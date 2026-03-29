@@ -18,6 +18,7 @@ import {
 } from '@ezstart/ui/components'
 import type { useRBAC } from '@ezstart/rbac'
 import { ROLE_PERMISSIONS, ROLE_FEATURES } from '@ezstart/rbac'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 interface UserEditModalProps {
@@ -33,6 +34,8 @@ const ALL_APP_ROLES = ['admin', 'manager', 'beta-tester', 'client']
 const ALL_APPS = ['ezbill', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd', 'ezpay', 'ezauth']
 
 export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: UserEditModalProps) {
+  const t = useTranslations('admin')
+
   // State for new role structure
   const [globalRoles, setGlobalRoles] = useState<string[]>(user.globalRoles || [])
   const [appRoles, setAppRoles] = useState<Record<string, string[]>>(user.appRoles || {})
@@ -138,22 +141,22 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
       isOpen={true}
       onClose={onClose}
       size="lg"
-      title={`Edit User: ${user.username}`}
+      title={t('editModal.title', { username: user.username })}
       footer={
         <Div className="flex gap-2 justify-end">
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
+            {t('editModal.cancel')}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Saving...
+                {t('editModal.saving')}
               </>
             ) : (
               <>
                 <Icon name="lucide:Save" className="mr-2" />
-                Save Changes
+                {t('editModal.saveChanges')}
               </>
             )}
           </Button>
@@ -163,21 +166,23 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
       <Div className="space-y-6">
         {/* User Info */}
         <Div>
-          <H3>User Information</H3>
+          <H3>{t('editModal.userInfo.title')}</H3>
           <Div className="mt-2 space-y-1 text-sm">
             <P>
-              <Span className="font-semibold">Email:</Span> {user.email}
+              <Span className="font-semibold">{t('editModal.userInfo.email')}</Span> {user.email}
             </P>
             <P>
-              <Span className="font-semibold">Username:</Span> {user.username}
+              <Span className="font-semibold">{t('editModal.userInfo.username')}</Span>{' '}
+              {user.username}
             </P>
             {user.firstName && (
               <P>
-                <Span className="font-semibold">Name:</Span> {user.firstName} {user.lastName}
+                <Span className="font-semibold">{t('editModal.userInfo.name')}</Span>{' '}
+                {user.firstName} {user.lastName}
               </P>
             )}
             <P>
-              <Span className="font-semibold">Created:</Span>{' '}
+              <Span className="font-semibold">{t('editModal.userInfo.created')}</Span>{' '}
               {new Date(user.createdAt).toLocaleDateString()}
             </P>
           </Div>
@@ -190,15 +195,15 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
               checked={isVerified}
               onCheckedChange={checked => setIsVerified(checked as boolean)}
             />
-            Email Verified
+            {t('editModal.emailVerified')}
           </Label>
         </Div>
 
         {/* Global Roles (Superadmin only) */}
         <Div>
-          <H3 className="mb-3">Global Roles (Cross-App Access)</H3>
+          <H3 className="mb-3">{t('editModal.globalRoles.title')}</H3>
           <P className="text-sm text-muted-foreground mb-2">
-            Only superadmin can be a global role with access to everything everywhere
+            {t('editModal.globalRoles.description')}
           </P>
           <Div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {ALL_GLOBAL_ROLES.map(role => {
@@ -210,7 +215,7 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
                     onCheckedChange={() => toggleGlobalRole(role)}
                     disabled={disabled}
                   />
-                  <Span className="capitalize font-semibold text-orange-600">{role}</Span>
+                  <Span className="capitalize font-semibold text-destructive">{role}</Span>
                   {disabled && <Icon name="lucide:Lock" className="text-muted-foreground" />}
                 </Label>
               )
@@ -220,9 +225,9 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
 
         {/* Apps and App-Specific Roles */}
         <Div>
-          <H3 className="mb-3">Applications Access & App-Specific Roles</H3>
+          <H3 className="mb-3">{t('editModal.appAccess.title')}</H3>
           <P className="text-sm text-muted-foreground mb-3">
-            Select which apps the user can access and assign roles for each app
+            {t('editModal.appAccess.description')}
           </P>
           <Div className="space-y-4">
             {ALL_APPS.map(app => {
@@ -258,7 +263,7 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
         {/* Inherited Permissions */}
         {inheritedPermissions.size > 0 && (
           <Div>
-            <H3 className="mb-3">Inherited Permissions (from roles)</H3>
+            <H3 className="mb-3">{t('editModal.inheritedPermissions')}</H3>
             <Div className="flex flex-wrap gap-1">
               {Array.from(inheritedPermissions).map(perm => (
                 <Badge key={perm} variant="secondary" className="text-xs">
@@ -272,7 +277,7 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
         {/* Inherited Features */}
         {inheritedFeatures.size > 0 && (
           <Div>
-            <H3 className="mb-3">Inherited Features (from roles)</H3>
+            <H3 className="mb-3">{t('editModal.inheritedFeatures')}</H3>
             <Div className="flex flex-wrap gap-1">
               {Array.from(inheritedFeatures).map(feat => (
                 <Badge key={feat} variant="default" className="text-xs">
@@ -286,7 +291,7 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
         {/* Error Display */}
         {error && (
           <Div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md">
-            <P className="font-medium">Error saving changes</P>
+            <P className="font-medium">{t('editModal.errorSaving')}</P>
             <P className="text-sm mt-1">{error}</P>
           </Div>
         )}

@@ -1,55 +1,55 @@
-'use client';
+'use client'
 
-import { LibraryItem } from '@/types/library';
-import { Button, H3, Icon, P } from '@ezstart/ui/components';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useSafeTranslations } from '@/hooks/useSafeIntl';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { LibraryItem } from '@/types/library'
+import { Button, Div, H3, Icon, P, Span } from '@ezstart/ui/components'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
-export const MotionP = motion.create(P);
+export const MotionP = motion.create(P)
 export const FlippingGallery = ({
   items,
   autoplay = false,
 }: {
-  items: LibraryItem[];
-  autoplay?: boolean;
+  items: LibraryItem[]
+  autoplay?: boolean
 }) => {
-  const t = useSafeTranslations('common');
-  const [active, setActive] = useState(0);
-  const [rotations, setRotations] = useState<number[]>([]);
+  const t = useSafeTranslations('common')
+  const [active, setActive] = useState(0)
+  const [rotations, setRotations] = useState<number[]>([])
 
   // Fix random rotations at mount
   useEffect(() => {
-    setRotations(items.map(() => Math.floor(Math.random() * 21) - 10));
-  }, [items]);
+    setRotations(items.map(() => Math.floor(Math.random() * 21) - 10))
+  }, [items])
 
   useEffect(() => {
     if (autoplay) {
       const interval = setInterval(() => {
-        setActive((prev) => (prev + 1) % items.length);
-      }, 5000);
-      return () => clearInterval(interval);
+        setActive(prev => (prev + 1) % items.length)
+      }, 5000)
+      return () => clearInterval(interval)
     }
-  }, [autoplay, items.length]);
+  }, [autoplay, items.length])
 
   const handleNext = () => {
-    setActive((prev) => (prev + 1) % items.length);
-  };
+    setActive(prev => (prev + 1) % items.length)
+  }
 
   const handlePrev = () => {
-    setActive((prev) => (prev - 1 + items.length) % items.length);
-  };
+    setActive(prev => (prev - 1 + items.length) % items.length)
+  }
 
-  const isActive = (index: number) => index === active;
+  const isActive = (index: number) => index === active
 
-  if (rotations.length !== items.length) return null; // hydrate wait
+  if (rotations.length !== items.length) return null // hydrate wait
 
   return (
-    <div className='mx-auto max-w-sm px-4 font-sans antialiased md:max-w-4xl '>
-      <div className='relative grid grid-cols-1 md:gap-20 md:grid-cols-2'>
-        <div className='flex items-center justify-center'>
-          <div className='relative h-3/4 w-full '>
+    <Div className="mx-auto max-w-sm px-4 font-sans antialiased md:max-w-4xl">
+      <Div className="relative grid grid-cols-1 md:gap-20 md:grid-cols-2">
+        <Div className="flex items-center justify-center">
+          <Div className="relative h-3/4 w-full">
             <AnimatePresence>
               {items.map((item, index) => (
                 <motion.div
@@ -78,7 +78,7 @@ export const FlippingGallery = ({
                     duration: 0.4,
                     ease: 'easeInOut',
                   }}
-                  className='absolute inset-0 origin-bottom'
+                  className="absolute inset-0 origin-bottom"
                 >
                   <img
                     src={item.src}
@@ -86,17 +86,17 @@ export const FlippingGallery = ({
                     width={500}
                     height={500}
                     draggable={false}
-                    className='h-full w-full rounded-3xl object-cover object-center'
+                    className="h-full w-full rounded-3xl object-cover object-center"
                   />
                 </motion.div>
               ))}
             </AnimatePresence>
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div className='flex flex-col gap-4 justify-between py-4'>
+        <Div className="flex flex-col gap-4 justify-between py-4">
           <motion.div
-            className='flex flex-col gap-2'
+            className="flex flex-col gap-2"
             key={active}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -105,11 +105,7 @@ export const FlippingGallery = ({
           >
             <H3 size={'h5'}>{items[active]?.title || ''}</H3>
             <P size={'xs'}>{items[active]?.subtitle || ''}</P>
-            <MotionP
-              size={'xs'}
-              variant={'description'}
-              className='line-clamp-4'
-            >
+            <MotionP size={'xs'} variant={'description'} className="line-clamp-4">
               {(items[active]?.description || '').split(' ').map((word, index) => (
                 <motion.span
                   key={index}
@@ -128,7 +124,7 @@ export const FlippingGallery = ({
                     ease: 'easeInOut',
                     delay: 0.02 * index,
                   }}
-                  className='inline-block'
+                  className="inline-block"
                 >
                   {word}&nbsp;
                 </motion.span>
@@ -136,42 +132,39 @@ export const FlippingGallery = ({
             </MotionP>
             {items[active]?.links?.local && (
               <Button asChild>
-                <Link
-                  href={items[active]?.links?.local || ''}
-                  rel='noopener noreferrer'
-                >
-                  <span>{t('learnMore')}</span>
+                <Link href={items[active]?.links?.local || ''} rel="noopener noreferrer">
+                  <Span>{t('learnMore')}</Span>
                 </Link>
               </Button>
             )}
           </motion.div>
 
-          <div className='flex gap-4 pt-4 md:pt-0'>
+          <Div className="flex gap-4 pt-4 md:pt-0">
             <Button
               onClick={handlePrev}
               variant="ghost"
               size="sm"
-              className='group/button flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800'
+              className="group/button flex h-7 w-7 items-center justify-center rounded-full bg-muted"
             >
               <Icon
-                name='fa:FaArrowLeft'
-                className='h-5 w-5 text-black transition-transform duration-300 group-hover/button:rotate-12 dark:text-neutral-400'
+                name="fa:FaArrowLeft"
+                className="h-5 w-5 text-foreground transition-transform duration-300 group-hover/button:rotate-12"
               />
             </Button>
             <Button
               onClick={handleNext}
               variant="ghost"
               size="sm"
-              className='group/button flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800'
+              className="group/button flex h-7 w-7 items-center justify-center rounded-full bg-muted"
             >
               <Icon
-                name='fa:FaArrowRight'
-                className='h-5 w-5 text-black transition-transform duration-300 group-hover/button:-rotate-12 dark:text-neutral-400'
+                name="fa:FaArrowRight"
+                className="h-5 w-5 text-foreground transition-transform duration-300 group-hover/button:-rotate-12"
               />
             </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+          </Div>
+        </Div>
+      </Div>
+    </Div>
+  )
+}

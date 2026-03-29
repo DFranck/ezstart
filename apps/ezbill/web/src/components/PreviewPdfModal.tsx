@@ -9,6 +9,7 @@ import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
 import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 /** Discriminated union for preview */
 export type PreviewKind = 'invoice' | 'quote' | 'receipt'
@@ -41,6 +42,8 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
   const { clients, companies, paymentMethods } = useBillingContext()
   const [pdfBlob, setPdfBlob] = useState<string | null>(null)
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+  const t = useTranslations('preview')
+  const tToast = useTranslations('toast')
 
   // ALL HOOKS MUST BE BEFORE ANY CONDITIONAL RETURNS
   // Générer le preview automatiquement à l'ouverture
@@ -86,7 +89,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
           const url = URL.createObjectURL(blob)
           setPdfBlob(url)
         } catch (error) {
-          toast.error('Erreur lors de la génération du preview PDF')
+          toast.error(tToast('pdfPreviewError'))
         } finally {
           setIsGeneratingPreview(false)
         }
@@ -120,13 +123,13 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
 
   const handleGeneratePreview = async () => {
     if (kind !== 'invoice' && kind !== 'receipt') {
-      toast.error("La génération PDF n'est disponible que pour les factures et reçus")
+      toast.error(tToast('pdfOnlyInvoiceReceipt'))
       return
     }
 
     const pdfData = generatePDFData()
     if (!pdfData) {
-      toast.error('Client non trouvé')
+      toast.error(tToast('clientNotFound'))
       return
     }
 
@@ -144,7 +147,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
       const url = URL.createObjectURL(blob)
       setPdfBlob(url)
     } catch (error) {
-      toast.error('Erreur lors de la génération du preview PDF')
+      toast.error(tToast('pdfPreviewError'))
     } finally {
       setIsGeneratingPreview(false)
     }
@@ -153,7 +156,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
   const handleDownloadPDF = async () => {
     const pdfData = generatePDFData()
     if (!pdfData) {
-      toast.error('Client non trouvé')
+      toast.error(tToast('clientNotFound'))
       return
     }
 
@@ -179,7 +182,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
         URL.revokeObjectURL(url)
       }
     } catch (error) {
-      toast.error('Erreur lors du téléchargement du PDF')
+      toast.error(tToast('pdfDownloadError'))
     }
   }
 
@@ -211,11 +214,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
           <span className="font-semibold">{title}</span>
         </>
       }
-      description={
-        <>
-          Click outside or press <kbd className="px-1 py-0.5 border rounded">Esc</kbd> to close
-        </>
-      }
+      description={<>{t('escToClose')}</>}
       footer={
         <div className="flex items-center justify-between w-full">
           <div className="hidden md:flex items-center gap-2">
@@ -229,7 +228,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
                 name={isGeneratingPreview ? 'lucide:Loader2' : 'lucide:Eye'}
                 className={`w-4 h-4 mr-2 ${isGeneratingPreview ? 'animate-spin' : ''}`}
               />
-              {isGeneratingPreview ? 'Génération...' : 'Refresh Preview'}
+              {isGeneratingPreview ? t('generating') : t('refreshPreview')}
             </Button>
             <Button
               onClick={handleDownloadPDF}
@@ -240,7 +239,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
                 name={isGenerating ? 'lucide:Loader2' : 'lucide:Download'}
                 className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`}
               />
-              {isGenerating ? 'Téléchargement...' : 'Download PDF'}
+              {isGenerating ? t('downloading') : t('downloadPdf')}
             </Button>
           </div>
         </div>
@@ -262,10 +261,8 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
               <div className="w-16 h-16 bg-gradient-to-r from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-4">
                 <Icon name="lucide:FileDown" className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">PDF Ready</h3>
-              <p className="text-foreground/60 mb-4 text-sm">
-                PDF preview is not supported on mobile. Download to view.
-              </p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{t('pdfReady')}</h3>
+              <p className="text-foreground/60 mb-4 text-sm">{t('mobileNoPreview')}</p>
               <Button
                 onClick={() => {
                   const link = document.createElement('a')
@@ -278,7 +275,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
                 className="bg-primary hover:bg-primary/90"
               >
                 <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
-                Download PDF
+                {t('downloadPdf')}
               </Button>
             </div>
           </>
@@ -291,16 +288,18 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
               />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              {isGeneratingPreview ? 'Generating PDF Preview...' : 'Instant PDF Generation'}
+              {isGeneratingPreview ? t('generatingPreview') : t('instantGeneration')}
             </h3>
             <p className="text-foreground/60 mb-6 max-w-md">
               {isGeneratingPreview
-                ? 'Please wait while we generate your PDF preview...'
-                : `Click "Refresh Preview" to generate and preview your ${kind === 'invoice' ? 'invoice' : kind === 'quote' ? 'quote' : 'receipt'} PDF.`}
+                ? t('pleaseWait')
+                : t('clickRefresh', {
+                    kind: kind === 'invoice' ? 'invoice' : kind === 'quote' ? 'quote' : 'receipt',
+                  })}
             </p>
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Icon name="lucide:Zap" className="w-4 h-4 text-warning" />
-              <span>Client-side generation • No server required</span>
+              <span>{t('clientSideGeneration')}</span>
             </div>
           </div>
         )}

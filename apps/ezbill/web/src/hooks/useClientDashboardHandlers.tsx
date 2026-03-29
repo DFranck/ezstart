@@ -8,11 +8,13 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { callApi } from '@/config/api'
 import React from 'react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export function useClientDashboardHandlers() {
   const { clients, companies, paymentMethods, receipts, refetchAll } = useBillingContext()
   const { user } = useAuth()
   const userId = user?._id
+  const t = useTranslations('toast')
 
   const generateInvoicePdfUrl = async (invoice: Invoice): Promise<string | null> => {
     try {
@@ -48,11 +50,11 @@ export function useClientDashboardHandlers() {
         await refetchAll()
         return true
       } else {
-        toast.error('Failed to send invoice')
+        toast.error(t('invoiceSendFailed'))
         return false
       }
     } catch (error) {
-      toast.error('Error sending invoice')
+      toast.error(t('invoiceSendError'))
       return false
     }
   }
@@ -72,7 +74,7 @@ export function useClientDashboardHandlers() {
         : undefined
 
       if (!client) {
-        toast.error('Client not found')
+        toast.error(t('clientNotFound'))
         return
       }
 
@@ -97,7 +99,7 @@ export function useClientDashboardHandlers() {
       // Cleanup
       URL.revokeObjectURL(url)
     } catch (error) {
-      toast.error('Error downloading invoice')
+      toast.error(t('invoiceDownloadError'))
     }
   }
 
@@ -111,7 +113,7 @@ export function useClientDashboardHandlers() {
         : undefined
 
       if (!client) {
-        toast.error('Client not found')
+        toast.error(t('clientNotFound'))
         return
       }
 
@@ -136,7 +138,7 @@ export function useClientDashboardHandlers() {
       // Cleanup
       URL.revokeObjectURL(url)
     } catch (error) {
-      toast.error(`Error downloading receipt: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error(t('receiptDownloadError'))
     }
   }
 
@@ -147,13 +149,13 @@ export function useClientDashboardHandlers() {
       const receipt = receipts.find(r => r.invoiceId === invoice._id)
 
       if (!receipt) {
-        toast.error('No receipt found for this invoice')
+        toast.error(t('receiptNotFound'))
         return
       }
 
       await handleDownloadReceipt(receipt, e)
     } catch (error) {
-      toast.error('Error downloading receipt')
+      toast.error(t('receiptDownloadError'))
     }
   }
 
@@ -174,9 +176,7 @@ export function useClientDashboardHandlers() {
   const generateQuotePdfUrl = async (quote: Quote): Promise<string | null> => {
     try {
       const client = clients.find(c => c._id === quote.clientId)
-      const company = quote.companyId
-        ? companies.find(c => c._id === quote.companyId)
-        : undefined
+      const company = quote.companyId ? companies.find(c => c._id === quote.companyId) : undefined
 
       if (!client) {
         return null
@@ -204,11 +204,11 @@ export function useClientDashboardHandlers() {
         await refetchAll()
         return true
       } else {
-        toast.error('Failed to send quote')
+        toast.error(t('quoteSendFailed'))
         return false
       }
     } catch (error) {
-      toast.error('Error sending quote')
+      toast.error(t('quoteSendError'))
       return false
     }
   }
@@ -233,10 +233,10 @@ export function useClientDashboardHandlers() {
       if (response.ok) {
         await refetchAll()
       } else {
-        toast.error('Failed to accept quote')
+        toast.error(t('quoteAcceptFailed'))
       }
     } catch (error) {
-      toast.error('Error accepting quote')
+      toast.error(t('quoteAcceptError'))
     }
   }
 
@@ -255,10 +255,10 @@ export function useClientDashboardHandlers() {
       if (response.ok) {
         await refetchAll()
       } else {
-        toast.error('Failed to decline quote')
+        toast.error(t('quoteDeclineFailed'))
       }
     } catch (error) {
-      toast.error('Error declining quote')
+      toast.error(t('quoteDeclineError'))
     }
   }
 
@@ -267,20 +267,18 @@ export function useClientDashboardHandlers() {
 
     try {
       const client = clients.find(c => c._id === quote.clientId)
-      const company = quote.companyId
-        ? companies.find(c => c._id === quote.companyId)
-        : undefined
+      const company = quote.companyId ? companies.find(c => c._id === quote.companyId) : undefined
 
       if (!client) {
-        toast.error('Client not found')
+        toast.error(t('clientNotFound'))
         return
       }
 
       const fileName = quote.documentNumber || quote._id
       // TODO: Implement quote PDF generation if not exists
-      toast.error('Quote PDF download not implemented yet')
+      toast.error(t('quoteDownloadNotImplemented'))
     } catch (error) {
-      toast.error('Error downloading quote')
+      toast.error(t('quoteDownloadError'))
     }
   }
 
@@ -296,10 +294,10 @@ export function useClientDashboardHandlers() {
       if (response.ok) {
         await refetchAll()
       } else {
-        toast.error('Failed to delete quote')
+        toast.error(t('quoteDeleteFailed'))
       }
     } catch (error) {
-      toast.error('Error deleting quote')
+      toast.error(t('quoteDeleteError'))
     }
   }
 

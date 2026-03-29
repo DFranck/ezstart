@@ -1,5 +1,6 @@
 'use client'
 import { Button, Icon, Modal, Span } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 interface ShareModalProps {
@@ -24,6 +25,8 @@ export function ShareModal({
   documentStatus,
 }: ShareModalProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const t = useTranslations('share')
+  const tCommon = useTranslations('common')
 
   const documentLabel = documentType === 'invoice' ? 'Invoice' : 'Quote'
   const shareMessage = `Hi! Here's your ${documentLabel} #${documentNumber}. Please find the PDF attached.`
@@ -39,31 +42,31 @@ export function ShareModal({
 
   const shareOptions = [
     {
-      name: 'Email',
+      name: t('email'),
       icon: 'lucide:Mail' as const,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 hover:bg-blue-100',
+      color: 'text-primary',
+      bgColor: 'bg-primary/5 hover:bg-primary/10',
       href: `mailto:?subject=${documentLabel} ${documentNumber}&body=${encodedMessage}%0A%0A${encodedUrl}`,
     },
     {
-      name: 'WhatsApp',
+      name: t('whatsApp'),
       icon: 'lucide:MessageCircle' as const,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 hover:bg-green-100',
+      color: 'text-success',
+      bgColor: 'bg-success/5 hover:bg-success/10',
       href: `https://wa.me/?text=${encodedMessage}%0A${encodedUrl}`,
     },
     {
-      name: 'Telegram',
+      name: t('telegram'),
       icon: 'lucide:Send' as const,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-50 hover:bg-blue-100',
+      color: 'text-primary',
+      bgColor: 'bg-primary/5 hover:bg-primary/10',
       href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedMessage}`,
     },
     {
-      name: 'Copy Link',
+      name: t('copyLink'),
       icon: 'lucide:Copy' as const,
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50 hover:bg-gray-100',
+      color: 'text-muted-foreground',
+      bgColor: 'bg-muted hover:bg-muted/80',
       onClick: () => {
         navigator.clipboard.writeText(pdfUrl)
         // Could add a toast notification here
@@ -75,8 +78,12 @@ export function ShareModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Share ${documentLabel}`}
-      description={`Share ${documentLabel} #${documentNumber} with ${clientName}`}
+      title={t('title', { type: documentLabel })}
+      description={t('description', {
+        type: documentLabel,
+        number: documentNumber,
+        client: clientName,
+      })}
       size="md"
       footer={
         <>
@@ -84,10 +91,10 @@ export function ShareModal({
             {isAlreadySent ? (
               <>
                 <Icon name="lucide:X" className="w-4 h-4 mr-2" />
-                Close
+                {tCommon('close')}
               </>
             ) : (
-              'Cancel'
+              tCommon('cancel')
             )}
           </Button>
           {!isAlreadySent && (
@@ -95,12 +102,12 @@ export function ShareModal({
               {isLoading ? (
                 <>
                   <Icon name="lucide:Loader2" className="w-4 h-4 mr-2 animate-spin" />
-                  Marking...
+                  {tCommon('marking')}
                 </>
               ) : (
                 <>
                   <Icon name="lucide:Check" className="w-4 h-4 mr-2" />
-                  Mark as Sent
+                  {tCommon('markAsSent')}
                 </>
               )}
             </Button>
@@ -132,21 +139,11 @@ export function ShareModal({
             <Icon name="lucide:Info" className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="text-sm text-muted-foreground">
               {isAlreadySent ? (
-                <p>
-                  <strong className="text-foreground">Re-share your {documentType}</strong> with{' '}
-                  <strong className="text-foreground">{clientName}</strong> using any method above.
-                </p>
+                <p>{t('reshareInfo', { type: documentType, client: clientName })}</p>
               ) : (
                 <div className="space-y-1">
-                  <p>
-                    <strong className="text-foreground">Share your {documentType}</strong> using any
-                    method above.
-                  </p>
-                  <p>
-                    Once you've sent it to <strong className="text-foreground">{clientName}</strong>,
-                    click <strong className="text-foreground">"Mark as Sent"</strong> below to update
-                    the status.
-                  </p>
+                  <p>{t('shareInfo', { type: documentType })}</p>
+                  <p>{t('markAsSentInfo', { client: clientName })}</p>
                 </div>
               )}
             </div>

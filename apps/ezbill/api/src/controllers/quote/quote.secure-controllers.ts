@@ -2,6 +2,8 @@ import {
   CreateQuote,
   GetQuotesQuery,
   UpdateQuote,
+  createQuoteSchema,
+  updateQuoteSchema,
   addLineItemSchema,
   assignClientSchema,
   convertQuoteToInvoiceSchema,
@@ -32,11 +34,12 @@ export async function createSecureQuoteController(req: AuthRequest, res: Respons
   try {
     const userId = getAuthenticatedUserId(req)
 
-    logger.debug('Controller received request body:', JSON.stringify(req.body, null, 2))
+    const parsed = createQuoteSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid quote data', parsed.error.errors)
+    }
 
-    const quoteData: CreateQuote = req.body
-
-    logger.debug('Controller quoteData:', JSON.stringify(quoteData, null, 2))
+    const quoteData = parsed.data
 
     // Ensure userId in body matches authenticated user
     if (quoteData.userId && quoteData.userId !== userId) {
@@ -107,7 +110,12 @@ export async function updateSecureQuoteController(req: AuthRequest, res: Respons
       return sendError(res, 'Authentication required', 401)
     }
 
-    const updateData: UpdateQuote = req.body
+    const parsed = updateQuoteSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid quote update data', parsed.error.errors)
+    }
+
+    const updateData = parsed.data
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {

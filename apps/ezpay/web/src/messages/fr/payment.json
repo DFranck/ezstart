@@ -6,16 +6,16 @@
     "anonymous": "Don anonyme",
     "submit": "Faire un don",
     "thankYou": "Merci pour votre soutien !",
-    "recent": "Dons récents",
+    "recent": "Dons recents",
     "noMessage": "Aucun message"
   },
   "purchase": {
     "title": "Achat",
     "price": "Prix",
-    "quantity": "Quantité",
+    "quantity": "Quantite",
     "total": "Total",
     "buy": "Acheter maintenant",
-    "success": "Achat réussi !"
+    "success": "Achat reussi !"
   },
   "subscription": {
     "title": "S'abonner",
@@ -23,12 +23,26 @@
     "yearly": "Annuel",
     "subscribe": "S'abonner",
     "cancel": "Annuler l'abonnement",
-    "manage": "Gérer l'abonnement"
+    "manage": "Gerer l'abonnement"
   },
   "status": {
     "pending": "En attente",
-    "completed": "Terminé",
-    "failed": "Échoué",
-    "refunded": "Remboursé"
+    "completed": "Termine",
+    "failed": "Echoue",
+    "refunded": "Rembourse"
+  },
+  "home": {
+    "title": "EZPay",
+    "subtitle": "Systeme de paiement universel pour l'ecosysteme EZStart",
+    "donations": "Dons",
+    "donationsDescription": "Acceptez les dons avec temoignages et murs publics",
+    "purchases": "Achats",
+    "purchasesDescription": "Vendez des produits et articles in-app avec Stripe",
+    "subscriptions": "Abonnements",
+    "subscriptionsDescription": "Gerez les paiements recurrents et les plans premium",
+    "gettingStarted": "Pour commencer",
+    "installSdk": "1. Installer le SDK",
+    "setupClient": "2. Configurer le client",
+    "useComponents": "3. Utiliser les composants"
   }
 }

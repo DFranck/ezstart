@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { BillingClient } from '@ezbill/types'
+import { BillingClient, billingClientSchema } from '@ezbill/types'
 import { logger } from '@ezstart/logger/server'
-import { sendSuccess, sendError } from '@ezstart/express-core'
+import { sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import {
   createClientService,
   getClientByIdService,
@@ -25,7 +25,12 @@ export async function createSecureClientController(req: Request, res: Response) 
       return sendError(res, 'Authentication required', 401)
     }
 
-    const clientData: BillingClient = req.body
+    const parsed = billingClientSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid client data', parsed.error.errors)
+    }
+
+    const clientData = parsed.data
 
     // Ensure userId in body matches authenticated user
     if (clientData.userId && clientData.userId !== userId) {
@@ -105,7 +110,12 @@ export async function updateSecureClientController(req: Request, res: Response) 
     if (!userId) {
       return sendError(res, 'Authentication required', 401)
     }
-    const updateData: Partial<BillingClient> = req.body
+    const parsed = billingClientSchema.partial().safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid client update data', parsed.error.errors)
+    }
+
+    const updateData = parsed.data
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {

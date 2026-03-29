@@ -122,16 +122,11 @@ export default function HomePage(): any {
   return (
     <>
       {/* Popup Nouvel An Lunaire */}
-      <Modal
-        isOpen={showLunarPopup}
-        onClose={closeLunarPopup}
-        size="xl"
-        scrollBehavior="inside"
-      >
-        <div className="space-y-6">
+      <Modal isOpen={showLunarPopup} onClose={closeLunarPopup} size="xl" scrollBehavior="inside">
+        <Div className="space-y-6">
           {/* Header avec image */}
-          <div className="text-center">
-            <div className="flex justify-center mb-4">
+          <Div className="text-center">
+            <Div className="flex justify-center mb-4">
               <Image
                 src="/star-2026.svg"
                 alt="Étoiles Volantes 2026"
@@ -139,52 +134,47 @@ export default function HomePage(): any {
                 height={280}
                 className="rounded-lg"
               />
-            </div>
-            <h2
-              className="text-2xl font-bold"
-              style={{ color: '#C41E3A' }}
-            >
+            </Div>
+            <H2 className="text-2xl font-bold" style={{ color: '#C41E3A' }}>
               {t('lunarPopup.title')}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            </H2>
+            <P className="text-sm text-muted-foreground mt-1">
               {t('lunarPopup.subtitle', { year: currentYear })}
-            </p>
-          </div>
+            </P>
+          </Div>
 
           {/* Étoile 5 - DANGER */}
-          <div className="rounded-xl p-4 border-l-4" style={{ borderColor: '#C41E3A', backgroundColor: 'rgba(196, 30, 58, 0.05)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Icon name="lucide:AlertTriangle" className="w-5 h-5" style={{ color: '#C41E3A' }} />
-              <span className="font-bold text-base" style={{ color: '#C41E3A' }}>
+          <Div className="rounded-xl p-4 border-l-4 border-destructive bg-destructive/5">
+            <Div className="flex items-center gap-2 mb-2">
+              <Icon name="lucide:AlertTriangle" className="w-5 h-5 text-destructive" />
+              <Span className="font-bold text-base text-destructive">
                 {t('lunarPopup.dangerTitle')}
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700">
+              </Span>
+              <Span className="text-xs px-2 py-0.5 rounded-full font-medium bg-destructive/10 text-destructive">
                 {t('lunarPopup.dangerLocation')}
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+              </Span>
+            </Div>
+            <P className="text-sm text-muted-foreground leading-relaxed">
               {t('lunarPopup.dangerText', { year: currentYear })}
-            </p>
-          </div>
+            </P>
+          </Div>
 
           {/* Étoile 9 - PROSPÉRITÉ */}
-          <div className="rounded-xl p-4 border-l-4" style={{ borderColor: '#D4A017', backgroundColor: 'rgba(212, 160, 23, 0.05)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Icon name="lucide:Sparkles" className="w-5 h-5" style={{ color: '#D4A017' }} />
-              <span className="font-bold text-base" style={{ color: '#D4A017' }}>
-                {t('lunarPopup.luckyTitle')}
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700">
+          <Div className="rounded-xl p-4 border-l-4 border-warning bg-warning/5">
+            <Div className="flex items-center gap-2 mb-2">
+              <Icon name="lucide:Sparkles" className="w-5 h-5 text-warning" />
+              <Span className="font-bold text-base text-warning">{t('lunarPopup.luckyTitle')}</Span>
+              <Span className="text-xs px-2 py-0.5 rounded-full font-medium bg-warning/10 text-warning">
                 {t('lunarPopup.luckyLocation')}
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+              </Span>
+            </Div>
+            <P className="text-sm text-muted-foreground leading-relaxed">
               {t('lunarPopup.luckyText', { year: currentYear })}
-            </p>
-          </div>
+            </P>
+          </Div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <Div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link href="/analyze" onClick={closeLunarPopup}>
               <Button
                 size="lg"
@@ -202,33 +192,39 @@ export default function HomePage(): any {
             >
               {t('lunarPopup.dismiss')}
             </Button>
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Modal>
 
       {/* Hero Section */}
       <Section size={'full'} className="pt-16 relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <div
+        <Div className="absolute inset-0 -z-10">
+          <Div
             className="absolute inset-0 animate-pulse"
             style={getGradientWithOpacity(15, 'br')}
           />
-          <div
+          <Div
             className="absolute inset-0 animate-pulse"
             style={{ ...getGradientWithOpacity(15, 'tr'), animationDelay: '1s' }}
           />
-        </div>
+        </Div>
         <Div layout={'center'}>
           <P className="text-sm font-bold tracking-widest uppercase" style={{ color: '#D4A017' }}>
             {t('banner.tagline')}
           </P>
 
-          <Image src="/logo.png" alt="Feng Shui" width={160} height={160} className="object-contain mb-4" />
+          <Image
+            src="/logo.png"
+            alt="Feng Shui"
+            width={160}
+            height={160}
+            className="object-contain mb-4"
+          />
 
           <H1 className="text-5xl md:text-7xl font-bold mb-4">
-            <span className={`bg-gradient-to-r ${GRADIENT_TEXT}`}>
+            <Span className={`bg-gradient-to-r ${GRADIENT_TEXT}`}>
               {t('hero.title', { year: currentYear })}
-            </span>
+            </Span>
           </H1>
 
           <P className="text-lg font-medium" style={{ color: '#C41E3A' }}>
@@ -240,17 +236,11 @@ export default function HomePage(): any {
           </P>
 
           {/* USP - Unique Selling Proposition */}
-          <div
-            className="max-w-xl mx-auto my-6 px-6 py-4 rounded-2xl border-2 text-center"
-            style={{
-              borderColor: 'rgba(212, 160, 23, 0.4)',
-              backgroundColor: 'rgba(212, 160, 23, 0.06)',
-            }}
-          >
+          <Div className="max-w-xl mx-auto my-6 px-6 py-4 rounded-2xl border-2 text-center border-warning/40 bg-warning/5">
             <P className="text-base sm:text-lg font-semibold text-foreground leading-relaxed">
               {t('hero.usp')}
             </P>
-          </div>
+          </Div>
 
           <P size={'sm'} className="max-w-2xl mx-auto">
             {t('hero.description', { year: currentYear })}
@@ -282,36 +272,36 @@ export default function HomePage(): any {
       </Section>
 
       {/* Process Flow Section - 4 étapes avec flèches */}
-      <div id="features" className="container mx-auto px-4 py-20">
-        <div className="text-center mb-12">
+      <Div id="features" className="container mx-auto px-4 py-20">
+        <Div className="text-center mb-12">
           <H2 className="text-4xl font-bold mb-4 text-foreground">{t('features.title')}</H2>
           <P className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {t('features.subtitle')}
           </P>
-        </div>
+        </Div>
 
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-2 max-w-5xl mx-auto">
+        <Div className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-2 max-w-5xl mx-auto">
           {features.map((feature, idx) => (
-            <div key={idx} className="flex flex-col lg:flex-row items-center">
+            <Div key={idx} className="flex flex-col lg:flex-row items-center">
               {/* Step card */}
-              <div className="flex flex-col items-center text-center w-52">
+              <Div className="flex flex-col items-center text-center w-52">
                 {/* Step number + icon */}
-                <div className="relative mb-4">
-                  <div
+                <Div className="relative mb-4">
+                  <Div
                     className={`bg-gradient-to-br ${THEME_COLORS.gradientClasses} w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg`}
                   >
                     <Icon name={feature.icon as KnownIconName} className="h-9 w-9" />
-                  </div>
-                  <div
+                  </Div>
+                  <Div
                     className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md"
                     style={{ background: '#C41E3A' }}
                   >
                     {idx + 1}
-                  </div>
-                </div>
-                <h3 className="text-base font-bold mb-1 text-foreground">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-snug">{feature.description}</p>
-              </div>
+                  </Div>
+                </Div>
+                <H3 className="text-base font-bold mb-1 text-foreground">{feature.title}</H3>
+                <P className="text-sm text-muted-foreground leading-snug">{feature.description}</P>
+              </Div>
 
               {/* Arrow between steps */}
               {idx < features.length - 1 && (
@@ -326,34 +316,31 @@ export default function HomePage(): any {
                   />
                 </>
               )}
-            </div>
+            </Div>
           ))}
-        </div>
-      </div>
+        </Div>
+      </Div>
 
       {/* Objectifs & Bienfaits */}
-      <Section
-        size={'full'}
-        className="bg-muted/30"
-      >
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+      <Section size={'full'} className="bg-muted/30">
+        <Div className="container mx-auto px-4">
+          <Div className="text-center mb-12">
             <H2 className="text-4xl font-bold mb-4 text-foreground">{t('benefits.title')}</H2>
             <P className="text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {t('benefits.subtitle')}
             </P>
-          </div>
+          </Div>
 
           {/* 6 objectifs/bienfaits grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
-            {benefits.map((benefit) => (
+          <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
+            {benefits.map(benefit => (
               <Card
                 key={benefit.key}
                 className="group hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden border-t-4"
                 style={{ borderTopColor: benefit.color }}
               >
                 <CardContent className="p-6 text-center">
-                  <div
+                  <Div
                     className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md"
                     style={{ backgroundColor: `${benefit.color}15` }}
                   >
@@ -362,39 +349,39 @@ export default function HomePage(): any {
                       className="w-7 h-7"
                       style={{ color: benefit.color }}
                     />
-                  </div>
-                  <h3 className="font-bold text-base text-foreground mb-2">
+                  </Div>
+                  <H3 className="font-bold text-base text-foreground mb-2">
                     {t(`benefits.${benefit.key}.title`)}
-                  </h3>
+                  </H3>
                   <P className="text-sm text-muted-foreground leading-relaxed">
                     {t(`benefits.${benefit.key}.description`)}
                   </P>
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </Div>
 
           {/* Origines Feng Shui + 5 éléments */}
-          <div className="text-center mb-8">
+          <Div className="text-center mb-8">
             <P className="text-sm text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {t('sectors.origins')}
             </P>
-          </div>
+          </Div>
 
-          <div className="flex flex-wrap justify-center gap-6 mb-12">
+          <Div className="flex flex-wrap justify-center gap-6 mb-12">
             {fiveElements.map((el, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-2">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-md border-2 border-white"
+              <Div key={idx} className="flex flex-col items-center gap-2">
+                <Div
+                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-md border-2 border-background"
                   style={{ backgroundColor: el.color }}
                 >
                   <Icon name={el.icon as KnownIconName} className="w-7 h-7 text-white" />
-                </div>
-                <span className="text-sm font-semibold text-foreground">{el.name}</span>
-              </div>
+                </Div>
+                <Span className="text-sm font-semibold text-foreground">{el.name}</Span>
+              </Div>
             ))}
-          </div>
-        </div>
+          </Div>
+        </Div>
 
         <Link href="/analyze" className="mt-4 inline-block">
           <Button
@@ -409,57 +396,64 @@ export default function HomePage(): any {
       </Section>
 
       {/* Tableau comparatif */}
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center mb-12">
+      <Div className="container mx-auto px-4 py-20">
+        <Div className="text-center mb-12">
           <H2 className="text-4xl font-bold mb-4 text-foreground">{t('comparison.title')}</H2>
           <P className="text-base text-muted-foreground max-w-2xl mx-auto">
             {t('comparison.subtitle')}
           </P>
-        </div>
+        </Div>
 
-        <div className="max-w-4xl mx-auto overflow-x-auto">
+        <Div className="max-w-4xl mx-auto overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
                 <th className="text-left p-4 text-sm font-semibold text-muted-foreground border-b border-border" />
                 <th className="p-4 text-center border-b border-border">
-                  <div className="flex flex-col items-center gap-1">
+                  <Div className="flex flex-col items-center gap-1">
                     <Icon name="lucide:Sparkles" className="w-6 h-6" style={{ color: '#D4A017' }} />
-                    <span className="text-sm font-bold text-foreground">{t('comparison.ourTool')}</span>
-                  </div>
+                    <Span className="text-sm font-bold text-foreground">
+                      {t('comparison.ourTool')}
+                    </Span>
+                  </Div>
                 </th>
                 <th className="p-4 text-center border-b border-border">
-                  <div className="flex flex-col items-center gap-1">
+                  <Div className="flex flex-col items-center gap-1">
                     <Icon name="lucide:User" className="w-6 h-6 text-muted-foreground" />
-                    <span className="text-sm font-bold text-muted-foreground">{t('comparison.consultant')}</span>
-                  </div>
+                    <Span className="text-sm font-bold text-muted-foreground">
+                      {t('comparison.consultant')}
+                    </Span>
+                  </Div>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {comparisonRows.map((row) => (
-                <tr key={row.key} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+              {comparisonRows.map(row => (
+                <tr
+                  key={row.key}
+                  className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                >
                   <td className="p-4 text-sm text-foreground font-medium">
-                    <div className="flex items-center gap-2">
+                    <Div className="flex items-center gap-2">
                       {t(`comparison.${row.key}.label`, { year: currentYear })}
                       {row.isNew && (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-bold text-white" style={{ backgroundColor: '#D4A017' }}>
+                        <Span className="text-xs px-2 py-0.5 rounded-full font-bold text-warning-foreground bg-warning">
                           {t('comparison.new')}
-                        </span>
+                        </Span>
                       )}
-                    </div>
+                    </Div>
                   </td>
                   <td className="p-4 text-center">
                     {row.free ? (
-                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-green-600">
+                      <Span className="inline-flex items-center gap-1 text-sm font-semibold text-success">
                         <Icon name="lucide:Check" className="w-5 h-5" />
                         {t('comparison.free')}
-                      </span>
+                      </Span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: '#D4A017' }}>
+                      <Span className="inline-flex items-center gap-1 text-sm font-semibold text-warning">
                         <Icon name="lucide:Star" className="w-4 h-4" />
                         {t('comparison.premium')}
-                      </span>
+                      </Span>
                     )}
                   </td>
                   <td className="p-4 text-center text-sm text-muted-foreground font-medium">
@@ -471,30 +465,34 @@ export default function HomePage(): any {
               <tr className="bg-muted/50 font-bold">
                 <td className="p-4 text-sm text-foreground">{t('comparison.total.label')}</td>
                 <td className="p-4 text-center">
-                  <span className="text-sm font-bold text-green-600">{t('comparison.total.ours')}</span>
+                  <Span className="text-sm font-bold text-success">
+                    {t('comparison.total.ours')}
+                  </Span>
                 </td>
-                <td className="p-4 text-center text-sm text-red-500 font-bold">{t('comparison.total.consultant')}</td>
+                <td className="p-4 text-center text-sm text-destructive font-bold">
+                  {t('comparison.total.consultant')}
+                </td>
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
+        </Div>
+      </Div>
 
       {/* CTA Section - Avantages marketing */}
-      <div className="container mx-auto px-4 py-20">
+      <Div className="container mx-auto px-4 py-20">
         <Card className="bg-gradient-to-br from-card via-card to-muted/20 shadow-2xl overflow-hidden">
           <CardContent className="p-12 text-center relative">
-            <div
+            <Div
               className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl"
               style={getGradientWithOpacity(10, 'br')}
             />
-            <div
+            <Div
               className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl"
               style={getGradientWithOpacity(10, 'tr')}
             />
 
-            <div className="relative">
-              <div
+            <Div className="relative">
+              <Div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border"
                 style={{
                   backgroundColor: 'rgba(212, 160, 23, 0.1)',
@@ -502,37 +500,39 @@ export default function HomePage(): any {
                 }}
               >
                 <Icon name="lucide:Shield" className="w-4 h-4" style={{ color: '#D4A017' }} />
-                <span className="text-sm font-semibold text-foreground">
-                  {t('cta.badge')}
-                </span>
-              </div>
+                <Span className="text-sm font-semibold text-foreground">{t('cta.badge')}</Span>
+              </Div>
 
               <H2 size={'giant'} className="flex flex-col items-center mb-4">
-                <span className={GRADIENT_TEXT}>{t('cta.title')}</span>
+                <Span className={GRADIENT_TEXT}>{t('cta.title')}</Span>
               </H2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
-                <div className="flex flex-col items-center">
-                  <Icon name="lucide:PiggyBank" className="w-8 h-8 mb-2" style={{ color: '#D4A017' }} />
-                  <span className="text-sm font-semibold text-foreground">
+              <Div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
+                <Div className="flex flex-col items-center">
+                  <Icon
+                    name="lucide:PiggyBank"
+                    className="w-8 h-8 mb-2"
+                    style={{ color: '#D4A017' }}
+                  />
+                  <Span className="text-sm font-semibold text-foreground">
                     {t('cta.advantage1')}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
+                  </Span>
+                </Div>
+                <Div className="flex flex-col items-center">
                   <Icon name="lucide:Bot" className="w-8 h-8 mb-2" style={{ color: '#C41E3A' }} />
-                  <span className="text-sm font-semibold text-foreground">
+                  <Span className="text-sm font-semibold text-foreground">
                     {t('cta.advantage2')}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
+                  </Span>
+                </Div>
+                <Div className="flex flex-col items-center">
                   <Icon name="lucide:Zap" className="w-8 h-8 mb-2" style={{ color: '#2E7D32' }} />
-                  <span className="text-sm font-semibold text-foreground">
+                  <Span className="text-sm font-semibold text-foreground">
                     {t('cta.advantage3')}
-                  </span>
-                </div>
-              </div>
+                  </Span>
+                </Div>
+              </Div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link href="/analyze">
                   <Button
                     size="lg"
@@ -549,15 +549,15 @@ export default function HomePage(): any {
                     variant="outline"
                     className="border-2 hover:bg-accent/50 transition-all transform hover:scale-105"
                   >
-                    <Icon name="lucide:Leaf" className="text-green-600" />
+                    <Icon name="lucide:Leaf" className="text-success" />
                     <Span>{t('cta.supportTool')}</Span>
                   </Button>
                 </Link>
-              </div>
-            </div>
+              </Div>
+            </Div>
           </CardContent>
         </Card>
-      </div>
+      </Div>
     </>
   )
 }

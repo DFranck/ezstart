@@ -9,9 +9,15 @@ import {
   getApiPort,
   startServer,
   createVersionedRouter,
-  addVersionHeader
+  addVersionHeader,
 } from '@ezstart/express-core'
-import routes, { allRegistries, authRouter, oauthRouter, waitlistRouter, adminRouter } from './routes/index.js'
+import routes, {
+  allRegistries,
+  authRouter,
+  oauthRouter,
+  waitlistRouter,
+  adminRouter,
+} from './routes/index.js'
 import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
 import { getAuthCodeModel } from './models/auth-code.js'
@@ -27,17 +33,19 @@ const PORT = getApiPort('ezauth')
 const app = createApp({ apiApp: 'ezauth' })
 
 // ✅ Override CORS to enable credentials (required for httpOnly cookies)
-app.use(cors({
-  ...createCorsConfig('ezauth'),
-  credentials: true  // CRITICAL for httpOnly cookies
-}))
+app.use(
+  cors({
+    ...createCorsConfig('ezauth'),
+    credentials: true, // CRITICAL for httpOnly cookies
+  })
+)
 
 // ✅ Add cookie parser middleware (for httpOnly cookie support)
 app.use(cookieParser())
 
-// ❌ REMOVED: Global rate limiting was too aggressive for development scripts
-// Rate limiting is now applied per-route (see routes/auth.ts for specific endpoints)
-// app.use(createRateLimiter())
+// ✅ Global rate limiting (100 req/15min per IP, excludes /api/health)
+// Per-route strict limiters are also applied on login endpoints (see routes/auth/)
+app.use(createRateLimiter())
 
 // Initialize Passport
 app.use(passport.initialize())
@@ -49,8 +57,8 @@ app.use(addVersionHeader('v1'))
 // /api/auth/* - All authentication (credentials + OAuth)
 // /api/admin/* - All admin/authorization routes
 // /api/waitlist/* - Waitlist routes
-app.use(createVersionedRouter('/api/auth', authRouter))   // /api/auth/login, /api/auth/register, /api/auth/token, etc.
-app.use(createVersionedRouter('/api/auth', oauthRouter))  // /api/auth/google, /api/auth/callback (OAuth)
+app.use(createVersionedRouter('/api/auth', authRouter)) // /api/auth/login, /api/auth/register, /api/auth/token, etc.
+app.use(createVersionedRouter('/api/auth', oauthRouter)) // /api/auth/google, /api/auth/callback (OAuth)
 app.use(createVersionedRouter('/api/admin', adminRouter)) // /api/admin/users
 app.use(createVersionedRouter('/api/waitlist', waitlistRouter)) // /api/waitlist/:appName/add
 

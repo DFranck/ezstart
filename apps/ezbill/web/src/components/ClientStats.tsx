@@ -1,6 +1,7 @@
 'use client'
 
 import StatsCard from '@/components/StatsCard'
+import { useTranslations } from 'next-intl'
 
 interface ClientStatsProps {
   totalRevenue: number
@@ -15,28 +16,29 @@ export function ClientStats({
   invoicesCount,
   quotesCount,
 }: ClientStatsProps) {
+  const tDashboard = useTranslations('dashboard')
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <StatsCard
-        title="Total Revenue"
+        title={tDashboard('totalRevenue')}
         value={`$${totalRevenue.toFixed(2)}`}
         icon="lucide:DollarSign"
         iconGradient="bg-gradient-payment"
       />
       <StatsCard
-        title="Pending"
+        title={tDashboard('pending')}
         value={`$${pendingAmount.toFixed(2)}`}
         icon="lucide:Clock"
         iconGradient="bg-gradient-to-r from-orange-400 to-red-400"
       />
       <StatsCard
-        title="Invoices"
+        title={tDashboard('invoices')}
         value={invoicesCount.toString()}
         icon="lucide:FileEdit"
         iconGradient="bg-gradient-invoice"
       />
       <StatsCard
-        title="Quotes"
+        title={tDashboard('quotes')}
         value={quotesCount.toString()}
         icon="lucide:FileText"
         iconGradient="bg-gradient-receipt"

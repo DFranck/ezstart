@@ -1,5 +1,12 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 
@@ -14,7 +21,9 @@ const PromptSchema = z.object({
   name: z.string().describe('Prompt display name'),
   description: z.string().optional().describe('Prompt description'),
   content: z.string().describe('Prompt content template'),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).describe('Prompt category type'),
+  type: z
+    .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
+    .describe('Prompt category type'),
   provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).describe('Target AI provider'),
   isActive: z.boolean().describe('Whether prompt is active'),
   isDefault: z.boolean().describe('Whether this is the default prompt'),
@@ -35,7 +44,20 @@ docRouter.get(
   '/',
   async (req, res) => {
     try {
-      const { type, provider, active, limit = 20, offset = 0 } = req.query
+      const listPromptsQuerySchema = z.object({
+        type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional(),
+        provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional(),
+        active: z.enum(['true', 'false']).optional(),
+        limit: z.coerce.number().min(1).max(100).default(20),
+        offset: z.coerce.number().min(0).default(0),
+      })
+
+      const validation = listPromptsQuerySchema.safeParse(req.query)
+      if (!validation.success) {
+        return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
+      }
+
+      const { type, provider, active, limit, offset } = validation.data
 
       const filter: any = {}
       if (type) filter.type = type
@@ -43,16 +65,20 @@ docRouter.get(
       if (active !== undefined) filter.isActive = active === 'true'
 
       const [prompts, total] = await Promise.all([
-        SystemPrompt.find(filter).sort({ type: 1, key: 1 }).skip(Number(offset)).limit(Number(limit)).lean().exec(),
+        SystemPrompt.find(filter).sort({ type: 1, key: 1 }).skip(offset).limit(limit).lean().exec(),
         SystemPrompt.countDocuments(filter),
       ])
 
-      sendSuccess(res, prompts.map((p: any) => ({
-        ...p,
-        _id: p._id.toString(),
-        createdAt: p.createdAt?.toISOString(),
-        updatedAt: p.updatedAt?.toISOString(),
-      })), { total, limit: Number(limit), offset: Number(offset) })
+      sendSuccess(
+        res,
+        prompts.map((p: any) => ({
+          ...p,
+          _id: p._id.toString(),
+          createdAt: p.createdAt?.toISOString(),
+          updatedAt: p.updatedAt?.toISOString(),
+        })),
+        { total, limit, offset }
+      )
     } catch (error) {
       logger.error('Error listing prompts:', error)
       sendError(res, 'Failed to list prompts')
@@ -62,8 +88,14 @@ docRouter.get(
     summary: 'List all system prompts',
     tags: ['Prompts'],
     querySchema: z.object({
-      type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional().describe('Filter by prompt type'),
-      provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional().describe('Filter by AI provider'),
+      type: z
+        .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
+        .optional()
+        .describe('Filter by prompt type'),
+      provider: z
+        .enum(['all', 'gemini', 'openai', 'anthropic'])
+        .optional()
+        .describe('Filter by AI provider'),
       active: z.string().optional().describe('Filter by active status'),
       limit: z.coerce.number().default(20).optional().describe('Number of prompts to return'),
       offset: z.coerce.number().default(0).optional().describe('Number of prompts to skip'),

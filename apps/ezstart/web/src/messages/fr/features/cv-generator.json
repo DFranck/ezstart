@@ -48,7 +48,19 @@
         "colorLabel": "Couleur d'accent"
       },
       "preview": {
-        "title": "Aperçu & Téléchargement"
+        "title": "Aperçu & Téléchargement",
+        "enterInfo": "Entrez vos informations pour prévisualiser le CV",
+        "professionalSummary": "Résumé Professionnel",
+        "experience": "Expérience",
+        "present": "Présent",
+        "education": "Formation",
+        "skills": "Compétences",
+        "certifications": "Certifications",
+        "languages": "Langues",
+        "export": "Exporter",
+        "downloadPdf": "Télécharger en PDF",
+        "atsNote": "Format A4 standard optimisé pour les ATS (Systèmes de Suivi de Candidature)",
+        "pdfError": "Échec de la génération du PDF. Veuillez réessayer."
       },
       "resetButton": "Tout Réinitialiser",
       "errors": {

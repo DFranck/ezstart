@@ -1,8 +1,29 @@
 'use client'
 
-import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H3,
+  P,
+  Progress,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, RollBreakdown, StatTier } from '@gacha-analyzer/types'
+import type {
+  RuneData,
+  RuneAnalysis,
+  StatType,
+  RuneQuality,
+  ProgressiveAction,
+  RollBreakdown,
+  StatTier,
+} from '@gacha-analyzer/types'
 import { SET_STAT_TIERS } from '@gacha-analyzer/types'
 import { GEM_ICONS } from '../config/game-assets'
 import { SetIcon } from './rune-card-utils'
@@ -56,11 +77,16 @@ function getRollQualityBarColor(rollQuality: number): string {
 
 function getRollQualityTierBarColor(tier: RuneQuality): string {
   switch (tier) {
-    case 'legend': return '[&>div]:bg-ga-roll-legend'
-    case 'hero': return '[&>div]:bg-ga-roll-hero'
-    case 'rare': return '[&>div]:bg-ga-roll-rare'
-    case 'magic': return '[&>div]:bg-ga-roll-magic'
-    case 'normal': return '[&>div]:bg-ga-roll-normal'
+    case 'legend':
+      return '[&>div]:bg-ga-roll-legend'
+    case 'hero':
+      return '[&>div]:bg-ga-roll-hero'
+    case 'rare':
+      return '[&>div]:bg-ga-roll-rare'
+    case 'magic':
+      return '[&>div]:bg-ga-roll-magic'
+    case 'normal':
+      return '[&>div]:bg-ga-roll-normal'
   }
 }
 
@@ -151,86 +177,114 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
           <Div className="flex items-center gap-2">
             <SetIcon set={rune.set} className="w-6 h-6" />
             <H3 className="text-base font-bold capitalize">{rune.set}</H3>
-            <Badge variant="outline" className="text-xs">Slot {rune.slot}</Badge>
+            <Badge variant="outline" className="text-xs">
+              Slot {rune.slot}
+            </Badge>
           </Div>
           <Div className="flex items-center gap-1.5">
             <Badge className={`border text-xs ${QUALITY_BG[quality]}`}>
               {tRune(`quality.${quality}`)}
             </Badge>
             {rune.isAncient && (
-              <Badge className="border text-xs bg-amber-500/20 text-amber-400 border-amber-500/40">
-                Ancient
+              <Badge className="border text-xs bg-warning/20 text-warning border-warning/40">
+                {tRune('ancient')}
               </Badge>
             )}
           </Div>
         </Div>
         <Div className="flex items-center gap-2">
           <P className="text-ga-roll-legend text-xs tracking-tighter leading-none">{gradeStars}</P>
-          <Badge variant="secondary" className="text-xs">+{rune.level}</Badge>
+          <Badge variant="secondary" className="text-xs">
+            +{rune.level}
+          </Badge>
         </Div>
       </CardHeader>
 
       <CardContent className="space-y-3 px-3 pb-3">
         {/* ── Progressive Advice (prominent at top) ── */}
-        {analysis?.progressiveAdvice && (() => {
-          const advice = analysis.progressiveAdvice
-          return (
-            <Div className={`p-3 rounded-lg border-2 ${ADVICE_COLORS[advice.action]}`}>
-              <P className="font-bold text-lg">
-                {ADVICE_ICONS[advice.action]} {ADVICE_LABELS[advice.action]}
-                {advice.action === 'sell'
-                  ? (advice.sellProbability > 0 ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}` : '')
-                  : (advice.sellProbability > 0 ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}` : '')}
-              </P>
-              <P className="text-xs text-muted-foreground mt-1">
-                {advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}
-              </P>
-              {advice.nextCheckAt > 0 && (
-                <P className="text-xs opacity-70 mt-1">{tRune('nextCheck', { level: String(advice.nextCheckAt) })}</P>
-              )}
-            </Div>
-          )
-        })()}
+        {analysis?.progressiveAdvice &&
+          (() => {
+            const advice = analysis.progressiveAdvice
+            return (
+              <Div className={`p-3 rounded-lg border-2 ${ADVICE_COLORS[advice.action]}`}>
+                <P className="font-bold text-lg">
+                  {ADVICE_ICONS[advice.action]} {ADVICE_LABELS[advice.action]}
+                  {advice.action === 'sell'
+                    ? advice.sellProbability > 0
+                      ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}`
+                      : ''
+                    : advice.sellProbability > 0
+                      ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}`
+                      : ''}
+                </P>
+                <P className="text-xs text-muted-foreground mt-1">
+                  {advice.reasonKey
+                    ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})
+                    : advice.reason}
+                </P>
+                {advice.nextCheckAt > 0 && (
+                  <P className="text-xs opacity-70 mt-1">
+                    {tRune('nextCheck', { level: String(advice.nextCheckAt) })}
+                  </P>
+                )}
+              </Div>
+            )
+          })()}
 
         {/* ── Main stat ── */}
         <Div>
-          <P className="text-xs font-medium text-muted-foreground uppercase mb-1">{t('mainStat')}</P>
+          <P className="text-xs font-medium text-muted-foreground uppercase mb-1">
+            {t('mainStat')}
+          </P>
           <Div className="flex items-center justify-between">
             <P className="text-sm font-semibold text-muted-foreground">
               {formatStatLabel(rune.mainStat.type)}
             </P>
-            <P className="text-sm font-bold text-foreground">{formatStatValue(rune.mainStat.type, rune.mainStat.value)}</P>
+            <P className="text-sm font-bold text-foreground">
+              {formatStatValue(rune.mainStat.type, rune.mainStat.value)}
+            </P>
           </Div>
         </Div>
 
         {/* ── Innate stat ── */}
-        {rune.innateStat && (() => {
-          const innateTier = getStatTier(rune.set, rune.innateStat.type)
-          const isInnateMalus = innateTier === 'S' || innateTier === 'A' || innateTier === 'D'
-          return (
-            <Div>
-              <P className="text-xs font-medium text-muted-foreground uppercase mb-1">{t('innateStat')}</P>
-              <Div className="flex items-center justify-between">
-                <Div className="flex items-center gap-1.5">
-                  <P className="text-sm text-muted-foreground">
-                    {formatStatLabel(rune.innateStat.type)}
+        {rune.innateStat &&
+          (() => {
+            const innateTier = getStatTier(rune.set, rune.innateStat.type)
+            const isInnateMalus = innateTier === 'S' || innateTier === 'A' || innateTier === 'D'
+            return (
+              <Div>
+                <P className="text-xs font-medium text-muted-foreground uppercase mb-1">
+                  {t('innateStat')}
+                </P>
+                <Div className="flex items-center justify-between">
+                  <Div className="flex items-center gap-1.5">
+                    <P className="text-sm text-muted-foreground">
+                      {formatStatLabel(rune.innateStat.type)}
+                    </P>
+                    <Badge
+                      variant="outline"
+                      className={`text-[8px] px-1 py-0 font-bold ${INNATE_TIER_MALUS[innateTier]}`}
+                    >
+                      {isInnateMalus && '\u26A0\uFE0F'}
+                      {innateTier}
+                    </Badge>
+                  </Div>
+                  <P className="text-sm font-medium text-foreground">
+                    {formatStatValue(rune.innateStat.type, rune.innateStat.value)}
                   </P>
-                  <Badge variant="outline" className={`text-[8px] px-1 py-0 font-bold ${INNATE_TIER_MALUS[innateTier]}`}>
-                    {isInnateMalus && '\u26A0\uFE0F'}{innateTier}
-                  </Badge>
                 </Div>
-                <P className="text-sm font-medium text-foreground">{formatStatValue(rune.innateStat.type, rune.innateStat.value)}</P>
               </Div>
-            </Div>
-          )
-        })()}
+            )
+          })()}
 
         {/* ── Separator ── */}
         <Div className="border-t border-border" />
 
         {/* ── Substats with progress bars ── */}
         <Div>
-          <P className="text-xs font-medium text-muted-foreground uppercase mb-2">{t('subStats')}</P>
+          <P className="text-xs font-medium text-muted-foreground uppercase mb-2">
+            {t('subStats')}
+          </P>
           <Div className="space-y-2">
             {rune.subStats.map((stat, i) => {
               const subAnalysis = analysis?.substats.find(s => s.type === stat.type)
@@ -243,23 +297,39 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                         {formatStatLabel(stat.type)}
                       </P>
                       {analysis?.subStatTiers?.[stat.type] && (
-                        <Badge variant="outline" className={`text-[8px] px-1 py-0 font-bold ${STAT_TIER_COLORS[analysis.subStatTiers[stat.type] as StatTier]}`}>
+                        <Badge
+                          variant="outline"
+                          className={`text-[8px] px-1 py-0 font-bold ${STAT_TIER_COLORS[analysis.subStatTiers[stat.type] as StatTier]}`}
+                        >
                           {analysis.subStatTiers[stat.type]}
                         </Badge>
                       )}
                       {subAnalysis?.isGemTarget && (
-                        <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
+                        <Badge
+                          variant="outline"
+                          className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground"
+                        >
                           <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
                           gem target
                         </Badge>
                       )}
                     </Div>
                     <Div className="flex items-center gap-2">
-                      <P className={`font-semibold ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>{formatStatValue(stat.type, stat.value)}</P>
+                      <P
+                        className={`font-semibold ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}
+                      >
+                        {formatStatValue(stat.type, stat.value)}
+                      </P>
                       {subAnalysis && (
                         <P className="text-xs">
-                          <span className={getRollQualityColor(subAnalysis.efficiency)}>{tRune(`rollQuality.${getRollQualityTier(subAnalysis.efficiency)}`)}</span>
-                          <span className="text-muted-foreground"> ({subAnalysis.rolls} {subAnalysis.rolls > 1 ? tRune('rolls') : tRune('roll')})</span>
+                          <span className={getRollQualityColor(subAnalysis.efficiency)}>
+                            {tRune(`rollQuality.${getRollQualityTier(subAnalysis.efficiency)}`)}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {' '}
+                            ({subAnalysis.rolls}{' '}
+                            {subAnalysis.rolls > 1 ? tRune('rolls') : tRune('roll')})
+                          </span>
                         </P>
                       )}
                     </Div>
@@ -268,7 +338,11 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                   {breakdown && breakdown.length > 0 && (
                     <Div className="flex items-center gap-1 pl-1">
                       {breakdown.map((roll, j) => (
-                        <Badge key={j} variant="outline" className={`text-[10px] px-1.5 py-0 border ${ROLL_TIER_BG[roll.tier]}`}>
+                        <Badge
+                          key={j}
+                          variant="outline"
+                          className={`text-[10px] px-1.5 py-0 border ${ROLL_TIER_BG[roll.tier]}`}
+                        >
                           {formatRollValue(stat.type, roll.value)}
                         </Badge>
                       ))}
@@ -281,11 +355,15 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                     />
                   )}
                   {/* Grind potential inline */}
-                  {subAnalysis?.grindable && subAnalysis.grindAmount && subAnalysis.grindAmount > 0 && (
-                    <P className="text-[10px] text-muted-foreground pl-1">
-                      Grind: {formatStatValue(stat.type, stat.value)}{'\u2192'}{formatStatValue(stat.type, subAnalysis.grindedValue!)}
-                    </P>
-                  )}
+                  {subAnalysis?.grindable &&
+                    subAnalysis.grindAmount &&
+                    subAnalysis.grindAmount > 0 && (
+                      <P className="text-[10px] text-muted-foreground pl-1">
+                        Grind: {formatStatValue(stat.type, stat.value)}
+                        {'\u2192'}
+                        {formatStatValue(stat.type, subAnalysis.grindedValue!)}
+                      </P>
+                    )}
                 </Div>
               )
             })}
@@ -315,7 +393,8 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                   <Div className="flex items-center justify-between text-sm">
                     <P className="text-muted-foreground">{tRune('afterGemRolls')}</P>
                     <Badge className={`border text-xs ${ROLL_TIER_BG[rollQualityPostGem]}`}>
-                      {tRune(`rollQuality.${rollQualityPostGem}`)} ({analysis.rollQualityPostGemPercent}%)
+                      {tRune(`rollQuality.${rollQualityPostGem}`)} (
+                      {analysis.rollQualityPostGemPercent}%)
                     </Badge>
                   </Div>
                 )}
@@ -367,14 +446,20 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                   <Div className="flex items-center gap-1 cursor-default">
                     <Div
                       className={`h-1.5 w-1.5 rounded-full ${
-                        confidence >= 80 ? 'bg-success' : confidence >= 50 ? 'bg-warning' : 'bg-destructive'
+                        confidence >= 80
+                          ? 'bg-success'
+                          : confidence >= 50
+                            ? 'bg-warning'
+                            : 'bg-destructive'
                       }`}
                     />
                     <P className="text-[10px] text-muted-foreground">{Math.round(confidence)}%</P>
                   </Div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <P className="text-xs">{tRune('ocrConfidence')}: {Math.round(confidence)}%</P>
+                  <P className="text-xs">
+                    {tRune('ocrConfidence')}: {Math.round(confidence)}%
+                  </P>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

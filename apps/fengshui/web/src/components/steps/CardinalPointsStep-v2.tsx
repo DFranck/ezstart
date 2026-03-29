@@ -305,12 +305,14 @@ const CardinalPointsStep = (): any => {
 
         if (!uploadData.file || !uploadData.preview) {
           return (
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-8">
-                <h3 className="text-lg font-semibold text-red-800 mb-2">{t('cardinal.error')}</h3>
-                <p className="text-red-700">{t('cardinal.noFile')}</p>
-              </div>
-            </div>
+            <Div className="max-w-4xl mx-auto text-center">
+              <Div className="bg-destructive/10 border border-destructive/20 rounded-lg p-8">
+                <H2 size={'h3'} className="text-lg font-semibold text-destructive mb-2">
+                  {t('cardinal.error')}
+                </H2>
+                <P className="text-destructive">{t('cardinal.noFile')}</P>
+              </Div>
+            </Div>
           )
         }
 

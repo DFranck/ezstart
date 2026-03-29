@@ -67,15 +67,17 @@ export function ScanCard({ scan }: ScanCardProps) {
                   <SetIcon set={runeData.set as string} className="w-5 h-5 shrink-0" />
                   <P className="text-sm font-medium capitalize truncate">
                     {runeData.set as string}
-                    <span className="text-muted-foreground"> ({runeData.slot})</span>
-                    {' '}+{runeData.level}
+                    <span className="text-muted-foreground"> ({runeData.slot})</span> +
+                    {runeData.level}
                   </P>
-                  <Badge className={`border text-[10px] px-1 py-0 shrink-0 ${QUALITY_BADGE[quality as RuneQuality] ?? QUALITY_BADGE.normal}`}>
+                  <Badge
+                    className={`border text-[10px] px-1 py-0 shrink-0 ${QUALITY_BADGE[quality as RuneQuality] ?? QUALITY_BADGE.normal}`}
+                  >
                     {quality.charAt(0).toUpperCase() + quality.slice(1)}
                   </Badge>
                   {runeData.isAncient && (
-                    <Badge className="border text-[10px] px-1 py-0 shrink-0 bg-amber-500/20 text-amber-400 border-amber-500/40">
-                      Ancient
+                    <Badge className="border text-[10px] px-1 py-0 shrink-0 bg-warning/20 text-warning border-warning/40">
+                      {t('scanCard.ancient')}
                     </Badge>
                   )}
                 </Div>
@@ -86,21 +88,33 @@ export function ScanCard({ scan }: ScanCardProps) {
                     </P>
                   )}
                   {scan.reports && scan.reports.some(r => r.status === 'open') && (
-                    <Badge variant="outline" className="text-[10px] border bg-destructive/20 text-destructive border-destructive/40">
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] border bg-destructive/20 text-destructive border-destructive/40"
+                    >
                       🐛
                     </Badge>
                   )}
                   {scan.feedback && (
-                    <Badge variant="outline" className={`text-[10px] border ${scan.feedback.opinion === 'agree' ? 'bg-success/20 text-success-foreground border-success/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] border ${scan.feedback.opinion === 'agree' ? 'bg-success/20 text-success-foreground border-success/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}
+                    >
                       {scan.feedback.opinion === 'agree' ? '👍' : '👎'}
                     </Badge>
                   )}
                   {advice?.action ? (
-                    <Badge variant="outline" className={`text-[10px] border ${ADVICE_COLORS[advice.action] ?? ''}`}>
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] border ${ADVICE_COLORS[advice.action] ?? ''}`}
+                    >
                       {advice.action.toUpperCase()}
                     </Badge>
                   ) : (
-                    <Badge variant={statusVariantMap[scan.status] || 'outline'} className="text-[10px]">
+                    <Badge
+                      variant={statusVariantMap[scan.status] || 'outline'}
+                      className="text-[10px]"
+                    >
                       {t(`status.${scan.status}`)}
                     </Badge>
                   )}
@@ -111,21 +125,28 @@ export function ScanCard({ scan }: ScanCardProps) {
               <Div className="flex items-center gap-1.5 text-[11px] text-muted-foreground pl-[26px]">
                 {runeData.mainStat && (
                   <P className="text-foreground font-medium">
-                    {(runeData.mainStat.type as string).toUpperCase().replace('%', '%')} +{formatStatValue(runeData.mainStat.type, runeData.mainStat.value)}
+                    {(runeData.mainStat.type as string).toUpperCase().replace('%', '%')} +
+                    {formatStatValue(runeData.mainStat.type, runeData.mainStat.value)}
                   </P>
                 )}
                 {runeData.subStats && runeData.subStats.length > 0 && (
                   <>
                     <span className="text-border">|</span>
                     <P className="truncate">
-                      {runeData.subStats.map((s: { type: StatType }) => (s.type as string).toUpperCase().replace('%', '%')).join(' ')}
+                      {runeData.subStats
+                        .map((s: { type: StatType }) =>
+                          (s.type as string).toUpperCase().replace('%', '%')
+                        )
+                        .join(' ')}
                     </P>
                   </>
                 )}
                 {analysis?.setWeightedEfficiency !== undefined && (
                   <>
                     <span className="text-border">|</span>
-                    <P className="shrink-0 font-medium">Eff: {analysis.setWeightedEfficiency}%</P>
+                    <P className="shrink-0 font-medium">
+                      {t('scanCard.eff')}: {analysis.setWeightedEfficiency}%
+                    </P>
                   </>
                 )}
               </Div>

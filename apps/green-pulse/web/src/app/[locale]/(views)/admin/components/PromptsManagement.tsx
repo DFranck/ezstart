@@ -33,6 +33,7 @@ import {
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { PromptConfigEditor, type PromptConfig } from './PromptConfigEditor'
 
 type SystemPrompt = {
@@ -85,6 +86,7 @@ const PROVIDERS = [
 ]
 
 export function PromptsManagement() {
+  const t = useTranslations('admin.prompts')
   const queryClient = useQueryClient()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPrompt, setEditingPrompt] = useState<SystemPrompt | null>(null)
@@ -235,21 +237,22 @@ export function PromptsManagement() {
 
   // Filter by active types only (general, extraction) + selected filter
   const activeTypes = PROMPT_TYPES.map(t => t.value)
-  const filteredPrompts = data?.data?.filter(p => {
-    const isActiveType = activeTypes.includes(p.type)
-    const matchesFilter = filter === 'all' ? true : p.type === filter
-    return isActiveType && matchesFilter
-  }) || []
+  const filteredPrompts =
+    data?.data?.filter(p => {
+      const isActiveType = activeTypes.includes(p.type)
+      const matchesFilter = filter === 'all' ? true : p.type === filter
+      return isActiveType && matchesFilter
+    }) || []
 
   const getTypeBadge = (type: SystemPrompt['type']) => {
-    const colors = {
-      general: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      extraction: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      validation: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      vision: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      custom: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
-    }
-    return <Badge className={colors[type]}>{type}</Badge>
+    const variants = {
+      general: 'default',
+      extraction: 'default',
+      validation: 'secondary',
+      vision: 'outline',
+      custom: 'secondary',
+    } as const
+    return <Badge variant={variants[type]}>{type}</Badge>
   }
 
   if (isLoading) {
@@ -257,7 +260,7 @@ export function PromptsManagement() {
       <Card>
         <CardContent className="py-12 text-center">
           <Icon name="lucide:Loader2" className="w-8 h-8 mx-auto animate-spin" />
-          <P className="text-muted-foreground mt-2">Loading prompts...</P>
+          <P className="text-muted-foreground mt-2">{t('loading')}</P>
         </CardContent>
       </Card>
     )
@@ -268,7 +271,7 @@ export function PromptsManagement() {
       <Card>
         <CardContent className="py-12 text-center">
           <Icon name="lucide:AlertCircle" className="w-12 h-12 mx-auto text-destructive mb-2" />
-          <P className="text-destructive font-medium">Failed to load prompts</P>
+          <P className="text-destructive font-medium">{t('loadFailed')}</P>
           <P className="text-sm text-muted-foreground mt-2">
             {error instanceof Error ? error.message : 'Unknown error'}
           </P>
@@ -285,15 +288,13 @@ export function PromptsManagement() {
             <Div>
               <H3 className="flex items-center gap-2">
                 <Icon name="lucide:MessageSquare" />
-                System Prompts
+                {t('title')}
               </H3>
-              <P className="text-sm text-muted-foreground mt-1">
-                Manage AI system prompts for chat and extraction
-              </P>
+              <P className="text-sm text-muted-foreground mt-1">{t('manageDescription')}</P>
             </Div>
             <Button onClick={handleCreate}>
               <Icon name="lucide:Plus" className="mr-2" />
-              New Prompt
+              {t('newPrompt')}
             </Button>
           </Div>
         </CardHeader>
@@ -322,10 +323,13 @@ export function PromptsManagement() {
           {/* Prompts list */}
           {filteredPrompts.length === 0 ? (
             <Div className="text-center py-12">
-              <Icon name="lucide:FileText" className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
-              <P className="text-muted-foreground">No prompts found</P>
+              <Icon
+                name="lucide:FileText"
+                className="w-12 h-12 mx-auto text-muted-foreground mb-2"
+              />
+              <P className="text-muted-foreground">{t('noPrompts')}</P>
               <Button className="mt-4" onClick={handleCreate}>
-                Create your first prompt
+                {t('createFirst')}
               </Button>
             </Div>
           ) : (
@@ -339,20 +343,14 @@ export function PromptsManagement() {
                           <P className="font-medium">{prompt.name}</P>
                           {getTypeBadge(prompt.type)}
                           <Badge variant="outline">{prompt.provider}</Badge>
-                          {prompt.isDefault && (
-                            <Badge variant="default">Default</Badge>
-                          )}
-                          {!prompt.isActive && (
-                            <Badge variant="secondary">Inactive</Badge>
-                          )}
+                          {prompt.isDefault && <Badge variant="default">Default</Badge>}
+                          {!prompt.isActive && <Badge variant="secondary">Inactive</Badge>}
                         </Div>
                         <P className="text-xs text-muted-foreground font-mono mb-2">
                           key: {prompt.key}
                         </P>
                         {prompt.description && (
-                          <P className="text-sm text-muted-foreground mb-2">
-                            {prompt.description}
-                          </P>
+                          <P className="text-sm text-muted-foreground mb-2">{prompt.description}</P>
                         )}
                         <Div className="bg-muted/50 rounded p-2 max-h-24 overflow-y-auto">
                           <P className="text-xs font-mono whitespace-pre-wrap">
@@ -391,37 +389,40 @@ export function PromptsManagement() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editingPrompt ? 'Edit Prompt' : 'Create New Prompt'}
-            </DialogTitle>
+            <DialogTitle>{editingPrompt ? t('editPrompt') : t('createPrompt')}</DialogTitle>
           </DialogHeader>
 
           <Tabs defaultValue="prompt" className="py-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="prompt">
                 <Icon name="lucide:MessageSquare" className="mr-2" size={16} />
-                Prompt Content
+                {t('promptContent')}
               </TabsTrigger>
               <TabsTrigger value="config">
                 <Icon name="lucide:Settings" className="mr-2" size={16} />
-                Configuration
+                {t('configuration')}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="prompt" className="space-y-4">
               <Div className="grid grid-cols-2 gap-4">
                 <Div>
-                  <Label htmlFor="key">Key (unique identifier)</Label>
+                  <Label htmlFor="key">{t('key')}</Label>
                   <Input
                     id="key"
                     value={formData.key}
-                    onChange={e => setFormData({ ...formData, key: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        key: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''),
+                      })
+                    }
                     placeholder="e.g., general-esg-advisor"
                     disabled={!!editingPrompt}
                   />
                 </Div>
                 <Div>
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="name">{t('name')}</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -432,7 +433,7 @@ export function PromptsManagement() {
               </Div>
 
               <Div>
-                <Label htmlFor="description">Description (optional)</Label>
+                <Label htmlFor="description">{t('description_label')}</Label>
                 <Input
                   id="description"
                   value={formData.description}
@@ -443,10 +444,12 @@ export function PromptsManagement() {
 
               <Div className="grid grid-cols-2 gap-4">
                 <Div>
-                  <Label htmlFor="type">Type</Label>
+                  <Label htmlFor="type">{t('type')}</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value: SystemPrompt['type']) => setFormData({ ...formData, type: value })}
+                    onValueChange={(value: SystemPrompt['type']) =>
+                      setFormData({ ...formData, type: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -461,10 +464,12 @@ export function PromptsManagement() {
                   </Select>
                 </Div>
                 <Div>
-                  <Label htmlFor="provider">Provider</Label>
+                  <Label htmlFor="provider">{t('provider')}</Label>
                   <Select
                     value={formData.provider}
-                    onValueChange={(value: SystemPrompt['provider']) => setFormData({ ...formData, provider: value })}
+                    onValueChange={(value: SystemPrompt['provider']) =>
+                      setFormData({ ...formData, provider: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -481,16 +486,16 @@ export function PromptsManagement() {
               </Div>
 
               <Div>
-                <Label htmlFor="content">System Prompt (personality, role)</Label>
+                <Label htmlFor="content">{t('content')}</Label>
                 <TextArea
                   id="content"
                   value={formData.content}
                   onChange={e => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Enter the system prompt (e.g., 'You are GreenPulse.AI, an ESG advisor...')"
+                  placeholder={t('contentPlaceholder')}
                   className="min-h-[200px] font-mono text-sm"
                 />
                 <P className="text-xs text-muted-foreground mt-1">
-                  {formData.content.length}/10000 characters - Repeated in every message
+                  {t('characters', { count: formData.content.length })}
                 </P>
               </Div>
 
@@ -501,7 +506,7 @@ export function PromptsManagement() {
                     checked={formData.isActive}
                     onCheckedChange={checked => setFormData({ ...formData, isActive: checked })}
                   />
-                  <Label htmlFor="isActive">Active</Label>
+                  <Label htmlFor="isActive">{t('active')}</Label>
                 </Div>
                 <Div className="flex items-center gap-2">
                   <Switch
@@ -509,7 +514,7 @@ export function PromptsManagement() {
                     checked={formData.isDefault}
                     onCheckedChange={checked => setFormData({ ...formData, isDefault: checked })}
                   />
-                  <Label htmlFor="isDefault">Set as default for this type</Label>
+                  <Label htmlFor="isDefault">{t('setDefault')}</Label>
                 </Div>
               </Div>
             </TabsContent>
@@ -524,13 +529,13 @@ export function PromptsManagement() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={!formData.key || !formData.name || !formData.content}
             >
-              {editingPrompt ? 'Update' : 'Create'}
+              {editingPrompt ? t('update') : t('create')}
             </Button>
           </DialogFooter>
         </DialogContent>

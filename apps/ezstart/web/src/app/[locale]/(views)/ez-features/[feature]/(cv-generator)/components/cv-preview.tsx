@@ -1,7 +1,8 @@
 'use client'
 
 import { logger } from '@ezstart/logger'
-import { Button, Div, Icon } from '@ezstart/ui/components'
+import { Button, Div, Icon, P, Span } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 import { toast } from 'sonner'
 import { CVConfig, CVData } from '../types'
@@ -13,6 +14,7 @@ interface CVPreviewProps {
 
 export function CVPreview({ data, config }: CVPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('cvGenerator.generator.preview')
 
   const handleDownloadPDF = async () => {
     if (!previewRef.current || !data.personalInfo.name) return
@@ -42,93 +44,93 @@ export function CVPreview({ data, config }: CVPreviewProps) {
       pdf.save(`cv-${data.personalInfo.name.replace(/\s+/g, '-').toLowerCase()}.pdf`)
     } catch (error) {
       logger.error('PDF generation error:', error)
-      toast.error('Failed to generate PDF. Please try again.')
+      toast.error(t('pdfError'))
     }
   }
 
   if (!data.personalInfo.name) {
     return (
       <Div layout="center" className="min-h-[400px] bg-muted/50 rounded-lg">
-        <p className="text-muted-foreground">Enter your information to preview CV</p>
+        <P className="text-muted-foreground">{t('enterInfo')}</P>
       </Div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      {/* Preview Container */}
+    <Div className="space-y-4">
+      {/* Preview Container - bg-white/text-black is intentional for print context */}
       <Div className="bg-white p-8 rounded-lg shadow-lg overflow-auto max-h-[800px]">
-        <div ref={previewRef} className="text-black" style={{ minHeight: '1122px' }}>
+        <Div ref={previewRef} className="text-black" style={{ minHeight: '1122px' }}>
           {/* Header Section */}
-          <div className="border-b-4 pb-6 mb-6" style={{ borderColor: config.primaryColor }}>
+          <Div className="border-b-4 pb-6 mb-6" style={{ borderColor: config.primaryColor }}>
             <h1 className="text-4xl font-bold mb-2">{data.personalInfo.name}</h1>
             <h2 className="text-2xl" style={{ color: config.primaryColor }}>
               {data.personalInfo.title}
             </h2>
-            <div className="flex flex-wrap gap-4 mt-4 text-sm">
+            <Div className="flex flex-wrap gap-4 mt-4 text-sm">
               {data.personalInfo.email && (
-                <span className="flex items-center gap-1">
+                <Span className="flex items-center gap-1">
                   <Icon name="lucide:Mail" size={14} /> {data.personalInfo.email}
-                </span>
+                </Span>
               )}
               {data.personalInfo.phone && (
-                <span className="flex items-center gap-1">
+                <Span className="flex items-center gap-1">
                   <Icon name="lucide:Phone" size={14} /> {data.personalInfo.phone}
-                </span>
+                </Span>
               )}
               {data.personalInfo.location && (
-                <span className="flex items-center gap-1">
+                <Span className="flex items-center gap-1">
                   <Icon name="lucide:MapPin" size={14} /> {data.personalInfo.location}
-                </span>
+                </Span>
               )}
               {data.personalInfo.github && (
-                <span className="flex items-center gap-1">
+                <Span className="flex items-center gap-1">
                   <Icon name="lucide:Github" size={14} /> {data.personalInfo.github}
-                </span>
+                </Span>
               )}
               {data.personalInfo.linkedIn && (
-                <span className="flex items-center gap-1">
+                <Span className="flex items-center gap-1">
                   <Icon name="lucide:Linkedin" size={14} /> {data.personalInfo.linkedIn}
-                </span>
+                </Span>
               )}
-            </div>
-          </div>
+            </Div>
+          </Div>
 
           {/* Professional Summary */}
           {data.summary && (
-            <div className="mb-6">
+            <Div className="mb-6">
               <h3
                 className="text-xl font-bold mb-3 pb-1 border-b-2"
                 style={{ borderColor: config.primaryColor }}
               >
-                Professional Summary
+                {t('professionalSummary')}
               </h3>
-              <p className="text-sm leading-relaxed">{data.summary}</p>
-            </div>
+              <P className="text-sm leading-relaxed">{data.summary}</P>
+            </Div>
           )}
 
           {/* Experience */}
           {data.experience.length > 0 && (
-            <div className="mb-6">
+            <Div className="mb-6">
               <h3
                 className="text-xl font-bold mb-3 pb-1 border-b-2"
                 style={{ borderColor: config.primaryColor }}
               >
-                Experience
+                {t('experience')}
               </h3>
               {data.experience.map((exp, index) => (
-                <div key={index} className="mb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
+                <Div key={index} className="mb-4">
+                  <Div className="flex justify-between items-start">
+                    <Div>
                       <h4 className="font-bold text-base">{exp.position}</h4>
-                      <p className="text-sm" style={{ color: config.primaryColor }}>
+                      <P className="text-sm" style={{ color: config.primaryColor }}>
                         {exp.company}
-                      </p>
-                    </div>
-                    <span className="text-sm text-gray-600">
-                      {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
-                    </span>
-                  </div>
+                      </P>
+                    </Div>
+                    <Span className="text-sm text-gray-600">
+                      {exp.startDate} - {exp.current ? t('present') : exp.endDate}
+                    </Span>
+                  </Div>
                   {exp.description.length > 0 && (
                     <ul className="list-disc list-inside mt-2 text-sm space-y-1">
                       {exp.description.map((desc, i) => (
@@ -137,9 +139,9 @@ export function CVPreview({ data, config }: CVPreviewProps) {
                     </ul>
                   )}
                   {exp.technologies && exp.technologies.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <Div className="mt-2 flex flex-wrap gap-2">
                       {exp.technologies.map((tech, i) => (
-                        <span
+                        <Span
                           key={i}
                           className="text-xs px-2 py-1 rounded"
                           style={{
@@ -148,117 +150,115 @@ export function CVPreview({ data, config }: CVPreviewProps) {
                           }}
                         >
                           {tech}
-                        </span>
+                        </Span>
                       ))}
-                    </div>
+                    </Div>
                   )}
-                </div>
+                </Div>
               ))}
-            </div>
+            </Div>
           )}
 
           {/* Education */}
           {data.education.length > 0 && (
-            <div className="mb-6">
+            <Div className="mb-6">
               <h3
                 className="text-xl font-bold mb-3 pb-1 border-b-2"
                 style={{ borderColor: config.primaryColor }}
               >
-                Education
+                {t('education')}
               </h3>
               {data.education.map((edu, index) => (
-                <div key={index} className="mb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
+                <Div key={index} className="mb-3">
+                  <Div className="flex justify-between items-start">
+                    <Div>
                       <h4 className="font-bold text-base">
                         {edu.degree} in {edu.field}
                       </h4>
-                      <p className="text-sm" style={{ color: config.primaryColor }}>
+                      <P className="text-sm" style={{ color: config.primaryColor }}>
                         {edu.institution}
-                      </p>
-                    </div>
-                    <span className="text-sm text-gray-600">
+                      </P>
+                    </Div>
+                    <Span className="text-sm text-gray-600">
                       {edu.startDate} - {edu.endDate}
-                    </span>
-                  </div>
-                  {edu.gpa && <p className="text-sm mt-1">GPA: {edu.gpa}</p>}
-                </div>
+                    </Span>
+                  </Div>
+                  {edu.gpa && <P className="text-sm mt-1">GPA: {edu.gpa}</P>}
+                </Div>
               ))}
-            </div>
+            </Div>
           )}
 
           {/* Skills */}
           {data.skills.length > 0 && (
-            <div className="mb-6">
+            <Div className="mb-6">
               <h3
                 className="text-xl font-bold mb-3 pb-1 border-b-2"
                 style={{ borderColor: config.primaryColor }}
               >
-                Skills
+                {t('skills')}
               </h3>
               {data.skills.map((skillSet, index) => (
-                <div key={index} className="mb-2">
-                  <span className="font-semibold text-sm">{skillSet.category}: </span>
-                  <span className="text-sm">{skillSet.skills.join(', ')}</span>
-                </div>
+                <Div key={index} className="mb-2">
+                  <Span className="font-semibold text-sm">{skillSet.category}: </Span>
+                  <Span className="text-sm">{skillSet.skills.join(', ')}</Span>
+                </Div>
               ))}
-            </div>
+            </Div>
           )}
 
           {/* Certifications */}
           {data.certifications.length > 0 && (
-            <div className="mb-6">
+            <Div className="mb-6">
               <h3
                 className="text-xl font-bold mb-3 pb-1 border-b-2"
                 style={{ borderColor: config.primaryColor }}
               >
-                Certifications
+                {t('certifications')}
               </h3>
               {data.certifications.map((cert, index) => (
-                <div key={index} className="mb-2">
+                <Div key={index} className="mb-2">
                   <h4 className="font-semibold text-sm">{cert.name}</h4>
-                  <p className="text-sm text-gray-600">
+                  <P className="text-sm text-gray-600">
                     {cert.issuer} • {cert.date}
-                  </p>
-                </div>
+                  </P>
+                </Div>
               ))}
-            </div>
+            </Div>
           )}
 
           {/* Languages */}
           {data.languages.length > 0 && (
-            <div>
+            <Div>
               <h3
                 className="text-xl font-bold mb-3 pb-1 border-b-2"
                 style={{ borderColor: config.primaryColor }}
               >
-                Languages
+                {t('languages')}
               </h3>
-              <div className="flex flex-wrap gap-4">
+              <Div className="flex flex-wrap gap-4">
                 {data.languages.map((lang, index) => (
-                  <div key={index} className="text-sm">
-                    <span className="font-semibold">{lang.name}</span> - {lang.proficiency}
-                  </div>
+                  <Div key={index} className="text-sm">
+                    <Span className="font-semibold">{lang.name}</Span> - {lang.proficiency}
+                  </Div>
                 ))}
-              </div>
-            </div>
+              </Div>
+            </Div>
           )}
-        </div>
+        </Div>
       </Div>
 
       {/* Download Options */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Export</p>
-        <div className="flex flex-wrap gap-2">
+      <Div className="space-y-2">
+        <P className="text-sm font-medium">{t('export')}</P>
+        <Div className="flex flex-wrap gap-2">
           <Button onClick={handleDownloadPDF} variant="default" size="sm">
             <Icon name="lucide:Download" size={16} ariaHidden />
-            <span className="ml-2">Download PDF</span>
+            <Span className="ml-2">{t('downloadPdf')}</Span>
           </Button>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Standard A4 format optimized for ATS (Applicant Tracking Systems)
-        </p>
-      </div>
-    </div>
+        </Div>
+        <P className="text-xs text-muted-foreground">{t('atsNote')}</P>
+      </Div>
+    </Div>
   )
 }

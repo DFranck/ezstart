@@ -1,17 +1,15 @@
 // apps/ezstart/web/i18n/request.ts
-import merge from 'deepmerge';
-import { getRequestConfig } from 'next-intl/server';
-import { routing } from './routing';
+import merge from 'deepmerge'
+import { getRequestConfig } from 'next-intl/server'
+import { routing } from './routing'
 
-function isSupportedLocale(
-  locale: string | undefined
-): locale is (typeof routing.locales)[number] {
-  return locale !== undefined && routing.locales.includes(locale as any);
+function isSupportedLocale(locale: string | undefined): locale is (typeof routing.locales)[number] {
+  return locale !== undefined && routing.locales.includes(locale as any)
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  const resolved = await requestLocale;
-  const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale;
+  const resolved = await requestLocale
+  const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
   const [
     common,
@@ -29,6 +27,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     cvGenerator,
     businessCard,
     monitoring,
+    admin,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -51,7 +50,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/features/business-card.json`),
     // monitoring
     import(`../messages/${locale}/monitoring.json`),
-  ]);
+    // admin
+    import(`../messages/${locale}/admin.json`),
+  ])
 
   return {
     locale,
@@ -71,6 +72,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       cvGenerator.default,
       businessCard.default,
       monitoring.default,
+      admin.default,
     ]),
-  };
-});
+  }
+})

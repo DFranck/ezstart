@@ -11,7 +11,9 @@ import {
   Div,
   H3,
   Icon,
+  Img,
   P,
+  Span,
   UptimeGraph,
 } from '@ezstart/ui/components'
 import { useQuery } from '@tanstack/react-query'
@@ -49,7 +51,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
   const getGithubUrlForEndpoint = (endpointType: string) => {
     if (!project.githubUrl) return null
-    // Si le githubUrl pointe déjà vers un sous-dossier (api ou web), le retourner tel quel
+    // Si le githubUrl pointe deja vers un sous-dossier (api ou web), le retourner tel quel
     if (project.githubUrl.includes('/api') || project.githubUrl.includes('/web')) {
       return project.githubUrl
     }
@@ -100,40 +102,33 @@ export function ProjectCard({ project }: ProjectCardProps) {
   }
 
   return (
-    <Card
-      variant="floating"
-      // onClick={e => {
-      //   if (project.githubUrl) {
-      //     window.open(project.githubUrl, '_blank', 'noopener,noreferrer')
-      //   }
-      // }}
-    >
+    <Card variant="floating">
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
+        <Div className="flex items-start justify-between">
+          <Div className="flex items-center gap-3">
             {/* Logo or Emoji */}
             {project.logo ? (
-              <img
+              <Img
                 src={project.logo}
                 alt={`${project.name} logo`}
                 className="w-10 h-10 object-contain rounded-md"
               />
             ) : (
-              <span className="text-3xl">{project.emoji}</span>
+              <Span className="text-3xl">{project.emoji}</Span>
             )}
-            <div>
-              <div className="flex items-center gap-2">
+            <Div>
+              <Div className="flex items-center gap-2">
                 <H3 size="h5" className="mb-1">
                   {project.name}
                 </H3>
-              </div>
+              </Div>
               {project.description && (
                 <P className="text-xs text-muted-foreground">{project.description}</P>
               )}
-            </div>
-          </div>
+            </Div>
+          </Div>
           <Badge className={getStatusColor(project.overallStatus)}>{project.overallStatus}</Badge>
-        </div>
+        </Div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <Div layout={'col'} className="space-y-3 flex-1 flex flex-col">
@@ -145,8 +140,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
             const serviceHistory = servicesHistory.find(s => s.serviceId === serviceId)
 
             return (
-              <div key={index} className="space-y-2">
-                <div
+              <Div key={index} className="space-y-2">
+                <Div
                   onClick={() => {
                     if (githubUrl) {
                       window.open(githubUrl, '_blank', 'noopener,noreferrer')
@@ -154,10 +149,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   }}
                   className="flex items-start justify-between p-3 rounded-md bg-muted/50 border transition-colors hover:bg-muted/40 hover:border-primary/50 cursor-pointer"
                 >
-                  <div className="flex items-start gap-2 flex-1 min-w-0">
-                    <span className="mt-0.5">{getStatusEmoji(endpoint.status)}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
+                  <Div className="flex items-start gap-2 flex-1 min-w-0">
+                    <Span className="mt-0.5">{getStatusEmoji(endpoint.status)}</Span>
+                    <Div className="flex-1 min-w-0">
+                      <Div className="flex items-center gap-2 flex-wrap">
                         <P className="text-sm font-medium">{endpoint.label}</P>
                         {endpoint.platform && getPlatformBadge(endpoint.platform)}
                         {/* Show endpoints count for APIs */}
@@ -166,10 +161,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
                             {endpoint.metadata.endpointsCount} routes
                           </Badge>
                         )}
-                      </div>
+                      </Div>
 
                       {/* URLs */}
-                      <div className="flex flex-col gap-1 mt-2">
+                      <Div className="flex flex-col gap-1 mt-2">
                         {/* Main URL */}
                         <P asChild variant={'link'}>
                           <Link
@@ -200,10 +195,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
                             </Link>
                           </P>
                         )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right ml-2 flex-shrink-0">
+                      </Div>
+                    </Div>
+                  </Div>
+                  <Div className="text-right ml-2 flex-shrink-0">
                     <P className="text-sm font-medium">
                       {endpoint.responseTime ? `${endpoint.responseTime}ms` : 'N/A'}
                     </P>
@@ -215,8 +210,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
                         {endpoint.error}
                       </P>
                     )}
-                  </div>
-                </div>
+                  </Div>
+                </Div>
 
                 {/* Uptime Graph for this endpoint */}
                 {!isLoadingHistory && serviceHistory && (
@@ -228,7 +223,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                     showTitle={false}
                   />
                 )}
-              </div>
+              </Div>
             )
           })}
         </Div>

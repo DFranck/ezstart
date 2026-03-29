@@ -5,6 +5,7 @@ import { Company, CreateCompany } from '@ezbill/types'
 import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { LoadingButton } from './loading-button'
 
 interface CompanyModalProps {
@@ -17,6 +18,9 @@ interface CompanyModalProps {
 export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalProps) {
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const tToast = useTranslations('toast')
+  const tCompany = useTranslations('company')
+  const tCommon = useTranslations('common')
 
   const [formData, setFormData] = useState<CreateCompany>({
     userId: '',
@@ -83,9 +87,11 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
         onSave()
         onClose()
       },
-      toastLoading: { message: company ? 'Updating company...' : 'Creating company...' },
-      toastSuccess: { message: company ? 'Company updated' : 'Company created' },
-      toastError: { message: company ? 'Failed to update company' : 'Failed to create company' },
+      toastLoading: { message: company ? tToast('companyUpdating') : tToast('companyCreating') },
+      toastSuccess: { message: company ? tToast('companyUpdated') : tToast('companyCreated') },
+      toastError: {
+        message: company ? tToast('companyUpdateFailed') : tToast('companyCreateFailed'),
+      },
       onLoadingChange: setIsLoading,
     })
   }
@@ -94,10 +100,8 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={company ? 'Edit Company' : 'Create Company'}
-      description={
-        company ? 'Update your company information' : 'Add your company to start billing clients'
-      }
+      title={company ? tCompany('edit') : tCompany('create')}
+      description={company ? tCompany('edit') : tCompany('create')}
       footer={
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
@@ -107,7 +111,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             className="hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-4 h-4 mr-2" />
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <LoadingButton
             loading={isLoading}
@@ -117,7 +121,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             form="company-form"
           >
             <Icon name={company ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
-            {company ? 'Update Company' : 'Create Company'}
+            {company ? tCompany('update') : tCompany('create')}
           </LoadingButton>
         </div>
       }
@@ -263,7 +267,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
           </>
         )}
 
-        <div className="lg:col-span-2 border-t border-purple-200/50 pt-6 mt-2">
+        <div className="lg:col-span-2 border-t border-border pt-6 mt-2">
           <div className="flex items-center mb-4">
             <Icon name="lucide:Scale" className="w-5 h-5 mr-2 text-warning" />
             <h4 className="text-lg font-semibold ">Legal Information</h4>
@@ -278,7 +282,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
           <Input
             value={formData.companyRegistrationNumber}
             onChange={e => setFormData({ ...formData, companyRegistrationNumber: e.target.value })}
-            className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
             placeholder="12345678"
           />
         </div>
@@ -291,7 +295,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
           <Input
             value={formData.taxNumber}
             onChange={e => setFormData({ ...formData, taxNumber: e.target.value })}
-            className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
             placeholder="TAX123456789"
           />
         </div>

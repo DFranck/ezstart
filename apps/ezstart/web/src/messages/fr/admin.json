@@ -1,0 +1,66 @@
+{
+  "admin": {
+    "title": "Panneau d'Administration",
+    "description": "Gérer les utilisateurs, rôles, permissions et fonctionnalités du monorepo @ezstart",
+    "userManagement": {
+      "title": "Gestion des Utilisateurs",
+      "searchPlaceholder": "Rechercher par email, nom d'utilisateur, nom...",
+      "allRoles": "Tous les Rôles",
+      "roles": {
+        "superadmin": "Superadmin",
+        "admin": "Admin",
+        "manager": "Manager",
+        "betaTester": "Bêta Testeur",
+        "client": "Client"
+      },
+      "refresh": "Actualiser",
+      "showing": "Affichage de {count} sur {total} utilisateurs",
+      "previous": "Précédent",
+      "pageOf": "Page {page} sur {totalPages}",
+      "next": "Suivant",
+      "errorLoading": "Erreur de chargement des utilisateurs",
+      "noUsers": "Aucun utilisateur trouvé"
+    },
+    "table": {
+      "user": "Utilisateur",
+      "email": "Email",
+      "roles": "Rôles",
+      "apps": "Applications",
+      "verified": "Vérifié",
+      "actions": "Actions",
+      "noRoles": "Aucun rôle",
+      "noApps": "Aucune app",
+      "verifiedLabel": "Vérifié",
+      "unverified": "Non vérifié",
+      "notVerified": "Non vérifié",
+      "edit": "Modifier",
+      "editUser": "Modifier l'utilisateur",
+      "locked": "Verrouillé"
+    },
+    "editModal": {
+      "title": "Modifier l'utilisateur : {username}",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "saveChanges": "Enregistrer les modifications",
+      "userInfo": {
+        "title": "Informations Utilisateur",
+        "email": "Email :",
+        "username": "Nom d'utilisateur :",
+        "name": "Nom :",
+        "created": "Créé le :"
+      },
+      "emailVerified": "Email Vérifié",
+      "globalRoles": {
+        "title": "Rôles Globaux (Accès Inter-Apps)",
+        "description": "Seul le superadmin peut être un rôle global avec accès à tout partout"
+      },
+      "appAccess": {
+        "title": "Accès aux Applications & Rôles Spécifiques",
+        "description": "Sélectionnez les applications auxquelles l'utilisateur peut accéder et attribuez des rôles pour chaque app"
+      },
+      "inheritedPermissions": "Permissions Héritées (des rôles)",
+      "inheritedFeatures": "Fonctionnalités Héritées (des rôles)",
+      "errorSaving": "Erreur lors de l'enregistrement"
+    }
+  }
+}

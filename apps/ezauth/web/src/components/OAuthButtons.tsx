@@ -3,6 +3,7 @@
 import { Button, Div, Icon, Span } from '@ezstart/ui/components'
 import { getApiUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger'
+import { useTranslations } from 'next-intl'
 
 interface OAuthButtonsProps {
   app: string
@@ -10,6 +11,7 @@ interface OAuthButtonsProps {
 }
 
 export function OAuthButtons({ app, redirect_uri }: OAuthButtonsProps) {
+  const t = useTranslations('oauth')
   const handleGoogleLogin = () => {
     const apiUrl = getApiUrl('ezauth')
     const params = new URLSearchParams({
@@ -53,7 +55,7 @@ export function OAuthButtons({ app, redirect_uri }: OAuthButtonsProps) {
             fill="#EA4335"
           />
         </svg>
-        <Span>Continue with Google</Span>
+        <Span>{t('continueWithGoogle')}</Span>
       </Button>
 
       {/* GitHub OAuth Button (TODO) */}
@@ -74,7 +76,7 @@ export function OAuthButtons({ app, redirect_uri }: OAuthButtonsProps) {
           <Span className="w-full border-t" />
         </Div>
         <Div className="relative flex justify-center text-xs uppercase">
-          <Span className="bg-background px-2 text-muted-foreground">Or continue with</Span>
+          <Span className="bg-background px-2 text-muted-foreground">{t('orContinueWith')}</Span>
         </Div>
       </Div>
     </Div>

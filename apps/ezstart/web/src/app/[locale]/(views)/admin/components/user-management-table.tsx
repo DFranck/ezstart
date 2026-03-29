@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@ezstart/ui/components'
 import { canManageUser, type useRBAC } from '@ezstart/rbac'
+import { useTranslations } from 'next-intl'
 
 interface UserManagementTableProps {
   users: AuthUser[]
@@ -25,7 +26,14 @@ interface UserManagementTableProps {
   rbac: ReturnType<typeof useRBAC>
 }
 
-export function UserManagementTable({ users, currentUser, onEditUser, rbac }: UserManagementTableProps) {
+export function UserManagementTable({
+  users,
+  currentUser,
+  onEditUser,
+  rbac,
+}: UserManagementTableProps) {
+  const t = useTranslations('admin')
+
   const getRoleBadge = (role: string, isGlobal = true) => {
     const variants: Record<string, any> = {
       superadmin: 'destructive',
@@ -48,14 +56,14 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
 
     // Add global roles
     if (user.roles && user.roles.length > 0) {
-      user.roles.forEach((role) => roles.push({ role, isGlobal: true }))
+      user.roles.forEach(role => roles.push({ role, isGlobal: true }))
     }
 
     // Add app-specific roles with app name
     if (user.appRoles) {
       Object.entries(user.appRoles).forEach(([app, appRoles]) => {
         if (Array.isArray(appRoles)) {
-          appRoles.forEach((role) => roles.push({ role: `${role}`, isGlobal: false, app }))
+          appRoles.forEach(role => roles.push({ role: `${role}`, isGlobal: false, app }))
         }
       })
     }
@@ -67,7 +75,7 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
     <>
       {/* Mobile Card View (< 640px) */}
       <Div className="sm:hidden space-y-4">
-        {users?.map((user) => {
+        {users?.map(user => {
           const canEdit = canManageUser(currentUser, user)
 
           return (
@@ -95,29 +103,34 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
 
                 {/* Verified Badge */}
                 {user.isVerified ? (
-                  <Badge variant="default" className="bg-green-600 flex-shrink-0">
+                  <Badge variant="default" className="bg-status-healthy flex-shrink-0">
                     <Icon name="lucide:Check" className="mr-1" size={12} />
-                    <Span className="text-xs">Verified</Span>
+                    <Span className="text-xs">{t('table.verifiedLabel')}</Span>
                   </Badge>
                 ) : (
                   <Badge variant="secondary" className="flex-shrink-0">
                     <Icon name="lucide:X" className="mr-1" size={12} />
-                    <Span className="text-xs">Not verified</Span>
+                    <Span className="text-xs">{t('table.notVerified')}</Span>
                   </Badge>
                 )}
               </Div>
 
               {/* Roles */}
               <Div>
-                <P className="text-xs font-semibold text-muted-foreground mb-1">Roles</P>
+                <P className="text-xs font-semibold text-muted-foreground mb-1">
+                  {t('table.roles')}
+                </P>
                 <Div className="flex flex-wrap gap-1">
                   {(() => {
                     const allRoles = getAllRoles(user)
                     if (allRoles.length === 0) {
-                      return <Badge variant="outline">No roles</Badge>
+                      return <Badge variant="outline">{t('table.noRoles')}</Badge>
                     }
                     return allRoles.map((roleInfo, idx) => (
-                      <Span key={`${roleInfo.role}-${roleInfo.app || 'global'}-${idx}`} title={roleInfo.app ? `App: ${roleInfo.app}` : 'Global role'}>
+                      <Span
+                        key={`${roleInfo.role}-${roleInfo.app || 'global'}-${idx}`}
+                        title={roleInfo.app ? `App: ${roleInfo.app}` : 'Global role'}
+                      >
                         {getRoleBadge(roleInfo.role, roleInfo.isGlobal)}
                       </Span>
                     ))
@@ -128,9 +141,11 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
               {/* Apps */}
               {user.apps && user.apps.length > 0 && (
                 <Div>
-                  <P className="text-xs font-semibold text-muted-foreground mb-1">Apps</P>
+                  <P className="text-xs font-semibold text-muted-foreground mb-1">
+                    {t('table.apps')}
+                  </P>
                   <Div className="flex flex-wrap gap-1">
-                    {user.apps.slice(0, 3).map((app) => (
+                    {user.apps.slice(0, 3).map(app => (
                       <Badge key={app} variant="secondary" className="text-xs">
                         {app}
                       </Badge>
@@ -147,14 +162,19 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
               {/* Action Button */}
               <Div className="pt-2 border-t border-border">
                 {canEdit ? (
-                  <Button size="sm" variant="outline" onClick={() => onEditUser(user)} className="w-full">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onEditUser(user)}
+                    className="w-full"
+                  >
                     <Icon name="lucide:Edit" className="mr-2" />
-                    Edit User
+                    {t('table.editUser')}
                   </Button>
                 ) : (
                   <Button size="sm" variant="ghost" disabled className="w-full">
                     <Icon name="lucide:Lock" className="mr-2" />
-                    Locked
+                    {t('table.locked')}
                   </Button>
                 )}
               </Div>
@@ -164,7 +184,7 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
 
         {users && users.length === 0 && (
           <Div className="text-center py-12 border border-border rounded-lg">
-            <P className="text-muted-foreground">No users found</P>
+            <P className="text-muted-foreground">{t('userManagement.noUsers')}</P>
           </Div>
         )}
       </Div>
@@ -174,116 +194,119 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
         <Table variant="hoverable">
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead className="hidden sm:table-cell">Email</TableHead>
-              <TableHead>Roles</TableHead>
-              <TableHead className="hidden md:table-cell">Apps</TableHead>
-              <TableHead className="hidden lg:table-cell">Verified</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>{t('table.user')}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('table.email')}</TableHead>
+              <TableHead>{t('table.roles')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('table.apps')}</TableHead>
+              <TableHead className="hidden lg:table-cell">{t('table.verified')}</TableHead>
+              <TableHead>{t('table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-          {users?.map((user) => {
-            const canEdit = canManageUser(currentUser, user)
+            {users?.map(user => {
+              const canEdit = canManageUser(currentUser, user)
 
-            return (
-              <TableRow key={user._id}>
-                <TableCell>
-                  <Div className="flex items-center gap-3">
-                    {user.avatar && (
-                      <Img
-                        src={user.avatar}
-                        alt={user.username}
-                        className="w-8 h-8 rounded-full"
-                      />
-                    )}
-                    <Div>
-                      <P className="font-medium">{user.username}</P>
-                      {(user.firstName || user.lastName) && (
-                        <P className="text-sm text-muted-foreground">
-                          {user.firstName} {user.lastName}
-                        </P>
+              return (
+                <TableRow key={user._id}>
+                  <TableCell>
+                    <Div className="flex items-center gap-3">
+                      {user.avatar && (
+                        <Img
+                          src={user.avatar}
+                          alt={user.username}
+                          className="w-8 h-8 rounded-full"
+                        />
                       )}
-                      {/* Show email on mobile */}
-                      <P className="text-xs text-muted-foreground sm:hidden">{user.email}</P>
+                      <Div>
+                        <P className="font-medium">{user.username}</P>
+                        {(user.firstName || user.lastName) && (
+                          <P className="text-sm text-muted-foreground">
+                            {user.firstName} {user.lastName}
+                          </P>
+                        )}
+                        {/* Show email on mobile */}
+                        <P className="text-xs text-muted-foreground sm:hidden">{user.email}</P>
+                      </Div>
                     </Div>
-                  </Div>
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  <P className="text-sm">{user.email}</P>
-                </TableCell>
-                <TableCell>
-                  <Div className="flex flex-wrap gap-1">
-                    {(() => {
-                      const allRoles = getAllRoles(user)
-                      if (allRoles.length === 0) {
-                        return <Badge variant="outline">No roles</Badge>
-                      }
-                      return allRoles.map((roleInfo, idx) => (
-                        <Span key={`${roleInfo.role}-${roleInfo.app || 'global'}-${idx}`} title={roleInfo.app ? `App: ${roleInfo.app}` : 'Global role'}>
-                          {getRoleBadge(roleInfo.role, roleInfo.isGlobal)}
-                        </Span>
-                      ))
-                    })()}
-                  </Div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <Div className="flex flex-wrap gap-1">
-                    {user.apps && user.apps.length > 0 ? (
-                      user.apps.slice(0, 3).map((app) => (
-                        <Badge key={app} variant="secondary" className="text-xs">
-                          {app}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <P className="text-sm">{user.email}</P>
+                  </TableCell>
+                  <TableCell>
+                    <Div className="flex flex-wrap gap-1">
+                      {(() => {
+                        const allRoles = getAllRoles(user)
+                        if (allRoles.length === 0) {
+                          return <Badge variant="outline">{t('table.noRoles')}</Badge>
+                        }
+                        return allRoles.map((roleInfo, idx) => (
+                          <Span
+                            key={`${roleInfo.role}-${roleInfo.app || 'global'}-${idx}`}
+                            title={roleInfo.app ? `App: ${roleInfo.app}` : 'Global role'}
+                          >
+                            {getRoleBadge(roleInfo.role, roleInfo.isGlobal)}
+                          </Span>
+                        ))
+                      })()}
+                    </Div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <Div className="flex flex-wrap gap-1">
+                      {user.apps && user.apps.length > 0 ? (
+                        user.apps.slice(0, 3).map(app => (
+                          <Badge key={app} variant="secondary" className="text-xs">
+                            {app}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="outline" className="text-xs">
+                          {t('table.noApps')}
                         </Badge>
-                      ))
+                      )}
+                      {user.apps && user.apps.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{user.apps.length - 3}
+                        </Badge>
+                      )}
+                    </Div>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {user.isVerified ? (
+                      <Badge variant="default" className="bg-status-healthy">
+                        <Icon name="lucide:Check" className="mr-1" />
+                        {t('table.verifiedLabel')}
+                      </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-xs">
-                        No apps
+                      <Badge variant="secondary">
+                        <Icon name="lucide:X" className="mr-1" />
+                        {t('table.unverified')}
                       </Badge>
                     )}
-                    {user.apps && user.apps.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{user.apps.length - 3}
-                      </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {canEdit ? (
+                      <Button size="sm" variant="outline" onClick={() => onEditUser(user)}>
+                        <Icon name="lucide:Edit" className="mr-1 hidden sm:inline" />
+                        <Span className="hidden sm:inline">{t('table.edit')}</Span>
+                        <Icon name="lucide:Edit" className="sm:hidden" />
+                      </Button>
+                    ) : (
+                      <Button size="sm" variant="ghost" disabled>
+                        <Icon name="lucide:Lock" className="mr-1 hidden sm:inline" />
+                        <Span className="hidden sm:inline">{t('table.locked')}</Span>
+                        <Icon name="lucide:Lock" className="sm:hidden" />
+                      </Button>
                     )}
-                  </Div>
-                </TableCell>
-                <TableCell className="hidden lg:table-cell">
-                  {user.isVerified ? (
-                    <Badge variant="default" className="bg-green-600">
-                      <Icon name="lucide:Check" className="mr-1" />
-                      Verified
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">
-                      <Icon name="lucide:X" className="mr-1" />
-                      Unverified
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {canEdit ? (
-                    <Button size="sm" variant="outline" onClick={() => onEditUser(user)}>
-                      <Icon name="lucide:Edit" className="mr-1 hidden sm:inline" />
-                      <Span className="hidden sm:inline">Edit</Span>
-                      <Icon name="lucide:Edit" className="sm:hidden" />
-                    </Button>
-                  ) : (
-                    <Button size="sm" variant="ghost" disabled>
-                      <Icon name="lucide:Lock" className="mr-1 hidden sm:inline" />
-                      <Span className="hidden sm:inline">Locked</Span>
-                      <Icon name="lucide:Lock" className="sm:hidden" />
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
         </Table>
 
         {users && users.length === 0 && (
           <Div className="text-center py-12">
-            <P className="text-muted-foreground">No users found</P>
+            <P className="text-muted-foreground">{t('userManagement.noUsers')}</P>
           </Div>
         )}
       </Div>

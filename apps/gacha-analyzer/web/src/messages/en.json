@@ -219,6 +219,10 @@
       "speed-leader": "Speed Lead",
       "raid-support": "Raid"
     },
+    "ancient": "Ancient",
+    "runeInfo": "Rune Info",
+    "penalties": "Penalties",
+    "gemAnalysis": "Gem Analysis",
     "gemable": "Gem",
     "optimization": "Optimization",
     "perfectBuild": "Perfect",
@@ -298,7 +302,37 @@
     "filterByStatus": "Filter by status",
     "allGames": "All games",
     "allStatuses": "All statuses",
+    "allLevels": "All +",
+    "allAdvice": "All Advice",
+    "sell": "SELL",
+    "upgrade": "UPGRADE",
+    "keep": "KEEP",
+    "grind": "GRIND",
+    "allSets": "All Sets",
+    "allSlots": "All Slots",
+    "slot": "Slot {number}",
     "empty": "No scans found",
     "emptyDescription": "Start scanning your runes and gear!"
+  },
+  "scanCard": {
+    "ancient": "Ancient",
+    "eff": "Eff"
+  },
+  "sources": {
+    "comingSoon": "Coming Soon",
+    "comingSoonDescription": "Reference sources for {game} are being prepared.",
+    "pageDescription": "External references for Summoners War — APIs, tools, wikis, and open source projects that feed or complement the scanner."
+  },
+  "data": {
+    "comingSoon": "Coming Soon",
+    "comingSoonDescription": "Reference data for {game} are being prepared.",
+    "pageDescription": "All Summoners War rune reference tables, efficiency guides, and grindstone values in one place.",
+    "none": "None",
+    "runeSets": "1. Rune Sets",
+    "substatValues": "2. Substat Values",
+    "buildArchetypes": "3. Build Archetypes (Advanced)",
+    "archetype": "Archetype",
+    "description": "Description",
+    "statPriority": "Stat Priority"
   }
 }

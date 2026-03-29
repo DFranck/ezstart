@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, findByIdAndDelete } from '@ezstart/express-core'
 import { getScanModel } from '../models/scan.js'
 
 const router: any = Router()
@@ -13,7 +13,7 @@ router.delete('/:id', async (req: any, res: any) => {
   try {
     const Scan = await getScanModel()
 
-    const scan = await (Scan.findByIdAndDelete as any)(req.params.id).exec()
+    const scan = await findByIdAndDelete(Scan, req.params.id).exec()
 
     if (!scan) {
       return sendError(res, 'Scan not found', 404)

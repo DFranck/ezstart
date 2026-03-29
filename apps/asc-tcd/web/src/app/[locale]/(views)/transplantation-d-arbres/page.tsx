@@ -4,11 +4,13 @@ import BoutiqueCta from '@/components/BoutiqueCta'
 import { ACarousel, Button, Div, H2, Hero, Main, P, Section } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
 export default function PageTransplantationArbres(): any {
   const { isDesktop } = useDevice()
+  const t = useTranslations('transplantation')
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -32,19 +34,19 @@ export default function PageTransplantationArbres(): any {
   }, [])
   const carouselSlides: any[] = [
     {
-      title: 'Particulier',
+      title: t('individual'),
       src: '/images/particulier.jpg',
-      button: <Link href="/quote">Demander un devis</Link>,
+      button: <Link href="/quote">{t('requestQuote')}</Link>,
     },
     {
-      title: 'Acteur public',
+      title: t('publicActor'),
       src: '/images/secteur-public.jpg',
-      button: <Link href="/quote">Demander un devis</Link>,
+      button: <Link href="/quote">{t('requestQuote')}</Link>,
     },
     {
-      title: 'Professionnel',
+      title: t('professional'),
       src: '/images/professionnel.jpg',
-      button: <Link href="/quote">Demander un devis</Link>,
+      button: <Link href="/quote">{t('requestQuote')}</Link>,
     },
   ]
 
@@ -53,12 +55,12 @@ export default function PageTransplantationArbres(): any {
       {/* HERO */}
       <Hero
         title={
-          <span className="text-black">
+          <span className="text-foreground">
             Transplantation d’arbres matures et déplacement d'arbres sur chantier.
           </span>
         }
         subtitle={
-          <span className="text-black" style={{ fontFamily: `'Cambria', Georgia, serif` }}>
+          <span className="text-foreground" style={{ fontFamily: `'Cambria', Georgia, serif` }}>
             ASC
           </span>
         }
@@ -99,7 +101,7 @@ export default function PageTransplantationArbres(): any {
           <P variant={'description'}>Bergerac, 2023</P>
           <P>Besoin de déplacer un arbre adulte ?</P>
           <Button asChild>
-            <Link href="/quote">Demander un devis</Link>
+            <Link href="/quote">{t('requestQuote')}</Link>
           </Button>
         </Div>
         <Div size={'default'} className="relative aspect-video">
@@ -122,8 +124,8 @@ export default function PageTransplantationArbres(): any {
         {/* ✅ Conteneur scrollable sur mobile */}
         <div className="mt-8 w-full overflow-x-auto">
           <div className="flex justify-center">
-            <table className="border border-gray-200 text-left text-xs sm:text-sm rounded-lg overflow-hidden min-w-[700px]">
-              <thead className="bg-green-600 text-white">
+            <table className="border border-border text-left text-xs sm:text-sm rounded-lg overflow-hidden min-w-[700px]">
+              <thead className="bg-primary text-primary-foreground">
                 <tr>
                   <th className="p-3 border whitespace-nowrap">Critères</th>
                   <th className="p-3 border whitespace-nowrap">Abattage de l’arbre</th>
@@ -174,15 +176,15 @@ export default function PageTransplantationArbres(): any {
                     deplacement: 'Maintien du stockage + poursuite naturelle de la séquestration',
                   },
                 ].map((row, index) => (
-                  <tr key={index} className="hover:bg-gray-50 transition-colors duration-200">
+                  <tr key={index} className="hover:bg-muted transition-colors duration-200">
                     {/* ✅ Largeur auto + nowrap sur mobile */}
                     <td className="p-3 border font-medium whitespace-nowrap">{row.critere}</td>
                     <td
                       className={cn(
                         'p-3 border whitespace-normal',
                         row.abattage.includes('✗') || row.abattage === 'Élevé'
-                          ? 'text-red-500 font-semibold'
-                          : 'text-red-500'
+                          ? 'text-destructive font-semibold'
+                          : 'text-destructive'
                       )}
                     >
                       {row.abattage}
@@ -191,8 +193,8 @@ export default function PageTransplantationArbres(): any {
                       className={cn(
                         'p-3 border whitespace-normal',
                         row.deplacement.includes('✓') || row.deplacement === 'Immédiat'
-                          ? 'text-green-600 font-semibold'
-                          : 'text-green-600'
+                          ? 'text-success font-semibold'
+                          : 'text-success'
                       )}
                     >
                       {row.deplacement}

@@ -1,7 +1,8 @@
 'use client'
 
-import { Card, CardHeader, CardContent, Badge, H3, P } from '@ezstart/ui/components'
+import { Card, CardHeader, CardContent, Badge, Div, H3, P } from '@ezstart/ui/components'
 import type { HealthCheckResult } from '@ezstart/monitoring'
+import { useTranslations } from 'next-intl'
 
 interface ServiceCardProps {
   service: HealthCheckResult & {
@@ -12,6 +13,7 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service }: ServiceCardProps) {
+  const t = useTranslations('monitoring')
   const isHealthy = service.status === 'healthy'
   const statusColor = isHealthy
     ? 'bg-status-healthy/10 text-status-healthy border-status-healthy/20'
@@ -20,34 +22,32 @@ export function ServiceCard({ service }: ServiceCardProps) {
   return (
     <Card variant="floating" className="hover:border-primary/50 transition-colors">
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
+        <Div className="flex items-start justify-between">
+          <Div>
             <H3 size="h5" className="mb-1">
               {service.name}
             </H3>
             <Badge variant="outline" className="text-xs">
               {service.type.toUpperCase()}
             </Badge>
-          </div>
-          <Badge className={statusColor}>
-            {service.status}
-          </Badge>
-        </div>
+          </Div>
+          <Badge className={statusColor}>{service.status}</Badge>
+        </Div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <P className="text-muted-foreground">Response Time</P>
+        <Div className="space-y-2">
+          <Div className="flex items-center justify-between text-sm">
+            <P className="text-muted-foreground">{t('responseTime')}</P>
             <P className="font-medium">
               {service.responseTime ? `${service.responseTime}ms` : 'N/A'}
             </P>
-          </div>
+          </Div>
           {service.error && (
-            <div className="mt-3 p-2 bg-destructive/10 rounded-md">
+            <Div className="mt-3 p-2 bg-destructive/10 rounded-md">
               <P className="text-xs text-destructive">{service.error}</P>
-            </div>
+            </Div>
           )}
-        </div>
+        </Div>
       </CardContent>
     </Card>
   )

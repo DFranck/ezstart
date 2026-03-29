@@ -1,8 +1,24 @@
 'use client'
 
-import { Badge, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
+import {
+  Badge,
+  Div,
+  P,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, RollBreakdown, StatTier } from '@gacha-analyzer/types'
+import type {
+  RuneData,
+  RuneAnalysis,
+  StatType,
+  RuneQuality,
+  ProgressiveAction,
+  RollBreakdown,
+  StatTier,
+} from '@gacha-analyzer/types'
 import { SET_STAT_TIERS } from '@gacha-analyzer/types'
 import { GEM_ICONS } from '../config/game-assets'
 import { SetIconLarge } from './rune-card-utils'
@@ -57,14 +73,17 @@ function formatStatLabel(type: StatType): string {
 
 // ── Stat icons ──
 const STAT_ICONS: Record<string, string> = {
-  'hp': '\u2764\uFE0F', 'hp%': '\u2764\uFE0F',
-  'atk': '\u2694\uFE0F', 'atk%': '\u2694\uFE0F',
-  'def': '\uD83D\uDEE1\uFE0F', 'def%': '\uD83D\uDEE1\uFE0F',
-  'spd': '\uD83D\uDCA8',
-  'cr': '\uD83C\uDFAF',
-  'cd': '\uD83D\uDCA5',
-  'res': '\uD83D\uDE4F',
-  'acc': '\uD83D\uDD2D',
+  hp: '\u2764\uFE0F',
+  'hp%': '\u2764\uFE0F',
+  atk: '\u2694\uFE0F',
+  'atk%': '\u2694\uFE0F',
+  def: '\uD83D\uDEE1\uFE0F',
+  'def%': '\uD83D\uDEE1\uFE0F',
+  spd: '\uD83D\uDCA8',
+  cr: '\uD83C\uDFAF',
+  cd: '\uD83D\uDCA5',
+  res: '\uD83D\uDE4F',
+  acc: '\uD83D\uDD2D',
 }
 
 // ── Advice styles for gaming ──
@@ -154,7 +173,9 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
   const advice = analysis?.progressiveAdvice
 
   return (
-    <Div className={`relative rounded-xl border-2 overflow-hidden bg-gradient-to-b from-background via-background to-muted/30 ${QUALITY_BORDER[quality]}`}>
+    <Div
+      className={`relative rounded-xl border-2 overflow-hidden bg-gradient-to-b from-background via-background to-muted/30 ${QUALITY_BORDER[quality]}`}
+    >
       {/* ── Background pattern ── */}
       <Div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_50%_0%,_rgba(255,255,255,0.2),_transparent_70%)]" />
 
@@ -168,26 +189,40 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
           </P>
           <Div className="flex items-center justify-center gap-1">
             {Array.from({ length: rune.grade }).map((_, i) => (
-              <P key={i} className="text-ga-roll-legend text-sm animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
+              <P
+                key={i}
+                className="text-ga-roll-legend text-sm animate-pulse"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
                 {'\u2605'}
               </P>
             ))}
           </Div>
           <Div className="flex items-center justify-center gap-2">
-            <Badge variant="outline" className="text-xs border-muted-foreground/30">Slot {rune.slot}</Badge>
-            <Badge variant="secondary" className="text-xs">+{rune.level}</Badge>
-            <Badge className={`border text-xs ${
-              quality === 'legend' ? 'bg-ga-roll-legend/10 border-ga-roll-legend/30 text-ga-roll-legend' :
-              quality === 'hero' ? 'bg-ga-roll-hero/10 border-ga-roll-hero/30 text-ga-roll-hero' :
-              quality === 'rare' ? 'bg-ga-roll-rare/10 border-ga-roll-rare/30 text-ga-roll-rare' :
-              quality === 'magic' ? 'bg-ga-roll-magic/10 border-ga-roll-magic/30 text-ga-roll-magic' :
-              'bg-muted text-muted-foreground'
-            }`}>
+            <Badge variant="outline" className="text-xs border-muted-foreground/30">
+              Slot {rune.slot}
+            </Badge>
+            <Badge variant="secondary" className="text-xs">
+              +{rune.level}
+            </Badge>
+            <Badge
+              className={`border text-xs ${
+                quality === 'legend'
+                  ? 'bg-ga-roll-legend/10 border-ga-roll-legend/30 text-ga-roll-legend'
+                  : quality === 'hero'
+                    ? 'bg-ga-roll-hero/10 border-ga-roll-hero/30 text-ga-roll-hero'
+                    : quality === 'rare'
+                      ? 'bg-ga-roll-rare/10 border-ga-roll-rare/30 text-ga-roll-rare'
+                      : quality === 'magic'
+                        ? 'bg-ga-roll-magic/10 border-ga-roll-magic/30 text-ga-roll-magic'
+                        : 'bg-muted text-muted-foreground'
+              }`}
+            >
               {tRune(`quality.${quality}`)}
             </Badge>
             {rune.isAncient && (
-              <Badge className="border text-xs bg-amber-500/20 text-amber-400 border-amber-500/40">
-                Ancient
+              <Badge className="border text-xs bg-warning/20 text-warning border-warning/40">
+                {tRune('ancient')}
               </Badge>
             )}
           </Div>
@@ -195,15 +230,25 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
 
         {/* ── Advice (prominent, centered, with glow) ── */}
         {advice && (
-          <Div className={`rounded-lg p-3 text-center ${ADVICE_GAMING[advice.action].bg} ${ADVICE_GAMING[advice.action].glow}`}>
-            <P className={`text-2xl font-black tracking-widest ${ADVICE_GAMING[advice.action].text}`}>
+          <Div
+            className={`rounded-lg p-3 text-center ${ADVICE_GAMING[advice.action].bg} ${ADVICE_GAMING[advice.action].glow}`}
+          >
+            <P
+              className={`text-2xl font-black tracking-widest ${ADVICE_GAMING[advice.action].text}`}
+            >
               {ADVICE_ICONS[advice.action]} {advice.action.toUpperCase()}
               {advice.action === 'sell'
-                ? (advice.sellProbability > 0 ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}` : '')
-                : (advice.sellProbability > 0 ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}` : '')}
+                ? advice.sellProbability > 0
+                  ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}`
+                  : ''
+                : advice.sellProbability > 0
+                  ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}`
+                  : ''}
             </P>
             <P className="text-xs text-muted-foreground mt-1">
-              {advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}
+              {advice.reasonKey
+                ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})
+                : advice.reason}
             </P>
             {advice.nextCheckAt > 0 && (
               <P className="text-xs text-muted-foreground mt-0.5">
@@ -217,22 +262,29 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
         <Div className="text-center py-2 bg-muted/20 rounded-lg">
           <P className="text-xs text-muted-foreground uppercase tracking-wider">{t('mainStat')}</P>
           <P className="text-xl font-black text-foreground">
-            {STAT_ICONS[rune.mainStat.type] ?? ''} {formatStatLabel(rune.mainStat.type)} {formatStatValue(rune.mainStat.type, rune.mainStat.value)}
+            {STAT_ICONS[rune.mainStat.type] ?? ''} {formatStatLabel(rune.mainStat.type)}{' '}
+            {formatStatValue(rune.mainStat.type, rune.mainStat.value)}
           </P>
-          {rune.innateStat && (() => {
-            const innateTier = getStatTier(rune.set, rune.innateStat.type)
-            const isInnateMalus = innateTier === 'S' || innateTier === 'A' || innateTier === 'D'
-            return (
-              <Div className="flex items-center justify-center gap-1.5 mt-1">
-                <P className="text-xs text-muted-foreground">
-                  {STAT_ICONS[rune.innateStat.type] ?? ''} {formatStatLabel(rune.innateStat.type)} {formatStatValue(rune.innateStat.type, rune.innateStat.value)}
-                </P>
-                <Badge variant="outline" className={`text-[8px] px-1 py-0 font-bold ${INNATE_TIER_MALUS[innateTier]}`}>
-                  {isInnateMalus && '\u26A0\uFE0F'}{innateTier}
-                </Badge>
-              </Div>
-            )
-          })()}
+          {rune.innateStat &&
+            (() => {
+              const innateTier = getStatTier(rune.set, rune.innateStat.type)
+              const isInnateMalus = innateTier === 'S' || innateTier === 'A' || innateTier === 'D'
+              return (
+                <Div className="flex items-center justify-center gap-1.5 mt-1">
+                  <P className="text-xs text-muted-foreground">
+                    {STAT_ICONS[rune.innateStat.type] ?? ''} {formatStatLabel(rune.innateStat.type)}{' '}
+                    {formatStatValue(rune.innateStat.type, rune.innateStat.value)}
+                  </P>
+                  <Badge
+                    variant="outline"
+                    className={`text-[8px] px-1 py-0 font-bold ${INNATE_TIER_MALUS[innateTier]}`}
+                  >
+                    {isInnateMalus && '\u26A0\uFE0F'}
+                    {innateTier}
+                  </Badge>
+                </Div>
+              )
+            })()}
         </Div>
 
         {/* ── Decorative separator ── */}
@@ -244,7 +296,9 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
 
         {/* ── Substats with HP-style bars ── */}
         <Div className="space-y-2">
-          <P className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">{t('subStats')}</P>
+          <P className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">
+            {t('subStats')}
+          </P>
           {rune.subStats.map((stat, i) => {
             const subAnalysis = analysis?.substats.find(s => s.type === stat.type)
             const efficiency = subAnalysis?.efficiency ?? 0
@@ -254,21 +308,31 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                 <Div className="flex items-center justify-between text-sm">
                   <Div className="flex items-center gap-1.5">
                     <P className="text-xs">{STAT_ICONS[stat.type] ?? ''}</P>
-                    <P className="font-medium text-muted-foreground text-xs">{formatStatLabel(stat.type)}</P>
+                    <P className="font-medium text-muted-foreground text-xs">
+                      {formatStatLabel(stat.type)}
+                    </P>
                     {analysis?.subStatTiers?.[stat.type] && (
-                      <Badge variant="outline" className={`text-[8px] px-1 py-0 font-bold ${STAT_TIER_COLORS[analysis.subStatTiers[stat.type] as StatTier]}`}>
+                      <Badge
+                        variant="outline"
+                        className={`text-[8px] px-1 py-0 font-bold ${STAT_TIER_COLORS[analysis.subStatTiers[stat.type] as StatTier]}`}
+                      >
                         {analysis.subStatTiers[stat.type]}
                       </Badge>
                     )}
                     {subAnalysis?.isGemTarget && (
-                      <Badge variant="outline" className="text-[8px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
+                      <Badge
+                        variant="outline"
+                        className="text-[8px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground"
+                      >
                         <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
                         gem target
                       </Badge>
                     )}
                   </Div>
                   <Div className="flex items-center gap-2">
-                    <P className={`font-bold text-sm ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>
+                    <P
+                      className={`font-bold text-sm ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}
+                    >
                       {formatStatValue(stat.type, stat.value)}
                     </P>
                     {subAnalysis && (
@@ -282,7 +346,11 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                 {breakdown && breakdown.length > 0 && (
                   <Div className="flex items-center gap-1 pl-5">
                     {breakdown.map((roll, j) => (
-                      <Badge key={j} variant="outline" className={`text-[9px] px-1 py-0 border ${ROLL_TIER_BG[roll.tier]}`}>
+                      <Badge
+                        key={j}
+                        variant="outline"
+                        className={`text-[9px] px-1 py-0 border ${ROLL_TIER_BG[roll.tier]}`}
+                      >
                         {formatRollValue(stat.type, roll.value)}
                       </Badge>
                     ))}
@@ -292,11 +360,15 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                 <Div className="h-2 rounded-full bg-muted/50 overflow-hidden border border-border/50">
                   <Div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      efficiency >= 90 ? 'bg-gradient-to-r from-ga-roll-legend/80 to-ga-roll-legend' :
-                      efficiency >= 75 ? 'bg-gradient-to-r from-ga-roll-hero/80 to-ga-roll-hero' :
-                      efficiency >= 50 ? 'bg-gradient-to-r from-ga-roll-rare/80 to-ga-roll-rare' :
-                      efficiency >= 25 ? 'bg-gradient-to-r from-ga-roll-magic/80 to-ga-roll-magic' :
-                      'bg-gradient-to-r from-ga-roll-normal/80 to-ga-roll-normal'
+                      efficiency >= 90
+                        ? 'bg-gradient-to-r from-ga-roll-legend/80 to-ga-roll-legend'
+                        : efficiency >= 75
+                          ? 'bg-gradient-to-r from-ga-roll-hero/80 to-ga-roll-hero'
+                          : efficiency >= 50
+                            ? 'bg-gradient-to-r from-ga-roll-rare/80 to-ga-roll-rare'
+                            : efficiency >= 25
+                              ? 'bg-gradient-to-r from-ga-roll-magic/80 to-ga-roll-magic'
+                              : 'bg-gradient-to-r from-ga-roll-normal/80 to-ga-roll-normal'
                     }`}
                     style={{ width: `${Math.min(efficiency, 100)}%` }}
                   />
@@ -316,10 +388,16 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
             </Div>
 
             <Div className="text-center space-y-1">
-              <P className="text-xs text-muted-foreground uppercase tracking-wider">{tRune('rollQualityTitle')}</P>
+              <P className="text-xs text-muted-foreground uppercase tracking-wider">
+                {tRune('rollQualityTitle')}
+              </P>
               <Div className="space-y-1">
-                <P className="text-[10px] text-muted-foreground uppercase">{tRune('currentRolls')}</P>
-                <P className={`text-3xl font-black ${ROLL_QUALITY_COLORS[rollQualityTier]} drop-shadow-[0_0_10px_currentColor]`}>
+                <P className="text-[10px] text-muted-foreground uppercase">
+                  {tRune('currentRolls')}
+                </P>
+                <P
+                  className={`text-3xl font-black ${ROLL_QUALITY_COLORS[rollQualityTier]} drop-shadow-[0_0_10px_currentColor]`}
+                >
                   {analysis.rollQualityPercent}%
                 </P>
                 <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityTier]}`}>
@@ -328,9 +406,12 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
               </Div>
               {rollQualityPostGem !== rollQualityTier && (
                 <Div className="space-y-0.5 mt-1">
-                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('afterGemRolls')}</P>
+                  <P className="text-[10px] text-muted-foreground uppercase">
+                    {tRune('afterGemRolls')}
+                  </P>
                   <P className={`text-lg font-bold ${ROLL_QUALITY_COLORS[rollQualityPostGem]}`}>
-                    {tRune(`rollQuality.${rollQualityPostGem}`)} ({analysis.rollQualityPostGemPercent}%)
+                    {tRune(`rollQuality.${rollQualityPostGem}`)} (
+                    {analysis.rollQualityPostGemPercent}%)
                   </P>
                 </Div>
               )}
@@ -340,23 +421,33 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
             <Div className="grid grid-cols-2 gap-2">
               {analysis.setWeightedEfficiency !== undefined && (
                 <Div className="bg-muted/20 rounded-lg p-2 text-center border border-ga-roll-legend/20">
-                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('setEfficiency')}</P>
-                  <P className="text-sm font-bold text-ga-roll-legend">{analysis.setWeightedEfficiency}%</P>
+                  <P className="text-[10px] text-muted-foreground uppercase">
+                    {tRune('setEfficiency')}
+                  </P>
+                  <P className="text-sm font-bold text-ga-roll-legend">
+                    {analysis.setWeightedEfficiency}%
+                  </P>
                 </Div>
               )}
               {analysis.potentialEfficiency !== undefined && (
                 <Div className="bg-muted/20 rounded-lg p-2 text-center">
-                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('potential12')}</P>
+                  <P className="text-[10px] text-muted-foreground uppercase">
+                    {tRune('potential12')}
+                  </P>
                   <P className="text-sm font-bold">{analysis.potentialEfficiency}%</P>
                 </Div>
               )}
               {analysis.grindedEfficiency !== undefined && (
                 <Div className="bg-muted/20 rounded-lg p-2 text-center">
-                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('afterGrind')}</P>
+                  <P className="text-[10px] text-muted-foreground uppercase">
+                    {tRune('afterGrind')}
+                  </P>
                   <P className="text-sm font-bold">
                     {analysis.grindedEfficiency}%
                     {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
-                      <span className="text-success-foreground text-xs ml-1">(+{analysis.grindGain}%)</span>
+                      <span className="text-success-foreground text-xs ml-1">
+                        (+{analysis.grindGain}%)
+                      </span>
                     )}
                   </P>
                 </Div>
@@ -368,7 +459,9 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
         {/* ── Set bonus ── */}
         {analysis && (
           <Div className="text-center text-xs text-muted-foreground">
-            <P>{analysis.setBonus} ({analysis.setPieces} pcs)</P>
+            <P>
+              {analysis.setBonus} ({analysis.setPieces} pcs)
+            </P>
           </Div>
         )}
 
@@ -379,14 +472,22 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Div className="flex items-center gap-1 cursor-default">
-                    <Div className={`h-1.5 w-1.5 rounded-full ${
-                      confidence >= 80 ? 'bg-success' : confidence >= 50 ? 'bg-warning' : 'bg-destructive'
-                    }`} />
+                    <Div
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        confidence >= 80
+                          ? 'bg-success'
+                          : confidence >= 50
+                            ? 'bg-warning'
+                            : 'bg-destructive'
+                      }`}
+                    />
                     <P className="text-[10px] text-muted-foreground">{Math.round(confidence)}%</P>
                   </Div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <P className="text-xs">{tRune('ocrConfidence')}: {Math.round(confidence)}%</P>
+                  <P className="text-xs">
+                    {tRune('ocrConfidence')}: {Math.round(confidence)}%
+                  </P>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

@@ -1,38 +1,30 @@
 'use client'
 
 import { useAuthStore } from '@ezstart/auth-sdk'
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  Div,
-  H1,
-  H3,
-  Icon,
-  P,
-} from '@ezstart/ui/components'
+import { Badge, Card, CardContent, CardHeader, Div, H1, H3, Icon, P } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
-const ADMIN_CARDS = [
-  {
-    href: '/admin/prompts',
-    title: 'System Prompts',
-    description: 'Manage AI system prompts for chat and extraction',
-    icon: 'lucide:MessageSquare' as const,
-    color: 'text-blue-500',
-  },
-  {
-    href: '/admin/waitlist',
-    title: 'Beta Waitlist',
-    description: 'Approve or reject beta access requests',
-    icon: 'lucide:UserPlus' as const,
-    color: 'text-green-500',
-  },
-]
-
 export default function AdminDashboardPage() {
+  const t = useTranslations('admin')
   const { user } = useAuthStore()
+
+  const ADMIN_CARDS = [
+    {
+      href: '/admin/prompts',
+      title: t('cards.systemPrompts.title'),
+      description: t('cards.systemPrompts.description'),
+      icon: 'lucide:MessageSquare' as const,
+      color: 'text-primary',
+    },
+    {
+      href: '/admin/waitlist',
+      title: t('cards.betaWaitlist.title'),
+      description: t('cards.betaWaitlist.description'),
+      icon: 'lucide:UserPlus' as const,
+      color: 'text-primary',
+    },
+  ]
 
   // Gather all roles from globalRoles and appRoles
   const allRoles = [...(user?.globalRoles || []), ...(user?.appRoles?.['green-pulse'] || [])]
@@ -40,9 +32,11 @@ export default function AdminDashboardPage() {
   return (
     <Div>
       <Div className="mb-8">
-        <H1>Admin Dashboard</H1>
+        <H1>{t('dashboard.title')}</H1>
         <P className="text-muted-foreground mt-2">
-          Welcome back, {user?.firstName || user?.username || user?.email}
+          {t('dashboard.welcomeBack', {
+            name: user?.firstName || user?.username || user?.email || '',
+          })}
         </P>
         <Div className="mt-4 flex gap-2 flex-wrap">
           {allRoles.map((role, idx) => (

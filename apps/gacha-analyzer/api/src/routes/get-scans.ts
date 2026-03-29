@@ -3,7 +3,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+  findMany,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
@@ -32,7 +38,7 @@ router.get('/', async (req: any, res: any) => {
     if (gameType) filter.gameType = gameType
     if (status) filter.status = status
 
-    const scans = await (Scan.find as any)(filter)
+    const scans = await findMany(Scan, filter)
       .select('-thumbnail')
       .sort({ createdAt: -1 })
       .skip(offset)

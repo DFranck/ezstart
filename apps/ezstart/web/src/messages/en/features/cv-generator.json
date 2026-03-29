@@ -48,7 +48,19 @@
         "colorLabel": "Accent Color"
       },
       "preview": {
-        "title": "Preview & Download"
+        "title": "Preview & Download",
+        "enterInfo": "Enter your information to preview CV",
+        "professionalSummary": "Professional Summary",
+        "experience": "Experience",
+        "present": "Present",
+        "education": "Education",
+        "skills": "Skills",
+        "certifications": "Certifications",
+        "languages": "Languages",
+        "export": "Export",
+        "downloadPdf": "Download PDF",
+        "atsNote": "Standard A4 format optimized for ATS (Applicant Tracking Systems)",
+        "pdfError": "Failed to generate PDF. Please try again."
       },
       "resetButton": "Reset All",
       "errors": {

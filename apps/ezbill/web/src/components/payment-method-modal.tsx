@@ -18,6 +18,7 @@ import {
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { LoadingButton } from './loading-button'
 
 // Bank region types
@@ -64,6 +65,9 @@ export function PaymentMethodModal({
 }: PaymentMethodModalProps) {
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const tToast = useTranslations('toast')
+  const tPM = useTranslations('paymentMethod')
+  const tCommon = useTranslations('common')
 
   const [formData, setFormData] = useState<PaymentMethodFormData>({
     userId: '',
@@ -195,15 +199,15 @@ export function PaymentMethodModal({
         onClose()
       },
       toastLoading: {
-        message: paymentMethod ? 'Updating payment method...' : 'Creating payment method...',
+        message: paymentMethod ? tToast('paymentMethodUpdating') : tToast('paymentMethodCreating'),
       },
       toastSuccess: {
-        message: paymentMethod ? 'Payment method updated' : 'Payment method created',
+        message: paymentMethod ? tToast('paymentMethodUpdated') : tToast('paymentMethodCreated'),
       },
       toastError: {
         message: paymentMethod
-          ? 'Failed to update payment method'
-          : 'Failed to create payment method',
+          ? tToast('paymentMethodUpdateFailed')
+          : tToast('paymentMethodCreateFailed'),
       },
       onLoadingChange: setIsLoading,
     })
@@ -399,8 +403,8 @@ export function PaymentMethodModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={paymentMethod ? 'Edit Payment Method' : 'Add Payment Method'}
-      description="Configure how you want to receive payments from your clients"
+      title={paymentMethod ? tPM('edit') : tPM('create')}
+      description={tPM('description')}
       footer={
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
@@ -410,7 +414,7 @@ export function PaymentMethodModal({
             className="hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-4 h-4 mr-2" />
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <LoadingButton
             loading={isLoading}
@@ -420,7 +424,7 @@ export function PaymentMethodModal({
             className="bg-gradient-payment text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <Icon name={paymentMethod ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
-            {paymentMethod ? 'Update' : 'Add'} Payment Method
+            {paymentMethod ? tPM('edit') : tPM('create')}
           </LoadingButton>
         </div>
       }
@@ -455,7 +459,7 @@ export function PaymentMethodModal({
           </Select>
         </div>
 
-        <div className="lg:col-span-2 border-t border-green-200/50 pt-6 mt-2">
+        <div className="lg:col-span-2 border-t border-border pt-6 mt-2">
           <div className="flex items-center mb-4">
             <Icon
               name={selectedType?.icon || 'lucide:Settings'}

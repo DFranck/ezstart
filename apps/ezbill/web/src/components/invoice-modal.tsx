@@ -35,6 +35,7 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { cn } from '@ezstart/ui/lib'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { InvoiceAIAssistant, InvoiceAction } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
 
@@ -70,6 +71,11 @@ export function InvoiceModal({
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(invoice?.taxRate ? invoice.taxRate > 0 : false)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
+  const tToast = useTranslations('toast')
+  const tCommon = useTranslations('common')
+  const tInvoice = useTranslations('invoice')
+  const tPM = useTranslations('paymentMethod')
+  const tPlaceholders = useTranslations('placeholders')
   const [aiConversationHistory, setAiConversationHistory] = useState<
     Array<{ role: 'user' | 'assistant'; content: string }>
   >(invoice?.aiConversationHistory || [])
@@ -299,9 +305,11 @@ export function InvoiceModal({
         onSave()
         onClose()
       },
-      toastLoading: { message: invoice ? 'Updating invoice...' : 'Creating invoice...' },
-      toastSuccess: { message: invoice ? 'Invoice updated' : 'Invoice created' },
-      toastError: { message: invoice ? 'Failed to update invoice' : 'Failed to create invoice' },
+      toastLoading: { message: invoice ? tToast('invoiceUpdating') : tToast('invoiceCreating') },
+      toastSuccess: { message: invoice ? tToast('invoiceUpdated') : tToast('invoiceCreated') },
+      toastError: {
+        message: invoice ? tToast('invoiceUpdateFailed') : tToast('invoiceCreateFailed'),
+      },
       onLoadingChange: setIsLoading,
     })
   }
@@ -311,8 +319,8 @@ export function InvoiceModal({
       isOpen={isOpen}
       onClose={onClose}
       className={cn('', { 'max-w-5xl': showAIAssistant })}
-      title={invoice ? 'Edit Invoice' : 'Create Invoice'}
-      description={invoice ? 'Update invoice information' : 'Create a new invoice for your client'}
+      title={invoice ? tInvoice('edit') : tInvoice('create')}
+      description={invoice ? tInvoice('edit') : tInvoice('create')}
       footer={
         <div className="flex gap-3">
           {/* AI Assistant Toggle Button (when collapsed) */}
@@ -340,7 +348,7 @@ export function InvoiceModal({
             className="bg-card border  hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <LoadingButton
             loading={isLoading}
@@ -359,7 +367,7 @@ export function InvoiceModal({
               name={invoice ? 'lucide:Save' : 'lucide:Plus'}
               className="w-5 h-5 sm:w-4 sm:h-4 mr-2"
             />
-            {invoice ? 'Update Invoice' : 'Create Invoice'}
+            {invoice ? tInvoice('update') : tInvoice('create')}
           </LoadingButton>
         </div>
       }
@@ -382,8 +390,8 @@ export function InvoiceModal({
                     onValueChange={value => setFormData({ ...formData, clientId: value })}
                     required
                   >
-                    <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
-                      <SelectValue placeholder="Select a client" />
+                    <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
+                      <SelectValue placeholder={tCommon('selectClient')} />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border shadow-xl rounded-xl">
                       {clients.map(client => (
@@ -403,7 +411,7 @@ export function InvoiceModal({
               <div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
-                  Bill on behalf of
+                  {tCommon('billOnBehalf')}
                 </Label>
                 <Select
                   value={formData.companyId || 'personal'}
@@ -411,14 +419,14 @@ export function InvoiceModal({
                     setFormData({ ...formData, companyId: value === 'personal' ? '' : value })
                   }
                 >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
-                    <SelectValue placeholder="Select billing entity" />
+                  <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
+                    <SelectValue placeholder={tCommon('selectBillingEntity')} />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     <SelectItem value="personal" className="hover:bg-primary/5">
                       <div className="flex items-center">
                         <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
-                        Personal (your name)
+                        {tCommon('personalName')}
                       </div>
                     </SelectItem>
                     {companies?.map(company => (
@@ -443,7 +451,7 @@ export function InvoiceModal({
               <div>
                 <Label className="text-sm font-medium mb-3 block flex items-center">
                   <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
-                  Payment Methods
+                  {tCommon('paymentMethods' as any) || 'Payment Methods'}
                 </Label>
                 {paymentMethods && paymentMethods.length > 0 ? (
                   <div className="space-y-2 border rounded-lg p-3">
@@ -488,21 +496,21 @@ export function InvoiceModal({
                     })}
                   </div>
                 ) : (
-                  <div className="bg-orange-50/50 backdrop-blur-sm rounded-xl p-4 border border-orange-200/30">
+                  <div className="bg-warning/5 backdrop-blur-sm rounded-xl p-4 border border-warning/20">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <Icon name="lucide:AlertCircle" className="w-5 h-5 text-warning mr-2" />
-                        <span className="text-sm text-warning">No payment methods configured</span>
+                        <span className="text-sm text-warning">{tPM('noMethods')}</span>
                       </div>
                       {onManagePaymentMethods && (
                         <Button
                           type="button"
                           size="sm"
                           onClick={onManagePaymentMethods}
-                          className="bg-orange-500 hover:bg-orange-600 text-white"
+                          className="bg-warning hover:bg-warning/90 text-warning-foreground"
                         >
                           <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
-                          Add Method
+                          {tPM('addMethod')}
                         </Button>
                       )}
                     </div>
@@ -519,7 +527,7 @@ export function InvoiceModal({
                   value={formData.currency}
                   onValueChange={(value: Currency) => setFormData({ ...formData, currency: value })}
                 >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
+                  <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
@@ -820,7 +828,7 @@ export function InvoiceModal({
                 value={formData.notes}
                 onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+                className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Additional notes for this invoice..."
               />
             </div>
@@ -834,7 +842,7 @@ export function InvoiceModal({
                 value={formData.terms}
                 onChange={e => setFormData({ ...formData, terms: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+                className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Payment due upon receipt. Late payment penalties may apply..."
               />
             </div>

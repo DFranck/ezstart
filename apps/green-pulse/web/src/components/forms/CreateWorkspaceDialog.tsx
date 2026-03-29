@@ -4,8 +4,11 @@ import { useState } from 'react'
 import { logger } from '@ezstart/logger'
 import { Button, Input, Label, TextArea, P, Modal } from '@ezstart/ui/components'
 import { useCreateWorkspace } from '@/hooks/useWorkspaces'
+import { useTranslations } from 'next-intl'
 
 export function CreateWorkspaceDialog() {
+  const t = useTranslations('forms.createWorkspace')
+  const tActions = useTranslations('actions')
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
@@ -48,32 +51,32 @@ export function CreateWorkspaceDialog() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>+ New Workspace</Button>
+      <Button onClick={() => setOpen(true)}>{t('newWorkspace')}</Button>
 
       <Modal
         isOpen={open}
         onClose={() => setOpen(false)}
-        title="Create Workspace"
-        description="Create a new workspace to organize your forms and projects"
+        title={t('title')}
+        description={t('description')}
         footer={
           <>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tActions('cancel')}
             </Button>
             <Button type="submit" form="create-workspace-form" disabled={createWorkspace.isPending}>
-              {createWorkspace.isPending ? 'Creating...' : 'Create Workspace'}
+              {createWorkspace.isPending ? tActions('creating') : t('createWorkspace')}
             </Button>
           </>
         }
       >
         <form id="create-workspace-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Workspace Name *</Label>
+            <Label htmlFor="name">{t('name')}</Label>
             <Input
               id="name"
               value={name}
               onChange={e => handleNameChange(e.target.value)}
-              placeholder="e.g., Acme Inspections"
+              placeholder={t('namePlaceholder')}
               required
               minLength={1}
               maxLength={100}
@@ -81,12 +84,12 @@ export function CreateWorkspaceDialog() {
           </div>
 
           <div>
-            <Label htmlFor="slug">URL Slug *</Label>
+            <Label htmlFor="slug">{t('slug')}</Label>
             <Input
               id="slug"
               value={slug}
               onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-              placeholder="e.g., acme-inspections"
+              placeholder={t('slugPlaceholder')}
               required
               minLength={3}
               maxLength={50}
@@ -99,19 +102,19 @@ export function CreateWorkspaceDialog() {
               <P className="text-xs text-destructive mt-1">
                 {(createWorkspace.error as any)?.message?.includes('409') ||
                 (createWorkspace.error as any)?.message?.includes('already exists')
-                  ? `Slug "${slug}" is already taken. Please try another.`
+                  ? t('slugTaken', { slug })
                   : (createWorkspace.error as any)?.message || 'Failed to create workspace'}
               </P>
             )}
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
             <TextArea
               id="description"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="Describe your workspace..."
+              placeholder={t('descriptionPlaceholder')}
               maxLength={500}
               rows={3}
             />

@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 // Dynamic imports for modals (lazy load on demand) - Performance optimization
 const ClientModal = dynamic(
@@ -51,6 +52,10 @@ const DashboardPage = () => {
   const { user, isAuthenticated, login } = useAuth()
   const { clients, companies, paymentMethods, invoices, quotes, receipts, refetchAll, loading } =
     useBillingContext()
+  const tToast = useTranslations('toast')
+  const tDashboard = useTranslations('dashboard')
+  const tWelcome = useTranslations('welcome')
+  const tDelete = useTranslations('delete')
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined)
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
@@ -76,7 +81,7 @@ const DashboardPage = () => {
   if (!isAuthenticated || !user) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center">
-        <Spinner variant="fancy" size="xl" text="Checking authentication..." textSize="md" />
+        <Spinner variant="fancy" size="xl" text={tDashboard('checkingAuth')} textSize="md" />
       </div>
     )
   }
@@ -173,11 +178,11 @@ const DashboardPage = () => {
           userId: user?._id,
         })
       }
-      toast.success(`${itemName} deleted successfully`)
+      toast.success(tToast('deleteSuccess', { name: itemName }))
       refetchAll()
     } catch (error) {
       logger.error(`Error deleting ${deleteDialog.type}:`, error)
-      toast.error(`Failed to delete ${itemName}. Please try again.`)
+      toast.error(tToast('deleteFailed', { name: itemName }))
     }
   }
 
@@ -219,34 +224,31 @@ const DashboardPage = () => {
     <>
       <WelcomeModal
         appName="EZBill"
-        title="Welcome to EZBill! 💼"
-        description="Professional invoicing and billing made simple"
+        title={tWelcome('title')}
+        description={tWelcome('description')}
         features={[
           {
             icon: 'lucide:FileText',
-            title: 'Create Invoices & Quotes',
-            description:
-              'Generate professional invoices and quotes in seconds with customizable templates',
+            title: tWelcome('createInvoices'),
+            description: tWelcome('createInvoicesDesc'),
           },
           {
             icon: 'lucide:Users',
-            title: 'Manage Clients',
-            description: 'Keep track of all your clients and companies in one organized dashboard',
+            title: tWelcome('manageClients'),
+            description: tWelcome('manageClientsDesc'),
           },
           {
             icon: 'lucide:CreditCard',
-            title: 'Track Payments',
-            description:
-              'Monitor payment status, send reminders, and accept multiple payment methods',
+            title: tWelcome('trackPayments'),
+            description: tWelcome('trackPaymentsDesc'),
           },
           {
             icon: 'lucide:BarChart3',
-            title: 'Revenue Analytics',
-            description:
-              'Visualize your revenue trends and identify your top clients with insightful charts',
+            title: tWelcome('revenueAnalytics'),
+            description: tWelcome('revenueAnalyticsDesc'),
           },
         ]}
-        ctaText="Start Creating"
+        ctaText={tWelcome('startCreating')}
       />
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
@@ -255,27 +257,27 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <Div layout={'col'}>
               <StatsCard
-                title="Total Revenue"
+                title={tDashboard('totalRevenue')}
                 value={`$${totalRevenue.toFixed(2)}`}
                 icon="lucide:DollarSign"
                 iconGradient="bg-gradient-payment"
               />
               <StatsCard
-                title="Pending"
+                title={tDashboard('pending')}
                 value={`$${pendingAmount.toFixed(2)}`}
                 icon="lucide:Clock"
                 iconGradient="bg-gradient-to-r from-orange-400 to-red-400"
                 className="hidden md:flex"
               />
               <StatsCard
-                title="Total Invoices"
+                title={tDashboard('totalInvoices')}
                 value={allInvoices.length.toString()}
                 icon="lucide:FileEdit"
                 iconGradient="bg-gradient-invoice"
                 className="hidden md:flex"
               />
               <StatsCard
-                title="Total Quotes"
+                title={tDashboard('totalQuotes')}
                 value={allQuotes.length.toString()}
                 icon="lucide:FileText"
                 iconGradient="bg-gradient-receipt"
@@ -291,8 +293,8 @@ const DashboardPage = () => {
           <div className="flex flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8">
             {!hasCompanies && (
               <FirstActionCard
-                title="Create Company"
-                description="Set up your business profile and billing information"
+                title={tDashboard('createCompany')}
+                description={tDashboard('createCompanyDesc')}
                 setter={setIsCompanyModalOpen}
                 className="bg-gradient-company text-white"
                 descriptionClassName="text-primary-foreground/80"
@@ -301,8 +303,8 @@ const DashboardPage = () => {
 
             {!hasClients && (
               <FirstActionCard
-                title="Create Client"
-                description="Add clients to start creating invoices and quotes"
+                title={tDashboard('createClient')}
+                description={tDashboard('createClientDesc')}
                 setter={setIsClientModalOpen}
                 className="bg-gradient-client text-white"
                 descriptionClassName="text-primary-foreground/80"
@@ -310,8 +312,8 @@ const DashboardPage = () => {
             )}
             {paymentMethods.length === 0 && (
               <FirstActionCard
-                title="Add Payment Method"
-                description="Configure how you receive payments from clients"
+                title={tDashboard('addPaymentMethod')}
+                description={tDashboard('addPaymentMethodDesc')}
                 setter={setIsPaymentMethodModalOpen}
                 className="bg-gradient-payment text-white"
                 descriptionClassName="text-primary-foreground/80"
@@ -330,21 +332,21 @@ const DashboardPage = () => {
         {/* Clients Section - Always show if user has companies/payment methods set up */}
         {hasCompanies && paymentMethods.length > 0 && (
           <DashboardSection
-            title="Clients"
-            description="Click on a client to manage their billing"
+            title={tDashboard('clients')}
+            description={tDashboard('clickToManage')}
             icon="lucide:Users"
             iconGradient="bg-gradient-client"
             onAdd={() => setIsClientModalOpen(true)}
-            addButtonText="Add Client"
+            addButtonText={tDashboard('addClient')}
             addButtonIcon="lucide:UserPlus"
             addButtonGradient="bg-gradient-client hover:bg-gradient-client-hover"
             isEmpty={!hasClients}
             emptyState={{
               icon: 'lucide:Users',
               iconBg: 'bg-gradient-client-light text-ezbill-client',
-              title: 'No clients yet',
-              description: 'Add your first client to start creating invoices and quotes',
-              buttonText: 'Add First Client',
+              title: tDashboard('noClientsYet'),
+              description: tDashboard('noClientsDesc'),
+              buttonText: tDashboard('addFirstClient'),
             }}
           >
             <CollapsibleGroup
@@ -392,16 +394,23 @@ const DashboardPage = () => {
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false, type: 'client', item: null })}
         onConfirm={confirmDelete}
-        title={`Delete ${deleteDialog.type === 'company' ? 'Company' : deleteDialog.type === 'client' ? 'Client' : 'Payment Method'}`}
-        description={`Are you sure you want to delete "${
-          deleteDialog.item
+        title={tDelete('title', {
+          type:
+            deleteDialog.type === 'company'
+              ? 'Company'
+              : deleteDialog.type === 'client'
+                ? 'Client'
+                : 'Payment Method',
+        })}
+        description={tDelete('description', {
+          name: deleteDialog.item
             ? deleteDialog.type === 'company'
               ? (deleteDialog.item as Company).companyName
               : deleteDialog.type === 'client'
                 ? (deleteDialog.item as Client).clientName
                 : (deleteDialog.item as PaymentMethod).name
-            : ''
-        }"? This can be undone from Settings.`}
+            : '',
+        })}
       />
     </>
   )

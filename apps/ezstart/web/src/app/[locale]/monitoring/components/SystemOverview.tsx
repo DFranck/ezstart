@@ -122,7 +122,8 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
       value: `${avgResponseTime}ms`,
       subtitle: t('overview.stats.avgResponseTime.subtitle'),
       icon: 'lucide:Zap',
-      variant: avgResponseTime < 200 ? 'success' : avgResponseTime < 500 ? 'warning' : 'destructive',
+      variant:
+        avgResponseTime < 200 ? 'success' : avgResponseTime < 500 ? 'warning' : 'destructive',
     },
   ]
 
@@ -147,7 +148,8 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
     {
       category: t('overview.systemStatus.errorMonitoring.title'),
       score: recentErrors.length === 0 ? 100 : Math.max(0, 100 - recentErrors.length * 5),
-      status: recentErrors.length === 0 ? 'excellent' : recentErrors.length < 10 ? 'good' : 'critical',
+      status:
+        recentErrors.length === 0 ? 'excellent' : recentErrors.length < 10 ? 'good' : 'critical',
       issues: recentErrors.length,
       icon: 'lucide:Bug',
       description: `${recentErrors.length} ${t('overview.systemStatus.errorMonitoring.description')}`,
@@ -181,21 +183,29 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
     .slice(0, 5)
 
   const getStatusColor = (
-    status: 'excellent' | 'good' | 'warning' | 'critical' | 'success' | 'error' | 'default' | 'destructive'
+    status:
+      | 'excellent'
+      | 'good'
+      | 'warning'
+      | 'critical'
+      | 'success'
+      | 'error'
+      | 'default'
+      | 'destructive'
   ) => {
     switch (status) {
       case 'excellent':
       case 'success':
       case 'default':
-        return 'text-green-600 dark:text-green-400'
+        return 'text-status-healthy'
       case 'good':
-        return 'text-blue-600 dark:text-blue-400'
+        return 'text-primary'
       case 'warning':
-        return 'text-yellow-600 dark:text-yellow-400'
+        return 'text-status-degraded'
       case 'critical':
       case 'error':
       case 'destructive':
-        return 'text-red-600 dark:text-red-400'
+        return 'text-destructive'
       default:
         return 'text-muted-foreground'
     }
@@ -217,24 +227,27 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
   }
 
   return (
-    <div className="space-y-6">
+    <Div className="space-y-6">
       {/* Hero Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(stat => (
           <Card key={stat.title} variant="outline" className="relative overflow-hidden">
             <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+              <Div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
                 <Icon name={stat.icon} className={`w-4 h-4 ${getStatusColor(stat.variant)}`} />
-              </div>
+              </Div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-baseline justify-between">
+              <Div className="flex items-baseline justify-between">
                 <P className="text-3xl font-bold">{stat.value}</P>
                 {stat.trend && (
-                  <Badge variant={stat.trend.isPositive ? 'default' : 'destructive'} className="text-xs">
+                  <Badge
+                    variant={stat.trend.isPositive ? 'default' : 'destructive'}
+                    className="text-xs"
+                  >
                     <Icon
                       name={stat.trend.isPositive ? 'lucide:TrendingUp' : 'lucide:TrendingDown'}
                       className="w-3 h-3 mr-1"
@@ -243,64 +256,66 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                     {stat.trend.value}
                   </Badge>
                 )}
-              </div>
+              </Div>
               <P className="text-xs text-muted-foreground mt-1">{stat.subtitle}</P>
             </CardContent>
           </Card>
         ))}
-      </div>
+      </Div>
 
       {/* System Status Grid */}
       <Card variant="outline">
         <CardHeader>
           <CardTitle>{t('overview.systemStatus.title')}</CardTitle>
-          <CardDescription>Real-time health across all monitoring categories</CardDescription>
+          <CardDescription>{t('systemStatusDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <Div className="space-y-4">
             {systemStatus.map(item => (
-              <div key={item.category} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+              <Div key={item.category} className="space-y-2">
+                <Div className="flex items-center justify-between">
+                  <Div className="flex items-center gap-2">
                     <Icon name={item.icon} className={`w-4 h-4 ${getStatusColor(item.status)}`} />
                     <H3 className="text-sm font-medium">{item.category}</H3>
-                  </div>
-                  <div className="flex items-center gap-2">
+                  </Div>
+                  <Div className="flex items-center gap-2">
                     <Badge variant={getStatusBadgeVariant(item.status)} className="text-xs">
                       {item.status.toUpperCase()}
                     </Badge>
                     <P className="text-sm font-semibold">{item.score}/100</P>
-                  </div>
-                </div>
+                  </Div>
+                </Div>
                 <Progress value={item.score} className="h-2" />
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <Div className="flex items-center justify-between text-xs text-muted-foreground">
                   <P>{item.description}</P>
                   {item.issues > 0 && (
-                    <P className="text-destructive font-medium">{item.issues} {t('overview.systemStatus.issues')}</P>
+                    <P className="text-destructive font-medium">
+                      {item.issues} {t('overview.systemStatus.issues')}
+                    </P>
                   )}
-                </div>
-              </div>
+                </Div>
+              </Div>
             ))}
-          </div>
+          </Div>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
         <Card variant="outline">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
+            <Div className="flex items-center justify-between">
+              <Div>
                 <CardTitle>{t('overview.recentActivity.title')}</CardTitle>
-                <CardDescription>Latest events from all services</CardDescription>
-              </div>
+                <CardDescription>{t('recentActivityDescription')}</CardDescription>
+              </Div>
               <Icon name="lucide:Activity" className="w-4 h-4 text-muted-foreground" />
-            </div>
+            </Div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <Div className="space-y-3">
               {recentActivity.map((activity, idx) => (
-                <div key={idx} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                <Div key={idx} className="flex items-start gap-3 pb-3 border-b last:border-0">
                   <Icon
                     name={
                       activity.type === 'health_check'
@@ -309,20 +324,20 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                     }
                     className={`w-4 h-4 mt-0.5 ${getStatusColor(activity.status)}`}
                   />
-                  <div className="flex-1 min-w-0">
+                  <Div className="flex-1 min-w-0">
                     <P className="text-sm">{activity.message}</P>
                     <P className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                     </P>
-                  </div>
-                </div>
+                  </Div>
+                </Div>
               ))}
               {recentActivity.length === 0 && (
                 <P className="text-sm text-muted-foreground text-center py-4">
                   {t('overview.recentActivity.noRecentActivity')}
                 </P>
               )}
-            </div>
+            </Div>
           </CardContent>
         </Card>
 
@@ -330,7 +345,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
         <Card variant="outline">
           <CardHeader>
             <CardTitle>{t('overview.quickActions.title')}</CardTitle>
-            <CardDescription>Manage your monitoring dashboard</CardDescription>
+            <CardDescription>{t('manageDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Div layout="grid" className="gap-3">
@@ -361,7 +376,9 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={() => window.open('https://ezstart.sentry.io/insights/projects/', '_blank')}
+                onClick={() =>
+                  window.open('https://ezstart.sentry.io/insights/projects/', '_blank')
+                }
               >
                 <Icon name="lucide:ExternalLink" className="w-4 h-4" />
                 {t('overview.quickActions.openSentry')}
@@ -377,7 +394,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
             </Div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </Div>
+    </Div>
   )
 }

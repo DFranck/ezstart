@@ -14,6 +14,7 @@ import {
 } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -28,6 +29,7 @@ type FormData = {
 }
 
 export function LoginForm({ app, redirect_uri }: LoginFormProps) {
+  const t = useTranslations('login')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -100,9 +102,9 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email or Username</FormLabel>
+              <FormLabel>{t('emailOrUsername')}</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="your@email.com or username" {...field} />
+                <Input type="text" placeholder={t('emailOrUsernamePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,9 +120,9 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('password')}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder="••••••••" {...field} />
+                <PasswordInput placeholder={t('passwordPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -133,7 +135,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           className="w-full"
           variant={'brand'}
         >
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? t('submitting') : t('submit')}
         </Button>
       </form>
     </Form>

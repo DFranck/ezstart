@@ -10,22 +10,24 @@ import {
   H3,
   Icon,
   P,
+  Span,
   Spinner,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useMonitoringErrors, type ErrorLog } from '../../hooks'
 
 export function ErrorsFeed() {
-  const t = useTranslations('monitoring.errors')
+  const t = useTranslations('monitoring')
+  const tErrors = useTranslations('monitoring.errors')
   const { data, isLoading, error, refetch, isFetching } = useMonitoringErrors()
 
   const errorLogs = data?.logs || []
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <Spinner size="lg" text={t('loading')} />
-      </div>
+      <Div className="flex flex-col items-center justify-center py-12 gap-4">
+        <Spinner size="lg" text={tErrors('loading')} />
+      </Div>
     )
   }
 
@@ -33,30 +35,28 @@ export function ErrorsFeed() {
     return (
       <Card variant="ghost">
         <CardContent className="py-12">
-          <div className="flex flex-col items-center gap-4 text-center">
+          <Div className="flex flex-col items-center gap-4 text-center">
             <Icon name="lucide:AlertTriangle" className="w-12 h-12 text-destructive" />
-            <P className="text-destructive font-semibold">Failed to load error logs</P>
+            <P className="text-destructive font-semibold">{t('failedToLoadErrors')}</P>
             <P className="text-muted-foreground text-sm">
               {error instanceof Error ? error.message : 'Unknown error'}
             </P>
             <Button onClick={() => refetch()} variant="outline" size="sm">
-              Retry
+              {t('retry')}
             </Button>
-          </div>
+          </Div>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <Div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <Div className="flex items-center justify-between">
         <Div>
-          <H3>Error Logs</H3>
-          <P className="text-sm text-muted-foreground">
-            Recent errors captured from all projects (Sentry integration)
-          </P>
+          <H3>{t('errorLogs')}</H3>
+          <P className="text-sm text-muted-foreground">{t('errorLogsDescription')}</P>
         </Div>
         <Button
           onClick={() => refetch()}
@@ -65,33 +65,30 @@ export function ErrorsFeed() {
           className="gap-2"
           disabled={isFetching}
         >
-          <Icon
-            name="lucide:RefreshCw"
-            className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`}
-          />
-          {isFetching ? 'Refreshing...' : 'Refresh'}
+          <Icon name="lucide:RefreshCw" className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+          {isFetching ? t('refreshing') : t('retry')}
         </Button>
-      </div>
+      </Div>
 
       {/* Error Cards */}
       {errorLogs.length === 0 ? (
         <Card variant="ghost">
           <CardContent className="py-12">
-            <div className="flex flex-col items-center gap-2 text-center">
+            <Div className="flex flex-col items-center gap-2 text-center">
               <Icon name="lucide:CheckCircle" className="w-12 h-12 text-status-healthy" />
-              <P className="text-status-healthy font-semibold">All Clear!</P>
-              <P className="text-sm text-muted-foreground">No errors detected. All systems operational 🎉</P>
-            </div>
+              <P className="text-status-healthy font-semibold">{t('allClear')}</P>
+              <P className="text-sm text-muted-foreground">{t('allSystemsOperational')}</P>
+            </Div>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {errorLogs.map((log) => (
+        <Div className="space-y-3">
+          {errorLogs.map(log => (
             <ErrorCard key={log.id} log={log} />
           ))}
-        </div>
+        </Div>
       )}
-    </div>
+    </Div>
   )
 }
 
@@ -99,6 +96,8 @@ export function ErrorsFeed() {
  * Error Card Component
  */
 function ErrorCard({ log }: { log: ErrorLog }) {
+  const t = useTranslations('monitoring')
+
   const severityConfig = {
     critical: {
       bg: 'bg-destructive/10',
@@ -115,10 +114,10 @@ function ErrorCard({ log }: { log: ErrorLog }) {
       label: 'Error',
     },
     warning: {
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500',
+      bg: 'bg-status-degraded/10',
+      border: 'border-status-degraded',
       icon: 'lucide:AlertTriangle',
-      iconColor: 'text-yellow-600 dark:text-yellow-500',
+      iconColor: 'text-status-degraded',
       label: 'Warning',
     },
   } as const
@@ -142,20 +141,20 @@ function ErrorCard({ log }: { log: ErrorLog }) {
   return (
     <Card variant="default" className={`${config.bg} ${config.border} border-l-4`}>
       <CardHeader>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 flex-1">
+        <Div className="flex items-start justify-between gap-3">
+          <Div className="flex items-start gap-3 flex-1">
             <Icon name={config.icon} className={`w-5 h-5 ${config.iconColor} mt-0.5`} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <Div className="flex-1 min-w-0">
+              <Div className="flex items-center gap-2 mb-1 flex-wrap">
                 <P className="font-semibold text-sm">{log.title}</P>
                 <Badge variant="destructive" className="text-xs">
                   {config.label}
                 </Badge>
-              </div>
+              </Div>
               <P className="text-sm text-muted-foreground mb-2">{log.message}</P>
 
               {/* Metadata */}
-              <div className="flex items-center gap-3 flex-wrap">
+              <Div className="flex items-center gap-3 flex-wrap">
                 <P className="text-xs text-muted-foreground">
                   <Icon name="lucide:Server" className="w-3 h-3 inline mr-1" />
                   {log.source}
@@ -170,25 +169,25 @@ function ErrorCard({ log }: { log: ErrorLog }) {
                   <Icon name="lucide:Clock" className="w-3 h-3 inline mr-1" />
                   {timeAgo}
                 </P>
-              </div>
+              </Div>
 
               {/* Additional metadata */}
               {log.metadata && (
-                <div className="flex flex-wrap gap-2 mt-2">
+                <Div className="flex flex-wrap gap-2 mt-2">
                   {log.metadata.count && (
                     <Badge variant="outline" className="text-xs">
-                      {log.metadata.count} occurrences
+                      {t('occurrences', { count: log.metadata.count })}
                     </Badge>
                   )}
                   {log.metadata.userCount && (
                     <Badge variant="outline" className="text-xs">
-                      {log.metadata.userCount} users affected
+                      {t('usersAffected', { count: log.metadata.userCount })}
                     </Badge>
                   )}
-                </div>
+                </Div>
               )}
-            </div>
-          </div>
+            </Div>
+          </Div>
           {log.url && (
             <a
               href={log.url}
@@ -196,11 +195,11 @@ function ErrorCard({ log }: { log: ErrorLog }) {
               rel="noopener noreferrer"
               className="text-primary hover:underline text-sm flex items-center gap-1 shrink-0"
             >
-              View
+              {t('view')}
               <Icon name="lucide:ExternalLink" className="w-4 h-4" />
             </a>
           )}
-        </div>
+        </Div>
       </CardHeader>
     </Card>
   )

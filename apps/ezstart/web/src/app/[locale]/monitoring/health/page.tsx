@@ -41,13 +41,17 @@ function HealthMonitoringContent(): any {
   const projectsHealth = calculateOverallHealth(summary)
   const metricsData = getMetricsData('projects', summary, [], projects, [])
 
+  const minutes = Math.floor(secondsLeft / 60)
+  const seconds = secondsLeft % 60
+  const timeDisplay = `${minutes}:${String(seconds).padStart(2, '0')}`
+
   // Loading state
   if (isLoading) {
     return (
       <Section size="full">
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Div className="flex flex-col items-center justify-center py-20 gap-4">
           <Spinner size="xl" text={t('loading')} variant="fancy" />
-        </div>
+        </Div>
       </Section>
     )
   }
@@ -63,19 +67,16 @@ function HealthMonitoringContent(): any {
 
     return (
       <Section size="full">
-        <div className="flex items-center justify-center py-20">
-          <div className="space-y-4 text-center max-w-lg">
-            <div className="text-6xl">⚠️</div>
-            <P className="text-destructive font-semibold">Failed to load monitoring data</P>
+        <Div className="flex items-center justify-center py-20">
+          <Div className="space-y-4 text-center max-w-lg">
+            <Div className="text-6xl">⚠️</Div>
+            <P className="text-destructive font-semibold">{t('failedToLoad')}</P>
             <P className="text-muted-foreground">{errorMessage}</P>
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Section>
     )
   }
-
-  const minutes = Math.floor(secondsLeft / 60)
-  const seconds = secondsLeft % 60
 
   return (
     <>
@@ -84,11 +85,11 @@ function HealthMonitoringContent(): any {
         <Div layout={'center'}>
           <H1>{t('health.title')}</H1>
           <P className="text-muted-foreground">{t('health.description')}</P>
-          <div className="flex items-center gap-3">
+          <Div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
-              Next update in: {minutes}:{String(seconds).padStart(2, '0')}
+              {t('nextUpdateIn', { time: timeDisplay })}
             </P>
-          </div>
+          </Div>
         </Div>
 
         <Div layout="grid" size={'full'}>
@@ -96,8 +97,8 @@ function HealthMonitoringContent(): any {
           <TabScore
             score={projectsHealth.score}
             status={projectsHealth.status}
-            title="Projects Health Score"
-            subtitle={`${summary.total} projects monitored`}
+            title={t('projectsHealthScore')}
+            subtitle={t('projectsMonitored', { count: summary.total })}
           />
           {/* Metrics Overview */}
           {isDesktop && <MetricsOverview activeTab="projects" metrics={metricsData} />}
@@ -107,20 +108,20 @@ function HealthMonitoringContent(): any {
       {/* Projects Grid Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout="center">
-          <H2>All Projects ({projects.length})</H2>
+          <H2>{t('allProjects', { count: projects.length })}</H2>
           <P className="text-muted-foreground">{t('health.detailsSubtitle')}</P>
         </Div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project: any) => (
             <ProjectCard key={project.id} project={project} />
           ))}
-        </div>
+        </Div>
 
         {projects.length === 0 && (
-          <div className="text-center py-12">
+          <Div className="text-center py-12">
             <P className="text-muted-foreground">{t('health.noProjects')}</P>
-          </div>
+          </Div>
         )}
       </Section>
     </>

@@ -3,7 +3,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+  findOneAndUpdate,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { getGameConfigModel } from '../models/game-config.js'
 
@@ -44,7 +50,8 @@ router.put('/:gameType/:layoutName', async (req: any, res: any) => {
 
     const GameConfig = await getGameConfigModel()
 
-    const config = await (GameConfig.findOneAndUpdate as any)(
+    const config = await findOneAndUpdate(
+      GameConfig,
       { gameType, layoutName },
       {
         gameType,

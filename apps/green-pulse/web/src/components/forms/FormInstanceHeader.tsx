@@ -3,6 +3,7 @@
 import { H1, P, Badge } from '@ezstart/ui/components'
 import { WorkspaceBreadcrumbs } from './WorkspaceBreadcrumbs'
 import { useFormInstance } from '@/hooks/useForms'
+import { useTranslations } from 'next-intl'
 
 interface FormInstanceHeaderProps {
   formInstanceId: string
@@ -15,6 +16,7 @@ export function FormInstanceHeader({
   workspaceSlug,
   projectId,
 }: FormInstanceHeaderProps) {
+  const t = useTranslations('forms.forms')
   const { data: formInstance, isLoading } = useFormInstance(formInstanceId)
 
   if (isLoading) {
@@ -30,7 +32,7 @@ export function FormInstanceHeader({
     return (
       <div>
         <H1 size="h3" className="text-destructive">
-          Form not found
+          {t('formNotFound')}
         </H1>
       </div>
     )
@@ -41,13 +43,13 @@ export function FormInstanceHeader({
     if (!status) return null
 
     if (status === 'draft') {
-      return <Badge variant="secondary">Draft</Badge>
+      return <Badge variant="secondary">{t('draft')}</Badge>
     } else if (status === 'in_progress') {
-      return <Badge variant="default">In Progress</Badge>
+      return <Badge variant="default">{t('inProgress')}</Badge>
     } else if (status === 'submitted') {
-      return <Badge variant="default">Submitted</Badge>
+      return <Badge variant="default">{t('submitted')}</Badge>
     } else if (status === 'archived') {
-      return <Badge variant="outline">Archived</Badge>
+      return <Badge variant="outline">{t('archived')}</Badge>
     }
     return null
   }
@@ -69,13 +71,16 @@ export function FormInstanceHeader({
           <P className="text-sm text-muted-foreground">
             {formInstance?.data?.createdAt && (
               <>
-                Created {new Date(formInstance.data.createdAt).toLocaleDateString()}
+                {t('created', { date: new Date(formInstance.data.createdAt).toLocaleDateString() })}
               </>
             )}
             {formInstance?.data?.submittedAt && (
               <>
                 {' '}
-                • Submitted {new Date(formInstance.data.submittedAt).toLocaleDateString()}
+                •{' '}
+                {t('submittedAt', {
+                  date: new Date(formInstance.data.submittedAt).toLocaleDateString(),
+                })}
               </>
             )}
           </P>

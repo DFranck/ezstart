@@ -4,7 +4,7 @@
 /* path: /components/BaguaSectorCard.tsx */
 import type { Direction } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Icon } from '@ezstart/ui/components'
+import { Div, H3, H4, Icon, P, Span } from '@ezstart/ui/components'
 import { useMemo } from 'react'
 
 type Props = {
@@ -31,7 +31,7 @@ export default function BaguaSectorCard({
   const s = cfg.orientations[dir]
   if (!s) return null
 
-  // Couleur d’accent (priorité à colorHex de la config, sinon par élément)
+  // Couleur d'accent (priorité à colorHex de la config, sinon par élément)
   const accent = useMemo(() => {
     if (s.colorHex) return s.colorHex
     switch (s.element) {
@@ -61,14 +61,14 @@ export default function BaguaSectorCard({
   }
 
   return (
-    <div
+    <Div
       role="dialog"
       aria-label={`${s.title} – ${s.element}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={[
         'absolute -translate-x-1/2 -translate-y-1/2',
-        'rounded-2xl border bg-white/95 backdrop-blur',
+        'rounded-2xl border bg-card/95 backdrop-blur',
         'shadow-[0_10px_30px_rgba(0,0,0,0.08)]',
         ' max-w-[82vw]',
         'transition-transform will-change-transform',
@@ -82,29 +82,29 @@ export default function BaguaSectorCard({
         borderColor: `${accent}1A`, // ~10% opacity
       }}
     >
-      {/* Ribbon / barre d’accent */}
-      <div
+      {/* Ribbon / barre d'accent */}
+      <Div
         aria-hidden
         className="h-1.5 w-full rounded-t-2xl"
         style={{ background: `linear-gradient(90deg, ${accent}, ${accent}CC)` }}
       />
 
       {/* Header */}
-      <div className="px-3.5 pt-3.5 pb-2 flex items-center gap-2.5">
+      <Div className="px-3.5 pt-3.5 pb-2 flex items-center gap-2.5">
         {s.icon && (
-          <span
+          <Span
             className="grid h-7 w-7 place-items-center rounded-xl"
             style={{ backgroundColor: `${accent}14` }}
             aria-hidden
           >
             <Icon name={s.icon as any} className="h-4 w-4" style={{ color: accent }} />
-          </span>
+          </Span>
         )}
 
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-gray-900 truncate">{s.title}</h3>
-            <span
+        <Div className="min-w-0">
+          <Div className="flex items-center gap-2">
+            <H3 className="text-sm font-bold text-foreground truncate">{s.title}</H3>
+            <Span
               className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold"
               style={{
                 color: accent,
@@ -113,31 +113,31 @@ export default function BaguaSectorCard({
               }}
             >
               {s.element}
-            </span>
-          </div>
-          {s.summary && <p className="mt-1 text-xs text-gray-600">{s.summary}</p>}
-        </div>
-      </div>
+            </Span>
+          </Div>
+          {s.summary && <P className="mt-1 text-xs text-muted-foreground">{s.summary}</P>}
+        </Div>
+      </Div>
 
       {/* Body */}
-      <div className="px-3.5 pb-3.5">
+      <Div className="px-3.5 pb-3.5">
         {/* Mots-clés */}
         {has.keywords && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <Div className="mt-2 flex flex-wrap gap-1.5">
             {s.keywords!.map(k => (
-              <span
+              <Span
                 key={k}
-                className="rounded-full border px-2 py-0.5 text-[10px] text-gray-700"
+                className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground"
                 style={{ borderColor: `${accent}26`, backgroundColor: `${accent}0D` }}
               >
                 {k}
-              </span>
+              </Span>
             ))}
-          </div>
+          </Div>
         )}
 
         {/* Listes (tips / enhancers / remedies / avoid / symbols) */}
-        <div className="mt-2 space-y-2">
+        <Div className="mt-2 space-y-2">
           {has.tips && (
             <ListBlock title="Conseils" items={s.tips!} bullet="lucide:check" color={accent} />
           )}
@@ -164,19 +164,19 @@ export default function BaguaSectorCard({
           {has.symbols && (
             <ListFlat title="Symboles" items={s.symbols!} icon="lucide:star" color={accent} />
           )}
-        </div>
+        </Div>
 
         {/* Notes */}
         {has.notes && (
-          <div
-            className="mt-2 rounded-lg border p-2.5 text-[11px] leading-5 text-gray-700"
+          <Div
+            className="mt-2 rounded-lg border p-2.5 text-[11px] leading-5 text-muted-foreground"
             style={{ borderColor: `${accent}26`, backgroundColor: `${accent}0D` }}
           >
             {s.notes}
-          </div>
+          </Div>
         )}
-      </div>
-    </div>
+      </Div>
+    </Div>
   )
 }
 
@@ -194,17 +194,17 @@ function ListBlock(props: {
   const { title, items, bullet, color, danger } = props
   return (
     <section aria-label={title}>
-      <h4 className="mb-1 text-[11px] font-semibold text-gray-900">{title}</h4>
+      <H4 className="mb-1 text-[11px] font-semibold text-foreground">{title}</H4>
       <ul className="space-y-1.5">
         {items.map(it => (
-          <li key={it} className="flex items-start gap-1.5 text-[12px] text-gray-800">
+          <li key={it} className="flex items-start gap-1.5 text-[12px] text-foreground">
             <Icon
               name={bullet as any}
               className="mt-[2px] h-3.5 w-3.5 shrink-0"
               style={{ color: danger ? '#dc2626' : color }}
               aria-hidden
             />
-            <span className="leading-5">{it}</span>
+            <Span className="leading-5">{it}</Span>
           </li>
         ))}
       </ul>
@@ -216,19 +216,19 @@ function ListFlat(props: { title: string; items: string[]; icon: string; color: 
   const { title, items, icon, color } = props
   return (
     <section aria-label={title}>
-      <h4 className="mb-1 text-[11px] font-semibold text-gray-900">{title}</h4>
-      <div className="flex flex-wrap gap-1.5">
+      <H4 className="mb-1 text-[11px] font-semibold text-foreground">{title}</H4>
+      <Div className="flex flex-wrap gap-1.5">
         {items.map(it => (
-          <span
+          <Span
             key={it}
-            className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] text-gray-800"
-            style={{ borderColor: `${color}26`, backgroundColor: 'white' }}
+            className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] text-foreground"
+            style={{ borderColor: `${color}26`, backgroundColor: 'hsl(var(--background))' }}
           >
             <Icon name={icon as any} className="h-3 w-3" style={{ color }} aria-hidden />
             {it}
-          </span>
+          </Span>
         ))}
-      </div>
+      </Div>
     </section>
   )
 }

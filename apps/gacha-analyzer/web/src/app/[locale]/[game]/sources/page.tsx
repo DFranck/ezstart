@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Accordion,
   AccordionContent,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
   Div,
-
   P,
   Span,
 } from '@ezstart/ui/components'
@@ -56,7 +56,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         name: 'SWSTATS API',
         url: 'https://swstats.info/api/',
         description:
-          'Données agrégées de la communauté : monstres, runes, artefacts, builds contributeurs. Permet de valider nos calculs d\'efficacité contre les builds réels des joueurs.',
+          "Données agrégées de la communauté : monstres, runes, artefacts, builds contributeurs. Permet de valider nos calculs d'efficacité contre les builds réels des joueurs.",
         access: 'Gratuit, docs Swagger',
       },
     ],
@@ -76,7 +76,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         name: 'Swarena',
         url: 'https://swarena.gg',
         description:
-          'Stats RTA globales et personnelles, leaderboard, table des monstres. Référence pour les builds compétitifs et la validation des recommandations d\'archétypes.',
+          "Stats RTA globales et personnelles, leaderboard, table des monstres. Référence pour les builds compétitifs et la validation des recommandations d'archétypes.",
       },
       {
         name: 'Rosa Midman',
@@ -89,7 +89,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
   {
     id: 'tools',
     title: 'Outils Communautaires',
-    description: 'Outils complémentaires au scanner pour l\'optimisation',
+    description: "Outils complémentaires au scanner pour l'optimisation",
     sources: [
       {
         name: 'SWOP (SW Optimizer)',
@@ -101,7 +101,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         name: 'SW Exporter (SWEX)',
         url: 'https://github.com/Xzandro/sw-exporter',
         description:
-          'Export des données du jeu vers JSON (monstres, runes, artefacts). Format de référence pour l\'interopérabilité — notre scanner vise à reproduire ces données via OCR.',
+          "Export des données du jeu vers JSON (monstres, runes, artefacts). Format de référence pour l'interopérabilité — notre scanner vise à reproduire ces données via OCR.",
       },
       {
         name: 'SWGT',
@@ -113,7 +113,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         name: 'SW Rune Builder',
         url: 'https://swrunebuilder.com/',
         description:
-          'Simulateur de builds de runes. Permet de tester théoriquement des combinaisons avant d\'investir du mana.',
+          "Simulateur de builds de runes. Permet de tester théoriquement des combinaisons avant d'investir du mana.",
       },
     ],
   },
@@ -132,7 +132,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         name: 'SWMasters',
         url: 'https://www.swmasters.com/blog/rune-guide',
         description:
-          'Guides runes, farming, progression. Références utiles pour calibrer les seuils d\'efficacité par profil de progression (early/mid/endgame).',
+          "Guides runes, farming, progression. Références utiles pour calibrer les seuils d'efficacité par profil de progression (early/mid/endgame).",
       },
       {
         name: 'Theria Games',
@@ -169,7 +169,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         name: 'SWSTATS (code)',
         url: 'https://github.com/QuatZo/swstats',
         description:
-          'Big Data Summoners War. Algorithmes d\'agrégation de stats et modèles de données pour l\'analyse de runes à grande échelle.',
+          "Big Data Summoners War. Algorithmes d'agrégation de stats et modèles de données pour l'analyse de runes à grande échelle.",
       },
       {
         name: 'SW Exporter',
@@ -181,7 +181,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         name: 'SWProxy',
         url: 'https://github.com/kakaroto/SWProxy',
         description:
-          'Data extractor legacy. Projet historique, utile pour comprendre l\'évolution du format de données SW.',
+          "Data extractor legacy. Projet historique, utile pour comprendre l'évolution du format de données SW.",
       },
     ],
   },
@@ -237,13 +237,14 @@ function SourceCard({ source }: { source: Source }) {
 export default function SourcesPage() {
   const params = useParams()
   const game = params.game as string
+  const t = useTranslations('sources')
 
   if (game !== 'summoners-war') {
     return (
       <Div className="container mx-auto px-4 py-12 max-w-4xl text-center">
-        <P className="text-2xl font-bold mb-4">Coming Soon</P>
+        <P className="text-2xl font-bold mb-4">{t('comingSoon')}</P>
         <P className="text-muted-foreground">
-          Les sources de référence pour {game.replace(/-/g, ' ')} sont en cours de préparation.
+          {t('comingSoonDescription', { game: game.replace(/-/g, ' ') })}
         </P>
       </Div>
     )
@@ -252,14 +253,11 @@ export default function SourcesPage() {
   return (
     <Div className="container mx-auto px-4 py-6 max-w-4xl">
       <Div className="mb-6">
-        <P className="text-sm text-muted-foreground">
-          Références externes utiles pour Summoners War — APIs, outils, wikis et projets open source
-          qui alimentent ou complètent le scanner.
-        </P>
+        <P className="text-sm text-muted-foreground">{t('pageDescription')}</P>
       </Div>
 
-      <Accordion type="multiple" defaultValue={SOURCE_CATEGORIES.map((c) => c.id)}>
-        {SOURCE_CATEGORIES.map((category) => (
+      <Accordion type="multiple" defaultValue={SOURCE_CATEGORIES.map(c => c.id)}>
+        {SOURCE_CATEGORIES.map(category => (
           <AccordionItem key={category.id} value={category.id}>
             <AccordionTrigger className="hover:no-underline">
               <Div className="flex items-center gap-3">
@@ -272,7 +270,7 @@ export default function SourcesPage() {
             <AccordionContent>
               <P className="text-xs text-muted-foreground mb-3">{category.description}</P>
               <Div className="grid gap-2">
-                {category.sources.map((source) => (
+                {category.sources.map(source => (
                   <SourceCard key={source.name} source={source} />
                 ))}
               </Div>

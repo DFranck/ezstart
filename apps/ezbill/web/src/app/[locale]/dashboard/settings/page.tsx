@@ -28,6 +28,7 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { DeletedItemCard } from './components/deleted-item-card'
 
 export default function SettingsPage() {
@@ -49,6 +50,9 @@ export default function SettingsPage() {
   )
   const { isMobile } = useDevice()
   const queryClient = useQueryClient()
+  const t = useTranslations()
+  const tToast = useTranslations('toast')
+  const tSettings = useTranslations('settings')
 
   const { data: deletedItems, isLoading: loading } = useQuery({
     queryKey: ['deleted-items', user?._id],
@@ -100,12 +104,12 @@ export default function SettingsPage() {
         method: 'POST',
         userId: user?._id,
       })
-      toast.success('Item restored successfully')
+      toast.success(tToast('itemRestored'))
       invalidateResourceType(type) // Invalidate only the specific resource
       invalidateDeletedItems() // Refresh the deleted items list
     } catch (error) {
       logger.error(`Error restoring ${type}:`, error)
-      toast.error('Failed to restore item')
+      toast.error(tToast('itemRestoreFailed'))
     }
   }
 
@@ -140,12 +144,12 @@ export default function SettingsPage() {
         method: 'DELETE',
         userId: user?._id,
       })
-      toast.success('Item permanently deleted')
+      toast.success(tToast('itemDeleted'))
       invalidateResourceType(type) // Invalidate only the specific resource
       invalidateDeletedItems() // Refresh the deleted items list
     } catch (error) {
       logger.error(`Error permanently deleting ${type}:`, error)
-      toast.error('Failed to permanently delete item')
+      toast.error(tToast('itemDeleteFailed'))
     }
   }
 
@@ -165,12 +169,12 @@ export default function SettingsPage() {
         method: 'DELETE',
         userId: user?._id,
       })
-      toast.success(`${company.companyName} deleted successfully`)
+      toast.success(tToast('companyDeleteSuccess', { name: company.companyName }))
       refetchAll()
       invalidateDeletedItems() // Refresh deleted items list
     } catch (error) {
       logger.error('Error deleting company:', error)
-      toast.error(`Failed to delete ${company.companyName}. Please try again.`)
+      toast.error(tToast('companyDeleteFailed', { name: company.companyName }))
     }
   }
 
@@ -190,12 +194,12 @@ export default function SettingsPage() {
         method: 'DELETE',
         userId: user?._id,
       })
-      toast.success(`${paymentMethod.name} deleted successfully`)
+      toast.success(tToast('paymentMethodDeleteSuccess', { name: paymentMethod.name }))
       refetchAll()
       invalidateDeletedItems() // Refresh deleted items list
     } catch (error) {
       logger.error('Error deleting payment method:', error)
-      toast.error(`Failed to delete ${paymentMethod.name}. Please try again.`)
+      toast.error(tToast('paymentMethodDeleteFailed', { name: paymentMethod.name }))
     }
   }
 
@@ -239,35 +243,36 @@ export default function SettingsPage() {
           <TabsList>
             <TabsTrigger value="business">
               <Icon name="lucide:Building2" />
-              Your Business
+              {tSettings('yourBusiness')}
             </TabsTrigger>
             <TabsTrigger value="payment-methods">
               <Icon name="lucide:CreditCard" />
-              Payment Methods
+              {tSettings('paymentMethods')}
             </TabsTrigger>
             <TabsTrigger value="deleted-items">
               <Icon name="lucide:Trash2" />
-              Deleted Items {totalDeleted > 0 && <span className="ml-2">({totalDeleted})</span>}
+              {tSettings('deletedItems')}{' '}
+              {totalDeleted > 0 && <span className="ml-2">({totalDeleted})</span>}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="business">
             <DashboardSection
-              title="Your Business"
-              description="Configure your business information for invoices and quotes"
+              title={tSettings('yourBusiness')}
+              description={tSettings('businessDesc')}
               icon="lucide:Building2"
               iconGradient="bg-gradient-company"
               onAdd={() => setIsCompanyModalOpen(true)}
-              addButtonText="Add Company"
+              addButtonText={tSettings('addCompany')}
               addButtonIcon="lucide:Plus"
               addButtonGradient="bg-gradient-company"
               isEmpty={companies.length === 0}
               emptyState={{
                 icon: 'lucide:Building2',
                 iconBg: 'bg-gradient-company/10',
-                title: 'No companies yet',
-                description: 'Add your business information to appear on invoices and quotes',
-                buttonText: 'Add Your Business',
+                title: tSettings('noCompaniesYet'),
+                description: tSettings('noCompaniesDesc'),
+                buttonText: tSettings('addYourBusiness'),
               }}
               className={isMobile ? 'border-0 shadow-none' : ''}
             >
@@ -290,22 +295,21 @@ export default function SettingsPage() {
 
           <TabsContent value="payment-methods">
             <DashboardSection
-              title="Payment Methods"
-              description="Configure how you receive payments from clients"
+              title={tSettings('paymentMethods')}
+              description={tSettings('paymentMethodsDesc')}
               icon="lucide:CreditCard"
               iconGradient="bg-gradient-payment"
               onAdd={() => setIsPaymentMethodModalOpen(true)}
-              addButtonText="Add Payment Method"
+              addButtonText={tSettings('addPaymentMethod')}
               addButtonIcon="lucide:Plus"
               addButtonGradient="bg-gradient-payment"
               isEmpty={paymentMethods.length === 0}
               emptyState={{
                 icon: 'lucide:CreditCard',
                 iconBg: 'bg-gradient-payment/10',
-                title: 'No payment methods yet',
-                description:
-                  'Add your first payment method to start receiving payments from clients',
-                buttonText: 'Add First Payment Method',
+                title: tSettings('noPaymentMethodsYet'),
+                description: tSettings('noPaymentMethodsDesc'),
+                buttonText: tSettings('addFirstPaymentMethod'),
               }}
               className={isMobile ? 'border-0 shadow-none' : ''}
             >
@@ -328,8 +332,8 @@ export default function SettingsPage() {
 
           <TabsContent value="deleted-items">
             <DashboardSection
-              title="Recover Deleted Items"
-              description="Items shown here have been deleted but can be restored or permanently removed"
+              title={tSettings('recoverDeleted')}
+              description={tSettings('recoverDesc')}
               icon="lucide:RefreshCw"
               iconGradient="bg-gradient-receipt"
               hideAddButton
@@ -337,7 +341,7 @@ export default function SettingsPage() {
             >
               {deletedItemGroups.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No deleted items found.
+                  {tSettings('noDeletedItems')}
                 </div>
               ) : (
                 <CollapsibleGroup

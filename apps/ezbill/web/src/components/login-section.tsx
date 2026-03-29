@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { logger } from '@ezstart/logger'
 import { Icon, Input, Span } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { LoadingButton } from './loading-button'
 
@@ -11,6 +12,9 @@ export function LoginSection() {
   const { user, register, reset } = useUserStore()
   const [username, setUsername] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const t = useTranslations('login')
+  const tAuth = useTranslations('auth')
+  const tPlaceholders = useTranslations('placeholders')
 
   const validateUsername = (username: string) => {
     if (!username.trim()) {
@@ -37,9 +41,9 @@ export function LoginSection() {
         const user = await register(username.trim())
         return user
       },
-      toastLoading: { message: 'Logging in...' },
-      toastSuccess: { message: `Welcome, ${username.trim()}!` },
-      toastError: { message: 'Failed to login' },
+      toastLoading: { message: t('loggingIn') },
+      toastSuccess: { message: t('welcome', { username: username.trim() }) },
+      toastError: { message: t('loginFailed') },
       onLoadingChange: setIsLoggingIn,
       onError: err => {
         logger.error('Failed to register user', err)
@@ -53,8 +57,8 @@ export function LoginSection() {
         reset()
         return true
       },
-      toastSuccess: { message: 'Logged out successfully' },
-      toastError: { message: 'Failed to logout' },
+      toastSuccess: { message: t('loggedOut') },
+      toastError: { message: t('logoutFailed') },
       onError: err => {
         logger.error('Failed to logout', err)
       },
@@ -72,7 +76,7 @@ export function LoginSection() {
           className="space-y-4"
         >
           <Input
-            placeholder="Enter your username"
+            placeholder={tPlaceholders('username')}
             value={username}
             onChange={e => setUsername(e.target.value)}
             className="w-full text-center"
@@ -82,28 +86,30 @@ export function LoginSection() {
           <LoadingButton
             loading={isLoggingIn}
             disabled={!username.trim()}
-            loadingText="Signing in..."
+            loadingText={t('signingIn')}
             className="w-full bg-gradient-to-r from-ezbill-indigo-500 to-ezbill-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             <Icon name="lucide:ArrowRight" className="w-4 h-4 mr-2" />
-            Continue
+            {t('continue')}
           </LoadingButton>
         </form>
       ) : (
         <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+          <div className="flex items-center justify-center gap-3 p-4 bg-success/10 border border-success/20 rounded-xl">
             <div className="w-8 h-8 bg-gradient-payment rounded-lg flex items-center justify-center">
               <Icon name="lucide:Check" className="w-4 h-4 text-white" />
             </div>
-            <Span className="text-lg font-semibold text-success">Connected as {user.username}</Span>
+            <Span className="text-lg font-semibold text-success">
+              {t('connectedAs', { username: user.username })}
+            </Span>
           </div>
           <LoadingButton
             variant="outline"
             onClick={handleLogout}
-            className="w-full border-gray-300 hover:border-gray-400"
+            className="w-full border-border hover:border-border/80"
           >
             <Icon name="lucide:LogOut" className="w-4 h-4 mr-2" />
-            Logout
+            {tAuth('logout')}
           </LoadingButton>
         </div>
       )}

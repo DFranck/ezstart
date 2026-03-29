@@ -33,6 +33,7 @@ import {
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { InvoiceAIAssistant } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
 
@@ -64,6 +65,9 @@ export function QuoteModal({
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(false)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
+  const tToast = useTranslations('toast')
+  const tQuote = useTranslations('quote')
+  const tCommon = useTranslations('common')
 
   const [formData, setFormData] = useState<CreateQuote & { validUntil?: string }>({
     userId: '',
@@ -182,9 +186,9 @@ export function QuoteModal({
         onSave()
         onClose()
       },
-      toastLoading: { message: quote ? 'Updating quote...' : 'Creating quote...' },
-      toastSuccess: { message: quote ? 'Quote updated' : 'Quote created' },
-      toastError: { message: quote ? 'Failed to update quote' : 'Failed to create quote' },
+      toastLoading: { message: quote ? tToast('quoteUpdating') : tToast('quoteCreating') },
+      toastSuccess: { message: quote ? tToast('quoteUpdated') : tToast('quoteCreated') },
+      toastError: { message: quote ? tToast('quoteUpdateFailed') : tToast('quoteCreateFailed') },
       onLoadingChange: setIsLoading,
     })
   }
@@ -193,8 +197,8 @@ export function QuoteModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={quote ? 'Edit Quote' : 'Create Quote'}
-      description={quote ? 'Update quote information' : 'Create a new quote for your client'}
+      title={quote ? tQuote('edit') : tQuote('create')}
+      description={quote ? tQuote('edit') : tQuote('create')}
       size="full"
       footer={
         <div className="space-y-4">
@@ -206,7 +210,7 @@ export function QuoteModal({
               className="bg-card border  hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <LoadingButton
               loading={isLoading}
@@ -225,7 +229,7 @@ export function QuoteModal({
                 name={quote ? 'lucide:Save' : 'lucide:Plus'}
                 className="w-5 h-5 sm:w-4 sm:h-4 mr-2"
               />
-              {quote ? 'Update Quote' : 'Create Quote'}
+              {quote ? tQuote('update') : tQuote('create')}
             </LoadingButton>
           </div>
         </div>
@@ -258,7 +262,7 @@ export function QuoteModal({
                     onValueChange={value => setFormData({ ...formData, clientId: value })}
                     required
                   >
-                    <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
+                    <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
                       <SelectValue placeholder="Select a client" />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border shadow-xl rounded-xl">
@@ -287,7 +291,7 @@ export function QuoteModal({
                     setFormData({ ...formData, companyId: value === 'personal' ? '' : value })
                   }
                 >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
+                  <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
                     <SelectValue placeholder="Select billing entity" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
@@ -325,7 +329,7 @@ export function QuoteModal({
                   value={formData.currency}
                   onValueChange={(value: Currency) => setFormData({ ...formData, currency: value })}
                 >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
+                  <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
@@ -394,7 +398,7 @@ export function QuoteModal({
                         onChange={e =>
                           setFormData({ ...formData, taxRate: parseFloat(e.target.value) || 0 })
                         }
-                        className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
+                        className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
                       />
                     </div>
                   )}
@@ -603,7 +607,7 @@ export function QuoteModal({
                 value={formData.notes}
                 onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+                className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Additional notes for this quote..."
               />
             </div>
@@ -617,7 +621,7 @@ export function QuoteModal({
                 value={formData.terms}
                 onChange={e => setFormData({ ...formData, terms: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+                className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Quote terms and conditions..."
               />
             </div>

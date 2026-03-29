@@ -76,7 +76,9 @@ export default function HomePage(): any {
                   key={`word-${index}-${word}`}
                   className="inline-block"
                   style={{
-                    animation: showSubtitle ? `fadeInWord 0.4s ease-out ${index * 0.15}s forwards` : 'none',
+                    animation: showSubtitle
+                      ? `fadeInWord 0.4s ease-out ${index * 0.15}s forwards`
+                      : 'none',
                     opacity: showSubtitle ? 1 : 0,
                   }}
                 >
@@ -133,7 +135,7 @@ export default function HomePage(): any {
             asChild
             size="lg"
             variant="outline"
-            className="bg-gray-100 hover:bg-gray-200 border-black border text-black font-bold text-xl px-8 py-6"
+            className="bg-muted hover:bg-muted/80 border-foreground border text-foreground font-bold text-xl px-8 py-6"
           >
             <Link href="#partnership">
               {t('hero.ctaSecondary')} <Span className="ml-1">→</Span>
@@ -187,7 +189,7 @@ export default function HomePage(): any {
         </SplitSectionItem>
       </SplitSection>
       <H2 size="h3" className="text-center my-12">
-        Southeast Asia's Climate Crisis Challenges
+        {t('challenge.sealTitle')}
       </H2>
       {/* Light mode version */}
       <Image
@@ -440,7 +442,7 @@ export default function HomePage(): any {
                     {useCase.badges.map((badge, badgeIndex) => (
                       <Span
                         key={badgeIndex}
-                        className="bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap"
+                        className="bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap"
                       >
                         {badge}
                       </Span>
@@ -522,10 +524,10 @@ export default function HomePage(): any {
               }>
             ).map((value, index) => (
               <Fragment key={index}>
-                <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800 border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg w-full md:w-auto">
+                <Card className="bg-gp-accent/10 dark:bg-gp-accent/5 border-gp-accent dark:border-gp-accent border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg w-full md:w-auto">
                   <CardHeader>
                     <Div className="flex items-center gap-3 mb-4">
-                      <Div className="font-bold rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-xl bg-green-600 dark:bg-green-500 text-white">
+                      <Div className="font-bold rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-xl bg-gp-primary text-primary-foreground">
                         {index + 1}
                       </Div>
                       <H3 size="h5" className="text-gp-primary">
@@ -674,10 +676,10 @@ export default function HomePage(): any {
             {/* Free Package - Self-Awareness */}
             <Card className="p-8 border-2 border-border hover:shadow-lg transition-all duration-300">
               <Div className="mb-6">
-                <H3 className="text-2xl font-bold mb-2 text-foreground">{t('packages.free.title')}</H3>
-                <P className="text-sm text-muted-foreground">
-                  {t('packages.free.subtitle')}
-                </P>
+                <H3 className="text-2xl font-bold mb-2 text-foreground">
+                  {t('packages.free.title')}
+                </H3>
+                <P className="text-sm text-muted-foreground">{t('packages.free.subtitle')}</P>
               </Div>
 
               {/* Description */}
@@ -687,19 +689,24 @@ export default function HomePage(): any {
 
               {/* Features */}
               <Div className="space-y-3 mb-6">
-                {Object.entries(t.raw('packages.free.features') as Record<string, string>).map(([key, feature]) => (
-                  <Div key={key} className="flex items-start space-x-3">
-                    <Icon name="lucide:Check" className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5" />
-                    <P className={`text-sm ${key === 'instant' ? 'font-semibold' : ''}`}>{feature}</P>
-                  </Div>
-                ))}
+                {Object.entries(t.raw('packages.free.features') as Record<string, string>).map(
+                  ([key, feature]) => (
+                    <Div key={key} className="flex items-start space-x-3">
+                      <Icon
+                        name="lucide:Check"
+                        className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
+                      />
+                      <P className={`text-sm ${key === 'instant' ? 'font-semibold' : ''}`}>
+                        {feature}
+                      </P>
+                    </Div>
+                  )
+                )}
               </Div>
 
               {/* CTA */}
               <Button asChild className="w-full bg-gp-primary hover:bg-gp-primary/90 text-white">
-                <Link href="/chat">
-                  {t('packages.free.cta')}
-                </Link>
+                <Link href="/chat">{t('packages.free.cta')}</Link>
               </Button>
             </Card>
 
@@ -737,7 +744,7 @@ export default function HomePage(): any {
               {/* CTA */}
               <Button asChild className="w-full" variant="outline">
                 <a href="mailto:aseradni@nexora-venture.com?subject=Premium%20Package%20Inquiry">
-                  Contact Us
+                  {t('packages.contactUs')}
                 </a>
               </Button>
             </Card>
@@ -777,7 +784,7 @@ export default function HomePage(): any {
               {/* CTA */}
               <Button asChild className="w-full" variant="outline">
                 <a href="mailto:aseradni@nexora-venture.com?subject=Golden%20Package%20Inquiry">
-                  Contact Us
+                  {t('packages.contactUs')}
                 </a>
               </Button>
             </Card>

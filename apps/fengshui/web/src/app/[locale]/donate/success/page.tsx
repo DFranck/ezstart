@@ -46,9 +46,9 @@ export default function DonateSuccessPage(): any {
         <div className="mb-12 flex justify-center">
           <div className="relative">
             <div className="absolute inset-0 animate-ping opacity-75">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-pink-500 to-rose-500" />
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary to-accent" />
             </div>
-            <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-2xl">
+            <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl">
               <Icon name="lucide:Heart" className="w-12 h-12 md:w-16 md:h-16 text-white" />
             </div>
           </div>
@@ -67,7 +67,7 @@ export default function DonateSuccessPage(): any {
           <Button
             asChild
             size="lg"
-            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+            className="bg-gradient-to-r from-primary to-accent hover:from-pink-600 hover:to-rose-600"
           >
             <Link href="/">
               <Icon name="lucide:Home" className="w-5 h-5 mr-2" />
@@ -85,20 +85,20 @@ export default function DonateSuccessPage(): any {
         {/* Info Box */}
         <div className="p-8 bg-muted/50 backdrop-blur-sm rounded-2xl text-left border border-border">
           <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-            <Icon name="lucide:Sparkles" className="w-5 h-5 text-pink-500" />
+            <Icon name="lucide:Sparkles" className="w-5 h-5 text-primary" />
             {t('whatNext')}
           </h3>
           <ul className="space-y-3 text-sm text-muted-foreground">
             <li className="flex items-start gap-3">
-              <Icon name="lucide:Mail" className="w-5 h-5 mt-0.5 text-blue-500 flex-shrink-0" />
+              <Icon name="lucide:Mail" className="w-5 h-5 mt-0.5 text-primary flex-shrink-0" />
               <span>{t('emailConfirmation')}</span>
             </li>
             <li className="flex items-start gap-3">
-              <Icon name="lucide:Heart" className="w-5 h-5 mt-0.5 text-pink-500 flex-shrink-0" />
+              <Icon name="lucide:Heart" className="w-5 h-5 mt-0.5 text-primary flex-shrink-0" />
               <span>{t('supporterWall')}</span>
             </li>
             <li className="flex items-start gap-3">
-              <Icon name="lucide:Rocket" className="w-5 h-5 mt-0.5 text-purple-500 flex-shrink-0" />
+              <Icon name="lucide:Rocket" className="w-5 h-5 mt-0.5 text-accent flex-shrink-0" />
               <span>{t('projectImprovement')}</span>
             </li>
           </ul>

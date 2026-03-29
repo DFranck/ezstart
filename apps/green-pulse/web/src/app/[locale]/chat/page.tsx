@@ -133,6 +133,7 @@ function LiaPageContent(): any {
 }
 
 function BetaAccessRequest() {
+  const t = useTranslations('beta')
   const { user } = useAuthStore()
   const [accessCode, setAccessCode] = useState('')
 
@@ -233,25 +234,21 @@ function BetaAccessRequest() {
           {/* Pending state */}
           {status === 'pending' && (
             <Div className="space-y-4">
-              <Icon name="lucide:Clock" className="w-12 h-12 mx-auto text-orange-500" />
-              <P className="text-orange-600 font-medium">Request submitted!</P>
-              <P className="text-sm text-muted-foreground">
-                Waiting for admin approval. We'll notify you once approved.
-              </P>
+              <Icon name="lucide:Clock" className="w-12 h-12 mx-auto text-warning" />
+              <P className="text-warning font-medium">{t('requestSubmitted')}</P>
+              <P className="text-sm text-muted-foreground">{t('waitingApproval')}</P>
             </Div>
           )}
 
           {/* Invited state - needs to enter code */}
           {status === 'invited' && (
             <Div className="space-y-4">
-              <Icon name="lucide:Mail" className="w-12 h-12 mx-auto text-blue-500" />
-              <P className="text-blue-600 font-medium">You've been approved!</P>
-              <P className="text-sm text-muted-foreground">
-                Enter your access code to activate beta access:
-              </P>
+              <Icon name="lucide:Mail" className="w-12 h-12 mx-auto text-primary" />
+              <P className="text-primary font-medium">{t('approved')}</P>
+              <P className="text-sm text-muted-foreground">{t('enterCode')}</P>
               <Input
                 type="text"
-                placeholder="BETA-GP-XXXXXXXX"
+                placeholder={t('codePlaceholder')}
                 value={accessCode}
                 onChange={e => setAccessCode(e.target.value.toUpperCase())}
                 className="max-w-xs mx-auto"
@@ -262,7 +259,7 @@ function BetaAccessRequest() {
                 className="bg-gp-primary hover:bg-gp-primary/80"
               >
                 <Icon name="lucide:Check" className="mr-2" />
-                Activate Access
+                {t('activateAccess')}
               </Button>
             </Div>
           )}
@@ -270,18 +267,16 @@ function BetaAccessRequest() {
           {/* Activated state - needs to refresh */}
           {status === 'activated' && (
             <Div className="space-y-4">
-              <Icon name="lucide:CheckCircle2" className="w-12 h-12 mx-auto text-green-500" />
-              <P className="text-green-600 font-medium">Access granted!</P>
-              <P className="text-sm text-muted-foreground">
-                Your beta access has been activated. Click below to refresh your session.
-              </P>
+              <Icon name="lucide:CheckCircle2" className="w-12 h-12 mx-auto text-primary" />
+              <P className="text-primary font-medium">{t('accessGranted')}</P>
+              <P className="text-sm text-muted-foreground">{t('accessActivated')}</P>
               <Button
                 onClick={handleRefreshSession}
                 size="lg"
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-gp-primary hover:bg-gp-primary/80"
               >
                 <Icon name="lucide:RefreshCw" className="mr-2" />
-                Refresh Session
+                {t('refreshSession')}
               </Button>
             </Div>
           )}
@@ -289,11 +284,9 @@ function BetaAccessRequest() {
           {/* Rejected state */}
           {status === 'rejected' && (
             <Div className="space-y-4">
-              <Icon name="lucide:XCircle" className="w-12 h-12 mx-auto text-red-500" />
-              <P className="text-red-600 font-medium">Access denied</P>
-              <P className="text-sm text-muted-foreground">
-                Your beta access request was rejected. Please contact support for more information.
-              </P>
+              <Icon name="lucide:XCircle" className="w-12 h-12 mx-auto text-destructive" />
+              <P className="text-destructive font-medium">{t('accessDenied')}</P>
+              <P className="text-sm text-muted-foreground">{t('accessRejected')}</P>
             </Div>
           )}
 
@@ -305,7 +298,7 @@ function BetaAccessRequest() {
               className="bg-gp-primary hover:bg-gp-primary/80"
             >
               <Icon name="lucide:Sparkles" className="mr-2" />
-              Request Beta Access
+              {t('requestAccess')}
             </Button>
           )}
         </CardContent>

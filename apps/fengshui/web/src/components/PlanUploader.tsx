@@ -2,7 +2,7 @@
 'use client'
 
 import { getCroppedImg } from '@/utils/image'
-import { Button, Icon, Input, Progress } from '@ezstart/ui/components'
+import { Button, Div, Icon, Input, P, Progress, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
@@ -244,54 +244,56 @@ export function PlanUploader({
   const isImage = Boolean(uploadedFile && uploadedFile.type.startsWith('image/'))
 
   return (
-    <div className={className}>
+    <Div className={className}>
       {!uploadedFile ? (
-        <div
+        <Div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+            isDragActive
+              ? 'border-primary bg-primary/10'
+              : 'border-border hover:border-muted-foreground'
           }`}
           aria-label="Dropzone"
         >
           <input {...getInputProps()} aria-label="Select file" />
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex gap-2">
+          <Div className="flex flex-col items-center gap-3">
+            <Div className="flex gap-2">
               <Icon name="lucide:FileImage" className="w-8 h-8 " />
               <Icon name="lucide:FileText" className="w-8 h-8 " />
-            </div>
-            <p className=" font-medium">
+            </Div>
+            <P className=" font-medium">
               {isDragActive ? t('uploader.dropHere') : t('uploader.dragDrop')}
-            </p>
-            <p className="text-sm ">{t('uploader.clickToSelect')}</p>
-            <p className="text-xs ">{t('uploader.acceptedFormats')}</p>
+            </P>
+            <P className="text-sm ">{t('uploader.clickToSelect')}</P>
+            <P className="text-xs ">{t('uploader.acceptedFormats')}</P>
             {isProcessing && (
-              <div className="w-full max-w-xs mt-4">
+              <Div className="w-full max-w-xs mt-4">
                 <Progress value={uploadProgress} className="h-2" />
-                <p className="text-xs text-muted-foreground mt-2">
+                <P className="text-xs text-muted-foreground mt-2">
                   {t('uploader.processing')} {uploadProgress}%
-                </p>
-              </div>
+                </P>
+              </Div>
             )}
-          </div>
-        </div>
+          </Div>
+        </Div>
       ) : (
-        <div>
+        <Div>
           {/* Header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
+          <Div className="flex items-center justify-between mb-3">
+            <Div className="flex items-center gap-3">
               {isImage ? (
-                <Icon name="lucide:FileImage" className="w-5 h-5 text-blue-500" />
+                <Icon name="lucide:FileImage" className="w-5 h-5 text-primary" />
               ) : (
-                <Icon name="lucide:FileText" className="w-5 h-5 text-red-500" />
+                <Icon name="lucide:FileText" className="w-5 h-5 text-destructive" />
               )}
-              <div>
-                <div className="font-medium">{uploadedFile?.name}</div>
-                <div className="text-xs ">
+              <Div>
+                <Div className="font-medium">{uploadedFile?.name}</Div>
+                <Div className="text-xs ">
                   {(uploadedFile?.size ? uploadedFile.size / 1024 / 1024 : 0).toFixed(2)} MB
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
+                </Div>
+              </Div>
+            </Div>
+            <Div className="flex items-center gap-2">
               {/* Edit button for re-cropping */}
               {isImage && !isEditing && (
                 <Button
@@ -314,7 +316,7 @@ export function PlanUploader({
                   type="button"
                 >
                   <Icon name="lucide:Edit3" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
-                  <span className="hidden sm:inline">{t('uploader.edit')}</span>
+                  <Span className="hidden sm:inline">{t('uploader.edit')}</Span>
                 </Button>
               )}
               <Button
@@ -325,26 +327,26 @@ export function PlanUploader({
                 aria-label="Remove file"
                 type="button"
               >
-                <Icon name="lucide:X" className="w-6 h-6 sm:w-5 sm:h-5 text-gray-500" />
+                <Icon name="lucide:X" className="w-6 h-6 sm:w-5 sm:h-5 text-muted-foreground" />
               </Button>
-            </div>
-          </div>
+            </Div>
+          </Div>
 
           {/* Image preview when not editing */}
           {preview && isImage && !isEditing && (
-            <div className="mb-4">
+            <Div className="mb-4">
               <img
                 src={preview}
                 alt="Preview"
                 className="w-full h-auto max-h-64 object-contain rounded border"
               />
-            </div>
+            </Div>
           )}
 
           {/* Image editor (minimal) */}
           {preview && isImage && isEditing && (
-            <div className="space-y-4">
-              <div className="relative w-full overflow-hidden rounded border h-80 sm:h-96 md:h-[420px]">
+            <Div className="space-y-4">
+              <Div className="relative w-full overflow-hidden rounded border h-80 sm:h-96 md:h-[420px]">
                 <Cropper
                   image={preview}
                   crop={crop}
@@ -362,14 +364,14 @@ export function PlanUploader({
                   minZoom={0.1}
                   maxZoom={3}
                 />
-              </div>
+              </Div>
 
               {/* Controls: ONLY zoom, rotation, width, height */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <Div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {/* Zoom */}
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <label className="text-xs sm:text-sm block">{t('uploader.zoom')}</label>
-                  <div className="flex items-center gap-3">
+                  <Div className="flex items-center gap-3">
                     <input
                       type="range"
                       min={0.1}
@@ -388,14 +390,14 @@ export function PlanUploader({
                         [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-2 sm:[&::-webkit-slider-thumb]:-mt-1.5
                         [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
                     />
-                    <span className="text-xs w-10 text-right">{zoom.toFixed(1)}x</span>
-                  </div>
-                </div>
+                    <Span className="text-xs w-10 text-right">{zoom.toFixed(1)}x</Span>
+                  </Div>
+                </Div>
 
                 {/* Rotation */}
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <label className="text-xs sm:text-sm block">{t('uploader.rotation')}</label>
-                  <div className="flex items-center gap-2 w-full">
+                  <Div className="flex items-center gap-2 w-full">
                     <Button
                       onClick={() => setRotation(prev => prev - 90)}
                       size="sm"
@@ -414,11 +416,11 @@ export function PlanUploader({
                       + 90°
                       <Icon name="lucide:RotateCw" className="w-5 h-5 sm:w-4 sm:h-4" />
                     </Button>
-                  </div>
-                </div>
+                  </Div>
+                </Div>
 
                 {/* Width (slider + number) */}
-                <div className="flex items-center gap-3">
+                <Div className="flex items-center gap-3">
                   <label htmlFor="crop-width" className="text-sm w-24 flex items-center gap-1">
                     <Icon name="lucide:MoveHorizontal" className="w-5 h-5" />
                   </label>
@@ -457,11 +459,11 @@ export function PlanUploader({
                     min={MIN_W}
                     max={MAX_W}
                   />
-                  <span className="text-xs text-gray-600">px</span>
-                </div>
+                  <Span className="text-xs text-muted-foreground">px</Span>
+                </Div>
 
                 {/* Height (slider + number) */}
-                <div className="flex items-center gap-3">
+                <Div className="flex items-center gap-3">
                   <label htmlFor="crop-height" className="text-sm w-24 flex items-center gap-1">
                     <Icon name="lucide:MoveVertical" className="w-5 h-5" />
                   </label>
@@ -500,12 +502,12 @@ export function PlanUploader({
                     min={MIN_H}
                     max={MAX_H}
                   />
-                  <span className="text-xs text-gray-600">px</span>
-                </div>
-              </div>
+                  <Span className="text-xs text-muted-foreground">px</Span>
+                </Div>
+              </Div>
 
               {/* Actions */}
-              <div className="flex gap-3">
+              <Div className="flex gap-3">
                 <Button
                   onClick={handleApply}
                   className="flex-1 bg-gradient-to-r from-fengshui-primary to-fengshui-secondary hover:from-fengshui-primary-dark hover:to-fengshui-secondary-dark text-white shadow-lg hover:shadow-xl transition-all text-base font-semibold py-3"
@@ -518,23 +520,23 @@ export function PlanUploader({
                   <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
                   {t('uploader.cancel')}
                 </Button>
-              </div>
-            </div>
+              </Div>
+            </Div>
           )}
 
           {/* PDF preview (minimal) */}
           {uploadedFile?.type === 'application/pdf' && (
-            <div className="flex items-center justify-center h-56 bg-gray-50 rounded border">
-              <div className="text-center">
+            <Div className="flex items-center justify-center h-56 bg-muted rounded border">
+              <Div className="text-center">
                 <Icon name="lucide:FileText" className="w-14 h-14  mx-auto mb-2" />
-                <p className="">{t('uploader.pdfLoaded')}</p>
-                <p className="text-xs text-gray-500">{uploadedFile?.name}</p>
-              </div>
-            </div>
+                <P className="">{t('uploader.pdfLoaded')}</P>
+                <P className="text-xs text-muted-foreground">{uploadedFile?.name}</P>
+              </Div>
+            </Div>
           )}
-        </div>
+        </Div>
       )}
-    </div>
+    </Div>
   )
 }
 

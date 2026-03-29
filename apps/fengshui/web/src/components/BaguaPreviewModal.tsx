@@ -643,7 +643,7 @@ export function BaguaPreviewModal({
           <Button
             onClick={generatePDF}
             disabled={isGenerating}
-            className="bg-blue-600 text-white hover:bg-blue-700 flex-1 sm:flex-initial"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 sm:flex-initial"
           >
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
             {isGenerating ? t('pdfModal.generating') : t('pdfModal.generatePdf')}
@@ -651,7 +651,7 @@ export function BaguaPreviewModal({
           <Button
             onClick={handleDownloadPDF}
             disabled={!pdfUrl || isGenerating}
-            className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white flex-1 sm:flex-initial"
+            className="bg-gradient-to-r from-destructive to-warning hover:from-destructive/90 hover:to-warning/90 text-white flex-1 sm:flex-initial"
           >
             <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
             {t('pdfModal.downloadPdf')}
@@ -664,20 +664,22 @@ export function BaguaPreviewModal({
       <div className="flex flex-col items-center gap-4 px-2 sm:px-0">
         {isGenerating && (
           <div
-            className="w-full border border-gray-200 rounded-lg p-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center flex items-center justify-center"
+            className="w-full border border-border rounded-lg p-6 bg-gradient-to-br from-primary/5 to-primary/10 text-center flex items-center justify-center"
             style={{ minHeight: 'calc(-6rem + 70vh)', maxHeight: 'calc(-6rem + 70vh)' }}
           >
             <div className="flex flex-col items-center gap-6">
               <div className="flex items-center gap-4">
-                <Icon name="lucide:FileText" className="w-12 h-12 text-blue-600" />
-                <Icon name="lucide:Loader2" className="w-10 h-10 text-blue-500 animate-spin" />
+                <Icon name="lucide:FileText" className="w-12 h-12 text-primary" />
+                <Icon name="lucide:Loader2" className="w-10 h-10 text-primary animate-spin" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">
+                <h3 className="font-semibold text-foreground mb-2">
                   {t('pdfModal.generatingInProgress')}
                 </h3>
-                <p className="text-sm text-gray-600 mb-1">{t('pdfModal.capturingAnalysis')}</p>
-                <p className="text-xs text-gray-500">{t('pdfModal.twoPages')}</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {t('pdfModal.capturingAnalysis')}
+                </p>
+                <p className="text-xs text-muted-foreground">{t('pdfModal.twoPages')}</p>
               </div>
             </div>
           </div>
@@ -688,16 +690,16 @@ export function BaguaPreviewModal({
           <div className="w-full">
             {isMobile ? (
               // Mobile: Message informatif
-              <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 text-center">
-                <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-green-600" />
-                <h3 className="font-semibold text-gray-900 mb-2">PDF généré avec succès !</h3>
-                <p className="text-sm text-gray-600 mb-4">
+              <div className="border border-border rounded-lg p-6 bg-muted text-center">
+                <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-success" />
+                <h3 className="font-semibold text-foreground mb-2">PDF généré avec succès !</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   L'aperçu n'est pas disponible sur mobile, mais votre PDF 2 pages est prêt.
                 </p>
               </div>
             ) : (
               // Desktop: Preview des 2 pages
-              <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-inner">
+              <div className="border border-border rounded-lg p-4 bg-background shadow-inner">
                 {Object.keys(previewImageUrls).length > 0 ? (
                   <div className="space-y-6">
                     {/* Page 1 - Wheel */}
@@ -721,7 +723,7 @@ export function BaguaPreviewModal({
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-64 text-gray-500">
+                  <div className="flex items-center justify-center h-64 text-muted-foreground">
                     <Icon name="lucide:ImageIcon" className="w-12 h-12 mr-2" />
                     <span>Preview en cours de chargement...</span>
                   </div>

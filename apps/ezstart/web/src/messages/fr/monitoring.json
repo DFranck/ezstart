@@ -22,115 +22,134 @@
       "recentTitle": "Erreurs Récentes",
       "recentDescription": "Flux en direct des erreurs de tous les services surveillés"
     },
-  "tabs": {
-    "projects": "Projets",
-    "audits": "Audits",
-    "errors": "Erreurs"
-  },
-  "metrics": {
-    "projectsHealth": {
-      "title": "Santé des projets",
-      "operational": "opérationnel"
+    "tabs": {
+      "projects": "Projets",
+      "audits": "Audits",
+      "errors": "Erreurs"
     },
-    "avgResponseTime": {
-      "title": "Temps de réponse moy.",
-      "subtitle": "Dernières 24 heures"
-    },
-    "passingAudits": {
-      "title": "Audits réussis",
-      "passing": "réussis",
-      "target": "≥90/100"
-    },
-    "lowestScore": {
-      "title": "Score le plus bas"
-    },
-    "totalErrors": {
-      "title": "Total d'erreurs",
-      "criticalErrors": "critiques/erreurs"
-    },
-    "mostAffectedProject": {
-      "title": "Projet le plus affecté",
-      "none": "Aucun"
-    }
-  },
-  "errors": {
-    "loading": "Chargement des journaux d'erreurs...",
-    "noErrors": "Aucune erreur trouvée",
-    "filters": {
-      "all": "Toutes",
-      "critical": "Critique",
-      "error": "Erreur",
-      "warning": "Avertissement"
-    }
-  },
-  "projects": {
-    "status": {
-      "healthy": "Sain",
-      "degraded": "Dégradé",
-      "down": "Hors ligne"
-    }
-  },
-  "audits": {
-    "score": {
-      "excellent": "Excellent",
-      "veryGood": "Très bien",
-      "good": "Bien",
-      "needsWork": "À améliorer",
-      "target": "Cible : 90+"
-    }
-  },
-  "overview": {
-    "stats": {
-      "globalHealth": {
-        "title": "Santé Globale",
-        "subtitle": "audits ≥90/100"
-      },
-      "servicesUptime": {
-        "title": "Disponibilité des Services",
-        "healthy": "opérationnels"
-      },
-      "criticalErrors": {
-        "title": "Erreurs Critiques",
-        "subtitle": "Dernières 24 heures"
+    "metrics": {
+      "projectsHealth": {
+        "title": "Santé des projets",
+        "operational": "opérationnel"
       },
       "avgResponseTime": {
-        "title": "Temps de Réponse Moyen",
-        "subtitle": "Toutes les APIs"
+        "title": "Temps de réponse moy.",
+        "subtitle": "Dernières 24 heures"
+      },
+      "passingAudits": {
+        "title": "Audits réussis",
+        "passing": "réussis",
+        "target": "≥90/100"
+      },
+      "lowestScore": {
+        "title": "Score le plus bas"
+      },
+      "totalErrors": {
+        "title": "Total d'erreurs",
+        "criticalErrors": "critiques/erreurs"
+      },
+      "mostAffectedProject": {
+        "title": "Projet le plus affecté",
+        "none": "Aucun"
       }
     },
-    "systemStatus": {
-      "title": "État du Système",
-      "projectsHealth": {
-        "title": "Santé des Projets",
-        "description": "services opérationnels"
-      },
-      "codeQuality": {
-        "title": "Qualité du Code",
-        "description": "audits complétés"
-      },
-      "errorMonitoring": {
-        "title": "Surveillance des Erreurs",
-        "description": "erreurs en 24h"
-      },
-      "performance": {
-        "title": "Performance",
-        "description": "réponse moy."
-      },
-      "issues": "problèmes"
+    "errors": {
+      "loading": "Chargement des journaux d'erreurs...",
+      "noErrors": "Aucune erreur trouvée",
+      "filters": {
+        "all": "Toutes",
+        "critical": "Critique",
+        "error": "Erreur",
+        "warning": "Avertissement"
+      }
     },
-    "recentActivity": {
-      "title": "Activité Récente",
-      "healthCheckPassed": "Vérification réussie",
-      "noRecentActivity": "Aucune activité récente"
+    "projects": {
+      "status": {
+        "healthy": "Sain",
+        "degraded": "Dégradé",
+        "down": "Hors ligne"
+      }
     },
-    "quickActions": {
-      "title": "Actions Rapides",
-      "viewAllProjects": "Voir Tous les Projets",
-      "runQualityAudits": "Lancer les Audits Qualité",
-      "viewErrorLogs": "Voir les Logs d'Erreurs",
-      "openSentry": "Ouvrir Sentry",
-      "viewAnalytics": "Voir Analytics (Vercel)"
+    "audits": {
+      "score": {
+        "excellent": "Excellent",
+        "veryGood": "Très bien",
+        "good": "Bien",
+        "needsWork": "À améliorer",
+        "target": "Cible : 90+"
+      }
+    },
+    "systemStatusDescription": "Santé en temps réel de toutes les catégories de surveillance",
+    "recentActivityDescription": "Derniers événements de tous les services",
+    "manageDescription": "Gérer votre tableau de bord de surveillance",
+    "failedToLoad": "Échec du chargement des données de surveillance",
+    "failedToLoadErrors": "Échec du chargement des logs d'erreurs",
+    "retry": "Réessayer",
+    "errorLogs": "Journaux d'Erreurs",
+    "errorLogsDescription": "Erreurs récentes capturées de tous les projets (intégration Sentry)",
+    "refreshing": "Rafraîchissement...",
+    "allClear": "Tout est OK !",
+    "allSystemsOperational": "Aucune erreur détectée. Tous les systèmes opérationnels",
+    "view": "Voir",
+    "occurrences": "{count} occurrences",
+    "usersAffected": "{count} utilisateurs affectés",
+    "nextUpdateIn": "Prochaine mise à jour dans : {time}",
+    "projectsHealthScore": "Score de Santé des Projets",
+    "projectsMonitored": "{count} projets surveillés",
+    "allProjects": "Tous les Projets ({count})",
+    "responseTime": "Temps de Réponse",
+    "overview": {
+      "stats": {
+        "globalHealth": {
+          "title": "Santé Globale",
+          "subtitle": "audits ≥90/100"
+        },
+        "servicesUptime": {
+          "title": "Disponibilité des Services",
+          "healthy": "opérationnels"
+        },
+        "criticalErrors": {
+          "title": "Erreurs Critiques",
+          "subtitle": "Dernières 24 heures"
+        },
+        "avgResponseTime": {
+          "title": "Temps de Réponse Moyen",
+          "subtitle": "Toutes les APIs"
+        }
+      },
+      "systemStatus": {
+        "title": "État du Système",
+        "projectsHealth": {
+          "title": "Santé des Projets",
+          "description": "services opérationnels"
+        },
+        "codeQuality": {
+          "title": "Qualité du Code",
+          "description": "audits complétés"
+        },
+        "errorMonitoring": {
+          "title": "Surveillance des Erreurs",
+          "description": "erreurs en 24h"
+        },
+        "performance": {
+          "title": "Performance",
+          "description": "réponse moy."
+        },
+        "issues": "problèmes"
+      },
+      "recentActivity": {
+        "title": "Activité Récente",
+        "healthCheckPassed": "Vérification réussie",
+        "noRecentActivity": "Aucune activité récente"
+      },
+      "quickActions": {
+        "title": "Actions Rapides",
+        "viewAllProjects": "Voir Tous les Projets",
+        "runQualityAudits": "Lancer les Audits Qualité",
+        "viewErrorLogs": "Voir les Logs d'Erreurs",
+        "openSentry": "Ouvrir Sentry",
+        "viewAnalytics": "Voir Analytics (Vercel)"
+      }
     }
-  }
   }
 }

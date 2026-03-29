@@ -3,7 +3,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+  findById as findByIdQuery,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 import { summonersWarParser } from '../parsers/summoners-war.js'
@@ -26,7 +32,7 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     const { profile } = validation.data
 
     const Scan = await getScanModel()
-    const scan = await (Scan.findById as any)(req.params.id)
+    const scan = await findByIdQuery(Scan, req.params.id)
 
     if (!scan) {
       return sendError(res, 'Scan not found', 404)
@@ -68,9 +74,10 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     await scan.save()
 
     // Map _id → id for frontend compatibility
+    const obj = scan.toObject() as Record<string, any>
     const mapped = {
-      ...(scan.toObject() as any),
-      id: (scan as any)._id?.toString(),
+      ...obj,
+      id: obj._id?.toString(),
       _id: undefined,
     }
 

@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, findOneAndDelete } from '@ezstart/express-core'
 import { getGameConfigModel } from '../models/game-config.js'
 
 const router: any = Router()
@@ -18,7 +18,7 @@ router.delete('/:gameType/:layoutName', async (req: any, res: any) => {
 
     const GameConfig = await getGameConfigModel()
 
-    const config = await (GameConfig.findOneAndDelete as any)({ gameType, layoutName }).exec()
+    const config = await findOneAndDelete(GameConfig, { gameType, layoutName }).exec()
 
     if (!config) {
       return sendError(res, 'Layout not found', 404)

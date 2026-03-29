@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, findOne, findMany } from '@ezstart/express-core'
 import { getGameConfigModel } from '../models/game-config.js'
 
 const router: any = Router()
@@ -13,7 +13,7 @@ router.get('/:gameType/:layoutName', async (req: any, res: any) => {
   try {
     const GameConfig = await getGameConfigModel()
 
-    const config = await (GameConfig.findOne as any)({
+    const config = await findOne(GameConfig, {
       gameType: req.params.gameType,
       layoutName: req.params.layoutName,
     })
@@ -40,12 +40,7 @@ router.get('/:gameType', async (req: any, res: any) => {
     const filter = { gameType: req.params.gameType }
 
     const [configs, total] = await Promise.all([
-      (GameConfig.find as any)(filter)
-        .sort({ updatedAt: -1 })
-        .skip(offset)
-        .limit(limit)
-        .lean()
-        .exec(),
+      findMany(GameConfig, filter).sort({ updatedAt: -1 }).skip(offset).limit(limit).lean().exec(),
       GameConfig.countDocuments(filter),
     ])
 

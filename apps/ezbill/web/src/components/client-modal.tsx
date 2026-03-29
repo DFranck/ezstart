@@ -18,6 +18,7 @@ import {
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { LoadingButton } from './loading-button'
 
 interface ClientModalProps {
@@ -30,6 +31,9 @@ interface ClientModalProps {
 export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProps) {
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const tToast = useTranslations('toast')
+  const tClient = useTranslations('client')
+  const tCommon = useTranslations('common')
 
   const [formData, setFormData] = useState<BillingClient>({
     userId: client?.userId || '',
@@ -104,9 +108,9 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
         onSave()
         onClose()
       },
-      toastLoading: { message: client ? 'Updating client...' : 'Creating client...' },
-      toastSuccess: { message: client ? 'Client updated' : 'Client created' },
-      toastError: { message: client ? 'Failed to update client' : 'Failed to create client' },
+      toastLoading: { message: client ? tToast('clientUpdating') : tToast('clientCreating') },
+      toastSuccess: { message: client ? tToast('clientUpdated') : tToast('clientCreated') },
+      toastError: { message: client ? tToast('clientUpdateFailed') : tToast('clientCreateFailed') },
       onLoadingChange: setIsLoading,
     })
   }
@@ -115,8 +119,8 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={client ? 'Edit Client' : 'Create Client'}
-      description={client ? 'Update client information' : 'Add a new client to your billing system'}
+      title={client ? tClient('edit') : tClient('create')}
+      description={client ? tClient('edit') : tClient('create')}
       footer={
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
@@ -126,7 +130,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             className=" hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-4 h-4 mr-2" />
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <LoadingButton
             loading={isLoading}
@@ -137,7 +141,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
           >
             <>
               <Icon name={client ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
-              {client ? 'Update Client' : 'Create Client'}
+              {client ? tClient('update') : tClient('create')}
             </>
           </LoadingButton>
         </div>
@@ -331,7 +335,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 onChange={e =>
                   setFormData({ ...formData, companyRegistrationNumber: e.target.value })
                 }
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="12345678"
               />
             </div>
@@ -344,7 +348,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
               <Input
                 value={formData.taxNumber}
                 onChange={e => setFormData({ ...formData, taxNumber: e.target.value })}
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="TAX123456789"
               />
             </div>

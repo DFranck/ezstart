@@ -77,15 +77,15 @@ function BusinessCardGeneratorContent() {
 
       {/* Generator Section */}
       <Section size="default">
-        <div className="grid lg:grid-cols-2 gap-6">
+        <Div className="grid lg:grid-cols-2 gap-6">
           {/* Configuration Panel */}
-          <div className="space-y-6">
+          <Div className="space-y-6">
             <Card variant="elevated">
               <CardHeader>
                 <H3>{t('generator.contactInfo.title')}</H3>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="card-name">{t('generator.contactInfo.nameLabel')} *</Label>
                   <Input
                     id="card-name"
@@ -94,9 +94,9 @@ function BusinessCardGeneratorContent() {
                     onChange={e => updateData({ name: e.target.value })}
                     required
                   />
-                </div>
+                </Div>
 
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="card-title">{t('generator.contactInfo.titleLabel')}</Label>
                   <Input
                     id="card-title"
@@ -104,9 +104,9 @@ function BusinessCardGeneratorContent() {
                     value={data.title}
                     onChange={e => updateData({ title: e.target.value })}
                   />
-                </div>
+                </Div>
 
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="card-company">{t('generator.contactInfo.companyLabel')}</Label>
                   <Input
                     id="card-company"
@@ -114,10 +114,10 @@ function BusinessCardGeneratorContent() {
                     value={data.company}
                     onChange={e => updateData({ company: e.target.value })}
                   />
-                </div>
+                </Div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <Div className="grid grid-cols-2 gap-4">
+                  <Div className="space-y-2">
                     <Label htmlFor="card-email">{t('generator.contactInfo.emailLabel')}</Label>
                     <Input
                       id="card-email"
@@ -126,9 +126,9 @@ function BusinessCardGeneratorContent() {
                       value={data.email}
                       onChange={e => updateData({ email: e.target.value })}
                     />
-                  </div>
+                  </Div>
 
-                  <div className="space-y-2">
+                  <Div className="space-y-2">
                     <Label htmlFor="card-phone">{t('generator.contactInfo.phoneLabel')}</Label>
                     <Input
                       id="card-phone"
@@ -137,11 +137,11 @@ function BusinessCardGeneratorContent() {
                       value={data.phone}
                       onChange={e => updateData({ phone: e.target.value })}
                     />
-                  </div>
-                </div>
+                  </Div>
+                </Div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <Div className="grid grid-cols-2 gap-4">
+                  <Div className="space-y-2">
                     <Label htmlFor="card-whatsapp">
                       {t('generator.contactInfo.whatsappLabel')}
                     </Label>
@@ -152,9 +152,9 @@ function BusinessCardGeneratorContent() {
                       value={data.whatsapp}
                       onChange={e => updateData({ whatsapp: e.target.value })}
                     />
-                  </div>
+                  </Div>
 
-                  <div className="space-y-2">
+                  <Div className="space-y-2">
                     <Label htmlFor="card-website">{t('generator.contactInfo.websiteLabel')}</Label>
                     <Input
                       id="card-website"
@@ -163,10 +163,10 @@ function BusinessCardGeneratorContent() {
                       value={data.website}
                       onChange={e => updateData({ website: e.target.value })}
                     />
-                  </div>
-                </div>
+                  </Div>
+                </Div>
 
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="card-address">{t('generator.contactInfo.addressLabel')}</Label>
                   <Input
                     id="card-address"
@@ -174,7 +174,7 @@ function BusinessCardGeneratorContent() {
                     value={data.address}
                     onChange={e => updateData({ address: e.target.value })}
                   />
-                </div>
+                </Div>
               </CardContent>
             </Card>
 
@@ -188,10 +188,10 @@ function BusinessCardGeneratorContent() {
                   onSelect={template => updateConfig({ template })}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <Div className="grid grid-cols-2 gap-4">
+                  <Div className="space-y-2">
                     <Label htmlFor="primary-color">{t('generator.design.primaryColorLabel')}</Label>
-                    <div className="flex gap-2">
+                    <Div className="flex gap-2">
                       <input
                         id="primary-color"
                         type="color"
@@ -205,14 +205,14 @@ function BusinessCardGeneratorContent() {
                         onChange={e => updateConfig({ primaryColor: e.target.value })}
                         className="flex-1"
                       />
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
 
-                  <div className="space-y-2">
+                  <Div className="space-y-2">
                     <Label htmlFor="secondary-color">
                       {t('generator.design.secondaryColorLabel')}
                     </Label>
-                    <div className="flex gap-2">
+                    <Div className="flex gap-2">
                       <input
                         id="secondary-color"
                         type="color"
@@ -226,11 +226,11 @@ function BusinessCardGeneratorContent() {
                         onChange={e => updateConfig({ secondaryColor: e.target.value })}
                         className="flex-1"
                       />
-                    </div>
-                  </div>
-                </div>
+                    </Div>
+                  </Div>
+                </Div>
 
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="qr-data">{t('generator.design.qrContentLabel')}</Label>
                   <select
                     id="qr-data"
@@ -245,9 +245,9 @@ function BusinessCardGeneratorContent() {
                     <option value="whatsapp">{t('generator.design.qrContent.whatsapp')}</option>
                     <option value="email">{t('generator.design.qrContent.email')}</option>
                   </select>
-                </div>
+                </Div>
 
-                <div className="flex items-center gap-2">
+                <Div className="flex items-center gap-2">
                   <input
                     id="include-qr"
                     type="checkbox"
@@ -258,14 +258,14 @@ function BusinessCardGeneratorContent() {
                   <Label htmlFor="include-qr" className="cursor-pointer">
                     {t('generator.design.includeQrLabel')}
                   </Label>
-                </div>
+                </Div>
               </CardContent>
             </Card>
 
             <Button onClick={handleReset} variant="outline" className="w-full">
               {t('generator.resetButton')}
             </Button>
-          </div>
+          </Div>
 
           {/* Preview Panel */}
           <Card variant="elevated" className="lg:sticky lg:top-6 h-fit">
@@ -276,7 +276,7 @@ function BusinessCardGeneratorContent() {
               <BusinessCardCanvas data={data} config={config} />
             </CardContent>
           </Card>
-        </div>
+        </Div>
       </Section>
 
       {/* Features Section */}
@@ -284,7 +284,7 @@ function BusinessCardGeneratorContent() {
         <Div layout="center">
           <H3>{t('features.title')}</H3>
           <P className="text-muted-foreground mb-6">{t('features.description')}</P>
-          <div className="grid md:grid-cols-3 gap-4">
+          <Div className="grid md:grid-cols-3 gap-4">
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Zap" className="w-8 h-8 mx-auto text-primary" />
@@ -312,7 +312,7 @@ function BusinessCardGeneratorContent() {
                 </P>
               </CardContent>
             </Card>
-          </div>
+          </Div>
         </Div>
       </Section>
     </>

@@ -1,6 +1,15 @@
 'use client'
 
-import { Button, Div, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ezstart/ui/components'
+import {
+  Button,
+  Div,
+  P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -10,9 +19,28 @@ import { ScanCard } from '@/components/scan-card'
 import { useScans } from '@/hooks/use-scans'
 
 const RUNE_SETS = [
-  'violent', 'swift', 'will', 'rage', 'fatal', 'despair', 'blade', 'focus',
-  'guard', 'endure', 'shield', 'revenge', 'nemesis', 'vampire', 'energy',
-  'destroy', 'fight', 'determination', 'enhance', 'accuracy', 'tolerance', 'cruel',
+  'violent',
+  'swift',
+  'will',
+  'rage',
+  'fatal',
+  'despair',
+  'blade',
+  'focus',
+  'guard',
+  'endure',
+  'shield',
+  'revenge',
+  'nemesis',
+  'vampire',
+  'energy',
+  'destroy',
+  'fight',
+  'determination',
+  'enhance',
+  'accuracy',
+  'tolerance',
+  'cruel',
 ]
 
 const PAGE_SIZE = 20
@@ -37,7 +65,7 @@ export default function GameHistoryPage() {
     setPage(1)
   }
 
-  const apiStatus = statusFilter !== 'all' ? statusFilter as ScanStatus : undefined
+  const apiStatus = statusFilter !== 'all' ? (statusFilter as ScanStatus) : undefined
 
   const { scans, total, hasMore, isLoading } = useScans({
     gameType: game,
@@ -60,13 +88,23 @@ export default function GameHistoryPage() {
     if (feedbackFilter === 'none' && scan.feedback) return false
 
     if (reportFilter === 'hasReports' && (!scan.reports || scan.reports.length === 0)) return false
-    if (reportFilter === 'openReports' && (!scan.reports || !scan.reports.some(r => r.status === 'open'))) return false
+    if (
+      reportFilter === 'openReports' &&
+      (!scan.reports || !scan.reports.some(r => r.status === 'open'))
+    )
+      return false
     if (reportFilter === 'noReports' && scan.reports && scan.reports.length > 0) return false
 
     return true
   })
 
-  const hasClientFilters = levelFilter !== 'all' || adviceFilter !== 'all' || setFilter !== 'all' || slotFilter !== 'all' || feedbackFilter !== 'all' || reportFilter !== 'all'
+  const hasClientFilters =
+    levelFilter !== 'all' ||
+    adviceFilter !== 'all' ||
+    setFilter !== 'all' ||
+    slotFilter !== 'all' ||
+    feedbackFilter !== 'all' ||
+    reportFilter !== 'all'
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const rangeStart = (page - 1) * PAGE_SIZE + 1
   const rangeEnd = Math.min(page * PAGE_SIZE, total)
@@ -103,7 +141,7 @@ export default function GameHistoryPage() {
             <SelectValue placeholder="Level" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All +</SelectItem>
+            <SelectItem value="all">{t('history.allLevels')}</SelectItem>
             <SelectItem value="3">+3</SelectItem>
             <SelectItem value="6">+6</SelectItem>
             <SelectItem value="9">+9</SelectItem>
@@ -117,11 +155,11 @@ export default function GameHistoryPage() {
             <SelectValue placeholder="Advice" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Advice</SelectItem>
-            <SelectItem value="sell">SELL</SelectItem>
-            <SelectItem value="upgrade">UPGRADE</SelectItem>
-            <SelectItem value="keep">KEEP</SelectItem>
-            <SelectItem value="grind">GRIND</SelectItem>
+            <SelectItem value="all">{t('history.allAdvice')}</SelectItem>
+            <SelectItem value="sell">{t('history.sell')}</SelectItem>
+            <SelectItem value="upgrade">{t('history.upgrade')}</SelectItem>
+            <SelectItem value="keep">{t('history.keep')}</SelectItem>
+            <SelectItem value="grind">{t('history.grind')}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -130,9 +168,11 @@ export default function GameHistoryPage() {
             <SelectValue placeholder="Set" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Sets</SelectItem>
+            <SelectItem value="all">{t('history.allSets')}</SelectItem>
             {RUNE_SETS.map(s => (
-              <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+              <SelectItem key={s} value={s} className="capitalize">
+                {s}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -142,9 +182,11 @@ export default function GameHistoryPage() {
             <SelectValue placeholder="Slot" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Slots</SelectItem>
+            <SelectItem value="all">{t('history.allSlots')}</SelectItem>
             {[1, 2, 3, 4, 5, 6].map(s => (
-              <SelectItem key={s} value={String(s)}>Slot {s}</SelectItem>
+              <SelectItem key={s} value={String(s)}>
+                {t('history.slot', { number: String(s) })}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -179,8 +221,7 @@ export default function GameHistoryPage() {
         <P className="text-xs text-muted-foreground mb-3">
           {hasClientFilters
             ? `${filteredScans.length} / ${scans.length} runes (page ${page}/${totalPages}, ${total} total)`
-            : `${rangeStart}-${rangeEnd} sur ${total} runes`
-          }
+            : `${rangeStart}-${rangeEnd} sur ${total} runes`}
         </P>
       )}
 
@@ -193,7 +234,7 @@ export default function GameHistoryPage() {
         </Div>
       ) : filteredScans.length > 0 ? (
         <Div className="space-y-3">
-          {filteredScans.map((scan) => (
+          {filteredScans.map(scan => (
             <ScanCard key={scan.id} scan={scan} />
           ))}
         </Div>

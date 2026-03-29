@@ -1,0 +1,66 @@
+{
+  "admin": {
+    "title": "Admin Panel",
+    "description": "Manage users, roles, permissions, and features across the @ezstart monorepo",
+    "userManagement": {
+      "title": "User Management",
+      "searchPlaceholder": "Search by email, username, name...",
+      "allRoles": "All Roles",
+      "roles": {
+        "superadmin": "Superadmin",
+        "admin": "Admin",
+        "manager": "Manager",
+        "betaTester": "Beta Tester",
+        "client": "Client"
+      },
+      "refresh": "Refresh",
+      "showing": "Showing {count} of {total} users",
+      "previous": "Previous",
+      "pageOf": "Page {page} of {totalPages}",
+      "next": "Next",
+      "errorLoading": "Error loading users",
+      "noUsers": "No users found"
+    },
+    "table": {
+      "user": "User",
+      "email": "Email",
+      "roles": "Roles",
+      "apps": "Apps",
+      "verified": "Verified",
+      "actions": "Actions",
+      "noRoles": "No roles",
+      "noApps": "No apps",
+      "verifiedLabel": "Verified",
+      "unverified": "Unverified",
+      "notVerified": "Not verified",
+      "edit": "Edit",
+      "editUser": "Edit User",
+      "locked": "Locked"
+    },
+    "editModal": {
+      "title": "Edit User: {username}",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "userInfo": {
+        "title": "User Information",
+        "email": "Email:",
+        "username": "Username:",
+        "name": "Name:",
+        "created": "Created:"
+      },
+      "emailVerified": "Email Verified",
+      "globalRoles": {
+        "title": "Global Roles (Cross-App Access)",
+        "description": "Only superadmin can be a global role with access to everything everywhere"
+      },
+      "appAccess": {
+        "title": "Applications Access & App-Specific Roles",
+        "description": "Select which apps the user can access and assign roles for each app"
+      },
+      "inheritedPermissions": "Inherited Permissions (from roles)",
+      "inheritedFeatures": "Inherited Features (from roles)",
+      "errorSaving": "Error saving changes"
+    }
+  }
+}

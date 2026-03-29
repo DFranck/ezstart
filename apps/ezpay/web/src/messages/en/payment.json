@@ -30,5 +30,19 @@
     "completed": "Completed",
     "failed": "Failed",
     "refunded": "Refunded"
+  },
+  "home": {
+    "title": "EZPay",
+    "subtitle": "Universal Payment System for the EZStart ecosystem",
+    "donations": "Donations",
+    "donationsDescription": "Accept donations with testimonials and public walls",
+    "purchases": "Purchases",
+    "purchasesDescription": "Sell products and in-app items with Stripe",
+    "subscriptions": "Subscriptions",
+    "subscriptionsDescription": "Manage recurring payments and premium plans",
+    "gettingStarted": "Getting Started",
+    "installSdk": "1. Install SDK",
+    "setupClient": "2. Setup Client",
+    "useComponents": "3. Use Components"
   }
 }

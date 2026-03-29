@@ -30,6 +30,7 @@
     },
     "packages": {
       "title": "Our Offers",
+      "contactUs": "Contact Us",
       "free": {
         "title": "Self-Awareness",
         "subtitle": "For self-awareness & curious CEOs",
@@ -92,6 +93,7 @@
     ],
     "challenge": {
       "title": "The world is facing <strong>extreme weather</strong> due to climate change, Companies are pushed to move beyond Business as Usual and to aim to sustainable growth.",
+      "sealTitle": "Southeast Asia's Climate Crisis Challenges",
       "challenges": [
         "Limited resources to establish robust ESG frameworks and demonstrate real climate impact",
         "Lack of structured documentation to meet investor ESG requirements for fundraising",

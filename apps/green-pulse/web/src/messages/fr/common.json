@@ -23,5 +23,143 @@
     "useCases": "Cas d'usage",
     "pricing": "Tarifs",
     "partnership": "Partenariat"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Tableau de bord Admin",
+      "welcomeBack": "Bienvenue, {name}"
+    },
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "systemPrompts": "Prompts système",
+      "betaWaitlist": "Liste d'attente Beta",
+      "chat": "Chat"
+    },
+    "cards": {
+      "systemPrompts": {
+        "title": "Prompts système",
+        "description": "Gérer les prompts IA pour le chat et l'extraction"
+      },
+      "betaWaitlist": {
+        "title": "Liste d'attente Beta",
+        "description": "Approuver ou refuser les demandes d'accès bêta"
+      }
+    },
+    "prompts": {
+      "title": "Prompts système",
+      "description": "Gérer les prompts IA utilisés pour le chat et l'extraction ESG",
+      "manageDescription": "Gérer les prompts IA pour le chat et l'extraction",
+      "newPrompt": "Nouveau prompt",
+      "editPrompt": "Modifier le prompt",
+      "createPrompt": "Créer un nouveau prompt",
+      "noPrompts": "Aucun prompt trouvé",
+      "createFirst": "Créez votre premier prompt",
+      "loading": "Chargement des prompts...",
+      "loadFailed": "Échec du chargement des prompts",
+      "key": "Clé (identifiant unique)",
+      "name": "Nom",
+      "description_label": "Description (optionnel)",
+      "type": "Type",
+      "provider": "Fournisseur",
+      "content": "Prompt système (personnalité, rôle)",
+      "contentPlaceholder": "Entrez le prompt système (ex: 'Vous êtes GreenPulse.AI, un conseiller ESG...')",
+      "characters": "{count}/10000 caractères - Répété dans chaque message",
+      "active": "Actif",
+      "setDefault": "Définir par défaut pour ce type",
+      "updated": "Mis à jour : {date}",
+      "updatedBy": " par {user}",
+      "cancel": "Annuler",
+      "update": "Mettre à jour",
+      "create": "Créer",
+      "promptContent": "Contenu du prompt",
+      "configuration": "Configuration",
+      "deleteConfirm": "Supprimer le prompt \"{key}\" ? Cette action est irréversible.",
+      "config": {
+        "title": "Configuration",
+        "description": "Paramètres appliqués une fois (non répétés dans le contexte)",
+        "showAdvanced": "Afficher avancé",
+        "hideAdvanced": "Masquer avancé",
+        "generationParams": "Paramètres de génération",
+        "temperature": "Température (0-1)",
+        "temperatureHelp": "Plus haut = plus créatif, Plus bas = plus ciblé",
+        "maxTokens": "Tokens max",
+        "maxTokensHelp": "Longueur maximale de la réponse",
+        "topP": "Top P (0-1)",
+        "topK": "Top K (Gemini uniquement)",
+        "behavioralRules": "Règles comportementales",
+        "rulesDescription": "Instructions appliquées hors contexte de conversation",
+        "rulePlaceholder": "ex: Toujours répondre dans la langue de l'utilisateur",
+        "noRules": "Aucune règle définie",
+        "constraints": "Contraintes",
+        "maxResponseLength": "Longueur max de réponse (caractères)",
+        "allowedTopics": "Sujets autorisés",
+        "allowedTopicPlaceholder": "ex: ESG, finance",
+        "forbiddenTopics": "Sujets interdits",
+        "forbiddenTopicPlaceholder": "ex: politique, religion",
+        "requiredFormat": "Format requis",
+        "noRequirement": "Aucune exigence",
+        "safety": "Sécurité & Modération",
+        "blockThreshold": "Seuil de blocage (Gemini)",
+        "filterLevel": "Niveau de filtre (0-10)",
+        "rawJson": "JSON brut (lecture seule)"
+      }
+    },
+    "waitlist": {
+      "title": "Liste d'attente Beta",
+      "description": "Approuver ou refuser les demandes d'accès bêta pour GreenPulse",
+      "management": "Gestion de la liste d'attente Beta",
+      "manageDescription": "Approuver ou refuser les demandes d'accès bêta",
+      "loading": "Chargement de la liste d'attente...",
+      "loadFailed": "Échec du chargement de la liste",
+      "noEntries": "Aucune entrée trouvée",
+      "total": "Total : {count}",
+      "pending": "En attente : {count}",
+      "activated": "Activés : {count}",
+      "all": "Tout",
+      "filterPending": "En attente",
+      "filterInvited": "Invités",
+      "filterActivated": "Activés",
+      "filterRejected": "Rejetés",
+      "headers": {
+        "email": "Email",
+        "status": "Statut",
+        "added": "Ajouté",
+        "accessCode": "Code d'accès",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "En attente",
+        "invited": "Invité",
+        "activated": "Activé",
+        "rejected": "Rejeté"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "waitingRegistration": "En attente d'inscription",
+        "activeUser": "Utilisateur actif",
+        "codeCopied": "Code copié !"
+      }
+    }
+  },
+  "beta": {
+    "requestSubmitted": "Demande envoyée !",
+    "waitingApproval": "En attente de l'approbation admin. Vous serez notifié une fois approuvé.",
+    "approved": "Vous avez été approuvé !",
+    "enterCode": "Entrez votre code d'accès pour activer l'accès bêta :",
+    "codePlaceholder": "BETA-GP-XXXXXXXX",
+    "activateAccess": "Activer l'accès",
+    "accessGranted": "Accès accordé !",
+    "accessActivated": "Votre accès bêta a été activé. Cliquez ci-dessous pour rafraîchir votre session.",
+    "refreshSession": "Rafraîchir la session",
+    "accessDenied": "Accès refusé",
+    "accessRejected": "Votre demande d'accès bêta a été rejetée. Veuillez contacter le support pour plus d'informations.",
+    "requestAccess": "Demander l'accès Beta"
+  },
+  "actions": {
+    "cancel": "Annuler",
+    "create": "Créer",
+    "creating": "Création...",
+    "contactUs": "Nous contacter"
   }
 }

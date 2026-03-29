@@ -14,6 +14,7 @@ import {
 } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -31,6 +32,7 @@ interface FormData {
 }
 
 export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
+  const t = useTranslations('register')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -103,9 +105,9 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email *</FormLabel>
+              <FormLabel>{t('email')}</FormLabel>
               <FormControl>
-                <Input type="email" required placeholder="your@email.com" {...field} />
+                <Input type="email" required placeholder={t('emailPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -117,9 +119,9 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username *</FormLabel>
+              <FormLabel>{t('username')}</FormLabel>
               <FormControl>
-                <Input type="text" required placeholder="username" {...field} />
+                <Input type="text" required placeholder={t('usernamePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -132,9 +134,9 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs md:text-sm">First Name</FormLabel>
+                <FormLabel className="text-xs md:text-sm">{t('firstName')}</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder="John" {...field} />
+                  <Input type="text" placeholder={t('firstNamePlaceholder')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -145,9 +147,9 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs md:text-sm">Last Name</FormLabel>
+                <FormLabel className="text-xs md:text-sm">{t('lastName')}</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder="Doe" {...field} />
+                  <Input type="text" placeholder={t('lastNamePlaceholder')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -160,18 +162,23 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password *</FormLabel>
+              <FormLabel>{t('password')}</FormLabel>
               <FormControl>
-                <PasswordInput required minLength={6} placeholder="••••••••" {...field} />
+                <PasswordInput
+                  required
+                  minLength={6}
+                  placeholder={t('passwordPlaceholder')}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
-              <p className="mt-1 text-xs text-muted-foreground">Minimum 6 characters</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t('passwordHint')}</p>
             </FormItem>
           )}
         />
 
         <Button type="submit" disabled={loading} className="w-full" variant={'brand'}>
-          {loading ? 'Creating account...' : 'Create account'}
+          {loading ? t('submitting') : t('submit')}
         </Button>
       </form>
     </Form>

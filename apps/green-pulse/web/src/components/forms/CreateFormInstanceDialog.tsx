@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 
 interface CreateFormInstanceDialogProps {
   projectId: string
@@ -25,6 +26,8 @@ export function CreateFormInstanceDialog({
   projectId,
   workspaceSlug,
 }: CreateFormInstanceDialogProps) {
+  const t = useTranslations('forms.createInstance')
+  const tActions = useTranslations('actions')
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [selectedConfigId, setSelectedConfigId] = useState('')
@@ -65,25 +68,23 @@ export function CreateFormInstanceDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>+ New Form</Button>
+        <Button>{t('newForm')}</Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Form Instance</DialogTitle>
-          <DialogDescription>Choose a form template and filling mode</DialogDescription>
+          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogDescription>{t('description')}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Form Template Selection */}
           <div>
-            <Label className="mb-3 block">Select Form Template *</Label>
+            <Label className="mb-3 block">{t('selectTemplate')}</Label>
             {isLoading ? (
-              <P className="text-sm text-muted-foreground">Loading form templates...</P>
+              <P className="text-sm text-muted-foreground">{t('loadingTemplates')}</P>
             ) : formConfigs.length === 0 ? (
-              <P className="text-sm text-muted-foreground">
-                No form templates available. Please seed the database first.
-              </P>
+              <P className="text-sm text-muted-foreground">{t('noTemplates')}</P>
             ) : (
               <div className="grid gap-3">
                 {formConfigs.map((config: any) => (
@@ -107,7 +108,7 @@ export function CreateFormInstanceDialog({
                               {config.category}
                             </span>
                             <span className="text-xs px-2 py-1 bg-muted rounded">
-                              {config.extraction?.fields?.length || 0} fields
+                              {t('fields', { count: config.extraction?.fields?.length || 0 })}
                             </span>
                           </div>
                         </div>
@@ -121,7 +122,7 @@ export function CreateFormInstanceDialog({
 
           {/* Filling Mode Selection */}
           <div>
-            <Label className="mb-3 block">Filling Mode *</Label>
+            <Label className="mb-3 block">{t('fillingMode')}</Label>
             <div className="grid gap-3">
               <Card
                 className={`cursor-pointer transition-all ${
@@ -135,10 +136,8 @@ export function CreateFormInstanceDialog({
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">💬</span>
                     <div>
-                      <P className="font-medium mb-1">Chat Mode (Recommended)</P>
-                      <P className="text-sm text-muted-foreground">
-                        Have a conversation with AI to fill the form automatically
-                      </P>
+                      <P className="font-medium mb-1">{t('chatMode')}</P>
+                      <P className="text-sm text-muted-foreground">{t('chatModeDescription')}</P>
                     </div>
                   </div>
                 </CardContent>
@@ -156,10 +155,8 @@ export function CreateFormInstanceDialog({
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">🎤</span>
                     <div>
-                      <P className="font-medium mb-1">Vocal Mode</P>
-                      <P className="text-sm text-muted-foreground">
-                        Talk naturally to AI using voice (Web Speech API)
-                      </P>
+                      <P className="font-medium mb-1">{t('vocalMode')}</P>
+                      <P className="text-sm text-muted-foreground">{t('vocalModeDescription')}</P>
                     </div>
                   </div>
                 </CardContent>
@@ -177,10 +174,8 @@ export function CreateFormInstanceDialog({
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">✍️</span>
                     <div>
-                      <P className="font-medium mb-1">Manual Mode</P>
-                      <P className="text-sm text-muted-foreground">
-                        Fill out the form fields manually (traditional)
-                      </P>
+                      <P className="font-medium mb-1">{t('manualMode')}</P>
+                      <P className="text-sm text-muted-foreground">{t('manualModeDescription')}</P>
                     </div>
                   </div>
                 </CardContent>
@@ -190,10 +185,10 @@ export function CreateFormInstanceDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tActions('cancel')}
             </Button>
             <Button type="submit" disabled={!selectedConfigId || createFormInstance.isPending}>
-              {createFormInstance.isPending ? 'Creating...' : 'Create & Fill Form'}
+              {createFormInstance.isPending ? tActions('creating') : t('createAndFill')}
             </Button>
           </DialogFooter>
         </form>

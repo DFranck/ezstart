@@ -30,6 +30,7 @@
     },
     "packages": {
       "title": "Nos Offres",
+      "contactUs": "Nous contacter",
       "free": {
         "title": "Conscience",
         "subtitle": "Pour la prise de conscience & les PDG curieux",
@@ -92,6 +93,7 @@
     ],
     "challenge": {
       "title": "Le monde fait face à des <strong>conditions climatiques extrêmes</strong> en raison du changement climatique. Les entreprises sont poussées à aller au-delà du Business as Usual et à viser une croissance durable.",
+      "sealTitle": "Les défis de la crise climatique en Asie du Sud-Est",
       "challenges": [
         "Ressources limitées pour établir des cadres ESG robustes et démontrer un impact climatique réel",
         "Manque de documentation structurée pour répondre aux exigences ESG des investisseurs pour la levée de fonds",

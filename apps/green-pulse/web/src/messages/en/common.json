@@ -23,5 +23,143 @@
     "useCases": "Use Cases",
     "pricing": "Pricing",
     "partnership": "Partnership"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "welcomeBack": "Welcome back, {name}"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "systemPrompts": "System Prompts",
+      "betaWaitlist": "Beta Waitlist",
+      "chat": "Chat"
+    },
+    "cards": {
+      "systemPrompts": {
+        "title": "System Prompts",
+        "description": "Manage AI system prompts for chat and extraction"
+      },
+      "betaWaitlist": {
+        "title": "Beta Waitlist",
+        "description": "Approve or reject beta access requests"
+      }
+    },
+    "prompts": {
+      "title": "System Prompts",
+      "description": "Manage AI system prompts used for chat and ESG data extraction",
+      "manageDescription": "Manage AI system prompts for chat and extraction",
+      "newPrompt": "New Prompt",
+      "editPrompt": "Edit Prompt",
+      "createPrompt": "Create New Prompt",
+      "noPrompts": "No prompts found",
+      "createFirst": "Create your first prompt",
+      "loading": "Loading prompts...",
+      "loadFailed": "Failed to load prompts",
+      "key": "Key (unique identifier)",
+      "name": "Name",
+      "description_label": "Description (optional)",
+      "type": "Type",
+      "provider": "Provider",
+      "content": "System Prompt (personality, role)",
+      "contentPlaceholder": "Enter the system prompt (e.g., 'You are GreenPulse.AI, an ESG advisor...')",
+      "characters": "{count}/10000 characters - Repeated in every message",
+      "active": "Active",
+      "setDefault": "Set as default for this type",
+      "updated": "Updated: {date}",
+      "updatedBy": " by {user}",
+      "cancel": "Cancel",
+      "update": "Update",
+      "create": "Create",
+      "promptContent": "Prompt Content",
+      "configuration": "Configuration",
+      "deleteConfirm": "Delete prompt \"{key}\"? This action cannot be undone.",
+      "config": {
+        "title": "Configuration",
+        "description": "Parameters applied once (not repeated in context)",
+        "showAdvanced": "Show Advanced",
+        "hideAdvanced": "Hide Advanced",
+        "generationParams": "Generation Parameters",
+        "temperature": "Temperature (0-1)",
+        "temperatureHelp": "Higher = more creative, Lower = more focused",
+        "maxTokens": "Max Tokens",
+        "maxTokensHelp": "Maximum response length",
+        "topP": "Top P (0-1)",
+        "topK": "Top K (Gemini only)",
+        "behavioralRules": "Behavioral Rules",
+        "rulesDescription": "Instructions applied without being in conversation context",
+        "rulePlaceholder": "e.g., Always respond in user's language",
+        "noRules": "No rules defined",
+        "constraints": "Constraints",
+        "maxResponseLength": "Max Response Length (characters)",
+        "allowedTopics": "Allowed Topics",
+        "allowedTopicPlaceholder": "e.g., ESG, finance",
+        "forbiddenTopics": "Forbidden Topics",
+        "forbiddenTopicPlaceholder": "e.g., politics, religion",
+        "requiredFormat": "Required Format",
+        "noRequirement": "No requirement",
+        "safety": "Safety & Moderation",
+        "blockThreshold": "Block Threshold (Gemini)",
+        "filterLevel": "Filter Level (0-10)",
+        "rawJson": "Raw JSON (read-only)"
+      }
+    },
+    "waitlist": {
+      "title": "Beta Waitlist",
+      "description": "Approve or reject beta access requests for GreenPulse",
+      "management": "Beta Waitlist Management",
+      "manageDescription": "Approve or reject beta access requests",
+      "loading": "Loading waitlist...",
+      "loadFailed": "Failed to load waitlist",
+      "noEntries": "No entries found",
+      "total": "Total: {count}",
+      "pending": "Pending: {count}",
+      "activated": "Activated: {count}",
+      "all": "All",
+      "filterPending": "Pending",
+      "filterInvited": "Invited",
+      "filterActivated": "Activated",
+      "filterRejected": "Rejected",
+      "headers": {
+        "email": "Email",
+        "status": "Status",
+        "added": "Added",
+        "accessCode": "Access Code",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "invited": "Invited",
+        "activated": "Activated",
+        "rejected": "Rejected"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "waitingRegistration": "Waiting for registration",
+        "activeUser": "Active user",
+        "codeCopied": "Code copied!"
+      }
+    }
+  },
+  "beta": {
+    "requestSubmitted": "Request submitted!",
+    "waitingApproval": "Waiting for admin approval. We'll notify you once approved.",
+    "approved": "You've been approved!",
+    "enterCode": "Enter your access code to activate beta access:",
+    "codePlaceholder": "BETA-GP-XXXXXXXX",
+    "activateAccess": "Activate Access",
+    "accessGranted": "Access granted!",
+    "accessActivated": "Your beta access has been activated. Click below to refresh your session.",
+    "refreshSession": "Refresh Session",
+    "accessDenied": "Access denied",
+    "accessRejected": "Your beta access request was rejected. Please contact support for more information.",
+    "requestAccess": "Request Beta Access"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating...",
+    "contactUs": "Contact Us"
   }
 }

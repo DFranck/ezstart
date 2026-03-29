@@ -1,3 +1,4 @@
+import { findOneAndUpdate } from '@ezstart/express-core'
 import { getMonsterModel } from '../models/monster.js'
 
 const SWARFARM_API = 'https://swarfarm.com/api/v2/monsters/'
@@ -178,7 +179,7 @@ export async function importMonsters(): Promise<number> {
       awakenLevel: m.awaken_level,
     }
 
-    await (MonsterModel.findOneAndUpdate as any)({ id: m.id }, monsterData, {
+    await findOneAndUpdate(MonsterModel, { id: m.id }, monsterData, {
       upsert: true,
       new: true,
     })

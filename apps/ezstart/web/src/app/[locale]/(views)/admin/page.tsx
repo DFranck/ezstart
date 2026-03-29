@@ -94,22 +94,20 @@ function AdminPanelContent() {
   return (
     <Div size={'xs'}>
       <Section size={'xl'} className="mt-10">
-        <H1>Admin Panel</H1>
-        <P className="text-muted-foreground mt-2">
-          Manage users, roles, permissions, and features across the @ezstart monorepo
-        </P>
+        <H1>{t('admin.title')}</H1>
+        <P className="text-muted-foreground mt-2">{t('admin.description')}</P>
       </Section>
 
       <Card>
         <CardHeader>
-          <H2>User Management</H2>
+          <H2>{t('admin.userManagement.title')}</H2>
         </CardHeader>
         <CardContent>
           {loading && <Spinner size="lg" />}
 
           {error && (
             <Div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md mb-4">
-              <P className="font-medium">Error loading users</P>
+              <P className="font-medium">{t('admin.userManagement.errorLoading')}</P>
               <P className="text-sm mt-1">{error}</P>
             </Div>
           )}
@@ -120,26 +118,32 @@ function AdminPanelContent() {
               <Div className="mb-6 flex gap-4 flex-wrap">
                 <Input
                   type="text"
-                  placeholder="Search by email, username, name..."
+                  placeholder={t('admin.userManagement.searchPlaceholder')}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="flex-1 min-w-[200px]"
                 />
                 <Select value={roleFilter || 'all'} onValueChange={setRoleFilter}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="All Roles" />
+                    <SelectValue placeholder={t('admin.userManagement.allRoles')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    <SelectItem value="superadmin">Superadmin</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="beta-tester">Beta Tester</SelectItem>
-                    <SelectItem value="client">Client</SelectItem>
+                    <SelectItem value="all">{t('admin.userManagement.allRoles')}</SelectItem>
+                    <SelectItem value="superadmin">
+                      {t('admin.userManagement.roles.superadmin')}
+                    </SelectItem>
+                    <SelectItem value="admin">{t('admin.userManagement.roles.admin')}</SelectItem>
+                    <SelectItem value="manager">
+                      {t('admin.userManagement.roles.manager')}
+                    </SelectItem>
+                    <SelectItem value="beta-tester">
+                      {t('admin.userManagement.roles.betaTester')}
+                    </SelectItem>
+                    <SelectItem value="client">{t('admin.userManagement.roles.client')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button onClick={() => refetch()} variant="outline">
-                  Refresh
+                  {t('admin.userManagement.refresh')}
                 </Button>
               </Div>
 
@@ -154,7 +158,10 @@ function AdminPanelContent() {
               {/* Pagination */}
               <Div className="mt-6 flex items-center justify-between">
                 <P className="text-sm text-muted-foreground">
-                  Showing {users?.length ?? 0} of {pagination?.total ?? 0} users
+                  {t('admin.userManagement.showing', {
+                    count: users?.length ?? 0,
+                    total: pagination?.total ?? 0,
+                  })}
                 </P>
                 <Div className="flex gap-2">
                   <Button
@@ -163,10 +170,13 @@ function AdminPanelContent() {
                     disabled={pagination.page === 1}
                     onClick={() => setPage(p => p - 1)}
                   >
-                    Previous
+                    {t('admin.userManagement.previous')}
                   </Button>
                   <P className="text-sm py-2 px-3">
-                    Page {pagination.page} of {pagination.totalPages || 1}
+                    {t('admin.userManagement.pageOf', {
+                      page: pagination.page,
+                      totalPages: pagination.totalPages || 1,
+                    })}
                   </P>
                   <Button
                     variant="outline"
@@ -174,7 +184,7 @@ function AdminPanelContent() {
                     disabled={pagination.page === pagination.totalPages}
                     onClick={() => setPage(p => p + 1)}
                   >
-                    Next
+                    {t('admin.userManagement.next')}
                   </Button>
                 </Div>
               </Div>

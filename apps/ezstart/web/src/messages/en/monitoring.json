@@ -22,115 +22,134 @@
       "recentTitle": "Recent Errors",
       "recentDescription": "Live feed of errors from all monitored services"
     },
-  "tabs": {
-    "projects": "Projects",
-    "audits": "Audits",
-    "errors": "Errors"
-  },
-  "metrics": {
-    "projectsHealth": {
-      "title": "Projects Health",
-      "operational": "operational"
+    "tabs": {
+      "projects": "Projects",
+      "audits": "Audits",
+      "errors": "Errors"
     },
-    "avgResponseTime": {
-      "title": "Avg Response Time",
-      "subtitle": "Last 24 hours"
-    },
-    "passingAudits": {
-      "title": "Passing Audits",
-      "passing": "passing",
-      "target": "≥90/100"
-    },
-    "lowestScore": {
-      "title": "Lowest Score"
-    },
-    "totalErrors": {
-      "title": "Total Errors",
-      "criticalErrors": "critical/errors"
-    },
-    "mostAffectedProject": {
-      "title": "Most Affected Project",
-      "none": "None"
-    }
-  },
-  "errors": {
-    "loading": "Loading error logs...",
-    "noErrors": "No errors found",
-    "filters": {
-      "all": "All",
-      "critical": "Critical",
-      "error": "Error",
-      "warning": "Warning"
-    }
-  },
-  "projects": {
-    "status": {
-      "healthy": "Healthy",
-      "degraded": "Degraded",
-      "down": "Down"
-    }
-  },
-  "audits": {
-    "score": {
-      "excellent": "Excellent",
-      "veryGood": "Very Good",
-      "good": "Good",
-      "needsWork": "Needs Work",
-      "target": "Target: 90+"
-    }
-  },
-  "overview": {
-    "stats": {
-      "globalHealth": {
-        "title": "Global Health",
-        "subtitle": "audits ≥90/100"
-      },
-      "servicesUptime": {
-        "title": "Services Uptime",
-        "healthy": "healthy"
-      },
-      "criticalErrors": {
-        "title": "Critical Errors",
-        "subtitle": "Last 24 hours"
+    "metrics": {
+      "projectsHealth": {
+        "title": "Projects Health",
+        "operational": "operational"
       },
       "avgResponseTime": {
         "title": "Avg Response Time",
-        "subtitle": "Across all APIs"
+        "subtitle": "Last 24 hours"
+      },
+      "passingAudits": {
+        "title": "Passing Audits",
+        "passing": "passing",
+        "target": "≥90/100"
+      },
+      "lowestScore": {
+        "title": "Lowest Score"
+      },
+      "totalErrors": {
+        "title": "Total Errors",
+        "criticalErrors": "critical/errors"
+      },
+      "mostAffectedProject": {
+        "title": "Most Affected Project",
+        "none": "None"
       }
     },
-    "systemStatus": {
-      "title": "System Status",
-      "projectsHealth": {
-        "title": "Projects Health",
-        "description": "services operational"
-      },
-      "codeQuality": {
-        "title": "Code Quality",
-        "description": "audits completed"
-      },
-      "errorMonitoring": {
-        "title": "Error Monitoring",
-        "description": "errors in 24h"
-      },
-      "performance": {
-        "title": "Performance",
-        "description": "avg response"
-      },
-      "issues": "issues"
+    "errors": {
+      "loading": "Loading error logs...",
+      "noErrors": "No errors found",
+      "filters": {
+        "all": "All",
+        "critical": "Critical",
+        "error": "Error",
+        "warning": "Warning"
+      }
     },
-    "recentActivity": {
-      "title": "Recent Activity",
-      "healthCheckPassed": "Health check passed",
-      "noRecentActivity": "No recent activity"
+    "projects": {
+      "status": {
+        "healthy": "Healthy",
+        "degraded": "Degraded",
+        "down": "Down"
+      }
     },
-    "quickActions": {
-      "title": "Quick Actions",
-      "viewAllProjects": "View All Projects",
-      "runQualityAudits": "Run Quality Audits",
-      "viewErrorLogs": "View Error Logs",
-      "openSentry": "Open Sentry Dashboard",
-      "viewAnalytics": "View Analytics (Vercel)"
+    "audits": {
+      "score": {
+        "excellent": "Excellent",
+        "veryGood": "Very Good",
+        "good": "Good",
+        "needsWork": "Needs Work",
+        "target": "Target: 90+"
+      }
+    },
+    "systemStatusDescription": "Real-time health across all monitoring categories",
+    "recentActivityDescription": "Latest events from all services",
+    "manageDescription": "Manage your monitoring dashboard",
+    "failedToLoad": "Failed to load monitoring data",
+    "failedToLoadErrors": "Failed to load error logs",
+    "retry": "Retry",
+    "errorLogs": "Error Logs",
+    "errorLogsDescription": "Recent errors captured from all projects (Sentry integration)",
+    "refreshing": "Refreshing...",
+    "allClear": "All Clear!",
+    "allSystemsOperational": "No errors detected. All systems operational",
+    "view": "View",
+    "occurrences": "{count} occurrences",
+    "usersAffected": "{count} users affected",
+    "nextUpdateIn": "Next update in: {time}",
+    "projectsHealthScore": "Projects Health Score",
+    "projectsMonitored": "{count} projects monitored",
+    "allProjects": "All Projects ({count})",
+    "responseTime": "Response Time",
+    "overview": {
+      "stats": {
+        "globalHealth": {
+          "title": "Global Health",
+          "subtitle": "audits ≥90/100"
+        },
+        "servicesUptime": {
+          "title": "Services Uptime",
+          "healthy": "healthy"
+        },
+        "criticalErrors": {
+          "title": "Critical Errors",
+          "subtitle": "Last 24 hours"
+        },
+        "avgResponseTime": {
+          "title": "Avg Response Time",
+          "subtitle": "Across all APIs"
+        }
+      },
+      "systemStatus": {
+        "title": "System Status",
+        "projectsHealth": {
+          "title": "Projects Health",
+          "description": "services operational"
+        },
+        "codeQuality": {
+          "title": "Code Quality",
+          "description": "audits completed"
+        },
+        "errorMonitoring": {
+          "title": "Error Monitoring",
+          "description": "errors in 24h"
+        },
+        "performance": {
+          "title": "Performance",
+          "description": "avg response"
+        },
+        "issues": "issues"
+      },
+      "recentActivity": {
+        "title": "Recent Activity",
+        "healthCheckPassed": "Health check passed",
+        "noRecentActivity": "No recent activity"
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "viewAllProjects": "View All Projects",
+        "runQualityAudits": "Run Quality Audits",
+        "viewErrorLogs": "View Error Logs",
+        "openSentry": "Open Sentry Dashboard",
+        "viewAnalytics": "View Analytics (Vercel)"
+      }
     }
-  }
   }
 }

@@ -56,6 +56,16 @@ export { zObjectWithAutoOpenApi } from './openapi/z-object-helper.js'
 
 // Helpers
 export { sendSuccess, sendError, sendValidationError } from './helpers/api-response.js'
+export {
+  findById,
+  findOne,
+  findMany,
+  findByIdAndUpdate,
+  findOneAndUpdate,
+  findByIdAndDelete,
+  findOneAndDelete,
+  countDocuments,
+} from './helpers/mongoose-query.js'
 
 // Utils
 export { findWithQuery } from './utils/find-with-query.js'

@@ -1,7 +1,14 @@
 import { Request, Response } from 'express'
-import { CreateInvoice, GetInvoicesQuery, UpdateInvoice } from '@ezbill/types'
+import {
+  CreateInvoice,
+  GetInvoicesQuery,
+  UpdateInvoice,
+  createInvoiceSchema,
+  updateInvoiceSchema,
+} from '@ezbill/types'
+import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
-import { sendSuccess, sendError } from '@ezstart/express-core'
+import { sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import {
   createInvoiceService,
   getInvoiceByIdService,
@@ -23,7 +30,12 @@ export async function createSecureInvoiceController(req: AuthRequest, res: Respo
       return sendError(res, 'Authentication required', 401)
     }
 
-    const invoiceData: CreateInvoice = req.body
+    const parsed = createInvoiceSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid invoice data', parsed.error.errors)
+    }
+
+    const invoiceData = parsed.data
 
     // Ensure userId in body matches authenticated user
     if (invoiceData.userId && invoiceData.userId !== userId) {
@@ -92,7 +104,12 @@ export async function updateSecureInvoiceController(req: AuthRequest, res: Respo
       return sendError(res, 'Authentication required', 401)
     }
 
-    const updateData: UpdateInvoice = req.body
+    const parsed = updateInvoiceSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid invoice update data', parsed.error.errors)
+    }
+
+    const updateData = parsed.data
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {
@@ -240,7 +257,17 @@ export async function markInvoiceAsPaidSecureController(req: AuthRequest, res: R
       return sendError(res, 'Invoice not found or access denied', 404)
     }
 
-    const result = await markInvoiceAsPaidService(id, req.body)
+    const markPaidSchema = z.object({
+      companyId: z.string().optional(),
+      paymentDate: z.string().optional(),
+      notes: z.string().optional(),
+    })
+    const parsedBody = markPaidSchema.safeParse(req.body)
+    if (!parsedBody.success) {
+      return sendValidationError(res, 'Invalid mark-paid data', parsedBody.error.errors)
+    }
+
+    const result = await markInvoiceAsPaidService(id, parsedBody.data)
 
     if (!result) {
       return sendError(res, 'Invoice not found', 404)

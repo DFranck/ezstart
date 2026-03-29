@@ -14,12 +14,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 
 interface CreateProjectDialogProps {
   workspaceSlug: string
 }
 
 export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps) {
+  const t = useTranslations('forms.createProject')
+  const tActions = useTranslations('actions')
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -69,71 +72,69 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>+ New Project</Button>
+        <Button>{t('newProject')}</Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Project</DialogTitle>
-          <DialogDescription>
-            Create a new project (case/dossier) to organize form instances
-          </DialogDescription>
+          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogDescription>{t('description')}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Project Name *</Label>
+            <Label htmlFor="name">{t('name')}</Label>
             <Input
               id="name"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g., Inspection ABC Corp - 2025-10-26"
+              placeholder={t('namePlaceholder')}
               required
             />
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
             <TextArea
               id="description"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="Brief description of this project..."
+              placeholder={t('descriptionPlaceholder')}
               rows={2}
             />
           </div>
 
           <div className="border-t pt-4">
-            <P className="text-sm font-medium mb-3">Company Information (Optional)</P>
+            <P className="text-sm font-medium mb-3">{t('companyInfo')}</P>
 
             <div className="space-y-3">
               <div>
-                <Label htmlFor="companyName">Company Name</Label>
+                <Label htmlFor="companyName">{t('companyName')}</Label>
                 <Input
                   id="companyName"
                   value={companyName}
                   onChange={e => setCompanyName(e.target.value)}
-                  placeholder="e.g., ABC Corporation"
+                  placeholder={t('companyNamePlaceholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="companyAddress">Address</Label>
+                <Label htmlFor="companyAddress">{t('address')}</Label>
                 <Input
                   id="companyAddress"
                   value={companyAddress}
                   onChange={e => setCompanyAddress(e.target.value)}
-                  placeholder="e.g., 123 Main St, Paris"
+                  placeholder={t('addressPlaceholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="companySector">Sector</Label>
+                <Label htmlFor="companySector">{t('sector')}</Label>
                 <Input
                   id="companySector"
                   value={companySector}
                   onChange={e => setCompanySector(e.target.value)}
-                  placeholder="e.g., Technology, Manufacturing, Services"
+                  placeholder={t('sectorPlaceholder')}
                 />
               </div>
             </div>
@@ -141,10 +142,10 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tActions('cancel')}
             </Button>
             <Button type="submit" disabled={createProject.isPending}>
-              {createProject.isPending ? 'Creating...' : 'Create Project'}
+              {createProject.isPending ? tActions('creating') : t('createProject')}
             </Button>
           </DialogFooter>
         </form>

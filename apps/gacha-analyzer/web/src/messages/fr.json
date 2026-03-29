@@ -219,6 +219,10 @@
       "speed-leader": "Speed Lead",
       "raid-support": "Raid"
     },
+    "ancient": "Ancient",
+    "runeInfo": "Info Rune",
+    "penalties": "Penalites",
+    "gemAnalysis": "Analyse Gem",
     "gemable": "Gem",
     "optimization": "Optimisation",
     "perfectBuild": "Parfait",
@@ -298,7 +302,37 @@
     "filterByStatus": "Filtrer par statut",
     "allGames": "Tous les jeux",
     "allStatuses": "Tous les statuts",
+    "allLevels": "Tous les +",
+    "allAdvice": "Tous les conseils",
+    "sell": "SELL",
+    "upgrade": "UPGRADE",
+    "keep": "KEEP",
+    "grind": "GRIND",
+    "allSets": "Tous les Sets",
+    "allSlots": "Tous les Slots",
+    "slot": "Slot {number}",
     "empty": "Aucun scan trouve",
     "emptyDescription": "Commencez a scanner vos runes et equipements !"
+  },
+  "scanCard": {
+    "ancient": "Ancient",
+    "eff": "Eff"
+  },
+  "sources": {
+    "comingSoon": "Bientot disponible",
+    "comingSoonDescription": "Les sources de reference pour {game} sont en cours de preparation.",
+    "pageDescription": "References externes utiles pour Summoners War — APIs, outils, wikis et projets open source qui alimentent ou completent le scanner."
+  },
+  "data": {
+    "comingSoon": "Bientot disponible",
+    "comingSoonDescription": "Les donnees de reference pour {game} sont en cours de preparation.",
+    "pageDescription": "Toutes les tables de reference des runes Summoners War, guides d'efficacite et valeurs de meules en un seul endroit.",
+    "none": "Aucun",
+    "runeSets": "1. Sets de Runes",
+    "substatValues": "2. Valeurs de Sous-stats",
+    "buildArchetypes": "3. Archetypes de Builds (Avance)",
+    "archetype": "Archetype",
+    "description": "Description",
+    "statPriority": "Priorite des Stats"
   }
 }

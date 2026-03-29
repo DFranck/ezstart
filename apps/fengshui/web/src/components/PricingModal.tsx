@@ -4,7 +4,7 @@ import { GRADIENT_BG } from '@/lib/theme-colors'
 import { useAuth } from '@ezstart/auth-sdk'
 import { usePay } from '@ezstart/pay-sdk'
 import { logger } from '@ezstart/logger'
-import { Button, Card, CardContent, Icon, Modal } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Div, H3, Icon, Modal, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -87,24 +87,21 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
       description={t('pricingSubtitle', { year })}
       size="xl"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+      <Div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
         {/* Free Tier */}
         <Card className="border-2 border-border">
           <CardContent className="p-6">
-            <div className="text-center mb-6">
+            <Div className="text-center mb-6">
               <Icon name="lucide:Shield" className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-foreground">{t('freeTitle')}</h3>
-              <div className="mt-2">
-                <span className="text-3xl font-bold text-foreground">{t('freePrice')}</span>
-              </div>
-            </div>
+              <H3 className="text-lg font-bold text-foreground">{t('freeTitle')}</H3>
+              <Div className="mt-2">
+                <Span className="text-3xl font-bold text-foreground">{t('freePrice')}</Span>
+              </Div>
+            </Div>
             <ul className="space-y-3">
               {freeFeatures.map((feature, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <Icon
-                    name="lucide:Check"
-                    className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"
-                  />
+                  <Icon name="lucide:Check" className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                   {feature}
                 </li>
               ))}
@@ -116,31 +113,28 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
         </Card>
 
         {/* Premium Tier */}
-        <Card className="border-2 border-amber-400 dark:border-amber-600 relative overflow-hidden">
+        <Card className="border-2 border-warning relative overflow-hidden">
           {/* Popular badge */}
-          <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+          <Div className="absolute top-0 right-0 bg-warning text-warning-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
             {t('popular')}
-          </div>
+          </Div>
           <CardContent className="p-6">
-            <div className="text-center mb-6">
-              <Icon name="lucide:Star" className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-foreground">{t('premiumTitle', { year })}</h3>
-            </div>
+            <Div className="text-center mb-6">
+              <Icon name="lucide:Star" className="w-10 h-10 text-warning mx-auto mb-3" />
+              <H3 className="text-lg font-bold text-foreground">{t('premiumTitle', { year })}</H3>
+            </Div>
 
             <ul className="space-y-3 mb-6">
               {premiumFeatures.map((feature, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                  <Icon
-                    name="lucide:Star"
-                    className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0"
-                  />
+                  <Icon name="lucide:Star" className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
                   {feature}
                 </li>
               ))}
             </ul>
 
             {/* Price options */}
-            <div className="space-y-2">
+            <Div className="space-y-2">
               {/* One-time */}
               <Button
                 onClick={() => handlePurchase('oneshot')}
@@ -161,7 +155,7 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
                 onClick={() => handlePurchase('monthly')}
                 disabled={!!loading}
                 variant="outline"
-                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/30"
+                className="w-full border-warning/50 text-warning hover:bg-warning/10"
               >
                 {loading === 'monthly' ? (
                   <Icon name="lucide:Loader2" className="w-4 h-4 mr-2 animate-spin" />
@@ -178,7 +172,7 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
                 onClick={() => handlePurchase('yearly')}
                 disabled={!!loading}
                 variant="outline"
-                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/30"
+                className="w-full border-warning/50 text-warning hover:bg-warning/10"
               >
                 {loading === 'yearly' ? (
                   <Icon name="lucide:Loader2" className="w-4 h-4 mr-2 animate-spin" />
@@ -188,14 +182,14 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
                 {t('yearly')} — {PRICES.yearly.amount}
                 {PRICES.yearly.currency}
                 {t('perYear')}
-                <span className="ml-1 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded-full">
+                <Span className="ml-1 text-xs bg-success/10 text-success px-1.5 py-0.5 rounded-full">
                   {t('bestValue')}
-                </span>
+                </Span>
               </Button>
-            </div>
+            </Div>
           </CardContent>
         </Card>
-      </div>
+      </Div>
     </Modal>
   )
 }

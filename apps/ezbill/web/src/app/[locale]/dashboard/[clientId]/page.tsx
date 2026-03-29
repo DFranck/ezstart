@@ -25,32 +25,48 @@ import dynamic from 'next/dynamic'
 import { redirect, useParams } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 // Dynamic imports for modals (lazy load on demand) - Performance optimization
-const InvoiceModal = dynamic(() => import('@/components/invoice-modal').then(mod => ({ default: mod.InvoiceModal })), {
-  loading: () => null,
-  ssr: false
-})
+const InvoiceModal = dynamic(
+  () => import('@/components/invoice-modal').then(mod => ({ default: mod.InvoiceModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
-const QuoteModal = dynamic(() => import('@/components/quote-modal').then(mod => ({ default: mod.QuoteModal })), {
-  loading: () => null,
-  ssr: false
-})
+const QuoteModal = dynamic(
+  () => import('@/components/quote-modal').then(mod => ({ default: mod.QuoteModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
-const MarkPaidModal = dynamic(() => import('@/components/mark-paid-modal').then(mod => ({ default: mod.MarkPaidModal })), {
-  loading: () => null,
-  ssr: false
-})
+const MarkPaidModal = dynamic(
+  () => import('@/components/mark-paid-modal').then(mod => ({ default: mod.MarkPaidModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
-const PreviewPdfModal = dynamic(() => import('@/components/PreviewPdfModal').then(mod => ({ default: mod.PreviewPdfModal })), {
-  loading: () => null,
-  ssr: false
-})
+const PreviewPdfModal = dynamic(
+  () => import('@/components/PreviewPdfModal').then(mod => ({ default: mod.PreviewPdfModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
-const ShareModal = dynamic(() => import('@/components/share-modal').then(mod => ({ default: mod.ShareModal })), {
-  loading: () => null,
-  ssr: false
-})
+const ShareModal = dynamic(
+  () => import('@/components/share-modal').then(mod => ({ default: mod.ShareModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
 // Type import for PreviewState
 type PreviewState = {
@@ -87,6 +103,8 @@ const ClientDashboardPage = () => {
 
   // Use the custom hook for all document handlers
   const handlers = useClientDashboardHandlers()
+  const tToast = useTranslations('toast')
+  const tDashboard = useTranslations('dashboard')
 
   if (!user || !isAuthenticated) {
     redirect('/')
@@ -158,7 +176,7 @@ const ClientDashboardPage = () => {
     if (pdfUrl) {
       setShareState({ isOpen: true, type: 'invoice', document: invoice, pdfUrl })
     } else {
-      toast.error('Failed to generate PDF for sharing')
+      toast.error(tToast('pdfGenerateFailed'))
     }
   }
 
@@ -168,16 +186,17 @@ const ClientDashboardPage = () => {
     if (pdfUrl) {
       setShareState({ isOpen: true, type: 'quote', document: quote, pdfUrl })
     } else {
-      toast.error('Quote PDF generation not implemented yet')
+      toast.error(tToast('quotePdfNotReady'))
     }
   }
 
   const handleMarkAsSent = async () => {
     if (!shareState.document) return
 
-    const success = shareState.type === 'invoice'
-      ? await handlers.markInvoiceAsSent(shareState.document as Invoice)
-      : await handlers.markQuoteAsSent(shareState.document as Quote)
+    const success =
+      shareState.type === 'invoice'
+        ? await handlers.markInvoiceAsSent(shareState.document as Invoice)
+        : await handlers.markQuoteAsSent(shareState.document as Quote)
 
     if (success) {
       // Cleanup PDF URL
@@ -273,21 +292,21 @@ const ClientDashboardPage = () => {
 
         {/* Invoices with Grouping */}
         <DashboardSection
-          title="Invoices"
-          description={`${clientInvoices.length} total invoices`}
+          title={tDashboard('invoices')}
+          description={tDashboard('totalInvoicesCount', { count: clientInvoices.length })}
           icon="lucide:FileEdit"
           iconGradient="bg-gradient-invoice"
           onAdd={handleCreateInvoice}
-          addButtonText="Create Invoice"
+          addButtonText={tDashboard('newInvoice')}
           addButtonIcon="lucide:Plus"
           addButtonGradient="bg-gradient-invoice hover:bg-gradient-invoice-hover"
           isEmpty={clientInvoices.length === 0}
           emptyState={{
             icon: 'lucide:FileEdit',
             iconBg: 'bg-gradient-invoice-light text-ezbill-invoice',
-            title: 'No invoices yet',
-            description: 'Create your first invoice to get started',
-            buttonText: 'Create First Invoice',
+            title: tDashboard('noInvoicesYet'),
+            description: tDashboard('noInvoicesDesc'),
+            buttonText: tDashboard('createFirstInvoice'),
           }}
         >
           {clientInvoices.length > 0 && (
@@ -301,7 +320,7 @@ const ClientDashboardPage = () => {
                     onClick={() => setInvoiceGroupBy('month')}
                   >
                     <Icon name="lucide:Calendar" className="w-4 h-4 mr-2" />
-                    By Month
+                    {tDashboard('byMonth')}
                   </Button>
                   <Button
                     size="sm"
@@ -309,7 +328,7 @@ const ClientDashboardPage = () => {
                     onClick={() => setInvoiceGroupBy('week')}
                   >
                     <Icon name="lucide:CalendarDays" className="w-4 h-4 mr-2" />
-                    By Week
+                    {tDashboard('byWeek')}
                   </Button>
                   <Button
                     size="sm"
@@ -317,7 +336,7 @@ const ClientDashboardPage = () => {
                     onClick={() => setInvoiceGroupBy('status')}
                   >
                     <Icon name="lucide:Tag" className="w-4 h-4 mr-2" />
-                    By Status
+                    {tDashboard('byStatus')}
                   </Button>
                 </div>
               )}
@@ -378,21 +397,21 @@ const ClientDashboardPage = () => {
 
         {/* Quotes with Grouping */}
         <DashboardSection
-          title="Quotes"
-          description={`${clientQuotes.length} total quotes`}
+          title={tDashboard('quotes')}
+          description={tDashboard('totalQuotesCount', { count: clientQuotes.length })}
           icon="lucide:FileText"
           iconGradient="bg-gradient-quote"
           onAdd={handleCreateQuote}
-          addButtonText="Create Quote"
+          addButtonText={tDashboard('newQuote')}
           addButtonIcon="lucide:Plus"
           addButtonGradient="bg-gradient-quote hover:bg-gradient-payment-hover"
           isEmpty={clientQuotes.length === 0}
           emptyState={{
             icon: 'lucide:FileText',
             iconBg: 'bg-gradient-quote-light text-ezbill-quote',
-            title: 'No quotes yet',
-            description: 'Create your first quote to get started',
-            buttonText: 'Create First Quote',
+            title: tDashboard('noQuotesYet'),
+            description: tDashboard('noQuotesDesc'),
+            buttonText: tDashboard('createFirstQuote'),
           }}
         >
           {clientQuotes.length > 0 && (
@@ -406,7 +425,7 @@ const ClientDashboardPage = () => {
                     onClick={() => setQuoteGroupBy('month')}
                   >
                     <Icon name="lucide:Calendar" className="w-4 h-4 mr-2" />
-                    By Month
+                    {tDashboard('byMonth')}
                   </Button>
                   <Button
                     size="sm"
@@ -414,7 +433,7 @@ const ClientDashboardPage = () => {
                     onClick={() => setQuoteGroupBy('status')}
                   >
                     <Icon name="lucide:Tag" className="w-4 h-4 mr-2" />
-                    By Status
+                    {tDashboard('byStatus')}
                   </Button>
                 </div>
               )}
@@ -481,8 +500,8 @@ const ClientDashboardPage = () => {
 
         {/* Receipts with Grouping */}
         <DashboardSection
-          title="Receipts"
-          description={`${clientReceipts.length} total receipts`}
+          title={tDashboard('receipts')}
+          description={tDashboard('totalReceiptsCount', { count: clientReceipts.length })}
           icon="lucide:Receipt"
           iconGradient="bg-gradient-receipt"
           onAdd={() => {}}
@@ -493,8 +512,8 @@ const ClientDashboardPage = () => {
           emptyState={{
             icon: 'lucide:Receipt',
             iconBg: 'bg-gradient-receipt-light text-ezbill-receipt',
-            title: 'No receipts yet',
-            description: 'Receipts are generated automatically when invoices are paid',
+            title: tDashboard('noReceiptsYet'),
+            description: tDashboard('noReceiptsDesc'),
             buttonText: '',
           }}
           className="mb-0"
@@ -597,9 +616,7 @@ const ClientDashboardPage = () => {
           }
           clientName={client?.clientName || ''}
           documentStatus={
-            (shareState.document as Invoice).status ||
-            (shareState.document as Quote).status ||
-            ''
+            (shareState.document as Invoice).status || (shareState.document as Quote).status || ''
           }
         />
       )}

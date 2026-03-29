@@ -6,7 +6,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+  findMany,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { importMonsters } from '../services/monster-import-service.js'
 import { getMonsterModel } from '../models/monster.js'
@@ -55,7 +61,7 @@ router.get('/', async (req: any, res: any) => {
     const skip = (page - 1) * limit
 
     const [monsters, total] = await Promise.all([
-      (MonsterModel.find as any)(filter)
+      findMany(MonsterModel, filter)
         .sort({ naturalStars: -1, name: 1 })
         .skip(skip)
         .limit(limit)
@@ -85,7 +91,7 @@ router.get('/by-build/:archetype', async (req: any, res: any) => {
     const filter = { buildArchetypes: archetype }
 
     const [monsters, total] = await Promise.all([
-      (MonsterModel.find as any)(filter)
+      findMany(MonsterModel, filter)
         .sort({ naturalStars: -1, name: 1 })
         .skip(offset)
         .limit(limit)

@@ -1,7 +1,13 @@
 import { Request, Response } from 'express'
-import { CreateReceipt, GetReceiptsQuery, UpdateReceipt } from '@ezbill/types'
+import {
+  CreateReceipt,
+  GetReceiptsQuery,
+  UpdateReceipt,
+  createReceiptSchema,
+  updateReceiptSchema,
+} from '@ezbill/types'
 import { logger } from '@ezstart/logger/server'
-import { sendSuccess, sendError } from '@ezstart/express-core'
+import { sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import {
   createReceiptService,
   getReceiptByIdService,
@@ -21,7 +27,12 @@ export async function createSecureReceiptController(req: AuthRequest, res: Respo
       return sendError(res, 'Authentication required', 401)
     }
 
-    const receiptData: CreateReceipt = req.body
+    const parsed = createReceiptSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid receipt data', parsed.error.errors)
+    }
+
+    const receiptData = parsed.data
 
     // Ensure userId in body matches authenticated user
     if (receiptData.userId && receiptData.userId !== userId) {
@@ -90,7 +101,12 @@ export async function updateSecureReceiptController(req: AuthRequest, res: Respo
       return sendError(res, 'Authentication required', 401)
     }
 
-    const updateData: UpdateReceipt = req.body
+    const parsed = updateReceiptSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid receipt update data', parsed.error.errors)
+    }
+
+    const updateData = parsed.data
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {

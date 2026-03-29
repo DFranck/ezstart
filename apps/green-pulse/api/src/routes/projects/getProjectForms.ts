@@ -5,9 +5,16 @@ import {
   Router,
   sendSuccess,
   sendError,
+  sendValidationError,
 } from '@ezstart/express-core'
+import { z } from 'zod'
 import { ProjectSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../models/FormInstance.js'
+
+const getProjectFormsQuerySchema = z.object({
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0),
+})
 
 export const getProjectFormsRegistry = new OpenAPIRegistry()
 
@@ -19,9 +26,13 @@ docRouter.get(
   '/:id/forms',
   async (req, res) => {
     try {
+      const validation = getProjectFormsQuerySchema.safeParse(req.query)
+      if (!validation.success) {
+        return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
+      }
+
       const FormInstance = await getFormInstanceModel()
-      const limit = Math.min(Number(req.query.limit) || 20, 100)
-      const offset = Math.max(Number(req.query.offset) || 0, 0)
+      const { limit, offset } = validation.data
 
       const filter = { projectId: req.params.id }
 

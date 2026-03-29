@@ -34,8 +34,8 @@ const ClientLayout = ({
   // Navigation links pour users authentifiés
   const navLinks: any[] = isAuthenticated
     ? [
-        { href: '/dashboard', label: 'Dashboard', icon: 'lucide:LayoutDashboard' },
-        { href: '/dashboard/settings', label: 'Settings', icon: 'lucide:Settings' },
+        { href: '/dashboard', label: t('nav.dashboard'), icon: 'lucide:LayoutDashboard' },
+        { href: '/dashboard/settings', label: t('nav.settings'), icon: 'lucide:Settings' },
       ]
     : []
 
@@ -60,7 +60,9 @@ const ClientLayout = ({
               >
                 EZBill
               </H1>
-              <p className="text-xs text-muted-foreground -mt-1">Professional Billing</p>
+              <p className="text-xs text-muted-foreground -mt-1">
+                {t('layout.professionalBilling')}
+              </p>
             </div>
           </Link>
         </div>
@@ -80,7 +82,7 @@ const ClientLayout = ({
                   className="font-medium px-2 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200"
                 >
                   <Icon name="lucide:LogOut" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Logout</span>
+                  <span className="hidden sm:inline">{t('auth.logout')}</span>
                 </Button>
               )}
             </>
@@ -94,7 +96,7 @@ const ClientLayout = ({
             >
               <>
                 <Icon name="lucide:LogIn" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Get Started</span>
+                <span className="hidden sm:inline">{t('auth.login')}</span>
               </>
             </Button>
           )}
@@ -106,7 +108,7 @@ const ClientLayout = ({
       footerShowCopyright={true}
       creator={
         <>
-          Made by
+          {t('layout.madeBy')}
           <a
             href="https://ezstart-web.vercel.app/fr"
             target="_blank"

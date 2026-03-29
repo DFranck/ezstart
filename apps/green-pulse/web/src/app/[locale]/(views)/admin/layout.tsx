@@ -7,27 +7,31 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const ADMIN_NAV_ITEMS = [
-  {
-    href: '/admin',
-    label: 'Dashboard',
-    icon: 'lucide:LayoutDashboard' as const,
-    exact: true,
-  },
-  {
-    href: '/admin/prompts',
-    label: 'System Prompts',
-    icon: 'lucide:MessageSquare' as const,
-  },
-  {
-    href: '/admin/waitlist',
-    label: 'Beta Waitlist',
-    icon: 'lucide:UserPlus' as const,
-  },
-  { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },
-]
+function useAdminNavItems() {
+  const t = useTranslations('admin.nav')
+  return [
+    {
+      href: '/admin',
+      label: t('dashboard'),
+      icon: 'lucide:LayoutDashboard' as const,
+      exact: true,
+    },
+    {
+      href: '/admin/prompts',
+      label: t('systemPrompts'),
+      icon: 'lucide:MessageSquare' as const,
+    },
+    {
+      href: '/admin/waitlist',
+      label: t('betaWaitlist'),
+      icon: 'lucide:UserPlus' as const,
+    },
+    { href: '/chat', label: t('chat'), icon: 'lucide:Bot' as const },
+  ]
+}
 
 function AdminSidebar() {
+  const navItems = useAdminNavItems()
   const pathname = usePathname()
 
   const isActive = (href: string, exact?: boolean) => {
@@ -44,7 +48,7 @@ function AdminSidebar() {
   return (
     <aside className="w-64 border-r bg-card min-h-[calc(100vh-4rem)] p-4 hidden md:block">
       <nav className="space-y-1">
-        {ADMIN_NAV_ITEMS.map(item => (
+        {navItems.map(item => (
           <Link key={item.href} href={item.href}>
             <Button
               variant={isActive(item.href, item.exact) ? 'secondary' : 'ghost'}
@@ -62,6 +66,7 @@ function AdminSidebar() {
 }
 
 function AdminMobileNav() {
+  const navItems = useAdminNavItems()
   const pathname = usePathname()
 
   const isActive = (href: string, exact?: boolean) => {
@@ -77,7 +82,7 @@ function AdminMobileNav() {
 
   return (
     <Div className="md:hidden border-b p-2 flex gap-2 overflow-x-auto">
-      {ADMIN_NAV_ITEMS.map(item => (
+      {navItems.map(item => (
         <Link key={item.href} href={item.href}>
           <Button variant={isActive(item.href, item.exact) ? 'secondary' : 'outline'} size="sm">
             <Icon name={item.icon} className="mr-1" size={14} />

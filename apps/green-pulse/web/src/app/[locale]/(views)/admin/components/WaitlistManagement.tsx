@@ -22,6 +22,7 @@ import {
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 
 type WaitlistEntry = {
   _id: string
@@ -46,9 +47,12 @@ type WaitlistResponse = {
 }
 
 export function WaitlistManagement() {
+  const t = useTranslations('admin.waitlist')
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
-  const [filter, setFilter] = useState<'all' | 'pending' | 'invited' | 'activated' | 'rejected'>('pending')
+  const [filter, setFilter] = useState<'all' | 'pending' | 'invited' | 'activated' | 'rejected'>(
+    'pending'
+  )
 
   // Fetch waitlist
   const { data, isLoading, error } = useQuery<WaitlistResponse>({
@@ -118,9 +122,8 @@ export function WaitlistManagement() {
     })
   }
 
-  const filteredEntries = data?.entries.filter(entry =>
-    filter === 'all' ? true : entry.status === filter
-  ) || []
+  const filteredEntries =
+    data?.entries.filter(entry => (filter === 'all' ? true : entry.status === filter)) || []
 
   const getStatusBadge = (status: WaitlistEntry['status']) => {
     const variants = {
@@ -131,17 +134,13 @@ export function WaitlistManagement() {
     } as const
 
     const labels = {
-      pending: '⏳ Pending',
-      invited: '✉️ Invited',
-      activated: '✅ Activated',
-      rejected: '❌ Rejected',
+      pending: `⏳ ${t('status.pending')}`,
+      invited: `✉️ ${t('status.invited')}`,
+      activated: `✅ ${t('status.activated')}`,
+      rejected: `❌ ${t('status.rejected')}`,
     }
 
-    return (
-      <Badge variant={variants[status]}>
-        {labels[status]}
-      </Badge>
-    )
+    return <Badge variant={variants[status]}>{labels[status]}</Badge>
   }
 
   if (isLoading) {
@@ -149,7 +148,7 @@ export function WaitlistManagement() {
       <Card>
         <CardContent className="py-12 text-center">
           <Icon name="lucide:Loader2" className="w-8 h-8 mx-auto animate-spin" />
-          <P className="text-muted-foreground mt-2">Loading waitlist...</P>
+          <P className="text-muted-foreground mt-2">{t('loading')}</P>
         </CardContent>
       </Card>
     )
@@ -160,8 +159,10 @@ export function WaitlistManagement() {
       <Card>
         <CardContent className="py-12 text-center">
           <Icon name="lucide:AlertCircle" className="w-12 h-12 mx-auto text-destructive mb-2" />
-          <P className="text-destructive font-medium">Failed to load waitlist</P>
-          <P className="text-sm text-muted-foreground mt-2">{error instanceof Error ? error.message : 'Unknown error'}</P>
+          <P className="text-destructive font-medium">{t('loadFailed')}</P>
+          <P className="text-sm text-muted-foreground mt-2">
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </P>
         </CardContent>
       </Card>
     )
@@ -174,56 +175,57 @@ export function WaitlistManagement() {
           <Div>
             <H3 className="flex items-center gap-2">
               <Icon name="lucide:UserPlus" />
-              Beta Waitlist Management
+              {t('management')}
             </H3>
-            <P className="text-sm text-muted-foreground mt-1">
-              Approve or reject beta access requests
-            </P>
+            <P className="text-sm text-muted-foreground mt-1">{t('manageDescription')}</P>
           </Div>
           <Div className="flex gap-2">
-            <Badge variant="outline">
-              Total: {data?.stats.total || 0}
-            </Badge>
-            <Badge variant="secondary">
-              Pending: {data?.stats.pending || 0}
-            </Badge>
-            <Badge variant="default">
-              Activated: {data?.stats.activated || 0}
-            </Badge>
+            <Badge variant="outline">{t('total', { count: data?.stats.total || 0 })}</Badge>
+            <Badge variant="secondary">{t('pending', { count: data?.stats.pending || 0 })}</Badge>
+            <Badge variant="default">{t('activated', { count: data?.stats.activated || 0 })}</Badge>
           </Div>
         </Div>
       </CardHeader>
       <CardContent>
         {/* Filter tabs */}
         <Div className="flex gap-2 mb-4 flex-wrap">
-          {(['all', 'pending', 'invited', 'activated', 'rejected'] as const).map(f => (
-            <Button
-              key={f}
-              size="sm"
-              variant={filter === f ? 'default' : 'outline'}
-              onClick={() => setFilter(f)}
-            >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-              {f !== 'all' && ` (${data?.stats[f] || 0})`}
-            </Button>
-          ))}
+          {(['all', 'pending', 'invited', 'activated', 'rejected'] as const).map(f => {
+            const filterLabels = {
+              all: t('all'),
+              pending: t('filterPending'),
+              invited: t('filterInvited'),
+              activated: t('filterActivated'),
+              rejected: t('filterRejected'),
+            }
+            return (
+              <Button
+                key={f}
+                size="sm"
+                variant={filter === f ? 'default' : 'outline'}
+                onClick={() => setFilter(f)}
+              >
+                {filterLabels[f]}
+                {f !== 'all' && ` (${data?.stats[f] || 0})`}
+              </Button>
+            )
+          })}
         </Div>
 
         {/* Table */}
         {filteredEntries.length === 0 ? (
           <Div className="text-center py-12">
             <Icon name="lucide:Inbox" className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
-            <P className="text-muted-foreground">No entries found</P>
+            <P className="text-muted-foreground">{t('noEntries')}</P>
           </Div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Added</TableHead>
-                <TableHead>Access Code</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('headers.email')}</TableHead>
+                <TableHead>{t('headers.status')}</TableHead>
+                <TableHead>{t('headers.added')}</TableHead>
+                <TableHead>{t('headers.accessCode')}</TableHead>
+                <TableHead className="text-right">{t('headers.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -236,10 +238,14 @@ export function WaitlistManagement() {
                   </TableCell>
                   <TableCell className="font-mono text-xs">
                     {entry.accessCode ? (
-                      <Badge variant="outline" className="cursor-pointer" onClick={() => {
-                        navigator.clipboard.writeText(entry.accessCode!)
-                        toast.success('Code copied!')
-                      }}>
+                      <Badge
+                        variant="outline"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          navigator.clipboard.writeText(entry.accessCode!)
+                          toast.success(t('actions.codeCopied'))
+                        }}
+                      >
                         {entry.accessCode}
                       </Badge>
                     ) : (
@@ -254,10 +260,9 @@ export function WaitlistManagement() {
                             size="sm"
                             onClick={() => handleApprove(entry.email)}
                             disabled={approveMutation.isPending}
-                            className="bg-green-600 hover:bg-green-700"
                           >
                             <Icon name="lucide:Check" className="mr-1" />
-                            Approve
+                            {t('actions.approve')}
                           </Button>
                           <Button
                             size="sm"
@@ -266,23 +271,23 @@ export function WaitlistManagement() {
                             disabled={rejectMutation.isPending}
                           >
                             <Icon name="lucide:X" className="mr-1" />
-                            Reject
+                            {t('actions.reject')}
                           </Button>
                         </React.Fragment>
                       )}
                       {entry.status === 'invited' && (
                         <Badge variant="outline" key={`invited-${entry._id}`}>
-                          ✉️ Waiting for registration
+                          ✉️ {t('actions.waitingRegistration')}
                         </Badge>
                       )}
                       {entry.status === 'activated' && (
                         <Badge variant="default" key={`activated-${entry._id}`}>
-                          ✅ Active user
+                          ✅ {t('actions.activeUser')}
                         </Badge>
                       )}
                       {entry.status === 'rejected' && (
                         <Badge variant="destructive" key={`rejected-${entry._id}`}>
-                          ❌ Rejected
+                          ❌ {t('status.rejected')}
                         </Badge>
                       )}
                     </Div>

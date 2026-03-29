@@ -3,7 +3,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+  findByIdAndUpdate,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
@@ -25,7 +31,8 @@ router.post('/:id/feedback', async (req: any, res: any) => {
 
     const Scan = await getScanModel()
 
-    const scan = await (Scan.findByIdAndUpdate as any)(
+    const scan = await findByIdAndUpdate(
+      Scan,
       req.params.id,
       { feedback: { opinion, comment, createdAt: new Date() } },
       { new: true }
@@ -35,7 +42,11 @@ router.post('/:id/feedback', async (req: any, res: any) => {
       return sendError(res, 'Scan not found', 404)
     }
 
-    return sendSuccess(res, { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined })
+    return sendSuccess(res, {
+      ...scan,
+      id: (scan as Record<string, any>)._id?.toString(),
+      _id: undefined,
+    })
   } catch (error) {
     logger.error('[feedback-scan] Error:', error)
     return sendError(res, 'Failed to submit feedback')
