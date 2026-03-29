@@ -1,10 +1,10 @@
-'use client';
-import { cn } from '@ezstart/ui/lib';
-import React, { ReactNode } from 'react';
+'use client'
+import { cn } from '../lib/utils'
+import React, { ReactNode } from 'react'
 
 interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {
-  children: ReactNode;
-  showRadialGradient?: boolean;
+  children: ReactNode
+  showRadialGradient?: boolean
 }
 
 export const AuroraBackground = ({
@@ -22,7 +22,7 @@ export const AuroraBackground = ({
       {...props}
     >
       <div
-        className='absolute inset-0 overflow-hidden'
+        className="absolute inset-0 overflow-hidden"
         style={
           {
             '--aurora':
@@ -55,5 +55,5 @@ export const AuroraBackground = ({
       </div>
       {children}
     </div>
-  );
-};
+  )
+}

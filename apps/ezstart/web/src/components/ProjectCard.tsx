@@ -6,7 +6,7 @@ import { Badge, Button, Div, H3, LI, P } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ReadMoreText } from './ReadMoreText'
+import { ReadMoreText } from '@ezstart/ui/components'
 import TechList from './TechList'
 
 type Props = {

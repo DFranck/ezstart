@@ -3,7 +3,7 @@
 import { ProjectCard } from '@/components/ProjectCard'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { ProjectItem } from '@/types/projects'
-import { getTranslationArray } from '@/utils/get-translation-array'
+import { getTranslationArray } from '@ezstart/ui/lib'
 import { H2, Section, UL } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { FC, HTMLAttributes } from 'react'

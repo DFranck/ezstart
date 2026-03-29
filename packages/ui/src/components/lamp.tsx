@@ -1,7 +1,7 @@
 'use client'
-import { Div, Section } from '@ezstart/ui/components'
-import { cn } from '@ezstart/ui/lib'
-import { motion } from 'framer-motion'
+import { Div, Section } from './tag'
+import { cn } from '../lib/utils'
+import { motion } from 'motion/react'
 import React from 'react'
 
 export function LampDemo() {

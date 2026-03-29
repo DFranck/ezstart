@@ -1,5 +1,6 @@
 import { Router } from '@ezstart/express-core'
 import type { Router as ExpressRouter } from 'express'
+import { getWebUrl } from '@ezstart/config/urls'
 import passport from '../../config/passport.js'
 
 const router: ExpressRouter = Router()
@@ -26,7 +27,7 @@ router.get(
     }
 
     // Fallback: redirect to EZAuth web with code
-    return res.redirect(`http://localhost:5015/auth/callback?code=${user.authCode}`)
+    return res.redirect(`${getWebUrl('ezauth')}/auth/callback?code=${user.authCode}`)
   }
 )
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { SkillShowcase } from '@/components/JobShowing'
-import { AuroraBackground } from '@/components/ui/aurora-background'
+import { AuroraBackground } from '@ezstart/ui/components'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { Div, H1, Section, TextGradient } from '@ezstart/ui/components'
 import Image from 'next/image'

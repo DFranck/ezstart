@@ -1,7 +1,7 @@
 'use client'
 
 import { LibraryContentLink, LibraryItem } from '@/types/library'
-import { getTranslationArray } from '@/utils/get-translation-array'
+import { getTranslationArray } from '@ezstart/ui/lib'
 import { customIconMap, H3, Icon, LI, Main, P, Section, UL } from '@ezstart/ui/components'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Link from 'next/link'

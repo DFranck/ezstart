@@ -22,6 +22,7 @@ Last Updated: 2025-10-26 (Added CRITICAL database protection rules after data lo
    - Tests utilisent TOUJOURS `.env.test` + MongoMemoryServer
 
 3. **JAMAIS lancer `pnpm test` sans vérifier l'environnement**
+
    ```bash
    # ❌ DANGEREUX
    pnpm test
@@ -33,6 +34,7 @@ Last Updated: 2025-10-26 (Added CRITICAL database protection rules after data lo
    ```
 
 4. **JAMAIS utiliser `deleteMany({})` ou `drop()` sans protection**
+
    ```typescript
    // ❌ DANGEREUX - Peut supprimer la production !
    await Model.deleteMany({})
@@ -47,6 +49,7 @@ Last Updated: 2025-10-26 (Added CRITICAL database protection rules after data lo
 ### ✅ OBLIGATIONS ABSOLUES
 
 1. **TOUJOURS avoir des environnements séparés**
+
    ```
    DEV:  mongodb://localhost:27017/[db]-dev
    TEST: MongoMemoryServer (en mémoire)
@@ -54,12 +57,14 @@ Last Updated: 2025-10-26 (Added CRITICAL database protection rules after data lo
    ```
 
 2. **TOUJOURS faire des backups hebdomadaires** (M0 gratuit = PAS de backups auto)
+
    ```bash
    # Chaque semaine (ou avant tests importants)
    ./scripts/backup-mongodb.sh
    ```
 
 3. **TOUJOURS vérifier NODE_ENV dans les scripts destructifs**
+
    ```typescript
    if (process.env.NODE_ENV === 'production') {
      throw new Error('This script cannot run in production!')
@@ -109,15 +114,15 @@ export default defineConfig({
 
 **Chaque app DOIT suivre ces patterns. Source de vérité : ezbill / green-pulse / gacha-analyzer.**
 
-| Pattern | Standard | Interdit |
-|---------|----------|----------|
-| **API calls** | `callApi` wrapper dans `src/config/api.ts` avec `appName` | `fetch()` direct, `axios` |
-| **Data fetching** | React Query (`useQuery`, `useMutation`) avec `queryKey` | `useState` + `useEffect` + `fetch` |
-| **Logging** | `@ezstart/logger` (`logger.debug/info/warn/error`) | `console.log/warn/error` |
-| **Feedback** | `sonner` toast (`toast.success/error`) | `alert()`, `window.confirm` |
-| **Components** | `@ezstart/ui/components` + `Tag` pour HTML | Composants custom, HTML brut |
-| **Styles** | CSS variables theme (OKLCH) | Couleurs Tailwind hardcodées |
-| **Réponses API** | `{ success, data, meta }` | Objets bruts, formats custom |
+| Pattern           | Standard                                                  | Interdit                           |
+| ----------------- | --------------------------------------------------------- | ---------------------------------- |
+| **API calls**     | `callApi` wrapper dans `src/config/api.ts` avec `appName` | `fetch()` direct, `axios`          |
+| **Data fetching** | React Query (`useQuery`, `useMutation`) avec `queryKey`   | `useState` + `useEffect` + `fetch` |
+| **Logging**       | `@ezstart/logger` (`logger.debug/info/warn/error`)        | `console.log/warn/error`           |
+| **Feedback**      | `sonner` toast (`toast.success/error`)                    | `alert()`, `window.confirm`        |
+| **Components**    | `@ezstart/ui/components` + `Tag` pour HTML                | Composants custom, HTML brut       |
+| **Styles**        | CSS variables theme (OKLCH)                               | Couleurs Tailwind hardcodées       |
+| **Réponses API**  | `{ success, data, meta }`                                 | Objets bruts, formats custom       |
 
 **Exception** : les apps minimales (ezauth login forms, ezpay landing, asc-tcd statique) peuvent déroger si justifié.
 
@@ -192,16 +197,16 @@ export default defineConfig({
 
 ### Exemples Concrets
 
-| Type de Code | Destination | Raison |
-|--------------|-------------|--------|
-| Validation email | `packages/utils` | Utilisé partout |
-| Type `User` | `packages/types` | Entité commune |
-| CORS config | `packages/config` | Infrastructure globale |
-| Card component | `packages/ui` | UI réutilisable |
-| Type `Invoice` | `apps/ezbill/types` | Spécifique EZBill mais partagé web+api |
-| Calculate invoice total | `apps/ezbill/utils` | Logic partagée web+api |
-| Invoice form component | `apps/ezbill/web/components` | UI spécifique frontend |
-| Invoice CRUD routes | `apps/ezbill/api/routes` | Backend uniquement |
+| Type de Code            | Destination                  | Raison                                 |
+| ----------------------- | ---------------------------- | -------------------------------------- |
+| Validation email        | `packages/utils`             | Utilisé partout                        |
+| Type `User`             | `packages/types`             | Entité commune                         |
+| CORS config             | `packages/config`            | Infrastructure globale                 |
+| Card component          | `packages/ui`                | UI réutilisable                        |
+| Type `Invoice`          | `apps/ezbill/types`          | Spécifique EZBill mais partagé web+api |
+| Calculate invoice total | `apps/ezbill/utils`          | Logic partagée web+api                 |
+| Invoice form component  | `apps/ezbill/web/components` | UI spécifique frontend                 |
+| Invoice CRUD routes     | `apps/ezbill/api/routes`     | Backend uniquement                     |
 
 ---
 
@@ -210,6 +215,7 @@ export default defineConfig({
 ### 1. JAMAIS de HTML Natif
 
 ❌ **INTERDIT** - Balises HTML natives :
+
 ```tsx
 <div className="bg-white p-4">
   <h1>Title</h1>
@@ -220,6 +226,7 @@ export default defineConfig({
 ```
 
 ✅ **OBLIGATOIRE** - Composants `@ezstart/ui` :
+
 ```tsx
 import { Card, CardHeader, CardContent, H1, P, Button, Input } from '@ezstart/ui/components'
 
@@ -236,6 +243,7 @@ import { Card, CardHeader, CardContent, H1, P, Button, Input } from '@ezstart/ui
 ```
 
 **Composants disponibles :**
+
 - **Layout** : `Card`, `CardHeader`, `CardContent`, `CardFooter`, `Main`, `Header`, `Footer`
 - **Typography** : `H1`-`H6`, `P`, `Label`, `Text`
 - **Forms** : `Button`, `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`
@@ -246,31 +254,34 @@ import { Card, CardHeader, CardContent, H1, P, Button, Input } from '@ezstart/ui
 ### 2. Couleurs Sémantiques UNIQUEMENT
 
 ❌ **INTERDIT** - Couleurs hardcodées :
+
 ```tsx
-className="bg-gray-100 text-gray-900 border-gray-200"
-className="bg-indigo-500 text-white hover:bg-indigo-600"
-className="text-red-600 bg-red-50"
+className = 'bg-gray-100 text-gray-900 border-gray-200'
+className = 'bg-indigo-500 text-white hover:bg-indigo-600'
+className = 'text-red-600 bg-red-50'
 ```
 
 ✅ **OBLIGATOIRE** - Classes sémantiques :
+
 ```tsx
-className="bg-card text-foreground border"
-className="bg-primary text-primary-foreground hover:bg-primary/90"
-className="text-destructive bg-destructive/10"
+className = 'bg-card text-foreground border'
+className = 'bg-primary text-primary-foreground hover:bg-primary/90'
+className = 'text-destructive bg-destructive/10'
 ```
 
 **Palette sémantique complète :**
 
-| Contexte | Classes |
-|----------|---------|
-| **Background** | `bg-background`, `bg-card`, `bg-muted`, `bg-popover`, `bg-accent` |
-| **Text** | `text-foreground`, `text-muted-foreground`, `text-card-foreground` |
-| **Primary** | `bg-primary`, `text-primary`, `text-primary-foreground`, `border-primary` |
-| **Destructive** | `bg-destructive`, `text-destructive`, `text-destructive-foreground` |
-| **Border** | `border` (auto), `border-input`, `border-ring` |
-| **Status** | `bg-success`, `bg-warning`, `bg-error`, `bg-info` |
+| Contexte        | Classes                                                                   |
+| --------------- | ------------------------------------------------------------------------- |
+| **Background**  | `bg-background`, `bg-card`, `bg-muted`, `bg-popover`, `bg-accent`         |
+| **Text**        | `text-foreground`, `text-muted-foreground`, `text-card-foreground`        |
+| **Primary**     | `bg-primary`, `text-primary`, `text-primary-foreground`, `border-primary` |
+| **Destructive** | `bg-destructive`, `text-destructive`, `text-destructive-foreground`       |
+| **Border**      | `border` (auto), `border-input`, `border-ring`                            |
+| **Status**      | `bg-success`, `bg-warning`, `bg-error`, `bg-info`                         |
 
 **Avantages :**
+
 - ✅ Dark mode automatique
 - ✅ Thèmes cohérents
 - ✅ Maintenance simplifiée
@@ -279,11 +290,42 @@ className="text-destructive bg-destructive/10"
 ### 3. Props variants/size TOUJOURS
 
 ✅ **Utiliser les variants** quand disponibles :
+
 ```tsx
 <Card variant="floating" />     // "default" | "floating" | "ghost" | "elevated" | "premium"
 <Button variant="destructive" size="sm" /> // variant + size
 <H2 size="h3" />                // Rendu h2 avec style h3
 ```
+
+### 4. i18n — TOUT texte user-facing traduit
+
+**TOUTE string visible par l'utilisateur DOIT passer par `next-intl`.**
+
+❌ **INTERDIT** :
+
+```tsx
+toast.success('Invoice created successfully')
+<Button>Submit</Button>
+<H1>Dashboard</H1>
+placeholder="Search..."
+```
+
+✅ **OBLIGATOIRE** :
+
+```tsx
+const t = useTranslations('invoice')
+toast.success(t('created'))
+<Button>{t('submit')}</Button>
+<H1>{t('dashboard')}</H1>
+placeholder={t('searchPlaceholder')}
+```
+
+**Exceptions** :
+
+- Code API (messages d'erreur serveur) — anglais OK
+- Logs (`logger.debug/info/warn/error`) — anglais OK
+- Identifiants techniques, URLs, class names
+- Pages dev/playground (showcase, demo)
 
 ---
 
@@ -299,11 +341,11 @@ import { ThemeProvider } from '@ezstart/next-theme'
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning> {/* ⚠️ PAS de className ici! */}
+    <html lang="en" suppressHydrationWarning>
+      {' '}
+      {/* ⚠️ PAS de className ici! */}
       <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   )
@@ -341,12 +383,14 @@ if (!mounted) return <div suppressHydrationWarning>{children}</div>
 ### Quand Utiliser React Query ?
 
 ✅ **OUI - Utiliser React Query pour :**
+
 - Apps avec beaucoup de fetching (conversations, messages, listes)
 - Besoin de cache pour éviter refetch inutiles
 - Optimistic updates pour UX fluide
 - Pagination, infinite scroll
 
 ❌ **NON - Pas nécessaire pour :**
+
 - Fetch simples (1-2 endpoints)
 - Pages statiques (SSG)
 - Données rarement changées
@@ -359,16 +403,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 export function QueryProvider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 5 * 60 * 1000,      // 5 min fresh
-        gcTime: 10 * 60 * 1000,         // 10 min cache
-        retry: 1,                        // 1 retry
-        refetchOnWindowFocus: false,     // No refetch on focus
-      },
-    },
-  }))
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60 * 1000, // 5 min fresh
+            gcTime: 10 * 60 * 1000, // 10 min cache
+            retry: 1, // 1 retry
+            refetchOnWindowFocus: false, // No refetch on focus
+          },
+        },
+      })
+  )
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -409,16 +456,19 @@ useQuery({ queryKey: ['user', id], queryFn: fetchUser, enabled: !!id })
 **UN SEUL processus TypeScript pour TOUT le monorepo.**
 
 ✅ **Configuration obligatoire :**
+
 - `tsc -b --watch` à la racine uniquement
 - `composite: true` dans TOUS les tsconfig
 - References vers packages dépendants
 
 ❌ **JAMAIS :**
+
 - `tsc --watch` dans les scripts dev des packages
 - Duplication de processus TypeScript
 - Compilation indépendante
 
 **Scripts optimisés (root package.json) :**
+
 ```json
 {
   "dev:types": "tsc -b --watch",
@@ -444,6 +494,7 @@ useQuery({ queryKey: ['user', id], queryFn: fetchUser, enabled: !!id })
 ```
 
 **Variantes disponibles :**
+
 - `base.json` - Configuration de base (packages simples)
 - `api.json` - Configuration API (Express)
 - `nextjs.json` - Configuration Next.js
@@ -480,22 +531,23 @@ useQuery({ queryKey: ['user', id], queryFn: fetchUser, enabled: !!id })
 
 ### Packages de Configuration
 
-| Package | Usage | Variantes |
-|---------|-------|-----------|
-| `@ezstart/config` | URLs, ports, CORS | Env-aware (local/dev/prod) |
-| `@ezstart/typescript-config` | TypeScript | 6 variantes (base, api, nextjs, library, react-library, types) |
-| `@ezstart/eslint-config` | ESLint | 3 variantes (base, next-js, react-internal) |
-| `@ezstart/tailwind-config` | Tailwind CSS | base.js |
-| `@ezstart/next-config` | Next.js | Config partagée |
-| `@ezstart/ui` | PostCSS, CSS globals | postcss.config, globals.css |
-| `@ezstart/express-core` | Express + MongoDB | Infrastructure API |
-| `@ezstart/next-theme` | Theme provider | Dark/light mode |
+| Package                      | Usage                | Variantes                                                      |
+| ---------------------------- | -------------------- | -------------------------------------------------------------- |
+| `@ezstart/config`            | URLs, ports, CORS    | Env-aware (local/dev/prod)                                     |
+| `@ezstart/typescript-config` | TypeScript           | 6 variantes (base, api, nextjs, library, react-library, types) |
+| `@ezstart/eslint-config`     | ESLint               | 3 variantes (base, next-js, react-internal)                    |
+| `@ezstart/tailwind-config`   | Tailwind CSS         | base.js                                                        |
+| `@ezstart/next-config`       | Next.js              | Config partagée                                                |
+| `@ezstart/ui`                | PostCSS, CSS globals | postcss.config, globals.css                                    |
+| `@ezstart/express-core`      | Express + MongoDB    | Infrastructure API                                             |
+| `@ezstart/next-theme`        | Theme provider       | Dark/light mode                                                |
 
 ### Propagation Automatique
 
 ✨ **Toute modification dans un package de config se propage automatiquement à TOUS les projets.**
 
 **Exemple :**
+
 1. Modifier règle ESLint dans `@ezstart/eslint-config`
 2. Rebuild le package (`pnpm --filter @ezstart/eslint-config build`)
 3. Tous les projets ont la nouvelle règle instantanément ✅
@@ -526,12 +578,12 @@ const domain = getWebUrl('ezpay', 'production')
 
 ### Pattern des Ports (50xx)
 
-| Pattern | Usage | Exemples |
-|---------|-------|----------|
-| `50X0` | APIs | EZAuth 5010, EZBill 5020, TD 5030, EZPay 5040 |
-| `50X5` | Web Apps | EZAuth 5015, EZBill 5025, TD 5035, EZPay 5045 |
-| `5000` | EZStart API | Port fixe |
-| `5050` | EZStart (hub) | Port fixe |
+| Pattern | Usage         | Exemples                                      |
+| ------- | ------------- | --------------------------------------------- |
+| `50X0`  | APIs          | EZAuth 5010, EZBill 5020, TD 5030, EZPay 5040 |
+| `50X5`  | Web Apps      | EZAuth 5015, EZBill 5025, TD 5035, EZPay 5045 |
+| `5000`  | EZStart API   | Port fixe                                     |
+| `5050`  | EZStart (hub) | Port fixe                                     |
 
 ### CORS Automatique
 
@@ -586,6 +638,7 @@ const doc = await MyModel.findOne({ ... })
    - Attacher model à la connexion partagée via `connectToMongo()`
 
 2. ✅ **Wait for Ready** avant schedulers/cron jobs
+
    ```typescript
    connectToMongo('database-name')
      .then(() => startServer(...))
@@ -593,6 +646,7 @@ const doc = await MyModel.findOne({ ... })
    ```
 
 3. ✅ **bufferCommands: false** dans schemas
+
    ```typescript
    const schema = new Schema({...}, { bufferCommands: false })
    ```
@@ -647,12 +701,14 @@ app.get('/api/health', (_, res) => res.json({ status: 'ok' }))
 
 // Démarrage
 connectToMongo('ezauth')
-  .then(() => startServer(app, {
-    routes: router,
-    registries: [registry],
-    serviceName: 'EZAuth',
-    port: PORT,
-  }))
+  .then(() =>
+    startServer(app, {
+      routes: router,
+      registries: [registry],
+      serviceName: 'EZAuth',
+      port: PORT,
+    })
+  )
   .catch(err => {
     console.error('❌ Failed to start API', err)
     process.exit(1)
@@ -664,6 +720,7 @@ connectToMongo('ezauth')
 **⚠️ TOUTES les APIs DOIVENT avoir du rate limiting** pour se protéger contre les abus et attaques DDoS.
 
 ✅ **Standard (100 req/15min per IP)** :
+
 ```typescript
 import { createRateLimiter } from '@ezstart/express-core'
 
@@ -672,6 +729,7 @@ app.use(createRateLimiter())
 ```
 
 ✅ **Strict pour endpoints sensibles (5 req/min)** :
+
 ```typescript
 import { createStrictRateLimiter } from '@ezstart/express-core'
 
@@ -681,6 +739,7 @@ app.post('/api/auth/logout', createStrictRateLimiter(), logoutHandler)
 ```
 
 ✅ **Très strict pour création de compte (3 req/hour)** :
+
 ```typescript
 import { createVeryStrictRateLimiter } from '@ezstart/express-core'
 
@@ -690,6 +749,7 @@ app.post('/api/auth/reset-password', createVeryStrictRateLimiter(), resetHandler
 ```
 
 **Configuration automatique :**
+
 - Retourne 429 avec `Retry-After` header
 - Headers standards : `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`
 - Skip automatique de `/api/health`
@@ -717,6 +777,7 @@ src/routes/
 ```
 
 **Naming convention:**
+
 - `create{Entity}.ts` - POST action
 - `list{Entities}.ts` - GET collection
 - `get{Entity}ById.ts` - GET single
@@ -725,6 +786,7 @@ src/routes/
 - `{action}With{Modifier}.ts` - Special actions (generateFormWithAI.ts)
 
 **Example: Conversations feature**
+
 ```
 routes/conversations/
 ├── createConversation.ts      # POST /conversations
@@ -736,6 +798,7 @@ routes/conversations/
 ```
 
 **Single action file:**
+
 ```typescript
 // createConversation.ts
 import { Router } from '@ezstart/express-core'
@@ -746,6 +809,7 @@ createConversationRouter.post('/', createConversationController)
 ```
 
 **Feature index:**
+
 ```typescript
 // conversations/index.ts
 import { Router } from '@ezstart/express-core'
@@ -753,12 +817,11 @@ import { createConversationRouter } from './createConversation.js'
 import { listConversationsRouter } from './listConversations.js'
 
 export const conversationsRouter = Router()
-conversationsRouter
-  .use('/', createConversationRouter)
-  .use('/', listConversationsRouter)
+conversationsRouter.use('/', createConversationRouter).use('/', listConversationsRouter)
 ```
 
 **Benefits:**
+
 - ✅ One file = One action (clear responsibility)
 - ✅ Easy to find (`getConversationById.ts`)
 - ✅ No merge conflicts
@@ -778,6 +841,7 @@ app.get('/api/health', healthCheck)
 ```
 
 **Raisons :**
+
 - Séparation claire API vs assets/web
 - Proxying nginx/reverse proxy simplifié
 - Convention universelle (Next.js, Express)
@@ -798,6 +862,7 @@ apps/[app]/api/
 ```
 
 **package.json :**
+
 ```json
 {
   "main": "dist/index.js",
@@ -866,7 +931,13 @@ import { AuthProvider } from '@ezstart/auth-sdk'
 import { ErrorBoundary } from '@ezstart/ui/components'
 import { Toaster } from 'sonner'
 
-export default async function LocaleLayout({ children, params }: { children: ReactNode, params: { locale: string } }) {
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
+  children: ReactNode
+  params: { locale: string }
+}) {
   const messages = await getMessages()
 
   return (
@@ -946,6 +1017,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
 **TOUJOURS** maintenir README à jour pour TOUS les packages dans `/packages/` :
 
 ✅ **README doit inclure :**
+
 - Overview et description claire
 - Installation et configuration
 - Exemples d'usage avec code
@@ -1071,6 +1143,7 @@ cd apps/[appname]/api && node dist/index.js
 ### Vercel (Web Apps)
 
 **Configuration Vercel Dashboard :**
+
 - ✅ Root Directory : `apps/[app]/web`
 - ✅ Include files outside root directory : COCHÉ
 - ✅ Build Command : `pnpm build`
@@ -1106,12 +1179,14 @@ type: brief description
 ### 2. Règles de Commit
 
 ✅ **TOUJOURS :**
+
 - Commiter après chaque modification importante
 - Documenter les changements de manière détaillée
 - Mettre à jour CLAUDE.md pour nouvelles pratiques/règles
 - Mettre à jour README des packages avant commit
 
 ❌ **JAMAIS :**
+
 - Ajouter "Generated with Claude Code"
 - Ajouter "Co-Authored-By: Claude"
 
@@ -1135,6 +1210,7 @@ pnpm typecheck
 ⚠️ **CRITIQUE pour packages** :
 
 Après TOUTE modification de package dans `/packages/` :
+
 1. ✅ Mettre à jour README.md du package
 2. ✅ Ajouter exemples d'usage si nouvelle feature
 3. ✅ Documenter breaking changes
@@ -1165,11 +1241,13 @@ pnpm --filter @ezstart/[package] build
 ### Standards de Qualité
 
 ✅ **Avant chaque commit :**
+
 - TypeCheck sans erreurs
 - Lint warnings acceptables (pas de blockers)
 - Build réussi pour packages modifiés
 
 ✅ **Avant chaque push :**
+
 - Tous les packages buildent
 - Documentation à jour
 - Tests passent (si applicable)
@@ -1217,6 +1295,7 @@ Quand tu crées une nouvelle app dans `/apps/` :
 **Problème :** Anciens processus Node.js persistent.
 
 **Solution :**
+
 ```bash
 # Killer tous les ports @ezstart
 pnpm kill:ports
@@ -1229,6 +1308,7 @@ pnpm kill:ports
 **Problème :** Types non trouvés après ajout workspace dependency.
 
 **Solution :**
+
 ```bash
 # Reinstaller dépendances
 pnpm install
@@ -1245,6 +1325,7 @@ pnpm dev:types
 **Problème :** API rejette requests du frontend.
 
 **Solution :**
+
 ```typescript
 // Vérifier createApp avec apiApp
 const app = createApp({ apiApp: 'ezauth' })
@@ -1258,6 +1339,7 @@ const API_URL = getApiUrl('ezauth') // Pas hardcodé
 **Problème :** `bufferCommands` timeout ou multiple connections.
 
 **Solution :**
+
 ```typescript
 // Utiliser connectToMongo() au lieu de mongoose.connect()
 import { connectToMongo } from '@ezstart/express-core'
@@ -1301,7 +1383,7 @@ scripts/
 - ❌ **JAMAIS** de scripts à la racine du monorepo (sauf configs: eslint, prettier, turbo)
 - ❌ **JAMAIS** de dossier `tmp/` ou `src/` à la racine
 - ❌ **JAMAIS** de fichiers `*.backup` dans le repo
-- ❌ **JAMAIS** de scripts de test one-shot (test-*.js, fix-*.js, etc.) — utiliser les tests Vitest
+- ❌ **JAMAIS** de scripts de test one-shot (test-_.js, fix-_.js, etc.) — utiliser les tests Vitest
 
 ---
 

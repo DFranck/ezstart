@@ -1,12 +1,13 @@
 import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
+import { getApiUrl } from '@ezstart/config/urls'
 import { OAuthProfile, OAuthService } from '../services/oauth.service.js'
 import { logger } from '@ezstart/logger/server'
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || ''
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || ''
 const GOOGLE_CALLBACK_URL =
-  process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5010/api/auth/google/callback'
+  process.env.GOOGLE_CALLBACK_URL || `${getApiUrl('ezauth')}/api/auth/google/callback`
 
 // Configure Google OAuth Strategy
 if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {

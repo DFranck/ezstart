@@ -1,5 +1,5 @@
 import { LibraryItem } from '@/types/library'
-import { getTranslationArray } from '@/utils/get-translation-array'
+import { getTranslationArray } from '@ezstart/ui/lib'
 import { H1, H2, Main, P, Section } from '@ezstart/ui/components'
 import { getTranslations } from 'next-intl/server'
 import { LibSection } from './[lib]/components/section-lib'

@@ -1,7 +1,7 @@
 'use client'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { LibraryItem } from '@/types/library'
-import { getTranslationArray } from '@/utils/get-translation-array'
+import { getTranslationArray } from '@ezstart/ui/lib'
 import {
   Badge,
   Card,

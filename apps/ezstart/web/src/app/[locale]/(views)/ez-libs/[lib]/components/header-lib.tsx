@@ -1,6 +1,6 @@
 import TechList from '@/components/TechList'
 import { LibraryItem } from '@/types/library'
-import { getTranslationArray } from '@/utils/get-translation-array'
+import { getTranslationArray } from '@ezstart/ui/lib'
 import { Button, Div, H3, H4, Icon, P, Section } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
