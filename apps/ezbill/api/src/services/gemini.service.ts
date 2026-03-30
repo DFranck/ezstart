@@ -334,11 +334,19 @@ The user can choose between two billing types via a tab in the UI. You MUST resp
    - NEVER generate items array when billing type is flat-rate
    - Summarize all work into one description, calculate total amount
 
+CRITICAL RULES — ACT IMMEDIATELY:
+- Read "Current invoice state" carefully BEFORE responding. It contains the current billingType, flatRateAmount, items, and their prices.
+- If billing type is "flat-rate" AND an amount is already set (flatRateAmount > 0 OR items[0].price > 0), use that amount directly. DO NOT ask for the amount.
+- If billing type is "flat-rate" and the user pastes a timesheet or task list, immediately call update_flat_rate with a professional description summarizing the work AND the existing flatRateAmount.
+- If billing type is "flat-rate" and NO amount is set (flatRateAmount is 0 or missing AND no item prices), generate the description and then ask for the amount.
+- If billing type is "itemized" and items already have a price > 0, use that price as the hourly rate for new items. Do NOT ask for the rate.
+- NEVER ask clarifying questions when you have enough data to act. Act immediately on the first message if it contains work data (timesheet, task list, etc).
+
 IMPORTANT:
 - Be conversational and helpful
 - Use your knowledge of development work to fill in details intelligently
 - Always call a function with your response (never just text)
-- Ask for clarification when uncertain
+- Only ask for clarification when critical information is truly missing
 - ALWAYS check the billing type before choosing which function to call`
 
 // NEW: Conversational AI with function calling
@@ -372,11 +380,20 @@ export async function chatWithInvoiceAssistant(
         ? `\nCurrency: ${currentInvoiceData.currency}`
         : ''
       const flatRateInfo =
-        activeBillingType === 'flat-rate' && currentInvoiceData.description
-          ? `\nFlat-rate description: ${currentInvoiceData.description}\nFlat-rate amount: ${currentInvoiceData.flatRateAmount || 0}`
+        activeBillingType === 'flat-rate'
+          ? `\nFlat-rate description: ${currentInvoiceData.description || '(not set)'}\nFlat-rate amount: ${currentInvoiceData.flatRateAmount || 0}`
           : ''
 
-      contextMessage = `Current billing type: ${activeBillingType}\nCurrent invoice state:${clientInfo}${itemsSummary}${flatRateInfo}${currency}\n\nUser message: ${message}`
+      // For itemized mode, surface the existing hourly rate if items have prices
+      const hourlyRateInfo =
+        activeBillingType === 'itemized' &&
+        currentInvoiceData.items &&
+        currentInvoiceData.items.length > 0 &&
+        currentInvoiceData.items[0].price > 0
+          ? `\nExisting hourly rate: ${currentInvoiceData.items[0].price}`
+          : ''
+
+      contextMessage = `Current billing type: ${activeBillingType}\nCurrent invoice state:${clientInfo}${itemsSummary}${flatRateInfo}${hourlyRateInfo}${currency}\n\nUser message: ${message}`
     } else {
       contextMessage = `Current billing type: ${activeBillingType}\n\nUser message: ${message}`
     }
