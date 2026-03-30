@@ -56,7 +56,8 @@ export const baseBillingDocSchemaRaw = z.object({
   userId: z
     .string()
     .min(1, 'User ID is required')
-    .describe('User who created this billing document'),
+    .optional()
+    .describe('User who created this billing document — injected by auth middleware'),
   clientId: z.string().min(1, 'Client is required').describe('Client identifier from mongo _id'),
   companyId: z
     .string()

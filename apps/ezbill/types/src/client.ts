@@ -84,7 +84,8 @@ export const billingClientSchema = z.object({
   userId: z
     .string()
     .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
-    .describe('User who owns this client'),
+    .optional()
+    .describe('User who owns this client — injected by auth middleware'),
   clientName: z
     .string()
     .min(1, 'Client name is required')
