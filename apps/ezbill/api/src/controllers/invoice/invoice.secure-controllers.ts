@@ -64,9 +64,9 @@ export async function getSecureInvoicesController(req: AuthRequest, res: Respons
     }
 
     const query = { ...req.query, userId } as GetInvoicesQuery & { userId: string }
-    const result = await getInvoicesPaginatedService(query)
+    const { data, pagination } = await getInvoicesPaginatedService(query)
 
-    sendSuccess(res, result)
+    sendSuccess(res, data, { ...pagination })
   } catch (error) {
     logger.error('Error in getSecureInvoicesController:', error)
     sendError(res, 'Failed to retrieve invoices')

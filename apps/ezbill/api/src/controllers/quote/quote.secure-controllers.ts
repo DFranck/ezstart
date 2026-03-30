@@ -70,9 +70,9 @@ export async function getSecureQuotesController(req: AuthRequest, res: Response)
     }
 
     const query = { ...req.query, userId } as GetQuotesQuery & { userId: string }
-    const result = await getQuotesPaginatedService(query)
+    const { data, pagination } = await getQuotesPaginatedService(query)
 
-    sendSuccess(res, result)
+    sendSuccess(res, data, { ...pagination })
   } catch (error) {
     logger.error('Error in getSecureQuotesController:', error)
     sendError(res, 'Failed to retrieve quotes')

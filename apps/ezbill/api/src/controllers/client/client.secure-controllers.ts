@@ -63,9 +63,9 @@ export async function getSecureClientsController(req: Request, res: Response) {
     }
 
     const query = { ...req.query, userId }
-    const result = await getClientsPaginatedService(query)
+    const { data, pagination } = await getClientsPaginatedService(query)
 
-    sendSuccess(res, result)
+    sendSuccess(res, data, { ...pagination })
   } catch (error) {
     logger.error('Error in getSecureClientsController:', error)
     sendError(res, 'Failed to retrieve clients')

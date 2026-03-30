@@ -61,9 +61,9 @@ export async function getSecureReceiptsController(req: AuthRequest, res: Respons
     }
 
     const query = { ...req.query, userId } as GetReceiptsQuery & { userId: string }
-    const result = await getReceiptsPaginatedService(query)
+    const { data, pagination } = await getReceiptsPaginatedService(query)
 
-    sendSuccess(res, result)
+    sendSuccess(res, data, { ...pagination })
   } catch (error) {
     logger.error('Error in getSecureReceiptsController:', error)
     sendError(res, 'Failed to retrieve receipts')
