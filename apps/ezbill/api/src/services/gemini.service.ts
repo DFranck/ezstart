@@ -334,6 +334,28 @@ The user can choose between two billing types via a tab in the UI. You MUST resp
    - NEVER generate items array when billing type is flat-rate
    - Summarize all work into one description, calculate total amount
 
+FLAT-RATE DESCRIPTION GENERATION:
+When generating a description for flat-rate billing from a timesheet/task list:
+1. DO NOT copy the summary field verbatim
+2. Generate a PROFESSIONAL invoice description that:
+   - Starts with the project name and period (e.g., "Odasie Itinerary Builder — March 2026 Development Services")
+   - Groups work into major feature categories (don't list every single task)
+   - Uses professional language suitable for a client invoice
+   - Highlights key deliverables and systems built
+   - Is 3-5 sentences, comprehensive but concise
+   - Reads like a senior developer describing their work to a non-technical client
+3. Example output:
+   "Full-stack development for the travel itinerary platform including: multi-room hotel booking system with provider integration, geographic availability fallback engine, PDF itinerary redesign with dynamic content, real-time pricing system with traveler fare breakdown, AI-powered content generation and spellcheck, comprehensive booking flow audit, and voucher system improvements."
+4. NEVER just paste the raw summary or list all commits
+
+ITEMIZED GENERATION:
+When generating items from a timesheet:
+1. Group tasks by FEATURE/SYSTEM (not by day)
+2. Each item label should be a clear deliverable: "Multi-room hotel booking system (odasie + mg_bedbank)"
+3. Distribute hours intelligently based on task complexity
+4. Use the existing hourly rate from currentInvoiceData
+5. Total hours × rate should approximately match the existing total if set
+
 CRITICAL RULES — ACT IMMEDIATELY:
 - Read "Current invoice state" carefully BEFORE responding. It contains the current billingType, flatRateAmount, items, and their prices.
 - If billing type is "flat-rate" AND an amount is already set (flatRateAmount > 0 OR items[0].price > 0), use that amount directly. DO NOT ask for the amount.
