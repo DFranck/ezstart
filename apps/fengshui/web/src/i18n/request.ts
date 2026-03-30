@@ -3,21 +3,15 @@ import merge from 'deepmerge'
 import { getRequestConfig } from 'next-intl/server'
 import { routing } from './routing'
 
-function isSupportedLocale(
-  locale: string | undefined
-): locale is (typeof routing.locales)[number] {
-  return locale !== undefined && routing.locales.includes(locale as any)
+function isSupportedLocale(locale: string | undefined): locale is (typeof routing.locales)[number] {
+  return locale !== undefined && (routing.locales as readonly string[]).includes(locale)
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
-  const [
-    common,
-    baguaBase,
-    baguaStars,
-  ] = await Promise.all([
+  const [common, baguaBase, baguaStars] = await Promise.all([
     // Main UI translations
     import(`../messages/${locale}/index.json`),
     // Bagua configuration

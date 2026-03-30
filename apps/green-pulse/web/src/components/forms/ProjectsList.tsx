@@ -70,7 +70,7 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
 
   return (
     <Div className="space-y-4">
-      {projects.map((project: any) => (
+      {projects.map((project: Record<string, unknown>) => (
         <Link key={project._id} href={`/w/${workspaceSlug}/p/${project._id}`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">

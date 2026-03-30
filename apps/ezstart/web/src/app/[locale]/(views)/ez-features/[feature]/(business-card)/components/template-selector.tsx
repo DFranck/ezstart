@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Div } from '@ezstart/ui/components'
+import { Button, Div, P, Span } from '@ezstart/ui/components'
 import { BusinessCardConfig } from '../types'
 
 interface TemplateSelectorProps {

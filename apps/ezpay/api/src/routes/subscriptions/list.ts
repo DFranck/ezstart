@@ -1,5 +1,11 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -37,25 +43,26 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
     const parsed = subscriptionsQuerySchema.safeParse(req.query)
-    const { userId, limit = 20, offset = 0 } = parsed.success ? parsed.data : req.query as any
+    const {
+      userId,
+      limit = 20,
+      offset = 0,
+    } = parsed.success ? parsed.data : (req.query as Record<string, string>)
 
-    const query: any = {
+    const query: Record<string, unknown> = {
       type: 'subscription',
     }
 
     if (userId) query.userId = userId
 
     const [subscriptions, total] = await Promise.all([
-      Payment.find(query)
-        .sort({ createdAt: -1 })
-        .skip(Number(offset))
-        .limit(Number(limit)),
+      Payment.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)),
       Payment.countDocuments(query),
     ])
 
     sendSuccess(res, subscriptions, { total, limit: Number(limit), offset: Number(offset) })
   } catch (error) {
-    logger.error('Get subscriptions error:', error)
+    logger.error('Get subscriptions error:', error instanceof Error ? error : String(error))
     sendError(res, 'Failed to fetch subscriptions')
   }
 }

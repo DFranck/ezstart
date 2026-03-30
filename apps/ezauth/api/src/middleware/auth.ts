@@ -78,11 +78,11 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     }
 
     next()
-  } catch (error: any) {
-    if (error.name === 'JsonWebTokenError') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === 'JsonWebTokenError') {
       return res.status(401).json({ error: 'Invalid token' })
     }
-    if (error.name === 'TokenExpiredError') {
+    if (error instanceof Error && error.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token expired' })
     }
     logger.error('Auth middleware error:', error)

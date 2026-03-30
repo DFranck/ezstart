@@ -10,29 +10,7 @@ import {
   Invoice,
   PaymentMethod,
 } from '@ezbill/types'
-import {
-  Button,
-  Checkbox,
-  Icon,
-  Input,
-  Label,
-  Modal,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Span,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TextArea,
-  Div,
-  H3,
-} from '@ezstart/ui/components'
+import { Button, Icon, Modal, Div } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { cn } from '@ezstart/ui/lib'
@@ -40,6 +18,9 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { InvoiceAIAssistant, InvoiceAction } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
+import { FormFields } from './invoice/form-fields'
+import { ItemsTable } from './invoice/items-table'
+import { InvoiceSummary } from './invoice/summary'
 
 interface InvoiceModalProps {
   isOpen: boolean
@@ -52,11 +33,6 @@ interface InvoiceModalProps {
   onManagePaymentMethods?: () => void
   clientId?: string // Optional: if we're in a specific client context
 }
-
-const currencies: { value: Currency; label: string; symbol: string }[] = [
-  { value: 'EUR', label: 'EUR - Euro', symbol: '€' },
-  { value: 'USD', label: 'USD - US Dollar', symbol: '$' },
-]
 
 export function InvoiceModal({
   isOpen,
@@ -76,8 +52,6 @@ export function InvoiceModal({
   const tToast = useTranslations('toast')
   const tCommon = useTranslations('common')
   const tInvoice = useTranslations('invoice')
-  const tPM = useTranslations('paymentMethod')
-  const tPlaceholders = useTranslations('placeholders')
   const [aiConversationHistory, setAiConversationHistory] = useState<
     Array<{ role: 'user' | 'assistant'; content: string }>
   >(invoice?.aiConversationHistory || [])
@@ -114,7 +88,7 @@ export function InvoiceModal({
   useEffect(() => {
     setAiConversationHistory(invoice?.aiConversationHistory || [])
     setFormData({
-      userId: '', // Will be set in handleSubmit
+      userId: '',
       clientId:
         invoice?.clientId || clientId || (clients.length > 0 && clients[0] ? clients[0]._id : ''),
       companyId: invoice?.companyId || '',
@@ -138,37 +112,13 @@ export function InvoiceModal({
     setShowTaxes(invoice?.taxRate ? invoice.taxRate > 0 : false)
   }, [invoice, clientId, clients, paymentMethods])
 
-  const addLineItem = () => {
-    setFormData({
-      ...formData,
-      items: [...(formData.items || []), { label: '', quantity: 1, price: 0 }],
-    })
-  }
-
-  const updateLineItem = (index: number, field: keyof BaseLineItem, value: any) => {
-    const updatedItems = [...(formData.items || [])]
-    updatedItems[index] = {
-      ...updatedItems[index],
-      [field]: value,
-    } as BaseLineItem
-    setFormData({ ...formData, items: updatedItems })
-  }
-
-  const removeLineItem = (index: number) => {
-    if (formData.items && formData.items.length > 1) {
-      const updatedItems = formData.items.filter((_, i) => i !== index)
-      setFormData({ ...formData, items: updatedItems })
-    }
-  }
-
-  // NEW: Handle incremental AI actions
+  // Handle incremental AI actions
   const handleAIAction = (action: InvoiceAction) => {
     switch (action.type) {
       case 'replace_all': {
         const data = action.data
         const updates: Partial<typeof formData> = {}
 
-        // Try to find matching client by name
         if (data.clientName && clients.length > 0) {
           const matchingClient = clients.find(
             c =>
@@ -180,13 +130,11 @@ export function InvoiceModal({
           }
         }
 
-        // Update items if provided
         if (data.items && data.items.length > 0) {
           updates.items = data.items
           updates.billingType = 'itemized'
         }
 
-        // Update other fields
         if (data.description) updates.description = data.description
         if (data.dueDate) updates.dueDate = data.dueDate
         if (data.notes) updates.notes = data.notes
@@ -220,7 +168,6 @@ export function InvoiceModal({
         break
 
       case 'update_client': {
-        // Try to find matching client
         const matchingClient = clients.find(
           c =>
             c.clientName?.toLowerCase().includes(action.clientName.toLowerCase()) ||
@@ -325,7 +272,6 @@ export function InvoiceModal({
       description={invoice ? tInvoice('edit') : tInvoice('create')}
       footer={
         <Div className="flex gap-3">
-          {/* AI Assistant Toggle Button (when collapsed) */}
           {!showAIAssistant && (
             <InvoiceAIAssistant
               isCollapsed={true}
@@ -378,476 +324,29 @@ export function InvoiceModal({
         {/* Main Form */}
         <Div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
           <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6 p-1">
-            <Div
-              className={`grid gap-6 ${showAIAssistant ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}
-            >
-              {!clientId && (
-                <Div>
-                  <Label className="text-sm font-medium  mb-3 block flex items-center">
-                    <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
-                    Client *
-                  </Label>
-                  <Select
-                    value={formData.clientId}
-                    onValueChange={value => setFormData({ ...formData, clientId: value })}
-                    required
-                  >
-                    <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
-                      <SelectValue placeholder={tCommon('selectClient')} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border shadow-xl rounded-xl">
-                      {clients.map(client => (
-                        <SelectItem
-                          key={client._id}
-                          value={client._id}
-                          className="hover:bg-primary/5"
-                        >
-                          <Div className="flex items-center">{client.clientName}</Div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Div>
-              )}
+            <FormFields
+              formData={formData}
+              setFormData={setFormData}
+              clients={clients}
+              companies={companies}
+              paymentMethods={paymentMethods}
+              showTaxes={showTaxes}
+              setShowTaxes={setShowTaxes}
+              showAIAssistant={showAIAssistant}
+              clientId={clientId}
+              onManagePaymentMethods={onManagePaymentMethods}
+            />
 
-              <Div>
-                <Label className="text-sm font-medium  mb-3 block flex items-center">
-                  <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
-                  {tCommon('billOnBehalf')}
-                </Label>
-                <Select
-                  value={formData.companyId || 'personal'}
-                  onValueChange={value =>
-                    setFormData({ ...formData, companyId: value === 'personal' ? '' : value })
-                  }
-                >
-                  <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
-                    <SelectValue placeholder={tCommon('selectBillingEntity')} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border shadow-xl rounded-xl">
-                    <SelectItem value="personal" className="hover:bg-primary/5">
-                      <Div className="flex items-center">
-                        <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
-                        {tCommon('personalName')}
-                      </Div>
-                    </SelectItem>
-                    {companies?.map(company => (
-                      <SelectItem
-                        key={company._id}
-                        value={company._id}
-                        className="hover:bg-primary/5"
-                      >
-                        <Div className="flex items-center">
-                          <Icon
-                            name="lucide:Building2"
-                            className="w-4 h-4 mr-2 text-ezbill-company"
-                          />
-                          {company.companyName}
-                        </Div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Div>
+            <ItemsTable formData={formData} setFormData={setFormData} />
 
-              <Div>
-                <Label className="text-sm font-medium mb-3 block flex items-center">
-                  <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
-                  {tCommon('paymentMethods' as any) || 'Payment Methods'}
-                </Label>
-                {paymentMethods && paymentMethods.length > 0 ? (
-                  <Div className="space-y-2 border rounded-lg p-3">
-                    {paymentMethods.map(method => {
-                      const isChecked = formData.paymentMethodIds?.includes(method._id) || false
-                      return (
-                        <Div key={method._id} className="flex items-center space-x-3">
-                          <Checkbox
-                            id={`payment-${method._id}`}
-                            checked={isChecked}
-                            onCheckedChange={(checked: boolean) => {
-                              const currentIds = formData.paymentMethodIds || []
-                              const newIds = checked
-                                ? [...currentIds, method._id]
-                                : currentIds.filter(id => id !== method._id)
-                              setFormData({ ...formData, paymentMethodIds: newIds })
-                            }}
-                          />
-                          <Label
-                            htmlFor={`payment-${method._id}`}
-                            className="flex items-center flex-1 cursor-pointer"
-                          >
-                            <Icon
-                              name={
-                                method.type === 'crypto_wallet'
-                                  ? 'lucide:Wallet'
-                                  : method.type === 'bank_transfer'
-                                    ? 'lucide:Building'
-                                    : method.type === 'cash'
-                                      ? 'lucide:Banknote'
-                                      : 'lucide:CreditCard'
-                              }
-                              className="w-4 h-4 mr-2 text-ezbill-payment"
-                            />
-                            <Span>{method.name}</Span>
-                            {method.isDefault && (
-                              <Span className="ml-2 text-xs text-success">(Default)</Span>
-                            )}
-                          </Label>
-                        </Div>
-                      )
-                    })}
-                  </Div>
-                ) : (
-                  <Div className="bg-warning/5 backdrop-blur-sm rounded-xl p-4 border border-warning/20">
-                    <Div className="flex items-center justify-between">
-                      <Div className="flex items-center">
-                        <Icon name="lucide:AlertCircle" className="w-5 h-5 text-warning mr-2" />
-                        <Span className="text-sm text-warning">{tPM('noMethods')}</Span>
-                      </Div>
-                      {onManagePaymentMethods && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={onManagePaymentMethods}
-                          className="bg-warning hover:bg-warning/90 text-warning-foreground"
-                        >
-                          <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
-                          {tPM('addMethod')}
-                        </Button>
-                      )}
-                    </Div>
-                  </Div>
-                )}
-              </Div>
-
-              <Div>
-                <Label className="text-sm font-medium  mb-3 block flex items-center">
-                  <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-warning" />
-                  Currency
-                </Label>
-                <Select
-                  value={formData.currency}
-                  onValueChange={(value: Currency) => setFormData({ ...formData, currency: value })}
-                >
-                  <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border shadow-xl rounded-xl">
-                    {currencies.map(({ value, label, symbol }) => (
-                      <SelectItem key={value} value={value} className="hover:bg-primary/5">
-                        <Div className="flex items-center">
-                          {label}
-                          <Span className="ml-2 text-warning">{symbol}</Span>
-                        </Div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Div>
-
-              <Div>
-                <Label className="text-sm font-medium  mb-3 block flex items-center">
-                  <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-warning" />
-                  Due Date
-                </Label>
-                <Div className="relative">
-                  <Input
-                    type="date"
-                    value={formData.dueDate}
-                    onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
-                  />
-                </Div>
-              </Div>
-
-              <Div>
-                <Div className="">
-                  <Div className="flex items-center space-x-3 mb-4">
-                    <Checkbox
-                      id="showTaxes"
-                      checked={showTaxes}
-                      onCheckedChange={(checked: boolean) => {
-                        setShowTaxes(checked)
-                        if (checked) {
-                          setFormData({ ...formData, taxRate: 20 })
-                        } else {
-                          setFormData({ ...formData, taxRate: 0 })
-                        }
-                      }}
-                      className="border-primary/30 text-primary focus:ring-primary"
-                    />
-                    <Label
-                      htmlFor="showTaxes"
-                      className="text-sm font-medium  flex items-center cursor-pointer"
-                    >
-                      <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-warning" />
-                      Add Taxes
-                    </Label>
-                  </Div>
-                  {showTaxes && (
-                    <Div>
-                      <Label className="text-sm font-medium  mb-3 block flex items-center">
-                        <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-warning" />
-                        Tax Rate (%)
-                      </Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.5"
-                        value={formData.taxRate}
-                        onChange={e =>
-                          setFormData({
-                            ...formData,
-                            taxRate: parseFloat(e.target.value.replace(',', '.')) || 0,
-                          })
-                        }
-                        className="w-full  focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
-                      />
-                    </Div>
-                  )}
-                </Div>
-              </Div>
-            </Div>
-
-            <Div>
-              {/* Billing Type Toggle */}
-              <Div className="mb-6">
-                <Label className="text-sm font-medium mb-3 block flex items-center">
-                  <Icon name="lucide:FileType" className="w-4 h-4 mr-2 text-primary" />
-                  Billing Type *
-                </Label>
-                <Div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant={formData.billingType === 'itemized' ? 'default' : 'outline'}
-                    onClick={() => setFormData({ ...formData, billingType: 'itemized' })}
-                    className="flex-1"
-                  >
-                    <Icon name="lucide:List" className="w-4 h-4 mr-2" />
-                    Itemized
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.billingType === 'flat-rate' ? 'default' : 'outline'}
-                    onClick={() => setFormData({ ...formData, billingType: 'flat-rate' })}
-                    className="flex-1"
-                  >
-                    <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                    Flat Rate
-                  </Button>
-                </Div>
-              </Div>
-
-              {/* Itemized Mode: Table */}
-              {formData.billingType === 'itemized' && (
-                <>
-                  <Div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <Div className="rounded-xl overflow-hidden">
-                      <Table className="w-full min-w-[600px]">
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="font-semibold ">
-                              <Div className="flex items-center">
-                                <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                                Description
-                              </Div>
-                            </TableHead>
-                            <TableHead className="font-semibold w-24">
-                              <Div className="flex items-center">
-                                <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
-                                Qty
-                              </Div>
-                            </TableHead>
-                            <TableHead className="font-semibold w-28">
-                              <Div className="flex items-center">
-                                <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
-                                Price
-                              </Div>
-                            </TableHead>
-                            <TableHead className="w-12"></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {formData.items?.map((item, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="min-w-[200px]">
-                                <TextArea
-                                  placeholder="Description"
-                                  value={item.label}
-                                  onChange={e => updateLineItem(index, 'label', e.target.value)}
-                                  required
-                                  rows={3}
-                                  className="resize-y min-h-[60px]"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  placeholder="Qty"
-                                  min="0"
-                                  step="0.5"
-                                  value={item.quantity === 0 ? '' : item.quantity}
-                                  onChange={e =>
-                                    updateLineItem(
-                                      index,
-                                      'quantity',
-                                      parseFloat(e.target.value.replace(',', '.')) || 0
-                                    )
-                                  }
-                                  required
-                                  className="w-20"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  placeholder="Price"
-                                  min="0"
-                                  step="0.5"
-                                  value={item.price === 0 ? '' : item.price}
-                                  onChange={e =>
-                                    updateLineItem(
-                                      index,
-                                      'price',
-                                      parseFloat(e.target.value.replace(',', '.')) || 0
-                                    )
-                                  }
-                                  required
-                                  className="w-24"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size={'icon'}
-                                  onClick={() => removeLineItem(index)}
-                                  disabled={(formData.items?.length || 0) <= 1}
-                                >
-                                  <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </Div>
-                  </Div>
-                  <Button type="button" variant="outline" className="mt-2" onClick={addLineItem}>
-                    <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
-                    Add Line Item
-                  </Button>
-                </>
-              )}
-
-              {/* Flat-Rate Mode: Description + Amount */}
-              {formData.billingType === 'flat-rate' && (
-                <Div className="space-y-4">
-                  <Div>
-                    <Label className="text-sm font-medium mb-3 block flex items-center">
-                      <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
-                      Description *
-                    </Label>
-                    <TextArea
-                      placeholder="Describe the work or service provided..."
-                      value={formData.description || ''}
-                      onChange={e => setFormData({ ...formData, description: e.target.value })}
-                      required
-                      rows={6}
-                      className="w-full resize-none"
-                    />
-                  </Div>
-                  <Div>
-                    <Label className="text-sm font-medium mb-3 block flex items-center">
-                      <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-success" />
-                      Amount *
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="Enter flat rate amount"
-                      min="0"
-                      step="0.01"
-                      value={formData.flatRateAmount === 0 ? '' : formData.flatRateAmount}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          flatRateAmount: parseFloat(e.target.value.replace(',', '.')) || 0,
-                        })
-                      }
-                      required
-                      className="w-full"
-                    />
-                  </Div>
-                </Div>
-              )}
-            </Div>
-
-            {/* Totals */}
-            <Div>
-              <Div className="flex items-center mb-4">
-                <Icon name="lucide:Calculator" className="w-5 h-5 mr-2 text-primary" />
-                <H3 className="text-lg font-semibold ">Invoice Summary</H3>
-              </Div>
-              <Div className="space-y-3">
-                <Div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
-                  <Span className="flex items-center font-medium ">
-                    <Icon name="lucide:Minus" className="w-4 h-4 mr-2" />
-                    Subtotal:
-                  </Span>
-                  <Span className="font-semibold ">
-                    {subtotal.toFixed(2)} {formData.currency}
-                  </Span>
-                </Div>
-                {showTaxes && (
-                  <Div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
-                    <Span className="flex items-center font-medium ">
-                      <Icon name="lucide:Percent" className="w-4 h-4 mr-2" />
-                      Tax ({formData.taxRate}%):
-                    </Span>
-                    <Span className="font-semibold ">
-                      {taxAmount.toFixed(2)} {formData.currency}
-                    </Span>
-                  </Div>
-                )}
-                <Div className="flex justify-between items-center bg-gradient-invoice text-white rounded-lg p-4 shadow-lg">
-                  <Span className="flex items-center font-bold text-lg">
-                    <Icon name="lucide:DollarSign" className="w-5 h-5 mr-2" />
-                    Total:
-                  </Span>
-                  <Span className="font-bold text-xl">
-                    {total.toFixed(2)} {formData.currency}
-                  </Span>
-                </Div>
-              </Div>
-            </Div>
-
-            <Div>
-              <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
-                Notes
-              </Label>
-              <TextArea
-                value={formData.notes}
-                onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
-                placeholder="Additional notes for this invoice..."
-              />
-            </Div>
-
-            <Div>
-              <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 text-primary" />
-                Terms & Conditions
-              </Label>
-              <TextArea
-                value={formData.terms}
-                onChange={e => setFormData({ ...formData, terms: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
-                placeholder="Payment due upon receipt. Late payment penalties may apply..."
-              />
-            </Div>
+            <InvoiceSummary
+              formData={formData}
+              setFormData={setFormData}
+              showTaxes={showTaxes}
+              subtotal={subtotal}
+              taxAmount={taxAmount}
+              total={total}
+            />
           </form>
         </Div>
 

@@ -128,8 +128,8 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
       } else {
         throw new Error('Failed to update user')
       }
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err))
       logger.error('Error updating user:', err)
     } finally {
       setSaving(false)

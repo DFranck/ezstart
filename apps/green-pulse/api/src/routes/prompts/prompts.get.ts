@@ -1,11 +1,17 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 
 export const getPromptRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(getPromptRegistry, router, '/prompts')
 
 const PromptSchema = z.object({
@@ -14,7 +20,9 @@ const PromptSchema = z.object({
   name: z.string().describe('Prompt display name'),
   description: z.string().optional().describe('Prompt description'),
   content: z.string().describe('Prompt content template'),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).describe('Prompt category type'),
+  type: z
+    .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
+    .describe('Prompt category type'),
   provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).describe('Target AI provider'),
   isActive: z.boolean().describe('Whether prompt is active'),
   isDefault: z.boolean().describe('Whether this is the default prompt'),
@@ -43,11 +51,12 @@ docRouter.get(
         return sendError(res, 'Prompt not found', 404)
       }
 
+      const doc = prompt as Record<string, unknown>
       sendSuccess(res, {
         ...prompt,
-        _id: (prompt as any)._id.toString(),
-        createdAt: (prompt as any).createdAt?.toISOString(),
-        updatedAt: (prompt as any).updatedAt?.toISOString(),
+        _id: String(doc._id),
+        createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+        updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
       })
     } catch (error) {
       logger.error('Error getting prompt:', error)

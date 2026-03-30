@@ -46,7 +46,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
           )
 
           // Pass auth code to callback
-          done(null, { authCode: authCodeResponse.code, redirect_uri })
+          done(null, { authCode: authCodeResponse.code, redirect_uri } as unknown as Express.User)
         } catch (error) {
           done(error as Error)
         }

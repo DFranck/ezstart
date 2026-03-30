@@ -1,5 +1,12 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { createCheckoutSession } from '../../services/stripe.js'
@@ -40,7 +47,7 @@ const paymentResponseSchema = z.object({
 // ========================================
 
 const createDonationHandler = async (req: Request, res: Response) => {
-  const Payment = await getPaymentModel();
+  const Payment = await getPaymentModel()
   try {
     const validation = createDonationSchema.safeParse(req.body)
     if (!validation.success) {
@@ -108,7 +115,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
-    logger.error('Create donation error:', error)
+    logger.error('Create donation error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to create donation')
   }
 }

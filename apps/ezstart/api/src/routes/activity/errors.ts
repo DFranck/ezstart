@@ -27,7 +27,7 @@ const getErrorsHandler = async (req: Request, res: Response) => {
       limit = 50,
       offset = 0,
       since = '7d',
-    } = parsed.success ? parsed.data : (req.query as any)
+    } = parsed.success ? parsed.data : (req.query as Record<string, string>)
 
     const sentryClient = createSentryClient()
     if (!sentryClient) {

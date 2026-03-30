@@ -4,18 +4,20 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import fs from 'fs'
 import { transcribeAudio } from '../../services/gemini.service.js'
 import { upload } from './multerConfig.js'
 
 export const uploadAudioRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const uploadAudioRouter = createRouterWithDoc(
-  uploadAudioRegistry,
-  router,
-  '/audio'
-)
+const router: import('express').Router = Router()
+export const uploadAudioRouter = createRouterWithDoc(uploadAudioRegistry, router, '/audio')
 
 uploadAudioRouter.post(
   '/',

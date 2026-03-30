@@ -56,12 +56,7 @@ const formatDeletedDate = (deletedAt?: string) => {
   }
 }
 
-export function DeletedItemCard({
-  item,
-  type,
-  onRestore,
-  onHardDelete,
-}: DeletedItemCardProps): any {
+export function DeletedItemCard({ item, type, onRestore, onHardDelete }: DeletedItemCardProps) {
   const [deleteDialog, setDeleteDialog] = useState(false)
 
   return (

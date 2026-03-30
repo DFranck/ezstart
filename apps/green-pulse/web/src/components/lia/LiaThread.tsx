@@ -113,12 +113,14 @@ export function LiaThread({
   // Load messages from cache when conversationData changes
   useEffect(() => {
     if (conversationData && conversationData.messages) {
-      const threadMessages = conversationData.messages.map((msg: any) => ({
-        id: `${msg.role}-${msg.timestamp.getTime()}`,
-        role: msg.role === 'assistant' ? 'ai' : msg.role,
-        content: msg.content,
-        timestamp: msg.timestamp.toISOString(),
-      }))
+      const threadMessages = conversationData.messages.map(
+        (msg: { role: string; content: string }) => ({
+          id: `${msg.role}-${msg.timestamp.getTime()}`,
+          role: msg.role === 'assistant' ? 'ai' : msg.role,
+          content: msg.content,
+          timestamp: msg.timestamp.toISOString(),
+        })
+      )
       loadMessages(threadMessages)
     }
   }, [conversationData, loadMessages])

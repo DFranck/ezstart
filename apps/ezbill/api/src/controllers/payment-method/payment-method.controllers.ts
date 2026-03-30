@@ -38,7 +38,7 @@ export const getPaymentMethods = async (req: AuthRequest, res: Response) => {
       page,
       totalPages: Math.ceil(total / limit),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching payment methods:', error)
     sendError(res, 'Failed to fetch payment methods')
   }
@@ -58,7 +58,7 @@ export const getPaymentMethodById = async (req: AuthRequest, res: Response) => {
     }
 
     sendSuccess(res, toApiObject(paymentMethod))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching payment method:', error)
     sendError(res, 'Failed to fetch payment method')
   }
@@ -83,9 +83,9 @@ export const createPaymentMethod = async (req: AuthRequest, res: Response) => {
     await paymentMethod.save()
     res.status(201)
     sendSuccess(res, toApiObject(paymentMethod))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating payment method:', error)
-    sendError(res, error.message || 'Failed to create payment method', 400)
+    sendError(res, error instanceof Error ? error.message : 'Failed to create payment method', 400)
   }
 }
 
@@ -115,9 +115,9 @@ export const updatePaymentMethod = async (req: AuthRequest, res: Response) => {
     }
 
     sendSuccess(res, toApiObject(paymentMethod))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating payment method:', error)
-    sendError(res, error.message || 'Failed to update payment method', 400)
+    sendError(res, error instanceof Error ? error.message : 'Failed to update payment method', 400)
   }
 }
 
@@ -152,7 +152,7 @@ export const deletePaymentMethod = async (req: AuthRequest, res: Response) => {
 
       sendSuccess(res, toApiObject(paymentMethod))
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting payment method:', error)
     sendError(res, 'Failed to delete payment method')
   }
@@ -172,7 +172,7 @@ export const restorePaymentMethod = async (req: AuthRequest, res: Response) => {
     }
 
     sendSuccess(res, toApiObject(paymentMethod))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error restoring payment method:', error)
     sendError(res, 'Failed to restore payment method')
   }

@@ -16,7 +16,7 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 
 export const createWorkspaceRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const createWorkspaceRouter = createRouterWithDoc(
   createWorkspaceRegistry,
   router,

@@ -13,7 +13,7 @@ export default function MobileNavbar() {
   const locale = useLocale()
   const [isOpen, setIsOpen] = useState(false)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const burgerRef = useRef<HTMLButtonElement>(null)
+  const burgerRef = useRef<HTMLDivElement>(null)
 
   useClickOutside(mobileMenuRef, () => {
     if (burgerRef.current?.contains(event?.target as Node)) return
@@ -54,7 +54,9 @@ export default function MobileNavbar() {
             />
           </Link>
 
-          <Burger isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} ref={burgerRef} />
+          <Div ref={burgerRef}>
+            <Burger isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+          </Div>
           {/* <Button
             variant={'ghost'}
             onClick={(e) => {

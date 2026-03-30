@@ -13,7 +13,7 @@ import {
 import { z } from 'zod'
 import { getGameConfigModel } from '../models/game-config.js'
 
-const router: any = Router()
+const router = Router()
 
 const paramsSchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']),
@@ -28,7 +28,7 @@ const bodySchema = z.object({
   roi: z.record(z.any()).optional(),
 })
 
-router.put('/:gameType/:layoutName', async (req: any, res: any) => {
+router.put('/:gameType/:layoutName', async (req, res) => {
   try {
     const paramsValidation = paramsSchema.safeParse(req.params)
     if (!paramsValidation.success) {

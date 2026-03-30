@@ -34,7 +34,7 @@ export const getCompanies = async (req: AuthRequest, res: Response) => {
       page,
       totalPages: Math.ceil(total / limit),
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching companies:', error)
     sendError(res, 'Failed to fetch companies')
   }
@@ -50,7 +50,7 @@ export const getCompanyById = async (req: AuthRequest, res: Response) => {
     }
 
     sendSuccess(res, toApiObject(company))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching company:', error)
     sendError(res, 'Failed to fetch company')
   }
@@ -61,7 +61,7 @@ export const getCompaniesByUserId = async (req: Request, res: Response) => {
     const { userId } = req.params
     const companies = await CompanyModel.find({ userId }).sort({ createdAt: -1 })
     sendSuccess(res, companies.map(toApiObject))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching companies:', error)
     sendError(res, 'Failed to fetch companies')
   }
@@ -77,9 +77,9 @@ export const createCompany = async (req: AuthRequest, res: Response) => {
     await company.save()
     res.status(201)
     sendSuccess(res, toApiObject(company))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating company:', error)
-    sendError(res, error.message || 'Failed to create company', 400)
+    sendError(res, error instanceof Error ? error.message : 'Failed to create company', 400)
   }
 }
 
@@ -101,9 +101,9 @@ export const updateCompany = async (req: AuthRequest, res: Response) => {
     }
 
     sendSuccess(res, toApiObject(company))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating company:', error)
-    sendError(res, error.message || 'Failed to update company', 400)
+    sendError(res, error instanceof Error ? error.message : 'Failed to update company', 400)
   }
 }
 
@@ -135,7 +135,7 @@ export const deleteCompany = async (req: AuthRequest, res: Response) => {
 
       sendSuccess(res, toApiObject(company))
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting company:', error)
     sendError(res, 'Failed to delete company')
   }
@@ -155,7 +155,7 @@ export const restoreCompany = async (req: AuthRequest, res: Response) => {
     }
 
     sendSuccess(res, toApiObject(company))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error restoring company:', error)
     sendError(res, 'Failed to restore company')
   }

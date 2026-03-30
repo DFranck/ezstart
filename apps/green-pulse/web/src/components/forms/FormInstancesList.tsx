@@ -59,7 +59,7 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
 
   return (
     <Div className="space-y-3">
-      {forms.map((form: any) => (
+      {forms.map((form: Record<string, unknown>) => (
         <Link key={form._id} href={`/w/${workspaceSlug}/p/${projectId}/f/${form._id}`}>
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="p-4">

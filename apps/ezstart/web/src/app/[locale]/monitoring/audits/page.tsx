@@ -16,7 +16,7 @@ import { calculateAuditsHealth, getMetricsData } from '../lib/utils'
 import { AuditCard } from './components/AuditCard'
 import { AuditsFilters } from './components/AuditsFilters'
 
-function AuditsMonitoringContent(): any {
+function AuditsMonitoringContent() {
   const { isDesktop } = useDevice()
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
@@ -27,7 +27,7 @@ function AuditsMonitoringContent(): any {
 
   // Extract data - Filter out domain-level audits (only keep categories)
   const allAudits = auditsData?.audits || []
-  const audits = allAudits.filter((audit: any) => {
+  const audits = allAudits.filter(audit => {
     // Domain-level audits have filePath like "docs/audits.json → domains.backend"
     // Category-level audits have filePath like "docs/audits.json → domains.backend.categories.api"
     return audit.filePath && audit.filePath.includes('.categories.')
@@ -139,6 +139,7 @@ function AuditsMonitoringContent(): any {
               <>
                 {/* Audits Grid */}
                 <Div className={`grid ${gridCols} gap-4 mt-4`}>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {filteredAudits.map((audit: any) => (
                     <Div key={audit.auditType} id={`audit-${audit.auditType}`}>
                       <AuditCard audit={audit} />

@@ -1,14 +1,8 @@
 'use client'
 
+import { MacbookScroll } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
-
-// ⚡ PERFORMANCE: Dynamic import to reduce initial bundle size
-// framer-motion (used by MacbookScroll) is ~150KB - only load on home page
-const MacbookScroll = dynamic(
-  () => import('@ezstart/ui/components').then(mod => ({ default: mod.MacbookScroll })),
-  { ssr: false }
-)
 
 const FlippingGallery = dynamic(
   () => import('@/components/ui/flipping-gallery').then(mod => ({ default: mod.FlippingGallery })),
@@ -19,7 +13,7 @@ type Props = {
   id?: string
 }
 
-const LibsSection = ({ id }: Props): any => {
+const LibsSection = ({ id }: Props): React.JSX.Element => {
   const t = useTranslations('libraries')
   return (
     <MacbookScroll

@@ -12,15 +12,15 @@
  * - DELETE /api/companies/:id        -> deleteCompanyById
  */
 
-import { Router } from '@ezstart/express-core';
+import { Router } from '@ezstart/express-core'
 
 // Import action routers
-import listCompaniesRouter, { listCompaniesRegistry } from './listCompanies.js';
-import getCompanyByIdRouter, { getCompanyByIdRegistry } from './getCompanyById.js';
-import createCompanyRouter, { createCompanyRegistry } from './createCompany.js';
-import updateCompanyByIdRouter, { updateCompanyByIdRegistry } from './updateCompanyById.js';
-import restoreCompanyByIdRouter, { restoreCompanyByIdRegistry } from './restoreCompanyById.js';
-import deleteCompanyByIdRouter, { deleteCompanyByIdRegistry } from './deleteCompanyById.js';
+import listCompaniesRouter, { listCompaniesRegistry } from './listCompanies.js'
+import getCompanyByIdRouter, { getCompanyByIdRegistry } from './getCompanyById.js'
+import createCompanyRouter, { createCompanyRegistry } from './createCompany.js'
+import updateCompanyByIdRouter, { updateCompanyByIdRegistry } from './updateCompanyById.js'
+import restoreCompanyByIdRouter, { restoreCompanyByIdRegistry } from './restoreCompanyById.js'
+import deleteCompanyByIdRouter, { deleteCompanyByIdRegistry } from './deleteCompanyById.js'
 
 // Export all registries as an array for OpenAPI documentation
 export const companiesRegistries = [
@@ -30,10 +30,10 @@ export const companiesRegistries = [
   updateCompanyByIdRegistry,
   restoreCompanyByIdRegistry,
   deleteCompanyByIdRegistry,
-];
+]
 
 // Consolidate all company routers
-const router: any = Router();
+const router: import('express').Router = Router()
 
 router
   .use('/', listCompaniesRouter)
@@ -41,6 +41,6 @@ router
   .use('/', createCompanyRouter)
   .use('/', updateCompanyByIdRouter)
   .use('/', restoreCompanyByIdRouter)
-  .use('/', deleteCompanyByIdRouter);
+  .use('/', deleteCompanyByIdRouter)
 
-export default router;
+export default router

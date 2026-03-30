@@ -26,7 +26,7 @@ interface PageProps {
   params: Promise<{ slug: string; id: string; locale: string }>
 }
 
-function ProjectDetailContent({ params }: PageProps): any {
+function ProjectDetailContent({ params }: PageProps) {
   const { slug, id } = use(params)
   const t = useTranslations('forms.projects')
 

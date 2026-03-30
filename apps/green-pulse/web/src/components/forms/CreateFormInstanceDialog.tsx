@@ -87,7 +87,7 @@ export function CreateFormInstanceDialog({
               <P className="text-sm text-muted-foreground">{t('noTemplates')}</P>
             ) : (
               <Div className="grid gap-3">
-                {formConfigs.map((config: any) => (
+                {formConfigs.map((config: Record<string, unknown>) => (
                   <Card
                     key={config.id}
                     className={`cursor-pointer transition-all ${

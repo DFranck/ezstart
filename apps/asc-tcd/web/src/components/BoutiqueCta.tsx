@@ -1,12 +1,12 @@
 import { Button, Icon, Span } from '@ezstart/ui/components'
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 
 type Props = {
   icon?: string | ReactNode
   label?: string
 }
 
-const BoutiqueCta = ({ label = 'Equipez vous', icon }: Props): any => {
+const BoutiqueCta = ({ label = 'Equipez vous', icon }: Props): React.JSX.Element => {
   return (
     <Button asChild>
       <a

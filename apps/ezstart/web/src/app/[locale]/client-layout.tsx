@@ -24,7 +24,7 @@ type ClientLayoutProps = {
   children: ReactNode
 }
 
-const ClientLayout = ({ children }: ClientLayoutProps): any => {
+const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
   const { isAuthenticated } = useAuth()
   const { isMobile } = useDevice()
   const router = useRouter()

@@ -16,7 +16,7 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 
 export const updateWorkspaceRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const updateWorkspaceRouter = createRouterWithDoc(
   updateWorkspaceRegistry,
   router,
@@ -45,7 +45,9 @@ updateWorkspaceRouter.put(
       }
 
       // Check permissions: only owner or admin can update
-      const member = workspace.members?.find((m: any) => m.userId === userId)
+      const member = workspace.members?.find(
+        (m: { userId: string; role?: string }) => m.userId === userId
+      )
       const isOwner = workspace.ownerId === userId
       const isAdmin = member?.role === 'admin'
 

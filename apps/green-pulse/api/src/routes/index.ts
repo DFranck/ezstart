@@ -12,7 +12,7 @@ import workspaceRoutes, { workspaceRegistries } from './workspaces/index.js'
 import themeRoutes, { themeRegistries } from './theme/index.js'
 import promptsRoutes, { promptsRegistries } from './prompts/index.js'
 
-const router: any = Router()
+const router: import('express').Router = Router()
 
 export const globalRegistry = [
   ...chatRegistries,
@@ -22,11 +22,11 @@ export const globalRegistry = [
   ...esgRegistries,
   ...webhookRegistries,
   ...conversationRegistries, // Spread the array of conversation registries
-  ...formRegistries,         // Spread the array of form registries
-  ...projectRegistries,      // Spread the array of project registries
-  ...workspaceRegistries,    // Spread the array of workspace registries
-  ...themeRegistries,        // Spread the array of theme registries
-  ...promptsRegistries,      // Spread the array of prompts registries
+  ...formRegistries, // Spread the array of form registries
+  ...projectRegistries, // Spread the array of project registries
+  ...workspaceRegistries, // Spread the array of workspace registries
+  ...themeRegistries, // Spread the array of theme registries
+  ...promptsRegistries, // Spread the array of prompts registries
 ]
 
 router

@@ -6,9 +6,9 @@ export interface GameConfig {
   layoutName: string
   displayName?: string
   bestPresets: string[]
-  zones: any
-  masks: any
-  roi: any
+  zones: Record<string, unknown>
+  masks: Record<string, unknown>
+  roi: Record<string, unknown>
   updatedAt: Date
 }
 

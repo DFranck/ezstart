@@ -16,7 +16,7 @@ export function FormPreview({
   onFieldsUpdate,
   disabled,
 }: FormPreviewProps) {
-  const handleFieldChange = (fieldId: string, value: any) => {
+  const handleFieldChange = (fieldId: string, value: unknown) => {
     if (disabled) return
     onFieldsUpdate({ ...extractedFields, [fieldId]: value })
   }

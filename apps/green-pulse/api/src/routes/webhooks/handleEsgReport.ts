@@ -13,10 +13,10 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
-import { WebhookEventSchema } from '@green-pulse/types'
+import { WebhookEventSchema, type WebhookEvent } from '@green-pulse/types'
 
 export const handleEsgReportRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const handleEsgReportRouter = createRouterWithDoc(
   handleEsgReportRegistry,
   router,
@@ -24,7 +24,7 @@ export const handleEsgReportRouter = createRouterWithDoc(
 )
 
 // Handle report completion
-async function handleReportCompleted(event: any) {
+async function handleReportCompleted(event: WebhookEvent) {
   logger.info(`✅ Report ${event.job_id} completed successfully`)
 
   // Here you would:
@@ -48,7 +48,7 @@ async function handleReportCompleted(event: any) {
 }
 
 // Handle report failure
-async function handleReportFailed(event: any) {
+async function handleReportFailed(event: WebhookEvent) {
   logger.info(`❌ Report ${event.job_id} failed: ${event.data.error}`)
 
   const reportData = {
@@ -66,7 +66,7 @@ async function handleReportFailed(event: any) {
 }
 
 // Handle data processing completion
-async function handleDataProcessed(event: any) {
+async function handleDataProcessed(event: WebhookEvent) {
   logger.info(`📊 Data processing ${event.job_id} completed`)
 
   // TODO: Update dashboard with processed metrics

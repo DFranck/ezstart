@@ -26,7 +26,7 @@ interface PageProps {
   params: Promise<{ slug: string; locale: string }>
 }
 
-function WorkspacePageContent({ params }: PageProps): any {
+function WorkspacePageContent({ params }: PageProps) {
   const { slug } = use(params)
   const t = useTranslations('forms.projects')
 

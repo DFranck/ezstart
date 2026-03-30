@@ -19,7 +19,7 @@ import { ChatRequestSchema, ChatResponseSchema, ApiResponseSchema } from '@green
 
 export const chatV2Registry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(chatV2Registry, router, '/chat-v2')
 
 // POST /api/chat-v2 - Chat using @ezstart/ai-sdk
@@ -59,10 +59,12 @@ docRouter.post(
           // @ts-expect-error - Mongoose findById type inference issue
           const conversation = await Conversation.findById(conversation_id).lean().exec()
           if (conversation && conversation.messages) {
-            conversationHistory = conversation.messages.map((msg: any) => ({
-              role: msg.role,
-              content: msg.content,
-            }))
+            conversationHistory = conversation.messages.map(
+              (msg: { role: string; content: string }) => ({
+                role: msg.role,
+                content: msg.content,
+              })
+            )
           }
         } catch (loadError) {
           logger.error('[Chat V2] Failed to load conversation history:', loadError)
@@ -78,7 +80,7 @@ docRouter.post(
       })
 
       // Validate extracted data if present
-      let validationResult: any = null
+      let validationResult: Record<string, unknown> | null = null
       if (result.extractedData) {
         validationResult = await validateEsgData(result.extractedData)
       }

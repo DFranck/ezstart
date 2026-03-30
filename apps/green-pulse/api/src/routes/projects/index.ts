@@ -23,7 +23,7 @@ export const projectRegistries = [
 ]
 
 // Combine all routers
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router.use('/', listProjectsRouter)
 router.use('/', getProjectByIdRouter)

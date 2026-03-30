@@ -20,14 +20,14 @@ export const formInstanceRegistries = [
   deleteFormInstanceRegistry,
 ]
 
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
-  .use('/', listFormInstancesRouter)      // GET /instances
-  .use('/', getFormInstanceByIdRouter)    // GET /instances/:id
-  .use('/', createFormInstanceRouter)     // POST /instances
-  .use('/', updateFormInstanceRouter)     // PUT /instances/:id
-  .use('/', submitFormInstanceRouter)     // POST /instances/:id/submit
-  .use('/', deleteFormInstanceRouter)     // DELETE /instances/:id
+  .use('/', listFormInstancesRouter) // GET /instances
+  .use('/', getFormInstanceByIdRouter) // GET /instances/:id
+  .use('/', createFormInstanceRouter) // POST /instances
+  .use('/', updateFormInstanceRouter) // PUT /instances/:id
+  .use('/', submitFormInstanceRouter) // POST /instances/:id/submit
+  .use('/', deleteFormInstanceRouter) // DELETE /instances/:id
 
 export default router

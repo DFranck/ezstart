@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, H2, H3, Icon, Main, P, Section } from '@ezstart/ui/components'
+import { Button, Div, H2, H3, Icon, Main, P, Section, Span } from '@ezstart/ui/components'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Link from 'next/link'
 
@@ -19,7 +19,7 @@ const icons: Record<string, React.ReactNode> = {
   contact: <Icon name="fa:FaEnvelope" className="text-blue-500" size={20} />,
 }
 
-const LegalNoticesPage = (): any => {
+const LegalNoticesPage = (): React.JSX.Element => {
   const t = useSafeTranslations('legal-notices')
   const sections = t.raw('sections') as LegalSection[]
 

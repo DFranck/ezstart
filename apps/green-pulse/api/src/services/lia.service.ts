@@ -30,13 +30,13 @@ export const liaAgent = new AIAgent({
   temperature: 0.7,
 
   // Hook: Before sending request
-  beforeRequest: async (context) => {
+  beforeRequest: async context => {
     logger.info(`[LIA] User ${context.userId || 'anonymous'}: ${context.message.substring(0, 100)}`)
     return context
   },
 
   // Hook: After receiving response
-  afterResponse: async (context) => {
+  afterResponse: async context => {
     logger.info(`[LIA] AI response: ${context.response.substring(0, 100)}...`)
 
     // Save to conversation if conversationId provided
@@ -74,7 +74,7 @@ export const liaAgent = new AIAgent({
     logger.error('[LIA] Error:', error.message)
     logger.error('  User:', context.userId || 'anonymous')
     logger.error('  Message:', context.message.substring(0, 100))
-  }
+  },
 })
 
 /**
@@ -88,17 +88,19 @@ export const esgExtractionAgent = new AIAgent({
   temperature: 0.1, // Low temp for consistency
 
   // Hook: Parse and validate JSON response
-  afterResponse: async (context) => {
+  afterResponse: async context => {
     try {
       const extracted = JSON.parse(context.response) as ESGPayload
       context.metadata = { extractedData: extracted }
-      logger.info(`[ESG Extraction] Successfully extracted data for ${extracted.company?.name || 'unknown company'}`)
+      logger.info(
+        `[ESG Extraction] Successfully extracted data for ${extracted.company?.name || 'unknown company'}`
+      )
     } catch (error) {
       logger.error('[ESG Extraction] Failed to parse JSON:', error)
       context.metadata = { extractedData: null, error: 'Failed to parse extracted data' }
     }
     return context
-  }
+  },
 })
 
 /**
@@ -129,13 +131,13 @@ export async function chatWithLIA(
     userId,
     history: history.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content
-    }))
+      content: msg.content,
+    })),
   })
 
   return {
     response: result.text,
-    extractedData: result.metadata?.extractedData,
+    extractedData: result.metadata?.extractedData as ESGPayload | null | undefined,
     conversationId,
   }
 }
@@ -143,7 +145,9 @@ export async function chatWithLIA(
 /**
  * Validate ESG data using AI
  */
-export async function validateEsgData(payload: ESGPayload): Promise<{ ok: boolean; errors?: string[] }> {
+export async function validateEsgData(
+  payload: ESGPayload
+): Promise<{ ok: boolean; errors?: string[] }> {
   const validationAgent = new AIAgent({
     provider: 'openai',
     model: 'gpt-4o-mini',
@@ -158,7 +162,9 @@ export async function validateEsgData(payload: ESGPayload): Promise<{ ok: boolea
 - Company country must be 2-letter code
 Return {"ok": true} or {"ok": false, "errors": [...]}`
 
-  const result = await validationAgent.chat(`${validationPrompt}\n\nData: ${JSON.stringify(payload)}`)
+  const result = await validationAgent.chat(
+    `${validationPrompt}\n\nData: ${JSON.stringify(payload)}`
+  )
 
   try {
     return JSON.parse(result.text)

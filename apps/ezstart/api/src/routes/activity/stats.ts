@@ -19,7 +19,7 @@ export const router: ReturnType<typeof Router> = Router()
 const getStatsHandler = async (req: Request, res: Response) => {
   try {
     const parsed = statsQuerySchema.safeParse(req.query)
-    const { since = '7d' } = parsed.success ? parsed.data : req.query as any
+    const { since = '7d' } = parsed.success ? parsed.data : (req.query as Record<string, string>)
 
     const sentryClient = createSentryClient()
     const stats = {

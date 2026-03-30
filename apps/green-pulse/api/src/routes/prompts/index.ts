@@ -5,7 +5,7 @@ import createPromptRouter, { createPromptRegistry } from './prompts.create.js'
 import updatePromptRouter, { updatePromptRegistry } from './prompts.update.js'
 import deletePromptRouter, { deletePromptRegistry } from './prompts.delete.js'
 
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router.use(listPromptsRouter)
 router.use(getPromptRouter)

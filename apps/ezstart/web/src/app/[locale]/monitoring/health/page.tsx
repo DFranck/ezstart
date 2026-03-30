@@ -15,7 +15,7 @@ import { useSocket } from '../hooks/useSocket'
 import { calculateOverallHealth, getMetricsData } from '../lib/utils'
 import { ProjectCard } from './components/ProjectCard'
 
-function HealthMonitoringContent(): any {
+function HealthMonitoringContent() {
   const { isDesktop } = useDevice()
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
@@ -113,6 +113,7 @@ function HealthMonitoringContent(): any {
         </Div>
 
         <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {projects.map((project: any) => (
             <ProjectCard key={project.id} project={project} />
           ))}

@@ -17,10 +17,10 @@ import { z } from 'zod'
 import { importMonsters } from '../services/monster-import-service.js'
 import { getMonsterModel } from '../models/monster.js'
 
-const router: any = Router()
+const router = Router()
 
 // POST /import — Trigger SWARFARM import
-router.post('/import', async (_req: any, res: any) => {
+router.post('/import', async (_req, res) => {
   try {
     const count = await importMonsters()
     return sendSuccess(res, { imported: count })
@@ -41,7 +41,7 @@ const listQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(50),
 })
 
-router.get('/', async (req: any, res: any) => {
+router.get('/', async (req, res) => {
   try {
     const validation = listQuerySchema.safeParse(req.query)
     if (!validation.success) {
@@ -81,7 +81,7 @@ router.get('/', async (req: any, res: any) => {
 })
 
 // GET /by-build/:archetype — Monsters by build archetype
-router.get('/by-build/:archetype', async (req: any, res: any) => {
+router.get('/by-build/:archetype', async (req, res) => {
   try {
     const { archetype } = req.params
     const limit = Math.min(Number(req.query.limit) || 20, 100)
@@ -110,7 +110,7 @@ router.get('/by-build/:archetype', async (req: any, res: any) => {
 })
 
 // GET /for-rune?archetypes=speed-dps,cleave — Monsters matching rune archetypes
-router.get('/for-rune', async (req: any, res: any) => {
+router.get('/for-rune', async (req, res) => {
   try {
     const archetypesParam = req.query.archetypes as string
     if (!archetypesParam) {

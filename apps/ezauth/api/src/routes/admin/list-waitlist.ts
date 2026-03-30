@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -58,9 +59,9 @@ const errorSchema = z.object({
 })
 
 // List waitlist for an app
-const listWaitlistController = async (req: any, res: any) => {
+const listWaitlistController = async (req: Request, res: Response) => {
   try {
-    const currentUser = req.user
+    const currentUser = req.user!
     const isAdmin =
       currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
@@ -85,16 +86,16 @@ const listWaitlistController = async (req: any, res: any) => {
     // Filter by status if provided
     let entries = waitlist.emails
     if (status) {
-      entries = entries.filter((entry: any) => entry.status === status)
+      entries = entries.filter((entry: { status: string }) => entry.status === status)
     }
 
     // Calculate stats (on all emails, before pagination)
     const stats = {
       total: waitlist.emails.length,
-      pending: waitlist.emails.filter((e: any) => e.status === 'pending').length,
-      invited: waitlist.emails.filter((e: any) => e.status === 'invited').length,
-      activated: waitlist.emails.filter((e: any) => e.status === 'activated').length,
-      rejected: waitlist.emails.filter((e: any) => e.status === 'rejected').length,
+      pending: waitlist.emails.filter((e: { status: string }) => e.status === 'pending').length,
+      invited: waitlist.emails.filter((e: { status: string }) => e.status === 'invited').length,
+      activated: waitlist.emails.filter((e: { status: string }) => e.status === 'activated').length,
+      rejected: waitlist.emails.filter((e: { status: string }) => e.status === 'rejected').length,
     }
 
     // Paginate filtered entries

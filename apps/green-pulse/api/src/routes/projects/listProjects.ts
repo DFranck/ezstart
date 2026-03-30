@@ -20,7 +20,7 @@ const listProjectsQuerySchema = z.object({
 
 export const listProjectsRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(listProjectsRegistry, router, '/projects')
 
 // GET /api/projects - List user's projects
@@ -37,7 +37,7 @@ docRouter.get(
 
       const Project = await getProjectModel()
 
-      const query: any = {
+      const query: Record<string, unknown> = {
         $or: [{ ownerId: userId }, { 'members.userId': userId }],
       }
 
@@ -46,7 +46,8 @@ docRouter.get(
       }
 
       const [projects, total] = await Promise.all([
-        (Project.find as any)(query).sort({ updatedAt: -1 }).skip(offset).limit(limit).lean(),
+        // @ts-expect-error - Mongoose type inference issue with dynamic query
+        Project.find(query).sort({ updatedAt: -1 }).skip(offset).limit(limit).lean(),
         Project.countDocuments(query),
       ])
 

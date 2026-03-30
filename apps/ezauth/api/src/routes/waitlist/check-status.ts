@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -31,7 +32,7 @@ const errorSchema = z.object({
 })
 
 // Check status of email in waitlist
-const checkStatusController = async (req: any, res: any) => {
+const checkStatusController = async (req: Request, res: Response) => {
   try {
     const { appName, email } = req.params
 

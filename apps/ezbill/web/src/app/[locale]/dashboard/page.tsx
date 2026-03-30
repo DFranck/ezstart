@@ -5,9 +5,7 @@ import CollapsibleGroup from '@/components/CollapsibleGroup'
 import DashboardSection from '@/components/DashboardSection'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import FirstActionCard from '@/components/FirstActionCard'
-import { RevenueChart } from '@/components/RevenueChart'
 import StatsCard from '@/components/StatsCard'
-import { TopClientsChart } from '@/components/TopClientsChart'
 import { useBillingContext } from '@/contexts/billing-context'
 import { callApi } from '@/config/api'
 import { groupClientsByActivity } from '@/utils/group-clients'
@@ -16,6 +14,23 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { Div, Spinner, SkeletonCard, Skeleton, WelcomeModal } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
+
+// Dynamic imports for chart components (recharts ~200KB, lazy-loaded)
+const RevenueChart = dynamic(
+  () => import('@/components/RevenueChart').then(mod => ({ default: mod.RevenueChart })),
+  {
+    ssr: false,
+    loading: () => <Div className="h-64 animate-pulse bg-muted rounded" />,
+  }
+)
+
+const TopClientsChart = dynamic(
+  () => import('@/components/TopClientsChart').then(mod => ({ default: mod.TopClientsChart })),
+  {
+    ssr: false,
+    loading: () => <Div className="h-64 animate-pulse bg-muted rounded" />,
+  }
+)
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'

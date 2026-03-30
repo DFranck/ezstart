@@ -513,6 +513,7 @@ export function QuoteModal({
                                   variant="destructive"
                                   onClick={() => removeLineItem(index)}
                                   disabled={(formData.items?.length || 0) <= 1}
+                                  aria-label="Remove line item"
                                 >
                                   <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4" />
                                 </Button>

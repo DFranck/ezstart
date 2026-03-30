@@ -24,7 +24,7 @@
 const isDev = typeof process !== 'undefined' ? process.env.NODE_ENV !== 'production' : true
 
 export const logger = {
-  info: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  info: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (!isDev) return
     if (typeof msgOrObj === 'string') {
       console.log(`[INFO] ${msgOrObj}`, dataOrMsg || '')
@@ -32,21 +32,21 @@ export const logger = {
       console.log(`[INFO] ${dataOrMsg}`, msgOrObj)
     }
   },
-  warn: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  warn: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (typeof msgOrObj === 'string') {
       console.warn(`[WARN] ${msgOrObj}`, dataOrMsg || '')
     } else {
       console.warn(`[WARN] ${dataOrMsg}`, msgOrObj)
     }
   },
-  error: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  error: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (typeof msgOrObj === 'string') {
       console.error(`[ERROR] ${msgOrObj}`, dataOrMsg || '')
     } else {
       console.error(`[ERROR] ${dataOrMsg}`, msgOrObj)
     }
   },
-  debug: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  debug: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (!isDev) return
     if (typeof msgOrObj === 'string') {
       console.debug(`[DEBUG] ${msgOrObj}`, dataOrMsg || '')

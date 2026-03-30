@@ -12,7 +12,7 @@ import { getProjectModel } from '../../models/Project.js'
 
 export const getWorkspaceByIdRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const getWorkspaceByIdRouter = createRouterWithDoc(
   getWorkspaceByIdRegistry,
   router,
@@ -38,7 +38,8 @@ getWorkspaceByIdRouter.get(
 
       // Check if user has access
       const hasAccess =
-        workspace.ownerId === userId || workspace.members?.some((m: any) => m.userId === userId)
+        workspace.ownerId === userId ||
+        workspace.members?.some((m: { userId: string; role?: string }) => m.userId === userId)
 
       if (!hasAccess) {
         return sendError(res, 'Forbidden - you do not have access to this workspace', 403)
@@ -47,7 +48,9 @@ getWorkspaceByIdRouter.get(
       // Add stats
       const projectCount = await Project.countDocuments({ workspaceId: workspace._id?.toString() })
       const memberCount = workspace.members?.length || 0
-      const currentUserMember = workspace.members?.find((m: any) => m.userId === userId)
+      const currentUserMember = workspace.members?.find(
+        (m: { userId: string; role?: string }) => m.userId === userId
+      )
       const currentUserRole =
         workspace.ownerId === userId ? 'owner' : currentUserMember?.role || undefined
 

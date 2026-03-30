@@ -22,7 +22,9 @@ import createConversationRouter, { createConversationRegistry } from './createCo
 import getConversationByIdRouter, { getConversationByIdRegistry } from './getConversationById.js'
 import updateConversationRouter, { updateConversationRegistry } from './updateConversation.js'
 import deleteConversationRouter, { deleteConversationRegistry } from './deleteConversation.js'
-import hardDeleteConversationRouter, { hardDeleteConversationRegistry } from './hardDeleteConversation.js'
+import hardDeleteConversationRouter, {
+  hardDeleteConversationRegistry,
+} from './hardDeleteConversation.js'
 import restoreConversationRouter, { restoreConversationRegistry } from './restoreConversation.js'
 
 // Export all registries as an array for OpenAPI documentation
@@ -37,15 +39,15 @@ export const conversationRegistries = [
 ]
 
 // Consolidate all action routers
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
-  .use('/', listConversationsRouter)         // GET /
-  .use('/', createConversationRouter)        // POST /
-  .use('/', getConversationByIdRouter)       // GET /:id
-  .use('/', updateConversationRouter)        // PATCH /:id
-  .use('/', deleteConversationRouter)        // DELETE /:id
-  .use('/', hardDeleteConversationRouter)    // DELETE /:id/hard
-  .use('/', restoreConversationRouter)       // POST /:id/restore
+  .use('/', listConversationsRouter) // GET /
+  .use('/', createConversationRouter) // POST /
+  .use('/', getConversationByIdRouter) // GET /:id
+  .use('/', updateConversationRouter) // PATCH /:id
+  .use('/', deleteConversationRouter) // DELETE /:id
+  .use('/', hardDeleteConversationRouter) // DELETE /:id/hard
+  .use('/', restoreConversationRouter) // POST /:id/restore
 
 export default router

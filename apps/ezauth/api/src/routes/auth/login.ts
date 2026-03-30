@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -24,7 +25,7 @@ const docRouter = createRouterWithDoc(loginRegistry, router)
 const loginRateLimiter = createStrictRateLimiter()
 
 // Login user
-const loginController = async (req: any, res: any) => {
+const loginController = async (req: Request, res: Response) => {
   try {
     const parsed = loginRequestSchema.safeParse(req.body)
     if (!parsed.success) {

@@ -4,7 +4,14 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import {
   FormInstanceSchema,
   CreateFormInstanceRequestSchema,
@@ -13,7 +20,7 @@ import {
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
 
 export const createFormInstanceRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const createFormInstanceRouter = createRouterWithDoc(
   createFormInstanceRegistry,
   router,

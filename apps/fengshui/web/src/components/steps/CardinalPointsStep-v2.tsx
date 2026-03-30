@@ -21,7 +21,7 @@ import {
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 // Composant interne pour gérer le drag et les hooks
 const CardinalWheel = ({
@@ -35,7 +35,7 @@ const CardinalWheel = ({
   updateData: (newData: Partial<CardinalStepData>) => void
   uploadData: UploadStepData
   isMobile: boolean
-  t: any
+  t: (key: string) => string
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState({ w: 0, h: 0 })
@@ -293,7 +293,7 @@ const CardinalWheel = ({
   )
 }
 
-const CardinalPointsStep = (): any => {
+const CardinalPointsStep = (): React.JSX.Element => {
   const { isMobile } = useDevice()
   const t = useTranslations()
 

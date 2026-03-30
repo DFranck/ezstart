@@ -32,7 +32,7 @@ const CreateWorkspaceDialog = dynamic(
   }
 )
 
-function DashboardContent(): any {
+function DashboardContent() {
   const t = useTranslations('forms.workspaces')
   const tWelcome = useTranslations('forms.welcome')
 

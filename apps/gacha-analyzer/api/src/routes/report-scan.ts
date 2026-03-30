@@ -48,10 +48,10 @@ const reportIndexSchema = z.object({
   reportIndex: z.coerce.number().int().min(0),
 })
 
-const router: any = Router()
+const router = Router()
 
 // POST /:id/report — Create a new report
-router.post('/:id/report', async (req: any, res: any) => {
+router.post('/:id/report', async (req, res) => {
   try {
     const validation = createReportSchema.safeParse(req.body)
     if (!validation.success) {
@@ -97,7 +97,7 @@ router.post('/:id/report', async (req: any, res: any) => {
 })
 
 // PATCH /:id/report/:reportIndex — Update report status
-router.patch('/:id/report/:reportIndex', async (req: any, res: any) => {
+router.patch('/:id/report/:reportIndex', async (req, res) => {
   try {
     const indexValidation = reportIndexSchema.safeParse(req.params)
     if (!indexValidation.success) {

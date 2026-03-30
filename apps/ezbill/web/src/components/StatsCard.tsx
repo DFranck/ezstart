@@ -9,7 +9,7 @@ type Props = {
   className?: string
 }
 
-const StatsCard = ({ title, value, icon, iconGradient, className }: Props): any => {
+const StatsCard = ({ title, value, icon, iconGradient, className }: Props): React.JSX.Element => {
   return (
     <Card variant="floating" className={cn('', className)}>
       <CardContent className="flex items-center">

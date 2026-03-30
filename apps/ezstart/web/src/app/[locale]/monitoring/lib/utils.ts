@@ -1,5 +1,20 @@
 import type { ProjectsData } from '../hooks'
 
+interface MonitoringAudit {
+  score?: number | null
+  name?: string
+}
+
+interface MonitoringProject {
+  avgResponseTime?: number | null
+}
+
+interface MonitoringError {
+  timestamp: string
+  severity: 'critical' | 'error' | 'warning' | 'info'
+  project?: string
+}
+
 export function calculateOverallHealth(summary: ProjectsData['summary']) {
   const { total, healthy } = summary
   if (total === 0) return { score: 0, status: 'critical' as const }
@@ -16,10 +31,10 @@ export function calculateOverallHealth(summary: ProjectsData['summary']) {
   return { score, status }
 }
 
-export function calculateAuditsHealth(audits: any[]) {
+export function calculateAuditsHealth(audits: MonitoringAudit[]) {
   const auditsGlobalScore =
     audits.length > 0
-      ? Math.round(audits.reduce((acc: number, a: any) => acc + (a.score || 0), 0) / audits.length)
+      ? Math.round(audits.reduce((acc: number, a) => acc + (a.score || 0), 0) / audits.length)
       : 0
 
   let status: 'excellent' | 'good' | 'fair' | 'poor' | 'critical'
@@ -32,7 +47,7 @@ export function calculateAuditsHealth(audits: any[]) {
   return { score: auditsGlobalScore, status }
 }
 
-export function calculateErrorsHealth(errors: any[]) {
+export function calculateErrorsHealth(errors: MonitoringError[]) {
   // Score inversé: moins d'erreurs = meilleur score
   // Pondération par sévérité: critical = 10 points, error = 5, warning = 1
 
@@ -40,17 +55,17 @@ export function calculateErrorsHealth(errors: any[]) {
   const now = new Date().getTime()
   const last24h = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 
-  const recentErrors = errors.filter((e: any) => {
+  const recentErrors = errors.filter(e => {
     const errorTime = new Date(e.timestamp).getTime()
-    return (now - errorTime) <= last24h
+    return now - errorTime <= last24h
   })
 
-  const criticalCount = recentErrors.filter((e: any) => e.severity === 'critical').length
-  const errorCount = recentErrors.filter((e: any) => e.severity === 'error').length
-  const warningCount = recentErrors.filter((e: any) => e.severity === 'warning').length
+  const criticalCount = recentErrors.filter(e => e.severity === 'critical').length
+  const errorCount = recentErrors.filter(e => e.severity === 'error').length
+  const warningCount = recentErrors.filter(e => e.severity === 'warning').length
 
   // Score de pénalité (plus c'est haut, plus c'est grave)
-  const penaltyScore = (criticalCount * 10) + (errorCount * 5) + (warningCount * 1)
+  const penaltyScore = criticalCount * 10 + errorCount * 5 + warningCount * 1
 
   // Convertir en score sur 100 (100 = parfait, 0 = catastrophique)
   // Si penaltyScore = 0 → 100
@@ -73,15 +88,25 @@ export function calculateErrorsHealth(errors: any[]) {
 export function getMetricsData(
   activeTab: 'projects' | 'audits' | 'errors',
   summary: ProjectsData['summary'],
-  audits: any[],
-  projects: any[],
-  errors: any[] = []
-) {
+  audits: MonitoringAudit[],
+  projects: MonitoringProject[],
+  errors: MonitoringError[] = []
+): {
+  servicesHealthy: number
+  servicesTotal: number
+  auditsComplete: number
+  auditsTotal: number
+  deploymentsActive: number
+  deploymentsTotal: number
+  avgResponseTime: number
+  worstAuditName?: string
+  worstProjectName?: string
+} {
   if (activeTab === 'projects') {
     return {
       servicesHealthy: summary.healthy,
       servicesTotal: summary.total,
-      auditsComplete: audits.filter((a: any) => a.score !== null && a.score !== undefined).length,
+      auditsComplete: audits.filter(a => a.score !== null && a.score !== undefined).length,
       auditsTotal: audits.length,
       deploymentsActive: summary.healthy,
       deploymentsTotal: summary.total,
@@ -89,9 +114,9 @@ export function getMetricsData(
         projects.length > 0
           ? Math.round(
               projects
-                .filter((p: any) => p.avgResponseTime !== null)
-                .reduce((acc: number, p: any) => acc + (p.avgResponseTime || 0), 0) /
-                projects.filter((p: any) => p.avgResponseTime !== null).length
+                .filter(p => p.avgResponseTime !== null)
+                .reduce((acc: number, p) => acc + (p.avgResponseTime || 0), 0) /
+                projects.filter(p => p.avgResponseTime !== null).length
             )
           : 0,
     }
@@ -99,28 +124,29 @@ export function getMetricsData(
 
   if (activeTab === 'audits') {
     // Audits tab
-    const worstAudit = audits.length > 0
-      ? audits.reduce((worst: any, current: any) =>
-          (current.score || 0) < (worst.score || 0) ? current : worst
-        )
-      : null
+    const worstAudit =
+      audits.length > 0
+        ? audits.reduce((worst, current) =>
+            (current.score || 0) < (worst.score || 0) ? current : worst
+          )
+        : null
 
     return {
-      servicesHealthy: audits.filter((a: any) => a.score >= 90).length,
+      servicesHealthy: audits.filter(a => (a.score ?? 0) >= 90).length,
       servicesTotal: audits.length,
-      auditsComplete: audits.filter((a: any) => a.score !== null && a.score !== undefined).length,
+      auditsComplete: audits.filter(a => a.score !== null && a.score !== undefined).length,
       auditsTotal: audits.length,
-      deploymentsActive: audits.filter((a: any) => a.score >= 90).length,
+      deploymentsActive: audits.filter(a => (a.score ?? 0) >= 90).length,
       deploymentsTotal: audits.length,
-      avgResponseTime: worstAudit ? worstAudit.score : 0,
-      worstAuditName: worstAudit ? worstAudit.name : '',
+      avgResponseTime: worstAudit?.score ?? 0,
+      worstAuditName: worstAudit?.name ?? '',
     }
   }
 
   // Errors tab - calculate error statistics
   // Group errors by project to find worst offender
   const errorsByProject: Record<string, number> = {}
-  errors.forEach((error: any) => {
+  errors.forEach(error => {
     const project = error.project || 'Unknown'
     errorsByProject[project] = (errorsByProject[project] || 0) + 1
   })
@@ -136,7 +162,9 @@ export function getMetricsData(
 
   return {
     servicesHealthy: errors.length, // Total errors count
-    servicesTotal: errors.filter((e: any) => e.severity === 'critical').length + errors.filter((e: any) => e.severity === 'error').length,
+    servicesTotal:
+      errors.filter(e => e.severity === 'critical').length +
+      errors.filter(e => e.severity === 'error').length,
     auditsComplete: 0, // Not used for errors
     auditsTotal: 0, // Not used for errors
     deploymentsActive: worstProject.count,

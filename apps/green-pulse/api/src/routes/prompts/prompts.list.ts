@@ -12,7 +12,7 @@ import { SystemPrompt } from '../../models/SystemPrompt.js'
 
 export const listPromptsRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(listPromptsRegistry, router, '/prompts')
 
 const PromptSchema = z.object({
@@ -59,7 +59,7 @@ docRouter.get(
 
       const { type, provider, active, limit, offset } = validation.data
 
-      const filter: any = {}
+      const filter: Record<string, unknown> = {}
       if (type) filter.type = type
       if (provider) filter.provider = provider
       if (active !== undefined) filter.isActive = active === 'true'
@@ -71,12 +71,15 @@ docRouter.get(
 
       sendSuccess(
         res,
-        prompts.map((p: any) => ({
-          ...p,
-          _id: p._id.toString(),
-          createdAt: p.createdAt?.toISOString(),
-          updatedAt: p.updatedAt?.toISOString(),
-        })),
+        prompts.map(p => {
+          const doc = p as Record<string, unknown>
+          return {
+            ...p,
+            _id: String(doc._id),
+            createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+            updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
+          }
+        }),
         { total, limit, offset }
       )
     } catch (error) {

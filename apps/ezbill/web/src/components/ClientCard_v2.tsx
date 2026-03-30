@@ -21,7 +21,7 @@ type Props = {
   className?: string
 }
 
-const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): any => {
+const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): React.JSX.Element => {
   return (
     <Div key={client._id} className="group relative">
       <Card

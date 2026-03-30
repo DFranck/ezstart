@@ -15,7 +15,7 @@ import { useSocket } from '../hooks/useSocket'
 import { calculateErrorsHealth, getMetricsData } from '../lib/utils'
 import { ErrorsFeed } from './components/ErrorsFeed'
 
-function ErrorsMonitoringContent(): any {
+function ErrorsMonitoringContent() {
   const { isDesktop } = useDevice()
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()

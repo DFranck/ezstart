@@ -58,7 +58,7 @@ export function useCreateFormInstance() {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/forms/instances?userId=${user._id}`, {
+          callApi<{ _id: string }>(`/forms/instances?userId=${user._id}`, {
             method: 'POST',
             body: data,
           }),

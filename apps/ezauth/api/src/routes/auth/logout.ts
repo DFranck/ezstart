@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -13,7 +14,7 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(logoutRegistry, router)
 
 // Logout (clear httpOnly cookie)
-const logoutController = async (req: any, res: any) => {
+const logoutController = async (req: Request, res: Response) => {
   // Clear cookie
   res.clearCookie('ezauth_token', {
     httpOnly: true,

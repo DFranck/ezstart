@@ -31,7 +31,7 @@ export function useSafeTranslations(namespace: string = '', fallback: Record<str
     logger.warn(`useTranslations(${namespace}) failed, using fallback:`, error)
 
     // Return a mock translation function
-    const mockTranslation = (key: string, values?: any) => {
+    const mockTranslation = (key: string, values?: Record<string, unknown>) => {
       const fallbackKey = namespace ? `${namespace}.${key}` : key
       logger.warn(`Translation missing: ${fallbackKey}`)
       return fallbackKey // Return the key itself as fallback
@@ -43,7 +43,7 @@ export function useSafeTranslations(namespace: string = '', fallback: Record<str
       return fallback[key] || []
     }
 
-    mockTranslation.rich = (key: string, values?: any) => {
+    mockTranslation.rich = (key: string, values?: Record<string, unknown>) => {
       const fallbackKey = namespace ? `${namespace}.${key}` : key
       logger.warn(`Translation rich missing: ${fallbackKey}`)
       return fallbackKey

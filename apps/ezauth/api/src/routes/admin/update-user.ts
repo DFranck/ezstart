@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -73,7 +74,7 @@ const updateUserParamsSchema = z.object({
 })
 
 // Controller
-const updateUserController = async (req: any, res: any) => {
+const updateUserController = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return sendError(res, 'Authentication required', 401)
@@ -132,8 +133,10 @@ const updateUserController = async (req: any, res: any) => {
       'managedBy',
     ] as const
     allowedFields.forEach(field => {
-      if ((body as any)[field] !== undefined) {
-        ;(user as any)[field] = (body as any)[field]
+      if ((body as Record<string, unknown>)[field] !== undefined) {
+        ;(user as unknown as Record<string, unknown>)[field] = (body as Record<string, unknown>)[
+          field
+        ]
       }
     })
 
@@ -150,7 +153,7 @@ const updateUserController = async (req: any, res: any) => {
     sendSuccess(res, {
       user: {
         ...user.toObject(),
-        _id: (user._id as any).toString(),
+        _id: String(user._id),
         globalRoles: user.globalRoles || [],
         appRoles: appRolesObj,
         roles: user.roles || [],
@@ -160,7 +163,7 @@ const updateUserController = async (req: any, res: any) => {
       },
       message: 'User updated successfully',
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating user:', error)
     sendError(res, 'Failed to update user', 500)
   }

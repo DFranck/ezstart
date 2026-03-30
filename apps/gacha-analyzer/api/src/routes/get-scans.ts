@@ -13,7 +13,7 @@ import {
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
-const router: any = Router()
+const router = Router()
 
 const querySchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']).optional(),
@@ -23,7 +23,7 @@ const querySchema = z.object({
 })
 
 // GET /scans — Get all scans (most recent first)
-router.get('/', async (req: any, res: any) => {
+router.get('/', async (req, res) => {
   try {
     const validation = querySchema.safeParse(req.query)
     if (!validation.success) {
@@ -49,7 +49,11 @@ router.get('/', async (req: any, res: any) => {
     const total = await Scan.countDocuments(filter).exec()
 
     // Map _id → id for frontend compatibility
-    const mapped = scans.map((s: any) => ({ ...s, id: s._id?.toString(), _id: undefined }))
+    const mapped = scans.map((s: Record<string, unknown> & { _id?: { toString(): string } }) => ({
+      ...s,
+      id: s._id?.toString(),
+      _id: undefined,
+    }))
 
     return sendSuccess(res, mapped, { total, limit, offset })
   } catch (error) {

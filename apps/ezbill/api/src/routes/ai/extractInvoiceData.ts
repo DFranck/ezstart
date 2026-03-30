@@ -10,10 +10,14 @@ import { chatWithInvoiceAssistant } from '../../services/gemini.service.js'
 
 const extractInvoiceBodySchema = z.object({
   text: z.string().min(1, 'Text is required'),
-  conversationHistory: z.array(z.object({
-    role: z.enum(['user', 'assistant']),
-    content: z.string(),
-  })).optional(),
+  conversationHistory: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string(),
+      })
+    )
+    .optional(),
   currentInvoiceData: z.record(z.unknown()).optional(),
 })
 
@@ -40,7 +44,7 @@ export async function extractInvoiceData(req: Request, res: Response) {
       suggestions: response.suggestions,
       conversationState: response.conversationState,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error in AI conversation:', error)
     sendError(res, 'Failed to process AI conversation')
   }

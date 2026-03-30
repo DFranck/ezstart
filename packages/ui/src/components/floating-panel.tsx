@@ -26,7 +26,8 @@ const floatingPanelVariants = cva(
 )
 
 export interface FloatingPanelProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
     VariantProps<typeof floatingPanelVariants> {
   /**
    * Title displayed in the panel header (can be string or JSX)
@@ -220,19 +221,37 @@ export function FloatingPanel({
 
         <div className="flex items-center gap-1">
           {minimizable && (
-            <Button variant="ghost" size="icon" onClick={handleMinimize} className="h-6 w-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleMinimize}
+              className="h-6 w-6"
+              aria-label="Minimize panel"
+            >
               <Minimize2 className="h-3.5 w-3.5" />
             </Button>
           )}
 
           {maximizable && (
-            <Button variant="ghost" size="icon" onClick={handleMaximize} className="h-6 w-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleMaximize}
+              className="h-6 w-6"
+              aria-label="Maximize panel"
+            >
               <Maximize2 className="h-3.5 w-3.5" />
             </Button>
           )}
 
           {closable && (
-            <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-6 w-6"
+              aria-label="Close panel"
+            >
               <X className="h-3.5 w-3.5" />
             </Button>
           )}

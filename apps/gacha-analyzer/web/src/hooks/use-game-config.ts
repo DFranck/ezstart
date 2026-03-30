@@ -6,9 +6,9 @@ interface GameLayoutData {
   layoutName: string
   displayName?: string
   bestPresets: string[]
-  zones: any
-  masks: any
-  roi: any
+  zones: Record<string, unknown>
+  masks: Record<string, unknown>
+  roi: Record<string, unknown>
   updatedAt: string
 }
 
@@ -44,9 +44,9 @@ export function useGameLayout(gameType: string, layoutName: string) {
 interface SaveGameLayoutInput {
   displayName?: string
   bestPresets?: string[]
-  zones?: any
-  masks?: any
-  roi?: any
+  zones?: Record<string, unknown>
+  masks?: Record<string, unknown>
+  roi?: Record<string, unknown>
 }
 
 /** Save/update a layout */
@@ -113,8 +113,8 @@ export function useGameConfig(gameType: string) {
 
 interface SaveGameConfigInput {
   bestPresets?: string[]
-  zones?: any
-  masks?: any
+  zones?: Record<string, unknown>
+  masks?: Record<string, unknown>
 }
 
 /** @deprecated Use useSaveGameLayout instead */

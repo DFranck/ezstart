@@ -20,12 +20,8 @@ import {
 } from '@green-pulse/types'
 
 export const extractEsgDataRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const extractEsgDataRouter = createRouterWithDoc(
-  extractEsgDataRegistry,
-  router,
-  '/extract'
-)
+const router: import('express').Router = Router()
+export const extractEsgDataRouter = createRouterWithDoc(extractEsgDataRegistry, router, '/extract')
 
 extractEsgDataRouter.post(
   '/',

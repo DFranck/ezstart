@@ -1,6 +1,6 @@
 'use client'
 
-import { Input, Label, P, pVariantsMeta } from '@ezstart/ui/components'
+import { Div, Input, Label, P, pVariantsMeta } from '@ezstart/ui/components'
 import { useState } from 'react'
 import PlaygroundCodeView from '../components/playground-code-view'
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects'

@@ -16,13 +16,13 @@ import { summonersWarParser } from '../parsers/summoners-war.js'
 import { analyzeRune } from '../analyzers/rune-efficiency.js'
 import type { RuneData, ScanResult } from '@gacha-analyzer/types'
 
-const router: any = Router()
+const router = Router()
 
 const querySchema = z.object({
   profile: z.enum(['early', 'mid', 'late']).optional().default('mid'),
 })
 
-router.post('/:id/reanalyze', async (req: any, res: any) => {
+router.post('/:id/reanalyze', async (req, res) => {
   try {
     const validation = querySchema.safeParse(req.query)
     if (!validation.success) {
@@ -56,7 +56,7 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
       try {
         analysis = analyzeRune(
           parseResult.data as unknown as RuneData,
-          profile as any
+          profile as 'early' | 'mid' | 'late'
         ) as unknown as ScanResult['analysis']
       } catch (e) {
         logger.error('[reanalyze] Analysis failed:', e)
@@ -66,8 +66,8 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     const processingTimeMs = Date.now() - startTime
 
     // Update scan result in DB
-    scan.result.data = parseResult.data as any
-    scan.result.analysis = analysis as any
+    scan.result.data = parseResult.data as unknown as ScanResult['data']
+    scan.result.analysis = analysis as ScanResult['analysis']
     scan.result.processingTimeMs = processingTimeMs
     scan.result.success = parseResult.success
     scan.status = parseResult.success ? 'completed' : 'failed'

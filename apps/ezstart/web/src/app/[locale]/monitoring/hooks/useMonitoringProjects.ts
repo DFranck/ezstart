@@ -1,8 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { callApi } from '@/config/api'
 
+export interface MonitoringProject {
+  name?: string
+  status?: string
+  lastCheck?: string
+  avgResponseTime?: number | null
+  url?: string
+}
+
 export interface ProjectsData {
-  projects: any[]
+  projects: MonitoringProject[]
   summary: {
     total: number
     healthy: number

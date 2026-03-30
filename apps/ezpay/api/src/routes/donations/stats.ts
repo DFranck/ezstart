@@ -1,5 +1,11 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -18,17 +24,19 @@ const donationStatsQuerySchema = z.object({
 
 const donationStatsResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  stats: z.object({
-    total: z.number().describe('Total amount donated'),
-    count: z.number().describe('Total number of donations'),
-    byType: z.object({
-      donation: z.object({
-        total: z.number().describe('Total amount from donations'),
-        count: z.number().describe('Number of donations'),
+  stats: z
+    .object({
+      total: z.number().describe('Total amount donated'),
+      count: z.number().describe('Total number of donations'),
+      byType: z.object({
+        donation: z.object({
+          total: z.number().describe('Total amount from donations'),
+          count: z.number().describe('Number of donations'),
+        }),
       }),
-    }),
-    recent: z.array(z.any()).describe('Recent donations (last 5)'),
-  }).describe('Donation statistics'),
+      recent: z.array(z.any()).describe('Recent donations (last 5)'),
+    })
+    .describe('Donation statistics'),
 })
 
 // ========================================
@@ -36,12 +44,12 @@ const donationStatsResponseSchema = z.object({
 // ========================================
 
 const getDonationStatsHandler = async (req: Request, res: Response) => {
-  const Payment = await getPaymentModel();
+  const Payment = await getPaymentModel()
   try {
     const parsed = donationStatsQuerySchema.safeParse(req.query)
-    const { projectId } = parsed.success ? parsed.data : req.query as any
+    const { projectId } = parsed.success ? parsed.data : (req.query as Record<string, string>)
 
-    const query: any = {
+    const query: Record<string, unknown> = {
       type: 'donation',
       status: 'completed',
     }
@@ -69,7 +77,7 @@ const getDonationStatsHandler = async (req: Request, res: Response) => {
       recent,
     })
   } catch (error) {
-    logger.error('Get donation stats error:', error)
+    logger.error('Get donation stats error:', error instanceof Error ? error : String(error))
     sendError(res, 'Failed to fetch donation stats')
   }
 }

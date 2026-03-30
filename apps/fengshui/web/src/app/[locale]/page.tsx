@@ -27,7 +27,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
-export default function HomePage(): any {
+export default function HomePage() {
   const [currentYear] = useState(new Date().getFullYear())
   const t = useTranslations()
   const [showLunarPopup, setShowLunarPopup] = useState(false)

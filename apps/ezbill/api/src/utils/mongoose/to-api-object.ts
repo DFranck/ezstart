@@ -1,18 +1,13 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic Mongoose doc transformer
 export function toApiObject<T = any>(doc: any): T {
-  if (!doc) return doc;
-  const obj = doc.toObject ? doc.toObject() : doc;
+  if (!doc) return doc
+  const obj = doc.toObject ? doc.toObject() : doc
 
   return {
     ...obj,
     _id: obj._id?.toString(),
-    createdAt:
-      typeof obj.createdAt === 'string'
-        ? obj.createdAt
-        : obj.createdAt?.toISOString(),
-    updatedAt:
-      typeof obj.updatedAt === 'string'
-        ? obj.updatedAt
-        : obj.updatedAt?.toISOString(),
+    createdAt: typeof obj.createdAt === 'string' ? obj.createdAt : obj.createdAt?.toISOString(),
+    updatedAt: typeof obj.updatedAt === 'string' ? obj.updatedAt : obj.updatedAt?.toISOString(),
     deletedAt: obj.deletedAt ?? undefined,
-  };
+  }
 }

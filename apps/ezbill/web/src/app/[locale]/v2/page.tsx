@@ -38,7 +38,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function LandingV2Page(): any {
+export default function LandingV2Page() {
   const t = useTranslations('landing')
 
   return (
@@ -76,12 +76,14 @@ export default function LandingV2Page(): any {
             />
 
             {/* Description */}
-            <P className="text-xl text-white/90 max-w-2xl">
-              {t('hero.description')}
-            </P>
+            <P className="text-xl text-white/90 max-w-2xl">{t('hero.description')}</P>
 
             {/* CTA Button */}
-            <Button asChild size="lg" className="bg-white text-ezbill-invoice hover:bg-white/90 text-lg px-8 py-6">
+            <Button
+              asChild
+              size="lg"
+              className="bg-white text-ezbill-invoice hover:bg-white/90 text-lg px-8 py-6"
+            >
               <Link href="/signup">{t('hero.cta')}</Link>
             </Button>
           </Div>
@@ -143,9 +145,7 @@ export default function LandingV2Page(): any {
           <H2 size="h3" className="mb-8">
             {t('solution.title')}
           </H2>
-          <P className="text-lg text-muted-foreground mb-8">
-            {t('solution.description')}
-          </P>
+          <P className="text-lg text-muted-foreground mb-8">{t('solution.description')}</P>
 
           {/* 3-Step Process */}
           <Div className="space-y-6">
@@ -158,9 +158,7 @@ export default function LandingV2Page(): any {
                   <H3 size="h5" className="mb-2">
                     {t(`solution.steps.${step}.title`)}
                   </H3>
-                  <P className="text-muted-foreground">
-                    {t(`solution.steps.${step}.description`)}
-                  </P>
+                  <P className="text-muted-foreground">{t(`solution.steps.${step}.description`)}</P>
                 </Div>
               </Div>
             ))}
@@ -189,52 +187,52 @@ export default function LandingV2Page(): any {
           <H2 size="h3" className="mb-4">
             {t('features.title')}
           </H2>
-          <P className="text-xl text-muted-foreground">
-            {t('features.subtitle')}
-          </P>
+          <P className="text-xl text-muted-foreground">{t('features.subtitle')}</P>
         </Div>
 
         {/* Feature Grid - 3 main features */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {(Array.isArray(t.raw('solution.features')) ? t.raw('solution.features') : []).map(
             (feature: { title: string; description: string }, index: number) => (
-            <Card key={index} variant="floating" className="hover:shadow-xl transition-all">
-              <CardHeader className="flex items-center gap-3">
-                <Icon
-                  name={
-                    (index === 0
-                      ? 'lucide:Infinity'
-                      : index === 1
-                        ? 'lucide:Shield'
-                        : 'lucide:Palette') as KnownIconName
-                  }
-                  size={30}
-                  className="text-ezbill-invoice"
-                />
-                <H3 size="h5" className="w-fit">
-                  {feature.title}
-                </H3>
-              </CardHeader>
-              <CardContent>
-                <P className="text-muted-foreground">{feature.description}</P>
-              </CardContent>
-            </Card>
-          ))}
+              <Card key={index} variant="floating" className="hover:shadow-xl transition-all">
+                <CardHeader className="flex items-center gap-3">
+                  <Icon
+                    name={
+                      (index === 0
+                        ? 'lucide:Infinity'
+                        : index === 1
+                          ? 'lucide:Shield'
+                          : 'lucide:Palette') as KnownIconName
+                    }
+                    size={30}
+                    className="text-ezbill-invoice"
+                  />
+                  <H3 size="h5" className="w-fit">
+                    {feature.title}
+                  </H3>
+                </CardHeader>
+                <CardContent>
+                  <P className="text-muted-foreground">{feature.description}</P>
+                </CardContent>
+              </Card>
+            )
+          )}
         </Div>
 
         {/* Additional features - 6 cards */}
         <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {(Array.isArray(t.raw('features.list')) ? t.raw('features.list') : []).map(
             (feature: { title: string; description: string }, index: number) => (
-            <Card key={index} className="hover:border-ezbill-invoice/50 transition-colors">
-              <CardHeader>
-                <H3 size="h6">{feature.title}</H3>
-              </CardHeader>
-              <CardContent>
-                <P className="text-sm text-muted-foreground">{feature.description}</P>
-              </CardContent>
-            </Card>
-          ))}
+              <Card key={index} className="hover:border-ezbill-invoice/50 transition-colors">
+                <CardHeader>
+                  <H3 size="h6">{feature.title}</H3>
+                </CardHeader>
+                <CardContent>
+                  <P className="text-sm text-muted-foreground">{feature.description}</P>
+                </CardContent>
+              </Card>
+            )
+          )}
         </Div>
       </Section>
 
@@ -244,29 +242,34 @@ export default function LandingV2Page(): any {
           <H2 size="h3" className="mb-4">
             {t('comparison.title')}
           </H2>
-          <P className="text-xl text-muted-foreground">
-            {t('comparison.description')}
-          </P>
+          <P className="text-xl text-muted-foreground">{t('comparison.description')}</P>
         </Div>
 
         {/* Comparison Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {/* Competitors */}
-          {(Array.isArray(t.raw('comparison.competitors')) ? t.raw('comparison.competitors') : []).map(
-            (competitor: { name: string; price: string; yearCost: string; limits: string }, index: number) => (
-            <Card key={index} className="bg-muted/50">
-              <CardContent className="p-6 space-y-4">
-                <H3 size="h5" className="text-center">
-                  {competitor.name}
-                </H3>
-                <Div className="text-center space-y-2">
-                  <P className="text-2xl font-bold text-destructive">{competitor.price}</P>
-                  <P className="text-sm text-muted-foreground">{competitor.yearCost}</P>
-                  <P className="text-xs text-muted-foreground italic">{competitor.limits}</P>
-                </Div>
-              </CardContent>
-            </Card>
-          ))}
+          {(Array.isArray(t.raw('comparison.competitors'))
+            ? t.raw('comparison.competitors')
+            : []
+          ).map(
+            (
+              competitor: { name: string; price: string; yearCost: string; limits: string },
+              index: number
+            ) => (
+              <Card key={index} className="bg-muted/50">
+                <CardContent className="p-6 space-y-4">
+                  <H3 size="h5" className="text-center">
+                    {competitor.name}
+                  </H3>
+                  <Div className="text-center space-y-2">
+                    <P className="text-2xl font-bold text-destructive">{competitor.price}</P>
+                    <P className="text-sm text-muted-foreground">{competitor.yearCost}</P>
+                    <P className="text-xs text-muted-foreground italic">{competitor.limits}</P>
+                  </Div>
+                </CardContent>
+              </Card>
+            )
+          )}
 
           {/* EZBill - Highlighted */}
           <Card className="bg-gradient-invoice text-white border-4 border-primary relative overflow-hidden">
@@ -306,35 +309,37 @@ export default function LandingV2Page(): any {
           <H2 size="h3" className="mb-4">
             {t('useCases.title')}
           </H2>
-          <P className="text-xl text-muted-foreground">
-            {t('useCases.subtitle')}
-          </P>
+          <P className="text-xl text-muted-foreground">{t('useCases.subtitle')}</P>
         </Div>
 
         <Div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {(Array.isArray(t.raw('useCases.cases')) ? t.raw('useCases.cases') : []).map(
-            (useCase: { persona: string; challenge: string; solution: string; result: string }, index: number) => (
-            <Card key={index} className="hover:shadow-xl transition-all">
-              <CardHeader>
-                <Badge className="mb-2 w-fit">{useCase.persona}</Badge>
-                <H3 size="h5">Challenge</H3>
-                <P className="text-sm text-muted-foreground">{useCase.challenge}</P>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Div>
-                  <H3 size="h6" className="mb-2">
-                    Solution
-                  </H3>
-                  <P className="text-sm">{useCase.solution}</P>
-                </Div>
-                <Div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                  <Strong className="text-green-700 dark:text-green-400">
-                    ✓ {useCase.result}
-                  </Strong>
-                </Div>
-              </CardContent>
-            </Card>
-          ))}
+            (
+              useCase: { persona: string; challenge: string; solution: string; result: string },
+              index: number
+            ) => (
+              <Card key={index} className="hover:shadow-xl transition-all">
+                <CardHeader>
+                  <Badge className="mb-2 w-fit">{useCase.persona}</Badge>
+                  <H3 size="h5">Challenge</H3>
+                  <P className="text-sm text-muted-foreground">{useCase.challenge}</P>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Div>
+                    <H3 size="h6" className="mb-2">
+                      Solution
+                    </H3>
+                    <P className="text-sm">{useCase.solution}</P>
+                  </Div>
+                  <Div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <Strong className="text-green-700 dark:text-green-400">
+                      ✓ {useCase.result}
+                    </Strong>
+                  </Div>
+                </CardContent>
+              </Card>
+            )
+          )}
         </Div>
       </Section>
 
@@ -347,16 +352,17 @@ export default function LandingV2Page(): any {
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {(Array.isArray(t.raw('testimonials.items')) ? t.raw('testimonials.items') : []).map(
             (testimonial: { quote: string; author: string; role: string }, index: number) => (
-            <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6 space-y-4">
-                <P className="text-white/90 italic">&ldquo;{testimonial.quote}&rdquo;</P>
-                <Div>
-                  <P className="font-semibold text-white">{testimonial.author}</P>
-                  <P className="text-sm text-white/70">{testimonial.role}</P>
-                </Div>
-              </CardContent>
-            </Card>
-          ))}
+              <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20">
+                <CardContent className="p-6 space-y-4">
+                  <P className="text-white/90 italic">&ldquo;{testimonial.quote}&rdquo;</P>
+                  <Div>
+                    <P className="font-semibold text-white">{testimonial.author}</P>
+                    <P className="text-sm text-white/70">{testimonial.role}</P>
+                  </Div>
+                </CardContent>
+              </Card>
+            )
+          )}
         </Div>
       </Section>
 
@@ -370,19 +376,20 @@ export default function LandingV2Page(): any {
           <Div className="space-y-4">
             {(Array.isArray(t.raw('faq.questions')) ? t.raw('faq.questions') : []).map(
               (item: { question: string; answer: string }, index: number) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
-                <Div>
-                  <H3 size="h5" className="mb-3 flex items-start gap-3">
-                    <Icon
-                      name="lucide:HelpCircle"
-                      className="w-6 h-6 text-ezbill-invoice flex-shrink-0 mt-1"
-                    />
-                    <Span>{item.question}</Span>
-                  </H3>
-                  <P className="text-muted-foreground leading-relaxed pl-9">{item.answer}</P>
-                </Div>
-              </Card>
-            ))}
+                <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+                  <Div>
+                    <H3 size="h5" className="mb-3 flex items-start gap-3">
+                      <Icon
+                        name="lucide:HelpCircle"
+                        className="w-6 h-6 text-ezbill-invoice flex-shrink-0 mt-1"
+                      />
+                      <Span>{item.question}</Span>
+                    </H3>
+                    <P className="text-muted-foreground leading-relaxed pl-9">{item.answer}</P>
+                  </Div>
+                </Card>
+              )
+            )}
           </Div>
         </Div>
       </Section>
@@ -394,22 +401,27 @@ export default function LandingV2Page(): any {
             <H2 size="h2" className="text-white">
               {t('cta.title')}
             </H2>
-            <P className="text-xl text-white/90">
-              {t('cta.description')}
-            </P>
+            <P className="text-xl text-white/90">{t('cta.description')}</P>
 
             <Div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button asChild size="lg" className="bg-white text-ezbill-invoice hover:bg-white/90 text-lg px-8 py-6">
+              <Button
+                asChild
+                size="lg"
+                className="bg-white text-ezbill-invoice hover:bg-white/90 text-lg px-8 py-6"
+              >
                 <Link href="/signup">{t('cta.primary')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white text-white hover:bg-white/10"
+              >
                 <Link href="/pricing">{t('cta.secondary')}</Link>
               </Button>
             </Div>
 
-            <P className="text-sm text-white/70">
-              {t('cta.guarantee')}
-            </P>
+            <P className="text-sm text-white/70">{t('cta.guarantee')}</P>
           </Div>
         </Div>
       </Section>

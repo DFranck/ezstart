@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -19,7 +20,7 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(verifyRegistry, router)
 
 // Verify token validity
-const verifyController = async (req: any, res: any) => {
+const verifyController = async (req: Request, res: Response) => {
   try {
     const parsed = verifyRequestSchema.safeParse(req.body)
     if (!parsed.success) {

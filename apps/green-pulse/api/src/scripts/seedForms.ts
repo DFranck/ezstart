@@ -23,7 +23,7 @@ async function seedForms() {
     // console.log('🗑️  Cleared existing form configs')
 
     // Insert seed data
-    const results: any[] = []
+    const results: Array<Record<string, unknown>> = []
     for (const config of FORM_CONFIGS) {
       try {
         // Check if config already exists
@@ -46,7 +46,7 @@ async function seedForms() {
 
     console.log(`\n🎉 Seed completed! Created ${results.length} form configs`)
     console.log('\nAvailable forms:')
-    results.forEach((config: any) => {
+    results.forEach(config => {
       console.log(`  ${config.icon} ${config.name} (${config.id})`)
     })
 

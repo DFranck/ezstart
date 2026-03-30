@@ -36,7 +36,7 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
   // Find workspace ID from slug
   // callApi wraps response: { ok, data: { success, data: { workspaces } } }
   const workspace = workspacesData?.data?.data?.workspaces?.find(
-    (w: any) => w.slug === workspaceSlug
+    (w: { slug: string }) => w.slug === workspaceSlug
   )
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -9,7 +9,12 @@ type Props = {
   className?: string
 }
 
-const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props): any => {
+const PaymentMethodCard = ({
+  paymentMethod,
+  onEdit,
+  onDelete,
+  className,
+}: Props): React.JSX.Element => {
   return (
     <Div key={paymentMethod._id} className="group relative">
       <Card

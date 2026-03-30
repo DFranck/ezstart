@@ -18,7 +18,7 @@ const getProjectFormsQuerySchema = z.object({
 
 export const getProjectFormsRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(getProjectFormsRegistry, router, '/projects')
 
 // GET /api/projects/:id/forms - Get all form instances for project
@@ -37,8 +37,8 @@ docRouter.get(
       const filter = { projectId: req.params.id }
 
       const [forms, total] = await Promise.all([
-        (FormInstance as any).find(filter).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
-        (FormInstance as any).countDocuments(filter),
+        FormInstance.find(filter).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
+        FormInstance.countDocuments(filter),
       ])
 
       sendSuccess(res, forms, { total, limit, offset })

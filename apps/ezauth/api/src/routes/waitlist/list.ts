@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -44,7 +45,7 @@ const listWaitlistsQuerySchema = z.object({
 })
 
 // Get all waitlists (admin endpoint)
-const getAllWaitlistsController = async (req: any, res: any) => {
+const getAllWaitlistsController = async (req: Request, res: Response) => {
   try {
     const parsedQuery = listWaitlistsQuerySchema.safeParse(req.query)
     if (!parsedQuery.success) {
@@ -55,14 +56,15 @@ const getAllWaitlistsController = async (req: any, res: any) => {
     const { page, limit } = parsedQuery.data
 
     const [waitlists, total] = await Promise.all([
-      (WaitlistModel.find as any)({})
+      // @ts-expect-error - Mongoose type inference issue with dynamic query
+      WaitlistModel.find({})
         .skip((page - 1) * limit)
         .limit(limit),
       WaitlistModel.countDocuments({}),
     ])
 
     const result = waitlists.reduce(
-      (acc: Record<string, string[]>, waitlist: any) => {
+      (acc: Record<string, string[]>, waitlist: { appName: string; emails: string[] }) => {
         acc[waitlist.appName] = waitlist.emails
         return acc
       },

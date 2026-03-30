@@ -51,17 +51,22 @@ const getByServiceHandler = async (req: Request, res: Response) => {
 
     // Calculate uptime percentage
     const totalChecks = history.length
-    const healthyChecks = history.filter((h: any) => h.status === 'healthy').length
+    const healthyChecks = history.filter(
+      (h: { status: string; responseTime?: number | null }) => h.status === 'healthy'
+    ).length
     const uptimePercentage = totalChecks > 0 ? (healthyChecks / totalChecks) * 100 : 0
 
     // Calculate average response time (only healthy checks)
     const healthyWithResponse = history.filter(
-      (h: any) => h.status === 'healthy' && h.responseTime !== null
+      (h: { status: string; responseTime?: number | null }) =>
+        h.status === 'healthy' && h.responseTime !== null
     )
     const avgResponseTime =
       healthyWithResponse.length > 0
-        ? healthyWithResponse.reduce((sum: number, h: any) => sum + (h.responseTime || 0), 0) /
-          healthyWithResponse.length
+        ? healthyWithResponse.reduce(
+            (sum: number, h: { responseTime?: number | null }) => sum + (h.responseTime || 0),
+            0
+          ) / healthyWithResponse.length
         : null
 
     // Empty data is OK (200), return empty history
@@ -74,7 +79,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
         healthyChecks,
         uptimePercentage: Number(uptimePercentage.toFixed(2)),
         avgResponseTime: avgResponseTime ? Math.round(avgResponseTime) : null,
-        history: history.map((h: any) => ({
+        history: history.map((h: Record<string, unknown>) => ({
           status: h.status,
           responseTime: h.responseTime,
           timestamp: h.timestamp,

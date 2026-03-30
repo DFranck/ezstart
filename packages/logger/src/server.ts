@@ -45,30 +45,30 @@ const pinoLogger = pino({
  * ```
  */
 export const logger = {
-  info: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  info: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.info(dataOrMsg || {}, msgOrObj)
+      pinoLogger.info((dataOrMsg as object) || {}, msgOrObj)
     } else {
       pinoLogger.info(msgOrObj, dataOrMsg as string)
     }
   },
-  warn: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  warn: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.warn(dataOrMsg || {}, msgOrObj)
+      pinoLogger.warn((dataOrMsg as object) || {}, msgOrObj)
     } else {
       pinoLogger.warn(msgOrObj, dataOrMsg as string)
     }
   },
-  error: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  error: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.error(dataOrMsg || {}, msgOrObj)
+      pinoLogger.error((dataOrMsg as object) || {}, msgOrObj)
     } else {
       pinoLogger.error(msgOrObj, dataOrMsg as string)
     }
   },
-  debug: (msgOrObj: string | object, dataOrMsg?: string | object) => {
+  debug: (msgOrObj: string | object, dataOrMsg?: unknown) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.debug(dataOrMsg || {}, msgOrObj)
+      pinoLogger.debug((dataOrMsg as object) || {}, msgOrObj)
     } else {
       pinoLogger.debug(msgOrObj, dataOrMsg as string)
     }

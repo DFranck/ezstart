@@ -19,22 +19,30 @@
  * - POST   /api/quotes/:id/convert-to-invoice -> convertQuoteToInvoiceById
  */
 
-import { Router } from '@ezstart/express-core';
+import { Router } from '@ezstart/express-core'
 
 // Import action routers
-import createQuoteRouter, { createQuoteRegistry } from './createQuote.js';
-import listQuotesRouter, { listQuotesRegistry } from './listQuotes.js';
-import getQuoteByIdRouter, { getQuoteByIdRegistry } from './getQuoteById.js';
-import updateQuoteByIdRouter, { updateQuoteByIdRegistry } from './updateQuoteById.js';
-import deleteQuoteByIdRouter, { deleteQuoteByIdRegistry } from './deleteQuoteById.js';
-import restoreQuoteByIdRouter, { restoreQuoteByIdRegistry } from './restoreQuoteById.js';
-import hardDeleteQuoteByIdRouter, { hardDeleteQuoteByIdRegistry } from './hardDeleteQuoteById.js';
-import addLineItemToQuoteByIdRouter, { addLineItemToQuoteByIdRegistry } from './addLineItemToQuoteById.js';
-import removeLineItemFromQuoteByIdRouter, { removeLineItemFromQuoteByIdRegistry } from './removeLineItemFromQuoteById.js';
-import assignClientToQuoteByIdRouter, { assignClientToQuoteByIdRegistry } from './assignClientToQuoteById.js';
-import acceptQuoteByIdRouter, { acceptQuoteByIdRegistry } from './acceptQuoteById.js';
-import rejectQuoteByIdRouter, { rejectQuoteByIdRegistry } from './rejectQuoteById.js';
-import convertQuoteToInvoiceByIdRouter, { convertQuoteToInvoiceByIdRegistry } from './convertQuoteToInvoiceById.js';
+import createQuoteRouter, { createQuoteRegistry } from './createQuote.js'
+import listQuotesRouter, { listQuotesRegistry } from './listQuotes.js'
+import getQuoteByIdRouter, { getQuoteByIdRegistry } from './getQuoteById.js'
+import updateQuoteByIdRouter, { updateQuoteByIdRegistry } from './updateQuoteById.js'
+import deleteQuoteByIdRouter, { deleteQuoteByIdRegistry } from './deleteQuoteById.js'
+import restoreQuoteByIdRouter, { restoreQuoteByIdRegistry } from './restoreQuoteById.js'
+import hardDeleteQuoteByIdRouter, { hardDeleteQuoteByIdRegistry } from './hardDeleteQuoteById.js'
+import addLineItemToQuoteByIdRouter, {
+  addLineItemToQuoteByIdRegistry,
+} from './addLineItemToQuoteById.js'
+import removeLineItemFromQuoteByIdRouter, {
+  removeLineItemFromQuoteByIdRegistry,
+} from './removeLineItemFromQuoteById.js'
+import assignClientToQuoteByIdRouter, {
+  assignClientToQuoteByIdRegistry,
+} from './assignClientToQuoteById.js'
+import acceptQuoteByIdRouter, { acceptQuoteByIdRegistry } from './acceptQuoteById.js'
+import rejectQuoteByIdRouter, { rejectQuoteByIdRegistry } from './rejectQuoteById.js'
+import convertQuoteToInvoiceByIdRouter, {
+  convertQuoteToInvoiceByIdRegistry,
+} from './convertQuoteToInvoiceById.js'
 
 // Export all registries as an array for OpenAPI documentation
 export const quotesRegistries = [
@@ -51,10 +59,10 @@ export const quotesRegistries = [
   acceptQuoteByIdRegistry,
   rejectQuoteByIdRegistry,
   convertQuoteToInvoiceByIdRegistry,
-];
+]
 
 // Consolidate all quote routers
-const router: any = Router();
+const router: import('express').Router = Router()
 
 router
   .use('/', createQuoteRouter)
@@ -69,6 +77,6 @@ router
   .use('/', assignClientToQuoteByIdRouter)
   .use('/', acceptQuoteByIdRouter)
   .use('/', rejectQuoteByIdRouter)
-  .use('/', convertQuoteToInvoiceByIdRouter);
+  .use('/', convertQuoteToInvoiceByIdRouter)
 
-export default router;
+export default router

@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function DonateSuccessPage(): any {
+export default function DonateSuccessPage() {
   const t = useTranslations('donate')
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
@@ -22,7 +22,7 @@ export default function DonateSuccessPage(): any {
         method: 'POST',
       })
         .then(response => {
-          if (response.ok && response.data?.success) {
+          if (response.ok && (response.data as Record<string, unknown>)?.success) {
             setVerified(true)
           }
         })

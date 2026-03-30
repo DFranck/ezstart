@@ -4,7 +4,7 @@ import { io, type Socket } from 'socket.io-client'
 import { MONITORING_API_URL } from '../lib/config'
 
 interface UseSocketOptions {
-  onHealthChecksUpdated?: (data: any) => void
+  onHealthChecksUpdated?: (data: unknown) => void
 }
 
 export function useSocket({

@@ -21,7 +21,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
-    logger.error('Webhook signature verification failed:', err)
+    logger.error('Webhook signature verification failed:', err instanceof Error ? err : String(err))
     return sendError(res, 'Invalid signature', 400)
   }
 
@@ -32,7 +32,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         logger.info(`🔍 Looking for payment with ID: ${session.id}`)
 
-        const updateData: any = {
+        const updateData: Record<string, unknown> = {
           status: 'completed',
           completedAt: new Date(),
           paymentMethod: session.payment_method_types?.[0],
@@ -134,7 +134,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
     sendSuccess(res, { received: true })
   } catch (error) {
-    logger.error('Webhook processing error:', error)
+    logger.error('Webhook processing error:', error instanceof Error ? error : String(error))
     sendError(res, 'Webhook processing failed', 500)
   }
 })

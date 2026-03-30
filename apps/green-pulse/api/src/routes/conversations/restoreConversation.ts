@@ -4,11 +4,17 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 
 export const restoreConversationRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const restoreConversationRouter = createRouterWithDoc(
   restoreConversationRegistry,
   router,

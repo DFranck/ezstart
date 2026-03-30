@@ -149,7 +149,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
                   borderRadius: '8px',
                 }}
                 labelStyle={{ color: 'hsl(var(--foreground))' }}
-                formatter={(value: any, name: string) => {
+                formatter={(value: number, name: string) => {
                   if (name === 'responseTime') return [`${value}ms`, 'Response Time']
                   if (name === 'status') return [value === 1 ? 'Healthy' : 'Down', 'Status']
                   return [value, name]

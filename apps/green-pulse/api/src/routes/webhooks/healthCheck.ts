@@ -6,12 +6,8 @@
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 
 export const healthCheckRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const healthCheckRouter = createRouterWithDoc(
-  healthCheckRegistry,
-  router,
-  '/health'
-)
+const router: import('express').Router = Router()
+export const healthCheckRouter = createRouterWithDoc(healthCheckRegistry, router, '/health')
 
 healthCheckRouter.get(
   '/',

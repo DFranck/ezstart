@@ -1,12 +1,18 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 import { clearPromptCache } from '../../services/prompt.service.js'
 
 export const deletePromptRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(deletePromptRegistry, router, '/prompts')
 
 const DeletePromptResponseSchema = z.object({
@@ -30,7 +36,11 @@ docRouter.delete(
 
       // Prevent deletion of default prompts
       if (prompt.isDefault) {
-        return sendError(res, 'Cannot delete a default prompt. Set another prompt as default first.', 400)
+        return sendError(
+          res,
+          'Cannot delete a default prompt. Set another prompt as default first.',
+          400
+        )
       }
 
       await SystemPrompt.deleteOne({ key })

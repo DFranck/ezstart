@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@ezstart/logger'
-import { Button, Div, Icon } from '@ezstart/ui/components'
+import { Button, Div, Icon, P, Span } from '@ezstart/ui/components'
 import { useEffect, useRef, useState } from 'react'
 import { QRCodeConfig } from '../types'
 

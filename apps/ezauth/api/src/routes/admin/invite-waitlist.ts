@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -34,9 +35,9 @@ const errorSchema = z.object({
 })
 
 // Invite an email from waitlist (generate access code)
-const inviteWaitlistController = async (req: any, res: any) => {
+const inviteWaitlistController = async (req: Request, res: Response) => {
   try {
-    const currentUser = req.user
+    const currentUser = req.user!
     const isAdmin =
       currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
@@ -45,7 +46,8 @@ const inviteWaitlistController = async (req: any, res: any) => {
     }
 
     const WaitlistModel = await getWaitlistModel()
-    const { appName, email } = req.params
+    const appName = req.params.appName as string
+    const email = req.params.email as string
     const { notes } = req.body
 
     // Find waitlist

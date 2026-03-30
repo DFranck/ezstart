@@ -59,7 +59,7 @@ export function WorkspacesList() {
 
   return (
     <Div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {workspaces.map((workspace: any) => (
+      {workspaces.map((workspace: Record<string, unknown>) => (
         <Link key={workspace._id} href={`/w/${workspace.slug}`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>

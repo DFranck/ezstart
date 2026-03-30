@@ -133,16 +133,16 @@ export default function BenchPage() {
     if (!layoutData) return
 
     if (layoutData.roi) {
-      setRoi(layoutData.roi)
-      roiRef.current = layoutData.roi
+      setRoi(layoutData.roi as unknown as RoiRect)
+      roiRef.current = layoutData.roi as unknown as RoiRect
     }
     if (layoutData.zones) {
-      setZones(layoutData.zones)
-      zonesRef.current = layoutData.zones
+      setZones(layoutData.zones as unknown as ZoneConfig[])
+      zonesRef.current = layoutData.zones as unknown as ZoneConfig[]
     }
     if (layoutData.masks) {
-      setMasks(layoutData.masks)
-      masksRef.current = layoutData.masks
+      setMasks(layoutData.masks as unknown as MaskRect[])
+      masksRef.current = layoutData.masks as unknown as MaskRect[]
     }
   }, [layoutData])
 
@@ -165,9 +165,9 @@ export default function BenchPage() {
     saveLayout({
       layoutName,
       displayName: name,
-      roi: roiRef.current,
-      zones: zonesRef.current,
-      masks: masksRef.current,
+      roi: roiRef.current as unknown as Record<string, unknown>,
+      zones: zonesRef.current as unknown as Record<string, unknown>,
+      masks: masksRef.current as unknown as Record<string, unknown>,
     })
 
     setCurrentLayoutName(layoutName)
@@ -402,9 +402,9 @@ export default function BenchPage() {
       layoutName,
       displayName: currentDisplay ?? layoutName,
       bestPresets,
-      zones: zonesRef.current,
-      masks: masksRef.current,
-      roi: roiRef.current,
+      zones: zonesRef.current as unknown as Record<string, unknown>,
+      masks: masksRef.current as unknown as Record<string, unknown>,
+      roi: roiRef.current as unknown as Record<string, unknown>,
     })
 
     setPresetsSaved(true)

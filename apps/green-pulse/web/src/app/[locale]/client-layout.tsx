@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import React from 'react'
 
-const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
+const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   const pathname = usePathname()
   const router = useRouter()
   const currentLocale = useLocale()

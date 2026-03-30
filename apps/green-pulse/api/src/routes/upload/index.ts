@@ -28,11 +28,11 @@ export const uploadRegistries = [
 ]
 
 // Consolidate all action routers
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
-  .use('/audio', uploadAudioRouter)      // POST /audio
-  .use('/image', uploadImageRouter)      // POST /image
+  .use('/audio', uploadAudioRouter) // POST /audio
+  .use('/image', uploadImageRouter) // POST /image
   .use('/document', uploadDocumentRouter) // POST /document
   .use('/file/:fileId', getFileInfoRouter) // GET /file/:fileId
 

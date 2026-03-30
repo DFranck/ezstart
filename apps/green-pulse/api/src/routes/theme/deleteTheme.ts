@@ -1,11 +1,17 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { getThemeOverrideModel } from '../../models/ThemeOverride.js'
 
 export const deleteThemeRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(deleteThemeRegistry, router, '/theme')
 
 const DeleteThemeResponseSchema = z.object({

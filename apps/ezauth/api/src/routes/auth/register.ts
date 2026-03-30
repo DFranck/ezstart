@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -24,7 +25,7 @@ const docRouter = createRouterWithDoc(registerRegistry, router)
 const registerRateLimiter = createVeryStrictRateLimiter()
 
 // Register new user
-const registerController = async (req: any, res: any) => {
+const registerController = async (req: Request, res: Response) => {
   try {
     const parsed = registerRequestSchema.safeParse(req.body)
     if (!parsed.success) {

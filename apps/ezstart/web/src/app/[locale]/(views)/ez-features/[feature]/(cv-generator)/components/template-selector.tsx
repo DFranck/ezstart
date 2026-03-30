@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@ezstart/ui/components'
+import { Button, Div, P, Span } from '@ezstart/ui/components'
 import { CVConfig } from '../types'
 
 interface TemplateSelectorProps {

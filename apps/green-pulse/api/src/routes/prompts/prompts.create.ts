@@ -1,11 +1,18 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 
 export const createPromptRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(createPromptRegistry, router, '/prompts')
 
 const CreatePromptBodySchema = z.object({
@@ -18,8 +25,14 @@ const CreatePromptBodySchema = z.object({
   name: z.string().min(1).max(100).describe('Prompt display name'),
   description: z.string().max(500).optional().describe('Prompt description'),
   content: z.string().min(1).max(10000).describe('Prompt content template'),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).default('general').describe('Prompt category type'),
-  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).default('all').describe('Target AI provider'),
+  type: z
+    .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
+    .default('general')
+    .describe('Prompt category type'),
+  provider: z
+    .enum(['all', 'gemini', 'openai', 'anthropic'])
+    .default('all')
+    .describe('Target AI provider'),
   isActive: z.boolean().default(true).describe('Whether prompt is active'),
   isDefault: z.boolean().default(false).describe('Whether this is the default prompt'),
   variables: z.array(z.string()).optional().describe('Template variable names'),
@@ -58,7 +71,9 @@ docRouter.post(
 
       const prompt = new SystemPrompt({
         ...body,
-        updatedBy: (req as any).user?.email || 'system',
+        updatedBy:
+          (req as unknown as Record<string, unknown> & { user?: { email?: string } }).user?.email ||
+          'system',
       })
 
       await prompt.save()
@@ -69,7 +84,7 @@ docRouter.post(
         createdAt: prompt.createdAt?.toISOString(),
         updatedAt: prompt.updatedAt?.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error creating prompt:', error)
       sendError(res, 'Failed to create prompt')
     }

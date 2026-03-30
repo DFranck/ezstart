@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -26,7 +27,7 @@ const loginCookieRateLimiter = createStrictRateLimiter()
 const csrf = createCsrfMiddleware()
 
 // Login with httpOnly cookie (DUAL-MODE)
-const loginCookieController = async (req: any, res: any) => {
+const loginCookieController = async (req: Request, res: Response) => {
   try {
     const parsed = loginRequestSchema.safeParse(req.body)
     if (!parsed.success) {
@@ -58,7 +59,8 @@ const loginCookieController = async (req: any, res: any) => {
 docRouter.get(
   '/login-cookie/csrf',
   csrf.generateToken,
-  ((_req: any, res: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- createRouterWithDoc handler type mismatch
+  ((_req: Request, res: Response) => {
     sendSuccess(res, { message: 'CSRF token generated' })
   }) as any,
   {

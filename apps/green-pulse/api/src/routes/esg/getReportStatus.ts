@@ -4,11 +4,17 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 
 export const getReportStatusRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const getReportStatusRouter = createRouterWithDoc(
   getReportStatusRegistry,
   router,

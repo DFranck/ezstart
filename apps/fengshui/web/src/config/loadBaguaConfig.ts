@@ -10,13 +10,14 @@ import {
 } from '@/types/yearBaguaConfig'
 
 // Version client : utilise les données des messages next-intl
-export function loadBaguaConfigFromMessages(messages: any): YearBaguaConfig {
+export function loadBaguaConfigFromMessages(messages: Record<string, unknown>): YearBaguaConfig {
   if (!messages.bagua) {
     throw new Error(`No Bagua config found in messages`)
   }
 
-  const baseConfig = validateBaseConfig(messages.bagua)
-  const starsConfig = validateStarsConfig(messages.bagua.stars)
+  const baguaMessages = messages.bagua as Record<string, unknown>
+  const baseConfig = validateBaseConfig(baguaMessages)
+  const starsConfig = validateStarsConfig(baguaMessages.stars)
 
   // Combiner les deux configurations
   return combineConfigs(baseConfig, starsConfig)

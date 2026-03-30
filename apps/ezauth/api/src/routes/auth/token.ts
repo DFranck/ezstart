@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -20,7 +21,7 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(tokenRegistry, router)
 
 // Exchange code for token
-const tokenController = async (req: any, res: any) => {
+const tokenController = async (req: Request, res: Response) => {
   try {
     const parsed = tokenRequestSchema.safeParse(req.body)
     if (!parsed.success) {

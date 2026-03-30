@@ -241,7 +241,7 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                       borderRadius: '8px',
                     }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: any, name: string) => {
+                    formatter={(value: number, name: string) => {
                       if (name.includes('responseTime')) {
                         const serviceName = name.replace('-responseTime', '')
                         return [`${value}ms`, serviceName.toUpperCase()]
@@ -296,7 +296,7 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                       borderRadius: '8px',
                     }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: any, name: string) => {
+                    formatter={(value: number, name: string) => {
                       if (name.includes('status')) {
                         const serviceName = name.replace('-status', '')
                         return [value === 1 ? 'UP' : 'DOWN', serviceName.toUpperCase()]

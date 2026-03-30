@@ -14,11 +14,11 @@ export const formConfigRegistries = [
   createFormConfigRegistry,
 ]
 
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
-  .use('/', listFormConfigsRouter)      // GET /configs
-  .use('/', getFormConfigByIdRouter)    // GET /configs/:id
-  .use('/', createFormConfigRouter)     // POST /configs
+  .use('/', listFormConfigsRouter) // GET /configs
+  .use('/', getFormConfigByIdRouter) // GET /configs/:id
+  .use('/', createFormConfigRouter) // POST /configs
 
 export default router

@@ -223,7 +223,13 @@ Examples:
           <Span className="font-semibold text-sm sm:text-base text-primary">AI Assistant</Span>
         </Div>
         {onToggle && (
-          <Button onClick={onToggle} variant="ghost" size="sm" className="hover:bg-muted/50">
+          <Button
+            onClick={onToggle}
+            variant="ghost"
+            size="sm"
+            className="hover:bg-muted/50"
+            aria-label="Close AI assistant"
+          >
             <Icon name="lucide:ChevronRight" className="w-4 h-4" />
           </Button>
         )}

@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
-export default function PageTransplantationArbres(): any {
+export default function PageTransplantationArbres() {
   const { isDesktop } = useDevice()
   const t = useTranslations('transplantation')
   const videoRef = useRef<HTMLVideoElement>(null)

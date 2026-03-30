@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, CardContent, CardHeader, CardTitle, H3 } from '@ezstart/ui/components'
+import { Badge, Card, CardContent, CardHeader, CardTitle, Div, H3 } from '@ezstart/ui/components'
 import { ReactNode } from 'react'
 
 type ModernPlaygroundLayoutProps = {

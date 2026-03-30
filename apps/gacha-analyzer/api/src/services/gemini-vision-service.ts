@@ -35,12 +35,19 @@ Do NOT add explanations, just the raw text.`
       const result = await model.generateContent([prompt, imageData])
       logger.info(`[OCR] Gemini ${modelName} succeeded`)
       return result.response.text()
-    } catch (error: any) {
-      if (error?.status === 429) {
+    } catch (error: unknown) {
+      const statusCode =
+        error instanceof Error && 'status' in error
+          ? (error as { status: number }).status
+          : undefined
+      if (statusCode === 429) {
         logger.warn(`[OCR] Gemini ${modelName} rate limited, trying next model...`)
         continue
       }
-      logger.error(`[OCR] Gemini ${modelName} failed:`, error.message)
+      logger.error(
+        `[OCR] Gemini ${modelName} failed:`,
+        error instanceof Error ? error.message : String(error)
+      )
       return null
     }
   }

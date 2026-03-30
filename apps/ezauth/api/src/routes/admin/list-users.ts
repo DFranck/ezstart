@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -57,7 +58,7 @@ const listUsersQuerySchema = z.object({
 })
 
 // Controller
-const listUsersController = async (req: any, res: any) => {
+const listUsersController = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return sendError(res, 'Authentication required', 401)
@@ -79,12 +80,12 @@ const listUsersController = async (req: any, res: any) => {
     const AuthUser = await getAuthUserModel()
     const { page, limit } = parsedQuery.data
 
-    const query: any = {}
+    const query: Record<string, unknown> = {}
 
     // Superadmin sees all users, admin sees non-superadmins in their apps
     if (!currentUser.roles?.includes('superadmin')) {
       query.roles = { $ne: 'superadmin' }
-      if (currentUser.apps?.length > 0) {
+      if ((currentUser.apps?.length ?? 0) > 0) {
         query.apps = { $in: currentUser.apps }
       }
     }
@@ -100,13 +101,22 @@ const listUsersController = async (req: any, res: any) => {
     ])
 
     sendSuccess(res, {
-      users: users.map((u: any) => ({
-        ...u,
-        _id: u._id.toString(),
-        roles: u.roles || [],
-        permissions: u.permissions || [],
-        features: u.features || [],
-      })),
+      users: users.map(
+        (
+          u: Record<string, unknown> & {
+            _id: { toString(): string }
+            roles?: string[]
+            permissions?: string[]
+            features?: string[]
+          }
+        ) => ({
+          ...u,
+          _id: u._id.toString(),
+          roles: u.roles || [],
+          permissions: u.permissions || [],
+          features: u.features || [],
+        })
+      ),
       pagination: {
         page,
         limit,
@@ -114,7 +124,7 @@ const listUsersController = async (req: any, res: any) => {
         totalPages: Math.ceil(total / limit),
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error listing users:', error)
     sendError(res, 'Failed to list users', 500)
   }

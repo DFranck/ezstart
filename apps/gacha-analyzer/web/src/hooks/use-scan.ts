@@ -26,7 +26,24 @@ export function useScan() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ image, imageAlt, imageFull, gameType, profile, benchMode, presets, thumbnail, zoneSetSlot, zoneMainStat, zoneQuality, zoneInnate, zoneSub1, zoneSub2, zoneSub3, zoneSub4 }: ScanInput): Promise<ScanResult> => {
+    mutationFn: async ({
+      image,
+      imageAlt,
+      imageFull,
+      gameType,
+      profile,
+      benchMode,
+      presets,
+      thumbnail,
+      zoneSetSlot,
+      zoneMainStat,
+      zoneQuality,
+      zoneInnate,
+      zoneSub1,
+      zoneSub2,
+      zoneSub3,
+      zoneSub4,
+    }: ScanInput): Promise<ScanResult> => {
       const formData = new FormData()
       formData.append('image', image)
       if (imageAlt) formData.append('imageAlt', imageAlt)
@@ -52,7 +69,7 @@ export function useScan() {
 
       // API returns { success, data: { _id, gameType, status, result: ScanResult } }
       // Auto-unwrapped: response.data is the Scan directly
-      return response.data!.result
+      return response.data!.result as ScanResult
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scans'] })

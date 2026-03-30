@@ -32,11 +32,11 @@ export const formRegistries = [
 ]
 
 // Consolidate all form routers
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
-  .use('/', formConfigsRouter)      // /configs/*
-  .use('/', formInstancesRouter)    // /instances/*
-  .use('/', extractFormDataRouter)  // /extract
+  .use('/', formConfigsRouter) // /configs/*
+  .use('/', formInstancesRouter) // /instances/*
+  .use('/', extractFormDataRouter) // /extract
 
 export default router

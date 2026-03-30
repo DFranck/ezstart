@@ -11,7 +11,7 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 
 export const removeWorkspaceMemberRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const removeWorkspaceMemberRouter = createRouterWithDoc(
   removeWorkspaceMemberRegistry,
   router,
@@ -35,7 +35,9 @@ removeWorkspaceMemberRouter.delete(
       }
 
       // Check permissions: only owner or admin can remove members
-      const member = workspace.members?.find((m: any) => m.userId === userId)
+      const member = workspace.members?.find(
+        (m: { userId: string; role?: string }) => m.userId === userId
+      )
       const isOwner = workspace.ownerId === userId
       const isAdmin = member?.role === 'admin'
 
@@ -49,12 +51,17 @@ removeWorkspaceMemberRouter.delete(
       }
 
       // Find and remove member
-      const memberToRemove = workspace.members?.find((m: any) => m.userId === req.params.uid)
+      const memberToRemove = workspace.members?.find(
+        (m: { userId: string; role?: string }) => m.userId === req.params.uid
+      )
       if (!memberToRemove) {
         return sendError(res, 'Member not found in workspace', 404)
       }
 
-      workspace.members = workspace.members?.filter((m: any) => m.userId !== req.params.uid) || []
+      workspace.members =
+        workspace.members?.filter(
+          (m: { userId: string; role?: string }) => m.userId !== req.params.uid
+        ) || []
       await workspace.save()
 
       sendSuccess(res, workspace)

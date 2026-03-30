@@ -16,7 +16,7 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 
 export const addWorkspaceMemberRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const addWorkspaceMemberRouter = createRouterWithDoc(
   addWorkspaceMemberRegistry,
   router,
@@ -45,7 +45,9 @@ addWorkspaceMemberRouter.post(
       }
 
       // Check permissions: only owner or admin can add members
-      const member = workspace.members?.find((m: any) => m.userId === userId)
+      const member = workspace.members?.find(
+        (m: { userId: string; role?: string }) => m.userId === userId
+      )
       const isOwner = workspace.ownerId === userId
       const isAdmin = member?.role === 'admin'
 
@@ -55,7 +57,7 @@ addWorkspaceMemberRouter.post(
 
       // Check if user already a member
       const existingMember = workspace.members?.find(
-        (m: any) => m.userId === validation.data.userId
+        (m: { userId: string; role?: string }) => m.userId === validation.data.userId
       )
       if (existingMember) {
         return sendError(res, 'User is already a member of this workspace', 409)

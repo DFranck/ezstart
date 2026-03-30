@@ -12,15 +12,21 @@
  * - DELETE /api/payment-methods/:id        -> deletePaymentMethodById
  */
 
-import { Router } from '@ezstart/express-core';
+import { Router } from '@ezstart/express-core'
 
 // Import action routers
-import listPaymentMethodsRouter, { listPaymentMethodsRegistry } from './listPaymentMethods.js';
-import getPaymentMethodByIdRouter, { getPaymentMethodByIdRegistry } from './getPaymentMethodById.js';
-import createPaymentMethodRouter, { createPaymentMethodRegistry } from './createPaymentMethod.js';
-import updatePaymentMethodByIdRouter, { updatePaymentMethodByIdRegistry } from './updatePaymentMethodById.js';
-import restorePaymentMethodByIdRouter, { restorePaymentMethodByIdRegistry } from './restorePaymentMethodById.js';
-import deletePaymentMethodByIdRouter, { deletePaymentMethodByIdRegistry } from './deletePaymentMethodById.js';
+import listPaymentMethodsRouter, { listPaymentMethodsRegistry } from './listPaymentMethods.js'
+import getPaymentMethodByIdRouter, { getPaymentMethodByIdRegistry } from './getPaymentMethodById.js'
+import createPaymentMethodRouter, { createPaymentMethodRegistry } from './createPaymentMethod.js'
+import updatePaymentMethodByIdRouter, {
+  updatePaymentMethodByIdRegistry,
+} from './updatePaymentMethodById.js'
+import restorePaymentMethodByIdRouter, {
+  restorePaymentMethodByIdRegistry,
+} from './restorePaymentMethodById.js'
+import deletePaymentMethodByIdRouter, {
+  deletePaymentMethodByIdRegistry,
+} from './deletePaymentMethodById.js'
 
 // Export all registries as an array for OpenAPI documentation
 export const paymentMethodsRegistries = [
@@ -30,10 +36,10 @@ export const paymentMethodsRegistries = [
   updatePaymentMethodByIdRegistry,
   restorePaymentMethodByIdRegistry,
   deletePaymentMethodByIdRegistry,
-];
+]
 
 // Consolidate all payment method routers
-const router: any = Router();
+const router: import('express').Router = Router()
 
 router
   .use('/', listPaymentMethodsRouter)
@@ -41,6 +47,6 @@ router
   .use('/', createPaymentMethodRouter)
   .use('/', updatePaymentMethodByIdRouter)
   .use('/', restorePaymentMethodByIdRouter)
-  .use('/', deletePaymentMethodByIdRouter);
+  .use('/', deletePaymentMethodByIdRouter)
 
-export default router;
+export default router

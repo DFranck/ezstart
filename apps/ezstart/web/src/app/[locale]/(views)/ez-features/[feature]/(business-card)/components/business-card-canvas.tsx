@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Div, Icon } from '@ezstart/ui/components'
+import { Button, Div, Icon, P, Span } from '@ezstart/ui/components'
 import { useEffect, useRef, useState } from 'react'
 import { BusinessCardConfig, BusinessCardData, CARD_DIMENSIONS } from '../types'
 

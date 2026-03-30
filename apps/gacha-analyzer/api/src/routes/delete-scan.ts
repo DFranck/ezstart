@@ -6,10 +6,10 @@ import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, findByIdAndDelete } from '@ezstart/express-core'
 import { getScanModel } from '../models/scan.js'
 
-const router: any = Router()
+const router = Router()
 
 // DELETE /scans/:id — Delete a scan by ID
-router.delete('/:id', async (req: any, res: any) => {
+router.delete('/:id', async (req, res) => {
   try {
     const Scan = await getScanModel()
 

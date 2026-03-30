@@ -11,7 +11,7 @@ interface PageProps {
   params: Promise<{ slug: string; id: string; fid: string; locale: string }>
 }
 
-function FormFillingContent({ params }: PageProps): any {
+function FormFillingContent({ params }: PageProps) {
   const { slug, id, fid } = use(params)
 
   return (

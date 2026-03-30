@@ -18,6 +18,7 @@ import { useParams } from 'next/navigation'
 import type { GameType, ScanResult } from '@gacha-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import type { MaskRect } from '@/components/blackout-mask'
+import type { ZoneConfig } from '@/components/multi-zone-selector'
 import { RuneCardWithTemplate } from '@/components/rune-card-templates'
 import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { GearCard } from '@/components/gear-card'
@@ -271,15 +272,15 @@ export default function GameScanPage() {
     setShowSettings(false)
 
     if (layoutData.roi) {
-      setRoi(layoutData.roi)
-      roiRef.current = layoutData.roi
+      setRoi(layoutData.roi as unknown as RoiRect)
+      roiRef.current = layoutData.roi as unknown as RoiRect
     }
     if (layoutData.bestPresets && layoutData.bestPresets.length > 0) {
       savedPresets.current = layoutData.bestPresets
     }
-    if (layoutData.masks && layoutData.masks.length > 0) {
-      setMasks(layoutData.masks)
-      masksRef.current = layoutData.masks
+    if (layoutData.masks && Object.keys(layoutData.masks).length > 0) {
+      setMasks(layoutData.masks as unknown as MaskRect[])
+      masksRef.current = layoutData.masks as unknown as MaskRect[]
     }
   }, [layoutData])
 
@@ -511,7 +512,7 @@ export default function GameScanPage() {
             onMasksChange={masks.length > 0 ? () => {} : undefined}
             onMaskAdd={masks.length > 0 ? () => {} : undefined}
             onMaskRemove={masks.length > 0 ? () => {} : undefined}
-            zones={layoutData?.zones}
+            zones={layoutData?.zones as unknown as ZoneConfig[] | undefined}
             onZonesChange={() => {}}
             zonesLocked={!showSettings}
             maskColor="rgba(255, 0, 0, 0.15)"

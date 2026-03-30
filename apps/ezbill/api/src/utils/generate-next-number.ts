@@ -1,7 +1,7 @@
-import { Model } from 'mongoose';
-import { getInvoiceModel } from '../models/billing/invoice.js';
-import { getQuoteModel } from '../models/billing/quote.js';
-import { getReceiptModel } from '../models/billing/receipt.js';
+import { Model } from 'mongoose'
+import { getInvoiceModel } from '../models/billing/invoice.js'
+import { getQuoteModel } from '../models/billing/quote.js'
+import { getReceiptModel } from '../models/billing/receipt.js'
 
 export async function generateNextNumber(
   type: 'invoice' | 'quote' | 'receipt',
@@ -11,22 +11,23 @@ export async function generateNextNumber(
     invoice: 'INV',
     quote: 'Q',
     receipt: 'R',
-  };
+  }
 
-  const prefix = `${prefixMap[type]}-${new Date().getFullYear()}`;
+  const prefix = `${prefixMap[type]}-${new Date().getFullYear()}`
 
   // Get models using factory functions
-  const InvoiceModel = await getInvoiceModel();
-  const QuoteModel = await getQuoteModel();
-  const ReceiptModel = await getReceiptModel();
+  const InvoiceModel = await getInvoiceModel()
+  const QuoteModel = await getQuoteModel()
+  const ReceiptModel = await getReceiptModel()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Mongoose Model generic
   const models: Record<'invoice' | 'quote' | 'receipt', Model<any>> = {
     invoice: InvoiceModel,
     quote: QuoteModel,
     receipt: ReceiptModel,
-  };
+  }
 
-  const Model = models[type];
+  const Model = models[type]
 
   const last = (await Model.findOne({
     documentNumber: { $regex: `^${prefix}` },
@@ -34,10 +35,10 @@ export async function generateNextNumber(
     deletedAt: null,
   })
     .sort({ documentNumber: -1 })
-    .lean()) as { documentNumber?: string } | null;
+    .lean()) as { documentNumber?: string } | null
 
-  const lastNumber = last?.documentNumber?.split('-')?.[2] ?? '0000';
-  const nextNumber = String(parseInt(lastNumber) + 1).padStart(4, '0');
+  const lastNumber = last?.documentNumber?.split('-')?.[2] ?? '0000'
+  const nextNumber = String(parseInt(lastNumber) + 1).padStart(4, '0')
 
-  return `${prefix}-${nextNumber}`;
+  return `${prefix}-${nextNumber}`
 }

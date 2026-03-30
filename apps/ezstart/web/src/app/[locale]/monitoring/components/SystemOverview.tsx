@@ -21,10 +21,28 @@ import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
+interface MonitoringAudit {
+  score?: number | null
+  name?: string
+}
+
+interface MonitoringProject {
+  name?: string
+  status?: string
+  lastCheck?: string
+  avgResponseTime?: number | null
+}
+
+interface MonitoringError {
+  timestamp: string
+  severity: string
+  message: string
+}
+
 interface SystemOverviewProps {
-  projects: any[]
-  audits: any[]
-  errors: any[]
+  projects: MonitoringProject[]
+  audits: MonitoringAudit[]
+  errors: MonitoringError[]
   summary: {
     total: number
     healthy: number
@@ -68,27 +86,27 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
 
   const avgAuditScore =
     audits.length > 0
-      ? Math.round(audits.reduce((acc: number, a: any) => acc + (a.score || 0), 0) / audits.length)
+      ? Math.round(audits.reduce((acc: number, a) => acc + (a.score || 0), 0) / audits.length)
       : 0
 
   // Filter recent errors (last 24h)
   const now = Date.now()
   const last24h = 24 * 60 * 60 * 1000
-  const recentErrors = errors.filter((e: any) => {
+  const recentErrors = errors.filter(e => {
     const errorTime = new Date(e.timestamp).getTime()
     return now - errorTime <= last24h
   })
 
-  const criticalErrors = recentErrors.filter((e: any) => e.severity === 'critical').length
+  const criticalErrors = recentErrors.filter(e => e.severity === 'critical').length
 
   // Average response time across all projects
   const avgResponseTime =
     projects.length > 0
       ? Math.round(
           projects
-            .filter((p: any) => p.avgResponseTime !== null)
-            .reduce((acc: number, p: any) => acc + (p.avgResponseTime || 0), 0) /
-            projects.filter((p: any) => p.avgResponseTime !== null).length || 1
+            .filter(p => p.avgResponseTime !== null)
+            .reduce((acc: number, p) => acc + (p.avgResponseTime || 0), 0) /
+            projects.filter(p => p.avgResponseTime !== null).length || 1
         )
       : 0
 
@@ -141,7 +159,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
       category: t('overview.systemStatus.codeQuality.title'),
       score: avgAuditScore,
       status: avgAuditScore >= 90 ? 'excellent' : avgAuditScore >= 70 ? 'good' : 'warning',
-      issues: audits.filter((a: any) => a.score < 80).length,
+      issues: audits.filter(a => (a.score ?? 0) < 80).length,
       icon: 'lucide:CheckCircle2',
       description: `${audits.length} ${t('overview.systemStatus.codeQuality.description')}`,
     },
@@ -158,7 +176,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
       category: t('overview.systemStatus.performance.title'),
       score: avgResponseTime < 200 ? 95 : avgResponseTime < 500 ? 80 : 60,
       status: avgResponseTime < 200 ? 'excellent' : avgResponseTime < 500 ? 'good' : 'warning',
-      issues: projects.filter((p: any) => p.avgResponseTime > 500).length,
+      issues: projects.filter(p => (p.avgResponseTime ?? 0) > 500).length,
       icon: 'lucide:Gauge',
       description: `${avgResponseTime}ms ${t('overview.systemStatus.performance.description')}`,
     },
@@ -166,13 +184,13 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
 
   // Recent activity
   const recentActivity = [
-    ...projects.slice(0, 3).map((p: any) => ({
+    ...projects.slice(0, 3).map(p => ({
       type: 'health_check' as const,
       message: `${t('overview.recentActivity.healthCheckPassed')}: ${p.name}`,
-      timestamp: p.lastCheck,
+      timestamp: p.lastCheck ?? new Date().toISOString(),
       status: p.status === 'healthy' ? ('success' as const) : ('warning' as const),
     })),
-    ...recentErrors.slice(0, 2).map((e: any) => ({
+    ...recentErrors.slice(0, 2).map(e => ({
       type: 'error' as const,
       message: `${e.severity.toUpperCase()}: ${e.message.slice(0, 50)}...`,
       timestamp: e.timestamp,

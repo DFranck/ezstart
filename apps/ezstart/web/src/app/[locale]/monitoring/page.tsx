@@ -13,7 +13,7 @@ import { useMonitoringProjects } from './hooks/useMonitoringProjects'
 import { useSocket } from './hooks/useSocket'
 import { getMetricsData } from './lib/utils'
 
-function MonitoringOverviewContent(): any {
+function MonitoringOverviewContent() {
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes

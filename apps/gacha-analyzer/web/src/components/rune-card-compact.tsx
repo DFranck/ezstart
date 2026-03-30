@@ -434,13 +434,13 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
             const penaltiesTotal = qualityPen + innate + mismatchPen + lowRoll + nonGrind
             const bestOptim = analysis.archetypeOptimizations?.[0]
             const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12) as 0 | 3 | 6 | 9 | 12
-            const adjSetWeighted = (analysis as any).adjustedSetWeighted as number | undefined
-            const adjPotentialApi = (analysis as any).adjustedPotential as number | undefined
+            const adjSetWeighted = analysis.adjustedSetWeighted as number | undefined
+            const adjPotentialApi = analysis.adjustedPotential as number | undefined
             const currentEff = analysis.setWeightedEfficiency ?? 0
             const effWithPenalties = adjSetWeighted ?? currentEff + penaltiesTotal
             const potentialWithPenalties =
               adjPotentialApi ?? (analysis.potentialEfficiency ?? currentEff) + penaltiesTotal
-            const activeProfile = ((analysis as any).profile ?? 'mid') as PlayerProfile
+            const activeProfile = (analysis.profile ?? 'mid') as PlayerProfile
             const activeThresh =
               (PROGRESSIVE_SELL_THRESHOLDS[activeProfile]?.[levelKey] ?? 0) + setBonus
             const finalThresh = (PROGRESSIVE_SELL_THRESHOLDS[activeProfile]?.[12] ?? 0) + setBonus
@@ -483,8 +483,8 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
             else positives.push('Stats synergiques avec le set')
 
             // Main stat tier (slots 2/4/6 only)
-            const mainTier = (analysis as any).mainStatTier as string | undefined
-            const mainFactor = (analysis as any).mainStatFactor as number | undefined
+            const mainTier = analysis.mainStatTier as string | undefined
+            const mainFactor = analysis.mainStatFactor as number | undefined
             if (mainTier && mainFactor !== undefined) {
               if (mainTier === 'S' || mainTier === 'A')
                 positives.push(
@@ -609,7 +609,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
             </Button>
             {showDebug &&
               (() => {
-                const breakdown = (analysis as any).setWeightedBreakdown as
+                const breakdown = analysis.setWeightedBreakdown as
                   | Array<{
                       type: StatType
                       value: number
@@ -622,7 +622,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                       contribution: number
                     }>
                   | undefined
-                const maxDivisor = (analysis as any).setWeightedMaxDivisor as number | undefined
+                const maxDivisor = analysis.setWeightedMaxDivisor as number | undefined
                 const setTiers = SET_STAT_TIERS[rune.set]
                 const setStrengthTier = (analysis.setStrength ??
                   SET_STRENGTH[rune.set] ??
@@ -817,14 +817,9 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                           | 6
                           | 9
                           | 12
-                        const adjSetWeighted = (analysis as any).adjustedSetWeighted as
-                          | number
-                          | undefined
-                        const adjPotentialApi = (analysis as any).adjustedPotential as
-                          | number
-                          | undefined
-                        const activeProfileKey = ((analysis as any).profile ??
-                          'mid') as PlayerProfile
+                        const adjSetWeighted = analysis.adjustedSetWeighted as number | undefined
+                        const adjPotentialApi = analysis.adjustedPotential as number | undefined
+                        const activeProfileKey = (analysis.profile ?? 'mid') as PlayerProfile
                         const currentEff = analysis.setWeightedEfficiency ?? 0
                         const effWithPenalties = adjSetWeighted ?? currentEff + penaltiesTotal
                         const potentialWithPenalties =

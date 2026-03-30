@@ -7,6 +7,7 @@
 
 const fs = require('fs')
 const path = require('path')
+const { execSync } = require('child_process')
 const { ROOT_DIR, APPS_DIR, appExists } = require('./lib/utils')
 
 const PACKAGES_DIR = path.join(ROOT_DIR, 'packages')
@@ -165,20 +166,22 @@ function generateRootPackageJson(appName, subProjects) {
   scripts.typecheck = 'turbo run typecheck'
   scripts.lint = 'turbo run lint'
 
-  return JSON.stringify(
-    {
-      name: appName + '-standalone',
-      version: '0.1.0',
-      private: true,
-      scripts,
-      devDependencies: {
-        turbo: '^2.4.2',
+  return (
+    JSON.stringify(
+      {
+        name: appName + '-standalone',
+        version: '0.1.0',
+        private: true,
+        scripts,
+        devDependencies: {
+          turbo: '^2.4.2',
+        },
+        packageManager: 'pnpm@10.12.2',
       },
-      packageManager: 'pnpm@10.12.2',
-    },
-    null,
-    2
-  ) + '\n'
+      null,
+      2
+    ) + '\n'
+  )
 }
 
 function generateRootTsconfig(appName, subProjects, packageFolders) {
@@ -197,19 +200,21 @@ function generateRootTsconfig(appName, subProjects, packageFolders) {
     refs.push({ path: './' + sub })
   }
 
-  return JSON.stringify(
-    {
-      compilerOptions: {
-        composite: true,
-        declaration: true,
-        noEmit: true,
+  return (
+    JSON.stringify(
+      {
+        compilerOptions: {
+          composite: true,
+          declaration: true,
+          noEmit: true,
+        },
+        files: [],
+        references: refs,
       },
-      files: [],
-      references: refs,
-    },
-    null,
-    2
-  ) + '\n'
+      null,
+      2
+    ) + '\n'
+  )
 }
 
 function generateReadme(appName, subProjects, packageFolders) {
@@ -368,6 +373,21 @@ function main() {
   console.log('  pnpm install')
   console.log('  pnpm dev')
   console.log('')
+
+  // Optional --test flag: verify extraction by running install + build
+  if (process.argv.includes('--test')) {
+    console.log('Running post-extraction test...\n')
+    try {
+      console.log('  pnpm install...')
+      execSync('pnpm install', { cwd: output, stdio: 'inherit' })
+      console.log('\n  pnpm build...')
+      execSync('pnpm build', { cwd: output, stdio: 'inherit' })
+      console.log('\n✅ Extraction test passed!')
+    } catch {
+      console.error('\n❌ Extraction test failed!')
+      process.exit(1)
+    }
+  }
 }
 
 main()

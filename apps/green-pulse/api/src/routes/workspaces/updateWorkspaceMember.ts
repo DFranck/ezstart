@@ -16,7 +16,7 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 
 export const updateWorkspaceMemberRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const updateWorkspaceMemberRouter = createRouterWithDoc(
   updateWorkspaceMemberRegistry,
   router,
@@ -50,7 +50,9 @@ updateWorkspaceMemberRouter.put(
       }
 
       // Find member
-      const member = workspace.members?.find((m: any) => m.userId === req.params.uid)
+      const member = workspace.members?.find(
+        (m: { userId: string; role?: string }) => m.userId === req.params.uid
+      )
       if (!member) {
         return sendError(res, 'Member not found in workspace', 404)
       }

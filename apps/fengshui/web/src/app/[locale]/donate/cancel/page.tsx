@@ -5,7 +5,7 @@ import { Button, Div, H1, H3, Icon, LI, P, Section, Span, UL } from '@ezstart/ui
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
-export default function DonateCancelPage(): any {
+export default function DonateCancelPage() {
   const t = useTranslations('donate')
 
   return (

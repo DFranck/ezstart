@@ -4,17 +4,20 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { ESGPayloadSchema } from '@green-pulse/types'
 
 export const createProjectRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const createProjectRouter = createRouterWithDoc(
-  createProjectRegistry,
-  router,
-  '/projects'
-)
+const router: import('express').Router = Router()
+export const createProjectRouter = createRouterWithDoc(createProjectRegistry, router, '/projects')
 
 createProjectRouter.post(
   '/',

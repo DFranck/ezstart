@@ -20,7 +20,7 @@ const UploadStep = dynamic(() => import('@/components/steps/UploadStep'), {
   loading: () => <Div className="flex items-center justify-center p-8">Loading uploader...</Div>,
 })
 
-export default function AnalyzePage(): any {
+export default function AnalyzePage() {
   const [triggerPreview, setTriggerPreview] = useState(0)
   const t = useTranslations()
 
@@ -114,7 +114,15 @@ export default function AnalyzePage(): any {
         allowStepNavigation
         theme={fengShuiTheme}
         renderButtons={context => {
-          const uploadData = context.getStepData('upload')
+          const uploadData = context.getStepData('upload') as {
+            file?: File
+            preview?: string
+            _editingState?: {
+              isEditing: boolean
+              canApply: boolean
+              applyHandler: () => Promise<void>
+            }
+          }
           const isUploadStep = context.currentStep === 0
           const hasFile = uploadData?.file
           const editingState = uploadData?._editingState

@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@ezstart/logger'
-import { Button, Icon } from '@ezstart/ui/components'
+import { Button, Icon, Span } from '@ezstart/ui/components'
 import { useState } from 'react'
 
 type CopyCodeButtonProps = {

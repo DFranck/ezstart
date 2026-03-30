@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, DEFAULT_NAV_VARIANTS, H4, Nav, tagVariantsMeta } from '@ezstart/ui/components'
+import { Button, DEFAULT_NAV_VARIANTS, Div, H4, Nav, tagVariantsMeta } from '@ezstart/ui/components'
 import { useState } from 'react'
 import PlaygroundCodeView from '../components/playground-code-view'
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects'

@@ -13,7 +13,7 @@ router.get(
   '/google/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login?error=oauth_failed' }),
   (req, res) => {
-    const user = req.user as { authCode: string; redirect_uri?: string }
+    const user = req.user as unknown as { authCode: string; redirect_uri?: string }
 
     if (!user || !user.authCode) {
       return res.redirect('/login?error=oauth_failed')

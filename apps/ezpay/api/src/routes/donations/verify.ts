@@ -1,5 +1,11 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -28,7 +34,7 @@ const paymentResponseSchema = z.object({
 // ========================================
 
 const verifyPaymentHandler = async (req: Request, res: Response) => {
-  const Payment = await getPaymentModel();
+  const Payment = await getPaymentModel()
   try {
     const { sessionId } = req.params
 
@@ -67,7 +73,7 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
       sendError(res, 'Payment not confirmed', 400)
     }
   } catch (error) {
-    logger.error('Verify payment error:', error)
+    logger.error('Verify payment error:', error instanceof Error ? error : String(error))
     sendError(res, 'Failed to verify payment')
   }
 }

@@ -6,9 +6,9 @@ import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, findOneAndDelete } from '@ezstart/express-core'
 import { getGameConfigModel } from '../models/game-config.js'
 
-const router: any = Router()
+const router = Router()
 
-router.delete('/:gameType/:layoutName', async (req: any, res: any) => {
+router.delete('/:gameType/:layoutName', async (req, res) => {
   try {
     const { gameType, layoutName } = req.params
 

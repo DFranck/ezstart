@@ -33,7 +33,7 @@ Expected JSON Schema:
 
 interface CVGenerationRequest {
   jobPosting: string
-  currentData: any
+  currentData: Record<string, unknown>
   sources: {
     githubUsername?: string
     linkedInProfile?: string

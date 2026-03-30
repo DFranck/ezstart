@@ -4,17 +4,19 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import path from 'path'
 import { upload } from './multerConfig.js'
 
 export const uploadDocumentRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const uploadDocumentRouter = createRouterWithDoc(
-  uploadDocumentRegistry,
-  router,
-  '/document'
-)
+const router: import('express').Router = Router()
+export const uploadDocumentRouter = createRouterWithDoc(uploadDocumentRegistry, router, '/document')
 
 uploadDocumentRouter.post(
   '/',

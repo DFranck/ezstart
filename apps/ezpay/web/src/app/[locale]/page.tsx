@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl'
 import { Div, H1, H2, H3, Main, P } from '@ezstart/ui/components'
 
-export default function HomePage(): any {
+export default function HomePage() {
   const t = useTranslations('home')
 
   return (

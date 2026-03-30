@@ -12,7 +12,7 @@ import { getProjectModel } from '../../models/Project.js'
 
 export const deleteWorkspaceRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const deleteWorkspaceRouter = createRouterWithDoc(
   deleteWorkspaceRegistry,
   router,

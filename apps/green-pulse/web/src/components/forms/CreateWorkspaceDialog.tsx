@@ -100,10 +100,14 @@ export function CreateWorkspaceDialog() {
             </P>
             {createWorkspace.error && (
               <P className="text-xs text-destructive mt-1">
-                {(createWorkspace.error as any)?.message?.includes('409') ||
-                (createWorkspace.error as any)?.message?.includes('already exists')
+                {(createWorkspace.error instanceof Error &&
+                  createWorkspace.error.message?.includes('409')) ||
+                (createWorkspace.error instanceof Error &&
+                  createWorkspace.error.message?.includes('already exists'))
                   ? t('slugTaken', { slug })
-                  : (createWorkspace.error as any)?.message || 'Failed to create workspace'}
+                  : createWorkspace.error instanceof Error
+                    ? createWorkspace.error.message
+                    : 'Failed to create workspace'}
               </P>
             )}
           </Div>

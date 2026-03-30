@@ -1,5 +1,11 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -34,12 +40,16 @@ const donationsListResponseSchema = z.object({
 // ========================================
 
 const getDonationsHandler = async (req: Request, res: Response) => {
-  const Payment = await getPaymentModel();
+  const Payment = await getPaymentModel()
   try {
     const parsed = donationsQuerySchema.safeParse(req.query)
-    const { projectId, limit = 20, offset = 0 } = parsed.success ? parsed.data : req.query as any
+    const {
+      projectId,
+      limit = 20,
+      offset = 0,
+    } = parsed.success ? parsed.data : (req.query as Record<string, string>)
 
-    const query: any = {
+    const query: Record<string, unknown> = {
       type: 'donation',
       status: 'completed',
       'metadata.isPublic': true,
@@ -60,7 +70,7 @@ const getDonationsHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, donations, { total, limit: Number(limit), offset: Number(offset) })
   } catch (error) {
-    logger.error('Get donations error:', error)
+    logger.error('Get donations error:', error instanceof Error ? error : String(error))
     sendError(res, 'Failed to fetch donations')
   }
 }

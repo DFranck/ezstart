@@ -11,7 +11,7 @@ import type { GameType } from '@gacha-analyzer/types'
 
 const VALID_GAMES: GameType[] = ['summoners-war', 'nikke']
 
-const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
+const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   const pathname = usePathname()
   const router = useRouter()
   const params = useParams()

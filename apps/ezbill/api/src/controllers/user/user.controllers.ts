@@ -23,9 +23,9 @@ export const createUser = async (req: Request, res: Response) => {
 
     res.status(201)
     sendSuccess(res, toApiObject(user))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating user:', error)
-    sendError(res, error.message || 'Failed to create user', 400)
+    sendError(res, error instanceof Error ? error.message : 'Failed to create user', 400)
   }
 }
 
@@ -43,8 +43,8 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     }
 
     sendSuccess(res, toApiObject(user))
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting user:', error)
-    sendError(res, error.message || 'Failed to get user', 400)
+    sendError(res, error instanceof Error ? error.message : 'Failed to get user', 400)
   }
 }

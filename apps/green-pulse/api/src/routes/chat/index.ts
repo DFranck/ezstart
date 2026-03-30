@@ -16,16 +16,13 @@ import sendMessageRouter, { sendMessageRegistry } from './sendMessage.js'
 import extractEsgDataRouter, { extractEsgDataRegistry } from './extractEsgData.js'
 
 // Export all registries as an array for OpenAPI documentation
-export const chatRegistries = [
-  sendMessageRegistry,
-  extractEsgDataRegistry,
-]
+export const chatRegistries = [sendMessageRegistry, extractEsgDataRegistry]
 
 // Consolidate all action routers
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
-  .use('/', sendMessageRouter)        // POST /
+  .use('/', sendMessageRouter) // POST /
   .use('/extract', extractEsgDataRouter) // POST /extract
 
 export default router

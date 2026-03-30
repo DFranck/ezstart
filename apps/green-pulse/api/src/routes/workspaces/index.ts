@@ -8,8 +8,12 @@ import createWorkspaceRouter, { createWorkspaceRegistry } from './createWorkspac
 import updateWorkspaceRouter, { updateWorkspaceRegistry } from './updateWorkspace.js'
 import deleteWorkspaceRouter, { deleteWorkspaceRegistry } from './deleteWorkspace.js'
 import addWorkspaceMemberRouter, { addWorkspaceMemberRegistry } from './addWorkspaceMember.js'
-import updateWorkspaceMemberRouter, { updateWorkspaceMemberRegistry } from './updateWorkspaceMember.js'
-import removeWorkspaceMemberRouter, { removeWorkspaceMemberRegistry } from './removeWorkspaceMember.js'
+import updateWorkspaceMemberRouter, {
+  updateWorkspaceMemberRegistry,
+} from './updateWorkspaceMember.js'
+import removeWorkspaceMemberRouter, {
+  removeWorkspaceMemberRegistry,
+} from './removeWorkspaceMember.js'
 
 // Export array of registries
 export const workspaceRegistries = [
@@ -24,7 +28,7 @@ export const workspaceRegistries = [
 ]
 
 // Combine all routers — all workspace routes require authentication
-const router: any = Router()
+const router: import('express').Router = Router()
 router.use(authMiddleware)
 
 router.use('/', listWorkspacesRouter)

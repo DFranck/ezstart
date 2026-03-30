@@ -9,7 +9,7 @@ import { upload } from '../middleware/upload.js'
 import { scanImage } from '../services/scan-service.js'
 import type { GameType } from '@gacha-analyzer/types'
 
-const router: any = Router()
+const router = Router()
 
 const scanBodySchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']),
@@ -40,7 +40,7 @@ router.post(
     { name: 'zoneSub3', maxCount: 1 },
     { name: 'zoneSub4', maxCount: 1 },
   ]),
-  async (req: any, res: any) => {
+  async (req, res) => {
     try {
       const files = req.files as Record<string, Express.Multer.File[]> | undefined
       const imageFile = files?.image?.[0]

@@ -24,7 +24,7 @@ const listConversationsQuerySchema = z.object({
 })
 
 export const listConversationsRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const listConversationsRouter = createRouterWithDoc(
   listConversationsRegistry,
   router,
@@ -42,29 +42,30 @@ listConversationsRouter.get(
 
       const { userId, includeDeleted, limit, offset } = validation.data
 
-      const query: any = {}
+      const query: Record<string, unknown> = {}
       if (userId) query.userId = userId
       if (!includeDeleted || includeDeleted === 'false') {
         query.deletedAt = null
       }
 
       const [conversations, total] = await Promise.all([
-        (Conversation.find as any)(query)
+        // @ts-expect-error - Mongoose type inference issue with dynamic query
+        Conversation.find(query)
           .sort({ updatedAt: -1 })
           .skip(offset)
           .limit(limit)
           .select('_id title preview createdAt updatedAt')
           .lean()
-          .exec() as Promise<any[]>,
+          .exec() as Promise<Record<string, unknown>[]>,
         Conversation.countDocuments(query),
       ])
 
       const list = conversations.map(conv => ({
-        id: conv._id.toString(),
-        title: conv.title,
-        preview: conv.preview,
-        createdAt: conv.createdAt,
-        updatedAt: conv.updatedAt,
+        id: String(conv._id),
+        title: conv.title as string,
+        preview: conv.preview as string,
+        createdAt: conv.createdAt as string,
+        updatedAt: conv.updatedAt as string,
         unread: false, // TODO: Implement unread logic
       }))
 

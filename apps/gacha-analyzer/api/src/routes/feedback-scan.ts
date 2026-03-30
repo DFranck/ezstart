@@ -13,14 +13,14 @@ import {
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
-const router: any = Router()
+const router = Router()
 
 const feedbackBodySchema = z.object({
   opinion: z.enum(['agree', 'disagree']),
   comment: z.string().optional().default(''),
 })
 
-router.post('/:id/feedback', async (req: any, res: any) => {
+router.post('/:id/feedback', async (req, res) => {
   try {
     const validation = feedbackBodySchema.safeParse(req.body)
     if (!validation.success) {

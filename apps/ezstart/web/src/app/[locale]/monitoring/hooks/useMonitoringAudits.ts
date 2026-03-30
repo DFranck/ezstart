@@ -1,8 +1,26 @@
 import { useQuery } from '@tanstack/react-query'
 import { callApi } from '@/config/api'
 
+export interface MonitoringAudit {
+  score: number | null
+  name: string
+  type?: string
+  filePath?: string
+  auditType: string
+  emoji: string
+  description: string
+  status: 'complete' | 'partial' | 'not-audited'
+  exists?: boolean
+  lastUpdated?: string | null
+  audited?: string[]
+  notAudited?: string[]
+  why?: string
+  nextSteps?: string[]
+  categories?: Record<string, unknown>
+}
+
 export interface AuditsData {
-  audits: any[]
+  audits: MonitoringAudit[]
 }
 
 async function fetchAudits(): Promise<AuditsData> {

@@ -17,7 +17,7 @@ const icons: Record<string, React.ReactNode> = {
   contact: <Icon name="fa:FaEnvelope" className="text-blue-500" size={20} />,
 }
 
-const LegalNoticesPage = (): any => {
+const LegalNoticesPage = (): React.JSX.Element => {
   const t = useTranslations('legal-notices')
   const sections = t.raw('sections') as LegalSection[]
 

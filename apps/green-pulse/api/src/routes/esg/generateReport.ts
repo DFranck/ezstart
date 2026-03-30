@@ -4,7 +4,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 
 const generateReportSchema = z.object({
@@ -14,12 +20,8 @@ const generateReportSchema = z.object({
 import { esgService } from '../../services/esg.service.js'
 
 export const generateReportRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const generateReportRouter = createRouterWithDoc(
-  generateReportRegistry,
-  router,
-  '/reports'
-)
+const router: import('express').Router = Router()
+export const generateReportRouter = createRouterWithDoc(generateReportRegistry, router, '/reports')
 
 generateReportRouter.post(
   '/',

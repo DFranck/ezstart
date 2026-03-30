@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -33,7 +34,7 @@ const errorSchema = z.object({
 })
 
 // Get waitlist for an app
-const getWaitlistController = async (req: any, res: any) => {
+const getWaitlistController = async (req: Request, res: Response) => {
   try {
     const WaitlistModel = await getWaitlistModel()
 

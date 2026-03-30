@@ -5,7 +5,7 @@ import MobileNavbar from '@/components/layout/mobile-nav-bar'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
-const ClientLayout = ({ children }: { children: React.ReactNode }): any => {
+const ClientLayout = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
   const isFeatureScoped = segments[1] === 'ez-features' && !!segments[2]

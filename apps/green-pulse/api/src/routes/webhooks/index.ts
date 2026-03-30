@@ -16,16 +16,13 @@ import handleEsgReportRouter, { handleEsgReportRegistry } from './handleEsgRepor
 import healthCheckRouter, { healthCheckRegistry } from './healthCheck.js'
 
 // Export all registries as an array for OpenAPI documentation
-export const webhookRegistries = [
-  handleEsgReportRegistry,
-  healthCheckRegistry,
-]
+export const webhookRegistries = [handleEsgReportRegistry, healthCheckRegistry]
 
 // Consolidate all action routers
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
   .use('/esg-report', handleEsgReportRouter) // POST /esg-report
-  .use('/health', healthCheckRouter)         // GET /health
+  .use('/health', healthCheckRouter) // GET /health
 
 export default router

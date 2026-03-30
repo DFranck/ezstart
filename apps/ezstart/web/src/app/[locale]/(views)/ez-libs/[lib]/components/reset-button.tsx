@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Icon } from '@ezstart/ui/components'
+import { Button, Icon, Span } from '@ezstart/ui/components'
 
 type ResetButtonProps = {
   onReset: () => void

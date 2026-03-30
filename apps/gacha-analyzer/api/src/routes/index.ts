@@ -14,7 +14,7 @@ import reportScanRoutes from './report-scan.js'
 import { scansRegistry, monstersRegistry, configRegistry, benchRegistry } from './openapi.js'
 import { authMiddleware } from '../middleware/auth.js'
 
-const router: any = Router()
+const router = Router()
 
 export const globalRegistry = [scansRegistry, monstersRegistry, configRegistry, benchRegistry]
 

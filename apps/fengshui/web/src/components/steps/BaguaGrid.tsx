@@ -52,7 +52,7 @@ function getGridPositionForDirection(direction: Direction, rotation: number) {
   const rotationSteps = Math.round(rotation / 45) % 8
 
   // Index de base de la direction (N=0, NE=1, E=2, etc.)
-  const baseIndex = DIRECTIONS.indexOf(direction as any)
+  const baseIndex = (DIRECTIONS as readonly string[]).indexOf(direction)
   if (baseIndex === -1) return GRID_POSITIONS_BASE[direction]
 
   // MÊME LOGIQUE QUE WHEEL: rotation directe dans le même sens

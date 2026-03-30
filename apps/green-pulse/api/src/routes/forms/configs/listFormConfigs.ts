@@ -24,7 +24,7 @@ const listFormConfigsQuerySchema = z.object({
 })
 
 export const listFormConfigsRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const listFormConfigsRouter = createRouterWithDoc(
   listFormConfigsRegistry,
   router,
@@ -44,12 +44,13 @@ listFormConfigsRouter.get(
 
       const { category, tags, limit, offset } = validation.data
 
-      const query: any = {}
+      const query: Record<string, unknown> = {}
       if (category) query.category = category
       if (tags) query.tags = { $in: Array.isArray(tags) ? tags : [tags] }
 
       const [configs, total] = await Promise.all([
-        (FormConfig.find as any)(query).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
+        // @ts-expect-error - Mongoose type inference issue with dynamic query
+        FormConfig.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
         FormConfig.countDocuments(query),
       ])
 

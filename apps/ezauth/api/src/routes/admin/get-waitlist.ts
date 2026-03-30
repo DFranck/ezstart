@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -46,9 +47,9 @@ const errorSchema = z.object({
 })
 
 // Get waitlist for specific app (admin endpoint)
-const getWaitlistController = async (req: any, res: any) => {
+const getWaitlistController = async (req: Request, res: Response) => {
   try {
-    const currentUser = req.user
+    const currentUser = req.user!
     const isAdmin =
       currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
@@ -80,10 +81,10 @@ const getWaitlistController = async (req: any, res: any) => {
     // Calculate stats
     const stats = {
       total: waitlist.emails.length,
-      pending: waitlist.emails.filter((e: any) => e.status === 'pending').length,
-      invited: waitlist.emails.filter((e: any) => e.status === 'invited').length,
-      activated: waitlist.emails.filter((e: any) => e.status === 'activated').length,
-      rejected: waitlist.emails.filter((e: any) => e.status === 'rejected').length,
+      pending: waitlist.emails.filter((e: { status: string }) => e.status === 'pending').length,
+      invited: waitlist.emails.filter((e: { status: string }) => e.status === 'invited').length,
+      activated: waitlist.emails.filter((e: { status: string }) => e.status === 'activated').length,
+      rejected: waitlist.emails.filter((e: { status: string }) => e.status === 'rejected').length,
     }
 
     sendSuccess(res, {

@@ -15,7 +15,7 @@ import {
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 /**
  * UploadStep
@@ -23,7 +23,7 @@ import { useEffect, useRef, useState } from 'react'
  * - Responsive container (full width on mobile, clamps at sm/2xl)
  * - Minimal crop intent via optional uploaderOptions (no extra toolbars)
  */
-const UploadStep = (): any => {
+const UploadStep = (): React.JSX.Element => {
   const t = useTranslations()
   const [editingState, setEditingState] = useState<{
     isEditing: boolean

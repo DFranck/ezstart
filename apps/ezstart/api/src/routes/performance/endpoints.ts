@@ -87,13 +87,21 @@ const getEndpointsHandler = async (req: Request, res: Response) => {
       {
         serviceId,
         hours,
-        slowestEndpoints: endpointStats.map((stat: any) => ({
-          endpoint: stat._id,
-          avgDuration: Math.round(stat.avgDuration),
-          maxDuration: stat.maxDuration,
-          minDuration: stat.minDuration,
-          requestCount: stat.count,
-        })),
+        slowestEndpoints: endpointStats.map(
+          (stat: {
+            _id: string
+            avgDuration: number
+            maxDuration: number
+            minDuration: number
+            count: number
+          }) => ({
+            endpoint: stat._id,
+            avgDuration: Math.round(stat.avgDuration),
+            maxDuration: stat.maxDuration,
+            minDuration: stat.minDuration,
+            requestCount: stat.count,
+          })
+        ),
       },
       { total, limit, offset }
     )

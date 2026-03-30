@@ -4,7 +4,14 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import {
   FormInstanceSchema,
   SubmitFormInstanceRequestSchema,
@@ -13,7 +20,7 @@ import {
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
 
 export const submitFormInstanceRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const submitFormInstanceRouter = createRouterWithDoc(
   submitFormInstanceRegistry,
   router,
@@ -34,7 +41,6 @@ submitFormInstanceRouter.post(
 
       const FormInstance = await getFormInstanceModel()
 
-      // @ts-expect-error - Mongoose type inference issue
       const instance = await FormInstance.findById(req.params.id)
 
       if (!instance) {

@@ -7,9 +7,9 @@ import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, findOne, findMany } from '@ezstart/express-core'
 import { getGameConfigModel } from '../models/game-config.js'
 
-const router: any = Router()
+const router = Router()
 
-router.get('/:gameType/:layoutName', async (req: any, res: any) => {
+router.get('/:gameType/:layoutName', async (req, res) => {
   try {
     const GameConfig = await getGameConfigModel()
 
@@ -31,7 +31,7 @@ router.get('/:gameType/:layoutName', async (req: any, res: any) => {
   }
 })
 
-router.get('/:gameType', async (req: any, res: any) => {
+router.get('/:gameType', async (req, res) => {
   try {
     const GameConfig = await getGameConfigModel()
     const limit = Math.min(Number(req.query.limit) || 20, 100)

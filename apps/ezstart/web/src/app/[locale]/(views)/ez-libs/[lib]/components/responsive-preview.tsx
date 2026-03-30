@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Div, Icon, KnownIconName } from '@ezstart/ui/components'
+import { Button, Div, Icon, KnownIconName, Span } from '@ezstart/ui/components'
 import { ReactNode, useState } from 'react'
 
 type DeviceSize = 'mobile' | 'tablet' | 'desktop'

@@ -1,20 +1,33 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 import { clearPromptCache } from '../../services/prompt.service.js'
 
 export const updatePromptRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(updatePromptRegistry, router, '/prompts')
 
 const UpdatePromptBodySchema = z.object({
   name: z.string().min(1).max(100).optional().describe('Prompt display name'),
   description: z.string().max(500).optional().describe('Prompt description'),
   content: z.string().min(1).max(10000).optional().describe('Prompt content template'),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional().describe('Prompt category type'),
-  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional().describe('Target AI provider'),
+  type: z
+    .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
+    .optional()
+    .describe('Prompt category type'),
+  provider: z
+    .enum(['all', 'gemini', 'openai', 'anthropic'])
+    .optional()
+    .describe('Target AI provider'),
   isActive: z.boolean().optional().describe('Whether prompt is active'),
   isDefault: z.boolean().optional().describe('Whether this is the default prompt'),
   variables: z.array(z.string()).optional().describe('Template variable names'),
@@ -55,7 +68,9 @@ docRouter.patch(
 
       // Update fields
       Object.assign(prompt, body, {
-        updatedBy: (req as any).user?.email || 'system',
+        updatedBy:
+          (req as unknown as Record<string, unknown> & { user?: { email?: string } }).user?.email ||
+          'system',
       })
 
       await prompt.save()
@@ -69,7 +84,7 @@ docRouter.patch(
         createdAt: prompt.createdAt?.toISOString(),
         updatedAt: prompt.updatedAt?.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error updating prompt:', error)
       sendError(res, 'Failed to update prompt')
     }

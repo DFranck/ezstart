@@ -2,16 +2,12 @@
  * AI Providers Routes
  */
 
-import {
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  Router,
-} from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { listProviders } from '../actions/providers/list.js'
 
 export const providersRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 const docRouter = createRouterWithDoc(providersRegistry, router, '/providers')
 
 // GET /api/providers - List available AI providers

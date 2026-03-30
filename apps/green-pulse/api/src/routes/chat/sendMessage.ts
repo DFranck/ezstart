@@ -25,12 +25,8 @@ import {
 import { getSystemPrompt } from '../../services/prompt.service.js'
 
 export const sendMessageRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const sendMessageRouter = createRouterWithDoc(
-  sendMessageRegistry,
-  router,
-  '/'
-)
+const router: import('express').Router = Router()
+export const sendMessageRouter = createRouterWithDoc(sendMessageRegistry, router, '/')
 
 sendMessageRouter.post(
   '/',
@@ -41,7 +37,8 @@ sendMessageRouter.post(
         return sendValidationError(res, 'Invalid request format', validation.error.errors)
       }
 
-      let { message, extract_esg, session_id, conversation_id, userId, providerId } = validation.data
+      let { message, extract_esg, session_id, conversation_id, userId, providerId } =
+        validation.data
 
       // Default to gemini-flash if not specified
       const selectedProvider = providerId || 'gemini-flash'
@@ -72,10 +69,12 @@ sendMessageRouter.post(
           // @ts-expect-error - Mongoose findById type inference issue
           const conversation = await Conversation.findById(conversation_id).lean().exec()
           if (conversation && conversation.messages) {
-            conversationHistory = conversation.messages.map((msg: any) => ({
-              role: msg.role,
-              content: msg.content,
-            }))
+            conversationHistory = conversation.messages.map(
+              (msg: { role: string; content: string }) => ({
+                role: msg.role,
+                content: msg.content,
+              })
+            )
           }
         } catch (loadError) {
           logger.error('Failed to load conversation history:', loadError)
@@ -103,7 +102,7 @@ sendMessageRouter.post(
       }
 
       // If ESG extraction was successful, validate the data
-      let validationResult: any = null
+      let validationResult: Record<string, unknown> | null = null
       if (result.extractedData) {
         const esgValidation = ESGPayloadSchema.safeParse(result.extractedData)
         if (esgValidation.success) {
@@ -129,7 +128,9 @@ sendMessageRouter.post(
                   role: 'assistant',
                   content: result.response,
                   timestamp: new Date(),
-                  metadata: result.extractedData ? { extractedData: result.extractedData } : undefined,
+                  metadata: result.extractedData
+                    ? { extractedData: result.extractedData }
+                    : undefined,
                 },
               ],
             },
@@ -148,7 +149,11 @@ sendMessageRouter.post(
         conversation_id,
         suggestions: result.extractedData
           ? ['Review extracted data', 'Submit to ESG system', 'Add more details']
-          : ['Tell me about your energy usage', 'Upload a utility bill', 'Take a photo of your meter']
+          : [
+              'Tell me about your energy usage',
+              'Upload a utility bill',
+              'Take a photo of your meter',
+            ],
       })
     } catch (error) {
       logger.error('Chat error:', error)

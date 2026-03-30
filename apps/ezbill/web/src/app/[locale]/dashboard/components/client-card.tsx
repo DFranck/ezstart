@@ -12,7 +12,7 @@ import {
 import Link from 'next/link'
 
 type Props = { client: Client }
-const ClientCard = ({ client }: Props): any => {
+const ClientCard = ({ client }: Props): React.JSX.Element => {
   return (
     <Card
       className={`w-full cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-105 ${

@@ -22,18 +22,16 @@ import {
 import Link from 'next/link'
 import { HeaderLib } from '../components/header-lib'
 
-const EzTagPage = (): any => {
+const EzTagPage = (): React.JSX.Element => {
   const t = useSafeTranslations('libraries')
   const commonT = useSafeTranslations('common')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   const lib = libraries.find(lib => lib.title.toLowerCase() === 'tag')
 
-  const headingTagSet = new Set(HEADING_TAGS)
-  const listingTagSet = new Set(LISTING_TAGS)
+  const headingTagSet: Set<string> = new Set(HEADING_TAGS)
+  const listingTagSet: Set<string> = new Set(LISTING_TAGS)
   const shownTags = [
-    ...tagVariantsKeys.filter(
-      tag => !headingTagSet.has(tag as any) && !listingTagSet.has(tag as any)
-    ),
+    ...tagVariantsKeys.filter(tag => !headingTagSet.has(tag) && !listingTagSet.has(tag)),
     `heading`,
     `listing`,
   ]

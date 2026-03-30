@@ -15,7 +15,7 @@ import { summonersWarParser } from '../parsers/summoners-war.js'
 import { upload } from '../middleware/upload.js'
 import { preprocessImage, type PreprocessOptions } from '../services/image-preprocessing.js'
 
-const router: any = Router()
+const router = Router()
 
 // --- OCR presets to benchmark ---
 
@@ -109,11 +109,7 @@ async function runPreset(
 /**
  * Save raw image and bench results to test-images/
  */
-async function saveBenchData(
-  imageBuffer: Buffer,
-  benchId: string,
-  results: PresetResult[]
-) {
+async function saveBenchData(imageBuffer: Buffer, benchId: string, results: PresetResult[]) {
   const dir = join(process.cwd(), 'test-images')
   await mkdir(dir, { recursive: true })
 
@@ -124,7 +120,7 @@ async function saveBenchData(
 }
 
 // POST /bench
-router.post('/', upload.single('image'), async (req: any, res: any) => {
+router.post('/', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return sendError(res, 'No image file provided. Use field name "image".', 400)
@@ -141,7 +137,7 @@ router.post('/', upload.single('image'), async (req: any, res: any) => {
 
     // Run all presets in parallel
     const results = await Promise.all(
-      OCR_PRESETS.map((preset) => runPreset(imageBuffer, preset, gameType))
+      OCR_PRESETS.map(preset => runPreset(imageBuffer, preset, gameType))
     )
 
     // Save to disk

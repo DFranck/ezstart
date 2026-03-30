@@ -71,19 +71,20 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
     const { domains } = auditsJson
 
     // Find audit by type (search in domains and categories)
-    let auditData: any = null
+    let auditData: Record<string, unknown> | null = null
     let domainKey: string | null = null
 
     // First check if it's a domain-level audit
-    for (const [key, domain] of Object.entries(domains) as [string, any][]) {
+    for (const [key, domain] of Object.entries(domains) as [string, Record<string, unknown>][]) {
       if (key === auditType) {
         auditData = domain
         domainKey = key
         break
       }
       // Then check categories
-      if (domain.categories && domain.categories[auditType]) {
-        auditData = domain.categories[auditType]
+      const categories = domain.categories as Record<string, Record<string, unknown>> | undefined
+      if (categories && categories[auditType]) {
+        auditData = categories[auditType]!
         domainKey = key
         break
       }
@@ -93,7 +94,7 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
       return sendError(res, `No audit found for type: ${auditType}`, 404)
     }
 
-    const score = auditData.score || null
+    const score = (auditData.score as number | null) || null
     const lastUpdated = auditData.lastUpdate || auditsJson.lastUpdated
     const status = score === null ? 'not-audited' : score >= 90 ? 'complete' : 'partial'
 

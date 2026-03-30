@@ -4,12 +4,18 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { FormInstanceSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
 
 export const deleteFormInstanceRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const deleteFormInstanceRouter = createRouterWithDoc(
   deleteFormInstanceRegistry,
   router,
@@ -22,7 +28,6 @@ deleteFormInstanceRouter.delete(
     try {
       const FormInstance = await getFormInstanceModel()
 
-      // @ts-expect-error - Mongoose type inference issue
       const instance = await FormInstance.findByIdAndDelete(req.params.id)
 
       if (!instance) {

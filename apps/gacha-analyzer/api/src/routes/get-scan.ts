@@ -6,10 +6,10 @@ import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, findById } from '@ezstart/express-core'
 import { getScanModel } from '../models/scan.js'
 
-const router: any = Router()
+const router = Router()
 
 // GET /scans/:id — Get a single scan by ID
-router.get('/:id', async (req: any, res: any) => {
+router.get('/:id', async (req, res) => {
   try {
     const Scan = await getScanModel()
 

@@ -90,7 +90,7 @@ formInstanceSchema.index({ createdAt: -1 })
 // Middleware to add history entry on update
 formInstanceSchema.pre('save', function (next) {
   if (this.isModified() && !this.isNew) {
-    const changes: any = {}
+    const changes: Record<string, unknown> = {}
     const modifiedPaths = this.modifiedPaths()
 
     modifiedPaths.forEach(path => {
@@ -119,5 +119,6 @@ formInstanceSchema.pre('save', function (next) {
  */
 export async function getFormInstanceModel() {
   const mongoose = await connectToMongo('green-pulse')
-  return mongoose.models.FormInstance || mongoose.model<FormInstance>('FormInstance', formInstanceSchema)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Mongoose model caching returns Model<any>
+  return (mongoose.models.FormInstance || mongoose.model('FormInstance', formInstanceSchema)) as any
 }

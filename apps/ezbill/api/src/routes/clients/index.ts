@@ -13,16 +13,16 @@
  * - DELETE /api/clients/:id/hard-delete    -> hardDeleteClientById
  */
 
-import { Router } from '@ezstart/express-core';
+import { Router } from '@ezstart/express-core'
 
 // Import action routers
-import createClientRouter, { createClientRegistry } from './createClient.js';
-import listClientsRouter, { listClientsRegistry } from './listClients.js';
-import getClientByIdRouter, { getClientByIdRegistry } from './getClientById.js';
-import updateClientByIdRouter, { updateClientByIdRegistry } from './updateClientById.js';
-import deleteClientByIdRouter, { deleteClientByIdRegistry } from './deleteClientById.js';
-import restoreClientByIdRouter, { restoreClientByIdRegistry } from './restoreClientById.js';
-import hardDeleteClientByIdRouter, { hardDeleteClientByIdRegistry } from './hardDeleteClientById.js';
+import createClientRouter, { createClientRegistry } from './createClient.js'
+import listClientsRouter, { listClientsRegistry } from './listClients.js'
+import getClientByIdRouter, { getClientByIdRegistry } from './getClientById.js'
+import updateClientByIdRouter, { updateClientByIdRegistry } from './updateClientById.js'
+import deleteClientByIdRouter, { deleteClientByIdRegistry } from './deleteClientById.js'
+import restoreClientByIdRouter, { restoreClientByIdRegistry } from './restoreClientById.js'
+import hardDeleteClientByIdRouter, { hardDeleteClientByIdRegistry } from './hardDeleteClientById.js'
 
 // Export all registries as an array for OpenAPI documentation
 export const clientsRegistries = [
@@ -33,10 +33,10 @@ export const clientsRegistries = [
   deleteClientByIdRegistry,
   restoreClientByIdRegistry,
   hardDeleteClientByIdRegistry,
-];
+]
 
 // Consolidate all client routers
-const router: any = Router();
+const router: import('express').Router = Router()
 
 router
   .use('/', createClientRouter)
@@ -45,6 +45,6 @@ router
   .use('/', updateClientByIdRouter)
   .use('/', deleteClientByIdRouter)
   .use('/', restoreClientByIdRouter)
-  .use('/', hardDeleteClientByIdRouter);
+  .use('/', hardDeleteClientByIdRouter)
 
-export default router;
+export default router

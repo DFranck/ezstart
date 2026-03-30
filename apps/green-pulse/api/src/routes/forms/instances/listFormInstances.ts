@@ -25,7 +25,7 @@ const listFormInstancesQuerySchema = z.object({
 })
 
 export const listFormInstancesRegistry = new OpenAPIRegistry()
-const router: any = Router()
+const router: import('express').Router = Router()
 export const listFormInstancesRouter = createRouterWithDoc(
   listFormInstancesRegistry,
   router,
@@ -45,13 +45,13 @@ listFormInstancesRouter.get(
 
       const { userId, formConfigId, status, limit, offset } = validation.data
 
-      const query: any = {}
+      const query: Record<string, unknown> = {}
       if (userId) query.userId = userId
       if (formConfigId) query.formConfigId = formConfigId
       if (status) query.status = status
 
       const [instances, total] = await Promise.all([
-        (FormInstance.find as any)(query).sort({ updatedAt: -1 }).skip(offset).limit(limit).lean(),
+        FormInstance.find(query).sort({ updatedAt: -1 }).skip(offset).limit(limit).lean(),
         FormInstance.countDocuments(query),
       ])
 

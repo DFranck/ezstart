@@ -8,23 +8,18 @@
  * - GET  /api/users/:username -> getUserByUsername
  */
 
-import { Router } from '@ezstart/express-core';
+import { Router } from '@ezstart/express-core'
 
 // Import action routers
-import createUserRouter, { createUserRegistry } from './createUser.js';
-import getUserByUsernameRouter, { getUserByUsernameRegistry } from './getUserByUsername.js';
+import createUserRouter, { createUserRegistry } from './createUser.js'
+import getUserByUsernameRouter, { getUserByUsernameRegistry } from './getUserByUsername.js'
 
 // Export all registries as an array for OpenAPI documentation
-export const usersRegistries = [
-  createUserRegistry,
-  getUserByUsernameRegistry,
-];
+export const usersRegistries = [createUserRegistry, getUserByUsernameRegistry]
 
 // Consolidate all user routers
-const router: any = Router();
+const router: import('express').Router = Router()
 
-router
-  .use('/', createUserRouter)
-  .use('/', getUserByUsernameRouter);
+router.use('/', createUserRouter).use('/', getUserByUsernameRouter)
 
-export default router;
+export default router

@@ -32,10 +32,7 @@ function getCachedStatus(): PremiumStatus | null {
 function setCachedStatus(status: PremiumStatus) {
   if (typeof window === 'undefined') return
   try {
-    localStorage.setItem(
-      PREMIUM_CACHE_KEY,
-      JSON.stringify({ status, timestamp: Date.now() })
-    )
+    localStorage.setItem(PREMIUM_CACHE_KEY, JSON.stringify({ status, timestamp: Date.now() }))
   } catch {
     // Ignore storage errors
   }
@@ -70,7 +67,7 @@ export function usePremium() {
       setIsLoading(true)
       const res = await client.getPurchases({ userId: user._id })
       const activePurchase = res.payments?.find(
-        (p: any) =>
+        (p: { projectId?: string; status?: string; type?: string }) =>
           p.projectId === 'fengshui' &&
           p.status === 'completed' &&
           (p.type === 'purchase' || p.type === 'subscription')
@@ -80,7 +77,8 @@ export function usePremium() {
         ? {
             isPremium: true,
             type: activePurchase.type === 'subscription' ? 'subscription' : 'oneshot',
-            expiresAt: (activePurchase as any).expiresAt || null,
+            expiresAt:
+              ((activePurchase as unknown as Record<string, unknown>).expiresAt as string) || null,
           }
         : { isPremium: false, type: null, expiresAt: null }
 

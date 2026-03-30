@@ -1,6 +1,6 @@
 'use client'
 import { FeatureItem } from '@/types/feature'
-import { Button, H2, H4, Icon, Section } from '@ezstart/ui/components'
+import { Button, Div, H2, H4, Icon, Section } from '@ezstart/ui/components'
 import Link from 'next/link'
 
 type Props = {

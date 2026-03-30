@@ -47,14 +47,16 @@ export function useConversations() {
       const userId = user?._id
       const endpoint = userId ? `/conversations?userId=${userId}` : '/conversations'
 
-      const response = await callApi<{ conversations: any[] }>(endpoint)
+      const response = await callApi<{
+        conversations: Array<Record<string, unknown> & { createdAt: string; updatedAt: string }>
+      }>(endpoint)
 
       if (!response.ok) {
         throw new Error(parseApiError(response.data))
       }
 
       if (response.data?.conversations) {
-        return response.data.conversations.map((conv: any) => ({
+        return response.data.conversations.map(conv => ({
           ...conv,
           createdAt: new Date(conv.createdAt),
           updatedAt: new Date(conv.updatedAt),
@@ -81,7 +83,7 @@ export function useConversations() {
             createdAt: new Date(conversation.createdAt),
             updatedAt: new Date(conversation.updatedAt),
             messages:
-              conversation.messages?.map((msg: any) => ({
+              conversation.messages?.map((msg: { role: string; content: string }) => ({
                 ...msg,
                 timestamp: new Date(msg.timestamp),
               })) || [],
@@ -144,7 +146,9 @@ export function useConversations() {
     onSuccess: ({ id, newTitle }) => {
       // Optimistic update
       queryClient.setQueryData(['conversations', user?._id], (old: ConversationListItem[] = []) =>
-        old.map(conv => (conv.id === id ? { ...conv, title: newTitle, updatedAt: new Date() } : conv))
+        old.map(conv =>
+          conv.id === id ? { ...conv, title: newTitle, updatedAt: new Date() } : conv
+        )
       )
     },
   })

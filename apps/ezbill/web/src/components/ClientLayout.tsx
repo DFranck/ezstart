@@ -4,6 +4,7 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
   ClientLayout as BaseClientLayout,
+  NavigationLink,
   Button,
   H1,
   Icon,
@@ -35,7 +36,7 @@ const ClientLayout = ({
   const t = useTranslations()
 
   // Navigation links pour users authentifiés
-  const navLinks: any[] = isAuthenticated
+  const navLinks: NavigationLink[] = isAuthenticated
     ? [
         { href: '/dashboard', label: t('nav.dashboard'), icon: 'lucide:LayoutDashboard' },
         { href: '/dashboard/settings', label: t('nav.settings'), icon: 'lucide:Settings' },

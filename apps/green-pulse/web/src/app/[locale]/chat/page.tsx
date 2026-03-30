@@ -27,7 +27,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
-function LiaPageContent(): any {
+function LiaPageContent() {
   const t = useTranslations('chat')
 
   // Get user from Zustand store (localStorage 'ezauth-storage')
@@ -50,7 +50,7 @@ function LiaPageContent(): any {
       },
       enableStreaming: true, // Auto-detects SSE vs JSON based on Content-Type
       formatRequest: (message: string) => {
-        const payload: any = {
+        const payload: Record<string, unknown> = {
           message,
           stream: true, // Request streaming (API decides via Content-Type)
           extract_esg: false,
@@ -67,12 +67,17 @@ function LiaPageContent(): any {
         }
         return payload
       },
-      formatResponse: (data: any) => {
-        // For streaming, data contains chunks of text
-        return data.delta || data.data?.response || data.response || ''
+      formatResponse: (rawData: unknown): string => {
+        const data = rawData as Record<string, unknown> & {
+          delta?: string
+          data?: Record<string, unknown>
+          response?: string
+        }
+        return String(data.delta || data.data?.response || data.response || '')
       },
-      onSuccess: (data: any) => {
-        const conversationId = data.data?.conversation_id
+      onSuccess: (rawData: unknown) => {
+        const data = rawData as Record<string, unknown> & { data?: Record<string, unknown> }
+        const conversationId = data.data?.conversation_id as string | undefined
 
         // Save conversation_id for subsequent messages
         if (conversationId && !activeConversationId) {
@@ -148,7 +153,7 @@ function BetaAccessRequest() {
     queryKey: ['waitlist-status', user?.email],
     queryFn: async () => {
       if (!user?.email) return null
-      const response = await callApi(
+      const response = await callApi<{ status?: string; found?: boolean }>(
         `/waitlist/green-pulse/status/${encodeURIComponent(user.email)}`,
         {
           appName: 'ezauth',
@@ -173,7 +178,7 @@ function BetaAccessRequest() {
 
         if (!response.ok) {
           throw new Error(
-            response.error || (response.data as any)?.error || 'Failed to request beta access'
+            String((response as Record<string, unknown>).error || 'Failed to request beta access')
           )
         }
 
@@ -200,7 +205,11 @@ function BetaAccessRequest() {
         })
 
         if (!response.ok) {
-          throw new Error(response.error || (response.data as any)?.error || 'Invalid access code')
+          throw new Error(
+            response.error ||
+              String((response.data as Record<string, unknown>)?.error ?? '') ||
+              'Invalid access code'
+          )
         }
 
         await refetchUser()

@@ -462,8 +462,8 @@ export async function convertQuoteToInvoiceSecureController(req: AuthRequest, re
 
     res.status(201)
     sendSuccess(res, invoice)
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error in convertQuoteToInvoiceSecureController:', error)
-    sendError(res, error.message || 'Failed to convert quote to invoice')
+    sendError(res, error instanceof Error ? error.message : 'Failed to convert quote to invoice')
   }
 }

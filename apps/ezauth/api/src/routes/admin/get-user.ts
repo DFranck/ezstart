@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -40,7 +41,7 @@ const errorSchema = z.object({
 })
 
 // Controller
-const getUserController = async (req: any, res: any) => {
+const getUserController = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return sendError(res, 'Authentication required', 401)
@@ -67,8 +68,8 @@ const getUserController = async (req: any, res: any) => {
         return sendError(res, 'Cannot view superadmin users', 403)
       }
       if (
-        currentUser.apps?.length > 0 &&
-        !user.apps?.some((app: string) => currentUser.apps.includes(app))
+        (currentUser.apps?.length ?? 0) > 0 &&
+        !user.apps?.some((app: string) => currentUser.apps?.includes(app))
       ) {
         return sendError(res, 'User not in your apps', 403)
       }
@@ -83,7 +84,7 @@ const getUserController = async (req: any, res: any) => {
         features: user.features || [],
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting user:', error)
     sendError(res, 'Failed to get user', 500)
   }

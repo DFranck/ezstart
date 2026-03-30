@@ -4,17 +4,19 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import path from 'path'
 import fs from 'fs'
 
 export const getFileInfoRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const getFileInfoRouter = createRouterWithDoc(
-  getFileInfoRegistry,
-  router,
-  '/file/:fileId'
-)
+const router: import('express').Router = Router()
+export const getFileInfoRouter = createRouterWithDoc(getFileInfoRegistry, router, '/file/:fileId')
 
 getFileInfoRouter.get(
   '/',

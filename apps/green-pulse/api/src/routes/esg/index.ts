@@ -31,13 +31,13 @@ export const esgRegistries = [
 ]
 
 // Consolidate all action routers
-const router: any = Router()
+const router: import('express').Router = Router()
 
 router
-  .use('/projects', createProjectRouter)        // POST /projects
+  .use('/projects', createProjectRouter) // POST /projects
   .use('/activity-data', pushActivityDataRouter) // POST /activity-data
-  .use('/reports', generateReportRouter)         // POST /reports
+  .use('/reports', generateReportRouter) // POST /reports
   .use('/reports/:jobId/status', getReportStatusRouter) // GET /reports/:jobId/status
-  .use('/process', processEsgDataRouter)         // POST /process
+  .use('/process', processEsgDataRouter) // POST /process
 
 export default router

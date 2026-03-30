@@ -9,11 +9,13 @@ import { useMemo } from 'react'
 import IconPlayground from '../(Icon)/IconPlayground'
 import { HeaderLib } from '../components/header-lib'
 
-const EzIconPage = (): any => {
+const EzIconPage = (): React.JSX.Element => {
   const t = useSafeTranslations('libraries')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   const lib = libraries.find(lib => lib.title.toLowerCase() === 'icon')
-  const contentItems = getTranslationArray<LibraryContentLink>(lib?.content, 'items')
+  const contentItems = lib?.content
+    ? getTranslationArray<LibraryContentLink>(lib.content, 'items')
+    : []
   const customIcons = useMemo(() => Object.keys(customIconMap), [])
 
   if (!lib) {
@@ -46,6 +48,7 @@ const EzIconPage = (): any => {
           <UL size={'default'} layout="row" className="justify-center">
             {customIcons.map(name => (
               <LI key={name} layout={'center'} size={'sm'} className="md:w-28 aspect-square">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic icon name */}
                 <Icon name={`custom:${name}` as any} size={32} />
                 <P className="text-xs text-center">{name}</P>
               </LI>

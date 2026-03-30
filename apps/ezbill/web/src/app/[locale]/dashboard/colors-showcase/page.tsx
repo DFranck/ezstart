@@ -23,7 +23,7 @@ import {
  * Access at: http://localhost:5025/dashboard/colors-showcase
  */
 
-export default function ColorsShowcasePage(): any {
+export default function ColorsShowcasePage() {
   return (
     <Main>
       <Div className="max-w-7xl mx-auto px-6 py-8 space-y-12">

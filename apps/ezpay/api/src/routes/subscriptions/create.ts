@@ -1,5 +1,12 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { createSubscriptionSession } from '../../services/stripe.js'
@@ -98,7 +105,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
-    logger.error('Create subscription error:', error)
+    logger.error('Create subscription error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to create subscription')
   }
 }

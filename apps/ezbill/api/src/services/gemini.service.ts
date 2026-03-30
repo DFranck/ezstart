@@ -181,7 +181,8 @@ const updateTaxRateFunction: FunctionDeclaration = {
 
 const replaceAllFunction: FunctionDeclaration = {
   name: 'replace_all',
-  description: 'Replace all invoice data at once (use for initial extraction from timesheet/description)',
+  description:
+    'Replace all invoice data at once (use for initial extraction from timesheet/description)',
   parameters: {
     type: SchemaType.OBJECT,
     properties: {
@@ -200,7 +201,11 @@ const replaceAllFunction: FunctionDeclaration = {
       description: { type: SchemaType.STRING },
       dueDate: { type: SchemaType.STRING },
       notes: { type: SchemaType.STRING },
-      currency: { type: SchemaType.STRING, format: 'enum', enum: ['USD', 'EUR', 'GBP', 'JPY', 'VND', 'THB', 'AUD', 'CAD', 'CNY', 'CHF'] },
+      currency: {
+        type: SchemaType.STRING,
+        format: 'enum',
+        enum: ['USD', 'EUR', 'GBP', 'JPY', 'VND', 'THB', 'AUD', 'CAD', 'CNY', 'CHF'],
+      },
       taxRate: { type: SchemaType.NUMBER },
     },
   },
@@ -318,8 +323,12 @@ export async function chatWithInvoiceAssistant(
       const itemsSummary = currentInvoiceData.items
         ? `\nCurrent items:\n${currentInvoiceData.items.map((item, i) => `${i}. ${item.label} (${item.quantity}h @ ${item.price}€)`).join('\n')}`
         : ''
-      const clientInfo = currentInvoiceData.clientName ? `\nClient: ${currentInvoiceData.clientName}` : ''
-      const currency = currentInvoiceData.currency ? `\nCurrency: ${currentInvoiceData.currency}` : ''
+      const clientInfo = currentInvoiceData.clientName
+        ? `\nClient: ${currentInvoiceData.clientName}`
+        : ''
+      const currency = currentInvoiceData.currency
+        ? `\nCurrency: ${currentInvoiceData.currency}`
+        : ''
 
       contextMessage = `Current invoice state:${clientInfo}${itemsSummary}${currency}\n\nUser message: ${message}`
     }
@@ -380,6 +389,7 @@ export async function chatWithInvoiceAssistant(
 }
 
 // Helper: Convert function call to action
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Gemini API function call args are dynamically typed
 function processFunctionCall(functionName: string, args: any): InvoiceAction {
   switch (functionName) {
     case 'update_items':
@@ -408,6 +418,7 @@ function processFunctionCall(functionName: string, args: any): InvoiceAction {
 }
 
 // Helper: Generate friendly message
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Gemini API function call args are dynamically typed
 function generateResponseMessage(action: InvoiceAction, args: any): string {
   switch (action.type) {
     case 'replace_all': {

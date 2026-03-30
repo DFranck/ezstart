@@ -4,17 +4,19 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { readImage } from '../../services/gemini.service.js'
 import { upload } from './multerConfig.js'
 
 export const uploadImageRegistry = new OpenAPIRegistry()
-const router: any = Router()
-export const uploadImageRouter = createRouterWithDoc(
-  uploadImageRegistry,
-  router,
-  '/image'
-)
+const router: import('express').Router = Router()
+export const uploadImageRouter = createRouterWithDoc(uploadImageRegistry, router, '/image')
 
 uploadImageRouter.post(
   '/',

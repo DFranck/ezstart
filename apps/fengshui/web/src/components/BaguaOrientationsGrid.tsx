@@ -2,7 +2,7 @@
 'use client'
 
 import { DIRECTIONS_WITH_CENTER, Direction } from '@/types/directions'
-import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
+import type { YearBaguaConfig, CombinedOrientation } from '@/types/yearBaguaConfig'
 import {
   Button,
   Card,
@@ -15,6 +15,7 @@ import {
   H4,
   H5,
   Icon,
+  KnownIconName,
   LI,
   P,
   Span,
@@ -147,7 +148,7 @@ export default function BaguaOrientationsGrid({
 
 type SectorCardProps = {
   direction: Direction
-  sector: any
+  sector: CombinedOrientation
   accent: string
   isExpanded: boolean
   onToggle: () => void
@@ -398,7 +399,7 @@ function InfoSection({ title, items, icon, accent, danger }: InfoSectionProps) {
   return (
     <Div>
       <H4 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-1">
-        <Icon name={icon as any} className="w-4 h-4" style={{ color }} />
+        <Icon name={icon as KnownIconName} className="w-4 h-4" style={{ color }} />
         {title}
       </H4>
       <UL className="space-y-1">

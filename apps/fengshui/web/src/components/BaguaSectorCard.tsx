@@ -4,7 +4,18 @@
 /* path: /components/BaguaSectorCard.tsx */
 import type { Direction } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Div, H3, H4, Icon, LI, P, Section, Span, UL } from '@ezstart/ui/components'
+import {
+  Div,
+  H3,
+  H4,
+  Icon,
+  type KnownIconName,
+  LI,
+  P,
+  Section,
+  Span,
+  UL,
+} from '@ezstart/ui/components'
 import { useMemo } from 'react'
 
 type Props = {
@@ -97,7 +108,7 @@ export default function BaguaSectorCard({
             style={{ backgroundColor: `${accent}14` }}
             aria-hidden
           >
-            <Icon name={s.icon as any} className="h-4 w-4" style={{ color: accent }} />
+            <Icon name={s.icon as KnownIconName} className="h-4 w-4" style={{ color: accent }} />
           </Span>
         )}
 
@@ -199,7 +210,7 @@ function ListBlock(props: {
         {items.map(it => (
           <LI key={it} className="flex items-start gap-1.5 text-[12px] text-foreground">
             <Icon
-              name={bullet as any}
+              name={bullet as KnownIconName}
               className="mt-[2px] h-3.5 w-3.5 shrink-0"
               style={{ color: danger ? '#dc2626' : color }}
               aria-hidden
@@ -224,7 +235,7 @@ function ListFlat(props: { title: string; items: string[]; icon: string; color: 
             className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] text-foreground"
             style={{ borderColor: `${color}26`, backgroundColor: 'hsl(var(--background))' }}
           >
-            <Icon name={icon as any} className="h-3 w-3" style={{ color }} aria-hidden />
+            <Icon name={icon as KnownIconName} className="h-3 w-3" style={{ color }} aria-hidden />
             {it}
           </Span>
         ))}

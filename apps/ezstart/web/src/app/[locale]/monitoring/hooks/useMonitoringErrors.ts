@@ -23,7 +23,7 @@ export interface ErrorsData {
 }
 
 async function fetchErrors(): Promise<ErrorsData> {
-  const response = await callApi<{ logs: any[] }>('/activity', {
+  const response = await callApi<{ logs: Array<ErrorLog & { type: string }> }>('/activity', {
     query: { _t: String(Date.now()) },
   })
 
@@ -32,7 +32,7 @@ async function fetchErrors(): Promise<ErrorsData> {
   }
 
   // Filter only errors
-  const errorLogs = (response.data.logs || []).filter((log: any) => log.type === 'error')
+  const errorLogs = (response.data.logs || []).filter(log => log.type === 'error')
 
   return { logs: errorLogs }
 }

@@ -1,9 +1,5 @@
 'use client'
 
-import { HEADING_TAGS, headingVariants, Tag, tagVariantsMeta } from '@ezstart/ui/components'
-import { useState } from 'react'
-import { buildFakeTag } from '../utils/build-fake-tag'
-
 import {
   Accordion,
   AccordionContent,
@@ -11,7 +7,15 @@ import {
   AccordionTrigger,
   Card,
   CardContent,
+  Div,
+  HEADING_TAGS,
+  Span,
+  Tag,
+  headingVariants,
+  tagVariantsMeta,
 } from '@ezstart/ui/components'
+import { useState } from 'react'
+import { buildFakeTag } from '../utils/build-fake-tag'
 import PlaygroundCodeView from '../components/playground-code-view'
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects'
 import { ModernPlaygroundLayout } from '../components/modern-playground-layout'
@@ -37,8 +41,9 @@ type TesterProps = {
   tag: (typeof HEADING_TAGS)[number]
 }
 
-const HeadingVariantTester = ({ tag }: TesterProps): any => {
+const HeadingVariantTester = ({ tag }: TesterProps): React.JSX.Element => {
   const meta = tagVariantsMeta[tag]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic variant factory lookup
   const factory = headingVariants[tag] as any
   const getDefaultVariants = () => {
     const out: Record<string, string> = {}

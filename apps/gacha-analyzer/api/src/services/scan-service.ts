@@ -6,10 +6,36 @@ import { analyzeRune } from '../analyzers/rune-efficiency.js'
 import { getScanModel } from '../models/scan.js'
 import { ocrWithGemini } from './gemini-vision-service.js'
 import { preprocessImage } from './image-preprocessing.js'
-import type { GameType, RuneData, ScanResult, OcrSource, BenchRunResult } from '@gacha-analyzer/types'
+import type {
+  GameType,
+  RuneData,
+  ScanResult,
+  OcrSource,
+  BenchRunResult,
+} from '@gacha-analyzer/types'
 
-type OcrResult = { text: string; confidence: number; regions: { text: string; bbox: { x: number; y: number; width: number; height: number }; confidence: number }[] }
-type ParsedResult = { success: boolean; data?: any; errors?: string[] }
+type OcrResult = {
+  text: string
+  confidence: number
+  regions: {
+    text: string
+    bbox: { x: number; y: number; width: number; height: number }
+    confidence: number
+  }[]
+}
+type ParsedData = Record<string, unknown> & {
+  subStats?: Array<{ type: string; value: number }>
+  set?: string | null
+  slot?: number | null
+  level?: number | null
+  grade?: string | null
+  quality?: string | null
+  mainStat?: { type: string; value: number } | null
+  innateStat?: { type: string; value: number } | null
+  isAncient?: boolean
+  partial?: boolean
+}
+type ParsedResult = { success: boolean; data?: ParsedData; errors?: string[] }
 
 // --- Parse a single stat line like "HP +15%" or "ATK +120" ---
 function parseStatLine(text: string): { type: string; value: number } | null {
@@ -37,9 +63,10 @@ const BENCH_PRESETS = [
 
 // --- Majority vote merge for bench results ---
 
-function mergeBenchResults(
-  results: Array<{ ocr: OcrResult; parse: ParsedResult }>
-): { ocrResult: OcrResult; parseResult: ParsedResult } {
+function mergeBenchResults(results: Array<{ ocr: OcrResult; parse: ParsedResult }>): {
+  ocrResult: OcrResult
+  parseResult: ParsedResult
+} {
   const successful = results.filter(r => r.parse.success)
 
   if (successful.length === 0) {
@@ -54,7 +81,7 @@ function mergeBenchResults(
   const statVotes = new Map<string, Map<number, number>>() // type -> value -> count
 
   for (const r of successful) {
-    const subs = (r.parse.data as any).subStats || []
+    const subs = r.parse.data?.subStats || []
     for (const sub of subs) {
       if (!statVotes.has(sub.type)) {
         statVotes.set(sub.type, new Map())
@@ -96,11 +123,13 @@ function mergeBenchResults(
 
   // Restore OCR order: use the best successful result as reference for substat ordering
   const bestRef = successful.reduce((best, r) => {
-    const bestSubs = ((best.parse.data as any).subStats || []).length
-    const rSubs = ((r.parse.data as any).subStats || []).length
-    return rSubs > bestSubs || (rSubs === bestSubs && r.ocr.confidence > best.ocr.confidence) ? r : best
+    const bestSubs = (best.parse.data?.subStats || []).length
+    const rSubs = (r.parse.data?.subStats || []).length
+    return rSubs > bestSubs || (rSubs === bestSubs && r.ocr.confidence > best.ocr.confidence)
+      ? r
+      : best
   })
-  const refOrder = ((bestRef.parse.data as any).subStats || []).map((s: any) => s.type)
+  const refOrder = (bestRef.parse.data?.subStats || []).map(s => s.type)
   mergedSubs.sort((a, b) => {
     const ai = refOrder.indexOf(a.type)
     const bi = refOrder.indexOf(b.type)
@@ -109,33 +138,39 @@ function mergeBenchResults(
   })
 
   // Merge other fields — take first non-null value
-  const mergedData: Record<string, any> = {
-    set: null, slot: null, level: null, grade: null,
-    quality: null, mainStat: null, innateStat: null,
+  const mergedData: ParsedData = {
+    set: null,
+    slot: null,
+    level: null,
+    grade: null,
+    quality: null,
+    mainStat: null,
+    innateStat: null,
     subStats: mergedSubs,
   }
   for (const r of successful) {
-    const d = r.parse.data as any
-    if (!mergedData.set) mergedData.set = d.set
-    if (!mergedData.slot) mergedData.slot = d.slot
-    if (mergedData.level == null) mergedData.level = d.level
-    if (!mergedData.grade) mergedData.grade = d.grade
-    if (!mergedData.quality) mergedData.quality = d.quality
-    if (!mergedData.mainStat) mergedData.mainStat = d.mainStat
-    if (!mergedData.innateStat) mergedData.innateStat = d.innateStat
-    if (d.isAncient) mergedData.isAncient = true
+    const d = r.parse.data
+    if (!mergedData.set) mergedData.set = d?.set
+    if (!mergedData.slot) mergedData.slot = d?.slot
+    if (mergedData.level == null) mergedData.level = d?.level
+    if (!mergedData.grade) mergedData.grade = d?.grade
+    if (!mergedData.quality) mergedData.quality = d?.quality
+    if (!mergedData.mainStat) mergedData.mainStat = d?.mainStat
+    if (!mergedData.innateStat) mergedData.innateStat = d?.innateStat
+    if (d?.isAncient) mergedData.isAncient = true
   }
 
   // Remove innate from merged substats if present (some runs may not have separated it)
   if (mergedData.innateStat) {
     const inn = mergedData.innateStat as { type: string; value: number }
-    mergedData.subStats = (mergedData.subStats as Array<{ type: string; value: number }>)
-      .filter(s => !(s.type === inn.type && s.value === inn.value))
+    mergedData.subStats = (mergedData.subStats as Array<{ type: string; value: number }>).filter(
+      s => !(s.type === inn.type && s.value === inn.value)
+    )
   }
 
   // Confidence: max confidence among results that found the most substats
-  const maxSubs = Math.max(...successful.map(r => ((r.parse.data as any).subStats || []).length))
-  const bestResults = successful.filter(r => ((r.parse.data as any).subStats || []).length === maxSubs)
+  const maxSubs = Math.max(...successful.map(r => (r.parse.data?.subStats || []).length))
+  const bestResults = successful.filter(r => (r.parse.data?.subStats || []).length === maxSubs)
   const maxConfidence = Math.max(...bestResults.map(r => r.ocr.confidence))
 
   // Bonus for cross-confirmation
@@ -147,8 +182,14 @@ function mergeBenchResults(
   const mergedConfidence = Math.min(Math.round(maxConfidence + confirmedCount * 2), 99)
 
   // rawText from the highest confidence source
-  const bestSource = results.reduce((best, r) => r.ocr.confidence > best.ocr.confidence ? r : best)
-  const mergedOcr: OcrResult = { text: bestSource.ocr.text, confidence: mergedConfidence, regions: [] }
+  const bestSource = results.reduce((best, r) =>
+    r.ocr.confidence > best.ocr.confidence ? r : best
+  )
+  const mergedOcr: OcrResult = {
+    text: bestSource.ocr.text,
+    confidence: mergedConfidence,
+    regions: [],
+  }
 
   // Partial flag
   const partial = mergedSubs.length < 4 && (mergedData.level || 0) >= 12
@@ -159,7 +200,7 @@ function mergeBenchResults(
       success: true,
       data: { ...mergedData, partial },
       errors: [],
-    }
+    },
   }
 }
 
@@ -191,12 +232,13 @@ export async function scanImage(
   const startTime = Date.now()
 
   try {
-    const ocrConfig = gameType === 'summoners-war'
-      ? {
-          whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-%():. *',
-          psm: '6',
-        }
-      : undefined
+    const ocrConfig =
+      gameType === 'summoners-war'
+        ? {
+            whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-%():. *',
+            psm: '6',
+          }
+        : undefined
     const parser = gameType === 'summoners-war' ? summonersWarParser : nikkeParser
 
     let ocrResult: OcrResult
@@ -213,9 +255,10 @@ export async function scanImage(
       if (imageFullBuffer) images.push({ name: 'full-crop', buffer: imageFullBuffer })
 
       // Filter presets if specific ones requested (prod scan with saved presets)
-      const activePresets = presets && presets.length > 0
-        ? BENCH_PRESETS.filter(p => presets.includes(p.name))
-        : BENCH_PRESETS
+      const activePresets =
+        presets && presets.length > 0
+          ? BENCH_PRESETS.filter(p => presets.includes(p.name))
+          : BENCH_PRESETS
 
       const allRuns: Array<{
         source: string
@@ -236,14 +279,14 @@ export async function scanImage(
                 ? await preprocessImage(img.buffer, preset.options)
                 : img.buffer
               const ocr = await recognize(processed, ocrConfig)
-              const parse = parser.parse(ocr)
+              const parse = parser.parse(ocr) as ParsedResult
               allRuns.push({
                 source: img.name,
                 preset: preset.name,
                 ocr,
                 parse,
                 confidence: Math.round(ocr.confidence),
-                subsCount: parse.success ? ((parse.data as any)?.subStats || []).length : 0,
+                subsCount: parse.success ? (parse.data?.subStats || []).length : 0,
               })
             } catch (_e) {
               // Skip failed preset/source combinations
@@ -290,9 +333,7 @@ export async function scanImage(
 
       // Merge ALL results using majority vote
       if (allRuns.length > 0) {
-        const merged = mergeBenchResults(
-          allRuns.map(r => ({ ocr: r.ocr, parse: r.parse }))
-        )
+        const merged = mergeBenchResults(allRuns.map(r => ({ ocr: r.ocr, parse: r.parse })))
         ocrResult = merged.ocrResult
         parseResult = merged.parseResult
       } else {
@@ -321,13 +362,13 @@ export async function scanImage(
                 ? await preprocessImage(img.buffer, preset.options)
                 : img.buffer
               const ocr = await recognize(processed, ocrConfig)
-              const parse = parser.parse(ocr)
+              const parse = parser.parse(ocr) as ParsedResult
               allRuns.push({ ocr, parse })
               ocrSources.push({
                 name: `${img.name}+${preset.name}`,
                 confidence: Math.round(ocr.confidence),
                 rawText: ocr.text,
-                subsFound: parse.success ? ((parse.data as any)?.subStats || []).length : 0,
+                subsFound: parse.success ? (parse.data?.subStats || []).length : 0,
                 success: parse.success,
               })
             } catch (_e) {
@@ -351,13 +392,13 @@ export async function scanImage(
     } else {
       // --- STANDARD MODE (no bench, no presets) ---
       ocrResult = await recognize(imageBuffer, ocrConfig)
-      parseResult = parser.parse(ocrResult)
+      parseResult = parser.parse(ocrResult) as ParsedResult
 
       ocrSources.push({
         name: 'zoom-preprocessed',
         confidence: ocrResult.confidence,
         rawText: ocrResult.text,
-        subsFound: parseResult.success ? ((parseResult.data as any)?.subStats || []).length : 0,
+        subsFound: parseResult.success ? (parseResult.data?.subStats || []).length : 0,
         success: parseResult.success,
       })
 
@@ -372,12 +413,12 @@ export async function scanImage(
             extraBuffers.map(async ({ label, buffer }) => {
               try {
                 const ocr = await recognize(buffer, ocrConfig)
-                const parse = parser.parse(ocr)
+                const parse = parser.parse(ocr) as ParsedResult
                 ocrSources.push({
                   name: sourceNames[label] || label,
                   confidence: ocr.confidence,
                   rawText: ocr.text,
-                  subsFound: parse.success ? ((parse.data as any)?.subStats || []).length : 0,
+                  subsFound: parse.success ? (parse.data?.subStats || []).length : 0,
                   success: parse.success,
                 })
                 return { ocr, parse }
@@ -443,7 +484,7 @@ export async function scanImage(
 
       if (zoneConfidenceCount > 0) {
         // Parse individual zones directly instead of relying on the full parser
-        const zoneParsed: Record<string, any> = {}
+        const zoneParsed: Partial<ParsedData> = {}
 
         // setSlot → extract set name, slot number, level
         if (zoneMap.setSlot) {
@@ -466,7 +507,9 @@ export async function scanImage(
           if (statMatch) {
             zoneParsed.mainStat = {
               type: statMatch[1]!.trim(),
-              value: statMatch[2]!.includes('%') ? parseInt(statMatch[2]!, 10) : parseInt(statMatch[2]!, 10),
+              value: statMatch[2]!.includes('%')
+                ? parseInt(statMatch[2]!, 10)
+                : parseInt(statMatch[2]!, 10),
             }
           }
         }
@@ -505,8 +548,14 @@ export async function scanImage(
         zoneParsed.subStats = filteredSubStats
 
         const combinedConfidence = Math.round(zoneConfidenceSum / zoneConfidenceCount)
-        const combinedText = Object.entries(zoneMap).map(([k, v]) => `[${k}] ${v.text}`).join('\n')
-        const zoneOcr: OcrResult = { text: combinedText, confidence: combinedConfidence, regions: [] }
+        const combinedText = Object.entries(zoneMap)
+          .map(([k, v]) => `[${k}] ${v.text}`)
+          .join('\n')
+        const zoneOcr: OcrResult = {
+          text: combinedText,
+          confidence: combinedConfidence,
+          regions: [],
+        }
 
         // Build zone-based parse result
         const zoneParseResult: ParsedResult = {
@@ -524,16 +573,18 @@ export async function scanImage(
         }
 
         const zoneSubCount = subStats.length
-        const currentSubCount = parseResult.success ? ((parseResult.data as any)?.subStats || []).length : 0
+        const currentSubCount = parseResult.success ? (parseResult.data?.subStats || []).length : 0
 
-        logger.info(`[scan] Zone individual parse: ${zoneSubCount} subs (innate: ${zoneParsed.innateStat ? 'yes' : 'no'}), current global: ${currentSubCount}`)
+        logger.info(
+          `[scan] Zone individual parse: ${zoneSubCount} subs (innate: ${zoneParsed.innateStat ? 'yes' : 'no'}), current global: ${currentSubCount}`
+        )
 
         // Zone-based parsing is PRIORITY when it found meaningful data.
         // The global parser mixes innate into substats — zones keep them separate.
         if (zoneParseResult.success) {
           // Fill missing fields from global parse result (grade, set, etc.)
-          const zoneData = zoneParseResult.data as Record<string, any>
-          const globalData = parseResult.success ? (parseResult.data as Record<string, any>) : null
+          const zoneData = zoneParseResult.data as ParsedData
+          const globalData = parseResult.success ? parseResult.data : null
 
           if (!zoneData.set && globalData?.set) zoneData.set = globalData.set
           if (!zoneData.slot && globalData?.slot) zoneData.slot = globalData.slot
@@ -544,16 +595,21 @@ export async function scanImage(
 
           ocrResult = zoneOcr
           parseResult = zoneParseResult
-          logger.info(`[scan] Using zone-individual result (${zoneSubCount} subs, innate separated, ${combinedConfidence}% conf)`)
+          logger.info(
+            `[scan] Using zone-individual result (${zoneSubCount} subs, innate separated, ${combinedConfidence}% conf)`
+          )
         } else {
-          logger.info(`[scan] Zone parse failed, falling back to global result (${currentSubCount} subs)`)
+          logger.info(
+            `[scan] Zone parse failed, falling back to global result (${currentSubCount} subs)`
+          )
         }
       }
     }
 
     // Gemini Vision fallback if Tesseract result is weak
     const isPartial = parseResult.success && parseResult.data?.partial === true
-    const hasFewerSubstats = (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
+    const hasFewerSubstats =
+      (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
     const needsFallback = ocrResult.confidence < 70 || isPartial || hasFewerSubstats
 
     if (needsFallback && gameType === 'summoners-war') {
@@ -562,10 +618,14 @@ export async function scanImage(
 
       if (geminiText) {
         const geminiOcr = { text: geminiText, confidence: 95, regions: [] as OcrResult['regions'] }
-        const geminiParse = parser.parse(geminiOcr)
+        const geminiParse = parser.parse(geminiOcr) as ParsedResult
 
-        const geminiSubCount = Array.isArray(geminiParse.data?.subStats) ? geminiParse.data.subStats.length : 0
-        const currentSubCount = Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0
+        const geminiSubCount = Array.isArray(geminiParse.data?.subStats)
+          ? geminiParse.data.subStats.length
+          : 0
+        const currentSubCount = Array.isArray(parseResult.data?.subStats)
+          ? parseResult.data.subStats.length
+          : 0
 
         if (geminiSubCount > currentSubCount) {
           logger.info('[scan] Gemini found more stats, using Gemini result')
@@ -579,16 +639,25 @@ export async function scanImage(
     // Mark result as unreliable when Gemini fallback was needed but unavailable
     const geminiWasNeeded = needsFallback && gameType === 'summoners-war'
     const geminiDidNotImprove = ocrResult.confidence < 70 || parseResult.data?.partial === true
-    const tooFewSubstats = (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
+    const tooFewSubstats =
+      (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
     const isUnreliable = geminiWasNeeded && geminiDidNotImprove && tooFewSubstats
 
     const processingTimeMs = Date.now() - startTime
 
     // Analyze rune if parsing succeeded (SW only for now)
     let analysis: ScanResult['analysis'] = undefined
-    if (parseResult.success && gameType === 'summoners-war' && parseResult.data && 'set' in parseResult.data) {
+    if (
+      parseResult.success &&
+      gameType === 'summoners-war' &&
+      parseResult.data &&
+      'set' in parseResult.data
+    ) {
       try {
-        analysis = analyzeRune(parseResult.data as unknown as RuneData, profile as any) as unknown as ScanResult['analysis']
+        analysis = analyzeRune(
+          parseResult.data as unknown as RuneData,
+          profile as 'early' | 'mid' | 'late'
+        ) as unknown as ScanResult['analysis']
       } catch (e) {
         logger.error('[scan] Analysis failed:', e)
       }

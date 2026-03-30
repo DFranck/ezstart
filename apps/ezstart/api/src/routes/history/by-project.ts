@@ -68,16 +68,21 @@ const getByProjectHandler = async (req: Request, res: Response) => {
         if (history.length === 0 && serviceTotal === 0) return null
 
         const totalChecks = history.length
-        const healthyChecks = history.filter((h: any) => h.status === 'healthy').length
+        const healthyChecks = history.filter(
+          (h: { status: string; responseTime?: number | null }) => h.status === 'healthy'
+        ).length
         const uptimePercentage = totalChecks > 0 ? (healthyChecks / totalChecks) * 100 : 0
 
         const healthyWithResponse = history.filter(
-          (h: any) => h.status === 'healthy' && h.responseTime !== null
+          (h: { status: string; responseTime?: number | null }) =>
+            h.status === 'healthy' && h.responseTime !== null
         )
         const avgResponseTime =
           healthyWithResponse.length > 0
-            ? healthyWithResponse.reduce((sum: number, h: any) => sum + (h.responseTime || 0), 0) /
-              healthyWithResponse.length
+            ? healthyWithResponse.reduce(
+                (sum: number, h: { responseTime?: number | null }) => sum + (h.responseTime || 0),
+                0
+              ) / healthyWithResponse.length
             : null
 
         return {
@@ -87,7 +92,7 @@ const getByProjectHandler = async (req: Request, res: Response) => {
           uptimePercentage: Number(uptimePercentage.toFixed(2)),
           avgResponseTime: avgResponseTime ? Math.round(avgResponseTime) : null,
           totalRecords: serviceTotal,
-          history: history.map((h: any) => ({
+          history: history.map((h: Record<string, unknown>) => ({
             status: h.status,
             responseTime: h.responseTime,
             timestamp: h.timestamp,
@@ -100,7 +105,10 @@ const getByProjectHandler = async (req: Request, res: Response) => {
     const validHistories = histories.filter(h => h !== null)
 
     // Empty data is OK (200), return empty array
-    const total = validHistories.reduce((sum, h: any) => sum + (h.totalRecords || 0), 0)
+    const total = validHistories.reduce(
+      (sum, h) => sum + (((h as Record<string, unknown>).totalRecords as number) || 0),
+      0
+    )
     sendSuccess(res, { projectId, hours, services: validHistories }, { total, limit, offset })
   } catch (error) {
     // Real error (DB connection, query failure, etc) = 500

@@ -6,6 +6,7 @@
 
 import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import type { HealthCheckScheduler } from '../../services/healthCheckScheduler.js'
+import type { MonitoredServiceId } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 
 export const router: ReturnType<typeof Router> = Router()
@@ -22,7 +23,7 @@ const getServiceStateHandler = (req: Request, res: Response) => {
   }
 
   const { serviceId } = req.params
-  const state = scheduler.getServiceState(serviceId as any)
+  const state = scheduler.getServiceState(serviceId as MonitoredServiceId)
 
   if (!state) {
     return sendError(res, `Service ${serviceId} not found`, 404)

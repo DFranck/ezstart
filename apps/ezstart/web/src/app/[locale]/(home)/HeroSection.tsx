@@ -1,15 +1,14 @@
 'use client'
 
 import { SkillShowcase } from '@/components/JobShowing'
-import { AuroraBackground } from '@ezstart/ui/components'
+import { AuroraBackground, Div, H1, Section, TextGradient } from '@ezstart/ui/components'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
-import { Div, H1, Section, TextGradient } from '@ezstart/ui/components'
 import Image from 'next/image'
 import ContactsList from '../../../components/contactsList'
 
 type Props = { id?: string }
 
-const HeroSection = ({ id }: Props): any => {
+const HeroSection = ({ id }: Props) => {
   const t = useSafeTranslations('home.hero')
   const skillsShowcase = t.raw('skillsShowcase') as Array<{
     first: string

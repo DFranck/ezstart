@@ -46,7 +46,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
     const PerformanceMetric = await getPerformanceMetricModel()
 
     // Build query
-    const query: any = {
+    const query: Record<string, unknown> = {
       serviceId,
       timestamp: { $gte: cutoffTime },
     }

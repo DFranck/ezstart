@@ -13,7 +13,7 @@ import { getProjectModel } from '../../models/Project.js'
 
 export const listWorkspacesRegistry = new OpenAPIRegistry()
 
-const router: any = Router()
+const router: import('express').Router = Router()
 export const listWorkspacesRouter = createRouterWithDoc(
   listWorkspacesRegistry,
   router,
@@ -56,22 +56,32 @@ listWorkspacesRouter.get(
 
       // Add stats to each workspace
       const workspacesWithStats = await Promise.all(
-        workspaces.map(async (workspace: any) => {
-          const projectCount = await Project.countDocuments({
-            workspaceId: workspace._id?.toString(),
-          })
-          const memberCount = workspace.members?.length || 0
-          const currentUserMember = workspace.members?.find((m: any) => m.userId === userId)
-          const currentUserRole =
-            workspace.ownerId === userId ? 'owner' : currentUserMember?.role || undefined
+        workspaces.map(
+          async (
+            workspace: Record<string, unknown> & {
+              _id?: { toString(): string }
+              members?: Array<{ userId: string; role?: string }>
+              ownerId?: string
+            }
+          ) => {
+            const projectCount = await Project.countDocuments({
+              workspaceId: workspace._id?.toString(),
+            })
+            const memberCount = workspace.members?.length || 0
+            const currentUserMember = workspace.members?.find(
+              (m: { userId: string; role?: string }) => m.userId === userId
+            )
+            const currentUserRole =
+              workspace.ownerId === userId ? 'owner' : currentUserMember?.role || undefined
 
-          return {
-            ...workspace,
-            memberCount,
-            projectCount,
-            currentUserRole,
+            return {
+              ...workspace,
+              memberCount,
+              projectCount,
+              currentUserRole,
+            }
           }
-        })
+        )
       )
 
       sendSuccess(res, { workspaces: workspacesWithStats, total })

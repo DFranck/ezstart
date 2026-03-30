@@ -13,7 +13,7 @@ export interface IConversation {
       hasAudio?: boolean
       hasImage?: boolean
       hasDocument?: boolean
-      extractedData?: any
+      extractedData?: Record<string, unknown>
     }
   }>
   userId?: string
@@ -86,4 +86,5 @@ conversationSchema.pre('save', function (next) {
   next()
 })
 
-export const Conversation = models.Conversation || model<IConversation>('Conversation', conversationSchema)
+export const Conversation =
+  models.Conversation || model<IConversation>('Conversation', conversationSchema)

@@ -16,13 +16,13 @@ import { cn } from '@ezstart/ui/lib'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 
 type ClientLayoutProps = {
   children: ReactNode
 }
 
-const ClientLayout = ({ children }: ClientLayoutProps): any => {
+const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
   const { isAuthenticated, login, logout } = useAuth()
   const { theme } = useTheme()
   const t = useTranslations()
