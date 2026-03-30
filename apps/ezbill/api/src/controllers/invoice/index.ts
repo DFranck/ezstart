@@ -1,1 +1,1 @@
-export * from './invoice.secure-controllers';
+export * from './invoice.secure-controllers.js'

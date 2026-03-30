@@ -1,10 +1,10 @@
-import 'dotenv/config';
-import mongoose from 'mongoose';
-import { updateAllExchangeRates } from '../cron/update-exchange-rates';
+import 'dotenv/config'
+import mongoose from 'mongoose'
+import { updateAllExchangeRates } from '../cron/update-exchange-rates.js'
 
-(async () => {
-  await mongoose.connect(process.env.MONGO_URL!);
-  await updateAllExchangeRates();
-  await mongoose.disconnect();
-  process.exit();
-})();
+;(async () => {
+  await mongoose.connect(process.env.MONGO_URL!)
+  await updateAllExchangeRates()
+  await mongoose.disconnect()
+  process.exit()
+})()
