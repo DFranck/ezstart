@@ -18,7 +18,14 @@ export function useProject(id: string) {
   return useQuery({
     queryKey: ['project', id],
     queryFn: async () => {
-      return callApi(`/projects/${id}`)
+      return callApi<{
+        name: string
+        description?: string
+        status?: string
+        companyName?: string
+        companySector?: string
+        companyAddress?: string
+      }>(`/projects/${id}`)
     },
     enabled: !!id,
   })
@@ -61,14 +68,16 @@ export function useUpdateProject(id: string) {
   const { user } = useAuthStore()
 
   return useMutation({
-    mutationFn: async (data: Partial<{
-      name: string
-      description: string
-      status: string
-      companyName: string
-      companyAddress: string
-      companySector: string
-    }>) => {
+    mutationFn: async (
+      data: Partial<{
+        name: string
+        description: string
+        status: string
+        companyName: string
+        companyAddress: string
+        companySector: string
+      }>
+    ) => {
       if (!user?._id) throw new Error('User not authenticated')
 
       return runWithFeedback({

@@ -114,11 +114,13 @@ export function LiaThread({
   useEffect(() => {
     if (conversationData && conversationData.messages) {
       const threadMessages = conversationData.messages.map(
-        (msg: { role: string; content: string }) => ({
-          id: `${msg.role}-${msg.timestamp.getTime()}`,
-          role: msg.role === 'assistant' ? 'ai' : msg.role,
+        (msg: { role: string; content: string; timestamp?: Date | string }) => ({
+          id: `${msg.role}-${msg.timestamp ? new Date(msg.timestamp).getTime() : Date.now()}`,
+          role: (msg.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
           content: msg.content,
-          timestamp: msg.timestamp.toISOString(),
+          timestamp: msg.timestamp
+            ? new Date(msg.timestamp).toISOString()
+            : new Date().toISOString(),
         })
       )
       loadMessages(threadMessages)

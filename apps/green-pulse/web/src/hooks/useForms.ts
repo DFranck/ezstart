@@ -8,7 +8,17 @@ export function useFormConfigs() {
   return useQuery({
     queryKey: ['form-configs'],
     queryFn: async () => {
-      return callApi('/forms/configs')
+      return callApi<{
+        success: boolean
+        data: Array<{
+          _id: string
+          name: string
+          description?: string
+          category?: string
+          icon?: string
+          extraction?: { fields?: unknown[] }
+        }>
+      }>('/forms/configs')
     },
   })
 }
@@ -17,7 +27,7 @@ export function useFormConfig(id: string) {
   return useQuery({
     queryKey: ['form-config', id],
     queryFn: async () => {
-      return callApi(`/forms/configs/${id}`)
+      return callApi<Record<string, unknown>>(`/forms/configs/${id}`)
     },
     enabled: !!id,
   })
@@ -28,7 +38,7 @@ export function useFormInstances(userId?: string) {
     queryKey: ['form-instances', userId],
     queryFn: async () => {
       if (!userId) throw new Error('User not authenticated')
-      return callApi(`/forms/instances?userId=${userId}`)
+      return callApi<{ data: Array<Record<string, unknown>> }>(`/forms/instances?userId=${userId}`)
     },
     enabled: !!userId,
   })
@@ -38,7 +48,7 @@ export function useFormInstance(id: string) {
   return useQuery({
     queryKey: ['form-instance', id],
     queryFn: async () => {
-      return callApi(`/forms/instances/${id}`)
+      return callApi<Record<string, unknown>>(`/forms/instances/${id}`)
     },
     enabled: !!id,
   })
@@ -133,7 +143,11 @@ export function useExtractFormData() {
       formConfigId: string
       conversationHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>
     }) => {
-      return callApi('/forms/extract', {
+      return callApi<{
+        extractedFields: Record<string, unknown>
+        aiResponse?: string
+        missingFields?: string[]
+      }>('/forms/extract', {
         method: 'POST',
         body: data,
       })

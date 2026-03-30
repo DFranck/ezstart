@@ -74,7 +74,7 @@ export function FormChatInterface({
         conversationHistory,
       })
 
-      const extractionData = result?.data
+      const extractionData = result?.ok ? result.data : undefined
 
       if (extractionData) {
         // Update extracted fields
@@ -91,10 +91,10 @@ export function FormChatInterface({
         setMessages(prev => [...prev, aiResponse])
 
         // Show missing fields if any
-        if (extractionData.missingFields?.length > 0) {
+        if ((extractionData.missingFields?.length ?? 0) > 0) {
           const missingSummary: Message = {
             role: 'system',
-            content: `Still need: ${extractionData.missingFields.join(', ')}`,
+            content: `Still need: ${extractionData.missingFields!.join(', ')}`,
             timestamp: new Date(),
           }
           setMessages(prev => [...prev, missingSummary])

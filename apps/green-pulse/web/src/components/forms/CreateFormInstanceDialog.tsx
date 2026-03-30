@@ -62,8 +62,16 @@ export function CreateFormInstanceDialog({
     }
   }
 
-  // ✅ Fixed: callApi wraps response as { ok, data: { success, data: [...] } }
-  const formConfigs = configsData?.data?.data || []
+  // callApi wraps response as { ok, data: { success, data: [...] } }
+  type FormConfig = {
+    _id: string
+    name: string
+    description?: string
+    category?: string
+    icon?: string
+    extraction?: { fields?: unknown[] }
+  }
+  const formConfigs: FormConfig[] = (configsData?.ok && configsData.data?.data) || []
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -87,15 +95,15 @@ export function CreateFormInstanceDialog({
               <P className="text-sm text-muted-foreground">{t('noTemplates')}</P>
             ) : (
               <Div className="grid gap-3">
-                {formConfigs.map((config: Record<string, unknown>) => (
+                {formConfigs.map(config => (
                   <Card
-                    key={config.id}
+                    key={config._id}
                     className={`cursor-pointer transition-all ${
-                      selectedConfigId === config.id
+                      selectedConfigId === config._id
                         ? 'border-primary ring-2 ring-primary'
                         : 'hover:border-muted-foreground'
                     }`}
-                    onClick={() => setSelectedConfigId(config.id)}
+                    onClick={() => setSelectedConfigId(config._id)}
                   >
                     <CardContent className="p-4">
                       <Div className="flex items-start gap-3">

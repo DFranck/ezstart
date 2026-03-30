@@ -48,7 +48,14 @@ export function useConversations() {
       const endpoint = userId ? `/conversations?userId=${userId}` : '/conversations'
 
       const response = await callApi<{
-        conversations: Array<Record<string, unknown> & { createdAt: string; updatedAt: string }>
+        conversations: Array<{
+          _id: string
+          title?: string
+          preview?: string
+          createdAt: string
+          updatedAt: string
+          unread?: boolean
+        }>
       }>(endpoint)
 
       if (!response.ok) {
@@ -56,11 +63,16 @@ export function useConversations() {
       }
 
       if (response.data?.conversations) {
-        return response.data.conversations.map(conv => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-        }))
+        return response.data.conversations.map(
+          (conv): ConversationListItem => ({
+            id: conv._id,
+            title: conv.title || 'Untitled',
+            preview: conv.preview,
+            createdAt: new Date(conv.createdAt),
+            updatedAt: new Date(conv.updatedAt),
+            unread: conv.unread,
+          })
+        )
       }
 
       throw new Error('Invalid response format: missing conversations data')
@@ -83,10 +95,13 @@ export function useConversations() {
             createdAt: new Date(conversation.createdAt),
             updatedAt: new Date(conversation.updatedAt),
             messages:
-              conversation.messages?.map((msg: { role: string; content: string }) => ({
-                ...msg,
-                timestamp: new Date(msg.timestamp),
-              })) || [],
+              conversation.messages?.map(
+                (msg: { role: string; content: string; timestamp?: string }) => ({
+                  role: msg.role,
+                  content: msg.content,
+                  timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+                })
+              ) || [],
           } as ConversationWithMessages
         }
         return null

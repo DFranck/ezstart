@@ -52,7 +52,8 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
     setError(null)
 
     try {
-      const blob = await pdf(component).toBlob()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob = await pdf(component as any).toBlob()
       return Promise.resolve()
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to generate PDF')
@@ -69,7 +70,8 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
     setError(null)
 
     try {
-      const blob = await pdf(component).toBlob()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob = await pdf(component as any).toBlob()
 
       // Créer un lien de téléchargement
       const url = URL.createObjectURL(blob)

@@ -41,8 +41,17 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
     )
   }
 
-  // ✅ Fixed: callApi wraps response as { ok, data: { success, data: [...] } }
-  const forms = data?.data?.data || []
+  // callApi wraps response as { ok, data: { success, data: [...] } }
+  type FormItem = {
+    _id: string
+    formConfigId?: string
+    mode?: string
+    status?: string
+    fields?: Record<string, unknown>
+    updatedAt?: string
+  }
+  const forms: FormItem[] =
+    (data?.ok ? (data.data as { data?: FormItem[] })?.data : undefined) || []
 
   if (forms.length === 0) {
     return (
@@ -59,21 +68,24 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
 
   return (
     <Div className="space-y-3">
-      {forms.map((form: Record<string, unknown>) => (
-        <Link key={form._id} href={`/w/${workspaceSlug}/p/${projectId}/f/${form._id}`}>
+      {forms.map(form => (
+        <Link key={form._id as string} href={`/w/${workspaceSlug}/p/${projectId}/f/${form._id}`}>
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="p-4">
               <Div className="flex items-start justify-between">
                 <Div className="flex-1">
                   <Div className="flex items-center gap-2 mb-1">
-                    <H3 size="h5">📄 {form.formConfigId || 'Untitled Form'}</H3>
+                    <H3 size="h5">📄 {String(form.formConfigId || 'Untitled Form')}</H3>
                     <Badge variant="outline" size="sm">
-                      {form.mode || 'manual'}
+                      {String(form.mode || 'manual')}
                     </Badge>
                   </Div>
                   <P className="text-sm text-muted-foreground">
-                    {Object.keys(form.fields || {}).length} field
-                    {Object.keys(form.fields || {}).length !== 1 ? 's' : ''} filled
+                    {Object.keys((form.fields as Record<string, unknown>) || {}).length} field
+                    {Object.keys((form.fields as Record<string, unknown>) || {}).length !== 1
+                      ? 's'
+                      : ''}{' '}
+                    filled
                   </P>
                 </Div>
                 <Badge
@@ -85,11 +97,11 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
                         : 'outline'
                   }
                 >
-                  {form.status}
+                  {String(form.status || 'draft')}
                 </Badge>
               </Div>
 
-              {form.updatedAt && (
+              {typeof form.updatedAt === 'string' && (
                 <P className="text-xs text-muted-foreground mt-2">
                   Last updated {new Date(form.updatedAt).toLocaleString()}
                 </P>

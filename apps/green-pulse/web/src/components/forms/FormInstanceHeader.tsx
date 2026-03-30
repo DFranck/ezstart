@@ -17,7 +17,10 @@ export function FormInstanceHeader({
   projectId,
 }: FormInstanceHeaderProps) {
   const t = useTranslations('forms.forms')
-  const { data: formInstance, isLoading } = useFormInstance(formInstanceId)
+  const { data: formInstanceResponse, isLoading } = useFormInstance(formInstanceId)
+  const formInstance = formInstanceResponse?.ok
+    ? (formInstanceResponse.data as Record<string, unknown>)
+    : undefined
 
   if (isLoading) {
     return (
@@ -39,7 +42,7 @@ export function FormInstanceHeader({
   }
 
   const getStatusBadge = () => {
-    const status = formInstance?.data?.status
+    const status = formInstance?.status as string | undefined
     if (!status) return null
 
     if (status === 'draft') {
@@ -65,21 +68,19 @@ export function FormInstanceHeader({
       <Div className="flex items-center justify-between mt-4">
         <Div>
           <Div className="flex items-center gap-3 mb-2">
-            <H1 size="h3">{formInstance?.data?.formConfigId || 'Form'}</H1>
+            <H1 size="h3">{(formInstance?.formConfigId as string) || 'Form'}</H1>
             {getStatusBadge()}
           </Div>
           <P className="text-sm text-muted-foreground">
-            {formInstance?.data?.createdAt && (
-              <>
-                {t('created', { date: new Date(formInstance.data.createdAt).toLocaleDateString() })}
-              </>
+            {typeof formInstance?.createdAt === 'string' && (
+              <>{t('created', { date: new Date(formInstance.createdAt).toLocaleDateString() })}</>
             )}
-            {formInstance?.data?.submittedAt && (
+            {typeof formInstance?.submittedAt === 'string' && (
               <>
                 {' '}
                 •{' '}
                 {t('submittedAt', {
-                  date: new Date(formInstance.data.submittedAt).toLocaleDateString(),
+                  date: new Date(formInstance.submittedAt).toLocaleDateString(),
                 })}
               </>
             )}

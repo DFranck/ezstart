@@ -52,8 +52,20 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
     )
   }
 
-  // callApi wraps response: { ok, data: { success, data: { projects } } }
-  const projects = data?.data?.data || []
+  // callApi wraps response: { ok, data: { success, data: [...] } }
+  type ProjectItem = {
+    _id: string
+    name: string
+    description?: string
+    status?: string
+    companyName?: string
+    companySector?: string
+    members?: unknown[]
+    formConfigIds?: unknown[]
+    updatedAt?: string
+  }
+  const projects: ProjectItem[] =
+    (data?.ok ? (data.data as { data?: ProjectItem[] })?.data : undefined) || []
 
   if (projects.length === 0) {
     return (
@@ -70,7 +82,7 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
 
   return (
     <Div className="space-y-4">
-      {projects.map((project: Record<string, unknown>) => (
+      {projects.map(project => (
         <Link key={project._id} href={`/w/${workspaceSlug}/p/${project._id}`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">
@@ -106,7 +118,7 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
               <Div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
                 <Span>👥 {project.members?.length || 0} members</Span>
                 <Span>📄 {project.formConfigIds?.length || 0} form types</Span>
-                {project.updatedAt && (
+                {typeof project.updatedAt === 'string' && (
                   <Span>Updated {new Date(project.updatedAt).toLocaleDateString()}</Span>
                 )}
               </Div>

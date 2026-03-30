@@ -7,6 +7,7 @@ import { WorkspaceBreadcrumbs } from './WorkspaceBreadcrumbs'
 import { FormChatInterface } from './FormChatInterface'
 import { FormPreview } from './FormPreview'
 import { useUpdateFormInstance, useSubmitFormInstance } from '@/hooks/useForms'
+import type { FormConfig } from '@green-pulse/types'
 
 interface FormFillingInterfaceProps {
   workspaceSlug: string
@@ -20,10 +21,17 @@ export function FormFillingInterface({
   formInstanceId,
 }: FormFillingInterfaceProps) {
   const { data: instanceData, isLoading: instanceLoading } = useFormInstance(formInstanceId)
-  const instance = instanceData?.data
+  const instance = instanceData?.ok
+    ? (instanceData.data as {
+        formConfigId?: string
+        mode?: string
+        status?: string
+        fields?: Record<string, unknown>
+      })
+    : undefined
 
   const { data: configData, isLoading: configLoading } = useFormConfig(instance?.formConfigId || '')
-  const config = configData?.data
+  const config = configData?.ok ? (configData.data as FormConfig) : undefined
 
   const updateInstance = useUpdateFormInstance(formInstanceId)
   const submitInstance = useSubmitFormInstance(formInstanceId)

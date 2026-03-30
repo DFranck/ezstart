@@ -42,7 +42,21 @@ export function WorkspacesList() {
   }
 
   // callApi wraps response: { ok, data: { success, data: { workspaces } } }
-  const workspaces = data?.data?.data?.workspaces || []
+  type WorkspaceItem = {
+    _id: string
+    slug: string
+    name: string
+    description?: string
+    logoUrl?: string
+    currentUserRole?: string
+    projectCount?: number
+    memberCount?: number
+    status?: string
+  }
+  const innerData = data?.ok
+    ? (data.data as { data?: { workspaces?: WorkspaceItem[] } })
+    : undefined
+  const workspaces: WorkspaceItem[] = innerData?.data?.workspaces || []
 
   if (workspaces.length === 0) {
     return (
@@ -59,7 +73,7 @@ export function WorkspacesList() {
 
   return (
     <Div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {workspaces.map((workspace: Record<string, unknown>) => (
+      {workspaces.map(workspace => (
         <Link key={workspace._id} href={`/w/${workspace.slug}`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
