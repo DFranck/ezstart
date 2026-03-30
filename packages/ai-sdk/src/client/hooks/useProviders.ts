@@ -6,7 +6,7 @@
 
 import { logger } from '@ezstart/logger'
 import { useEffect, useState } from 'react'
-import { useAIStore } from '../store/aiStore.js'
+import { useAIStore, type AIProviderInfo } from '../store/aiStore.js'
 import { callApi } from '@ezstart/fetch-client'
 import type { AppName } from '@ezstart/config/urls'
 
@@ -25,7 +25,10 @@ export function useProviders(appName: AppName = 'green-pulse') {
       setLoading(true)
       setError(null)
       try {
-        const response = await callApi('/providers', { appName, logLevel: 'errors' })
+        const response = await callApi<AIProviderInfo[]>('/providers', {
+          appName,
+          logLevel: 'errors',
+        })
 
         if (response.ok && response.data) {
           setProviders(response.data || [])

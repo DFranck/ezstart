@@ -17,6 +17,7 @@ declare global {
       permissions?: string[]
       features?: string[]
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Express User augmentation requires index signature
       [key: string]: any
     }
 

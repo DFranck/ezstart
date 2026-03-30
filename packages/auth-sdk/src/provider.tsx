@@ -254,7 +254,7 @@ export function useAuth() {
 
       return authResult.user
     } catch (error) {
-      logger.error('Auth callback error:', error)
+      logger.error('Auth callback error:', error instanceof Error ? error.message : String(error))
       throw error
     }
   }
@@ -275,7 +275,10 @@ export function useAuth() {
         store.updateUser(user)
         return user
       } catch (error: unknown) {
-        logger.error('Failed to refresh user:', error)
+        logger.error(
+          'Failed to refresh user:',
+          error instanceof Error ? error.message : String(error)
+        )
         // Only logout on 401 - keep session on transient errors
         if ((error as { status?: number })?.status === 401) {
           store.logout()
@@ -288,7 +291,10 @@ export function useAuth() {
         store.updateUser(user)
         return user
       } catch (error: unknown) {
-        logger.error('Failed to refresh user:', error)
+        logger.error(
+          'Failed to refresh user:',
+          error instanceof Error ? error.message : String(error)
+        )
         // Only logout on 401 - keep session on transient errors
         if ((error as { status?: number })?.status === 401) {
           store.logout()

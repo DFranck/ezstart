@@ -50,8 +50,7 @@ const splitSectionVariants = cva('relative w-full', {
 // ============================================================================
 
 export interface SplitSectionProps
-  extends React.HTMLAttributes<HTMLElement>,
-    VariantProps<typeof splitSectionVariants> {
+  extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof splitSectionVariants> {
   /**
    * Enable diagonal separator between items (only works with 2+ children)
    * @default false
@@ -177,7 +176,7 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
 
     return (
       <Component
-        ref={ref as any}
+        ref={ref as unknown as React.Ref<HTMLDivElement>}
         size={size}
         className={cn(
           splitSectionVariants({ layout, align, padding }),

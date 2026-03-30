@@ -127,7 +127,11 @@ export async function runWithFeedback<T>({
     }
 
     onError?.(e)
-    if (!onError) logger.error('Unhandled error in runWithFeedback:', e)
+    if (!onError)
+      logger.error(
+        'Unhandled error in runWithFeedback:',
+        e instanceof Error ? e.message : String(e)
+      )
 
     if (throwOnError) throw e
     return undefined

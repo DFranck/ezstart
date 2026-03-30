@@ -1,10 +1,12 @@
 import type { VariantProps } from 'class-variance-authority'
 import { tagVariants } from './variants'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- CVA generic constraint requires (...args: any) => any
 type HasVariant<T extends (...args: any) => any> = keyof VariantProps<T> extends never
   ? false
   : true
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- CVA generic constraint
 type FilterSupportedAs<T extends Record<string, (...args: any) => any>> = {
   [K in keyof T]: HasVariant<T[K]> extends true ? K : never
 }[keyof T]
@@ -24,6 +26,7 @@ export type CustomVariants<T extends SupportedAs> = T extends keyof TagVariantsM
   : {}
 
 // Extrait les variants si "variant" existe dans la config
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- CVA generic constraint
 export type ExtractVariantIfPresent<T extends (...args: any) => any> =
   'variant' extends keyof VariantProps<T> ? { variant?: VariantProps<T>['variant'] } : {}
 

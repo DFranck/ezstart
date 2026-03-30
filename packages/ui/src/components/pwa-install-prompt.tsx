@@ -94,7 +94,7 @@ export function PWAInstallPrompt({
         logger.info(`PWA ${appName} installation cancelled`)
       }
     } catch (error) {
-      logger.error('Error installing PWA:', error)
+      logger.error('Error installing PWA:', error instanceof Error ? error.message : String(error))
     }
 
     setDeferredPrompt(null)

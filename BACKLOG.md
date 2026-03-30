@@ -64,7 +64,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 22. [x] MOVED → apps/ezpay/BACKLOG.md (config app, pas monorepo)
 23. [ ] extract-app.js test — après extraction, vérifier automatiquement que pnpm install && pnpm build passent
 24. [ ] insert-app.js reverse — importer un standalone dans le monorepo (inverse de extract)
-25. [ ] Zod validation sur TOUTES les routes API (ezauth, ezbill, ezpay, ezstart, green-pulse) — gacha-analyzer déjà fait
+25. [x] Zod validation sur TOUTES les routes API (ezauth, ezbill, ezpay, ezstart, green-pulse) — gacha-analyzer déjà fait
 26. [ ] OpenAPI descriptions complètes — zéro warning au démarrage
 
 ### Full audit 2026-03-29
@@ -73,13 +73,13 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 36. [x] Standardize usage — sendSuccess/sendError all APIs (107 violations), console→logger (173), fetch→callApi (12), pagination (15 endpoints), React Query (3 files)
 37. [x] Shared auth middleware — extracted to express-core (replaces 5 copy-pasted files)
 38. [x] Package refactoring — config registry, rbac configurable, next-theme generic, seo-config injectable
-39. [ ] i18n compliance — ~275 hardcoded user-facing strings across all apps (ezbill 123, ezstart 51, green-pulse 39)
-40. [ ] HTML→Tag migration — ~1,714 raw HTML tags across all apps (div 1103, span 445, p 94, h1-h6 56)
-41. [ ] Hardcoded colors→CSS vars — ~200+ violations across all apps (fengshui 50+, ezbill 30+, ezstart 25+)
-42. [ ] Deduplicate components — 11 components shared between asc-tcd and ezstart → move to packages/ui
-43. [ ] OAuth token encryption — oauth-account.ts stores tokens in plaintext (TODO in code)
-44. [ ] Localhost URLs in prod code — google-callback.ts and passport.ts use hardcoded http://localhost fallbacks
-45. [ ] Reduce `any` types — 599 occurrences (gacha-analyzer 49 Mongoose casts, green-pulse 125)
+39. [x] i18n compliance — ~275 strings translated across all apps
+40. [x] HTML→Tag migration — all 8 apps clean, 0 violations
+41. [x] Hardcoded colors→CSS vars — ~200+ fixed, ~20 legitimate remaining
+42. [x] Deduplicate components — 8 components moved to packages/ui
+43. [x] OAuth token encryption — AES-256-GCM in ezauth
+44. [x] Localhost URLs — 3 files fixed, using @ezstart/config
+45. [ ] Reduce `any` types — ~94 in packages done, ~483 in apps remaining
 46. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
 47. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
 48. [x] HIGH: EZPay — auth middleware sur GET routes sensibles
@@ -88,6 +88,11 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 51. [x] MEDIUM: Zod validation sur gacha-analyzer routes (get-scans, feedback, report, reanalyze, config)
 52. [x] Logger — filtre NODE_ENV ajouté (debug/info silencieux en prod)
 53. [x] Remplacer console.log par logger.debug() dans auth-sdk (7 logs clés restaurés)
+54. [ ] CSRF protection — middleware created in express-core, needs to be applied to ezauth cookie routes
+55. [ ] Json type adoption — created in express-core, needs to replace remaining `any` for JSON data
+56. [ ] Large component splitting — 15 files >500 lines need refactoring
+57. [ ] Dynamic import recharts — 6 components import recharts statically
+58. [ ] Aria-labels — only 19 across entire codebase, many interactive elements missing a11y
 
 ---
 

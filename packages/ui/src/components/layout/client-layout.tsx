@@ -6,7 +6,7 @@ import { useDevice, useOnScroll } from '../../hooks'
 import { cn } from '../../lib'
 import { Burger } from '../burger'
 import { Button } from '../button'
-import { Icon } from '../icon'
+import { Icon, KnownIconName } from '../icon'
 import { SkipLink } from '../skip-link'
 import { Div, Main } from '../tag'
 import { headerVariantConfig } from '../tag/src/variants/tags/header'
@@ -125,7 +125,7 @@ export function ClientLayout({
   const burgerMenuRef = useRef<HTMLDivElement>(null)
   const desktopMenuRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
-  const LinkTag = LinkComponent as any
+  const LinkTag = LinkComponent as React.ElementType
 
   const toggleMenu = (index: number) => {
     setOpenMenus(prev => {
@@ -479,7 +479,7 @@ export function ClientLayout({
             currentPath={currentPath}
             LinkComponent={LinkComponent}
             appName={appName}
-            logoIcon={mobileLogoIcon as any}
+            logoIcon={mobileLogoIcon as KnownIconName}
             logoSrc={mobileLogoSrc}
             logoAlt={mobileLogoAlt}
             logoHref={mobileLogoHref}

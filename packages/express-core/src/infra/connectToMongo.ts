@@ -73,7 +73,10 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
     isConnecting = false
     return mongoose
   } catch (err) {
-    logger.error(`❌ [MongoDB] Failed to connect:`, err instanceof Error ? err.message : err)
+    logger.error(
+      `❌ [MongoDB] Failed to connect:`,
+      err instanceof Error ? err.message : String(err)
+    )
 
     // Fallback to localhost only if MONGO_URL was provided (avoid double localhost attempt)
     if (process.env.MONGO_URL) {
@@ -94,7 +97,7 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
       } catch (fallbackErr) {
         logger.error(
           '❌ [MongoDB] Fallback connection also failed:',
-          fallbackErr instanceof Error ? fallbackErr.message : fallbackErr
+          fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)
         )
       }
     }

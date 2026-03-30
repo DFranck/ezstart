@@ -126,7 +126,10 @@ export function ThemeEditor({
       toastSuccess: { message: 'Theme saved successfully!' },
       toastError: { message: 'Failed to save theme' },
       onError: error => {
-        logger.error('Failed to save theme:', error)
+        logger.error(
+          'Failed to save theme:',
+          error instanceof Error ? error.message : String(error)
+        )
       },
     })
   }, [editor, apiEndpoint, defaultTheme])

@@ -54,7 +54,11 @@ export { checkMissingDescriptions } from './openapi/check-missing-descriptions.j
 export { openApiCompatible } from './openapi/openapi-compatible.js'
 export { createRouterWithDoc } from './openapi/route-with-doc.js'
 export { stripIncompatible } from './openapi/strip-incompatible.js'
-export { zObjectWithAutoOpenApi } from './openapi/z-object-helper.js'
+export {
+  zObjectWithAutoOpenApi,
+  apiSuccessSchema,
+  apiErrorSchema,
+} from './openapi/z-object-helper.js'
 
 // Helpers
 export { sendSuccess, sendError, sendValidationError } from './helpers/api-response.js'

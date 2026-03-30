@@ -112,7 +112,10 @@ export function usePerformance({
       })
     } catch (error) {
       // Silently fail - don't break the app if monitoring is down
-      logger.warn('[Performance] Failed to send metric:', error)
+      logger.warn(
+        '[Performance] Failed to send metric:',
+        error instanceof Error ? error.message : String(error)
+      )
     }
   }
 

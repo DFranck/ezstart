@@ -88,7 +88,10 @@ function CallbackContent({
         // Redirect after successful auth
         setTimeout(() => router.push(finalRedirect), 1500)
       } catch (err) {
-        logger.error('[AuthCallback] Authentication failed:', err)
+        logger.error(
+          '[AuthCallback] Authentication failed:',
+          err instanceof Error ? err.message : String(err)
+        )
         setStatus('error')
         setError(err instanceof Error ? err.message : 'Authentication failed')
       } finally {

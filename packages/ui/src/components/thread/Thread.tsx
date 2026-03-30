@@ -2,11 +2,12 @@
 
 import { ReactNode, useEffect, useRef } from 'react'
 import { cn } from '../../lib/utils'
+import type { ThreadMessage } from './types'
 
 type ThreadProps = {
   children: ReactNode
   className?: string
-  messages?: any[]
+  messages?: ThreadMessage[]
   streamingText?: string
   autoScroll?: boolean
 }
@@ -34,7 +35,7 @@ export function Thread({
     >
       <div className="flex flex-col flex-1 min-h-full py-4">
         <div aria-hidden className="pointer-events-none h-px w-px" />
-        <div className='flex flex-col text-sm gap-4 pl-[18px] pr-4 md:pr-2 flex-1 w-full justify-end'>
+        <div className="flex flex-col text-sm gap-4 pl-[18px] pr-4 md:pr-2 flex-1 w-full justify-end">
           {children}
         </div>
         <div ref={bottomRef} aria-hidden className="pointer-events-none h-px w-px" />

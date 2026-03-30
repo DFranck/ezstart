@@ -51,7 +51,10 @@ export class UnifiedChat {
         logger.debug(`Trying provider: ${providerId}`)
         return await this.send(message, providerId, options)
       } catch (error) {
-        logger.warn(`Provider ${providerId} failed:`, error)
+        logger.warn(
+          `Provider ${providerId} failed:`,
+          error instanceof Error ? error.message : String(error)
+        )
         errors.push(error as Error)
         continue
       }

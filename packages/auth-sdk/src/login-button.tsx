@@ -60,7 +60,10 @@ export function LoginButton({
         await login() // login redirects, so no need to reset loading
       }
     } catch (error) {
-      logger.error(isAuthenticated ? 'Logout failed:' : 'Login failed:', error)
+      logger.error(
+        isAuthenticated ? 'Logout failed:' : 'Login failed:',
+        error instanceof Error ? error.message : String(error)
+      )
       setLoggingIn(false)
     }
   }

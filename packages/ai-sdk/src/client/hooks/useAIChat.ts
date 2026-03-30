@@ -15,7 +15,7 @@ interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: string
-  metadata?: any
+  metadata?: Record<string, unknown>
 }
 
 interface UseAIChatOptions {
@@ -29,7 +29,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
   const { selectedProvider, setSelectedProvider, providers } = useAIStore()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loading, setLoading] = useState(false)
-  const [extractedData, setExtractedData] = useState<any>(null)
+  const [extractedData, setExtractedData] = useState<unknown>(null)
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -45,7 +45,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
       setMessages(prev => [...prev, userMessage])
 
       try {
-        const response = await callApi('/chat', {
+        const response = await callApi<{ response: string; extracted_data?: unknown }>('/chat', {
           method: 'POST',
           body: {
             message: content,
@@ -56,24 +56,25 @@ export function useAIChat(options: UseAIChatOptions = {}) {
           appName: options.appName || 'green-pulse',
         })
 
+        if (!response.ok || !response.data) throw new Error('Empty response from AI')
+        const data = response.data
+
         // Add assistant message
         const assistantMessage: ChatMessage = {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: response.data.response,
+          content: data.response,
           timestamp: new Date().toISOString(),
-          metadata: response.data.extracted_data
-            ? { extractedData: response.data.extracted_data }
-            : undefined,
+          metadata: data.extracted_data ? { extractedData: data.extracted_data } : undefined,
         }
         setMessages(prev => [...prev, assistantMessage])
 
         // Save extracted data
-        if (response.data.extracted_data) {
-          setExtractedData(response.data.extracted_data)
+        if (data.extracted_data) {
+          setExtractedData(data.extracted_data)
         }
       } catch (error) {
-        logger.error('Chat error:', error)
+        logger.error('Chat error:', error instanceof Error ? error.message : String(error))
         // Add error message
         const errorMessage: ChatMessage = {
           id: crypto.randomUUID(),

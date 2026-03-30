@@ -175,13 +175,13 @@ export function Dropdown({
   const triggerElement = trigger ? (
     <div
       onClick={() => setOpen(!open)}
-      ref={buttonRef as any}
+      ref={buttonRef as unknown as React.RefObject<HTMLDivElement>}
       role="button"
       aria-haspopup="menu"
       aria-expanded={open}
       aria-controls={menuId}
       tabIndex={0}
-      onKeyDown={(e) => {
+      onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           setOpen(!open)

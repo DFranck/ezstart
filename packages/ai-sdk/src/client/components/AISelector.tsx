@@ -4,14 +4,14 @@
  */
 'use client'
 
-import { Select, SelectItem, Badge, Icon } from '@ezstart/ui/components'
+import { Select, SelectItem, Badge, Icon, KnownIconName } from '@ezstart/ui/components'
 
 interface AIProvider {
   id: string
   name: string
   type: string
   enabled: boolean
-  capabilities: any
+  capabilities: { vision?: boolean; audio?: boolean } | undefined
 }
 
 interface AISelectorProps {
@@ -36,7 +36,7 @@ export function AISelector({
       {providers.map(provider => (
         <SelectItem key={provider.id} value={provider.id}>
           <div className="flex items-center gap-2">
-            <Icon name={getProviderIcon(provider.type) as any} size={16} />
+            <Icon name={getProviderIcon(provider.type) as KnownIconName} size={16} />
             <span>{provider.name}</span>
 
             {showCapabilities && (

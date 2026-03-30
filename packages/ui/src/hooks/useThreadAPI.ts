@@ -8,10 +8,10 @@ export type ThreadAPIConfig = {
   endpoint: string
   method?: 'POST' | 'GET'
   headers?: Record<string, string>
-  onSuccess?: (data: any) => void
+  onSuccess?: (data: unknown) => void
   onError?: (error: Error) => void
-  formatRequest?: (message: string, files?: File[]) => any
-  formatResponse?: (data: any) => string
+  formatRequest?: (message: string, files?: File[]) => unknown
+  formatResponse?: (data: unknown) => string
   enableStreaming?: boolean
 }
 
@@ -48,7 +48,10 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
     onSuccess,
     onError,
     formatRequest = message => ({ message }),
-    formatResponse = data => data.response || data.message || JSON.stringify(data),
+    formatResponse = data => {
+      const d = data as Record<string, unknown>
+      return (d.response as string) || (d.message as string) || JSON.stringify(data)
+    },
     enableStreaming = false,
   } = config
 
@@ -113,7 +116,7 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
           const reader = response.body.getReader()
           const decoder = new TextDecoder()
           let fullText = ''
-          let lastData: any = null
+          let lastData: unknown = null
 
           // Add placeholder AI message for streaming
           const aiMessageId = `ai-${Date.now()}`

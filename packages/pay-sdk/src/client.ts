@@ -83,7 +83,7 @@ export class PayClient {
 
     // Normalize MongoDB _id to id
     if (result.payments) {
-      result.payments = result.payments.map((p: any) => ({
+      result.payments = result.payments.map((p: Payment & { _id?: string }) => ({
         ...p,
         id: p.id || p._id,
       }))

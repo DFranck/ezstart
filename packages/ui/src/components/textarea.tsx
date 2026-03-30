@@ -34,10 +34,13 @@ export interface TextAreaProps extends ComponentProps<'textarea'> {
 }
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  ({ label, className, autoResize, maxRows = 10, showCharCount, maxLength, value, ...props }, ref) => {
+  (
+    { label, className, autoResize, maxRows = 10, showCharCount, maxLength, value, ...props },
+    ref
+  ) => {
     const [charCount, setCharCount] = useState(0)
     const internalRef = useRef<HTMLTextAreaElement>(null)
-    const textareaRef = (ref as any) || internalRef
+    const textareaRef = (ref as React.RefObject<HTMLTextAreaElement>) || internalRef
 
     // Auto-resize logic
     useEffect(() => {
@@ -71,14 +74,10 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
     return (
       <div className="space-y-2">
-        {label && (
-          <label className="text-sm font-medium text-foreground">
-            {label}
-          </label>
-        )}
+        {label && <label className="text-sm font-medium text-foreground">{label}</label>}
         <textarea
           ref={textareaRef}
-          data-slot='textarea'
+          data-slot="textarea"
           className={cn(
             'placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full border bg-transparent shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
             'min-h-[80px] sm:min-h-[60px]', // Responsive min-height (mobile 80px, desktop 60px)
@@ -98,7 +97,8 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         />
         {showCharCount && (
           <div className="text-xs text-muted-foreground text-right">
-            {charCount}{maxLength && ` / ${maxLength}`}
+            {charCount}
+            {maxLength && ` / ${maxLength}`}
           </div>
         )}
       </div>

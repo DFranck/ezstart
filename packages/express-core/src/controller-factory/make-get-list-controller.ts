@@ -10,7 +10,7 @@ export function makeGetListController<Q, T>(service: (query: Q) => Promise<T[]>,
       const items = await service(query)
       return sendSuccess(res, items)
     } catch (err) {
-      logger.error(`[${logTag}]`, err)
+      logger.error(`[${logTag}]`, err instanceof Error ? err.message : String(err))
       return sendError(res, `Failed to fetch ${logTag}`)
     }
   }

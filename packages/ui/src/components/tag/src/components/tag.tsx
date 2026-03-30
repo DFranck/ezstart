@@ -16,7 +16,7 @@ export type TagProps<T extends SupportedAs = 'span'> = Omit<ComponentProps<T>, n
  * Filter props to only pass valid DOM attributes.
  * Prevents React warnings for non-standard attributes.
  */
-function filterDomSafeProps(props: Record<string, any>): Record<string, any> {
+function filterDomSafeProps(props: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(props).filter(([key, value]) => {
       // ref is handled separately — never spread it via domSafeProps
@@ -69,7 +69,7 @@ function TagComponent<T extends SupportedAs = 'span'>({
   ariaHidden,
   ref,
   ...props
-}: TagProps<T> & { asChild?: boolean; ref?: React.Ref<any> }) {
+}: TagProps<T> & { asChild?: boolean; ref?: React.Ref<HTMLElement> }) {
   const tag = (as ?? 'span') as SupportedAs
 
   const variantFn = tagVariants[tag as keyof typeof tagVariants]
@@ -86,12 +86,13 @@ function TagComponent<T extends SupportedAs = 'span'>({
 
   const Component: ElementType = asChild ? Slot : as || 'span'
 
-  const domSafeProps = useMemo(() => filterDomSafeProps(props as Record<string, any>), [props])
+  const domSafeProps = useMemo(() => filterDomSafeProps(props as Record<string, unknown>), [props])
 
+  const propsWithIntent = props as Record<string, unknown>
   const ariaAttributes = useMemo(
     () =>
       buildAriaAttributes({
-        intent: (props as any).intent,
+        intent: propsWithIntent.intent as string | undefined,
         ariaLabel,
         ariaLabelledBy,
         ariaDescribedBy,
@@ -100,7 +101,7 @@ function TagComponent<T extends SupportedAs = 'span'>({
         ariaHidden,
       }),
     [
-      (props as any).intent,
+      propsWithIntent.intent,
       ariaLabel,
       ariaLabelledBy,
       ariaDescribedBy,

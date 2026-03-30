@@ -219,7 +219,10 @@ export class AuthClient {
       })
     } catch (error) {
       // Logout can fail silently - we still clear local state
-      logger.error('Logout API call failed:', error)
+      logger.error(
+        'Logout API call failed:',
+        error instanceof Error ? error.message : String(error)
+      )
     }
   }
 }

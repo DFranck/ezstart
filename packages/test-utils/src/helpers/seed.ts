@@ -20,6 +20,7 @@ export async function seedCollection<T extends Record<string, unknown>>(
 
   if (data.length > 0) {
     // Cast needed: MongoDB's insertMany expects OptionalUnlessRequiredId which can't be expressed generically
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MongoDB insertMany requires Document[] which can't be expressed generically
     await collection.insertMany(data as any[])
   }
 }

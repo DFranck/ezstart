@@ -50,9 +50,10 @@ export function PlausibleAnalytics({
 
   // Track page views on route change
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).plausible) {
+    const win = window as unknown as { plausible?: (event: string, options: { u: string }) => void }
+    if (typeof window !== 'undefined' && win.plausible) {
       const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
-      ;(window as any).plausible('pageview', { u: url })
+      win.plausible('pageview', { u: url })
     }
   }, [pathname, searchParams])
 
@@ -61,9 +62,10 @@ export function PlausibleAnalytics({
   if (trackOutboundLinks) extensions.push('outbound-links')
   if (trackFileDownloads) extensions.push('file-downloads')
 
-  const scriptSrc = extensions.length > 0
-    ? `${apiHost}/js/script.${extensions.join('.')}.js`
-    : `${apiHost}/js/script.js`
+  const scriptSrc =
+    extensions.length > 0
+      ? `${apiHost}/js/script.${extensions.join('.')}.js`
+      : `${apiHost}/js/script.js`
 
   return (
     <Script

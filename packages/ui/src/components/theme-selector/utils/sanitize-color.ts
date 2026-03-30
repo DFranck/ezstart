@@ -36,7 +36,10 @@ export function sanitizeColorValues(values: Record<string, string>): Record<stri
     try {
       sanitized[key] = sanitizeColorValue(value)
     } catch (error) {
-      logger.warn(`Skipping invalid color for ${key}:`, error)
+      logger.warn(
+        `Skipping invalid color for ${key}:`,
+        error instanceof Error ? error.message : String(error)
+      )
       // Skip invalid values instead of throwing
     }
   }

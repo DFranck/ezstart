@@ -12,8 +12,7 @@ export const Burger = ({
   setIsOpen?: (isOpen: boolean) => void
   isOpen: boolean
   className?: string
-  [key: string]: any
-}) => {
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
   const handleClick = () => {
     if (setIsOpen) {
       setIsOpen(!isOpen)
@@ -24,10 +23,7 @@ export const Burger = ({
       onClick={handleClick}
       size={'sm'}
       variant={'ghost'}
-      className={cn(
-        'relative cursor-pointer flex flex-col justify-center items-center',
-        className
-      )}
+      className={cn('relative cursor-pointer flex flex-col justify-center items-center', className)}
       {...props}
     >
       <span

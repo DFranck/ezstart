@@ -1,6 +1,6 @@
 'use client'
 
-import { getApiUrl } from '@ezstart/config/urls'
+import { getApiUrl, type AppName } from '@ezstart/config/urls'
 import { ThemeEditor as UIThemeEditor } from '@ezstart/ui/components'
 import { useTheme } from 'next-themes'
 import { useThemeSelectorContext } from '../theme-selector-context'
@@ -39,7 +39,7 @@ export function ThemeEditor({
   const actualTheme = resolvedTheme || theme
 
   // Build full API URL for theme endpoint
-  const apiUrl = getApiUrl(appName as any)
+  const apiUrl = getApiUrl(appName as AppName)
   const apiEndpoint = `${apiUrl}/api/theme`
 
   return (

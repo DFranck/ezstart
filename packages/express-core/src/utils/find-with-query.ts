@@ -30,26 +30,27 @@ export async function findWithQuery<T>(
 ): Promise<T[]> {
   const { page = 1, limit = 20, includeDeleted, deletedOnly, from, to, ...otherFilters } = query
 
-  const filter: FilterQuery<T> = { ...extraFilter } as FilterQuery<T>
+  // Use Record for dynamic filter building, then cast for Mongoose
+  const filter: Record<string, unknown> = { ...extraFilter }
 
   if (includeDeleted) {
   } else if (deletedOnly) {
-    filter.deletedAt = { $ne: null } as FilterQuery<T>[keyof FilterQuery<T>]
+    filter.deletedAt = { $ne: null }
   } else {
-    filter.deletedAt = null as FilterQuery<T>[keyof FilterQuery<T>]
+    filter.deletedAt = null
   }
 
   if (from || to) {
     const dateFilter: { $gte?: Date; $lte?: Date } = {}
     if (from) dateFilter.$gte = new Date(from)
     if (to) dateFilter.$lte = new Date(to)
-    filter.createdAt = dateFilter as FilterQuery<T>[keyof FilterQuery<T>]
+    filter.createdAt = dateFilter
   }
 
   Object.assign(filter, otherFilters)
 
   let queryBuilder = model
-    .find(filter, projection)
+    .find(filter as FilterQuery<T>, projection)
     .sort(sort)
     .skip((page - 1) * limit)
     .limit(limit)
@@ -59,5 +60,5 @@ export async function findWithQuery<T>(
   }
 
   const docs = await queryBuilder.exec()
-  return docs.map(toApiObject<T>)
+  return docs.map(doc => toApiObject<T>(doc as unknown as Parameters<typeof toApiObject>[0]))
 }

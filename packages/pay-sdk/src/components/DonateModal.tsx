@@ -95,7 +95,7 @@ export function DonateModal({
         window.location.href = result.checkoutUrl
       }
     } catch (error) {
-      logger.error('Donation failed:', error)
+      logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
     }
   }
 

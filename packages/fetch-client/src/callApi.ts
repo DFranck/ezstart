@@ -89,7 +89,7 @@ function getGlobalLogLevel(): LogLevel {
  * localStorage.setItem('callApiLogLevel', 'all')
  * ```
  */
-export async function callApi<T = any>(
+export async function callApi<T = unknown>(
   endpoint: string,
   options: CallApiOptions
 ): Promise<ApiResponse<T>> {
@@ -330,7 +330,7 @@ export function createCallApi(
   appName: AppName,
   factoryOptions?: { getToken?: () => string | null }
 ) {
-  const call = <T = any>(endpoint: string, options: Omit<CallApiOptions, 'appName'> = {}) => {
+  const call = <T = unknown>(endpoint: string, options: Omit<CallApiOptions, 'appName'> = {}) => {
     return baseCallApi<T>(endpoint, {
       ...options,
       appName,
@@ -340,12 +340,12 @@ export function createCallApi(
 
   return Object.assign(call, {
     /** Generate a React Query key: [appName, endpoint, params?] */
-    queryKey: (endpoint: string, params?: Record<string, any>) =>
+    queryKey: (endpoint: string, params?: Record<string, string | number | boolean>) =>
       [appName, endpoint, ...(params ? [params] : [])] as const,
 
     /** Generate a React Query queryFn that calls this endpoint and returns data */
     queryFn:
-      <T = any>(endpoint: string, params?: Record<string, any>) =>
+      <T = unknown>(endpoint: string, params?: Record<string, string | number | boolean>) =>
       async () => {
         const query = params
           ? '?' +

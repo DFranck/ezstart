@@ -138,11 +138,20 @@ export function UptimeGraph({
     payload,
   }: {
     active?: boolean
-    payload?: Array<{ payload: { timestamp: string; uptime: number; responseTime: number } }>
+    payload?: Array<{
+      payload: {
+        timestamp: string
+        uptime: number
+        responseTime: number
+        healthyCount: number
+        totalCount: number
+        status: string
+      }
+    }>
   }) => {
     if (!active || !payload || !payload.length) return null
 
-    const data = payload[0].payload
+    const data = payload[0]!.payload
     const timestamp = new Date(data.timestamp)
     const timeStr = timestamp.toLocaleTimeString('en-US', {
       hour: '2-digit',

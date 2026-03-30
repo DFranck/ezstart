@@ -61,7 +61,7 @@ export interface AIRequestContext {
   /**
    * Additional metadata
    */
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 
   /**
    * User ID (optional)
@@ -86,7 +86,7 @@ export interface AIResponseContext extends AIRequestContext {
   /**
    * Raw API response
    */
-  rawResponse?: any
+  rawResponse?: unknown
 
   /**
    * Tokens used
@@ -158,7 +158,7 @@ export interface AIAgentConfig {
   /**
    * Additional provider-specific options
    */
-  providerOptions?: Record<string, any>
+  providerOptions?: Record<string, unknown>
 }
 
 /**
@@ -182,12 +182,12 @@ export interface AIAgentResponse {
   /**
    * Raw provider response
    */
-  raw?: any
+  raw?: unknown
 
   /**
    * Metadata from hooks
    */
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 /**

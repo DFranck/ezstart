@@ -31,7 +31,7 @@ export function makeUpdateController<TInput, TOutput>(
       const result = await service(id, parsed.data)
       return sendSuccess(res, result)
     } catch (err) {
-      logger.error(`[${logTag}]`, err)
+      logger.error(`[${logTag}]`, err instanceof Error ? err.message : String(err))
       return sendError(res, `Failed to update ${logTag}`)
     }
   }

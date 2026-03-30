@@ -22,13 +22,13 @@ export interface ProviderSendOptions {
 
 export interface ProviderResponse {
   text: string
-  extractedData?: any
+  extractedData?: unknown
   tokensUsed?: {
     prompt: number
     completion: number
     total: number
   }
-  raw?: any
+  raw?: unknown
 }
 
 export interface IAIProvider {

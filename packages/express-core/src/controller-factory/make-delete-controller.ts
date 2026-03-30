@@ -39,7 +39,7 @@ export function makeDeleteController<T>(
         return res.status(statusCode).send()
       }
     } catch (err) {
-      logger.error(`[${label}]`, err)
+      logger.error(`[${label}]`, err instanceof Error ? err.message : String(err))
       return sendError(res, `Failed to delete ${label}`)
     }
   }

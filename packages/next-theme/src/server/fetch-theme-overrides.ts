@@ -53,7 +53,10 @@ export async function fetchThemeOverrides(appName: string): Promise<ThemeOverrid
     return { appName, overrides: {} }
   } catch (error) {
     // Network error or timeout - fail gracefully
-    logger.warn(`[fetchThemeOverrides] Failed to fetch theme for ${appName}:`, error)
+    logger.warn(
+      `[fetchThemeOverrides] Failed to fetch theme for ${appName}:`,
+      error instanceof Error ? error.message : String(error)
+    )
     return { appName, overrides: {} }
   }
 }

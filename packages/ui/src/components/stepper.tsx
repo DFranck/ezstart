@@ -85,12 +85,12 @@ export interface Step {
 interface StepperContextType {
   currentStep: number
   steps: Step[]
-  stepData: Record<string, any>
+  stepData: Record<string, Record<string, unknown>>
   goToStep: (stepIndex: number) => void
   nextStep: () => void
   previousStep: () => void
-  updateStepData: (stepId: string, data: any) => void
-  getStepData: (stepId: string) => any
+  updateStepData: (stepId: string, data: Record<string, unknown>) => void
+  getStepData: (stepId: string) => Record<string, unknown>
   isStepCompleted: (stepIndex: number) => boolean
   isStepAccessible: (stepIndex: number) => boolean
   theme?: StepperTheme
@@ -140,7 +140,7 @@ interface StepperProps {
   steps: Step[]
   initialStep?: number
   onStepChange?: (stepIndex: number, stepId: string) => void
-  onComplete?: (allData: Record<string, any>) => void
+  onComplete?: (allData: Record<string, Record<string, unknown>>) => void
   className?: string
   withHeaderOffset?: boolean
   showStepNumbers?: boolean
@@ -177,7 +177,7 @@ export function Stepper({
   theme,
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState(initialStep)
-  const [stepData, setStepData] = useState<Record<string, any>>({})
+  const [stepData, setStepData] = useState<Record<string, Record<string, unknown>>>({})
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
   const goToStep = (stepIndex: number) => {
@@ -212,7 +212,7 @@ export function Stepper({
     }
   }
 
-  const updateStepData = (stepId: string, data: any) => {
+  const updateStepData = (stepId: string, data: Record<string, unknown>) => {
     setStepData(prev => ({
       ...prev,
       [stepId]: { ...prev[stepId], ...data },
@@ -552,14 +552,17 @@ function StepperNavigation({
 // Composant pour afficher le contenu d'une étape avec données persistantes
 interface StepContentProps {
   stepId: string
-  children: (data: any, updateData: (newData: any) => void) => ReactNode
+  children: (
+    data: Record<string, unknown>,
+    updateData: (newData: Record<string, unknown>) => void
+  ) => ReactNode
 }
 
 export function StepContent({ stepId, children }: StepContentProps) {
   const { getStepData, updateStepData } = useStepper()
   const data = getStepData(stepId)
 
-  const handleUpdateData = (newData: any) => {
+  const handleUpdateData = (newData: Record<string, unknown>) => {
     updateStepData(stepId, newData)
   }
 
