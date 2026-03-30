@@ -24,7 +24,26 @@ function extractUserId(req: Request, jwtSecret: string): string | null {
     }
   }
 
-  // 2. Fallback: X-User-Id header (legacy / dev only)
+  // 2. Try httpOnly cookie (set by EZAuth login-cookie flow)
+  const cookieHeader = req.headers.cookie || ''
+  const cookieToken = cookieHeader
+    .split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith('ezauth_token='))
+    ?.split('=')[1]
+  if (cookieToken) {
+    try {
+      const decoded = jwt.verify(cookieToken, jwtSecret) as Record<string, unknown>
+      const userId = (decoded.userId || decoded.sub || decoded.id) as string | undefined
+      if (userId && OBJECT_ID_REGEX.test(userId)) {
+        return userId
+      }
+    } catch {
+      // Cookie token invalid — fall through
+    }
+  }
+
+  // 3. Fallback: X-User-Id header (legacy / dev only)
   const headerUserId = req.headers['x-user-id'] as string | undefined
   if (headerUserId && OBJECT_ID_REGEX.test(headerUserId)) {
     return headerUserId
