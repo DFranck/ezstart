@@ -9,7 +9,7 @@ import {
   getApiPort,
   startServer,
   createVersionedRouter,
-  addVersionHeader
+  addVersionHeader,
 } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 import { logger } from '@ezstart/logger/server'
@@ -43,3 +43,4 @@ connectToMongo('ezbill')
     logger.error('❌ Failed to start EZBill API', err)
     process.exit(1)
   })
+// trigger deploy
