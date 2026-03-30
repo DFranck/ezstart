@@ -114,7 +114,6 @@ Examples:
     try {
       // Call conversational AI API with current invoice context
       const response = await callApi<{
-        success: boolean
         action: InvoiceAction
         message: string
         suggestions?: string[]
@@ -128,7 +127,7 @@ Examples:
         },
       })
 
-      if (response.ok && response.data?.success) {
+      if (response.ok && response.data) {
         const { action, message: aiMessage, suggestions } = response.data
 
         // Add assistant response with suggestions
