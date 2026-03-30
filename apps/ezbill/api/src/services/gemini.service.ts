@@ -11,6 +11,7 @@ interface ExtractedInvoiceData {
     price: number
   }>
   description?: string
+  flatRateAmount?: number
   dueDate?: string
   notes?: string
   currency?: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'VND' | 'THB' | 'AUD' | 'CAD' | 'CNY' | 'CHF'
@@ -24,6 +25,7 @@ export type InvoiceAction =
   | { type: 'remove_items'; indices: number[] }
   | { type: 'update_client'; clientName: string }
   | { type: 'update_description'; description: string }
+  | { type: 'update_flat_rate'; description: string; flatRateAmount: number }
   | { type: 'update_payment_terms'; notes: string }
   | { type: 'update_currency'; currency: ExtractedInvoiceData['currency'] }
   | { type: 'update_due_date'; dueDate: string }
@@ -126,6 +128,26 @@ const updateDescriptionFunction: FunctionDeclaration = {
   },
 }
 
+const updateFlatRateFunction: FunctionDeclaration = {
+  name: 'update_flat_rate',
+  description:
+    'Set or update flat-rate billing with a description and total amount. Use this when billing type is flat-rate.',
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      description: {
+        type: SchemaType.STRING,
+        description: 'Flat-rate description (e.g., "March 2026 - Development services")',
+      },
+      flatRateAmount: {
+        type: SchemaType.NUMBER,
+        description: 'Total flat-rate amount',
+      },
+    },
+    required: ['description', 'flatRateAmount'],
+  },
+}
+
 const updatePaymentTermsFunction: FunctionDeclaration = {
   name: 'update_payment_terms',
   description: 'Set payment terms and conditions in notes field',
@@ -199,6 +221,7 @@ const replaceAllFunction: FunctionDeclaration = {
         },
       },
       description: { type: SchemaType.STRING },
+      flatRateAmount: { type: SchemaType.NUMBER, description: 'Total flat-rate amount' },
       dueDate: { type: SchemaType.STRING },
       notes: { type: SchemaType.STRING },
       currency: {
@@ -219,6 +242,7 @@ const tools: Tool[] = [
       removeItemsFunction,
       updateClientFunction,
       updateDescriptionFunction,
+      updateFlatRateFunction,
       updatePaymentTermsFunction,
       updateCurrencyFunction,
       updateDueDateFunction,
@@ -295,17 +319,34 @@ User: "Make descriptions more readable"
 You: update_items([{ label: "• Login page • Dark mode • Responsive design", ... }])
      "I've reformatted with bullet points. Better?"
 
+BILLING TYPES:
+The user can choose between two billing types via a tab in the UI. You MUST respect the current billing type:
+
+1. **Itemized** (billingType = "itemized"):
+   - Generate individual line items with label, quantity, and price
+   - Use update_items, add_items, remove_items, or replace_all with items array
+   - Example: [{ label: "2026-03-23 Frontend dev", quantity: 3, price: 35 }]
+
+2. **Flat Rate** (billingType = "flat-rate"):
+   - Generate a SINGLE description and total amount (NOT individual items)
+   - Use update_flat_rate(description, flatRateAmount) or replace_all with description + flatRateAmount
+   - Example: update_flat_rate("March 2026 - Development services (frontend, backend, testing)", 1200)
+   - NEVER generate items array when billing type is flat-rate
+   - Summarize all work into one description, calculate total amount
+
 IMPORTANT:
 - Be conversational and helpful
 - Use your knowledge of development work to fill in details intelligently
 - Always call a function with your response (never just text)
-- Ask for clarification when uncertain`
+- Ask for clarification when uncertain
+- ALWAYS check the billing type before choosing which function to call`
 
 // NEW: Conversational AI with function calling
 export async function chatWithInvoiceAssistant(
   message: string,
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>,
-  currentInvoiceData?: ExtractedInvoiceData
+  currentInvoiceData?: ExtractedInvoiceData,
+  billingType?: 'itemized' | 'flat-rate'
 ): Promise<ConversationalResponse> {
   try {
     const model = genAI.getGenerativeModel({
@@ -318,6 +359,7 @@ export async function chatWithInvoiceAssistant(
     })
 
     // Build context with current invoice data
+    const activeBillingType = billingType || 'itemized'
     let contextMessage = message
     if (currentInvoiceData && Object.keys(currentInvoiceData).length > 0) {
       const itemsSummary = currentInvoiceData.items
@@ -329,8 +371,14 @@ export async function chatWithInvoiceAssistant(
       const currency = currentInvoiceData.currency
         ? `\nCurrency: ${currentInvoiceData.currency}`
         : ''
+      const flatRateInfo =
+        activeBillingType === 'flat-rate' && currentInvoiceData.description
+          ? `\nFlat-rate description: ${currentInvoiceData.description}\nFlat-rate amount: ${currentInvoiceData.flatRateAmount || 0}`
+          : ''
 
-      contextMessage = `Current invoice state:${clientInfo}${itemsSummary}${currency}\n\nUser message: ${message}`
+      contextMessage = `Current billing type: ${activeBillingType}\nCurrent invoice state:${clientInfo}${itemsSummary}${flatRateInfo}${currency}\n\nUser message: ${message}`
+    } else {
+      contextMessage = `Current billing type: ${activeBillingType}\n\nUser message: ${message}`
     }
 
     let result
@@ -402,6 +450,12 @@ function processFunctionCall(functionName: string, args: any): InvoiceAction {
       return { type: 'update_client', clientName: args.clientName }
     case 'update_description':
       return { type: 'update_description', description: args.description }
+    case 'update_flat_rate':
+      return {
+        type: 'update_flat_rate',
+        description: args.description,
+        flatRateAmount: args.flatRateAmount,
+      }
     case 'update_payment_terms':
       return { type: 'update_payment_terms', notes: args.notes }
     case 'update_currency':
@@ -438,6 +492,8 @@ function generateResponseMessage(action: InvoiceAction, args: any): string {
       const count = action.indices?.length || 0
       return `Removed ${count} item${count > 1 ? 's' : ''}. Anything else?`
     }
+    case 'update_flat_rate':
+      return `Set flat-rate: "${action.description}" for ${action.flatRateAmount}. Looks good?`
     case 'update_client':
       return `Client set to "${action.clientName}". What else?`
     case 'update_currency':
@@ -462,6 +518,8 @@ function generateSuggestions(action: InvoiceAction): string[] {
       return ['Add more items', 'Change currency', 'Set due date']
     case 'add_items':
       return ['Update prices', 'Add payment terms', 'All done']
+    case 'update_flat_rate':
+      return ['Change amount', 'Update description', 'Add payment terms']
     default:
       return ['Make changes', 'All good, save it']
   }
@@ -517,6 +575,10 @@ export async function extractInvoiceData(
     case 'update_items':
     case 'add_items':
       data.items = response.action.items
+      break
+    case 'update_flat_rate':
+      data.description = response.action.description
+      data.flatRateAmount = response.action.flatRateAmount
       break
     case 'update_client':
       data.clientName = response.action.clientName

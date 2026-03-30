@@ -26,6 +26,7 @@ interface ExtractedInvoiceData {
     price: number
   }>
   description?: string
+  flatRateAmount?: number
   dueDate?: string
   notes?: string
   currency?: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'VND' | 'THB' | 'AUD' | 'CAD' | 'CNY' | 'CHF'
@@ -39,6 +40,7 @@ export type InvoiceAction =
   | { type: 'remove_items'; indices: number[] }
   | { type: 'update_client'; clientName: string }
   | { type: 'update_description'; description: string }
+  | { type: 'update_flat_rate'; description: string; flatRateAmount: number }
   | { type: 'update_payment_terms'; notes: string }
   | {
       type: 'update_currency'
@@ -56,6 +58,7 @@ interface InvoiceAIAssistantProps {
   initialHistory?: Message[] // Load existing conversation
   onHistoryChange?: (history: Message[]) => void // Save conversation on each message
   currentInvoiceData?: ExtractedInvoiceData // Current invoice content for context
+  billingType?: 'itemized' | 'flat-rate' // Current billing type tab
 }
 
 export function InvoiceAIAssistant({
@@ -66,6 +69,7 @@ export function InvoiceAIAssistant({
   initialHistory,
   onHistoryChange,
   currentInvoiceData,
+  billingType = 'itemized',
 }: InvoiceAIAssistantProps) {
   // Generate initial message based on context
   const getInitialMessage = (): Message => {
@@ -124,6 +128,7 @@ Examples:
           text: inputMessage,
           conversationHistory: messages,
           currentInvoiceData, // Send current form data for context
+          billingType, // Send current billing type tab
         },
       })
 
@@ -181,6 +186,8 @@ Examples:
       case 'update_items':
       case 'add_items':
         return { items: action.items }
+      case 'update_flat_rate':
+        return { description: action.description, flatRateAmount: action.flatRateAmount }
       case 'update_client':
         return { clientName: action.clientName }
       case 'update_currency':

@@ -19,6 +19,7 @@ const extractInvoiceBodySchema = z.object({
     )
     .optional(),
   currentInvoiceData: z.record(z.unknown()).optional(),
+  billingType: z.enum(['itemized', 'flat-rate']).optional(),
 })
 
 export async function extractInvoiceData(req: Request, res: Response) {
@@ -29,13 +30,14 @@ export async function extractInvoiceData(req: Request, res: Response) {
       return sendValidationError(res, 'Invalid request body', parsed.error.errors)
     }
 
-    const { text, conversationHistory, currentInvoiceData } = parsed.data
+    const { text, conversationHistory, currentInvoiceData, billingType } = parsed.data
 
     // Use conversational AI with function calling
     const response = await chatWithInvoiceAssistant(
       text,
       conversationHistory as Array<{ role: 'user' | 'assistant'; content: string }>,
-      currentInvoiceData as any
+      currentInvoiceData as any,
+      billingType
     )
 
     sendSuccess(res, {

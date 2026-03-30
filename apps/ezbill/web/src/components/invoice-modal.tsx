@@ -135,6 +135,12 @@ export function InvoiceModal({
           updates.billingType = 'itemized'
         }
 
+        if (data.description && data.flatRateAmount !== undefined) {
+          updates.description = data.description
+          updates.flatRateAmount = data.flatRateAmount
+          updates.billingType = 'flat-rate'
+        }
+
         if (data.description) updates.description = data.description
         if (data.dueDate) updates.dueDate = data.dueDate
         if (data.notes) updates.notes = data.notes
@@ -181,6 +187,15 @@ export function InvoiceModal({
 
       case 'update_description':
         setFormData(prev => ({ ...prev, description: action.description }))
+        break
+
+      case 'update_flat_rate':
+        setFormData(prev => ({
+          ...prev,
+          description: action.description,
+          flatRateAmount: action.flatRateAmount,
+          billingType: 'flat-rate' as BillingType,
+        }))
         break
 
       case 'update_payment_terms':
@@ -280,10 +295,12 @@ export function InvoiceModal({
               onDataExtracted={handleAIExtraction}
               initialHistory={aiConversationHistory}
               onHistoryChange={setAiConversationHistory}
+              billingType={formData.billingType}
               currentInvoiceData={{
                 items: formData.items,
                 currency: formData.currency,
                 description: formData.description,
+                flatRateAmount: formData.flatRateAmount,
                 notes: formData.notes,
                 taxRate: formData.taxRate,
               }}
@@ -360,10 +377,12 @@ export function InvoiceModal({
               onDataExtracted={handleAIExtraction}
               initialHistory={aiConversationHistory}
               onHistoryChange={setAiConversationHistory}
+              billingType={formData.billingType}
               currentInvoiceData={{
                 items: formData.items,
                 currency: formData.currency,
                 description: formData.description,
+                flatRateAmount: formData.flatRateAmount,
                 notes: formData.notes,
                 taxRate: formData.taxRate,
               }}
