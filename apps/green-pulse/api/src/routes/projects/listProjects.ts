@@ -12,7 +12,7 @@ import { ProjectSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getProjectModel } from '../../models/Project.js'
 
 const listProjectsQuerySchema = z.object({
-  userId: z.string().min(1, 'userId is required'),
+  userId: z.string().optional().describe('User ID (auto-filled from auth)'),
   status: z.string().optional(),
   limit: z.coerce.number().min(1).max(100).default(20),
   offset: z.coerce.number().min(0).default(0),
@@ -33,7 +33,11 @@ docRouter.get(
         return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
       }
 
-      const { userId, status, limit, offset } = validation.data
+      const { userId: queryUserId, status, limit, offset } = validation.data
+      const userId = queryUserId || req.userId
+      if (!userId) {
+        return sendError(res, 'userId is required (via query or authentication)', 401)
+      }
 
       const Project = await getProjectModel()
 

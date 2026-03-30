@@ -1,13 +1,27 @@
-import { z, type infer as ZodInfer } from 'zod';
+import { z, type infer as ZodInfer } from 'zod'
 
 // Listing query schema (copied from common)
+// Note: query params are always strings, so use z.coerce.number() for numeric fields
 const listingQuerySchema = z.object({
-  page: z.number().min(1).default(1).optional().describe('Page number for pagination'),
-  limit: z.number().min(1).max(100).default(20).optional().describe('Number of items per page'),
+  page: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(1)
+    .optional()
+    .describe('Page number for pagination'),
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(100)
+    .default(20)
+    .optional()
+    .describe('Number of items per page'),
   search: z.string().optional().describe('Search term to filter results'),
   sortBy: z.string().optional().describe('Field to sort by'),
   sortOrder: z.enum(['asc', 'desc']).default('asc').optional().describe('Sort order'),
-});
+})
 
 // -----------------------------------
 // 🟢 BASE (never used alone)
@@ -45,10 +59,7 @@ export const baseClientSchema = z.object({
     .optional()
     .describe('Company registration number (SIRET, etc.)'),
 
-  taxNumber: z
-    .string()
-    .optional()
-    .describe('VAT / tax identification number'),
+  taxNumber: z.string().optional().describe('VAT / tax identification number'),
 
   // Contact person fields (for companies)
   contactPersonName: z.string().optional().describe('Name of the main contact person'),
@@ -63,9 +74,9 @@ export const baseClientSchema = z.object({
 
   // Additional info
   website: z.string().url().optional().or(z.literal('')).describe('Website URL'),
-  
+
   notes: z.string().optional().describe('Internal notes about the client'),
-});
+})
 
 // -----------------------------------
 // 🟢 INPUTS (create/update)
@@ -94,10 +105,7 @@ export const billingClientSchema = z.object({
     .string()
     .optional()
     .describe('Company registration number (SIRET, etc.)'),
-  taxNumber: z
-    .string()
-    .optional()
-    .describe('VAT / tax identification number'),
+  taxNumber: z.string().optional().describe('VAT / tax identification number'),
   // Contact person fields (for companies)
   contactPersonName: z.string().optional().describe('Name of the main contact person'),
   contactPersonEmail: z
@@ -110,15 +118,15 @@ export const billingClientSchema = z.object({
   contactPersonTitle: z.string().optional().describe('Job title of the contact person'),
   website: z.string().url().optional().or(z.literal('')).describe('Website URL'),
   notes: z.string().optional().describe('Internal notes about the client'),
-});
+})
 
 export const clientIdSchema = z.object({
   id: z
     .string()
     .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
     .describe('MongoDB ObjectId (24 hex chars)'),
-});
-export type ClientId = ZodInfer<typeof clientIdSchema>;
+})
+export type ClientId = ZodInfer<typeof clientIdSchema>
 
 // Output
 export const clientSchema = baseClientSchema.extend({
@@ -129,15 +137,10 @@ export const clientSchema = baseClientSchema.extend({
 
   createdAt: z.string().describe('ISO timestamp when the client was created'),
 
-  updatedAt: z
-    .string()
-    .describe('ISO timestamp when the client was last updated'),
+  updatedAt: z.string().describe('ISO timestamp when the client was last updated'),
 
-  deletedAt: z
-    .string()
-    .optional()
-    .describe('ISO timestamp when the client was soft-deleted'),
-});
+  deletedAt: z.string().optional().describe('ISO timestamp when the client was soft-deleted'),
+})
 
 // -----------------------------------
 // 🟡 QUERY (listing/filter)
@@ -145,13 +148,16 @@ export const getClientsQuerySchema = listingQuerySchema.extend({
   userId: z
     .string()
     .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
-    .describe('Filter clients by user ID'),
-});
-export type GetClientsQuery = ZodInfer<typeof getClientsQuerySchema>;
+    .optional()
+    .describe('Filter clients by user ID (auto-filled from auth)'),
+  deletedOnly: z.enum(['true', 'false']).optional().describe('Only return soft-deleted clients'),
+  includeDeleted: z.enum(['true', 'false']).optional().describe('Include soft-deleted clients'),
+})
+export type GetClientsQuery = ZodInfer<typeof getClientsQuerySchema>
 
 // BASE
-export type BaseClient = ZodInfer<typeof baseClientSchema>;
+export type BaseClient = ZodInfer<typeof baseClientSchema>
 // Inputs
-export type BillingClient = ZodInfer<typeof billingClientSchema>;
+export type BillingClient = ZodInfer<typeof billingClientSchema>
 // Output
-export type Client = ZodInfer<typeof clientSchema>;
+export type Client = ZodInfer<typeof clientSchema>
