@@ -166,7 +166,12 @@ export function QuoteModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const dataToSend = { ...formData, userId: user?._id }
+    const dataToSend = {
+      ...formData,
+      userId: user?._id,
+      // In flat-rate mode, don't send empty placeholder items
+      items: formData.billingType === 'flat-rate' ? [] : formData.items,
+    }
 
     return runWithFeedback({
       action: async () => {

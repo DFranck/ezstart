@@ -247,7 +247,12 @@ export function InvoiceModal({
       return
     }
 
-    const dataToSend = { ...formData, userId }
+    const dataToSend = {
+      ...formData,
+      userId,
+      // In flat-rate mode, don't send empty placeholder items
+      items: formData.billingType === 'flat-rate' ? [] : formData.items,
+    }
 
     return runWithFeedback({
       action: async () => {
