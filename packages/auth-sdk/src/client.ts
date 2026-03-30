@@ -133,11 +133,13 @@ export class AuthClient {
       throw new Error(result.error || 'Token exchange failed')
     }
 
+    // Support both wrapped { success, data } and flat response formats
+    const data = result.data ?? result
     return {
-      access_token: result.access_token,
-      token_type: result.token_type,
-      expires_in: result.expires_in,
-      user: result.user,
+      access_token: data.access_token,
+      token_type: data.token_type,
+      expires_in: data.expires_in,
+      user: data.user,
     }
   }
 
@@ -159,10 +161,13 @@ export class AuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new Error(result.error || 'Login failed')
+      throw new Error(
+        result.error || (result.data as Record<string, unknown>)?.error || 'Login failed'
+      )
     }
 
-    return result.user
+    const loginData = result.data ?? result
+    return loginData.user
   }
 
   // Get current user info (dual-mode: httpOnly cookie OR accessToken)
@@ -185,7 +190,8 @@ export class AuthClient {
       throw error
     }
 
-    return result.user
+    const meData = result.data ?? result
+    return meData.user
   }
 
   // Verify token validity
@@ -204,7 +210,8 @@ export class AuthClient {
       })
 
       const result = await response.json()
-      return result.success && result.valid
+      const verifyData = result.data ?? result
+      return verifyData.success !== false && verifyData.valid
     } catch (error) {
       return false
     }
