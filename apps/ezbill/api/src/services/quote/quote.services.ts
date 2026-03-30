@@ -62,15 +62,13 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
   return toApiObject(await doc.save())
 }
 
-export async function getQuotesService(
-  query: GetQuotesQuery & { includeDeleted?: boolean; deletedOnly?: boolean }
-): Promise<Quote[]> {
+export async function getQuotesService(query: GetQuotesQuery): Promise<Quote[]> {
   const QuoteModel = await getQuoteModel()
   let deletedAtFilter = {}
 
-  if (query.deletedOnly) {
+  if (query.deletedOnly === 'true') {
     deletedAtFilter = { deletedAt: { $ne: null } }
-  } else if (!query.includeDeleted) {
+  } else if (query.includeDeleted !== 'true') {
     deletedAtFilter = { deletedAt: null }
   }
 
@@ -83,14 +81,14 @@ export async function getQuotesService(
 }
 
 export async function getQuotesPaginatedService(
-  query: GetQuotesQuery & { includeDeleted?: boolean; deletedOnly?: boolean }
+  query: GetQuotesQuery
 ): Promise<PaginatedResult<Quote>> {
   const QuoteModel = await getQuoteModel()
   let deletedAtFilter = {}
 
-  if (query.deletedOnly) {
+  if (query.deletedOnly === 'true') {
     deletedAtFilter = { deletedAt: { $ne: null } }
-  } else if (!query.includeDeleted) {
+  } else if (query.includeDeleted !== 'true') {
     deletedAtFilter = { deletedAt: null }
   }
 

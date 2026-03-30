@@ -24,9 +24,7 @@ export async function getClientByIdService(id: string, userId?: string): Promise
   return doc ? toApiObject(doc) : null
 }
 
-export async function getClientsService(
-  query: GetClientsQuery & { includeDeleted?: boolean; deletedOnly?: boolean; userId?: string }
-): Promise<Client[]> {
+export async function getClientsService(query: GetClientsQuery): Promise<Client[]> {
   const ClientModel = await getClientModel()
   const baseQuery = { ...query }
   delete baseQuery.includeDeleted
@@ -37,7 +35,7 @@ export async function getClientsService(
 }
 
 export async function getClientsPaginatedService(
-  query: GetClientsQuery & { includeDeleted?: boolean; deletedOnly?: boolean; userId?: string }
+  query: GetClientsQuery
 ): Promise<PaginatedResult<Client>> {
   const ClientModel = await getClientModel()
   const baseQuery = { ...query }
