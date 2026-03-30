@@ -168,8 +168,8 @@ export async function convertQuoteToInvoiceService(
 ): Promise<Invoice | null> {
   const QuoteModel = await getQuoteModel()
   // Import here to avoid circular dependency
-  const { getInvoiceModel } = await import('../../models/billing/invoice')
-  const { generateNextNumber } = await import('../../utils/generate-next-number')
+  const { getInvoiceModel } = await import('../../models/billing/invoice.js')
+  const { generateNextNumber } = await import('../../utils/generate-next-number.js')
 
   const InvoiceModel = await getInvoiceModel()
 
