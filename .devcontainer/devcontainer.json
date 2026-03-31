@@ -6,7 +6,7 @@
       "version": "22"
     }
   },
-  "postCreateCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm install",
+  "postCreateCommand": "COREPACK_ENABLE_AUTO_PIN=0 corepack enable && yes | corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile",
   "customizations": {
     "vscode": {
       "extensions": [
