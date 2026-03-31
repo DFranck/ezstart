@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { useTranslations } from 'next-intl'
 
 // Dynamic import for LoginForm (144 lines)
 // Form is only shown after user clicks "Sign in with email"
@@ -31,6 +32,7 @@ const LoginForm = dynamic(
 )
 
 function LoginContent() {
+  const t = useTranslations('login')
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || 'ezstart'
   const redirect_uri = searchParams.get('redirect_uri')
@@ -47,12 +49,12 @@ function LoginContent() {
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Sign in to access{' '}
+          {t('signInToAccess')}{' '}
           <Span className={`${theme.primaryColor} font-semibold`}>{theme.name}</Span>
         </CardDescription>
         {theme.showEzstartMessage && (
           <P variant={'description'} size={'xs'} className="hidden md:block">
-            One account, all EZStart apps!
+            {t('oneAccountAllApps')}
           </P>
         )}
       </CardHeader>
@@ -66,12 +68,12 @@ function LoginContent() {
 
         <Div className="text-center">
           <P size={'xs'}>
-            Don't have an account?{' '}
+            {t('noAccount')}{' '}
             <Link
               href={`/register?${searchParams.toString()}`}
               className={`${theme.primaryColor} hover:opacity-80 font-medium`}
             >
-              Sign up
+              {t('register')}
             </Link>
           </P>
         </Div>
@@ -81,8 +83,10 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
+  const t = useTranslations('login')
+
   return (
-    <Suspense fallback={<Spinner variant="primary" size="lg" text="Loading..." />}>
+    <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
       <LoginContent />
     </Suspense>
   )

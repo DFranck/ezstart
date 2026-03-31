@@ -2,6 +2,7 @@ import { connectToMongo } from '@ezstart/express-core'
 import { Schema, Document, Model } from 'mongoose'
 import bcrypt from 'bcryptjs'
 import { AuthUser } from '@ezstart/auth-sdk/server'
+import { mapToRecord } from '../utils/map-to-record.js'
 
 export interface AuthUserDocument extends Document {
   email: string
@@ -214,14 +215,6 @@ authUserSchema.methods.hasFeature = function (feature: string): boolean {
 
 // Transform to API object
 authUserSchema.methods.toAuthUser = function (): AuthUser {
-  // Convert Map to plain object for appRoles
-  const appRolesObj: Record<string, string[]> = {}
-  if (this.appRoles) {
-    ;(this.appRoles as Map<string, string[]>).forEach((roles: string[], appName: string) => {
-      appRolesObj[appName] = roles
-    })
-  }
-
   return {
     _id: this._id.toString(),
     email: this.email,
@@ -233,7 +226,7 @@ authUserSchema.methods.toAuthUser = function (): AuthUser {
     apps: this.apps,
     roles: this.roles || [], // DEPRECATED - kept for backwards compatibility
     globalRoles: this.globalRoles || [],
-    appRoles: appRolesObj,
+    appRoles: mapToRecord(this.appRoles as Map<string, string[]>),
     permissions: this.permissions || [],
     features: this.features || [],
     organizationId: this.organizationId,

@@ -1,0 +1,51 @@
+import { connectToMongo } from '@ezstart/express-core'
+import { Schema, Document, Model } from 'mongoose'
+
+export interface TotpSecretDocument extends Document {
+  userId: string
+  secret: string // Encrypted TOTP secret
+  isEnabled: boolean
+  backupCodes: string[] // Hashed backup codes
+  createdAt: Date
+  updatedAt: Date
+}
+
+const totpSecretSchema = new Schema<TotpSecretDocument>(
+  {
+    userId: {
+      type: String,
+      required: true,
+      unique: true, // One TOTP secret per user
+      index: true,
+    },
+    secret: {
+      type: String,
+      required: true,
+    },
+    isEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    backupCodes: [
+      {
+        type: String,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+    collection: 'totp_secrets',
+    bufferCommands: false,
+  }
+)
+
+/**
+ * Factory function to get TotpSecret model attached to shared connection
+ * MUST be called after connectToMongo() has been initialized
+ */
+export async function getTotpSecretModel(): Promise<Model<TotpSecretDocument>> {
+  const mongoose = await connectToMongo('ezauth')
+  return (
+    mongoose.models.TotpSecret || mongoose.model<TotpSecretDocument>('TotpSecret', totpSecretSchema)
+  )
+}

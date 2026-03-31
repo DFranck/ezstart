@@ -20,6 +20,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { TwoFactorPrompt } from './TwoFactorPrompt'
 
 interface LoginFormProps {
   app: string
@@ -36,6 +37,9 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
   const tForgot = useTranslations('forgotPassword')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [twoFactorState, setTwoFactorState] = useState<{
+    tempToken: string
+  } | null>(null)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -70,10 +74,21 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         )
       }
 
-      const result = response.data as { code: string }
+      const result = response.data as {
+        code?: string
+        requires2FA?: boolean
+        tempToken?: string
+      }
+
+      // Handle 2FA requirement
+      if (result.requires2FA && result.tempToken) {
+        setTwoFactorState({ tempToken: result.tempToken })
+        setLoading(false)
+        return
+      }
 
       // Redirect with authorization code
-      if (redirect_uri) {
+      if (redirect_uri && result.code) {
         logger.info('Redirecting to:', redirect_uri)
         const url = new URL(redirect_uri)
         url.searchParams.set('code', result.code)
@@ -88,6 +103,17 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setLoading(false)
     }
+  }
+
+  // Show 2FA prompt if needed
+  if (twoFactorState) {
+    return (
+      <TwoFactorPrompt
+        tempToken={twoFactorState.tempToken}
+        redirect_uri={redirect_uri}
+        onBack={() => setTwoFactorState(null)}
+      />
+    )
   }
 
   return (

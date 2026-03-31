@@ -1,10 +1,12 @@
 'use client'
 
-import { Div, Icon, Spinner } from '@ezstart/ui/components'
+import { Div, Spinner } from '@ezstart/ui/components'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 function HomeContent() {
+  const t = useTranslations('home')
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -22,17 +24,19 @@ function HomeContent() {
 
   return (
     <Div className="text-center">
-      <Spinner variant="primary" size="lg" text="Redirecting to login..." textSize="sm" />
+      <Spinner variant="primary" size="lg" text={t('redirecting')} textSize="sm" />
     </Div>
   )
 }
 
 export default function HomePage() {
+  const t = useTranslations('home')
+
   return (
     <Suspense
       fallback={
         <Div className="text-center">
-          <Spinner variant="primary" size="md" text="Loading..." />
+          <Spinner variant="primary" size="md" text={t('loading')} />
         </Div>
       }
     >

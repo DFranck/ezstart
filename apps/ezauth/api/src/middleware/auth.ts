@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
 import { getAuthUserModel } from '../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
+import { mapToRecord } from '../utils/map-to-record.js'
 
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
@@ -46,16 +47,6 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       return res.status(401).json({ error: 'User not found' })
     }
 
-    // Convert appRoles Map to plain object (Mongoose .lean() may return Map or plain object)
-    let appRolesObj: Record<string, string[]> = {}
-    if (user.appRoles) {
-      if (user.appRoles instanceof Map) {
-        appRolesObj = Object.fromEntries(user.appRoles)
-      } else {
-        appRolesObj = user.appRoles as Record<string, string[]>
-      }
-    }
-
     // Attach user to request
     req.user = {
       _id: user._id.toString(),
@@ -68,7 +59,7 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       apps: user.apps,
       roles: user.roles || [], // Legacy - kept for backward compatibility
       globalRoles: user.globalRoles || [],
-      appRoles: appRolesObj,
+      appRoles: mapToRecord(user.appRoles),
       permissions: user.permissions || [],
       features: user.features || [],
       organizationId: user.organizationId,
@@ -121,16 +112,6 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
     const user = await AuthUser.findById(payload.userId).select('-passwordHash').lean()
 
     if (user) {
-      // Convert appRoles Map to plain object (Mongoose .lean() may return Map or plain object)
-      let appRolesObj: Record<string, string[]> = {}
-      if (user.appRoles) {
-        if (user.appRoles instanceof Map) {
-          appRolesObj = Object.fromEntries(user.appRoles)
-        } else {
-          appRolesObj = user.appRoles as Record<string, string[]>
-        }
-      }
-
       req.user = {
         _id: user._id.toString(),
         email: user.email,
@@ -142,7 +123,7 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
         apps: user.apps,
         roles: user.roles || [], // Legacy - kept for backward compatibility
         globalRoles: user.globalRoles || [],
-        appRoles: appRolesObj,
+        appRoles: mapToRecord(user.appRoles),
         permissions: user.permissions || [],
         features: user.features || [],
         organizationId: user.organizationId,

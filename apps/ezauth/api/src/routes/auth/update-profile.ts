@@ -1,0 +1,76 @@
+import type { Request, Response } from 'express'
+import {
+  createRouterWithDoc,
+  createAuthMiddleware,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
+import { Router as ExpressRouter } from 'express'
+import { getAuthUserModel } from '../../models/auth-user.js'
+import { logger } from '@ezstart/logger/server'
+import { z } from 'zod'
+import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
+
+const { authMiddleware } = createAuthMiddleware()
+
+export const updateProfileRegistry = new OpenAPIRegistry()
+const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(updateProfileRegistry, router)
+
+const updateProfileSchema = z.object({
+  firstName: z.string().trim().max(100).optional().describe('First name'),
+  lastName: z.string().trim().max(100).optional().describe('Last name'),
+  avatar: z.string().url().optional().describe('Avatar URL'),
+})
+
+const updateProfileController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!
+
+    const parsed = updateProfileSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid profile data', parsed.error.issues)
+    }
+
+    const { firstName, lastName, avatar } = parsed.data
+
+    // Build update object with only provided fields
+    const update: Record<string, unknown> = {}
+    if (firstName !== undefined) update.firstName = firstName
+    if (lastName !== undefined) update.lastName = lastName
+    if (avatar !== undefined) update.avatar = avatar
+
+    if (Object.keys(update).length === 0) {
+      return sendError(res, 'No fields to update', 400)
+    }
+
+    const AuthUser = await getAuthUserModel()
+    const user = await AuthUser.findByIdAndUpdate(userId, { $set: update }, { new: true })
+
+    if (!user) {
+      return sendError(res, 'User not found', 404)
+    }
+
+    sendSuccess(res, { user: user.toAuthUser() })
+  } catch (error) {
+    logger.error('Update profile error:', error)
+    sendError(res, error instanceof Error ? error.message : 'Failed to update profile', 500)
+  }
+}
+
+docRouter.put('/profile', authMiddleware, updateProfileController, {
+  summary: 'Update own profile (firstName, lastName, avatar)',
+  tags: ['User'],
+  bodySchema: updateProfileSchema,
+  responseSchema: userResponseSchema,
+  extraResponses: {
+    400: { description: 'No fields to update', schema: errorResponseSchema },
+    401: { description: 'Authentication required', schema: errorResponseSchema },
+    404: { description: 'User not found', schema: errorResponseSchema },
+  },
+})
+
+export default router

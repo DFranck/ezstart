@@ -11,12 +11,16 @@ import {
 } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { TotpService } from '../../services/totp.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
   loginRequestSchema,
   userResponseSchema,
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
+import jwt from 'jsonwebtoken'
+
+const JWT_SECRET = process.env.JWT_SECRET!
 
 export const loginCookieRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -34,7 +38,33 @@ const loginCookieController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid login request', parsed.error.issues)
     }
 
-    // Get token directly (skip auth code)
+    // Validate credentials first
+    const userId = await AuthService.validateCredentials(parsed.data)
+
+    // Check if user has 2FA enabled
+    const has2FA = await TotpService.isEnabled(userId)
+
+    if (has2FA) {
+      const tempToken = jwt.sign(
+        {
+          userId,
+          app: parsed.data.app,
+          redirect_uri: parsed.data.redirect_uri,
+          type: '2fa_pending',
+          mode: 'cookie',
+        },
+        JWT_SECRET,
+        { expiresIn: '5m' }
+      )
+
+      return sendSuccess(res, {
+        requires2FA: true,
+        tempToken,
+        message: 'Two-factor authentication required',
+      })
+    }
+
+    // No 2FA — proceed with normal login
     const authResult = await AuthService.loginWithToken(parsed.data)
 
     // Set httpOnly cookie

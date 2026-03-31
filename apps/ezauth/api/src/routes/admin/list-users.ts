@@ -69,8 +69,7 @@ const listUsersController = async (req: Request, res: Response) => {
     }
 
     const AuthUser = await getAuthUserModel()
-    const { page, limit } = parsedQuery.data
-
+    const { page, limit, search, role } = parsedQuery.data
     const query: Record<string, unknown> = {}
 
     // Superadmin sees all users, admin sees non-superadmins in their apps
@@ -79,6 +78,24 @@ const listUsersController = async (req: Request, res: Response) => {
       if ((currentUser.apps?.length ?? 0) > 0) {
         query.apps = { $in: currentUser.apps }
       }
+    }
+
+    // Search filter: match email or username (case-insensitive)
+    if (search) {
+      query.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { username: { $regex: search, $options: 'i' } },
+      ]
+    }
+
+    // Role filter: match in globalRoles, legacy roles, or any appRoles value
+    if (role) {
+      query.$and = [
+        ...((query.$and as Record<string, unknown>[]) || []),
+        {
+          $or: [{ globalRoles: role }, { roles: role }],
+        },
+      ]
     }
 
     const [users, total] = await Promise.all([

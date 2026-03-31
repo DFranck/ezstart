@@ -9,6 +9,10 @@ import forgotPasswordRouter, { forgotPasswordRegistry } from './forgot-password.
 import resetPasswordRouter, { resetPasswordRegistry } from './reset-password.js'
 import verifyEmailRouter, { verifyEmailRegistry } from './verify-email.js'
 import sendVerificationRouter, { sendVerificationRegistry } from './send-verification.js'
+import checkAvailabilityRouter, { checkAvailabilityRegistry } from './check-availability.js'
+import { twoFactorRegistries, twoFactorRouters } from './two-factor/index.js'
+import deleteAccountRouter, { deleteAccountRegistry } from './delete-account.js'
+import updateProfileRouter, { updateProfileRegistry } from './update-profile.js'
 
 export const authRegistries = [
   registerRegistry,
@@ -22,6 +26,10 @@ export const authRegistries = [
   resetPasswordRegistry,
   verifyEmailRegistry,
   sendVerificationRegistry,
+  checkAvailabilityRegistry,
+  ...twoFactorRegistries,
+  deleteAccountRegistry,
+  updateProfileRegistry,
 ]
 
 export const authRouters = [
@@ -36,4 +44,8 @@ export const authRouters = [
   resetPasswordRouter,
   verifyEmailRouter,
   sendVerificationRouter,
+  checkAvailabilityRouter,
+  ...twoFactorRouters,
+  deleteAccountRouter,
+  updateProfileRouter,
 ]

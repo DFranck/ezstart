@@ -18,8 +18,9 @@ import { callApi } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { PasswordStrength } from './PasswordStrength'
 
 interface RegisterFormProps {
   app: string
@@ -30,6 +31,7 @@ interface FormData {
   email: string
   username: string
   password: string
+  confirmPassword: string
   firstName: string
   lastName: string
 }
@@ -40,16 +42,73 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [registered, setRegistered] = useState(false)
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null)
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
+  const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const form = useForm<FormData>({
     defaultValues: {
       email: '',
       username: '',
       password: '',
+      confirmPassword: '',
       firstName: '',
       lastName: '',
     },
+    mode: 'onChange',
   })
+
+  const watchPassword = form.watch('password')
+
+  // Debounced availability check
+  const checkAvailability = useCallback(async (field: 'email' | 'username', value: string) => {
+    if (!value || value.length < 3) {
+      if (field === 'email') setEmailAvailable(null)
+      else setUsernameAvailable(null)
+      return
+    }
+
+    try {
+      const params = new URLSearchParams({ [field]: value })
+      const response = await callApi(`/auth/check-availability?${params.toString()}`, {
+        appName: 'ezauth',
+        method: 'GET',
+      })
+
+      if (response.ok) {
+        const data = response.data as {
+          emailAvailable?: boolean
+          usernameAvailable?: boolean
+        }
+        if (field === 'email') setEmailAvailable(data.emailAvailable ?? null)
+        else setUsernameAvailable(data.usernameAvailable ?? null)
+      }
+    } catch {
+      // Silently fail — availability check is non-critical
+    }
+  }, [])
+
+  const watchEmail = form.watch('email')
+  const watchUsername = form.watch('username')
+
+  useEffect(() => {
+    if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
+    setEmailAvailable(null)
+    emailTimerRef.current = setTimeout(() => checkAvailability('email', watchEmail), 500)
+    return () => {
+      if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
+    }
+  }, [watchEmail, checkAvailability])
+
+  useEffect(() => {
+    if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
+    setUsernameAvailable(null)
+    usernameTimerRef.current = setTimeout(() => checkAvailability('username', watchUsername), 500)
+    return () => {
+      if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
+    }
+  }, [watchUsername, checkAvailability])
 
   const onSubmit = async (formData: FormData) => {
     setLoading(true)
@@ -124,6 +183,11 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
                 <Input type="email" required placeholder={t('emailPlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
+              {emailAvailable === false && (
+                <P size="xs" className="text-destructive">
+                  {t('emailTaken')}
+                </P>
+              )}
             </FormItem>
           )}
         />
@@ -138,6 +202,11 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
                 <Input type="text" required placeholder={t('usernamePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
+              {usernameAvailable === false && (
+                <P size="xs" className="text-destructive">
+                  {t('usernameTaken')}
+                </P>
+              )}
             </FormItem>
           )}
         />
@@ -186,7 +255,31 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
                 />
               </FormControl>
               <FormMessage />
+              <PasswordStrength password={watchPassword} />
               <P className="mt-1 text-xs text-muted-foreground">{t('passwordHint')}</P>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          rules={{
+            validate: (value: string) =>
+              value === form.getValues('password') || t('passwordMismatch'),
+          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('confirmPassword')}</FormLabel>
+              <FormControl>
+                <PasswordInput
+                  required
+                  minLength={6}
+                  placeholder={t('confirmPasswordPlaceholder')}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

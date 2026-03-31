@@ -10,6 +10,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { mapToRecord } from '../../utils/map-to-record.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 
@@ -142,20 +143,12 @@ const updateUserController = async (req: Request, res: Response) => {
 
     await user.save()
 
-    // Convert appRoles Map to object for response
-    const appRolesObj: Record<string, string[]> = {}
-    if (user.appRoles) {
-      user.appRoles.forEach((roles: string[], appName: string) => {
-        appRolesObj[appName] = roles
-      })
-    }
-
     sendSuccess(res, {
       user: {
         ...user.toObject(),
         _id: String(user._id),
         globalRoles: user.globalRoles || [],
-        appRoles: appRolesObj,
+        appRoles: mapToRecord(user.appRoles),
         roles: user.roles || [],
         permissions: user.permissions || [],
         features: user.features || [],

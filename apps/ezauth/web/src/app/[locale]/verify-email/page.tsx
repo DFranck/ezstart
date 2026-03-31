@@ -122,8 +122,10 @@ function VerifyEmailContent() {
 }
 
 export default function VerifyEmailPage() {
+  const t = useTranslations('login')
+
   return (
-    <Suspense fallback={<Spinner variant="primary" size="lg" text="Loading..." />}>
+    <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
       <VerifyEmailContent />
     </Suspense>
   )

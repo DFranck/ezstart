@@ -14,20 +14,13 @@ import {
 } from '@ezstart/auth-sdk/server'
 import { ROLE_PERMISSIONS, ROLE_FEATURES } from '@ezstart/rbac/server'
 import { logger } from '@ezstart/logger/server'
+import { mapToRecord } from '../utils/map-to-record.js'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
 const JWT_EXPIRES_IN = '7d'
 
 function buildJwtPayload(user: AuthUserDocument) {
-  // Convert appRoles Map to plain object for JWT
-  const appRolesObj: Record<string, string[]> = {}
-  if (user.appRoles) {
-    user.appRoles.forEach((roles: string[], appName: string) => {
-      appRolesObj[appName] = roles
-    })
-  }
-
   return {
     userId: user._id!.toString(),
     email: user.email,
@@ -35,7 +28,7 @@ function buildJwtPayload(user: AuthUserDocument) {
     apps: user.apps,
     roles: user.roles || [], // DEPRECATED - kept for backwards compatibility
     globalRoles: user.globalRoles || [],
-    appRoles: appRolesObj,
+    appRoles: mapToRecord(user.appRoles),
     permissions: user.permissions || [],
     features: user.features || [],
   }
@@ -118,35 +111,38 @@ export class AuthService {
     return this.generateAuthCode(user._id!.toString(), data.app, data.redirect_uri)
   }
 
-  // Login user
-  static async login(data: LoginRequest): Promise<AuthCodeResponse> {
+  /**
+   * Validate user credentials without generating an auth code.
+   * Used by the login route to check credentials before 2FA.
+   * Returns the user ID on success.
+   */
+  static async validateCredentials(data: LoginRequest): Promise<string> {
     const AuthUserModel = await getAuthUserModel()
-    // Find user by email OR username
     const user = await AuthUserModel.findOne({
-      $or: [
-        { email: data.email },
-        { username: data.email }, // Allow using email field for username too
-      ],
+      $or: [{ email: data.email }, { username: data.email }],
     })
     if (!user) {
       throw new Error('Invalid credentials')
     }
 
-    // Check password
     const isValidPassword = await user.comparePassword(data.password)
     if (!isValidPassword) {
       throw new Error('Invalid credentials')
     }
 
-    // Check if user has access to the app
+    // Grant access to new app automatically in v1
     if (!user.apps.includes(data.app)) {
-      // Grant access to new app automatically in v1
       user.apps.push(data.app)
       await user.save()
     }
 
-    // Generate auth code
-    return this.generateAuthCode(user._id!.toString(), data.app, data.redirect_uri)
+    return user._id!.toString()
+  }
+
+  // Login user
+  static async login(data: LoginRequest): Promise<AuthCodeResponse> {
+    const userId = await this.validateCredentials(data)
+    return this.generateAuthCode(userId, data.app, data.redirect_uri)
   }
 
   // ✅ NEW: Login with direct token (httpOnly cookie mode)
@@ -250,6 +246,17 @@ export class AuthService {
       throw new Error('User not found')
     }
     return user.toAuthUser()
+  }
+
+  /**
+   * Public wrapper for generating auth codes (used by 2FA validate route)
+   */
+  static async generateAuthCodePublic(
+    userId: string,
+    app: string,
+    redirectUri?: string
+  ): Promise<AuthCodeResponse> {
+    return this.generateAuthCode(userId, app, redirectUri)
   }
 
   // Private: Generate auth code

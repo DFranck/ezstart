@@ -22,6 +22,7 @@ import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
 import { getAuthCodeModel } from './models/auth-code.js'
 import { getOAuthAccountModel } from './models/oauth-account.js'
+import { getTotpSecretModel } from './models/totp-secret.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { createCorsConfig } from '@ezstart/config/cors'
@@ -73,7 +74,8 @@ connectToMongo('ezauth')
     await getAuthUserModel()
     await getAuthCodeModel()
     await getOAuthAccountModel()
-    logger.info('✅ [Models] Initialized: AuthUser, AuthCode, OAuthAccount')
+    await getTotpSecretModel()
+    logger.info('✅ [Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret')
 
     return startServer(app, {
       routes,

@@ -12,12 +12,14 @@ import {
   Div,
   P,
   Span,
+  Spinner,
 } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { useTranslations } from 'next-intl'
 
 // Dynamic import for RegisterForm (182 lines)
 // Form is only shown after user clicks "Sign up with email"
@@ -30,6 +32,7 @@ const RegisterForm = dynamic(
 )
 
 function RegisterContent() {
+  const t = useTranslations('register')
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || 'ezstart'
   const theme = getAppTheme(app)
@@ -45,12 +48,12 @@ function RegisterContent() {
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-2xl md:text-3xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Create account to access{' '}
+          {t('createAccountToAccess')}{' '}
           <Span className={`${theme.primaryColor} font-medium`}>{theme.name}</Span>
         </CardDescription>
         {theme.showEzstartMessage && (
           <P variant={'description'} size={'xs'} className="hidden md:block">
-            One account, all EZStart apps!
+            {t('oneAccountAllApps')}
           </P>
         )}
       </CardHeader>
@@ -64,12 +67,12 @@ function RegisterContent() {
 
         <Div className="text-center">
           <P size={'xs'}>
-            Already have an account?{' '}
+            {t('hasAccount')}{' '}
             <Link
               href={`/login?${searchParams.toString()}`}
               className={`${theme.primaryColor} hover:opacity-80 font-medium`}
             >
-              Sign in
+              {t('login')}
             </Link>
           </P>
         </Div>
@@ -79,8 +82,10 @@ function RegisterContent() {
 }
 
 export default function RegisterPage() {
+  const t = useTranslations('login')
+
   return (
-    <Suspense fallback={<Div>Loading...</Div>}>
+    <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
       <RegisterContent />
     </Suspense>
   )
