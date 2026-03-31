@@ -17,7 +17,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       # Build packages + APIs only (webs are built by Vercel)
-      - run: pnpm turbo build --filter='./packages/*' --filter='api-*'
+      - run: pnpm turbo build --filter='./packages/*' --filter='api-*' --filter='@ezbill/types' --filter='@ezbill/templates' --filter='@gacha-analyzer/types' --filter='@green-pulse/types'
       # Typecheck everything (fast, no build needed)
       - run: pnpm turbo typecheck
       - run: pnpm turbo test || true
