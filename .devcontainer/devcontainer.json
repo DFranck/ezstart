@@ -6,7 +6,7 @@
       "version": "22"
     }
   },
-  "postCreateCommand": "npm install -g @anthropic-ai/claude-code && COREPACK_ENABLE_AUTO_PIN=0 COREPACK_ENABLE_STRICT=0 corepack enable && corepack install && pnpm install --frozen-lockfile && pnpm setup:env",
+  "postCreateCommand": "npm install -g @anthropic-ai/claude-code && COREPACK_ENABLE_AUTO_PIN=0 COREPACK_ENABLE_STRICT=0 corepack enable && corepack install && pnpm install --frozen-lockfile && pnpm turbo build --filter='./packages/*' && pnpm setup:env",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -41,96 +41,96 @@ apps/
 <details>
 <summary>90 etapes completees (cliquer pour voir)</summary>
 
-1. [x] Rediger plan detaille (taches par agent)
-2. [x] Nettoyer refs obsoletes port 5080 -> 5000
-3. [x] Ajouter ports 5080/5085 dans `@ezstart/config`
-4. [x] Creer `packages/ocr-sdk/` — moteur OCR + types + helpers
-5. [x] Creer `apps/gacha-analyzer/types/` — Rune, Gear, Scan, Game
-6. [x] Creer `apps/gacha-analyzer/api/` — Express + routes action-based + multer
-7. [x] Parser Summoners War (runes) — 16 tests
-8. [x] Parser Nikke (gear) — 8 tests
-9. [x] Creer `apps/gacha-analyzer/web/` — Next.js mobile-first
-10. [x] Client layout avec nav, auth, i18n
-11. [x] Engine efficacite Barion — 15 tests
-12. [x] Screen capture + frame diff + ROI selector draggable
-13. [x] Fix fetch-client FormData, turbo stream mode, dev scripts cross-platform
-14. [x] Pipeline end-to-end : capture -> crop ROI -> OCR Tesseract -> affichage rawText
-15. [x] Parser robuste (hardcoded main stats, fuzzy matching, multiline, validation ranges)
-16. [x] Synergy scoring (5 archetypes, gem/roll awareness)
-17. [x] Profile selector par jeu (early/mid/late) avec seuils + level strictness
-18. [x] Zoomed ROI preview (drag + scroll zoom, resolution native)
-19. [x] Image preprocessing (grayscale + contrast + binarize)
-20. [x] Bouton rescan manuel
-21. [x] Fix efficacite Barion (0-100%, tier display, set bonus)
-22. [x] Bench mode — 3 sources x 8 presets x zones individuelles = 24 OCR runs
-23. [x] 8 zones de lecture (setSlot, mainStat, quality, innate, sub1-4)
-24. [x] Masques rouges (bench) / marron (scan) pour cacher les boutons UI
-25. [x] Dual preview (tabs zoom/full) avec lock toggle
-26. [x] Layouts nommes en DB (rune-manager, power-up, etc.)
-27. [x] Import 1001 monstres SWARFARM avec suggestions par archetype
-28. [x] Theme SW CSS variables (OKLCH, roll quality, tiers, elements)
-29. [x] Profil joueur envoye a l'API
-30. [x] 14 build archetypes avec gem/roll awareness
-31. [x] Artifact types + parser (33 substats, 10 tests)
-32. [x] Mode unifie zoom+ROI (full window + zoom + drag ROI)
-33. [x] Upload mode supprime — capture only
-34. [x] UX pass : settings collapsibles, compact RuneCard, gaming homepage
-35. [x] Game banners SVG + rune set icons SWARFARM
-36. [x] Interactions separees : left=ROI, middle=pan, Ctrl+scroll=zoom
-37. [x] 3 rune card templates (compact/detailed/gaming) avec selecteur
-38. [x] Skeletons permanents pour tous les templates
-39. [x] Roll breakdown par substat avec badges qualite SW
-40. [x] Roll Quality separe (current vs post-gem)
-41. [x] Gem/grind recommendations par archetype avec icones
-42. [x] Set affinity — archetypes priorises par coherence du set
-43. [x] Flash background base sur le conseil (sell=rouge, upgrade=bleu, keep=vert)
-44. [x] Cache image hash — pas de rescan duplique
-45. [x] Conseil progressif considere le potentiel
-46. [x] Toutes couleurs via CSS variables (theme GA + globals)
-47. [x] Advice simplifie — "UP UPGRADE — 65% to keep"
-48. [x] Page /data avec 11 sections de reference + tooltips
-49. [x] SET_STAT_TIERS per set + setWeightedEfficiency dans le scoring
-50. [x] Innate scoring (S=-20, A=-12, B=0, C=+5, D=-5)
-51. [x] Low-roll penalty S/A tier + non-grindable penalty
-52. [x] SET_STRENGTH (consensus communautaire S/A/B/C/D)
-53. [x] Gem logic 100% set-based (plus archetype-based)
-54. [x] Archetypes retires du scoring principal (info secondaire)
-55. [x] Rune card compact : badge simplifie + breakdown score +/-
-56. [x] Page /data mergee 14->10 sections, sprites rune sets, tableau unifie
-57. [x] Page /sources creee (APIs, wikis, outils, GitHub)
-58. [x] Home : images de fond par jeu + logos PNG (plus d'emojis)
-59. [x] Banner decoratif avec H1 overlay sur les pages jeu
-60. [x] UX scan : bouton parametres a cote de capture, settings en dessous
-61. [x] Scripts dev:x clean .next automatiquement (rimraf)
-62. [x] Architecture multi-game : images/[game]/, config/games/[game].ts
-63. [x] Theme CSS splite : common + summoners-war + nikke
-64. [x] Assets Nikke : 12 icons (manufacturers, gear types, rarities)
-65. [x] Halo lumineux sur logos de jeu (drop-shadow)
-66. [x] Banner margin dynamique (ResizeObserver sur header)
-67. [x] Charts package UI — Recharts + DataTable installes, /data refactore avec radar chart + DataTables
-68. [x] DataTable package UI — @tanstack/react-table + sort/filter/pagination, utilise dans /data
-69. [x] Refacto OCR SDK — parsers/analyzers dans gacha-analyzer/api, SDK 100% agnostique
-70. [x] Ancient runes — detection "A" OCR, ranges in-game verifies (HP% 6-10), base vs roll separe, badge Ancient
-71. [x] Hot reload API — tsx watch < NUL (fix Windows/turbo PTY bug)
-72. [x] Scoring fixes — quality/mismatch penalty, potential set-weighted, seuils resserres, low-roll avg-based
-73. [x] UI card compact — value/max total, powerup rolls individuels, breakdown score, gem breakdown
-74. [x] Gem logic v2 — rolls protegent massivement (+0.4/powerup), gem la stat avec least rolls + low tier
-75. [x] Gem/Grind sprites — gem+set overlay, grind+set, ban icon non-grindable, tooltips ranges
-76. [x] Main stat tier scoring — factor multiplicateur (S=1.0, B=0.8, C=0.6) pour slots 2/4/6
-77. [x] Resume narratif — "Pourquoi SELL/UPGRADE?" avec check/cross + gem/grind reco, toujours visible
-78. [x] Debug panel expandable — flow complet colore (gris/vert/rouge), 3 profils cote a cote
-79. [x] History page fix — \_id->id mapping, confidence display, scan cards avec set/slot/advice badge
-80. [x] Scan detail fix — memory:// image fallback, confidence x100 fix
-81. [x] Re-analyser — endpoint API + bouton pour re-parser avec nouveau code
-82. [x] Scan feedback — agree/disagree + commentaire, filtre history, badge scan card
-83. [x] Estimation rolls — parser (aX%) hints du rawText, 6 tests, rollHints dans RuneData
-84. [x] OpenAPI/Swagger — 15 operations documentees, /docs expose sur localhost:5080/docs
-85. [x] Screenshots — thumbnail JPEG 50% sauve en DB, affiche dans scan detail
-86. [x] History enrichie — scan cards avec set/slot/quality/main/subs/eff, 6 filtres client-side
-87. [x] Debug panel fix — uses API values (adjustedSetWeighted, adjustedPotential, setWeightRatio)
-88. [x] Frame diff masks — ignores masked zones in comparison (no rescan on sell button change)
-89. [x] Pagination ALL APIs — ezauth, ezbill, ezpay, green-pulse (13 endpoints added)
-90. [x] Bug report system — categories, status flow, report filter, badge
+- [x] Rediger plan detaille (taches par agent)
+- [x] Nettoyer refs obsoletes port 5080 -> 5000
+- [x] Ajouter ports 5080/5085 dans `@ezstart/config`
+- [x] Creer `packages/ocr-sdk/` — moteur OCR + types + helpers
+- [x] Creer `apps/gacha-analyzer/types/` — Rune, Gear, Scan, Game
+- [x] Creer `apps/gacha-analyzer/api/` — Express + routes action-based + multer
+- [x] Parser Summoners War (runes) — 16 tests
+- [x] Parser Nikke (gear) — 8 tests
+- [x] Creer `apps/gacha-analyzer/web/` — Next.js mobile-first
+- [x] Client layout avec nav, auth, i18n
+- [x] Engine efficacite Barion — 15 tests
+- [x] Screen capture + frame diff + ROI selector draggable
+- [x] Fix fetch-client FormData, turbo stream mode, dev scripts cross-platform
+- [x] Pipeline end-to-end : capture -> crop ROI -> OCR Tesseract -> affichage rawText
+- [x] Parser robuste (hardcoded main stats, fuzzy matching, multiline, validation ranges)
+- [x] Synergy scoring (5 archetypes, gem/roll awareness)
+- [x] Profile selector par jeu (early/mid/late) avec seuils + level strictness
+- [x] Zoomed ROI preview (drag + scroll zoom, resolution native)
+- [x] Image preprocessing (grayscale + contrast + binarize)
+- [x] Bouton rescan manuel
+- [x] Fix efficacite Barion (0-100%, tier display, set bonus)
+- [x] Bench mode — 3 sources x 8 presets x zones individuelles = 24 OCR runs
+- [x] 8 zones de lecture (setSlot, mainStat, quality, innate, sub1-4)
+- [x] Masques rouges (bench) / marron (scan) pour cacher les boutons UI
+- [x] Dual preview (tabs zoom/full) avec lock toggle
+- [x] Layouts nommes en DB (rune-manager, power-up, etc.)
+- [x] Import 1001 monstres SWARFARM avec suggestions par archetype
+- [x] Theme SW CSS variables (OKLCH, roll quality, tiers, elements)
+- [x] Profil joueur envoye a l'API
+- [x] 14 build archetypes avec gem/roll awareness
+- [x] Artifact types + parser (33 substats, 10 tests)
+- [x] Mode unifie zoom+ROI (full window + zoom + drag ROI)
+- [x] Upload mode supprime — capture only
+- [x] UX pass : settings collapsibles, compact RuneCard, gaming homepage
+- [x] Game banners SVG + rune set icons SWARFARM
+- [x] Interactions separees : left=ROI, middle=pan, Ctrl+scroll=zoom
+- [x] 3 rune card templates (compact/detailed/gaming) avec selecteur
+- [x] Skeletons permanents pour tous les templates
+- [x] Roll breakdown par substat avec badges qualite SW
+- [x] Roll Quality separe (current vs post-gem)
+- [x] Gem/grind recommendations par archetype avec icones
+- [x] Set affinity — archetypes priorises par coherence du set
+- [x] Flash background base sur le conseil (sell=rouge, upgrade=bleu, keep=vert)
+- [x] Cache image hash — pas de rescan duplique
+- [x] Conseil progressif considere le potentiel
+- [x] Toutes couleurs via CSS variables (theme GA + globals)
+- [x] Advice simplifie — "UP UPGRADE — 65% to keep"
+- [x] Page /data avec 11 sections de reference + tooltips
+- [x] SET_STAT_TIERS per set + setWeightedEfficiency dans le scoring
+- [x] Innate scoring (S=-20, A=-12, B=0, C=+5, D=-5)
+- [x] Low-roll penalty S/A tier + non-grindable penalty
+- [x] SET_STRENGTH (consensus communautaire S/A/B/C/D)
+- [x] Gem logic 100% set-based (plus archetype-based)
+- [x] Archetypes retires du scoring principal (info secondaire)
+- [x] Rune card compact : badge simplifie + breakdown score +/-
+- [x] Page /data mergee 14->10 sections, sprites rune sets, tableau unifie
+- [x] Page /sources creee (APIs, wikis, outils, GitHub)
+- [x] Home : images de fond par jeu + logos PNG (plus d'emojis)
+- [x] Banner decoratif avec H1 overlay sur les pages jeu
+- [x] UX scan : bouton parametres a cote de capture, settings en dessous
+- [x] Scripts dev:x clean .next automatiquement (rimraf)
+- [x] Architecture multi-game : images/[game]/, config/games/[game].ts
+- [x] Theme CSS splite : common + summoners-war + nikke
+- [x] Assets Nikke : 12 icons (manufacturers, gear types, rarities)
+- [x] Halo lumineux sur logos de jeu (drop-shadow)
+- [x] Banner margin dynamique (ResizeObserver sur header)
+- [x] Charts package UI — Recharts + DataTable installes, /data refactore avec radar chart + DataTables
+- [x] DataTable package UI — @tanstack/react-table + sort/filter/pagination, utilise dans /data
+- [x] Refacto OCR SDK — parsers/analyzers dans gacha-analyzer/api, SDK 100% agnostique
+- [x] Ancient runes — detection "A" OCR, ranges in-game verifies (HP% 6-10), base vs roll separe, badge Ancient
+- [x] Hot reload API — tsx watch < NUL (fix Windows/turbo PTY bug)
+- [x] Scoring fixes — quality/mismatch penalty, potential set-weighted, seuils resserres, low-roll avg-based
+- [x] UI card compact — value/max total, powerup rolls individuels, breakdown score, gem breakdown
+- [x] Gem logic v2 — rolls protegent massivement (+0.4/powerup), gem la stat avec least rolls + low tier
+- [x] Gem/Grind sprites — gem+set overlay, grind+set, ban icon non-grindable, tooltips ranges
+- [x] Main stat tier scoring — factor multiplicateur (S=1.0, B=0.8, C=0.6) pour slots 2/4/6
+- [x] Resume narratif — "Pourquoi SELL/UPGRADE?" avec check/cross + gem/grind reco, toujours visible
+- [x] Debug panel expandable — flow complet colore (gris/vert/rouge), 3 profils cote a cote
+- [x] History page fix — \_id->id mapping, confidence display, scan cards avec set/slot/advice badge
+- [x] Scan detail fix — memory:// image fallback, confidence x100 fix
+- [x] Re-analyser — endpoint API + bouton pour re-parser avec nouveau code
+- [x] Scan feedback — agree/disagree + commentaire, filtre history, badge scan card
+- [x] Estimation rolls — parser (aX%) hints du rawText, 6 tests, rollHints dans RuneData
+- [x] OpenAPI/Swagger — 15 operations documentees, /docs expose sur localhost:5080/docs
+- [x] Screenshots — thumbnail JPEG 50% sauve en DB, affiche dans scan detail
+- [x] History enrichie — scan cards avec set/slot/quality/main/subs/eff, 6 filtres client-side
+- [x] Debug panel fix — uses API values (adjustedSetWeighted, adjustedPotential, setWeightRatio)
+- [x] Frame diff masks — ignores masked zones in comparison (no rescan on sell button change)
+- [x] Pagination ALL APIs — ezauth, ezbill, ezpay, green-pulse (13 endpoints added)
+- [x] Bug report system — categories, status flow, report filter, badge
 
 </details>
 
@@ -459,35 +459,35 @@ apps/
 
 ### Sprint 1 — Stabilisation (bugs + deploy)
 
-1. A1 — Fix scan doublons (perceptual hash)
-2. B1 — Auth/rate limit sur POST /scan
-3. C6 — Filtres history cote serveur
-4. A2 — Supprimer les `as unknown as` (aligner types)
-5. E13 — Deploy Railway + Vercel
-6. C1 — Mode upload photo pour mobile
+- A1 — Fix scan doublons (perceptual hash)
+- B1 — Auth/rate limit sur POST /scan
+- C6 — Filtres history cote serveur
+- A2 — Supprimer les `as unknown as` (aligner types)
+- E13 — Deploy Railway + Vercel
+- C1 — Mode upload photo pour mobile
 
 ### Sprint 2 — Qualite code
 
-7. A7 — Extraire buildScanPayload (deduplicate scan page)
-8. A8 — Split rune-card-compact.tsx
-9. A9 — Split scan-service.ts
-10. A3 — Typer les routes API (supprimer Record<string, any>)
-11. A4+A5 — Supprimer les any restants
-12. C2+C3+C4 — Petits fixes UX (i18n, emojis, icons)
+- A7 — Extraire buildScanPayload (deduplicate scan page)
+- A8 — Split rune-card-compact.tsx
+- A9 — Split scan-service.ts
+- A3 — Typer les routes API (supprimer Record<string, any>)
+- A4+A5 — Supprimer les any restants
+- C2+C3+C4 — Petits fixes UX (i18n, emojis, icons)
 
 ### Sprint 3 — Nikke + Features
 
-13. E1 — Nikke gear analyzer complet
-14. E2 — Detection grind existant
-15. E4 — Fallback IA ameliore
-16. E5 — Import SWEX JSON
+- E1 — Nikke gear analyzer complet
+- E2 — Detection grind existant
+- E4 — Fallback IA ameliore
+- E5 — Import SWEX JSON
 
 ### Sprint 4 — Advanced features
 
-17. E3 — Batch scanning
-18. E6 — Integration builds populaires
-19. E8 — Compare runes
-20. E10 — Artifact analysis
+- E3 — Batch scanning
+- E6 — Integration builds populaires
+- E8 — Compare runes
+- E10 — Artifact analysis
 
 ---
 

@@ -1205,7 +1205,12 @@ pnpm typecheck
 - ❌ **JAMAIS** commiter si typecheck échoue — corriger d'abord
 - ❌ **JAMAIS** push si le build risque de fail sur Railway/Vercel
 
-### 4. Documentation README
+### 4. Backlog Formatting
+
+- App backlogs (`apps/*/BACKLOG.md`) utilisent `- [ ]` (tirets), **PAS** de listes numérotées (`1. [ ]`). Cela évite les conflits de merge quand plusieurs personnes ajoutent des items.
+- Seul le BACKLOG racine du monorepo (`BACKLOG.md`) peut utiliser des numéros.
+
+### 5. Documentation README
 
 ⚠️ **CRITIQUE pour packages** :
 
