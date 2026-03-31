@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -59,7 +60,13 @@ import {
   gemGrindColumns,
 } from './data-columns'
 
-import { SetRadarChart } from './set-radar-chart'
+const SetRadarChart = dynamic(
+  () => import('./set-radar-chart').then(mod => ({ default: mod.SetRadarChart })),
+  {
+    ssr: false,
+    loading: () => <Div className="h-64 animate-pulse bg-muted rounded" />,
+  }
+)
 
 // ---------------------------------------------------------------------------
 // Component

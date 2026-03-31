@@ -45,8 +45,7 @@ listWorkspacesRouter.get(
         query.status = status
       }
 
-      // @ts-expect-error - Mongoose type inference issue
-      const workspaces = await Workspace.find(query)
+      const workspaces = await (Workspace.find as Function)(query)
         .sort({ createdAt: -1 })
         .skip(offset)
         .limit(limit)
@@ -84,7 +83,7 @@ listWorkspacesRouter.get(
         )
       )
 
-      sendSuccess(res, { workspaces: workspacesWithStats, total })
+      sendSuccess(res, workspacesWithStats, { total, limit, offset })
     } catch (error) {
       logger.error('Error listing workspaces:', error)
       sendError(res, 'Internal server error')
