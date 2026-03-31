@@ -30,12 +30,20 @@
     "dev:asc": "rimraf apps/asc-tcd/web/.next && turbo run dev --filter=web-asc-tcd...",
     "dev:all": "rimraf apps/*/web/.next && turbo run dev --concurrency 60",
     "icons:generate": "node packages/next-config/scripts/generate-all-icons.js",
+    "check:i18n": "node scripts/tools/check-i18n.js",
+    "check:size": "node scripts/tools/check-component-size.js",
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["prettier --write"],
-    "*.{js,jsx}": ["prettier --write"],
-    "*.{json,md,css}": ["prettier --write"]
+    "*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{js,jsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "jest": {
     "projects": [
