@@ -9,7 +9,13 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
+import crypto from 'crypto'
 import { AuthService } from '../../services/auth.service.js'
+import { getAuthUserModel } from '../../models/auth-user.js'
+import { getAuthCodeModel } from '../../models/auth-code.js'
+import { emailService } from '../../services/email.service.js'
+import { emailVerificationTemplate } from '@ezstart/email-service'
+import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import {
   registerRequestSchema,
@@ -34,11 +40,45 @@ const registerController = async (req: Request, res: Response) => {
 
     const authCode = await AuthService.register(parsed.data)
 
+    // Send verification email
+    try {
+      const AuthUserModel = await getAuthUserModel()
+      const user = await AuthUserModel.findOne({ email: parsed.data.email })
+
+      if (user) {
+        const AuthCodeModel = await getAuthCodeModel()
+        const token = crypto.randomBytes(32).toString('hex')
+
+        const verificationCode = new AuthCodeModel({
+          code: token,
+          userId: user._id!.toString(),
+          type: 'email-verification',
+          app: parsed.data.app,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        })
+
+        await verificationCode.save()
+
+        const verifyUrl = `${getWebUrl('ezauth')}/verify-email?token=${token}`
+
+        await emailService.send({
+          to: user.email,
+          subject: 'Verify your email address',
+          html: emailVerificationTemplate(verifyUrl, 'EZAuth'),
+        })
+
+        logger.info({ email: user.email }, 'Verification email sent after registration')
+      }
+    } catch (emailError) {
+      // Don't fail registration if email sending fails
+      logger.error('Failed to send verification email:', emailError)
+    }
+
     res.status(201)
     sendSuccess(res, {
       code: authCode.code,
       expires_at: authCode.expires_at,
-      message: 'User registered successfully',
+      message: 'User registered successfully. Please check your email to verify your account.',
     })
   } catch (error) {
     logger.error('Register error:', error)

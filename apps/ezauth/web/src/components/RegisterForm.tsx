@@ -17,6 +17,7 @@ import {
 import { callApi } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -35,8 +36,10 @@ interface FormData {
 
 export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
   const t = useTranslations('register')
+  const tv = useTranslations('verifyEmail')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [registered, setRegistered] = useState(false)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -77,24 +80,29 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
         )
       }
 
-      const result = response.data as { code: string }
-
-      // Redirect with authorization code
-      if (redirect_uri) {
-        logger.info('Redirecting to:', redirect_uri)
-        const url = new URL(redirect_uri)
-        url.searchParams.set('code', result.code)
-        window.location.href = url.toString()
-        // Don't set loading to false here since we're redirecting
-        return
-      } else {
-        logger.error('No redirect_uri provided! Cannot redirect after registration.')
-        throw new Error('No redirect URL configured. Please provide redirect_uri parameter.')
-      }
+      // Show "check your email" message
+      setRegistered(true)
+      logger.info('Registration successful, verification email sent')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
       setLoading(false)
     }
+  }
+
+  if (registered) {
+    return (
+      <Div className="space-y-4 text-center py-4">
+        <Div className="text-4xl">&#9993;</Div>
+        <P className="font-semibold text-lg">{tv('checkEmail')}</P>
+        <P className="text-sm text-muted-foreground">{tv('checkEmailDescription')}</P>
+        <Div className="pt-2">
+          <Link href="/login" className="text-sm text-primary hover:opacity-80 font-medium">
+            {tv('backToLogin')}
+          </Link>
+        </Div>
+      </Div>
+    )
   }
 
   return (

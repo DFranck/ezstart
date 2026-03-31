@@ -103,7 +103,7 @@ export class AuthService {
       firstName: data.firstName,
       lastName: data.lastName,
       apps: [data.app], // Grant access to the requesting app
-      isVerified: true, // For simplicity in v1
+      isVerified: false, // Requires email verification
       // Assign role and permissions (app-specific)
       appRoles,
       permissions: isBetaTester ? ROLE_PERMISSIONS['beta-tester'] : [],
