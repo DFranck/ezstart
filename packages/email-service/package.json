@@ -1,0 +1,30 @@
+{
+  "name": "@ezstart/email-service",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "resend": "^4.0.0",
+    "@ezstart/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "typescript": "^5.7.3"
+  }
+}
