@@ -8,6 +8,7 @@ import {
 } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { logger } from '@ezstart/logger/server'
 import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
 
@@ -15,35 +16,21 @@ export const meRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(meRegistry, router)
 
-// Get current user info (DUAL-MODE: supports httpOnly cookie + Authorization header)
+// Get current user info — delegates token extraction to verifyTokenMiddleware
 const meController = async (req: Request, res: Response) => {
   try {
-    // Try httpOnly cookie first
-    let token = req.cookies?.ezauth_token
-
-    // Fallback to Authorization header (localStorage mode)
-    if (!token) {
-      const authHeader = req.headers.authorization
-      if (authHeader?.startsWith('Bearer ')) {
-        token = authHeader.substring(7)
-      }
-    }
-
-    if (!token) {
-      return sendError(res, 'No token provided', 401)
-    }
-
-    const payload = await AuthService.verifyToken(token)
-    const user = await AuthService.getUserById(payload.userId)
+    // verifyTokenMiddleware already verified the token and attached req.user
+    // Re-fetch from DB via AuthService for consistency with other auth routes
+    const user = await AuthService.getUserById(req.userId!)
 
     sendSuccess(res, { user })
   } catch (error) {
     logger.error('Get user error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Invalid token', 401)
+    sendError(res, error instanceof Error ? error.message : 'Failed to fetch user', 500)
   }
 }
 
-docRouter.get('/me', meController, {
+docRouter.get('/me', verifyTokenMiddleware, meController, {
   summary: 'Get current user information',
   tags: ['User'],
   responseSchema: userResponseSchema,

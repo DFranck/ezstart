@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Block direct push to master — use feature branches + PR
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$branch" = "master" ] || [ "$branch" = "main" ]; then
+  echo ""
+  echo "  ❌ Direct push to master/main is forbidden!"
+  echo ""
+  echo "  Use a feature branch + Pull Request instead:"
+  echo "    git checkout -b feat/my-feature"
+  echo "    git push origin feat/my-feature"
+  echo "    Then create a PR on GitHub."
+  echo ""
+  echo "  To bypass (admin only): git push --no-verify"
+  echo ""
+  exit 1
+fi

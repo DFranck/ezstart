@@ -1,0 +1,35 @@
+{
+  "name": "EZStart Monorepo",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "postCreateCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropics.claude-code",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "typescript.tsdk": "node_modules/typescript/lib"
+      }
+    }
+  },
+  "forwardPorts": [5000, 5005, 5010, 5015, 5020, 5025, 5040, 5045, 5065, 5070, 5075, 5080, 5085],
+  "portsAttributes": {
+    "5005": { "label": "EZStart Web" },
+    "5015": { "label": "EZAuth Web" },
+    "5025": { "label": "EZBill Web" },
+    "5045": { "label": "EZPay Web" },
+    "5075": { "label": "GreenPulse Web" },
+    "5085": { "label": "Gacha Analyzer Web" }
+  }
+}
