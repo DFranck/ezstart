@@ -33,7 +33,8 @@
     "check:i18n": "node scripts/tools/check-i18n.js",
     "check:size": "node scripts/tools/check-component-size.js",
     "check:dead-code": "node scripts/tools/check-dead-code.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "setup:env": "node scripts/tools/setup-env.js"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
