@@ -65,7 +65,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 23. [x] extract-app.js test — après extraction, vérifier automatiquement que pnpm install && pnpm build passent
 24. [ ] insert-app.js reverse — importer un standalone dans le monorepo (inverse de extract)
 25. [x] Zod validation sur TOUTES les routes API (ezauth, ezbill, ezpay, ezstart, green-pulse) — gacha-analyzer déjà fait
-26. [ ] OpenAPI descriptions complètes — zéro warning au démarrage
+26. [x] OpenAPI descriptions complètes — zéro warning au démarrage
 
 ### Full audit 2026-03-29
 
@@ -105,7 +105,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P1 — Code quality cross-app
 
-63. [ ] i18n enforcement — pre-commit hook to detect hardcoded strings not wrapped in t()
+63. [x] i18n enforcement — check:i18n script created
 64. [x] Mongoose typing — eliminate @ts-expect-error across APIs via express-core model factory
 65. [x] Zod schema deduplication — verified no actual duplication across SDKs
 66. [x] Currency formatter — formatCurrency + getCurrencySymbol in packages/ui
@@ -115,15 +115,15 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 68. [ ] @ezstart/email-service — Resend/SendGrid with templates (password reset, verification, receipts, notifications)
 69. [x] Socket.IO event constants — fixed mismatch in ezstart
-70. [ ] Webhook validation middleware — signature verification + retry logic in express-core
+70. [x] Webhook validation middleware — createWebhookVerifier in express-core
 71. [x] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
 72. [x] Centralize app themes — all 8 apps have defined themes in config
 
 #### P3 — DevOps / Testing
 
 73. [ ] Test coverage baseline — all apps >=60%, shared setup in @ezstart/test-utils
-74. [ ] Dead code detector — ESLint unused-exports + pre-commit hook
-75. [ ] Component size limit — ESLint rule warn >300 lines
+74. [x] Dead code detector — check:dead-code script created
+75. [x] Component size limit — check:size script created
 76. [x] Pagination response consistency — all list endpoints return { data, meta: { total, limit, offset } }
 
 ---

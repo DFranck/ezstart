@@ -32,6 +32,7 @@
     "icons:generate": "node packages/next-config/scripts/generate-all-icons.js",
     "check:i18n": "node scripts/tools/check-i18n.js",
     "check:size": "node scripts/tools/check-component-size.js",
+    "check:dead-code": "node scripts/tools/check-dead-code.js",
     "prepare": "husky"
   },
   "lint-staged": {

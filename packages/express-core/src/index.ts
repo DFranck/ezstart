@@ -39,6 +39,7 @@ export { securityHeaders, securityHeadersPresets } from './middleware/security-h
 export type { SecurityHeadersOptions } from './middleware/security-headers.js'
 export { createAuthMiddleware, createRoleMiddleware } from './middleware/auth.js'
 export { createCsrfMiddleware } from './middleware/csrf.js'
+export { createWebhookVerifier } from './middleware/webhook.js'
 
 // Versioning
 export { createVersionedRouter, addVersionHeader, extractVersionFromPath } from './versioning.js'
