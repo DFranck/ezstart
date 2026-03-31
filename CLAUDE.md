@@ -57,6 +57,49 @@ Avant de déclarer une phase/feature terminée, Claude (manager) **rédige une c
 
 Claude rédige la checklist → agents exécutent → Claude utilise MCP pour les tests user → consolide et reporte.
 
+### Git — Branching & PRs (OBLIGATOIRE)
+
+**JAMAIS de push direct sur master/main.** Tout passe par des feature branches + Pull Request.
+
+**Au démarrage de chaque session**, Claude détecte l'utilisateur :
+
+```bash
+git config user.name  # → identifie qui travaille
+```
+
+**Règles par profil :**
+
+| Profil                             | Détection                                                                | Droits                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| **Admin** (DFranck, franck)        | `git config user.name` contient "franck" ou "dfranck" (case insensitive) | Peut bypass pre-push (`--no-verify`) si urgence. Review + merge les PRs.                                   |
+| **Collaborator** (tous les autres) | Tout autre user.name                                                     | JAMAIS de bypass. Branch obligatoire. PR obligatoire. Ne touche PAS aux packages/ ni aux configs monorepo. |
+
+**Flow obligatoire (TOUS les utilisateurs) :**
+
+1. **Créer une branche** : `git checkout -b {type}/{description}` (ex: `feat/portfolio`, `fix/login-bug`)
+2. **Développer** sur la branche
+3. **Commit** avec messages conventionnels (`feat:`, `fix:`, `refactor:`, etc.)
+4. **Push** la branche : `git push origin {branche}`
+5. **Créer la PR** : `gh pr create --title "..." --body "..."`
+6. **Review** : l'admin review et merge
+7. **Cleanup** : supprimer la branche après merge
+
+**Règles collaborator (non-admin) :**
+
+- ❌ JAMAIS modifier `packages/` directement — proposer via PR, l'admin valide
+- ❌ JAMAIS modifier `CLAUDE.md`, `DEV-RULES.md`, `BACKLOG.md` (root)
+- ❌ JAMAIS modifier les `.env`, `tsconfig.json` root, `turbo.json`
+- ✅ Peut créer/modifier dans `apps/{son-projet}/` uniquement
+- ✅ Peut utiliser les packages via import (pas les modifier)
+- ✅ Peut créer une nouvelle app avec `insert-app.js`
+
+**Nommage des branches :**
+
+- `feat/` — nouvelle feature ou app
+- `fix/` — bug fix
+- `refactor/` — refactoring sans changement fonctionnel
+- `chore/` — maintenance, docs, config
+
 ### Si les règles ne sont pas respectées :
 
 L'utilisateur peut dire : **"relis les règles CLAUDE.md"** → Claude relit et corrige immédiatement son comportement.
@@ -82,28 +125,33 @@ Quand l'utilisateur dit **"init"** (nouveau projet avec seulement CLAUDE.md) :
 **Socle universel — TOUJOURS appliqué lors d'un init (quel que soit le projet) :**
 
 Code quality :
+
 - Typecheck/lint obligatoire avant chaque commit
 - Jamais de secrets (clés API, tokens, .env) dans le code
 - Naming conventions cohérentes (PascalCase composants, camelCase fonctions/variables, UPPERCASE constantes, kebab-case dossiers)
 - Anti-over-documentation : documenter le WHY pas le WHAT, pas de README inutiles
 
 Architecture :
+
 - Réutilisabilité maximale (shared/packages > project-specific > layer-specific)
 - Pas de duplication de code ni de docs
 - Action-based organization quand applicable (1 fichier = 1 responsabilité)
 - Pas de dépendances circulaires
 
 Fichiers & scripts :
+
 - `.env.example` committé, `.env.local` gitignored
 - Scripts organisés dans des sous-dossiers (jamais de one-shot qui traînent)
 - Jamais de fichiers temporaires (tmp/, backup, src/ fantôme) à la racine
 
 Git :
+
 - Commits conventionnels : `type: description` (feat, fix, docs, refactor, test, chore)
 - Jamais de "Generated with Claude Code" ou "Co-Authored-By: Claude"
 - README mis à jour quand un package/module est modifié
 
 Communication :
+
 - Français pour la communication avec l'utilisateur
 - Concis et actionnable
 - Demander avant d'assumer
@@ -144,6 +192,7 @@ DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .en
 - 🔀 [apps/green-pulse/api/docs/ROUTING-PATTERN.md](./apps/green-pulse/api/docs/ROUTING-PATTERN.md) — Action-based routing reference
 
 ### Backlogs per-app
+
 - 🎮 [apps/gacha-analyzer/BACKLOG.md](./apps/gacha-analyzer/BACKLOG.md) — Gacha Analyzer
 - 💰 [apps/ezbill/BACKLOG.md](./apps/ezbill/BACKLOG.md) — EZBill
 - 🔐 [apps/ezauth/BACKLOG.md](./apps/ezauth/BACKLOG.md) — EZAuth
@@ -176,15 +225,15 @@ pnpm dev:types
 
 ### Ports
 
-| Service           | API  | Web  |
-| ----------------- | ---- | ---- |
-| **EZStart**       | 5000 | 5005 |
-| **EZAuth**        | 5010 | 5015 |
-| **EZBill**        | 5020 | 5025 |
-| **EZPay**         | 5040 | 5045 |
-| **ASC-TCD**       | —    | 5055 |
-| **FengShui**      | —    | 5065 |
-| **GreenPulse**    | 5070 | 5075 |
+| Service            | API  | Web  |
+| ------------------ | ---- | ---- |
+| **EZStart**        | 5000 | 5005 |
+| **EZAuth**         | 5010 | 5015 |
+| **EZBill**         | 5020 | 5025 |
+| **EZPay**          | 5040 | 5045 |
+| **ASC-TCD**        | —    | 5055 |
+| **FengShui**       | —    | 5065 |
+| **GreenPulse**     | 5070 | 5075 |
 | **Gacha Analyzer** | 5080 | 5085 |
 
 ---
@@ -224,12 +273,12 @@ pnpm dev:types
 
 **APIs → Railway** | **Web → Vercel**
 
-| API | URL |
-|-----|-----|
-| EZAuth | https://ezauth-api.up.railway.app |
-| EZPay | https://ezpay-api.up.railway.app |
-| EZBill | https://ezbill-api.up.railway.app |
+| API        | URL                                   |
+| ---------- | ------------------------------------- |
+| EZAuth     | https://ezauth-api.up.railway.app     |
+| EZPay      | https://ezpay-api.up.railway.app      |
+| EZBill     | https://ezbill-api.up.railway.app     |
 | GreenPulse | https://greenpulse-api.up.railway.app |
-| EZStart | https://ezstart-api.up.railway.app |
+| EZStart    | https://ezstart-api.up.railway.app    |
 
 **Web** : https://www.ezstart.xyz + sous-domaines Vercel
