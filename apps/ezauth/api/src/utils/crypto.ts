@@ -3,8 +3,8 @@ import crypto from 'crypto'
 const ALGORITHM = 'aes-256-gcm'
 
 function getKey(): Buffer {
-  const secret = process.env.JWT_SECRET
-  if (!secret) throw new Error('JWT_SECRET required for token encryption')
+  const secret = process.env.OAUTH_ENCRYPTION_KEY || process.env.JWT_SECRET
+  if (!secret) throw new Error('OAUTH_ENCRYPTION_KEY or JWT_SECRET required for token encryption')
   return crypto.createHash('sha256').update(secret).digest()
 }
 

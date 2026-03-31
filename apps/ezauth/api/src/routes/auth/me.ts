@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
+  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
@@ -8,19 +9,18 @@ import {
 } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { logger } from '@ezstart/logger/server'
 import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
+
+const { authMiddleware } = createAuthMiddleware()
 
 export const meRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(meRegistry, router)
 
-// Get current user info — delegates token extraction to verifyTokenMiddleware
+// Get current user info
 const meController = async (req: Request, res: Response) => {
   try {
-    // verifyTokenMiddleware already verified the token and attached req.user
-    // Re-fetch from DB via AuthService for consistency with other auth routes
     const user = await AuthService.getUserById(req.userId!)
 
     sendSuccess(res, { user })
@@ -30,7 +30,7 @@ const meController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/me', verifyTokenMiddleware, meController, {
+docRouter.get('/me', authMiddleware, meController, {
   summary: 'Get current user information',
   tags: ['User'],
   responseSchema: userResponseSchema,

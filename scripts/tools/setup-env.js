@@ -19,6 +19,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
 const RESEND_API_KEY = process.env.RESEND_API_KEY || ''
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || ''
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || ''
+const OAUTH_ENCRYPTION_KEY = process.env.OAUTH_ENCRYPTION_KEY || ''
 
 const MONGO_OPTS = 'retryWrites=true&w=majority&appName=Cluster0'
 
@@ -32,6 +33,7 @@ const apps = [
       GOOGLE_CLIENT_ID,
       GOOGLE_CLIENT_SECRET,
       GOOGLE_CALLBACK_URL: 'http://localhost:5010/api/auth/google/callback',
+      OAUTH_ENCRYPTION_KEY,
       RESEND_API_KEY,
       EMAIL_FROM: 'EZAuth <noreply@ezstart.xyz>',
     },

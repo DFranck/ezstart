@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
+  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
@@ -10,6 +11,7 @@ import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+import { verifyTokenMiddleware } from '../../middleware/auth.js'
 
 export const waitlistGetRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -33,12 +35,27 @@ const errorSchema = z.object({
   error: z.string().describe('Error message explaining what went wrong'),
 })
 
-// Get waitlist for an app
+// Get waitlist for an app (admin only)
 const getWaitlistController = async (req: Request, res: Response) => {
   try {
-    const WaitlistModel = await getWaitlistModel()
-
     const { appName } = req.params
+    const user = req.user as
+      | {
+          globalRoles?: string[]
+          appRoles?: Record<string, string[]>
+        }
+      | undefined
+
+    // Check authorization: globalRoles admin/superadmin OR appRoles admin for this app
+    const isGlobalAdmin =
+      user?.globalRoles?.includes('superadmin') || user?.globalRoles?.includes('admin')
+    const isAppAdmin = user?.appRoles?.[appName!]?.includes('admin')
+
+    if (!isGlobalAdmin && !isAppAdmin) {
+      return sendError(res, 'Admin access required', 403)
+    }
+
+    const WaitlistModel = await getWaitlistModel()
 
     // @ts-expect-error - Mongoose type inference issue
     const waitlist = await WaitlistModel.findOne({ appName })
@@ -62,11 +79,13 @@ const getWaitlistController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/:appName', getWaitlistController, {
-  summary: 'Get waitlist for specific app',
+docRouter.get('/:appName', verifyTokenMiddleware, getWaitlistController, {
+  summary: 'Get waitlist for specific app (admin only)',
   tags: ['Waitlist'],
   responseSchema: waitlistResponseSchema,
   extraResponses: {
+    401: { description: 'Authentication required', schema: errorSchema },
+    403: { description: 'Admin access required', schema: errorSchema },
     500: { description: 'Server error', schema: errorSchema },
   },
 })

@@ -11,6 +11,8 @@ import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireAdmin } from '../admin/require-admin.js'
 
 export const waitlistListRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -44,7 +46,7 @@ const listWaitlistsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
 })
 
-// Get all waitlists (admin endpoint)
+// Get all waitlists (global admin only)
 const getAllWaitlistsController = async (req: Request, res: Response) => {
   try {
     const parsedQuery = listWaitlistsQuerySchema.safeParse(req.query)
@@ -90,11 +92,13 @@ const getAllWaitlistsController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/', getAllWaitlistsController, {
-  summary: 'Get all waitlists (admin)',
+docRouter.get('/', verifyTokenMiddleware, requireAdmin, getAllWaitlistsController, {
+  summary: 'Get all waitlists (global admin only)',
   tags: ['Waitlist'],
   responseSchema: getAllWaitlistsResponseSchema,
   extraResponses: {
+    401: { description: 'Authentication required', schema: errorSchema },
+    403: { description: 'Admin access required', schema: errorSchema },
     500: { description: 'Server error', schema: errorSchema },
   },
 })

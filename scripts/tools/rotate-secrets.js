@@ -28,6 +28,8 @@ const doBoth = !devOnly && !prodOnly
 // ── Generate secrets ──
 const devJwtSecret = crypto.randomBytes(64).toString('base64url')
 const prodJwtSecret = crypto.randomBytes(64).toString('base64url')
+const devOauthEncKey = crypto.randomBytes(32).toString('base64url')
+const prodOauthEncKey = crypto.randomBytes(32).toString('base64url')
 
 // ── Railway services needing JWT_SECRET ──
 const RAILWAY_SERVICES = [
@@ -84,6 +86,8 @@ if (doBoth || devOnly) {
   for (const app of JWT_APPS) {
     updateEnvFile(`${app}/.env.local`, { JWT_SECRET: devJwtSecret })
   }
+  // EZAuth also needs OAUTH_ENCRYPTION_KEY
+  updateEnvFile('apps/ezauth/api/.env.local', { OAUTH_ENCRYPTION_KEY: devOauthEncKey })
   console.log('')
 }
 
@@ -93,6 +97,8 @@ if (doBoth || prodOnly) {
   for (const app of JWT_APPS) {
     updateEnvFile(`${app}/.env.production`, { JWT_SECRET: prodJwtSecret })
   }
+  // EZAuth also needs OAUTH_ENCRYPTION_KEY
+  updateEnvFile('apps/ezauth/api/.env.production', { OAUTH_ENCRYPTION_KEY: prodOauthEncKey })
   console.log('')
 }
 
@@ -127,7 +133,17 @@ if ((doBoth || prodOnly) && !noRailway && !isDryRun) {
           timeout: 30_000,
           cwd: ROOT,
         })
-        console.log(`  ✅ ${service} (${project}) — updated`)
+        // EZAuth also needs OAUTH_ENCRYPTION_KEY
+        if (service === 'ezauth-api') {
+          execSync(`railway variable set OAUTH_ENCRYPTION_KEY=${prodOauthEncKey}`, {
+            stdio: 'pipe',
+            timeout: 30_000,
+            cwd: ROOT,
+          })
+          console.log(`  ✅ ${service} (${project}) — updated (JWT_SECRET + OAUTH_ENCRYPTION_KEY)`)
+        } else {
+          console.log(`  ✅ ${service} (${project}) — updated`)
+        }
         results.push({ service, project, ok: true })
       } catch (err) {
         console.log(`  ❌ ${service} (${project}) — failed: ${err.message}`)
