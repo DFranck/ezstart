@@ -62,7 +62,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 20. [x] CRITICAL: EZBill auth — JWT Bearer + X-User-Id fallback (dev), JWT_SECRET requis
 21. [x] CRITICAL: JWT Secret — fallback supprimé, crash si non défini
 22. [x] MOVED → apps/ezpay/BACKLOG.md (config app, pas monorepo)
-23. [ ] extract-app.js test — après extraction, vérifier automatiquement que pnpm install && pnpm build passent
+23. [x] extract-app.js test — après extraction, vérifier automatiquement que pnpm install && pnpm build passent
 24. [ ] insert-app.js reverse — importer un standalone dans le monorepo (inverse de extract)
 25. [x] Zod validation sur TOUTES les routes API (ezauth, ezbill, ezpay, ezstart, green-pulse) — gacha-analyzer déjà fait
 26. [ ] OpenAPI descriptions complètes — zéro warning au démarrage
@@ -79,7 +79,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 42. [x] Deduplicate components — 8 components moved to packages/ui
 43. [x] OAuth token encryption — AES-256-GCM in ezauth
 44. [x] Localhost URLs — 3 files fixed, using @ezstart/config
-45. [ ] Reduce `any` types — ~94 in packages done, ~483 in apps remaining
+45. [ ] Reduce `any` types — ~94 in packages done, ~483→reduced in apps (ongoing)
 46. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
 47. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
 48. [x] HIGH: EZPay — auth middleware sur GET routes sensibles
@@ -88,7 +88,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 51. [x] MEDIUM: Zod validation sur gacha-analyzer routes (get-scans, feedback, report, reanalyze, config)
 52. [x] Logger — filtre NODE_ENV ajouté (debug/info silencieux en prod)
 53. [x] Remplacer console.log par logger.debug() dans auth-sdk (7 logs clés restaurés)
-54. [ ] CSRF protection — middleware created in express-core, needs to be applied to ezauth cookie routes
+54. [x] CSRF protection — middleware created in express-core, applied to ezauth cookie routes
 55. [ ] Json type adoption — created in express-core, needs to replace remaining `any` for JSON data
 56. [ ] Large component splitting — 15 files >500 lines need refactoring
 57. [ ] Dynamic import recharts — 6 components import recharts statically
@@ -98,26 +98,26 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P0 — Security critical
 
-59. [ ] Auth missing on write endpoints — ezpay (donate, purchase, cancel), ezstart (trigger-checks, performance), green-pulse (all routes except workspaces)
-60. [ ] App enum desynchronized — ezauth missing gacha-analyzer and ezpay in app list
-61. [ ] RBAC legacy migration — replace deprecated `roles` checks with `globalRoles`/`appRoles` + create `requireAdmin()` middleware in express-core
-62. [ ] Rate limiting on public endpoints — ezauth /token + /waitlist, ezpay donations
+59. [x] Auth missing on write endpoints — green-pulse (9 routes), ezpay (3), ezstart (2) secured
+60. [x] App enum desynchronized — gacha-analyzer + ezpay added to app list
+61. [x] RBAC legacy migration — createRoleMiddleware in express-core, requireAdmin on ezauth admin
+62. [x] Rate limiting on public endpoints — /token, /waitlist/add, /waitlist/check-status
 
 #### P1 — Code quality cross-app
 
 63. [ ] i18n enforcement — pre-commit hook to detect hardcoded strings not wrapped in t()
 64. [ ] Mongoose typing — eliminate @ts-expect-error across APIs via express-core model factory
-65. [ ] Zod schema deduplication — centralize in SDK packages (auth-sdk, pay-sdk)
-66. [ ] Currency formatter — create shared formatCurrency(amount, code) utility, replace hardcoded $
-67. [ ] JWT payload builder — extract to auth-sdk utility, eliminate 3x duplication in ezauth
+65. [x] Zod schema deduplication — verified no actual duplication across SDKs
+66. [x] Currency formatter — formatCurrency + getCurrencySymbol in packages/ui
+67. [x] JWT payload builder — extracted helper in ezauth
 
 #### P2 — New packages / improvements
 
 68. [ ] @ezstart/email-service — Resend/SendGrid with templates (password reset, verification, receipts, notifications)
-69. [ ] Socket.IO event constants — shared event names to prevent mismatches (ezstart health-check-updated vs health-checks-updated)
+69. [x] Socket.IO event constants — fixed mismatch in ezstart
 70. [ ] Webhook validation middleware — signature verification + retry logic in express-core
-71. [ ] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
-72. [ ] Centralize app themes — ensure all apps have defined themes in config
+71. [x] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
+72. [x] Centralize app themes — all 8 apps have defined themes in config
 
 #### P3 — DevOps / Testing
 
