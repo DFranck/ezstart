@@ -3,6 +3,7 @@
 import StatsCard from '@/components/StatsCard'
 import { useTranslations } from 'next-intl'
 import { Div } from '@ezstart/ui/components'
+import { formatCurrency } from '@ezstart/ui/utils'
 
 interface ClientStatsProps {
   totalRevenue: number
@@ -22,13 +23,13 @@ export function ClientStats({
     <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <StatsCard
         title={tDashboard('totalRevenue')}
-        value={`$${totalRevenue.toFixed(2)}`}
+        value={formatCurrency(totalRevenue, 'USD')}
         icon="lucide:DollarSign"
         iconGradient="bg-gradient-payment"
       />
       <StatsCard
         title={tDashboard('pending')}
-        value={`$${pendingAmount.toFixed(2)}`}
+        value={formatCurrency(pendingAmount, 'USD')}
         icon="lucide:Clock"
         iconGradient="bg-gradient-to-r from-orange-400 to-red-400"
       />

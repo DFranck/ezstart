@@ -92,7 +92,16 @@ describe('AuthCode Model', () => {
     })
 
     it('should validate app enum values', async () => {
-      const validApps = ['ezbill', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd']
+      const validApps = [
+        'ezbill',
+        'admin',
+        'ezstart',
+        'green-pulse',
+        'fengshui',
+        'asc-tcd',
+        'gacha-analyzer',
+        'ezpay',
+      ]
 
       for (const app of validApps) {
         const authCode = await AuthCodeModel.create({
@@ -141,7 +150,7 @@ describe('AuthCode Model', () => {
 
       // expiresAt should be ~5 minutes (300000ms) from now
       const minExpectedTime = beforeCreate + 4.9 * 60 * 1000 // 4.9 minutes
-      const maxExpectedTime = afterCreate + 5.1 * 60 * 1000  // 5.1 minutes
+      const maxExpectedTime = afterCreate + 5.1 * 60 * 1000 // 5.1 minutes
 
       expect(expiresAtTime).toBeGreaterThan(minExpectedTime)
       expect(expiresAtTime).toBeLessThan(maxExpectedTime)

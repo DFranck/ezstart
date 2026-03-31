@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
+  createRateLimiter,
   OpenAPIRegistry,
   Router,
   sendSuccess,
@@ -10,6 +11,14 @@ import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+
+/** Normal rate limit: 30 requests per 15 minutes */
+const checkStatusRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: 'Too many status check requests, please try again later.',
+  skipPaths: [],
+})
 
 export const checkStatusRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -68,7 +77,7 @@ const checkStatusController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/:appName/status/:email', checkStatusController, {
+docRouter.get('/:appName/status/:email', checkStatusRateLimiter, checkStatusController, {
   summary: 'Check email status in waitlist',
   tags: ['Waitlist'],
   responseSchema: checkStatusResponseSchema,

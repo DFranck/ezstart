@@ -38,89 +38,113 @@ export interface AuthUserDocument extends Document {
   hasFeature(feature: string): boolean
 }
 
-const authUserSchema = new Schema<AuthUserDocument>({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    minlength: 1,
-    maxlength: 50,
-  },
-  passwordHash: {
-    type: String,
-    required: false, // Optional for OAuth-only users
-  },
-  firstName: {
-    type: String,
-    trim: true,
-  },
-  lastName: {
-    type: String,
-    trim: true,
-  },
-  avatar: {
-    type: String,
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
-  apps: [{
-    type: String,
-    enum: ['ezbill', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd'], // Add more apps as needed
-  }],
-  // RBAC fields
-  roles: [{
-    type: String,
-    enum: ['superadmin', 'admin', 'manager', 'beta-tester', 'client'],
-    default: []
-  }], // DEPRECATED - kept for backwards compatibility
-  globalRoles: [{
-    type: String,
-    enum: ['superadmin'], // Only superadmin can be global
-    default: []
-  }],
-  appRoles: {
-    type: Map,
-    of: [{
+const authUserSchema = new Schema<AuthUserDocument>(
+  {
+    email: {
       type: String,
-      enum: ['admin', 'manager', 'beta-tester', 'client']
-    }],
-    default: {}
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      minlength: 1,
+      maxlength: 50,
+    },
+    passwordHash: {
+      type: String,
+      required: false, // Optional for OAuth-only users
+    },
+    firstName: {
+      type: String,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+    },
+    avatar: {
+      type: String,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    apps: [
+      {
+        type: String,
+        enum: [
+          'ezbill',
+          'admin',
+          'ezstart',
+          'green-pulse',
+          'fengshui',
+          'asc-tcd',
+          'gacha-analyzer',
+          'ezpay',
+        ],
+      },
+    ],
+    // RBAC fields
+    roles: [
+      {
+        type: String,
+        enum: ['superadmin', 'admin', 'manager', 'beta-tester', 'client'],
+        default: [],
+      },
+    ], // DEPRECATED - kept for backwards compatibility
+    globalRoles: [
+      {
+        type: String,
+        enum: ['superadmin'], // Only superadmin can be global
+        default: [],
+      },
+    ],
+    appRoles: {
+      type: Map,
+      of: [
+        {
+          type: String,
+          enum: ['admin', 'manager', 'beta-tester', 'client'],
+        },
+      ],
+      default: {},
+    },
+    permissions: [
+      {
+        type: String,
+        default: [],
+      },
+    ],
+    features: [
+      {
+        type: String,
+        default: [],
+      },
+    ],
+    // Metadata
+    organizationId: {
+      type: String,
+      required: false,
+    },
+    managedBy: {
+      type: String,
+      required: false,
+    },
   },
-  permissions: [{
-    type: String,
-    default: []
-  }],
-  features: [{
-    type: String,
-    default: []
-  }],
-  // Metadata
-  organizationId: {
-    type: String,
-    required: false
-  },
-  managedBy: {
-    type: String,
-    required: false
+  {
+    timestamps: true,
+    collection: 'auth_users', // Separate collection from other apps
+    bufferCommands: false, // Disable buffering for fail-fast
   }
-}, {
-  timestamps: true,
-  collection: 'auth_users', // Separate collection from other apps
-  bufferCommands: false, // Disable buffering for fail-fast
-})
+)
 
 // Hash password before saving
-authUserSchema.pre('save', async function(next) {
+authUserSchema.pre('save', async function (next) {
   if (!this.isModified('passwordHash') || !this.passwordHash) return next()
 
   const salt = await bcrypt.genSalt(12)
@@ -129,7 +153,7 @@ authUserSchema.pre('save', async function(next) {
 })
 
 // Compare password method
-authUserSchema.methods.comparePassword = async function(password: string): Promise<boolean> {
+authUserSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
   if (!this.passwordHash) {
     return false // OAuth-only users have no password
   }
@@ -137,16 +161,16 @@ authUserSchema.methods.comparePassword = async function(password: string): Promi
 }
 
 // RBAC methods
-authUserSchema.methods.hasGlobalRole = function(role: string): boolean {
+authUserSchema.methods.hasGlobalRole = function (role: string): boolean {
   return this.globalRoles?.includes(role) || false
 }
 
-authUserSchema.methods.hasAppRole = function(appName: string, role: string): boolean {
+authUserSchema.methods.hasAppRole = function (appName: string, role: string): boolean {
   const appRoles = this.appRoles?.get(appName) || []
   return appRoles.includes(role)
 }
 
-authUserSchema.methods.hasRole = function(role: string, appName?: string): boolean {
+authUserSchema.methods.hasRole = function (role: string, appName?: string): boolean {
   // Check global roles first (superadmin is always global)
   if (role === 'superadmin') {
     return this.hasGlobalRole('superadmin')
@@ -169,31 +193,31 @@ authUserSchema.methods.hasRole = function(role: string, appName?: string): boole
   return hasOldRole || hasNewGlobalRole || hasInAnyApp
 }
 
-authUserSchema.methods.hasAnyRole = function(roles: string[], appName?: string): boolean {
+authUserSchema.methods.hasAnyRole = function (roles: string[], appName?: string): boolean {
   // Superadmin always has access
   if (this.hasGlobalRole('superadmin')) return true
 
   return roles.some(role => this.hasRole(role, appName))
 }
 
-authUserSchema.methods.hasPermission = function(permission: string): boolean {
+authUserSchema.methods.hasPermission = function (permission: string): boolean {
   // Superadmin has all permissions
   if (this.hasGlobalRole('superadmin')) return true
   return this.permissions?.includes(permission) || false
 }
 
-authUserSchema.methods.hasFeature = function(feature: string): boolean {
+authUserSchema.methods.hasFeature = function (feature: string): boolean {
   // Superadmin has all features
   if (this.hasGlobalRole('superadmin')) return true
   return this.features?.includes(feature) || false
 }
 
 // Transform to API object
-authUserSchema.methods.toAuthUser = function(): AuthUser {
+authUserSchema.methods.toAuthUser = function (): AuthUser {
   // Convert Map to plain object for appRoles
   const appRolesObj: Record<string, string[]> = {}
   if (this.appRoles) {
-    (this.appRoles as Map<string, string[]>).forEach((roles: string[], appName: string) => {
+    ;(this.appRoles as Map<string, string[]>).forEach((roles: string[], appName: string) => {
       appRolesObj[appName] = roles
     })
   }

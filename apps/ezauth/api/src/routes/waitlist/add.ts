@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
+  createStrictRateLimiter,
   OpenAPIRegistry,
   Router,
   sendSuccess,
@@ -11,6 +12,13 @@ import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+
+/** Strict rate limit: 5 requests per 15 minutes */
+const waitlistAddRateLimiter = createStrictRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: 'Too many waitlist registration attempts, please try again later.',
+})
 
 export const waitlistAddRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -94,7 +102,7 @@ const addEmailController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/:appName/add', addEmailController, {
+docRouter.post('/:appName/add', waitlistAddRateLimiter, addEmailController, {
   summary: 'Add email to waitlist for specific app',
   tags: ['Waitlist'],
   bodySchema: addEmailSchema,

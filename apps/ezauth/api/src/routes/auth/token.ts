@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
+  createStrictRateLimiter,
   OpenAPIRegistry,
   Router,
   sendSuccess,
@@ -15,6 +16,13 @@ import {
   tokenResponseSchema,
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
+
+/** Strict rate limit: 10 requests per 5 minutes */
+const tokenRateLimiter = createStrictRateLimiter({
+  windowMs: 5 * 60 * 1000,
+  max: 10,
+  message: 'Too many token exchange attempts, please try again later.',
+})
 
 export const tokenRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -47,7 +55,7 @@ const tokenController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/token', tokenController, {
+docRouter.post('/token', tokenRateLimiter, tokenController, {
   summary: 'Exchange authorization code for access token',
   tags: ['Authentication'],
   bodySchema: tokenRequestSchema,

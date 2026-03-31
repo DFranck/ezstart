@@ -37,7 +37,7 @@ export {
 export type { RateLimitOptions } from './middleware/rateLimit.js'
 export { securityHeaders, securityHeadersPresets } from './middleware/security-headers.js'
 export type { SecurityHeadersOptions } from './middleware/security-headers.js'
-export { createAuthMiddleware } from './middleware/auth.js'
+export { createAuthMiddleware, createRoleMiddleware } from './middleware/auth.js'
 export { createCsrfMiddleware } from './middleware/csrf.js'
 
 // Versioning

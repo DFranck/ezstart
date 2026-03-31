@@ -9,6 +9,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 
@@ -61,14 +62,6 @@ const errorSchema = z.object({
 // List waitlist for an app
 const listWaitlistController = async (req: Request, res: Response) => {
   try {
-    const currentUser = req.user!
-    const isAdmin =
-      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
-
-    if (!isAdmin) {
-      return sendError(res, 'Admin access required', 403)
-    }
-
     const WaitlistModel = await getWaitlistModel()
     const { appName } = req.params
     const { status } = req.query
@@ -120,7 +113,7 @@ const listWaitlistController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/:appName', verifyTokenMiddleware, listWaitlistController, {
+docRouter.get('/:appName', verifyTokenMiddleware, requireAdmin, listWaitlistController, {
   summary: 'List waitlist entries for an app (Admin only)',
   tags: ['Admin', 'Waitlist'],
   responseSchema: listWaitlistResponseSchema,

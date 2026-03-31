@@ -1,10 +1,20 @@
+import { logger } from '@ezstart/logger/server'
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is required')
+const stripeKey = process.env.STRIPE_SECRET_KEY
+if (!stripeKey) {
+  throw new Error('STRIPE_SECRET_KEY required')
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+// Safety: prevent live keys in development
+if (process.env.NODE_ENV !== 'production' && stripeKey.startsWith('sk_live_')) {
+  throw new Error('DANGER: Live Stripe key detected in development! Use sk_test_ keys.')
+}
+if (process.env.NODE_ENV === 'production' && stripeKey.startsWith('sk_test_')) {
+  logger.warn('WARNING: Test Stripe key in production — payments will not be processed')
+}
+
+export const stripe = new Stripe(stripeKey, {
   apiVersion: '2023-10-16',
 })
 
@@ -41,7 +51,9 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
   return session
 }
 
-export async function createSubscriptionSession(params: CreateCheckoutParams & { interval: string }) {
+export async function createSubscriptionSession(
+  params: CreateCheckoutParams & { interval: string }
+) {
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [

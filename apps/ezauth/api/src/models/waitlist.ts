@@ -26,67 +26,76 @@ export interface WaitlistDocument extends Document {
   generateAccessCode(): string
 }
 
-const waitlistEntrySchema = new Schema<WaitlistEntry>({
-  email: {
-    type: String,
-    required: true,
-    lowercase: true,
-    trim: true,
+const waitlistEntrySchema = new Schema<WaitlistEntry>(
+  {
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'invited', 'activated', 'rejected'],
+      default: 'pending',
+    },
+    accessCode: {
+      type: String,
+      default: null,
+    },
+    invitedAt: {
+      type: Date,
+      default: null,
+    },
+    invitedBy: {
+      type: String,
+      default: null,
+    },
+    activatedAt: {
+      type: Date,
+      default: null,
+    },
+    notes: {
+      type: String,
+      default: '',
+    },
+    addedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  status: {
-    type: String,
-    enum: ['pending', 'invited', 'activated', 'rejected'],
-    default: 'pending',
-  },
-  accessCode: {
-    type: String,
-    default: null,
-  },
-  invitedAt: {
-    type: Date,
-    default: null,
-  },
-  invitedBy: {
-    type: String,
-    default: null,
-  },
-  activatedAt: {
-    type: Date,
-    default: null,
-  },
-  notes: {
-    type: String,
-    default: '',
-  },
-  addedAt: {
-    type: Date,
-    default: Date.now,
-  },
-}, { _id: false })
+  { _id: false }
+)
 
-const waitlistSchema = new Schema<WaitlistDocument>({
-  appName: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    enum: ['green-pulse', 'ezbill', 'ezstart', 'fengshui', 'asc-tcd'],
+const waitlistSchema = new Schema<WaitlistDocument>(
+  {
+    appName: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      enum: ['green-pulse', 'ezbill', 'ezstart', 'fengshui', 'asc-tcd', 'gacha-analyzer', 'ezpay'],
+    },
+    emails: [waitlistEntrySchema],
   },
-  emails: [waitlistEntrySchema],
-}, {
-  timestamps: true,
-  collection: 'app_waitlists',
-  bufferCommands: false, // Disable buffering for fail-fast
-})
+  {
+    timestamps: true,
+    collection: 'app_waitlists',
+    bufferCommands: false, // Disable buffering for fail-fast
+  }
+)
 
 // Helper method to find entry by email
-waitlistSchema.methods.findEntryByEmail = function(email: string): WaitlistEntry | undefined {
+waitlistSchema.methods.findEntryByEmail = function (email: string): WaitlistEntry | undefined {
   return this.emails.find((entry: WaitlistEntry) => entry.email === email.toLowerCase())
 }
 
 // Generate unique access code for an app
-waitlistSchema.methods.generateAccessCode = function(): string {
-  const appPrefix = this.appName.split('-').map((word: string) => word[0]?.toUpperCase() || '').join('')
+waitlistSchema.methods.generateAccessCode = function (): string {
+  const appPrefix = this.appName
+    .split('-')
+    .map((word: string) => word[0]?.toUpperCase() || '')
+    .join('')
   const random = crypto.randomBytes(4).toString('hex').toUpperCase()
   return `BETA-${appPrefix}-${random}`
 }

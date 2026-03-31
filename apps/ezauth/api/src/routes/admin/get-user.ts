@@ -9,6 +9,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 
@@ -43,17 +44,7 @@ const errorSchema = z.object({
 // Controller
 const getUserController = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
-      return sendError(res, 'Authentication required', 401)
-    }
-
-    const currentUser = req.user
-    const isAdmin =
-      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
-
-    if (!isAdmin) {
-      return sendError(res, 'Admin access required', 403)
-    }
+    const currentUser = req.user!
 
     const AuthUser = await getAuthUserModel()
     const user = await AuthUser.findById(req.params.id).select('-passwordHash').lean()
@@ -90,7 +81,7 @@ const getUserController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/users/:id', verifyTokenMiddleware, getUserController, {
+docRouter.get('/users/:id', verifyTokenMiddleware, requireAdmin, getUserController, {
   summary: 'Get user by ID (admin)',
   tags: ['Admin'],
   responseSchema: getUserResponseSchema,

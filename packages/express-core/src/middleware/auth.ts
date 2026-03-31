@@ -86,3 +86,37 @@ export function createAuthMiddleware(jwtSecret?: string) {
 
   return { authMiddleware, optionalAuthMiddleware }
 }
+
+/**
+ * Create role-based access control middlewares.
+ * Checks both new RBAC fields (globalRoles, appRoles) and legacy roles for backward compatibility.
+ *
+ * Must be used AFTER an auth middleware that attaches `req.user` with role information.
+ */
+export function createRoleMiddleware() {
+  return {
+    requireAdmin: (req: Request, res: Response, next: NextFunction) => {
+      const user = (req as any).user
+      if (!req.userId && !user) return sendError(res, 'Authentication required', 401)
+      const isAdmin =
+        user?.globalRoles?.includes('superadmin') ||
+        user?.globalRoles?.includes('admin') ||
+        user?.roles?.includes('superadmin') ||
+        user?.roles?.includes('admin')
+      if (!isAdmin) return sendError(res, 'Admin access required', 403)
+      next()
+    },
+    requireRole: (role: string) => (req: Request, res: Response, next: NextFunction) => {
+      const user = (req as any).user
+      if (!req.userId && !user) return sendError(res, 'Authentication required', 401)
+      const hasRole =
+        user?.globalRoles?.includes(role) ||
+        user?.roles?.includes(role) ||
+        Object.values(user?.appRoles || {})
+          .flat()
+          .includes(role)
+      if (!hasRole) return sendError(res, `Role '${role}' required`, 403)
+      next()
+    },
+  }
+}

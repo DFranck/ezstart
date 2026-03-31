@@ -13,6 +13,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@ezstart/ui/components'
+import { formatCurrency } from '@ezstart/ui/utils'
 import { Cell, Pie, PieChart } from 'recharts'
 
 type TopClientsChartProps = {
@@ -87,7 +88,7 @@ export function TopClientsChart({ invoices, clients, className }: TopClientsChar
               cx="50%"
               cy="50%"
               outerRadius={80}
-              label={entry => `$${entry.revenue.toFixed(0)}`}
+              label={entry => formatCurrency(entry.revenue, 'USD')}
             >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={TOP_CLIENT_COLORS[index]} />

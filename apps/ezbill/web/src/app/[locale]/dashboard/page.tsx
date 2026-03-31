@@ -13,6 +13,7 @@ import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { Div, Spinner, SkeletonCard, Skeleton, WelcomeModal } from '@ezstart/ui/components'
+import { formatCurrency } from '@ezstart/ui/utils'
 import dynamic from 'next/dynamic'
 
 // Dynamic imports for chart components (recharts ~200KB, lazy-loaded)
@@ -273,13 +274,13 @@ const DashboardPage = () => {
             <Div layout={'col'}>
               <StatsCard
                 title={tDashboard('totalRevenue')}
-                value={`$${totalRevenue.toFixed(2)}`}
+                value={formatCurrency(totalRevenue, 'USD')}
                 icon="lucide:DollarSign"
                 iconGradient="bg-gradient-payment"
               />
               <StatsCard
                 title={tDashboard('pending')}
-                value={`$${pendingAmount.toFixed(2)}`}
+                value={formatCurrency(pendingAmount, 'USD')}
                 icon="lucide:Clock"
                 iconGradient="bg-gradient-to-r from-orange-400 to-red-400"
                 className="hidden md:flex"

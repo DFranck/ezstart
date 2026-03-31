@@ -31,8 +31,8 @@ export function useSocket({
       logger.debug('[Monitoring] Socket.IO connected:', socket.id)
     })
 
-    socket.on('health-checks-updated', data => {
-      logger.debug('[Monitoring] Received health-checks-updated event:', data)
+    socket.on('health-check-updated', data => {
+      logger.debug('[Monitoring] Received health-check-updated event:', data)
       callbackRef.current?.(data)
     })
 

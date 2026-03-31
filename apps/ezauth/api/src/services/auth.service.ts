@@ -19,6 +19,28 @@ const JWT_SECRET = process.env.JWT_SECRET!
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
 const JWT_EXPIRES_IN = '7d'
 
+function buildJwtPayload(user: AuthUserDocument) {
+  // Convert appRoles Map to plain object for JWT
+  const appRolesObj: Record<string, string[]> = {}
+  if (user.appRoles) {
+    user.appRoles.forEach((roles: string[], appName: string) => {
+      appRolesObj[appName] = roles
+    })
+  }
+
+  return {
+    userId: user._id!.toString(),
+    email: user.email,
+    username: user.username,
+    apps: user.apps,
+    roles: user.roles || [], // DEPRECATED - kept for backwards compatibility
+    globalRoles: user.globalRoles || [],
+    appRoles: appRolesObj,
+    permissions: user.permissions || [],
+    features: user.features || [],
+  }
+}
+
 export class AuthService {
   // Register new user
   static async register(data: RegisterRequest): Promise<AuthCodeResponse> {
@@ -151,26 +173,7 @@ export class AuthService {
     }
 
     // Generate JWT token directly (skip auth code)
-    // Convert appRoles Map to plain object for JWT
-    const appRolesObj: Record<string, string[]> = {}
-    if (user.appRoles) {
-      user.appRoles.forEach((roles: string[], appName: string) => {
-        appRolesObj[appName] = roles
-      })
-    }
-
-    const payload = {
-      userId: user._id!.toString(),
-      email: user.email,
-      username: user.username,
-      apps: user.apps,
-      roles: user.roles || [], // DEPRECATED - kept for backwards compatibility
-      globalRoles: user.globalRoles || [],
-      appRoles: appRolesObj,
-      permissions: user.permissions || [],
-      features: user.features || [],
-    }
-
+    const payload = buildJwtPayload(user)
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 
     return {
@@ -216,27 +219,8 @@ export class AuthService {
     }
 
     // Generate JWT token
-    // Convert appRoles Map to plain object for JWT
-    const appRolesObj: Record<string, string[]> = {}
-    if (user.appRoles) {
-      user.appRoles.forEach((roles: string[], appName: string) => {
-        appRolesObj[appName] = roles
-      })
-    }
-
-    const payload = {
-      userId: user._id!.toString(),
-      email: user.email,
-      username: user.username,
-      apps: user.apps,
-      roles: user.roles || [], // DEPRECATED - kept for backwards compatibility
-      globalRoles: user.globalRoles || [],
-      appRoles: appRolesObj,
-      permissions: user.permissions || [],
-      features: user.features || [],
-    }
-
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })
+    const payload = buildJwtPayload(user)
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 
     return {
       access_token: token,

@@ -10,6 +10,7 @@ import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 
@@ -38,12 +39,6 @@ const errorSchema = z.object({
 const inviteWaitlistController = async (req: Request, res: Response) => {
   try {
     const currentUser = req.user!
-    const isAdmin =
-      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
-
-    if (!isAdmin) {
-      return sendError(res, 'Admin access required', 403)
-    }
 
     const WaitlistModel = await getWaitlistModel()
     const appName = req.params.appName as string
@@ -154,18 +149,24 @@ const inviteWaitlistController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/:appName/:email/invite', verifyTokenMiddleware, inviteWaitlistController, {
-  summary: 'Invite email from waitlist (generate access code)',
-  tags: ['Admin', 'Waitlist'],
-  bodySchema: inviteRequestSchema,
-  responseSchema: inviteResponseSchema,
-  status: 200,
-  extraResponses: {
-    403: { description: 'Forbidden - Admin access required', schema: errorSchema },
-    404: { description: 'Waitlist or email not found', schema: errorSchema },
-    409: { description: 'Email already invited', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema },
-  },
-})
+docRouter.post(
+  '/:appName/:email/invite',
+  verifyTokenMiddleware,
+  requireAdmin,
+  inviteWaitlistController,
+  {
+    summary: 'Invite email from waitlist (generate access code)',
+    tags: ['Admin', 'Waitlist'],
+    bodySchema: inviteRequestSchema,
+    responseSchema: inviteResponseSchema,
+    status: 200,
+    extraResponses: {
+      403: { description: 'Forbidden - Admin access required', schema: errorSchema },
+      404: { description: 'Waitlist or email not found', schema: errorSchema },
+      409: { description: 'Email already invited', schema: errorSchema },
+      500: { description: 'Server error', schema: errorSchema },
+    },
+  }
+)
 
 export default router
