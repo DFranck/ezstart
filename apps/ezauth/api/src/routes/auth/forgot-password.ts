@@ -1,0 +1,99 @@
+import type { Request, Response } from 'express'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  createVeryStrictRateLimiter,
+  sendSuccess,
+  sendValidationError,
+} from '@ezstart/express-core'
+import { Router as ExpressRouter } from 'express'
+import { z } from 'zod'
+import crypto from 'crypto'
+import { getAuthUserModel } from '../../models/auth-user.js'
+import { getAuthCodeModel } from '../../models/auth-code.js'
+import { emailService } from '../../services/email.service.js'
+import { passwordResetTemplate } from '@ezstart/email-service'
+import { getWebUrl } from '@ezstart/config/urls'
+import { logger } from '@ezstart/logger/server'
+
+export const forgotPasswordRegistry = new OpenAPIRegistry()
+const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(forgotPasswordRegistry, router)
+
+/** Strict rate limit: 3 requests per 15 minutes */
+const forgotPasswordRateLimiter = createVeryStrictRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  message: 'Too many password reset attempts, please try again later.',
+})
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email format'),
+})
+
+const forgotPasswordResponseSchema = z.object({
+  message: z.string(),
+})
+
+const forgotPasswordController = async (req: Request, res: Response) => {
+  try {
+    const parsed = forgotPasswordSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid email address', parsed.error.issues)
+    }
+
+    const { email } = parsed.data
+    const AuthUserModel = await getAuthUserModel()
+    const user = await AuthUserModel.findOne({ email: email.toLowerCase() })
+
+    if (user) {
+      const AuthCodeModel = await getAuthCodeModel()
+      const token = crypto.randomBytes(32).toString('hex')
+
+      const authCode = new AuthCodeModel({
+        code: token,
+        userId: user._id!.toString(),
+        type: 'password-reset',
+        app: 'ezstart',
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+      })
+
+      await authCode.save()
+
+      const resetUrl = `${getWebUrl('ezauth')}/reset-password?token=${token}`
+
+      await emailService.send({
+        to: user.email,
+        subject: 'Reset your password',
+        html: passwordResetTemplate(resetUrl, 'EZAuth'),
+      })
+
+      logger.info({ email: user.email }, 'Password reset email sent')
+    } else {
+      logger.debug({ email }, 'Password reset requested for non-existent email')
+    }
+
+    // Always return 200 to not reveal if email exists
+    sendSuccess(res, { message: 'If an account exists, a reset link has been sent' })
+  } catch (error) {
+    logger.error('Forgot password error:', error)
+    // Still return success to not reveal information
+    sendSuccess(res, { message: 'If an account exists, a reset link has been sent' })
+  }
+}
+
+docRouter.post('/forgot-password', forgotPasswordRateLimiter, forgotPasswordController, {
+  summary: 'Request password reset email',
+  tags: ['Authentication'],
+  bodySchema: forgotPasswordSchema,
+  responseSchema: forgotPasswordResponseSchema,
+  extraResponses: {
+    429: {
+      description: 'Too many attempts',
+      schema: z.object({ success: z.literal(false), error: z.string() }),
+    },
+  },
+})
+
+export default router

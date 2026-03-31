@@ -5,6 +5,10 @@ import meRouter, { meRegistry } from './me.js'
 import verifyRouter, { verifyRegistry } from './verify.js'
 import loginCookieRouter, { loginCookieRegistry } from './login-cookie.js'
 import logoutRouter, { logoutRegistry } from './logout.js'
+import forgotPasswordRouter, { forgotPasswordRegistry } from './forgot-password.js'
+import resetPasswordRouter, { resetPasswordRegistry } from './reset-password.js'
+import verifyEmailRouter, { verifyEmailRegistry } from './verify-email.js'
+import sendVerificationRouter, { sendVerificationRegistry } from './send-verification.js'
 
 export const authRegistries = [
   registerRegistry,
@@ -13,7 +17,11 @@ export const authRegistries = [
   meRegistry,
   verifyRegistry,
   loginCookieRegistry,
-  logoutRegistry
+  logoutRegistry,
+  forgotPasswordRegistry,
+  resetPasswordRegistry,
+  verifyEmailRegistry,
+  sendVerificationRegistry,
 ]
 
 export const authRouters = [
@@ -23,5 +31,9 @@ export const authRouters = [
   meRouter,
   verifyRouter,
   loginCookieRouter,
-  logoutRouter
+  logoutRouter,
+  forgotPasswordRouter,
+  resetPasswordRouter,
+  verifyEmailRouter,
+  sendVerificationRouter,
 ]

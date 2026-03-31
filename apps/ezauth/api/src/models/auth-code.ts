@@ -5,6 +5,7 @@ interface AuthCodeDocument extends Document {
   code: string
   userId: string
   app: string
+  type: 'auth' | 'password-reset' | 'email-verification'
   redirectUri?: string
   expiresAt: Date
   isUsed: boolean
@@ -22,6 +23,11 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
     userId: {
       type: String,
       required: true,
+    },
+    type: {
+      type: String,
+      enum: ['auth', 'password-reset', 'email-verification'],
+      default: 'auth',
     },
     app: {
       type: String,

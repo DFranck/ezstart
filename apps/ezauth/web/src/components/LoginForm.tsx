@@ -4,6 +4,7 @@ import type { LoginRequest } from '@ezstart/auth-sdk'
 import {
   Button,
   Div,
+  P,
   Form,
   FormControl,
   FormField,
@@ -16,6 +17,7 @@ import {
 import { callApi } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -31,6 +33,7 @@ type FormData = {
 
 export function LoginForm({ app, redirect_uri }: LoginFormProps) {
   const t = useTranslations('login')
+  const tForgot = useTranslations('forgotPassword')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -131,6 +134,14 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
             </FormItem>
           )}
         />
+
+        <Div className="text-right">
+          <P size="xs">
+            <Link href="/forgot-password" className="text-primary hover:opacity-80 font-medium">
+              {tForgot('link')}
+            </Link>
+          </P>
+        </Div>
 
         <Button
           type="submit"
