@@ -1,7 +1,18 @@
 'use client'
 
 import BoutiqueCta from '@/components/BoutiqueCta'
-import { ACarousel, Button, Div, H2, Hero, Main, P, Section, Span } from '@ezstart/ui/components'
+import {
+  ACarousel,
+  Button,
+  Div,
+  H2,
+  Hero,
+  Main,
+  P,
+  Section,
+  Span,
+  type SlideData,
+} from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
@@ -32,7 +43,7 @@ export default function PageTransplantationArbres() {
       observer.unobserve(video)
     }
   }, [])
-  const carouselSlides: any[] = [
+  const carouselSlides: SlideData[] = [
     {
       title: t('individual'),
       src: '/images/particulier.jpg',

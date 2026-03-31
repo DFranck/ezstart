@@ -82,7 +82,7 @@ connectToMongo('ezauth')
       port: Number(PORT),
     })
   })
-  .catch((err: any) => {
+  .catch((err: unknown) => {
     logger.error('❌ Failed to start EZAuth API', err)
     process.exit(1)
   })

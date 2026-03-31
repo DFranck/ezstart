@@ -70,7 +70,9 @@ export class AuthService {
         throw new Error('Invalid access code')
       }
 
-      const entry = waitlist.emails.find((e: any) => e.accessCode === data.accessCode)
+      const entry = waitlist.emails.find(
+        (e: { accessCode: string | null }) => e.accessCode === data.accessCode
+      )
 
       if (!entry) {
         throw new Error('Invalid access code')

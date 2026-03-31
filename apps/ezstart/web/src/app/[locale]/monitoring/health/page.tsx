@@ -113,7 +113,7 @@ function HealthMonitoringContent() {
         </Div>
 
         <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- ProjectCard expects ProjectHealth, API returns MonitoringProject */}
           {projects.map((project: any) => (
             <ProjectCard key={project.id} project={project} />
           ))}

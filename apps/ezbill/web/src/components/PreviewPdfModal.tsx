@@ -17,11 +17,11 @@ export type PreviewDoc = (Invoice | Quote | Receipt) & { _id: string }
 export type PreviewState = { isOpen: boolean; kind?: PreviewKind; doc?: PreviewDoc }
 
 const getDocTitle = (kind: PreviewKind, doc: PreviewDoc) =>
-  `${kind.charAt(0).toUpperCase() + kind.slice(1)} #${(doc as any).documentNumber ?? doc._id}`
+  `${kind.charAt(0).toUpperCase() + kind.slice(1)} #${(doc as Invoice | Quote | Receipt).documentNumber ?? doc._id}`
 
 const getPdfUrl = (kind: PreviewKind, doc: PreviewDoc) => {
   // Prefer explicit url if your doc already carries one
-  const explicit = (doc as any).pdfUrl as string | undefined
+  const explicit = (doc as Record<string, unknown>).pdfUrl as string | undefined
   if (explicit) return explicit
 
   // Fallback: REST endpoint convention

@@ -70,7 +70,7 @@ export default function SettingsPage() {
       ])
 
       // With auto-unwrap, response.data is already the array
-      const extractItems = (response: any) => {
+      const extractItems = (response: { ok: boolean; data: unknown }) => {
         if (!response.ok || !response.data) return []
         if (Array.isArray(response.data)) return response.data
         return []

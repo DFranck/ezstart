@@ -13,7 +13,7 @@ export interface IPerformanceMetric {
     statusCode?: number
     errorMessage?: string
     userId?: string
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 

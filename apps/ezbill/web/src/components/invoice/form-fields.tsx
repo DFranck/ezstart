@@ -121,7 +121,8 @@ export function FormFields({
       <Div>
         <Label className="text-sm font-medium mb-3 block flex items-center">
           <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
-          {tCommon('paymentMethods' as any) || 'Payment Methods'}
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- next-intl dynamic key */}
+          {tCommon('paymentMethods' as Parameters<typeof tCommon>[0]) || 'Payment Methods'}
         </Label>
         {paymentMethods && paymentMethods.length > 0 ? (
           <Div className="space-y-2 border rounded-lg p-3">

@@ -47,11 +47,11 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
   const { isAuthenticated, login } = useAuth()
 
   // Refs pour scroll vers les secteurs
-  const sectorRefs = useRef<Record<Direction, React.RefObject<HTMLDivElement | null>>>({} as any)
+  const sectorRefs = useRef({} as Record<Direction, React.RefObject<HTMLDivElement | null>>)
 
   // Initialiser les refs pour chaque secteur
   useEffect(() => {
-    const refs: Record<Direction, React.RefObject<HTMLDivElement | null>> = {} as any
+    const refs = {} as Record<Direction, React.RefObject<HTMLDivElement | null>>
     DIRECTIONS_WITH_CENTER.forEach(dir => {
       refs[dir] = React.createRef<HTMLDivElement>()
     })

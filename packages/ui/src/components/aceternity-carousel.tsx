@@ -2,7 +2,7 @@
 import { ReactNode, useEffect, useId, useRef, useState } from 'react'
 import { Icon } from './icon'
 
-interface SlideData {
+export interface SlideData {
   title: string
   button: string | ReactNode
   src: string

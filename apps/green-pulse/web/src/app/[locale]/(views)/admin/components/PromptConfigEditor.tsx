@@ -116,11 +116,7 @@ export function PromptConfigEditor({ config, onChange }: PromptConfigEditorProps
             Parameters applied once (not repeated in context)
           </P>
         </Div>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-        >
+        <Button size="sm" variant="ghost" onClick={() => setShowAdvanced(!showAdvanced)}>
           <Icon name={showAdvanced ? 'lucide:ChevronUp' : 'lucide:ChevronDown'} className="mr-1" />
           {showAdvanced ? 'Hide' : 'Show'} Advanced
         </Button>
@@ -164,9 +160,7 @@ export function PromptConfigEditor({ config, onChange }: PromptConfigEditorProps
                 onChange={e => updateConfig({ maxTokens: parseInt(e.target.value) })}
                 placeholder="2000"
               />
-              <P className="text-xs text-muted-foreground mt-1">
-                Maximum response length
-              </P>
+              <P className="text-xs text-muted-foreground mt-1">Maximum response length</P>
             </Div>
           </Div>
 
@@ -233,19 +227,13 @@ export function PromptConfigEditor({ config, onChange }: PromptConfigEditorProps
                 className="flex items-center justify-between bg-muted/50 rounded p-2"
               >
                 <P className="text-sm flex-1">{rule}</P>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => removeRule(index)}
-                >
+                <Button size="sm" variant="ghost" onClick={() => removeRule(index)}>
                   <Icon name="lucide:X" size={14} />
                 </Button>
               </Div>
             ))}
             {(!config.rules || config.rules.length === 0) && (
-              <P className="text-xs text-muted-foreground text-center py-2">
-                No rules defined
-              </P>
+              <P className="text-xs text-muted-foreground text-center py-2">No rules defined</P>
             )}
           </Div>
         </CardContent>
@@ -372,7 +360,7 @@ export function PromptConfigEditor({ config, onChange }: PromptConfigEditorProps
                 </Label>
                 <Select
                   value={config.safety?.blockThreshold ?? 'none'}
-                  onValueChange={(value: any) =>
+                  onValueChange={(value: 'none' | 'low' | 'medium' | 'high') =>
                     updateSafety({ blockThreshold: value })
                   }
                 >
@@ -398,9 +386,7 @@ export function PromptConfigEditor({ config, onChange }: PromptConfigEditorProps
                   min="0"
                   max="10"
                   value={config.safety?.filterLevel ?? 5}
-                  onChange={e =>
-                    updateSafety({ filterLevel: parseInt(e.target.value) })
-                  }
+                  onChange={e => updateSafety({ filterLevel: parseInt(e.target.value) })}
                   placeholder="5"
                 />
               </Div>

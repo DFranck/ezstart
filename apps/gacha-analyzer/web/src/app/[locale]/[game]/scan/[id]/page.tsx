@@ -19,7 +19,7 @@ import Link from 'next/link'
 import { use, useCallback, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
-import type { GameType, ReportCategory } from '@gacha-analyzer/types'
+import type { GameType, ReportCategory, RuneData, GearData } from '@gacha-analyzer/types'
 import { RuneCardWithTemplate } from '@/components/rune-card-templates'
 import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { GearCard } from '@/components/gear-card'
@@ -234,7 +234,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
       {/* Rune Card with full template */}
       {scan.result && hasRuneData && (
         <RuneCardWithTemplate
-          rune={scan.result.data as any}
+          rune={scan.result.data as RuneData}
           analysis={scan.result.analysis}
           confidence={scan.result.confidence}
           template={runeTemplate}
@@ -243,7 +243,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
 
       {/* Gear Card (Nikke) */}
       {scan.result && hasGearData && (
-        <GearCard gear={scan.result.data as any} confidence={scan.result.confidence} />
+        <GearCard gear={scan.result.data as GearData} confidence={scan.result.confidence} />
       )}
 
       {/* Template selector */}

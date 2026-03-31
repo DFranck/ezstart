@@ -70,10 +70,14 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(response.error || (response.data as any)?.error || 'Registration failed')
+        throw new Error(
+          response.error ||
+            (response.data as { error?: string } | null)?.error ||
+            'Registration failed'
+        )
       }
 
-      const result = response.data as any
+      const result = response.data as { code: string }
 
       // Redirect with authorization code
       if (redirect_uri) {

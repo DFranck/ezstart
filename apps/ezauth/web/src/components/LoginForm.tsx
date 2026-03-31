@@ -62,10 +62,12 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(response.error || (response.data as any)?.error || 'Login failed')
+        throw new Error(
+          response.error || (response.data as { error?: string } | null)?.error || 'Login failed'
+        )
       }
 
-      const result = response.data as any
+      const result = response.data as { code: string }
 
       // Redirect with authorization code
       if (redirect_uri) {

@@ -150,7 +150,7 @@ export function PaymentMethodModal({
     const { bankRegion, ...baseData } = formData
 
     // Clean up bank transfer fields based on region
-    let cleanData: any = { ...baseData }
+    let cleanData: Partial<Omit<PaymentMethodFormData, 'bankRegion'>> = { ...baseData }
     if (formData.type === 'bank_transfer' && bankRegion) {
       if (bankRegion === 'international') {
         // Keep IBAN/SWIFT only (remove spaces from IBAN)

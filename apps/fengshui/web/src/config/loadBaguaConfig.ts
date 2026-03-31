@@ -57,7 +57,7 @@ export async function loadBaguaConfig(
 }
 
 function combineConfigs(base: BaguaBaseConfig, stars: BaguaStarsConfig): YearBaguaConfig {
-  const orientations: Record<Direction, CombinedOrientation> = {} as any
+  const orientations = {} as Record<Direction, CombinedOrientation>
 
   // Directions principales + Centre
   const dirs: Direction[] = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO', 'C']

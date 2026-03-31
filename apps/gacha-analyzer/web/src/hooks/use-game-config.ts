@@ -90,8 +90,8 @@ export function useDeleteGameLayout(gameType: string) {
 interface GameConfigData {
   gameType: string
   bestPresets: string[]
-  zones: any
-  masks: any
+  zones: Record<string, unknown>
+  masks: Record<string, unknown>
   updatedAt: string
 }
 

@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic Mongoose doc transformer
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic Mongoose doc transformer needs flexible input/output
 export function toApiObject<T = any>(doc: any): T {
   if (!doc) return doc
   const obj = doc.toObject ? doc.toObject() : doc

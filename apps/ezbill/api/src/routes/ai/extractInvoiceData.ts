@@ -6,7 +6,10 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
-import { chatWithInvoiceAssistant } from '../../services/gemini.service.js'
+import {
+  chatWithInvoiceAssistant,
+  type ExtractedInvoiceData,
+} from '../../services/gemini.service.js'
 
 const extractInvoiceBodySchema = z.object({
   text: z.string().min(1, 'Text is required').describe('User message to the AI assistant'),
@@ -37,7 +40,7 @@ export async function extractInvoiceData(req: Request, res: Response) {
     const response = await chatWithInvoiceAssistant(
       text,
       conversationHistory as Array<{ role: 'user' | 'assistant'; content: string }>,
-      currentInvoiceData as any,
+      currentInvoiceData as ExtractedInvoiceData | undefined,
       billingType
     )
 

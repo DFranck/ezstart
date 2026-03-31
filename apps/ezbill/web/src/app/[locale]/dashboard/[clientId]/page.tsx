@@ -72,7 +72,7 @@ const ShareModal = dynamic(
 type PreviewState = {
   isOpen: boolean
   kind?: 'invoice' | 'quote' | 'receipt'
-  doc?: any
+  doc?: Invoice | Quote | Receipt
 }
 
 type ShareState = {
@@ -160,11 +160,11 @@ const ClientDashboardPage = () => {
   const handleConvertToInvoice = (quote: Quote, e?: React.MouseEvent) => {
     e?.stopPropagation()
     const invoiceData = handlers.handleConvertToInvoice(quote)
-    setEditingInvoice(invoiceData as any)
+    setEditingInvoice(invoiceData as unknown as Invoice)
     setIsInvoiceModalOpen(true)
   }
 
-  const openPreview = (kind: 'invoice' | 'quote' | 'receipt', doc: any) => {
+  const openPreview = (kind: 'invoice' | 'quote' | 'receipt', doc: Invoice | Quote | Receipt) => {
     setPreview({ isOpen: true, kind, doc })
   }
 

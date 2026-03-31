@@ -32,7 +32,7 @@ const currencies: { value: Currency; label: string; symbol: string }[] = [
 /* ── Itemized Items Table ── */
 interface ItemsTableProps {
   items: BaseLineItem[]
-  onUpdateItem: (index: number, field: keyof BaseLineItem, value: any) => void
+  onUpdateItem: (index: number, field: keyof BaseLineItem, value: string | number) => void
   onRemoveItem: (index: number) => void
   onAddItem: () => void
 }

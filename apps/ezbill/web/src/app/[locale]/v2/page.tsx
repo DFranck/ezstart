@@ -282,13 +282,13 @@ export default function LandingV2Page() {
               </H3>
               <Div className="text-center space-y-2">
                 <P className="text-2xl font-bold text-white">
-                  {(t.raw('comparison.ezbill') as any).price}
+                  {(t.raw('comparison.ezbill') as Record<string, string>).price}
                 </P>
                 <P className="text-sm text-white/90">
-                  {(t.raw('comparison.ezbill') as any).yearCost}
+                  {(t.raw('comparison.ezbill') as Record<string, string>).yearCost}
                 </P>
                 <P className="text-xs text-white/90 italic">
-                  {(t.raw('comparison.ezbill') as any).limits}
+                  {(t.raw('comparison.ezbill') as Record<string, string>).limits}
                 </P>
               </Div>
             </CardContent>

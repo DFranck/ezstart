@@ -3,7 +3,7 @@ import { GoogleGenerativeAI, FunctionDeclaration, Tool, SchemaType } from '@goog
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-interface ExtractedInvoiceData {
+export interface ExtractedInvoiceData {
   clientName?: string
   items?: Array<{
     label: string

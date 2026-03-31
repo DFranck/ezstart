@@ -139,7 +139,7 @@ function AuditsMonitoringContent() {
               <>
                 {/* Audits Grid */}
                 <Div className={`grid ${gridCols} gap-4 mt-4`}>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- AuditsFilters returns Audit type missing fields expected by AuditCard */}
                   {filteredAudits.map((audit: any) => (
                     <Div key={audit.auditType} id={`audit-${audit.auditType}`}>
                       <AuditCard audit={audit} />
