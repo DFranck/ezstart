@@ -86,12 +86,12 @@ git config user.name  # → identifie qui travaille
 
 **Règles collaborator (non-admin) :**
 
-- ❌ JAMAIS modifier `packages/` directement — proposer via PR, l'admin valide
-- ❌ JAMAIS modifier `CLAUDE.md`, `DEV-RULES.md`, `BACKLOG.md` (root)
-- ❌ JAMAIS modifier les `.env`, `tsconfig.json` root, `turbo.json`
-- ✅ Peut créer/modifier dans `apps/{son-projet}/` uniquement
-- ✅ Peut utiliser les packages via import (pas les modifier)
+- ✅ Peut créer/modifier dans `apps/{son-projet}/`
+- ✅ Peut modifier `packages/` si nécessaire (nouveaux composants, types, etc.) — passera par PR review
 - ✅ Peut créer une nouvelle app avec `insert-app.js`
+- ✅ Peut utiliser tous les packages via import
+- ⚠️ Modifications de `CLAUDE.md`, `DEV-RULES.md`, configs root → l'admin review attentivement dans la PR
+- ❌ JAMAIS modifier les `.env.local` ou `.env.production` des autres apps
 
 **Nommage des branches :**
 
