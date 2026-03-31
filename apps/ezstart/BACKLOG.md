@@ -22,13 +22,6 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ## Phase 1 — Bugs & Code Quality (priority: high)
 
-### 1.1 Socket.IO event name mismatch (→ monorepo #69)
-
-- **Status:** `planned`
-- **Severity:** bug / real-time broken
-- **Details:** API emits `health-check-updated` (singular, `healthCheckScheduler.ts:227`) but web listens for `health-checks-updated` (plural, `useSocket.ts:34`). Real-time updates never reach the frontend.
-- **Files:** `api/src/services/healthCheckScheduler.ts`, `web/src/app/[locale]/monitoring/hooks/useSocket.ts`
-
 ### 1.2 Hardcoded strings in monitoring pages
 
 - **Status:** `planned`
@@ -115,12 +108,6 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 - **Status:** `planned`
 - **Details:** `alerting.ts` has full email + Slack alerting implementation but it is never called from `healthCheckScheduler.ts`. When a service goes down, no alert is sent. Need to call `alertServiceDown()` and `alertHighResponseTime()` from the scheduler.
 - **Files:** `api/src/services/alerting.ts`, `api/src/services/healthCheckScheduler.ts`
-
-### 2.4 Add authentication to write endpoints (→ monorepo #59)
-
-- **Status:** `planned`
-- **Details:** `POST /api/trigger-checks` and `POST /api/performance` have no auth guard. Any client can trigger health checks or record arbitrary performance metrics. Should require at least an API key or auth token.
-- **Files:** `api/src/routes/trigger.ts`, `api/src/routes/performance/record.ts`
 
 ### 2.5 Remove `node-cron` unused dependency
 
@@ -250,11 +237,6 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 ---
 
 ## Phase 6 — Testing & DX (priority: low)
-
-### 6.1 Expand test coverage (→ monorepo #73)
-
-- **Status:** `planned`
-- **Details:** Only one test file exists: `api/src/__tests__/models/HealthCheck.test.ts`. No route tests, no service tests, no web component tests.
 
 ### 6.2 API documentation
 

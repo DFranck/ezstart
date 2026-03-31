@@ -16,21 +16,6 @@ Full audit of green-pulse web + API. Findings organized by priority.
 
 ## P0 — Critical / Security
 
-### GP-001: Auth missing on projects, forms, conversations, chat, ESG routes (→ monorepo #59)
-
-- **Status:** `planned`
-- **Problem:** Only `/workspaces` routes use `authMiddleware`. All other route groups (projects, forms, conversations, chat, ESG, prompts, theme, upload) have NO authentication middleware.
-  - `/api/projects` — no auth, `userId` comes from query param (trivially spoofable)
-  - `/api/forms/*` — no auth at all (anyone can create/read/delete form configs and instances)
-  - `/api/conversations` — no auth (anyone can list/read/delete any user's conversations)
-  - `/api/chat` — no auth (userId from request body)
-  - `/api/esg/*` — no auth
-  - `/api/prompts` — no auth (admin-only CRUD exposed publicly)
-  - `/api/theme` — no auth
-  - `/api/upload` — no auth
-- **Fix:** Add `authMiddleware` to all route groups. Use `req.userId` from JWT instead of query/body params. Admin routes need role-based middleware.
-- **Files:** `api/src/routes/*/index.ts`
-
 ### GP-002: Project access control commented out
 
 - **Status:** `planned`
@@ -69,18 +54,6 @@ Full audit of green-pulse web + API. Findings organized by priority.
   - `types/src/chat.ts` — 3 occurrences
   - `web/src/app/[locale]/page.tsx` — `(): any` return type
   - `web/src/app/[locale]/(views)/admin/components/PromptConfigEditor.tsx` — `any` cast
-
-### GP-011: 30+ `@ts-expect-error` across API routes (→ monorepo #64)
-
-- **Status:** `planned`
-- **Problem:** Almost every Mongoose call has `// @ts-expect-error - Mongoose type inference issue`. These should be fixed with proper Mongoose model typing or use the `express-core` model factory pattern.
-- **Files:** Most files in `api/src/routes/`
-
-### GP-012: 0 unit tests (→ monorepo #73)
-
-- **Status:** `planned`
-- **Problem:** `vitest.config.ts` exists but there are zero test files (`.test.ts` or `.spec.ts`) in the entire app.
-- **Priority tests needed:** form extraction service, chat message handling, workspace access control logic.
 
 ### GP-013: Stale/temporary files at root
 
@@ -227,12 +200,6 @@ Full audit of green-pulse web + API. Findings organized by priority.
 - **Status:** `planned`
 - **Problem:** `extract_esg` is hardcoded to `false` in `chat/page.tsx`. Related prompt types ('extraction') are unused. Comment in `PromptsManagement.tsx`: "extract_esg is hardcoded to false". Feature is half-built.
 - **Files:** `web/src/app/[locale]/chat/page.tsx`, `api/src/services/prompt.service.ts`
-
-### GP-046: listWorkspaces missing pagination metadata in response (→ monorepo #76)
-
-- **Status:** `planned`
-- **Problem:** `listWorkspaces.ts` uses `skip/limit` but returns `sendSuccess(res, { workspaces, total })` without `limit`/`offset` in pagination metadata. Other list endpoints (conversations, projects, forms) correctly use `sendSuccess(res, data, { total, limit, offset })`.
-- **Files:** `api/src/routes/workspaces/listWorkspaces.ts`
 
 ---
 

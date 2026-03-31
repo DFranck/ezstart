@@ -11,7 +11,6 @@
 - [ ] Quote PDF generation is not implemented — `generateQuotePdfUrl()` returns null, download shows "not implemented" toast, preview modal shows nothing for quotes
 - [ ] Quote modal has massive i18n gaps — labels "Client _", "Bill on behalf of", "Currency", "Valid Until", "Add Taxes", "Tax Rate (%)", "Billing Type _", "Itemized", "Flat Rate", "Description", "Qty", "Price", "Quote Summary", "Subtotal:", "Total:", "Add Line Item", "Notes", "Terms & Conditions" are all hardcoded English
 - [ ] Mark-paid modal is entirely un-i18n'd — "Mark Invoice as Paid", "This will create a receipt...", "Bill on behalf of", "Personal (your name)", "Payment Date", "Notes", "Cancel", "Mark as Paid", "Marking invoice as paid...", "Invoice marked as paid and receipt created", "Failed to mark invoice as paid" all hardcoded
-- [ ] DocumentCard displays `$` hardcoded regardless of currency (line 155: `${total} {currency}`) — should use currency symbol from currency code (→ monorepo #66)
 - [ ] Delete quote dialog has hardcoded English: "Delete Quote" and description text
 - [ ] Hardcoded locale `'fr'` passed to groupInvoicesByMonth/Week, groupQuotesByMonth, groupReceiptsByMonth in client dashboard — should use current locale from next-intl
 - [ ] `billing-permissions.ts` is duplicated between web and API (`web/src/utils/` and `api/src/utils/`) — logic drift risk (web version has `canDecline` alias, API does not)
@@ -46,7 +45,6 @@
 - [ ] `cleanup-old-auth.ts` utility — likely legacy from auth migration, verify if still needed
 - [ ] `billing-permissions.ts` should be a shared package or moved to `@ezbill/types` to avoid web/API duplication
 - [ ] API `findWithQuery` applies `limit=20` default but web fetches ALL data at once (no pagination in billing-provider) — frontend loads everything, pagination is effectively unused
-- [ ] `@ts-expect-error` in Invoice test (line 452) for timestamp type mismatch — fix the type definition instead (→ monorepo #64)
 
 ## Low Priority (nice to have)
 
@@ -55,7 +53,6 @@
 - [ ] No date range filter on client dashboard — all invoices/quotes shown, no way to filter by period
 - [ ] No search within client dashboard — cannot search invoices by number or description
 - [ ] Revenue chart only shows paid invoices in USD — no multi-currency aggregation using exchange rates
-- [ ] StatsCard shows `$` hardcoded — should respect user's preferred currency (→ monorepo #66)
 - [ ] No animations/transitions when switching between group-by modes (month/week/status)
 - [ ] Mobile: action buttons on document cards could overflow on small screens with many actions (invoice cards have up to 5 buttons)
 - [ ] No empty state illustration/images — uses text-only empty states
@@ -88,7 +85,6 @@
 
 ## Testing
 
-- [ ] Only 4 model tests exist (Client, Invoice, Quote, Receipt) — all are schema/CRUD level only (→ monorepo #73)
 - [ ] No API endpoint tests (controllers, routes, middleware)
 - [ ] No service layer tests (business logic like markAsPaid, convertQuoteToInvoice)
 - [ ] No web component tests (modals, forms, billing permissions)

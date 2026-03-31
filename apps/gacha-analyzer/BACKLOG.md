@@ -330,14 +330,6 @@ apps/
 
 ### D. Tests
 
-#### D1. Pas de tests frontend (0 test web) `P2` (→ monorepo #73)
-
-**Status :** `planned` | **Effort :** L
-
-- 3314 lignes de tests API (parsers + efficiency), 0 cote web
-- Composants critiques non testes : rune-card-compact (1072L), scan page (725L), history filters
-- Solution : vitest + testing-library pour les composants cles
-
 #### D2. Tests dupliques dans 2 dossiers `P3`
 
 **Status :** `planned` | **Effort :** S

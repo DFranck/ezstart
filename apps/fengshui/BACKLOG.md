@@ -133,13 +133,6 @@ L'app fonctionne end-to-end : upload plan, orientation boussole (drag), analyse 
 
 **Status :** `planned`
 
-### 4.1 Tests (→ monorepo #73)
-
-- [ ] Aucun test existant — ajouter au minimum :
-  - Unit tests pour `calculateBaguaRotation`, `getCroppedImg`, `loadBaguaConfigFromMessages`
-  - Unit tests pour `getGridPositionForDirection`
-  - Component tests pour `PremiumGate`, `PricingModal`
-
 ### 4.2 Performance
 
 - [ ] `page.tsx` (homepage) fait 564 lignes — extraire les sections en composants (HeroSection, BenefitsSection, ComparisonTable, CTASection, LunarPopup)

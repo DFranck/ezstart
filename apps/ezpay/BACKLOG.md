@@ -10,18 +10,6 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Phase 1 — CRITICAL : Securite & Fiabilite
 
-### 1.1 Stripe key safety `critical` `security` — `planned` (→ monorepo #71)
-
-- [ ] Verifier que `.env.local` utilise `sk_test_*` et `.env.production` utilise `sk_live_*`
-- [ ] Ajouter un guard au demarrage : si `NODE_ENV=development` et `STRIPE_SECRET_KEY` commence par `sk_live_`, throw error
-- [ ] Ajouter le meme guard pour `STRIPE_PUBLISHABLE_KEY` cote web (pk_test vs pk_live)
-
-### 1.2 Auth manquant sur cancel subscription `critical` `security` — `planned` (→ monorepo #59)
-
-- [ ] `POST /subscriptions/:subscriptionId/cancel` n'a pas de `authMiddleware` — n'importe qui peut annuler un abonnement
-- [ ] Ajouter `authMiddleware` + verifier que le `userId` du token correspond au `userId` du payment
-- [ ] Meme probleme sur `POST /donate` et `POST /purchase` — pas d'auth requise (acceptable pour guest payments, mais il faudrait `optionalAuthMiddleware` pour enrichir avec userId du token)
-
 ### 1.3 Auth manquant sur verify-payment `high` `security` — `planned`
 
 - [ ] `POST /verify-payment/:sessionId` n'a aucune protection — permet a quiconque de verifier/completer un paiement arbitraire
@@ -41,18 +29,6 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Phase 2 — Qualite de Code
 
-### 2.1 Remplacer `z.any()` dans les response schemas `medium` `code-quality` — `planned` (→ monorepo #65)
-
-- [ ] 12 occurrences de `z.any()` dans les schemas de reponse API (routes: donations/create, list, stats, verify, purchases/create, list, subscriptions/create, list, payments/get)
-- [ ] Creer un `paymentResponseZodSchema` propre base sur `basePaymentSchema` du pay-sdk et le reutiliser partout
-- [ ] Les schemas de reponse dans l'API dupliquent ceux du pay-sdk — utiliser les schemas du pay-sdk directement
-
-### 2.2 Schema duplication API vs pay-sdk `medium` `code-quality` — `planned` (→ monorepo #65)
-
-- [ ] `createDonationSchema` est defini DEUX FOIS : dans `pay-sdk/schemas.ts` ET dans `api/routes/donations/create.ts` — risque de desynchronisation
-- [ ] Meme duplication pour purchases et subscriptions
-- [ ] Solution : importer les schemas depuis `@ezstart/pay-sdk/server` dans l'API
-
 ### 2.3 Stats endpoint inefficace `medium` `performance` — `planned`
 
 - [ ] `donations/stats.ts` charge TOUS les documents en memoire (`Payment.find(query)`) pour calculer total/count
@@ -68,11 +44,6 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 - [ ] `Payment.metadata` type est `Record<string, any>` — devrait etre un union type base sur `PaymentType`
 - [ ] Utiliser les interfaces specifiques deja definies (`Donation['metadata'] | Purchase['metadata'] | ...`)
-
-### 2.6 Hardcoded `$` dans DonationWall `low` `bug` — `planned` (→ monorepo #66)
-
-- [ ] `DonationWall.tsx` ligne 136 : `${donation.amount}` hardcode le symbole `$` au lieu d'utiliser `donation.currency`
-- [ ] Ajouter une prop `currencySymbol` ou utiliser `Intl.NumberFormat` avec `donation.currency`
 
 ### 2.7 `as any` dans les tests `low` `code-quality` — `planned`
 

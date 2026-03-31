@@ -18,24 +18,6 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 
 ## P0 — Securite critique
 
-### SEC-1: App enum desynchronisee `planned` (→ monorepo #60)
-
-- **Probleme :** L'enum `apps` dans `auth-user.ts` et `auth-code.ts` liste `['ezbill', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd']` mais il manque `gacha-analyzer` et `ezpay`. L'enum dans `waitlist.ts` est aussi differente (pas `admin` mais inclut les autres).
-- **Impact :** Les users de gacha-analyzer et ezpay ne peuvent pas etre enregistres avec ces apps.
-- **Action :** Centraliser l'enum des apps dans `@ezstart/config` et l'importer partout.
-
-### SEC-2: Admin role checks utilisent le legacy `roles` field `planned` (→ monorepo #61)
-
-- **Probleme :** Toutes les routes admin (`list-users`, `get-user`, `invite-waitlist`, `list-waitlist`, `get-waitlist`) verifient `currentUser.roles?.includes('admin')` au lieu d'utiliser `globalRoles` ou `appRoles`. Le champ `roles` est marque DEPRECATED dans le model.
-- **Impact :** Incoherence entre le systeme RBAC et les checks effectifs.
-- **Action :** Migrer vers `globalRoles.includes('superadmin')` ou utiliser un middleware RBAC centralise.
-
-### SEC-3: Token exchange (`/token`) sans rate limiting `planned` (→ monorepo #62)
-
-- **Probleme :** Le endpoint `/token` (code-for-token exchange) n'a pas de rate limiter. Un attaquant pourrait bruteforce les auth codes.
-- **Impact :** L'auth code est 64 chars hex donc bruteforce improbable, mais c'est une bonne pratique.
-- **Action :** Ajouter `createStrictRateLimiter()`.
-
 ### SEC-4: `/me` endpoint sans middleware auth standard `planned`
 
 - **Probleme :** `/me` reimplemente manuellement l'extraction du token au lieu d'utiliser `verifyTokenMiddleware`. Code duplique avec le middleware.
@@ -45,12 +27,6 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 
 - **Probleme :** `utils/crypto.ts` derive la cle AES de `JWT_SECRET`. Si JWT_SECRET leak, les tokens OAuth encrypts sont aussi compromis.
 - **Action :** Utiliser une variable d'env separee `OAUTH_ENCRYPTION_KEY`.
-
-### SEC-6: Waitlist public endpoints sans rate limiting `planned` (→ monorepo #62)
-
-- **Probleme :** `POST /:appName/add` (ajout waitlist) et `GET /:appName/status/:email` (check status) n'ont pas de rate limiter.
-- **Impact :** Spam de la waitlist ou enumeration d'emails.
-- **Action :** Ajouter rate limiting sur ces endpoints.
 
 ### SEC-7: Waitlist GET endpoints publics sans auth `planned`
 
@@ -83,12 +59,6 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
   - [ ] `isVerified: false` par defaut a l'inscription
   - [ ] Middleware pour bloquer les users non-verifies si necessaire
   - [ ] Integration email service
-
-### FEAT-3: Email service `planned` (→ monorepo #68)
-
-- **Quoi :** Service d'envoi d'emails (verification, password reset, invitations waitlist).
-- **Pourquoi :** TODO present dans `invite-waitlist.ts` : "Send email with access code (implement email service later)".
-- **Options :** Resend, SendGrid, ou AWS SES.
 
 ### FEAT-4: 2FA (Two-Factor Authentication) `planned`
 
@@ -147,47 +117,15 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
   - `page.tsx` (home) : "Redirecting to login...", "Loading..."
 - **Action :** Utiliser `useTranslations()` partout.
 
-### CODE-2: `@ts-expect-error` Mongoose type issues (7 occurrences) `planned` (→ monorepo #64)
-
-- **Fichiers :** `auth.service.ts`, `add.ts`, `get.ts`, `check-status.ts`, `list-waitlist.ts`, `get-waitlist.ts`, `invite-waitlist.ts`, `list.ts`.
-- **Cause :** `getWaitlistModel()` retourne un type generique. Le model Waitlist n'a pas de type de retour precis.
-- **Action :** Typer correctement `getWaitlistModel()` avec `Model<WaitlistDocument>`.
-
 ### CODE-3: `as any` casts (4 occurrences) `planned`
 
 - **Fichiers :** `index.ts` (catch block), `auth.service.ts` (waitlist entry find), `AuthCode.test.ts` (model type), `express.d.ts` (index signature).
 - **Action :** Typer correctement ou utiliser des narrowing patterns.
 
-### CODE-4: Code duplique — JWT payload construction `planned` (→ monorepo #67)
-
-- **Probleme :** La construction du JWT payload (userId, email, username, apps, roles, globalRoles, appRoles, permissions, features) est dupliquee 3 fois : `loginWithToken()`, `exchangeCodeForToken()`, et `verifyTokenMiddleware`.
-- **Action :** Extraire dans une methode `buildJWTPayload(user)`.
-
 ### CODE-5: Code duplique — appRoles Map-to-Object conversion `planned`
 
 - **Probleme :** La conversion `Map<string, string[]>` -> `Record<string, string[]>` est faite dans 5 endroits differents.
 - **Action :** Extraire dans un util `mapToRecord()` ou dans le model.
-
-### CODE-6: Code duplique — admin auth check `planned` (→ monorepo #61)
-
-- **Probleme :** Le pattern `currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')` est repete dans 5 routes admin.
-- **Action :** Extraire dans un middleware `requireAdmin` ou `requireRole('admin')`.
-
-### CODE-7: Tests — couverture incomplete `planned` (→ monorepo #73)
-
-- **Existant :** Tests pour AuthUser model et AuthCode model (bonne qualite).
-- **Manquant :**
-  - [ ] Tests OAuthAccount model
-  - [ ] Tests Waitlist model
-  - [ ] Tests AuthService (login, register, token exchange)
-  - [ ] Tests OAuthService
-  - [ ] Tests routes (integration)
-  - [ ] Tests middleware auth
-
-### CODE-8: Zod schemas non-partages `planned` (→ monorepo #65)
-
-- **Probleme :** Les schemas Zod des routes admin (`userSchema`, `errorSchema`, `paginationSchema`) sont dupliques entre `list-users.ts`, `get-user.ts`, `update-user.ts`.
-- **Action :** Centraliser dans un fichier `schemas/admin.ts`.
 
 ---
 
@@ -217,11 +155,6 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 
 - **Probleme :** Les erreurs API sont en anglais ("Invalid credentials", "User already exists"). Pas de traduction cote client.
 - **Action :** Mapper les codes d'erreur API vers des messages i18n.
-
-### UX-6: Theme gacha-analyzer manquant `planned` (→ monorepo #72)
-
-- **Probleme :** `app-themes.ts` ne definit pas de theme pour `gacha-analyzer`. L'app tombera sur le theme par defaut.
-- **Action :** Ajouter le theme gacha-analyzer et asc-tcd.
 
 ### UX-7: Login/Register — pas de Suspense uniforme `planned`
 
