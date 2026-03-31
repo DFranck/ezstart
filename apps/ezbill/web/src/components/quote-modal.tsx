@@ -23,21 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
   Span,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   TextArea,
   Div,
-  H4,
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { InvoiceAIAssistant } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
+import { ItemsTable, QuoteSummary } from './quote-form-fields'
 
 interface QuoteModalProps {
   isOpen: boolean
@@ -99,7 +93,7 @@ export function QuoteModal({
     })
   }
 
-  const updateLineItem = (index: number, field: keyof BaseLineItem, value: any) => {
+  const updateLineItem = (index: number, field: keyof BaseLineItem, value: string | number) => {
     const updatedItems = [...(formData.items || [])]
     updatedItems[index] = { ...updatedItems[index], [field]: value } as BaseLineItem
     setFormData({ ...formData, items: updatedItems })
@@ -444,96 +438,12 @@ export function QuoteModal({
 
               {/* Itemized Mode: Table */}
               {formData.billingType === 'itemized' && (
-                <>
-                  <Div className="bg-card/60 backdrop-blur-sm rounded-xl border overflow-hidden">
-                    <Div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                      <Table className="w-full min-w-[600px]">
-                        <TableHeader>
-                          <TableRow className="bg-gradient-to-r from-warning/10 to-warning/5">
-                            <TableHead className="font-semibold ">
-                              <Div className="flex items-center">
-                                <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                                Description
-                              </Div>
-                            </TableHead>
-                            <TableHead className="w-20 font-semibold ">
-                              <Div className="flex items-center">
-                                <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
-                                Qty
-                              </Div>
-                            </TableHead>
-                            <TableHead className="w-24 font-semibold ">
-                              <Div className="flex items-center">
-                                <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
-                                Price
-                              </Div>
-                            </TableHead>
-                            <TableHead className="w-16"></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {formData.items?.map((item, index) => (
-                            <TableRow key={index} className="hover:bg-warning/5">
-                              <TableCell className="p-3">
-                                <TextArea
-                                  placeholder="Description"
-                                  value={item.label}
-                                  onChange={e => updateLineItem(index, 'label', e.target.value)}
-                                  required
-                                  rows={3}
-                                  className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning resize-y min-h-[60px]"
-                                />
-                              </TableCell>
-                              <TableCell className="p-3">
-                                <Input
-                                  type="number"
-                                  placeholder="Qty"
-                                  min="1"
-                                  value={item.quantity}
-                                  onChange={e =>
-                                    updateLineItem(index, 'quantity', parseInt(e.target.value) || 1)
-                                  }
-                                  required
-                                  className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning"
-                                />
-                              </TableCell>
-                              <TableCell className="p-3">
-                                <Input
-                                  type="number"
-                                  placeholder="Price"
-                                  min="0"
-                                  step="0.01"
-                                  value={item.price}
-                                  onChange={e =>
-                                    updateLineItem(index, 'price', parseFloat(e.target.value) || 0)
-                                  }
-                                  required
-                                  className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning"
-                                />
-                              </TableCell>
-                              <TableCell className="p-3">
-                                <Button
-                                  type="button"
-                                  size="icon"
-                                  variant="destructive"
-                                  onClick={() => removeLineItem(index)}
-                                  disabled={(formData.items?.length || 0) <= 1}
-                                  aria-label="Remove line item"
-                                >
-                                  <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </Div>
-                  </Div>
-                  <Button type="button" variant="outline" className="mt-2" onClick={addLineItem}>
-                    <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
-                    Add Line Item
-                  </Button>
-                </>
+                <ItemsTable
+                  items={formData.items || []}
+                  onUpdateItem={updateLineItem}
+                  onRemoveItem={removeLineItem}
+                  onAddItem={addLineItem}
+                />
               )}
 
               {/* Flat-Rate Mode: Description + Amount */}
@@ -578,34 +488,14 @@ export function QuoteModal({
               )}
             </Div>
             {/* Totals */}
-            <Div className="">
-              <Div className="flex items-center mb-3">
-                <Icon name="lucide:Calculator" className="w-4 h-4 mr-2" />
-                <H4 className="font-semibold ">Quote Summary</H4>
-              </Div>
-              <Div className="space-y-2">
-                <Div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
-                  <Span className="font-medium ">Subtotal:</Span>
-                  <Span className="font-semibold">
-                    {subtotal.toFixed(2)} {formData.currency}
-                  </Span>
-                </Div>
-                {showTaxes && (
-                  <Div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
-                    <Span className="font-medium ">Tax ({formData.taxRate}%):</Span>
-                    <Span className="font-semibold">
-                      {taxAmount.toFixed(2)} {formData.currency}
-                    </Span>
-                  </Div>
-                )}
-                <Div className="flex justify-between bg-gradient-quote text-white rounded-lg p-3 shadow">
-                  <Span className="font-bold">Total:</Span>
-                  <Span className="font-bold text-lg">
-                    {total.toFixed(2)} {formData.currency}
-                  </Span>
-                </Div>
-              </Div>
-            </Div>
+            <QuoteSummary
+              subtotal={subtotal}
+              taxAmount={taxAmount}
+              total={total}
+              showTaxes={showTaxes}
+              taxRate={formData.taxRate || 0}
+              currency={formData.currency}
+            />
             <Div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />

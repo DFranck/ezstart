@@ -3,14 +3,12 @@
 import {
   Button,
   Div,
-  H2,
   P,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Span,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
@@ -21,8 +19,13 @@ import type { MaskRect } from '@/components/blackout-mask'
 import type { ZoneConfig } from '@/components/multi-zone-selector'
 import { getDefaultZones } from '@/components/multi-zone-selector'
 import { CapturePreview } from '@/components/capture-preview'
-import { OcrDebugPanel } from '@/components/ocr-debug-panel'
 import { preprocessForOcr } from '@/utils/image-preprocessing'
+import {
+  applyBlackoutMasks,
+  canvasFromImageData,
+  cropImageData,
+  imageDataToBlob,
+} from '@/utils/scan-image-utils'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
@@ -32,6 +35,7 @@ import {
   useSaveGameLayout,
   useDeleteGameLayout,
 } from '@/hooks/use-game-config'
+import { BenchResults } from './bench-results'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
@@ -41,59 +45,6 @@ const DEFAULT_MASKS: MaskRect[] = [
   { id: 'score', x: 60, y: 15, width: 35, height: 15 },
   { id: 'sell', x: 65, y: 75, width: 30, height: 20 },
 ]
-
-function applyBlackoutMasks(imageData: ImageData, masks: MaskRect[]): ImageData {
-  const canvas = document.createElement('canvas')
-  canvas.width = imageData.width
-  canvas.height = imageData.height
-  const ctx = canvas.getContext('2d')!
-  ctx.putImageData(imageData, 0, 0)
-
-  ctx.fillStyle = 'black'
-  for (const mask of masks) {
-    const x = Math.round((mask.x / 100) * canvas.width)
-    const y = Math.round((mask.y / 100) * canvas.height)
-    const w = Math.round((mask.width / 100) * canvas.width)
-    const h = Math.round((mask.height / 100) * canvas.height)
-    ctx.fillRect(x, y, w, h)
-  }
-
-  return ctx.getImageData(0, 0, canvas.width, canvas.height)
-}
-
-function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
-  const canvas = document.createElement('canvas')
-  canvas.width = imageData.width
-  canvas.height = imageData.height
-  const ctx = canvas.getContext('2d')
-  if (ctx) ctx.putImageData(imageData, 0, 0)
-  return canvas
-}
-
-function cropImageData(imageData: ImageData, roi: RoiRect): ImageData {
-  const srcCanvas = canvasFromImageData(imageData)
-
-  const sx = Math.round((roi.x / 100) * imageData.width)
-  const sy = Math.round((roi.y / 100) * imageData.height)
-  const sw = Math.round((roi.width / 100) * imageData.width)
-  const sh = Math.round((roi.height / 100) * imageData.height)
-
-  const cropCanvas = document.createElement('canvas')
-  cropCanvas.width = sw
-  cropCanvas.height = sh
-  const ctx = cropCanvas.getContext('2d')
-  if (!ctx) return imageData
-
-  ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, sw, sh)
-  return ctx.getImageData(0, 0, sw, sh)
-}
-
-async function imageDataToBlob(imageData: ImageData): Promise<Blob> {
-  const canvas = canvasFromImageData(imageData)
-  return new Promise(resolve => {
-    canvas.toBlob(blob => resolve(blob ?? new Blob()), 'image/png')
-  })
-}
 
 export default function BenchPage() {
   const t = useTranslations()
@@ -161,7 +112,6 @@ export default function BenchPage() {
       .replace(/[^a-z0-9-]/g, '')
     if (!layoutName) return
 
-    // Save new layout with current state
     saveLayout({
       layoutName,
       displayName: name,
@@ -281,7 +231,6 @@ export default function BenchPage() {
         })
         const blob = await imageDataToBlob(zoneProcessed)
 
-        // Add zone preview
         const zoneCanvas = canvasFromImageData(zoneProcessed)
         previews.push({ name: `Zone: ${zone.name}`, dataUrl: zoneCanvas.toDataURL('image/png') })
 
@@ -378,12 +327,10 @@ export default function BenchPage() {
 
     const layoutName = currentLayoutName || 'default'
 
-    // Sort bench results: most substats first, then highest confidence
     const sorted = [...scanResult.benchResults]
       .filter(r => r.success)
       .sort((a, b) => b.subsCount - a.subsCount || b.confidence - a.confidence)
 
-    // Take unique preset names (top 3)
     const seen = new Set<string>()
     const bestPresets: string[] = []
     for (const r of sorted) {
@@ -396,7 +343,6 @@ export default function BenchPage() {
 
     if (bestPresets.length === 0) bestPresets.push('upscale-2x')
 
-    // Save to current layout (presets + zones + masks + ROI)
     const currentDisplay = layouts.find(l => l.layoutName === layoutName)?.displayName
     saveLayout({
       layoutName,
@@ -411,7 +357,6 @@ export default function BenchPage() {
   }, [scanResult, currentLayoutName, layouts, saveLayout])
 
   const isAnalyzing = isPending
-  const resultData = scanResult
 
   return (
     <Div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -517,92 +462,15 @@ export default function BenchPage() {
         )}
 
         {/* Results */}
-        {resultData && (
-          <Div className="space-y-4">
-            {/* Merged result summary */}
-            <Div className="rounded-md bg-muted/50 border px-3 py-2">
-              <P className="text-sm font-medium">
-                {t('labels.confidence')}: {resultData.confidence}%
-                {resultData.rawText && (
-                  <Span className="ml-4 text-muted-foreground">
-                    Raw: {resultData.rawText.substring(0, 120)}
-                    {resultData.rawText.length > 120 ? '...' : ''}
-                  </Span>
-                )}
-              </P>
-            </Div>
-
-            {/* Bench results table */}
-            {resultData.benchResults && resultData.benchResults.length > 0 && (
-              <Div className="space-y-3">
-                <H2 className="text-lg font-semibold">{t('bench.results')}</H2>
-                <Div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium">{t('bench.source')}</th>
-                        <th className="text-left py-2 px-3 font-medium">{t('bench.preset')}</th>
-                        <th className="text-right py-2 px-3 font-medium">
-                          {t('labels.confidence')}
-                        </th>
-                        <th className="text-right py-2 px-3 font-medium">{t('bench.substats')}</th>
-                        <th className="text-center py-2 px-3 font-medium">{t('bench.status')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {resultData.benchResults.map((r, idx) => (
-                        <tr
-                          key={`${r.source}-${r.preset}-${idx}`}
-                          className={`border-b ${idx === 0 ? 'bg-primary/5' : ''}`}
-                        >
-                          <td className="py-2 px-3 font-mono text-xs">{r.source}</td>
-                          <td className="py-2 px-3 font-mono text-xs">
-                            {r.preset}
-                            {idx === 0 && (
-                              <Span className="ml-2 text-xs text-primary font-medium">BEST</Span>
-                            )}
-                          </td>
-                          <td className="text-right py-2 px-3">{r.confidence}%</td>
-                          <td className="text-right py-2 px-3">{r.subsCount}</td>
-                          <td className="text-center py-2 px-3">
-                            {r.success ? (
-                              <Span className="text-success-foreground">OK</Span>
-                            ) : (
-                              <Span className="text-destructive-foreground">FAIL</Span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </Div>
-
-                {/* Save best presets button */}
-                <Button
-                  variant={presetsSaved ? 'outline' : 'default'}
-                  className="w-full"
-                  onClick={handleSavePresets}
-                  disabled={presetsSaved}
-                >
-                  {presetsSaved ? t('bench.presetsSaved') : t('bench.savePresets')}
-                </Button>
-              </Div>
-            )}
-
-            {/* OCR debug panel */}
-            {ocrPreviews.length > 0 && (
-              <OcrDebugPanel
-                previews={ocrPreviews}
-                sources={resultData.ocrSources}
-                mergedConfidence={resultData.confidence}
-                mergedSubs={resultData.benchResults?.find(r => r.success)?.subsCount ?? 0}
-              />
-            )}
-          </Div>
-        )}
+        <BenchResults
+          resultData={scanResult}
+          ocrPreviews={ocrPreviews}
+          presetsSaved={presetsSaved}
+          onSavePresets={handleSavePresets}
+        />
 
         {/* Waiting state */}
-        {!resultData && !isPending && isCapturing && (
+        {!scanResult && !isPending && isCapturing && (
           <Div className="text-center py-8">
             <P className="text-muted-foreground text-sm">{t('scan.capture.waitingForChange')}</P>
           </Div>

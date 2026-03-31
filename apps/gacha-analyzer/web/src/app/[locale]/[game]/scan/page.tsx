@@ -19,17 +19,22 @@ import type { GameType, ScanResult } from '@gacha-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import type { MaskRect } from '@/components/blackout-mask'
 import type { ZoneConfig } from '@/components/multi-zone-selector'
-import { RuneCardWithTemplate } from '@/components/rune-card-templates'
 import type { RuneCardTemplate } from '@/components/rune-card-templates'
-import { GearCard } from '@/components/gear-card'
 import { CapturePreview } from '@/components/capture-preview'
-import { ScanResultRaw } from '@/components/scan-result-raw'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
 import { preprocessForOcr } from '@/utils/image-preprocessing'
+import {
+  applyBlackoutMasks,
+  cropImageData,
+  imageDataToBlob,
+  imageDataToJpegBase64,
+  quickHash,
+} from '@/utils/scan-image-utils'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
 import { useGameLayouts, useGameLayout } from '@/hooks/use-game-config'
+import { ScanResults, ScanStatusBar } from './scan-results'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
@@ -64,79 +69,7 @@ function loadMasks(gameType: GameType): MaskRect[] {
   return []
 }
 
-/** Black-out mask regions on an ImageData (for OCR — always black) */
-function applyBlackoutMasks(imageData: ImageData, masks: MaskRect[]): ImageData {
-  const canvas = document.createElement('canvas')
-  canvas.width = imageData.width
-  canvas.height = imageData.height
-  const ctx = canvas.getContext('2d')!
-  ctx.putImageData(imageData, 0, 0)
-
-  ctx.fillStyle = 'black'
-  for (const mask of masks) {
-    const x = Math.round((mask.x / 100) * canvas.width)
-    const y = Math.round((mask.y / 100) * canvas.height)
-    const w = Math.round((mask.width / 100) * canvas.width)
-    const h = Math.round((mask.height / 100) * canvas.height)
-    ctx.fillRect(x, y, w, h)
-  }
-
-  return ctx.getImageData(0, 0, canvas.width, canvas.height)
-}
-
-/** Compute a fast hash from an ImageData by sampling ~1000 pixels */
-function quickHash(imageData: ImageData): string {
-  const data = imageData.data
-  const step = Math.max(1, Math.floor(data.length / 1000))
-  let hash = 0
-  for (let i = 0; i < data.length; i += step * 4) {
-    hash = ((hash << 5) - hash + data[i]! + data[i + 1]! + data[i + 2]!) | 0
-  }
-  return hash.toString(36)
-}
-
 const MAX_SCAN_CACHE = 50
-
-function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
-  const canvas = document.createElement('canvas')
-  canvas.width = imageData.width
-  canvas.height = imageData.height
-  const ctx = canvas.getContext('2d')
-  if (ctx) ctx.putImageData(imageData, 0, 0)
-  return canvas
-}
-
-/** Crop an ImageData to the given ROI (percentages 0-100) */
-function cropImageData(imageData: ImageData, roi: RoiRect): ImageData {
-  const srcCanvas = canvasFromImageData(imageData)
-
-  const sx = Math.round((roi.x / 100) * imageData.width)
-  const sy = Math.round((roi.y / 100) * imageData.height)
-  const sw = Math.round((roi.width / 100) * imageData.width)
-  const sh = Math.round((roi.height / 100) * imageData.height)
-
-  const cropCanvas = document.createElement('canvas')
-  cropCanvas.width = sw
-  cropCanvas.height = sh
-  const ctx = cropCanvas.getContext('2d')
-  if (!ctx) return imageData
-
-  ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, sw, sh)
-  return ctx.getImageData(0, 0, sw, sh)
-}
-
-async function imageDataToBlob(imageData: ImageData): Promise<Blob> {
-  const canvas = canvasFromImageData(imageData)
-  return new Promise(resolve => {
-    canvas.toBlob(blob => resolve(blob ?? new Blob()), 'image/png')
-  })
-}
-
-/** Convert ImageData to a compressed JPEG base64 data URL for thumbnail storage */
-function imageDataToJpegBase64(imageData: ImageData, quality = 0.5): string {
-  const canvas = canvasFromImageData(imageData)
-  return canvas.toDataURL('image/jpeg', quality)
-}
 
 export default function GameScanPage() {
   const t = useTranslations()
@@ -183,14 +116,12 @@ export default function GameScanPage() {
   const flashConfig: Record<string, { color: string; intensity: number; duration: number }> =
     useMemo(
       () => ({
-        // Advice actions (priority)
         /* Flash colors use rgba() because they are applied via inline style as background overlays
        with dynamic alpha. CSS variables are referenced through getComputedStyle at runtime. */
         sell: { color: 'rgba(239, 68, 68, ALPHA)', intensity: 0.5, duration: 800 },
         upgrade: { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
         keep: { color: 'rgba(34, 197, 94, ALPHA)', intensity: 0.5, duration: 1200 },
         grind: { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.4, duration: 1000 },
-        // Tier fallback (when no advice)
         godlike: { color: 'rgba(255, 180, 0, ALPHA)', intensity: 0.6, duration: 1500 },
         great: { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.5, duration: 1200 },
         good: { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
@@ -287,25 +218,11 @@ export default function GameScanPage() {
   // Track whether an auto-scan is in progress to avoid overlapping requests
   const scanningRef = useRef(false)
 
-  const handleSignificantChange = useCallback(
-    (frame: ImageData) => {
-      if (scanningRef.current) return
-
-      // Check image hash cache before sending to API
-      const hash = quickHash(frame)
-      const cached = scanCacheRef.current.get(hash)
-      if (cached) {
-        logger.debug('[scan] Cache hit — skipping OCR')
-        setCachedResult(cached)
-        return
-      }
-      lastHashRef.current = hash
-
-      scanningRef.current = true
-      setScanCount(prev => prev + 1)
-
+  /** Build scan files from a cropped frame and send to API */
+  const buildAndScan = useCallback(
+    (frame: ImageData, thumbnail?: string) => {
       // Generate compressed JPEG thumbnail from the raw crop before preprocessing
-      const thumbnail = imageDataToJpegBase64(frame)
+      const thumb = thumbnail ?? imageDataToJpegBase64(frame)
 
       // Apply blackout masks before preprocessing
       const maskedFrame =
@@ -356,7 +273,7 @@ export default function GameScanPage() {
             profile,
             benchMode: false,
             presets: savedPresets.current,
-            thumbnail,
+            thumbnail: thumb,
           },
           {
             onSettled: () => {
@@ -367,6 +284,29 @@ export default function GameScanPage() {
       })
     },
     [game, scan, profile]
+  )
+
+  const handleSignificantChange = useCallback(
+    (frame: ImageData) => {
+      if (scanningRef.current) return
+
+      // Check image hash cache before sending to API
+      const hash = quickHash(frame)
+      const cached = scanCacheRef.current.get(hash)
+      if (cached) {
+        logger.debug('[scan] Cache hit — skipping OCR')
+        setCachedResult(cached)
+        return
+      }
+      lastHashRef.current = hash
+
+      scanningRef.current = true
+      setScanCount(prev => prev + 1)
+
+      const thumbnail = imageDataToJpegBase64(frame)
+      buildAndScan(frame, thumbnail)
+    },
+    [buildAndScan]
   )
 
   const { processFrame } = useFrameDiff({
@@ -409,75 +349,14 @@ export default function GameScanPage() {
     setScanCount(prev => prev + 1)
     const cropped = cropImageData(currentFrame, roiRef.current)
     lastHashRef.current = quickHash(cropped)
-
-    // Generate compressed JPEG thumbnail from the raw crop
     const thumbnail = imageDataToJpegBase64(cropped)
-
-    // Apply blackout masks before preprocessing
-    const maskedCropped =
-      masksRef.current.length > 0 ? applyBlackoutMasks(cropped, masksRef.current) : cropped
-    const processed = preprocessForOcr(maskedCropped, {
-      scale: 2,
-      contrast: 1.0,
-      binarize: false,
-      grayscale: false,
-    })
-
-    // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
-    const blobPromises: Promise<Blob>[] = [
-      imageDataToBlob(processed),
-      imageDataToBlob(maskedCropped),
-    ]
-
-    // 3rd source: full window frame cropped to ROI at native resolution
-    let hasFullBlob = false
-    if (fullFrameRef.current) {
-      const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
-      const fullMasked =
-        masksRef.current.length > 0
-          ? applyBlackoutMasks(fullCropped, masksRef.current)
-          : fullCropped
-      const fullProcessed = preprocessForOcr(fullMasked, {
-        scale: 2,
-        contrast: 1.0,
-        binarize: false,
-        grayscale: false,
-      })
-      blobPromises.push(imageDataToBlob(fullProcessed))
-      hasFullBlob = true
-    }
-
-    Promise.all(blobPromises).then(blobs => {
-      const mainFile = new File([blobs[0]!], 'capture.png', { type: 'image/png' })
-      const altFile = new File([blobs[1]!], 'capture-raw.png', { type: 'image/png' })
-      const fullFile = hasFullBlob
-        ? new File([blobs[2]!], 'capture-full.png', { type: 'image/png' })
-        : undefined
-      scan(
-        {
-          image: mainFile,
-          imageAlt: altFile,
-          imageFull: fullFile,
-          gameType: game,
-          profile,
-          benchMode: false,
-          presets: savedPresets.current,
-          thumbnail,
-        },
-        {
-          onSettled: () => {
-            scanningRef.current = false
-          },
-        }
-      )
-    })
-  }, [currentFrame, scan, game, profile])
+    buildAndScan(cropped, thumbnail)
+  }, [currentFrame, buildAndScan])
 
   const isAnalyzing = isPending
 
   const resultData = cachedResult || scanResult
   const isCachedDisplay = !!cachedResult
-  const hasStructuredData = resultData?.data && Object.keys(resultData.data).length > 0
 
   return (
     <Div className="container mx-auto px-4 py-6 max-w-6xl">
@@ -514,7 +393,7 @@ export default function GameScanPage() {
             onMaskRemove={masks.length > 0 ? () => {} : undefined}
             zones={layoutData?.zones as unknown as ZoneConfig[] | undefined}
             onZonesChange={() => {}}
-            zonesLocked={!showSettings}
+            zonesLocked={!showSettings && isCapturing}
             maskColor="rgba(255, 0, 0, 0.15)"
             compact={!showSettings && isCapturing}
             extraButtons={
@@ -597,128 +476,27 @@ export default function GameScanPage() {
 
           {/* Status bar */}
           {isCapturing && (
-            <Div className="flex items-center gap-2 flex-wrap">
-              {currentLayoutName && (
-                <Badge variant="outline" className="text-xs">
-                  {t('scan.statusBar.layout')}: {currentLayoutName}
-                </Badge>
-              )}
-              {resultData?.confidence !== undefined && (
-                <Badge variant="outline" className="text-xs">
-                  <Div
-                    className={`h-1.5 w-1.5 rounded-full mr-1 ${
-                      resultData.confidence >= 80
-                        ? 'bg-success'
-                        : resultData.confidence >= 50
-                          ? 'bg-warning'
-                          : 'bg-destructive'
-                    }`}
-                  />
-                  {t('scan.statusBar.lastConfidence')}: {Math.round(resultData.confidence)}%
-                </Badge>
-              )}
-              {isCachedDisplay && (
-                <Badge variant="secondary" className="text-xs">
-                  Cached
-                </Badge>
-              )}
-              {scanCount > 0 && (
-                <Badge variant="outline" className="text-xs">
-                  {scanCount} {t('scan.statusBar.scans')}
-                </Badge>
-              )}
-            </Div>
+            <ScanStatusBar
+              currentLayoutName={currentLayoutName}
+              resultData={resultData}
+              isCachedDisplay={isCachedDisplay}
+              scanCount={scanCount}
+            />
           )}
         </Div>
 
         {/* Right: Results */}
-        <Div className="space-y-4">
-          {/* Template selector — always visible for SW */}
-          {game === 'summoners-war' && (
-            <Div className="flex gap-1.5">
-              {(['compact', 'detailed', 'gaming'] as const).map(tmpl => (
-                <Button
-                  key={tmpl}
-                  variant={runeTemplate === tmpl ? 'default' : 'outline'}
-                  size="sm"
-                  className="text-xs capitalize"
-                  onClick={() => handleTemplateChange(tmpl)}
-                >
-                  {tmpl}
-                </Button>
-              ))}
-            </Div>
-          )}
-
-          {/* Rune card — skeleton when no result, real content when available */}
-          {game === 'summoners-war' && (
-            <Div
-              className={
-                resultData && hasStructuredData && resultData.success && 'set' in resultData.data
-                  ? 'animate-in fade-in-0 duration-300'
-                  : ''
-              }
-            >
-              <RuneCardWithTemplate
-                rune={
-                  hasStructuredData && resultData?.success && 'set' in resultData.data
-                    ? resultData.data
-                    : undefined
-                }
-                analysis={resultData?.analysis}
-                confidence={resultData?.confidence}
-                template={runeTemplate}
-                isLoading={isPending}
-              />
-            </Div>
-          )}
-
-          {resultData && (
-            <Div
-              className={
-                isPending
-                  ? 'opacity-50 pointer-events-none'
-                  : 'animate-in fade-in-0 slide-in-from-bottom-2 duration-300'
-              }
-            >
-              {resultData.unreliable && (
-                <Div className="rounded-md bg-warning/10 border border-warning/20 px-3 py-2 mb-3">
-                  <P className="text-sm text-warning-foreground">{t('scan.unreliableResult')}</P>
-                </Div>
-              )}
-
-              {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
-                <GearCard gear={resultData.data} confidence={resultData.confidence} />
-              )}
-
-              {resultData.rawText && (
-                <ScanResultRaw
-                  rawText={resultData.rawText}
-                  confidence={resultData.confidence}
-                  parsingFailed={!hasStructuredData}
-                  defaultCollapsed={hasStructuredData}
-                />
-              )}
-
-              {!hasStructuredData && resultData.rawText && (
-                <Div className="rounded-md bg-warning/10 border border-warning/20 px-3 py-2">
-                  <P className="text-sm text-warning-foreground">
-                    {t('scan.parsingImproving', {
-                      defaultMessage:
-                        'Structured parsing is being improved. Raw OCR text is shown above.',
-                    })}
-                  </P>
-                </Div>
-              )}
-            </Div>
-          )}
-
-          {!resultData && !isPending && isCapturing && game !== 'summoners-war' && (
-            <Div className="text-center py-8">
-              <P className="text-muted-foreground text-sm">{t('scan.capture.waitingForChange')}</P>
-            </Div>
-          )}
-        </Div>
+        <ScanResults
+          game={game}
+          resultData={resultData}
+          isPending={isPending}
+          isCapturing={isCapturing}
+          isCachedDisplay={isCachedDisplay}
+          scanCount={scanCount}
+          currentLayoutName={currentLayoutName}
+          runeTemplate={runeTemplate}
+          onTemplateChange={handleTemplateChange}
+        />
       </Div>
     </Div>
   )
