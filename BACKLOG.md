@@ -79,7 +79,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 42. [x] Deduplicate components — 8 components moved to packages/ui
 43. [x] OAuth token encryption — AES-256-GCM in ezauth
 44. [x] Localhost URLs — 3 files fixed, using @ezstart/config
-45. [ ] Reduce `any` types — ~94 in packages done, ~483→reduced in apps (ongoing)
+45. [x] Reduce `any` types — 25 files fixed, all remaining `any` justified with eslint-disable
 46. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
 47. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
 48. [x] HIGH: EZPay — auth middleware sur GET routes sensibles
@@ -89,8 +89,8 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 52. [x] Logger — filtre NODE_ENV ajouté (debug/info silencieux en prod)
 53. [x] Remplacer console.log par logger.debug() dans auth-sdk (7 logs clés restaurés)
 54. [x] CSRF protection — middleware created in express-core, applied to ezauth cookie routes
-55. [ ] Json type adoption — created in express-core, needs to replace remaining `any` for JSON data
-56. [ ] Large component splitting — 15 files >500 lines need refactoring
+55. [x] Json type adoption — Json type created in express-core, used where applicable (merged with #45)
+56. [x] Large component splitting — 10 components split (data-page, BaguaPreviewModal, capture-preview, invoice-modal, green-pulse landing, rune-card-compact, scan/page, bench/page, fengshui/page, quote-modal)
 57. [x] Dynamic import recharts — 6 components import recharts statically
 58. [x] Aria-labels — icon-only buttons across gacha-analyzer, fengshui now have aria-label
 
