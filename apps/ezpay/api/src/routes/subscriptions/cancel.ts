@@ -8,6 +8,7 @@ import {
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { cancelSubscription } from '../../services/stripe.js'
+import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -59,7 +60,7 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/subscriptions/:subscriptionId/cancel', cancelSubscriptionHandler, {
+docRouter.post('/subscriptions/:subscriptionId/cancel', authMiddleware, cancelSubscriptionHandler, {
   summary: 'Cancel an active subscription',
   tags: ['Subscriptions'],
   responseSchema: cancelResponseSchema,

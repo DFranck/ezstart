@@ -1,4 +1,5 @@
 import { Router } from '@ezstart/express-core'
+import { authMiddleware } from '../../middleware/auth.js'
 import listProjectsRouter, { listProjectsRegistry } from './listProjects.js'
 import getProjectByIdRouter, { getProjectByIdRegistry } from './getProjectById.js'
 import createProjectRouter, { createProjectRegistry } from './createProject.js'
@@ -22,8 +23,9 @@ export const projectRegistries = [
   getProjectFormsRegistry,
 ]
 
-// Combine all routers
+// Combine all routers — all project routes require authentication
 const router: import('express').Router = Router()
+router.use(authMiddleware)
 
 router.use('/', listProjectsRouter)
 router.use('/', getProjectByIdRouter)

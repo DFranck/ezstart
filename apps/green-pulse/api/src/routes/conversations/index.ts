@@ -15,6 +15,7 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { authMiddleware } from '../../middleware/auth.js'
 
 // Import individual action routers
 import listConversationsRouter, { listConversationsRegistry } from './listConversations.js'
@@ -38,8 +39,9 @@ export const conversationRegistries = [
   restoreConversationRegistry,
 ]
 
-// Consolidate all action routers
+// Consolidate all action routers — all conversation routes require authentication
 const router: import('express').Router = Router()
+router.use(authMiddleware)
 
 router
   .use('/', listConversationsRouter) // GET /

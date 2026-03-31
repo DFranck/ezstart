@@ -13,6 +13,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/express-core'
+import { authMiddleware } from '../middleware/auth.js'
 import { chatWithLIA, validateEsgData } from '../services/lia.service.js'
 import { Conversation } from '../models/Conversation.js'
 import { ChatRequestSchema, ChatResponseSchema, ApiResponseSchema } from '@green-pulse/types'
@@ -20,6 +21,7 @@ import { ChatRequestSchema, ChatResponseSchema, ApiResponseSchema } from '@green
 export const chatV2Registry = new OpenAPIRegistry()
 
 const router: import('express').Router = Router()
+router.use(authMiddleware)
 const docRouter = createRouterWithDoc(chatV2Registry, router, '/chat-v2')
 
 // POST /api/chat-v2 - Chat using @ezstart/ai-sdk

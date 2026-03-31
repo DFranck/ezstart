@@ -10,6 +10,7 @@ import {
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { createCheckoutSession } from '../../services/stripe.js'
+import { optionalAuthMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -124,7 +125,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/donate', createDonationHandler, {
+docRouter.post('/donate', optionalAuthMiddleware, createDonationHandler, {
   summary: 'Create a donation checkout session',
   tags: ['Donations'],
   bodySchema: createDonationSchema,

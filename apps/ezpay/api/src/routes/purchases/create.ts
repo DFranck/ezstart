@@ -10,6 +10,7 @@ import {
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { createCheckoutSession } from '../../services/stripe.js'
+import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -110,7 +111,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/purchase', createPurchaseHandler, {
+docRouter.post('/purchase', authMiddleware, createPurchaseHandler, {
   summary: 'Create a purchase checkout session',
   tags: ['Purchases'],
   bodySchema: createPurchaseSchema,

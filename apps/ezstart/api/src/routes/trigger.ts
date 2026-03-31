@@ -1,5 +1,6 @@
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { authMiddleware } from '../middleware/auth.js'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import { getHealthCheckModel } from '../models/HealthCheck.js'
 
@@ -11,7 +12,7 @@ const healthChecker = new HealthChecker()
  * Manually trigger health checks on all services
  * Returns immediately and runs checks in background
  */
-triggerRouter.post('/', async (req, res) => {
+triggerRouter.post('/', authMiddleware, async (req, res) => {
   try {
     const isDev = process.env.NODE_ENV !== 'production'
 

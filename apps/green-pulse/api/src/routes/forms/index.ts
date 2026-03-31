@@ -18,6 +18,7 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { authMiddleware } from '../../middleware/auth.js'
 
 // Import sub-feature routers
 import formConfigsRouter, { formConfigRegistries } from './configs/index.js'
@@ -31,8 +32,9 @@ export const formRegistries = [
   extractFormDataRegistry,
 ]
 
-// Consolidate all form routers
+// Consolidate all form routers — all form routes require authentication
 const router: import('express').Router = Router()
+router.use(authMiddleware)
 
 router
   .use('/', formConfigsRouter) // /configs/*

@@ -10,6 +10,7 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { authMiddleware } from '../../middleware/auth.js'
 
 // Import individual action routers
 import sendMessageRouter, { sendMessageRegistry } from './sendMessage.js'
@@ -18,8 +19,9 @@ import extractEsgDataRouter, { extractEsgDataRegistry } from './extractEsgData.j
 // Export all registries as an array for OpenAPI documentation
 export const chatRegistries = [sendMessageRegistry, extractEsgDataRegistry]
 
-// Consolidate all action routers
+// Consolidate all action routers — all chat routes require authentication
 const router: import('express').Router = Router()
+router.use(authMiddleware)
 
 router
   .use('/', sendMessageRouter) // POST /

@@ -12,6 +12,7 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { authMiddleware } from '../../middleware/auth.js'
 
 // Import individual action routers
 import uploadAudioRouter, { uploadAudioRegistry } from './uploadAudio.js'
@@ -27,8 +28,9 @@ export const uploadRegistries = [
   getFileInfoRegistry,
 ]
 
-// Consolidate all action routers
+// Consolidate all action routers — all upload routes require authentication
 const router: import('express').Router = Router()
+router.use(authMiddleware)
 
 router
   .use('/audio', uploadAudioRouter) // POST /audio

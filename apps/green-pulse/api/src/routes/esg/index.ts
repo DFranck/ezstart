@@ -13,6 +13,7 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { authMiddleware } from '../../middleware/auth.js'
 
 // Import individual action routers
 import createProjectRouter, { createProjectRegistry } from './createProject.js'
@@ -30,8 +31,9 @@ export const esgRegistries = [
   processEsgDataRegistry,
 ]
 
-// Consolidate all action routers
+// Consolidate all action routers — all ESG routes require authentication
 const router: import('express').Router = Router()
+router.use(authMiddleware)
 
 router
   .use('/projects', createProjectRouter) // POST /projects
