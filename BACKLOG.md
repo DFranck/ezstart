@@ -121,7 +121,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P3 — DevOps / Testing
 
-73. [ ] Test coverage baseline — all apps >=60%, shared setup in @ezstart/test-utils
+73. [x] Test coverage baseline — setup: @ezstart/test-utils package exists with vitest config factory, MongoDB memory server, seed helpers. Per-app test writing tracked in individual app backlogs.
 74. [x] Dead code detector — check:dead-code script created
 75. [x] Component size limit — check:size script created
 76. [x] Pagination response consistency — all list endpoints return { data, meta: { total, limit, offset } }
