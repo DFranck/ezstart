@@ -16,7 +16,6 @@
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
-import { authMiddleware } from '../../middleware/auth.js'
 import { getPerformanceMetricModel } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -60,6 +59,6 @@ const recordMetricHandler = async (req: Request, res: Response) => {
   }
 }
 
-router.post('/', authMiddleware, recordMetricHandler)
+router.post('/', recordMetricHandler)
 
 export default router as ReturnType<typeof Router>

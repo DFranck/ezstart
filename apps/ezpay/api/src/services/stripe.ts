@@ -6,9 +6,10 @@ if (!stripeKey) {
   throw new Error('STRIPE_SECRET_KEY required')
 }
 
-// Safety: prevent live keys in development
-if (process.env.NODE_ENV !== 'production' && stripeKey.startsWith('sk_live_')) {
-  throw new Error('DANGER: Live Stripe key detected in development! Use sk_test_ keys.')
+// Safety: prevent live keys in local development (RAILWAY_ENVIRONMENT is set on deployed servers)
+const isLocalDev = process.env.NODE_ENV !== 'production' && !process.env.RAILWAY_ENVIRONMENT
+if (isLocalDev && stripeKey.startsWith('sk_live_')) {
+  throw new Error('DANGER: Live Stripe key detected in local development! Use sk_test_ keys.')
 }
 if (process.env.NODE_ENV === 'production' && stripeKey.startsWith('sk_test_')) {
   logger.warn('WARNING: Test Stripe key in production — payments will not be processed')
