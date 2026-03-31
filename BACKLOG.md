@@ -113,7 +113,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2 — New packages / improvements
 
-68. [ ] @ezstart/email-service — Resend/SendGrid with templates (password reset, verification, receipts, notifications)
+68. [x] @ezstart/email-service — ResendProvider + ConsoleProvider + templates, provider-agnostic pattern
 69. [x] Socket.IO event constants — fixed mismatch in ezstart
 70. [x] Webhook validation middleware — createWebhookVerifier in express-core
 71. [x] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
