@@ -16,6 +16,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo build
+      # Build packages + APIs only (webs are built by Vercel)
+      - run: pnpm turbo build --filter='./packages/*' --filter='api-*'
+      # Typecheck everything (fast, no build needed)
       - run: pnpm turbo typecheck
-      - run: pnpm turbo test || true  # some apps may not have tests
+      - run: pnpm turbo test || true
