@@ -13,6 +13,8 @@ import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+import { emailService } from '../../services/email.service.js'
+import { emailVerificationTemplate } from '@ezstart/email-service'
 
 export const inviteWaitlistRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -133,8 +135,14 @@ const inviteWaitlistController = async (req: Request, res: Response) => {
 
     await waitlist.save()
 
-    // TODO: Send email with access code (implement email service later)
-    logger.info(`📧 [TODO] Send beta access email to ${email} with code: ${accessCode}`)
+    // Send invite email with access code
+    const registerUrl = `https://ezauth.ezstart.xyz/register?code=${accessCode}&app=${appName}`
+    await emailService.send({
+      to: email,
+      subject: `Your ${appName} access code`,
+      html: emailVerificationTemplate(registerUrl, appName),
+    })
+    logger.info(`📧 Sent beta access email to ${email}`)
 
     sendSuccess(res, {
       accessCode,

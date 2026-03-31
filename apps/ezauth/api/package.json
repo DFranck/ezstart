@@ -18,6 +18,7 @@
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
+    "@ezstart/email-service": "workspace:*",
     "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/rbac": "workspace:*",
