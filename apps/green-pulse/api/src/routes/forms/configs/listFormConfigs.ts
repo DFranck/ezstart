@@ -17,10 +17,13 @@ import { FormConfigSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormConfigModel } from '../../../models/FormConfig.js'
 
 const listFormConfigsQuerySchema = z.object({
-  category: z.string().optional(),
-  tags: z.union([z.string(), z.array(z.string())]).optional(),
-  limit: z.coerce.number().min(1).max(100).default(20),
-  offset: z.coerce.number().min(0).default(0),
+  category: z.string().optional().describe('Filter by form category'),
+  tags: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .describe('Filter by tag(s)'),
+  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
+  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
 
 export const listFormConfigsRegistry = new OpenAPIRegistry()

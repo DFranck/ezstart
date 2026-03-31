@@ -148,7 +148,7 @@ const CardinalWheel = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="">
+                  <button className="" aria-label={t('cardinal.tooltipHelp')}>
                     <Icon name="lucide:Info" size={14} />
                   </button>
                 </TooltipTrigger>

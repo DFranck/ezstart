@@ -83,6 +83,7 @@ export function ZoomCanvas({
               onClick={onZoomOut}
               className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
               title={t('capture.zoomOut')}
+              aria-label={t('capture.zoomOut')}
             >
               -
             </button>
@@ -94,6 +95,7 @@ export function ZoomCanvas({
               onClick={onZoomIn}
               className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
               title={t('capture.zoomIn')}
+              aria-label={t('capture.zoomIn')}
             >
               +
             </button>

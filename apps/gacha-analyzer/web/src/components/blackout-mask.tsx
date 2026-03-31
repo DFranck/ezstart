@@ -367,6 +367,7 @@ export function BlackoutMask({
                     padding: 0,
                   }}
                   title={t('removeMask')}
+                  aria-label={t('removeMask')}
                 >
                   ×
                 </button>

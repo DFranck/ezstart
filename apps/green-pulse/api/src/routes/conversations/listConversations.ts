@@ -17,10 +17,13 @@ import { Conversation } from '../../models/Conversation.js'
 import { ConversationListSchema, ApiResponseSchema } from '@green-pulse/types'
 
 const listConversationsQuerySchema = z.object({
-  userId: z.string().optional(),
-  includeDeleted: z.enum(['true', 'false']).optional(),
-  limit: z.coerce.number().min(1).max(100).default(20),
-  offset: z.coerce.number().min(0).default(0),
+  userId: z.string().optional().describe('Filter by user ID'),
+  includeDeleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .describe('Include soft-deleted conversations'),
+  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
+  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
 
 export const listConversationsRegistry = new OpenAPIRegistry()

@@ -45,11 +45,17 @@ docRouter.get(
   async (req, res) => {
     try {
       const listPromptsQuerySchema = z.object({
-        type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional(),
-        provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional(),
-        active: z.enum(['true', 'false']).optional(),
-        limit: z.coerce.number().min(1).max(100).default(20),
-        offset: z.coerce.number().min(0).default(0),
+        type: z
+          .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
+          .optional()
+          .describe('Filter by prompt type'),
+        provider: z
+          .enum(['all', 'gemini', 'openai', 'anthropic'])
+          .optional()
+          .describe('Filter by AI provider'),
+        active: z.enum(['true', 'false']).optional().describe('Filter by active status'),
+        limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
+        offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
       })
 
       const validation = listPromptsQuerySchema.safeParse(req.query)

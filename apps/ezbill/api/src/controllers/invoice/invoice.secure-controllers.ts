@@ -258,9 +258,9 @@ export async function markInvoiceAsPaidSecureController(req: AuthRequest, res: R
     }
 
     const markPaidSchema = z.object({
-      companyId: z.string().optional(),
-      paymentDate: z.string().optional(),
-      notes: z.string().optional(),
+      companyId: z.string().optional().describe('Company ID for the payment'),
+      paymentDate: z.string().optional().describe('Payment date in ISO format'),
+      notes: z.string().optional().describe('Additional payment notes'),
     })
     const parsedBody = markPaidSchema.safeParse(req.body)
     if (!parsedBody.success) {

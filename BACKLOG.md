@@ -91,8 +91,8 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 54. [x] CSRF protection — middleware created in express-core, applied to ezauth cookie routes
 55. [ ] Json type adoption — created in express-core, needs to replace remaining `any` for JSON data
 56. [ ] Large component splitting — 15 files >500 lines need refactoring
-57. [ ] Dynamic import recharts — 6 components import recharts statically
-58. [ ] Aria-labels — only 19 across entire codebase, many interactive elements missing a11y
+57. [x] Dynamic import recharts — 6 components import recharts statically
+58. [x] Aria-labels — icon-only buttons across gacha-analyzer, fengshui now have aria-label
 
 ### Cross-app audit 2026-03-31
 
@@ -106,7 +106,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 #### P1 — Code quality cross-app
 
 63. [ ] i18n enforcement — pre-commit hook to detect hardcoded strings not wrapped in t()
-64. [ ] Mongoose typing — eliminate @ts-expect-error across APIs via express-core model factory
+64. [x] Mongoose typing — eliminate @ts-expect-error across APIs via express-core model factory
 65. [x] Zod schema deduplication — verified no actual duplication across SDKs
 66. [x] Currency formatter — formatCurrency + getCurrencySymbol in packages/ui
 67. [x] JWT payload builder — extracted helper in ezauth
@@ -124,7 +124,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 73. [ ] Test coverage baseline — all apps >=60%, shared setup in @ezstart/test-utils
 74. [ ] Dead code detector — ESLint unused-exports + pre-commit hook
 75. [ ] Component size limit — ESLint rule warn >300 lines
-76. [ ] Pagination response consistency — all list endpoints return { data, meta: { total, limit, offset } }
+76. [x] Pagination response consistency — all list endpoints return { data, meta: { total, limit, offset } }
 
 ---
 

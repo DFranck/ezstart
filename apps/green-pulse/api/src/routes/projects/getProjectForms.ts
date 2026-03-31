@@ -12,8 +12,8 @@ import { ProjectSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../models/FormInstance.js'
 
 const getProjectFormsQuerySchema = z.object({
-  limit: z.coerce.number().min(1).max(100).default(20),
-  offset: z.coerce.number().min(0).default(0),
+  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
+  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
 
 export const getProjectFormsRegistry = new OpenAPIRegistry()

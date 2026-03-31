@@ -9,17 +9,18 @@ import { sendSuccess, sendError, sendValidationError } from '@ezstart/express-co
 import { chatWithInvoiceAssistant } from '../../services/gemini.service.js'
 
 const extractInvoiceBodySchema = z.object({
-  text: z.string().min(1, 'Text is required'),
+  text: z.string().min(1, 'Text is required').describe('User message to the AI assistant'),
   conversationHistory: z
     .array(
       z.object({
-        role: z.enum(['user', 'assistant']),
-        content: z.string(),
+        role: z.enum(['user', 'assistant']).describe('Message sender role'),
+        content: z.string().describe('Message content'),
       })
     )
-    .optional(),
-  currentInvoiceData: z.record(z.unknown()).optional(),
-  billingType: z.enum(['itemized', 'flat-rate']).optional(),
+    .optional()
+    .describe('Previous conversation messages for context'),
+  currentInvoiceData: z.record(z.unknown()).optional().describe('Current invoice form data'),
+  billingType: z.enum(['itemized', 'flat-rate']).optional().describe('Invoice billing type'),
 })
 
 export async function extractInvoiceData(req: Request, res: Response) {

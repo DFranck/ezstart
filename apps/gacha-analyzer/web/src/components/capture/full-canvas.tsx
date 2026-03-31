@@ -129,6 +129,7 @@ export function FullCanvas({
               onClick={onFullZoomOut}
               className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
               title={t('capture.zoomOut')}
+              aria-label={t('capture.zoomOut')}
             >
               -
             </button>
@@ -140,6 +141,7 @@ export function FullCanvas({
               onClick={onFullZoomIn}
               className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
               title={t('capture.zoomIn')}
+              aria-label={t('capture.zoomIn')}
             >
               +
             </button>
@@ -149,6 +151,7 @@ export function FullCanvas({
                 onClick={onFullZoomReset}
                 className="text-white text-xs px-1.5 py-0.5 hover:bg-white/20 rounded ml-1"
                 title={t('capture.resetZoom')}
+                aria-label={t('capture.resetZoom')}
               >
                 1:1
               </button>
