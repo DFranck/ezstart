@@ -2,7 +2,7 @@ import { EmailService, ResendProvider, ConsoleProvider } from '@ezstart/email-se
 import { logger } from '@ezstart/logger/server'
 
 const apiKey = process.env.RESEND_API_KEY
-const from = process.env.EMAIL_FROM || 'EZStart <noreply@ezstart.xyz>'
+const from = process.env.EMAIL_FROM || 'EZAuth <noreply@ezstart.xyz>'
 
 const provider = apiKey ? new ResendProvider(apiKey) : new ConsoleProvider()
 
