@@ -94,6 +94,38 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 57. [ ] Dynamic import recharts — 6 components import recharts statically
 58. [ ] Aria-labels — only 19 across entire codebase, many interactive elements missing a11y
 
+### Cross-app audit 2026-03-31
+
+#### P0 — Security critical
+
+59. [ ] Auth missing on write endpoints — ezpay (donate, purchase, cancel), ezstart (trigger-checks, performance), green-pulse (all routes except workspaces)
+60. [ ] App enum desynchronized — ezauth missing gacha-analyzer and ezpay in app list
+61. [ ] RBAC legacy migration — replace deprecated `roles` checks with `globalRoles`/`appRoles` + create `requireAdmin()` middleware in express-core
+62. [ ] Rate limiting on public endpoints — ezauth /token + /waitlist, ezpay donations
+
+#### P1 — Code quality cross-app
+
+63. [ ] i18n enforcement — pre-commit hook to detect hardcoded strings not wrapped in t()
+64. [ ] Mongoose typing — eliminate @ts-expect-error across APIs via express-core model factory
+65. [ ] Zod schema deduplication — centralize in SDK packages (auth-sdk, pay-sdk)
+66. [ ] Currency formatter — create shared formatCurrency(amount, code) utility, replace hardcoded $
+67. [ ] JWT payload builder — extract to auth-sdk utility, eliminate 3x duplication in ezauth
+
+#### P2 — New packages / improvements
+
+68. [ ] @ezstart/email-service — Resend/SendGrid with templates (password reset, verification, receipts, notifications)
+69. [ ] Socket.IO event constants — shared event names to prevent mismatches (ezstart health-check-updated vs health-checks-updated)
+70. [ ] Webhook validation middleware — signature verification + retry logic in express-core
+71. [ ] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
+72. [ ] Centralize app themes — ensure all apps have defined themes in config
+
+#### P3 — DevOps / Testing
+
+73. [ ] Test coverage baseline — all apps >=60%, shared setup in @ezstart/test-utils
+74. [ ] Dead code detector — ESLint unused-exports + pre-commit hook
+75. [ ] Component size limit — ESLint rule warn >300 lines
+76. [ ] Pagination response consistency — all list endpoints return { data, meta: { total, limit, offset } }
+
 ---
 
 ## 📱 claude-mobile
