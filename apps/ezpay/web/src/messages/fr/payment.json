@@ -44,5 +44,27 @@
     "installSdk": "1. Installer le SDK",
     "setupClient": "2. Configurer le client",
     "useComponents": "3. Utiliser les composants"
+  },
+  "success": {
+    "donateTitle": "Merci !",
+    "donateMessage": "Votre don a ete recu avec succes. Votre generosite fait la difference !",
+    "purchaseTitle": "Achat finalise !",
+    "purchaseMessage": "Votre achat a ete traite avec succes. Merci pour votre commande !",
+    "subscribeTitle": "Abonnement actif !",
+    "subscribeMessage": "Votre abonnement a ete active avec succes. Bienvenue a bord !",
+    "backHome": "Retour a l'accueil",
+    "whatNext": "Et maintenant ?",
+    "emailConfirmation": "Vous recevrez un email de confirmation sous peu.",
+    "receiptAvailable": "Votre recu est disponible dans votre email Stripe.",
+    "accessGranted": "Votre acces a ete accorde immediatement."
+  },
+  "cancel": {
+    "title": "Paiement annule",
+    "message": "Votre paiement a ete annule. Aucun montant n'a ete debite.",
+    "tryAgain": "Reessayer",
+    "backHome": "Retour a l'accueil",
+    "needHelp": "Besoin d'aide ?",
+    "contactSupport": "Si vous avez rencontre un probleme, contactez le support.",
+    "noCharge": "Ne vous inquietez pas, aucun montant n'a ete debite de votre compte."
   }
 }

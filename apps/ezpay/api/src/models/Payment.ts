@@ -1,6 +1,35 @@
 import { connectToMongo } from '@ezstart/express-core'
 import { Schema, Model, Document } from 'mongoose'
 
+export interface DonationMetadata {
+  message?: string
+  isPublic?: boolean
+}
+
+export interface PurchaseMetadata {
+  productId?: string
+  productName?: string
+  quantity?: number
+}
+
+export interface SubscriptionMetadata {
+  subscriptionId?: string
+  planId?: string
+  planName?: string
+  interval?: 'month' | 'year'
+}
+
+export interface InvoiceMetadata {
+  invoiceId?: string
+  invoiceNumber?: string
+}
+
+/** Combined metadata type — all fields optional, used fields depend on payment type */
+export type PaymentMetadata = DonationMetadata &
+  PurchaseMetadata &
+  SubscriptionMetadata &
+  InvoiceMetadata
+
 export interface PaymentDocument extends Document {
   // Project Info
   projectId: string
@@ -26,27 +55,8 @@ export interface PaymentDocument extends Document {
   paymentMethod?: string
   status: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled'
 
-  // Metadata (flexible pour différents use cases)
-  metadata?: {
-    // Pour donations
-    message?: string
-    isPublic?: boolean
-
-    // Pour purchases
-    productId?: string
-    productName?: string
-    quantity?: number
-
-    // Pour subscriptions
-    subscriptionId?: string
-    planId?: string
-    planName?: string
-    interval?: 'month' | 'year'
-
-    // Pour invoices
-    invoiceId?: string
-    invoiceNumber?: string
-  }
+  // Metadata (type-specific fields)
+  metadata?: PaymentMetadata
 
   // Dates
   createdAt: Date
@@ -79,6 +89,7 @@ const paymentSchema = new Schema<PaymentDocument>(
     isAnonymous: { type: Boolean, default: false },
 
     // Payment Details
+    // Only Stripe is currently integrated. PayPal kept in enum for future support.
     provider: { type: String, enum: ['stripe', 'paypal'], default: 'stripe' },
     paymentId: { type: String, unique: true },
     stripePaymentIntentId: { type: String, index: true },
@@ -134,7 +145,3 @@ export async function getPaymentModel(): Promise<Model<PaymentDocument>> {
   const mongoose = await connectToMongo('ezpay')
   return mongoose.models.Payment || mongoose.model<PaymentDocument>('Payment', paymentSchema)
 }
-
-// Legacy export for backward compatibility
-// TODO: Update all consuming code to use getPaymentModel()
-export const Payment = { get: getPaymentModel }

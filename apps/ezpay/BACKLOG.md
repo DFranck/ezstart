@@ -10,15 +10,15 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Phase 1 — CRITICAL : Securite & Fiabilite
 
-### 1.3 Auth manquant sur verify-payment `high` `security` — `planned`
+### 1.3 Auth manquant sur verify-payment `high` `security` — `done`
 
-- [ ] `POST /verify-payment/:sessionId` n'a aucune protection — permet a quiconque de verifier/completer un paiement arbitraire
-- [ ] Ajouter rate limiting specifique ou `optionalAuthMiddleware`
+- [x] `POST /verify-payment/:sessionId` n'a aucune protection — permet a quiconque de verifier/completer un paiement arbitraire
+- [x] Ajouter rate limiting specifique ou `optionalAuthMiddleware`
 
-### 1.4 Webhook refund lookup incorrect `critical` `bug` — `planned`
+### 1.4 Webhook refund lookup incorrect `critical` `bug` — `done`
 
-- [ ] `charge.refunded` cherche par `charge.id` mais les payments sont stockes avec `session.id` (checkout session ID) — le refund ne sera JAMAIS trouve en DB
-- [ ] Solution : stocker `payment_intent` dans le Payment document lors du webhook `checkout.session.completed`, puis chercher par payment_intent dans `charge.refunded`
+- [x] `charge.refunded` cherche par `charge.id` mais les payments sont stockes avec `session.id` (checkout session ID) — le refund ne sera JAMAIS trouve en DB
+- [x] Solution : stocker `payment_intent` dans le Payment document lors du webhook `checkout.session.completed`, puis chercher par payment_intent dans `charge.refunded`
 
 ### 1.5 Stripe API version obsolete `high` `tech-debt` — `planned`
 
@@ -29,21 +29,21 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Phase 2 — Qualite de Code
 
-### 2.3 Stats endpoint inefficace `medium` `performance` — `planned`
+### 2.3 Stats endpoint inefficace `medium` `performance` — `done`
 
-- [ ] `donations/stats.ts` charge TOUS les documents en memoire (`Payment.find(query)`) pour calculer total/count
-- [ ] Puis refait une 2e query pour les `recent` — 2 queries au lieu d'1 aggregation
-- [ ] Solution : utiliser `Payment.aggregate()` avec `$group` pour calculer total/count + `$facet` pour les recent
+- [x] `donations/stats.ts` charge TOUS les documents en memoire (`Payment.find(query)`) pour calculer total/count
+- [x] Puis refait une 2e query pour les `recent` — 2 queries au lieu d'1 aggregation
+- [x] Solution : utiliser `Payment.aggregate()` avec `$group` pour calculer total/count + `$facet` pour les recent
 
-### 2.4 Fallback silencieux sur validation echouee `low` `bug` — `planned`
+### 2.4 Fallback silencieux sur validation echouee `low` `bug` — `done`
 
-- [ ] `list.ts` (donations, purchases, subscriptions) : si `safeParse` echoue, fallback sur `req.query as Record<string, string>` au lieu de retourner une erreur de validation
-- [ ] Solution : retourner `sendValidationError()` quand la validation echoue, comme dans les routes create
+- [x] `list.ts` (donations, purchases, subscriptions) : si `safeParse` echoue, fallback sur `req.query as Record<string, string>` au lieu de retourner une erreur de validation
+- [x] Solution : retourner `sendValidationError()` quand la validation echoue, comme dans les routes create
 
-### 2.5 `Record<string, any>` dans pay-sdk types `low` `code-quality` — `planned`
+### 2.5 `Record<string, any>` dans pay-sdk types `low` `code-quality` — `done`
 
-- [ ] `Payment.metadata` type est `Record<string, any>` — devrait etre un union type base sur `PaymentType`
-- [ ] Utiliser les interfaces specifiques deja definies (`Donation['metadata'] | Purchase['metadata'] | ...`)
+- [x] `Payment.metadata` type est `Record<string, any>` — devrait etre un union type base sur `PaymentType`
+- [x] Utiliser les interfaces specifiques deja definies (`DonationMetadata | PurchaseMetadata | SubscriptionMetadata | InvoiceMetadata`)
 
 ### 2.7 `as any` dans les tests `low` `code-quality` — `planned`
 
@@ -85,33 +85,33 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Phase 4 — API Robustesse
 
-### 4.1 Pas d'endpoint refund `high` `feature` — `planned`
+### 4.1 Pas d'endpoint refund `high` `feature` — `done`
 
-- [ ] `stripe.ts` a une fonction `refundPayment()` mais aucune route API ne l'expose
-- [ ] Creer `POST /payments/:paymentId/refund` avec auth admin
-- [ ] Mettre a jour le statut en DB apres refund reussi
+- [x] `stripe.ts` a une fonction `refundPayment()` mais aucune route API ne l'expose
+- [x] Creer `POST /payments/:paymentId/refund` avec auth admin
+- [x] Mettre a jour le statut en DB apres refund reussi
 
-### 4.2 Pas de GET /payments (liste) `high` `feature` — `planned`
+### 4.2 Pas de GET /payments (liste) `high` `feature` — `done`
 
-- [ ] Seul `GET /payments/:paymentId` existe — pas moyen de lister tous les paiements
-- [ ] Ajouter `GET /payments` avec pagination, filtres (type, status, projectId, userId, dateRange)
-- [ ] Proteger avec authMiddleware (admin only ou user=own payments)
+- [x] Seul `GET /payments/:paymentId` existe — pas moyen de lister tous les paiements
+- [x] Ajouter `GET /payments` avec pagination, filtres (type, status, projectId, userId, dateRange)
+- [x] Proteger avec authMiddleware (admin only ou user=own payments)
 
-### 4.3 Purchase redirect URLs incorrectes `medium` `bug` — `planned`
+### 4.3 Purchase redirect URLs incorrectes `medium` `bug` — `done`
 
-- [ ] `purchases/create.ts` redirige vers `/donate/success` et `/donate/cancel` — devrait etre `/purchase/success` et `/purchase/cancel`
-- [ ] Meme probleme dans `subscriptions/create.ts` — redirige vers `/donate/success` au lieu de `/subscribe/success`
+- [x] `purchases/create.ts` redirige vers `/donate/success` et `/donate/cancel` — devrait etre `/purchase/success` et `/purchase/cancel`
+- [x] Meme probleme dans `subscriptions/create.ts` — redirige vers `/donate/success` au lieu de `/subscribe/success`
 
 ### 4.4 Subscriptions list manque filtre par projectId `low` `feature` — `planned`
 
 - [ ] `GET /subscriptions` filtre uniquement par userId — pas par projectId
 - [ ] Ajouter le filtre projectId comme dans donations et purchases
 
-### 4.5 Donations list requiert auth mais est publique `medium` `bug` — `planned`
+### 4.5 Donations list requiert auth mais est publique `medium` `bug` — `done`
 
-- [ ] `GET /donations` a `authMiddleware` mais sert a afficher le mur public de donations
-- [ ] Devrait utiliser `optionalAuthMiddleware` ou pas d'auth du tout (les donations publiques sont publiques)
-- [ ] Le pay-sdk `getDonations()` n'envoie pas de token d'auth — donc cet endpoint echoue toujours en production
+- [x] `GET /donations` a `authMiddleware` mais sert a afficher le mur public de donations
+- [x] Devrait utiliser `optionalAuthMiddleware` ou pas d'auth du tout (les donations publiques sont publiques)
+- [x] Le pay-sdk `getDonations()` n'envoie pas de token d'auth — donc cet endpoint echoue toujours en production
 
 ### 4.6 Missing idempotency `low` `reliability` — `planned`
 
@@ -174,15 +174,15 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [ ] `api/dist/` est versionne dans git — devrait etre dans `.gitignore`
 - [ ] Supprimer du repo et ajouter a `.gitignore`
 
-### 6.2 PayPal reference morte `low` `cleanup` — `planned`
+### 6.2 PayPal reference morte `low` `cleanup` — `done`
 
-- [ ] Le model Payment supporte `provider: 'paypal'` mais aucune integration PayPal n'existe
-- [ ] Retirer `paypal` de l'enum ou le garder pour un futur support (documenter le choix)
+- [x] Le model Payment supporte `provider: 'paypal'` mais aucune integration PayPal n'existe
+- [x] Documente dans le code : garde pour futur support
 
-### 6.3 Legacy export dans Payment model `low` `cleanup` — `planned`
+### 6.3 Legacy export dans Payment model `low` `cleanup` — `done`
 
-- [ ] `export const Payment = { get: getPaymentModel }` est un wrapper inutile marque TODO
-- [ ] Verifier qu'aucun code ne l'utilise et le supprimer
+- [x] `export const Payment = { get: getPaymentModel }` est un wrapper inutile marque TODO
+- [x] Verifie qu'aucun code ne l'utilise — supprime
 
 ### 6.4 Commented-out code dans DonateModal `low` `cleanup` — `planned`
 
@@ -194,11 +194,11 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [ ] Animation CSS injectee via `dangerouslySetInnerHTML` — risque XSS et mauvaise pratique
 - [ ] Deplacer dans un fichier CSS ou utiliser Tailwind `animate-*` classes
 
-### 6.6 useDonations missing deps dans useEffect `low` `bug` — `planned`
+### 6.6 useDonations missing deps dans useEffect `low` `bug` — `done`
 
-- [ ] `useDonations.ts` : le useEffect depend de `loadDonations` qui n'est pas dans le deps array
-- [ ] React strict mode peut causer des comportements inattendus
-- [ ] Solution : utiliser `useCallback` pour `loadDonations` ou ajouter les deps correctes
+- [x] `useDonations.ts` : le useEffect depend de `loadDonations` qui n'est pas dans le deps array
+- [x] React strict mode peut causer des comportements inattendus
+- [x] Solution : `loadDonations` wrappe dans `useCallback`, ajoute dans les deps du useEffect
 
 ---
 

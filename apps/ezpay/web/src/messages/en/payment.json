@@ -44,5 +44,27 @@
     "installSdk": "1. Install SDK",
     "setupClient": "2. Setup Client",
     "useComponents": "3. Use Components"
+  },
+  "success": {
+    "donateTitle": "Thank You!",
+    "donateMessage": "Your donation has been received successfully. Your generosity makes a difference!",
+    "purchaseTitle": "Purchase Complete!",
+    "purchaseMessage": "Your purchase has been processed successfully. Thank you for your order!",
+    "subscribeTitle": "Subscription Active!",
+    "subscribeMessage": "Your subscription has been activated successfully. Welcome aboard!",
+    "backHome": "Back to Home",
+    "whatNext": "What happens next?",
+    "emailConfirmation": "You will receive a confirmation email shortly.",
+    "receiptAvailable": "Your receipt is available in your Stripe email.",
+    "accessGranted": "Your access has been granted immediately."
+  },
+  "cancel": {
+    "title": "Payment Cancelled",
+    "message": "Your payment was cancelled. No charges have been made.",
+    "tryAgain": "Try Again",
+    "backHome": "Back to Home",
+    "needHelp": "Need help?",
+    "contactSupport": "If you encountered an issue, please contact support.",
+    "noCharge": "Don't worry, no amount has been charged to your account."
   }
 }

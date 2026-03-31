@@ -18,17 +18,17 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 
 ## P0 — Securite critique
 
-### SEC-4: `/me` endpoint sans middleware auth standard `planned`
+### SEC-4: `/me` endpoint sans middleware auth standard `done`
 
 - **Probleme :** `/me` reimplemente manuellement l'extraction du token au lieu d'utiliser `verifyTokenMiddleware`. Code duplique avec le middleware.
 - **Action :** Utiliser `verifyTokenMiddleware` et acceder a `req.user`.
 
-### SEC-5: Crypto key derivation utilise JWT_SECRET `planned`
+### SEC-5: Crypto key derivation utilise JWT_SECRET `done`
 
 - **Probleme :** `utils/crypto.ts` derive la cle AES de `JWT_SECRET`. Si JWT_SECRET leak, les tokens OAuth encrypts sont aussi compromis.
 - **Action :** Utiliser une variable d'env separee `OAUTH_ENCRYPTION_KEY`.
 
-### SEC-7: Waitlist GET endpoints publics sans auth `planned`
+### SEC-7: Waitlist GET endpoints publics sans auth `done`
 
 - **Probleme :** `GET /waitlist/:appName` et `GET /waitlist/` (list all) sont publics et retournent toutes les emails.
 - **Impact :** Leak de toutes les adresses email de la waitlist.
@@ -38,27 +38,27 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 
 ## P1 — Fonctionnalites manquantes
 
-### FEAT-1: Password reset flow `planned`
+### FEAT-1: Password reset flow `done`
 
 - **Quoi :** Forgot password -> email avec lien/code -> reset password.
 - **Pourquoi :** Fonctionnalite basique attendue par tout service auth.
 - **Etapes :**
-  - [ ] Endpoint `POST /auth/forgot-password` (envoie email)
-  - [ ] Endpoint `POST /auth/reset-password` (avec token)
-  - [ ] Model `PasswordResetToken` (ou reutiliser AuthCode)
-  - [ ] Page web `/forgot-password`
-  - [ ] Integration email service
+  - [x] Endpoint `POST /auth/forgot-password` (envoie email)
+  - [x] Endpoint `POST /auth/reset-password` (avec token)
+  - [x] Model `PasswordResetToken` (ou reutiliser AuthCode)
+  - [x] Page web `/forgot-password`
+  - [x] Integration email service
 
-### FEAT-2: Email verification `planned`
+### FEAT-2: Email verification `done`
 
 - **Quoi :** Verifier l'email des users apres inscription.
 - **Pourquoi :** `isVerified: true` est force a l'inscription ("for simplicity in v1"). Les users ne sont jamais verifies.
 - **Etapes :**
-  - [ ] Endpoint `POST /auth/send-verification`
-  - [ ] Endpoint `POST /auth/verify-email` (avec token)
-  - [ ] `isVerified: false` par defaut a l'inscription
-  - [ ] Middleware pour bloquer les users non-verifies si necessaire
-  - [ ] Integration email service
+  - [x] Endpoint `POST /auth/send-verification`
+  - [x] Endpoint `POST /auth/verify-email` (avec token)
+  - [x] `isVerified: false` par defaut a l'inscription
+  - [x] Middleware pour bloquer les users non-verifies si necessaire
+  - [x] Integration email service
 
 ### FEAT-4: 2FA (Two-Factor Authentication) `planned`
 
@@ -70,13 +70,13 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
   - [ ] UI dans le profil user
   - [ ] Integration dans le flow login
 
-### FEAT-5: Account deletion (self-service) `planned`
+### FEAT-5: Account deletion (self-service) `in-progress`
 
 - **Quoi :** Permettre a un user de supprimer son compte.
 - **Pourquoi :** Requis par GDPR. Actuellement aucun endpoint DELETE user.
 - **Etapes :**
-  - [ ] Endpoint `DELETE /auth/account`
-  - [ ] Suppression cascade (OAuth accounts, waitlist entries)
+  - [x] Endpoint `DELETE /auth/account`
+  - [x] Suppression cascade (OAuth accounts)
   - [ ] UI de confirmation
 
 ### FEAT-6: Session management UI `planned`
@@ -90,19 +90,19 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Quoi :** Remplacer le JWT 7 jours unique par access token court (15min) + refresh token (30 jours) avec rotation.
 - **Pourquoi :** Meilleure securite. Actuellement un seul JWT de 7 jours sans possibilite de revocation.
 
-### FEAT-8: Admin — delete user endpoint `planned`
+### FEAT-8: Admin — delete user endpoint `done`
 
 - **Quoi :** Endpoint `DELETE /admin/users/:id`.
 - **Pourquoi :** Les admins peuvent lister, voir, et modifier les users mais pas les supprimer.
 
-### FEAT-9: Admin — search/filter users `planned`
+### FEAT-9: Admin — search/filter users `done`
 
 - **Quoi :** Le schema `listUsersQuerySchema` definit `search` et `role` mais ils ne sont jamais utilises dans le query builder.
 - **Action :** Implementer le filtrage par recherche (email/username) et par role.
 
-### FEAT-10: Profile update endpoint `planned`
+### FEAT-10: Profile update endpoint `done`
 
-- **Quoi :** Endpoint pour modifier son propre profil (firstName, lastName, avatar, password).
+- **Quoi :** Endpoint pour modifier son propre profil (firstName, lastName, avatar).
 - **Pourquoi :** Aucun endpoint self-service pour modifier son profil.
 
 ---
@@ -122,10 +122,10 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Fichiers :** `index.ts` (catch block), `auth.service.ts` (waitlist entry find), `AuthCode.test.ts` (model type), `express.d.ts` (index signature).
 - **Action :** Typer correctement ou utiliser des narrowing patterns.
 
-### CODE-5: Code duplique — appRoles Map-to-Object conversion `planned`
+### CODE-5: Code duplique — appRoles Map-to-Object conversion `done`
 
 - **Probleme :** La conversion `Map<string, string[]>` -> `Record<string, string[]>` est faite dans 5 endroits differents.
-- **Action :** Extraire dans un util `mapToRecord()` ou dans le model.
+- **Action :** Extrait dans `utils/map-to-record.ts` — utilise partout (model, service, middleware, admin routes).
 
 ---
 
@@ -185,7 +185,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Probleme :** `POST /auth/logout` clear le cookie mais ne blacklist pas le JWT. Si le token a ete copie, il reste valide 7 jours.
 - **Lien :** FEAT-6/FEAT-7 (session management / refresh tokens).
 
-### API-5: OAuth callback redirect_uri non-validee `planned`
+### API-5: OAuth callback redirect_uri non-validee `done`
 
 - **Probleme :** Dans `google-callback.ts`, `user.redirect_uri` est utilise directement pour construire le redirect URL sans validation de whitelist.
 - **Impact :** Open redirect potentiel apres OAuth.

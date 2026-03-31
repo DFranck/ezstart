@@ -5,6 +5,7 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
+  sendValidationError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware } from '../../middleware/auth.js'
@@ -44,12 +45,10 @@ const getPurchasesHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
     const parsed = purchasesQuerySchema.safeParse(req.query)
-    const {
-      userId,
-      projectId,
-      limit = 20,
-      offset = 0,
-    } = parsed.success ? parsed.data : (req.query as Record<string, string>)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
+    }
+    const { userId, projectId, limit, offset } = parsed.data
 
     const query: Record<string, unknown> = {
       type: { $in: ['purchase', 'subscription'] },

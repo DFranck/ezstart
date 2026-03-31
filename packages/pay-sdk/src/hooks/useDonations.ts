@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePayContext } from '../provider.js'
 import type { Payment } from '../types.js'
 
@@ -18,7 +18,7 @@ export function useDonations(params: UseDonationsParams = {}) {
 
   const { projectId, limit = 10, autoLoad = true } = params
 
-  const loadDonations = async () => {
+  const loadDonations = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
@@ -29,13 +29,13 @@ export function useDonations(params: UseDonationsParams = {}) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [client, projectId, limit])
 
   useEffect(() => {
     if (autoLoad) {
       loadDonations()
     }
-  }, [projectId, limit, autoLoad])
+  }, [autoLoad, loadDonations])
 
   return {
     donations,
