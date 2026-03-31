@@ -38,6 +38,11 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           paymentMethod: session.payment_method_types?.[0],
         }
 
+        // Store payment intent ID for refund lookups
+        if (session.payment_intent) {
+          updateData.stripePaymentIntentId = session.payment_intent as string
+        }
+
         // Store subscription ID if this was a subscription checkout
         if (session.mode === 'subscription' && session.subscription) {
           updateData['metadata.subscriptionId'] = session.subscription as string
@@ -66,10 +71,13 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
       case 'charge.refunded': {
         const charge = event.data.object as Stripe.Charge
 
-        // Update payment status to refunded
-        await Payment.updateOne({ paymentId: charge.id }, { status: 'refunded' })
+        // Look up by stripePaymentIntentId (payments are stored by session.id, not charge.id)
+        await Payment.updateOne(
+          { stripePaymentIntentId: charge.payment_intent as string },
+          { status: 'refunded' }
+        )
 
-        logger.info(`↩️ Payment refunded: ${charge.id}`)
+        logger.info(`↩️ Payment refunded: ${charge.payment_intent}`)
         break
       }
 

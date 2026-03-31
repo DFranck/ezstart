@@ -22,6 +22,7 @@ export interface PaymentDocument extends Document {
   // Payment Details
   provider: 'stripe' | 'paypal'
   paymentId: string
+  stripePaymentIntentId?: string
   paymentMethod?: string
   status: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled'
 
@@ -80,6 +81,7 @@ const paymentSchema = new Schema<PaymentDocument>(
     // Payment Details
     provider: { type: String, enum: ['stripe', 'paypal'], default: 'stripe' },
     paymentId: { type: String, unique: true },
+    stripePaymentIntentId: { type: String, index: true },
     paymentMethod: { type: String },
     status: {
       type: String,

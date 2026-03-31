@@ -58,15 +58,21 @@ const getDonationStatsHandler = async (req: Request, res: Response) => {
       query.projectId = projectId
     }
 
-    const donations = await Payment.find(query)
+    const [aggregateResult, recent] = await Promise.all([
+      Payment.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$amount' },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      Payment.find(query).sort({ createdAt: -1 }).limit(5).select('-customerEmail -paymentId'),
+    ])
 
-    const total = donations.reduce((sum, d) => sum + d.amount, 0)
-    const count = donations.length
-
-    const recent = await Payment.find(query)
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('-customerEmail -paymentId')
+    const { total = 0, count = 0 } = aggregateResult[0] || {}
 
     sendSuccess(res, {
       total,
