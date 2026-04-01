@@ -229,7 +229,9 @@
     "byStatus": "Par statut",
     "backToDashboard": "Retour au tableau de bord",
     "newQuote": "Nouveau devis",
-    "newInvoice": "Nouvelle facture"
+    "newInvoice": "Nouvelle facture",
+    "searchClients": "Rechercher par nom ou email...",
+    "noSearchResults": "Aucun client ne correspond a votre recherche"
   },
   "settings": {
     "yourBusiness": "Votre entreprise",

@@ -1,5 +1,6 @@
-import { Client, Company, Invoice, PaymentMethod, Receipt } from '@ezbill/types'
+import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
+import type { PDFQuoteData } from '@ezbill/templates'
 
 /** Convertit les données pour le template PDF Invoice */
 export function convertToInvoicePDFData(
@@ -103,6 +104,56 @@ export function convertToInvoicePDFData(
             })
             .filter((method): method is NonNullable<typeof method> => method !== null)
         : undefined,
+  }
+}
+
+/** Convertit les données pour le template PDF Quote */
+export function convertToQuotePDFData(
+  quote: Quote,
+  client: Client,
+  company?: Company
+): PDFQuoteData {
+  return {
+    documentNumber: quote.documentNumber || quote._id,
+    createdAt: quote.createdAt,
+    validUntil: quote.validUntil,
+    status: quote.status,
+    currency: quote.currency,
+    subtotal: quote.subtotal,
+    taxAmount: quote.taxAmount,
+    total: quote.total,
+    billingType: quote.billingType || 'itemized',
+    items: quote.items.map(item => ({
+      label: item.label,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+    description: quote.description,
+    flatRateAmount: quote.flatRateAmount,
+    client: {
+      clientName: client.clientName,
+      email: client.email,
+      phone: client.phone,
+      address: client.address,
+      city: client.city,
+      country: client.country,
+      contactPersonName: client.contactPersonName,
+      contactPersonEmail: client.contactPersonEmail,
+      contactPersonPhone: client.contactPersonPhone,
+      contactPersonTitle: client.contactPersonTitle,
+    },
+    company: company
+      ? {
+          companyName: company.companyName,
+          email: company.email,
+          phone: company.phone,
+          address: company.address,
+          city: company.city,
+          country: company.country,
+        }
+      : undefined,
+    notes: quote.notes,
+    terms: quote.terms,
   }
 }
 

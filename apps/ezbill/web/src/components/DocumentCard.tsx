@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -12,6 +13,84 @@ import {
 import { cn } from '@ezstart/ui/lib'
 import { ReactNode, useState } from 'react'
 import { DeleteConfirmationDialog } from './delete-confirmation-dialog'
+
+/** Returns a due date indicator badge based on status and date */
+function DueDateBadge({ status, dueDate }: { status: string; dueDate?: string }) {
+  if (status === 'paid') {
+    return (
+      <Badge variant="success" className="text-xs">
+        Paid
+      </Badge>
+    )
+  }
+
+  if (!dueDate) return null
+
+  const now = new Date()
+  const due = new Date(dueDate)
+  const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+
+  if (diffDays < 0) {
+    return (
+      <Badge variant="destructive" className="text-xs">
+        Overdue
+      </Badge>
+    )
+  }
+
+  if (diffDays <= 7) {
+    return (
+      <Badge variant="warning" className="text-xs">
+        Due soon
+      </Badge>
+    )
+  }
+
+  return null
+}
+
+/** Returns a validity indicator badge for quotes */
+function ValidityBadge({ status, validUntil }: { status: string; validUntil?: string }) {
+  if (status === 'accepted') {
+    return (
+      <Badge variant="success" className="text-xs">
+        Accepted
+      </Badge>
+    )
+  }
+
+  if (status === 'rejected' || status === 'declined') {
+    return (
+      <Badge variant="destructive" className="text-xs">
+        Declined
+      </Badge>
+    )
+  }
+
+  if (!validUntil) return null
+
+  const now = new Date()
+  const expiry = new Date(validUntil)
+  const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+
+  if (diffDays < 0) {
+    return (
+      <Badge variant="destructive" className="text-xs">
+        Expired
+      </Badge>
+    )
+  }
+
+  if (diffDays <= 7) {
+    return (
+      <Badge variant="warning" className="text-xs">
+        Expires soon
+      </Badge>
+    )
+  }
+
+  return null
+}
 
 interface BaseDocumentCardProps {
   documentNumber: string
@@ -180,6 +259,7 @@ export function DocumentCard({
 
 // Specialized Invoice Card
 interface InvoiceCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
+  dueDate?: string
   permissions: {
     canEdit?: boolean
     canSend?: boolean
@@ -199,6 +279,7 @@ export function InvoiceCard({
   createdAt,
   total,
   currency,
+  dueDate,
   permissions,
   onClick,
   onEdit,
@@ -229,6 +310,7 @@ export function InvoiceCard({
       statusConfig={statusConfig}
       onClick={onClick}
       className={className}
+      additionalInfo={<DueDateBadge status={status} dueDate={dueDate} />}
       actions={
         <>
           <Button
@@ -343,9 +425,12 @@ export function QuoteCard({
         onClick={onClick}
         className={className}
         additionalInfo={
-          <Span className="text-sm text-muted-foreground">
-            Valid until: {validUntil ? new Date(validUntil).toLocaleDateString() : '-'}
-          </Span>
+          <>
+            <Span className="text-sm text-muted-foreground">
+              Valid until: {validUntil ? new Date(validUntil).toLocaleDateString() : '-'}
+            </Span>
+            <ValidityBadge status={status} validUntil={validUntil} />
+          </>
         }
         actions={
           <>

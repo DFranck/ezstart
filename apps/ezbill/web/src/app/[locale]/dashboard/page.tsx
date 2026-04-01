@@ -12,7 +12,15 @@ import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
-import { Div, Spinner, SkeletonCard, Skeleton, WelcomeModal } from '@ezstart/ui/components'
+import {
+  Div,
+  Spinner,
+  SkeletonCard,
+  Skeleton,
+  WelcomeModal,
+  Input,
+  Icon,
+} from '@ezstart/ui/components'
 import { formatCurrency } from '@ezstart/ui/utils'
 import dynamic from 'next/dynamic'
 
@@ -33,7 +41,7 @@ const TopClientsChart = dynamic(
   }
 )
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 
@@ -85,6 +93,7 @@ const DashboardPage = () => {
   const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | undefined>(
     undefined
   )
+  const [clientSearch, setClientSearch] = useState('')
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -120,6 +129,22 @@ const DashboardPage = () => {
 
   // Group clients by activity
   const clientGroups = groupClientsByActivity(clients || [], allInvoices, allQuotes, allReceipts)
+
+  // Filter client groups by search query
+  const filteredClientGroups = useMemo(() => {
+    if (!clientSearch.trim()) return clientGroups
+    const query = clientSearch.toLowerCase().trim()
+    return clientGroups
+      .map(group => ({
+        ...group,
+        items: group.items.filter(
+          (client: Client) =>
+            client.clientName.toLowerCase().includes(query) ||
+            (client.email && client.email.toLowerCase().includes(query))
+        ),
+      }))
+      .filter(group => group.items.length > 0)
+  }, [clientGroups, clientSearch])
 
   const handleEditCompany = (company: Company) => {
     setEditingCompany(company)
@@ -365,21 +390,43 @@ const DashboardPage = () => {
               buttonText: tDashboard('addFirstClient'),
             }}
           >
-            <CollapsibleGroup
-              groups={clientGroups}
-              renderItem={client => (
-                <ClientCard
-                  client={client}
-                  onClick={handleClientClick}
-                  onEdit={handleEditClient}
-                  onDelete={handleDeleteClient}
+            {hasClients && clients.length >= 3 && (
+              <Div className="mb-4">
+                <Input
+                  placeholder={tDashboard('searchClients')}
+                  value={clientSearch}
+                  onChange={e => setClientSearch(e.target.value)}
+                  className="max-w-sm"
                 />
-              )}
-              getItemKey={client => client._id}
-              defaultOpenAll={false}
-              showToggleAll={true}
-              className="grid grid-cols-1 gap-4 sm:gap-6"
-            />
+              </Div>
+            )}
+            {filteredClientGroups.length > 0 ? (
+              <CollapsibleGroup
+                groups={filteredClientGroups}
+                renderItem={client => (
+                  <ClientCard
+                    client={client}
+                    onClick={handleClientClick}
+                    onEdit={handleEditClient}
+                    onDelete={handleDeleteClient}
+                  />
+                )}
+                getItemKey={client => client._id}
+                defaultOpenAll={false}
+                showToggleAll={true}
+                className="grid grid-cols-1 gap-4 sm:gap-6"
+              />
+            ) : (
+              clientSearch.trim() && (
+                <Div className="text-center py-8">
+                  <Icon
+                    name="lucide:SearchX"
+                    className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50"
+                  />
+                  <p className="text-muted-foreground">{tDashboard('noSearchResults')}</p>
+                </Div>
+              )
+            )}
           </DashboardSection>
         )}
       </Div>

@@ -1,12 +1,17 @@
 'use client'
 
 import { useBillingContext } from '@/contexts/billing-context'
-import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-converters'
+import {
+  convertToInvoicePDFData,
+  convertToQuotePDFData,
+  convertToReceiptPDFData,
+} from '@/utils/pdf-converters'
 import { Invoice, Quote, Receipt } from '@ezbill/types'
 import { Button, Icon, Modal, Div, H3, P, Span } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@/hooks/useInvoicePDF'
-import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
+import { InvoicePDF, QuotePDF, ReceiptPDF } from '@ezbill/templates'
 import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
+import type { PDFQuoteData } from '@ezbill/templates'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -50,17 +55,13 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
   React.useEffect(() => {
     if (
       isOpen &&
-      (kind === 'invoice' || kind === 'receipt') &&
+      (kind === 'invoice' || kind === 'quote' || kind === 'receipt') &&
       !pdfBlob &&
       !isGeneratingPreview &&
       doc
     ) {
       const generatePreview = async () => {
-        if (kind !== 'invoice' && kind !== 'receipt') {
-          return
-        }
-
-        const document = doc as Invoice | Receipt
+        const document = doc as Invoice | Quote | Receipt
         const client = clients.find(c => c._id === document.clientId)
         const company = document.companyId
           ? companies.find(c => c._id === document.companyId)
@@ -81,6 +82,9 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
               paymentMethods
             )
             blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+          } else if (kind === 'quote') {
+            const pdfData = convertToQuotePDFData(document as Quote, client, company)
+            blob = await pdf(<QuotePDF data={pdfData} />).toBlob()
           } else {
             const pdfData = convertToReceiptPDFData(document as Receipt, client, company)
             blob = await pdf(<ReceiptPDF data={pdfData} />).toBlob()
@@ -104,9 +108,9 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
   const pdfUrl = getPdfUrl(kind, doc)
 
   const generatePDFData = () => {
-    if (kind !== 'invoice' && kind !== 'receipt') return null
+    if (!kind || !doc) return null
 
-    const document = doc as Invoice | Receipt
+    const document = doc as Invoice | Quote | Receipt
     const client = clients.find(c => c._id === document.clientId)
     const company = document.companyId
       ? companies.find(c => c._id === document.companyId)
@@ -116,17 +120,14 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
 
     if (kind === 'invoice') {
       return convertToInvoicePDFData(document as Invoice, client, company, paymentMethods)
+    } else if (kind === 'quote') {
+      return convertToQuotePDFData(document as Quote, client, company)
     } else {
       return convertToReceiptPDFData(document as Receipt, client, company)
     }
   }
 
   const handleGeneratePreview = async () => {
-    if (kind !== 'invoice' && kind !== 'receipt') {
-      toast.error(tToast('pdfOnlyInvoiceReceipt'))
-      return
-    }
-
     const pdfData = generatePDFData()
     if (!pdfData) {
       toast.error(tToast('clientNotFound'))
@@ -140,6 +141,8 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
 
       if (kind === 'invoice') {
         blob = await pdf(<InvoicePDF data={pdfData as PDFInvoiceData} />).toBlob()
+      } else if (kind === 'quote') {
+        blob = await pdf(<QuotePDF data={pdfData as PDFQuoteData} />).toBlob()
       } else {
         blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
       }
@@ -161,21 +164,29 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
     }
 
     try {
-      const document = doc as Invoice | Receipt
+      const document = doc as Invoice | Quote | Receipt
       const fileName = document.documentNumber || document._id
 
       if (kind === 'invoice') {
         await downloadInvoicePDF(<InvoicePDF data={pdfData as PDFInvoiceData} />, fileName)
       } else {
-        // For receipts, use the same download mechanism but with receipt template
+        // For quotes and receipts, generate and download directly
         const { pdf } = await import('@react-pdf/renderer')
-        const blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
+        let blob: Blob
+        let prefix: string
 
-        // Create download link
+        if (kind === 'quote') {
+          blob = await pdf(<QuotePDF data={pdfData as PDFQuoteData} />).toBlob()
+          prefix = 'quote'
+        } else {
+          blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
+          prefix = 'receipt'
+        }
+
         const url = URL.createObjectURL(blob)
         const link = window.document.createElement('a')
         link.href = url
-        link.download = `receipt-${fileName}.pdf`
+        link.download = `${prefix}-${fileName}.pdf`
         window.document.body.appendChild(link)
         link.click()
         window.document.body.removeChild(link)
