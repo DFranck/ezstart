@@ -1,6 +1,6 @@
 # Backlog — Gacha Analyzer
 
-**Status :** `in-progress` | **Priorite :** haute | **Derniere mise a jour :** 2026-03-29
+**Status :** `in-progress` | **Priorite :** haute | **Derniere mise a jour :** 2026-04-01
 
 ## Objectif
 
@@ -420,11 +420,11 @@ apps/
 
 ### E10. Artifact analysis `P3`
 
-**Status :** `planned` | **Effort :** L
+**Status :** `in-progress` | **Effort :** L
 
-- Parser artifact existe (33 substats, 10 tests) mais pas d'analyzer
-- Efficiency calculator pour artifacts (differents rolls, differents tiers)
-- Artifact card + /data artifacts
+- [x] Parser artifact existe (33 substats, 10 tests) — initial setup done
+- [ ] Efficiency calculator pour artifacts (differents rolls, differents tiers)
+- [ ] Artifact card + /data artifacts
 - Pre-requis : definir le scoring system (pas de formule Barion pour les artifacts)
 
 ### E11. Overlay/PiP pour afficher resultats sur le jeu `P3`

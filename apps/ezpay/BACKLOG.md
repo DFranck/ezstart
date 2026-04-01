@@ -1,6 +1,6 @@
 # Backlog — EZPay
 
-**Status :** `maintained` | **Derniere mise a jour :** 2026-03-29
+**Status :** `maintained` | **Derniere mise a jour :** 2026-04-01
 
 ## Objectif
 
