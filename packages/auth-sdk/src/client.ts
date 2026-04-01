@@ -113,7 +113,7 @@ export class AuthClient {
   }
 
   // Exchange authorization code for access token
-  async exchangeCode(code: string): Promise<AuthToken> {
+  async exchangeCode(code: string): Promise<AuthToken & { refresh_token?: string }> {
     const response = await fetch(`${this.config.baseURL}/token`, {
       method: 'POST',
       headers: {
@@ -140,6 +140,7 @@ export class AuthClient {
       token_type: data.token_type,
       expires_in: data.expires_in,
       user: data.user,
+      refresh_token: data.refresh_token,
     }
   }
 
@@ -218,11 +219,15 @@ export class AuthClient {
   }
 
   // ✅ NEW: Logout and clear httpOnly cookie
-  async logout(): Promise<void> {
+  async logout(refreshToken?: string): Promise<void> {
     try {
       await fetch(`${this.config.baseURL}/logout`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include', // ✅ Required to clear httpOnly cookie
+        body: JSON.stringify({ refreshToken }),
       })
     } catch (error) {
       // Logout can fail silently - we still clear local state
@@ -230,6 +235,41 @@ export class AuthClient {
         'Logout API call failed:',
         error instanceof Error ? error.message : String(error)
       )
+    }
+  }
+
+  /**
+   * Refresh tokens using a refresh token.
+   * Returns new access token, refresh token, and user info.
+   */
+  async refreshTokens(
+    refreshToken: string
+  ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number; user: AuthUser }> {
+    const response = await fetch(`${this.config.baseURL}/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ refreshToken }),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      const error = Object.assign(
+        new Error(result.error || result.data?.error || 'Token refresh failed'),
+        { status: response.status }
+      )
+      throw error
+    }
+
+    const data = result.data ?? result
+    return {
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      expiresIn: data.expiresIn,
+      user: data.user,
     }
   }
 }

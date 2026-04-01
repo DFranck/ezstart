@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router, sendError } from '@ezstart/express-core'
 import type { Router as ExpressRouter } from 'express'
 import { getWebUrl } from '@ezstart/config/urls'
 import { getAllowedOrigins } from '@ezstart/config/cors'
@@ -44,7 +44,7 @@ router.get(
     if (user.redirect_uri) {
       if (!isAllowedRedirectUri(user.redirect_uri)) {
         logger.warn(`OAuth callback blocked invalid redirect_uri: ${user.redirect_uri}`)
-        return res.status(400).json({ error: 'Invalid redirect_uri' })
+        return sendError(res, 'Invalid redirect_uri', 400)
       }
 
       const redirectUrl = new URL(user.redirect_uri)

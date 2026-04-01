@@ -143,13 +143,20 @@ export function AuthProvider({
         // Re-authenticate user with new mode
         const user = store.user
         if (user) {
-          store.setAuth(user, store.accessToken || undefined, resolvedMode)
+          store.setAuth(
+            user,
+            store.accessToken || undefined,
+            resolvedMode,
+            store.refreshToken || undefined
+          )
         }
       }
     }
   }, [authMode, appName, jwtPublicKey, store])
 
   // Auto-verify token on mount and periodically (but NOT on callback pages)
+  // Includes silent refresh: when access token is expired but refresh token exists,
+  // automatically obtain new tokens without user interaction.
   useEffect(() => {
     // Skip token verification on callback pages to avoid race conditions
     if (typeof window !== 'undefined' && window.location.pathname.includes('/auth/callback')) {
@@ -157,6 +164,29 @@ export function AuthProvider({
     }
 
     let intervalId: NodeJS.Timeout
+    // Track whether a refresh is already in progress to avoid concurrent calls
+    let refreshing = false
+
+    const tryRefresh = async (): Promise<boolean> => {
+      const rt = store.refreshToken
+      if (!rt || refreshing) return false
+      refreshing = true
+      try {
+        const result = await client.refreshTokens(rt)
+        store.setTokens(result.accessToken, result.refreshToken)
+        store.updateUser(result.user)
+        logger.debug('[AuthProvider] Silently refreshed tokens')
+        return true
+      } catch (err) {
+        logger.debug('[AuthProvider] Silent refresh failed, logging out', {
+          error: err instanceof Error ? err.message : String(err),
+        })
+        store.logout()
+        return false
+      } finally {
+        refreshing = false
+      }
+    }
 
     const verifyToken = async () => {
       const mode = store.getMode()
@@ -164,9 +194,15 @@ export function AuthProvider({
       if (mode === 'localStorage' && store.accessToken) {
         const isValid = await client.verifyToken(store.accessToken)
         if (!isValid) {
-          logger.debug('[AuthProvider] Token invalid, logging out')
-          store.logout()
+          // Try silent refresh before logging out
+          const refreshed = await tryRefresh()
+          if (!refreshed) {
+            logger.debug('[AuthProvider] Token invalid and refresh failed, logging out')
+          }
         }
+      } else if (mode === 'localStorage' && !store.accessToken && store.refreshToken) {
+        // No access token but we have a refresh token — try to get new tokens
+        await tryRefresh()
       } else if (mode === 'httpOnly') {
         // httpOnly mode: try to fetch user from cookie
         try {
@@ -183,8 +219,13 @@ export function AuthProvider({
             err?.message?.toLowerCase().includes('unauthorized')
 
           if (isAuthFailure) {
-            logger.debug('[AuthProvider] httpOnly auth failure (401), logging out')
-            store.logout()
+            // Try silent refresh before logging out
+            const refreshed = await tryRefresh()
+            if (!refreshed) {
+              logger.debug(
+                '[AuthProvider] httpOnly auth failure (401) and refresh failed, logging out'
+              )
+            }
           } else {
             logger.debug('[AuthProvider] httpOnly fetch error (not 401, keeping session)', {
               error: err?.message,
@@ -205,9 +246,9 @@ export function AuthProvider({
         clearInterval(intervalId)
       }
     }
-    // Only re-run if accessToken or mode changes (not on every store update)
+    // Only re-run if accessToken, refreshToken, or mode changes (not on every store update)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.accessToken, client])
+  }, [store.accessToken, store.refreshToken, client])
 
   return <AuthContext.Provider value={{ client }}>{children}</AuthContext.Provider>
 }
@@ -245,11 +286,16 @@ export function useAuth() {
       const authResult = await client.exchangeCode(code)
 
       if (mode === 'httpOnly') {
-        // httpOnly mode: token is in cookie, only store user
-        store.setAuth(authResult.user, undefined, 'httpOnly')
+        // httpOnly mode: token is in cookie, only store user + refresh token
+        store.setAuth(authResult.user, undefined, 'httpOnly', authResult.refresh_token)
       } else {
-        // localStorage mode: store user + token
-        store.setAuth(authResult.user, authResult.access_token, 'localStorage')
+        // localStorage mode: store user + token + refresh token
+        store.setAuth(
+          authResult.user,
+          authResult.access_token,
+          'localStorage',
+          authResult.refresh_token
+        )
       }
 
       return authResult.user
@@ -260,11 +306,10 @@ export function useAuth() {
   }
 
   const logout = async () => {
-    if (mode === 'httpOnly') {
-      // httpOnly mode: call logout endpoint to clear cookie
-      await client.logout()
-    }
-    // Clear local state for both modes
+    const rt = store.refreshToken
+    // Call logout endpoint to clear cookie and revoke refresh token
+    await client.logout(rt || undefined)
+    // Clear local state for all modes
     store.logout()
   }
 

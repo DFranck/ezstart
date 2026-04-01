@@ -1,18 +1,9 @@
 import addRouter, { waitlistAddRegistry } from './add.js'
-import getRouter, { waitlistGetRegistry } from './get.js'
 import listRouter, { waitlistListRegistry } from './list.js'
 import checkStatusRouter, { checkStatusRegistry } from './check-status.js'
 
-export const waitlistRegistries = [
-  waitlistAddRegistry,
-  waitlistGetRegistry,
-  waitlistListRegistry,
-  checkStatusRegistry
-]
+// NOTE: waitlist/get.ts removed — use admin/get-waitlist.ts instead (same functionality, proper admin middleware)
 
-export const waitlistRouters = [
-  addRouter,
-  getRouter,
-  listRouter,
-  checkStatusRouter
-]
+export const waitlistRegistries = [waitlistAddRegistry, waitlistListRegistry, checkStatusRegistry]
+
+export const waitlistRouters = [addRouter, listRouter, checkStatusRouter]

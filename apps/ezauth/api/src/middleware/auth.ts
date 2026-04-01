@@ -6,6 +6,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
+import { sendError } from '@ezstart/express-core'
 import { getAuthUserModel } from '../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
@@ -33,7 +34,7 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     }
 
     if (!token) {
-      return res.status(401).json({ error: 'Authentication required' })
+      return sendError(res, 'Authentication required', 401)
     }
 
     // Verify token
@@ -44,7 +45,7 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     const user = await AuthUser.findById(payload.userId).select('-passwordHash').lean()
 
     if (!user) {
-      return res.status(401).json({ error: 'User not found' })
+      return sendError(res, 'User not found', 401)
     }
 
     // Attach user to request
@@ -71,13 +72,13 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     next()
   } catch (error: unknown) {
     if (error instanceof Error && error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ error: 'Invalid token' })
+      return sendError(res, 'Invalid token', 401)
     }
     if (error instanceof Error && error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Token expired' })
+      return sendError(res, 'Token expired', 401)
     }
     logger.error('Auth middleware error:', error)
-    return res.status(500).json({ error: 'Authentication failed' })
+    return sendError(res, 'Authentication failed', 500)
   }
 }
 

@@ -10,12 +10,14 @@ export type AuthMode = 'localStorage' | 'httpOnly' | 'jwt'
 export interface AuthState {
   user: AuthUser | null
   accessToken: string | null
+  refreshToken: string | null
   isAuthenticated: boolean
   mode: AuthMode
   isLoggingIn: boolean
 
   // Actions
-  setAuth: (user: AuthUser, accessToken?: string, mode?: AuthMode) => void
+  setAuth: (user: AuthUser, accessToken?: string, mode?: AuthMode, refreshToken?: string) => void
+  setTokens: (accessToken: string, refreshToken: string) => void
   logout: () => void
   updateUser: (user: AuthUser) => void
   getMode: () => AuthMode
@@ -36,24 +38,40 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       accessToken: null,
+      refreshToken: null,
       isAuthenticated: false,
       mode: 'localStorage', // Will be auto-detected on first use
       isLoggingIn: false,
 
-      setAuth: (user: AuthUser, accessToken?: string, mode: AuthMode = 'localStorage') => {
+      setAuth: (
+        user: AuthUser,
+        accessToken?: string,
+        mode: AuthMode = 'localStorage',
+        refreshToken?: string
+      ) => {
         set({
           user,
-          accessToken: mode === 'localStorage' ? accessToken : null, // Only store token for localStorage mode
+          accessToken: mode === 'localStorage' ? (accessToken ?? null) : null,
+          refreshToken: refreshToken ?? null,
           isAuthenticated: true,
           mode,
           isLoggingIn: false,
         })
       },
 
+      setTokens: (accessToken: string, refreshToken: string) => {
+        set(state => ({
+          ...state,
+          accessToken: state.mode === 'localStorage' ? accessToken : null,
+          refreshToken,
+        }))
+      },
+
       logout: () => {
         set({
           user: null,
           accessToken: null,
+          refreshToken: null,
           isAuthenticated: false,
           mode: 'localStorage', // Reset to default
         })
@@ -77,6 +95,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: state => ({
         user: state.user,
         accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
         mode: state.mode,
       }),
@@ -93,10 +112,10 @@ if (typeof window !== 'undefined') {
   // Listen for auth changes from other tabs/apps
   if (authChannel) {
     authChannel.onmessage = event => {
-      const { type, user, accessToken, mode } = event.data
+      const { type, user, accessToken, mode, refreshToken } = event.data
 
       if (type === 'LOGIN') {
-        useAuthStore.getState().setAuth(user, accessToken, mode)
+        useAuthStore.getState().setAuth(user, accessToken, mode, refreshToken)
       } else if (type === 'LOGOUT') {
         useAuthStore.getState().logout()
       }
@@ -107,9 +126,9 @@ if (typeof window !== 'undefined') {
     const originalLogout = useAuthStore.getState().logout
 
     useAuthStore.setState({
-      setAuth: (user, accessToken, mode) => {
-        originalSetAuth(user, accessToken, mode)
-        authChannel.postMessage({ type: 'LOGIN', user, accessToken, mode })
+      setAuth: (user, accessToken, mode, refreshToken) => {
+        originalSetAuth(user, accessToken, mode, refreshToken)
+        authChannel.postMessage({ type: 'LOGIN', user, accessToken, mode, refreshToken })
       },
       logout: () => {
         originalLogout()
@@ -133,9 +152,11 @@ export function useAuthStoreSSR() {
     return {
       user: null,
       accessToken: null,
+      refreshToken: null,
       isAuthenticated: false,
       mode: 'localStorage' as AuthMode,
       setAuth: store.setAuth,
+      setTokens: store.setTokens,
       logout: store.logout,
       updateUser: store.updateUser,
       getMode: store.getMode,

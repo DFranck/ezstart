@@ -4,6 +4,11 @@ import { getAuthUserModel, AuthUserDocument } from '../models/auth-user.js'
 import { getAuthCodeModel } from '../models/auth-code.js'
 import { getWaitlistModel } from '../models/waitlist.js'
 import {
+  getRefreshTokenModel,
+  hashRefreshToken,
+  generateRawRefreshToken,
+} from '../models/refresh-token.js'
+import {
   LoginRequest,
   RegisterRequest,
   TokenRequest,
@@ -18,7 +23,8 @@ import { mapToRecord } from '../utils/map-to-record.js'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
-const JWT_EXPIRES_IN = '7d'
+const ACCESS_TOKEN_EXPIRES_IN = '15m'
+const REFRESH_TOKEN_DAYS = 30
 
 function buildJwtPayload(user: AuthUserDocument) {
   return {
@@ -146,7 +152,10 @@ export class AuthService {
   }
 
   // ✅ NEW: Login with direct token (httpOnly cookie mode)
-  static async loginWithToken(data: LoginRequest): Promise<AuthToken> {
+  static async loginWithToken(
+    data: LoginRequest,
+    meta?: { userAgent?: string; ip?: string }
+  ): Promise<AuthToken & { refreshToken: string }> {
     const AuthUserModel = await getAuthUserModel()
 
     // Find user by email OR username
@@ -170,20 +179,31 @@ export class AuthService {
       await user.save()
     }
 
-    // Generate JWT token directly (skip auth code)
+    // Generate short-lived access token
     const payload = buildJwtPayload(user)
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+
+    // Generate refresh token
+    const rawRefreshToken = await this.generateRefreshToken(
+      user._id!.toString(),
+      meta?.userAgent,
+      meta?.ip
+    )
 
     return {
-      access_token: token,
+      access_token: accessToken,
       token_type: 'Bearer',
-      expires_in: 7 * 24 * 60 * 60, // 7 days in seconds
+      expires_in: 15 * 60, // 15 minutes in seconds
       user: user.toAuthUser(),
+      refreshToken: rawRefreshToken,
     }
   }
 
   // Exchange code for token
-  static async exchangeCodeForToken(data: TokenRequest): Promise<AuthToken> {
+  static async exchangeCodeForToken(
+    data: TokenRequest,
+    meta?: { userAgent?: string; ip?: string }
+  ): Promise<AuthToken & { refreshToken: string }> {
     const AuthCodeModel = await getAuthCodeModel()
     const AuthUserModel = await getAuthUserModel()
     logger.debug(
@@ -216,15 +236,23 @@ export class AuthService {
       throw new Error('User not found')
     }
 
-    // Generate JWT token
+    // Generate short-lived access token
     const payload = buildJwtPayload(user)
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+
+    // Generate refresh token
+    const rawRefreshToken = await this.generateRefreshToken(
+      user._id!.toString(),
+      meta?.userAgent,
+      meta?.ip
+    )
 
     return {
-      access_token: token,
+      access_token: accessToken,
       token_type: 'Bearer',
-      expires_in: 7 * 24 * 60 * 60, // 7 days in seconds
+      expires_in: 15 * 60, // 15 minutes in seconds
       user: user.toAuthUser(),
+      refreshToken: rawRefreshToken,
     }
   }
 
@@ -288,5 +316,147 @@ export class AuthService {
     const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findById(userId)
     return user ? user.apps.includes(app) : false
+  }
+
+  // --- Refresh Token Management ---
+
+  /**
+   * Create and store a refresh token for a user.
+   * Returns the raw (unhashed) token to send to the client.
+   */
+  static async generateRefreshToken(
+    userId: string,
+    userAgent?: string,
+    ip?: string
+  ): Promise<string> {
+    const RefreshTokenModel = await getRefreshTokenModel()
+    const rawToken = generateRawRefreshToken()
+    const tokenHash = hashRefreshToken(rawToken)
+
+    await RefreshTokenModel.create({
+      userId,
+      tokenHash,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000),
+      userAgent,
+      ip,
+    })
+
+    return rawToken
+  }
+
+  /**
+   * Validate a refresh token, rotate it (revoke old, create new), and return
+   * new access + refresh tokens.
+   */
+  static async refreshAccessToken(
+    rawRefreshToken: string,
+    meta?: { userAgent?: string; ip?: string }
+  ): Promise<AuthToken & { refreshToken: string }> {
+    const RefreshTokenModel = await getRefreshTokenModel()
+    const AuthUserModel = await getAuthUserModel()
+    const tokenHash = hashRefreshToken(rawRefreshToken)
+
+    // Find the stored token
+    const storedToken = await RefreshTokenModel.findOne({ tokenHash })
+
+    if (!storedToken) {
+      throw new Error('Invalid refresh token')
+    }
+
+    if (storedToken.isRevoked) {
+      // Possible token reuse attack — revoke ALL tokens for this user
+      logger.warn(
+        { userId: storedToken.userId.toString() },
+        'Revoked refresh token reuse detected — revoking all user tokens'
+      )
+      await RefreshTokenModel.updateMany(
+        { userId: storedToken.userId },
+        { $set: { isRevoked: true } }
+      )
+      throw new Error('Refresh token has been revoked')
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      throw new Error('Refresh token has expired')
+    }
+
+    // Revoke the old token (rotation)
+    storedToken.isRevoked = true
+    await storedToken.save()
+
+    // Get user
+    const user = await AuthUserModel.findById(storedToken.userId)
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Generate new access token
+    const payload = buildJwtPayload(user)
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+
+    // Generate new refresh token
+    const newRawRefreshToken = await this.generateRefreshToken(
+      user._id!.toString(),
+      meta?.userAgent || storedToken.userAgent,
+      meta?.ip || storedToken.ip
+    )
+
+    return {
+      access_token: accessToken,
+      token_type: 'Bearer',
+      expires_in: 15 * 60,
+      user: user.toAuthUser(),
+      refreshToken: newRawRefreshToken,
+    }
+  }
+
+  /**
+   * Revoke a specific refresh token by its document ID.
+   */
+  static async revokeRefreshToken(tokenId: string, userId: string): Promise<void> {
+    const RefreshTokenModel = await getRefreshTokenModel()
+    const token = await RefreshTokenModel.findOne({ _id: tokenId, userId })
+
+    if (!token) {
+      throw new Error('Session not found')
+    }
+
+    token.isRevoked = true
+    await token.save()
+  }
+
+  /**
+   * Revoke all refresh tokens for a user (logout everywhere).
+   */
+  static async revokeAllUserTokens(userId: string): Promise<number> {
+    const RefreshTokenModel = await getRefreshTokenModel()
+    const result = await RefreshTokenModel.updateMany(
+      { userId, isRevoked: false },
+      { $set: { isRevoked: true } }
+    )
+    return result.modifiedCount
+  }
+
+  /**
+   * Get all active (non-revoked, non-expired) sessions for a user.
+   */
+  static async getUserSessions(userId: string) {
+    const RefreshTokenModel = await getRefreshTokenModel()
+    const sessions = await RefreshTokenModel.find({
+      userId,
+      isRevoked: false,
+      expiresAt: { $gt: new Date() },
+    })
+      .sort({ createdAt: -1 })
+      .select('_id userAgent ip createdAt expiresAt')
+      .lean()
+
+    return sessions.map(s => ({
+      id: s._id.toString(),
+      userAgent: s.userAgent || null,
+      ip: s.ip || null,
+      createdAt: s.createdAt.toISOString(),
+      expiresAt: s.expiresAt.toISOString(),
+    }))
   }
 }

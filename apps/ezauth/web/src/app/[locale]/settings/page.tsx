@@ -16,6 +16,7 @@ import { BackButton } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { callApi } from '@ezstart/fetch-client'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 type SetupPhase = 'idle' | 'qr' | 'backup' | 'disable'
@@ -306,6 +307,15 @@ export default function SettingsPage() {
               </Button>
             </Div>
           )}
+        </Div>
+
+        {/* Sessions link */}
+        <Div className="border-t pt-4">
+          <Link href="/settings/sessions">
+            <Button variant="outline" className="w-full">
+              {ts('sessions')}
+            </Button>
+          </Link>
         </Div>
       </CardContent>
     </Card>
