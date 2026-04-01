@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { cancelSubscription } from '../../services/stripe.js'
+import { getProvider } from '../../services/stripe.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -43,7 +43,7 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Subscription not found', 404)
     }
 
-    await cancelSubscription(subscriptionId)
+    await getProvider().cancelSubscription(subscriptionId)
 
     await Payment.updateOne({ _id: payment._id }, { status: 'cancelled' })
 

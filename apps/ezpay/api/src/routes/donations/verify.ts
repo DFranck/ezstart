@@ -51,26 +51,26 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
       return sendSuccess(res, payment)
     }
 
-    // Verify with Stripe API to prevent fraud
-    const { stripe } = await import('../../services/stripe.js')
+    // Verify with payment provider to prevent fraud
+    const { getProvider } = await import('../../services/stripe.js')
     if (!sessionId) {
       return sendError(res, 'Missing sessionId', 400)
     }
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    const verification = await getProvider().verifyPayment(sessionId)
 
-    // Only mark as completed if Stripe confirms payment
-    if (session.payment_status === 'paid' && session.status === 'complete') {
+    // Only mark as completed if provider confirms payment
+    if (verification.paid) {
       payment.status = 'completed'
       payment.completedAt = new Date()
-      payment.paymentMethod = session.payment_method_types?.[0]
+      payment.paymentMethod = verification.paymentMethod
       await payment.save()
 
-      logger.info(`✅ Payment verified with Stripe and completed: ${sessionId}`)
+      logger.info(`✅ Payment verified and completed: ${sessionId}`)
 
       sendSuccess(res, payment)
     } else {
-      // Payment not confirmed by Stripe
-      logger.warn(`⚠️ Payment not confirmed by Stripe: ${sessionId} (status: ${session.status})`)
+      // Payment not confirmed by provider
+      logger.warn(`⚠️ Payment not confirmed: ${sessionId} (status: ${verification.status})`)
       sendError(res, 'Payment not confirmed', 400)
     }
   } catch (error) {

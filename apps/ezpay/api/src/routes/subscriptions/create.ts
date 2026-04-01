@@ -9,7 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
-import { createSubscriptionSession } from '../../services/stripe.js'
+import { getProvider } from '../../services/stripe.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -66,7 +66,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
-    const session = await createSubscriptionSession({
+    const provider = getProvider()
+    const session = await provider.createSubscriptionCheckout({
       amount,
       currency,
       interval,
@@ -92,7 +93,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       customerEmail,
       isAnonymous: false,
       provider: 'stripe',
-      paymentId: session.id,
+      paymentId: session.sessionId,
       status: 'pending',
       metadata: {
         planId,
@@ -101,7 +102,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       },
     })
 
-    logger.info(`💳 Subscription created - Session ID: ${session.id}`)
+    logger.info(`💳 Subscription created - Session ID: ${session.sessionId}`)
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {

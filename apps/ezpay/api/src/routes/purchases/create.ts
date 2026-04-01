@@ -9,7 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
-import { createCheckoutSession } from '../../services/stripe.js'
+import { getProvider } from '../../services/stripe.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -65,7 +65,8 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
-    const session = await createCheckoutSession({
+    const provider = getProvider()
+    const session = await provider.createCheckoutSession({
       amount,
       currency,
       description: `Purchase: ${productName}`,
@@ -90,7 +91,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       customerEmail,
       isAnonymous: false,
       provider: 'stripe',
-      paymentId: session.id,
+      paymentId: session.sessionId,
       status: 'pending',
       metadata: {
         productId,
@@ -98,7 +99,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       },
     })
 
-    logger.info(`💳 Purchase created - Session ID: ${session.id}`)
+    logger.info(`💳 Purchase created - Session ID: ${session.sessionId}`)
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {

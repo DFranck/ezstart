@@ -8,7 +8,7 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { refundPayment } from '../../services/stripe.js'
+import { getProvider } from '../../services/stripe.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -67,7 +67,7 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
       return sendError(res, 'No payment intent found — cannot refund', 400)
     }
 
-    await refundPayment(payment.stripePaymentIntentId)
+    await getProvider().refundPayment(payment.stripePaymentIntentId)
 
     payment.status = 'refunded'
     await payment.save()

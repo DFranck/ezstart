@@ -9,7 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
-import { createCheckoutSession } from '../../services/stripe.js'
+import { getProvider } from '../../services/stripe.js'
 import { optionalAuthMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -73,8 +73,9 @@ const createDonationHandler = async (req: Request, res: Response) => {
     // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
-    // Create Stripe checkout session
-    const session = await createCheckoutSession({
+    // Create checkout session via provider
+    const provider = getProvider()
+    const session = await provider.createCheckoutSession({
       amount,
       currency,
       description: `Donation to ${projectName || projectId}`,
@@ -103,7 +104,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       customerEmail: donorEmail,
       isAnonymous,
       provider: 'stripe',
-      paymentId: session.id,
+      paymentId: session.sessionId,
       status: 'pending',
       metadata: {
         message,
@@ -111,7 +112,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       },
     })
 
-    logger.info(`💳 Donation created - Session ID: ${session.id}`)
+    logger.info(`💳 Donation created - Session ID: ${session.sessionId}`)
     logger.info(`🔗 Checkout URL: ${session.url}`)
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
