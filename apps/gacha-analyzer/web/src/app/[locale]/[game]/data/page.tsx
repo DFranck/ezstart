@@ -29,8 +29,18 @@ import {
   TooltipTrigger,
 } from '@ezstart/ui/components'
 
-import { TIER_WEIGHTS } from '@gacha-analyzer/types'
-import type { StatTier } from '@gacha-analyzer/types'
+import {
+  TIER_WEIGHTS,
+  ARTIFACT_MAIN_STAT_MAX,
+  ARTIFACT_SUBSTAT_NAMES,
+  ARTIFACT_SUBSTATS_BY_QUALITY,
+} from '@gacha-analyzer/types'
+import type {
+  StatTier,
+  ArtifactMainStat,
+  ArtifactQuality,
+  ArtifactSubstatType,
+} from '@gacha-analyzer/types'
 
 import {
   TIER_COLOR,
@@ -785,9 +795,144 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- 8. Sources ---- */}
+        {/* ---- 8. Artifacts ---- */}
+        <AccordionItem value="artifacts">
+          <AccordionTrigger className="text-base font-semibold">
+            8. Artifact Reference Data
+          </AccordionTrigger>
+          <AccordionContent>
+            <Div className="space-y-6">
+              <P className="text-xs text-muted-foreground">
+                Artifact main stat max values, substat ranges, and quality thresholds. Artifacts
+                have flat main stats (ATK, DEF, HP) and conditional/skill-specific substat effects.
+              </P>
+
+              {/* Main stat ranges */}
+              <Div>
+                <P className="font-bold text-sm mb-3">Main Stat Max Values (+15)</P>
+                <Table size="compact">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[100px]">Stat</TableHead>
+                      <TableHead className="text-center">Max at +15</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(Object.entries(ARTIFACT_MAIN_STAT_MAX) as [ArtifactMainStat, number][]).map(
+                      ([stat, max]) => (
+                        <TableRow key={stat}>
+                          <TableCell className="font-medium uppercase">{stat}</TableCell>
+                          <TableCell className="text-center tabular-nums">{max}</TableCell>
+                        </TableRow>
+                      )
+                    )}
+                  </TableBody>
+                </Table>
+              </Div>
+
+              <hr className="border-border" />
+
+              {/* Quality / substat count */}
+              <Div>
+                <P className="font-bold text-sm mb-3">Substats by Quality</P>
+                <P className="text-xs text-muted-foreground mb-2">
+                  Number of substats at +0 by artifact quality.
+                </P>
+                <Table size="compact">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[100px]">Quality</TableHead>
+                      <TableHead className="text-center">Substats at +0</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(
+                      Object.entries(ARTIFACT_SUBSTATS_BY_QUALITY) as [ArtifactQuality, number][]
+                    ).map(([quality, count]) => (
+                      <TableRow key={quality}>
+                        <TableCell className="font-medium capitalize">{quality}</TableCell>
+                        <TableCell className="text-center tabular-nums">{count}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Div>
+
+              <hr className="border-border" />
+
+              {/* Substat names and max values */}
+              <Div>
+                <P className="font-bold text-sm mb-3">Substat Reference</P>
+                <P className="text-xs text-muted-foreground mb-2">
+                  All artifact substats with their display names. Artifact substats are conditional
+                  effects (percentage-based) that differ from rune substats.
+                </P>
+                <Div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <Table variant="striped" size="compact">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[200px] sticky top-0 bg-background z-10">
+                          Substat
+                        </TableHead>
+                        <TableHead className="min-w-[120px] sticky top-0 bg-background z-10">
+                          Key
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(
+                        Object.entries(ARTIFACT_SUBSTAT_NAMES) as [ArtifactSubstatType, string][]
+                      ).map(([key, name]) => (
+                        <TableRow key={key}>
+                          <TableCell className="font-medium text-sm">{name}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground font-mono">
+                            {key}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Div>
+              </Div>
+
+              <Card size="sm" className="border-primary/20 bg-primary/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">Efficiency Tiers</P>
+                  <Div className="flex flex-wrap gap-3 mt-2">
+                    <Div className="flex items-center gap-1.5">
+                      <Span className="text-ga-tier-s font-bold">S</Span>
+                      <Span className="text-xs text-muted-foreground">&ge; 80%</Span>
+                    </Div>
+                    <Div className="flex items-center gap-1.5">
+                      <Span className="text-ga-tier-a font-semibold">A</Span>
+                      <Span className="text-xs text-muted-foreground">&ge; 60%</Span>
+                    </Div>
+                    <Div className="flex items-center gap-1.5">
+                      <Span className="text-ga-tier-b">B</Span>
+                      <Span className="text-xs text-muted-foreground">&ge; 40%</Span>
+                    </Div>
+                    <Div className="flex items-center gap-1.5">
+                      <Span className="text-ga-tier-c">C</Span>
+                      <Span className="text-xs text-muted-foreground">&ge; 20%</Span>
+                    </Div>
+                    <Div className="flex items-center gap-1.5">
+                      <Span className="text-ga-tier-d">D</Span>
+                      <Span className="text-xs text-muted-foreground">&lt; 20%</Span>
+                    </Div>
+                  </Div>
+                  <P className="text-xs text-muted-foreground mt-2">
+                    Artifact efficiency is calculated from substat roll quality weighted by substat
+                    desirability. CRIT DMG and Additional DMG substats are rated highest.
+                  </P>
+                </CardContent>
+              </Card>
+            </Div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ---- 9. Sources ---- */}
         <AccordionItem value="sources">
-          <AccordionTrigger className="text-base font-semibold">8. Sources</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">9. Sources</AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-2">
               {SOURCES.map(s => (
