@@ -92,15 +92,19 @@ export class PayClient {
       throw new Error(result.error || 'Failed to fetch donations')
     }
 
-    // Normalize MongoDB _id to id
-    if (result.payments) {
-      result.payments = result.payments.map((p: Payment & { _id?: string }) => ({
+    // Unwrap API response: { success, data, meta } → { payments, total }
+    const payments = (result.data || result.payments || []).map(
+      (p: Payment & { _id?: string }) => ({
         ...p,
         id: p.id || p._id,
-      }))
-    }
+      })
+    )
 
-    return result
+    return {
+      ...result,
+      payments,
+      total: result.meta?.total ?? payments.length,
+    }
   }
 
   async getDonationStats(projectId?: string): Promise<StatsResponse> {
