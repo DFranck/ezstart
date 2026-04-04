@@ -14,7 +14,7 @@ import {
 } from '@ezstart/ui/components'
 import { BackButton } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
@@ -61,7 +61,7 @@ export default function SettingsPage() {
         method: 'POST',
       })
       if (!response.ok) {
-        throw new Error((response.data as { error?: string } | null)?.error || 'Setup failed')
+        throw new Error(parseApiError(response.data as any) || 'Setup failed')
       }
       const data = response.data as { qrCode: string; secret: string }
       setQrCode(data.qrCode)
@@ -85,9 +85,7 @@ export default function SettingsPage() {
         body: { code },
       })
       if (!response.ok) {
-        throw new Error(
-          (response.data as { error?: string } | null)?.error || 'Verification failed'
-        )
+        throw new Error(parseApiError(response.data as any) || 'Verification failed')
       }
       const data = response.data as { backupCodes: string[] }
       setBackupCodes(data.backupCodes)
@@ -111,7 +109,7 @@ export default function SettingsPage() {
         body: { code },
       })
       if (!response.ok) {
-        throw new Error((response.data as { error?: string } | null)?.error || 'Disable failed')
+        throw new Error(parseApiError(response.data as any) || 'Disable failed')
       }
       setIs2FAEnabled(false)
       setPhase('idle')

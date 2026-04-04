@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Div, Input, P } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -33,7 +33,7 @@ export function TwoFactorPrompt({ tempToken, redirect_uri, onBack }: TwoFactorPr
       })
 
       if (!response.ok) {
-        throw new Error((response.data as { error?: string } | null)?.error || 'Invalid 2FA code')
+        throw new Error(parseApiError(response.data as any) || 'Invalid 2FA code')
       }
 
       const result = response.data as { code?: string }

@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, Div, P, Spinner } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -30,7 +30,7 @@ function VerifyEmailContent() {
       })
 
       if (!response.ok) {
-        const errorMsg = response.error || ''
+        const errorMsg = parseApiError(response.data as any) || ''
         if (errorMsg.includes('already verified')) {
           setState('already-verified')
         } else {

@@ -14,7 +14,7 @@ import {
   Input,
   PasswordInput,
 } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -70,9 +70,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(
-          response.error || (response.data as { error?: string } | null)?.error || 'Login failed'
-        )
+        throw new Error(parseApiError(response.data as any) || 'Login failed')
       }
 
       const result = response.data as {
