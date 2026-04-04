@@ -81,6 +81,21 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [ ] Les messages `common.json` et `layout.json` existent mais ne semblent pas utilises dans la page d'accueil (utilise `payment.json > home`)
 - [ ] Verifier que les traductions `layout.json` sont utilisees dans le layout
 
+### 3.5 Page 404 custom `medium` `ux` — `planned`
+
+- [ ] La page 404 utilise le fallback Next.js par défaut (EN, pas stylisé)
+- [ ] Créer une page 404 custom avec le design EZPay
+- [ ] i18n FR/EN
+- [ ] Bouton "Retour à l'accueil"
+- [ ] Cohérent avec les pages success/cancel
+
+### 3.6 Remplacer window.confirm par AlertDialog `medium` `ux` — `planned`
+
+- [ ] Les boutons "Annuler l'abonnement" et "Rembourser" utilisent `window.confirm()` natif
+- [ ] Remplacer par `<AlertDialog>` de @ezstart/ui pour une UX cohérente
+- [ ] Appliquer dans : admin dashboard, Test Center, RefundButton (pay-sdk), SubscriptionCard (pay-sdk)
+- [ ] Le composant AlertDialog permet un meilleur styling et des messages plus riches
+
 ---
 
 ## Phase 4 — API Robustesse

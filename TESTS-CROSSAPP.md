@@ -269,26 +269,29 @@ Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent �
 
 ### 2.9 E2E Flows (MCP validated)
 
-| ID    | Test                                        | Résultat attendu                                    | Résultat réel                                                                                                              | Status |
-| ----- | ------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ |
-| P2-37 | SSO Login EZPay                             | Redirect EZAuth → callback → connecté               | test-ezpay connecté via SSO, "Authentification réussie !" traduit FR, callback fonctionnel                                 | ✅     |
-| P2-38 | Purchase e2e (€9.99)                        | Checkout Stripe → webhook → completed               | Flow complet: modal "Purchasing as test-ezpay" → Stripe checkout → carte 4242 → webhook 200 → DB completed → redirect home | ✅     |
-| P2-39 | Subscription yearly e2e (€99.99)            | Checkout → webhook → completed                      | Flow complet: modal → Stripe → 14 webhooks [200] → DB completed, subscriptionId stocké → redirect /subscribe/success       | ✅     |
-| P2-40 | Subscription monthly e2e (€9.99)            | Checkout → webhook → completed                      | Flow complet validé depuis Test Center → Stripe → webhooks → /subscribe/success "Abonnement actif !"                       | ✅     |
-| P2-41 | Admin dashboard                             | Stats + table + filtres                             | Revenu total 119,97€ (tous types), 5 paiements, filtres type/status, badges colorés, bouton Rembourser                     | ✅     |
-| P2-42 | Test Center                                 | Tabs + tous les composants                          | 4 onglets (Tout/Dons/Achats/Abonnements), provider banner Stripe, 4 plans subscription (1/3/6/12 mois)                     | ✅     |
-| P2-43 | Pages success/cancel                        | 6 pages dédiées                                     | donate/purchase/subscribe × success/cancel, toutes rendues correctement avec i18n FR                                       | ✅     |
-| P2-44 | i18n FR complet                             | Accents + traductions                               | Tous les textes FR avec accents corrects. Version EN fonctionne aussi (/en)                                                | ✅     |
-| P2-45 | Auth EZPay web                              | SSO + LoginButton                                   | Bouton Connexion/Déconnexion, AuthProvider, callback page, token passé aux composants                                      | ✅     |
-| P2-46 | Admin — filtre par type                     | Filtre retourne uniquement le type sélectionné      | Filtre "Abonnement" retourne 5 abonnements correctement. Dropdown FR (Don/Achat/Abonnement/Facture).                       | ✅     |
-| P2-47 | Admin — tous les paiements (admin appRoles) | Admin voit les paiements de TOUS les users          | 41 paiements visibles (test-ezpay + franckdufournetpro + test@test.com + anonymes). Fix isAdminUser() avec appRoles.ezpay. | ✅     |
-| P2-48 | Admin — stats globales tous types           | Revenu total inclut tous les types                  | Revenu total 186,97€ (donations + purchases + subscriptions). 28 dons, 8 achats. Stats calculées depuis GET /payments.     | ✅     |
-| P2-49 | Admin — boutons cancel subscription         | Bouton "Annuler l'abonnement" sur les subscriptions | Boutons visibles sur les abonnements completed et pending. Pas de bouton sur les annulés.                                  | ✅     |
-| P2-50 | Admin — pagination                          | 20 items/page avec navigation                       | "Affichage de 1 à 20 sur 41" avec boutons Précédent (disabled)/Suivant.                                                    | ✅     |
-| P2-51 | Test Center — vue Tout                      | Toutes les sections affichées                       | Dons + Achats + Abonnements + Historique. Provider banner Stripe. Tabs fonctionnels.                                       | ✅     |
-| P2-52 | Test Center — vue Achats                    | Produits + historique achats                        | 2 produits (Article de test €9.99, Pass Premium €24.99). PurchaseButton fonctionnels.                                      | ✅     |
-| P2-53 | Test Center — 4 plans subscription          | 1/3/6/12 mois affichés                              | Pro Mensuel €9.99/month, Trimestriel €24.99/3months, Semestriel €44.99/6months, Annuel €79.99/year.                        | ✅     |
-| P2-54 | Home EN                                     | Switch langue fonctionne                            | /en affiche "Logout", "Donations", "Purchases", "Subscriptions", "Getting Started".                                        | ✅     |
+| ID    | Test                                        | Résultat attendu                                    | Résultat réel                                                                                                                                                | Status |
+| ----- | ------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| P2-37 | SSO Login EZPay                             | Redirect EZAuth → callback → connecté               | test-ezpay connecté via SSO, "Authentification réussie !" traduit FR, callback fonctionnel                                                                   | ✅     |
+| P2-38 | Purchase e2e (€9.99)                        | Checkout Stripe → webhook → completed               | Flow complet: modal "Purchasing as test-ezpay" → Stripe checkout → carte 4242 → webhook 200 → DB completed → redirect home                                   | ✅     |
+| P2-39 | Subscription yearly e2e (€99.99)            | Checkout → webhook → completed                      | Flow complet: modal → Stripe → 14 webhooks [200] → DB completed, subscriptionId stocké → redirect /subscribe/success                                         | ✅     |
+| P2-40 | Subscription monthly e2e (€9.99)            | Checkout → webhook → completed                      | Flow complet validé depuis Test Center → Stripe → webhooks → /subscribe/success "Abonnement actif !"                                                         | ✅     |
+| P2-41 | Admin dashboard                             | Stats + table + filtres                             | Revenu total 119,97€ (tous types), 5 paiements, filtres type/status, badges colorés, bouton Rembourser                                                       | ✅     |
+| P2-42 | Test Center                                 | Tabs + tous les composants                          | 4 onglets (Tout/Dons/Achats/Abonnements), provider banner Stripe, 4 plans subscription (1/3/6/12 mois)                                                       | ✅     |
+| P2-43 | Pages success/cancel                        | 6 pages dédiées                                     | donate/purchase/subscribe × success/cancel, toutes rendues correctement avec i18n FR                                                                         | ✅     |
+| P2-44 | i18n FR complet                             | Accents + traductions                               | Tous les textes FR avec accents corrects. Version EN fonctionne aussi (/en)                                                                                  | ✅     |
+| P2-45 | Auth EZPay web                              | SSO + LoginButton                                   | Bouton Connexion/Déconnexion, AuthProvider, callback page, token passé aux composants                                                                        | ✅     |
+| P2-46 | Admin — filtre par type                     | Filtre retourne uniquement le type sélectionné      | Filtre "Abonnement" retourne 5 abonnements correctement. Dropdown FR (Don/Achat/Abonnement/Facture).                                                         | ✅     |
+| P2-47 | Admin — tous les paiements (admin appRoles) | Admin voit les paiements de TOUS les users          | 41 paiements visibles (test-ezpay + franckdufournetpro + test@test.com + anonymes). Fix isAdminUser() avec appRoles.ezpay.                                   | ✅     |
+| P2-48 | Admin — stats globales tous types           | Revenu total inclut tous les types                  | Revenu total 186,97€ (donations + purchases + subscriptions). 28 dons, 8 achats. Stats calculées depuis GET /payments.                                       | ✅     |
+| P2-49 | Admin — boutons cancel subscription         | Bouton "Annuler l'abonnement" sur les subscriptions | Boutons visibles sur les abonnements completed et pending. Pas de bouton sur les annulés.                                                                    | ✅     |
+| P2-50 | Admin — pagination                          | 20 items/page avec navigation                       | "Affichage de 1 à 20 sur 41" avec boutons Précédent (disabled)/Suivant.                                                                                      | ✅     |
+| P2-51 | Test Center — vue Tout                      | Toutes les sections affichées                       | Dons + Achats + Abonnements + Historique. Provider banner Stripe. Tabs fonctionnels.                                                                         | ✅     |
+| P2-52 | Test Center — vue Achats                    | Produits + historique achats                        | 2 produits (Article de test €9.99, Pass Premium €24.99). PurchaseButton fonctionnels.                                                                        | ✅     |
+| P2-53 | Test Center — 4 plans subscription          | 1/3/6/12 mois affichés                              | Pro Mensuel €9.99/month, Trimestriel €24.99/3months, Semestriel €44.99/6months, Annuel €79.99/year.                                                          | ✅     |
+| P2-54 | Home EN                                     | Switch langue fonctionne                            | /en affiche "Logout", "Donations", "Purchases", "Subscriptions", "Getting Started".                                                                          | ✅     |
+| P2-55 | Cancel subscription — admin                 | Bouton annule l'abo dans Stripe                     | Clic "Annuler l'abonnement" → confirm dialog FR "Êtes-vous sûr ?" → statut passe de "Terminé" à "Annulé", boutons disparaissent. 2 abos annulés avec succès. | ✅     |
+| P2-56 | Refund payment — admin                      | Bouton rembourse via Stripe                         | Clic "Rembourser" → confirm dialog FR → statut passe de "Terminé" à "Remboursé" (badge bleu), bouton disparaît. Achat €9.99 remboursé.                       | ✅     |
+| P2-57 | Page 404                                    | Page d'erreur affichée                              | 404 Next.js par défaut "This page could not be found." — pas de page custom, texte EN.                                                                       | ⚠️     |
 
 ---
 
@@ -406,14 +409,14 @@ Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent �
 
 ## Résumé Exécution
 
-| Phase               | Total tests | ✅      | ❌    | ⚠️    | ⏳     |
-| ------------------- | ----------- | ------- | ----- | ----- | ------ |
-| Phase 0 — Auto      | 15          | 15      | 0     | 0     | 0      |
-| Phase 1 — EZAuth    | 66          | 54      | 0     | 2     | 10     |
-| Phase 2 — EZPay     | 57          | 49      | 1     | 7     | 0      |
-| Phase 3 — EZStart   | 27          | 12      | 0     | 0     | 15     |
-| Phase 4 — Cross-App | 19          | 0       | 0     | 0     | 19     |
-| **TOTAL**           | **184**     | **130** | **1** | **9** | **44** |
+| Phase               | Total tests | ✅      | ❌    | ⚠️     | ⏳     |
+| ------------------- | ----------- | ------- | ----- | ------ | ------ |
+| Phase 0 — Auto      | 15          | 15      | 0     | 0      | 0      |
+| Phase 1 — EZAuth    | 66          | 54      | 0     | 2      | 10     |
+| Phase 2 — EZPay     | 60          | 51      | 1     | 8      | 0      |
+| Phase 3 — EZStart   | 27          | 12      | 0     | 0      | 15     |
+| Phase 4 — Cross-App | 19          | 0       | 0     | 0      | 19     |
+| **TOTAL**           | **187**     | **132** | **1** | **10** | **44** |
 
 ---
 
