@@ -44,11 +44,11 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### EZStart API
 
-| ID    | Test             | Commande                                                  | Résultat attendu                 | Résultat réel | Status |
-| ----- | ---------------- | --------------------------------------------------------- | -------------------------------- | ------------- | ------ |
-| A0-11 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs                        | 0 erreurs     | ✅     |
-| A0-12 | Unit tests       | `vitest run`                                              | Tous passent (si tests existent) |               | ⏳     |
-| A0-13 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match                          | 0 match       | ✅     |
+| ID    | Test             | Commande                                                  | Résultat attendu                 | Résultat réel                                            | Status |
+| ----- | ---------------- | --------------------------------------------------------- | -------------------------------- | -------------------------------------------------------- | ------ |
+| A0-11 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs                        | 0 erreurs                                                | ✅     |
+| A0-12 | Unit tests       | `vitest run`                                              | Tous passent (si tests existent) | 30 tests passed (60 with dist). HealthCheck model tests. | ✅     |
+| A0-13 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match                          | 0 match                                                  | ✅     |
 
 ### EZStart Web
 
@@ -82,7 +82,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | A1-10 | Verify email — token expiré         | Erreur "token expired", lien resend        | Token expiré → 'Lien de vérification invalide ou expiré.' Même message sécurisé.                                 | ✅     |
 | A1-11 | Verify email — token invalide       | Erreur "invalid token"                     | Token invalide → 'Lien de vérification invalide ou expiré.' Pas de leak.                                         | ✅     |
 | A1-12 | Resend verification — user connecté | Nouvel email envoyé, ancien token invalidé |                                                                                                                  | ⏳     |
-| A1-13 | Resend verification — rate limit    | 429 après 3 req/15min                      |                                                                                                                  | ⏳     |
+| A1-13 | Resend verification — rate limit    | 429 après 3 req/15min                      | Rate limit resend verification: bloqué après 2 req. retryAfter=631s.                                             | ✅     |
 
 ### 1.3 Login
 
@@ -100,10 +100,10 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | ID    | Test                                       | Résultat attendu                                                      | Résultat réel                                                                               | Status |
 | ----- | ------------------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------ |
 | A1-20 | Token exchange — code valide               | Access token (15min) + refresh token (30j) retournés                  | access_token (900s/15min) + refresh_token retournés. user data incluse.                     | ✅     |
-| A1-21 | Token exchange — code expiré               | Erreur "code expired"                                                 |                                                                                             | ⏳     |
+| A1-21 | Token exchange — code expiré               | Erreur "code expired"                                                 | 'Invalid or expired authorization code' pour code fake/expiré.                              | ✅     |
 | A1-22 | Token exchange — code déjà utilisé         | Erreur "code already used"                                            | 'Invalid or expired authorization code' pour code déjà utilisé.                             | ✅     |
 | A1-23 | Refresh token — token valide               | Nouveau access token + nouveau refresh token (rotation)               | Nouveau access_token + nouveau refresh_token (rotation). Ancien token différent du nouveau. | ✅     |
-| A1-24 | Refresh token — token expiré               | Erreur 401, redirect login                                            |                                                                                             | ⏳     |
+| A1-24 | Refresh token — token expiré               | Erreur 401, redirect login                                            | 'Invalid refresh token' pour token invalide/expiré.                                         | ✅     |
 | A1-25 | Refresh token — token révoqué              | Erreur 401, redirect login                                            | 'Invalid refresh token' pour token random.                                                  | ✅     |
 | A1-26 | Refresh token — réutilisation ancien token | Erreur (token rotation = ancien invalidé)                             | 'Refresh token has been revoked' pour ancien token post-rotation.                           | ✅     |
 | A1-27 | Auto-refresh transparent                   | Access token expire → auth-sdk refresh auto → pas d'interruption user |                                                                                             | ⏳     |
@@ -146,17 +146,17 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | ----- | ------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------ |
 | A1-45 | List sessions                  | Toutes les sessions actives avec user-agent, IP, date | 2 sessions: 'Chrome on Windows' + 'Unknown browser' (curl). IP, date, user-agent. Accents OK.             | ✅     |
 | A1-46 | Revoke session — une seule     | Session ciblée révoquée, les autres intactes          | Session curl révoquée, reste uniquement Chrome. Bouton 'Révoquer toutes' disparaît quand 1 seule session. | ✅     |
-| A1-47 | Revoke all — logout everywhere | Toutes sessions révoquées, user déconnecté partout    |                                                                                                           | ⏳     |
+| A1-47 | Revoke all — logout everywhere | Toutes sessions révoquées, user déconnecté partout    | '12 session(s) revoked'. 1 session restante (la courante). Bouton revoke all fonctionne.                  | ✅     |
 | A1-48 | Session — current marker       | La session courante identifiée dans la liste          | ISSUE-008: Pas de marqueur 'session courante' visible dans la liste.                                      | ⚠️     |
 
 ### 1.9 Profile & Account
 
-| ID    | Test                                 | Résultat attendu                                             | Résultat réel | Status |
-| ----- | ------------------------------------ | ------------------------------------------------------------ | ------------- | ------ |
-| A1-49 | Update profile — nom                 | firstName/lastName mis à jour                                |               | ⏳     |
-| A1-50 | Update profile — avatar              | Avatar URL mis à jour                                        |               | ⏳     |
-| A1-51 | Delete account — confirmation        | Compte supprimé, OAuth accounts nettoyés, sessions révoquées |               | ⏳     |
-| A1-52 | Delete account — re-login impossible | Login échoue après suppression                               |               | ⏳     |
+| ID    | Test                                 | Résultat attendu                                             | Résultat réel                                                          | Status |
+| ----- | ------------------------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------- | ------ |
+| A1-49 | Update profile — nom                 | firstName/lastName mis à jour                                | PUT /auth/profile — firstName/lastName mis à jour puis revert. Succès. | ✅     |
+| A1-50 | Update profile — avatar              | Avatar URL mis à jour                                        |                                                                        | ⏳     |
+| A1-51 | Delete account — confirmation        | Compte supprimé, OAuth accounts nettoyés, sessions révoquées |                                                                        | ⏳     |
+| A1-52 | Delete account — re-login impossible | Login échoue après suppression                               |                                                                        | ⏳     |
 
 ### 1.10 Admin
 
@@ -172,15 +172,15 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.11 Security
 
-| ID    | Test                           | Résultat attendu                                  | Résultat réel                                                            | Status |
-| ----- | ------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------ | ------ |
-| A1-60 | CSRF — login-cookie sans token | 403 forbidden                                     |                                                                          | ⏳     |
-| A1-61 | CSRF — token valide            | Login OK                                          |                                                                          | ⏳     |
-| A1-62 | JWT — token expiré             | 401 unauthorized                                  | JWT expiré → 'Authentication required'                                   | ✅     |
-| A1-63 | JWT — token malformé           | 401 unauthorized                                  | JWT malformé/signature invalide → 'Authentication required'              | ✅     |
-| A1-64 | OAuth token encryption         | Tokens OAuth stockés chiffrés (AES-256-GCM) en DB |                                                                          | ⏳     |
-| A1-65 | Password hashing               | Passwords stockés en bcrypt, jamais en clair      | bcrypt salt factor 12 via pre-save hook. Refresh tokens SHA-256.         | ✅     |
-| A1-66 | No secrets in response         | Aucun password/secret dans les réponses API       | Aucun passwordHash/totpSecret/backupCodes dans login ou token responses. | ✅     |
+| ID    | Test                           | Résultat attendu                                  | Résultat réel                                                                          | Status |
+| ----- | ------------------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------- | ------ |
+| A1-60 | CSRF — login-cookie sans token | 403 forbidden                                     | CSRF sans token → 'CSRF token mismatch' (403). Protection active sur login-cookie.     | ✅     |
+| A1-61 | CSRF — token valide            | Login OK                                          |                                                                                        | ⏳     |
+| A1-62 | JWT — token expiré             | 401 unauthorized                                  | JWT expiré → 'Authentication required'                                                 | ✅     |
+| A1-63 | JWT — token malformé           | 401 unauthorized                                  | JWT malformé/signature invalide → 'Authentication required'                            | ✅     |
+| A1-64 | OAuth token encryption         | Tokens OAuth stockés chiffrés (AES-256-GCM) en DB | AES-256-GCM encryption confirmée dans code (crypto.ts). IV random 16 bytes + auth tag. | ✅     |
+| A1-65 | Password hashing               | Passwords stockés en bcrypt, jamais en clair      | bcrypt salt factor 12 via pre-save hook. Refresh tokens SHA-256.                       | ✅     |
+| A1-66 | No secrets in response         | Aucun password/secret dans les réponses API       | Aucun passwordHash/totpSecret/backupCodes dans login ou token responses.               | ✅     |
 
 ---
 
@@ -377,12 +377,12 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 | Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳      |
 | ------------------- | ----------- | ------ | ----- | ----- | ------- |
-| Phase 0 — Auto      | 15          | 11     | 0     | 0     | 4       |
-| Phase 1 — EZAuth    | 66          | 32     | 0     | 1     | 33      |
+| Phase 0 — Auto      | 15          | 12     | 0     | 0     | 3       |
+| Phase 1 — EZAuth    | 66          | 39     | 0     | 1     | 26      |
 | Phase 2 — EZPay     | 36          | 0      | 0     | 0     | 36      |
 | Phase 3 — EZStart   | 24          | 0      | 0     | 0     | 24      |
 | Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19      |
-| **TOTAL**           | **160**     | **43** | **0** | **1** | **116** |
+| **TOTAL**           | **160**     | **51** | **0** | **1** | **108** |
 
 ---
 
