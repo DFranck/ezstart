@@ -1,6 +1,6 @@
 # Backlog — EZPay
 
-**Status :** `maintained` | **Derniere mise a jour :** 2026-04-04
+**Status :** `in-progress` | **Derniere mise a jour :** 2026-04-04
 
 ## Objectif
 
@@ -159,10 +159,11 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
   - [ ] Graphiques d'evolution
   - [ ] Top projets par revenue
 
-### 5.6 Pas de composants SDK pour purchases/subscriptions `low` `feature` — `planned`
+### 5.6 Pas de composants SDK pour purchases/subscriptions `low` `feature` — `in-progress`
 
-- [ ] Le pay-sdk a des composants uniquement pour donations (DonateButton, DonateModal, DonationWall)
-- [ ] Manque : PurchaseButton, SubscriptionCard, PaymentHistory
+- [x] PurchaseButton composant ajouté au pay-sdk
+- [x] PaymentSuccessPage composant ajouté au pay-sdk
+- [ ] Manque : SubscribeButton, SubscriptionCard, PaymentHistory
 - [ ] Les hooks n'existent que pour donations (useDonations) — manque usePurchases, useSubscriptions
 
 ---
@@ -207,7 +208,12 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 ### P-SUCCESS — Payment Success/Cancel Pages `high` `feature` — `in-progress`
 
 - [x] PaymentSuccessPage composant exporte par pay-sdk
-- [ ] Integrer dans EZStart et autres apps
+- [x] PurchaseButton composant exporte par pay-sdk
+- [x] Stripe test products crées (2 purchases, 2 subscriptions, donation presets)
+- [x] Webhook handling fonctionnel (donation e2e valide)
+- [x] callApi error standardization
+- [x] CORS config cross-app
+- [ ] Integrer PaymentSuccessPage dans EZStart et autres apps
 - [ ] Toast notification "Merci pour votre soutien !" sur la home quand `?payment=success`
 - [ ] Page cancel avec message adapte
 
@@ -222,7 +228,8 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ### P-SUBSCRIPTION — Subscription Management `medium` `feature` — `planned`
 
-- [ ] SubscribeButton composant pay-sdk
+- [ ] SubscribeButton composant pay-sdk (API fonctionne, composant manquant)
+- [ ] Purchase/Subscription e2e testing (checkout complet + webhooks invoice.paid, customer.subscription.created)
 - [ ] Customer Portal Stripe pour gestion des abonnements
 - [ ] Webhook handling pour subscription events (created, updated, canceled, payment_failed)
 - [ ] `usePremium()` hook pour verifier le statut d'abonnement dans les apps
@@ -252,3 +259,5 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - OpenAPI documentation est en place sur toutes les routes
 - Rate limiting global est active (100 req/15min)
 - La web app est quasi vide — fonctionnellement c'est juste une page de doc SDK
+- ISSUE-015: EZPay web n'a pas d'auth system (pas de LoginButton/AuthProvider) — les boutons Purchase/Subscribe necessitent auth mais impossible de se connecter sur EZPay web
+- ISSUE-016: SSO cross-domain ne fonctionne pas en localhost (ports differents = origins differentes, tokens localStorage non partages). Fonctionne en prod via cookies shared \*.ezstart.xyz

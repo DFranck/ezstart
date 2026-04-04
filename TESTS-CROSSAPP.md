@@ -200,22 +200,25 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | P2-8  | Verify payment — session invalide   | Erreur appropriée                                   |                                                                                                                                                                                                                                                                       | ⏳     |
 | P2-8a | Stripe checkout — donation complète | Flow donation complet end-to-end                    | Flow donation complet validé end-to-end en MCP: Frontend → DonateModal → EZPay API → Stripe Checkout → Carte test 4242 → Processing → payment_intent.succeeded webhook [200] → DB status=completed, amount=5€, completedAt set. Stripe listen forwarding webhooks OK. | ✅     |
 | P2-8b | Webhooks Stripe — réception         | Webhooks reçus et traités avec 200 OK               | Webhooks reçus et traités: payment_intent.succeeded [200], charge.succeeded [200], checkout.session.completed [200], payment_intent.created [200]. Tous 200 OK.                                                                                                       | ✅     |
+| P2-8c | Test products endpoint              | Retourne les produits de test par type              | GET /test-products retourne 2 purchases, 2 subscriptions, donation presets.                                                                                                                                                                                           | ✅     |
+
+Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent à tester. Le flow est identique au donation e2e déjà validé mais les webhook events sont différents (invoice.paid, customer.subscription.created, etc.).
 
 ### 2.2 Purchases
 
-| ID    | Test                        | Résultat attendu                   | Résultat réel | Status |
-| ----- | --------------------------- | ---------------------------------- | ------------- | ------ |
-| P2-9  | Create purchase             | Payment créé, checkoutUrl retourné |               | ⏳     |
-| P2-10 | List purchases — user       | Seuls ses achats retournés         |               | ⏳     |
-| P2-11 | List purchases — pagination | limit/offset fonctionnent          |               | ⏳     |
+| ID    | Test                        | Résultat attendu                   | Résultat réel                                                                     | Status |
+| ----- | --------------------------- | ---------------------------------- | --------------------------------------------------------------------------------- | ------ |
+| P2-9  | Create purchase             | Payment créé, checkoutUrl retourné | Purchase API crée payment + checkout URL Stripe (200 OK). E2e checkout non testé. | ✅     |
+| P2-10 | List purchases — user       | Seuls ses achats retournés         |                                                                                   | ⏳     |
+| P2-11 | List purchases — pagination | limit/offset fonctionnent          |                                                                                   | ⏳     |
 
 ### 2.3 Subscriptions
 
-| ID    | Test                      | Résultat attendu                   | Résultat réel | Status |
-| ----- | ------------------------- | ---------------------------------- | ------------- | ------ |
-| P2-12 | Create subscription       | Payment créé, checkoutUrl retourné |               | ⏳     |
-| P2-13 | List subscriptions — user | Seuls ses abos retournés           |               | ⏳     |
-| P2-14 | Cancel subscription       | Stripe cancel, status=cancelled    |               | ⏳     |
+| ID    | Test                      | Résultat attendu                   | Résultat réel                                                                                         | Status |
+| ----- | ------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------- | ------ |
+| P2-12 | Create subscription       | Payment créé, checkoutUrl retourné | Subscription API crée payment + checkout URL Stripe avec récurrence (200 OK). E2e checkout non testé. | ✅     |
+| P2-13 | List subscriptions — user | Seuls ses abos retournés           |                                                                                                       | ⏳     |
+| P2-14 | Cancel subscription       | Stripe cancel, status=cancelled    |                                                                                                       | ⏳     |
 
 ### 2.4 Payments (admin)
 
@@ -384,10 +387,10 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | ------------------- | ----------- | ------ | ----- | ----- | ------ |
 | Phase 0 — Auto      | 15          | 15     | 0     | 0     | 0      |
 | Phase 1 — EZAuth    | 66          | 54     | 0     | 2     | 10     |
-| Phase 2 — EZPay     | 38          | 9      | 0     | 0     | 29     |
+| Phase 2 — EZPay     | 39          | 12     | 0     | 0     | 27     |
 | Phase 3 — EZStart   | 27          | 12     | 0     | 0     | 15     |
 | Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19     |
-| **TOTAL**           | **165**     | **90** | **0** | **2** | **73** |
+| **TOTAL**           | **166**     | **93** | **0** | **2** | **71** |
 
 ---
 
@@ -508,6 +511,22 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 - **Description:** Hardcoded /donate/success in ezpay API. Return URL should be configurable per consumer app.
 - **Fix needed:** Accept returnUrl from client, use it in Stripe session
 - **Status:** open
+
+### ISSUE-015 — EZPay web has no auth system (medium)
+
+- **Test:** P2-9, P2-12
+- **Severity:** medium
+- **Description:** EZPay web doesn't have auth-sdk/LoginButton configured. Purchase/Subscribe buttons require authentication but users can't login on EZPay web.
+- **Fix:** Add AuthProvider + LoginButton to EZPay web layout, or document that EZPay web is SDK doc only
+- **Status:** open
+
+### ISSUE-016 — SSO cross-domain not working in localhost (low, dev-only)
+
+- **Test:** X4-1 to X4-6
+- **Severity:** low (dev-only)
+- **Description:** In dev, each app runs on different port = different origin. Tokens stored in localStorage are not shared across origins. In prod with \*.ezstart.xyz this works via shared cookies.
+- **Fix:** No fix needed for dev — just a known limitation.
+- **Status:** open (known limitation)
 
 ---
 
