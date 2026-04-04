@@ -29,10 +29,15 @@ const SHORTCUTS = {
   all: '__all__',
 }
 
-// SDK → app dependency mapping
+// SDK → app dependency mapping (auto-detected from package.json)
 const SDK_TO_APP = {
   '@ezstart/auth-sdk': 'ezauth',
   '@ezstart/pay-sdk': 'ezpay',
+}
+
+// Extra dependencies not detected via SDK (e.g. CRM needs payment API)
+const EXTRA_DEPS = {
+  ezstart: ['ezpay'],
 }
 
 // ---------------------------------------------------------------------------
@@ -71,6 +76,12 @@ function detectDependencies(appName) {
     if (mapped && mapped !== appName) {
       needed.add(mapped)
     }
+  }
+
+  // Add extra deps not detectable via SDK
+  const extras = EXTRA_DEPS[appName] || []
+  for (const extra of extras) {
+    if (extra !== appName) needed.add(extra)
   }
 
   return [...needed]
