@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -62,7 +62,6 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
     const query: Record<string, unknown> = {}
 
     // Non-admin users can only see their own payments
-    const { isAdminUser } = await import('../../middleware/auth.js')
     const isAdmin = isAdminUser(req)
 
     if (!isAdmin) {

@@ -20,6 +20,7 @@
     "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/pay-sdk": "workspace:*",
+    "@ezstart/rbac": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.19.2",

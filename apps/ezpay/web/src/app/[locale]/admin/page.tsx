@@ -22,6 +22,7 @@ import {
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { ConfirmActionDialog } from '@ezstart/pay-sdk'
+import { hasAnyRole } from '@ezstart/rbac'
 
 // ========================================
 // Types
@@ -80,12 +81,7 @@ function isAdmin(): boolean {
       const parsed = JSON.parse(raw)
       const user = parsed?.state?.user
       if (!user) return false
-      return (
-        user.globalRoles?.includes('superadmin') ||
-        user.globalRoles?.includes('admin') ||
-        user.appRoles?.ezpay?.includes('admin') ||
-        false
-      )
+      return hasAnyRole(user, ['superadmin', 'admin'], 'ezpay')
     }
   } catch {}
   return false

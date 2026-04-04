@@ -3,6 +3,9 @@
  *
  * Universal exports (client + server + React components)
  * Like @ezstart/auth-sdk, this package contains both logic and UI
+ *
+ * Architecture: Role → gives Permissions → checked by hasPermission()
+ * Supports wildcards: "*" (all), "domain.*" (all actions in domain)
  */
 
 export * from './types.js'

@@ -1,4 +1,5 @@
 import { createAuthMiddleware } from '@ezstart/express-core'
+import { hasAnyRole } from '@ezstart/rbac/client'
 import type { Request, Response, NextFunction } from 'express'
 
 export const { authMiddleware, optionalAuthMiddleware } = createAuthMiddleware()
@@ -73,18 +74,14 @@ export function populateUserFromToken(req: Request, _res: Response, next: NextFu
 }
 
 /**
- * Check if the authenticated user has admin/superadmin global role.
- * Works with the JwtUser populated by populateUserFromToken.
+ * Check if the authenticated user has admin/superadmin role.
+ * Delegates to @ezstart/rbac hasAnyRole for consistent role checking.
  */
 export function isAdminUser(req: Request): boolean {
   if (!req.user) return false
-
-  return (
-    req.user.globalRoles?.includes('superadmin') ||
-    req.user.globalRoles?.includes('admin') ||
-    req.user.roles?.includes('superadmin') ||
-    req.user.roles?.includes('admin') ||
-    req.user.appRoles?.ezpay?.includes('admin') ||
-    false
+  return hasAnyRole(
+    req.user as unknown as Parameters<typeof hasAnyRole>[0],
+    ['superadmin', 'admin'],
+    'ezpay'
   )
 }

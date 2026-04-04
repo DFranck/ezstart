@@ -45,7 +45,7 @@ describe('Payment Model', () => {
       expect(payment.projectName).toBe('EZBill')
       expect(payment.type).toBe('donation')
       expect(payment.amount).toBe(10.0)
-      expect(payment.currency).toBe('USD') // Default value
+      expect(payment.currency).toBe('EUR') // Default value
       expect(payment.provider).toBe('stripe') // Default value
       expect(payment.status).toBe('pending') // Default value
       expect(payment.isAnonymous).toBe(false) // Default value

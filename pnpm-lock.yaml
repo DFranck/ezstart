@@ -588,6 +588,9 @@ importers:
       '@ezstart/pay-sdk':
         specifier: workspace:*
         version: link:../../../packages/pay-sdk
+      '@ezstart/rbac':
+        specifier: workspace:*
+        version: link:../../../packages/rbac
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -655,6 +658,9 @@ importers:
       '@ezstart/pay-sdk':
         specifier: workspace:*
         version: link:../../../packages/pay-sdk
+      '@ezstart/rbac':
+        specifier: workspace:*
+        version: link:../../../packages/rbac
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui

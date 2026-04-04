@@ -5,6 +5,9 @@
 
 import type { Request, Response, NextFunction } from 'express'
 import type { Permission, Role, Feature } from './types.js'
+import { matchesPermission, getRBACConfig } from './types.js'
+import { hasRole } from './client.js'
+import type { AuthUser } from '@ezstart/auth-sdk/server'
 
 // Re-export types and helpers for server use
 export * from './types.js'
@@ -15,7 +18,7 @@ export * from './helpers.js'
  */
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.user) {
-    return res.status(401).json({ error: 'Authentication required' })
+    return res.status(401).json({ success: false, error: 'Authentication required' })
   }
   next()
 }
@@ -23,11 +26,32 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 /**
  * Express middleware to require specific role(s)
  * Checks both globalRoles and appRoles
+ *
+ * @param role - The role required
+ * @param appName - Optional app name for app-specific role checking
  */
-export function requireRole(...roles: Role[]) {
+export function requireRole(role: Role, appName?: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' })
+      return res.status(401).json({ success: false, error: 'Authentication required' })
+    }
+
+    if (!hasRole(req.user as unknown as AuthUser, role, appName)) {
+      return res.status(403).json({ success: false, error: 'Insufficient role' })
+    }
+
+    next()
+  }
+}
+
+/**
+ * Express middleware to require ANY of the specified roles
+ * Checks both globalRoles and appRoles
+ */
+export function requireAnyRole(...roles: Role[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' })
     }
 
     const user = req.user!
@@ -52,41 +76,83 @@ export function requireRole(...roles: Role[]) {
     }
 
     return res.status(403).json({
-      error: 'Insufficient permissions',
+      success: false,
+      error: 'Insufficient role',
       required: roles,
-      current: { globalRoles, appRoles, legacyRoles },
     })
   }
 }
 
 /**
- * Express middleware to require specific permission(s)
+ * Express middleware to require a specific permission.
+ * Resolves permissions from global roles, app roles, and explicit user permissions.
+ * Supports wildcards: "*", "domain.*"
+ *
+ * @param permission - The permission required (e.g. "payments.refund")
+ * @param appName - Optional app name for app-specific permission resolution
  */
-export function requirePermission(...permissions: Permission[]) {
+export function requirePermission(permission: Permission, appName?: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' })
+      return res.status(401).json({ success: false, error: 'Authentication required' })
     }
 
     const user = req.user!
+    const config = getRBACConfig()
 
-    // Superadmin has all permissions (check globalRoles)
+    // Superadmin has all permissions
     if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
       return next()
     }
 
-    const userPermissions = user.permissions || []
-    const hasPermission = permissions.some(perm => userPermissions.includes(perm))
-
-    if (!hasPermission) {
-      return res.status(403).json({
-        error: 'Insufficient permissions',
-        required: permissions,
-        current: userPermissions,
-      })
+    // Check explicit user permissions (with wildcard support)
+    if (user.permissions?.length && matchesPermission(user.permissions, permission)) {
+      return next()
     }
 
-    next()
+    // Check global role permissions
+    for (const role of user.globalRoles || []) {
+      const perms = config.globalPermissions[role] || []
+      if (matchesPermission(perms, permission)) return next()
+    }
+
+    // Check app-specific role permissions
+    if (appName) {
+      const appConfig = config.apps[appName]
+      if (appConfig) {
+        const appRoles = user.appRoles?.[appName] || []
+        for (const role of appRoles) {
+          const perms = appConfig.roles[role] || []
+          if (matchesPermission(perms, permission)) return next()
+        }
+      }
+    }
+
+    // Check all app roles when no specific appName
+    if (!appName && user.appRoles) {
+      for (const [app, roles] of Object.entries(user.appRoles)) {
+        const appConfig = config.apps[app]
+        if (!appConfig) continue
+        for (const role of roles) {
+          const perms = appConfig.roles[role] || []
+          if (matchesPermission(perms, permission)) return next()
+        }
+      }
+    }
+
+    // Legacy: check role-based permissions from config.permissions
+    if (user.roles) {
+      for (const role of user.roles) {
+        const rolePerms = config.permissions[role]
+        if (rolePerms && matchesPermission(rolePerms, permission)) return next()
+      }
+    }
+
+    return res.status(403).json({
+      success: false,
+      error: 'Insufficient permissions',
+      required: permission,
+    })
   }
 }
 
@@ -96,7 +162,7 @@ export function requirePermission(...permissions: Permission[]) {
 export function requireFeature(...features: Feature[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' })
+      return res.status(401).json({ success: false, error: 'Authentication required' })
     }
 
     const user = req.user!
@@ -111,9 +177,9 @@ export function requireFeature(...features: Feature[]) {
 
     if (!hasFeature) {
       return res.status(403).json({
+        success: false,
         error: 'Feature not enabled',
         required: features,
-        current: userFeatures,
       })
     }
 
@@ -138,7 +204,6 @@ export function canManageUser(req: Request, targetUserId: string): boolean {
   const appRoles = user.appRoles || {}
   const allRoles = Object.values(appRoles).flat()
   if (allRoles.includes('admin') || user.roles?.includes('admin')) {
-    // TODO: Add organization check when implemented
     return true
   }
 

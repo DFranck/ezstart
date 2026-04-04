@@ -9,7 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -46,7 +46,6 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
     const { paymentId } = validation.data
 
     // Admin check
-    const { isAdminUser } = await import('../../middleware/auth.js')
     const isAdmin = isAdminUser(req)
 
     if (!isAdmin) {

@@ -1,9 +1,12 @@
 /**
  * RBAC Types for @ezstart monorepo
- * Role-Based Access Control system with hierarchical roles
+ * Role-Based Access Control system with hierarchical roles and granular permissions
+ *
+ * Architecture: Role → gives Permissions → checked by hasPermission()
+ * Supports wildcards: "*" (all), "domain.*" (all actions in domain)
  *
  * Uses a configurable registry pattern: defaults are provided but can be extended
- * via configureRBAC() without code changes.
+ * via configureRBAC() or extendRBACConfig() without code changes.
  */
 
 // --- Default roles ---
@@ -13,29 +16,8 @@ export type DefaultRole = (typeof DEFAULT_ROLES)[number]
 // Allows any string but preserves autocomplete for known roles
 export type Role = DefaultRole | (string & {})
 
-export type Permission =
-  // User Management
-  | 'users:view'
-  | 'users:manage'
-  | 'users:delete'
-  // Theme
-  | 'theme:edit'
-  | 'theme:publish'
-  // Analytics
-  | 'analytics:view'
-  | 'analytics:export'
-  // Content
-  | 'content:create'
-  | 'content:edit'
-  | 'content:delete'
-  | 'content:publish'
-  // Organization
-  | 'org:manage'
-  | 'org:view-members'
-  // Apps
-  | 'apps:manage'
-  // Custom permissions (extendable)
-  | (string & {})
+// Granular permission format: "domain.action" (e.g. "payments.refund")
+export type Permission = string
 
 export type Feature =
   | 'beta-features'
@@ -50,17 +32,21 @@ export type Feature =
  */
 export const DEFAULT_ROLE_HIERARCHY: Record<string, number> = {
   superadmin: 100,
-  admin: 80,
-  manager: 60,
-  'beta-tester': 40,
-  client: 20,
+  admin: 90,
+  manager: 70,
+  editor: 50,
+  viewer: 30,
+  'beta-tester': 25,
+  user: 10,
+  client: 10,
 }
 
 /**
- * Default permissions per role
+ * Default permissions per role (legacy format, kept for backward compatibility)
  */
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
-  superadmin: [
+  superadmin: ['*'],
+  admin: [
     'users:view',
     'users:manage',
     'users:delete',
@@ -75,16 +61,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'org:manage',
     'org:view-members',
     'apps:manage',
-  ],
-  admin: [
-    'users:view',
-    'users:manage',
-    'theme:edit',
-    'analytics:view',
-    'content:create',
-    'content:edit',
-    'content:publish',
-    'org:view-members',
   ],
   manager: ['users:view', 'analytics:view', 'content:create', 'content:edit', 'org:view-members'],
   'beta-tester': ['content:create'],
@@ -108,16 +84,89 @@ export const DEFAULT_ROLE_FEATURES: Record<string, Feature[]> = {
   client: [],
 }
 
-// --- Configurable registry ---
+// --- App-level RBAC config ---
 
-interface RBACConfig {
-  hierarchy: Record<string, number>
+/**
+ * RBAC config for a single app
+ */
+export interface AppRBACConfig {
+  roles: Record<string, Permission[]> // role → permissions
+}
+
+/**
+ * Full RBAC configuration with hierarchy, global permissions, and per-app configs
+ */
+export interface RBACConfig {
+  hierarchy: Record<string, number> // role → level (superadmin=100, admin=90, etc.)
+  globalPermissions: Record<string, Permission[]> // globalRole → permissions
+  apps: Record<string, AppRBACConfig> // appName → config
+  // Legacy fields (backward compatibility)
   permissions: Record<string, Permission[]>
   features: Record<string, Feature[]>
 }
 
+/**
+ * Default per-app RBAC configurations
+ */
+const DEFAULT_APP_CONFIGS: Record<string, AppRBACConfig> = {
+  ezpay: {
+    roles: {
+      admin: ['payments.*', 'subscriptions.*', 'donations.*', 'refund', 'products.*'],
+      editor: ['payments.read', 'subscriptions.read', 'donations.read', 'products.edit'],
+      viewer: ['payments.read', 'donations.read'],
+    },
+  },
+  ezstart: {
+    roles: {
+      admin: ['users.*', 'content.*', 'monitoring.*', 'settings.*'],
+      editor: ['content.edit', 'content.create', 'monitoring.read'],
+      viewer: ['content.read', 'monitoring.read'],
+    },
+  },
+  ezbill: {
+    roles: {
+      admin: ['invoices.*', 'clients.*', 'settings.*'],
+      editor: ['invoices.create', 'invoices.edit', 'clients.read'],
+      viewer: ['invoices.read', 'clients.read'],
+    },
+  },
+  'green-pulse': {
+    roles: {
+      admin: ['forms.*', 'submissions.*', 'ai.*', 'settings.*'],
+      editor: ['forms.edit', 'submissions.read', 'ai.generate'],
+      viewer: ['forms.read', 'submissions.read'],
+    },
+  },
+  fengshui: {
+    roles: {
+      admin: ['analysis.*', 'reports.*', 'settings.*'],
+      editor: ['analysis.create', 'reports.read'],
+      viewer: ['analysis.read', 'reports.read'],
+    },
+  },
+  'gacha-analyzer': {
+    roles: {
+      admin: ['scans.*', 'settings.*'],
+      editor: ['scans.create', 'scans.read'],
+      viewer: ['scans.read'],
+    },
+  },
+}
+
+/**
+ * Default global permissions (cross-app)
+ */
+const DEFAULT_GLOBAL_PERMISSIONS: Record<string, Permission[]> = {
+  superadmin: ['*'],
+  admin: ['users.*', 'monitoring.*', 'payments.read'],
+}
+
+// --- Configurable registry ---
+
 let _roleConfig: RBACConfig = {
   hierarchy: { ...DEFAULT_ROLE_HIERARCHY },
+  globalPermissions: { ...DEFAULT_GLOBAL_PERMISSIONS },
+  apps: structuredClone(DEFAULT_APP_CONFIGS),
   permissions: { ...DEFAULT_ROLE_PERMISSIONS },
   features: { ...DEFAULT_ROLE_FEATURES },
 }
@@ -139,6 +188,10 @@ export function configureRBAC(config: Partial<RBACConfig>) {
     hierarchy: config.hierarchy
       ? { ..._roleConfig.hierarchy, ...config.hierarchy }
       : _roleConfig.hierarchy,
+    globalPermissions: config.globalPermissions
+      ? { ..._roleConfig.globalPermissions, ...config.globalPermissions }
+      : _roleConfig.globalPermissions,
+    apps: config.apps ? { ..._roleConfig.apps, ...config.apps } : _roleConfig.apps,
     permissions: config.permissions
       ? { ..._roleConfig.permissions, ...config.permissions }
       : _roleConfig.permissions,
@@ -149,10 +202,47 @@ export function configureRBAC(config: Partial<RBACConfig>) {
 }
 
 /**
+ * Extend RBAC config for a specific app.
+ * Allows apps to register their own role→permission mappings at startup.
+ *
+ * @example
+ * ```ts
+ * extendRBACConfig('myapp', {
+ *   roles: {
+ *     admin: ['myapp.*'],
+ *     editor: ['myapp.edit'],
+ *   }
+ * })
+ * ```
+ */
+export function extendRBACConfig(appName: string, config: AppRBACConfig) {
+  _roleConfig.apps[appName] = config
+}
+
+/**
  * Get current RBAC configuration (read-only snapshot)
  */
 export function getRBACConfig(): Readonly<RBACConfig> {
   return _roleConfig
+}
+
+/**
+ * Wildcard permission matcher.
+ * Supports:
+ * - "*" matches everything
+ * - "domain.*" matches "domain.action" (any action in domain)
+ * - Exact match "domain.action" matches "domain.action"
+ */
+export function matchesPermission(permissions: Permission[], target: Permission): boolean {
+  return permissions.some(p => {
+    if (p === '*') return true
+    if (p === target) return true
+    if (p.endsWith('.*')) {
+      const domain = p.slice(0, -2)
+      return target.startsWith(domain + '.')
+    }
+    return false
+  })
 }
 
 // --- Backward-compatible aliases ---

@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
+import { hasAnyRole } from '@ezstart/rbac'
 import { useTranslations } from 'next-intl'
 import { Card, Div, H1, Icon, Main, P } from '@ezstart/ui/components'
 import { ReactNode } from 'react'
@@ -14,8 +15,7 @@ export function TestGuard({ children }: TestGuardProps) {
   const { user } = useAuth()
 
   const isDev = process.env.NODE_ENV !== 'production'
-  const isAdmin =
-    user?.globalRoles?.includes('superadmin') || user?.appRoles?.['ezpay']?.includes('admin')
+  const isAdmin = hasAnyRole(user ?? null, ['superadmin', 'admin'], 'ezpay')
 
   if (!isDev && !isAdmin) {
     return (
