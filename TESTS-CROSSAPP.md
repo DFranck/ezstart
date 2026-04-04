@@ -63,50 +63,50 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.1 Registration
 
-| ID   | Test                                     | Résultat attendu                                       | Résultat réel                                                                            | Status |
-| ---- | ---------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- | ------ |
-| A1-1 | Register — email/password valides        | Compte créé, redirect login, email vérification envoyé | Compte créé, redirect vers page vérification email. Password strength indicator visible. | ✅     |
-| A1-2 | Register — email déjà pris               | Erreur "email already exists", pas de création         |                                                                                          | ⏳     |
-| A1-3 | Register — username déjà pris            | Erreur "username already exists"                       |                                                                                          | ⏳     |
-| A1-4 | Register — password trop court (<6)      | Validation inline, pas de submit                       |                                                                                          | ⏳     |
-| A1-5 | Register — confirm password mismatch     | Erreur inline "passwords don't match"                  | Champ confirm password présent et fonctionnel                                            | ✅     |
-| A1-6 | Register — check availability (debounce) | Feedback temps réel sur email/username dispo           |                                                                                          | ⏳     |
-| A1-7 | Register — password strength indicator   | Indicateur visuel force du mot de passe                | Barre de force visible (3 segments, "Bon")                                               | ✅     |
-| A1-8 | Register — avec access code (waitlist)   | Code accepté, compte créé avec accès app               |                                                                                          | ⏳     |
+| ID   | Test                                     | Résultat attendu                                       | Résultat réel                                                                                                                    | Status |
+| ---- | ---------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| A1-1 | Register — email/password valides        | Compte créé, redirect login, email vérification envoyé | Compte créé, redirect vers page vérification email. Password strength indicator visible.                                         | ✅     |
+| A1-2 | Register — email déjà pris               | Erreur "email already exists", pas de création         | Erreur 'User already exists with this email or username' + inline 'Cet email est déjà utilisé'. API error EN, inline traduit FR. | ✅     |
+| A1-3 | Register — username déjà pris            | Erreur "username already exists"                       | ISSUE-004: Register accepte un username dupliqué sans erreur. Le check semble être email-only.                                   | ⚠️     |
+| A1-4 | Register — password trop court (<6)      | Validation inline, pas de submit                       | Validation HTML5 minLength bloque le submit. Indicateur 'Faible'. Hint 'Minimum 6 caractères' traduit.                           | ✅     |
+| A1-5 | Register — confirm password mismatch     | Erreur inline "passwords don't match"                  | Champ confirm password présent et fonctionnel                                                                                    | ✅     |
+| A1-6 | Register — check availability (debounce) | Feedback temps réel sur email/username dispo           |                                                                                                                                  | ⏳     |
+| A1-7 | Register — password strength indicator   | Indicateur visuel force du mot de passe                | Barre de force visible (3 segments, "Bon")                                                                                       | ✅     |
+| A1-8 | Register — avec access code (waitlist)   | Code accepté, compte créé avec accès app               |                                                                                                                                  | ⏳     |
 
 ### 1.2 Email Verification
 
-| ID    | Test                                | Résultat attendu                           | Résultat réel | Status |
-| ----- | ----------------------------------- | ------------------------------------------ | ------------- | ------ |
-| A1-9  | Verify email — token valide         | isVerified=true, redirect success          |               | ⏳     |
-| A1-10 | Verify email — token expiré         | Erreur "token expired", lien resend        |               | ⏳     |
-| A1-11 | Verify email — token invalide       | Erreur "invalid token"                     |               | ⏳     |
-| A1-12 | Resend verification — user connecté | Nouvel email envoyé, ancien token invalidé |               | ⏳     |
-| A1-13 | Resend verification — rate limit    | 429 après 3 req/15min                      |               | ⏳     |
+| ID    | Test                                | Résultat attendu                           | Résultat réel                                                                                                    | Status |
+| ----- | ----------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------ |
+| A1-9  | Verify email — token valide         | isVerified=true, redirect success          | Email reçu via Resend (noreply@ezstart.xyz), lien localhost:6111 correct, 'Email vérifié avec succès !' affiché. | ✅     |
+| A1-10 | Verify email — token expiré         | Erreur "token expired", lien resend        | Token expiré → 'Lien de vérification invalide ou expiré.' Même message sécurisé.                                 | ✅     |
+| A1-11 | Verify email — token invalide       | Erreur "invalid token"                     | Token invalide → 'Lien de vérification invalide ou expiré.' Pas de leak.                                         | ✅     |
+| A1-12 | Resend verification — user connecté | Nouvel email envoyé, ancien token invalidé |                                                                                                                  | ⏳     |
+| A1-13 | Resend verification — rate limit    | 429 après 3 req/15min                      |                                                                                                                  | ⏳     |
 
 ### 1.3 Login
 
-| ID    | Test                          | Résultat attendu                                              | Résultat réel                                                                   | Status |
-| ----- | ----------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------ |
-| A1-14 | Login — credentials valides   | Auth code généré, redirect avec code                          | Flow EZStart→EZAuth→login→redirect→"Authentication successful"→EZStart connecté | ✅     |
-| A1-15 | Login — mauvais password      | Erreur "invalid credentials"                                  |                                                                                 | ⏳     |
-| A1-16 | Login — email inexistant      | Erreur "invalid credentials" (même message, pas de leak)      |                                                                                 | ⏳     |
-| A1-17 | Login — rate limit            | 429 après 5 req/min                                           |                                                                                 | ⏳     |
-| A1-18 | Login cookie — httpOnly mode  | Cookie set, CSRF validé, pas de token dans le body            |                                                                                 | ⏳     |
-| A1-19 | Login — redirect_uri préservé | Après login, redirect vers l'app source (ezbill, gacha, etc.) |                                                                                 | ⏳     |
+| ID    | Test                          | Résultat attendu                                              | Résultat réel                                                                         | Status |
+| ----- | ----------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
+| A1-14 | Login — credentials valides   | Auth code généré, redirect avec code                          | Flow EZStart→EZAuth→login→redirect→"Authentication successful"→EZStart connecté       | ✅     |
+| A1-15 | Login — mauvais password      | Erreur "invalid credentials"                                  | 'Invalid credentials' affiché. Pas de leak sur quel champ est faux.                   | ✅     |
+| A1-16 | Login — email inexistant      | Erreur "invalid credentials" (même message, pas de leak)      | Même message 'Invalid credentials' pour email inexistant. Sécurité OK.                | ✅     |
+| A1-17 | Login — rate limit            | 429 après 5 req/min                                           |                                                                                       | ⏳     |
+| A1-18 | Login cookie — httpOnly mode  | Cookie set, CSRF validé, pas de token dans le body            |                                                                                       | ⏳     |
+| A1-19 | Login — redirect_uri préservé | Après login, redirect vers l'app source (ezbill, gacha, etc.) | redirect_uri préservé tout au long du flow SSO. Redirect vers app source après login. | ✅     |
 
 ### 1.4 Token Exchange & Refresh
 
-| ID    | Test                                       | Résultat attendu                                                      | Résultat réel | Status |
-| ----- | ------------------------------------------ | --------------------------------------------------------------------- | ------------- | ------ |
-| A1-20 | Token exchange — code valide               | Access token (15min) + refresh token (30j) retournés                  |               | ⏳     |
-| A1-21 | Token exchange — code expiré               | Erreur "code expired"                                                 |               | ⏳     |
-| A1-22 | Token exchange — code déjà utilisé         | Erreur "code already used"                                            |               | ⏳     |
-| A1-23 | Refresh token — token valide               | Nouveau access token + nouveau refresh token (rotation)               |               | ⏳     |
-| A1-24 | Refresh token — token expiré               | Erreur 401, redirect login                                            |               | ⏳     |
-| A1-25 | Refresh token — token révoqué              | Erreur 401, redirect login                                            |               | ⏳     |
-| A1-26 | Refresh token — réutilisation ancien token | Erreur (token rotation = ancien invalidé)                             |               | ⏳     |
-| A1-27 | Auto-refresh transparent                   | Access token expire → auth-sdk refresh auto → pas d'interruption user |               | ⏳     |
+| ID    | Test                                       | Résultat attendu                                                      | Résultat réel                                                                               | Status |
+| ----- | ------------------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------ |
+| A1-20 | Token exchange — code valide               | Access token (15min) + refresh token (30j) retournés                  | access_token (900s/15min) + refresh_token retournés. user data incluse.                     | ✅     |
+| A1-21 | Token exchange — code expiré               | Erreur "code expired"                                                 |                                                                                             | ⏳     |
+| A1-22 | Token exchange — code déjà utilisé         | Erreur "code already used"                                            | 'Invalid or expired authorization code' pour code déjà utilisé.                             | ✅     |
+| A1-23 | Refresh token — token valide               | Nouveau access token + nouveau refresh token (rotation)               | Nouveau access_token + nouveau refresh_token (rotation). Ancien token différent du nouveau. | ✅     |
+| A1-24 | Refresh token — token expiré               | Erreur 401, redirect login                                            |                                                                                             | ⏳     |
+| A1-25 | Refresh token — token révoqué              | Erreur 401, redirect login                                            | 'Invalid refresh token' pour token random.                                                  | ✅     |
+| A1-26 | Refresh token — réutilisation ancien token | Erreur (token rotation = ancien invalidé)                             | 'Refresh token has been revoked' pour ancien token post-rotation.                           | ✅     |
+| A1-27 | Auto-refresh transparent                   | Access token expire → auth-sdk refresh auto → pas d'interruption user |                                                                                             | ⏳     |
 
 ### 1.5 Google OAuth
 
@@ -118,36 +118,36 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.6 Two-Factor Authentication (2FA)
 
-| ID    | Test                          | Résultat attendu                                     | Résultat réel | Status |
-| ----- | ----------------------------- | ---------------------------------------------------- | ------------- | ------ |
-| A1-31 | 2FA setup — générer secret    | QR code affiché, secret stocké, backup codes générés |               | ⏳     |
-| A1-32 | 2FA verify — code TOTP valide | 2FA activé, backup codes retournés                   |               | ⏳     |
-| A1-33 | 2FA verify — code invalide    | Erreur "invalid code", 2FA pas activé                |               | ⏳     |
-| A1-34 | 2FA login — code valide       | Login complété, tokens retournés                     |               | ⏳     |
-| A1-35 | 2FA login — code invalide     | Erreur, login bloqué                                 |               | ⏳     |
-| A1-36 | 2FA login — backup code       | Login complété (backup code consommé)                |               | ⏳     |
-| A1-37 | 2FA disable — code valide     | 2FA désactivé, secret supprimé                       |               | ⏳     |
-| A1-38 | 2FA status — check            | Retourne enabled: true/false                         |               | ⏳     |
+| ID    | Test                          | Résultat attendu                                     | Résultat réel                                      | Status |
+| ----- | ----------------------------- | ---------------------------------------------------- | -------------------------------------------------- | ------ |
+| A1-31 | 2FA setup — générer secret    | QR code affiché, secret stocké, backup codes générés |                                                    | ⏳     |
+| A1-32 | 2FA verify — code TOTP valide | 2FA activé, backup codes retournés                   |                                                    | ⏳     |
+| A1-33 | 2FA verify — code invalide    | Erreur "invalid code", 2FA pas activé                |                                                    | ⏳     |
+| A1-34 | 2FA login — code valide       | Login complété, tokens retournés                     |                                                    | ⏳     |
+| A1-35 | 2FA login — code invalide     | Erreur, login bloqué                                 |                                                    | ⏳     |
+| A1-36 | 2FA login — backup code       | Login complété (backup code consommé)                |                                                    | ⏳     |
+| A1-37 | 2FA disable — code valide     | 2FA désactivé, secret supprimé                       |                                                    | ⏳     |
+| A1-38 | 2FA status — check            | Retourne enabled: true/false                         | 'Désactivé' visible sur settings page. Accents OK. | ✅     |
 
 ### 1.7 Password Reset
 
-| ID    | Test                                         | Résultat attendu                        | Résultat réel | Status |
-| ----- | -------------------------------------------- | --------------------------------------- | ------------- | ------ |
-| A1-39 | Forgot password — email existant             | Email envoyé avec lien reset            |               | ⏳     |
-| A1-40 | Forgot password — email inexistant           | Même réponse (pas de leak), pas d'email |               | ⏳     |
-| A1-41 | Forgot password — rate limit                 | 429 après 3 req/15min                   |               | ⏳     |
-| A1-42 | Reset password — token valide                | Password changé, ancien token invalidé  |               | ⏳     |
-| A1-43 | Reset password — token expiré                | Erreur "token expired"                  |               | ⏳     |
-| A1-44 | Reset password — nouveau password fonctionne | Login avec nouveau password OK          |               | ⏳     |
+| ID    | Test                                         | Résultat attendu                        | Résultat réel                                                                                                                                                              | Status |
+| ----- | -------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| A1-39 | Forgot password — email existant             | Email envoyé avec lien reset            | 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.' Message sécurisé, accents OK.                                                             | ✅     |
+| A1-40 | Forgot password — email inexistant           | Même réponse (pas de leak), pas d'email | Même message pour email inexistant. Pas de leak.                                                                                                                           | ✅     |
+| A1-41 | Forgot password — rate limit                 | 429 après 3 req/15min                   |                                                                                                                                                                            | ⏳     |
+| A1-42 | Reset password — token valide                | Password changé, ancien token invalidé  | Password changé, 'Mot de passe réinitialisé ! Redirection vers la connexion...' Redirect auto vers /login.                                                                 | ✅     |
+| A1-43 | Reset password — token expiré                | Erreur "token expired"                  | ISSUE-007: Token déjà utilisé rejeté mais message 'An unexpected error occurred' au lieu de 'Lien invalide ou expiré'. Lien 'Demander un nouveau lien' visible et traduit. | ⚠️     |
+| A1-44 | Reset password — nouveau password fonctionne | Login avec nouveau password OK          | Login avec nouveau password OK → flow SSO complet → 'Authentification réussie !' traduit sur EZStart.                                                                      | ✅     |
 
 ### 1.8 Session Management
 
-| ID    | Test                           | Résultat attendu                                      | Résultat réel | Status |
-| ----- | ------------------------------ | ----------------------------------------------------- | ------------- | ------ |
-| A1-45 | List sessions                  | Toutes les sessions actives avec user-agent, IP, date |               | ⏳     |
-| A1-46 | Revoke session — une seule     | Session ciblée révoquée, les autres intactes          |               | ⏳     |
-| A1-47 | Revoke all — logout everywhere | Toutes sessions révoquées, user déconnecté partout    |               | ⏳     |
-| A1-48 | Session — current marker       | La session courante identifiée dans la liste          |               | ⏳     |
+| ID    | Test                           | Résultat attendu                                      | Résultat réel                                                                                             | Status |
+| ----- | ------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------ |
+| A1-45 | List sessions                  | Toutes les sessions actives avec user-agent, IP, date | 2 sessions: 'Chrome on Windows' + 'Unknown browser' (curl). IP, date, user-agent. Accents OK.             | ✅     |
+| A1-46 | Revoke session — une seule     | Session ciblée révoquée, les autres intactes          | Session curl révoquée, reste uniquement Chrome. Bouton 'Révoquer toutes' disparaît quand 1 seule session. | ✅     |
+| A1-47 | Revoke all — logout everywhere | Toutes sessions révoquées, user déconnecté partout    |                                                                                                           | ⏳     |
+| A1-48 | Session — current marker       | La session courante identifiée dans la liste          | ISSUE-008: Pas de marqueur 'session courante' visible dans la liste.                                      | ⚠️     |
 
 ### 1.9 Profile & Account
 
@@ -172,15 +172,15 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.11 Security
 
-| ID    | Test                           | Résultat attendu                                  | Résultat réel | Status |
-| ----- | ------------------------------ | ------------------------------------------------- | ------------- | ------ |
-| A1-60 | CSRF — login-cookie sans token | 403 forbidden                                     |               | ⏳     |
-| A1-61 | CSRF — token valide            | Login OK                                          |               | ⏳     |
-| A1-62 | JWT — token expiré             | 401 unauthorized                                  |               | ⏳     |
-| A1-63 | JWT — token malformé           | 401 unauthorized                                  |               | ⏳     |
-| A1-64 | OAuth token encryption         | Tokens OAuth stockés chiffrés (AES-256-GCM) en DB |               | ⏳     |
-| A1-65 | Password hashing               | Passwords stockés en bcrypt, jamais en clair      |               | ⏳     |
-| A1-66 | No secrets in response         | Aucun password/secret dans les réponses API       |               | ⏳     |
+| ID    | Test                           | Résultat attendu                                  | Résultat réel                                                            | Status |
+| ----- | ------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------ | ------ |
+| A1-60 | CSRF — login-cookie sans token | 403 forbidden                                     |                                                                          | ⏳     |
+| A1-61 | CSRF — token valide            | Login OK                                          |                                                                          | ⏳     |
+| A1-62 | JWT — token expiré             | 401 unauthorized                                  | JWT expiré → 'Authentication required'                                   | ✅     |
+| A1-63 | JWT — token malformé           | 401 unauthorized                                  | JWT malformé/signature invalide → 'Authentication required'              | ✅     |
+| A1-64 | OAuth token encryption         | Tokens OAuth stockés chiffrés (AES-256-GCM) en DB |                                                                          | ⏳     |
+| A1-65 | Password hashing               | Passwords stockés en bcrypt, jamais en clair      | bcrypt salt factor 12 via pre-save hook. Refresh tokens SHA-256.         | ✅     |
+| A1-66 | No secrets in response         | Aucun password/secret dans les réponses API       | Aucun passwordHash/totpSecret/backupCodes dans login ou token responses. | ✅     |
 
 ---
 
@@ -378,11 +378,11 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳      |
 | ------------------- | ----------- | ------ | ----- | ----- | ------- |
 | Phase 0 — Auto      | 15          | 11     | 0     | 0     | 4       |
-| Phase 1 — EZAuth    | 66          | 4      | 0     | 0     | 62      |
+| Phase 1 — EZAuth    | 66          | 28     | 0     | 3     | 35      |
 | Phase 2 — EZPay     | 36          | 0      | 0     | 0     | 36      |
 | Phase 3 — EZStart   | 24          | 0      | 0     | 0     | 24      |
 | Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19      |
-| **TOTAL**           | **160**     | **15** | **0** | **0** | **145** |
+| **TOTAL**           | **160**     | **39** | **0** | **3** | **118** |
 
 ---
 
@@ -419,6 +419,54 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 - **Severity:** low (i18n)
 - **Description:** La page callback d'EZStart affiche "Authentication successful!" et "Redirecting to home..." en anglais au lieu de français.
 - **Fix:** Traduire dans apps/ezstart/web/messages/fr.json
+- **Status:** open
+
+### ISSUE-004 — Username uniqueness not enforced (medium)
+
+- **Test:** A1-3
+- **Expected:** Register with existing username → error
+- **Actual:** Register succeeds, creating a second user with same username
+- **Impact:** Duplicate usernames possible
+- **Status:** open
+
+### ISSUE-005 — [object Object] displayed in error messages (FIXED)
+
+- **Test:** Registration with rate limit
+- **Expected:** Readable error message
+- **Actual:** Forms displayed [object Object] instead of parsing API error
+- **Fix:** All forms now use parseApiError() from @ezstart/fetch-client
+- **Status:** fixed
+
+### ISSUE-006 — Email links point to production in dev (FIXED)
+
+- **Test:** Email verification + password reset
+- **Expected:** Links to localhost:6111 in dev
+- **Actual:** Links to ezauth.ezstart.xyz (production)
+- **Fix:** getCurrentEnvironment() now returns 'local' for server-side dev
+- **Status:** fixed
+
+### ISSUE-007 — Reset password reuse shows generic error (low)
+
+- **Test:** A1-43
+- **Expected:** "Lien de réinitialisation invalide ou expiré"
+- **Actual:** "An unexpected error occurred. Please try again."
+- **Impact:** Confusing UX but not a security issue
+- **Status:** open
+
+### ISSUE-008 — No "current session" marker (low)
+
+- **Test:** A1-48
+- **Expected:** Current session highlighted or marked in session list
+- **Actual:** All sessions look the same
+- **Impact:** User can't easily identify which session to keep
+- **Status:** open
+
+### ISSUE-009 — Settings page 403 for users without 'ezauth' app (medium)
+
+- **Test:** 2FA settings access
+- **Expected:** Any authenticated user can access their own settings
+- **Actual:** 403 Forbidden if user doesn't have 'ezauth' in their apps array
+- **Impact:** Settings/2FA inaccessible for most users
 - **Status:** open
 
 ---
