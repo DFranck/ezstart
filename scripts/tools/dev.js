@@ -40,7 +40,7 @@ const SDK_TO_APP = {
 // ---------------------------------------------------------------------------
 
 function getAllAppDirs() {
-  return fs.readdirSync(APPS_DIR).filter((name) => {
+  return fs.readdirSync(APPS_DIR).filter(name => {
     const stat = fs.statSync(path.join(APPS_DIR, name))
     return stat.isDirectory()
   })
@@ -173,7 +173,7 @@ function main() {
     const resolved = SHORTCUTS[arg] || arg
 
     if (resolved === '__all__') {
-      allAppDirs.forEach((a) => requestedApps.add(a))
+      allAppDirs.forEach(a => requestedApps.add(a))
       break
     }
 
@@ -190,7 +190,7 @@ function main() {
   const allApps = new Set(requestedApps)
   for (const app of requestedApps) {
     const deps = detectDependencies(app)
-    deps.forEach((d) => allApps.add(d))
+    deps.forEach(d => allApps.add(d))
   }
 
   // Build filters
@@ -214,8 +214,10 @@ function main() {
   }
 
   // Build and run turbo command
-  // Concurrency must be > number of persistent tasks (filters count)
-  const concurrency = Math.max(filters.length + 5, 30)
+  // Concurrency must be > number of persistent tasks.
+  // Turbo runs transitive deps too, so actual task count exceeds filters.length.
+  // Use 2x multiplier with a floor of 50 to stay future-proof.
+  const concurrency = Math.max(filters.length * 2, 50)
   const cmd = ['turbo', 'run', 'dev', ...filters, `--concurrency=${concurrency}`]
 
   console.log(`\nLaunching: ${[...allApps].join(', ')}`)
@@ -227,7 +229,7 @@ function main() {
     shell: true,
   })
 
-  child.on('exit', (code) => {
+  child.on('exit', code => {
     process.exit(code || 0)
   })
 }

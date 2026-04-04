@@ -33,14 +33,14 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
       })
 
       expect(payment.projectId).toBe('ezbill')
       expect(payment.projectName).toBe('EZBill')
       expect(payment.type).toBe('donation')
-      expect(payment.amount).toBe(10.00)
+      expect(payment.amount).toBe(10.0)
       expect(payment.currency).toBe('USD') // Default value
       expect(payment.provider).toBe('stripe') // Default value
       expect(payment.status).toBe('pending') // Default value
@@ -52,7 +52,7 @@ describe('Payment Model', () => {
         PaymentModel.create({
           projectName: 'EZBill',
           type: 'donation',
-          amount: 10.00,
+          amount: 10.0,
           paymentId: 'cs_test_123',
         })
       ).rejects.toThrow()
@@ -63,7 +63,7 @@ describe('Payment Model', () => {
         PaymentModel.create({
           projectId: 'ezbill',
           type: 'donation',
-          amount: 10.00,
+          amount: 10.0,
           paymentId: 'cs_test_123',
         })
       ).rejects.toThrow()
@@ -74,7 +74,7 @@ describe('Payment Model', () => {
         PaymentModel.create({
           projectId: 'ezbill',
           projectName: 'EZBill',
-          amount: 10.00,
+          amount: 10.0,
           paymentId: 'cs_test_123',
         })
       ).rejects.toThrow()
@@ -99,7 +99,7 @@ describe('Payment Model', () => {
           projectId: 'ezbill',
           projectName: 'EZBill',
           type: type as any,
-          amount: 10.00,
+          amount: 10.0,
           paymentId: `cs_test_${type}`,
         })
         expect(payment.type).toBe(type)
@@ -113,7 +113,7 @@ describe('Payment Model', () => {
           projectId: 'ezbill',
           projectName: 'EZBill',
           type: 'invalid-type',
-          amount: 10.00,
+          amount: 10.0,
           paymentId: 'cs_test_123',
         })
       ).rejects.toThrow()
@@ -127,7 +127,7 @@ describe('Payment Model', () => {
           projectId: 'ezbill',
           projectName: 'EZBill',
           type: 'donation',
-          amount: 10.00,
+          amount: 10.0,
           provider: provider as any,
           paymentId: `cs_test_${provider}`,
         })
@@ -144,7 +144,7 @@ describe('Payment Model', () => {
           projectId: 'ezbill',
           projectName: 'EZBill',
           type: 'donation',
-          amount: 10.00,
+          amount: 10.0,
           status: status as any,
           paymentId: `cs_test_${status}`,
         })
@@ -160,7 +160,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 25.00,
+        amount: 25.0,
         paymentId: 'cs_test_123',
         metadata: {
           message: 'Great game!',
@@ -177,7 +177,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 50.00,
+        amount: 50.0,
         paymentId: 'cs_test_123',
         isAnonymous: true,
         customerName: 'Anonymous',
@@ -275,7 +275,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'invoice',
-        amount: 150.00,
+        amount: 150.0,
         paymentId: 'cs_test_123',
         metadata: {
           invoiceId: '507f1f77bcf86cd799439011',
@@ -294,7 +294,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
         userId: '507f1f77bcf86cd799439011',
         customerName: 'John Doe',
@@ -311,7 +311,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
         customerName: 'Guest User',
         customerEmail: 'guest@example.com',
@@ -328,7 +328,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
         status: 'pending',
       })
@@ -347,7 +347,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
       })
 
@@ -363,7 +363,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
         status: 'completed',
         completedAt: new Date(),
@@ -383,7 +383,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_unique',
       })
 
@@ -392,7 +392,7 @@ describe('Payment Model', () => {
           projectId: 'ezbill',
           projectName: 'EZBill',
           type: 'invoice',
-          amount: 100.00,
+          amount: 100.0,
           paymentId: 'cs_test_unique', // Same paymentId
         })
       ).rejects.toThrow()
@@ -405,7 +405,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_1',
       })
 
@@ -418,15 +418,15 @@ describe('Payment Model', () => {
       })
 
       await PaymentModel.create({
-        projectId: 'ezbill',
-        projectName: 'EZBill',
+        projectId: 'greenpulse',
+        projectName: 'GreenPulse',
         type: 'invoice',
-        amount: 100.00,
+        amount: 100.0,
         paymentId: 'cs_test_3',
       })
 
-      const tdPayments = await PaymentModel.find({ projectId: 'ezbill' })
-      expect(tdPayments).toHaveLength(2)
+      const ezbillPayments = await PaymentModel.find({ projectId: 'ezbill' })
+      expect(ezbillPayments).toHaveLength(2)
     })
 
     it('should find payments by userId', async () => {
@@ -436,7 +436,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         userId,
         paymentId: 'cs_test_1',
       })
@@ -445,7 +445,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'invoice',
-        amount: 100.00,
+        amount: 100.0,
         userId,
         paymentId: 'cs_test_2',
       })
@@ -459,7 +459,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         status: 'completed',
         paymentId: 'cs_test_1',
       })
@@ -468,7 +468,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 20.00,
+        amount: 20.0,
         status: 'pending',
         paymentId: 'cs_test_2',
       })
@@ -479,7 +479,7 @@ describe('Payment Model', () => {
       })
 
       expect(completedDonations).toHaveLength(1)
-      expect(completedDonations[0]!.amount).toBe(10.00)
+      expect(completedDonations[0]!.amount).toBe(10.0)
     })
   })
 
@@ -489,7 +489,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
       })
 
@@ -502,7 +502,7 @@ describe('Payment Model', () => {
         projectId: 'ezbill',
         projectName: 'EZBill',
         type: 'donation',
-        amount: 10.00,
+        amount: 10.0,
         paymentId: 'cs_test_123',
       })
 

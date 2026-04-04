@@ -4,8 +4,4 @@ import { createVitestConfig } from '@ezstart/test-utils'
 // Prevents tests from EVER touching production MongoDB
 export default createVitestConfig({
   dbName: 'ezstart-monitoring',
-  extend: {
-    testTimeout: 30000,
-    hookTimeout: 30000,
-  },
 })
