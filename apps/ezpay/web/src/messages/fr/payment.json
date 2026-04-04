@@ -111,6 +111,11 @@
     "cancelNoSubscriptionId": "Impossible d'annuler : l'abonnement n'a pas encore été activé par Stripe",
     "active": "Actif"
   },
+  "notFound": {
+    "title": "Page introuvable",
+    "message": "La page que vous cherchez n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
+  },
   "cancel": {
     "title": "Paiement annulé",
     "message": "Votre paiement a été annulé. Aucun montant n'a été débité.",

@@ -26,6 +26,7 @@ import {
   SelectValue,
   Skeleton,
 } from '@ezstart/ui/components'
+import { ConfirmActionDialog } from '@ezstart/pay-sdk'
 
 // ========================================
 // Types
@@ -163,11 +164,17 @@ export default function AdminPage() {
   const [emailSearch, setEmailSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(0)
 
-  // Refund state
-  const [refundingId, setRefundingId] = useState<string | null>(null)
+  // Refund dialog state
+  const [refundDialog, setRefundDialog] = useState<{ open: boolean; paymentId: string | null }>({
+    open: false,
+    paymentId: null,
+  })
 
-  // Cancel subscription state
-  const [cancellingId, setCancellingId] = useState<string | null>(null)
+  // Cancel subscription dialog state
+  const [cancelDialog, setCancelDialog] = useState<{
+    open: boolean
+    payment: (Payment & { metadata?: Record<string, any> }) | null
+  }>({ open: false, payment: null })
 
   // ---- Auth check ----
   useEffect(() => {
@@ -247,59 +254,36 @@ export default function AdminPage() {
   }, [typeFilter, statusFilter, emailSearch])
 
   // ---- Refund handler ----
-  const handleRefund = async (paymentId: string) => {
-    if (!token) return
-    if (!window.confirm(t('table.refundConfirm'))) return
-
-    setRefundingId(paymentId)
-    try {
-      const res = await fetch(`${API_URL}/payments/${paymentId}/refund`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (data.success) {
-        fetchPayments()
-      } else {
-        alert(t('table.refundError'))
-      }
-    } catch {
-      alert(t('table.refundError'))
-    } finally {
-      setRefundingId(null)
+  const handleRefundConfirm = useCallback(async () => {
+    if (!token || !refundDialog.paymentId) return
+    const res = await fetch(`${API_URL}/payments/${refundDialog.paymentId}/refund`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    if (!data.success) {
+      throw new Error(data.error || t('table.refundError'))
     }
-  }
+    fetchPayments()
+  }, [token, refundDialog.paymentId, fetchPayments, t])
 
   // ---- Cancel subscription handler ----
-  const handleCancelSubscription = async (
-    payment: Payment & { metadata?: Record<string, any> }
-  ) => {
-    if (!token) return
-    const subscriptionId = payment.metadata?.subscriptionId
+  const handleCancelConfirm = useCallback(async () => {
+    if (!token || !cancelDialog.payment) return
+    const subscriptionId = cancelDialog.payment.metadata?.subscriptionId
     if (!subscriptionId) {
-      alert(t('table.cancelNoId'))
-      return
+      throw new Error(t('table.cancelNoId'))
     }
-    if (!window.confirm(t('table.cancelConfirm'))) return
-
-    setCancellingId(payment._id)
-    try {
-      const res = await fetch(`${API_URL}/subscriptions/${subscriptionId}/cancel`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (data.success) {
-        fetchPayments()
-      } else {
-        alert(t('table.cancelError'))
-      }
-    } catch {
-      alert(t('table.cancelError'))
-    } finally {
-      setCancellingId(null)
+    const res = await fetch(`${API_URL}/subscriptions/${subscriptionId}/cancel`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    if (!data.success) {
+      throw new Error(data.error || t('table.cancelError'))
     }
-  }
+    fetchPayments()
+  }, [token, cancelDialog.payment, fetchPayments, t])
 
   // ---- Filter payments by email (client-side) ----
   const filteredPayments = emailSearch
@@ -467,10 +451,9 @@ export default function AdminPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleRefund(payment._id)}
-                          disabled={refundingId === payment._id}
+                          onClick={() => setRefundDialog({ open: true, paymentId: payment._id })}
                         >
-                          {refundingId === payment._id ? t('table.loading') : t('table.refund')}
+                          {t('table.refund')}
                         </Button>
                       )}
                       {payment.type === 'subscription' &&
@@ -479,15 +462,13 @@ export default function AdminPage() {
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                              handleCancelSubscription(
-                                payment as Payment & { metadata?: Record<string, any> }
-                              )
+                              setCancelDialog({
+                                open: true,
+                                payment: payment as Payment & { metadata?: Record<string, any> },
+                              })
                             }
-                            disabled={cancellingId === payment._id}
                           >
-                            {cancellingId === payment._id
-                              ? t('table.loading')
-                              : t('table.cancelSubscription')}
+                            {t('table.cancelSubscription')}
                           </Button>
                         )}
                     </Div>
