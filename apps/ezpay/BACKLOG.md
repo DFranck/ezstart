@@ -75,11 +75,11 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [ ] Devrait avoir une vraie landing page de presentation + CTA vers les demos
 - [ ] Les code snippets ne sont pas dans des composants `<pre>/<code>` stylises
 
-### 3.4 i18n incomplet `low` `i18n` — `planned`
+### 3.4 i18n incomplet `low` `i18n` — `done`
 
-- [ ] Les traductions FR manquent les accents (`recents` → `recents`, `Termine` → `Termine`, etc.)
-- [ ] Les messages `common.json` et `layout.json` existent mais ne semblent pas utilises dans la page d'accueil (utilise `payment.json > home`)
-- [ ] Verifier que les traductions `layout.json` sont utilisees dans le layout
+- [x] Les traductions FR manquent les accents (`recents` → `recents`, `Termine` → `Termine`, etc.)
+- [x] Les messages `common.json` et `layout.json` existent mais ne semblent pas utilises dans la page d'accueil (utilise `payment.json > home`)
+- [x] Verifier que les traductions `layout.json` sont utilisees dans le layout
 
 ### 3.5 Page 404 custom `medium` `ux` — `done`
 

@@ -144,3 +144,39 @@
 | Security      | 10     | 10     | 0     | 0     |
 | Webhooks      | 6      | 6      | 0     | 0     |
 | **TOTAL**     | **71** | **63** | **8** | **0** |
+
+---
+
+## Issues trouvees
+
+### ISSUE-021 — DonateButton tous identiques dans le Test Center `low` `ux`
+
+- **Test:** TC-4
+- **Description:** Les 5 DonateButton dans /test/donate affichent tous "❤️ Donate" sans differenciation. Devraient afficher les montants predefinis (€5, €10, €25, €50, €100).
+- **Fix:** Passer un label ou amount visible sur chaque bouton dans la test page
+- **Status:** open
+
+### ISSUE-022 — DonationWall/Historique vide malgre donnees en DB `high` `bug`
+
+- **Tests:** DON-8, PUR-6, SUB-10
+- **Description:** Les hooks useDonations/usePurchases/useSubscriptions ne retournent pas de donnees dans le Test Center, bien que l'API retourne les donnees correctement en curl. Le fix du PayClient (unwrap data→payments) a ete committe mais le package pay-sdk n'est pas rebuilde par le hot-reload Next.js.
+- **Fix:** Verifier que `pnpm dev:types` est lance en parallele, ou que le build du package est a jour. Possible aussi que les hooks ne passent pas le bon projectId ou que le composant DonationWall filtre cote client.
+- **Status:** open
+
+### ISSUE-023 — Token expire ne declenche pas de redirect/alert `medium` `ux`
+
+- **Description:** Quand le JWT access token expire (15min), l'app reste visuellement connectee mais les appels API echouent silencieusement (0 resultats, pas d'erreur affichee). Devrait soit auto-refresh via refresh token, soit afficher une alerte "Session expiree" et rediriger vers le login.
+- **Fix:** Implementer le auto-refresh dans auth-sdk (la branche s'appelle feat/refresh-token-rotation), ou ajouter un intercepteur dans PayClient/AuthProvider qui detecte les 401 et declenche un re-login.
+- **Status:** open
+
+### ISSUE-024 — "Vous recevrez un email de confirmation" trompeur `low` `ux`
+
+- **Description:** La page /donate/success affiche "Vous recevrez un email de confirmation sous peu" mais EZPay n'envoie aucun email. C'est Stripe qui envoie un receipt si configure. Si le receipt Stripe n'est pas active, le texte est trompeur.
+- **Fix:** Soit activer `receipt_email` dans la checkout session Stripe, soit changer le texte en "Retrouvez votre recu dans votre compte Stripe."
+- **Status:** open
+
+### ISSUE-025 — Recherche email admin cote client seulement `low` `perf`
+
+- **Description:** Le champ "Rechercher par email" dans l'admin dashboard filtre cote client (DataTable filterColumn). Pour 41 paiements c'est OK mais ne scale pas. Devrait etre server-side avec un query param.
+- **Fix:** Ajouter un param `email` ou `search` au endpoint GET /payments et faire le filtre en MongoDB.
+- **Status:** open
