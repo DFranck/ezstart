@@ -10,7 +10,7 @@ import { URLS, AppName, getAllWebUrls, getRegistry } from './urls.js'
 const CORS_DEPENDENCIES: Record<string, 'all' | string[]> = {
   ezauth: 'all', // SSO — called by ALL web apps
   ezstart: 'all', // Monitoring — called by ALL web apps
-  ezpay: ['ezpay', 'ezbill', 'fengshui'], // Payment callers
+  ezpay: ['ezpay', 'ezbill', 'fengshui', 'ezstart'], // Payment callers
   ezbill: ['ezbill'],
   'green-pulse': ['green-pulse'],
   'gacha-analyzer': ['gacha-analyzer'],
