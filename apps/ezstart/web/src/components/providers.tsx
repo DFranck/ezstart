@@ -1,6 +1,7 @@
 'use client'
 
 import { AuthProvider } from '@ezstart/auth-sdk'
+import { PayProvider } from '@ezstart/pay-sdk'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
@@ -32,17 +33,19 @@ export function Providers({
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider appName="ezstart" authMode="httpOnly">
-        <NextThemesProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme
-        >
-          <NextIntlClientProvider messages={messages} locale={locale} timeZone={timeZone}>
-            {children}
-          </NextIntlClientProvider>
-        </NextThemesProvider>
+        <PayProvider appName="ezstart">
+          <NextThemesProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+            enableColorScheme
+          >
+            <NextIntlClientProvider messages={messages} locale={locale} timeZone={timeZone}>
+              {children}
+            </NextIntlClientProvider>
+          </NextThemesProvider>
+        </PayProvider>
       </AuthProvider>
     </QueryClientProvider>
   )

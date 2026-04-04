@@ -20,6 +20,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     skills,
     projects,
     contact,
+    support,
     legal,
     libraries,
     features,
@@ -40,6 +41,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/home/skills.json`),
     import(`../messages/${locale}/home/projects.json`),
     import(`../messages/${locale}/home/contact.json`),
+    import(`../messages/${locale}/home/support.json`),
 
     import(`../messages/${locale}/legal-notices.json`),
     import(`../messages/${locale}/libraries.json`),
@@ -65,6 +67,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       skills.default,
       projects.default,
       contact.default,
+      support.default,
       legal.default,
       libraries.default,
       features.default,
