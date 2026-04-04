@@ -138,15 +138,15 @@ describe('AuthUser Model', () => {
       expect(user.apps).toEqual(['ezbill', 'green-pulse'])
     })
 
-    it('should reject invalid app enum values', async () => {
-      await expect(
-        AuthUserModel.create({
-          email: 'test@example.com',
-          username: 'testuser',
-          passwordHash: 'hashedpassword123',
-          apps: ['invalid-app'],
-        })
-      ).rejects.toThrow()
+    it('should accept any string in apps (no enum restriction)', async () => {
+      const user = await AuthUserModel.create({
+        email: 'test@example.com',
+        username: 'testuser',
+        passwordHash: 'hashedpassword123',
+        apps: ['custom-app', 'another-app'],
+      })
+
+      expect(user.apps).toEqual(['custom-app', 'another-app'])
     })
   })
 
