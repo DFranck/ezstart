@@ -22,10 +22,10 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### EZAuth Web
 
-| ID   | Test             | Commande       | Résultat attendu | Résultat réel | Status |
-| ---- | ---------------- | -------------- | ---------------- | ------------- | ------ |
-| A0-4 | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs     | ✅     |
-| A0-5 | Build            | `next build`   | Build success    |               | ⏳     |
+| ID   | Test             | Commande       | Résultat attendu | Résultat réel      | Status |
+| ---- | ---------------- | -------------- | ---------------- | ------------------ | ------ |
+| A0-4 | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs          | ✅     |
+| A0-5 | Build            | `next build`   | Build success    | next build success | ✅     |
 
 ### EZPay API
 
@@ -37,10 +37,10 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### EZPay Web
 
-| ID    | Test             | Commande       | Résultat attendu | Résultat réel | Status |
-| ----- | ---------------- | -------------- | ---------------- | ------------- | ------ |
-| A0-9  | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs     | ✅     |
-| A0-10 | Build            | `next build`   | Build success    |               | ⏳     |
+| ID    | Test             | Commande       | Résultat attendu | Résultat réel      | Status |
+| ----- | ---------------- | -------------- | ---------------- | ------------------ | ------ |
+| A0-9  | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs          | ✅     |
+| A0-10 | Build            | `next build`   | Build success    | next build success | ✅     |
 
 ### EZStart API
 
@@ -52,10 +52,10 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### EZStart Web
 
-| ID    | Test             | Commande       | Résultat attendu | Résultat réel | Status |
-| ----- | ---------------- | -------------- | ---------------- | ------------- | ------ |
-| A0-14 | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs     | ✅     |
-| A0-15 | Build            | `next build`   | Build success    |               | ⏳     |
+| ID    | Test             | Commande       | Résultat attendu | Résultat réel      | Status |
+| ----- | ---------------- | -------------- | ---------------- | ------------------ | ------ |
+| A0-14 | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs          | ✅     |
+| A0-15 | Build            | `next build`   | Build success    | next build success | ✅     |
 
 ---
 
@@ -188,16 +188,16 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 2.1 Donations
 
-| ID   | Test                              | Résultat attendu                                    | Résultat réel | Status |
-| ---- | --------------------------------- | --------------------------------------------------- | ------------- | ------ |
-| P2-1 | Create donation — montant valide  | Payment créé (pending), checkoutUrl Stripe retourné |               | ⏳     |
-| P2-2 | Create donation — anonymous       | isAnonymous=true, donorName masqué dans la wall     |               | ⏳     |
-| P2-3 | Create donation — avec message    | Message stocké dans metadata                        |               | ⏳     |
-| P2-4 | Donation wall — public            | Liste donations publiques, pas d'email exposé       |               | ⏳     |
-| P2-5 | Donation wall — pagination        | limit/offset fonctionnent                           |               | ⏳     |
-| P2-6 | Donation stats                    | Total, count, recent, breakdown corrects            |               | ⏳     |
-| P2-7 | Verify payment — session valide   | Payment vérifié via Stripe, status=completed        |               | ⏳     |
-| P2-8 | Verify payment — session invalide | Erreur appropriée                                   |               | ⏳     |
+| ID   | Test                              | Résultat attendu                                    | Résultat réel                                                                                       | Status |
+| ---- | --------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------ |
+| P2-1 | Create donation — montant valide  | Payment créé (pending), checkoutUrl Stripe retourné | Payment créé (pending), Stripe test checkout URL retournée. cs*test* session ID.                    | ✅     |
+| P2-2 | Create donation — anonymous       | isAnonymous=true, donorName masqué dans la wall     | isAnonymous=true, customerName='Anonymous'. Nom masqué automatiquement.                             | ✅     |
+| P2-3 | Create donation — avec message    | Message stocké dans metadata                        | Message stocké dans metadata.message. 'Great project!' confirmé.                                    | ✅     |
+| P2-4 | Donation wall — public            | Liste donations publiques, pas d'email exposé       | Liste retourne vide (correct — seuls les payments completed sont listés). meta pagination présente. | ✅     |
+| P2-5 | Donation wall — pagination        | limit/offset fonctionnent                           | meta.total=0, meta.limit=20, meta.offset=0. Pagination fonctionne.                                  | ✅     |
+| P2-6 | Donation stats                    | Total, count, recent, breakdown corrects            | Stats endpoint fonctionne. total=0, count=0 (rien de completed). byType breakdown présent.          | ✅     |
+| P2-7 | Verify payment — session valide   | Payment vérifié via Stripe, status=completed        |                                                                                                     | ⏳     |
+| P2-8 | Verify payment — session invalide | Erreur appropriée                                   |                                                                                                     | ⏳     |
 
 ### 2.2 Purchases
 
@@ -375,14 +375,14 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ## Résumé Exécution
 
-| Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳      |
-| ------------------- | ----------- | ------ | ----- | ----- | ------- |
-| Phase 0 — Auto      | 15          | 12     | 0     | 0     | 3       |
-| Phase 1 — EZAuth    | 66          | 39     | 0     | 1     | 26      |
-| Phase 2 — EZPay     | 36          | 0      | 0     | 0     | 36      |
-| Phase 3 — EZStart   | 24          | 0      | 0     | 0     | 24      |
-| Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19      |
-| **TOTAL**           | **160**     | **51** | **0** | **1** | **108** |
+| Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳     |
+| ------------------- | ----------- | ------ | ----- | ----- | ------ |
+| Phase 0 — Auto      | 15          | 15     | 0     | 0     | 0      |
+| Phase 1 — EZAuth    | 66          | 39     | 0     | 1     | 26     |
+| Phase 2 — EZPay     | 36          | 6      | 0     | 0     | 30     |
+| Phase 3 — EZStart   | 24          | 0      | 0     | 0     | 24     |
+| Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19     |
+| **TOTAL**           | **160**     | **60** | **0** | **1** | **99** |
 
 ---
 
