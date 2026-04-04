@@ -30,6 +30,7 @@ pnpm start
 ### Health Checks
 
 **Environment Behavior:**
+
 - **Development**: Checks ONLY local URLs (doesn't consume production resources)
 - **Production**: Checks ONLY production URLs
 
@@ -87,7 +88,7 @@ GET /api/metrics/dashboard
 
 ```env
 NODE_ENV=development
-PORT=5000
+PORT=6100
 MONGO_URL=mongodb://localhost:27017/ezstart-monitoring
 
 HEALTH_CHECK_INTERVAL=30000
@@ -168,13 +169,13 @@ CORS is automatically configured via `@ezstart/config` to allow:
 
 ```bash
 # Test health check
-curl http://localhost:5000/api/health
+curl http://localhost:6100/api/health
 
 # Test metrics
-curl http://localhost:5000/api/metrics
+curl http://localhost:6100/api/metrics
 
 # Test specific service
-curl http://localhost:5000/api/health-checks/ezauth-api
+curl http://localhost:6100/api/health-checks/ezauth-api
 ```
 
 ## 📄 License

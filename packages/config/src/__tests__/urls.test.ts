@@ -43,7 +43,7 @@ describe('@ezstart/config - URLs', () => {
     it('should return local URL when env is local', () => {
       const url = getWebUrl('ezstart', 'local')
 
-      expect(url).toBe('http://localhost:5050')
+      expect(url).toBe('http://localhost:6101')
     })
 
     it('should return development URL when env is development', () => {
@@ -78,7 +78,7 @@ describe('@ezstart/config - URLs', () => {
     it('should return local API URL when env is local', () => {
       const url = getApiUrl('ezauth', 'local')
 
-      expect(url).toBe('http://localhost:5010')
+      expect(url).toBe('http://localhost:6110')
     })
 
     it('should return production API URL in production', () => {
@@ -103,13 +103,13 @@ describe('@ezstart/config - URLs', () => {
     it('should extract port from web URL', () => {
       const port = getPort('ezstart', 'web')
 
-      expect(port).toBe(5050)
+      expect(port).toBe(6101)
     })
 
     it('should extract port from API URL', () => {
       const port = getPort('ezauth', 'api')
 
-      expect(port).toBe(5010)
+      expect(port).toBe(6110)
     })
 
     it('should throw for apps without API when requesting api port', () => {
@@ -121,41 +121,35 @@ describe('@ezstart/config - URLs', () => {
       const ezbillPort = getPort('ezbill', 'web')
 
       expect(ezstartPort).not.toBe(ezbillPort)
-      expect(ezstartPort).toBe(5050)
-      expect(ezbillPort).toBe(5025)
+      expect(ezstartPort).toBe(6101)
+      expect(ezbillPort).toBe(6121)
     })
 
-    it('should follow 50xx port pattern', () => {
+    it('should follow 61xx port pattern', () => {
       const apps: Array<keyof typeof URLS> = ['ezstart', 'ezauth', 'ezbill', 'ezpay']
 
       apps.forEach(app => {
         const port = getPort(app, 'web')
-        expect(port).toBeGreaterThanOrEqual(5000)
-        expect(port).toBeLessThan(6000)
+        expect(port).toBeGreaterThanOrEqual(6100)
+        expect(port).toBeLessThan(6200)
       })
     })
   })
 
   describe('Port pattern consistency', () => {
-    it('should have APIs on 50x0 and Web on 50x5', () => {
+    it('should have APIs on 6XX0 and Web on 6XX1', () => {
       // APIs should be on ports ending in 0
-      expect(getPort('ezauth', 'api')).toBe(5010)
-      expect(getPort('ezbill', 'api')).toBe(5020)
+      expect(getPort('ezauth', 'api')).toBe(6110)
+      expect(getPort('ezbill', 'api')).toBe(6120)
 
-      // Web should be on ports ending in 5
-      expect(getPort('ezauth', 'web')).toBe(5015)
-      expect(getPort('ezbill', 'web')).toBe(5025)
+      // Web should be on ports ending in 1
+      expect(getPort('ezauth', 'web')).toBe(6111)
+      expect(getPort('ezbill', 'web')).toBe(6121)
     })
 
     it('should have unique ports for each service', () => {
       const ports = new Set<number>()
-      const apps: Array<keyof typeof URLS> = [
-        'ezstart',
-        'ezauth',
-        'ezbill',
-        'ezpay',
-        'green-pulse',
-      ]
+      const apps: Array<keyof typeof URLS> = ['ezstart', 'ezauth', 'ezbill', 'ezpay', 'green-pulse']
 
       apps.forEach(app => {
         const webPort = getPort(app, 'web')

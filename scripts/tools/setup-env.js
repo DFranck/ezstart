@@ -32,7 +32,7 @@ const apps = [
       JWT_SECRET,
       GOOGLE_CLIENT_ID,
       GOOGLE_CLIENT_SECRET,
-      GOOGLE_CALLBACK_URL: 'http://localhost:5010/api/auth/google/callback',
+      GOOGLE_CALLBACK_URL: 'http://localhost:6110/api/auth/google/callback',
       OAUTH_ENCRYPTION_KEY,
       RESEND_API_KEY,
       EMAIL_FROM: 'EZAuth <noreply@ezstart.xyz>',

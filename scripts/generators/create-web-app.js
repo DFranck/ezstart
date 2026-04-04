@@ -16,29 +16,31 @@ if (!projectName) {
 const rootDir = process.cwd()
 const projectPath = path.join(rootDir, 'apps', projectName, 'web')
 
-// Port assignment system (50xx pattern)
-// Web Apps: 50x5 pattern
+// Port assignment system (61xx pattern)
+// Web Apps: 6XX1 pattern
 const EXISTING_PORTS = {
-  // APIs (50x0)
-  'ezauth-api': 5010,
-  'ezbill-api': 5020,
-  // Web Apps (50x5)
-  'ezauth-web': 5015,
-  'ezbill-web': 5025,
+  // APIs (6XX0)
+  'ezauth-api': 6110,
+  'ezbill-api': 6120,
+  // Web Apps (6XX1)
+  'ezauth-web': 6111,
+  'ezbill-web': 6121,
   // Standalone Web Apps
-  'ezstart-web': 5045,
-  'asc-tcd-web': 5055,
-  'fengshui-web': 5065,
+  'ezstart-web': 6101,
+  'asc-tcd-web': 6141,
+  'fengshui-web': 6151,
 }
 
 // Find next available port
 function getNextAvailablePort() {
-  const webPorts = Object.values(EXISTING_PORTS).filter(port =>
-    port.toString().endsWith('5') // Web apps end in 5
-  ).sort((a, b) => a - b)
+  const webPorts = Object.values(EXISTING_PORTS)
+    .filter(
+      port => port.toString().endsWith('1') // Web apps end in 1
+    )
+    .sort((a, b) => a - b)
 
-  const lastPort = webPorts[webPorts.length - 1] || 5005
-  return lastPort + 10 // Increment by 10 to maintain xx5 pattern
+  const lastPort = webPorts[webPorts.length - 1] || 6101
+  return lastPort + 10 // Increment by 10 to maintain XX1 pattern
 }
 
 const assignedPort = getNextAvailablePort()
@@ -70,21 +72,22 @@ const packageJson = {
   scripts: {
     dev: 'node src/scripts/dev-with-port.js',
     'dev:port': 'next dev -p $PORT',
-    build: 'pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build',
+    build:
+      'pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build',
     start: 'next start',
     lint: 'eslint .',
-    typecheck: 'tsc --noEmit'
+    typecheck: 'tsc --noEmit',
   },
   dependencies: {
     '@ezstart/auth-sdk': 'workspace:*',
     '@ezstart/next-theme': 'workspace:*',
     '@ezstart/ui': 'workspace:*',
-    'deepmerge': '^4.3.1',
-    'next': '^15.1.6',
+    deepmerge: '^4.3.1',
+    next: '^15.1.6',
     'next-intl': '^4.1.0',
     'next-pwa': '^5.6.0',
-    'react': '^18.3.1',
-    'react-dom': '^18.3.1'
+    react: '^18.3.1',
+    'react-dom': '^18.3.1',
   },
   devDependencies: {
     '@ezstart/eslint-config': 'workspace:*',
@@ -93,18 +96,15 @@ const packageJson = {
     '@types/node': '^22.10.6',
     '@types/react': '^19.0.7',
     '@types/react-dom': '^19.0.3',
-    'autoprefixer': '^10.4.20',
-    'eslint': '^9.18.0',
-    'postcss': '^8.5.1',
-    'tailwindcss': '^3.4.17',
-    'typescript': '^5.7.3'
-  }
+    autoprefixer: '^10.4.20',
+    eslint: '^9.18.0',
+    postcss: '^8.5.1',
+    tailwindcss: '^3.4.17',
+    typescript: '^5.7.3',
+  },
 }
 
-fs.writeFileSync(
-  path.join(projectPath, 'package.json'),
-  JSON.stringify(packageJson, null, 2)
-)
+fs.writeFileSync(path.join(projectPath, 'package.json'), JSON.stringify(packageJson, null, 2))
 
 // TypeScript config
 const tsConfig = {
@@ -114,26 +114,18 @@ const tsConfig = {
     incremental: true,
     plugins: [
       {
-        name: 'next'
-      }
+        name: 'next',
+      },
     ],
     paths: {
-      '@/*': ['./src/*']
-    }
+      '@/*': ['./src/*'],
+    },
   },
-  include: [
-    'next-env.d.ts',
-    '**/*.ts',
-    '**/*.tsx',
-    '.next/types/**/*.ts'
-  ],
-  exclude: ['node_modules']
+  include: ['next-env.d.ts', '**/*.ts', '**/*.tsx', '.next/types/**/*.ts'],
+  exclude: ['node_modules'],
 }
 
-fs.writeFileSync(
-  path.join(projectPath, 'tsconfig.json'),
-  JSON.stringify(tsConfig, null, 2)
-)
+fs.writeFileSync(path.join(projectPath, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2))
 
 // ESLint config
 const eslintConfig = `import eslintConfig from '@ezstart/eslint-config/next-js'
@@ -141,10 +133,7 @@ const eslintConfig = `import eslintConfig from '@ezstart/eslint-config/next-js'
 export default [...eslintConfig]
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'eslint.config.js'),
-  eslintConfig
-)
+fs.writeFileSync(path.join(projectPath, 'eslint.config.js'), eslintConfig)
 
 // Tailwind config
 const tailwindConfig = `import type { Config } from 'tailwindcss'
@@ -163,10 +152,7 @@ const config: Config = {
 export default config
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'tailwind.config.ts'),
-  tailwindConfig
-)
+fs.writeFileSync(path.join(projectPath, 'tailwind.config.ts'), tailwindConfig)
 
 // PostCSS config
 const postcssConfig = `/** @type {import('postcss-load-config').Config} */
@@ -177,10 +163,7 @@ const config = {
 export default config
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'postcss.config.mjs'),
-  postcssConfig
-)
+fs.writeFileSync(path.join(projectPath, 'postcss.config.mjs'), postcssConfig)
 
 // Next.js config with PWA and next-intl
 const nextConfig = `import createNextIntlPlugin from 'next-intl/plugin'
@@ -203,10 +186,7 @@ const pwaConfig = withPWA({
 export default withNextIntl(pwaConfig(baseConfig))
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'next.config.mjs'),
-  nextConfig
-)
+fs.writeFileSync(path.join(projectPath, 'next.config.mjs'), nextConfig)
 
 // .env.example
 const envExample = `# Application
@@ -218,10 +198,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:${assignedPort}
 NEXT_PUBLIC_API_URL=http://localhost:${assignedPort - 5}/api
 `
 
-fs.writeFileSync(
-  path.join(projectPath, '.env.example'),
-  envExample
-)
+fs.writeFileSync(path.join(projectPath, '.env.example'), envExample)
 
 // .env.local
 const envLocal = `# Application
@@ -233,10 +210,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:${assignedPort}
 NEXT_PUBLIC_API_URL=http://localhost:${assignedPort - 5}/api
 `
 
-fs.writeFileSync(
-  path.join(projectPath, '.env.local'),
-  envLocal
-)
+fs.writeFileSync(path.join(projectPath, '.env.local'), envLocal)
 
 // Dev script with port management
 const devScriptContent = `import { spawn } from 'child_process'
@@ -279,10 +253,7 @@ async function startDev() {
 startDev()
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/scripts/dev-with-port.js'),
-  devScriptContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/scripts/dev-with-port.js'), devScriptContent)
 
 // next-env.d.ts
 fs.writeFileSync(
@@ -313,10 +284,7 @@ export function getTimeZoneFromLocale(locale: string): string {
 }
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/i18n/routing.ts'),
-  routingContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/i18n/routing.ts'), routingContent)
 
 const requestContent = `import merge from 'deepmerge'
 import { getRequestConfig } from 'next-intl/server'
@@ -345,10 +313,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 })
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/i18n/request.ts'),
-  requestContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/i18n/request.ts'), requestContent)
 
 const navigationContent = `import { createNavigation } from 'next-intl/navigation'
 import { routing } from './routing'
@@ -357,10 +322,7 @@ export const { Link, useRouter, usePathname, redirect, getPathname } =
   createNavigation(routing)
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/i18n/navigation.ts'),
-  navigationContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/i18n/navigation.ts'), navigationContent)
 
 // Create middleware
 const middlewareContent = `import createMiddleware from 'next-intl/middleware'
@@ -373,10 +335,7 @@ export const config = {
 }
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/middleware.ts'),
-  middlewareContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/middleware.ts'), middlewareContent)
 
 // Create translation files
 const commonTranslations = {
@@ -470,10 +429,7 @@ export function Providers({ children, locale, messages, timeZone }: ProvidersPro
 }
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/providers/providers.tsx'),
-  providersContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/providers/providers.tsx'), providersContent)
 
 // Layout.tsx with i18n and ClientLayout
 const layoutContent = `import { getTimeZoneFromLocale } from '@/i18n/routing'
@@ -513,10 +469,7 @@ export default async function RootLayout({
 }
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/app/[locale]/layout.tsx'),
-  layoutContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/app/[locale]/layout.tsx'), layoutContent)
 
 // Page.tsx with i18n
 const pageContent = `'use client'
@@ -555,10 +508,7 @@ export default function HomePage() {
 }
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/app/[locale]/page.tsx'),
-  pageContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/app/[locale]/page.tsx'), pageContent)
 
 // ClientLayout component using fully agnostic components
 const clientLayoutContent = `'use client'
@@ -624,10 +574,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
 export default AppClientLayout
 `
 
-fs.writeFileSync(
-  path.join(projectPath, 'src/app/[locale]/client-layout.tsx'),
-  clientLayoutContent
-)
+fs.writeFileSync(path.join(projectPath, 'src/app/[locale]/client-layout.tsx'), clientLayoutContent)
 
 // Add to root package.json scripts
 const rootPackageJsonPath = path.join(rootDir, 'package.json')
@@ -651,7 +598,9 @@ console.log(`  • Port assigned: ${assignedPort}`)
 console.log(`  • App URL: http://localhost:${assignedPort}`)
 console.log('\n📋 Next steps:')
 console.log(`  1. Add to CLAUDE.md ports table:`)
-console.log(`     | ${projectName.charAt(0).toUpperCase() + projectName.slice(1)} | Web | ${assignedPort} | http://localhost:${assignedPort} | ✅ Running |`)
+console.log(
+  `     | ${projectName.charAt(0).toUpperCase() + projectName.slice(1)} | Web | ${assignedPort} | http://localhost:${assignedPort} | ✅ Running |`
+)
 console.log(`  2. Run: pnpm dev:${projectName}`)
 console.log(`  3. Open: http://localhost:${assignedPort}`)
 console.log('\n🎉 Happy coding!')

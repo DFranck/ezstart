@@ -43,7 +43,7 @@ Create `.env.local` in this directory:
 
 ```env
 # Server
-PORT=5070
+PORT=6160
 NODE_ENV=development
 
 # Database
@@ -56,7 +56,7 @@ JWT_SECRET=your-secret-key
 OPENAI_API_KEY=sk-...
 
 # CORS
-WEB_URL=http://localhost:5075
+WEB_URL=http://localhost:6161
 ```
 
 ## Scripts
@@ -198,6 +198,7 @@ apps/green-pulse/api/
 ## OpenAI Integration
 
 The API uses OpenAI for:
+
 - **Smart Recommendations** - Personalized eco-tips based on user data
 - **Product Analysis** - Sustainability assessment from images
 - **Trend Analysis** - Environmental impact insights
@@ -208,8 +209,8 @@ const response = await openai.chat.completions.create({
   model: 'gpt-4',
   messages: [
     { role: 'system', content: 'You are an eco-sustainability expert' },
-    { role: 'user', content: `Analyze this carbon footprint: ${data}` }
-  ]
+    { role: 'user', content: `Analyze this carbon footprint: ${data}` },
+  ],
 })
 ```
 
@@ -240,12 +241,10 @@ router.get('/api/carbon', authenticate, async (req, res) => {
 ### Render Configuration
 
 ```yaml
-Build Command:
-  pnpm install --frozen-lockfile --shamefully-hoist &&
+Build Command: pnpm install --frozen-lockfile --shamefully-hoist &&
   pnpm turbo build --filter=api-green-pulse
 
-Start Command:
-  cd apps/green-pulse/api && node dist/index.js
+Start Command: cd apps/green-pulse/api && node dist/index.js
 
 Environment:
   NODE_ENV=production
@@ -281,7 +280,7 @@ const router = Router()
 
 const createGoalSchema = z.object({
   target: z.number().min(0).describe('Target carbon reduction (kg CO2)'),
-  deadline: z.string().datetime().describe('Goal deadline (ISO 8601)')
+  deadline: z.string().datetime().describe('Goal deadline (ISO 8601)'),
 })
 
 router.post('/api/goals', authenticate, async (req, res) => {

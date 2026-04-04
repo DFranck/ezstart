@@ -12,5 +12,5 @@ Copy `.env.example` to `.env.local` in both `api/` and `web/`.
 
 ## Ports
 
-- API: 5020
-- Web: 5025
+- API: 6120
+- Web: 6121

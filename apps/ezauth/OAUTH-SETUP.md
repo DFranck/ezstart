@@ -40,7 +40,7 @@
 4. **Name** : EZAuth Local Dev
 5. **Authorized redirect URIs** :
    ```
-   http://localhost:5010/api/auth/google/callback
+   http://localhost:6110/api/auth/google/callback
    ```
 6. Cliquer **Create**
 7. **Copier** le Client ID et Client Secret
@@ -53,11 +53,12 @@ cp .env.example .env.local
 ```
 
 Éditer `.env.local` :
+
 ```env
 # Google OAuth Credentials
 GOOGLE_CLIENT_ID=123456789-abc.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxxxxxx
-GOOGLE_CALLBACK_URL=http://localhost:5010/api/auth/google/callback
+GOOGLE_CALLBACK_URL=http://localhost:6110/api/auth/google/callback
 ```
 
 ### 5. Redémarrer l'API
@@ -67,21 +68,24 @@ pnpm dev:auth  # ou pnpm dev
 ```
 
 Vérifier les logs :
+
 ```
 ✅ Models initialized (AuthUser, AuthCode, OAuthAccount)
 ```
 
 Si tu vois :
+
 ```
 ⚠️  [OAuth] Google OAuth not configured
 ```
+
 → Vérifie que `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET` sont bien dans `.env.local`
 
 ## 🧪 Tester le Flow OAuth
 
 ### 1. Login Page
 
-1. Ouvrir http://localhost:5015/login?app=ezbill&redirect_uri=http://localhost:5025/auth/callback
+1. Ouvrir http://localhost:6111/login?app=ezbill&redirect_uri=http://localhost:6121/auth/callback
 2. Tu devrais voir le bouton **"Continue with Google"**
 3. Cliquer dessus
 
@@ -95,22 +99,25 @@ Si tu vois :
 ### 3. Callback & Account Linking
 
 **Cas 1 : Nouvel utilisateur**
+
 - Crée un compte EZAuth avec l'email Google
 - Username généré automatiquement (ex: `johndoe`)
 - `passwordHash` = null (OAuth-only user)
 - Crée un lien dans `oauth_accounts`
 
 **Cas 2 : Email existant**
+
 - Lie le compte Google au compte EZAuth existant
 - Met à jour l'avatar si non-défini
 - Continue avec le compte existant
 
 **Cas 3 : OAuth account déjà lié**
+
 - Login direct avec le compte existant
 
 ### 4. Résultat Final
 
-→ Redirection vers `http://localhost:5025/auth/callback?code=abc123`
+→ Redirection vers `http://localhost:6121/auth/callback?code=abc123`
 → Flow SSO normal (échange code → token)
 → User connecté sur EZBill ✅
 
@@ -156,10 +163,12 @@ Si tu vois :
 ### Development vs Production
 
 **Development** :
-- `http://localhost:5010/api/auth/google/callback`
+
+- `http://localhost:6110/api/auth/google/callback`
 - Test users dans Google OAuth Consent
 
 **Production** :
+
 - `https://ezauth-api.up.railway.app/api/auth/google/callback`
 - Publish OAuth Consent Screen (review Google)
 - Encrypt `accessToken` et `refreshToken` (TODO)
@@ -185,6 +194,7 @@ GOOGLE_CALLBACK_URL=https://ezauth-api.up.railway.app/api/auth/google/callback
 ### 2. Google Cloud Console
 
 Ajouter la redirect URI de production :
+
 ```
 https://ezauth-api.up.railway.app/api/auth/google/callback
 ```
@@ -198,6 +208,7 @@ https://ezauth-api.up.railway.app/api/auth/google/callback
 ## 📝 Ajouter GitHub OAuth (TODO)
 
 1. Installer `passport-github2` :
+
    ```bash
    pnpm add passport-github2 @types/passport-github2
    ```
@@ -210,7 +221,7 @@ https://ezauth-api.up.railway.app/api/auth/google/callback
 
 5. Configurer GitHub App :
    - https://github.com/settings/developers
-   - Authorization callback URL: `http://localhost:5010/api/auth/github/callback`
+   - Authorization callback URL: `http://localhost:6110/api/auth/github/callback`
 
 ## 🎯 Avantages OAuth
 
@@ -226,8 +237,9 @@ https://ezauth-api.up.railway.app/api/auth/google/callback
 ### Erreur "redirect_uri_mismatch"
 
 → Vérifie que l'URL dans Google Cloud Console correspond exactement :
+
 ```
-http://localhost:5010/api/auth/google/callback
+http://localhost:6110/api/auth/google/callback
 ```
 
 ### Erreur "OAuth not configured"
@@ -245,6 +257,7 @@ http://localhost:5010/api/auth/google/callback
 ### Callback ne redirige pas
 
 → Vérifie que `redirect_uri` est passé dans l'URL :
+
 ```
-/login?app=ezbill&redirect_uri=http://localhost:5025/auth/callback
+/login?app=ezbill&redirect_uri=http://localhost:6121/auth/callback
 ```

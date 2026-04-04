@@ -2,7 +2,7 @@ Write-Host "=== Kill @ezstart Ports ===" -ForegroundColor Cyan
 Write-Host ""
 
 # Hardcoded ports — all @ezstart dev ports
-$ezstartPorts = @(5000, 5005, 5010, 5015, 5020, 5025, 5040, 5045, 5050, 5055, 5065, 5070, 5075, 5080, 5085)
+$ezstartPorts = @(6100, 6101, 6110, 6111, 6120, 6121, 6130, 6131, 6141, 6151, 6160, 6161, 6170, 6171)
 
 # Also catch fallback ports (+1, +2) that happen when primary port is busy
 $allPorts = @()

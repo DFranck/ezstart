@@ -44,19 +44,20 @@ pnpm dev
 
 ## 📊 Fonctionnalités Supportées
 
-| Fonctionnalité | Status | Modèle Gemini |
-|----------------|--------|---------------|
-| Chat ESG | ✅ Fonctionne | gemini-1.5-flash |
-| Extraction JSON | ✅ Fonctionne | gemini-1.5-flash |
-| Analyse Images | ✅ Fonctionne | gemini-1.5-flash |
-| Validation Données | ✅ Fonctionne | gemini-1.5-flash |
-| Audio → Texte | ⚠️ Non supporté | Utiliser Whisper ou AssemblyAI |
+| Fonctionnalité     | Status          | Modèle Gemini                  |
+| ------------------ | --------------- | ------------------------------ |
+| Chat ESG           | ✅ Fonctionne   | gemini-1.5-flash               |
+| Extraction JSON    | ✅ Fonctionne   | gemini-1.5-flash               |
+| Analyse Images     | ✅ Fonctionne   | gemini-1.5-flash               |
+| Validation Données | ✅ Fonctionne   | gemini-1.5-flash               |
+| Audio → Texte      | ⚠️ Non supporté | Utiliser Whisper ou AssemblyAI |
 
 ## ⚠️ Note sur l'Audio
 
 Gemini ne supporte pas encore la transcription audio. Pour cette fonctionnalité :
 
 **Option A: Whisper (OpenAI)** - Payant
+
 ```env
 OPENAI_API_KEY=sk-...
 ```
@@ -70,17 +71,17 @@ https://www.assemblyai.com/
 
 ```bash
 # Chat simple
-curl -X POST http://localhost:5070/api/chat \
+curl -X POST http://localhost:6160/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "What is ESG reporting?", "extract_esg": false}'
 
 # Extraction ESG
-curl -X POST http://localhost:5070/api/chat \
+curl -X POST http://localhost:6160/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "My company Acme Ltd in Singapore uses 1000 kWh electricity per month", "extract_esg": true}'
 
 # Analyse image
-curl -X POST http://localhost:5070/api/upload/image \
+curl -X POST http://localhost:6160/api/upload/image \
   -F "image=@/path/to/meter-photo.jpg"
 ```
 
@@ -94,12 +95,15 @@ curl -X POST http://localhost:5070/api/upload/image \
 ## 🆘 Problèmes Courants
 
 ### Erreur: "API key not found"
+
 → Vérifier que `GEMINI_API_KEY` est bien dans `.env.local`
 
 ### Erreur: "Invalid API key"
+
 → Clé mal copiée. Doit commencer par `AIza`
 
 ### Erreur: "Quota exceeded"
+
 → 60 req/min dépassées. Attendre 1 minute.
 
 ## 🔗 Liens Utiles

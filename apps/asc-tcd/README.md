@@ -12,4 +12,4 @@ Copy `web/.env.example` to `web/.env.local`.
 
 ## Ports
 
-- Web: 5055
+- Web: 6141

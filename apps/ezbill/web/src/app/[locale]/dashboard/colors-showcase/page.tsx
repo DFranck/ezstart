@@ -20,7 +20,7 @@ import {
  * EZBill Colors Showcase Page
  *
  * Visual reference for all EZBill semantic colors defined in @ezstart/ui/globals.css
- * Access at: http://localhost:5025/dashboard/colors-showcase
+ * Access at: http://localhost:6121/dashboard/colors-showcase
  */
 
 export default function ColorsShowcasePage() {

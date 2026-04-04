@@ -85,10 +85,10 @@ describe('AuthCode Model', () => {
         code: 'abc123def456',
         userId: '507f1f77bcf86cd799439011',
         app: 'ezbill',
-        redirectUri: 'http://localhost:5025/auth/callback',
+        redirectUri: 'http://localhost:6121/auth/callback',
       })
 
-      expect(authCode.redirectUri).toBe('http://localhost:5025/auth/callback')
+      expect(authCode.redirectUri).toBe('http://localhost:6121/auth/callback')
     })
 
     it('should validate app enum values', async () => {
@@ -398,7 +398,7 @@ describe('AuthCode Model', () => {
       const userId = '507f1f77bcf86cd799439011'
       const code = 'abc123def456'
       const app = 'ezbill'
-      const redirectUri = 'http://localhost:5025/auth/callback'
+      const redirectUri = 'http://localhost:6121/auth/callback'
 
       // Step 1: Create authorization code
       const authCode = await AuthCodeModel.create({

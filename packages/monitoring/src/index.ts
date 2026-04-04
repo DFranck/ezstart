@@ -15,7 +15,7 @@
  * const result = await checker.check({
  *   name: 'EZAuth API',
  *   type: 'api',
- *   url: 'http://localhost:5010/api/health',
+ *   url: 'http://localhost:6110/api/health',
  *   timeout: 5000,
  *   interval: 30000,
  *   retries: 3,

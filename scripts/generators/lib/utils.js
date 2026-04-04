@@ -29,26 +29,28 @@ function renderTemplate(templatePath, vars) {
 function parseExistingPorts() {
   const content = fs.readFileSync(URLS_FILE, 'utf8')
   const portMatches = content.match(/localhost:(\d{4,5})/g) || []
-  return [...new Set(portMatches.map(m => parseInt(m.replace('localhost:', ''), 10)))].sort((a, b) => a - b)
+  return [...new Set(portMatches.map(m => parseInt(m.replace('localhost:', ''), 10)))].sort(
+    (a, b) => a - b
+  )
 }
 
 /**
- * Find next available API port (ends in 0, pattern 50X0)
+ * Find next available API port (ends in 0, pattern 6XX0)
  */
 function findNextApiPort() {
   const ports = parseExistingPorts()
   const apiPorts = ports.filter(p => p % 10 === 0).sort((a, b) => a - b)
-  const last = apiPorts[apiPorts.length - 1] || 5000
+  const last = apiPorts[apiPorts.length - 1] || 6100
   return last + 10
 }
 
 /**
- * Find next available web port (ends in 5, pattern 50X5)
+ * Find next available web port (ends in 1, pattern 6XX1)
  */
 function findNextWebPort() {
   const ports = parseExistingPorts()
-  const webPorts = ports.filter(p => p % 10 === 5).sort((a, b) => a - b)
-  const last = webPorts[webPorts.length - 1] || 5005
+  const webPorts = ports.filter(p => p % 10 === 1).sort((a, b) => a - b)
+  const last = webPorts[webPorts.length - 1] || 6101
   return last + 10
 }
 
@@ -59,9 +61,9 @@ function findNextPortPair() {
   const ports = parseExistingPorts()
   // Find the highest port group (in tens)
   const groups = [...new Set(ports.map(p => Math.floor(p / 10) * 10))]
-  const lastGroup = Math.max(...groups, 5080)
+  const lastGroup = Math.max(...groups, 6170)
   const nextGroup = lastGroup + 10
-  return { apiPort: nextGroup, webPort: nextGroup + 5 }
+  return { apiPort: nextGroup, webPort: nextGroup + 1 }
 }
 
 /**
@@ -177,7 +179,8 @@ function registerInUrls(appName, displayName, description, apiPort, webPort, has
       pos++
     }
     const closingBracePos = pos - 1
-    content = content.slice(0, closingBracePos) + metadataEntry + '\n' + content.slice(closingBracePos)
+    content =
+      content.slice(0, closingBracePos) + metadataEntry + '\n' + content.slice(closingBracePos)
   }
 
   fs.writeFileSync(URLS_FILE, content)

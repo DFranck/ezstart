@@ -7,7 +7,7 @@ import { AppName, getWebUrl, getApiUrl, getCurrentEnvironment } from './urls.js'
  * ```typescript
  * // In EZPay web app
  * const { webUrl, apiUrl } = getAppUrls('ezpay')
- * // Local: webUrl = 'http://localhost:5045', apiUrl = 'http://localhost:5040'
+ * // Local: webUrl = 'http://localhost:6131', apiUrl = 'http://localhost:6130'
  * // Prod: webUrl = 'https://ezpay.ezstart.xyz', apiUrl = 'https://ezpay-api.up.railway.app'
  * ```
  */

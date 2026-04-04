@@ -124,7 +124,7 @@ apps/
 - [x] Re-analyser — endpoint API + bouton pour re-parser avec nouveau code
 - [x] Scan feedback — agree/disagree + commentaire, filtre history, badge scan card
 - [x] Estimation rolls — parser (aX%) hints du rawText, 6 tests, rollHints dans RuneData
-- [x] OpenAPI/Swagger — 15 operations documentees, /docs expose sur localhost:5080/docs
+- [x] OpenAPI/Swagger — 15 operations documentees, /docs expose sur localhost:6170/docs
 - [x] Screenshots — thumbnail JPEG 50% sauve en DB, affiche dans scan detail
 - [x] History enrichie — scan cards avec set/slot/quality/main/subs/eff, 6 filtres client-side
 - [x] Debug panel fix — uses API values (adjustedSetWeighted, adjustedPotential, setWeightRatio)

@@ -18,6 +18,7 @@ Le monitoring dashboard de @ezstart suit une **architecture à pages dédiées**
 ### Navigation
 
 La navigation se fait via le menu principal :
+
 ```json
 {
   "menuLabel": "Monitoring",
@@ -35,12 +36,15 @@ La navigation se fait via le menu principal :
 ## Pages Détaillées
 
 ### 1. `/monitoring` - Overview
+
 **Contenu :**
+
 - Hero section avec Global Health Score (96.6/100)
 - Metrics overview (métriques globales)
 - SystemOverview component (cartes résumées pour chaque catégorie)
 
 **Données chargées :**
+
 - Projects (pour stats)
 - Audits (pour stats)
 - Errors (pour stats)
@@ -48,43 +52,55 @@ La navigation se fait via le menu principal :
 ---
 
 ### 2. `/monitoring/health` - Projects Health
+
 **Contenu :**
+
 - Hero section avec Projects Health Score
 - Trending Metrics (top 3 projets)
 - Projects Grid (tous les projets avec UptimeGraph)
 
 **Composants :**
+
 - `health/components/TrendingMetrics.tsx` - Graphiques Recharts
 - `health/components/ProjectCard.tsx` - Carte projet + UptimeGraph
 - `health/components/ServiceCard.tsx` - Carte service
 
 **Données chargées :**
+
 - Projects + health checks history
 
 ---
 
 ### 3. `/monitoring/audits` - Quality Audits
+
 **Contenu :**
+
 - Hero section avec Audits Quality Score
 - Audits Grid (toutes les catégories d'audits)
 
 **Composants :**
+
 - `health/components/AuditCard.tsx` - Carte audit avec score
 
 **Données chargées :**
+
 - Audits
 
 ---
 
 ### 4. `/monitoring/errors` - Error Monitoring
+
 **Contenu :**
+
 - Hero section avec Error Status Score
 - ErrorsFeed (flux en temps réel des erreurs)
 
 **Composants :**
+
 - `errors/components/ErrorsFeed.tsx` - Feed d'erreurs paginé
 
 **Données chargées :**
+
 - Error logs
 
 ---
@@ -128,11 +144,13 @@ monitoring/
 ## Hooks Partagés
 
 ### Data Fetching (React Query)
+
 - `useMonitoringProjects()` - Fetch projects + summary
 - `useMonitoringAudits()` - Fetch audits
 - `useMonitoringErrors()` - Fetch error logs
 
 ### Real-time Updates
+
 - `useSocket()` - Socket.IO pour updates en temps réel
 - `useCountdown()` - Compte à rebours jusqu'au prochain refresh (5min)
 
@@ -141,21 +159,25 @@ monitoring/
 ## Avantages de cette Architecture
 
 ### ✅ SEO-Friendly
+
 - Chaque page a son propre URL
 - Meilleur indexation par Google
 - Partage de liens direct vers une section
 
 ### ✅ Performance
+
 - Code-splitting automatique par Next.js
 - Chaque page charge seulement les données nécessaires
 - Lazy loading des composants
 
 ### ✅ Navigation Intuitive
+
 - Breadcrumbs possibles
 - Back button fonctionnel
 - Deep linking supporté
 
 ### ✅ Maintenance
+
 - Code mieux organisé
 - Composants isolés par page
 - Imports plus clairs
@@ -165,7 +187,9 @@ monitoring/
 ## Real-time Updates
 
 ### Socket.IO Integration
+
 Toutes les pages écoutent l'événement `healthChecksUpdated` :
+
 ```ts
 useSocket({
   onHealthChecksUpdated: () => {
@@ -176,6 +200,7 @@ useSocket({
 ```
 
 ### Automatic Refresh
+
 - Health checks toutes les 5 minutes (API cron)
 - Socket.IO push les updates immédiatement
 - React Query invalide le cache automatiquement
@@ -186,7 +211,9 @@ useSocket({
 ## Performance Optimizations
 
 ### 1. UptimeGraph - Dynamic Aggregation
+
 Le composant `UptimeGraph` agrège intelligemment les données :
+
 - **<100 checks** : 1 barre = 1 check (pas d'agrégation)
 - **>100 checks** : Agrégation pour ~60 barres max
 
@@ -194,6 +221,7 @@ Avant (fixe) : `groupSize = 6` → 4 barres pour 26 checks ❌
 Après (dynamique) : `groupSize = 1` → 26 barres pour 26 checks ✅
 
 ### 2. TrendingMetrics - XAxis Configuration
+
 - `interval="preserveStartEnd"` - Garde début et fin visibles
 - `minTickGap={30}` - Espacement minimal entre labels
 - Sampling si >60 points (pour lisibilité)
@@ -203,6 +231,7 @@ Après (dynamique) : `groupSize = 1` → 26 barres pour 26 checks ✅
 ## Migration depuis Tabs
 
 ### Avant (v1)
+
 ```tsx
 <Tabs>
   <TabsList>
@@ -216,12 +245,14 @@ Après (dynamique) : `groupSize = 1` → 26 barres pour 26 checks ✅
 ```
 
 **Problèmes :**
+
 - Tout le code chargé d'un coup
 - Navigation cachée (tabs invisibles)
 - URLs statiques (`/monitoring`)
 - Redondance Hero + Tabs
 
 ### Après (v2 - Pages dédiées)
+
 ```tsx
 /monitoring          → page.tsx (Overview)
 /monitoring/health   → health/page.tsx
@@ -230,6 +261,7 @@ Après (dynamique) : `groupSize = 1` → 26 barres pour 26 checks ✅
 ```
 
 **Avantages :**
+
 - Code-splitting par page
 - Navigation évidente (menu)
 - URLs sémantiques
@@ -242,6 +274,7 @@ Après (dynamique) : `groupSize = 1` → 26 barres pour 26 checks ✅
 ### Améliorations Possibles
 
 1. **Breadcrumbs Navigation**
+
    ```tsx
    Home > Monitoring > Health
    ```
@@ -278,10 +311,10 @@ pnpm --filter web-ezstart typecheck
 pnpm dev:ez
 
 # URLs to test
-http://localhost:5005/fr/monitoring
-http://localhost:5005/fr/monitoring/health
-http://localhost:5005/fr/monitoring/audits
-http://localhost:5005/fr/monitoring/errors
+http://localhost:6101/fr/monitoring
+http://localhost:6101/fr/monitoring/health
+http://localhost:6101/fr/monitoring/audits
+http://localhost:6101/fr/monitoring/errors
 ```
 
 ---

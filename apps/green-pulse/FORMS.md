@@ -9,6 +9,7 @@
 **Use Case:** Inspecteurs/prestataires visitant plusieurs entreprises avec formulaires répétitifs.
 
 **Innovation:**
+
 - ✅ 100% Agnostique (formulaires définis via JSON config)
 - ✅ Multi-User/Multi-Projet (partage et permissions)
 - ✅ 3 Modes de remplissage (Manuel, Chat textuel IA, Vocal IA)
@@ -21,21 +22,24 @@
 ### Backend (100% Complet ✅)
 
 **Types TypeScript:**
+
 ```typescript
-FormConfig        // Template de formulaire (champs, extraction hints, UI)
-FormInstance      // Formulaire rempli lié à un projet
-Project           // Dossier/cas avec membres et permissions
-ProjectMember     // User avec role (owner/editor/viewer)
+FormConfig // Template de formulaire (champs, extraction hints, UI)
+FormInstance // Formulaire rempli lié à un projet
+Project // Dossier/cas avec membres et permissions
+ProjectMember // User avec role (owner/editor/viewer)
 ```
 
 **Models MongoDB:**
+
 ```typescript
-getFormConfigModel()     // Templates de formulaires
-getFormInstanceModel()   // Formulaires remplis
-getProjectModel()        // Projets/dossiers
+getFormConfigModel() // Templates de formulaires
+getFormInstanceModel() // Formulaires remplis
+getProjectModel() // Projets/dossiers
 ```
 
 **Routes API:**
+
 ```
 POST   /api/forms/configs           # Create template
 GET    /api/forms/configs           # List templates
@@ -77,6 +81,7 @@ extractFormData(formConfigId, conversationHistory)
 ### 1. Company Inspection Form 🏢 (USE CASE PRINCIPAL)
 
 **Champs (10):**
+
 - company_name (text, required)
 - company_address (text, required)
 - company_sector (select, required)
@@ -93,6 +98,7 @@ extractFormData(formConfigId, conversationHistory)
 ### 2. Solar Grant Application ☀️
 
 **Champs (5):**
+
 - property_address
 - roof_orientation (select: North/South/East/West)
 - installation_budget (number)
@@ -102,6 +108,7 @@ extractFormData(formConfigId, conversationHistory)
 ### 3. Carbon Emissions Report 🌍
 
 **Champs (5):**
+
 - company_name
 - employee_count
 - vehicle_count
@@ -111,6 +118,7 @@ extractFormData(formConfigId, conversationHistory)
 ### 4. Waste Reduction Plan ♻️
 
 **Champs (4):**
+
 - current_waste_amount (kg/month)
 - target_reduction_percentage
 - implementation_timeline (months)
@@ -158,16 +166,19 @@ pnpm seed:forms
 ### Pages
 
 **Dashboard (/forms):**
+
 - Liste tous projets
 - Filtres (status, date, assigné)
 - Création nouveau projet
 
 **Project Detail (/projects/[id]):**
+
 - Liste forms du projet
 - Membres du projet
 - Timeline d'activité
 
 **Form Filling (/forms/[id]):**
+
 - Split-screen: Form + AI interface
 - 3 modes: Manual, Chat, Vocal
 - Real-time validation
@@ -175,22 +186,22 @@ pnpm seed:forms
 ### Components
 
 **FormChatInterface:**
+
 ```tsx
 <FormChatInterface
   formConfigId="company-inspection"
-  onFieldsExtracted={(fields) => setFormData(fields)}
+  onFieldsExtracted={fields => setFormData(fields)}
 />
 ```
 
 **FormVocalInterface:**
+
 ```tsx
-<FormVocalInterface
-  formConfigId="company-inspection"
-  onTranscript={(text) => sendToAI(text)}
-/>
+<FormVocalInterface formConfigId="company-inspection" onTranscript={text => sendToAI(text)} />
 ```
 
 **FormRenderer:**
+
 ```tsx
 <FormRenderer
   config={formConfig}
@@ -201,12 +212,9 @@ pnpm seed:forms
 ```
 
 **ProjectCard:**
+
 ```tsx
-<ProjectCard
-  project={project}
-  stats={{ total: 5, completed: 2 }}
-  members={members}
-/>
+<ProjectCard project={project} stats={{ total: 5, completed: 2 }} members={members} />
 ```
 
 ---
@@ -279,21 +287,25 @@ Form auto-fills with confidence colors:
 ## 📊 Roadmap
 
 ### Phase 1: Frontend Basic (Semaines 1-2)
+
 - [ ] Pages dashboard, project detail, form filling
 - [ ] Composants de base: ProjectCard, FormRow, FormRenderer
 - [ ] Navigation et routing
 
 ### Phase 2: AI Integration (Semaine 3)
+
 - [ ] FormChatInterface avec extraction API
 - [ ] Real-time form updates
 - [ ] Confidence scores display
 
 ### Phase 3: Vocal & Polish (Semaine 4)
+
 - [ ] FormVocalInterface avec Web Speech API
 - [ ] Text-to-speech responses
 - [ ] Mobile responsive
 
 ### Phase 4: Multi-User (Semaine 5)
+
 - [ ] Permissions UI + Share dialog
 - [ ] Real-time collaboration (Socket.IO)
 - [ ] Activity timeline
@@ -319,7 +331,7 @@ pnpm test formExtractor.service.test.ts
 pnpm seed:forms
 
 # 2. Test extraction API
-curl -X POST http://localhost:5070/api/forms/extract \
+curl -X POST http://localhost:6160/api/forms/extract \
   -H "Content-Type: application/json" \
   -d '{
     "formConfigId": "company-inspection-2025",
@@ -341,6 +353,7 @@ GEMINI_API_KEY=your_api_key_here
 ```
 
 **Get API Key:**
+
 1. Go to https://ai.google.dev/
 2. Create project
 3. Enable Gemini API

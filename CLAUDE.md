@@ -228,14 +228,14 @@ pnpm dev:types
 
 | Service            | API  | Web  |
 | ------------------ | ---- | ---- |
-| **EZStart**        | 5000 | 5005 |
-| **EZAuth**         | 5010 | 5015 |
-| **EZBill**         | 5020 | 5025 |
-| **EZPay**          | 5040 | 5045 |
-| **ASC-TCD**        | —    | 5055 |
-| **FengShui**       | —    | 5065 |
-| **GreenPulse**     | 5070 | 5075 |
-| **Gacha Analyzer** | 5080 | 5085 |
+| **EZStart**        | 6100 | 6101 |
+| **EZAuth**         | 6110 | 6111 |
+| **EZBill**         | 6120 | 6121 |
+| **EZPay**          | 6130 | 6131 |
+| **ASC-TCD**        | —    | 6141 |
+| **FengShui**       | —    | 6151 |
+| **GreenPulse**     | 6160 | 6161 |
+| **Gacha Analyzer** | 6170 | 6171 |
 
 ---
 

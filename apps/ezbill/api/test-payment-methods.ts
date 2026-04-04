@@ -3,7 +3,7 @@
  * Run with: npx tsx test-payment-methods.ts
  */
 
-const API_URL = 'http://localhost:5020/api'
+const API_URL = 'http://localhost:6120/api'
 const TEST_USER_ID = 'test-user-123' // You can replace with real userId
 
 async function testPaymentMethods() {
@@ -56,7 +56,10 @@ async function testPaymentMethods() {
   const activePaymentMethods = await getActiveResponse.json()
   console.log('✅ Active payment methods:', activePaymentMethods.length)
   const foundActive = activePaymentMethods.find((pm: any) => pm._id === paymentMethodId)
-  console.log('   Our deleted PM in active list?', foundActive ? '❌ YES (BUG!)' : '✅ NO (correct)')
+  console.log(
+    '   Our deleted PM in active list?',
+    foundActive ? '❌ YES (BUG!)' : '✅ NO (correct)'
+  )
 
   // 5. Get deleted payment methods ONLY
   console.log('\n5️⃣ Getting deleted payment methods only...')

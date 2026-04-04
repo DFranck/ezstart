@@ -12,8 +12,8 @@ import { logger } from '@ezstart/logger/server'
  *
  * @example
  * ```typescript
- * const PORT = getApiPort('ezauth') // 5010 from config
- * const PORT = getApiPort('ezpay') // 5040 from config
+ * const PORT = getApiPort('ezauth') // 6110 from config
+ * const PORT = getApiPort('ezpay') // 6130 from config
  * ```
  */
 export function getApiPort(appName: AppName): number {

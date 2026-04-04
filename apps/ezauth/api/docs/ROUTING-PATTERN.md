@@ -28,6 +28,7 @@ src/routes/
 Pattern: `{verb}{Entity}[ById|With{Modifier}].ts`
 
 **Examples:**
+
 - `createConversation.ts` - POST action
 - `listConversations.ts` - GET collection
 - `getConversationById.ts` - GET single item
@@ -40,12 +41,12 @@ Pattern: `{verb}{Entity}[ById|With{Modifier}].ts`
 ```typescript
 // In {feature}/index.ts
 router
-  .post('/', createRoute)              // POST /{feature}
-  .get('/', listRoute)                 // GET /{feature}
-  .get('/:id', getByIdRoute)          // GET /{feature}/:id
-  .patch('/:id', updateRoute)         // PATCH /{feature}/:id
-  .delete('/:id', deleteRoute)        // DELETE /{feature}/:id
-  .post('/generate', generateRoute)   // POST /{feature}/generate
+  .post('/', createRoute) // POST /{feature}
+  .get('/', listRoute) // GET /{feature}
+  .get('/:id', getByIdRoute) // GET /{feature}/:id
+  .patch('/:id', updateRoute) // PATCH /{feature}/:id
+  .delete('/:id', deleteRoute) // DELETE /{feature}/:id
+  .post('/generate', generateRoute) // POST /{feature}/generate
 ```
 
 ## Example Implementation
@@ -105,11 +106,11 @@ export const conversationRegistries = [
 const router = Router()
 
 router
-  .use('/', createConversationRouter)      // POST /
-  .use('/', listConversationsRouter)       // GET /
-  .use('/', getConversationByIdRouter)     // GET /:id
-  .use('/', updateConversationRouter)      // PATCH /:id
-  .use('/', deleteConversationRouter)      // DELETE /:id
+  .use('/', createConversationRouter) // POST /
+  .use('/', listConversationsRouter) // GET /
+  .use('/', getConversationByIdRouter) // GET /:id
+  .use('/', updateConversationRouter) // PATCH /:id
+  .use('/', deleteConversationRouter) // DELETE /:id
 
 export default router
 ```
@@ -125,11 +126,7 @@ import chatRouter, { chatRegistries } from './chat/index.js'
 const router = Router()
 
 // Combine all OpenAPI registries
-export const globalRegistry = [
-  ...conversationRegistries,
-  ...formRegistries,
-  ...chatRegistries,
-]
+export const globalRegistry = [...conversationRegistries, ...formRegistries, ...chatRegistries]
 
 router
   .use('/conversations', conversationsRouter)
@@ -149,15 +146,13 @@ import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-c
 
 export const createConversationRegistry = new OpenAPIRegistry()
 const router = Router()
-export const createConversationRouter = createRouterWithDoc(
-  createConversationRegistry,
-  router,
-  '/'
-)
+export const createConversationRouter = createRouterWithDoc(createConversationRegistry, router, '/')
 
 createConversationRouter.post(
   '/',
-  async (req, res) => { /* ... */ },
+  async (req, res) => {
+    /* ... */
+  },
   {
     summary: 'Create new conversation',
     tags: ['Conversations'],
@@ -187,11 +182,7 @@ Main router spreads feature registry arrays:
 
 ```typescript
 // routes/index.ts
-export const globalRegistry = [
-  ...conversationRegistries,
-  ...formRegistries,
-  ...chatRegistries,
-]
+export const globalRegistry = [...conversationRegistries, ...formRegistries, ...chatRegistries]
 ```
 
 **Why arrays?** OpenAPIRegistry doesn't have a `merge()` method, so we export/spread arrays.
@@ -199,26 +190,31 @@ export const globalRegistry = [
 ## Benefits
 
 ### 1. Clarity
+
 - File name = exact action
 - No scrolling through huge files
 - Intent is obvious
 
 ### 2. Maintainability
+
 - Changes isolated to single file
 - Easy to add new actions
 - Safe to delete unused actions
 
 ### 3. Testing
+
 - One test file per action
 - Clear test boundaries
 - Easy to mock
 
 ### 4. Git/PR
+
 - Small, focused commits
 - Clear PR diffs
 - Easy to review
 
 ### 5. Team collaboration
+
 - No merge conflicts
 - Multiple devs can work on same feature
 - Clear ownership
@@ -226,6 +222,7 @@ export const globalRegistry = [
 ## Anti-patterns to avoid
 
 ❌ **One big file per feature**
+
 ```typescript
 // conversations.ts (1000+ lines)
 router.post('/', ...)
@@ -236,6 +233,7 @@ router.delete('/:id', ...)
 ```
 
 ❌ **Mixed concerns**
+
 ```typescript
 // routes/api.ts
 router.post('/conversations', ...)
@@ -244,6 +242,7 @@ router.post('/chat', ...)
 ```
 
 ❌ **Unclear naming**
+
 ```typescript
 // routes/conv1.ts  ← What does this do?
 // routes/chat-new.ts  ← Why "new"?
@@ -252,11 +251,13 @@ router.post('/chat', ...)
 ## Migration Guide
 
 ### Step 1: Create feature folder
+
 ```bash
 mkdir -p src/routes/{feature}
 ```
 
 ### Step 2: Split routes into actions
+
 ```typescript
 // Old: conversations.ts
 router.post('/', createController)
@@ -272,15 +273,15 @@ listConversationsRouter.get('/', listController)
 ```
 
 ### Step 3: Create feature index
+
 ```typescript
 // conversations/index.ts
 export const conversationsRouter = Router()
-conversationsRouter
-  .use('/', createConversationRouter)
-  .use('/', listConversationsRouter)
+conversationsRouter.use('/', createConversationRouter).use('/', listConversationsRouter)
 ```
 
 ### Step 4: Update main router
+
 ```typescript
 // routes/index.ts
 import { conversationsRouter } from './conversations/index.js'
@@ -288,9 +289,10 @@ router.use('/conversations', conversationsRouter)
 ```
 
 ### Step 5: Test & delete old file
+
 ```bash
 # Test all endpoints still work
-curl -X POST http://localhost:5070/api/conversations
+curl -X POST http://localhost:6160/api/conversations
 
 # Delete old file
 rm src/routes/conversations.ts

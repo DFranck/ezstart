@@ -8,16 +8,16 @@ describe('@ezstart/config - CORS', () => {
 
       // EZAuth is called by ALL apps (SSO)
       expect(origins.length).toBeGreaterThan(5)
-      expect(origins).toContain('http://localhost:5050') // ezstart
-      expect(origins).toContain('http://localhost:5025') // ezbill
-      expect(origins).toContain('http://localhost:5045') // ezpay
+      expect(origins).toContain('http://localhost:6101') // ezstart
+      expect(origins).toContain('http://localhost:6121') // ezbill
+      expect(origins).toContain('http://localhost:6131') // ezpay
     })
 
     it('should return specific origins for ezbill', () => {
       const origins = getAllowedOrigins('ezbill')
 
       // EZBill is only called by EZBill web
-      expect(origins).toContain('http://localhost:5025')
+      expect(origins).toContain('http://localhost:6121')
       expect(origins.length).toBeGreaterThanOrEqual(1)
     })
 
@@ -63,17 +63,17 @@ describe('@ezstart/config - CORS', () => {
       const origins = getAllowedOrigins('ezauth')
 
       // EZAuth API is called by all apps (SSO)
-      expect(origins).toContain('http://localhost:5050') // ezstart
-      expect(origins).toContain('http://localhost:5025') // ezbill
-      expect(origins).toContain('http://localhost:5045') // ezpay
+      expect(origins).toContain('http://localhost:6101') // ezstart
+      expect(origins).toContain('http://localhost:6121') // ezbill
+      expect(origins).toContain('http://localhost:6131') // ezpay
     })
 
     it('should only allow ezbill web for ezbill API', () => {
       const origins = getAllowedOrigins('ezbill')
 
-      expect(origins).toContain('http://localhost:5025')
+      expect(origins).toContain('http://localhost:6121')
       // Should not contain other apps
-      expect(origins).not.toContain('http://localhost:5050') // ezstart
+      expect(origins).not.toContain('http://localhost:6101') // ezstart
     })
 
     it('should handle ezpay with multiple callers', () => {
@@ -111,7 +111,8 @@ describe('@ezstart/config - CORS', () => {
         const isLocalhost = origin.includes('localhost')
         const isVercel = origin.includes('vercel.app')
         const isEzstart = origin.includes('ezstart.xyz')
-        const isCustomDomain = origin.includes('asc-tcd.com') || origin.includes('ai-greenpulse.com')
+        const isCustomDomain =
+          origin.includes('asc-tcd.com') || origin.includes('ai-greenpulse.com')
 
         expect(isLocalhost || isVercel || isEzstart || isCustomDomain).toBe(true)
       })

@@ -2,12 +2,12 @@
  * Centralized URL configuration for all @ezstart apps
  *
  * Pattern:
- * - Local: localhost:50XX
+ * - Local: localhost:6XXX
  * - Dev: [app].vercel.app (Vercel default)
  * - Prod: [app].ezstart.xyz OR custom domain
  *
  * APIs:
- * - Local: localhost:50X0 (APIs end with 0)
+ * - Local: localhost:6XX0 (APIs end with 0)
  * - Prod: [app]-api.up.railway.app OR render
  */
 
@@ -63,55 +63,55 @@ export interface ProjectMetadata {
 export const URLS: Record<AppName, AppUrls> = {
   ezstart: {
     web: {
-      local: 'http://localhost:5005',
+      local: 'http://localhost:6101',
       development: 'https://ezstart-web.vercel.app',
       production: 'https://www.ezstart.xyz',
     },
     api: {
-      local: 'http://localhost:5000',
+      local: 'http://localhost:6100',
       production: 'https://ezstart-api.ezstart.xyz',
     },
   },
 
   ezauth: {
     web: {
-      local: 'http://localhost:5015',
+      local: 'http://localhost:6111',
       development: 'https://ezstart-ezauth.vercel.app',
       production: 'https://ezauth.ezstart.xyz',
     },
     api: {
-      local: 'http://localhost:5010',
+      local: 'http://localhost:6110',
       production: 'https://ezauth-api.ezstart.xyz',
     },
   },
 
   ezbill: {
     web: {
-      local: 'http://localhost:5025',
+      local: 'http://localhost:6121',
       development: 'https://ezstart-ezbill.vercel.app',
       production: 'https://ezbill.ezstart.xyz',
     },
     api: {
-      local: 'http://localhost:5020',
+      local: 'http://localhost:6120',
       production: 'https://ezbill-api.ezstart.xyz',
     },
   },
 
   ezpay: {
     web: {
-      local: 'http://localhost:5045',
+      local: 'http://localhost:6131',
       development: 'https://ezstart-ezpay.vercel.app',
       production: 'https://ezpay.ezstart.xyz',
     },
     api: {
-      local: 'http://localhost:5040',
+      local: 'http://localhost:6130',
       production: 'https://ezpay-api.up.railway.app',
     },
   },
 
   fengshui: {
     web: {
-      local: 'http://localhost:5065',
+      local: 'http://localhost:6151',
       development: 'https://fengshui.vercel.app',
       production: 'https://ezfengshui.ezstart.xyz',
     },
@@ -119,7 +119,7 @@ export const URLS: Record<AppName, AppUrls> = {
 
   'asc-tcd': {
     web: {
-      local: 'http://localhost:5055',
+      local: 'http://localhost:6141',
       development: 'https://asc-tcd-web.vercel.app',
       production: 'https://www.asc-tcd.com',
     },
@@ -127,24 +127,24 @@ export const URLS: Record<AppName, AppUrls> = {
 
   'green-pulse': {
     web: {
-      local: 'http://localhost:5075',
+      local: 'http://localhost:6161',
       development: 'https://green-pulse-web.vercel.app',
       production: 'https://www.ai-greenpulse.com',
     },
     api: {
-      local: 'http://localhost:5070',
+      local: 'http://localhost:6160',
       production: 'https://greenpulse-api.up.railway.app',
     },
   },
 
   'gacha-analyzer': {
     web: {
-      local: 'http://localhost:5085',
+      local: 'http://localhost:6171',
       development: 'https://game-analyzer-web.vercel.app',
       production: 'https://game-analyzer.ezstart.xyz',
     },
     api: {
-      local: 'http://localhost:5080',
+      local: 'http://localhost:6170',
       production: 'https://game-analyzer-api.up.railway.app',
     },
   },
@@ -416,10 +416,10 @@ export function getAllApiUrls(app: AppName): string[] {
  * @example
  * ```typescript
  * // Web app
- * const port = getPort('ezstart', 'web') // 5050
+ * const port = getPort('ezstart', 'web') // 6101
  *
  * // API
- * const port = getPort('ezauth', 'api') // 5010
+ * const port = getPort('ezauth', 'api') // 6110
  * ```
  */
 export function getPort(app: AppName, type: 'web' | 'api' = 'web'): number {

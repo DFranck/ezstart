@@ -28,6 +28,7 @@ apps/fengshui/web/
 ### 🔧 Configuration
 
 **Client Pay** (`src/lib/pay-client.ts`):
+
 ```typescript
 import { createPayClient } from '@ezstart/pay-sdk'
 
@@ -37,11 +38,12 @@ export const payClient = createPayClient({
 ```
 
 **Provider** (`src/app/[locale]/layout.tsx`):
+
 ```tsx
 import { PayProvider } from '@ezstart/pay-sdk'
 import { payClient } from '@/lib/pay-client'
 
-<PayProvider client={payClient}>
+;<PayProvider client={payClient}>
   <ClientLayout>{children}</ClientLayout>
 </PayProvider>
 ```
@@ -49,6 +51,7 @@ import { payClient } from '@/lib/pay-client'
 ### 🎨 Page Donations (`/donate`)
 
 La page `/donate` contient :
+
 - ✅ **DonateModal** - Modal de donation avec montants prédéfinis
 - ✅ **DonationWall** - Mur de testimonials publics
 - ✅ **Link EZAuth** - Si user connecté, nom/email pré-remplis
@@ -57,11 +60,13 @@ La page `/donate` contient :
 ### 🚀 Utilisation
 
 **Visiter la page :**
+
 ```
-http://localhost:5065/donate
+http://localhost:6151/donate
 ```
 
 **Utiliser les composants ailleurs :**
+
 ```tsx
 import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 
@@ -75,9 +80,10 @@ import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 ### 🔐 Variables d'Environnement
 
 Pour utiliser en dev, créer `.env.local` :
+
 ```env
 # EZPay API est déjà configuré automatiquement
-# http://localhost:5040/api (dev)
+# http://localhost:6130/api (dev)
 # https://ezpay-api.onrender.com/api (prod)
 ```
 
@@ -95,6 +101,7 @@ Pour utiliser en dev, créer `.env.local` :
 ### 📊 Prochaines Étapes
 
 Pour activer les donations en production :
+
 1. Configurer Stripe (clés API)
 2. Lancer API EZPay (`pnpm dev:pay`)
 3. Tester le flow complet

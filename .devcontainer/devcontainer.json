@@ -23,13 +23,15 @@
       }
     }
   },
-  "forwardPorts": [5000, 5005, 5010, 5015, 5020, 5025, 5040, 5045, 5065, 5070, 5075, 5080, 5085],
+  "forwardPorts": [
+    6100, 6101, 6110, 6111, 6120, 6121, 6130, 6131, 6141, 6151, 6160, 6161, 6170, 6171
+  ],
   "portsAttributes": {
-    "5005": { "label": "EZStart Web" },
-    "5015": { "label": "EZAuth Web" },
-    "5025": { "label": "EZBill Web" },
-    "5045": { "label": "EZPay Web" },
-    "5075": { "label": "GreenPulse Web" },
-    "5085": { "label": "Gacha Analyzer Web" }
+    "6101": { "label": "EZStart Web" },
+    "6111": { "label": "EZAuth Web" },
+    "6121": { "label": "EZBill Web" },
+    "6131": { "label": "EZPay Web" },
+    "6161": { "label": "GreenPulse Web" },
+    "6171": { "label": "Gacha Analyzer Web" }
   }
 }

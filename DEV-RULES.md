@@ -565,25 +565,25 @@ import { getApiUrl, getWebUrl, getApiPort } from '@ezstart/config'
 
 // Web app - obtenir URL API
 const API_URL = getApiUrl('ezpay')
-// Dev: http://localhost:5040
+// Dev: http://localhost:6130
 // Prod: https://ezpay-api.up.railway.app
 
 // API - obtenir port
-const PORT = getApiPort('ezauth') // 5010
+const PORT = getApiPort('ezauth') // 6110
 
 // SEO - domaine production
 const domain = getWebUrl('ezpay', 'production')
 // https://ezpay.ezstart.xyz
 ```
 
-### Pattern des Ports (50xx)
+### Pattern des Ports (61xx)
 
 | Pattern | Usage         | Exemples                                      |
 | ------- | ------------- | --------------------------------------------- |
-| `50X0`  | APIs          | EZAuth 5010, EZBill 5020, TD 5030, EZPay 5040 |
-| `50X5`  | Web Apps      | EZAuth 5015, EZBill 5025, TD 5035, EZPay 5045 |
-| `5000`  | EZStart API   | Port fixe                                     |
-| `5050`  | EZStart (hub) | Port fixe                                     |
+| `6XX0`  | APIs          | EZAuth 6110, EZBill 6120, EZPay 6130, GP 6160 |
+| `6XX1`  | Web Apps      | EZAuth 6111, EZBill 6121, EZPay 6131, GP 6161 |
+| `6100`  | EZStart API   | Port fixe                                     |
+| `6101`  | EZStart (hub) | Port fixe                                     |
 
 ### CORS Automatique
 
@@ -592,7 +592,7 @@ const domain = getWebUrl('ezpay', 'production')
 ```typescript
 // ❌ MAUVAIS
 app.use(cors({
-  origin: ['http://localhost:5015', 'http://localhost:5025', ...],
+  origin: ['http://localhost:6111', 'http://localhost:6121', ...],
   credentials: true
 }))
 
@@ -1108,7 +1108,7 @@ Les ports sont auto-détectés depuis `@ezstart/config` :
 
 ```typescript
 // APIs
-const PORT = getApiPort('ezauth') // 5010
+const PORT = getApiPort('ezauth') // 6110
 
 // Web apps (via dev-server.js)
 // Détection automatique du nom d'app → port

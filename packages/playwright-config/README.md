@@ -11,7 +11,7 @@ Shared Playwright E2E testing configuration for all web apps.
 ```typescript
 // playwright.config.ts
 import { createConfig } from '@ezstart/playwright-config'
-export default createConfig({ port: 5025 })
+export default createConfig({ port: 6121 })
 ```
 
 ## Used by
