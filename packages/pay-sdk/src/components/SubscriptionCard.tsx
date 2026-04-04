@@ -1,10 +1,11 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, Icon, Modal, P } from '@ezstart/ui/components'
+import { Badge, Button, Card, CardContent, Icon, P } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { usePayContext } from '../provider.js'
 import { formatCurrency } from '../utils/format-currency.js'
+import { ConfirmActionDialog } from './ConfirmActionDialog.js'
 import type { PaymentStatus } from '../types.js'
 
 export interface SubscriptionCardTexts {
@@ -15,6 +16,11 @@ export interface SubscriptionCardTexts {
   confirmCancel?: string
   confirmTitle?: string
   confirmNo?: string
+  cancelSuccess?: string
+  cancelError?: string
+  loading?: string
+  close?: string
+  retry?: string
 }
 
 export interface SubscriptionCardProps {
@@ -52,7 +58,6 @@ export function SubscriptionCard({
 }: SubscriptionCardProps) {
   const { client } = usePayContext()
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [cancelling, setCancelling] = useState(false)
 
   const t = {
     cancel: texts?.cancel || 'Cancel subscription',
@@ -62,6 +67,11 @@ export function SubscriptionCard({
     confirmCancel: texts?.confirmCancel || 'Are you sure you want to cancel this subscription?',
     confirmTitle: texts?.confirmTitle || 'Cancel subscription',
     confirmNo: texts?.confirmNo || 'Keep subscription',
+    cancelSuccess: texts?.cancelSuccess || 'Subscription cancelled successfully',
+    cancelError: texts?.cancelError || 'Failed to cancel subscription',
+    loading: texts?.loading || 'Cancelling...',
+    close: texts?.close || 'Close',
+    retry: texts?.retry || 'Retry',
   }
 
   const statusLabel =
@@ -82,9 +92,8 @@ export function SubscriptionCard({
   const subscriptionId = subscription.metadata?.subscriptionId
   const canCancel = showCancel && subscription.status === 'completed' && !!subscriptionId
 
-  const handleCancel = async () => {
+  const handleCancel = useCallback(async () => {
     if (!subscriptionId) return
-    setCancelling(true)
     try {
       if (onCancel) {
         await onCancel(subscriptionId)
@@ -96,11 +105,9 @@ export function SubscriptionCard({
         'Failed to cancel subscription:',
         err instanceof Error ? err.message : String(err)
       )
-    } finally {
-      setCancelling(false)
-      setConfirmOpen(false)
+      throw err
     }
-  }
+  }, [subscriptionId, onCancel, client])
 
   return (
     <>
@@ -124,61 +131,36 @@ export function SubscriptionCard({
             <Button
               variant="destructive"
               size="sm"
-              disabled={loading || cancelling}
+              disabled={loading}
               onClick={() => setConfirmOpen(true)}
               className="w-full"
             >
-              {cancelling ? (
-                <span className="flex items-center gap-2">
-                  <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
-                  {t.cancel}
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Icon name="lucide:XCircle" className="w-4 h-4" />
-                  {t.cancel}
-                </span>
-              )}
+              <span className="flex items-center gap-2">
+                <Icon name="lucide:XCircle" className="w-4 h-4" />
+                {t.cancel}
+              </span>
             </Button>
           )}
         </CardContent>
       </Card>
 
-      <Modal
-        isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
+      <ConfirmActionDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
         title={t.confirmTitle}
-        size="sm"
-        footer={
-          <div className="flex gap-2 w-full">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setConfirmOpen(false)}
-              disabled={cancelling}
-            >
-              {t.confirmNo}
-            </Button>
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={handleCancel}
-              disabled={cancelling}
-            >
-              {cancelling ? (
-                <span className="flex items-center gap-2">
-                  <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
-                  {t.cancel}
-                </span>
-              ) : (
-                t.cancel
-              )}
-            </Button>
-          </div>
-        }
-      >
-        <P>{t.confirmCancel}</P>
-      </Modal>
+        description={t.confirmCancel}
+        onConfirm={handleCancel}
+        variant="destructive"
+        texts={{
+          confirmLabel: t.cancel,
+          cancelLabel: t.confirmNo,
+          loadingMessage: t.loading,
+          successMessage: t.cancelSuccess,
+          errorMessage: t.cancelError,
+          retryLabel: t.retry,
+          closeLabel: t.close,
+        }}
+      />
     </>
   )
 }

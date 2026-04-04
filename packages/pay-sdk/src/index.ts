@@ -33,6 +33,13 @@ export type { SubscribeButtonTexts, SubscribeButtonProps } from './components/Su
 export { SubscriptionCard } from './components/SubscriptionCard.js'
 export type { SubscriptionCardProps, SubscriptionCardTexts } from './components/SubscriptionCard.js'
 
+// Components - Confirm Action Dialog
+export { ConfirmActionDialog } from './components/ConfirmActionDialog.js'
+export type {
+  ConfirmActionDialogProps,
+  ConfirmActionDialogTexts,
+} from './components/ConfirmActionDialog.js'
+
 // Components - Refund
 export { RefundButton } from './components/RefundButton.js'
 export type { RefundButtonProps, RefundButtonTexts } from './components/RefundButton.js'

@@ -2,7 +2,7 @@
 
 import { useAuth } from '@ezstart/auth-sdk'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Badge,
   Button,
@@ -14,7 +14,13 @@ import {
   H3,
   P,
 } from '@ezstart/ui/components'
-import { SubscribeButton, PaymentHistory, useSubscriptions, usePayContext } from '@ezstart/pay-sdk'
+import {
+  SubscribeButton,
+  PaymentHistory,
+  useSubscriptions,
+  usePayContext,
+  ConfirmActionDialog,
+} from '@ezstart/pay-sdk'
 
 const plans = [
   { key: 'monthly', priceId: 'ezpay-pro-monthly', amount: 9.99, interval: 1 },
@@ -28,24 +34,18 @@ export default function TestSubscribePage() {
   const { user } = useAuth()
   const { client } = usePayContext()
   const { subscriptions, isLoading, reload } = useSubscriptions({ userId: user?._id, limit: 20 })
-  const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [cancelDialog, setCancelDialog] = useState<{
+    open: boolean
+    subscriptionId: string | null
+  }>({ open: false, subscriptionId: null })
 
-  const handleCancelSubscription = async (subscriptionId?: string) => {
-    if (!subscriptionId) {
-      alert(t('cancelNoSubscriptionId'))
-      return
+  const handleCancelConfirm = useCallback(async () => {
+    if (!cancelDialog.subscriptionId) {
+      throw new Error(t('cancelNoSubscriptionId'))
     }
-    setCancellingId(subscriptionId)
-    try {
-      await client.cancelSubscription(subscriptionId)
-      alert(t('cancelSuccess'))
-      reload()
-    } catch {
-      alert(t('cancelError'))
-    } finally {
-      setCancellingId(null)
-    }
-  }
+    await client.cancelSubscription(cancelDialog.subscriptionId)
+    reload()
+  }, [cancelDialog.subscriptionId, client, reload, t])
 
   const activeSubscriptions = (subscriptions || []).filter(
     (s: { status: string }) => s.status === 'completed' || s.status === 'pending'
@@ -114,12 +114,14 @@ export default function TestSubscribePage() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      disabled={cancellingId === sub.metadata?.subscriptionId}
-                      onClick={() => handleCancelSubscription(sub.metadata?.subscriptionId)}
+                      onClick={() =>
+                        setCancelDialog({
+                          open: true,
+                          subscriptionId: sub.metadata?.subscriptionId || null,
+                        })
+                      }
                     >
-                      {cancellingId === sub.metadata?.subscriptionId
-                        ? t('loading')
-                        : t('cancelSubscription')}
+                      {t('cancelSubscription')}
                     </Button>
                   </Div>
                 </Div>
@@ -142,6 +144,20 @@ export default function TestSubscribePage() {
           />
         </CardContent>
       </Card>
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <ConfirmActionDialog
+        open={cancelDialog.open}
+        onOpenChange={open => setCancelDialog(prev => ({ ...prev, open }))}
+        title={t('cancelSubscription')}
+        description={t('cancelConfirm')}
+        onConfirm={handleCancelConfirm}
+        variant="destructive"
+        texts={{
+          successMessage: t('cancelSuccess'),
+          errorMessage: t('cancelError'),
+        }}
+      />
     </Div>
   )
 }

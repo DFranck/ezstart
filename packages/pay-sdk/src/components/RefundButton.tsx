@@ -1,10 +1,11 @@
 'use client'
 
-import { Button, Icon, Modal, P } from '@ezstart/ui/components'
+import { Button, Icon } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { usePayContext } from '../provider.js'
 import { formatCurrency } from '../utils/format-currency.js'
+import { ConfirmActionDialog } from './ConfirmActionDialog.js'
 
 export interface RefundButtonTexts {
   refund?: string
@@ -13,6 +14,9 @@ export interface RefundButtonTexts {
   error?: string
   confirmTitle?: string
   cancel?: string
+  loading?: string
+  close?: string
+  retry?: string
 }
 
 export interface RefundButtonProps {
@@ -40,7 +44,6 @@ export function RefundButton({
 }: RefundButtonProps) {
   const { client } = usePayContext()
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [refunding, setRefunding] = useState(false)
 
   const t = {
     refund: texts?.refund || 'Refund',
@@ -53,10 +56,12 @@ export function RefundButton({
     error: texts?.error || 'Refund failed',
     confirmTitle: texts?.confirmTitle || 'Confirm refund',
     cancel: texts?.cancel || 'Cancel',
+    loading: texts?.loading || 'Refunding...',
+    close: texts?.close || 'Close',
+    retry: texts?.retry || 'Retry',
   }
 
-  const handleRefund = async () => {
-    setRefunding(true)
+  const handleRefund = useCallback(async () => {
     try {
       if (onRefund) {
         await onRefund(paymentId)
@@ -68,69 +73,42 @@ export function RefundButton({
       const message = err instanceof Error ? err.message : t.error
       logger.error('Refund failed:', message)
       onError?.(message)
-    } finally {
-      setRefunding(false)
-      setConfirmOpen(false)
+      throw err
     }
-  }
+  }, [paymentId, onRefund, client, onSuccess, onError, t.error])
 
   return (
     <>
       <Button
         variant="outline"
         size="sm"
-        disabled={disabled || refunding}
+        disabled={disabled}
         onClick={() => setConfirmOpen(true)}
         className={className}
       >
-        {refunding ? (
-          <span className="flex items-center gap-2">
-            <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
-            {t.refund}
-          </span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-            {t.refund}
-          </span>
-        )}
+        <span className="flex items-center gap-2">
+          <Icon name="lucide:RotateCcw" className="w-4 h-4" />
+          {t.refund}
+        </span>
       </Button>
 
-      <Modal
-        isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
+      <ConfirmActionDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
         title={t.confirmTitle}
-        size="sm"
-        footer={
-          <div className="flex gap-2 w-full">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setConfirmOpen(false)}
-              disabled={refunding}
-            >
-              {t.cancel}
-            </Button>
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={handleRefund}
-              disabled={refunding}
-            >
-              {refunding ? (
-                <span className="flex items-center gap-2">
-                  <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
-                  {t.refund}
-                </span>
-              ) : (
-                t.refund
-              )}
-            </Button>
-          </div>
-        }
-      >
-        <P>{t.confirm}</P>
-      </Modal>
+        description={t.confirm}
+        onConfirm={handleRefund}
+        variant="destructive"
+        texts={{
+          confirmLabel: t.refund,
+          cancelLabel: t.cancel,
+          loadingMessage: t.loading,
+          successMessage: t.success,
+          errorMessage: t.error,
+          retryLabel: t.retry,
+          closeLabel: t.close,
+        }}
+      />
     </>
   )
 }

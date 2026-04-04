@@ -506,6 +506,34 @@ export default function AdminPage() {
           </Div>
         </Div>
       )}
+
+      {/* Refund Confirmation Dialog */}
+      <ConfirmActionDialog
+        open={refundDialog.open}
+        onOpenChange={open => setRefundDialog(prev => ({ ...prev, open }))}
+        title={t('table.refund')}
+        description={t('table.refundConfirm')}
+        onConfirm={handleRefundConfirm}
+        variant="destructive"
+        texts={{
+          successMessage: t('table.refundSuccess'),
+          errorMessage: t('table.refundError'),
+        }}
+      />
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <ConfirmActionDialog
+        open={cancelDialog.open}
+        onOpenChange={open => setCancelDialog(prev => ({ ...prev, open }))}
+        title={t('table.cancelSubscription')}
+        description={t('table.cancelConfirm')}
+        onConfirm={handleCancelConfirm}
+        variant="destructive"
+        texts={{
+          successMessage: t('table.cancelSuccess'),
+          errorMessage: t('table.cancelError'),
+        }}
+      />
     </Main>
   )
 }
