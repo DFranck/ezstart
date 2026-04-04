@@ -62,7 +62,8 @@ export class PayClient {
       throw new Error(result.error || 'Failed to create donation')
     }
 
-    return result
+    // Unwrap standard { success, data } response
+    return result.data ?? result
   }
 
   async getDonations(params?: {
