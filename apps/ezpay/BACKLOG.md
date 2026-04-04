@@ -45,9 +45,9 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] `Payment.metadata` type est `Record<string, any>` — devrait etre un union type base sur `PaymentType`
 - [x] Utiliser les interfaces specifiques deja definies (`DonationMetadata | PurchaseMetadata | SubscriptionMetadata | InvoiceMetadata`)
 
-### 2.7 `as any` dans les tests `low` `code-quality` — `planned`
+### 2.7 `as any` dans les tests `low` `code-quality` — `done`
 
-- [ ] 3 occurrences de `as any` dans Payment.test.ts (lignes 101, 131, 148) — utiliser les types corrects
+- [x] 3 occurrences de `as any` dans Payment.test.ts (lignes 101, 131, 148) — utiliser les types corrects
 
 ---
 
@@ -102,10 +102,10 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] `purchases/create.ts` redirige vers `/donate/success` et `/donate/cancel` — devrait etre `/purchase/success` et `/purchase/cancel`
 - [x] Meme probleme dans `subscriptions/create.ts` — redirige vers `/donate/success` au lieu de `/subscribe/success`
 
-### 4.4 Subscriptions list manque filtre par projectId `low` `feature` — `planned`
+### 4.4 Subscriptions list manque filtre par projectId `low` `feature` — `done`
 
-- [ ] `GET /subscriptions` filtre uniquement par userId — pas par projectId
-- [ ] Ajouter le filtre projectId comme dans donations et purchases
+- [x] `GET /subscriptions` filtre uniquement par userId — pas par projectId
+- [x] Ajouter le filtre projectId comme dans donations et purchases
 
 ### 4.5 Donations list requiert auth mais est publique `medium` `bug` — `done`
 
@@ -136,12 +136,12 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [ ] Mais aucune route API pour les invoices (pas de create, list, etc.)
 - [ ] Creer les routes invoice et integrer avec l'API EZBill pour generer un paiement a partir d'une facture
 
-### 5.3 Multi-currency support `medium` `feature` — `planned`
+### 5.3 Multi-currency support `medium` `feature` — `done`
 
-- [ ] Le champ `currency` existe dans le model mais tout est en USD par defaut
-- [ ] Le DonationWall hardcode `$`
-- [ ] Ajouter la gestion multi-devise : EUR, GBP, etc.
-- [ ] Utiliser `Intl.NumberFormat` pour l'affichage des montants partout
+- [x] Le champ `currency` existe dans le model mais tout est en USD par defaut
+- [x] Le DonationWall hardcode `$`
+- [x] Ajouter la gestion multi-devise : EUR, GBP, etc.
+- [x] Utiliser `Intl.NumberFormat` pour l'affichage des montants partout
 
 ### 5.4 Email receipts `medium` `feature` — `planned`
 
@@ -185,15 +185,15 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] `export const Payment = { get: getPaymentModel }` est un wrapper inutile marque TODO
 - [x] Verifie qu'aucun code ne l'utilise — supprime
 
-### 6.4 Commented-out code dans DonateModal `low` `cleanup` — `planned`
+### 6.4 Commented-out code dans DonateModal `low` `cleanup` — `done`
 
-- [ ] Lignes 149-151 : bloc de code commente (currency symbol prefix dans l'input)
-- [ ] Supprimer ou reimplementer proprement
+- [x] Lignes 149-151 : bloc de code commente (currency symbol prefix dans l'input)
+- [x] Supprimer ou reimplementer proprement
 
-### 6.5 `dangerouslySetInnerHTML` pour CSS dans DonationWall `low` `code-quality` — `planned`
+### 6.5 `dangerouslySetInnerHTML` pour CSS dans DonationWall `low` `code-quality` — `done`
 
-- [ ] Animation CSS injectee via `dangerouslySetInnerHTML` — risque XSS et mauvaise pratique
-- [ ] Deplacer dans un fichier CSS ou utiliser Tailwind `animate-*` classes
+- [x] Animation CSS injectee via `dangerouslySetInnerHTML` — risque XSS et mauvaise pratique
+- [x] Deplacer dans un fichier CSS ou utiliser Tailwind `animate-*` classes
 
 ### 6.6 useDonations missing deps dans useEffect `low` `bug` — `done`
 
@@ -205,7 +205,7 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Phase 7 — Admin & Marketplace
 
-### P-SUCCESS — Payment Success/Cancel Pages `high` `feature` — `in-progress`
+### P-SUCCESS — Payment Success/Cancel Pages `high` `feature` — `done`
 
 - [x] PaymentSuccessPage composant exporte par pay-sdk
 - [x] PurchaseButton composant exporte par pay-sdk
@@ -213,9 +213,9 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] Webhook handling fonctionnel (donation e2e valide)
 - [x] callApi error standardization
 - [x] CORS config cross-app
-- [ ] Integrer PaymentSuccessPage dans EZStart et autres apps
-- [ ] Toast notification "Merci pour votre soutien !" sur la home quand `?payment=success`
-- [ ] Page cancel avec message adapte
+- [x] Integrer PaymentSuccessPage dans EZStart et autres apps
+- [x] Toast notification "Merci pour votre soutien !" sur la home quand `?payment=success`
+- [x] Page cancel avec message adapte
 
 ### P-ADMIN — EZPay Admin Interface `medium` `feature` — `planned`
 
@@ -226,20 +226,30 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [ ] Filtrage par app : chaque app (greenpulse, fengshui, etc.) voit ses propres produits
 - [ ] Interface marketplace-ready : composants exportes par pay-sdk pour integrer dans n'importe quelle app
 
-### P-SUBSCRIPTION — Subscription Management `medium` `feature` — `planned`
+### P-SUBSCRIPTION — Subscription Management `medium` `feature` — `in-progress`
 
-- [ ] SubscribeButton composant pay-sdk (API fonctionne, composant manquant)
-- [ ] Purchase/Subscription e2e testing (checkout complet + webhooks invoice.paid, customer.subscription.created)
+- [x] SubscribeButton composant pay-sdk (API fonctionne, composant manquant)
+- [x] Purchase/Subscription e2e testing (checkout complet + webhooks invoice.paid, customer.subscription.created)
 - [ ] Customer Portal Stripe pour gestion des abonnements
-- [ ] Webhook handling pour subscription events (created, updated, canceled, payment_failed)
+- [x] Webhook handling pour subscription events (created, updated, canceled, payment_failed)
 - [ ] `usePremium()` hook pour verifier le statut d'abonnement dans les apps
 
-### P-MARKETPLACE — Marketplace Components `low` `feature` — `planned`
+### P-MARKETPLACE — Marketplace Components `low` `feature` — `in-progress`
 
-- [ ] ProductGrid : grille de produits avec filtres, search, pagination
-- [ ] ProductCard : carte produit avec image, nom, prix, bouton achat
+- [x] ProductGrid : grille de produits avec filtres, search, pagination
+- [x] ProductCard : carte produit avec image, nom, prix, bouton achat
 - [ ] CartProvider : panier multi-produits (pour les apps qui en ont besoin)
-- [ ] Export via pay-sdk pour consommation dans toute app
+- [x] PaymentHistory : historique des paiements utilisateur
+- [x] Export via pay-sdk pour consommation dans toute app
+
+### P-TESTCENTER — Test Center & Admin Dashboard `done`
+
+- [x] Test Center avec tabs (donate/purchase/subscribe/all)
+- [x] Provider banner + selector (placeholder)
+- [x] Admin dashboard avec stats globales + table paiements
+- [x] Boutons Rembourser et Annuler l'abonnement
+- [x] Auth system intégré (SSO via EZAuth)
+- [x] i18n FR/EN complet
 
 ### P-AI — AI Product Descriptions `low` `feature` — `planned`
 

@@ -267,6 +267,20 @@ Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent �
 | P2-35 | Stripe key safety — sk_test in prod | Warning loggé                                            | logger.warn('WARNING: Test Stripe key in production') quand sk_test en prod. Serveur démarre quand même (acceptable).       | ✅     |
 | P2-36 | Auth sur routes protégées           | 401 sans token sur /payments, /purchases, /subscriptions | 401 sur /purchases, /subscriptions, /payments, /payments/:id, /payments/:id/refund. 200 sur /donations et /donations/stats. | ✅     |
 
+### 2.9 E2E Flows (MCP validated)
+
+| ID    | Test                             | Résultat attendu                      | Résultat réel                                                                                                              | Status |
+| ----- | -------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-37 | SSO Login EZPay                  | Redirect EZAuth → callback → connecté | test-ezpay connecté via SSO, "Authentification réussie !" traduit FR, callback fonctionnel                                 | ✅     |
+| P2-38 | Purchase e2e (€9.99)             | Checkout Stripe → webhook → completed | Flow complet: modal "Purchasing as test-ezpay" → Stripe checkout → carte 4242 → webhook 200 → DB completed → redirect home | ✅     |
+| P2-39 | Subscription yearly e2e (€99.99) | Checkout → webhook → completed        | Flow complet: modal → Stripe → 14 webhooks [200] → DB completed, subscriptionId stocké → redirect /subscribe/success       | ✅     |
+| P2-40 | Subscription monthly e2e (€9.99) | Checkout → webhook → completed        | Flow complet validé depuis Test Center → Stripe → webhooks → /subscribe/success "Abonnement actif !"                       | ✅     |
+| P2-41 | Admin dashboard                  | Stats + table + filtres               | Revenu total 119,97€ (tous types), 5 paiements, filtres type/status, badges colorés, bouton Rembourser                     | ✅     |
+| P2-42 | Test Center                      | Tabs + tous les composants            | 4 onglets (Tout/Dons/Achats/Abonnements), provider banner Stripe, 4 plans subscription (1/3/6/12 mois)                     | ✅     |
+| P2-43 | Pages success/cancel             | 6 pages dédiées                       | donate/purchase/subscribe × success/cancel, toutes rendues correctement avec i18n FR                                       | ✅     |
+| P2-44 | i18n FR complet                  | Accents + traductions                 | Tous les textes FR avec accents corrects. Version EN fonctionne aussi (/en)                                                | ✅     |
+| P2-45 | Auth EZPay web                   | SSO + LoginButton                     | Bouton Connexion/Déconnexion, AuthProvider, callback page, token passé aux composants                                      | ✅     |
+
 ---
 
 ## Phase 3 — EZStart (portfolio/monitoring)
@@ -387,10 +401,10 @@ Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent �
 | ------------------- | ----------- | ------- | ----- | ----- | ------ |
 | Phase 0 — Auto      | 15          | 15      | 0     | 0     | 0      |
 | Phase 1 — EZAuth    | 66          | 54      | 0     | 2     | 10     |
-| Phase 2 — EZPay     | 39          | 31      | 1     | 7     | 0      |
+| Phase 2 — EZPay     | 48          | 40      | 1     | 7     | 0      |
 | Phase 3 — EZStart   | 27          | 12      | 0     | 0     | 15     |
 | Phase 4 — Cross-App | 19          | 0       | 0     | 0     | 19     |
-| **TOTAL**           | **166**     | **112** | **1** | **9** | **44** |
+| **TOTAL**           | **175**     | **121** | **1** | **9** | **44** |
 
 ---
 

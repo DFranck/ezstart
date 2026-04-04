@@ -105,6 +105,12 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Quoi :** Endpoint pour modifier son propre profil (firstName, lastName, avatar).
 - **Pourquoi :** Aucun endpoint self-service pour modifier son profil.
 
+### FEAT-11: Session current marker `done`
+
+- [x] API: isCurrent flag via token hash comparison
+- [x] Web: Badge "Session actuelle" + visual differentiation
+- [x] Bouton Révoquer masqué sur session courante
+
 ---
 
 ## P2 — Qualite de code
@@ -117,7 +123,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
   - `page.tsx` (home) : "Redirecting to login...", "Loading..."
 - **Action :** Utiliser `useTranslations()` partout.
 
-### CODE-3: `as any` casts (4 occurrences) `reduced`
+### CODE-3: `as any` casts (4 occurrences) `done`
 
 - **Fichiers :** `index.ts` (catch block), `auth.service.ts` (waitlist entry find), `AuthCode.test.ts` (model type), `express.d.ts` (index signature).
 - **Action :** Typer correctement ou utiliser des narrowing patterns.
@@ -151,7 +157,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Probleme :** Un seul champ password, pas de confirmation.
 - **Action :** Ajouter un champ "Confirm password".
 
-### UX-5: Error messages pas i18n `partially-done`
+### UX-5: Error messages pas i18n `done`
 
 - **Probleme :** Les erreurs API sont en anglais ("Invalid credentials", "User already exists"). Pas de traduction cote client.
 - **Action :** Mapper les codes d'erreur API vers des messages i18n.
@@ -170,7 +176,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Probleme :** Les routes auth (login, register, token) retournent le data directement via `sendSuccess()`, mais certaines routes waitlist ajoutent `success: true` manuellement dans le schema.
 - **Action :** S'assurer que toutes les reponses passent uniquement par `sendSuccess()`/`sendError()` et que les schemas refletent le wrapper `{ success, data }`.
 
-### API-2: OpenAPI registries manquantes pour OAuth `planned`
+### API-2: OpenAPI registries manquantes pour OAuth `done`
 
 - **Probleme :** `oauthRegistries` est un array vide (`never[]`). Les routes Google OAuth n'ont pas de documentation OpenAPI.
 - **Action :** Ajouter des registries pour `google-authorize` et `google-callback`.
@@ -180,7 +186,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Probleme :** Il y a 2 routes `GET /waitlist/:appName` — une dans `waitlist/get.ts` (publique) et une dans `admin/list-waitlist.ts` (admin avec auth). Elles sont montees sur des routers differents mais la publique expose les emails.
 - **Action :** Supprimer la route publique ou la limiter aux stats (count seulement).
 
-### API-4: Logout ne blacklist pas le token `planned`
+### API-4: Logout ne blacklist pas le token `done`
 
 - **Probleme :** `POST /auth/logout` clear le cookie mais ne blacklist pas le JWT. Si le token a ete copie, il reste valide 7 jours.
 - **Lien :** FEAT-6/FEAT-7 (session management / refresh tokens).
