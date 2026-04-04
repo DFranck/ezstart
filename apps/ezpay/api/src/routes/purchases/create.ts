@@ -77,8 +77,8 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
         productName,
         userId: userId || '',
       },
-      successUrl: `${baseUrl}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/purchase/cancel`,
+      successUrl: `${baseUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/?payment=cancel`,
     })
 
     const payment = await Payment.create({

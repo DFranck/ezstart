@@ -18,6 +18,14 @@ export { DonateModal } from './components/DonateModal.js'
 export type { DonateModalTexts, DonateModalProps } from './components/DonateModal.js'
 export { DonationWall } from './components/DonationWall.js'
 
+// Components - Purchases
+export { PurchaseButton } from './components/PurchaseButton.js'
+export type { PurchaseButtonTexts, PurchaseButtonProps } from './components/PurchaseButton.js'
+
+// Components - Payment Success
+export { PaymentSuccessPage } from './components/PaymentSuccessPage.js'
+export type { PaymentSuccessPageProps } from './components/PaymentSuccessPage.js'
+
 // Re-export types
 export type {
   Payment,

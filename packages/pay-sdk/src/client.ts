@@ -129,7 +129,8 @@ export class PayClient {
       throw new Error(result.error || 'Failed to create purchase')
     }
 
-    return result
+    // Unwrap standard { success, data } response
+    return result.data ?? result
   }
 
   async getPurchases(params?: { userId?: string; limit?: number }): Promise<PaymentsListResponse> {
@@ -167,7 +168,8 @@ export class PayClient {
       throw new Error(result.error || 'Failed to create subscription')
     }
 
-    return result
+    // Unwrap standard { success, data } response
+    return result.data ?? result
   }
 
   async getSubscriptions(userId: string): Promise<PaymentsListResponse> {

@@ -1,5 +1,6 @@
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
+import { PayProvider } from '@ezstart/pay-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
@@ -44,7 +45,9 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         <NextIntlClientProvider messages={messages}>
           <ErrorBoundary title="Something went wrong in EZPay">
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              <PayProvider appName="ezpay">{children}</PayProvider>
+            </ThemeProvider>
           </ErrorBoundary>
         </NextIntlClientProvider>
         <Toaster />

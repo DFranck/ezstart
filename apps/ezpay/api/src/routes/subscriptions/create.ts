@@ -79,8 +79,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
         planName,
         userId: userId || '',
       },
-      successUrl: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/subscribe/cancel`,
+      successUrl: `${baseUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/?payment=cancel`,
     })
 
     const payment = await Payment.create({

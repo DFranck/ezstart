@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { Div, H1, H2, H3, Main, P } from '@ezstart/ui/components'
+import { TestZone } from './test-zone'
 
 export default function HomePage() {
   const t = useTranslations('home')
@@ -54,6 +55,8 @@ export default function HomePage() {
             </Div>
           </Div>
         </Div>
+
+        <TestZone />
       </Div>
     </Main>
   )
