@@ -241,6 +241,23 @@ export class PayClient {
     return result
   }
 
+  // ===== REFUNDS =====
+
+  async refundPayment(paymentId: string): Promise<{ success: boolean }> {
+    const response = await fetch(`${this.config.baseURL}/payments/${paymentId}/refund`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to refund payment')
+    }
+
+    return result
+  }
+
   // ===== GENERAL =====
 
   async getPayments(params?: {

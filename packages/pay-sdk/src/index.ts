@@ -29,6 +29,21 @@ export type { PurchaseButtonTexts, PurchaseButtonProps } from './components/Purc
 export { SubscribeButton } from './components/SubscribeButton.js'
 export type { SubscribeButtonTexts, SubscribeButtonProps } from './components/SubscribeButton.js'
 
+// Components - Subscriptions (management)
+export { SubscriptionCard } from './components/SubscriptionCard.js'
+export type { SubscriptionCardProps, SubscriptionCardTexts } from './components/SubscriptionCard.js'
+
+// Components - Refund
+export { RefundButton } from './components/RefundButton.js'
+export type { RefundButtonProps, RefundButtonTexts } from './components/RefundButton.js'
+
+// Components - Dashboard
+export { UserPaymentDashboard } from './components/UserPaymentDashboard.js'
+export type {
+  UserPaymentDashboardProps,
+  UserPaymentDashboardTexts,
+} from './components/UserPaymentDashboard.js'
+
 // Components - Payment Success
 export { PaymentSuccessPage } from './components/PaymentSuccessPage.js'
 export type { PaymentSuccessPageProps } from './components/PaymentSuccessPage.js'
