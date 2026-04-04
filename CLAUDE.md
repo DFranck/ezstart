@@ -211,7 +211,7 @@ DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .en
 pnpm install
 
 # Lancer l'app ciblée (type watching inclus automatiquement)
-pnpm dev:ez     # EZStart
+pnpm dev:ez     # EZStart + EZAuth + EZPay
 pnpm dev:bill   # EZBill + EZAuth
 pnpm dev:gp     # GreenPulse + EZAuth
 pnpm dev:pay    # EZPay
