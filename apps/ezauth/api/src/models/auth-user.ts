@@ -75,21 +75,7 @@ const authUserSchema = new Schema<AuthUserDocument>(
       type: Boolean,
       default: false,
     },
-    apps: [
-      {
-        type: String,
-        enum: [
-          'ezbill',
-          'admin',
-          'ezstart',
-          'green-pulse',
-          'fengshui',
-          'asc-tcd',
-          'gacha-analyzer',
-          'ezpay',
-        ],
-      },
-    ],
+    apps: [{ type: String }],
     // RBAC fields
     roles: [
       {
