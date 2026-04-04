@@ -1,9 +1,12 @@
 'use client'
 
+import { useAuth } from '@ezstart/auth-sdk'
 import { Div, H2, H3, P } from '@ezstart/ui/components'
-import { DonateModal, PurchaseButton } from '@ezstart/pay-sdk'
+import { DonateModal, PurchaseButton, SubscribeButton } from '@ezstart/pay-sdk'
 
 export function TestZone() {
+  const { user } = useAuth()
+
   return (
     <Div className="mt-12 p-6 border-2 border-dashed border-yellow-500/50 rounded-lg bg-yellow-500/5">
       <Div className="mb-6">
@@ -25,7 +28,9 @@ export function TestZone() {
             projectName="EZPay Development"
             amounts={[5, 10, 25, 50]}
             currency="EUR"
-            currencySymbol="€"
+            userId={user?._id}
+            userEmail={user?.email}
+            userName={user?.username}
           />
         </Div>
 
@@ -39,8 +44,10 @@ export function TestZone() {
             productName="EZPay Test Item"
             amount={9.99}
             currency="EUR"
-            currencySymbol="€"
             description="Test product for development"
+            userId={user?._id}
+            userEmail={user?.email}
+            userName={user?.username}
           />
         </Div>
 
@@ -54,8 +61,45 @@ export function TestZone() {
             productName="EZPay Premium Pass"
             amount={24.99}
             currency="EUR"
-            currencySymbol="€"
             description="Premium access pass for testing"
+            userId={user?._id}
+            userEmail={user?.email}
+            userName={user?.username}
+          />
+        </Div>
+        {/* Subscription - Monthly */}
+        <Div className="p-4 border rounded-lg flex flex-col gap-3">
+          <H3 className="text-lg font-semibold">Subscription (Monthly)</H3>
+          <P className="text-sm text-muted-foreground">Pro Plan — recurring monthly</P>
+          <SubscribeButton
+            projectId="ezpay"
+            priceId="ezpay-pro-monthly"
+            planName="Pro Plan"
+            amount={9.99}
+            intervalCount={1}
+            currency="EUR"
+            description="Monthly pro subscription for testing"
+            userId={user?._id}
+            userEmail={user?.email}
+            userName={user?.username}
+          />
+        </Div>
+
+        {/* Subscription - Yearly */}
+        <Div className="p-4 border rounded-lg flex flex-col gap-3">
+          <H3 className="text-lg font-semibold">Subscription (Yearly)</H3>
+          <P className="text-sm text-muted-foreground">Pro Plan — recurring yearly</P>
+          <SubscribeButton
+            projectId="ezpay"
+            priceId="ezpay-pro-yearly"
+            planName="Pro Plan"
+            amount={99.99}
+            intervalCount={12}
+            currency="EUR"
+            description="Yearly pro subscription for testing"
+            userId={user?._id}
+            userEmail={user?.email}
+            userName={user?.username}
           />
         </Div>
       </Div>

@@ -53,7 +53,8 @@ export interface Subscription extends Payment {
     subscriptionId: string
     planId: string
     planName: string
-    interval: 'month' | 'year'
+    interval: 'month'
+    intervalCount: number
   }
 }
 
@@ -72,6 +73,9 @@ export interface PayClientConfig {
   appName: string
   /** Explicit return URL for payment redirects. Falls back to window.location origin. */
   returnUrl?: string
+  /** Optional callback to retrieve the current auth token dynamically.
+   *  When provided, the token is sent as `Authorization: Bearer <token>` on every request. */
+  getToken?: () => string | null | undefined
 }
 
 // API Requests
@@ -104,7 +108,8 @@ export interface CreateSubscriptionRequest {
   planId: string
   planName: string
   amount: number
-  interval: 'month' | 'year'
+  interval?: 'month'
+  intervalCount?: number
   currency?: string
   userId?: string
   customerName?: string

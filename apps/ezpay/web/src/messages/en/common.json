@@ -1,5 +1,16 @@
 {
   "appName": "EZPay",
   "description": "Universal payment system for all EZStart projects",
-  "tagline": "Donations, purchases, subscriptions made simple"
+  "tagline": "Donations, purchases, subscriptions made simple",
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "callback": {
+      "success": "Authentication successful!",
+      "redirecting": "Redirecting to home...",
+      "backToHome": "Back to Home",
+      "error": "Authentication failed",
+      "noCode": "No authorization code found"
+    }
+  }
 }

@@ -27,7 +27,7 @@ const createPurchaseSchema = z.object({
   productId: z.string().describe('Product identifier'),
   productName: z.string().describe('Product display name'),
   amount: z.number().positive().describe('Purchase amount in currency units'),
-  currency: z.string().default('USD').describe('Currency code (USD, EUR, etc.)'),
+  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   userId: z.string().optional().describe('EZAuth user ID if logged in'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
@@ -57,7 +57,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       productId,
       productName,
       amount,
-      currency = 'USD',
+      currency = 'EUR',
       userId,
       customerEmail,
       returnUrl,
@@ -77,8 +77,8 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
         productName,
         userId: userId || '',
       },
-      successUrl: `${baseUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/?payment=cancel`,
+      successUrl: `${baseUrl}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/purchase/cancel`,
     })
 
     const payment = await Payment.create({

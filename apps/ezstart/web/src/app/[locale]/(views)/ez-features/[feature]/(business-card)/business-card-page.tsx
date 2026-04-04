@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Checkbox,
   Div,
   H1,
   H3,
@@ -16,6 +17,11 @@ import {
   Label,
   P,
   Section,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Spinner,
 } from '@ezstart/ui/components'
 import { useState } from 'react'
@@ -192,12 +198,12 @@ function BusinessCardGeneratorContent() {
                   <Div className="space-y-2">
                     <Label htmlFor="primary-color">{t('generator.design.primaryColorLabel')}</Label>
                     <Div className="flex gap-2">
-                      <input
+                      <Input
                         id="primary-color"
                         type="color"
                         value={config.primaryColor}
                         onChange={e => updateConfig({ primaryColor: e.target.value })}
-                        className="h-10 w-20 cursor-pointer"
+                        className="h-10 w-20 cursor-pointer p-1"
                       />
                       <Input
                         type="text"
@@ -213,12 +219,12 @@ function BusinessCardGeneratorContent() {
                       {t('generator.design.secondaryColorLabel')}
                     </Label>
                     <Div className="flex gap-2">
-                      <input
+                      <Input
                         id="secondary-color"
                         type="color"
                         value={config.secondaryColor}
                         onChange={e => updateConfig({ secondaryColor: e.target.value })}
-                        className="h-10 w-20 cursor-pointer"
+                        className="h-10 w-20 cursor-pointer p-1"
                       />
                       <Input
                         type="text"
@@ -232,28 +238,33 @@ function BusinessCardGeneratorContent() {
 
                 <Div className="space-y-2">
                   <Label htmlFor="qr-data">{t('generator.design.qrContentLabel')}</Label>
-                  <select
-                    id="qr-data"
+                  <Select
                     value={config.qrData}
-                    onChange={e =>
-                      updateConfig({ qrData: e.target.value as BusinessCardConfig['qrData'] })
+                    onValueChange={value =>
+                      updateConfig({ qrData: value as BusinessCardConfig['qrData'] })
                     }
-                    className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    <option value="vcard">{t('generator.design.qrContent.vcard')}</option>
-                    <option value="website">{t('generator.design.qrContent.website')}</option>
-                    <option value="whatsapp">{t('generator.design.qrContent.whatsapp')}</option>
-                    <option value="email">{t('generator.design.qrContent.email')}</option>
-                  </select>
+                    <SelectTrigger id="qr-data" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="vcard">{t('generator.design.qrContent.vcard')}</SelectItem>
+                      <SelectItem value="website">
+                        {t('generator.design.qrContent.website')}
+                      </SelectItem>
+                      <SelectItem value="whatsapp">
+                        {t('generator.design.qrContent.whatsapp')}
+                      </SelectItem>
+                      <SelectItem value="email">{t('generator.design.qrContent.email')}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Div>
 
                 <Div className="flex items-center gap-2">
-                  <input
+                  <Checkbox
                     id="include-qr"
-                    type="checkbox"
                     checked={config.includeQR}
-                    onChange={e => updateConfig({ includeQR: e.target.checked })}
-                    className="h-4 w-4"
+                    onCheckedChange={checked => updateConfig({ includeQR: checked === true })}
                   />
                   <Label htmlFor="include-qr" className="cursor-pointer">
                     {t('generator.design.includeQrLabel')}

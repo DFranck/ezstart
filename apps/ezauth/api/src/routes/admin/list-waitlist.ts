@@ -69,7 +69,6 @@ const listWaitlistController = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 20
 
     // Find waitlist
-    // @ts-expect-error - Mongoose type inference issue
     const waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {

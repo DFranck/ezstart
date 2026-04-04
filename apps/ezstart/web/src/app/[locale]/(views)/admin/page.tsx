@@ -59,7 +59,7 @@ function AdminPanelContent() {
   } = useQuery({
     queryKey: ['admin', 'users', page, limit, searchQuery, roleFilter],
     queryFn: async () => {
-      const query: Record<string, any> = {
+      const query: Record<string, string> = {
         page: String(page),
         limit: String(limit),
       }

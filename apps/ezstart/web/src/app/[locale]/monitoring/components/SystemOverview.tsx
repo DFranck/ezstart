@@ -76,9 +76,6 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
   const router = useRouter()
   const t = useTranslations('monitoring')
 
-  // Calculate global health score (same as docs/README.md)
-  const globalHealthScore = 96.6
-
   // Calculate stats
   const totalServices = projects.length
   const healthyServices = summary.healthy
@@ -110,15 +107,21 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
         )
       : 0
 
+  // Calculate global health score dynamically from sub-scores
+  const errorScore = recentErrors.length === 0 ? 100 : Math.max(0, 100 - recentErrors.length * 5)
+  const performanceScore = avgResponseTime < 200 ? 95 : avgResponseTime < 500 ? 80 : 60
+  const globalHealthScore =
+    Math.round(((uptimePercent + avgAuditScore + errorScore + performanceScore) / 4) * 10) / 10
+
   // Quick stats cards
   const stats: StatCard[] = [
     {
       title: t('overview.stats.globalHealth.title'),
       value: `${globalHealthScore}/100`,
-      subtitle: `11 ${t('overview.stats.globalHealth.subtitle')}`,
+      subtitle: `${totalServices} ${t('overview.stats.globalHealth.subtitle')}`,
       icon: 'lucide:Activity',
-      variant: 'success',
-      trend: { value: 1.2, isPositive: true },
+      variant:
+        globalHealthScore >= 90 ? 'success' : globalHealthScore >= 70 ? 'warning' : 'destructive',
     },
     {
       title: t('overview.stats.servicesUptime.title'),

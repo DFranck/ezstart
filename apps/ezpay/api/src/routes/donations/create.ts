@@ -26,7 +26,7 @@ const createDonationSchema = z.object({
   projectId: z.string().describe('Project identifier'),
   projectName: z.string().optional().describe('Project display name'),
   amount: z.number().positive().describe('Donation amount in currency units'),
-  currency: z.string().default('USD').describe('Currency code (USD, EUR, etc.)'),
+  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   message: z.string().optional().describe('Optional message from donor'),
   isPublic: z.boolean().default(true).describe('Whether donation is shown publicly'),
   isAnonymous: z.boolean().default(false).describe('Whether donor wants to stay anonymous'),
@@ -59,7 +59,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       projectId,
       projectName,
       amount,
-      currency = 'USD',
+      currency = 'EUR',
       message,
       isPublic = true,
       isAnonymous = false,
@@ -88,8 +88,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
         isPublic: isPublic.toString(),
         isAnonymous: isAnonymous.toString(),
       },
-      successUrl: `${baseUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/?payment=cancel`,
+      successUrl: `${baseUrl}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/donate/cancel`,
     })
 
     // Create payment record in DB

@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, Div, H3, P, Span, Spinner } from '@ezstart/ui/components'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import {
   LineChart,
   Line,
@@ -38,6 +39,7 @@ interface HistoryResponse {
 }
 
 export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphProps) {
+  const t = useTranslations('monitoring')
   const { data, isLoading, error } = useQuery<HistoryResponse>({
     queryKey: ['monitoring', 'history', serviceId, hours],
     queryFn: async () => {
@@ -71,7 +73,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
           <H3 size="h5">{title || `${serviceId} - Trending`}</H3>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <P className="text-muted-foreground">Unable to load trending data</P>
+          <P className="text-muted-foreground">{t('trending.unableToLoad')}</P>
         </CardContent>
       </Card>
     )
@@ -100,23 +102,25 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
         <H3 size="h5">{title || `${serviceId} - Last ${hours}h`}</H3>
         <Div className="flex gap-4 text-sm">
           <P className="text-muted-foreground">
-            Uptime: <Span className="font-semibold text-foreground">{data.uptimePercentage}%</Span>
+            {t('trending.uptime')}{' '}
+            <Span className="font-semibold text-foreground">{data.uptimePercentage}%</Span>
           </P>
           <P className="text-muted-foreground">
-            Avg Response:{' '}
+            {t('trending.avgResponse')}{' '}
             <Span className="font-semibold text-foreground">
               {data.avgResponseTime ? `${data.avgResponseTime}ms` : 'N/A'}
             </Span>
           </P>
           <P className="text-muted-foreground">
-            Checks: <Span className="font-semibold text-foreground">{data.totalChecks}</Span>
+            {t('trending.checks')}{' '}
+            <Span className="font-semibold text-foreground">{data.totalChecks}</Span>
           </P>
         </Div>
       </CardHeader>
       <CardContent>
         {sampledData.length === 0 ? (
           <Div className="flex items-center justify-center h-64">
-            <P className="text-muted-foreground">No data available for the selected period</P>
+            <P className="text-muted-foreground">{t('trending.noData')}</P>
           </Div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>

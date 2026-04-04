@@ -6,15 +6,10 @@ export const paymentStatusSchema = z.enum([
   'completed',
   'failed',
   'refunded',
-  'cancelled'
+  'cancelled',
 ])
 
-export const paymentTypeSchema = z.enum([
-  'donation',
-  'purchase',
-  'subscription',
-  'invoice'
-])
+export const paymentTypeSchema = z.enum(['donation', 'purchase', 'subscription', 'invoice'])
 
 export const paymentProviderSchema = z.enum(['stripe', 'paypal'])
 
@@ -24,7 +19,7 @@ export const basePaymentSchema = z.object({
   projectName: z.string(),
   type: paymentTypeSchema,
   amount: z.number().positive(),
-  currency: z.string().default('USD'),
+  currency: z.string().default('EUR'),
   provider: paymentProviderSchema,
   paymentId: z.string(),
   paymentMethod: z.string().optional(),
@@ -43,7 +38,7 @@ export const basePaymentSchema = z.object({
 export const createDonationSchema = z.object({
   projectId: z.string(),
   amount: z.number().positive(),
-  currency: z.string().default('USD'),
+  currency: z.string().default('EUR'),
   message: z.string().max(500, 'Message too long').optional(),
   isPublic: z.boolean().default(true),
   isAnonymous: z.boolean().default(false),
@@ -58,7 +53,7 @@ export const createPurchaseSchema = z.object({
   productName: z.string(),
   amount: z.number().positive(),
   quantity: z.number().positive().default(1),
-  currency: z.string().default('USD'),
+  currency: z.string().default('EUR'),
   userId: z.string().optional(),
   customerName: z.string().optional(),
   customerEmail: z.string().email('Invalid email').optional(),
@@ -69,8 +64,9 @@ export const createSubscriptionSchema = z.object({
   planId: z.string(),
   planName: z.string(),
   amount: z.number().positive(),
-  interval: z.enum(['month', 'year']),
-  currency: z.string().default('USD'),
+  interval: z.enum(['month']).default('month'),
+  intervalCount: z.number().int().min(1).max(12).default(1),
+  currency: z.string().default('EUR'),
   userId: z.string().optional(),
   customerName: z.string().optional(),
   customerEmail: z.string().email('Invalid email').optional(),

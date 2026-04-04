@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import {
 } from '@ezstart/ui/components'
 import { BackButton } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/fetch-client'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -22,6 +24,7 @@ interface Session {
   ip: string | null
   createdAt: string
   expiresAt: string
+  isCurrent: boolean
 }
 
 function parseUserAgent(ua: string | null): string {
@@ -63,12 +66,19 @@ export default function SessionsPage() {
   const [revokingAll, setRevokingAll] = useState(false)
   const [error, setError] = useState('')
 
+  const refreshToken = useAuthStore(state => state.refreshToken)
+
   const fetchSessions = useCallback(async () => {
     try {
       setLoading(true)
+      const headers: Record<string, string> = {}
+      if (refreshToken) {
+        headers['X-Refresh-Token'] = refreshToken
+      }
       const response = await callApi('/auth/sessions', {
         appName: 'ezauth',
         method: 'GET',
+        headers,
       })
       if (response.ok) {
         const data = response.data as { sessions: Session[] }
@@ -79,7 +89,7 @@ export default function SessionsPage() {
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, refreshToken])
 
   useEffect(() => {
     fetchSessions()
@@ -160,12 +170,21 @@ export default function SessionsPage() {
         {sessions.map(session => (
           <Div
             key={session.id}
-            className="flex items-center justify-between border rounded-lg p-3 gap-3"
+            className={`flex items-center justify-between border rounded-lg p-3 gap-3 ${
+              session.isCurrent ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : ''
+            }`}
           >
             <Div className="flex-1 min-w-0">
-              <P size="sm" className="font-medium truncate">
-                {parseUserAgent(session.userAgent)}
-              </P>
+              <Div className="flex items-center gap-2">
+                <P size="sm" className="font-medium truncate">
+                  {parseUserAgent(session.userAgent)}
+                </P>
+                {session.isCurrent && (
+                  <Badge variant="default" className="shrink-0 text-xs">
+                    {t('currentSession')}
+                  </Badge>
+                )}
+              </Div>
               <P size="xs" className="text-muted-foreground">
                 {session.ip || t('unknownIp')}
               </P>
@@ -173,14 +192,16 @@ export default function SessionsPage() {
                 {t('createdAt', { date: formatDate(session.createdAt) })}
               </P>
             </Div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => handleRevoke(session.id)}
-              disabled={revoking === session.id}
-            >
-              {revoking === session.id ? <Spinner size="sm" /> : t('revoke')}
-            </Button>
+            {!session.isCurrent && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleRevoke(session.id)}
+                disabled={revoking === session.id}
+              >
+                {revoking === session.id ? <Spinner size="sm" /> : t('revoke')}
+              </Button>
+            )}
           </Div>
         ))}
 

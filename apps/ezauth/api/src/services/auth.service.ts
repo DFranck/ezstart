@@ -59,11 +59,10 @@ export class AuthService {
     if (data.accessCode) {
       const WaitlistModel = await getWaitlistModel()
 
-      // Find waitlist entry with this access code
-      // @ts-expect-error - Mongoose type inference issue
+      // Find waitlist entry with this access code (dot-notation query for nested subdocument)
       const waitlist = await WaitlistModel.findOne({
         'emails.accessCode': data.accessCode,
-      })
+      } as Record<string, string>)
 
       if (!waitlist) {
         throw new Error('Invalid access code')
@@ -440,7 +439,7 @@ export class AuthService {
   /**
    * Get all active (non-revoked, non-expired) sessions for a user.
    */
-  static async getUserSessions(userId: string) {
+  static async getUserSessions(userId: string, currentTokenHash?: string) {
     const RefreshTokenModel = await getRefreshTokenModel()
     const sessions = await RefreshTokenModel.find({
       userId,
@@ -448,7 +447,7 @@ export class AuthService {
       expiresAt: { $gt: new Date() },
     })
       .sort({ createdAt: -1 })
-      .select('_id userAgent ip createdAt expiresAt')
+      .select('_id userAgent ip createdAt expiresAt tokenHash')
       .lean()
 
     return sessions.map(s => ({
@@ -457,6 +456,7 @@ export class AuthService {
       ip: s.ip || null,
       createdAt: s.createdAt.toISOString(),
       expiresAt: s.expiresAt.toISOString(),
+      isCurrent: currentTokenHash ? s.tokenHash === currentTokenHash : false,
     }))
   }
 }

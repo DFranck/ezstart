@@ -3,6 +3,10 @@ import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
 import { getPaymentModel, type PaymentDocument } from '../../models/Payment.js'
 import type { Model } from 'mongoose'
 
+type PaymentType = PaymentDocument['type']
+type PaymentProvider = PaymentDocument['provider']
+type PaymentStatus = PaymentDocument['status']
+
 describe('Payment Model', () => {
   let PaymentModel: Model<PaymentDocument>
 
@@ -98,7 +102,7 @@ describe('Payment Model', () => {
         const payment = await PaymentModel.create({
           projectId: 'ezbill',
           projectName: 'EZBill',
-          type: type as any,
+          type: type as PaymentType,
           amount: 10.0,
           paymentId: `cs_test_${type}`,
         })
@@ -128,7 +132,7 @@ describe('Payment Model', () => {
           projectName: 'EZBill',
           type: 'donation',
           amount: 10.0,
-          provider: provider as any,
+          provider: provider as PaymentProvider,
           paymentId: `cs_test_${provider}`,
         })
         expect(payment.provider).toBe(provider)
@@ -145,7 +149,7 @@ describe('Payment Model', () => {
           projectName: 'EZBill',
           type: 'donation',
           amount: 10.0,
-          status: status as any,
+          status: status as PaymentStatus,
           paymentId: `cs_test_${status}`,
         })
         expect(payment.status).toBe(status)
@@ -249,7 +253,7 @@ describe('Payment Model', () => {
       expect(payment.metadata?.interval).toBe('month')
     })
 
-    it('should support yearly subscriptions', async () => {
+    it('should support yearly subscriptions (12 months)', async () => {
       const payment = await PaymentModel.create({
         projectId: 'ezbill',
         projectName: 'EZBill',
@@ -260,11 +264,13 @@ describe('Payment Model', () => {
           subscriptionId: 'sub_456',
           planId: 'premium-yearly',
           planName: 'Premium Yearly',
-          interval: 'year',
+          interval: 'month',
+          intervalCount: 12,
         },
       })
 
-      expect(payment.metadata?.interval).toBe('year')
+      expect(payment.metadata?.interval).toBe('month')
+      expect(payment.metadata?.intervalCount).toBe(12)
       expect(payment.amount).toBe(99.99)
     })
   })

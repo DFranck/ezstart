@@ -1,9 +1,6 @@
-import googleAuthorizeRouter from './google-authorize.js'
-import googleCallbackRouter from './google-callback.js'
+import googleAuthorizeRouter, { googleAuthorizeRegistry } from './google-authorize.js'
+import googleCallbackRouter, { googleCallbackRegistry } from './google-callback.js'
 
-export const oauthRegistries: never[] = []
+export const oauthRegistries = [googleAuthorizeRegistry, googleCallbackRegistry]
 
-export const oauthRouters = [
-  googleAuthorizeRouter,
-  googleCallbackRouter
-]
+export const oauthRouters = [googleAuthorizeRouter, googleCallbackRouter]

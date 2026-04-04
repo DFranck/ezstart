@@ -197,7 +197,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | P2-5  | Donation wall — pagination          | limit/offset fonctionnent                           | meta.total=0, meta.limit=20, meta.offset=0. Pagination fonctionne.                                                                                                                                                                                                    | ✅     |
 | P2-6  | Donation stats                      | Total, count, recent, breakdown corrects            | Stats endpoint fonctionne. total=0, count=0 (rien de completed). byType breakdown présent.                                                                                                                                                                            | ✅     |
 | P2-7  | Verify payment — session valide     | Payment vérifié via Stripe, status=completed        | Purchase créé via API, checkout URL Stripe générée.                                                                                                                                                                                                                   | ✅     |
-| P2-8  | Verify payment — session invalide   | Erreur appropriée                                   |                                                                                                                                                                                                                                                                       | ⏳     |
+| P2-8  | Verify payment — session invalide   | Erreur appropriée                                   | Retourne 404 propre {success:false, error:'Payment not found'} sans crash. optionalAuthMiddleware OK.                                                                                                                                                                 | ✅     |
 | P2-8a | Stripe checkout — donation complète | Flow donation complet end-to-end                    | Flow donation complet validé end-to-end en MCP: Frontend → DonateModal → EZPay API → Stripe Checkout → Carte test 4242 → Processing → payment_intent.succeeded webhook [200] → DB status=completed, amount=5€, completedAt set. Stripe listen forwarding webhooks OK. | ✅     |
 | P2-8b | Webhooks Stripe — réception         | Webhooks reçus et traités avec 200 OK               | Webhooks reçus et traités: payment_intent.succeeded [200], charge.succeeded [200], checkout.session.completed [200], payment_intent.created [200]. Tous 200 OK.                                                                                                       | ✅     |
 | P2-8c | Test products endpoint              | Retourne les produits de test par type              | GET /test-products retourne 2 purchases, 2 subscriptions, donation presets.                                                                                                                                                                                           | ✅     |
@@ -206,66 +206,66 @@ Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent �
 
 ### 2.2 Purchases
 
-| ID    | Test                        | Résultat attendu                   | Résultat réel                                                                     | Status |
-| ----- | --------------------------- | ---------------------------------- | --------------------------------------------------------------------------------- | ------ |
-| P2-9  | Create purchase             | Payment créé, checkoutUrl retourné | Purchase API crée payment + checkout URL Stripe (200 OK). E2e checkout non testé. | ✅     |
-| P2-10 | List purchases — user       | Seuls ses achats retournés         |                                                                                   | ⏳     |
-| P2-11 | List purchases — pagination | limit/offset fonctionnent          |                                                                                   | ⏳     |
+| ID    | Test                        | Résultat attendu                   | Résultat réel                                                                                                                                | Status |
+| ----- | --------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-9  | Create purchase             | Payment créé, checkoutUrl retourné | Purchase API crée payment + checkout URL Stripe (200 OK). E2e checkout non testé.                                                            | ✅     |
+| P2-10 | List purchases — user       | Seuls ses achats retournés         | SECURITE: Retourne TOUS les achats de tous les users (9 items). Le handler ne filtre pas par req.user — userId est un query param optionnel. | ⚠️     |
+| P2-11 | List purchases — pagination | limit/offset fonctionnent          | Pagination OK: meta.limit=2, meta.offset=0, 2 items retournés sur 9 total.                                                                   | ✅     |
 
 ### 2.3 Subscriptions
 
-| ID    | Test                      | Résultat attendu                   | Résultat réel                                                                                         | Status |
-| ----- | ------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------- | ------ |
-| P2-12 | Create subscription       | Payment créé, checkoutUrl retourné | Subscription API crée payment + checkout URL Stripe avec récurrence (200 OK). E2e checkout non testé. | ✅     |
-| P2-13 | List subscriptions — user | Seuls ses abos retournés           |                                                                                                       | ⏳     |
-| P2-14 | Cancel subscription       | Stripe cancel, status=cancelled    |                                                                                                       | ⏳     |
+| ID    | Test                      | Résultat attendu                   | Résultat réel                                                                                                                          | Status |
+| ----- | ------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-12 | Create subscription       | Payment créé, checkoutUrl retourné | Subscription API crée payment + checkout URL Stripe avec récurrence (200 OK). E2e checkout non testé.                                  | ✅     |
+| P2-13 | List subscriptions — user | Seuls ses abos retournés           | SECURITE: Même faille que P2-10 — retourne toutes les subscriptions de tous les users. Pas de filtre auto par userId.                  | ⚠️     |
+| P2-14 | Cancel subscription       | Stripe cancel, status=cancelled    | Endpoint POST /subscriptions/:id/cancel existe, retourne 404 propre. Pas de vérif ownership. Nécessite webhook data pour test complet. | ⚠️     |
 
 ### 2.4 Payments (admin)
 
-| ID    | Test                      | Résultat attendu                        | Résultat réel | Status |
-| ----- | ------------------------- | --------------------------------------- | ------------- | ------ |
-| P2-15 | List payments — admin     | Tous les paiements, filtres type/status |               | ⏳     |
-| P2-16 | List payments — non-admin | Seuls ses paiements                     |               | ⏳     |
-| P2-17 | Get payment — by ID       | Payment retourné                        |               | ⏳     |
-| P2-18 | Refund — admin            | Stripe refund, status=refunded          |               | ⏳     |
-| P2-19 | Refund — non-admin        | 403 forbidden                           |               | ⏳     |
+| ID    | Test                      | Résultat attendu                        | Résultat réel                                                                                                                                                     | Status |
+| ----- | ------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-15 | List payments — admin     | Tous les paiements, filtres type/status | BUG: req.user jamais peuplé par authMiddleware (seul req.userId est set). Admin traité comme user lambda. Filtres type/status acceptés. Pagination meta présente. | ⚠️     |
+| P2-16 | List payments — non-admin | Seuls ses paiements                     | Safe par accident: req.user.\_id undefined → query userId=undefined → liste vide. Le filtre user ne fonctionne pas pour la bonne raison.                          | ⚠️     |
+| P2-17 | Get payment — by ID       | Payment retourné                        | 404 correct pour ID inexistant. SECURITE: aucun contrôle d'accès — tout user auth peut voir n'importe quel paiement par ID.                                       | ⚠️     |
+| P2-18 | Refund — admin            | Stripe refund, status=refunded          | FAIL: 403 'Admin access required' pour TOUT le monde, y compris admin. Cause: req.user toujours undefined.                                                        | ❌     |
+| P2-19 | Refund — non-admin        | 403 forbidden                           | 403 correct mais pour la mauvaise raison (req.user undefined → rejette tout le monde).                                                                            | ✅     |
 
 ### 2.5 Webhooks Stripe
 
-| ID    | Test                          | Résultat attendu                                   | Résultat réel | Status |
-| ----- | ----------------------------- | -------------------------------------------------- | ------------- | ------ |
-| P2-20 | checkout.session.completed    | Payment → completed, paymentIntentId stocké        |               | ⏳     |
-| P2-21 | checkout.session.expired      | Payment → cancelled                                |               | ⏳     |
-| P2-22 | charge.refunded               | Payment → refunded (lookup via paymentIntentId)    |               | ⏳     |
-| P2-23 | customer.subscription.updated | Status mappé correctement (active→completed, etc.) |               | ⏳     |
-| P2-24 | customer.subscription.deleted | Payment → cancelled                                |               | ⏳     |
-| P2-25 | invoice.payment_failed        | Payment → failed                                   |               | ⏳     |
-| P2-26 | Webhook — signature invalide  | 400 rejected                                       |               | ⏳     |
+| ID    | Test                          | Résultat attendu                                   | Résultat réel                                                                                                                         | Status |
+| ----- | ----------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-20 | checkout.session.completed    | Payment → completed, paymentIntentId stocké        | Code review: paymentIntentId stocké, status→completed, completedAt set. Lookup via paymentId:sessionId correct.                       | ✅     |
+| P2-21 | checkout.session.expired      | Payment → cancelled                                | Code review: status→cancelled via paymentId:sessionId. Simple et correct.                                                             | ✅     |
+| P2-22 | charge.refunded               | Payment → refunded (lookup via paymentIntentId)    | Code review: Lookup via stripePaymentIntentId (pas session id) — correct. Fonctionne grâce au stockage dans checkout.completed.       | ✅     |
+| P2-23 | customer.subscription.updated | Status mappé correctement (active→completed, etc.) | Code review: Mapping exhaustif des 8 statuts Stripe (active→completed, past_due→pending, canceled→cancelled, etc.). Fallback→pending. | ✅     |
+| P2-24 | customer.subscription.deleted | Payment → cancelled                                | Code review: status→cancelled via metadata.subscriptionId. Correct.                                                                   | ✅     |
+| P2-25 | invoice.payment_failed        | Payment → failed                                   | Code review: Guard sur subscriptionId avant update. status→failed. Bonne pratique.                                                    | ✅     |
+| P2-26 | Webhook — signature invalide  | 400 rejected                                       | Sans header: 'Missing webhook signature'. Avec fausse signature: 'Invalid signature'. 2 couches de validation (header + crypto).      | ✅     |
 
 ### 2.6 Pages résultat
 
-| ID    | Test               | Résultat attendu                           | Résultat réel | Status |
-| ----- | ------------------ | ------------------------------------------ | ------------- | ------ |
-| P2-27 | /donate/success    | Page succès affichée, message confirmation |               | ⏳     |
-| P2-28 | /donate/cancel     | Page annulation affichée, bouton retry     |               | ⏳     |
-| P2-29 | /purchase/success  | Page succès achat affichée                 |               | ⏳     |
-| P2-30 | /subscribe/success | Page succès abo affichée                   |               | ⏳     |
+| ID    | Test               | Résultat attendu                           | Résultat réel                                                                                                                            | Status |
+| ----- | ------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-27 | /donate/success    | Page succès affichée, message confirmation | Page 'Merci !' avec icône cœur, message, bouton retour, section 'Et maintenant ?'. Accents FR manquants (ete, recu, succes, generosite). | ✅     |
+| P2-28 | /donate/cancel     | Page annulation affichée, bouton retry     | Page 'Paiement annule' avec bouton Réessayer + Retour, section 'Besoin d'aide ?'. Accents FR manquants.                                  | ✅     |
+| P2-29 | /purchase/success  | Page succès achat affichée                 | Page 'Achat finalise !' avec message adapté (achat, pas donation). Section 'Et maintenant ?' avec accès immédiat.                        | ✅     |
+| P2-30 | /subscribe/success | Page succès abo affichée                   | Page 'Abonnement actif !' avec message adapté, 3 infos dans 'Et maintenant ?' (email, accès, reçu Stripe).                               | ✅     |
 
 ### 2.7 Pay-SDK Components
 
-| ID    | Test         | Résultat attendu                                               | Résultat réel | Status |
-| ----- | ------------ | -------------------------------------------------------------- | ------------- | ------ |
-| P2-31 | DonateButton | Click → ouvre le flow donation                                 |               | ⏳     |
-| P2-32 | DonateModal  | Montants prédéfinis, montant custom, message, anonymous toggle |               | ⏳     |
-| P2-33 | DonationWall | Liste donations, loading skeleton, empty state                 |               | ⏳     |
+| ID    | Test         | Résultat attendu                                               | Résultat réel                                                                                                                | Status |
+| ----- | ------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-31 | DonateButton | Click → ouvre le flow donation                                 | Click Donate → ouvre DonateModal immédiatement. Bouton ❤️ Donate visible dans la test zone.                                  | ✅     |
+| P2-32 | DonateModal  | Montants prédéfinis, montant custom, message, anonymous toggle | Montants prédéfinis (€5/€10/€25/€50), montant custom, message optional. Textes EN non-i18n. Pas de toggle anonymous visible. | ⚠️     |
+| P2-33 | DonationWall | Liste donations, loading skeleton, empty state                 | Empty state 'Soyez le premier à soutenir !' sur EZStart (traduit FR). Icône cœur, design pointillés.                         | ✅     |
 
 ### 2.8 Security
 
-| ID    | Test                                | Résultat attendu                                         | Résultat réel | Status |
-| ----- | ----------------------------------- | -------------------------------------------------------- | ------------- | ------ |
-| P2-34 | Stripe key safety — sk_live in dev  | Erreur fatale, refuse de démarrer                        |               | ⏳     |
-| P2-35 | Stripe key safety — sk_test in prod | Warning loggé                                            |               | ⏳     |
-| P2-36 | Auth sur routes protégées           | 401 sans token sur /payments, /purchases, /subscriptions |               | ⏳     |
+| ID    | Test                                | Résultat attendu                                         | Résultat réel                                                                                                               | Status |
+| ----- | ----------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-34 | Stripe key safety — sk_live in dev  | Erreur fatale, refuse de démarrer                        | Guard: throw Error('DANGER: Live Stripe key detected in local development!') si sk_live en dev. Empêche le démarrage.       | ✅     |
+| P2-35 | Stripe key safety — sk_test in prod | Warning loggé                                            | logger.warn('WARNING: Test Stripe key in production') quand sk_test en prod. Serveur démarre quand même (acceptable).       | ✅     |
+| P2-36 | Auth sur routes protégées           | 401 sans token sur /payments, /purchases, /subscriptions | 401 sur /purchases, /subscriptions, /payments, /payments/:id, /payments/:id/refund. 200 sur /donations et /donations/stats. | ✅     |
 
 ---
 
@@ -383,14 +383,14 @@ Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent �
 
 ## Résumé Exécution
 
-| Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳     |
-| ------------------- | ----------- | ------ | ----- | ----- | ------ |
-| Phase 0 — Auto      | 15          | 15     | 0     | 0     | 0      |
-| Phase 1 — EZAuth    | 66          | 54     | 0     | 2     | 10     |
-| Phase 2 — EZPay     | 39          | 12     | 0     | 0     | 27     |
-| Phase 3 — EZStart   | 27          | 12     | 0     | 0     | 15     |
-| Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19     |
-| **TOTAL**           | **166**     | **93** | **0** | **2** | **71** |
+| Phase               | Total tests | ✅      | ❌    | ⚠️    | ⏳     |
+| ------------------- | ----------- | ------- | ----- | ----- | ------ |
+| Phase 0 — Auto      | 15          | 15      | 0     | 0     | 0      |
+| Phase 1 — EZAuth    | 66          | 54      | 0     | 2     | 10     |
+| Phase 2 — EZPay     | 39          | 31      | 1     | 7     | 0      |
+| Phase 3 — EZStart   | 27          | 12      | 0     | 0     | 15     |
+| Phase 4 — Cross-App | 19          | 0       | 0     | 0     | 19     |
+| **TOTAL**           | **166**     | **112** | **1** | **9** | **44** |
 
 ---
 
@@ -527,6 +527,37 @@ Note: Purchase et Subscription e2e (checkout Stripe complet + webhook) restent �
 - **Description:** In dev, each app runs on different port = different origin. Tokens stored in localStorage are not shared across origins. In prod with \*.ezstart.xyz this works via shared cookies.
 - **Fix:** No fix needed for dev — just a known limitation.
 - **Status:** open (known limitation)
+
+### ISSUE-017 — req.user never populated in EZPay API (critical, security)
+
+- **Tests:** P2-15, P2-16, P2-17, P2-18
+- **Severity:** critical (security + functionality)
+- **Description:** `authMiddleware` only sets `req.userId`, not `req.user`. All payment routes that read `req.user.role` or `req.user._id` get `undefined`. This breaks: admin list (admin treated as regular user), get by ID (no access control), refund (403 for everyone including admin). The list endpoints for purchases/subscriptions also don't auto-filter by authenticated user.
+- **Fix needed:** authMiddleware must fetch user from DB and attach to `req.user`, OR payment routes must use `req.userId` directly and fetch role separately.
+- **Status:** open
+
+### ISSUE-018 — Purchases/Subscriptions list no ownership filter (high, security)
+
+- **Tests:** P2-10, P2-13
+- **Severity:** high (security)
+- **Description:** `GET /purchases` and `GET /subscriptions` return ALL records for ALL users. The `userId` filter is an optional query param, not enforced from the JWT token. Any authenticated user can see everyone's purchases.
+- **Fix needed:** Auto-filter by `req.userId` from JWT (or `req.user._id` once ISSUE-017 is fixed). Only admin should bypass this filter.
+- **Status:** open
+
+### ISSUE-019 — EZPay i18n accents missing on all pages (medium, i18n)
+
+- **Tests:** P2-27, P2-28, P2-29, P2-30, landing page
+- **Severity:** medium (i18n)
+- **Description:** All EZPay web pages have French text without accents: "Systeme"→"Système", "ecosysteme"→"écosystème", "temoignages"→"témoignages", "Gerez"→"Gérez", "recurrents"→"récurrents", "ete recu"→"été reçu", "succes"→"succès", "generosite"→"générosité", "annule"→"annulé", "debite"→"débité", "Reessayer"→"Réessayer", "probleme"→"problème"
+- **Fix:** Update apps/ezpay/web/messages/fr.json with proper accents
+- **Status:** open
+
+### ISSUE-020 — DonateModal texts not i18n (low, i18n)
+
+- **Tests:** P2-32
+- **Severity:** low (i18n)
+- **Description:** DonateModal component displays hardcoded English strings: "Support EZPay Development", "Your support helps us keep this project running", "Amount", "Custom amount", "Message (optional)", "Leave a message...". Should use translations from pay-sdk or consumer app.
+- **Status:** open
 
 ---
 

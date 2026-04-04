@@ -35,7 +35,7 @@ export function UserManagementTable({
   const t = useTranslations('admin')
 
   const getRoleBadge = (role: string, isGlobal = true) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, 'destructive' | 'default' | 'secondary' | 'outline'> = {
       superadmin: 'destructive',
       admin: 'default',
       manager: 'secondary',

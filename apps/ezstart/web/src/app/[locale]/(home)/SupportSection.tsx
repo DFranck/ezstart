@@ -23,8 +23,7 @@ const SupportSection = ({ id }: Props): React.JSX.Element => {
           projectId="ezstart"
           projectName="EZStart"
           amounts={[5, 10, 25, 50]}
-          currency="eur"
-          currencySymbol="€"
+          currency="EUR"
           userId={isAuthenticated ? user?._id : undefined}
           userEmail={isAuthenticated ? user?.email : undefined}
           userName={isAuthenticated ? user?.username : undefined}

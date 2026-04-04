@@ -11,6 +11,9 @@ export { PayProvider, usePay, usePayContext } from './provider.js'
 
 // Hooks
 export { useDonations } from './hooks/useDonations.js'
+export { usePurchases } from './hooks/usePurchases.js'
+export { useSubscriptions } from './hooks/useSubscriptions.js'
+export { usePaymentHistory } from './hooks/usePaymentHistory.js'
 
 // Components - Donations
 export { DonateButton } from './components/DonateButton.js'
@@ -22,9 +25,25 @@ export { DonationWall } from './components/DonationWall.js'
 export { PurchaseButton } from './components/PurchaseButton.js'
 export type { PurchaseButtonTexts, PurchaseButtonProps } from './components/PurchaseButton.js'
 
+// Components - Subscriptions
+export { SubscribeButton } from './components/SubscribeButton.js'
+export type { SubscribeButtonTexts, SubscribeButtonProps } from './components/SubscribeButton.js'
+
 // Components - Payment Success
 export { PaymentSuccessPage } from './components/PaymentSuccessPage.js'
 export type { PaymentSuccessPageProps } from './components/PaymentSuccessPage.js'
+
+// Components - Marketplace
+export { ProductCard } from './components/ProductCard.js'
+export type { ProductCardProps, ProductCardTexts } from './components/ProductCard.js'
+export { ProductGrid } from './components/ProductGrid.js'
+export type {
+  ProductGridProps,
+  ProductGridTexts,
+  ProductGridFilterOptions,
+} from './components/ProductGrid.js'
+export { PaymentHistory } from './components/PaymentHistory.js'
+export type { PaymentHistoryProps, PaymentHistoryTexts } from './components/PaymentHistory.js'
 
 // Re-export types
 export type {
@@ -43,6 +62,9 @@ export type {
   PaymentsListResponse,
   StatsResponse,
 } from './types.js'
+
+// Utils
+export { formatCurrency, getCurrencySymbol } from './utils/format-currency.js'
 
 // Zod schemas for validation and OpenAPI
 export {

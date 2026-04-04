@@ -1,12 +1,14 @@
 import { useTranslations } from 'next-intl'
-import { Div, H1, H2, H3, Main, P } from '@ezstart/ui/components'
-import { TestZone } from './test-zone'
+import Link from 'next/link'
+import { Button, Div, H1, H2, H3, Icon, Main, P } from '@ezstart/ui/components'
+import { AuthHeader } from './auth-header'
 
 export default function HomePage() {
   const t = useTranslations('home')
 
   return (
     <Main className="container mx-auto py-12 px-4">
+      <AuthHeader />
       <Div className="max-w-4xl mx-auto text-center">
         <H1 className="text-4xl font-bold mb-4">{t('title')}</H1>
         <P className="text-xl text-muted-foreground mb-8">{t('subtitle')}</P>
@@ -56,7 +58,15 @@ export default function HomePage() {
           </Div>
         </Div>
 
-        <TestZone />
+        {/* Link to Test Center */}
+        <Div className="mt-8">
+          <Button asChild variant="outline" size="lg">
+            <Link href="/test">
+              <Icon name="lucide:FlaskConical" className="w-5 h-5 mr-2" />
+              Test Center
+            </Link>
+          </Button>
+        </Div>
       </Div>
     </Main>
   )

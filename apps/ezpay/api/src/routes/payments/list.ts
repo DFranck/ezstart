@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -59,16 +59,20 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
       offset = 0,
     } = parsed.success ? parsed.data : (req.query as Record<string, string>)
 
-    const user = (req as unknown as { user?: { _id?: string; role?: string } }).user
-
     const query: Record<string, unknown> = {}
 
     // Non-admin users can only see their own payments
-    if (!user || user.role !== 'admin') {
-      if (!user?._id) {
+    const isAdmin =
+      req.user?.globalRoles?.includes('superadmin') ||
+      req.user?.globalRoles?.includes('admin') ||
+      req.user?.roles?.includes('superadmin') ||
+      req.user?.roles?.includes('admin')
+
+    if (!isAdmin) {
+      if (!req.userId) {
         return sendSuccess(res, [], { total: 0, limit: Number(limit), offset: Number(offset) })
       }
-      query.userId = user._id
+      query.userId = req.userId
     }
 
     if (type) query.type = type
@@ -91,7 +95,7 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/payments', authMiddleware, listPaymentsHandler, {
+docRouter.get('/payments', authMiddleware, populateUserFromToken, listPaymentsHandler, {
   summary: 'List payments (admin: all, user: own)',
   tags: ['Payments'],
   querySchema: paymentsQuerySchema,

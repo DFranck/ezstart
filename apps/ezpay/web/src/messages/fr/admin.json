@@ -1,0 +1,52 @@
+{
+  "admin": {
+    "title": "EZPay Admin",
+    "accessRequired": "Accès administrateur requis",
+    "accessRequiredDescription": "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.",
+    "stats": {
+      "totalRevenue": "Revenu total",
+      "totalPayments": "Nombre de paiements",
+      "donations": "Dons",
+      "purchases": "Achats",
+      "subscriptions": "Abonnements"
+    },
+    "table": {
+      "date": "Date",
+      "type": "Type",
+      "client": "Client",
+      "amount": "Montant",
+      "status": "Statut",
+      "actions": "Actions",
+      "noPayments": "Aucun paiement trouvé",
+      "refund": "Rembourser",
+      "refundConfirm": "Êtes-vous sûr de vouloir rembourser ce paiement ?",
+      "refundSuccess": "Paiement remboursé avec succès",
+      "refundError": "Erreur lors du remboursement",
+      "cancelSubscription": "Annuler l'abonnement",
+      "cancelConfirm": "Êtes-vous sûr de vouloir annuler cet abonnement ?",
+      "cancelSuccess": "Abonnement annulé avec succès",
+      "cancelError": "Erreur lors de l'annulation de l'abonnement",
+      "cancelNoId": "Impossible d'annuler : l'abonnement n'a pas encore été activé par Stripe",
+      "loading": "Chargement..."
+    },
+    "filters": {
+      "allTypes": "Tous les types",
+      "allStatuses": "Tous les statuts",
+      "searchEmail": "Rechercher par email...",
+      "donation": "Don",
+      "purchase": "Achat",
+      "subscription": "Abonnement",
+      "invoice": "Facture",
+      "pending": "En attente",
+      "completed": "Terminé",
+      "failed": "Échoué",
+      "refunded": "Remboursé",
+      "cancelled": "Annulé"
+    },
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "showing": "Affichage de {from} à {to} sur {total}"
+    }
+  }
+}

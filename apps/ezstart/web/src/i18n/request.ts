@@ -29,6 +29,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     businessCard,
     monitoring,
     admin,
+    donate,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -54,6 +55,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/monitoring.json`),
     // admin
     import(`../messages/${locale}/admin.json`),
+    // donate
+    import(`../messages/${locale}/donate.json`),
   ])
 
   return {
@@ -76,6 +79,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       businessCard.default,
       monitoring.default,
       admin.default,
+      donate.default,
     ]),
   }
 })

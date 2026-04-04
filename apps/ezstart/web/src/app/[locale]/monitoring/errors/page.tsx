@@ -66,7 +66,7 @@ function ErrorsMonitoringContent() {
         <Div className="flex items-center justify-center py-20">
           <Div className="space-y-4 text-center max-w-lg">
             <Div className="text-6xl">⚠️</Div>
-            <P className="text-destructive font-semibold">Failed to load monitoring data</P>
+            <P className="text-destructive font-semibold">{t('failedToLoad')}</P>
             <P className="text-muted-foreground">{errorMessage}</P>
           </Div>
         </Div>
@@ -86,7 +86,7 @@ function ErrorsMonitoringContent() {
           <P className="text-muted-foreground">{t('errorsPage.description')}</P>
           <Div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
-              Next update in: {minutes}:{String(seconds).padStart(2, '0')}
+              {t('nextUpdateIn', { time: `${minutes}:${String(seconds).padStart(2, '0')}` })}
             </P>
           </Div>
         </Div>
@@ -96,7 +96,7 @@ function ErrorsMonitoringContent() {
           <TabScore
             score={errorsHealth.score}
             status={errorsHealth.status}
-            title="Error Status Score"
+            title={t('errorStatusScore')}
             subtitle={t('errorsPage.metricsSubtitle')}
           />
           {/* Metrics Overview */}

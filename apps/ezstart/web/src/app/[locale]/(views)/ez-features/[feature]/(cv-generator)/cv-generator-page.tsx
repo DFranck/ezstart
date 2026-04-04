@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Checkbox,
   Div,
   H1,
   H3,
@@ -133,12 +134,10 @@ function CVGeneratorContent() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Div className="flex items-center gap-2">
-                  <input
+                  <Checkbox
                     id="use-ai"
-                    type="checkbox"
                     checked={config.useAI}
-                    onChange={e => updateConfig({ useAI: e.target.checked })}
-                    className="h-4 w-4"
+                    onCheckedChange={checked => updateConfig({ useAI: checked === true })}
                   />
                   <Label htmlFor="use-ai" className="cursor-pointer">
                     {t('generator.aiConfig.useAiLabel')}
@@ -386,12 +385,12 @@ function CVGeneratorContent() {
                 <Div className="space-y-2">
                   <Label htmlFor="cv-color">{t('generator.design.colorLabel')}</Label>
                   <Div className="flex gap-2">
-                    <input
+                    <Input
                       id="cv-color"
                       type="color"
                       value={config.primaryColor}
                       onChange={e => updateConfig({ primaryColor: e.target.value })}
-                      className="h-10 w-20 cursor-pointer"
+                      className="h-10 w-20 cursor-pointer p-1"
                     />
                     <Input
                       type="text"

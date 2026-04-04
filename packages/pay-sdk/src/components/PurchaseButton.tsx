@@ -4,6 +4,7 @@ import { Button, Div, H2, Icon, Modal, P } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { usePay } from '../provider.js'
+import { formatCurrency } from '../utils/format-currency.js'
 
 export interface PurchaseButtonTexts {
   title?: string
@@ -18,7 +19,6 @@ export interface PurchaseButtonProps {
   productName: string
   amount: number
   currency?: string
-  currencySymbol?: string
   description?: string
   userId?: string
   userEmail?: string
@@ -32,8 +32,7 @@ export function PurchaseButton({
   productId,
   productName,
   amount,
-  currency = 'USD',
-  currencySymbol = '$',
+  currency = 'EUR',
   description,
   userId,
   userEmail,
@@ -82,8 +81,7 @@ export function PurchaseButton({
         {trigger || (
           <Button variant="default">
             <Icon name="lucide:ShoppingCart" className="w-4 h-4" />
-            {productName} — {currencySymbol}
-            {amount.toFixed(2)}
+            {productName} — {formatCurrency(amount, currency)}
           </Button>
         )}
       </div>
@@ -107,8 +105,7 @@ export function PurchaseButton({
           <Div className="p-4 rounded-lg bg-muted/50 flex flex-col gap-2">
             <P className="font-semibold">{productName}</P>
             <P size={'lg'} className="font-bold">
-              {currencySymbol}
-              {amount.toFixed(2)} {currency}
+              {formatCurrency(amount, currency)}
             </P>
           </Div>
 
@@ -129,8 +126,7 @@ export function PurchaseButton({
             ) : (
               <span className="flex items-center gap-2">
                 <Icon name="lucide:ShoppingCart" className="w-5 h-5" />
-                {t.buyButton} — {currencySymbol}
-                {amount.toFixed(2)}
+                {t.buyButton} — {formatCurrency(amount, currency)}
               </span>
             )}
           </Button>

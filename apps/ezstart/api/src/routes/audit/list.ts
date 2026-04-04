@@ -76,9 +76,27 @@ const getAllAuditsHandler = (_: Request, res: Response) => {
     const { domains } = auditsJson
 
     // Transform audits.json structure to match expected API format
-    const audits = Object.entries(domains).flatMap(([domainKey, domainData]: [string, any]) => {
-      return Object.entries(domainData.categories || {}).map(
-        ([categoryKey, categoryData]: [string, any]) => {
+    interface AuditDomainData {
+      emoji?: string
+      agent?: string
+      score?: number
+      domain?: string
+      categories?: Record<string, AuditCategoryData>
+    }
+
+    interface AuditCategoryData {
+      score: number
+      description?: string
+      lastUpdate?: string
+      audited?: string[]
+      notAudited?: string[]
+      why?: string
+      nextSteps?: string[]
+    }
+
+    const audits = Object.entries(domains as Record<string, AuditDomainData>).flatMap(
+      ([domainKey, domainData]) => {
+        return Object.entries(domainData.categories || {}).map(([categoryKey, categoryData]) => {
           const score = categoryData.score
           const status = score >= 90 ? 'complete' : score >= 70 ? 'partial' : 'not-audited'
 
@@ -98,32 +116,34 @@ const getAllAuditsHandler = (_: Request, res: Response) => {
             why: categoryData.why || '',
             nextSteps: categoryData.nextSteps || [],
           }
-        }
-      )
-    })
+        })
+      }
+    )
 
     // Add domain-level scores as well
-    const domainAudits = Object.entries(domains).map(([domainKey, domainData]: [string, any]) => {
-      const score = domainData.score
-      const status = score >= 90 ? 'complete' : score >= 70 ? 'partial' : 'not-audited'
+    const domainAudits = Object.entries(domains as Record<string, AuditDomainData>).map(
+      ([domainKey, domainData]) => {
+        const score = domainData.score ?? 0
+        const status = score >= 90 ? 'complete' : score >= 70 ? 'partial' : 'not-audited'
 
-      return {
-        auditType: domainKey,
-        emoji: domainData.emoji || '📊',
-        name: domainData.domain || domainKey,
-        description: domainData.domain || `${domainData.agent} - Overall ${domainKey} score`,
-        filePath: `docs/audits.json → domains.${domainKey}`,
-        score,
-        lastUpdated: auditsJson.lastUpdated,
-        status,
-        exists: true,
-        // Domain-level doesn't have these detailed fields
-        audited: [],
-        notAudited: [],
-        why: `Overall ${domainKey} score aggregated from ${Object.keys(domainData.categories || {}).length} categories`,
-        nextSteps: [],
+        return {
+          auditType: domainKey,
+          emoji: domainData.emoji || '📊',
+          name: domainData.domain || domainKey,
+          description: domainData.domain || `${domainData.agent} - Overall ${domainKey} score`,
+          filePath: `docs/audits.json → domains.${domainKey}`,
+          score,
+          lastUpdated: auditsJson.lastUpdated,
+          status,
+          exists: true,
+          // Domain-level doesn't have these detailed fields
+          audited: [],
+          notAudited: [],
+          why: `Overall ${domainKey} score aggregated from ${Object.keys(domainData.categories || {}).length} categories`,
+          nextSteps: [],
+        }
       }
-    })
+    )
 
     const allAudits = [...domainAudits, ...audits]
 

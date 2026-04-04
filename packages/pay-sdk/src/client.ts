@@ -43,6 +43,16 @@ export class PayClient {
     )
   }
 
+  /** Build headers with optional Authorization bearer token */
+  private getHeaders(extra?: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = { ...extra }
+    const token = this.config.getToken?.()
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    return headers
+  }
+
   // ===== DONATIONS =====
 
   async createDonation(data: CreateDonationRequest): Promise<PaymentResponse> {
@@ -50,9 +60,7 @@ export class PayClient {
 
     const response = await fetch(`${this.config.baseURL}/donate`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
     })
 
@@ -74,7 +82,9 @@ export class PayClient {
     if (params?.projectId) searchParams.set('projectId', params.projectId)
     if (params?.limit) searchParams.set('limit', params.limit.toString())
 
-    const response = await fetch(`${this.config.baseURL}/donations?${searchParams.toString()}`)
+    const response = await fetch(`${this.config.baseURL}/donations?${searchParams.toString()}`, {
+      headers: this.getHeaders(),
+    })
 
     const result = await response.json()
 
@@ -98,7 +108,8 @@ export class PayClient {
     if (projectId) searchParams.set('projectId', projectId)
 
     const response = await fetch(
-      `${this.config.baseURL}/donations/stats?${searchParams.toString()}`
+      `${this.config.baseURL}/donations/stats?${searchParams.toString()}`,
+      { headers: this.getHeaders() }
     )
 
     const result = await response.json()
@@ -117,9 +128,7 @@ export class PayClient {
 
     const response = await fetch(`${this.config.baseURL}/purchase`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
     })
 
@@ -133,12 +142,19 @@ export class PayClient {
     return result.data ?? result
   }
 
-  async getPurchases(params?: { userId?: string; limit?: number }): Promise<PaymentsListResponse> {
+  async getPurchases(params?: {
+    userId?: string
+    limit?: number
+    offset?: number
+  }): Promise<PaymentsListResponse> {
     const searchParams = new URLSearchParams()
     if (params?.userId) searchParams.set('userId', params.userId)
     if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.offset) searchParams.set('offset', params.offset.toString())
 
-    const response = await fetch(`${this.config.baseURL}/purchases?${searchParams.toString()}`)
+    const response = await fetch(`${this.config.baseURL}/purchases?${searchParams.toString()}`, {
+      headers: this.getHeaders(),
+    })
 
     const result = await response.json()
 
@@ -146,7 +162,15 @@ export class PayClient {
       throw new Error(result.error || 'Failed to fetch purchases')
     }
 
-    return result
+    // Unwrap standard { success, data, meta } response
+    return {
+      success: result.success,
+      payments: (result.data ?? []).map((p: Payment & { _id?: string }) => ({
+        ...p,
+        id: p.id || p._id,
+      })),
+      total: result.meta?.total ?? 0,
+    }
   }
 
   // ===== SUBSCRIPTIONS =====
@@ -156,9 +180,7 @@ export class PayClient {
 
     const response = await fetch(`${this.config.baseURL}/subscribe`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
     })
 
@@ -172,8 +194,20 @@ export class PayClient {
     return result.data ?? result
   }
 
-  async getSubscriptions(userId: string): Promise<PaymentsListResponse> {
-    const response = await fetch(`${this.config.baseURL}/subscriptions?userId=${userId}`)
+  async getSubscriptions(params?: {
+    userId?: string
+    limit?: number
+    offset?: number
+  }): Promise<PaymentsListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params?.userId) searchParams.set('userId', params.userId)
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.offset) searchParams.set('offset', params.offset.toString())
+
+    const response = await fetch(
+      `${this.config.baseURL}/subscriptions?${searchParams.toString()}`,
+      { headers: this.getHeaders() }
+    )
 
     const result = await response.json()
 
@@ -181,12 +215,21 @@ export class PayClient {
       throw new Error(result.error || 'Failed to fetch subscriptions')
     }
 
-    return result
+    // Unwrap standard { success, data, meta } response
+    return {
+      success: result.success,
+      payments: (result.data ?? []).map((p: Payment & { _id?: string }) => ({
+        ...p,
+        id: p.id || p._id,
+      })),
+      total: result.meta?.total ?? 0,
+    }
   }
 
   async cancelSubscription(subscriptionId: string): Promise<{ success: boolean }> {
     const response = await fetch(`${this.config.baseURL}/subscriptions/${subscriptionId}/cancel`, {
       method: 'POST',
+      headers: this.getHeaders(),
     })
 
     const result = await response.json()
@@ -200,8 +243,49 @@ export class PayClient {
 
   // ===== GENERAL =====
 
+  async getPayments(params?: {
+    userId?: string
+    limit?: number
+    offset?: number
+    type?: string
+    status?: string
+    dateFrom?: string
+    dateTo?: string
+  }): Promise<PaymentsListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params?.userId) searchParams.set('userId', params.userId)
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.offset) searchParams.set('offset', params.offset.toString())
+    if (params?.type) searchParams.set('type', params.type)
+    if (params?.status) searchParams.set('status', params.status)
+    if (params?.dateFrom) searchParams.set('dateFrom', params.dateFrom)
+    if (params?.dateTo) searchParams.set('dateTo', params.dateTo)
+
+    const response = await fetch(`${this.config.baseURL}/payments?${searchParams.toString()}`, {
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to fetch payments')
+    }
+
+    // Unwrap standard { success, data, meta } response
+    return {
+      success: result.success,
+      payments: (result.data ?? []).map((p: Payment & { _id?: string }) => ({
+        ...p,
+        id: p.id || p._id,
+      })),
+      total: result.meta?.total ?? 0,
+    }
+  }
+
   async getPayment(paymentId: string): Promise<Payment> {
-    const response = await fetch(`${this.config.baseURL}/payments/${paymentId}`)
+    const response = await fetch(`${this.config.baseURL}/payments/${paymentId}`, {
+      headers: this.getHeaders(),
+    })
 
     const result = await response.json()
 

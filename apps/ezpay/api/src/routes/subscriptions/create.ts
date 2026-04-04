@@ -26,8 +26,17 @@ const createSubscriptionSchema = z.object({
   planId: z.string().describe('Plan identifier'),
   planName: z.string().describe('Plan display name'),
   amount: z.number().positive().describe('Subscription amount per interval'),
-  interval: z.enum(['month', 'year']).describe('Billing interval'),
-  currency: z.string().default('USD').describe('Currency code (USD, EUR, etc.)'),
+  interval: z.enum(['month']).default('month').describe('Billing interval (always month)'),
+  intervalCount: z
+    .number()
+    .int()
+    .min(1)
+    .max(12)
+    .default(1)
+    .describe(
+      'Number of months between billings (1=monthly, 3=quarterly, 6=semi-annual, 12=annual)'
+    ),
+  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   userId: z.string().optional().describe('EZAuth user ID if logged in'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
@@ -57,8 +66,9 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       planId,
       planName,
       amount,
-      interval,
-      currency = 'USD',
+      interval = 'month',
+      intervalCount = 1,
+      currency = 'EUR',
       userId,
       customerEmail,
       returnUrl,
@@ -71,6 +81,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       amount,
       currency,
       interval,
+      intervalCount,
       description: `Subscription: ${planName}`,
       metadata: {
         type: 'subscription',
@@ -79,8 +90,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
         planName,
         userId: userId || '',
       },
-      successUrl: `${baseUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/?payment=cancel`,
+      successUrl: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/subscribe/cancel`,
     })
 
     const payment = await Payment.create({
@@ -98,7 +109,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       metadata: {
         planId,
         planName,
-        interval,
+        interval: 'month',
+        intervalCount,
       },
     })
 

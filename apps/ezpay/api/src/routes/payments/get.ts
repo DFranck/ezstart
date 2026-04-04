@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -42,6 +42,17 @@ const getPaymentHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Payment not found', 404)
     }
 
+    // Access control: non-admin users can only see their own payments
+    const isAdmin =
+      req.user?.globalRoles?.includes('superadmin') ||
+      req.user?.globalRoles?.includes('admin') ||
+      req.user?.roles?.includes('superadmin') ||
+      req.user?.roles?.includes('admin')
+
+    if (!isAdmin && payment.userId !== req.userId) {
+      return sendError(res, 'Payment not found', 404)
+    }
+
     sendSuccess(res, payment)
   } catch (error) {
     logger.error('Get payment error:', error instanceof Error ? error : String(error))
@@ -53,7 +64,7 @@ const getPaymentHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/payments/:paymentId', authMiddleware, getPaymentHandler, {
+docRouter.get('/payments/:paymentId', authMiddleware, populateUserFromToken, getPaymentHandler, {
   summary: 'Get a payment by ID',
   tags: ['Payments'],
   responseSchema: paymentResponseSchema,

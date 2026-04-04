@@ -90,10 +90,33 @@
     "refreshing": "Rafraîchissement...",
     "allClear": "Tout est OK !",
     "allSystemsOperational": "Aucune erreur détectée. Tous les systèmes opérationnels",
+    "severity": {
+      "critical": "Critique",
+      "error": "Erreur",
+      "warning": "Avertissement"
+    },
+    "timeAgo": {
+      "daysAgo": "il y a {count}j",
+      "hoursAgo": "il y a {count}h",
+      "minutesAgo": "il y a {count}min",
+      "justNow": "À l'instant"
+    },
+    "trending": {
+      "unableToLoad": "Impossible de charger les données de tendance",
+      "noData": "Aucune donnée disponible pour la période sélectionnée",
+      "uptime": "Disponibilité :",
+      "avgResponse": "Réponse moy. :",
+      "checks": "Vérifications :"
+    },
     "view": "Voir",
     "occurrences": "{count} occurrences",
     "usersAffected": "{count} utilisateurs affectés",
     "nextUpdateIn": "Prochaine mise à jour dans : {time}",
+    "errorStatusScore": "Score de Statut des Erreurs",
+    "auditsQualityScore": "Score de Qualité des Audits",
+    "auditsCompleted": "{count} audits complétés",
+    "auditsOverview": "Aperçu des Audits ({count})",
+    "noAuditsMatch": "Aucun audit ne correspond à vos filtres.",
     "projectsHealthScore": "Score de Santé des Projets",
     "projectsMonitored": "{count} projets surveillés",
     "allProjects": "Tous les Projets ({count})",

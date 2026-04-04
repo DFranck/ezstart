@@ -45,7 +45,14 @@ const getByServiceHandler = async (req: Request, res: Response) => {
         .limit(limit)
         .select('status responseTime timestamp error')
         .lean()
-        .exec() as Promise<any[]>,
+        .exec() as Promise<
+        Array<{
+          status: string
+          responseTime: number | null
+          timestamp: Date
+          error: string | null
+        }>
+      >,
       HealthCheck.countDocuments(filter),
     ])
 

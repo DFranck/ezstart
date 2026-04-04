@@ -9,6 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { hashRefreshToken } from '../../models/refresh-token.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
@@ -25,6 +26,7 @@ const sessionSchema = z.object({
   ip: z.string().nullable().describe('IP address'),
   createdAt: z.string().describe('Session creation date ISO string'),
   expiresAt: z.string().describe('Session expiration date ISO string'),
+  isCurrent: z.boolean().describe('Whether this is the current session'),
 })
 
 const sessionsResponseSchema = z.object({
@@ -38,7 +40,11 @@ const deleteSessionResponseSchema = z.object({
 // GET /auth/sessions — list active sessions
 const listSessionsController = async (req: Request, res: Response) => {
   try {
-    const sessions = await AuthService.getUserSessions(req.userId!)
+    // Hash the refresh token from header to identify the current session
+    const rawRefreshToken = req.headers['x-refresh-token'] as string | undefined
+    const currentTokenHash = rawRefreshToken ? hashRefreshToken(rawRefreshToken) : undefined
+
+    const sessions = await AuthService.getUserSessions(req.userId!, currentTokenHash)
     sendSuccess(res, { sessions })
   } catch (error) {
     logger.error('List sessions error:', error)

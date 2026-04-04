@@ -111,7 +111,10 @@ export class StripeProvider implements IPaymentProvider {
             currency: options.currency.toLowerCase(),
             product_data: { name: options.description },
             unit_amount: Math.round(options.amount * 100),
-            recurring: { interval: options.interval },
+            recurring: {
+              interval: 'month',
+              interval_count: options.intervalCount ?? 1,
+            },
           },
           quantity: 1,
         },

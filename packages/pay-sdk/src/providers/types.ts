@@ -52,7 +52,8 @@ export interface CheckoutOptions {
 }
 
 export interface SubscriptionCheckoutOptions extends CheckoutOptions {
-  interval: 'month' | 'year'
+  interval: 'month'
+  intervalCount?: number
 }
 
 export interface CheckoutResult {

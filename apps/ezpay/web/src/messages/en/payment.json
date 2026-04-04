@@ -58,6 +58,59 @@
     "receiptAvailable": "Your receipt is available in your Stripe email.",
     "accessGranted": "Your access has been granted immediately."
   },
+  "test": {
+    "title": "EZPay Test Center",
+    "subtitle": "Test payment components in Stripe test mode",
+    "banner": {
+      "provider": "Provider: Stripe (Test Mode)",
+      "info": "Payments use the test card 4242 4242 4242 4242"
+    },
+    "tabs": {
+      "all": "All",
+      "donate": "Donations",
+      "purchase": "Purchases",
+      "subscribe": "Subscriptions"
+    },
+    "providerSelect": {
+      "label": "Provider",
+      "stripe": "Stripe (Test)",
+      "console": "Console (Mock)"
+    },
+    "sections": {
+      "donations": "Donations",
+      "donationsDesc": "Test donation flow with DonateModal and DonationWall",
+      "purchases": "Purchases",
+      "purchasesDesc": "Test one-time purchases with PurchaseButton",
+      "subscriptions": "Subscriptions",
+      "subscriptionsDesc": "Test recurring subscriptions with SubscribeButton",
+      "history": "Payment History",
+      "historyDesc": "All payments for the connected account"
+    },
+    "products": {
+      "testItem": "Test Item",
+      "testItemDesc": "Test product for development",
+      "premiumPass": "Premium Pass",
+      "premiumPassDesc": "Premium access pass for testing"
+    },
+    "plans": {
+      "monthly": "Pro Monthly (1 month)",
+      "quarterly": "Pro Quarterly (3 months)",
+      "biannual": "Pro Biannual (6 months)",
+      "yearly": "Pro Yearly (12 months)"
+    },
+    "noDonations": "No donations yet",
+    "noPurchases": "No purchases yet",
+    "noSubscriptions": "No subscriptions yet",
+    "loading": "Loading...",
+    "error": "Error loading data",
+    "accessDenied": "Access Denied",
+    "accessDeniedDesc": "This section is restricted to administrators.",
+    "cancelSubscription": "Cancel",
+    "cancelSuccess": "Subscription cancelled successfully",
+    "cancelError": "Error while cancelling subscription",
+    "cancelNoSubscriptionId": "Cannot cancel: subscription not yet activated by Stripe",
+    "active": "Active"
+  },
   "cancel": {
     "title": "Payment Cancelled",
     "message": "Your payment was cancelled. No charges have been made.",

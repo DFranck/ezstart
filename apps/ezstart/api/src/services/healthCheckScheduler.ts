@@ -22,7 +22,13 @@ import {
   type MonitoredServiceId,
 } from '@ezstart/monitoring'
 import { getHealthCheckModel } from '../models/HealthCheck.js'
+import { alertServiceDown, alertHighResponseTime } from './alerting.js'
 import type { Server as IOServer } from 'socket.io'
+
+/** Cooldown period to avoid spamming alerts for the same service (15 minutes) */
+const ALERT_COOLDOWN_MS = 15 * 60 * 1000
+/** Response time threshold in ms above which we alert */
+const HIGH_RESPONSE_TIME_THRESHOLD_MS = 5000
 
 export class HealthCheckScheduler {
   private healthChecker: HealthChecker
@@ -34,6 +40,9 @@ export class HealthCheckScheduler {
 
   // Track scheduled timeouts for each service
   private scheduledChecks = new Map<MonitoredServiceId, NodeJS.Timeout>()
+
+  // Track last alert time per service per alert type to enforce cooldown
+  private lastAlertTimes = new Map<string, number>()
 
   constructor() {
     this.healthChecker = new HealthChecker()
@@ -84,8 +93,12 @@ export class HealthCheckScheduler {
     )
     logger.info('⏰ [Scheduler] Config:')
     logger.info(`   - Min interval: ${ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS / 60000} minutes`)
-    logger.info(`   - Max interval (Railway/Vercel): ${ADAPTIVE_CHECK_CONFIG.MAX_INTERVAL_MS / 60000} minutes`)
-    logger.info(`   - Max interval (Render): ${ADAPTIVE_CHECK_CONFIG.RENDER_MAX_INTERVAL_MS / 60000} minutes`)
+    logger.info(
+      `   - Max interval (Railway/Vercel): ${ADAPTIVE_CHECK_CONFIG.MAX_INTERVAL_MS / 60000} minutes`
+    )
+    logger.info(
+      `   - Max interval (Render): ${ADAPTIVE_CHECK_CONFIG.RENDER_MAX_INTERVAL_MS / 60000} minutes`
+    )
     logger.info(`   - Backoff multiplier: ${ADAPTIVE_CHECK_CONFIG.BACKOFF_MULTIPLIER}x`)
 
     this.isRunning = true
@@ -112,7 +125,9 @@ export class HealthCheckScheduler {
       this.scheduleNextCheck(serviceId)
     }
 
-    logger.info(`⏰ [Scheduler] Scheduled ${allServiceIds.length} services for adaptive health checks`)
+    logger.info(
+      `⏰ [Scheduler] Scheduled ${allServiceIds.length} services for adaptive health checks`
+    )
   }
 
   /**
@@ -134,9 +149,12 @@ export class HealthCheckScheduler {
     const delay = state.nextCheckAt.getTime() - Date.now()
     const delayMin = Math.round(delay / 60000)
 
-    const timeout = setTimeout(async () => {
-      await this.performHealthCheck(serviceId)
-    }, Math.max(delay, 0))
+    const timeout = setTimeout(
+      async () => {
+        await this.performHealthCheck(serviceId)
+      },
+      Math.max(delay, 0)
+    )
 
     this.scheduledChecks.set(serviceId, timeout)
 
@@ -209,6 +227,14 @@ export class HealthCheckScheduler {
         },
       })
 
+      // Check alerting conditions (cooldown-guarded)
+      await this.sendAlertsIfNeeded(
+        serviceId,
+        result.status,
+        result.responseTime ?? null,
+        result.error
+      )
+
       const duration = Date.now() - startTime
 
       // Log result
@@ -242,6 +268,10 @@ export class HealthCheckScheduler {
       state.currentInterval = ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS
       state.nextCheckAt = new Date(Date.now() + ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS)
 
+      // Alert for service down (cooldown-guarded)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      await this.sendAlertsIfNeeded(serviceId, 'unhealthy', null, errorMessage)
+
       // Save error to MongoDB
       try {
         const HealthCheck = await getHealthCheckModel()
@@ -250,7 +280,7 @@ export class HealthCheckScheduler {
           status: 'unhealthy',
           responseTime: null,
           timestamp: new Date(),
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: errorMessage,
         })
       } catch (dbError) {
         logger.error(`❌ [Scheduler] Failed to save error to DB:`, dbError)
@@ -294,6 +324,52 @@ export class HealthCheckScheduler {
       environment: process.env.NODE_ENV,
       totalServices: this.serviceStates.size,
       states,
+    }
+  }
+
+  /**
+   * Send alerts if needed, respecting the per-service cooldown.
+   * - Service down → alertServiceDown (critical)
+   * - High response time → alertHighResponseTime (warning)
+   */
+  private async sendAlertsIfNeeded(
+    serviceId: MonitoredServiceId,
+    status: string,
+    responseTime: number | null,
+    error?: string | null
+  ): Promise<void> {
+    const now = Date.now()
+
+    // Alert: service down
+    if (status !== 'healthy') {
+      const cooldownKey = `down:${serviceId}`
+      const lastAlerted = this.lastAlertTimes.get(cooldownKey) ?? 0
+
+      if (now - lastAlerted >= ALERT_COOLDOWN_MS) {
+        this.lastAlertTimes.set(cooldownKey, now)
+        try {
+          await alertServiceDown(serviceId, error ?? 'Service unhealthy')
+          logger.info(`🚨 [Scheduler] Alert sent: ${serviceId} is down`)
+        } catch (alertError) {
+          logger.error(`❌ [Scheduler] Failed to send down alert for ${serviceId}:`, alertError)
+        }
+      }
+    }
+
+    // Alert: high response time (only if service responded)
+    if (responseTime !== null && responseTime > HIGH_RESPONSE_TIME_THRESHOLD_MS) {
+      const cooldownKey = `slow:${serviceId}`
+      const lastAlerted = this.lastAlertTimes.get(cooldownKey) ?? 0
+
+      if (now - lastAlerted >= ALERT_COOLDOWN_MS) {
+        this.lastAlertTimes.set(cooldownKey, now)
+        try {
+          await alertHighResponseTime(serviceId, responseTime, HIGH_RESPONSE_TIME_THRESHOLD_MS)
+          logger.info(`🚨 [Scheduler] Alert sent: ${serviceId} slow response (${responseTime}ms)`)
+        } catch (alertError) {
+          logger.error(`❌ [Scheduler] Failed to send slow alert for ${serviceId}:`, alertError)
+        }
+      }
     }
   }
 

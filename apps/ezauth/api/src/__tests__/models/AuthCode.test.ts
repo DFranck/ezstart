@@ -1,21 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
 import { getAuthCodeModel } from '../../models/auth-code.js'
-import type { Model } from 'mongoose'
 
-interface AuthCodeDocument {
-  code: string
-  userId: string
-  app: string
-  redirectUri?: string
-  expiresAt: Date
-  isUsed: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+type AuthCodeModelType = Awaited<ReturnType<typeof getAuthCodeModel>>
 
 describe('AuthCode Model', () => {
-  let AuthCodeModel: any
+  let AuthCodeModel: AuthCodeModelType
 
   beforeAll(async () => {
     await setupTestDatabase()

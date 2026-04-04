@@ -73,7 +73,7 @@ function AuditsMonitoringContent() {
         <Div className="flex items-center justify-center py-20">
           <Div className="space-y-4 text-center max-w-lg">
             <Div className="text-6xl">⚠️</Div>
-            <P className="text-destructive font-semibold">Failed to load monitoring data</P>
+            <P className="text-destructive font-semibold">{t('failedToLoad')}</P>
             <P className="text-muted-foreground">{errorMessage}</P>
           </Div>
         </Div>
@@ -93,7 +93,7 @@ function AuditsMonitoringContent() {
           <P className="text-muted-foreground">{t('auditsPage.description')}</P>
           <Div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
-              Next update in: {minutes}:{String(seconds).padStart(2, '0')}
+              {t('nextUpdateIn', { time: `${minutes}:${String(seconds).padStart(2, '0')}` })}
             </P>
           </Div>
         </Div>
@@ -103,8 +103,8 @@ function AuditsMonitoringContent() {
           <TabScore
             score={auditsHealth.score}
             status={auditsHealth.status}
-            title="Audits Quality Score"
-            subtitle={`${audits.length} audits completed`}
+            title={t('auditsQualityScore')}
+            subtitle={t('auditsCompleted', { count: audits.length })}
           />
           {/* Metrics Overview */}
           {isDesktop && <MetricsOverview activeTab="audits" metrics={metricsData} />}{' '}
@@ -114,7 +114,7 @@ function AuditsMonitoringContent() {
       {/* Audits Grid Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout="center">
-          <H2>Audits Overview ({audits.length})</H2>
+          <H2>{t('auditsOverview', { count: audits.length })}</H2>
           <P className="text-muted-foreground">{t('auditsPage.detailsSubtitle')}</P>
         </Div>
 
@@ -139,17 +139,16 @@ function AuditsMonitoringContent() {
               <>
                 {/* Audits Grid */}
                 <Div className={`grid ${gridCols} gap-4 mt-4`}>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- AuditsFilters returns Audit type missing fields expected by AuditCard */}
-                  {filteredAudits.map((audit: any) => (
+                  {filteredAudits.map(audit => (
                     <Div key={audit.auditType} id={`audit-${audit.auditType}`}>
-                      <AuditCard audit={audit} />
+                      <AuditCard audit={audit as Parameters<typeof AuditCard>[0]['audit']} />
                     </Div>
                   ))}
                 </Div>
 
                 {filteredAudits.length === 0 && audits.length > 0 && (
                   <Div className="text-center py-12">
-                    <P className="text-muted-foreground">No audits match your filters.</P>
+                    <P className="text-muted-foreground">{t('noAuditsMatch')}</P>
                   </Div>
                 )}
 

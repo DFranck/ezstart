@@ -36,6 +36,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
   const t = useTranslations('login')
   const tForgot = useTranslations('forgotPassword')
   const tValidation = useTranslations('validation')
+  const tApiErrors = useTranslations('apiErrors')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [twoFactorState, setTwoFactorState] = useState<{
@@ -70,7 +71,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data as any) || 'Login failed')
+        throw new Error(response.error || parseApiError(response.data) || 'Login failed')
       }
 
       const result = response.data as {
@@ -99,7 +100,8 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         throw new Error(t('noRedirectUri'))
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const rawMessage = err instanceof Error ? err.message : 'fallback'
+      setError(tApiErrors.has(rawMessage) ? tApiErrors(rawMessage) : tApiErrors('fallback'))
       setLoading(false)
     }
   }

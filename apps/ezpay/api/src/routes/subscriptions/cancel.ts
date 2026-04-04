@@ -8,7 +8,7 @@ import {
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -43,6 +43,11 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Subscription not found', 404)
     }
 
+    // Ownership check: non-admin users can only cancel their own subscriptions
+    if (!isAdminUser(req) && payment.userId !== req.userId) {
+      return sendError(res, 'You can only cancel your own subscriptions', 403)
+    }
+
     await getProvider().cancelSubscription(subscriptionId)
 
     await Payment.updateOne({ _id: payment._id }, { status: 'cancelled' })
@@ -60,11 +65,17 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/subscriptions/:subscriptionId/cancel', authMiddleware, cancelSubscriptionHandler, {
-  summary: 'Cancel an active subscription',
-  tags: ['Subscriptions'],
-  responseSchema: cancelResponseSchema,
-})
+docRouter.post(
+  '/subscriptions/:subscriptionId/cancel',
+  authMiddleware,
+  populateUserFromToken,
+  cancelSubscriptionHandler,
+  {
+    summary: 'Cancel an active subscription',
+    tags: ['Subscriptions'],
+    responseSchema: cancelResponseSchema,
+  }
+)
 
 export { cancelSubscriptionRegistry as registry, router }
 export default router

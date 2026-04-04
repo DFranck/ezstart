@@ -5,6 +5,7 @@ import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { usePay } from '../provider.js'
 import { DonateButton } from './DonateButton.js'
+import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
 
 export interface DonateModalTexts {
   title?: string
@@ -24,8 +25,7 @@ export interface DonateModalProps {
   projectId: string
   projectName?: string
   amounts?: number[]
-  currency?: string // ISO code: USD, EUR, GBP, etc.
-  currencySymbol?: string // Display symbol: $, €, £, etc.
+  currency?: string // ISO code: EUR, USD, GBP, etc.
   userId?: string
   userEmail?: string
   userName?: string
@@ -37,8 +37,7 @@ export function DonateModal({
   projectId,
   projectName,
   amounts = [5, 10],
-  currency = 'USD',
-  currencySymbol = '$',
+  currency = 'EUR',
   userId,
   userEmail,
   userName,
@@ -53,12 +52,14 @@ export function DonateModal({
   const [isAnonymous, setIsAnonymous] = useState(false)
 
   // Default texts with fallback
+  const symbol = getCurrencySymbol(currency)
+
   const t = {
     title: texts?.title || `Support ${projectName || projectId}`,
     description:
       texts?.description || 'Your support helps us keep this project running and improving.',
     amountLabel: texts?.amountLabel || 'Amount',
-    customAmountLabel: texts?.customAmountLabel || `Custom amount (${currencySymbol})`,
+    customAmountLabel: texts?.customAmountLabel || `Custom amount (${symbol})`,
     customAmountPlaceholder: texts?.customAmountPlaceholder || 'Enter custom amount',
     messageLabel: texts?.messageLabel || 'Message (optional)',
     messagePlaceholder: texts?.messagePlaceholder || 'Leave a message...',
@@ -130,10 +131,7 @@ export function DonateModal({
                     setCustomAmount('')
                   }}
                 >
-                  <span className="text-2xl font-bold">
-                    {currencySymbol}
-                    {val}
-                  </span>
+                  <span className="text-2xl font-bold">{formatCurrency(val, currency)}</span>
                   {val === amounts[1] && <span className="text-xs opacity-70">Popular</span>}
                 </Button>
               ))}
@@ -146,9 +144,6 @@ export function DonateModal({
               {t.customAmountLabel}
             </Label>
             <div className="relative">
-              {/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-base font-medium">
-                {currencySymbol}
-              </span> */}
               <Input
                 id="custom-amount"
                 type="number"
@@ -211,8 +206,7 @@ export function DonateModal({
             ) : (
               <span className="flex items-center gap-2">
                 <Icon name="lucide:Heart" className="w-5 h-5" />
-                {t.donateButton} {currencySymbol}
-                {finalAmount.toFixed(2)}
+                {t.donateButton} {formatCurrency(finalAmount, currency)}
               </span>
             )}
           </Button>

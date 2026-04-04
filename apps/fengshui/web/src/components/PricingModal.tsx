@@ -59,14 +59,15 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
           window.location.href = res.checkoutUrl
         }
       } else {
-        const interval = type === 'monthly' ? 'month' : 'year'
+        const intervalCount = type === 'monthly' ? 1 : 12
         const res = await createSubscription({
           projectId: 'fengshui',
-          planId: `fengshui-premium-${interval}ly`,
+          planId: `fengshui-premium-${type}`,
           planName: `FengShui Premium ${type === 'monthly' ? 'Monthly' : 'Yearly'}`,
           amount: type === 'monthly' ? PRICES.monthly.amount : PRICES.yearly.amount,
           currency: 'eur',
-          interval,
+          interval: 'month',
+          intervalCount,
           userId: user?._id || '',
           customerEmail: user?.email || '',
         })

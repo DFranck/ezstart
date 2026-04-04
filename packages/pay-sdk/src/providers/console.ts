@@ -38,7 +38,8 @@ export class ConsoleProvider implements IPaymentProvider {
       sessionId,
       amount: options.amount,
       currency: options.currency,
-      interval: options.interval,
+      interval: 'month',
+      intervalCount: options.intervalCount ?? 1,
       description: options.description,
     })
 

@@ -31,7 +31,8 @@ export const TEST_PRODUCTS = {
       planName: 'EZPay Yearly Plan',
       amount: 4999, // €49.99/year
       currency: 'eur',
-      interval: 'year' as const,
+      interval: 'month' as const,
+      intervalCount: 12,
       description: 'Yearly subscription test',
     },
   ],
