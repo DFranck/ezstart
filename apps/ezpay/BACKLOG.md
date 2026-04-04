@@ -1,6 +1,6 @@
 # Backlog — EZPay
 
-**Status :** `maintained` | **Derniere mise a jour :** 2026-04-01
+**Status :** `maintained` | **Derniere mise a jour :** 2026-04-04
 
 ## Objectif
 
@@ -199,6 +199,46 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] `useDonations.ts` : le useEffect depend de `loadDonations` qui n'est pas dans le deps array
 - [x] React strict mode peut causer des comportements inattendus
 - [x] Solution : `loadDonations` wrappe dans `useCallback`, ajoute dans les deps du useEffect
+
+---
+
+## Phase 7 — Admin & Marketplace
+
+### P-SUCCESS — Payment Success/Cancel Pages `high` `feature` — `in-progress`
+
+- [x] PaymentSuccessPage composant exporte par pay-sdk
+- [ ] Integrer dans EZStart et autres apps
+- [ ] Toast notification "Merci pour votre soutien !" sur la home quand `?payment=success`
+- [ ] Page cancel avec message adapte
+
+### P-ADMIN — EZPay Admin Interface `medium` `feature` — `planned`
+
+- [ ] Dashboard admin EZPay pour gerer produits, prix et abonnements par app
+- [ ] RBAC integre avec EZAuth : superadmin gere tout, admin d'une app gere ses produits
+- [ ] CRUD produits : creer/modifier/supprimer des items a vendre (name, description, price, currency, image)
+- [ ] CRUD prix Stripe : creer des Price IDs (one-time ou recurring) directement depuis l'interface
+- [ ] Filtrage par app : chaque app (greenpulse, fengshui, etc.) voit ses propres produits
+- [ ] Interface marketplace-ready : composants exportes par pay-sdk pour integrer dans n'importe quelle app
+
+### P-SUBSCRIPTION — Subscription Management `medium` `feature` — `planned`
+
+- [ ] SubscribeButton composant pay-sdk
+- [ ] Customer Portal Stripe pour gestion des abonnements
+- [ ] Webhook handling pour subscription events (created, updated, canceled, payment_failed)
+- [ ] `usePremium()` hook pour verifier le statut d'abonnement dans les apps
+
+### P-MARKETPLACE — Marketplace Components `low` `feature` — `planned`
+
+- [ ] ProductGrid : grille de produits avec filtres, search, pagination
+- [ ] ProductCard : carte produit avec image, nom, prix, bouton achat
+- [ ] CartProvider : panier multi-produits (pour les apps qui en ont besoin)
+- [ ] Export via pay-sdk pour consommation dans toute app
+
+### P-AI — AI Product Descriptions `low` `feature` — `planned`
+
+- [ ] Route API EZPay qui utilise `@ezstart/ai-sdk` pour generer des descriptions produits
+- [ ] Interface front pour editer/valider les descriptions generees
+- [ ] Multi-langue via ai-sdk (FR/EN automatique)
 
 ---
 
