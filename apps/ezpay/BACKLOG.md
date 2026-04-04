@@ -138,11 +138,11 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Phase 5 — Features Manquantes
 
-### 5.1 Payment history pour users `high` `feature` — `planned`
+### 5.1 Payment history pour users `high` `feature` — `done`
 
-- [ ] Pas de vue "mes paiements" pour un utilisateur connecte
-- [ ] Cote API : ajouter `GET /payments/me` (auth required, filtre par userId du token)
-- [ ] Cote SDK : ajouter `getMyPayments()` dans PayClient
+- [x] Pas de vue "mes paiements" pour un utilisateur connecte
+- [x] Cote API : ajouter `GET /payments/me` (auth required, filtre par userId du token)
+- [x] Cote SDK : ajouter `getMyPayments()` dans PayClient
 - [ ] Cote web : page `/dashboard` avec liste paginee
 
 ### 5.2 Integration EZBill (invoices) `medium` `feature` — `planned`

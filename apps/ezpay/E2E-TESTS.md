@@ -95,7 +95,13 @@
 | ADM-8 | Cancel subscription e2e | Clic Annuler → ConfirmDialog → status=Annule          | 2026-04-05    | ✅     |
 | ADM-9 | ConfirmDialog — etats   | Confirm → Loading → Success (ou Error)                | 2026-04-05    | ⏳     |
 
-## 8. API Security
+## 8. My Payments
+
+| ID   | Test             | Comment tester                                                      | Derniere date | Status |
+| ---- | ---------------- | ------------------------------------------------------------------- | ------------- | ------ |
+| ME-1 | GET /payments/me | curl avec token → retourne seulement les paiements du user connecte | —             | ⏳     |
+
+## 9. API Security
 
 | ID     | Test                    | Comment tester                                   | Derniere date | Status |
 | ------ | ----------------------- | ------------------------------------------------ | ------------- | ------ |
@@ -110,7 +116,7 @@
 | SEC-9  | CORS                    | Origins validees, credentials true               | 2026-04-04    | ✅     |
 | SEC-10 | Rate limiting           | Headers RateLimit-\* presents                    | 2026-04-04    | ✅     |
 
-## 9. Webhooks
+## 10. Webhooks
 
 | ID   | Test                          | Comment tester                                         | Derniere date | Status |
 | ---- | ----------------------------- | ------------------------------------------------------ | ------------- | ------ |
@@ -134,6 +140,7 @@
 | Purchases     | 6      | 5      | 1     | 0     |
 | Subscriptions | 10     | 8      | 2     | 0     |
 | Admin         | 9      | 6      | 3     | 0     |
+| My Payments   | 1      | 0      | 1     | 0     |
 | Security      | 10     | 10     | 0     | 0     |
 | Webhooks      | 6      | 6      | 0     | 0     |
-| **TOTAL**     | **70** | **63** | **7** | **0** |
+| **TOTAL**     | **71** | **63** | **8** | **0** |

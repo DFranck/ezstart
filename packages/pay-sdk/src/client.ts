@@ -258,6 +258,41 @@ export class PayClient {
     return result
   }
 
+  // ===== MY PAYMENTS =====
+
+  async getMyPayments(params?: {
+    type?: string
+    status?: string
+    limit?: number
+    offset?: number
+  }): Promise<PaymentsListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params?.type) searchParams.set('type', params.type)
+    if (params?.status) searchParams.set('status', params.status)
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
+    if (params?.offset) searchParams.set('offset', params.offset.toString())
+
+    const response = await fetch(`${this.config.baseURL}/payments/me?${searchParams.toString()}`, {
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to fetch my payments')
+    }
+
+    // Unwrap standard { success, data, meta } response
+    return {
+      success: result.success,
+      payments: (result.data ?? []).map((p: Payment & { _id?: string }) => ({
+        ...p,
+        id: p.id || p._id,
+      })),
+      total: result.meta?.total ?? 0,
+    }
+  }
+
   // ===== GENERAL =====
 
   async getPayments(params?: {
