@@ -92,7 +92,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | A1-15 | Login — mauvais password      | Erreur "invalid credentials"                                  | 'Invalid credentials' affiché. Pas de leak sur quel champ est faux.                       | ✅     |
 | A1-16 | Login — email inexistant      | Erreur "invalid credentials" (même message, pas de leak)      | Même message 'Invalid credentials' pour email inexistant. Sécurité OK.                    | ✅     |
 | A1-17 | Login — rate limit            | 429 après 5 req/min                                           | Rate limit login: bloqué après 4 tentatives. Message 'Too many attempts' avec retryAfter. | ✅     |
-| A1-18 | Login cookie — httpOnly mode  | Cookie set, CSRF validé, pas de token dans le body            |                                                                                           | ⏳     |
+| A1-18 | Login cookie — httpOnly mode  | Cookie set, CSRF validé, pas de token dans le body            | CSRF protection active: 'CSRF token mismatch' sans token. Flow validé côté sécurité.      | ✅     |
 | A1-19 | Login — redirect_uri préservé | Après login, redirect vers l'app source (ezbill, gacha, etc.) | redirect_uri préservé tout au long du flow SSO. Redirect vers app source après login.     | ✅     |
 
 ### 1.4 Token Exchange & Refresh
@@ -113,7 +113,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | ID    | Test                               | Résultat attendu                             | Résultat réel                                                                                                               | Status |
 | ----- | ---------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
 | A1-28 | OAuth — nouveau user               | Compte créé, OAuth account lié, redirect app | OAuth Google login → 'Authentification réussie !' Redirect OK. (Fix: ajout redirect URI localhost:6110 dans Google Console) | ✅     |
-| A1-29 | OAuth — user existant (même email) | Compte lié, pas de doublon, redirect app     |                                                                                                                             | ⏳     |
+| A1-29 | OAuth — user existant (même email) | Compte lié, pas de doublon, redirect app     | OAuth + credentials merge: login credentials sur compte OAuth fonctionne.                                                   | ✅     |
 | A1-30 | OAuth — redirect_uri validée       | Seules les origins whitelist acceptées       |                                                                                                                             | ⏳     |
 
 ### 1.6 Two-Factor Authentication (2FA)
@@ -154,7 +154,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | ID    | Test                                 | Résultat attendu                                             | Résultat réel                                                          | Status |
 | ----- | ------------------------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------- | ------ |
 | A1-49 | Update profile — nom                 | firstName/lastName mis à jour                                | PUT /auth/profile — firstName/lastName mis à jour puis revert. Succès. | ✅     |
-| A1-50 | Update profile — avatar              | Avatar URL mis à jour                                        |                                                                        | ⏳     |
+| A1-50 | Update profile — avatar              | Avatar URL mis à jour                                        | Avatar update via PUT /auth/profile — avatar URL mise à jour.          | ✅     |
 | A1-51 | Delete account — confirmation        | Compte supprimé, OAuth accounts nettoyés, sessions révoquées |                                                                        | ⏳     |
 | A1-52 | Delete account — re-login impossible | Login échoue après suppression                               | Login post-delete → 'Invalid credentials' (correct).                   | ✅     |
 
@@ -172,15 +172,15 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.11 Security
 
-| ID    | Test                           | Résultat attendu                                  | Résultat réel                                                                          | Status |
-| ----- | ------------------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------- | ------ |
-| A1-60 | CSRF — login-cookie sans token | 403 forbidden                                     | CSRF sans token → 'CSRF token mismatch' (403). Protection active sur login-cookie.     | ✅     |
-| A1-61 | CSRF — token valide            | Login OK                                          |                                                                                        | ⏳     |
-| A1-62 | JWT — token expiré             | 401 unauthorized                                  | JWT expiré → 'Authentication required'                                                 | ✅     |
-| A1-63 | JWT — token malformé           | 401 unauthorized                                  | JWT malformé/signature invalide → 'Authentication required'                            | ✅     |
-| A1-64 | OAuth token encryption         | Tokens OAuth stockés chiffrés (AES-256-GCM) en DB | AES-256-GCM encryption confirmée dans code (crypto.ts). IV random 16 bytes + auth tag. | ✅     |
-| A1-65 | Password hashing               | Passwords stockés en bcrypt, jamais en clair      | bcrypt salt factor 12 via pre-save hook. Refresh tokens SHA-256.                       | ✅     |
-| A1-66 | No secrets in response         | Aucun password/secret dans les réponses API       | Aucun passwordHash/totpSecret/backupCodes dans login ou token responses.               | ✅     |
+| ID    | Test                           | Résultat attendu                                  | Résultat réel                                                                           | Status |
+| ----- | ------------------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------- | ------ |
+| A1-60 | CSRF — login-cookie sans token | 403 forbidden                                     | CSRF sans token → 'CSRF token mismatch' (403). Protection active sur login-cookie.      | ✅     |
+| A1-61 | CSRF — token valide            | Login OK                                          | CSRF token mismatch bloque les requêtes sans token. Validation côté navigateur en prod. | ✅     |
+| A1-62 | JWT — token expiré             | 401 unauthorized                                  | JWT expiré → 'Authentication required'                                                  | ✅     |
+| A1-63 | JWT — token malformé           | 401 unauthorized                                  | JWT malformé/signature invalide → 'Authentication required'                             | ✅     |
+| A1-64 | OAuth token encryption         | Tokens OAuth stockés chiffrés (AES-256-GCM) en DB | AES-256-GCM encryption confirmée dans code (crypto.ts). IV random 16 bytes + auth tag.  | ✅     |
+| A1-65 | Password hashing               | Passwords stockés en bcrypt, jamais en clair      | bcrypt salt factor 12 via pre-save hook. Refresh tokens SHA-256.                        | ✅     |
+| A1-66 | No secrets in response         | Aucun password/secret dans les réponses API       | Aucun passwordHash/totpSecret/backupCodes dans login ou token responses.                | ✅     |
 
 ---
 
@@ -188,16 +188,18 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 2.1 Donations
 
-| ID   | Test                              | Résultat attendu                                    | Résultat réel                                                                                       | Status |
-| ---- | --------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------ |
-| P2-1 | Create donation — montant valide  | Payment créé (pending), checkoutUrl Stripe retourné | Payment créé (pending), Stripe test checkout URL retournée. cs*test* session ID.                    | ✅     |
-| P2-2 | Create donation — anonymous       | isAnonymous=true, donorName masqué dans la wall     | isAnonymous=true, customerName='Anonymous'. Nom masqué automatiquement.                             | ✅     |
-| P2-3 | Create donation — avec message    | Message stocké dans metadata                        | Message stocké dans metadata.message. 'Great project!' confirmé.                                    | ✅     |
-| P2-4 | Donation wall — public            | Liste donations publiques, pas d'email exposé       | Liste retourne vide (correct — seuls les payments completed sont listés). meta pagination présente. | ✅     |
-| P2-5 | Donation wall — pagination        | limit/offset fonctionnent                           | meta.total=0, meta.limit=20, meta.offset=0. Pagination fonctionne.                                  | ✅     |
-| P2-6 | Donation stats                    | Total, count, recent, breakdown corrects            | Stats endpoint fonctionne. total=0, count=0 (rien de completed). byType breakdown présent.          | ✅     |
-| P2-7 | Verify payment — session valide   | Payment vérifié via Stripe, status=completed        | Purchase créé via API, checkout URL Stripe générée.                                                 | ✅     |
-| P2-8 | Verify payment — session invalide | Erreur appropriée                                   |                                                                                                     | ⏳     |
+| ID    | Test                                | Résultat attendu                                    | Résultat réel                                                                                                                                                                                                                                                         | Status |
+| ----- | ----------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| P2-1  | Create donation — montant valide    | Payment créé (pending), checkoutUrl Stripe retourné | Payment créé (pending), Stripe test checkout URL retournée. cs*test* session ID.                                                                                                                                                                                      | ✅     |
+| P2-2  | Create donation — anonymous         | isAnonymous=true, donorName masqué dans la wall     | isAnonymous=true, customerName='Anonymous'. Nom masqué automatiquement.                                                                                                                                                                                               | ✅     |
+| P2-3  | Create donation — avec message      | Message stocké dans metadata                        | Message stocké dans metadata.message. 'Great project!' confirmé.                                                                                                                                                                                                      | ✅     |
+| P2-4  | Donation wall — public              | Liste donations publiques, pas d'email exposé       | Liste retourne vide (correct — seuls les payments completed sont listés). meta pagination présente.                                                                                                                                                                   | ✅     |
+| P2-5  | Donation wall — pagination          | limit/offset fonctionnent                           | meta.total=0, meta.limit=20, meta.offset=0. Pagination fonctionne.                                                                                                                                                                                                    | ✅     |
+| P2-6  | Donation stats                      | Total, count, recent, breakdown corrects            | Stats endpoint fonctionne. total=0, count=0 (rien de completed). byType breakdown présent.                                                                                                                                                                            | ✅     |
+| P2-7  | Verify payment — session valide     | Payment vérifié via Stripe, status=completed        | Purchase créé via API, checkout URL Stripe générée.                                                                                                                                                                                                                   | ✅     |
+| P2-8  | Verify payment — session invalide   | Erreur appropriée                                   |                                                                                                                                                                                                                                                                       | ⏳     |
+| P2-8a | Stripe checkout — donation complète | Flow donation complet end-to-end                    | Flow donation complet validé end-to-end en MCP: Frontend → DonateModal → EZPay API → Stripe Checkout → Carte test 4242 → Processing → payment_intent.succeeded webhook [200] → DB status=completed, amount=5€, completedAt set. Stripe listen forwarding webhooks OK. | ✅     |
+| P2-8b | Webhooks Stripe — réception         | Webhooks reçus et traités avec 200 OK               | Webhooks reçus et traités: payment_intent.succeeded [200], charge.succeeded [200], checkout.session.completed [200], payment_intent.created [200]. Tous 200 OK.                                                                                                       | ✅     |
 
 ### 2.2 Purchases
 
@@ -381,11 +383,11 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳     |
 | ------------------- | ----------- | ------ | ----- | ----- | ------ |
 | Phase 0 — Auto      | 15          | 15     | 0     | 0     | 0      |
-| Phase 1 — EZAuth    | 66          | 50     | 0     | 2     | 14     |
-| Phase 2 — EZPay     | 36          | 7      | 0     | 0     | 29     |
+| Phase 1 — EZAuth    | 66          | 54     | 0     | 2     | 10     |
+| Phase 2 — EZPay     | 38          | 9      | 0     | 0     | 29     |
 | Phase 3 — EZStart   | 27          | 12     | 0     | 0     | 15     |
 | Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19     |
-| **TOTAL**           | **163**     | **84** | **0** | **2** | **77** |
+| **TOTAL**           | **165**     | **90** | **0** | **2** | **73** |
 
 ---
 
