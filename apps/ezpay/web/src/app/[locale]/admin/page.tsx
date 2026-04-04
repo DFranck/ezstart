@@ -8,23 +8,18 @@ import {
   Card,
   Div,
   H1,
-  H2,
   Main,
   P,
   Span,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
   Skeleton,
+  DataTable,
+  DataTableColumnHeader,
+  type ColumnDef,
 } from '@ezstart/ui/components'
 import { ConfirmActionDialog } from '@ezstart/pay-sdk'
 
@@ -46,12 +41,6 @@ interface Payment {
   userId?: string
   projectId?: string
   createdAt: string
-}
-
-interface PaymentsMeta {
-  total: number
-  limit: number
-  offset: number
 }
 
 interface GlobalStats {
@@ -155,14 +144,11 @@ export default function AdminPage() {
 
   // Payments state
   const [payments, setPayments] = useState<Payment[]>([])
-  const [meta, setMeta] = useState<PaymentsMeta>({ total: 0, limit: PAGE_SIZE, offset: 0 })
   const [paymentsLoading, setPaymentsLoading] = useState(true)
 
   // Filters
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [emailSearch, setEmailSearch] = useState('')
-  const [currentPage, setCurrentPage] = useState(0)
 
   // Refund dialog state
   const [refundDialog, setRefundDialog] = useState<{ open: boolean; paymentId: string | null }>({
@@ -227,8 +213,7 @@ export default function AdminPage() {
     const params = new URLSearchParams()
     if (typeFilter !== 'all') params.set('type', typeFilter)
     if (statusFilter !== 'all') params.set('status', statusFilter)
-    params.set('limit', String(PAGE_SIZE))
-    params.set('offset', String(currentPage * PAGE_SIZE))
+    params.set('limit', '1000')
 
     fetch(`${API_URL}/payments?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -237,21 +222,15 @@ export default function AdminPage() {
       .then(data => {
         if (data.success) {
           setPayments(data.data || [])
-          setMeta(data.meta || { total: 0, limit: PAGE_SIZE, offset: 0 })
         }
       })
       .catch(() => {})
       .finally(() => setPaymentsLoading(false))
-  }, [token, typeFilter, statusFilter, currentPage])
+  }, [token, typeFilter, statusFilter])
 
   useEffect(() => {
     fetchPayments()
   }, [fetchPayments])
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(0)
-  }, [typeFilter, statusFilter, emailSearch])
 
   // ---- Refund handler ----
   const handleRefundConfirm = useCallback(async () => {
@@ -285,15 +264,81 @@ export default function AdminPage() {
     fetchPayments()
   }, [token, cancelDialog.payment, fetchPayments, t])
 
-  // ---- Filter payments by email (client-side) ----
-  const filteredPayments = emailSearch
-    ? payments.filter(p => p.customerEmail?.toLowerCase().includes(emailSearch.toLowerCase()))
-    : payments
-
-  // ---- Pagination ----
-  const totalPages = Math.ceil(meta.total / PAGE_SIZE)
-  const from = currentPage * PAGE_SIZE + 1
-  const to = Math.min((currentPage + 1) * PAGE_SIZE, meta.total)
+  // ---- DataTable columns ----
+  const columns: ColumnDef<Payment>[] = [
+    {
+      accessorKey: 'createdAt',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('table.date')} />,
+      cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.createdAt)}</Span>,
+    },
+    {
+      accessorKey: 'type',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('table.type')} />,
+      cell: ({ row }) => (
+        <Badge variant={typeVariantMap[row.original.type]} size="sm">
+          {t(`filters.${row.original.type}`)}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'customerEmail',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('table.client')} />,
+      cell: ({ row }) => <Span className="text-sm">{row.original.customerEmail || '-'}</Span>,
+    },
+    {
+      accessorKey: 'amount',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('table.amount')} />,
+      cell: ({ row }) => (
+        <Span className="font-medium">
+          {formatCurrency(row.original.amount, row.original.currency)}
+        </Span>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('table.status')} />,
+      cell: ({ row }) => (
+        <Badge variant={statusVariantMap[row.original.status]} size="sm" dot>
+          {t(`filters.${row.original.status}`)}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('table.actions'),
+      cell: ({ row }) => {
+        const payment = row.original
+        return (
+          <Div className="flex gap-1">
+            {payment.status === 'completed' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setRefundDialog({ open: true, paymentId: payment._id })}
+              >
+                {t('table.refund')}
+              </Button>
+            )}
+            {payment.type === 'subscription' &&
+              (payment.status === 'completed' || payment.status === 'pending') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCancelDialog({
+                      open: true,
+                      payment: payment as Payment & { metadata?: Record<string, any> },
+                    })
+                  }
+                >
+                  {t('table.cancelSubscription')}
+                </Button>
+              )}
+          </Div>
+        )
+      },
+    },
+  ]
 
   // ---- Auth guard ----
   if (!authChecked) return null
@@ -381,130 +426,25 @@ export default function AdminPage() {
             <SelectItem value="cancelled">{t('filters.cancelled')}</SelectItem>
           </SelectContent>
         </Select>
-
-        <Input
-          type="text"
-          placeholder={t('filters.searchEmail')}
-          value={emailSearch}
-          onChange={e => setEmailSearch(e.target.value)}
-          className="w-full sm:w-64"
-        />
       </Div>
 
-      {/* Payments Table */}
-      <Card className="overflow-hidden">
-        <Table variant="hoverable">
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('table.date')}</TableHead>
-              <TableHead>{t('table.type')}</TableHead>
-              <TableHead>{t('table.client')}</TableHead>
-              <TableHead>{t('table.amount')}</TableHead>
-              <TableHead>{t('table.status')}</TableHead>
-              <TableHead>{t('table.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paymentsLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  {Array.from({ length: 6 }).map((_, j) => (
-                    <TableCell key={j}>
-                      <Skeleton className="h-5 w-full" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : filteredPayments.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6}>
-                  <P className="text-center text-muted-foreground py-8">{t('table.noPayments')}</P>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredPayments.map(payment => (
-                <TableRow key={payment._id}>
-                  <TableCell>
-                    <Span className="text-sm">{formatDate(payment.createdAt)}</Span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={typeVariantMap[payment.type]} size="sm">
-                      {t(`filters.${payment.type}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Span className="text-sm">{payment.customerEmail || '-'}</Span>
-                  </TableCell>
-                  <TableCell>
-                    <Span className="font-medium">
-                      {formatCurrency(payment.amount, payment.currency)}
-                    </Span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariantMap[payment.status]} size="sm" dot>
-                      {t(`filters.${payment.status}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Div className="flex gap-1">
-                      {payment.status === 'completed' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setRefundDialog({ open: true, paymentId: payment._id })}
-                        >
-                          {t('table.refund')}
-                        </Button>
-                      )}
-                      {payment.type === 'subscription' &&
-                        (payment.status === 'completed' || payment.status === 'pending') && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setCancelDialog({
-                                open: true,
-                                payment: payment as Payment & { metadata?: Record<string, any> },
-                              })
-                            }
-                          >
-                            {t('table.cancelSubscription')}
-                          </Button>
-                        )}
-                    </Div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </Card>
-
-      {/* Pagination */}
-      {meta.total > 0 && (
-        <Div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-3">
-          <P className="text-sm text-muted-foreground">
-            {t('pagination.showing', { from, to, total: meta.total })}
-          </P>
-          <Div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-              disabled={currentPage === 0}
-            >
-              {t('pagination.previous')}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
-              disabled={currentPage >= totalPages - 1}
-            >
-              {t('pagination.next')}
-            </Button>
+      {/* Payments DataTable */}
+      {paymentsLoading ? (
+        <Card className="p-8">
+          <Div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
           </Div>
-        </Div>
+        </Card>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={payments}
+          filterColumn="customerEmail"
+          filterPlaceholder={t('filters.searchEmail')}
+          pageSize={PAGE_SIZE}
+        />
       )}
 
       {/* Refund Confirmation Dialog */}
@@ -516,8 +456,13 @@ export default function AdminPage() {
         onConfirm={handleRefundConfirm}
         variant="destructive"
         texts={{
+          confirmLabel: t('dialog.confirm'),
+          cancelLabel: t('dialog.cancel'),
+          loadingMessage: t('dialog.loading'),
           successMessage: t('table.refundSuccess'),
           errorMessage: t('table.refundError'),
+          retryLabel: t('dialog.retry'),
+          closeLabel: t('dialog.close'),
         }}
       />
 
@@ -530,8 +475,13 @@ export default function AdminPage() {
         onConfirm={handleCancelConfirm}
         variant="destructive"
         texts={{
+          confirmLabel: t('dialog.confirm'),
+          cancelLabel: t('dialog.cancel'),
+          loadingMessage: t('dialog.loading'),
           successMessage: t('table.cancelSuccess'),
           errorMessage: t('table.cancelError'),
+          retryLabel: t('dialog.retry'),
+          closeLabel: t('dialog.close'),
         }}
       />
     </Main>

@@ -47,6 +47,15 @@
       "previous": "Précédent",
       "next": "Suivant",
       "showing": "Affichage de {from} à {to} sur {total}"
+    },
+    "dialog": {
+      "cancel": "Annuler",
+      "confirm": "Confirmer",
+      "loading": "Opération en cours...",
+      "success": "Opération réussie",
+      "error": "Une erreur est survenue",
+      "retry": "Réessayer",
+      "close": "Fermer"
     }
   }
 }

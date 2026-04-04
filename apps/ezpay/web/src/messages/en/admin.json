@@ -47,6 +47,15 @@
       "previous": "Previous",
       "next": "Next",
       "showing": "Showing {from} to {to} of {total}"
+    },
+    "dialog": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "loading": "Operation in progress...",
+      "success": "Operation completed",
+      "error": "An error occurred",
+      "retry": "Retry",
+      "close": "Close"
     }
   }
 }
