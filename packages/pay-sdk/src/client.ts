@@ -83,7 +83,7 @@ export class PayClient {
       id: p.id || p._id,
     }))
 
-    return { payments, total: result.meta?.total ?? payments.length }
+    return { success: true, payments, total: result.meta?.total ?? payments.length }
   }
 
   // ===== DONATIONS =====
