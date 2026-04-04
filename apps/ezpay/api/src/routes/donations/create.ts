@@ -88,8 +88,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
         isPublic: isPublic.toString(),
         isAnonymous: isAnonymous.toString(),
       },
-      successUrl: `${baseUrl}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/donate/cancel`,
+      successUrl: `${baseUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/?payment=cancel`,
     })
 
     // Create payment record in DB
