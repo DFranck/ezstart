@@ -7,7 +7,14 @@
   },
   "auth": {
     "login": "Connexion",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "callback": {
+      "success": "Authentification réussie !",
+      "redirecting": "Redirection vers l'accueil...",
+      "backToHome": "Retour à l'accueil",
+      "error": "Échec de l'authentification",
+      "noCode": "Aucun code d'autorisation trouvé"
+    }
   },
   "pwa": {
     "install": {
