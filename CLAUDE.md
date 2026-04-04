@@ -10,20 +10,42 @@
 
 1. **Planifier** — Rédiger un plan détaillé avec les tâches identifiées
 2. **Valider** — Attendre la validation explicite de l'utilisateur avant tout code
-3. **Déléguer** — Lancer des agents en parallèle, chacun FOCUS sur 1 tâche spécifique
-4. **Manager** — Rester disponible pour discuter pendant que les agents travaillent
-5. **Résumer** — Faire un résumé quand les agents finissent
-6. **Itérer** — Lancer d'autres agents si nécessaire pour la suite
+3. **Coder** — Lancer des agents codeurs en parallèle, chacun FOCUS sur 1 tâche
+4. **Tester** — Lancer des agents testeurs :
+   - `tsc --noEmit` (typecheck)
+   - `vitest run` (unit/integration tests)
+   - Grep secrets (patterns sensibles)
+   - MCP chrome-devtools (tests user si UI modifiée)
+5. **Auditer** — Lancer des agents auditeurs en parallèle AVANT toute PR :
+   - `code-quality.md` — types, naming, API standards, dead code, packages
+   - `i18n-compliance.md` — tout texte traduit, toutes langues supportées
+   - `ux-quality.md` — states, toasts, logging, design tokens (si frontend touché)
+   - `security.md` — auth, secrets, injection (si routes/auth touchées)
+6. **Décider** — Claude évalue les rapports d'audit :
+   - ✅ Clean → passer à l'étape PR
+   - ❌ Issues → lancer agents fixers → re-audit (boucle jusqu'à clean)
+7. **PR** — `gh pr create` (JAMAIS de push direct sur master)
+8. **Résumer** — Faire un résumé final au user
+
+### Règles pipeline :
+
+- ✅ Chaque agent codeur reçoit les **DEV-RULES pertinentes** dans son prompt
+- ✅ Chaque agent codeur reçoit la **checklist** du rôle agent applicable
+- ✅ `tsc --noEmit` OBLIGATOIRE avant chaque commit
+- ✅ Audit OBLIGATOIRE avant chaque PR (jamais de PR sans audit clean)
+- ✅ Boucle audit/fix jusqu'à 100% clean (jamais de "on verra plus tard")
+- ✅ Claude est **décideur** sur tout ce qui est logique/évident (ne demande au user que pour les choix d'architecture ou débats de rules)
+- ✅ Claude est **libre** d'ajouter/modifier/supprimer des agents pour optimiser le pipeline
+- ✅ Lancer autant d'agents que nécessaire en **parallèle**
+- ✅ Claude reste **disponible** pour discuter avec l'utilisateur pendant l'exécution
+- ✅ Claude **vérifie** le travail des agents avant de résumer
 
 ### Règles agents :
 
 - ✅ Chaque agent reçoit une tâche **précise et isolée**
-- ✅ Chaque agent reçoit dans son prompt les **règles de [DEV-RULES.md](./DEV-RULES.md)** applicables à sa tâche
-- ✅ Lancer autant d'agents que nécessaire en **parallèle**
-- ✅ Claude reste **disponible** pour discuter avec l'utilisateur pendant l'exécution
-- ✅ Claude **vérifie** le travail des agents avant de résumer (respect des DEV-RULES)
-- ✅ Chaque agent **met à jour le README** du package/app qu'il modifie (si README existe)
-- ✅ Chaque agent **vérifie qu'aucun secret** (clé API, token, mot de passe, .env) ne se retrouve dans le code
+- ✅ Chaque agent reçoit dans son prompt les **règles de DEV-RULES.md** applicables
+- ✅ Chaque agent **met à jour le README** du package/app modifié (si README existe)
+- ✅ Chaque agent **vérifie qu'aucun secret** ne se retrouve dans le code
 - ❌ **JAMAIS** exécuter soi-même : écrire du code, modifier des fichiers, supprimer, déplacer, renommer — **TOUT passe par les agents**
 - ❌ **JAMAIS** lancer du travail sans plan validé par l'utilisateur
 
@@ -35,27 +57,6 @@
 - Discuter avec l'utilisateur
 - Lancer et vérifier le travail des agents
 - Vérifier qu'aucun secret (clés API, tokens, .env, credentials) n'est exposé dans le travail des agents
-- **Rédiger la checklist de tests** avant de valider une phase (voir section Tests ci-dessous)
-
-### Tests — workflow obligatoire :
-
-Avant de déclarer une phase/feature terminée, Claude (manager) **rédige une checklist de tests** puis **délègue l'exécution aux agents** :
-
-1. **Tests code** (agents automatisés) :
-   - Typecheck (`tsc --noEmit`)
-   - Unit tests (`vitest run`)
-   - Lint si configuré
-   - Build (`next build`, `tsc`)
-   - Vérification secrets (grep patterns sensibles)
-
-2. **Tests MCP** (tester comme un vrai utilisateur via chrome-devtools) :
-   - Naviguer les pages dans le navigateur
-   - Vérifier que l'UI s'affiche correctement (screenshots)
-   - Tester les flows fonctionnels (cliquer, remplir, soumettre)
-   - Vérifier les endpoints API (requêtes réseau)
-   - Tester les cas d'erreur (mauvais input, 404, etc.)
-
-Claude rédige la checklist → agents exécutent → Claude utilise MCP pour les tests user → consolide et reporte.
 
 ### Git — Branching & PRs (OBLIGATOIRE)
 
