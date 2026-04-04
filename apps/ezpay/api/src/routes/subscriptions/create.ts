@@ -10,6 +10,7 @@ import {
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
+import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -127,7 +128,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/subscribe', createSubscriptionHandler, {
+docRouter.post('/subscribe', authMiddleware, createSubscriptionHandler, {
   summary: 'Create a subscription checkout session',
   tags: ['Subscriptions'],
   bodySchema: createSubscriptionSchema,

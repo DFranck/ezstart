@@ -111,7 +111,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - [x] Web: Badge "Session actuelle" + visual differentiation
 - [x] Bouton Révoquer masqué sur session courante
 
-### RBAC-1: Simplifier le systeme de roles `high` `architecture` — `planned`
+### RBAC-1: Simplifier le systeme de roles `high` `architecture` — `done`
 
 - **Probleme :** Le systeme de roles est disperse et incoherent :
   - `roles` (legacy) encore dans le code mais ne devrait plus exister
