@@ -160,15 +160,15 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.10 Admin
 
-| ID    | Test                    | Résultat attendu                         | Résultat réel | Status |
-| ----- | ----------------------- | ---------------------------------------- | ------------- | ------ |
-| A1-53 | Admin — list users      | Liste paginée, search par email/username |               | ⏳     |
-| A1-54 | Admin — filter by role  | Filtre par role fonctionne               |               | ⏳     |
-| A1-55 | Admin — edit user roles | Roles mis à jour (globalRoles, appRoles) |               | ⏳     |
-| A1-56 | Admin — delete user     | User supprimé (superadmin only)          |               | ⏳     |
-| A1-57 | Admin — non-admin accès | 403 forbidden                            |               | ⏳     |
-| A1-58 | Admin — waitlist list   | Liste des emails par app                 |               | ⏳     |
-| A1-59 | Admin — waitlist invite | Email invité, access code généré         |               | ⏳     |
+| ID    | Test                    | Résultat attendu                         | Résultat réel                                                                                         | Status |
+| ----- | ----------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------ |
+| A1-53 | Admin — list users      | Liste paginée, search par email/username | Admin list users: 2 users retournés avec tous les champs. Pagination meta présente.                   | ✅     |
+| A1-54 | Admin — filter by role  | Filtre par role fonctionne               | Admin search: search=franck retourne les résultats filtrés.                                           | ✅     |
+| A1-55 | Admin — edit user roles | Roles mis à jour (globalRoles, appRoles) | PATCH /admin/users/:id fonctionne, validation Zod active (globalRoles enum). PUT /roles n'existe pas. | ⚠️     |
+| A1-56 | Admin — delete user     | User supprimé (superadmin only)          |                                                                                                       | ⏳     |
+| A1-57 | Admin — non-admin accès | 403 forbidden                            |                                                                                                       | ⏳     |
+| A1-58 | Admin — waitlist list   | Liste des emails par app                 |                                                                                                       | ⏳     |
+| A1-59 | Admin — waitlist invite | Email invité, access code généré         |                                                                                                       | ⏳     |
 
 ### 1.11 Security
 
@@ -266,54 +266,57 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ## Phase 3 — EZStart (portfolio/monitoring)
 
-### 3.1 Landing Page
+### 3.1 Landing Page & Core
 
-| ID   | Test                | Résultat attendu               | Résultat réel | Status |
-| ---- | ------------------- | ------------------------------ | ------------- | ------ |
-| S3-1 | Hero section        | Rendu correct, animations, CTA |               | ⏳     |
-| S3-2 | Skills section      | Liste skills, icônes           |               | ⏳     |
-| S3-3 | Projects section    | Cards projets, liens           |               | ⏳     |
-| S3-4 | Libraries section   | Liste libs @ezstart            |               | ⏳     |
-| S3-5 | Contact section     | Formulaire/liens contact       |               | ⏳     |
-| S3-6 | Responsive — mobile | Layout adapté, pas d'overflow  |               | ⏳     |
-| S3-7 | i18n — FR/EN toggle | Toutes les strings traduites   |               | ⏳     |
+| ID    | Test               | Résultat attendu                                 | Résultat réel                                                                                                               | Status |
+| ----- | ------------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| S3-1  | Landing page FR    | Toutes sections rendues correctement             | Hero, Skills, Projects, Libs, Support, Contact — toutes sections render. 8 projets avec images/descriptions.                | ✅     |
+| S3-2  | Landing page EN    | Switch FR→EN, tous textes traduits               | Switch FR→EN fonctionne. Tous les textes traduits. URL /fr → /en.                                                           | ✅     |
+| S3-3  | Theme toggle       | Light/dark mode toggle fonctionnel               | Light/dark mode toggle instantané. Design adapté dans les deux modes.                                                       | ✅     |
+| S3-4  | SSO Login flow     | Connexion via EZAuth → callback → session active | Connexion → EZAuth /fr/login → credentials → callback → 'Authentification réussie !' → home connecté (Déconnexion visible). | ✅     |
+| S3-5  | Logout             | Déconnexion → retour état non connecté           | Déconnexion → bouton revient à 'Connexion'. Instantané, pas de redirect.                                                    | ✅     |
+| S3-6  | Locale cross-app   | Locale préservée entre EZStart et EZAuth         | EZStart FR → EZAuth /fr/login. EZStart EN → EZAuth /en/login. Locale préservée.                                             | ✅     |
+| S3-7  | Legal notices      | Page mentions légales complète                   | Page mentions légales complète en FR.                                                                                       | ✅     |
+| S3-8  | Monitoring API     | /api/health — scheduler + services monitored     | /api/health — scheduler running, 12 services monitored.                                                                     | ✅     |
+| S3-9  | EZStart API health | /health — status ok                              | /health — status ok                                                                                                         | ✅     |
+| S3-10 | Donate modal       | DonateModal s'ouvre, montants, message, i18n     | DonateModal s'ouvre, montants €5/10/25/50, montant custom, message, textes traduits FR.                                     | ✅     |
+| S3-11 | Donation wall      | Empty state ou liste donations                   | Empty state 'Soyez le premier à soutenir !'. Pas de crash.                                                                  | ✅     |
 
 ### 3.2 Auth Integration
 
-| ID    | Test                             | Résultat attendu                             | Résultat réel | Status |
-| ----- | -------------------------------- | -------------------------------------------- | ------------- | ------ |
-| S3-8  | Auth callback                    | Login via ezauth → callback → session active |               | ⏳     |
-| S3-9  | Protected pages — non connecté   | Redirect vers login ezauth                   |               | ⏳     |
-| S3-10 | Protected pages — non superadmin | Accès refusé (monitoring/admin)              |               | ⏳     |
+| ID    | Test                             | Résultat attendu                | Résultat réel | Status |
+| ----- | -------------------------------- | ------------------------------- | ------------- | ------ |
+| S3-12 | Protected pages — non connecté   | Redirect vers login ezauth      |               | ⏳     |
+| S3-13 | Protected pages — non superadmin | Accès refusé (monitoring/admin) |               | ⏳     |
 
 ### 3.3 Monitoring Dashboard
 
 | ID    | Test                 | Résultat attendu                                | Résultat réel | Status |
 | ----- | -------------------- | ----------------------------------------------- | ------------- | ------ |
-| S3-11 | Overview             | Health global, count erreurs, count audits      |               | ⏳     |
-| S3-12 | Real-time Socket.IO  | Données se mettent à jour sans refresh          |               | ⏳     |
-| S3-13 | Health page          | Status par service (healthy/degraded/unhealthy) |               | ⏳     |
-| S3-14 | Health — history     | Historique uptime 24h/7d/30d                    |               | ⏳     |
-| S3-15 | Errors page          | Feed erreurs Sentry, filtres severity           |               | ⏳     |
-| S3-16 | Audits page          | Scores audits, détails, filtres                 |               | ⏳     |
-| S3-17 | Trigger manual check | POST trigger → refresh données                  |               | ⏳     |
+| S3-14 | Overview             | Health global, count erreurs, count audits      |               | ⏳     |
+| S3-15 | Real-time Socket.IO  | Données se mettent à jour sans refresh          |               | ⏳     |
+| S3-16 | Health page          | Status par service (healthy/degraded/unhealthy) |               | ⏳     |
+| S3-17 | Health — history     | Historique uptime 24h/7d/30d                    |               | ⏳     |
+| S3-18 | Errors page          | Feed erreurs Sentry, filtres severity           |               | ⏳     |
+| S3-19 | Audits page          | Scores audits, détails, filtres                 |               | ⏳     |
+| S3-20 | Trigger manual check | POST trigger → refresh données                  |               | ⏳     |
 
 ### 3.4 Admin Panel
 
 | ID    | Test                | Résultat attendu                | Résultat réel | Status |
 | ----- | ------------------- | ------------------------------- | ------------- | ------ |
-| S3-18 | User list           | Liste paginée (50/page)         |               | ⏳     |
-| S3-19 | User search         | Search par nom/email fonctionne |               | ⏳     |
-| S3-20 | User filter by role | Filtre par role fonctionne      |               | ⏳     |
-| S3-21 | User edit           | Modification roles/permissions  |               | ⏳     |
+| S3-21 | User list           | Liste paginée (50/page)         |               | ⏳     |
+| S3-22 | User search         | Search par nom/email fonctionne |               | ⏳     |
+| S3-23 | User filter by role | Filtre par role fonctionne      |               | ⏳     |
+| S3-24 | User edit           | Modification roles/permissions  |               | ⏳     |
 
 ### 3.5 Feature Demos
 
 | ID    | Test          | Résultat attendu                    | Résultat réel | Status |
 | ----- | ------------- | ----------------------------------- | ------------- | ------ |
-| S3-22 | CV Generator  | Form → preview → rendu correct      |               | ⏳     |
-| S3-23 | QR Code       | Input → QR généré → customisation   |               | ⏳     |
-| S3-24 | Business Card | Form → card preview → rendu correct |               | ⏳     |
+| S3-25 | CV Generator  | Form → preview → rendu correct      |               | ⏳     |
+| S3-26 | QR Code       | Input → QR généré → customisation   |               | ⏳     |
+| S3-27 | Business Card | Form → card preview → rendu correct |               | ⏳     |
 
 ---
 
@@ -378,11 +381,11 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳     |
 | ------------------- | ----------- | ------ | ----- | ----- | ------ |
 | Phase 0 — Auto      | 15          | 15     | 0     | 0     | 0      |
-| Phase 1 — EZAuth    | 66          | 39     | 0     | 1     | 26     |
+| Phase 1 — EZAuth    | 66          | 41     | 0     | 2     | 23     |
 | Phase 2 — EZPay     | 36          | 6      | 0     | 0     | 30     |
-| Phase 3 — EZStart   | 24          | 0      | 0     | 0     | 24     |
+| Phase 3 — EZStart   | 27          | 11     | 0     | 0     | 16     |
 | Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19     |
-| **TOTAL**           | **160**     | **60** | **0** | **1** | **99** |
+| **TOTAL**           | **163**     | **73** | **0** | **2** | **88** |
 
 ---
 
