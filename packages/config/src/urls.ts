@@ -248,6 +248,12 @@ export function getCurrentEnvironment(): Environment {
     return 'production'
   }
 
+  // Server-side: Not production = local development
+  // @ts-ignore - window may not exist in Node.js context
+  if (typeof process !== 'undefined' && typeof window === 'undefined') {
+    return 'local'
+  }
+
   // Client-side: Detect from window.location.hostname
   // @ts-ignore - window exists in browser context
   if (typeof window !== 'undefined' && typeof window.location !== 'undefined') {
