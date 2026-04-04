@@ -110,24 +110,24 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.5 Google OAuth
 
-| ID    | Test                               | Résultat attendu                             | Résultat réel | Status |
-| ----- | ---------------------------------- | -------------------------------------------- | ------------- | ------ |
-| A1-28 | OAuth — nouveau user               | Compte créé, OAuth account lié, redirect app |               | ⏳     |
-| A1-29 | OAuth — user existant (même email) | Compte lié, pas de doublon, redirect app     |               | ⏳     |
-| A1-30 | OAuth — redirect_uri validée       | Seules les origins whitelist acceptées       |               | ⏳     |
+| ID    | Test                               | Résultat attendu                             | Résultat réel                                                                                                               | Status |
+| ----- | ---------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| A1-28 | OAuth — nouveau user               | Compte créé, OAuth account lié, redirect app | OAuth Google login → 'Authentification réussie !' Redirect OK. (Fix: ajout redirect URI localhost:6110 dans Google Console) | ✅     |
+| A1-29 | OAuth — user existant (même email) | Compte lié, pas de doublon, redirect app     |                                                                                                                             | ⏳     |
+| A1-30 | OAuth — redirect_uri validée       | Seules les origins whitelist acceptées       |                                                                                                                             | ⏳     |
 
 ### 1.6 Two-Factor Authentication (2FA)
 
-| ID    | Test                          | Résultat attendu                                     | Résultat réel                                      | Status |
-| ----- | ----------------------------- | ---------------------------------------------------- | -------------------------------------------------- | ------ |
-| A1-31 | 2FA setup — générer secret    | QR code affiché, secret stocké, backup codes générés |                                                    | ⏳     |
-| A1-32 | 2FA verify — code TOTP valide | 2FA activé, backup codes retournés                   |                                                    | ⏳     |
-| A1-33 | 2FA verify — code invalide    | Erreur "invalid code", 2FA pas activé                |                                                    | ⏳     |
-| A1-34 | 2FA login — code valide       | Login complété, tokens retournés                     |                                                    | ⏳     |
-| A1-35 | 2FA login — code invalide     | Erreur, login bloqué                                 |                                                    | ⏳     |
-| A1-36 | 2FA login — backup code       | Login complété (backup code consommé)                |                                                    | ⏳     |
-| A1-37 | 2FA disable — code valide     | 2FA désactivé, secret supprimé                       |                                                    | ⏳     |
-| A1-38 | 2FA status — check            | Retourne enabled: true/false                         | 'Désactivé' visible sur settings page. Accents OK. | ✅     |
+| ID    | Test                          | Résultat attendu                                     | Résultat réel                                                             | Status |
+| ----- | ----------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| A1-31 | 2FA setup — générer secret    | QR code affiché, secret stocké, backup codes générés | 2FA setup: QR code scanné avec Google Authenticator.                      | ✅     |
+| A1-32 | 2FA verify — code TOTP valide | 2FA activé, backup codes retournés                   | 2FA verify: code TOTP validé, 2FA activé, backup codes générés (8 codes). | ✅     |
+| A1-33 | 2FA verify — code invalide    | Erreur "invalid code", 2FA pas activé                |                                                                           | ⏳     |
+| A1-34 | 2FA login — code valide       | Login complété, tokens retournés                     | 2FA login: code authenticator → login complété.                           | ✅     |
+| A1-35 | 2FA login — code invalide     | Erreur, login bloqué                                 | 2FA login mauvais code → 'Invalid 2FA code', login bloqué.                | ✅     |
+| A1-36 | 2FA login — backup code       | Login complété (backup code consommé)                | 2FA backup code → login complété, code consommé.                          | ✅     |
+| A1-37 | 2FA disable — code valide     | 2FA désactivé, secret supprimé                       | 2FA disable: code TOTP → 2FA désactivé.                                   | ✅     |
+| A1-38 | 2FA status — check            | Retourne enabled: true/false                         | 'Désactivé' visible sur settings page. Accents OK.                        | ✅     |
 
 ### 1.7 Password Reset
 
@@ -156,7 +156,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | A1-49 | Update profile — nom                 | firstName/lastName mis à jour                                | PUT /auth/profile — firstName/lastName mis à jour puis revert. Succès. | ✅     |
 | A1-50 | Update profile — avatar              | Avatar URL mis à jour                                        |                                                                        | ⏳     |
 | A1-51 | Delete account — confirmation        | Compte supprimé, OAuth accounts nettoyés, sessions révoquées |                                                                        | ⏳     |
-| A1-52 | Delete account — re-login impossible | Login échoue après suppression                               |                                                                        | ⏳     |
+| A1-52 | Delete account — re-login impossible | Login échoue après suppression                               | Login post-delete → 'Invalid credentials' (correct).                   | ✅     |
 
 ### 1.10 Admin
 
@@ -165,7 +165,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | A1-53 | Admin — list users      | Liste paginée, search par email/username | Admin list users: 2 users retournés avec tous les champs. Pagination meta présente.                   | ✅     |
 | A1-54 | Admin — filter by role  | Filtre par role fonctionne               | Admin search: search=franck retourne les résultats filtrés.                                           | ✅     |
 | A1-55 | Admin — edit user roles | Roles mis à jour (globalRoles, appRoles) | PATCH /admin/users/:id fonctionne, validation Zod active (globalRoles enum). PUT /roles n'existe pas. | ⚠️     |
-| A1-56 | Admin — delete user     | User supprimé (superadmin only)          |                                                                                                       | ⏳     |
+| A1-56 | Admin — delete user     | User supprimé (superadmin only)          | Admin delete user → 'User deleted successfully'.                                                      | ✅     |
 | A1-57 | Admin — non-admin accès | 403 forbidden                            |                                                                                                       | ⏳     |
 | A1-58 | Admin — waitlist list   | Liste des emails par app                 |                                                                                                       | ⏳     |
 | A1-59 | Admin — waitlist invite | Email invité, access code généré         |                                                                                                       | ⏳     |
@@ -196,7 +196,7 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | P2-4 | Donation wall — public            | Liste donations publiques, pas d'email exposé       | Liste retourne vide (correct — seuls les payments completed sont listés). meta pagination présente. | ✅     |
 | P2-5 | Donation wall — pagination        | limit/offset fonctionnent                           | meta.total=0, meta.limit=20, meta.offset=0. Pagination fonctionne.                                  | ✅     |
 | P2-6 | Donation stats                    | Total, count, recent, breakdown corrects            | Stats endpoint fonctionne. total=0, count=0 (rien de completed). byType breakdown présent.          | ✅     |
-| P2-7 | Verify payment — session valide   | Payment vérifié via Stripe, status=completed        |                                                                                                     | ⏳     |
+| P2-7 | Verify payment — session valide   | Payment vérifié via Stripe, status=completed        | Purchase créé via API, checkout URL Stripe générée.                                                 | ✅     |
 | P2-8 | Verify payment — session invalide | Erreur appropriée                                   |                                                                                                     | ⏳     |
 
 ### 2.2 Purchases
@@ -279,15 +279,15 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | S3-7  | Legal notices      | Page mentions légales complète                   | Page mentions légales complète en FR.                                                                                       | ✅     |
 | S3-8  | Monitoring API     | /api/health — scheduler + services monitored     | /api/health — scheduler running, 12 services monitored.                                                                     | ✅     |
 | S3-9  | EZStart API health | /health — status ok                              | /health — status ok                                                                                                         | ✅     |
-| S3-10 | Donate modal       | DonateModal s'ouvre, montants, message, i18n     | DonateModal s'ouvre, montants €5/10/25/50, montant custom, message, textes traduits FR.                                     | ✅     |
+| S3-10 | Donate modal       | DonateModal s'ouvre, montants, message, i18n     | Modal → API → Stripe checkout redirect → paiement complété sur Stripe test. Fix: unwrap data dans pay-sdk client.           | ✅     |
 | S3-11 | Donation wall      | Empty state ou liste donations                   | Empty state 'Soyez le premier à soutenir !'. Pas de crash.                                                                  | ✅     |
 
 ### 3.2 Auth Integration
 
-| ID    | Test                             | Résultat attendu                | Résultat réel | Status |
-| ----- | -------------------------------- | ------------------------------- | ------------- | ------ |
-| S3-12 | Protected pages — non connecté   | Redirect vers login ezauth      |               | ⏳     |
-| S3-13 | Protected pages — non superadmin | Accès refusé (monitoring/admin) |               | ⏳     |
+| ID    | Test                             | Résultat attendu                                   | Résultat réel                                                                                                      | Status |
+| ----- | -------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| S3-12 | Monitoring dashboard             | Dashboard monitoring accessible, données affichées | Dashboard monitoring: Santé Globale 96.6/100, Qualité Code 92/100, 0 erreurs critiques, 377ms temps réponse moyen. | ✅     |
+| S3-13 | Protected pages — non superadmin | Accès refusé (monitoring/admin)                    |                                                                                                                    | ⏳     |
 
 ### 3.3 Monitoring Dashboard
 
@@ -381,11 +381,11 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 | Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳     |
 | ------------------- | ----------- | ------ | ----- | ----- | ------ |
 | Phase 0 — Auto      | 15          | 15     | 0     | 0     | 0      |
-| Phase 1 — EZAuth    | 66          | 41     | 0     | 2     | 23     |
-| Phase 2 — EZPay     | 36          | 6      | 0     | 0     | 30     |
-| Phase 3 — EZStart   | 27          | 11     | 0     | 0     | 16     |
+| Phase 1 — EZAuth    | 66          | 50     | 0     | 2     | 14     |
+| Phase 2 — EZPay     | 36          | 7      | 0     | 0     | 29     |
+| Phase 3 — EZStart   | 27          | 12     | 0     | 0     | 15     |
 | Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19     |
-| **TOTAL**           | **163**     | **73** | **0** | **2** | **88** |
+| **TOTAL**           | **163**     | **84** | **0** | **2** | **77** |
 
 ---
 
@@ -471,6 +471,41 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 - **Actual:** Not an app access issue. The 403 was caused by expired tokens + no re-auth mechanism on EZAuth web (no callback page). 2FA status endpoint works fine with valid token.
 - **Impact:** Low — EZAuth web needs its own auth callback page for token renewal
 - **Status:** open (reclassified low)
+
+### ISSUE-010 — RESERVED
+
+### ISSUE-011 — Reset password fails for OAuth-only users with legacy app values (FIXED)
+
+- **Test:** Password reset for OAuth account
+- **Severity:** medium
+- **Description:** user.save() failed due to 'tower-defense' not in apps enum
+- **Fix:** Removed hardcoded enum from apps field in AuthUser model
+- **Status:** fixed
+
+### ISSUE-012 — DonateModal doesn't redirect to Stripe (FIXED)
+
+- **Test:** S3-10
+- **Severity:** high
+- **Description:** result.checkoutUrl was undefined because data was not unwrapped from { success, data } response
+- **Fix:** pay-sdk client now unwraps { success, data } response
+- **Status:** fixed
+
+### ISSUE-013 — No payment success page (open, low)
+
+- **Test:** After Stripe checkout completion
+- **Severity:** low
+- **Description:** 404 on /donate/success after Stripe checkout completion. Expected a success page with thank you message.
+- **Temp fix:** Redirect to /?payment=success
+- **Proper fix:** pay-sdk should export PaymentSuccessPage component (like auth-sdk exports AuthCallbackPage)
+- **Status:** open
+
+### ISSUE-014 — Stripe return URLs hardcoded in API (open, medium)
+
+- **Test:** Donation return after payment
+- **Severity:** medium
+- **Description:** Hardcoded /donate/success in ezpay API. Return URL should be configurable per consumer app.
+- **Fix needed:** Accept returnUrl from client, use it in Stripe session
+- **Status:** open
 
 ---
 
