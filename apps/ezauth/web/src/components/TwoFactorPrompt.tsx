@@ -33,7 +33,7 @@ export function TwoFactorPrompt({ tempToken, redirect_uri, onBack }: TwoFactorPr
       })
 
       if (!response.ok) {
-        throw new Error(parseApiError(response.data as any) || 'Invalid 2FA code')
+        throw new Error(response.error || parseApiError(response.data as any) || 'Invalid 2FA code')
       }
 
       const result = response.data as { code?: string }

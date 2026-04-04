@@ -31,6 +31,7 @@ type FormData = {
 
 function ForgotPasswordContent() {
   const t = useTranslations('forgotPassword')
+  const tValidation = useTranslations('validation')
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -54,7 +55,7 @@ function ForgotPasswordContent() {
       })
 
       if (!response.ok) {
-        throw new Error(parseApiError(response.data as any) || 'Request failed')
+        throw new Error(response.error || parseApiError(response.data as any) || 'Request failed')
       }
 
       setSuccess(true)
@@ -99,10 +100,10 @@ function ForgotPasswordContent() {
                 control={form.control}
                 name="email"
                 rules={{
-                  required: 'Email is required',
+                  required: tValidation('required'),
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Invalid email format',
+                    message: tValidation('invalidEmail'),
                   },
                 }}
                 render={({ field }) => (

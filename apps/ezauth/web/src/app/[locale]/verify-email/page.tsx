@@ -30,7 +30,7 @@ function VerifyEmailContent() {
       })
 
       if (!response.ok) {
-        const errorMsg = parseApiError(response.data as any) || ''
+        const errorMsg = response.error || parseApiError(response.data as any) || ''
         if (errorMsg.includes('already verified')) {
           setState('already-verified')
         } else {

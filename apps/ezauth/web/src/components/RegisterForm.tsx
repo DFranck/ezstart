@@ -132,7 +132,9 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(parseApiError(response.data as any) || 'Registration failed')
+        throw new Error(
+          response.error || parseApiError(response.data as any) || 'Registration failed'
+        )
       }
 
       // Show "check your email" message

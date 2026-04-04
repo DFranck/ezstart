@@ -70,7 +70,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(parseApiError(response.data as any) || 'Login failed')
+        throw new Error(response.error || parseApiError(response.data as any) || 'Login failed')
       }
 
       const result = response.data as {

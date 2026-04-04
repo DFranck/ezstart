@@ -32,6 +32,7 @@ type FormData = {
 
 function ResetPasswordContent() {
   const t = useTranslations('resetPassword')
+  const tValidation = useTranslations('validation')
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get('token')
@@ -71,7 +72,7 @@ function ResetPasswordContent() {
       })
 
       if (!response.ok) {
-        throw new Error(parseApiError(response.data as any) || 'Request failed')
+        throw new Error(response.error || parseApiError(response.data as any) || 'Request failed')
       }
 
       setSuccess(true)
@@ -136,8 +137,8 @@ function ResetPasswordContent() {
                 control={form.control}
                 name="newPassword"
                 rules={{
-                  required: 'Password is required',
-                  minLength: { value: 6, message: 'Must be at least 6 characters' },
+                  required: tValidation('required'),
+                  minLength: { value: 6, message: tValidation('minLength', { min: 6 }) },
                 }}
                 render={({ field }) => (
                   <FormItem>
@@ -154,8 +155,8 @@ function ResetPasswordContent() {
                 control={form.control}
                 name="confirmPassword"
                 rules={{
-                  required: 'Please confirm your password',
-                  minLength: { value: 6, message: 'Must be at least 6 characters' },
+                  required: tValidation('required'),
+                  minLength: { value: 6, message: tValidation('minLength', { min: 6 }) },
                 }}
                 render={({ field }) => (
                   <FormItem>
