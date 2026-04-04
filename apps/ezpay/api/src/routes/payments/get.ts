@@ -43,11 +43,8 @@ const getPaymentHandler = async (req: Request, res: Response) => {
     }
 
     // Access control: non-admin users can only see their own payments
-    const isAdmin =
-      req.user?.globalRoles?.includes('superadmin') ||
-      req.user?.globalRoles?.includes('admin') ||
-      req.user?.roles?.includes('superadmin') ||
-      req.user?.roles?.includes('admin')
+    const { isAdminUser } = await import('../../middleware/auth.js')
+    const isAdmin = isAdminUser(req)
 
     if (!isAdmin && payment.userId !== req.userId) {
       return sendError(res, 'Payment not found', 404)

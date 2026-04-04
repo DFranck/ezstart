@@ -45,12 +45,9 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
 
     const { paymentId } = validation.data
 
-    // Admin check — uses globalRoles/roles from JWT token
-    const isAdmin =
-      req.user?.globalRoles?.includes('superadmin') ||
-      req.user?.globalRoles?.includes('admin') ||
-      req.user?.roles?.includes('superadmin') ||
-      req.user?.roles?.includes('admin')
+    // Admin check
+    const { isAdminUser } = await import('../../middleware/auth.js')
+    const isAdmin = isAdminUser(req)
 
     if (!isAdmin) {
       return sendError(res, 'Admin access required', 403)

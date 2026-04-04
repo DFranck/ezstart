@@ -62,11 +62,8 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
     const query: Record<string, unknown> = {}
 
     // Non-admin users can only see their own payments
-    const isAdmin =
-      req.user?.globalRoles?.includes('superadmin') ||
-      req.user?.globalRoles?.includes('admin') ||
-      req.user?.roles?.includes('superadmin') ||
-      req.user?.roles?.includes('admin')
+    const { isAdminUser } = await import('../../middleware/auth.js')
+    const isAdmin = isAdminUser(req)
 
     if (!isAdmin) {
       if (!req.userId) {
