@@ -72,7 +72,7 @@
     "ts-jest": "^29.3.4",
     "ts-prune": "^0.10.3",
     "tsx": "^4.20.3",
-    "turbo": "^2.4.2",
+    "turbo": "^2.9.3",
     "typescript": "5.7.3"
   },
   "packageManager": "pnpm@10.12.2+sha256.07b2396c6c99a93b75b5f9ce22be9285c3b2533c49fec51b349d44798cf56b82",
