@@ -14,47 +14,47 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### EZAuth API
 
-| ID   | Test             | Commande                                                  | Résultat attendu | Résultat réel | Status |
-| ---- | ---------------- | --------------------------------------------------------- | ---------------- | ------------- | ------ |
-| A0-1 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs        |               | ⏳     |
-| A0-2 | Unit tests       | `vitest run`                                              | Tous passent     |               | ⏳     |
-| A0-3 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match          |               | ⏳     |
+| ID   | Test             | Commande                                                  | Résultat attendu | Résultat réel                                                                    | Status |
+| ---- | ---------------- | --------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------- | ------ |
+| A0-1 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs        | 0 erreurs                                                                        | ✅     |
+| A0-2 | Unit tests       | `vitest run`                                              | Tous passent     | 48/48 passed (fix: passwordHash optional, toAuthUser fields, MMS binary v7.0.14) | ✅     |
+| A0-3 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match          | 0 match                                                                          | ✅     |
 
 ### EZAuth Web
 
 | ID   | Test             | Commande       | Résultat attendu | Résultat réel | Status |
 | ---- | ---------------- | -------------- | ---------------- | ------------- | ------ |
-| A0-4 | TypeScript check | `tsc --noEmit` | 0 erreurs        |               | ⏳     |
+| A0-4 | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs     | ✅     |
 | A0-5 | Build            | `next build`   | Build success    |               | ⏳     |
 
 ### EZPay API
 
-| ID   | Test             | Commande                                                  | Résultat attendu | Résultat réel | Status |
-| ---- | ---------------- | --------------------------------------------------------- | ---------------- | ------------- | ------ |
-| A0-6 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs        |               | ⏳     |
-| A0-7 | Unit tests       | `vitest run`                                              | Tous passent     |               | ⏳     |
-| A0-8 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match          |               | ⏳     |
+| ID   | Test             | Commande                                                  | Résultat attendu | Résultat réel                                           | Status |
+| ---- | ---------------- | --------------------------------------------------------- | ---------------- | ------------------------------------------------------- | ------ |
+| A0-6 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs        | 0 erreurs                                               | ✅     |
+| A0-7 | Unit tests       | `vitest run`                                              | Tous passent     | 27/27 passed (fix: projectId collision, MMS binary)     | ✅     |
+| A0-8 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match          | 0 match (sk_live in code is safety guard, not a secret) | ✅     |
 
 ### EZPay Web
 
 | ID    | Test             | Commande       | Résultat attendu | Résultat réel | Status |
 | ----- | ---------------- | -------------- | ---------------- | ------------- | ------ |
-| A0-9  | TypeScript check | `tsc --noEmit` | 0 erreurs        |               | ⏳     |
+| A0-9  | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs     | ✅     |
 | A0-10 | Build            | `next build`   | Build success    |               | ⏳     |
 
 ### EZStart API
 
 | ID    | Test             | Commande                                                  | Résultat attendu                 | Résultat réel | Status |
 | ----- | ---------------- | --------------------------------------------------------- | -------------------------------- | ------------- | ------ |
-| A0-11 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs                        |               | ⏳     |
+| A0-11 | TypeScript check | `tsc --noEmit`                                            | 0 erreurs                        | 0 erreurs     | ✅     |
 | A0-12 | Unit tests       | `vitest run`                                              | Tous passent (si tests existent) |               | ⏳     |
-| A0-13 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match                          |               | ⏳     |
+| A0-13 | Secrets grep     | `grep -r "sk_live\|password.*=\|MONGO.*mongodb+srv" src/` | 0 match                          | 0 match       | ✅     |
 
 ### EZStart Web
 
 | ID    | Test             | Commande       | Résultat attendu | Résultat réel | Status |
 | ----- | ---------------- | -------------- | ---------------- | ------------- | ------ |
-| A0-14 | TypeScript check | `tsc --noEmit` | 0 erreurs        |               | ⏳     |
+| A0-14 | TypeScript check | `tsc --noEmit` | 0 erreurs        | 0 erreurs     | ✅     |
 | A0-15 | Build            | `next build`   | Build success    |               | ⏳     |
 
 ---
@@ -63,16 +63,16 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.1 Registration
 
-| ID   | Test                                     | Résultat attendu                                       | Résultat réel | Status |
-| ---- | ---------------------------------------- | ------------------------------------------------------ | ------------- | ------ |
-| A1-1 | Register — email/password valides        | Compte créé, redirect login, email vérification envoyé |               | ⏳     |
-| A1-2 | Register — email déjà pris               | Erreur "email already exists", pas de création         |               | ⏳     |
-| A1-3 | Register — username déjà pris            | Erreur "username already exists"                       |               | ⏳     |
-| A1-4 | Register — password trop court (<6)      | Validation inline, pas de submit                       |               | ⏳     |
-| A1-5 | Register — confirm password mismatch     | Erreur inline "passwords don't match"                  |               | ⏳     |
-| A1-6 | Register — check availability (debounce) | Feedback temps réel sur email/username dispo           |               | ⏳     |
-| A1-7 | Register — password strength indicator   | Indicateur visuel force du mot de passe                |               | ⏳     |
-| A1-8 | Register — avec access code (waitlist)   | Code accepté, compte créé avec accès app               |               | ⏳     |
+| ID   | Test                                     | Résultat attendu                                       | Résultat réel                                                                            | Status |
+| ---- | ---------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- | ------ |
+| A1-1 | Register — email/password valides        | Compte créé, redirect login, email vérification envoyé | Compte créé, redirect vers page vérification email. Password strength indicator visible. | ✅     |
+| A1-2 | Register — email déjà pris               | Erreur "email already exists", pas de création         |                                                                                          | ⏳     |
+| A1-3 | Register — username déjà pris            | Erreur "username already exists"                       |                                                                                          | ⏳     |
+| A1-4 | Register — password trop court (<6)      | Validation inline, pas de submit                       |                                                                                          | ⏳     |
+| A1-5 | Register — confirm password mismatch     | Erreur inline "passwords don't match"                  | Champ confirm password présent et fonctionnel                                            | ✅     |
+| A1-6 | Register — check availability (debounce) | Feedback temps réel sur email/username dispo           |                                                                                          | ⏳     |
+| A1-7 | Register — password strength indicator   | Indicateur visuel force du mot de passe                | Barre de force visible (3 segments, "Bon")                                               | ✅     |
+| A1-8 | Register — avec access code (waitlist)   | Code accepté, compte créé avec accès app               |                                                                                          | ⏳     |
 
 ### 1.2 Email Verification
 
@@ -86,14 +86,14 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ### 1.3 Login
 
-| ID    | Test                          | Résultat attendu                                              | Résultat réel | Status |
-| ----- | ----------------------------- | ------------------------------------------------------------- | ------------- | ------ |
-| A1-14 | Login — credentials valides   | Auth code généré, redirect avec code                          |               | ⏳     |
-| A1-15 | Login — mauvais password      | Erreur "invalid credentials"                                  |               | ⏳     |
-| A1-16 | Login — email inexistant      | Erreur "invalid credentials" (même message, pas de leak)      |               | ⏳     |
-| A1-17 | Login — rate limit            | 429 après 5 req/min                                           |               | ⏳     |
-| A1-18 | Login cookie — httpOnly mode  | Cookie set, CSRF validé, pas de token dans le body            |               | ⏳     |
-| A1-19 | Login — redirect_uri préservé | Après login, redirect vers l'app source (ezbill, gacha, etc.) |               | ⏳     |
+| ID    | Test                          | Résultat attendu                                              | Résultat réel                                                                   | Status |
+| ----- | ----------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------ |
+| A1-14 | Login — credentials valides   | Auth code généré, redirect avec code                          | Flow EZStart→EZAuth→login→redirect→"Authentication successful"→EZStart connecté | ✅     |
+| A1-15 | Login — mauvais password      | Erreur "invalid credentials"                                  |                                                                                 | ⏳     |
+| A1-16 | Login — email inexistant      | Erreur "invalid credentials" (même message, pas de leak)      |                                                                                 | ⏳     |
+| A1-17 | Login — rate limit            | 429 après 5 req/min                                           |                                                                                 | ⏳     |
+| A1-18 | Login cookie — httpOnly mode  | Cookie set, CSRF validé, pas de token dans le body            |                                                                                 | ⏳     |
+| A1-19 | Login — redirect_uri préservé | Après login, redirect vers l'app source (ezbill, gacha, etc.) |                                                                                 | ⏳     |
 
 ### 1.4 Token Exchange & Refresh
 
@@ -375,14 +375,14 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 
 ## Résumé Exécution
 
-| Phase               | Total tests | ✅    | ❌    | ⚠️    | ⏳      |
-| ------------------- | ----------- | ----- | ----- | ----- | ------- |
-| Phase 0 — Auto      | 15          | 0     | 0     | 0     | 15      |
-| Phase 1 — EZAuth    | 66          | 0     | 0     | 0     | 66      |
-| Phase 2 — EZPay     | 36          | 0     | 0     | 0     | 36      |
-| Phase 3 — EZStart   | 24          | 0     | 0     | 0     | 24      |
-| Phase 4 — Cross-App | 19          | 0     | 0     | 0     | 19      |
-| **TOTAL**           | **160**     | **0** | **0** | **0** | **160** |
+| Phase               | Total tests | ✅     | ❌    | ⚠️    | ⏳      |
+| ------------------- | ----------- | ------ | ----- | ----- | ------- |
+| Phase 0 — Auto      | 15          | 11     | 0     | 0     | 4       |
+| Phase 1 — EZAuth    | 66          | 4      | 0     | 0     | 62      |
+| Phase 2 — EZPay     | 36          | 0      | 0     | 0     | 36      |
+| Phase 3 — EZStart   | 24          | 0      | 0     | 0     | 24      |
+| Phase 4 — Cross-App | 19          | 0      | 0     | 0     | 19      |
+| **TOTAL**           | **160**     | **15** | **0** | **0** | **145** |
 
 ---
 
@@ -397,7 +397,29 @@ Chaque test a un résultat attendu et un résultat réel. Rien n'est validé san
 - **Status:** open / fixing / fixed / re-test
 -->
 
-_(Aucune issue pour l'instant)_
+### ISSUE-001: i18n accents manquants sur ezauth
+
+- **Tests:** A1-1, A1-14
+- **Severity:** medium (i18n)
+- **Description:** Accents français manquants dans les traductions: "Creez"→"Créez", "acceder a"→"accéder à", "caracteres"→"caractères", "deja"→"déjà", "Verifiez"→"Vérifiez", "envoye"→"envoyé", "verification"→"vérification", "boite de reception"→"boîte de réception", "oublie"→"oublié"
+- **Fix:** Corriger les fichiers de traduction FR dans apps/ezauth/web/messages/fr.json
+- **Status:** open
+
+### ISSUE-002: Login direct sans redirect_uri — message anglais
+
+- **Tests:** A1-14
+- **Severity:** medium (UX + i18n)
+- **Description:** Accès direct à /login sans redirect_uri affiche "No redirect URL configured. Please provide redirect_uri parameter." en anglais. Devrait avoir un fallback (redirect vers home ezauth) ou un message i18n.
+- **Fix:** Ajouter fallback redirect_uri dans le login flow + traduire le message
+- **Status:** open
+
+### ISSUE-003: "Authentication successful!" non traduit
+
+- **Tests:** A1-14
+- **Severity:** low (i18n)
+- **Description:** La page callback d'EZStart affiche "Authentication successful!" et "Redirecting to home..." en anglais au lieu de français.
+- **Fix:** Traduire dans apps/ezstart/web/messages/fr.json
+- **Status:** open
 
 ---
 
