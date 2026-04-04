@@ -31,7 +31,7 @@ if (useConsole) {
     logger.warn('WARNING: Test Stripe key in production — payments will not be processed')
   }
 
-  const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' })
+  const stripe = new Stripe(stripeKey)
 
   registry.register(
     new StripeProvider({

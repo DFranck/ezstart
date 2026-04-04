@@ -22,8 +22,8 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ### 1.5 Stripe API version obsolete `high` `tech-debt` — `done`
 
-- [x] `stripe.ts` utilise `apiVersion: '2023-10-16'` — plus de 2 ans de retard
-- [x] Mettre a jour vers la derniere version Stripe API et tester la compatibilite
+- [x] `stripe.ts` utilisait `apiVersion: '2023-10-16'` avec stripe v14 — plus de 2 ans de retard
+- [x] Upgrade stripe v14 → v22 (API `2026-03-25.dahlia`), apiVersion geree automatiquement par le SDK
 
 ---
 
