@@ -218,6 +218,15 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ---
 
+## Dependencies
+
+### P-RBAC — Depend de RBAC-1 EZAuth `high` — `blocked`
+
+- [ ] Remplacer `isAdminUser()` inline par `hasAccess()` de auth-sdk
+- [ ] Bloquer tant que RBAC-1 n'est pas done
+
+---
+
 ## Phase 7 — Admin & Marketplace
 
 ### P-SUCCESS — Payment Success/Cancel Pages `high` `feature` — `done`

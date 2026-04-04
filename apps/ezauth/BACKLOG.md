@@ -111,6 +111,28 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - [x] Web: Badge "Session actuelle" + visual differentiation
 - [x] Bouton Révoquer masqué sur session courante
 
+### RBAC-1: Simplifier le systeme de roles `high` `architecture` — `planned`
+
+- **Probleme :** Le systeme de roles est disperse et incoherent :
+  - `roles` (legacy) encore dans le code mais ne devrait plus exister
+  - `globalRoles` pour superadmin/admin
+  - `appRoles` pour les roles par app
+  - `permissions` et `features` existent dans le modele mais jamais utilises
+  - Chaque app fait ses propres checks inline au lieu d'utiliser un helper centralise
+  - `isAdminUser()` dans EZPay verifie 5 conditions differentes
+- **Solution proposee :**
+  - [x] Definir la hierarchie : `superadmin > admin > app:admin > app:editor > app:viewer > user`
+  - [ ] Supprimer `roles` (legacy), `permissions`, `features` du modele AuthUser
+  - [ ] Creer `hasAccess(user, app, requiredRole)` helper dans auth-sdk (partage)
+  - [ ] Remplacer TOUS les checks inline dans les apps par `hasAccess()`
+  - [ ] Mettre a jour le JWT payload pour ne plus inclure les champs supprimes
+  - [ ] Page admin EZAuth pour gerer les roles visuellement (assign globalRoles + appRoles)
+  - [ ] Tests unitaires pour la hierarchie des roles
+  - [ ] Migration des users existants (supprimer les champs legacy)
+- **Impact :** EZAuth API, auth-sdk, EZPay API, EZStart API, tous les middleware auth
+- **Prerequis :** Aucun — peut etre fait independamment
+- **Priorite :** High — doit etre fait avant le CRM/CMS car le panel admin a besoin d'un RBAC propre
+
 ---
 
 ## P2 — Qualite de code

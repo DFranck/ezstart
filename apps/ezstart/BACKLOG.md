@@ -257,6 +257,15 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ---
 
+## Dependencies
+
+### P-RBAC — Depend de RBAC-1 EZAuth `high` — `blocked`
+
+- [ ] Le CRM/CMS admin panel necessite un RBAC propre
+- [ ] Bloquer le developpement CRM tant que RBAC-1 n'est pas done
+
+---
+
 ## Phase 6 — Testing & DX (priority: low)
 
 ### 6.2 API documentation
