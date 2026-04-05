@@ -29,8 +29,12 @@
     "setup:env": "node scripts/tools/setup-env.js"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
+    "package.json": [
       "prettier --write"
+    ],
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "bash scripts/tools/lint-rules.sh"
     ],
     "*.{js,jsx}": [
       "prettier --write"
