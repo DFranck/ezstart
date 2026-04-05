@@ -394,8 +394,12 @@
   "plans": {
     "title": "My Plans",
     "newAnalysis": "New Analysis",
-    "authRequired": "Login Required",
-    "authDescription": "Sign in to view and manage your saved floor plans.",
+    "guest": {
+      "title": "Your plans are not saved",
+      "description": "Sign in to save your floor plans and access them anytime. Without an account, your plans will be lost when you close the page.",
+      "login": "Sign in to save",
+      "tryWithout": "Analyze without saving"
+    },
     "empty": {
       "title": "No plans yet",
       "description": "Upload your first floor plan to start your Feng Shui analysis",

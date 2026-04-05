@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/navigation'
 import { GRADIENT_BG } from '@/lib/theme-colors'
 import { callApi } from '@/config/api'
-import { RequireAuth, LoginButton } from '@ezstart/auth-sdk'
+import { useAuth, LoginButton } from '@ezstart/auth-sdk'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -261,37 +261,51 @@ function PlansPageContent() {
 }
 
 export default function PlansPage() {
-  const t = useTranslations()
+  const t = useTranslations('plans')
+  const { isAuthenticated } = useAuth()
 
-  return (
-    <RequireAuth
-      loadingComponent={
-        <Section className="flex items-center justify-center min-h-[60vh]">
-          <Spinner size="lg" />
-        </Section>
-      }
-      fallbackComponent={
-        <Section className="flex items-center justify-center min-h-[60vh]">
-          <Card variant="ghost" className="max-w-md mx-auto text-center">
-            <CardContent className="py-12 space-y-6">
-              <Div className="flex justify-center">
-                <Div className="rounded-full bg-muted p-6">
-                  <Icon name="lucide:Lock" className="w-10 h-10 text-muted-foreground" />
-                </Div>
+  // Not logged in — show incentive to login, not a blocker
+  if (!isAuthenticated) {
+    return (
+      <Section className="container mx-auto px-4 py-8 max-w-6xl">
+        <Div className="flex items-center justify-between mb-8">
+          <H1 size="h2" className="font-bold">{t('title')}</H1>
+          <Link href="/analyze">
+            <Button className={`${GRADIENT_BG} text-white`}>
+              <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
+              {t('newAnalysis')}
+            </Button>
+          </Link>
+        </Div>
+
+        <Card variant="ghost" className="max-w-lg mx-auto text-center">
+          <CardContent className="py-12 space-y-6">
+            <Div className="flex justify-center">
+              <Div className="rounded-full bg-muted p-6">
+                <Icon name="lucide:CloudOff" className="w-10 h-10 text-muted-foreground" />
               </Div>
-              <Div className="space-y-2">
-                <P className="text-lg font-semibold">{t('plans.authRequired')}</P>
-                <P className="text-muted-foreground">{t('plans.authDescription')}</P>
-              </Div>
+            </Div>
+            <Div className="space-y-2">
+              <P className="text-lg font-semibold">{t('guest.title')}</P>
+              <P className="text-muted-foreground">{t('guest.description')}</P>
+            </Div>
+            <Div className="flex flex-col sm:flex-row gap-3 justify-center">
               <LoginButton size="lg" alwaysShowText>
-                {t('common.login')}
+                {t('guest.login')}
               </LoginButton>
-            </CardContent>
-          </Card>
-        </Section>
-      }
-    >
-      <PlansPageContent />
-    </RequireAuth>
-  )
+              <Link href="/analyze">
+                <Button variant="outline" size="lg">
+                  <Icon name="lucide:Sparkles" className="w-4 h-4 mr-2" />
+                  {t('guest.tryWithout')}
+                </Button>
+              </Link>
+            </Div>
+          </CardContent>
+        </Card>
+      </Section>
+    )
+  }
+
+  // Logged in — show saved plans
+  return <PlansPageContent />
 }

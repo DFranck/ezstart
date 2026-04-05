@@ -398,8 +398,12 @@
   "plans": {
     "title": "Mis Planos",
     "newAnalysis": "Nuevo An\u00e1lisis",
-    "authRequired": "Inicio de sesi\u00f3n requerido",
-    "authDescription": "Inicia sesi\u00f3n para ver y gestionar tus planos guardados.",
+    "guest": {
+      "title": "Tus planos no están guardados",
+      "description": "Inicia sesión para guardar tus planos y acceder a ellos en cualquier momento. Sin cuenta, tus planos se perderán al cerrar la página.",
+      "login": "Iniciar sesión para guardar",
+      "tryWithout": "Analizar sin guardar"
+    },
     "empty": {
       "title": "Sin planos a\u00fan",
       "description": "Sube tu primer plano para comenzar tu an\u00e1lisis Feng Shui",

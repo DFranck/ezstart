@@ -396,8 +396,12 @@
   "plans": {
     "title": "Mes Plans",
     "newAnalysis": "Nouvelle Analyse",
-    "authRequired": "Connexion requise",
-    "authDescription": "Connectez-vous pour voir et g\u00e9rer vos plans sauvegard\u00e9s.",
+    "guest": {
+      "title": "Vos plans ne sont pas sauvegardés",
+      "description": "Connectez-vous pour sauvegarder vos plans et y accéder à tout moment. Sans compte, vos plans seront perdus en fermant la page.",
+      "login": "Se connecter pour sauvegarder",
+      "tryWithout": "Analyser sans sauvegarder"
+    },
     "empty": {
       "title": "Aucun plan",
       "description": "Importez votre premier plan pour commencer votre analyse Feng Shui",
