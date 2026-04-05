@@ -122,9 +122,9 @@ export function UserTable() {
         query,
       })
       if (response.ok) {
-        const result = response.data
-        setUsers(result.data || [])
-        setTotal(result.meta?.total ?? 0)
+        const result = response.data as { users?: AdminUser[]; pagination?: { total: number } }
+        setUsers(result.users || [])
+        setTotal(result.pagination?.total ?? 0)
       }
     } catch {
       // Error logged by callApi

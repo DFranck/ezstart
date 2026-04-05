@@ -34,6 +34,7 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
       required: true,
       enum: [
         'ezbill',
+        'ezauth',
         'admin',
         'ezstart',
         'green-pulse',

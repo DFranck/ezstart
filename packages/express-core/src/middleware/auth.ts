@@ -96,7 +96,9 @@ export function createAuthMiddleware(jwtSecret?: string) {
 export function createRoleMiddleware() {
   return {
     requireAdmin: (req: Request, res: Response, next: NextFunction) => {
-      const user = (req as Request & { user?: Record<string, unknown> }).user
+      const user = (
+        req as Request & { user?: { globalRoles?: string[]; appRoles?: Record<string, string[]> } }
+      ).user
       if (!req.userId && !user) return sendError(res, 'Authentication required', 401)
       const isAdmin =
         user?.globalRoles?.includes('superadmin') ||
@@ -108,7 +110,9 @@ export function createRoleMiddleware() {
       next()
     },
     requireRole: (role: string) => (req: Request, res: Response, next: NextFunction) => {
-      const user = (req as Request & { user?: Record<string, unknown> }).user
+      const user = (
+        req as Request & { user?: { globalRoles?: string[]; appRoles?: Record<string, string[]> } }
+      ).user
       if (!req.userId && !user) return sendError(res, 'Authentication required', 401)
       const hasRole =
         user?.globalRoles?.includes(role) ||

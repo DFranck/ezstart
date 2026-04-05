@@ -46,11 +46,12 @@
       "client": "Client"
     },
     "waitlist": {
+      "selectApp": "Select app",
       "columns": {
         "email": "Email",
-        "app": "App",
         "status": "Status",
-        "createdAt": "Created At",
+        "addedAt": "Added At",
+        "invitedAt": "Invited At",
         "actions": "Actions"
       },
       "invite": "Invite",
@@ -60,7 +61,8 @@
       "loading": "Loading waitlist...",
       "statusPending": "Pending",
       "statusInvited": "Invited",
-      "statusRegistered": "Registered"
+      "statusActivated": "Activated",
+      "statusRejected": "Rejected"
     },
     "dialog": {
       "confirm": "Confirm",

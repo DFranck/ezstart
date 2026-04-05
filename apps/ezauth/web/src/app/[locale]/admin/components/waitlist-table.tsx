@@ -12,6 +12,11 @@ import {
   Span,
   DataTable,
   DataTableColumnHeader,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
@@ -21,17 +26,40 @@ import { callApi, parseApiError } from '@ezstart/fetch-client'
 // ========================================
 
 interface WaitlistEntry {
-  _id: string
   email: string
-  app: string
-  status: 'pending' | 'invited' | 'registered'
-  createdAt: string
+  status: 'pending' | 'invited' | 'activated' | 'rejected'
+  accessCode: string | null
+  invitedAt: string | null
+  activatedAt: string | null
+  addedAt: string
+  notes: string
 }
 
 interface WaitlistResponse {
-  data: WaitlistEntry[]
-  meta: { total: number; limit: number; offset: number }
+  entries: WaitlistEntry[]
+  stats: {
+    total: number
+    pending: number
+    invited: number
+    activated: number
+    rejected: number
+  }
 }
+
+// ========================================
+// Constants — known apps
+// ========================================
+
+const APPS = [
+  'ezstart',
+  'ezbill',
+  'ezpay',
+  'green-pulse',
+  'fengshui',
+  'asc-tcd',
+  'gacha-analyzer',
+  'ezauth',
+] as const
 
 // ========================================
 // Constants
@@ -39,17 +67,19 @@ interface WaitlistResponse {
 
 const PAGE_SIZE = 20
 
-const statusVariantMap: Record<string, 'warning' | 'info' | 'success'> = {
+const statusVariantMap: Record<string, 'warning' | 'info' | 'success' | 'destructive'> = {
   pending: 'warning',
   invited: 'info',
-  registered: 'success',
+  activated: 'success',
+  rejected: 'destructive',
 }
 
 // ========================================
 // Helpers
 // ========================================
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return '—'
   return new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short',
@@ -63,22 +93,23 @@ function formatDate(dateStr: string): string {
 export function WaitlistTable() {
   const t = useTranslations('admin.waitlist')
 
-  // Data state
+  // State
+  const [selectedApp, setSelectedApp] = useState<string>(APPS[0])
   const [entries, setEntries] = useState<WaitlistEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Fetch waitlist
-  const fetchWaitlist = useCallback(async () => {
+  // Fetch waitlist for the selected app
+  const fetchWaitlist = useCallback(async (appName: string) => {
     setLoading(true)
+    setError('')
     try {
-      const response = await callApi<WaitlistResponse>('/admin/waitlist', {
+      const response = await callApi<WaitlistResponse>(`/admin/${appName}`, {
         appName: 'ezauth',
         method: 'GET',
-        query: { limit: String(PAGE_SIZE), offset: '0' },
       })
       if (response.ok) {
-        setEntries(response.data.data || [])
+        setEntries(response.data.entries || [])
       }
     } catch {
       // Error logged by callApi
@@ -88,28 +119,30 @@ export function WaitlistTable() {
   }, [])
 
   useEffect(() => {
-    fetchWaitlist()
-  }, [fetchWaitlist])
+    fetchWaitlist(selectedApp)
+  }, [fetchWaitlist, selectedApp])
 
-  // Invite handler
+  // Invite handler — email in URL path, no body needed
   const handleInvite = useCallback(
-    async (entryId: string) => {
+    async (email: string) => {
       setError('')
       try {
-        const response = await callApi('/admin/waitlist/invite', {
-          appName: 'ezauth',
-          method: 'POST',
-          body: { waitlistId: entryId },
-        })
+        const response = await callApi(
+          `/admin/${selectedApp}/${encodeURIComponent(email)}/invite`,
+          {
+            appName: 'ezauth',
+            method: 'POST',
+          }
+        )
         if (!response.ok) {
           throw new Error(response.error || parseApiError(response.data) || t('inviteError'))
         }
-        fetchWaitlist()
+        fetchWaitlist(selectedApp)
       } catch (err) {
         setError(err instanceof Error ? err.message : t('inviteError'))
       }
     },
-    [fetchWaitlist, t]
+    [fetchWaitlist, selectedApp, t]
   )
 
   // DataTable columns
@@ -120,15 +153,6 @@ export function WaitlistTable() {
       cell: ({ row }) => <Span className="text-sm font-medium">{row.original.email}</Span>,
     },
     {
-      accessorKey: 'app',
-      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.app')} />,
-      cell: ({ row }) => (
-        <Badge variant="outline" size="sm">
-          {row.original.app}
-        </Badge>
-      ),
-    },
-    {
       accessorKey: 'status',
       header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.status')} />,
       cell: ({ row }) => {
@@ -136,7 +160,8 @@ export function WaitlistTable() {
         const statusKey = `status${status.charAt(0).toUpperCase()}${status.slice(1)}` as
           | 'statusPending'
           | 'statusInvited'
-          | 'statusRegistered'
+          | 'statusActivated'
+          | 'statusRejected'
         return (
           <Badge variant={statusVariantMap[status] || 'secondary'} size="sm" dot>
             {t(statusKey)}
@@ -145,11 +170,18 @@ export function WaitlistTable() {
       },
     },
     {
-      accessorKey: 'createdAt',
+      accessorKey: 'addedAt',
       header: ({ header }) => (
-        <DataTableColumnHeader header={header} title={t('columns.createdAt')} />
+        <DataTableColumnHeader header={header} title={t('columns.addedAt')} />
       ),
-      cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.createdAt)}</Span>,
+      cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.addedAt)}</Span>,
+    },
+    {
+      accessorKey: 'invitedAt',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t('columns.invitedAt')} />
+      ),
+      cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.invitedAt)}</Span>,
     },
     {
       id: 'actions',
@@ -157,7 +189,7 @@ export function WaitlistTable() {
       cell: ({ row }) => {
         if (row.original.status !== 'pending') return null
         return (
-          <Button variant="outline" size="sm" onClick={() => handleInvite(row.original._id)}>
+          <Button variant="outline" size="sm" onClick={() => handleInvite(row.original.email)}>
             {t('invite')}
           </Button>
         )
@@ -167,6 +199,21 @@ export function WaitlistTable() {
 
   return (
     <Div className="space-y-4">
+      <Div className="flex items-center gap-3">
+        <Select value={selectedApp} onValueChange={setSelectedApp}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder={t('selectApp')} />
+          </SelectTrigger>
+          <SelectContent>
+            {APPS.map(app => (
+              <SelectItem key={app} value={app}>
+                {app}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Div>
+
       {error && (
         <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
           {error}
