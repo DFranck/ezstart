@@ -8,17 +8,13 @@ import {
   Card,
   CardContent,
   CardHeader,
+  type ColumnDef,
+  DataTable,
   Div,
   H2,
   Icon,
   P,
   Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from '@ezstart/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
@@ -182,6 +178,75 @@ export function EZPayTab() {
   const currentPage = Math.floor(offset / limit) + 1
   const totalPages = Math.ceil(meta.total / limit) || 1
 
+  const columns: ColumnDef<Payment>[] = [
+    {
+      accessorKey: 'paymentId',
+      header: t('columns.id'),
+      cell: ({ row }) => (
+        <P className="text-xs font-mono text-muted-foreground">
+          {row.original.paymentId?.slice(0, 12) ?? row.original._id.slice(0, 12)}...
+        </P>
+      ),
+    },
+    {
+      accessorKey: 'type',
+      header: t('columns.type'),
+      cell: ({ row }) => <Badge variant="outline">{row.original.type}</Badge>,
+    },
+    {
+      accessorKey: 'amount',
+      header: t('columns.amount'),
+      cell: ({ row }) => (
+        <P className="font-medium">
+          {(row.original.amount / 100).toFixed(2)} {row.original.currency?.toUpperCase()}
+        </P>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: t('columns.status'),
+      cell: ({ row }) => <PaymentStatusBadge status={row.original.status} />,
+    },
+    {
+      accessorKey: 'projectId',
+      header: t('columns.project'),
+      cell: ({ row }) => (
+        <P className="text-sm text-muted-foreground">{row.original.projectId}</P>
+      ),
+    },
+    {
+      accessorKey: 'createdAt',
+      header: t('columns.date'),
+      cell: ({ row }) => (
+        <P className="text-sm text-muted-foreground">
+          {new Date(row.original.createdAt).toLocaleDateString()}
+        </P>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('columns.actions'),
+      cell: ({ row }) => {
+        const payment = row.original
+        if (payment.status === 'completed') {
+          return (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => refundMutation.mutate(payment._id)}
+              disabled={refundMutation.isPending}
+            >
+              <Icon name="lucide:RotateCcw" className="mr-1" />
+              {t('refund')}
+            </Button>
+          )
+        }
+        return <P className="text-xs text-muted-foreground">{payment.status}</P>
+      },
+      enableSorting: false,
+    },
+  ]
+
   return (
     <Div className="space-y-4">
       <Card>
@@ -204,113 +269,43 @@ export function EZPayTab() {
             <>
               <StatsCards payments={payments} total={meta.total} />
 
-              {payments.length === 0 ? (
-                <Div className="text-center py-12">
-                  <P className="text-muted-foreground">{t('noPayments')}</P>
-                </Div>
-              ) : (
-                <>
-                  <Div className="overflow-x-auto">
-                    <Table variant="hoverable">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t('columns.id')}</TableHead>
-                          <TableHead>{t('columns.type')}</TableHead>
-                          <TableHead>{t('columns.amount')}</TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            {t('columns.status')}
-                          </TableHead>
-                          <TableHead className="hidden lg:table-cell">
-                            {t('columns.project')}
-                          </TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            {t('columns.date')}
-                          </TableHead>
-                          <TableHead>{t('columns.actions')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {payments.map(payment => (
-                          <TableRow key={payment._id}>
-                            <TableCell>
-                              <P className="text-xs font-mono text-muted-foreground">
-                                {payment.paymentId?.slice(0, 12) ?? payment._id.slice(0, 12)}...
-                              </P>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">{payment.type}</Badge>
-                            </TableCell>
-                            <TableCell>
-                              <P className="font-medium">
-                                {(payment.amount / 100).toFixed(2)} {payment.currency?.toUpperCase()}
-                              </P>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <PaymentStatusBadge status={payment.status} />
-                            </TableCell>
-                            <TableCell className="hidden lg:table-cell">
-                              <P className="text-sm text-muted-foreground">
-                                {payment.projectId}
-                              </P>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <P className="text-sm text-muted-foreground">
-                                {new Date(payment.createdAt).toLocaleDateString()}
-                              </P>
-                            </TableCell>
-                            <TableCell>
-                              {payment.status === 'completed' ? (
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => refundMutation.mutate(payment._id)}
-                                  disabled={refundMutation.isPending}
-                                >
-                                  <Icon name="lucide:RotateCcw" className="mr-1" />
-                                  {t('refund')}
-                                </Button>
-                              ) : (
-                                <P className="text-xs text-muted-foreground">{payment.status}</P>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Div>
+              <DataTable
+                columns={columns}
+                data={payments}
+                pageSize={limit}
+                hidePagination
+              />
 
-                  {/* Pagination */}
-                  <Div className="mt-6 flex items-center justify-between">
-                    <P className="text-sm text-muted-foreground">
-                      {t('showing', {
-                        count: payments.length,
-                        total: meta.total,
-                      })}
-                    </P>
-                    <Div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={offset === 0}
-                        onClick={() => setOffset(o => Math.max(0, o - limit))}
-                      >
-                        {t('previous')}
-                      </Button>
-                      <P className="text-sm py-2 px-3">
-                        {t('pageOf', { page: currentPage, totalPages })}
-                      </P>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={offset + limit >= meta.total}
-                        onClick={() => setOffset(o => o + limit)}
-                      >
-                        {t('next')}
-                      </Button>
-                    </Div>
-                  </Div>
-                </>
-              )}
+              {/* Server-side pagination */}
+              <Div className="flex items-center justify-between">
+                <P className="text-sm text-muted-foreground">
+                  {t('showing', {
+                    count: payments.length,
+                    total: meta.total,
+                  })}
+                </P>
+                <Div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={offset === 0}
+                    onClick={() => setOffset(o => Math.max(0, o - limit))}
+                  >
+                    {t('previous')}
+                  </Button>
+                  <P className="text-sm py-2 px-3">
+                    {t('pageOf', { page: currentPage, totalPages })}
+                  </P>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={offset + limit >= meta.total}
+                    onClick={() => setOffset(o => o + limit)}
+                  >
+                    {t('next')}
+                  </Button>
+                </Div>
+              </Div>
             </>
           )}
         </CardContent>

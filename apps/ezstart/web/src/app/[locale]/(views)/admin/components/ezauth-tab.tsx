@@ -8,6 +8,8 @@ import {
   Card,
   CardContent,
   CardHeader,
+  type ColumnDef,
+  DataTable,
   Div,
   H2,
   Icon,
@@ -18,12 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
   Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from '@ezstart/ui/components'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
@@ -150,6 +146,56 @@ export function EZAuthTab() {
   const stats = data?.stats ?? { total: 0, pending: 0, invited: 0, activated: 0, rejected: 0 }
   const pagination = data?.pagination ?? { page: 1, limit, total: 0, totalPages: 0 }
 
+  const columns: ColumnDef<WaitlistEntry>[] = [
+    {
+      accessorKey: 'email',
+      header: t('columns.email'),
+      cell: ({ row }) => <P className="text-sm font-medium">{row.original.email}</P>,
+    },
+    {
+      accessorKey: 'status',
+      header: t('columns.status'),
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    },
+    {
+      accessorKey: 'addedAt',
+      header: t('columns.date'),
+      cell: ({ row }) => (
+        <P className="text-sm text-muted-foreground">
+          {new Date(row.original.addedAt).toLocaleDateString()}
+        </P>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('columns.actions'),
+      cell: ({ row }) => {
+        const entry = row.original
+        if (entry.status === 'pending') {
+          return (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => inviteMutation.mutate(entry.email)}
+              disabled={inviteMutation.isPending}
+            >
+              <Icon name="lucide:Mail" className="mr-1" />
+              {t('invite')}
+            </Button>
+          )
+        }
+        return (
+          <P className="text-xs text-muted-foreground">
+            {entry.status === 'invited' && entry.invitedAt
+              ? t('invitedOn', { date: new Date(entry.invitedAt).toLocaleDateString() })
+              : entry.status}
+          </P>
+        )
+      },
+      enableSorting: false,
+    },
+  ]
+
   return (
     <Div className="space-y-4">
       <Card>
@@ -186,100 +232,48 @@ export function EZAuthTab() {
             <>
               <WaitlistStatsCards stats={stats} />
 
-              {entries.length === 0 ? (
-                <Div className="text-center py-12">
-                  <P className="text-muted-foreground">{t('noEntries')}</P>
-                </Div>
-              ) : (
-                <>
-                  <Div className="overflow-x-auto">
-                    <Table variant="hoverable">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t('columns.email')}</TableHead>
-                          <TableHead>{t('columns.status')}</TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            {t('columns.date')}
-                          </TableHead>
-                          <TableHead>{t('columns.actions')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {entries.map(entry => (
-                          <TableRow key={entry.email}>
-                            <TableCell>
-                              <P className="text-sm font-medium">{entry.email}</P>
-                            </TableCell>
-                            <TableCell>
-                              <StatusBadge status={entry.status} />
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              <P className="text-sm text-muted-foreground">
-                                {new Date(entry.addedAt).toLocaleDateString()}
-                              </P>
-                            </TableCell>
-                            <TableCell>
-                              {entry.status === 'pending' ? (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => inviteMutation.mutate(entry.email)}
-                                  disabled={inviteMutation.isPending}
-                                >
-                                  <Icon name="lucide:Mail" className="mr-1" />
-                                  {t('invite')}
-                                </Button>
-                              ) : (
-                                <P className="text-xs text-muted-foreground">
-                                  {entry.status === 'invited' && entry.invitedAt
-                                    ? t('invitedOn', {
-                                        date: new Date(entry.invitedAt).toLocaleDateString(),
-                                      })
-                                    : entry.status}
-                                </P>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Div>
+              <DataTable
+                columns={columns}
+                data={entries}
+                filterColumn="email"
+                filterPlaceholder={t('columns.email')}
+                pageSize={limit}
+                hidePagination
+              />
 
-                  {/* Pagination */}
-                  <Div className="mt-6 flex items-center justify-between">
-                    <P className="text-sm text-muted-foreground">
-                      {t('showing', {
-                        count: entries.length,
-                        total: pagination.total,
-                      })}
-                    </P>
-                    <Div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={pagination.page === 1}
-                        onClick={() => setPage(p => p - 1)}
-                      >
-                        {t('previous')}
-                      </Button>
-                      <P className="text-sm py-2 px-3">
-                        {t('pageOf', {
-                          page: pagination.page,
-                          totalPages: pagination.totalPages || 1,
-                        })}
-                      </P>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={pagination.page >= pagination.totalPages}
-                        onClick={() => setPage(p => p + 1)}
-                      >
-                        {t('next')}
-                      </Button>
-                    </Div>
-                  </Div>
-                </>
-              )}
+              {/* Server-side pagination */}
+              <Div className="flex items-center justify-between">
+                <P className="text-sm text-muted-foreground">
+                  {t('showing', {
+                    count: entries.length,
+                    total: pagination.total,
+                  })}
+                </P>
+                <Div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={pagination.page === 1}
+                    onClick={() => setPage(p => p - 1)}
+                  >
+                    {t('previous')}
+                  </Button>
+                  <P className="text-sm py-2 px-3">
+                    {t('pageOf', {
+                      page: pagination.page,
+                      totalPages: pagination.totalPages || 1,
+                    })}
+                  </P>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => setPage(p => p + 1)}
+                  >
+                    {t('next')}
+                  </Button>
+                </Div>
+              </Div>
             </>
           )}
         </CardContent>
