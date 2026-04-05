@@ -77,7 +77,7 @@ export default function AnalyzePage() {
             component: React.ReactElement
           }>
         }
-        withHeaderOffset
+        withHeaderOffset={false}
         bottomOffset="bottom-10 sm:bottom-0"
         onStepChange={handleStepChange}
         onComplete={handleComplete}

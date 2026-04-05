@@ -39,7 +39,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
 
   return (
     <BaseClientLayout
-      className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
+      className={cn(isAnalyzePage ? 'h-[100dvh] overflow-hidden' : 'mb-10 sm:mb-0')}
       appName="Feng Shui"
       showHeader={!isAnalyzePage}
       showFooter={!isAnalyzePage}
