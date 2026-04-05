@@ -1,9 +1,13 @@
 'use client'
 
 import { useBillingContext } from '@/contexts/billing-context'
-import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-converters'
+import {
+  convertToInvoicePDFData,
+  convertToQuotePDFData,
+  convertToReceiptPDFData,
+} from '@/utils/pdf-converters'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
-import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
+import { InvoicePDF, QuotePDF, ReceiptPDF } from '@ezbill/templates'
 import { useAuth } from '@ezstart/auth-sdk'
 import { callApi } from '@/config/api'
 import React from 'react'
@@ -182,9 +186,10 @@ export function useClientDashboardHandlers() {
         return null
       }
 
-      // TODO: Implement QuotePDF component and converter
-      // For now, return null
-      return null
+      const pdfData = convertToQuotePDFData(quote, client, company)
+      const { pdf } = await import('@react-pdf/renderer')
+      const blob = await pdf(<QuotePDF data={pdfData} />).toBlob()
+      return URL.createObjectURL(blob)
     } catch (error) {
       return null
     }
@@ -274,9 +279,20 @@ export function useClientDashboardHandlers() {
         return
       }
 
+      const pdfData = convertToQuotePDFData(quote, client, company)
       const fileName = quote.documentNumber || quote._id
-      // TODO: Implement quote PDF generation if not exists
-      toast.error(t('quoteDownloadNotImplemented'))
+
+      const { pdf } = await import('@react-pdf/renderer')
+      const blob = await pdf(<QuotePDF data={pdfData} />).toBlob()
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `quote-${fileName}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
     } catch (error) {
       toast.error(t('quoteDownloadError'))
     }

@@ -1,11 +1,14 @@
-import { Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError } from '@ezstart/express-core'
 import type { Router as ExpressRouter } from 'express'
 import { getWebUrl } from '@ezstart/config/urls'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { logger } from '@ezstart/logger/server'
+import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import passport from '../../config/passport.js'
 
+export const googleCallbackRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(googleCallbackRegistry, router)
 
 /** Check if a redirect URI's origin is in the allowed CORS origins or is localhost */
 function isAllowedRedirectUri(uri: string): boolean {
@@ -30,7 +33,7 @@ function isAllowedRedirectUri(uri: string): boolean {
  * GET /auth/google/callback
  * Google OAuth callback
  */
-router.get(
+docRouter.get(
   '/google/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login?error=oauth_failed' }),
   (req, res) => {
@@ -44,7 +47,7 @@ router.get(
     if (user.redirect_uri) {
       if (!isAllowedRedirectUri(user.redirect_uri)) {
         logger.warn(`OAuth callback blocked invalid redirect_uri: ${user.redirect_uri}`)
-        return res.status(400).json({ error: 'Invalid redirect_uri' })
+        return sendError(res, 'Invalid redirect_uri', 400)
       }
 
       const redirectUrl = new URL(user.redirect_uri)
@@ -54,6 +57,14 @@ router.get(
 
     // Fallback: redirect to EZAuth web with code
     return res.redirect(`${getWebUrl('ezauth')}/auth/callback?code=${user.authCode}`)
+  },
+  {
+    summary: 'Google OAuth callback',
+    tags: ['OAuth'],
+    extraResponses: {
+      302: { description: 'Redirect to app with authorization code' },
+      400: { description: 'Invalid redirect_uri', schema: errorResponseSchema },
+    },
   }
 )
 

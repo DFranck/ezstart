@@ -1,0 +1,27 @@
+{
+  "support": {
+    "title": "Support My Work",
+    "description": "If you enjoy my projects and want to support my work, every contribution helps me keep building and sharing open-source tools.",
+    "recentSupporters": "Recent Supporters",
+    "noDonations": "Be the first to support!",
+    "modal": {
+      "title": "Support EZStart",
+      "description": "Your contribution helps me continue building open-source tools and sharing knowledge.",
+      "amountLabel": "Amount",
+      "customAmountLabel": "Custom amount",
+      "customAmountPlaceholder": "Enter amount",
+      "messageLabel": "Leave a message (optional)",
+      "messagePlaceholder": "Thanks for your amazing work!",
+      "anonymousLabel": "Donate anonymously",
+      "donatingAsLabel": "Donating as",
+      "donateButton": "Support",
+      "processingButton": "Processing..."
+    },
+    "wall": {
+      "loadingText": "Loading...",
+      "errorText": "Failed to load supporters",
+      "noDonationsText": "Be the first to support!",
+      "anonymousLabel": "Anonymous"
+    }
+  }
+}

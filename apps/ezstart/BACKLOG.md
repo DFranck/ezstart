@@ -45,14 +45,14 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ### 1.3 Hardcoded `globalHealthScore = 96.6`
 
-- **Status:** `planned`
+- **Status:** `done`
 - **Severity:** bug / misleading data
 - **Details:** `SystemOverview.tsx:80` hardcodes `const globalHealthScore = 96.6` instead of computing it dynamically. The displayed "Global Health" stat card is always stale.
 - **File:** `web/src/app/[locale]/monitoring/components/SystemOverview.tsx`
 
 ### 1.4 Remove `any` types
 
-- **Status:** `planned`
+- **Status:** `done`
 - **Severity:** code quality
 - **Details:**
   - `health/page.tsx:117` — `projects.map((project: any)` — should use `ProjectHealth` type
@@ -67,7 +67,7 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ### 1.5 Native HTML elements instead of UI components
 
-- **Status:** `planned`
+- **Status:** `done`
 - **Severity:** code quality / inconsistency
 - **Details:** Feature demo pages use raw `<textarea>`, `<select>`, `<option>`, `<input type="checkbox">`, `<input type="color">`, `<input type="range">` instead of `@ezstart/ui` components (or at minimum the Tag component). This violates the UI component rule.
 - **Files:**
@@ -78,7 +78,7 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ### 1.6 `<a>` tag used directly in ErrorsFeed
 
-- **Status:** `planned`
+- **Status:** `done`
 - **Severity:** code quality
 - **Details:** `ErrorsFeed.tsx:192` uses raw `<a href>` instead of `Link` from next or the UI component.
 - **File:** `web/src/app/[locale]/monitoring/errors/components/ErrorsFeed.tsx`
@@ -89,7 +89,7 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ### 2.1 Implement metrics endpoint (stub)
 
-- **Status:** `planned`
+- **Status:** `done`
 - **Details:** `GET /api/metrics` currently returns `{ message: 'Metrics endpoint - TODO: implement full metrics' }`. Should aggregate real data: uptime %, avg response time, error rate, checks count per period.
 - **File:** `api/src/routes/metrics/root.ts`
 
@@ -105,13 +105,13 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ### 2.3 Wire alerting service to scheduler
 
-- **Status:** `planned`
+- **Status:** `done`
 - **Details:** `alerting.ts` has full email + Slack alerting implementation but it is never called from `healthCheckScheduler.ts`. When a service goes down, no alert is sent. Need to call `alertServiceDown()` and `alertHighResponseTime()` from the scheduler.
 - **Files:** `api/src/services/alerting.ts`, `api/src/services/healthCheckScheduler.ts`
 
 ### 2.5 Remove `node-cron` unused dependency
 
-- **Status:** `planned`
+- **Status:** `done`
 - **Details:** `node-cron` is in `package.json` but never imported. The scheduler uses `setTimeout` (adaptive intervals). Remove dead dependency.
 - **File:** `api/package.json`
 
@@ -224,15 +224,45 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
   - Password generator
   - JSON formatter/validator
 
-### 5.6 Admin panel improvements
+### 5.6 Admin panel — CRM / CMS / UX overhaul `high`
 
 - **Status:** `planned`
 - **Details:**
-  - No user creation from admin panel (only edit)
-  - No user deletion / deactivation
-  - No audit log of admin actions
-  - No bulk operations
-  - Search is client-side filter on already-fetched page; should be server-side query
+  EZStart admin doit devenir le **hub central** de gestion de l'ecosysteme (CRM + CMS + monitoring).
+
+  **CRM — Gestion utilisateurs :**
+  - User creation from admin panel (pas seulement edit)
+  - User deletion / deactivation (soft delete avec motif)
+  - Bulk operations (select multiple → assign role, delete, export)
+  - Server-side search + filters (email, username, role, app, date range)
+  - User detail page : profil complet, sessions actives, historique paiements, apps accessibles
+  - Audit log des actions admin (qui a fait quoi, quand)
+  - Export CSV/JSON des users filtrés
+  - Stats dashboard : users actifs, inscriptions/jour, retention
+
+  **CMS — Gestion contenu :**
+  - Gestion des projets affichés sur la landing page (CRUD, order, visibility)
+  - Gestion des feature demos (enable/disable, access control)
+  - Gestion des textes/traductions (edit inline, preview)
+  - Upload et gestion des images/assets
+  - Blog/announcements system (optionnel, v2)
+
+  **UX Admin :**
+  - Sidebar navigation (Dashboard, Users, Content, Monitoring, Settings)
+  - Breadcrumbs
+  - Dark/light mode coherent
+  - Mobile responsive
+  - Real-time notifications (new users, errors, payments)
+  - Quick actions (ban user, trigger health check, view logs)
+
+---
+
+## Dependencies
+
+### P-RBAC — Depend de RBAC-1 EZAuth `high` — `blocked`
+
+- [ ] Le CRM/CMS admin panel necessite un RBAC propre
+- [ ] Bloquer le developpement CRM tant que RBAC-1 n'est pas done
 
 ---
 

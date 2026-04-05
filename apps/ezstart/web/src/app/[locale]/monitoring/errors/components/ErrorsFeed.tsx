@@ -13,6 +13,7 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useMonitoringErrors, type ErrorLog } from '../../hooks'
 
@@ -104,21 +105,21 @@ function ErrorCard({ log }: { log: ErrorLog }) {
       border: 'border-destructive',
       icon: 'lucide:AlertOctagon',
       iconColor: 'text-destructive',
-      label: 'Critical',
+      label: t('severity.critical'),
     },
     error: {
       bg: 'bg-destructive/10',
       border: 'border-destructive',
       icon: 'lucide:XCircle',
       iconColor: 'text-destructive',
-      label: 'Error',
+      label: t('severity.error'),
     },
     warning: {
       bg: 'bg-status-degraded/10',
       border: 'border-status-degraded',
       icon: 'lucide:AlertTriangle',
       iconColor: 'text-status-degraded',
-      label: 'Warning',
+      label: t('severity.warning'),
     },
   } as const
 
@@ -133,10 +134,10 @@ function ErrorCard({ log }: { log: ErrorLog }) {
   const diffDays = Math.floor(diffHours / 24)
 
   let timeAgo = ''
-  if (diffDays > 0) timeAgo = `${diffDays}d ago`
-  else if (diffHours > 0) timeAgo = `${diffHours}h ago`
-  else if (diffMins > 0) timeAgo = `${diffMins}m ago`
-  else timeAgo = 'Just now'
+  if (diffDays > 0) timeAgo = t('timeAgo.daysAgo', { count: diffDays })
+  else if (diffHours > 0) timeAgo = t('timeAgo.hoursAgo', { count: diffHours })
+  else if (diffMins > 0) timeAgo = t('timeAgo.minutesAgo', { count: diffMins })
+  else timeAgo = t('timeAgo.justNow')
 
   return (
     <Card variant="default" className={`${config.bg} ${config.border} border-l-4`}>
@@ -189,7 +190,7 @@ function ErrorCard({ log }: { log: ErrorLog }) {
             </Div>
           </Div>
           {log.url && (
-            <a
+            <Link
               href={log.url}
               target="_blank"
               rel="noopener noreferrer"
@@ -197,7 +198,7 @@ function ErrorCard({ log }: { log: ErrorLog }) {
             >
               {t('view')}
               <Icon name="lucide:ExternalLink" className="w-4 h-4" />
-            </a>
+            </Link>
           )}
         </Div>
       </CardHeader>

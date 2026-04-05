@@ -5,7 +5,6 @@ import { createVitestConfig } from '@ezstart/test-utils'
 export default createVitestConfig({
   dbName: 'ezpay',
   extend: {
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    exclude: ['dist/**', 'node_modules/**'],
   },
 })

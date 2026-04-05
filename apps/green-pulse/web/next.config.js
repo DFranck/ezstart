@@ -10,7 +10,7 @@ export default createNextConfig({
       return [
         {
           source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5070/api'}/:path*`,
+          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6160/api'}/:path*`,
         },
       ]
     },

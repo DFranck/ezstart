@@ -19,7 +19,7 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
     registries = [],
     basePath = '',
     serviceName = 'API',
-    port = 5000,
+    port = 6100,
     onHttpServerReady,
   } = opts
 

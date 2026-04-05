@@ -2,8 +2,8 @@
  * Script to create a test user via EZAuth API
  */
 
-const EZAUTH_API = 'http://localhost:5010/api/auth'
-const EZBILL_API = 'http://localhost:5020/api'
+const EZAUTH_API = 'http://localhost:6110/api/auth'
+const EZBILL_API = 'http://localhost:6120/api'
 
 interface AuthCodeResponse {
   success: boolean
@@ -240,12 +240,9 @@ async function testPaymentMethodsSoftDelete(userId: string) {
 
     // 5. Verify appears in deleted list
     console.log('5️⃣ Checking deleted payment methods...')
-    const deletedResponse = await fetch(
-      `${EZBILL_API}/payment-methods?deletedOnly=true`,
-      {
-        headers: { 'x-user-id': userId },
-      }
-    )
+    const deletedResponse = await fetch(`${EZBILL_API}/payment-methods?deletedOnly=true`, {
+      headers: { 'x-user-id': userId },
+    })
 
     const deletedMethods = await deletedResponse.json()
     const foundDeleted = deletedMethods.find((pm: any) => pm._id === paymentMethod._id)

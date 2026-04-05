@@ -21,7 +21,7 @@ EZPay Web est l'interface de gestion et de documentation du système de paiement
 
 - Node.js 20+
 - pnpm 9+
-- Accès à l'API EZPay (http://localhost:5040)
+- Accès à l'API EZPay (http://localhost:6130)
 
 ### Installation
 
@@ -36,7 +36,7 @@ pnpm --filter web-ezpay dev
 pnpm dev:pay
 ```
 
-L'application sera accessible sur **http://localhost:5045**
+L'application sera accessible sur **http://localhost:6131**
 
 ### Variables d'environnement
 
@@ -44,14 +44,14 @@ Créer `.env.local` à partir de `.env.example` :
 
 ```env
 # API EZPay
-NEXT_PUBLIC_API_URL=http://localhost:5040/api
-NEXT_PUBLIC_WEB_URL=http://localhost:5045
+NEXT_PUBLIC_API_URL=http://localhost:6130/api
+NEXT_PUBLIC_WEB_URL=http://localhost:6131
 
 # Stripe (pour playground)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 # Auth (optionnel - pour historique utilisateur)
-NEXT_PUBLIC_EZAUTH_API_URL=http://localhost:5010/api
+NEXT_PUBLIC_EZAUTH_API_URL=http://localhost:6110/api
 ```
 
 ## 🏗️ Architecture
@@ -89,6 +89,7 @@ apps/ezpay/web/
 ### Page d'Accueil (Actuelle)
 
 **Documentation complète avec :**
+
 - Vue d'ensemble d'EZPay
 - Types de paiements supportés (Donations, Purchases, Subscriptions, Invoices)
 - Guide de démarrage rapide
@@ -98,6 +99,7 @@ apps/ezpay/web/
 ### Dashboard Analytics (À venir)
 
 **Vue globale des paiements :**
+
 - Total des revenus (tous projets confondus)
 - Répartition par type (donations, purchases, subscriptions)
 - Top projets (par revenus)
@@ -107,6 +109,7 @@ apps/ezpay/web/
 ### Documentation Interactive (À venir)
 
 **Sections prévues :**
+
 - 🎯 Getting Started - Installation et setup
 - 🔌 Integration Examples - Code snippets par use case
 - 🧩 Components Reference - API des composants
@@ -117,6 +120,7 @@ apps/ezpay/web/
 ### Playground Interactif (À venir)
 
 **Test des composants pay-sdk :**
+
 - DonateModal - Modal de donation avec testimonials
 - BuyButton - Bouton d'achat avec callback
 - SubscribeButton - Bouton d'abonnement
@@ -136,21 +140,18 @@ pnpm add @ezstart/pay-sdk
 import { PayProvider, createPayClient } from '@ezstart/pay-sdk'
 
 const payClient = createPayClient({
-  appName: 'green-pulse'
+  appName: 'green-pulse',
 })
 
 export default function RootLayout({ children }) {
-  return (
-    <PayProvider client={payClient}>
-      {children}
-    </PayProvider>
-  )
+  return <PayProvider client={payClient}>{children}</PayProvider>
 }
 ```
 
 ### Utilisation des composants
 
 **Donations avec testimonials :**
+
 ```tsx
 import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 
@@ -169,15 +170,16 @@ import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 ```
 
 **Achats in-app :**
+
 ```tsx
 import { BuyButton } from '@ezstart/pay-sdk'
 
-<BuyButton
+;<BuyButton
   projectId="green-pulse"
   productId="premium-report"
   productName="Premium Report"
   amount={4.99}
-  onSuccess={(payment) => {
+  onSuccess={payment => {
     // Unlock premium report
     unlockReport()
   }}
@@ -185,6 +187,7 @@ import { BuyButton } from '@ezstart/pay-sdk'
 ```
 
 **Abonnements :**
+
 ```tsx
 import { SubscribeButton, PricingTable } from '@ezstart/pay-sdk'
 
@@ -217,7 +220,7 @@ const { createDonation, createPurchase, createSubscription } = usePay()
 // Hook spécialisé donations
 const { donations, isLoading, reload } = useDonations({
   projectId: 'green-pulse',
-  limit: 10
+  limit: 10,
 })
 
 // Créer une donation
@@ -227,7 +230,7 @@ await createDonation({
   amount: 10,
   customerName: 'John Doe',
   message: 'Great project!',
-  isPublic: true
+  isPublic: true,
 })
 ```
 
@@ -236,6 +239,7 @@ await createDonation({
 ### Endpoints Disponibles
 
 **Global Stats :**
+
 ```typescript
 GET /api/payments/stats
 
@@ -257,6 +261,7 @@ Response:
 ```
 
 **Project Stats :**
+
 ```typescript
 GET /api/payments/stats?projectId=green-pulse
 
@@ -278,25 +283,25 @@ Response:
 
 ### Base URL
 
-- **Local** : http://localhost:5040/api
+- **Local** : http://localhost:6130/api
 - **Production** : https://ezpay-api.onrender.com/api
 
 ### Endpoints Principaux
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/donate` | POST | Créer donation |
-| `/donations` | GET | Liste donations (testimonials) |
-| `/donations/stats` | GET | Stats donations |
-| `/purchase` | POST | Créer achat |
-| `/purchases` | GET | Liste achats |
-| `/subscribe` | POST | Créer abonnement |
-| `/subscriptions` | GET | Liste abonnements |
-| `/subscriptions/:id/cancel` | POST | Annuler abonnement |
-| `/payments/:id` | GET | Détails paiement |
-| `/payments/stats` | GET | Statistiques globales |
-| `/webhooks/stripe` | POST | Webhook Stripe |
-| `/health` | GET | Health check |
+| Endpoint                    | Method | Description                    |
+| --------------------------- | ------ | ------------------------------ |
+| `/donate`                   | POST   | Créer donation                 |
+| `/donations`                | GET    | Liste donations (testimonials) |
+| `/donations/stats`          | GET    | Stats donations                |
+| `/purchase`                 | POST   | Créer achat                    |
+| `/purchases`                | GET    | Liste achats                   |
+| `/subscribe`                | POST   | Créer abonnement               |
+| `/subscriptions`            | GET    | Liste abonnements              |
+| `/subscriptions/:id/cancel` | POST   | Annuler abonnement             |
+| `/payments/:id`             | GET    | Détails paiement               |
+| `/payments/stats`           | GET    | Statistiques globales          |
+| `/webhooks/stripe`          | POST   | Webhook Stripe                 |
+| `/health`                   | GET    | Health check                   |
 
 ### Modèle de données
 
@@ -352,7 +357,7 @@ interface Payment {
 ```tsx
 import { ThemeProvider } from '@ezstart/next-theme'
 
-<ThemeProvider>
+;<ThemeProvider>
   <App />
 </ThemeProvider>
 ```
@@ -360,16 +365,10 @@ import { ThemeProvider } from '@ezstart/next-theme'
 ### Composants UI disponibles
 
 ```tsx
-import {
-  Button,
-  Card,
-  Input,
-  Label,
-  Badge
-} from '@ezstart/ui/components'
+import { Button, Card, Input, Label, Badge } from '@ezstart/ui/components'
 
 // Tous les composants respectent le theme automatiquement
-<Card>
+;<Card>
   <Button variant="default">Primary</Button>
   <Button variant="destructive">Danger</Button>
   <Badge variant="success">Success</Badge>
@@ -387,12 +386,7 @@ import { PaymentHistory } from '@ezstart/pay-sdk'
 function UserDashboard() {
   const { user } = useAuth()
 
-  return (
-    <PaymentHistory
-      userId={user?.id}
-      limit={20}
-    />
-  )
+  return <PaymentHistory userId={user?.id} limit={20} />
 }
 ```
 
@@ -403,9 +397,9 @@ function UserDashboard() {
 await createDonation({
   projectId: 'green-pulse',
   amount: 10,
-  userId: user.id,        // Link avec EZAuth
+  userId: user.id, // Link avec EZAuth
   customerName: user.name,
-  customerEmail: user.email
+  customerEmail: user.email,
 })
 ```
 
@@ -414,6 +408,7 @@ await createDonation({
 ### Vercel (Recommandé)
 
 **Configuration :**
+
 - Root Directory: `apps/ezpay/web`
 - Include files outside root: ✅ COCHÉ
 - Build Command: `pnpm build`
@@ -440,16 +435,16 @@ pnpm --filter web-ezpay start
 
 - `next` ^15.5.2 - Framework
 - `react` ^19.1.1 - UI Library
-- `@ezstart/ui` workspace:* - Composants
-- `@ezstart/next-theme` workspace:* - Theme provider
-- `@ezstart/pay-sdk` workspace:* - SDK paiements
+- `@ezstart/ui` workspace:\* - Composants
+- `@ezstart/next-theme` workspace:\* - Theme provider
+- `@ezstart/pay-sdk` workspace:\* - SDK paiements
 - `next-themes` ^0.4.6 - Theme management
 
 ### Dev
 
-- `@ezstart/typescript-config` workspace:* - Config TS
-- `@ezstart/eslint-config` workspace:* - Config ESLint
-- `@ezstart/tailwind-config` workspace:* - Config Tailwind
+- `@ezstart/typescript-config` workspace:\* - Config TS
+- `@ezstart/eslint-config` workspace:\* - Config ESLint
+- `@ezstart/tailwind-config` workspace:\* - Config Tailwind
 - `typescript` ^5.7.3 - TypeScript
 
 ## 🔗 Ressources
@@ -520,7 +515,7 @@ pnpm lint
 
 ## 📝 Notes
 
-- Port **5045** (pattern 50x5 pour Web apps)
+- Port **6131** (pattern 6XX1 pour Web apps)
 - Utilise le ThemeProvider pour dark/light mode
 - Auto-configuration de l'API URL (dev/prod)
 - Compatible avec le monorepo @ezstart

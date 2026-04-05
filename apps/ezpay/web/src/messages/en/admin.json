@@ -1,0 +1,61 @@
+{
+  "admin": {
+    "title": "EZPay Admin",
+    "accessRequired": "Admin access required",
+    "accessRequiredDescription": "You must be logged in as an administrator to access this page.",
+    "stats": {
+      "totalRevenue": "Total Revenue",
+      "totalPayments": "Total Payments",
+      "donations": "Donations",
+      "purchases": "Purchases",
+      "subscriptions": "Subscriptions"
+    },
+    "table": {
+      "date": "Date",
+      "type": "Type",
+      "client": "Client",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions",
+      "noPayments": "No payments found",
+      "refund": "Refund",
+      "refundConfirm": "Are you sure you want to refund this payment?",
+      "refundSuccess": "Payment refunded successfully",
+      "refundError": "Error while processing refund",
+      "cancelSubscription": "Cancel subscription",
+      "cancelConfirm": "Are you sure you want to cancel this subscription?",
+      "cancelSuccess": "Subscription cancelled successfully",
+      "cancelError": "Error while cancelling subscription",
+      "cancelNoId": "Cannot cancel: subscription not yet activated by Stripe",
+      "loading": "Loading..."
+    },
+    "filters": {
+      "allTypes": "All types",
+      "allStatuses": "All statuses",
+      "searchEmail": "Search by email...",
+      "donation": "Donation",
+      "purchase": "Purchase",
+      "subscription": "Subscription",
+      "invoice": "Invoice",
+      "pending": "Pending",
+      "completed": "Completed",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "cancelled": "Cancelled"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "Showing {from} to {to} of {total}"
+    },
+    "dialog": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "loading": "Operation in progress...",
+      "success": "Operation completed",
+      "error": "An error occurred",
+      "retry": "Retry",
+      "close": "Close"
+    }
+  }
+}

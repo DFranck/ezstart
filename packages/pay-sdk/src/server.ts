@@ -36,3 +36,20 @@ export {
   statsResponseSchema,
   errorResponseSchema,
 } from './schemas.js'
+
+// Providers (provider-agnostic payment abstraction)
+export { PaymentProviderRegistry, StripeProvider, ConsoleProvider } from './providers/index.js'
+export type {
+  IPaymentProvider,
+  CheckoutOptions,
+  CheckoutResult,
+  SubscriptionCheckoutOptions,
+  PaymentVerification,
+  RefundResult,
+  CancelResult,
+  WebhookEvent,
+  WebhookEventType,
+  WebhookEventData,
+  StripeProviderConfig,
+  StripeInstance,
+} from './providers/index.js'

@@ -1,6 +1,6 @@
 # Backlog — EZAuth
 
-**Status :** `active` | **Derniere mise a jour :** 2026-03-29
+**Status :** `active` | **Derniere mise a jour :** 2026-04-01
 
 ## Objectif
 
@@ -60,32 +60,32 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
   - [x] Middleware pour bloquer les users non-verifies si necessaire
   - [x] Integration email service
 
-### FEAT-4: 2FA (Two-Factor Authentication) `planned`
+### FEAT-4: 2FA (Two-Factor Authentication) `done`
 
 - **Quoi :** TOTP (Google Authenticator) ou SMS.
 - **Pourquoi :** Standard de securite pour un service auth SSO.
 - **Etapes :**
-  - [ ] Model pour stocker les secrets TOTP
-  - [ ] Endpoints setup/verify/disable 2FA
-  - [ ] UI dans le profil user
-  - [ ] Integration dans le flow login
+  - [x] Model pour stocker les secrets TOTP
+  - [x] Endpoints setup/verify/disable 2FA
+  - [x] UI dans le profil user
+  - [x] Integration dans le flow login
 
-### FEAT-5: Account deletion (self-service) `in-progress`
+### FEAT-5: Account deletion (self-service) `done`
 
 - **Quoi :** Permettre a un user de supprimer son compte.
 - **Pourquoi :** Requis par GDPR. Actuellement aucun endpoint DELETE user.
 - **Etapes :**
   - [x] Endpoint `DELETE /auth/account`
   - [x] Suppression cascade (OAuth accounts)
-  - [ ] UI de confirmation
+  - [x] UI de confirmation
 
-### FEAT-6: Session management UI `planned`
+### FEAT-6: Session management UI `done`
 
 - **Quoi :** Dashboard des sessions actives + revocation.
 - **Pourquoi :** Pas de moyen de voir ou invalider les sessions. Le JWT de 7 jours est stateless.
 - **Options :** Token blacklist en Redis, ou refresh token rotation.
 
-### FEAT-7: Refresh token rotation `planned`
+### FEAT-7: Refresh token rotation `done`
 
 - **Quoi :** Remplacer le JWT 7 jours unique par access token court (15min) + refresh token (30 jours) avec rotation.
 - **Pourquoi :** Meilleure securite. Actuellement un seul JWT de 7 jours sans possibilite de revocation.
@@ -105,11 +105,39 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - **Quoi :** Endpoint pour modifier son propre profil (firstName, lastName, avatar).
 - **Pourquoi :** Aucun endpoint self-service pour modifier son profil.
 
+### FEAT-11: Session current marker `done`
+
+- [x] API: isCurrent flag via token hash comparison
+- [x] Web: Badge "Session actuelle" + visual differentiation
+- [x] Bouton Révoquer masqué sur session courante
+
+### RBAC-1: Simplifier le systeme de roles `high` `architecture` — `done`
+
+- **Probleme :** Le systeme de roles est disperse et incoherent :
+  - `roles` (legacy) encore dans le code mais ne devrait plus exister
+  - `globalRoles` pour superadmin/admin
+  - `appRoles` pour les roles par app
+  - `permissions` et `features` existent dans le modele mais jamais utilises
+  - Chaque app fait ses propres checks inline au lieu d'utiliser un helper centralise
+  - `isAdminUser()` dans EZPay verifie 5 conditions differentes
+- **Solution proposee :**
+  - [x] Definir la hierarchie : `superadmin > admin > app:admin > app:editor > app:viewer > user`
+  - [ ] Supprimer `roles` (legacy), `permissions`, `features` du modele AuthUser
+  - [ ] Creer `hasAccess(user, app, requiredRole)` helper dans auth-sdk (partage)
+  - [ ] Remplacer TOUS les checks inline dans les apps par `hasAccess()`
+  - [ ] Mettre a jour le JWT payload pour ne plus inclure les champs supprimes
+  - [ ] Page admin EZAuth pour gerer les roles visuellement (assign globalRoles + appRoles)
+  - [ ] Tests unitaires pour la hierarchie des roles
+  - [ ] Migration des users existants (supprimer les champs legacy)
+- **Impact :** EZAuth API, auth-sdk, EZPay API, EZStart API, tous les middleware auth
+- **Prerequis :** Aucun — peut etre fait independamment
+- **Priorite :** High — doit etre fait avant le CRM/CMS car le panel admin a besoin d'un RBAC propre
+
 ---
 
 ## P2 — Qualite de code
 
-### CODE-1: Hardcoded strings dans le web `planned`
+### CODE-1: Hardcoded strings dans le web `done`
 
 - **Probleme :** Les pages login et register contiennent des strings en dur non-i18n :
   - `login/page.tsx` : "Sign in to access", "One account, all EZStart apps!", "Don't have an account?", "Sign up", "Loading..."
@@ -117,7 +145,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
   - `page.tsx` (home) : "Redirecting to login...", "Loading..."
 - **Action :** Utiliser `useTranslations()` partout.
 
-### CODE-3: `as any` casts (4 occurrences) `planned`
+### CODE-3: `as any` casts (4 occurrences) `done`
 
 - **Fichiers :** `index.ts` (catch block), `auth.service.ts` (waitlist entry find), `AuthCode.test.ts` (model type), `express.d.ts` (index signature).
 - **Action :** Typer correctement ou utiliser des narrowing patterns.
@@ -131,32 +159,32 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 
 ## P3 — UX Web
 
-### UX-1: Pas de "Forgot password" link `planned`
+### UX-1: Pas de "Forgot password" link `done`
 
 - **Probleme :** Le formulaire login n'a pas de lien "Mot de passe oublie".
 - **Prerequis :** FEAT-1 (Password reset flow).
 
-### UX-2: Register form — pas de validation en temps reel `planned`
+### UX-2: Register form — pas de validation en temps reel `done`
 
 - **Probleme :** La validation email/username se fait uniquement au submit. Pas de verification d'unicite en temps reel.
 - **Action :** Ajouter un endpoint `GET /auth/check-availability?email=...&username=...` et debounce dans le form.
 
-### UX-3: Register form — password strength indicator `planned`
+### UX-3: Register form — password strength indicator `done`
 
 - **Probleme :** Juste "Minimum 6 characters" comme hint. Pas d'indicateur de force.
 - **Action :** Ajouter un composant password strength (from `@ezstart/ui`).
 
-### UX-4: Register form — pas de confirm password `planned`
+### UX-4: Register form — pas de confirm password `done`
 
 - **Probleme :** Un seul champ password, pas de confirmation.
 - **Action :** Ajouter un champ "Confirm password".
 
-### UX-5: Error messages pas i18n `planned`
+### UX-5: Error messages pas i18n `done`
 
 - **Probleme :** Les erreurs API sont en anglais ("Invalid credentials", "User already exists"). Pas de traduction cote client.
 - **Action :** Mapper les codes d'erreur API vers des messages i18n.
 
-### UX-7: Login/Register — pas de Suspense uniforme `planned`
+### UX-7: Login/Register — pas de Suspense uniforme `done`
 
 - **Probleme :** Login utilise `<Spinner>` comme fallback, Register utilise `<Div>Loading...</Div>`. Incoherent.
 - **Action :** Utiliser le meme pattern Suspense/Spinner partout.
@@ -165,22 +193,22 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 
 ## P4 — API Quality
 
-### API-1: Response format inconsistant `planned`
+### API-1: Response format inconsistant `done`
 
 - **Probleme :** Les routes auth (login, register, token) retournent le data directement via `sendSuccess()`, mais certaines routes waitlist ajoutent `success: true` manuellement dans le schema.
 - **Action :** S'assurer que toutes les reponses passent uniquement par `sendSuccess()`/`sendError()` et que les schemas refletent le wrapper `{ success, data }`.
 
-### API-2: OpenAPI registries manquantes pour OAuth `planned`
+### API-2: OpenAPI registries manquantes pour OAuth `done`
 
 - **Probleme :** `oauthRegistries` est un array vide (`never[]`). Les routes Google OAuth n'ont pas de documentation OpenAPI.
 - **Action :** Ajouter des registries pour `google-authorize` et `google-callback`.
 
-### API-3: Waitlist routes dupliquees `planned`
+### API-3: Waitlist routes dupliquees `done`
 
 - **Probleme :** Il y a 2 routes `GET /waitlist/:appName` — une dans `waitlist/get.ts` (publique) et une dans `admin/list-waitlist.ts` (admin avec auth). Elles sont montees sur des routers differents mais la publique expose les emails.
 - **Action :** Supprimer la route publique ou la limiter aux stats (count seulement).
 
-### API-4: Logout ne blacklist pas le token `planned`
+### API-4: Logout ne blacklist pas le token `done`
 
 - **Probleme :** `POST /auth/logout` clear le cookie mais ne blacklist pas le JWT. Si le token a ete copie, il reste valide 7 jours.
 - **Lien :** FEAT-6/FEAT-7 (session management / refresh tokens).

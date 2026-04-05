@@ -263,7 +263,7 @@ export async function callApi<T = unknown>(
           ok: false as const,
           status: res.status,
           url: res.url,
-          data: json.data as ApiError | null,
+          data: (json.data ?? json) as ApiError | null,
           meta: json.meta as ApiMeta | undefined,
           error: json.error as string | undefined,
           raw: json,

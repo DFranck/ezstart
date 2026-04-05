@@ -12,7 +12,7 @@ Structured logging with Pino for all @ezstart services.
 import { createLogger } from '@ezstart/logger'
 
 const log = createLogger('my-service')
-log.info('Server started', { port: 5000 })
+log.info('Server started', { port: 6100 })
 ```
 
 ## Used by

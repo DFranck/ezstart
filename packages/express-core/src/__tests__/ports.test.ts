@@ -18,7 +18,7 @@ describe('@ezstart/express-core - Ports', () => {
 
       const port = getApiPort('ezauth')
 
-      expect(port).toBe(5010)
+      expect(port).toBe(6110)
     })
 
     it('should return port from @ezstart/config for ezpay', () => {
@@ -26,7 +26,7 @@ describe('@ezstart/express-core - Ports', () => {
 
       const port = getApiPort('ezpay')
 
-      expect(port).toBe(5040)
+      expect(port).toBe(6130)
     })
 
     it('should return port from @ezstart/config for ezbill', () => {
@@ -34,7 +34,7 @@ describe('@ezstart/express-core - Ports', () => {
 
       const port = getApiPort('ezbill')
 
-      expect(port).toBe(5020)
+      expect(port).toBe(6120)
     })
 
     it('should return port from @ezstart/config for green-pulse', () => {
@@ -42,7 +42,7 @@ describe('@ezstart/express-core - Ports', () => {
 
       const port = getApiPort('green-pulse')
 
-      expect(port).toBe(5070)
+      expect(port).toBe(6160)
     })
 
     it('should return port from @ezstart/config for ezstart', () => {
@@ -50,7 +50,7 @@ describe('@ezstart/express-core - Ports', () => {
 
       const port = getApiPort('ezstart')
 
-      expect(port).toBe(5000)
+      expect(port).toBe(6100)
     })
 
     it('should override with PORT env var if provided', () => {

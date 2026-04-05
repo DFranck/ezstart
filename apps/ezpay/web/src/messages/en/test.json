@@ -1,0 +1,53 @@
+{
+  "test": {
+    "title": "Test Environment",
+    "subtitle": "Test EZPay donations, purchases, and subscriptions in sandbox mode",
+    "tabs": {
+      "all": "All",
+      "donate": "Donations",
+      "purchase": "Purchases",
+      "subscribe": "Subscriptions"
+    },
+    "sections": {
+      "donations": "Donations",
+      "donationsDesc": "Test donation buttons and the donation wall",
+      "purchases": "Purchases",
+      "purchasesDesc": "Test one-time product purchases",
+      "subscriptions": "Subscriptions",
+      "subscriptionsDesc": "Test recurring subscription plans",
+      "history": "History",
+      "historyDesc": "View your test payment history"
+    },
+    "products": {
+      "testItem": "Test Item",
+      "testItemDesc": "A test item to validate the purchase flow",
+      "premiumPass": "Premium Pass",
+      "premiumPassDesc": "A premium pass to test higher-value purchases"
+    },
+    "plans": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "biannual": "Biannual",
+      "yearly": "Yearly"
+    },
+    "noDonations": "No donations yet",
+    "noPurchases": "No purchases yet",
+    "noSubscriptions": "No subscriptions yet",
+    "cancelSubscription": "Cancel Subscription",
+    "cancelConfirm": "Are you sure you want to cancel this subscription? This action cannot be undone.",
+    "cancelSuccess": "Subscription cancelled successfully",
+    "cancelError": "Failed to cancel subscription",
+    "cancelNoSubscriptionId": "Missing subscription ID",
+    "active": "Active",
+    "accessDenied": "Access Denied",
+    "accessDeniedDesc": "This page is restricted to administrators and the development environment.",
+    "banner": {
+      "provider": "Stripe (Test)",
+      "info": "Test mode — no real payments will be processed"
+    },
+    "providerSelect": {
+      "stripe": "Stripe (Test)",
+      "console": "Console (Mock)"
+    }
+  }
+}

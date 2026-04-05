@@ -14,7 +14,7 @@ import {
   P,
   PasswordInput,
 } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -39,6 +39,7 @@ interface FormData {
 export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
   const t = useTranslations('register')
   const tv = useTranslations('verifyEmail')
+  const tApiErrors = useTranslations('apiErrors')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [registered, setRegistered] = useState(false)
@@ -132,18 +133,15 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(
-          response.error ||
-            (response.data as { error?: string } | null)?.error ||
-            'Registration failed'
-        )
+        throw new Error(response.error || parseApiError(response.data) || 'Registration failed')
       }
 
       // Show "check your email" message
       setRegistered(true)
       logger.info('Registration successful, verification email sent')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const rawMessage = err instanceof Error ? err.message : 'fallback'
+      setError(tApiErrors.has(rawMessage) ? tApiErrors(rawMessage) : tApiErrors('fallback'))
     } finally {
       setLoading(false)
     }

@@ -9,7 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
-import { createCheckoutSession } from '../../services/stripe.js'
+import { getProvider } from '../../services/stripe.js'
 import { optionalAuthMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -26,7 +26,7 @@ const createDonationSchema = z.object({
   projectId: z.string().describe('Project identifier'),
   projectName: z.string().optional().describe('Project display name'),
   amount: z.number().positive().describe('Donation amount in currency units'),
-  currency: z.string().default('USD').describe('Currency code (USD, EUR, etc.)'),
+  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   message: z.string().optional().describe('Optional message from donor'),
   isPublic: z.boolean().default(true).describe('Whether donation is shown publicly'),
   isAnonymous: z.boolean().default(false).describe('Whether donor wants to stay anonymous'),
@@ -59,7 +59,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       projectId,
       projectName,
       amount,
-      currency = 'USD',
+      currency = 'EUR',
       message,
       isPublic = true,
       isAnonymous = false,
@@ -73,8 +73,9 @@ const createDonationHandler = async (req: Request, res: Response) => {
     // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
-    // Create Stripe checkout session
-    const session = await createCheckoutSession({
+    // Create checkout session via provider
+    const provider = getProvider()
+    const session = await provider.createCheckoutSession({
       amount,
       currency,
       description: `Donation to ${projectName || projectId}`,
@@ -103,7 +104,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       customerEmail: donorEmail,
       isAnonymous,
       provider: 'stripe',
-      paymentId: session.id,
+      paymentId: session.sessionId,
       status: 'pending',
       metadata: {
         message,
@@ -111,7 +112,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       },
     })
 
-    logger.info(`💳 Donation created - Session ID: ${session.id}`)
+    logger.info(`💳 Donation created - Session ID: ${session.sessionId}`)
     logger.info(`🔗 Checkout URL: ${session.url}`)
 
     sendSuccess(res, { payment, checkoutUrl: session.url })

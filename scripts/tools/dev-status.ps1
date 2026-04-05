@@ -2,13 +2,13 @@ Write-Host "=== Development Server Status ===" -ForegroundColor Cyan
 Write-Host ""
 
 $projects = @(
-    @{Name="EZAuth API"; Port=5010; Path="apps/ezauth/api"},
-    @{Name="EZBill API"; Port=5020; Path="apps/ezbill/api"},
-    @{Name="EZStart Web"; Port=5045; Path="apps/ezstart/web"},
-    @{Name="EZAuth Web"; Port=5015; Path="apps/ezauth/web"},
-    @{Name="EZBill Web"; Port=5025; Path="apps/ezbill/web"},
-    @{Name="ASC-TCD Web"; Port=5055; Path="apps/asc-tcd/web"},
-    @{Name="FengShui Web"; Port=5065; Path="apps/fengshui/web"}
+    @{Name="EZAuth API"; Port=6110; Path="apps/ezauth/api"},
+    @{Name="EZBill API"; Port=6120; Path="apps/ezbill/api"},
+    @{Name="EZStart Web"; Port=6101; Path="apps/ezstart/web"},
+    @{Name="EZAuth Web"; Port=6111; Path="apps/ezauth/web"},
+    @{Name="EZBill Web"; Port=6121; Path="apps/ezbill/web"},
+    @{Name="ASC-TCD Web"; Port=6141; Path="apps/asc-tcd/web"},
+    @{Name="FengShui Web"; Port=6151; Path="apps/fengshui/web"}
 )
 
 foreach ($project in $projects) {

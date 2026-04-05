@@ -36,19 +36,29 @@ const tokenController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid token request', parsed.error.issues)
     }
 
-    const token = await AuthService.exchangeCodeForToken(parsed.data)
+    const token = await AuthService.exchangeCodeForToken(parsed.data, {
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
+    })
 
     // DUAL-MODE: Set httpOnly cookie for apps using httpOnly mode
     res.cookie('ezauth_token', token.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 15 * 60 * 1000, // 15 minutes (matches access token TTL)
       path: '/',
       domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined,
     })
 
-    sendSuccess(res, token)
+    // Return token data including refresh token
+    sendSuccess(res, {
+      access_token: token.access_token,
+      token_type: token.token_type,
+      expires_in: token.expires_in,
+      user: token.user,
+      refresh_token: token.refreshToken,
+    })
   } catch (error) {
     logger.error('Token exchange error:', error)
     sendError(res, error instanceof Error ? error.message : 'Token exchange failed', 400)

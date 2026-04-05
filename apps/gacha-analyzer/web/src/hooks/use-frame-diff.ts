@@ -97,7 +97,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
 
       // Pre-compute masks in absolute pixel coordinates once per frame
       const absMasks =
-        masks && masks.length > 0
+        masks && Array.isArray(masks) && masks.length > 0
           ? masks.map(m => ({
               x1: Math.floor((m.x / 100) * frame.width),
               y1: Math.floor((m.y / 100) * frame.height),
@@ -108,23 +108,28 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
 
       let sampledCount = 0
       let changedCount = 0
+      let maskedCount = 0
 
       // Walk through pixels with the configured sample rate
       // Each pixel occupies 4 bytes (RGBA) in the ImageData array
       for (let i = 0; i < totalPixels; i += sampleRate) {
-        // Skip pixels inside masked regions
+        // Skip pixels inside masked regions — these must not influence
+        // either the numerator (changedCount) or the denominator (sampledCount)
         if (absMasks) {
           const px = i % frame.width
           const py = Math.floor(i / frame.width)
           let masked = false
           for (let m = 0; m < absMasks.length; m++) {
             const mask = absMasks[m]
-            if (mask && px >= mask.x1 && px <= mask.x2 && py >= mask.y1 && py <= mask.y2) {
+            if (mask && px >= mask.x1 && px < mask.x2 && py >= mask.y1 && py < mask.y2) {
               masked = true
               break
             }
           }
-          if (masked) continue
+          if (masked) {
+            maskedCount++
+            continue
+          }
         }
 
         const offset = i * 4
@@ -141,6 +146,8 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
         }
       }
 
+      // Score uses only non-masked pixels: changedCount / sampledCount
+      // maskedCount is tracked but excluded from both numerator and denominator
       const score = sampledCount > 0 ? (changedCount / sampledCount) * 100 : 0
       diffScoreRef.current = score
 

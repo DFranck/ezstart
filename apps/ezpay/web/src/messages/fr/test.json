@@ -1,0 +1,53 @@
+{
+  "test": {
+    "title": "Environnement de test",
+    "subtitle": "Testez les dons, achats et abonnements EZPay en mode sandbox",
+    "tabs": {
+      "all": "Tout",
+      "donate": "Dons",
+      "purchase": "Achats",
+      "subscribe": "Abonnements"
+    },
+    "sections": {
+      "donations": "Dons",
+      "donationsDesc": "Testez les boutons de don et le mur de donateurs",
+      "purchases": "Achats",
+      "purchasesDesc": "Testez les achats uniques de produits",
+      "subscriptions": "Abonnements",
+      "subscriptionsDesc": "Testez les formules d'abonnement récurrentes",
+      "history": "Historique",
+      "historyDesc": "Consultez l'historique de vos paiements de test"
+    },
+    "products": {
+      "testItem": "Article de test",
+      "testItemDesc": "Un article de test pour valider le flux d'achat",
+      "premiumPass": "Pass Premium",
+      "premiumPassDesc": "Un pass premium pour tester les achats de valeur supérieure"
+    },
+    "plans": {
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel",
+      "biannual": "Semestriel",
+      "yearly": "Annuel"
+    },
+    "noDonations": "Aucun don pour le moment",
+    "noPurchases": "Aucun achat pour le moment",
+    "noSubscriptions": "Aucun abonnement pour le moment",
+    "cancelSubscription": "Résilier l'abonnement",
+    "cancelConfirm": "Êtes-vous sûr de vouloir résilier cet abonnement ? Cette action est irréversible.",
+    "cancelSuccess": "Abonnement résilié avec succès",
+    "cancelError": "Erreur lors de la résiliation de l'abonnement",
+    "cancelNoSubscriptionId": "Identifiant d'abonnement manquant",
+    "active": "Actif",
+    "accessDenied": "Accès refusé",
+    "accessDeniedDesc": "Cette page est réservée aux administrateurs et à l'environnement de développement.",
+    "banner": {
+      "provider": "Stripe (Test)",
+      "info": "Mode test — aucun paiement réel ne sera effectué"
+    },
+    "providerSelect": {
+      "stripe": "Stripe (Test)",
+      "console": "Console (Mock)"
+    }
+  }
+}

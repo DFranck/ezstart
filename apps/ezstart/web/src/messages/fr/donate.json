@@ -1,0 +1,14 @@
+{
+  "donate": {
+    "success": {
+      "message": "Merci ! Votre don a bien été reçu.",
+      "redirecting": "Redirection vers l'accueil...",
+      "error": "Un problème est survenu avec votre don",
+      "backToHome": "Retour à l'accueil"
+    },
+    "cancel": {
+      "message": "Votre paiement a été annulé. Aucun montant n'a été débité.",
+      "backToHome": "Retour à l'accueil"
+    }
+  }
+}

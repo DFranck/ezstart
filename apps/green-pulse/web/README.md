@@ -47,12 +47,12 @@ Create `.env.local` in this directory:
 
 ```env
 # API
-NEXT_PUBLIC_API_URL=http://localhost:5070/api
+NEXT_PUBLIC_API_URL=http://localhost:6160/api
 
 # App
-NEXT_PUBLIC_APP_URL=http://localhost:5075
+NEXT_PUBLIC_APP_URL=http://localhost:6161
 NODE_ENV=development
-PORT=5075
+PORT=6161
 
 # OpenAI (optional for client-side features)
 NEXT_PUBLIC_OPENAI_KEY=sk-...
@@ -62,7 +62,7 @@ NEXT_PUBLIC_OPENAI_KEY=sk-...
 
 ```bash
 # Development
-pnpm dev              # Start dev server on port 5075
+pnpm dev              # Start dev server on port 6161
 
 # Build
 pnpm build            # Build for production
@@ -208,9 +208,7 @@ export default function RootLayout({ children, params: { locale } }) {
       <body>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ThemeProvider>
-            <AuthProvider appName="green-pulse">
-              {children}
-            </AuthProvider>
+            <AuthProvider appName="green-pulse">{children}</AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
@@ -235,8 +233,8 @@ const newEntry = await callApi('/carbon', {
   body: JSON.stringify({
     category: 'transport',
     amount: 5.2,
-    description: 'Car commute'
-  })
+    description: 'Car commute',
+  }),
 })
 ```
 
@@ -252,7 +250,7 @@ export default withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development'
+  disable: process.env.NODE_ENV === 'development',
 })
 ```
 
@@ -270,8 +268,7 @@ Build Settings:
   Output Directory: .next
   Install Command: pnpm install
 
-Environment Variables:
-  NEXT_PUBLIC_API_URL=https://greenpulse-api.onrender.com/api
+Environment Variables: NEXT_PUBLIC_API_URL=https://greenpulse-api.onrender.com/api
   NEXT_PUBLIC_APP_URL=https://greenpulse.vercel.app
 ```
 
@@ -300,12 +297,12 @@ export default authMiddleware({
   publicRoutes: ['/'],
   afterAuth: createIntlMiddleware({
     locales: ['en', 'fr'],
-    defaultLocale: 'en'
-  })
+    defaultLocale: 'en',
+  }),
 })
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next|.*\\..*).*)'],
 }
 ```
 

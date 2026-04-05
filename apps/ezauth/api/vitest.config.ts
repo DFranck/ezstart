@@ -5,7 +5,6 @@ import { createVitestConfig } from '@ezstart/test-utils'
 export default createVitestConfig({
   dbName: 'ezauth',
   extend: {
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    include: ['src/**/*.{test,spec}.{js,ts}'],
   },
 })

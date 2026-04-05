@@ -24,7 +24,7 @@ interface Alert {
   severity: 'info' | 'warning' | 'error' | 'critical'
   service?: string
   timestamp: Date
-  metadata?: Record<string, any>
+  metadata?: Record<string, string | number | boolean | null | undefined>
 }
 
 class AlertingService {
@@ -135,12 +135,16 @@ class AlertingService {
               <div class="meta-item">
                 <span class="label">Time:</span> ${alert.timestamp.toLocaleString()}
               </div>
-              ${alert.metadata ? `
+              ${
+                alert.metadata
+                  ? `
               <div class="meta-item" style="margin-top: 15px;">
                 <span class="label">Details:</span>
                 <pre style="background: #f3f4f6; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px;">${JSON.stringify(alert.metadata, null, 2)}</pre>
               </div>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
           </div>
           <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
@@ -299,7 +303,11 @@ export async function alertServiceDown(serviceId: string, error: string) {
   })
 }
 
-export async function alertHighResponseTime(serviceId: string, responseTime: number, threshold: number) {
+export async function alertHighResponseTime(
+  serviceId: string,
+  responseTime: number,
+  threshold: number
+) {
   await alertingService.sendAlert({
     title: `High Response Time: ${serviceId}`,
     message: `Response time (${responseTime}ms) exceeded threshold (${threshold}ms) for ${serviceId}.`,

@@ -14,8 +14,9 @@ import {
 } from '@ezstart/ui/components'
 import { BackButton } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 type SetupPhase = 'idle' | 'qr' | 'backup' | 'disable'
@@ -60,7 +61,7 @@ export default function SettingsPage() {
         method: 'POST',
       })
       if (!response.ok) {
-        throw new Error((response.data as { error?: string } | null)?.error || 'Setup failed')
+        throw new Error(response.error || parseApiError(response.data as any) || 'Setup failed')
       }
       const data = response.data as { qrCode: string; secret: string }
       setQrCode(data.qrCode)
@@ -85,7 +86,7 @@ export default function SettingsPage() {
       })
       if (!response.ok) {
         throw new Error(
-          (response.data as { error?: string } | null)?.error || 'Verification failed'
+          response.error || parseApiError(response.data as any) || 'Verification failed'
         )
       }
       const data = response.data as { backupCodes: string[] }
@@ -110,7 +111,7 @@ export default function SettingsPage() {
         body: { code },
       })
       if (!response.ok) {
-        throw new Error((response.data as { error?: string } | null)?.error || 'Disable failed')
+        throw new Error(response.error || parseApiError(response.data as any) || 'Disable failed')
       }
       setIs2FAEnabled(false)
       setPhase('idle')
@@ -306,6 +307,15 @@ export default function SettingsPage() {
               </Button>
             </Div>
           )}
+        </Div>
+
+        {/* Sessions link */}
+        <Div className="border-t pt-4">
+          <Link href="/settings/sessions">
+            <Button variant="outline" className="w-full">
+              {ts('sessions')}
+            </Button>
+          </Link>
         </Div>
       </CardContent>
     </Card>

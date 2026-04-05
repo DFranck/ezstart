@@ -20,6 +20,7 @@ const handleConversationSelect = async (id: string) => {
 ```
 
 **Résultat :**
+
 - 🐌 Lent (200-500ms par switch)
 - 📡 Trop de requêtes réseau
 - 💸 Coût API élevé
@@ -35,6 +36,7 @@ const { data } = useConversation(id) // ✅ Fetch du cache si disponible
 ```
 
 **Résultat :**
+
 - ⚡ Instantané (<10ms)
 - 📉 70% moins de requêtes réseau
 - 💰 Économie de coûts API
@@ -52,16 +54,17 @@ Configuration globale du cache :
 new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,      // 5 minutes (données fraîches)
-      gcTime: 10 * 60 * 1000,         // 10 minutes (persistance cache)
-      retry: 1,                        // 1 retry en cas d'échec
-      refetchOnWindowFocus: false,     // Pas de refetch au focus
+      staleTime: 5 * 60 * 1000, // 5 minutes (données fraîches)
+      gcTime: 10 * 60 * 1000, // 10 minutes (persistance cache)
+      retry: 1, // 1 retry en cas d'échec
+      refetchOnWindowFocus: false, // Pas de refetch au focus
     },
   },
 })
 ```
 
 **Pourquoi ces valeurs ?**
+
 - **5 min stale time** : Conversations changent rarement dans les 5 minutes
 - **10 min gc time** : Garde les données accessibles même après navigation
 - **1 retry** : Évite les boucles infinies, mais permet une 2e tentative
@@ -77,7 +80,7 @@ new QueryClient({
 // Liste des conversations
 const { data: conversations } = useQuery({
   queryKey: ['conversations'],
-  queryFn: async () => callApi('/conversations')
+  queryFn: async () => callApi('/conversations'),
 })
 
 // Conversation spécifique (CACHED!)
@@ -95,15 +98,17 @@ const useConversation = (id: string | null) => {
 ```typescript
 // Créer une conversation
 const createConversationMutation = useMutation({
-  mutationFn: async (title: string) => callApi('/conversations', { method: 'POST', body: { title } }),
+  mutationFn: async (title: string) =>
+    callApi('/conversations', { method: 'POST', body: { title } }),
   onSuccess: newConv => {
     // Optimistic update immédiat
     queryClient.setQueryData(['conversations'], old => [newConv, ...old])
-  }
+  },
 })
 ```
 
 **Avantages des mutations :**
+
 - ✅ Optimistic updates (UI instantanée)
 - ✅ Rollback automatique en cas d'erreur
 - ✅ Invalidation ciblée du cache
@@ -111,12 +116,11 @@ const createConversationMutation = useMutation({
 ### 3. Cache Keys Strategy
 
 ```typescript
-['conversations']                    // Liste de toutes les conversations
-['conversation', 'conv-123']         // Conversation spécifique
-['conversation', 'conv-456']         // Autre conversation (cache séparé)
+;['conversations'][('conversation', 'conv-123')][('conversation', 'conv-456')] // Liste de toutes les conversations // Conversation spécifique // Autre conversation (cache séparé)
 ```
 
 **Pourquoi ?**
+
 - Invalidation granulaire (ex: delete 'conv-123' → invalider seulement ce cache)
 - Optimisation mémoire (garbage collection par clé)
 - Debugging facile avec React Query DevTools
@@ -127,10 +131,10 @@ const createConversationMutation = useMutation({
 
 ```typescript
 const {
-  conversations,        // Liste des conversations (cached)
-  useConversation,      // Hook pour fetch conversation (cached)
-  createConversation,   // Mutation
-  renameConversation,   // Mutation
+  conversations, // Liste des conversations (cached)
+  useConversation, // Hook pour fetch conversation (cached)
+  createConversation, // Mutation
+  renameConversation, // Mutation
   softDeleteConversation, // Mutation
 } = useConversations()
 
@@ -157,11 +161,12 @@ const handleSelect = (id: string) => {
 Activé automatiquement en développement :
 
 ```
-Open: http://localhost:5075
+Open: http://localhost:6161
 DevTools: Coin bas-gauche (logo React Query)
 ```
 
 **Features :**
+
 - 🔍 Voir toutes les queries/mutations actives
 - 📊 Status du cache (fresh/stale/inactive)
 - ⏱️ Temps de fetch et cache hit ratio
@@ -178,7 +183,7 @@ const queryClient = new QueryClient({
     log: console.log,
     warn: console.warn,
     error: console.error,
-  }
+  },
 })
 ```
 
@@ -215,16 +220,19 @@ Performance gain: 87% faster! 🚀
 ### ✅ DO
 
 1. **Utiliser useQuery pour toutes les lectures**
+
    ```typescript
    const { data } = useQuery({ queryKey: ['resource'], queryFn: fetchResource })
    ```
 
 2. **Utiliser useMutation pour les écritures**
+
    ```typescript
    const mutation = useMutation({ mutationFn: updateResource })
    ```
 
 3. **Optimistic updates pour UX fluide**
+
    ```typescript
    onSuccess: () => queryClient.setQueryData(['resource'], newData)
    ```
@@ -237,6 +245,7 @@ Performance gain: 87% faster! 🚀
 ### ❌ DON'T
 
 1. **Ne pas fetch manuellement si query existe**
+
    ```typescript
    // ❌ Mauvais
    const data = await fetch('/api/resource')
@@ -246,6 +255,7 @@ Performance gain: 87% faster! 🚀
    ```
 
 2. **Ne pas dupliquer queryKeys**
+
    ```typescript
    // ❌ Mauvais (2 caches différents pour même data)
    useQuery({ queryKey: ['conv'], ... })
@@ -256,6 +266,7 @@ Performance gain: 87% faster! 🚀
    ```
 
 3. **Ne pas oublier enabled flag**
+
    ```typescript
    // ❌ Mauvais (fetch même si id null)
    useQuery({ queryKey: ['conv', id], queryFn: () => fetch(`/conv/${id}`) })
@@ -273,7 +284,7 @@ Performance gain: 87% faster! 🚀
 const handleHover = (id: string) => {
   queryClient.prefetchQuery({
     queryKey: ['conversation', id],
-    queryFn: () => callApi(`/conversations/${id}`)
+    queryFn: () => callApi(`/conversations/${id}`),
   })
 }
 ```
@@ -285,7 +296,7 @@ const handleHover = (id: string) => {
 const { data, fetchNextPage } = useInfiniteQuery({
   queryKey: ['conversations'],
   queryFn: ({ pageParam = 0 }) => callApi(`/conversations?page=${pageParam}`),
-  getNextPageParam: (lastPage) => lastPage.nextPage,
+  getNextPageParam: lastPage => lastPage.nextPage,
 })
 ```
 
@@ -311,6 +322,7 @@ const persister = createSyncStoragePersister({
 ## Support
 
 Questions ou bugs ? Voir :
+
 - `src/hooks/useConversations.ts` - Implementation
 - `src/components/providers/QueryProvider.tsx` - Configuration
 - React Query DevTools - Debugging en temps réel

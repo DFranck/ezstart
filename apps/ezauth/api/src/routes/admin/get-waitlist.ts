@@ -54,7 +54,6 @@ const getWaitlistController = async (req: Request, res: Response) => {
     const { appName } = req.params
 
     // Find waitlist
-    // @ts-expect-error - Mongoose type inference issue
     const waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {

@@ -90,10 +90,33 @@
     "refreshing": "Refreshing...",
     "allClear": "All Clear!",
     "allSystemsOperational": "No errors detected. All systems operational",
+    "severity": {
+      "critical": "Critical",
+      "error": "Error",
+      "warning": "Warning"
+    },
+    "timeAgo": {
+      "daysAgo": "{count}d ago",
+      "hoursAgo": "{count}h ago",
+      "minutesAgo": "{count}m ago",
+      "justNow": "Just now"
+    },
+    "trending": {
+      "unableToLoad": "Unable to load trending data",
+      "noData": "No data available for the selected period",
+      "uptime": "Uptime:",
+      "avgResponse": "Avg Response:",
+      "checks": "Checks:"
+    },
     "view": "View",
     "occurrences": "{count} occurrences",
     "usersAffected": "{count} users affected",
     "nextUpdateIn": "Next update in: {time}",
+    "errorStatusScore": "Error Status Score",
+    "auditsQualityScore": "Audits Quality Score",
+    "auditsCompleted": "{count} audits completed",
+    "auditsOverview": "Audits Overview ({count})",
+    "noAuditsMatch": "No audits match your filters.",
     "projectsHealthScore": "Projects Health Score",
     "projectsMonitored": "{count} projects monitored",
     "allProjects": "All Projects ({count})",

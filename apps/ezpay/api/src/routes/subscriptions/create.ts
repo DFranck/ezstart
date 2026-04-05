@@ -9,7 +9,8 @@ import {
 } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
-import { createSubscriptionSession } from '../../services/stripe.js'
+import { getProvider } from '../../services/stripe.js'
+import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -26,8 +27,17 @@ const createSubscriptionSchema = z.object({
   planId: z.string().describe('Plan identifier'),
   planName: z.string().describe('Plan display name'),
   amount: z.number().positive().describe('Subscription amount per interval'),
-  interval: z.enum(['month', 'year']).describe('Billing interval'),
-  currency: z.string().default('USD').describe('Currency code (USD, EUR, etc.)'),
+  interval: z.enum(['month']).default('month').describe('Billing interval (always month)'),
+  intervalCount: z
+    .number()
+    .int()
+    .min(1)
+    .max(12)
+    .default(1)
+    .describe(
+      'Number of months between billings (1=monthly, 3=quarterly, 6=semi-annual, 12=annual)'
+    ),
+  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   userId: z.string().optional().describe('EZAuth user ID if logged in'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
@@ -57,8 +67,9 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       planId,
       planName,
       amount,
-      interval,
-      currency = 'USD',
+      interval = 'month',
+      intervalCount = 1,
+      currency = 'EUR',
       userId,
       customerEmail,
       returnUrl,
@@ -66,10 +77,12 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
-    const session = await createSubscriptionSession({
+    const provider = getProvider()
+    const session = await provider.createSubscriptionCheckout({
       amount,
       currency,
       interval,
+      intervalCount,
       description: `Subscription: ${planName}`,
       metadata: {
         type: 'subscription',
@@ -92,16 +105,17 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       customerEmail,
       isAnonymous: false,
       provider: 'stripe',
-      paymentId: session.id,
+      paymentId: session.sessionId,
       status: 'pending',
       metadata: {
         planId,
         planName,
-        interval,
+        interval: 'month',
+        intervalCount,
       },
     })
 
-    logger.info(`💳 Subscription created - Session ID: ${session.id}`)
+    logger.info(`💳 Subscription created - Session ID: ${session.sessionId}`)
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
@@ -114,7 +128,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/subscribe', createSubscriptionHandler, {
+docRouter.post('/subscribe', authMiddleware, createSubscriptionHandler, {
   summary: 'Create a subscription checkout session',
   tags: ['Subscriptions'],
   bodySchema: createSubscriptionSchema,

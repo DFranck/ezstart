@@ -116,7 +116,7 @@ res.json({
 
 ```bash
 # Test general chat
-curl -X POST http://localhost:5070/api/chat-v2 \
+curl -X POST http://localhost:6160/api/chat-v2 \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Tell me about ESG reporting",
@@ -124,7 +124,7 @@ curl -X POST http://localhost:5070/api/chat-v2 \
   }'
 
 # Test with ESG extraction
-curl -X POST http://localhost:5070/api/chat-v2 \
+curl -X POST http://localhost:6160/api/chat-v2 \
   -H "Content-Type: application/json" \
   -d '{
     "message": "My company ABC Corp in Singapore used 5000 kWh in January 2024",
@@ -146,9 +146,9 @@ const config = {
     message,
     extract_esg: false,
     userId: user?._id,
-    conversation_id: activeConversationId
+    conversation_id: activeConversationId,
   }),
-  formatResponse: (data: any) => data.response
+  formatResponse: (data: any) => data.response,
 }
 ```
 
@@ -157,6 +157,7 @@ const config = {
 ### beforeRequest Hook
 
 Called **before** sending message to AI:
+
 - Log user requests
 - Add custom context
 - Modify preprompt dynamically
@@ -165,6 +166,7 @@ Called **before** sending message to AI:
 ### afterResponse Hook
 
 Called **after** receiving AI response:
+
 - Save to database (conversations)
 - Send analytics
 - Parse/validate extracted data
@@ -173,6 +175,7 @@ Called **after** receiving AI response:
 ### onError Hook
 
 Called when errors occur:
+
 - Log errors
 - Send alerts
 - Fallback logic
@@ -187,21 +190,21 @@ Each app can have different AI configs:
 const greenPulseAgent = new AIAgent({
   model: 'gpt-4o',
   preprompt: 'You are an ESG advisor...',
-  temperature: 0.7
+  temperature: 0.7,
 })
 
 // EZBill - Support focused
 const ezbillAgent = new AIAgent({
   model: 'gpt-4',
   preprompt: 'You are an invoicing support assistant...',
-  temperature: 0.5
+  temperature: 0.5,
 })
 
 // EZStart - General help
 const ezstartAgent = new AIAgent({
   model: 'gpt-3.5-turbo',
   preprompt: 'You are a helpful assistant...',
-  temperature: 0.8
+  temperature: 0.8,
 })
 ```
 
@@ -219,6 +222,7 @@ To migrate `/api/chat` to use SDK:
 ## Benefits Demonstrated
 
 **Before (openai.service.ts):**
+
 ```typescript
 // Direct OpenAI calls - hard to reuse
 const response = await openai.chat.completions.create({
@@ -231,6 +235,7 @@ await Conversation.findByIdAndUpdate(...)
 ```
 
 **After (lia.service.ts):**
+
 ```typescript
 // Reusable agent - works in any project
 const result = await liaAgent.chat(message, { conversationId })

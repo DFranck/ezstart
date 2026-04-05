@@ -25,7 +25,7 @@ import dynamic from 'next/dynamic'
 import { redirect, useParams } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 // Dynamic imports for modals (lazy load on demand) - Performance optimization
 const InvoiceModal = dynamic(
@@ -105,6 +105,7 @@ const ClientDashboardPage = () => {
   const handlers = useClientDashboardHandlers()
   const tToast = useTranslations('toast')
   const tDashboard = useTranslations('dashboard')
+  const locale = useLocale() as 'fr' | 'en'
 
   if (!user || !isAuthenticated) {
     redirect('/')
@@ -217,21 +218,21 @@ const ClientDashboardPage = () => {
 
   // Group invoices based on selected grouping
   const invoiceGroups = useMemo(() => {
-    if (invoiceGroupBy === 'month') return groupInvoicesByMonth(clientInvoices, 'fr')
-    if (invoiceGroupBy === 'week') return groupInvoicesByWeek(clientInvoices, 'fr')
+    if (invoiceGroupBy === 'month') return groupInvoicesByMonth(clientInvoices, locale)
+    if (invoiceGroupBy === 'week') return groupInvoicesByWeek(clientInvoices, locale)
     return groupInvoicesByStatus(clientInvoices)
-  }, [clientInvoices, invoiceGroupBy])
+  }, [clientInvoices, invoiceGroupBy, locale])
 
   // Group quotes based on selected grouping
   const quoteGroups = useMemo(() => {
-    if (quoteGroupBy === 'month') return groupQuotesByMonth(clientQuotes, 'fr')
+    if (quoteGroupBy === 'month') return groupQuotesByMonth(clientQuotes, locale)
     return groupQuotesByStatus(clientQuotes)
-  }, [clientQuotes, quoteGroupBy])
+  }, [clientQuotes, quoteGroupBy, locale])
 
   // Group receipts by month
   const receiptGroups = useMemo(() => {
-    return groupReceiptsByMonth(clientReceipts, 'fr')
-  }, [clientReceipts])
+    return groupReceiptsByMonth(clientReceipts, locale)
+  }, [clientReceipts, locale])
 
   if (loading) {
     return (
@@ -355,6 +356,7 @@ const ClientDashboardPage = () => {
                         createdAt={invoice.createdAt}
                         total={invoice.total}
                         currency={invoice.currency}
+                        dueDate={invoice.dueDate}
                         permissions={permissions}
                         onClick={() => openPreview('invoice', invoice)}
                         onEdit={e => handleEditInvoice(invoice, e)}

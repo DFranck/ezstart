@@ -62,6 +62,9 @@ export function createVitestConfig(options: VitestConfigOptions) {
         // Fallback MongoDB URL if MongoMemoryServer fails
         // Uses localhost NEVER production!
         MONGO_URL: `mongodb://localhost:27017/${dbName}-test`,
+        // Pin MongoMemoryServer binary version to use locally cached binary
+        // Prevents MMS from downloading a newer version on every test run
+        MONGOMS_VERSION: '7.0.14',
       },
 
       // Default timeouts for MongoDB operations

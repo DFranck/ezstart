@@ -7,7 +7,7 @@ const defaultContent = [
   './components/**/*.{js,ts,jsx,tsx,mdx}',
   // Src directory (for apps using src folder)
   './src/**/*.{js,ts,jsx,tsx,mdx}',
-  // Shared UI components from monorepo
+  // Shared packages from monorepo (only those with React components using Tailwind)
   '../../packages/ui/**/*.{js,ts,jsx,tsx,mdx}',
 ]
 

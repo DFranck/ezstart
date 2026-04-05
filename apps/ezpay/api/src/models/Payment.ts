@@ -16,7 +16,8 @@ export interface SubscriptionMetadata {
   subscriptionId?: string
   planId?: string
   planName?: string
-  interval?: 'month' | 'year'
+  interval?: 'month'
+  intervalCount?: number
 }
 
 export interface InvoiceMetadata {
@@ -80,7 +81,7 @@ const paymentSchema = new Schema<PaymentDocument>(
 
     // Amount
     amount: { type: Number, required: true },
-    currency: { type: String, default: 'USD' },
+    currency: { type: String, default: 'EUR' },
 
     // Customer Info (link avec EZAuth si connecté)
     userId: { type: String, index: true },
@@ -116,7 +117,8 @@ const paymentSchema = new Schema<PaymentDocument>(
       subscriptionId: { type: String },
       planId: { type: String },
       planName: { type: String },
-      interval: { type: String, enum: ['month', 'year'] },
+      interval: { type: String, enum: ['month'], default: 'month' },
+      intervalCount: { type: Number, default: 1 },
 
       // Pour invoices
       invoiceId: { type: String },

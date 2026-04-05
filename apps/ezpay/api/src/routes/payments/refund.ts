@@ -8,8 +8,8 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { refundPayment } from '../../services/stripe.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { getProvider } from '../../services/stripe.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -46,8 +46,9 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
     const { paymentId } = validation.data
 
     // Admin check
-    const user = (req as unknown as { user?: { role?: string } }).user
-    if (!user || user.role !== 'admin') {
+    const isAdmin = isAdminUser(req)
+
+    if (!isAdmin) {
       return sendError(res, 'Admin access required', 403)
     }
 
@@ -67,7 +68,7 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
       return sendError(res, 'No payment intent found — cannot refund', 400)
     }
 
-    await refundPayment(payment.stripePaymentIntentId)
+    await getProvider().refundPayment(payment.stripePaymentIntentId)
 
     payment.status = 'refunded'
     await payment.save()
@@ -85,12 +86,18 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/payments/:paymentId/refund', authMiddleware, refundPaymentHandler, {
-  summary: 'Refund a payment (admin only)',
-  tags: ['Payments'],
-  paramsSchema: refundParamsSchema,
-  responseSchema: refundResponseSchema,
-})
+docRouter.post(
+  '/payments/:paymentId/refund',
+  authMiddleware,
+  populateUserFromToken,
+  refundPaymentHandler,
+  {
+    summary: 'Refund a payment (admin only)',
+    tags: ['Payments'],
+    paramsSchema: refundParamsSchema,
+    responseSchema: refundResponseSchema,
+  }
+)
 
 export { refundPaymentRegistry as registry, router }
 export default router

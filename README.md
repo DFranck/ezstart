@@ -13,14 +13,14 @@
 
 **Overall: 85/100** 🟢 Excellent
 
-| Category | Score | Status |
-|----------|-------|--------|
-| [Architecture](./docs/audits/ARCHITECTURE-AUDIT.md) | 95/100 | 🟢 Exemplary |
-| [Code Quality](./docs/audits/CODE-QUALITY-AUDIT.md) | 92/100 | 🟢 Excellent |
-| [SEO](./docs/audits/SEO-AUDIT.md) | 85/100 | 🟢 Excellent |
+| Category                                                | Score  | Status       |
+| ------------------------------------------------------- | ------ | ------------ |
+| [Architecture](./docs/audits/ARCHITECTURE-AUDIT.md)     | 95/100 | 🟢 Exemplary |
+| [Code Quality](./docs/audits/CODE-QUALITY-AUDIT.md)     | 92/100 | 🟢 Excellent |
+| [SEO](./docs/audits/SEO-AUDIT.md)                       | 85/100 | 🟢 Excellent |
 | [Infrastructure](./docs/audits/INFRASTRUCTURE-AUDIT.md) | 82/100 | 🟢 Very Good |
-| [Dependencies](./docs/audits/DEPENDENCIES-AUDIT.md) | 80/100 | 🟢 Very Good |
-| [Monitoring](./docs/audits/MONITORING-AUDIT.md) | 70/100 | 🟡 Fair |
+| [Dependencies](./docs/audits/DEPENDENCIES-AUDIT.md)     | 80/100 | 🟢 Very Good |
+| [Monitoring](./docs/audits/MONITORING-AUDIT.md)         | 70/100 | 🟡 Fair      |
 
 📈 **Full Audit Dashboard**: [docs/README.md](./docs/README.md)
 📋 **Improvement Roadmap**: [docs/IMPROVEMENT-ROADMAP.md](./docs/IMPROVEMENT-ROADMAP.md)
@@ -47,15 +47,15 @@ pnpm dev:status
 
 ### Development URLs
 
-| Service | Web | API |
-|---------|-----|-----|
-| **EZStart** | http://localhost:5050 | http://localhost:5000 |
-| **EZAuth** | http://localhost:5015 | http://localhost:5010 |
-| **EZBill** | http://localhost:5025 | http://localhost:5020 |
-| **EZPay** | http://localhost:5045 | http://localhost:5040 |
-| **FengShui** | http://localhost:5065 | - |
-| **ASC-TCD** | http://localhost:5055 | - |
-| **GreenPulse** | http://localhost:5075 | http://localhost:5070 |
+| Service        | Web                   | API                   |
+| -------------- | --------------------- | --------------------- |
+| **EZStart**    | http://localhost:6101 | http://localhost:6100 |
+| **EZAuth**     | http://localhost:6111 | http://localhost:6110 |
+| **EZBill**     | http://localhost:6121 | http://localhost:6120 |
+| **EZPay**      | http://localhost:6131 | http://localhost:6130 |
+| **FengShui**   | http://localhost:6151 | -                     |
+| **ASC-TCD**    | http://localhost:6141 | -                     |
+| **GreenPulse** | http://localhost:6161 | http://localhost:6160 |
 
 ---
 
@@ -64,54 +64,68 @@ pnpm dev:status
 ### Web Applications (7)
 
 #### 🏠 EZStart
+
 **Main Hub & Dashboard** - Central platform for accessing all EZStart applications.
+
 - **Tech**: Next.js 15, i18n (next-intl), PWA
 - **Features**: Multilingual, monitoring dashboard, app launcher
 - **Status**: ✅ Production ready
 
 #### 🔐 EZAuth
+
 **Centralized Authentication** - SSO authentication service for all apps.
+
 - **Tech**: OAuth2, JWT, MongoDB
 - **Features**: Single sign-on, user management, secure tokens
 - **Status**: ✅ Production ready
 
 #### 💼 EZBill
+
 **Invoicing & Billing** - Simple billing management for businesses.
+
 - **Tech**: Next.js, React Query, MongoDB
 - **Features**: Clients, invoices, payments tracking
 - **Status**: ✅ Production ready
 
 #### 💳 EZPay
+
 **Universal Payment System** - Centralized payment handling for all apps.
+
 - **Tech**: Stripe, webhooks, MongoDB
 - **Features**: Donations, purchases, subscriptions
 - **Status**: ✅ Production ready
 
 #### 🧭 FengShui Bagua
+
 **Feng Shui Analysis** - Interactive Feng Shui compass with floor plan import.
+
 - **Tech**: Next.js, Canvas, i18n
 - **Features**: Bagua wheel, floor plans, orientation analysis
 - **Status**: ✅ Production ready
 
 #### 🏃 ASC-TCD
+
 **Sports Association Website** - Website for sports and cultural activities.
+
 - **Tech**: Next.js, i18n
 - **Features**: Event management, member portal
 - **Status**: ✅ Production ready
 
 #### 🌱 Green Pulse
+
 **AI Sustainability Assistant** - Track and improve environmental impact.
+
 - **Tech**: Next.js, React Query, AI integration
 - **Features**: Carbon tracking, recommendations, analytics
 - **Status**: ✅ Production ready
 
 ### API Services (5)
 
-- **EZAuth API** (5010) - Authentication service
-- **EZBill API** (5020) - Billing backend
-- **EZPay API** (5040) - Payment processing
-- **GreenPulse API** (5070) - AI sustainability backend
-- **EZStart API** (5000) - Health checks and metrics
+- **EZAuth API** (6110) - Authentication service
+- **EZBill API** (6120) - Billing backend
+- **EZPay API** (6130) - Payment processing
+- **GreenPulse API** (6160) - AI sustainability backend
+- **EZStart API** (6100) - Health checks and metrics
 
 ---
 
@@ -182,15 +196,17 @@ pnpm --filter ezbill-web build
 
 ### Port Management
 
-All services use the **50xx** pattern:
-- **APIs**: 5000, 5010, 5020, 5040, 5070 (ending in 0)
-- **Web Apps**: 5015, 5025, 5045, 5050, 5055, 5065, 5075 (ending in 5)
+All services use the **61xx** pattern:
+
+- **APIs**: 6100, 6110, 6120, 6130, 6160, 6170 (ending in 0)
+- **Web Apps**: 6101, 6111, 6121, 6131, 6141, 6151, 6161, 6171 (ending in 1)
 
 Auto-detected from `@ezstart/config` - no manual configuration needed!
 
 ### Environment Variables
 
 Each app has:
+
 - `.env.example` - Template with placeholders (committed)
 - `.env.local` - Your local secrets (gitignored)
 - `.env.production` - Production secrets (gitignored)
@@ -211,6 +227,7 @@ All URLs and ports are auto-configured via `@ezstart/config`.
 ### Audits (16/16 Complete)
 
 All audits available in [docs/audits/](./docs/audits/):
+
 - Architecture, Code Quality, Dependencies, Security
 - Performance, SEO, Accessibility, Infrastructure
 - API, Web Apps, Testing, UX, i18n, Monitoring
@@ -218,6 +235,7 @@ All audits available in [docs/audits/](./docs/audits/):
 ### Package Documentation
 
 Browse [packages/](./packages/) - Each package has a comprehensive README with:
+
 - Installation & setup
 - API reference
 - Usage examples
@@ -229,17 +247,17 @@ Browse [packages/](./packages/) - Each package has a comprehensive README with:
 
 ### Production URLs
 
-| App | Domain | Platform |
-|-----|--------|----------|
-| EZStart | ezstart-web.vercel.app | Vercel |
-| EZAuth | ezauth.vercel.app | Vercel (Web) |
-| EZAuth API | ezauth.up.railway.app | Railway |
-| EZBill | ezstart-ezbill.vercel.app | Vercel |
-| EZPay | ezstart-ezpay.vercel.app | Vercel |
-| EZPay API | ezpay-api.up.railway.app | Railway |
-| FengShui | ezfengshui.vercel.app | Vercel |
-| ASC-TCD | asc-tcd-web.vercel.app | Vercel |
-| GreenPulse | green-pulse-web.vercel.app | Vercel |
+| App        | Domain                     | Platform     |
+| ---------- | -------------------------- | ------------ |
+| EZStart    | ezstart-web.vercel.app     | Vercel       |
+| EZAuth     | ezauth.vercel.app          | Vercel (Web) |
+| EZAuth API | ezauth.up.railway.app      | Railway      |
+| EZBill     | ezstart-ezbill.vercel.app  | Vercel       |
+| EZPay      | ezstart-ezpay.vercel.app   | Vercel       |
+| EZPay API  | ezpay-api.up.railway.app   | Railway      |
+| FengShui   | ezfengshui.vercel.app      | Vercel       |
+| ASC-TCD    | asc-tcd-web.vercel.app     | Vercel       |
+| GreenPulse | green-pulse-web.vercel.app | Vercel       |
 
 **See [DEPLOY.md](./DEPLOY.md) for complete deployment instructions.**
 

@@ -65,20 +65,26 @@ const loginCookieController = async (req: Request, res: Response) => {
     }
 
     // No 2FA — proceed with normal login
-    const authResult = await AuthService.loginWithToken(parsed.data)
+    const authResult = await AuthService.loginWithToken(parsed.data, {
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
+    })
 
-    // Set httpOnly cookie
+    // Set httpOnly cookie with short-lived access token
     res.cookie('ezauth_token', authResult.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 15 * 60 * 1000, // 15 minutes (matches access token TTL)
       path: '/',
       domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined,
     })
 
-    // Return user info (frontend will store in localStorage for client-side access)
-    sendSuccess(res, { user: authResult.user })
+    // Return user info + refresh token
+    sendSuccess(res, {
+      user: authResult.user,
+      refreshToken: authResult.refreshToken,
+    })
   } catch (error) {
     logger.error('Login cookie error:', error)
     sendError(res, error instanceof Error ? error.message : 'Login failed', 401)

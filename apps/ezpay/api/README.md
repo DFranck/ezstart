@@ -36,7 +36,7 @@ Créer `.env.local` :
 
 ```env
 # Server
-PORT=5040
+PORT=6130
 NODE_ENV=development
 
 # MongoDB
@@ -170,7 +170,7 @@ POST   /api/webhooks/paypal
 
 ```bash
 # Créer une donation
-curl -X POST http://localhost:5040/api/donate \
+curl -X POST http://localhost:6130/api/donate \
   -H "Content-Type: application/json" \
   -d '{
     "projectId": "test-project",
@@ -217,10 +217,12 @@ apps/ezpay/api/
 ## 🌐 URLs
 
 **Development:**
-- API: http://localhost:5040/api
-- Health: http://localhost:5040/api/health
+
+- API: http://localhost:6130/api
+- Health: http://localhost:6130/api/health
 
 **Production:**
+
 - API: https://ezpay-api.onrender.com/api
 - Health: https://ezpay-api.onrender.com/api/health
 
@@ -293,7 +295,7 @@ pnpm lint
 
 ## 📝 Notes
 
-- Port **5040** (pattern 50x0 pour APIs)
+- Port **6130** (pattern 6XX0 pour APIs)
 - Prefix `/api` pour toutes les routes
 - Auto-config Stripe checkout redirects
 - Webhook signature verification activée

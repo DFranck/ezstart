@@ -2,6 +2,7 @@
 
 import { Card, CardContent, Icon } from '@ezstart/ui/components'
 import { useDonations } from '../hooks/useDonations.js'
+import { formatCurrency } from '../utils/format-currency.js'
 
 export interface DonationWallTexts {
   loadingText?: string
@@ -24,7 +25,7 @@ export function DonationWall({
   limit = 10,
   className,
   texts,
-  noDonationsText: legacyNoDonationsText
+  noDonationsText: legacyNoDonationsText,
 }: DonationWallProps) {
   const { donations, isLoading, error } = useDonations({ projectId, limit })
 
@@ -32,7 +33,10 @@ export function DonationWall({
   const t = {
     loadingText: texts?.loadingText || 'Loading donations...',
     errorText: texts?.errorText || 'Error',
-    noDonationsText: texts?.noDonationsText || legacyNoDonationsText || 'No donations yet. Be the first to support!',
+    noDonationsText:
+      texts?.noDonationsText ||
+      legacyNoDonationsText ||
+      'No donations yet. Be the first to support!',
     anonymousLabel: texts?.anonymousLabel || 'Anonymous',
   }
 
@@ -63,13 +67,15 @@ export function DonationWall({
       <div className={className}>
         <div className="flex items-center justify-center gap-2 p-8 rounded-lg bg-destructive/10 border border-destructive/20">
           <Icon name="lucide:AlertCircle" className="w-5 h-5 text-destructive" />
-          <p className="text-destructive font-medium">{t.errorText}: {error}</p>
+          <p className="text-destructive font-medium">
+            {t.errorText}: {error}
+          </p>
         </div>
       </div>
     )
   }
 
-  if (!donations.length) {
+  if (!donations?.length) {
     return (
       <div className={className}>
         <div className="flex flex-col items-center justify-center gap-4 p-12 rounded-lg border-2 border-dashed border-muted-foreground/20">
@@ -81,34 +87,15 @@ export function DonationWall({
   }
 
   return (
-    <>
-      {/* Add keyframes for animation */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `
-      }} />
-
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className || ''}`}>
-        {donations.map((donation, index) => (
-          <Card
-            key={donation.id}
-            className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
-            style={{
-              animationDelay: `${index * 100}ms`,
-              animation: 'fadeInUp 0.6s ease-out forwards',
-              opacity: 0
-            }}
-          >
+    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className || ''}`}>
+      {donations.map((donation, index) => (
+        <Card
+          key={donation.id}
+          className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 relative overflow-hidden animate-in fade-in-0 slide-in-from-bottom-5 duration-500"
+          style={{
+            animationDelay: `${index * 100}ms`,
+          }}
+        >
           {/* Gradient overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 via-purple-500/0 to-blue-500/0 group-hover:from-pink-500/5 group-hover:via-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" />
 
@@ -128,11 +115,13 @@ export function DonationWall({
 
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-base truncate">
-                  {donation.isAnonymous ? t.anonymousLabel : donation.customerName || t.anonymousLabel}
+                  {donation.isAnonymous
+                    ? t.anonymousLabel
+                    : donation.customerName || t.anonymousLabel}
                 </p>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                   <span className="font-semibold text-pink-600 dark:text-pink-400">
-                    ${donation.amount}
+                    {formatCurrency(donation.amount, donation.currency)}
                   </span>
                   <span>•</span>
                   <span>
@@ -170,9 +159,8 @@ export function DonationWall({
               </div>
             )}
           </CardContent>
-          </Card>
-        ))}
-      </div>
-    </>
+        </Card>
+      ))}
+    </div>
   )
 }

@@ -43,10 +43,10 @@ const errorSchema = z.object({
 // Check status of email in waitlist
 const checkStatusController = async (req: Request, res: Response) => {
   try {
-    const { appName, email } = req.params
+    const appName = req.params.appName!
+    const email = req.params.email!
 
     const WaitlistModel = await getWaitlistModel()
-    // @ts-expect-error - Mongoose type inference issue
     const waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {

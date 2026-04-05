@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Checkbox,
   Div,
   H1,
   H3,
@@ -13,6 +14,11 @@ import {
   Label,
   P,
   Section,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Spinner,
 } from '@ezstart/ui/components'
 import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
@@ -83,21 +89,24 @@ function QRCodeGeneratorContent() {
                 <Label htmlFor="redirect-type">
                   {t('generator.configuration.redirectTypeLabel')}
                 </Label>
-                <select
-                  id="redirect-type"
+                <Select
                   value={config.redirectType}
-                  onChange={e =>
-                    updateConfig({ redirectType: e.target.value as 'permanent' | 'temporary' })
+                  onValueChange={value =>
+                    updateConfig({ redirectType: value as 'permanent' | 'temporary' })
                   }
-                  className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="permanent">
-                    {t('generator.configuration.redirectType.permanent')}
-                  </option>
-                  <option value="temporary">
-                    {t('generator.configuration.redirectType.temporary')}
-                  </option>
-                </select>
+                  <SelectTrigger id="redirect-type" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="permanent">
+                      {t('generator.configuration.redirectType.permanent')}
+                    </SelectItem>
+                    <SelectItem value="temporary">
+                      {t('generator.configuration.redirectType.temporary')}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </Div>
 
               {/* Size Control */}
@@ -105,7 +114,7 @@ function QRCodeGeneratorContent() {
                 <Label htmlFor="qr-size">
                   {t('generator.configuration.sizeLabel')}: {config.size}px
                 </Label>
-                <input
+                <Input
                   id="qr-size"
                   type="range"
                   value={config.size}
@@ -124,12 +133,12 @@ function QRCodeGeneratorContent() {
                     {t('generator.configuration.foregroundColorLabel')}
                   </Label>
                   <Div className="flex gap-2">
-                    <input
+                    <Input
                       id="fg-color"
                       type="color"
                       value={config.foregroundColor}
                       onChange={e => updateConfig({ foregroundColor: e.target.value })}
-                      className="h-10 w-20 cursor-pointer"
+                      className="h-10 w-20 cursor-pointer p-1"
                     />
                     <Input
                       type="text"
@@ -145,12 +154,12 @@ function QRCodeGeneratorContent() {
                     {t('generator.configuration.backgroundColorLabel')}
                   </Label>
                   <Div className="flex gap-2">
-                    <input
+                    <Input
                       id="bg-color"
                       type="color"
                       value={config.backgroundColor}
                       onChange={e => updateConfig({ backgroundColor: e.target.value })}
-                      className="h-10 w-20 cursor-pointer"
+                      className="h-10 w-20 cursor-pointer p-1"
                     />
                     <Input
                       type="text"
@@ -167,21 +176,32 @@ function QRCodeGeneratorContent() {
                 <Label htmlFor="error-correction">
                   {t('generator.configuration.errorCorrectionLabel')}
                 </Label>
-                <select
-                  id="error-correction"
+                <Select
                   value={config.errorCorrectionLevel}
-                  onChange={e =>
+                  onValueChange={value =>
                     updateConfig({
-                      errorCorrectionLevel: e.target.value as QRCodeConfig['errorCorrectionLevel'],
+                      errorCorrectionLevel: value as QRCodeConfig['errorCorrectionLevel'],
                     })
                   }
-                  className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="L">{t('generator.configuration.errorCorrection.low')}</option>
-                  <option value="M">{t('generator.configuration.errorCorrection.medium')}</option>
-                  <option value="Q">{t('generator.configuration.errorCorrection.quartile')}</option>
-                  <option value="H">{t('generator.configuration.errorCorrection.high')}</option>
-                </select>
+                  <SelectTrigger id="error-correction" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="L">
+                      {t('generator.configuration.errorCorrection.low')}
+                    </SelectItem>
+                    <SelectItem value="M">
+                      {t('generator.configuration.errorCorrection.medium')}
+                    </SelectItem>
+                    <SelectItem value="Q">
+                      {t('generator.configuration.errorCorrection.quartile')}
+                    </SelectItem>
+                    <SelectItem value="H">
+                      {t('generator.configuration.errorCorrection.high')}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 <P className="text-sm text-muted-foreground">
                   {t('generator.configuration.errorCorrectionHelp')}
                 </P>
@@ -189,12 +209,10 @@ function QRCodeGeneratorContent() {
 
               {/* Include Margin */}
               <Div className="flex items-center gap-2">
-                <input
+                <Checkbox
                   id="include-margin"
-                  type="checkbox"
                   checked={config.includeMargin}
-                  onChange={e => updateConfig({ includeMargin: e.target.checked })}
-                  className="h-4 w-4"
+                  onCheckedChange={checked => updateConfig({ includeMargin: checked === true })}
                 />
                 <Label htmlFor="include-margin" className="cursor-pointer">
                   {t('generator.configuration.includeMarginLabel')}

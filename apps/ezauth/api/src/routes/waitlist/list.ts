@@ -58,20 +58,18 @@ const getAllWaitlistsController = async (req: Request, res: Response) => {
     const { page, limit } = parsedQuery.data
 
     const [waitlists, total] = await Promise.all([
-      // @ts-expect-error - Mongoose type inference issue with dynamic query
       WaitlistModel.find({})
         .skip((page - 1) * limit)
         .limit(limit),
       WaitlistModel.countDocuments({}),
     ])
 
-    const result = waitlists.reduce(
-      (acc: Record<string, string[]>, waitlist: { appName: string; emails: string[] }) => {
-        acc[waitlist.appName] = waitlist.emails
-        return acc
-      },
-      {} as Record<string, string[]>
-    )
+    const result = waitlists.reduce<
+      Record<string, import('../../models/waitlist.js').WaitlistEntry[]>
+    >((acc, waitlist) => {
+      acc[waitlist.appName] = waitlist.emails
+      return acc
+    }, {})
 
     sendSuccess(res, {
       waitlists: result,

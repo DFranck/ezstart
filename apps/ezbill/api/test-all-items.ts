@@ -3,8 +3,8 @@
  * Tests: Create → Soft Delete → Verify in deleted list → Restore → Hard Delete
  */
 
-const EZAUTH_API = 'http://localhost:5010/api/auth'
-const EZBILL_API = 'http://localhost:5020/api'
+const EZAUTH_API = 'http://localhost:6110/api/auth'
+const EZBILL_API = 'http://localhost:6120/api'
 
 interface AuthCodeResponse {
   success: boolean

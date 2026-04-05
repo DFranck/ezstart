@@ -1,5 +1,16 @@
 {
   "appName": "EZPay",
   "description": "Système de paiement universel pour tous les projets EZStart",
-  "tagline": "Dons, achats, abonnements en toute simplicité"
+  "tagline": "Dons, achats, abonnements en toute simplicité",
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "callback": {
+      "success": "Authentification réussie !",
+      "redirecting": "Redirection vers l'accueil...",
+      "backToHome": "Retour à l'accueil",
+      "error": "Échec de l'authentification",
+      "noCode": "Aucun code d'autorisation trouvé"
+    }
+  }
 }

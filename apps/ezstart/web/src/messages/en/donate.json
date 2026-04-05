@@ -1,0 +1,14 @@
+{
+  "donate": {
+    "success": {
+      "message": "Thank you! Your donation has been received.",
+      "redirecting": "Redirecting to home...",
+      "error": "Something went wrong with your donation",
+      "backToHome": "Back to Home"
+    },
+    "cancel": {
+      "message": "Your payment has been cancelled. No amount has been charged.",
+      "backToHome": "Back to Home"
+    }
+  }
+}

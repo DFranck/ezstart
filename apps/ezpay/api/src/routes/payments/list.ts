@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -29,6 +29,7 @@ const paymentsQuerySchema = z.object({
     .optional()
     .describe('Filter by payment status'),
   projectId: z.string().optional().describe('Filter by project ID'),
+  search: z.string().optional().describe('Search by customer email (case-insensitive)'),
   limit: z.coerce.number().min(1).max(100).default(20).describe('Number of payments to return'),
   offset: z.coerce.number().min(0).default(0).describe('Number of payments to skip'),
 })
@@ -55,25 +56,27 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
       type,
       status,
       projectId,
+      search,
       limit = 20,
       offset = 0,
     } = parsed.success ? parsed.data : (req.query as Record<string, string>)
 
-    const user = (req as unknown as { user?: { _id?: string; role?: string } }).user
-
     const query: Record<string, unknown> = {}
 
     // Non-admin users can only see their own payments
-    if (!user || user.role !== 'admin') {
-      if (!user?._id) {
+    const isAdmin = isAdminUser(req)
+
+    if (!isAdmin) {
+      if (!req.userId) {
         return sendSuccess(res, [], { total: 0, limit: Number(limit), offset: Number(offset) })
       }
-      query.userId = user._id
+      query.userId = req.userId
     }
 
     if (type) query.type = type
     if (status) query.status = status
     if (projectId) query.projectId = projectId
+    if (search) query.customerEmail = { $regex: search, $options: 'i' }
 
     const [payments, total] = await Promise.all([
       Payment.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)),
@@ -91,7 +94,7 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/payments', authMiddleware, listPaymentsHandler, {
+docRouter.get('/payments', authMiddleware, populateUserFromToken, listPaymentsHandler, {
   summary: 'List payments (admin: all, user: own)',
   tags: ['Payments'],
   querySchema: paymentsQuerySchema,

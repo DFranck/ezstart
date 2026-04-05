@@ -1,0 +1,27 @@
+{
+  "support": {
+    "title": "Soutenir mon travail",
+    "description": "Si vous appréciez mes projets et souhaitez soutenir mon travail, chaque contribution m'aide à continuer de créer et partager des outils open-source.",
+    "recentSupporters": "Derniers soutiens",
+    "noDonations": "Soyez le premier à soutenir !",
+    "modal": {
+      "title": "Soutenir EZStart",
+      "description": "Votre contribution m'aide à continuer de développer des outils open-source et à partager mes connaissances.",
+      "amountLabel": "Montant",
+      "customAmountLabel": "Montant personnalisé",
+      "customAmountPlaceholder": "Entrez un montant",
+      "messageLabel": "Laisser un message (optionnel)",
+      "messagePlaceholder": "Merci pour ton travail incroyable !",
+      "anonymousLabel": "Donner anonymement",
+      "donatingAsLabel": "Don en tant que",
+      "donateButton": "Soutenir",
+      "processingButton": "En cours..."
+    },
+    "wall": {
+      "loadingText": "Chargement...",
+      "errorText": "Impossible de charger les soutiens",
+      "noDonationsText": "Soyez le premier à soutenir !",
+      "anonymousLabel": "Anonyme"
+    }
+  }
+}

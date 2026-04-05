@@ -61,13 +61,15 @@ describe('AuthUser Model', () => {
       ).rejects.toThrow()
     })
 
-    it('should require passwordHash field', async () => {
-      await expect(
-        AuthUserModel.create({
-          email: 'test@example.com',
-          username: 'testuser',
-        })
-      ).rejects.toThrow()
+    it('should allow creating user without passwordHash (OAuth users)', async () => {
+      const user = await AuthUserModel.create({
+        email: 'test@example.com',
+        username: 'testuser',
+      })
+
+      expect(user.email).toBe('test@example.com')
+      expect(user.username).toBe('testuser')
+      expect(user.passwordHash).toBeUndefined()
     })
 
     it('should lowercase and trim email', async () => {
@@ -136,15 +138,15 @@ describe('AuthUser Model', () => {
       expect(user.apps).toEqual(['ezbill', 'green-pulse'])
     })
 
-    it('should reject invalid app enum values', async () => {
-      await expect(
-        AuthUserModel.create({
-          email: 'test@example.com',
-          username: 'testuser',
-          passwordHash: 'hashedpassword123',
-          apps: ['invalid-app'],
-        })
-      ).rejects.toThrow()
+    it('should accept any string in apps (no enum restriction)', async () => {
+      const user = await AuthUserModel.create({
+        email: 'test@example.com',
+        username: 'testuser',
+        passwordHash: 'hashedpassword123',
+        apps: ['custom-app', 'another-app'],
+      })
+
+      expect(user.apps).toEqual(['custom-app', 'another-app'])
     })
   })
 
@@ -358,6 +360,13 @@ describe('AuthUser Model', () => {
         avatar: 'https://example.com/avatar.png',
         isVerified: true,
         apps: ['ezbill', 'green-pulse'],
+        roles: [],
+        globalRoles: [],
+        appRoles: {},
+        permissions: [],
+        features: [],
+        organizationId: undefined,
+        managedBy: undefined,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       })

@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Div, Input, P } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -14,6 +14,7 @@ interface TwoFactorPromptProps {
 
 export function TwoFactorPrompt({ tempToken, redirect_uri, onBack }: TwoFactorPromptProps) {
   const t = useTranslations('twoFactor')
+  const tApiErrors = useTranslations('apiErrors')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -33,7 +34,7 @@ export function TwoFactorPrompt({ tempToken, redirect_uri, onBack }: TwoFactorPr
       })
 
       if (!response.ok) {
-        throw new Error((response.data as { error?: string } | null)?.error || 'Invalid 2FA code')
+        throw new Error(response.error || parseApiError(response.data) || 'Invalid 2FA code')
       }
 
       const result = response.data as { code?: string }
@@ -46,7 +47,8 @@ export function TwoFactorPrompt({ tempToken, redirect_uri, onBack }: TwoFactorPr
         return
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Verification failed')
+      const rawMessage = err instanceof Error ? err.message : 'fallback'
+      setError(tApiErrors.has(rawMessage) ? tApiErrors(rawMessage) : tApiErrors('fallback'))
       setLoading(false)
     }
   }

@@ -14,7 +14,7 @@ import {
   Input,
   PasswordInput,
 } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -35,6 +35,8 @@ type FormData = {
 export function LoginForm({ app, redirect_uri }: LoginFormProps) {
   const t = useTranslations('login')
   const tForgot = useTranslations('forgotPassword')
+  const tValidation = useTranslations('validation')
+  const tApiErrors = useTranslations('apiErrors')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [twoFactorState, setTwoFactorState] = useState<{
@@ -69,9 +71,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error(
-          response.error || (response.data as { error?: string } | null)?.error || 'Login failed'
-        )
+        throw new Error(response.error || parseApiError(response.data) || 'Login failed')
       }
 
       const result = response.data as {
@@ -97,10 +97,11 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         return
       } else {
         logger.error('No redirect_uri provided! Cannot redirect after login.')
-        throw new Error('No redirect URL configured. Please provide redirect_uri parameter.')
+        throw new Error(t('noRedirectUri'))
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const rawMessage = err instanceof Error ? err.message : 'fallback'
+      setError(tApiErrors.has(rawMessage) ? tApiErrors(rawMessage) : tApiErrors('fallback'))
       setLoading(false)
     }
   }
@@ -129,8 +130,8 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           control={form.control}
           name="email"
           rules={{
-            required: 'Email or username is required',
-            minLength: { value: 3, message: 'Must be at least 3 characters' },
+            required: tValidation('required'),
+            minLength: { value: 3, message: tValidation('minLength', { min: 3 }) },
           }}
           render={({ field }) => (
             <FormItem>
@@ -147,8 +148,8 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           control={form.control}
           name="password"
           rules={{
-            required: 'Password is required',
-            minLength: { value: 6, message: 'Must be at least 6 characters' },
+            required: tValidation('required'),
+            minLength: { value: 6, message: tValidation('minLength', { min: 6 }) },
           }}
           render={({ field }) => (
             <FormItem>

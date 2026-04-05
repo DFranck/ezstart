@@ -7,7 +7,14 @@
   },
   "auth": {
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "callback": {
+      "success": "Authentication successful!",
+      "redirecting": "Redirecting to home...",
+      "backToHome": "Back to Home",
+      "error": "Authentication failed",
+      "noCode": "No authorization code found"
+    }
   },
   "pwa": {
     "install": {

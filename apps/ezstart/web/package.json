@@ -19,6 +19,7 @@
     "@ezstart/logger": "workspace:*",
     "@ezstart/monitoring": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
+    "@ezstart/pay-sdk": "workspace:*",
     "@ezstart/rbac": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@google/generative-ai": "^0.24.1",

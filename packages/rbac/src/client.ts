@@ -4,7 +4,13 @@
  */
 
 import type { AuthUser } from '@ezstart/auth-sdk/server'
-import { getRBACConfig, type Role, type Permission, type Feature } from './types.js'
+import {
+  getRBACConfig,
+  matchesPermission,
+  type Role,
+  type Permission,
+  type Feature,
+} from './types.js'
 
 /**
  * Check if user has a specific role
@@ -68,25 +74,69 @@ export function hasAllRoles(user: AuthUser | null, roles: Role[], appName?: stri
 }
 
 /**
- * Check if user has a specific permission
- * Superadmin automatically has all permissions
+ * Check if user has a specific permission.
+ * Resolves permissions from: explicit user permissions, global role permissions,
+ * app-specific role permissions, and legacy role permissions.
+ * Supports wildcards: "*" (all), "domain.*" (all actions in domain).
+ *
+ * @param user - The user to check
+ * @param permission - The permission to check (e.g. "payments.refund")
+ * @param appName - Optional app name for app-specific permission resolution
  */
-export function hasPermission(user: AuthUser | null, permission: Permission): boolean {
+export function hasPermission(
+  user: AuthUser | null,
+  permission: Permission,
+  appName?: string
+): boolean {
   if (!user) return false
 
   // Superadmin has everything
   if (hasRole(user, 'superadmin')) return true
 
-  // Check explicit permissions
-  if (user.permissions?.includes(permission)) return true
+  const config = getRBACConfig()
 
-  // Check role-based permissions
+  // Check explicit user permissions (with wildcard support)
+  if (user.permissions?.length) {
+    if (matchesPermission(user.permissions, permission)) return true
+  }
+
+  // Check global role permissions
+  for (const role of user.globalRoles || []) {
+    const perms = config.globalPermissions[role] || []
+    if (matchesPermission(perms, permission)) return true
+  }
+
+  // Check app-specific role permissions
+  if (appName) {
+    const appConfig = config.apps[appName]
+    if (appConfig) {
+      const appRoles = user.appRoles?.[appName] || []
+      for (const role of appRoles) {
+        const perms = appConfig.roles[role] || []
+        if (matchesPermission(perms, permission)) return true
+      }
+    }
+  }
+
+  // Check all app roles when no specific appName (permission in ANY app)
+  if (!appName && user.appRoles) {
+    for (const [app, roles] of Object.entries(user.appRoles)) {
+      const appConfig = config.apps[app]
+      if (!appConfig) continue
+      for (const role of roles) {
+        const perms = appConfig.roles[role] || []
+        if (matchesPermission(perms, permission)) return true
+      }
+    }
+  }
+
+  // Legacy: check role-based permissions from config.permissions
   if (user.roles) {
-    const { permissions: rolePermissions } = getRBACConfig()
-    return user.roles.some(role => {
+    const { permissions: rolePermissions } = config
+    for (const role of user.roles) {
       const rolePerms = rolePermissions[role]
-      return rolePerms?.includes(permission)
-    })
+      if (rolePerms && matchesPermission(rolePerms, permission)) return true
+    }
   }
 
   return false
@@ -95,15 +145,23 @@ export function hasPermission(user: AuthUser | null, permission: Permission): bo
 /**
  * Check if user has ANY of the specified permissions
  */
-export function hasAnyPermission(user: AuthUser | null, permissions: Permission[]): boolean {
-  return permissions.some(perm => hasPermission(user, perm))
+export function hasAnyPermission(
+  user: AuthUser | null,
+  permissions: Permission[],
+  appName?: string
+): boolean {
+  return permissions.some(perm => hasPermission(user, perm, appName))
 }
 
 /**
  * Check if user has ALL of the specified permissions
  */
-export function hasAllPermissions(user: AuthUser | null, permissions: Permission[]): boolean {
-  return permissions.every(perm => hasPermission(user, perm))
+export function hasAllPermissions(
+  user: AuthUser | null,
+  permissions: Permission[],
+  appName?: string
+): boolean {
+  return permissions.every(perm => hasPermission(user, perm, appName))
 }
 
 /**
@@ -217,9 +275,12 @@ export function useRBAC(user: AuthUser | null, appName?: string) {
       hasAnyRole(user, roles, overrideAppName || appName),
     hasAllRoles: (roles: Role[], overrideAppName?: string) =>
       hasAllRoles(user, roles, overrideAppName || appName),
-    hasPermission: (permission: Permission) => hasPermission(user, permission),
-    hasAnyPermission: (permissions: Permission[]) => hasAnyPermission(user, permissions),
-    hasAllPermissions: (permissions: Permission[]) => hasAllPermissions(user, permissions),
+    hasPermission: (permission: Permission, overrideAppName?: string) =>
+      hasPermission(user, permission, overrideAppName || appName),
+    hasAnyPermission: (permissions: Permission[], overrideAppName?: string) =>
+      hasAnyPermission(user, permissions, overrideAppName || appName),
+    hasAllPermissions: (permissions: Permission[], overrideAppName?: string) =>
+      hasAllPermissions(user, permissions, overrideAppName || appName),
     hasFeature: (feature: Feature) => hasFeature(user, feature),
     hasAnyFeature: (features: Feature[]) => hasAnyFeature(user, features),
     canManageUser: (targetUser: AuthUser, overrideAppName?: string) =>

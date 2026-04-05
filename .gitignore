@@ -60,3 +60,6 @@ test-*.json
 
 # OCR bench test images
 test-images/
+
+# Dev credentials (never commit)
+.dev-users.md

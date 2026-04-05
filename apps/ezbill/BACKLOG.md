@@ -1,6 +1,6 @@
 # Backlog — EZBill
 
-**Status :** `in-progress` | **Priorite :** haute | **Derniere mise a jour :** 2026-03-29
+**Status :** `in-progress` | **Priorite :** haute | **Derniere mise a jour :** 2026-04-01
 
 ## Audit complet 2026-03-29
 
@@ -8,21 +8,21 @@
 
 ## Critical (bugs/regressions)
 
-- [ ] Quote PDF generation is not implemented — `generateQuotePdfUrl()` returns null, download shows "not implemented" toast, preview modal shows nothing for quotes
+- [x] Quote PDF generation is not implemented — `generateQuotePdfUrl()` returns null, download shows "not implemented" toast, preview modal shows nothing for quotes
 - [ ] Quote modal has massive i18n gaps — labels "Client _", "Bill on behalf of", "Currency", "Valid Until", "Add Taxes", "Tax Rate (%)", "Billing Type _", "Itemized", "Flat Rate", "Description", "Qty", "Price", "Quote Summary", "Subtotal:", "Total:", "Add Line Item", "Notes", "Terms & Conditions" are all hardcoded English
 - [ ] Mark-paid modal is entirely un-i18n'd — "Mark Invoice as Paid", "This will create a receipt...", "Bill on behalf of", "Personal (your name)", "Payment Date", "Notes", "Cancel", "Mark as Paid", "Marking invoice as paid...", "Invoice marked as paid and receipt created", "Failed to mark invoice as paid" all hardcoded
 - [ ] Delete quote dialog has hardcoded English: "Delete Quote" and description text
-- [ ] Hardcoded locale `'fr'` passed to groupInvoicesByMonth/Week, groupQuotesByMonth, groupReceiptsByMonth in client dashboard — should use current locale from next-intl
+- [x] Hardcoded locale `'fr'` passed to groupInvoicesByMonth/Week, groupQuotesByMonth, groupReceiptsByMonth in client dashboard — should use current locale from next-intl
 - [ ] `billing-permissions.ts` is duplicated between web and API (`web/src/utils/` and `api/src/utils/`) — logic drift risk (web version has `canDecline` alias, API does not)
 
 ## High Priority (UX/functionality)
 
-- [ ] No client search/filter on main dashboard — users with many clients have no way to find one quickly
+- [x] No client search/filter on main dashboard — users with many clients have no way to find one quickly
 - [ ] No invoice delete action — invoices can only be deleted via settings trash, no delete button on InvoiceCard (unlike QuoteCard which has one)
 - [ ] No confirmation dialog for quote accept/decline — clicking Accept or Decline immediately fires API call with no confirmation
 - [ ] Quote modal form is not reset when re-opened — state persists from previous edit (unlike invoice-modal which has useEffect reset)
 - [ ] Share modal's "Copy Link" copies blob URL which is only valid in current tab/session — useless for sharing
-- [ ] No due date display on invoice cards — due date is critical info but not shown in the card view
+- [x] No due date display on invoice cards — due date is critical info but not shown in the card view
 - [ ] No overdue invoice detection — no visual indicator when an invoice is past due date
 - [ ] PDF preview only works for invoices and receipts — quotes show a "click refresh" state that does nothing useful
 - [ ] v2 landing page has placeholder "Dashboard Screenshot" instead of actual image

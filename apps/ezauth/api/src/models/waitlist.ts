@@ -1,5 +1,5 @@
 import { connectToMongo } from '@ezstart/express-core'
-import { Schema, Document } from 'mongoose'
+import { Schema, Document, Model } from 'mongoose'
 import crypto from 'crypto'
 
 export type WaitlistStatus = 'pending' | 'invited' | 'activated' | 'rejected'
@@ -104,7 +104,10 @@ waitlistSchema.methods.generateAccessCode = function (): string {
  * Factory function to get Waitlist model attached to shared connection
  * MUST be called after connectToMongo() has been initialized
  */
-export async function getWaitlistModel() {
+export async function getWaitlistModel(): Promise<Model<WaitlistDocument>> {
   const mongoose = await connectToMongo('ezauth')
-  return mongoose.models.Waitlist || mongoose.model<WaitlistDocument>('Waitlist', waitlistSchema)
+  return (
+    (mongoose.models.Waitlist as Model<WaitlistDocument>) ||
+    mongoose.model<WaitlistDocument>('Waitlist', waitlistSchema)
+  )
 }

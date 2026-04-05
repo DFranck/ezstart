@@ -229,7 +229,9 @@
     "byStatus": "By Status",
     "backToDashboard": "Back to Dashboard",
     "newQuote": "New Quote",
-    "newInvoice": "New Invoice"
+    "newInvoice": "New Invoice",
+    "searchClients": "Search clients by name or email...",
+    "noSearchResults": "No clients match your search"
   },
   "settings": {
     "yourBusiness": "Your Business",

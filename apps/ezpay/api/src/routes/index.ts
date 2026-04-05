@@ -4,6 +4,7 @@ import { purchasesRegistries, purchasesRouters } from './purchases/index.js'
 import { subscriptionsRegistries, subscriptionsRouters } from './subscriptions/index.js'
 import { paymentsRegistries, paymentsRouters } from './payments/index.js'
 import webhooksRouter from './webhooks.js'
+import testProductsRouter from './test-products.js'
 import type { Router as ExpressRouter } from 'express'
 
 const router: ExpressRouter = Router()
@@ -14,6 +15,7 @@ purchasesRouters.forEach(r => router.use('/', r))
 subscriptionsRouters.forEach(r => router.use('/', r))
 paymentsRouters.forEach(r => router.use('/', r))
 router.use('/', webhooksRouter)
+router.use('/', testProductsRouter)
 
 // Health check
 router.get('/health', (_, res) => {

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useMemo, type ReactNode } from 'react'
+import React, { createContext, useContext, useRef, useMemo, type ReactNode } from 'react'
 import { createPayClient } from './client.js'
 import { usePayStore } from './store.js'
 import type { PayClientConfig } from './types.js'
@@ -15,11 +15,42 @@ interface PayProviderProps {
   children: ReactNode
   appName: string
   config?: Partial<Omit<PayClientConfig, 'appName'>>
+  /** Optional callback to retrieve the current auth token dynamically.
+   *  Shorthand for config.getToken — if both are provided, this prop takes precedence. */
+  getToken?: () => string | null | undefined
+  /** Optional callback to refresh the auth token on 401. Should return the new token or null. */
+  onTokenRefresh?: () => Promise<string | null>
+  /** Optional callback invoked when token refresh fails (e.g. to trigger logout/redirect). */
+  onAuthFailure?: () => void
 }
 
-export function PayProvider({ children, appName, config }: PayProviderProps) {
+export function PayProvider({
+  children,
+  appName,
+  config,
+  getToken,
+  onTokenRefresh,
+  onAuthFailure,
+}: PayProviderProps) {
+  // Use refs so the client always calls the latest callbacks without re-creating the client
+  const getTokenRef = useRef(getToken ?? config?.getToken)
+  getTokenRef.current = getToken ?? config?.getToken
+
+  const onTokenRefreshRef = useRef(onTokenRefresh ?? config?.onTokenRefresh)
+  onTokenRefreshRef.current = onTokenRefresh ?? config?.onTokenRefresh
+
+  const onAuthFailureRef = useRef(onAuthFailure ?? config?.onAuthFailure)
+  onAuthFailureRef.current = onAuthFailure ?? config?.onAuthFailure
+
   const client = useMemo(() => {
-    return createPayClient({ appName, ...config })
+    return createPayClient({
+      appName,
+      ...config,
+      getToken: () => getTokenRef.current?.() ?? null,
+      onTokenRefresh: () => onTokenRefreshRef.current?.() ?? Promise.resolve(null),
+      onAuthFailure: () => onAuthFailureRef.current?.(),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- callbacks are handled via refs
   }, [appName, config])
 
   return <PayContext.Provider value={{ client }}>{children}</PayContext.Provider>

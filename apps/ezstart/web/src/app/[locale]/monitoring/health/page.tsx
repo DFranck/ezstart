@@ -13,6 +13,7 @@ import { useCountdown } from '../hooks/useCountdown'
 import { useMonitoringProjects } from '../hooks/useMonitoringProjects'
 import { useSocket } from '../hooks/useSocket'
 import { calculateOverallHealth, getMetricsData } from '../lib/utils'
+import type { ProjectHealth } from '@ezstart/monitoring'
 import { ProjectCard } from './components/ProjectCard'
 
 function HealthMonitoringContent() {
@@ -113,8 +114,7 @@ function HealthMonitoringContent() {
         </Div>
 
         <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- ProjectCard expects ProjectHealth, API returns MonitoringProject */}
-          {projects.map((project: any) => (
+          {(projects as unknown as ProjectHealth[]).map(project => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </Div>

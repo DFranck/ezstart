@@ -8,7 +8,7 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -21,6 +21,7 @@ const docRouter = createRouterWithDoc(listSubscriptionsRegistry, router)
 // ========================================
 
 const subscriptionsQuerySchema = z.object({
+  projectId: z.string().optional().describe('Filter by project ID'),
   userId: z.string().optional().describe('Filter by user ID'),
   limit: z.coerce.number().default(20).describe('Number of subscriptions to return'),
   offset: z.coerce.number().default(0).describe('Number of subscriptions to skip'),
@@ -47,13 +48,22 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
     }
-    const { userId, limit, offset } = parsed.data
+    const { projectId, userId, limit, offset } = parsed.data
 
     const query: Record<string, unknown> = {
       type: 'subscription',
     }
 
-    if (userId) query.userId = userId
+    if (projectId) query.projectId = projectId
+
+    // Non-admin users can only see their own subscriptions
+    if (isAdminUser(req)) {
+      // Admin can filter by specific userId or see all
+      if (userId) query.userId = userId
+    } else {
+      // Force filter to authenticated user's own subscriptions
+      query.userId = req.userId
+    }
 
     const [subscriptions, total] = await Promise.all([
       Payment.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)),
@@ -71,7 +81,7 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/subscriptions', authMiddleware, getSubscriptionsHandler, {
+docRouter.get('/subscriptions', authMiddleware, populateUserFromToken, getSubscriptionsHandler, {
   summary: 'Get subscriptions for a user',
   tags: ['Subscriptions'],
   querySchema: subscriptionsQuerySchema,

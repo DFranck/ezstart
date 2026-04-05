@@ -8,7 +8,7 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -54,7 +54,15 @@ const getPurchasesHandler = async (req: Request, res: Response) => {
       type: { $in: ['purchase', 'subscription'] },
     }
 
-    if (userId) query.userId = userId
+    // Non-admin users can only see their own purchases
+    if (isAdminUser(req)) {
+      // Admin can filter by specific userId or see all
+      if (userId) query.userId = userId
+    } else {
+      // Force filter to authenticated user's own purchases
+      query.userId = req.userId
+    }
+
     if (projectId) query.projectId = projectId
 
     const [purchases, total] = await Promise.all([
@@ -73,7 +81,7 @@ const getPurchasesHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/purchases', authMiddleware, getPurchasesHandler, {
+docRouter.get('/purchases', authMiddleware, populateUserFromToken, getPurchasesHandler, {
   summary: 'Get purchases for a user',
   tags: ['Purchases'],
   querySchema: purchasesQuerySchema,

@@ -60,7 +60,6 @@ const addEmailController = async (req: Request, res: Response) => {
     const { email } = parsed.data
 
     // Find or create waitlist for this app
-    // @ts-expect-error - Mongoose type inference issue
     let waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {

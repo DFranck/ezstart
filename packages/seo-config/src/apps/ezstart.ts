@@ -96,7 +96,8 @@ export interface AppSEOConfig {
 export const ezstartSEO: AppSEOConfig = {
   appName: 'EZStart',
   tagline: 'Build and Launch SaaS Apps 10x Faster',
-  shortDescription: 'Complete development ecosystem for building production-ready SaaS applications in days instead of months.',
+  shortDescription:
+    'Complete development ecosystem for building production-ready SaaS applications in days instead of months.',
   longDescription: `EZStart is the ultimate open-source development platform that accelerates your SaaS journey from concept to production. Built on a powerful monorepo architecture, EZStart provides everything you need: enterprise-grade authentication with OAuth and SSO, Stripe payment processing with subscriptions, professional invoicing, 100+ production-ready UI components, and even complete applications like multiplayer games and AI-powered form builders. Unlike traditional boilerplates that give you a starting template, EZStart provides a living, breathing ecosystem where code is shared intelligently across multiple applications. With TypeScript throughout, comprehensive testing infrastructure, accessibility built-in (WCAG compliance), and battle-tested components used in production by real companies, you're not just getting code - you're getting years of best practices, security hardening, and performance optimization. Whether you're a solo developer launching your first SaaS, a startup racing to market, or an agency building client projects, EZStart eliminates months of repetitive infrastructure work so you can focus on what makes your product unique. One command to start, zero configuration needed, deploy anywhere. The only platform that gives you authentication, payments, invoicing, games, and AI tools - all production-ready, all open-source, all working together.`,
 
   mission: {
@@ -108,8 +109,10 @@ export const ezstartSEO: AppSEOConfig = {
   features: [
     {
       title: 'Monorepo Architecture - Code Sharing at Scale',
-      description: 'Share TypeScript types, UI components, utilities, and business logic across unlimited applications',
-      longDescription: 'EZStart\'s monorepo architecture is the foundation that makes everything else possible. Unlike traditional multi-repo setups where each project is isolated, our Turborepo-powered monorepo lets you share code intelligently across all your applications. Change a TypeScript interface once, and it updates everywhere. Create a UI component, and every app can use it immediately. This isn\'t just about convenience - it\'s about building a sustainable codebase that scales. As your product grows from 1 app to 10 apps, your development speed accelerates instead of slowing down. You build a library of reusable solutions that compound over time.',
+      description:
+        'Share TypeScript types, UI components, utilities, and business logic across unlimited applications',
+      longDescription:
+        "EZStart's monorepo architecture is the foundation that makes everything else possible. Unlike traditional multi-repo setups where each project is isolated, our Turborepo-powered monorepo lets you share code intelligently across all your applications. Change a TypeScript interface once, and it updates everywhere. Create a UI component, and every app can use it immediately. This isn't just about convenience - it's about building a sustainable codebase that scales. As your product grows from 1 app to 10 apps, your development speed accelerates instead of slowing down. You build a library of reusable solutions that compound over time.",
       icon: 'lucide:GitBranch',
       keywords: ['monorepo', 'turborepo', 'code sharing', 'typescript', 'scalable architecture'],
       useCases: [
@@ -121,9 +124,17 @@ export const ezstartSEO: AppSEOConfig = {
     {
       title: '100+ Production-Ready UI Components',
       description: 'Accessible, themeable React components built on Radix UI with Tailwind CSS',
-      longDescription: 'Stop rebuilding buttons, modals, and forms. Our UI library provides 100+ production-ready components built on industry-standard foundations: Radix UI for accessibility and behavior, Tailwind CSS for styling, and Lucide for icons. Every component is accessible (WCAG compliant), supports dark mode, is fully typed with TypeScript, and follows consistent design patterns. From simple buttons to complex data tables, from modals to date pickers - it\'s all there, tested, and ready to use. These aren\'t just demos - they\'re the same components powering real production applications in the monorepo.',
+      longDescription:
+        "Stop rebuilding buttons, modals, and forms. Our UI library provides 100+ production-ready components built on industry-standard foundations: Radix UI for accessibility and behavior, Tailwind CSS for styling, and Lucide for icons. Every component is accessible (WCAG compliant), supports dark mode, is fully typed with TypeScript, and follows consistent design patterns. From simple buttons to complex data tables, from modals to date pickers - it's all there, tested, and ready to use. These aren't just demos - they're the same components powering real production applications in the monorepo.",
       icon: 'lucide:Blocks',
-      keywords: ['react components', 'ui library', 'radix ui', 'tailwind css', 'accessible components', 'design system'],
+      keywords: [
+        'react components',
+        'ui library',
+        'radix ui',
+        'tailwind css',
+        'accessible components',
+        'design system',
+      ],
       useCases: [
         'Building a dashboard with consistent design without designing every component from scratch',
         'Creating accessible applications that meet WCAG standards without accessibility expertise',
@@ -132,8 +143,10 @@ export const ezstartSEO: AppSEOConfig = {
     },
     {
       title: 'Authentication System - Enterprise SSO',
-      description: 'Complete auth system with OAuth (Google, GitHub, Discord), JWT tokens, and multi-app SSO',
-      longDescription: 'Authentication is complex and security-critical - we\'ve built it so you don\'t have to. EZAuth provides enterprise-grade authentication with OAuth providers (Google, GitHub, Discord), secure JWT token management with httpOnly cookies (XSS-proof), automatic token refresh, and true Single Sign-On across all your applications. Log in once, access everything. The system handles user registration, email verification, password reset, session management, and role-based access control. It\'s the same authentication system banks and financial apps use, but open-source and ready to deploy.',
+      description:
+        'Complete auth system with OAuth (Google, GitHub, Discord), JWT tokens, and multi-app SSO',
+      longDescription:
+        "Authentication is complex and security-critical - we've built it so you don't have to. EZAuth provides enterprise-grade authentication with OAuth providers (Google, GitHub, Discord), secure JWT token management with httpOnly cookies (XSS-proof), automatic token refresh, and true Single Sign-On across all your applications. Log in once, access everything. The system handles user registration, email verification, password reset, session management, and role-based access control. It's the same authentication system banks and financial apps use, but open-source and ready to deploy.",
       icon: 'lucide:Shield',
       keywords: ['authentication', 'oauth', 'sso', 'jwt', 'security', 'login system'],
       useCases: [
@@ -144,10 +157,19 @@ export const ezstartSEO: AppSEOConfig = {
     },
     {
       title: 'Payment & Billing Infrastructure',
-      description: 'Stripe integration with subscriptions, one-time payments, invoice generation, and webhook handling',
-      longDescription: 'Monetize your SaaS immediately with our complete payment infrastructure. EZPay handles Stripe integration with support for both one-time payments and recurring subscriptions. Create checkout sessions, manage subscription plans, handle webhook events (payment succeeded, subscription canceled, etc.), and automatically generate PDF invoices. EZBill adds professional invoicing with client management, quote generation, payment tracking, and beautiful PDF templates. This is the same infrastructure processing real payments for real businesses - battle-tested and compliant.',
+      description:
+        'Stripe integration with subscriptions, one-time payments, invoice generation, and webhook handling',
+      longDescription:
+        'Monetize your SaaS immediately with our complete payment infrastructure. EZPay handles Stripe integration with support for both one-time payments and recurring subscriptions. Create checkout sessions, manage subscription plans, handle webhook events (payment succeeded, subscription canceled, etc.), and automatically generate PDF invoices. EZBill adds professional invoicing with client management, quote generation, payment tracking, and beautiful PDF templates. This is the same infrastructure processing real payments for real businesses - battle-tested and compliant.',
       icon: 'lucide:CreditCard',
-      keywords: ['stripe integration', 'payments', 'subscriptions', 'invoicing', 'billing', 'saas monetization'],
+      keywords: [
+        'stripe integration',
+        'payments',
+        'subscriptions',
+        'invoicing',
+        'billing',
+        'saas monetization',
+      ],
       useCases: [
         'SaaS startups launching paid plans (monthly/yearly subscriptions)',
         'Freelancers and agencies sending professional invoices to clients',
@@ -156,10 +178,18 @@ export const ezstartSEO: AppSEOConfig = {
     },
     {
       title: 'Real-World Applications - Learn from Production Code',
-      description: 'Multiple complete applications: multiplayer game, AI form builder, Feng Shui analyzer, and more',
-      longDescription: 'The best way to learn is from real, working applications. EZStart includes complete, production-ready applications you can learn from, customize, or use as-is: GreenPulse (AI-powered form builder), FengShui (image analysis tool), EZBill (invoicing), and more. These aren\'t toy examples - they\'re fully functional applications with authentication, databases, real-time features, and complex business logic. Study how they\'re built, see best practices in action, and adapt patterns to your own projects. It\'s like having a senior developer\'s entire portfolio to learn from.',
+      description:
+        'Multiple complete applications: multiplayer game, AI form builder, Feng Shui analyzer, and more',
+      longDescription:
+        "The best way to learn is from real, working applications. EZStart includes complete, production-ready applications you can learn from, customize, or use as-is: GreenPulse (AI-powered form builder), FengShui (image analysis tool), EZBill (invoicing), and more. These aren't toy examples - they're fully functional applications with authentication, databases, real-time features, and complex business logic. Study how they're built, see best practices in action, and adapt patterns to your own projects. It's like having a senior developer's entire portfolio to learn from.",
       icon: 'lucide:Rocket',
-      keywords: ['example applications', 'real-time apps', 'socketio', 'ai integration', 'production code'],
+      keywords: [
+        'example applications',
+        'real-time apps',
+        'socketio',
+        'ai integration',
+        'production code',
+      ],
       useCases: [
         'Developers learning modern web development patterns by studying working code',
         'Teams needing examples of real-time features (multiplayer, chat, notifications)',
@@ -174,7 +204,7 @@ export const ezstartSEO: AppSEOConfig = {
       painPoints: [
         'Building the same auth/payment infrastructure for every project',
         'Limited time - need to ship fast to validate ideas',
-        'Can\'t afford expensive SaaS subscriptions for every tool',
+        "Can't afford expensive SaaS subscriptions for every tool",
         'Need professional-looking UI without design skills',
       ],
       goals: [
@@ -236,7 +266,7 @@ export const ezstartSEO: AppSEOConfig = {
       persona: 'Learning Developer',
       painPoints: [
         'Tutorials show toy examples, not real applications',
-        'Don\'t know how to structure large applications',
+        "Don't know how to structure large applications",
         'Struggle with authentication, payments, deployment',
         'Hard to see how pieces fit together',
       ],
@@ -258,8 +288,10 @@ export const ezstartSEO: AppSEOConfig = {
   useCases: [
     {
       title: 'Solo Dev: Launch SaaS in 2 Weeks',
-      before: 'Spent 6 weeks building authentication and Stripe integration for my SaaS idea. By the time I got to building the actual product features, I was burned out and behind schedule. Still don\'t have user management or proper error handling.',
-      after: 'Cloned EZStart, had authentication and payments working in 2 hours. Focused 100% on my unique product features. Launched MVP in 2 weeks, got first paying customer on day 3. Now building feature #2 while feature #1 makes money.',
+      before:
+        "Spent 6 weeks building authentication and Stripe integration for my SaaS idea. By the time I got to building the actual product features, I was burned out and behind schedule. Still don't have user management or proper error handling.",
+      after:
+        'Cloned EZStart, had authentication and payments working in 2 hours. Focused 100% on my unique product features. Launched MVP in 2 weeks, got first paying customer on day 3. Now building feature #2 while feature #1 makes money.',
       metrics: {
         timelineBefore: '6 weeks',
         timelineAfter: '2 weeks',
@@ -269,8 +301,10 @@ export const ezstartSEO: AppSEOConfig = {
     },
     {
       title: 'Startup: Standardize Across Team',
-      before: 'Team of 5 developers all writing code differently. Shared components didn\'t exist - everyone rebuilt the same stuff. Code reviews took hours arguing about patterns. Onboarding new devs took 2 weeks.',
-      after: 'Adopted EZStart as company standard. All projects use same components, same patterns, same types. Code reviews focus on business logic, not implementation details. New devs productive in 2 days. Shipping features 3x faster.',
+      before:
+        "Team of 5 developers all writing code differently. Shared components didn't exist - everyone rebuilt the same stuff. Code reviews took hours arguing about patterns. Onboarding new devs took 2 weeks.",
+      after:
+        'Adopted EZStart as company standard. All projects use same components, same patterns, same types. Code reviews focus on business logic, not implementation details. New devs productive in 2 days. Shipping features 3x faster.',
       metrics: {
         timelineBefore: '2 week onboarding',
         timelineAfter: '2 day onboarding',
@@ -280,8 +314,10 @@ export const ezstartSEO: AppSEOConfig = {
     },
     {
       title: 'Agency: Reuse Across Clients',
-      before: 'Built 12 client websites last year, each one from scratch. Similar features (auth, payments, admin panels) rebuilt 12 times. Maintenance nightmare - bug fixes had to be applied to 12 codebases.',
-      after: 'All new client projects start with EZStart. Auth and payments are done. Focus on client-specific features. Ship projects 40% faster, higher profit margins. One bug fix updates all client projects via monorepo.',
+      before:
+        'Built 12 client websites last year, each one from scratch. Similar features (auth, payments, admin panels) rebuilt 12 times. Maintenance nightmare - bug fixes had to be applied to 12 codebases.',
+      after:
+        'All new client projects start with EZStart. Auth and payments are done. Focus on client-specific features. Ship projects 40% faster, higher profit margins. One bug fix updates all client projects via monorepo.',
       metrics: {
         timelineBefore: '8 weeks per project',
         timelineAfter: '5 weeks per project',
@@ -291,8 +327,10 @@ export const ezstartSEO: AppSEOConfig = {
     },
     {
       title: 'Learning Dev: Portfolio That Stands Out',
-      before: 'Portfolio had 3 tutorial projects - todo app, weather app, basic CRUD. Couldn\'t explain how authentication works or how to handle payments. Interviews focused on what I didn\'t know.',
-      after: 'Studied EZStart codebase, understood production patterns. Built custom SaaS using EZStart foundations. Portfolio project has auth, payments, real-time features, tests. Interviews now discuss architecture decisions. Got hired.',
+      before:
+        "Portfolio had 3 tutorial projects - todo app, weather app, basic CRUD. Couldn't explain how authentication works or how to handle payments. Interviews focused on what I didn't know.",
+      after:
+        'Studied EZStart codebase, understood production patterns. Built custom SaaS using EZStart foundations. Portfolio project has auth, payments, real-time features, tests. Interviews now discuss architecture decisions. Got hired.',
       metrics: {
         timelineBefore: 'Tutorial-level projects',
         timelineAfter: 'Production-quality portfolio',
@@ -347,17 +385,20 @@ export const ezstartSEO: AppSEOConfig = {
     {
       category: 'VS Boilerplates (ShipFast, Supastarter, etc.)',
       competitors: ['ShipFast', 'Supastarter', 'SaaSy Land'],
-      ourAdvantage: 'They give you a starting point. We give you a complete ecosystem with working apps. They stop at "hello world" - we include multiplayer games, AI tools, and complex real-world applications. Plus, we\'re 100% open-source forever.',
+      ourAdvantage:
+        'They give you a starting point. We give you a complete ecosystem with working apps. They stop at "hello world" - we include multiplayer games, AI tools, and complex real-world applications. Plus, we\'re 100% open-source forever.',
     },
     {
       category: 'VS Component Libraries (shadcn/ui, Chakra)',
       competitors: ['shadcn/ui', 'Chakra UI', 'Mantine'],
-      ourAdvantage: 'They provide UI components. We provide UI components PLUS complete applications that show you how to use them in production. Want to see how authentication works? We have a working auth system. Want to see payments? We have a working payment system. Components + context = faster learning.',
+      ourAdvantage:
+        'They provide UI components. We provide UI components PLUS complete applications that show you how to use them in production. Want to see how authentication works? We have a working auth system. Want to see payments? We have a working payment system. Components + context = faster learning.',
     },
     {
       category: 'VS Low-Code Platforms (Bubble, Webflow)',
       competitors: ['Bubble', 'Webflow', 'Retool'],
-      ourAdvantage: 'They lock you into their platform and charge monthly forever. We give you the code - own it, customize it, deploy anywhere. No platform fees, no usage limits, no vendor lock-in. Plus, you learn real development skills, not platform-specific tricks.',
+      ourAdvantage:
+        'They lock you into their platform and charge monthly forever. We give you the code - own it, customize it, deploy anywhere. No platform fees, no usage limits, no vendor lock-in. Plus, you learn real development skills, not platform-specific tricks.',
     },
   ],
 
@@ -374,7 +415,7 @@ export const ezstartSEO: AppSEOConfig = {
       },
       script: [
         '0-5s: Terminal showing "git clone" + "pnpm install" + "pnpm dev"',
-        '5-10s: Browser opening localhost:5005, beautiful landing page appears',
+        '5-10s: Browser opening localhost:6101, beautiful landing page appears',
         '10-15s: Quick cuts: Click login → OAuth screen → Dashboard',
         '15-20s: Code editor split screen: Change component in packages/ui → See it update in 3 different apps simultaneously',
         '20-25s: Terminal showing "pnpm test" → All tests passing',
@@ -395,7 +436,7 @@ export const ezstartSEO: AppSEOConfig = {
         'VS Code showing packages/ui/src/components/Button.tsx',
         'Change button color from blue to green',
         'Split screen showing 4 apps simultaneously',
-        'All 4 apps\' buttons change from blue to green instantly',
+        "All 4 apps' buttons change from blue to green instantly",
         'Text overlay: "Change once, update everywhere"',
       ],
     },
@@ -490,43 +531,53 @@ export const ezstartSEO: AppSEOConfig = {
   faq: [
     {
       question: 'Is EZStart really free and open-source?',
-      answer: 'Yes, 100% open-source under MIT license. You own the code, can modify it, use it commercially, no restrictions. No hidden fees, no premium tiers, no vendor lock-in.',
+      answer:
+        'Yes, 100% open-source under MIT license. You own the code, can modify it, use it commercially, no restrictions. No hidden fees, no premium tiers, no vendor lock-in.',
     },
     {
       question: 'Do I need to know TypeScript to use EZStart?',
-      answer: 'Yes, EZStart is built entirely in TypeScript. If you know JavaScript, learning TypeScript will take a few days and is absolutely worth it for the type safety and developer experience.',
+      answer:
+        'Yes, EZStart is built entirely in TypeScript. If you know JavaScript, learning TypeScript will take a few days and is absolutely worth it for the type safety and developer experience.',
     },
     {
       question: 'Can I use EZStart for commercial projects?',
-      answer: 'Absolutely! MIT license means you can use it for personal projects, commercial SaaS, client work, anything. Many companies are already using EZStart in production.',
+      answer:
+        'Absolutely! MIT license means you can use it for personal projects, commercial SaaS, client work, anything. Many companies are already using EZStart in production.',
     },
     {
       question: 'How is this different from other boilerplates?',
-      answer: 'Most boilerplates give you a starting template. EZStart gives you complete, working applications in a monorepo. You get auth, payments, invoicing, games, AI tools - all production-ready. It\'s a living ecosystem, not just starter code.',
+      answer:
+        "Most boilerplates give you a starting template. EZStart gives you complete, working applications in a monorepo. You get auth, payments, invoicing, games, AI tools - all production-ready. It's a living ecosystem, not just starter code.",
     },
     {
-      question: 'What\'s included in the monorepo?',
-      answer: '7 complete applications (EZStart hub, EZAuth SSO, EZPay payments, EZBill invoicing, GreenPulse AI forms, FengShui analyzer, ASC-TCD association site), 100+ UI components, authentication SDK, payment SDK, testing infrastructure, deployment configs, and comprehensive documentation.',
+      question: "What's included in the monorepo?",
+      answer:
+        '7 complete applications (EZStart hub, EZAuth SSO, EZPay payments, EZBill invoicing, GreenPulse AI forms, FengShui analyzer, ASC-TCD association site), 100+ UI components, authentication SDK, payment SDK, testing infrastructure, deployment configs, and comprehensive documentation.',
     },
     {
       question: 'Can I deploy EZStart apps separately?',
-      answer: 'Yes! Each app in the monorepo can be deployed independently. The monorepo structure is for development convenience - you can deploy to Vercel, Railway, AWS, anywhere you want.',
+      answer:
+        'Yes! Each app in the monorepo can be deployed independently. The monorepo structure is for development convenience - you can deploy to Vercel, Railway, AWS, anywhere you want.',
     },
     {
       question: 'Do I need to use all the apps?',
-      answer: 'No! Pick what you need. Want just authentication? Use EZAuth. Just payments? Use EZPay. Or use everything as a complete platform. The monorepo makes it easy to add/remove apps.',
+      answer:
+        'No! Pick what you need. Want just authentication? Use EZAuth. Just payments? Use EZPay. Or use everything as a complete platform. The monorepo makes it easy to add/remove apps.',
     },
     {
       question: 'Is this production-ready?',
-      answer: 'Yes, all apps are running in production right now. EZAuth handles thousands of logins, EZPay processes real payments, EZBill generates real invoices. This isn\'t demo code - it\'s battle-tested production code.',
+      answer:
+        "Yes, all apps are running in production right now. EZAuth handles thousands of logins, EZPay processes real payments, EZBill generates real invoices. This isn't demo code - it's battle-tested production code.",
     },
     {
       question: 'How hard is it to customize?',
-      answer: 'All code is TypeScript with clear patterns. Comprehensive documentation guides you through customization. If you can build a React app, you can customize EZStart. Plus, you have working examples to learn from.',
+      answer:
+        'All code is TypeScript with clear patterns. Comprehensive documentation guides you through customization. If you can build a React app, you can customize EZStart. Plus, you have working examples to learn from.',
     },
     {
       question: 'What if I get stuck?',
-      answer: 'Comprehensive documentation covers everything. GitHub issues for bug reports. Discussions for questions. Plus, the codebase itself is educational - read how working apps implement features.',
+      answer:
+        'Comprehensive documentation covers everything. GitHub issues for bug reports. Discussions for questions. Plus, the codebase itself is educational - read how working apps implement features.',
     },
   ],
 
@@ -534,7 +585,7 @@ export const ezstartSEO: AppSEOConfig = {
     tone: [
       'Technical but approachable - not academic',
       'Confident but humble - let code speak',
-      'Helpful and educational - teach, don\'t sell',
+      "Helpful and educational - teach, don't sell",
       'Professional but human - avoid corporate jargon',
     ],
     avoid: [

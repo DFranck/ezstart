@@ -8,7 +8,7 @@
  */
 
 import { spawn } from 'child_process'
-import { readFileSync } from 'fs'
+import { readFileSync, rmSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import net from 'net'
@@ -42,7 +42,7 @@ if (!appName) {
 }
 
 async function isPortFree(port) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const server = net.createServer()
     server.listen(port, () => {
       server.once('close', () => resolve(true))
@@ -72,6 +72,11 @@ async function startDev() {
       console.log(`⚠️  Using port ${port} instead of configured port ${configPort}`)
     }
 
+    // Clean .next cache to ensure Tailwind and other configs are fresh
+    const nextCacheDir = join(process.cwd(), '.next')
+    rmSync(nextCacheDir, { recursive: true, force: true })
+    console.log(`🧹 Cleaned .next cache`)
+
     console.log(`🚀 Starting ${appName} dev server on port ${port}`)
 
     const child = spawn('next', ['dev', '--turbopack', '-p', port.toString()], {
@@ -79,12 +84,12 @@ async function startDev() {
       shell: true,
     })
 
-    child.on('error', (error) => {
+    child.on('error', error => {
       console.error('❌ Error starting dev server:', error)
       process.exit(1)
     })
 
-    child.on('exit', (code) => {
+    child.on('exit', code => {
       process.exit(code || 0)
     })
   } catch (error) {
