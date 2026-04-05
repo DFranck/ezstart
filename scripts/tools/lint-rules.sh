@@ -62,7 +62,39 @@ if [ -n "$TAILWIND" ]; then
 fi
 
 # ============================================================
-# 4. No secrets in code
+# 4. No alert() / window.confirm (use sonner toast / AlertDialog)
+# ============================================================
+ALERT=$(echo "$FILES" | xargs grep -ln 'alert(\|window\.confirm(' 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'scripts/')
+
+if [ -n "$ALERT" ]; then
+  echo ""
+  echo "❌ ALERT/CONFIRM DETECTED — Use sonner toast or AlertDialog from @ezstart/ui"
+  echo "$ALERT" | while read f; do
+    echo "   $f"
+    grep -n 'alert(\|window\.confirm(' "$f" 2>/dev/null | head -3
+  done
+  echo ""
+  EXIT_CODE=1
+fi
+
+# ============================================================
+# 5. No 'any' type (use proper typing)
+# ============================================================
+ANY_TYPE=$(echo "$FILES" | xargs grep -ln ': any\b\|: any;\|: any,\|as any\b' 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'dist/' | grep -v '.d.ts')
+
+if [ -n "$ANY_TYPE" ]; then
+  echo ""
+  echo "❌ 'any' TYPE DETECTED — Use proper TypeScript typing"
+  echo "$ANY_TYPE" | while read f; do
+    echo "   $f"
+    grep -n ': any\b\|: any;\|: any,\|as any\b' "$f" 2>/dev/null | head -5
+  done
+  echo ""
+  EXIT_CODE=1
+fi
+
+# ============================================================
+# 6. No secrets in code
 # ============================================================
 SECRETS=$(echo "$FILES" | xargs grep -ln 'sk_live_\|sk_test_\|AKIA[A-Z0-9]\|password\s*=\s*["\x27][^"\x27]\+["\x27]' 2>/dev/null | grep -v '.env' | grep -v 'node_modules' | grep -v '.test.')
 
