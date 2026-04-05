@@ -9,9 +9,6 @@ const defaultContent = [
   './src/**/*.{js,ts,jsx,tsx,mdx}',
   // Shared packages from monorepo (only those with React components using Tailwind)
   '../../packages/ui/**/*.{js,ts,jsx,tsx,mdx}',
-  '../../packages/pay-sdk/**/*.{js,ts,jsx,tsx,mdx}',
-  '../../packages/auth-sdk/**/*.{js,ts,jsx,tsx,mdx}',
-  '../../packages/ai-sdk/**/*.{js,ts,jsx,tsx,mdx}',
 ]
 
 const themeExtend = {

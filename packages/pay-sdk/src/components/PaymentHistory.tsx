@@ -1,6 +1,16 @@
 'use client'
 
-import { Badge, Card, CardContent, Icon, SkeletonList } from '@ezstart/ui/components'
+import {
+  Badge,
+  DataTable,
+  DataTableColumnHeader,
+  Div,
+  Icon,
+  P,
+  SkeletonList,
+  Span,
+  type ColumnDef,
+} from '@ezstart/ui/components'
 import type { KnownIconName } from '@ezstart/ui/components'
 import type { Payment, PaymentStatus, PaymentType } from '../types.js'
 import { formatCurrency } from '../utils/format-currency.js'
@@ -73,6 +83,70 @@ function getProductName(payment: Payment): string {
   return payment.projectName || '—'
 }
 
+function buildColumns(
+  statusLabel: (status: PaymentStatus) => string,
+  typeLabel: (type: PaymentType) => string,
+  headers: {
+    dateHeader: string
+    productHeader: string
+    typeHeader: string
+    amountHeader: string
+    statusHeader: string
+  }
+): ColumnDef<Payment, unknown>[] {
+  return [
+    {
+      accessorKey: 'createdAt',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={headers.dateHeader} />,
+      cell: ({ row }) => (
+        <Span>
+          {new Date(row.original.createdAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </Span>
+      ),
+    },
+    {
+      accessorKey: 'productName',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={headers.productHeader} />
+      ),
+      cell: ({ row }) => <Span>{getProductName(row.original)}</Span>,
+      enableSorting: false,
+    },
+    {
+      accessorKey: 'type',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={headers.typeHeader} />,
+      cell: ({ row }) => (
+        <Badge variant="secondary" size="sm">
+          <Icon name={TYPE_ICON[row.original.type]} size={12} />
+          {typeLabel(row.original.type)}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'amount',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={headers.amountHeader} />
+      ),
+      cell: ({ row }) => <Span>{formatCurrency(row.original.amount, row.original.currency)}</Span>,
+    },
+    {
+      accessorKey: 'status',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={headers.statusHeader} />
+      ),
+      cell: ({ row }) => (
+        <Badge variant={STATUS_VARIANT[row.original.status]} size="sm" dot>
+          {statusLabel(row.original.status)}
+        </Badge>
+      ),
+    },
+  ]
+}
+
 export function PaymentHistory({
   payments,
   loading = false,
@@ -97,112 +171,40 @@ export function PaymentHistory({
   // Loading state
   if (loading) {
     return (
-      <div className={className}>
+      <Div className={className}>
         <SkeletonList items={4} showAvatar={false} />
-      </div>
+      </Div>
     )
   }
 
   // Empty state
   if (!payments.length) {
     return (
-      <div className={className}>
-        <div className="flex flex-col items-center justify-center gap-4 p-12 rounded-lg border-2 border-dashed border-muted-foreground/20">
-          <Icon name="lucide:Receipt" className="w-12 h-12 text-muted-foreground/40" />
-          <p className="text-muted-foreground text-center">{t.emptyMessage}</p>
-        </div>
-      </div>
+      <Div className={className}>
+        <Div layout="center" size="lg" variant="outline">
+          <Icon name="lucide:Receipt" size={48} />
+          <P variant="description">{t.emptyMessage}</P>
+        </Div>
+      </Div>
     )
   }
 
-  return (
-    <div className={className}>
-      {/* Desktop table */}
-      <div className="hidden md:block overflow-hidden rounded-lg border border-border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                {t.dateHeader}
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                {t.productHeader}
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                {t.typeHeader}
-              </th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                {t.amountHeader}
-              </th>
-              <th className="px-4 py-3 text-center font-medium text-muted-foreground">
-                {t.statusHeader}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {payments.map(payment => (
-              <tr key={payment.id} className="transition-colors hover:bg-muted/30">
-                <td className="px-4 py-3 text-muted-foreground">
-                  {new Date(payment.createdAt).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </td>
-                <td className="px-4 py-3 font-medium">{getProductName(payment)}</td>
-                <td className="px-4 py-3">
-                  <Badge variant="secondary" size="sm">
-                    <Icon name={TYPE_ICON[payment.type]} className="w-3 h-3 mr-1" />
-                    {typeLabel(payment.type)}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3 text-right font-semibold">
-                  {formatCurrency(payment.amount, payment.currency)}
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <Badge variant={STATUS_VARIANT[payment.status]} size="sm" dot>
-                    {statusLabel(payment.status)}
-                  </Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  const columns = buildColumns(statusLabel, typeLabel, {
+    dateHeader: t.dateHeader,
+    productHeader: t.productHeader,
+    typeHeader: t.typeHeader,
+    amountHeader: t.amountHeader,
+    statusHeader: t.statusHeader,
+  })
 
-      {/* Mobile cards */}
-      <div className="flex flex-col gap-3 md:hidden">
-        {payments.map(payment => (
-          <Card key={payment.id} size="sm">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{getProductName(payment)}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {new Date(payment.createdAt).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </p>
-                </div>
-                <p className="font-semibold whitespace-nowrap">
-                  {formatCurrency(payment.amount, payment.currency)}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 mt-3">
-                <Badge variant="secondary" size="sm">
-                  <Icon name={TYPE_ICON[payment.type]} className="w-3 h-3 mr-1" />
-                  {typeLabel(payment.type)}
-                </Badge>
-                <Badge variant={STATUS_VARIANT[payment.status]} size="sm" dot>
-                  {statusLabel(payment.status)}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+  return (
+    <Div className={className}>
+      <DataTable
+        columns={columns}
+        data={payments}
+        pageSize={10}
+        initialSorting={[{ id: 'createdAt', desc: true }]}
+      />
+    </Div>
   )
 }
