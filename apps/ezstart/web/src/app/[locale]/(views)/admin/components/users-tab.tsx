@@ -1,327 +1,343 @@
 'use client'
 
-import type { AuthUser } from '@ezstart/auth-sdk'
-import { useAuth } from '@ezstart/auth-sdk'
-import { callApi } from '@ezstart/fetch-client'
-import { canManageUser, useRBAC } from '@ezstart/rbac'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Badge,
   Button,
   Card,
-  CardContent,
-  CardHeader,
-  type ColumnDef,
-  DataTable,
   Div,
-  H2,
-  Icon,
-  Img,
+  Input,
   P,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Skeleton,
   Span,
   Spinner,
+  DataTable,
+  DataTableColumnHeader,
+  type ColumnDef,
 } from '@ezstart/ui/components'
-import { useQuery } from '@tanstack/react-query'
-import { useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
-import { UserEditModal } from './user-edit-modal'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { EditRolesModal } from './edit-roles-modal'
 
-interface PaginatedUsers {
-  users: AuthUser[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+// ========================================
+// Types
+// ========================================
+
+interface AdminUser {
+  _id: string
+  email: string
+  username: string
+  globalRoles: string[]
+  appRoles: Record<string, string[]>
+  createdAt: string
 }
 
-function getRoleBadgeVariant(role: string): 'destructive' | 'default' | 'secondary' | 'outline' {
-  const variants: Record<string, 'destructive' | 'default' | 'secondary' | 'outline'> = {
-    superadmin: 'destructive',
-    admin: 'default',
-    manager: 'secondary',
-    'beta-tester': 'outline',
-    client: 'outline',
-  }
-  return variants[role] || 'outline'
+interface UsersResponse {
+  data: AdminUser[]
+  meta: { total: number; limit: number; offset: number }
 }
+
+// ========================================
+// Constants
+// ========================================
+
+const PAGE_SIZE = 20
+
+// ========================================
+// Helpers
+// ========================================
+
+function formatDate(dateStr: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(dateStr))
+}
+
+// ========================================
+// Component
+// ========================================
 
 export function UsersTab() {
-  const { user: currentUser } = useAuth()
-  const t = useTranslations()
-  const rbac = useRBAC(currentUser, 'ezstart')
-  const [page, setPage] = useState(1)
-  const limit = 50
-  const [selectedUser, setSelectedUser] = useState<AuthUser | null>(null)
+  const t = useTranslations('admin.users')
+  const td = useTranslations('admin.dialog')
+  const tr = useTranslations('admin.roles')
+
+  // Data state
+  const [users, setUsers] = useState<AdminUser[]>([])
+  const [loading, setLoading] = useState(true)
+  const [total, setTotal] = useState(0)
+  const [offset, setOffset] = useState(0)
+
+  // Search state
+  const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [roleFilter, setRoleFilter] = useState<string>('all')
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const {
-    data,
-    isLoading: loading,
-    error: queryError,
-    refetch,
-  } = useQuery({
-    queryKey: ['admin', 'users', page, limit, searchQuery, roleFilter],
-    queryFn: async () => {
-      const query: Record<string, string> = {
-        page: String(page),
-        limit: String(limit),
-      }
-
-      if (searchQuery) query.search = searchQuery
-      if (roleFilter && roleFilter !== 'all') query.role = roleFilter
-
-      const response = await callApi<PaginatedUsers>('/admin/users', {
-        appName: 'ezauth',
-        query,
-      })
-
-      if (response.ok && response.data) {
-        return response.data
-      }
-
-      const errorMsg =
-        response.status === 401
-          ? 'Unauthorized - Please login again'
-          : response.status === 403
-            ? 'Forbidden - Admin access required'
-            : `Failed to fetch users (${response.status})`
-      throw new Error(errorMsg)
-    },
-    staleTime: 30000,
+  // Modal/dialog state
+  const [editUser, setEditUser] = useState<AdminUser | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; userId: string | null }>({
+    open: false,
+    userId: null,
   })
 
-  const users = data?.users ?? []
-  const pagination = data?.pagination ?? { page: 1, limit, total: 0, totalPages: 0 }
-  const error = queryError?.message ?? null
+  // Debounced search
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value)
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    searchTimerRef.current = setTimeout(() => {
+      setSearchQuery(value)
+      setOffset(0)
+    }, 400)
+  }, [])
 
-  const columns: ColumnDef<AuthUser>[] = useMemo(
-    () => [
-      {
-        id: 'user',
-        header: t('admin.table.user'),
-        accessorFn: row => row.username,
-        cell: ({ row }) => {
-          const u = row.original
-          return (
-            <Div className="flex items-center gap-3">
-              {u.avatar && (
-                <Img
-                  src={u.avatar}
-                  alt={u.username}
-                  className="w-8 h-8 rounded-full flex-shrink-0"
-                />
-              )}
-              <Div className="min-w-0">
-                <P className="font-medium truncate">{u.username}</P>
-                <P className="text-xs text-muted-foreground truncate">{u.email}</P>
-              </Div>
-            </Div>
-          )
-        },
-      },
-      {
-        id: 'globalRoles',
-        header: t('admin.table.roles'),
-        enableSorting: false,
-        cell: ({ row }) => {
-          const globalRoles = row.original.globalRoles ?? []
-          if (globalRoles.length === 0) return null
-          return (
-            <Div className="flex flex-wrap gap-1">
-              {globalRoles.map(role => (
-                <Badge key={role} variant={getRoleBadgeVariant(role)}>
-                  {role}
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    }
+  }, [])
+
+  // Fetch users
+  const fetchUsers = useCallback(async () => {
+    setLoading(true)
+    try {
+      const query: Record<string, string> = {
+        limit: String(PAGE_SIZE),
+        offset: String(offset),
+      }
+      if (searchQuery) query.search = searchQuery
+
+      const response = await callApi<UsersResponse>('/admin/users', {
+        appName: 'ezauth',
+        method: 'GET',
+        query,
+      })
+      if (response.ok) {
+        const result = response.data as { users?: AdminUser[]; pagination?: { total: number } }
+        setUsers(result.users || [])
+        setTotal(result.pagination?.total ?? 0)
+      }
+    } catch {
+      // Error logged by callApi
+    } finally {
+      setLoading(false)
+    }
+  }, [offset, searchQuery])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
+
+  // Delete state
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+
+  // Delete handler
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteDialog.userId) return
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      const response = await callApi(`/admin/users/${deleteDialog.userId}`, {
+        appName: 'ezauth',
+        method: 'DELETE',
+      })
+      if (!response.ok) {
+        throw new Error(response.error || parseApiError(response.data) || t('deleteError'))
+      }
+      setDeleteDialog({ open: false, userId: null })
+      fetchUsers()
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : t('deleteError'))
+    } finally {
+      setDeleting(false)
+    }
+  }, [deleteDialog.userId, fetchUsers, t])
+
+  // Edit handler
+  const handleEditClick = useCallback((user: AdminUser) => {
+    setEditUser(user)
+    setEditOpen(true)
+  }, [])
+
+  // DataTable columns
+  const columns: ColumnDef<AdminUser>[] = [
+    {
+      accessorKey: 'email',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.email')} />,
+      cell: ({ row }) => <Span className="text-sm font-medium">{row.original.email}</Span>,
+    },
+    {
+      accessorKey: 'username',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t('columns.username')} />
+      ),
+      cell: ({ row }) => <Span className="text-sm">{row.original.username}</Span>,
+    },
+    {
+      accessorKey: 'globalRoles',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t('columns.globalRoles')} />
+      ),
+      cell: ({ row }) => (
+        <Div className="flex flex-wrap gap-1">
+          {row.original.globalRoles.map(role => (
+            <Badge
+              key={role}
+              variant={role === 'superadmin' ? 'destructive' : 'secondary'}
+              size="sm"
+            >
+              {tr(role as 'superadmin' | 'admin' | 'manager' | 'beta-tester' | 'client')}
+            </Badge>
+          ))}
+        </Div>
+      ),
+    },
+    {
+      accessorKey: 'appRoles',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t('columns.appRoles')} />
+      ),
+      cell: ({ row }) => {
+        const entries = Object.entries(row.original.appRoles)
+        if (entries.length === 0) return <Span className="text-muted-foreground text-sm">-</Span>
+        return (
+          <Div className="flex flex-wrap gap-1">
+            {entries.map(([app, roles]) =>
+              roles.map(role => (
+                <Badge key={`${app}-${role}`} variant="outline" size="sm">
+                  {app}:{role}
                 </Badge>
-              ))}
-            </Div>
-          )
-        },
+              ))
+            )}
+          </Div>
+        )
       },
-      {
-        id: 'appRoles',
-        header: t('admin.table.apps'),
-        enableSorting: false,
-        cell: ({ row }) => {
-          const appRoles = row.original.appRoles ?? {}
-          const entries = Object.entries(appRoles).filter(
-            ([, roles]) => Array.isArray(roles) && roles.length > 0
-          )
-          if (entries.length === 0) {
-            return (
-              <Badge variant="outline" className="text-xs">
-                {t('admin.table.noApps')}
-              </Badge>
-            )
-          }
-          return (
-            <Div className="flex flex-wrap gap-1">
-              {entries.map(([app, roles]) => (
-                <Badge key={app} variant="secondary" className="text-xs" title={roles.join(', ')}>
-                  {app}
-                  <Span className="ml-1 text-[10px] opacity-70">({roles.join(', ')})</Span>
-                </Badge>
-              ))}
-            </Div>
-          )
-        },
-      },
-      {
-        accessorKey: 'isVerified',
-        header: t('admin.table.verified'),
-        cell: ({ row }) =>
-          row.original.isVerified ? (
-            <Icon name="lucide:Check" className="text-emerald-500" />
-          ) : (
-            <Icon name="lucide:X" className="text-muted-foreground" />
-          ),
-      },
-      {
-        accessorKey: 'createdAt',
-        header: t('admin.table.createdAt'),
-        cell: ({ row }) => (
-          <P className="text-sm text-muted-foreground">
-            {new Date(row.original.createdAt).toLocaleDateString()}
-          </P>
-        ),
-      },
-      {
-        id: 'actions',
-        header: t('admin.table.actions'),
-        enableSorting: false,
-        cell: ({ row }) => {
-          const u = row.original
-          const canEdit = canManageUser(currentUser, u)
-          return canEdit ? (
-            <Button size="sm" variant="outline" onClick={() => setSelectedUser(u)}>
-              <Icon name="lucide:Edit" className="mr-1" />
-              {t('admin.table.edit')}
-            </Button>
-          ) : (
-            <Button size="sm" variant="ghost" disabled>
-              <Icon name="lucide:Lock" className="mr-1" />
-              {t('admin.table.locked')}
-            </Button>
-          )
-        },
-      },
-    ],
-    [t, currentUser]
-  )
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t('columns.createdAt')} />
+      ),
+      cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.createdAt)}</Span>,
+    },
+    {
+      id: 'actions',
+      header: t('columns.actions'),
+      cell: ({ row }) => (
+        <Div className="flex gap-1">
+          <Button variant="outline" size="sm" onClick={() => handleEditClick(row.original)}>
+            {t('edit')}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setDeleteDialog({ open: true, userId: row.original._id })}
+          >
+            {t('delete')}
+          </Button>
+        </Div>
+      ),
+    },
+  ]
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <H2>{t('admin.userManagement.title')}</H2>
-        </CardHeader>
-        <CardContent>
-          {loading && <Spinner size="lg" />}
+    <Div className="space-y-4">
+      {/* Search */}
+      <Input
+        placeholder={t('searchPlaceholder')}
+        value={searchInput}
+        onChange={e => handleSearchChange(e.target.value)}
+        className="w-full sm:w-80"
+      />
 
-          {error && (
-            <Div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md mb-4">
-              <P className="font-medium">{t('admin.userManagement.errorLoading')}</P>
-              <P className="text-sm mt-1">{error}</P>
+      {/* Table */}
+      {loading ? (
+        <Card className="p-8">
+          <Div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </Div>
+        </Card>
+      ) : users.length === 0 ? (
+        <Card className="p-8">
+          <P className="text-center text-muted-foreground">{t('noUsers')}</P>
+        </Card>
+      ) : (
+        <DataTable columns={columns} data={users} pageSize={PAGE_SIZE} />
+      )}
+
+      {/* Server-side pagination info */}
+      {!loading && total > PAGE_SIZE && (
+        <Div className="flex items-center justify-between">
+          <P className="text-sm text-muted-foreground">
+            {offset + 1}-{Math.min(offset + PAGE_SIZE, total)} / {total}
+          </P>
+          <Div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={offset === 0}
+              onClick={() => setOffset(prev => Math.max(0, prev - PAGE_SIZE))}
+            >
+              &larr;
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={offset + PAGE_SIZE >= total}
+              onClick={() => setOffset(prev => prev + PAGE_SIZE)}
+            >
+              &rarr;
+            </Button>
+          </Div>
+        </Div>
+      )}
+
+      {/* Edit Roles Modal */}
+      <EditRolesModal
+        user={editUser}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={fetchUsers}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        variant="destructive"
+        open={deleteDialog.open}
+        onOpenChange={(open: boolean) => {
+          if (!deleting) setDeleteDialog(prev => ({ ...prev, open }))
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('confirmDeleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('confirmDeleteDescription')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          {deleteError && (
+            <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
+              {deleteError}
             </Div>
           )}
-
-          {!loading && !error && (
-            <>
-              {/* Filters */}
-              <Div className="mb-6 flex gap-4 flex-wrap">
-                <Select value={roleFilter || 'all'} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={t('admin.userManagement.allRoles')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('admin.userManagement.allRoles')}</SelectItem>
-                    <SelectItem value="superadmin">
-                      {t('admin.userManagement.roles.superadmin')}
-                    </SelectItem>
-                    <SelectItem value="admin">{t('admin.userManagement.roles.admin')}</SelectItem>
-                    <SelectItem value="manager">
-                      {t('admin.userManagement.roles.manager')}
-                    </SelectItem>
-                    <SelectItem value="beta-tester">
-                      {t('admin.userManagement.roles.betaTester')}
-                    </SelectItem>
-                    <SelectItem value="client">
-                      {t('admin.userManagement.roles.client')}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={() => refetch()} variant="outline">
-                  {t('admin.userManagement.refresh')}
-                </Button>
-              </Div>
-
-              {/* Users DataTable */}
-              <DataTable
-                columns={columns}
-                data={users}
-                filterColumn="user"
-                filterPlaceholder={t('admin.userManagement.searchPlaceholder')}
-                pageSize={limit}
-                hidePagination
-              />
-
-              {/* Server-side pagination */}
-              <Div className="mt-6 flex items-center justify-between">
-                <P className="text-sm text-muted-foreground">
-                  {t('admin.userManagement.showing', {
-                    count: users?.length ?? 0,
-                    total: pagination?.total ?? 0,
-                  })}
-                </P>
-                <Div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={pagination.page === 1}
-                    onClick={() => setPage(p => p - 1)}
-                  >
-                    {t('admin.userManagement.previous')}
-                  </Button>
-                  <P className="text-sm py-2 px-3">
-                    {t('admin.userManagement.pageOf', {
-                      page: pagination.page,
-                      totalPages: pagination.totalPages || 1,
-                    })}
-                  </P>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={pagination.page === pagination.totalPages}
-                    onClick={() => setPage(p => p + 1)}
-                  >
-                    {t('admin.userManagement.next')}
-                  </Button>
-                </Div>
-              </Div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Edit User Modal */}
-      {selectedUser && (
-        <UserEditModal
-          user={selectedUser}
-          currentUser={currentUser}
-          rbac={rbac}
-          onClose={() => setSelectedUser(null)}
-          onSave={() => {
-            setSelectedUser(null)
-            refetch()
-          }}
-        />
-      )}
-    </>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>{td('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleting}>
+              {deleting ? <Spinner size="sm" /> : td('confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Div>
   )
 }

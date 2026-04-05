@@ -1,125 +1,117 @@
 {
   "admin": {
     "title": "Panneau d'Administration",
-    "description": "Gérer les utilisateurs, rôles, permissions et fonctionnalités du monorepo @ezstart",
+    "description": "Gerer les utilisateurs, roles, permissions et fonctionnalites du monorepo @ezstart",
     "tabs": {
       "users": "Utilisateurs",
       "ezauth": "EZAuth",
       "ezpay": "EZPay",
       "monitoring": "Monitoring"
     },
-    "userManagement": {
-      "title": "Gestion des Utilisateurs",
-      "searchPlaceholder": "Rechercher par email, nom d'utilisateur, nom...",
-      "allRoles": "Tous les Rôles",
-      "roles": {
-        "superadmin": "Superadmin",
-        "admin": "Admin",
-        "manager": "Manager",
-        "betaTester": "Bêta Testeur",
-        "client": "Client"
+    "users": {
+      "searchPlaceholder": "Rechercher par email ou nom d'utilisateur...",
+      "columns": {
+        "email": "Email",
+        "username": "Nom d'utilisateur",
+        "globalRoles": "Roles globaux",
+        "appRoles": "Roles par app",
+        "createdAt": "Date de creation",
+        "actions": "Actions"
       },
-      "refresh": "Actualiser",
-      "showing": "Affichage de {count} sur {total} utilisateurs",
-      "previous": "Précédent",
-      "pageOf": "Page {page} sur {totalPages}",
-      "next": "Suivant",
-      "errorLoading": "Erreur de chargement des utilisateurs",
-      "noUsers": "Aucun utilisateur trouvé"
-    },
-    "table": {
-      "user": "Utilisateur",
-      "email": "Email",
-      "roles": "Rôles",
-      "apps": "Applications",
-      "verified": "Vérifié",
-      "actions": "Actions",
-      "noRoles": "Aucun rôle",
-      "noApps": "Aucune app",
-      "verifiedLabel": "Vérifié",
-      "unverified": "Non vérifié",
-      "notVerified": "Non vérifié",
       "edit": "Modifier",
-      "editUser": "Modifier l'utilisateur",
-      "locked": "Verrouillé",
-      "createdAt": "Créé le"
+      "delete": "Supprimer",
+      "noUsers": "Aucun utilisateur trouve.",
+      "confirmDeleteTitle": "Supprimer l'utilisateur",
+      "confirmDeleteDescription": "Etes-vous sur de vouloir supprimer cet utilisateur ? Cette action est irreversible.",
+      "deleteSuccess": "Utilisateur supprime avec succes.",
+      "deleteError": "Echec de la suppression de l'utilisateur.",
+      "loading": "Chargement des utilisateurs..."
     },
-    "editModal": {
-      "title": "Modifier l'utilisateur : {username}",
+    "editRoles": {
+      "title": "Modifier les roles",
+      "subtitle": "Modifier les roles pour {email}",
+      "globalRoles": "Roles globaux",
+      "appRoles": "Roles par app ({app})",
+      "save": "Enregistrer",
       "cancel": "Annuler",
       "saving": "Enregistrement...",
-      "saveChanges": "Enregistrer les modifications",
-      "userInfo": {
-        "title": "Informations Utilisateur",
-        "email": "Email :",
-        "username": "Nom d'utilisateur :",
-        "name": "Nom :",
-        "created": "Créé le :"
-      },
-      "emailVerified": "Email Vérifié",
-      "globalRoles": {
-        "title": "Rôles Globaux (Accès Inter-Apps)",
-        "description": "Seul le superadmin peut être un rôle global avec accès à tout partout"
-      },
-      "appAccess": {
-        "title": "Accès aux Applications & Rôles Spécifiques",
-        "description": "Sélectionnez les applications auxquelles l'utilisateur peut accéder et attribuez des rôles pour chaque app"
-      },
-      "inheritedPermissions": "Permissions Héritées (des rôles)",
-      "inheritedFeatures": "Fonctionnalités Héritées (des rôles)",
-      "errorSaving": "Erreur lors de l'enregistrement"
+      "editSuccess": "Roles mis a jour avec succes.",
+      "editError": "Echec de la mise a jour des roles.",
+      "noAppRoles": "Aucun role d'application assigne."
     },
-    "ezauth": {
-      "title": "Gestion de la Liste d'Attente",
-      "selectApp": "Sélectionner une app",
-      "errorLoading": "Erreur de chargement de la liste d'attente",
-      "noEntries": "Aucune entrée dans la liste d'attente pour cette app",
-      "invite": "Inviter",
-      "inviteSuccess": "Invitation envoyée à {email}",
-      "inviteError": "Échec de l'invitation : {message}",
-      "invitedOn": "Invité le {date}",
-      "showing": "Affichage de {count} sur {total} entrées",
-      "previous": "Précédent",
-      "pageOf": "Page {page} sur {totalPages}",
-      "next": "Suivant",
+    "roles": {
+      "superadmin": "Super Admin",
+      "admin": "Admin",
+      "manager": "Manager",
+      "beta-tester": "Beta Testeur",
+      "client": "Client"
+    },
+    "waitlist": {
+      "selectApp": "Selectionner l'app",
       "columns": {
         "email": "Email",
         "status": "Statut",
-        "date": "Date d'ajout",
+        "addedAt": "Date d'ajout",
+        "invitedAt": "Date d'invitation",
         "actions": "Actions"
       },
-      "stats": {
-        "total": "Total",
-        "pending": "En attente",
-        "invited": "Invités",
-        "activated": "Activés",
-        "rejected": "Rejetés"
-      }
+      "invite": "Inviter",
+      "noWaitlist": "Aucune entree en liste d'attente.",
+      "inviteSuccess": "Invitation envoyee avec succes.",
+      "inviteError": "Echec de l'envoi de l'invitation.",
+      "loading": "Chargement de la liste d'attente...",
+      "statusPending": "En attente",
+      "statusInvited": "Invite",
+      "statusActivated": "Active",
+      "statusRejected": "Rejete"
+    },
+    "dialog": {
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "loading": "Traitement en cours...",
+      "retry": "Reessayer",
+      "close": "Fermer"
     },
     "ezpay": {
-      "title": "Aperçu des Paiements",
-      "errorLoading": "Erreur de chargement des paiements",
-      "noPayments": "Aucun paiement trouvé",
-      "refund": "Rembourser",
-      "refundSuccess": "Paiement remboursé avec succès",
-      "refundError": "Échec du remboursement : {message}",
-      "showing": "Affichage de {count} sur {total} paiements",
-      "previous": "Précédent",
-      "pageOf": "Page {page} sur {totalPages}",
-      "next": "Suivant",
-      "columns": {
-        "id": "ID",
+      "stats": {
+        "totalRevenue": "Revenu total",
+        "totalPayments": "Nombre de paiements",
+        "donations": "Dons",
+        "purchases": "Achats",
+        "subscriptions": "Abonnements"
+      },
+      "table": {
+        "date": "Date",
         "type": "Type",
+        "client": "Client",
         "amount": "Montant",
         "status": "Statut",
-        "project": "Projet",
-        "date": "Date",
-        "actions": "Actions"
+        "actions": "Actions",
+        "noPayments": "Aucun paiement trouve",
+        "refund": "Rembourser",
+        "refundConfirm": "Etes-vous sur de vouloir rembourser ce paiement ?",
+        "refundSuccess": "Paiement rembourse avec succes",
+        "refundError": "Erreur lors du remboursement",
+        "cancelSubscription": "Annuler l'abonnement",
+        "cancelConfirm": "Etes-vous sur de vouloir annuler cet abonnement ?",
+        "cancelSuccess": "Abonnement annule avec succes",
+        "cancelError": "Erreur lors de l'annulation de l'abonnement",
+        "cancelNoId": "Impossible d'annuler : l'abonnement n'a pas encore ete active par Stripe",
+        "loading": "Chargement..."
       },
-      "stats": {
-        "totalRevenue": "Revenu Total",
-        "totalTransactions": "Total des Transactions",
-        "totalRefunds": "Total des Remboursements"
+      "filters": {
+        "allTypes": "Tous les types",
+        "allStatuses": "Tous les statuts",
+        "searchEmail": "Rechercher par email...",
+        "donation": "Don",
+        "purchase": "Achat",
+        "subscription": "Abonnement",
+        "invoice": "Facture",
+        "pending": "En attente",
+        "completed": "Termine",
+        "failed": "Echoue",
+        "refunded": "Rembourse",
+        "cancelled": "Annule"
       }
     }
   }

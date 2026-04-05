@@ -16,7 +16,6 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { UsersTab } from './components/users-tab'
-import { EZAuthTab } from './components/ezauth-tab'
 import { EZPayTab } from './components/ezpay-tab'
 import { MonitoringTab } from './components/monitoring-tab'
 
@@ -30,20 +29,15 @@ function AdminPanelContent() {
         <P className="text-muted-foreground mt-2">{t('admin.description')}</P>
       </Section>
 
-      <Tabs defaultValue="users" className="mt-6">
+      <Tabs defaultValue="ezauth" className="mt-6">
         <TabsList>
-          <TabsTrigger value="users">{t('admin.tabs.users')}</TabsTrigger>
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>
           <TabsTrigger value="ezpay">{t('admin.tabs.ezpay')}</TabsTrigger>
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users">
-          <UsersTab />
-        </TabsContent>
-
         <TabsContent value="ezauth">
-          <EZAuthTab />
+          <UsersTab />
         </TabsContent>
 
         <TabsContent value="ezpay">

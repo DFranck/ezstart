@@ -8,118 +8,110 @@
       "ezpay": "EZPay",
       "monitoring": "Monitoring"
     },
-    "userManagement": {
-      "title": "User Management",
-      "searchPlaceholder": "Search by email, username, name...",
-      "allRoles": "All Roles",
-      "roles": {
-        "superadmin": "Superadmin",
-        "admin": "Admin",
-        "manager": "Manager",
-        "betaTester": "Beta Tester",
-        "client": "Client"
+    "users": {
+      "searchPlaceholder": "Search by email or username...",
+      "columns": {
+        "email": "Email",
+        "username": "Username",
+        "globalRoles": "Global Roles",
+        "appRoles": "App Roles",
+        "createdAt": "Created At",
+        "actions": "Actions"
       },
-      "refresh": "Refresh",
-      "showing": "Showing {count} of {total} users",
-      "previous": "Previous",
-      "pageOf": "Page {page} of {totalPages}",
-      "next": "Next",
-      "errorLoading": "Error loading users",
-      "noUsers": "No users found"
-    },
-    "table": {
-      "user": "User",
-      "email": "Email",
-      "roles": "Roles",
-      "apps": "Apps",
-      "verified": "Verified",
-      "actions": "Actions",
-      "noRoles": "No roles",
-      "noApps": "No apps",
-      "verifiedLabel": "Verified",
-      "unverified": "Unverified",
-      "notVerified": "Not verified",
       "edit": "Edit",
-      "editUser": "Edit User",
-      "locked": "Locked",
-      "createdAt": "Created"
+      "delete": "Delete",
+      "noUsers": "No users found.",
+      "confirmDeleteTitle": "Delete User",
+      "confirmDeleteDescription": "Are you sure you want to delete this user? This action cannot be undone.",
+      "deleteSuccess": "User deleted successfully.",
+      "deleteError": "Failed to delete user.",
+      "loading": "Loading users..."
     },
-    "editModal": {
-      "title": "Edit User: {username}",
+    "editRoles": {
+      "title": "Edit Roles",
+      "subtitle": "Update roles for {email}",
+      "globalRoles": "Global Roles",
+      "appRoles": "App Roles ({app})",
+      "save": "Save Changes",
       "cancel": "Cancel",
       "saving": "Saving...",
-      "saveChanges": "Save Changes",
-      "userInfo": {
-        "title": "User Information",
-        "email": "Email:",
-        "username": "Username:",
-        "name": "Name:",
-        "created": "Created:"
-      },
-      "emailVerified": "Email Verified",
-      "globalRoles": {
-        "title": "Global Roles (Cross-App Access)",
-        "description": "Only superadmin can be a global role with access to everything everywhere"
-      },
-      "appAccess": {
-        "title": "Applications Access & App-Specific Roles",
-        "description": "Select which apps the user can access and assign roles for each app"
-      },
-      "inheritedPermissions": "Inherited Permissions (from roles)",
-      "inheritedFeatures": "Inherited Features (from roles)",
-      "errorSaving": "Error saving changes"
+      "editSuccess": "Roles updated successfully.",
+      "editError": "Failed to update roles.",
+      "noAppRoles": "No app roles assigned."
     },
-    "ezauth": {
-      "title": "Waitlist Management",
-      "selectApp": "Select an app",
-      "errorLoading": "Error loading waitlist",
-      "noEntries": "No waitlist entries for this app",
-      "invite": "Invite",
-      "inviteSuccess": "Invitation sent to {email}",
-      "inviteError": "Failed to invite: {message}",
-      "invitedOn": "Invited on {date}",
-      "showing": "Showing {count} of {total} entries",
-      "previous": "Previous",
-      "pageOf": "Page {page} of {totalPages}",
-      "next": "Next",
+    "roles": {
+      "superadmin": "Super Admin",
+      "admin": "Admin",
+      "manager": "Manager",
+      "beta-tester": "Beta Tester",
+      "client": "Client"
+    },
+    "waitlist": {
+      "selectApp": "Select app",
       "columns": {
         "email": "Email",
         "status": "Status",
-        "date": "Date Added",
+        "addedAt": "Added At",
+        "invitedAt": "Invited At",
         "actions": "Actions"
       },
-      "stats": {
-        "total": "Total",
-        "pending": "Pending",
-        "invited": "Invited",
-        "activated": "Activated",
-        "rejected": "Rejected"
-      }
+      "invite": "Invite",
+      "noWaitlist": "No waitlist entries found.",
+      "inviteSuccess": "Invitation sent successfully.",
+      "inviteError": "Failed to send invitation.",
+      "loading": "Loading waitlist...",
+      "statusPending": "Pending",
+      "statusInvited": "Invited",
+      "statusActivated": "Activated",
+      "statusRejected": "Rejected"
+    },
+    "dialog": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "loading": "Processing...",
+      "retry": "Retry",
+      "close": "Close"
     },
     "ezpay": {
-      "title": "Payments Overview",
-      "errorLoading": "Error loading payments",
-      "noPayments": "No payments found",
-      "refund": "Refund",
-      "refundSuccess": "Payment refunded successfully",
-      "refundError": "Failed to refund: {message}",
-      "showing": "Showing {count} of {total} payments",
-      "previous": "Previous",
-      "pageOf": "Page {page} of {totalPages}",
-      "next": "Next",
-      "columns": {
-        "id": "ID",
-        "type": "Type",
-        "amount": "Amount",
-        "status": "Status",
-        "project": "Project",
-        "date": "Date",
-        "actions": "Actions"
-      },
       "stats": {
         "totalRevenue": "Total Revenue",
-        "totalTransactions": "Total Transactions",
-        "totalRefunds": "Total Refunds"
+        "totalPayments": "Total Payments",
+        "donations": "Donations",
+        "purchases": "Purchases",
+        "subscriptions": "Subscriptions"
+      },
+      "table": {
+        "date": "Date",
+        "type": "Type",
+        "client": "Client",
+        "amount": "Amount",
+        "status": "Status",
+        "actions": "Actions",
+        "noPayments": "No payments found",
+        "refund": "Refund",
+        "refundConfirm": "Are you sure you want to refund this payment?",
+        "refundSuccess": "Payment refunded successfully",
+        "refundError": "Error while processing refund",
+        "cancelSubscription": "Cancel subscription",
+        "cancelConfirm": "Are you sure you want to cancel this subscription?",
+        "cancelSuccess": "Subscription cancelled successfully",
+        "cancelError": "Error while cancelling subscription",
+        "cancelNoId": "Cannot cancel: subscription not yet activated by Stripe",
+        "loading": "Loading..."
+      },
+      "filters": {
+        "allTypes": "All types",
+        "allStatuses": "All statuses",
+        "searchEmail": "Search by email...",
+        "donation": "Donation",
+        "purchase": "Purchase",
+        "subscription": "Subscription",
+        "invoice": "Invoice",
+        "pending": "Pending",
+        "completed": "Completed",
+        "failed": "Failed",
+        "refunded": "Refunded",
+        "cancelled": "Cancelled"
       }
     }
   }
