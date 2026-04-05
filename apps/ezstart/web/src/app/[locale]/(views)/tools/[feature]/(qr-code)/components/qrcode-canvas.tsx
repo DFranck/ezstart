@@ -2,7 +2,9 @@
 
 import { logger } from '@ezstart/logger'
 import { Button, Div, Icon, P, Span } from '@ezstart/ui/components'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { QRCodeConfig } from '../types'
 
 interface QRCodeCanvasProps {
@@ -10,11 +12,11 @@ interface QRCodeCanvasProps {
 }
 
 export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
+  const t = useSafeTranslations('qrCode')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [qrCode, setQRCode] = useState<any>(null)
 
   useEffect(() => {
-    // Dynamically import qrcode library (client-side only)
     import('qrcode').then(QRCode => {
       setQRCode(() => QRCode.default)
     })
@@ -50,8 +52,8 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
       link.download = `qrcode-${Date.now()}.png`
       link.href = url
       link.click()
+      toast.success(t('generator.preview.downloadSuccess'))
     } else if (format === 'svg') {
-      // For SVG, we'll use the qrcode library's toString method
       if (!qrCode) return
 
       qrCode.toString(
@@ -78,6 +80,7 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
           link.href = url
           link.click()
           URL.revokeObjectURL(url)
+          toast.success(t('generator.preview.downloadSuccess'))
         }
       )
     }
@@ -92,18 +95,18 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
       })
 
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-
-      // Show success feedback (could add toast here)
-      logger.info('QR Code copied to clipboard')
+      toast.success(t('generator.preview.copied'))
     } catch (error) {
       logger.error('Failed to copy image:', error)
+      toast.error(t('generator.preview.copyError'))
     }
   }
 
   if (!config.url) {
     return (
-      <Div layout="center" className="min-h-[300px] bg-muted/50 rounded-lg">
-        <P className="text-muted-foreground">Enter a URL to generate QR code</P>
+      <Div layout="center" className="min-h-[320px] border border-dashed border-border rounded-lg bg-muted/30">
+        <Icon name="lucide:QrCode" className="w-12 h-12 text-muted-foreground/40 mb-3" />
+        <P className="text-muted-foreground">{t('generator.preview.emptyState')}</P>
       </Div>
     )
   }
@@ -111,39 +114,36 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
   return (
     <Div className="space-y-4">
       {/* Canvas Preview */}
-      <Div layout="center" className="p-6 bg-muted/50 rounded-lg">
+      <Div layout="center" className="p-6 bg-muted/30 rounded-lg">
         <canvas
           ref={canvasRef}
-          className="border border-border rounded-lg shadow-sm"
+          className="rounded-lg"
           style={{ maxWidth: '100%', height: 'auto' }}
         />
       </Div>
 
-      {/* Download Options */}
-      <Div className="space-y-2">
-        <P className="text-sm font-medium">Download</P>
-        <Div className="flex flex-wrap gap-2">
-          <Button onClick={() => handleDownload('png')} variant="default" size="sm">
-            <Icon name="lucide:Download" size={16} ariaHidden />
-            <Span className="ml-2">PNG</Span>
-          </Button>
-          <Button onClick={() => handleDownload('svg')} variant="default" size="sm">
-            <Icon name="lucide:Download" size={16} ariaHidden />
-            <Span className="ml-2">SVG</Span>
-          </Button>
-          <Button onClick={handleCopyImage} variant="outline" size="sm">
-            <Icon name="lucide:Copy" size={16} ariaHidden />
-            <Span className="ml-2">Copy Image</Span>
-          </Button>
-        </Div>
+      {/* Download & Copy Actions */}
+      <Div className="flex flex-wrap gap-2">
+        <Button onClick={() => handleDownload('png')} variant="default" className="flex-1">
+          <Icon name="lucide:Download" size={16} ariaHidden />
+          <Span className="ml-2">{t('generator.preview.downloadPng')}</Span>
+        </Button>
+        <Button onClick={() => handleDownload('svg')} variant="default" className="flex-1">
+          <Icon name="lucide:Download" size={16} ariaHidden />
+          <Span className="ml-2">{t('generator.preview.downloadSvg')}</Span>
+        </Button>
       </Div>
+      <Button onClick={handleCopyImage} variant="outline" className="w-full">
+        <Icon name="lucide:Copy" size={16} ariaHidden />
+        <Span className="ml-2">{t('generator.preview.copyToClipboard')}</Span>
+      </Button>
 
-      {/* Info */}
+      {/* Redirect Info */}
       {config.redirectType === 'temporary' && (
-        <Div variant="card" size="sm" className="text-sm bg-muted/50">
-          <Icon name="lucide:Info" size={16} className="inline mr-2" ariaHidden />
+        <Div variant="card" size="sm" className="text-sm bg-muted/30 rounded-lg">
+          <Icon name="lucide:Info" size={16} className="inline mr-2 text-muted-foreground" ariaHidden />
           <Span className="text-muted-foreground">
-            Temporary redirect: URL can be changed later without regenerating the QR code
+            {t('generator.preview.temporaryRedirectInfo')}
           </Span>
         </Div>
       )}

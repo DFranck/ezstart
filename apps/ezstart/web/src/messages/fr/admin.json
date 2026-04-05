@@ -2,6 +2,12 @@
   "admin": {
     "title": "Panneau d'Administration",
     "description": "Gérer les utilisateurs, rôles, permissions et fonctionnalités du monorepo @ezstart",
+    "tabs": {
+      "users": "Utilisateurs",
+      "ezauth": "EZAuth",
+      "ezpay": "EZPay",
+      "monitoring": "Monitoring"
+    },
     "userManagement": {
       "title": "Gestion des Utilisateurs",
       "searchPlaceholder": "Rechercher par email, nom d'utilisateur, nom...",
@@ -61,6 +67,59 @@
       "inheritedPermissions": "Permissions Héritées (des rôles)",
       "inheritedFeatures": "Fonctionnalités Héritées (des rôles)",
       "errorSaving": "Erreur lors de l'enregistrement"
+    },
+    "ezauth": {
+      "title": "Gestion de la Liste d'Attente",
+      "selectApp": "Sélectionner une app",
+      "errorLoading": "Erreur de chargement de la liste d'attente",
+      "noEntries": "Aucune entrée dans la liste d'attente pour cette app",
+      "invite": "Inviter",
+      "inviteSuccess": "Invitation envoyée à {email}",
+      "inviteError": "Échec de l'invitation : {message}",
+      "invitedOn": "Invité le {date}",
+      "showing": "Affichage de {count} sur {total} entrées",
+      "previous": "Précédent",
+      "pageOf": "Page {page} sur {totalPages}",
+      "next": "Suivant",
+      "columns": {
+        "email": "Email",
+        "status": "Statut",
+        "date": "Date d'ajout",
+        "actions": "Actions"
+      },
+      "stats": {
+        "total": "Total",
+        "pending": "En attente",
+        "invited": "Invités",
+        "activated": "Activés",
+        "rejected": "Rejetés"
+      }
+    },
+    "ezpay": {
+      "title": "Aperçu des Paiements",
+      "errorLoading": "Erreur de chargement des paiements",
+      "noPayments": "Aucun paiement trouvé",
+      "refund": "Rembourser",
+      "refundSuccess": "Paiement remboursé avec succès",
+      "refundError": "Échec du remboursement : {message}",
+      "showing": "Affichage de {count} sur {total} paiements",
+      "previous": "Précédent",
+      "pageOf": "Page {page} sur {totalPages}",
+      "next": "Suivant",
+      "columns": {
+        "id": "ID",
+        "type": "Type",
+        "amount": "Montant",
+        "status": "Statut",
+        "project": "Projet",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "stats": {
+        "totalRevenue": "Revenu Total",
+        "totalTransactions": "Total des Transactions",
+        "totalRefunds": "Total des Remboursements"
+      }
     }
   }
 }

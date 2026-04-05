@@ -2,7 +2,7 @@
   "qrCode": {
     "hero": {
       "title": "QR Code Generator",
-      "description": "Generate professional QR codes with customization options. Perfect for business cards, marketing materials, and event tickets."
+      "description": "Generate professional QR codes instantly. Free, no account required."
     },
     "generator": {
       "configuration": {
@@ -15,9 +15,9 @@
           "temporary": "Temporary (Trackable)"
         },
         "sizeLabel": "Size",
-        "foregroundColorLabel": "Foreground Color",
-        "backgroundColorLabel": "Background Color",
-        "errorCorrectionLabel": "Error Correction Level",
+        "foregroundColorLabel": "Foreground",
+        "backgroundColorLabel": "Background",
+        "errorCorrectionLabel": "Error Correction",
         "errorCorrection": {
           "low": "Low (7%)",
           "medium": "Medium (15%)",
@@ -29,9 +29,15 @@
         "resetButton": "Reset"
       },
       "preview": {
-        "title": "Preview & Download",
-        "downloadButton": "Download QR Code",
-        "emptyState": "Enter content to generate QR code"
+        "title": "Preview",
+        "emptyState": "Enter a URL to generate your QR code",
+        "downloadPng": "Download PNG",
+        "downloadSvg": "Download SVG",
+        "copyToClipboard": "Copy to clipboard",
+        "downloadSuccess": "QR code downloaded",
+        "copied": "Copied to clipboard!",
+        "copyError": "Failed to copy to clipboard",
+        "temporaryRedirectInfo": "Temporary redirect: URL can be changed later without regenerating the QR code"
       }
     },
     "useCases": {

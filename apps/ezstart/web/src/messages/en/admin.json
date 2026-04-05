@@ -2,6 +2,12 @@
   "admin": {
     "title": "Admin Panel",
     "description": "Manage users, roles, permissions, and features across the @ezstart monorepo",
+    "tabs": {
+      "users": "Users",
+      "ezauth": "EZAuth",
+      "ezpay": "EZPay",
+      "monitoring": "Monitoring"
+    },
     "userManagement": {
       "title": "User Management",
       "searchPlaceholder": "Search by email, username, name...",
@@ -61,6 +67,59 @@
       "inheritedPermissions": "Inherited Permissions (from roles)",
       "inheritedFeatures": "Inherited Features (from roles)",
       "errorSaving": "Error saving changes"
+    },
+    "ezauth": {
+      "title": "Waitlist Management",
+      "selectApp": "Select an app",
+      "errorLoading": "Error loading waitlist",
+      "noEntries": "No waitlist entries for this app",
+      "invite": "Invite",
+      "inviteSuccess": "Invitation sent to {email}",
+      "inviteError": "Failed to invite: {message}",
+      "invitedOn": "Invited on {date}",
+      "showing": "Showing {count} of {total} entries",
+      "previous": "Previous",
+      "pageOf": "Page {page} of {totalPages}",
+      "next": "Next",
+      "columns": {
+        "email": "Email",
+        "status": "Status",
+        "date": "Date Added",
+        "actions": "Actions"
+      },
+      "stats": {
+        "total": "Total",
+        "pending": "Pending",
+        "invited": "Invited",
+        "activated": "Activated",
+        "rejected": "Rejected"
+      }
+    },
+    "ezpay": {
+      "title": "Payments Overview",
+      "errorLoading": "Error loading payments",
+      "noPayments": "No payments found",
+      "refund": "Refund",
+      "refundSuccess": "Payment refunded successfully",
+      "refundError": "Failed to refund: {message}",
+      "showing": "Showing {count} of {total} payments",
+      "previous": "Previous",
+      "pageOf": "Page {page} of {totalPages}",
+      "next": "Next",
+      "columns": {
+        "id": "ID",
+        "type": "Type",
+        "amount": "Amount",
+        "status": "Status",
+        "project": "Project",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "stats": {
+        "totalRevenue": "Total Revenue",
+        "totalTransactions": "Total Transactions",
+        "totalRefunds": "Total Refunds"
+      }
     }
   }
 }

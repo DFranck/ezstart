@@ -1,8 +1,8 @@
 {
   "qrCode": {
     "hero": {
-      "title": "Générateur de QR Code",
-      "description": "Générez des QR codes professionnels avec des options de personnalisation. Parfait pour les cartes de visite, supports marketing et billets d'événements."
+      "title": "Generateur de QR Code",
+      "description": "Generez des QR codes professionnels instantanement. Gratuit, sans inscription."
     },
     "generator": {
       "configuration": {
@@ -12,41 +12,47 @@
         "redirectTypeLabel": "Type de Redirection",
         "redirectType": {
           "permanent": "Permanente (Directe)",
-          "temporary": "Temporaire (Traçable)"
+          "temporary": "Temporaire (Tracable)"
         },
         "sizeLabel": "Taille",
-        "foregroundColorLabel": "Couleur de Premier Plan",
-        "backgroundColorLabel": "Couleur de Fond",
-        "errorCorrectionLabel": "Niveau de Correction d'Erreur",
+        "foregroundColorLabel": "Premier plan",
+        "backgroundColorLabel": "Arriere-plan",
+        "errorCorrectionLabel": "Correction d'erreur",
         "errorCorrection": {
           "low": "Faible (7%)",
           "medium": "Moyen (15%)",
           "quartile": "Quartile (25%)",
-          "high": "Élevé (30%)"
+          "high": "Eleve (30%)"
         },
-        "errorCorrectionHelp": "Des niveaux plus élevés permettent une meilleure récupération en cas de dommage",
+        "errorCorrectionHelp": "Des niveaux plus eleves permettent une meilleure recuperation en cas de dommage",
         "includeMarginLabel": "Inclure une marge",
-        "resetButton": "Réinitialiser"
+        "resetButton": "Reinitialiser"
       },
       "preview": {
-        "title": "Aperçu & Téléchargement",
-        "downloadButton": "Télécharger le QR Code",
-        "emptyState": "Entrez du contenu pour générer le QR code"
+        "title": "Apercu",
+        "emptyState": "Entrez une URL pour generer votre QR code",
+        "downloadPng": "Telecharger PNG",
+        "downloadSvg": "Telecharger SVG",
+        "copyToClipboard": "Copier dans le presse-papiers",
+        "downloadSuccess": "QR code telecharge",
+        "copied": "Copie dans le presse-papiers !",
+        "copyError": "Echec de la copie dans le presse-papiers",
+        "temporaryRedirectInfo": "Redirection temporaire : l'URL peut etre modifiee plus tard sans regenerer le QR code"
       }
     },
     "useCases": {
-      "title": "Cas d'Usage Courants",
-      "description": "Les QR codes sont polyvalents et peuvent être utilisés dans de nombreux scénarios",
+      "title": "Cas d'usage courants",
+      "description": "Les QR codes sont polyvalents et peuvent etre utilises dans de nombreux scenarios",
       "businessCards": {
-        "title": "Cartes de Visite",
-        "description": "Partagez vos coordonnées instantanément"
+        "title": "Cartes de visite",
+        "description": "Partagez vos coordonnees instantanement"
       },
       "marketing": {
-        "title": "Supports Marketing",
-        "description": "Liez à des campagnes et promotions"
+        "title": "Supports marketing",
+        "description": "Liez a des campagnes et promotions"
       },
       "events": {
-        "title": "Billets d'Événements",
+        "title": "Billets d'evenements",
         "description": "Enregistrement et validation rapides"
       }
     }
