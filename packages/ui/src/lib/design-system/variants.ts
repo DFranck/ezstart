@@ -345,6 +345,66 @@ export const animatedCounterVariantConfig = {
 } as const
 
 // ============================================================================
+// CONFIG: STEPPER (Multi-Step Forms & Wizards)
+// ============================================================================
+
+/**
+ * Config de variants pour stepper
+ * Usage: Stepper, StepperHeader, StepperNavigation
+ */
+export const stepperVariantConfig = {
+  size: {
+    sm: {
+      tab: [touchHeight.sm, paddingX.sm, fontSize.sm, gap.tight].join(' '),
+      progressBar: 'h-0.5',
+      navigation: [paddingX.sm, paddingY.sm, gap.sm].join(' '),
+      icon: 'size-3.5 sm:size-3',
+    },
+    default: {
+      tab: [touchHeight.default, paddingX.default, fontSize.base, gap.default].join(' '),
+      progressBar: 'h-1',
+      navigation: [paddingX.default, paddingY.default, gap.default].join(' '),
+      icon: 'size-4 sm:size-3.5',
+    },
+    lg: {
+      tab: [touchHeight.lg, paddingX.lg, fontSize.lg, gap.normal].join(' '),
+      progressBar: 'h-1.5',
+      navigation: [paddingX.lg, paddingY.lg, gap.normal].join(' '),
+      icon: 'size-5 sm:size-4',
+    },
+  },
+  variant: {
+    default: {
+      tab: {
+        active: 'bg-primary text-primary-foreground',
+        completed: 'bg-primary/20 text-primary',
+        future: 'text-muted-foreground',
+      },
+      progressBar: 'bg-primary',
+      navigation: 'bg-card/60 backdrop-blur border-t border-border',
+    },
+    minimal: {
+      tab: {
+        active: 'bg-accent text-accent-foreground font-medium',
+        completed: 'text-foreground',
+        future: 'text-muted-foreground',
+      },
+      progressBar: 'bg-foreground',
+      navigation: 'bg-background/80 backdrop-blur border-t border-border',
+    },
+    pills: {
+      tab: {
+        active: 'bg-primary text-primary-foreground rounded-full',
+        completed: 'bg-primary/15 text-primary rounded-full',
+        future: 'bg-muted text-muted-foreground rounded-full',
+      },
+      progressBar: 'bg-primary',
+      navigation: 'bg-card/60 backdrop-blur border-t border-border',
+    },
+  },
+} as const
+
+// ============================================================================
 // CONFIG: COMMAND (Command Palette Groups)
 // ============================================================================
 
