@@ -250,8 +250,33 @@ export function UsersTab() {
     },
   ]
 
+  // Stats computed from current data
+  const superadminCount = users.filter(u => u.globalRoles.includes('superadmin')).length
+  const adminCount = users.filter(u => u.globalRoles.includes('admin')).length
+  const withAppRoles = users.filter(u => Object.keys(u.appRoles).length > 0).length
+
   return (
     <Div className="space-y-4">
+      {/* Stats */}
+      <Div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="p-4">
+          <P className="text-sm text-muted-foreground">{t('stats.totalUsers')}</P>
+          <P className="text-2xl font-bold">{total}</P>
+        </Card>
+        <Card className="p-4">
+          <P className="text-sm text-muted-foreground">{t('stats.superadmins')}</P>
+          <P className="text-2xl font-bold">{superadminCount}</P>
+        </Card>
+        <Card className="p-4">
+          <P className="text-sm text-muted-foreground">{t('stats.admins')}</P>
+          <P className="text-2xl font-bold">{adminCount}</P>
+        </Card>
+        <Card className="p-4">
+          <P className="text-sm text-muted-foreground">{t('stats.withAppRoles')}</P>
+          <P className="text-2xl font-bold">{withAppRoles}</P>
+        </Card>
+      </Div>
+
       {/* Search */}
       <Input
         placeholder={t('searchPlaceholder')}

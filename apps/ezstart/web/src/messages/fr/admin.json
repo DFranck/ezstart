@@ -21,6 +21,12 @@
       "edit": "Modifier",
       "delete": "Supprimer",
       "noUsers": "Aucun utilisateur trouve.",
+      "stats": {
+        "totalUsers": "Total Utilisateurs",
+        "superadmins": "Superadmins",
+        "admins": "Admins",
+        "withAppRoles": "Avec Roles App"
+      },
       "confirmDeleteTitle": "Supprimer l'utilisateur",
       "confirmDeleteDescription": "Etes-vous sur de vouloir supprimer cet utilisateur ? Cette action est irreversible.",
       "deleteSuccess": "Utilisateur supprime avec succes.",

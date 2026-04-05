@@ -23,13 +23,8 @@ function AdminPanelContent() {
   const t = useTranslations()
 
   return (
-    <Div size={'xs'}>
-      <Section size={'xl'} className="mt-10">
-        <H1>{t('admin.title')}</H1>
-        <P className="text-muted-foreground mt-2">{t('admin.description')}</P>
-      </Section>
-
-      <Tabs defaultValue="ezauth" className="mt-6">
+    <Div size={'xs'} className="mt-10">
+      <Tabs defaultValue="ezauth">
         <TabsList>
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>
           <TabsTrigger value="ezpay">{t('admin.tabs.ezpay')}</TabsTrigger>
