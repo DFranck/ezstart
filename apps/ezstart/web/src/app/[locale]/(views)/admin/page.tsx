@@ -23,23 +23,23 @@ function AdminPanelContent() {
   const t = useTranslations()
 
   return (
-    <Div size={'xs'} className="mt-10">
-      <Tabs defaultValue="ezauth">
+    <Div className="w-full max-w-7xl mx-auto px-4 mt-10">
+      <Tabs defaultValue="ezauth" className="w-full">
         <TabsList>
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>
           <TabsTrigger value="ezpay">{t('admin.tabs.ezpay')}</TabsTrigger>
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="ezauth" className="min-h-[600px]">
+        <TabsContent value="ezauth" className="w-full">
           <UsersTab />
         </TabsContent>
 
-        <TabsContent value="ezpay" className="min-h-[600px]">
+        <TabsContent value="ezpay" className="w-full">
           <EZPayTab />
         </TabsContent>
 
-        <TabsContent value="monitoring" className="min-h-[600px]">
+        <TabsContent value="monitoring" className="w-full">
           <MonitoringTab />
         </TabsContent>
       </Tabs>
