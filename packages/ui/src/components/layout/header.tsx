@@ -1,7 +1,7 @@
 import { useOnScroll } from '../../hooks'
 import { cn } from '../../lib/utils'
 import { Div, Tag } from '../tag'
-import { headerVariantConfig } from '../tag/src/variants/tags/header'
+import { headerVariantConfig } from '../../lib/design-system/variants'
 
 /**
  * Header Component - Responsive Site Header
@@ -62,8 +62,10 @@ export const Header = ({
       className={cn(
         'px-2 md:px-6',
         (position === 'sticky' || position === 'fixed') && [
-          'transition-all duration-200 ease-out backdrop-blur-sm pt-safe-top',
-          isTop ? 'bg-background/0  py-4' : 'bg-background/80  py-2',
+          'transition-all duration-200 ease-out pt-safe-top',
+          isTop
+            ? 'bg-background/0 py-4'
+            : 'bg-background/80 backdrop-blur-sm py-2',
         ],
         className
       )}

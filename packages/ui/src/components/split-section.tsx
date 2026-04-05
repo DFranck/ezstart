@@ -2,6 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { cn } from '../lib'
 import { size } from '../lib/design-system/tokens'
+import { splitSectionVariantConfig } from '../lib/design-system/variants'
 import { Div, Section } from './tag'
 
 // ============================================================================
@@ -9,35 +10,7 @@ import { Div, Section } from './tag'
 // ============================================================================
 
 const splitSectionVariants = cva('relative w-full', {
-  variants: {
-    /**
-     * Layout direction
-     */
-    layout: {
-      horizontal: 'grid grid-cols-1 lg:grid-cols-2 gap-0',
-      vertical: 'flex flex-col',
-    },
-    /**
-     * Alignment of items
-     */
-    align: {
-      start: 'items-start',
-      center: 'items-center',
-      end: 'items-end',
-      stretch: 'items-stretch',
-    },
-    /**
-     * Padding around the section
-     */
-    padding: {
-      none: '',
-      sm: 'py-8 px-4',
-      md: 'py-12 px-6',
-      lg: 'py-16 px-8',
-      xl: 'py-24 px-12',
-      '2xl': 'py-32 px-16',
-    },
-  },
+  variants: splitSectionVariantConfig,
   defaultVariants: {
     layout: 'horizontal',
     align: 'stretch',

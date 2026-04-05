@@ -336,6 +336,22 @@ export const size = {
 } as const
 
 // ============================================================================
+// DENSITY (Espacement Global - compact/default/relaxed)
+// ============================================================================
+
+export const densityContainer = {
+  compact: 'gap-1 py-1 px-2',
+  default: '',
+  relaxed: 'gap-4 py-4 px-4',
+} as const
+
+export const densityText = {
+  compact: 'leading-tight',
+  default: '',
+  relaxed: 'leading-relaxed',
+} as const
+
+// ============================================================================
 // RESPONSIVE PATTERNS (Patterns Communs)
 // ============================================================================
 
@@ -373,6 +389,28 @@ export const responsive = {
     4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
     6: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6',
   },
+} as const
+
+// ============================================================================
+// SIZE TEXT (Typography Sizing Scale - Headings, Spans, etc.)
+// ============================================================================
+
+/**
+ * Text sizing scale used by heading, span, and p tag variants.
+ * Separate from fontSize because it includes heading-level defaults.
+ */
+export const sizeText = {
+  default: '',
+  h1: 'text-3xl sm:text-4xl md:text-5xl',
+  h2: 'text-2xl sm:text-3xl md:text-4xl',
+  h3: 'text-xl sm:text-2xl md:text-3xl',
+  h4: 'text-lg sm:text-xl md:text-2xl',
+  h5: 'text-base sm:text-lg md:text-xl',
+  h6: 'text-sm sm:text-base md:text-lg',
+  giant: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
+  lg: 'text-lg sm:text-xl',
+  sm: 'text-sm sm:text-base',
+  xs: 'text-xs sm:text-sm',
 } as const
 
 // ============================================================================
@@ -417,6 +455,11 @@ export const tokens = {
   // Size
   size,
   sizeContainer,
+  sizeText,
+
+  // Density
+  density: densityContainer,
+  densityText,
 
   // Patterns
   responsive,

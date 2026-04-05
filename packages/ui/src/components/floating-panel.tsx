@@ -5,20 +5,13 @@ import { GripVertical, Maximize2, Minimize2, X } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '../lib'
+import { floatingPanelVariantConfig } from '../lib/design-system/variants'
 import { Button } from './button'
 
 const floatingPanelVariants = cva(
   'fixed z-50 bg-card border border-border rounded-lg shadow-lg flex flex-col overflow-hidden',
   {
-    variants: {
-      size: {
-        sm: 'w-80 max-h-96',
-        md: 'w-96 max-h-[32rem]',
-        lg: 'w-[28rem] max-h-[40rem]',
-        xl: 'w-[32rem] max-h-[48rem]',
-        full: 'w-[90vw] h-[90vh]',
-      },
-    },
+    variants: floatingPanelVariantConfig,
     defaultVariants: {
       size: 'md',
     },

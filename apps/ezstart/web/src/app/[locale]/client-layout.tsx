@@ -40,6 +40,9 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
     currentLocale = 'en'
   }
 
+  // Pages where header overlays content (hero/landing style)
+  const isOverlayPage = pathname === `/${currentLocale}` || pathname === `/${currentLocale}/`
+
   // useNavLinks() format is already compatible with ClientLayout!
   const navLinks = useNavLinks() as NavigationLink[]
   const locales = ['en', 'fr']
@@ -53,6 +56,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
     <>
       <BaseClientLayout
         appName="EZStart"
+        headerOverlay={isOverlayPage}
         mobileLogoIcon="custom:Ezstart"
         mobileLogoHref={`/${currentLocale}/`}
         creator={

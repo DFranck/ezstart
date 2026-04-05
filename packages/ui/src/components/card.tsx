@@ -3,6 +3,11 @@ import * as React from 'react'
 
 import { cn } from '../lib/utils'
 import { paddingX, gap, paddingY } from '../lib/design-system/tokens'
+import {
+  cardVariantConfig,
+  cardHeaderVariantConfig,
+  cardContentVariantConfig,
+} from '../lib/design-system/variants'
 
 /**
  * Card Component - Interactive & Configurable
@@ -39,11 +44,9 @@ const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border t
       elevated: 'bg-card shadow-2xl shadow-foreground/10 border-border/50',
     },
     size: {
-      xs: [gap.sm, paddingY.sm].join(' '), // gap-2 sm:gap-1, py-2 sm:py-1
-      sm: [gap.normal, paddingY.md].join(' '), // gap-3 sm:gap-2, py-3 sm:py-2
-      default: [gap.relaxed, paddingY.lg].join(' '), // gap-4 sm:gap-3, py-4 sm:py-3
-      lg: [gap.spacious, paddingY.xl].join(' '), // gap-6 sm:gap-4, py-6 sm:py-4
-      xl: [gap.loose, 'py-6 sm:py-6 md:py-8'].join(' '), // gap-8 sm:gap-6, custom py
+      ...cardVariantConfig.size,
+      sm: [gap.normal, paddingY.md].join(' '),
+      xl: [gap.loose, 'py-6 sm:py-6 md:py-8'].join(' '),
     },
     interactive: {
       true: 'cursor-pointer',
@@ -85,11 +88,9 @@ interface CardHeaderProps extends React.ComponentProps<'div'> {
 
 function CardHeader({ className, size = 'default', ...props }: CardHeaderProps) {
   const sizeClasses = {
-    xs: cn(paddingX.default, gap.tight), // px-4 sm:px-3, gap-1.5 sm:gap-1
-    sm: cn(paddingX.default, gap.sm), // px-4 sm:px-3, gap-2 sm:gap-1
-    default: cn(paddingX.lg, gap.sm), // px-4 sm:px-6, gap-2 sm:gap-1
-    lg: cn(paddingX.lg, gap.default), // px-4 sm:px-6, gap-2 sm:gap-2
-    xl: cn(paddingX.xl, gap.normal), // px-6 sm:px-8, gap-3 sm:gap-2
+    ...cardHeaderVariantConfig.size,
+    xs: cn(paddingX.default, gap.tight),
+    sm: cn(paddingX.default, gap.sm),
   }
 
   return (
@@ -141,11 +142,9 @@ interface CardContentProps extends React.ComponentProps<'div'> {
 
 function CardContent({ className, size = 'default', ...props }: CardContentProps) {
   const sizeClasses = {
-    xs: paddingX.sm, // px-3 sm:px-2
-    sm: paddingX.default, // px-4 sm:px-3
-    default: paddingX.lg, // px-4 sm:px-6
-    lg: paddingX.lg, // px-4 sm:px-6
-    xl: paddingX.xl, // px-6 sm:px-8
+    ...cardContentVariantConfig.size,
+    xs: paddingX.sm,
+    sm: paddingX.default,
   }
 
   return <div data-slot="card-content" className={cn(sizeClasses[size], className)} {...props} />
@@ -157,11 +156,9 @@ interface CardFooterProps extends React.ComponentProps<'div'> {
 
 function CardFooter({ className, size = 'default', ...props }: CardFooterProps) {
   const sizeClasses = {
-    xs: paddingX.sm, // px-3 sm:px-2
-    sm: paddingX.default, // px-4 sm:px-3
-    default: paddingX.lg, // px-4 sm:px-6
-    lg: paddingX.lg, // px-4 sm:px-6
-    xl: paddingX.xl, // px-6 sm:px-8
+    ...cardContentVariantConfig.size,
+    xs: paddingX.sm,
+    sm: paddingX.default,
   }
 
   return (

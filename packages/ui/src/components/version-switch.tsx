@@ -2,6 +2,7 @@
 
 import { Label, Switch } from '@ezstart/ui/components'
 import * as React from 'react'
+import { versionSwitchVariantConfig } from '../lib/design-system/variants'
 
 export interface VersionSwitchProps {
   /**
@@ -64,17 +65,9 @@ export function VersionSwitch({
     }
   }
 
-  // Position classes
-  const positionClasses = {
-    'bottom-left': 'bottom-4 left-4',
-    'bottom-right': 'bottom-4 right-4',
-    'top-left': 'top-4 left-4',
-    'top-right': 'top-4 right-4',
-  }
-
   return (
     <div
-      className={`fixed ${positionClasses[position]} z-50 flex items-center gap-3 px-4 py-3 bg-card/95 backdrop-blur border border-border rounded-lg shadow-lg`}
+      className={`fixed ${versionSwitchVariantConfig.position[position]} z-50 flex items-center gap-3 px-4 py-3 bg-card/95 backdrop-blur border border-border rounded-lg shadow-lg`}
     >
       <Label htmlFor="version-switch" className="text-sm font-medium cursor-pointer select-none">
         {isV2 ? v2Label : v1Label}

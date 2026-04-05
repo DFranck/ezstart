@@ -16,6 +16,7 @@
 
 import * as React from 'react'
 import { cn } from '../../lib/utils'
+import { landingHeroVariantConfig } from '../../lib/design-system/variants'
 import { Button } from '../button'
 import { Badge } from '../badge'
 
@@ -85,38 +86,26 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     // Variant-specific container classes
     const containerClasses = cn(
       'relative w-full overflow-hidden',
-      variant === 'fullHeight' && 'min-h-screen',
-      variant !== 'fullHeight' && 'py-20 sm:py-24 lg:py-32',
+      landingHeroVariantConfig.container[variant],
       className
     )
 
     // Content wrapper classes
     const contentWrapperClasses = cn(
       'container mx-auto px-4 sm:px-6 lg:px-8',
-      variant === 'centered' && 'text-center',
-      variant === 'split' && 'grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'
+      landingHeroVariantConfig.contentWrapper[variant]
     )
 
     // Title classes
     const titleClasses = cn(
       'font-bold tracking-tight',
-      variant === 'minimal'
-        ? 'text-4xl sm:text-5xl lg:text-6xl'
-        : variant === 'centered'
-          ? 'text-5xl sm:text-6xl lg:text-7xl'
-          : 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
-      variant === 'withGradient' &&
-        'bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent'
+      landingHeroVariantConfig.title[variant]
     )
 
     // Description classes
     const descriptionClasses = cn(
       'text-muted-foreground',
-      variant === 'minimal'
-        ? 'text-lg sm:text-xl max-w-2xl'
-        : variant === 'centered'
-          ? 'text-xl sm:text-2xl max-w-3xl mx-auto'
-          : 'text-lg sm:text-xl lg:text-2xl max-w-3xl'
+      landingHeroVariantConfig.description[variant]
     )
 
     return (

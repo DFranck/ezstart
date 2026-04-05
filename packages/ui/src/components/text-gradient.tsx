@@ -1,6 +1,7 @@
 import React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/utils'
+import { textGradientVariantConfig } from '../lib/design-system/variants'
 
 /**
  * TextGradient Component - Animated Color Gradients
@@ -54,18 +55,7 @@ export const gradientColors = [
 export type GradientColor = (typeof gradientColors)[number]
 
 const textGradientVariants = cva('', {
-  variants: {
-    direction: {
-      'to-r': '',
-      'to-l': '',
-      'to-t': '',
-      'to-b': '',
-      'to-tr': '',
-      'to-tl': '',
-      'to-br': '',
-      'to-bl': '',
-    },
-  },
+  variants: textGradientVariantConfig,
   defaultVariants: {
     direction: 'to-r',
   },

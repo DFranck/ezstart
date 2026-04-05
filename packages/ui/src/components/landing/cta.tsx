@@ -7,6 +7,7 @@
 
 import * as React from 'react'
 import { cn } from '../../lib/utils'
+import { ctaVariantConfig } from '../../lib/design-system/variants'
 import { Button } from '../button'
 
 // ========== Types ==========
@@ -50,31 +51,24 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
   ) => {
     const containerClasses = cn(
       'relative overflow-hidden rounded-2xl',
-      variant === 'gradient' &&
-        'bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-primary-foreground',
-      variant === 'bordered' && 'border-2 border-primary',
-      bgColor === 'primary' && variant !== 'gradient' && 'bg-primary text-primary-foreground',
-      bgColor === 'muted' && variant !== 'gradient' && 'bg-muted',
-      bgColor === 'default' && variant !== 'gradient' && 'bg-card',
+      ctaVariantConfig.container[variant],
+      variant !== 'gradient' && ctaVariantConfig.bgColor[bgColor],
       className
     )
 
     const contentClasses = cn(
       'container mx-auto px-6 py-12 sm:py-16 lg:py-20',
-      variant === 'centered' && 'text-center',
-      variant === 'split' &&
-        'grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'
+      ctaVariantConfig.content[variant]
     )
 
     const titleClasses = cn(
       'font-bold tracking-tight mb-4',
-      variant === 'minimal' ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl lg:text-5xl'
+      ctaVariantConfig.title[variant === 'minimal' ? 'minimal' : 'default']
     )
 
     const buttonClasses = cn(
       'flex flex-wrap gap-4',
-      variant === 'centered' && 'justify-center',
-      variant === 'split' && 'lg:justify-start'
+      ctaVariantConfig.buttons[variant === 'centered' ? 'centered' : variant === 'split' ? 'split' : 'default']
     )
 
     return (

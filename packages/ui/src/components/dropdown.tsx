@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import { cn } from '../lib/utils'
+import { dropdownPositionConfig } from '../lib/design-system/variants'
 import { Button } from './button'
 import { LI, UL } from './tag'
 
@@ -108,18 +109,6 @@ export function Dropdown({
 
   const menuId = useId()
 
-  // Compute menu position classes
-  const alignClasses = {
-    start: 'left-0',
-    center: 'left-1/2 -translate-x-1/2',
-    end: 'right-0',
-  }
-
-  const sideClasses = {
-    top: 'bottom-full mb-2',
-    bottom: 'top-full mt-2',
-  }
-
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -217,8 +206,8 @@ export function Dropdown({
           layout={'menu'}
           className={cn(
             'absolute z-50 focus:outline-none bg-background shadow-lg',
-            alignClasses[align],
-            sideClasses[side],
+            dropdownPositionConfig.align[align],
+            dropdownPositionConfig.side[side],
             fullWidth && 'w-full',
             menuClassName
           )}

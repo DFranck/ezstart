@@ -7,6 +7,7 @@
 
 import * as React from 'react'
 import { cn } from '../../lib/utils'
+import { featureGridVariantConfig } from '../../lib/design-system/variants'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../card'
 import { Badge } from '../badge'
 
@@ -54,17 +55,11 @@ export const FeatureGrid = React.forwardRef<HTMLDivElement, FeatureGridProps>(
   ) => {
     const gridClasses = cn(
       'grid gap-6',
-      columns === 2 && 'grid-cols-1 md:grid-cols-2',
-      columns === 3 && 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-      columns === 4 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+      featureGridVariantConfig.columns[columns],
       className
     )
 
-    const cardVariantClasses = cn(
-      variant === 'minimal' && 'border-0 shadow-none bg-transparent',
-      variant === 'bordered' && 'border-2',
-      variant === 'floating' && 'shadow-lg hover:shadow-xl transition-shadow duration-300'
-    )
+    const cardVariantClasses = featureGridVariantConfig.cardVariant[variant]
 
     return (
       <div ref={ref} className={gridClasses} {...props}>

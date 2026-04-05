@@ -2,6 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '../lib/utils'
+import { skeletonVariantConfig, skeletonCardSizeConfig } from '../lib/design-system/variants'
 
 /**
  * Skeleton Component - Loading State Placeholders
@@ -27,15 +28,7 @@ import { cn } from '../lib/utils'
  */
 
 const skeletonVariants = cva('animate-pulse rounded-md bg-muted', {
-  variants: {
-    variant: {
-      default: 'bg-muted',
-      lighter: 'bg-muted/50',
-      darker: 'bg-muted/70',
-      shimmer:
-        'bg-gradient-to-r from-muted via-muted/50 to-muted bg-[length:200%_100%] animate-shimmer',
-    },
-  },
+  variants: skeletonVariantConfig,
   defaultVariants: {
     variant: 'default',
   },
@@ -145,11 +138,7 @@ function SkeletonCard({
   variant = 'default',
   size = 'default',
 }: SkeletonCardProps) {
-  const sizeClasses = {
-    sm: 'p-4 gap-3 sm:p-3 sm:gap-2.5',
-    default: 'p-4 gap-4 sm:p-6 sm:gap-4',
-    lg: 'p-6 gap-5 sm:p-8 sm:gap-6',
-  }
+  const sizeClasses = skeletonCardSizeConfig
 
   return (
     <div

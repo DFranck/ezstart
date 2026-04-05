@@ -6,6 +6,7 @@ import * as React from "react"
 import { cn } from "../lib/utils"
 import { buttonVariants } from "./button"
 import { padding, gap } from "../lib/design-system/tokens"
+import { alertDialogVariantConfig } from "../lib/design-system/variants"
 
 /**
  * AlertDialog Component - Enhanced with Variants
@@ -177,17 +178,12 @@ function AlertDialogAction({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
   const { variant } = React.useContext(AlertDialogContext)
 
-  // Apply variant-specific styles to action button
-  const variantStyles = {
-    default: buttonVariants(),
-    destructive: buttonVariants({ variant: 'destructive' }),
-    warning: buttonVariants({ variant: 'default' }),
-    info: buttonVariants({ variant: 'default' }),
-  }
+  // Apply variant-specific styles to action button via design system config
+  const buttonVariant = alertDialogVariantConfig.actionButtonVariant[variant || 'default']
 
   return (
     <AlertDialogPrimitive.Action
-      className={cn(variantStyles[variant || 'default'], className)}
+      className={cn(buttonVariants({ variant: buttonVariant }), className)}
       {...props}
     />
   )

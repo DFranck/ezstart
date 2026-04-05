@@ -9,7 +9,7 @@ import { Button } from '../button'
 import { Icon, KnownIconName } from '../icon'
 import { SkipLink } from '../skip-link'
 import { Div, Main } from '../tag'
-import { headerVariantConfig } from '../tag/src/variants/tags/header'
+import { headerVariantConfig } from '../../lib/design-system/variants'
 import { Footer } from './footer'
 import { Header } from './header'
 import { NavigationItem, NavigationLink, isNavigationMenu } from './types'
@@ -59,6 +59,9 @@ export interface ClientLayoutProps {
   mobileLogoAlt?: string // Alt text for image logo
   mobileLogoHref?: string // Logo link href (default: '/')
 
+  // Header overlay mode (landing pages with hero)
+  headerOverlay?: boolean // When true: fixed header, transparent→blur on scroll, no pt-16 padding on Main
+
   // Styling
   className?: string
   headerClassName?: string
@@ -102,6 +105,9 @@ export function ClientLayout({
   footerLayout = 'simple',
   footerStackOnMobile = true,
 
+  // Header overlay
+  headerOverlay = false,
+
   // Components
   LinkComponent = 'a',
 
@@ -120,6 +126,7 @@ export function ClientLayout({
   const { isMobile, isTablet, isDesktop } = useDevice()
   const scrollY = useOnScroll()
   const isTop = scrollY === 0
+  const effectiveHeaderPosition = headerOverlay ? 'fixed' : headerPosition
   const [isBurgerOpen, setIsBurgerOpen] = useState(false)
   const [openMenus, setOpenMenus] = useState<Set<number>>(new Set())
   const burgerMenuRef = useRef<HTMLDivElement>(null)
@@ -307,7 +314,7 @@ export function ClientLayout({
       {/* Header with smart navigation */}
       {showHeader && (
         <Header
-          position={headerPosition}
+          position={effectiveHeaderPosition}
           leftContent={headerLeftContent}
           centerContent={navLinks ? renderDesktopNav() : headerCenterContent}
           rightContent={
@@ -443,7 +450,10 @@ export function ClientLayout({
       <Main
         id="main-content"
         className={cn(
-          showHeader && (headerPosition === 'fixed' || headerPosition === 'absolute') && 'pt-16'
+          showHeader &&
+            !headerOverlay &&
+            (effectiveHeaderPosition === 'fixed' || effectiveHeaderPosition === 'absolute') &&
+            'pt-16'
         )}
       >
         {children}

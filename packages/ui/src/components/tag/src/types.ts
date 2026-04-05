@@ -1,5 +1,5 @@
 import type { VariantProps } from 'class-variance-authority'
-import { tagVariants } from './variants'
+import { tagVariants } from '../../../lib/design-system/variants'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- CVA generic constraint requires (...args: any) => any
 type HasVariant<T extends (...args: any) => any> = keyof VariantProps<T> extends never

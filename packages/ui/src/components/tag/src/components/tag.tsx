@@ -3,7 +3,7 @@ import type { VariantProps } from 'class-variance-authority'
 import React, { ComponentProps, ElementType, useMemo } from 'react'
 import { cn } from '../../../../lib/utils'
 import { CustomVariants, INTENT_ARIA_MAP, SupportedAs, TagAriaProps } from '../types'
-import { tagVariants } from '../variants'
+import { tagVariants } from '../../../../lib/design-system/variants'
 
 export type TagProps<T extends SupportedAs = 'span'> = Omit<ComponentProps<T>, never> & {
   as?: T

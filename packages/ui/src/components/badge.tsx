@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { fontSize, paddingX, paddingY } from '../lib/design-system/tokens'
+import { badgeVariantConfig } from '../lib/design-system/variants'
 import { cn } from '../lib/utils'
 
 /**
@@ -39,11 +40,9 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary text-primary-foreground',
+        ...badgeVariantConfig.variant,
         primary: 'border-transparent bg-primary text-primary-foreground', // Alias for default
-        secondary: 'border-transparent bg-secondary text-secondary-foreground',
         destructive: 'border-transparent bg-destructive text-destructive-foreground',
-        outline: 'text-foreground',
         success: 'border-transparent bg-success/20 text-success dark:bg-success/10',
         warning: 'border-transparent bg-warning/20 text-warning dark:bg-warning/10',
         info: 'border-transparent bg-info/20 text-info dark:bg-info/10',
@@ -54,9 +53,9 @@ const badgeVariants = cva(
       },
       size: {
         none: '', // No size classes - used for circle variant
-        default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '), // px-3 sm:px-2, py-1 sm:py-0.5, text-sm sm:text-xs
-        sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '), // px-2 sm:px-1, py-1 sm:py-0.5, text-xs sm:text-[10px]
-        lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '), // px-4 sm:px-3, py-2 sm:py-1, text-base sm:text-sm
+        default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '),
+        sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '),
+        lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '),
       },
       circle: {
         true: 'aspect-square justify-center p-0',

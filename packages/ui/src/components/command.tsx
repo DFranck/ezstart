@@ -6,6 +6,7 @@ import { SearchIcon } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "../lib"
+import { commandGroupVariantConfig } from "../lib/design-system/variants"
 import { Dialog, DialogTitle, DialogDescription, DialogContent, DialogHeader } from "./dialog"
 
 function Command({
@@ -108,15 +109,7 @@ function CommandEmpty({
 const commandGroupVariants = cva(
   "text-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:rounded-md",
   {
-    variants: {
-      headingVariant: {
-        default: "[&_[cmdk-group-heading]]:text-muted-foreground",
-        healthy: "[&_[cmdk-group-heading]]:bg-status-healthy/10 [&_[cmdk-group-heading]]:text-status-healthy [&_[cmdk-group-heading]]:font-semibold",
-        "healthy-light": "[&_[cmdk-group-heading]]:bg-status-healthy/5 [&_[cmdk-group-heading]]:text-status-healthy [&_[cmdk-group-heading]]:font-semibold",
-        degraded: "[&_[cmdk-group-heading]]:bg-status-degraded/10 [&_[cmdk-group-heading]]:text-status-degraded [&_[cmdk-group-heading]]:font-semibold",
-        unhealthy: "[&_[cmdk-group-heading]]:bg-status-unhealthy/10 [&_[cmdk-group-heading]]:text-status-unhealthy [&_[cmdk-group-heading]]:font-semibold",
-      },
-    },
+    variants: commandGroupVariantConfig,
     defaultVariants: {
       headingVariant: "default",
     },

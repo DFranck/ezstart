@@ -1,14 +1,33 @@
-// aliases.tsx
+// aliases.tsx — All Tag aliases centralized
 
 import { createAlias } from './utils/create-alias'
 
-// Typography
-export const Span = createAlias('span')
-export const Strong = createAlias('strong')
-
-// Layout
+// Container aliases
 export const Div = createAlias('div')
+export const Section = createAlias('section')
+export const Aside = createAlias('aside')
+export const Main = createAlias('main')
+export const Nav = createAlias('nav')
 export const Article = createAlias('article')
 
-// Lists
+// Text aliases
+export const Span = createAlias('span')
+export const Strong = createAlias('strong')
+export const P = createAlias('p')
+
+// Heading aliases
+export const H1 = createAlias('h1')
+export const H2 = createAlias('h2')
+export const H3 = createAlias('h3')
+export const H4 = createAlias('h4')
+export const H5 = createAlias('h5')
+export const H6 = createAlias('h6')
+
+// List aliases
+export const UL = createAlias('ul')
+export const LI = createAlias('li')
 export const Ol = createAlias('ol')
+
+// Legacy alias
+export const Header = createAlias('header')
+export const FooterTag = createAlias('footer')

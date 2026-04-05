@@ -1,8 +1,8 @@
 'use client'
 
 import { useDevice } from '../hooks'
-import { responsive } from '../lib/design-system/tokens'
 import { cn } from '../lib/utils'
+import { dialogVariantConfig } from '../lib/design-system/variants'
 import {
   Dialog,
   DialogContent,
@@ -78,13 +78,7 @@ export interface ModalProps {
   scrollBehavior?: ModalScrollBehavior
 }
 
-const SIZE_CLASSES: Record<ModalSize, string> = {
-  sm: responsive.modalWidth.sm, // max-w-sm
-  md: responsive.modalWidth.md, // max-w-md
-  lg: responsive.modalWidth.lg, // max-w-lg
-  xl: responsive.modalWidth.xl, // max-w-2xl
-  full: responsive.modalWidth.full, // max-w-[95vw]
-}
+const SIZE_CLASSES = dialogVariantConfig.size
 
 export const Modal = ({
   isOpen,

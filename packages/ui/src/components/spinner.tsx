@@ -1,4 +1,5 @@
 import { cn } from '../lib/utils'
+import { spinnerVariantConfig } from '../lib/design-system/variants'
 
 export interface SpinnerProps {
   /** Size of the spinner */
@@ -19,46 +20,6 @@ export interface SpinnerProps {
   fullScreen?: boolean
   /** Show backdrop blur when fullScreen */
   backdrop?: boolean
-}
-
-const sizeStyles = {
-  xs: 'w-3 h-3 border-2',
-  sm: 'w-4 h-4 border-2',
-  md: 'w-6 h-6 border-2',
-  lg: 'w-8 h-8 border-3',
-  xl: 'w-12 h-12 border-4',
-}
-
-const variantStyles = {
-  default: 'border-border border-t-foreground',
-  primary: 'border-primary/30 border-t-primary',
-  secondary: 'border-secondary/30 border-t-secondary',
-  accent: 'border-accent/30 border-t-accent',
-  destructive: 'border-destructive/30 border-t-destructive',
-  success: 'border-green-500/30 border-t-green-500',
-  fancy: 'border-primary/20 border-t-primary', // Same as primary but with pulse effect
-}
-
-// Inner pulse circle sizes for fancy variant
-const fancyPulseSizes = {
-  xs: 'w-2 h-2 top-0.5 left-0.5',
-  sm: 'w-2.5 h-2.5 top-0.5 left-0.5',
-  md: 'w-4 h-4 top-1 left-1',
-  lg: 'w-5 h-5 top-1.5 left-1.5',
-  xl: 'w-8 h-8 top-2 left-2',
-}
-
-const speedStyles = {
-  slow: 'animate-spin-slow',
-  normal: 'animate-spin',
-  fast: 'animate-spin-fast',
-}
-
-const textSizeStyles = {
-  xs: 'text-xs',
-  sm: 'text-sm',
-  md: 'text-base',
-  lg: 'text-lg',
 }
 
 /**
@@ -103,9 +64,9 @@ export function Spinner({
       <div
         className={cn(
           'rounded-full border-solid',
-          sizeStyles[size],
-          variantStyles[variant],
-          speedStyles[speed],
+          spinnerVariantConfig.size[size],
+          spinnerVariantConfig.variant[variant],
+          spinnerVariantConfig.speed[speed],
           className
         )}
         role="status"
@@ -114,7 +75,7 @@ export function Spinner({
       <div
         className={cn(
           'absolute bg-gradient-to-r from-primary to-primary/80 rounded-full opacity-20 animate-pulse',
-          fancyPulseSizes[size]
+          spinnerVariantConfig.fancyPulseSize[size]
         )}
         aria-hidden="true"
       />
@@ -124,9 +85,9 @@ export function Spinner({
     <div
       className={cn(
         'rounded-full border-solid',
-        sizeStyles[size],
-        variantStyles[variant],
-        speedStyles[speed],
+        spinnerVariantConfig.size[size],
+        spinnerVariantConfig.variant[variant],
+        spinnerVariantConfig.speed[speed],
         className
       )}
       role="status"
@@ -140,7 +101,7 @@ export function Spinner({
     >
       {spinner}
       {text && (
-        <p className={cn('text-muted-foreground', textSizeStyles[textSize], textClassName)}>
+        <p className={cn('text-muted-foreground', spinnerVariantConfig.textSize[textSize], textClassName)}>
           {text}
         </p>
       )}

@@ -119,9 +119,17 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 71. [x] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
 72. [x] Centralize app themes — all 8 apps have defined themes in config
 
-#### P2.5 — Infra auth (2026-04-05)
+#### P2.5 — Infra (2026-04-05)
 
 77. [ ] SSR auth middleware — `createProtectedMiddleware()` dans auth-sdk/rbac pour Next.js middleware. Zéro flash client, config déclarative (publicPaths, protectedPaths, adminPaths+roles). Remplace les AuthGuard/RequireRole client-side pour l'auth check. Toutes les apps utilisent le même pattern.
+
+#### P2.6 — Layout & Design System (2026-04-05)
+
+78. [ ] Fix Header backdrop-blur à scroll y=0 — `backdrop-blur-sm` visible malgré `bg-background/0`. Déplacer blur dans condition `!isTop`.
+79. [ ] SSR Layout split — Séparer `ClientLayout` en `AppLayout` (RSC server) + client islands (burger, auth, theme). Élimine le flash render complet.
+80. [ ] Unified variant taxonomy — Standardiser les noms de variants (size, intent, variant, density) sur TOUS les composants Tag. Même nom = interprétation contextuelle (container vs text).
+81. [ ] Density variant — Ajouter `density: 'compact' | 'default' | 'relaxed'` comme variant partagé sur tous les composants.
+82. [ ] Theme presets — Presets déclaratifs par app (dashboard=compact, landing=relaxed) qui configurent tous les composants d'un coup.
 
 #### P3 — DevOps / Testing
 

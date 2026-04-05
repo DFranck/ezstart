@@ -3,6 +3,7 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { useDevice } from '../hooks/use-device'
 import { cn } from '../lib/utils'
+import { heroVariantConfig } from '../lib/design-system/variants'
 import { H1, P, Section } from './tag'
 import { Div } from './tag/src/aliases'
 
@@ -46,20 +47,7 @@ import { Div } from './tag/src/aliases'
  */
 
 const heroVariants = cva('relative max-w-none overflow-hidden', {
-  variants: {
-    height: {
-      sm: 'min-h-[40vh]',
-      md: 'min-h-[60vh]',
-      lg: 'min-h-[80vh]',
-      viewport: 'min-h-[100vh]',
-      auto: 'min-h-0',
-    },
-    alignment: {
-      left: '[&_*]:text-left',
-      center: '[&_*]:text-center',
-      right: '[&_*]:text-right',
-    },
-  },
+  variants: heroVariantConfig,
   defaultVariants: {
     height: 'lg',
     alignment: 'center',

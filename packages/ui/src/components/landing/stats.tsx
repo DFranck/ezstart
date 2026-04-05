@@ -9,6 +9,7 @@
 
 import * as React from 'react'
 import { cn } from '../../lib/utils'
+import { statsVariantConfig } from '../../lib/design-system/variants'
 
 // ========== Types ==========
 
@@ -47,18 +48,11 @@ export const Stats = React.forwardRef<HTMLDivElement, StatsProps>(
   ) => {
     const containerClasses = cn(
       'w-full',
-      variant === 'centered' && 'text-center',
+      statsVariantConfig.container[variant || 'default'],
       className
     )
 
-    const statsWrapperClasses = cn(
-      variant === 'grid' &&
-        'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8',
-      variant === 'inline' && 'flex flex-wrap justify-center gap-x-12 gap-y-6',
-      variant === 'default' && 'flex flex-wrap justify-around gap-8',
-      variant === 'centered' && 'flex flex-wrap justify-center gap-12',
-      variant === 'cards' && 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6'
-    )
+    const statsWrapperClasses = statsVariantConfig.statsWrapper[variant || 'default']
 
     return (
       <div ref={ref} className={containerClasses} {...props}>
@@ -171,11 +165,7 @@ const StatItem = ({
     return `${count.toLocaleString()}${suffix}`
   }
 
-  const itemClasses = cn(
-    variant === 'cards' &&
-      'p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow',
-    variant === 'centered' && 'flex flex-col items-center'
-  )
+  const itemClasses = statsVariantConfig.item[variant || 'default']
 
   return (
     <div ref={ref} className={itemClasses}>

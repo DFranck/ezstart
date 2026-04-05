@@ -4,6 +4,7 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as React from 'react';
 
 import { cn } from '../lib/utils';
+import { tooltipVariantConfig } from '../lib/design-system/variants';
 
 /**
  * Tooltip Component - Enhanced with Positioning & Variants
@@ -73,34 +74,6 @@ interface TooltipContentProps extends React.ComponentProps<typeof TooltipPrimiti
   hideArrow?: boolean
 }
 
-const variantStyles: Record<TooltipVariant, { bg: string; text: string; arrow: string }> = {
-  default: {
-    bg: 'bg-primary',
-    text: 'text-primary-foreground',
-    arrow: 'bg-primary fill-primary',
-  },
-  info: {
-    bg: 'bg-blue-600 dark:bg-blue-500',
-    text: 'text-white',
-    arrow: 'bg-blue-600 fill-blue-600 dark:bg-blue-500 dark:fill-blue-500',
-  },
-  success: {
-    bg: 'bg-green-600 dark:bg-green-500',
-    text: 'text-white',
-    arrow: 'bg-green-600 fill-green-600 dark:bg-green-500 dark:fill-green-500',
-  },
-  warning: {
-    bg: 'bg-yellow-600 dark:bg-yellow-500',
-    text: 'text-white',
-    arrow: 'bg-yellow-600 fill-yellow-600 dark:bg-yellow-500 dark:fill-yellow-500',
-  },
-  destructive: {
-    bg: 'bg-destructive',
-    text: 'text-destructive-foreground',
-    arrow: 'bg-destructive fill-destructive',
-  },
-}
-
 function TooltipContent({
   className,
   sideOffset = 4,
@@ -109,7 +82,7 @@ function TooltipContent({
   children,
   ...props
 }: TooltipContentProps) {
-  const styles = variantStyles[variant]
+  const styles = tooltipVariantConfig.variant[variant]
 
   return (
     <TooltipPrimitive.Portal>
