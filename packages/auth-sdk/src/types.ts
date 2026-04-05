@@ -12,7 +12,6 @@ export interface AuthUser {
   apps: string[]
 
   // RBAC - Role-Based Access Control
-  roles?: string[] // DEPRECATED - Use globalRoles or appRoles (kept for backwards compatibility)
   globalRoles?: string[] // Cross-app roles (only 'superadmin' allowed)
   appRoles?: Record<string, string[]> // App-specific roles: { 'green-pulse': ['admin'], 'ezbill': ['beta-tester'] }
   permissions?: string[] // ['theme:edit', 'users:manage', 'analytics:view']
@@ -77,7 +76,6 @@ export interface JWTPayload {
   email: string
   username: string
   apps: string[]
-  roles?: string[] // DEPRECATED
   globalRoles?: string[]
   appRoles?: Record<string, string[]>
   permissions?: string[]

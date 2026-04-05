@@ -69,12 +69,6 @@ export function requireAnyRole(...roles: Role[]) {
       return next()
     }
 
-    // Fallback: check legacy roles
-    const legacyRoles = user.roles || []
-    if (roles.some(role => legacyRoles.includes(role))) {
-      return next()
-    }
-
     return res.status(403).json({
       success: false,
       error: 'Insufficient role',
@@ -101,7 +95,7 @@ export function requirePermission(permission: Permission, appName?: string) {
     const config = getRBACConfig()
 
     // Superadmin has all permissions
-    if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
+    if (user.globalRoles?.includes('superadmin')) {
       return next()
     }
 
@@ -140,14 +134,6 @@ export function requirePermission(permission: Permission, appName?: string) {
       }
     }
 
-    // Legacy: check role-based permissions from config.permissions
-    if (user.roles) {
-      for (const role of user.roles) {
-        const rolePerms = config.permissions[role]
-        if (rolePerms && matchesPermission(rolePerms, permission)) return next()
-      }
-    }
-
     return res.status(403).json({
       success: false,
       error: 'Insufficient permissions',
@@ -168,7 +154,7 @@ export function requireFeature(...features: Feature[]) {
     const user = req.user!
 
     // Superadmin has all features (check globalRoles)
-    if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
+    if (user.globalRoles?.includes('superadmin')) {
       return next()
     }
 
@@ -196,19 +182,19 @@ export function canManageUser(req: Request, targetUserId: string): boolean {
   const user = req.user!
 
   // Superadmin can manage everyone (check globalRoles)
-  if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
+  if (user.globalRoles?.includes('superadmin')) {
     return true
   }
 
   // Admin can manage users in their organization (check appRoles)
   const appRoles = user.appRoles || {}
   const allRoles = Object.values(appRoles).flat()
-  if (allRoles.includes('admin') || user.roles?.includes('admin')) {
+  if (allRoles.includes('admin')) {
     return true
   }
 
   // Manager can manage users they created
-  if (allRoles.includes('manager') || user.roles?.includes('manager')) {
+  if (allRoles.includes('manager')) {
     return user._id === targetUserId
   }
 

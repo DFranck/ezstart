@@ -40,8 +40,7 @@ const deleteUserController = async (req: Request, res: Response) => {
     }
 
     const currentUser = req.user!
-    const isSuperAdmin =
-      currentUser.globalRoles?.includes('superadmin') || currentUser.roles?.includes('superadmin')
+    const isSuperAdmin = currentUser.globalRoles?.includes('superadmin')
 
     if (!isSuperAdmin) {
       return sendError(res, 'Superadmin access required', 403)

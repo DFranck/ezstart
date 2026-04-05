@@ -32,7 +32,6 @@ function buildJwtPayload(user: AuthUserDocument) {
     email: user.email,
     username: user.username,
     apps: user.apps,
-    roles: user.roles || [], // DEPRECATED - kept for backwards compatibility
     globalRoles: user.globalRoles || [],
     appRoles: mapToRecord(user.appRoles),
     permissions: user.permissions || [],
@@ -106,8 +105,6 @@ export class AuthService {
       appRoles,
       permissions: isBetaTester ? ROLE_PERMISSIONS['beta-tester'] : [],
       features: isBetaTester ? ROLE_FEATURES['beta-tester'] : [],
-      // Keep old roles for backwards compatibility
-      roles: isBetaTester ? ['beta-tester'] : [],
     })
 
     await user.save()

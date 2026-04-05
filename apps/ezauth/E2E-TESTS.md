@@ -149,6 +149,23 @@
 | AUTO-3 | Secrets grep     | grep sk_live/password → 0 match | 2026-04-04    | ✅     |
 | AUTO-4 | Build web        | next build → success            | 2026-04-04    | ✅     |
 
+## 14. RBAC Simplification
+
+| ID      | Test                                 | Comment tester                                                  | Derniere date | Status |
+| ------- | ------------------------------------ | --------------------------------------------------------------- | ------------- | ------ |
+| RBAC-1  | Login SSO — globalRoles dans JWT     | Login → decode JWT → globalRoles present, roles absent          | 2026-04-05    | ✅     |
+| RBAC-2  | Login SSO — appRoles dans JWT        | Login → decode JWT → appRoles present avec app roles            | 2026-04-05    | ✅     |
+| RBAC-3  | Admin EZPay — accès via appRoles     | User avec appRoles.ezpay=['admin'] → /admin accessible          | 2026-04-05    | ✅     |
+| RBAC-4  | Admin EZAuth — page dashboard        | /admin → liste users, search, pagination                        | 2026-04-05    | ✅     |
+| RBAC-5  | Admin EZAuth — edit roles            | Edit user → modifier globalRoles/appRoles → sauvegarde OK       | 2026-04-05    | ✅     |
+| RBAC-6  | Admin EZAuth — delete user           | Delete user → confirmation → user supprime                      | 2026-04-05    | ⚠️     |
+| RBAC-7  | Admin EZAuth — waitlist              | Liste waitlist + invite email                                   | 2026-04-05    | ✅     |
+| RBAC-8  | Non-admin — acces refuse             | User sans admin role → /admin → InsufficientPermissions         | 2026-04-05    | ✅     |
+| RBAC-9  | requireRole middleware — sans legacy | API avec requireRole('admin') → check globalRoles/appRoles only | 2026-04-05    | ✅     |
+| RBAC-10 | Migration — legacy roles converties  | Users avec ancien roles[] → globalRoles/appRoles corrects       | 2026-04-05    | ✅     |
+
+> **RBAC-6 :** Bouton visible, non teste en action pour eviter suppression de vrais users
+
 ---
 
 ## Resume
@@ -168,4 +185,5 @@
 | Security                  | 7      | 7      | 0      | 0     |
 | Admin Dashboard           | 8      | 2      | 6      | 0     |
 | API Automated Tests       | 4      | 4      | 0      | 0     |
-| **TOTAL**                 | **78** | **60** | **16** | **2** |
+| RBAC Simplification       | 10     | 9      | 0      | 1     |
+| **TOTAL**                 | **88** | **69** | **16** | **3** |

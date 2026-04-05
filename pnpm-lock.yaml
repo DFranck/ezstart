@@ -288,6 +288,9 @@ importers:
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
+      '@ezstart/rbac':
+        specifier: workspace:*
+        version: link:../../../packages/rbac
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
