@@ -73,8 +73,8 @@ const listUsersController = async (req: Request, res: Response) => {
     const query: Record<string, unknown> = {}
 
     // Superadmin sees all users, admin sees non-superadmins in their apps
-    if (!currentUser.roles?.includes('superadmin')) {
-      query.roles = { $ne: 'superadmin' }
+    if (!currentUser.globalRoles?.includes('superadmin')) {
+      query.globalRoles = { $ne: 'superadmin' }
       if ((currentUser.apps?.length ?? 0) > 0) {
         query.apps = { $in: currentUser.apps }
       }
@@ -113,14 +113,12 @@ const listUsersController = async (req: Request, res: Response) => {
         (
           u: Record<string, unknown> & {
             _id: { toString(): string }
-            roles?: string[]
             permissions?: string[]
             features?: string[]
           }
         ) => ({
           ...u,
           _id: u._id.toString(),
-          roles: u.roles || [],
           permissions: u.permissions || [],
           features: u.features || [],
         })

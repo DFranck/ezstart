@@ -92,8 +92,7 @@ const updateUserController = async (req: Request, res: Response) => {
     }
 
     const currentUser = req.user
-    const isSuperAdmin =
-      currentUser.globalRoles?.includes('superadmin') || currentUser.roles?.includes('superadmin')
+    const isSuperAdmin = currentUser.globalRoles?.includes('superadmin')
 
     if (!isSuperAdmin) {
       return sendError(res, 'Superadmin access required for user management from ezstart', 403)
@@ -125,7 +124,6 @@ const updateUserController = async (req: Request, res: Response) => {
 
     // Update other fields
     const allowedFields = [
-      'roles',
       'permissions',
       'features',
       'apps',
@@ -149,7 +147,6 @@ const updateUserController = async (req: Request, res: Response) => {
         _id: String(user._id),
         globalRoles: user.globalRoles || [],
         appRoles: mapToRecord(user.appRoles),
-        roles: user.roles || [],
         permissions: user.permissions || [],
         features: user.features || [],
         isVerified: user.isVerified,

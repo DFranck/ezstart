@@ -88,11 +88,6 @@ const inviteWaitlistController = async (req: Request, res: Response) => {
         existingUser.appRoles.set(appName, currentAppRoles)
       }
 
-      // Add beta-tester to old roles field for backwards compatibility
-      if (!existingUser.roles.includes('beta-tester')) {
-        existingUser.roles.push('beta-tester')
-      }
-
       // Add app to user's apps if not already present
       if (!existingUser.apps.includes(appName)) {
         existingUser.apps.push(appName)

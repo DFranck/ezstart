@@ -11,7 +11,6 @@ declare global {
       email: string
 
       // RBAC - Role-Based Access Control
-      roles?: Role[] // DEPRECATED - kept for backwards compatibility
       globalRoles?: string[] // Cross-app roles (only 'superadmin' allowed)
       appRoles?: Record<string, string[]> // App-specific roles
       permissions?: string[]

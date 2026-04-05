@@ -72,9 +72,7 @@ function ResetPasswordContent() {
       })
 
       if (!response.ok) {
-        throw new Error(
-          response.error || parseApiError(response.data as unknown) || 'Request failed'
-        )
+        throw new Error(response.error || parseApiError(response.data) || 'Request failed')
       }
 
       setSuccess(true)

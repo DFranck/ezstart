@@ -54,8 +54,8 @@ const getUserController = async (req: Request, res: Response) => {
     }
 
     // Check if admin has permission to view this user
-    if (!currentUser.roles?.includes('superadmin')) {
-      if (user.roles?.includes('superadmin')) {
+    if (!currentUser.globalRoles?.includes('superadmin')) {
+      if (user.globalRoles?.includes('superadmin')) {
         return sendError(res, 'Cannot view superadmin users', 403)
       }
       if (
@@ -70,7 +70,6 @@ const getUserController = async (req: Request, res: Response) => {
       user: {
         ...user,
         _id: user._id.toString(),
-        roles: user.roles || [],
         permissions: user.permissions || [],
         features: user.features || [],
       },

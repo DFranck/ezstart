@@ -55,8 +55,8 @@ export function UserManagementTable({
     const roles: Array<{ role: string; isGlobal: boolean; app?: string }> = []
 
     // Add global roles
-    if (user.roles && user.roles.length > 0) {
-      user.roles.forEach(role => roles.push({ role, isGlobal: true }))
+    if (user.globalRoles && user.globalRoles.length > 0) {
+      user.globalRoles.forEach((role: string) => roles.push({ role, isGlobal: true }))
     }
 
     // Add app-specific roles with app name

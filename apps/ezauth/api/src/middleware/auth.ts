@@ -58,7 +58,6 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       avatar: user.avatar,
       isVerified: user.isVerified,
       apps: user.apps,
-      roles: user.roles || [], // Legacy - kept for backward compatibility
       globalRoles: user.globalRoles || [],
       appRoles: mapToRecord(user.appRoles),
       permissions: user.permissions || [],
@@ -122,7 +121,6 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
         avatar: user.avatar,
         isVerified: user.isVerified,
         apps: user.apps,
-        roles: user.roles || [], // Legacy - kept for backward compatibility
         globalRoles: user.globalRoles || [],
         appRoles: mapToRecord(user.appRoles),
         permissions: user.permissions || [],

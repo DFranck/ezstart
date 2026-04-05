@@ -61,7 +61,7 @@ export default function SettingsPage() {
         method: 'POST',
       })
       if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data as unknown) || 'Setup failed')
+        throw new Error(response.error || parseApiError(response.data) || 'Setup failed')
       }
       const data = response.data as { qrCode: string; secret: string }
       setQrCode(data.qrCode)
@@ -85,9 +85,7 @@ export default function SettingsPage() {
         body: { code },
       })
       if (!response.ok) {
-        throw new Error(
-          response.error || parseApiError(response.data as unknown) || 'Verification failed'
-        )
+        throw new Error(response.error || parseApiError(response.data) || 'Verification failed')
       }
       const data = response.data as { backupCodes: string[] }
       setBackupCodes(data.backupCodes)
@@ -111,9 +109,7 @@ export default function SettingsPage() {
         body: { code },
       })
       if (!response.ok) {
-        throw new Error(
-          response.error || parseApiError(response.data as unknown) || 'Disable failed'
-        )
+        throw new Error(response.error || parseApiError(response.data) || 'Disable failed')
       }
       setIs2FAEnabled(false)
       setPhase('idle')

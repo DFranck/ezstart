@@ -10,7 +10,6 @@ export interface JwtUser {
   email?: string
   username?: string
   apps?: string[]
-  roles?: string[]
   globalRoles?: string[]
   appRoles?: Record<string, string[]>
   permissions?: string[]
@@ -58,7 +57,6 @@ export function populateUserFromToken(req: Request, _res: Response, next: NextFu
           email: decoded.email as string | undefined,
           username: decoded.username as string | undefined,
           apps: decoded.apps as string[] | undefined,
-          roles: decoded.roles as string[] | undefined,
           globalRoles: decoded.globalRoles as string[] | undefined,
           appRoles: decoded.appRoles as Record<string, string[]> | undefined,
           permissions: decoded.permissions as string[] | undefined,

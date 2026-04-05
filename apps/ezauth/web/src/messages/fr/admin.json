@@ -1,0 +1,78 @@
+{
+  "admin": {
+    "title": "Tableau de bord Admin",
+    "accessDenied": "Acces refuse",
+    "accessDeniedDescription": "Vous devez avoir les privileges administrateur pour acceder a cette page.",
+    "tabs": {
+      "users": "Utilisateurs",
+      "waitlist": "Liste d'attente"
+    },
+    "users": {
+      "searchPlaceholder": "Rechercher par email ou nom d'utilisateur...",
+      "columns": {
+        "email": "Email",
+        "username": "Nom d'utilisateur",
+        "globalRoles": "Roles globaux",
+        "appRoles": "Roles par app",
+        "createdAt": "Date de creation",
+        "actions": "Actions"
+      },
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "noUsers": "Aucun utilisateur trouve.",
+      "confirmDeleteTitle": "Supprimer l'utilisateur",
+      "confirmDeleteDescription": "Etes-vous sur de vouloir supprimer cet utilisateur ? Cette action est irreversible.",
+      "deleteSuccess": "Utilisateur supprime avec succes.",
+      "deleteError": "Echec de la suppression de l'utilisateur.",
+      "loading": "Chargement des utilisateurs..."
+    },
+    "editRoles": {
+      "title": "Modifier les roles",
+      "subtitle": "Modifier les roles pour {email}",
+      "globalRoles": "Roles globaux",
+      "appRoles": "Roles par app ({app})",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "editSuccess": "Roles mis a jour avec succes.",
+      "editError": "Echec de la mise a jour des roles.",
+      "noAppRoles": "Aucun role d'application assigne."
+    },
+    "roles": {
+      "superadmin": "Super Admin",
+      "admin": "Admin",
+      "manager": "Manager",
+      "beta-tester": "Beta Testeur",
+      "client": "Client"
+    },
+    "waitlist": {
+      "columns": {
+        "email": "Email",
+        "app": "Application",
+        "status": "Statut",
+        "createdAt": "Date de creation",
+        "actions": "Actions"
+      },
+      "invite": "Inviter",
+      "noWaitlist": "Aucune entree en liste d'attente.",
+      "inviteSuccess": "Invitation envoyee avec succes.",
+      "inviteError": "Echec de l'envoi de l'invitation.",
+      "loading": "Chargement de la liste d'attente...",
+      "statusPending": "En attente",
+      "statusInvited": "Invite",
+      "statusRegistered": "Inscrit"
+    },
+    "dialog": {
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "loading": "Traitement en cours...",
+      "retry": "Reessayer",
+      "close": "Fermer"
+    },
+    "pagination": {
+      "showing": "Affichage {from}-{to} sur {total}",
+      "previous": "Precedent",
+      "next": "Suivant"
+    }
+  }
+}

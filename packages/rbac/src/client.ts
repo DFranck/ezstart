@@ -23,7 +23,7 @@ export function hasRole(user: AuthUser | null, role: Role, appName?: string): bo
 
   // Superadmin is always global and has access to everything
   if (role === 'superadmin') {
-    return user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin') || false
+    return user.globalRoles?.includes('superadmin') || false
   }
 
   // If appName specified, check app-specific role
@@ -40,9 +40,6 @@ export function hasRole(user: AuthUser | null, role: Role, appName?: string): bo
     const hasInAnyApp = Object.values(user.appRoles).some(roles => roles.includes(role))
     if (hasInAnyApp) return true
   }
-
-  // Check old roles field for backwards compatibility
-  if (user.roles?.includes(role)) return true
 
   return false
 }
@@ -130,15 +127,6 @@ export function hasPermission(
     }
   }
 
-  // Legacy: check role-based permissions from config.permissions
-  if (user.roles) {
-    const { permissions: rolePermissions } = config
-    for (const role of user.roles) {
-      const rolePerms = rolePermissions[role]
-      if (rolePerms && matchesPermission(rolePerms, permission)) return true
-    }
-  }
-
   return false
 }
 
@@ -176,15 +164,6 @@ export function hasFeature(user: AuthUser | null, feature: Feature): boolean {
 
   // Check explicit features
   if (user.features?.includes(feature)) return true
-
-  // Check role-based features
-  if (user.roles) {
-    const { features: roleFeatures } = getRBACConfig()
-    return user.roles.some(role => {
-      const feats = roleFeatures[role]
-      return feats?.includes(feature)
-    })
-  }
 
   return false
 }
@@ -246,10 +225,23 @@ export function canManageUser(
  * Get user's highest role level
  */
 export function getHighestRoleLevel(user: AuthUser | null): number {
-  if (!user?.roles || !Array.isArray(user.roles) || user.roles.length === 0) return 0
+  if (!user) return 0
 
   const { hierarchy } = getRBACConfig()
-  return Math.max(...user.roles.map(role => hierarchy[role] || 0))
+  const allRoles: string[] = []
+
+  // Collect globalRoles
+  if (user.globalRoles?.length) allRoles.push(...user.globalRoles)
+
+  // Collect all appRoles
+  if (user.appRoles) {
+    for (const roles of Object.values(user.appRoles)) {
+      allRoles.push(...roles)
+    }
+  }
+
+  if (allRoles.length === 0) return 0
+  return Math.max(...allRoles.map(role => hierarchy[role] || 0))
 }
 
 /**

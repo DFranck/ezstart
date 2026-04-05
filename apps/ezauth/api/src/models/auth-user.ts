@@ -15,7 +15,7 @@ export interface AuthUserDocument extends Document {
   apps: string[]
 
   // RBAC - Role-Based Access Control
-  roles: string[] // DEPRECATED - Use globalRoles or appRoles instead (kept for backwards compatibility)
+  roles: string[] // DEPRECATED: Legacy field, kept for data preservation. Not used in code anymore. Use globalRoles and appRoles instead.
   globalRoles: string[] // Cross-app roles (only 'superadmin' allowed)
   appRoles: Map<string, string[]> // App-specific roles: { 'green-pulse': ['admin'], 'ezbill': ['beta-tester'] }
   permissions: string[] // ['theme:edit', 'users:manage', 'analytics:view']
@@ -83,7 +83,7 @@ const authUserSchema = new Schema<AuthUserDocument>(
         enum: ['superadmin', 'admin', 'manager', 'beta-tester', 'client'],
         default: [],
       },
-    ], // DEPRECATED - kept for backwards compatibility
+    ], // DEPRECATED: Legacy field, kept for data preservation. Not used in code anymore. Use globalRoles and appRoles instead.
     globalRoles: [
       {
         type: String,
@@ -168,16 +168,15 @@ authUserSchema.methods.hasRole = function (role: string, appName?: string): bool
     return this.hasAppRole(appName, role)
   }
 
-  // Check both old roles (backwards compat) and global roles
-  const hasOldRole = this.roles?.includes(role) || false
-  const hasNewGlobalRole = this.globalRoles?.includes(role) || false
+  // Check global roles
+  if (this.globalRoles?.includes(role)) return true
 
   // Check if has role in ANY app
   const hasInAnyApp = Array.from(this.appRoles?.keys() || []).some(app =>
     this.hasAppRole(app, role)
   )
 
-  return hasOldRole || hasNewGlobalRole || hasInAnyApp
+  return hasInAnyApp
 }
 
 authUserSchema.methods.hasAnyRole = function (roles: string[], appName?: string): boolean {
@@ -210,7 +209,6 @@ authUserSchema.methods.toAuthUser = function (): AuthUser {
     avatar: this.avatar,
     isVerified: this.isVerified,
     apps: this.apps,
-    roles: this.roles || [], // DEPRECATED - kept for backwards compatibility
     globalRoles: this.globalRoles || [],
     appRoles: mapToRecord(this.appRoles as Map<string, string[]>),
     permissions: this.permissions || [],

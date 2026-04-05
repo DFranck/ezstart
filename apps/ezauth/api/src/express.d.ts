@@ -8,7 +8,6 @@ declare global {
     interface User {
       _id: string
       email: string
-      roles?: string[]
       globalRoles?: string[]
       appRoles?: Record<string, string[]>
       permissions?: string[]
