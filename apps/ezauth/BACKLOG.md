@@ -16,7 +16,7 @@ All core features implemented and audited. Remaining items are future improvemen
 
 ### Future (non-blocking)
 
-- RBAC-1: Complete role system simplification (remove legacy fields, replace inline checks, admin page, migrations)
+- ~~RBAC-1: Complete role system simplification (remove legacy fields, replace inline checks, admin page, migrations)~~ `done`
 
 ## Objectif
 
@@ -127,7 +127,7 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
 - [x] Web: Badge "Session actuelle" + visual differentiation
 - [x] Bouton Révoquer masqué sur session courante
 
-### RBAC-1: Simplifier le systeme de roles `high` `architecture` — `in-progress`
+### RBAC-1: Simplifier le systeme de roles `high` `architecture` — `done`
 
 - **Probleme :** Le systeme de roles est disperse et incoherent :
   - `roles` (legacy) encore dans le code mais ne devrait plus exister
@@ -138,13 +138,13 @@ EZAuth est fonctionnel pour les flows principaux (login, register, Google OAuth,
   - `isAdminUser()` dans EZPay verifie 5 conditions differentes
 - **Solution proposee :**
   - [x] Definir la hierarchie : `superadmin > admin > app:admin > app:editor > app:viewer > user`
-  - [ ] Supprimer `roles` (legacy), `permissions`, `features` du modele AuthUser
-  - [ ] Creer `hasAccess(user, app, requiredRole)` helper dans auth-sdk (partage)
-  - [ ] Remplacer TOUS les checks inline dans les apps par `hasAccess()`
-  - [ ] Mettre a jour le JWT payload pour ne plus inclure les champs supprimes
-  - [ ] Page admin EZAuth pour gerer les roles visuellement (assign globalRoles + appRoles)
-  - [ ] Tests unitaires pour la hierarchie des roles
-  - [ ] Migration des users existants (supprimer les champs legacy)
+  - [x] Supprimer `roles` (legacy), `permissions`, `features` du modele AuthUser
+  - [x] Creer `hasAccess(user, app, requiredRole)` helper dans auth-sdk (partage)
+  - [x] Remplacer TOUS les checks inline dans les apps par `hasAccess()`
+  - [x] Mettre a jour le JWT payload pour ne plus inclure les champs supprimes
+  - [x] Page admin EZAuth pour gerer les roles visuellement (assign globalRoles + appRoles)
+  - [x] Tests unitaires pour la hierarchie des roles
+  - [x] Migration des users existants (script ready, data verified in DB)
 - **Impact :** EZAuth API, auth-sdk, EZPay API, EZStart API, tous les middleware auth
 - **Prerequis :** Aucun — peut etre fait independamment
 - **Priorite :** High — doit etre fait avant le CRM/CMS car le panel admin a besoin d'un RBAC propre
