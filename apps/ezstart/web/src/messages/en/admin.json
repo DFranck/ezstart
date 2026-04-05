@@ -41,7 +41,8 @@
       "notVerified": "Not verified",
       "edit": "Edit",
       "editUser": "Edit User",
-      "locked": "Locked"
+      "locked": "Locked",
+      "createdAt": "Created"
     },
     "editModal": {
       "title": "Edit User: {username}",

@@ -3,29 +3,32 @@
 import type { AuthUser } from '@ezstart/auth-sdk'
 import { useAuth } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/fetch-client'
-import { useRBAC } from '@ezstart/rbac'
+import { canManageUser, useRBAC } from '@ezstart/rbac'
 import {
   Badge,
   Button,
   Card,
   CardContent,
   CardHeader,
+  type ColumnDef,
+  DataTable,
   Div,
   H2,
-  Input,
+  Icon,
+  Img,
   P,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Span,
   Spinner,
 } from '@ezstart/ui/components'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { UserEditModal } from './user-edit-modal'
-import { UserManagementTable } from './user-management-table'
 
 interface PaginatedUsers {
   users: AuthUser[]
@@ -37,10 +40,21 @@ interface PaginatedUsers {
   }
 }
 
+function getRoleBadgeVariant(role: string): 'destructive' | 'default' | 'secondary' | 'outline' {
+  const variants: Record<string, 'destructive' | 'default' | 'secondary' | 'outline'> = {
+    superadmin: 'destructive',
+    admin: 'default',
+    manager: 'secondary',
+    'beta-tester': 'outline',
+    client: 'outline',
+  }
+  return variants[role] || 'outline'
+}
+
 export function UsersTab() {
-  const { user } = useAuth()
+  const { user: currentUser } = useAuth()
   const t = useTranslations()
-  const rbac = useRBAC(user, 'ezstart')
+  const rbac = useRBAC(currentUser, 'ezstart')
   const [page, setPage] = useState(1)
   const limit = 50
   const [selectedUser, setSelectedUser] = useState<AuthUser | null>(null)
@@ -87,6 +101,120 @@ export function UsersTab() {
   const pagination = data?.pagination ?? { page: 1, limit, total: 0, totalPages: 0 }
   const error = queryError?.message ?? null
 
+  const columns: ColumnDef<AuthUser>[] = useMemo(
+    () => [
+      {
+        id: 'user',
+        header: t('admin.table.user'),
+        accessorFn: row => row.username,
+        cell: ({ row }) => {
+          const u = row.original
+          return (
+            <Div className="flex items-center gap-3">
+              {u.avatar && (
+                <Img
+                  src={u.avatar}
+                  alt={u.username}
+                  className="w-8 h-8 rounded-full flex-shrink-0"
+                />
+              )}
+              <Div className="min-w-0">
+                <P className="font-medium truncate">{u.username}</P>
+                <P className="text-xs text-muted-foreground truncate">{u.email}</P>
+              </Div>
+            </Div>
+          )
+        },
+      },
+      {
+        id: 'globalRoles',
+        header: t('admin.table.roles'),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const globalRoles = row.original.globalRoles ?? []
+          if (globalRoles.length === 0) return null
+          return (
+            <Div className="flex flex-wrap gap-1">
+              {globalRoles.map(role => (
+                <Badge key={role} variant={getRoleBadgeVariant(role)}>
+                  {role}
+                </Badge>
+              ))}
+            </Div>
+          )
+        },
+      },
+      {
+        id: 'appRoles',
+        header: t('admin.table.apps'),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const appRoles = row.original.appRoles ?? {}
+          const entries = Object.entries(appRoles).filter(
+            ([, roles]) => Array.isArray(roles) && roles.length > 0
+          )
+          if (entries.length === 0) {
+            return (
+              <Badge variant="outline" className="text-xs">
+                {t('admin.table.noApps')}
+              </Badge>
+            )
+          }
+          return (
+            <Div className="flex flex-wrap gap-1">
+              {entries.map(([app, roles]) => (
+                <Badge key={app} variant="secondary" className="text-xs" title={roles.join(', ')}>
+                  {app}
+                  <Span className="ml-1 text-[10px] opacity-70">({roles.join(', ')})</Span>
+                </Badge>
+              ))}
+            </Div>
+          )
+        },
+      },
+      {
+        accessorKey: 'isVerified',
+        header: t('admin.table.verified'),
+        cell: ({ row }) =>
+          row.original.isVerified ? (
+            <Icon name="lucide:Check" className="text-emerald-500" />
+          ) : (
+            <Icon name="lucide:X" className="text-muted-foreground" />
+          ),
+      },
+      {
+        accessorKey: 'createdAt',
+        header: t('admin.table.createdAt'),
+        cell: ({ row }) => (
+          <P className="text-sm text-muted-foreground">
+            {new Date(row.original.createdAt).toLocaleDateString()}
+          </P>
+        ),
+      },
+      {
+        id: 'actions',
+        header: t('admin.table.actions'),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const u = row.original
+          const canEdit = canManageUser(currentUser, u)
+          return canEdit ? (
+            <Button size="sm" variant="outline" onClick={() => setSelectedUser(u)}>
+              <Icon name="lucide:Edit" className="mr-1" />
+              {t('admin.table.edit')}
+            </Button>
+          ) : (
+            <Button size="sm" variant="ghost" disabled>
+              <Icon name="lucide:Lock" className="mr-1" />
+              {t('admin.table.locked')}
+            </Button>
+          )
+        },
+      },
+    ],
+    [t, currentUser]
+  )
+
   return (
     <>
       <Card>
@@ -107,13 +235,6 @@ export function UsersTab() {
             <>
               {/* Filters */}
               <Div className="mb-6 flex gap-4 flex-wrap">
-                <Input
-                  type="text"
-                  placeholder={t('admin.userManagement.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="flex-1 min-w-[200px]"
-                />
                 <Select value={roleFilter || 'all'} onValueChange={setRoleFilter}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder={t('admin.userManagement.allRoles')} />
@@ -130,7 +251,9 @@ export function UsersTab() {
                     <SelectItem value="beta-tester">
                       {t('admin.userManagement.roles.betaTester')}
                     </SelectItem>
-                    <SelectItem value="client">{t('admin.userManagement.roles.client')}</SelectItem>
+                    <SelectItem value="client">
+                      {t('admin.userManagement.roles.client')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <Button onClick={() => refetch()} variant="outline">
@@ -138,15 +261,17 @@ export function UsersTab() {
                 </Button>
               </Div>
 
-              {/* Users Table */}
-              <UserManagementTable
-                users={users}
-                currentUser={user}
-                onEditUser={setSelectedUser}
-                rbac={rbac}
+              {/* Users DataTable */}
+              <DataTable
+                columns={columns}
+                data={users}
+                filterColumn="user"
+                filterPlaceholder={t('admin.userManagement.searchPlaceholder')}
+                pageSize={limit}
+                hidePagination
               />
 
-              {/* Pagination */}
+              {/* Server-side pagination */}
               <Div className="mt-6 flex items-center justify-between">
                 <P className="text-sm text-muted-foreground">
                   {t('admin.userManagement.showing', {
@@ -188,7 +313,7 @@ export function UsersTab() {
       {selectedUser && (
         <UserEditModal
           user={selectedUser}
-          currentUser={user}
+          currentUser={currentUser}
           rbac={rbac}
           onClose={() => setSelectedUser(null)}
           onSave={() => {
