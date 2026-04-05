@@ -31,15 +31,15 @@ function AdminPanelContent() {
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="ezauth">
+        <TabsContent value="ezauth" className="min-h-[600px]">
           <UsersTab />
         </TabsContent>
 
-        <TabsContent value="ezpay">
+        <TabsContent value="ezpay" className="min-h-[600px]">
           <EZPayTab />
         </TabsContent>
 
-        <TabsContent value="monitoring">
+        <TabsContent value="monitoring" className="min-h-[600px]">
           <MonitoringTab />
         </TabsContent>
       </Tabs>
