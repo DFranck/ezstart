@@ -54,6 +54,7 @@
   },
   "navigation": {
     "home": "Home",
+    "plans": "My Plans",
     "analyze": "Analyze",
     "about": "About"
   },
@@ -389,5 +390,31 @@
     "luckyText": "The queen star of Period 9! Activate it to multiply prosperity, fertility and marriage opportunities. In {year}, it amplifies everything it touches ~ this is THE sector to boost.",
     "cta": "Analyze my home now",
     "dismiss": "Maybe later"
+  },
+  "plans": {
+    "title": "My Plans",
+    "newAnalysis": "New Analysis",
+    "authRequired": "Login Required",
+    "authDescription": "Sign in to view and manage your saved floor plans.",
+    "empty": {
+      "title": "No plans yet",
+      "description": "Upload your first floor plan to start your Feng Shui analysis",
+      "cta": "Upload a Plan"
+    },
+    "card": {
+      "analyses": "{count} analyses",
+      "noAnalyses": "No analysis yet",
+      "analyze": "Analyze",
+      "delete": "Delete",
+      "validated": "Validated",
+      "poorQuality": "Poor quality",
+      "notValidated": "Not validated"
+    },
+    "deleteConfirm": {
+      "title": "Delete Plan",
+      "description": "Are you sure? This will also delete all analyses for this plan.",
+      "success": "Plan deleted successfully",
+      "error": "Failed to delete the plan"
+    }
   }
 }

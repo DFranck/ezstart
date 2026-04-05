@@ -54,6 +54,7 @@
   },
   "navigation": {
     "home": "Inicio",
+    "plans": "Mis Planos",
     "analyze": "Analizar",
     "about": "Acerca de"
   },
@@ -393,5 +394,31 @@
     "luckyText": "¡La estrella reina del Período 9! Actívela para multiplicar prosperidad, fertilidad y oportunidades matrimoniales. En {year}, amplifica todo lo que toca ~ es EL sector a potenciar.",
     "cta": "Analizar mi hogar ahora",
     "dismiss": "Más tarde"
+  },
+  "plans": {
+    "title": "Mis Planos",
+    "newAnalysis": "Nuevo An\u00e1lisis",
+    "authRequired": "Inicio de sesi\u00f3n requerido",
+    "authDescription": "Inicia sesi\u00f3n para ver y gestionar tus planos guardados.",
+    "empty": {
+      "title": "Sin planos a\u00fan",
+      "description": "Sube tu primer plano para comenzar tu an\u00e1lisis Feng Shui",
+      "cta": "Subir un Plano"
+    },
+    "card": {
+      "analyses": "{count} an\u00e1lisis",
+      "noAnalyses": "Sin an\u00e1lisis a\u00fan",
+      "analyze": "Analizar",
+      "delete": "Eliminar",
+      "validated": "Validado",
+      "poorQuality": "Calidad baja",
+      "notValidated": "No validado"
+    },
+    "deleteConfirm": {
+      "title": "Eliminar plano",
+      "description": "\u00bfEst\u00e1s seguro? Esto tambi\u00e9n eliminar\u00e1 todos los an\u00e1lisis de este plano.",
+      "success": "Plano eliminado con \u00e9xito",
+      "error": "Error al eliminar el plano"
+    }
   }
 }

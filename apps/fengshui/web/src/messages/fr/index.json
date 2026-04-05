@@ -54,6 +54,7 @@
   },
   "navigation": {
     "home": "Accueil",
+    "plans": "Mes Plans",
     "analyze": "Analyser",
     "about": "À propos"
   },
@@ -391,5 +392,31 @@
     "luckyText": "L'étoile reine de la Période 9 ! Activez-la pour multiplier prospérité, fertilité et opportunités de mariage. En {year}, elle démultiplie tout ce qu'elle touche ~ c'est LE secteur à booster.",
     "cta": "Analyser mon habitat maintenant",
     "dismiss": "Plus tard"
+  },
+  "plans": {
+    "title": "Mes Plans",
+    "newAnalysis": "Nouvelle Analyse",
+    "authRequired": "Connexion requise",
+    "authDescription": "Connectez-vous pour voir et g\u00e9rer vos plans sauvegard\u00e9s.",
+    "empty": {
+      "title": "Aucun plan",
+      "description": "Importez votre premier plan pour commencer votre analyse Feng Shui",
+      "cta": "Importer un Plan"
+    },
+    "card": {
+      "analyses": "{count} analyses",
+      "noAnalyses": "Aucune analyse",
+      "analyze": "Analyser",
+      "delete": "Supprimer",
+      "validated": "Valid\u00e9",
+      "poorQuality": "Qualit\u00e9 faible",
+      "notValidated": "Non valid\u00e9"
+    },
+    "deleteConfirm": {
+      "title": "Supprimer le plan",
+      "description": "\u00cates-vous s\u00fbr ? Cela supprimera \u00e9galement toutes les analyses de ce plan.",
+      "success": "Plan supprim\u00e9 avec succ\u00e8s",
+      "error": "\u00c9chec de la suppression du plan"
+    }
   }
 }
