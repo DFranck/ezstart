@@ -19,7 +19,7 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(twoFactorVerifyRegistry, router)
 
 const verifyCodeSchema = z.object({
-  code: z.string().length(6, 'Code must be 6 digits'),
+  code: z.string().length(6, 'Code must be 6 digits').describe('TOTP verification code'),
 })
 
 // POST /auth/2fa/verify — verifies a TOTP code to complete setup

@@ -85,7 +85,13 @@ export class HealthCheckScheduler {
     }
 
     const isDev = process.env.NODE_ENV !== 'production'
-    const envLabel = isDev ? 'development' : 'production'
+
+    if (isDev) {
+      logger.info('⏰ [Scheduler] Skipped in development mode')
+      return
+    }
+
+    const envLabel = 'production'
 
     logger.info(`⏰ [Scheduler] Starting ADAPTIVE health check scheduler in ${envLabel} mode...`)
     logger.info(

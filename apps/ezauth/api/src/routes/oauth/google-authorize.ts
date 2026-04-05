@@ -14,8 +14,8 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(googleAuthorizeRegistry, router)
 
 const googleAuthorizeQuerySchema = z.object({
-  app: z.string().min(1).default('ezstart'),
-  redirect_uri: z.string().url().optional(),
+  app: z.string().min(1).default('ezstart').describe('Application name requesting OAuth'),
+  redirect_uri: z.string().url().optional().describe('URL to redirect after OAuth completion'),
 })
 
 /**

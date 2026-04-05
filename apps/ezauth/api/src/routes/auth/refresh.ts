@@ -21,7 +21,10 @@ const docRouter = createRouterWithDoc(refreshRegistry, router)
 const refreshRateLimiter = createStrictRateLimiter()
 
 const refreshRequestSchema = z.object({
-  refreshToken: z.string().min(1, 'Refresh token is required'),
+  refreshToken: z
+    .string()
+    .min(1, 'Refresh token is required')
+    .describe('Refresh token for obtaining new access tokens'),
 })
 
 const refreshResponseSchema = z.object({

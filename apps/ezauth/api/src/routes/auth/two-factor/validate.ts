@@ -23,8 +23,11 @@ const docRouter = createRouterWithDoc(twoFactorValidateRegistry, router)
 const validateRateLimiter = createStrictRateLimiter()
 
 const validateSchema = z.object({
-  tempToken: z.string().min(1, 'Temporary token is required'),
-  code: z.string().min(6, 'Code must be at least 6 characters'),
+  tempToken: z
+    .string()
+    .min(1, 'Temporary token is required')
+    .describe('Temporary token from login requiring 2FA'),
+  code: z.string().min(6, 'Code must be at least 6 characters').describe('TOTP verification code'),
 })
 
 // POST /auth/2fa/validate — accepts tempToken + TOTP code, returns real auth code

@@ -22,7 +22,7 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(logoutRegistry, router)
 
 const logoutRequestSchema = z.object({
-  refreshToken: z.string().optional(),
+  refreshToken: z.string().optional().describe('Refresh token for obtaining new access tokens'),
 })
 
 const logoutResponseSchema = z.object({

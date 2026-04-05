@@ -60,8 +60,6 @@ export function createApp(options?: CreateAppOptions): Express {
     logger.info(
       `✅ [CORS] Auto-configured for ${options.apiApp}: ${allowedOrigins.length} origins allowed`
     )
-    logger.debug(`   📋 Allowed origins:`)
-    allowedOrigins.forEach(origin => logger.debug(`      - ${origin}`))
   } else if (options?.corsOrigins) {
     // Option 2: Manual CORS origins
     corsOptions = {

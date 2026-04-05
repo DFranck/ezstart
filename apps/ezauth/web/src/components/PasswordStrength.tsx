@@ -34,16 +34,16 @@ function calculateStrength(password: string): { level: number; label: Strength }
 
 const strengthColors: Record<Strength, string> = {
   weak: 'bg-destructive',
-  fair: 'bg-orange-500',
-  good: 'bg-yellow-500',
-  strong: 'bg-green-500',
+  fair: 'bg-warning',
+  good: 'bg-warning/70',
+  strong: 'bg-success',
 }
 
 const strengthTextColors: Record<Strength, string> = {
   weak: 'text-destructive',
-  fair: 'text-orange-500',
-  good: 'text-yellow-500',
-  strong: 'text-green-500',
+  fair: 'text-warning',
+  good: 'text-warning/70',
+  strong: 'text-success',
 }
 
 export function PasswordStrength({ password }: PasswordStrengthProps) {

@@ -5,9 +5,10 @@
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, findOne, findMany } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { getGameConfigModel } from '../models/game-config.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 router.get('/:gameType/:layoutName', async (req, res) => {
   try {

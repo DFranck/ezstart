@@ -19,7 +19,7 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(twoFactorDisableRegistry, router)
 
 const disableSchema = z.object({
-  code: z.string().length(6, 'Code must be 6 digits'),
+  code: z.string().length(6, 'Code must be 6 digits').describe('TOTP verification code'),
 })
 
 // POST /auth/2fa/disable — disables 2FA (requires current code)

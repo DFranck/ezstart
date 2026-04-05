@@ -21,6 +21,7 @@ import {
   usePayContext,
   ConfirmActionDialog,
   formatCurrency,
+  type Payment,
 } from '@ezstart/pay-sdk'
 
 const plans = [
@@ -95,7 +96,7 @@ export default function TestSubscribePage() {
           </CardHeader>
           <CardContent>
             <Div className="space-y-3">
-              {activeSubscriptions.map(sub => (
+              {activeSubscriptions.map((sub: Payment) => (
                 <Div
                   key={sub.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
@@ -147,7 +148,7 @@ export default function TestSubscribePage() {
       {/* Cancel Subscription Confirmation Dialog */}
       <ConfirmActionDialog
         open={cancelDialog.open}
-        onOpenChange={open => setCancelDialog(prev => ({ ...prev, open }))}
+        onOpenChange={(open: boolean) => setCancelDialog(prev => ({ ...prev, open }))}
         title={t('cancelSubscription')}
         description={t('cancelConfirm')}
         onConfirm={handleCancelConfirm}

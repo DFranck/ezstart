@@ -14,7 +14,7 @@
     "build:ga-api": "pnpm build:api && turbo build --filter=api-gacha-analyzer",
     "build:ga-web": "turbo build --filter=web-gacha-analyzer",
     "dev": "node scripts/tools/dev.js",
-    "dev:types": "tsc -b --watch",
+    "dev:packages": "tsc -b --watch tsconfig.build-packages.json",
     "rotate-secrets": "node scripts/tools/rotate-secrets.js",
     "validate-env": "node scripts/tools/validate-env.js",
     "lint": "turbo run lint",

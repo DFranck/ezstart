@@ -10,10 +10,11 @@ import {
   sendValidationError,
   findMany,
 } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 const querySchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']).optional(),

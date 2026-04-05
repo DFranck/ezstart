@@ -4,9 +4,10 @@
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, findByIdAndDelete } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { getScanModel } from '../models/scan.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 // DELETE /scans/:id — Delete a scan by ID
 router.delete('/:id', async (req, res) => {

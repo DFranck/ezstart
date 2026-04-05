@@ -10,10 +10,11 @@ import {
   sendValidationError,
   findByIdAndUpdate,
 } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 const feedbackBodySchema = z.object({
   opinion: z.enum(['agree', 'disagree']),

@@ -12,10 +12,15 @@
     "./helpers/*": "./dist/helpers/*.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["testing", "vitest", "mongodb", "test-utils"],
+  "keywords": [
+    "testing",
+    "vitest",
+    "mongodb",
+    "test-utils"
+  ],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.12.2",

@@ -74,8 +74,7 @@ const registerController = async (req: Request, res: Response) => {
       logger.error('Failed to send verification email:', emailError)
     }
 
-    res.status(201)
-    sendSuccess(res, {
+    sendSuccess(res.status(201), {
       code: authCode.code,
       expires_at: authCode.expires_at,
       message: 'User registered successfully. Please check your email to verify your account.',

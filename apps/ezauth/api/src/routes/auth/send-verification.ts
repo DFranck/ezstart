@@ -30,12 +30,12 @@ const sendVerificationRateLimiter = createVeryStrictRateLimiter({
 })
 
 const sendVerificationResponseSchema = z.object({
-  message: z.string(),
+  message: z.string().describe('Response message'),
 })
 
 const errorSchema = z.object({
-  success: z.literal(false),
-  error: z.string(),
+  success: z.literal(false).describe('Whether the operation succeeded'),
+  error: z.string().describe('Error message if operation failed'),
 })
 
 const sendVerificationController = async (req: Request, res: Response) => {

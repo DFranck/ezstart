@@ -30,7 +30,7 @@ function VerifyEmailContent() {
       })
 
       if (!response.ok) {
-        const errorMsg = response.error || parseApiError(response.data as any) || ''
+        const errorMsg = response.error || parseApiError(response.data as unknown) || ''
         if (errorMsg.includes('already verified')) {
           setState('already-verified')
         } else {
@@ -75,7 +75,7 @@ function VerifyEmailContent() {
 
         {state === 'success' && (
           <Div className="space-y-4">
-            <P className="text-center text-sm text-green-600">{t('success')}</P>
+            <P className="text-center text-sm text-success">{t('success')}</P>
             <Div className="text-center">
               <Link href="/login" className="text-sm text-primary hover:opacity-80 font-medium">
                 {t('backToLogin')}

@@ -72,7 +72,9 @@ function ResetPasswordContent() {
       })
 
       if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data as any) || 'Request failed')
+        throw new Error(
+          response.error || parseApiError(response.data as unknown) || 'Request failed'
+        )
       }
 
       setSuccess(true)
@@ -112,7 +114,7 @@ function ResetPasswordContent() {
       <CardContent className="space-y-4">
         {success ? (
           <Div className="space-y-4">
-            <P className="text-center text-sm text-green-600">{t('success')}</P>
+            <P className="text-center text-sm text-success">{t('success')}</P>
             <Div className="text-center">
               <Link href="/login" className="text-sm text-primary hover:opacity-80 font-medium">
                 {t('backToLogin')}

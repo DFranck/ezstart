@@ -30,11 +30,13 @@ const purchasesQuerySchema = z.object({
 const purchasesListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   payments: z.array(z.any()).describe('List of purchases'),
-  meta: z.object({
-    total: z.number().describe('Total number of purchases matching the query'),
-    limit: z.number().describe('Number of purchases returned'),
-    offset: z.number().describe('Number of purchases skipped'),
-  }),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of purchases matching the query'),
+      limit: z.number().describe('Number of purchases returned'),
+      offset: z.number().describe('Number of purchases skipped'),
+    })
+    .describe('Pagination metadata'),
 })
 
 // ========================================

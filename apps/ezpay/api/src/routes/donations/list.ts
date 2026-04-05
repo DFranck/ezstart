@@ -29,11 +29,13 @@ const donationsQuerySchema = z.object({
 const donationsListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   payments: z.array(z.any()).describe('List of public donations'),
-  meta: z.object({
-    total: z.number().describe('Total number of donations matching the query'),
-    limit: z.number().describe('Number of donations returned'),
-    offset: z.number().describe('Number of donations skipped'),
-  }),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of donations matching the query'),
+      limit: z.number().describe('Number of donations returned'),
+      offset: z.number().describe('Number of donations skipped'),
+    })
+    .describe('Pagination metadata'),
 })
 
 // ========================================

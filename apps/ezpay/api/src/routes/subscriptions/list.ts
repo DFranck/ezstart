@@ -30,11 +30,13 @@ const subscriptionsQuerySchema = z.object({
 const subscriptionsListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   payments: z.array(z.any()).describe('List of subscriptions'),
-  meta: z.object({
-    total: z.number().describe('Total number of subscriptions matching the query'),
-    limit: z.number().describe('Number of subscriptions returned'),
-    offset: z.number().describe('Number of subscriptions skipped'),
-  }),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of subscriptions matching the query'),
+      limit: z.number().describe('Number of subscriptions returned'),
+      offset: z.number().describe('Number of subscriptions skipped'),
+    })
+    .describe('Pagination metadata'),
 })
 
 // ========================================

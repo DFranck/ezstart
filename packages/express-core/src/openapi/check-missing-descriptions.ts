@@ -19,6 +19,6 @@ export function checkMissingDescriptions(schema: ZodTypeAny, name: string) {
   }
 
   if (missing.length > 0) {
-    logger.warn(`⚠️ [OpenAPI] ${name} - Missing descriptions for: ${missing.join(', ')}`)
+    logger.debug(`[OpenAPI] ${name} - Missing descriptions for: ${missing.join(', ')}`)
   }
 }

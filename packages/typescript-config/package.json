@@ -12,7 +12,6 @@
     "./nextjs.json": "./src/nextjs.json",
     "./library.json": "./src/library.json",
     "./react-library.json": "./src/react-library.json",
-    "./types.json": "./src/types.json",
-    "./package.json": "./src/package.json"
+    "./types.json": "./src/types.json"
   }
 }

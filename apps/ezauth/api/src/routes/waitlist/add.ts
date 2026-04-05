@@ -90,8 +90,7 @@ const addEmailController = async (req: Request, res: Response) => {
     })
     await waitlist.save()
 
-    res.status(201)
-    sendSuccess(res, {
+    sendSuccess(res.status(201), {
       message: 'Successfully added to waitlist',
       count: waitlist.emails.length,
     })

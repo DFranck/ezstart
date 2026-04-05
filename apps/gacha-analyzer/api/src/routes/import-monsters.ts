@@ -13,11 +13,12 @@ import {
   sendValidationError,
   findMany,
 } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { importMonsters } from '../services/monster-import-service.js'
 import { getMonsterModel } from '../models/monster.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 // POST /import — Trigger SWARFARM import
 router.post('/import', async (_req, res) => {

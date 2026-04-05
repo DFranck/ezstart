@@ -43,8 +43,8 @@ const getWaitlistResponseSchema = z.object({
 })
 
 const errorSchema = z.object({
-  success: z.literal(false),
-  error: z.string().describe('Error message'),
+  success: z.literal(false).describe('Whether the operation succeeded'),
+  error: z.string().describe('Error message if operation failed'),
 })
 
 // Get waitlist for specific app (admin endpoint)

@@ -7,6 +7,7 @@
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
@@ -15,7 +16,7 @@ import { summonersWarParser } from '../parsers/summoners-war.js'
 import { upload } from '../middleware/upload.js'
 import { preprocessImage, type PreprocessOptions } from '../services/image-preprocessing.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 // --- OCR presets to benchmark ---
 

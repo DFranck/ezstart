@@ -61,7 +61,7 @@ export default function SettingsPage() {
         method: 'POST',
       })
       if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data as any) || 'Setup failed')
+        throw new Error(response.error || parseApiError(response.data as unknown) || 'Setup failed')
       }
       const data = response.data as { qrCode: string; secret: string }
       setQrCode(data.qrCode)
@@ -86,7 +86,7 @@ export default function SettingsPage() {
       })
       if (!response.ok) {
         throw new Error(
-          response.error || parseApiError(response.data as any) || 'Verification failed'
+          response.error || parseApiError(response.data as unknown) || 'Verification failed'
         )
       }
       const data = response.data as { backupCodes: string[] }
@@ -111,7 +111,9 @@ export default function SettingsPage() {
         body: { code },
       })
       if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data as any) || 'Disable failed')
+        throw new Error(
+          response.error || parseApiError(response.data as unknown) || 'Disable failed'
+        )
       }
       setIs2FAEnabled(false)
       setPhase('idle')
@@ -152,7 +154,7 @@ export default function SettingsPage() {
             <P className="font-medium">{t('title')}</P>
             <P
               size="sm"
-              className={is2FAEnabled ? 'text-green-600 font-medium' : 'text-muted-foreground'}
+              className={is2FAEnabled ? 'text-success font-medium' : 'text-muted-foreground'}
             >
               {is2FAEnabled ? t('enabled') : t('disabled')}
             </P>

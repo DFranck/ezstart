@@ -35,11 +35,13 @@ const myPaymentsQuerySchema = z.object({
 const myPaymentsResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   payments: z.array(z.any()).describe('List of payments'),
-  meta: z.object({
-    total: z.number().describe('Total number of payments matching the query'),
-    limit: z.number().describe('Number of payments returned'),
-    offset: z.number().describe('Number of payments skipped'),
-  }),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of payments matching the query'),
+      limit: z.number().describe('Number of payments returned'),
+      offset: z.number().describe('Number of payments skipped'),
+    })
+    .describe('Pagination metadata'),
 })
 
 // ========================================

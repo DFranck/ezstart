@@ -29,11 +29,11 @@ const forgotPasswordRateLimiter = createVeryStrictRateLimiter({
 })
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  email: z.string().email('Invalid email format').describe('User email address'),
 })
 
 const forgotPasswordResponseSchema = z.object({
-  message: z.string(),
+  message: z.string().describe('Response message'),
 })
 
 const forgotPasswordController = async (req: Request, res: Response) => {
@@ -91,7 +91,10 @@ docRouter.post('/forgot-password', forgotPasswordRateLimiter, forgotPasswordCont
   extraResponses: {
     429: {
       description: 'Too many attempts',
-      schema: z.object({ success: z.literal(false), error: z.string() }),
+      schema: z.object({
+        success: z.literal(false).describe('Whether the operation succeeded'),
+        error: z.string().describe('Error message if operation failed'),
+      }),
     },
   },
 })

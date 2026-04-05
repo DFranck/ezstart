@@ -1,5 +1,3 @@
-/// <reference types="express" />
-
 import 'express'
 import type { JwtUser } from '../middleware/auth.js'
 

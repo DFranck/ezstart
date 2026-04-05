@@ -467,7 +467,7 @@ export default function AdminPage() {
       {/* Refund Confirmation Dialog */}
       <ConfirmActionDialog
         open={refundDialog.open}
-        onOpenChange={open => setRefundDialog(prev => ({ ...prev, open }))}
+        onOpenChange={(open: boolean) => setRefundDialog(prev => ({ ...prev, open }))}
         title={t('table.refund')}
         description={t('table.refundConfirm')}
         onConfirm={handleRefundConfirm}
@@ -486,7 +486,7 @@ export default function AdminPage() {
       {/* Cancel Subscription Confirmation Dialog */}
       <ConfirmActionDialog
         open={cancelDialog.open}
-        onOpenChange={open => setCancelDialog(prev => ({ ...prev, open }))}
+        onOpenChange={(open: boolean) => setCancelDialog(prev => ({ ...prev, open }))}
         title={t('table.cancelSubscription')}
         description={t('table.cancelConfirm')}
         onConfirm={handleCancelConfirm}

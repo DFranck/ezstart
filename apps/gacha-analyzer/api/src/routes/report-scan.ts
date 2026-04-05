@@ -11,6 +11,7 @@ import {
   sendValidationError,
   findByIdAndUpdate,
 } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
@@ -48,7 +49,7 @@ const reportIndexSchema = z.object({
   reportIndex: z.coerce.number().int().min(0),
 })
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 // POST /:id/report — Create a new report
 router.post('/:id/report', async (req, res) => {

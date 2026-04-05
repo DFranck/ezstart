@@ -29,12 +29,16 @@ const donationStatsResponseSchema = z.object({
     .object({
       total: z.number().describe('Total amount donated'),
       count: z.number().describe('Total number of donations'),
-      byType: z.object({
-        donation: z.object({
-          total: z.number().describe('Total amount from donations'),
-          count: z.number().describe('Number of donations'),
-        }),
-      }),
+      byType: z
+        .object({
+          donation: z
+            .object({
+              total: z.number().describe('Total amount from donations'),
+              count: z.number().describe('Number of donations'),
+            })
+            .describe('Donation type breakdown'),
+        })
+        .describe('Breakdown by payment type'),
       recent: z.array(z.any()).describe('Recent donations (last 5)'),
     })
     .describe('Donation statistics'),

@@ -1,4 +1,5 @@
 import { Router } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import scanImageRoutes from './scan-image.js'
 import getScansRoutes from './get-scans.js'
 import getScanRoutes from './get-scan.js'
@@ -14,7 +15,7 @@ import reportScanRoutes from './report-scan.js'
 import { scansRegistry, monstersRegistry, configRegistry, benchRegistry } from './openapi.js'
 import { authMiddleware } from '../middleware/auth.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 export const globalRegistry = [scansRegistry, monstersRegistry, configRegistry, benchRegistry]
 

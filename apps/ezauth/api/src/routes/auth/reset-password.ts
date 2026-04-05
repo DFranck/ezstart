@@ -21,17 +21,20 @@ const docRouter = createRouterWithDoc(resetPasswordRegistry, router)
 const resetPasswordRateLimiter = createStrictRateLimiter()
 
 const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
-  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  token: z.string().min(1, 'Token is required').describe('Password reset token'),
+  newPassword: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .describe('New password (min 6 characters)'),
 })
 
 const resetPasswordResponseSchema = z.object({
-  message: z.string(),
+  message: z.string().describe('Response message'),
 })
 
 const errorSchema = z.object({
-  success: z.literal(false),
-  error: z.string(),
+  success: z.literal(false).describe('Whether the operation succeeded'),
+  error: z.string().describe('Error message if operation failed'),
 })
 
 const resetPasswordController = async (req: Request, res: Response) => {

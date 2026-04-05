@@ -1,7 +1,6 @@
 {
-  "extends": "@ezstart/typescript-config/base.json",
+  "extends": "@ezstart/typescript-config/library.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node"]

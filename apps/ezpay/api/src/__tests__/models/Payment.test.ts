@@ -17,7 +17,7 @@ describe('Payment Model', () => {
     // Drop all indexes and recreate to ensure correct indexes
     try {
       await PaymentModel.collection.dropIndexes()
-    } catch (error) {
+    } catch (_error) {
       // Ignore error if collection doesn't exist yet
     }
     await PaymentModel.createIndexes()

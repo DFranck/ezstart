@@ -82,7 +82,7 @@ function RegisterContent() {
 }
 
 export default function RegisterPage() {
-  const t = useTranslations('login')
+  const t = useTranslations('register')
 
   return (
     <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>

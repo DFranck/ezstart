@@ -10,10 +10,11 @@ import {
   sendValidationError,
   findOneAndUpdate,
 } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getGameConfigModel } from '../models/game-config.js'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 const paramsSchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']),

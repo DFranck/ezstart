@@ -2,16 +2,38 @@
   "name": "@ezstart/seo-config",
   "version": "0.0.1",
   "description": "Centralized SEO configuration with robots.txt, sitemap.xml, and metadata helpers",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./metadata": "./src/metadata.ts",
-    "./metadata-enhanced": "./src/metadata-enhanced.ts",
-    "./robots": "./src/robots.ts",
-    "./sitemap": "./src/sitemap.ts",
-    "./json-ld": "./src/json-ld.ts",
-    "./apps": "./src/apps/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./metadata": {
+      "types": "./dist/metadata.d.ts",
+      "default": "./dist/metadata.js"
+    },
+    "./metadata-enhanced": {
+      "types": "./dist/metadata-enhanced.d.ts",
+      "default": "./dist/metadata-enhanced.js"
+    },
+    "./robots": {
+      "types": "./dist/robots.d.ts",
+      "default": "./dist/robots.js"
+    },
+    "./sitemap": {
+      "types": "./dist/sitemap.d.ts",
+      "default": "./dist/sitemap.js"
+    },
+    "./json-ld": {
+      "types": "./dist/json-ld.d.ts",
+      "default": "./dist/json-ld.js"
+    },
+    "./apps": {
+      "types": "./dist/apps/index.d.ts",
+      "default": "./dist/apps/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -b",

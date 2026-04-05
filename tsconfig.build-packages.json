@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/tsconfig",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./packages/config" },
+    { "path": "./packages/logger" },
+    { "path": "./packages/fetch-client" },
+    { "path": "./packages/ocr-sdk" },
+    { "path": "./packages/rbac" },
+    { "path": "./packages/email-service" },
+    { "path": "./packages/express-core" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/auth-sdk" },
+    { "path": "./packages/pay-sdk" },
+    { "path": "./packages/next-theme" },
+    { "path": "./packages/ai-sdk" },
+    { "path": "./packages/monitoring" },
+    { "path": "./packages/seo-config" },
+    { "path": "./packages/test-utils" }
+  ]
+}

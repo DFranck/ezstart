@@ -4,12 +4,13 @@
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { upload } from '../middleware/upload.js'
 import { scanImage } from '../services/scan-service.js'
 import type { GameType } from '@gacha-analyzer/types'
 
-const router = Router()
+const router: ExpressRouter = Router()
 
 const scanBodySchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']),

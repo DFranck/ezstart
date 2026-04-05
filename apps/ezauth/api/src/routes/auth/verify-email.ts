@@ -21,16 +21,16 @@ const docRouter = createRouterWithDoc(verifyEmailRegistry, router)
 const verifyEmailRateLimiter = createStrictRateLimiter()
 
 const verifyEmailSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
+  token: z.string().min(1, 'Token is required').describe('Email verification token'),
 })
 
 const verifyEmailResponseSchema = z.object({
-  message: z.string(),
+  message: z.string().describe('Response message'),
 })
 
 const errorSchema = z.object({
-  success: z.literal(false),
-  error: z.string(),
+  success: z.literal(false).describe('Whether the operation succeeded'),
+  error: z.string().describe('Error message if operation failed'),
 })
 
 const verifyEmailController = async (req: Request, res: Response) => {
