@@ -18,16 +18,39 @@ interface PayProviderProps {
   /** Optional callback to retrieve the current auth token dynamically.
    *  Shorthand for config.getToken — if both are provided, this prop takes precedence. */
   getToken?: () => string | null | undefined
+  /** Optional callback to refresh the auth token on 401. Should return the new token or null. */
+  onTokenRefresh?: () => Promise<string | null>
+  /** Optional callback invoked when token refresh fails (e.g. to trigger logout/redirect). */
+  onAuthFailure?: () => void
 }
 
-export function PayProvider({ children, appName, config, getToken }: PayProviderProps) {
-  // Use a ref so the client always calls the latest getToken without re-creating the client
+export function PayProvider({
+  children,
+  appName,
+  config,
+  getToken,
+  onTokenRefresh,
+  onAuthFailure,
+}: PayProviderProps) {
+  // Use refs so the client always calls the latest callbacks without re-creating the client
   const getTokenRef = useRef(getToken ?? config?.getToken)
   getTokenRef.current = getToken ?? config?.getToken
 
+  const onTokenRefreshRef = useRef(onTokenRefresh ?? config?.onTokenRefresh)
+  onTokenRefreshRef.current = onTokenRefresh ?? config?.onTokenRefresh
+
+  const onAuthFailureRef = useRef(onAuthFailure ?? config?.onAuthFailure)
+  onAuthFailureRef.current = onAuthFailure ?? config?.onAuthFailure
+
   const client = useMemo(() => {
-    return createPayClient({ appName, ...config, getToken: () => getTokenRef.current?.() ?? null })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- getToken is handled via ref
+    return createPayClient({
+      appName,
+      ...config,
+      getToken: () => getTokenRef.current?.() ?? null,
+      onTokenRefresh: () => onTokenRefreshRef.current?.() ?? Promise.resolve(null),
+      onAuthFailure: () => onAuthFailureRef.current?.(),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- callbacks are handled via refs
   }, [appName, config])
 
   return <PayContext.Provider value={{ client }}>{children}</PayContext.Provider>

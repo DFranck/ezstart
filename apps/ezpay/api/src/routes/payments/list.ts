@@ -29,6 +29,7 @@ const paymentsQuerySchema = z.object({
     .optional()
     .describe('Filter by payment status'),
   projectId: z.string().optional().describe('Filter by project ID'),
+  search: z.string().optional().describe('Search by customer email (case-insensitive)'),
   limit: z.coerce.number().min(1).max(100).default(20).describe('Number of payments to return'),
   offset: z.coerce.number().min(0).default(0).describe('Number of payments to skip'),
 })
@@ -55,6 +56,7 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
       type,
       status,
       projectId,
+      search,
       limit = 20,
       offset = 0,
     } = parsed.success ? parsed.data : (req.query as Record<string, string>)
@@ -74,6 +76,7 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
     if (type) query.type = type
     if (status) query.status = status
     if (projectId) query.projectId = projectId
+    if (search) query.customerEmail = { $regex: search, $options: 'i' }
 
     const [payments, total] = await Promise.all([
       Payment.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)),

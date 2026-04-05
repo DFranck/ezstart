@@ -1,13 +1,14 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Badge,
   Button,
   Card,
   Div,
   H1,
+  Input,
   Main,
   P,
   Span,
@@ -145,6 +146,9 @@ export default function AdminPage() {
   // Filters
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Refund dialog state
   const [refundDialog, setRefundDialog] = useState<{ open: boolean; paymentId: string | null }>({
@@ -157,6 +161,21 @@ export default function AdminPage() {
     open: boolean
     payment: (Payment & { metadata?: Record<string, any> }) | null
   }>({ open: false, payment: null })
+
+  // ---- Debounced search ----
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value)
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    searchTimerRef.current = setTimeout(() => {
+      setSearchQuery(value)
+    }, 400)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    }
+  }, [])
 
   // ---- Auth check ----
   useEffect(() => {
@@ -209,6 +228,7 @@ export default function AdminPage() {
     const params = new URLSearchParams()
     if (typeFilter !== 'all') params.set('type', typeFilter)
     if (statusFilter !== 'all') params.set('status', statusFilter)
+    if (searchQuery) params.set('search', searchQuery)
     params.set('limit', '1000')
 
     fetch(`${API_URL}/payments?${params.toString()}`, {
@@ -222,7 +242,7 @@ export default function AdminPage() {
       })
       .catch(() => {})
       .finally(() => setPaymentsLoading(false))
-  }, [token, typeFilter, statusFilter])
+  }, [token, typeFilter, statusFilter, searchQuery])
 
   useEffect(() => {
     fetchPayments()
@@ -396,6 +416,13 @@ export default function AdminPage() {
 
       {/* Filters */}
       <Div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <Input
+          placeholder={t('filters.searchEmail')}
+          value={searchInput}
+          onChange={e => handleSearchChange(e.target.value)}
+          className="w-full sm:w-64"
+        />
+
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder={t('filters.allTypes')} />
@@ -434,13 +461,7 @@ export default function AdminPage() {
           </Div>
         </Card>
       ) : (
-        <DataTable
-          columns={columns}
-          data={payments}
-          filterColumn="customerEmail"
-          filterPlaceholder={t('filters.searchEmail')}
-          pageSize={PAGE_SIZE}
-        />
+        <DataTable columns={columns} data={payments} pageSize={PAGE_SIZE} />
       )}
 
       {/* Refund Confirmation Dialog */}

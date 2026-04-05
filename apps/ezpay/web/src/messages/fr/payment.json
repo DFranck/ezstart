@@ -54,7 +54,7 @@
     "subscribeMessage": "Votre abonnement a été activé avec succès. Bienvenue à bord !",
     "backHome": "Retour à l'accueil",
     "whatNext": "Et maintenant ?",
-    "emailConfirmation": "Vous recevrez un email de confirmation sous peu.",
+    "emailConfirmation": "Un reçu vous sera envoyé par email via Stripe.",
     "receiptAvailable": "Votre reçu est disponible dans votre email Stripe.",
     "accessGranted": "Votre accès a été accordé immédiatement."
   },

@@ -54,6 +54,36 @@ export class PayClient {
   }
 
   /**
+   * Fetch with automatic 401 retry: when a request returns 401 and an
+   * `onTokenRefresh` callback is configured, refresh the token and retry once.
+   * If the refresh itself fails, invoke `onAuthFailure` (logout / redirect).
+   */
+  private async fetchWithAuth(url: string, options: RequestInit): Promise<Response> {
+    let response = await fetch(url, options)
+
+    if (response.status === 401 && this.config.onTokenRefresh) {
+      try {
+        const newToken = await this.config.onTokenRefresh()
+        if (newToken) {
+          const retryHeaders = new Headers(options.headers)
+          retryHeaders.set('Authorization', `Bearer ${newToken}`)
+          response = await fetch(url, { ...options, headers: retryHeaders })
+        }
+      } catch {
+        this.config.onAuthFailure?.()
+        return response
+      }
+    }
+
+    // If still 401 after retry (or no refresh callback), signal auth failure
+    if (response.status === 401) {
+      this.config.onAuthFailure?.()
+    }
+
+    return response
+  }
+
+  /**
    * Centralized list fetcher — normalizes API response { success, data, meta }
    * into { payments, total } format expected by hooks.
    */
@@ -69,7 +99,7 @@ export class PayClient {
     }
 
     const url = `${this.config.baseURL}/${path}?${searchParams.toString()}`
-    const response = await fetch(url, { headers: this.getHeaders() })
+    const response = await this.fetchWithAuth(url, { headers: this.getHeaders() })
     const result = await response.json()
 
     if (!response.ok) {
@@ -91,7 +121,7 @@ export class PayClient {
   async createDonation(data: CreateDonationRequest): Promise<PaymentResponse> {
     const returnUrl = this.getReturnUrl()
 
-    const response = await fetch(`${this.config.baseURL}/donate`, {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/donate`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
@@ -118,7 +148,7 @@ export class PayClient {
     const searchParams = new URLSearchParams()
     if (projectId) searchParams.set('projectId', projectId)
 
-    const response = await fetch(
+    const response = await this.fetchWithAuth(
       `${this.config.baseURL}/donations/stats?${searchParams.toString()}`,
       { headers: this.getHeaders() }
     )
@@ -137,7 +167,7 @@ export class PayClient {
   async createPurchase(data: CreatePurchaseRequest): Promise<PaymentResponse> {
     const returnUrl = this.getReturnUrl()
 
-    const response = await fetch(`${this.config.baseURL}/purchase`, {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/purchase`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
@@ -166,7 +196,7 @@ export class PayClient {
   async createSubscription(data: CreateSubscriptionRequest): Promise<PaymentResponse> {
     const returnUrl = this.getReturnUrl()
 
-    const response = await fetch(`${this.config.baseURL}/subscribe`, {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/subscribe`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
@@ -191,10 +221,13 @@ export class PayClient {
   }
 
   async cancelSubscription(subscriptionId: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${this.config.baseURL}/subscriptions/${subscriptionId}/cancel`, {
-      method: 'POST',
-      headers: this.getHeaders(),
-    })
+    const response = await this.fetchWithAuth(
+      `${this.config.baseURL}/subscriptions/${subscriptionId}/cancel`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(),
+      }
+    )
 
     const result = await response.json()
 
@@ -208,10 +241,13 @@ export class PayClient {
   // ===== REFUNDS =====
 
   async refundPayment(paymentId: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${this.config.baseURL}/payments/${paymentId}/refund`, {
-      method: 'POST',
-      headers: this.getHeaders(),
-    })
+    const response = await this.fetchWithAuth(
+      `${this.config.baseURL}/payments/${paymentId}/refund`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(),
+      }
+    )
 
     const result = await response.json()
 
@@ -248,7 +284,7 @@ export class PayClient {
   }
 
   async getPayment(paymentId: string): Promise<Payment> {
-    const response = await fetch(`${this.config.baseURL}/payments/${paymentId}`, {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/payments/${paymentId}`, {
       headers: this.getHeaders(),
     })
 

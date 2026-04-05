@@ -76,6 +76,11 @@ export interface PayClientConfig {
   /** Optional callback to retrieve the current auth token dynamically.
    *  When provided, the token is sent as `Authorization: Bearer <token>` on every request. */
   getToken?: () => string | null | undefined
+  /** Optional callback to refresh the auth token when a 401 is received.
+   *  Should return the new access token, or null if refresh failed. */
+  onTokenRefresh?: () => Promise<string | null>
+  /** Optional callback invoked when token refresh fails (e.g. to trigger logout/redirect). */
+  onAuthFailure?: () => void
 }
 
 // API Requests

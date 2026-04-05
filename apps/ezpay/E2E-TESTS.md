@@ -53,7 +53,7 @@
 | DON-5 | Checkout Stripe             | Clic Donate → redirect Stripe → paiement carte 4242 | 2026-04-05    | ✅     |
 | DON-6 | Webhook → completed         | Webhook recu [200] → payment status=completed en DB | 2026-04-05    | ✅     |
 | DON-7 | Redirect success            | Apres paiement → /donate/success                    | 2026-04-05    | ✅     |
-| DON-8 | DonationWall affiche le don | Don completed apparait dans le wall                 | 2026-04-05    | ⏳     |
+| DON-8 | DonationWall affiche le don | Don completed apparait dans le wall                 | 2026-04-05    | ✅     |
 
 ## 5. Purchase Flow E2E
 
@@ -64,7 +64,7 @@
 | PUR-3 | Checkout Stripe             | Buy now → redirect Stripe → carte 4242   | 2026-04-05    | ✅     |
 | PUR-4 | Webhook → completed         | Webhooks [200] → status=completed        | 2026-04-05    | ✅     |
 | PUR-5 | Redirect success            | Apres paiement → /purchase/success       | 2026-04-05    | ✅     |
-| PUR-6 | Historique affiche l'achat  | Purchase apparait dans l'historique user | 2026-04-05    | ⏳     |
+| PUR-6 | Historique affiche l'achat  | Purchase apparait dans l'historique user | 2026-04-05    | ✅     |
 
 ## 6. Subscription Flow E2E
 
@@ -78,8 +78,8 @@
 | SUB-6  | DB subscription completed                | status=completed, subscriptionId Stripe stocke                   | 2026-04-05    | ✅     |
 | SUB-7  | Redirect /subscribe/success              | "Abonnement actif !"                                             | 2026-04-05    | ✅     |
 | SUB-8  | Cancel subscription — admin              | Bouton Annuler → ConfirmDialog → status=Annule                   | 2026-04-05    | ✅     |
-| SUB-9  | Cancel subscription — user (Test Center) | Bouton Annuler dans la liste abos actifs                         | 2026-04-05    | ⏳     |
-| SUB-10 | Historique affiche les abos              | Subscriptions dans l'historique user                             | 2026-04-05    | ⏳     |
+| SUB-9  | Cancel subscription — user (Test Center) | Bouton Annuler dans la liste abos actifs                         | 2026-04-05    | ✅     |
+| SUB-10 | Historique affiche les abos              | Subscriptions dans l'historique user                             | 2026-04-05    | ✅     |
 
 ## 7. Admin Dashboard
 
@@ -88,20 +88,34 @@
 | ADM-1 | Stats globales          | Revenu total tous types, nombre paiements, par type   | 2026-04-05    | ✅     |
 | ADM-2 | Table paiements         | Tous les paiements de tous les users                  | 2026-04-05    | ✅     |
 | ADM-3 | Filtre par type         | Dropdown → Don/Achat/Abonnement/Facture               | 2026-04-05    | ✅     |
-| ADM-4 | Filtre par statut       | Dropdown → Termine/En attente/Echoue/Rembourse/Annule | 2026-04-05    | ⏳     |
-| ADM-5 | Recherche email         | Saisir email → resultats filtres                      | 2026-04-05    | ⏳     |
+| ADM-4 | Filtre par statut       | Dropdown → Termine/En attente/Echoue/Rembourse/Annule | 2026-04-05    | ✅     |
+| ADM-5 | Recherche email         | Saisir email → resultats filtres                      | 2026-04-05    | ✅     |
 | ADM-6 | Pagination              | Suivant/Precedent, "Affichage de X a Y sur Z"         | 2026-04-05    | ✅     |
 | ADM-7 | Refund e2e              | Clic Rembourser → ConfirmDialog → status=Rembourse    | 2026-04-05    | ✅     |
 | ADM-8 | Cancel subscription e2e | Clic Annuler → ConfirmDialog → status=Annule          | 2026-04-05    | ✅     |
-| ADM-9 | ConfirmDialog — etats   | Confirm → Loading → Success (ou Error)                | 2026-04-05    | ⏳     |
+| ADM-9 | ConfirmDialog — etats   | Confirm → Loading → Success (ou Error)                | 2026-04-05    | ✅     |
 
-## 8. My Payments
+## 8. Verification Fixes (ISSUE-021 a 025)
+
+| ID    | Test                                            | Comment tester                                                                                     | Derniere date | Status |
+| ----- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------- | ------ |
+| FIX-1 | DonateButton montants visibles (ISSUE-021)      | /test/donate → chaque bouton affiche son montant (❤️ €5, €10, €25, €50, €100)                      | 2026-04-05    | ✅     |
+| FIX-2 | PaymentHistory render apres rebuild (ISSUE-022) | Restart dev server ou rebuild packages → DonationWall et historiques affichent les donnees         | 2026-04-05    | ✅     |
+| FIX-3 | Token refresh auto sur 401 (ISSUE-023)          | Attendre expiration token (15min) → action API → token refresh silencieux → requete retry OK       | 2026-04-05    | ✅     |
+| FIX-4 | Auth failure declenche logout (ISSUE-023)       | Invalider le refresh token → action API → 401 → callback onAuthFailure → redirect login            | 2026-04-05    | ✅     |
+| FIX-5 | Success page texte recu Stripe (ISSUE-024)      | /donate/success → texte FR: "Un recu vous sera envoye par email via Stripe." / EN equivalent       | 2026-04-05    | ✅     |
+| FIX-6 | Stripe receipt email envoye (ISSUE-024)         | Faire un don test → verifier dans Stripe dashboard que receipt_email est set sur le payment intent | —             | ⏳     |
+| FIX-7 | Admin recherche server-side (ISSUE-025)         | /admin → saisir email partiel → verifier requete API avec param `search` dans le Network tab       | 2026-04-05    | ✅     |
+| FIX-8 | Admin recherche debounce (ISSUE-025)            | /admin → taper rapidement → verifier qu'une seule requete part apres 400ms d'inactivite            | 2026-04-05    | ✅     |
+| FIX-9 | Admin recherche email partiel (ISSUE-025)       | /admin → saisir "test@" → resultats filtres contenant "test@" dans l'email                         | 2026-04-05    | ✅     |
+
+## 9. My Payments
 
 | ID   | Test             | Comment tester                                                      | Derniere date | Status |
 | ---- | ---------------- | ------------------------------------------------------------------- | ------------- | ------ |
-| ME-1 | GET /payments/me | curl avec token → retourne seulement les paiements du user connecte | —             | ⏳     |
+| ME-1 | GET /payments/me | curl avec token → retourne seulement les paiements du user connecte | 2026-04-05    | ✅     |
 
-## 9. API Security
+## 10. API Security
 
 | ID     | Test                    | Comment tester                                   | Derniere date | Status |
 | ------ | ----------------------- | ------------------------------------------------ | ------------- | ------ |
@@ -116,7 +130,7 @@
 | SEC-9  | CORS                    | Origins validees, credentials true               | 2026-04-04    | ✅     |
 | SEC-10 | Rate limiting           | Headers RateLimit-\* presents                    | 2026-04-04    | ✅     |
 
-## 10. Webhooks
+## 11. Webhooks
 
 | ID   | Test                          | Comment tester                                         | Derniere date | Status |
 | ---- | ----------------------------- | ------------------------------------------------------ | ------------- | ------ |
@@ -136,14 +150,15 @@
 | Auth & SSO    | 6      | 6      | 0     | 0     |
 | Pages         | 9      | 9      | 0     | 0     |
 | Test Center   | 6      | 6      | 0     | 0     |
-| Donations     | 8      | 7      | 1     | 0     |
-| Purchases     | 6      | 5      | 1     | 0     |
-| Subscriptions | 10     | 8      | 2     | 0     |
-| Admin         | 9      | 6      | 3     | 0     |
-| My Payments   | 1      | 0      | 1     | 0     |
+| Donations     | 8      | 8      | 0     | 0     |
+| Purchases     | 6      | 6      | 0     | 0     |
+| Subscriptions | 10     | 10     | 0     | 0     |
+| Admin         | 9      | 9      | 0     | 0     |
+| Verif. Fixes  | 9      | 8      | 1     | 0     |
+| My Payments   | 1      | 1      | 0     | 0     |
 | Security      | 10     | 10     | 0     | 0     |
 | Webhooks      | 6      | 6      | 0     | 0     |
-| **TOTAL**     | **71** | **63** | **8** | **0** |
+| **TOTAL**     | **80** | **79** | **1** | **0** |
 
 ---
 
@@ -153,30 +168,34 @@
 
 - **Test:** TC-4
 - **Description:** Les 5 DonateButton dans /test/donate affichent tous "❤️ Donate" sans differenciation. Devraient afficher les montants predefinis (€5, €10, €25, €50, €100).
-- **Fix:** Passer un label ou amount visible sur chaque bouton dans la test page
-- **Status:** open
+- **Fix:** Chaque DonateModal utilise un custom trigger prop affichant le montant (❤️ €5, €10, etc.)
+- **Fichier:** `apps/ezpay/web/src/app/[locale]/test/donate/page.tsx`
+- **Status:** fixed
 
 ### ISSUE-022 — DonationWall/Historique vide malgre donnees en DB `high` `bug`
 
 - **Tests:** DON-8, PUR-6, SUB-10
 - **Description:** Les hooks useDonations/usePurchases/useSubscriptions ne retournent pas de donnees dans le Test Center, bien que l'API retourne les donnees correctement en curl. Le fix du PayClient (unwrap data→payments) a ete committe mais le package pay-sdk n'est pas rebuilde par le hot-reload Next.js.
-- **Fix:** Verifier que `pnpm dev:types` est lance en parallele, ou que le build du package est a jour. Possible aussi que les hooks ne passent pas le bon projectId ou que le composant DonationWall filtre cote client.
-- **Status:** open
+- **Fix:** Le code etait deja correct (fetchList normalise: `result.data || result.payments || []`). Le probleme etait un cache hot-reload/build qui ne refletait pas les changements du pay-sdk. Resolution: rebuild des packages ou restart du dev server.
+- **Status:** fixed (resolved — build cache)
 
 ### ISSUE-023 — Token expire ne declenche pas de redirect/alert `medium` `ux`
 
 - **Description:** Quand le JWT access token expire (15min), l'app reste visuellement connectee mais les appels API echouent silencieusement (0 resultats, pas d'erreur affichee). Devrait soit auto-refresh via refresh token, soit afficher une alerte "Session expiree" et rediriger vers le login.
-- **Fix:** Implementer le auto-refresh dans auth-sdk (la branche s'appelle feat/refresh-token-rotation), ou ajouter un intercepteur dans PayClient/AuthProvider qui detecte les 401 et declenche un re-login.
-- **Status:** open
+- **Fix:** Ajout d'un intercepteur `fetchWithAuth()` dans PayClient qui detecte les 401, tente un token refresh via auth-sdk, puis retry la requete. Ajout de callbacks `onTokenRefresh` et `onAuthFailure` dans PayProvider, cables dans les providers EZPay et EZStart via `createAuthClient` + `refreshTokens`.
+- **Fichiers:** `packages/pay-sdk/src/client.ts`, `types.ts`, `provider.tsx`, providers EZPay/EZStart
+- **Status:** fixed
 
 ### ISSUE-024 — "Vous recevrez un email de confirmation" trompeur `low` `ux`
 
 - **Description:** La page /donate/success affiche "Vous recevrez un email de confirmation sous peu" mais EZPay n'envoie aucun email. C'est Stripe qui envoie un receipt si configure. Si le receipt Stripe n'est pas active, le texte est trompeur.
-- **Fix:** Soit activer `receipt_email` dans la checkout session Stripe, soit changer le texte en "Retrouvez votre recu dans votre compte Stripe."
-- **Status:** open
+- **Fix:** Ajout de `receipt_email` dans le `payment_intent_data` de la checkout session Stripe (mode payment uniquement, pas subscription). Mise a jour des textes i18n FR: "Un recu vous sera envoye par email via Stripe." / EN: "A receipt will be sent to your email via Stripe."
+- **Fichiers:** `packages/pay-sdk/src/providers/stripe.ts`, `apps/ezpay/web/src/messages/{fr,en}/payment.json`
+- **Status:** fixed
 
 ### ISSUE-025 — Recherche email admin cote client seulement `low` `perf`
 
 - **Description:** Le champ "Rechercher par email" dans l'admin dashboard filtre cote client (DataTable filterColumn). Pour 41 paiements c'est OK mais ne scale pas. Devrait etre server-side avec un query param.
-- **Fix:** Ajouter un param `email` ou `search` au endpoint GET /payments et faire le filtre en MongoDB.
-- **Status:** open
+- **Fix:** Ajout du param `search` au schema Zod du endpoint GET /payments avec filtre MongoDB `$regex` case-insensitive sur `customerEmail`. Ajout d'un Input debounce (400ms) dans la page admin, suppression du `filterColumn` client-side du DataTable.
+- **Fichiers:** `apps/ezpay/api/src/routes/payments/list.ts`, `apps/ezpay/web/src/app/[locale]/admin/page.tsx`
+- **Status:** fixed

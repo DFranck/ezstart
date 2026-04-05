@@ -3,7 +3,13 @@
 import { useAuth } from '@ezstart/auth-sdk'
 import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle, Div, P } from '@ezstart/ui/components'
-import { DonateModal, DonationWall, PaymentHistory, useDonations } from '@ezstart/pay-sdk'
+import {
+  DonateButton,
+  DonateModal,
+  DonationWall,
+  PaymentHistory,
+  useDonations,
+} from '@ezstart/pay-sdk'
 
 export default function TestDonatePage() {
   const t = useTranslations('test')
@@ -30,6 +36,7 @@ export default function TestDonatePage() {
                 userId={user?._id}
                 userEmail={user?.email}
                 userName={user?.username}
+                trigger={<DonateButton>❤️ €{amount}</DonateButton>}
               />
             ))}
           </Div>

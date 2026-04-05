@@ -1,20 +1,42 @@
 'use client'
 
-import { AuthProvider } from '@ezstart/auth-sdk'
-import { useAuthStore } from '@ezstart/auth-sdk'
+import { AuthProvider, useAuthStore, createAuthClient } from '@ezstart/auth-sdk'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { ReactNode } from 'react'
 
+const authClient = createAuthClient({ appName: 'ezpay', redirectUri: '/auth/callback' })
+
 function getToken() {
   return useAuthStore.getState().accessToken
+}
+
+async function handleTokenRefresh(): Promise<string | null> {
+  const { refreshToken } = useAuthStore.getState()
+  if (!refreshToken) return null
+  try {
+    const result = await authClient.refreshTokens(refreshToken)
+    useAuthStore.getState().setTokens(result.accessToken, result.refreshToken)
+    return result.accessToken
+  } catch {
+    return null
+  }
+}
+
+function handleAuthFailure() {
+  useAuthStore.getState().logout()
 }
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider appName="ezpay">
       <ThemeProvider>
-        <PayProvider appName="ezpay" getToken={getToken}>
+        <PayProvider
+          appName="ezpay"
+          getToken={getToken}
+          onTokenRefresh={handleTokenRefresh}
+          onAuthFailure={handleAuthFailure}
+        >
           {children}
         </PayProvider>
       </ThemeProvider>

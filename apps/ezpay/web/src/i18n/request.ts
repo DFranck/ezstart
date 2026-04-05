@@ -11,15 +11,22 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
-  const [common, payment, layout, admin] = await Promise.all([
+  const [common, payment, layout, admin, test] = await Promise.all([
     import(`../messages/${locale}/common.json`),
     import(`../messages/${locale}/payment.json`),
     import(`../messages/${locale}/layout.json`),
     import(`../messages/${locale}/admin.json`),
+    import(`../messages/${locale}/test.json`),
   ])
 
   return {
     locale,
-    messages: merge.all([common.default, payment.default, layout.default, admin.default]),
+    messages: merge.all([
+      common.default,
+      payment.default,
+      layout.default,
+      admin.default,
+      test.default,
+    ]),
   }
 })

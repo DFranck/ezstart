@@ -96,7 +96,14 @@ export class StripeProvider implements IPaymentProvider {
       success_url: options.successUrl,
       cancel_url: options.cancelUrl,
       metadata: options.metadata,
-      ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
+      ...(options.customerEmail
+        ? {
+            customer_email: options.customerEmail,
+            payment_intent_data: {
+              receipt_email: options.customerEmail,
+            },
+          }
+        : {}),
     })
 
     return { sessionId: session.id, url: session.url }

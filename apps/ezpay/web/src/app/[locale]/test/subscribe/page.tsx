@@ -20,6 +20,7 @@ import {
   useSubscriptions,
   usePayContext,
   ConfirmActionDialog,
+  formatCurrency,
 } from '@ezstart/pay-sdk'
 
 const plans = [
@@ -102,9 +103,7 @@ export default function TestSubscribePage() {
                   <Div>
                     <P className="font-medium">{sub.projectName || sub.projectId}</P>
                     <P size="sm" variant="description">
-                      {sub.amount
-                        ? `${(sub.amount / 100).toFixed(2)} ${sub.currency?.toUpperCase()}`
-                        : ''}
+                      {sub.amount ? formatCurrency(sub.amount, sub.currency) : ''}
                     </P>
                   </Div>
                   <Div className="flex items-center gap-2">

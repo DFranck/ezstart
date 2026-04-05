@@ -54,7 +54,7 @@
     "subscribeMessage": "Your subscription has been activated successfully. Welcome aboard!",
     "backHome": "Back to Home",
     "whatNext": "What happens next?",
-    "emailConfirmation": "You will receive a confirmation email shortly.",
+    "emailConfirmation": "A receipt will be sent to your email via Stripe.",
     "receiptAvailable": "Your receipt is available in your Stripe email.",
     "accessGranted": "Your access has been granted immediately."
   },
