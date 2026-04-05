@@ -1,6 +1,22 @@
 # Backlog — EZAuth
 
-**Status :** `active` | **Derniere mise a jour :** 2026-04-01
+**Status :** `maintained` | **Derniere mise a jour :** 2026-04-05
+
+## ✅ Status: Maintained
+
+All core features implemented and audited. Remaining items are future improvements.
+
+### Done
+
+- All P0 security fixes
+- All P1 features (password reset, email verification, 2FA, sessions, refresh token rotation, admin endpoints)
+- All P2 code quality fixes
+- All P3 UX improvements
+- All P4 API quality fixes
+
+### Future (non-blocking)
+
+- RBAC-1: Complete role system simplification (remove legacy fields, replace inline checks, admin page, migrations)
 
 ## Objectif
 

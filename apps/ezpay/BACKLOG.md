@@ -1,6 +1,31 @@
 # Backlog — EZPay
 
-**Status :** `in-progress` | **Derniere mise a jour :** 2026-04-04
+**Status :** `maintained` | **Derniere mise a jour :** 2026-04-05
+
+## ✅ Status: Maintained
+
+Phases 1-4 complete. Stripe v22, webhooks, pagination, RBAC, SDK, admin dashboard all functional. Remaining items are future features.
+
+### Done
+
+- Phase 1: Critical Security & Reliability
+- Phase 2: Code Quality
+- Phase 3: UX Web (except landing page polish)
+- Phase 4: API Robustness (except idempotency)
+- Payment SDK components (SubscribeButton, ProductGrid, PaymentHistory, etc.)
+- Admin dashboard with stats/filters
+- Multi-currency support
+
+### Future (non-blocking)
+
+- 3.3: Landing page polish
+- 4.6: Idempotency-Key header
+- 5.2: EZBill invoice integration
+- 5.4: Email receipts
+- 5.5: Payment analytics dashboard
+- Customer Portal Stripe, usePremium() hook
+- CartProvider for marketplace
+- AI product descriptions
 
 ## Objectif
 
