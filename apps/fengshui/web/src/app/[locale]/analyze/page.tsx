@@ -2,7 +2,7 @@
 'use client'
 
 import { THEME_COLORS } from '@/lib/theme-colors'
-import { Div, Stepper, type StepperTheme, WelcomeModal } from '@ezstart/ui/components'
+import { Div, Stepper, type StepperTheme } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
@@ -67,37 +67,7 @@ export default function AnalyzePage() {
   }
 
   return (
-    <>
-      <WelcomeModal
-        appName="FengShui"
-        title={t('welcome.title')}
-        description={t('welcome.description')}
-        features={[
-          {
-            icon: 'lucide:Upload',
-            title: t('welcome.feature1.title'),
-            description: t('welcome.feature1.description'),
-          },
-          {
-            icon: 'lucide:Compass',
-            title: t('welcome.feature2.title'),
-            description: t('welcome.feature2.description'),
-          },
-          {
-            icon: 'lucide:Sparkles',
-            title: t('welcome.feature3.title'),
-            description: t('welcome.feature3.description'),
-          },
-          {
-            icon: 'lucide:FileText',
-            title: t('welcome.feature4.title'),
-            description: t('welcome.feature4.description'),
-          },
-        ]}
-        ctaText={t('welcome.ctaText')}
-      />
-
-      <Stepper
+    <Stepper
         steps={
           steps as unknown as Array<{
             id: string
@@ -197,6 +167,5 @@ export default function AnalyzePage() {
           }
         }}
       />
-    </>
   )
 }
