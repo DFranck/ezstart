@@ -1,4 +1,4 @@
-# Step 4 — Test
+# Step 6 — Test
 
 ## Automated tests
 

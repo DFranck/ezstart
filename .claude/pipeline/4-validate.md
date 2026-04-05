@@ -1,4 +1,4 @@
-# Step 3 — Validate (Post-Agent Checks)
+# Step 4 — Validate (Post-Agent Checks)
 
 Run ALL checks on modified files after EVERY agent. If ANY fails -> fix before proceeding.
 

@@ -6,15 +6,18 @@
 
 ## Pipeline
 
-Chaque tâche suit 5 étapes. Lire le fichier de l'étape en cours dans `.claude/pipeline/` :
+Chaque tâche suit 8 étapes. Lire le fichier de l'étape en cours dans `.claude/pipeline/` :
 
-| Étape       | Fichier         | Résumé                                                     |
-| ----------- | --------------- | ---------------------------------------------------------- |
-| 1. Plan     | `1-plan.md`     | Lire le code, rédiger plan, attendre validation user       |
-| 2. Code     | `2-code.md`     | Dispatch agents avec `coding-rules.md` dans CHAQUE prompt  |
-| 3. Validate | `3-validate.md` | Grep + tsc post-agent, bloquer si fail, fix, re-validate   |
-| 4. Test     | `4-test.md`     | vitest + MCP browser, mettre à jour E2E-TESTS.md           |
-| 5. PR       | `5-pr.md`       | Audit obligatoire (boucle 100% clean), puis `gh pr create` |
+| Étape       | Fichier             | Résumé                                              |
+| ----------- | ------------------- | --------------------------------------------------- |
+| 1. Plan     | `1-plan.md`         | Lire le code, plan, validation user                 |
+| 2. Track    | `2-track-start.md`  | BACKLOG in-progress, créer issues, marquer tests ⏳ |
+| 3. Code     | `3-code.md`         | Agents avec `coding-rules.md`                       |
+| 4. Validate | `4-validate.md`     | Grep + tsc, bloquer si fail                         |
+| 5. Track    | `5-track-update.md` | Issues fixed, tests à retester, BACKLOG progress    |
+| 6. Test     | `6-test.md`         | vitest + MCP, résultats E2E-TESTS.md                |
+| 7. Audit    | `7-audit.md`        | code-quality, i18n, ux, security (boucle fix)       |
+| 8. PR       | `8-pr.md`           | Checklist finale, push, `gh pr create`              |
 
 ## Règles de code
 
@@ -59,7 +62,7 @@ pnpm dev --list  # Voir toutes les apps
 | [BACKLOG.md](./BACKLOG.md)               | Index monorepo, "continue [projet]" pour reprendre                                |
 | [DEPLOY.md](./DEPLOY.md)                 | Guide Railway/Vercel                                                              |
 | [.claude/agents/](./. claude/agents/)    | Rôles agents (coding-rules, code-quality, ux-quality, i18n, security, testing)    |
-| [.claude/pipeline/](./.claude/pipeline/) | Contexte par étape du pipeline (1-plan → 5-pr)                                    |
+| [.claude/pipeline/](./.claude/pipeline/) | Contexte par étape du pipeline (1-plan → 8-pr)                                    |
 
 ## Architecture
 

@@ -1,4 +1,4 @@
-# Step 2 — Code (Agent Dispatch)
+# Step 3 — Code (Agent Dispatch)
 
 ## Before launching ANY coding agent
 
@@ -32,4 +32,4 @@
 - OK to launch multiple agents in parallel
 - Each agent gets its OWN complete rules context
 - No shared files between parallel agents
-- Manager validates EACH agent output (Step 3) before committing
+- Manager validates EACH agent output (Step 4) before committing
