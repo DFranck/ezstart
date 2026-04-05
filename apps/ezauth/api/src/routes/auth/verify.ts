@@ -9,6 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { updatePresenceByUserId } from '../../services/presence.service.js'
 import {
   verifyRequestSchema,
   verifyResponseSchema,
@@ -37,6 +38,9 @@ const verifyController = async (req: Request, res: Response) => {
         return sendError(res, `No access to app: ${app}`, 403)
       }
     }
+
+    // Fire-and-forget presence update (throttled, non-blocking)
+    updatePresenceByUserId(payload.userId)
 
     sendSuccess(res, {
       valid: true,

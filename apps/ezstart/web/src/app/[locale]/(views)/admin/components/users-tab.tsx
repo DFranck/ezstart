@@ -37,6 +37,7 @@ interface AdminUser {
   username: string
   globalRoles: string[]
   appRoles: Record<string, string[]>
+  lastActiveAt?: string | null
   createdAt: string
 }
 
@@ -60,6 +61,31 @@ function formatDate(dateStr: string): string {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(dateStr))
+}
+
+const ONLINE_THRESHOLD_MS = 5 * 60 * 1000 // 5 minutes
+
+function isOnline(lastActiveAt?: string | null): boolean {
+  if (!lastActiveAt) return false
+  return Date.now() - new Date(lastActiveAt).getTime() < ONLINE_THRESHOLD_MS
+}
+
+function getRelativeTime(
+  lastActiveAt: string | null | undefined,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: (key: string, values?: Record<string, any>) => string
+): string {
+  if (!lastActiveAt) return '-'
+
+  const diffMs = Date.now() - new Date(lastActiveAt).getTime()
+  const diffMin = Math.floor(diffMs / 60_000)
+  const diffHours = Math.floor(diffMs / 3_600_000)
+  const diffDays = Math.floor(diffMs / 86_400_000)
+
+  if (diffMin < 5) return t('online')
+  if (diffMin < 60) return t('minutesAgo', { count: diffMin })
+  if (diffHours < 24) return t('hoursAgo', { count: diffHours })
+  return t('daysAgo', { count: diffDays })
 }
 
 // ========================================
@@ -224,6 +250,23 @@ export function UsersTab() {
       },
     },
     {
+      accessorKey: 'lastActiveAt',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t('columns.lastActive')} />
+      ),
+      cell: ({ row }) => {
+        const online = isOnline(row.original.lastActiveAt)
+        const label = getRelativeTime(row.original.lastActiveAt, t)
+        return online ? (
+          <Badge variant="default" size="sm" className="bg-success text-success-foreground">
+            {label}
+          </Badge>
+        ) : (
+          <Span className="text-sm text-muted-foreground">{label}</Span>
+        )
+      },
+    },
+    {
       accessorKey: 'createdAt',
       header: ({ header }) => (
         <DataTableColumnHeader header={header} title={t('columns.createdAt')} />
@@ -254,14 +297,19 @@ export function UsersTab() {
   const superadminCount = users.filter(u => u.globalRoles.includes('superadmin')).length
   const adminCount = users.filter(u => u.globalRoles.includes('admin')).length
   const withAppRoles = users.filter(u => Object.keys(u.appRoles).length > 0).length
+  const onlineCount = users.filter(u => isOnline(u.lastActiveAt)).length
 
   return (
     <Div className="space-y-4">
       {/* Stats */}
-      <Div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <Div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <Card className="p-4">
           <P className="text-sm text-muted-foreground">{t('stats.totalUsers')}</P>
           <P className="text-2xl font-bold">{total}</P>
+        </Card>
+        <Card className="p-4">
+          <P className="text-sm text-muted-foreground">{t('stats.online')}</P>
+          <P className="text-2xl font-bold text-success">{onlineCount}</P>
         </Card>
         <Card className="p-4">
           <P className="text-sm text-muted-foreground">{t('stats.superadmins')}</P>

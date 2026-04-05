@@ -29,6 +29,7 @@ const userSchema = z.object({
   apps: z.array(z.string()).optional().describe('Accessible applications'),
   organizationId: z.string().optional().describe('Organization ID'),
   managedBy: z.string().optional().describe('Manager user ID'),
+  lastActiveAt: z.string().nullable().optional().describe('Last activity date ISO string'),
   createdAt: z.string().describe('Creation date ISO string'),
   updatedAt: z.string().describe('Last update date ISO string'),
 })

@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
 import { sendError } from '@ezstart/express-core'
 import { getAuthUserModel } from '../models/auth-user.js'
+import { updatePresenceByUserId } from '../services/presence.service.js'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
 
@@ -48,9 +49,11 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       return sendError(res, 'User not found', 401)
     }
 
+    const userId = user._id.toString()
+
     // Attach user to request
     req.user = {
-      _id: user._id.toString(),
+      _id: userId,
       email: user.email,
       username: user.username,
       firstName: user.firstName,
@@ -67,6 +70,9 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
     }
+
+    // Fire-and-forget presence update (throttled, non-blocking)
+    updatePresenceByUserId(userId)
 
     next()
   } catch (error: unknown) {
@@ -112,8 +118,9 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
     const user = await AuthUser.findById(payload.userId).select('-passwordHash').lean()
 
     if (user) {
+      const userId = user._id.toString()
       req.user = {
-        _id: user._id.toString(),
+        _id: userId,
         email: user.email,
         username: user.username,
         firstName: user.firstName,
@@ -130,6 +137,9 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       }
+
+      // Fire-and-forget presence update (throttled, non-blocking)
+      updatePresenceByUserId(userId)
     }
 
     next()

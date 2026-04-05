@@ -25,6 +25,8 @@ export interface AuthUserDocument extends Document {
   organizationId?: string // For client managers
   managedBy?: string // User ID of manager (for clients)
 
+  lastActiveAt?: Date | null
+
   createdAt: Date
   updatedAt: Date
 
@@ -122,6 +124,10 @@ const authUserSchema = new Schema<AuthUserDocument>(
       type: String,
       required: false,
     },
+    lastActiveAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -215,6 +221,7 @@ authUserSchema.methods.toAuthUser = function (): AuthUser {
     features: this.features || [],
     organizationId: this.organizationId,
     managedBy: this.managedBy,
+    lastActiveAt: this.lastActiveAt ? this.lastActiveAt.toISOString() : null,
     createdAt: this.createdAt.toISOString(),
     updatedAt: this.updatedAt.toISOString(),
   }

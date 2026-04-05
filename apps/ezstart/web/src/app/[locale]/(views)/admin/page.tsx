@@ -1,12 +1,10 @@
 'use client'
 
-import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac'
+import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import {
   Card,
   Div,
-  H1,
-  P,
   Section,
   Spinner,
   Tabs,
@@ -15,15 +13,15 @@ import {
   TabsTrigger,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { UsersTab } from './components/users-tab'
 import { EZPayTab } from './components/ezpay-tab'
 import { MonitoringTab } from './components/monitoring-tab'
+import { UsersTab } from './components/users-tab'
 
 function AdminPanelContent() {
   const t = useTranslations()
 
   return (
-    <Div className="w-full max-w-7xl mx-auto px-4 mt-10">
+    <Div className="w-full max-w-7xl mx-auto px-4 my-10">
       <Tabs defaultValue="ezauth" className="w-full">
         <TabsList>
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>

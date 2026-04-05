@@ -15,6 +15,7 @@
         "username": "Nom d'utilisateur",
         "globalRoles": "Roles globaux",
         "appRoles": "Roles par app",
+        "lastActive": "Derniere activite",
         "createdAt": "Date de creation",
         "actions": "Actions"
       },
@@ -23,6 +24,7 @@
       "noUsers": "Aucun utilisateur trouve.",
       "stats": {
         "totalUsers": "Total Utilisateurs",
+        "online": "En ligne",
         "superadmins": "Superadmins",
         "admins": "Admins",
         "withAppRoles": "Avec Roles App"
@@ -31,7 +33,11 @@
       "confirmDeleteDescription": "Etes-vous sur de vouloir supprimer cet utilisateur ? Cette action est irreversible.",
       "deleteSuccess": "Utilisateur supprime avec succes.",
       "deleteError": "Echec de la suppression de l'utilisateur.",
-      "loading": "Chargement des utilisateurs..."
+      "loading": "Chargement des utilisateurs...",
+      "online": "En ligne",
+      "minutesAgo": "il y a {count}m",
+      "hoursAgo": "il y a {count}h",
+      "daysAgo": "il y a {count}j"
     },
     "editRoles": {
       "title": "Modifier les roles",
