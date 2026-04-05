@@ -119,6 +119,10 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 71. [x] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
 72. [x] Centralize app themes — all 8 apps have defined themes in config
 
+#### P2.5 — Infra auth (2026-04-05)
+
+77. [ ] SSR auth middleware — `createProtectedMiddleware()` dans auth-sdk/rbac pour Next.js middleware. Zéro flash client, config déclarative (publicPaths, protectedPaths, adminPaths+roles). Remplace les AuthGuard/RequireRole client-side pour l'auth check. Toutes les apps utilisent le même pattern.
+
 #### P3 — DevOps / Testing
 
 73. [x] Test coverage baseline — setup: @ezstart/test-utils package exists with vitest config factory, MongoDB memory server, seed helpers. Per-app test writing tracked in individual app backlogs.
