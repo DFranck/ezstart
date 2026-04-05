@@ -141,6 +141,14 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 88. [ ] Landing page pro — Refonte home avec sections portfolio, tools, packages, apps
 89. [ ] User presence (lastActiveAt) — Middleware express-core update lastActiveAt, badge online/offline dans admin
 
+#### P2.8 — AI SDK Enhancement (2026-04-06)
+
+90. [ ] ai-sdk cascade/fallback — Si provider A échoue (quota, erreur), fallback auto sur provider B. Config: priority order + max retries. Optionnel: mode "cascade free tiers" (épuise Gemini free → OpenAI free → etc.)
+91. [ ] ai-sdk usage tracking — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). Service: `trackUsage()` appelé automatiquement par UnifiedChat/providers.
+92. [ ] ai-sdk vision support — Ajouter support images au GeminiProvider (generateContent avec inlineData). FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
+93. [ ] ai-sdk client components — Enrichir les composants React: `<AISelector>` (existe), `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
+94. [ ] Admin tab AI Usage — Nouveau tab dans ezstart admin: consommation par provider, par app, par jour. Stats: total tokens, coût estimé, requêtes/jour. Graphique tendances. Alerte si proche du quota free tier.
+
 #### P3 — DevOps / Testing
 
 73. [x] Test coverage baseline — setup: @ezstart/test-utils package exists with vitest config factory, MongoDB memory server, seed helpers. Per-app test writing tracked in individual app backlogs.
