@@ -9,9 +9,9 @@ import Link from 'next/link'
 
 export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
   const { isMobile } = useDevice()
-  const t = useSafeTranslations('libraries')
-  const libraries = getTranslationArray<LibraryItem>(t, 'items')
-  const lib = libraries.find(lib => lib.title.toLowerCase() === libTitle.toLowerCase())
+  const t = useSafeTranslations('packages')
+  const packages = getTranslationArray<LibraryItem>(t, 'items')
+  const lib = packages.find(lib => lib.title.toLowerCase() === libTitle.toLowerCase())
   if (!lib) {
     return <P>Librairie introuvable</P>
   }

@@ -22,8 +22,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     contact,
     support,
     legal,
-    libraries,
-    features,
+    packages,
+    tools,
     qrCode,
     cvGenerator,
     businessCard,
@@ -45,12 +45,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/home/support.json`),
 
     import(`../messages/${locale}/legal-notices.json`),
-    import(`../messages/${locale}/libraries.json`),
-    import(`../messages/${locale}/features.json`),
-    // features
-    import(`../messages/${locale}/features/qr-code.json`),
-    import(`../messages/${locale}/features/cv-generator.json`),
-    import(`../messages/${locale}/features/business-card.json`),
+    import(`../messages/${locale}/packages.json`),
+    import(`../messages/${locale}/tools.json`),
+    // tools
+    import(`../messages/${locale}/tools/qr-code.json`),
+    import(`../messages/${locale}/tools/cv-generator.json`),
+    import(`../messages/${locale}/tools/business-card.json`),
     // monitoring
     import(`../messages/${locale}/monitoring.json`),
     // admin
@@ -72,8 +72,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
       contact.default,
       support.default,
       legal.default,
-      libraries.default,
-      features.default,
+      packages.default,
+      tools.default,
       qrCode.default,
       cvGenerator.default,
       businessCard.default,

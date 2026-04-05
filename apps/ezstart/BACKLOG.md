@@ -163,7 +163,7 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 - **Status:** `planned`
 - **Details:** The CV form only has personal info + summary. The `CVData` type defines `experience[]`, `education[]`, `skills[]`, `languages[]`, `certifications[]` but there are no form sections to edit them. The preview (`cv-preview.tsx`) may render them if AI-generated, but manual input is impossible.
-- **File:** `web/src/app/[locale]/(views)/ez-features/[feature]/(cv-generator)/cv-generator-page.tsx`
+- **File:** `web/src/app/[locale]/(views)/tools/[feature]/(cv-generator)/cv-generator-page.tsx`
 
 ### 4.2 CV Generator — PDF export
 
@@ -174,13 +174,13 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 - **Status:** `planned`
 - **Details:** The QR code canvas renders but there is no download button (PNG/SVG). Users can only screenshot.
-- **File:** `web/src/app/[locale]/(views)/ez-features/[feature]/(qr-code)/qr-code-page.tsx`
+- **File:** `web/src/app/[locale]/(views)/tools/[feature]/(qr-code)/qr-code-page.tsx`
 
 ### 4.4 Business Card — download/print
 
 - **Status:** `planned`
 - **Details:** Same as QR code — no export functionality. The feature section mentions "Print Ready" but there is no print/download action.
-- **File:** `web/src/app/[locale]/(views)/ez-features/[feature]/(business-card)/business-card-page.tsx`
+- **File:** `web/src/app/[locale]/(views)/tools/[feature]/(business-card)/business-card-page.tsx`
 
 ### 4.5 Feature demos access control inconsistency
 

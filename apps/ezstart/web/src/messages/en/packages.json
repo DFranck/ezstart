@@ -1,9 +1,9 @@
 {
-  "libraries": {
-    "title": "My Libraries",
+  "packages": {
+    "title": "My Packages",
     "subtitle": "Reusable and optimized components for faster and cleaner development.",
-    "description": "Each EzStart library is designed to boost productivity, keep the codebase elegant, and reduce complexity. Polymorphic, strongly typed, and modular, they integrate seamlessly into any React/Next.js project.",
-    "notFound": "Library not found",
+    "description": "Each EzStart package is designed to boost productivity, keep the codebase elegant, and reduce complexity. Polymorphic, strongly typed, and modular, they integrate seamlessly into any React/Next.js project.",
+    "notFound": "Package not found",
     "items": [
       {
         "title": "Tag",
@@ -11,7 +11,7 @@
         "roles": ["Owner"],
         "description": "EzTag is a polymorphic and strongly typed React component system that makes it easy to manage HTML tags with Tailwind styles and variants via `cva()`. It provides JSX aliases like `<H1 />`, `<Section />`, or `<Main />`, while ensuring clean semantics, accessibility, and reusable layouts. Perfect for building a modular and scalable UI.",
         "links": {
-          "local": "/ez-libs/tag",
+          "local": "/packages/tag",
           "github": "https://github.com/DFranck/ezstart/tree/master/packages/ui/components/tag",
           "npm": ""
         },
@@ -30,7 +30,7 @@
         "src": "/images/libraries/ez-icon.png",
         "roles": ["Owner"],
         "links": {
-          "local": "/ez-libs/icon",
+          "local": "/packages/icon",
           "github": "https://github.com/DFranck/ezstart/tree/master/packages/ui/components/icon",
           "npm": ""
         },

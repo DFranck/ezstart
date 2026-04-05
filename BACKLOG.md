@@ -125,11 +125,20 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2.6 — Layout & Design System (2026-04-05)
 
-78. [ ] Fix Header backdrop-blur à scroll y=0 — `backdrop-blur-sm` visible malgré `bg-background/0`. Déplacer blur dans condition `!isTop`.
-79. [ ] SSR Layout split — Séparer `ClientLayout` en `AppLayout` (RSC server) + client islands (burger, auth, theme). Élimine le flash render complet.
-80. [ ] Unified variant taxonomy — Standardiser les noms de variants (size, intent, variant, density) sur TOUS les composants Tag. Même nom = interprétation contextuelle (container vs text).
-81. [ ] Density variant — Ajouter `density: 'compact' | 'default' | 'relaxed'` comme variant partagé sur tous les composants.
-82. [ ] Theme presets — Presets déclaratifs par app (dashboard=compact, landing=relaxed) qui configurent tous les composants d'un coup.
+78. [x] Fix Header backdrop-blur à scroll y=0 — backdrop-blur déplacé dans condition !isTop
+79. [x] headerOverlay prop — ClientLayout overlay/block mode + ezstart home wired
+80. [x] Unified variant taxonomy — tokens + variants centralisés dans design-system, 30 composants migrés, 13 tag files supprimés
+81. [x] Density variant — compact/default/relaxed ajouté sur tous les container tags
+82. [ ] Theme presets — Presets déclaratifs par app (dashboard=compact, landing=relaxed)
+83. [x] Component reorganization — 56 fichiers réorganisés en 8 sous-dossiers catégorisés
+84. [ ] SSR Layout split — Séparer ClientLayout en RSC + client islands
+
+#### P2.7 — EZStart Hub (2026-04-06)
+
+85. [ ] Rename /ez-libs → /packages — Documentation publique des packages (@ezstart/ui, auth-sdk, etc.)
+86. [ ] Rename /ez-features → /tools — Micro-apps standalone (QR, CV, business card) avec free/pro
+87. [ ] Admin hub centralisé — Fusionner /monitoring dans /admin, ajouter tabs EZAuth + EZPay
+88. [ ] Landing page pro — Refonte home avec sections portfolio, tools, packages, apps
 
 #### P3 — DevOps / Testing
 

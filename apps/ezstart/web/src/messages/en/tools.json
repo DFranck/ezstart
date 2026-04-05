@@ -1,0 +1,19 @@
+{
+  "tools": {
+    "title": "My Tools",
+    "subtitle": "",
+    "description": "",
+    "notFound": "Tool not found",
+    "items": [
+      {
+        "title": "EzBilling",
+        "description": "Simple and flexible billing system for your SaaS. Manage your subscriptions, invoices, and payments with a clear API and customizable UI hooks.",
+        "links": {
+          "local": "/tools/ezbill",
+          "github": "https://github.com/DFranck/ezstart/tree/master/apps/ezbill",
+          "npm": ""
+        }
+      }
+    ]
+  }
+}

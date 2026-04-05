@@ -23,10 +23,10 @@ import Link from 'next/link'
 import { HeaderLib } from '../components/header-lib'
 
 const EzTagPage = (): React.JSX.Element => {
-  const t = useSafeTranslations('libraries')
+  const t = useSafeTranslations('packages')
   const commonT = useSafeTranslations('common')
-  const libraries = getTranslationArray<LibraryItem>(t, 'items')
-  const lib = libraries.find(lib => lib.title.toLowerCase() === 'tag')
+  const packages = getTranslationArray<LibraryItem>(t, 'items')
+  const lib = packages.find(lib => lib.title.toLowerCase() === 'tag')
 
   const headingTagSet: Set<string> = new Set(HEADING_TAGS)
   const listingTagSet: Set<string> = new Set(LISTING_TAGS)
@@ -63,7 +63,7 @@ const EzTagPage = (): React.JSX.Element => {
             {shownTags
               .filter(tag => tag !== 'main' && tag !== 'header' && tag !== 'footer')
               .map(tag => (
-                <Link key={tag} href={'/ez-libs/tag/' + tag}>
+                <Link key={tag} href={'/packages/tag/' + tag}>
                   <Card interactive hover="lift" variant="outline" size="sm" className="h-full">
                     <CardContent className="flex items-center justify-center py-6">
                       <P className="font-mono font-medium text-sm">&lt;{tag}&gt;</P>

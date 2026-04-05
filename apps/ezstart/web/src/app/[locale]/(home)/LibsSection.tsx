@@ -14,7 +14,7 @@ type Props = {
 }
 
 const LibsSection = ({ id }: Props): React.JSX.Element => {
-  const t = useTranslations('libraries')
+  const t = useTranslations('packages')
   return (
     <MacbookScroll
       title={t('title')}

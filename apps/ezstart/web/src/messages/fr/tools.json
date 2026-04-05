@@ -1,0 +1,19 @@
+{
+  "tools": {
+    "title": "Mes Outils",
+    "subtitle": "",
+    "description": "",
+    "notFound": "Outil introuvable",
+    "items": [
+      {
+        "title": "EzBilling",
+        "description": "Systeme de facturation simple et flexible pour votre SaaS. Gerez vos abonnements, vos factures et vos paiements grace a une API claire et des hooks d'interface utilisateur personnalisables.",
+        "links": {
+          "local": "/tools/ezbill",
+          "github": "https://github.com/DFranck/ezstart/tree/master/apps/ezbill",
+          "npm": ""
+        }
+      }
+    ]
+  }
+}

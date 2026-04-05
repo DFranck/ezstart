@@ -10,19 +10,19 @@
       ]
     },
     {
-      "menuLabel": "Libraries",
+      "menuLabel": "Packages",
       "menu": [
-        { "label": "My Libraries", "href": "/ez-libs" },
-        { "label": "Tag", "href": "/ez-libs/tag" },
-        { "label": "Icon", "href": "/ez-libs/icon" }
+        { "label": "My Packages", "href": "/packages" },
+        { "label": "Tag", "href": "/packages/tag" },
+        { "label": "Icon", "href": "/packages/icon" }
       ]
     },
     {
-      "menuLabel": "Features",
+      "menuLabel": "Tools",
       "menu": [
-        { "label": "QR Code Generator", "href": "/ez-features/qr-code" },
-        { "label": "Business Card Generator", "href": "/ez-features/business-card" },
-        { "label": "CV Generator", "href": "/ez-features/cv-generator" }
+        { "label": "QR Code Generator", "href": "/tools/qr-code" },
+        { "label": "Business Card Generator", "href": "/tools/business-card" },
+        { "label": "CV Generator", "href": "/tools/cv-generator" }
       ]
     },
     {

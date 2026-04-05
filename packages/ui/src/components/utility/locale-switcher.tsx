@@ -24,7 +24,7 @@ export function LocaleSwitcher({ locales, currentLocale, onLocaleChange }: Local
   const triggerLabel = (
     <>
       <Icon name="lucide:Globe" />
-      <span className="align-middle hidden md:inline">{activeLabel}</span>
+      {/* <span className="align-middle hidden md:inline">{activeLabel}</span> */}
     </>
   )
 

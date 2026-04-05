@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server'
 import { FeatureSection } from './[feature]/components/section-feature'
 
 export default async function EzFeaturesPage() {
-  const t = await getTranslations('features')
+  const t = await getTranslations('tools')
   const features = getTranslationArray<FeatureItem>(t, 'items')
 
   return (

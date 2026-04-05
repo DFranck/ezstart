@@ -7,16 +7,16 @@ export default function sitemap() {
       // Main pages
       '/',
 
-      // Features
-      '/ez-features',
-      '/ez-features/business-card',
-      '/ez-features/cv-generator',
-      '/ez-features/qr-code',
+      // Tools
+      '/tools',
+      '/tools/business-card',
+      '/tools/cv-generator',
+      '/tools/qr-code',
 
-      // Libraries
-      '/ez-libs',
-      '/ez-libs/tag',
-      '/ez-libs/icon',
+      // Packages
+      '/packages',
+      '/packages/tag',
+      '/packages/icon',
 
       // Other
       '/legal-notices',

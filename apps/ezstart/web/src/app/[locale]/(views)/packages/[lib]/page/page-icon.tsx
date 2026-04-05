@@ -10,9 +10,9 @@ import IconPlayground from '../(Icon)/IconPlayground'
 import { HeaderLib } from '../components/header-lib'
 
 const EzIconPage = (): React.JSX.Element => {
-  const t = useSafeTranslations('libraries')
-  const libraries = getTranslationArray<LibraryItem>(t, 'items')
-  const lib = libraries.find(lib => lib.title.toLowerCase() === 'icon')
+  const t = useSafeTranslations('packages')
+  const packages = getTranslationArray<LibraryItem>(t, 'items')
+  const lib = packages.find(lib => lib.title.toLowerCase() === 'icon')
   const contentItems = lib?.content
     ? getTranslationArray<LibraryContentLink>(lib.content, 'items')
     : []
