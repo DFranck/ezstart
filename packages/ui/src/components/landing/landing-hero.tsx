@@ -18,7 +18,7 @@ import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { landingHeroVariantConfig } from '../../lib/design-system/variants'
 import { Button } from '../button'
-import { Badge } from '../badge'
+import { Badge } from '../data-display/badge'
 
 // ========== Base Types ==========
 

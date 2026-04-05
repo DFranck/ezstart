@@ -12,7 +12,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '../accordion'
+} from '../data-display/accordion'
 
 // ========== Types ==========
 

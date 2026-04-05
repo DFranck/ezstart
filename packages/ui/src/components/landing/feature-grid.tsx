@@ -8,8 +8,8 @@
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { featureGridVariantConfig } from '../../lib/design-system/variants'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../card'
-import { Badge } from '../badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../data-display/card'
+import { Badge } from '../data-display/badge'
 
 // ========== Types ==========
 

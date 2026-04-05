@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '../../button'
 import { Icon } from '../../icon'
-import { Input } from '../../input'
-import { Label } from '../../label'
+import { Input } from '../../forms/input'
+import { Label } from '../../forms/label'
 import type { ThemeVariable } from '../types'
 import { toHex, toOklch } from '../utils/oklch-to-hex'
 
