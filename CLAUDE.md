@@ -159,10 +159,10 @@ Communication :
 
 ### Dev servers :
 
-- ✅ **TOUJOURS** dire à l'utilisateur quel script lancer (`pnpm dev:bill`, `pnpm dev:ga`, etc.)
+- ✅ **TOUJOURS** dire à l'utilisateur quel script lancer (`pnpm dev bill`, `pnpm dev ga`, etc.)
 - ✅ Préciser quand lancer `pnpm dev:types` en parallèle si nécessaire
 - ❌ **JAMAIS** lancer un dev server sans prévenir l'utilisateur
-- ❌ **JAMAIS** lancer `pnpm dev:all` sauf si l'utilisateur le demande explicitement
+- ❌ **JAMAIS** lancer `pnpm dev all` sauf si l'utilisateur le demande explicitement
 
 ### Référence règles de code :
 
@@ -211,14 +211,15 @@ DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .en
 pnpm install
 
 # Lancer l'app ciblée (type watching inclus automatiquement)
-pnpm dev:ez     # EZStart + EZAuth + EZPay
-pnpm dev:bill   # EZBill + EZAuth
-pnpm dev:gp     # GreenPulse + EZAuth
-pnpm dev:pay    # EZPay
-pnpm dev:fs     # FengShui + EZAuth + EZPay
-pnpm dev:asc    # ASC-TCD
-pnpm dev:ga     # Gacha Analyzer + EZAuth
-pnpm dev:all    # TOUT (rarement nécessaire)
+pnpm dev ez     # EZStart + EZAuth + EZPay
+pnpm dev bill   # EZBill + EZAuth
+pnpm dev gp     # GreenPulse + EZAuth
+pnpm dev pay    # EZPay
+pnpm dev fs     # FengShui + EZAuth + EZPay
+pnpm dev asc    # ASC-TCD
+pnpm dev ga     # Gacha Analyzer + EZAuth
+pnpm dev all    # TOUT (rarement nécessaire)
+pnpm dev --list # Voir toutes les apps disponibles
 
 # Optionnel — type watching seul (debug)
 pnpm dev:types
