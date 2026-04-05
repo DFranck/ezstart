@@ -41,6 +41,8 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
     <BaseClientLayout
       className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
       appName="Feng Shui"
+      showHeader={!isAnalyzePage}
+      showFooter={!isAnalyzePage}
       headerPosition="sticky"
       creator={<Span>Made with ❤️ for a peaceful living place and life serenity</Span>}
       currentPath={pathname}
