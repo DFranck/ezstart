@@ -17,14 +17,15 @@ Every feature follows this pipeline. Claude (manager) orchestrates, agents execu
 
 ## Available Roles
 
-| Role            | File                 | When                                              |
-| --------------- | -------------------- | ------------------------------------------------- |
-| Code Quality    | `code-quality.md`    | Every PR                                          |
-| i18n Compliance | `i18n-compliance.md` | Every PR                                          |
-| UX Quality      | `ux-quality.md`      | Every PR (if frontend touched)                    |
-| Security        | `security.md`        | When auth/routes/secrets touched                  |
-| Testing         | `testing.md`         | When setting up test infrastructure               |
-| Full Audit      | `full-audit.md`      | Major milestones, new apps, periodic health check |
+| Role            | File                 | When                                                               |
+| --------------- | -------------------- | ------------------------------------------------------------------ |
+| Code Quality    | `code-quality.md`    | Every PR                                                           |
+| i18n Compliance | `i18n-compliance.md` | Every PR                                                           |
+| UX Quality      | `ux-quality.md`      | Every PR (if frontend touched)                                     |
+| Security        | `security.md`        | When auth/routes/secrets touched                                   |
+| Testing         | `testing.md`         | When setting up test infrastructure                                |
+| Full Audit      | `full-audit.md`      | Major milestones, new apps, periodic health check                  |
+| Coding Rules    | `coding-rules.md`    | Mandatory briefing for ALL coding agents — include in every prompt |
 
 ## Usage
 
