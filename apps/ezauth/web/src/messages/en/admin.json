@@ -12,8 +12,7 @@
       "columns": {
         "email": "Email",
         "username": "Username",
-        "globalRoles": "Global Roles",
-        "appRoles": "App Roles",
+        "roles": "Roles",
         "createdAt": "Created At",
         "actions": "Actions"
       },

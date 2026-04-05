@@ -184,35 +184,27 @@ export function UserTable() {
       cell: ({ row }) => <Span className="text-sm">{row.original.username}</Span>,
     },
     {
-      accessorKey: 'globalRoles',
-      header: ({ header }) => (
-        <DataTableColumnHeader header={header} title={t('columns.globalRoles')} />
-      ),
-      cell: ({ row }) => (
-        <Div className="flex flex-wrap gap-1">
-          {row.original.globalRoles.map(role => (
-            <Badge
-              key={role}
-              variant={role === 'superadmin' ? 'destructive' : 'secondary'}
-              size="sm"
-            >
-              {tr(role as 'superadmin' | 'admin' | 'manager' | 'beta-tester' | 'client')}
-            </Badge>
-          ))}
-        </Div>
-      ),
-    },
-    {
-      accessorKey: 'appRoles',
-      header: ({ header }) => (
-        <DataTableColumnHeader header={header} title={t('columns.appRoles')} />
-      ),
+      id: 'roles',
+      header: t('columns.roles'),
+      enableSorting: false,
       cell: ({ row }) => {
-        const entries = Object.entries(row.original.appRoles)
-        if (entries.length === 0) return <Span className="text-muted-foreground text-sm">-</Span>
+        const global = row.original.globalRoles
+        const appEntries = Object.entries(row.original.appRoles)
+        if (global.length === 0 && appEntries.length === 0) {
+          return <Span className="text-muted-foreground text-sm">-</Span>
+        }
         return (
           <Div className="flex flex-wrap gap-1">
-            {entries.map(([app, roles]) =>
+            {global.map(role => (
+              <Badge
+                key={role}
+                variant={role === 'superadmin' ? 'destructive' : 'secondary'}
+                size="sm"
+              >
+                {tr(role as 'superadmin' | 'admin' | 'manager' | 'beta-tester' | 'client')}
+              </Badge>
+            ))}
+            {appEntries.map(([app, roles]) =>
               roles.map(role => (
                 <Badge key={`${app}-${role}`} variant="outline" size="sm">
                   {app}:{role}

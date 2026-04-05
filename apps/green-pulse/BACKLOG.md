@@ -1,12 +1,14 @@
 # Backlog — GreenPulse
 
-**Status :** `active` | **Derniere mise a jour :** 2026-03-29
+**Status :** `active` | **Derniere mise a jour :** 2026-04-06
 
 ## Objectif
 
 AI-powered forms application with chat assistant (Lia/GP.A), workspace/project management, ESG integration, and admin panel.
 
 ---
+
+## Audit: 2026-04-06
 
 ## Audit Summary (2026-03-29)
 
@@ -33,6 +35,19 @@ Full audit of green-pulse web + API. Findings organized by priority.
 - **Status:** `planned`
 - **Problem:** `/api/prompts` CRUD (create, update, delete system prompts) has no auth. The web admin panel at `/(views)/admin` also needs server-side role check.
 - **Files:** `api/src/routes/prompts/index.ts`, `web/src/app/[locale]/(views)/admin/`
+
+### GP-005: Auth middleware missing on form config CRUD routes (Audit 2026-04-06)
+
+- **Status:** `planned`
+- **Problem:** Form config create/list/getById routes have no auth middleware. Any unauthenticated user can create or list form templates.
+- **Files:** `api/src/routes/forms/configs/`
+
+### GP-006: RequireRole commented out on chat page (Audit 2026-04-06)
+
+- **Status:** `planned`
+- **Problem:** `chat/page.tsx` has `RequireRole` wrapper commented out. Any authenticated user can access chat regardless of role. Either uncomment RequireRole or remove the beta access flow entirely.
+- **Files:** `web/src/app/[locale]/chat/page.tsx`
+- **Note:** Previously tracked as GP-061 in P3, elevated to P0 per security audit.
 
 ---
 
@@ -177,10 +192,10 @@ Full audit of green-pulse web + API. Findings organized by priority.
 - **Problem:** `handleEsgReport.ts` (134 lines) has 4 TODO comments: "Save to database", "Send email notification", "Send failure notification", "Update dashboard with processed metrics". Core webhook logic is not implemented.
 - **Files:** `api/src/routes/webhooks/handleEsgReport.ts`
 
-### GP-042: Theme routes missing auth
+### GP-042: Theme routes missing auth (**Elevated to P0** per Audit 2026-04-06)
 
 - **Status:** `planned`
-- **Problem:** `updateTheme.ts` has `// TODO: Get userId from auth middleware` comment. Theme CRUD is unprotected.
+- **Problem:** `updateTheme.ts` has `// TODO: Get userId from auth middleware` comment. Theme CRUD is unprotected. `deleteTheme` also has a TODO for auth.
 - **Files:** `api/src/routes/theme/`
 
 ### GP-043: Chat v1 and v2 both active — redundancy
@@ -251,6 +266,11 @@ Full audit of green-pulse web + API. Findings organized by priority.
 - **Status:** `planned`
 - **Description:** Form creation dialog offers "Vocal Mode" option but there is no Web Speech API integration. Only chat mode works.
 
+### GP-070: Admin dashboard DataTable (Audit 2026-04-06)
+
+- **Status:** `planned`
+- **Description:** DataTable-based admin panel (replicate ezauth pattern, then add to ezstart admin hub).
+
 ### GP-059: No ESG dashboard
 
 - **Status:** `planned`
@@ -286,9 +306,14 @@ Full audit of green-pulse web + API. Findings organized by priority.
 
 ---
 
+### GP-071: Unit + integration + E2E tests (Audit 2026-04-06)
+
+- **Status:** `planned`
+- **Description:** 0 test files currently. Need unit tests for services, integration tests for API routes, E2E tests for form filling and chat flows.
+
 ## Notes
 
-- **Auth is the top priority** — most routes are completely unprotected.
+- **Auth is the top priority** — most routes are completely unprotected. GP-005, GP-006, GP-042 elevated to P0 in Audit 2026-04-06.
 - **i18n pass was done** for structured pages but form components and chat components still have many hardcoded English strings.
 - **ESG is half-built** — API endpoints exist but webhook handlers are stubs, extract_esg is disabled, and there is no web UI.
 - **Test coverage is 0%** — vitest is configured but no tests written.

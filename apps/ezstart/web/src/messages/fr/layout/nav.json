@@ -1,15 +1,6 @@
 {
   "links": [
     {
-      "menuLabel": "Monitoring",
-      "menu": [
-        { "label": "Vue d'ensemble", "href": "/monitoring" },
-        { "label": "Santé", "href": "/monitoring/health" },
-        { "label": "Audits", "href": "/monitoring/audits" },
-        { "label": "Erreurs", "href": "/monitoring/errors" }
-      ]
-    },
-    {
       "menuLabel": "Packages",
       "menu": [
         { "label": "Mes Packages", "href": "/packages" },
