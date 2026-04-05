@@ -27,8 +27,19 @@
 7. **PR** — `gh pr create` (JAMAIS de push direct sur master)
 8. **Résumer** — Faire un résumé final au user
 
+### Pipeline files (context par étape)
+
+Chaque étape a son fichier dans `.claude/pipeline/` — Claude lit UNIQUEMENT le fichier de l'étape en cours :
+
+- `1-plan.md` — Planification et validation utilisateur
+- `2-code.md` — Dispatch agents avec rules obligatoires (inclure `coding-rules.md` dans CHAQUE prompt)
+- `3-validate.md` — Checks automatiques post-agent (grep HTML raw, console.log, className, tsc)
+- `4-test.md` — Tests unitaires + MCP browser + E2E-TESTS.md
+- `5-pr.md` — Audit obligatoire (boucle jusqu'à 100% clean) + création PR
+
 ### Règles pipeline :
 
+- ✅ Chaque agent codeur reçoit `.claude/agents/coding-rules.md` dans son prompt
 - ✅ Chaque agent codeur reçoit les **DEV-RULES pertinentes** dans son prompt
 - ✅ Chaque agent codeur reçoit la **checklist** du rôle agent applicable
 - ✅ `tsc --noEmit` OBLIGATOIRE avant chaque commit
