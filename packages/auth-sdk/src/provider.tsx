@@ -356,6 +356,7 @@ export function useAuth() {
     accessToken: store.accessToken,
     isAuthenticated: store.isAuthenticated,
     isLoggingIn: store.isLoggingIn,
+    isAuthReady: store.isAuthReady,
     mode, // ✅ Expose mode
 
     // Actions

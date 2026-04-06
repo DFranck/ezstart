@@ -8,6 +8,7 @@ export interface CreateAnalysisInput {
   name: string
   bearing: number
   results: Record<string, unknown>
+  imageData?: string
 }
 
 /**
@@ -17,11 +18,21 @@ export async function listAnalyses(
   userId: string,
   limit: number,
   offset: number,
-  planId?: string
+  planId?: string,
+  isAdmin?: boolean,
+  filterUserId?: string
 ): Promise<{ data: AnalysisDocument[]; total: number }> {
   await connectToMongo()
 
-  const filter: Record<string, string> = { userId }
+  const filter: Record<string, string> = {}
+
+  if (isAdmin && filterUserId) {
+    filter.userId = filterUserId
+  } else if (!isAdmin) {
+    filter.userId = userId
+  }
+  // If admin without filterUserId, no userId filter = all analyses
+
   if (planId) {
     filter.planId = planId
   }
@@ -43,10 +54,12 @@ export async function listAnalyses(
  */
 export async function getAnalysisById(
   analysisId: string,
-  userId: string
+  userId?: string
 ): Promise<AnalysisDocument | null> {
   await connectToMongo()
-  return AnalysisModel.findOne({ _id: analysisId, userId }).lean<AnalysisDocument>()
+  const filter: Record<string, string> = { _id: analysisId }
+  if (userId) filter.userId = userId
+  return AnalysisModel.findOne(filter).lean<AnalysisDocument>()
 }
 
 /**
@@ -63,6 +76,7 @@ export async function createAnalysis(
     name: input.name,
     bearing: input.bearing,
     results: input.results,
+    imageData: input.imageData || null,
   })
 
   logger.info(

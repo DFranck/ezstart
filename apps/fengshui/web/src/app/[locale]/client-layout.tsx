@@ -69,7 +69,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
       }
       navLinks={[
         { href: '/', label: t('navigation.home'), icon: 'lucide:Home' },
-        { href: '/plans', label: t('navigation.plans'), icon: 'lucide:FolderOpen' },
+        { href: '/dashboard', label: t('navigation.plans'), icon: 'lucide:FolderOpen' },
         { href: '/analyze', label: t('navigation.analyze'), icon: 'lucide:Sparkles' },
         { href: '/donate', label: t('common.donate'), icon: 'lucide:Leaf' },
       ]}

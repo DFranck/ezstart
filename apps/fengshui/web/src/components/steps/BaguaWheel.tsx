@@ -10,7 +10,7 @@ import { Div } from '@ezstart/ui/components'
 type CardsMode = 'hover' | 'all'
 
 type BaguaWheelProps = {
-  src: string
+  src?: string
   bearingFromNorth: number
   size?: number
   radiusPct?: number
@@ -160,16 +160,18 @@ export default function BaguaWheel({
             </clipPath>
           </defs>
 
-          <image
-            href={src}
-            x={imgX}
-            y={imgY}
-            width={s}
-            height={s}
-            preserveAspectRatio="xMidYMid meet"
-            clipPath={`url(#${clipId})`}
-            data-bagua="plan"
-          />
+          {src && (
+            <image
+              href={src}
+              x={imgX}
+              y={imgY}
+              width={s}
+              height={s}
+              preserveAspectRatio="xMidYMid meet"
+              clipPath={`url(#${clipId})`}
+              data-bagua="plan"
+            />
+          )}
 
           {/* Overlay tourné (triangles + labels) */}
           <g transform={`rotate(${rot}, ${cx}, ${cy})`} data-bagua="overlay">

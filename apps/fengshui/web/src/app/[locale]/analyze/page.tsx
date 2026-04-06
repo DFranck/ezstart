@@ -6,7 +6,6 @@ import { THEME_COLORS } from '@/lib/theme-colors'
 import {
   clearStepperState,
   getStepperState,
-  saveLocalAnalysis,
   saveStepperState,
 } from '@/lib/local-plans'
 import type { CardinalStepData } from '@/types/bagua'
@@ -36,7 +35,7 @@ export default function AnalyzePage() {
   const [isSaving, setIsSaving] = useState(false)
   const t = useTranslations()
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, login } = useAuth()
 
   // Restore stepper state from localStorage
   const [restoredStep, setRestoredStep] = useState(0)
@@ -81,6 +80,11 @@ export default function AnalyzePage() {
   // Refs to track latest state for persistence (avoids stale closures)
   const latestStepDataRef = useRef<Record<string, Record<string, unknown>>>({})
   const currentStepRef = useRef(restoredStep)
+
+  // Keep currentStepRef in sync when restored step changes
+  useEffect(() => {
+    currentStepRef.current = restoredStep
+  }, [restoredStep])
 
   // Persist stepper state on page unload (covers refresh, tab close, navigation)
   useEffect(() => {
@@ -155,50 +159,45 @@ export default function AnalyzePage() {
           cardinalData,
         }
 
-        if (isAuthenticated) {
-          // Save to API
-          try {
-            // Try to get planId from upload step data if it was saved earlier
-            const uploadData = (allData['upload'] ?? {}) as Record<string, unknown>
-            const planId = (uploadData.savedPlanId as string) || ''
+        if (!isAuthenticated) {
+          // Save stepper state before redirecting to login so Step 3 is restored after
+          saveStepperState({
+            currentStep: steps.length - 1,
+            stepData: latestStepDataRef.current,
+          })
+          login()
+          setIsSaving(false)
+          return
+        }
 
-            await callApi('/api/analyses', {
-              method: 'POST',
-              body: {
-                planId: planId || 'unsaved',
-                name,
-                bearing,
-                results,
-              },
-            })
-            toast.success(t('analysis.saveSuccess'))
-          } catch (err) {
-            logger.error('Failed to save analysis to API:', err)
-            // Fallback to local save
-            saveLocalAnalysis({
-              planId: null,
+        // Save to API
+        try {
+          const uploadData = (allData['upload'] ?? {}) as Record<string, unknown>
+          const planId = (uploadData.savedPlanId as string) || ''
+          const imageData = (uploadData.preview as string) || undefined
+
+          await callApi('/api/analyses', {
+            method: 'POST',
+            body: {
+              planId: planId || 'unsaved',
               name,
               bearing,
               results,
-            })
-            toast.success(t('analysis.saveSuccessLocal'))
-          }
-        } else {
-          // Save locally
-          saveLocalAnalysis({
-            planId: null,
-            name,
-            bearing,
-            results,
+              imageData,
+            },
           })
-          toast.success(t('analysis.saveSuccessLocal'))
+          toast.success(t('analysis.saveSuccess'))
+        } catch (err) {
+          logger.error('Failed to save analysis to API:', err)
+          toast.error(t('analysis.saveError'))
+          return
         }
 
         // Clear stepper state after successful save
         clearStepperState()
 
         // Redirect to plans page
-        router.push('/plans')
+        router.push('/dashboard')
       } catch (err) {
         logger.error('Save analysis error:', err)
         toast.error(t('analysis.saveError'))
@@ -206,7 +205,7 @@ export default function AnalyzePage() {
         setIsSaving(false)
       }
     },
-    [isAuthenticated, router, t]
+    [isAuthenticated, login, router, t]
   )
 
   const handleComplete = useCallback(
@@ -299,11 +298,13 @@ export default function AnalyzePage() {
               ? false
               : {
                   label: isLastStep
-                    ? isSaving
-                      ? t('analysis.saving')
-                      : t('analysis.save')
+                    ? isAuthenticated
+                      ? isSaving
+                        ? t('analysis.saving')
+                        : t('analysis.save')
+                      : t('common.login')
                     : t('common.next'),
-                  icon: isLastStep ? 'lucide:Save' : 'lucide:ArrowRight',
+                  icon: isLastStep ? (isAuthenticated ? 'lucide:Save' : 'lucide:LogIn') : 'lucide:ArrowRight',
                   variant: 'brand',
                   disabled: (isUploadStep && !canProceedFromStep1) || (isLastStep && isSaving),
                   onClick: handleNext,

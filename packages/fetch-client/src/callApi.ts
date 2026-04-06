@@ -106,16 +106,24 @@ export async function callApi<T = unknown>(
     getToken,
   } = options
 
-  // Auto-inject access token for cross-domain requests if not explicitly provided
+  // Auto-inject access token if not explicitly provided
   let finalAccessToken = accessToken
   if (!finalAccessToken && typeof window !== 'undefined') {
-    // Detect auth mode using same logic as @ezstart/auth-sdk
     const currentHost = window.location.hostname
     const isLocalhost = currentHost === 'localhost' || currentHost.startsWith('127.0.0.1')
+    const apiUrl = getApiUrl(appName)
 
-    if (!isLocalhost) {
-      // Check if this is a cross-domain request
-      const apiUrl = getApiUrl(appName)
+    if (isLocalhost) {
+      // On localhost, always inject token for same-origin API routes (e.g. Next.js API routes)
+      // since httpOnly cookies from other ports (EZAuth) are not available
+      const apiHost = apiUrl ? new URL(apiUrl).hostname : ''
+      const apiPort = apiUrl ? new URL(apiUrl).port : ''
+      const currentPort = window.location.port
+      if (apiHost === currentHost && apiPort === currentPort) {
+        finalAccessToken = getAccessTokenFromStore(getToken) || undefined
+      }
+    } else {
+      // In production, inject token for cross-domain requests
       const apiHost = new URL(apiUrl).hostname
 
       const getRootDomain = (hostname: string) => {
@@ -127,7 +135,6 @@ export async function callApi<T = unknown>(
       const currentRootDomain = getRootDomain(currentHost)
       const apiRootDomain = getRootDomain(apiHost)
 
-      // If cross-domain, auto-inject token from store
       if (currentRootDomain !== apiRootDomain) {
         finalAccessToken = getAccessTokenFromStore(getToken) || undefined
       }

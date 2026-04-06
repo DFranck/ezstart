@@ -19,8 +19,11 @@ export async function GET(req: NextRequest, context: RouteContext) {
     }
 
     const { id } = await context.params
+    const isAdmin = user.role === 'admin'
 
-    const analysis = await getAnalysisById(id, user._id)
+    const analysis = isAdmin
+      ? await getAnalysisById(id)
+      : await getAnalysisById(id, user._id)
     if (!analysis) {
       return apiError('Analysis not found', 404)
     }

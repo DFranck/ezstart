@@ -183,7 +183,7 @@ export function Stepper({
   return (
     <TooltipProvider>
       <StepperContext.Provider value={contextValue}>
-        <Div className="flex-1 flex flex-col w-full">
+        <Div className="flex-1 flex flex-col w-full min-h-0">
           <StepperHeader
             steps={steps}
             currentStep={currentStep}
@@ -199,9 +199,11 @@ export function Stepper({
             headerOffsetCollapsed={headerOffsetCollapsed}
           />
 
-          <Div className={cn('flex-1 flex flex-col w-full', className)}>
-            <Div className="flex-1 flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 overflow-y-auto">
-              {children || steps[currentStep]?.component}
+          <Div className={cn('flex-1 flex flex-col w-full min-h-0', className)}>
+            <Div className="flex-1 flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 overflow-y-auto min-h-0">
+              <Div className="my-auto w-full">
+                {children || steps[currentStep]?.component}
+              </Div>
             </Div>
 
             <StepperNavigation
@@ -492,7 +494,7 @@ function StepperNavigation({
   return (
     <div
       className={cn(
-        'fixed z-20 left-0 right-0 flex items-center',
+        'w-full flex items-center shrink-0',
         sizeTokens.navigation,
         variantTokens.navigation,
         bottomOffset

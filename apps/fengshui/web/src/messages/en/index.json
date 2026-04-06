@@ -54,7 +54,7 @@
   },
   "navigation": {
     "home": "Home",
-    "plans": "My Plans",
+    "plans": "Dashboard",
     "analyze": "Analyze",
     "about": "About"
   },
@@ -264,7 +264,7 @@
     "processing": "Processing"
   },
   "validation": {
-    "analyzing": "AI analysis in progress...",
+    "analyzing": "Analysis in progress...",
     "valid": "{rooms} rooms detected — Score {score}/100",
     "poorQuality": "Poor quality — The result might be imprecise",
     "invalid": "This doesn't appear to be a floor plan",
@@ -275,6 +275,7 @@
     "invalidFormat": "Only JPG and PNG are accepted",
     "autoCropped": "Plan detected and auto-framed",
     "adjustCrop": "Adjust framing",
+    "cropHint": "The framing should fit the outer walls of the plan for an accurate analysis.",
     "validateAndContinue": "Validate",
     "validTitle": "Plan validated",
     "reupload": "Upload another"
@@ -312,7 +313,9 @@
     "saving": "Saving...",
     "saveSuccess": "Analysis saved",
     "saveSuccessLocal": "Analysis saved locally",
-    "saveError": "Failed to save analysis"
+    "saveError": "Failed to save analysis",
+    "notFound": "Analysis not found",
+    "backToDashboard": "Back to Dashboard"
   },
   "pdfModal": {
     "title": "Feng Shui Analysis",
@@ -414,35 +417,42 @@
     "dismiss": "Maybe later"
   },
   "plans": {
-    "title": "My Plans",
+    "title": "Dashboard",
     "newAnalysis": "New Analysis",
-    "localBanner": "Plans saved locally — Sign in to keep them permanently",
-    "localWarning": "These plans are stored in your browser and will be lost if you clear your cache",
+    "localBanner": "Analyses saved locally — Sign in to keep them",
+    "localWarning": "These analyses are stored in your browser and will be lost if you clear your cache",
     "guest": {
-      "title": "Your plans are not saved",
-      "description": "Sign in to save your floor plans and access them anytime. Without an account, your plans will be lost when you close the page.",
-      "login": "Sign in to save",
-      "tryWithout": "Analyze without saving"
+      "title": "Your analyses are not saved",
+      "description": "Sign in to save your analyses and access them anytime.",
+      "login": "Sign in to save"
     },
     "empty": {
-      "title": "No plans yet",
-      "description": "Upload your first floor plan to start your Feng Shui analysis",
-      "cta": "Upload a Plan"
+      "title": "No analyses",
+      "description": "Start your first Feng Shui analysis to get started",
+      "cta": "New Analysis"
+    },
+    "stats": {
+      "totalAnalyses": "{count} analyses",
+      "lastActivity": "Last activity"
+    },
+    "filters": {
+      "all": "All",
+      "byUser": "By user",
+      "byDate": "By date",
+      "search": "Search..."
     },
     "card": {
-      "analyses": "{count} analyses",
-      "noAnalyses": "No analysis yet",
-      "analyze": "Analyze",
+      "bearing": "Bearing: {bearing}°",
+      "viewAnalysis": "View analysis",
+      "newAnalysis": "New analysis",
       "delete": "Delete",
-      "validated": "Validated",
-      "poorQuality": "Poor quality",
-      "notValidated": "Not validated"
+      "noAnalyses": "No analyses"
     },
     "deleteConfirm": {
-      "title": "Delete Plan",
-      "description": "Are you sure? This will also delete all analyses for this plan.",
-      "success": "Plan deleted successfully",
-      "error": "Failed to delete the plan"
+      "title": "Delete this analysis?",
+      "description": "This action cannot be undone. The analysis will be permanently deleted.",
+      "success": "Analysis deleted",
+      "error": "Failed to delete"
     }
   }
 }

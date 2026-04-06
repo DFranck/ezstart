@@ -10,6 +10,7 @@ const createAnalysisSchema = z.object({
   name: z.string().min(1).max(200),
   bearing: z.number().min(0).max(360),
   results: z.record(z.unknown()),
+  imageData: z.string().optional(),
 })
 
 /**
@@ -26,8 +27,10 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(Number(searchParams.get('limit')) || 20, 100)
     const offset = Math.max(Number(searchParams.get('offset')) || 0, 0)
     const planId = searchParams.get('planId') || undefined
+    const isAdmin = user.role === 'admin'
+    const filterUserId = isAdmin ? (searchParams.get('userId') || undefined) : undefined
 
-    const { data, total } = await listAnalyses(user._id, limit, offset, planId)
+    const { data, total } = await listAnalyses(user._id, limit, offset, planId, isAdmin, filterUserId)
 
     return apiSuccess(data, { total, limit, offset })
   } catch (err) {

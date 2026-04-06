@@ -17,6 +17,7 @@ import {
   StepContent,
   useStepper,
 } from '@ezstart/ui/components'
+import { useScroll } from '@ezstart/ui/hooks'
 import { useMessages, useTranslations } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
@@ -36,6 +37,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
   const [isPricingOpen, setIsPricingOpen] = useState(false)
   const { isPremium } = usePremium()
   const { isAuthenticated, login } = useAuth()
+  const { scrollTo } = useScroll()
 
   // Refs pour scroll vers les secteurs
   const sectorRefs = useRef({} as Record<Direction, React.RefObject<HTMLDivElement | null>>)
@@ -98,19 +100,9 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
     // Fermer tous les autres et ouvrir seulement celui-ci
     setExpandedSectors(new Set([direction]))
 
-    // Toujours scroller vers le secteur
-    setTimeout(() => {
-      const ref = sectorRefs.current[direction]
-      if (ref?.current) {
-        // Scroll avec offset pour voir le bouton et le début du contenu
-        const rect = ref.current.getBoundingClientRect()
-        const offset = 150 // Espace au-dessus du bouton
-        window.scrollTo({
-          top: window.scrollY + rect.top - offset,
-          behavior: 'smooth',
-        })
-      }
-    }, 100) // Petit délai pour l'animation d'ouverture
+    // Scroller vers le secteur
+    const ref = sectorRefs.current[direction]
+    scrollTo(ref, { block: 'center', delay: 100 })
   }
 
   // Fonction pour ouvrir tous les secteurs
@@ -137,7 +129,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
         const cardinalData = (getStepData('cardinal-points') as CardinalStepData) ?? {}
 
         // Pas de plan → on ne rend rien (Step 2 gère déjà l'erreur)
-        if (!uploadData.file || !uploadData.preview) return null
+        if (!uploadData.preview) return null
 
         // On consomme UNIQUEMENT le bearing calculé en step 2
         const rotationAngle = cardinalData.rotationAngle ?? 0

@@ -54,7 +54,7 @@
   },
   "navigation": {
     "home": "Inicio",
-    "plans": "Mis Planos",
+    "plans": "Dashboard",
     "analyze": "Analizar",
     "about": "Acerca de"
   },
@@ -264,7 +264,7 @@
     "processing": "Procesando"
   },
   "validation": {
-    "analyzing": "Análisis IA en curso...",
+    "analyzing": "Análisis en curso...",
     "valid": "{rooms} habitaciones detectadas — Puntuación {score}/100",
     "poorQuality": "Calidad insuficiente — El resultado podría ser impreciso",
     "invalid": "Esto no parece ser un plano de planta",
@@ -275,6 +275,7 @@
     "invalidFormat": "Solo se aceptan los formatos JPG y PNG",
     "autoCropped": "Plano detectado y enmarcado automaticamente",
     "adjustCrop": "Ajustar el encuadre",
+    "cropHint": "El encuadre debe ajustarse a los muros exteriores del plano para un análisis preciso.",
     "validateAndContinue": "Validar",
     "validTitle": "Plano validado",
     "reupload": "Subir otro"
@@ -312,7 +313,9 @@
     "saving": "Guardando...",
     "saveSuccess": "Análisis guardado",
     "saveSuccessLocal": "Análisis guardado localmente",
-    "saveError": "Error al guardar el análisis"
+    "saveError": "Error al guardar el análisis",
+    "notFound": "Análisis no encontrado",
+    "backToDashboard": "Volver al Dashboard"
   },
   "pdfModal": {
     "title": "Análisis Feng Shui",
@@ -418,35 +421,42 @@
     "dismiss": "Más tarde"
   },
   "plans": {
-    "title": "Mis Planos",
-    "newAnalysis": "Nuevo An\u00e1lisis",
-    "localBanner": "Planos guardados localmente \u2014 Inicia sesi\u00f3n para conservarlos",
-    "localWarning": "Estos planos est\u00e1n almacenados en tu navegador y se perder\u00e1n si borras la cach\u00e9",
+    "title": "Dashboard",
+    "newAnalysis": "Nuevo Análisis",
+    "localBanner": "Análisis guardados localmente — Inicia sesión para conservarlos",
+    "localWarning": "Estos análisis están almacenados en tu navegador y se perderán si borras la caché",
     "guest": {
-      "title": "Tus planos no est\u00e1n guardados",
-      "description": "Inicia sesi\u00f3n para guardar tus planos y acceder a ellos en cualquier momento. Sin cuenta, tus planos se perder\u00e1n al cerrar la p\u00e1gina.",
-      "login": "Iniciar sesi\u00f3n para guardar",
-      "tryWithout": "Analizar sin guardar"
+      "title": "Tus análisis no están guardados",
+      "description": "Inicia sesión para guardar tus análisis y acceder a ellos en cualquier momento.",
+      "login": "Iniciar sesión para guardar"
     },
     "empty": {
-      "title": "Sin planos a\u00fan",
-      "description": "Sube tu primer plano para comenzar tu an\u00e1lisis Feng Shui",
-      "cta": "Subir un Plano"
+      "title": "Sin análisis",
+      "description": "Inicia tu primer análisis Feng Shui para comenzar",
+      "cta": "Nuevo Análisis"
+    },
+    "stats": {
+      "totalAnalyses": "{count} análisis",
+      "lastActivity": "Última actividad"
+    },
+    "filters": {
+      "all": "Todas",
+      "byUser": "Por usuario",
+      "byDate": "Por fecha",
+      "search": "Buscar..."
     },
     "card": {
-      "analyses": "{count} an\u00e1lisis",
-      "noAnalyses": "Sin an\u00e1lisis a\u00fan",
-      "analyze": "Analizar",
+      "bearing": "Orientación: {bearing}°",
+      "viewAnalysis": "Ver análisis",
+      "newAnalysis": "Nuevo análisis",
       "delete": "Eliminar",
-      "validated": "Validado",
-      "poorQuality": "Calidad baja",
-      "notValidated": "No validado"
+      "noAnalyses": "Sin análisis"
     },
     "deleteConfirm": {
-      "title": "Eliminar plano",
-      "description": "\u00bfEst\u00e1s seguro? Esto tambi\u00e9n eliminar\u00e1 todos los an\u00e1lisis de este plano.",
-      "success": "Plano eliminado con \u00e9xito",
-      "error": "Error al eliminar el plano"
+      "title": "¿Eliminar este análisis?",
+      "description": "Esta acción no se puede deshacer. El análisis se eliminará permanentemente.",
+      "success": "Análisis eliminado",
+      "error": "Error al eliminar"
     }
   }
 }

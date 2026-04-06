@@ -6,6 +6,7 @@ export interface AnalysisDocument extends Document {
   name: string
   bearing: number // 0-360 degrees
   results: Record<string, unknown> // Bagua analysis results
+  imageData?: string // Base64 plan preview
   createdAt: Date
   updatedAt: Date
 }
@@ -17,6 +18,7 @@ const analysisSchema = new Schema(
     name: { type: String, required: true },
     bearing: { type: Number, required: true, min: 0, max: 360 },
     results: { type: Schema.Types.Mixed, default: {} },
+    imageData: { type: String, default: null },
   },
   { timestamps: true, bufferCommands: false }
 )

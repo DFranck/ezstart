@@ -491,6 +491,11 @@ export function PlanUploader({
 
           {/* Two-button action bar: Ajuster + Valider — visible after validation, hidden during editing */}
           {preview && isImage && !isEditing && !isValidating && validationResult && validationResult.score >= 20 && !showValidationOverlay && (
+            <>
+            <Div intent="info" className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg">
+              <Icon name="lucide:Info" className="w-4 h-4 shrink-0" />
+              <P className="text-sm">{t('validation.cropHint')}</P>
+            </Div>
             <Div className="flex flex-col sm:flex-row gap-3 mt-4">
               <Button
                 onClick={() => {
@@ -513,6 +518,7 @@ export function PlanUploader({
                 {t('validation.validateAndContinue')}
               </Button>
             </Div>
+            </>
           )}
 
           {/* Image editor */}
