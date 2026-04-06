@@ -156,6 +156,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
 98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
 99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
+100. [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
 
 #### P3 — DevOps / Testing
 
