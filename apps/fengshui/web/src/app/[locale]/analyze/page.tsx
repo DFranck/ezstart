@@ -42,7 +42,6 @@ export default function AnalyzePage() {
       id: 'cardinal-points',
       title: t('steps.orientation.title'),
       icon: 'lucide:Compass',
-      description: t('steps.orientation.description'),
       component: <CardinalPointsStep />,
     },
     {

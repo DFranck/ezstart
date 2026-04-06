@@ -4,18 +4,10 @@
 import { THEME_COLORS } from '@/lib/theme-colors'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import {
-  Card,
-  CardContent,
-  CardHeader,
   Div,
   H2,
-  Icon,
   P,
   StepContent,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
   useStepper,
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
@@ -66,10 +58,6 @@ const CardinalWheel = ({
     updateData({ rotationAngle: norm, bearingFromNorth: norm })
   }
 
-  const resetRotation = () => {
-    updateData({ rotationAngle: 0, bearingFromNorth: 0 }) // bearing = 0 pour Nord en haut
-  }
-
   // Calcul de l'angle entre le centre et la position de la souris/touch
   const calculateAngle = (clientX: number, clientY: number) => {
     if (!wrapperRef.current) return 0
@@ -78,7 +66,6 @@ const CardinalWheel = ({
     const centerY = rect.top + cy
     const dx = clientX - centerX
     const dy = clientY - centerY
-    // atan2 retourne l'angle en radians, on convertit en degrés
     return Math.atan2(dy, dx) * (180 / Math.PI)
   }
 
@@ -129,103 +116,27 @@ const CardinalWheel = ({
   }, [isDragging, currentRotation])
 
   const cardinalPoints = [
-    { direction: 'N', angle: -90, label: t('cardinal.north') }, // Nord en haut (270° ou -90°)
-    { direction: 'E', angle: 0, label: t('cardinal.east') }, // Est à droite (0°)
-    { direction: 'S', angle: 90, label: t('cardinal.south') }, // Sud en bas (90°)
-    { direction: 'O', angle: 180, label: t('cardinal.west') }, // Ouest à gauche (180°)
+    { direction: 'N', angle: -90, label: t('cardinal.north') },
+    { direction: 'E', angle: 0, label: t('cardinal.east') },
+    { direction: 'S', angle: 90, label: t('cardinal.south') },
+    { direction: 'O', angle: 180, label: t('cardinal.west') },
   ] as const
 
   return (
-    <Div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto')}>
-        <CardHeader className="flex items-center gap-2">
-          <Div className="min-w-8 h-8 rounded-full flex items-center justify-center ">
-            <Icon name="lucide:Upload" size={16} />
-          </Div>
-          <H2 size={'h5'} className="text-left flex items-center gap-2">
-            {t('cardinal.title')}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="" aria-label={t('cardinal.tooltipHelp')}>
-                    <Icon name="lucide:Info" size={14} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <P className="text-xs">{t('cardinal.tooltipHelp')}</P>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </H2>
-        </CardHeader>
-        <CardContent className="">
-          <P variant={'description'}>{t('cardinal.description')}</P>
-          <P variant={'description'} className="mt-2 text-xs">
-            💡 {t('cardinal.dragHint') || 'Drag any cardinal point to rotate'}
-          </P>
-        </CardContent>
-      </Card>
-      {/* Contrôles */}
-      {/* <Div className="flex items-center justify-center space-x-2 mb-4">
-        <Div layout={'center'}>
-          <Label htmlFor="-rotate-45">45°</Label>
-          <Button id="-rotate-45" onClick={() => handleRotate(currentRotation - 45)} size="sm">
-            <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-          </Button>
-        </Div>
-        <Div layout={'center'}>
-          <Label htmlFor="-rotate-10">10°</Label>
-          <Button id="-rotate-10" onClick={() => handleRotate(currentRotation - 10)} size="sm">
-            <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-          </Button>
-        </Div>
-        <Div layout={'center'}>
-          <Label htmlFor="-rotate-1">1°</Label>
-          <Button id="-rotate-1" onClick={() => handleRotate(currentRotation - 1)} size="sm">
-            <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-          </Button>
-        </Div>
-
-        <Div className="w-px h-8 bg-gray-300 mx-2" />
-
-        <Div layout={'center'}>
-          <Label htmlFor="+rotate-1">1°</Label>
-          <Button id="+rotate-1" onClick={() => handleRotate(currentRotation + 1)} size="sm">
-            <Icon name="lucide:RotateCw" className="w-4 h-4" />
-          </Button>
-        </Div>
-        <Div layout={'center'}>
-          <Label htmlFor="+rotate-10">10°</Label>
-          <Button id="+rotate-10" onClick={() => handleRotate(currentRotation + 10)} size="sm">
-            <Icon name="lucide:RotateCw" className="w-4 h-4" />
-          </Button>
-        </Div>
-        <Div layout={'center'}>
-          <Label htmlFor="+rotate-45">45°</Label>
-          <Button id="+rotate-45" onClick={() => handleRotate(currentRotation + 45)} size="sm">
-            <Icon name="lucide:RotateCw" className="w-4 h-4" />
-          </Button>
-        </Div>
-      </Div> */}
-
-      {/* Roue */}
-      <Div className="relative flex justify-center items-center ">
+    <Div className="flex flex-col items-center flex-1 min-h-0">
+      {/* Compass wheel */}
+      <Div className="relative flex justify-center items-center flex-1 w-full min-h-0">
         <Div ref={wrapperRef} className="relative w-full h-72 md:h-[550px]">
-          {/* Plan centré */}
+          {/* Plan centré — no overlay */}
           <Div className="absolute w-44 h-44 md:w-96 md:h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <img
               src={uploadData.preview}
-              alt="Plan uploadé"
+              alt="Plan"
               className="w-full h-full object-contain bg-white"
             />
-            <Div className="absolute inset-0 bg-black/10 flex flex-col items-center justify-center text-white p-4 text-center pointer-events-none">
-              <Div className="text-2xl font-bold mb-1 drop-shadow-lg">{t('cardinal.yourPlan')}</Div>
-              <Div className="text-sm opacity-90 drop-shadow-lg">{t('cardinal.fixedCenter')}</Div>
-            </Div>
           </Div>
 
-          {/* Pastilles cardinales (même rayon que les lignes) - DRAGGABLE */}
+          {/* Pastilles cardinales - DRAGGABLE */}
           {cardinalPoints.map(({ direction, angle, label }) => {
             const a = (angle + currentRotation) * (Math.PI / 180)
             const x = Math.cos(a) * radius
@@ -234,7 +145,7 @@ const CardinalWheel = ({
               <Div
                 key={direction}
                 className={cn(
-                  `absolute bg-gradient-to-r ${THEME_COLORS.gradientClasses} w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-background shadow-xl z-50 cursor-grab active:cursor-grabbing transition-transform`,
+                  `absolute bg-gradient-to-r ${THEME_COLORS.gradientClasses} w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-background shadow-xl cursor-grab active:cursor-grabbing transition-transform`,
                   isDragging && 'cursor-grabbing'
                 )}
                 style={{
@@ -242,7 +153,7 @@ const CardinalWheel = ({
                   top: cy,
                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
                   zIndex: 5,
-                  touchAction: 'none', // Empêche le scroll pendant le drag sur mobile
+                  touchAction: 'none',
                 }}
                 onMouseDown={handleDragStart}
                 onTouchStart={handleDragStart}
@@ -255,8 +166,8 @@ const CardinalWheel = ({
             )
           })}
 
-          {/* Lignes → centre dynamique (cx, cy) */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
+          {/* Lignes centre -> pastilles */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 4 }}>
             <defs>
               <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="rgba(239, 68, 68, 0.4)" />
@@ -282,13 +193,18 @@ const CardinalWheel = ({
             })}
           </svg>
 
-          {/* Cercle guide → même centre / rayon */}
+          {/* Cercle guide */}
           <Div
             className="absolute rounded-full border-2 border-dashed border-foreground/40 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             style={{ width: radius * 2, height: radius * 2 }}
           />
         </Div>
       </Div>
+
+      {/* Hint text below compass */}
+      <P variant={'description'} className="text-xs text-center mt-2 text-muted-foreground">
+        {t('cardinal.dragHint')}
+      </P>
     </Div>
   )
 }
