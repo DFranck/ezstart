@@ -481,6 +481,7 @@ export function PlanUploader({
               src={originalPreview ?? preview}
               onCropComplete={handleCropComplete}
               onCancel={handleCropCancel}
+              cropShape="round"
               showRotation
               maxOutputWidth={1500}
               outputQuality={0.85}

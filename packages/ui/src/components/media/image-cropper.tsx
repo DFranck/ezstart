@@ -29,6 +29,8 @@ export interface ImageCropperProps {
   outputQuality?: number
   /** Output format */
   outputFormat?: 'image/png' | 'image/jpeg'
+  /** Crop shape: 'rect' (default) or 'round' (circle crop) */
+  cropShape?: 'rect' | 'round'
   /** Custom class for the container */
   className?: string
   /** i18n labels */
@@ -161,6 +163,7 @@ export function ImageCropper({
   maxOutputWidth,
   outputQuality = 0.85,
   outputFormat = 'image/jpeg',
+  cropShape = 'rect',
   className,
   labels,
 }: ImageCropperProps) {
@@ -216,14 +219,15 @@ export function ImageCropper({
           crop={crop}
           zoom={zoom}
           rotation={rotation}
-          aspect={activeAspect}
+          aspect={cropShape === 'round' ? 1 : activeAspect}
+          cropShape={cropShape}
           restrictPosition={false}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onRotationChange={setRotation}
           onCropComplete={onCropAreaChange}
           objectFit="contain"
-          showGrid
+          showGrid={cropShape !== 'round'}
           minZoom={0.1}
           maxZoom={5}
         />
@@ -231,8 +235,8 @@ export function ImageCropper({
 
       {/* Controls */}
       <div className="flex flex-col gap-3">
-        {/* Aspect presets */}
-        {presets && presets.length > 0 && (
+        {/* Aspect presets (hidden for round crop — always 1:1) */}
+        {cropShape !== 'round' && presets && presets.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {presets.map(p => (
               <button
