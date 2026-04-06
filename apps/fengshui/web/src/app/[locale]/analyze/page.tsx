@@ -1,12 +1,23 @@
 /* path: /app/[locale]/analyze/page.tsx */
 'use client'
 
+import { callApi } from '@/config/api'
 import { THEME_COLORS } from '@/lib/theme-colors'
-import { Div, Stepper, type StepperTheme } from '@ezstart/ui/components'
+import {
+  clearStepperState,
+  getStepperState,
+  saveLocalAnalysis,
+  saveStepperState,
+} from '@/lib/local-plans'
+import type { CardinalStepData } from '@/types/bagua'
+import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
+import { Div, Stepper, type StepperTheme } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { useRouter } from '@/i18n/navigation'
 
 // Dynamic imports for heavy step components (~900 lines total)
 // Reduces initial bundle size and improves First Load JS
@@ -22,7 +33,66 @@ const UploadStep = dynamic(() => import('@/components/steps/UploadStep'), {
 
 export default function AnalyzePage() {
   const [triggerPreview, setTriggerPreview] = useState(0)
+  const [isSaving, setIsSaving] = useState(false)
   const t = useTranslations()
+  const router = useRouter()
+  const { isAuthenticated } = useAuth()
+
+  // Restore stepper state from localStorage
+  const [restoredStep, setRestoredStep] = useState(0)
+  const [restoredStepData, setRestoredStepData] = useState<
+    Record<string, Record<string, unknown>> | undefined
+  >(undefined)
+  const [isRestored, setIsRestored] = useState(false)
+
+  useEffect(() => {
+    try {
+      const saved = getStepperState()
+      if (saved) {
+        // Reconstruct File object from base64 preview if needed
+        const uploadData = saved.stepData['upload']
+        if (uploadData?.preview && !uploadData.file) {
+          try {
+            const base64 = uploadData.preview as string
+            const match = base64.match(/^data:(image\/\w+);base64,/)
+            if (match) {
+              const mime = match[1]
+              const ext = mime === 'image/png' ? 'png' : 'jpg'
+              const binaryStr = atob(base64.split(',')[1]!)
+              const bytes = new Uint8Array(binaryStr.length)
+              for (let i = 0; i < binaryStr.length; i++) {
+                bytes[i] = binaryStr.charCodeAt(i)
+              }
+              uploadData.file = new File([bytes], `restored-plan.${ext}`, { type: mime })
+            }
+          } catch {
+            // If reconstruction fails, user will need to re-upload
+          }
+        }
+        setRestoredStep(saved.currentStep)
+        setRestoredStepData(saved.stepData)
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    setIsRestored(true)
+  }, [])
+
+  // Refs to track latest state for persistence (avoids stale closures)
+  const latestStepDataRef = useRef<Record<string, Record<string, unknown>>>({})
+  const currentStepRef = useRef(restoredStep)
+
+  // Persist stepper state on page unload (covers refresh, tab close, navigation)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      saveStepperState({
+        currentStep: currentStepRef.current,
+        stepData: latestStepDataRef.current,
+      })
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
 
   // Theme FengShui dynamique (centralisé dans theme-colors.ts)
   // Utilise CSS variables pour éviter les problèmes d'hydratation SSR
@@ -53,124 +123,217 @@ export default function AnalyzePage() {
     },
   ] as const
 
-  const handleStepChange = (idx: number, id: string) => {
-    logger.debug(`Étape changée: ${id} (${idx + 1}/${steps.length})`)
-  }
+  // Persist stepper state on step change
+  const handleStepChange = useCallback(
+    (idx: number, id: string) => {
+      logger.debug(`Step changed: ${id} (${idx + 1}/${steps.length})`)
+      currentStepRef.current = idx
+      // Save current step + data to localStorage
+      saveStepperState({
+        currentStep: idx,
+        stepData: latestStepDataRef.current,
+      })
+    },
+    [steps.length]
+  )
 
-  const handleComplete = (allData: Record<string, unknown>) => {
-    logger.info('Analyse terminée! Données collectées:', allData)
-    // Déclencher l'ouverture du preview PDF avec un compteur pour forcer le re-trigger
-    setTriggerPreview(prev => prev + 1)
-  }
+  // Save analysis (API or localStorage) then redirect
+  const handleSaveAnalysis = useCallback(
+    async (allData: Record<string, Record<string, unknown>>) => {
+      setIsSaving(true)
+      try {
+        const cardinalData = (allData['cardinal-points'] as CardinalStepData) ?? {}
+        const rotationAngle = cardinalData.rotationAngle ?? 0
+        const bearing = cardinalData.bearingFromNorth ?? (rotationAngle + 90) % 360
+
+        const now = new Date()
+        const name = `Analyse du ${now.toLocaleDateString()}`
+
+        // Build results from available data
+        const results: Record<string, unknown> = {
+          bearing,
+          cardinalData,
+        }
+
+        if (isAuthenticated) {
+          // Save to API
+          try {
+            // Try to get planId from upload step data if it was saved earlier
+            const uploadData = (allData['upload'] ?? {}) as Record<string, unknown>
+            const planId = (uploadData.savedPlanId as string) || ''
+
+            await callApi('/api/analyses', {
+              method: 'POST',
+              body: {
+                planId: planId || 'unsaved',
+                name,
+                bearing,
+                results,
+              },
+            })
+            toast.success(t('analysis.saveSuccess'))
+          } catch (err) {
+            logger.error('Failed to save analysis to API:', err)
+            // Fallback to local save
+            saveLocalAnalysis({
+              planId: null,
+              name,
+              bearing,
+              results,
+            })
+            toast.success(t('analysis.saveSuccessLocal'))
+          }
+        } else {
+          // Save locally
+          saveLocalAnalysis({
+            planId: null,
+            name,
+            bearing,
+            results,
+          })
+          toast.success(t('analysis.saveSuccessLocal'))
+        }
+
+        // Clear stepper state after successful save
+        clearStepperState()
+
+        // Redirect to plans page
+        router.push('/plans')
+      } catch (err) {
+        logger.error('Save analysis error:', err)
+        toast.error(t('analysis.saveError'))
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [isAuthenticated, router, t]
+  )
+
+  const handleComplete = useCallback(
+    (allData: Record<string, Record<string, unknown>>) => {
+      logger.info('Analysis complete! Collected data:', allData)
+      handleSaveAnalysis(allData)
+    },
+    [handleSaveAnalysis]
+  )
+
+  // Don't render until we've tried restoring state (avoids flash at step 0)
+  if (!isRestored) return null
 
   return (
     <Stepper
-        steps={
-          steps as unknown as Array<{
-            id: string
-            title: string
-            icon: string
-            description: string
-            component: React.ReactElement
-          }>
+      steps={
+        steps as unknown as Array<{
+          id: string
+          title: string
+          icon: string
+          description: string
+          component: React.ReactElement
+        }>
+      }
+      initialStep={restoredStep}
+      initialStepData={restoredStepData}
+      withHeaderOffset={false}
+      bottomOffset="bottom-10 sm:bottom-0"
+      onStepChange={handleStepChange}
+      onComplete={handleComplete}
+      allowStepNavigation
+      theme={fengShuiTheme}
+      renderButtons={context => {
+        // Keep ref updated for persistence
+        latestStepDataRef.current = context.stepData
+
+        const uploadData = context.getStepData('upload') as {
+          file?: File
+          preview?: string
+          _editingState?: {
+            isEditing: boolean
+            canApply: boolean
+            applyHandler: () => Promise<void>
+          }
+          aiValidation?: { isValid: boolean; score: number; roomsDetected: number; feedback: string }
         }
-        withHeaderOffset={false}
-        bottomOffset="bottom-10 sm:bottom-0"
-        onStepChange={handleStepChange}
-        onComplete={handleComplete}
-        allowStepNavigation
-        theme={fengShuiTheme}
-        renderButtons={context => {
-          const uploadData = context.getStepData('upload') as {
-            file?: File
-            preview?: string
-            _editingState?: {
-              isEditing: boolean
-              canApply: boolean
-              applyHandler: () => Promise<void>
+        const isUploadStep = context.currentStep === 0
+        const hasFile = uploadData?.file
+        const editingState = uploadData?._editingState
+        const aiValidation = uploadData?.aiValidation
+
+        // Pour Step 1: besoin d'un fichier + validation score >= 20 (or no validation yet but not loading)
+        // Disable if score < 20 (invalid plan)
+        const isInvalidPlan = aiValidation && aiValidation.score < 20
+        const isValidatedPlan = aiValidation && aiValidation.score >= 20
+        const canProceedFromStep1 = hasFile && !isInvalidPlan
+
+        const isLastStep = context.currentStep === context.steps.length - 1
+
+        // Handler async pour le bouton Next qui auto-valide le crop si nécessaire
+        const handleNext = async () => {
+          // Si on est sur l'étape upload avec une image et qu'on est en édition
+          if (isUploadStep && uploadData.file?.type?.startsWith('image/')) {
+            // Si le crop est en cours d'édition et peut être appliqué
+            if (editingState?.isEditing && editingState?.canApply) {
+              // Auto-valider le crop avant de passer à l'étape suivante
+              await editingState.applyHandler()
             }
-            aiValidation?: { isValid: boolean; score: number; roomsDetected: number; feedback: string }
+            // Sinon si aucun crop n'a été validé, on continue quand même
+            // (l'image sera utilisée telle quelle)
           }
-          const isUploadStep = context.currentStep === 0
-          const hasFile = uploadData?.file
-          const editingState = uploadData?._editingState
-          const aiValidation = uploadData?.aiValidation
+          // Passer à l'étape suivante (or complete on last step)
+          context.nextStep()
+        }
 
-          // Pour Step 1: besoin d'un fichier + validation score >= 20 (or no validation yet but not loading)
-          // Disable if score < 20 (invalid plan)
-          const isInvalidPlan = aiValidation && aiValidation.score < 20
-          const isValidatedPlan = aiValidation && aiValidation.score >= 20
-          const canProceedFromStep1 = hasFile && !isInvalidPlan
-
-          // Handler async pour le bouton Next qui auto-valide le crop si nécessaire
-          const handleNext = async () => {
-            // Si on est sur l'étape upload avec une image et qu'on est en édition
-            if (isUploadStep && uploadData.file?.type?.startsWith('image/')) {
-              // Si le crop est en cours d'édition et peut être appliqué
-              if (editingState?.isEditing && editingState?.canApply) {
-                // Auto-valider le crop avant de passer à l'étape suivante
-                await editingState.applyHandler()
-              }
-              // Sinon si aucun crop n'a été validé, on continue quand même
-              // (l'image sera utilisée telle quelle)
-            }
-            // Passer à l'étape suivante
-            context.nextStep()
-          }
-
-          return {
-            previous:
-              context.currentStep === 0
-                ? false
-                : {
-                    label: t('common.previous'),
-                    icon: 'lucide:ArrowLeft',
-                    variant: 'outline',
-                    onClick: context.previousStep,
-                    tooltip: t('tooltips.previousStep'),
-                  },
-            // Hide stepper "next" on step 1 when validated — "Valider" button in PlanUploader handles advancing
-            next: isUploadStep && isValidatedPlan
+        return {
+          previous:
+            context.currentStep === 0
               ? false
               : {
-                  label:
-                    context.currentStep === context.steps.length - 1
-                      ? t('common.downloadPlan')
-                      : t('common.next'),
-                  icon:
-                    context.currentStep === context.steps.length - 1
-                      ? 'lucide:Download'
-                      : 'lucide:ArrowRight',
+                  label: t('common.previous'),
+                  icon: 'lucide:ArrowLeft',
+                  variant: 'outline',
+                  onClick: context.previousStep,
+                  tooltip: t('tooltips.previousStep'),
+                },
+          // Hide stepper "next" on step 1 when validated — "Valider" button in PlanUploader handles advancing
+          next:
+            isUploadStep && isValidatedPlan
+              ? false
+              : {
+                  label: isLastStep
+                    ? isSaving
+                      ? t('analysis.saving')
+                      : t('analysis.save')
+                    : t('common.next'),
+                  icon: isLastStep ? 'lucide:Save' : 'lucide:ArrowRight',
                   variant: 'brand',
-                  disabled: isUploadStep && !canProceedFromStep1,
+                  disabled: (isUploadStep && !canProceedFromStep1) || (isLastStep && isSaving),
                   onClick: handleNext,
                   tooltip:
                     isUploadStep && !canProceedFromStep1
                       ? hasFile
                         ? t('steps.upload.cropRequired')
                         : t('steps.upload.fileRequired')
-                      : context.currentStep === context.steps.length - 1
-                        ? t('tooltips.finishAnalysis')
+                      : isLastStep
+                        ? t('analysis.save')
                         : t('tooltips.nextStep'),
                 },
-            custom:
-              isUploadStep && !canProceedFromStep1
-                ? [
-                    {
-                      label: hasFile
-                        ? t('steps.upload.cropRequired')
-                        : t('steps.upload.fileRequired'),
-                      icon: 'lucide:AlertCircle',
-                      variant: 'outline',
-                      disabled: true,
-                      tooltip: hasFile
-                        ? t('tooltips.validateCrop')
-                        : t('steps.upload.instructions'),
-                    },
-                  ]
-                : undefined,
-          }
-        }}
-      />
+          custom:
+            isUploadStep && !canProceedFromStep1
+              ? [
+                  {
+                    label: hasFile
+                      ? t('steps.upload.cropRequired')
+                      : t('steps.upload.fileRequired'),
+                    icon: 'lucide:AlertCircle',
+                    variant: 'outline',
+                    disabled: true,
+                    tooltip: hasFile
+                      ? t('tooltips.validateCrop')
+                      : t('steps.upload.instructions'),
+                  },
+                ]
+              : undefined,
+        }
+      }}
+    />
   )
 }

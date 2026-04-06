@@ -307,7 +307,12 @@
     "downloadPdf": "Télécharger PDF",
     "generating": "Génération...",
     "pdfGenerated": "PDF généré avec succès !",
-    "errorPdf": "Erreur lors de la génération du PDF"
+    "errorPdf": "Erreur lors de la génération du PDF",
+    "save": "Sauvegarder l'analyse",
+    "saving": "Sauvegarde...",
+    "saveSuccess": "Analyse sauvegardée",
+    "saveSuccessLocal": "Analyse sauvegardée localement",
+    "saveError": "Erreur lors de la sauvegarde"
   },
   "pdfModal": {
     "title": "Analyse Feng Shui",

@@ -94,6 +94,8 @@ export interface StepperTheme {
 interface StepperProps {
   steps: Step[]
   initialStep?: number
+  /** Pre-fill step data (e.g. restored from localStorage). Keyed by step id. */
+  initialStepData?: Record<string, Record<string, unknown>>
   onStepChange?: (stepIndex: number, stepId: string) => void
   onComplete?: (allData: Record<string, Record<string, unknown>>) => void
   className?: string
@@ -113,6 +115,7 @@ interface StepperProps {
 export function Stepper({
   steps,
   initialStep = 0,
+  initialStepData,
   onStepChange,
   onComplete,
   className,
@@ -129,7 +132,7 @@ export function Stepper({
   theme,
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState(initialStep)
-  const [stepData, setStepData] = useState<Record<string, Record<string, unknown>>>({})
+  const [stepData, setStepData] = useState<Record<string, Record<string, unknown>>>(initialStepData ?? {})
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
   const goToStep = (stepIndex: number) => {
