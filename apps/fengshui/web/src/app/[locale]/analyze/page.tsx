@@ -48,7 +48,6 @@ export default function AnalyzePage() {
       id: 'analysis',
       title: t('steps.analysis.title'),
       icon: 'lucide:Sparkles',
-      description: t('steps.analysis.description'),
       component: <AnalysisStep triggerPreview={triggerPreview} />,
       isFinalStep: true, // Marque cette étape comme finale
     },

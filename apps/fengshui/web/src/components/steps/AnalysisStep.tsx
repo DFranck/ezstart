@@ -11,20 +11,13 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   Div,
-  H2,
   Icon,
-  P,
   Span,
   StepContent,
   useStepper,
 } from '@ezstart/ui/components'
-import { useDevice } from '@ezstart/ui/hooks'
-import { cn } from '@ezstart/ui/lib'
-import { useLocale, useMessages, useTranslations } from 'next-intl'
+import { useMessages, useTranslations } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
@@ -33,9 +26,7 @@ import BaguaGrid from './BaguaGrid'
 import BaguaWheel from './BaguaWheel'
 
 export default function AnalysisStep({ triggerPreview }: { triggerPreview?: number }) {
-  const { isMobile } = useDevice()
   const t = useTranslations()
-  const locale = useLocale()
   const messages = useMessages()
   const [cfg, setCfg] = useState<YearBaguaConfig | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
@@ -182,35 +173,8 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
 
         return (
           <Div className="mx-auto w-full max-w-7xl">
-            {/* Header avec bouton PDF */}
-
-            <Card variant={'ghost'} className={cn('gap-2 mx-auto mb-6', {})}>
-              <CardHeader className="flex items-center justify-center gap-2">
-                <Icon name="lucide:Sparkles" size={16} />
-                <H2 size={'h5'} className="w-fit">
-                  {t('analysis.title')}
-                </H2>
-              </CardHeader>
-              <CardContent className="">
-                <P variant={'description'}>{t('analysis.description')}</P>
-                <Div className="flex gap-2 mt-4">
-                  <Button
-                    onClick={handleOpenPreview}
-                    variant="ghost"
-                    disabled={!cfg || isGeneratingPDF}
-                    style={{
-                      background: `linear-gradient(to right, ${THEME_COLORS.cssVars.primary}, ${THEME_COLORS.cssVars.secondary})`,
-                      color: 'white',
-                      border: 'none',
-                    }}
-                  >
-                    <Icon name="lucide:FileDown" className="w-4 h-4" />
-                    <Span>{t('analysis.pdfPreview')}</Span>
-                  </Button>
-                </Div>
-
                 {/* Toggle visualisation */}
-                <Div className="flex gap-1 mt-3 p-1 bg-muted rounded-lg">
+                <Div className="flex gap-1 mb-4 p-1 bg-muted rounded-lg max-w-xs mx-auto">
                   <Button
                     onClick={() => setVisualizationMode('wheel')}
                     variant={visualizationMode === 'wheel' ? 'default' : 'ghost'}
@@ -230,8 +194,10 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     {t('analysis.grid')}
                   </Button>
                 </Div>
+
+                {/* Mobile visualization */}
                 <Div className="w-full py-4 flex lg:hidden items-center justify-center">
-                  <Div className="w-full  max-w-[600px]">
+                  <Div className="w-full max-w-[600px]">
                     {visualizationMode === 'wheel' ? (
                       <BaguaWheel
                         src={uploadData.preview!}
@@ -256,8 +222,6 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     )}
                   </Div>
                 </Div>
-              </CardContent>
-            </Card>
             <Div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Colonne gauche : Visualization Bagua (hidden below lg, shown in Card above) */}
               <Div className="hidden lg:block lg:col-span-1">
@@ -304,6 +268,23 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                   onLogin={login}
                 />
               </Div>
+            </Div>
+
+            {/* PDF download button */}
+            <Div className="flex justify-center mt-6">
+              <Button
+                onClick={handleOpenPreview}
+                variant="ghost"
+                disabled={!cfg || isGeneratingPDF}
+                style={{
+                  background: `linear-gradient(to right, ${THEME_COLORS.cssVars.primary}, ${THEME_COLORS.cssVars.secondary})`,
+                  color: 'white',
+                  border: 'none',
+                }}
+              >
+                <Icon name="lucide:FileDown" className="w-4 h-4" />
+                <Span>{t('analysis.pdfPreview')}</Span>
+              </Button>
             </Div>
 
             {/* Preview Modal */}
