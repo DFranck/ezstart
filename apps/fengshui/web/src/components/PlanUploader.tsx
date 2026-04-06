@@ -410,11 +410,11 @@ export function PlanUploader({
 
           {/* Image preview when not editing — with overlays */}
           {preview && isImage && !isEditing && (
-            <Div className="relative mb-4 flex items-center justify-center">
+            <Div className="relative mb-4 flex items-center justify-center w-full max-w-2xl mx-auto">
               <img
                 src={preview}
                 alt="Preview"
-                className="w-full max-h-[50vh] object-contain rounded-lg border"
+                className="w-full max-h-[50vh] object-contain rounded-xl border shadow-sm"
               />
 
               {/* Loading overlay — dimmed background + spinner */}
@@ -516,7 +516,8 @@ export function PlanUploader({
               showRotation
               maxOutputWidth={1500}
               outputQuality={0.85}
-              className="min-h-[400px]"
+              themeColor="var(--fengshui-primary)"
+              className="w-full max-w-2xl mx-auto min-h-[350px] sm:min-h-[450px]"
               labels={{
                 apply: t('uploader.apply'),
                 cancel: t('uploader.cancel'),

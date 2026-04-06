@@ -35,6 +35,8 @@ export interface ImageCropperProps {
   outputFormat?: 'image/png' | 'image/jpeg'
   /** Crop shape: 'rect' (default) or 'round' (circle crop) */
   cropShape?: 'rect' | 'round'
+  /** Theme color for handles/borders (CSS color string, e.g., '#d4a017' or 'hsl(var(--primary))') */
+  themeColor?: string
   /** Custom class for the container */
   className?: string
   /** i18n labels */
@@ -180,6 +182,7 @@ function EdgeDragCropper({
   maxOutputWidth,
   outputQuality = 0.85,
   outputFormat = 'image/jpeg',
+  themeColor,
   className,
   labels,
 }: {
@@ -190,6 +193,7 @@ function EdgeDragCropper({
   maxOutputWidth?: number
   outputQuality?: number
   outputFormat?: 'image/png' | 'image/jpeg'
+  themeColor?: string
   className?: string
   labels: { apply: string; cancel: string }
 }) {
@@ -315,10 +319,11 @@ function EdgeDragCropper({
   const handles: EdgeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
 
   function handleStyle(h: EdgeHandle): React.CSSProperties {
+    const color = themeColor || 'hsl(var(--primary))'
     const base: React.CSSProperties = {
-      position: 'absolute', backgroundColor: 'hsl(var(--primary))',
-      border: '2px solid hsl(var(--primary-foreground))', borderRadius: 3,
-      boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+      position: 'absolute', backgroundColor: color,
+      border: '2px solid white', borderRadius: 3,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
       zIndex: 30, pointerEvents: 'auto', touchAction: 'none',
       cursor: HANDLE_CURSORS[h],
     }
@@ -366,7 +371,7 @@ function EdgeDragCropper({
             position: 'absolute',
             top: `${c.top}%`, left: `${c.left}%`,
             width: `${c.right - c.left}%`, height: `${c.bottom - c.top}%`,
-            border: '2px solid hsl(var(--primary))',
+            border: `2px solid ${themeColor || 'hsl(var(--primary))'}`,
             boxSizing: 'border-box',
             cursor: 'move',
             touchAction: 'none',
@@ -434,6 +439,7 @@ export function ImageCropper({
   outputQuality = 0.85,
   outputFormat = 'image/jpeg',
   cropShape = 'rect',
+  themeColor,
   className,
   labels,
 }: ImageCropperProps) {
@@ -460,6 +466,7 @@ export function ImageCropper({
         maxOutputWidth={maxOutputWidth}
         outputQuality={outputQuality}
         outputFormat={outputFormat}
+        themeColor={themeColor}
         className={className}
         labels={{ apply: l.apply, cancel: l.cancel }}
       />
