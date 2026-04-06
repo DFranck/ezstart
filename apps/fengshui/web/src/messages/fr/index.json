@@ -273,7 +273,9 @@
     "tooLarge": "Fichier trop volumineux (max 10 Mo)",
     "invalidFormat": "Seuls les formats JPG et PNG sont acceptés",
     "autoCropped": "Plan détecté et cadré automatiquement",
-    "adjustCrop": "Ajuster le cadrage"
+    "adjustCrop": "Ajuster le cadrage",
+    "validTitle": "Plan validé",
+    "reupload": "Ré-uploader"
   },
   "cardinal": {
     "title": "Étape 2 : Points Cardinaux",

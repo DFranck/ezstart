@@ -2,11 +2,11 @@
 'use client'
 
 import type { AiValidationResult } from '@/types/bagua'
-import { Button, Div, Icon, ImageCropper, P, Progress, Span, Spinner } from '@ezstart/ui/components'
+import { Button, Card, Div, Icon, ImageCropper, P, Progress, Span, Spinner } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 
@@ -20,69 +20,6 @@ interface PlanUploaderProps {
   className?: string
 }
 
-/* ------------------------------------------------------------------------------------------
- * Inline validation badge component
- * ----------------------------------------------------------------------------------------*/
-function ValidationBadge({
-  result,
-  isLoading,
-  t,
-}: {
-  result: AiValidationResult | null
-  isLoading: boolean
-  t: ReturnType<typeof useTranslations>
-}) {
-  if (isLoading) {
-    return (
-      <Div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-muted/50">
-        <Spinner size="sm" />
-        <P className="text-sm text-muted-foreground">{t('validation.analyzing')}</P>
-      </Div>
-    )
-  }
-
-  if (!result) return null
-
-  if (result.score >= 50) {
-    return (
-      <Div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-success/10">
-        <Icon name="lucide:CheckCircle" className="w-5 h-5 text-success shrink-0" />
-        <P className="text-sm text-success">
-          {t('validation.valid', {
-            rooms: result.roomsDetected,
-            score: result.score,
-          })}
-        </P>
-      </Div>
-    )
-  }
-
-  if (result.score >= 20) {
-    return (
-      <Div className="flex flex-col gap-1 py-2 px-3 rounded-lg bg-warning/10">
-        <Div className="flex items-center gap-2">
-          <Icon name="lucide:AlertTriangle" className="w-5 h-5 text-warning shrink-0" />
-          <P className="text-sm text-warning font-medium">{t('validation.poorQuality')}</P>
-        </Div>
-        {result.feedback && (
-          <P className="text-xs text-muted-foreground ml-7">{result.feedback}</P>
-        )}
-      </Div>
-    )
-  }
-
-  return (
-    <Div className="flex flex-col gap-1 py-2 px-3 rounded-lg bg-destructive/10">
-      <Div className="flex items-center gap-2">
-        <Icon name="lucide:XCircle" className="w-5 h-5 text-destructive shrink-0" />
-        <P className="text-sm text-destructive font-medium">{t('validation.invalid')}</P>
-      </Div>
-      {result.feedback && (
-        <P className="text-xs text-muted-foreground ml-7">{result.feedback}</P>
-      )}
-    </Div>
-  )
-}
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png']
 
@@ -108,10 +45,19 @@ export function PlanUploader({
   // AI validation state
   const [validationResult, setValidationResult] = useState<AiValidationResult | null>(null)
   const [isValidating, setIsValidating] = useState(false)
+  const [showValidationOverlay, setShowValidationOverlay] = useState(false)
   const validationAbortRef = useRef<AbortController | null>(null)
+  const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Editing state
   const [isEditing, setIsEditing] = useState(false)
+
+  // Cleanup overlay timer on unmount
+  useEffect(() => {
+    return () => {
+      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
+    }
+  }, [])
 
   // --- Auto-crop utility ---
   const autoCropImage = useCallback(
@@ -190,6 +136,15 @@ export function PlanUploader({
         if (!controller.signal.aborted) {
           setValidationResult(result)
           onValidationResult?.(result)
+
+          // Show validation overlay
+          setShowValidationOverlay(true)
+          if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
+
+          // Auto-dismiss for valid plans after 3s, keep overlay for invalid
+          if (result.score >= 20) {
+            overlayTimerRef.current = setTimeout(() => setShowValidationOverlay(false), 3000)
+          }
 
           // Auto-crop if bounding box detected and score is acceptable
           let currentDataUrl = dataUrl
@@ -354,6 +309,7 @@ export function PlanUploader({
 
   const removeFile = () => {
     validationAbortRef.current?.abort()
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
     setUploadedFile(null)
     setPreview(null)
     setOriginalPreview(null)
@@ -361,6 +317,7 @@ export function PlanUploader({
     onEditingChange?.(false)
     setValidationResult(null)
     setIsValidating(false)
+    setShowValidationOverlay(false)
     onValidationResult?.(null)
   }
 
@@ -424,15 +381,20 @@ export function PlanUploader({
                 <Icon name="lucide:FileText" className="w-5 h-5 text-destructive" />
               )}
               <Div>
-                <Div className="font-medium">{uploadedFile?.name}</Div>
-                <Div className="text-xs ">
+                <Div className="flex items-center gap-2">
+                  <Span className="font-medium">{uploadedFile?.name}</Span>
+                  {validationResult && validationResult.score >= 50 && !showValidationOverlay && (
+                    <Icon name="lucide:CheckCircle" className="w-4 h-4 text-success" />
+                  )}
+                </Div>
+                <Div className="text-xs text-muted-foreground">
                   {(uploadedFile?.size ? uploadedFile.size / 1024 / 1024 : 0).toFixed(2)} MB
                 </Div>
               </Div>
             </Div>
             <Div className="flex items-center gap-2">
-              {/* Edit / Adjust crop button */}
-              {isImage && !isEditing && (
+              {/* Adjust crop button — always visible after validation */}
+              {isImage && !isEditing && validationResult && validationResult.score >= 20 && (
                 <Button
                   onClick={() => {
                     setIsEditing(true)
@@ -440,12 +402,12 @@ export function PlanUploader({
                   }}
                   variant="outline"
                   size="sm"
-                  aria-label="Edit/Crop image"
+                  aria-label="Adjust crop"
                   type="button"
                 >
-                  <Icon name="lucide:Edit3" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
+                  <Icon name="lucide:Crop" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
                   <Span className="hidden sm:inline">
-                    {validationResult?.boundingBox ? t('validation.adjustCrop') : t('uploader.edit')}
+                    {t('validation.adjustCrop')}
                   </Span>
                 </Button>
               )}
@@ -462,16 +424,65 @@ export function PlanUploader({
             </Div>
           </Div>
 
-          {/* Image preview when not editing */}
+          {/* Image preview when not editing — with overlays */}
           {preview && isImage && !isEditing && (
-            <Div className="mb-4 space-y-3">
+            <Div className="relative mb-4 flex items-center justify-center">
               <img
                 src={preview}
                 alt="Preview"
-                className="w-full h-auto max-h-64 object-contain rounded border"
+                className="w-full max-h-[50vh] object-contain rounded-lg border"
               />
-              {/* AI validation badge — shown below the preview */}
-              <ValidationBadge result={validationResult} isLoading={isValidating} t={t} />
+
+              {/* Loading overlay — dimmed background + spinner */}
+              {isValidating && (
+                <Div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg z-20">
+                  <Card className="p-6 text-center">
+                    <Spinner size="md" />
+                    <P className="mt-2 text-sm">{t('validation.analyzing')}</P>
+                  </Card>
+                </Div>
+              )}
+
+              {/* Validation result overlay */}
+              {!isValidating && showValidationOverlay && validationResult && (
+                <Div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg z-20">
+                  <Card className="p-6 text-center max-w-sm">
+                    {validationResult.score >= 50 ? (
+                      <>
+                        <Icon name="lucide:CheckCircle" className="w-12 h-12 text-success mx-auto" />
+                        <P className="font-semibold mt-3">{t('validation.validTitle')}</P>
+                        <P className="text-sm text-muted-foreground mt-1">
+                          {t('validation.valid', {
+                            rooms: validationResult.roomsDetected,
+                            score: validationResult.score,
+                          })}
+                        </P>
+                      </>
+                    ) : validationResult.score >= 20 ? (
+                      <>
+                        <Icon name="lucide:AlertTriangle" className="w-12 h-12 text-warning mx-auto" />
+                        <P className="font-semibold mt-3">{t('validation.poorQuality')}</P>
+                        {validationResult.feedback && (
+                          <P className="text-sm text-muted-foreground mt-1">{validationResult.feedback}</P>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="lucide:XCircle" className="w-12 h-12 text-destructive mx-auto" />
+                        <P className="font-semibold mt-3">{t('validation.invalid')}</P>
+                        {validationResult.feedback && (
+                          <P className="text-sm text-muted-foreground mt-1">{validationResult.feedback}</P>
+                        )}
+                        <Div className="flex gap-2 mt-4 justify-center">
+                          <Button variant="outline" size="sm" onClick={removeFile}>
+                            {t('validation.reupload')}
+                          </Button>
+                        </Div>
+                      </>
+                    )}
+                  </Card>
+                </Div>
+              )}
             </Div>
           )}
 

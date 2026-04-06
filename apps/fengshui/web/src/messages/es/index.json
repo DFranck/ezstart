@@ -273,7 +273,9 @@
     "tooLarge": "Archivo demasiado grande (máx. 10 MB)",
     "invalidFormat": "Solo se aceptan los formatos JPG y PNG",
     "autoCropped": "Plano detectado y enmarcado automaticamente",
-    "adjustCrop": "Ajustar el encuadre"
+    "adjustCrop": "Ajustar el encuadre",
+    "validTitle": "Plano validado",
+    "reupload": "Subir otro"
   },
   "cardinal": {
     "title": "Paso 2: Puntos Cardinales",

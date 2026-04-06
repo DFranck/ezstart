@@ -41,7 +41,8 @@ Add to your JSON response:
   "right": number   // percentage from left (0-100)
 }
 
-If you cannot determine the bounding box (e.g., plan fills the entire image), return null for boundingBox.
+ALWAYS return a boundingBox, even if the building fills the entire image.
+In that case, return { "top": 0, "left": 0, "bottom": 100, "right": 100 }.
 
 Respond ONLY in JSON format:
 {

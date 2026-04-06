@@ -273,7 +273,9 @@
     "tooLarge": "File too large (max 10MB)",
     "invalidFormat": "Only JPG and PNG are accepted",
     "autoCropped": "Plan detected and auto-framed",
-    "adjustCrop": "Adjust framing"
+    "adjustCrop": "Adjust framing",
+    "validTitle": "Plan validated",
+    "reupload": "Upload another"
   },
   "cardinal": {
     "title": "Step 2: Cardinal Points",
