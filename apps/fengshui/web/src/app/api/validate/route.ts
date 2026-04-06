@@ -13,16 +13,16 @@ const validateSchema = z.object({
 
 /**
  * Simple in-memory rate limiter for validation endpoint.
- * Max 5 requests per minute per user.
+ * Max 5 requests per minute per IP (public endpoint).
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
-function checkRateLimit(userId: string): boolean {
+function checkRateLimit(key: string): boolean {
   const now = Date.now()
-  const entry = rateLimitMap.get(userId)
+  const entry = rateLimitMap.get(key)
 
   if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(userId, { count: 1, resetAt: now + 60_000 })
+    rateLimitMap.set(key, { count: 1, resetAt: now + 60_000 })
     return true
   }
 
@@ -39,13 +39,12 @@ function checkRateLimit(userId: string): boolean {
  */
 export async function POST(req: NextRequest) {
   try {
-    const user = await getAuthUser(req)
-    if (!user) {
-      return apiError('Authentication required', 401)
-    }
+    // Public endpoint — auth optional (used for auto-save only)
+    const user = await getAuthUser(req).catch(() => null)
 
-    // Rate limit: 5 requests per minute per user
-    if (!checkRateLimit(user._id)) {
+    // Rate limit by user ID or IP
+    const rateLimitKey = user?._id || req.headers.get('x-forwarded-for') || 'anonymous'
+    if (!checkRateLimit(rateLimitKey)) {
       return apiError('Too many validation requests. Please wait a minute.', 429)
     }
 
@@ -58,8 +57,8 @@ export async function POST(req: NextRequest) {
 
     const result = await validatePlanImage(parsed.data.imageData)
 
-    // If planId provided, persist validation result on the plan
-    if (parsed.data.planId) {
+    // If planId provided AND user is authenticated, persist validation result
+    if (parsed.data.planId && user) {
       await updatePlanValidation(parsed.data.planId, user._id, {
         ...result,
         validatedAt: new Date(),

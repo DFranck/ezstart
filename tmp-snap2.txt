@@ -1,0 +1,19 @@
+uid=4_0 RootWebArea "Feng Shui 2026 ~ Guide Complet Année du Cheval de Feu Yang" url="http://localhost:6151/fr/analyze"
+  uid=4_1 link "Skip to main content" url="http://localhost:6151/fr/analyze#main-content"
+    uid=4_2 StaticText "Skip to main content"
+  uid=4_3 main
+    uid=4_4 tab "Étape 1 · Import de votre plan 1/3" selectable selected
+    uid=4_5 tab "Points Cardinaux 2/3" disableable disabled selectable
+    uid=4_6 tab "Résultats 3/3" disableable disabled selectable
+    uid=4_7 progressbar "Step 1 of 3" value="33.33333206176758" valuemax="100" valuemin="0" valuetext=""
+    uid=4_8 generic "Dropzone"
+      uid=4_9 button "Select file" value="No file chosen"
+      uid=4_10 StaticText "Glissez-déposez votre plan"
+      uid=4_11 StaticText "…ou cliquez pour sélectionner un fichier"
+      uid=4_12 StaticText "Accepté : JPG, PNG"
+    uid=4_13 button "Uploadez d'abord un plan" disableable disabled
+    uid=4_14 button "Suivant" disableable disabled
+  uid=4_15 button "Open Tanstack query devtools"
+  uid=4_16 region "Notifications alt+T" live="polite" relevant="additions text"
+  uid=4_17 button "Open Next.js Dev Tools" expandable haspopup="menu"
+  uid=4_18 alert atomic live="assertive" relevant="additions text"

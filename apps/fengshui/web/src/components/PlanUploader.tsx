@@ -187,11 +187,6 @@ export function PlanUploader({
         })
 
         if (!response.ok) {
-          // If 401 (unauthenticated), skip validation silently
-          if (response.status === 401) {
-            logger.debug('[PlanUploader] Skipping AI validation — not authenticated')
-            return
-          }
           throw new Error(`Validation API error: ${response.status}`)
         }
 
