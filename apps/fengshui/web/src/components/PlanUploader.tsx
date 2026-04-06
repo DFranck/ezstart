@@ -244,28 +244,36 @@ export function PlanUploader({
   const isImage = Boolean(uploadedFile && uploadedFile.type.startsWith('image/'))
 
   return (
-    <Div className={className}>
+    <Div className={`flex flex-col ${className}`}>
       {!uploadedFile ? (
-        <Div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive
-              ? 'border-primary bg-primary/10'
-              : 'border-border hover:border-muted-foreground'
-          }`}
-          aria-label="Dropzone"
-        >
-          <input {...getInputProps()} aria-label="Select file" />
-          <Div className="flex flex-col items-center gap-3">
-            <Div className="flex gap-2">
-              <Icon name="lucide:FileImage" className="w-8 h-8 " />
-              <Icon name="lucide:FileText" className="w-8 h-8 " />
-            </Div>
-            <P className=" font-medium">
-              {isDragActive ? t('uploader.dropHere') : t('uploader.dragDrop')}
-            </P>
-            <P className="text-sm ">{t('uploader.clickToSelect')}</P>
-            <P className="text-xs ">{t('uploader.acceptedFormats')}</P>
+        <Div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+          <Div
+            {...getRootProps()}
+            className={`relative w-full max-w-2xl flex flex-col items-center justify-center rounded-xl border bg-card/50 shadow-sm min-h-[350px] sm:min-h-[450px] text-center cursor-pointer transition-all ${
+              isDragActive
+                ? 'border-primary bg-primary/10 shadow-lg scale-[1.01]'
+                : 'border-border hover:border-muted-foreground hover:shadow-md'
+            }`}
+            aria-label="Dropzone"
+          >
+            <input {...getInputProps()} aria-label="Select file" />
+
+            {/* SVG floor plan placeholder as subtle background */}
+            <img
+              src="/images/floor-plan-placeholder.svg"
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none p-10 sm:p-16"
+              aria-hidden="true"
+            />
+
+            {/* Dropzone content */}
+            <Div className="relative z-10 flex flex-col items-center gap-3 bg-background/60 backdrop-blur-sm rounded-lg px-6 py-8">
+              <Icon name="lucide:Upload" className="w-10 h-10 text-muted-foreground" />
+              <P className="font-semibold text-base">
+                {isDragActive ? t('uploader.dropHere') : t('uploader.dragDrop')}
+              </P>
+              <P className="text-sm text-muted-foreground">{t('uploader.clickToSelect')}</P>
+              <P className="text-xs text-muted-foreground">{t('uploader.acceptedFormats')}</P>
             {isProcessing && (
               <Div className="w-full max-w-xs mt-4">
                 <Progress value={uploadProgress} className="h-2" />
@@ -274,6 +282,7 @@ export function PlanUploader({
                 </P>
               </Div>
             )}
+          </Div>
           </Div>
         </Div>
       ) : (

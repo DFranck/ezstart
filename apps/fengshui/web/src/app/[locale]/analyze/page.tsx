@@ -36,7 +36,6 @@ export default function AnalyzePage() {
       id: 'upload',
       title: t('steps.upload.title'),
       icon: 'lucide:Upload',
-      description: t('steps.upload.description'),
       component: <UploadStep />,
     },
     {
