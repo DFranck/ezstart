@@ -270,6 +270,7 @@
     "invalid": "Ceci ne semble pas être un plan d'étage",
     "saved": "Plan sauvegardé dans votre compte",
     "loginToSave": "Connectez-vous pour sauvegarder votre plan",
+    "savedLocal": "Plan sauvegard\u00e9 localement",
     "tooLarge": "Fichier trop volumineux (max 10 Mo)",
     "invalidFormat": "Seuls les formats JPG et PNG sont acceptés",
     "autoCropped": "Plan détecté et cadré automatiquement",
@@ -412,9 +413,11 @@
   "plans": {
     "title": "Mes Plans",
     "newAnalysis": "Nouvelle Analyse",
+    "localBanner": "Plans sauvegard\u00e9s localement \u2014 Connectez-vous pour les conserver",
+    "localWarning": "Ces plans sont stock\u00e9s dans votre navigateur et seront perdus si vous videz votre cache",
     "guest": {
-      "title": "Vos plans ne sont pas sauvegardés",
-      "description": "Connectez-vous pour sauvegarder vos plans et y accéder à tout moment. Sans compte, vos plans seront perdus en fermant la page.",
+      "title": "Vos plans ne sont pas sauvegard\u00e9s",
+      "description": "Connectez-vous pour sauvegarder vos plans et y acc\u00e9der \u00e0 tout moment. Sans compte, vos plans seront perdus en fermant la page.",
       "login": "Se connecter pour sauvegarder",
       "tryWithout": "Analyser sans sauvegarder"
     },

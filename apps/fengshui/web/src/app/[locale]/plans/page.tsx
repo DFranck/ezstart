@@ -261,52 +261,195 @@ function PlansPageContent() {
   )
 }
 
-export default function PlansPage() {
+function LocalPlansContent() {
   const t = useTranslations('plans')
-  const { isAuthenticated } = useAuth()
+  const [localPlans, setLocalPlans] = useState<LocalPlan[]>([])
+  const [deleteTarget, setDeleteTarget] = useState<LocalPlan | null>(null)
+  const tc = useTranslations('common')
 
-  // Not logged in — show incentive to login, not a blocker
-  if (!isAuthenticated) {
+  useEffect(() => {
+    import('@/lib/local-plans').then(({ getLocalPlans }) => {
+      setLocalPlans(getLocalPlans())
+    })
+  }, [])
+
+  const handleDelete = (plan: LocalPlan) => {
+    import('@/lib/local-plans').then(({ deleteLocalPlan }) => {
+      deleteLocalPlan(plan.id)
+      setLocalPlans(prev => prev.filter(p => p.id !== plan.id))
+      toast.success(t('deleteConfirm.success'))
+      setDeleteTarget(null)
+    })
+  }
+
+  const getValidationBadge = (validation: LocalPlan['aiValidation']) => {
+    if (!validation) {
+      return (
+        <Badge variant="outline" className="text-muted-foreground">
+          <Icon name="lucide:HelpCircle" className="w-3 h-3 mr-1" />
+          {t('card.notValidated')}
+        </Badge>
+      )
+    }
+    if (validation.isValid && validation.score >= 70) {
+      return (
+        <Badge variant="default" className="bg-success text-success-foreground">
+          <Icon name="lucide:CheckCircle" className="w-3 h-3 mr-1" />
+          {t('card.validated')}
+        </Badge>
+      )
+    }
     return (
-      <Section className="container mx-auto px-4 py-8 max-w-6xl">
-        <Div className="flex items-center justify-between mb-8">
-          <H1 size="h2" className="font-bold">{t('title')}</H1>
-          <Link href="/analyze">
-            <Button className={`${GRADIENT_BG} text-white`}>
-              <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
-              {t('newAnalysis')}
-            </Button>
-          </Link>
-        </Div>
-
-        <Card variant="ghost" className="max-w-lg mx-auto text-center">
-          <CardContent className="py-12 space-y-6">
-            <Div className="flex justify-center">
-              <Div className="rounded-full bg-muted p-6">
-                <Icon name="lucide:CloudOff" className="w-10 h-10 text-muted-foreground" />
-              </Div>
-            </Div>
-            <Div className="space-y-2">
-              <P className="text-lg font-semibold">{t('guest.title')}</P>
-              <P className="text-muted-foreground">{t('guest.description')}</P>
-            </Div>
-            <Div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <LoginButton size="lg" alwaysShowText>
-                {t('guest.login')}
-              </LoginButton>
-              <Link href="/analyze">
-                <Button variant="outline" size="lg">
-                  <Icon name="lucide:Sparkles" className="w-4 h-4 mr-2" />
-                  {t('guest.tryWithout')}
-                </Button>
-              </Link>
-            </Div>
-          </CardContent>
-        </Card>
-      </Section>
+      <Badge variant="secondary" className="bg-warning/15 text-warning">
+        <Icon name="lucide:AlertTriangle" className="w-3 h-3 mr-1" />
+        {t('card.poorQuality')}
+      </Badge>
     )
   }
 
-  // Logged in — show saved plans
+  const isEmpty = localPlans.length === 0
+
+  return (
+    <Section className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Header */}
+      <Div className="flex items-center justify-between mb-8">
+        <H1 size="h2" className="font-bold">{t('title')}</H1>
+        <Link href="/analyze">
+          <Button className={`${GRADIENT_BG} text-white`}>
+            <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
+            {t('newAnalysis')}
+          </Button>
+        </Link>
+      </Div>
+
+      {/* Local storage banner */}
+      <Card className="mb-6 border-warning/30 bg-warning/5">
+        <CardContent className="py-4">
+          <Div className="flex items-start gap-3">
+            <Icon name="lucide:CloudOff" className="w-5 h-5 text-warning mt-0.5 shrink-0" />
+            <Div className="space-y-1 flex-1">
+              <P className="font-medium text-sm">{t('localBanner')}</P>
+              <P className="text-xs text-muted-foreground">{t('localWarning')}</P>
+            </Div>
+            <LoginButton size="sm" alwaysShowText>
+              {t('guest.login')}
+            </LoginButton>
+          </Div>
+        </CardContent>
+      </Card>
+
+      {/* Empty State */}
+      {isEmpty && (
+        <Card variant="ghost" className="max-w-md mx-auto text-center">
+          <CardContent className="py-16 space-y-6">
+            <Div className="flex justify-center">
+              <Div className="rounded-full bg-muted p-6">
+                <Icon name="lucide:FolderOpen" className="w-12 h-12 text-muted-foreground" />
+              </Div>
+            </Div>
+            <Div className="space-y-2">
+              <P className="text-lg font-semibold">{t('empty.title')}</P>
+              <P className="text-muted-foreground">{t('empty.description')}</P>
+            </Div>
+            <Link href="/analyze">
+              <Button size="lg" className={`${GRADIENT_BG} text-white`}>
+                <Icon name="lucide:Upload" className="w-4 h-4 mr-2" />
+                {t('empty.cta')}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Local Plans Grid */}
+      {!isEmpty && (
+        <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {localPlans.map(plan => (
+            <Card key={plan.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              {/* Thumbnail */}
+              <Div className="relative h-40 bg-muted flex items-center justify-center">
+                {plan.imageData ? (
+                  <img
+                    src={plan.imageData}
+                    alt={plan.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Icon name="lucide:Image" className="w-12 h-12 text-muted-foreground/40" />
+                )}
+              </Div>
+
+              <CardHeader className="pb-2">
+                <Div className="flex items-start justify-between gap-2">
+                  <Span className="font-semibold text-sm line-clamp-1">{plan.name}</Span>
+                  {getValidationBadge(plan.aiValidation)}
+                </Div>
+              </CardHeader>
+
+              <CardContent className="space-y-3">
+                {/* Meta info */}
+                <Div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <Span className="flex items-center gap-1">
+                    <Icon name="lucide:Calendar" className="w-3 h-3" />
+                    {new Date(plan.createdAt).toLocaleDateString()}
+                  </Span>
+                </Div>
+
+                {/* Actions */}
+                <Div className="flex gap-2">
+                  <Link href="/analyze" className="flex-1">
+                    <Button size="sm" className="w-full" variant="outline">
+                      <Icon name="lucide:Sparkles" className="w-3 h-3 mr-1" />
+                      {t('card.analyze')}
+                    </Button>
+                  </Link>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setDeleteTarget(plan)}
+                  >
+                    <Icon name="lucide:Trash2" className="w-3 h-3" />
+                  </Button>
+                </Div>
+              </CardContent>
+            </Card>
+          ))}
+        </Div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        variant="destructive"
+        open={!!deleteTarget}
+        onOpenChange={open => !open && setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteConfirm.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('deleteConfirm.description')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteTarget && handleDelete(deleteTarget)}
+            >
+              <Icon name="lucide:Trash2" className="w-4 h-4 mr-2" />
+              {t('card.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Section>
+  )
+}
+
+export default function PlansPage() {
+  const { isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <LocalPlansContent />
+  }
+
   return <PlansPageContent />
 }

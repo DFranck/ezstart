@@ -269,7 +269,8 @@
     "poorQuality": "Calidad insuficiente — El resultado podría ser impreciso",
     "invalid": "Esto no parece ser un plano de planta",
     "saved": "Plano guardado en tu cuenta",
-    "loginToSave": "Inicia sesión para guardar tu plano",
+    "loginToSave": "Inicia sesi\u00f3n para guardar tu plano",
+    "savedLocal": "Plano guardado localmente",
     "tooLarge": "Archivo demasiado grande (máx. 10 MB)",
     "invalidFormat": "Solo se aceptan los formatos JPG y PNG",
     "autoCropped": "Plano detectado y enmarcado automaticamente",
@@ -414,10 +415,12 @@
   "plans": {
     "title": "Mis Planos",
     "newAnalysis": "Nuevo An\u00e1lisis",
+    "localBanner": "Planos guardados localmente \u2014 Inicia sesi\u00f3n para conservarlos",
+    "localWarning": "Estos planos est\u00e1n almacenados en tu navegador y se perder\u00e1n si borras la cach\u00e9",
     "guest": {
-      "title": "Tus planos no están guardados",
-      "description": "Inicia sesión para guardar tus planos y acceder a ellos en cualquier momento. Sin cuenta, tus planos se perderán al cerrar la página.",
-      "login": "Iniciar sesión para guardar",
+      "title": "Tus planos no est\u00e1n guardados",
+      "description": "Inicia sesi\u00f3n para guardar tus planos y acceder a ellos en cualquier momento. Sin cuenta, tus planos se perder\u00e1n al cerrar la p\u00e1gina.",
+      "login": "Iniciar sesi\u00f3n para guardar",
       "tryWithout": "Analizar sin guardar"
     },
     "empty": {

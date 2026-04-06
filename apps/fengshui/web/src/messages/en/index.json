@@ -270,6 +270,7 @@
     "invalid": "This doesn't appear to be a floor plan",
     "saved": "Plan saved to your account",
     "loginToSave": "Sign in to save your plan",
+    "savedLocal": "Plan saved locally",
     "tooLarge": "File too large (max 10MB)",
     "invalidFormat": "Only JPG and PNG are accepted",
     "autoCropped": "Plan detected and auto-framed",
@@ -410,6 +411,8 @@
   "plans": {
     "title": "My Plans",
     "newAnalysis": "New Analysis",
+    "localBanner": "Plans saved locally — Sign in to keep them permanently",
+    "localWarning": "These plans are stored in your browser and will be lost if you clear your cache",
     "guest": {
       "title": "Your plans are not saved",
       "description": "Sign in to save your floor plans and access them anytime. Without an account, your plans will be lost when you close the page.",
