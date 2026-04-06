@@ -315,11 +315,14 @@ export function PlanUploader({
         const result = e.target?.result as string
         setPreview(result)
         setOriginalPreview(result)
-        setIsEditing(true)
-        onEditingChange?.(true)
+        // Don't open cropper — let AI validate + auto-crop first
+        setIsEditing(false)
 
-        // Notify parent immediately with the file (even before crop is applied)
+        // Notify parent immediately with the file
         onPlanUpload(file, result)
+
+        // Trigger AI validation immediately on the raw image
+        triggerAiValidation(result, file)
 
         setTimeout(() => {
           setIsProcessing(false)
@@ -335,7 +338,7 @@ export function PlanUploader({
 
       reader.readAsDataURL(file)
     },
-    [onPlanUpload, onEditingChange, onValidationResult, t]
+    [onPlanUpload, onEditingChange, onValidationResult, triggerAiValidation, t]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

@@ -27,10 +27,11 @@ If it IS a floor plan but poor quality (blurry, too small, no rooms visible), sc
 If it's a decent floor plan, score 50-80.
 If it's a clear, detailed floor plan with rooms labeled, score 80-100.
 
-Also detect the bounding box of the building/floor plan within the image.
+Also detect the bounding box of the ENTIRE building/floor plan within the image.
 Return the coordinates as percentages (0-100) of the image dimensions.
-The bounding box should tightly enclose ALL walls of the building, including irregular shapes (L-shaped, T-shaped buildings).
-Leave a small margin (~2-3%) around the building for context.
+IMPORTANT: The bounding box MUST include ALL parts of the building — garage, terrace, porch, extensions, annexes, garden walls, ALL rooms without exception.
+For irregular shapes (L-shaped, T-shaped, U-shaped), the bounding box must enclose the FULL footprint.
+Leave a generous margin (~5-8%) around the building to ensure nothing is cut off.
 
 Add to your JSON response:
 "boundingBox": {
