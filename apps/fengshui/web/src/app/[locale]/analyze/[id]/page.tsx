@@ -82,15 +82,18 @@ export default function AnalysisViewPage() {
     }
   }, [messages])
 
-  // Fetch analysis
+  // Fetch analysis (retry on failure — token may need refresh on first load)
   const { data: analysis, isLoading: isLoadingAnalysis } =
     useQuery<AnalysisData>({
       queryKey: ['analysis', id],
       queryFn: async () => {
         const res = await callApi(`/api/analyses/${id}`, { method: 'GET' })
+        if (!res.ok) throw new Error(res.error || 'Failed to load analysis')
         return res.data as AnalysisData
       },
       enabled: !!id,
+      retry: 5,
+      retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 5000),
     })
 
   const planImage = analysis?.imageData || null

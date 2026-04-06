@@ -10,12 +10,13 @@ export async function captureElement(
 ): Promise<string> {
   const { width, height, bgcolor = '#ffffff', scale = 2, quality = 1 } = options
 
-  const domtoimage = await import('dom-to-image')
+  const domtoimageModule = await import('dom-to-image')
+  const domtoimage = domtoimageModule.default || domtoimageModule
 
   const captureWidth = width || element.offsetWidth
   const captureHeight = height || element.offsetHeight
 
-  const dataUrl = await domtoimage.default.toPng(element, {
+  const dataUrl = await domtoimage.toPng(element, {
     quality,
     width: captureWidth * scale,
     height: captureHeight * scale,
