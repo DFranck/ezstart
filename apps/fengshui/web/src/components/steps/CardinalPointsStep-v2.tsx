@@ -136,16 +136,29 @@ const CardinalWheel = ({
             />
           </Div>
 
-          {/* Pastilles cardinales - DRAGGABLE */}
+          {/* Pastilles cardinales - DRAGGABLE — compass rose style */}
           {cardinalPoints.map(({ direction, angle, label }) => {
             const a = (angle + currentRotation) * (Math.PI / 180)
             const x = Math.cos(a) * radius
             const y = Math.sin(a) * radius
+            const isNorth = direction === 'N'
+            const isSouth = direction === 'S'
+
+            // Size varies: N largest, E/O medium, S smallest
+            const sizeClass = isNorth
+              ? 'w-14 h-14 md:w-24 md:h-24'
+              : isSouth
+                ? 'w-8 h-8 md:w-14 md:h-14'
+                : 'w-10 h-10 md:w-18 md:h-18'
+
+            // Outward angle for the North triangle (degrees)
+            const outwardAngle = angle + currentRotation
+
             return (
               <Div
                 key={direction}
                 className={cn(
-                  `absolute bg-gradient-to-r ${THEME_COLORS.gradientClasses} w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-background shadow-xl cursor-grab active:cursor-grabbing transition-transform`,
+                  'absolute cursor-grab active:cursor-grabbing transition-transform',
                   isDragging && 'cursor-grabbing'
                 )}
                 style={{
@@ -158,10 +171,53 @@ const CardinalWheel = ({
                 onMouseDown={handleDragStart}
                 onTouchStart={handleDragStart}
               >
-                <Div className="h-full flex flex-col items-center justify-center text-white p-2 text-center pointer-events-none">
-                  <Div className="text-lg md:text-xl font-bold">{direction}</Div>
-                  <Div className="text-xs md:text-sm opacity-90 hidden md:block">{label}</Div>
-                </Div>
+                {isNorth ? (
+                  /* North — compass needle: diamond arrow + circle with "N" */
+                  <Div className={cn(sizeClass, 'relative pointer-events-none')}>
+                    {/* Outward-pointing triangle */}
+                    <Div
+                      className="absolute left-1/2 top-1/2"
+                      style={{
+                        transform: `translate(-50%, -50%) rotate(${outwardAngle - 90}deg)`,
+                        width: 0,
+                        height: 0,
+                        borderLeft: '10px solid transparent',
+                        borderRight: '10px solid transparent',
+                        borderBottom: '16px solid var(--fengshui-primary)',
+                        transformOrigin: 'center calc(100% + 12px)',
+                        filter: 'drop-shadow(0 -2px 3px rgba(0,0,0,0.3))',
+                      }}
+                    />
+                    {/* Circle body */}
+                    <Div
+                      className={cn(
+                        `w-full h-full rounded-full border-2 border-background shadow-xl bg-gradient-to-r ${THEME_COLORS.gradientClasses}`,
+                        'flex flex-col items-center justify-center text-white'
+                      )}
+                    >
+                      <Div className="text-lg md:text-2xl font-extrabold drop-shadow-md">N</Div>
+                      <Div className="text-[10px] md:text-sm opacity-90 hidden md:block">{label}</Div>
+                    </Div>
+                  </Div>
+                ) : (
+                  /* S / E / O — standard circles with varied sizes */
+                  <Div
+                    className={cn(
+                      sizeClass,
+                      `rounded-full border-2 border-background shadow-xl bg-gradient-to-r ${THEME_COLORS.gradientClasses}`,
+                      'flex flex-col items-center justify-center text-white pointer-events-none'
+                    )}
+                  >
+                    <Div className={cn(
+                      'font-bold',
+                      isSouth ? 'text-sm md:text-base' : 'text-base md:text-lg'
+                    )}>{direction}</Div>
+                    <Div className={cn(
+                      'opacity-90 hidden md:block',
+                      isSouth ? 'text-[9px]' : 'text-xs'
+                    )}>{label}</Div>
+                  </Div>
+                )}
               </Div>
             )
           })}

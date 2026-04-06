@@ -199,7 +199,26 @@ export function PlanUploader({
               logger.warn('[PlanUploader] Auto-save failed', saveErr)
             }
           } else if (!isAuthenticated && result.score >= 20) {
-            toast.info(t('validation.loginToSave'), { duration: 5000 })
+            try {
+              const { saveLocalPlan } = await import('@/lib/local-plans')
+              // Get image dimensions
+              const img = new Image()
+              img.src = saveDataUrl
+              await new Promise<void>(resolve => {
+                img.onload = () => resolve()
+                if (img.complete) resolve()
+              })
+              saveLocalPlan({
+                name: file.name,
+                imageData: saveDataUrl,
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+                aiValidation: result,
+              })
+              toast.success(t('validation.savedLocal'))
+            } catch {
+              // localStorage full or unavailable — silent fail
+            }
           }
         }
       } catch (err) {
