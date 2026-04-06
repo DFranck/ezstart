@@ -1,36 +1,21 @@
 /* path: app/(wherever)/PlanUploader.tsx */
 'use client'
 
-import { getCroppedImg } from '@/utils/image'
 import type { AiValidationResult } from '@/types/bagua'
-import { Button, Div, Icon, Input, P, Progress, Span, Spinner } from '@ezstart/ui/components'
+import { Button, Div, Icon, ImageCropper, P, Progress, Span, Spinner } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import Cropper, { Area } from 'react-easy-crop'
 import { toast } from 'sonner'
 
 /* ------------------------------------------------------------------------------------------
- * Types (kept scale/position for backward-compat with parent onPlanUpload signature)
+ * Types
  * ----------------------------------------------------------------------------------------*/
-type Transformations = {
-  rotation: number
-  scale: number
-  position: { x: number; y: number }
-  crop?: { x: number; y: number; width: number; height: number }
-  zoom?: number
-}
-
 interface PlanUploaderProps {
-  onPlanUpload: (file: File, preview: string, transformations?: Transformations) => void
+  onPlanUpload: (file: File, preview: string) => void
   onEditingChange?: (isEditing: boolean) => void
-  onEditingStateChange?: (state: {
-    isEditing: boolean
-    canApply: boolean
-    applyHandler: () => Promise<void>
-  }) => void
   onValidationResult?: (result: AiValidationResult | null) => void
   className?: string
 }
@@ -98,22 +83,15 @@ function ValidationBadge({
     </Div>
   )
 }
-const MIN_W = 50
-const MAX_W = 800
-const MIN_H = 50
-const MAX_H = 400
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png']
 
-type CropPixels = { width: number; height: number; x: number; y: number }
-
 /* ------------------------------------------------------------------------------------------
- * Component (MINIMAL)
+ * Component
  * ----------------------------------------------------------------------------------------*/
 export function PlanUploader({
   onPlanUpload,
   onEditingChange,
-  onEditingStateChange,
   onValidationResult,
   className = '',
 }: PlanUploaderProps) {
@@ -123,7 +101,7 @@ export function PlanUploader({
   // File & preview
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const [originalPreview, setOriginalPreview] = useState<string | null>(null) // Garder l'image originale
+  const [originalPreview, setOriginalPreview] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -132,39 +110,8 @@ export function PlanUploader({
   const [isValidating, setIsValidating] = useState(false)
   const validationAbortRef = useRef<AbortController | null>(null)
 
-  // Minimal editing state
+  // Editing state
   const [isEditing, setIsEditing] = useState(false)
-  const [rotation, setRotation] = useState<number>(0)
-  const [zoom, setZoom] = useState<number>(0.5) // Commencer plus petit pour mobile
-  const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropPixels | null>(null)
-
-  // Only width/height controls for the crop area - responsive defaults
-  const [cropWidth, setCropWidth] = useState<number>(280) // Plus petit pour mobile
-  const [cropHeight, setCropHeight] = useState<number>(180) // Plus petit pour mobile
-
-  // Ajuster les dimensions du crop selon la taille d'écran
-  useEffect(() => {
-    const updateCropSize = () => {
-      const isMobile = window.innerWidth < 640 // sm breakpoint
-      const isTablet = window.innerWidth < 768 // md breakpoint
-
-      if (isMobile) {
-        setCropWidth(200) // Plus petit pour laisser plus d'espace
-        setCropHeight(120)
-      } else if (isTablet) {
-        setCropWidth(250)
-        setCropHeight(150)
-      } else {
-        setCropWidth(300)
-        setCropHeight(200)
-      }
-    }
-
-    updateCropSize()
-    window.addEventListener('resize', updateCropSize)
-    return () => window.removeEventListener('resize', updateCropSize)
-  }, [])
 
   // --- AI validation + auto-save ---
   const triggerAiValidation = useCallback(
@@ -242,49 +189,17 @@ export function PlanUploader({
     [isAuthenticated, accessToken, onValidationResult, t]
   )
 
-  // Notify parent about editing state changes
-  useEffect(() => {
-    const canApply = Boolean(uploadedFile && preview && croppedAreaPixels)
-
-    onEditingStateChange?.({
-      isEditing,
-      canApply,
-      applyHandler: handleApply,
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, uploadedFile, preview, croppedAreaPixels])
-
-  const handleApply = useCallback(async () => {
-    if (!uploadedFile || !preview || !croppedAreaPixels) return
-
-    const { file: outFile, dataUrl } = await getCroppedImg(preview, croppedAreaPixels, rotation)
-
-    setUploadedFile(outFile)
-    setPreview(dataUrl)
-    setIsEditing(false)
-    onEditingChange?.(false)
-
-    // reset transient edit state
-    setRotation(0)
-    setZoom(1)
-    setCrop({ x: 0, y: 0 })
-
-    onPlanUpload(outFile, dataUrl, {
-      rotation,
-      scale: 1,
-      position: { x: 0, y: 0 },
-      crop: {
-        x: croppedAreaPixels.x,
-        y: croppedAreaPixels.y,
-        width: croppedAreaPixels.width,
-        height: croppedAreaPixels.height,
-      },
-      zoom,
-    })
-
-    // Trigger AI validation on the cropped image (non-blocking)
-    triggerAiValidation(dataUrl, outFile)
-  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload, onEditingChange, triggerAiValidation])
+  const handleCropComplete = useCallback(
+    (dataUrl: string, file: File) => {
+      setPreview(dataUrl)
+      setUploadedFile(file)
+      setIsEditing(false)
+      onEditingChange?.(false)
+      onPlanUpload(file, dataUrl)
+      triggerAiValidation(dataUrl, file)
+    },
+    [onPlanUpload, onEditingChange, triggerAiValidation]
+  )
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -331,20 +246,12 @@ export function PlanUploader({
 
         const result = e.target?.result as string
         setPreview(result)
-        setOriginalPreview(result) // Sauvegarder l'image originale
+        setOriginalPreview(result)
         setIsEditing(true)
         onEditingChange?.(true)
-        setRotation(0)
-        setZoom(1)
-        setCrop({ x: 0, y: 0 })
-        setCroppedAreaPixels(null)
 
         // Notify parent immediately with the file (even before crop is applied)
-        onPlanUpload(file, result, {
-          rotation: 0,
-          scale: 1,
-          position: { x: 0, y: 0 },
-        })
+        onPlanUpload(file, result)
 
         setTimeout(() => {
           setIsProcessing(false)
@@ -381,24 +288,12 @@ export function PlanUploader({
     setOriginalPreview(null)
     setIsEditing(false)
     onEditingChange?.(false)
-    setRotation(0)
-    setZoom(1)
-    setCrop({ x: 0, y: 0 })
-    setCroppedAreaPixels(null)
     setValidationResult(null)
     setIsValidating(false)
     onValidationResult?.(null)
   }
 
-  const onCropComplete = useCallback((_area: Area, areaPx: Area) => {
-    // react-easy-crop's Area = { x,y,width,height }
-    setCroppedAreaPixels(areaPx as CropPixels)
-  }, [])
-
-  const handleCancel = () => {
-    setRotation(0)
-    setZoom(1)
-    setCrop({ x: 0, y: 0 })
+  const handleCropCancel = () => {
     setIsEditing(false)
     onEditingChange?.(false)
   }
@@ -469,17 +364,11 @@ export function PlanUploader({
               {isImage && !isEditing && (
                 <Button
                   onClick={() => {
-                    // Revenir à l'image originale pour un nouveau crop
                     if (originalPreview) {
                       setPreview(originalPreview)
                     }
                     setIsEditing(true)
                     onEditingChange?.(true)
-                    // Reset crop state for new editing session
-                    setRotation(0)
-                    setZoom(1)
-                    setCrop({ x: 0, y: 0 })
-                    setCroppedAreaPixels(null)
                   }}
                   variant="outline"
                   size="sm"
@@ -516,185 +405,23 @@ export function PlanUploader({
             </Div>
           )}
 
-          {/* Image editor (minimal) */}
+          {/* Image editor */}
           {preview && isImage && isEditing && (
-            <Div className="space-y-4">
-              <Div className="relative w-full overflow-hidden rounded border h-80 sm:h-96 md:h-[420px]">
-                <Cropper
-                  image={preview}
-                  crop={crop}
-                  zoom={zoom}
-                  rotation={rotation}
-                  aspect={undefined}
-                  cropSize={{ width: cropWidth, height: cropHeight }}
-                  restrictPosition={false}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onRotationChange={setRotation}
-                  onCropComplete={onCropComplete}
-                  objectFit="contain"
-                  showGrid={false}
-                  minZoom={0.1}
-                  maxZoom={3}
-                />
-              </Div>
-
-              {/* Controls: ONLY zoom, rotation, width, height */}
-              <Div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                {/* Zoom */}
-                <Div className="space-y-2">
-                  <label className="text-xs sm:text-sm block">{t('uploader.zoom')}</label>
-                  <Div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min={0.1}
-                      max={3}
-                      step={0.1}
-                      value={zoom}
-                      onChange={e => setZoom(Number(e.target.value))}
-                      className="w-full h-8 sm:h-6 appearance-none bg-transparent cursor-pointer
-                        [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
-                        [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
-                        [&::-webkit-slider-runnable-track]:to-fengshui-secondary
-                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6
-                        sm:[&::-webkit-slider-thumb]:w-5 sm:[&::-webkit-slider-thumb]:h-5
-                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
-                        [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
-                        [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-2 sm:[&::-webkit-slider-thumb]:-mt-1.5
-                        [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-                    />
-                    <Span className="text-xs w-10 text-right">{zoom.toFixed(1)}x</Span>
-                  </Div>
-                </Div>
-
-                {/* Rotation */}
-                <Div className="space-y-2">
-                  <label className="text-xs sm:text-sm block">{t('uploader.rotation')}</label>
-                  <Div className="flex items-center gap-2 w-full">
-                    <Button
-                      onClick={() => setRotation(prev => prev - 90)}
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 h-10 sm:h-9"
-                    >
-                      - 90°
-                      <Icon name="lucide:RotateCcw" className="w-5 h-5 sm:w-4 sm:h-4" />
-                    </Button>
-                    <Button
-                      onClick={() => setRotation(prev => prev + 90)}
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 h-10 sm:h-9"
-                    >
-                      + 90°
-                      <Icon name="lucide:RotateCw" className="w-5 h-5 sm:w-4 sm:h-4" />
-                    </Button>
-                  </Div>
-                </Div>
-
-                {/* Width (slider + number) */}
-                <Div className="flex items-center gap-3">
-                  <label htmlFor="crop-width" className="text-sm w-24 flex items-center gap-1">
-                    <Icon name="lucide:MoveHorizontal" className="w-5 h-5" />
-                  </label>
-                  <input
-                    type="range"
-                    min={MIN_W}
-                    max={MAX_W}
-                    step={10}
-                    value={cropWidth}
-                    onChange={e =>
-                      setCropWidth(
-                        Math.max(MIN_W, Math.min(MAX_W, Number(e.target.value) || MIN_W))
-                      )
-                    }
-                    className="flex-1 appearance-none bg-transparent cursor-pointer
-                      [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
-                      [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
-                      [&::-webkit-slider-runnable-track]:to-fengshui-secondary
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
-                      [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
-                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-1.5
-                      [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-                    aria-label="Crop width"
-                  />
-                  <Input
-                    id="crop-width"
-                    type="number"
-                    className="w-24 text-sm"
-                    value={cropWidth}
-                    onChange={e =>
-                      setCropWidth(
-                        Math.max(MIN_W, Math.min(MAX_W, Number(e.target.value) || MIN_W))
-                      )
-                    }
-                    min={MIN_W}
-                    max={MAX_W}
-                  />
-                  <Span className="text-xs text-muted-foreground">px</Span>
-                </Div>
-
-                {/* Height (slider + number) */}
-                <Div className="flex items-center gap-3">
-                  <label htmlFor="crop-height" className="text-sm w-24 flex items-center gap-1">
-                    <Icon name="lucide:MoveVertical" className="w-5 h-5" />
-                  </label>
-                  <input
-                    type="range"
-                    min={MIN_H}
-                    max={MAX_H}
-                    step={10}
-                    value={cropHeight}
-                    onChange={e =>
-                      setCropHeight(
-                        Math.max(MIN_H, Math.min(MAX_H, Number(e.target.value) || MIN_H))
-                      )
-                    }
-                    className="flex-1 appearance-none bg-transparent cursor-pointer
-                      [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
-                      [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
-                      [&::-webkit-slider-runnable-track]:to-fengshui-secondary
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
-                      [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
-                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-1.5
-                      [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-                    aria-label="Crop height"
-                  />
-                  <Input
-                    id="crop-height"
-                    type="number"
-                    className="w-24 text-sm"
-                    value={cropHeight}
-                    onChange={e =>
-                      setCropHeight(
-                        Math.max(MIN_H, Math.min(MAX_H, Number(e.target.value) || MIN_H))
-                      )
-                    }
-                    min={MIN_H}
-                    max={MAX_H}
-                  />
-                  <Span className="text-xs text-muted-foreground">px</Span>
-                </Div>
-              </Div>
-
-              {/* Actions */}
-              <Div className="flex gap-3">
-                <Button
-                  onClick={handleApply}
-                  className="flex-1 bg-gradient-to-r from-fengshui-primary to-fengshui-secondary hover:from-fengshui-primary-dark hover:to-fengshui-secondary-dark text-white shadow-lg hover:shadow-xl transition-all text-base font-semibold py-3"
-                  type="button"
-                >
-                  <Icon name="lucide:Check" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
-                  {t('uploader.apply')}
-                </Button>
-                <Button variant="outline" onClick={handleCancel} type="button">
-                  <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
-                  {t('uploader.cancel')}
-                </Button>
-              </Div>
-            </Div>
+            <ImageCropper
+              src={originalPreview ?? preview}
+              onCropComplete={handleCropComplete}
+              onCancel={handleCropCancel}
+              showRotation
+              maxOutputWidth={1500}
+              outputQuality={0.85}
+              className="min-h-[400px]"
+              labels={{
+                apply: t('uploader.apply'),
+                cancel: t('uploader.cancel'),
+                zoom: t('uploader.zoom'),
+                rotation: t('uploader.rotation'),
+              }}
+            />
           )}
 
         </Div>

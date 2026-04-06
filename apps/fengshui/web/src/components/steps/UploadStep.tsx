@@ -4,7 +4,7 @@
 import { PlanUploader } from '@/components/PlanUploader'
 import type { AiValidationResult, UploadStepData } from '@/types/bagua'
 import { StepContent } from '@ezstart/ui/components'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 /**
  * UploadStep
@@ -14,12 +14,6 @@ import React, { useEffect, useRef, useState } from 'react'
  * - AI validation result stored in step data for downstream steps
  */
 const UploadStep = (): React.JSX.Element => {
-  const [editingState, setEditingState] = useState<{
-    isEditing: boolean
-    canApply: boolean
-    applyHandler: () => Promise<void>
-  } | null>(null)
-
   // Track latest validation result to sync into step data
   const validationRef = useRef<AiValidationResult | null>(null)
 
@@ -28,35 +22,18 @@ const UploadStep = (): React.JSX.Element => {
       {(data: UploadStepData, updateData) => {
         const [isEditing, setIsEditing] = useState(false)
 
-        // Sync editingState to stepData via useEffect to avoid re-render loop
-        useEffect(() => {
-          if (editingState) {
-            updateData({
-              ...data,
-              _editingState: editingState,
-            })
-          }
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [editingState])
-
         return (
           <PlanUploader
             className="flex-1 flex flex-col min-h-0"
-            onPlanUpload={(file, preview, transformations) => {
+            onPlanUpload={(file, preview) => {
               updateData({
                 ...data,
                 file,
                 preview,
-                transformations: transformations ?? {
-                  rotation: 0,
-                  scale: 1,
-                  position: { x: 0, y: 0 },
-                },
                 aiValidation: validationRef.current ?? undefined,
               })
             }}
             onEditingChange={setIsEditing}
-            onEditingStateChange={setEditingState}
             onValidationResult={result => {
               validationRef.current = result
               // Update step data with validation result
