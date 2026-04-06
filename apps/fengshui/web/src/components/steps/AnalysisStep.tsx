@@ -76,16 +76,24 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
       tempDiv.style.height = '400px'
       document.body.appendChild(tempDiv)
 
-      // Import des libs
-      const { default: domtoimage } = await import('dom-to-image')
-      const { default: jsPDF } = await import('jspdf')
+      // Import pdf-sdk
+      const { PdfBuilder } = await import('@ezstart/pdf-sdk')
 
-      // Render la roue dans le div temporaire (il faudrait créer BaguaWheel ici)
-      // Pour l'instant, on simule juste le téléchargement
-      const pdf = new jsPDF()
-      pdf.text('Analyse Feng Shui', 20, 20)
-      pdf.text(`Bearing: ${bearingFromNorth}°`, 20, 40)
-      pdf.save('analyse-fengshui.pdf')
+      // Placeholder PDF (la vraie génération passe par BaguaPreviewModal)
+      const builder = new PdfBuilder()
+      builder
+        .addPage()
+        .addTitle('Analyse Feng Shui')
+        .addText(`Bearing: ${bearingFromNorth}°`)
+
+      const { blobUrl } = await builder.build()
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = 'analyse-fengshui.pdf'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
 
       document.body.removeChild(tempDiv)
     } catch (error) {
