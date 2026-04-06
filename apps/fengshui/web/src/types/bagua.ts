@@ -11,10 +11,18 @@ export type Transformations = {
   zoom?: number
 }
 
+export type AiValidationResult = {
+  isValid: boolean
+  score: number
+  roomsDetected: number
+  feedback: string
+}
+
 export type UploadStepData = {
   file?: File
   preview?: string
   transformations?: Transformations
+  aiValidation?: AiValidationResult
 }
 
 export type CardinalStepData = {

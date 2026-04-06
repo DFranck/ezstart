@@ -91,13 +91,17 @@ export default function AnalyzePage() {
               canApply: boolean
               applyHandler: () => Promise<void>
             }
+            aiValidation?: { isValid: boolean; score: number; roomsDetected: number; feedback: string }
           }
           const isUploadStep = context.currentStep === 0
           const hasFile = uploadData?.file
           const editingState = uploadData?._editingState
+          const aiValidation = uploadData?.aiValidation
 
-          // Pour Step 1: juste besoin d'un fichier uploadé
-          const canProceedFromStep1 = hasFile
+          // Pour Step 1: besoin d'un fichier + validation score >= 20 (or no validation yet but not loading)
+          // Disable if score < 20 (invalid plan)
+          const isInvalidPlan = aiValidation && aiValidation.score < 20
+          const canProceedFromStep1 = hasFile && !isInvalidPlan
 
           // Handler async pour le bouton Next qui auto-valide le crop si nécessaire
           const handleNext = async () => {

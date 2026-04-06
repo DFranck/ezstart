@@ -2,11 +2,15 @@
 'use client'
 
 import { getCroppedImg } from '@/utils/image'
-import { Button, Div, Icon, Input, P, Progress, Span } from '@ezstart/ui/components'
+import type { AiValidationResult } from '@/types/bagua'
+import { Button, Div, Icon, Input, P, Progress, Span, Spinner } from '@ezstart/ui/components'
+import { useAuth } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Cropper, { Area } from 'react-easy-crop'
+import { toast } from 'sonner'
 
 /* ------------------------------------------------------------------------------------------
  * Types (kept scale/position for backward-compat with parent onPlanUpload signature)
@@ -27,12 +31,79 @@ interface PlanUploaderProps {
     canApply: boolean
     applyHandler: () => Promise<void>
   }) => void
+  onValidationResult?: (result: AiValidationResult | null) => void
   className?: string
+}
+
+/* ------------------------------------------------------------------------------------------
+ * Inline validation badge component
+ * ----------------------------------------------------------------------------------------*/
+function ValidationBadge({
+  result,
+  isLoading,
+  t,
+}: {
+  result: AiValidationResult | null
+  isLoading: boolean
+  t: ReturnType<typeof useTranslations>
+}) {
+  if (isLoading) {
+    return (
+      <Div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-muted/50">
+        <Spinner size="sm" />
+        <P className="text-sm text-muted-foreground">{t('validation.analyzing')}</P>
+      </Div>
+    )
+  }
+
+  if (!result) return null
+
+  if (result.score >= 50) {
+    return (
+      <Div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-success/10">
+        <Icon name="lucide:CheckCircle" className="w-5 h-5 text-success shrink-0" />
+        <P className="text-sm text-success">
+          {t('validation.valid', {
+            rooms: result.roomsDetected,
+            score: result.score,
+          })}
+        </P>
+      </Div>
+    )
+  }
+
+  if (result.score >= 20) {
+    return (
+      <Div className="flex flex-col gap-1 py-2 px-3 rounded-lg bg-warning/10">
+        <Div className="flex items-center gap-2">
+          <Icon name="lucide:AlertTriangle" className="w-5 h-5 text-warning shrink-0" />
+          <P className="text-sm text-warning font-medium">{t('validation.poorQuality')}</P>
+        </Div>
+        {result.feedback && (
+          <P className="text-xs text-muted-foreground ml-7">{result.feedback}</P>
+        )}
+      </Div>
+    )
+  }
+
+  return (
+    <Div className="flex flex-col gap-1 py-2 px-3 rounded-lg bg-destructive/10">
+      <Div className="flex items-center gap-2">
+        <Icon name="lucide:XCircle" className="w-5 h-5 text-destructive shrink-0" />
+        <P className="text-sm text-destructive font-medium">{t('validation.invalid')}</P>
+      </Div>
+      {result.feedback && (
+        <P className="text-xs text-muted-foreground ml-7">{result.feedback}</P>
+      )}
+    </Div>
+  )
 }
 const MIN_W = 50
 const MAX_W = 800
 const MIN_H = 50
 const MAX_H = 400
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png']
 
 type CropPixels = { width: number; height: number; x: number; y: number }
 
@@ -43,9 +114,11 @@ export function PlanUploader({
   onPlanUpload,
   onEditingChange,
   onEditingStateChange,
+  onValidationResult,
   className = '',
 }: PlanUploaderProps) {
   const t = useTranslations()
+  const { isAuthenticated, accessToken } = useAuth()
 
   // File & preview
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
@@ -53,6 +126,11 @@ export function PlanUploader({
   const [originalPreview, setOriginalPreview] = useState<string | null>(null) // Garder l'image originale
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // AI validation state
+  const [validationResult, setValidationResult] = useState<AiValidationResult | null>(null)
+  const [isValidating, setIsValidating] = useState(false)
+  const validationAbortRef = useRef<AbortController | null>(null)
 
   // Minimal editing state
   const [isEditing, setIsEditing] = useState(false)
@@ -87,6 +165,87 @@ export function PlanUploader({
     window.addEventListener('resize', updateCropSize)
     return () => window.removeEventListener('resize', updateCropSize)
   }, [])
+
+  // --- AI validation + auto-save ---
+  const triggerAiValidation = useCallback(
+    async (dataUrl: string, file: File) => {
+      // Abort any previous validation
+      validationAbortRef.current?.abort()
+      const controller = new AbortController()
+      validationAbortRef.current = controller
+
+      setIsValidating(true)
+      setValidationResult(null)
+      onValidationResult?.(null)
+
+      try {
+        const response = await fetch('/api/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageData: dataUrl }),
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          // If 401 (unauthenticated), skip validation silently
+          if (response.status === 401) {
+            logger.debug('[PlanUploader] Skipping AI validation — not authenticated')
+            return
+          }
+          throw new Error(`Validation API error: ${response.status}`)
+        }
+
+        const json = await response.json()
+        const result = json.data as AiValidationResult
+
+        if (!controller.signal.aborted) {
+          setValidationResult(result)
+          onValidationResult?.(result)
+
+          // Auto-save if authenticated and score >= 20
+          if (isAuthenticated && result.score >= 20) {
+            try {
+              // Get image dimensions
+              const img = new Image()
+              img.src = dataUrl
+              await new Promise<void>(resolve => {
+                img.onload = () => resolve()
+                // If already loaded (cached)
+                if (img.complete) resolve()
+              })
+
+              await fetch('/api/plans', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+                },
+                body: JSON.stringify({
+                  name: file.name,
+                  imageData: dataUrl,
+                  width: img.naturalWidth,
+                  height: img.naturalHeight,
+                }),
+              })
+              toast.success(t('validation.saved'))
+            } catch (saveErr) {
+              logger.warn('[PlanUploader] Auto-save failed', saveErr)
+            }
+          } else if (!isAuthenticated && result.score >= 20) {
+            toast.info(t('validation.loginToSave'), { duration: 5000 })
+          }
+        }
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return
+        logger.warn('[PlanUploader] AI validation failed', err)
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsValidating(false)
+        }
+      }
+    },
+    [isAuthenticated, accessToken, onValidationResult, t]
+  )
 
   // Notify parent about editing state changes
   useEffect(() => {
@@ -127,71 +286,66 @@ export function PlanUploader({
       },
       zoom,
     })
-  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload, onEditingChange])
+
+    // Trigger AI validation on the cropped image (non-blocking)
+    triggerAiValidation(dataUrl, outFile)
+  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload, onEditingChange, triggerAiValidation])
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
       if (!file) return
 
+      // Client-side validation: file size
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(t('validation.tooLarge'))
+        return
+      }
+
+      // Client-side validation: format (JPG, PNG only)
+      if (!ACCEPTED_TYPES.includes(file.type)) {
+        toast.error(t('validation.invalidFormat'))
+        return
+      }
+
+      // Reset validation state for new file
+      setValidationResult(null)
+      onValidationResult?.(null)
+      setIsValidating(false)
+
       setUploadedFile(file)
       setIsProcessing(true)
       setUploadProgress(0)
 
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader()
+      const reader = new FileReader()
 
-        // Simulate progress for better UX feedback
-        const progressInterval = setInterval(() => {
-          setUploadProgress(prev => {
-            if (prev >= 90) {
-              clearInterval(progressInterval)
-              return prev
-            }
-            return prev + 10
-          })
-        }, 50)
+      // Simulate progress for better UX feedback
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval)
+            return prev
+          }
+          return prev + 10
+        })
+      }, 50)
 
-        reader.onload = e => {
-          clearInterval(progressInterval)
-          setUploadProgress(100)
-
-          const result = e.target?.result as string
-          setPreview(result)
-          setOriginalPreview(result) // Sauvegarder l'image originale
-          setIsEditing(true)
-          onEditingChange?.(true)
-          setRotation(0)
-          setZoom(1)
-          setCrop({ x: 0, y: 0 })
-          setCroppedAreaPixels(null)
-
-          // Notify parent immediately with the file (even before crop is applied)
-          onPlanUpload(file, result, {
-            rotation: 0,
-            scale: 1,
-            position: { x: 0, y: 0 },
-          })
-
-          setTimeout(() => {
-            setIsProcessing(false)
-            setUploadProgress(0)
-          }, 300)
-        }
-
-        reader.onerror = () => {
-          clearInterval(progressInterval)
-          setIsProcessing(false)
-          setUploadProgress(0)
-        }
-
-        reader.readAsDataURL(file)
-      } else {
-        // PDFs: no image editing; pass straight to parent
+      reader.onload = e => {
+        clearInterval(progressInterval)
         setUploadProgress(100)
-        const pdfPreview = '/api/pdf-preview'
-        setPreview(pdfPreview)
-        onPlanUpload(file, pdfPreview, {
+
+        const result = e.target?.result as string
+        setPreview(result)
+        setOriginalPreview(result) // Sauvegarder l'image originale
+        setIsEditing(true)
+        onEditingChange?.(true)
+        setRotation(0)
+        setZoom(1)
+        setCrop({ x: 0, y: 0 })
+        setCroppedAreaPixels(null)
+
+        // Notify parent immediately with the file (even before crop is applied)
+        onPlanUpload(file, result, {
           rotation: 0,
           scale: 1,
           position: { x: 0, y: 0 },
@@ -202,21 +356,31 @@ export function PlanUploader({
           setUploadProgress(0)
         }, 300)
       }
+
+      reader.onerror = () => {
+        clearInterval(progressInterval)
+        setIsProcessing(false)
+        setUploadProgress(0)
+      }
+
+      reader.readAsDataURL(file)
     },
-    [onPlanUpload, onEditingChange]
+    [onPlanUpload, onEditingChange, onValidationResult, t]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.bmp', '.webp'],
-      'application/pdf': ['.pdf'],
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
     },
+    maxSize: MAX_FILE_SIZE,
     multiple: false,
     useFsAccessApi: false,
   })
 
   const removeFile = () => {
+    validationAbortRef.current?.abort()
     setUploadedFile(null)
     setPreview(null)
     setOriginalPreview(null)
@@ -226,6 +390,9 @@ export function PlanUploader({
     setZoom(1)
     setCrop({ x: 0, y: 0 })
     setCroppedAreaPixels(null)
+    setValidationResult(null)
+    setIsValidating(false)
+    onValidationResult?.(null)
   }
 
   const onCropComplete = useCallback((_area: Area, areaPx: Area) => {
@@ -343,12 +510,14 @@ export function PlanUploader({
 
           {/* Image preview when not editing */}
           {preview && isImage && !isEditing && (
-            <Div className="mb-4">
+            <Div className="mb-4 space-y-3">
               <img
                 src={preview}
                 alt="Preview"
                 className="w-full h-auto max-h-64 object-contain rounded border"
               />
+              {/* AI validation badge — shown below the preview */}
+              <ValidationBadge result={validationResult} isLoading={isValidating} t={t} />
             </Div>
           )}
 
@@ -533,16 +702,6 @@ export function PlanUploader({
             </Div>
           )}
 
-          {/* PDF preview (minimal) */}
-          {uploadedFile?.type === 'application/pdf' && (
-            <Div className="flex items-center justify-center h-56 bg-muted rounded border">
-              <Div className="text-center">
-                <Icon name="lucide:FileText" className="w-14 h-14  mx-auto mb-2" />
-                <P className="">{t('uploader.pdfLoaded')}</P>
-                <P className="text-xs text-muted-foreground">{uploadedFile?.name}</P>
-              </Div>
-            </Div>
-          )}
         </Div>
       )}
     </Div>

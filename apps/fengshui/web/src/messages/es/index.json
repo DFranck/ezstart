@@ -252,7 +252,7 @@
     "dragDrop": "Arrastra y suelta tu plano",
     "dropHere": "Suelta tu plano aquí",
     "clickToSelect": "…o haz clic para seleccionar un archivo",
-    "acceptedFormats": "Aceptado: JPG, PNG, PDF",
+    "acceptedFormats": "Aceptado: JPG, PNG",
     "edit": "Editar",
     "apply": "Aplicar",
     "cancel": "Cancelar",
@@ -260,7 +260,18 @@
     "rotation": "Rotación",
     "width": "Ancho",
     "height": "Alto",
-    "pdfLoaded": "PDF cargado"
+    "pdfLoaded": "PDF cargado",
+    "processing": "Procesando"
+  },
+  "validation": {
+    "analyzing": "Análisis IA en curso...",
+    "valid": "{rooms} habitaciones detectadas — Puntuación {score}/100",
+    "poorQuality": "Calidad insuficiente — El resultado podría ser impreciso",
+    "invalid": "Esto no parece ser un plano de planta",
+    "saved": "Plano guardado en tu cuenta",
+    "loginToSave": "Inicia sesión para guardar tu plano",
+    "tooLarge": "Archivo demasiado grande (máx. 10 MB)",
+    "invalidFormat": "Solo se aceptan los formatos JPG y PNG"
   },
   "cardinal": {
     "title": "Paso 2: Puntos Cardinales",

@@ -252,7 +252,7 @@
     "dragDrop": "Drag & drop your plan",
     "dropHere": "Drop your plan here",
     "clickToSelect": "…or click to select a file",
-    "acceptedFormats": "Accepted: JPG, PNG, PDF",
+    "acceptedFormats": "Accepted: JPG, PNG",
     "edit": "Edit",
     "apply": "Apply",
     "cancel": "Cancel",
@@ -260,7 +260,18 @@
     "rotation": "Rotation",
     "width": "Width",
     "height": "Height",
-    "pdfLoaded": "PDF loaded"
+    "pdfLoaded": "PDF loaded",
+    "processing": "Processing"
+  },
+  "validation": {
+    "analyzing": "AI analysis in progress...",
+    "valid": "{rooms} rooms detected — Score {score}/100",
+    "poorQuality": "Poor quality — The result might be imprecise",
+    "invalid": "This doesn't appear to be a floor plan",
+    "saved": "Plan saved to your account",
+    "loginToSave": "Sign in to save your plan",
+    "tooLarge": "File too large (max 10MB)",
+    "invalidFormat": "Only JPG and PNG are accepted"
   },
   "cardinal": {
     "title": "Step 2: Cardinal Points",

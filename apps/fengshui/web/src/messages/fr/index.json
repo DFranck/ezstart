@@ -252,7 +252,7 @@
     "dragDrop": "Glissez-déposez votre plan",
     "dropHere": "Déposez votre plan ici",
     "clickToSelect": "…ou cliquez pour sélectionner un fichier",
-    "acceptedFormats": "Accepté : JPG, PNG, PDF",
+    "acceptedFormats": "Accepté : JPG, PNG",
     "edit": "Modifier",
     "apply": "Appliquer",
     "cancel": "Annuler",
@@ -260,7 +260,18 @@
     "rotation": "Rotation",
     "width": "Largeur",
     "height": "Hauteur",
-    "pdfLoaded": "PDF chargé"
+    "pdfLoaded": "PDF chargé",
+    "processing": "Traitement"
+  },
+  "validation": {
+    "analyzing": "Analyse IA en cours...",
+    "valid": "{rooms} pièces détectées — Score {score}/100",
+    "poorQuality": "Qualité insuffisante — Le résultat pourrait être imprécis",
+    "invalid": "Ceci ne semble pas être un plan d'étage",
+    "saved": "Plan sauvegardé dans votre compte",
+    "loginToSave": "Connectez-vous pour sauvegarder votre plan",
+    "tooLarge": "Fichier trop volumineux (max 10 Mo)",
+    "invalidFormat": "Seuls les formats JPG et PNG sont acceptés"
   },
   "cardinal": {
     "title": "Étape 2 : Points Cardinaux",
