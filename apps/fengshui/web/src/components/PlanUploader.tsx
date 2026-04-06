@@ -267,7 +267,7 @@ export function PlanUploader({
             />
 
             {/* Dropzone content */}
-            <Div className="relative z-10 flex flex-col items-center gap-3 bg-background/60 backdrop-blur-sm rounded-lg px-6 py-8">
+            <Div className="relative z-10 flex flex-col items-center gap-3 px-6 py-8">
               <Icon name="lucide:Upload" className="w-10 h-10 text-muted-foreground" />
               <P className="font-semibold text-base">
                 {isDragActive ? t('uploader.dropHere') : t('uploader.dragDrop')}
