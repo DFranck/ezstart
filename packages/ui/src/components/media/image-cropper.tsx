@@ -15,6 +15,10 @@ export interface ImageCropperProps {
   onCropComplete: (croppedDataUrl: string, croppedFile: File) => void
   /** Called when crop is cancelled */
   onCancel?: () => void
+  /** Cropper mode: pan-zoom (default), edge-drag (rectangle handles), round (circle) */
+  mode?: 'pan-zoom' | 'edge-drag' | 'round'
+  /** Initial crop rectangle for edge-drag mode (percentages 0-100) */
+  initialCrop?: { top: number; left: number; bottom: number; right: number }
   /** Aspect ratio constraint (e.g., 1 for square, 16/9 for landscape). undefined = free crop */
   aspectRatio?: number
   /** Preset aspect ratios to show as buttons */
@@ -149,6 +153,269 @@ async function getCroppedImg(
 }
 
 /* ------------------------------------------------------------------------------------------
+ * Edge-Drag Cropper (internal)
+ * Drag/resize logic inspired by MultiZoneSelector from gacha-analyzer
+ * ----------------------------------------------------------------------------------------*/
+
+type EdgeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
+
+interface CropRect { top: number; left: number; bottom: number; right: number }
+
+const EDGE_MIN_SIZE = 10 // minimum 10% in each dimension
+
+function edgeClamp(v: number, min: number, max: number) {
+  return Math.min(Math.max(v, min), max)
+}
+
+const HANDLE_CURSORS: Record<EdgeHandle, string> = {
+  nw: 'nw-resize', n: 'n-resize', ne: 'ne-resize', e: 'e-resize',
+  se: 'se-resize', s: 's-resize', sw: 'sw-resize', w: 'w-resize',
+}
+
+function EdgeDragCropper({
+  src,
+  initialCrop,
+  onCropDone,
+  onCancel,
+  maxOutputWidth,
+  outputQuality = 0.85,
+  outputFormat = 'image/jpeg',
+  className,
+  labels,
+}: {
+  src: string
+  initialCrop?: CropRect
+  onCropDone: (dataUrl: string, file: File) => void
+  onCancel?: () => void
+  maxOutputWidth?: number
+  outputQuality?: number
+  outputFormat?: 'image/png' | 'image/jpeg'
+  className?: string
+  labels: { apply: string; cancel: string }
+}) {
+  const [crop, setCrop] = React.useState<CropRect>(
+    initialCrop ?? { top: 10, left: 10, bottom: 90, right: 90 }
+  )
+  const [isApplying, setIsApplying] = React.useState(false)
+
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const cropRef = React.useRef(crop)
+  cropRef.current = crop
+
+  const dragRef = React.useRef<{
+    type: 'move' | 'resize'
+    handle?: EdgeHandle
+    startX: number
+    startY: number
+    startCrop: CropRect
+  } | null>(null)
+
+  // Sync initialCrop from props
+  React.useEffect(() => {
+    if (initialCrop && !dragRef.current) {
+      setCrop(initialCrop)
+    }
+  }, [initialCrop])
+
+  // Global drag handlers
+  React.useEffect(() => {
+    function handleMove(clientX: number, clientY: number) {
+      const drag = dragRef.current
+      const el = containerRef.current
+      if (!drag || !el) return
+      const rect = el.getBoundingClientRect()
+      if (rect.width === 0 || rect.height === 0) return
+
+      const dx = ((clientX - drag.startX) / rect.width) * 100
+      const dy = ((clientY - drag.startY) / rect.height) * 100
+      const s = drag.startCrop
+      let nc = { ...s }
+
+      if (drag.type === 'move') {
+        const w = s.right - s.left
+        const h = s.bottom - s.top
+        const newLeft = edgeClamp(s.left + dx, 0, 100 - w)
+        const newTop = edgeClamp(s.top + dy, 0, 100 - h)
+        nc = { top: newTop, left: newLeft, bottom: newTop + h, right: newLeft + w }
+      } else if (drag.handle) {
+        const h = drag.handle
+        if (h === 'n' || h === 'nw' || h === 'ne') {
+          nc.top = edgeClamp(s.top + dy, 0, s.bottom - EDGE_MIN_SIZE)
+        }
+        if (h === 's' || h === 'sw' || h === 'se') {
+          nc.bottom = edgeClamp(s.bottom + dy, s.top + EDGE_MIN_SIZE, 100)
+        }
+        if (h === 'w' || h === 'nw' || h === 'sw') {
+          nc.left = edgeClamp(s.left + dx, 0, s.right - EDGE_MIN_SIZE)
+        }
+        if (h === 'e' || h === 'ne' || h === 'se') {
+          nc.right = edgeClamp(s.right + dx, s.left + EDGE_MIN_SIZE, 100)
+        }
+      }
+
+      setCrop(nc)
+      cropRef.current = nc
+    }
+
+    function handleEnd() { dragRef.current = null }
+
+    function onMouseMove(e: MouseEvent) { handleMove(e.clientX, e.clientY) }
+    function onTouchMove(e: TouchEvent) {
+      const t = e.touches[0]
+      if (e.touches.length === 1 && t) { e.preventDefault(); handleMove(t.clientX, t.clientY) }
+    }
+
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', handleEnd)
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', handleEnd)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', handleEnd)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', handleEnd)
+    }
+  }, [])
+
+  function startDrag(
+    clientX: number, clientY: number,
+    type: 'move' | 'resize', handle?: EdgeHandle
+  ) {
+    dragRef.current = { type, handle, startX: clientX, startY: clientY, startCrop: { ...cropRef.current } }
+  }
+
+  function onMD(e: React.MouseEvent, type: 'move' | 'resize', handle?: EdgeHandle) {
+    e.preventDefault(); e.stopPropagation()
+    startDrag(e.clientX, e.clientY, type, handle)
+  }
+  function onTS(e: React.TouchEvent, type: 'move' | 'resize', handle?: EdgeHandle) {
+    e.stopPropagation()
+    const t = e.touches[0]
+    if (e.touches.length === 1 && t) startDrag(t.clientX, t.clientY, type, handle)
+  }
+
+  const handleApply = React.useCallback(async () => {
+    setIsApplying(true)
+    try {
+      const image = await createImage(src)
+      const c = cropRef.current
+      const px: CropPixels = {
+        x: (c.left / 100) * image.width,
+        y: (c.top / 100) * image.height,
+        width: ((c.right - c.left) / 100) * image.width,
+        height: ((c.bottom - c.top) / 100) * image.height,
+      }
+      const { dataUrl, file } = await getCroppedImg(src, px, 0, maxOutputWidth, outputQuality, outputFormat)
+      onCropDone(dataUrl, file)
+    } finally {
+      setIsApplying(false)
+    }
+  }, [src, maxOutputWidth, outputQuality, outputFormat, onCropDone])
+
+  const handles: EdgeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
+
+  function handleStyle(h: EdgeHandle): React.CSSProperties {
+    const base: React.CSSProperties = {
+      position: 'absolute', backgroundColor: 'hsl(var(--primary))',
+      border: '1px solid hsl(var(--primary-foreground))', borderRadius: 2,
+      zIndex: 30, pointerEvents: 'auto', touchAction: 'none',
+      cursor: HANDLE_CURSORS[h],
+    }
+    const cs = 14 // corner size
+    const es = 20 // edge length
+    const et = 8  // edge thickness
+    switch (h) {
+      case 'nw': return { ...base, width: cs, height: cs, top: -cs / 2, left: -cs / 2 }
+      case 'ne': return { ...base, width: cs, height: cs, top: -cs / 2, right: -cs / 2 }
+      case 'sw': return { ...base, width: cs, height: cs, bottom: -cs / 2, left: -cs / 2 }
+      case 'se': return { ...base, width: cs, height: cs, bottom: -cs / 2, right: -cs / 2 }
+      case 'n': return { ...base, width: es, height: et, top: -et / 2, left: '50%', transform: 'translateX(-50%)' }
+      case 's': return { ...base, width: es, height: et, bottom: -et / 2, left: '50%', transform: 'translateX(-50%)' }
+      case 'e': return { ...base, width: et, height: es, right: -et / 2, top: '50%', transform: 'translateY(-50%)' }
+      case 'w': return { ...base, width: et, height: es, left: -et / 2, top: '50%', transform: 'translateY(-50%)' }
+    }
+  }
+
+  const c = crop
+
+  return (
+    <div className={cn('flex flex-col gap-3', className)}>
+      {/* Image + overlay area */}
+      <div
+        ref={containerRef}
+        className="relative w-full overflow-hidden rounded-lg border bg-muted/30 select-none"
+        style={{ touchAction: 'none' }}
+      >
+        {/* Raw image */}
+        <img src={src} alt="" className="block w-full h-auto" draggable={false} />
+
+        {/* Dimmed overlays (4 regions around the crop rect) */}
+        {/* Top */}
+        <div className="absolute left-0 top-0 bg-black/50 pointer-events-none" style={{ width: '100%', height: `${c.top}%` }} />
+        {/* Bottom */}
+        <div className="absolute left-0 bottom-0 bg-black/50 pointer-events-none" style={{ width: '100%', height: `${100 - c.bottom}%` }} />
+        {/* Left */}
+        <div className="absolute left-0 bg-black/50 pointer-events-none" style={{ top: `${c.top}%`, width: `${c.left}%`, height: `${c.bottom - c.top}%` }} />
+        {/* Right */}
+        <div className="absolute right-0 bg-black/50 pointer-events-none" style={{ top: `${c.top}%`, width: `${100 - c.right}%`, height: `${c.bottom - c.top}%` }} />
+
+        {/* Crop rectangle */}
+        <div
+          style={{
+            position: 'absolute',
+            top: `${c.top}%`, left: `${c.left}%`,
+            width: `${c.right - c.left}%`, height: `${c.bottom - c.top}%`,
+            border: '2px solid hsl(var(--primary))',
+            boxSizing: 'border-box',
+            cursor: 'move',
+            touchAction: 'none',
+            overflow: 'visible',
+            zIndex: 20,
+          }}
+          onMouseDown={e => onMD(e, 'move')}
+          onTouchStart={e => onTS(e, 'move')}
+        >
+          {/* Resize handles */}
+          {handles.map(h => (
+            <div
+              key={h}
+              style={handleStyle(h)}
+              onMouseDown={e => onMD(e, 'resize', h)}
+              onTouchStart={e => onTS(e, 'resize', h)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex items-center gap-3 pt-1">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium bg-background hover:bg-accent transition-colors text-foreground"
+          >
+            {labels.cancel}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={handleApply}
+          disabled={isApplying}
+          className={cn(
+            'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
+            'bg-primary text-primary-foreground hover:bg-primary/90 shadow',
+            'disabled:opacity-50 disabled:cursor-not-allowed'
+          )}
+        >
+          {isApplying ? '...' : labels.apply}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------------------------------
  * Component
  * ----------------------------------------------------------------------------------------*/
 
@@ -156,6 +423,8 @@ export function ImageCropper({
   src,
   onCropComplete: onCropDone,
   onCancel,
+  mode = 'pan-zoom',
+  initialCrop,
   aspectRatio,
   aspectPresets,
   showRotation = false,
@@ -167,6 +436,88 @@ export function ImageCropper({
   className,
   labels,
 }: ImageCropperProps) {
+  const l = {
+    apply: labels?.apply ?? 'Apply',
+    cancel: labels?.cancel ?? 'Cancel',
+    zoom: labels?.zoom ?? 'Zoom',
+    rotation: labels?.rotation ?? 'Rotation',
+    resetRotation: labels?.resetRotation ?? 'Reset',
+  }
+
+  // Resolve effective mode: 'round' maps to pan-zoom with cropShape='round'
+  const effectiveMode = mode === 'round' ? 'pan-zoom' : mode
+  const effectiveCropShape = mode === 'round' ? 'round' : cropShape
+
+  // Edge-drag mode — delegate entirely
+  if (effectiveMode === 'edge-drag') {
+    return (
+      <EdgeDragCropper
+        src={src}
+        initialCrop={initialCrop}
+        onCropDone={onCropDone}
+        onCancel={onCancel}
+        maxOutputWidth={maxOutputWidth}
+        outputQuality={outputQuality}
+        outputFormat={outputFormat}
+        className={className}
+        labels={{ apply: l.apply, cancel: l.cancel }}
+      />
+    )
+  }
+
+  // Pan-zoom mode (default) — uses react-easy-crop
+  return (
+    <PanZoomCropper
+      src={src}
+      onCropDone={onCropDone}
+      onCancel={onCancel}
+      aspectRatio={aspectRatio}
+      aspectPresets={aspectPresets}
+      showRotation={showRotation}
+      showZoom={showZoom}
+      maxOutputWidth={maxOutputWidth}
+      outputQuality={outputQuality}
+      outputFormat={outputFormat}
+      cropShape={effectiveCropShape}
+      className={className}
+      labels={l}
+    />
+  )
+}
+
+/* ------------------------------------------------------------------------------------------
+ * Pan-Zoom Cropper (internal, original behavior)
+ * ----------------------------------------------------------------------------------------*/
+
+function PanZoomCropper({
+  src,
+  onCropDone,
+  onCancel,
+  aspectRatio,
+  aspectPresets,
+  showRotation = false,
+  showZoom = true,
+  maxOutputWidth,
+  outputQuality = 0.85,
+  outputFormat = 'image/jpeg',
+  cropShape = 'rect',
+  className,
+  labels: l,
+}: {
+  src: string
+  onCropDone: (dataUrl: string, file: File) => void
+  onCancel?: () => void
+  aspectRatio?: number
+  aspectPresets?: Array<{ label: string; value: number | undefined }>
+  showRotation?: boolean
+  showZoom?: boolean
+  maxOutputWidth?: number
+  outputQuality?: number
+  outputFormat?: 'image/png' | 'image/jpeg'
+  cropShape?: 'rect' | 'round'
+  className?: string
+  labels: { apply: string; cancel: string; zoom: string; rotation: string; resetRotation: string }
+}) {
   const [crop, setCrop] = React.useState({ x: 0, y: 0 })
   const [zoom, setZoom] = React.useState(1)
   const [rotation, setRotation] = React.useState(0)
@@ -201,14 +552,6 @@ export function ImageCropper({
   const handlePreset = React.useCallback((value: number | undefined) => {
     setActiveAspect(value)
   }, [])
-
-  const l = {
-    apply: labels?.apply ?? 'Apply',
-    cancel: labels?.cancel ?? 'Cancel',
-    zoom: labels?.zoom ?? 'Zoom',
-    rotation: labels?.rotation ?? 'Rotation',
-    resetRotation: labels?.resetRotation ?? 'Reset',
-  }
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>

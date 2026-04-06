@@ -264,9 +264,9 @@ export function PlanUploader({
       setIsEditing(false)
       onEditingChange?.(false)
       onPlanUpload(file, dataUrl)
-      triggerAiValidation(dataUrl, file)
+      // No re-validation — AI already validated at upload, manual crop is user's final choice
     },
-    [onPlanUpload, onEditingChange, triggerAiValidation]
+    [onPlanUpload, onEditingChange]
   )
 
   const onDrop = useCallback(
@@ -481,7 +481,17 @@ export function PlanUploader({
               src={originalPreview ?? preview}
               onCropComplete={handleCropComplete}
               onCancel={handleCropCancel}
-              cropShape="round"
+              mode={validationResult?.boundingBox ? 'edge-drag' : 'pan-zoom'}
+              initialCrop={
+                validationResult?.boundingBox
+                  ? {
+                      top: validationResult.boundingBox.top,
+                      left: validationResult.boundingBox.left,
+                      bottom: validationResult.boundingBox.bottom,
+                      right: validationResult.boundingBox.right,
+                    }
+                  : undefined
+              }
               showRotation
               maxOutputWidth={1500}
               outputQuality={0.85}
