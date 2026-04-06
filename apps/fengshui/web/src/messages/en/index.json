@@ -274,6 +274,7 @@
     "invalidFormat": "Only JPG and PNG are accepted",
     "autoCropped": "Plan detected and auto-framed",
     "adjustCrop": "Adjust framing",
+    "validateAndContinue": "Validate",
     "validTitle": "Plan validated",
     "reupload": "Upload another"
   },

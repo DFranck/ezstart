@@ -101,6 +101,7 @@ export default function AnalyzePage() {
           // Pour Step 1: besoin d'un fichier + validation score >= 20 (or no validation yet but not loading)
           // Disable if score < 20 (invalid plan)
           const isInvalidPlan = aiValidation && aiValidation.score < 20
+          const isValidatedPlan = aiValidation && aiValidation.score >= 20
           const canProceedFromStep1 = hasFile && !isInvalidPlan
 
           // Handler async pour le bouton Next qui auto-valide le crop si nécessaire
@@ -130,27 +131,30 @@ export default function AnalyzePage() {
                     onClick: context.previousStep,
                     tooltip: t('tooltips.previousStep'),
                   },
-            next: {
-              label:
-                context.currentStep === context.steps.length - 1
-                  ? t('common.downloadPlan')
-                  : t('common.next'),
-              icon:
-                context.currentStep === context.steps.length - 1
-                  ? 'lucide:Download'
-                  : 'lucide:ArrowRight',
-              variant: 'brand',
-              disabled: isUploadStep && !canProceedFromStep1,
-              onClick: handleNext,
-              tooltip:
-                isUploadStep && !canProceedFromStep1
-                  ? hasFile
-                    ? t('steps.upload.cropRequired')
-                    : t('steps.upload.fileRequired')
-                  : context.currentStep === context.steps.length - 1
-                    ? t('tooltips.finishAnalysis')
-                    : t('tooltips.nextStep'),
-            },
+            // Hide stepper "next" on step 1 when validated — "Valider" button in PlanUploader handles advancing
+            next: isUploadStep && isValidatedPlan
+              ? false
+              : {
+                  label:
+                    context.currentStep === context.steps.length - 1
+                      ? t('common.downloadPlan')
+                      : t('common.next'),
+                  icon:
+                    context.currentStep === context.steps.length - 1
+                      ? 'lucide:Download'
+                      : 'lucide:ArrowRight',
+                  variant: 'brand',
+                  disabled: isUploadStep && !canProceedFromStep1,
+                  onClick: handleNext,
+                  tooltip:
+                    isUploadStep && !canProceedFromStep1
+                      ? hasFile
+                        ? t('steps.upload.cropRequired')
+                        : t('steps.upload.fileRequired')
+                      : context.currentStep === context.steps.length - 1
+                        ? t('tooltips.finishAnalysis')
+                        : t('tooltips.nextStep'),
+                },
             custom:
               isUploadStep && !canProceedFromStep1
                 ? [

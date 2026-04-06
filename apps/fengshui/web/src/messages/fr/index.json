@@ -274,6 +274,7 @@
     "invalidFormat": "Seuls les formats JPG et PNG sont acceptés",
     "autoCropped": "Plan détecté et cadré automatiquement",
     "adjustCrop": "Ajuster le cadrage",
+    "validateAndContinue": "Valider",
     "validTitle": "Plan validé",
     "reupload": "Ré-uploader"
   },

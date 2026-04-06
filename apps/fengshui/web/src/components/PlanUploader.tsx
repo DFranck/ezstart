@@ -17,6 +17,7 @@ interface PlanUploaderProps {
   onPlanUpload: (file: File, preview: string) => void
   onEditingChange?: (isEditing: boolean) => void
   onValidationResult?: (result: AiValidationResult | null) => void
+  onValidate?: () => void
   className?: string
 }
 
@@ -30,6 +31,7 @@ export function PlanUploader({
   onPlanUpload,
   onEditingChange,
   onValidationResult,
+  onValidate,
   className = '',
 }: PlanUploaderProps) {
   const t = useTranslations()
@@ -393,24 +395,6 @@ export function PlanUploader({
               </Div>
             </Div>
             <Div className="flex items-center gap-2">
-              {/* Adjust crop button — always visible after validation */}
-              {isImage && !isEditing && validationResult && validationResult.score >= 20 && (
-                <Button
-                  onClick={() => {
-                    setIsEditing(true)
-                    onEditingChange?.(true)
-                  }}
-                  variant="outline"
-                  size="sm"
-                  aria-label="Adjust crop"
-                  type="button"
-                >
-                  <Icon name="lucide:Crop" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
-                  <Span className="hidden sm:inline">
-                    {t('validation.adjustCrop')}
-                  </Span>
-                </Button>
-              )}
               <Button
                 onClick={removeFile}
                 variant="ghost"
@@ -483,6 +467,32 @@ export function PlanUploader({
                   </Card>
                 </Div>
               )}
+            </Div>
+          )}
+
+          {/* Two-button action bar: Ajuster + Valider — visible after validation, hidden during editing */}
+          {preview && isImage && !isEditing && !isValidating && validationResult && validationResult.score >= 20 && !showValidationOverlay && (
+            <Div className="flex flex-col sm:flex-row gap-3 mt-4">
+              <Button
+                onClick={() => {
+                  setIsEditing(true)
+                  onEditingChange?.(true)
+                }}
+                variant="outline"
+                className="flex-1 min-h-[44px]"
+                type="button"
+              >
+                <Icon name="lucide:Crop" className="w-4 h-4 mr-2" />
+                {t('validation.adjustCrop')}
+              </Button>
+              <Button
+                onClick={() => onValidate?.()}
+                variant="brand"
+                className="flex-1 min-h-[44px]"
+                type="button"
+              >
+                {t('validation.validateAndContinue')}
+              </Button>
             </Div>
           )}
 

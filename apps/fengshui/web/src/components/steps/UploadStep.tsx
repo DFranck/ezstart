@@ -3,7 +3,7 @@
 
 import { PlanUploader } from '@/components/PlanUploader'
 import type { AiValidationResult, UploadStepData } from '@/types/bagua'
-import { StepContent } from '@ezstart/ui/components'
+import { StepContent, useStepper } from '@ezstart/ui/components'
 import React, { useRef, useState } from 'react'
 
 /**
@@ -12,10 +12,12 @@ import React, { useRef, useState } from 'react'
  * - SVG floor plan placeholder as background in empty state
  * - Crop/edit functionality preserved when file is uploaded
  * - AI validation result stored in step data for downstream steps
+ * - "Valider" button advances to step 2 via useStepper().nextStep()
  */
 const UploadStep = (): React.JSX.Element => {
   // Track latest validation result to sync into step data
   const validationRef = useRef<AiValidationResult | null>(null)
+  const { nextStep } = useStepper()
 
   return (
     <StepContent stepId="upload">
@@ -42,6 +44,7 @@ const UploadStep = (): React.JSX.Element => {
                 aiValidation: result ?? undefined,
               })
             }}
+            onValidate={nextStep}
           />
         )
       }}

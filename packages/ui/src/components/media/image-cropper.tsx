@@ -194,7 +194,7 @@ function EdgeDragCropper({
   labels: { apply: string; cancel: string }
 }) {
   const [crop, setCrop] = React.useState<CropRect>(
-    initialCrop ?? { top: 10, left: 10, bottom: 90, right: 90 }
+    initialCrop ?? { top: 2, left: 2, bottom: 98, right: 98 }
   )
   const [isApplying, setIsApplying] = React.useState(false)
 
@@ -317,13 +317,14 @@ function EdgeDragCropper({
   function handleStyle(h: EdgeHandle): React.CSSProperties {
     const base: React.CSSProperties = {
       position: 'absolute', backgroundColor: 'hsl(var(--primary))',
-      border: '1px solid hsl(var(--primary-foreground))', borderRadius: 2,
+      border: '2px solid hsl(var(--primary-foreground))', borderRadius: 3,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
       zIndex: 30, pointerEvents: 'auto', touchAction: 'none',
       cursor: HANDLE_CURSORS[h],
     }
-    const cs = 14 // corner size
-    const es = 20 // edge length
-    const et = 8  // edge thickness
+    const cs = 18 // corner size (was 14)
+    const es = 28 // edge length (was 20)
+    const et = 10 // edge thickness (was 8)
     switch (h) {
       case 'nw': return { ...base, width: cs, height: cs, top: -cs / 2, left: -cs / 2 }
       case 'ne': return { ...base, width: cs, height: cs, top: -cs / 2, right: -cs / 2 }
