@@ -197,7 +197,7 @@ export function Stepper({
           />
 
           <Div className={cn('flex-1 flex flex-col w-full', className)}>
-            <Div className="flex-1 flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-6 py-4">
+            <Div className="flex-1 flex flex-col justify-center w-full max-w-5xl mx-auto px-4 sm:px-6 py-4">
               {children || steps[currentStep]?.component}
             </Div>
 
