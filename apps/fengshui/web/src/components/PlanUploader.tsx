@@ -113,7 +113,54 @@ export function PlanUploader({
   // Editing state
   const [isEditing, setIsEditing] = useState(false)
 
-  // --- AI validation + auto-save ---
+  // --- Auto-crop utility ---
+  const autoCropImage = useCallback(
+    async (
+      dataUrl: string,
+      boundingBox: { top: number; left: number; bottom: number; right: number }
+    ): Promise<{ croppedDataUrl: string; croppedFile: File }> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            reject(new Error('Canvas 2D context not available'))
+            return
+          }
+
+          // Convert percentages to pixels
+          const x = (boundingBox.left / 100) * img.naturalWidth
+          const y = (boundingBox.top / 100) * img.naturalHeight
+          const w = ((boundingBox.right - boundingBox.left) / 100) * img.naturalWidth
+          const h = ((boundingBox.bottom - boundingBox.top) / 100) * img.naturalHeight
+
+          canvas.width = w
+          canvas.height = h
+          ctx.drawImage(img, x, y, w, h, 0, 0, w, h)
+
+          const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.9)
+          canvas.toBlob(
+            blob => {
+              if (!blob) {
+                reject(new Error('Failed to create blob from canvas'))
+                return
+              }
+              const file = new File([blob], 'plan-auto-cropped.jpg', { type: 'image/jpeg' })
+              resolve({ croppedDataUrl, croppedFile: file })
+            },
+            'image/jpeg',
+            0.9
+          )
+        }
+        img.onerror = () => reject(new Error('Failed to load image for auto-crop'))
+        img.src = dataUrl
+      })
+    },
+    []
+  )
+
+  // --- AI validation + auto-crop + auto-save ---
   const triggerAiValidation = useCallback(
     async (dataUrl: string, file: File) => {
       // Abort any previous validation
@@ -144,12 +191,33 @@ export function PlanUploader({
           setValidationResult(result)
           onValidationResult?.(result)
 
+          // Auto-crop if bounding box detected and score is acceptable
+          let currentDataUrl = dataUrl
+          if (result.boundingBox && result.score >= 50) {
+            try {
+              const { croppedDataUrl, croppedFile } = await autoCropImage(
+                dataUrl,
+                result.boundingBox
+              )
+              if (!controller.signal.aborted) {
+                setPreview(croppedDataUrl)
+                setUploadedFile(croppedFile)
+                onPlanUpload(croppedFile, croppedDataUrl)
+                toast.success(t('validation.autoCropped'))
+                currentDataUrl = croppedDataUrl
+              }
+            } catch (cropErr) {
+              logger.warn('[PlanUploader] Auto-crop failed, keeping original', cropErr)
+            }
+          }
+
           // Auto-save if authenticated and score >= 20
+          const saveDataUrl = currentDataUrl
           if (isAuthenticated && result.score >= 20) {
             try {
               // Get image dimensions
               const img = new Image()
-              img.src = dataUrl
+              img.src = saveDataUrl
               await new Promise<void>(resolve => {
                 img.onload = () => resolve()
                 // If already loaded (cached)
@@ -164,7 +232,7 @@ export function PlanUploader({
                 },
                 body: JSON.stringify({
                   name: file.name,
-                  imageData: dataUrl,
+                  imageData: saveDataUrl,
                   width: img.naturalWidth,
                   height: img.naturalHeight,
                 }),
@@ -186,7 +254,7 @@ export function PlanUploader({
         }
       }
     },
-    [isAuthenticated, accessToken, onValidationResult, t]
+    [isAuthenticated, accessToken, onValidationResult, onPlanUpload, autoCropImage, t]
   )
 
   const handleCropComplete = useCallback(
@@ -360,13 +428,10 @@ export function PlanUploader({
               </Div>
             </Div>
             <Div className="flex items-center gap-2">
-              {/* Edit button for re-cropping */}
+              {/* Edit / Adjust crop button */}
               {isImage && !isEditing && (
                 <Button
                   onClick={() => {
-                    if (originalPreview) {
-                      setPreview(originalPreview)
-                    }
                     setIsEditing(true)
                     onEditingChange?.(true)
                   }}
@@ -376,7 +441,9 @@ export function PlanUploader({
                   type="button"
                 >
                   <Icon name="lucide:Edit3" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
-                  <Span className="hidden sm:inline">{t('uploader.edit')}</Span>
+                  <Span className="hidden sm:inline">
+                    {validationResult?.boundingBox ? t('validation.adjustCrop') : t('uploader.edit')}
+                  </Span>
                 </Button>
               )}
               <Button

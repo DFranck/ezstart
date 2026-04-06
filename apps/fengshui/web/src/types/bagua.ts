@@ -16,6 +16,12 @@ export type AiValidationResult = {
   score: number
   roomsDetected: number
   feedback: string
+  boundingBox: {
+    top: number
+    left: number
+    bottom: number
+    right: number
+  } | null
 }
 
 export type UploadStepData = {

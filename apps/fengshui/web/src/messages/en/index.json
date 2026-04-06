@@ -271,7 +271,9 @@
     "saved": "Plan saved to your account",
     "loginToSave": "Sign in to save your plan",
     "tooLarge": "File too large (max 10MB)",
-    "invalidFormat": "Only JPG and PNG are accepted"
+    "invalidFormat": "Only JPG and PNG are accepted",
+    "autoCropped": "Plan detected and auto-framed",
+    "adjustCrop": "Adjust framing"
   },
   "cardinal": {
     "title": "Step 2: Cardinal Points",

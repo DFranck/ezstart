@@ -1,11 +1,19 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { logger } from '@ezstart/logger'
 
+export interface BoundingBox {
+  top: number
+  left: number
+  bottom: number
+  right: number
+}
+
 export interface ValidationResult {
   isValid: boolean
   score: number
   roomsDetected: number
   feedback: string
+  boundingBox: BoundingBox | null
 }
 
 const VALIDATION_PROMPT = `You are a floor plan validator. Analyze this image and determine:
@@ -19,12 +27,28 @@ If it IS a floor plan but poor quality (blurry, too small, no rooms visible), sc
 If it's a decent floor plan, score 50-80.
 If it's a clear, detailed floor plan with rooms labeled, score 80-100.
 
+Also detect the bounding box of the building/floor plan within the image.
+Return the coordinates as percentages (0-100) of the image dimensions.
+The bounding box should tightly enclose ALL walls of the building, including irregular shapes (L-shaped, T-shaped buildings).
+Leave a small margin (~2-3%) around the building for context.
+
+Add to your JSON response:
+"boundingBox": {
+  "top": number,    // percentage from top (0-100)
+  "left": number,   // percentage from left (0-100)
+  "bottom": number, // percentage from top (0-100)
+  "right": number   // percentage from left (0-100)
+}
+
+If you cannot determine the bounding box (e.g., plan fills the entire image), return null for boundingBox.
+
 Respond ONLY in JSON format:
 {
   "isValid": true,
   "score": 75,
   "roomsDetected": 5,
-  "feedback": "Clear floor plan with 5 rooms detected. Good resolution."
+  "feedback": "Clear floor plan with 5 rooms detected. Good resolution.",
+  "boundingBox": { "top": 5, "left": 10, "bottom": 90, "right": 85 }
 }`
 
 /**
@@ -74,11 +98,33 @@ export async function validatePlanImage(
       `[validate.service] Plan validated: score=${parsed.score}, rooms=${parsed.roomsDetected}`
     )
 
+    // Parse bounding box if present and valid
+    let boundingBox: BoundingBox | null = null
+    if (parsed.boundingBox && typeof parsed.boundingBox === 'object') {
+      const bb = parsed.boundingBox
+      if (
+        typeof bb.top === 'number' &&
+        typeof bb.left === 'number' &&
+        typeof bb.bottom === 'number' &&
+        typeof bb.right === 'number' &&
+        bb.bottom > bb.top &&
+        bb.right > bb.left
+      ) {
+        boundingBox = {
+          top: Math.max(0, Math.min(100, bb.top)),
+          left: Math.max(0, Math.min(100, bb.left)),
+          bottom: Math.max(0, Math.min(100, bb.bottom)),
+          right: Math.max(0, Math.min(100, bb.right)),
+        }
+      }
+    }
+
     return {
       isValid: Boolean(parsed.isValid),
       score: Math.max(0, Math.min(100, Number(parsed.score) || 0)),
       roomsDetected: Math.max(0, Number(parsed.roomsDetected) || 0),
       feedback: String(parsed.feedback || 'No feedback available'),
+      boundingBox,
     }
   } catch (err) {
     logger.error(

@@ -271,7 +271,9 @@
     "saved": "Plan sauvegardé dans votre compte",
     "loginToSave": "Connectez-vous pour sauvegarder votre plan",
     "tooLarge": "Fichier trop volumineux (max 10 Mo)",
-    "invalidFormat": "Seuls les formats JPG et PNG sont acceptés"
+    "invalidFormat": "Seuls les formats JPG et PNG sont acceptés",
+    "autoCropped": "Plan détecté et cadré automatiquement",
+    "adjustCrop": "Ajuster le cadrage"
   },
   "cardinal": {
     "title": "Étape 2 : Points Cardinaux",

@@ -271,7 +271,9 @@
     "saved": "Plano guardado en tu cuenta",
     "loginToSave": "Inicia sesión para guardar tu plano",
     "tooLarge": "Archivo demasiado grande (máx. 10 MB)",
-    "invalidFormat": "Solo se aceptan los formatos JPG y PNG"
+    "invalidFormat": "Solo se aceptan los formatos JPG y PNG",
+    "autoCropped": "Plano detectado y enmarcado automaticamente",
+    "adjustCrop": "Ajustar el encuadre"
   },
   "cardinal": {
     "title": "Paso 2: Puntos Cardinales",
