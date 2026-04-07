@@ -36,6 +36,11 @@ function useAdminNavItems() {
       label: t('payments'),
       icon: 'lucide:CreditCard' as const,
     },
+    {
+      href: '/admin/test-payments',
+      label: t('testPayments'),
+      icon: 'lucide:TestTube' as const,
+    },
     { href: '/chat', label: t('chat'), icon: 'lucide:Bot' as const },
   ]
 }

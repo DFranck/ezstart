@@ -35,6 +35,7 @@
       "betaWaitlist": "Beta Waitlist",
       "users": "Users",
       "payments": "Payments",
+      "testPayments": "Test Payments",
       "chat": "Chat"
     },
     "cards": {
@@ -62,6 +63,29 @@
     "payments": {
       "title": "Payment Management",
       "description": "View and manage all payment transactions and subscriptions"
+    },
+    "testPayments": {
+      "pageTitle": "Test Payments — GreenPulse",
+      "testModeBanner": "Test Mode — GreenPulse Payments",
+      "testModeDescription": "All payments will be tagged as app: green-pulse",
+      "promoCode": "Promo Code",
+      "donations": {
+        "title": "Donations",
+        "description": "Test donation buttons"
+      },
+      "purchases": {
+        "title": "Purchases",
+        "description": "Test one-time purchases",
+        "esgReport": "ESG Report",
+        "esgReportDesc": "Full ESG analysis report for your company"
+      },
+      "subscriptions": {
+        "title": "Subscriptions",
+        "description": "Test subscription plans",
+        "noPlans": "No plans yet. Create plans in the Payments admin tab first.",
+        "month": "month",
+        "year": "year"
+      }
     },
     "prompts": {
       "title": "System Prompts",
