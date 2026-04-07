@@ -216,6 +216,10 @@ export interface PayAdminDashboardTexts {
   // Plan empty
   noPlans?: string
 
+  // App filter
+  allApps?: string
+  appFilterLabel?: string
+
   // Empty states
   noPayments?: string
   noSubscriptions?: string
@@ -224,6 +228,7 @@ export interface PayAdminDashboardTexts {
 
 export interface PayAdminDashboardProps {
   appName: string
+  showAppFilter?: boolean
   className?: string
   texts?: Partial<PayAdminDashboardTexts>
 }
@@ -322,7 +327,7 @@ function PaymentsTab({
   const [statsLoading, setStatsLoading] = useState(true)
 
   // Stats
-  const [totalRevenue, setTotalRevenue] = useState(0)
+  const [revenueByCurrency, setRevenueByCurrency] = useState<Record<string, number>>({})
   const [completedCount, setCompletedCount] = useState(0)
   const [failedCount, setFailedCount] = useState(0)
 
@@ -362,19 +367,20 @@ function PaymentsTab({
       .then(result => {
         // Filter out subscriptions — they have their own tab
         const nonSubPayments = result.payments.filter(p => p.type !== 'subscription')
-        let revenue = 0
+        const revenueMap: Record<string, number> = {}
         let completed = 0
         let failed = 0
         for (const p of nonSubPayments) {
           if (p.status === 'completed') {
-            revenue += p.amount
+            const cur = p.currency || 'EUR'
+            revenueMap[cur] = (revenueMap[cur] || 0) + p.amount
             completed++
           }
           if (p.status === 'failed') {
             failed++
           }
         }
-        setTotalRevenue(revenue)
+        setRevenueByCurrency(revenueMap)
         setTotalPayments(nonSubPayments.length)
         setCompletedCount(completed)
         setFailedCount(failed)
@@ -490,7 +496,17 @@ function PaymentsTab({
     <Div className="space-y-6">
       {/* Stats */}
       <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label={t.totalRevenue} value={formatCurrency(totalRevenue)} loading={statsLoading} />
+        <StatCard
+          label={t.totalRevenue}
+          value={
+            Object.keys(revenueByCurrency).length === 0
+              ? formatCurrency(0)
+              : Object.entries(revenueByCurrency)
+                  .map(([cur, amount]) => formatCurrency(amount, cur))
+                  .join(' | ')
+          }
+          loading={statsLoading}
+        />
         <StatCard label={t.totalPayments} value={totalPayments} loading={statsLoading} />
         <StatCard label={t.completedPayments} value={completedCount} loading={statsLoading} />
         <StatCard label={t.failedPayments} value={failedCount} loading={statsLoading} />
@@ -588,7 +604,7 @@ function SubscriptionsTab({
 
   // Stats
   const [activeCount, setActiveCount] = useState(0)
-  const [mrr, setMrr] = useState(0)
+  const [mrrByCurrency, setMrrByCurrency] = useState<Record<string, number>>({})
 
   // Cancel dialog
   const [cancelDialog, setCancelDialog] = useState<{
@@ -605,17 +621,18 @@ function SubscriptionsTab({
       .then(result => {
         setSubscriptions(result.payments)
         let active = 0
-        let monthlyRevenue = 0
+        const mrrMap: Record<string, number> = {}
         for (const sub of result.payments) {
           if (sub.status === 'completed') {
             active++
             const intervalCount =
               (sub.metadata?.intervalCount as number | undefined) || 1
-            monthlyRevenue += sub.amount / intervalCount
+            const cur = sub.currency || 'EUR'
+            mrrMap[cur] = (mrrMap[cur] || 0) + sub.amount / intervalCount
           }
         }
         setActiveCount(active)
-        setMrr(monthlyRevenue)
+        setMrrByCurrency(mrrMap)
       })
       .catch(() => {})
       .finally(() => {
@@ -704,7 +721,7 @@ function SubscriptionsTab({
         header: t.actionsHeader,
         cell: ({ row }) => {
           const payment = row.original
-          if (payment.status !== 'completed' && payment.status !== 'pending') return null
+          if (payment.status !== 'completed') return null
           return (
             <Button
               variant="outline"
@@ -738,7 +755,17 @@ function SubscriptionsTab({
           {/* Stats */}
           <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatCard label={t.activeSubscriptions} value={activeCount} loading={statsLoading} />
-            <StatCard label={t.mrr} value={formatCurrency(mrr)} loading={statsLoading} />
+            <StatCard
+              label={t.mrr}
+              value={
+                Object.keys(mrrByCurrency).length === 0
+                  ? formatCurrency(0)
+                  : Object.entries(mrrByCurrency)
+                      .map(([cur, amount]) => formatCurrency(amount, cur))
+                      .join(' | ')
+              }
+              loading={statsLoading}
+            />
           </Div>
 
           {/* Table */}
@@ -1359,9 +1386,9 @@ function PlansSection({
     fetchPlans()
   }, [client, deleteDialog.planId, fetchPlans])
 
-  // Format price
+  // Format price — amount is stored in cents, convert to display unit
   const formatPrice = useCallback((plan: Plan) => {
-    return formatCurrency(plan.amount, plan.currency)
+    return formatCurrency(plan.amount / 100, plan.currency)
   }, [])
 
   // Format interval display
@@ -1922,20 +1949,66 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   save: 'Save',
   create: 'Create',
 
+  // App filter
+  allApps: 'All apps',
+  appFilterLabel: 'App',
+
   // Empty states
   noPayments: 'No payments found.',
   noSubscriptions: 'No subscriptions found.',
   noPromos: 'No promo codes yet.',
 }
 
-export function PayAdminDashboard({ appName, className, texts }: PayAdminDashboardProps) {
+export function PayAdminDashboard({ appName, showAppFilter, className, texts }: PayAdminDashboardProps) {
+  const { client } = usePayContext()
   const t: Required<PayAdminDashboardTexts> = useMemo(
     () => ({ ...DEFAULT_TEXTS, ...texts }),
     [texts]
   )
 
+  // App filter state — only used when showAppFilter is true
+  const [appFilter, setAppFilter] = useState<string>('all')
+  const [appOptions, setAppOptions] = useState<string[]>([])
+
+  // Fetch unique app names from payments for the filter dropdown
+  useEffect(() => {
+    if (!showAppFilter) return
+    client
+      .getPayments({ limit: 100 })
+      .then(result => {
+        const apps = new Set<string>()
+        for (const p of result.payments) {
+          if (p.projectId) apps.add(p.projectId)
+        }
+        setAppOptions(Array.from(apps).sort())
+      })
+      .catch(() => {})
+  }, [client, showAppFilter])
+
+  // Effective appName: when filter is active and a specific app is selected, use it
+  const effectiveAppName = showAppFilter && appFilter !== 'all' ? appFilter : appName
+
   return (
     <Div className={className}>
+      {/* App filter for superadmin */}
+      {showAppFilter && appOptions.length > 0 && (
+        <Div className="mb-4">
+          <Select value={appFilter} onValueChange={setAppFilter}>
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder={t.allApps} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t.allApps}</SelectItem>
+              {appOptions.map(app => (
+                <SelectItem key={app} value={app}>
+                  {app}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Div>
+      )}
+
       <Tabs defaultValue="payments">
         <TabsList>
           <TabsTrigger value="payments">{t.paymentsTab}</TabsTrigger>
@@ -1944,15 +2017,15 @@ export function PayAdminDashboard({ appName, className, texts }: PayAdminDashboa
         </TabsList>
 
         <TabsContent value="payments">
-          <PaymentsTab appName={appName} t={t} />
+          <PaymentsTab appName={effectiveAppName} t={t} />
         </TabsContent>
 
         <TabsContent value="subscriptions">
-          <SubscriptionsTab appName={appName} t={t} />
+          <SubscriptionsTab appName={effectiveAppName} t={t} />
         </TabsContent>
 
         <TabsContent value="promos">
-          <PromosTab appName={appName} t={t} />
+          <PromosTab appName={effectiveAppName} t={t} />
         </TabsContent>
       </Tabs>
     </Div>
