@@ -188,10 +188,7 @@ export function DonationCard({
         {allowCustomAmount && (
           <Div className="space-y-1">
             <Label className="text-sm text-muted-foreground">{texts.orEnterCustom}</Label>
-            <Div className="relative">
-              <Span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                {symbol}
-              </Span>
+            <Div>
               <Input
                 type="number"
                 min="1"
@@ -201,8 +198,7 @@ export function DonationCard({
                   setCustomAmount(e.target.value)
                   setSelectedAmount(null)
                 }}
-                placeholder="0.00"
-                className="pl-8"
+                placeholder={`0.00 ${symbol}`}
               />
             </Div>
           </Div>
