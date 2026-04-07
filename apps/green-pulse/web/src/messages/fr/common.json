@@ -33,6 +33,8 @@
       "dashboard": "Tableau de bord",
       "systemPrompts": "Prompts système",
       "betaWaitlist": "Liste d'attente Beta",
+      "users": "Utilisateurs",
+      "payments": "Paiements",
       "chat": "Chat"
     },
     "cards": {
@@ -43,7 +45,23 @@
       "betaWaitlist": {
         "title": "Liste d'attente Beta",
         "description": "Approuver ou refuser les demandes d'accès bêta"
+      },
+      "users": {
+        "title": "Utilisateurs",
+        "description": "Gérer les comptes utilisateurs, rôles et permissions"
+      },
+      "payments": {
+        "title": "Paiements",
+        "description": "Consulter et gérer les transactions de paiement"
       }
+    },
+    "users": {
+      "title": "Gestion des utilisateurs",
+      "description": "Gérer les comptes utilisateurs, rôles et permissions sur la plateforme"
+    },
+    "payments": {
+      "title": "Gestion des paiements",
+      "description": "Consulter et gérer toutes les transactions et abonnements"
     },
     "prompts": {
       "title": "Prompts système",

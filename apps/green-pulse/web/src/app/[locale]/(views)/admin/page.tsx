@@ -24,6 +24,20 @@ export default function AdminDashboardPage() {
       icon: 'lucide:UserPlus' as const,
       color: 'text-primary',
     },
+    {
+      href: '/admin/users',
+      title: t('cards.users.title'),
+      description: t('cards.users.description'),
+      icon: 'lucide:Users' as const,
+      color: 'text-primary',
+    },
+    {
+      href: '/admin/payments',
+      title: t('cards.payments.title'),
+      description: t('cards.payments.description'),
+      icon: 'lucide:CreditCard' as const,
+      color: 'text-primary',
+    },
   ]
 
   // Gather all roles from globalRoles and appRoles
