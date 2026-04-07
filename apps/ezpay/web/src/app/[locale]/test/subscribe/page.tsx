@@ -12,6 +12,8 @@ import {
   CardTitle,
   Div,
   H3,
+  Input,
+  Label,
   P,
 } from '@ezstart/ui/components'
 import {
@@ -36,6 +38,7 @@ export default function TestSubscribePage() {
   const { user } = useAuth()
   const { client } = usePayContext()
   const { subscriptions, isLoading, reload } = useSubscriptions({ userId: user?._id, limit: 20 })
+  const [promoCode, setPromoCode] = useState('')
   const [cancelDialog, setCancelDialog] = useState<{
     open: boolean
     subscriptionId: string | null
@@ -55,6 +58,30 @@ export default function TestSubscribePage() {
 
   return (
     <Div className="space-y-8">
+      {/* Promo Code */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('promoCode')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Div className="flex items-center gap-3 max-w-md">
+            <Label htmlFor="promo-code">{t('promoCode')}</Label>
+            <Input
+              id="promo-code"
+              value={promoCode}
+              onChange={e => setPromoCode(e.target.value)}
+              placeholder={t('promoCodePlaceholder')}
+              className="flex-1"
+            />
+          </Div>
+          {promoCode && (
+            <P size="sm" variant="description" className="mt-2">
+              {t('promoCodeApplied', { code: promoCode })}
+            </P>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Subscribe Buttons */}
       <Card>
         <CardHeader>
@@ -79,6 +106,8 @@ export default function TestSubscribePage() {
                   userId={user?._id}
                   userEmail={user?.email}
                   userName={user?.username}
+                  promoCode={promoCode || undefined}
+                  showPromoInput
                 />
               </Div>
             ))}

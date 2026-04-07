@@ -5,14 +5,19 @@ import type {
   CreateSubscriptionRequest,
   CreatePromoRequest,
   UpdatePromoRequest,
+  CreatePlanRequest,
+  UpdatePlanRequest,
   PayClientConfig,
   Payment,
+  Plan,
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
   PromoResponse,
   PromosListResponse,
   PromoValidationResponse,
+  PlanResponse,
+  PlansListResponse,
 } from './types.js'
 
 // Helper to get the correct URLs based on environment
@@ -396,6 +401,88 @@ export class PayClient {
 
     if (!response.ok) {
       throw new Error(result.error || 'Failed to delete promo')
+    }
+
+    return result
+  }
+
+  // ===== PLANS =====
+
+  async createPlan(data: CreatePlanRequest): Promise<PlanResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create plan')
+    }
+
+    return result.data ?? result
+  }
+
+  async listPlans(params?: {
+    appName?: string
+    active?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<PlansListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== '') searchParams.set(key, String(value))
+      }
+    }
+
+    // Public endpoint — no auth needed, but include token if available
+    const url = `${this.config.baseURL}/plans?${searchParams.toString()}`
+    const response = await fetch(url, { headers: this.getHeaders() })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to list plans')
+    }
+
+    // Map MongoDB _id to id for SDK type compatibility
+    const data = result.data ?? result.plans ?? []
+    const plans = data.map((p: Record<string, unknown>) => ({
+      ...p,
+      id: p.id || p._id,
+    }))
+
+    return { ...result, data: plans }
+  }
+
+  async updatePlan(planId: string, data: UpdatePlanRequest): Promise<PlanResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans/${planId}`, {
+      method: 'PATCH',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to update plan')
+    }
+
+    return result.data ?? result
+  }
+
+  async deletePlan(planId: string): Promise<{ success: boolean }> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans/${planId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to delete plan')
     }
 
     return result

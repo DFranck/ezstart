@@ -29,6 +29,14 @@ export type { PurchaseButtonTexts, PurchaseButtonProps } from './components/Purc
 export { SubscribeButton } from './components/SubscribeButton.js'
 export type { SubscribeButtonTexts, SubscribeButtonProps } from './components/SubscribeButton.js'
 
+// Components - Promo Code
+export { PromoCodeInput } from './components/PromoCodeInput.js'
+export type {
+  PromoCodeInputProps,
+  PromoCodeInputTexts,
+  PromoValidation,
+} from './components/PromoCodeInput.js'
+
 // Components - Subscriptions (management)
 export { SubscriptionCard } from './components/SubscriptionCard.js'
 export type { SubscriptionCardProps, SubscriptionCardTexts } from './components/SubscriptionCard.js'
@@ -98,6 +106,11 @@ export type {
   PromoResponse,
   PromosListResponse,
   PromoValidationResponse,
+  Plan,
+  CreatePlanRequest,
+  UpdatePlanRequest,
+  PlanResponse,
+  PlansListResponse,
 } from './types.js'
 
 // Utils
@@ -122,4 +135,8 @@ export {
   updatePromoSchema,
   promoResponseSchema,
   promoValidationResponseSchema,
+  planIntervalSchema,
+  createPlanSchema,
+  updatePlanSchema,
+  planResponseSchema,
 } from './schemas.js'

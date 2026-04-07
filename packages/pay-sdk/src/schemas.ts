@@ -153,3 +153,39 @@ export const promoValidationResponseSchema = z.object({
     duration: promoDurationSchema.optional(),
   }),
 })
+
+// Plan schemas
+export const planIntervalSchema = z.enum(['month', 'year'])
+
+export const createPlanSchema = z.object({
+  name: z.string().min(1).max(100),
+  appName: z.string().min(1),
+  description: z.string().max(500).optional(),
+  amount: z.number().int().min(0),
+  currency: z.string().min(3).max(3).default('EUR'),
+  interval: planIntervalSchema,
+  intervalCount: z.number().int().min(1).max(12).default(1),
+  features: z.array(z.string()).optional(),
+  sortOrder: z.number().int().min(0).default(0),
+  stripePriceId: z.string().optional(),
+})
+
+export const updatePlanSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  description: z.string().max(500).nullable().optional(),
+  amount: z.number().int().min(0).optional(),
+  currency: z.string().min(3).max(3).optional(),
+  interval: planIntervalSchema.optional(),
+  intervalCount: z.number().int().min(1).max(12).optional(),
+  features: z.array(z.string()).optional(),
+  active: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).optional(),
+  stripePriceId: z.string().nullable().optional(),
+})
+
+export const planResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    plan: z.any(),
+  }),
+})

@@ -158,6 +158,67 @@ export interface PromosListResponse {
   }
 }
 
+// Plan Types
+export interface Plan {
+  id: string
+  name: string
+  appName: string
+  description?: string
+  amount: number
+  currency: string
+  interval: 'month' | 'year'
+  intervalCount: number
+  features?: string[]
+  active: boolean
+  sortOrder: number
+  stripePriceId?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreatePlanRequest {
+  name: string
+  appName: string
+  description?: string
+  amount: number
+  currency: string
+  interval: 'month' | 'year'
+  intervalCount: number
+  features?: string[]
+  sortOrder?: number
+  stripePriceId?: string
+}
+
+export interface UpdatePlanRequest {
+  name?: string
+  description?: string | null
+  amount?: number
+  currency?: string
+  interval?: 'month' | 'year'
+  intervalCount?: number
+  features?: string[]
+  active?: boolean
+  sortOrder?: number
+  stripePriceId?: string | null
+}
+
+export interface PlanResponse {
+  success: boolean
+  data: {
+    plan: Plan
+  }
+}
+
+export interface PlansListResponse {
+  success: boolean
+  data: Plan[]
+  meta: {
+    total: number
+    limit: number
+    offset: number
+  }
+}
+
 // API Requests
 export interface CreateDonationRequest {
   projectId: string
