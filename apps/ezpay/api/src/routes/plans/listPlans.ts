@@ -49,7 +49,7 @@ const listPlansHandler = async (req: Request, res: Response) => {
 
     const { appName, active, limit, offset } = validation.data
 
-    const query: Record<string, unknown> = {}
+    const query: Record<string, unknown> = { deletedAt: null }
     if (appName) query.appName = appName
     if (active !== undefined) query.active = active === 'true'
 

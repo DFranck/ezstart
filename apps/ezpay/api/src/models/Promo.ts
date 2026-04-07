@@ -12,6 +12,7 @@ export interface PromoDocument extends Document {
   maxUses?: number
   usedCount: number
   active: boolean
+  deletedAt?: Date | null
   expiresAt?: Date
   createdAt: Date
   updatedAt: Date
@@ -37,6 +38,7 @@ const promoSchema = new Schema<PromoDocument>(
     maxUses: { type: Number, min: 1 },
     usedCount: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
+    deletedAt: { type: Date, default: null },
     expiresAt: { type: Date },
   },
   {

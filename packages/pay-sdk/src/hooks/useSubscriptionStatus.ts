@@ -54,15 +54,17 @@ export function useSubscriptionStatus(params: UseSubscriptionStatusParams): Subs
         return
       }
 
-      // Fetch plans to resolve features
-      let features: string[] = []
-      try {
-        const plansRes = await client.listPlans({ appName: params.appName, active: true })
-        const plans = plansRes.data || []
-        const plan = plans.find(p => p.name === activeSub.metadata?.planName)
-        features = plan?.features || []
-      } catch {
-        // Plan lookup is best-effort
+      // Priority: snapshot from payment metadata > current plan
+      let features: string[] = (activeSub.metadata?.features as string[]) || []
+      if (features.length === 0) {
+        try {
+          const plansRes = await client.listPlans({ appName: params.appName, active: true })
+          const plans = plansRes.data || []
+          const plan = plans.find(p => p.name === activeSub.metadata?.planName)
+          features = plan?.features || []
+        } catch {
+          // Plan lookup is best-effort
+        }
       }
 
       setStatus({

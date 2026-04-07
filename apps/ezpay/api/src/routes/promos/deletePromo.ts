@@ -51,15 +51,19 @@ const deletePromoHandler = async (req: Request, res: Response) => {
 
     const Promo = await getPromoModel()
 
-    const promo = await Promo.findByIdAndDelete(id)
+    const promo = await Promo.findByIdAndUpdate(
+      id,
+      { active: false, deletedAt: new Date() },
+      { new: true }
+    )
 
     if (!promo) {
       return sendError(res, 'Promo not found', 404)
     }
 
-    logger.info(`Promo deleted: ${promo.code} for ${promo.appName}`)
+    logger.info(`Promo soft-deleted: ${promo.code} for ${promo.appName}`)
 
-    sendSuccess(res, { message: `Promo ${promo.code} deleted` })
+    sendSuccess(res, promo)
   } catch (error) {
     logger.error('Delete promo error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to delete promo')

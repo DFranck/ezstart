@@ -58,6 +58,7 @@ export interface Subscription extends Payment {
     planName: string
     interval: 'month'
     intervalCount: number
+    features?: string[]
   }
 }
 

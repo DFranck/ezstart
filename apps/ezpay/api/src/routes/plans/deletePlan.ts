@@ -51,15 +51,19 @@ const deletePlanHandler = async (req: Request, res: Response) => {
 
     const Plan = await getPlanModel()
 
-    const plan = await Plan.findByIdAndDelete(id)
+    const plan = await Plan.findByIdAndUpdate(
+      id,
+      { active: false, deletedAt: new Date() },
+      { new: true }
+    )
 
     if (!plan) {
       return sendError(res, 'Plan not found', 404)
     }
 
-    logger.info(`Plan deleted: ${plan.name} for ${plan.appName}`)
+    logger.info(`Plan soft-deleted: ${plan.name} for ${plan.appName}`)
 
-    sendSuccess(res, { message: `Plan ${plan.name} deleted` })
+    sendSuccess(res, plan)
   } catch (error) {
     logger.error('Delete plan error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to delete plan')

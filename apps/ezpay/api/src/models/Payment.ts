@@ -18,6 +18,7 @@ export interface SubscriptionMetadata {
   planName?: string
   interval?: 'month'
   intervalCount?: number
+  features?: string[]
 }
 
 export interface InvoiceMetadata {
@@ -130,6 +131,9 @@ const paymentSchema = new Schema<PaymentDocument>(
       // Pour invoices
       invoiceId: { type: String },
       invoiceNumber: { type: String },
+
+      // Plan features snapshot (captured at checkout time)
+      features: [{ type: String }],
 
       // Pour promo codes
       promoCode: { type: String },

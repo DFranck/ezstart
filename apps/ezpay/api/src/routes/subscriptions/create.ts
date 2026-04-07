@@ -9,6 +9,7 @@ import {
 } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
+import { getPlanModel } from '../../models/Plan.js'
 import { getProvider } from '../../services/stripe.js'
 import { validatePromo, calculateDiscount, incrementUsage } from '../../services/promo.js'
 import { authMiddleware } from '../../middleware/auth.js'
@@ -101,6 +102,11 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       }
     }
 
+    // Fetch the plan to snapshot its features at checkout time
+    const Plan = await getPlanModel()
+    const plan = await Plan.findById(planId).lean()
+    const snapshotFeatures = plan?.features || []
+
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
     const provider = getProvider()
@@ -149,6 +155,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
         planName,
         interval: 'month',
         intervalCount,
+        features: snapshotFeatures,
         ...promoMetadata,
       },
     })

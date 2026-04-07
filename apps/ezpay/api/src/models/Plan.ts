@@ -11,6 +11,7 @@ export interface PlanDocument extends Document {
   intervalCount: number
   features?: string[]
   active: boolean
+  deletedAt?: Date | null
   sortOrder: number
   stripePriceId?: string
   createdAt: Date
@@ -32,6 +33,7 @@ const planSchema = new Schema<PlanDocument>(
     intervalCount: { type: Number, required: true, min: 1, default: 1 },
     features: [{ type: String }],
     active: { type: Boolean, default: true },
+    deletedAt: { type: Date, default: null },
     sortOrder: { type: Number, default: 0 },
     stripePriceId: { type: String },
   },
