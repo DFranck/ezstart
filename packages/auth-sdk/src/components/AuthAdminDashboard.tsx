@@ -33,6 +33,7 @@ import {
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { toast } from '@ezstart/ui/utils'
 
 // ========================================
 // Types
@@ -89,6 +90,7 @@ export interface AuthAdminDashboardTexts {
   cancel?: string
   confirm?: string
   deleteError?: string
+  deleteSuccess?: string
 
   // Edit roles modal
   editRolesTitle?: string
@@ -98,6 +100,7 @@ export interface AuthAdminDashboardTexts {
   noAppRoles?: string
   save?: string
   editError?: string
+  editSuccess?: string
 
   // Role labels
   roleSuperadmin?: string
@@ -156,6 +159,7 @@ const DEFAULT_TEXTS: Required<AuthAdminDashboardTexts> = {
   cancel: 'Cancel',
   confirm: 'Confirm',
   deleteError: 'Failed to delete user.',
+  deleteSuccess: 'User deleted successfully.',
   editRolesTitle: 'Edit roles',
   editRolesSubtitle: 'Edit roles for {email}',
   globalRolesLabel: 'Global roles',
@@ -163,6 +167,7 @@ const DEFAULT_TEXTS: Required<AuthAdminDashboardTexts> = {
   noAppRoles: 'No app-specific roles assigned.',
   save: 'Save',
   editError: 'Failed to update roles.',
+  editSuccess: 'Roles updated successfully.',
   roleSuperadmin: 'Superadmin',
   roleAdmin: 'Admin',
   roleManager: 'Manager',
@@ -269,10 +274,13 @@ function EditRolesModal({
       if (!response.ok) {
         throw new Error(response.error || parseApiError(response.data) || t.editError)
       }
+      toast.success(t.editSuccess)
       onSaved()
       onOpenChange(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.editError)
+      const message = err instanceof Error ? err.message : t.editError
+      setError(message)
+      toast.error(t.editError)
     } finally {
       setSaving(false)
     }
@@ -450,10 +458,13 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
       if (!response.ok) {
         throw new Error(response.error || parseApiError(response.data) || t.deleteError)
       }
+      toast.success(t.deleteSuccess)
       setDeleteDialog({ open: false, userId: null })
       fetchUsers()
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : t.deleteError)
+      const message = err instanceof Error ? err.message : t.deleteError
+      setDeleteError(message)
+      toast.error(t.deleteError)
     } finally {
       setDeleting(false)
     }

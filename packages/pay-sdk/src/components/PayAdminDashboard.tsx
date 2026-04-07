@@ -32,6 +32,7 @@ import {
   TabsTrigger,
   type ColumnDef,
 } from '@ezstart/ui/components'
+import { toast } from '@ezstart/ui/utils'
 import type { Payment, PaymentStatus, PaymentType, Promo, PromoDiscountType, PromoDuration } from '../types.js'
 import { formatCurrency } from '../utils/format-currency.js'
 import { usePayContext } from '../provider.js'
@@ -117,8 +118,11 @@ export interface PayAdminDashboardTexts {
   deletePromo?: string
   deletePromoTitle?: string
   deletePromoDescription?: string
+  createPromoSuccess?: string
+  createPromoError?: string
   deletePromoSuccess?: string
   deletePromoError?: string
+  togglePromoSuccess?: string
   togglePromoError?: string
 
   // Promo form labels
@@ -771,10 +775,13 @@ function CreatePromoDialog({
         expiresAt: expiresAt || undefined,
         active: true,
       })
+      toast.success(t.createPromoSuccess)
       onCreated()
       onOpenChange(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err))
+      const message = err instanceof Error ? err.message : String(err)
+      setError(message)
+      toast.error(t.createPromoError)
     } finally {
       setSaving(false)
     }
@@ -1006,12 +1013,13 @@ function PromosTab({
     async (promo: Promo) => {
       try {
         await client.updatePromo(promo.id, { active: !promo.active })
+        toast.success(t.togglePromoSuccess)
         fetchPromos()
       } catch {
-        // Error is visible in the UI via the switch not toggling
+        toast.error(t.togglePromoError)
       }
     },
-    [client, fetchPromos]
+    [client, fetchPromos, t]
   )
 
   // Delete handler
@@ -1259,8 +1267,11 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   deletePromo: 'Delete',
   deletePromoTitle: 'Delete Promo',
   deletePromoDescription: 'Are you sure you want to delete this promo code? This action cannot be undone.',
+  createPromoSuccess: 'Promo code created successfully',
+  createPromoError: 'Failed to create promo code',
   deletePromoSuccess: 'Promo deleted successfully',
   deletePromoError: 'Failed to delete promo',
+  togglePromoSuccess: 'Promo status updated',
   togglePromoError: 'Failed to update promo',
 
   // Promo form labels
