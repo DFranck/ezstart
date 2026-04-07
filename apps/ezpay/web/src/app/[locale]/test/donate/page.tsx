@@ -13,7 +13,7 @@ import {
 export default function TestDonatePage() {
   const t = useTranslations('test')
   const { user } = useAuth()
-  const { donations, isLoading } = useDonations({ projectId: 'ezpay', limit: 20 })
+  const { donations, isLoading } = useDonations({ limit: 20 })
 
   return (
     <Div className="space-y-8">
@@ -37,7 +37,6 @@ export default function TestDonatePage() {
         </CardHeader>
         <CardContent>
           <DonationWall
-            projectId="ezpay"
             limit={20}
             texts={{ noDonationsText: t('noDonations') }}
           />
