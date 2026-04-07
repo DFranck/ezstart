@@ -1,6 +1,6 @@
 # Backlog — EZPay
 
-**Status :** `maintained` | **Derniere mise a jour :** 2026-04-05
+**Status :** `maintained` | **Derniere mise a jour :** 2026-04-07
 
 ## ✅ Status: Maintained
 
@@ -22,8 +22,14 @@ Phases 1-4 complete. Stripe v22, webhooks, pagination, RBAC, SDK, admin dashboar
 - 4.6: Idempotency-Key header
 - 5.2: EZBill invoice integration
 - 5.4: Email receipts
-- 5.5: Payment analytics dashboard
-- Customer Portal Stripe, usePremium() hook
+- EP-005: SDK Payment Cards (SubscriptionCard, DonationCard, PurchaseCard)
+- EP-006: Customer Portal Stripe
+- EP-007: Upgrade/Downgrade between plans
+- EP-008: Trial periods
+- EP-009: Invoice management
+- EP-010: Currency conversion in dashboard stats
+- EP-011: Promo code targeting
+- EP-012: Audit ALL DELETE endpoints for soft delete
 - CartProvider for marketplace
 - AI product descriptions
 
@@ -271,29 +277,32 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] Dashboard admin EZPay avec DataTable, stats globales, filtres et pagination
 - [x] RBAC integre avec EZAuth : superadmin gere tout, admin d'une app gere ses produits
 - [x] Boutons Rembourser et Annuler l'abonnement dans le dashboard
-- [ ] CRUD produits : creer/modifier/supprimer des items a vendre (name, description, price, currency, image)
-- [ ] CRUD prix Stripe : creer des Price IDs (one-time ou recurring) directement depuis l'interface
+- [x] Plans CRUD : creer/modifier/supprimer des plans (name, description, price, interval, features)
+- [x] Promos CRUD : creer/modifier/supprimer des codes promo (code, type, valeur, limites)
+- [x] Soft delete pour plans et promos (deletedAt au lieu de suppression physique)
 - [ ] Filtrage par app : chaque app (greenpulse, fengshui, etc.) voit ses propres produits
 - [x] Interface marketplace-ready : composants exportes par pay-sdk pour integrer dans n'importe quelle app
 
-### P-SUBSCRIPTION — Subscription Management `medium` `feature` — `in-progress`
+### P-SUBSCRIPTION — Subscription Management `medium` `feature` — `done`
 
 - [x] SubscribeButton composant pay-sdk
 - [x] Cancel subscription button dans admin dashboard et SubscriptionCard
+- [x] Cancel at period end (subscription stays active until billing period ends)
 - [x] Purchase/Subscription e2e testing (checkout complet + webhooks invoice.paid, customer.subscription.created)
-- [ ] Customer Portal Stripe pour gestion des abonnements
+- [ ] Customer Portal Stripe pour gestion des abonnements (moved to EP-006)
 - [x] Webhook handling pour subscription events (created, updated, canceled, payment_failed)
-- [ ] `usePremium()` hook pour verifier le statut d'abonnement dans les apps
+- [x] `useSubscriptionStatus()` hook pour verifier le statut d'abonnement dans les apps
+- [x] `<FeatureGate>` component pour gating features basé sur le plan actif
 
-### P-PROMO — Codes Promo `medium` `feature` — `planned`
+### P-PROMO — Codes Promo `medium` `feature` — `done`
 
-- [ ] Modèle `PromoCode` : code, type (pourcentage/montant fixe), valeur, limites (usage max, date expiration, apps autorisées)
-- [ ] CRUD API codes promo : superadmin crée des codes globaux, appadmin crée pour son app
-- [ ] Validation à l'achat : vérifier code, appliquer réduction, tracker usage
-- [ ] UI admin : interface gestion codes promo (créer, activer/désactiver, stats d'usage)
-- [ ] UI client : champ "Code promo" dans le flow d'achat (checkout Stripe avec coupon)
-- [ ] Intégration Stripe Coupons/Promotion Codes pour les abonnements
-- [ ] Export via pay-sdk : `<PromoCodeInput>` composant réutilisable
+- [x] Modèle `PromoCode` : code, type (pourcentage/montant fixe), valeur, limites (usage max, date expiration, apps autorisées)
+- [x] CRUD API codes promo : superadmin crée des codes globaux, appadmin crée pour son app
+- [x] Validation à l'achat : vérifier code, appliquer réduction, tracker usage
+- [x] UI admin : interface gestion codes promo (créer, activer/désactiver, stats d'usage)
+- [x] UI client : champ "Code promo" dans le flow d'achat (checkout Stripe avec coupon)
+- [x] Intégration Stripe Coupons/Promotion Codes pour les abonnements
+- [x] Export via pay-sdk : `<PromoCodeInput>` composant réutilisable
 
 ### P-MARKETPLACE — Marketplace Components `low` `feature` — `in-progress`
 
@@ -335,10 +344,7 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ## Backlog Items (2026-04-07)
 
-### EP-001: Currency conversion in dashboard stats
-- **Status:** `planned`
-- **Description:** Save exchange rates (to USD/EUR) in Payment metadata at checkout time. Dashboard stats show a single total in admin-chosen base currency. DataTable keeps original currency per row.
-- **Files:** Payment model (add exchangeRates), checkout routes (fetch rates from API), PayAdminDashboard (convert totals)
+### EP-001: Currency conversion in dashboard stats — `moved to EP-010`
 
 ### EP-002: Clean stale pending payments
 - **Status:** `planned`
@@ -351,3 +357,67 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 ### EP-004: Superadmin app filter
 - **Status:** `done`
 - **Description:** Fixed — showAppFilter prop for multi-app filtering in EZPay dashboard.
+
+### EP-005: SDK Payment Cards (SubscriptionCard, DonationCard, PurchaseCard)
+- **Status:** `planned`
+- **Priority:** HIGH
+- **Description:** Reusable card components that auto-fetch plan/product data and embed checkout modals. Apps just pass `appName` + `planId` and the card renders everything (title, price, features, checkout button). Zero manual config.
+- **Components:** SubscriptionCard, DonationCard, PurchaseCard
+- **Props:** appName, planId/productId, className, variant (default/featured/compact), promoCode, onSuccess, onCancel, texts (i18n)
+
+### EP-006: Customer Portal (Stripe built-in)
+- **Status:** `planned`
+- **Priority:** MEDIUM
+- **Description:** Stripe provides a hosted Customer Portal where users can manage their subscriptions, update payment methods, view invoices, and cancel. EZPay should create a portal session and redirect users to it. No custom UI needed — Stripe handles everything.
+- **Implementation:** 
+  - API: `POST /api/portal/session` → creates Stripe billing portal session → returns URL
+  - SDK: `useCustomerPortal()` hook or `<ManageSubscriptionButton>` component
+  - Stripe Dashboard: configure portal features (cancel, update payment, view invoices)
+- **Why:** Users need self-service subscription management without contacting admin
+
+### EP-007: Upgrade/Downgrade between plans
+- **Status:** `planned`
+- **Priority:** MEDIUM
+- **Description:** Allow users to switch from one plan to another (e.g., Pro → Business). Stripe handles proration automatically — the user pays the difference or gets credit.
+- **Implementation:**
+  - API: `PATCH /api/subscriptions/:id/change-plan` → calls `stripe.subscriptions.update()` with new price
+  - Stripe proration: automatically calculates credit/debit for the remaining period
+  - SDK: `<ChangePlanButton currentPlan="pro" targetPlan="business" />` component
+- **Why:** Users grow and need to upgrade. Downgrade for users who want to reduce costs.
+
+### EP-008: Trial periods
+- **Status:** `planned`
+- **Priority:** MEDIUM
+- **Description:** Allow plans to have a free trial period (e.g., 14 days free, then €19.99/month). Stripe supports `trial_period_days` natively.
+- **Implementation:**
+  - Plan model: add `trialDays?: number` field
+  - Checkout: pass `subscription_data.trial_period_days` to Stripe
+  - Stripe handles: no charge during trial → auto-charge at trial end
+  - SDK: `useSubscriptionStatus()` already has `isTrialing` field
+- **Why:** Lower friction for new users to try the service before committing
+
+### EP-009: Invoice management
+- **Status:** `planned`
+- **Priority:** LOW
+- **Description:** Stripe automatically generates invoices for subscriptions. EZPay should expose these to users and admins.
+- **Implementation:**
+  - API: `GET /api/invoices` → list invoices from Stripe API (not stored in DB)
+  - API: `GET /api/invoices/:id/pdf` → redirect to Stripe invoice PDF URL
+  - SDK: `<InvoiceHistory>` component showing user's invoices with download links
+  - Admin: invoices tab in PayAdminDashboard
+- **Why:** Users need invoices for accounting. Stripe generates them automatically for subscriptions.
+
+### EP-010: Currency conversion in dashboard stats
+- **Status:** `planned`
+- **Priority:** LOW
+- **Description:** Save exchange rates at checkout time. Dashboard stats show single total in admin-chosen base currency.
+
+### EP-011: Promo code targeting (plan-specific, type-specific)
+- **Status:** `planned`
+- **Priority:** LOW
+- **Description:** Allow promo codes to target specific plans, payment types (subscription only), or products. Currently promos are universal.
+
+### EP-012: Audit ALL DELETE endpoints for soft delete
+- **Status:** `planned`
+- **Priority:** HIGH
+- **Description:** All DELETE endpoints across the monorepo must use soft delete (deletedAt). Hard delete only for superadmin with explicit confirmation. Check: ezauth users, ezpay payments, green-pulse data, etc.
