@@ -299,7 +299,7 @@ function PaymentsTab({
   useEffect(() => {
     setStatsLoading(true)
     client
-      .getPayments({ limit: 1000 })
+      .getPayments({ limit: 100 })
       .then(result => {
         let revenue = 0
         let completed = 0
@@ -326,7 +326,7 @@ function PaymentsTab({
   const fetchPayments = useCallback(() => {
     setLoading(true)
     const params: Record<string, string | number | undefined> = {
-      limit: 1000,
+      limit: 100,
     }
     if (typeFilter !== 'all') params.type = typeFilter
     if (statusFilter !== 'all') params.status = statusFilter
@@ -540,7 +540,7 @@ function SubscriptionsTab({
     setLoading(true)
     setStatsLoading(true)
     client
-      .getSubscriptions({ limit: 1000 })
+      .getSubscriptions({ limit: 100 })
       .then(result => {
         setSubscriptions(result.payments)
         let active = 0
@@ -989,7 +989,7 @@ function PromosTab({
     setLoading(true)
     setStatsLoading(true)
     client
-      .listPromos({ appName, limit: 1000 })
+      .listPromos({ appName, limit: 100 })
       .then(result => {
         const list = result.data || []
         setPromos(list)
