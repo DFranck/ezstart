@@ -446,7 +446,7 @@ export function LiaThread({
           loading={loading}
           streamingText={streamingText}
           isNewThread={isNewThread}
-          loadingText="LIA is thinking"
+          loadingText={tChat('welcome.loadingText')}
           onRetry={resendLastMessage}
           onEdit={editMessage}
           formatResponseTime={time => `${(time / 1000).toFixed(2)}s`}
@@ -456,14 +456,31 @@ export function LiaThread({
       <ThreadComposer
         onSubmit={sendMessage}
         loading={loading}
-        placeholder="Ask GP.A anything about sustainability..."
+        placeholder={tChat('welcome.placeholder')}
         isNewThread={isNewThread}
         welcomeMessage={
-          <ThreadWelcome
-            show={isNewThread}
-            title="Welcome to GP.A"
-            description="Your AI assistant for sustainability and ESG reporting"
-          />
+          <>
+            <ThreadWelcome
+              show={isNewThread}
+              title={tChat('welcome.title')}
+              description={tChat('welcome.description')}
+            />
+            {isNewThread && (
+              <Div className="flex flex-wrap justify-center gap-2 -translate-y-20 md:-translate-y-12">
+                {(['energy', 'greenCredit', 'esgExport'] as const).map(key => (
+                  <Button
+                    key={key}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => sendMessage(tChat(`welcome.suggestions.${key}`))}
+                  >
+                    {tChat(`welcome.suggestions.${key}`)}
+                  </Button>
+                ))}
+              </Div>
+            )}
+          </>
         }
         headerSlot={
           providers.length > 0 && selectedProvider && onProviderChange ? (
