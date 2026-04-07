@@ -224,6 +224,7 @@ export class PayClient {
 
   async getSubscriptions(params?: {
     userId?: string
+    projectId?: string
     limit?: number
     offset?: number
     liveMode?: string
@@ -284,6 +285,7 @@ export class PayClient {
 
   async getPayments(params?: {
     userId?: string
+    projectId?: string
     limit?: number
     offset?: number
     type?: string

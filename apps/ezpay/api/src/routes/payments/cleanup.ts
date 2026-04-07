@@ -52,7 +52,8 @@ const cleanupPaymentsHandler = async (req: Request, res: Response) => {
     const { appName } = validation.data
 
     // CRITICAL: Only delete test data — production data must NEVER be deleted
-    const query: Record<string, unknown> = { liveMode: false }
+    // Use $ne: true to match both liveMode: false AND old records where liveMode is undefined/null
+    const query: Record<string, unknown> = { liveMode: { $ne: true } }
     if (appName) query.projectId = appName
 
     const Payment = await getPaymentModel()

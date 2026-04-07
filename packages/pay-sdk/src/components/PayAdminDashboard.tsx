@@ -380,7 +380,7 @@ function PaymentsTab({
   useEffect(() => {
     setStatsLoading(true)
     client
-      .getPayments({ limit: 100, liveMode: liveModeFilter })
+      .getPayments({ limit: 100, liveMode: liveModeFilter, projectId: appName })
       .then(result => {
         // Filter out subscriptions — they have their own tab
         const nonSubPayments = result.payments.filter(p => p.type !== 'subscription')
@@ -404,13 +404,14 @@ function PaymentsTab({
       })
       .catch(() => {})
       .finally(() => setStatsLoading(false))
-  }, [client, liveModeFilter])
+  }, [client, liveModeFilter, appName])
 
   // Fetch payments
   const fetchPayments = useCallback(() => {
     setLoading(true)
     const params: Record<string, string | number | undefined> = {
       limit: 100,
+      projectId: appName,
       liveMode: liveModeFilter,
     }
     if (typeFilter !== 'all') params.type = typeFilter
@@ -434,7 +435,7 @@ function PaymentsTab({
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [client, typeFilter, statusFilter, searchQuery, liveModeFilter])
+  }, [client, typeFilter, statusFilter, searchQuery, liveModeFilter, appName])
 
   useEffect(() => {
     fetchPayments()
@@ -663,7 +664,7 @@ function SubscriptionsTab({
     setLoading(true)
     setStatsLoading(true)
     client
-      .getSubscriptions({ limit: 100, liveMode: liveModeFilter })
+      .getSubscriptions({ limit: 100, liveMode: liveModeFilter, projectId: appName })
       .then(result => {
         setSubscriptions(result.payments)
         let active = 0
@@ -685,7 +686,7 @@ function SubscriptionsTab({
         setLoading(false)
         setStatsLoading(false)
       })
-  }, [client, liveModeFilter])
+  }, [client, liveModeFilter, appName])
 
   useEffect(() => {
     fetchSubscriptions()
