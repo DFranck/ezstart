@@ -48,6 +48,9 @@ export interface DonationCardTexts {
   error: string
   oneTime: string
   orEnterCustom: string
+  messageLabel: string
+  messagePlaceholder: string
+  anonymous: string
 }
 
 const DEFAULT_TEXTS: DonationCardTexts = {
@@ -60,6 +63,9 @@ const DEFAULT_TEXTS: DonationCardTexts = {
   error: 'Something went wrong',
   oneTime: 'One-time donation',
   orEnterCustom: 'Or enter a custom amount',
+  messageLabel: 'Message (optional)',
+  messagePlaceholder: 'Leave a message...',
+  anonymous: 'Donate anonymously',
 }
 
 export function DonationCard({
@@ -69,7 +75,7 @@ export function DonationCard({
   className,
   variant = 'default',
   presetAmounts = [5, 10, 25, 50],
-  currency = 'EUR',
+  currency = 'USD',
   allowCustomAmount = true,
   userId,
   userEmail,
@@ -80,6 +86,8 @@ export function DonationCard({
   const { createDonation, isLoading } = usePay()
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
+  const [message, setMessage] = useState('')
+  const [isAnonymous, setIsAnonymous] = useState(false)
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
 
@@ -99,7 +107,8 @@ export function DonationCard({
         amount,
         currency,
         isPublic: true,
-        isAnonymous: false,
+        isAnonymous,
+        message: message || undefined,
         userId,
         donorEmail: userEmail,
         donorName: userName,
@@ -192,11 +201,34 @@ export function DonationCard({
                   setSelectedAmount(null)
                 }}
                 placeholder="0.00"
-                className="pl-7"
+                className="pl-8"
               />
             </Div>
           </Div>
         )}
+      </CardContent>
+      {/* Message + Anonymous */}
+      <CardContent className="space-y-3 pt-0">
+        <Div>
+          <Label className="text-sm text-muted-foreground">{texts.messageLabel || 'Message (optional)'}</Label>
+          <Input
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            placeholder={texts.messagePlaceholder || 'Leave a message...'}
+          />
+        </Div>
+        <Div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="donate-anonymous"
+            checked={isAnonymous}
+            onChange={e => setIsAnonymous(e.target.checked)}
+            className="rounded"
+          />
+          <Label htmlFor="donate-anonymous" className="text-sm text-muted-foreground cursor-pointer">
+            {texts.anonymous || 'Donate anonymously'}
+          </Label>
+        </Div>
       </CardContent>
       <CardFooter>
         <Button
