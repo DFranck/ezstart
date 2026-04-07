@@ -92,7 +92,7 @@ export default function TestSubscribePage() {
                   appName="ezpay"
                   planId={plan.id}
                   variant={index === 1 ? 'featured' : 'default'}
-                  promoCode={promoCode || undefined}
+                  promoCode={undefined}
                   userId={user?._id}
                   userEmail={user?.email}
                   userName={user?.username}
