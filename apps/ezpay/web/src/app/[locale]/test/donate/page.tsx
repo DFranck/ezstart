@@ -16,7 +16,7 @@ export default function TestDonatePage() {
   const { donations, isLoading } = useDonations({ limit: 20 })
 
   return (
-    <Div className="space-y-8">
+    <Div className="w-full space-y-8">
       {/* Donation Card */}
       <DonationCard
         appName="ezpay"
@@ -31,7 +31,7 @@ export default function TestDonatePage() {
       />
 
       {/* Donation Wall */}
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle>Donation Wall</CardTitle>
         </CardHeader>

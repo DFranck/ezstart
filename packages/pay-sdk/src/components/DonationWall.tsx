@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Div, Icon, P, Span } from '@ezstart/ui/components'
+import { Div, Icon, InfiniteMovingCards, P, Span } from '@ezstart/ui/components'
 import { useDonations } from '../hooks/useDonations.js'
 import { formatCurrency } from '../utils/format-currency.js'
 import type { Payment } from '../types.js'
@@ -45,23 +45,35 @@ function DonationPill({
 }) {
   const isAnonymous = donation.isAnonymous || !donation.customerName
   const name = isAnonymous ? anonymousLabel : donation.customerName!
+  const message = donation.metadata?.message as string | undefined
 
   return (
-    <Div className="flex items-center gap-2 px-3 py-2 rounded-full bg-card border shrink-0">
-      <Div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-        {isAnonymous ? (
-          <Icon name="lucide:User" size={14} className="text-primary" />
-        ) : (
-          <Span className="text-xs font-bold text-primary">{getInitials(name)}</Span>
+    <Div
+      className={`flex flex-col gap-1 px-3 py-2 bg-card border shrink-0 ${
+        message ? 'rounded-xl' : 'rounded-full'
+      }`}
+    >
+      <Div className="flex items-center gap-2">
+        <Div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+          {isAnonymous ? (
+            <Icon name="lucide:User" size={14} className="text-primary" />
+          ) : (
+            <Span className="text-xs font-bold text-primary">{getInitials(name)}</Span>
+          )}
+        </Div>
+        <Span className="text-sm font-medium whitespace-nowrap">{name}</Span>
+        {donation.amount > 0 && (
+          <Span className="text-sm font-bold text-primary whitespace-nowrap">
+            {formatCurrency(donation.amount, donation.currency)}
+          </Span>
         )}
+        <Span className="text-xs text-muted-foreground whitespace-nowrap">
+          {formatDate(donation.createdAt)}
+        </Span>
       </Div>
-      <Span className="text-sm font-medium whitespace-nowrap">{name}</Span>
-      <Span className="text-sm font-bold text-primary whitespace-nowrap">
-        {formatCurrency(donation.amount, donation.currency)}
-      </Span>
-      <Span className="text-xs text-muted-foreground whitespace-nowrap">
-        {formatDate(donation.createdAt)}
-      </Span>
+      {message && (
+        <P className="text-xs italic text-muted-foreground line-clamp-1 pl-9">{message}</P>
+      )}
     </Div>
   )
 }
@@ -94,8 +106,8 @@ export function DonationWall({
 
   if (isLoading) {
     return (
-      <Div className={`w-full max-w-full overflow-hidden ${className || ''}`}>
-        <Div className="flex gap-3 w-max">
+      <Div className={`overflow-hidden ${className || ''}`}>
+        <Div className="flex gap-3 py-1">
           {[...Array(6)].map((_, i) => (
             <Div
               key={i}
@@ -137,8 +149,8 @@ export function DonationWall({
   }
 
   return (
-    <Div className={`w-full max-w-full overflow-x-auto scrollbar-hide ${className || ''}`}>
-      <Div className="flex gap-3 w-max">
+    <Div className={className}>
+      <InfiniteMovingCards direction="left" speed="slow" pauseOnHover>
         {sortedDonations.map(donation => (
           <DonationPill
             key={donation.id}
@@ -146,7 +158,7 @@ export function DonationWall({
             anonymousLabel={t.anonymousLabel}
           />
         ))}
-      </Div>
+      </InfiniteMovingCards>
     </Div>
   )
 }

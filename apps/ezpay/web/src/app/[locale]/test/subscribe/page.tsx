@@ -1,8 +1,16 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  ConfirmActionDialog,
+  formatCurrency,
+  PaymentHistory,
+  SubscriptionPlanCard,
+  usePayContext,
+  useSubscriptions,
+  type Payment,
+  type Plan,
+} from '@ezstart/pay-sdk'
 import {
   Badge,
   Button,
@@ -11,28 +19,17 @@ import {
   CardHeader,
   CardTitle,
   Div,
-  Input,
-  Label,
   P,
   Skeleton,
 } from '@ezstart/ui/components'
-import {
-  SubscribeButton,
-  SubscriptionPlanCard,
-  PaymentHistory,
-  useSubscriptions,
-  usePayContext,
-  ConfirmActionDialog,
-  formatCurrency,
-  type Payment,
-  type Plan,
-} from '@ezstart/pay-sdk'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function TestSubscribePage() {
   const t = useTranslations('test')
   const { user } = useAuth()
   const { client } = usePayContext()
-  const { subscriptions, isLoading, reload } = useSubscriptions({ userId: user?._id, limit: 20 })
+  const { subscriptions, isLoading, reload } = useSubscriptions({ limit: 20 })
   const [plans, setPlans] = useState<Plan[]>([])
   const [plansLoading, setPlansLoading] = useState(true)
 

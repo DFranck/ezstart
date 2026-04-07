@@ -18,6 +18,7 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
+import { toast } from 'sonner'
 import { usePay } from '../provider.js'
 import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
 
@@ -52,6 +53,9 @@ export interface DonationCardTexts {
   messageLabel: string
   messagePlaceholder: string
   anonymous: string
+  support: string
+  sendMessage: string
+  messageRequired: string
 }
 
 const DEFAULT_TEXTS: DonationCardTexts = {
@@ -67,6 +71,9 @@ const DEFAULT_TEXTS: DonationCardTexts = {
   messageLabel: 'Message (optional)',
   messagePlaceholder: 'Leave a message...',
   anonymous: 'Donate anonymously',
+  support: 'Or just leave a message',
+  sendMessage: 'Send message',
+  messageRequired: 'Message (required)',
 }
 
 export function DonationCard({
@@ -98,9 +105,17 @@ export function DonationCard({
     : texts.title
 
   const effectiveAmount = customAmount ? parseFloat(customAmount) : selectedAmount
+  const isTestimonial = effectiveAmount === 0 || effectiveAmount === null
+
+  const canSubmit =
+    !isLoading &&
+    (isTestimonial
+      ? message.trim().length > 0
+      : effectiveAmount !== null && effectiveAmount > 0 && !isNaN(effectiveAmount))
 
   const handleDonate = async (amount: number) => {
-    if (!amount || amount <= 0 || isNaN(amount)) return
+    if (amount < 0 || isNaN(amount)) return
+    if (amount === 0 && !message.trim()) return // testimonial needs a message
 
     try {
       const result = await createDonation({
@@ -117,6 +132,13 @@ export function DonationCard({
 
       if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl
+      } else {
+        // Testimonial saved successfully - reset form
+        setSelectedAmount(null)
+        setCustomAmount('')
+        setMessage('')
+        setIsAnonymous(false)
+        toast.success(texts.thankYou)
       }
     } catch (error) {
       logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
@@ -191,7 +213,7 @@ export function DonationCard({
             <Div>
               <Input
                 type="number"
-                min="1"
+                min="0"
                 step="0.01"
                 value={customAmount}
                 onChange={e => {
@@ -204,10 +226,18 @@ export function DonationCard({
           </Div>
         )}
       </CardContent>
-      {/* Message + Anonymous */}
+      {/* Separator + Message */}
       <CardContent className="space-y-3 pt-0">
+        {/* "or just leave a message" separator */}
+        <Div className="flex items-center gap-3">
+          <Div className="flex-1 h-px bg-border" />
+          <Span className="text-xs text-muted-foreground uppercase">{texts.support}</Span>
+          <Div className="flex-1 h-px bg-border" />
+        </Div>
         <Div>
-          <Label className="text-sm text-muted-foreground">{texts.messageLabel || 'Message (optional)'}</Label>
+          <Label className="text-sm text-muted-foreground">
+            {texts.messageLabel}
+          </Label>
           <Input
             value={message}
             onChange={e => setMessage(e.target.value)}
@@ -229,21 +259,23 @@ export function DonationCard({
         <Button
           className="w-full"
           size="lg"
-          disabled={!effectiveAmount || effectiveAmount <= 0 || isLoading}
-          onClick={() => effectiveAmount && handleDonate(effectiveAmount)}
+          disabled={!canSubmit}
+          onClick={() => handleDonate(isTestimonial ? 0 : effectiveAmount!)}
         >
           {isLoading ? (
             <>
               <Icon name="lucide:Loader2" className="w-5 h-5 animate-spin" />
               {texts.loading}
             </>
+          ) : isTestimonial ? (
+            <>
+              <Icon name="lucide:MessageCircle" className="w-5 h-5" />
+              {texts.sendMessage}
+            </>
           ) : (
             <>
               <Icon name="lucide:Heart" className="w-5 h-5" />
-              {texts.donate}
-              {effectiveAmount && effectiveAmount > 0
-                ? ` ${formatCurrency(effectiveAmount, currency)}`
-                : ''}
+              {texts.donate} {formatCurrency(effectiveAmount!, currency)}
             </>
           )}
         </Button>

@@ -51,6 +51,7 @@ const TYPE_ICON: Record<PaymentType, KnownIconName> = {
   purchase: 'lucide:ShoppingCart',
   subscription: 'lucide:CreditCard',
   invoice: 'lucide:FileText',
+  testimonial: 'lucide:MessageCircle',
 }
 
 const DEFAULT_STATUS_LABELS: Record<PaymentStatus, string> = {
@@ -66,6 +67,7 @@ const DEFAULT_TYPE_LABELS: Record<PaymentType, string> = {
   purchase: 'Purchase',
   subscription: 'Subscription',
   invoice: 'Invoice',
+  testimonial: 'Testimonial',
 }
 
 function getProductName(payment: Payment): string {

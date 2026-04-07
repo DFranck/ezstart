@@ -1,14 +1,14 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { useTranslations } from 'next-intl'
+import { PaymentHistory, PurchaseCard, usePurchases } from '@ezstart/pay-sdk'
 import { Card, CardContent, CardHeader, CardTitle, Div } from '@ezstart/ui/components'
-import { PurchaseCard, PaymentHistory, usePurchases } from '@ezstart/pay-sdk'
+import { useTranslations } from 'next-intl'
 
 export default function TestPurchasePage() {
   const t = useTranslations('test')
   const { user } = useAuth()
-  const { purchases, isLoading } = usePurchases({ userId: user?._id, limit: 20 })
+  const { purchases, isLoading } = usePurchases({ limit: 20 })
 
   return (
     <Div className="space-y-8">

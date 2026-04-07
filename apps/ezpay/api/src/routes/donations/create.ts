@@ -25,7 +25,7 @@ const docRouter = createRouterWithDoc(createDonationRegistry, router)
 const createDonationSchema = z.object({
   projectId: z.string().describe('Project identifier'),
   projectName: z.string().optional().describe('Project display name'),
-  amount: z.number().positive().describe('Donation amount in currency units'),
+  amount: z.number().nonnegative().describe('Donation amount in currency units (0 = testimonial)'),
   currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   message: z.string().optional().describe('Optional message from donor'),
   isPublic: z.boolean().default(true).describe('Whether donation is shown publicly'),
@@ -69,6 +69,40 @@ const createDonationHandler = async (req: Request, res: Response) => {
       returnUrl,
     } = validation.data
 
+    // Detect live vs test mode from Stripe key
+    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
+
+    // Testimonial: bypass Stripe for €0 donations, save directly to DB
+    if (amount === 0) {
+      const payment = await Payment.create({
+        projectId,
+        projectName: projectName || projectId,
+        type: 'testimonial',
+        amount: 0,
+        currency: currency || 'USD',
+        provider: 'stripe',
+        paymentId: `testimonial-${Date.now()}`,
+        status: 'completed',
+        completedAt: new Date(),
+        userId: userId || undefined,
+        customerName: donorName || undefined,
+        customerEmail: donorEmail || undefined,
+        isAnonymous: isAnonymous || false,
+        liveMode: isLiveMode,
+        metadata: {
+          message: message || undefined,
+          isPublic: isPublic !== false,
+        },
+      })
+
+      logger.info(`💬 Testimonial created - ID: ${payment._id}`)
+
+      return sendSuccess(res, {
+        payment: { id: payment._id, ...payment.toObject() },
+        checkoutUrl: null,
+      })
+    }
+
     // Use custom returnUrl or fallback to project's web URL based on projectId
     // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
@@ -91,9 +125,6 @@ const createDonationHandler = async (req: Request, res: Response) => {
       successUrl: `${baseUrl}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/donate/cancel`,
     })
-
-    // Detect live vs test mode from Stripe key
-    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
 
     // Create payment record in DB
     const payment = await Payment.create({

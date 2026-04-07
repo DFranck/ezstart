@@ -89,6 +89,7 @@ export interface PayAdminDashboardTexts {
   purchase?: string
   subscription?: string
   invoice?: string
+  testimonial?: string
 
   // Payment statuses
   completed?: string
@@ -270,6 +271,7 @@ const TYPE_VARIANT: Record<PaymentType, 'purple' | 'cyan' | 'indigo' | 'pink'> =
   purchase: 'cyan',
   subscription: 'indigo',
   invoice: 'pink',
+  testimonial: 'purple',
 }
 
 // ========================================
@@ -1922,6 +1924,7 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   purchase: 'Purchase',
   subscription: 'Subscription',
   invoice: 'Invoice',
+  testimonial: 'Testimonial',
 
   // Payment statuses
   completed: 'Completed',
