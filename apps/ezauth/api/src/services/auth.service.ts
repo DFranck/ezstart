@@ -23,7 +23,7 @@ import { mapToRecord } from '../utils/map-to-record.js'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
-const ACCESS_TOKEN_EXPIRES_IN = '15m'
+const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
 const REFRESH_TOKEN_DAYS = 30
 
 function buildJwtPayload(user: AuthUserDocument) {

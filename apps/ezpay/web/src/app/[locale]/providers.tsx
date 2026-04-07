@@ -25,6 +25,9 @@ async function handleTokenRefresh(): Promise<string | null> {
 
 function handleAuthFailure() {
   useAuthStore.getState().logout()
+  if (typeof window !== 'undefined') {
+    window.location.href = '/'
+  }
 }
 
 export function Providers({ children }: { children: ReactNode }) {
