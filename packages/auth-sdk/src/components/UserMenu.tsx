@@ -48,6 +48,8 @@ export interface UserMenuProps {
   onManageAccount?: () => void
   /** Override texts for AccountModal */
   accountModalTexts?: Record<string, string>
+  /** Google OAuth URL for "Connect account" button in AccountModal */
+  googleOAuthUrl?: string
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -71,6 +73,7 @@ export function UserMenu({
   theme,
   onManageAccount,
   accountModalTexts,
+  googleOAuthUrl,
 }: UserMenuProps) {
   const { user, isAuthenticated, login, logout, isLoggingIn } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
@@ -190,6 +193,7 @@ export function UserMenu({
         languages={languages}
         currentLocale={currentLocale}
         onLocaleChange={onLocaleChange}
+        googleOAuthUrl={googleOAuthUrl}
       />
     </>
   )

@@ -2,6 +2,7 @@
 
 import { useNavLinks } from '@/hooks/useNavLinks'
 import { LoginButton, RequireAuth, SignedIn, SignedOut, UserMenu } from '@ezstart/auth-sdk'
+import { getApiUrl } from '@ezstart/config'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useTheme } from 'next-themes'
 import {
@@ -100,6 +101,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
               <UserMenu
                 avatarSize="sm"
                 theme={{ theme, setTheme }}
+                googleOAuthUrl={`${getApiUrl('ezauth')}/api/auth/google?app=ezstart`}
                 languages={[
                   { code: 'en', label: 'English' },
                   { code: 'fr', label: 'Français' },

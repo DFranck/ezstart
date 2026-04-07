@@ -6,6 +6,7 @@ import {
   Div,
   H3,
   Icon,
+  ImageCropper,
   Input,
   Label,
   Modal,
@@ -16,7 +17,7 @@ import {
   SheetTitle,
   Span,
 } from '@ezstart/ui/components'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth, useAuthContext } from '../provider.js'
 import { useAuthStore } from '../store.js'
@@ -45,6 +46,9 @@ export interface AccountModalTexts {
   save: string
   cancel: string
   profileUpdated: string
+  // Avatar
+  changeAvatar: string
+  cropAvatar: string
   // Password
   passwordSection: string
   currentPassword: string
@@ -90,6 +94,9 @@ const DEFAULT_TEXTS: AccountModalTexts = {
   save: 'Save',
   cancel: 'Cancel',
   profileUpdated: 'Profile updated successfully',
+  // Avatar
+  changeAvatar: 'Change avatar',
+  cropAvatar: 'Crop avatar',
   // Password
   passwordSection: 'Password',
   currentPassword: 'Current password',
@@ -141,7 +148,14 @@ export function AccountModal({
   const [editLastName, setEditLastName] = useState('')
   const [savingProfile, setSavingProfile] = useState(false)
 
+  // Avatar upload state
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [avatarFile, setAvatarFile] = useState<string | null>(null)
+  const [showCropper, setShowCropper] = useState(false)
+  const [savingAvatar, setSavingAvatar] = useState(false)
+
   // Password state
+  const [editingPassword, setEditingPassword] = useState(false)
   const [currentPasswordValue, setCurrentPasswordValue] = useState('')
   const [newPasswordValue, setNewPasswordValue] = useState('')
   const [savingPassword, setSavingPassword] = useState(false)
@@ -160,6 +174,42 @@ export function AccountModal({
 
   const cancelEditing = () => {
     setEditing(false)
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      setAvatarFile(reader.result as string)
+      setShowCropper(true)
+    }
+    reader.readAsDataURL(file)
+    // Reset input so the same file can be re-selected
+    e.target.value = ''
+  }
+
+  const handleCropComplete = async (croppedDataUrl: string) => {
+    setShowCropper(false)
+    setAvatarFile(null)
+    setSavingAvatar(true)
+    try {
+      const updatedUser = await client.updateProfile(
+        { avatar: croppedDataUrl },
+        accessToken || undefined
+      )
+      store.updateUser(updatedUser)
+      toast.success(texts.profileUpdated)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update avatar')
+    } finally {
+      setSavingAvatar(false)
+    }
+  }
+
+  const handleCropCancel = () => {
+    setShowCropper(false)
+    setAvatarFile(null)
   }
 
   const saveProfile = async () => {
@@ -290,9 +340,30 @@ export function AccountModal({
           {/* ── Profile ── */}
           {activeTab === 'profile' && (
             <>
+              {/* Hidden file input for avatar upload */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
               {/* Avatar + name */}
               <Div className="flex items-center gap-4">
-                <UserAvatar size="lg" user={user} />
+                <Div
+                  className="relative cursor-pointer group shrink-0"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <UserAvatar size="lg" user={user} />
+                  <Div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    {savingAvatar ? (
+                      <Icon name="lucide:Loader2" className="w-5 h-5 text-white animate-spin" />
+                    ) : (
+                      <Icon name="lucide:Camera" className="w-5 h-5 text-white" />
+                    )}
+                  </Div>
+                </Div>
                 <Div className="flex flex-col gap-1 flex-1">
                   {editing ? (
                     <>
@@ -379,7 +450,11 @@ export function AccountModal({
                   onClick={handleConnectGoogle}
                   disabled={!googleOAuthUrl}
                 >
-                  <Icon name="lucide:Link" className="w-4 h-4 text-muted-foreground shrink-0" />
+                  {googleOAuthUrl ? (
+                    <Icon name="fa:FaGoogle" className="w-4 h-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <Icon name="lucide:Link" className="w-4 h-4 text-muted-foreground shrink-0" />
+                  )}
                   <Span className="text-sm text-muted-foreground">{texts.connectAccount}</Span>
                 </Button>
               </Div>
@@ -400,37 +475,65 @@ export function AccountModal({
               {/* Password */}
               <Div className="space-y-3">
                 <H3 className="text-sm font-semibold text-foreground">{texts.passwordSection}</H3>
-                <Div className="space-y-2">
-                  <Div>
-                    <Label className="text-xs text-muted-foreground">{texts.currentPassword}</Label>
-                    <Input
-                      type="password"
-                      value={currentPasswordValue}
-                      onChange={e => setCurrentPasswordValue(e.target.value)}
-                      placeholder={texts.currentPassword}
-                      className="mt-1"
-                    />
-                  </Div>
-                  <Div>
-                    <Label className="text-xs text-muted-foreground">{texts.newPassword}</Label>
-                    <Input
-                      type="password"
-                      value={newPasswordValue}
-                      onChange={e => setNewPasswordValue(e.target.value)}
-                      placeholder={texts.newPassword}
-                      className="mt-1"
-                    />
-                  </Div>
+                {!editingPassword ? (
                   <Button
                     variant="outline"
                     size="sm"
-                    className="cursor-pointer mt-1"
-                    onClick={handleChangePassword}
-                    disabled={savingPassword || !newPasswordValue}
+                    className="cursor-pointer"
+                    onClick={() => setEditingPassword(true)}
                   >
+                    <Icon name="lucide:Lock" className="w-4 h-4 mr-1.5" />
                     {texts.changePassword}
                   </Button>
-                </Div>
+                ) : (
+                  <Div className="space-y-2">
+                    <Div>
+                      <Label className="text-xs text-muted-foreground">
+                        {texts.currentPassword}
+                      </Label>
+                      <Input
+                        type="password"
+                        value={currentPasswordValue}
+                        onChange={e => setCurrentPasswordValue(e.target.value)}
+                        placeholder={texts.currentPassword}
+                        className="mt-1"
+                      />
+                    </Div>
+                    <Div>
+                      <Label className="text-xs text-muted-foreground">{texts.newPassword}</Label>
+                      <Input
+                        type="password"
+                        value={newPasswordValue}
+                        onChange={e => setNewPasswordValue(e.target.value)}
+                        placeholder={texts.newPassword}
+                        className="mt-1"
+                      />
+                    </Div>
+                    <Div className="flex gap-2">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={handleChangePassword}
+                        disabled={savingPassword || !newPasswordValue}
+                      >
+                        {texts.changePassword}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setEditingPassword(false)
+                          setCurrentPasswordValue('')
+                          setNewPasswordValue('')
+                        }}
+                      >
+                        {texts.cancel}
+                      </Button>
+                    </Div>
+                  </Div>
+                )}
               </Div>
 
               <Div className="h-px bg-border" />
@@ -505,6 +608,26 @@ export function AccountModal({
           )}
         </Div>
       </Div>
+
+      {/* Avatar Cropper Modal */}
+      <Modal isOpen={showCropper} onClose={handleCropCancel} size="md" title={texts.cropAvatar}>
+        {avatarFile && (
+          <ImageCropper
+            src={avatarFile}
+            mode="round"
+            aspectRatio={1}
+            onCropComplete={croppedDataUrl => handleCropComplete(croppedDataUrl)}
+            onCancel={handleCropCancel}
+            maxOutputWidth={256}
+            outputQuality={0.85}
+            outputFormat="image/jpeg"
+            labels={{
+              apply: texts.save,
+              cancel: texts.cancel,
+            }}
+          />
+        )}
+      </Modal>
     </Modal>
   )
 }
