@@ -102,10 +102,11 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       }
     }
 
-    // Fetch the plan to snapshot its features at checkout time
+    // Fetch the plan to snapshot its features and trial config at checkout time
     const Plan = await getPlanModel()
     const plan = await Plan.findById(planId).lean()
     const snapshotFeatures = plan?.features || []
+    const trialDays = plan?.trialDays || 0
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
@@ -132,6 +133,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
         durationInMonths: validatedPromo.durationInMonths,
         code: promoCode,
       } : undefined,
+      trialDays: trialDays > 0 ? trialDays : undefined,
     })
 
     // Detect live vs test mode from Stripe key

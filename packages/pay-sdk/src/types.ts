@@ -173,6 +173,7 @@ export interface Plan {
   interval: 'month' | 'year'
   intervalCount: number
   features?: string[]
+  trialDays?: number
   active: boolean
   sortOrder: number
   stripePriceId?: string
@@ -189,6 +190,7 @@ export interface CreatePlanRequest {
   interval: 'month' | 'year'
   intervalCount: number
   features?: string[]
+  trialDays?: number
   sortOrder?: number
   stripePriceId?: string
 }
@@ -201,6 +203,7 @@ export interface UpdatePlanRequest {
   interval?: 'month' | 'year'
   intervalCount?: number
   features?: string[]
+  trialDays?: number
   active?: boolean
   sortOrder?: number
   stripePriceId?: string | null

@@ -102,7 +102,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         const mappedStatus = statusMap[data.status] || 'pending'
 
-        const updateFields: Record<string, unknown> = { status: mappedStatus }
+        const updateFields: Record<string, unknown> = {
+          status: mappedStatus,
+          'metadata.subscriptionStatus': data.status,
+        }
 
         // Track cancel-at-period-end state
         if (data.cancelAtPeriodEnd !== undefined) {
