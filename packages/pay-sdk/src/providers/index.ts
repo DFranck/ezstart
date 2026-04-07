@@ -6,6 +6,7 @@
 export type {
   IPaymentProvider,
   PaymentProviderConfig,
+  DiscountInfo,
   CheckoutOptions,
   CheckoutResult,
   SubscriptionCheckoutOptions,

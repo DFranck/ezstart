@@ -83,6 +83,81 @@ export interface PayClientConfig {
   onAuthFailure?: () => void
 }
 
+// Promo Types
+export type PromoDiscountType = 'percent' | 'fixed'
+
+export type PromoDuration = 'once' | 'repeating' | 'forever'
+
+export interface Promo {
+  id: string
+  code: string
+  appName: string
+  discountType: PromoDiscountType
+  discountValue: number
+  currency?: string
+  duration: PromoDuration
+  durationInMonths?: number
+  maxUses?: number
+  usedCount: number
+  active: boolean
+  expiresAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreatePromoRequest {
+  code: string
+  appName: string
+  discountType: PromoDiscountType
+  discountValue: number
+  currency?: string
+  duration: PromoDuration
+  durationInMonths?: number
+  maxUses?: number
+  active?: boolean
+  expiresAt?: string
+}
+
+export interface UpdatePromoRequest {
+  discountType?: PromoDiscountType
+  discountValue?: number
+  currency?: string
+  duration?: PromoDuration
+  durationInMonths?: number
+  maxUses?: number | null
+  active?: boolean
+  expiresAt?: string | null
+}
+
+export interface PromoValidationResponse {
+  success: boolean
+  data: {
+    valid: boolean
+    reason?: string
+    discountType?: PromoDiscountType
+    discountValue?: number
+    currency?: string
+    duration?: PromoDuration
+  }
+}
+
+export interface PromoResponse {
+  success: boolean
+  data: {
+    promo: Promo
+  }
+}
+
+export interface PromosListResponse {
+  success: boolean
+  data: Promo[]
+  meta: {
+    total: number
+    limit: number
+    offset: number
+  }
+}
+
 // API Requests
 export interface CreateDonationRequest {
   projectId: string
@@ -106,6 +181,7 @@ export interface CreatePurchaseRequest {
   userId?: string
   customerName?: string
   customerEmail?: string
+  promoCode?: string
 }
 
 export interface CreateSubscriptionRequest {
@@ -119,6 +195,7 @@ export interface CreateSubscriptionRequest {
   userId?: string
   customerName?: string
   customerEmail?: string
+  promoCode?: string
 }
 
 // API Responses

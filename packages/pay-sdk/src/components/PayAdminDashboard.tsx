@@ -1,0 +1,1289 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Badge,
+  Button,
+  Card,
+  DataTable,
+  DataTableColumnHeader,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Div,
+  Icon,
+  Input,
+  Label,
+  P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Skeleton,
+  Span,
+  Switch,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  type ColumnDef,
+} from '@ezstart/ui/components'
+import type { Payment, PaymentStatus, PaymentType, Promo, PromoDiscountType, PromoDuration } from '../types.js'
+import { formatCurrency } from '../utils/format-currency.js'
+import { usePayContext } from '../provider.js'
+import { ConfirmActionDialog } from './ConfirmActionDialog.js'
+
+// ========================================
+// Types
+// ========================================
+
+export interface PayAdminDashboardTexts {
+  // Tabs
+  paymentsTab?: string
+  subscriptionsTab?: string
+  promosTab?: string
+
+  // Stats
+  totalRevenue?: string
+  totalPayments?: string
+  completedPayments?: string
+  failedPayments?: string
+  activeSubscriptions?: string
+  mrr?: string
+  totalPromos?: string
+  activePromos?: string
+  totalUses?: string
+
+  // Payment table headers
+  dateHeader?: string
+  userHeader?: string
+  typeHeader?: string
+  amountHeader?: string
+  statusHeader?: string
+  actionsHeader?: string
+
+  // Subscription table headers
+  planHeader?: string
+  intervalHeader?: string
+  startedHeader?: string
+
+  // Promo table headers
+  codeHeader?: string
+  discountHeader?: string
+  durationHeader?: string
+  usesHeader?: string
+  expiryHeader?: string
+
+  // Filters
+  allTypes?: string
+  allStatuses?: string
+  searchPlaceholder?: string
+
+  // Payment types
+  donation?: string
+  purchase?: string
+  subscription?: string
+  invoice?: string
+
+  // Payment statuses
+  completed?: string
+  pending?: string
+  failed?: string
+  refunded?: string
+  cancelled?: string
+
+  // Subscription intervals
+  monthly?: string
+
+  // Actions
+  refund?: string
+  refundTitle?: string
+  refundDescription?: string
+  refundSuccess?: string
+  refundError?: string
+  cancelSubscription?: string
+  cancelSubscriptionTitle?: string
+  cancelSubscriptionDescription?: string
+  cancelSubscriptionSuccess?: string
+  cancelSubscriptionError?: string
+
+  // Promo actions
+  createPromo?: string
+  createPromoTitle?: string
+  deletePromo?: string
+  deletePromoTitle?: string
+  deletePromoDescription?: string
+  deletePromoSuccess?: string
+  deletePromoError?: string
+  togglePromoError?: string
+
+  // Promo form labels
+  promoCode?: string
+  promoDiscountType?: string
+  promoDiscountValue?: string
+  promoCurrency?: string
+  promoDuration?: string
+  promoDurationInMonths?: string
+  promoMaxUses?: string
+  promoExpiryDate?: string
+  promoDiscountPercent?: string
+  promoDiscountFixed?: string
+  promoDurationOnce?: string
+  promoDurationRepeating?: string
+  promoDurationForever?: string
+  promoActive?: string
+  promoInactive?: string
+  promoNoExpiry?: string
+
+  // Dialog common
+  confirm?: string
+  cancel?: string
+  loading?: string
+  close?: string
+  retry?: string
+  save?: string
+  create?: string
+
+  // Empty states
+  noPayments?: string
+  noSubscriptions?: string
+  noPromos?: string
+}
+
+export interface PayAdminDashboardProps {
+  appName: string
+  className?: string
+  texts?: Partial<PayAdminDashboardTexts>
+}
+
+// ========================================
+// Constants
+// ========================================
+
+const PAGE_SIZE = 20
+
+const STATUS_VARIANT: Record<
+  PaymentStatus,
+  'success' | 'warning' | 'destructive' | 'info' | 'secondary'
+> = {
+  completed: 'success',
+  pending: 'warning',
+  failed: 'destructive',
+  refunded: 'info',
+  cancelled: 'secondary',
+}
+
+const TYPE_VARIANT: Record<PaymentType, 'purple' | 'cyan' | 'indigo' | 'pink'> = {
+  donation: 'purple',
+  purchase: 'cyan',
+  subscription: 'indigo',
+  invoice: 'pink',
+}
+
+// ========================================
+// Helpers
+// ========================================
+
+function formatDate(dateStr: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(dateStr))
+}
+
+function formatDateShort(dateStr: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+  }).format(new Date(dateStr))
+}
+
+// ========================================
+// Sub-components
+// ========================================
+
+function StatCard({
+  label,
+  value,
+  loading,
+}: {
+  label: string
+  value: string | number
+  loading: boolean
+}) {
+  return (
+    <Card className="p-6">
+      <P className="text-sm text-muted-foreground mb-1">{label}</P>
+      {loading ? (
+        <Skeleton className="h-8 w-24" />
+      ) : (
+        <P className="text-2xl font-bold">{value}</P>
+      )}
+    </Card>
+  )
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <Div className="flex flex-col items-center justify-center gap-4 p-12 rounded-lg border-2 border-dashed border-muted-foreground/20">
+      <Icon name="lucide:Receipt" className="w-12 h-12 text-muted-foreground/40" />
+      <P className="text-muted-foreground text-center">{message}</P>
+    </Div>
+  )
+}
+
+// ========================================
+// Payments Tab
+// ========================================
+
+function PaymentsTab({
+  appName,
+  t,
+}: {
+  appName: string
+  t: Required<PayAdminDashboardTexts>
+}) {
+  const { client } = usePayContext()
+
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [totalPayments, setTotalPayments] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  // Stats
+  const [totalRevenue, setTotalRevenue] = useState(0)
+  const [completedCount, setCompletedCount] = useState(0)
+  const [failedCount, setFailedCount] = useState(0)
+
+  // Filters
+  const [typeFilter, setTypeFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Refund dialog
+  const [refundDialog, setRefundDialog] = useState<{
+    open: boolean
+    paymentId: string | null
+  }>({ open: false, paymentId: null })
+
+  // Debounced search
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value)
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    searchTimerRef.current = setTimeout(() => {
+      setSearchQuery(value)
+    }, 400)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    }
+  }, [])
+
+  // Fetch stats
+  useEffect(() => {
+    setStatsLoading(true)
+    client
+      .getPayments({ limit: 1000 })
+      .then(result => {
+        let revenue = 0
+        let completed = 0
+        let failed = 0
+        for (const p of result.payments) {
+          if (p.status === 'completed') {
+            revenue += p.amount
+            completed++
+          }
+          if (p.status === 'failed') {
+            failed++
+          }
+        }
+        setTotalRevenue(revenue)
+        setTotalPayments(result.total)
+        setCompletedCount(completed)
+        setFailedCount(failed)
+      })
+      .catch(() => {})
+      .finally(() => setStatsLoading(false))
+  }, [client])
+
+  // Fetch payments
+  const fetchPayments = useCallback(() => {
+    setLoading(true)
+    const params: Record<string, string | number | undefined> = {
+      limit: 1000,
+    }
+    if (typeFilter !== 'all') params.type = typeFilter
+    if (statusFilter !== 'all') params.status = statusFilter
+
+    client
+      .getPayments(params as Parameters<typeof client.getPayments>[0])
+      .then(result => {
+        let filtered = result.payments
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase()
+          filtered = filtered.filter(
+            p =>
+              p.customerEmail?.toLowerCase().includes(q) ||
+              p.customerName?.toLowerCase().includes(q) ||
+              p.paymentId?.toLowerCase().includes(q)
+          )
+        }
+        setPayments(filtered)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [client, typeFilter, statusFilter, searchQuery])
+
+  useEffect(() => {
+    fetchPayments()
+  }, [fetchPayments])
+
+  // Refund handler
+  const handleRefundConfirm = useCallback(async () => {
+    if (!refundDialog.paymentId) return
+    await client.refundPayment(refundDialog.paymentId)
+    fetchPayments()
+  }, [client, refundDialog.paymentId, fetchPayments])
+
+  // Columns
+  const columns: ColumnDef<Payment>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'createdAt',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.dateHeader} />,
+        cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.createdAt)}</Span>,
+      },
+      {
+        accessorKey: 'customerEmail',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.userHeader} />,
+        cell: ({ row }) => (
+          <Span className="text-sm">{row.original.customerEmail || row.original.userId || '-'}</Span>
+        ),
+      },
+      {
+        accessorKey: 'type',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.typeHeader} />,
+        cell: ({ row }) => (
+          <Badge variant={TYPE_VARIANT[row.original.type]} size="sm">
+            {t[row.original.type] || row.original.type}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: 'amount',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.amountHeader} />,
+        cell: ({ row }) => (
+          <Span className="font-medium">
+            {formatCurrency(row.original.amount, row.original.currency)}
+          </Span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.statusHeader} />,
+        cell: ({ row }) => (
+          <Badge variant={STATUS_VARIANT[row.original.status]} size="sm" dot>
+            {t[row.original.status] || row.original.status}
+          </Badge>
+        ),
+      },
+      {
+        id: 'actions',
+        header: t.actionsHeader,
+        cell: ({ row }) => {
+          const payment = row.original
+          if (payment.status !== 'completed') return null
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRefundDialog({ open: true, paymentId: payment.id })}
+            >
+              {t.refund}
+            </Button>
+          )
+        },
+      },
+    ],
+    [t]
+  )
+
+  return (
+    <Div className="space-y-6">
+      {/* Stats */}
+      <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label={t.totalRevenue} value={formatCurrency(totalRevenue)} loading={statsLoading} />
+        <StatCard label={t.totalPayments} value={totalPayments} loading={statsLoading} />
+        <StatCard label={t.completedPayments} value={completedCount} loading={statsLoading} />
+        <StatCard label={t.failedPayments} value={failedCount} loading={statsLoading} />
+      </Div>
+
+      {/* Filters */}
+      <Div className="flex flex-col sm:flex-row gap-3">
+        <Input
+          placeholder={t.searchPlaceholder}
+          value={searchInput}
+          onChange={e => handleSearchChange(e.target.value)}
+          className="w-full sm:w-64"
+        />
+
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder={t.allTypes} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t.allTypes}</SelectItem>
+            <SelectItem value="donation">{t.donation}</SelectItem>
+            <SelectItem value="purchase">{t.purchase}</SelectItem>
+            <SelectItem value="subscription">{t.subscription}</SelectItem>
+            <SelectItem value="invoice">{t.invoice}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder={t.allStatuses} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t.allStatuses}</SelectItem>
+            <SelectItem value="pending">{t.pending}</SelectItem>
+            <SelectItem value="completed">{t.completed}</SelectItem>
+            <SelectItem value="failed">{t.failed}</SelectItem>
+            <SelectItem value="refunded">{t.refunded}</SelectItem>
+            <SelectItem value="cancelled">{t.cancelled}</SelectItem>
+          </SelectContent>
+        </Select>
+      </Div>
+
+      {/* Table */}
+      {loading ? (
+        <Card className="p-8">
+          <Div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </Div>
+        </Card>
+      ) : payments.length === 0 ? (
+        <EmptyState message={t.noPayments} />
+      ) : (
+        <DataTable columns={columns} data={payments} pageSize={PAGE_SIZE} />
+      )}
+
+      {/* Refund Dialog */}
+      <ConfirmActionDialog
+        open={refundDialog.open}
+        onOpenChange={open => setRefundDialog(prev => ({ ...prev, open }))}
+        title={t.refundTitle}
+        description={t.refundDescription}
+        onConfirm={handleRefundConfirm}
+        variant="destructive"
+        texts={{
+          confirmLabel: t.confirm,
+          cancelLabel: t.cancel,
+          loadingMessage: t.loading,
+          successMessage: t.refundSuccess,
+          errorMessage: t.refundError,
+          retryLabel: t.retry,
+          closeLabel: t.close,
+        }}
+      />
+    </Div>
+  )
+}
+
+// ========================================
+// Subscriptions Tab
+// ========================================
+
+function SubscriptionsTab({
+  appName,
+  t,
+}: {
+  appName: string
+  t: Required<PayAdminDashboardTexts>
+}) {
+  const { client } = usePayContext()
+
+  const [subscriptions, setSubscriptions] = useState<Payment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  // Stats
+  const [activeCount, setActiveCount] = useState(0)
+  const [mrr, setMrr] = useState(0)
+
+  // Cancel dialog
+  const [cancelDialog, setCancelDialog] = useState<{
+    open: boolean
+    payment: Payment | null
+  }>({ open: false, payment: null })
+
+  // Fetch subscriptions
+  const fetchSubscriptions = useCallback(() => {
+    setLoading(true)
+    setStatsLoading(true)
+    client
+      .getSubscriptions({ limit: 1000 })
+      .then(result => {
+        setSubscriptions(result.payments)
+        let active = 0
+        let monthlyRevenue = 0
+        for (const sub of result.payments) {
+          if (sub.status === 'completed') {
+            active++
+            const intervalCount =
+              (sub.metadata?.intervalCount as number | undefined) || 1
+            monthlyRevenue += sub.amount / intervalCount
+          }
+        }
+        setActiveCount(active)
+        setMrr(monthlyRevenue)
+      })
+      .catch(() => {})
+      .finally(() => {
+        setLoading(false)
+        setStatsLoading(false)
+      })
+  }, [client])
+
+  useEffect(() => {
+    fetchSubscriptions()
+  }, [fetchSubscriptions])
+
+  // Cancel handler
+  const handleCancelConfirm = useCallback(async () => {
+    if (!cancelDialog.payment) return
+    const subscriptionId = cancelDialog.payment.metadata?.subscriptionId as string | undefined
+    if (!subscriptionId) {
+      throw new Error('No subscription ID found')
+    }
+    await client.cancelSubscription(subscriptionId)
+    fetchSubscriptions()
+  }, [client, cancelDialog.payment, fetchSubscriptions])
+
+  // Columns
+  const columns: ColumnDef<Payment>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'customerEmail',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.userHeader} />,
+        cell: ({ row }) => (
+          <Span className="text-sm">{row.original.customerEmail || row.original.userId || '-'}</Span>
+        ),
+      },
+      {
+        accessorKey: 'planName',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.planHeader} />,
+        cell: ({ row }) => (
+          <Span className="text-sm font-medium">
+            {(row.original.metadata?.planName as string) || '-'}
+          </Span>
+        ),
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'amount',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.amountHeader} />,
+        cell: ({ row }) => (
+          <Span className="font-medium">
+            {formatCurrency(row.original.amount, row.original.currency)}
+          </Span>
+        ),
+      },
+      {
+        accessorKey: 'interval',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.intervalHeader} />,
+        cell: ({ row }) => {
+          const intervalCount =
+            (row.original.metadata?.intervalCount as number | undefined) || 1
+          return (
+            <Span className="text-sm">
+              {intervalCount > 1 ? `${intervalCount}x ` : ''}
+              {t.monthly}
+            </Span>
+          )
+        },
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'status',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.statusHeader} />,
+        cell: ({ row }) => (
+          <Badge variant={STATUS_VARIANT[row.original.status]} size="sm" dot>
+            {t[row.original.status] || row.original.status}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: 'createdAt',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.startedHeader} />,
+        cell: ({ row }) => (
+          <Span className="text-sm">{formatDateShort(row.original.createdAt)}</Span>
+        ),
+      },
+      {
+        id: 'actions',
+        header: t.actionsHeader,
+        cell: ({ row }) => {
+          const payment = row.original
+          if (payment.status !== 'completed' && payment.status !== 'pending') return null
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCancelDialog({ open: true, payment })}
+            >
+              {t.cancelSubscription}
+            </Button>
+          )
+        },
+      },
+    ],
+    [t]
+  )
+
+  return (
+    <Div className="space-y-6">
+      {/* Stats */}
+      <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StatCard label={t.activeSubscriptions} value={activeCount} loading={statsLoading} />
+        <StatCard label={t.mrr} value={formatCurrency(mrr)} loading={statsLoading} />
+      </Div>
+
+      {/* Table */}
+      {loading ? (
+        <Card className="p-8">
+          <Div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </Div>
+        </Card>
+      ) : subscriptions.length === 0 ? (
+        <EmptyState message={t.noSubscriptions} />
+      ) : (
+        <DataTable columns={columns} data={subscriptions} pageSize={PAGE_SIZE} />
+      )}
+
+      {/* Cancel Dialog */}
+      <ConfirmActionDialog
+        open={cancelDialog.open}
+        onOpenChange={open => setCancelDialog(prev => ({ ...prev, open }))}
+        title={t.cancelSubscriptionTitle}
+        description={t.cancelSubscriptionDescription}
+        onConfirm={handleCancelConfirm}
+        variant="destructive"
+        texts={{
+          confirmLabel: t.confirm,
+          cancelLabel: t.cancel,
+          loadingMessage: t.loading,
+          successMessage: t.cancelSubscriptionSuccess,
+          errorMessage: t.cancelSubscriptionError,
+          retryLabel: t.retry,
+          closeLabel: t.close,
+        }}
+      />
+    </Div>
+  )
+}
+
+// ========================================
+// Create Promo Dialog
+// ========================================
+
+function CreatePromoDialog({
+  open,
+  onOpenChange,
+  appName,
+  t,
+  onCreated,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  appName: string
+  t: Required<PayAdminDashboardTexts>
+  onCreated: () => void
+}) {
+  const { client } = usePayContext()
+
+  const [code, setCode] = useState('')
+  const [discountType, setDiscountType] = useState<PromoDiscountType>('percent')
+  const [discountValue, setDiscountValue] = useState('')
+  const [currency, setCurrency] = useState('EUR')
+  const [duration, setDuration] = useState<PromoDuration>('once')
+  const [durationInMonths, setDurationInMonths] = useState('')
+  const [maxUses, setMaxUses] = useState('')
+  const [expiresAt, setExpiresAt] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Reset form on open
+  useEffect(() => {
+    if (open) {
+      setCode('')
+      setDiscountType('percent')
+      setDiscountValue('')
+      setCurrency('EUR')
+      setDuration('once')
+      setDurationInMonths('')
+      setMaxUses('')
+      setExpiresAt('')
+      setError(null)
+    }
+  }, [open])
+
+  const handleSubmit = useCallback(async () => {
+    setSaving(true)
+    setError(null)
+    try {
+      await client.createPromo({
+        code: code.toUpperCase(),
+        appName,
+        discountType,
+        discountValue: Number(discountValue),
+        currency: discountType === 'fixed' ? currency : undefined,
+        duration,
+        durationInMonths: duration === 'repeating' ? Number(durationInMonths) : undefined,
+        maxUses: maxUses ? Number(maxUses) : undefined,
+        expiresAt: expiresAt || undefined,
+        active: true,
+      })
+      onCreated()
+      onOpenChange(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSaving(false)
+    }
+  }, [
+    client,
+    code,
+    appName,
+    discountType,
+    discountValue,
+    currency,
+    duration,
+    durationInMonths,
+    maxUses,
+    expiresAt,
+    onCreated,
+    onOpenChange,
+  ])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t.createPromoTitle}</DialogTitle>
+          <DialogDescription>{t.createPromo}</DialogDescription>
+        </DialogHeader>
+
+        <Div className="space-y-4">
+          {/* Code */}
+          <Div className="space-y-2">
+            <Label>{t.promoCode}</Label>
+            <Input
+              value={code}
+              onChange={e => setCode(e.target.value.toUpperCase())}
+              placeholder="SUMMER2026"
+            />
+          </Div>
+
+          {/* Discount Type */}
+          <Div className="space-y-2">
+            <Label>{t.promoDiscountType}</Label>
+            <Select
+              value={discountType}
+              onValueChange={v => setDiscountType(v as PromoDiscountType)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="percent">{t.promoDiscountPercent}</SelectItem>
+                <SelectItem value="fixed">{t.promoDiscountFixed}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Div>
+
+          {/* Discount Value */}
+          <Div className="space-y-2">
+            <Label>{t.promoDiscountValue}</Label>
+            <Input
+              type="number"
+              value={discountValue}
+              onChange={e => setDiscountValue(e.target.value)}
+              placeholder={discountType === 'percent' ? '20' : '5.00'}
+            />
+          </Div>
+
+          {/* Currency (only for fixed) */}
+          {discountType === 'fixed' && (
+            <Div className="space-y-2">
+              <Label>{t.promoCurrency}</Label>
+              <Input
+                value={currency}
+                onChange={e => setCurrency(e.target.value.toUpperCase())}
+                placeholder="EUR"
+              />
+            </Div>
+          )}
+
+          {/* Duration */}
+          <Div className="space-y-2">
+            <Label>{t.promoDuration}</Label>
+            <Select value={duration} onValueChange={v => setDuration(v as PromoDuration)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="once">{t.promoDurationOnce}</SelectItem>
+                <SelectItem value="repeating">{t.promoDurationRepeating}</SelectItem>
+                <SelectItem value="forever">{t.promoDurationForever}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Div>
+
+          {/* Duration in months (only for repeating) */}
+          {duration === 'repeating' && (
+            <Div className="space-y-2">
+              <Label>{t.promoDurationInMonths}</Label>
+              <Input
+                type="number"
+                value={durationInMonths}
+                onChange={e => setDurationInMonths(e.target.value)}
+                placeholder="3"
+              />
+            </Div>
+          )}
+
+          {/* Max uses */}
+          <Div className="space-y-2">
+            <Label>{t.promoMaxUses}</Label>
+            <Input
+              type="number"
+              value={maxUses}
+              onChange={e => setMaxUses(e.target.value)}
+              placeholder="100"
+            />
+          </Div>
+
+          {/* Expiry date */}
+          <Div className="space-y-2">
+            <Label>{t.promoExpiryDate}</Label>
+            <Input
+              type="date"
+              value={expiresAt}
+              onChange={e => setExpiresAt(e.target.value)}
+            />
+          </Div>
+
+          {/* Error */}
+          {error && <P className="text-sm text-destructive">{error}</P>}
+        </Div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+            {t.cancel}
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={saving || !code || !discountValue}
+          >
+            {saving && <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin mr-2" />}
+            {t.create}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ========================================
+// Promos Tab
+// ========================================
+
+function PromosTab({
+  appName,
+  t,
+}: {
+  appName: string
+  t: Required<PayAdminDashboardTexts>
+}) {
+  const { client } = usePayContext()
+
+  const [promos, setPromos] = useState<Promo[]>([])
+  const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  // Stats
+  const [totalPromos, setTotalPromos] = useState(0)
+  const [activePromosCount, setActivePromosCount] = useState(0)
+  const [totalUsesCount, setTotalUsesCount] = useState(0)
+
+  // Create dialog
+  const [createOpen, setCreateOpen] = useState(false)
+
+  // Delete dialog
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean
+    promoId: string | null
+  }>({ open: false, promoId: null })
+
+  // Fetch promos
+  const fetchPromos = useCallback(() => {
+    setLoading(true)
+    setStatsLoading(true)
+    client
+      .listPromos({ appName, limit: 1000 })
+      .then(result => {
+        const list = result.data || []
+        setPromos(list)
+        setTotalPromos(result.meta?.total ?? list.length)
+        setActivePromosCount(list.filter(p => p.active).length)
+        setTotalUsesCount(list.reduce((sum, p) => sum + p.usedCount, 0))
+      })
+      .catch(() => {})
+      .finally(() => {
+        setLoading(false)
+        setStatsLoading(false)
+      })
+  }, [client, appName])
+
+  useEffect(() => {
+    fetchPromos()
+  }, [fetchPromos])
+
+  // Toggle active
+  const handleToggleActive = useCallback(
+    async (promo: Promo) => {
+      try {
+        await client.updatePromo(promo.id, { active: !promo.active })
+        fetchPromos()
+      } catch {
+        // Error is visible in the UI via the switch not toggling
+      }
+    },
+    [client, fetchPromos]
+  )
+
+  // Delete handler
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteDialog.promoId) return
+    await client.deletePromo(deleteDialog.promoId)
+    fetchPromos()
+  }, [client, deleteDialog.promoId, fetchPromos])
+
+  // Format discount display
+  const formatDiscount = useCallback((promo: Promo) => {
+    if (promo.discountType === 'percent') {
+      return `${promo.discountValue}%`
+    }
+    return formatCurrency(promo.discountValue, promo.currency || 'EUR')
+  }, [])
+
+  // Duration label
+  const getDurationLabel = useCallback(
+    (promo: Promo) => {
+      if (promo.duration === 'once') return t.promoDurationOnce
+      if (promo.duration === 'forever') return t.promoDurationForever
+      if (promo.duration === 'repeating' && promo.durationInMonths) {
+        return `${t.promoDurationRepeating} (${promo.durationInMonths}m)`
+      }
+      return promo.duration
+    },
+    [t]
+  )
+
+  // Columns
+  const columns: ColumnDef<Promo>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'code',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.codeHeader} />,
+        cell: ({ row }) => (
+          <Span className="font-mono font-medium">{row.original.code}</Span>
+        ),
+      },
+      {
+        accessorKey: 'discountValue',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.discountHeader} />,
+        cell: ({ row }) => <Span className="font-medium">{formatDiscount(row.original)}</Span>,
+      },
+      {
+        accessorKey: 'duration',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.durationHeader} />,
+        cell: ({ row }) => <Span className="text-sm">{getDurationLabel(row.original)}</Span>,
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'usedCount',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.usesHeader} />,
+        cell: ({ row }) => (
+          <Span className="text-sm">
+            {row.original.usedCount}
+            {row.original.maxUses ? `/${row.original.maxUses}` : ''}
+          </Span>
+        ),
+      },
+      {
+        accessorKey: 'active',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.statusHeader} />,
+        cell: ({ row }) => (
+          <Badge variant={row.original.active ? 'success' : 'secondary'} size="sm" dot>
+            {row.original.active ? t.promoActive : t.promoInactive}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: 'expiresAt',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.expiryHeader} />,
+        cell: ({ row }) => (
+          <Span className="text-sm">
+            {row.original.expiresAt ? formatDateShort(row.original.expiresAt) : t.promoNoExpiry}
+          </Span>
+        ),
+      },
+      {
+        id: 'actions',
+        header: t.actionsHeader,
+        cell: ({ row }) => {
+          const promo = row.original
+          return (
+            <Div className="flex items-center gap-2">
+              <Switch
+                checked={promo.active}
+                onCheckedChange={() => handleToggleActive(promo)}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDeleteDialog({ open: true, promoId: promo.id })}
+              >
+                <Icon name="lucide:Trash2" size={14} />
+              </Button>
+            </Div>
+          )
+        },
+      },
+    ],
+    [t, formatDiscount, getDurationLabel, handleToggleActive]
+  )
+
+  return (
+    <Div className="space-y-6">
+      {/* Stats + Create button */}
+      <Div className="flex flex-col sm:flex-row sm:items-end gap-4">
+        <Div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+          <StatCard label={t.totalPromos} value={totalPromos} loading={statsLoading} />
+          <StatCard label={t.activePromos} value={activePromosCount} loading={statsLoading} />
+          <StatCard label={t.totalUses} value={totalUsesCount} loading={statsLoading} />
+        </Div>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Icon name="lucide:Plus" size={16} className="mr-2" />
+          {t.createPromo}
+        </Button>
+      </Div>
+
+      {/* Table */}
+      {loading ? (
+        <Card className="p-8">
+          <Div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </Div>
+        </Card>
+      ) : promos.length === 0 ? (
+        <EmptyState message={t.noPromos} />
+      ) : (
+        <DataTable columns={columns} data={promos} pageSize={PAGE_SIZE} />
+      )}
+
+      {/* Create Promo Dialog */}
+      <CreatePromoDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        appName={appName}
+        t={t}
+        onCreated={fetchPromos}
+      />
+
+      {/* Delete Dialog */}
+      <ConfirmActionDialog
+        open={deleteDialog.open}
+        onOpenChange={open => setDeleteDialog(prev => ({ ...prev, open }))}
+        title={t.deletePromoTitle}
+        description={t.deletePromoDescription}
+        onConfirm={handleDeleteConfirm}
+        variant="destructive"
+        texts={{
+          confirmLabel: t.confirm,
+          cancelLabel: t.cancel,
+          loadingMessage: t.loading,
+          successMessage: t.deletePromoSuccess,
+          errorMessage: t.deletePromoError,
+          retryLabel: t.retry,
+          closeLabel: t.close,
+        }}
+      />
+    </Div>
+  )
+}
+
+// ========================================
+// Main Component
+// ========================================
+
+const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
+  // Tabs
+  paymentsTab: 'Payments',
+  subscriptionsTab: 'Subscriptions',
+  promosTab: 'Promos',
+
+  // Stats
+  totalRevenue: 'Total Revenue',
+  totalPayments: 'Total Payments',
+  completedPayments: 'Completed',
+  failedPayments: 'Failed',
+  activeSubscriptions: 'Active Subscriptions',
+  mrr: 'Monthly Recurring Revenue',
+  totalPromos: 'Total Promos',
+  activePromos: 'Active Promos',
+  totalUses: 'Total Uses',
+
+  // Payment table headers
+  dateHeader: 'Date',
+  userHeader: 'User',
+  typeHeader: 'Type',
+  amountHeader: 'Amount',
+  statusHeader: 'Status',
+  actionsHeader: 'Actions',
+
+  // Subscription table headers
+  planHeader: 'Plan',
+  intervalHeader: 'Interval',
+  startedHeader: 'Started',
+
+  // Promo table headers
+  codeHeader: 'Code',
+  discountHeader: 'Discount',
+  durationHeader: 'Duration',
+  usesHeader: 'Uses',
+  expiryHeader: 'Expiry',
+
+  // Filters
+  allTypes: 'All types',
+  allStatuses: 'All statuses',
+  searchPlaceholder: 'Search by email...',
+
+  // Payment types
+  donation: 'Donation',
+  purchase: 'Purchase',
+  subscription: 'Subscription',
+  invoice: 'Invoice',
+
+  // Payment statuses
+  completed: 'Completed',
+  pending: 'Pending',
+  failed: 'Failed',
+  refunded: 'Refunded',
+  cancelled: 'Cancelled',
+
+  // Subscription intervals
+  monthly: 'Monthly',
+
+  // Actions
+  refund: 'Refund',
+  refundTitle: 'Refund Payment',
+  refundDescription: 'Are you sure you want to refund this payment? This action cannot be undone.',
+  refundSuccess: 'Payment refunded successfully',
+  refundError: 'Failed to refund payment',
+  cancelSubscription: 'Cancel',
+  cancelSubscriptionTitle: 'Cancel Subscription',
+  cancelSubscriptionDescription:
+    'Are you sure you want to cancel this subscription? The customer will lose access at the end of the current billing period.',
+  cancelSubscriptionSuccess: 'Subscription cancelled successfully',
+  cancelSubscriptionError: 'Failed to cancel subscription',
+
+  // Promo actions
+  createPromo: 'Create Promo',
+  createPromoTitle: 'Create Promo Code',
+  deletePromo: 'Delete',
+  deletePromoTitle: 'Delete Promo',
+  deletePromoDescription: 'Are you sure you want to delete this promo code? This action cannot be undone.',
+  deletePromoSuccess: 'Promo deleted successfully',
+  deletePromoError: 'Failed to delete promo',
+  togglePromoError: 'Failed to update promo',
+
+  // Promo form labels
+  promoCode: 'Code',
+  promoDiscountType: 'Discount Type',
+  promoDiscountValue: 'Discount Value',
+  promoCurrency: 'Currency',
+  promoDuration: 'Duration',
+  promoDurationInMonths: 'Duration (months)',
+  promoMaxUses: 'Max Uses',
+  promoExpiryDate: 'Expiry Date',
+  promoDiscountPercent: 'Percentage',
+  promoDiscountFixed: 'Fixed Amount',
+  promoDurationOnce: 'Once',
+  promoDurationRepeating: 'Repeating',
+  promoDurationForever: 'Forever',
+  promoActive: 'Active',
+  promoInactive: 'Inactive',
+  promoNoExpiry: 'No expiry',
+
+  // Dialog common
+  confirm: 'Confirm',
+  cancel: 'Cancel',
+  loading: 'Processing...',
+  close: 'Close',
+  retry: 'Retry',
+  save: 'Save',
+  create: 'Create',
+
+  // Empty states
+  noPayments: 'No payments found.',
+  noSubscriptions: 'No subscriptions found.',
+  noPromos: 'No promo codes yet.',
+}
+
+export function PayAdminDashboard({ appName, className, texts }: PayAdminDashboardProps) {
+  const t: Required<PayAdminDashboardTexts> = useMemo(
+    () => ({ ...DEFAULT_TEXTS, ...texts }),
+    [texts]
+  )
+
+  return (
+    <Div className={className}>
+      <Tabs defaultValue="payments">
+        <TabsList>
+          <TabsTrigger value="payments">{t.paymentsTab}</TabsTrigger>
+          <TabsTrigger value="subscriptions">{t.subscriptionsTab}</TabsTrigger>
+          <TabsTrigger value="promos">{t.promosTab}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="payments">
+          <PaymentsTab appName={appName} t={t} />
+        </TabsContent>
+
+        <TabsContent value="subscriptions">
+          <SubscriptionsTab appName={appName} t={t} />
+        </TabsContent>
+
+        <TabsContent value="promos">
+          <PromosTab appName={appName} t={t} />
+        </TabsContent>
+      </Tabs>
+    </Div>
+  )
+}

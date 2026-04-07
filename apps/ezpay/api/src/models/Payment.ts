@@ -123,6 +123,11 @@ const paymentSchema = new Schema<PaymentDocument>(
       // Pour invoices
       invoiceId: { type: String },
       invoiceNumber: { type: String },
+
+      // Pour promo codes
+      promoCode: { type: String },
+      originalAmount: { type: Number },
+      discountApplied: { type: Number },
     },
 
     // Dates

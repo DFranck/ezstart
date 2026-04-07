@@ -105,3 +105,51 @@ export const errorResponseSchema = z.object({
   success: z.boolean(),
   error: z.string(),
 })
+
+// Promo schemas
+export const promoDiscountTypeSchema = z.enum(['percent', 'fixed'])
+
+export const promoDurationSchema = z.enum(['once', 'repeating', 'forever'])
+
+export const createPromoSchema = z.object({
+  code: z.string().min(1).max(50),
+  appName: z.string().min(1),
+  discountType: promoDiscountTypeSchema,
+  discountValue: z.number().positive(),
+  currency: z.string().optional(),
+  duration: promoDurationSchema,
+  durationInMonths: z.number().int().min(1).optional(),
+  maxUses: z.number().int().min(1).optional(),
+  active: z.boolean().default(true),
+  expiresAt: z.string().datetime().optional(),
+})
+
+export const updatePromoSchema = z.object({
+  discountType: promoDiscountTypeSchema.optional(),
+  discountValue: z.number().positive().optional(),
+  currency: z.string().optional(),
+  duration: promoDurationSchema.optional(),
+  durationInMonths: z.number().int().min(1).optional(),
+  maxUses: z.number().int().min(1).nullable().optional(),
+  active: z.boolean().optional(),
+  expiresAt: z.string().datetime().nullable().optional(),
+})
+
+export const promoResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    promo: z.any(),
+  }),
+})
+
+export const promoValidationResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    valid: z.boolean(),
+    reason: z.string().optional(),
+    discountType: promoDiscountTypeSchema.optional(),
+    discountValue: z.number().optional(),
+    currency: z.string().optional(),
+    duration: promoDurationSchema.optional(),
+  }),
+})

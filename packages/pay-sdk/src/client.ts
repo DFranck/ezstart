@@ -3,11 +3,16 @@ import type {
   CreateDonationRequest,
   CreatePurchaseRequest,
   CreateSubscriptionRequest,
+  CreatePromoRequest,
+  UpdatePromoRequest,
   PayClientConfig,
   Payment,
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
+  PromoResponse,
+  PromosListResponse,
+  PromoValidationResponse,
 } from './types.js'
 
 // Helper to get the correct URLs based on environment
@@ -295,6 +300,98 @@ export class PayClient {
     }
 
     return result.payment
+  }
+
+  // ===== PROMOS =====
+
+  async createPromo(data: CreatePromoRequest): Promise<PromoResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create promo')
+    }
+
+    return result.data ?? result
+  }
+
+  async listPromos(params?: {
+    appName?: string
+    active?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<PromosListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== '') searchParams.set(key, String(value))
+      }
+    }
+
+    const response = await this.fetchWithAuth(
+      `${this.config.baseURL}/promos?${searchParams.toString()}`,
+      { headers: this.getHeaders() }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to list promos')
+    }
+
+    return result
+  }
+
+  async validatePromo(code: string, appName: string): Promise<PromoValidationResponse> {
+    const searchParams = new URLSearchParams({ appName })
+
+    const response = await fetch(
+      `${this.config.baseURL}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to validate promo')
+    }
+
+    return result
+  }
+
+  async updatePromo(promoId: string, data: UpdatePromoRequest): Promise<PromoResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos/${promoId}`, {
+      method: 'PATCH',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to update promo')
+    }
+
+    return result.data ?? result
+  }
+
+  async deletePromo(promoId: string): Promise<{ success: boolean }> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos/${promoId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to delete promo')
+    }
+
+    return result
   }
 }
 

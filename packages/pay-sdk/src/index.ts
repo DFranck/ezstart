@@ -51,6 +51,13 @@ export type {
   UserPaymentDashboardTexts,
 } from './components/UserPaymentDashboard.js'
 
+// Components - Admin Dashboard
+export { PayAdminDashboard } from './components/PayAdminDashboard.js'
+export type {
+  PayAdminDashboardProps,
+  PayAdminDashboardTexts,
+} from './components/PayAdminDashboard.js'
+
 // Components - Payment Success
 export { PaymentSuccessPage } from './components/PaymentSuccessPage.js'
 export type { PaymentSuccessPageProps } from './components/PaymentSuccessPage.js'
@@ -83,6 +90,14 @@ export type {
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
+  Promo,
+  PromoDiscountType,
+  PromoDuration,
+  CreatePromoRequest,
+  UpdatePromoRequest,
+  PromoResponse,
+  PromosListResponse,
+  PromoValidationResponse,
 } from './types.js'
 
 // Utils
@@ -101,4 +116,10 @@ export {
   paymentsListResponseSchema,
   statsResponseSchema,
   errorResponseSchema,
+  promoDiscountTypeSchema,
+  promoDurationSchema,
+  createPromoSchema,
+  updatePromoSchema,
+  promoResponseSchema,
+  promoValidationResponseSchema,
 } from './schemas.js'
