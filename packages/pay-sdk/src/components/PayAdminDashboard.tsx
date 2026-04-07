@@ -141,6 +141,8 @@ export interface PayAdminDashboardTexts {
   promoNoExpiry?: string
   promoOptional?: string
   promoUnlimitedHint?: string
+  promoRequired?: string
+  promoOptionalSection?: string
 
   // Dialog common
   confirm?: string
@@ -799,129 +801,129 @@ function CreatePromoDialog({
           <DialogDescription>{t.createPromo}</DialogDescription>
         </DialogHeader>
 
-        <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Code */}
-          <Div className="space-y-2">
-            <Label>{t.promoCode}</Label>
-            <Input
-              value={code}
-              onChange={e => setCode(e.target.value.toUpperCase())}
-              placeholder="EARTHDAY2026"
-            />
-          </Div>
+        <Div className="space-y-4">
+          {/* Required section */}
+          <Div>
+            <P className="text-xs text-muted-foreground font-medium mb-3">{t.promoRequired}</P>
+            <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Code */}
+              <Div className="space-y-2">
+                <Label>{t.promoCode}</Label>
+                <Input
+                  value={code}
+                  onChange={e => setCode(e.target.value.toUpperCase())}
+                  placeholder="EARTHDAY2026"
+                />
+              </Div>
 
-          {/* App Name (read-only) */}
-          <Div className="space-y-2">
-            <Label>{t.promoAppName}</Label>
-            <Input value={appName} disabled />
-          </Div>
+              {/* Discount Type */}
+              <Div className="space-y-2">
+                <Label>{t.promoDiscountType}</Label>
+                <Select
+                  value={discountType}
+                  onValueChange={v => setDiscountType(v as PromoDiscountType)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percent">{t.promoDiscountPercent}</SelectItem>
+                    <SelectItem value="fixed">{t.promoDiscountFixed}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Div>
 
-          {/* Discount Type */}
-          <Div className="space-y-2">
-            <Label>{t.promoDiscountType}</Label>
-            <Select
-              value={discountType}
-              onValueChange={v => setDiscountType(v as PromoDiscountType)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="percent">{t.promoDiscountPercent}</SelectItem>
-                <SelectItem value="fixed">{t.promoDiscountFixed}</SelectItem>
-              </SelectContent>
-            </Select>
-          </Div>
+              {/* Discount Value */}
+              <Div className="space-y-2">
+                <Label>{t.promoDiscountValue}</Label>
+                <Div className="relative">
+                  <Input
+                    type="number"
+                    value={discountValue}
+                    onChange={e => setDiscountValue(e.target.value)}
+                    placeholder={discountType === 'percent' ? '20' : '5.00'}
+                    className={discountType === 'percent' ? 'pr-8' : 'pr-12'}
+                  />
+                  <Span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                    {discountType === 'percent' ? '%' : currency}
+                  </Span>
+                </Div>
+              </Div>
 
-          {/* Discount Value */}
-          <Div className="space-y-2">
-            <Label>{t.promoDiscountValue}</Label>
-            <Div className="relative">
-              <Input
-                type="number"
-                value={discountValue}
-                onChange={e => setDiscountValue(e.target.value)}
-                placeholder={discountType === 'percent' ? '20' : '5.00'}
-                className={discountType === 'percent' ? 'pr-8' : 'pr-12'}
-              />
-              <Span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-                {discountType === 'percent' ? '%' : currency}
-              </Span>
+              {/* Duration */}
+              <Div className="space-y-2">
+                <Label>{t.promoDuration}</Label>
+                <Select value={duration} onValueChange={v => setDuration(v as PromoDuration)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="once">{t.promoDurationOnce}</SelectItem>
+                    <SelectItem value="repeating">{t.promoDurationRepeating}</SelectItem>
+                    <SelectItem value="forever">{t.promoDurationForever}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Div>
+
+              {/* Duration in months (only for repeating — becomes required) */}
+              {duration === 'repeating' && (
+                <Div className="space-y-2">
+                  <Label>{t.promoDurationInMonths}</Label>
+                  <Input
+                    type="number"
+                    value={durationInMonths}
+                    onChange={e => setDurationInMonths(e.target.value)}
+                    placeholder="3"
+                    min={1}
+                  />
+                </Div>
+              )}
+
+              {/* Currency (only for fixed — becomes required) */}
+              {discountType === 'fixed' && (
+                <Div className="space-y-2">
+                  <Label>{t.promoCurrency}</Label>
+                  <Input
+                    value={currency}
+                    onChange={e => setCurrency(e.target.value.toUpperCase())}
+                    placeholder="EUR"
+                  />
+                </Div>
+              )}
             </Div>
           </Div>
 
-          {/* Duration */}
-          <Div className="space-y-2">
-            <Label>{t.promoDuration}</Label>
-            <Select value={duration} onValueChange={v => setDuration(v as PromoDuration)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="once">{t.promoDurationOnce}</SelectItem>
-                <SelectItem value="repeating">{t.promoDurationRepeating}</SelectItem>
-                <SelectItem value="forever">{t.promoDurationForever}</SelectItem>
-              </SelectContent>
-            </Select>
-          </Div>
+          {/* Optional section */}
+          <Div className="border-t border-border pt-4">
+            <P className="text-xs text-muted-foreground font-medium mb-3">{t.promoOptionalSection}</P>
+            <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Max uses */}
+              <Div className="space-y-2">
+                <Label>{t.promoMaxUses}</Label>
+                <Input
+                  type="number"
+                  value={maxUses}
+                  onChange={e => setMaxUses(e.target.value)}
+                  placeholder={t.promoUnlimitedHint}
+                  min={1}
+                />
+              </Div>
 
-          {/* Duration in months (only for repeating) */}
-          {duration === 'repeating' && (
-            <Div className="space-y-2">
-              <Label>{t.promoDurationInMonths}</Label>
-              <Input
-                type="number"
-                value={durationInMonths}
-                onChange={e => setDurationInMonths(e.target.value)}
-                placeholder="3"
-                min={1}
-              />
+              {/* Expiry date */}
+              <Div className="space-y-2">
+                <Label>{t.promoExpiryDate}</Label>
+                <Input
+                  type="date"
+                  value={expiresAt}
+                  onChange={e => setExpiresAt(e.target.value)}
+                />
+              </Div>
             </Div>
-          )}
-
-          {/* Currency (only for fixed) */}
-          {discountType === 'fixed' && (
-            <Div className="space-y-2">
-              <Label>{t.promoCurrency}</Label>
-              <Input
-                value={currency}
-                onChange={e => setCurrency(e.target.value.toUpperCase())}
-                placeholder="EUR"
-              />
-            </Div>
-          )}
-
-          {/* Max uses */}
-          <Div className="space-y-2">
-            <Label>
-              {t.promoMaxUses}{' '}
-              <Span className="text-muted-foreground text-xs">({t.promoOptional})</Span>
-            </Label>
-            <Input
-              type="number"
-              value={maxUses}
-              onChange={e => setMaxUses(e.target.value)}
-              placeholder={t.promoUnlimitedHint}
-              min={1}
-            />
-          </Div>
-
-          {/* Expiry date */}
-          <Div className="space-y-2">
-            <Label>
-              {t.promoExpiryDate}{' '}
-              <Span className="text-muted-foreground text-xs">({t.promoOptional})</Span>
-            </Label>
-            <Input
-              type="date"
-              value={expiresAt}
-              onChange={e => setExpiresAt(e.target.value)}
-            />
           </Div>
 
           {/* Error — full width */}
           {error && (
-            <Div className="sm:col-span-2">
+            <Div>
               <P className="text-sm text-destructive">{error}</P>
             </Div>
           )}
@@ -1281,6 +1283,8 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   promoNoExpiry: 'No expiry',
   promoOptional: 'optional',
   promoUnlimitedHint: 'Unlimited if empty',
+  promoRequired: 'Required',
+  promoOptionalSection: 'Optional',
 
   // Dialog common
   confirm: 'Confirm',
