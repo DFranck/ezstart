@@ -22,7 +22,7 @@ export default function TestDonatePage() {
         appName="ezpay"
         projectId="ezpay"
         projectName="EZPay Development"
-        presetAmounts={[5, 10, 25, 50, 100]}
+        presetAmounts={[5, 10]}
         currency="EUR"
         allowCustomAmount
         userId={user?._id}
