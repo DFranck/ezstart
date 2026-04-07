@@ -226,6 +226,7 @@ export class PayClient {
     userId?: string
     limit?: number
     offset?: number
+    liveMode?: string
   }): Promise<PaymentsListResponse> {
     return this.fetchList('subscriptions', params)
   }
@@ -287,6 +288,7 @@ export class PayClient {
     offset?: number
     type?: string
     status?: string
+    liveMode?: string
     dateFrom?: string
     dateTo?: string
   }): Promise<PaymentsListResponse> {

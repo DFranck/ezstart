@@ -30,6 +30,10 @@ const paymentsQuerySchema = z.object({
     .describe('Filter by payment status'),
   projectId: z.string().optional().describe('Filter by project ID'),
   search: z.string().optional().describe('Search by customer email (case-insensitive)'),
+  liveMode: z
+    .enum(['true', 'false'])
+    .optional()
+    .describe('Filter by live mode (true=production, false=test)'),
   limit: z.coerce.number().min(1).max(100).default(20).describe('Number of payments to return'),
   offset: z.coerce.number().min(0).default(0).describe('Number of payments to skip'),
 })
@@ -59,6 +63,7 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
       status,
       projectId,
       search,
+      liveMode,
       limit = 20,
       offset = 0,
     } = parsed.success ? parsed.data : (req.query as Record<string, string>)
@@ -79,6 +84,7 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
     if (status) query.status = status
     if (projectId) query.projectId = projectId
     if (search) query.customerEmail = { $regex: search, $options: 'i' }
+    if (liveMode !== undefined) query.liveMode = liveMode === 'true'
 
     const [payments, total] = await Promise.all([
       Payment.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)),

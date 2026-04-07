@@ -117,6 +117,8 @@ export type WebhookEventType =
 
 export interface WebhookEvent {
   type: WebhookEventType
+  /** Whether this event comes from a live (production) Stripe environment */
+  livemode: boolean
   /** Provider-specific raw event object */
   raw: unknown
   /** Parsed data depending on event type */

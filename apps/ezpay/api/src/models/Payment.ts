@@ -59,6 +59,9 @@ export interface PaymentDocument extends Document {
   // Metadata (type-specific fields)
   metadata?: PaymentMetadata
 
+  // Environment
+  liveMode: boolean
+
   // Dates
   createdAt: Date
   updatedAt: Date
@@ -129,6 +132,9 @@ const paymentSchema = new Schema<PaymentDocument>(
       originalAmount: { type: Number },
       discountApplied: { type: Number },
     },
+
+    // Environment — separates test data from production data
+    liveMode: { type: Boolean, default: false, index: true },
 
     // Dates
     completedAt: { type: Date },

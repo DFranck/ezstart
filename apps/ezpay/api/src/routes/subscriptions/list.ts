@@ -23,6 +23,10 @@ const docRouter = createRouterWithDoc(listSubscriptionsRegistry, router)
 const subscriptionsQuerySchema = z.object({
   projectId: z.string().optional().describe('Filter by project ID'),
   userId: z.string().optional().describe('Filter by user ID'),
+  liveMode: z
+    .enum(['true', 'false'])
+    .optional()
+    .describe('Filter by live mode (true=production, false=test)'),
   limit: z.coerce.number().default(20).describe('Number of subscriptions to return'),
   offset: z.coerce.number().default(0).describe('Number of subscriptions to skip'),
 })
@@ -50,13 +54,14 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
     }
-    const { projectId, userId, limit, offset } = parsed.data
+    const { projectId, userId, liveMode, limit, offset } = parsed.data
 
     const query: Record<string, unknown> = {
       type: 'subscription',
     }
 
     if (projectId) query.projectId = projectId
+    if (liveMode !== undefined) query.liveMode = liveMode === 'true'
 
     // Non-admin users can only see their own subscriptions
     if (isAdminUser(req)) {

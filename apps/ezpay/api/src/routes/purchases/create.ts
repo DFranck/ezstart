@@ -114,6 +114,9 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       } : undefined,
     })
 
+    // Detect live vs test mode from Stripe key
+    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
+
     const payment = await Payment.create({
       projectId,
       projectName: projectId,
@@ -126,6 +129,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       provider: 'stripe',
       paymentId: session.sessionId,
       status: 'pending',
+      liveMode: isLiveMode,
       metadata: {
         productId,
         productName,

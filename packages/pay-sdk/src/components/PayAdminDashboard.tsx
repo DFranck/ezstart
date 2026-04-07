@@ -373,11 +373,14 @@ function PaymentsTab({
     }
   }, [])
 
+  // Derive liveMode filter from testMode prop
+  const liveModeFilter = testMode === true ? 'false' : testMode === false ? 'true' : undefined
+
   // Fetch stats
   useEffect(() => {
     setStatsLoading(true)
     client
-      .getPayments({ limit: 100 })
+      .getPayments({ limit: 100, liveMode: liveModeFilter })
       .then(result => {
         // Filter out subscriptions — they have their own tab
         const nonSubPayments = result.payments.filter(p => p.type !== 'subscription')
@@ -401,13 +404,14 @@ function PaymentsTab({
       })
       .catch(() => {})
       .finally(() => setStatsLoading(false))
-  }, [client])
+  }, [client, liveModeFilter])
 
   // Fetch payments
   const fetchPayments = useCallback(() => {
     setLoading(true)
     const params: Record<string, string | number | undefined> = {
       limit: 100,
+      liveMode: liveModeFilter,
     }
     if (typeFilter !== 'all') params.type = typeFilter
     if (statusFilter !== 'all') params.status = statusFilter
@@ -430,7 +434,7 @@ function PaymentsTab({
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [client, typeFilter, statusFilter, searchQuery])
+  }, [client, typeFilter, statusFilter, searchQuery, liveModeFilter])
 
   useEffect(() => {
     fetchPayments()
@@ -651,12 +655,15 @@ function SubscriptionsTab({
     payment: Payment | null
   }>({ open: false, payment: null })
 
+  // Derive liveMode filter from testMode prop
+  const liveModeFilter = testMode === true ? 'false' : testMode === false ? 'true' : undefined
+
   // Fetch subscriptions
   const fetchSubscriptions = useCallback(() => {
     setLoading(true)
     setStatsLoading(true)
     client
-      .getSubscriptions({ limit: 100 })
+      .getSubscriptions({ limit: 100, liveMode: liveModeFilter })
       .then(result => {
         setSubscriptions(result.payments)
         let active = 0
@@ -678,7 +685,7 @@ function SubscriptionsTab({
         setLoading(false)
         setStatsLoading(false)
       })
-  }, [client])
+  }, [client, liveModeFilter])
 
   useEffect(() => {
     fetchSubscriptions()
@@ -2043,6 +2050,9 @@ export function PayAdminDashboard({ appName, showAppFilter, testMode, className,
     [texts]
   )
 
+  // Derive liveMode filter from testMode prop
+  const liveModeFilter = testMode === true ? 'false' : testMode === false ? 'true' : undefined
+
   // App filter state — only used when showAppFilter is true
   const [appFilter, setAppFilter] = useState<string>('all')
   const [appOptions, setAppOptions] = useState<string[]>([])
@@ -2051,7 +2061,7 @@ export function PayAdminDashboard({ appName, showAppFilter, testMode, className,
   useEffect(() => {
     if (!showAppFilter) return
     client
-      .getPayments({ limit: 100 })
+      .getPayments({ limit: 100, liveMode: liveModeFilter })
       .then(result => {
         const apps = new Set<string>()
         for (const p of result.payments) {
@@ -2060,7 +2070,7 @@ export function PayAdminDashboard({ appName, showAppFilter, testMode, className,
         setAppOptions(Array.from(apps).sort())
       })
       .catch(() => {})
-  }, [client, showAppFilter])
+  }, [client, showAppFilter, liveModeFilter])
 
   // Effective appName: when filter is active and a specific app is selected, use it
   const effectiveAppName = showAppFilter && appFilter !== 'all' ? appFilter : appName

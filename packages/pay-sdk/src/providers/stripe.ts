@@ -51,6 +51,7 @@ export interface StripeInstance {
 
 export interface StripeWebhookEvent {
   type: string
+  livemode: boolean
   data: { object: Record<string, unknown> }
 }
 
@@ -268,7 +269,7 @@ function mapStripeEvent(event: StripeWebhookEvent): WebhookEvent {
   const type = STRIPE_EVENT_MAP[event.type] ?? 'unknown'
   const data = extractEventData(type, event)
 
-  return { type, raw: event, data }
+  return { type, livemode: event.livemode ?? false, raw: event, data }
 }
 
 function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): WebhookEventData {

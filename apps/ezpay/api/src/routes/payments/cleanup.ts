@@ -51,13 +51,14 @@ const cleanupPaymentsHandler = async (req: Request, res: Response) => {
 
     const { appName } = validation.data
 
-    const query: Record<string, unknown> = {}
+    // CRITICAL: Only delete test data — production data must NEVER be deleted
+    const query: Record<string, unknown> = { liveMode: false }
     if (appName) query.projectId = appName
 
     const Payment = await getPaymentModel()
     const result = await Payment.deleteMany(query)
 
-    logger.info(`🗑️ Cleanup: ${result.deletedCount} payments deleted${appName ? ` for ${appName}` : ''}`)
+    logger.info(`🗑️ Cleanup: ${result.deletedCount} test payments deleted${appName ? ` for ${appName}` : ''}`)
 
     sendSuccess(res, { deletedCount: result.deletedCount })
   } catch (error) {

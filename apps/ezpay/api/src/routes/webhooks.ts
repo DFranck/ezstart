@@ -31,6 +31,9 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
     return sendError(res, 'Invalid signature', 400)
   }
 
+  // Extract livemode from webhook event
+  const eventLiveMode = event.livemode ?? false
+
   try {
     switch (event.type) {
       case 'checkout.completed': {
@@ -42,6 +45,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           status: 'completed',
           completedAt: new Date(),
           paymentMethod: data.paymentMethod,
+          liveMode: eventLiveMode,
         }
 
         // Store payment intent ID for refund lookups

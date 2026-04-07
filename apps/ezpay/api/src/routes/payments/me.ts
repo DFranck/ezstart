@@ -28,6 +28,10 @@ const myPaymentsQuerySchema = z.object({
     .enum(['pending', 'completed', 'failed', 'refunded', 'cancelled'])
     .optional()
     .describe('Filter by payment status'),
+  liveMode: z
+    .enum(['true', 'false'])
+    .optional()
+    .describe('Filter by live mode (true=production, false=test)'),
   limit: z.coerce.number().min(1).max(100).default(20).describe('Number of payments to return'),
   offset: z.coerce.number().min(0).default(0).describe('Number of payments to skip'),
 })
@@ -60,11 +64,12 @@ const myPaymentsHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Invalid query parameters', 400)
     }
 
-    const { type, status, limit, offset } = parsed.data
+    const { type, status, liveMode, limit, offset } = parsed.data
 
     const query: Record<string, unknown> = { userId: req.userId }
     if (type) query.type = type
     if (status) query.status = status
+    if (liveMode !== undefined) query.liveMode = liveMode === 'true'
 
     const [payments, total] = await Promise.all([
       Payment.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit),

@@ -92,6 +92,9 @@ const createDonationHandler = async (req: Request, res: Response) => {
       cancelUrl: `${baseUrl}/donate/cancel`,
     })
 
+    // Detect live vs test mode from Stripe key
+    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
+
     // Create payment record in DB
     const payment = await Payment.create({
       projectId,
@@ -106,6 +109,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       provider: 'stripe',
       paymentId: session.sessionId,
       status: 'pending',
+      liveMode: isLiveMode,
       metadata: {
         message,
         isPublic,

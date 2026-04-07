@@ -71,6 +71,7 @@ export class ConsoleProvider implements IPaymentProvider {
 
     return {
       type: 'checkout.completed',
+      livemode: false,
       raw: {},
       data: {
         sessionId: 'console_webhook_session',
