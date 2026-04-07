@@ -245,9 +245,9 @@ function EditRolesModal({
 
   useEffect(() => {
     if (user) {
-      setGlobalRoles([...user.globalRoles])
+      setGlobalRoles([...(user.globalRoles || [])])
       setAppRoles(
-        Object.fromEntries(Object.entries(user.appRoles).map(([app, roles]) => [app, [...roles]]))
+        Object.fromEntries(Object.entries(user.appRoles || {}).map(([app, roles]) => [app, [...(roles || [])]]))
       )
     }
   }, [user])
@@ -292,7 +292,7 @@ function EditRolesModal({
 
   if (!user) return null
 
-  const appNames = Object.keys(appRoles)
+  const appNames = Object.keys(appRoles || {})
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -501,8 +501,8 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
       header: t.columnRoles,
       enableSorting: false,
       cell: ({ row }) => {
-        const global = row.original.globalRoles
-        const appEntries = Object.entries(row.original.appRoles)
+        const global = row.original.globalRoles || []
+        const appEntries = Object.entries(row.original.appRoles || {})
         if (global.length === 0 && appEntries.length === 0) {
           return <Span className="text-muted-foreground text-sm">-</Span>
         }
