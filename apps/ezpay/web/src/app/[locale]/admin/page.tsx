@@ -69,7 +69,8 @@ export default function AdminPage() {
 
   return (
     <PayAdminDashboard
-      appName="ezpay"
+      appName=""
+      showAppFilter
       testMode
       texts={{
         // Stats

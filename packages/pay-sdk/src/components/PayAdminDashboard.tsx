@@ -216,6 +216,9 @@ export interface PayAdminDashboardTexts {
   // Plan empty
   noPlans?: string
 
+  // Column App (visible when no appName)
+  columnApp?: string
+
   // App filter
   allApps?: string
   appFilterLabel?: string
@@ -380,7 +383,7 @@ function PaymentsTab({
   useEffect(() => {
     setStatsLoading(true)
     client
-      .getPayments({ limit: 100, liveMode: liveModeFilter, projectId: appName })
+      .getPayments({ limit: 100, liveMode: liveModeFilter, projectId: appName || undefined })
       .then(result => {
         // Filter out subscriptions — they have their own tab
         const nonSubPayments = result.payments.filter(p => p.type !== 'subscription')
@@ -411,7 +414,7 @@ function PaymentsTab({
     setLoading(true)
     const params: Record<string, string | number | undefined> = {
       limit: 100,
-      projectId: appName,
+      projectId: appName || undefined,
       liveMode: liveModeFilter,
     }
     if (typeFilter !== 'all') params.type = typeFilter
@@ -466,6 +469,7 @@ function PaymentsTab({
   }, [client, payments, fetchPayments, t])
 
   // Columns
+  const showAppColumn = !appName
   const columns: ColumnDef<Payment>[] = useMemo(
     () => [
       {
@@ -480,6 +484,19 @@ function PaymentsTab({
           <Span className="text-sm">{row.original.customerEmail || row.original.userId || '-'}</Span>
         ),
       },
+      ...(showAppColumn
+        ? [
+            {
+              accessorKey: 'projectId' as const,
+              header: t.columnApp,
+              cell: ({ row }: { row: { original: Payment } }) => (
+                <Badge variant="outline" size="sm">
+                  {row.original.projectId || '-'}
+                </Badge>
+              ),
+            },
+          ]
+        : []),
       {
         accessorKey: 'type',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.typeHeader} />,
@@ -525,7 +542,7 @@ function PaymentsTab({
         },
       },
     ],
-    [t]
+    [t, showAppColumn]
   )
 
   return (
@@ -664,7 +681,7 @@ function SubscriptionsTab({
     setLoading(true)
     setStatsLoading(true)
     client
-      .getSubscriptions({ limit: 100, liveMode: liveModeFilter, projectId: appName })
+      .getSubscriptions({ limit: 100, liveMode: liveModeFilter, projectId: appName || undefined })
       .then(result => {
         setSubscriptions(result.payments)
         let active = 0
@@ -723,6 +740,7 @@ function SubscriptionsTab({
   }, [client, subscriptions, fetchSubscriptions, t])
 
   // Columns
+  const showAppColumn = !appName
   const columns: ColumnDef<Payment>[] = useMemo(
     () => [
       {
@@ -732,6 +750,19 @@ function SubscriptionsTab({
           <Span className="text-sm">{row.original.customerEmail || row.original.userId || '-'}</Span>
         ),
       },
+      ...(showAppColumn
+        ? [
+            {
+              accessorKey: 'projectId' as const,
+              header: t.columnApp,
+              cell: ({ row }: { row: { original: Payment } }) => (
+                <Badge variant="outline" size="sm">
+                  {row.original.projectId || '-'}
+                </Badge>
+              ),
+            },
+          ]
+        : []),
       {
         accessorKey: 'planName',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.planHeader} />,
@@ -800,7 +831,7 @@ function SubscriptionsTab({
         },
       },
     ],
-    [t]
+    [t, showAppColumn]
   )
 
   return (
@@ -1420,7 +1451,7 @@ function PlansSection({
     setLoading(true)
     setStatsLoading(true)
     client
-      .listPlans({ appName, limit: 100 })
+      .listPlans({ appName: appName || undefined, limit: 100 })
       .then(result => {
         const list = result.data || []
         setPlans(list)
@@ -1643,7 +1674,7 @@ function PromosTab({
     setLoading(true)
     setStatsLoading(true)
     client
-      .listPromos({ appName, limit: 100 })
+      .listPromos({ appName: appName || undefined, limit: 100 })
       .then(result => {
         const list = result.data || []
         setPromos(list)
@@ -2021,6 +2052,9 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   retry: 'Retry',
   save: 'Save',
   create: 'Create',
+
+  // Column App (visible when no appName)
+  columnApp: 'App',
 
   // App filter
   allApps: 'All apps',
