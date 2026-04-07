@@ -55,6 +55,7 @@ export * from './navigation/tabs'
 export * from './overlay/dialog'
 export * from './overlay/floating-panel'
 export * from './overlay/modal'
+export * from './overlay/sheet'
 export * from './overlay/welcome-modal'
 
 // Utility

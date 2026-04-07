@@ -32,6 +32,8 @@ export type {
 // User components (Clerk-like pre-built UI)
 export { UserMenu } from './components/UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './components/UserMenu.js'
+export { AccountModal } from './components/AccountModal.js'
+export type { AccountModalProps, AccountModalTexts } from './components/AccountModal.js'
 export { UserAvatar } from './components/UserAvatar.js'
 export type { UserAvatarProps } from './components/UserAvatar.js'
 export { UserSettings } from './components/UserSettings.js'

@@ -1,8 +1,9 @@
 'use client'
 
 import { useNavLinks } from '@/hooks/useNavLinks'
-import { LoginButton, RequireAuth, useAuth } from '@ezstart/auth-sdk'
+import { LoginButton, RequireAuth, SignedIn, SignedOut, UserMenu } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { useTheme } from 'next-themes'
 import {
   ClientLayout as BaseClientLayout,
   Div,
@@ -25,7 +26,7 @@ type ClientLayoutProps = {
 }
 
 const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
-  const { isAuthenticated } = useAuth()
+  const { theme, setTheme } = useTheme()
   const { isMobile } = useDevice()
   const router = useRouter()
   const pathname = usePathname()
@@ -86,13 +87,55 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
         navLinks={navLinks}
         headerRightContent={
           <Div className="flex items-center gap-2">
-            <LoginButton>{isAuthenticated ? t('auth.logout') : t('auth.login')}</LoginButton>
-            <LocaleSwitcher
-              locales={locales}
-              currentLocale={currentLocale}
-              onLocaleChange={handleLocaleChange}
-            />
-            <ThemeSwitcher />
+            <SignedOut>
+              <LoginButton>{t('auth.login')}</LoginButton>
+              <LocaleSwitcher
+                locales={locales}
+                currentLocale={currentLocale}
+                onLocaleChange={handleLocaleChange}
+              />
+              <ThemeSwitcher />
+            </SignedOut>
+            <SignedIn>
+              <UserMenu
+                avatarSize="sm"
+                theme={{ theme, setTheme }}
+                languages={[
+                  { code: 'en', label: 'English' },
+                  { code: 'fr', label: 'Français' },
+                ]}
+                currentLocale={currentLocale}
+                onLocaleChange={handleLocaleChange}
+                texts={{
+                  signOut: t('auth.logout'),
+                  manageAccount: t('auth.manageAccount') || 'Manage account',
+                }}
+                accountModalTexts={{
+                  title: t('auth.account') || 'Account',
+                  profileTab: t('auth.profile'),
+                  settingsTab: t('auth.settings'),
+                  themeSection: t('theme.theme') || 'Theme',
+                  themeLight: t('theme.light'),
+                  themeDark: t('theme.dark'),
+                  themeSystem: t('theme.system'),
+                  languageSection: t('auth.language') || 'Language',
+                  emailSection: t('auth.emailAddresses') || 'Email addresses',
+                  primary: t('auth.primary') || 'Primary',
+                  connectedAccounts: t('auth.connectedAccounts') || 'Connected accounts',
+                  connectAccount: t('auth.connectAccount') || 'Connect account',
+                  memberSince: t('auth.memberSince') || 'Member since',
+                  updateProfile: t('auth.updateProfile') || 'Update profile',
+                  firstName: t('auth.firstName') || 'First name',
+                  lastName: t('auth.lastName') || 'Last name',
+                  save: t('auth.save') || 'Save',
+                  cancel: t('auth.cancel') || 'Cancel',
+                  passwordSection: t('auth.passwordSection') || 'Password',
+                  currentPassword: t('auth.currentPassword') || 'Current password',
+                  newPassword: t('auth.newPassword') || 'New password',
+                  changePassword: t('auth.changePassword') || 'Change password',
+                }}
+              />
+            </SignedIn>
           </Div>
         }
         // Footer customization

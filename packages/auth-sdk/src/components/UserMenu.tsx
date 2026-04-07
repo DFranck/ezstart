@@ -1,9 +1,10 @@
 'use client'
 
-import { Button, Dropdown, type DropdownItem, Icon } from '@ezstart/ui/components'
+import { useState } from 'react'
+import { Button, Dropdown, type DropdownItem, Icon, Div, Span } from '@ezstart/ui/components'
 import { useAuth } from '../provider.js'
 import { UserAvatar } from './UserAvatar.js'
-import { Div, Span } from '@ezstart/ui/components'
+import { AccountModal } from './AccountModal.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -23,18 +24,10 @@ export interface UserMenuItem {
 export interface UserMenuTexts {
   signIn: string
   signOut: string
-  profile: string
-  settings: string
-  themeLight: string
-  themeDark: string
-  themeSystem: string
+  manageAccount: string
 }
 
 export interface UserMenuProps {
-  /** Show dark/light/system theme toggle */
-  showThemeToggle?: boolean
-  /** Show language selector */
-  showLanguageSelector?: boolean
   /** Available languages for selector */
   languages?: { code: string; label: string }[]
   /** Current locale code */
@@ -51,6 +44,10 @@ export interface UserMenuProps {
   avatarSize?: 'sm' | 'md' | 'lg'
   /** Theme getter — pass `useTheme()` result to avoid hard dep on next-themes */
   theme?: { theme?: string; setTheme: (t: string) => void }
+  /** Override "Manage account" behavior (e.g. navigate to settings page) */
+  onManageAccount?: () => void
+  /** Override texts for AccountModal */
+  accountModalTexts?: Record<string, string>
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -58,18 +55,12 @@ export interface UserMenuProps {
 const DEFAULT_TEXTS: UserMenuTexts = {
   signIn: 'Sign in',
   signOut: 'Sign out',
-  profile: 'Profile',
-  settings: 'Settings',
-  themeLight: 'Light',
-  themeDark: 'Dark',
-  themeSystem: 'System',
+  manageAccount: 'Manage account',
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function UserMenu({
-  showThemeToggle = false,
-  showLanguageSelector = false,
   languages,
   currentLocale,
   onLocaleChange,
@@ -78,9 +69,12 @@ export function UserMenu({
   texts: textOverrides,
   avatarSize = 'md',
   theme,
+  onManageAccount,
+  accountModalTexts,
 }: UserMenuProps) {
   const { user, isAuthenticated, login, logout, isLoggingIn } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
+  const [showAccount, setShowAccount] = useState(false)
 
   // ── Not authenticated: show sign-in button ──
   if (!isAuthenticated || !user) {
@@ -98,20 +92,20 @@ export function UserMenu({
     )
   }
 
+  const fullName = user.firstName
+    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
+    : user.username
+
   // ── Build dropdown items ──
   const items: DropdownItem[] = []
 
-  // User info header (non-interactive)
+  // 1. Header: avatar + name + email (non-clickable)
   items.push({
     label: (
-      <Div className="flex items-center gap-3 py-1 pointer-events-none">
+      <Div className="flex items-center gap-2 pointer-events-none">
         <UserAvatar size="sm" user={user} />
         <Div className="flex flex-col min-w-0">
-          <Span className="text-sm font-medium text-foreground truncate">
-            {user.firstName
-              ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
-              : user.username}
-          </Span>
+          <Span className="text-sm font-medium text-foreground truncate">{fullName}</Span>
           <Span className="text-xs text-muted-foreground truncate">{user.email}</Span>
         </Div>
       </Div>
@@ -121,11 +115,24 @@ export function UserMenu({
     divider: true,
   })
 
-  // Extra items from the app
+  // 2. Manage account
+  items.push({
+    label: texts.manageAccount,
+    value: '_manage-account',
+    icon: <Icon name="lucide:Settings" className="w-4 h-4" />,
+    onSelect: () => {
+      if (onManageAccount) {
+        onManageAccount()
+      } else {
+        setShowAccount(true)
+      }
+    },
+  })
+
+  // 3. Extra items from the app
   if (extraItems && extraItems.length > 0) {
     extraItems.forEach((item, index) => {
       if (item.separator && index > 0) {
-        // Mark divider on previous item
         const prevItem = items[items.length - 1]
         if (prevItem) prevItem.divider = true
       }
@@ -133,73 +140,23 @@ export function UserMenu({
       items.push({
         label: item.label,
         value: `extra-${index}`,
-        icon: item.icon ? <Icon name={item.icon as 'lucide:LogIn'} className="w-4 h-4" /> : undefined,
+        icon: item.icon ? (
+          <Icon name={item.icon as 'lucide:LogIn'} className="w-4 h-4" />
+        ) : undefined,
         onSelect: () => {
           if (item.onClick) item.onClick()
           if (item.href) window.location.href = item.href
         },
       })
     })
-
-    // Divider after extra items
-    const lastExtra = items[items.length - 1]
-    if (lastExtra) lastExtra.divider = true
   }
 
-  // Theme toggle
-  if (showThemeToggle && theme) {
-    const currentTheme = theme.theme || 'system'
-    const themeOptions = [
-      { value: 'light', label: texts.themeLight, icon: 'lucide:Sun' },
-      { value: 'dark', label: texts.themeDark, icon: 'lucide:Moon' },
-      { value: 'system', label: texts.themeSystem, icon: 'lucide:Monitor' },
-    ] as const
+  // 4. Divider + Sign out (destructive)
+  const lastItem = items[items.length - 1]
+  if (lastItem) lastItem.divider = true
 
-    themeOptions.forEach(opt => {
-      items.push({
-        label: (
-          <Span className="flex items-center gap-2">
-            <Span className="text-sm">{opt.label}</Span>
-            {currentTheme === opt.value && (
-              <Icon name="lucide:Check" className="w-3 h-3 text-primary ml-auto" />
-            )}
-          </Span>
-        ),
-        value: `theme-${opt.value}`,
-        icon: <Icon name={opt.icon} className="w-4 h-4" />,
-        onSelect: () => theme.setTheme(opt.value),
-      })
-    })
-
-    const lastTheme = items[items.length - 1]
-    if (lastTheme) lastTheme.divider = true
-  }
-
-  // Language selector
-  if (showLanguageSelector && languages && languages.length > 0 && onLocaleChange) {
-    languages.forEach(lang => {
-      items.push({
-        label: (
-          <Span className="flex items-center gap-2">
-            <Span className="text-sm">{lang.label}</Span>
-            {currentLocale === lang.code && (
-              <Icon name="lucide:Check" className="w-3 h-3 text-primary ml-auto" />
-            )}
-          </Span>
-        ),
-        value: `lang-${lang.code}`,
-        icon: <Icon name="lucide:Globe" className="w-4 h-4" />,
-        onSelect: () => onLocaleChange(lang.code),
-      })
-    })
-
-    const lastLang = items[items.length - 1]
-    if (lastLang) lastLang.divider = true
-  }
-
-  // Sign out
   items.push({
-    label: texts.signOut,
+    label: <Span className="text-destructive">{texts.signOut}</Span>,
     value: '_sign-out',
     icon: <Icon name="lucide:LogOut" className="w-4 h-4 text-destructive" />,
     onSelect: () => logout(),
@@ -207,21 +164,33 @@ export function UserMenu({
 
   // ── Render ──
   return (
-    <Dropdown
-      trigger={
-        <button
-          type="button"
-          className="rounded-full ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label="User menu"
-        >
-          <UserAvatar size={avatarSize} user={user} />
-        </button>
-      }
-      items={items}
-      align="end"
-      side="bottom"
-      menuClassName="min-w-[220px]"
-      className={className}
-    />
+    <>
+      <Dropdown
+        trigger={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full cursor-pointer"
+            aria-label="User menu"
+          >
+            <UserAvatar size={avatarSize} user={user} />
+          </Button>
+        }
+        items={items}
+        align="end"
+        side="bottom"
+        menuClassName="min-w-[240px]"
+        className={className}
+      />
+      <AccountModal
+        open={showAccount}
+        onClose={() => setShowAccount(false)}
+        texts={accountModalTexts}
+        theme={theme}
+        languages={languages}
+        currentLocale={currentLocale}
+        onLocaleChange={onLocaleChange}
+      />
+    </>
   )
 }
