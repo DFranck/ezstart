@@ -24,6 +24,7 @@ export interface PaymentHistoryTexts {
   statusHeader?: string
   typeHeader?: string
   productHeader?: string
+  appHeader?: string
 }
 
 export interface PaymentHistoryProps {
@@ -92,9 +93,11 @@ function buildColumns(
     typeHeader: string
     amountHeader: string
     statusHeader: string
-  }
+    appHeader: string
+  },
+  showAppColumn: boolean
 ): ColumnDef<Payment, unknown>[] {
-  return [
+  const columns: ColumnDef<Payment, unknown>[] = [
     {
       accessorKey: 'createdAt',
       header: ({ header }) => <DataTableColumnHeader header={header} title={headers.dateHeader} />,
@@ -108,6 +111,22 @@ function buildColumns(
         </Span>
       ),
     },
+  ]
+
+  if (showAppColumn) {
+    columns.push({
+      accessorKey: 'projectId',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={headers.appHeader} />,
+      cell: ({ row }) => (
+        <Badge variant="secondary" size="sm">
+          {row.original.projectName || row.original.projectId}
+        </Badge>
+      ),
+      enableSorting: false,
+    })
+  }
+
+  columns.push(
     {
       accessorKey: 'productName',
       header: ({ header }) => (
@@ -143,8 +162,10 @@ function buildColumns(
           {statusLabel(row.original.status)}
         </Badge>
       ),
-    },
-  ]
+    }
+  )
+
+  return columns
 }
 
 export function PaymentHistory({
@@ -166,6 +187,7 @@ export function PaymentHistory({
     statusHeader: texts?.statusHeader || 'Status',
     typeHeader: texts?.typeHeader || 'Type',
     productHeader: texts?.productHeader || 'Product',
+    appHeader: texts?.appHeader || 'App',
   }
 
   // Loading state
@@ -189,13 +211,23 @@ export function PaymentHistory({
     )
   }
 
-  const columns = buildColumns(statusLabel, typeLabel, {
-    dateHeader: t.dateHeader,
-    productHeader: t.productHeader,
-    typeHeader: t.typeHeader,
-    amountHeader: t.amountHeader,
-    statusHeader: t.statusHeader,
-  })
+  // Show App column when payments come from multiple projects
+  const showAppColumn =
+    payments.length > 0 && new Set(payments.map(p => p.projectId)).size > 1
+
+  const columns = buildColumns(
+    statusLabel,
+    typeLabel,
+    {
+      dateHeader: t.dateHeader,
+      productHeader: t.productHeader,
+      typeHeader: t.typeHeader,
+      amountHeader: t.amountHeader,
+      statusHeader: t.statusHeader,
+      appHeader: t.appHeader,
+    },
+    showAppColumn
+  )
 
   return (
     <Div className={className}>

@@ -38,7 +38,7 @@ export default function TestSubscribePage() {
 
   useEffect(() => {
     client
-      .listPlans({ appName: 'ezpay', active: true })
+      .listPlans({ active: true })
       .then(res => {
         setPlans(res.data || [])
       })
