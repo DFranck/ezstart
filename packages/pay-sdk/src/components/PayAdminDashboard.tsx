@@ -123,6 +123,7 @@ export interface PayAdminDashboardTexts {
 
   // Promo form labels
   promoCode?: string
+  promoAppName?: string
   promoDiscountType?: string
   promoDiscountValue?: string
   promoCurrency?: string
@@ -138,6 +139,8 @@ export interface PayAdminDashboardTexts {
   promoActive?: string
   promoInactive?: string
   promoNoExpiry?: string
+  promoOptional?: string
+  promoUnlimitedHint?: string
 
   // Dialog common
   confirm?: string
@@ -725,7 +728,7 @@ function CreatePromoDialog({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Reset form on open
+  // Reset form on open + clear conditional fields on type/duration change
   useEffect(() => {
     if (open) {
       setCode('')
@@ -739,6 +742,16 @@ function CreatePromoDialog({
       setError(null)
     }
   }, [open])
+
+  // Clear currency when switching away from fixed
+  useEffect(() => {
+    if (discountType !== 'fixed') setCurrency('EUR')
+  }, [discountType])
+
+  // Clear durationInMonths when switching away from repeating
+  useEffect(() => {
+    if (duration !== 'repeating') setDurationInMonths('')
+  }, [duration])
 
   const handleSubmit = useCallback(async () => {
     setSaving(true)
@@ -786,15 +799,21 @@ function CreatePromoDialog({
           <DialogDescription>{t.createPromo}</DialogDescription>
         </DialogHeader>
 
-        <Div className="space-y-4">
+        <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Code */}
           <Div className="space-y-2">
             <Label>{t.promoCode}</Label>
             <Input
               value={code}
               onChange={e => setCode(e.target.value.toUpperCase())}
-              placeholder="SUMMER2026"
+              placeholder="EARTHDAY2026"
             />
+          </Div>
+
+          {/* App Name (read-only) */}
+          <Div className="space-y-2">
+            <Label>{t.promoAppName}</Label>
+            <Input value={appName} disabled />
           </Div>
 
           {/* Discount Type */}
@@ -817,25 +836,19 @@ function CreatePromoDialog({
           {/* Discount Value */}
           <Div className="space-y-2">
             <Label>{t.promoDiscountValue}</Label>
-            <Input
-              type="number"
-              value={discountValue}
-              onChange={e => setDiscountValue(e.target.value)}
-              placeholder={discountType === 'percent' ? '20' : '5.00'}
-            />
-          </Div>
-
-          {/* Currency (only for fixed) */}
-          {discountType === 'fixed' && (
-            <Div className="space-y-2">
-              <Label>{t.promoCurrency}</Label>
+            <Div className="relative">
               <Input
-                value={currency}
-                onChange={e => setCurrency(e.target.value.toUpperCase())}
-                placeholder="EUR"
+                type="number"
+                value={discountValue}
+                onChange={e => setDiscountValue(e.target.value)}
+                placeholder={discountType === 'percent' ? '20' : '5.00'}
+                className={discountType === 'percent' ? 'pr-8' : 'pr-12'}
               />
+              <Span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                {discountType === 'percent' ? '%' : currency}
+              </Span>
             </Div>
-          )}
+          </Div>
 
           {/* Duration */}
           <Div className="space-y-2">
@@ -861,24 +874,44 @@ function CreatePromoDialog({
                 value={durationInMonths}
                 onChange={e => setDurationInMonths(e.target.value)}
                 placeholder="3"
+                min={1}
+              />
+            </Div>
+          )}
+
+          {/* Currency (only for fixed) */}
+          {discountType === 'fixed' && (
+            <Div className="space-y-2">
+              <Label>{t.promoCurrency}</Label>
+              <Input
+                value={currency}
+                onChange={e => setCurrency(e.target.value.toUpperCase())}
+                placeholder="EUR"
               />
             </Div>
           )}
 
           {/* Max uses */}
           <Div className="space-y-2">
-            <Label>{t.promoMaxUses}</Label>
+            <Label>
+              {t.promoMaxUses}{' '}
+              <Span className="text-muted-foreground text-xs">({t.promoOptional})</Span>
+            </Label>
             <Input
               type="number"
               value={maxUses}
               onChange={e => setMaxUses(e.target.value)}
-              placeholder="100"
+              placeholder={t.promoUnlimitedHint}
+              min={1}
             />
           </Div>
 
           {/* Expiry date */}
           <Div className="space-y-2">
-            <Label>{t.promoExpiryDate}</Label>
+            <Label>
+              {t.promoExpiryDate}{' '}
+              <Span className="text-muted-foreground text-xs">({t.promoOptional})</Span>
+            </Label>
             <Input
               type="date"
               value={expiresAt}
@@ -886,8 +919,12 @@ function CreatePromoDialog({
             />
           </Div>
 
-          {/* Error */}
-          {error && <P className="text-sm text-destructive">{error}</P>}
+          {/* Error — full width */}
+          {error && (
+            <Div className="sm:col-span-2">
+              <P className="text-sm text-destructive">{error}</P>
+            </Div>
+          )}
         </Div>
 
         <DialogFooter>
@@ -1226,6 +1263,7 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
 
   // Promo form labels
   promoCode: 'Code',
+  promoAppName: 'App Name',
   promoDiscountType: 'Discount Type',
   promoDiscountValue: 'Discount Value',
   promoCurrency: 'Currency',
@@ -1241,6 +1279,8 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   promoActive: 'Active',
   promoInactive: 'Inactive',
   promoNoExpiry: 'No expiry',
+  promoOptional: 'optional',
+  promoUnlimitedHint: 'Unlimited if empty',
 
   // Dialog common
   confirm: 'Confirm',
