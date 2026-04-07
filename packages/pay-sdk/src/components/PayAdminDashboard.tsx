@@ -224,11 +224,21 @@ export interface PayAdminDashboardTexts {
   noPayments?: string
   noSubscriptions?: string
   noPromos?: string
+
+  // Test mode bulk actions
+  testModeWarning?: string
+  refundAllCompleted?: string
+  refundAllConfirm?: string
+  refundAllSuccess?: string
+  cancelAllSubscriptions?: string
+  cancelAllConfirm?: string
+  cancelAllSuccess?: string
 }
 
 export interface PayAdminDashboardProps {
   appName: string
   showAppFilter?: boolean
+  testMode?: boolean
   className?: string
   texts?: Partial<PayAdminDashboardTexts>
 }
@@ -315,9 +325,11 @@ function EmptyState({ message }: { message: string }) {
 function PaymentsTab({
   appName,
   t,
+  testMode,
 }: {
   appName: string
   t: Required<PayAdminDashboardTexts>
+  testMode?: boolean
 }) {
   const { client } = usePayContext()
 
@@ -428,6 +440,23 @@ function PaymentsTab({
     await client.refundPayment(refundDialog.paymentId)
     fetchPayments()
   }, [client, refundDialog.paymentId, fetchPayments])
+
+  // Bulk refund handler (test mode only)
+  const handleRefundAll = useCallback(async () => {
+    if (!window.confirm(t.refundAllConfirm)) return
+    const completedPayments = payments.filter(p => p.status === 'completed')
+    let count = 0
+    for (const payment of completedPayments) {
+      try {
+        await client.refundPayment(payment.id)
+        count++
+      } catch {
+        // Skip individual failures
+      }
+    }
+    toast.success(`${t.refundAllSuccess} (${count}/${completedPayments.length})`)
+    fetchPayments()
+  }, [client, payments, fetchPayments, t])
 
   // Columns
   const columns: ColumnDef<Payment>[] = useMemo(
@@ -546,6 +575,12 @@ function PaymentsTab({
             <SelectItem value="cancelled">{t.cancelled}</SelectItem>
           </SelectContent>
         </Select>
+
+        {testMode && (
+          <Button variant="outline" size="sm" onClick={handleRefundAll} className="sm:ml-auto">
+            {t.refundAllCompleted}
+          </Button>
+        )}
       </Div>
 
       {/* Table */}
@@ -592,9 +627,11 @@ function PaymentsTab({
 function SubscriptionsTab({
   appName,
   t,
+  testMode,
 }: {
   appName: string
   t: Required<PayAdminDashboardTexts>
+  testMode?: boolean
 }) {
   const { client } = usePayContext()
 
@@ -655,6 +692,25 @@ function SubscriptionsTab({
     await client.cancelSubscription(subscriptionId)
     fetchSubscriptions()
   }, [client, cancelDialog.payment, fetchSubscriptions])
+
+  // Bulk cancel handler (test mode only)
+  const handleCancelAll = useCallback(async () => {
+    if (!window.confirm(t.cancelAllConfirm)) return
+    const activeSubscriptions = subscriptions.filter(s => s.status === 'completed')
+    let count = 0
+    for (const sub of activeSubscriptions) {
+      const subscriptionId = sub.metadata?.subscriptionId as string | undefined
+      if (!subscriptionId) continue
+      try {
+        await client.cancelSubscription(subscriptionId)
+        count++
+      } catch {
+        // Skip individual failures
+      }
+    }
+    toast.success(`${t.cancelAllSuccess} (${count}/${activeSubscriptions.length})`)
+    fetchSubscriptions()
+  }, [client, subscriptions, fetchSubscriptions, t])
 
   // Columns
   const columns: ColumnDef<Payment>[] = useMemo(
@@ -750,7 +806,14 @@ function SubscriptionsTab({
 
       {/* Active Subscriptions Section */}
       <Div>
-        <P className="text-lg font-semibold mb-4">{t.activeSubscriptionsSection}</P>
+        <Div className="flex items-center justify-between mb-4">
+          <P className="text-lg font-semibold">{t.activeSubscriptionsSection}</P>
+          {testMode && (
+            <Button variant="outline" size="sm" onClick={handleCancelAll}>
+              {t.cancelAllSubscriptions}
+            </Button>
+          )}
+        </Div>
         <Div className="space-y-6">
           {/* Stats */}
           <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1957,9 +2020,18 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   noPayments: 'No payments found.',
   noSubscriptions: 'No subscriptions found.',
   noPromos: 'No promo codes yet.',
+
+  // Test mode bulk actions
+  testModeWarning: 'Test Mode — Bulk actions available',
+  refundAllCompleted: 'Refund All Completed',
+  refundAllConfirm: 'Refund ALL completed payments? This cannot be undone.',
+  refundAllSuccess: 'Bulk refund completed',
+  cancelAllSubscriptions: 'Cancel All Active',
+  cancelAllConfirm: 'Cancel ALL active subscriptions? This cannot be undone.',
+  cancelAllSuccess: 'Bulk cancel completed',
 }
 
-export function PayAdminDashboard({ appName, showAppFilter, className, texts }: PayAdminDashboardProps) {
+export function PayAdminDashboard({ appName, showAppFilter, testMode, className, texts }: PayAdminDashboardProps) {
   const { client } = usePayContext()
   const t: Required<PayAdminDashboardTexts> = useMemo(
     () => ({ ...DEFAULT_TEXTS, ...texts }),
@@ -2009,6 +2081,13 @@ export function PayAdminDashboard({ appName, showAppFilter, className, texts }: 
         </Div>
       )}
 
+      {testMode && (
+        <Div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-4 flex items-center gap-2">
+          <Icon name="lucide:AlertTriangle" className="w-4 h-4 text-warning shrink-0" />
+          <Span className="text-sm font-medium text-warning">{t.testModeWarning}</Span>
+        </Div>
+      )}
+
       <Tabs defaultValue="payments">
         <TabsList>
           <TabsTrigger value="payments">{t.paymentsTab}</TabsTrigger>
@@ -2017,11 +2096,11 @@ export function PayAdminDashboard({ appName, showAppFilter, className, texts }: 
         </TabsList>
 
         <TabsContent value="payments">
-          <PaymentsTab appName={effectiveAppName} t={t} />
+          <PaymentsTab appName={effectiveAppName} t={t} testMode={testMode} />
         </TabsContent>
 
         <TabsContent value="subscriptions">
-          <SubscriptionsTab appName={effectiveAppName} t={t} />
+          <SubscriptionsTab appName={effectiveAppName} t={t} testMode={testMode} />
         </TabsContent>
 
         <TabsContent value="promos">

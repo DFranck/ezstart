@@ -70,6 +70,7 @@ export default function AdminPage() {
   return (
     <PayAdminDashboard
       appName="ezpay"
+      testMode
       texts={{
         // Stats
         totalRevenue: t('stats.totalRevenue'),
