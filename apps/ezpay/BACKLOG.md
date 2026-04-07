@@ -332,3 +332,22 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - La web app est quasi vide — fonctionnellement c'est juste une page de doc SDK
 - ISSUE-015: EZPay web n'a pas d'auth system (pas de LoginButton/AuthProvider) — les boutons Purchase/Subscribe necessitent auth mais impossible de se connecter sur EZPay web
 - ISSUE-016: SSO cross-domain ne fonctionne pas en localhost (ports differents = origins differentes, tokens localStorage non partages). Fonctionne en prod via cookies shared \*.ezstart.xyz
+
+## Backlog Items (2026-04-07)
+
+### EP-001: Currency conversion in dashboard stats
+- **Status:** `planned`
+- **Description:** Save exchange rates (to USD/EUR) in Payment metadata at checkout time. Dashboard stats show a single total in admin-chosen base currency. DataTable keeps original currency per row.
+- **Files:** Payment model (add exchangeRates), checkout routes (fetch rates from API), PayAdminDashboard (convert totals)
+
+### EP-002: Clean stale pending payments
+- **Status:** `planned`
+- **Description:** Auto-archive or delete "pending" payments after 24h (abandoned checkouts). Currently they clutter the dashboard.
+
+### EP-003: Cancel button only on active subscriptions
+- **Status:** `done`
+- **Description:** Fixed — cancel button only on status "completed", not "pending" or "cancelled".
+
+### EP-004: Superadmin app filter
+- **Status:** `done`
+- **Description:** Fixed — showAppFilter prop for multi-app filtering in EZPay dashboard.
