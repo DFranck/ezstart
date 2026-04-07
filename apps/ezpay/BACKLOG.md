@@ -346,19 +346,26 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 
 ### EP-001: Currency conversion in dashboard stats — `moved to EP-010`
 
+- **Description:** Save exchange rates (to USD/EUR) in Payment metadata at checkout time. Dashboard stats show a single total in admin-chosen base currency. DataTable keeps original currency per row.
+- **Files:** Payment model (add exchangeRates), checkout routes (fetch rates from API), PayAdminDashboard (convert totals)
+
 ### EP-002: Clean stale pending payments
+
 - **Status:** `planned`
 - **Description:** Auto-archive or delete "pending" payments after 24h (abandoned checkouts). Currently they clutter the dashboard.
 
 ### EP-003: Cancel button only on active subscriptions
+
 - **Status:** `done`
 - **Description:** Fixed — cancel button only on status "completed", not "pending" or "cancelled".
 
 ### EP-004: Superadmin app filter
+
 - **Status:** `done`
 - **Description:** Fixed — showAppFilter prop for multi-app filtering in EZPay dashboard.
 
 ### EP-005: SDK Payment Cards (SubscriptionCard, DonationCard, PurchaseCard)
+
 - **Status:** `planned`
 - **Priority:** HIGH
 - **Description:** Reusable card components that auto-fetch plan/product data and embed checkout modals. Apps just pass `appName` + `planId` and the card renders everything (title, price, features, checkout button). Zero manual config.
@@ -366,16 +373,18 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - **Props:** appName, planId/productId, className, variant (default/featured/compact), promoCode, onSuccess, onCancel, texts (i18n)
 
 ### EP-006: Customer Portal (Stripe built-in)
+
 - **Status:** `planned`
 - **Priority:** MEDIUM
 - **Description:** Stripe provides a hosted Customer Portal where users can manage their subscriptions, update payment methods, view invoices, and cancel. EZPay should create a portal session and redirect users to it. No custom UI needed — Stripe handles everything.
-- **Implementation:** 
+- **Implementation:**
   - API: `POST /api/portal/session` → creates Stripe billing portal session → returns URL
   - SDK: `useCustomerPortal()` hook or `<ManageSubscriptionButton>` component
   - Stripe Dashboard: configure portal features (cancel, update payment, view invoices)
 - **Why:** Users need self-service subscription management without contacting admin
 
 ### EP-007: Upgrade/Downgrade between plans
+
 - **Status:** `planned`
 - **Priority:** MEDIUM
 - **Description:** Allow users to switch from one plan to another (e.g., Pro → Business). Stripe handles proration automatically — the user pays the difference or gets credit.
@@ -386,6 +395,7 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - **Why:** Users grow and need to upgrade. Downgrade for users who want to reduce costs.
 
 ### EP-008: Trial periods
+
 - **Status:** `planned`
 - **Priority:** MEDIUM
 - **Description:** Allow plans to have a free trial period (e.g., 14 days free, then €19.99/month). Stripe supports `trial_period_days` natively.
@@ -397,6 +407,7 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - **Why:** Lower friction for new users to try the service before committing
 
 ### EP-009: Invoice management
+
 - **Status:** `planned`
 - **Priority:** LOW
 - **Description:** Stripe automatically generates invoices for subscriptions. EZPay should expose these to users and admins.
@@ -408,16 +419,19 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - **Why:** Users need invoices for accounting. Stripe generates them automatically for subscriptions.
 
 ### EP-010: Currency conversion in dashboard stats
+
 - **Status:** `planned`
 - **Priority:** LOW
 - **Description:** Save exchange rates at checkout time. Dashboard stats show single total in admin-chosen base currency.
 
 ### EP-011: Promo code targeting (plan-specific, type-specific)
+
 - **Status:** `planned`
 - **Priority:** LOW
 - **Description:** Allow promo codes to target specific plans, payment types (subscription only), or products. Currently promos are universal.
 
 ### EP-012: Audit ALL DELETE endpoints for soft delete
+
 - **Status:** `planned`
 - **Priority:** HIGH
 - **Description:** All DELETE endpoints across the monorepo must use soft delete (deletedAt). Hard delete only for superadmin with explicit confirmation. Check: ezauth users, ezpay payments, green-pulse data, etc.

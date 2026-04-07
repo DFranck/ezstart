@@ -2,16 +2,20 @@
 
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardFooter,
   CardHeader,
+  Div,
   H3,
   Icon,
+  Img,
   P,
   Span,
 } from '@ezstart/ui/components'
-import { PurchaseButton } from './PurchaseButton.js'
+import { logger } from '@ezstart/logger'
+import { usePay } from '../provider.js'
 import { formatCurrency } from '../utils/format-currency.js'
 
 export interface PurchaseCardProps {
@@ -71,44 +75,57 @@ export function PurchaseCard({
   texts: textsProp,
 }: PurchaseCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
+  const { createPurchase, isLoading } = usePay()
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const price = formatCurrency(amount, currency)
+
+  const handlePurchase = async () => {
+    try {
+      const result = await createPurchase({
+        projectId: appName,
+        productId,
+        productName,
+        amount,
+        currency,
+        userId,
+        customerEmail: userEmail,
+        customerName: userName,
+      })
+
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl
+      }
+    } catch (error) {
+      logger.error('Purchase failed:', error instanceof Error ? error.message : String(error))
+    }
+  }
 
   if (isCompact) {
     return (
       <Card className={`flex flex-row items-center gap-4 p-4 ${className || ''}`}>
         {image && (
-          <img
+          <Img
             src={image}
             alt={productName}
-            className="w-12 h-12 rounded-md object-cover shrink-0"
+            className={`w-12 h-12 rounded-md object-cover shrink-0`}
           />
         )}
-        <div className="flex-1 min-w-0">
-          <H3 size="h5" className="truncate">
+        <Div className={`flex-1 min-w-0`}>
+          <H3 size="h5" className={`truncate`}>
             {productName}
           </H3>
-          <Span className="text-lg font-bold">{price}</Span>
-        </div>
-        <div className="shrink-0">
-          <PurchaseButton
-            projectId={appName}
-            productId={productId}
-            productName={productName}
-            amount={amount}
-            currency={currency}
-            description={description}
-            userId={userId}
-            userEmail={userEmail}
-            userName={userName}
-            trigger={
-              <button className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                {texts.buy}
-              </button>
-            }
-          />
-        </div>
+          <Span className={`text-lg font-bold`}>{price}</Span>
+        </Div>
+        <Div className={`shrink-0`}>
+          <Button size="sm" disabled={isLoading} onClick={handlePurchase}>
+            {isLoading ? (
+              <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin`} />
+            ) : (
+              texts.buy
+            )}
+          </Button>
+        </Div>
       </Card>
     )
   }
@@ -118,56 +135,48 @@ export function PurchaseCard({
       className={`relative flex flex-col overflow-hidden ${isFeatured ? 'border-primary shadow-lg' : ''} ${className || ''}`}
     >
       {isFeatured && (
-        <Badge className="absolute top-3 right-3 z-10" variant="default">
+        <Badge className={`absolute top-3 right-3 z-10`} variant="default">
           {texts.featured}
         </Badge>
       )}
 
       {/* Product image */}
       {image && (
-        <div className={`w-full overflow-hidden ${isFeatured ? 'h-48' : 'h-36'}`}>
-          <img
-            src={image}
-            alt={productName}
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <Div className={`w-full overflow-hidden ${isFeatured ? 'h-48' : 'h-36'}`}>
+          <Img src={image} alt={productName} className={`w-full h-full object-cover`} />
+        </Div>
       )}
 
       <CardHeader>
         <H3>{productName}</H3>
         {description && (
-          <P size="sm" className="text-muted-foreground">
+          <P size="sm" className={`text-muted-foreground`}>
             {description}
           </P>
         )}
-        <div className="mt-2">
+        <Div className={`mt-2`}>
           <Span className={`font-bold ${isFeatured ? 'text-3xl text-primary' : 'text-2xl'}`}>
             {price}
           </Span>
-        </div>
+        </Div>
       </CardHeader>
 
-      <CardContent className="flex-1" />
+      <CardContent className={`flex-1`} />
 
       <CardFooter>
-        <PurchaseButton
-          projectId={appName}
-          productId={productId}
-          productName={productName}
-          amount={amount}
-          currency={currency}
-          description={description}
-          userId={userId}
-          userEmail={userEmail}
-          userName={userName}
-          trigger={
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
-              <Icon name="lucide:ShoppingCart" className="w-4 h-4" />
+        <Button className={`w-full`} size="lg" disabled={isLoading} onClick={handlePurchase}>
+          {isLoading ? (
+            <>
+              <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin`} />
+              {texts.loading}
+            </>
+          ) : (
+            <>
+              <Icon name="lucide:ShoppingCart" className={`w-4 h-4`} />
               {texts.buy} — {price}
-            </button>
-          }
-        />
+            </>
+          )}
+        </Button>
       </CardFooter>
     </Card>
   )

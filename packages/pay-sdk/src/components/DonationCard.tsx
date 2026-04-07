@@ -8,6 +8,8 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
+  Checkbox,
+  Div,
   H3,
   Icon,
   Input,
@@ -15,7 +17,9 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { DonateModal } from './DonateModal.js'
+import { logger } from '@ezstart/logger'
+import { toast } from 'sonner'
+import { usePay } from '../provider.js'
 import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
 
 export interface DonationCardProps {
@@ -46,6 +50,12 @@ export interface DonationCardTexts {
   error: string
   oneTime: string
   orEnterCustom: string
+  messageLabel: string
+  messagePlaceholder: string
+  anonymous: string
+  support: string
+  sendMessage: string
+  messageRequired: string
 }
 
 const DEFAULT_TEXTS: DonationCardTexts = {
@@ -58,6 +68,12 @@ const DEFAULT_TEXTS: DonationCardTexts = {
   error: 'Something went wrong',
   oneTime: 'One-time donation',
   orEnterCustom: 'Or enter a custom amount',
+  messageLabel: 'Message (optional)',
+  messagePlaceholder: 'Leave a message...',
+  anonymous: 'Donate anonymously',
+  support: 'Or just leave a message',
+  sendMessage: 'Send message',
+  messageRequired: 'Message (required)',
 }
 
 export function DonationCard({
@@ -67,7 +83,7 @@ export function DonationCard({
   className,
   variant = 'default',
   presetAmounts = [5, 10, 25, 50],
-  currency = 'EUR',
+  currency = 'USD',
   allowCustomAmount = true,
   userId,
   userEmail,
@@ -75,45 +91,78 @@ export function DonationCard({
   texts: textsProp,
 }: DonationCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
+  const { createDonation, isLoading } = usePay()
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
+  const [message, setMessage] = useState('')
+  const [isAnonymous, setIsAnonymous] = useState(false)
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
 
   const symbol = getCurrencySymbol(currency)
-  const displayTitle = projectName
-    ? texts.title.replace('this project', projectName)
-    : texts.title
+  const displayTitle = projectName ? texts.title.replace('this project', projectName) : texts.title
 
-  // The amount used for the donate modal trigger
   const effectiveAmount = customAmount ? parseFloat(customAmount) : selectedAmount
+  const isTestimonial = effectiveAmount === 0 || effectiveAmount === null
+
+  const canSubmit =
+    !isLoading &&
+    (isTestimonial
+      ? message.trim().length > 0
+      : effectiveAmount !== null && effectiveAmount > 0 && !isNaN(effectiveAmount))
+
+  const handleDonate = async (amount: number) => {
+    if (amount < 0 || isNaN(amount)) return
+    if (amount === 0 && !message.trim()) return // testimonial needs a message
+
+    try {
+      const result = await createDonation({
+        projectId,
+        amount,
+        currency,
+        isPublic: true,
+        isAnonymous,
+        message: message || undefined,
+        userId,
+        donorEmail: userEmail,
+        donorName: userName,
+      })
+
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl
+      } else {
+        // Testimonial saved successfully - reset form
+        setSelectedAmount(null)
+        setCustomAmount('')
+        setMessage('')
+        setIsAnonymous(false)
+        toast.success(texts.thankYou)
+      }
+    } catch (error) {
+      logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
+    }
+  }
 
   if (isCompact) {
     return (
       <Card className={`p-4 ${className || ''}`}>
-        <div className="flex flex-wrap items-center gap-3">
-          <Icon name="lucide:Heart" className="w-5 h-5 text-destructive shrink-0" />
-          <Span className="font-semibold">{displayTitle}</Span>
-          <div className="flex items-center gap-2 ml-auto">
+        <Div className={`flex flex-wrap items-center gap-3`}>
+          <Icon name="lucide:Heart" className={`w-5 h-5 text-destructive shrink-0`} />
+          <Span className={`font-semibold`}>{displayTitle}</Span>
+          <Div className={`flex items-center gap-2 ml-auto`}>
             {presetAmounts.slice(0, 3).map(amount => (
-              <DonateModal
+              <Button
                 key={amount}
-                projectId={projectId}
-                projectName={projectName || appName}
-                amounts={presetAmounts}
-                currency={currency}
-                userId={userId}
-                userEmail={userEmail}
-                userName={userName}
-                trigger={
-                  <Button variant="outline" size="sm">
-                    {formatCurrency(amount, currency)}
-                  </Button>
-                }
-              />
+                variant="outline"
+                size="sm"
+                disabled={isLoading}
+                onClick={() => handleDonate(amount)}
+              >
+                {formatCurrency(amount, currency)}
+              </Button>
             ))}
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Card>
     )
   }
@@ -123,28 +172,28 @@ export function DonationCard({
       className={`relative flex flex-col ${isFeatured ? 'border-primary shadow-lg' : ''} ${className || ''}`}
     >
       {isFeatured && (
-        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" variant="default">
+        <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2`} variant="default">
           {texts.oneTime}
         </Badge>
       )}
       <CardHeader>
-        <H3 className="flex items-center gap-2">
-          <Icon name="lucide:Heart" className="w-5 h-5 text-destructive" />
+        <H3 className={`flex items-center gap-2`}>
+          <Icon name="lucide:Heart" className={`w-5 h-5 text-destructive`} />
           {displayTitle}
         </H3>
-        <P size="sm" className="text-muted-foreground">
+        <P size="sm" className={`text-muted-foreground`}>
           {texts.selectAmount}
         </P>
       </CardHeader>
-      <CardContent className="flex-1 space-y-4">
+      <CardContent className={`flex-1 space-y-4`}>
         {/* Preset amount grid */}
-        <div className="grid grid-cols-2 gap-2">
+        <Div className={`grid grid-cols-2 gap-2`}>
           {presetAmounts.map(amount => (
             <Button
               key={amount}
               type="button"
               variant={selectedAmount === amount && !customAmount ? 'default' : 'outline'}
-              className="text-lg font-semibold"
+              className={`text-lg font-semibold`}
               onClick={() => {
                 setSelectedAmount(amount)
                 setCustomAmount('')
@@ -153,55 +202,82 @@ export function DonationCard({
               {formatCurrency(amount, currency)}
             </Button>
           ))}
-        </div>
+        </Div>
 
         {/* Custom amount input */}
         {allowCustomAmount && (
-          <div className="space-y-1">
-            <Label className="text-sm text-muted-foreground">{texts.orEnterCustom}</Label>
-            <div className="relative">
-              <Span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                {symbol}
-              </Span>
+          <Div className={`space-y-1`}>
+            <Label className={`text-sm text-muted-foreground`}>{texts.orEnterCustom}</Label>
+            <Div>
               <Input
                 type="number"
-                min="1"
+                min="0"
                 step="0.01"
                 value={customAmount}
                 onChange={e => {
                   setCustomAmount(e.target.value)
                   setSelectedAmount(null)
                 }}
-                placeholder="0.00"
-                className="pl-7"
+                placeholder={`0.00 ${symbol}`}
               />
-            </div>
-          </div>
+            </Div>
+          </Div>
         )}
       </CardContent>
+      {/* Separator + Message */}
+      <CardContent className={`space-y-3 pt-0`}>
+        {/* "or just leave a message" separator */}
+        <Div className={`flex items-center gap-3`}>
+          <Div className={`flex-1 h-px bg-border`} />
+          <Span className={`text-xs text-muted-foreground uppercase`}>{texts.support}</Span>
+          <Div className={`flex-1 h-px bg-border`} />
+        </Div>
+        <Div>
+          <Label className={`text-sm text-muted-foreground`}>{texts.messageLabel}</Label>
+          <Input
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            placeholder={texts.messagePlaceholder || 'Leave a message...'}
+          />
+        </Div>
+        <Div className={`flex items-center gap-2`}>
+          <Checkbox
+            id="donate-anonymous"
+            checked={isAnonymous}
+            onCheckedChange={checked => setIsAnonymous(checked === true)}
+          />
+          <Label
+            htmlFor="donate-anonymous"
+            className={`text-sm text-muted-foreground cursor-pointer`}
+          >
+            {texts.anonymous || 'Donate anonymously'}
+          </Label>
+        </Div>
+      </CardContent>
       <CardFooter>
-        <DonateModal
-          projectId={projectId}
-          projectName={projectName || appName}
-          amounts={presetAmounts}
-          currency={currency}
-          userId={userId}
-          userEmail={userEmail}
-          userName={userName}
-          trigger={
-            <Button
-              className="w-full"
-              size="lg"
-              disabled={!effectiveAmount || effectiveAmount <= 0}
-            >
-              <Icon name="lucide:Heart" className="w-5 h-5" />
-              {texts.donate}
-              {effectiveAmount && effectiveAmount > 0
-                ? ` ${formatCurrency(effectiveAmount, currency)}`
-                : ''}
-            </Button>
-          }
-        />
+        <Button
+          className={`w-full`}
+          size="lg"
+          disabled={!canSubmit}
+          onClick={() => handleDonate(isTestimonial ? 0 : effectiveAmount!)}
+        >
+          {isLoading ? (
+            <>
+              <Icon name="lucide:Loader2" className={`w-5 h-5 animate-spin`} />
+              {texts.loading}
+            </>
+          ) : isTestimonial ? (
+            <>
+              <Icon name="lucide:MessageCircle" className={`w-5 h-5`} />
+              {texts.sendMessage}
+            </>
+          ) : (
+            <>
+              <Icon name="lucide:Heart" className={`w-5 h-5`} />
+              {texts.donate} {formatCurrency(effectiveAmount!, currency)}
+            </>
+          )}
+        </Button>
       </CardFooter>
     </Card>
   )

@@ -9,6 +9,7 @@ export * from './data-display/table'
 // Effects
 export * from './effects/aceternity-carousel'
 export * from './effects/animated-counter'
+export * from './effects/infinite-moving-cards'
 export * from './effects/aurora-background'
 export * from './effects/background-gradient-animation'
 export * from './effects/hero'
