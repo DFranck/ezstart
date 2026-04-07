@@ -31,6 +31,9 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
     return sendError(res, 'Invalid signature', 400)
   }
 
+  // Extract livemode from webhook event
+  const eventLiveMode = event.livemode ?? false
+
   try {
     switch (event.type) {
       case 'checkout.completed': {
@@ -42,6 +45,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           status: 'completed',
           completedAt: new Date(),
           paymentMethod: data.paymentMethod,
+          liveMode: eventLiveMode,
         }
 
         // Store payment intent ID for refund lookups
@@ -98,11 +102,23 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         const mappedStatus = statusMap[data.status] || 'pending'
 
+        const updateFields: Record<string, unknown> = { status: mappedStatus }
+
+        // Track cancel-at-period-end state
+        if (data.cancelAtPeriodEnd !== undefined) {
+          updateFields.cancelAtPeriodEnd = data.cancelAtPeriodEnd
+        }
+
+        // Track current period end date
+        if (data.currentPeriodEnd) {
+          updateFields.currentPeriodEnd = new Date(data.currentPeriodEnd * 1000)
+        }
+
         await Payment.updateOne(
           { 'metadata.subscriptionId': data.subscriptionId },
-          { status: mappedStatus }
+          updateFields
         )
-        logger.info(`Subscription updated: ${data.subscriptionId} -> ${mappedStatus}`)
+        logger.info(`Subscription updated: ${data.subscriptionId} -> ${mappedStatus}${data.cancelAtPeriodEnd ? ' (canceling at period end)' : ''}`)
         break
       }
 

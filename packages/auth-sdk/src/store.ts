@@ -14,6 +14,7 @@ export interface AuthState {
   isAuthenticated: boolean
   mode: AuthMode
   isLoggingIn: boolean
+  isAuthReady: boolean
 
   // Actions
   setAuth: (user: AuthUser, accessToken?: string, mode?: AuthMode, refreshToken?: string) => void
@@ -42,6 +43,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       mode: 'localStorage', // Will be auto-detected on first use
       isLoggingIn: false,
+      isAuthReady: false,
 
       setAuth: (
         user: AuthUser,
@@ -99,6 +101,9 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
         mode: state.mode,
       }),
+      onRehydrateStorage: () => () => {
+        useAuthStore.setState({ isAuthReady: true })
+      },
     }
   )
 )
@@ -154,6 +159,7 @@ export function useAuthStoreSSR() {
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      isAuthReady: false,
       mode: 'localStorage' as AuthMode,
       setAuth: store.setAuth,
       setTokens: store.setTokens,

@@ -110,8 +110,17 @@ export function AuthProvider({
 
   // Create client lazily to avoid SSR issues (memoized to prevent infinite loops)
   const client = useMemo(() => {
-    const redirectUri =
-      typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'
+    // Include locale prefix in redirect URI if path starts with a locale segment
+    const getRedirectUri = () => {
+      if (typeof window === 'undefined') return '/auth/callback'
+      const pathParts = window.location.pathname.split('/')
+      // Check if first path segment looks like a locale (2-3 chars: en, fr, es, etc.)
+      const maybeLocale = pathParts[1]
+      const hasLocalePrefix = maybeLocale && /^[a-z]{2,3}$/.test(maybeLocale)
+      const localePrefix = hasLocalePrefix ? `/${maybeLocale}` : ''
+      return `${window.location.origin}${localePrefix}/auth/callback`
+    }
+    const redirectUri = getRedirectUri()
 
     return createAuthClient({
       appName,
@@ -356,6 +365,7 @@ export function useAuth() {
     accessToken: store.accessToken,
     isAuthenticated: store.isAuthenticated,
     isLoggingIn: store.isLoggingIn,
+    isAuthReady: store.isAuthReady,
     mode, // ✅ Expose mode
 
     // Actions

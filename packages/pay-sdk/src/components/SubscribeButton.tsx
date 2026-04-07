@@ -1,10 +1,11 @@
 'use client'
 
-import { Button, Div, H2, Icon, Modal, P } from '@ezstart/ui/components'
+import { Button, Div, H2, Icon, Input, Modal, P } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
-import { usePay } from '../provider.js'
+import { usePay, usePayContext } from '../provider.js'
 import { formatCurrency } from '../utils/format-currency.js'
+import { PromoCodeInput, type PromoValidation } from './PromoCodeInput.js'
 
 export interface SubscribeButtonTexts {
   title?: string
@@ -15,6 +16,8 @@ export interface SubscribeButtonTexts {
   intervalYear?: string
   /** Template for multi-interval display, e.g. "{count} months". Use {count} placeholder. */
   intervalCountTemplate?: string
+  promoCodePlaceholder?: string
+  promoCodeLabel?: string
 }
 
 export interface SubscribeButtonProps {
@@ -28,6 +31,10 @@ export interface SubscribeButtonProps {
   userId?: string
   userEmail?: string
   userName?: string
+  /** Pre-filled promo code. When set, the promo input is shown with this value. */
+  promoCode?: string
+  /** Show an inline promo code input inside the subscribe modal. Default false. */
+  showPromoInput?: boolean
   trigger?: React.ReactNode
   className?: string
   texts?: SubscribeButtonTexts
@@ -44,12 +51,16 @@ export function SubscribeButton({
   userId,
   userEmail,
   userName,
+  promoCode: promoCodeProp,
+  showPromoInput = false,
   trigger,
   className,
   texts,
 }: SubscribeButtonProps) {
   const { createSubscription, isLoading } = usePay()
   const [open, setOpen] = useState(false)
+  const [promoCode, setPromoCode] = useState(promoCodeProp || '')
+  const [promoValidation, setPromoValidation] = useState<PromoValidation | null>(null)
 
   // Default texts with fallback
   const t = {
@@ -59,6 +70,7 @@ export function SubscribeButton({
     processingButton: texts?.processingButton || 'Processing...',
     intervalMonth: texts?.intervalMonth || 'month',
     intervalYear: texts?.intervalYear || 'year',
+    promoCodeLabel: texts?.promoCodeLabel || 'Promo code',
   }
 
   // Smart interval display: 1→month, 12→year, other→N months
@@ -70,6 +82,9 @@ export function SubscribeButton({
         : texts?.intervalCountTemplate
           ? texts.intervalCountTemplate.replace('{count}', String(intervalCount))
           : `${intervalCount} ${t.intervalMonth}s`
+
+  // Sync promoCode prop changes
+  const effectivePromoCode = promoCode || promoCodeProp || ''
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,6 +101,7 @@ export function SubscribeButton({
         userId,
         customerEmail: userEmail,
         customerName: userName,
+        ...(effectivePromoCode.trim() ? { promoCode: effectivePromoCode.trim() } : {}),
       })
 
       // Redirect to Stripe checkout
@@ -136,6 +152,24 @@ export function SubscribeButton({
             <P size={'sm'} variant={'description'} className="text-center">
               Subscribing as <span className="font-medium">{userName}</span>
             </P>
+          )}
+
+          {/* Promo code input */}
+          {showPromoInput && (
+            <Div className="flex flex-col gap-1">
+              <P size="sm" className="font-medium">
+                {t.promoCodeLabel}
+              </P>
+              <PromoCodeInput
+                appName={projectId}
+                value={promoCode}
+                onChange={setPromoCode}
+                onValidated={setPromoValidation}
+                texts={{
+                  placeholder: texts?.promoCodePlaceholder,
+                }}
+              />
+            </Div>
           )}
 
           {/* CTA Button */}

@@ -7,10 +7,17 @@ interface PdfPreviewProps {
   isGenerating: boolean
   isMobile: boolean
   pdfUrl: string | null
-  previewImageUrls: { page1?: string; page2?: string }
+  previews: string[]
+  pageCount: number
 }
 
-export function PdfPreview({ isGenerating, isMobile, pdfUrl, previewImageUrls }: PdfPreviewProps) {
+export function PdfPreview({
+  isGenerating,
+  isMobile,
+  pdfUrl,
+  previews,
+  pageCount,
+}: PdfPreviewProps) {
   const t = useTranslations()
 
   return (
@@ -18,7 +25,7 @@ export function PdfPreview({ isGenerating, isMobile, pdfUrl, previewImageUrls }:
       {isGenerating && (
         <Div
           className="w-full border border-border rounded-lg p-6 bg-gradient-to-br from-primary/5 to-primary/10 text-center flex items-center justify-center"
-          style={{ minHeight: 'calc(-6rem + 70vh)', maxHeight: 'calc(-6rem + 70vh)' }}
+          style={{ minHeight: '300px' }}
         >
           <Div className="flex flex-col items-center gap-6">
             <Div className="flex items-center gap-4">
@@ -29,10 +36,7 @@ export function PdfPreview({ isGenerating, isMobile, pdfUrl, previewImageUrls }:
               <H3 className="font-semibold text-foreground mb-2">
                 {t('pdfModal.generatingInProgress')}
               </H3>
-              <P className="text-sm text-muted-foreground mb-1">
-                {t('pdfModal.capturingAnalysis')}
-              </P>
-              <P className="text-xs text-muted-foreground">{t('pdfModal.twoPages')}</P>
+              <P className="text-sm text-muted-foreground">{t('pdfModal.capturingAnalysis')}</P>
             </Div>
           </Div>
         </Div>
@@ -43,38 +47,50 @@ export function PdfPreview({ isGenerating, isMobile, pdfUrl, previewImageUrls }:
           {isMobile ? (
             <Div className="border border-border rounded-lg p-6 bg-muted text-center">
               <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-success" />
-              <H3 className="font-semibold text-foreground mb-2">PDF genere avec succes !</H3>
-              <P className="text-sm text-muted-foreground mb-4">
-                L&apos;apercu n&apos;est pas disponible sur mobile, mais votre PDF 2 pages est pret.
-              </P>
+              <H3 className="font-semibold text-foreground mb-2">PDF prêt !</H3>
+              <P className="text-sm text-muted-foreground">{pageCount} pages</P>
             </Div>
           ) : (
             <Div className="border border-border rounded-lg p-4 bg-background shadow-inner">
-              {Object.keys(previewImageUrls).length > 0 ? (
-                <Div className="space-y-6">
-                  {previewImageUrls.page1 && (
-                    <img
-                      src={previewImageUrls.page1}
-                      alt="Page 1 - Roue Bagua"
-                      className="w-full h-auto rounded-lg shadow-lg border mx-auto"
-                      style={{ maxWidth: '400px' }}
-                    />
-                  )}
+              <Div className="flex flex-wrap gap-4 justify-center">
+                {/* Cover page (text preview) */}
+                <Div className="flex flex-col items-center gap-2">
+                  <Span className="text-xs text-muted-foreground font-medium">
+                    {t('pdfModal.cover')}
+                  </Span>
+                  <Div className="w-[140px] aspect-[210/297] bg-white rounded-lg shadow border flex flex-col items-center justify-center p-3 gap-1">
+                    <Span className="text-[10px] font-bold text-gray-800 text-center">
+                      Analyse Feng Shui Bagua
+                    </Span>
+                    <Span className="text-[8px] text-gray-400">Rapport complet</Span>
+                  </Div>
+                </Div>
 
-                  {previewImageUrls.page2 && (
-                    <img
-                      src={previewImageUrls.page2}
-                      alt={`Page 2 - ${t('pdfModal.detailedSectors')}`}
-                      className="w-full h-auto rounded-lg shadow-lg border mx-auto"
-                      style={{ maxWidth: '400px' }}
-                    />
-                  )}
-                </Div>
-              ) : (
-                <Div className="flex items-center justify-center h-64 text-muted-foreground">
-                  <Icon name="lucide:ImageIcon" className="w-12 h-12 mr-2" />
-                  <Span>Preview en cours de chargement...</Span>
-                </Div>
+                {/* Capture previews */}
+                {previews.map((preview, idx) => (
+                  <Div key={idx} className="flex flex-col items-center gap-2">
+                    <Span className="text-xs text-muted-foreground font-medium">
+                      {idx === 0
+                        ? t('pdfModal.compass')
+                        : idx === 1
+                          ? t('pdfModal.grid')
+                          : 'Orientations'}
+                    </Span>
+                    <Div className="w-[140px] aspect-[210/297] bg-white rounded-lg shadow border overflow-hidden flex items-start justify-center p-1">
+                      <img
+                        src={preview}
+                        alt={`Page ${idx + 2}`}
+                        className="w-full h-auto object-contain object-top"
+                      />
+                    </Div>
+                  </Div>
+                ))}
+              </Div>
+
+              {pageCount > 0 && (
+                <P className="text-center text-xs text-muted-foreground mt-3">
+                  {pageCount} pages au total
+                </P>
               )}
             </Div>
           )}

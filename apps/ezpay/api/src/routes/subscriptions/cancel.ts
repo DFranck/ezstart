@@ -50,9 +50,11 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
 
     await getProvider().cancelSubscription(subscriptionId)
 
-    await Payment.updateOne({ _id: payment._id }, { status: 'cancelled' })
+    // Mark as canceling at period end — actual cancellation happens via webhook
+    // when Stripe fires customer.subscription.deleted at end of billing period
+    await Payment.updateOne({ _id: payment._id }, { cancelAtPeriodEnd: true })
 
-    logger.info(`❌ Subscription cancelled: ${subscriptionId}`)
+    logger.info(`⏳ Subscription set to cancel at period end: ${subscriptionId}`)
 
     sendSuccess(res, { cancelled: true })
   } catch (error) {

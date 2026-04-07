@@ -18,6 +18,12 @@ All core features implemented and audited. Remaining items are future improvemen
 
 - ~~RBAC-1: Complete role system simplification (remove legacy fields, replace inline checks, admin page, migrations)~~ `done`
 
+### Audit: 2026-04-06
+
+- [ ] Auto-refresh tokens dans auth-sdk — intercepter les 401, appeler /api/auth/refresh automatiquement, relancer la requête. Transparent pour l'utilisateur.
+- [ ] Fallback httpOnly → bearer en dev — auto-detect: httpOnly en prod (cookies même domain .ezstart.xyz), bearer (localStorage) en dev (ports différents). Le refresh token cookie ne traverse pas les ports en localhost.
+- [ ] Timer proactif — scheduler un refresh 1 min avant expiration du access token (évite le 401 + retry)
+
 ## Objectif
 
 SSO Authentication service pour le monorepo @ezstart (API + Web).

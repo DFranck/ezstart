@@ -9,7 +9,9 @@ import {
 } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
+import { getPlanModel } from '../../models/Plan.js'
 import { getProvider } from '../../services/stripe.js'
+import { validatePromo, calculateDiscount, incrementUsage } from '../../services/promo.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -41,6 +43,7 @@ const createSubscriptionSchema = z.object({
   userId: z.string().optional().describe('EZAuth user ID if logged in'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
+  promoCode: z.string().optional().describe('Optional promo code for discount'),
 })
 
 const paymentResponseSchema = z.object({
@@ -73,13 +76,42 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       userId,
       customerEmail,
       returnUrl,
+      promoCode,
     } = validation.data
+
+    // Promo code validation and discount calculation
+    let finalAmount = amount
+    let promoMetadata: { promoCode?: string; originalAmount?: number; discountApplied?: number } = {}
+    let promoId: string | undefined
+    let validatedPromo: Awaited<ReturnType<typeof validatePromo>>['promo']
+
+    if (promoCode) {
+      const promoResult = await validatePromo(promoCode, projectId)
+      if (!promoResult.valid) {
+        return sendError(res, promoResult.reason || 'Invalid promo code', 400)
+      }
+
+      validatedPromo = promoResult.promo
+      const discount = calculateDiscount(amount, promoResult.promo!)
+      finalAmount = discount.discountedAmount
+      promoId = String(promoResult.promo!._id)
+      promoMetadata = {
+        promoCode: promoResult.promo!.code,
+        originalAmount: discount.originalAmount,
+        discountApplied: discount.discountApplied,
+      }
+    }
+
+    // Fetch the plan to snapshot its features at checkout time
+    const Plan = await getPlanModel()
+    const plan = await Plan.findById(planId).lean()
+    const snapshotFeatures = plan?.features || []
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
     const provider = getProvider()
     const session = await provider.createSubscriptionCheckout({
-      amount,
+      amount, // FULL price — provider handles discount via native mechanism (coupon)
       currency,
       interval,
       intervalCount,
@@ -93,13 +125,23 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       },
       successUrl: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/subscribe/cancel`,
+      discount: validatedPromo ? {
+        type: validatedPromo.discountType,
+        value: validatedPromo.discountValue,
+        duration: validatedPromo.duration,
+        durationInMonths: validatedPromo.durationInMonths,
+        code: promoCode,
+      } : undefined,
     })
+
+    // Detect live vs test mode from Stripe key
+    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
 
     const payment = await Payment.create({
       projectId,
       projectName: projectId,
       type: 'subscription',
-      amount,
+      amount: finalAmount,
       currency,
       userId,
       customerEmail,
@@ -107,13 +149,21 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       provider: 'stripe',
       paymentId: session.sessionId,
       status: 'pending',
+      liveMode: isLiveMode,
       metadata: {
         planId,
         planName,
         interval: 'month',
         intervalCount,
+        features: snapshotFeatures,
+        ...promoMetadata,
       },
     })
+
+    // Increment promo usage after successful payment creation
+    if (promoId) {
+      await incrementUsage(promoId)
+    }
 
     logger.info(`💳 Subscription created - Session ID: ${session.sessionId}`)
 

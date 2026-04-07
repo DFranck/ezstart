@@ -41,6 +41,7 @@ export {
 export { PaymentProviderRegistry, StripeProvider, ConsoleProvider } from './providers/index.js'
 export type {
   IPaymentProvider,
+  DiscountInfo,
   CheckoutOptions,
   CheckoutResult,
   SubscriptionCheckoutOptions,

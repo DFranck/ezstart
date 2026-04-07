@@ -54,6 +54,7 @@
   },
   "navigation": {
     "home": "Inicio",
+    "plans": "Dashboard",
     "analyze": "Analizar",
     "about": "Acerca de"
   },
@@ -251,7 +252,7 @@
     "dragDrop": "Arrastra y suelta tu plano",
     "dropHere": "Suelta tu plano aquí",
     "clickToSelect": "…o haz clic para seleccionar un archivo",
-    "acceptedFormats": "Aceptado: JPG, PNG, PDF",
+    "acceptedFormats": "Aceptado: JPG, PNG",
     "edit": "Editar",
     "apply": "Aplicar",
     "cancel": "Cancelar",
@@ -259,7 +260,25 @@
     "rotation": "Rotación",
     "width": "Ancho",
     "height": "Alto",
-    "pdfLoaded": "PDF cargado"
+    "pdfLoaded": "PDF cargado",
+    "processing": "Procesando"
+  },
+  "validation": {
+    "analyzing": "Análisis en curso...",
+    "valid": "{rooms} habitaciones detectadas — Puntuación {score}/100",
+    "poorQuality": "Calidad insuficiente — El resultado podría ser impreciso",
+    "invalid": "Esto no parece ser un plano de planta",
+    "saved": "Plano guardado en tu cuenta",
+    "loginToSave": "Inicia sesi\u00f3n para guardar tu plano",
+    "savedLocal": "Plano guardado localmente",
+    "tooLarge": "Archivo demasiado grande (máx. 10 MB)",
+    "invalidFormat": "Solo se aceptan los formatos JPG y PNG",
+    "autoCropped": "Plano detectado y enmarcado automaticamente",
+    "adjustCrop": "Ajustar el encuadre",
+    "cropHint": "El encuadre debe ajustarse a los muros exteriores del plano para un análisis preciso.",
+    "validateAndContinue": "Validar",
+    "validTitle": "Plano validado",
+    "reupload": "Subir otro"
   },
   "cardinal": {
     "title": "Paso 2: Puntos Cardinales",
@@ -289,7 +308,14 @@
     "downloadPdf": "Descargar PDF",
     "generating": "Generando...",
     "pdfGenerated": "¡PDF generado exitosamente!",
-    "errorPdf": "Error al generar PDF"
+    "errorPdf": "Error al generar PDF",
+    "save": "Guardar análisis",
+    "saving": "Guardando...",
+    "saveSuccess": "Análisis guardado",
+    "saveSuccessLocal": "Análisis guardado localmente",
+    "saveError": "Error al guardar el análisis",
+    "notFound": "Análisis no encontrado",
+    "backToDashboard": "Volver al Dashboard"
   },
   "pdfModal": {
     "title": "Análisis Feng Shui",
@@ -303,7 +329,13 @@
     "twoPages": "2 páginas: Rueda + Cuadrícula y Sectores detallados",
     "downloadPdf": "Descargar PDF",
     "planBagua": "Plan Feng Shui",
-    "detailedSectors": "Sectores Detallados"
+    "detailedSectors": "Sectores Detallados",
+    "cover": "Portada",
+    "compass": "Brújula",
+    "grid": "Cuadrícula",
+    "orientations": "Orientaciones",
+    "backToAnalysis": "Volver al análisis",
+    "pagesTotal": "{count} páginas en total"
   },
   "bagua": {
     "orientations": "Orientaciones Feng Shui",
@@ -393,5 +425,44 @@
     "luckyText": "¡La estrella reina del Período 9! Actívela para multiplicar prosperidad, fertilidad y oportunidades matrimoniales. En {year}, amplifica todo lo que toca ~ es EL sector a potenciar.",
     "cta": "Analizar mi hogar ahora",
     "dismiss": "Más tarde"
+  },
+  "plans": {
+    "title": "Dashboard",
+    "newAnalysis": "Nuevo Análisis",
+    "localBanner": "Análisis guardados localmente — Inicia sesión para conservarlos",
+    "localWarning": "Estos análisis están almacenados en tu navegador y se perderán si borras la caché",
+    "guest": {
+      "title": "Tus análisis no están guardados",
+      "description": "Inicia sesión para guardar tus análisis y acceder a ellos en cualquier momento.",
+      "login": "Iniciar sesión para guardar"
+    },
+    "empty": {
+      "title": "Sin análisis",
+      "description": "Inicia tu primer análisis Feng Shui para comenzar",
+      "cta": "Nuevo Análisis"
+    },
+    "stats": {
+      "totalAnalyses": "{count} análisis",
+      "lastActivity": "Última actividad"
+    },
+    "filters": {
+      "all": "Todas",
+      "byUser": "Por usuario",
+      "byDate": "Por fecha",
+      "search": "Buscar..."
+    },
+    "card": {
+      "bearing": "Orientación: {bearing}°",
+      "viewAnalysis": "Ver análisis",
+      "newAnalysis": "Nuevo análisis",
+      "delete": "Eliminar",
+      "noAnalyses": "Sin análisis"
+    },
+    "deleteConfirm": {
+      "title": "¿Eliminar este análisis?",
+      "description": "Esta acción no se puede deshacer. El análisis se eliminará permanentemente.",
+      "success": "Análisis eliminado",
+      "error": "Error al eliminar"
+    }
   }
 }

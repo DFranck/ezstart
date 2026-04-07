@@ -16,6 +16,7 @@ import type {
   WebhookEvent,
   WebhookEventType,
   WebhookEventData,
+  DiscountInfo,
 } from './types.js'
 
 // ========================================
@@ -34,11 +35,15 @@ export interface StripeInstance {
       }>
     }
   }
+  coupons: {
+    create(params: Record<string, unknown>): Promise<{ id: string }>
+  }
   refunds: {
     create(params: { payment_intent: string }): Promise<{ id: string; status: string | null }>
   }
   subscriptions: {
     cancel(id: string): Promise<{ status: string }>
+    update(id: string, params: Record<string, unknown>): Promise<{ status: string; cancel_at_period_end: boolean; current_period_end: number }>
   }
   webhooks: {
     constructEvent(payload: string | Buffer, signature: string, secret: string): StripeWebhookEvent
@@ -47,6 +52,7 @@ export interface StripeInstance {
 
 export interface StripeWebhookEvent {
   type: string
+  livemode: boolean
   data: { object: Record<string, unknown> }
 }
 
@@ -80,6 +86,12 @@ export class StripeProvider implements IPaymentProvider {
   // ========================================
 
   async createCheckoutSession(options: CheckoutOptions): Promise<CheckoutResult> {
+    // For one-time purchases, apply discount directly to the amount
+    let unitAmount = Math.round(options.amount * 100)
+    if (options.discount) {
+      unitAmount = this.applyDiscountToAmount(unitAmount, options.discount)
+    }
+
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -87,7 +99,7 @@ export class StripeProvider implements IPaymentProvider {
           price_data: {
             currency: options.currency.toLowerCase(),
             product_data: { name: options.description },
-            unit_amount: Math.round(options.amount * 100),
+            unit_amount: unitAmount,
           },
           quantity: 1,
         },
@@ -110,6 +122,13 @@ export class StripeProvider implements IPaymentProvider {
   }
 
   async createSubscriptionCheckout(options: SubscriptionCheckoutOptions): Promise<CheckoutResult> {
+    // For subscriptions, use Stripe native coupons to handle discount duration properly
+    let discountsParam: Record<string, unknown>[] | undefined
+    if (options.discount) {
+      const coupon = await this.createStripeCoupon(options.discount, options.currency)
+      discountsParam = [{ coupon: coupon.id }]
+    }
+
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -117,7 +136,7 @@ export class StripeProvider implements IPaymentProvider {
           price_data: {
             currency: options.currency.toLowerCase(),
             product_data: { name: options.description },
-            unit_amount: Math.round(options.amount * 100),
+            unit_amount: Math.round(options.amount * 100), // FULL price, coupon handles discount
             recurring: {
               interval: 'month',
               interval_count: options.intervalCount ?? 1,
@@ -130,11 +149,58 @@ export class StripeProvider implements IPaymentProvider {
       success_url: options.successUrl,
       cancel_url: options.cancelUrl,
       metadata: options.metadata,
+      ...(discountsParam ? { discounts: discountsParam } : {}),
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
     })
 
     return { sessionId: session.id, url: session.url }
   }
+
+  // ========================================
+  // Discount Helpers
+  // ========================================
+
+  /**
+   * Create a Stripe Coupon from DiscountInfo.
+   * Used for subscription checkouts where Stripe must manage discount duration.
+   */
+  private async createStripeCoupon(
+    discount: DiscountInfo,
+    currency: string
+  ): Promise<{ id: string }> {
+    const params: Record<string, unknown> = {
+      duration: discount.duration,
+    }
+
+    if (discount.type === 'percent') {
+      params.percent_off = discount.value
+    } else {
+      params.amount_off = discount.value
+      params.currency = currency.toLowerCase()
+    }
+
+    if (discount.duration === 'repeating' && discount.durationInMonths) {
+      params.duration_in_months = discount.durationInMonths
+    }
+
+    return this.stripe.coupons.create(params)
+  }
+
+  /**
+   * Apply discount directly to amount (for one-time payments).
+   * Returns the discounted amount in cents, minimum 0.
+   */
+  private applyDiscountToAmount(amountInCents: number, discount: DiscountInfo): number {
+    if (discount.type === 'percent') {
+      return Math.max(0, Math.round(amountInCents * (1 - discount.value / 100)))
+    }
+    // Fixed discount: value is already in minor units (cents)
+    return Math.max(0, amountInCents - discount.value)
+  }
+
+  // ========================================
+  // Verification
+  // ========================================
 
   async verifyPayment(sessionId: string): Promise<PaymentVerification> {
     const session = await this.stripe.checkout.sessions.retrieve(sessionId)
@@ -163,10 +229,12 @@ export class StripeProvider implements IPaymentProvider {
   // ========================================
 
   async cancelSubscription(subscriptionId: string): Promise<CancelResult> {
-    const subscription = await this.stripe.subscriptions.cancel(subscriptionId)
+    const subscription = await this.stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true,
+    })
 
     return {
-      cancelled: subscription.status === 'canceled',
+      cancelled: subscription.cancel_at_period_end === true,
       status: subscription.status,
     }
   }
@@ -204,7 +272,7 @@ function mapStripeEvent(event: StripeWebhookEvent): WebhookEvent {
   const type = STRIPE_EVENT_MAP[event.type] ?? 'unknown'
   const data = extractEventData(type, event)
 
-  return { type, raw: event, data }
+  return { type, livemode: event.livemode ?? false, raw: event, data }
 }
 
 function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): WebhookEventData {
@@ -229,6 +297,8 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
       return {
         subscriptionId: obj.id as string,
         status: obj.status as string,
+        cancelAtPeriodEnd: (obj.cancel_at_period_end as boolean) ?? undefined,
+        currentPeriodEnd: (obj.current_period_end as number) ?? undefined,
       }
     case 'invoice.payment_failed':
       return {

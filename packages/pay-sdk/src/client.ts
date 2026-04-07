@@ -3,11 +3,21 @@ import type {
   CreateDonationRequest,
   CreatePurchaseRequest,
   CreateSubscriptionRequest,
+  CreatePromoRequest,
+  UpdatePromoRequest,
+  CreatePlanRequest,
+  UpdatePlanRequest,
   PayClientConfig,
   Payment,
+  Plan,
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
+  PromoResponse,
+  PromosListResponse,
+  PromoValidationResponse,
+  PlanResponse,
+  PlansListResponse,
 } from './types.js'
 
 // Helper to get the correct URLs based on environment
@@ -214,8 +224,10 @@ export class PayClient {
 
   async getSubscriptions(params?: {
     userId?: string
+    projectId?: string
     limit?: number
     offset?: number
+    liveMode?: string
   }): Promise<PaymentsListResponse> {
     return this.fetchList('subscriptions', params)
   }
@@ -273,10 +285,12 @@ export class PayClient {
 
   async getPayments(params?: {
     userId?: string
+    projectId?: string
     limit?: number
     offset?: number
     type?: string
     status?: string
+    liveMode?: string
     dateFrom?: string
     dateTo?: string
   }): Promise<PaymentsListResponse> {
@@ -295,6 +309,200 @@ export class PayClient {
     }
 
     return result.payment
+  }
+
+  // ===== PROMOS =====
+
+  async createPromo(data: CreatePromoRequest): Promise<PromoResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create promo')
+    }
+
+    return result.data ?? result
+  }
+
+  async listPromos(params?: {
+    appName?: string
+    active?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<PromosListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== '') searchParams.set(key, String(value))
+      }
+    }
+
+    const response = await this.fetchWithAuth(
+      `${this.config.baseURL}/promos?${searchParams.toString()}`,
+      { headers: this.getHeaders() }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to list promos')
+    }
+
+    // Map MongoDB _id to id for SDK type compatibility
+    const data = result.data ?? result.promos ?? []
+    const promos = data.map((p: Record<string, unknown>) => ({
+      ...p,
+      id: p.id || p._id,
+    }))
+
+    return { ...result, data: promos, promos }
+  }
+
+  async validatePromo(code: string, appName: string): Promise<PromoValidationResponse> {
+    const searchParams = new URLSearchParams({ appName })
+
+    const response = await fetch(
+      `${this.config.baseURL}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to validate promo')
+    }
+
+    return result
+  }
+
+  async updatePromo(promoId: string, data: UpdatePromoRequest): Promise<PromoResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos/${promoId}`, {
+      method: 'PATCH',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to update promo')
+    }
+
+    return result.data ?? result
+  }
+
+  async deletePromo(promoId: string): Promise<{ success: boolean }> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos/${promoId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to delete promo')
+    }
+
+    return result
+  }
+
+  // ===== CLEANUP =====
+
+  async cleanupPayments(appName?: string): Promise<{ deletedCount: number }> {
+    const params = appName ? `?appName=${appName}` : ''
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/payments/cleanup${params}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+    const result = await response.json()
+    if (!response.ok) throw new Error(result.error || 'Failed to cleanup')
+    return result.data ?? result
+  }
+
+  // ===== PLANS =====
+
+  async createPlan(data: CreatePlanRequest): Promise<PlanResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create plan')
+    }
+
+    return result.data ?? result
+  }
+
+  async listPlans(params?: {
+    appName?: string
+    active?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<PlansListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== '') searchParams.set(key, String(value))
+      }
+    }
+
+    // Public endpoint — no auth needed, but include token if available
+    const url = `${this.config.baseURL}/plans?${searchParams.toString()}`
+    const response = await fetch(url, { headers: this.getHeaders() })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to list plans')
+    }
+
+    // Map MongoDB _id to id for SDK type compatibility
+    const data = result.data ?? result.plans ?? []
+    const plans = data.map((p: Record<string, unknown>) => ({
+      ...p,
+      id: p.id || p._id,
+    }))
+
+    return { ...result, data: plans }
+  }
+
+  async updatePlan(planId: string, data: UpdatePlanRequest): Promise<PlanResponse> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans/${planId}`, {
+      method: 'PATCH',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to update plan')
+    }
+
+    return result.data ?? result
+  }
+
+  async deletePlan(planId: string): Promise<{ success: boolean }> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans/${planId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to delete plan')
+    }
+
+    return result
   }
 }
 

@@ -27,6 +27,7 @@ export class ConsoleProvider implements IPaymentProvider {
       currency: options.currency,
       description: options.description,
       successUrl: options.successUrl,
+      ...(options.discount ? { discount: options.discount } : {}),
     })
 
     return { sessionId, url: options.successUrl.replace('{CHECKOUT_SESSION_ID}', sessionId) }
@@ -41,6 +42,7 @@ export class ConsoleProvider implements IPaymentProvider {
       interval: 'month',
       intervalCount: options.intervalCount ?? 1,
       description: options.description,
+      ...(options.discount ? { discount: options.discount } : {}),
     })
 
     return { sessionId, url: options.successUrl.replace('{CHECKOUT_SESSION_ID}', sessionId) }
@@ -69,6 +71,7 @@ export class ConsoleProvider implements IPaymentProvider {
 
     return {
       type: 'checkout.completed',
+      livemode: false,
       raw: {},
       data: {
         sessionId: 'console_webhook_session',

@@ -39,8 +39,10 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
 
   return (
     <BaseClientLayout
-      className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
+      className={cn(isAnalyzePage ? 'h-[100dvh] overflow-hidden' : 'mb-10 sm:mb-0')}
       appName="Feng Shui"
+      showHeader={!isAnalyzePage}
+      showFooter={!isAnalyzePage}
       headerPosition="sticky"
       creator={<Span>Made with ❤️ for a peaceful living place and life serenity</Span>}
       currentPath={pathname}
@@ -48,11 +50,18 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
         <Div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Image
-              src="/logo.png"
+              src="/logo-dark.svg"
               alt="Feng Shui"
-              width={100}
-              height={100}
-              className="object-contain"
+              width={36}
+              height={36}
+              className="object-contain dark:hidden"
+            />
+            <Image
+              src="/logo-white.svg"
+              alt="Feng Shui"
+              width={36}
+              height={36}
+              className="object-contain hidden dark:block"
             />
             <Div>
               <H1 size={'h5'} className={`text-start w-fit font-bold ${GRADIENT_TEXT}`}>
@@ -67,6 +76,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
       }
       navLinks={[
         { href: '/', label: t('navigation.home'), icon: 'lucide:Home' },
+        { href: '/dashboard', label: t('navigation.plans'), icon: 'lucide:FolderOpen' },
         { href: '/analyze', label: t('navigation.analyze'), icon: 'lucide:Sparkles' },
         { href: '/donate', label: t('common.donate'), icon: 'lucide:Leaf' },
       ]}

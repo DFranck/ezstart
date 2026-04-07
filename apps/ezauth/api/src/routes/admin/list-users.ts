@@ -57,6 +57,7 @@ const listUsersQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(200).optional().default(50),
   search: z.string().optional(),
   role: z.string().optional(),
+  app: z.string().optional(),
 })
 
 // Controller
@@ -70,7 +71,7 @@ const listUsersController = async (req: Request, res: Response) => {
     }
 
     const AuthUser = await getAuthUserModel()
-    const { page, limit, search, role } = parsedQuery.data
+    const { page, limit, search, role, app } = parsedQuery.data
     const query: Record<string, unknown> = {}
 
     // Superadmin sees all users, admin sees non-superadmins in their apps
@@ -79,6 +80,11 @@ const listUsersController = async (req: Request, res: Response) => {
       if ((currentUser.apps?.length ?? 0) > 0) {
         query.apps = { $in: currentUser.apps }
       }
+    }
+
+    // App filter: only show users who have logged into this app
+    if (app) {
+      query.apps = { $in: [app] }
     }
 
     // Search filter: match email or username (case-insensitive)

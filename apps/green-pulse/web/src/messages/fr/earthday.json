@@ -1,0 +1,42 @@
+{
+  "earthday": {
+    "meta": {
+      "title": "GreenPulse.AI tai Earth Day 2026",
+      "description": "Danh gia ESG mien phi bang AI cho doanh nghiep SME Viet Nam. San sang tiep can tai chinh xanh trong vai phut."
+    },
+    "header": {
+      "cobranding": "Doi tac cong nghe tai Sustainable Future 10 & Earth Day 2026"
+    },
+    "hero": {
+      "title": "Doanh nghiep cua ban san sang tiep can tai chinh xanh chua?",
+      "subtitle": "Danh gia ESG mien phi bang AI trong 5 phut"
+    },
+    "valueProps": {
+      "assessment": {
+        "title": "Danh gia ESG mien phi bang AI",
+        "description": "Nhan diem san sang ESG trong vai phut voi tro ly AI GP.A — khong can dang ky."
+      },
+      "roadmap": {
+        "title": "Lo trinh tiep can tin dung xanh",
+        "description": "Hieu chinh xac ngan hang can gi de phe duyet don vay xanh cua ban."
+      },
+      "reporting": {
+        "title": "Bao cao ESG tu dong",
+        "description": "Tao bao cao tuan thu GRI, SFDR va CSRD tu dong tu du lieu doanh nghiep."
+      }
+    },
+    "cta": {
+      "start": "Bat dau mien phi voi GP.A",
+      "promo": {
+        "label": "Ma uu dai",
+        "applied": "Ma EARTHDAY2026 da duoc ap dung — 1 thang Pro mien phi khi ra mat!",
+        "default": "Nhap ma EARTHDAY2026 de nhan 1 thang Pro mien phi khi ra mat"
+      }
+    },
+    "footer": {
+      "contact": "Lien he",
+      "eventCredit": "Trinh bay tai Sustainable Future 10 & Earth Day Vietnam 2026 — to chuc boi Green Leaders Community (GLC)",
+      "poweredBy": "GreenPulse.AI — AI cho doanh nghiep SME ben vung tai Dong Nam A"
+    }
+  }
+}

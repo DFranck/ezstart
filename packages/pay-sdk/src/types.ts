@@ -21,6 +21,9 @@ export interface Payment {
   customerName?: string
   customerEmail?: string
   isAnonymous: boolean
+  liveMode: boolean
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: string
   metadata?: Record<string, any>
   createdAt: string
   updatedAt: string
@@ -55,6 +58,7 @@ export interface Subscription extends Payment {
     planName: string
     interval: 'month'
     intervalCount: number
+    features?: string[]
   }
 }
 
@@ -83,6 +87,142 @@ export interface PayClientConfig {
   onAuthFailure?: () => void
 }
 
+// Promo Types
+export type PromoDiscountType = 'percent' | 'fixed'
+
+export type PromoDuration = 'once' | 'repeating' | 'forever'
+
+export interface Promo {
+  id: string
+  code: string
+  appName: string
+  discountType: PromoDiscountType
+  discountValue: number
+  currency?: string
+  duration: PromoDuration
+  durationInMonths?: number
+  maxUses?: number
+  usedCount: number
+  active: boolean
+  expiresAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreatePromoRequest {
+  code: string
+  appName: string
+  discountType: PromoDiscountType
+  discountValue: number
+  currency?: string
+  duration: PromoDuration
+  durationInMonths?: number
+  maxUses?: number
+  active?: boolean
+  expiresAt?: string
+}
+
+export interface UpdatePromoRequest {
+  discountType?: PromoDiscountType
+  discountValue?: number
+  currency?: string
+  duration?: PromoDuration
+  durationInMonths?: number
+  maxUses?: number | null
+  active?: boolean
+  expiresAt?: string | null
+}
+
+export interface PromoValidationResponse {
+  success: boolean
+  data: {
+    valid: boolean
+    reason?: string
+    discountType?: PromoDiscountType
+    discountValue?: number
+    currency?: string
+    duration?: PromoDuration
+  }
+}
+
+export interface PromoResponse {
+  success: boolean
+  data: {
+    promo: Promo
+  }
+}
+
+export interface PromosListResponse {
+  success: boolean
+  data: Promo[]
+  meta: {
+    total: number
+    limit: number
+    offset: number
+  }
+}
+
+// Plan Types
+export interface Plan {
+  id: string
+  name: string
+  appName: string
+  description?: string
+  amount: number
+  currency: string
+  interval: 'month' | 'year'
+  intervalCount: number
+  features?: string[]
+  active: boolean
+  sortOrder: number
+  stripePriceId?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreatePlanRequest {
+  name: string
+  appName: string
+  description?: string
+  amount: number
+  currency: string
+  interval: 'month' | 'year'
+  intervalCount: number
+  features?: string[]
+  sortOrder?: number
+  stripePriceId?: string
+}
+
+export interface UpdatePlanRequest {
+  name?: string
+  description?: string | null
+  amount?: number
+  currency?: string
+  interval?: 'month' | 'year'
+  intervalCount?: number
+  features?: string[]
+  active?: boolean
+  sortOrder?: number
+  stripePriceId?: string | null
+}
+
+export interface PlanResponse {
+  success: boolean
+  data: {
+    plan: Plan
+  }
+}
+
+export interface PlansListResponse {
+  success: boolean
+  data: Plan[]
+  meta: {
+    total: number
+    limit: number
+    offset: number
+  }
+}
+
 // API Requests
 export interface CreateDonationRequest {
   projectId: string
@@ -106,6 +246,7 @@ export interface CreatePurchaseRequest {
   userId?: string
   customerName?: string
   customerEmail?: string
+  promoCode?: string
 }
 
 export interface CreateSubscriptionRequest {
@@ -119,6 +260,7 @@ export interface CreateSubscriptionRequest {
   userId?: string
   customerName?: string
   customerEmail?: string
+  promoCode?: string
 }
 
 // API Responses

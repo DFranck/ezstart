@@ -285,6 +285,16 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] Webhook handling pour subscription events (created, updated, canceled, payment_failed)
 - [ ] `usePremium()` hook pour verifier le statut d'abonnement dans les apps
 
+### P-PROMO — Codes Promo `medium` `feature` — `planned`
+
+- [ ] Modèle `PromoCode` : code, type (pourcentage/montant fixe), valeur, limites (usage max, date expiration, apps autorisées)
+- [ ] CRUD API codes promo : superadmin crée des codes globaux, appadmin crée pour son app
+- [ ] Validation à l'achat : vérifier code, appliquer réduction, tracker usage
+- [ ] UI admin : interface gestion codes promo (créer, activer/désactiver, stats d'usage)
+- [ ] UI client : champ "Code promo" dans le flow d'achat (checkout Stripe avec coupon)
+- [ ] Intégration Stripe Coupons/Promotion Codes pour les abonnements
+- [ ] Export via pay-sdk : `<PromoCodeInput>` composant réutilisable
+
 ### P-MARKETPLACE — Marketplace Components `low` `feature` — `in-progress`
 
 - [x] ProductGrid : grille de produits avec filtres, search, pagination
@@ -322,3 +332,22 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - La web app est quasi vide — fonctionnellement c'est juste une page de doc SDK
 - ISSUE-015: EZPay web n'a pas d'auth system (pas de LoginButton/AuthProvider) — les boutons Purchase/Subscribe necessitent auth mais impossible de se connecter sur EZPay web
 - ISSUE-016: SSO cross-domain ne fonctionne pas en localhost (ports differents = origins differentes, tokens localStorage non partages). Fonctionne en prod via cookies shared \*.ezstart.xyz
+
+## Backlog Items (2026-04-07)
+
+### EP-001: Currency conversion in dashboard stats
+- **Status:** `planned`
+- **Description:** Save exchange rates (to USD/EUR) in Payment metadata at checkout time. Dashboard stats show a single total in admin-chosen base currency. DataTable keeps original currency per row.
+- **Files:** Payment model (add exchangeRates), checkout routes (fetch rates from API), PayAdminDashboard (convert totals)
+
+### EP-002: Clean stale pending payments
+- **Status:** `planned`
+- **Description:** Auto-archive or delete "pending" payments after 24h (abandoned checkouts). Currently they clutter the dashboard.
+
+### EP-003: Cancel button only on active subscriptions
+- **Status:** `done`
+- **Description:** Fixed — cancel button only on status "completed", not "pending" or "cancelled".
+
+### EP-004: Superadmin app filter
+- **Status:** `done`
+- **Description:** Fixed — showAppFilter prop for multi-app filtering in EZPay dashboard.

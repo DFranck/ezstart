@@ -38,6 +38,18 @@ export interface IPaymentProvider {
 }
 
 // ========================================
+// Discount Types
+// ========================================
+
+export interface DiscountInfo {
+  type: 'percent' | 'fixed'
+  value: number // 20 for 20%, or 500 for $5.00
+  duration: 'once' | 'repeating' | 'forever'
+  durationInMonths?: number
+  code?: string // the promo code for reference
+}
+
+// ========================================
 // Checkout Types
 // ========================================
 
@@ -49,6 +61,7 @@ export interface CheckoutOptions {
   successUrl: string
   cancelUrl: string
   customerEmail?: string
+  discount?: DiscountInfo
 }
 
 export interface SubscriptionCheckoutOptions extends CheckoutOptions {
@@ -104,6 +117,8 @@ export type WebhookEventType =
 
 export interface WebhookEvent {
   type: WebhookEventType
+  /** Whether this event comes from a live (production) Stripe environment */
+  livemode: boolean
   /** Provider-specific raw event object */
   raw: unknown
   /** Parsed data depending on event type */
@@ -125,6 +140,8 @@ export interface WebhookRefundData {
 export interface WebhookSubscriptionData {
   subscriptionId: string
   status: string
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: number
 }
 
 export interface WebhookInvoiceData {

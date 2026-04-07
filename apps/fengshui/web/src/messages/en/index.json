@@ -54,6 +54,7 @@
   },
   "navigation": {
     "home": "Home",
+    "plans": "Dashboard",
     "analyze": "Analyze",
     "about": "About"
   },
@@ -251,7 +252,7 @@
     "dragDrop": "Drag & drop your plan",
     "dropHere": "Drop your plan here",
     "clickToSelect": "…or click to select a file",
-    "acceptedFormats": "Accepted: JPG, PNG, PDF",
+    "acceptedFormats": "Accepted: JPG, PNG",
     "edit": "Edit",
     "apply": "Apply",
     "cancel": "Cancel",
@@ -259,7 +260,25 @@
     "rotation": "Rotation",
     "width": "Width",
     "height": "Height",
-    "pdfLoaded": "PDF loaded"
+    "pdfLoaded": "PDF loaded",
+    "processing": "Processing"
+  },
+  "validation": {
+    "analyzing": "Analysis in progress...",
+    "valid": "{rooms} rooms detected — Score {score}/100",
+    "poorQuality": "Poor quality — The result might be imprecise",
+    "invalid": "This doesn't appear to be a floor plan",
+    "saved": "Plan saved to your account",
+    "loginToSave": "Sign in to save your plan",
+    "savedLocal": "Plan saved locally",
+    "tooLarge": "File too large (max 10MB)",
+    "invalidFormat": "Only JPG and PNG are accepted",
+    "autoCropped": "Plan detected and auto-framed",
+    "adjustCrop": "Adjust framing",
+    "cropHint": "The framing should fit the outer walls of the plan for an accurate analysis.",
+    "validateAndContinue": "Validate",
+    "validTitle": "Plan validated",
+    "reupload": "Upload another"
   },
   "cardinal": {
     "title": "Step 2: Cardinal Points",
@@ -289,7 +308,14 @@
     "downloadPdf": "Download PDF",
     "generating": "Generating...",
     "pdfGenerated": "PDF generated successfully!",
-    "errorPdf": "Error generating PDF"
+    "errorPdf": "Error generating PDF",
+    "save": "Save analysis",
+    "saving": "Saving...",
+    "saveSuccess": "Analysis saved",
+    "saveSuccessLocal": "Analysis saved locally",
+    "saveError": "Failed to save analysis",
+    "notFound": "Analysis not found",
+    "backToDashboard": "Back to Dashboard"
   },
   "pdfModal": {
     "title": "Feng Shui Analysis",
@@ -303,7 +329,13 @@
     "twoPages": "2 pages: Wheel + Grid & Detailed Sectors",
     "downloadPdf": "Download PDF",
     "planBagua": "Feng Shui Plan",
-    "detailedSectors": "Detailed Sectors"
+    "detailedSectors": "Detailed Sectors",
+    "cover": "Cover",
+    "compass": "Compass",
+    "grid": "Grid",
+    "orientations": "Orientations",
+    "backToAnalysis": "Back to analysis",
+    "pagesTotal": "{count} pages total"
   },
   "bagua": {
     "orientations": "Feng Shui Orientations",
@@ -389,5 +421,44 @@
     "luckyText": "The queen star of Period 9! Activate it to multiply prosperity, fertility and marriage opportunities. In {year}, it amplifies everything it touches ~ this is THE sector to boost.",
     "cta": "Analyze my home now",
     "dismiss": "Maybe later"
+  },
+  "plans": {
+    "title": "Dashboard",
+    "newAnalysis": "New Analysis",
+    "localBanner": "Analyses saved locally — Sign in to keep them",
+    "localWarning": "These analyses are stored in your browser and will be lost if you clear your cache",
+    "guest": {
+      "title": "Your analyses are not saved",
+      "description": "Sign in to save your analyses and access them anytime.",
+      "login": "Sign in to save"
+    },
+    "empty": {
+      "title": "No analyses",
+      "description": "Start your first Feng Shui analysis to get started",
+      "cta": "New Analysis"
+    },
+    "stats": {
+      "totalAnalyses": "{count} analyses",
+      "lastActivity": "Last activity"
+    },
+    "filters": {
+      "all": "All",
+      "byUser": "By user",
+      "byDate": "By date",
+      "search": "Search..."
+    },
+    "card": {
+      "bearing": "Bearing: {bearing}°",
+      "viewAnalysis": "View analysis",
+      "newAnalysis": "New analysis",
+      "delete": "Delete",
+      "noAnalyses": "No analyses"
+    },
+    "deleteConfirm": {
+      "title": "Delete this analysis?",
+      "description": "This action cannot be undone. The analysis will be permanently deleted.",
+      "success": "Analysis deleted",
+      "error": "Failed to delete"
+    }
   }
 }

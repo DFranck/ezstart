@@ -26,6 +26,21 @@ function useAdminNavItems() {
       label: t('betaWaitlist'),
       icon: 'lucide:UserPlus' as const,
     },
+    {
+      href: '/admin/users',
+      label: t('users'),
+      icon: 'lucide:Users' as const,
+    },
+    {
+      href: '/admin/payments',
+      label: t('payments'),
+      icon: 'lucide:CreditCard' as const,
+    },
+    {
+      href: '/admin/test-payments',
+      label: t('testPayments'),
+      icon: 'lucide:TestTube' as const,
+    },
     { href: '/chat', label: t('chat'), icon: 'lucide:Bot' as const },
   ]
 }

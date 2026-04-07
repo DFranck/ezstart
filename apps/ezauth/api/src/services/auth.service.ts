@@ -23,7 +23,7 @@ import { mapToRecord } from '../utils/map-to-record.js'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
-const ACCESS_TOKEN_EXPIRES_IN = '15m'
+const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
 const REFRESH_TOKEN_DAYS = 30
 
 function buildJwtPayload(user: AuthUserDocument) {
@@ -177,7 +177,7 @@ export class AuthService {
 
     // Generate short-lived access token
     const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN as any })
 
     // Generate refresh token
     const rawRefreshToken = await this.generateRefreshToken(
@@ -234,7 +234,7 @@ export class AuthService {
 
     // Generate short-lived access token
     const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN as any })
 
     // Generate refresh token
     const rawRefreshToken = await this.generateRefreshToken(
@@ -388,7 +388,7 @@ export class AuthService {
 
     // Generate new access token
     const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN as any })
 
     // Generate new refresh token
     const newRawRefreshToken = await this.generateRefreshToken(

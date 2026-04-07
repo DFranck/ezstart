@@ -2,7 +2,7 @@
 
 import { useAuth } from '@ezstart/auth-sdk'
 import { useTranslations } from 'next-intl'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Badge,
   Button,
@@ -12,7 +12,10 @@ import {
   CardTitle,
   Div,
   H3,
+  Input,
+  Label,
   P,
+  Skeleton,
 } from '@ezstart/ui/components'
 import {
   SubscribeButton,
@@ -22,20 +25,27 @@ import {
   ConfirmActionDialog,
   formatCurrency,
   type Payment,
+  type Plan,
 } from '@ezstart/pay-sdk'
-
-const plans = [
-  { key: 'monthly', priceId: 'ezpay-pro-monthly', amount: 9.99, interval: 1 },
-  { key: 'quarterly', priceId: 'ezpay-pro-quarterly', amount: 24.99, interval: 3 },
-  { key: 'biannual', priceId: 'ezpay-pro-biannual', amount: 44.99, interval: 6 },
-  { key: 'yearly', priceId: 'ezpay-pro-yearly', amount: 79.99, interval: 12 },
-] as const
 
 export default function TestSubscribePage() {
   const t = useTranslations('test')
   const { user } = useAuth()
   const { client } = usePayContext()
   const { subscriptions, isLoading, reload } = useSubscriptions({ userId: user?._id, limit: 20 })
+  const [promoCode, setPromoCode] = useState('')
+  const [plans, setPlans] = useState<Plan[]>([])
+  const [plansLoading, setPlansLoading] = useState(true)
+
+  useEffect(() => {
+    client
+      .listPlans({ appName: 'ezpay', active: true })
+      .then(res => {
+        setPlans(res.data || [])
+      })
+      .catch(() => {})
+      .finally(() => setPlansLoading(false))
+  }, [client])
   const [cancelDialog, setCancelDialog] = useState<{
     open: boolean
     subscriptionId: string | null
@@ -55,6 +65,30 @@ export default function TestSubscribePage() {
 
   return (
     <Div className="space-y-8">
+      {/* Promo Code */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('promoCode')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Div className="flex items-center gap-3 max-w-md">
+            <Label htmlFor="promo-code">{t('promoCode')}</Label>
+            <Input
+              id="promo-code"
+              value={promoCode}
+              onChange={e => setPromoCode(e.target.value)}
+              placeholder={t('promoCodePlaceholder')}
+              className="flex-1"
+            />
+          </Div>
+          {promoCode && (
+            <P size="sm" variant="description" className="mt-2">
+              {t('promoCodeApplied', { code: promoCode })}
+            </P>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Subscribe Buttons */}
       <Card>
         <CardHeader>
@@ -62,27 +96,61 @@ export default function TestSubscribePage() {
           <P variant="description">{t('sections.subscriptionsDesc')}</P>
         </CardHeader>
         <CardContent>
-          <Div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {plans.map(plan => (
-              <Div key={plan.key} className="p-4 border rounded-lg flex flex-col gap-3">
-                <H3 className="font-semibold text-sm">{t(`plans.${plan.key}` as const)}</H3>
-                <P size="sm" variant="description">
-                  {plan.amount} EUR / {plan.interval} {plan.interval === 1 ? 'mois' : 'mois'}
-                </P>
-                <SubscribeButton
-                  projectId="ezpay"
-                  priceId={plan.priceId}
-                  planName={t(`plans.${plan.key}` as const)}
-                  amount={plan.amount}
-                  intervalCount={plan.interval}
-                  currency="EUR"
-                  userId={user?._id}
-                  userEmail={user?.email}
-                  userName={user?.username}
-                />
-              </Div>
-            ))}
-          </Div>
+          {plansLoading ? (
+            <Div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-40 w-full rounded-lg" />
+              ))}
+            </Div>
+          ) : plans.length === 0 ? (
+            <Div className="text-center py-8">
+              <P className="text-muted-foreground">
+                {t('noPlans')}
+              </P>
+              <Button variant="outline" size="sm" className="mt-4" asChild>
+                <a href="/admin">{t('goToAdmin')}</a>
+              </Button>
+            </Div>
+          ) : (
+            <Div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {plans.map(plan => (
+                <Div key={plan.id} className="p-4 border rounded-lg flex flex-col gap-3">
+                  <H3 className="font-semibold text-sm">{plan.name}</H3>
+                  <P size="sm" variant="description">
+                    {formatCurrency(plan.amount / 100, plan.currency)} / {plan.intervalCount}{' '}
+                    {plan.interval === 'year' ? t('intervalYear') : t('intervalMonth')}
+                  </P>
+                  {plan.description && (
+                    <P size="sm" variant="description">
+                      {plan.description}
+                    </P>
+                  )}
+                  {plan.features && plan.features.length > 0 && (
+                    <Div className="flex flex-col gap-1">
+                      {plan.features.map((feature, i) => (
+                        <P key={i} size="sm" className="text-muted-foreground">
+                          - {feature}
+                        </P>
+                      ))}
+                    </Div>
+                  )}
+                  <SubscribeButton
+                    projectId="ezpay"
+                    priceId={plan.stripePriceId || plan.id}
+                    planName={plan.name}
+                    amount={plan.amount / 100}
+                    intervalCount={plan.intervalCount}
+                    currency={plan.currency}
+                    userId={user?._id}
+                    userEmail={user?.email}
+                    userName={user?.username}
+                    promoCode={promoCode || undefined}
+                    showPromoInput
+                  />
+                </Div>
+              ))}
+            </Div>
+          )}
         </CardContent>
       </Card>
 

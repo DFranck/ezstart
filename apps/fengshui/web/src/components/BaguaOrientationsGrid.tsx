@@ -36,6 +36,7 @@ type Props = {
   isAuthenticated?: boolean
   onOpenPricing?: () => void
   onLogin?: () => void
+  hideControls?: boolean
 }
 
 export default function BaguaOrientationsGrid({
@@ -49,6 +50,7 @@ export default function BaguaOrientationsGrid({
   isAuthenticated = false,
   onOpenPricing,
   onLogin,
+  hideControls = false,
 }: Props) {
   const t = useTranslations()
   const [internalExpandedSectors, setInternalExpandedSectors] = useState<Set<Direction>>(new Set())
@@ -95,26 +97,30 @@ export default function BaguaOrientationsGrid({
 
   return (
     <Div className="space-y-4">
-      <Div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <H2 className="text-lg sm:text-xl font-bold text-foreground">{t('bagua.orientations')}</H2>
-        <Div className="flex gap-2 text-sm">
-          <Button
-            onClick={expandAll}
-            variant="link"
-            className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
-          >
-            {t('bagua.expandAll')}
-          </Button>
-          <Span className="text-muted-foreground">•</Span>
-          <Button
-            onClick={collapseAll}
-            variant="link"
-            className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
-          >
-            {t('bagua.collapseAll')}
-          </Button>
+      {!hideControls && (
+        <Div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <H2 className="text-lg sm:text-xl font-bold text-foreground">
+            {t('bagua.orientations')}
+          </H2>
+          <Div className="flex gap-2 text-sm">
+            <Button
+              onClick={expandAll}
+              variant="link"
+              className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
+            >
+              {t('bagua.expandAll')}
+            </Button>
+            <Span className="text-muted-foreground">•</Span>
+            <Button
+              onClick={collapseAll}
+              variant="link"
+              className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
+            >
+              {t('bagua.collapseAll')}
+            </Button>
+          </Div>
         </Div>
-      </Div>
+      )}
 
       <Div className="space-y-2 sm:space-y-3">
         {DIRECTIONS_WITH_CENTER.map(dir => {

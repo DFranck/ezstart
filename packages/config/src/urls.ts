@@ -110,6 +110,11 @@ export const URLS: Record<AppName, AppUrls> = {
   },
 
   fengshui: {
+    api: {
+      local: 'http://localhost:6151',
+      development: 'https://fengshui.vercel.app',
+      production: 'https://ezfengshui.ezstart.xyz',
+    },
     web: {
       local: 'http://localhost:6151',
       development: 'https://fengshui.vercel.app',

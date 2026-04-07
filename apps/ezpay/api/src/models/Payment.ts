@@ -18,6 +18,7 @@ export interface SubscriptionMetadata {
   planName?: string
   interval?: 'month'
   intervalCount?: number
+  features?: string[]
 }
 
 export interface InvoiceMetadata {
@@ -58,6 +59,13 @@ export interface PaymentDocument extends Document {
 
   // Metadata (type-specific fields)
   metadata?: PaymentMetadata
+
+  // Subscription cancellation
+  cancelAtPeriodEnd: boolean
+  currentPeriodEnd?: Date
+
+  // Environment
+  liveMode: boolean
 
   // Dates
   createdAt: Date
@@ -123,7 +131,22 @@ const paymentSchema = new Schema<PaymentDocument>(
       // Pour invoices
       invoiceId: { type: String },
       invoiceNumber: { type: String },
+
+      // Plan features snapshot (captured at checkout time)
+      features: [{ type: String }],
+
+      // Pour promo codes
+      promoCode: { type: String },
+      originalAmount: { type: Number },
+      discountApplied: { type: Number },
     },
+
+    // Subscription cancellation
+    cancelAtPeriodEnd: { type: Boolean, default: false },
+    currentPeriodEnd: { type: Date },
+
+    // Environment — separates test data from production data
+    liveMode: { type: Boolean, default: false, index: true },
 
     // Dates
     completedAt: { type: Date },

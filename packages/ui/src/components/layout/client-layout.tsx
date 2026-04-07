@@ -450,6 +450,7 @@ export function ClientLayout({
       <Main
         id="main-content"
         className={cn(
+          'flex-1 min-h-0',
           showHeader &&
             !headerOverlay &&
             (effectiveHeaderPosition === 'fixed' || effectiveHeaderPosition === 'absolute') &&

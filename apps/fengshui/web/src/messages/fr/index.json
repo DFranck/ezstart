@@ -54,6 +54,7 @@
   },
   "navigation": {
     "home": "Accueil",
+    "plans": "Dashboard",
     "analyze": "Analyser",
     "about": "À propos"
   },
@@ -251,7 +252,7 @@
     "dragDrop": "Glissez-déposez votre plan",
     "dropHere": "Déposez votre plan ici",
     "clickToSelect": "…ou cliquez pour sélectionner un fichier",
-    "acceptedFormats": "Accepté : JPG, PNG, PDF",
+    "acceptedFormats": "Accepté : JPG, PNG",
     "edit": "Modifier",
     "apply": "Appliquer",
     "cancel": "Annuler",
@@ -259,7 +260,25 @@
     "rotation": "Rotation",
     "width": "Largeur",
     "height": "Hauteur",
-    "pdfLoaded": "PDF chargé"
+    "pdfLoaded": "PDF chargé",
+    "processing": "Traitement"
+  },
+  "validation": {
+    "analyzing": "Analyse en cours...",
+    "valid": "{rooms} pièces détectées — Score {score}/100",
+    "poorQuality": "Qualité insuffisante — Le résultat pourrait être imprécis",
+    "invalid": "Ceci ne semble pas être un plan d'étage",
+    "saved": "Plan sauvegardé dans votre compte",
+    "loginToSave": "Connectez-vous pour sauvegarder votre plan",
+    "savedLocal": "Plan sauvegard\u00e9 localement",
+    "tooLarge": "Fichier trop volumineux (max 10 Mo)",
+    "invalidFormat": "Seuls les formats JPG et PNG sont acceptés",
+    "autoCropped": "Plan détecté et cadré automatiquement",
+    "adjustCrop": "Ajuster le cadrage",
+    "cropHint": "Le cadrage doit épouser les murs extérieurs du plan pour une analyse précise.",
+    "validateAndContinue": "Valider",
+    "validTitle": "Plan validé",
+    "reupload": "Ré-uploader"
   },
   "cardinal": {
     "title": "Étape 2 : Points Cardinaux",
@@ -289,7 +308,14 @@
     "downloadPdf": "Télécharger PDF",
     "generating": "Génération...",
     "pdfGenerated": "PDF généré avec succès !",
-    "errorPdf": "Erreur lors de la génération du PDF"
+    "errorPdf": "Erreur lors de la génération du PDF",
+    "save": "Sauvegarder l'analyse",
+    "saving": "Sauvegarde...",
+    "saveSuccess": "Analyse sauvegardée",
+    "saveSuccessLocal": "Analyse sauvegardée localement",
+    "saveError": "Erreur lors de la sauvegarde",
+    "notFound": "Analyse introuvable",
+    "backToDashboard": "Retour au Dashboard"
   },
   "pdfModal": {
     "title": "Analyse Feng Shui",
@@ -303,7 +329,13 @@
     "twoPages": "2 pages: Roue + Grille & Secteurs détaillés",
     "downloadPdf": "Télécharger PDF",
     "planBagua": "Plan Feng Shui",
-    "detailedSectors": "Secteurs Détaillés"
+    "detailedSectors": "Secteurs Détaillés",
+    "cover": "Couverture",
+    "compass": "Boussole",
+    "grid": "Grille",
+    "orientations": "Orientations",
+    "backToAnalysis": "Retour à l'analyse",
+    "pagesTotal": "{count} pages au total"
   },
   "bagua": {
     "orientations": "Orientations Feng Shui",
@@ -391,5 +423,44 @@
     "luckyText": "L'étoile reine de la Période 9 ! Activez-la pour multiplier prospérité, fertilité et opportunités de mariage. En {year}, elle démultiplie tout ce qu'elle touche ~ c'est LE secteur à booster.",
     "cta": "Analyser mon habitat maintenant",
     "dismiss": "Plus tard"
+  },
+  "plans": {
+    "title": "Dashboard",
+    "newAnalysis": "Nouvelle Analyse",
+    "localBanner": "Analyses sauvegardées localement — Connectez-vous pour les conserver",
+    "localWarning": "Ces analyses sont stockées dans votre navigateur et seront perdues si vous videz votre cache",
+    "guest": {
+      "title": "Vos analyses ne sont pas sauvegardées",
+      "description": "Connectez-vous pour sauvegarder vos analyses et y accéder à tout moment.",
+      "login": "Se connecter pour sauvegarder"
+    },
+    "empty": {
+      "title": "Aucune analyse",
+      "description": "Lancez votre première analyse Feng Shui pour commencer",
+      "cta": "Nouvelle Analyse"
+    },
+    "stats": {
+      "totalAnalyses": "{count} analyses",
+      "lastActivity": "Dernière activité"
+    },
+    "filters": {
+      "all": "Toutes",
+      "byUser": "Par utilisateur",
+      "byDate": "Par date",
+      "search": "Rechercher..."
+    },
+    "card": {
+      "bearing": "Orientation : {bearing}°",
+      "viewAnalysis": "Voir l'analyse",
+      "newAnalysis": "Nouvelle analyse",
+      "delete": "Supprimer",
+      "noAnalyses": "Aucune analyse"
+    },
+    "deleteConfirm": {
+      "title": "Supprimer cette analyse ?",
+      "description": "Cette action est irréversible. L'analyse sera définitivement supprimée.",
+      "success": "Analyse supprimée",
+      "error": "Erreur lors de la suppression"
+    }
   }
 }

@@ -12,6 +12,7 @@ import {
   P,
 } from '@ezstart/ui/components'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from '@ezstart/ui/utils'
 
 type DialogState = 'confirm' | 'loading' | 'success' | 'error'
 
@@ -83,9 +84,11 @@ export function ConfirmActionDialog({
     try {
       await onConfirm()
       setState('success')
+      toast.success(t.successMessage)
     } catch (err) {
       setErrorDetail(err instanceof Error ? err.message : String(err))
       setState('error')
+      toast.error(t.errorMessage)
     }
   }, [onConfirm])
 

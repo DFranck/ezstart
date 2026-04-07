@@ -1,0 +1,19 @@
+{
+  "name": "@ezstart/pdf-sdk",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "jspdf": "^4.2.0",
+    "html2canvas": "^1.4.1",
+    "dom-to-image-more": "^3.4.5"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*"
+  }
+}

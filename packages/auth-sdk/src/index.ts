@@ -22,6 +22,13 @@ export type { RequireAuthProps } from './require-auth.js'
 export { AccessDenied } from './access-denied.js'
 export type { AccessDeniedProps } from './access-denied.js'
 
+// Admin dashboard
+export { AuthAdminDashboard } from './components/AuthAdminDashboard.js'
+export type {
+  AuthAdminDashboardProps,
+  AuthAdminDashboardTexts,
+} from './components/AuthAdminDashboard.js'
+
 // Re-export types
 export type {
   AuthUser,

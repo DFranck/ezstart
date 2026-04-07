@@ -10,7 +10,7 @@ import { Div } from '@ezstart/ui/components'
 type CardsMode = 'hover' | 'all'
 
 type BaguaGridProps = {
-  src: string
+  src?: string
   bearingFromNorth: number
   size?: number
   config?: YearBaguaConfig
@@ -104,7 +104,11 @@ export default function BaguaGrid({
       <Div className="relative ">
         {/* Plan en taille maximale avec ratio conservé */}
         <Div className="w-full relative overflow-hidden">
-          <img src={src} alt="Plan Bagua" className="w-full h-auto object-contain" />
+          {src ? (
+            <img src={src} alt="Plan Bagua" className="w-full h-auto object-contain" />
+          ) : (
+            <Div className="w-full aspect-square" />
+          )}
 
           {/* Grille 3x3 overlay absolute */}
           <Div
