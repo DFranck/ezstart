@@ -19,6 +19,9 @@ import {
   CardHeader,
   CardTitle,
   Div,
+  H3,
+  Input,
+  Label,
   P,
   Skeleton,
 } from '@ezstart/ui/components'
@@ -30,12 +33,13 @@ export default function TestSubscribePage() {
   const { user } = useAuth()
   const { client } = usePayContext()
   const { subscriptions, isLoading, reload } = useSubscriptions({ limit: 20 })
+  const [promoCode, setPromoCode] = useState('')
   const [plans, setPlans] = useState<Plan[]>([])
   const [plansLoading, setPlansLoading] = useState(true)
 
   useEffect(() => {
     client
-      .listPlans({ active: true })
+      .listPlans({ appName: 'ezpay', active: true })
       .then(res => {
         setPlans(res.data || [])
       })
@@ -61,6 +65,30 @@ export default function TestSubscribePage() {
 
   return (
     <Div className="space-y-8">
+      {/* Promo Code */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('promoCode')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Div className="flex items-center gap-3 max-w-md">
+            <Label htmlFor="promo-code">{t('promoCode')}</Label>
+            <Input
+              id="promo-code"
+              value={promoCode}
+              onChange={e => setPromoCode(e.target.value)}
+              placeholder={t('promoCodePlaceholder')}
+              className="flex-1"
+            />
+          </Div>
+          {promoCode && (
+            <P size="sm" variant="description" className="mt-2">
+              {t('promoCodeApplied', { code: promoCode })}
+            </P>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Subscribe Buttons — using SubscriptionPlanCard */}
       <Card>
         <CardHeader>
@@ -89,7 +117,7 @@ export default function TestSubscribePage() {
                   appName="ezpay"
                   planId={plan.id}
                   variant={index === 1 ? 'featured' : 'default'}
-                  promoCode={undefined}
+                  promoCode={promoCode || undefined}
                   userId={user?._id}
                   userEmail={user?.email}
                   userName={user?.username}
