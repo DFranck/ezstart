@@ -417,6 +417,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
       const query: Record<string, string> = {
         limit: String(PAGE_SIZE),
         page: String(page),
+        app: appName,
       }
       if (searchQuery) query.search = searchQuery
 
@@ -435,7 +436,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
     } finally {
       setLoading(false)
     }
-  }, [offset, searchQuery])
+  }, [offset, searchQuery, appName])
 
   useEffect(() => {
     fetchUsers()
