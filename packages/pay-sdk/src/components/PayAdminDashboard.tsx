@@ -360,10 +360,12 @@ function PaymentsTab({
     client
       .getPayments({ limit: 100 })
       .then(result => {
+        // Filter out subscriptions — they have their own tab
+        const nonSubPayments = result.payments.filter(p => p.type !== 'subscription')
         let revenue = 0
         let completed = 0
         let failed = 0
-        for (const p of result.payments) {
+        for (const p of nonSubPayments) {
           if (p.status === 'completed') {
             revenue += p.amount
             completed++
@@ -373,7 +375,7 @@ function PaymentsTab({
           }
         }
         setTotalRevenue(revenue)
-        setTotalPayments(result.total)
+        setTotalPayments(nonSubPayments.length)
         setCompletedCount(completed)
         setFailedCount(failed)
       })
@@ -393,7 +395,8 @@ function PaymentsTab({
     client
       .getPayments(params as Parameters<typeof client.getPayments>[0])
       .then(result => {
-        let filtered = result.payments
+        // Filter out subscriptions — they have their own tab
+        let filtered = result.payments.filter(p => p.type !== 'subscription')
         if (searchQuery) {
           const q = searchQuery.toLowerCase()
           filtered = filtered.filter(
@@ -510,7 +513,6 @@ function PaymentsTab({
             <SelectItem value="all">{t.allTypes}</SelectItem>
             <SelectItem value="donation">{t.donation}</SelectItem>
             <SelectItem value="purchase">{t.purchase}</SelectItem>
-            <SelectItem value="subscription">{t.subscription}</SelectItem>
             <SelectItem value="invoice">{t.invoice}</SelectItem>
           </SelectContent>
         </Select>
