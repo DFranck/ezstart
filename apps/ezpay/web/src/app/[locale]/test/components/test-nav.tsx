@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Button, Div, H1, P } from '@ezstart/ui/components'
 
 const tabs = [
-  { key: 'all', href: '/test' },
   { key: 'donate', href: '/test/donate' },
   { key: 'purchase', href: '/test/purchase' },
   { key: 'subscribe', href: '/test/subscribe' },
@@ -30,7 +29,7 @@ export function TestNav() {
       <Div className="flex flex-wrap gap-2">
         {tabs.map(({ key, href }) => {
           const fullHref = `/${locale}${href}`
-          const isActive = key === 'all' ? pathname === fullHref : pathname.startsWith(fullHref)
+          const isActive = pathname.startsWith(fullHref)
 
           return (
             <Button key={key} asChild variant={isActive ? 'default' : 'outline'} size="sm">

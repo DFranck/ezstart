@@ -2,10 +2,9 @@
 
 import { useAuth } from '@ezstart/auth-sdk'
 import { useTranslations } from 'next-intl'
-import { Card, CardContent, CardHeader, CardTitle, Div, P } from '@ezstart/ui/components'
+import { Card, CardContent, CardHeader, CardTitle, Div } from '@ezstart/ui/components'
 import {
-  DonateButton,
-  DonateModal,
+  DonationCard,
   DonationWall,
   PaymentHistory,
   useDonations,
@@ -18,30 +17,18 @@ export default function TestDonatePage() {
 
   return (
     <Div className="space-y-8">
-      {/* Donate Buttons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('sections.donations')}</CardTitle>
-          <P variant="description">{t('sections.donationsDesc')}</P>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Div className="flex flex-wrap gap-4">
-            {[5, 10, 25, 50, 100].map(amount => (
-              <DonateModal
-                key={amount}
-                projectId="ezpay"
-                projectName="EZPay Development"
-                amounts={[amount]}
-                currency="EUR"
-                userId={user?._id}
-                userEmail={user?.email}
-                userName={user?.username}
-                trigger={<DonateButton>❤️ €{amount}</DonateButton>}
-              />
-            ))}
-          </Div>
-        </CardContent>
-      </Card>
+      {/* Donation Card */}
+      <DonationCard
+        appName="ezpay"
+        projectId="ezpay"
+        projectName="EZPay Development"
+        presetAmounts={[5, 10, 25, 50, 100]}
+        currency="EUR"
+        allowCustomAmount
+        userId={user?._id}
+        userEmail={user?.email}
+        userName={user?.username}
+      />
 
       {/* Donation Wall */}
       <Card>
