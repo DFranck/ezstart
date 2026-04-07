@@ -34,6 +34,7 @@ import {
 } from '@ezstart/ui/components'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { toast } from '@ezstart/ui/utils'
+import { useAuthStore } from '../store.js'
 
 // ========================================
 // Types
@@ -228,12 +229,14 @@ function EditRolesModal({
   onOpenChange,
   onSaved,
   t,
+  accessToken,
 }: {
   user: AdminUser | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onSaved: () => void
   t: Required<AuthAdminDashboardTexts>
+  accessToken: string | null
 }) {
   const [globalRoles, setGlobalRoles] = useState<string[]>([])
   const [appRoles, setAppRoles] = useState<Record<string, string[]>>({})
@@ -270,6 +273,7 @@ function EditRolesModal({
         appName: 'ezauth',
         method: 'PATCH',
         body: { globalRoles, appRoles },
+        accessToken: accessToken ?? undefined,
       })
       if (!response.ok) {
         throw new Error(response.error || parseApiError(response.data) || t.editError)
@@ -284,7 +288,7 @@ function EditRolesModal({
     } finally {
       setSaving(false)
     }
-  }, [user, globalRoles, appRoles, onSaved, onOpenChange, t])
+  }, [user, globalRoles, appRoles, onSaved, onOpenChange, t, accessToken])
 
   if (!user) return null
 
@@ -373,6 +377,7 @@ function EditRolesModal({
 
 export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashboardProps) {
   const t: Required<AuthAdminDashboardTexts> = { ...DEFAULT_TEXTS, ...texts }
+  const accessToken = useAuthStore(state => state.accessToken)
 
   // Data state
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -425,6 +430,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
         appName: 'ezauth',
         method: 'GET',
         query,
+        accessToken: accessToken ?? undefined,
       })
       if (response.ok) {
         const result = response.data as UsersApiResult
@@ -436,7 +442,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
     } finally {
       setLoading(false)
     }
-  }, [offset, searchQuery, appName])
+  }, [offset, searchQuery, appName, accessToken])
 
   useEffect(() => {
     fetchUsers()
@@ -455,6 +461,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
       const response = await callApi(`/admin/users/${deleteDialog.userId}`, {
         appName: 'ezauth',
         method: 'DELETE',
+        accessToken: accessToken ?? undefined,
       })
       if (!response.ok) {
         throw new Error(response.error || parseApiError(response.data) || t.deleteError)
@@ -562,9 +569,9 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
   ]
 
   // Stats computed from current page data
-  const superadminCount = users.filter(u => u.globalRoles.includes('superadmin')).length
-  const adminCount = users.filter(u => u.globalRoles.includes('admin')).length
-  const withAppRoles = users.filter(u => Object.keys(u.appRoles).length > 0).length
+  const superadminCount = users.filter(u => u.globalRoles?.includes('superadmin')).length
+  const adminCount = users.filter(u => u.globalRoles?.includes('admin')).length
+  const withAppRoles = users.filter(u => Object.keys(u.appRoles || {}).length > 0).length
   const onlineCount = users.filter(u => isOnline(u.lastActiveAt)).length
 
   return (
@@ -653,6 +660,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
           onOpenChange={setEditOpen}
           onSaved={fetchUsers}
           t={t}
+          accessToken={accessToken}
         />
 
         {/* Delete Confirmation Dialog */}
