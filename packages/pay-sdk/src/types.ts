@@ -1,5 +1,5 @@
 // Payment Types
-export type PaymentType = 'donation' | 'purchase' | 'subscription' | 'invoice'
+export type PaymentType = 'donation' | 'purchase' | 'subscription' | 'invoice' | 'testimonial'
 
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled'
 

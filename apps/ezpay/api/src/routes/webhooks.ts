@@ -145,6 +145,67 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         break
       }
 
+      case 'invoice.payment_succeeded': {
+        const data = event.data as WebhookInvoiceData
+        if (!data.subscriptionId) break
+
+        // Skip initial subscription creation (handled by checkout.completed)
+        if (data.billingReason === 'subscription_create') {
+          logger.info('Skipping initial subscription invoice (handled by checkout.completed)')
+          break
+        }
+
+        // Find the original subscription payment
+        const subPayment = await Payment.findOne({
+          'metadata.subscriptionId': data.subscriptionId,
+          type: 'subscription',
+        }).sort({ createdAt: -1 })
+
+        if (!subPayment) {
+          logger.warn(`No subscription payment found for ${data.subscriptionId}`)
+          break
+        }
+
+        // Update the subscription's period end
+        await Payment.updateOne(
+          { _id: subPayment._id },
+          {
+            $set: {
+              status: 'completed',
+              currentPeriodEnd: data.periodEnd,
+              cancelAtPeriodEnd: false,
+            },
+          }
+        )
+
+        // Create a new payment record for this renewal
+        await Payment.create({
+          projectId: subPayment.projectId,
+          projectName: subPayment.projectName,
+          type: 'subscription',
+          amount: (data.amount || 0) / 100,
+          currency: data.currency || subPayment.currency,
+          provider: 'stripe',
+          paymentId: `renewal-${data.subscriptionId}-${Date.now()}`,
+          status: 'completed',
+          completedAt: new Date(),
+          userId: subPayment.userId,
+          customerName: data.customerName || subPayment.customerName,
+          customerEmail: data.customerEmail || subPayment.customerEmail,
+          isAnonymous: false,
+          liveMode: subPayment.liveMode,
+          metadata: {
+            subscriptionId: data.subscriptionId,
+            billingReason: data.billingReason,
+            periodEnd: data.periodEnd,
+            renewalOf: subPayment._id.toString(),
+          },
+        })
+
+        logger.info(`Subscription renewal recorded for ${data.subscriptionId}`)
+        break
+      }
+
       default:
         logger.info(`Unhandled webhook event type: ${event.type}`)
     }

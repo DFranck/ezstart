@@ -52,6 +52,7 @@ next-env.d.ts
 .claude/settings.local.json
 .claude/**/local/**
 .claude/**/*.local.*
+.claude/worktrees/
 
 # Temporary logs and test files
 test-*.log
