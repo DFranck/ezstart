@@ -8,6 +8,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
+  Checkbox,
   Div,
   H3,
   Icon,
@@ -218,12 +219,10 @@ export function DonationCard({
           />
         </Div>
         <Div className="flex items-center gap-2">
-          <input
-            type="checkbox"
+          <Checkbox
             id="donate-anonymous"
             checked={isAnonymous}
-            onChange={e => setIsAnonymous(e.target.checked)}
-            className="rounded"
+            onCheckedChange={(checked) => setIsAnonymous(checked === true)}
           />
           <Label htmlFor="donate-anonymous" className="text-sm text-muted-foreground cursor-pointer">
             {texts.anonymous || 'Donate anonymously'}
