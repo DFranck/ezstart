@@ -14,7 +14,8 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { PurchaseButton } from './PurchaseButton.js'
+import { logger } from '@ezstart/logger'
+import { usePay } from '../provider.js'
 import { formatCurrency } from '../utils/format-currency.js'
 
 export interface PurchaseCardProps {
@@ -74,9 +75,31 @@ export function PurchaseCard({
   texts: textsProp,
 }: PurchaseCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
+  const { createPurchase, isLoading } = usePay()
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const price = formatCurrency(amount, currency)
+
+  const handlePurchase = async () => {
+    try {
+      const result = await createPurchase({
+        projectId: appName,
+        productId,
+        productName,
+        amount,
+        currency,
+        userId,
+        customerEmail: userEmail,
+        customerName: userName,
+      })
+
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl
+      }
+    } catch (error) {
+      logger.error('Purchase failed:', error instanceof Error ? error.message : String(error))
+    }
+  }
 
   if (isCompact) {
     return (
@@ -95,22 +118,13 @@ export function PurchaseCard({
           <Span className="text-lg font-bold">{price}</Span>
         </Div>
         <Div className="shrink-0">
-          <PurchaseButton
-            projectId={appName}
-            productId={productId}
-            productName={productName}
-            amount={amount}
-            currency={currency}
-            description={description}
-            userId={userId}
-            userEmail={userEmail}
-            userName={userName}
-            trigger={
-              <Button size="sm">
-                {texts.buy}
-              </Button>
-            }
-          />
+          <Button size="sm" disabled={isLoading} onClick={handlePurchase}>
+            {isLoading ? (
+              <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
+            ) : (
+              texts.buy
+            )}
+          </Button>
         </Div>
       </Card>
     )
@@ -154,23 +168,24 @@ export function PurchaseCard({
       <CardContent className="flex-1" />
 
       <CardFooter>
-        <PurchaseButton
-          projectId={appName}
-          productId={productId}
-          productName={productName}
-          amount={amount}
-          currency={currency}
-          description={description}
-          userId={userId}
-          userEmail={userEmail}
-          userName={userName}
-          trigger={
-            <Button className="w-full" size="lg">
+        <Button
+          className="w-full"
+          size="lg"
+          disabled={isLoading}
+          onClick={handlePurchase}
+        >
+          {isLoading ? (
+            <>
+              <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
+              {texts.loading}
+            </>
+          ) : (
+            <>
               <Icon name="lucide:ShoppingCart" className="w-4 h-4" />
               {texts.buy} — {price}
-            </Button>
-          }
-        />
+            </>
+          )}
+        </Button>
       </CardFooter>
     </Card>
   )
