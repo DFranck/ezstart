@@ -406,6 +406,19 @@ export class PayClient {
     return result
   }
 
+  // ===== CLEANUP =====
+
+  async cleanupPayments(appName?: string): Promise<{ deletedCount: number }> {
+    const params = appName ? `?appName=${appName}` : ''
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/payments/cleanup${params}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+    const result = await response.json()
+    if (!response.ok) throw new Error(result.error || 'Failed to cleanup')
+    return result.data ?? result
+  }
+
   // ===== PLANS =====
 
   async createPlan(data: CreatePlanRequest): Promise<PlanResponse> {

@@ -233,6 +233,8 @@ export interface PayAdminDashboardTexts {
   cancelAllSubscriptions?: string
   cancelAllConfirm?: string
   cancelAllSuccess?: string
+  deleteAll?: string
+  deleteAllConfirm?: string
 }
 
 export interface PayAdminDashboardProps {
@@ -2029,6 +2031,9 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   cancelAllSubscriptions: 'Cancel All Active',
   cancelAllConfirm: 'Cancel ALL active subscriptions? This cannot be undone.',
   cancelAllSuccess: 'Bulk cancel completed',
+  deleteAll: 'Delete All Data',
+  deleteAllConfirm:
+    'DELETE ALL payment records from the database? This permanently removes all test data and cannot be undone.',
 }
 
 export function PayAdminDashboard({ appName, showAppFilter, testMode, className, texts }: PayAdminDashboardProps) {
@@ -2084,7 +2089,23 @@ export function PayAdminDashboard({ appName, showAppFilter, testMode, className,
       {testMode && (
         <Div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-4 flex items-center gap-2">
           <Icon name="lucide:AlertTriangle" className="w-4 h-4 text-warning shrink-0" />
-          <Span className="text-sm font-medium text-warning">{t.testModeWarning}</Span>
+          <Span className="text-sm font-medium text-warning flex-1">{t.testModeWarning}</Span>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={async () => {
+              if (!window.confirm(t.deleteAllConfirm)) return
+              try {
+                const result = await client.cleanupPayments(effectiveAppName || undefined)
+                toast.success(`${result.deletedCount} records deleted`)
+                window.location.reload()
+              } catch {
+                toast.error('Failed to delete')
+              }
+            }}
+          >
+            {t.deleteAll}
+          </Button>
         </Div>
       )}
 
