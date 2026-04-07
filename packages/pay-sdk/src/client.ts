@@ -344,7 +344,14 @@ export class PayClient {
       throw new Error(result.error || 'Failed to list promos')
     }
 
-    return result
+    // Map MongoDB _id to id for SDK type compatibility
+    const data = result.data ?? result.promos ?? []
+    const promos = data.map((p: Record<string, unknown>) => ({
+      ...p,
+      id: p.id || p._id,
+    }))
+
+    return { ...result, data: promos, promos }
   }
 
   async validatePromo(code: string, appName: string): Promise<PromoValidationResponse> {
