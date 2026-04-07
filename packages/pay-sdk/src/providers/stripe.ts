@@ -45,6 +45,11 @@ export interface StripeInstance {
     cancel(id: string): Promise<{ status: string }>
     update(id: string, params: Record<string, unknown>): Promise<{ status: string; cancel_at_period_end: boolean; current_period_end: number }>
   }
+  billingPortal: {
+    sessions: {
+      create(params: { customer: string; return_url: string }): Promise<{ url: string }>
+    }
+  }
   webhooks: {
     constructEvent(payload: string | Buffer, signature: string, secret: string): StripeWebhookEvent
   }
@@ -151,6 +156,9 @@ export class StripeProvider implements IPaymentProvider {
       metadata: options.metadata,
       ...(discountsParam ? { discounts: discountsParam } : {}),
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
+      ...(options.trialDays
+        ? { subscription_data: { trial_period_days: options.trialDays } }
+        : {}),
     })
 
     return { sessionId: session.id, url: session.url }
@@ -237,6 +245,18 @@ export class StripeProvider implements IPaymentProvider {
       cancelled: subscription.cancel_at_period_end === true,
       status: subscription.status,
     }
+  }
+
+  // ========================================
+  // Customer Portal
+  // ========================================
+
+  async createPortalSession(customerId: string, returnUrl: string): Promise<{ url: string }> {
+    const session = await this.stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: returnUrl,
+    })
+    return { url: session.url }
   }
 
   // ========================================

@@ -5,6 +5,7 @@ import { subscriptionsRegistries, subscriptionsRouters } from './subscriptions/i
 import { paymentsRegistries, paymentsRouters } from './payments/index.js'
 import { promosRegistries, promosRouters } from './promos/index.js'
 import { plansRegistries, plansRouters } from './plans/index.js'
+import { portalRegistries, portalRouters } from './portal/index.js'
 import webhooksRouter from './webhooks.js'
 import testProductsRouter from './test-products.js'
 import type { Router as ExpressRouter } from 'express'
@@ -18,6 +19,7 @@ subscriptionsRouters.forEach(r => router.use('/', r))
 paymentsRouters.forEach(r => router.use('/', r))
 promosRouters.forEach(r => router.use('/', r))
 plansRouters.forEach(r => router.use('/', r))
+portalRouters.forEach(r => router.use('/', r))
 router.use('/', webhooksRouter)
 router.use('/', testProductsRouter)
 
@@ -33,5 +35,6 @@ export const registries = [
   ...paymentsRegistries,
   ...promosRegistries,
   ...plansRegistries,
+  ...portalRegistries,
 ]
 export default router

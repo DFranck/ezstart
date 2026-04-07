@@ -410,6 +410,24 @@ export class PayClient {
     return result
   }
 
+  // ===== CUSTOMER PORTAL =====
+
+  async createPortalSession(returnUrl?: string): Promise<{ url: string }> {
+    const response = await this.fetchWithAuth(`${this.config.baseURL}/portal/session`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ returnUrl: returnUrl || this.getReturnUrl() }),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create portal session')
+    }
+
+    return result.data ?? result
+  }
+
   // ===== CLEANUP =====
 
   async cleanupPayments(appName?: string): Promise<{ deletedCount: number }> {

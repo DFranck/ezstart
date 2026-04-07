@@ -33,6 +33,9 @@ export interface IPaymentProvider {
   // Subscriptions
   cancelSubscription(subscriptionId: string): Promise<CancelResult>
 
+  // Customer Portal
+  createPortalSession?(customerId: string, returnUrl: string): Promise<{ url: string }>
+
   // Webhooks
   verifyWebhookSignature(payload: string | Buffer, signature: string): WebhookEvent
 }
@@ -67,6 +70,7 @@ export interface CheckoutOptions {
 export interface SubscriptionCheckoutOptions extends CheckoutOptions {
   interval: 'month'
   intervalCount?: number
+  trialDays?: number
 }
 
 export interface CheckoutResult {

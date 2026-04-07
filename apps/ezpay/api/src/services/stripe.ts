@@ -16,6 +16,9 @@ const registry = new PaymentProviderRegistry()
 const stripeKey = process.env.STRIPE_SECRET_KEY
 const useConsole = !stripeKey || process.env.PAYMENT_PROVIDER === 'console'
 
+/** Raw Stripe SDK instance — null when ConsoleProvider is used */
+let stripeInstance: Stripe | null = null
+
 if (useConsole) {
   logger.warn(
     'No STRIPE_SECRET_KEY — using ConsoleProvider (payments will be logged, not processed)'
@@ -31,11 +34,11 @@ if (useConsole) {
     logger.warn('WARNING: Test Stripe key in production — payments will not be processed')
   }
 
-  const stripe = new Stripe(stripeKey)
+  stripeInstance = new Stripe(stripeKey)
 
   registry.register(
     new StripeProvider({
-      stripe: stripe as unknown as import('@ezstart/pay-sdk/providers').StripeInstance,
+      stripe: stripeInstance as unknown as import('@ezstart/pay-sdk/providers').StripeInstance,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     })
   )
@@ -51,4 +54,9 @@ export { registry }
 /** Shortcut to the default provider */
 export function getProvider(): IPaymentProvider {
   return registry.getDefault()
+}
+
+/** Get the raw Stripe SDK instance (needed for APIs not abstracted by pay-sdk, e.g. customer lookup) */
+export function getStripeInstance(): Stripe | null {
+  return stripeInstance
 }

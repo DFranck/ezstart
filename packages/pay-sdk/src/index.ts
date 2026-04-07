@@ -42,6 +42,13 @@ export type {
 export { SubscriptionCard } from './components/SubscriptionCard.js'
 export type { SubscriptionCardProps, SubscriptionCardTexts } from './components/SubscriptionCard.js'
 
+// Components - Customer Portal
+export { ManageSubscriptionButton } from './components/ManageSubscriptionButton.js'
+export type {
+  ManageSubscriptionButtonProps,
+  ManageSubscriptionButtonTexts,
+} from './components/ManageSubscriptionButton.js'
+
 // Components - Feature Gate
 export { FeatureGate } from './components/FeatureGate.js'
 export type { FeatureGateProps } from './components/FeatureGate.js'
