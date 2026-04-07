@@ -16,7 +16,8 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { DonateModal } from './DonateModal.js'
+import { logger } from '@ezstart/logger'
+import { usePay } from '../provider.js'
 import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
 
 export interface DonationCardProps {
@@ -76,6 +77,7 @@ export function DonationCard({
   texts: textsProp,
 }: DonationCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
+  const { createDonation, isLoading } = usePay()
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
   const isFeatured = variant === 'featured'
@@ -86,8 +88,30 @@ export function DonationCard({
     ? texts.title.replace('this project', projectName)
     : texts.title
 
-  // The amount used for the donate modal trigger
   const effectiveAmount = customAmount ? parseFloat(customAmount) : selectedAmount
+
+  const handleDonate = async (amount: number) => {
+    if (!amount || amount <= 0 || isNaN(amount)) return
+
+    try {
+      const result = await createDonation({
+        projectId,
+        amount,
+        currency,
+        isPublic: true,
+        isAnonymous: false,
+        userId,
+        donorEmail: userEmail,
+        donorName: userName,
+      })
+
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl
+      }
+    } catch (error) {
+      logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
+    }
+  }
 
   if (isCompact) {
     return (
@@ -97,21 +121,15 @@ export function DonationCard({
           <Span className="font-semibold">{displayTitle}</Span>
           <Div className="flex items-center gap-2 ml-auto">
             {presetAmounts.slice(0, 3).map(amount => (
-              <DonateModal
+              <Button
                 key={amount}
-                projectId={projectId}
-                projectName={projectName || appName}
-                amounts={presetAmounts}
-                currency={currency}
-                userId={userId}
-                userEmail={userEmail}
-                userName={userName}
-                trigger={
-                  <Button variant="outline" size="sm">
-                    {formatCurrency(amount, currency)}
-                  </Button>
-                }
-              />
+                variant="outline"
+                size="sm"
+                disabled={isLoading}
+                onClick={() => handleDonate(amount)}
+              >
+                {formatCurrency(amount, currency)}
+              </Button>
             ))}
           </Div>
         </Div>
@@ -181,28 +199,27 @@ export function DonationCard({
         )}
       </CardContent>
       <CardFooter>
-        <DonateModal
-          projectId={projectId}
-          projectName={projectName || appName}
-          amounts={presetAmounts}
-          currency={currency}
-          userId={userId}
-          userEmail={userEmail}
-          userName={userName}
-          trigger={
-            <Button
-              className="w-full"
-              size="lg"
-              disabled={!effectiveAmount || effectiveAmount <= 0}
-            >
+        <Button
+          className="w-full"
+          size="lg"
+          disabled={!effectiveAmount || effectiveAmount <= 0 || isLoading}
+          onClick={() => effectiveAmount && handleDonate(effectiveAmount)}
+        >
+          {isLoading ? (
+            <>
+              <Icon name="lucide:Loader2" className="w-5 h-5 animate-spin" />
+              {texts.loading}
+            </>
+          ) : (
+            <>
               <Icon name="lucide:Heart" className="w-5 h-5" />
               {texts.donate}
               {effectiveAmount && effectiveAmount > 0
                 ? ` ${formatCurrency(effectiveAmount, currency)}`
                 : ''}
-            </Button>
-          }
-        />
+            </>
+          )}
+        </Button>
       </CardFooter>
     </Card>
   )
