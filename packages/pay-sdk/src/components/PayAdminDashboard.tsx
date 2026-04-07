@@ -148,6 +148,16 @@ export interface PayAdminDashboardTexts {
   promoRequired?: string
   promoOptionalSection?: string
 
+  // Promo form hints
+  promoDiscountTypeHintPercent?: string
+  promoDiscountTypeHintFixed?: string
+  promoDurationHintOnce?: string
+  promoDurationHintRepeating?: string
+  promoDurationHintForever?: string
+  promoDiscountValueHintPercent?: string
+  promoDiscountValueHintFixed?: string
+  promoMaxUsesHint?: string
+
   // Dialog common
   confirm?: string
   cancel?: string
@@ -838,6 +848,11 @@ function CreatePromoDialog({
                     <SelectItem value="fixed">{t.promoDiscountFixed}</SelectItem>
                   </SelectContent>
                 </Select>
+                <P className="text-xs text-muted-foreground mt-1">
+                  {discountType === 'percent'
+                    ? t.promoDiscountTypeHintPercent
+                    : t.promoDiscountTypeHintFixed}
+                </P>
               </Div>
 
               {/* Discount Value */}
@@ -855,6 +870,11 @@ function CreatePromoDialog({
                     {discountType === 'percent' ? '%' : currency}
                   </Span>
                 </Div>
+                <P className="text-xs text-muted-foreground mt-1">
+                  {discountType === 'percent'
+                    ? t.promoDiscountValueHintPercent
+                    : t.promoDiscountValueHintFixed}
+                </P>
               </Div>
 
               {/* Duration */}
@@ -870,6 +890,13 @@ function CreatePromoDialog({
                     <SelectItem value="forever">{t.promoDurationForever}</SelectItem>
                   </SelectContent>
                 </Select>
+                <P className="text-xs text-muted-foreground mt-1">
+                  {duration === 'once'
+                    ? t.promoDurationHintOnce
+                    : duration === 'repeating'
+                      ? t.promoDurationHintRepeating
+                      : t.promoDurationHintForever}
+                </P>
               </Div>
 
               {/* Duration in months (only for repeating — becomes required) */}
@@ -914,6 +941,7 @@ function CreatePromoDialog({
                   placeholder={t.promoUnlimitedHint}
                   min={1}
                 />
+                <P className="text-xs text-muted-foreground mt-1">{t.promoMaxUsesHint}</P>
               </Div>
 
               {/* Expiry date */}
@@ -1296,6 +1324,19 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   promoUnlimitedHint: 'Unlimited if empty',
   promoRequired: 'Required',
   promoOptionalSection: 'Optional',
+
+  // Promo form hints
+  promoDiscountTypeHintPercent: 'Percentage off the price (e.g., 20 = 20% off)',
+  promoDiscountTypeHintFixed: 'Fixed amount off (e.g., 5 = 5€ off)',
+  promoDurationHintOnce:
+    'Discount applies to the first payment only. Use for one-time offers to specific customers.',
+  promoDurationHintRepeating:
+    'Discount applies for a set number of months, then full price resumes. Ideal for "X months free" promos.',
+  promoDurationHintForever:
+    'Discount applies permanently as long as the subscription is active. Use for loyalty or partnership deals.',
+  promoDiscountValueHintPercent: 'Enter percentage (e.g., 100 for 100% = free, 20 for 20% off)',
+  promoDiscountValueHintFixed: 'Enter amount in smallest unit (e.g., 500 = 5.00)',
+  promoMaxUsesHint: 'Maximum number of customers who can use this code. Leave empty for unlimited.',
 
   // Dialog common
   confirm: 'Confirm',
