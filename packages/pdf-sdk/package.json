@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "jspdf": "^4.2.0",
-    "dom-to-image": "^2.6.0"
+    "html2canvas": "^1.4.1",
+    "dom-to-image-more": "^3.4.5"
   },
   "devDependencies": {
-    "@ezstart/typescript-config": "workspace:*",
-    "@types/dom-to-image": "^2.6.7"
+    "@ezstart/typescript-config": "workspace:*"
   }
 }

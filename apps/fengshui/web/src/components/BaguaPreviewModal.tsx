@@ -26,7 +26,6 @@ export function BaguaPreviewModal({
   config,
   planImage,
   bearingFromNorth,
-  visualizationMode = 'wheel',
   transformations,
   isPremium = false,
 }: Props) {
@@ -34,55 +33,33 @@ export function BaguaPreviewModal({
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [previewImageUrls, setPreviewImageUrls] = useState<{
-    page1?: string
-    page2?: string
-  }>({})
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [previews, setPreviews] = useState<string[]>([])
+  const [pageCount, setPageCount] = useState(0)
   const wheelRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
-  const cardsRef = useRef<HTMLDivElement>(null)
   const cardsGridRef = useRef<HTMLDivElement>(null)
 
-  const pdfBgColor = '#ffffff'
-
-  // Detect mobile and theme
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(
-        window.innerWidth <= 768 ||
-          /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      )
-    }
-    const checkTheme = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'))
+      setIsMobile(window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent))
     }
     checkMobile()
-    checkTheme()
     window.addEventListener('resize', checkMobile)
-
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-
-    return () => {
-      window.removeEventListener('resize', checkMobile)
-      observer.disconnect()
-    }
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   const handleGenerate = async () => {
     await generatePDF({
       wheelRef,
       gridRef,
-      cardsRef,
       cardsGridRef,
-      pdfBgColor,
-      titleText: t('pdfModal.title'),
       config,
-      planImage,
       bearingFromNorth,
       onPdfUrl: setPdfUrl,
-      onPreviewImages: setPreviewImageUrls,
+      onResult: ({ previews: p, pageCount: c }) => {
+        setPreviews(p)
+        setPageCount(c)
+      },
       onGeneratingChange: setIsGenerating,
     })
   }
@@ -99,7 +76,8 @@ export function BaguaPreviewModal({
     if (!isOpen && pdfUrl) {
       URL.revokeObjectURL(pdfUrl)
       setPdfUrl(null)
-      setPreviewImageUrls({})
+      setPreviews([])
+      setPageCount(0)
     }
   }, [isOpen, pdfUrl])
 
@@ -115,7 +93,7 @@ export function BaguaPreviewModal({
       }
       description={
         <Span className="block">
-          <Span className="hidden sm:inline">{t('pdfModal.previewTitle')} • </Span>
+          <Span className="hidden sm:inline">{t('pdfModal.previewTitle')} </Span>
           {isGenerating ? t('pdfModal.generatingPdf') : t('pdfModal.clickToGenerate')}
         </Span>
       }
@@ -145,22 +123,20 @@ export function BaguaPreviewModal({
         isGenerating={isGenerating}
         isMobile={isMobile}
         pdfUrl={pdfUrl}
-        previewImageUrls={previewImageUrls}
+        previews={previews}
+        pageCount={pageCount}
       />
 
       {/* Hidden capture containers for PDF generation */}
       <PdfCaptureContainers
         wheelRef={wheelRef}
         gridRef={gridRef}
-        cardsRef={cardsRef}
         cardsGridRef={cardsGridRef}
         planImage={planImage}
         bearingFromNorth={bearingFromNorth}
         config={config}
-        visualizationMode={visualizationMode}
         transformations={transformations}
         isPremium={isPremium}
-        isDarkMode={isDarkMode}
       />
     </Modal>
   )

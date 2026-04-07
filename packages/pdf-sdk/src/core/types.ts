@@ -49,4 +49,6 @@ export interface CaptureOptions {
   scale?: number
   /** Quality 0-1 */
   quality?: number
+  /** Capture engine to use. html2canvas is better for SVG/complex DOM, dom-to-image for simpler HTML. Default: 'html2canvas' */
+  engine?: 'html2canvas' | 'dom-to-image'
 }

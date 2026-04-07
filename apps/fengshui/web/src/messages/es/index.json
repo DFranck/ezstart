@@ -329,7 +329,13 @@
     "twoPages": "2 páginas: Rueda + Cuadrícula y Sectores detallados",
     "downloadPdf": "Descargar PDF",
     "planBagua": "Plan Feng Shui",
-    "detailedSectors": "Sectores Detallados"
+    "detailedSectors": "Sectores Detallados",
+    "cover": "Portada",
+    "compass": "Brújula",
+    "grid": "Cuadrícula",
+    "orientations": "Orientaciones",
+    "backToAnalysis": "Volver al análisis",
+    "pagesTotal": "{count} páginas en total"
   },
   "bagua": {
     "orientations": "Orientaciones Feng Shui",

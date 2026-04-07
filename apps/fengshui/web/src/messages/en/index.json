@@ -329,7 +329,13 @@
     "twoPages": "2 pages: Wheel + Grid & Detailed Sectors",
     "downloadPdf": "Download PDF",
     "planBagua": "Feng Shui Plan",
-    "detailedSectors": "Detailed Sectors"
+    "detailedSectors": "Detailed Sectors",
+    "cover": "Cover",
+    "compass": "Compass",
+    "grid": "Grid",
+    "orientations": "Orientations",
+    "backToAnalysis": "Back to analysis",
+    "pagesTotal": "{count} pages total"
   },
   "bagua": {
     "orientations": "Feng Shui Orientations",

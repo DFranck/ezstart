@@ -10,23 +10,13 @@ import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
-import {
-  Button,
-  Div,
-  H1,
-  Icon,
-  P,
-  Section,
-  Skeleton,
-  Span,
-} from '@ezstart/ui/components'
+import { Button, Div, H1, Icon, P, Section, Skeleton, Span } from '@ezstart/ui/components'
 import { useScroll } from '@ezstart/ui/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { useMessages, useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '@/components/BaguaOrientationsGrid'
-import { BaguaPreviewModal } from '@/components/BaguaPreviewModal'
 import PricingModal from '@/components/PricingModal'
 import BaguaGrid from '@/components/steps/BaguaGrid'
 import BaguaWheel from '@/components/steps/BaguaWheel'
@@ -53,20 +43,13 @@ export default function AnalysisViewPage() {
   const { scrollTo } = useScroll()
 
   const [cfg, setCfg] = useState<YearBaguaConfig | null>(null)
-  const [visualizationMode, setVisualizationMode] = useState<'wheel' | 'grid'>(
-    'wheel'
-  )
-  const [expandedSectors, setExpandedSectors] = useState<Set<Direction>>(
-    new Set()
-  )
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [visualizationMode, setVisualizationMode] = useState<'wheel' | 'grid'>('wheel')
+  const [expandedSectors, setExpandedSectors] = useState<Set<Direction>>(new Set())
   const [isPricingOpen, setIsPricingOpen] = useState(false)
 
   // Refs for sector scroll
-  const sectorRefs = useRef(
-    {} as Record<Direction, React.RefObject<HTMLDivElement | null>>
-  )
-  DIRECTIONS_WITH_CENTER.forEach((dir) => {
+  const sectorRefs = useRef({} as Record<Direction, React.RefObject<HTMLDivElement | null>>)
+  DIRECTIONS_WITH_CENTER.forEach(dir => {
     if (!sectorRefs.current[dir]) {
       sectorRefs.current[dir] = React.createRef<HTMLDivElement>()
     }
@@ -83,18 +66,17 @@ export default function AnalysisViewPage() {
   }, [messages])
 
   // Fetch analysis (retry on failure — token may need refresh on first load)
-  const { data: analysis, isLoading: isLoadingAnalysis } =
-    useQuery<AnalysisData>({
-      queryKey: ['analysis', id],
-      queryFn: async () => {
-        const res = await callApi(`/api/analyses/${id}`, { method: 'GET' })
-        if (!res.ok) throw new Error(res.error || 'Failed to load analysis')
-        return res.data as AnalysisData
-      },
-      enabled: !!id,
-      retry: 5,
-      retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 5000),
-    })
+  const { data: analysis, isLoading: isLoadingAnalysis } = useQuery<AnalysisData>({
+    queryKey: ['analysis', id],
+    queryFn: async () => {
+      const res = await callApi(`/api/analyses/${id}`, { method: 'GET' })
+      if (!res.ok) throw new Error(res.error || 'Failed to load analysis')
+      return res.data as AnalysisData
+    },
+    enabled: !!id,
+    retry: 5,
+    retryDelay: attemptIndex => Math.min(1000 * (attemptIndex + 1), 5000),
+  })
 
   const planImage = analysis?.imageData || null
 
@@ -123,8 +105,7 @@ export default function AnalysisViewPage() {
     scrollTo(ref, { block: 'center', delay: 100 })
   }
 
-  const handleExpandAll = () =>
-    setExpandedSectors(new Set(DIRECTIONS_WITH_CENTER))
+  const handleExpandAll = () => setExpandedSectors(new Set(DIRECTIONS_WITH_CENTER))
   const handleCollapseAll = () => setExpandedSectors(new Set())
 
   if (isLoadingAnalysis) {
@@ -139,13 +120,8 @@ export default function AnalysisViewPage() {
   if (!analysis) {
     return (
       <Section className="container mx-auto px-4 py-8 max-w-7xl text-center">
-        <Icon
-          name="lucide:AlertCircle"
-          className="w-12 h-12 text-muted-foreground mx-auto mb-4"
-        />
-        <P className="text-lg text-muted-foreground">
-          {t('analysis.notFound')}
-        </P>
+        <Icon name="lucide:AlertCircle" className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <P className="text-lg text-muted-foreground">{t('analysis.notFound')}</P>
         <Link href="/dashboard">
           <Button variant="outline" className="mt-4">
             <Icon name="lucide:ArrowLeft" className="w-4 h-4 mr-2" />
@@ -273,35 +249,24 @@ export default function AnalysisViewPage() {
         </Div>
       </Div>
 
-      {/* PDF download button */}
+      {/* PDF preview button — TODO: fix dom-to-image border artifacts before re-enabling
       <Div className="flex justify-center mt-6">
-        <Button
-          onClick={() => setIsPreviewOpen(true)}
-          variant="ghost"
-          disabled={!cfg}
-          style={{
-            background: `linear-gradient(to right, ${THEME_COLORS.cssVars.primary}, ${THEME_COLORS.cssVars.secondary})`,
-            color: 'white',
-            border: 'none',
-          }}
-        >
-          <Icon name="lucide:FileDown" className="w-4 h-4" />
-          <Span>{t('analysis.pdfPreview')}</Span>
-        </Button>
+        <Link href={`/analyze/${id}/preview`}>
+          <Button
+            variant="ghost"
+            disabled={!cfg}
+            style={{
+              background: `linear-gradient(to right, ${THEME_COLORS.cssVars.primary}, ${THEME_COLORS.cssVars.secondary})`,
+              color: 'white',
+              border: 'none',
+            }}
+          >
+            <Icon name="lucide:FileDown" className="w-4 h-4" />
+            <Span>{t('analysis.pdfPreview')}</Span>
+          </Button>
+        </Link>
       </Div>
-
-      {/* Preview Modal */}
-      {cfg && (
-        <BaguaPreviewModal
-          isOpen={isPreviewOpen}
-          onClose={() => setIsPreviewOpen(false)}
-          config={cfg}
-          planImage={planImage || undefined}
-          bearingFromNorth={bearing}
-          visualizationMode={visualizationMode}
-          isPremium={isPremium}
-        />
-      )}
+      */}
 
       {/* Pricing Modal */}
       <PricingModal

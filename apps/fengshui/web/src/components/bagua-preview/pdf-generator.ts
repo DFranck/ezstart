@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger'
-import { PdfBuilder, captureElement } from '@ezstart/pdf-sdk'
+import { PdfDocument } from '@ezstart/pdf-sdk'
 import { toast } from 'sonner'
 
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
@@ -7,225 +7,134 @@ import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 interface PdfGeneratorOptions {
   wheelRef: React.RefObject<HTMLDivElement | null>
   gridRef: React.RefObject<HTMLDivElement | null>
-  cardsRef: React.RefObject<HTMLDivElement | null>
   cardsGridRef: React.RefObject<HTMLDivElement | null>
-  pdfBgColor: string
-  titleText: string
   config: YearBaguaConfig
-  planImage?: string
   bearingFromNorth: number
   onPdfUrl: (url: string) => void
-  onPreviewImages: (images: { page1?: string; page2?: string }) => void
+  onResult: (result: { previews: string[]; pageCount: number }) => void
   onGeneratingChange: (isGenerating: boolean) => void
 }
 
-/**
- * Temporarily make a hidden element visible for capture, run an async callback,
- * then restore original styles.
- */
-async function withVisible<T>(
-  element: HTMLElement,
-  fn: () => Promise<T>
-): Promise<T> {
-  const original = {
-    position: element.style.position,
-    top: element.style.top,
-    left: element.style.left,
-    display: element.style.display,
-  }
+function makeVisible(el: HTMLElement) {
+  el.style.position = 'fixed'
+  el.style.left = '0px'
+  el.style.top = '0px'
+  el.style.visibility = 'visible'
+  el.style.pointerEvents = 'none'
+  el.style.zIndex = '-1'
+}
 
-  element.style.position = 'static'
-  element.style.top = 'auto'
-  element.style.left = 'auto'
-  element.style.display = 'block'
-
-  await new Promise(resolve => setTimeout(resolve, 500))
-
-  try {
-    return await fn()
-  } finally {
-    element.style.position = original.position
-    element.style.top = original.top
-    element.style.left = original.left
-    element.style.display = original.display
-  }
+function makeHidden(el: HTMLElement) {
+  el.style.position = 'fixed'
+  el.style.left = '-9999px'
+  el.style.top = '0'
+  el.style.visibility = ''
+  el.style.pointerEvents = 'none'
+  el.style.zIndex = '-1'
 }
 
 export async function generatePDF({
   wheelRef,
   gridRef,
-  cardsRef,
   cardsGridRef,
-  pdfBgColor,
+  config,
+  bearingFromNorth,
   onPdfUrl,
-  onPreviewImages,
+  onResult,
   onGeneratingChange,
 }: PdfGeneratorOptions) {
   try {
     onGeneratingChange(true)
-
-    // Inject global CSS to hide ALL scrollbars during generation
-    const hideScrollbarStyle = document.createElement('style')
-    hideScrollbarStyle.id = 'hide-scrollbars-during-pdf'
-    hideScrollbarStyle.textContent = `
-      * {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-      }
-      *::-webkit-scrollbar {
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-      }
-      body, html {
-        overflow: hidden !important;
-      }
-    `
-    document.head.appendChild(hideScrollbarStyle)
-
-    logger.debug('Starting PDF generation (2-page report)...')
+    logger.debug('Starting PDF generation...')
 
     // Wait for elements to render
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
     if (!wheelRef.current || !gridRef.current) {
-      throw new Error('Wheel or Grid element not found - make sure the modal is open')
+      throw new Error('Wheel or Grid element not found')
     }
 
-    // ──────────────────────────────────────────────
-    // Capture DOM elements
-    // ──────────────────────────────────────────────
-
-    const containerSize = 600
-
-    // Capture wheel
-    logger.debug('Capturing wheel component...')
-    const wheelDataUrl = await withVisible(wheelRef.current, () =>
-      captureElement(wheelRef.current!, {
-        width: containerSize,
-        height: containerSize,
-        bgcolor: pdfBgColor,
-        scale: 2,
-      })
-    )
-
-    // Capture cards overlay for the wheel composite
-    let wheelCompositeUrl = wheelDataUrl
-    if (cardsRef.current) {
-      const originalCardsDisplay = cardsRef.current.style.display
-      cardsRef.current.style.display = 'block'
-
-      const cardsDataUrl = await captureElement(cardsRef.current, {
-        width: 800,
-        height: 800,
-        bgcolor: 'transparent',
-        scale: 2,
-      })
-
-      cardsRef.current.style.display = originalCardsDisplay
-
-      // Combine wheel + cards
-      const captureSize = 1200
-      const combinedCanvas = document.createElement('canvas')
-      const combinedCtx = combinedCanvas.getContext('2d')
-      combinedCanvas.width = captureSize
-      combinedCanvas.height = captureSize
-
-      const baguaImg = new Image()
-      const cardsImg = new Image()
-
-      await new Promise<void>(resolve => {
-        let loaded = 0
-        const onLoad = () => {
-          loaded++
-          if (loaded === 2) resolve()
-        }
-        baguaImg.onload = onLoad
-        cardsImg.onload = onLoad
-        baguaImg.src = wheelDataUrl
-        cardsImg.src = cardsDataUrl
-      })
-
-      combinedCtx?.drawImage(baguaImg, 0, 0, captureSize, captureSize)
-      combinedCtx?.drawImage(cardsImg, 0, 0, captureSize, captureSize)
-      wheelCompositeUrl = combinedCanvas.toDataURL('image/png', 1.0)
+    const year = config.year || new Date().getFullYear()
+    const captureOpts = {
+      engine: 'dom-to-image' as const,
+      scale: 2,
+      bgcolor: '#ffffff',
+      prepare: makeVisible,
+      cleanup: makeHidden,
     }
 
-    // Capture grid
-    logger.debug('Capturing grid component...')
-    const gridDataUrl = await withVisible(gridRef.current, () =>
-      captureElement(gridRef.current!, {
-        width: containerSize,
-        height: containerSize,
-        bgcolor: pdfBgColor,
-        scale: 2,
-      })
-    )
+    const doc = new PdfDocument({ format: 'a4' })
 
-    // Capture cards grid (detailed sector grid)
-    let cardsGridDataUrl: string | null = null
-    if (cardsGridRef?.current) {
-      logger.debug('Capturing cards grid component...')
-      cardsGridDataUrl = await withVisible(cardsGridRef.current, () =>
-        captureElement(cardsGridRef.current!, {
-          bgcolor: pdfBgColor,
-          scale: 2,
-        })
+    // Page 1: Cover
+    doc
+      .textPage()
+      .space(80)
+      .title('Analyse Feng Shui Bagua', { fontSize: 28, color: '#1a1a2e' })
+      .space(10)
+      .subtitle(`Année ${year}`, { fontSize: 18, color: '#4a4a6a' })
+      .space(8)
+      .text(`Orientation : ${Math.round(bearingFromNorth)}°`, {
+        fontSize: 14,
+        color: '#666666',
+        align: 'center',
+      })
+      .space(5)
+      .text(
+        new Date().toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        }),
+        { fontSize: 12, color: '#888888', align: 'center' }
       )
+      .space(30)
+      .separator()
+      .space(40)
+      .text('Rapport généré par EZStart FengShui', {
+        fontSize: 10,
+        color: '#aaaaaa',
+        align: 'center',
+      })
+
+    // Page 2: Wheel
+    doc
+      .capturePage(wheelRef.current, {
+        ...captureOpts,
+        width: 600,
+        height: 600,
+      })
+      .subtitle('Boussole Bagua')
+
+    // Page 3: Grid
+    doc
+      .capturePage(gridRef.current, {
+        ...captureOpts,
+        width: 600,
+        height: 600,
+      })
+      .subtitle('Grille Bagua')
+
+    // Pages 4+: Orientations (auto-paginated)
+    if (cardsGridRef.current) {
+      doc.capturePages(cardsGridRef.current, captureOpts).title('Orientations Feng Shui')
     }
 
-    // ──────────────────────────────────────────────
-    // Build 2-page PDF
-    // ──────────────────────────────────────────────
+    const result = await doc.build()
 
-    const builder = new PdfBuilder({ format: 'a4', orientation: 'portrait' })
-
-    // Page 1: Wheel composite (full page image)
-    builder
-      .addPage()
-      .addImage(wheelCompositeUrl, { width: 190, height: 190, align: 'center' })
-
-    // Page 2: Grid + Cards grid
-    builder.addPage()
-
-    if (gridDataUrl) {
-      builder.addImage(gridDataUrl, { width: 90, height: 90, align: 'center' })
-      builder.addSpace(5)
-    }
-
-    if (cardsGridDataUrl) {
-      builder.addImage(cardsGridDataUrl, { width: 170, height: 180, align: 'center' })
-    }
-
-    builder.addPageNumbers()
-
-    const { blobUrl } = await builder.build()
-
-    logger.debug('PDF generated successfully with 2 pages')
-    onPdfUrl(blobUrl)
-
-    // Provide preview images (wheel and grid captures)
-    onPreviewImages({
-      page1: wheelCompositeUrl,
-      page2: gridDataUrl,
-    })
+    logger.debug(`PDF generated: ${result.pageCount} pages`)
+    onPdfUrl(result.blobUrl)
+    onResult({ previews: result.previews, pageCount: result.pageCount })
   } catch (error) {
-    logger.error('Erreur generation PDF detaillee:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
-    toast.error(`Erreur lors de la generation du PDF: ${errorMessage}`)
+    logger.error('PDF generation error:', error)
+    const msg = error instanceof Error ? error.message : 'Unknown error'
+    toast.error(`Erreur PDF: ${msg}`)
   } finally {
-    const injectedStyle = document.getElementById('hide-scrollbars-during-pdf')
-    if (injectedStyle) {
-      document.head.removeChild(injectedStyle)
-    }
-    document.body.style.overflow = ''
     onGeneratingChange(false)
   }
 }
 
 export function handleDownloadPDF(pdfUrl: string | null, year?: number) {
   if (!pdfUrl) return
-
   try {
     const link = document.createElement('a')
     link.href = pdfUrl
@@ -234,7 +143,7 @@ export function handleDownloadPDF(pdfUrl: string | null, year?: number) {
     link.click()
     document.body.removeChild(link)
   } catch (error) {
-    logger.error('Erreur telechargement PDF:', error)
-    toast.error('Erreur lors du telechargement du PDF')
+    logger.error('Download error:', error)
+    toast.error('Erreur téléchargement PDF')
   }
 }
