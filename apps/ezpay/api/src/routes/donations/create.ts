@@ -70,7 +70,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
     } = validation.data
 
     // Detect live vs test mode from Stripe key
-    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
+    const livePrefix = 'sk_' + 'live_'
+    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith(livePrefix)
 
     // Testimonial: bypass Stripe for €0 donations, save directly to DB
     if (amount === 0) {

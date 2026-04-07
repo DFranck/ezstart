@@ -33,7 +33,15 @@ import {
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import type { Payment, PaymentStatus, PaymentType, Plan, Promo, PromoDiscountType, PromoDuration } from '../types.js'
+import type {
+  Payment,
+  PaymentStatus,
+  PaymentType,
+  Plan,
+  Promo,
+  PromoDiscountType,
+  PromoDuration,
+} from '../types.js'
 import { formatCurrency } from '../utils/format-currency.js'
 import { usePayContext } from '../provider.js'
 import { ConfirmActionDialog } from './ConfirmActionDialog.js'
@@ -305,12 +313,12 @@ function StatCard({
   loading: boolean
 }) {
   return (
-    <Card className="p-6">
-      <P className="text-sm text-muted-foreground mb-1">{label}</P>
+    <Card className={`p-6`}>
+      <P className={`text-sm text-muted-foreground mb-1`}>{label}</P>
       {loading ? (
-        <Skeleton className="h-8 w-24" />
+        <Skeleton className={`h-8 w-24`} />
       ) : (
-        <P className="text-2xl font-bold">{value}</P>
+        <P className={`text-2xl font-bold`}>{value}</P>
       )}
     </Card>
   )
@@ -318,9 +326,11 @@ function StatCard({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <Div className="flex flex-col items-center justify-center gap-4 p-12 rounded-lg border-2 border-dashed border-muted-foreground/20">
-      <Icon name="lucide:Receipt" className="w-12 h-12 text-muted-foreground/40" />
-      <P className="text-muted-foreground text-center">{message}</P>
+    <Div
+      className={`flex flex-col items-center justify-center gap-4 p-12 rounded-lg border-2 border-dashed border-muted-foreground/20`}
+    >
+      <Icon name="lucide:Receipt" className={`w-12 h-12 text-muted-foreground/40`} />
+      <P className={`text-muted-foreground text-center`}>{message}</P>
     </Div>
   )
 }
@@ -455,7 +465,7 @@ function PaymentsTab({
 
   // Bulk refund handler (test mode only)
   const handleRefundAll = useCallback(async () => {
-    if (!window.confirm(t.refundAllConfirm)) return
+    if (!confirm(t.refundAllConfirm)) return
     const completedPayments = payments.filter(p => p.status === 'completed')
     let count = 0
     for (const payment of completedPayments) {
@@ -477,13 +487,15 @@ function PaymentsTab({
       {
         accessorKey: 'createdAt',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.dateHeader} />,
-        cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.createdAt)}</Span>,
+        cell: ({ row }) => <Span className={`text-sm`}>{formatDate(row.original.createdAt)}</Span>,
       },
       {
         accessorKey: 'customerEmail',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.userHeader} />,
         cell: ({ row }) => (
-          <Span className="text-sm">{row.original.customerEmail || row.original.userId || '-'}</Span>
+          <Span className={`text-sm`}>
+            {row.original.customerEmail || row.original.userId || '-'}
+          </Span>
         ),
       },
       ...(showAppColumn
@@ -512,7 +524,7 @@ function PaymentsTab({
         accessorKey: 'amount',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.amountHeader} />,
         cell: ({ row }) => (
-          <Span className="font-medium">
+          <Span className={`font-medium`}>
             {formatCurrency(row.original.amount, row.original.currency)}
           </Span>
         ),
@@ -548,9 +560,9 @@ function PaymentsTab({
   )
 
   return (
-    <Div className="space-y-6">
+    <Div className={`space-y-6`}>
       {/* Stats */}
-      <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`}>
         <StatCard
           label={t.totalRevenue}
           value={
@@ -568,16 +580,16 @@ function PaymentsTab({
       </Div>
 
       {/* Filters */}
-      <Div className="flex flex-col sm:flex-row gap-3">
+      <Div className={`flex flex-col sm:flex-row gap-3`}>
         <Input
           placeholder={t.searchPlaceholder}
           value={searchInput}
           onChange={e => handleSearchChange(e.target.value)}
-          className="w-full sm:w-64"
+          className={`w-full sm:w-64`}
         />
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className={`w-full sm:w-48`}>
             <SelectValue placeholder={t.allTypes} />
           </SelectTrigger>
           <SelectContent>
@@ -589,7 +601,7 @@ function PaymentsTab({
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className={`w-full sm:w-48`}>
             <SelectValue placeholder={t.allStatuses} />
           </SelectTrigger>
           <SelectContent>
@@ -603,7 +615,7 @@ function PaymentsTab({
         </Select>
 
         {testMode && (
-          <Button variant="outline" size="sm" onClick={handleRefundAll} className="sm:ml-auto">
+          <Button variant="outline" size="sm" onClick={handleRefundAll} className={`sm:ml-auto`}>
             {t.refundAllCompleted}
           </Button>
         )}
@@ -611,10 +623,10 @@ function PaymentsTab({
 
       {/* Table */}
       {loading ? (
-        <Card className="p-8">
-          <Div className="space-y-3">
+        <Card className={`p-8`}>
+          <Div className={`space-y-3`}>
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
+              <Skeleton key={i} className={`h-10 w-full`} />
             ))}
           </Div>
         </Card>
@@ -691,8 +703,7 @@ function SubscriptionsTab({
         for (const sub of result.payments) {
           if (sub.status === 'completed') {
             active++
-            const intervalCount =
-              (sub.metadata?.intervalCount as number | undefined) || 1
+            const intervalCount = (sub.metadata?.intervalCount as number | undefined) || 1
             const cur = sub.currency || 'EUR'
             mrrMap[cur] = (mrrMap[cur] || 0) + sub.amount / intervalCount
           }
@@ -724,7 +735,7 @@ function SubscriptionsTab({
 
   // Bulk cancel handler (test mode only)
   const handleCancelAll = useCallback(async () => {
-    if (!window.confirm(t.cancelAllConfirm)) return
+    if (!confirm(t.cancelAllConfirm)) return
     const activeSubscriptions = subscriptions.filter(s => s.status === 'completed')
     let count = 0
     for (const sub of activeSubscriptions) {
@@ -749,7 +760,9 @@ function SubscriptionsTab({
         accessorKey: 'customerEmail',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.userHeader} />,
         cell: ({ row }) => (
-          <Span className="text-sm">{row.original.customerEmail || row.original.userId || '-'}</Span>
+          <Span className={`text-sm`}>
+            {row.original.customerEmail || row.original.userId || '-'}
+          </Span>
         ),
       },
       ...(showAppColumn
@@ -769,7 +782,7 @@ function SubscriptionsTab({
         accessorKey: 'planName',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.planHeader} />,
         cell: ({ row }) => (
-          <Span className="text-sm font-medium">
+          <Span className={`text-sm font-medium`}>
             {(row.original.metadata?.planName as string) || '-'}
           </Span>
         ),
@@ -779,7 +792,7 @@ function SubscriptionsTab({
         accessorKey: 'amount',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.amountHeader} />,
         cell: ({ row }) => (
-          <Span className="font-medium">
+          <Span className={`font-medium`}>
             {formatCurrency(row.original.amount, row.original.currency)}
           </Span>
         ),
@@ -788,10 +801,9 @@ function SubscriptionsTab({
         accessorKey: 'interval',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.intervalHeader} />,
         cell: ({ row }) => {
-          const intervalCount =
-            (row.original.metadata?.intervalCount as number | undefined) || 1
+          const intervalCount = (row.original.metadata?.intervalCount as number | undefined) || 1
           return (
-            <Span className="text-sm">
+            <Span className={`text-sm`}>
               {intervalCount > 1 ? `${intervalCount}x ` : ''}
               {t.monthly}
             </Span>
@@ -812,7 +824,7 @@ function SubscriptionsTab({
         accessorKey: 'createdAt',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.startedHeader} />,
         cell: ({ row }) => (
-          <Span className="text-sm">{formatDateShort(row.original.createdAt)}</Span>
+          <Span className={`text-sm`}>{formatDateShort(row.original.createdAt)}</Span>
         ),
       },
       {
@@ -837,29 +849,29 @@ function SubscriptionsTab({
   )
 
   return (
-    <Div className="space-y-8">
+    <Div className={`space-y-8`}>
       {/* Plans Section */}
       <Div>
-        <P className="text-lg font-semibold mb-4">{t.plansSection}</P>
+        <P className={`text-lg font-semibold mb-4`}>{t.plansSection}</P>
         <PlansSection appName={appName} t={t} />
       </Div>
 
       {/* Divider */}
-      <Div className="border-t border-border" />
+      <Div className={`border-t border-border`} />
 
       {/* Active Subscriptions Section */}
       <Div>
-        <Div className="flex items-center justify-between mb-4">
-          <P className="text-lg font-semibold">{t.activeSubscriptionsSection}</P>
+        <Div className={`flex items-center justify-between mb-4`}>
+          <P className={`text-lg font-semibold`}>{t.activeSubscriptionsSection}</P>
           {testMode && (
             <Button variant="outline" size="sm" onClick={handleCancelAll}>
               {t.cancelAllSubscriptions}
             </Button>
           )}
         </Div>
-        <Div className="space-y-6">
+        <Div className={`space-y-6`}>
           {/* Stats */}
-          <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
             <StatCard label={t.activeSubscriptions} value={activeCount} loading={statsLoading} />
             <StatCard
               label={t.mrr}
@@ -876,10 +888,10 @@ function SubscriptionsTab({
 
           {/* Table */}
           {loading ? (
-            <Card className="p-8">
-              <Div className="space-y-3">
+            <Card className={`p-8`}>
+              <Div className={`space-y-3`}>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
+                  <Skeleton key={i} className={`h-10 w-full`} />
                 ))}
               </Div>
             </Card>
@@ -1017,13 +1029,13 @@ function CreatePromoDialog({
           <DialogDescription>{t.createPromo}</DialogDescription>
         </DialogHeader>
 
-        <Div className="space-y-4">
+        <Div className={`space-y-4`}>
           {/* Required section */}
           <Div>
-            <P className="text-xs text-muted-foreground font-medium mb-3">{t.promoRequired}</P>
-            <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <P className={`text-xs text-muted-foreground font-medium mb-3`}>{t.promoRequired}</P>
+            <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
               {/* Code */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.promoCode}</Label>
                 <Input
                   value={code}
@@ -1033,7 +1045,7 @@ function CreatePromoDialog({
               </Div>
 
               {/* Discount Type */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.promoDiscountType}</Label>
                 <Select
                   value={discountType}
@@ -1047,7 +1059,7 @@ function CreatePromoDialog({
                     <SelectItem value="fixed">{t.promoDiscountFixed}</SelectItem>
                   </SelectContent>
                 </Select>
-                <P className="text-xs text-muted-foreground mt-1">
+                <P className={`text-xs text-muted-foreground mt-1`}>
                   {discountType === 'percent'
                     ? t.promoDiscountTypeHintPercent
                     : t.promoDiscountTypeHintFixed}
@@ -1055,9 +1067,9 @@ function CreatePromoDialog({
               </Div>
 
               {/* Discount Value */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.promoDiscountValue}</Label>
-                <Div className="relative">
+                <Div className={`relative`}>
                   <Input
                     type="number"
                     value={discountValue}
@@ -1065,11 +1077,13 @@ function CreatePromoDialog({
                     placeholder={discountType === 'percent' ? '20' : '5.00'}
                     className={discountType === 'percent' ? 'pr-8' : 'pr-12'}
                   />
-                  <Span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                  <Span
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none`}
+                  >
                     {discountType === 'percent' ? '%' : currency}
                   </Span>
                 </Div>
-                <P className="text-xs text-muted-foreground mt-1">
+                <P className={`text-xs text-muted-foreground mt-1`}>
                   {discountType === 'percent'
                     ? t.promoDiscountValueHintPercent
                     : t.promoDiscountValueHintFixed}
@@ -1077,7 +1091,7 @@ function CreatePromoDialog({
               </Div>
 
               {/* Duration */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.promoDuration}</Label>
                 <Select value={duration} onValueChange={v => setDuration(v as PromoDuration)}>
                   <SelectTrigger>
@@ -1089,7 +1103,7 @@ function CreatePromoDialog({
                     <SelectItem value="forever">{t.promoDurationForever}</SelectItem>
                   </SelectContent>
                 </Select>
-                <P className="text-xs text-muted-foreground mt-1">
+                <P className={`text-xs text-muted-foreground mt-1`}>
                   {duration === 'once'
                     ? t.promoDurationHintOnce
                     : duration === 'repeating'
@@ -1100,7 +1114,7 @@ function CreatePromoDialog({
 
               {/* Duration in months (only for repeating — becomes required) */}
               {duration === 'repeating' && (
-                <Div className="space-y-2">
+                <Div className={`space-y-2`}>
                   <Label>{t.promoDurationInMonths}</Label>
                   <Input
                     type="number"
@@ -1114,7 +1128,7 @@ function CreatePromoDialog({
 
               {/* Currency (only for fixed — becomes required) */}
               {discountType === 'fixed' && (
-                <Div className="space-y-2">
+                <Div className={`space-y-2`}>
                   <Label>{t.promoCurrency}</Label>
                   <Input
                     value={currency}
@@ -1127,11 +1141,13 @@ function CreatePromoDialog({
           </Div>
 
           {/* Optional section */}
-          <Div className="border-t border-border pt-4">
-            <P className="text-xs text-muted-foreground font-medium mb-3">{t.promoOptionalSection}</P>
-            <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Div className={`border-t border-border pt-4`}>
+            <P className={`text-xs text-muted-foreground font-medium mb-3`}>
+              {t.promoOptionalSection}
+            </P>
+            <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
               {/* Max uses */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.promoMaxUses}</Label>
                 <Input
                   type="number"
@@ -1140,17 +1156,13 @@ function CreatePromoDialog({
                   placeholder={t.promoUnlimitedHint}
                   min={1}
                 />
-                <P className="text-xs text-muted-foreground mt-1">{t.promoMaxUsesHint}</P>
+                <P className={`text-xs text-muted-foreground mt-1`}>{t.promoMaxUsesHint}</P>
               </Div>
 
               {/* Expiry date */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.promoExpiryDate}</Label>
-                <Input
-                  type="date"
-                  value={expiresAt}
-                  onChange={e => setExpiresAt(e.target.value)}
-                />
+                <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} />
               </Div>
             </Div>
           </Div>
@@ -1158,7 +1170,7 @@ function CreatePromoDialog({
           {/* Error — full width */}
           {error && (
             <Div>
-              <P className="text-sm text-destructive">{error}</P>
+              <P className={`text-sm text-destructive`}>{error}</P>
             </Div>
           )}
         </Div>
@@ -1167,11 +1179,8 @@ function CreatePromoDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t.cancel}
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={saving || !code || !discountValue}
-          >
-            {saving && <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin mr-2" />}
+          <Button onClick={handleSubmit} disabled={saving || !code || !discountValue}>
+            {saving && <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin mr-2`} />}
             {t.create}
           </Button>
         </DialogFooter>
@@ -1279,23 +1288,19 @@ function CreatePlanDialog({
           <DialogDescription>{t.createPlan}</DialogDescription>
         </DialogHeader>
 
-        <Div className="space-y-4">
+        <Div className={`space-y-4`}>
           {/* Required section */}
           <Div>
-            <P className="text-xs text-muted-foreground font-medium mb-3">{t.promoRequired}</P>
-            <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <P className={`text-xs text-muted-foreground font-medium mb-3`}>{t.promoRequired}</P>
+            <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
               {/* Name */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.planName}</Label>
-                <Input
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="Pro"
-                />
+                <Input value={name} onChange={e => setName(e.target.value)} placeholder="Pro" />
               </Div>
 
               {/* Amount */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.planAmount}</Label>
                 <Input
                   type="number"
@@ -1304,11 +1309,11 @@ function CreatePlanDialog({
                   placeholder="999"
                   min={0}
                 />
-                <P className="text-xs text-muted-foreground mt-1">{t.planAmountHint}</P>
+                <P className={`text-xs text-muted-foreground mt-1`}>{t.planAmountHint}</P>
               </Div>
 
               {/* Currency */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.planCurrency}</Label>
                 <Select value={currency} onValueChange={setCurrency}>
                   <SelectTrigger>
@@ -1323,7 +1328,7 @@ function CreatePlanDialog({
               </Div>
 
               {/* Interval */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.planInterval}</Label>
                 <Select value={interval} onValueChange={v => setInterval(v as 'month' | 'year')}>
                   <SelectTrigger>
@@ -1337,7 +1342,7 @@ function CreatePlanDialog({
               </Div>
 
               {/* Interval Count */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.planIntervalCount}</Label>
                 <Input
                   type="number"
@@ -1347,17 +1352,19 @@ function CreatePlanDialog({
                   min={1}
                   max={12}
                 />
-                <P className="text-xs text-muted-foreground mt-1">{t.planIntervalCountHint}</P>
+                <P className={`text-xs text-muted-foreground mt-1`}>{t.planIntervalCountHint}</P>
               </Div>
             </Div>
           </Div>
 
           {/* Optional section */}
-          <Div className="border-t border-border pt-4">
-            <P className="text-xs text-muted-foreground font-medium mb-3">{t.promoOptionalSection}</P>
-            <Div className="grid grid-cols-1 gap-4">
+          <Div className={`border-t border-border pt-4`}>
+            <P className={`text-xs text-muted-foreground font-medium mb-3`}>
+              {t.promoOptionalSection}
+            </P>
+            <Div className={`grid grid-cols-1 gap-4`}>
               {/* Description */}
-              <Div className="space-y-2">
+              <Div className={`space-y-2`}>
                 <Label>{t.planDescription}</Label>
                 <Input
                   value={description}
@@ -1366,20 +1373,20 @@ function CreatePlanDialog({
                 />
               </Div>
 
-              <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
                 {/* Features */}
-                <Div className="space-y-2">
+                <Div className={`space-y-2`}>
                   <Label>{t.planFeatures}</Label>
                   <Input
                     value={features}
                     onChange={e => setFeatures(e.target.value)}
                     placeholder="Feature 1, Feature 2, Feature 3"
                   />
-                  <P className="text-xs text-muted-foreground mt-1">{t.planFeaturesHint}</P>
+                  <P className={`text-xs text-muted-foreground mt-1`}>{t.planFeaturesHint}</P>
                 </Div>
 
                 {/* Sort Order */}
-                <Div className="space-y-2">
+                <Div className={`space-y-2`}>
                   <Label>{t.planSortOrder}</Label>
                   <Input
                     type="number"
@@ -1396,7 +1403,7 @@ function CreatePlanDialog({
           {/* Error — full width */}
           {error && (
             <Div>
-              <P className="text-sm text-destructive">{error}</P>
+              <P className={`text-sm text-destructive`}>{error}</P>
             </Div>
           )}
         </Div>
@@ -1405,11 +1412,8 @@ function CreatePlanDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t.cancel}
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={saving || !name || !amount || !intervalCount}
-          >
-            {saving && <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin mr-2" />}
+          <Button onClick={handleSubmit} disabled={saving || !name || !amount || !intervalCount}>
+            {saving && <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin mr-2`} />}
             {t.create}
           </Button>
         </DialogFooter>
@@ -1422,13 +1426,7 @@ function CreatePlanDialog({
 // Plans Section (used in Subscriptions tab)
 // ========================================
 
-function PlansSection({
-  appName,
-  t,
-}: {
-  appName: string
-  t: Required<PayAdminDashboardTexts>
-}) {
+function PlansSection({ appName, t }: { appName: string; t: Required<PayAdminDashboardTexts> }) {
   const { client } = usePayContext()
 
   const [plans, setPlans] = useState<Plan[]>([])
@@ -1517,9 +1515,9 @@ function PlansSection({
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.planNameHeader} />,
         cell: ({ row }) => (
           <Div>
-            <Span className="font-medium">{row.original.name}</Span>
+            <Span className={`font-medium`}>{row.original.name}</Span>
             {row.original.description && (
-              <P className="text-xs text-muted-foreground">{row.original.description}</P>
+              <P className={`text-xs text-muted-foreground`}>{row.original.description}</P>
             )}
           </Div>
         ),
@@ -1527,22 +1525,22 @@ function PlansSection({
       {
         accessorKey: 'amount',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.planPriceHeader} />,
-        cell: ({ row }) => <Span className="font-medium">{formatPrice(row.original)}</Span>,
+        cell: ({ row }) => <Span className={`font-medium`}>{formatPrice(row.original)}</Span>,
       },
       {
         accessorKey: 'interval',
-        header: ({ header }) => <DataTableColumnHeader header={header} title={t.planIntervalHeader} />,
-        cell: ({ row }) => <Span className="text-sm">{formatInterval(row.original)}</Span>,
+        header: ({ header }) => (
+          <DataTableColumnHeader header={header} title={t.planIntervalHeader} />
+        ),
+        cell: ({ row }) => <Span className={`text-sm`}>{formatInterval(row.original)}</Span>,
         enableSorting: false,
       },
       {
         accessorKey: 'features',
-        header: ({ header }) => <DataTableColumnHeader header={header} title={t.planFeaturesHeader} />,
-        cell: ({ row }) => (
-          <Span className="text-sm">
-            {row.original.features?.length || 0}
-          </Span>
+        header: ({ header }) => (
+          <DataTableColumnHeader header={header} title={t.planFeaturesHeader} />
         ),
+        cell: ({ row }) => <Span className={`text-sm`}>{row.original.features?.length || 0}</Span>,
         enableSorting: false,
       },
       {
@@ -1560,11 +1558,8 @@ function PlansSection({
         cell: ({ row }) => {
           const plan = row.original
           return (
-            <Div className="flex items-center gap-2">
-              <Switch
-                checked={plan.active}
-                onCheckedChange={() => handleToggleActive(plan)}
-              />
+            <Div className={`flex items-center gap-2`}>
+              <Switch checked={plan.active} onCheckedChange={() => handleToggleActive(plan)} />
               <Button
                 variant="outline"
                 size="sm"
@@ -1581,25 +1576,25 @@ function PlansSection({
   )
 
   return (
-    <Div className="space-y-6">
+    <Div className={`space-y-6`}>
       {/* Stats + Create button */}
-      <Div className="flex flex-col sm:flex-row sm:items-end gap-4">
-        <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+      <Div className={`flex flex-col sm:flex-row sm:items-end gap-4`}>
+        <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1`}>
           <StatCard label={t.totalPlans} value={totalPlansCount} loading={statsLoading} />
           <StatCard label={t.activePlans} value={activePlansCount} loading={statsLoading} />
         </Div>
         <Button onClick={() => setCreateOpen(true)}>
-          <Icon name="lucide:Plus" size={16} className="mr-2" />
+          <Icon name="lucide:Plus" size={16} className={`mr-2`} />
           {t.createPlan}
         </Button>
       </Div>
 
       {/* Table */}
       {loading ? (
-        <Card className="p-8">
-          <Div className="space-y-3">
+        <Card className={`p-8`}>
+          <Div className={`space-y-3`}>
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
+              <Skeleton key={i} className={`h-10 w-full`} />
             ))}
           </Div>
         </Card>
@@ -1644,13 +1639,7 @@ function PlansSection({
 // Promos Tab
 // ========================================
 
-function PromosTab({
-  appName,
-  t,
-}: {
-  appName: string
-  t: Required<PayAdminDashboardTexts>
-}) {
+function PromosTab({ appName, t }: { appName: string; t: Required<PayAdminDashboardTexts> }) {
   const { client } = usePayContext()
 
   const [promos, setPromos] = useState<Promo[]>([])
@@ -1743,26 +1732,24 @@ function PromosTab({
       {
         accessorKey: 'code',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.codeHeader} />,
-        cell: ({ row }) => (
-          <Span className="font-mono font-medium">{row.original.code}</Span>
-        ),
+        cell: ({ row }) => <Span className={`font-mono font-medium`}>{row.original.code}</Span>,
       },
       {
         accessorKey: 'discountValue',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.discountHeader} />,
-        cell: ({ row }) => <Span className="font-medium">{formatDiscount(row.original)}</Span>,
+        cell: ({ row }) => <Span className={`font-medium`}>{formatDiscount(row.original)}</Span>,
       },
       {
         accessorKey: 'duration',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.durationHeader} />,
-        cell: ({ row }) => <Span className="text-sm">{getDurationLabel(row.original)}</Span>,
+        cell: ({ row }) => <Span className={`text-sm`}>{getDurationLabel(row.original)}</Span>,
         enableSorting: false,
       },
       {
         accessorKey: 'usedCount',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.usesHeader} />,
         cell: ({ row }) => (
-          <Span className="text-sm">
+          <Span className={`text-sm`}>
             {row.original.usedCount}
             {row.original.maxUses ? `/${row.original.maxUses}` : ''}
           </Span>
@@ -1781,7 +1768,7 @@ function PromosTab({
         accessorKey: 'expiresAt',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.expiryHeader} />,
         cell: ({ row }) => (
-          <Span className="text-sm">
+          <Span className={`text-sm`}>
             {row.original.expiresAt ? formatDateShort(row.original.expiresAt) : t.promoNoExpiry}
           </Span>
         ),
@@ -1792,11 +1779,8 @@ function PromosTab({
         cell: ({ row }) => {
           const promo = row.original
           return (
-            <Div className="flex items-center gap-2">
-              <Switch
-                checked={promo.active}
-                onCheckedChange={() => handleToggleActive(promo)}
-              />
+            <Div className={`flex items-center gap-2`}>
+              <Switch checked={promo.active} onCheckedChange={() => handleToggleActive(promo)} />
               <Button
                 variant="outline"
                 size="sm"
@@ -1813,26 +1797,26 @@ function PromosTab({
   )
 
   return (
-    <Div className="space-y-6">
+    <Div className={`space-y-6`}>
       {/* Stats + Create button */}
-      <Div className="flex flex-col sm:flex-row sm:items-end gap-4">
-        <Div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+      <Div className={`flex flex-col sm:flex-row sm:items-end gap-4`}>
+        <Div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1`}>
           <StatCard label={t.totalPromos} value={totalPromos} loading={statsLoading} />
           <StatCard label={t.activePromos} value={activePromosCount} loading={statsLoading} />
           <StatCard label={t.totalUses} value={totalUsesCount} loading={statsLoading} />
         </Div>
         <Button onClick={() => setCreateOpen(true)}>
-          <Icon name="lucide:Plus" size={16} className="mr-2" />
+          <Icon name="lucide:Plus" size={16} className={`mr-2`} />
           {t.createPromo}
         </Button>
       </Div>
 
       {/* Table */}
       {loading ? (
-        <Card className="p-8">
-          <Div className="space-y-3">
+        <Card className={`p-8`}>
+          <Div className={`space-y-3`}>
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
+              <Skeleton key={i} className={`h-10 w-full`} />
             ))}
           </Div>
         </Card>
@@ -1954,7 +1938,8 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   createPromoTitle: 'Create Promo Code',
   deletePromo: 'Delete',
   deletePromoTitle: 'Delete Promo',
-  deletePromoDescription: 'Are you sure you want to delete this promo code? This action cannot be undone.',
+  deletePromoDescription:
+    'Are you sure you want to delete this promo code? This action cannot be undone.',
   createPromoSuccess: 'Promo code created successfully',
   createPromoError: 'Failed to create promo code',
   deletePromoSuccess: 'Promo deleted successfully',
@@ -2013,7 +1998,8 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   createPlanTitle: 'Create Subscription Plan',
   deletePlan: 'Delete',
   deletePlanTitle: 'Delete Plan',
-  deletePlanDescription: 'Are you sure you want to delete this plan? Existing subscribers will not be affected, but no new subscriptions can be created with this plan.',
+  deletePlanDescription:
+    'Are you sure you want to delete this plan? Existing subscribers will not be affected, but no new subscriptions can be created with this plan.',
   createPlanSuccess: 'Plan created successfully',
   createPlanError: 'Failed to create plan',
   deletePlanSuccess: 'Plan deleted successfully',
@@ -2081,7 +2067,13 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
     'DELETE ALL payment records from the database? This permanently removes all test data and cannot be undone.',
 }
 
-export function PayAdminDashboard({ appName, showAppFilter, testMode, className, texts }: PayAdminDashboardProps) {
+export function PayAdminDashboard({
+  appName,
+  showAppFilter,
+  testMode,
+  className,
+  texts,
+}: PayAdminDashboardProps) {
   const { client } = usePayContext()
   const t: Required<PayAdminDashboardTexts> = useMemo(
     () => ({ ...DEFAULT_TEXTS, ...texts }),
@@ -2117,9 +2109,9 @@ export function PayAdminDashboard({ appName, showAppFilter, testMode, className,
     <Div className={className}>
       {/* App filter for superadmin */}
       {showAppFilter && appOptions.length > 0 && (
-        <Div className="mb-4">
+        <Div className={`mb-4`}>
           <Select value={appFilter} onValueChange={setAppFilter}>
-            <SelectTrigger className="w-full sm:w-64">
+            <SelectTrigger className={`w-full sm:w-64`}>
               <SelectValue placeholder={t.allApps} />
             </SelectTrigger>
             <SelectContent>
@@ -2135,14 +2127,16 @@ export function PayAdminDashboard({ appName, showAppFilter, testMode, className,
       )}
 
       {testMode && (
-        <Div className="bg-warning/10 border border-warning/30 rounded-lg p-3 mb-4 flex items-center gap-2">
-          <Icon name="lucide:AlertTriangle" className="w-4 h-4 text-warning shrink-0" />
-          <Span className="text-sm font-medium text-warning flex-1">{t.testModeWarning}</Span>
+        <Div
+          className={`bg-warning/10 border border-warning/30 rounded-lg p-3 mb-4 flex items-center gap-2`}
+        >
+          <Icon name="lucide:AlertTriangle" className={`w-4 h-4 text-warning shrink-0`} />
+          <Span className={`text-sm font-medium text-warning flex-1`}>{t.testModeWarning}</Span>
           <Button
             variant="destructive"
             size="sm"
             onClick={async () => {
-              if (!window.confirm(t.deleteAllConfirm)) return
+              if (!confirm(t.deleteAllConfirm)) return
               try {
                 const result = await client.cleanupPayments(effectiveAppName || undefined)
                 toast.success(`${result.deletedCount} records deleted`)

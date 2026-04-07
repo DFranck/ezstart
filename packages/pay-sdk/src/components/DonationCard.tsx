@@ -100,9 +100,7 @@ export function DonationCard({
   const isCompact = variant === 'compact'
 
   const symbol = getCurrencySymbol(currency)
-  const displayTitle = projectName
-    ? texts.title.replace('this project', projectName)
-    : texts.title
+  const displayTitle = projectName ? texts.title.replace('this project', projectName) : texts.title
 
   const effectiveAmount = customAmount ? parseFloat(customAmount) : selectedAmount
   const isTestimonial = effectiveAmount === 0 || effectiveAmount === null
@@ -148,10 +146,10 @@ export function DonationCard({
   if (isCompact) {
     return (
       <Card className={`p-4 ${className || ''}`}>
-        <Div className="flex flex-wrap items-center gap-3">
-          <Icon name="lucide:Heart" className="w-5 h-5 text-destructive shrink-0" />
-          <Span className="font-semibold">{displayTitle}</Span>
-          <Div className="flex items-center gap-2 ml-auto">
+        <Div className={`flex flex-wrap items-center gap-3`}>
+          <Icon name="lucide:Heart" className={`w-5 h-5 text-destructive shrink-0`} />
+          <Span className={`font-semibold`}>{displayTitle}</Span>
+          <Div className={`flex items-center gap-2 ml-auto`}>
             {presetAmounts.slice(0, 3).map(amount => (
               <Button
                 key={amount}
@@ -174,28 +172,28 @@ export function DonationCard({
       className={`relative flex flex-col ${isFeatured ? 'border-primary shadow-lg' : ''} ${className || ''}`}
     >
       {isFeatured && (
-        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" variant="default">
+        <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2`} variant="default">
           {texts.oneTime}
         </Badge>
       )}
       <CardHeader>
-        <H3 className="flex items-center gap-2">
-          <Icon name="lucide:Heart" className="w-5 h-5 text-destructive" />
+        <H3 className={`flex items-center gap-2`}>
+          <Icon name="lucide:Heart" className={`w-5 h-5 text-destructive`} />
           {displayTitle}
         </H3>
-        <P size="sm" className="text-muted-foreground">
+        <P size="sm" className={`text-muted-foreground`}>
           {texts.selectAmount}
         </P>
       </CardHeader>
-      <CardContent className="flex-1 space-y-4">
+      <CardContent className={`flex-1 space-y-4`}>
         {/* Preset amount grid */}
-        <Div className="grid grid-cols-2 gap-2">
+        <Div className={`grid grid-cols-2 gap-2`}>
           {presetAmounts.map(amount => (
             <Button
               key={amount}
               type="button"
               variant={selectedAmount === amount && !customAmount ? 'default' : 'outline'}
-              className="text-lg font-semibold"
+              className={`text-lg font-semibold`}
               onClick={() => {
                 setSelectedAmount(amount)
                 setCustomAmount('')
@@ -208,8 +206,8 @@ export function DonationCard({
 
         {/* Custom amount input */}
         {allowCustomAmount && (
-          <Div className="space-y-1">
-            <Label className="text-sm text-muted-foreground">{texts.orEnterCustom}</Label>
+          <Div className={`space-y-1`}>
+            <Label className={`text-sm text-muted-foreground`}>{texts.orEnterCustom}</Label>
             <Div>
               <Input
                 type="number"
@@ -227,54 +225,55 @@ export function DonationCard({
         )}
       </CardContent>
       {/* Separator + Message */}
-      <CardContent className="space-y-3 pt-0">
+      <CardContent className={`space-y-3 pt-0`}>
         {/* "or just leave a message" separator */}
-        <Div className="flex items-center gap-3">
-          <Div className="flex-1 h-px bg-border" />
-          <Span className="text-xs text-muted-foreground uppercase">{texts.support}</Span>
-          <Div className="flex-1 h-px bg-border" />
+        <Div className={`flex items-center gap-3`}>
+          <Div className={`flex-1 h-px bg-border`} />
+          <Span className={`text-xs text-muted-foreground uppercase`}>{texts.support}</Span>
+          <Div className={`flex-1 h-px bg-border`} />
         </Div>
         <Div>
-          <Label className="text-sm text-muted-foreground">
-            {texts.messageLabel}
-          </Label>
+          <Label className={`text-sm text-muted-foreground`}>{texts.messageLabel}</Label>
           <Input
             value={message}
             onChange={e => setMessage(e.target.value)}
             placeholder={texts.messagePlaceholder || 'Leave a message...'}
           />
         </Div>
-        <Div className="flex items-center gap-2">
+        <Div className={`flex items-center gap-2`}>
           <Checkbox
             id="donate-anonymous"
             checked={isAnonymous}
-            onCheckedChange={(checked) => setIsAnonymous(checked === true)}
+            onCheckedChange={checked => setIsAnonymous(checked === true)}
           />
-          <Label htmlFor="donate-anonymous" className="text-sm text-muted-foreground cursor-pointer">
+          <Label
+            htmlFor="donate-anonymous"
+            className={`text-sm text-muted-foreground cursor-pointer`}
+          >
             {texts.anonymous || 'Donate anonymously'}
           </Label>
         </Div>
       </CardContent>
       <CardFooter>
         <Button
-          className="w-full"
+          className={`w-full`}
           size="lg"
           disabled={!canSubmit}
           onClick={() => handleDonate(isTestimonial ? 0 : effectiveAmount!)}
         >
           {isLoading ? (
             <>
-              <Icon name="lucide:Loader2" className="w-5 h-5 animate-spin" />
+              <Icon name="lucide:Loader2" className={`w-5 h-5 animate-spin`} />
               {texts.loading}
             </>
           ) : isTestimonial ? (
             <>
-              <Icon name="lucide:MessageCircle" className="w-5 h-5" />
+              <Icon name="lucide:MessageCircle" className={`w-5 h-5`} />
               {texts.sendMessage}
             </>
           ) : (
             <>
-              <Icon name="lucide:Heart" className="w-5 h-5" />
+              <Icon name="lucide:Heart" className={`w-5 h-5`} />
               {texts.donate} {formatCurrency(effectiveAmount!, currency)}
             </>
           )}
