@@ -59,6 +59,10 @@ export interface PaymentDocument extends Document {
   // Metadata (type-specific fields)
   metadata?: PaymentMetadata
 
+  // Subscription cancellation
+  cancelAtPeriodEnd: boolean
+  currentPeriodEnd?: Date
+
   // Environment
   liveMode: boolean
 
@@ -132,6 +136,10 @@ const paymentSchema = new Schema<PaymentDocument>(
       originalAmount: { type: Number },
       discountApplied: { type: Number },
     },
+
+    // Subscription cancellation
+    cancelAtPeriodEnd: { type: Boolean, default: false },
+    currentPeriodEnd: { type: Date },
 
     // Environment — separates test data from production data
     liveMode: { type: Boolean, default: false, index: true },

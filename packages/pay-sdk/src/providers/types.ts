@@ -140,6 +140,8 @@ export interface WebhookRefundData {
 export interface WebhookSubscriptionData {
   subscriptionId: string
   status: string
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: number
 }
 
 export interface WebhookInvoiceData {

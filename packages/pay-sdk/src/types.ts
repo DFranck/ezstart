@@ -22,6 +22,8 @@ export interface Payment {
   customerEmail?: string
   isAnonymous: boolean
   liveMode: boolean
+  cancelAtPeriodEnd?: boolean
+  currentPeriodEnd?: string
   metadata?: Record<string, any>
   createdAt: string
   updatedAt: string

@@ -13,6 +13,7 @@ export { PayProvider, usePay, usePayContext } from './provider.js'
 export { useDonations } from './hooks/useDonations.js'
 export { usePurchases } from './hooks/usePurchases.js'
 export { useSubscriptions } from './hooks/useSubscriptions.js'
+export { useSubscriptionStatus } from './hooks/useSubscriptionStatus.js'
 export { usePaymentHistory } from './hooks/usePaymentHistory.js'
 
 // Components - Donations
@@ -40,6 +41,10 @@ export type {
 // Components - Subscriptions (management)
 export { SubscriptionCard } from './components/SubscriptionCard.js'
 export type { SubscriptionCardProps, SubscriptionCardTexts } from './components/SubscriptionCard.js'
+
+// Components - Feature Gate
+export { FeatureGate } from './components/FeatureGate.js'
+export type { FeatureGateProps } from './components/FeatureGate.js'
 
 // Components - Confirm Action Dialog
 export { ConfirmActionDialog } from './components/ConfirmActionDialog.js'

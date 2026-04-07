@@ -43,6 +43,7 @@ export interface StripeInstance {
   }
   subscriptions: {
     cancel(id: string): Promise<{ status: string }>
+    update(id: string, params: Record<string, unknown>): Promise<{ status: string; cancel_at_period_end: boolean; current_period_end: number }>
   }
   webhooks: {
     constructEvent(payload: string | Buffer, signature: string, secret: string): StripeWebhookEvent
@@ -228,10 +229,12 @@ export class StripeProvider implements IPaymentProvider {
   // ========================================
 
   async cancelSubscription(subscriptionId: string): Promise<CancelResult> {
-    const subscription = await this.stripe.subscriptions.cancel(subscriptionId)
+    const subscription = await this.stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true,
+    })
 
     return {
-      cancelled: subscription.status === 'canceled',
+      cancelled: subscription.cancel_at_period_end === true,
       status: subscription.status,
     }
   }
@@ -294,6 +297,8 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
       return {
         subscriptionId: obj.id as string,
         status: obj.status as string,
+        cancelAtPeriodEnd: (obj.cancel_at_period_end as boolean) ?? undefined,
+        currentPeriodEnd: (obj.current_period_end as number) ?? undefined,
       }
     case 'invoice.payment_failed':
       return {
