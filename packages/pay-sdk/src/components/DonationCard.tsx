@@ -8,6 +8,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
+  Div,
   H3,
   Icon,
   Input,
@@ -91,10 +92,10 @@ export function DonationCard({
   if (isCompact) {
     return (
       <Card className={`p-4 ${className || ''}`}>
-        <div className="flex flex-wrap items-center gap-3">
+        <Div className="flex flex-wrap items-center gap-3">
           <Icon name="lucide:Heart" className="w-5 h-5 text-destructive shrink-0" />
           <Span className="font-semibold">{displayTitle}</Span>
-          <div className="flex items-center gap-2 ml-auto">
+          <Div className="flex items-center gap-2 ml-auto">
             {presetAmounts.slice(0, 3).map(amount => (
               <DonateModal
                 key={amount}
@@ -112,8 +113,8 @@ export function DonationCard({
                 }
               />
             ))}
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Card>
     )
   }
@@ -138,7 +139,7 @@ export function DonationCard({
       </CardHeader>
       <CardContent className="flex-1 space-y-4">
         {/* Preset amount grid */}
-        <div className="grid grid-cols-2 gap-2">
+        <Div className="grid grid-cols-2 gap-2">
           {presetAmounts.map(amount => (
             <Button
               key={amount}
@@ -153,13 +154,13 @@ export function DonationCard({
               {formatCurrency(amount, currency)}
             </Button>
           ))}
-        </div>
+        </Div>
 
         {/* Custom amount input */}
         {allowCustomAmount && (
-          <div className="space-y-1">
+          <Div className="space-y-1">
             <Label className="text-sm text-muted-foreground">{texts.orEnterCustom}</Label>
-            <div className="relative">
+            <Div className="relative">
               <Span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                 {symbol}
               </Span>
@@ -175,8 +176,8 @@ export function DonationCard({
                 placeholder="0.00"
                 className="pl-7"
               />
-            </div>
-          </div>
+            </Div>
+          </Div>
         )}
       </CardContent>
       <CardFooter>

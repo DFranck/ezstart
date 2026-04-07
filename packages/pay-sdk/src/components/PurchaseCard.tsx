@@ -2,12 +2,15 @@
 
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardFooter,
   CardHeader,
+  Div,
   H3,
   Icon,
+  Img,
   P,
   Span,
 } from '@ezstart/ui/components'
@@ -79,19 +82,19 @@ export function PurchaseCard({
     return (
       <Card className={`flex flex-row items-center gap-4 p-4 ${className || ''}`}>
         {image && (
-          <img
+          <Img
             src={image}
             alt={productName}
             className="w-12 h-12 rounded-md object-cover shrink-0"
           />
         )}
-        <div className="flex-1 min-w-0">
+        <Div className="flex-1 min-w-0">
           <H3 size="h5" className="truncate">
             {productName}
           </H3>
           <Span className="text-lg font-bold">{price}</Span>
-        </div>
-        <div className="shrink-0">
+        </Div>
+        <Div className="shrink-0">
           <PurchaseButton
             projectId={appName}
             productId={productId}
@@ -103,12 +106,12 @@ export function PurchaseCard({
             userEmail={userEmail}
             userName={userName}
             trigger={
-              <button className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+              <Button size="sm">
                 {texts.buy}
-              </button>
+              </Button>
             }
           />
-        </div>
+        </Div>
       </Card>
     )
   }
@@ -125,13 +128,13 @@ export function PurchaseCard({
 
       {/* Product image */}
       {image && (
-        <div className={`w-full overflow-hidden ${isFeatured ? 'h-48' : 'h-36'}`}>
-          <img
+        <Div className={`w-full overflow-hidden ${isFeatured ? 'h-48' : 'h-36'}`}>
+          <Img
             src={image}
             alt={productName}
             className="w-full h-full object-cover"
           />
-        </div>
+        </Div>
       )}
 
       <CardHeader>
@@ -141,11 +144,11 @@ export function PurchaseCard({
             {description}
           </P>
         )}
-        <div className="mt-2">
+        <Div className="mt-2">
           <Span className={`font-bold ${isFeatured ? 'text-3xl text-primary' : 'text-2xl'}`}>
             {price}
           </Span>
-        </div>
+        </Div>
       </CardHeader>
 
       <CardContent className="flex-1" />
@@ -162,10 +165,10 @@ export function PurchaseCard({
           userEmail={userEmail}
           userName={userName}
           trigger={
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
+            <Button className="w-full" size="lg">
               <Icon name="lucide:ShoppingCart" className="w-4 h-4" />
               {texts.buy} — {price}
-            </button>
+            </Button>
           }
         />
       </CardFooter>

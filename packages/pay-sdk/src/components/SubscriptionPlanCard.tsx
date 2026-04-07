@@ -5,10 +5,12 @@ import { usePayContext } from '../provider.js'
 import type { Plan } from '../types.js'
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardFooter,
   CardHeader,
+  Div,
   H3,
   Icon,
   P,
@@ -63,11 +65,12 @@ export function SubscriptionPlanCard({
   userId,
   userEmail,
   userName,
+  texts: textsProp,
 }: SubscriptionPlanCardProps) {
   const { client } = usePayContext()
   const [plan, setPlan] = useState<Plan | null>(null)
   const [loading, setLoading] = useState(true)
-  const [texts] = useState(DEFAULT_TEXTS)
+  const texts = { ...DEFAULT_TEXTS, ...textsProp }
 
   useEffect(() => {
     client
@@ -99,7 +102,7 @@ export function SubscriptionPlanCard({
       <Card
         className={`flex flex-row items-center gap-4 p-4 ${className || ''}`}
       >
-        <div className="flex-1 min-w-0">
+        <Div className="flex-1 min-w-0">
           <H3 size="h5" className="truncate">
             {plan.name}
           </H3>
@@ -108,12 +111,12 @@ export function SubscriptionPlanCard({
               {plan.description}
             </P>
           )}
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="text-right">
+        </Div>
+        <Div className="flex items-center gap-3 shrink-0">
+          <Div className="text-right">
             <Span className="text-xl font-bold">{price}</Span>
             <Span className="text-muted-foreground text-sm"> / {intervalLabel}</Span>
-          </div>
+          </Div>
           <SubscribeButton
             projectId={appName}
             priceId={plan.stripePriceId || plan.id}
@@ -126,9 +129,9 @@ export function SubscriptionPlanCard({
             userName={userName}
             promoCode={promoCode}
             showPromoInput={!!promoCode}
-            trigger={<button className="shrink-0">{texts.subscribe}</button>}
+            trigger={<Button className="shrink-0">{texts.subscribe}</Button>}
           />
-        </div>
+        </Div>
       </Card>
     )
   }
@@ -147,21 +150,21 @@ export function SubscriptionPlanCard({
         {plan.description && (
           <P className="text-muted-foreground text-sm">{plan.description}</P>
         )}
-        <div className="mt-4">
+        <Div className="mt-4">
           <Span className="text-3xl font-bold">{price}</Span>
           <Span className="text-muted-foreground"> / {intervalLabel}</Span>
-        </div>
+        </Div>
       </CardHeader>
       <CardContent className="flex-1">
         {plan.features && plan.features.length > 0 && (
-          <div className="space-y-2">
+          <Div className="space-y-2">
             {plan.features.map((feature, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <Div key={i} className="flex items-center gap-2">
                 <Icon name="lucide:Check" className="w-4 h-4 text-success shrink-0" />
                 <Span className="text-sm">{feature}</Span>
-              </div>
+              </Div>
             ))}
-          </div>
+          </Div>
         )}
       </CardContent>
       <CardFooter>
