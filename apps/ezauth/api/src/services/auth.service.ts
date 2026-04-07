@@ -177,7 +177,7 @@ export class AuthService {
 
     // Generate short-lived access token
     const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN as any })
 
     // Generate refresh token
     const rawRefreshToken = await this.generateRefreshToken(
@@ -234,7 +234,7 @@ export class AuthService {
 
     // Generate short-lived access token
     const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN as any })
 
     // Generate refresh token
     const rawRefreshToken = await this.generateRefreshToken(
@@ -388,7 +388,7 @@ export class AuthService {
 
     // Generate new access token
     const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN as any })
 
     // Generate new refresh token
     const newRawRefreshToken = await this.generateRefreshToken(
