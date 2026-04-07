@@ -13,7 +13,6 @@ function getAccessTokenFromStore(customGetToken?: () => string | null): string |
   if (typeof window === 'undefined') return null
 
   try {
-    // Access Zustand store directly from localStorage (default fallback)
     const stored = localStorage.getItem('ezauth-storage')
     if (!stored) return null
 
@@ -22,6 +21,74 @@ function getAccessTokenFromStore(customGetToken?: () => string | null): string |
   } catch {
     return null
   }
+}
+
+function getRefreshTokenFromStore(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = localStorage.getItem('ezauth-storage')
+    if (!stored) return null
+    const parsed = JSON.parse(stored)
+    return parsed?.state?.refreshToken || null
+  } catch {
+    return null
+  }
+}
+
+function updateStoreTokens(accessToken: string, refreshToken: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const stored = localStorage.getItem('ezauth-storage')
+    if (!stored) return
+    const parsed = JSON.parse(stored)
+    if (parsed?.state) {
+      parsed.state.accessToken = accessToken
+      parsed.state.refreshToken = refreshToken
+      localStorage.setItem('ezauth-storage', JSON.stringify(parsed))
+    }
+  } catch {
+    // ignore
+  }
+}
+
+let _refreshPromise: Promise<string | null> | null = null
+
+async function refreshAccessToken(): Promise<string | null> {
+  // Deduplicate concurrent refresh calls
+  if (_refreshPromise) return _refreshPromise
+
+  _refreshPromise = (async () => {
+    try {
+      const rt = getRefreshTokenFromStore()
+      if (!rt) return null
+
+      const ezauthUrl = getApiUrl('ezauth')
+      const res = await fetch(`${ezauthUrl}/api/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: rt }),
+      })
+
+      if (!res.ok) return null
+
+      const json = await res.json()
+      const data = json.data ?? json
+      const newAccessToken = data.accessToken || data.access_token
+      const newRefreshToken = data.refreshToken || data.refresh_token
+
+      if (newAccessToken && newRefreshToken) {
+        updateStoreTokens(newAccessToken, newRefreshToken)
+        return newAccessToken
+      }
+      return null
+    } catch {
+      return null
+    } finally {
+      _refreshPromise = null
+    }
+  })()
+
+  return _refreshPromise
 }
 
 /**
@@ -248,6 +315,52 @@ export async function callApi<T = unknown>(
         data: json as T,
       }
     } else {
+      // Auto-refresh token on 401 and retry once
+      if (res.status === 401 && finalAccessToken && typeof window !== 'undefined') {
+        const newToken = await refreshAccessToken()
+        if (newToken) {
+          logger.debug('[callApi] Token refreshed, retrying request...')
+          const retryRes = await fetch(url, {
+            method,
+            headers: {
+              ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
+              ...(userId ? { 'X-User-Id': userId } : {}),
+              Authorization: `Bearer ${newToken}`,
+              ...headers,
+            },
+            body: isFormData
+              ? body
+              : isFormUrlEncoded
+                ? body
+                : isStringBody
+                  ? body
+                  : body
+                    ? JSON.stringify(body)
+                    : undefined,
+            credentials: 'include',
+            signal,
+          })
+
+          let retryJson: any = null
+          try { retryJson = await retryRes.json() } catch { retryJson = null }
+
+          if (retryRes.ok) {
+            const isRetryStandard = retryJson && typeof retryJson === 'object' && 'success' in retryJson
+            if (isRetryStandard) {
+              return {
+                ok: true as const,
+                status: retryRes.status,
+                url: retryRes.url,
+                data: (retryJson.data ?? retryJson) as T,
+                meta: retryJson.meta as ApiMeta | undefined,
+                raw: retryJson,
+              }
+            }
+            return { ok: true as const, status: retryRes.status, url: retryRes.url, data: retryJson as T }
+          }
+        }
+      }
+
       // Log error details if enabled (errors or all)
       if (effectiveLogLevel === 'errors' || effectiveLogLevel === 'all') {
         if (effectiveLogLevel === 'errors') {
