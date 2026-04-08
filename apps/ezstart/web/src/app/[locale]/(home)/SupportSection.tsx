@@ -2,7 +2,7 @@
 
 import { useAuth } from '@ezstart/auth-sdk'
 import { DonationCard, DonationWall } from '@ezstart/pay-sdk'
-import { Div, H2, P, Section } from '@ezstart/ui/components'
+import { Div, Section } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
 type Props = {
@@ -15,10 +15,7 @@ const SupportSection = ({ id }: Props): React.JSX.Element => {
 
   return (
     <Section id={id} size="lg">
-      <Div className="flex flex-col items-center gap-6 text-center">
-        <H2>{t('title')}</H2>
-        <P className="max-w-2xl text-muted-foreground">{t('description')}</P>
-
+      <Div className="flex flex-col items-center gap-6">
         <Div className="w-full max-w-md">
           <DonationCard
             appName="ezstart"
@@ -30,6 +27,10 @@ const SupportSection = ({ id }: Props): React.JSX.Element => {
             userId={isAuthenticated ? user?._id : undefined}
             userEmail={isAuthenticated ? user?.email : undefined}
             userName={isAuthenticated ? user?.username : undefined}
+            texts={{
+              title: t('title'),
+              selectAmount: t('description'),
+            }}
           />
         </Div>
 
