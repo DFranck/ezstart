@@ -34,6 +34,7 @@ const quickSignupSchema = z.object({
     .describe('Unique username'),
   email: z.string().email('Invalid email format').describe('User email address'),
   app: z.string().min(1, 'App name is required').describe('App requesting signup'),
+  promoCode: z.string().optional().describe('Promo code from referral/campaign'),
 })
 
 const quickSignupResponseSchema = z.object({
@@ -69,7 +70,7 @@ const quickSignupController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid quick-signup request', parsed.error.issues)
     }
 
-    const { username, email, app } = parsed.data
+    const { username, email, app, promoCode } = parsed.data
     const normalizedUsername = username.trim().toLowerCase()
     const normalizedEmail = email.trim().toLowerCase()
 
@@ -95,6 +96,7 @@ const quickSignupController = async (req: Request, res: Response) => {
       apps: [app],
       isVerified: false,
       hasSetOwnPassword: false,
+      ...(promoCode ? { promoCode } : {}),
     })
 
     await user.save()

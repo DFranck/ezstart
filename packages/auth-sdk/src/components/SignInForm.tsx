@@ -18,6 +18,7 @@ import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
+import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -33,6 +34,15 @@ export interface SignInFormTexts {
   minLength: string
   noRedirectUri: string
   fallbackError: string
+  // 2FA texts (optional — only needed if 2FA is enabled)
+  twoFactorPrompt?: string
+  twoFactorCodePlaceholder?: string
+  twoFactorVerify?: string
+  twoFactorVerifying?: string
+  twoFactorBack?: string
+  // OAuth texts (optional — only needed if showOAuth is true)
+  continueWithGoogle?: string
+  orContinueWith?: string
 }
 
 export interface SignInFormProps {
@@ -90,6 +100,7 @@ export function SignInForm({
   const t = { ...DEFAULT_TEXTS, ...texts }
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -126,6 +137,13 @@ export function SignInForm({
         tempToken?: string
       }
 
+      // Handle 2FA requirement
+      if (result.requires2FA && result.tempToken) {
+        setTwoFactorState({ tempToken: result.tempToken })
+        setLoading(false)
+        return
+      }
+
       // Redirect with authorization code
       if (redirectUri && result.code) {
         logger.info('Redirecting to:', redirectUri)
@@ -152,10 +170,37 @@ export function SignInForm({
     }
   }
 
+  // Show 2FA prompt if needed
+  if (twoFactorState) {
+    const twoFactorTexts: Partial<TwoFactorPromptTexts> = {}
+    if (t.twoFactorPrompt) twoFactorTexts.prompt = t.twoFactorPrompt
+    if (t.twoFactorCodePlaceholder) twoFactorTexts.codePlaceholder = t.twoFactorCodePlaceholder
+    if (t.twoFactorVerify) twoFactorTexts.verify = t.twoFactorVerify
+    if (t.twoFactorVerifying) twoFactorTexts.verifying = t.twoFactorVerifying
+    if (t.twoFactorBack) twoFactorTexts.back = t.twoFactorBack
+
+    return (
+      <TwoFactorPrompt
+        tempToken={twoFactorState.tempToken}
+        redirectUri={redirectUri}
+        onBack={() => setTwoFactorState(null)}
+        texts={twoFactorTexts}
+      />
+    )
+  }
+
   return (
     <Div className="space-y-3 md:space-y-4">
       {showOAuth && (
-        <OAuthButtons appName={appName} redirectUri={redirectUri} providers={oauthProviders} />
+        <OAuthButtons
+          appName={appName}
+          redirectUri={redirectUri}
+          providers={oauthProviders}
+          texts={{
+            ...(t.continueWithGoogle && { continueWithGoogle: t.continueWithGoogle }),
+            ...(t.orContinueWith && { orContinueWith: t.orContinueWith }),
+          }}
+        />
       )}
 
       <Form {...form}>

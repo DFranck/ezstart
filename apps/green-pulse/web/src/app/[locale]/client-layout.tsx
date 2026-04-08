@@ -1,6 +1,6 @@
 'use client'
 import { routing } from '@/i18n/routing'
-import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
+import { LoginButton, UserMenu, useAuthStore } from '@ezstart/auth-sdk'
 import { ThemeEditor, ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useRBAC } from '@ezstart/rbac'
 import { Button, ClientLayout, Div, LocaleSwitcher, Span } from '@ezstart/ui/components'
@@ -33,6 +33,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
 
   return (
     <ClientLayout
+      headerOverlay={pathname === `/${currentLocale}/earthday`}
       appName="Green Pulse"
       currentPath={pathname}
       showHeader={!isChatPage}
@@ -103,10 +104,11 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
       headerRightContent={
         <Div>
           {isAuthenticated ? (
-            <LoginButton
-              loginText={tAuth('login')}
-              logoutText={tAuth('logout')}
-              loadingText={tAuth('loading')}
+            <UserMenu
+              texts={{
+                signOut: tAuth('logout'),
+                signIn: tAuth('login'),
+              }}
             />
           ) : (
             <Button asChild size="default" className="bg-gp-primary hover:bg-gp-primary/80">

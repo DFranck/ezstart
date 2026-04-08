@@ -11,7 +11,7 @@
  * - centered: Centered with large text
  * - withStats: Includes social proof stats
  * - withSearch: Includes search input
- * - fullHeight: Full viewport height hero
+ * - full: Full viewport width + height hero
  */
 
 import * as React from 'react'
@@ -19,6 +19,7 @@ import { cn } from '../../lib/utils'
 import { landingHeroVariantConfig } from '../../lib/design-system/variants'
 import { Button } from '../button'
 import { Badge } from '../data-display/badge'
+import { Section, Div, H1, P } from '../tag'
 
 // ========== Base Types ==========
 
@@ -34,7 +35,7 @@ export interface HeroProps extends React.HTMLAttributes<HTMLElement> {
     | 'centered'
     | 'withStats'
     | 'withSearch'
-    | 'fullHeight'
+    | 'full'
   /** Hero title */
   title: string
   /** Hero description */
@@ -55,6 +56,8 @@ export interface HeroProps extends React.HTMLAttributes<HTMLElement> {
   video?: string
   /** Stats array (for withStats variant) */
   stats?: { label: string; value: string }[]
+  /** Background scroll behavior */
+  bgMode?: 'scroll' | 'fixed'
   /** Custom content below description */
   children?: React.ReactNode
 }
@@ -75,13 +78,19 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
       image,
       video,
       stats,
+      bgMode = 'scroll',
       className,
       children,
+      style,
       ...props
     },
     ref
   ) => {
     const [isVideoLoaded, setIsVideoLoaded] = React.useState(false)
+
+    // Merge background-attachment into style when bgMode is fixed
+    const mergedStyle =
+      bgMode === 'fixed' ? { ...style, backgroundAttachment: 'fixed' as const } : style
 
     // Variant-specific container classes
     const containerClasses = cn(
@@ -97,10 +106,7 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     )
 
     // Title classes
-    const titleClasses = cn(
-      'font-bold tracking-tight',
-      landingHeroVariantConfig.title[variant]
-    )
+    const titleClasses = cn('font-bold tracking-tight', landingHeroVariantConfig.title[variant])
 
     // Description classes
     const descriptionClasses = cn(
@@ -108,11 +114,16 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
       landingHeroVariantConfig.description[variant]
     )
 
+    const hasBackgroundImage = mergedStyle?.backgroundImage
+
     return (
-      <section ref={ref} className={containerClasses} {...props}>
+      <Section ref={ref} className={containerClasses} {...props} style={mergedStyle}>
+        {/* Dark overlay for background images */}
+        {hasBackgroundImage && <Div className="absolute inset-0 bg-black/50 z-0" />}
+
         {/* Background Video */}
         {variant === 'withVideo' && video && (
-          <div className="absolute inset-0 -z-10">
+          <Div className="absolute inset-0 -z-10">
             <video
               autoPlay
               loop
@@ -126,93 +137,81 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
             >
               <source src={video} type="video/mp4" />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background" />
-          </div>
+            <Div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background" />
+          </Div>
         )}
 
         {/* Gradient Background */}
         {variant === 'withGradient' && (
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-          </div>
+          <Div className="absolute inset-0 -z-10">
+            <Div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
+            <Div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+          </Div>
         )}
 
-        <div className={contentWrapperClasses}>
+        <Div className={cn(contentWrapperClasses, 'relative z-10')}>
           {/* Text Content */}
-          <div className={variant === 'split' ? 'order-1' : ''}>
+          <Div className={variant === 'split' ? 'order-1' : ''}>
             {/* Badge */}
             {badge && (
-              <div className={cn('mb-6', variant === 'centered' && 'flex justify-center')}>
+              <Div className={cn('mb-6', variant === 'centered' && 'flex justify-center')}>
                 <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
                   {badge}
                 </Badge>
-              </div>
+              </Div>
             )}
 
             {/* Title */}
-            <h1 className={cn(titleClasses, 'mb-6')}>{title}</h1>
+            <H1 className={cn(titleClasses, 'mb-6')}>{title}</H1>
 
             {/* Description */}
-            <p className={cn(descriptionClasses, 'mb-8')}>{description}</p>
+            <P className={cn(descriptionClasses, 'mb-8')}>{description}</P>
 
             {/* CTAs */}
-            <div
-              className={cn(
-                'flex flex-wrap gap-4',
-                variant === 'centered' && 'justify-center'
-              )}
-            >
+            <Div className={cn('flex flex-wrap gap-4', variant === 'centered' && 'justify-center')}>
               {primaryCTA && (
                 <Button asChild size="lg" className="text-base px-8 py-6">
                   <a href={primaryCTAHref}>{primaryCTA}</a>
                 </Button>
               )}
               {secondaryCTA && (
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base px-8 py-6"
-                >
+                <Button asChild size="lg" variant="outline" className="text-base px-8 py-6">
                   <a href={secondaryCTAHref}>{secondaryCTA}</a>
                 </Button>
               )}
-            </div>
+            </Div>
 
             {/* Stats (for withStats variant) */}
             {variant === 'withStats' && stats && stats.length > 0 && (
-              <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6">
+              <Div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6">
                 {stats.map((stat, index) => (
-                  <div key={index} className="text-center sm:text-left">
-                    <div className="text-3xl sm:text-4xl font-bold text-primary">
-                      {stat.value}
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
-                  </div>
+                  <Div key={index} className="text-center sm:text-left">
+                    <Div className="text-3xl sm:text-4xl font-bold text-primary">{stat.value}</Div>
+                    <Div className="text-sm text-muted-foreground mt-1">{stat.label}</Div>
+                  </Div>
                 ))}
-              </div>
+              </Div>
             )}
 
             {/* Custom Children */}
-            {children && <div className="mt-8">{children}</div>}
-          </div>
+            {children && <Div className="mt-8">{children}</Div>}
+          </Div>
 
           {/* Image/Visual Content (for split/withImage variants) */}
           {(variant === 'split' || variant === 'withImage') && image && (
-            <div className={cn('order-2', variant === 'withImage' && 'mt-12 lg:mt-0')}>
-              <div className="relative aspect-video lg:aspect-square rounded-2xl overflow-hidden shadow-2xl">
+            <Div className={cn('order-2', variant === 'withImage' && 'mt-12 lg:mt-0')}>
+              <Div className="relative aspect-video lg:aspect-square rounded-2xl overflow-hidden shadow-2xl">
                 <img
                   src={image}
                   alt={title}
                   className="h-full w-full object-cover"
                   loading="eager"
                 />
-              </div>
-            </div>
+              </Div>
+            </Div>
           )}
-        </div>
-      </section>
+        </Div>
+      </Section>
     )
   }
 )

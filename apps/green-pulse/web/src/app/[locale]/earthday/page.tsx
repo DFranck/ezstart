@@ -6,15 +6,14 @@ import {
   Card,
   CardContent,
   Div,
-  H1,
   H2,
   Icon,
   type KnownIconName,
+  LandingHero,
   P,
   PWAInstallPrompt,
   Section,
   Span,
-  LandingHero,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -52,95 +51,78 @@ function EarthDayContent() {
       : searchParams.get('promo') === 'EARTHDAY2026'
 
   return (
-    <Div className="min-h-screen bg-background">
-      {/* Header */}
-      <Div className="w-full border-b border-border/40 bg-card/50 backdrop-blur-sm">
-        <Div className="max-w-2xl mx-auto px-4 py-4 flex flex-col items-center gap-3">
-          <Div layout="row" className="gap-3 items-center">
-            <Image
-              src="/logo_complet_light.svg"
-              alt="GreenPulse.AI"
-              width={180}
-              height={36}
-              className="dark:hidden"
-              priority
-            />
-            <Image
-              src="/logo_complet_dark.svg"
-              alt="GreenPulse.AI"
-              width={180}
-              height={36}
-              className="hidden dark:block"
-              priority
-            />
-          </Div>
-          <P className="text-xs text-muted-foreground text-center leading-relaxed">
-            {t('header.cobranding')}
-          </P>
-        </Div>
-      </Div>
-
-      {/* Hero with background image */}
+    <>
+      {/* Hero */}
       <LandingHero
-        variant="fullHeight"
+        bgMode="fixed"
+        variant="full"
         title={t('hero.title')}
         description={t('hero.subtitle')}
-        badge={t('header.cobranding')}
         className="bg-cover bg-center text-white"
         style={{ backgroundImage: "url('/images/earthday-hero.jpg')" }}
       >
-        {/* Dark overlay */}
-        <Div className="absolute inset-0 bg-black/50 -z-[1]" />
+        {/* Logo */}
+        <Div className="flex justify-center mb-6">
+          <Image
+            src="/logo_complet_light.svg"
+            alt="GreenPulse.AI"
+            width={280}
+            height={56}
+            className="dark:hidden"
+            priority
+          />
+          <Image
+            src="/logo_complet_dark.svg"
+            alt="GreenPulse.AI"
+            width={280}
+            height={56}
+            className="hidden dark:block"
+            priority
+          />
+        </Div>
 
-        {/* Promo code */}
-        <Div className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-4 text-center max-w-md mx-auto">
-          <Div className="flex items-center justify-center gap-2 mb-1">
-            <Icon name="lucide:Gift" size={16} className="text-primary" />
-            <Span className="text-xs font-semibold text-primary uppercase tracking-wide">
+        {/* GLC co-branding */}
+        <Div className="flex items-center justify-center gap-2 mb-4">
+          <Icon name="lucide:Leaf" size={18} className="text-gp-primary" />
+          <Span className="text-sm text-white/70">{t('header.cobranding')}</Span>
+        </Div>
+
+        {/* Promo code — big & prominent */}
+        <Div className="rounded-2xl bg-gp-primary/20 backdrop-blur-md border-2 border-gp-primary/50 p-6 text-center max-w-lg mx-auto">
+          <Div className="flex items-center justify-center gap-3 mb-2">
+            <Icon name="lucide:Gift" size={24} className="text-gp-primary" />
+            <Span className="text-lg font-bold text-gp-primary uppercase tracking-wider">
               {t('cta.promo.label')}
             </Span>
           </Div>
-          <P className="text-sm text-white/80">
+          <P className="text-base text-white font-medium">
             {hasPromo ? t('cta.promo.applied') : t('cta.promo.default')}
           </P>
         </Div>
       </LandingHero>
 
-      {/* Value Props */}
-      <Section className="max-w-2xl mx-auto px-4 py-8">
-        <Div className="grid gap-4">
-          {VALUE_PROPS.map(({ icon, key }) => (
-            <Card key={key} variant="default" className="border-border/50">
-              <CardContent className="flex items-start gap-4 p-4 sm:p-5">
-                <Div className="shrink-0 w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Icon name={icon} size={22} className="text-primary" />
-                </Div>
-                <Div className="flex flex-col gap-1">
-                  <H2 className="text-base font-semibold text-foreground">
-                    {t(`valueProps.${key}.title`)}
-                  </H2>
-                  <P className="text-sm text-muted-foreground leading-relaxed">
-                    {t(`valueProps.${key}.description`)}
-                  </P>
-                </Div>
-              </CardContent>
-            </Card>
-          ))}
-        </Div>
-      </Section>
-
       {/* Auth section: QuickSignUp or Welcome */}
-      <Section className="max-w-2xl mx-auto px-4 pb-8">
+      <Section size="full" className="">
         <SignedOut>
           <Card variant="floating" className="overflow-hidden">
+            {/* Promo banner */}
+            {hasPromo && (
+              <Div className="bg-brand/10 border-b border-brand/20 px-4 py-3 text-center">
+                <Div className="flex items-center justify-center gap-2">
+                  <Icon name="lucide:Gift" size={16} className="text-brand" />
+                  <Span className="text-sm font-semibold text-brand">{t('cta.promo.applied')}</Span>
+                </Div>
+              </Div>
+            )}
             <CardContent className="p-6 sm:p-8">
               <Div className="text-center mb-6">
-                <Icon name="lucide:UserPlus" size={32} className="text-primary mx-auto mb-3" />
+                <Icon name="lucide:UserPlus" size={32} className="text-brand mx-auto mb-3" />
                 <H2 className="text-xl font-bold text-foreground">{t('signup.title')}</H2>
                 <P className="text-sm text-muted-foreground mt-1">{t('signup.subtitle')}</P>
               </Div>
               <QuickSignUpForm
                 appName="green-pulse"
+                promoCode={hasPromo ? 'EARTHDAY2026' : undefined}
                 onSuccess={() => setSignupSuccess(true)}
                 texts={{
                   username: t('signup.username'),
@@ -149,6 +131,10 @@ function EarthDayContent() {
                   emailPlaceholder: t('signup.emailPlaceholder'),
                   submit: t('signup.submit'),
                   submitting: t('signup.submitting'),
+                  successToast: t('signup.successToast'),
+                  fallbackError: t('signup.fallbackError'),
+                  required: t('signup.required'),
+                  invalidEmail: t('signup.invalidEmail'),
                 }}
               />
             </CardContent>
@@ -187,6 +173,29 @@ function EarthDayContent() {
         </SignedIn>
       </Section>
 
+      {/* Value Props */}
+      <Section className="max-w-2xl mx-auto px-4 pb-8">
+        <Div className="grid gap-4">
+          {VALUE_PROPS.map(({ icon, key }) => (
+            <Card key={key} variant="default" className="border-border/50">
+              <CardContent className="flex items-start gap-4 p-4 sm:p-5">
+                <Div className="shrink-0 w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Icon name={icon} size={22} className="text-primary" />
+                </Div>
+                <Div className="flex flex-col gap-1">
+                  <H2 className="text-base font-semibold text-foreground">
+                    {t(`valueProps.${key}.title`)}
+                  </H2>
+                  <P className="text-sm text-muted-foreground leading-relaxed">
+                    {t(`valueProps.${key}.description`)}
+                  </P>
+                </Div>
+              </CardContent>
+            </Card>
+          ))}
+        </Div>
+      </Section>
+
       {/* Footer */}
       <Div className="w-full border-t border-border/40 bg-muted/30">
         <Div className="max-w-2xl mx-auto px-4 py-6 flex flex-col items-center gap-3 text-center">
@@ -201,7 +210,7 @@ function EarthDayContent() {
           </Link>
         </Div>
       </Div>
-    </Div>
+    </>
   )
 }
 

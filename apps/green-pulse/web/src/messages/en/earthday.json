@@ -41,7 +41,11 @@
       "email": "Email",
       "emailPlaceholder": "your@email.com",
       "submit": "Join Now",
-      "submitting": "Creating account..."
+      "submitting": "Creating account...",
+      "successToast": "Account created! Welcome aboard.",
+      "fallbackError": "An error occurred. Please try again.",
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email"
     },
     "welcome": {
       "justJoined": "Welcome aboard!",

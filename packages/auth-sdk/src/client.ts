@@ -300,7 +300,8 @@ export class AuthClient {
     username: string
     email: string
     app: string
-  }): Promise<{ success: boolean }> {
+    promoCode?: string
+  }): Promise<{ user: AuthUser; accessToken: string; refreshToken: string }> {
     const response = await fetch(`${this.config.baseURL}/quick-signup`, {
       method: 'POST',
       headers: {

@@ -4,7 +4,19 @@
  */
 'use client'
 
-import { Select, SelectItem, Badge, Icon, KnownIconName } from '@ezstart/ui/components'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Badge,
+  Icon,
+  Div,
+  Span,
+  P,
+  KnownIconName,
+} from '@ezstart/ui/components'
 
 interface AIProvider {
   id: string
@@ -28,34 +40,43 @@ export function AISelector({
   showCapabilities = true,
 }: AISelectorProps) {
   if (providers.length === 0) {
-    return <div className="text-sm text-muted-foreground">No providers available</div>
+    return (
+      <P variant="description" size="sm">
+        No providers available
+      </P>
+    )
   }
 
   return (
     <Select value={value} onValueChange={onChange}>
-      {providers.map(provider => (
-        <SelectItem key={provider.id} value={provider.id}>
-          <div className="flex items-center gap-2">
-            <Icon name={getProviderIcon(provider.type) as KnownIconName} size={16} />
-            <span>{provider.name}</span>
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {providers.map(provider => (
+          <SelectItem key={provider.id} value={provider.id}>
+            <Div layout="row">
+              <Icon name={getProviderIcon(provider.type) as KnownIconName} size={16} />
+              <Span>{provider.name}</Span>
 
-            {showCapabilities && (
-              <div className="flex gap-1 ml-auto">
-                {provider.capabilities?.vision && (
-                  <Badge variant="secondary" className="text-xs">
-                    Vision
-                  </Badge>
-                )}
-                {provider.capabilities?.audio && (
-                  <Badge variant="secondary" className="text-xs">
-                    Audio
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
-        </SelectItem>
-      ))}
+              {showCapabilities && (
+                <Div layout="row">
+                  {provider.capabilities?.vision && (
+                    <Badge variant="secondary" size="sm">
+                      Vision
+                    </Badge>
+                  )}
+                  {provider.capabilities?.audio && (
+                    <Badge variant="secondary" size="sm">
+                      Audio
+                    </Badge>
+                  )}
+                </Div>
+              )}
+            </Div>
+          </SelectItem>
+        ))}
+      </SelectContent>
     </Select>
   )
 }

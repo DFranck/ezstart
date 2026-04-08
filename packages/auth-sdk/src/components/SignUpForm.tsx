@@ -51,11 +51,16 @@ export interface SignUpFormTexts {
   passwordFair: string
   passwordGood: string
   passwordStrong: string
+  // OAuth texts (optional — only needed if showOAuth is true)
+  continueWithGoogle?: string
+  orContinueWith?: string
 }
 
 export interface SignUpFormProps {
   /** App name for the register request */
   appName: string
+  /** Pre-filled promo code (not shown as input, just sent with signup) */
+  promoCode?: string
   /** Redirect URI after registration (OAuth code flow) */
   redirectUri?: string
   /** Called after successful registration */
@@ -117,6 +122,7 @@ interface FormData {
 
 export function SignUpForm({
   appName,
+  promoCode,
   redirectUri,
   onSuccess,
   onBackToLogin,
@@ -213,6 +219,7 @@ export function SignUpForm({
           lastName: formData.lastName || undefined,
           app: appName,
           redirect_uri: redirectUri || undefined,
+          ...(promoCode ? { promoCode } : {}),
         },
       })
 
@@ -265,7 +272,15 @@ export function SignUpForm({
   return (
     <Div className="space-y-3 md:space-y-4">
       {showOAuth && (
-        <OAuthButtons appName={appName} redirectUri={redirectUri} providers={oauthProviders} />
+        <OAuthButtons
+          appName={appName}
+          redirectUri={redirectUri}
+          providers={oauthProviders}
+          texts={{
+            ...(t.continueWithGoogle && { continueWithGoogle: t.continueWithGoogle }),
+            ...(t.orContinueWith && { orContinueWith: t.orContinueWith }),
+          }}
+        />
       )}
 
       <Form {...form}>

@@ -34,14 +34,18 @@
       }
     },
     "signup": {
-      "title": "Tham gia phong trao xanh",
-      "subtitle": "Tao tai khoan mien phi trong vai giay",
-      "username": "Ten nguoi dung",
-      "usernamePlaceholder": "Chon ten nguoi dung",
+      "title": "Rejoignez le mouvement vert",
+      "subtitle": "Cr\u00e9ez votre compte gratuit en quelques secondes",
+      "username": "Nom d'utilisateur",
+      "usernamePlaceholder": "Choisissez un nom d'utilisateur",
       "email": "Email",
-      "emailPlaceholder": "email@cuaban.com",
-      "submit": "Tham gia ngay",
-      "submitting": "Dang tao tai khoan..."
+      "emailPlaceholder": "votre@email.com",
+      "submit": "Rejoindre",
+      "submitting": "Cr\u00e9ation du compte...",
+      "successToast": "Compte cr\u00e9\u00e9 ! Bienvenue.",
+      "fallbackError": "Une erreur est survenue. Veuillez r\u00e9essayer.",
+      "required": "Ce champ est obligatoire",
+      "invalidEmail": "Veuillez entrer un email valide"
     },
     "welcome": {
       "justJoined": "Chao mung ban!",

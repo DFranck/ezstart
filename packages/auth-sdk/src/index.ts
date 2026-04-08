@@ -49,6 +49,8 @@ export type {
 } from './components/OAuthButtons.js'
 export { PasswordStrength } from './components/PasswordStrength.js'
 export type { PasswordStrengthProps, PasswordStrengthTexts } from './components/PasswordStrength.js'
+export { TwoFactorPrompt } from './components/TwoFactorPrompt.js'
+export type { TwoFactorPromptProps, TwoFactorPromptTexts } from './components/TwoFactorPrompt.js'
 
 // User components (Clerk-like pre-built UI)
 export { UserMenu } from './components/UserMenu.js'

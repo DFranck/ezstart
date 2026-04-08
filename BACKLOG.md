@@ -130,8 +130,9 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 80. [x] Unified variant taxonomy — tokens + variants centralisés dans design-system, 30 composants migrés, 13 tag files supprimés
 81. [x] Density variant — compact/default/relaxed ajouté sur tous les container tags
 82. [ ] Theme presets — Presets déclaratifs par app (dashboard=compact, landing=relaxed)
-83. [x] Component reorganization — 56 fichiers réorganisés en 8 sous-dossiers catégorisés
-84. [ ] SSR Layout split — Séparer ClientLayout en RSC + client islands
+83. [ ] Theme CSS scoping — Remplacer `:root` par `[data-app="xxx"]` dans chaque theme CSS pour éviter les conflits de variables (--brand etc.) quand tous les thèmes sont chargés simultanément. Ajouter `data-app` sur `<body>` de chaque app.
+84. [x] Component reorganization — 56 fichiers réorganisés en 8 sous-dossiers catégorisés
+85. [ ] SSR Layout split — Séparer ClientLayout en RSC + client islands
 
 #### P2.7 — EZStart Hub (2026-04-06)
 

@@ -1045,7 +1045,7 @@ export const landingHeroVariantConfig = {
     centered: 'py-20 sm:py-24 lg:py-32',
     withStats: 'py-20 sm:py-24 lg:py-32',
     withSearch: 'py-20 sm:py-24 lg:py-32',
-    fullHeight: 'min-h-screen',
+    full: 'min-h-screen px-4 py-16 md:px-16 md:py-18 flex flex-col items-center justify-center',
   },
   contentWrapper: {
     default: '',
@@ -1057,7 +1057,7 @@ export const landingHeroVariantConfig = {
     centered: 'text-center',
     withStats: '',
     withSearch: '',
-    fullHeight: '',
+    full: '',
   },
   title: {
     default: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
@@ -1070,7 +1070,7 @@ export const landingHeroVariantConfig = {
     centered: 'text-5xl sm:text-6xl lg:text-7xl',
     withStats: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
     withSearch: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
-    fullHeight: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
+    full: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
   },
   description: {
     default: 'text-lg sm:text-xl lg:text-2xl max-w-3xl',
@@ -1082,7 +1082,7 @@ export const landingHeroVariantConfig = {
     centered: 'text-xl sm:text-2xl max-w-3xl mx-auto',
     withStats: 'text-lg sm:text-xl lg:text-2xl max-w-3xl',
     withSearch: 'text-lg sm:text-xl lg:text-2xl max-w-3xl',
-    fullHeight: 'text-lg sm:text-xl lg:text-2xl max-w-3xl',
+    full: 'text-lg sm:text-xl lg:text-2xl max-w-3xl',
   },
 } as const
 

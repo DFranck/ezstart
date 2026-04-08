@@ -1,7 +1,8 @@
 'use client'
 
+import React from 'react'
 import { getAppTheme } from '@/config/app-themes'
-import { OAuthButtons } from '@/components/OAuthButtons'
+import { SignInForm } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
   BackButton,
@@ -9,37 +10,42 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   Div,
   P,
   Span,
   Spinner,
 } from '@ezstart/ui/components'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { useTranslations } from 'next-intl'
 
-// Dynamic import for LoginForm (144 lines)
-// Form is only shown after user clicks "Sign in with email"
-// Reduces initial bundle size
-const LoginForm = dynamic(
-  () => import('@/components/LoginForm').then(mod => ({ default: mod.LoginForm })),
-  {
-    loading: () => <Div className="animate-pulse bg-muted rounded h-32" />,
-  }
-)
-
 function LoginContent() {
   const t = useTranslations('login')
+  const tForgot = useTranslations('forgotPassword')
+  const tValidation = useTranslations('validation')
+  const tApiErrors = useTranslations('apiErrors')
+  const tOAuth = useTranslations('oauth')
+  const tTwoFactor = useTranslations('twoFactor')
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || 'ezstart'
   const redirect_uri = searchParams.get('redirect_uri')
   const theme = getAppTheme(app)
 
   return (
-    <Card className="max-w-md w-full relative">
+    <Card
+      className="max-w-md w-full relative"
+      style={
+        theme.brandColor
+          ? ({
+              '--brand': theme.brandColor,
+              '--brand-foreground': theme.brandForeground ?? 'oklch(0.985 0 0)',
+              '--color-brand': 'var(--brand)',
+              '--color-brand-foreground': 'var(--brand-foreground)',
+            } as React.CSSProperties)
+          : undefined
+      }
+    >
       <Div className="absolute top-4 left-4">
         <BackButton />
       </Div>
@@ -47,7 +53,6 @@ function LoginContent() {
         <ThemeSwitcher />
       </Div>
       <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl md:text-2xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
           {t('signInToAccess')}{' '}
           <Span className={`${theme.primaryColor} font-semibold`}>{theme.name}</Span>
@@ -60,11 +65,33 @@ function LoginContent() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* OAuth Buttons (Google, GitHub) */}
-        <OAuthButtons app={app} redirect_uri={redirect_uri} />
-
-        {/* Classic Email/Password Form */}
-        <LoginForm app={app} redirect_uri={redirect_uri} />
+        <SignInForm
+          appName={app}
+          redirectUri={redirect_uri || undefined}
+          showOAuth
+          oauthProviders={['google']}
+          forgotPasswordHref="/forgot-password"
+          texts={{
+            emailOrUsername: t('emailOrUsername'),
+            emailOrUsernamePlaceholder: t('emailOrUsernamePlaceholder'),
+            password: t('password'),
+            passwordPlaceholder: t('passwordPlaceholder'),
+            forgotPassword: tForgot('link'),
+            submit: t('submit'),
+            submitting: t('submitting'),
+            required: tValidation('required'),
+            minLength: tValidation('minLength', { min: '{min}' }),
+            noRedirectUri: t('noRedirectUri'),
+            fallbackError: tApiErrors('fallback'),
+            twoFactorPrompt: tTwoFactor('loginPrompt'),
+            twoFactorCodePlaceholder: tTwoFactor('codePlaceholder'),
+            twoFactorVerify: tTwoFactor('loginVerify'),
+            twoFactorVerifying: tTwoFactor('loginVerifying'),
+            twoFactorBack: tTwoFactor('useBackupCode'),
+            continueWithGoogle: tOAuth('continueWithGoogle'),
+            orContinueWith: tOAuth('orContinueWith'),
+          }}
+        />
 
         <Div className="text-center">
           <P size={'xs'}>

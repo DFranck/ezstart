@@ -13,6 +13,10 @@ export interface AppTheme {
   primaryColor: string
   /** Background accent color class */
   bgAccent: string
+  /** Brand color (OKLCH value) — overrides --brand CSS variable for buttons */
+  brandColor?: string
+  /** Brand foreground color (OKLCH value) — overrides --brand-foreground */
+  brandForeground?: string
   /** Icon name for the app */
   icon?: KnownIconName
   /** Whether to show "One account, all EZStart apps!" message */
@@ -46,8 +50,10 @@ export const appThemes: Record<string, AppTheme> = {
     logoDark: '/logos/greenpulse-dark.svg',
     primaryColor: 'text-gp-primary',
     bgAccent: 'bg-gp-primary/10',
+    brandColor: 'oklch(0.6 0.18 145)',
+    brandForeground: 'oklch(0.98 0.01 145)',
     icon: 'lucide:Leaf',
-    showEzstartMessage: true,
+    showEzstartMessage: false,
   },
   ezbill: {
     name: 'EZBill',
@@ -73,6 +79,8 @@ export const appThemes: Record<string, AppTheme> = {
     logo: '/logos/fengshui.svg',
     primaryColor: 'text-fengshui',
     bgAccent: 'bg-fengshui/10',
+    brandColor: 'oklch(0.78 0.16 80)',
+    brandForeground: 'oklch(0.15 0.05 80)',
     icon: 'lucide:Compass',
     showEzstartMessage: true,
   },

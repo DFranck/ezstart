@@ -21,6 +21,9 @@ export interface AuthUser {
   organizationId?: string // For client managers
   managedBy?: string // User ID of manager (for clients)
 
+  // Promo
+  promoCode?: string // Promo code from referral/campaign
+
   // Password state
   hasSetOwnPassword?: boolean // false for quick-signup users who haven't set a password yet
 
@@ -54,6 +57,7 @@ export interface RegisterRequest {
   app: string
   redirect_uri?: string
   accessCode?: string // Beta access code from waitlist invitation
+  promoCode?: string // Promo code from referral/campaign
 }
 
 export interface TokenRequest {

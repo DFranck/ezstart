@@ -25,6 +25,8 @@ export interface AuthUserDocument extends Document {
   organizationId?: string // For client managers
   managedBy?: string // User ID of manager (for clients)
 
+  promoCode?: string
+
   hasSetOwnPassword: boolean
 
   lastActiveAt?: Date | null
@@ -125,6 +127,10 @@ const authUserSchema = new Schema<AuthUserDocument>(
     managedBy: {
       type: String,
       required: false,
+    },
+    promoCode: {
+      type: String,
+      default: undefined,
     },
     hasSetOwnPassword: {
       type: Boolean,
@@ -227,6 +233,7 @@ authUserSchema.methods.toAuthUser = function (): AuthUser {
     features: this.features || [],
     organizationId: this.organizationId,
     managedBy: this.managedBy,
+    promoCode: this.promoCode,
     hasSetOwnPassword: this.hasSetOwnPassword ?? true,
     lastActiveAt: this.lastActiveAt ? this.lastActiveAt.toISOString() : null,
     createdAt: this.createdAt.toISOString(),
