@@ -24,8 +24,7 @@ export function Providers({
     <QueryProvider>
       <AuthProvider
         appName="green-pulse"
-        authMode="httpOnly"
-        jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}
+        authMode="localStorage"
       >
         <ThemeProvider
           attribute="class"
