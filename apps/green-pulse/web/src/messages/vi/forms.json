@@ -1,0 +1,128 @@
+{
+  "navigation": {
+    "workspaces": "Không gian làm việc",
+    "forms": "Biểu mẫu",
+    "dashboard": "Bảng điều khiển",
+    "dashboardDisabled": "Khả dụng với Gói 2"
+  },
+  "workspaces": {
+    "title": "Không gian làm việc",
+    "description": "Các không gian biểu mẫu của bạn - Điền thông minh với AI",
+    "noWorkspaces": "Không có không gian làm việc",
+    "noWorkspacesDescription": "Tạo không gian đầu tiên để bắt đầu quản lý biểu mẫu",
+    "createWorkspace": "Tạo không gian",
+    "members": "thành viên",
+    "projects": "dự án",
+    "underDevelopment": "Đang phát triển"
+  },
+  "welcome": {
+    "title": "Chào mừng đến với GreenPulse!",
+    "description": "Biểu mẫu động được hỗ trợ bởi AI cho thu thập dữ liệu hiện đại",
+    "features": {
+      "createForms": {
+        "title": "Tạo biểu mẫu động",
+        "description": "Xây dựng biểu mẫu thông minh với tạo trường và logic điều kiện bằng AI"
+      },
+      "workspaces": {
+        "title": "Tổ chức với không gian",
+        "description": "Giữ dự án ngăn nắp với không gian chuyên dụng cho các ngữ cảnh khác nhau"
+      },
+      "validation": {
+        "title": "Xác thực thông minh",
+        "description": "Xác thực tự động và kiểm tra chất lượng dữ liệu được hỗ trợ bởi AI"
+      },
+      "collaborate": {
+        "title": "Cộng tác dễ dàng",
+        "description": "Chia sẻ biểu mẫu và không gian với đội nhóm để cộng tác tốt hơn"
+      }
+    },
+    "cta": "Bắt đầu tạo biểu mẫu"
+  },
+  "projects": {
+    "title": "Dự án",
+    "description": "Quản lý hồ sơ kiểm tra và biểu mẫu",
+    "noProjects": "Không có dự án",
+    "noProjectsDescription": "Tạo dự án đầu tiên để bắt đầu điền biểu mẫu",
+    "createProject": "Tạo dự án",
+    "formInstances": "Phiên bản biểu mẫu",
+    "formInstancesDescription": "Biểu mẫu đã điền cho dự án này"
+  },
+  "forms": {
+    "title": "Biểu mẫu",
+    "createForm": "Biểu mẫu mới",
+    "noForms": "Không có biểu mẫu",
+    "noFormsDescription": "Tạo phiên bản đầu tiên để bắt đầu nhập dữ liệu",
+    "fillForm": "Điền biểu mẫu",
+    "submitForm": "Gửi",
+    "submitting": "Đang gửi...",
+    "saving": "Đang lưu...",
+    "draft": "Bản nháp",
+    "inProgress": "Đang thực hiện",
+    "submitted": "Đã gửi",
+    "archived": "Đã lưu trữ",
+    "formNotFound": "Không tìm thấy biểu mẫu",
+    "created": "Tạo ngày {date}",
+    "submittedAt": "Gửi ngày {date}"
+  },
+  "createInstance": {
+    "title": "Tạo phiên bản biểu mẫu",
+    "description": "Chọn mẫu và chế độ điền",
+    "selectTemplate": "Chọn mẫu *",
+    "loadingTemplates": "Đang tải mẫu...",
+    "noTemplates": "Không có mẫu khả dụng. Vui lòng cung cấp cơ sở dữ liệu trước.",
+    "fields": "{count} trường",
+    "fillingMode": "Chế độ điền *",
+    "chatMode": "Chế độ Trò chuyện (Đề xuất)",
+    "chatModeDescription": "Trò chuyện với AI để điền biểu mẫu tự động",
+    "vocalMode": "Chế độ Giọng nói",
+    "vocalModeDescription": "Nói tự nhiên với AI bằng giọng nói (Web Speech API)",
+    "manualMode": "Chế độ Thủ công",
+    "manualModeDescription": "Điền các trường biểu mẫu thủ công (truyền thống)",
+    "createAndFill": "Tạo & Điền",
+    "newForm": "+ Biểu mẫu mới"
+  },
+  "createWorkspace": {
+    "title": "Tạo không gian làm việc",
+    "description": "Tạo không gian mới để tổ chức biểu mẫu và dự án",
+    "name": "Tên không gian *",
+    "namePlaceholder": "ví dụ: Kiểm tra Acme",
+    "slug": "Slug URL *",
+    "slugPlaceholder": "ví dụ: kiem-tra-acme",
+    "slugPreview": "/forms/w/{slug}/projects",
+    "slugTaken": "Slug \"{slug}\" đã được sử dụng. Vui lòng thử slug khác.",
+    "descriptionLabel": "Mô tả",
+    "descriptionPlaceholder": "Mô tả không gian làm việc...",
+    "newWorkspace": "+ Không gian mới",
+    "createWorkspace": "Tạo không gian"
+  },
+  "createProject": {
+    "title": "Tạo dự án",
+    "description": "Tạo dự án mới (thư mục) để tổ chức các phiên bản biểu mẫu",
+    "name": "Tên dự án *",
+    "namePlaceholder": "ví dụ: Kiểm tra ABC Corp - 2025-10-26",
+    "descriptionLabel": "Mô tả",
+    "descriptionPlaceholder": "Mô tả ngắn gọn về dự án...",
+    "companyInfo": "Thông tin doanh nghiệp (Tùy chọn)",
+    "companyName": "Tên doanh nghiệp",
+    "companyNamePlaceholder": "ví dụ: Công ty ABC",
+    "address": "Địa chỉ",
+    "addressPlaceholder": "ví dụ: 123 Đường Nguyễn Huệ, TP.HCM",
+    "sector": "Ngành",
+    "sectorPlaceholder": "ví dụ: Công nghệ, Sản xuất, Dịch vụ",
+    "createProject": "Tạo dự án",
+    "newProject": "+ Dự án mới"
+  },
+  "chat": {
+    "placeholder": "Nhập tin nhắn tại đây...",
+    "send": "Gửi",
+    "aiAssistant": "Trợ lý AI",
+    "chatMode": "Chế độ trò chuyện",
+    "vocalMode": "Chế độ giọng nói",
+    "manualMode": "Chế độ thủ công"
+  },
+  "auth": {
+    "loginRequired": "Vui lòng đăng nhập để truy cập không gian làm việc",
+    "loading": "Đang tải...",
+    "redirecting": "Đang chuyển hướng đến trang đăng nhập..."
+  }
+}

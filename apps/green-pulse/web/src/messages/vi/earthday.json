@@ -1,0 +1,42 @@
+{
+  "earthday": {
+    "meta": {
+      "title": "GreenPulse.AI tại Earth Day 2026",
+      "description": "Đánh giá ESG miễn phí bằng AI cho doanh nghiệp SME Việt Nam. Sẵn sàng tiếp cận tài chính xanh trong vài phút."
+    },
+    "header": {
+      "cobranding": "Đối tác công nghệ tại Sustainable Future 10 & Earth Day 2026"
+    },
+    "hero": {
+      "title": "Doanh nghiệp của bạn sẵn sàng tiếp cận tài chính xanh chưa?",
+      "subtitle": "Đánh giá ESG miễn phí bằng AI trong 5 phút"
+    },
+    "valueProps": {
+      "assessment": {
+        "title": "Đánh giá ESG miễn phí bằng AI",
+        "description": "Nhận điểm sẵn sàng ESG trong vài phút với trợ lý AI GP.A — không cần đăng ký."
+      },
+      "roadmap": {
+        "title": "Lộ trình tiếp cận tín dụng xanh",
+        "description": "Hiểu chính xác ngân hàng cần gì để phê duyệt đơn vay xanh của bạn."
+      },
+      "reporting": {
+        "title": "Báo cáo ESG tự động",
+        "description": "Tạo báo cáo tuân thủ GRI, SFDR và CSRD tự động từ dữ liệu doanh nghiệp."
+      }
+    },
+    "cta": {
+      "start": "Bắt đầu miễn phí với GP.A",
+      "promo": {
+        "label": "Mã ưu đãi",
+        "applied": "Mã EARTHDAY2026 đã được áp dụng — 1 tháng Pro miễn phí khi ra mắt!",
+        "default": "Nhập mã EARTHDAY2026 để nhận 1 tháng Pro miễn phí khi ra mắt"
+      }
+    },
+    "footer": {
+      "contact": "Liên hệ",
+      "eventCredit": "Trình bày tại Sustainable Future 10 & Earth Day Vietnam 2026 — tổ chức bởi Green Leaders Community (GLC)",
+      "poweredBy": "GreenPulse.AI — AI cho doanh nghiệp SME bền vững tại Đông Nam Á"
+    }
+  }
+}
