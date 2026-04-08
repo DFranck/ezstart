@@ -44,11 +44,13 @@ function EarthDayContent() {
     }
   }, [searchParams])
 
-  const hasPromo =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('gp_promo_code') === 'EARTHDAY2026' ||
-        searchParams.get('promo') === 'EARTHDAY2026'
-      : searchParams.get('promo') === 'EARTHDAY2026'
+  const [hasPromo, setHasPromo] = useState(false)
+
+  useEffect(() => {
+    const fromUrl = searchParams.get('promo') === 'EARTHDAY2026'
+    const fromStorage = localStorage.getItem('gp_promo_code') === 'EARTHDAY2026'
+    setHasPromo(fromUrl || fromStorage)
+  }, [searchParams])
 
   return (
     <>
