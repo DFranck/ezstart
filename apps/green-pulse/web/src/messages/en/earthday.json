@@ -1,0 +1,42 @@
+{
+  "earthday": {
+    "meta": {
+      "title": "GreenPulse.AI at Earth Day 2026",
+      "description": "Free AI-powered ESG assessment for Vietnamese SMEs. Green finance readiness in minutes."
+    },
+    "header": {
+      "cobranding": "Technology Partner at Sustainable Future 10 & Earth Day 2026"
+    },
+    "hero": {
+      "title": "Is your business ready for green finance?",
+      "subtitle": "Free AI-powered ESG assessment in 5 minutes"
+    },
+    "valueProps": {
+      "assessment": {
+        "title": "Free AI ESG Assessment",
+        "description": "Get your ESG readiness score in minutes with our AI assistant GP.A — no signup required."
+      },
+      "roadmap": {
+        "title": "Green Loan Readiness Roadmap",
+        "description": "Understand exactly what banks need to approve your green loan application."
+      },
+      "reporting": {
+        "title": "Automated ESG Reporting",
+        "description": "Generate GRI, SFDR, and CSRD-compliant reports automatically from your business data."
+      }
+    },
+    "cta": {
+      "start": "Start Free with GP.A",
+      "promo": {
+        "label": "Promo code",
+        "applied": "Promo code EARTHDAY2026 applied — 1 free month of Pro at launch!",
+        "default": "Enter code EARTHDAY2026 for 1 free month of Pro at launch"
+      }
+    },
+    "footer": {
+      "contact": "Contact us",
+      "eventCredit": "Presented at Sustainable Future 10 & Earth Day Vietnam 2026 — organized by Green Leaders Community (GLC)",
+      "poweredBy": "Powered by GreenPulse.AI — AI for sustainable SMEs in Southeast Asia"
+    }
+  }
+}

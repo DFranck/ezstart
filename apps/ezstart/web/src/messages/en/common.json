@@ -8,6 +8,25 @@
   "auth": {
     "login": "Login",
     "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "manageAccount": "Manage account",
+    "account": "Account",
+    "language": "Language",
+    "emailAddresses": "Email addresses",
+    "primary": "Primary",
+    "connectedAccounts": "Connected accounts",
+    "connectAccount": "Connect account",
+    "memberSince": "Member since",
+    "updateProfile": "Update profile",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "passwordSection": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "changePassword": "Change password",
     "callback": {
       "success": "Authentication successful!",
       "redirecting": "Redirecting to home...",
@@ -15,6 +34,12 @@
       "error": "Authentication failed",
       "noCode": "No authorization code found"
     }
+  },
+  "theme": {
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "pwa": {
     "install": {

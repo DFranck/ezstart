@@ -87,6 +87,17 @@ export type {
 export { PaymentHistory } from './components/PaymentHistory.js'
 export type { PaymentHistoryProps, PaymentHistoryTexts } from './components/PaymentHistory.js'
 
+// Components - SDK Payment Cards (EP-005)
+export { SubscriptionPlanCard } from './components/SubscriptionPlanCard.js'
+export type {
+  SubscriptionPlanCardProps,
+  SubscriptionPlanCardTexts,
+} from './components/SubscriptionPlanCard.js'
+export { DonationCard } from './components/DonationCard.js'
+export type { DonationCardProps, DonationCardTexts } from './components/DonationCard.js'
+export { PurchaseCard } from './components/PurchaseCard.js'
+export type { PurchaseCardProps, PurchaseCardTexts } from './components/PurchaseCard.js'
+
 // Re-export types
 export type {
   Payment,

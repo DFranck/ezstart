@@ -8,6 +8,25 @@
   "auth": {
     "login": "Connexion",
     "logout": "Déconnexion",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "manageAccount": "Gérer le compte",
+    "account": "Compte",
+    "language": "Langue",
+    "emailAddresses": "Adresses email",
+    "primary": "Principal",
+    "connectedAccounts": "Comptes connectés",
+    "connectAccount": "Connecter un compte",
+    "memberSince": "Membre depuis",
+    "updateProfile": "Modifier le profil",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "passwordSection": "Mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "changePassword": "Changer le mot de passe",
     "callback": {
       "success": "Authentification réussie !",
       "redirecting": "Redirection vers l'accueil...",
@@ -15,6 +34,12 @@
       "error": "Échec de l'authentification",
       "noCode": "Aucun code d'autorisation trouvé"
     }
+  },
+  "theme": {
+    "theme": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
   },
   "pwa": {
     "install": {

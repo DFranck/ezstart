@@ -113,6 +113,7 @@ export type WebhookEventType =
   | 'subscription.updated'
   | 'subscription.deleted'
   | 'invoice.payment_failed'
+  | 'invoice.payment_succeeded'
   | 'unknown'
 
 export interface WebhookEvent {
@@ -146,6 +147,12 @@ export interface WebhookSubscriptionData {
 
 export interface WebhookInvoiceData {
   subscriptionId: string | null
+  amount?: number
+  currency?: string
+  billingReason?: string
+  periodEnd?: string
+  customerEmail?: string
+  customerName?: string
 }
 
 export type WebhookEventData =

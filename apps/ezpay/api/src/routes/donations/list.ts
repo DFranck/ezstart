@@ -52,7 +52,7 @@ const getDonationsHandler = async (req: Request, res: Response) => {
     const { projectId, limit, offset } = parsed.data
 
     const query: Record<string, unknown> = {
-      type: 'donation',
+      type: { $in: ['donation', 'testimonial'] },
       status: 'completed',
       'metadata.isPublic': true,
     }

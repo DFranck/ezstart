@@ -82,7 +82,7 @@ const paymentSchema = new Schema<PaymentDocument>(
     // Payment Type
     type: {
       type: String,
-      enum: ['donation', 'purchase', 'subscription', 'invoice'],
+      enum: ['donation', 'purchase', 'subscription', 'invoice', 'testimonial'],
       required: true,
       index: true,
     },

@@ -47,8 +47,9 @@ fi
 # 3. No hardcoded Tailwind classes outside packages/ui
 #    className={variable} on UI components is OK (prop forwarding)
 #    className="bg-xxx text-xxx" with hardcoded Tailwind is NOT OK
+#    SDK packages (pay-sdk, auth-sdk) are excluded — they consume UI components with className
 # ============================================================
-TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'node_modules')
+TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'node_modules')
 
 if [ -n "$TAILWIND" ]; then
   echo ""

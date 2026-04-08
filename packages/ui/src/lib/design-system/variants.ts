@@ -767,7 +767,7 @@ export const listingContainersLayout = {
   row: 'flex flex-row flex-wrap gap-2 items-center',
   grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2',
   center: 'flex flex-col items-center justify-center gap-2',
-  menu: 'flex flex-col py-1 md:py-1 px-2 md:px-2 gap-2 ',
+  menu: 'flex flex-col py-1 px-1 gap-0.5',
 } as const
 
 export const listingContainersVariantConfig = {
@@ -1063,7 +1063,8 @@ export const landingHeroVariantConfig = {
     default: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
     withImage: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
     withVideo: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
-    withGradient: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent',
+    withGradient:
+      'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent',
     split: 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl',
     minimal: 'text-4xl sm:text-5xl lg:text-6xl',
     centered: 'text-5xl sm:text-6xl lg:text-7xl',
@@ -1226,22 +1227,19 @@ export const tagVariants = {
       layout: 'col',
     },
   }),
-  li: cva(`${isDebug() ? 'bg-green-500/50' : ''} flex gap-2`, {
+  li: cva(`${isDebug() ? 'bg-green-500/50' : ''}`, {
     variants: listingItemsVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
       size: 'default',
       marker: 'default',
-      layout: 'row',
       button: false,
     },
   }),
 }
 
-export const tagVariantsKeys = Object.keys(
-  tagVariants
-) as (keyof typeof tagVariants)[]
+export const tagVariantsKeys = Object.keys(tagVariants) as (keyof typeof tagVariants)[]
 
 // Grouped variant subsets for backward compatibility
 export const headingVariants = {
@@ -1300,12 +1298,30 @@ export const tagVariantsMeta: TagVariantsMetaMap = {
   p: extractMetaKeys(pVariantConfig),
 
   // Headings
-  h1: { variant: Object.keys(tagHeadingVariantConfig.variant), size: Object.keys(tagHeadingVariantConfig.size) },
-  h2: { variant: Object.keys(tagHeadingVariantConfig.variant), size: Object.keys(tagHeadingVariantConfig.size) },
-  h3: { variant: Object.keys(tagHeadingVariantConfig.variant), size: Object.keys(tagHeadingVariantConfig.size) },
-  h4: { variant: Object.keys(tagHeadingVariantConfig.variant), size: Object.keys(tagHeadingVariantConfig.size) },
-  h5: { variant: Object.keys(tagHeadingVariantConfig.variant), size: Object.keys(tagHeadingVariantConfig.size) },
-  h6: { variant: Object.keys(tagHeadingVariantConfig.variant), size: Object.keys(tagHeadingVariantConfig.size) },
+  h1: {
+    variant: Object.keys(tagHeadingVariantConfig.variant),
+    size: Object.keys(tagHeadingVariantConfig.size),
+  },
+  h2: {
+    variant: Object.keys(tagHeadingVariantConfig.variant),
+    size: Object.keys(tagHeadingVariantConfig.size),
+  },
+  h3: {
+    variant: Object.keys(tagHeadingVariantConfig.variant),
+    size: Object.keys(tagHeadingVariantConfig.size),
+  },
+  h4: {
+    variant: Object.keys(tagHeadingVariantConfig.variant),
+    size: Object.keys(tagHeadingVariantConfig.size),
+  },
+  h5: {
+    variant: Object.keys(tagHeadingVariantConfig.variant),
+    size: Object.keys(tagHeadingVariantConfig.size),
+  },
+  h6: {
+    variant: Object.keys(tagHeadingVariantConfig.variant),
+    size: Object.keys(tagHeadingVariantConfig.size),
+  },
 
   // Listings
   ul: extractMetaKeys(listingContainersVariantConfig),
