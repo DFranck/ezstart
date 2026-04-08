@@ -21,6 +21,9 @@ export interface AuthUser {
   organizationId?: string // For client managers
   managedBy?: string // User ID of manager (for clients)
 
+  // Password state
+  hasSetOwnPassword?: boolean // false for quick-signup users who haven't set a password yet
+
   // Presence
   lastActiveAt?: string | null // ISO date string of last activity
 

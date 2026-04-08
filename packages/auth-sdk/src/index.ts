@@ -29,6 +29,27 @@ export type {
   AuthAdminDashboardTexts,
 } from './components/AuthAdminDashboard.js'
 
+// Auth form components (embeddable sign-in/sign-up forms)
+export { SignInForm } from './components/SignInForm.js'
+export type { SignInFormProps, SignInFormTexts } from './components/SignInForm.js'
+export { SignUpForm } from './components/SignUpForm.js'
+export type { SignUpFormProps, SignUpFormTexts } from './components/SignUpForm.js'
+export { QuickSignUpForm } from './components/QuickSignUpForm.js'
+export type { QuickSignUpFormProps, QuickSignUpFormTexts } from './components/QuickSignUpForm.js'
+export { ForgotPasswordForm } from './components/ForgotPasswordForm.js'
+export type {
+  ForgotPasswordFormProps,
+  ForgotPasswordFormTexts,
+} from './components/ForgotPasswordForm.js'
+export { OAuthButtons } from './components/OAuthButtons.js'
+export type {
+  OAuthButtonsProps,
+  OAuthButtonsTexts,
+  OAuthProvider,
+} from './components/OAuthButtons.js'
+export { PasswordStrength } from './components/PasswordStrength.js'
+export type { PasswordStrengthProps, PasswordStrengthTexts } from './components/PasswordStrength.js'
+
 // User components (Clerk-like pre-built UI)
 export { UserMenu } from './components/UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './components/UserMenu.js'
