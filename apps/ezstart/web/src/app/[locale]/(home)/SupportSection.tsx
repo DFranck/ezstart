@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
+import { DonationCard, DonationWall } from '@ezstart/pay-sdk'
 import { Div, H2, P, Section } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
@@ -19,31 +19,23 @@ const SupportSection = ({ id }: Props): React.JSX.Element => {
         <H2>{t('title')}</H2>
         <P className="max-w-2xl text-muted-foreground">{t('description')}</P>
 
-        <DonateModal
-          projectId="ezstart"
-          projectName="EZStart"
-          amounts={[5, 10, 25, 50]}
-          currency="EUR"
-          userId={isAuthenticated ? user?._id : undefined}
-          userEmail={isAuthenticated ? user?.email : undefined}
-          userName={isAuthenticated ? user?.username : undefined}
-          texts={{
-            title: t('modal.title'),
-            description: t('modal.description'),
-            amountLabel: t('modal.amountLabel'),
-            customAmountLabel: t('modal.customAmountLabel'),
-            customAmountPlaceholder: t('modal.customAmountPlaceholder'),
-            messageLabel: t('modal.messageLabel'),
-            messagePlaceholder: t('modal.messagePlaceholder'),
-            anonymousLabel: t('modal.anonymousLabel'),
-            donateButton: t('modal.donateButton'),
-            processingButton: t('modal.processingButton'),
-          }}
-        />
+        <Div className="w-full max-w-md">
+          <DonationCard
+            appName="ezstart"
+            projectId="ezstart"
+            projectName="EZStart"
+            presetAmounts={[5, 10]}
+            currency="EUR"
+            allowCustomAmount
+            userId={isAuthenticated ? user?._id : undefined}
+            userEmail={isAuthenticated ? user?.email : undefined}
+            userName={isAuthenticated ? user?.username : undefined}
+          />
+        </Div>
 
         <DonationWall
           projectId="ezstart"
-          limit={6}
+          limit={10}
           className="w-full max-w-3xl"
           texts={{
             loadingText: t('wall.loadingText'),
