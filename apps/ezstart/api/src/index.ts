@@ -11,11 +11,12 @@ import {
   getApiPort,
   createSocketServer,
   createVersionedRouter,
-  addVersionHeader
+  addVersionHeader,
 } from '@ezstart/express-core'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries, setScheduler } from './routes/index.js'
 import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
+import { initializeAIProviders } from './config/ai-providers.js'
 import type { Server as IOServer } from 'socket.io'
 
 const PORT = getApiPort('ezstart')
@@ -61,29 +62,32 @@ Sentry.setupExpressErrorHandler(app)
 
 // Connect to MongoDB and start server
 // Wait for MongoDB to be fully ready before starting scheduler
-connectToMongo('ezstart-monitoring')
+connectToMongo('ezstart')
   .then(() => {
+    // Initialize AI providers after MongoDB is ready
+    initializeAIProviders()
+
     return startServer(app, {
       routes,
       registries,
       serviceName: 'Monitoring API',
       port: PORT,
-      onHttpServerReady: (httpServer) => {
+      onHttpServerReady: httpServer => {
         // Create Socket.IO server with CORS matching Express CORS
         io = createSocketServer(httpServer, {
           corsOrigins: socketCorsOrigins,
-          onConnection: (socket) => {
+          onConnection: socket => {
             logger.info(`📡 [Socket.IO] Client connected from monitoring dashboard`)
 
             socket.on('disconnect', () => {
               logger.info(`📡 [Socket.IO] Client disconnected`)
             })
-          }
+          },
         })
 
         // Pass Socket.IO instance to scheduler for real-time updates
         healthCheckScheduler.setSocketIO(io)
-      }
+      },
     })
   })
   .then(() => {

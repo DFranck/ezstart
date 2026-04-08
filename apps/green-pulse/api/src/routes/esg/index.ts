@@ -21,6 +21,7 @@ import pushActivityDataRouter, { pushActivityDataRegistry } from './pushActivity
 import generateReportRouter, { generateReportRegistry } from './generateReport.js'
 import getReportStatusRouter, { getReportStatusRegistry } from './getReportStatus.js'
 import processEsgDataRouter, { processEsgDataRegistry } from './processEsgData.js'
+import extractEsgDataRouter, { extractEsgDataRegistry } from '../chat/extractEsgData.js'
 
 // Export all registries as an array for OpenAPI documentation
 export const esgRegistries = [
@@ -29,6 +30,7 @@ export const esgRegistries = [
   generateReportRegistry,
   getReportStatusRegistry,
   processEsgDataRegistry,
+  extractEsgDataRegistry,
 ]
 
 // Consolidate all action routers — all ESG routes require authentication
@@ -41,5 +43,6 @@ router
   .use('/reports', generateReportRouter) // POST /reports
   .use('/reports/:jobId/status', getReportStatusRouter) // GET /reports/:jobId/status
   .use('/process', processEsgDataRouter) // POST /process
+  .use('/extract', extractEsgDataRouter) // POST /extract (ESG data extraction from text)
 
 export default router

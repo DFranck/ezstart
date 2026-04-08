@@ -1,5 +1,6 @@
 'use client'
 
+import { AIProvider } from '@ezstart/ai-sdk/client'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { globalThemeCss, greenPulseThemeCss } from '@ezstart/ui/styles'
@@ -22,29 +23,28 @@ export function Providers({
 }) {
   return (
     <QueryProvider>
-      <AuthProvider
-        appName="green-pulse"
-        authMode="localStorage"
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          themeSelector={
-            enableThemeSelector
-              ? {
-                  appName: 'green-pulse',
-                  globalCss: globalThemeCss,
-                  appCss: greenPulseThemeCss,
-                }
-              : undefined
-          }
-        >
-          <NextIntlClientProvider messages={messages} locale={locale} timeZone={timeZone}>
-            {children}
-          </NextIntlClientProvider>
-        </ThemeProvider>
+      <AuthProvider appName="green-pulse" authMode="localStorage">
+        <AIProvider appName="green-pulse">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+            themeSelector={
+              enableThemeSelector
+                ? {
+                    appName: 'green-pulse',
+                    globalCss: globalThemeCss,
+                    appCss: greenPulseThemeCss,
+                  }
+                : undefined
+            }
+          >
+            <NextIntlClientProvider messages={messages} locale={locale} timeZone={timeZone}>
+              {children}
+            </NextIntlClientProvider>
+          </ThemeProvider>
+        </AIProvider>
       </AuthProvider>
     </QueryProvider>
   )

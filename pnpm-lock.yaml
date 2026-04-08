@@ -719,6 +719,9 @@ importers:
 
   apps/ezstart/api:
     dependencies:
+      '@ezstart/ai-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/ai-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
@@ -792,6 +795,9 @@ importers:
 
   apps/ezstart/web:
     dependencies:
+      '@ezstart/ai-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/ai-sdk
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
@@ -1405,25 +1411,31 @@ importers:
 
   packages/ai-sdk:
     dependencies:
-      '@ezstart/logger':
-        specifier: workspace:*
-        version: link:../logger
-      '@google/generative-ai':
-        specifier: ^0.21.0
-        version: 0.21.0
-      openai:
-        specifier: ^4.77.3
-        version: 4.104.0(ws@8.18.3)(zod@3.23.8)
-      zustand:
-        specifier: ^4.5.5
-        version: 4.5.7(@types/react@19.2.7)(react@19.2.3)
-    devDependencies:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
       '@ezstart/fetch-client':
         specifier: workspace:*
         version: link:../fetch-client
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@google/generative-ai':
+        specifier: ^0.21.0
+        version: 0.21.0
+      '@tanstack/react-query':
+        specifier: ^5.0.0
+        version: 5.90.12(react@19.2.3)
+      openai:
+        specifier: ^4.77.3
+        version: 4.104.0(ws@8.18.3)(zod@3.23.8)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+      zustand:
+        specifier: ^4.5.5
+        version: 4.5.7(@types/react@19.2.7)(react@19.2.3)
+    devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

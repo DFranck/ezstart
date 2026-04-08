@@ -45,7 +45,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
       setMessages(prev => [...prev, userMessage])
 
       try {
-        const response = await callApi<{ response: string; extracted_data?: unknown }>('/chat', {
+        const response = await callApi<{ response: string; extracted_data?: unknown }>('/ai/chat', {
           method: 'POST',
           body: {
             message: content,
@@ -53,7 +53,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
             conversation_id: options.conversationId,
             extract_esg: options.extractData,
           },
-          appName: options.appName || 'green-pulse',
+          appName: options.appName || 'ezstart',
         })
 
         if (!response.ok || !response.data) throw new Error('Empty response from AI')

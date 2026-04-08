@@ -6,7 +6,8 @@
       "users": "Utilisateurs",
       "ezauth": "EZAuth",
       "ezpay": "EZPay",
-      "monitoring": "Monitoring"
+      "monitoring": "Monitoring",
+      "ai": "IA"
     },
     "users": {
       "searchPlaceholder": "Rechercher par email ou nom d'utilisateur...",

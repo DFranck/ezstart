@@ -10,7 +10,7 @@ import { useAIStore, type AIProviderInfo } from '../store/aiStore.js'
 import { callApi } from '@ezstart/fetch-client'
 import type { AppName } from '@ezstart/config/urls'
 
-export function useProviders(appName: AppName = 'green-pulse') {
+export function useProviders(appName: AppName = 'ezstart') {
   const { providers, setProviders, selectedProvider, setSelectedProvider } = useAIStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -25,7 +25,7 @@ export function useProviders(appName: AppName = 'green-pulse') {
       setLoading(true)
       setError(null)
       try {
-        const response = await callApi<AIProviderInfo[]>('/providers', {
+        const response = await callApi<AIProviderInfo[]>('/ai/providers', {
           appName,
           logLevel: 'errors',
         })
