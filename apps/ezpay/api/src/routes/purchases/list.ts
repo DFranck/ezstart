@@ -53,7 +53,7 @@ const getPurchasesHandler = async (req: Request, res: Response) => {
     const { userId, projectId, limit, offset } = parsed.data
 
     const query: Record<string, unknown> = {
-      type: { $in: ['purchase', 'subscription'] },
+      type: 'purchase',
     }
 
     // Non-admin users can only see their own purchases

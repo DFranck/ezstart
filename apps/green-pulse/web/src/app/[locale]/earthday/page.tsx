@@ -149,9 +149,7 @@ function EarthDayContent() {
       {/* Footer */}
       <Div className="w-full border-t border-border/40 bg-muted/30">
         <Div className="max-w-2xl mx-auto px-4 py-6 flex flex-col items-center gap-3 text-center">
-          <P className="text-xs text-muted-foreground leading-relaxed">
-            {t('footer.eventCredit')}
-          </P>
+          <P className="text-xs text-muted-foreground leading-relaxed">{t('footer.eventCredit')}</P>
           <Div className="h-px w-12 bg-border" />
           <P className="text-xs text-muted-foreground">{t('footer.poweredBy')}</P>
           <Link
