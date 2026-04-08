@@ -1,64 +1,64 @@
 {
   "earthday": {
     "meta": {
-      "title": "GreenPulse.AI tai Earth Day 2026",
-      "description": "Danh gia ESG mien phi bang AI cho doanh nghiep SME Viet Nam. San sang tiep can tai chinh xanh trong vai phut."
+      "title": "GreenPulse.AI à Earth Day 2026",
+      "description": "Évaluation ESG gratuite par IA pour les PME vietnamiennes. Prêt pour la finance verte en quelques minutes."
     },
     "header": {
-      "cobranding": "Doi tac cong nghe tai Sustainable Future 10 & Earth Day 2026"
+      "cobranding": "Partenaire technologique à Sustainable Future 10 & Earth Day 2026"
     },
     "hero": {
-      "title": "Doanh nghiep cua ban san sang tiep can tai chinh xanh chua?",
-      "subtitle": "Danh gia ESG mien phi bang AI trong 5 phut"
+      "title": "Votre entreprise est-elle prête pour la finance verte ?",
+      "subtitle": "Évaluation ESG gratuite par IA en 5 minutes"
     },
     "valueProps": {
       "assessment": {
-        "title": "Danh gia ESG mien phi bang AI",
-        "description": "Nhan diem san sang ESG trong vai phut voi tro ly AI GP.A — khong can dang ky."
+        "title": "Évaluation ESG gratuite par IA",
+        "description": "Obtenez votre score de préparation ESG en quelques minutes avec notre assistant IA GP.A — sans inscription."
       },
       "roadmap": {
-        "title": "Lo trinh tiep can tin dung xanh",
-        "description": "Hieu chinh xac ngan hang can gi de phe duyet don vay xanh cua ban."
+        "title": "Feuille de route crédit vert",
+        "description": "Comprenez exactement ce dont les banques ont besoin pour approuver votre demande de prêt vert."
       },
       "reporting": {
-        "title": "Bao cao ESG tu dong",
-        "description": "Tao bao cao tuan thu GRI, SFDR va CSRD tu dong tu du lieu doanh nghiep."
+        "title": "Reporting ESG automatisé",
+        "description": "Générez des rapports conformes GRI, SFDR et CSRD automatiquement à partir de vos données."
       }
     },
     "cta": {
-      "start": "Bat dau mien phi voi GP.A",
+      "start": "Commencer gratuitement avec GP.A",
       "promo": {
-        "label": "Ma uu dai",
-        "applied": "Ma EARTHDAY2026 da duoc ap dung — 1 thang Pro mien phi khi ra mat!",
-        "default": "Nhap ma EARTHDAY2026 de nhan 1 thang Pro mien phi khi ra mat"
+        "label": "Code promo",
+        "applied": "Code EARTHDAY2026 appliqué — 1 mois Pro gratuit au lancement !",
+        "default": "Entrez le code EARTHDAY2026 pour 1 mois Pro gratuit au lancement"
       }
     },
     "signup": {
       "title": "Rejoignez le mouvement vert",
-      "subtitle": "Cr\u00e9ez votre compte gratuit en quelques secondes",
+      "subtitle": "Créez votre compte gratuit en quelques secondes",
       "username": "Nom d'utilisateur",
       "usernamePlaceholder": "Choisissez un nom d'utilisateur",
       "email": "Email",
       "emailPlaceholder": "votre@email.com",
       "submit": "Rejoindre",
-      "submitting": "Cr\u00e9ation du compte...",
-      "successToast": "Compte cr\u00e9\u00e9 ! Bienvenue.",
-      "fallbackError": "Une erreur est survenue. Veuillez r\u00e9essayer.",
+      "submitting": "Création du compte...",
+      "successToast": "Compte créé ! Bienvenue.",
+      "fallbackError": "Une erreur est survenue. Veuillez réessayer.",
       "required": "Ce champ est obligatoire",
       "invalidEmail": "Veuillez entrer un email valide"
     },
     "welcome": {
-      "justJoined": "Chao mung ban!",
-      "back": "Chao mung tro lai!",
-      "installHint": "Cai dat ung dung de truy cap nhanh va ho tro ngoai tuyen.",
-      "installDescription": "Them GreenPulse.AI vao man hinh chinh de trai nghiem tot nhat.",
-      "installButton": "Cai dat ung dung",
-      "laterButton": "De sau"
+      "justJoined": "Bienvenue !",
+      "back": "Bon retour !",
+      "installHint": "Installez l'application pour un accès rapide et le mode hors ligne.",
+      "installDescription": "Ajoutez GreenPulse.AI à votre écran d'accueil pour la meilleure expérience.",
+      "installButton": "Installer l'application",
+      "laterButton": "Plus tard"
     },
     "footer": {
-      "contact": "Lien he",
-      "eventCredit": "Trinh bay tai Sustainable Future 10 & Earth Day Vietnam 2026 — to chuc boi Green Leaders Community (GLC)",
-      "poweredBy": "GreenPulse.AI — AI cho doanh nghiep SME ben vung tai Dong Nam A"
+      "contact": "Contact",
+      "eventCredit": "Présenté lors de Sustainable Future 10 & Earth Day Vietnam 2026 — organisé par Green Leaders Community (GLC)",
+      "poweredBy": "GreenPulse.AI — IA pour les PME durables en Asie du Sud-Est"
     }
   }
 }
