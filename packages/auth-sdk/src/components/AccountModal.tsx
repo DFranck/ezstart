@@ -271,7 +271,7 @@ export function AccountModal({
       isOpen={open}
       onClose={onClose}
       size="xl"
-      scrollBehavior="inside"
+      scrollBehavior="outside"
       title={
         <Div className="flex items-center gap-2">
           {/* Mobile burger in title */}
