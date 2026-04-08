@@ -35,6 +35,13 @@ export function ConversationItem({
   const inputRef = useRef<HTMLInputElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
+  // Sync editedTitle when title prop changes (only when not editing)
+  useEffect(() => {
+    if (!isEditing) {
+      setEditedTitle(title)
+    }
+  }, [title, isEditing])
+
   // Focus input when entering edit mode
   useEffect(() => {
     if (isEditing && inputRef.current) {

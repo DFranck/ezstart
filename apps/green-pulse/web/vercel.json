@@ -14,6 +14,17 @@
   },
   "redirects": [
     {
+      "source": "/:path*",
+      "destination": "https://www.ai-greenpulse.com/:path*",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "green-pulse-web.vercel.app"
+        }
+      ]
+    },
+    {
       "source": "/",
       "destination": "/en",
       "statusCode": 302

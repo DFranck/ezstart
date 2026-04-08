@@ -212,6 +212,12 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 - **Problem:** `WaitlistManagement.tsx` line 95: `// TODO: If user exists, remove beta-tester role`. Role removal on rejection not implemented.
 - **Files:** `web/src/app/[locale]/(views)/admin/components/WaitlistManagement.tsx`
 
+### GP-046: Conversations & messages pagination (frontend)
+
+- **Status:** `planned`
+- **Problem:** API already supports pagination (`limit/offset/meta`) but frontend loads all conversations at once (max 20) and all messages in a single fetch. Need: (1) paginated/infinite scroll for conversation list, (2) paginated message loading per conversation (oldest first, load more on scroll up). Both via React Query with proper cache keys.
+- **Files:** `web/src/hooks/useConversations.ts`, `web/src/components/lia/LiaThread.tsx`
+
 ### GP-045: ESG extract_esg feature disabled
 
 - **Status:** `planned`
@@ -478,16 +484,18 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 - **Description:** Update GP.A chat welcome message and initial suggestions to be relevant for Earth Day conference attendees arriving via QR code. The current generic message ("Ask GP.A anything about sustainability") must be replaced.
 - **New welcome message (VN):**
   > "Xin chao! Toi la GP.A — tro ly AI cua GreenPulse. Toi giup doanh nghiep SME danh gia muc do san sang ESG va kha nang tiep can tai chinh xanh. Ban co the hoi toi ve:
+  >
   > - Chi phi nang luong va cach giam thieu
   > - Yeu cau ESG cho xuat khau sang EU
   > - Dieu kien vay tin dung xanh
-  > Hay bat dau bang cau hoi don gian: nganh nghe cua ban la gi?"
+  >   Hay bat dau bang cau hoi don gian: nganh nghe cua ban la gi?"
 - **New welcome message (EN):**
   > "Hi! I'm GP.A — GreenPulse's AI assistant. I help SMEs assess their ESG readiness and green finance eligibility. You can ask me about:
+  >
   > - Energy costs and reduction strategies
   > - ESG requirements for EU exports
   > - Green loan eligibility conditions
-  > Let's start simple: what industry is your business in?"
+  >   Let's start simple: what industry is your business in?"
 - **New suggestion chips:**
   - VN: "Chi phi nang luong anh huong the nao?" / "Tin dung xanh la gi?" / "Yeu cau ESG xuat khau EU"
   - EN: "How do energy costs affect me?" / "What is green credit?" / "EU export ESG requirements"
@@ -551,16 +559,18 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 > Updated 2026-04-07. Conference Sprint 0 inserted as top priority. BIDV/ICED on hold (silence radio). Focus: Earth Day acquisition -> investor demo readiness -> V1 deployment.
 
 ### Sprint 0 — Earth Day Conference (Apr 7-16, HARD DEADLINE Apr 17)
-| Ticket | Description | Owner | Estimate | Deadline |
-|--------|-------------|-------|----------|----------|
-| GP-200 | Landing page `/earthday` mobile-first VN/EN | Franck | 2-3 days | Apr 14 |
-| GP-201 | Promo code system + Lead model | Franck | 1 day | Apr 14 |
-| GP-202 | GP.A welcome message update VN/EN | Franck | 0.5 day | Apr 14 |
-| GP-006 | RequireRole fix on chat (users must access chat!) | Franck | 0.5 day | Apr 13 |
-| GP-203 | Conference slide with QR | Amber+Claude | 1 round | Apr 15 |
-| GP-204 | Roll-up/A2 banner design | Amber+Claude | 1 round | Apr 14 (print) |
+
+| Ticket | Description                                       | Owner        | Estimate | Deadline       |
+| ------ | ------------------------------------------------- | ------------ | -------- | -------------- |
+| GP-200 | Landing page `/earthday` mobile-first VN/EN       | Franck       | 2-3 days | Apr 14         |
+| GP-201 | Promo code system + Lead model                    | Franck       | 1 day    | Apr 14         |
+| GP-202 | GP.A welcome message update VN/EN                 | Franck       | 0.5 day  | Apr 14         |
+| GP-006 | RequireRole fix on chat (users must access chat!) | Franck       | 0.5 day  | Apr 13         |
+| GP-203 | Conference slide with QR                          | Amber+Claude | 1 round  | Apr 15         |
+| GP-204 | Roll-up/A2 banner design                          | Amber+Claude | 1 round  | Apr 14 (print) |
 
 **Acceptance criteria Sprint 0:**
+
 - [ ] QR code scanned on phone -> lands on `/earthday` in <2s
 - [ ] Registration form works, stores lead with `source: earthday2026` and `promoCode: EARTHDAY2026`
 - [ ] After registration, user can access GP.A chat with green-finance-relevant welcome
@@ -568,46 +578,51 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 - [ ] Chat page accessible without auth issues (GP-006 resolved)
 
 ### Sprint 1 — Security & Post-Conference Foundation (Weeks 3-4)
-| Ticket | Description | Why |
-|--------|-------------|-----|
-| GP-002, GP-004, GP-005, GP-042 | Remaining auth/access control fixes | Cannot scale with open security holes |
-| GP-043 | Consolidate chat v1/v2 | Clean foundation before adding features |
-| GP-024 + GP-100 | Energy vulnerability prompt for Plan 1 | Convert Earth Day leads into engaged users |
-| GP-205 | Lead follow-up system | Nurture Earth Day contacts |
+
+| Ticket                         | Description                            | Why                                        |
+| ------------------------------ | -------------------------------------- | ------------------------------------------ |
+| GP-002, GP-004, GP-005, GP-042 | Remaining auth/access control fixes    | Cannot scale with open security holes      |
+| GP-043                         | Consolidate chat v1/v2                 | Clean foundation before adding features    |
+| GP-024 + GP-100                | Energy vulnerability prompt for Plan 1 | Convert Earth Day leads into engaged users |
+| GP-205                         | Lead follow-up system                  | Nurture Earth Day contacts                 |
 
 ### Sprint 2 — Plan 2 Core: ESG Dashboard + Energy (Weeks 5-8)
-| Ticket | Description | Why |
-|--------|-------------|-----|
-| GP-059 | ESG dashboard web UI | Biggest gap — blocker for everything Plan 2+ |
-| GP-041 | ESG webhook handlers | Backend needed for dashboard data |
-| GP-045 | Re-enable extract_esg | Prerequisite for structured data collection |
-| GP-101 | Energy intensity mapping | Differentiator in energy crisis context |
-| GP-052 | Form data export (CSV, PDF) | Needed for banking partner sharing |
+
+| Ticket | Description                 | Why                                          |
+| ------ | --------------------------- | -------------------------------------------- |
+| GP-059 | ESG dashboard web UI        | Biggest gap — blocker for everything Plan 2+ |
+| GP-041 | ESG webhook handlers        | Backend needed for dashboard data            |
+| GP-045 | Re-enable extract_esg       | Prerequisite for structured data collection  |
+| GP-101 | Energy intensity mapping    | Differentiator in energy crisis context      |
+| GP-052 | Form data export (CSV, PDF) | Needed for banking partner sharing           |
 
 ### Sprint 3 — Compliance & Green Finance (Weeks 9-12)
-| Ticket | Description | Why |
-|--------|-------------|-----|
-| GP-102 | ETS supply chain exposure | Market timing with Decree 29/2026 |
-| GP-106 | EU CBAM export readiness | Affects 50K export SMEs |
+
+| Ticket | Description                    | Why                                               |
+| ------ | ------------------------------ | ------------------------------------------------- |
+| GP-102 | ETS supply chain exposure      | Market timing with Decree 29/2026                 |
+| GP-106 | EU CBAM export readiness       | Affects 50K export SMEs                           |
 | GP-103 | Green loan eligibility scoring | Core BIDV value proposition (when they re-engage) |
-| GP-053 | Multi-language forms (EN/VI) | Full i18n system beyond hardcoded strings |
-| GP-057 | Additional form field types | Needed for assessment wizards |
+| GP-053 | Multi-language forms (EN/VI)   | Full i18n system beyond hardcoded strings         |
+| GP-057 | Additional form field types    | Needed for assessment wizards                     |
 
 ### Sprint 4 — White-label & Blockchain Prep (Weeks 13-16)
-| Ticket | Description | Why |
-|--------|-------------|-----|
-| GP-108 | White-label branding engine | Banking partner deployment |
+
+| Ticket | Description                        | Why                                    |
+| ------ | ---------------------------------- | -------------------------------------- |
+| GP-108 | White-label branding engine        | Banking partner deployment             |
 | GP-104 | Blockchain credential architecture | V2 differentiator, NDAChain-compatible |
-| GP-105 | Legal framework for credentials | Parallel track with tech |
-| GP-058 | Vocal mode | Rural SME accessibility |
+| GP-105 | Legal framework for credentials    | Parallel track with tech               |
+| GP-058 | Vocal mode                         | Rural SME accessibility                |
 
 ### Sprint 5 — Scale & Monetization (Weeks 17+)
-| Ticket | Description | Why |
-|--------|-------------|-----|
+
+| Ticket | Description             | Why                                  |
+| ------ | ----------------------- | ------------------------------------ |
 | GP-107 | Carbon credit readiness | ETS trading launch on Hanoi Exchange |
-| GP-055 | Collaboration features | Plan 3 multi-user |
-| GP-054 | Form versioning | Audit trail for compliance |
-| GP-071 | Test coverage | Pre-scaling stability |
+| GP-055 | Collaboration features  | Plan 3 multi-user                    |
+| GP-054 | Form versioning         | Audit trail for compliance           |
+| GP-071 | Test coverage           | Pre-scaling stability                |
 
 ---
 

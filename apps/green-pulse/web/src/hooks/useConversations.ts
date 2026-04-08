@@ -49,7 +49,7 @@ export function useConversations() {
 
       const response = await callApi<{
         conversations: Array<{
-          _id: string
+          id: string
           title?: string
           preview?: string
           createdAt: string
@@ -65,7 +65,7 @@ export function useConversations() {
       if (response.data?.conversations) {
         return response.data.conversations.map(
           (conv): ConversationListItem => ({
-            id: conv._id,
+            id: conv.id,
             title: conv.title || 'Untitled',
             preview: conv.preview,
             createdAt: new Date(conv.createdAt),

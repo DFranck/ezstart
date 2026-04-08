@@ -203,7 +203,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 108. [ ] Theme CSS scoping — `[data-app]` selector au lieu de `:root` pour éviter conflits `--brand` quand tous les thèmes sont chargés simultanément.
 109. [ ] Chat UX responsive — Fix sidebar mobile, conversation selection, responsive layout du ThreadLayout. Passe UX complète.
 110. [ ] Green-pulse chat locale — L'IA doit répondre dans la langue de la locale de l'utilisateur (déjà fait côté frontend, à centraliser dans ezstart-api).
-111. [ ] DEPLOY: Railway ezauth-api — Ajouter `--filter @ezstart/fetch-client --filter @ezstart/email-service` au build command. Redeploy.
+111. [x] DEPLOY: Railway ezauth-api — Ajouter `--filter @ezstart/fetch-client --filter @ezstart/email-service` au build command. Redeploy. (done 2026-04-08)
 
 #### P3 — DevOps / Testing
 

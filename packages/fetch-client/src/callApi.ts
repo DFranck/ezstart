@@ -181,14 +181,9 @@ export async function callApi<T = unknown>(
     const apiUrl = getApiUrl(appName)
 
     if (isLocalhost) {
-      // On localhost, always inject token for same-origin API routes (e.g. Next.js API routes)
-      // since httpOnly cookies from other ports (EZAuth) are not available
-      const apiHost = apiUrl ? new URL(apiUrl).hostname : ''
-      const apiPort = apiUrl ? new URL(apiUrl).port : ''
-      const currentPort = window.location.port
-      if (apiHost === currentHost && apiPort === currentPort) {
-        finalAccessToken = getAccessTokenFromStore(getToken) || undefined
-      }
+      // On localhost, always inject token since httpOnly cookies don't work across ports
+      // (e.g. web on :6161, API on :6160)
+      finalAccessToken = getAccessTokenFromStore(getToken) || undefined
     } else {
       // In production, inject token for cross-domain requests
       const apiHost = new URL(apiUrl).hostname
@@ -277,9 +272,8 @@ export async function callApi<T = unknown>(
 
     const duration = Date.now() - startTime
 
-    // Parse response body
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let json: any = null
+    // Parse response body (type narrowed via isStandardResponse checks below)
+    let json: Record<string, unknown> | null = null
     try {
       json = await res.json()
     } catch {
@@ -297,7 +291,7 @@ export async function callApi<T = unknown>(
         console.groupEnd()
       }
 
-      if (isStandardResponse) {
+      if (isStandardResponse && json) {
         return {
           ok: true as const,
           status: res.status,
@@ -341,12 +335,17 @@ export async function callApi<T = unknown>(
             signal,
           })
 
-          let retryJson: any = null
-          try { retryJson = await retryRes.json() } catch { retryJson = null }
+          let retryJson: Record<string, unknown> | null = null
+          try {
+            retryJson = await retryRes.json()
+          } catch {
+            retryJson = null
+          }
 
           if (retryRes.ok) {
-            const isRetryStandard = retryJson && typeof retryJson === 'object' && 'success' in retryJson
-            if (isRetryStandard) {
+            const isRetryStandard =
+              retryJson && typeof retryJson === 'object' && 'success' in retryJson
+            if (isRetryStandard && retryJson) {
               return {
                 ok: true as const,
                 status: retryRes.status,
@@ -356,7 +355,12 @@ export async function callApi<T = unknown>(
                 raw: retryJson,
               }
             }
-            return { ok: true as const, status: retryRes.status, url: retryRes.url, data: retryJson as T }
+            return {
+              ok: true as const,
+              status: retryRes.status,
+              url: retryRes.url,
+              data: retryJson as T,
+            }
           }
         }
       }
@@ -378,7 +382,7 @@ export async function callApi<T = unknown>(
         console.groupEnd()
       }
 
-      if (isStandardResponse) {
+      if (isStandardResponse && json) {
         return {
           ok: false as const,
           status: res.status,
