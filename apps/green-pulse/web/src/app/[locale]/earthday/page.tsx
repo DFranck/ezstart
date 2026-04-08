@@ -1,5 +1,6 @@
 'use client'
 
+import { QuickSignUpForm, SignedIn, SignedOut } from '@ezstart/auth-sdk'
 import {
   Button,
   Card,
@@ -10,6 +11,7 @@ import {
   Icon,
   type KnownIconName,
   P,
+  PWAInstallPrompt,
   Section,
   Span,
 } from '@ezstart/ui/components'
@@ -17,7 +19,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 const VALUE_PROPS: { icon: KnownIconName; key: 'assessment' | 'roadmap' | 'reporting' }[] = [
   { icon: 'lucide:Bot', key: 'assessment' },
@@ -28,6 +30,7 @@ const VALUE_PROPS: { icon: KnownIconName; key: 'assessment' | 'roadmap' | 'repor
 function EarthDayContent() {
   const t = useTranslations('earthday')
   const searchParams = useSearchParams()
+  const [signupSuccess, setSignupSuccess] = useState(false)
 
   useEffect(() => {
     const promo = searchParams.get('promo')
@@ -76,27 +79,20 @@ function EarthDayContent() {
         </Div>
       </Div>
 
-      {/* Hero */}
-      <Section className="max-w-2xl mx-auto px-4 pt-8 pb-6">
-        <Div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6 sm:p-8">
-          <Div
-            className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-60"
-            aria-hidden="true"
-          />
-          <Div className="relative z-10 flex flex-col items-center text-center gap-4">
-            <Div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center">
-              <Icon name="lucide:Leaf" size={28} className="text-primary" />
-            </Div>
-            <H1 className="text-2xl sm:text-3xl font-bold leading-tight text-foreground">
-              {t('hero.title')}
-            </H1>
-            <P className="text-base text-muted-foreground max-w-md">{t('hero.subtitle')}</P>
-          </Div>
+      {/* Hero with background image */}
+      <Div
+        className="relative min-h-[60vh] flex items-center justify-center bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/earthday-hero.jpg')" }}
+      >
+        <Div className="absolute inset-0 bg-black/50" />
+        <Div className="relative z-10 text-center px-4 py-16 max-w-2xl mx-auto">
+          <H1 className="text-3xl sm:text-5xl font-bold text-white">{t('hero.title')}</H1>
+          <P className="text-lg text-white/80 mt-4">{t('hero.subtitle')}</P>
         </Div>
-      </Section>
+      </Div>
 
       {/* Value Props */}
-      <Section className="max-w-2xl mx-auto px-4 pb-6">
+      <Section className="max-w-2xl mx-auto px-4 py-8">
         <Div className="grid gap-4">
           {VALUE_PROPS.map(({ icon, key }) => (
             <Card key={key} variant="default" className="border-border/50">
@@ -119,7 +115,7 @@ function EarthDayContent() {
       </Section>
 
       {/* Promo Badge */}
-      <Section className="max-w-2xl mx-auto px-4 pb-4">
+      <Section className="max-w-2xl mx-auto px-4 pb-6">
         <Div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-center">
           <Div className="flex items-center justify-center gap-2 mb-1">
             <Icon name="lucide:Gift" size={16} className="text-primary" />
@@ -133,17 +129,62 @@ function EarthDayContent() {
         </Div>
       </Section>
 
-      {/* CTA */}
-      <Section className="max-w-2xl mx-auto px-4 pb-10">
-        <Link href="/chat" className="block">
-          <Button
-            size="lg"
-            className="w-full text-base font-semibold py-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
-          >
-            {t('cta.start')}
-            <Icon name="lucide:ArrowRight" size={20} className="ml-2" />
-          </Button>
-        </Link>
+      {/* Auth section: QuickSignUp or Welcome */}
+      <Section className="max-w-2xl mx-auto px-4 pb-8">
+        <SignedOut>
+          <Card variant="floating" className="overflow-hidden">
+            <CardContent className="p-6 sm:p-8">
+              <Div className="text-center mb-6">
+                <Icon name="lucide:UserPlus" size={32} className="text-primary mx-auto mb-3" />
+                <H2 className="text-xl font-bold text-foreground">{t('signup.title')}</H2>
+                <P className="text-sm text-muted-foreground mt-1">{t('signup.subtitle')}</P>
+              </Div>
+              <QuickSignUpForm
+                appName="green-pulse"
+                onSuccess={() => setSignupSuccess(true)}
+                texts={{
+                  username: t('signup.username'),
+                  usernamePlaceholder: t('signup.usernamePlaceholder'),
+                  email: t('signup.email'),
+                  emailPlaceholder: t('signup.emailPlaceholder'),
+                  submit: t('signup.submit'),
+                  submitting: t('signup.submitting'),
+                }}
+              />
+            </CardContent>
+          </Card>
+        </SignedOut>
+
+        <SignedIn>
+          <Card variant="floating" className="overflow-hidden">
+            <CardContent className="p-6 sm:p-8 text-center">
+              <Icon name="lucide:PartyPopper" size={40} className="text-primary mx-auto mb-4" />
+              <H2 className="text-xl font-bold text-foreground mb-2">
+                {signupSuccess ? t('welcome.justJoined') : t('welcome.back')}
+              </H2>
+              <P className="text-sm text-muted-foreground mb-6">{t('welcome.installHint')}</P>
+
+              <Div className="flex flex-col gap-3">
+                <PWAInstallPrompt
+                  appName="GreenPulse.AI"
+                  description={t('welcome.installDescription')}
+                  installButtonText={t('welcome.installButton')}
+                  laterButtonText={t('welcome.laterButton')}
+                />
+
+                <Link href="/chat" className="block">
+                  <Button
+                    size="lg"
+                    className="w-full text-base font-semibold py-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                  >
+                    {t('cta.start')}
+                    <Icon name="lucide:ArrowRight" size={20} className="ml-2" />
+                  </Button>
+                </Link>
+              </Div>
+            </CardContent>
+          </Card>
+        </SignedIn>
       </Section>
 
       {/* Footer */}

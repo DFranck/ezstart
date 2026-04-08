@@ -33,6 +33,24 @@
         "default": "Nhập mã EARTHDAY2026 để nhận 1 tháng Pro miễn phí khi ra mắt"
       }
     },
+    "signup": {
+      "title": "Tham gia phong tr\u00e0o xanh",
+      "subtitle": "T\u1ea1o t\u00e0i kho\u1ea3n mi\u1ec5n ph\u00ed trong v\u00e0i gi\u00e2y",
+      "username": "T\u00ean ng\u01b0\u1eddi d\u00f9ng",
+      "usernamePlaceholder": "Ch\u1ecdn t\u00ean ng\u01b0\u1eddi d\u00f9ng",
+      "email": "Email",
+      "emailPlaceholder": "email@cuaban.com",
+      "submit": "Tham gia ngay",
+      "submitting": "\u0110ang t\u1ea1o t\u00e0i kho\u1ea3n..."
+    },
+    "welcome": {
+      "justJoined": "Ch\u00e0o m\u1eebng b\u1ea1n!",
+      "back": "Ch\u00e0o m\u1eebng tr\u1edf l\u1ea1i!",
+      "installHint": "C\u00e0i \u0111\u1eb7t \u1ee9ng d\u1ee5ng \u0111\u1ec3 truy c\u1eadp nhanh v\u00e0 h\u1ed7 tr\u1ee3 ngo\u1ea1i tuy\u1ebfn.",
+      "installDescription": "Th\u00eam GreenPulse.AI v\u00e0o m\u00e0n h\u00ecnh ch\u00ednh \u0111\u1ec3 tr\u1ea3i nghi\u1ec7m t\u1ed1t nh\u1ea5t.",
+      "installButton": "C\u00e0i \u0111\u1eb7t \u1ee9ng d\u1ee5ng",
+      "laterButton": "\u0110\u1ec3 sau"
+    },
     "footer": {
       "contact": "Liên hệ",
       "eventCredit": "Trình bày tại Sustainable Future 10 & Earth Day Vietnam 2026 — tổ chức bởi Green Leaders Community (GLC)",

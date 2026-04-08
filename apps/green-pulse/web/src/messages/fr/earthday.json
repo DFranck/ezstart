@@ -33,6 +33,24 @@
         "default": "Nhap ma EARTHDAY2026 de nhan 1 thang Pro mien phi khi ra mat"
       }
     },
+    "signup": {
+      "title": "Tham gia phong trao xanh",
+      "subtitle": "Tao tai khoan mien phi trong vai giay",
+      "username": "Ten nguoi dung",
+      "usernamePlaceholder": "Chon ten nguoi dung",
+      "email": "Email",
+      "emailPlaceholder": "email@cuaban.com",
+      "submit": "Tham gia ngay",
+      "submitting": "Dang tao tai khoan..."
+    },
+    "welcome": {
+      "justJoined": "Chao mung ban!",
+      "back": "Chao mung tro lai!",
+      "installHint": "Cai dat ung dung de truy cap nhanh va ho tro ngoai tuyen.",
+      "installDescription": "Them GreenPulse.AI vao man hinh chinh de trai nghiem tot nhat.",
+      "installButton": "Cai dat ung dung",
+      "laterButton": "De sau"
+    },
     "footer": {
       "contact": "Lien he",
       "eventCredit": "Trinh bay tai Sustainable Future 10 & Earth Day Vietnam 2026 — to chuc boi Green Leaders Community (GLC)",

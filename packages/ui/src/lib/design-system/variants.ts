@@ -1148,7 +1148,7 @@ export const tagVariants = {
     variants: asideVariantConfig,
     defaultVariants: DEFAULT_ASIDE_VARIANTS,
   }),
-  main: cva('w-full flex-1 flex flex-col items-center', {
+  main: cva('w-full flex-1 flex flex-col items-center pb-12 md:pb-16', {
     variants: mainVariantConfig,
     defaultVariants: DEFAULT_MAIN_VARIANTS,
   }),
