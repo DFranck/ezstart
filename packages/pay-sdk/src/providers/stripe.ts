@@ -43,7 +43,10 @@ export interface StripeInstance {
   }
   subscriptions: {
     cancel(id: string): Promise<{ status: string }>
-    update(id: string, params: Record<string, unknown>): Promise<{ status: string; cancel_at_period_end: boolean; current_period_end: number }>
+    update(
+      id: string,
+      params: Record<string, unknown>
+    ): Promise<{ status: string; cancel_at_period_end: boolean; current_period_end: number }>
   }
   billingPortal: {
     sessions: {
@@ -156,9 +159,7 @@ export class StripeProvider implements IPaymentProvider {
       metadata: options.metadata,
       ...(discountsParam ? { discounts: discountsParam } : {}),
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
-      ...(options.trialDays
-        ? { subscription_data: { trial_period_days: options.trialDays } }
-        : {}),
+      ...(options.trialDays ? { subscription_data: { trial_period_days: options.trialDays } } : {}),
     })
 
     return { sessionId: session.id, url: session.url }
@@ -286,6 +287,7 @@ const STRIPE_EVENT_MAP: Record<string, WebhookEventType> = {
   'customer.subscription.updated': 'subscription.updated',
   'customer.subscription.deleted': 'subscription.deleted',
   'invoice.payment_failed': 'invoice.payment_failed',
+  'invoice.payment_succeeded': 'invoice.payment_succeeded',
 }
 
 function mapStripeEvent(event: StripeWebhookEvent): WebhookEvent {
@@ -324,6 +326,23 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
       return {
         subscriptionId: (obj.subscription as string) ?? null,
       }
+    case 'invoice.payment_succeeded': {
+      const sub = obj.subscription
+      return {
+        subscriptionId:
+          typeof sub === 'string'
+            ? sub
+            : (((sub as Record<string, unknown>)?.id as string) ?? null),
+        amount: obj.amount_paid as number | undefined,
+        currency: obj.currency as string | undefined,
+        billingReason: obj.billing_reason as string | undefined,
+        periodEnd: obj.period_end
+          ? new Date((obj.period_end as number) * 1000).toISOString()
+          : undefined,
+        customerEmail: obj.customer_email as string | undefined,
+        customerName: obj.customer_name as string | undefined,
+      }
+    }
     default:
       return {}
   }

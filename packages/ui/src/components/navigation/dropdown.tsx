@@ -205,7 +205,7 @@ export function Dropdown({
           variant={'outline'}
           layout={'menu'}
           className={cn(
-            'absolute z-50 focus:outline-none bg-background shadow-lg',
+            'absolute z-50 focus:outline-none bg-background shadow-lg p-1',
             dropdownPositionConfig.align[align],
             dropdownPositionConfig.side[side],
             fullWidth && 'w-full',
@@ -213,33 +213,31 @@ export function Dropdown({
           )}
         >
           {items.map(({ label, onSelect, value, disabled, divider, icon }, i) => (
-            <div key={value}>
-              <Button
-                variant={'ghost'}
-                asChild
-                className={cn(
-                  'w-full justify-start mb-0',
-                  disabled && 'opacity-50 cursor-not-allowed',
-                  focusedIndex === i && 'bg-accent'
-                )}
+            <LI key={value} className="list-none">
+              <button
+                type="button"
                 role="menuitem"
-                size={'sm'}
+                tabIndex={-1}
+                disabled={disabled}
+                className={cn(
+                  'w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer transition-colors',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  'focus-visible:outline-none focus-visible:bg-accent',
+                  disabled && 'opacity-50 !cursor-not-allowed pointer-events-none',
+                  focusedIndex === i && 'bg-accent text-accent-foreground'
+                )}
                 onClick={() => {
                   if (!disabled) {
                     onSelect?.()
                     setOpen(false)
                   }
                 }}
-                tabIndex={-1}
-                disabled={disabled}
               >
-                <LI className="flex items-center gap-2">
-                  {icon && <span className="shrink-0">{icon}</span>}
-                  <span>{label}</span>
-                </LI>
-              </Button>
+                {icon && <span className="shrink-0">{icon}</span>}
+                <span className="flex-1 text-left">{label}</span>
+              </button>
               {divider && <div className="h-px bg-border my-1" role="separator" />}
-            </div>
+            </LI>
           ))}
         </UL>
       )}

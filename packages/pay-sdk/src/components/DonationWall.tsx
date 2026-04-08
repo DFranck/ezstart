@@ -1,8 +1,10 @@
 'use client'
 
-import { Card, CardContent, Icon } from '@ezstart/ui/components'
+import { useMemo } from 'react'
+import { Div, Icon, InfiniteMovingCards, P, Span } from '@ezstart/ui/components'
 import { useDonations } from '../hooks/useDonations.js'
 import { formatCurrency } from '../utils/format-currency.js'
+import type { Payment } from '../types.js'
 
 export interface DonationWallTexts {
   loadingText?: string
@@ -16,20 +18,69 @@ interface DonationWallProps {
   limit?: number
   className?: string
   texts?: DonationWallTexts
-  // Legacy props for backward compatibility
   noDonationsText?: string
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) {
+    return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase()
+  }
+  return name.slice(0, 2).toUpperCase()
+}
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function DonationPill({ donation, anonymousLabel }: { donation: Payment; anonymousLabel: string }) {
+  const isAnonymous = donation.isAnonymous || !donation.customerName
+  const name = isAnonymous ? anonymousLabel : donation.customerName!
+  const message = donation.metadata?.message as string | undefined
+
+  return (
+    <Div
+      className={`flex flex-col gap-1 px-3 py-2 bg-card border shrink-0 ${
+        message ? 'rounded-xl' : 'rounded-full'
+      }`}
+    >
+      <Div className={`flex items-center gap-2`}>
+        <Div className={`w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center`}>
+          {isAnonymous ? (
+            <Icon name="lucide:User" size={14} className={`text-primary`} />
+          ) : (
+            <Span className={`text-xs font-bold text-primary`}>{getInitials(name)}</Span>
+          )}
+        </Div>
+        <Span className={`text-sm font-medium whitespace-nowrap`}>{name}</Span>
+        {donation.amount > 0 && (
+          <Span className={`text-sm font-bold text-primary whitespace-nowrap`}>
+            {formatCurrency(donation.amount, donation.currency)}
+          </Span>
+        )}
+        <Span className={`text-xs text-muted-foreground whitespace-nowrap`}>
+          {formatDate(donation.createdAt)}
+        </Span>
+      </Div>
+      {message && (
+        <P className={`text-xs italic text-muted-foreground line-clamp-1 pl-9`}>{message}</P>
+      )}
+    </Div>
+  )
 }
 
 export function DonationWall({
   projectId,
-  limit = 10,
+  limit = 20,
   className,
   texts,
   noDonationsText: legacyNoDonationsText,
 }: DonationWallProps) {
   const { donations, isLoading, error } = useDonations({ projectId, limit })
 
-  // Merge texts with defaults
   const t = {
     loadingText: texts?.loadingText || 'Loading donations...',
     errorText: texts?.errorText || 'Error',
@@ -40,127 +91,68 @@ export function DonationWall({
     anonymousLabel: texts?.anonymousLabel || 'Anonymous',
   }
 
+  const sortedDonations = useMemo(() => {
+    if (!donations?.length) return []
+    return [...donations].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  }, [donations])
+
   if (isLoading) {
     return (
-      <div className={className}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-muted" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-muted rounded w-24" />
-                    <div className="h-3 bg-muted rounded w-32" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+      <Div className={`overflow-hidden ${className || ''}`}>
+        <Div className={`flex gap-3 py-1`}>
+          {[...Array(6)].map((_, i) => (
+            <Div
+              key={i}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full bg-card border shrink-0 animate-pulse`}
+            >
+              <Div className={`w-7 h-7 rounded-full bg-muted`} />
+              <Div className={`h-4 bg-muted rounded w-16`} />
+              <Div className={`h-4 bg-muted rounded w-12`} />
+              <Div className={`h-3 bg-muted rounded w-10`} />
+            </Div>
           ))}
-        </div>
-      </div>
+        </Div>
+      </Div>
     )
   }
 
   if (error) {
     return (
-      <div className={className}>
-        <div className="flex items-center justify-center gap-2 p-8 rounded-lg bg-destructive/10 border border-destructive/20">
-          <Icon name="lucide:AlertCircle" className="w-5 h-5 text-destructive" />
-          <p className="text-destructive font-medium">
+      <Div className={className}>
+        <Div
+          className={`flex items-center justify-center gap-2 p-8 rounded-lg bg-destructive/10 border border-destructive/20`}
+        >
+          <Icon name="lucide:AlertCircle" className={`w-5 h-5 text-destructive`} />
+          <P className={`text-destructive font-medium`}>
             {t.errorText}: {error}
-          </p>
-        </div>
-      </div>
+          </P>
+        </Div>
+      </Div>
     )
   }
 
-  if (!donations?.length) {
+  if (!sortedDonations.length) {
     return (
-      <div className={className}>
-        <div className="flex flex-col items-center justify-center gap-4 p-12 rounded-lg border-2 border-dashed border-muted-foreground/20">
-          <Icon name="lucide:Heart" className="w-12 h-12 text-muted-foreground/40" />
-          <p className="text-muted-foreground text-center">{t.noDonationsText}</p>
-        </div>
-      </div>
+      <Div className={className}>
+        <Div
+          className={`flex flex-col items-center justify-center gap-4 p-12 rounded-lg border-2 border-dashed border-muted-foreground/20`}
+        >
+          <Icon name="lucide:Heart" className={`w-12 h-12 text-muted-foreground/40`} />
+          <P className={`text-muted-foreground text-center`}>{t.noDonationsText}</P>
+        </Div>
+      </Div>
     )
   }
 
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className || ''}`}>
-      {donations.map((donation, index) => (
-        <Card
-          key={donation.id}
-          className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 relative overflow-hidden animate-in fade-in-0 slide-in-from-bottom-5 duration-500"
-          style={{
-            animationDelay: `${index * 100}ms`,
-          }}
-        >
-          {/* Gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 via-purple-500/0 to-blue-500/0 group-hover:from-pink-500/5 group-hover:via-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" />
-
-          <CardContent className="p-6 relative">
-            <div className="flex items-start gap-4 mb-3">
-              {/* Avatar with gradient border */}
-              <div className="relative">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 opacity-20 blur-sm" />
-                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                  {donation.isAnonymous ? (
-                    <Icon name="lucide:User" className="w-6 h-6" />
-                  ) : (
-                    donation.customerName?.[0]?.toUpperCase() || '?'
-                  )}
-                </div>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-base truncate">
-                  {donation.isAnonymous
-                    ? t.anonymousLabel
-                    : donation.customerName || t.anonymousLabel}
-                </p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                  <span className="font-semibold text-pink-600 dark:text-pink-400">
-                    {formatCurrency(donation.amount, donation.currency)}
-                  </span>
-                  <span>•</span>
-                  <span>
-                    {new Date(donation.createdAt).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              {/* Heart icon */}
-              <Icon
-                name="lucide:Heart"
-                className="w-5 h-5 text-pink-500 group-hover:scale-110 transition-transform"
-              />
-            </div>
-
-            {/* Message with quote styling */}
-            {donation.metadata?.message && (
-              <div className="relative mt-4 pl-4 border-l-2 border-pink-500/30">
-                <p className="text-sm text-muted-foreground italic leading-relaxed">
-                  &ldquo;{donation.metadata.message}&rdquo;
-                </p>
-              </div>
-            )}
-
-            {/* Project badge */}
-            {!projectId && donation.projectName && (
-              <div className="mt-4 pt-3 border-t border-border/50">
-                <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-xs font-medium">
-                  <Icon name="lucide:Sparkles" className="w-3 h-3" />
-                  {donation.projectName}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <Div className={className}>
+      <InfiniteMovingCards direction="left" speed="slow" pauseOnHover>
+        {sortedDonations.map(donation => (
+          <DonationPill key={donation.id} donation={donation} anonymousLabel={t.anonymousLabel} />
+        ))}
+      </InfiniteMovingCards>
+    </Div>
   )
 }

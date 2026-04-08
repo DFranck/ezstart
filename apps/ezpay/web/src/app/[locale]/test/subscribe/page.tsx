@@ -1,8 +1,16 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  ConfirmActionDialog,
+  formatCurrency,
+  PaymentHistory,
+  SubscriptionPlanCard,
+  usePayContext,
+  useSubscriptions,
+  type Payment,
+  type Plan,
+} from '@ezstart/pay-sdk'
 import {
   Badge,
   Button,
@@ -17,16 +25,8 @@ import {
   P,
   Skeleton,
 } from '@ezstart/ui/components'
-import {
-  SubscribeButton,
-  PaymentHistory,
-  useSubscriptions,
-  usePayContext,
-  ConfirmActionDialog,
-  formatCurrency,
-  type Payment,
-  type Plan,
-} from '@ezstart/pay-sdk'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function TestSubscribePage() {
   const t = useTranslations('test')
@@ -89,7 +89,7 @@ export default function TestSubscribePage() {
         </CardContent>
       </Card>
 
-      {/* Subscribe Buttons */}
+      {/* Subscribe Buttons — using SubscriptionPlanCard */}
       <Card>
         <CardHeader>
           <CardTitle>{t('sections.subscriptions')}</CardTitle>
@@ -99,55 +99,29 @@ export default function TestSubscribePage() {
           {plansLoading ? (
             <Div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-40 w-full rounded-lg" />
+                <Skeleton key={i} className="h-[400px] w-full rounded-xl" />
               ))}
             </Div>
           ) : plans.length === 0 ? (
             <Div className="text-center py-8">
-              <P className="text-muted-foreground">
-                {t('noPlans')}
-              </P>
+              <P className="text-muted-foreground">{t('noPlans')}</P>
               <Button variant="outline" size="sm" className="mt-4" asChild>
                 <a href="/admin">{t('goToAdmin')}</a>
               </Button>
             </Div>
           ) : (
             <Div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {plans.map(plan => (
-                <Div key={plan.id} className="p-4 border rounded-lg flex flex-col gap-3">
-                  <H3 className="font-semibold text-sm">{plan.name}</H3>
-                  <P size="sm" variant="description">
-                    {formatCurrency(plan.amount / 100, plan.currency)} / {plan.intervalCount}{' '}
-                    {plan.interval === 'year' ? t('intervalYear') : t('intervalMonth')}
-                  </P>
-                  {plan.description && (
-                    <P size="sm" variant="description">
-                      {plan.description}
-                    </P>
-                  )}
-                  {plan.features && plan.features.length > 0 && (
-                    <Div className="flex flex-col gap-1">
-                      {plan.features.map((feature, i) => (
-                        <P key={i} size="sm" className="text-muted-foreground">
-                          - {feature}
-                        </P>
-                      ))}
-                    </Div>
-                  )}
-                  <SubscribeButton
-                    projectId="ezpay"
-                    priceId={plan.stripePriceId || plan.id}
-                    planName={plan.name}
-                    amount={plan.amount / 100}
-                    intervalCount={plan.intervalCount}
-                    currency={plan.currency}
-                    userId={user?._id}
-                    userEmail={user?.email}
-                    userName={user?.username}
-                    promoCode={promoCode || undefined}
-                    showPromoInput
-                  />
-                </Div>
+              {plans.map((plan, index) => (
+                <SubscriptionPlanCard
+                  key={plan.id}
+                  appName="ezpay"
+                  planId={plan.id}
+                  variant={index === 1 ? 'featured' : 'default'}
+                  promoCode={promoCode || undefined}
+                  userId={user?._id}
+                  userEmail={user?.email}
+                  userName={user?.username}
+                />
               ))}
             </Div>
           )}

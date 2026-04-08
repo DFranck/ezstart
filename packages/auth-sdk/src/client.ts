@@ -239,6 +239,59 @@ export class AuthClient {
   }
 
   /**
+   * Update the current user's profile (firstName, lastName, avatar).
+   * Requires authentication (token or httpOnly cookie).
+   */
+  async updateProfile(
+    data: { firstName?: string; lastName?: string; avatar?: string },
+    accessToken?: string
+  ): Promise<AuthUser> {
+    const response = await fetch(`${this.config.baseURL}/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || result.data?.error || 'Failed to update profile')
+    }
+
+    const profileData = result.data ?? result
+    return profileData.user
+  }
+
+  /**
+   * Change (or create) the current user's password.
+   * If the user has no password (OAuth-only), currentPassword can be omitted.
+   */
+  async changePassword(
+    data: { currentPassword?: string; newPassword: string },
+    accessToken?: string
+  ): Promise<void> {
+    const response = await fetch(`${this.config.baseURL}/change-password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || result.data?.error || 'Failed to change password')
+    }
+  }
+
+  /**
    * Refresh tokens using a refresh token.
    * Returns new access token, refresh token, and user info.
    */
