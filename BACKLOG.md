@@ -192,6 +192,12 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
 100.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
 
+#### P2.10 — AI Centralization (2026-04-08)
+
+102. [ ] Centraliser AI dans ezstart-api — Migrer routes chat/conversations/providers/prompts de green-pulse API → ezstart API. Pattern identique à ezauth/ezpay : une seule API, `appName` pour scoper (conversations, prompts, providers). Clés API partagées. ai-sdk fournit routes + dashboard admin.
+103. [ ] AI admin dashboard — Prompts CRUD par app, providers config, usage stats. Dashboard admin via ai-sdk comme auth-sdk/pay-sdk.
+104. [ ] Dynamic plans — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
+
 #### P3 — DevOps / Testing
 
 73. [x] Test coverage baseline — setup: @ezstart/test-utils package exists with vitest config factory, MongoDB memory server, seed helpers. Per-app test writing tracked in individual app backlogs.
