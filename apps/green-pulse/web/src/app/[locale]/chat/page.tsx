@@ -31,7 +31,7 @@ function LiaPageContent() {
   const t = useTranslations('chat')
 
   // Get user from Zustand store (localStorage 'ezauth-storage')
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, accessToken } = useAuthStore()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [onConversationCreated, setOnConversationCreated] = useState<(() => void) | null>(null)
 
@@ -47,6 +47,7 @@ function LiaPageContent() {
       method: 'POST' as const,
       headers: {
         'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
       enableStreaming: true, // Auto-detects SSE vs JSON based on Content-Type
       formatRequest: (message: string) => {
@@ -115,6 +116,7 @@ function LiaPageContent() {
     [
       isAuthenticated,
       user,
+      accessToken,
       activeConversationId,
       onConversationCreated,
       selectedProvider,
