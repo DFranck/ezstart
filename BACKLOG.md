@@ -194,9 +194,16 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2.10 — AI Centralization (2026-04-08)
 
-102. [ ] Centraliser AI dans ezstart-api — Migrer routes chat/conversations/providers/prompts de green-pulse API → ezstart API. Pattern identique à ezauth/ezpay : une seule API, `appName` pour scoper (conversations, prompts, providers). Clés API partagées. ai-sdk fournit routes + dashboard admin.
-103. [ ] AI admin dashboard — Prompts CRUD par app, providers config, usage stats. Dashboard admin via ai-sdk comme auth-sdk/pay-sdk.
-104. [ ] Dynamic plans — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
+102. [ ] Centraliser AI dans ezstart-api — Migrer routes chat/conversations/providers/prompts de green-pulse API → ezstart API. Pattern identique à ezauth/ezpay : une seule API, `appName` pour scoper (conversations, prompts, providers). Clés API partagées, pas une par app. Frontend appelle `getApiUrl('ezstart')` pour l'IA.
+103. [ ] ai-sdk routes agnostiques — Routes Express réutilisables dans ai-sdk : `/api/ai/chat`, `/api/ai/conversations`, `/api/ai/providers`, `/api/ai/prompts`. Chaque route scopée par `appName`. ezstart-api monte ces routes. Toute app peut consommer via `getApiUrl('ezstart')`.
+104. [ ] AI admin dashboard (`<AIAdminDashboard>`) — Composant SDK client comme `<AuthAdminDashboard>` et `<PayAdminDashboard>`. Fonctionnalités : Prompts CRUD par app, providers config (activer/désactiver par app), usage stats (tokens, coût estimé, par user/jour). SuperAdmin (sans appName) voit tout. App admin (avec appName) voit que ses propres prompts/providers.
+105. [ ] ai-sdk prompt management — Modèle `SystemPrompt` avec `appName`, `type` (general/extraction/etc), `locale`, `content`, `isDefault`. CRUD API + UI dans AIAdminDashboard. Le chat utilise le prompt de la DB au lieu du fichier hardcodé.
+106. [ ] ai-sdk provider registry par app — Chaque app déclare ses providers activés (pas tous partagés). Modèle `AppProvider` avec `appName`, `providerId`, `enabled`, `config`. Dashboard admin pour toggle on/off par app.
+107. [ ] Dynamic plans — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
+108. [ ] Theme CSS scoping — `[data-app]` selector au lieu de `:root` pour éviter conflits `--brand` quand tous les thèmes sont chargés simultanément.
+109. [ ] Chat UX responsive — Fix sidebar mobile, conversation selection, responsive layout du ThreadLayout. Passe UX complète.
+110. [ ] Green-pulse chat locale — L'IA doit répondre dans la langue de la locale de l'utilisateur (déjà fait côté frontend, à centraliser dans ezstart-api).
+111. [ ] DEPLOY: Railway ezauth-api — Ajouter `--filter @ezstart/fetch-client --filter @ezstart/email-service` au build command. Redeploy.
 
 #### P3 — DevOps / Testing
 
