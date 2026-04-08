@@ -14,6 +14,7 @@ import {
   PWAInstallPrompt,
   Section,
   Span,
+  LandingHero,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -80,16 +81,30 @@ function EarthDayContent() {
       </Div>
 
       {/* Hero with background image */}
-      <Div
-        className="relative min-h-[60vh] flex items-center justify-center bg-cover bg-center"
+      <LandingHero
+        variant="fullHeight"
+        title={t('hero.title')}
+        description={t('hero.subtitle')}
+        badge={t('header.cobranding')}
+        className="bg-cover bg-center text-white"
         style={{ backgroundImage: "url('/images/earthday-hero.jpg')" }}
       >
-        <Div className="absolute inset-0 bg-black/50" />
-        <Div className="relative z-10 text-center px-4 py-16 max-w-2xl mx-auto">
-          <H1 className="text-3xl sm:text-5xl font-bold text-white">{t('hero.title')}</H1>
-          <P className="text-lg text-white/80 mt-4">{t('hero.subtitle')}</P>
+        {/* Dark overlay */}
+        <Div className="absolute inset-0 bg-black/50 -z-[1]" />
+
+        {/* Promo code */}
+        <Div className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-4 text-center max-w-md mx-auto">
+          <Div className="flex items-center justify-center gap-2 mb-1">
+            <Icon name="lucide:Gift" size={16} className="text-primary" />
+            <Span className="text-xs font-semibold text-primary uppercase tracking-wide">
+              {t('cta.promo.label')}
+            </Span>
+          </Div>
+          <P className="text-sm text-white/80">
+            {hasPromo ? t('cta.promo.applied') : t('cta.promo.default')}
+          </P>
         </Div>
-      </Div>
+      </LandingHero>
 
       {/* Value Props */}
       <Section className="max-w-2xl mx-auto px-4 py-8">
@@ -111,21 +126,6 @@ function EarthDayContent() {
               </CardContent>
             </Card>
           ))}
-        </Div>
-      </Section>
-
-      {/* Promo Badge */}
-      <Section className="max-w-2xl mx-auto px-4 pb-6">
-        <Div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-center">
-          <Div className="flex items-center justify-center gap-2 mb-1">
-            <Icon name="lucide:Gift" size={16} className="text-primary" />
-            <Span className="text-xs font-semibold text-primary uppercase tracking-wide">
-              {t('cta.promo.label')}
-            </Span>
-          </Div>
-          <P className="text-sm text-muted-foreground">
-            {hasPromo ? t('cta.promo.applied') : t('cta.promo.default')}
-          </P>
         </Div>
       </Section>
 
