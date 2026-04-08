@@ -264,17 +264,32 @@ export function AccountModal({
     { id: 'settings', label: texts.settingsTab, icon: 'lucide:Settings' },
   ]
 
+  const modalContainerRef = useRef<HTMLDivElement>(null)
+
   return (
     <Modal
       isOpen={open}
       onClose={onClose}
       size="xl"
       scrollBehavior="inside"
-      title={texts.title}
+      title={
+        <Div className="flex items-center gap-2">
+          {/* Mobile burger in title */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden cursor-pointer -ml-2"
+            onClick={() => setMobileNavOpen(true)}
+          >
+            <Icon name="lucide:Menu" className="w-5 h-5" />
+          </Button>
+          <Span>{texts.title}</Span>
+        </Div>
+      }
       className={className}
     >
-      {/* Desktop: sidebar + content — Mobile: burger + sheet nav */}
-      <Div className="flex flex-row gap-4 min-h-[400px]">
+      {/* Desktop: sidebar + content — Mobile: sheet nav within modal */}
+      <Div ref={modalContainerRef} className="relative flex flex-row gap-4 min-h-[400px]">
         {/* ── Desktop sidebar — hidden on mobile ── */}
         <Div className="hidden md:flex flex-col gap-1 w-40 shrink-0 border-r pr-4">
           {tabs.map(tab => (
@@ -293,21 +308,9 @@ export function AccountModal({
           ))}
         </Div>
 
-        {/* ── Mobile burger — shown only on mobile ── */}
-        <Div className="flex md:hidden items-start pt-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="cursor-pointer"
-            onClick={() => setMobileNavOpen(true)}
-          >
-            <Icon name="lucide:Menu" className="w-5 h-5" />
-          </Button>
-        </Div>
-
-        {/* ── Mobile Sheet nav ── */}
+        {/* ── Mobile Sheet nav — contained within modal ── */}
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-          <SheetContent side="left" className="w-48 p-4">
+          <SheetContent side="left" className="w-48 p-4" container={modalContainerRef.current}>
             <SheetHeader>
               <SheetTitle>{texts.title}</SheetTitle>
             </SheetHeader>

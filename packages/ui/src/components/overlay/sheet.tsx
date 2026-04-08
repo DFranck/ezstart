@@ -32,6 +32,8 @@ function SheetOverlay({
 interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.Content> {
   side?: 'top' | 'right' | 'bottom' | 'left'
   showCloseButton?: boolean
+  /** Container element for the portal — if provided, sheet renders inside this element instead of fullscreen */
+  container?: HTMLElement | null
 }
 
 function SheetContent({
@@ -39,6 +41,7 @@ function SheetContent({
   className,
   children,
   showCloseButton = true,
+  container,
   ...props
 }: SheetContentProps) {
   const sideClasses = {
@@ -51,12 +54,13 @@ function SheetContent({
   }
 
   return (
-    <SheetPortal>
-      <SheetOverlay />
+    <SheetPortal container={container}>
+      {!container && <SheetOverlay />}
       <DialogPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          'bg-background fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out',
+          'bg-background z-50 flex flex-col gap-4 shadow-lg transition ease-in-out',
+          container ? 'absolute' : 'fixed',
           'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300',
           sideClasses[side],
           className
