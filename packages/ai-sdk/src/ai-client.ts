@@ -172,7 +172,10 @@ export class AIClient {
   // === Providers ===
 
   async listProviders(): Promise<AIProviderInfo[]> {
-    return this.fetch('/providers')
+    const result = await this.fetch<{ providers: AIProviderInfo[] } | AIProviderInfo[]>(
+      '/providers'
+    )
+    return Array.isArray(result) ? result : result.providers
   }
 }
 

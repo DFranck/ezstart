@@ -64,9 +64,9 @@ function LiaPageContent() {
         if (selectedProvider) {
           payload.providerId = selectedProvider
         }
-        // Only include conversation_id if it exists (avoid sending null)
+        // Only include conversationId if it exists (avoid sending null)
         if (activeConversationId) {
-          payload.conversation_id = activeConversationId
+          payload.conversationId = activeConversationId
         }
         return payload
       },
@@ -80,7 +80,7 @@ function LiaPageContent() {
       },
       onSuccess: (rawData: unknown) => {
         const data = rawData as Record<string, unknown> & { data?: Record<string, unknown> }
-        const conversationId = data.data?.conversation_id as string | undefined
+        const conversationId = data.data?.conversationId as string | undefined
 
         // Save conversation_id for subsequent messages
         if (conversationId && !activeConversationId) {
