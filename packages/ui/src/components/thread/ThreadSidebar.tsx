@@ -64,7 +64,7 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
   }, [])
 
   return (
-    <div className={cn('flex flex-col h-full', className)}>
+    <div className={cn('flex flex-col h-full border-r', className)}>
       {/* Custom header slot (above everything) */}
       {header && <div className="border-b">{header}</div>}
 
