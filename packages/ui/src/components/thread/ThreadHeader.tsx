@@ -20,7 +20,7 @@ export const ThreadHeader = React.memo(function ThreadHeader({
   return (
     <header
       className={cn(
-        'flex items-center justify-between px-4 py-3 border-b shrink-0',
+        'flex items-center justify-between px-4 py-3 shrink-0',
         theme.background,
         theme.border,
         className

@@ -33,6 +33,28 @@
         "default": "Nhap ma EARTHDAY2026 de nhan 1 thang Pro mien phi khi ra mat"
       }
     },
+    "signup": {
+      "title": "Rejoignez le mouvement vert",
+      "subtitle": "Cr\u00e9ez votre compte gratuit en quelques secondes",
+      "username": "Nom d'utilisateur",
+      "usernamePlaceholder": "Choisissez un nom d'utilisateur",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "submit": "Rejoindre",
+      "submitting": "Cr\u00e9ation du compte...",
+      "successToast": "Compte cr\u00e9\u00e9 ! Bienvenue.",
+      "fallbackError": "Une erreur est survenue. Veuillez r\u00e9essayer.",
+      "required": "Ce champ est obligatoire",
+      "invalidEmail": "Veuillez entrer un email valide"
+    },
+    "welcome": {
+      "justJoined": "Chao mung ban!",
+      "back": "Chao mung tro lai!",
+      "installHint": "Cai dat ung dung de truy cap nhanh va ho tro ngoai tuyen.",
+      "installDescription": "Them GreenPulse.AI vao man hinh chinh de trai nghiem tot nhat.",
+      "installButton": "Cai dat ung dung",
+      "laterButton": "De sau"
+    },
     "footer": {
       "contact": "Lien he",
       "eventCredit": "Trinh bay tai Sustainable Future 10 & Earth Day Vietnam 2026 — to chuc boi Green Leaders Community (GLC)",

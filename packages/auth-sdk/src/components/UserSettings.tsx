@@ -150,9 +150,7 @@ export function UserSettings({
           </Div>
           {/* TODO: Edit profile button when editable=true */}
           {editable && (
-            <P className="text-xs text-muted-foreground italic">
-              Edit functionality coming soon
-            </P>
+            <P className="text-xs text-muted-foreground italic">Edit functionality coming soon</P>
           )}
         </Div>
       )}

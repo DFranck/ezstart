@@ -130,8 +130,9 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 80. [x] Unified variant taxonomy — tokens + variants centralisés dans design-system, 30 composants migrés, 13 tag files supprimés
 81. [x] Density variant — compact/default/relaxed ajouté sur tous les container tags
 82. [ ] Theme presets — Presets déclaratifs par app (dashboard=compact, landing=relaxed)
-83. [x] Component reorganization — 56 fichiers réorganisés en 8 sous-dossiers catégorisés
-84. [ ] SSR Layout split — Séparer ClientLayout en RSC + client islands
+83. [ ] Theme CSS scoping — Remplacer `:root` par `[data-app="xxx"]` dans chaque theme CSS pour éviter les conflits de variables (--brand etc.) quand tous les thèmes sont chargés simultanément. Ajouter `data-app` sur `<body>` de chaque app.
+84. [x] Component reorganization — 56 fichiers réorganisés en 8 sous-dossiers catégorisés
+85. [ ] SSR Layout split — Séparer ClientLayout en RSC + client islands
 
 #### P2.7 — EZStart Hub (2026-04-06)
 
@@ -173,6 +174,29 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
 99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
 100.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
+
+#### P2.8 — SDK Admin Dashboards (2026-04-06)
+
+90. [ ] auth-sdk: Extraire `<AuthAdminDashboard>` — déplacer user-table, edit-roles-modal, stats depuis ezauth/admin vers auth-sdk/client. Toutes les apps (ezauth, ezstart) importent le même composant. Zéro duplication.
+91. [ ] pay-sdk: Extraire `<PayAdminDashboard>` — déplacer DataTable paiements, stats cards, refund/cancel dialogs depuis ezpay/admin vers pay-sdk/client.
+92. [ ] ai-sdk: Créer `<AIAdminDashboard>` — stats consommation par provider/app/jour, graphique tendances, alerte quota free tier.
+93. [ ] monitoring: Extraire `<MonitoringDashboard>` — déplacer SystemOverview + hooks depuis ezstart/monitoring vers un package ou export réutilisable.
+94. [ ] ezstart admin: Refactorer les tabs pour importer directement `<AuthAdminDashboard>`, `<PayAdminDashboard>`, `<AIAdminDashboard>`, `<MonitoringDashboard>` depuis les SDKs. Supprimer les copies locales.
+
+#### P2.9 — AI SDK Enhancement (2026-04-06)
+
+95. [ ] ai-sdk cascade/fallback — Si provider A échoue (quota, erreur), fallback auto sur provider B. Config: priority order + max retries. Mode "cascade free tiers".
+96. [ ] ai-sdk usage tracking — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). `trackUsage()` auto dans UnifiedChat.
+97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
+98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
+99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
+100.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
+
+#### P2.10 — AI Centralization (2026-04-08)
+
+102. [ ] Centraliser AI dans ezstart-api — Migrer routes chat/conversations/providers/prompts de green-pulse API → ezstart API. Pattern identique à ezauth/ezpay : une seule API, `appName` pour scoper (conversations, prompts, providers). Clés API partagées. ai-sdk fournit routes + dashboard admin.
+103. [ ] AI admin dashboard — Prompts CRUD par app, providers config, usage stats. Dashboard admin via ai-sdk comme auth-sdk/pay-sdk.
+104. [ ] Dynamic plans — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
 
 #### P3 — DevOps / Testing
 

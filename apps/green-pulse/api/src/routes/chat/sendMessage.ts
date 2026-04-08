@@ -37,7 +37,7 @@ sendMessageRouter.post(
         return sendValidationError(res, 'Invalid request format', validation.error.errors)
       }
 
-      let { message, extract_esg, session_id, conversation_id, userId, providerId } =
+      let { message, extract_esg, session_id, conversation_id, userId, providerId, locale } =
         validation.data
 
       // Default to gemini-flash if not specified
@@ -84,7 +84,17 @@ sendMessageRouter.post(
 
       // Get system prompt from DB (with fallback)
       const promptType = extract_esg ? 'extraction' : 'general'
-      const systemPrompt = await getSystemPrompt(promptType, 'all')
+      const baseSystemPrompt = await getSystemPrompt(promptType, 'all')
+
+      // Add locale instruction to system prompt
+      const localeMap: Record<string, string> = {
+        en: 'English',
+        fr: 'French',
+        vi: 'Vietnamese',
+      }
+      const langInstruction =
+        locale && localeMap[locale] ? `\n\nIMPORTANT: Always respond in ${localeMap[locale]}.` : ''
+      const systemPrompt = baseSystemPrompt + langInstruction
 
       // Chat using UnifiedChat from @ezstart/ai-sdk
       const aiResponse = await UnifiedChat.send(message, selectedProvider, {

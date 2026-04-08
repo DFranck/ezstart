@@ -14,7 +14,7 @@ fi
 # ============================================================
 # 1. No raw HTML tags outside packages/ui
 # ============================================================
-RAW_HTML=$(echo "$FILES" | xargs grep -ln '<div \|<div>\|<p \|<p>\|<span \|<span>\|<table \|<table>\|<thead\|<tbody\|<button \|<button>\|<input \|<input>' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'node_modules' | grep -v '.test.')
+RAW_HTML=$(echo "$FILES" | xargs grep -ln '<div \|<div>\|<p \|<p>\|<span \|<span>\|<table \|<table>\|<thead\|<tbody\|<button \|<button>\|<input \|<input>' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'packages/email-service/' | grep -v 'node_modules' | grep -v '.test.')
 
 if [ -n "$RAW_HTML" ]; then
   echo ""

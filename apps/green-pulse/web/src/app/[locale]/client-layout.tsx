@@ -1,7 +1,7 @@
 'use client'
 import { routing } from '@/i18n/routing'
-import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
-import { ThemeEditor, ThemeSwitcher } from '@ezstart/next-theme/components'
+import { UserMenu, useAuthStore } from '@ezstart/auth-sdk'
+import { useTheme } from 'next-themes'
 import { useRBAC } from '@ezstart/rbac'
 import { Button, ClientLayout, Div, LocaleSwitcher, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
@@ -19,6 +19,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
   const tForms = useTranslations('forms')
   const { user, isAuthenticated } = useAuthStore()
   const rbac = useRBAC(user)
+  const theme = useTheme()
 
   const handleLocaleChange = (locale: string) => {
     if (!pathname) return
@@ -33,6 +34,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
 
   return (
     <ClientLayout
+      headerOverlay={pathname === `/${currentLocale}/earthday`}
       appName="Green Pulse"
       currentPath={pathname}
       showHeader={!isChatPage}
@@ -103,32 +105,34 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
       headerRightContent={
         <Div>
           {isAuthenticated ? (
-            <LoginButton
-              loginText={tAuth('login')}
-              logoutText={tAuth('logout')}
-              loadingText={tAuth('loading')}
+            <UserMenu
+              theme={theme}
+              languages={[
+                { code: 'en', label: 'English' },
+                { code: 'fr', label: 'Français' },
+                { code: 'vi', label: 'Tiếng Việt' },
+              ]}
+              currentLocale={currentLocale}
+              onLocaleChange={handleLocaleChange}
+              texts={{
+                signOut: tAuth('logout'),
+                signIn: tAuth('login'),
+              }}
             />
           ) : (
-            <Button asChild size="default" className="bg-gp-primary hover:bg-gp-primary/80">
-              <Link href="/chat" target="_blank" rel="noopener noreferrer">
-                {tAuth('getStarted')}
-              </Link>
-            </Button>
+            <>
+              <Button asChild size="default" className="bg-gp-primary hover:bg-gp-primary/80">
+                <Link href="/chat" target="_blank" rel="noopener noreferrer">
+                  {tAuth('getStarted')}
+                </Link>
+              </Button>
+              <LocaleSwitcher
+                locales={[...routing.locales]}
+                currentLocale={currentLocale}
+                onLocaleChange={handleLocaleChange}
+              />
+            </>
           )}
-          <LocaleSwitcher
-            locales={[...routing.locales]}
-            currentLocale={currentLocale}
-            onLocaleChange={handleLocaleChange}
-          />
-          {/* ThemeEditor: visible only for manager, admin, superadmin */}
-          {rbac.hasAnyRole(['manager', 'admin', 'superadmin']) && (
-            <ThemeEditor
-              adminOnly={true}
-              enableHistory={true}
-              getAuthState={() => useAuthStore.getState()}
-            />
-          )}
-          <ThemeSwitcher />
         </Div>
       }
       LinkComponent={Link}

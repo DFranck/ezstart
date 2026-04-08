@@ -1,13 +1,11 @@
 'use client'
 
-import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 import { greenPulseThreadTheme } from '@/config/thread-theme'
 import { useConversations } from '@/hooks/useConversations'
 import type { AIProviderInfo } from '@ezstart/ai-sdk'
 import { AISelector } from '@ezstart/ai-sdk/client'
-import { useAuthStore } from '@ezstart/auth-sdk'
+import { useAuthStore, UserMenu } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useRBAC } from '@ezstart/rbac'
 import {
   Button,
@@ -15,11 +13,6 @@ import {
   Div,
   Icon,
   Nav,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Span,
   Thread,
   ThreadComposer,
@@ -33,20 +26,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@ezstart/ui/components'
+import { useTheme } from 'next-themes'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useThreadContext } from './ThreadProvider'
 
 // Mock AI models for UI display (all requests still use the same AI backend)
-const MOCK_AI_MODELS = [
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google', enabled: true },
-  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI', enabled: false },
-  { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', enabled: false },
-  { id: 'llama-3-70b', name: 'Llama 3 70B (Hébergé)', provider: 'Local', enabled: false },
-] as const
 
 type LiaThreadProps = {
   activeConversationId: string | null
@@ -69,12 +57,21 @@ export function LiaThread({
   const { isAuthenticated, user } = useAuthStore()
   const rbac = useRBAC(user, 'green-pulse')
   const pathname = usePathname()
+  const router = useRouter()
   const locale = useLocale()
+  const theme = useTheme()
+
   const tForms = useTranslations('forms')
   const tChat = useTranslations('chat')
+  const tAuth = useTranslations('auth')
 
-  // Mock AI model selection (UI only - all requests use same backend)
-  const [selectedMockModel, setSelectedMockModel] = useState<string>(MOCK_AI_MODELS[0].id)
+  const handleLocaleChange = useCallback(
+    (newLocale: string) => {
+      const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`)
+      router.push(newPathname)
+    },
+    [pathname, locale, router]
+  )
 
   const {
     messages,
@@ -188,7 +185,7 @@ export function LiaThread({
     [softDeleteConversation, activeConversationId, clearMessages]
   )
   const header = (
-    <Div size={'xs'} layout={'center'}>
+    <Div className="h-14 flex items-center justify-center px-3">
       <Button asChild variant={'ghost'} className="w-full">
         <Link href="/">
           <Image
@@ -348,32 +345,24 @@ export function LiaThread({
         </Nav>
       </Div>
 
-      {/* User info section */}
-      <Div className="border-t pt-3 space-y-2">
-        <Button variant="ghost" className="w-full justify-start h-auto py-2 px-2">
-          <Div className="flex items-center gap-2 w-full">
-            <Div className="w-8 h-8 rounded-full bg-gp-primary/10 flex items-center justify-center flex-shrink-0">
-              <Icon name="lucide:User" size={16} className="text-gp-primary" />
-            </Div>
-            <Div className="flex-1 min-w-0 text-left">
-              <Div className="text-sm font-medium truncate">
-                {user?.firstName || user?.email || 'User'}
-              </Div>
-              {user?.email && (
-                <Div className="text-xs text-muted-foreground truncate">{user.email}</Div>
-              )}
-            </Div>
-          </Div>
-        </Button>
-        <Button
-          variant="ghost"
-          className="w-full justify-start opacity-50 cursor-not-allowed h-8 px-2"
-          size="sm"
-          disabled
-        >
-          <Icon name="lucide:Settings" className="mr-2" size={14} />
-          <Span className="text-xs">{tChat('sidebar.settings')}</Span>
-        </Button>
+      {/* User menu */}
+      <Div className="border-t pt-3">
+        <UserMenu
+          side="top"
+          variant="extended"
+          theme={theme}
+          languages={[
+            { code: 'en', label: 'English' },
+            { code: 'fr', label: 'Français' },
+            { code: 'vi', label: 'Tiếng Việt' },
+          ]}
+          currentLocale={locale}
+          onLocaleChange={handleLocaleChange}
+          texts={{
+            signOut: tAuth('logout'),
+            manageAccount: tChat('sidebar.settings'),
+          }}
+        />
       </Div>
     </Div>
   )
@@ -407,38 +396,7 @@ export function LiaThread({
         ) : undefined
       }
     >
-      {/* Thread Header with AI Model selector and Theme switcher */}
-      <ThreadHeader
-        left={
-          <Select value={selectedMockModel} onValueChange={setSelectedMockModel}>
-            <SelectTrigger className="w-[280px]">
-              <SelectValue
-                placeholder={locale === 'fr' ? 'Sélectionner un modèle' : 'Select a model'}
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_AI_MODELS.map(model => {
-                const isComingSoon = !model.enabled
-
-                return (
-                  <SelectItem key={model.id} value={model.id} disabled={isComingSoon}>
-                    <Div className="flex flex-col">
-                      <Span className="font-medium">{model.name}</Span>
-                      <Span className="text-xs text-muted-foreground">{model.provider}</Span>
-                    </Div>
-                  </SelectItem>
-                )
-              })}
-            </SelectContent>
-          </Select>
-        }
-        right={
-          <>
-            <LocaleSwitcher />
-            <ThemeSwitcher />
-          </>
-        }
-      />
+      <ThreadHeader />
 
       <Thread messages={messages} streamingText={streamingText}>
         <ThreadMessages
@@ -459,23 +417,23 @@ export function LiaThread({
         placeholder="Ask GP.A anything about sustainability..."
         isNewThread={isNewThread}
         welcomeMessage={
-          <ThreadWelcome
-            show={isNewThread}
-            title="Welcome to GP.A"
-            description="Your AI assistant for sustainability and ESG reporting"
-          />
-        }
-        headerSlot={
-          providers.length > 0 && selectedProvider && onProviderChange ? (
-            <Div className="px-4 py-2 border-b border-border bg-muted/30">
-              <AISelector
-                value={selectedProvider}
-                onChange={onProviderChange}
-                providers={providers}
-                showCapabilities={true}
-              />
-            </Div>
-          ) : null
+          <>
+            <ThreadWelcome
+              show={isNewThread}
+              title="Welcome to GP.A"
+              description="Your AI assistant for sustainability and ESG reporting"
+            />
+            {isNewThread && providers.length > 0 && selectedProvider && onProviderChange && (
+              <Div className="flex justify-center mt-4">
+                <AISelector
+                  value={selectedProvider}
+                  onChange={onProviderChange}
+                  providers={providers}
+                  showCapabilities={true}
+                />
+              </Div>
+            )}
+          </>
         }
       />
     </ThreadLayout>

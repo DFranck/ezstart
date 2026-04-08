@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 const LOCALES = [
   { code: 'en', label: 'English' },
   { code: 'fr', label: 'Français' },
+  { code: 'vi', label: 'Tiếng Việt' },
 ] as const
 
 export function LocaleSwitcher() {

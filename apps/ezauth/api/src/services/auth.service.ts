@@ -105,6 +105,7 @@ export class AuthService {
       appRoles,
       permissions: isBetaTester ? ROLE_PERMISSIONS['beta-tester'] : [],
       features: isBetaTester ? ROLE_FEATURES['beta-tester'] : [],
+      ...(data.promoCode ? { promoCode: data.promoCode } : {}),
     })
 
     await user.save()

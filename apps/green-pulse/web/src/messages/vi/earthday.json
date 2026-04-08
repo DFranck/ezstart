@@ -1,0 +1,64 @@
+{
+  "earthday": {
+    "meta": {
+      "title": "GreenPulse.AI tại Earth Day 2026",
+      "description": "Đánh giá ESG miễn phí bằng AI cho doanh nghiệp SME Việt Nam. Sẵn sàng tiếp cận tài chính xanh trong vài phút."
+    },
+    "header": {
+      "cobranding": "Đối tác công nghệ tại Sustainable Future 10 & Earth Day 2026"
+    },
+    "hero": {
+      "title": "Doanh nghiệp của bạn sẵn sàng tiếp cận tài chính xanh chưa?",
+      "subtitle": "Đánh giá ESG miễn phí bằng AI trong 5 phút"
+    },
+    "valueProps": {
+      "assessment": {
+        "title": "Đánh giá ESG miễn phí bằng AI",
+        "description": "Nhận điểm sẵn sàng ESG trong vài phút với trợ lý AI GP.A — không cần đăng ký."
+      },
+      "roadmap": {
+        "title": "Lộ trình tiếp cận tín dụng xanh",
+        "description": "Hiểu chính xác ngân hàng cần gì để phê duyệt đơn vay xanh của bạn."
+      },
+      "reporting": {
+        "title": "Báo cáo ESG tự động",
+        "description": "Tạo báo cáo tuân thủ GRI, SFDR và CSRD tự động từ dữ liệu doanh nghiệp."
+      }
+    },
+    "cta": {
+      "start": "Bắt đầu miễn phí với GP.A",
+      "promo": {
+        "label": "Mã ưu đãi",
+        "applied": "Mã EARTHDAY2026 đã được áp dụng — 1 tháng Pro miễn phí khi ra mắt!",
+        "default": "Nhập mã EARTHDAY2026 để nhận 1 tháng Pro miễn phí khi ra mắt"
+      }
+    },
+    "signup": {
+      "title": "Tham gia phong tr\u00e0o xanh",
+      "subtitle": "T\u1ea1o t\u00e0i kho\u1ea3n mi\u1ec5n ph\u00ed trong v\u00e0i gi\u00e2y",
+      "username": "T\u00ean ng\u01b0\u1eddi d\u00f9ng",
+      "usernamePlaceholder": "Ch\u1ecdn t\u00ean ng\u01b0\u1eddi d\u00f9ng",
+      "email": "Email",
+      "emailPlaceholder": "email@cuaban.com",
+      "submit": "Tham gia ngay",
+      "submitting": "\u0110ang t\u1ea1o t\u00e0i kho\u1ea3n...",
+      "successToast": "T\u00e0i kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c t\u1ea1o! Ch\u00e0o m\u1eebng b\u1ea1n.",
+      "fallbackError": "\u0110\u00e3 x\u1ea3y ra l\u1ed7i. Vui l\u00f2ng th\u1eed l\u1ea1i.",
+      "required": "Tr\u01b0\u1eddng n\u00e0y l\u00e0 b\u1eaft bu\u1ed9c",
+      "invalidEmail": "Vui l\u00f2ng nh\u1eadp email h\u1ee3p l\u1ec7"
+    },
+    "welcome": {
+      "justJoined": "Ch\u00e0o m\u1eebng b\u1ea1n!",
+      "back": "Ch\u00e0o m\u1eebng tr\u1edf l\u1ea1i!",
+      "installHint": "C\u00e0i \u0111\u1eb7t \u1ee9ng d\u1ee5ng \u0111\u1ec3 truy c\u1eadp nhanh v\u00e0 h\u1ed7 tr\u1ee3 ngo\u1ea1i tuy\u1ebfn.",
+      "installDescription": "Th\u00eam GreenPulse.AI v\u00e0o m\u00e0n h\u00ecnh ch\u00ednh \u0111\u1ec3 tr\u1ea3i nghi\u1ec7m t\u1ed1t nh\u1ea5t.",
+      "installButton": "C\u00e0i \u0111\u1eb7t \u1ee9ng d\u1ee5ng",
+      "laterButton": "\u0110\u1ec3 sau"
+    },
+    "footer": {
+      "contact": "Liên hệ",
+      "eventCredit": "Trình bày tại Sustainable Future 10 & Earth Day Vietnam 2026 — tổ chức bởi Green Leaders Community (GLC)",
+      "poweredBy": "GreenPulse.AI — AI cho doanh nghiệp SME bền vững tại Đông Nam Á"
+    }
+  }
+}

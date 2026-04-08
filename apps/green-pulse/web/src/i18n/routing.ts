@@ -2,7 +2,7 @@
 import { defineRouting } from 'next-intl/routing'
 
 export const routing = defineRouting({
-  locales: ['fr', 'en'],
+  locales: ['fr', 'en', 'vi'],
   defaultLocale: 'en',
   localeDetection: true,
 })
@@ -14,7 +14,7 @@ export function getTimeZoneFromLocale(locale: string): string {
   const timeZoneMap: Record<string, string> = {
     en: 'UTC',
     fr: 'Europe/Paris',
-    // Add more locales as needed
+    vi: 'Asia/Ho_Chi_Minh',
   }
 
   return timeZoneMap[locale] || 'UTC'

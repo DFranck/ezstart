@@ -1,0 +1,207 @@
+{
+  "common": {
+    "appName": "GreenPulse.AI",
+    "loading": "Đang tải...",
+    "error": "Đã xảy ra lỗi",
+    "retry": "Thử lại"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "loading": "Đang chuyển hướng...",
+    "getStarted": "Bắt đầu",
+    "welcome": {
+      "title": "Bắt đầu hành trình xanh của bạn",
+      "description": "Đăng nhập để sử dụng GreenPulse.AI miễn phí và chuyển đổi tính bền vững cho doanh nghiệp của bạn",
+      "login": "Đăng nhập để bắt đầu"
+    }
+  },
+  "navigation": {
+    "admin": "Quản trị",
+    "careers": "Tuyển dụng",
+    "howItWorks": "Cách hoạt động",
+    "useCases": "Trường hợp sử dụng",
+    "pricing": "Bảng giá",
+    "partnership": "Đối tác"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Bảng điều khiển Quản trị",
+      "welcomeBack": "Chào mừng, {name}"
+    },
+    "nav": {
+      "dashboard": "Bảng điều khiển",
+      "systemPrompts": "Prompt hệ thống",
+      "betaWaitlist": "Danh sách chờ Beta",
+      "users": "Người dùng",
+      "payments": "Thanh toán",
+      "testPayments": "Thanh toán thử",
+      "chat": "Trò chuyện"
+    },
+    "cards": {
+      "systemPrompts": {
+        "title": "Prompt hệ thống",
+        "description": "Quản lý prompt AI cho trò chuyện và trích xuất"
+      },
+      "betaWaitlist": {
+        "title": "Danh sách chờ Beta",
+        "description": "Phê duyệt hoặc từ chối yêu cầu truy cập beta"
+      },
+      "users": {
+        "title": "Người dùng",
+        "description": "Quản lý tài khoản người dùng, vai trò và quyền hạn"
+      },
+      "payments": {
+        "title": "Thanh toán",
+        "description": "Xem và quản lý các giao dịch thanh toán"
+      }
+    },
+    "users": {
+      "title": "Quản lý người dùng",
+      "description": "Quản lý tài khoản người dùng, vai trò và quyền hạn trên nền tảng"
+    },
+    "payments": {
+      "title": "Quản lý thanh toán",
+      "description": "Xem và quản lý tất cả giao dịch và đăng ký"
+    },
+    "testPayments": {
+      "pageTitle": "Thanh toán thử — GreenPulse",
+      "testModeBanner": "Chế độ Thử — Thanh toán GreenPulse",
+      "testModeDescription": "Tất cả thanh toán sẽ được gắn thẻ app: green-pulse",
+      "promoCode": "Mã khuyến mãi",
+      "donations": {
+        "title": "Quyên góp",
+        "description": "Thử các nút quyên góp"
+      },
+      "purchases": {
+        "title": "Mua hàng",
+        "description": "Thử các giao dịch mua một lần",
+        "esgReport": "Báo cáo ESG",
+        "esgReportDesc": "Báo cáo phân tích ESG toàn diện cho doanh nghiệp của bạn"
+      },
+      "subscriptions": {
+        "title": "Đăng ký",
+        "description": "Thử các gói đăng ký",
+        "noPlans": "Chưa có gói nào. Tạo gói trong tab Thanh toán quản trị.",
+        "month": "tháng",
+        "year": "năm"
+      }
+    },
+    "prompts": {
+      "title": "Prompt hệ thống",
+      "description": "Quản lý prompt AI được sử dụng cho trò chuyện và trích xuất ESG",
+      "manageDescription": "Quản lý prompt AI cho trò chuyện và trích xuất",
+      "newPrompt": "Prompt mới",
+      "editPrompt": "Sửa prompt",
+      "createPrompt": "Tạo prompt mới",
+      "noPrompts": "Không tìm thấy prompt nào",
+      "createFirst": "Tạo prompt đầu tiên của bạn",
+      "loading": "Đang tải prompt...",
+      "loadFailed": "Không thể tải prompt",
+      "key": "Khóa (định danh duy nhất)",
+      "name": "Tên",
+      "description_label": "Mô tả (tùy chọn)",
+      "type": "Loại",
+      "provider": "Nhà cung cấp",
+      "content": "Prompt hệ thống (tính cách, vai trò)",
+      "contentPlaceholder": "Nhập prompt hệ thống (ví dụ: 'Bạn là GreenPulse.AI, một cố vấn ESG...')",
+      "characters": "{count}/10000 ký tự - Được lặp lại trong mỗi tin nhắn",
+      "active": "Đang hoạt động",
+      "setDefault": "Đặt làm mặc định cho loại này",
+      "updated": "Cập nhật: {date}",
+      "updatedBy": " bởi {user}",
+      "cancel": "Hủy",
+      "update": "Cập nhật",
+      "create": "Tạo",
+      "promptContent": "Nội dung prompt",
+      "configuration": "Cấu hình",
+      "deleteConfirm": "Xóa prompt \"{key}\"? Hành động này không thể hoàn tác.",
+      "config": {
+        "title": "Cấu hình",
+        "description": "Tham số được áp dụng một lần (không lặp lại trong ngữ cảnh)",
+        "showAdvanced": "Hiển thị nâng cao",
+        "hideAdvanced": "Ẩn nâng cao",
+        "generationParams": "Tham số tạo",
+        "temperature": "Nhiệt độ (0-1)",
+        "temperatureHelp": "Cao hơn = sáng tạo hơn, Thấp hơn = tập trung hơn",
+        "maxTokens": "Số token tối đa",
+        "maxTokensHelp": "Độ dài tối đa của phản hồi",
+        "topP": "Top P (0-1)",
+        "topK": "Top K (chỉ Gemini)",
+        "behavioralRules": "Quy tắc hành vi",
+        "rulesDescription": "Hướng dẫn được áp dụng ngoài ngữ cảnh hội thoại",
+        "rulePlaceholder": "ví dụ: Luôn trả lời bằng ngôn ngữ của người dùng",
+        "noRules": "Chưa có quy tắc nào",
+        "constraints": "Ràng buộc",
+        "maxResponseLength": "Độ dài phản hồi tối đa (ký tự)",
+        "allowedTopics": "Chủ đề được phép",
+        "allowedTopicPlaceholder": "ví dụ: ESG, tài chính",
+        "forbiddenTopics": "Chủ đề bị cấm",
+        "forbiddenTopicPlaceholder": "ví dụ: chính trị, tôn giáo",
+        "requiredFormat": "Định dạng yêu cầu",
+        "noRequirement": "Không có yêu cầu",
+        "safety": "An toàn & Kiểm duyệt",
+        "blockThreshold": "Ngưỡng chặn (Gemini)",
+        "filterLevel": "Mức lọc (0-10)",
+        "rawJson": "JSON thô (chỉ đọc)"
+      }
+    },
+    "waitlist": {
+      "title": "Danh sách chờ Beta",
+      "description": "Phê duyệt hoặc từ chối yêu cầu truy cập beta cho GreenPulse",
+      "management": "Quản lý danh sách chờ Beta",
+      "manageDescription": "Phê duyệt hoặc từ chối yêu cầu truy cập beta",
+      "loading": "Đang tải danh sách chờ...",
+      "loadFailed": "Không thể tải danh sách",
+      "noEntries": "Không tìm thấy mục nào",
+      "total": "Tổng: {count}",
+      "pending": "Đang chờ: {count}",
+      "activated": "Đã kích hoạt: {count}",
+      "all": "Tất cả",
+      "filterPending": "Đang chờ",
+      "filterInvited": "Đã mời",
+      "filterActivated": "Đã kích hoạt",
+      "filterRejected": "Đã từ chối",
+      "headers": {
+        "email": "Email",
+        "status": "Trạng thái",
+        "added": "Đã thêm",
+        "accessCode": "Mã truy cập",
+        "actions": "Hành động"
+      },
+      "status": {
+        "pending": "Đang chờ",
+        "invited": "Đã mời",
+        "activated": "Đã kích hoạt",
+        "rejected": "Đã từ chối"
+      },
+      "actions": {
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "waitingRegistration": "Đang chờ đăng ký",
+        "activeUser": "Người dùng hoạt động",
+        "codeCopied": "Đã sao chép mã!"
+      }
+    }
+  },
+  "beta": {
+    "requestSubmitted": "Yêu cầu đã được gửi!",
+    "waitingApproval": "Đang chờ phê duyệt từ quản trị viên. Bạn sẽ được thông báo khi được phê duyệt.",
+    "approved": "Bạn đã được phê duyệt!",
+    "enterCode": "Nhập mã truy cập để kích hoạt quyền truy cập beta:",
+    "codePlaceholder": "BETA-GP-XXXXXXXX",
+    "activateAccess": "Kích hoạt truy cập",
+    "accessGranted": "Đã cấp quyền truy cập!",
+    "accessActivated": "Quyền truy cập beta của bạn đã được kích hoạt. Nhấn bên dưới để làm mới phiên.",
+    "refreshSession": "Làm mới phiên",
+    "accessDenied": "Truy cập bị từ chối",
+    "accessRejected": "Yêu cầu truy cập beta của bạn đã bị từ chối. Vui lòng liên hệ bộ phận hỗ trợ để biết thêm thông tin.",
+    "requestAccess": "Yêu cầu truy cập Beta"
+  },
+  "actions": {
+    "cancel": "Hủy",
+    "create": "Tạo mới",
+    "creating": "Đang tạo...",
+    "contactUs": "Liên hệ chúng tôi"
+  }
+}

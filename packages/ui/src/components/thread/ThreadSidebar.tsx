@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode, useCallback } from 'react'
+import React, { Fragment, ReactNode, useCallback } from 'react'
 import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Icon } from '../icon'
@@ -64,7 +64,7 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
   }, [])
 
   return (
-    <div className={cn('flex flex-col h-full', className)}>
+    <div className={cn('flex flex-col h-full border-r', className)}>
       {/* Custom header slot (above everything) */}
       {header && <div className="border-b">{header}</div>}
 
@@ -87,7 +87,11 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
       )}
 
       {/* Conversations List */}
-      <nav role="navigation" aria-label="Conversation history" className="flex-1 overflow-y-auto min-h-0">
+      <nav
+        role="navigation"
+        aria-label="Conversation history"
+        className="flex-1 overflow-y-auto min-h-0"
+      >
         <div className="p-2 space-y-1">
           {conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-sm">
@@ -98,7 +102,11 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
               const isActive = conversation.id === activeConversationId
 
               if (renderConversation) {
-                return renderConversation(conversation, isActive)
+                return (
+                  <Fragment key={conversation.id}>
+                    {renderConversation(conversation, isActive)}
+                  </Fragment>
+                )
               }
 
               return (
@@ -110,7 +118,7 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
                   timestamp={conversation.timestamp}
                   unread={conversation.unread}
                   isActive={isActive}
-                  onSelect={(id) => {
+                  onSelect={id => {
                     onConversationSelect?.(id)
                     onClose?.()
                     layoutContext?.closeSidebar()

@@ -1,12 +1,33 @@
 'use client'
 
 import { Div, P } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
-interface PasswordStrengthProps {
-  password: string
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+export interface PasswordStrengthTexts {
+  weak: string
+  fair: string
+  good: string
+  strong: string
 }
+
+export interface PasswordStrengthProps {
+  password: string
+  /** Override texts */
+  texts?: Partial<PasswordStrengthTexts>
+}
+
+// ─── Defaults ───────────────────────────────────────────────────────────────
+
+const DEFAULT_TEXTS: PasswordStrengthTexts = {
+  weak: 'Weak',
+  fair: 'Fair',
+  good: 'Good',
+  strong: 'Strong',
+}
+
+// ─── Logic ──────────────────────────────────────────────────────────────────
 
 type Strength = 'weak' | 'fair' | 'good' | 'strong'
 
@@ -46,8 +67,10 @@ const strengthTextColors: Record<Strength, string> = {
   strong: 'text-success',
 }
 
-export function PasswordStrength({ password }: PasswordStrengthProps) {
-  const t = useTranslations('register.passwordStrength')
+// ─── Component ──────────────────────────────────────────────────────────────
+
+export function PasswordStrength({ password, texts }: PasswordStrengthProps) {
+  const t = { ...DEFAULT_TEXTS, ...texts }
   const { level, label } = useMemo(() => calculateStrength(password), [password])
 
   if (!password) return null
@@ -65,7 +88,7 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
         ))}
       </Div>
       <P size="xs" className={strengthTextColors[label]}>
-        {t(label)}
+        {t[label]}
       </P>
     </Div>
   )

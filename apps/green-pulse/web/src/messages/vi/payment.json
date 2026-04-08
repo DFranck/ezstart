@@ -1,0 +1,24 @@
+{
+  "success": {
+    "donateTitle": "Cảm ơn bạn!",
+    "donateMessage": "Khoản quyên góp của bạn đã được nhận. Sự hào phóng của bạn đóng góp cho một tương lai xanh hơn!",
+    "purchaseTitle": "Mua hàng hoàn tất!",
+    "purchaseMessage": "Giao dịch mua hàng đã được xử lý thành công. Cảm ơn đơn hàng của bạn!",
+    "subscribeTitle": "Đăng ký thành công!",
+    "subscribeMessage": "Đăng ký của bạn đã được kích hoạt thành công. Chào mừng bạn!",
+    "backHome": "Quay lại trang chủ",
+    "whatNext": "Tiếp theo là gì?",
+    "emailConfirmation": "Biên lai sẽ được gửi đến email của bạn qua Stripe.",
+    "receiptAvailable": "Biên lai có sẵn trong email Stripe của bạn.",
+    "accessGranted": "Quyền truy cập đã được cấp ngay lập tức."
+  },
+  "cancel": {
+    "title": "Thanh toán đã hủy",
+    "message": "Thanh toán của bạn đã bị hủy. Không có khoản nào bị trừ.",
+    "tryAgain": "Thử lại",
+    "backHome": "Quay lại trang chủ",
+    "needHelp": "Cần trợ giúp?",
+    "contactSupport": "Nếu bạn gặp sự cố, vui lòng liên hệ bộ phận hỗ trợ.",
+    "noCharge": "Đừng lo, không có khoản nào bị trừ từ tài khoản của bạn."
+  }
+}

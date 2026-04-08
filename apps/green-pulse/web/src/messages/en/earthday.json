@@ -33,6 +33,28 @@
         "default": "Enter code EARTHDAY2026 for 1 free month of Pro at launch"
       }
     },
+    "signup": {
+      "title": "Join the Green Movement",
+      "subtitle": "Create your free account in seconds",
+      "username": "Username",
+      "usernamePlaceholder": "Choose a username",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "submit": "Join Now",
+      "submitting": "Creating account...",
+      "successToast": "Account created! Welcome aboard.",
+      "fallbackError": "An error occurred. Please try again.",
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email"
+    },
+    "welcome": {
+      "justJoined": "Welcome aboard!",
+      "back": "Welcome back!",
+      "installHint": "Install the app for quick access and offline support.",
+      "installDescription": "Add GreenPulse.AI to your home screen for the best experience.",
+      "installButton": "Install App",
+      "laterButton": "Later"
+    },
     "footer": {
       "contact": "Contact us",
       "eventCredit": "Presented at Sustainable Future 10 & Earth Day Vietnam 2026 — organized by Green Leaders Community (GLC)",

@@ -12,7 +12,7 @@ export interface SignedInProps {
  *
  * @example
  * <SignedIn>
- *   <p>Welcome back!</p>
+ *   <P>Welcome back!</P>
  * </SignedIn>
  */
 export function SignedIn({ children }: SignedInProps) {

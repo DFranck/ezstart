@@ -59,6 +59,7 @@ const changePasswordController = async (req: Request, res: Response) => {
 
     // Set new password — pre-save hook will hash it automatically
     user.passwordHash = newPassword
+    user.hasSetOwnPassword = true
     await user.save()
 
     logger.info(`Password changed for user ${userId}`)

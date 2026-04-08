@@ -16,6 +16,7 @@ import { twoFactorRegistries, twoFactorRouters } from './two-factor/index.js'
 import deleteAccountRouter, { deleteAccountRegistry } from './delete-account.js'
 import updateProfileRouter, { updateProfileRegistry } from './update-profile.js'
 import changePasswordRouter, { changePasswordRegistry } from './change-password.js'
+import quickSignupRouter, { quickSignupRegistry } from './quick-signup.js'
 
 export const authRegistries = [
   registerRegistry,
@@ -36,6 +37,7 @@ export const authRegistries = [
   deleteAccountRegistry,
   updateProfileRegistry,
   changePasswordRegistry,
+  quickSignupRegistry,
 ]
 
 export const authRouters = [
@@ -57,4 +59,5 @@ export const authRouters = [
   deleteAccountRouter,
   updateProfileRouter,
   changePasswordRouter,
+  quickSignupRouter,
 ]

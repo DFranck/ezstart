@@ -9,12 +9,7 @@ import { getMessages } from 'next-intl/server'
 import { Gugi, K2D } from 'next/font/google'
 import Script from 'next/script'
 import ClientLayout from './client-layout'
-import {
-  faqSchema,
-  organizationSchema,
-  softwareApplicationSchema,
-  websiteSchema,
-} from './schemas'
+import { faqSchema, organizationSchema, softwareApplicationSchema, websiteSchema } from './schemas'
 
 const gugi = Gugi({ weight: '400', subsets: ['latin'], variable: '--font-gugi' })
 const k2d = K2D({
@@ -78,7 +73,15 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
       <head>
         <ThemeStyleInjector appName="green-pulse" />
       </head>
-      <body className="font-k2d">
+      <body
+        className="font-k2d"
+        style={
+          {
+            '--brand': 'oklch(0.6 0.18 145)',
+            '--brand-foreground': 'oklch(0.98 0.01 145)',
+          } as unknown as Record<string, string>
+        }
+      >
         <Script
           id="json-ld-app"
           type="application/ld+json"

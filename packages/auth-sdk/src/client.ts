@@ -292,6 +292,35 @@ export class AuthClient {
   }
 
   /**
+   * Quick sign up with just username and email (no password).
+   * The API will auto-generate a password and send a verification email.
+   * @stub This method requires a corresponding API endpoint to be implemented.
+   */
+  async quickSignUp(data: {
+    username: string
+    email: string
+    app: string
+    promoCode?: string
+  }): Promise<{ user: AuthUser; accessToken: string; refreshToken: string }> {
+    const response = await fetch(`${this.config.baseURL}/quick-signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || result.data?.error || 'Quick signup failed')
+    }
+
+    return result.data ?? result
+  }
+
+  /**
    * Refresh tokens using a refresh token.
    * Returns new access token, refresh token, and user info.
    */

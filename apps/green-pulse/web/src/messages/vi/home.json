@@ -1,0 +1,333 @@
+{
+  "home": {
+    "hero": {
+      "title": "GreenPulse.AI - Tuân thủ ESG Được Hỗ trợ bởi AI cho Doanh nghiệp SME Đông Nam Á",
+      "subtitle": "Trợ lý bền vững cho 1 triệu doanh nghiệp",
+      "typewriterText": "Chuyển đổi tăng trưởng bền vững thành cơ hội tài chính xanh",
+      "description": "Giảm chi phí 30% • Mở khóa vay xanh • Đáp ứng tiêu chuẩn xuất khẩu • Tăng trưởng bền vững • Có KPI cho marketing xanh, KHÔNG tẩy xanh",
+      "cta": "Bắt đầu Miễn phí",
+      "ctaSecondary": "Khám phá Giải pháp Tích hợp",
+      "emailPlaceholder": "Địa chỉ email của bạn",
+      "notifyMe": "Thông báo cho tôi",
+      "getStarted": "Bắt đầu Miễn phí"
+    },
+    "value": {
+      "intro": "Với GreenPulse.AI, bạn không cần phải là chuyên gia môi trường hay thuê một chuyên gia. Chỉ cần trò chuyện đơn giản với trợ lý cá nhân, bạn sẽ nhận được hướng dẫn từng bước để:",
+      "points": {
+        "chat": "Trao đổi về tình hình hiện tại và tìm giải pháp đơn giản",
+        "measure": "Đo lường dấu chân carbon của bạn",
+        "improve": "Cải thiện hiệu quả và tiết kiệm chi phí",
+        "roadmap": "Xây dựng lộ trình bền vững với KPI",
+        "qualify": "Đủ điều kiện vay xanh và cơ hội xuất khẩu"
+      }
+    },
+    "example": {
+      "title": "Ví dụ tương tác",
+      "user": "Người dùng:",
+      "userMessage": "Tôi quản lý 4 phòng khám thẩm mỹ ở TP.HCM với 15 nhân viên và 10 máy móc. Tôi muốn giảm hóa đơn điện và thu hút khách hàng yêu cầu chất lượng cao và yêu thiên nhiên. Bạn có thể giúp tôi không?",
+      "ai": "GreenPulse.AI:",
+      "aiMessage": "Xin chào chị Hằng, vâng tôi hoàn toàn có thể giúp chị đạt được mục tiêu tăng trưởng bền vững. Hãy cùng xem xét chi phí hiện tại và kiểm kê thiết bị của chị. Chị có thể cho biết chị muốn marketing các hoạt động này hay chỉ muốn âm thầm thực hiện? Chị có đang cân nhắc huy động vốn qua tài chính xanh trong tương lai gần không?"
+    },
+    "packages": {
+      "title": "Các Gói Dịch vụ",
+      "contactUs": "Liên hệ chúng tôi",
+      "free": {
+        "title": "Nhận thức",
+        "subtitle": "Cho việc nâng cao nhận thức & các CEO tò mò",
+        "price": "0$",
+        "period": "/trọn đời",
+        "description": "Bắt đầu hành trình bền vững với sự hỗ trợ của AI. Khám phá các hành động đơn giản để giảm chi phí, hiểu dấu chân carbon và khám phá cơ hội mới. Không cần cam kết.",
+        "features": {
+          "chat": "Trợ lý AI ESG hội thoại (Agent GreenPulse)",
+          "footprint": "Nhận thức cơ bản về dấu chân carbon",
+          "wins": "Xác định các cải thiện nhanh (năng lượng, chất thải, chi phí)",
+          "tips": "Mẹo giáo dục về bền vững",
+          "marketing": "Khám phá cơ hội marketing xanh",
+          "instant": "⚡ Truy cập ngay—không cần thẻ tín dụng"
+        },
+        "cta": "Bắt đầu khám phá miễn phí",
+        "note": "💡 Hoàn hảo cho các hành động nhanh & đơn giản để tăng trưởng có ý thức"
+      },
+      "premium": {
+        "title": "Gói Premium",
+        "subtitle": "Cho tăng trưởng được thúc đẩy bởi ESG",
+        "badge": "Sắp Ra Mắt",
+        "description": "Tôi muốn sử dụng các hành động bền vững và xanh để thúc đẩy kinh doanh thông qua marketing xanh phù hợp, tránh tẩy xanh và có KPI vững chắc cho khách hàng.",
+        "features": {
+          "chat": "Nền tảng trò chuyện AI",
+          "tools": "Truy cập công cụ ESG với bảng điều khiển",
+          "import": "Nhập dữ liệu (tài liệu, giọng nói, hình ảnh)",
+          "analysis": "Phân tích dữ liệu và biểu đồ",
+          "plans": "Kế hoạch hành động tùy chỉnh"
+        }
+      },
+      "golden": {
+        "title": "Gói Golden",
+        "subtitle": "Cho tuân thủ ESG chính thức",
+        "badge": "Sắp Ra Mắt",
+        "description": "Tôi cần một báo cáo/hồ sơ/kiểm toán ESG chắc chắn và chính thức để chứng nhận ISO / xuất khẩu quốc tế / tiếp cận tài chính xanh.",
+        "features": {
+          "all": "Tất cả tính năng Premium",
+          "support": "Hỗ trợ tùy chỉnh cho tiêu chuẩn chính thức/quốc tế",
+          "replace": "Thay thế hoặc hỗ trợ người phụ trách ESG"
+        }
+      }
+    },
+    "cta": {
+      "title": "Sẵn sàng chuyển đổi hành trình bền vững của bạn?",
+      "description": "Bắt đầu sử dụng GreenPulse.AI ngay hôm nay và giải phóng tiềm năng xanh của bạn.",
+      "joinWaitlist": "Tham gia danh sách chờ",
+      "getStarted": "Bắt đầu",
+      "thankYou": "Cảm ơn bạn! Bạn sẽ được thông báo khi GreenPulse.AI ra mắt",
+      "loading": "Đang thêm vào danh sách chờ...",
+      "alreadyRegistered": "Email này đã được đăng ký!",
+      "error": "Đã xảy ra lỗi. Vui lòng thử lại."
+    },
+    "subtitle": "Trợ lý xanh mới của bạn",
+    "heroFeatures": [
+      "Trích xuất dữ liệu thông minh",
+      "Chấm điểm ESG tức thì",
+      "Báo cáo tuân thủ tự động",
+      "Chuẩn bị tài chính xanh",
+      "Chiến lược tăng trưởng tùy chỉnh"
+    ],
+    "challenge": {
+      "title": "Thế giới đang đối mặt với <strong>điều kiện thời tiết khắc nghiệt</strong> do biến đổi khí hậu. Các doanh nghiệp được thúc đẩy vượt ra ngoài kinh doanh thông thường và hướng tới tăng trưởng bền vững.",
+      "sealTitle": "Thách thức khủng hoảng khí hậu tại Đông Nam Á",
+      "challenges": [
+        "Nguồn lực hạn chế để thiết lập khung ESG vững chắc và chứng minh tác động khí hậu thực sự",
+        "Thiếu tài liệu có cấu trúc để đáp ứng yêu cầu ESG của nhà đầu tư để huy động vốn",
+        "Thiếu chuyên môn để điều hướng các tiêu chuẩn quốc tế (GRI, SFDR, CSRD) được yêu cầu bởi các nhà đầu tư tác động"
+      ]
+    },
+    "transformation": {
+      "title": "GreenPulse.AI dễ dàng chuyển đổi dữ liệu phức tạp thành chiến lược tác động",
+      "steps": {
+        "step1": {
+          "badge": "1",
+          "title": "Trò chuyện & tải lên"
+        },
+        "step2": {
+          "badge": "2",
+          "title": "Để GPA làm việc cho bạn"
+        },
+        "step3": {
+          "badge": "3",
+          "title": "Nhận chiến lược & KPI"
+        }
+      },
+      "features": [
+        {
+          "title": "Trích xuất và tập trung dữ liệu mạnh mẽ",
+          "description": "Giọng nói, hình ảnh và tích hợp liền mạch với phần mềm hiện có (ERP, CRM, Excel) để trích xuất dữ liệu tự động và điền trước."
+        },
+        {
+          "title": "Phân tích ESG tức thì",
+          "description": "Đánh giá và chấm điểm thời gian thực cho dự án và danh mục đầu tư với tiêu chí ESG tùy chỉnh và khuyến nghị tức thì."
+        },
+        {
+          "title": "Chiến lược và báo cáo tùy chỉnh",
+          "description": "Trợ lý AI hội thoại cho khuyến nghị cá nhân hóa và báo cáo tuân thủ (GRI, SFDR) phù hợp với nhu cầu của bạn."
+        }
+      ]
+    },
+    "problem": {
+      "title": "Tuân thủ ESG Không Nên Cản Trở Tăng trưởng Của Bạn",
+      "subtitle": "Bạn không đơn độc. <strong>98% doanh nghiệp SME tại Đông Nam Á</strong> không có quyền tiếp cận kiến thức ESG, trong khi người mua toàn cầu yêu cầu bằng chứng bền vững trước năm 2025.",
+      "problems": [
+        {
+          "title": "⏰ Nguồn Lực Hạn Chế",
+          "description": "Đội ngũ của bạn thiếu thời gian và chuyên môn để điều hướng các khung <strong>GRI, SFDR, CSRD</strong> trong khi quản lý hoạt động hàng ngày."
+        },
+        {
+          "title": "💰 Rào Cản Tài Chính",
+          "description": "Ngân hàng yêu cầu tài liệu ESG mà bạn chưa có. Không có bằng chứng tuân thủ, <strong>vay xanh vẫn ngoài tầm với</strong>."
+        },
+        {
+          "title": "🌍 Sẵn Sàng Xuất Khẩu",
+          "description": "Quy định EU (<strong>CSRD</strong>) hiện yêu cầu tính bền vững của chuỗi cung ứng. Không tuân thủ = mất cơ hội xuất khẩu."
+        }
+      ]
+    },
+    "useCases": {
+      "title": "GreenPulse.AI có thể giúp hơn 900K doanh nghiệp SME như thế nào?",
+      "cases": [
+        {
+          "icon": "🏭",
+          "title": "SME sản xuất: giảm chi phí qua hiệu quả năng lượng",
+          "challenge": "Chi phí năng lượng cao, thiếu tài liệu ESG cho người mua quốc tế",
+          "solution": "Tính toán dấu chân carbon, xác định cơ hội tiết kiệm năng lượng (pin mặt trời, máy móc hiệu quả), đánh giá đủ điều kiện vay xanh",
+          "result": "Giảm chi phí năng lượng 20-35% tùy vào đầu tư ban đầu, cải thiện tiếp cận tài chính xanh, cung cấp báo cáo tuân thủ có thể kiểm toán cho người mua quốc tế",
+          "badges": ["Sản xuất", "Hiệu quả Năng lượng"]
+        },
+        {
+          "icon": "🍽️",
+          "title": "Nhà hàng: giảm chi phí và xây dựng hình ảnh xanh",
+          "challenge": "Hóa đơn điện cao, khó thu hút khách hàng ý thức môi trường khi không có chiến lược bền vững rõ ràng",
+          "solution": "Xác định cải thiện nhanh (đèn LED, cách nhiệt, đánh giá tiềm năng năng lượng mặt trời), hướng dẫn đối tác với nhà cung cấp địa phương, tối ưu hóa quản lý chất thải, loại bỏ nhựa dùng một lần",
+          "result": "Giảm chi phí năng lượng 25-40% tùy biện pháp thực hiện, giảm chất thải 40-60%, nâng cao định vị thương hiệu cho du lịch sinh thái và người tiêu dùng có ý thức, tiềm năng được công nhận 'Chứng nhận Xanh'",
+          "badges": [
+            "Từ nông trại đến bàn ăn",
+            "Marketing Xanh",
+            "Nhà bếp không rác thải",
+            "Ẩm thực bền vững"
+          ]
+        },
+        {
+          "icon": "🌾",
+          "title": "Kinh doanh nông nghiệp: nông nghiệp tái tạo cho tiếp cận tài chính và xuất khẩu",
+          "challenge": "Người mua EU / Mỹ và thậm chí Trung Quốc yêu cầu tài liệu bền vững tuân thủ và vững chắc",
+          "solution": "Hướng dẫn danh sách kiểm tra tuân thủ EU, tạo báo cáo ESG sẵn sàng xuất khẩu, phân tích khoảng cách và kế hoạch hành động",
+          "result": "Kiểm toán thành công với người mua quốc tế, duy trì hoặc mở rộng hợp đồng xuất khẩu, vị thế tốt hơn cho tài trợ bằng trái phiếu xanh, lợi thế cạnh tranh trong chuỗi cung ứng tập trung vào sức khỏe và bền vững",
+          "badges": [
+            "Nông nghiệp tái tạo",
+            "Tuân thủ Xuất khẩu",
+            "Tài chính Xanh",
+            "Nông nghiệp thích ứng khí hậu"
+          ]
+        }
+      ],
+      "disclaimer": "*Kết quả thay đổi tùy theo điều kiện ban đầu, ngành và biện pháp thực hiện. GreenPulse cung cấp chiến lược và công cụ vững chắc; kết quả thực tế phụ thuộc vào hành động và đầu tư của khách hàng."
+    },
+    "competitive": {
+      "title": "Tại sao GreenPulse Vượt trội hơn Phần mềm ESG Chung & Chatbot AI",
+      "cta": "Xem GreenPulse Hoạt động",
+      "ctaSubtitle": "Được thiết kế cho các SME Đông Nam Á cần kết quả, không phải sự phức tạp.",
+      "headers": {
+        "feature": "Tính năng",
+        "greenpulse": "GreenPulse.AI",
+        "software": "Phần mềm ESG",
+        "ai": "Nền tảng AI"
+      },
+      "rows": [
+        {
+          "feature": "Loại Giao diện",
+          "greenpulse": "✅ Kết hợp (Bảng điều khiển + AI hội thoại)",
+          "software": "❌ Giao diện dự án tĩnh",
+          "ai": "❌ Chỉ hội thoại"
+        },
+        {
+          "feature": "Chuyên môn ESG",
+          "greenpulse": "✅ Khung quốc tế tích hợp (GRI, SFDR, SDG)",
+          "software": "✅ Danh sách kiểm tra tuân thủ thủ công",
+          "ai": "❌ Chung chung, nguy cơ ảo giác"
+        },
+        {
+          "feature": "Thu thập Dữ liệu",
+          "greenpulse": "✅ Trích xuất AI giọng nói, ảnh, tài liệu tất cả trong một",
+          "software": "❌ Nhập thủ công hoặc bán tự động",
+          "ai": "✅ Nếu đăng ký nền tảng riêng"
+        },
+        {
+          "feature": "Theo dõi Dự án",
+          "greenpulse": "✅ Cập nhật tự động + bảng điều khiển thông minh",
+          "software": "✅ Quản lý dự án nhưng cập nhật thủ công",
+          "ai": "❌ Không có khả năng theo dõi"
+        },
+        {
+          "feature": "Tích hợp ERP/CRM",
+          "greenpulse": "✅ Đồng bộ một cú nhấp",
+          "software": "❌ Hoạt động riêng lẻ",
+          "ai": "✅ Hạn chế, tốn nhiều phát triển"
+        }
+      ]
+    },
+    "credibility": {
+      "title": "Được Công nhận bởi Lãnh đạo Ngành và Hỗ trợ bởi Chuyên môn",
+      "cards": [
+        {
+          "icon": "🎓",
+          "title": "Hợp tác Nghiên cứu Học thuật",
+          "description": "Hợp tác với viện nghiên cứu đại học hàng đầu Đông Nam Á về thông tin thị trường, phân tích khung pháp lý và xác nhận các phương pháp ESG tốt nhất."
+        },
+        {
+          "icon": "💼",
+          "title": "Mạng lưới Nhà đầu tư Tác động",
+          "description": "Được hỗ trợ bởi các nhà đầu tư tác động quản lý hơn 500 triệu USD tài sản tại Đông Nam Á, cung cấp tư vấn chiến lược về triển khai tài chính xanh và yêu cầu ESG danh mục đầu tư."
+        },
+        {
+          "icon": "🏦",
+          "title": "Góc nhìn Ngân hàng Khu vực",
+          "description": "Hợp tác với các chuyên gia tài chính xanh từ các ngân hàng lớn Đông Nam Á để đảm bảo nền tảng đáp ứng yêu cầu cho vay thực tế và tiêu chuẩn pháp lý."
+        },
+        {
+          "icon": "⚙️",
+          "title": "Công nghệ ESG Cấp Doanh nghiệp",
+          "description": "Được hỗ trợ bởi các giải pháp SaaS ESG đã được chứng minh và khung AI tiên tiến. Chúng tôi tích hợp các công cụ tuân thủ tốt nhất trực tiếp vào giao diện hội thoại dễ tiếp cận—mang phần mềm doanh nghiệp 50K$+ đến mọi SME."
+        }
+      ],
+      "teamNote": "Đội ngũ sáng lập kết hợp: 12+ năm kinh nghiệm chiến lược bền vững và tư vấn ESG, chuyên môn sâu về kỹ thuật AI/ML, và kinh nghiệm trực tiếp về khoảng cách tiếp cận mà các SME tại Đông Nam Á đang đối mặt."
+    },
+    "partnership": {
+      "title": "Cơ hội Đối tác",
+      "subtitle": "Giải pháp nhãn trắng & API cho doanh nghiệp của bạn",
+      "description": "",
+      "values": [
+        {
+          "icon": "🎯",
+          "title": "Tối ưu hóa Thẩm định Danh mục Đầu tư",
+          "items": [
+            "Phân tích ESG đa tiêu chí (SDG, GRI, SFDR) với chấm điểm rủi ro tức thì",
+            "Sàng lọc dự án tự động tiết kiệm 40% thời gian thẩm định",
+            "Bảng điều khiển giám sát sức khỏe ESG danh mục đầu tư theo thời gian thực"
+          ]
+        },
+        {
+          "icon": "📊",
+          "title": "Giải pháp ESG Nhãn trắng",
+          "items": [
+            "Nền tảng tùy chỉnh cho khách hàng SME của bạn (ví dụ: \"Green [Ngân hàng của Bạn] powered by GreenPulse\")",
+            "Tích hợp liền mạch với quy trình xét duyệt khoản vay",
+            "Đánh giá đủ điều kiện vay xanh phù hợp với yêu cầu ngân hàng trung ương"
+          ]
+        },
+        {
+          "icon": "🚀",
+          "title": "Hỗ trợ Ươm tạo Dự án",
+          "items": [
+            "Trợ lý AI để chính thức hóa sản phẩm và phát triển lộ trình ESG",
+            "Theo dõi tuân thủ tự động cho các công ty trong danh mục đầu tư",
+            "Báo cáo tác động chuẩn hóa cho truyền thông LP"
+          ]
+        }
+      ],
+      "cta": "Lên lịch Thảo luận Đối tác",
+      "ctaEmail": "partnerships@greenpulse.ai?subject=Yêu cầu Đối tác",
+      "note": "Thí điểm hiện tại: Ngân hàng hàng đầu Đông Nam Á, quỹ tác động quốc tế, máy gia tốc công nghệ khí hậu"
+    },
+    "press": {
+      "title": "Báo chí nói về chúng tôi",
+      "vietstock": {
+        "publication": "VietStock",
+        "date": "Tháng 11 năm 2025",
+        "title": "\"Tẩy xanh\" dưới góc nhìn của chuyên gia tư vấn ESG quốc tế",
+        "quote": "Gần đây, chúng tôi đang thử nghiệm một ứng dụng có tên GreenPulse.AI. Đây là trợ lý trí tuệ nhân tạo (AI) giúp các doanh nghiệp SME tại Việt Nam và Đông Nam Á dễ dàng thực hành bền vững. Người dùng sẽ được hướng dẫn từng bước để giải quyết các vấn đề như giảm chi phí điện, đáp ứng yêu cầu xuất khẩu, với bảng điều khiển để theo dõi tiến độ. Nền tảng cũng tích hợp các công cụ báo cáo ESG tự động theo tiêu chuẩn quốc tế. Mục tiêu chính là giúp doanh nghiệp tránh bẫy 'tẩy xanh', chứng minh cải thiện có thể đo lường và mở rộng tiếp cận nhà đầu tư, khách hàng và thị trường quốc tế."
+      }
+    },
+    "faq": {
+      "title": "Câu hỏi Thường gặp",
+      "questions": [
+        {
+          "question": "GreenPulse khác gì so với ChatGPT hoặc các công cụ AI chung?",
+          "answer": "GreenPulse được thiết kế đặc biệt cho tuân thủ ESG và báo cáo bền vững. Khác với ChatGPT, chúng tôi được đào tạo trên các khung quốc tế (GRI, SFDR, CSRD, ISSB) và tích hợp với các nguồn dữ liệu hiện có của bạn (ERP, CRM, Excel). Chúng tôi cung cấp kết quả có cấu trúc đáp ứng yêu cầu pháp lý—không phải văn bản chung cần chỉnh sửa thủ công."
+        },
+        {
+          "question": "Dữ liệu của tôi có an toàn không? Bạn có chia sẻ với bên thứ ba không?",
+          "answer": "**GÓI MIỄN PHÍ:** Cuộc hội thoại của bạn sử dụng nhà cung cấp AI bên thứ ba (OpenAI, Anthropic). Dữ liệu được truyền đến máy chủ của họ (đặt tại Mỹ) để xử lý. Các nhà cung cấp này có thể sử dụng dữ liệu hội thoại để cải thiện mô hình trừ khi bạn từ chối. **GÓI PREMIUM & GOLDEN:** Chúng tôi cung cấp mô hình AI được lưu trữ cục bộ (Llama 3) triển khai tại Đông Nam Á. Dữ liệu của bạn không bao giờ rời khỏi cơ sở hạ tầng của chúng tôi—đảm bảo chủ quyền dữ liệu hoàn toàn, không chia sẻ với bên thứ ba, và tuân thủ yêu cầu lưu trữ dữ liệu địa phương. Tất cả dữ liệu được mã hóa khi truyền (HTTPS) và khi lưu trữ (AES-256)."
+        },
+        {
+          "question": "AI không tạo ra phát thải sao? Bạn xử lý điều này như thế nào?",
+          "answer": "Đúng, tính toán AI tạo ra phát thải—đó là lý do chúng tôi bù đắp 200% dấu chân carbon thông qua các dự án loại bỏ carbon đã được xác minh. Quan trọng hơn, tự động hóa của GreenPulse giảm nhu cầu di chuyển, báo cáo giấy và công việc thủ công dư thừa, mang lại tác động carbon ròng âm cho người dùng."
+        },
+        {
+          "question": "GreenPulse có thể tích hợp với các công cụ hiện có không?",
+          "answer": "Hoàn toàn có thể. GreenPulse kết nối với các hệ thống ERP chính (SAP, Oracle), CRM (Salesforce, HubSpot) và nguồn dữ liệu (Excel, Google Sheets, CSV). API của chúng tôi cho phép tích hợp tùy chỉnh cho các hệ thống riêng. Hầu hết các triển khai hoạt động trong 2 tuần."
+        },
+        {
+          "question": "Điều gì xảy ra nếu GreenPulse mắc lỗi trong báo cáo tuân thủ?",
+          "answer": "GreenPulse cung cấp tính minh bạch trong tất cả kết quả—hiển thị khung và điểm dữ liệu nào được sử dụng cho mỗi khuyến nghị. Tất cả báo cáo bao gồm điểm kiểm tra con người trước khi hoàn thành. Chúng tôi cũng cung cấp nhật ký kiểm toán và kiểm soát phiên bản để đảm bảo sự tin cậy pháp lý."
+        }
+      ]
+    }
+  }
+}

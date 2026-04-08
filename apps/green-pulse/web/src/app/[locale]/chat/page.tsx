@@ -23,15 +23,16 @@ import {
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery } from '@tanstack/react-query'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
 function LiaPageContent() {
   const t = useTranslations('chat')
+  const locale = useLocale()
 
   // Get user from Zustand store (localStorage 'ezauth-storage')
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, accessToken } = useAuthStore()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [onConversationCreated, setOnConversationCreated] = useState<(() => void) | null>(null)
 
@@ -47,6 +48,7 @@ function LiaPageContent() {
       method: 'POST' as const,
       headers: {
         'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
       enableStreaming: true, // Auto-detects SSE vs JSON based on Content-Type
       formatRequest: (message: string) => {
@@ -54,6 +56,7 @@ function LiaPageContent() {
           message,
           stream: true, // Request streaming (API decides via Content-Type)
           extract_esg: false,
+          locale, // Pass locale so AI responds in the user's language
           // Include userId if authenticated
           ...(isAuthenticated && user?._id && { userId: user._id }),
         }
@@ -115,6 +118,7 @@ function LiaPageContent() {
     [
       isAuthenticated,
       user,
+      accessToken,
       activeConversationId,
       onConversationCreated,
       selectedProvider,
@@ -124,16 +128,18 @@ function LiaPageContent() {
   ) // Re-create when auth state, activeConversationId, selectedProvider, or refreshConversation changes
 
   return (
-    <ThreadProvider config={config}>
-      <LiaThread
-        activeConversationId={activeConversationId}
-        setActiveConversationId={setActiveConversationId}
-        onRegisterConversationCreatedCallback={setOnConversationCreated}
-        providers={providers}
-        selectedProvider={selectedProvider}
-        onProviderChange={setSelectedProvider}
-      />
-    </ThreadProvider>
+    <Div className="fixed inset-0 z-0">
+      <ThreadProvider config={config}>
+        <LiaThread
+          activeConversationId={activeConversationId}
+          setActiveConversationId={setActiveConversationId}
+          onRegisterConversationCreatedCallback={setOnConversationCreated}
+          providers={providers}
+          selectedProvider={selectedProvider}
+          onProviderChange={setSelectedProvider}
+        />
+      </ThreadProvider>
+    </Div>
   )
 }
 

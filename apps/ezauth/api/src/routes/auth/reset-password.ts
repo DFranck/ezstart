@@ -68,6 +68,7 @@ const resetPasswordController = async (req: Request, res: Response) => {
 
     // Update password (pre-save hook will hash it)
     user.passwordHash = newPassword
+    user.hasSetOwnPassword = true
     await user.save()
 
     // Mark token as used

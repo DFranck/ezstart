@@ -1,0 +1,28 @@
+{
+  "sidebar": {
+    "myPlan": "Gói của tôi:",
+    "myTools": "Công cụ của tôi:",
+    "upgradePrompt": "Sắp ra mắt:",
+    "settings": "Cài đặt",
+    "newChat": "Cuộc trò chuyện mới",
+    "emptyState": "Bắt đầu cuộc trò chuyện mới để nhận thông tin từ LIA",
+    "tools": {
+      "dashboards": "Bảng điều khiển",
+      "uploadFiles": "Tải lên tệp",
+      "documents": "Tài liệu",
+      "myProjects": "Dự án của tôi",
+      "compliances": "Tuân thủ"
+    }
+  },
+  "plans": {
+    "free": "Self-Awareness (Gói miễn phí)",
+    "premium": "Gói Premium",
+    "golden": "Gói Golden"
+  },
+  "errors": {
+    "sendFailed": "Gửi tin nhắn thất bại. Vui lòng thử lại.",
+    "serviceOverloaded": "Dịch vụ AI tạm thời quá tải. Vui lòng thử lại sau vài phút.",
+    "quotaExceeded": "Hạn mức dịch vụ AI đã vượt quá. Vui lòng thử lại sau.",
+    "configError": "Lỗi cấu hình dịch vụ AI. Vui lòng liên hệ bộ phận hỗ trợ."
+  }
+}
