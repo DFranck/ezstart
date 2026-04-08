@@ -50,6 +50,10 @@ export interface UserMenuProps {
   accountModalTexts?: Record<string, string>
   /** Google OAuth URL for "Connect account" button in AccountModal */
   googleOAuthUrl?: string
+  /** Dropdown open direction */
+  side?: 'top' | 'bottom'
+  /** Trigger style: 'icon' = avatar only, 'extended' = avatar + name + email */
+  variant?: 'icon' | 'extended'
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -74,6 +78,8 @@ export function UserMenu({
   onManageAccount,
   accountModalTexts,
   googleOAuthUrl,
+  side = 'bottom',
+  variant = 'icon',
 }: UserMenuProps) {
   const { user, isAuthenticated, login, logout, isLoggingIn } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
@@ -170,18 +176,34 @@ export function UserMenu({
     <>
       <Dropdown
         trigger={
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full cursor-pointer"
-            aria-label="User menu"
-          >
-            <UserAvatar size={avatarSize} user={user} />
-          </Button>
+          variant === 'extended' ? (
+            <Button
+              variant="ghost"
+              className="w-full justify-start h-auto py-2 px-2 cursor-pointer"
+              aria-label="User menu"
+            >
+              <Div className="flex items-center gap-2 w-full min-w-0">
+                <UserAvatar size={avatarSize} user={user} />
+                <Div className="flex flex-col min-w-0 text-left">
+                  <Span className="text-sm font-medium truncate">{fullName}</Span>
+                  <Span className="text-xs text-muted-foreground truncate">{user.email}</Span>
+                </Div>
+              </Div>
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full cursor-pointer"
+              aria-label="User menu"
+            >
+              <UserAvatar size={avatarSize} user={user} />
+            </Button>
+          )
         }
         items={items}
         align="end"
-        side="bottom"
+        side={side}
         menuClassName="min-w-[240px]"
         className={className}
       />

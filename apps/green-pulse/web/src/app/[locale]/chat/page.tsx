@@ -124,16 +124,18 @@ function LiaPageContent() {
   ) // Re-create when auth state, activeConversationId, selectedProvider, or refreshConversation changes
 
   return (
-    <ThreadProvider config={config}>
-      <LiaThread
-        activeConversationId={activeConversationId}
-        setActiveConversationId={setActiveConversationId}
-        onRegisterConversationCreatedCallback={setOnConversationCreated}
-        providers={providers}
-        selectedProvider={selectedProvider}
-        onProviderChange={setSelectedProvider}
-      />
-    </ThreadProvider>
+    <Div className="fixed inset-0 z-0">
+      <ThreadProvider config={config}>
+        <LiaThread
+          activeConversationId={activeConversationId}
+          setActiveConversationId={setActiveConversationId}
+          onRegisterConversationCreatedCallback={setOnConversationCreated}
+          providers={providers}
+          selectedProvider={selectedProvider}
+          onProviderChange={setSelectedProvider}
+        />
+      </ThreadProvider>
+    </Div>
   )
 }
 

@@ -5,7 +5,7 @@ import { greenPulseThreadTheme } from '@/config/thread-theme'
 import { useConversations } from '@/hooks/useConversations'
 import type { AIProviderInfo } from '@ezstart/ai-sdk'
 import { AISelector } from '@ezstart/ai-sdk/client'
-import { useAuthStore } from '@ezstart/auth-sdk'
+import { useAuthStore, UserMenu } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useRBAC } from '@ezstart/rbac'
@@ -72,6 +72,7 @@ export function LiaThread({
   const locale = useLocale()
   const tForms = useTranslations('forms')
   const tChat = useTranslations('chat')
+  const tAuth = useTranslations('auth')
 
   // Mock AI model selection (UI only - all requests use same backend)
   const [selectedMockModel, setSelectedMockModel] = useState<string>(MOCK_AI_MODELS[0].id)
@@ -348,32 +349,16 @@ export function LiaThread({
         </Nav>
       </Div>
 
-      {/* User info section */}
-      <Div className="border-t pt-3 space-y-2">
-        <Button variant="ghost" className="w-full justify-start h-auto py-2 px-2">
-          <Div className="flex items-center gap-2 w-full">
-            <Div className="w-8 h-8 rounded-full bg-gp-primary/10 flex items-center justify-center flex-shrink-0">
-              <Icon name="lucide:User" size={16} className="text-gp-primary" />
-            </Div>
-            <Div className="flex-1 min-w-0 text-left">
-              <Div className="text-sm font-medium truncate">
-                {user?.firstName || user?.email || 'User'}
-              </Div>
-              {user?.email && (
-                <Div className="text-xs text-muted-foreground truncate">{user.email}</Div>
-              )}
-            </Div>
-          </Div>
-        </Button>
-        <Button
-          variant="ghost"
-          className="w-full justify-start opacity-50 cursor-not-allowed h-8 px-2"
-          size="sm"
-          disabled
-        >
-          <Icon name="lucide:Settings" className="mr-2" size={14} />
-          <Span className="text-xs">{tChat('sidebar.settings')}</Span>
-        </Button>
+      {/* User menu */}
+      <Div className="border-t pt-3">
+        <UserMenu
+          side="top"
+          variant="extended"
+          texts={{
+            signOut: tAuth('logout'),
+            manageAccount: tChat('sidebar.settings'),
+          }}
+        />
       </Div>
     </Div>
   )

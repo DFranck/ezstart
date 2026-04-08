@@ -655,6 +655,7 @@ export const navSize = {
 } as const
 
 export const navLayout = {
+  default: 'flex flex-col',
   col: 'flex flex-col gap-4 md:gap-6 lg:gap-8',
   row: 'flex flex-row gap-4 md:gap-6 lg:gap-8 items-center justify-between',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
@@ -670,7 +671,7 @@ export const DEFAULT_NAV_VARIANTS = {
   variant: 'default',
   intent: 'default',
   size: 'full',
-  layout: 'center',
+  layout: 'default',
   density: 'default',
   withHeaderOffset: false,
 } as const
