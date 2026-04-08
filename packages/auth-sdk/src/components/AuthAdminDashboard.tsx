@@ -46,6 +46,7 @@ interface AdminUser {
   username: string
   globalRoles: string[]
   appRoles: Record<string, string[]>
+  apps?: string[]
   lastActiveAt?: string | null
   createdAt: string
 }
@@ -72,6 +73,7 @@ export interface AuthAdminDashboardTexts {
   columnRoles?: string
   columnLastActive?: string
   columnCreatedAt?: string
+  columnApps?: string
   columnActions?: string
 
   // Actions
@@ -116,7 +118,7 @@ export interface AuthAdminDashboardTexts {
 }
 
 export interface AuthAdminDashboardProps {
-  appName: string
+  appName?: string
   className?: string
   texts?: Partial<AuthAdminDashboardTexts>
 }
@@ -147,6 +149,7 @@ const DEFAULT_TEXTS: Required<AuthAdminDashboardTexts> = {
   columnRoles: 'Roles',
   columnLastActive: 'Last active',
   columnCreatedAt: 'Created',
+  columnApps: 'Apps',
   columnActions: 'Actions',
   edit: 'Edit',
   delete: 'Delete',
@@ -156,7 +159,8 @@ const DEFAULT_TEXTS: Required<AuthAdminDashboardTexts> = {
   hoursAgo: '{count}h ago',
   daysAgo: '{count}d ago',
   confirmDeleteTitle: 'Delete user',
-  confirmDeleteDescription: 'Are you sure you want to delete this user? This action cannot be undone.',
+  confirmDeleteDescription:
+    'Are you sure you want to delete this user? This action cannot be undone.',
   cancel: 'Cancel',
   confirm: 'Confirm',
   deleteError: 'Failed to delete user.',
@@ -194,7 +198,10 @@ function isOnline(lastActiveAt?: string | null): boolean {
   return Date.now() - new Date(lastActiveAt).getTime() < ONLINE_THRESHOLD_MS
 }
 
-function getRelativeTime(lastActiveAt: string | null | undefined, t: Required<AuthAdminDashboardTexts>): string {
+function getRelativeTime(
+  lastActiveAt: string | null | undefined,
+  t: Required<AuthAdminDashboardTexts>
+): string {
   if (!lastActiveAt) return '-'
 
   const diffMs = Date.now() - new Date(lastActiveAt).getTime()
@@ -247,7 +254,9 @@ function EditRolesModal({
     if (user) {
       setGlobalRoles([...(user.globalRoles || [])])
       setAppRoles(
-        Object.fromEntries(Object.entries(user.appRoles || {}).map(([app, roles]) => [app, [...(roles || [])]]))
+        Object.fromEntries(
+          Object.entries(user.appRoles || {}).map(([app, roles]) => [app, [...(roles || [])]])
+        )
       )
     }
   }, [user])
@@ -299,7 +308,9 @@ function EditRolesModal({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{t.editRolesTitle}</DialogTitle>
-          <DialogDescription>{t.editRolesSubtitle.replace('{email}', user.email)}</DialogDescription>
+          <DialogDescription>
+            {t.editRolesSubtitle.replace('{email}', user.email)}
+          </DialogDescription>
         </DialogHeader>
 
         <Div className="space-y-6 py-4">
@@ -422,8 +433,8 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
       const query: Record<string, string> = {
         limit: String(PAGE_SIZE),
         page: String(page),
-        app: appName,
       }
+      if (appName) query.app = appName
       if (searchQuery) query.search = searchQuery
 
       const response = await callApi<UsersApiResult>('/admin/users', {
@@ -485,6 +496,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
   }, [])
 
   // DataTable columns
+  const showAppsColumn = !appName
   const columns: ColumnDef<AdminUser>[] = [
     {
       accessorKey: 'email',
@@ -496,6 +508,30 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
       header: ({ header }) => <DataTableColumnHeader header={header} title={t.columnUsername} />,
       cell: ({ row }) => <Span className="text-sm">{row.original.username}</Span>,
     },
+    ...(showAppsColumn
+      ? [
+          {
+            id: 'apps',
+            header: t.columnApps,
+            enableSorting: false,
+            cell: ({ row }: { row: { original: AdminUser } }) => {
+              const apps = row.original.apps || []
+              if (apps.length === 0) {
+                return <Span className="text-muted-foreground text-sm">-</Span>
+              }
+              return (
+                <Div className="flex flex-wrap gap-1">
+                  {apps.map(app => (
+                    <Badge key={app} variant="secondary" size="sm">
+                      {app}
+                    </Badge>
+                  ))}
+                </Div>
+              )
+            },
+          },
+        ]
+      : []),
     {
       id: 'roles',
       header: t.columnRoles,
