@@ -16,8 +16,9 @@ const SupportSection = ({ id }: Props): React.JSX.Element => {
   return (
     <Section id={id} size="lg">
       <Div className="flex flex-col items-center gap-6">
-        <Div className="w-full max-w-md">
+        <Div className="w-full max-w-2xl">
           <DonationCard
+            cardVariant="ghost"
             appName="ezstart"
             projectId="ezstart"
             projectName="EZStart"
