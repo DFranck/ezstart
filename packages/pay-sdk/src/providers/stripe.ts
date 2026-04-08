@@ -43,7 +43,10 @@ export interface StripeInstance {
   }
   subscriptions: {
     cancel(id: string): Promise<{ status: string }>
-    update(id: string, params: Record<string, unknown>): Promise<{ status: string; cancel_at_period_end: boolean; current_period_end: number }>
+    update(
+      id: string,
+      params: Record<string, unknown>
+    ): Promise<{ status: string; cancel_at_period_end: boolean; current_period_end: number }>
   }
   webhooks: {
     constructEvent(payload: string | Buffer, signature: string, secret: string): StripeWebhookEvent
@@ -308,11 +311,16 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
     case 'invoice.payment_succeeded': {
       const sub = obj.subscription
       return {
-        subscriptionId: typeof sub === 'string' ? sub : (sub as Record<string, unknown>)?.id as string ?? null,
+        subscriptionId:
+          typeof sub === 'string'
+            ? sub
+            : (((sub as Record<string, unknown>)?.id as string) ?? null),
         amount: obj.amount_paid as number | undefined,
         currency: obj.currency as string | undefined,
         billingReason: obj.billing_reason as string | undefined,
-        periodEnd: obj.period_end ? new Date((obj.period_end as number) * 1000).toISOString() : undefined,
+        periodEnd: obj.period_end
+          ? new Date((obj.period_end as number) * 1000).toISOString()
+          : undefined,
         customerEmail: obj.customer_email as string | undefined,
         customerName: obj.customer_name as string | undefined,
       }

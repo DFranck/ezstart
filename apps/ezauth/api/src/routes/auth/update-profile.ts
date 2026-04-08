@@ -23,7 +23,7 @@ const docRouter = createRouterWithDoc(updateProfileRegistry, router)
 const updateProfileSchema = z.object({
   firstName: z.string().trim().max(100).optional().describe('First name'),
   lastName: z.string().trim().max(100).optional().describe('Last name'),
-  avatar: z.string().url().optional().describe('Avatar URL'),
+  avatar: z.string().optional().describe('Avatar URL or base64 data URI'),
 })
 
 const updateProfileController = async (req: Request, res: Response) => {

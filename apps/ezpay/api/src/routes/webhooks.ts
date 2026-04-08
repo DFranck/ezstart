@@ -114,11 +114,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           updateFields.currentPeriodEnd = new Date(data.currentPeriodEnd * 1000)
         }
 
-        await Payment.updateOne(
-          { 'metadata.subscriptionId': data.subscriptionId },
-          updateFields
+        await Payment.updateOne({ 'metadata.subscriptionId': data.subscriptionId }, updateFields)
+        logger.info(
+          `Subscription updated: ${data.subscriptionId} -> ${mappedStatus}${data.cancelAtPeriodEnd ? ' (canceling at period end)' : ''}`
         )
-        logger.info(`Subscription updated: ${data.subscriptionId} -> ${mappedStatus}${data.cancelAtPeriodEnd ? ' (canceling at period end)' : ''}`)
         break
       }
 

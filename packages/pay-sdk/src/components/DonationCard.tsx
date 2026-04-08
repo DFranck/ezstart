@@ -28,6 +28,12 @@ export interface DonationCardProps {
   projectName?: string
   className?: string
   variant?: 'default' | 'featured' | 'compact'
+  /** Card size (forwarded to Card component) */
+  cardSize?: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+  /** Card visual variant (forwarded to Card component) */
+  cardVariant?: 'default' | 'outline' | 'ghost' | 'floating' | 'dark' | 'premium' | 'elevated'
+  /** Card hover effect (forwarded to Card component) */
+  cardHover?: 'none' | 'lift' | 'glow' | 'border' | 'scale'
   presetAmounts?: number[]
   currency?: string
   allowCustomAmount?: boolean
@@ -82,6 +88,9 @@ export function DonationCard({
   projectName,
   className,
   variant = 'default',
+  cardSize,
+  cardVariant,
+  cardHover,
   presetAmounts = [5, 10, 25, 50],
   currency = 'USD',
   allowCustomAmount = true,
@@ -145,7 +154,12 @@ export function DonationCard({
 
   if (isCompact) {
     return (
-      <Card className={`p-4 ${className || ''}`}>
+      <Card
+        className={`p-4 ${className || ''}`}
+        size={cardSize}
+        variant={cardVariant}
+        hover={cardHover}
+      >
         <Div className={`flex flex-wrap items-center gap-3`}>
           <Icon name="lucide:Heart" className={`w-5 h-5 text-destructive shrink-0`} />
           <Span className={`font-semibold`}>{displayTitle}</Span>
@@ -170,6 +184,9 @@ export function DonationCard({
   return (
     <Card
       className={`relative flex flex-col ${isFeatured ? 'border-primary shadow-lg' : ''} ${className || ''}`}
+      size={cardSize}
+      variant={cardVariant}
+      hover={cardHover}
     >
       {isFeatured && (
         <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2`} variant="default">

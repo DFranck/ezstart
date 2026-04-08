@@ -214,8 +214,7 @@ export function PaymentHistory({
   }
 
   // Show App column when payments come from multiple projects
-  const showAppColumn =
-    payments.length > 0 && new Set(payments.map(p => p.projectId)).size > 1
+  const showAppColumn = payments.length > 0 && new Set(payments.map(p => p.projectId)).size > 1
 
   const columns = buildColumns(
     statusLabel,

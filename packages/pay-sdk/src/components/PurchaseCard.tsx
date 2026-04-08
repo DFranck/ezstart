@@ -108,19 +108,19 @@ export function PurchaseCard({
           <Img
             src={image}
             alt={productName}
-            className="w-12 h-12 rounded-md object-cover shrink-0"
+            className={`w-12 h-12 rounded-md object-cover shrink-0`}
           />
         )}
-        <Div className="flex-1 min-w-0">
-          <H3 size="h5" className="truncate">
+        <Div className={`flex-1 min-w-0`}>
+          <H3 size="h5" className={`truncate`}>
             {productName}
           </H3>
-          <Span className="text-lg font-bold">{price}</Span>
+          <Span className={`text-lg font-bold`}>{price}</Span>
         </Div>
-        <Div className="shrink-0">
+        <Div className={`shrink-0`}>
           <Button size="sm" disabled={isLoading} onClick={handlePurchase}>
             {isLoading ? (
-              <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
+              <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin`} />
             ) : (
               texts.buy
             )}
@@ -135,7 +135,7 @@ export function PurchaseCard({
       className={`relative flex flex-col overflow-hidden ${isFeatured ? 'border-primary shadow-lg' : ''} ${className || ''}`}
     >
       {isFeatured && (
-        <Badge className="absolute top-3 right-3 z-10" variant="default">
+        <Badge className={`absolute top-3 right-3 z-10`} variant="default">
           {texts.featured}
         </Badge>
       )}
@@ -143,45 +143,36 @@ export function PurchaseCard({
       {/* Product image */}
       {image && (
         <Div className={`w-full overflow-hidden ${isFeatured ? 'h-48' : 'h-36'}`}>
-          <Img
-            src={image}
-            alt={productName}
-            className="w-full h-full object-cover"
-          />
+          <Img src={image} alt={productName} className={`w-full h-full object-cover`} />
         </Div>
       )}
 
       <CardHeader>
         <H3>{productName}</H3>
         {description && (
-          <P size="sm" className="text-muted-foreground">
+          <P size="sm" className={`text-muted-foreground`}>
             {description}
           </P>
         )}
-        <Div className="mt-2">
+        <Div className={`mt-2`}>
           <Span className={`font-bold ${isFeatured ? 'text-3xl text-primary' : 'text-2xl'}`}>
             {price}
           </Span>
         </Div>
       </CardHeader>
 
-      <CardContent className="flex-1" />
+      <CardContent className={`flex-1`} />
 
       <CardFooter>
-        <Button
-          className="w-full"
-          size="lg"
-          disabled={isLoading}
-          onClick={handlePurchase}
-        >
+        <Button className={`w-full`} size="lg" disabled={isLoading} onClick={handlePurchase}>
           {isLoading ? (
             <>
-              <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
+              <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin`} />
               {texts.loading}
             </>
           ) : (
             <>
-              <Icon name="lucide:ShoppingCart" className="w-4 h-4" />
+              <Icon name="lucide:ShoppingCart" className={`w-4 h-4`} />
               {texts.buy} — {price}
             </>
           )}

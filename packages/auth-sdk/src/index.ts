@@ -29,6 +29,20 @@ export type {
   AuthAdminDashboardTexts,
 } from './components/AuthAdminDashboard.js'
 
+// User components (Clerk-like pre-built UI)
+export { UserMenu } from './components/UserMenu.js'
+export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './components/UserMenu.js'
+export { AccountModal } from './components/AccountModal.js'
+export type { AccountModalProps, AccountModalTexts } from './components/AccountModal.js'
+export { UserAvatar } from './components/UserAvatar.js'
+export type { UserAvatarProps } from './components/UserAvatar.js'
+export { UserSettings } from './components/UserSettings.js'
+export type { UserSettingsProps, UserSettingsTexts } from './components/UserSettings.js'
+export { SignedIn } from './components/SignedIn.js'
+export type { SignedInProps } from './components/SignedIn.js'
+export { SignedOut } from './components/SignedOut.js'
+export type { SignedOutProps } from './components/SignedOut.js'
+
 // Re-export types
 export type {
   AuthUser,

@@ -31,7 +31,7 @@ export function InfiniteMovingCards({
       const scrollerContent = Array.from(scrollerRef.current.children)
 
       // Duplicate all children for seamless loop
-      scrollerContent.forEach((item) => {
+      scrollerContent.forEach(item => {
         const duplicatedItem = item.cloneNode(true)
         if (scrollerRef.current) {
           scrollerRef.current.appendChild(duplicatedItem)
@@ -61,10 +61,7 @@ export function InfiniteMovingCards({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={cn('scroller relative z-20 overflow-hidden', className)}
-    >
+    <div ref={containerRef} className={cn('scroller relative z-20 overflow-hidden', className)}>
       <div
         ref={scrollerRef}
         className={cn(

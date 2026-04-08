@@ -87,7 +87,7 @@ export function SubscriptionPlanCard({
   }, [client, appName, planId, planName])
 
   if (loading) {
-    return <Skeleton className="h-[400px] w-full rounded-xl" />
+    return <Skeleton className={`h-[400px] w-full rounded-xl`} />
   }
 
   if (!plan) return null
@@ -99,23 +99,21 @@ export function SubscriptionPlanCard({
 
   if (isCompact) {
     return (
-      <Card
-        className={`flex flex-row items-center gap-4 p-4 ${className || ''}`}
-      >
-        <Div className="flex-1 min-w-0">
-          <H3 size="h5" className="truncate">
+      <Card className={`flex flex-row items-center gap-4 p-4 ${className || ''}`}>
+        <Div className={`flex-1 min-w-0`}>
+          <H3 size="h5" className={`truncate`}>
             {plan.name}
           </H3>
           {plan.description && (
-            <P size="sm" className="text-muted-foreground truncate">
+            <P size="sm" className={`text-muted-foreground truncate`}>
               {plan.description}
             </P>
           )}
         </Div>
-        <Div className="flex items-center gap-3 shrink-0">
-          <Div className="text-right">
-            <Span className="text-xl font-bold">{price}</Span>
-            <Span className="text-muted-foreground text-sm"> / {intervalLabel}</Span>
+        <Div className={`flex items-center gap-3 shrink-0`}>
+          <Div className={`text-right`}>
+            <Span className={`text-xl font-bold`}>{price}</Span>
+            <Span className={`text-muted-foreground text-sm`}> / {intervalLabel}</Span>
           </Div>
           <SubscribeButton
             projectId={appName}
@@ -129,7 +127,7 @@ export function SubscriptionPlanCard({
             userName={userName}
             promoCode={promoCode}
             showPromoInput={!!promoCode}
-            trigger={<Button className="shrink-0">{texts.subscribe}</Button>}
+            trigger={<Button className={`shrink-0`}>{texts.subscribe}</Button>}
           />
         </Div>
       </Card>
@@ -141,27 +139,25 @@ export function SubscriptionPlanCard({
       className={`relative flex flex-col ${isFeatured ? 'border-primary shadow-lg scale-105' : ''} ${className || ''}`}
     >
       {isFeatured && (
-        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" variant="default">
+        <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2`} variant="default">
           {texts.mostPopular}
         </Badge>
       )}
       <CardHeader>
         <H3>{plan.name}</H3>
-        {plan.description && (
-          <P className="text-muted-foreground text-sm">{plan.description}</P>
-        )}
-        <Div className="mt-4">
-          <Span className="text-3xl font-bold">{price}</Span>
-          <Span className="text-muted-foreground"> / {intervalLabel}</Span>
+        {plan.description && <P className={`text-muted-foreground text-sm`}>{plan.description}</P>}
+        <Div className={`mt-4`}>
+          <Span className={`text-3xl font-bold`}>{price}</Span>
+          <Span className={`text-muted-foreground`}> / {intervalLabel}</Span>
         </Div>
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className={`flex-1`}>
         {plan.features && plan.features.length > 0 && (
-          <Div className="space-y-2">
+          <Div className={`space-y-2`}>
             {plan.features.map((feature, i) => (
-              <Div key={i} className="flex items-center gap-2">
-                <Icon name="lucide:Check" className="w-4 h-4 text-success shrink-0" />
-                <Span className="text-sm">{feature}</Span>
+              <Div key={i} className={`flex items-center gap-2`}>
+                <Icon name="lucide:Check" className={`w-4 h-4 text-success shrink-0`} />
+                <Span className={`text-sm`}>{feature}</Span>
               </Div>
             ))}
           </Div>
@@ -180,7 +176,7 @@ export function SubscriptionPlanCard({
           userName={userName}
           promoCode={promoCode}
           showPromoInput
-          className="w-full"
+          className={`w-full`}
         />
       </CardFooter>
     </Card>

@@ -304,16 +304,6 @@ Payment System centralise pour le monorepo @ezstart (donations, achats, abonneme
 - [x] Intégration Stripe Coupons/Promotion Codes pour les abonnements
 - [x] Export via pay-sdk : `<PromoCodeInput>` composant réutilisable
 
-### P-PROMO — Codes Promo `medium` `feature` — `planned`
-
-- [ ] Modèle `PromoCode` : code, type (pourcentage/montant fixe), valeur, limites (usage max, date expiration, apps autorisées)
-- [ ] CRUD API codes promo : superadmin crée des codes globaux, appadmin crée pour son app
-- [ ] Validation à l'achat : vérifier code, appliquer réduction, tracker usage
-- [ ] UI admin : interface gestion codes promo (créer, activer/désactiver, stats d'usage)
-- [ ] UI client : champ "Code promo" dans le flow d'achat (checkout Stripe avec coupon)
-- [ ] Intégration Stripe Coupons/Promotion Codes pour les abonnements
-- [ ] Export via pay-sdk : `<PromoCodeInput>` composant réutilisable
-
 ### P-MARKETPLACE — Marketplace Components `low` `feature` — `in-progress`
 
 - [x] ProductGrid : grille de produits avec filtres, search, pagination
