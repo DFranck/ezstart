@@ -131,8 +131,8 @@ function AdminPanelContent() {
         </TabsContent>
 
         <TabsContent value="ai" className="w-full">
-          <AIProvider appName="ezstart">
-            <AIAdminDashboard />
+          <AIProvider appName="">
+            <AIAdminDashboard showAppFilter />
           </AIProvider>
         </TabsContent>
       </Tabs>

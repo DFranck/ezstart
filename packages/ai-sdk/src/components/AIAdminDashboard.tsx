@@ -90,6 +90,8 @@ export interface AIAdminDashboardProps {
   appName?: string
   className?: string
   texts?: Partial<AIAdminDashboardTexts>
+  showAppFilter?: boolean
+  appFilterLabel?: string
 }
 
 // ========================================
@@ -661,13 +663,34 @@ function ConversationsTab({ client, t }: { client: AIClient; t: Required<AIAdmin
 // Main Component
 // ========================================
 
-export function AIAdminDashboard({ appName, className, texts }: AIAdminDashboardProps) {
+export function AIAdminDashboard({
+  appName,
+  className,
+  texts,
+  showAppFilter,
+  appFilterLabel,
+}: AIAdminDashboardProps) {
   const t: Required<AIAdminDashboardTexts> = { ...DEFAULT_TEXTS, ...texts }
+  const [filterAppName, setFilterAppName] = useState(appName || '')
 
-  const client = useMemo(() => new AIClient({ appName: appName || 'ezstart' }), [appName])
+  const client = useMemo(
+    () => new AIClient({ appName: showAppFilter ? filterAppName : appName || 'ezstart' }),
+    [showAppFilter, filterAppName, appName]
+  )
 
   return (
     <Div className={className}>
+      {showAppFilter && (
+        <Div className="flex items-center gap-2 mb-4">
+          <Label>{appFilterLabel || 'App'}</Label>
+          <Input
+            value={filterAppName}
+            onChange={e => setFilterAppName(e.target.value)}
+            placeholder="All apps"
+            className="max-w-xs"
+          />
+        </Div>
+      )}
       <Tabs defaultValue="prompts">
         <TabsList>
           <TabsTrigger value="prompts">{t.promptsTab}</TabsTrigger>
