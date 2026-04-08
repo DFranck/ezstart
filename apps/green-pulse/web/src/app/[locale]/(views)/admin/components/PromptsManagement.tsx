@@ -109,8 +109,8 @@ export function PromptsManagement() {
   const { data, isLoading, error } = useQuery<PromptsResponse>({
     queryKey: ['prompts'],
     queryFn: async () => {
-      const response = await callApi<PromptsResponse>('/prompts', {
-        appName: 'green-pulse',
+      const response = await callApi<PromptsResponse>('/ai/prompts', {
+        appName: 'ezstart',
       })
       if (!response.ok || !response.data) {
         throw new Error(`Failed to fetch prompts: ${response.status}`)
@@ -122,8 +122,8 @@ export function PromptsManagement() {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const response = await callApi('/prompts', {
-        appName: 'green-pulse',
+      const response = await callApi('/ai/prompts', {
+        appName: 'ezstart',
         method: 'POST',
         body: data,
       })
@@ -140,8 +140,8 @@ export function PromptsManagement() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({ key, data }: { key: string; data: Partial<typeof formData> }) => {
-      const response = await callApi(`/prompts/${key}`, {
-        appName: 'green-pulse',
+      const response = await callApi(`/ai/prompts/${key}`, {
+        appName: 'ezstart',
         method: 'PATCH',
         body: data,
       })
@@ -159,8 +159,8 @@ export function PromptsManagement() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (key: string) => {
-      const response = await callApi(`/prompts/${key}`, {
-        appName: 'green-pulse',
+      const response = await callApi(`/ai/prompts/${key}`, {
+        appName: 'ezstart',
         method: 'DELETE',
       })
       if (!response.ok) throw new Error('Failed to delete prompt')

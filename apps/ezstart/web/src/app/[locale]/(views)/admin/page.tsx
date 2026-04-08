@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { AccessDenied, AuthAdminDashboard, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import { PayAdminDashboard } from '@ezstart/pay-sdk'
+import { AIAdminDashboard, AIProvider } from '@ezstart/ai-sdk/client'
 import {
   Card,
   Div,
@@ -114,6 +115,7 @@ function AdminPanelContent() {
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>
           <TabsTrigger value="ezpay">{t('admin.tabs.ezpay')}</TabsTrigger>
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
+          <TabsTrigger value="ai">{t('admin.tabs.ai')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ezauth" className="w-full">
@@ -126,6 +128,12 @@ function AdminPanelContent() {
 
         <TabsContent value="monitoring" className="w-full">
           <MonitoringTab />
+        </TabsContent>
+
+        <TabsContent value="ai" className="w-full">
+          <AIProvider appName="">
+            <AIAdminDashboard showAppFilter />
+          </AIProvider>
         </TabsContent>
       </Tabs>
     </Div>

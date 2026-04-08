@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/ai-sdk": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",

@@ -1,6 +1,6 @@
 # Backlog — GreenPulse
 
-**Status :** `active` | **Derniere mise a jour :** 2026-04-07
+**Status :** `active` | **Derniere mise a jour :** 2026-04-08
 
 ## Objectif
 
@@ -42,12 +42,12 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 - **Problem:** Form config create/list/getById routes have no auth middleware. Any unauthenticated user can create or list form templates.
 - **Files:** `api/src/routes/forms/configs/`
 
-### GP-006: RequireRole commented out on chat page (Audit 2026-04-06)
+### GP-006: Remove waitlist/RequireRole — open chat to all authenticated users
 
-- **Status:** `planned`
-- **Problem:** `chat/page.tsx` has `RequireRole` wrapper commented out. Any authenticated user can access chat regardless of role. Either uncomment RequireRole or remove the beta access flow entirely.
+- **Status:** `in-progress`
+- **Action:** Remove RequireRole wrapper AND BetaAccessRequest component entirely. Quicksignup replaces the old waitlist flow — any authenticated user accesses chat directly. Remove dead waitlist code from chat/page.tsx.
 - **Files:** `web/src/app/[locale]/chat/page.tsx`
-- **Note:** Previously tracked as GP-061 in P3, elevated to P0 per security audit.
+- **Note:** Waitlist system fully deprecated. Quicksignup handles onboarding transparently.
 
 ### GP-042: Theme routes missing auth (**Elevated to P0** per Audit 2026-04-06)
 
@@ -440,7 +440,7 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 
 ### GP-200: Conference landing page `/earthday` — DEADLINE 14 April
 
-- **Status:** `urgent`
+- **Status:** `done` (2026-04-08) — page exists, translated en/fr/vi, quicksignup integrated
 - **Priority:** CRITICAL — 11 days
 - **Description:** Dedicated mobile-first landing page at `www.ai-greenpulse.com/earthday` (or `/greenfinance`). Accessible via QR code scan from phones during the conference.
 - **Language:** Vietnamese primary, English toggle.
@@ -463,19 +463,9 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 - **Estimate:** 2-3 days dev
 - **Dependencies:** None (standalone page)
 
-### GP-201: Promo code system — DEADLINE 14 April
+### GP-201: ~~Promo code system~~ — CANCELLED
 
-- **Status:** `urgent`
-- **Priority:** CRITICAL
-- **Description:** Minimal promo code storage linked to lead/user profile. When V1 paid tier launches, users with `promoCode: "EARTHDAY2026"` get 1 free month of Pro plan.
-- **Implementation (minimal viable):**
-  - `Lead` model in MongoDB: `{ name, email, company, sector, phone, promoCode, source, createdAt, redeemed: false }`
-  - `POST /api/leads` endpoint with Zod validation
-  - Admin view: list leads with filter by source/promoCode (can be basic table, reuse GP-070 DataTable pattern)
-  - No Stripe integration needed now — just the flag
-- **Files:** `api/src/models/lead.model.ts`, `api/src/routes/leads/`, admin component
-- **Estimate:** 1 day dev
-- **Dependencies:** GP-200 (form submission calls this endpoint)
+- **Status:** `cancelled` (2026-04-08) — replaced by quicksignup flow. Users are created directly as real accounts via quicksignup + noreply email for password change. No separate Lead model needed. PromoCode tracked on user profile if needed.
 
 ### GP-202: GP.A chat welcome message update — DEADLINE 14 April
 

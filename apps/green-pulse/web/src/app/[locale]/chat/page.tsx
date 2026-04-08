@@ -2,8 +2,7 @@
 
 import { LiaThread } from '@/components/lia/LiaThread'
 import { ThreadProvider } from '@/components/lia/ThreadProvider'
-import { useConversations } from '@/hooks/useConversations'
-import { useProviders } from '@ezstart/ai-sdk/client'
+import { useConversations, useProviders } from '@ezstart/ai-sdk/client'
 import { LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/fetch-client'
 import { getApiUrl } from '@ezstart/config'
@@ -44,7 +43,7 @@ function LiaPageContent() {
 
   const config = useMemo(
     () => ({
-      endpoint: `${getApiUrl('green-pulse')}/api/chat`,
+      endpoint: `${getApiUrl('ezstart')}/api/ai/chat`,
       method: 'POST' as const,
       headers: {
         'Content-Type': 'application/json',
@@ -54,6 +53,7 @@ function LiaPageContent() {
       formatRequest: (message: string) => {
         const payload: Record<string, unknown> = {
           message,
+          appName: 'green-pulse', // Scope conversation to green-pulse
           stream: true, // Request streaming (API decides via Content-Type)
           extract_esg: false,
           locale, // Pass locale so AI responds in the user's language
@@ -64,9 +64,9 @@ function LiaPageContent() {
         if (selectedProvider) {
           payload.providerId = selectedProvider
         }
-        // Only include conversation_id if it exists (avoid sending null)
+        // Only include conversationId if it exists (avoid sending null)
         if (activeConversationId) {
-          payload.conversation_id = activeConversationId
+          payload.conversationId = activeConversationId
         }
         return payload
       },
@@ -80,7 +80,7 @@ function LiaPageContent() {
       },
       onSuccess: (rawData: unknown) => {
         const data = rawData as Record<string, unknown> & { data?: Record<string, unknown> }
-        const conversationId = data.data?.conversation_id as string | undefined
+        const conversationId = data.data?.conversationId as string | undefined
 
         // Save conversation_id for subsequent messages
         if (conversationId && !activeConversationId) {

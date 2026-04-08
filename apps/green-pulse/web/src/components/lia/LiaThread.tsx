@@ -1,7 +1,7 @@
 'use client'
 
 import { greenPulseThreadTheme } from '@/config/thread-theme'
-import { useConversations } from '@/hooks/useConversations'
+import { useConversations, useConversation } from '@ezstart/ai-sdk/client'
 import type { AIProviderInfo } from '@ezstart/ai-sdk'
 import { AISelector } from '@ezstart/ai-sdk/client'
 import { useAuthStore, UserMenu } from '@ezstart/auth-sdk'
@@ -91,7 +91,6 @@ export function LiaThread({
     createConversation,
     renameConversation,
     softDeleteConversation,
-    useConversation,
     loadConversations,
     refreshConversation,
   } = useConversations()

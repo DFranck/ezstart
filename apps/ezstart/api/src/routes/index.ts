@@ -9,6 +9,7 @@ import triggerRouter from './trigger.js'
 import activityRouter from './activity/index.js'
 import performanceRouter from './performance/index.js'
 import schedulerRouter, { setScheduler } from './scheduler/index.js'
+import aiRouter from './ai/index.js'
 
 const router = Router()
 
@@ -23,6 +24,7 @@ router.use('/trigger-checks', triggerRouter)
 router.use('/activity', activityRouter)
 router.use('/performance', performanceRouter)
 router.use('/scheduler', schedulerRouter)
+router.use('/ai', aiRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -45,6 +47,11 @@ router.get('/', (_, res) => {
       performanceEndpoints: '/api/performance/:serviceId/endpoints',
       scheduler: '/api/scheduler/status',
       schedulerService: '/api/scheduler/service/:serviceId',
+      ai: '/api/ai',
+      aiChat: '/api/ai/chat',
+      aiConversations: '/api/ai/conversations',
+      aiPrompts: '/api/ai/prompts',
+      aiProviders: '/api/ai/providers',
       docs: '/api/docs',
     },
   })

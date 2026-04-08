@@ -1,8 +1,8 @@
 'use client'
 
+import { AIAdminDashboard, AIProvider } from '@ezstart/ai-sdk/client'
 import { Div, H1, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { PromptsManagement } from '../components/PromptsManagement'
 
 export default function PromptsPage() {
   const t = useTranslations('admin.prompts')
@@ -14,7 +14,9 @@ export default function PromptsPage() {
         <P className="text-muted-foreground mt-2">{t('description')}</P>
       </Div>
 
-      <PromptsManagement />
+      <AIProvider appName="green-pulse">
+        <AIAdminDashboard appName="green-pulse" />
+      </AIProvider>
     </Div>
   )
 }
