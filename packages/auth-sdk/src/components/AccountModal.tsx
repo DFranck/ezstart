@@ -267,14 +267,11 @@ export function AccountModal({
   const modalContainerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <Modal
-      isOpen={open}
-      onClose={onClose}
-      size="xl"
-      scrollBehavior="outside"
-      title={
-        <Div className="flex items-center gap-2">
-          {/* Mobile burger in title */}
+    <Modal isOpen={open} onClose={onClose} size="xl" scrollBehavior="inside" className={className}>
+      {/* Ref wraps everything so Sheet covers full modal height */}
+      <Div ref={modalContainerRef} className="relative flex flex-col h-full">
+        {/* ── Header with burger on mobile ── */}
+        <Div className="flex items-center gap-2 pb-4 border-b mb-4">
           <Button
             variant="ghost"
             size="icon"
@@ -283,332 +280,339 @@ export function AccountModal({
           >
             <Icon name="lucide:Menu" className="w-5 h-5" />
           </Button>
-          <Span>{texts.title}</Span>
-        </Div>
-      }
-      className={className}
-    >
-      {/* Desktop: sidebar + content — Mobile: sheet nav within modal */}
-      <Div ref={modalContainerRef} className="relative flex flex-row gap-4 min-h-[400px]">
-        {/* ── Desktop sidebar — hidden on mobile ── */}
-        <Div className="hidden md:flex flex-col gap-1 w-40 shrink-0 border-r pr-4">
-          {tabs.map(tab => (
-            <Button
-              key={tab.id}
-              variant="ghost"
-              size="sm"
-              className={`justify-start cursor-pointer ${
-                activeTab === tab.id ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <Icon name={tab.icon as 'lucide:User'} className="w-4 h-4 mr-2" />
-              {tab.label}
-            </Button>
-          ))}
+          <H3 className="text-lg font-semibold">{texts.title}</H3>
         </Div>
 
-        {/* ── Mobile Sheet nav — contained within modal ── */}
-        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-          <SheetContent side="left" className="w-48 p-4" container={modalContainerRef.current}>
-            <SheetHeader>
-              <SheetTitle>{texts.title}</SheetTitle>
-            </SheetHeader>
-            <Div className="flex flex-col gap-1 mt-4">
-              {tabs.map(tab => (
-                <Button
-                  key={tab.id}
-                  variant="ghost"
-                  size="sm"
-                  className={`justify-start cursor-pointer ${
-                    activeTab === tab.id
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground'
-                  }`}
-                  onClick={() => {
-                    setActiveTab(tab.id)
-                    setMobileNavOpen(false)
-                  }}
-                >
-                  <Icon name={tab.icon as 'lucide:User'} className="w-4 h-4 mr-2" />
-                  {tab.label}
-                </Button>
-              ))}
-            </Div>
-          </SheetContent>
-        </Sheet>
+        {/* ── Body: sidebar + content ── */}
+        <Div className="flex flex-row gap-4 flex-1 min-h-[350px]">
+          {/* ── Desktop sidebar — hidden on mobile ── */}
+          <Div className="hidden md:flex flex-col gap-1 w-40 shrink-0 border-r pr-4">
+            {tabs.map(tab => (
+              <Button
+                key={tab.id}
+                variant="ghost"
+                size="sm"
+                className={`justify-start cursor-pointer ${
+                  activeTab === tab.id
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground'
+                }`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <Icon name={tab.icon as 'lucide:User'} className="w-4 h-4 mr-2" />
+                {tab.label}
+              </Button>
+            ))}
+          </Div>
 
-        {/* ── Content ── */}
-        <Div className="flex-1 space-y-6">
-          {/* ── Profile ── */}
-          {activeTab === 'profile' && (
-            <>
-              {/* Hidden file input for avatar upload */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
+          {/* ── Mobile Sheet nav — contained within modal ── */}
+          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+            <SheetContent side="left" className="w-48 p-4" container={modalContainerRef.current}>
+              <SheetHeader>
+                <SheetTitle>{texts.title}</SheetTitle>
+              </SheetHeader>
+              <Div className="flex flex-col gap-1 mt-4">
+                {tabs.map(tab => (
+                  <Button
+                    key={tab.id}
+                    variant="ghost"
+                    size="sm"
+                    className={`justify-start cursor-pointer ${
+                      activeTab === tab.id
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground'
+                    }`}
+                    onClick={() => {
+                      setActiveTab(tab.id)
+                      setMobileNavOpen(false)
+                    }}
+                  >
+                    <Icon name={tab.icon as 'lucide:User'} className="w-4 h-4 mr-2" />
+                    {tab.label}
+                  </Button>
+                ))}
+              </Div>
+            </SheetContent>
+          </Sheet>
 
-              {/* Avatar + name */}
-              <Div className="flex items-center gap-4">
-                <Div
-                  className="relative cursor-pointer group shrink-0"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <UserAvatar size="lg" user={user} />
-                  <Div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    {savingAvatar ? (
-                      <Icon name="lucide:Loader2" className="w-5 h-5 text-white animate-spin" />
+          {/* ── Content ── */}
+          <Div className="flex-1 space-y-6">
+            {/* ── Profile ── */}
+            {activeTab === 'profile' && (
+              <>
+                {/* Hidden file input for avatar upload */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
+                {/* Avatar + name */}
+                <Div className="flex items-center gap-4">
+                  <Div
+                    className="relative cursor-pointer group shrink-0"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <UserAvatar size="lg" user={user} />
+                    <Div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      {savingAvatar ? (
+                        <Icon name="lucide:Loader2" className="w-5 h-5 text-white animate-spin" />
+                      ) : (
+                        <Icon name="lucide:Camera" className="w-5 h-5 text-white" />
+                      )}
+                    </Div>
+                  </Div>
+                  <Div className="flex flex-col gap-1 flex-1">
+                    {editing ? (
+                      <>
+                        <Div className="space-y-2">
+                          <Div>
+                            <Label className="text-xs text-muted-foreground">
+                              {texts.firstName}
+                            </Label>
+                            <Input
+                              value={editFirstName}
+                              onChange={e => setEditFirstName(e.target.value)}
+                              placeholder={texts.firstName}
+                              className="mt-1"
+                            />
+                          </Div>
+                          <Div>
+                            <Label className="text-xs text-muted-foreground">
+                              {texts.lastName}
+                            </Label>
+                            <Input
+                              value={editLastName}
+                              onChange={e => setEditLastName(e.target.value)}
+                              placeholder={texts.lastName}
+                              className="mt-1"
+                            />
+                          </Div>
+                        </Div>
+                        <Div className="flex gap-2 mt-2">
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="cursor-pointer"
+                            onClick={saveProfile}
+                            disabled={savingProfile}
+                          >
+                            {texts.save}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="cursor-pointer"
+                            onClick={cancelEditing}
+                            disabled={savingProfile}
+                          >
+                            {texts.cancel}
+                          </Button>
+                        </Div>
+                      </>
                     ) : (
-                      <Icon name="lucide:Camera" className="w-5 h-5 text-white" />
+                      <>
+                        <H3 className="text-lg font-semibold text-foreground">{fullName}</H3>
+                        <P className="text-sm text-muted-foreground">{user.username}</P>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-1 w-fit cursor-pointer"
+                          onClick={startEditing}
+                        >
+                          {texts.updateProfile}
+                        </Button>
+                      </>
                     )}
                   </Div>
                 </Div>
-                <Div className="flex flex-col gap-1 flex-1">
-                  {editing ? (
-                    <>
-                      <Div className="space-y-2">
-                        <Div>
-                          <Label className="text-xs text-muted-foreground">{texts.firstName}</Label>
-                          <Input
-                            value={editFirstName}
-                            onChange={e => setEditFirstName(e.target.value)}
-                            placeholder={texts.firstName}
-                            className="mt-1"
-                          />
-                        </Div>
-                        <Div>
-                          <Label className="text-xs text-muted-foreground">{texts.lastName}</Label>
-                          <Input
-                            value={editLastName}
-                            onChange={e => setEditLastName(e.target.value)}
-                            placeholder={texts.lastName}
-                            className="mt-1"
-                          />
-                        </Div>
+
+                <Div className="h-px bg-border" />
+
+                {/* Email */}
+                <Div className="space-y-3">
+                  <H3 className="text-sm font-semibold text-foreground">{texts.emailSection}</H3>
+                  <Div className="flex items-center gap-3 rounded-md border bg-card p-3">
+                    <Icon name="lucide:Mail" className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <Span className="text-sm text-foreground flex-1 truncate">{user.email}</Span>
+                    <Badge variant="secondary" className="text-xs shrink-0">
+                      {texts.primary}
+                    </Badge>
+                  </Div>
+                </Div>
+
+                <Div className="h-px bg-border" />
+
+                {/* Connected accounts */}
+                <Div className="space-y-3">
+                  <H3 className="text-sm font-semibold text-foreground">
+                    {texts.connectedAccounts}
+                  </H3>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3 p-3 h-auto cursor-pointer"
+                    onClick={handleConnectGoogle}
+                    disabled={!googleOAuthUrl}
+                  >
+                    {googleOAuthUrl ? (
+                      <Icon name="fa:FaGoogle" className="w-4 h-4 text-muted-foreground shrink-0" />
+                    ) : (
+                      <Icon name="lucide:Link" className="w-4 h-4 text-muted-foreground shrink-0" />
+                    )}
+                    <Span className="text-sm text-muted-foreground">{texts.connectAccount}</Span>
+                  </Button>
+                </Div>
+
+                <Div className="h-px bg-border" />
+
+                {/* Member since */}
+                <Div className="space-y-1">
+                  <H3 className="text-sm font-semibold text-foreground">{texts.memberSince}</H3>
+                  <P className="text-sm text-muted-foreground">{formatDate(user.createdAt)}</P>
+                </Div>
+              </>
+            )}
+
+            {/* ── Settings ── */}
+            {activeTab === 'settings' && (
+              <>
+                {/* Password */}
+                <Div className="space-y-3">
+                  <H3 className="text-sm font-semibold text-foreground">{texts.passwordSection}</H3>
+                  {!editingPassword ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="cursor-pointer"
+                      onClick={() => setEditingPassword(true)}
+                    >
+                      <Icon name="lucide:Lock" className="w-4 h-4 mr-1.5" />
+                      {texts.changePassword}
+                    </Button>
+                  ) : (
+                    <Div className="space-y-2">
+                      <Div>
+                        <Label className="text-xs text-muted-foreground">
+                          {texts.currentPassword}
+                        </Label>
+                        <Input
+                          type="password"
+                          value={currentPasswordValue}
+                          onChange={e => setCurrentPasswordValue(e.target.value)}
+                          placeholder={texts.currentPassword}
+                          className="mt-1"
+                        />
                       </Div>
-                      <Div className="flex gap-2 mt-2">
+                      <Div>
+                        <Label className="text-xs text-muted-foreground">{texts.newPassword}</Label>
+                        <Input
+                          type="password"
+                          value={newPasswordValue}
+                          onChange={e => setNewPasswordValue(e.target.value)}
+                          placeholder={texts.newPassword}
+                          className="mt-1"
+                        />
+                      </Div>
+                      <Div className="flex gap-2">
                         <Button
                           variant="default"
                           size="sm"
                           className="cursor-pointer"
-                          onClick={saveProfile}
-                          disabled={savingProfile}
+                          onClick={handleChangePassword}
+                          disabled={savingPassword || !newPasswordValue}
                         >
-                          {texts.save}
+                          {texts.changePassword}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           className="cursor-pointer"
-                          onClick={cancelEditing}
-                          disabled={savingProfile}
+                          onClick={() => {
+                            setEditingPassword(false)
+                            setCurrentPasswordValue('')
+                            setNewPasswordValue('')
+                          }}
                         >
                           {texts.cancel}
                         </Button>
                       </Div>
-                    </>
-                  ) : (
-                    <>
-                      <H3 className="text-lg font-semibold text-foreground">{fullName}</H3>
-                      <P className="text-sm text-muted-foreground">{user.username}</P>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-1 w-fit cursor-pointer"
-                        onClick={startEditing}
-                      >
-                        {texts.updateProfile}
-                      </Button>
-                    </>
+                    </Div>
                   )}
                 </Div>
-              </Div>
 
-              <Div className="h-px bg-border" />
+                <Div className="h-px bg-border" />
 
-              {/* Email */}
-              <Div className="space-y-3">
-                <H3 className="text-sm font-semibold text-foreground">{texts.emailSection}</H3>
-                <Div className="flex items-center gap-3 rounded-md border bg-card p-3">
-                  <Icon name="lucide:Mail" className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <Span className="text-sm text-foreground flex-1 truncate">{user.email}</Span>
-                  <Badge variant="secondary" className="text-xs shrink-0">
-                    {texts.primary}
-                  </Badge>
-                </Div>
-              </Div>
-
-              <Div className="h-px bg-border" />
-
-              {/* Connected accounts */}
-              <Div className="space-y-3">
-                <H3 className="text-sm font-semibold text-foreground">{texts.connectedAccounts}</H3>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-3 p-3 h-auto cursor-pointer"
-                  onClick={handleConnectGoogle}
-                  disabled={!googleOAuthUrl}
-                >
-                  {googleOAuthUrl ? (
-                    <Icon name="fa:FaGoogle" className="w-4 h-4 text-muted-foreground shrink-0" />
-                  ) : (
-                    <Icon name="lucide:Link" className="w-4 h-4 text-muted-foreground shrink-0" />
-                  )}
-                  <Span className="text-sm text-muted-foreground">{texts.connectAccount}</Span>
-                </Button>
-              </Div>
-
-              <Div className="h-px bg-border" />
-
-              {/* Member since */}
-              <Div className="space-y-1">
-                <H3 className="text-sm font-semibold text-foreground">{texts.memberSince}</H3>
-                <P className="text-sm text-muted-foreground">{formatDate(user.createdAt)}</P>
-              </Div>
-            </>
-          )}
-
-          {/* ── Settings ── */}
-          {activeTab === 'settings' && (
-            <>
-              {/* Password */}
-              <Div className="space-y-3">
-                <H3 className="text-sm font-semibold text-foreground">{texts.passwordSection}</H3>
-                {!editingPassword ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="cursor-pointer"
-                    onClick={() => setEditingPassword(true)}
-                  >
-                    <Icon name="lucide:Lock" className="w-4 h-4 mr-1.5" />
-                    {texts.changePassword}
-                  </Button>
-                ) : (
-                  <Div className="space-y-2">
-                    <Div>
-                      <Label className="text-xs text-muted-foreground">
-                        {texts.currentPassword}
-                      </Label>
-                      <Input
-                        type="password"
-                        value={currentPasswordValue}
-                        onChange={e => setCurrentPasswordValue(e.target.value)}
-                        placeholder={texts.currentPassword}
-                        className="mt-1"
-                      />
-                    </Div>
-                    <Div>
-                      <Label className="text-xs text-muted-foreground">{texts.newPassword}</Label>
-                      <Input
-                        type="password"
-                        value={newPasswordValue}
-                        onChange={e => setNewPasswordValue(e.target.value)}
-                        placeholder={texts.newPassword}
-                        className="mt-1"
-                      />
-                    </Div>
+                {/* Theme */}
+                {theme && (
+                  <Div className="space-y-3">
+                    <H3 className="text-sm font-semibold text-foreground">{texts.themeSection}</H3>
                     <Div className="flex gap-2">
                       <Button
-                        variant="default"
+                        variant={theme.theme === 'light' ? 'default' : 'outline'}
                         size="sm"
                         className="cursor-pointer"
-                        onClick={handleChangePassword}
-                        disabled={savingPassword || !newPasswordValue}
+                        onClick={() => theme.setTheme('light')}
                       >
-                        {texts.changePassword}
+                        <Icon name="lucide:Sun" className="w-4 h-4 mr-1.5" />
+                        {texts.themeLight}
                       </Button>
                       <Button
-                        variant="outline"
+                        variant={theme.theme === 'dark' ? 'default' : 'outline'}
                         size="sm"
                         className="cursor-pointer"
-                        onClick={() => {
-                          setEditingPassword(false)
-                          setCurrentPasswordValue('')
-                          setNewPasswordValue('')
-                        }}
+                        onClick={() => theme.setTheme('dark')}
                       >
-                        {texts.cancel}
+                        <Icon name="lucide:Moon" className="w-4 h-4 mr-1.5" />
+                        {texts.themeDark}
+                      </Button>
+                      <Button
+                        variant={theme.theme === 'system' || !theme.theme ? 'default' : 'outline'}
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={() => theme.setTheme('system')}
+                      >
+                        <Icon name="lucide:Monitor" className="w-4 h-4 mr-1.5" />
+                        {texts.themeSystem}
                       </Button>
                     </Div>
                   </Div>
                 )}
-              </Div>
 
-              <Div className="h-px bg-border" />
-
-              {/* Theme */}
-              {theme && (
-                <Div className="space-y-3">
-                  <H3 className="text-sm font-semibold text-foreground">{texts.themeSection}</H3>
-                  <Div className="flex gap-2">
-                    <Button
-                      variant={theme.theme === 'light' ? 'default' : 'outline'}
-                      size="sm"
-                      className="cursor-pointer"
-                      onClick={() => theme.setTheme('light')}
-                    >
-                      <Icon name="lucide:Sun" className="w-4 h-4 mr-1.5" />
-                      {texts.themeLight}
-                    </Button>
-                    <Button
-                      variant={theme.theme === 'dark' ? 'default' : 'outline'}
-                      size="sm"
-                      className="cursor-pointer"
-                      onClick={() => theme.setTheme('dark')}
-                    >
-                      <Icon name="lucide:Moon" className="w-4 h-4 mr-1.5" />
-                      {texts.themeDark}
-                    </Button>
-                    <Button
-                      variant={theme.theme === 'system' || !theme.theme ? 'default' : 'outline'}
-                      size="sm"
-                      className="cursor-pointer"
-                      onClick={() => theme.setTheme('system')}
-                    >
-                      <Icon name="lucide:Monitor" className="w-4 h-4 mr-1.5" />
-                      {texts.themeSystem}
-                    </Button>
-                  </Div>
-                </Div>
-              )}
-
-              {/* Language */}
-              {languages && languages.length > 0 && onLocaleChange && (
-                <>
-                  {theme && <Div className="h-px bg-border" />}
-                  <Div className="space-y-3">
-                    <H3 className="text-sm font-semibold text-foreground">
-                      {texts.languageSection}
-                    </H3>
-                    <Div className="flex gap-2 flex-wrap">
-                      {languages.map(lang => (
-                        <Button
-                          key={lang.code}
-                          variant={currentLocale === lang.code ? 'default' : 'outline'}
-                          size="sm"
-                          className="cursor-pointer"
-                          onClick={() => onLocaleChange(lang.code)}
-                        >
-                          {lang.label}
-                        </Button>
-                      ))}
+                {/* Language */}
+                {languages && languages.length > 0 && onLocaleChange && (
+                  <>
+                    {theme && <Div className="h-px bg-border" />}
+                    <Div className="space-y-3">
+                      <H3 className="text-sm font-semibold text-foreground">
+                        {texts.languageSection}
+                      </H3>
+                      <Div className="flex gap-2 flex-wrap">
+                        {languages.map(lang => (
+                          <Button
+                            key={lang.code}
+                            variant={currentLocale === lang.code ? 'default' : 'outline'}
+                            size="sm"
+                            className="cursor-pointer"
+                            onClick={() => onLocaleChange(lang.code)}
+                          >
+                            {lang.label}
+                          </Button>
+                        ))}
+                      </Div>
                     </Div>
-                  </Div>
-                </>
-              )}
+                  </>
+                )}
 
-              {!theme && (!languages || languages.length === 0) && (
-                <Div className="flex items-center justify-center h-32">
-                  <P className="text-muted-foreground text-sm">No settings available</P>
-                </Div>
-              )}
-            </>
-          )}
+                {!theme && (!languages || languages.length === 0) && (
+                  <Div className="flex items-center justify-center h-32">
+                    <P className="text-muted-foreground text-sm">No settings available</P>
+                  </Div>
+                )}
+              </>
+            )}
+          </Div>
         </Div>
       </Div>
 
