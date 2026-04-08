@@ -1,4 +1,15 @@
 {
+  "welcome": {
+    "title": "Welcome to GP.A",
+    "description": "Hi! I'm GP.A, GreenPulse's AI assistant. I help SMEs assess their ESG readiness and green finance eligibility. Ask me about:\n\u2022 Energy costs and reduction strategies\n\u2022 ESG requirements for EU exports\n\u2022 Green loan eligibility conditions\n\nLet's start: what industry is your business in?",
+    "placeholder": "Ask GP.A about sustainability, ESG, or green finance...",
+    "loadingText": "GP.A is thinking",
+    "suggestions": {
+      "energy": "How do energy costs affect me?",
+      "greenCredit": "What is green credit?",
+      "esgExport": "EU export ESG requirements"
+    }
+  },
   "sidebar": {
     "myPlan": "My plan:",
     "myTools": "My tools:",

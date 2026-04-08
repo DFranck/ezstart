@@ -1,4 +1,15 @@
 {
+  "welcome": {
+    "title": "Bienvenue sur GP.A",
+    "description": "Bonjour ! Je suis GP.A, l'assistant IA de GreenPulse. Je vous aide \u00e0 \u00e9valuer votre maturit\u00e9 ESG et votre \u00e9ligibilit\u00e9 aux financements verts. Posez-moi vos questions sur :\n\u2022 Les co\u00fbts \u00e9nerg\u00e9tiques et strat\u00e9gies de r\u00e9duction\n\u2022 Les exigences ESG pour l'export vers l'UE\n\u2022 Les conditions d'\u00e9ligibilit\u00e9 au cr\u00e9dit vert\n\nCommen\u00e7ons : quel est votre secteur d'activit\u00e9 ?",
+    "placeholder": "Posez vos questions sur la durabilit\u00e9, l'ESG ou le financement vert...",
+    "loadingText": "GP.A r\u00e9fl\u00e9chit",
+    "suggestions": {
+      "energy": "Comment l'\u00e9nergie impacte mon entreprise ?",
+      "greenCredit": "Qu'est-ce que le cr\u00e9dit vert ?",
+      "esgExport": "Exigences ESG export UE"
+    }
+  },
   "sidebar": {
     "myPlan": "Mon forfait :",
     "myTools": "Mes outils :",
