@@ -53,7 +53,7 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
     return (
       <div
         className={cn(
-          'w-full h-screen flex flex-col',
+          'w-full h-dvh flex flex-col',
           theme.background,
           mobileHeaderOffset && `lg:pt-0 ${mobileHeaderOffset}`,
           mobileFooterOffset && `lg:pb-0 ${mobileFooterOffset}`,
@@ -71,7 +71,7 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
     >
       <div
         className={cn(
-          'relative flex w-full h-screen',
+          'relative flex w-full h-dvh',
           theme.background,
           // Add padding-top based on headerOffset to prevent overlap
           headerOffset === 'top-16'
@@ -127,12 +127,12 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
             headerOffset,
             // Calculate height based on header offset
             headerOffset === 'top-0'
-              ? 'h-screen'
+              ? 'h-dvh'
               : headerOffset === 'top-16'
-                ? 'h-[calc(100vh-4rem)]'
+                ? 'h-[calc(100dvh-4rem)]'
                 : headerOffset === 'top-20'
-                  ? 'h-[calc(100vh-5rem)]'
-                  : 'h-[calc(100vh-4rem)]', // default to top-16
+                  ? 'h-[calc(100dvh-5rem)]'
+                  : 'h-[calc(100dvh-4rem)]', // default to top-16
             // Mobile/Tablet: translate based on state
             'lg:translate-x-0',
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -156,12 +156,12 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
           className={cn(
             'flex-1 w-full flex flex-col',
             headerOffset === 'top-0'
-              ? 'h-screen'
+              ? 'h-dvh'
               : headerOffset === 'top-16'
-                ? 'h-[calc(100vh-4rem)]'
+                ? 'h-[calc(100dvh-4rem)]'
                 : headerOffset === 'top-20'
-                  ? 'h-[calc(100vh-5rem)]'
-                  : 'h-[calc(100vh-4rem)]', // default to top-16
+                  ? 'h-[calc(100dvh-5rem)]'
+                  : 'h-[calc(100dvh-4rem)]', // default to top-16
             'lg:ml-0' // No margin on desktop, sidebar is sticky
           )}
         >
