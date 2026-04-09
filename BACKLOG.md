@@ -199,7 +199,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 131. [ ] Design system playground — Standardiser et tester tous les tokens/variants (density, size, color) sur tous les composants UI. Étendre le playground Tag existant dans ezstart pour couvrir Card, Button, Input, Badge, etc. Vérifier cohérence compact/default/relaxed sur chaque composant container.
 132. [ ] QuickSignUpForm/SignUpForm density — Le prop density existe mais n'impacte que le form spacing interne. Card/CardContent ont leurs propres paddings non affectés. Harmoniser density à travers tout le composant.
 133. [ ] Hide provider selector for non-admin users — Le combobox "Gemini 2.5 Flash" dans le chat ne doit être visible que par les admins. Les users voient juste "l'IA" sans savoir quel provider tourne. Seuls les admins gèrent les providers dans le panel admin.
-134. [ ] packages/ui atomic reorganization — Réorganiser les composants par niveau (base → composed → complex) au lieu de par feature. Base: Button, Input, Icon, Label. Composed: Select, Form fields, Card. Complex: Thread, DataTable, Layout, Modal. Clarifie la hiérarchie de dépendances. Refactor massif (~56 fichiers + tous les imports apps).
+134. [x] packages/ui atomic levels — Re-exports par niveau: base/ (46 primitifs), composed/ (33 composés), complex/ (10 complexes). Subpath exports dans package.json. Fichiers non déplacés, imports existants inchangés. (done 2026-04-09)
 
 #### P3 — DevOps / Testing
 
