@@ -133,6 +133,7 @@ const quickSignupController = async (req: Request, res: Response) => {
 
       await emailService.send({
         to: normalizedEmail,
+        from: `${appDisplayName} <noreply@ezstart.xyz>`,
         subject: `Welcome to ${appDisplayName} — Set up your password`,
         html: welcomeSetPasswordTemplate(setPasswordUrl, appDisplayName, normalizedUsername),
       })
