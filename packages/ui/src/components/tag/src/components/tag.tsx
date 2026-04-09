@@ -2,6 +2,7 @@ import { Slot } from '@radix-ui/react-slot'
 import type { VariantProps } from 'class-variance-authority'
 import React, { ComponentProps, ElementType, useMemo } from 'react'
 import { cn } from '../../../../lib/utils'
+import { useDesignTokens } from '../../../../lib/design-system/DesignTokenContext'
 import { CustomVariants, INTENT_ARIA_MAP, SupportedAs, TagAriaProps } from '../types'
 import { tagVariants } from '../../../../lib/design-system/variants'
 
@@ -71,12 +72,23 @@ function TagComponent<T extends SupportedAs = 'span'>({
   ...props
 }: TagProps<T> & { asChild?: boolean; ref?: React.Ref<HTMLElement> }) {
   const tag = (as ?? 'span') as SupportedAs
+  const inherited = useDesignTokens()
+
+  // Resolve intent: explicit prop wins, then context, then undefined (let CVA default handle it)
+  const propsRecord = props as Record<string, unknown>
+  const resolvedIntent = (propsRecord.intent as string | undefined) ?? inherited.intent
+  const resolvedProps = useMemo(
+    () => (resolvedIntent !== undefined ? { ...props, intent: resolvedIntent } : props),
+    [props, resolvedIntent]
+  )
 
   const variantFn = tagVariants[tag as keyof typeof tagVariants]
   const variantClass = useMemo(
     () =>
-      typeof variantFn === 'function' ? variantFn(props as VariantProps<typeof variantFn>) : '',
-    [variantFn, props]
+      typeof variantFn === 'function'
+        ? variantFn(resolvedProps as VariantProps<typeof variantFn>)
+        : '',
+    [variantFn, resolvedProps]
   )
 
   const merged = useMemo(
@@ -86,13 +98,15 @@ function TagComponent<T extends SupportedAs = 'span'>({
 
   const Component: ElementType = asChild ? Slot : as || 'span'
 
-  const domSafeProps = useMemo(() => filterDomSafeProps(props as Record<string, unknown>), [props])
+  const domSafeProps = useMemo(
+    () => filterDomSafeProps(resolvedProps as Record<string, unknown>),
+    [resolvedProps]
+  )
 
-  const propsWithIntent = props as Record<string, unknown>
   const ariaAttributes = useMemo(
     () =>
       buildAriaAttributes({
-        intent: propsWithIntent.intent as string | undefined,
+        intent: resolvedIntent,
         ariaLabel,
         ariaLabelledBy,
         ariaDescribedBy,
@@ -100,15 +114,7 @@ function TagComponent<T extends SupportedAs = 'span'>({
         ariaLive,
         ariaHidden,
       }),
-    [
-      propsWithIntent.intent,
-      ariaLabel,
-      ariaLabelledBy,
-      ariaDescribedBy,
-      ariaRole,
-      ariaLive,
-      ariaHidden,
-    ]
+    [resolvedIntent, ariaLabel, ariaLabelledBy, ariaDescribedBy, ariaRole, ariaLive, ariaHidden]
   )
 
   return (

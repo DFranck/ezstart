@@ -3,6 +3,7 @@ import * as React from 'react'
 import { cn } from '../../lib'
 import { size } from '../../lib/design-system/tokens'
 import { splitSectionVariants } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { Div, Section } from '../tag'
 
 // ============================================================================
@@ -115,11 +116,13 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
       children,
       asSection = true,
       style,
-      size,
+      size: sizeProp,
       ...props
     },
     ref
   ) => {
+    const inherited = useDesignTokens()
+    const resolvedSize = (sizeProp ?? inherited.size ?? undefined) as SplitSectionProps['size']
     const Component = asSection ? Section : Div
 
     // Convert children to array
@@ -137,7 +140,7 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
     return (
       <Component
         ref={ref as unknown as React.Ref<HTMLDivElement>}
-        size={size}
+        size={resolvedSize}
         className={cn(
           splitSectionVariants({ layout, align, padding }),
           bgClass,
@@ -209,9 +212,11 @@ export interface SplitSectionItemProps extends React.HTMLAttributes<HTMLDivEleme
 }
 
 const SplitSectionItem = React.forwardRef<HTMLDivElement, SplitSectionItemProps>(
-  ({ className, size, children, ...props }, ref) => {
+  ({ className, size: sizeProp, children, ...props }, ref) => {
+    const inherited = useDesignTokens()
+    const resolvedSize = (sizeProp ?? inherited.size ?? undefined) as SplitSectionItemProps['size']
     return (
-      <Div ref={ref} size={size} className={cn(className)} {...props}>
+      <Div ref={ref} size={resolvedSize} className={cn(className)} {...props}>
         {children}
       </Div>
     )

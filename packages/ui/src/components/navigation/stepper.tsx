@@ -2,14 +2,8 @@
 
 import { ReactNode, createContext, useContext, useState } from 'react'
 import { cn } from '../../lib/utils'
-import {
-  paddingX,
-  paddingY,
-  padding,
-  gap,
-  fontSize,
-  radius,
-} from '../../lib/design-system/tokens'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
+import { paddingX, paddingY, padding, gap, fontSize, radius } from '../../lib/design-system/tokens'
 import { stepperVariantConfig } from '../../lib/design-system/variants'
 import { Button } from '../button'
 import { Icon, KnownIconName } from '../icon'
@@ -22,7 +16,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../fee
 type StepperSize = 'sm' | 'default' | 'lg'
 type StepperVariant = 'default' | 'minimal' | 'pills'
 
-interface TooltipButtonProps { button: StepButton; children: ReactNode }
+interface TooltipButtonProps {
+  button: StepButton
+  children: ReactNode
+}
 
 function TooltipButton({ button, children }: TooltipButtonProps) {
   if (!button.tooltip) return <>{children}</>
@@ -124,15 +121,19 @@ export function Stepper({
   allowStepNavigation = true,
   children,
   renderButtons,
-  size = 'default',
+  size: sizeProp,
   variant = 'default',
   headerOffsetTop = 'top-[68px] md:top-[70px]',
   headerOffsetCollapsed = 'top-[48px] md:top-[54px]',
   bottomOffset = 'bottom-0',
   theme,
 }: StepperProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'default') as StepperSize
   const [currentStep, setCurrentStep] = useState(initialStep)
-  const [stepData, setStepData] = useState<Record<string, Record<string, unknown>>>(initialStepData ?? {})
+  const [stepData, setStepData] = useState<Record<string, Record<string, unknown>>>(
+    initialStepData ?? {}
+  )
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
   const goToStep = (stepIndex: number) => {
@@ -201,9 +202,7 @@ export function Stepper({
 
           <Div className={cn('flex-1 flex flex-col w-full min-h-0', className)}>
             <Div className="flex-1 flex flex-col w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 overflow-y-auto min-h-0">
-              <Div className="my-auto w-full">
-                {children || steps[currentStep]?.component}
-              </Div>
+              <Div className="my-auto w-full">{children || steps[currentStep]?.component}</Div>
             </Div>
 
             <StepperNavigation
@@ -330,7 +329,10 @@ function StepperHeader({
                   size === 'default' && 'w-6 h-6 text-xs',
                   size === 'lg' && 'w-7 h-7 text-xs',
                   isActive && !theme?.primaryColor && 'bg-primary text-primary-foreground',
-                  isCompleted && !isActive && !theme?.primaryColor && 'bg-primary/80 text-primary-foreground',
+                  isCompleted &&
+                    !isActive &&
+                    !theme?.primaryColor &&
+                    'bg-primary/80 text-primary-foreground',
                   isFuture && 'bg-muted text-muted-foreground'
                 )}
                 style={
@@ -359,7 +361,13 @@ function StepperHeader({
       </div>
 
       {/* Mobile: single line step indicator + mini dots */}
-      <div className={cn('flex md:hidden items-center justify-between', paddingX.default, paddingY.default)}>
+      <div
+        className={cn(
+          'flex md:hidden items-center justify-between',
+          paddingX.default,
+          paddingY.default
+        )}
+      >
         <Div className={cn('flex items-center', gap.normal)}>
           <Span
             className={cn(
@@ -369,7 +377,9 @@ function StepperHeader({
               size === 'lg' && 'w-8 h-8 text-sm'
             )}
             style={
-              theme?.primaryColor ? { backgroundColor: theme.primaryColor, color: 'white' } : undefined
+              theme?.primaryColor
+                ? { backgroundColor: theme.primaryColor, color: 'white' }
+                : undefined
             }
           >
             {currentStep + 1}
@@ -533,7 +543,9 @@ function StepperNavigation({
                   size={size}
                   className={btn.className}
                 >
-                  {btn.icon && <Icon name={btn.icon as KnownIconName} className={sizeTokens.icon} />}
+                  {btn.icon && (
+                    <Icon name={btn.icon as KnownIconName} className={sizeTokens.icon} />
+                  )}
                   <span className="hidden sm:inline">{btn.label}</span>
                 </Button>
               </TooltipButton>

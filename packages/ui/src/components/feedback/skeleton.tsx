@@ -3,6 +3,7 @@ import * as React from 'react'
 
 import { cn } from '../../lib/utils'
 import { skeletonVariants, skeletonCardSizeConfig } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
 /**
  * Skeleton Component - Loading State Placeholders
@@ -87,7 +88,9 @@ interface SkeletonAvatarProps {
   variant?: 'default' | 'lighter' | 'darker' | 'shimmer'
 }
 
-function SkeletonAvatar({ size = 'md', className, variant = 'default' }: SkeletonAvatarProps) {
+function SkeletonAvatar({ size: sizeProp, className, variant = 'default' }: SkeletonAvatarProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'md') as NonNullable<SkeletonAvatarProps['size']>
   const sizeClasses = {
     xs: 'h-6 w-6',
     sm: 'h-8 w-8',
@@ -124,8 +127,10 @@ function SkeletonCard({
   lines = 3,
   className,
   variant = 'default',
-  size = 'default',
+  size: sizeProp,
 }: SkeletonCardProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'default') as NonNullable<SkeletonCardProps['size']>
   const sizeClasses = skeletonCardSizeConfig
 
   return (

@@ -3,6 +3,7 @@
 import { useDevice } from '../../hooks'
 import { cn } from '../../lib/utils'
 import { dialogVariantConfig } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import {
   Dialog,
   DialogContent,
@@ -91,9 +92,11 @@ export const Modal = ({
   title: propTitle,
   description: propDescription,
   footer: propFooter,
-  size = 'lg',
+  size: sizeProp,
   scrollBehavior = 'inside',
 }: ModalProps) => {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'lg') as ModalSize
   const { isMobile } = useDevice()
   const handleOpenChange = (open: boolean) => {
     if (!open && !disableOverlayClick && onClose) {

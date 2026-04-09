@@ -1,5 +1,6 @@
 import { cn } from '../../lib/utils'
 import { spinnerVariantConfig } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
 export interface SpinnerProps {
   /** Size of the spinner */
@@ -46,7 +47,7 @@ export interface SpinnerProps {
  * <Spinner fullScreen backdrop text="Please wait..." />
  */
 export function Spinner({
-  size = 'md',
+  size: sizeProp,
   variant = 'default',
   speed = 'normal',
   text,
@@ -56,6 +57,8 @@ export function Spinner({
   fullScreen = false,
   backdrop = false,
 }: SpinnerProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'md') as NonNullable<SpinnerProps['size']>
   const isFancy = variant === 'fancy'
 
   const spinner = isFancy ? (
@@ -101,7 +104,13 @@ export function Spinner({
     >
       {spinner}
       {text && (
-        <p className={cn('text-muted-foreground', spinnerVariantConfig.textSize[textSize], textClassName)}>
+        <p
+          className={cn(
+            'text-muted-foreground',
+            spinnerVariantConfig.textSize[textSize],
+            textClassName
+          )}
+        >
           {text}
         </p>
       )}

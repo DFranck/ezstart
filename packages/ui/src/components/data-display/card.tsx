@@ -3,7 +3,7 @@ import * as React from 'react'
 
 import { cn } from '../../lib/utils'
 import { DesignTokenProvider, useDesignTokens } from '../../lib/design-system/DesignTokenContext'
-import { paddingX, gap } from '../../lib/design-system/tokens'
+import { paddingX, gap, densityContainer } from '../../lib/design-system/tokens'
 import {
   cardVariants,
   cardHeaderVariantConfig,
@@ -31,14 +31,24 @@ import {
  * </Card>
  */
 
-interface CardProps extends React.ComponentProps<'div'>, VariantProps<typeof cardVariants> {}
+type DensityValue = 'compact' | 'default' | 'relaxed'
 
-function Card({ className, variant, size, interactive, hover, ...props }: CardProps) {
+interface CardProps extends React.ComponentProps<'div'>, VariantProps<typeof cardVariants> {
+  /** Controls spacing density inside the card (padding, gap) */
+  density?: DensityValue
+}
+
+function Card({ className, variant, size, interactive, hover, density, ...props }: CardProps) {
+  const resolvedDensity = density ?? 'default'
   return (
-    <DesignTokenProvider size={size ?? 'default'}>
+    <DesignTokenProvider size={size ?? 'default'} density={density}>
       <div
         data-slot="card"
-        className={cn(cardVariants({ variant, size, interactive, hover }), className)}
+        className={cn(
+          cardVariants({ variant, size, interactive, hover }),
+          densityContainer[resolvedDensity],
+          className
+        )}
         role={interactive ? 'button' : undefined}
         tabIndex={interactive ? 0 : undefined}
         {...props}
@@ -49,11 +59,18 @@ function Card({ className, variant, size, interactive, hover, ...props }: CardPr
 
 interface CardHeaderProps extends React.ComponentProps<'div'> {
   size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+  density?: DensityValue
 }
 
-function CardHeader({ className, size: sizeProp, ...props }: CardHeaderProps) {
+function CardHeader({
+  className,
+  size: sizeProp,
+  density: densityProp,
+  ...props
+}: CardHeaderProps) {
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size ?? 'default') as 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+  const density = (densityProp ?? inherited.density ?? 'default') as DensityValue
 
   const sizeClasses = {
     ...cardHeaderVariantConfig.size,
@@ -67,6 +84,7 @@ function CardHeader({ className, size: sizeProp, ...props }: CardHeaderProps) {
       className={cn(
         'grid auto-rows-min grid-rows-[auto_auto] items-start has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6',
         sizeClasses[size],
+        densityContainer[density],
         className
       )}
       {...props}
@@ -106,11 +124,18 @@ function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
 
 interface CardContentProps extends React.ComponentProps<'div'> {
   size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+  density?: DensityValue
 }
 
-function CardContent({ className, size: sizeProp, ...props }: CardContentProps) {
+function CardContent({
+  className,
+  size: sizeProp,
+  density: densityProp,
+  ...props
+}: CardContentProps) {
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size ?? 'default') as 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+  const density = (densityProp ?? inherited.density ?? 'default') as DensityValue
 
   const sizeClasses = {
     ...cardContentVariantConfig.size,
@@ -118,16 +143,29 @@ function CardContent({ className, size: sizeProp, ...props }: CardContentProps) 
     sm: paddingX.default,
   }
 
-  return <div data-slot="card-content" className={cn(sizeClasses[size], className)} {...props} />
+  return (
+    <div
+      data-slot="card-content"
+      className={cn(sizeClasses[size], densityContainer[density], className)}
+      {...props}
+    />
+  )
 }
 
 interface CardFooterProps extends React.ComponentProps<'div'> {
   size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+  density?: DensityValue
 }
 
-function CardFooter({ className, size: sizeProp, ...props }: CardFooterProps) {
+function CardFooter({
+  className,
+  size: sizeProp,
+  density: densityProp,
+  ...props
+}: CardFooterProps) {
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size ?? 'default') as 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+  const density = (densityProp ?? inherited.density ?? 'default') as DensityValue
 
   const sizeClasses = {
     ...cardContentVariantConfig.size,
@@ -138,7 +176,12 @@ function CardFooter({ className, size: sizeProp, ...props }: CardFooterProps) {
   return (
     <div
       data-slot="card-footer"
-      className={cn('flex items-center [.border-t]:pt-6', sizeClasses[size], className)}
+      className={cn(
+        'flex items-center [.border-t]:pt-6',
+        sizeClasses[size],
+        densityContainer[density],
+        className
+      )}
       {...props}
     />
   )

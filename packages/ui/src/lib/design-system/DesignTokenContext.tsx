@@ -34,9 +34,13 @@ import { createContext, useContext, useMemo, type ReactNode } from 'react'
  */
 
 export type DesignTokens = {
-  /** Structural tokens — auto-propagate */
+  /** Structural tokens — auto-propagate through the tree */
   size?: string
   density?: string
+  radius?: string
+
+  /** Semantic tokens — propagate to set the "mood" of a subtree */
+  intent?: string
 
   /** Visual tokens — propagate only when explicitly set */
   variant?: string
@@ -62,6 +66,8 @@ export function DesignTokenProvider({
   children,
   size,
   density,
+  radius,
+  intent,
   variant,
   colorScheme,
 }: DesignTokenProviderProps) {
@@ -72,10 +78,12 @@ export function DesignTokenProvider({
     // Only override if explicitly provided (not undefined)
     if (size !== undefined) next.size = size
     if (density !== undefined) next.density = density
+    if (radius !== undefined) next.radius = radius
+    if (intent !== undefined) next.intent = intent
     if (variant !== undefined) next.variant = variant
     if (colorScheme !== undefined) next.colorScheme = colorScheme
     return next
-  }, [parent, size, density, variant, colorScheme])
+  }, [parent, size, density, radius, intent, variant, colorScheme])
 
   return <DesignTokenCtx.Provider value={merged}>{children}</DesignTokenCtx.Provider>
 }

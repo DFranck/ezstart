@@ -2,6 +2,7 @@
 
 import { logger } from '@ezstart/logger'
 import { cn } from '../../lib/utils'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { Button } from '../button'
 import { Icon } from '../icon'
 import { useThreadLayout } from './ThreadLayoutContext'
@@ -29,10 +30,14 @@ type ThreadSidebarToggleProps = {
  */
 export function ThreadSidebarToggle({
   className,
-  size = 'icon',
+  size: sizeProp,
   variant = 'outline',
   iconSize = 20,
 }: ThreadSidebarToggleProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'icon') as NonNullable<
+    ThreadSidebarToggleProps['size']
+  >
   const layoutContext = useThreadLayout()
 
   if (!layoutContext) {

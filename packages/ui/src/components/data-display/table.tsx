@@ -43,11 +43,14 @@ import { tableVariants } from '../../lib/design-system/variants'
  * </Table>
  */
 
-export interface TableProps extends ComponentProps<'table'>, VariantProps<typeof tableVariants> {}
+export interface TableProps extends ComponentProps<'table'>, VariantProps<typeof tableVariants> {
+  /** Controls spacing density inside the table */
+  density?: 'compact' | 'default' | 'relaxed'
+}
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(
-  ({ className, variant, size, ...props }, ref) => (
-    <DesignTokenProvider size={size ?? 'default'}>
+  ({ className, variant, size, density, ...props }, ref) => (
+    <DesignTokenProvider size={size ?? 'default'} density={density}>
       <div className="relative w-full overflow-auto">
         <table ref={ref} className={cn(tableVariants({ variant, size }), className)} {...props} />
       </div>
