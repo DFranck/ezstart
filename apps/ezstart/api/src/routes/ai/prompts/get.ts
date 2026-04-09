@@ -16,7 +16,7 @@ import { z } from 'zod'
 import { AISystemPrompt } from '../../../models/AISystemPrompt.js'
 
 const getPromptQuerySchema = z.object({
-  appName: z.string().min(1).describe('Application name (required)'),
+  appName: z.string().min(1).optional().describe('Application name (optional)'),
 })
 
 export const getPromptRegistry = new OpenAPIRegistry()
@@ -27,7 +27,7 @@ docRouter.get(
   '/:key',
   async (req, res) => {
     try {
-      const { key } = req.params
+      const key = req.params.key as string
 
       const validation = getPromptQuerySchema.safeParse(req.query)
       if (!validation.success) {
@@ -36,7 +36,10 @@ docRouter.get(
 
       const { appName } = validation.data
 
-      const prompt = await AISystemPrompt.findOne({ key, appName }).lean().exec()
+      const filter: Record<string, string> = { key }
+      if (appName) filter.appName = appName
+
+      const prompt = await AISystemPrompt.findOne(filter).lean().exec()
 
       if (!prompt) {
         return sendError(res, 'Prompt not found', 404)

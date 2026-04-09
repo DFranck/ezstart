@@ -21,7 +21,6 @@ interface ChatMessage {
 interface UseAIChatOptions {
   conversationId?: string
   systemPrompt?: string
-  extractData?: boolean
   appName?: AppName
 }
 
@@ -45,13 +44,12 @@ export function useAIChat(options: UseAIChatOptions = {}) {
       setMessages(prev => [...prev, userMessage])
 
       try {
-        const response = await callApi<{ response: string; extracted_data?: unknown }>('/ai/chat', {
+        const response = await callApi<{ response: string; extractedData?: unknown }>('/ai/chat', {
           method: 'POST',
           body: {
             message: content,
             providerId: selectedProvider,
-            conversation_id: options.conversationId,
-            extract_esg: options.extractData,
+            conversationId: options.conversationId,
           },
           appName: options.appName || 'ezstart',
         })
@@ -65,13 +63,13 @@ export function useAIChat(options: UseAIChatOptions = {}) {
           role: 'assistant',
           content: data.response,
           timestamp: new Date().toISOString(),
-          metadata: data.extracted_data ? { extractedData: data.extracted_data } : undefined,
+          metadata: data.extractedData ? { extractedData: data.extractedData } : undefined,
         }
         setMessages(prev => [...prev, assistantMessage])
 
         // Save extracted data
-        if (data.extracted_data) {
-          setExtractedData(data.extracted_data)
+        if (data.extractedData) {
+          setExtractedData(data.extractedData)
         }
       } catch (error) {
         logger.error('Chat error:', error instanceof Error ? error.message : String(error))

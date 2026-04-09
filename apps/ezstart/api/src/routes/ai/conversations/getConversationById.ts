@@ -4,6 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
+import mongoose from 'mongoose'
 import {
   Router,
   createRouterWithDoc,
@@ -27,11 +28,19 @@ getConversationByIdRouter.get(
     try {
       const { id } = req.params
 
-      // @ts-expect-error - Mongoose findById type inference issue
+      if (!mongoose.isValidObjectId(id)) {
+        return sendError(res, 'Invalid conversation ID format', 400)
+      }
+
       const conversation = await AIConversation.findById(id).lean().exec()
 
       if (!conversation) {
         return sendError(res, 'Conversation not found', 404)
+      }
+
+      // Ownership check — only owner or superadmin can access
+      if (conversation.userId && conversation.userId !== req.userId) {
+        return sendError(res, 'Forbidden — not conversation owner', 403)
       }
 
       if (conversation.deletedAt) {

@@ -40,6 +40,34 @@
         "temporaryRedirectInfo": "Temporary redirect: URL can be changed later without regenerating the QR code"
       }
     },
+    "saved": {
+      "title": "My QR Codes",
+      "titleAdmin": "All QR Codes",
+      "titleLabel": "Title (optional)",
+      "titlePlaceholder": "e.g. My website, Business card...",
+      "saveButton": "Save QR Code",
+      "saving": "Saving...",
+      "saveSuccess": "QR code saved successfully",
+      "saveError": "Failed to save QR code",
+      "deleteSuccess": "QR code deleted",
+      "deleteError": "Failed to delete QR code",
+      "signInPrompt": "Sign in to save and manage your QR codes",
+      "signInToSave": "Sign in to save your QR codes",
+      "emptyState": "No saved QR codes yet",
+      "loading": "Loading...",
+      "totalCount": "{count} QR code(s)",
+      "filterByEmail": "Filter by user email...",
+      "columns": {
+        "title": "Title / URL",
+        "userEmail": "User",
+        "size": "Size",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "pagination": "{from}-{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
     "useCases": {
       "title": "Common Use Cases",
       "description": "QR codes are versatile and can be used in many scenarios",

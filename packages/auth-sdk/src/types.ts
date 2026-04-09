@@ -56,7 +56,6 @@ export interface RegisterRequest {
   lastName?: string
   app: string
   redirect_uri?: string
-  accessCode?: string // Beta access code from waitlist invitation
   promoCode?: string // Promo code from referral/campaign
 }
 

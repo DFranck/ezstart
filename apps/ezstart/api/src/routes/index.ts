@@ -10,6 +10,13 @@ import activityRouter from './activity/index.js'
 import performanceRouter from './performance/index.js'
 import schedulerRouter, { setScheduler } from './scheduler/index.js'
 import aiRouter from './ai/index.js'
+import { conversationRegistries } from './ai/conversations/index.js'
+import { promptsRegistries } from './ai/prompts/index.js'
+import { sendMessageRegistry } from './ai/chat/sendMessage.js'
+import { providersRegistry } from './ai/providers/index.js'
+import { appProvidersRegistries } from './ai/app-providers/index.js'
+import { globalProvidersRegistries } from './ai/global-providers/index.js'
+import qrCodesRouter, { qrCodeRegistries } from './qr-codes/index.js'
 
 const router = Router()
 
@@ -25,6 +32,7 @@ router.use('/activity', activityRouter)
 router.use('/performance', performanceRouter)
 router.use('/scheduler', schedulerRouter)
 router.use('/ai', aiRouter)
+router.use('/qr-codes', qrCodesRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -52,6 +60,9 @@ router.get('/', (_, res) => {
       aiConversations: '/api/ai/conversations',
       aiPrompts: '/api/ai/prompts',
       aiProviders: '/api/ai/providers',
+      aiAppProviders: '/api/ai/app-providers',
+      aiGlobalProviders: '/api/ai/global-providers',
+      qrCodes: '/api/qr-codes',
       docs: '/api/docs',
     },
   })
@@ -63,6 +74,13 @@ export const registries = [
   ...auditRegistries,
   ...deploymentRegistries,
   ...metricsRegistries,
+  ...conversationRegistries,
+  ...promptsRegistries,
+  sendMessageRegistry,
+  providersRegistry,
+  ...appProvidersRegistries,
+  ...globalProvidersRegistries,
+  ...qrCodeRegistries,
 ]
 
 // Re-export setScheduler for backward compatibility

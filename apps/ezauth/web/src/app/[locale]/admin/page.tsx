@@ -1,23 +1,11 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useEffect } from 'react'
-import {
-  Card,
-  Div,
-  H1,
-  Main,
-  P,
-  Spinner,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@ezstart/ui/components'
+import { Card, Div, H1, Main, P, Spinner } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { RequireRole } from '@ezstart/rbac'
 import { UserTable } from './components/user-table'
-import { WaitlistTable } from './components/waitlist-table'
 
 // ========================================
 // Access Denied Fallback
@@ -44,13 +32,14 @@ function AccessDenied() {
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated } = useAuth()
+  const locale = useLocale()
 
   useEffect(() => {
     if (!isAuthenticated && !user) {
-      const loginUrl = `/fr/login?redirect_uri=${encodeURIComponent(window.location.origin + '/fr/auth/callback')}&app=ezauth`
+      const loginUrl = `/${locale}/login?redirect_uri=${encodeURIComponent(window.location.origin + `/${locale}/auth/callback`)}&app=ezauth`
       window.location.href = loginUrl
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user, locale])
 
   if (!isAuthenticated || !user) {
     return (
@@ -85,21 +74,7 @@ export default function AdminPage() {
             <H1 className="text-3xl font-bold">{t('title')}</H1>
           </Div>
 
-          {/* Tabs */}
-          <Tabs defaultValue="users">
-            <TabsList>
-              <TabsTrigger value="users">{t('tabs.users')}</TabsTrigger>
-              <TabsTrigger value="waitlist">{t('tabs.waitlist')}</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="users" className="mt-6">
-              <UserTable />
-            </TabsContent>
-
-            <TabsContent value="waitlist" className="mt-6">
-              <WaitlistTable />
-            </TabsContent>
-          </Tabs>
+          <UserTable />
         </Main>
       </RequireRole>
     </AuthGuard>

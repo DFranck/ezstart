@@ -28,7 +28,7 @@ export const basePaymentSchema = z.object({
   customerName: z.string().optional(),
   customerEmail: z.string().email('Invalid email').optional(),
   isAnonymous: z.boolean().default(false),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
   completedAt: z.string().optional(),

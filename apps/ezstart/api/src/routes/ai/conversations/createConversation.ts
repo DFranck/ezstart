@@ -40,7 +40,6 @@ createConversationRouter.post(
 
       const { appName, title, userId } = validation.data
 
-      // @ts-expect-error - Mongoose create() type inference issue
       const conversation = await AIConversation.create({
         appName,
         title: title || 'New Chat',

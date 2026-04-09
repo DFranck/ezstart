@@ -22,11 +22,6 @@ function useAdminNavItems() {
       icon: 'lucide:MessageSquare' as const,
     },
     {
-      href: '/admin/waitlist',
-      label: t('betaWaitlist'),
-      icon: 'lucide:UserPlus' as const,
-    },
-    {
       href: '/admin/users',
       label: t('users'),
       icon: 'lucide:Users' as const,

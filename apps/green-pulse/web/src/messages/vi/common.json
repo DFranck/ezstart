@@ -32,7 +32,6 @@
     "nav": {
       "dashboard": "Bảng điều khiển",
       "systemPrompts": "Prompt hệ thống",
-      "betaWaitlist": "Danh sách chờ Beta",
       "users": "Người dùng",
       "payments": "Thanh toán",
       "testPayments": "Thanh toán thử",
@@ -42,10 +41,6 @@
       "systemPrompts": {
         "title": "Prompt hệ thống",
         "description": "Quản lý prompt AI cho trò chuyện và trích xuất"
-      },
-      "betaWaitlist": {
-        "title": "Danh sách chờ Beta",
-        "description": "Phê duyệt hoặc từ chối yêu cầu truy cập beta"
       },
       "users": {
         "title": "Người dùng",

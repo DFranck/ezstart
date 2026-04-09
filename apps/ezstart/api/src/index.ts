@@ -17,6 +17,8 @@ import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries, setScheduler } from './routes/index.js'
 import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
 import { initializeAIProviders } from './config/ai-providers.js'
+import { seedDefaultPrompts, seedDefaultAppProviders } from './services/ai-prompt.service.js'
+import { seedGlobalProviders } from './services/provider-access.service.js'
 import type { Server as IOServer } from 'socket.io'
 
 const PORT = getApiPort('ezstart')
@@ -66,6 +68,17 @@ connectToMongo('ezstart')
   .then(() => {
     // Initialize AI providers after MongoDB is ready
     initializeAIProviders()
+
+    // Seed default AI prompts and app providers if none exist (for each known app)
+    seedDefaultPrompts('ezstart').catch(() => {
+      /* non-blocking */
+    })
+    seedDefaultAppProviders('ezstart').catch(() => {
+      /* non-blocking */
+    })
+    seedGlobalProviders().catch(() => {
+      /* non-blocking */
+    })
 
     return startServer(app, {
       routes,

@@ -32,7 +32,6 @@
     "nav": {
       "dashboard": "Dashboard",
       "systemPrompts": "System Prompts",
-      "betaWaitlist": "Beta Waitlist",
       "users": "Users",
       "payments": "Payments",
       "testPayments": "Test Payments",
@@ -42,10 +41,6 @@
       "systemPrompts": {
         "title": "System Prompts",
         "description": "Manage AI system prompts for chat and extraction"
-      },
-      "betaWaitlist": {
-        "title": "Beta Waitlist",
-        "description": "Approve or reject beta access requests"
       },
       "users": {
         "title": "Users",

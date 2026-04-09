@@ -1,5 +1,11 @@
 import { logger } from '@ezstart/logger/server'
-import { AISystemPrompt, PromptType, ProviderTarget } from '../models/AISystemPrompt.js'
+import {
+  AISystemPrompt,
+  type IAISystemPrompt,
+  type PromptType,
+  type ProviderTarget,
+} from '../models/AISystemPrompt.js'
+import { AppProvider } from '../models/AppProvider.js'
 
 // ============================================================================
 // CACHE - Avoid DB query on every chat request
@@ -122,6 +128,41 @@ export async function getSystemPrompt(
 }
 
 /**
+ * Get full prompt document by type and appName (not just content string).
+ * Useful when caller needs config, provider target, variables, etc.
+ */
+export async function getSystemPromptDoc(
+  type: PromptType = 'general',
+  appName: string
+): Promise<IAISystemPrompt | null> {
+  try {
+    const cached = getFromCache(appName, type, 'all')
+    // Cache only stores content strings; for full doc we query DB
+    const prompt = await AISystemPrompt.findOne({
+      appName,
+      type,
+      isActive: true,
+    })
+      .sort({ isDefault: -1 })
+      .lean()
+      .exec()
+
+    if (prompt) {
+      // Also populate content cache as a side-effect
+      if (!cached) {
+        setCache(appName, type, prompt.provider, prompt.content)
+      }
+      return prompt as IAISystemPrompt
+    }
+
+    return null
+  } catch (error) {
+    logger.error('[AIPromptService] Error fetching prompt doc:', error)
+    return null
+  }
+}
+
+/**
  * Get a prompt by its unique key and appName
  */
 export async function getPromptByKey(key: string, appName: string): Promise<string | null> {
@@ -166,5 +207,67 @@ export async function seedDefaultPrompts(appName: string): Promise<void> {
     logger.info(`[AIPromptService] Seeded ${prompts.length} default prompts for app: ${appName}`)
   } catch (error) {
     logger.error('[AIPromptService] Error seeding prompts:', error)
+  }
+}
+
+// ============================================================================
+// DEFAULT APP PROVIDERS - Seed per-app provider configurations
+// ============================================================================
+
+interface DefaultProviderDef {
+  providerId: string
+  providerType: 'gemini' | 'openai' | 'anthropic'
+  priority: number
+  enabled: boolean
+  config?: {
+    model?: string
+    temperature?: number
+    maxTokens?: number
+  }
+}
+
+const DEFAULT_APP_PROVIDERS: DefaultProviderDef[] = [
+  {
+    providerId: 'gemini-flash',
+    providerType: 'gemini',
+    priority: 1,
+    enabled: true,
+    config: { model: 'gemini-2.5-flash-preview-04-17' },
+  },
+  {
+    providerId: 'openai-gpt4',
+    providerType: 'openai',
+    priority: 2,
+    enabled: true,
+    config: { model: 'gpt-4o' },
+  },
+]
+
+/**
+ * Seed default app providers for a specific app if none exist
+ */
+export async function seedDefaultAppProviders(appName: string): Promise<void> {
+  try {
+    const count = await AppProvider.countDocuments({ appName })
+    if (count > 0) {
+      logger.info(
+        `[AIPromptService] ${count} app providers already exist for app: ${appName}, skipping seed`
+      )
+      return
+    }
+
+    logger.info(`[AIPromptService] Seeding default app providers for app: ${appName}...`)
+
+    const providers = DEFAULT_APP_PROVIDERS.map(def => ({
+      ...def,
+      appName,
+    }))
+
+    await AppProvider.insertMany(providers)
+    logger.info(
+      `[AIPromptService] Seeded ${providers.length} default app providers for app: ${appName}`
+    )
+  } catch (error) {
+    logger.error('[AIPromptService] Error seeding app providers:', error)
   }
 }

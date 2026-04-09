@@ -25,6 +25,7 @@ function AdminPanelContent() {
   const td = useTranslations('admin.dialog')
   const te = useTranslations('admin.editRoles')
   const tp = useTranslations('admin.ezpay')
+  const ta = useTranslations('admin.ai')
 
   const authTexts = useMemo(
     () => ({
@@ -44,18 +45,18 @@ function AdminPanelContent() {
       delete: tu('delete'),
       noUsers: tu('noUsers'),
       onlineLabel: tu('online'),
-      minutesAgo: tu('minutesAgo'),
-      hoursAgo: tu('hoursAgo'),
-      daysAgo: tu('daysAgo'),
+      minutesAgo: tu.raw('minutesAgo'),
+      hoursAgo: tu.raw('hoursAgo'),
+      daysAgo: tu.raw('daysAgo'),
       confirmDeleteTitle: tu('confirmDeleteTitle'),
       confirmDeleteDescription: tu('confirmDeleteDescription'),
       cancel: td('cancel'),
       confirm: td('confirm'),
       deleteError: tu('deleteError'),
       editRolesTitle: te('title'),
-      editRolesSubtitle: te('subtitle'),
+      editRolesSubtitle: te.raw('subtitle'),
       globalRolesLabel: te('globalRoles'),
-      appRolesLabel: te('appRoles'),
+      appRolesLabel: te.raw('appRoles'),
       noAppRoles: te('noAppRoles'),
       save: te('save'),
       editError: te('editError'),
@@ -108,6 +109,91 @@ function AdminPanelContent() {
     [tp, td]
   )
 
+  const aiTexts = useMemo(
+    () => ({
+      promptsTab: ta('tabs.prompts'),
+      providersTab: ta('tabs.providers'),
+      conversationsTab: ta('tabs.conversations'),
+      createPrompt: ta('prompts.create'),
+      editPrompt: ta('prompts.edit'),
+      deletePrompt: ta('prompts.delete'),
+      promptKey: ta('prompts.key'),
+      promptName: ta('prompts.name'),
+      promptContent: ta('prompts.content'),
+      promptType: ta('prompts.type'),
+      promptProvider: ta('prompts.provider'),
+      promptStatus: ta('prompts.status'),
+      promptActions: ta('prompts.actions'),
+      promptDescription: ta('prompts.description'),
+      totalPrompts: ta('prompts.totalPrompts'),
+      activeCount: ta('prompts.activeCount'),
+      defaultCount: ta('prompts.defaultCount'),
+      defaultLabel: ta('prompts.defaultLabel'),
+      promptUpdated: ta('prompts.updated'),
+      promptCreated: ta('prompts.created'),
+      promptDeleted: ta('prompts.deleted'),
+      savePromptError: ta('prompts.saveError'),
+      deletePromptError: ta('prompts.deleteError'),
+      loadPromptsError: ta('prompts.loadError'),
+      promptKeyPlaceholder: ta('prompts.keyPlaceholder'),
+      promptNamePlaceholder: ta('prompts.namePlaceholder'),
+      promptDescriptionPlaceholder: ta('prompts.descriptionPlaceholder'),
+      promptContentPlaceholder: ta('prompts.contentPlaceholder'),
+      providerName: ta('providers.name'),
+      providerType: ta('providers.type'),
+      providerModel: ta('providers.model'),
+      providerCapabilities: ta('providers.capabilities'),
+      providerStatus: ta('providers.status'),
+      loadProvidersError: ta('providers.loadError'),
+      totalProviders: ta('providers.totalProviders'),
+      activeProviders: ta('providers.activeProviders'),
+      inactiveProviders: ta('providers.inactiveProviders'),
+      addProvider: ta('providers.addProvider'),
+      editProvider: ta('providers.editProvider'),
+      deleteProvider: ta('providers.deleteProvider'),
+      providerIdLabel: ta('providers.providerIdLabel'),
+      providerTypeLabel: ta('providers.providerTypeLabel'),
+      priorityLabel: ta('providers.priorityLabel'),
+      configLabel: ta('providers.configLabel'),
+      modelOverride: ta('providers.modelOverride'),
+      temperatureLabel: ta('providers.temperatureLabel'),
+      maxTokensLabel: ta('providers.maxTokensLabel'),
+      toggleEnabled: ta('providers.toggleEnabled'),
+      toggleDisabled: ta('providers.toggleDisabled'),
+      availableProviders: ta('providers.availableProviders'),
+      appProviders: ta('providers.appProviders'),
+      loadAppProvidersError: ta('providers.loadAppProvidersError'),
+      providerCreated: ta('providers.providerCreated'),
+      providerUpdated: ta('providers.providerUpdated'),
+      providerDeleted: ta('providers.providerDeleted'),
+      providerToggled: ta('providers.providerToggled'),
+      saveProviderError: ta('providers.saveProviderError'),
+      deleteProviderError: ta('providers.deleteProviderError'),
+      toggleProviderError: ta('providers.toggleProviderError'),
+      deleteProviderConfirm: ta('providers.deleteProviderConfirm'),
+      promptProviders: ta('providers.promptProviders'),
+      conversationTitle: ta('conversations.title'),
+      conversationUser: ta('conversations.user'),
+      conversationMessages: ta('conversations.messages'),
+      conversationDate: ta('conversations.date'),
+      conversationPreview: ta('conversations.preview'),
+      totalConversations: ta('conversations.totalConversations'),
+      loadConversationsError: ta('conversations.loadError'),
+      previous: td('previous'),
+      next: td('next'),
+      allAppsPlaceholder: ta('allAppsPlaceholder'),
+      noData: ta('noData'),
+      loading: td('loading'),
+      save: ta('save'),
+      cancel: td('cancel'),
+      confirm: td('confirm'),
+      deleteConfirm: ta('prompts.deleteConfirm'),
+      active: ta('active'),
+      inactive: ta('inactive'),
+    }),
+    [ta, td]
+  )
+
   return (
     <Div className="w-full max-w-7xl mx-auto px-4 my-10">
       <Tabs defaultValue="ezauth" className="w-full">
@@ -119,11 +205,11 @@ function AdminPanelContent() {
         </TabsList>
 
         <TabsContent value="ezauth" className="w-full">
-          <AuthAdminDashboard appName="ezstart" texts={authTexts} />
+          <AuthAdminDashboard texts={authTexts} />
         </TabsContent>
 
         <TabsContent value="ezpay" className="w-full">
-          <PayAdminDashboard appName="ezstart" texts={payTexts} />
+          <PayAdminDashboard texts={payTexts} />
         </TabsContent>
 
         <TabsContent value="monitoring" className="w-full">
@@ -131,8 +217,8 @@ function AdminPanelContent() {
         </TabsContent>
 
         <TabsContent value="ai" className="w-full">
-          <AIProvider appName="">
-            <AIAdminDashboard showAppFilter />
+          <AIProvider appName="ezstart">
+            <AIAdminDashboard showAppFilter texts={aiTexts} />
           </AIProvider>
         </TabsContent>
       </Tabs>

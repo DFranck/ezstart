@@ -34,7 +34,8 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
-  domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined,
+  domain:
+    process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN || '.ezstart.xyz' : undefined,
 }
 
 /**

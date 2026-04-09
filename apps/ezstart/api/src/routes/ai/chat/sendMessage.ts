@@ -14,15 +14,16 @@ import {
 } from '@ezstart/express-core'
 import { z } from 'zod'
 import { UnifiedChat } from '@ezstart/ai-sdk'
+import type { ProviderResponse } from '@ezstart/ai-sdk'
 import { AIConversation } from '../../../models/AIConversation.js'
-import { getSystemPrompt } from '../../../services/ai-prompt.service.js'
+import { getSystemPrompt, getSystemPromptDoc } from '../../../services/ai-prompt.service.js'
+import { getAppProviders } from '../../../services/app-provider.service.js'
 
 const ChatRequestSchema = z.object({
   message: z.string().min(1).max(10000).describe('User message'),
   appName: z.string().min(1).max(50).describe('Application name for scoping'),
   providerId: z.string().optional().describe('AI provider ID (default: gemini-flash)'),
   conversationId: z.string().optional().describe('Existing conversation ID'),
-  userId: z.string().optional().describe('User ID for conversation ownership'),
   locale: z.string().max(5).optional().describe('Response language locale (en, fr, vi, etc.)'),
 })
 
@@ -39,10 +40,11 @@ sendMessageRouter.post(
         return sendValidationError(res, 'Invalid request format', validation.error.errors)
       }
 
-      let { message, appName, conversationId, userId, providerId, locale } = validation.data
+      const { message, appName, providerId, locale } = validation.data
+      let { conversationId } = validation.data
 
-      // Default to gemini-flash if not specified
-      const selectedProvider = providerId || 'gemini-flash'
+      // userId comes from auth middleware (JWT), not from request body
+      const userId = req.userId
 
       // Auto-create conversation if not provided
       if (!conversationId) {
@@ -67,23 +69,22 @@ sendMessageRouter.post(
       let conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
       if (conversationId) {
         try {
-          // @ts-expect-error - Mongoose findById type inference issue
           const conversation = await AIConversation.findById(conversationId).lean().exec()
           if (conversation && conversation.messages) {
-            conversationHistory = conversation.messages.map(
-              (msg: { role: string; content: string }) => ({
-                role: msg.role,
-                content: msg.content,
-              })
-            )
+            conversationHistory = conversation.messages.map(msg => ({
+              role: msg.role as 'user' | 'assistant',
+              content: msg.content,
+            }))
           }
         } catch (loadError) {
           logger.error('[AI Chat] Failed to load conversation history:', loadError)
         }
       }
 
-      // Get system prompt from DB (with fallback)
-      const baseSystemPrompt = await getSystemPrompt('general', 'all', appName)
+      // Get full prompt doc from DB (single query) with fallback
+      const promptDoc = await getSystemPromptDoc('general', appName)
+      const baseSystemPrompt =
+        promptDoc?.content || (await getSystemPrompt('general', 'all', appName))
 
       // Add locale instruction to system prompt
       const localeMap: Record<string, string> = {
@@ -99,19 +100,70 @@ sendMessageRouter.post(
         locale && localeMap[locale] ? `\n\nIMPORTANT: Always respond in ${localeMap[locale]}.` : ''
       const systemPrompt = baseSystemPrompt + langInstruction
 
-      // Chat using UnifiedChat from @ezstart/ai-sdk
-      const aiResponse = await UnifiedChat.send(message, selectedProvider, {
+      // Build shared send options
+      const sendOptions = {
         systemPrompt,
         history: conversationHistory.map(msg => ({
-          role: msg.role,
+          role: msg.role as 'user' | 'assistant' | 'system',
           content: msg.content,
         })),
-      })
+        // Apply prompt-level config overrides if available
+        ...(promptDoc?.config?.temperature !== undefined && {
+          temperature: promptDoc.config.temperature,
+        }),
+        ...(promptDoc?.config?.maxTokens !== undefined && {
+          maxTokens: promptDoc.config.maxTokens,
+        }),
+      }
+
+      // Resolve provider: explicit choice → cascade through app providers
+      let aiResponse: ProviderResponse = { text: '' }
+      let usedProvider = 'unknown'
+
+      if (providerId) {
+        // Client explicitly chose a provider
+        aiResponse = await UnifiedChat.send(message, providerId, sendOptions)
+        usedProvider = providerId
+      } else {
+        // Cascade through app's enabled providers in priority order
+        const appProviders = await getAppProviders(appName)
+        let lastError: Error | null = null
+        let resolved = false
+
+        for (const provider of appProviders) {
+          try {
+            const providerOptions = {
+              ...sendOptions,
+              // Provider-level config overrides (prompt config takes precedence if set)
+              ...(provider.config?.temperature !== undefined &&
+                promptDoc?.config?.temperature === undefined && {
+                  temperature: provider.config.temperature,
+                }),
+              ...(provider.config?.maxTokens !== undefined &&
+                promptDoc?.config?.maxTokens === undefined && {
+                  maxTokens: provider.config.maxTokens,
+                }),
+            }
+            aiResponse = await UnifiedChat.send(message, provider.providerId, providerOptions)
+            usedProvider = provider.providerId
+            resolved = true
+            break
+          } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error))
+            logger.warn(`[AI Chat] Provider ${provider.providerId} failed, trying next...`, {
+              error: lastError.message,
+            })
+          }
+        }
+
+        if (!resolved) {
+          throw lastError || new Error('All AI providers failed')
+        }
+      }
 
       // Save messages to conversation if conversationId provided
       if (conversationId) {
         try {
-          // @ts-expect-error - Mongoose findByIdAndUpdate type inference issue
           await AIConversation.findByIdAndUpdate(conversationId, {
             $push: {
               messages: [
@@ -136,6 +188,7 @@ sendMessageRouter.post(
       sendSuccess(res, {
         response: aiResponse.text,
         conversationId,
+        provider: usedProvider,
         suggestions: [],
       })
     } catch (error) {
