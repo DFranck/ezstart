@@ -81,7 +81,7 @@ function EarthDayContent() {
         <Div className="w-full">
           <SignedOut>
             <Card variant="floating" className="bg-background/90 backdrop-blur-md border-white/10">
-              <CardContent className="p-4">
+              <CardContent className="p-5">
                 {mode === 'signup' ? (
                   <>
                     <QuickSignUpForm
