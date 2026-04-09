@@ -13,6 +13,10 @@ export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware.js'
 export type { AuthMiddlewareConfig } from './middleware.js'
 
+// SSR Protected Middleware (Next.js Edge Runtime)
+export { createProtectedMiddleware } from './middleware/index.js'
+export type { ProtectedMiddlewareConfig } from './middleware/index.js'
+
 // Components
 export { AuthCallbackPage } from './auth-callback-page.js'
 export { LoginButton } from './login-button.js'
