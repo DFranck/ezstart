@@ -194,6 +194,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 127. [ ] Anthropic provider — Implémenter AnthropicProvider dans ai-sdk (Claude API). Actuellement `throw new Error('not yet implemented')`.
 128. [ ] GlobalProviderAccess enforcement — Le chat endpoint ne vérifie PAS GlobalProviderAccess avant d'envoyer. Wirer `checkProviderAccess` middleware sur la route chat + filtrer les providers dans la cascade. L'UI app doit aussi masquer les providers non-autorisés (Available Providers filtré par GlobalProviderAccess, pas par ProviderRegistry statique).
 129. [ ] Provider status/health dans l'UI — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
+130. [ ] utm_source tracking — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
 
 #### P3 — DevOps / Testing
 
