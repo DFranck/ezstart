@@ -1,16 +1,44 @@
 # EZPay
 
-Universal payment system (donations, purchases, subscriptions) with Stripe integration.
+Universal payment service with Stripe integration for the @ezstart ecosystem.
 
-## Run
+## Purpose
 
-`pnpm dev:pay`
+Handles donations, one-time purchases, and subscriptions via Stripe. Any app can integrate payments through @ezstart/pay-sdk.
 
-## Env vars
+## Tech Stack
 
-Copy `.env.example` to `.env.local` in both `api/` and `web/`.
+- **Web:** Next.js, next-intl, @ezstart/ui
+- **API:** Express via @ezstart/express-core, MongoDB, Stripe SDK
+- **Deploy:** Vercel (web) + Railway (API)
 
-## Ports
+## Architecture
 
-- API: 6130
-- Web: 6131
+```
+ezpay/
+├── web/          # Payment UI and admin (port 6131)
+├── api/          # Payment API (port 6130)
+│   └── routes/   # donations, payments, plans, promos, purchases, subscriptions, webhooks
+├── types/        # Shared types
+└── config/       # Shared config
+```
+
+## Setup
+
+```bash
+cp api/.env.example api/.env.local    # Requires STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+cp web/.env.example web/.env.local
+pnpm dev pay
+```
+
+## Key Features
+
+- Stripe Checkout for donations, purchases, and subscriptions
+- Plan and promo code management
+- Webhook processing for payment events
+- Admin dashboard for payment tracking
+
+## Related
+
+- [@ezstart/pay-sdk](../../packages/pay-sdk) — Client SDK for integrating payments
+- [FengShui](../fengshui) — Example app using EZPay
