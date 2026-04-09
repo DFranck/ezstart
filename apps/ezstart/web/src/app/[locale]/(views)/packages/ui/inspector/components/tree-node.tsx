@@ -52,7 +52,7 @@ function CompatibilityInline({ parent, child }: { parent: ComponentEntry; child:
     badges.push({ label: `${token} uncontrollable`, variant: 'destructive' })
   }
   for (const token of result.localVisual) {
-    badges.push({ label: `${token} local`, variant: 'secondary' })
+    badges.push({ label: `${token} per-component`, variant: 'secondary' })
   }
 
   if (badges.length === 0) return null
@@ -135,6 +135,13 @@ export function TreeNode({
             {/* Component name */}
             <Span className="font-semibold text-sm text-foreground">{entry.name}</Span>
 
+            {/* Source path */}
+            {entry.sourcePath && (
+              <Span className="text-[10px] text-muted-foreground/50 font-mono hidden lg:inline">
+                {entry.sourcePath.replace('packages/ui/src/components/', '')}
+              </Span>
+            )}
+
             {/* Circular indicator */}
             {isCircular && (
               <Badge variant="warning" size="sm">
@@ -160,7 +167,7 @@ export function TreeNode({
                   {tokens[t.name] && (
                     <Span className="text-primary ml-1 text-[10px]">= {tokens[t.name]}</Span>
                   )}
-                  <Span className="text-muted-foreground ml-1 text-[10px]">local</Span>
+                  <Span className="text-muted-foreground ml-1 text-[10px]">per-component</Span>
                 </Badge>
               ))}
             </Div>

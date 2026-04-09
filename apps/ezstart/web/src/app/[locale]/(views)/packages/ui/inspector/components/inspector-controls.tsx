@@ -63,7 +63,7 @@ export function InspectorControls({ tokens, availableTokens, onChange }: Inspect
       {hasStructural && (
         <Div className="space-y-3">
           <P className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-            Structural Tokens (propagate through children)
+            Structural Tokens (auto-drill to children)
           </P>
           {structuralTokens.map(tokenInfo => (
             <TokenControlGroup
@@ -83,7 +83,7 @@ export function InspectorControls({ tokens, availableTokens, onChange }: Inspect
       {hasVisual && (
         <Div className="space-y-3">
           <P className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-            Visual Tokens (local to each component)
+            Visual Tokens (per-component)
           </P>
           {visualTokens.map(tokenInfo => (
             <TokenControlGroup

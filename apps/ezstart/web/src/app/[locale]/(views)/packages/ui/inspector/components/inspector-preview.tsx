@@ -96,7 +96,7 @@ function CompatibilityBadges({ parent, child }: { parent: ChainItem; child: Chai
         {localVisual.map(token => (
           <Badge key={`visual-${token}`} variant="secondary" size="sm">
             <Span className="font-mono">{token}</Span>
-            <Span className="ml-1 text-muted-foreground">local only — does not propagate</Span>
+            <Span className="ml-1 text-muted-foreground">per-component — does not auto-drill</Span>
           </Badge>
         ))}
       </Div>
@@ -179,7 +179,7 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
         <Div className="flex flex-wrap gap-1.5">
           {current.tokens.map(tokenInfo => {
             const isStructural = tokenInfo.category === 'structural'
-            const action = isBase ? 'applies' : isStructural ? 'drills' : 'local'
+            const action = isBase ? 'applies' : isStructural ? 'auto-drill' : 'per-component'
             return (
               <Badge
                 key={tokenInfo.name}

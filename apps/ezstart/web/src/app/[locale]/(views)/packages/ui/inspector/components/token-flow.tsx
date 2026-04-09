@@ -172,7 +172,7 @@ export function TokenFlow({ chain, tokens }: TokenFlowProps) {
             <Div className="flex items-center gap-2">
               <Div className="flex-1 border-t border-border" />
               <H3 className="text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                Structural Tokens (propagate)
+                Structural Tokens (auto-drill)
               </H3>
               <Div className="flex-1 border-t border-border" />
             </Div>
@@ -193,7 +193,7 @@ export function TokenFlow({ chain, tokens }: TokenFlowProps) {
             <Div className="flex items-center gap-2">
               <Div className="flex-1 border-t border-border" />
               <H3 className="text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                Visual Tokens (local only)
+                Visual Tokens (per-component)
               </H3>
               <Div className="flex-1 border-t border-border" />
             </Div>

@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -9,6 +11,7 @@ import {
   H1,
   H2,
   H3,
+  Input,
   P,
   Section,
   Span,
@@ -16,6 +19,7 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
+  componentRegistry,
   getComponentsByLevel,
   popularChains,
   type ComponentEntry,
@@ -63,6 +67,11 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
             </Div>
           </CardHeader>
           <CardContent className="pt-0 space-y-2">
+            {entry.sourcePath && (
+              <P className="text-[10px] text-muted-foreground/60 font-mono truncate">
+                {entry.sourcePath.replace('packages/ui/src/components/', '')}
+              </P>
+            )}
             {entry.description && (
               <P className="text-xs text-muted-foreground mb-2">{entry.description}</P>
             )}
@@ -121,9 +130,22 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
   )
 }
 
-function LevelSection({ level, locale }: { level: ComponentLevel; locale: string }) {
+function LevelSection({
+  level,
+  locale,
+  search,
+}: {
+  level: ComponentLevel
+  locale: string
+  search: string
+}) {
   const config = levelConfig[level]
-  const components = getComponentsByLevel(level)
+  const allComponents = getComponentsByLevel(level)
+  const components = useMemo(() => {
+    if (!search) return allComponents
+    const lower = search.toLowerCase()
+    return allComponents.filter(entry => entry.name.toLowerCase().includes(lower))
+  }, [allComponents, search])
 
   if (components.length === 0) return null
 
@@ -148,6 +170,23 @@ function LevelSection({ level, locale }: { level: ComponentLevel; locale: string
 export default function InspectorIndexPage() {
   const params = useParams()
   const locale = params.locale as string
+  const [search, setSearch] = useState('')
+
+  const totalFound = useMemo(() => {
+    if (!search) return null
+    const lower = search.toLowerCase()
+    return Object.values(componentRegistry).filter(entry =>
+      entry.name.toLowerCase().includes(lower)
+    ).length
+  }, [search])
+
+  const filteredChains = useMemo(() => {
+    if (!search) return popularChains
+    const lower = search.toLowerCase()
+    return popularChains.filter(({ chain }) =>
+      chain.some(name => name.toLowerCase().includes(lower))
+    )
+  }, [search])
 
   return (
     <Div className="max-w-5xl mx-auto px-4 py-8 space-y-10">
@@ -159,22 +198,50 @@ export default function InspectorIndexPage() {
         </P>
       </Div>
 
+      {/* Search */}
+      <Div className="relative max-w-md mx-auto">
+        <Input
+          placeholder="Search components..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="pr-8"
+        />
+        {search && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSearch('')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+            aria-label="Clear search"
+          >
+            <Span className="text-sm font-medium">&#x2715;</Span>
+          </Button>
+        )}
+        {totalFound !== null && (
+          <P className="text-sm text-muted-foreground mt-2 text-center">
+            {totalFound} component{totalFound !== 1 ? 's' : ''} found
+          </P>
+        )}
+      </Div>
+
       {/* Popular chains */}
-      <Section className="space-y-3">
-        <H2 className="text-lg font-semibold">Popular Chains</H2>
-        <Div className="flex flex-wrap gap-2">
-          {popularChains.map(({ label, chain }) => (
-            <Link key={label} href={`/${locale}/packages/ui/inspector/${chain.join('/')}`}>
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-accent transition-colors px-3 py-1.5 text-sm"
-              >
-                {label}
-              </Badge>
-            </Link>
-          ))}
-        </Div>
-      </Section>
+      {filteredChains.length > 0 && (
+        <Section className="space-y-3">
+          <H2 className="text-lg font-semibold">Popular Chains</H2>
+          <Div className="flex flex-wrap gap-2">
+            {filteredChains.map(({ label, chain }) => (
+              <Link key={label} href={`/${locale}/packages/ui/inspector/${chain.join('/')}`}>
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-accent transition-colors px-3 py-1.5 text-sm"
+                >
+                  {label}
+                </Badge>
+              </Link>
+            ))}
+          </Div>
+        </Section>
+      )}
 
       {/* Tree Explorer */}
       <Section className="space-y-3">
@@ -205,9 +272,9 @@ export default function InspectorIndexPage() {
       </Section>
 
       {/* Component sections by level */}
-      <LevelSection level="complex" locale={locale} />
-      <LevelSection level="composed" locale={locale} />
-      <LevelSection level="base" locale={locale} />
+      <LevelSection level="complex" locale={locale} search={search} />
+      <LevelSection level="composed" locale={locale} search={search} />
+      <LevelSection level="base" locale={locale} search={search} />
     </Div>
   )
 }

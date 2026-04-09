@@ -163,7 +163,7 @@ export default function TreeExplorerPage({
                 <Badge variant="success" size="sm">
                   flows
                 </Badge>
-                <Span className="text-xs text-muted-foreground">Token propagates from parent</Span>
+                <Span className="text-xs text-muted-foreground">Token auto-drills from parent</Span>
               </Div>
               <Div className="flex items-center gap-2">
                 <Badge variant="warning" size="sm">

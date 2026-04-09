@@ -215,7 +215,7 @@ export default function InspectorChainPage({
                         >
                           {token.name}
                           <Span className="ml-1 text-muted-foreground text-[10px]">
-                            {token.category === 'structural' ? 'propagates' : 'local'}
+                            {token.category === 'structural' ? 'auto-drill' : 'per-component'}
                           </Span>
                         </Badge>
                       ))}

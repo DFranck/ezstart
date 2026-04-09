@@ -29,6 +29,8 @@ const LEVEL_INDEXES = {
   complex: path.join(UI_PKG, 'complex/index.ts'),
 }
 
+const VARIANTS_FILE = path.join(ROOT, 'packages/ui/src/lib/design-system/variants.ts')
+
 /** Props that are always design tokens */
 const DESIGN_TOKEN_NAMES = new Set(['density', 'size', 'variant', 'colorScheme'])
 
@@ -653,6 +655,259 @@ function toRelativePath(absolutePath) {
   return path.relative(ROOT, absolutePath).replace(/\\/g, '/')
 }
 
+// ─── Variants.ts Scanning ──────────────────────────────────
+
+/**
+ * Mapping from VariantConfig export name → component name(s).
+ * When a config maps to multiple components, provide an array.
+ */
+const CONFIG_TO_COMPONENT = {
+  buttonVariantConfig: 'Button',
+  cardVariantConfig: 'Card',
+  cardHeaderVariantConfig: 'CardHeader',
+  cardContentVariantConfig: 'CardContent',
+  dialogVariantConfig: 'Dialog',
+  badgeVariantConfig: 'Badge',
+  tableVariantConfig: 'Table',
+  switchVariantConfig: 'Switch',
+  switchThumbVariantConfig: 'SwitchThumb',
+  skeletonVariantConfig: 'Skeleton',
+  animatedCounterVariantConfig: 'AnimatedCounter',
+  stepperVariantConfig: 'Stepper',
+  commandGroupVariantConfig: 'CommandGroup',
+  spinnerVariantConfig: 'Spinner',
+  tooltipVariantConfig: 'Tooltip',
+  alertDialogVariantConfig: 'AlertDialog',
+  versionSwitchVariantConfig: 'VersionSwitch',
+  heroVariantConfig: 'Hero',
+  splitSectionVariantConfig: 'SplitSection',
+  floatingPanelVariantConfig: 'FloatingPanel',
+  textGradientVariantConfig: 'TextGradient',
+  ctaVariantConfig: 'CTA',
+  landingHeroVariantConfig: 'LandingHero',
+  statsVariantConfig: 'Stats',
+  featureGridVariantConfig: 'FeatureGrid',
+  formInputVariantConfig: ['Input', 'Select', 'Textarea'],
+}
+
+/**
+ * Mapping from tagVariantsMeta key (lowercase tag) → component name.
+ * Tags from aliases.tsx use createAlias(tagName).
+ */
+const TAG_TO_COMPONENT = {
+  div: 'Div',
+  section: 'Section',
+  aside: 'Aside',
+  main: 'Main',
+  nav: 'Nav',
+  header: 'Header',
+  footer: 'FooterTag',
+  span: 'Span',
+  p: 'P',
+  h1: 'H1',
+  h2: 'H2',
+  h3: 'H3',
+  h4: 'H4',
+  h5: 'H5',
+  h6: 'H6',
+  ul: 'UL',
+  li: 'LI',
+  article: 'Article',
+  strong: 'Strong',
+  ol: 'Ol',
+}
+
+/**
+ * Extract token names from variants.ts by parsing VariantConfig objects
+ * and tagVariantsMeta entries. Returns Map<componentName, string[]>.
+ */
+function extractTokensFromVariantsFile() {
+  const content = readFile(VARIANTS_FILE)
+  if (!content) {
+    console.warn('  WARNING: Could not read variants.ts')
+    return new Map()
+  }
+
+  const componentTokens = new Map() // componentName → Set<tokenName>
+
+  // --- Part A: Parse named VariantConfig objects ---
+  // Pattern: export const xxxVariantConfig = { key1: {...}, key2: {...}, ... }
+  for (const [configName, componentNames] of Object.entries(CONFIG_TO_COMPONENT)) {
+    const configRegex = new RegExp(`export\\s+const\\s+${configName}\\s*=\\s*\\{`, 's')
+    const match = configRegex.exec(content)
+    if (!match) continue
+
+    const block = extractBraceBlock(content, match.index + match[0].length)
+    if (!block) continue
+
+    const keys = resolveSpreadKeys(content, block)
+
+    // Map to component(s)
+    const targets = Array.isArray(componentNames) ? componentNames : [componentNames]
+    for (const comp of targets) {
+      if (!componentTokens.has(comp)) componentTokens.set(comp, new Set())
+      for (const key of keys) {
+        componentTokens.get(comp).add(key)
+      }
+    }
+  }
+
+  // --- Part B: Parse tagVariantsMeta for Tag aliases ---
+  // The tagVariantsMeta object maps tag names → { variantKey: [...values] }
+  // We extract the variant key names (e.g., variant, size, layout, density, intent)
+  const metaRegex = /export\s+const\s+tagVariantsMeta[^=]*=\s*\{/s
+  const metaMatch = metaRegex.exec(content)
+  if (metaMatch) {
+    const metaBlock = extractBraceBlock(content, metaMatch.index + metaMatch[0].length)
+    if (metaBlock) {
+      // For each tag entry, we need to figure out which variant keys it has.
+      // The meta is built via extractMetaKeys(someConfig) or inline { variant: ..., size: ... }
+      // Instead of eval, we trace back to the config used.
+      // Strategy: for each tag in TAG_TO_COMPONENT, find its config.
+      const tagConfigMap = buildTagConfigMap(content)
+
+      for (const [tag, componentName] of Object.entries(TAG_TO_COMPONENT)) {
+        const configName = tagConfigMap[tag]
+        if (!configName) continue
+
+        // If we already parsed this config in Part A, reuse it
+        const configRegex2 = new RegExp(`export\\s+const\\s+${configName}\\s*=\\s*\\{`, 's')
+        const configMatch = configRegex2.exec(content)
+        if (!configMatch) continue
+
+        const configBlock = extractBraceBlock(content, configMatch.index + configMatch[0].length)
+        if (!configBlock) continue
+
+        const keys = resolveSpreadKeys(content, configBlock)
+
+        if (!componentTokens.has(componentName)) componentTokens.set(componentName, new Set())
+        for (const key of keys) {
+          componentTokens.get(componentName).add(key)
+        }
+      }
+    }
+  }
+
+  // Convert Sets to arrays
+  const result = new Map()
+  for (const [comp, tokenSet] of componentTokens) {
+    result.set(comp, [...tokenSet])
+  }
+
+  return result
+}
+
+/**
+ * Build a map of tag name → VariantConfig name used by tagVariantsMeta.
+ * Parses the tagVariantsMeta definition to find which config each tag uses.
+ */
+function buildTagConfigMap(content) {
+  const map = {}
+
+  // Pattern 1: tag: extractMetaKeys(someConfig),
+  const extractMetaPattern = /(\w+)\s*:\s*extractMetaKeys\s*\(\s*(\w+)\s*\)/g
+  // Only match within the tagVariantsMeta block
+  const metaStart = content.indexOf('tagVariantsMeta')
+  if (metaStart === -1) return map
+
+  const metaSection = content.substring(metaStart, metaStart + 3000)
+  let m
+  while ((m = extractMetaPattern.exec(metaSection)) !== null) {
+    map[m[1]] = m[2]
+  }
+
+  // Pattern 2: headings use tagHeadingVariantConfig (inline Object.keys)
+  // h1: { variant: Object.keys(tagHeadingVariantConfig.variant), size: Object.keys(tagHeadingVariantConfig.size) }
+  const headingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+  for (const tag of headingTags) {
+    if (!map[tag]) {
+      map[tag] = 'tagHeadingVariantConfig'
+    }
+  }
+
+  return map
+}
+
+/**
+ * Extract top-level object keys from a brace block content.
+ * Handles: key: { ... }, key: someVar, ...key (spread)
+ * Skips boolean keys like 'true', 'false'.
+ */
+function extractTopLevelKeys(block) {
+  const keys = []
+  // We need to walk the block tracking brace depth to only get top-level keys
+  let i = 0
+  let depth = 0
+
+  while (i < block.length) {
+    // Skip nested blocks
+    if (block[i] === '{') {
+      depth++
+      i++
+      continue
+    }
+    if (block[i] === '}') {
+      depth--
+      i++
+      continue
+    }
+
+    // Only extract keys at depth 0
+    if (depth === 0) {
+      // Handle spread: ...someVar
+      const spreadMatch = block.substring(i).match(/^\.\.\.(\w+)/)
+      if (spreadMatch) {
+        // Spread operator — we'd need to resolve the spread target
+        // For now, skip it (the spread's keys will be resolved via the spread target's config)
+        i += spreadMatch[0].length
+        continue
+      }
+
+      // Match key: (at top level)
+      const keyMatch = block.substring(i).match(/^(\w+)\s*:/)
+      if (keyMatch) {
+        const key = keyMatch[1]
+        if (!['true', 'false', 'as'].includes(key)) {
+          keys.push(key)
+        }
+        i += keyMatch[0].length
+        continue
+      }
+    }
+
+    i++
+  }
+
+  return [...new Set(keys)]
+}
+
+/**
+ * Resolve spread operators in a VariantConfig block.
+ * Returns all keys including those from spread targets.
+ */
+function resolveSpreadKeys(content, block) {
+  const keys = extractTopLevelKeys(block)
+
+  // Find spread operators: ...someVar
+  const spreadRegex = /\.\.\.(\w+)/g
+  let m
+  while ((m = spreadRegex.exec(block)) !== null) {
+    const spreadTarget = m[1]
+    // Find the spread target definition
+    const targetRegex = new RegExp(`(?:export\\s+)?const\\s+${spreadTarget}\\s*=\\s*\\{`, 's')
+    const targetMatch = targetRegex.exec(content)
+    if (targetMatch) {
+      const targetBlock = extractBraceBlock(content, targetMatch.index + targetMatch[0].length)
+      if (targetBlock) {
+        const spreadKeys = extractTopLevelKeys(targetBlock)
+        keys.push(...spreadKeys)
+      }
+    }
+  }
+
+  return [...new Set(keys)]
+}
+
 // ─── Main ───────────────────────────────────────────────────
 
 function main() {
@@ -727,6 +982,34 @@ function main() {
 
   console.log(`Processed: ${processed} components`)
   if (skipped > 0) console.log(`Skipped: ${skipped} components`)
+
+  // Step 2b: Merge tokens from variants.ts (source of truth for design tokens)
+  console.log('\nScanning variants.ts for centralized design tokens...')
+  const variantsTokens = extractTokensFromVariantsFile()
+  let mergedCount = 0
+
+  for (const [componentName, variantTokenNames] of variantsTokens) {
+    const entry = registry[componentName]
+    if (!entry) continue
+
+    const existingTokenNames = new Set(entry.tokens.map(t => (typeof t === 'string' ? t : t)))
+    let added = 0
+    for (const tokenName of variantTokenNames) {
+      if (!existingTokenNames.has(tokenName)) {
+        entry.tokens.push(tokenName)
+        existingTokenNames.add(tokenName)
+        added++
+      }
+    }
+    if (added > 0) {
+      // Regenerate description with updated tokens
+      entry.description = generateDescription(entry.name, entry.level, entry.tokens, entry.children)
+      mergedCount++
+    }
+  }
+
+  console.log(`  Found tokens for ${variantsTokens.size} components in variants.ts`)
+  console.log(`  Merged new tokens into ${mergedCount} registry entries`)
 
   // Step 3: Build popular chains from components with children
   const popularChains = buildPopularChains(registry)
