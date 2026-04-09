@@ -1,7 +1,7 @@
 import React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
-import { textGradientVariantConfig } from '../../lib/design-system/variants'
+import { textGradientVariants } from '../../lib/design-system/variants'
 
 /**
  * TextGradient Component - Animated Color Gradients
@@ -53,13 +53,6 @@ export const gradientColors = [
 ] as const
 
 export type GradientColor = (typeof gradientColors)[number]
-
-const textGradientVariants = cva('', {
-  variants: textGradientVariantConfig,
-  defaultVariants: {
-    direction: 'to-r',
-  },
-})
 
 export interface TextGradientProps extends VariantProps<typeof textGradientVariants> {
   /** Start color from design system */

@@ -1,10 +1,10 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
-import { paddingX, gap, paddingY } from '../../lib/design-system/tokens'
+import { paddingX, gap } from '../../lib/design-system/tokens'
 import {
-  cardVariantConfig,
+  cardVariants,
   cardHeaderVariantConfig,
   cardContentVariantConfig,
 } from '../../lib/design-system/variants'
@@ -29,44 +29,6 @@ import {
  *   <CardContent>Click me!</CardContent>
  * </Card>
  */
-
-const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border transition-all', {
-  variants: {
-    variant: {
-      default: 'bg-card shadow-sm shadow-foreground/5',
-      outline: 'bg-card border-border hover:border-primary/50 shadow-sm',
-      ghost: 'bg-transparent border-transparent shadow-none',
-      floating:
-        'bg-background/70 backdrop-blur-sm border-background/20 shadow-lg shadow-foreground/10',
-      dark: 'bg-foreground border-foreground shadow-2xl shadow-foreground/20 text-background',
-      premium:
-        'bg-gradient-to-r from-primary/5 via-background to-accent/5 border-primary/20 shadow-xl shadow-foreground/10',
-      elevated: 'bg-card shadow-2xl shadow-foreground/10 border-border/50',
-    },
-    size: {
-      ...cardVariantConfig.size,
-      sm: [gap.normal, paddingY.md].join(' '),
-      xl: [gap.loose, 'py-6 sm:py-6 md:py-8'].join(' '),
-    },
-    interactive: {
-      true: 'cursor-pointer',
-      false: '',
-    },
-    hover: {
-      none: '',
-      lift: 'hover:-translate-y-1 hover:shadow-xl',
-      glow: 'hover:shadow-xl hover:shadow-primary/20',
-      border: 'hover:border-primary',
-      scale: 'hover:scale-[1.02]',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-    size: 'default',
-    interactive: false,
-    hover: 'none',
-  },
-})
 
 interface CardProps extends React.ComponentProps<'div'>, VariantProps<typeof cardVariants> {}
 

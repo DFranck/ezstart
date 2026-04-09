@@ -1,9 +1,9 @@
 'use client'
 
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import { useDevice } from '../../hooks/use-device'
 import { cn } from '../../lib/utils'
-import { heroVariantConfig } from '../../lib/design-system/variants'
+import { heroVariants } from '../../lib/design-system/variants'
 import { H1, P, Section } from '../tag'
 import { Div } from '../tag/src/aliases'
 
@@ -45,14 +45,6 @@ import { Div } from '../tag/src/aliases'
  *   <CustomContent />
  * </Hero>
  */
-
-const heroVariants = cva('relative max-w-none overflow-hidden', {
-  variants: heroVariantConfig,
-  defaultVariants: {
-    height: 'lg',
-    alignment: 'center',
-  },
-})
 
 export interface HeroProps extends VariantProps<typeof heroVariants> {
   /** Unique ID for the section */
@@ -181,11 +173,7 @@ export const Hero = ({
   )
 
   return (
-    <Section
-      id={id}
-      size={size}
-      className={cn(heroVariants({ height, alignment }), className)}
-    >
+    <Section id={id} size={size} className={cn(heroVariants({ height, alignment }), className)}>
       {/* ✅ Center mode: media as background overlay */}
       {layout === 'center' && (
         <>

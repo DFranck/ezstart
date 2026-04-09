@@ -1,22 +1,9 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { cn } from '../../lib'
 import { size } from '../../lib/design-system/tokens'
-import { splitSectionVariantConfig } from '../../lib/design-system/variants'
+import { splitSectionVariants } from '../../lib/design-system/variants'
 import { Div, Section } from '../tag'
-
-// ============================================================================
-// SplitSection Variants
-// ============================================================================
-
-const splitSectionVariants = cva('relative w-full', {
-  variants: splitSectionVariantConfig,
-  defaultVariants: {
-    layout: 'horizontal',
-    align: 'stretch',
-    padding: 'none',
-  },
-})
 
 // ============================================================================
 // SplitSection Props

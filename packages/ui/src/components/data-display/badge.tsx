@@ -1,8 +1,7 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-import { fontSize, paddingX, paddingY } from '../../lib/design-system/tokens'
-import { badgeVariantConfig } from '../../lib/design-system/variants'
 import { cn } from '../../lib/utils'
+import { badgeVariants } from '../../lib/design-system/variants'
 
 /**
  * Badge Component - Display status, count, or label
@@ -34,45 +33,6 @@ import { cn } from '../../lib/utils'
  * // With pulse animation (for real-time status)
  * <Badge variant="success" pulse>Live</Badge>
  */
-
-const badgeVariants = cva(
-  'inline-flex items-center font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full',
-  {
-    variants: {
-      variant: {
-        ...badgeVariantConfig.variant,
-        primary: 'border-transparent bg-primary text-primary-foreground', // Alias for default
-        destructive: 'border-transparent bg-destructive text-destructive-foreground',
-        success: 'border-transparent bg-success/20 text-success dark:bg-success/10',
-        warning: 'border-transparent bg-warning/20 text-warning dark:bg-warning/10',
-        info: 'border-transparent bg-info/20 text-info dark:bg-info/10',
-        purple: 'border-transparent bg-purple-500/15 text-purple-700 dark:text-purple-300',
-        cyan: 'border-transparent bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
-        indigo: 'border-transparent bg-indigo-500/15 text-indigo-700 dark:text-indigo-300',
-        pink: 'border-transparent bg-pink-500/15 text-pink-700 dark:text-pink-300',
-      },
-      size: {
-        none: '', // No size classes - used for circle variant
-        default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '),
-        sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '),
-        lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '),
-      },
-      circle: {
-        true: 'aspect-square justify-center p-0',
-      },
-      circleSize: {
-        sm: 'w-8 h-8 text-sm',
-        md: 'w-10 h-10 text-base',
-        lg: 'w-12 h-12 text-xl',
-        xl: 'w-16 h-16 text-2xl',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-)
 
 const dotVariantClasses: Record<string, string> = {
   default: 'bg-primary',

@@ -1,22 +1,12 @@
 'use client'
 
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import { GripVertical, Maximize2, Minimize2, X } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '../../lib'
-import { floatingPanelVariantConfig } from '../../lib/design-system/variants'
+import { floatingPanelVariants } from '../../lib/design-system/variants'
 import { Button } from '../button'
-
-const floatingPanelVariants = cva(
-  'fixed z-50 bg-card border border-border rounded-lg shadow-lg flex flex-col overflow-hidden',
-  {
-    variants: floatingPanelVariantConfig,
-    defaultVariants: {
-      size: 'md',
-    },
-  }
-)
 
 export interface FloatingPanelProps
   extends

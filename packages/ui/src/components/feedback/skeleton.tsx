@@ -1,8 +1,8 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
-import { skeletonVariantConfig, skeletonCardSizeConfig } from '../../lib/design-system/variants'
+import { skeletonVariants, skeletonCardSizeConfig } from '../../lib/design-system/variants'
 
 /**
  * Skeleton Component - Loading State Placeholders
@@ -27,16 +27,8 @@ import { skeletonVariantConfig, skeletonCardSizeConfig } from '../../lib/design-
  * <SkeletonTable rows={5} cols={4} />
  */
 
-const skeletonVariants = cva('animate-pulse rounded-md bg-muted', {
-  variants: skeletonVariantConfig,
-  defaultVariants: {
-    variant: 'default',
-  },
-})
-
 interface SkeletonProps
-  extends React.ComponentProps<'div'>,
-    VariantProps<typeof skeletonVariants> {}
+  extends React.ComponentProps<'div'>, VariantProps<typeof skeletonVariants> {}
 
 /**
  * Base Skeleton component
@@ -76,11 +68,7 @@ function SkeletonText({
   return (
     <div className={cn('flex flex-col', spacingClasses[spacing], className)}>
       {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton
-          key={i}
-          variant={variant}
-          className={cn('h-4', i === lines - 1 && 'w-[80%]')}
-        />
+        <Skeleton key={i} variant={variant} className={cn('h-4', i === lines - 1 && 'w-[80%]')} />
       ))}
     </div>
   )
@@ -193,7 +181,10 @@ function SkeletonTable({
     <div className={cn('w-full overflow-hidden rounded-lg border border-border', className)}>
       <div className="w-full">
         {showHeader && (
-          <div className="grid gap-4 border-b border-border bg-muted/50 p-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+          <div
+            className="grid gap-4 border-b border-border bg-muted/50 p-4"
+            style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+          >
             {Array.from({ length: cols }).map((_, i) => (
               <Skeleton key={i} variant={variant} className="h-4" />
             ))}

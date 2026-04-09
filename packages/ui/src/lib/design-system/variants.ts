@@ -76,20 +76,38 @@ export const formInputDefaultVariants = {
  */
 export const buttonVariantConfig = {
   size: {
-    sm: [touchHeight.sm, 'px-3 gap-1.5'].join(' '),
-    default: [touchHeight.default, 'px-4 py-2 gap-2'].join(' '),
-    lg: [touchHeight.lg, 'px-6 gap-2'].join(' '),
-    icon: [touchSize.default].join(' '),
+    default: 'h-11 sm:h-9 px-4 py-2 has-[>svg]:px-3',
+    sm: 'h-11 sm:h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
+    lg: 'h-11 sm:h-10 rounded-md px-6 has-[>svg]:px-4',
+    icon: 'size-11 sm:size-9',
   },
   variant: {
     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
-    destructive: 'bg-destructive text-white shadow-xs hover:bg-destructive/90',
-    outline: 'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+    destructive:
+      'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+    outline:
+      'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
     secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
-    ghost: 'hover:bg-accent hover:text-accent-foreground',
+    ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
     link: 'text-primary underline-offset-4 hover:underline',
+    linkedin: 'bg-[#0077B5] text-white shadow-xs hover:bg-[#0077B5]/90',
+    brand: 'bg-brand text-brand-foreground shadow-xs hover:bg-brand/90',
   },
 } as const
+
+/**
+ * CVA instance for button variants
+ */
+export const buttonVariants = cva(
+  "cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  {
+    variants: buttonVariantConfig,
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+)
 
 // ============================================================================
 // CONFIG: CARD (Cards, Sections, Containers)
@@ -99,22 +117,52 @@ export const buttonVariantConfig = {
  * Config de variants pour cards/containers
  */
 export const cardVariantConfig = {
+  variant: {
+    default: 'bg-card shadow-sm shadow-foreground/5',
+    outline: 'bg-card border-border hover:border-primary/50 shadow-sm',
+    ghost: 'bg-transparent border-transparent shadow-none',
+    floating:
+      'bg-background/70 backdrop-blur-sm border-background/20 shadow-lg shadow-foreground/10',
+    dark: 'bg-foreground border-foreground shadow-2xl shadow-foreground/20 text-background',
+    premium:
+      'bg-gradient-to-r from-primary/5 via-background to-accent/5 border-primary/20 shadow-xl shadow-foreground/10',
+    elevated: 'bg-card shadow-2xl shadow-foreground/10 border-border/50',
+  },
   size: {
     xs: [gap.xs, paddingY.xs].join(' '),
-    sm: [gap.sm, paddingY.sm].join(' '),
+    sm: [gap.normal, paddingY.md].join(' '),
     default: [gap.relaxed, paddingY.lg].join(' '),
     lg: [gap.spacious, paddingY.lg].join(' '),
-    xl: [gap.loose, paddingY.xl].join(' '),
+    xl: [gap.loose, 'py-6 sm:py-6 md:py-8'].join(' '),
   },
-  variant: {
-    default: variantContainer.card,
-    outline: variantContainer.outline,
-    filled: variantContainer.filled,
-    floating: variantContainer.floating,
-    ghost: variantContainer.ghost,
+  interactive: {
+    true: 'cursor-pointer',
+    false: '',
   },
-  intent: intentContainer,
+  hover: {
+    none: '',
+    lift: 'hover:-translate-y-1 hover:shadow-xl',
+    glow: 'hover:shadow-xl hover:shadow-primary/20',
+    border: 'hover:border-primary',
+    scale: 'hover:scale-[1.02]',
+  },
 } as const
+
+/**
+ * CVA instance for card variants
+ */
+export const cardVariants = cva(
+  'text-card-foreground flex flex-col rounded-xl border transition-all',
+  {
+    variants: cardVariantConfig,
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+      interactive: false,
+      hover: 'none',
+    },
+  }
+)
 
 export const cardHeaderVariantConfig = {
   size: {
@@ -165,21 +213,50 @@ export const dialogContentPadding = {
  * Config de variants pour badges
  */
 export const badgeVariantConfig = {
-  size: {
-    sm: 'px-2 py-0.5 text-xs',
-    default: 'px-2.5 py-0.5 text-xs',
-    lg: 'px-3 py-1 text-sm',
-  },
   variant: {
     default: 'border-transparent bg-primary text-primary-foreground shadow',
     secondary: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
-    destructive: 'border-transparent bg-destructive text-white shadow',
+    primary: 'border-transparent bg-primary text-primary-foreground', // Alias for default
+    destructive: 'border-transparent bg-destructive text-destructive-foreground',
     outline: 'text-foreground border',
-    success: 'border-transparent bg-success text-success-foreground',
-    warning: 'border-transparent bg-warning text-warning-foreground',
-    info: 'border-transparent bg-info text-info-foreground',
+    success: 'border-transparent bg-success/20 text-success dark:bg-success/10',
+    warning: 'border-transparent bg-warning/20 text-warning dark:bg-warning/10',
+    info: 'border-transparent bg-info/20 text-info dark:bg-info/10',
+    purple: 'border-transparent bg-purple-500/15 text-purple-700 dark:text-purple-300',
+    cyan: 'border-transparent bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
+    indigo: 'border-transparent bg-indigo-500/15 text-indigo-700 dark:text-indigo-300',
+    pink: 'border-transparent bg-pink-500/15 text-pink-700 dark:text-pink-300',
+  },
+  size: {
+    none: '', // No size classes - used for circle variant
+    default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '),
+    sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '),
+    lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '),
+  },
+  circle: {
+    true: 'aspect-square justify-center p-0',
+  },
+  circleSize: {
+    sm: 'w-8 h-8 text-sm',
+    md: 'w-10 h-10 text-base',
+    lg: 'w-12 h-12 text-xl',
+    xl: 'w-16 h-16 text-2xl',
   },
 } as const
+
+/**
+ * CVA instance for badge variants
+ */
+export const badgeVariants = cva(
+  'inline-flex items-center font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full',
+  {
+    variants: badgeVariantConfig,
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+)
 
 // ============================================================================
 // CONFIG: TYPOGRAPHY (Headings, Paragraphs, etc.)
@@ -261,6 +338,34 @@ export const switchThumbVariantConfig = {
   },
 } as const
 
+/**
+ * CVA instance for switch variants
+ */
+export const switchVariants = cva(
+  'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+  {
+    variants: switchVariantConfig,
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+)
+
+/**
+ * CVA instance for switch thumb variants
+ */
+export const switchThumbVariants = cva(
+  'pointer-events-none block rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0',
+  {
+    variants: switchThumbVariantConfig,
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+)
+
 // ============================================================================
 // CONFIG: TABLE (Data Tables)
 // ============================================================================
@@ -284,6 +389,17 @@ export const tableVariantConfig = {
       '[&_td]:py-4 [&_td]:px-5 [&_td]:sm:py-3 [&_td]:sm:px-4 [&_th]:py-4 [&_th]:px-5 [&_th]:sm:py-3 [&_th]:sm:px-4',
   },
 } as const
+
+/**
+ * CVA instance for table variants
+ */
+export const tableVariants = cva('w-full caption-bottom text-base sm:text-sm', {
+  variants: tableVariantConfig,
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+})
 
 // ============================================================================
 // CONFIG: SKELETON (Loading Placeholders)
@@ -310,6 +426,16 @@ export const skeletonCardSizeConfig = {
   default: 'p-4 gap-4 sm:p-6 sm:gap-4',
   lg: 'p-6 gap-5 sm:p-8 sm:gap-6',
 } as const
+
+/**
+ * CVA instance for skeleton variants
+ */
+export const skeletonVariants = cva('animate-pulse rounded-md bg-muted', {
+  variants: skeletonVariantConfig,
+  defaultVariants: {
+    variant: 'default',
+  },
+})
 
 // ============================================================================
 // CONFIG: ANIMATED COUNTER (Number Animations)
@@ -343,6 +469,17 @@ export const animatedCounterVariantConfig = {
     giant: fontSize.giant,
   },
 } as const
+
+/**
+ * CVA instance for animated counter variants
+ */
+export const animatedCounterVariants = cva('tabular-nums inline-block transition-colors', {
+  variants: animatedCounterVariantConfig,
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+})
 
 // ============================================================================
 // CONFIG: STEPPER (Multi-Step Forms & Wizards)
@@ -425,6 +562,19 @@ export const commandGroupVariantConfig = {
   },
 } as const
 
+/**
+ * CVA instance for command group variants
+ */
+export const commandGroupVariants = cva(
+  'text-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:rounded-md',
+  {
+    variants: commandGroupVariantConfig,
+    defaultVariants: {
+      headingVariant: 'default',
+    },
+  }
+)
+
 // ============================================================================
 // HELPERS: Créer CVA rapidement
 // ============================================================================
@@ -461,7 +611,8 @@ export function createCardVariant(baseClasses: string) {
     defaultVariants: {
       size: 'default',
       variant: 'default',
-      intent: 'default',
+      interactive: false,
+      hover: 'none',
     },
   })
 }
@@ -938,6 +1089,17 @@ export const heroVariantConfig = {
   },
 } as const
 
+/**
+ * CVA instance for hero variants
+ */
+export const heroVariants = cva('relative max-w-none overflow-hidden', {
+  variants: heroVariantConfig,
+  defaultVariants: {
+    height: 'lg',
+    alignment: 'center',
+  },
+})
+
 // ============================================================================
 // CONFIG: SPLIT SECTION
 // ============================================================================
@@ -963,6 +1125,18 @@ export const splitSectionVariantConfig = {
   },
 } as const
 
+/**
+ * CVA instance for split section variants
+ */
+export const splitSectionVariants = cva('relative w-full', {
+  variants: splitSectionVariantConfig,
+  defaultVariants: {
+    layout: 'horizontal',
+    align: 'stretch',
+    padding: 'none',
+  },
+})
+
 // ============================================================================
 // CONFIG: FLOATING PANEL
 // ============================================================================
@@ -976,6 +1150,19 @@ export const floatingPanelVariantConfig = {
     full: 'w-[90vw] h-[90vh]',
   },
 } as const
+
+/**
+ * CVA instance for floating panel variants
+ */
+export const floatingPanelVariants = cva(
+  'fixed z-50 bg-card border border-border rounded-lg shadow-lg flex flex-col overflow-hidden',
+  {
+    variants: floatingPanelVariantConfig,
+    defaultVariants: {
+      size: 'md',
+    },
+  }
+)
 
 // ============================================================================
 // CONFIG: TEXT GRADIENT
@@ -993,6 +1180,16 @@ export const textGradientVariantConfig = {
     'to-bl': '',
   },
 } as const
+
+/**
+ * CVA instance for text gradient variants
+ */
+export const textGradientVariants = cva('', {
+  variants: textGradientVariantConfig,
+  defaultVariants: {
+    direction: 'to-r',
+  },
+})
 
 // ============================================================================
 // CONFIG: LANDING CTA
