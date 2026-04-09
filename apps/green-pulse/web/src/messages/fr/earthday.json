@@ -36,6 +36,7 @@
     "signup": {
       "title": "Rejoignez le mouvement vert",
       "subtitle": "Créez votre compte gratuit en quelques secondes",
+      "description": "Enregistrez-vous pour discuter avec GP.A gratuitement et bénéficier de votre code promo Earth Day !",
       "username": "Nom d'utilisateur",
       "usernamePlaceholder": "Choisissez un nom d'utilisateur",
       "email": "Email",
@@ -50,6 +51,7 @@
     "welcome": {
       "justJoined": "Bienvenue !",
       "back": "Bon retour !",
+      "promoApplied": "🎉 Code Earth Day appliqué ! Vous bénéficiez d'un mois gratuit sur la version Pro à venir.",
       "installHint": "Installez l'application pour un accès rapide et le mode hors ligne.",
       "installDescription": "Ajoutez GreenPulse.AI à votre écran d'accueil pour la meilleure expérience.",
       "installButton": "Installer l'application",

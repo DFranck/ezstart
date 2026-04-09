@@ -26,7 +26,9 @@ function EarthDayContent() {
   const currentLocale = useLocale()
   const router = useRouter()
   const [signupSuccess, setSignupSuccess] = useState(false)
+  const [signupPromo, setSignupPromo] = useState<string | null>(null)
   const [mode, setMode] = useState<'signup' | 'signin'>('signup')
+  const hasPromo = Boolean(searchParams.get('promo'))
 
   // Track utm_source for analytics
   useEffect(() => {
@@ -84,7 +86,11 @@ function EarthDayContent() {
                   <>
                     <QuickSignUpForm
                       appName="green-pulse"
-                      onSuccess={() => setSignupSuccess(true)}
+                      description={t('signup.description')}
+                      onSuccess={() => {
+                        setSignupSuccess(true)
+                        if (hasPromo) setSignupPromo(searchParams.get('promo'))
+                      }}
                       texts={{
                         username: t('signup.username'),
                         usernamePlaceholder: t('signup.usernamePlaceholder'),
@@ -137,7 +143,11 @@ function EarthDayContent() {
                 <H2 className="text-lg font-bold text-foreground mb-2">
                   {signupSuccess ? t('welcome.justJoined') : t('welcome.back')}
                 </H2>
-                <P className="text-sm text-muted-foreground mb-4">{t('welcome.installHint')}</P>
+                {signupPromo ? (
+                  <P className="text-sm text-green-400 mb-4">{t('welcome.promoApplied')}</P>
+                ) : (
+                  <P className="text-sm text-muted-foreground mb-4">{t('welcome.installHint')}</P>
+                )}
 
                 <Div className="flex flex-col gap-3">
                   <PWAInstallPrompt

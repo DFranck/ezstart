@@ -45,6 +45,8 @@ export interface QuickSignUpFormTexts {
 export interface QuickSignUpFormProps {
   /** App name for the quick signup request */
   appName: string
+  /** Optional description/message displayed above the form */
+  description?: string
   /** Pre-filled promo code (auto-detected from URL ?promo= or localStorage if not provided) */
   promoCode?: string
   /** Custom email subject override for the welcome email */
@@ -88,6 +90,7 @@ type FormData = {
 
 export function QuickSignUpForm({
   appName,
+  description,
   promoCode,
   emailSubject,
   emailBody,
@@ -155,6 +158,10 @@ export function QuickSignUpForm({
           <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
             {error}
           </Div>
+        )}
+
+        {description && (
+          <P className="text-sm text-muted-foreground text-center mb-4">{description}</P>
         )}
 
         <FormField
