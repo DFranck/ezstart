@@ -64,6 +64,8 @@ export function QuoteModal({
   const tToast = useTranslations('toast')
   const tQuote = useTranslations('quote')
   const tCommon = useTranslations('common')
+  const tFlatRate = useTranslations('flatRate')
+  const tPlaceholders = useTranslations('placeholders')
 
   const [formData, setFormData] = useState<CreateQuote & { validUntil?: string }>({
     userId: '',
@@ -256,7 +258,7 @@ export function QuoteModal({
                 <Div>
                   <Label className="text-sm font-medium  mb-3 block flex items-center">
                     <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
-                    Client *
+                    {tQuote('client')} *
                   </Label>
                   <Select
                     value={formData.clientId}
@@ -264,7 +266,7 @@ export function QuoteModal({
                     required
                   >
                     <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
-                      <SelectValue placeholder="Select a client" />
+                      <SelectValue placeholder={tCommon('selectClient')} />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border shadow-xl rounded-xl">
                       {clients.map(client => (
@@ -284,7 +286,7 @@ export function QuoteModal({
               <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
-                  Bill on behalf of
+                  {tCommon('billOnBehalf')}
                 </Label>
                 <Select
                   value={formData.companyId || 'personal'}
@@ -293,13 +295,13 @@ export function QuoteModal({
                   }
                 >
                   <SelectTrigger className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
-                    <SelectValue placeholder="Select billing entity" />
+                    <SelectValue placeholder={tCommon('selectBillingEntity')} />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     <SelectItem value="personal" className="hover:bg-warning/5">
                       <Div className="flex items-center">
                         <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
-                        Personal (your name)
+                        {tCommon('personalName')}
                       </Div>
                     </SelectItem>
                     {companies?.map(company => (
@@ -324,7 +326,7 @@ export function QuoteModal({
               <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-ezbill-quote" />
-                  Currency
+                  {tCommon('currency')}
                 </Label>
                 <Select
                   value={formData.currency}
@@ -349,7 +351,7 @@ export function QuoteModal({
               <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-ezbill-quote" />
-                  Valid Until
+                  {tQuote('validUntil')}
                 </Label>
                 <Div className="relative">
                   <Input
@@ -381,14 +383,14 @@ export function QuoteModal({
                       className="text-sm font-medium  flex items-center cursor-pointer"
                     >
                       <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-warning" />
-                      Add Taxes
+                      {tCommon('addTaxes')}
                     </Label>
                   </Div>
                   {showTaxes && (
                     <Div>
                       <Label className="text-sm font-medium  mb-3 block flex items-center">
                         <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-warning" />
-                        Tax Rate (%)
+                        {tCommon('taxRate')}
                       </Label>
                       <Input
                         type="number"
@@ -412,7 +414,7 @@ export function QuoteModal({
               <Div className="mb-6">
                 <Label className="text-sm font-medium mb-3 block flex items-center">
                   <Icon name="lucide:FileType" className="w-4 h-4 mr-2 text-primary" />
-                  Billing Type *
+                  {tCommon('billingType')} *
                 </Label>
                 <Div className="flex gap-3">
                   <Button
@@ -422,7 +424,7 @@ export function QuoteModal({
                     className="flex-1"
                   >
                     <Icon name="lucide:List" className="w-4 h-4 mr-2" />
-                    Itemized
+                    {tCommon('itemized')}
                   </Button>
                   <Button
                     type="button"
@@ -431,7 +433,7 @@ export function QuoteModal({
                     className="flex-1"
                   >
                     <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                    Flat Rate
+                    {tCommon('flatRate')}
                   </Button>
                 </Div>
               </Div>
@@ -452,10 +454,10 @@ export function QuoteModal({
                   <Div>
                     <Label className="text-sm font-medium mb-3 block flex items-center">
                       <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
-                      Description *
+                      {tCommon('description')} *
                     </Label>
                     <TextArea
-                      placeholder="Describe the work or service provided..."
+                      placeholder={tFlatRate('descriptionPlaceholder')}
                       value={formData.description || ''}
                       onChange={e => setFormData({ ...formData, description: e.target.value })}
                       required
@@ -466,11 +468,11 @@ export function QuoteModal({
                   <Div>
                     <Label className="text-sm font-medium mb-3 block flex items-center">
                       <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-success" />
-                      Amount *
+                      {tFlatRate('amount')} *
                     </Label>
                     <Input
                       type="number"
-                      placeholder="Enter flat rate amount"
+                      placeholder={tFlatRate('amountPlaceholder')}
                       min="0"
                       step="0.01"
                       value={formData.flatRateAmount === 0 ? '' : formData.flatRateAmount}
@@ -499,28 +501,28 @@ export function QuoteModal({
             <Div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                Notes
+                {tCommon('notes')}
               </Label>
               <TextArea
                 value={formData.notes}
                 onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
                 className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
-                placeholder="Additional notes for this quote..."
+                placeholder={tPlaceholders('quoteNotes')}
               />
             </Div>
 
             <Div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 " />
-                Terms & Conditions
+                {tCommon('termsConditions')}
               </Label>
               <TextArea
                 value={formData.terms}
                 onChange={e => setFormData({ ...formData, terms: e.target.value })}
                 rows={3}
                 className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
-                placeholder="Quote terms and conditions..."
+                placeholder={tPlaceholders('quoteTerms')}
               />
             </Div>
           </form>

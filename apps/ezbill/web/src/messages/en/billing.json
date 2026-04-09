@@ -25,7 +25,8 @@
     "validUntil": "Valid Until",
     "accept": "Accept",
     "decline": "Decline",
-    "convertToInvoice": "Invoice"
+    "convertToInvoice": "Invoice",
+    "client": "Client"
   },
   "receipt": {
     "download": "Download"
@@ -189,7 +190,10 @@
     "deleteFailed": "Failed to delete {name}. Please try again.",
     "pdfPreviewError": "Error generating PDF preview",
     "pdfOnlyInvoiceReceipt": "PDF generation is only available for invoices and receipts",
-    "pdfDownloadError": "Error downloading PDF"
+    "pdfDownloadError": "Error downloading PDF",
+    "markPaidLoading": "Marking invoice as paid...",
+    "markPaidSuccess": "Invoice marked as paid and receipt created",
+    "markPaidFailed": "Failed to mark invoice as paid"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -305,6 +309,12 @@
   "layout": {
     "professionalBilling": "Professional Billing",
     "madeBy": "Made by"
+  },
+  "markPaid": {
+    "title": "Mark Invoice as Paid",
+    "description": "This will create a receipt and mark the invoice as paid.",
+    "paymentDate": "Payment Date",
+    "markAsPaid": "Mark as Paid"
   },
   "flatRate": {
     "description": "Description",

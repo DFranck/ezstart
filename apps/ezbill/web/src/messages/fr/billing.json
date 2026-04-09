@@ -25,7 +25,8 @@
     "validUntil": "Valide jusqu'au",
     "accept": "Accepter",
     "decline": "Refuser",
-    "convertToInvoice": "Facture"
+    "convertToInvoice": "Facture",
+    "client": "Client"
   },
   "receipt": {
     "download": "Télécharger"
@@ -189,7 +190,10 @@
     "deleteFailed": "Échec de la suppression de {name}. Veuillez réessayer.",
     "pdfPreviewError": "Erreur lors de la génération du preview PDF",
     "pdfOnlyInvoiceReceipt": "La génération PDF n'est disponible que pour les factures et reçus",
-    "pdfDownloadError": "Erreur lors du téléchargement du PDF"
+    "pdfDownloadError": "Erreur lors du téléchargement du PDF",
+    "markPaidLoading": "Marquage de la facture...",
+    "markPaidSuccess": "Facture marquée comme payée et reçu créé",
+    "markPaidFailed": "Échec du marquage de la facture"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -305,6 +309,12 @@
   "layout": {
     "professionalBilling": "Facturation professionnelle",
     "madeBy": "Créé par"
+  },
+  "markPaid": {
+    "title": "Marquer la facture comme payée",
+    "description": "Cela créera un reçu et marquera la facture comme payée.",
+    "paymentDate": "Date de paiement",
+    "markAsPaid": "Marquer comme payée"
   },
   "flatRate": {
     "description": "Description",

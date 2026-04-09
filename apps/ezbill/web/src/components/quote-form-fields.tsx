@@ -23,6 +23,7 @@ import {
   H4,
   Span,
 } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 
 const currencies: { value: Currency; label: string; symbol: string }[] = [
   { value: 'EUR', label: 'EUR - Euro', symbol: '€' },
@@ -38,6 +39,7 @@ interface ItemsTableProps {
 }
 
 export function ItemsTable({ items, onUpdateItem, onRemoveItem, onAddItem }: ItemsTableProps) {
+  const tCommon = useTranslations('common')
   return (
     <>
       <Div className="bg-card/60 backdrop-blur-sm rounded-xl border overflow-hidden">
@@ -48,19 +50,19 @@ export function ItemsTable({ items, onUpdateItem, onRemoveItem, onAddItem }: Ite
                 <TableHead className="font-semibold ">
                   <Div className="flex items-center">
                     <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                    Description
+                    {tCommon('description')}
                   </Div>
                 </TableHead>
                 <TableHead className="w-20 font-semibold ">
                   <Div className="flex items-center">
                     <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
-                    Qty
+                    {tCommon('quantity')}
                   </Div>
                 </TableHead>
                 <TableHead className="w-24 font-semibold ">
                   <Div className="flex items-center">
                     <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
-                    Price
+                    {tCommon('price')}
                   </Div>
                 </TableHead>
                 <TableHead className="w-16"></TableHead>
@@ -71,7 +73,7 @@ export function ItemsTable({ items, onUpdateItem, onRemoveItem, onAddItem }: Ite
                 <TableRow key={index} className="hover:bg-warning/5">
                   <TableCell className="p-3">
                     <TextArea
-                      placeholder="Description"
+                      placeholder={tCommon('description')}
                       value={item.label}
                       onChange={e => onUpdateItem(index, 'label', e.target.value)}
                       required
@@ -82,7 +84,7 @@ export function ItemsTable({ items, onUpdateItem, onRemoveItem, onAddItem }: Ite
                   <TableCell className="p-3">
                     <Input
                       type="number"
-                      placeholder="Qty"
+                      placeholder={tCommon('quantity')}
                       min="1"
                       value={item.quantity}
                       onChange={e => onUpdateItem(index, 'quantity', parseInt(e.target.value) || 1)}
@@ -93,7 +95,7 @@ export function ItemsTable({ items, onUpdateItem, onRemoveItem, onAddItem }: Ite
                   <TableCell className="p-3">
                     <Input
                       type="number"
-                      placeholder="Price"
+                      placeholder={tCommon('price')}
                       min="0"
                       step="0.01"
                       value={item.price}
@@ -122,7 +124,7 @@ export function ItemsTable({ items, onUpdateItem, onRemoveItem, onAddItem }: Ite
       </Div>
       <Button type="button" variant="outline" className="mt-2" onClick={onAddItem}>
         <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
-        Add Line Item
+        {tCommon('addLineItem')}
       </Button>
     </>
   )
@@ -146,29 +148,31 @@ export function QuoteSummary({
   taxRate,
   currency,
 }: QuoteSummaryProps) {
+  const tCommon = useTranslations('common')
+  const tQuote = useTranslations('quote')
   return (
     <Div>
       <Div className="flex items-center mb-3">
         <Icon name="lucide:Calculator" className="w-4 h-4 mr-2" />
-        <H4 className="font-semibold ">Quote Summary</H4>
+        <H4 className="font-semibold ">{tQuote('summary')}</H4>
       </Div>
       <Div className="space-y-2">
         <Div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
-          <Span className="font-medium ">Subtotal:</Span>
+          <Span className="font-medium ">{tCommon('subtotal')}:</Span>
           <Span className="font-semibold">
             {subtotal.toFixed(2)} {currency}
           </Span>
         </Div>
         {showTaxes && (
           <Div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
-            <Span className="font-medium ">Tax ({taxRate}%):</Span>
+            <Span className="font-medium ">{tCommon('tax', { rate: taxRate })}:</Span>
             <Span className="font-semibold">
               {taxAmount.toFixed(2)} {currency}
             </Span>
           </Div>
         )}
         <Div className="flex justify-between bg-gradient-quote text-white rounded-lg p-3 shadow">
-          <Span className="font-bold">Total:</Span>
+          <Span className="font-bold">{tCommon('total')}:</Span>
           <Span className="font-bold text-lg">
             {total.toFixed(2)} {currency}
           </Span>
