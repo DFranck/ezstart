@@ -97,13 +97,28 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
 
   // State
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
+  // Track whether user explicitly chose a provider (vs auto-selected)
+  const [userChoseProvider, setUserChoseProvider] = useState(false)
 
   // Auth (read token each render to stay reactive)
   const token = getAuthToken()
   const isAuthenticated = !!token
 
   // Providers
-  const { providers, selectedProvider, setSelectedProvider } = useProviders(appName)
+  const {
+    providers,
+    selectedProvider,
+    setSelectedProvider: rawSetSelectedProvider,
+  } = useProviders(appName)
+
+  // Wrap setSelectedProvider to track explicit user choice
+  const setSelectedProvider = useCallback(
+    (id: string) => {
+      setUserChoseProvider(true)
+      rawSetSelectedProvider(id)
+    },
+    [rawSetSelectedProvider]
+  )
 
   // Conversations
   const {
@@ -139,7 +154,8 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
           locale,
           ...extraPayload,
         }
-        if (selectedProvider) {
+        // Only send providerId if user explicitly chose one — otherwise let backend cascade
+        if (selectedProvider && userChoseProvider) {
           payload.providerId = selectedProvider
         }
         if (activeConversationId) {
@@ -192,6 +208,7 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
       locale,
       extraPayload,
       selectedProvider,
+      userChoseProvider,
       activeConversationId,
       loadConversations,
       refreshConversation,
