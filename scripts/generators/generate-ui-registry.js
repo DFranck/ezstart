@@ -32,6 +32,14 @@ const LEVEL_INDEXES = {
 /** Props that are always design tokens */
 const DESIGN_TOKEN_NAMES = new Set(['density', 'size', 'variant', 'colorScheme'])
 
+/** Structural tokens propagate through the component tree */
+const STRUCTURAL_TOKENS = new Set(['density', 'size'])
+
+/** Categorize a token as structural (propagates) or visual (local only) */
+function categorizeToken(name) {
+  return STRUCTURAL_TOKENS.has(name) ? 'structural' : 'visual'
+}
+
 // ─── Helpers ────────────────────────────────────────────────
 
 function readFile(filePath) {
@@ -697,7 +705,9 @@ function generateOutput(registry, popularChains) {
 
   function formatEntry([name, entry]) {
     const tokens =
-      entry.tokens.length > 0 ? `[${entry.tokens.map(t => `'${t}'`).join(', ')}]` : '[]'
+      entry.tokens.length > 0
+        ? `[${entry.tokens.map(t => `{ name: '${t}', category: '${categorizeToken(t)}' }`).join(', ')}]`
+        : '[]'
     const children =
       entry.children.length > 0 ? `[${entry.children.map(c => `'${c}'`).join(', ')}]` : '[]'
     const props = formatProps(entry.props)
@@ -730,6 +740,13 @@ function generateOutput(registry, popularChains) {
 
 export type ComponentLevel = 'base' | 'composed' | 'complex'
 
+export type TokenCategory = 'structural' | 'visual'
+
+export type TokenInfo = {
+  name: string
+  category: TokenCategory
+}
+
 export type PropInfo = {
   name: string
   type: string
@@ -740,11 +757,26 @@ export type PropInfo = {
 export type ComponentEntry = {
   name: string
   level: ComponentLevel
-  tokens: string[]
+  tokens: TokenInfo[]
   props: PropInfo[]
   children: string[]
   description: string
   sourcePath: string
+}
+
+/** Extract token names from TokenInfo array */
+export function getTokenNames(tokens: TokenInfo[]): string[] {
+  return tokens.map(t => t.name)
+}
+
+/** Get structural tokens only */
+export function getStructuralTokens(tokens: TokenInfo[]): TokenInfo[] {
+  return tokens.filter(t => t.category === 'structural')
+}
+
+/** Get visual tokens only */
+export function getVisualTokens(tokens: TokenInfo[]): TokenInfo[] {
+  return tokens.filter(t => t.category === 'visual')
 }
 
 export const componentRegistry: Record<string, ComponentEntry> = {

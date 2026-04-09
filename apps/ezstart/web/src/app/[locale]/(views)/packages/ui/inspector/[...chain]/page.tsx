@@ -6,8 +6,10 @@ import Link from 'next/link'
 import {
   componentRegistry,
   getComponent,
+  getTokenNames,
   type ComponentEntry,
   type ComponentLevel,
+  type TokenInfo,
 } from '../registry'
 import { InspectorControls } from '../components/inspector-controls'
 import { InspectorPreview } from '../components/inspector-preview'
@@ -25,16 +27,16 @@ const levelBadgeVariant: Record<ComponentLevel, 'success' | 'info' | 'purple'> =
 }
 
 function getDefaultTokenValues(chain: ComponentEntry[]): Record<string, string> {
-  const allTokens = new Set<string>()
+  const allTokenNames = new Set<string>()
   for (const entry of chain) {
     for (const token of entry.tokens) {
-      allTokens.add(token)
+      allTokenNames.add(token.name)
     }
   }
 
   const defaults: Record<string, string> = {}
-  for (const token of allTokens) {
-    defaults[token] = 'default'
+  for (const name of allTokenNames) {
+    defaults[name] = 'default'
   }
   return defaults
 }
@@ -77,13 +79,17 @@ export default function InspectorChainPage({
   const warnings = useMemo(() => validateChainOrder(chainEntries), [chainEntries])
 
   const allTokens = useMemo(() => {
-    const tokens = new Set<string>()
+    const seen = new Set<string>()
+    const tokens: TokenInfo[] = []
     for (const entry of chainEntries) {
       for (const token of entry.tokens) {
-        tokens.add(token)
+        if (!seen.has(token.name)) {
+          seen.add(token.name)
+          tokens.push(token)
+        }
       }
     }
-    return Array.from(tokens)
+    return tokens
   }, [chainEntries])
 
   const [tokens, setTokens] = useState<Record<string, string>>(() =>
@@ -202,8 +208,15 @@ export default function InspectorChainPage({
                   {entry.tokens.length > 0 && (
                     <Div className="flex flex-wrap gap-1">
                       {entry.tokens.map(token => (
-                        <Badge key={token} variant="outline" size="sm">
-                          {token}
+                        <Badge
+                          key={token.name}
+                          variant={token.category === 'structural' ? 'outline' : 'secondary'}
+                          size="sm"
+                        >
+                          {token.name}
+                          <Span className="ml-1 text-muted-foreground text-[10px]">
+                            {token.category === 'structural' ? 'propagates' : 'local'}
+                          </Span>
                         </Badge>
                       ))}
                     </Div>

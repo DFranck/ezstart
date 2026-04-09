@@ -2,11 +2,12 @@
 
 import { type ReactNode } from 'react'
 import { Badge, Button, Card, CardContent, Div, Input, P, Span } from '@ezstart/ui/components'
+import { type TokenInfo, getTokenNames, getStructuralTokens, getVisualTokens } from '../registry'
 
 type ChainItem = {
   name: string
   level: 'base' | 'composed' | 'complex'
-  tokens: string[]
+  tokens: TokenInfo[]
 }
 
 type InspectorPreviewProps = {
@@ -18,6 +19,7 @@ type CompatibilityResult = {
   flows: string[]
   lost: string[]
   uncontrollable: string[]
+  localVisual: string[]
 }
 
 const LEVEL_COLORS: Record<string, string> = {
@@ -33,20 +35,37 @@ const LEVEL_BADGE_VARIANT: Record<string, 'purple' | 'info' | 'success'> = {
 }
 
 function computeCompatibility(parent: ChainItem, child: ChainItem): CompatibilityResult {
-  const parentTokens = new Set(parent.tokens)
-  const childTokens = new Set(child.tokens)
+  const parentStructural = getStructuralTokens(parent.tokens)
+  const childStructural = getStructuralTokens(child.tokens)
+  const parentStructuralNames = new Set(parentStructural.map(t => t.name))
+  const childStructuralNames = new Set(childStructural.map(t => t.name))
 
-  const flows = parent.tokens.filter(t => childTokens.has(t))
-  const lost = parent.tokens.filter(t => !childTokens.has(t))
-  const uncontrollable = child.tokens.filter(t => !parentTokens.has(t))
+  // Only structural tokens participate in propagation compatibility
+  const flows = parentStructural.filter(t => childStructuralNames.has(t.name)).map(t => t.name)
+  const lost = parentStructural.filter(t => !childStructuralNames.has(t.name)).map(t => t.name)
+  const uncontrollable = childStructural
+    .filter(t => !parentStructuralNames.has(t.name))
+    .map(t => t.name)
 
-  return { flows, lost, uncontrollable }
+  // Visual tokens are always local — collect unique visual token names across both
+  const allVisualNames = new Set([
+    ...getVisualTokens(parent.tokens).map(t => t.name),
+    ...getVisualTokens(child.tokens).map(t => t.name),
+  ])
+  const localVisual = [...allVisualNames]
+
+  return { flows, lost, uncontrollable, localVisual }
 }
 
 function CompatibilityBadges({ parent, child }: { parent: ChainItem; child: ChainItem }) {
-  const { flows, lost, uncontrollable } = computeCompatibility(parent, child)
+  const { flows, lost, uncontrollable, localVisual } = computeCompatibility(parent, child)
 
-  if (flows.length === 0 && lost.length === 0 && uncontrollable.length === 0) {
+  if (
+    flows.length === 0 &&
+    lost.length === 0 &&
+    uncontrollable.length === 0 &&
+    localVisual.length === 0
+  ) {
     return null
   }
 
@@ -72,6 +91,12 @@ function CompatibilityBadges({ parent, child }: { parent: ChainItem; child: Chai
           <Badge key={`unctl-${token}`} variant="destructive" size="sm">
             <Span className="font-mono">{token}</Span>
             <Span className="ml-1">uncontrollable — parent doesn&apos;t drill</Span>
+          </Badge>
+        ))}
+        {localVisual.map(token => (
+          <Badge key={`visual-${token}`} variant="secondary" size="sm">
+            <Span className="font-mono">{token}</Span>
+            <Span className="ml-1 text-muted-foreground">local only — does not propagate</Span>
           </Badge>
         ))}
       </Div>
@@ -152,13 +177,30 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
       {/* Token info */}
       {current.tokens.length > 0 && (
         <Div className="flex flex-wrap gap-1.5">
-          {current.tokens.map(token => {
-            const action = isBase ? 'applies' : 'drills'
+          {current.tokens.map(tokenInfo => {
+            const isStructural = tokenInfo.category === 'structural'
+            const action = isBase ? 'applies' : isStructural ? 'drills' : 'local'
             return (
-              <Badge key={token} variant="outline" size="sm">
-                <Span className={isBase ? 'text-success' : 'text-muted-foreground'}>{action}</Span>{' '}
-                <Span className="font-mono">{token}</Span>
-                {tokens[token] && <Span className="text-primary ml-1">= {tokens[token]}</Span>}
+              <Badge
+                key={tokenInfo.name}
+                variant={isStructural ? 'outline' : 'secondary'}
+                size="sm"
+              >
+                <Span
+                  className={
+                    isBase
+                      ? 'text-success'
+                      : isStructural
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                  }
+                >
+                  {action}
+                </Span>{' '}
+                <Span className="font-mono">{tokenInfo.name}</Span>
+                {tokens[tokenInfo.name] && (
+                  <Span className="text-primary ml-1">= {tokens[tokenInfo.name]}</Span>
+                )}
               </Badge>
             )
           })}

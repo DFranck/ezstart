@@ -68,8 +68,12 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
             {entry.tokens.length > 0 && (
               <Div className="flex flex-wrap gap-1">
                 {entry.tokens.map(token => (
-                  <Badge key={token} variant="outline" size="sm">
-                    {token}
+                  <Badge
+                    key={token.name}
+                    variant={token.category === 'structural' ? 'outline' : 'secondary'}
+                    size="sm"
+                  >
+                    {token.name}
                   </Badge>
                 ))}
               </Div>
