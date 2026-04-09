@@ -87,7 +87,7 @@ export default function TreeExplorerPage({
 
   if (!entry) {
     return (
-      <Div withHeaderOffset className="max-w-3xl mx-auto px-4 py-8 text-center space-y-4">
+      <Div className="max-w-3xl mx-auto px-4 py-8 text-center space-y-4">
         <H1 className="text-2xl font-bold">Component Not Found</H1>
         <P className="text-muted-foreground">
           The component &quot;{componentName}&quot; is not in the registry.
@@ -108,7 +108,7 @@ export default function TreeExplorerPage({
   }
 
   return (
-    <Div withHeaderOffset className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <Div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
       <Div className="space-y-3">
         <Link href={`/${locale}/packages/ui/inspector`}>

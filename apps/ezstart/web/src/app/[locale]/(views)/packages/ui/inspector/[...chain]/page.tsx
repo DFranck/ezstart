@@ -102,7 +102,7 @@ export default function InspectorChainPage({
 
   if (chainEntries.length === 0) {
     return (
-      <Div withHeaderOffset className="max-w-3xl mx-auto px-4 py-8 text-center space-y-4">
+      <Div className="max-w-3xl mx-auto px-4 py-8 text-center space-y-4">
         <H1 className="text-2xl font-bold">No Components Found</H1>
         <P className="text-muted-foreground">
           None of the requested components ({chainNames.join(', ')}) are in the registry.
@@ -117,7 +117,7 @@ export default function InspectorChainPage({
   }
 
   return (
-    <Div withHeaderOffset className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <Div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       {/* Chain breadcrumb */}
       <Div className="space-y-3">
         <Link href={`/${locale}/packages/ui/inspector`}>

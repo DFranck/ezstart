@@ -82,45 +82,41 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
             {entry.tokens.length === 0 && (
               <Span className="text-xs text-muted-foreground italic">No tokens</Span>
             )}
-            {hasChildren && (
-              <Div className="pt-1 border-t border-border/50">
-                <Div className="flex items-center justify-between mb-1">
-                  <P className="text-xs text-muted-foreground">Children:</P>
-                  <Link
-                    href={`/${locale}/packages/ui/inspector/explorer/${entry.name}`}
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <Badge
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer hover:bg-accent transition-colors text-[10px]"
-                    >
-                      View tree
-                    </Badge>
-                  </Link>
-                </Div>
-                <Div className="flex flex-wrap gap-1">
-                  {entry.children.map(childName => (
-                    <Link
-                      key={childName}
-                      href={`/${locale}/packages/ui/inspector/${entry.name}/${childName}`}
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <Badge
-                        variant="secondary"
-                        size="sm"
-                        className="cursor-pointer hover:bg-accent transition-colors"
-                      >
-                        {childName}
-                      </Badge>
-                    </Link>
-                  ))}
-                </Div>
-              </Div>
-            )}
           </CardContent>
         </Card>
       </Link>
+      {hasChildren && (
+        <Div className="px-3 pb-2 pt-1 border-x border-b border-border/50 rounded-b-md -mt-1 space-y-1">
+          <Div className="flex items-center justify-between">
+            <P className="text-xs text-muted-foreground">Children:</P>
+            <Link href={`/${locale}/packages/ui/inspector/explorer/${entry.name}`}>
+              <Badge
+                variant="outline"
+                size="sm"
+                className="cursor-pointer hover:bg-accent transition-colors text-[10px]"
+              >
+                View tree
+              </Badge>
+            </Link>
+          </Div>
+          <Div className="flex flex-wrap gap-1">
+            {entry.children.map(childName => (
+              <Link
+                key={childName}
+                href={`/${locale}/packages/ui/inspector/${entry.name}/${childName}`}
+              >
+                <Badge
+                  variant="secondary"
+                  size="sm"
+                  className="cursor-pointer hover:bg-accent transition-colors"
+                >
+                  {childName}
+                </Badge>
+              </Link>
+            ))}
+          </Div>
+        </Div>
+      )}
     </Div>
   )
 }
@@ -154,7 +150,7 @@ export default function InspectorIndexPage() {
   const locale = params.locale as string
 
   return (
-    <Div withHeaderOffset className="max-w-5xl mx-auto px-4 py-8 space-y-10">
+    <Div className="max-w-5xl mx-auto px-4 py-8 space-y-10">
       {/* Header */}
       <Div className="space-y-2 text-center">
         <H1 className="text-2xl font-bold">Design System Inspector</H1>
