@@ -154,7 +154,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 95. [x] ai-sdk cascade/fallback — Provider cascade par priorité dans le chat. Si provider A échoue, fallback auto sur B. Implémenté dans sendMessage.ts. (done 2026-04-09)
 96. [x] ai-sdk usage tracking — AIUsage model + trackAIUsage service (fire-and-forget) + wired dans sendMessage.ts. (done 2026-04-09)
 97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
-98. [ ] ai-sdk `<AILayout>` — Composant client qui wrappe Thread/ThreadComposer/ThreadLayout de packages/ui + ajoute la logique AI (providers, cascade, prompts, SSE streaming, conversation CRUD, admin). Hooks: `useAIChat()`, `useAIStream()`. Modifier Thread dans packages/ui change le design de ai-sdk ET du futur chat-sdk sans toucher la logique métier.
+98. [x] ai-sdk `<AILayout>` — Composant client agnostique : wrappe Thread UI + logique AI (providers, cascade, streaming, conversations). Hook `useAIThread()` orchestre tout. Testé via /testchat dans GP. (done 2026-04-09)
 99. [ ] chat-sdk `<ChatLayout>` (futur) — Même pattern: wrappe Thread de packages/ui + logique chat temps réel (Socket.IO, rooms, typing indicators, presence, P2P). Les deux SDKs partagent le même design system via packages/ui.
 100.  [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
 101.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
