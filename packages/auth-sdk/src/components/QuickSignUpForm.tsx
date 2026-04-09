@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Badge,
   Button,
   Div,
   Form,
@@ -17,6 +18,7 @@ import { useAuthContext } from '../provider.js'
 import { useAuthStore } from '../store.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { usePromoCode } from './usePromoCode.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -31,12 +33,15 @@ export interface QuickSignUpFormTexts {
   invalidEmail: string
   fallbackError: string
   successToast: string
+  promoCodeLabel: string
+  promoCodePlaceholder: string
+  promoCodeApplied: string
 }
 
 export interface QuickSignUpFormProps {
   /** App name for the quick signup request */
   appName: string
-  /** Pre-filled promo code (not shown as input, just sent with signup) */
+  /** Pre-filled promo code (auto-detected from URL ?promo= or localStorage if not provided) */
   promoCode?: string
   /** Custom email subject override for the welcome email */
   emailSubject?: string
@@ -61,6 +66,9 @@ const DEFAULT_TEXTS: QuickSignUpFormTexts = {
   invalidEmail: 'Please enter a valid email',
   fallbackError: 'An error occurred. Please try again.',
   successToast: 'Account created! Welcome aboard.',
+  promoCodeLabel: 'Promo code',
+  promoCodePlaceholder: 'Enter promo code',
+  promoCodeApplied: 'Code applied!',
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -68,6 +76,7 @@ const DEFAULT_TEXTS: QuickSignUpFormTexts = {
 type FormData = {
   username: string
   email: string
+  promoCode: string
 }
 
 export function QuickSignUpForm({
@@ -83,11 +92,13 @@ export function QuickSignUpForm({
   const store = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const resolvedPromo = usePromoCode(promoCode)
 
   const form = useForm<FormData>({
     defaultValues: {
       username: '',
       email: '',
+      promoCode: resolvedPromo,
     },
   })
 
@@ -98,11 +109,12 @@ export function QuickSignUpForm({
     setError('')
 
     try {
+      const finalPromo = formData.promoCode?.trim()
       const result = await client.quickSignUp({
         username: formData.username,
         email: formData.email,
         app: appName,
-        ...(promoCode ? { promoCode } : {}),
+        ...(finalPromo ? { promoCode: finalPromo } : {}),
         ...(emailSubject ? { emailSubject } : {}),
         ...(emailBody ? { emailBody } : {}),
       })
@@ -165,6 +177,29 @@ export function QuickSignUpForm({
                 <Input type="email" placeholder={t.emailPlaceholder} {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="promoCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs text-muted-foreground">{t.promoCodeLabel}</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder={t.promoCodePlaceholder}
+                  className="h-8 text-sm"
+                  {...field}
+                />
+              </FormControl>
+              {field.value?.trim() && (
+                <Badge variant="success" className="text-xs">
+                  {t.promoCodeApplied}
+                </Badge>
+              )}
             </FormItem>
           )}
         />

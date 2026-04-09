@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Badge,
   Button,
   Div,
   P,
@@ -19,6 +20,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { PasswordStrength } from './PasswordStrength.js'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
+import { usePromoCode } from './usePromoCode.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -51,6 +53,10 @@ export interface SignUpFormTexts {
   passwordFair: string
   passwordGood: string
   passwordStrong: string
+  // Promo code
+  promoCodeLabel: string
+  promoCodePlaceholder: string
+  promoCodeApplied: string
   // OAuth texts (optional — only needed if showOAuth is true)
   continueWithGoogle?: string
   orContinueWith?: string
@@ -59,7 +65,7 @@ export interface SignUpFormTexts {
 export interface SignUpFormProps {
   /** App name for the register request */
   appName: string
-  /** Pre-filled promo code (not shown as input, just sent with signup) */
+  /** Pre-filled promo code (auto-detected from URL ?promo= or localStorage if not provided) */
   promoCode?: string
   /** Redirect URI after registration (OAuth code flow) */
   redirectUri?: string
@@ -107,6 +113,9 @@ const DEFAULT_TEXTS: SignUpFormTexts = {
   passwordFair: 'Fair',
   passwordGood: 'Good',
   passwordStrong: 'Strong',
+  promoCodeLabel: 'Promo code',
+  promoCodePlaceholder: 'Enter promo code',
+  promoCodeApplied: 'Code applied!',
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -118,6 +127,7 @@ interface FormData {
   confirmPassword: string
   firstName: string
   lastName: string
+  promoCode: string
 }
 
 export function SignUpForm({
@@ -139,6 +149,7 @@ export function SignUpForm({
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
   const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resolvedPromo = usePromoCode(promoCode)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -148,6 +159,7 @@ export function SignUpForm({
       confirmPassword: '',
       firstName: '',
       lastName: '',
+      promoCode: resolvedPromo,
     },
     mode: 'onChange',
   })
@@ -208,6 +220,7 @@ export function SignUpForm({
     setError('')
 
     try {
+      const finalPromo = formData.promoCode?.trim()
       const response = await callApi('/auth/register', {
         appName: 'ezauth',
         method: 'POST',
@@ -219,7 +232,7 @@ export function SignUpForm({
           lastName: formData.lastName || undefined,
           app: appName,
           redirect_uri: redirectUri || undefined,
-          ...(promoCode ? { promoCode } : {}),
+          ...(finalPromo ? { promoCode: finalPromo } : {}),
         },
       })
 
@@ -406,6 +419,29 @@ export function SignUpForm({
                   />
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="promoCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs text-muted-foreground">{t.promoCodeLabel}</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder={t.promoCodePlaceholder}
+                    className="h-8 text-sm"
+                    {...field}
+                  />
+                </FormControl>
+                {field.value?.trim() && (
+                  <Badge variant="success" className="text-xs">
+                    {t.promoCodeApplied}
+                  </Badge>
+                )}
               </FormItem>
             )}
           />

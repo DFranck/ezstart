@@ -28,24 +28,12 @@ function EarthDayContent() {
   const [signupSuccess, setSignupSuccess] = useState(false)
   const [mode, setMode] = useState<'signup' | 'signin'>('signup')
 
+  // Track utm_source for analytics
   useEffect(() => {
-    const promo = searchParams.get('promo')
     const utmSource = searchParams.get('utm_source')
-
-    if (promo) {
-      localStorage.setItem('gp_promo_code', promo)
-    }
     if (utmSource) {
       localStorage.setItem('gp_utm_source', utmSource)
     }
-  }, [searchParams])
-
-  const [hasPromo, setHasPromo] = useState(false)
-
-  useEffect(() => {
-    const fromUrl = searchParams.get('promo') === 'EARTHDAY2026'
-    const fromStorage = localStorage.getItem('gp_promo_code') === 'EARTHDAY2026'
-    setHasPromo(fromUrl || fromStorage)
   }, [searchParams])
 
   return (
@@ -87,24 +75,15 @@ function EarthDayContent() {
         </H1>
         <P className="text-sm text-white/70 text-center mb-6">{t('hero.subtitle')}</P>
 
-        {/* QuickSignUp or Welcome */}
+        {/* Auth */}
         <Div className="w-full">
           <SignedOut>
             <Card variant="floating" className="bg-background/90 backdrop-blur-md border-white/10">
-              {hasPromo && (
-                <Div className="bg-green-500/10 border-b border-green-500/20 px-4 py-2 text-center">
-                  <P className="text-xs font-medium text-green-400">
-                    <Icon name="lucide:Gift" size={14} className="inline mr-1" />
-                    {t('cta.promo.applied')}
-                  </P>
-                </Div>
-              )}
               <CardContent className="p-5">
                 {mode === 'signup' ? (
                   <>
                     <QuickSignUpForm
                       appName="green-pulse"
-                      promoCode={hasPromo ? 'EARTHDAY2026' : undefined}
                       onSuccess={() => setSignupSuccess(true)}
                       texts={{
                         username: t('signup.username'),
