@@ -14,6 +14,12 @@ type InspectorPreviewProps = {
   tokens: Record<string, string>
 }
 
+type CompatibilityResult = {
+  flows: string[]
+  lost: string[]
+  uncontrollable: string[]
+}
+
 const LEVEL_COLORS: Record<string, string> = {
   complex: 'border-l-purple-500',
   composed: 'border-l-blue-500',
@@ -24,6 +30,53 @@ const LEVEL_BADGE_VARIANT: Record<string, 'purple' | 'info' | 'success'> = {
   complex: 'purple',
   composed: 'info',
   base: 'success',
+}
+
+function computeCompatibility(parent: ChainItem, child: ChainItem): CompatibilityResult {
+  const parentTokens = new Set(parent.tokens)
+  const childTokens = new Set(child.tokens)
+
+  const flows = parent.tokens.filter(t => childTokens.has(t))
+  const lost = parent.tokens.filter(t => !childTokens.has(t))
+  const uncontrollable = child.tokens.filter(t => !parentTokens.has(t))
+
+  return { flows, lost, uncontrollable }
+}
+
+function CompatibilityBadges({ parent, child }: { parent: ChainItem; child: ChainItem }) {
+  const { flows, lost, uncontrollable } = computeCompatibility(parent, child)
+
+  if (flows.length === 0 && lost.length === 0 && uncontrollable.length === 0) {
+    return null
+  }
+
+  return (
+    <Div className="py-2 px-3 space-y-1.5 bg-muted/30 rounded-md border border-border/50">
+      <P className="text-xs font-medium text-muted-foreground">
+        {parent.name} &rarr; {child.name}
+      </P>
+      <Div className="flex flex-wrap gap-1.5">
+        {flows.map(token => (
+          <Badge key={`flow-${token}`} variant="success" size="sm">
+            <Span className="font-mono">{token}</Span>
+            <Span className="ml-1">flows</Span>
+          </Badge>
+        ))}
+        {lost.map(token => (
+          <Badge key={`lost-${token}`} variant="warning" size="sm">
+            <Span className="font-mono">{token}</Span>
+            <Span className="ml-1">not drilled — child doesn&apos;t accept</Span>
+          </Badge>
+        ))}
+        {uncontrollable.map(token => (
+          <Badge key={`unctl-${token}`} variant="destructive" size="sm">
+            <Span className="font-mono">{token}</Span>
+            <Span className="ml-1">uncontrollable — parent doesn&apos;t drill</Span>
+          </Badge>
+        ))}
+      </Div>
+    </Div>
+  )
 }
 
 function renderBasePreview(name: string, tokens: Record<string, string>) {
@@ -81,6 +134,7 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
   const isBase = rest.length === 0
   const borderColor = LEVEL_COLORS[current.level] ?? 'border-l-muted'
   const badgeVariant = LEVEL_BADGE_VARIANT[current.level] ?? 'secondary'
+  const nextItem = rest[0]
 
   return (
     <Div
@@ -111,6 +165,9 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
         </Div>
       )}
 
+      {/* Compatibility badges between this component and next */}
+      {nextItem && <CompatibilityBadges parent={current} child={nextItem} />}
+
       {/* Nested children or base preview */}
       {isBase ? (
         <Div className="mt-3 p-4 bg-background rounded-lg border border-border">
@@ -136,4 +193,5 @@ export function InspectorPreview({ chain, tokens }: InspectorPreviewProps) {
   return <Div className="space-y-2">{renderChain(chain, tokens, 0)}</Div>
 }
 
-export type { ChainItem, InspectorPreviewProps }
+export { computeCompatibility }
+export type { ChainItem, InspectorPreviewProps, CompatibilityResult }

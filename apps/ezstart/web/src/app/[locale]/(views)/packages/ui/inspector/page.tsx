@@ -47,38 +47,62 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
   const config = levelConfig[entry.level]
 
   return (
-    <Link href={`/${locale}/packages/ui/inspector/${entry.name}`}>
-      <Card
-        variant="default"
-        className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
-      >
-        <CardHeader className="pb-2">
-          <Div className="flex items-center justify-between">
-            <H3 className="text-sm font-semibold">{entry.name}</H3>
-            <Badge variant={config.badgeVariant} size="sm">
-              {config.label}
-            </Badge>
-          </Div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {entry.description && (
-            <P className="text-xs text-muted-foreground mb-2">{entry.description}</P>
-          )}
-          {entry.tokens.length > 0 && (
-            <Div className="flex flex-wrap gap-1">
-              {entry.tokens.map(token => (
-                <Badge key={token} variant="outline" size="sm">
-                  {token}
-                </Badge>
-              ))}
+    <Div className="space-y-0">
+      <Link href={`/${locale}/packages/ui/inspector/${entry.name}`}>
+        <Card
+          variant="default"
+          className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
+        >
+          <CardHeader className="pb-2">
+            <Div className="flex items-center justify-between">
+              <H3 className="text-sm font-semibold">{entry.name}</H3>
+              <Badge variant={config.badgeVariant} size="sm">
+                {config.label}
+              </Badge>
             </Div>
-          )}
-          {entry.tokens.length === 0 && (
-            <Span className="text-xs text-muted-foreground italic">No tokens</Span>
-          )}
-        </CardContent>
-      </Card>
-    </Link>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            {entry.description && (
+              <P className="text-xs text-muted-foreground mb-2">{entry.description}</P>
+            )}
+            {entry.tokens.length > 0 && (
+              <Div className="flex flex-wrap gap-1">
+                {entry.tokens.map(token => (
+                  <Badge key={token} variant="outline" size="sm">
+                    {token}
+                  </Badge>
+                ))}
+              </Div>
+            )}
+            {entry.tokens.length === 0 && (
+              <Span className="text-xs text-muted-foreground italic">No tokens</Span>
+            )}
+            {entry.children && entry.children.length > 0 && (
+              <Div className="pt-1 border-t border-border/50">
+                <P className="text-xs text-muted-foreground mb-1">Children:</P>
+                <Div className="flex flex-wrap gap-1">
+                  {entry.children.map(childName => (
+                    <Link
+                      key={childName}
+                      href={`/${locale}/packages/ui/inspector/${entry.name}/${childName}`}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <Badge
+                        variant="secondary"
+                        size="sm"
+                        className="cursor-pointer hover:bg-accent transition-colors"
+                      >
+                        {childName}
+                      </Badge>
+                    </Link>
+                  ))}
+                </Div>
+              </Div>
+            )}
+          </CardContent>
+        </Card>
+      </Link>
+    </Div>
   )
 }
 

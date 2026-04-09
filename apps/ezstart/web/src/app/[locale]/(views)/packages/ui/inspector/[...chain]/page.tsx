@@ -226,6 +226,50 @@ export default function InspectorChainPage({
           </Card>
         </Div>
       </Div>
+
+      {/* Add to chain — suggest children of last component */}
+      {(() => {
+        const lastEntry = chainEntries[chainEntries.length - 1]
+        if (!lastEntry?.children || lastEntry.children.length === 0) return null
+
+        const currentChainPath = chainEntries.map(e => e.name).join('/')
+
+        return (
+          <Card variant="default">
+            <CardHeader className="pb-2">
+              <H2 className="text-sm uppercase tracking-wider text-muted-foreground">
+                Add to Chain
+              </H2>
+              <P className="text-xs text-muted-foreground">
+                Suggested children of {lastEntry.name}
+              </P>
+            </CardHeader>
+            <CardContent>
+              <Div className="flex flex-wrap gap-2">
+                {lastEntry.children.map(childName => {
+                  const childEntry = getComponent(childName)
+                  const variant = childEntry
+                    ? levelBadgeVariant[childEntry.level]
+                    : ('secondary' as const)
+                  return (
+                    <Link
+                      key={childName}
+                      href={`/${locale}/packages/ui/inspector/${currentChainPath}/${childName}`}
+                    >
+                      <Badge
+                        variant={variant}
+                        className="cursor-pointer hover:opacity-80 transition-opacity px-3 py-1.5"
+                      >
+                        + {childName}
+                      </Badge>
+                    </Link>
+                  )
+                })}
+              </Div>
+            </CardContent>
+          </Card>
+        )
+      })()}
     </Div>
   )
 }
