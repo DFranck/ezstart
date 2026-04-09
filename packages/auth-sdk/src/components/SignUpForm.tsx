@@ -118,7 +118,7 @@ const DEFAULT_TEXTS: SignUpFormTexts = {
   passwordStrong: 'Strong',
   promoCodeLabel: 'Promo code',
   promoCodePlaceholder: 'Enter promo code',
-  promoCodeApplied: 'Code applied!',
+  promoCodeApplied: 'Valid code!',
   promoCodeToggle: 'Have a promo code?',
   promoCodeInvalid: 'Invalid promo code',
   promoCodeChecking: 'Checking...',

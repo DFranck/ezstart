@@ -36,6 +36,7 @@
     "signup": {
       "title": "Join the Green Movement",
       "subtitle": "Create your free account in seconds",
+      "description": "Sign up to start chatting with GP.A for free and enjoy your Earth Day 2026 promo code",
       "username": "Username",
       "usernamePlaceholder": "Choose a username",
       "email": "Email",
@@ -50,6 +51,7 @@
     "welcome": {
       "justJoined": "Welcome aboard!",
       "back": "Welcome back!",
+      "promoApplied": "🎉 Code EARTHDAY2026 applied. You'll get a free trial month of Pro when we launch.",
       "installHint": "Install the app for quick access and offline support.",
       "installDescription": "Add GreenPulse.AI to your home screen for the best experience.",
       "installButton": "Install App",

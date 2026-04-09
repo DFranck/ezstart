@@ -195,6 +195,8 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 128. [ ] GlobalProviderAccess enforcement — Le chat endpoint ne vérifie PAS GlobalProviderAccess avant d'envoyer. Wirer `checkProviderAccess` middleware sur la route chat + filtrer les providers dans la cascade. L'UI app doit aussi masquer les providers non-autorisés (Available Providers filtré par GlobalProviderAccess, pas par ProviderRegistry statique).
 129. [ ] Provider status/health dans l'UI — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
 130. [ ] utm_source tracking — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
+131. [ ] Design system playground — Standardiser et tester tous les tokens/variants (density, size, color) sur tous les composants UI. Étendre le playground Tag existant dans ezstart pour couvrir Card, Button, Input, Badge, etc. Vérifier cohérence compact/default/relaxed sur chaque composant container.
+132. [ ] QuickSignUpForm/SignUpForm density — Le prop density existe mais n'impacte que le form spacing interne. Card/CardContent ont leurs propres paddings non affectés. Harmoniser density à travers tout le composant.
 
 #### P3 — DevOps / Testing
 

@@ -26,7 +26,9 @@ function EarthDayContent() {
   const currentLocale = useLocale()
   const router = useRouter()
   const [signupSuccess, setSignupSuccess] = useState(false)
+  const [signupPromo, setSignupPromo] = useState<string | null>(null)
   const [mode, setMode] = useState<'signup' | 'signin'>('signup')
+  const hasPromo = Boolean(searchParams.get('promo'))
 
   // Track utm_source for analytics
   useEffect(() => {
@@ -57,7 +59,7 @@ function EarthDayContent() {
       <Div className="absolute inset-0 bg-black/40" />
 
       {/* Content */}
-      <Div className="relative z-10 flex flex-col items-center w-full max-w-sm">
+      <Div className="relative z-10 flex flex-col items-center w-full">
         {/* Logo */}
         <Div className="mb-4">
           <Image
@@ -70,13 +72,13 @@ function EarthDayContent() {
         </Div>
 
         {/* Title */}
-        <H1 className="text-xl sm:text-2xl font-bold text-white text-center mb-1">
+        <H1 className="text-xl sm:text-3xl font-bold text-white text-center mb-1 max-w-lg">
           {t('hero.title')}
         </H1>
         <P className="text-sm text-white/70 text-center mb-6">{t('hero.subtitle')}</P>
 
         {/* Auth */}
-        <Div className="w-full">
+        <Div className="w-full max-w-sm">
           <SignedOut>
             <Card variant="floating" className="bg-background/90 backdrop-blur-md border-white/10">
               <CardContent className="p-5">
@@ -84,7 +86,12 @@ function EarthDayContent() {
                   <>
                     <QuickSignUpForm
                       appName="green-pulse"
-                      onSuccess={() => setSignupSuccess(true)}
+                      density="compact"
+                      description={t('signup.description')}
+                      onSuccess={() => {
+                        setSignupSuccess(true)
+                        if (hasPromo) setSignupPromo(searchParams.get('promo'))
+                      }}
                       texts={{
                         username: t('signup.username'),
                         usernamePlaceholder: t('signup.usernamePlaceholder'),
@@ -137,27 +144,31 @@ function EarthDayContent() {
                 <H2 className="text-lg font-bold text-foreground mb-2">
                   {signupSuccess ? t('welcome.justJoined') : t('welcome.back')}
                 </H2>
-                <P className="text-sm text-muted-foreground mb-4">{t('welcome.installHint')}</P>
+                {signupPromo ? (
+                  <P className="text-sm text-green-400 mb-4">{t('welcome.promoApplied')}</P>
+                ) : (
+                  <P className="text-sm text-muted-foreground mb-4">{t('welcome.installHint')}</P>
+                )}
 
-                <Div className="flex flex-col gap-3">
-                  <PWAInstallPrompt
-                    appName="GreenPulse.AI"
-                    description={t('welcome.installDescription')}
-                    installButtonText={t('welcome.installButton')}
-                    laterButtonText={t('welcome.laterButton')}
-                    showInDev
-                  />
-
-                  <Link href="/chat" className="block">
-                    <Button
-                      size="lg"
-                      className="w-full text-base font-semibold py-5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                      {t('cta.start')}
-                      <Icon name="lucide:ArrowRight" size={20} className="ml-2" />
-                    </Button>
-                  </Link>
-                </Div>
+                <PWAInstallPrompt
+                  installButtonText={t('welcome.installButton')}
+                  hideTitle
+                  hideDescription
+                  hideLater
+                  inline
+                  showInDev
+                  fallback={
+                    <Link href="/chat" className="block">
+                      <Button
+                        size="lg"
+                        className="w-full text-base font-semibold py-5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        {t('cta.start')}
+                        <Icon name="lucide:ArrowRight" size={20} className="ml-2" />
+                      </Button>
+                    </Link>
+                  }
+                />
               </CardContent>
             </Card>
           </SignedIn>

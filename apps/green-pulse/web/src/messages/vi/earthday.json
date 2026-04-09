@@ -36,6 +36,7 @@
     "signup": {
       "title": "Tham gia phong tr\u00e0o xanh",
       "subtitle": "T\u1ea1o t\u00e0i kho\u1ea3n mi\u1ec5n ph\u00ed trong v\u00e0i gi\u00e2y",
+      "description": "\u0110\u0103ng k\u00fd \u0111\u1ec3 tr\u00f2 chuy\u1ec7n v\u1edbi GP.A mi\u1ec5n ph\u00ed v\u00e0 nh\u1eadn \u01b0u \u0111\u00e3i Earth Day!",
       "username": "T\u00ean ng\u01b0\u1eddi d\u00f9ng",
       "usernamePlaceholder": "Ch\u1ecdn t\u00ean ng\u01b0\u1eddi d\u00f9ng",
       "email": "Email",
@@ -50,6 +51,7 @@
     "welcome": {
       "justJoined": "Ch\u00e0o m\u1eebng b\u1ea1n!",
       "back": "Ch\u00e0o m\u1eebng tr\u1edf l\u1ea1i!",
+      "promoApplied": "\ud83c\udf89 M\u00e3 Earth Day \u0111\u00e3 \u0111\u01b0\u1ee3c \u00e1p d\u1ee5ng! B\u1ea1n s\u1ebd nh\u1eadn 1 th\u00e1ng mi\u1ec5n ph\u00ed g\u00f3i Pro khi ra m\u1eaft.",
       "installHint": "C\u00e0i \u0111\u1eb7t \u1ee9ng d\u1ee5ng \u0111\u1ec3 truy c\u1eadp nhanh v\u00e0 h\u1ed7 tr\u1ee3 ngo\u1ea1i tuy\u1ebfn.",
       "installDescription": "Th\u00eam GreenPulse.AI v\u00e0o m\u00e0n h\u00ecnh ch\u00ednh \u0111\u1ec3 tr\u1ea3i nghi\u1ec7m t\u1ed1t nh\u1ea5t.",
       "installButton": "C\u00e0i \u0111\u1eb7t \u1ee9ng d\u1ee5ng",

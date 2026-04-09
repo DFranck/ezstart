@@ -45,6 +45,10 @@ export interface QuickSignUpFormTexts {
 export interface QuickSignUpFormProps {
   /** App name for the quick signup request */
   appName: string
+  /** Optional description/message displayed above the form */
+  description?: string
+  /** Layout density: compact reduces spacing for tight viewports */
+  density?: 'compact' | 'default' | 'relaxed'
   /** Pre-filled promo code (auto-detected from URL ?promo= or localStorage if not provided) */
   promoCode?: string
   /** Custom email subject override for the welcome email */
@@ -72,7 +76,7 @@ const DEFAULT_TEXTS: QuickSignUpFormTexts = {
   successToast: 'Account created! Welcome aboard.',
   promoCodeLabel: 'Promo code',
   promoCodePlaceholder: 'Enter promo code',
-  promoCodeApplied: 'Code applied!',
+  promoCodeApplied: 'Valid code!',
   promoCodeToggle: 'Have a promo code?',
   promoCodeInvalid: 'Invalid promo code',
   promoCodeChecking: 'Checking...',
@@ -88,6 +92,8 @@ type FormData = {
 
 export function QuickSignUpForm({
   appName,
+  description,
+  density = 'default',
   promoCode,
   emailSubject,
   emailBody,
@@ -150,11 +156,30 @@ export function QuickSignUpForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={
+          density === 'compact'
+            ? 'space-y-1.5'
+            : density === 'relaxed'
+              ? 'space-y-4 md:space-y-5'
+              : 'space-y-3 md:space-y-4'
+        }
+      >
         {error && (
-          <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
+          <Div
+            className={`bg-destructive/15 border border-destructive/50 text-destructive rounded-md ${density === 'compact' ? 'px-3 py-2 text-xs' : 'px-4 py-3'}`}
+          >
             {error}
           </Div>
+        )}
+
+        {description && (
+          <P
+            className={`text-muted-foreground text-center ${density === 'compact' ? 'text-xs mb-2' : 'text-sm mb-4'}`}
+          >
+            {description}
+          </P>
         )}
 
         <FormField
