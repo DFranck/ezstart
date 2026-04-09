@@ -4,6 +4,7 @@ import {
   Badge,
   Button,
   Div,
+  P,
   Form,
   FormControl,
   FormField,
@@ -36,6 +37,9 @@ export interface QuickSignUpFormTexts {
   promoCodeLabel: string
   promoCodePlaceholder: string
   promoCodeApplied: string
+  promoCodeToggle: string
+  promoCodeInvalid: string
+  promoCodeChecking: string
 }
 
 export interface QuickSignUpFormProps {
@@ -69,6 +73,9 @@ const DEFAULT_TEXTS: QuickSignUpFormTexts = {
   promoCodeLabel: 'Promo code',
   promoCodePlaceholder: 'Enter promo code',
   promoCodeApplied: 'Code applied!',
+  promoCodeToggle: 'Have a promo code?',
+  promoCodeInvalid: 'Invalid promo code',
+  promoCodeChecking: 'Checking...',
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -92,7 +99,14 @@ export function QuickSignUpForm({
   const store = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const resolvedPromo = usePromoCode(promoCode)
+  const {
+    promoCode: resolvedPromo,
+    setPromoCode: setResolvedPromo,
+    isValid: promoIsValid,
+    isValidating: promoIsValidating,
+    isOpen: promoOpen,
+    setIsOpen: setPromoOpen,
+  } = usePromoCode(appName, promoCode)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -109,7 +123,7 @@ export function QuickSignUpForm({
     setError('')
 
     try {
-      const finalPromo = formData.promoCode?.trim()
+      const finalPromo = promoIsValid === true ? formData.promoCode?.trim() : undefined
       const result = await client.quickSignUp({
         username: formData.username,
         email: formData.email,
@@ -181,28 +195,49 @@ export function QuickSignUpForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="promoCode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs text-muted-foreground">{t.promoCodeLabel}</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder={t.promoCodePlaceholder}
-                  className="h-8 text-sm"
-                  {...field}
-                />
-              </FormControl>
-              {field.value?.trim() && (
-                <Badge variant="success" className="text-xs">
-                  {t.promoCodeApplied}
-                </Badge>
-              )}
-            </FormItem>
-          )}
-        />
+        {!promoOpen ? (
+          <Button
+            type="button"
+            variant="link"
+            className="text-xs text-muted-foreground p-0 h-auto cursor-pointer"
+            onClick={() => setPromoOpen(true)}
+          >
+            {t.promoCodeToggle}
+          </Button>
+        ) : (
+          <FormField
+            control={form.control}
+            name="promoCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs text-muted-foreground">{t.promoCodeLabel}</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder={t.promoCodePlaceholder}
+                    className="h-8 text-sm"
+                    {...field}
+                    onChange={e => {
+                      field.onChange(e)
+                      setResolvedPromo(e.target.value)
+                    }}
+                  />
+                </FormControl>
+                {promoIsValidating && (
+                  <P className="text-xs text-muted-foreground">{t.promoCodeChecking}</P>
+                )}
+                {promoIsValid === true && (
+                  <Badge variant="success" className="text-xs">
+                    {t.promoCodeApplied}
+                  </Badge>
+                )}
+                {promoIsValid === false && (
+                  <P className="text-xs text-destructive">{t.promoCodeInvalid}</P>
+                )}
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button
           type="submit"
