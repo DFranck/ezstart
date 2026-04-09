@@ -11,6 +11,7 @@ type ThreadComposerProps = {
   loading?: boolean
   disabled?: boolean
   placeholder?: string
+  /** @slot ThreadWelcome, AISelector */
   welcomeMessage?: React.ReactNode
   showFileUpload?: boolean
   className?: string

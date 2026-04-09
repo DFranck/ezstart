@@ -502,6 +502,33 @@ function extractSlots(filePath, componentName) {
 
   if (!propsBlock) return []
 
+  // First pass: collect @slot annotations from JSDoc comments
+  // Pattern: /** @slot ComponentA, ComponentB */ followed by propName
+  const slotAnnotations = new Map()
+  const jsdocSlotRegex = /\/\*\*\s*@slot\s+([^*]+?)\s*\*\/\s*\n?\s*(\w+)/g
+  let jsdocMatch
+  while ((jsdocMatch = jsdocSlotRegex.exec(propsBlock)) !== null) {
+    const components = jsdocMatch[1]
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+    const propName = jsdocMatch[2]
+    slotAnnotations.set(propName, components)
+  }
+
+  // Also handle single-line: /** @slot ComponentA */ propName?: ReactNode
+  const inlineSlotRegex = /\/\*\*\s*@slot\s+([^*]+?)\s*\*\/\s*(\w+)/g
+  while ((jsdocMatch = inlineSlotRegex.exec(propsBlock)) !== null) {
+    const components = jsdocMatch[1]
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+    const propName = jsdocMatch[2]
+    if (!slotAnnotations.has(propName)) {
+      slotAnnotations.set(propName, components)
+    }
+  }
+
   // Match props whose type contains ReactNode, React.ReactNode, ReactElement, or JSX.Element
   const slotRegex = /^\s*(\w+)(\??)\s*:\s*([^\n]+)/gm
   let match
@@ -534,10 +561,14 @@ function extractSlots(filePath, componentName) {
     // Determine if this is a render prop (function returning ReactNode) vs a composition slot
     const isRenderProp = name.startsWith('render') || /^\(.*\)\s*=>\s*/.test(type)
 
+    // Get expected components from @slot annotation (empty array if none)
+    const expectedComponents = slotAnnotations.get(name) || []
+
     slots.push({
       name,
       required: optional !== '?',
       isRenderProp,
+      expectedComponents,
     })
   }
 
@@ -798,7 +829,11 @@ function generateOutput(registry, popularChains) {
   function formatSlots(slots) {
     if (slots.length === 0) return '[]'
     const items = slots.map(s => {
-      return `      { name: '${s.name}', required: ${s.required}, isRenderProp: ${s.isRenderProp} }`
+      const expected =
+        s.expectedComponents.length > 0
+          ? `[${s.expectedComponents.map(c => `'${c}'`).join(', ')}]`
+          : '[]'
+      return `      { name: '${s.name}', required: ${s.required}, isRenderProp: ${s.isRenderProp}, expectedComponents: ${expected} }`
     })
     return `[\n${items.join(',\n')},\n    ]`
   }
@@ -860,6 +895,7 @@ export type SlotInfo = {
   name: string
   required: boolean
   isRenderProp: boolean
+  expectedComponents: string[]
 }
 
 export type ComponentEntry = {

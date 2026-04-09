@@ -9,8 +9,11 @@ import { ThreadThemeProvider, useThreadTheme } from './ThreadThemeContext'
 import { ColorScheme, ThreadTheme } from './types'
 
 type ThreadLayoutProps = {
+  /** @slot Thread, ThreadComposer, ThreadMessages */
   children: ReactNode
+  /** @slot ThreadSidebar */
   sidebar?: ReactNode
+  /** @slot ThreadSidebarToggle */
   sidebarToggle?: ReactNode // Custom toggle button. If provided, default button is hidden.
   showSidebar?: boolean
   sidebarWidth?: string

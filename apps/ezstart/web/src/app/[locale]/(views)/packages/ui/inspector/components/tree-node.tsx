@@ -186,6 +186,10 @@ export function TreeNode({
                   slot={slot}
                   ancestors={nextAncestors}
                   isLast={slotIsLast}
+                  parentName={componentName}
+                  tokens={tokens}
+                  depth={depth}
+                  visited={nextVisited}
                 />
               )
             })}
@@ -213,41 +217,99 @@ export function TreeNode({
 /**
  * Renders a composition slot node in the tree.
  * Slots are ReactNode props that accept external content via composition.
+ * When expectedComponents is provided, renders each as an expandable TreeNode.
  */
 function SlotNode({
   slot,
   ancestors,
   isLast,
+  parentName,
+  tokens,
+  depth,
+  visited,
 }: {
   slot: SlotInfo
   ancestors: boolean[]
   isLast: boolean
+  parentName?: string
+  tokens: Record<string, string>
+  depth: number
+  visited: Set<string>
 }) {
+  const [collapsed, setCollapsed] = useState(false)
+  const hasExpectedComponents =
+    !slot.isRenderProp && slot.expectedComponents && slot.expectedComponents.length > 0
+
   return (
-    <Div className="flex items-start gap-0">
-      <TreeConnector ancestors={ancestors} isLast={isLast} />
+    <Div className="space-y-0">
+      <Div className="flex items-start gap-0">
+        <TreeConnector ancestors={ancestors} isLast={isLast && !hasExpectedComponents} />
 
-      <Div className="flex items-center gap-1.5 py-1">
-        <Span className="text-sm" aria-hidden="true">
-          {slot.isRenderProp ? '\uD83D\uDD27' : '\uD83D\uDCE6'}
-        </Span>
+        <Div className="flex items-center gap-1.5 py-1">
+          {/* Collapse toggle for slots with expected components */}
+          {hasExpectedComponents && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              <Span className="text-xs">{collapsed ? '\u25B6' : '\u25BC'}</Span>
+            </Button>
+          )}
 
-        <Span
-          className={`font-mono text-sm ${slot.required ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}
-        >
-          {slot.name}
-        </Span>
+          <Span className="text-sm" aria-hidden="true">
+            {slot.isRenderProp ? '\uD83D\uDD27' : '\uD83D\uDCE6'}
+          </Span>
 
-        <Badge variant="secondary" size="sm">
-          <Span className="text-[10px]">{slot.isRenderProp ? 'render prop' : 'slot'}</Span>
-        </Badge>
+          <Span
+            className={`font-mono text-sm ${slot.required ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}
+          >
+            {slot.name}
+          </Span>
 
-        {slot.required && (
-          <Badge variant="outline" size="sm">
-            <Span className="text-[10px] text-destructive">required</Span>
+          <Badge variant="secondary" size="sm">
+            <Span className="text-[10px]">{slot.isRenderProp ? 'render prop' : 'slot'}</Span>
           </Badge>
-        )}
+
+          {slot.required && (
+            <Badge variant="outline" size="sm">
+              <Span className="text-[10px] text-destructive">required</Span>
+            </Badge>
+          )}
+
+          {/* Show expected components hint or "custom content" */}
+          {!slot.isRenderProp &&
+            (hasExpectedComponents ? (
+              <Span className="text-[10px] text-muted-foreground">
+                expects: {slot.expectedComponents.join(', ')}
+              </Span>
+            ) : (
+              <Span className="text-[10px] text-muted-foreground italic">custom content</Span>
+            ))}
+        </Div>
       </Div>
+
+      {/* Render expected components as expandable tree nodes */}
+      {hasExpectedComponents &&
+        !collapsed &&
+        slot.expectedComponents.map((compName, index) => {
+          const childIsLast = index === slot.expectedComponents.length - 1
+          const nextAncestors = [...ancestors, !isLast]
+
+          return (
+            <TreeNode
+              key={`slot-${slot.name}-${compName}-${index}`}
+              componentName={compName}
+              parentName={parentName}
+              tokens={tokens}
+              depth={depth + 1}
+              visited={visited}
+              isLast={childIsLast}
+              ancestors={nextAncestors}
+            />
+          )
+        })}
     </Div>
   )
 }
