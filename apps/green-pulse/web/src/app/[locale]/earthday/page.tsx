@@ -91,6 +91,14 @@ function EarthDayContent() {
         <Div className="w-full">
           <SignedOut>
             <Card variant="floating" className="bg-background/90 backdrop-blur-md border-white/10">
+              {hasPromo && (
+                <Div className="bg-green-500/10 border-b border-green-500/20 px-4 py-2 text-center">
+                  <P className="text-xs font-medium text-green-400">
+                    <Icon name="lucide:Gift" size={14} className="inline mr-1" />
+                    {t('cta.promo.applied')}
+                  </P>
+                </Div>
+              )}
               <CardContent className="p-5">
                 {mode === 'signup' ? (
                   <>
