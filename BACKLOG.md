@@ -154,9 +154,10 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 95. [x] ai-sdk cascade/fallback — Provider cascade par priorité dans le chat. Si provider A échoue, fallback auto sur B. Implémenté dans sendMessage.ts. (done 2026-04-09)
 96. [x] ai-sdk usage tracking — AIUsage model + trackAIUsage service (fire-and-forget) + wired dans sendMessage.ts. (done 2026-04-09)
 97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
-98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
-99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
-100.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
+98. [ ] ai-sdk `<AILayout>` — Composant client qui wrappe Thread/ThreadComposer/ThreadLayout de packages/ui + ajoute la logique AI (providers, cascade, prompts, SSE streaming, conversation CRUD, admin). Hooks: `useAIChat()`, `useAIStream()`. Modifier Thread dans packages/ui change le design de ai-sdk ET du futur chat-sdk sans toucher la logique métier.
+99. [ ] chat-sdk `<ChatLayout>` (futur) — Même pattern: wrappe Thread de packages/ui + logique chat temps réel (Socket.IO, rooms, typing indicators, presence, P2P). Les deux SDKs partagent le même design system via packages/ui.
+100.  [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
+101.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
 
 #### P2.10 — AI Centralization (2026-04-08)
 
@@ -190,13 +191,15 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 124. [ ] Smart provider routing — Router automatiquement chaque message vers le provider le plus adapté dans une même conversation (ex: factuel→gemini, complexe→gpt-4o, vision→gemini). Critères: type de prompt, mots-clés, coût, complexité. User voit une conversation fluide.
 125. [ ] Provider model override dynamique — AppProvider.config.model doit être passé au ProviderRegistry au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
-126. [ ] OpenAI billing setup — Recharger crédits OpenAI pour activer le fallback cascade en prod. Tester le flow complet gemini→openai.
+126. [x] OpenAI billing setup — Crédits rechargés ($5), cascade testée E2E (gemini→openai→gemini). (done 2026-04-09)
 127. [ ] Anthropic provider — Implémenter AnthropicProvider dans ai-sdk (Claude API). Actuellement `throw new Error('not yet implemented')`.
 128. [x] GlobalProviderAccess enforcement — Chat endpoint vérifie isAppAuthorizedForProvider avant envoi. Explicit providerId → 403 si non autorisé. Cascade filtre les providers non autorisés. (done 2026-04-09). Reste: UI app masquer providers non-autorisés.
 129. [ ] Provider status/health dans l'UI — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
 130. [ ] utm_source tracking — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
 131. [ ] Design system playground — Standardiser et tester tous les tokens/variants (density, size, color) sur tous les composants UI. Étendre le playground Tag existant dans ezstart pour couvrir Card, Button, Input, Badge, etc. Vérifier cohérence compact/default/relaxed sur chaque composant container.
 132. [ ] QuickSignUpForm/SignUpForm density — Le prop density existe mais n'impacte que le form spacing interne. Card/CardContent ont leurs propres paddings non affectés. Harmoniser density à travers tout le composant.
+133. [ ] Hide provider selector for non-admin users — Le combobox "Gemini 2.5 Flash" dans le chat ne doit être visible que par les admins. Les users voient juste "l'IA" sans savoir quel provider tourne. Seuls les admins gèrent les providers dans le panel admin.
+134. [ ] packages/ui atomic reorganization — Réorganiser les composants par niveau (base → composed → complex) au lieu de par feature. Base: Button, Input, Icon, Label. Composed: Select, Form fields, Card. Complex: Thread, DataTable, Layout, Modal. Clarifie la hiérarchie de dépendances. Refactor massif (~56 fichiers + tous les imports apps).
 
 #### P3 — DevOps / Testing
 
