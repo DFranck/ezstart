@@ -11,8 +11,8 @@
 ## P0 — Critical (before launch)
 
 - [x] Quote PDF generation is not implemented — `generateQuotePdfUrl()` returns null, download shows "not implemented" toast, preview modal shows nothing for quotes
-- [ ] i18n: Quote modal has massive i18n gaps — labels "Client _", "Bill on behalf of", "Currency", "Valid Until", "Add Taxes", "Tax Rate (%)", "Billing Type _", "Itemized", "Flat Rate", "Description", "Qty", "Price", "Quote Summary", "Subtotal:", "Total:", "Add Line Item", "Notes", "Terms & Conditions" are all hardcoded English
-- [ ] i18n: Mark-paid modal is entirely un-i18n'd — "Mark Invoice as Paid", "This will create a receipt...", "Bill on behalf of", "Personal (your name)", "Payment Date", "Notes", "Cancel", "Mark as Paid", "Marking invoice as paid...", "Invoice marked as paid and receipt created", "Failed to mark invoice as paid" all hardcoded
+- [x] i18n: Quote modal has massive i18n gaps — all labels now use `useTranslations()` with FR+EN keys (done 2026-04-09)
+- [x] i18n: Mark-paid modal is entirely un-i18n'd — fully i18n'd with `useTranslations()`, 7 new keys added FR+EN (done 2026-04-09)
 - [ ] i18n: Delete quote dialog has hardcoded English: "Delete Quote" and description text
 - [x] Hardcoded locale `'fr'` passed to groupInvoicesByMonth/Week, groupQuotesByMonth, groupReceiptsByMonth in client dashboard — should use current locale from next-intl
 - [ ] Security: Add per-user rate limiting on /api/ai/extract-invoice-data (AI costs money)

@@ -20,9 +20,9 @@ All core features implemented and audited. Remaining items are future improvemen
 
 ### Audit: 2026-04-06
 
-- [ ] Auto-refresh tokens dans auth-sdk — intercepter les 401, appeler /api/auth/refresh automatiquement, relancer la requête. Transparent pour l'utilisateur.
-- [ ] Fallback httpOnly → bearer en dev — auto-detect: httpOnly en prod (cookies même domain .ezstart.xyz), bearer (localStorage) en dev (ports différents). Le refresh token cookie ne traverse pas les ports en localhost.
-- [ ] Timer proactif — scheduler un refresh 1 min avant expiration du access token (évite le 401 + retry)
+- [x] Auto-refresh tokens dans auth-sdk — 401 auto-retry already in callApi (fetch-client). Transparent pour l'utilisateur. (done 2026-04-09)
+- [x] Fallback httpOnly → bearer en dev — auto-detect already implemented in AuthProvider resolveAuthMode(). (already done)
+- [x] Timer proactif — proactive refresh 1 min avant JWT expiry via getTokenExpiry() + setTimeout dans AuthProvider. Fallback 5-min interval conservé. (done 2026-04-09)
 
 ## Objectif
 
