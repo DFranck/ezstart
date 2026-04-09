@@ -2,7 +2,7 @@
   "name": "GreenPulse - AI Sustainability Assistant",
   "short_name": "GreenPulse",
   "description": "AI-powered sustainability and carbon tracking assistant",
-  "start_url": "/",
+  "start_url": "/chat",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10b981",

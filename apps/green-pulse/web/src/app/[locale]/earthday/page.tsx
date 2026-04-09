@@ -127,6 +127,7 @@ function EarthDayContent() {
                     description={t('welcome.installDescription')}
                     installButtonText={t('welcome.installButton')}
                     laterButtonText={t('welcome.laterButton')}
+                    showInDev
                   />
 
                   <Link href="/chat" className="block">
