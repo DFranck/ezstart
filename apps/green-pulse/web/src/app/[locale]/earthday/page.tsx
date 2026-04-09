@@ -150,25 +150,25 @@ function EarthDayContent() {
                   <P className="text-sm text-muted-foreground mb-4">{t('welcome.installHint')}</P>
                 )}
 
-                <Div className="flex flex-col gap-3">
-                  <PWAInstallPrompt
-                    appName="GreenPulse.AI"
-                    description={t('welcome.installDescription')}
-                    installButtonText={t('welcome.installButton')}
-                    laterButtonText={t('welcome.laterButton')}
-                    showInDev
-                  />
-
-                  <Link href="/chat" className="block">
-                    <Button
-                      size="lg"
-                      className="w-full text-base font-semibold py-5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                      {t('cta.start')}
-                      <Icon name="lucide:ArrowRight" size={20} className="ml-2" />
-                    </Button>
-                  </Link>
-                </Div>
+                <PWAInstallPrompt
+                  installButtonText={t('welcome.installButton')}
+                  hideTitle
+                  hideDescription
+                  hideLater
+                  inline
+                  showInDev
+                  fallback={
+                    <Link href="/chat" className="block">
+                      <Button
+                        size="lg"
+                        className="w-full text-base font-semibold py-5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        {t('cta.start')}
+                        <Icon name="lucide:ArrowRight" size={20} className="ml-2" />
+                      </Button>
+                    </Link>
+                  }
+                />
               </CardContent>
             </Card>
           </SignedIn>

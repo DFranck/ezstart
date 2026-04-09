@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@ezstart/logger'
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Badge } from '../data-display/badge'
 import { Button } from '../button'
 
@@ -22,6 +22,16 @@ interface PWAInstallPromptProps {
   className?: string
   /** Show prompt in development mode (default: false) */
   showInDev?: boolean
+  /** Hide the title (default: false) */
+  hideTitle?: boolean
+  /** Hide the description (default: false) */
+  hideDescription?: boolean
+  /** Hide the "Later" button (default: false) */
+  hideLater?: boolean
+  /** Fallback content when PWA is not installable */
+  fallback?: ReactNode
+  /** Render as inline (no fixed positioning) instead of fixed bottom bar */
+  inline?: boolean
 }
 
 export function PWAInstallPrompt({
@@ -31,6 +41,11 @@ export function PWAInstallPrompt({
   laterButtonText = 'Later',
   className = '',
   showInDev = false,
+  hideTitle = false,
+  hideDescription = false,
+  hideLater = false,
+  fallback,
+  inline = false,
 }: PWAInstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
@@ -107,45 +122,52 @@ export function PWAInstallPrompt({
     setIsDismissed(true)
   }
 
-  // Don't show if app is already installed or no install prompt available
-  if (isInstalled || !showInstallPrompt) {
+  // Already installed — show nothing
+  if (isInstalled) {
     return null
   }
 
+  // Not installable — show fallback if provided
+  if (!showInstallPrompt) {
+    return fallback ? <>{fallback}</> : null
+  }
+
+  // Installable — render install prompt
+  const containerClass = inline
+    ? `${className}`
+    : `fixed bottom-4 left-4 right-4 z-50 bg-card text-card-foreground rounded-lg shadow-lg border p-4 ${className}`
+
   return (
-    <div
-      className={`fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 ${className}`}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {appName}
-            {isDev && showInDev && (
-              <Badge variant="warning" className="ml-2">
-                DEV
-              </Badge>
+    <div className={containerClass}>
+      <div className={inline ? 'flex flex-col gap-2' : 'flex items-center justify-between'}>
+        {(!hideTitle || !hideDescription) && (
+          <div className="flex-1">
+            {!hideTitle && (
+              <h3 className="text-lg font-semibold">
+                {appName}
+                {isDev && showInDev && (
+                  <Badge variant="warning" className="ml-2">
+                    DEV
+                  </Badge>
+                )}
+              </h3>
             )}
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-            {isDev && showInDev && !showInstallPrompt
-              ? "Dev mode active - Browser hasn't triggered beforeinstallprompt event yet"
-              : description}
-          </p>
-        </div>
-        <div className="flex gap-2 ml-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDismiss}
-            className="text-gray-600 dark:text-gray-300"
-          >
-            {laterButtonText}
-          </Button>
+            {!hideDescription && (
+              <p className="text-sm text-muted-foreground mt-1">{description}</p>
+            )}
+          </div>
+        )}
+        <div className={`flex gap-2 ${!hideTitle && !hideDescription && !inline ? 'ml-4' : ''}`}>
+          {!hideLater && (
+            <Button variant="outline" size="sm" onClick={handleDismiss}>
+              {laterButtonText}
+            </Button>
+          )}
           <Button
             size="sm"
             onClick={handleInstallClick}
             disabled={!deferredPrompt}
-            className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+            className={inline ? 'w-full' : ''}
           >
             {installButtonText}
           </Button>
