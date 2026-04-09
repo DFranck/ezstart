@@ -55,6 +55,12 @@
       "installButton": "Install App",
       "laterButton": "Later"
     },
+    "auth": {
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
     "footer": {
       "contact": "Contact us",
       "eventCredit": "Presented at Sustainable Future 10 & Earth Day Vietnam 2026 — organized by Green Leaders Community (GLC)",

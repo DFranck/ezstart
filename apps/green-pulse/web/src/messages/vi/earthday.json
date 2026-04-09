@@ -55,6 +55,12 @@
       "installButton": "C\u00e0i \u0111\u1eb7t \u1ee9ng d\u1ee5ng",
       "laterButton": "\u0110\u1ec3 sau"
     },
+    "auth": {
+      "hasAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập",
+      "noAccount": "Chưa có tài khoản?",
+      "signUp": "Đăng ký"
+    },
     "footer": {
       "contact": "Liên hệ",
       "eventCredit": "Trình bày tại Sustainable Future 10 & Earth Day Vietnam 2026 — tổ chức bởi Green Leaders Community (GLC)",

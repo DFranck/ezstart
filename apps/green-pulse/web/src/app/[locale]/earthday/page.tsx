@@ -1,6 +1,6 @@
 'use client'
 
-import { QuickSignUpForm, SignedIn, SignedOut } from '@ezstart/auth-sdk'
+import { QuickSignUpForm, SignedIn, SignedOut, SignInForm } from '@ezstart/auth-sdk'
 import {
   Button,
   Card,
@@ -26,6 +26,7 @@ function EarthDayContent() {
   const currentLocale = useLocale()
   const router = useRouter()
   const [signupSuccess, setSignupSuccess] = useState(false)
+  const [mode, setMode] = useState<'signup' | 'signin'>('signup')
 
   useEffect(() => {
     const promo = searchParams.get('promo')
@@ -91,23 +92,53 @@ function EarthDayContent() {
           <SignedOut>
             <Card variant="floating" className="bg-background/90 backdrop-blur-md border-white/10">
               <CardContent className="p-5">
-                <QuickSignUpForm
-                  appName="green-pulse"
-                  promoCode={hasPromo ? 'EARTHDAY2026' : undefined}
-                  onSuccess={() => setSignupSuccess(true)}
-                  texts={{
-                    username: t('signup.username'),
-                    usernamePlaceholder: t('signup.usernamePlaceholder'),
-                    email: t('signup.email'),
-                    emailPlaceholder: t('signup.emailPlaceholder'),
-                    submit: t('signup.submit'),
-                    submitting: t('signup.submitting'),
-                    successToast: t('signup.successToast'),
-                    fallbackError: t('signup.fallbackError'),
-                    required: t('signup.required'),
-                    invalidEmail: t('signup.invalidEmail'),
-                  }}
-                />
+                {mode === 'signup' ? (
+                  <>
+                    <QuickSignUpForm
+                      appName="green-pulse"
+                      promoCode={hasPromo ? 'EARTHDAY2026' : undefined}
+                      onSuccess={() => setSignupSuccess(true)}
+                      texts={{
+                        username: t('signup.username'),
+                        usernamePlaceholder: t('signup.usernamePlaceholder'),
+                        email: t('signup.email'),
+                        emailPlaceholder: t('signup.emailPlaceholder'),
+                        submit: t('signup.submit'),
+                        submitting: t('signup.submitting'),
+                        successToast: t('signup.successToast'),
+                        fallbackError: t('signup.fallbackError'),
+                        required: t('signup.required'),
+                        invalidEmail: t('signup.invalidEmail'),
+                      }}
+                    />
+                    <P className="text-xs text-center text-muted-foreground mt-4">
+                      {t('auth.hasAccount')}{' '}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="p-0 h-auto text-xs"
+                        onClick={() => setMode('signin')}
+                      >
+                        {t('auth.signIn')}
+                      </Button>
+                    </P>
+                  </>
+                ) : (
+                  <>
+                    <SignInForm appName="green-pulse" onSuccess={() => setSignupSuccess(false)} />
+                    <P className="text-xs text-center text-muted-foreground mt-4">
+                      {t('auth.noAccount')}{' '}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="p-0 h-auto text-xs"
+                        onClick={() => setMode('signup')}
+                      >
+                        {t('auth.signUp')}
+                      </Button>
+                    </P>
+                  </>
+                )}
               </CardContent>
             </Card>
           </SignedOut>
