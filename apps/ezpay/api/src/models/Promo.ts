@@ -14,6 +14,10 @@ export interface PromoDocument extends Document {
   active: boolean
   deletedAt?: Date | null
   expiresAt?: Date
+  description?: string
+  campaign?: string
+  targetPlanId?: string
+  targetUserId?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -40,6 +44,10 @@ const promoSchema = new Schema<PromoDocument>(
     active: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
     expiresAt: { type: Date },
+    description: { type: String },
+    campaign: { type: String, index: true },
+    targetPlanId: { type: String },
+    targetUserId: { type: String },
   },
   {
     timestamps: true,

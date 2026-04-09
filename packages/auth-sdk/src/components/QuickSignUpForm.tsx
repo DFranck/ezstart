@@ -72,7 +72,7 @@ const DEFAULT_TEXTS: QuickSignUpFormTexts = {
   successToast: 'Account created! Welcome aboard.',
   promoCodeLabel: 'Promo code',
   promoCodePlaceholder: 'Enter promo code',
-  promoCodeApplied: 'Code applied!',
+  promoCodeApplied: 'Valid code!',
   promoCodeToggle: 'Have a promo code?',
   promoCodeInvalid: 'Invalid promo code',
   promoCodeChecking: 'Checking...',

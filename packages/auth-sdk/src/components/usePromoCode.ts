@@ -2,9 +2,7 @@
 
 import { getApiUrl } from '@ezstart/config'
 import { useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-const PROMO_STORAGE_KEY = 'gp_promo_code'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 /**
  * Validate a promo code against the ezpay API (where promo codes are managed).
@@ -25,9 +23,8 @@ async function validatePromoCodeApi(code: string, appName: string): Promise<bool
 }
 
 /**
- * Resolves a promo code with priority: prop > URL ?promo= > localStorage > empty.
- * Also persists URL promo codes to localStorage for later retrieval.
- * Validates promo codes against the API with debounce.
+ * Resolves a promo code with priority: prop > URL ?promo= > empty.
+ * Validates promo codes against the ezpay API with debounce.
  *
  * Returns:
  * - promoCode: the current code string
@@ -41,30 +38,8 @@ export function usePromoCode(appName: string, propPromoCode?: string) {
   const searchParams = useSearchParams()
   const urlPromo = searchParams?.get('promo') ?? ''
 
-  // Persist URL promo to localStorage
-  useEffect(() => {
-    if (urlPromo) {
-      try {
-        localStorage.setItem(PROMO_STORAGE_KEY, urlPromo)
-      } catch {
-        // localStorage unavailable (SSR, incognito)
-      }
-    }
-  }, [urlPromo])
-
-  const [storedPromo] = useState(() => {
-    try {
-      return localStorage.getItem(PROMO_STORAGE_KEY) ?? ''
-    } catch {
-      return ''
-    }
-  })
-
-  // Priority: prop > URL > localStorage > empty
-  const initialPromo = useMemo(
-    () => propPromoCode || urlPromo || storedPromo || '',
-    [propPromoCode, urlPromo, storedPromo]
-  )
+  // Priority: prop > URL > empty
+  const initialPromo = useMemo(() => propPromoCode || urlPromo || '', [propPromoCode, urlPromo])
 
   const [promoCode, setPromoCode] = useState(initialPromo)
   const [isValid, setIsValid] = useState<boolean | null>(null)
@@ -113,7 +88,7 @@ export function usePromoCode(appName: string, propPromoCode?: string) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [promoCode, initialPromo])
+  }, [promoCode, initialPromo, appName])
 
   return { promoCode, setPromoCode, isValid, isValidating, isOpen, setIsOpen }
 }
