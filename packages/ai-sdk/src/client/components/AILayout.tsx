@@ -5,6 +5,7 @@
  */
 'use client'
 
+import { useState, useEffect } from 'react'
 import {
   Div,
   Thread,
@@ -47,6 +48,15 @@ export function AILayout({ appName, getToken, ...props }: AILayoutProps) {
 }
 
 function AILayoutInner({ getToken: _getToken, ...props }: AILayoutProps) {
+  // Prevent SSR hydration mismatch — hooks read localStorage (auth token, providers)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
+  return <AILayoutContent {...props} />
+}
+
+function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   const {
     messages,
     loading,

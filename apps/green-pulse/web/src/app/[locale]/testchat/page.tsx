@@ -7,7 +7,7 @@ export default function TestChatPage() {
   const locale = useLocale()
 
   return (
-    <div className="h-dvh">
+    <main className="h-dvh">
       <AILayout
         appName="green-pulse"
         locale={locale}
@@ -20,6 +20,6 @@ export default function TestChatPage() {
           newChatLabel: 'New Chat',
         }}
       />
-    </div>
+    </main>
   )
 }
