@@ -45,6 +45,7 @@ const levelConfig: Record<
 
 function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: string }) {
   const config = levelConfig[entry.level]
+  const hasChildren = entry.children && entry.children.length > 0
 
   return (
     <Div className="space-y-0">
@@ -81,9 +82,23 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
             {entry.tokens.length === 0 && (
               <Span className="text-xs text-muted-foreground italic">No tokens</Span>
             )}
-            {entry.children && entry.children.length > 0 && (
+            {hasChildren && (
               <Div className="pt-1 border-t border-border/50">
-                <P className="text-xs text-muted-foreground mb-1">Children:</P>
+                <Div className="flex items-center justify-between mb-1">
+                  <P className="text-xs text-muted-foreground">Children:</P>
+                  <Link
+                    href={`/${locale}/packages/ui/inspector/explorer/${entry.name}`}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <Badge
+                      variant="outline"
+                      size="sm"
+                      className="cursor-pointer hover:bg-accent transition-colors text-[10px]"
+                    >
+                      View tree
+                    </Badge>
+                  </Link>
+                </Div>
                 <Div className="flex flex-wrap gap-1">
                   {entry.children.map(childName => (
                     <Link
@@ -162,6 +177,34 @@ export default function InspectorIndexPage() {
               </Badge>
             </Link>
           ))}
+        </Div>
+      </Section>
+
+      {/* Tree Explorer */}
+      <Section className="space-y-3">
+        <Div className="space-y-1">
+          <H2 className="text-lg font-semibold">Tree Explorer</H2>
+          <P className="text-sm text-muted-foreground">
+            View the full recursive hierarchy of a component and how tokens propagate through all
+            descendants
+          </P>
+        </Div>
+        <Div className="flex flex-wrap gap-2">
+          {getComponentsByLevel('complex')
+            .filter(entry => entry.children.length > 0)
+            .map(entry => (
+              <Link
+                key={entry.name}
+                href={`/${locale}/packages/ui/inspector/explorer/${entry.name}`}
+              >
+                <Badge
+                  variant="purple"
+                  className="cursor-pointer hover:opacity-80 transition-opacity px-3 py-1.5 text-sm"
+                >
+                  {entry.name}
+                </Badge>
+              </Link>
+            ))}
         </Div>
       </Section>
 
