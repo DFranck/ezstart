@@ -20,9 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ezstart/ui/components'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { useState } from 'react'
 import { QRCodeCanvas } from './components/qrcode-canvas'
+import { SavedQRCodes } from './components/saved-qr-codes'
+import { useCreateQRCode } from './hooks/useQRCodes'
 import { QRCodeConfig } from './types'
 
 const DEFAULT_CONFIG: QRCodeConfig = {
@@ -38,13 +41,33 @@ const DEFAULT_CONFIG: QRCodeConfig = {
 function QRCodeGeneratorContent() {
   const t = useSafeTranslations('qrCode')
   const [config, setConfig] = useState<QRCodeConfig>(DEFAULT_CONFIG)
+  const [title, setTitle] = useState('')
+  const { user, isAuthenticated } = useAuthStore()
+  const createMutation = useCreateQRCode(t)
 
   const handleReset = () => {
     setConfig(DEFAULT_CONFIG)
+    setTitle('')
   }
 
   const updateConfig = (updates: Partial<QRCodeConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }))
+  }
+
+  const handleSave = () => {
+    if (!config.url) return
+
+    createMutation.mutate({
+      url: config.url,
+      title: title || undefined,
+      redirectType: config.redirectType,
+      size: config.size,
+      foreground: config.foregroundColor,
+      background: config.backgroundColor,
+      errorCorrection: config.errorCorrectionLevel,
+      includeMargin: config.includeMargin,
+      userEmail: user?.email,
+    })
   }
 
   return (
@@ -53,9 +76,7 @@ function QRCodeGeneratorContent() {
       <Section size="full" className="py-8 border-b border-border">
         <Div layout="center">
           <H2>{t('hero.title')}</H2>
-          <P className="text-muted-foreground max-w-xl">
-            {t('hero.description')}
-          </P>
+          <P className="text-muted-foreground max-w-xl">{t('hero.description')}</P>
         </Div>
       </Section>
 
@@ -69,6 +90,43 @@ function QRCodeGeneratorContent() {
             </CardHeader>
             <CardContent>
               <QRCodeCanvas config={config} />
+
+              {/* Save button - only for authenticated users with a valid URL */}
+              {isAuthenticated && config.url && (
+                <Div className="mt-4 space-y-3 border-t border-border pt-4">
+                  <Div className="space-y-2">
+                    <Label htmlFor="qr-title">{t('saved.titleLabel')}</Label>
+                    <Input
+                      id="qr-title"
+                      placeholder={t('saved.titlePlaceholder')}
+                      value={title}
+                      onChange={e => setTitle(e.target.value)}
+                      maxLength={200}
+                    />
+                  </Div>
+                  <Button
+                    onClick={handleSave}
+                    variant="default"
+                    className="w-full"
+                    disabled={createMutation.isPending}
+                  >
+                    <Icon name="lucide:Save" size={16} ariaHidden />
+                    <P className="ml-2">
+                      {createMutation.isPending ? t('saved.saving') : t('saved.saveButton')}
+                    </P>
+                  </Button>
+                </Div>
+              )}
+
+              {/* Sign-in prompt for unauthenticated users */}
+              {!isAuthenticated && config.url && (
+                <Div className="mt-4 border-t border-border pt-3">
+                  <P size="sm" className="text-muted-foreground text-center">
+                    <Icon name="lucide:Info" size={14} className="inline mr-1" ariaHidden />
+                    {t('saved.signInToSave')}
+                  </P>
+                </Div>
+              )}
             </CardContent>
           </Card>
 
@@ -120,10 +178,10 @@ function QRCodeGeneratorContent() {
               {/* Size Control - Value shown inline */}
               <Div className="space-y-2">
                 <Div className="flex items-center justify-between">
-                  <Label htmlFor="qr-size">
-                    {t('generator.configuration.sizeLabel')}
-                  </Label>
-                  <P size="sm" className="text-muted-foreground">{config.size}px</P>
+                  <Label htmlFor="qr-size">{t('generator.configuration.sizeLabel')}</Label>
+                  <P size="sm" className="text-muted-foreground">
+                    {config.size}px
+                  </P>
                 </Div>
                 <Input
                   id="qr-size"
@@ -241,17 +299,26 @@ function QRCodeGeneratorContent() {
         </Div>
       </Section>
 
+      {/* Saved QR Codes Section */}
+      <Section size="default" className="py-8">
+        <SavedQRCodes />
+      </Section>
+
       {/* Use Cases Section - Subtle */}
       <Section size="narrow" className="py-8">
         <Div layout="center" className="mb-4">
           <H3 className="text-lg">{t('useCases.title')}</H3>
-          <P size="sm" className="text-muted-foreground">{t('useCases.description')}</P>
+          <P size="sm" className="text-muted-foreground">
+            {t('useCases.description')}
+          </P>
         </Div>
         <Div className="grid md:grid-cols-3 gap-3">
           <Card variant="outline">
             <CardContent className="text-center py-4 space-y-1">
               <Icon name="lucide:Briefcase" className="w-6 h-6 mx-auto text-primary" />
-              <P size="sm" weight="medium">{t('useCases.businessCards.title')}</P>
+              <P size="sm" weight="medium">
+                {t('useCases.businessCards.title')}
+              </P>
               <P size="xs" className="text-muted-foreground">
                 {t('useCases.businessCards.description')}
               </P>
@@ -260,7 +327,9 @@ function QRCodeGeneratorContent() {
           <Card variant="outline">
             <CardContent className="text-center py-4 space-y-1">
               <Icon name="lucide:Share2" className="w-6 h-6 mx-auto text-primary" />
-              <P size="sm" weight="medium">{t('useCases.marketing.title')}</P>
+              <P size="sm" weight="medium">
+                {t('useCases.marketing.title')}
+              </P>
               <P size="xs" className="text-muted-foreground">
                 {t('useCases.marketing.description')}
               </P>
@@ -269,7 +338,9 @@ function QRCodeGeneratorContent() {
           <Card variant="outline">
             <CardContent className="text-center py-4 space-y-1">
               <Icon name="lucide:Ticket" className="w-6 h-6 mx-auto text-primary" />
-              <P size="sm" weight="medium">{t('useCases.events.title')}</P>
+              <P size="sm" weight="medium">
+                {t('useCases.events.title')}
+              </P>
               <P size="xs" className="text-muted-foreground">
                 {t('useCases.events.description')}
               </P>

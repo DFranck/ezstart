@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { getAuthUserModel, AuthUserDocument } from '../models/auth-user.js'
 import { getAuthCodeModel } from '../models/auth-code.js'
-import { getWaitlistModel } from '../models/waitlist.js'
 import {
   getRefreshTokenModel,
   hashRefreshToken,
@@ -17,7 +16,6 @@ import {
   AuthCodeResponse,
   JWTPayload,
 } from '@ezstart/auth-sdk/server'
-import { ROLE_PERMISSIONS, ROLE_FEATURES } from '@ezstart/rbac/server'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
 
@@ -53,46 +51,7 @@ export class AuthService {
       throw new Error('User already exists with this email or username')
     }
 
-    // Validate access code if provided
-    let isBetaTester = false
-    if (data.accessCode) {
-      const WaitlistModel = await getWaitlistModel()
-
-      // Find waitlist entry with this access code (dot-notation query for nested subdocument)
-      const waitlist = await WaitlistModel.findOne({
-        'emails.accessCode': data.accessCode,
-      } as Record<string, string>)
-
-      if (!waitlist) {
-        throw new Error('Invalid access code')
-      }
-
-      const entry = waitlist.emails.find(
-        (e: { accessCode: string | null }) => e.accessCode === data.accessCode
-      )
-
-      if (!entry) {
-        throw new Error('Invalid access code')
-      }
-
-      if (entry.status !== 'invited') {
-        throw new Error('Access code is not valid (already used or expired)')
-      }
-
-      // Mark as activated
-      entry.status = 'activated'
-      entry.activatedAt = new Date()
-      await waitlist.save()
-
-      isBetaTester = true
-    }
-
     // Create new user
-    const appRoles = new Map<string, string[]>()
-    if (isBetaTester) {
-      appRoles.set(data.app, ['beta-tester'])
-    }
-
     const user = new AuthUserModel({
       email: data.email,
       username: data.username,
@@ -101,10 +60,6 @@ export class AuthService {
       lastName: data.lastName,
       apps: [data.app], // Grant access to the requesting app
       isVerified: false, // Requires email verification
-      // Assign role and permissions (app-specific)
-      appRoles,
-      permissions: isBetaTester ? ROLE_PERMISSIONS['beta-tester'] : [],
-      features: isBetaTester ? ROLE_FEATURES['beta-tester'] : [],
       ...(data.promoCode ? { promoCode: data.promoCode } : {}),
     })
 

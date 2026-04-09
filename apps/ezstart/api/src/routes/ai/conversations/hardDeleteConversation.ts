@@ -4,6 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
+import mongoose from 'mongoose'
 import {
   Router,
   createRouterWithDoc,
@@ -27,7 +28,19 @@ hardDeleteConversationRouter.delete(
     try {
       const { id } = req.params
 
-      // @ts-expect-error - Mongoose findByIdAndDelete type inference issue
+      if (!mongoose.isValidObjectId(id)) {
+        return sendError(res, 'Invalid conversation ID format', 400)
+      }
+
+      // Ownership check before hard delete
+      const existing = await AIConversation.findById(id).lean().exec()
+      if (!existing) {
+        return sendError(res, 'Conversation not found', 404)
+      }
+      if (existing.userId && existing.userId !== req.userId) {
+        return sendError(res, 'Forbidden — not conversation owner', 403)
+      }
+
       const conversation = await AIConversation.findByIdAndDelete(id)
 
       if (!conversation) {

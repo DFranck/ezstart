@@ -159,7 +159,7 @@ export default function TestSubscribePage() {
                       onClick={() =>
                         setCancelDialog({
                           open: true,
-                          subscriptionId: sub.metadata?.subscriptionId || null,
+                          subscriptionId: (sub.metadata?.subscriptionId as string) || null,
                         })
                       }
                     >

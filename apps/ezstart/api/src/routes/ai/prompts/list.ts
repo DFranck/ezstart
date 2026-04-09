@@ -16,7 +16,7 @@ import { z } from 'zod'
 import { AISystemPrompt } from '../../../models/AISystemPrompt.js'
 
 const listPromptsQuerySchema = z.object({
-  appName: z.string().min(1).describe('Application name (required)'),
+  appName: z.string().min(1).optional().describe('Application name (optional — omit for all apps)'),
   type: z
     .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
     .optional()
@@ -45,7 +45,8 @@ docRouter.get(
 
       const { appName, type, provider, active, limit, offset } = validation.data
 
-      const filter: Record<string, unknown> = { appName }
+      const filter: Record<string, unknown> = {}
+      if (appName) filter.appName = appName
       if (type) filter.type = type
       if (provider) filter.provider = provider
       if (active !== undefined) filter.isActive = active === 'true'

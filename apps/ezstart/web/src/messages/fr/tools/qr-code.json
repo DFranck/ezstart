@@ -2,7 +2,7 @@
   "qrCode": {
     "hero": {
       "title": "Générateur de QR Code",
-      "description": "Générez des QR codes professionnels avec des options de personnalisation. Parfait pour les cartes de visite, supports marketing et billets d'événements."
+      "description": "Générez des QR codes professionnels instantanément. Gratuit, sans compte requis."
     },
     "generator": {
       "configuration": {
@@ -29,10 +29,44 @@
         "resetButton": "Réinitialiser"
       },
       "preview": {
-        "title": "Aperçu & Téléchargement",
-        "downloadButton": "Télécharger le QR Code",
-        "emptyState": "Entrez du contenu pour générer le QR code"
+        "title": "Aperçu",
+        "emptyState": "Entrez une URL pour générer votre QR code",
+        "downloadPng": "Télécharger PNG",
+        "downloadSvg": "Télécharger SVG",
+        "copyToClipboard": "Copier dans le presse-papiers",
+        "downloadSuccess": "QR code téléchargé",
+        "copied": "Copié dans le presse-papiers !",
+        "copyError": "Échec de la copie dans le presse-papiers",
+        "temporaryRedirectInfo": "Redirection temporaire : l'URL peut être modifiée ultérieurement sans régénérer le QR code"
       }
+    },
+    "saved": {
+      "title": "Mes QR Codes",
+      "titleAdmin": "Tous les QR Codes",
+      "titleLabel": "Titre (optionnel)",
+      "titlePlaceholder": "ex. Mon site web, Carte de visite...",
+      "saveButton": "Enregistrer le QR Code",
+      "saving": "Enregistrement...",
+      "saveSuccess": "QR code enregistré avec succès",
+      "saveError": "Échec de l'enregistrement du QR code",
+      "deleteSuccess": "QR code supprimé",
+      "deleteError": "Échec de la suppression du QR code",
+      "signInPrompt": "Connectez-vous pour enregistrer et gérer vos QR codes",
+      "signInToSave": "Connectez-vous pour enregistrer vos QR codes",
+      "emptyState": "Aucun QR code enregistré",
+      "loading": "Chargement...",
+      "totalCount": "{count} QR code(s)",
+      "filterByEmail": "Filtrer par email utilisateur...",
+      "columns": {
+        "title": "Titre / URL",
+        "userEmail": "Utilisateur",
+        "size": "Taille",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "pagination": "{from}-{to} sur {total}",
+      "previous": "Précédent",
+      "next": "Suivant"
     },
     "useCases": {
       "title": "Cas d'Usage Courants",

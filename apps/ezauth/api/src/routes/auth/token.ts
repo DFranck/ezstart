@@ -48,7 +48,10 @@ const tokenController = async (req: Request, res: Response) => {
       sameSite: 'lax',
       maxAge: 15 * 60 * 1000, // 15 minutes (matches access token TTL)
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined,
+      domain:
+        process.env.NODE_ENV === 'production'
+          ? process.env.COOKIE_DOMAIN || '.ezstart.xyz'
+          : undefined,
     })
 
     // Return token data including refresh token

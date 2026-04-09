@@ -3,6 +3,7 @@ import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
+  createRateLimiter,
   sendSuccess,
   sendError,
   sendValidationError,
@@ -100,7 +101,7 @@ const getDonationStatsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/donations/stats', getDonationStatsHandler, {
+docRouter.get('/donations/stats', createRateLimiter(), getDonationStatsHandler, {
   summary: 'Get donation statistics',
   tags: ['Donations'],
   querySchema: donationStatsQuerySchema,

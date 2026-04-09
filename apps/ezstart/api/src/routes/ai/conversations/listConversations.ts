@@ -16,7 +16,7 @@ import { z } from 'zod'
 import { AIConversation } from '../../../models/AIConversation.js'
 
 const listConversationsQuerySchema = z.object({
-  appName: z.string().min(1).describe('Application name (required)'),
+  appName: z.string().min(1).optional().describe('Application name (optional, omit for all apps)'),
   userId: z.string().optional().describe('Filter by user ID'),
   includeDeleted: z
     .enum(['true', 'false'])
@@ -45,14 +45,14 @@ listConversationsRouter.get(
 
       const { appName, userId, includeDeleted, limit, offset } = validation.data
 
-      const query: Record<string, unknown> = { appName }
+      const query: Record<string, unknown> = {}
+      if (appName) query.appName = appName
       if (userId) query.userId = userId
       if (!includeDeleted || includeDeleted === 'false') {
         query.deletedAt = null
       }
 
       const [conversations, total] = await Promise.all([
-        // @ts-expect-error - Mongoose type inference issue with dynamic query
         AIConversation.find(query)
           .sort({ updatedAt: -1 })
           .skip(offset)

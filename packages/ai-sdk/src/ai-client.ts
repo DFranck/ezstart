@@ -18,6 +18,12 @@ import type {
   PromptType,
   ProviderTarget,
   PaginationMeta,
+  AppProvider as AppProviderType,
+  CreateAppProviderRequest,
+  UpdateAppProviderRequest,
+  GlobalProviderAccess as GlobalProviderAccessType,
+  CreateGlobalProviderRequest,
+  UpdateGlobalProviderRequest,
 } from './ai-types.js'
 import type { AIProviderInfo } from './server/registry/types.js'
 
@@ -90,7 +96,8 @@ export class AIClient {
     limit?: number
     offset?: number
   }): Promise<{ conversations: ConversationListItem[]; meta: PaginationMeta }> {
-    const query = new URLSearchParams({ appName: this.appName })
+    const query = new URLSearchParams()
+    if (this.appName) query.set('appName', this.appName)
     if (params?.userId) query.set('userId', params.userId)
     if (params?.limit) query.set('limit', String(params.limit))
     if (params?.offset) query.set('offset', String(params.offset))
@@ -138,7 +145,8 @@ export class AIClient {
     limit?: number
     offset?: number
   }): Promise<{ prompts: SystemPrompt[]; meta: PaginationMeta }> {
-    const query = new URLSearchParams({ appName: this.appName })
+    const query = new URLSearchParams()
+    if (this.appName) query.set('appName', this.appName)
     if (params?.type) query.set('type', params.type)
     if (params?.provider) query.set('provider', params.provider)
     if (params?.active !== undefined) query.set('active', String(params.active))
@@ -148,7 +156,8 @@ export class AIClient {
   }
 
   async getPrompt(key: string): Promise<SystemPrompt> {
-    return this.fetch(`/prompts/${key}?appName=${this.appName}`)
+    const query = this.appName ? `?appName=${this.appName}` : ''
+    return this.fetch(`/prompts/${key}${query}`)
   }
 
   async createPrompt(data: Omit<CreatePromptRequest, 'appName'>): Promise<SystemPrompt> {
@@ -159,23 +168,102 @@ export class AIClient {
   }
 
   async updatePrompt(key: string, data: UpdatePromptRequest): Promise<SystemPrompt> {
-    return this.fetch(`/prompts/${key}?appName=${this.appName}`, {
+    const query = this.appName ? `?appName=${this.appName}` : ''
+    return this.fetch(`/prompts/${key}${query}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     })
   }
 
   async deletePrompt(key: string): Promise<void> {
-    return this.fetch(`/prompts/${key}?appName=${this.appName}`, { method: 'DELETE' })
+    const query = this.appName ? `?appName=${this.appName}` : ''
+    return this.fetch(`/prompts/${key}${query}`, { method: 'DELETE' })
   }
 
-  // === Providers ===
+  // === Providers (global registry) ===
 
   async listProviders(): Promise<AIProviderInfo[]> {
     const result = await this.fetch<{ providers: AIProviderInfo[] } | AIProviderInfo[]>(
       '/providers'
     )
     return Array.isArray(result) ? result : result.providers
+  }
+
+  // === App Providers (per-app configuration) ===
+
+  async listAppProviders(params?: {
+    enabled?: boolean
+    limit?: number
+    offset?: number
+  }): Promise<{ providers: AppProviderType[]; meta: PaginationMeta }> {
+    const query = new URLSearchParams()
+    if (this.appName) query.set('appName', this.appName)
+    if (params?.enabled !== undefined) query.set('enabled', String(params.enabled))
+    if (params?.limit) query.set('limit', String(params.limit))
+    if (params?.offset) query.set('offset', String(params.offset))
+    return this.fetch(`/app-providers?${query}`)
+  }
+
+  async createAppProvider(
+    data: Omit<CreateAppProviderRequest, 'appName'>
+  ): Promise<AppProviderType> {
+    return this.fetch('/app-providers', {
+      method: 'POST',
+      body: JSON.stringify({ ...data, appName: this.appName }),
+    })
+  }
+
+  async updateAppProvider(id: string, data: UpdateAppProviderRequest): Promise<AppProviderType> {
+    return this.fetch(`/app-providers/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteAppProvider(id: string): Promise<void> {
+    return this.fetch(`/app-providers/${id}`, { method: 'DELETE' })
+  }
+
+  async toggleAppProvider(id: string): Promise<AppProviderType> {
+    return this.fetch(`/app-providers/${id}/toggle`, { method: 'PATCH' })
+  }
+
+  // === Global Providers (superadmin only) ===
+
+  async listGlobalProviders(params?: {
+    isGloballyEnabled?: boolean
+    providerType?: string
+    limit?: number
+    offset?: number
+  }): Promise<{ providers: GlobalProviderAccessType[]; meta: PaginationMeta }> {
+    const query = new URLSearchParams()
+    if (params?.isGloballyEnabled !== undefined)
+      query.set('isGloballyEnabled', String(params.isGloballyEnabled))
+    if (params?.providerType) query.set('providerType', params.providerType)
+    if (params?.limit) query.set('limit', String(params.limit))
+    if (params?.offset) query.set('offset', String(params.offset))
+    return this.fetch(`/global-providers?${query}`)
+  }
+
+  async createGlobalProvider(data: CreateGlobalProviderRequest): Promise<GlobalProviderAccessType> {
+    return this.fetch('/global-providers', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateGlobalProvider(
+    id: string,
+    data: UpdateGlobalProviderRequest
+  ): Promise<GlobalProviderAccessType> {
+    return this.fetch(`/global-providers/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteGlobalProvider(id: string): Promise<void> {
+    return this.fetch(`/global-providers/${id}`, { method: 'DELETE' })
   }
 }
 

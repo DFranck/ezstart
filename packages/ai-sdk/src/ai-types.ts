@@ -17,6 +17,14 @@ import type {
   updatePromptSchema,
   promptTypeSchema,
   providerTargetSchema,
+  promptProviderSchema,
+  appProviderSchema,
+  createAppProviderSchema,
+  updateAppProviderSchema,
+  providerTypeSchema,
+  globalProviderAccessSchema,
+  createGlobalProviderSchema,
+  updateGlobalProviderSchema,
 } from './schemas.js'
 
 // === Chat ===
@@ -36,6 +44,18 @@ export type CreatePromptRequest = z.infer<typeof createPromptSchema>
 export type UpdatePromptRequest = z.infer<typeof updatePromptSchema>
 export type PromptType = z.infer<typeof promptTypeSchema>
 export type ProviderTarget = z.infer<typeof providerTargetSchema>
+export type PromptProvider = z.infer<typeof promptProviderSchema>
+
+// === App Providers ===
+export type AppProvider = z.infer<typeof appProviderSchema>
+export type CreateAppProviderRequest = z.infer<typeof createAppProviderSchema>
+export type UpdateAppProviderRequest = z.infer<typeof updateAppProviderSchema>
+export type ProviderType = z.infer<typeof providerTypeSchema>
+
+// === Global Provider Access ===
+export type GlobalProviderAccess = z.infer<typeof globalProviderAccessSchema>
+export type CreateGlobalProviderRequest = z.infer<typeof createGlobalProviderSchema>
+export type UpdateGlobalProviderRequest = z.infer<typeof updateGlobalProviderSchema>
 
 // Re-export existing provider types from registry
 export type {

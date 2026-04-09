@@ -18,13 +18,6 @@ export default function AdminDashboardPage() {
       color: 'text-primary',
     },
     {
-      href: '/admin/waitlist',
-      title: t('cards.betaWaitlist.title'),
-      description: t('cards.betaWaitlist.description'),
-      icon: 'lucide:UserPlus' as const,
-      color: 'text-primary',
-    },
-    {
       href: '/admin/users',
       title: t('cards.users.title'),
       description: t('cards.users.description'),

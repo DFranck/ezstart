@@ -24,7 +24,7 @@ export interface Payment {
   liveMode: boolean
   cancelAtPeriodEnd?: boolean
   currentPeriodEnd?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   createdAt: string
   updatedAt: string
   completedAt?: string

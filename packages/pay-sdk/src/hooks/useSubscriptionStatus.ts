@@ -71,7 +71,7 @@ export function useSubscriptionStatus(params: UseSubscriptionStatusParams): Subs
         loading: false,
         isActive: true,
         isCanceling: activeSub.cancelAtPeriodEnd || false,
-        plan: activeSub.metadata?.planName || null,
+        plan: (activeSub.metadata?.planName as string) || null,
         features,
         periodEnd: activeSub.currentPeriodEnd ? new Date(activeSub.currentPeriodEnd) : null,
         subscription: activeSub,

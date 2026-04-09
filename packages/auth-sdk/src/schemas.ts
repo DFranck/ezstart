@@ -16,7 +16,6 @@ export const registerRequestSchema = z.object({
   lastName: z.string().optional().describe('User last name'),
   app: z.string().min(1).describe('Application requesting authentication'),
   redirect_uri: z.string().url().optional().describe('OAuth redirect URI'),
-  accessCode: z.string().optional().describe('Beta access code from waitlist invitation'),
   promoCode: z.string().optional().describe('Promo code from referral/campaign'),
 })
 

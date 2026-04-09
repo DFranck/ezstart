@@ -92,5 +92,5 @@ aiConversationSchema.pre('save', function (next) {
   next()
 })
 
-export const AIConversation =
-  models.AIConversation || model<IAIConversation>('AIConversation', aiConversationSchema)
+export const AIConversation = (models.AIConversation ||
+  model<IAIConversation>('AIConversation', aiConversationSchema)) as mongoose.Model<IAIConversation>

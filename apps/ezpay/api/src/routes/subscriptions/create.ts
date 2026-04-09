@@ -12,7 +12,7 @@ import { getPaymentModel } from '../../models/Payment.js'
 import { getPlanModel } from '../../models/Plan.js'
 import { getProvider } from '../../services/stripe.js'
 import { validatePromo, calculateDiscount, incrementUsage } from '../../services/promo.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -81,7 +81,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     // Promo code validation and discount calculation
     let finalAmount = amount
-    let promoMetadata: { promoCode?: string; originalAmount?: number; discountApplied?: number } = {}
+    let promoMetadata: { promoCode?: string; originalAmount?: number; discountApplied?: number } =
+      {}
     let promoId: string | undefined
     let validatedPromo: Awaited<ReturnType<typeof validatePromo>>['promo']
 
@@ -125,13 +126,15 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       },
       successUrl: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/subscribe/cancel`,
-      discount: validatedPromo ? {
-        type: validatedPromo.discountType,
-        value: validatedPromo.discountValue,
-        duration: validatedPromo.duration,
-        durationInMonths: validatedPromo.durationInMonths,
-        code: promoCode,
-      } : undefined,
+      discount: validatedPromo
+        ? {
+            type: validatedPromo.discountType,
+            value: validatedPromo.discountValue,
+            duration: validatedPromo.duration,
+            durationInMonths: validatedPromo.durationInMonths,
+            code: promoCode,
+          }
+        : undefined,
     })
 
     // Detect live vs test mode from Stripe key
@@ -178,7 +181,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/subscribe', authMiddleware, createSubscriptionHandler, {
+docRouter.post('/subscribe', authMiddleware, populateUserFromToken, createSubscriptionHandler, {
   summary: 'Create a subscription checkout session',
   tags: ['Subscriptions'],
   bodySchema: createSubscriptionSchema,

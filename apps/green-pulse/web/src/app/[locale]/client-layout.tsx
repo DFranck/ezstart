@@ -31,19 +31,20 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
 
   // Hide header/footer/mobile-nav on full-page layouts
   const isChatPage = pathname?.includes('/chat')
+  const isEarthDayPage = pathname?.includes('/earthday')
 
   return (
     <ClientLayout
-      headerOverlay={pathname === `/${currentLocale}/earthday`}
+      headerOverlay={isEarthDayPage}
       appName="Green Pulse"
       currentPath={pathname}
-      showHeader={!isChatPage}
-      showFooter={!isChatPage}
+      showHeader={!isChatPage && !isEarthDayPage}
+      showFooter={!isChatPage && !isEarthDayPage}
       mobileLogoSrc="/logo.png"
       mobileLogoAlt="Green Pulse Logo"
       mobileLogoHref="/"
       navLinks={
-        isChatPage
+        isChatPage || isEarthDayPage
           ? []
           : [
               {

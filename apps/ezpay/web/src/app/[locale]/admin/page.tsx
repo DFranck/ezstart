@@ -128,20 +128,3 @@ export default function AdminPage() {
     />
   )
 }
-
-// ========================================
-// BACKUP: Original custom admin page (pre-migration)
-// ========================================
-// The original custom-built admin page has been replaced by
-// <PayAdminDashboard> from @ezstart/pay-sdk.
-//
-// The original implementation included:
-// - Custom stats cards (totalRevenue, totalPayments, donations, purchases)
-// - Manual fetch() calls to API_URL/payments with Authorization header
-// - Custom DataTable columns with Badge variants for status/type
-// - Debounced search, type/status filters
-// - ConfirmActionDialog for refund and cancel subscription
-// - Manual client-side stats aggregation from fetched payments
-//
-// If you need to restore the old behavior, check git history for this file
-// prior to the PayAdminDashboard migration commit.

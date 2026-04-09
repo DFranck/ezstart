@@ -4,8 +4,7 @@
     "accessDenied": "Acces refuse",
     "accessDeniedDescription": "Vous devez avoir les privileges administrateur pour acceder a cette page.",
     "tabs": {
-      "users": "Utilisateurs",
-      "waitlist": "Liste d'attente"
+      "users": "Utilisateurs"
     },
     "users": {
       "searchPlaceholder": "Rechercher par email ou nom d'utilisateur...",
@@ -43,25 +42,6 @@
       "manager": "Manager",
       "beta-tester": "Beta Testeur",
       "client": "Client"
-    },
-    "waitlist": {
-      "selectApp": "Selectionner l'app",
-      "columns": {
-        "email": "Email",
-        "status": "Statut",
-        "addedAt": "Date d'ajout",
-        "invitedAt": "Date d'invitation",
-        "actions": "Actions"
-      },
-      "invite": "Inviter",
-      "noWaitlist": "Aucune entree en liste d'attente.",
-      "inviteSuccess": "Invitation envoyee avec succes.",
-      "inviteError": "Echec de l'envoi de l'invitation.",
-      "loading": "Chargement de la liste d'attente...",
-      "statusPending": "En attente",
-      "statusInvited": "Invite",
-      "statusActivated": "Active",
-      "statusRejected": "Rejete"
     },
     "dialog": {
       "confirm": "Confirmer",

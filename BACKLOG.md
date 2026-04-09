@@ -194,16 +194,31 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2.10 — AI Centralization (2026-04-08)
 
-102. [ ] Centraliser AI dans ezstart-api — Migrer routes chat/conversations/providers/prompts de green-pulse API → ezstart API. Pattern identique à ezauth/ezpay : une seule API, `appName` pour scoper (conversations, prompts, providers). Clés API partagées, pas une par app. Frontend appelle `getApiUrl('ezstart')` pour l'IA.
-103. [ ] ai-sdk routes agnostiques — Routes Express réutilisables dans ai-sdk : `/api/ai/chat`, `/api/ai/conversations`, `/api/ai/providers`, `/api/ai/prompts`. Chaque route scopée par `appName`. ezstart-api monte ces routes. Toute app peut consommer via `getApiUrl('ezstart')`.
-104. [ ] AI admin dashboard (`<AIAdminDashboard>`) — Composant SDK client comme `<AuthAdminDashboard>` et `<PayAdminDashboard>`. Fonctionnalités : Prompts CRUD par app, providers config (activer/désactiver par app), usage stats (tokens, coût estimé, par user/jour). SuperAdmin (sans appName) voit tout. App admin (avec appName) voit que ses propres prompts/providers.
-105. [ ] ai-sdk prompt management — Modèle `SystemPrompt` avec `appName`, `type` (general/extraction/etc), `locale`, `content`, `isDefault`. CRUD API + UI dans AIAdminDashboard. Le chat utilise le prompt de la DB au lieu du fichier hardcodé.
-106. [ ] ai-sdk provider registry par app — Chaque app déclare ses providers activés (pas tous partagés). Modèle `AppProvider` avec `appName`, `providerId`, `enabled`, `config`. Dashboard admin pour toggle on/off par app.
+102. [x] Centraliser AI dans ezstart-api — Routes chat/conversations/providers/prompts migrées de green-pulse → ezstart API. `appName` scope tout. Auth + rate limiting + ownership checks. (done 2026-04-09)
+103. [x] ai-sdk routes agnostiques — `/api/ai/chat`, `/api/ai/conversations`, `/api/ai/providers`, `/api/ai/prompts`, `/api/ai/app-providers`, `/api/ai/global-providers`. Chaque route scopée par `appName`. (done 2026-04-09)
+104. [x] AI admin dashboard (`<AIAdminDashboard>`) — Composant SDK client. Prompts CRUD, providers toggle, conversations list. SuperAdmin (sans appName) voit tout. i18n FR+EN. Pagination. (done 2026-04-09)
+105. [x] ai-sdk prompt management — Modèle `AISystemPrompt` avec multi-provider assignment, config overrides. CRUD API + UI + seed defaults. Chat utilise prompt DB. (done 2026-04-09)
+106. [x] ai-sdk provider registry par app — Modèle `AppProvider` + `GlobalProviderAccess`. EZStart autorise, apps activent. Cascade/fallback dans le chat. (done 2026-04-09)
 107. [ ] Dynamic plans — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
 108. [ ] Theme CSS scoping — `[data-app]` selector au lieu de `:root` pour éviter conflits `--brand` quand tous les thèmes sont chargés simultanément.
 109. [ ] Chat UX responsive — Fix sidebar mobile, conversation selection, responsive layout du ThreadLayout. Passe UX complète.
-110. [ ] Green-pulse chat locale — L'IA doit répondre dans la langue de la locale de l'utilisateur (déjà fait côté frontend, à centraliser dans ezstart-api).
+110. [x] Green-pulse chat locale — L'IA répond dans la langue de la locale (localeMap dans sendMessage.ts). (done 2026-04-09)
 111. [x] DEPLOY: Railway ezauth-api — Ajouter `--filter @ezstart/fetch-client --filter @ezstart/email-service` au build command. Redeploy. (done 2026-04-08)
+112. [x] Waitlist system removed — Entièrement supprimé (ezauth API/web, auth-sdk, green-pulse). QuickSignup le remplace. (done 2026-04-09)
+113. [x] QR Code persistence — Save en DB si connecté, page "Mes QR codes", admin voit tout. Model + CRUD + UI. (done 2026-04-09)
+114. [x] EZAuth/EZPay/EZStart admin dashboards — appName optionnel, superadmin voit tout avec colonne Apps. i18n variables fixées. (done 2026-04-09)
+115. [x] EZPay fixes — populateUserFromToken sur purchase/subscribe, validation fallback, any→unknown, rate limiting stats. (done 2026-04-09)
+116. [x] AI security audit — Auth sur chat, IDOR conversations, role enforcement prompts, ObjectId validation, @ts-expect-error removed, OpenAI model→gpt-4o. (done 2026-04-09)
+
+#### P2.11 — AI Platform Enhancements (post-MVP)
+
+117. [ ] Usage tracking par app — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). Dashboard stats dans AIAdminDashboard. Indispensable pour monitorer/facturer.
+118. [ ] Alertes quota — Notification (email/toast) quand une app atteint 80% de son quota tokens/coût. Bloquer à 100%.
+119. [ ] API key rotation — Pouvoir changer une clé API provider sans downtime. Hot-reload dans ProviderRegistry.
+120. [ ] Provider health check — Ping providers périodiquement, désactiver auto si down, réactiver quand up. Status dans dashboard.
+121. [ ] Rate limiting per-app — Limiter le nombre de requêtes AI par app (pas juste global IP). Basé sur AppProvider config.
+122. [ ] ai-sdk streaming — Exposer SSE streaming dans le chat endpoint. OpenAIProvider a déjà handleStreaming(). Route + frontend.
+123. [ ] ai-sdk vision support — Support images dans GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
 
 #### P3 — DevOps / Testing
 

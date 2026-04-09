@@ -96,6 +96,11 @@ export const promptConfigSchema = z
   })
   .optional()
 
+export const promptProviderSchema = z.object({
+  providerId: z.string().min(1),
+  priority: z.number().int().min(1).default(1),
+})
+
 export const systemPromptSchema = z.object({
   key: z.string(),
   name: z.string(),
@@ -104,6 +109,7 @@ export const systemPromptSchema = z.object({
   config: promptConfigSchema,
   type: promptTypeSchema,
   provider: providerTargetSchema,
+  providers: z.array(promptProviderSchema).optional(),
   isActive: z.boolean(),
   isDefault: z.boolean(),
   variables: z.array(z.string()).optional(),
@@ -124,6 +130,7 @@ export const createPromptSchema = z.object({
   config: promptConfigSchema,
   type: promptTypeSchema.default('general'),
   provider: providerTargetSchema.default('all'),
+  providers: z.array(promptProviderSchema).optional(),
   isActive: z.boolean().default(true),
   isDefault: z.boolean().default(false),
   variables: z.array(z.string()).optional(),
@@ -137,7 +144,91 @@ export const updatePromptSchema = z.object({
   config: promptConfigSchema,
   type: promptTypeSchema.optional(),
   provider: providerTargetSchema.optional(),
+  providers: z.array(promptProviderSchema).optional(),
   isActive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
   variables: z.array(z.string()).optional(),
+})
+
+// === App Provider ===
+export const providerTypeSchema = z.enum(['gemini', 'openai', 'anthropic'])
+
+export const appProviderConfigSchema = z
+  .object({
+    model: z.string().max(100).optional(),
+    temperature: z.number().min(0).max(2).optional(),
+    maxTokens: z.number().int().min(1).optional(),
+  })
+  .optional()
+
+export const appProviderSchema = z.object({
+  _id: z.string(),
+  appName: z.string(),
+  providerId: z.string(),
+  providerType: providerTypeSchema,
+  enabled: z.boolean(),
+  priority: z.number(),
+  config: appProviderConfigSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
+export const createAppProviderSchema = z.object({
+  appName: z.string().min(1).max(50),
+  providerId: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/),
+  providerType: providerTypeSchema,
+  enabled: z.boolean().default(true),
+  priority: z.number().int().min(1).max(99).default(1),
+  config: appProviderConfigSchema,
+})
+
+export const updateAppProviderSchema = z.object({
+  enabled: z.boolean().optional(),
+  priority: z.number().int().min(1).max(99).optional(),
+  config: appProviderConfigSchema,
+})
+
+// === Global Provider Access ===
+
+export const globalProviderAccessSchema = z.object({
+  _id: z.string(),
+  providerId: z.string(),
+  providerType: providerTypeSchema,
+  displayName: z.string(),
+  allowedApps: z.array(z.string()),
+  defaultModel: z.string().optional(),
+  maxTokensPerDay: z.number().optional(),
+  maxCostPerMonth: z.number().optional(),
+  isGloballyEnabled: z.boolean(),
+  grantedBy: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
+export const createGlobalProviderSchema = z.object({
+  providerId: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/),
+  providerType: providerTypeSchema,
+  displayName: z.string().min(1).max(100),
+  allowedApps: z.array(z.string().min(1).max(50)).min(1),
+  defaultModel: z.string().max(100).optional(),
+  maxTokensPerDay: z.number().int().min(0).optional(),
+  maxCostPerMonth: z.number().min(0).optional(),
+  isGloballyEnabled: z.boolean().default(true),
+})
+
+export const updateGlobalProviderSchema = z.object({
+  displayName: z.string().min(1).max(100).optional(),
+  allowedApps: z.array(z.string().min(1).max(50)).min(1).optional(),
+  defaultModel: z.string().max(100).optional(),
+  maxTokensPerDay: z.number().int().min(0).optional(),
+  maxCostPerMonth: z.number().min(0).optional(),
+  isGloballyEnabled: z.boolean().optional(),
 })

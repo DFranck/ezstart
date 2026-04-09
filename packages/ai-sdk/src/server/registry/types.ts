@@ -25,7 +25,7 @@ export interface ProviderConfig {
   systemPrompt?: string
   temperature?: number
   maxTokens?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface AIProviderInfo {

@@ -17,7 +17,7 @@ export class OpenAIProvider implements IAIProvider {
   constructor(config: OpenAIProviderConfig = {}) {
     const apiKey = config.apiKey || process.env.OPENAI_API_KEY
     this.client = new OpenAI({ apiKey })
-    this.model = config.model || 'gpt-4-turbo-preview'
+    this.model = config.model || 'gpt-4o'
     this.validateConfig()
   }
 
@@ -42,7 +42,8 @@ export class OpenAIProvider implements IAIProvider {
     // Add conversation history
     if (options.history && options.history.length > 0) {
       options.history.forEach(msg => {
-        const role = msg.role === 'assistant' ? 'assistant' : msg.role === 'system' ? 'system' : 'user'
+        const role =
+          msg.role === 'assistant' ? 'assistant' : msg.role === 'system' ? 'system' : 'user'
         messages.push({ role, content: msg.content } as OpenAI.Chat.ChatCompletionMessageParam)
       })
     }

@@ -250,7 +250,7 @@ export interface PayAdminDashboardTexts {
 }
 
 export interface PayAdminDashboardProps {
-  appName: string
+  appName?: string
   showAppFilter?: boolean
   testMode?: boolean
   className?: string
@@ -344,7 +344,7 @@ function PaymentsTab({
   t,
   testMode,
 }: {
-  appName: string
+  appName?: string
   t: Required<PayAdminDashboardTexts>
   testMode?: boolean
 }) {
@@ -667,7 +667,7 @@ function SubscriptionsTab({
   t,
   testMode,
 }: {
-  appName: string
+  appName?: string
   t: Required<PayAdminDashboardTexts>
   testMode?: boolean
 }) {
@@ -938,13 +938,14 @@ function CreatePromoDialog({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  appName: string
+  appName?: string
   t: Required<PayAdminDashboardTexts>
   onCreated: () => void
 }) {
   const { client } = usePayContext()
 
   const [code, setCode] = useState('')
+  const [promoAppName, setPromoAppName] = useState(appName || '')
   const [discountType, setDiscountType] = useState<PromoDiscountType>('percent')
   const [discountValue, setDiscountValue] = useState('')
   const [currency, setCurrency] = useState('EUR')
@@ -959,6 +960,7 @@ function CreatePromoDialog({
   useEffect(() => {
     if (open) {
       setCode('')
+      setPromoAppName(appName || '')
       setDiscountType('percent')
       setDiscountValue('')
       setCurrency('EUR')
@@ -968,7 +970,7 @@ function CreatePromoDialog({
       setExpiresAt('')
       setError(null)
     }
-  }, [open])
+  }, [open, appName])
 
   // Clear currency when switching away from fixed
   useEffect(() => {
@@ -986,7 +988,7 @@ function CreatePromoDialog({
     try {
       await client.createPromo({
         code: code.toUpperCase(),
-        appName,
+        appName: promoAppName,
         discountType,
         discountValue: Number(discountValue),
         currency: discountType === 'fixed' ? currency : undefined,
@@ -1009,7 +1011,7 @@ function CreatePromoDialog({
   }, [
     client,
     code,
-    appName,
+    promoAppName,
     discountType,
     discountValue,
     currency,
@@ -1043,6 +1045,18 @@ function CreatePromoDialog({
                   placeholder="EARTHDAY2026"
                 />
               </Div>
+
+              {/* App Name — only shown when no appName is provided (superadmin mode) */}
+              {!appName && (
+                <Div className={`space-y-2`}>
+                  <Label>{t.promoAppName}</Label>
+                  <Input
+                    value={promoAppName}
+                    onChange={e => setPromoAppName(e.target.value)}
+                    placeholder="green-pulse"
+                  />
+                </Div>
+              )}
 
               {/* Discount Type */}
               <Div className={`space-y-2`}>
@@ -1179,7 +1193,10 @@ function CreatePromoDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t.cancel}
           </Button>
-          <Button onClick={handleSubmit} disabled={saving || !code || !discountValue}>
+          <Button
+            onClick={handleSubmit}
+            disabled={saving || !code || !discountValue || !promoAppName}
+          >
             {saving && <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin mr-2`} />}
             {t.create}
           </Button>
@@ -1202,13 +1219,14 @@ function CreatePlanDialog({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  appName: string
+  appName?: string
   t: Required<PayAdminDashboardTexts>
   onCreated: () => void
 }) {
   const { client } = usePayContext()
 
   const [name, setName] = useState('')
+  const [planAppName, setPlanAppName] = useState(appName || '')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [currency, setCurrency] = useState('EUR')
@@ -1223,6 +1241,7 @@ function CreatePlanDialog({
   useEffect(() => {
     if (open) {
       setName('')
+      setPlanAppName(appName || '')
       setDescription('')
       setAmount('')
       setCurrency('EUR')
@@ -1232,7 +1251,7 @@ function CreatePlanDialog({
       setSortOrder('')
       setError(null)
     }
-  }, [open])
+  }, [open, appName])
 
   const handleSubmit = useCallback(async () => {
     setSaving(true)
@@ -1245,7 +1264,7 @@ function CreatePlanDialog({
 
       await client.createPlan({
         name,
-        appName,
+        appName: planAppName,
         description: description || undefined,
         amount: Number(amount),
         currency,
@@ -1267,7 +1286,7 @@ function CreatePlanDialog({
   }, [
     client,
     name,
-    appName,
+    planAppName,
     description,
     amount,
     currency,
@@ -1298,6 +1317,18 @@ function CreatePlanDialog({
                 <Label>{t.planName}</Label>
                 <Input value={name} onChange={e => setName(e.target.value)} placeholder="Pro" />
               </Div>
+
+              {/* App Name — only shown when no appName is provided (superadmin mode) */}
+              {!appName && (
+                <Div className={`space-y-2`}>
+                  <Label>{t.promoAppName}</Label>
+                  <Input
+                    value={planAppName}
+                    onChange={e => setPlanAppName(e.target.value)}
+                    placeholder="green-pulse"
+                  />
+                </Div>
+              )}
 
               {/* Amount */}
               <Div className={`space-y-2`}>
@@ -1412,7 +1443,10 @@ function CreatePlanDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t.cancel}
           </Button>
-          <Button onClick={handleSubmit} disabled={saving || !name || !amount || !intervalCount}>
+          <Button
+            onClick={handleSubmit}
+            disabled={saving || !name || !amount || !intervalCount || !planAppName}
+          >
             {saving && <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin mr-2`} />}
             {t.create}
           </Button>
@@ -1426,7 +1460,7 @@ function CreatePlanDialog({
 // Plans Section (used in Subscriptions tab)
 // ========================================
 
-function PlansSection({ appName, t }: { appName: string; t: Required<PayAdminDashboardTexts> }) {
+function PlansSection({ appName, t }: { appName?: string; t: Required<PayAdminDashboardTexts> }) {
   const { client } = usePayContext()
 
   const [plans, setPlans] = useState<Plan[]>([])
@@ -1639,7 +1673,7 @@ function PlansSection({ appName, t }: { appName: string; t: Required<PayAdminDas
 // Promos Tab
 // ========================================
 
-function PromosTab({ appName, t }: { appName: string; t: Required<PayAdminDashboardTexts> }) {
+function PromosTab({ appName, t }: { appName?: string; t: Required<PayAdminDashboardTexts> }) {
   const { client } = usePayContext()
 
   const [promos, setPromos] = useState<Promo[]>([])

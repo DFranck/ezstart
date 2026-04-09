@@ -4,8 +4,7 @@
     "accessDenied": "Access Denied",
     "accessDeniedDescription": "You need administrator privileges to access this page.",
     "tabs": {
-      "users": "Users",
-      "waitlist": "Waitlist"
+      "users": "Users"
     },
     "users": {
       "searchPlaceholder": "Search by email or username...",
@@ -43,25 +42,6 @@
       "manager": "Manager",
       "beta-tester": "Beta Tester",
       "client": "Client"
-    },
-    "waitlist": {
-      "selectApp": "Select app",
-      "columns": {
-        "email": "Email",
-        "status": "Status",
-        "addedAt": "Added At",
-        "invitedAt": "Invited At",
-        "actions": "Actions"
-      },
-      "invite": "Invite",
-      "noWaitlist": "No waitlist entries found.",
-      "inviteSuccess": "Invitation sent successfully.",
-      "inviteError": "Failed to send invitation.",
-      "loading": "Loading waitlist...",
-      "statusPending": "Pending",
-      "statusInvited": "Invited",
-      "statusActivated": "Activated",
-      "statusRejected": "Rejected"
     },
     "dialog": {
       "confirm": "Confirm",

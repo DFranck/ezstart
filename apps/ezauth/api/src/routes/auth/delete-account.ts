@@ -10,6 +10,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getOAuthAccountModel } from '../../models/oauth-account.js'
+import { getRefreshTokenModel } from '../../models/refresh-token.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
@@ -30,14 +31,16 @@ const deleteAccountController = async (req: Request, res: Response) => {
 
     const AuthUser = await getAuthUserModel()
     const OAuthAccount = await getOAuthAccountModel()
+    const RefreshToken = await getRefreshTokenModel()
 
     const user = await AuthUser.findById(userId)
     if (!user) {
       return sendError(res, 'User not found', 404)
     }
 
-    // Cascade delete: OAuth accounts linked to this user
+    // Cascade delete: OAuth accounts and refresh tokens linked to this user
     await OAuthAccount.deleteMany({ userId: user._id })
+    await RefreshToken.deleteMany({ userId: user._id })
 
     // Delete the user
     await AuthUser.findByIdAndDelete(userId)

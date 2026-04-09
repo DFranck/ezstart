@@ -11,7 +11,7 @@ import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
 import { validatePromo, calculateDiscount, incrementUsage } from '../../services/promo.js'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -68,7 +68,8 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 
     // Promo code validation and discount calculation
     let finalAmount = amount
-    let promoMetadata: { promoCode?: string; originalAmount?: number; discountApplied?: number } = {}
+    let promoMetadata: { promoCode?: string; originalAmount?: number; discountApplied?: number } =
+      {}
     let promoId: string | undefined
     let validatedPromo: Awaited<ReturnType<typeof validatePromo>>['promo']
 
@@ -105,13 +106,15 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       },
       successUrl: `${baseUrl}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/purchase/cancel`,
-      discount: validatedPromo ? {
-        type: validatedPromo.discountType,
-        value: validatedPromo.discountValue,
-        duration: validatedPromo.duration,
-        durationInMonths: validatedPromo.durationInMonths,
-        code: promoCode,
-      } : undefined,
+      discount: validatedPromo
+        ? {
+            type: validatedPromo.discountType,
+            value: validatedPromo.discountValue,
+            duration: validatedPromo.duration,
+            durationInMonths: validatedPromo.durationInMonths,
+            code: promoCode,
+          }
+        : undefined,
     })
 
     // Detect live vs test mode from Stripe key
@@ -155,7 +158,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/purchase', authMiddleware, createPurchaseHandler, {
+docRouter.post('/purchase', authMiddleware, populateUserFromToken, createPurchaseHandler, {
   summary: 'Create a purchase checkout session',
   tags: ['Purchases'],
   bodySchema: createPurchaseSchema,

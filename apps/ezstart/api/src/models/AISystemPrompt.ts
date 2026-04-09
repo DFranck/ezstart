@@ -23,6 +23,11 @@ export interface PromptConfig {
   }
 }
 
+export interface IPromptProvider {
+  providerId: string
+  priority: number
+}
+
 export interface IAISystemPrompt {
   key: string
   appName: string
@@ -32,6 +37,7 @@ export interface IAISystemPrompt {
   config?: PromptConfig
   type: PromptType
   provider: ProviderTarget
+  providers?: IPromptProvider[]
   isActive: boolean
   isDefault: boolean
   variables?: string[]
@@ -89,6 +95,15 @@ const aiSystemPromptSchema = new Schema<IAISystemPrompt>(
     isDefault: {
       type: Boolean,
       default: false,
+    },
+    providers: {
+      type: [
+        {
+          providerId: { type: String, required: true },
+          priority: { type: Number, default: 1 },
+        },
+      ],
+      default: [],
     },
     variables: {
       type: [String],
