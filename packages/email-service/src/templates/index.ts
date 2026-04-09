@@ -22,11 +22,24 @@ export function emailVerificationTemplate(verifyUrl: string, appName: string): s
 export function welcomeSetPasswordTemplate(
   setPasswordUrl: string,
   appName: string,
-  username: string
+  username: string,
+  customMessage?: string,
+  promoCode?: string
 ): string {
+  const customMessageHtml = customMessage
+    ? `<div style="margin-bottom: 16px; padding: 12px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;">${customMessage}</div>`
+    : ''
+
+  const promoHtml =
+    !customMessage && promoCode
+      ? `<div style="margin-bottom: 16px; padding: 12px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;">🎁 Promo code <strong>${promoCode}</strong> applied to your account!</div>`
+      : ''
+
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Welcome to ${appName}, ${username}!</h2>
+      ${customMessageHtml}
+      ${promoHtml}
       <p>Your account has been created. To secure it, please set up a password:</p>
       <a href="${setPasswordUrl}" style="display: inline-block; background: #0070f3; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none;">Set My Password</a>
       <p style="color: #666; font-size: 14px; margin-top: 24px;">You can also log in without a password for now, but we recommend setting one for security.</p>

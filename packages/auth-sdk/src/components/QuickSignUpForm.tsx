@@ -38,6 +38,10 @@ export interface QuickSignUpFormProps {
   appName: string
   /** Pre-filled promo code (not shown as input, just sent with signup) */
   promoCode?: string
+  /** Custom email subject override for the welcome email */
+  emailSubject?: string
+  /** Custom message to prepend in the welcome email body */
+  emailBody?: string
   /** Called after successful signup */
   onSuccess?: () => void
   /** Override texts */
@@ -66,7 +70,14 @@ type FormData = {
   email: string
 }
 
-export function QuickSignUpForm({ appName, promoCode, onSuccess, texts }: QuickSignUpFormProps) {
+export function QuickSignUpForm({
+  appName,
+  promoCode,
+  emailSubject,
+  emailBody,
+  onSuccess,
+  texts,
+}: QuickSignUpFormProps) {
   const t = { ...DEFAULT_TEXTS, ...texts }
   const { client } = useAuthContext()
   const store = useAuthStore()
@@ -92,6 +103,8 @@ export function QuickSignUpForm({ appName, promoCode, onSuccess, texts }: QuickS
         email: formData.email,
         app: appName,
         ...(promoCode ? { promoCode } : {}),
+        ...(emailSubject ? { emailSubject } : {}),
+        ...(emailBody ? { emailBody } : {}),
       })
 
       // Auto-login: store tokens + user

@@ -35,6 +35,8 @@ const quickSignupSchema = z.object({
   email: z.string().email('Invalid email format').describe('User email address'),
   app: z.string().min(1, 'App name is required').describe('App requesting signup'),
   promoCode: z.string().optional().describe('Promo code from referral/campaign'),
+  emailSubject: z.string().max(200).optional().describe('Custom email subject override'),
+  emailBody: z.string().max(2000).optional().describe('Custom message to include in the email'),
 })
 
 const quickSignupResponseSchema = z.object({
@@ -70,7 +72,7 @@ const quickSignupController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid quick-signup request', parsed.error.issues)
     }
 
-    const { username, email, app, promoCode } = parsed.data
+    const { username, email, app, promoCode, emailSubject, emailBody } = parsed.data
     const normalizedUsername = username.trim().toLowerCase()
     const normalizedEmail = email.trim().toLowerCase()
 
@@ -134,8 +136,14 @@ const quickSignupController = async (req: Request, res: Response) => {
       await emailService.send({
         to: normalizedEmail,
         from: `${appDisplayName} <noreply@ezstart.xyz>`,
-        subject: `Welcome to ${appDisplayName} — Set up your password`,
-        html: welcomeSetPasswordTemplate(setPasswordUrl, appDisplayName, normalizedUsername),
+        subject: emailSubject || `Welcome to ${appDisplayName} — Set up your password`,
+        html: welcomeSetPasswordTemplate(
+          setPasswordUrl,
+          appDisplayName,
+          normalizedUsername,
+          emailBody,
+          promoCode
+        ),
       })
 
       logger.info({ email: normalizedEmail, app }, 'Welcome email sent after quick-signup')
