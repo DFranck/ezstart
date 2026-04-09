@@ -228,6 +228,20 @@ export class AIClient {
     return this.fetch(`/app-providers/${id}/toggle`, { method: 'PATCH' })
   }
 
+  // === Usage Stats ===
+
+  async getUsageStats(params?: { days?: number }): Promise<{
+    totalRequests: number
+    totalTokens: number
+    estimatedCost: number
+    byProvider: Record<string, { requests: number; tokens: number }>
+  }> {
+    const query = new URLSearchParams()
+    if (this.appName) query.set('appName', this.appName)
+    if (params?.days) query.set('days', String(params.days))
+    return this.fetch(`/usage/stats?${query}`)
+  }
+
   // === Global Providers (superadmin only) ===
 
   async listGlobalProviders(params?: {

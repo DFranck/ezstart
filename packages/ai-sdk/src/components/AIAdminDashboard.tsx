@@ -127,6 +127,16 @@ export interface AIAdminDashboardTexts {
   conversationPreview?: string
   totalConversations?: string
   loadConversationsError?: string
+  // Usage
+  usageTab?: string
+  totalRequests?: string
+  totalTokens?: string
+  estimatedCost?: string
+  byProvider?: string
+  loadUsageError?: string
+  noUsageData?: string
+  requests?: string
+  tokens?: string
   // Pagination
   previous?: string
   next?: string
@@ -224,6 +234,15 @@ const DEFAULT_TEXTS: Required<AIAdminDashboardTexts> = {
   conversationPreview: 'Preview',
   totalConversations: 'Total Conversations',
   loadConversationsError: 'Failed to load conversations',
+  usageTab: 'Usage',
+  totalRequests: 'Total Requests',
+  totalTokens: 'Total Tokens',
+  estimatedCost: 'Estimated Cost',
+  byProvider: 'By Provider',
+  loadUsageError: 'Failed to load usage stats',
+  noUsageData: 'No usage data',
+  requests: 'Requests',
+  tokens: 'Tokens',
   previous: 'Previous',
   next: 'Next',
   allAppsPlaceholder: 'All apps',
@@ -1273,6 +1292,91 @@ function ConversationsTab({ client, t }: { client: AIClient; t: Required<AIAdmin
 }
 
 // ========================================
+// Usage Tab
+// ========================================
+
+interface UsageStatsData {
+  totalRequests: number
+  totalTokens: number
+  estimatedCost: number
+  byProvider: Record<string, { requests: number; tokens: number }>
+}
+
+function UsageTab({ client, t }: { client: AIClient; t: Required<AIAdminDashboardTexts> }) {
+  const [stats, setStats] = useState<UsageStatsData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    client
+      .getUsageStats({ days: 30 })
+      .then(result => setStats(result))
+      .catch(() => toast.error(t.loadUsageError))
+      .finally(() => setLoading(false))
+  }, [client, t.loadUsageError])
+
+  const providerEntries = useMemo(() => {
+    if (!stats?.byProvider) return []
+    return Object.entries(stats.byProvider).sort(([, a], [, b]) => b.requests - a.requests)
+  }, [stats])
+
+  return (
+    <Div className="space-y-4">
+      {/* Stats cards */}
+      <Div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <StatCard label={t.totalRequests} value={stats?.totalRequests ?? 0} loading={loading} />
+        <StatCard
+          label={t.totalTokens}
+          value={stats?.totalTokens?.toLocaleString() ?? '0'}
+          loading={loading}
+        />
+        <StatCard
+          label={t.estimatedCost}
+          value={`$${(stats?.estimatedCost ?? 0).toFixed(4)}`}
+          loading={loading}
+        />
+      </Div>
+
+      {/* By provider breakdown */}
+      <Card className="p-6">
+        <P className="text-sm font-medium mb-4">{t.byProvider}</P>
+        {loading ? (
+          <Div className="space-y-2">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+          </Div>
+        ) : providerEntries.length === 0 ? (
+          <EmptyState message={t.noUsageData} />
+        ) : (
+          <Div className="space-y-2">
+            {providerEntries.map(([providerId, data]) => (
+              <Div
+                key={providerId}
+                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+              >
+                <Div className="flex items-center gap-2">
+                  <Badge variant="outline" size="sm">
+                    {providerId}
+                  </Badge>
+                </Div>
+                <Div className="flex items-center gap-4 text-sm">
+                  <Span className="text-muted-foreground">
+                    {data.requests.toLocaleString()} {t.requests}
+                  </Span>
+                  <Span className="text-muted-foreground">
+                    {data.tokens.toLocaleString()} {t.tokens}
+                  </Span>
+                </Div>
+              </Div>
+            ))}
+          </Div>
+        )}
+      </Card>
+    </Div>
+  )
+}
+
+// ========================================
 // Main Component
 // ========================================
 
@@ -1319,6 +1423,7 @@ export function AIAdminDashboard({
           <TabsTrigger value="prompts">{t.promptsTab}</TabsTrigger>
           <TabsTrigger value="providers">{t.providersTab}</TabsTrigger>
           <TabsTrigger value="conversations">{t.conversationsTab}</TabsTrigger>
+          <TabsTrigger value="usage">{t.usageTab}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="prompts" className="mt-4">
@@ -1331,6 +1436,10 @@ export function AIAdminDashboard({
 
         <TabsContent value="conversations" className="mt-4">
           <ConversationsTab client={client} t={t} />
+        </TabsContent>
+
+        <TabsContent value="usage" className="mt-4">
+          <UsageTab client={client} t={t} />
         </TabsContent>
       </Tabs>
     </Div>
