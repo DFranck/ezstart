@@ -4,23 +4,55 @@ import { sendError } from '../helpers/api-response.js'
 
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i
 
+interface JwtUserPayload {
+  userId: string
+  email?: string
+  username?: string
+  apps?: string[]
+  globalRoles?: string[]
+  appRoles?: Record<string, string[]>
+  permissions?: string[]
+  features?: string[]
+  [key: string]: unknown
+}
+
+interface ExtractResult {
+  userId: string
+  user?: JwtUserPayload
+}
+
+function buildUserFromDecoded(decoded: Record<string, unknown>): JwtUserPayload | undefined {
+  const userId = (decoded.userId || decoded.sub || decoded.id) as string | undefined
+  if (!userId || !OBJECT_ID_REGEX.test(userId)) return undefined
+  return {
+    userId,
+    email: decoded.email as string | undefined,
+    username: decoded.username as string | undefined,
+    apps: decoded.apps as string[] | undefined,
+    globalRoles: decoded.globalRoles as string[] | undefined,
+    appRoles: decoded.appRoles as Record<string, string[]> | undefined,
+    permissions: decoded.permissions as string[] | undefined,
+    features: decoded.features as string[] | undefined,
+  }
+}
+
 /**
  * Extract and validate userId from JWT Bearer token or X-User-Id header fallback.
- * Returns userId if valid, null otherwise.
+ * Returns userId and decoded user payload if available, null otherwise.
  */
-function extractUserId(req: Request, jwtSecret: string): string | null {
+function extractAuth(req: Request, jwtSecret: string): ExtractResult | null {
   // 1. Try Bearer token (JWT signed by EZAuth)
   const authHeader = req.headers.authorization
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7)
     try {
       const decoded = jwt.verify(token, jwtSecret) as Record<string, unknown>
-      const userId = (decoded.userId || decoded.sub || decoded.id) as string | undefined
-      if (userId && OBJECT_ID_REGEX.test(userId)) {
-        return userId
+      const user = buildUserFromDecoded(decoded)
+      if (user) {
+        return { userId: user.userId, user }
       }
     } catch {
-      // Token invalid — fall through to X-User-Id fallback
+      // Token invalid — fall through to cookie fallback
     }
   }
 
@@ -34,19 +66,19 @@ function extractUserId(req: Request, jwtSecret: string): string | null {
   if (cookieToken) {
     try {
       const decoded = jwt.verify(cookieToken, jwtSecret) as Record<string, unknown>
-      const userId = (decoded.userId || decoded.sub || decoded.id) as string | undefined
-      if (userId && OBJECT_ID_REGEX.test(userId)) {
-        return userId
+      const user = buildUserFromDecoded(decoded)
+      if (user) {
+        return { userId: user.userId, user }
       }
     } catch {
       // Cookie token invalid — fall through
     }
   }
 
-  // 3. Fallback: X-User-Id header (legacy / dev only)
+  // 3. Fallback: X-User-Id header (legacy / dev only — no user payload)
   const headerUserId = req.headers['x-user-id'] as string | undefined
   if (headerUserId && OBJECT_ID_REGEX.test(headerUserId)) {
-    return headerUserId
+    return { userId: headerUserId }
   }
 
   return null
@@ -64,21 +96,27 @@ export function createAuthMiddleware(jwtSecret?: string) {
   const secret: string = resolved
 
   function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    const userId = extractUserId(req, secret)
+    const result = extractAuth(req, secret)
 
-    if (!userId) {
+    if (!result) {
       return sendError(res, 'Authentication required', 401)
     }
 
-    req.userId = userId
+    req.userId = result.userId
+    if (result.user) {
+      req.user = result.user
+    }
     next()
   }
 
   function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction) {
-    const userId = extractUserId(req, secret)
+    const result = extractAuth(req, secret)
 
-    if (userId) {
-      req.userId = userId
+    if (result) {
+      req.userId = result.userId
+      if (result.user) {
+        req.user = result.user
+      }
     }
 
     next()
@@ -96,10 +134,8 @@ export function createAuthMiddleware(jwtSecret?: string) {
 export function createRoleMiddleware() {
   return {
     requireAdmin: (req: Request, res: Response, next: NextFunction) => {
-      const user = (
-        req as Request & { user?: { globalRoles?: string[]; appRoles?: Record<string, string[]> } }
-      ).user
-      if (!req.userId && !user) return sendError(res, 'Authentication required', 401)
+      if (!req.userId && !req.user) return sendError(res, 'Authentication required', 401)
+      const user = req.user
       const isAdmin =
         user?.globalRoles?.includes('superadmin') ||
         user?.globalRoles?.includes('admin') ||
@@ -110,10 +146,8 @@ export function createRoleMiddleware() {
       next()
     },
     requireRole: (role: string) => (req: Request, res: Response, next: NextFunction) => {
-      const user = (
-        req as Request & { user?: { globalRoles?: string[]; appRoles?: Record<string, string[]> } }
-      ).user
-      if (!req.userId && !user) return sendError(res, 'Authentication required', 401)
+      if (!req.userId && !req.user) return sendError(res, 'Authentication required', 401)
+      const user = req.user
       const hasRole =
         user?.globalRoles?.includes(role) ||
         Object.values(user?.appRoles || {})

@@ -54,6 +54,7 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     // Attach user to request
     req.user = {
       _id: userId,
+      userId,
       email: user.email,
       username: user.username,
       firstName: user.firstName,
@@ -121,6 +122,7 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
       const userId = user._id.toString()
       req.user = {
         _id: userId,
+        userId,
         email: user.email,
         username: user.username,
         firstName: user.firstName,

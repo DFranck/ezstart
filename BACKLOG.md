@@ -143,49 +143,15 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2.8 — SDK Admin Dashboards (2026-04-06)
 
-90. [ ] auth-sdk: Extraire `<AuthAdminDashboard>` — déplacer user-table, edit-roles-modal, stats depuis ezauth/admin vers auth-sdk/client. Toutes les apps (ezauth, ezstart) importent le même composant. Zéro duplication.
-91. [ ] pay-sdk: Extraire `<PayAdminDashboard>` — déplacer DataTable paiements, stats cards, refund/cancel dialogs depuis ezpay/admin vers pay-sdk/client.
-92. [ ] ai-sdk: Créer `<AIAdminDashboard>` — stats consommation par provider/app/jour, graphique tendances, alerte quota free tier.
+90. [x] auth-sdk: `<AuthAdminDashboard>` — extrait dans auth-sdk/client. Toutes les apps importent le même composant. (done 2026-04-09)
+91. [x] pay-sdk: `<PayAdminDashboard>` — extrait dans pay-sdk/client. (done 2026-04-09)
+92. [x] ai-sdk: `<AIAdminDashboard>` — Prompts CRUD, providers toggle, conversations list, showAppFilter. (done 2026-04-09)
 93. [ ] monitoring: Extraire `<MonitoringDashboard>` — déplacer SystemOverview + hooks depuis ezstart/monitoring vers un package ou export réutilisable.
-94. [ ] ezstart admin: Refactorer les tabs pour importer directement `<AuthAdminDashboard>`, `<PayAdminDashboard>`, `<AIAdminDashboard>`, `<MonitoringDashboard>` depuis les SDKs. Supprimer les copies locales.
+94. [x] ezstart admin: Tabs importent `<AuthAdminDashboard>`, `<PayAdminDashboard>`, `<AIAdminDashboard>`, `<MonitoringTab>` depuis les SDKs. (done 2026-04-09)
 
 #### P2.9 — AI SDK Enhancement (2026-04-06)
 
-95. [ ] ai-sdk cascade/fallback — Si provider A échoue (quota, erreur), fallback auto sur provider B. Config: priority order + max retries. Mode "cascade free tiers".
-96. [ ] ai-sdk usage tracking — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). `trackUsage()` auto dans UnifiedChat.
-97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
-98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
-99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
-100.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
-
-#### P2.8 — SDK Admin Dashboards (2026-04-06)
-
-90. [ ] auth-sdk: Extraire `<AuthAdminDashboard>` — déplacer user-table, edit-roles-modal, stats depuis ezauth/admin vers auth-sdk/client. Toutes les apps (ezauth, ezstart) importent le même composant. Zéro duplication.
-91. [ ] pay-sdk: Extraire `<PayAdminDashboard>` — déplacer DataTable paiements, stats cards, refund/cancel dialogs depuis ezpay/admin vers pay-sdk/client.
-92. [ ] ai-sdk: Créer `<AIAdminDashboard>` — stats consommation par provider/app/jour, graphique tendances, alerte quota free tier.
-93. [ ] monitoring: Extraire `<MonitoringDashboard>` — déplacer SystemOverview + hooks depuis ezstart/monitoring vers un package ou export réutilisable.
-94. [ ] ezstart admin: Refactorer les tabs pour importer directement `<AuthAdminDashboard>`, `<PayAdminDashboard>`, `<AIAdminDashboard>`, `<MonitoringDashboard>` depuis les SDKs. Supprimer les copies locales.
-
-#### P2.9 — AI SDK Enhancement (2026-04-06)
-
-95. [ ] ai-sdk cascade/fallback — Si provider A échoue (quota, erreur), fallback auto sur provider B. Config: priority order + max retries. Mode "cascade free tiers".
-96. [ ] ai-sdk usage tracking — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). `trackUsage()` auto dans UnifiedChat.
-97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
-98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
-99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
-100.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
-
-#### P2.8 — SDK Admin Dashboards (2026-04-06)
-
-90. [ ] auth-sdk: Extraire `<AuthAdminDashboard>` — déplacer user-table, edit-roles-modal, stats depuis ezauth/admin vers auth-sdk/client. Toutes les apps (ezauth, ezstart) importent le même composant. Zéro duplication.
-91. [ ] pay-sdk: Extraire `<PayAdminDashboard>` — déplacer DataTable paiements, stats cards, refund/cancel dialogs depuis ezpay/admin vers pay-sdk/client.
-92. [ ] ai-sdk: Créer `<AIAdminDashboard>` — stats consommation par provider/app/jour, graphique tendances, alerte quota free tier.
-93. [ ] monitoring: Extraire `<MonitoringDashboard>` — déplacer SystemOverview + hooks depuis ezstart/monitoring vers un package ou export réutilisable.
-94. [ ] ezstart admin: Refactorer les tabs pour importer directement `<AuthAdminDashboard>`, `<PayAdminDashboard>`, `<AIAdminDashboard>`, `<MonitoringDashboard>` depuis les SDKs. Supprimer les copies locales.
-
-#### P2.9 — AI SDK Enhancement (2026-04-06)
-
-95. [ ] ai-sdk cascade/fallback — Si provider A échoue (quota, erreur), fallback auto sur provider B. Config: priority order + max retries. Mode "cascade free tiers".
+95. [x] ai-sdk cascade/fallback — Provider cascade par priorité dans le chat. Si provider A échoue, fallback auto sur B. Implémenté dans sendMessage.ts. (done 2026-04-09)
 96. [ ] ai-sdk usage tracking — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). `trackUsage()` auto dans UnifiedChat.
 97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
 98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
@@ -219,6 +185,15 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 121. [ ] Rate limiting per-app — Limiter le nombre de requêtes AI par app (pas juste global IP). Basé sur AppProvider config.
 122. [ ] ai-sdk streaming — Exposer SSE streaming dans le chat endpoint. OpenAIProvider a déjà handleStreaming(). Route + frontend.
 123. [ ] ai-sdk vision support — Support images dans GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
+
+#### P2.12 — AI Intelligent Routing (post-MVP)
+
+124. [ ] Smart provider routing — Router automatiquement chaque message vers le provider le plus adapté dans une même conversation (ex: factuel→gemini, complexe→gpt-4o, vision→gemini). Critères: type de prompt, mots-clés, coût, complexité. User voit une conversation fluide.
+125. [ ] Provider model override dynamique — AppProvider.config.model doit être passé au ProviderRegistry au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
+126. [ ] OpenAI billing setup — Recharger crédits OpenAI pour activer le fallback cascade en prod. Tester le flow complet gemini→openai.
+127. [ ] Anthropic provider — Implémenter AnthropicProvider dans ai-sdk (Claude API). Actuellement `throw new Error('not yet implemented')`.
+128. [ ] GlobalProviderAccess enforcement — Le chat endpoint ne vérifie PAS GlobalProviderAccess avant d'envoyer. Wirer `checkProviderAccess` middleware sur la route chat + filtrer les providers dans la cascade. L'UI app doit aussi masquer les providers non-autorisés (Available Providers filtré par GlobalProviderAccess, pas par ProviderRegistry statique).
+129. [ ] Provider status/health dans l'UI — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
 
 #### P3 — DevOps / Testing
 
