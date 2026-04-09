@@ -152,7 +152,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 #### P2.9 — AI SDK Enhancement (2026-04-06)
 
 95. [x] ai-sdk cascade/fallback — Provider cascade par priorité dans le chat. Si provider A échoue, fallback auto sur B. Implémenté dans sendMessage.ts. (done 2026-04-09)
-96. [ ] ai-sdk usage tracking — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). `trackUsage()` auto dans UnifiedChat.
+96. [x] ai-sdk usage tracking — AIUsage model + trackAIUsage service (fire-and-forget) + wired dans sendMessage.ts. (done 2026-04-09)
 97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
 98. [ ] ai-sdk client components — `<AIChatThread>`, `<AIChatComposer>`, `<AIUsageBadge>`. Pattern identique à auth-sdk/pay-sdk.
 99. [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
@@ -167,7 +167,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 106. [x] ai-sdk provider registry par app — Modèle `AppProvider` + `GlobalProviderAccess`. EZStart autorise, apps activent. Cascade/fallback dans le chat. (done 2026-04-09)
 107. [ ] Dynamic plans — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
 108. [ ] Theme CSS scoping — `[data-app]` selector au lieu de `:root` pour éviter conflits `--brand` quand tous les thèmes sont chargés simultanément.
-109. [ ] Chat UX responsive — Fix sidebar mobile, conversation selection, responsive layout du ThreadLayout. Passe UX complète.
+109. [x] Chat UX responsive — Sidebar toggle gauche, ConversationItem actions mobile, safe-area composer, welcome offset, padding symétrique. (done 2026-04-09)
 110. [x] Green-pulse chat locale — L'IA répond dans la langue de la locale (localeMap dans sendMessage.ts). (done 2026-04-09)
 111. [x] DEPLOY: Railway ezauth-api — Ajouter `--filter @ezstart/fetch-client --filter @ezstart/email-service` au build command. Redeploy. (done 2026-04-08)
 112. [x] Waitlist system removed — Entièrement supprimé (ezauth API/web, auth-sdk, green-pulse). QuickSignup le remplace. (done 2026-04-09)
@@ -178,7 +178,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2.11 — AI Platform Enhancements (post-MVP)
 
-117. [ ] Usage tracking par app — Persister chaque appel IA en MongoDB (app, provider, model, tokensUsed, estimatedCost, userId, date). Dashboard stats dans AIAdminDashboard. Indispensable pour monitorer/facturer.
+117. [x] Usage tracking par app — AIUsage model + service créés. Tracking fire-and-forget dans sendMessage. (done 2026-04-09). Reste: dashboard stats UI dans AIAdminDashboard.
 118. [ ] Alertes quota — Notification (email/toast) quand une app atteint 80% de son quota tokens/coût. Bloquer à 100%.
 119. [ ] API key rotation — Pouvoir changer une clé API provider sans downtime. Hot-reload dans ProviderRegistry.
 120. [ ] Provider health check — Ping providers périodiquement, désactiver auto si down, réactiver quand up. Status dans dashboard.
@@ -192,7 +192,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 125. [ ] Provider model override dynamique — AppProvider.config.model doit être passé au ProviderRegistry au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
 126. [ ] OpenAI billing setup — Recharger crédits OpenAI pour activer le fallback cascade en prod. Tester le flow complet gemini→openai.
 127. [ ] Anthropic provider — Implémenter AnthropicProvider dans ai-sdk (Claude API). Actuellement `throw new Error('not yet implemented')`.
-128. [ ] GlobalProviderAccess enforcement — Le chat endpoint ne vérifie PAS GlobalProviderAccess avant d'envoyer. Wirer `checkProviderAccess` middleware sur la route chat + filtrer les providers dans la cascade. L'UI app doit aussi masquer les providers non-autorisés (Available Providers filtré par GlobalProviderAccess, pas par ProviderRegistry statique).
+128. [x] GlobalProviderAccess enforcement — Chat endpoint vérifie isAppAuthorizedForProvider avant envoi. Explicit providerId → 403 si non autorisé. Cascade filtre les providers non autorisés. (done 2026-04-09). Reste: UI app masquer providers non-autorisés.
 129. [ ] Provider status/health dans l'UI — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
 130. [ ] utm_source tracking — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
 131. [ ] Design system playground — Standardiser et tester tous les tokens/variants (density, size, color) sur tous les composants UI. Étendre le playground Tag existant dans ezstart pour couvrir Card, Button, Input, Badge, etc. Vérifier cohérence compact/default/relaxed sur chaque composant container.
