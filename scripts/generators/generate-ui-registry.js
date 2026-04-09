@@ -23,11 +23,7 @@ const OUTPUT = path.join(
   'apps/ezstart/web/src/app/[locale]/(views)/packages/ui/inspector/registry.ts'
 )
 
-const LEVEL_INDEXES = {
-  base: path.join(UI_PKG, 'base/index.ts'),
-  composed: path.join(UI_PKG, 'composed/index.ts'),
-  complex: path.join(UI_PKG, 'complex/index.ts'),
-}
+const MAIN_INDEX = path.join(UI_PKG, 'index.ts')
 
 const VARIANTS_FILE = path.join(ROOT, 'packages/ui/src/lib/design-system/variants.ts')
 
@@ -90,10 +86,20 @@ function parseIndexExports(indexPath) {
     if (starMatch) {
       const sourcePath = resolveSourceFile(dir, starMatch[1])
       if (sourcePath) {
-        const names = extractExportedNames(sourcePath)
-        for (const name of names) {
-          if (isComponentName(name)) {
-            entries.set(name, sourcePath)
+        // If the resolved file is an index.ts (barrel file), recurse into it
+        if (path.basename(sourcePath) === 'index.ts' || path.basename(sourcePath) === 'index.tsx') {
+          const subEntries = parseIndexExports(sourcePath)
+          for (const [name, subSourcePath] of subEntries) {
+            if (!entries.has(name)) {
+              entries.set(name, subSourcePath)
+            }
+          }
+        } else {
+          const names = extractExportedNames(sourcePath)
+          for (const name of names) {
+            if (isComponentName(name)) {
+              entries.set(name, sourcePath)
+            }
           }
         }
       }
@@ -237,7 +243,7 @@ function extractExportedNames(filePath) {
       .substring(m.index + m[0].length, m.index + m[0].length + 100)
       .trimStart()
     // Accept: React.forwardRef, React.memo, function, arrow function, or factory function calls
-    if (afterEqual.match(/^(React\.(forwardRef|memo)|function|\(|create[A-Z]\w*\()/)) {
+    if (afterEqual.match(/^((React\.)?(forwardRef|memo)|function|\(|create[A-Z]\w*\()/)) {
       names.add(name)
     }
   }
@@ -390,16 +396,73 @@ function isStringUnionType(type) {
 }
 
 /**
- * Extract cva variant keys from a component source file.
+ * Parse string literal union values from a type string.
+ * E.g., "'sm' | 'default' | 'lg'" → ['sm', 'default', 'lg']
+ */
+function parseStringUnionValues(type) {
+  if (!type) return []
+  const matches = type.match(/['"]([^'"]+)['"]/g)
+  if (!matches) return []
+  return matches.map(m => m.replace(/['"]/g, ''))
+}
+
+/**
+ * Extract cva variant keys and their values from a component source file.
  * Tries to match the cva block to the specific component by looking
  * for a const named `{componentName}Variants` or `{lowercase}Variants`.
- * Returns array of token names (variant, size, etc.)
+ * Returns Map<tokenName, string[]> where string[] are the possible values.
  */
 function extractCvaTokens(filePath, componentName) {
   const content = readFile(filePath)
-  if (!content) return []
+  if (!content) return new Map()
 
-  const tokens = []
+  const tokenValues = new Map()
+
+  /**
+   * Extract token names and their sub-keys from a variants brace block.
+   * The block is the content inside variants: { ... }
+   * Each top-level key is a token, and its sub-keys are the possible values.
+   */
+  function extractTokensAndValues(block) {
+    // Walk through at depth 0 to find top-level keys
+    let i = 0
+    let depth = 0
+
+    while (i < block.length) {
+      if (block[i] === '{') {
+        depth++
+        i++
+        continue
+      }
+      if (block[i] === '}') {
+        depth--
+        i++
+        continue
+      }
+
+      if (depth === 0) {
+        const keyMatch = block.substring(i).match(/^(\w+)\s*:\s*\{/)
+        if (keyMatch) {
+          const tokenName = keyMatch[1]
+          const subBlockStart = i + keyMatch[0].length
+          const subBlock = extractBraceBlock(block, subBlockStart)
+          if (subBlock) {
+            if (!['true', 'false'].includes(tokenName)) {
+              const values = extractTopLevelKeys(subBlock)
+              tokenValues.set(tokenName, values)
+            }
+            // Skip past the entire sub-block
+            i = subBlockStart + subBlock.length + 1
+          } else {
+            i += keyMatch[0].length
+          }
+          continue
+        }
+      }
+
+      i++
+    }
+  }
 
   // Try to find a cva block specifically for this component
   // Pattern: const buttonVariants = cva(...) or const cardVariants = cva(...)
@@ -413,15 +476,8 @@ function extractCvaTokens(filePath, componentName) {
   if (specificMatch) {
     const block = extractBraceBlock(content, specificMatch.index + specificMatch[0].length)
     if (block) {
-      const keyRegex = /^\s*(\w+)\s*:\s*\{/gm
-      let keyMatch
-      while ((keyMatch = keyRegex.exec(block)) !== null) {
-        const tokenName = keyMatch[1]
-        if (!['true', 'false'].includes(tokenName)) {
-          tokens.push(tokenName)
-        }
-      }
-      return [...new Set(tokens)]
+      extractTokensAndValues(block)
+      return tokenValues
     }
   }
 
@@ -438,24 +494,13 @@ function extractCvaTokens(filePath, componentName) {
       if (match) {
         const block = extractBraceBlock(content, match.index + match[0].length)
         if (block) {
-          const keyRegex = /^\s*(\w+)\s*:\s*\{/gm
-          let keyMatch
-          while ((keyMatch = keyRegex.exec(block)) !== null) {
-            const tokenName = keyMatch[1]
-            if (!['true', 'false'].includes(tokenName)) {
-              tokens.push(tokenName)
-            }
-          }
+          extractTokensAndValues(block)
         }
       }
     }
   }
 
-  // Also check the component's own props interface for variant-like props
-  // (e.g., CardHeaderProps with size?: 'xs' | 'sm' | ...)
-  // This is handled by the props extraction, so we don't duplicate here
-
-  return [...new Set(tokens)]
+  return tokenValues
 }
 
 /**
@@ -718,8 +763,8 @@ const TAG_TO_COMPONENT = {
 }
 
 /**
- * Extract token names from variants.ts by parsing VariantConfig objects
- * and tagVariantsMeta entries. Returns Map<componentName, string[]>.
+ * Extract token names and their possible values from variants.ts by parsing VariantConfig objects
+ * and tagVariantsMeta entries. Returns Map<componentName, Map<tokenName, string[]>>.
  */
 function extractTokensFromVariantsFile() {
   const content = readFile(VARIANTS_FILE)
@@ -728,7 +773,84 @@ function extractTokensFromVariantsFile() {
     return new Map()
   }
 
-  const componentTokens = new Map() // componentName → Set<tokenName>
+  const componentTokens = new Map() // componentName → Map<tokenName, string[]>
+
+  /**
+   * Extract token keys and their sub-key values from a VariantConfig block.
+   * Returns Map<tokenName, string[]>
+   */
+  function extractTokenValuesFromConfig(configBlock) {
+    const tokenValues = new Map()
+    let i = 0
+    let depth = 0
+
+    while (i < configBlock.length) {
+      if (configBlock[i] === '{') {
+        depth++
+        i++
+        continue
+      }
+      if (configBlock[i] === '}') {
+        depth--
+        i++
+        continue
+      }
+
+      if (depth === 0) {
+        // Handle spread: ...someVar
+        const spreadMatch = configBlock.substring(i).match(/^\.\.\.(\w+)/)
+        if (spreadMatch) {
+          // Resolve spread target values
+          const spreadTarget = spreadMatch[1]
+          const targetRegex = new RegExp(`(?:export\\s+)?const\\s+${spreadTarget}\\s*=\\s*\\{`, 's')
+          const targetMatch = targetRegex.exec(content)
+          if (targetMatch) {
+            const targetBlock = extractBraceBlock(
+              content,
+              targetMatch.index + targetMatch[0].length
+            )
+            if (targetBlock) {
+              const spreadValues = extractTokenValuesFromConfig(targetBlock)
+              for (const [k, v] of spreadValues) {
+                if (!tokenValues.has(k)) {
+                  tokenValues.set(k, v)
+                } else {
+                  // Merge values
+                  const existing = new Set(tokenValues.get(k))
+                  for (const val of v) existing.add(val)
+                  tokenValues.set(k, [...existing])
+                }
+              }
+            }
+          }
+          i += spreadMatch[0].length
+          continue
+        }
+
+        const keyMatch = configBlock.substring(i).match(/^(\w+)\s*:\s*\{/)
+        if (keyMatch) {
+          const tokenName = keyMatch[1]
+          const subBlockStart = i + keyMatch[0].length
+          const subBlock = extractBraceBlock(configBlock, subBlockStart)
+          if (subBlock) {
+            if (!['true', 'false', 'as'].includes(tokenName)) {
+              const values = extractTopLevelKeys(subBlock)
+              tokenValues.set(tokenName, values)
+            }
+            // Skip past the entire sub-block (subBlock length + closing brace)
+            i = subBlockStart + subBlock.length + 1
+          } else {
+            i += keyMatch[0].length
+          }
+          continue
+        }
+      }
+
+      i++
+    }
+
+    return tokenValues
+  }
 
   // --- Part A: Parse named VariantConfig objects ---
   // Pattern: export const xxxVariantConfig = { key1: {...}, key2: {...}, ... }
@@ -740,14 +862,22 @@ function extractTokensFromVariantsFile() {
     const block = extractBraceBlock(content, match.index + match[0].length)
     if (!block) continue
 
-    const keys = resolveSpreadKeys(content, block)
+    const tokenValuesMap = extractTokenValuesFromConfig(block)
 
     // Map to component(s)
     const targets = Array.isArray(componentNames) ? componentNames : [componentNames]
     for (const comp of targets) {
-      if (!componentTokens.has(comp)) componentTokens.set(comp, new Set())
-      for (const key of keys) {
-        componentTokens.get(comp).add(key)
+      if (!componentTokens.has(comp)) componentTokens.set(comp, new Map())
+      const compMap = componentTokens.get(comp)
+      for (const [tokenName, values] of tokenValuesMap) {
+        if (!compMap.has(tokenName)) {
+          compMap.set(tokenName, values)
+        } else {
+          // Merge values
+          const existing = new Set(compMap.get(tokenName))
+          for (const v of values) existing.add(v)
+          compMap.set(tokenName, [...existing])
+        }
       }
     }
   }
@@ -778,23 +908,24 @@ function extractTokensFromVariantsFile() {
         const configBlock = extractBraceBlock(content, configMatch.index + configMatch[0].length)
         if (!configBlock) continue
 
-        const keys = resolveSpreadKeys(content, configBlock)
+        const tokenValuesMap = extractTokenValuesFromConfig(configBlock)
 
-        if (!componentTokens.has(componentName)) componentTokens.set(componentName, new Set())
-        for (const key of keys) {
-          componentTokens.get(componentName).add(key)
+        if (!componentTokens.has(componentName)) componentTokens.set(componentName, new Map())
+        const compMap = componentTokens.get(componentName)
+        for (const [tokenName, values] of tokenValuesMap) {
+          if (!compMap.has(tokenName)) {
+            compMap.set(tokenName, values)
+          } else {
+            const existing = new Set(compMap.get(tokenName))
+            for (const v of values) existing.add(v)
+            compMap.set(tokenName, [...existing])
+          }
         }
       }
     }
   }
 
-  // Convert Sets to arrays
-  const result = new Map()
-  for (const [comp, tokenSet] of componentTokens) {
-    result.set(comp, [...tokenSet])
-  }
-
-  return result
+  return componentTokens
 }
 
 /**
@@ -840,6 +971,32 @@ function extractTopLevelKeys(block) {
   let depth = 0
 
   while (i < block.length) {
+    // Skip string literals (single-quoted, double-quoted, backtick)
+    if (block[i] === "'" || block[i] === '"' || block[i] === '`') {
+      const quote = block[i]
+      i++
+      while (i < block.length && block[i] !== quote) {
+        if (block[i] === '\\') i++ // skip escaped char
+        i++
+      }
+      i++ // skip closing quote
+      continue
+    }
+
+    // Skip line comments
+    if (block[i] === '/' && block[i + 1] === '/') {
+      while (i < block.length && block[i] !== '\n') i++
+      continue
+    }
+
+    // Skip block comments
+    if (block[i] === '/' && block[i + 1] === '*') {
+      i += 2
+      while (i < block.length - 1 && !(block[i] === '*' && block[i + 1] === '/')) i++
+      i += 2
+      continue
+    }
+
     // Skip nested blocks
     if (block[i] === '{') {
       depth++
@@ -849,6 +1006,26 @@ function extractTopLevelKeys(block) {
     if (block[i] === '}') {
       depth--
       i++
+      continue
+    }
+
+    // Skip array literals
+    if (block[i] === '[') {
+      let arrayDepth = 1
+      i++
+      while (i < block.length && arrayDepth > 0) {
+        if (block[i] === '[') arrayDepth++
+        else if (block[i] === ']') arrayDepth--
+        else if (block[i] === "'" || block[i] === '"' || block[i] === '`') {
+          const q = block[i]
+          i++
+          while (i < block.length && block[i] !== q) {
+            if (block[i] === '\\') i++
+            i++
+          }
+        }
+        i++
+      }
       continue
     }
 
@@ -863,8 +1040,9 @@ function extractTopLevelKeys(block) {
         continue
       }
 
-      // Match key: (at top level)
-      const keyMatch = block.substring(i).match(/^(\w+)\s*:/)
+      // Match key: (at top level) — must be preceded by start-of-line/whitespace/comma
+      // to avoid matching Tailwind pseudo-classes like hover: inside strings
+      const keyMatch = block.substring(i).match(/^(\w+)\s*:(?!:)/)
       if (keyMatch) {
         const key = keyMatch[1]
         if (!['true', 'false', 'as'].includes(key)) {
@@ -908,56 +1086,131 @@ function resolveSpreadKeys(content, block) {
   return [...new Set(keys)]
 }
 
+// ─── Compound Component Detection ──────────────────────────
+
+/**
+ * Detect compound component groups: multiple exports from the same source file
+ * sharing a common prefix. E.g., Card, CardHeader, CardContent from card.tsx.
+ *
+ * Returns array of { root: string, children: string[] }
+ */
+function detectCompoundGroups(registry) {
+  // Group components by their source file
+  const bySourceFile = new Map() // sourcePath → [componentName, ...]
+  for (const [name, entry] of Object.entries(registry)) {
+    const src = entry.sourcePath
+    if (!bySourceFile.has(src)) bySourceFile.set(src, [])
+    bySourceFile.get(src).push(name)
+  }
+
+  const groups = []
+
+  for (const [, names] of bySourceFile) {
+    if (names.length < 2) continue
+
+    // Find potential compound roots: a name that is a prefix of other names in the same file.
+    // The suffix after the prefix must start with an uppercase letter (word boundary).
+    // E.g., Card is a prefix of CardHeader (suffix "Header" starts uppercase) ✅
+    //        Tab is NOT a valid root if both Table and Tabs exist (they are separate roots)
+
+    // Sort names shortest-first so we try shorter prefixes first
+    const sorted = [...names].sort((a, b) => a.length - b.length)
+
+    const claimed = new Set() // names already assigned as children
+
+    for (const candidate of sorted) {
+      if (claimed.has(candidate)) continue
+
+      const children = []
+      for (const other of names) {
+        if (other === candidate) continue
+        if (claimed.has(other)) continue
+
+        // Check: other starts with candidate AND the next char is uppercase
+        if (
+          other.length > candidate.length &&
+          other.startsWith(candidate) &&
+          /^[A-Z]/.test(other.charAt(candidate.length))
+        ) {
+          children.push(other)
+        }
+      }
+
+      if (children.length >= 1) {
+        // Mark children as claimed so they don't become roots of other groups
+        for (const child of children) {
+          claimed.add(child)
+        }
+        groups.push({ root: candidate, children: children.sort() })
+      }
+    }
+  }
+
+  return groups
+}
+
 // ─── Main ───────────────────────────────────────────────────
 
 function main() {
   console.log('Design System Inspector — Registry Generator')
   console.log('=============================================\n')
 
-  // Step 1: Scan all three level indexes
-  const allComponents = new Map() // name -> { level, sourcePath }
-  const allComponentNames = new Set()
+  // Step 1: Scan the main components index.ts (source of truth)
+  console.log('Scanning main components index.ts...')
+  const mainEntries = parseIndexExports(MAIN_INDEX)
+  const allComponentNames = new Set(mainEntries.keys())
+  console.log(`  Found ${allComponentNames.size} components.\n`)
 
-  for (const [level, indexPath] of Object.entries(LEVEL_INDEXES)) {
-    console.log(`Scanning ${level} components...`)
-    const entries = parseIndexExports(indexPath)
-    console.log(`  Found ${entries.size} components.\n`)
-
-    for (const [name, sourcePath] of entries) {
-      allComponents.set(name, { level, sourcePath })
-      allComponentNames.add(name)
-    }
-  }
-
-  console.log(`Total components found: ${allComponentNames.size}\n`)
-
-  // Step 2: For each component, extract props, tokens, and children
+  // Step 2: For each component, extract props, tokens, children, and auto-determine level
   const registry = {}
   let processed = 0
   let skipped = 0
 
-  for (const [name, { level, sourcePath }] of allComponents) {
+  for (const [name, sourcePath] of mainEntries) {
     try {
       // Extract props
       const props = extractProps(sourcePath, name)
 
-      // Extract tokens from cva variants
-      const cvaTokens = extractCvaTokens(sourcePath, name)
+      // Extract tokens from cva variants (Map<tokenName, string[]>)
+      const cvaTokenMap = extractCvaTokens(sourcePath, name)
+
+      // Build token values map: tokenName → string[] (values)
+      const tokenValuesMap = new Map(cvaTokenMap)
 
       // Merge: tokens from cva + props that are design tokens
-      const tokenSet = new Set(cvaTokens)
+      const tokenSet = new Set(cvaTokenMap.keys())
       for (const prop of props) {
         if (prop.isDesignToken) {
           tokenSet.add(prop.name)
+          // If prop has string union type, extract values
+          if (!tokenValuesMap.has(prop.name) && isStringUnionType(prop.type)) {
+            tokenValuesMap.set(prop.name, parseStringUnionValues(prop.type))
+          } else if (tokenValuesMap.has(prop.name) && isStringUnionType(prop.type)) {
+            // Merge prop type values with existing cva values
+            const existing = new Set(tokenValuesMap.get(prop.name))
+            for (const v of parseStringUnionValues(prop.type)) existing.add(v)
+            tokenValuesMap.set(prop.name, [...existing])
+          }
         }
       }
       const tokens = [...tokenSet]
 
-      // Extract children
+      // Extract children (other UI components imported by this component)
       const children = extractChildren(sourcePath, allComponentNames)
 
       // Extract composition slots
       const slots = extractSlots(sourcePath, name)
+
+      // Auto-determine level:
+      //   complex  = imports other UI components AND has ReactNode slots
+      //   composed = imports other UI components (no slots required)
+      //   base     = everything else
+      let level = 'base'
+      if (children.length > 0 && slots.length > 0) {
+        level = 'complex'
+      } else if (children.length > 0) {
+        level = 'composed'
+      }
 
       // Generate description
       const description = generateDescription(name, level, tokens, children)
@@ -966,6 +1219,7 @@ function main() {
         name,
         level,
         tokens,
+        tokenValuesMap,
         props,
         children,
         slots,
@@ -988,17 +1242,25 @@ function main() {
   const variantsTokens = extractTokensFromVariantsFile()
   let mergedCount = 0
 
-  for (const [componentName, variantTokenNames] of variantsTokens) {
+  for (const [componentName, variantTokenValuesMap] of variantsTokens) {
     const entry = registry[componentName]
     if (!entry) continue
 
     const existingTokenNames = new Set(entry.tokens.map(t => (typeof t === 'string' ? t : t)))
     let added = 0
-    for (const tokenName of variantTokenNames) {
+    for (const [tokenName, values] of variantTokenValuesMap) {
       if (!existingTokenNames.has(tokenName)) {
         entry.tokens.push(tokenName)
         existingTokenNames.add(tokenName)
         added++
+      }
+      // Always merge values (variants.ts is the priority source)
+      if (values && values.length > 0) {
+        const existing = entry.tokenValuesMap.has(tokenName)
+          ? new Set(entry.tokenValuesMap.get(tokenName))
+          : new Set()
+        for (const v of values) existing.add(v)
+        entry.tokenValuesMap.set(tokenName, [...existing])
       }
     }
     if (added > 0) {
@@ -1010,6 +1272,36 @@ function main() {
 
   console.log(`  Found tokens for ${variantsTokens.size} components in variants.ts`)
   console.log(`  Merged new tokens into ${mergedCount} registry entries`)
+
+  // Step 2c: Detect compound components (multiple exports from the same source file sharing a prefix)
+  console.log('\nDetecting compound component groups...')
+  const compoundGroups = detectCompoundGroups(registry)
+  let compoundCount = 0
+
+  for (const { root, children } of compoundGroups) {
+    const entry = registry[root]
+    if (!entry) continue
+
+    // Upgrade root level to "composed" unless it's already "complex"
+    if (entry.level === 'base') {
+      entry.level = 'composed'
+    }
+
+    // Populate children array (merge with any existing children from import-based detection)
+    const existingChildren = new Set(entry.children)
+    for (const child of children) {
+      existingChildren.add(child)
+    }
+    entry.children = [...existingChildren]
+
+    // Regenerate description with updated level and children
+    entry.description = generateDescription(entry.name, entry.level, entry.tokens, entry.children)
+
+    compoundCount++
+    console.log(`  ${root} → [${children.join(', ')}]`)
+  }
+
+  console.log(`  Detected ${compoundCount} compound component groups`)
 
   // Step 3: Build popular chains from components with children
   const popularChains = buildPopularChains(registry)
@@ -1124,7 +1416,16 @@ function generateOutput(registry, popularChains) {
   function formatEntry([name, entry]) {
     const tokens =
       entry.tokens.length > 0
-        ? `[${entry.tokens.map(t => `{ name: '${t}', category: '${categorizeToken(t)}' }`).join(', ')}]`
+        ? `[${entry.tokens
+            .map(t => {
+              const values = entry.tokenValuesMap && entry.tokenValuesMap.get(t)
+              const valuesStr =
+                values && values.length > 0
+                  ? `, values: [${values.map(v => `'${v}'`).join(', ')}]`
+                  : ''
+              return `{ name: '${t}', category: '${categorizeToken(t)}'${valuesStr} }`
+            })
+            .join(', ')}]`
         : '[]'
     const children =
       entry.children.length > 0 ? `[${entry.children.map(c => `'${c}'`).join(', ')}]` : '[]'
@@ -1165,6 +1466,7 @@ export type TokenCategory = 'structural' | 'visual'
 export type TokenInfo = {
   name: string
   category: TokenCategory
+  values?: string[]
 }
 
 export type PropInfo = {

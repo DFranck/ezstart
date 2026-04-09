@@ -81,18 +81,6 @@
       "import": "./dist/components/index.js",
       "types": "./dist/components/index.d.ts"
     },
-    "./components/base": {
-      "import": "./dist/components/base/index.js",
-      "types": "./dist/components/base/index.d.ts"
-    },
-    "./components/composed": {
-      "import": "./dist/components/composed/index.js",
-      "types": "./dist/components/composed/index.d.ts"
-    },
-    "./components/complex": {
-      "import": "./dist/components/complex/index.js",
-      "types": "./dist/components/complex/index.d.ts"
-    },
     "./hooks": {
       "import": "./dist/hooks/index.js",
       "types": "./dist/hooks/index.d.ts"

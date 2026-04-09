@@ -2,6 +2,7 @@ import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { badgeVariants } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
 /**
  * Badge Component - Display status, count, or label
@@ -59,7 +60,7 @@ export interface BadgeProps
 function Badge({
   className,
   variant,
-  size,
+  size: sizeProp,
   circle,
   circleSize,
   dot,
@@ -67,6 +68,8 @@ function Badge({
   children,
   ...props
 }: BadgeProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size) as VariantProps<typeof badgeVariants>['size']
   const dotColor = variant ? dotVariantClasses[variant] : dotVariantClasses.default
 
   // When circle=true, use circleSize instead of size

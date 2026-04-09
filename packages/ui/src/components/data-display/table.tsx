@@ -2,6 +2,7 @@ import { ComponentProps, forwardRef } from 'react'
 import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { type VariantProps } from 'class-variance-authority'
+import { DesignTokenProvider } from '../../lib/design-system/DesignTokenContext'
 import { tableVariants } from '../../lib/design-system/variants'
 
 /**
@@ -46,9 +47,11 @@ export interface TableProps extends ComponentProps<'table'>, VariantProps<typeof
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ className, variant, size, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-      <table ref={ref} className={cn(tableVariants({ variant, size }), className)} {...props} />
-    </div>
+    <DesignTokenProvider size={size ?? 'default'}>
+      <div className="relative w-full overflow-auto">
+        <table ref={ref} className={cn(tableVariants({ variant, size }), className)} {...props} />
+      </div>
+    </DesignTokenProvider>
   )
 )
 Table.displayName = 'Table'

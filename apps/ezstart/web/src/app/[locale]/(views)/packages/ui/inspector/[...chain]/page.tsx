@@ -142,6 +142,13 @@ export default function InspectorChainPage({
               </Link>
             </Div>
           ))}
+          {chainEntries.length === 1 && chainEntries[0] && (
+            <Link href={`/${locale}/packages/ui/inspector/explorer/${chainEntries[0].name}`}>
+              <Badge variant="outline" size="sm" className="cursor-pointer hover:bg-accent">
+                View tree
+              </Badge>
+            </Link>
+          )}
         </Div>
 
         {unknownNames.length > 0 && (
@@ -240,10 +247,18 @@ export default function InspectorChainPage({
         </Div>
       </Div>
 
-      {/* Add to chain — suggest children of last component */}
+      {/* Add to chain — suggest composable children of last component */}
       {(() => {
         const lastEntry = chainEntries[chainEntries.length - 1]
-        if (!lastEntry?.children || lastEntry.children.length === 0) return null
+        if (!lastEntry) return null
+
+        // Prefer slot expectedComponents (composition API) over children (internal imports)
+        const hasSlots = lastEntry.slots && lastEntry.slots.length > 0
+        const composableChildren = hasSlots
+          ? [...new Set(lastEntry.slots.flatMap(s => s.expectedComponents))]
+          : (lastEntry.children ?? [])
+
+        if (composableChildren.length === 0) return null
 
         const currentChainPath = chainEntries.map(e => e.name).join('/')
 
@@ -254,26 +269,35 @@ export default function InspectorChainPage({
                 Add to Chain
               </H2>
               <P className="text-xs text-muted-foreground">
-                Suggested children of {lastEntry.name}
+                Composable children of {lastEntry.name}
               </P>
             </CardHeader>
             <CardContent>
               <Div className="flex flex-wrap gap-2">
-                {lastEntry.children.map(childName => {
+                {composableChildren.map(childName => {
                   const childEntry = getComponent(childName)
                   const variant = childEntry
                     ? levelBadgeVariant[childEntry.level]
                     : ('secondary' as const)
+                  // Show required/optional from slot info
+                  const slot = hasSlots
+                    ? lastEntry.slots.find(s => s.expectedComponents.includes(childName))
+                    : undefined
                   return (
                     <Link
                       key={childName}
                       href={`/${locale}/packages/ui/inspector/${currentChainPath}/${childName}`}
                     >
                       <Badge
-                        variant={variant}
+                        variant={slot?.required ? 'default' : variant}
                         className="cursor-pointer hover:opacity-80 transition-opacity px-3 py-1.5"
                       >
                         + {childName}
+                        {slot && (
+                          <Span className="ml-1 text-[10px] opacity-70">
+                            {slot.required ? '(required)' : '(optional)'}
+                          </Span>
+                        )}
                       </Badge>
                     </Link>
                   )

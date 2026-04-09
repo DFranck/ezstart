@@ -77,6 +77,13 @@ export * from './animated-icon-toggle'
 export * from './burger'
 export * from './button'
 
+// Design System
+export {
+  DesignTokenProvider,
+  useDesignTokens,
+  type DesignTokens,
+} from '../lib/design-system/DesignTokenContext'
+
 // Existing subdirectories
 export * from './icon'
 export * from './landing'

@@ -2,6 +2,7 @@ import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
+import { DesignTokenProvider, useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { paddingX, gap } from '../../lib/design-system/tokens'
 import {
   cardVariants,
@@ -34,13 +35,15 @@ interface CardProps extends React.ComponentProps<'div'>, VariantProps<typeof car
 
 function Card({ className, variant, size, interactive, hover, ...props }: CardProps) {
   return (
-    <div
-      data-slot="card"
-      className={cn(cardVariants({ variant, size, interactive, hover }), className)}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      {...props}
-    />
+    <DesignTokenProvider size={size ?? 'default'}>
+      <div
+        data-slot="card"
+        className={cn(cardVariants({ variant, size, interactive, hover }), className)}
+        role={interactive ? 'button' : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        {...props}
+      />
+    </DesignTokenProvider>
   )
 }
 
@@ -48,7 +51,10 @@ interface CardHeaderProps extends React.ComponentProps<'div'> {
   size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
 }
 
-function CardHeader({ className, size = 'default', ...props }: CardHeaderProps) {
+function CardHeader({ className, size: sizeProp, ...props }: CardHeaderProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'default') as 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+
   const sizeClasses = {
     ...cardHeaderVariantConfig.size,
     xs: cn(paddingX.default, gap.tight),
@@ -102,7 +108,10 @@ interface CardContentProps extends React.ComponentProps<'div'> {
   size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
 }
 
-function CardContent({ className, size = 'default', ...props }: CardContentProps) {
+function CardContent({ className, size: sizeProp, ...props }: CardContentProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'default') as 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+
   const sizeClasses = {
     ...cardContentVariantConfig.size,
     xs: paddingX.sm,
@@ -116,7 +125,10 @@ interface CardFooterProps extends React.ComponentProps<'div'> {
   size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
 }
 
-function CardFooter({ className, size = 'default', ...props }: CardFooterProps) {
+function CardFooter({ className, size: sizeProp, ...props }: CardFooterProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'default') as 'xs' | 'sm' | 'default' | 'lg' | 'xl'
+
   const sizeClasses = {
     ...cardContentVariantConfig.size,
     xs: paddingX.sm,
