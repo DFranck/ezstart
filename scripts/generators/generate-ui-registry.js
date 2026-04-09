@@ -457,6 +457,94 @@ function extractCvaTokens(filePath, componentName) {
 }
 
 /**
+ * Extract ReactNode composition slots from a component's props.
+ * Detects props whose type contains ReactNode, React.ReactNode, ReactElement, or JSX.Element.
+ * Returns array of SlotInfo objects.
+ */
+function extractSlots(filePath, componentName) {
+  const content = readFile(filePath)
+  if (!content) return []
+
+  const slots = []
+
+  // Find the props type/interface block (same logic as extractProps)
+  const propsPatterns = [
+    new RegExp(`(?:type|interface)\\s+${componentName}Props[^{]*\\{`, 's'),
+    /(?:type|interface)\s+(\w+Props)[^{]*\{/s,
+  ]
+
+  let propsBlock = null
+
+  for (const pattern of propsPatterns) {
+    const regex = new RegExp(
+      pattern.source,
+      pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g'
+    )
+    regex.lastIndex = 0
+    const match = regex.exec(content)
+    if (match) {
+      const startIdx = match.index + match[0].length
+      propsBlock = extractBraceBlock(content, startIdx)
+      if (propsBlock) break
+    }
+  }
+
+  // Also check inline type in function signature
+  if (!propsBlock) {
+    const inlineMatch = content.match(
+      new RegExp(`function\\s+${componentName}\\s*\\(\\s*\\{[^}]*\\}\\s*:\\s*[^{]*\\{`, 's')
+    )
+    if (inlineMatch) {
+      const startIdx = inlineMatch.index + inlineMatch[0].length
+      propsBlock = extractBraceBlock(content, startIdx)
+    }
+  }
+
+  if (!propsBlock) return []
+
+  // Match props whose type contains ReactNode, React.ReactNode, ReactElement, or JSX.Element
+  const slotRegex = /^\s*(\w+)(\??)\s*:\s*([^\n]+)/gm
+  let match
+  const seen = new Set()
+
+  while ((match = slotRegex.exec(propsBlock)) !== null) {
+    const [, name, optional, rawType] = match
+
+    if (seen.has(name)) continue
+    seen.add(name)
+
+    // Skip non-prop lines
+    if (!name || /^[*\/]/.test(name)) continue
+
+    // Clean up the type
+    const type = rawType
+      .trim()
+      .replace(/\/\/.*$/, '')
+      .replace(/,\s*$/, '')
+      .replace(/;\s*$/, '')
+      .trim()
+
+    // Check if type contains ReactNode/ReactElement/JSX.Element
+    const isReactNodeType = /React(?:\.)?Node|ReactElement|JSX\.Element/.test(type)
+    if (!isReactNodeType) continue
+
+    // Skip className, style, ref, key (already excluded but just in case)
+    if (['className', 'style', 'ref', 'key'].includes(name)) continue
+
+    // Determine if this is a render prop (function returning ReactNode) vs a composition slot
+    const isRenderProp = name.startsWith('render') || /^\(.*\)\s*=>\s*/.test(type)
+
+    slots.push({
+      name,
+      required: optional !== '?',
+      isRenderProp,
+    })
+  }
+
+  return slots
+}
+
+/**
  * Extract children components by scanning imports from other UI components.
  * Cross-references with all known component names.
  */
@@ -582,6 +670,9 @@ function main() {
       // Extract children
       const children = extractChildren(sourcePath, allComponentNames)
 
+      // Extract composition slots
+      const slots = extractSlots(sourcePath, name)
+
       // Generate description
       const description = generateDescription(name, level, tokens, children)
 
@@ -591,6 +682,7 @@ function main() {
         tokens,
         props,
         children,
+        slots,
         description,
         sourcePath: toRelativePath(sourcePath),
       }
@@ -703,6 +795,14 @@ function generateOutput(registry, popularChains) {
     return `[\n${items.join(',\n')},\n    ]`
   }
 
+  function formatSlots(slots) {
+    if (slots.length === 0) return '[]'
+    const items = slots.map(s => {
+      return `      { name: '${s.name}', required: ${s.required}, isRenderProp: ${s.isRenderProp} }`
+    })
+    return `[\n${items.join(',\n')},\n    ]`
+  }
+
   function formatEntry([name, entry]) {
     const tokens =
       entry.tokens.length > 0
@@ -711,6 +811,7 @@ function generateOutput(registry, popularChains) {
     const children =
       entry.children.length > 0 ? `[${entry.children.map(c => `'${c}'`).join(', ')}]` : '[]'
     const props = formatProps(entry.props)
+    const slots = formatSlots(entry.slots)
 
     return `  ${name}: {
     name: '${name}',
@@ -718,6 +819,7 @@ function generateOutput(registry, popularChains) {
     tokens: ${tokens},
     props: ${props},
     children: ${children},
+    slots: ${slots},
     description: '${escapeString(entry.description)}',
     sourcePath: '${entry.sourcePath}',
   }`
@@ -754,12 +856,19 @@ export type PropInfo = {
   isDesignToken: boolean
 }
 
+export type SlotInfo = {
+  name: string
+  required: boolean
+  isRenderProp: boolean
+}
+
 export type ComponentEntry = {
   name: string
   level: ComponentLevel
   tokens: TokenInfo[]
   props: PropInfo[]
   children: string[]
+  slots: SlotInfo[]
   description: string
   sourcePath: string
 }

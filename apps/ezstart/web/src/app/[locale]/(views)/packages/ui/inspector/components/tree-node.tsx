@@ -7,6 +7,7 @@ import {
   getStructuralTokens,
   getVisualTokens,
   type ComponentEntry,
+  type SlotInfo,
   type TokenInfo,
 } from '../registry'
 import { computeCompatibility, type ChainItem } from './inspector-preview'
@@ -95,6 +96,8 @@ export function TreeNode({
   const parentEntry = parentName ? getComponent(parentName) : undefined
   const badgeVariant = LEVEL_BADGE_VARIANT[entry.level] ?? 'secondary'
   const hasChildren = entry.children.length > 0 && !isCircular
+  const hasSlots = entry.slots.length > 0
+  const hasAnyChildren = hasChildren || hasSlots
 
   // Collect token info for this node
   const structuralTokens = getStructuralTokens(entry.tokens)
@@ -113,7 +116,7 @@ export function TreeNode({
         <Div className="flex-1 min-w-0 py-1 space-y-1">
           <Div className="flex items-center gap-1.5 flex-wrap">
             {/* Collapse toggle */}
-            {hasChildren && (
+            {hasAnyChildren && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -168,28 +171,83 @@ export function TreeNode({
         </Div>
       </Div>
 
-      {/* Children */}
-      {hasChildren && !collapsed && (
+      {/* Children + Slots */}
+      {hasAnyChildren && !collapsed && (
         <Div>
-          {entry.children.map((childName, index) => {
-            const childIsLast = index === entry.children.length - 1
-            const nextAncestors = [...ancestors, !isLast]
+          {/* Composition slots FIRST — this is the real architecture */}
+          {hasSlots &&
+            entry.slots.map((slot, index) => {
+              const slotIsLast = index === entry.slots.length - 1 && !hasChildren
+              const nextAncestors = [...ancestors, !isLast]
 
-            return (
-              <TreeNode
-                key={`${componentName}-${childName}-${index}`}
-                componentName={childName}
-                parentName={componentName}
-                tokens={tokens}
-                depth={depth + 1}
-                visited={nextVisited}
-                isLast={childIsLast}
-                ancestors={nextAncestors}
-              />
-            )
-          })}
+              return (
+                <SlotNode
+                  key={`${componentName}-slot-${slot.name}`}
+                  slot={slot}
+                  ancestors={nextAncestors}
+                  isLast={slotIsLast}
+                />
+              )
+            })}
+
+          {/* Imported children — internal implementation detail */}
+          {hasChildren && (
+            <InternalChildren
+              entry={entry}
+              componentName={componentName}
+              tokens={tokens}
+              depth={depth}
+              visited={nextVisited}
+              isLast={!hasSlots}
+              ancestors={[...ancestors, !isLast]}
+            />
+          )}
+
+          {/* Slots already rendered above */}
         </Div>
       )}
+    </Div>
+  )
+}
+
+/**
+ * Renders a composition slot node in the tree.
+ * Slots are ReactNode props that accept external content via composition.
+ */
+function SlotNode({
+  slot,
+  ancestors,
+  isLast,
+}: {
+  slot: SlotInfo
+  ancestors: boolean[]
+  isLast: boolean
+}) {
+  return (
+    <Div className="flex items-start gap-0">
+      <TreeConnector ancestors={ancestors} isLast={isLast} />
+
+      <Div className="flex items-center gap-1.5 py-1">
+        <Span className="text-sm" aria-hidden="true">
+          {slot.isRenderProp ? '\uD83D\uDD27' : '\uD83D\uDCE6'}
+        </Span>
+
+        <Span
+          className={`font-mono text-sm ${slot.required ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}
+        >
+          {slot.name}
+        </Span>
+
+        <Badge variant="secondary" size="sm">
+          <Span className="text-[10px]">{slot.isRenderProp ? 'render prop' : 'slot'}</Span>
+        </Badge>
+
+        {slot.required && (
+          <Badge variant="outline" size="sm">
+            <Span className="text-[10px] text-destructive">required</Span>
+          </Badge>
+        )}
+      </Div>
     </Div>
   )
 }
@@ -230,6 +288,76 @@ function TreeConnector({ ancestors, isLast }: { ancestors: boolean[]; isLast: bo
       >
         {'\u2500'}
       </Span>
+    </Div>
+  )
+}
+
+/**
+ * Collapsible section for internally imported children.
+ * These are implementation details, not composition architecture.
+ * De-emphasized visually (muted, collapsed by default).
+ */
+function InternalChildren({
+  entry,
+  componentName,
+  tokens,
+  depth,
+  visited,
+  isLast,
+  ancestors,
+}: {
+  entry: ComponentEntry
+  componentName: string
+  tokens: Record<string, string>
+  depth: number
+  visited: Set<string>
+  isLast: boolean
+  ancestors: boolean[]
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <Div className="space-y-0">
+      <Div className="flex items-start gap-0">
+        <TreeConnector ancestors={ancestors} isLast={isLast} />
+        <Div className="flex items-center gap-1.5 py-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+            onClick={() => setExpanded(!expanded)}
+          >
+            <Span className="text-xs">{expanded ? '\u25BC' : '\u25B6'}</Span>
+          </Button>
+          <Span className="text-sm" aria-hidden="true">
+            {'\uD83D\uDD27'}
+          </Span>
+          <Span className="text-muted-foreground text-sm">internal ({entry.children.length})</Span>
+          <Badge variant="secondary" size="sm">
+            <Span className="text-[10px]">implementation detail</Span>
+          </Badge>
+        </Div>
+      </Div>
+
+      {expanded &&
+        entry.children.map((childName, index) => {
+          const childIsLast = index === entry.children.length - 1
+          const nextAncestors = [...ancestors, !isLast]
+
+          return (
+            <Div key={`${componentName}-${childName}-${index}`} className="opacity-60">
+              <TreeNode
+                componentName={childName}
+                parentName={componentName}
+                tokens={tokens}
+                depth={depth + 1}
+                visited={visited}
+                isLast={childIsLast}
+                ancestors={nextAncestors}
+              />
+            </Div>
+          )
+        })}
     </Div>
   )
 }

@@ -3,7 +3,7 @@
 import { use, useMemo, useState } from 'react'
 import { Badge, Card, CardContent, CardHeader, Div, H1, H2, P, Span } from '@ezstart/ui/components'
 import Link from 'next/link'
-import { getComponent, type TokenInfo } from '../../registry'
+import { getComponent, type TokenInfo, type SlotInfo } from '../../registry'
 import { InspectorControls } from '../../components/inspector-controls'
 import { TreeNode, collectAllTokens } from '../../components/tree-node'
 
@@ -13,6 +13,53 @@ function getDefaultTokenValues(tokens: TokenInfo[]): Record<string, string> {
     defaults[token.name] = 'default'
   }
   return defaults
+}
+
+function CompositionDiagnostic({
+  entry,
+}: {
+  entry: { level: string; slots: SlotInfo[]; children: string[] }
+}) {
+  const isComplex = entry.level === 'complex'
+  const hasSlots = entry.slots.length > 0
+  const hasImportedChildren = entry.children.length > 0
+  const compositionSlots = entry.slots.filter(s => !s.isRenderProp)
+  const renderProps = entry.slots.filter(s => s.isRenderProp)
+
+  // Complex with no slots at all = tightly coupled
+  if (isComplex && !hasSlots && hasImportedChildren) {
+    return (
+      <Div className="mt-1.5">
+        <Badge variant="warning" size="sm">
+          <Span className="text-[10px]">No composition slots — may be tightly coupled</Span>
+        </Badge>
+      </Div>
+    )
+  }
+
+  // Show composition summary when slots exist
+  if (hasSlots) {
+    return (
+      <Div className="mt-1.5 flex flex-wrap gap-1">
+        {compositionSlots.length > 0 && (
+          <Badge variant="info" size="sm">
+            <Span className="text-[10px]">
+              {compositionSlots.length} slot{compositionSlots.length > 1 ? 's' : ''}
+            </Span>
+          </Badge>
+        )}
+        {renderProps.length > 0 && (
+          <Badge variant="secondary" size="sm">
+            <Span className="text-[10px]">
+              {renderProps.length} render prop{renderProps.length > 1 ? 's' : ''}
+            </Span>
+          </Badge>
+        )}
+      </Div>
+    )
+  }
+
+  return null
 }
 
 export default function TreeExplorerPage({
@@ -150,6 +197,20 @@ export default function TreeExplorerPage({
                   Circular reference, recursion stopped
                 </Span>
               </Div>
+              <Div className="flex items-center gap-2">
+                <Span className="text-sm">&#x1F4E6;</Span>
+                <Badge variant="secondary" size="sm">
+                  slot
+                </Badge>
+                <Span className="text-xs text-muted-foreground">ReactNode composition slot</Span>
+              </Div>
+              <Div className="flex items-center gap-2">
+                <Span className="text-sm">&#x1F527;</Span>
+                <Badge variant="secondary" size="sm">
+                  render prop
+                </Badge>
+                <Span className="text-xs text-muted-foreground">Function returning ReactNode</Span>
+              </Div>
             </CardContent>
           </Card>
         </Div>
@@ -163,7 +224,11 @@ export default function TreeExplorerPage({
               </H2>
               <P className="text-xs text-muted-foreground">
                 {entry.children.length} direct children
+                {entry.slots.length > 0 &&
+                  ` \u00B7 ${entry.slots.length} composition slot${entry.slots.length > 1 ? 's' : ''}`}
               </P>
+              {/* Composition diagnostic */}
+              <CompositionDiagnostic entry={entry} />
             </CardHeader>
             <CardContent>
               <Div className="font-mono text-sm overflow-x-auto">
