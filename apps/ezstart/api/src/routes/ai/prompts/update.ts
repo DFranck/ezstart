@@ -35,6 +35,15 @@ const UpdatePromptBodySchema = z.object({
   isActive: z.boolean().optional().describe('Whether prompt is active'),
   isDefault: z.boolean().optional().describe('Whether this is the default prompt'),
   variables: z.array(z.string()).optional().describe('Template variable names'),
+  providers: z
+    .array(
+      z.object({
+        providerId: z.string().min(1),
+        priority: z.number().min(1).max(99),
+      })
+    )
+    .optional()
+    .describe('Provider assignments with priority'),
 })
 
 export const updatePromptRegistry = new OpenAPIRegistry()
@@ -75,9 +84,7 @@ docRouter.patch(
       }
 
       Object.assign(prompt, body, {
-        updatedBy:
-          (req as unknown as Record<string, unknown> & { user?: { email?: string } }).user?.email ||
-          'system',
+        updatedBy: req.user?.email || 'system',
       })
 
       await prompt.save()

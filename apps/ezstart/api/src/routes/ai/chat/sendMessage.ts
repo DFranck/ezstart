@@ -204,6 +204,9 @@ sendMessageRouter.post(
         } else if (error.message.includes('quota') || error.message.includes('rate limit')) {
           statusCode = 429
           errorMessage = 'AI service quota exceeded. Please try again later.'
+        } else if (error.message.includes('does not exist') || error.message.includes('model')) {
+          statusCode = 400
+          errorMessage = 'AI model not available. Provider configuration may need updating.'
         } else if (error.message.includes('API key') || error.message.includes('authentication')) {
           statusCode = 500
           errorMessage = 'AI service configuration error. Please contact support.'

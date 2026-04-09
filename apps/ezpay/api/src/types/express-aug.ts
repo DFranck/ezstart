@@ -1,10 +1,2 @@
-import 'express'
-import type { JwtUser } from '../middleware/auth.js'
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: JwtUser
-    }
-  }
-}
+// Express Request augmentation is now provided by @ezstart/express-core
+// This file is kept empty to avoid breaking imports
