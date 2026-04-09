@@ -59,7 +59,7 @@ function EarthDayContent() {
       <Div className="absolute inset-0 bg-black/40" />
 
       {/* Content */}
-      <Div className="relative z-10 flex flex-col items-center w-full max-w-sm">
+      <Div className="relative z-10 flex flex-col items-center w-full">
         {/* Logo */}
         <Div className="mb-4">
           <Image
@@ -72,13 +72,13 @@ function EarthDayContent() {
         </Div>
 
         {/* Title */}
-        <H1 className="text-xl sm:text-2xl font-bold text-white text-center mb-1">
+        <H1 className="text-xl sm:text-3xl font-bold text-white text-center mb-1 max-w-lg">
           {t('hero.title')}
         </H1>
         <P className="text-sm text-white/70 text-center mb-6">{t('hero.subtitle')}</P>
 
         {/* Auth */}
-        <Div className="w-full">
+        <Div className="w-full max-w-sm">
           <SignedOut>
             <Card variant="floating" className="bg-background/90 backdrop-blur-md border-white/10">
               <CardContent className="p-5">
