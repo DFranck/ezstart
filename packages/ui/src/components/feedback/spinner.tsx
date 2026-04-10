@@ -1,8 +1,16 @@
+'use client'
+
 import { cn } from '../../lib/utils'
 import { spinnerVariantConfig } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
-export type SpinnerSize = 'xs' | 'sm' | 'default' | 'lg' | 'xl' | /** @deprecated Use 'default' instead */ 'md'
+export type SpinnerSize =
+  | 'xs'
+  | 'sm'
+  | 'default'
+  | 'lg'
+  | 'xl'
+  | /** @deprecated Use 'default' instead */ 'md'
 
 export interface SpinnerProps {
   /** Size of the spinner */

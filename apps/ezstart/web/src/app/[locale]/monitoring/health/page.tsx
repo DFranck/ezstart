@@ -7,6 +7,7 @@ import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 import { MetricsOverview } from '../components/MetricsOverview'
 import { TabScore } from '../components/TabScore'
 import { useCountdown } from '../hooks/useCountdown'
@@ -15,12 +16,14 @@ import { useSocket } from '../hooks/useSocket'
 import { calculateOverallHealth, getMetricsData } from '../lib/utils'
 import type { ProjectHealth } from '@ezstart/monitoring'
 import { ProjectCard } from './components/ProjectCard'
+import { TrendingMetrics } from './components/TrendingMetrics'
 
 function HealthMonitoringContent() {
   const { isDesktop } = useDevice()
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
+  const [selectedProject, setSelectedProject] = useState<string | null>(null)
 
   // Fetch projects data
   const { data: projectsData, isLoading, error, isFetching } = useMonitoringProjects()
@@ -115,7 +118,13 @@ function HealthMonitoringContent() {
 
         <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {(projects as unknown as ProjectHealth[]).map(project => (
-            <ProjectCard key={project.id} project={project} />
+            <Div
+              key={project.id}
+              className="cursor-pointer"
+              onClick={() => setSelectedProject(prev => (prev === project.id ? null : project.id))}
+            >
+              <ProjectCard project={project} isSelected={selectedProject === project.id} />
+            </Div>
           ))}
         </Div>
 
@@ -125,6 +134,19 @@ function HealthMonitoringContent() {
           </Div>
         )}
       </Section>
+
+      {/* Trending Metrics for selected project */}
+      {selectedProject && (
+        <Section size="full" className="max-w-7xl">
+          <TrendingMetrics
+            projectId={selectedProject}
+            projectName={
+              (projects as unknown as ProjectHealth[]).find(p => p.id === selectedProject)?.name ||
+              selectedProject
+            }
+          />
+        </Section>
+      )}
     </>
   )
 }

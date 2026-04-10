@@ -16,12 +16,14 @@ import {
   Span,
   UptimeGraph,
 } from '@ezstart/ui/components'
+import { cn } from '@ezstart/ui/lib'
 import { useQuery } from '@tanstack/react-query'
 import { callApi } from '@/config/api'
 import Link from 'next/link'
 
 interface ProjectCardProps {
   project: ProjectHealth
+  isSelected?: boolean
 }
 
 interface ServiceHistory {
@@ -33,7 +35,7 @@ interface ServiceHistory {
   history: UptimeDataPoint[]
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, isSelected }: ProjectCardProps) {
   const { data: historyData, isLoading: isLoadingHistory } = useQuery({
     queryKey: ['monitoring', 'project-history', project.id],
     queryFn: async () => {
@@ -102,7 +104,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   }
 
   return (
-    <Card variant="floating">
+    <Card variant="floating" className={cn('transition-all', isSelected && 'ring-2 ring-primary')}>
       <CardHeader>
         <Div className="flex items-start justify-between">
           <Div className="flex items-center gap-3">

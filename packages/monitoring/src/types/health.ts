@@ -143,55 +143,69 @@ const DEFAULT_MONITORED_SERVICES = {
     port: new URL(URLS.ezstart.api!.local).port,
   },
 
-  // Web Apps - Root URL health check
+  // Web Apps - /health endpoint (middleware excludes /health from i18n redirect)
   'ezstart-web': {
     name: 'EZStart',
     type: 'web' as ServiceType,
-    localUrl: URLS.ezstart.web.local,
-    productionUrl: URLS.ezstart.web.production,
+    localUrl: `${URLS.ezstart.web.local}/health`,
+    productionUrl: `${URLS.ezstart.web.production}/health`,
     port: new URL(URLS.ezstart.web.local).port,
   },
   'ezauth-web': {
     name: 'EZAuth',
     type: 'web' as ServiceType,
-    localUrl: URLS.ezauth.web.local,
-    productionUrl: URLS.ezauth.web.production,
+    localUrl: `${URLS.ezauth.web.local}/health`,
+    productionUrl: `${URLS.ezauth.web.production}/health`,
     port: new URL(URLS.ezauth.web.local).port,
   },
   'ezbill-web': {
     name: 'EZBill',
     type: 'web' as ServiceType,
-    localUrl: URLS.ezbill.web.local,
-    productionUrl: URLS.ezbill.web.production,
+    localUrl: `${URLS.ezbill.web.local}/health`,
+    productionUrl: `${URLS.ezbill.web.production}/health`,
     port: new URL(URLS.ezbill.web.local).port,
   },
   'ezpay-web': {
     name: 'EZPay',
     type: 'web' as ServiceType,
-    localUrl: URLS.ezpay.web.local,
-    productionUrl: URLS.ezpay.web.production,
+    localUrl: `${URLS.ezpay.web.local}/health`,
+    productionUrl: `${URLS.ezpay.web.production}/health`,
     port: new URL(URLS.ezpay.web.local).port,
   },
   'fengshui-web': {
     name: 'FengShui',
     type: 'web' as ServiceType,
-    localUrl: URLS.fengshui.web.local,
-    productionUrl: URLS.fengshui.web.production,
+    localUrl: `${URLS.fengshui.web.local}/health`,
+    productionUrl: `${URLS.fengshui.web.production}/health`,
     port: new URL(URLS.fengshui.web.local).port,
   },
   'asc-tcd-web': {
     name: 'ASC-TCD',
     type: 'web' as ServiceType,
-    localUrl: URLS['asc-tcd'].web.local,
-    productionUrl: URLS['asc-tcd'].web.production,
+    localUrl: `${URLS['asc-tcd'].web.local}/health`,
+    productionUrl: `${URLS['asc-tcd'].web.production}/health`,
     port: new URL(URLS['asc-tcd'].web.local).port,
   },
   'green-pulse-web': {
     name: 'GreenPulse',
     type: 'web' as ServiceType,
-    localUrl: URLS['green-pulse'].web.local,
-    productionUrl: URLS['green-pulse'].web.production,
+    localUrl: `${URLS['green-pulse'].web.local}/health`,
+    productionUrl: `${URLS['green-pulse'].web.production}/health`,
     port: new URL(URLS['green-pulse'].web.local).port,
+  },
+  'gacha-analyzer-api': {
+    name: 'Game Analyzer API',
+    type: 'api' as ServiceType,
+    localUrl: `${URLS['gacha-analyzer'].api?.local}/health`,
+    productionUrl: `${URLS['gacha-analyzer'].api?.production}/health`,
+    port: new URL(URLS['gacha-analyzer'].api!.local).port,
+  },
+  'gacha-analyzer-web': {
+    name: 'Game Analyzer',
+    type: 'web' as ServiceType,
+    localUrl: `${URLS['gacha-analyzer'].web.local}/health`,
+    productionUrl: `${URLS['gacha-analyzer'].web.production}/health`,
+    port: new URL(URLS['gacha-analyzer'].web.local).port,
   },
 } satisfies Record<string, MonitoredService>
 
@@ -232,6 +246,7 @@ export const SERVICE_PLATFORMS = {
     'ezpay-api',
     'ezbill-api',
     'green-pulse-api',
+    'gacha-analyzer-api',
   ] as MonitoredServiceId[],
 
   // Render (free) - No longer used (migrated to Railway)
@@ -246,6 +261,7 @@ export const SERVICE_PLATFORMS = {
     'fengshui-web',
     'asc-tcd-web',
     'green-pulse-web',
+    'gacha-analyzer-web',
   ] as MonitoredServiceId[],
 } as const
 
