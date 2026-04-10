@@ -1463,6 +1463,38 @@ function main() {
     }
   }
 
+  // Step 2e: Propagate inheritsTokens from Tag to all createAlias components
+  // Tag uses useDesignTokens() and resolves size/density/intent, but aliases (Div, H1, Section, etc.)
+  // are in a separate file (aliases.tsx) that doesn't call useDesignTokens directly.
+  // Since aliases just render <Tag>, they inherit all of Tag's token capabilities.
+  const tagEntry = registry['Tag']
+  if (tagEntry) {
+    const aliasesPath = path.join(UI_PKG, 'tag/src/aliases.tsx')
+    const aliasesContent = readFile(aliasesPath)
+    if (aliasesContent) {
+      // Find all createAlias('tagName') calls
+      const aliasRegex = /export\s+const\s+(\w+)\s*=\s*createAlias\(['"](\w+)['"]\)/g
+      let aliasMatch
+      let aliasCount = 0
+      while ((aliasMatch = aliasRegex.exec(aliasesContent)) !== null) {
+        const aliasName = aliasMatch[1]
+        const aliasEntry = registry[aliasName]
+        if (aliasEntry && tagEntry.inheritsTokens.length > 0) {
+          // Merge Tag's inheritsTokens into the alias
+          const existing = new Set(aliasEntry.inheritsTokens)
+          for (const token of tagEntry.inheritsTokens) {
+            existing.add(token)
+          }
+          aliasEntry.inheritsTokens = [...existing]
+          aliasCount++
+        }
+      }
+      if (aliasCount > 0) {
+        console.log(`\n  Propagated Tag inheritsTokens to ${aliasCount} aliases`)
+      }
+    }
+  }
+
   // Step 3: Build popular chains from components with children
   const popularChains = buildPopularChains(registry)
 
