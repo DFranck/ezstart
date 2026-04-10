@@ -152,20 +152,31 @@ export default function TokenLexiconPage() {
   const params = useParams()
   const locale = params.locale as string
 
-  const componentsWithToken = useMemo(() => {
-    const map = new Map<string, string[]>()
+  // Aggregate real values per token from registry + list components
+  const tokenData = useMemo(() => {
+    const map = new Map<
+      string,
+      { components: string[]; allValues: Set<string>; valuesByComponent: Map<string, string[]> }
+    >()
     for (const [tokenName] of Object.entries(TOKEN_LEXICON)) {
       const components: string[] = []
+      const allValues = new Set<string>()
+      const valuesByComponent = new Map<string, string[]>()
+
       for (const entry of Object.values(componentRegistry)) {
-        if (
-          entry.tokens.some(t => t.name === tokenName) ||
-          entry.providesTokens.includes(tokenName) ||
-          entry.inheritsTokens.includes(tokenName)
-        ) {
+        const tokenMatch = entry.tokens.find(t => t.name === tokenName)
+        const isProvider = entry.providesTokens.includes(tokenName)
+        const isConsumer = entry.inheritsTokens.includes(tokenName)
+
+        if (tokenMatch || isProvider || isConsumer) {
           components.push(entry.name)
+          if (tokenMatch?.values && tokenMatch.values.length > 0) {
+            valuesByComponent.set(entry.name, tokenMatch.values)
+            for (const v of tokenMatch.values) allValues.add(v)
+          }
         }
       }
-      map.set(tokenName, components.sort())
+      map.set(tokenName, { components: components.sort(), allValues, valuesByComponent })
     }
     return map
   }, [])
@@ -188,7 +199,13 @@ export default function TokenLexiconPage() {
 
       {/* Token cards */}
       {Object.entries(TOKEN_LEXICON).map(([name, token]) => {
-        const components = componentsWithToken.get(name) || []
+        const data = tokenData.get(name)
+        const components = data?.components ?? []
+        const dynamicValues = data ? [...data.allValues].sort() : []
+        const valuesByComponent = data?.valuesByComponent ?? new Map()
+        // Use dynamic values from registry, fallback to hardcoded
+        const displayValues = dynamicValues.length > 0 ? dynamicValues : (token.values ?? [])
+
         return (
           <Card key={name} variant="default">
             <CardHeader className="pb-3">
@@ -210,16 +227,50 @@ export default function TokenLexiconPage() {
             <CardContent className="space-y-4">
               <P className="text-sm text-muted-foreground">{token.purpose}</P>
 
-              {/* Values */}
-              {token.values && token.values.length > 0 && (
+              {/* All values (aggregated from registry) */}
+              {displayValues.length > 0 && (
                 <Div className="space-y-1">
-                  <P className="text-xs font-medium text-muted-foreground">Values</P>
+                  <P className="text-xs font-medium text-muted-foreground">
+                    All values ({displayValues.length})
+                  </P>
                   <Div className="flex flex-wrap gap-1">
-                    {token.values.map(v => (
+                    {displayValues.map(v => (
                       <Badge key={v} variant="secondary" size="sm" className="font-mono">
                         {v}
                       </Badge>
                     ))}
+                  </Div>
+                </Div>
+              )}
+
+              {/* Values per component (shows differences like Button having "icon") */}
+              {valuesByComponent.size > 0 && (
+                <Div className="space-y-1">
+                  <P className="text-xs font-medium text-muted-foreground">Values by component</P>
+                  <Div className="space-y-0.5">
+                    {[...valuesByComponent.entries()]
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([comp, vals]) => (
+                        <Div key={comp} className="flex items-center gap-2 text-xs">
+                          <Link href={`/${locale}/packages/ui/inspector/${comp}`}>
+                            <Span className="font-mono text-foreground hover:text-primary transition-colors min-w-[120px]">
+                              {comp}
+                            </Span>
+                          </Link>
+                          <Div className="flex flex-wrap gap-0.5">
+                            {vals.map((v: string) => (
+                              <Badge
+                                key={v}
+                                variant="outline"
+                                size="sm"
+                                className="font-mono text-[10px] h-5 px-1.5"
+                              >
+                                {v}
+                              </Badge>
+                            ))}
+                          </Div>
+                        </Div>
+                      ))}
                   </Div>
                 </Div>
               )}
