@@ -23,6 +23,8 @@ function entryToChainItem(entry: ComponentEntry): ChainItem {
     name: entry.name,
     level: entry.level,
     tokens: entry.tokens,
+    providesTokens: entry.providesTokens,
+    inheritsTokens: entry.inheritsTokens,
   }
 }
 

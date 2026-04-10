@@ -31,6 +31,8 @@ type ChainItem = {
   name: string
   level: 'base' | 'composed' | 'complex'
   tokens: TokenInfo[]
+  providesTokens: string[]
+  inheritsTokens: string[]
 }
 
 type InspectorPreviewProps = {
@@ -326,6 +328,8 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
           name: childEntry.name,
           level: childEntry.level,
           tokens: childEntry.tokens,
+          providesTokens: childEntry.providesTokens,
+          inheritsTokens: childEntry.inheritsTokens,
         })
       }
     }
@@ -343,6 +347,24 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
         </Badge>
         <Span className="font-semibold text-foreground">{current.name}</Span>
       </Div>
+
+      {/* Provides / Inherits context tokens */}
+      {(current.providesTokens.length > 0 || current.inheritsTokens.length > 0) && (
+        <Div className="flex flex-wrap gap-1.5">
+          {current.providesTokens.map(t => (
+            <Badge key={`provides-${t}`} variant="success" size="sm">
+              <Span className="text-success-foreground">&#8595; pushes</Span>{' '}
+              <Span className="font-mono">{t}</Span>
+            </Badge>
+          ))}
+          {current.inheritsTokens.map(t => (
+            <Badge key={`inherits-${t}`} variant="info" size="sm">
+              <Span className="text-info-foreground">&#8593; receives</Span>{' '}
+              <Span className="font-mono">{t}</Span>
+            </Badge>
+          ))}
+        </Div>
+      )}
 
       {/* Token info */}
       {current.tokens.length > 0 && (

@@ -26,11 +26,23 @@ const levelBadgeVariant: Record<ComponentLevel, 'success' | 'info' | 'purple'> =
   complex: 'purple',
 }
 
+const STRUCTURAL_TOKEN_NAMES = new Set(['size', 'density', 'radius', 'intent'])
+const VISUAL_TOKEN_NAMES = new Set(['variant', 'colorScheme'])
+
+function inferTokenCategory(tokenName: string): 'structural' | 'visual' {
+  if (STRUCTURAL_TOKEN_NAMES.has(tokenName)) return 'structural'
+  if (VISUAL_TOKEN_NAMES.has(tokenName)) return 'visual'
+  return 'structural'
+}
+
 function getDefaultTokenValues(chain: ComponentEntry[]): Record<string, string> {
   const allTokenNames = new Set<string>()
   for (const entry of chain) {
     for (const token of entry.tokens) {
       allTokenNames.add(token.name)
+    }
+    for (const tokenName of entry.inheritsTokens) {
+      allTokenNames.add(tokenName)
     }
   }
 
@@ -86,6 +98,12 @@ export default function InspectorChainPage({
         if (!seen.has(token.name)) {
           seen.add(token.name)
           tokens.push(token)
+        }
+      }
+      for (const tokenName of entry.inheritsTokens) {
+        if (!seen.has(tokenName)) {
+          seen.add(tokenName)
+          tokens.push({ name: tokenName, category: inferTokenCategory(tokenName) })
         }
       }
     }
@@ -224,6 +242,26 @@ export default function InspectorChainPage({
                           <Span className="ml-1 text-muted-foreground text-[10px]">
                             {token.category === 'structural' ? 'auto-drill' : 'per-component'}
                           </Span>
+                        </Badge>
+                      ))}
+                    </Div>
+                  )}
+                  {entry.providesTokens.length > 0 && (
+                    <Div className="flex flex-wrap items-center gap-1">
+                      <Span className="text-[10px] text-success font-medium">provides:</Span>
+                      {entry.providesTokens.map(t => (
+                        <Badge key={t} variant="success" size="sm">
+                          {t}
+                        </Badge>
+                      ))}
+                    </Div>
+                  )}
+                  {entry.inheritsTokens.length > 0 && (
+                    <Div className="flex flex-wrap items-center gap-1">
+                      <Span className="text-[10px] text-info font-medium">inherits:</Span>
+                      {entry.inheritsTokens.map(t => (
+                        <Badge key={t} variant="info" size="sm">
+                          {t}
                         </Badge>
                       ))}
                     </Div>

@@ -86,10 +86,50 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
                     {token.name}
                   </Badge>
                 ))}
+                {entry.providesTokens.length > 0 && (
+                  <Badge
+                    variant="success"
+                    size="sm"
+                    title={`Provides: ${entry.providesTokens.join(', ')}`}
+                  >
+                    P
+                  </Badge>
+                )}
+                {entry.inheritsTokens.length > 0 && (
+                  <Badge
+                    variant="info"
+                    size="sm"
+                    title={`Inherits: ${entry.inheritsTokens.join(', ')}`}
+                  >
+                    C
+                  </Badge>
+                )}
               </Div>
             )}
             {entry.tokens.length === 0 && (
-              <Span className="text-xs text-muted-foreground italic">No tokens</Span>
+              <Div className="flex flex-wrap gap-1">
+                {entry.providesTokens.length > 0 && (
+                  <Badge
+                    variant="success"
+                    size="sm"
+                    title={`Provides: ${entry.providesTokens.join(', ')}`}
+                  >
+                    P
+                  </Badge>
+                )}
+                {entry.inheritsTokens.length > 0 && (
+                  <Badge
+                    variant="info"
+                    size="sm"
+                    title={`Inherits: ${entry.inheritsTokens.join(', ')}`}
+                  >
+                    C
+                  </Badge>
+                )}
+                {entry.providesTokens.length === 0 && entry.inheritsTokens.length === 0 && (
+                  <Span className="text-xs text-muted-foreground italic">No tokens</Span>
+                )}
+              </Div>
             )}
           </CardContent>
         </Card>
