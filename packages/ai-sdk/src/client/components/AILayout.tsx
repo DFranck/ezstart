@@ -17,6 +17,8 @@ import {
   ThreadWelcome,
 } from '@ezstart/ui/components'
 
+import { useAuth } from '@ezstart/auth-sdk'
+
 import { AIProvider } from '../../provider.js'
 import { useAIThread } from '../hooks/useAIThread.js'
 import { AISelector } from './AISelector.js'
@@ -57,6 +59,9 @@ function AILayoutInner({ getToken: _getToken, ...props }: AILayoutProps) {
 }
 
 function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
+  const { user } = useAuth()
+  const isAdmin = user?.globalRoles?.includes('admin') || user?.globalRoles?.includes('superadmin')
+
   const {
     messages,
     loading,
@@ -151,15 +156,18 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
                       title={texts.welcomeTitle}
                       description={texts.welcomeDescription}
                     />
-                    {showProviderSelector && providers.length > 0 && selectedProvider && (
-                      <Div className="flex justify-center mt-4">
-                        <AISelector
-                          value={selectedProvider}
-                          onChange={setSelectedProvider}
-                          providers={providers}
-                        />
-                      </Div>
-                    )}
+                    {showProviderSelector &&
+                      providers.length > 0 &&
+                      selectedProvider &&
+                      isAdmin && (
+                        <Div className="flex justify-center mt-4">
+                          <AISelector
+                            value={selectedProvider}
+                            onChange={setSelectedProvider}
+                            providers={providers}
+                          />
+                        </Div>
+                      )}
                     {slots.welcomeExtra}
                   </>
                 ))

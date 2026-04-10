@@ -34,7 +34,8 @@
     "openai": "^4.77.3",
     "zod": "^3.23.0",
     "zustand": "^4.5.5",
-    "@ezstart/ui": "workspace:*"
+    "@ezstart/ui": "workspace:*",
+    "@ezstart/auth-sdk": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.3.1 || ^19.0.0"
