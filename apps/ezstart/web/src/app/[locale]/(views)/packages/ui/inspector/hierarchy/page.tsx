@@ -1,211 +1,85 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Div,
-  H1,
-  H2,
-  H3,
-  Input,
-  P,
-  Section,
-  Span,
-} from '@ezstart/ui/components'
+import { useState, useMemo } from 'react'
+import { Badge, Card, CardContent, Div, H1, H2, Input, P, Span } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { componentRegistry, type ComponentEntry, type ComponentLevel } from '../registry'
-
-// ─── Hierarchy data ────────────────────────────────────────────
-
-type HierarchyData = {
-  base: ComponentEntry[]
-  composed: ComponentEntry[]
-  complex: ComponentEntry[]
-  parentMap: Map<string, string[]>
-  usageCount: Map<string, number>
-  mostUsedPrimitive: { name: string; count: number } | null
-  mostTokens: { name: string; count: number } | null
-  deepestChain: string[]
-}
-
-function buildHierarchy(): HierarchyData {
-  const entries = Object.values(componentRegistry)
-
-  const base = entries.filter(e => e.level === 'base')
-  const composed = entries.filter(e => e.level === 'composed')
-  const complex = entries.filter(e => e.level === 'complex')
-
-  // parentMap: child → list of parents that use it
-  const parentMap = new Map<string, string[]>()
-  for (const entry of entries) {
-    for (const child of entry.children) {
-      const parents = parentMap.get(child) || []
-      parents.push(entry.name)
-      parentMap.set(child, parents)
-    }
-  }
-
-  // usageCount: how many components list this one as a child
-  const usageCount = new Map<string, number>()
-  for (const entry of entries) {
-    for (const child of entry.children) {
-      usageCount.set(child, (usageCount.get(child) || 0) + 1)
-    }
-  }
-
-  // Most-used primitive
-  let mostUsedPrimitive: { name: string; count: number } | null = null
-  for (const entry of base) {
-    const count = usageCount.get(entry.name) || 0
-    if (!mostUsedPrimitive || count > mostUsedPrimitive.count) {
-      mostUsedPrimitive = { name: entry.name, count }
-    }
-  }
-
-  // Most tokens
-  let mostTokens: { name: string; count: number } | null = null
-  for (const entry of entries) {
-    const count = entry.tokens.length
-    if (!mostTokens || count > mostTokens.count) {
-      mostTokens = { name: entry.name, count }
-    }
-  }
-
-  // Deepest chain (BFS from each complex component)
-  let deepestChain: string[] = []
-  const registryMap = componentRegistry
-
-  function findDeepestPath(startName: string): string[] {
-    let longest: string[] = [startName]
-    const stack: Array<{ name: string; path: string[] }> = [{ name: startName, path: [startName] }]
-    const visited = new Set<string>()
-
-    while (stack.length > 0) {
-      const current = stack.pop()!
-      const entry = registryMap[current.name]
-      if (!entry) continue
-
-      if (current.path.length > longest.length) {
-        longest = current.path
-      }
-
-      for (const child of entry.children) {
-        const childKey = `${current.name}->${child}`
-        if (!visited.has(childKey)) {
-          visited.add(childKey)
-          stack.push({ name: child, path: [...current.path, child] })
-        }
-      }
-    }
-    return longest
-  }
-
-  for (const entry of complex) {
-    const path = findDeepestPath(entry.name)
-    if (path.length > deepestChain.length) {
-      deepestChain = path
-    }
-  }
-
-  return {
-    base,
-    composed,
-    complex,
-    parentMap,
-    usageCount,
-    mostUsedPrimitive,
-    mostTokens,
-    deepestChain,
-  }
-}
 
 // ─── Level config ──────────────────────────────────────────────
 
 const levelConfig: Record<
   ComponentLevel,
-  {
-    label: string
-    badgeVariant: 'success' | 'info' | 'purple'
-    borderClass: string
-  }
+  { label: string; badgeVariant: 'success' | 'info' | 'purple' | 'warning' }
 > = {
-  base: {
-    label: 'Base',
-    badgeVariant: 'success',
-    borderClass: 'border-success/30',
-  },
-  composed: {
-    label: 'Composed',
-    badgeVariant: 'info',
-    borderClass: 'border-info/30',
-  },
-  complex: {
-    label: 'Complex',
-    badgeVariant: 'purple',
-    borderClass: 'border-purple-500/30',
-  },
+  atom: { label: 'Atom', badgeVariant: 'success' },
+  molecule: { label: 'Molecule', badgeVariant: 'info' },
+  organism: { label: 'Organism', badgeVariant: 'purple' },
+  template: { label: 'Template', badgeVariant: 'warning' },
 }
 
-// ─── Component row ─────────────────────────────────────────────
+// ─── Hierarchy data ────────────────────────────────────────────
 
-function ComponentRow({
-  entry,
+function buildData() {
+  const entries = Object.values(componentRegistry)
+
+  // parentMap: child → parents that use it
+  const parentMap = new Map<string, string[]>()
+  const usageCount = new Map<string, number>()
+  for (const entry of entries) {
+    for (const child of entry.children) {
+      const parents = parentMap.get(child) || []
+      parents.push(entry.name)
+      parentMap.set(child, parents)
+      usageCount.set(child, (usageCount.get(child) || 0) + 1)
+    }
+  }
+
+  // Stats
+  const counts = { atom: 0, molecule: 0, organism: 0, template: 0 }
+  for (const e of entries) counts[e.level]++
+
+  let mostUsed = { name: '', count: 0 }
+  for (const [name, count] of usageCount) {
+    if (count > mostUsed.count) mostUsed = { name, count }
+  }
+
+  return { entries, parentMap, usageCount, counts, mostUsed }
+}
+
+// ─── Recursive hierarchy renderer ─────────────────────────────
+
+function HierarchyTree({
+  name,
   locale,
-  usageCount,
-  parentMap,
-  highlighted,
-  onHover,
-  onLeave,
-  expandedUsedBy,
-  onToggleUsedBy,
+  depth,
+  visited,
 }: {
-  entry: ComponentEntry
+  name: string
   locale: string
-  usageCount: number
-  parentMap: Map<string, string[]>
-  highlighted: Set<string>
-  onHover: (name: string) => void
-  onLeave: () => void
-  expandedUsedBy: Set<string>
-  onToggleUsedBy: (name: string) => void
+  depth: number
+  visited: Set<string>
 }) {
-  const isHighlighted = highlighted.size > 0 && highlighted.has(entry.name)
-  const isDimmed = highlighted.size > 0 && !highlighted.has(entry.name)
-  const parents = parentMap.get(entry.name) || []
-  const isExpanded = expandedUsedBy.has(entry.name)
+  const entry = componentRegistry[name]
+  if (!entry || visited.has(name)) return null
+
   const config = levelConfig[entry.level]
+  const newVisited = new Set(visited)
+  newVisited.add(name)
 
   return (
-    <Div
-      className={`group rounded-md border px-2.5 py-1.5 transition-all ${config.borderClass} ${
-        isHighlighted
-          ? 'bg-accent/50 ring-1 ring-primary/30'
-          : isDimmed
-            ? 'opacity-30'
-            : 'hover:bg-accent/30'
-      }`}
-      onMouseEnter={() => onHover(entry.name)}
-      onMouseLeave={onLeave}
-    >
+    <Div className="space-y-1" style={{ marginLeft: depth > 0 ? 20 : 0 }}>
       <Div className="flex items-center gap-1.5 flex-wrap">
-        {/* Component name */}
-        <Link href={`/${locale}/packages/ui/inspector/${entry.name}`}>
-          <Span className="text-xs font-semibold hover:underline cursor-pointer">{entry.name}</Span>
-        </Link>
-
-        {/* Usage count */}
-        {usageCount > 0 && (
-          <Badge variant="secondary" size="sm" className="text-[10px] px-1 py-0">
-            {usageCount}x
+        {depth > 0 && <Span className="text-muted-foreground text-xs">└</Span>}
+        <Link href={`/${locale}/packages/ui/inspector/${name}`}>
+          <Badge
+            variant={config.badgeVariant}
+            size="sm"
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            {name}
           </Badge>
-        )}
-
-        {/* Token badges */}
+        </Link>
         {entry.providesTokens.length > 0 && (
           <Badge
             variant="success"
@@ -226,57 +100,22 @@ function ComponentRow({
             C
           </Badge>
         )}
-
-        {/* Used by count */}
-        {parents.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-[10px] h-auto px-1 py-0 text-muted-foreground hover:text-foreground"
-            onClick={e => {
-              e.preventDefault()
-              onToggleUsedBy(entry.name)
-            }}
-          >
-            used by {parents.length}
-          </Button>
+        {entry.tokens.length > 0 && (
+          <Span className="text-[10px] text-muted-foreground">
+            {entry.tokens.map(t => t.name).join(', ')}
+          </Span>
         )}
       </Div>
-
-      {/* Children (for composed/complex) */}
-      {entry.children.length > 0 && (
-        <Div className="mt-1 ml-3 flex flex-wrap gap-1">
+      {entry.children.length > 0 && depth < 4 && (
+        <Div>
           {entry.children.map(childName => (
-            <Link
+            <HierarchyTree
               key={childName}
-              href={`/${locale}/packages/ui/inspector/${entry.name}/${childName}`}
-            >
-              <Badge
-                variant="outline"
-                size="sm"
-                className="text-[10px] px-1 py-0 cursor-pointer hover:bg-accent"
-              >
-                {childName}
-              </Badge>
-            </Link>
-          ))}
-        </Div>
-      )}
-
-      {/* Expanded "used by" list */}
-      {isExpanded && parents.length > 0 && (
-        <Div className="mt-1.5 ml-3 flex flex-wrap gap-1">
-          <Span className="text-[10px] text-muted-foreground mr-1">Used by:</Span>
-          {parents.map(parentName => (
-            <Link key={parentName} href={`/${locale}/packages/ui/inspector/${parentName}`}>
-              <Badge
-                variant="secondary"
-                size="sm"
-                className="text-[10px] px-1 py-0 cursor-pointer hover:bg-accent"
-              >
-                {parentName}
-              </Badge>
-            </Link>
+              name={childName}
+              locale={locale}
+              depth={depth + 1}
+              visited={newVisited}
+            />
           ))}
         </Div>
       )}
@@ -284,56 +123,59 @@ function ComponentRow({
   )
 }
 
-// ─── Column component ──────────────────────────────────────────
+// ─── "Used by" reverse tree ────────────────────────────────────
 
-function HierarchyColumn({
-  level,
-  entries,
+function UsedByTree({
+  name,
   locale,
-  usageCountMap,
   parentMap,
-  highlighted,
-  onHover,
-  onLeave,
-  expandedUsedBy,
-  onToggleUsedBy,
+  depth,
+  visited,
 }: {
-  level: ComponentLevel
-  entries: ComponentEntry[]
+  name: string
   locale: string
-  usageCountMap: Map<string, number>
   parentMap: Map<string, string[]>
-  highlighted: Set<string>
-  onHover: (name: string) => void
-  onLeave: () => void
-  expandedUsedBy: Set<string>
-  onToggleUsedBy: (name: string) => void
+  depth: number
+  visited: Set<string>
 }) {
-  const config = levelConfig[level]
+  const parents = parentMap.get(name) || []
+  if (parents.length === 0 || visited.has(name)) return null
+
+  const newVisited = new Set(visited)
+  newVisited.add(name)
 
   return (
-    <Section className="flex-1 min-w-0 space-y-3">
-      <Div className="flex items-center gap-2">
-        <Badge variant={config.badgeVariant}>{config.label}</Badge>
-        <Span className="text-sm text-muted-foreground">({entries.length})</Span>
-      </Div>
-      <Div className="space-y-1.5 max-h-[70vh] overflow-y-auto pr-1">
-        {entries.map(entry => (
-          <ComponentRow
-            key={entry.name}
-            entry={entry}
-            locale={locale}
-            usageCount={usageCountMap.get(entry.name) || 0}
-            parentMap={parentMap}
-            highlighted={highlighted}
-            onHover={onHover}
-            onLeave={onLeave}
-            expandedUsedBy={expandedUsedBy}
-            onToggleUsedBy={onToggleUsedBy}
-          />
-        ))}
-      </Div>
-    </Section>
+    <Div className="space-y-1" style={{ marginLeft: depth > 0 ? 20 : 0 }}>
+      {parents.map(parentName => {
+        const parentEntry = componentRegistry[parentName]
+        const config = parentEntry ? levelConfig[parentEntry.level] : levelConfig.atom
+        return (
+          <Div key={parentName}>
+            <Div className="flex items-center gap-1.5">
+              {depth >= 0 && <Span className="text-muted-foreground text-xs">↑</Span>}
+              <Link href={`/${locale}/packages/ui/inspector/${parentName}`}>
+                <Badge
+                  variant={config.badgeVariant}
+                  size="sm"
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  {parentName}
+                </Badge>
+              </Link>
+            </Div>
+            {depth < 3 && (
+              <UsedByTree
+                name={parentName}
+                locale={locale}
+                parentMap={parentMap}
+                depth={depth + 1}
+                visited={newVisited}
+              />
+            )}
+          </Div>
+        )
+      })}
+    </Div>
   )
 }
 
@@ -343,229 +185,189 @@ export default function HierarchyPage() {
   const params = useParams()
   const locale = params.locale as string
   const [search, setSearch] = useState('')
-  const [hoveredComponent, setHoveredComponent] = useState<string | null>(null)
-  const [expandedUsedBy, setExpandedUsedBy] = useState<Set<string>>(new Set())
+  const [selected, setSelected] = useState<string | null>(null)
 
-  const hierarchy = useMemo(() => buildHierarchy(), [])
+  const data = useMemo(() => buildData(), [])
 
-  // Filter by search
-  const filtered = useMemo(() => {
-    if (!search) {
-      return {
-        base: hierarchy.base,
-        composed: hierarchy.composed,
-        complex: hierarchy.complex,
-      }
-    }
-    const lower = search.toLowerCase()
-    return {
-      base: hierarchy.base.filter(e => e.name.toLowerCase().includes(lower)),
-      composed: hierarchy.composed.filter(e => e.name.toLowerCase().includes(lower)),
-      complex: hierarchy.complex.filter(e => e.name.toLowerCase().includes(lower)),
-    }
-  }, [hierarchy, search])
-
-  // Sort by usage count (descending) within each level
-  const sorted = useMemo(() => {
-    const sortFn = (a: ComponentEntry, b: ComponentEntry) => {
-      const countA = hierarchy.usageCount.get(a.name) || 0
-      const countB = hierarchy.usageCount.get(b.name) || 0
+  const allEntries = useMemo(() => {
+    const sorted = [...data.entries].sort((a, b) => {
+      const countA = data.usageCount.get(a.name) || 0
+      const countB = data.usageCount.get(b.name) || 0
       return countB - countA
-    }
-    return {
-      base: [...filtered.base].sort(sortFn),
-      composed: [...filtered.composed].sort(sortFn),
-      complex: [...filtered.complex].sort(sortFn),
-    }
-  }, [filtered, hierarchy.usageCount])
-
-  // Bidirectional highlight: all components that use the hovered one + all it uses
-  const highlighted = useMemo(() => {
-    if (!hoveredComponent) return new Set<string>()
-    const set = new Set<string>()
-    set.add(hoveredComponent)
-
-    // Components that use hovered (parents)
-    const parents = hierarchy.parentMap.get(hoveredComponent) || []
-    for (const p of parents) set.add(p)
-
-    // Components that hovered uses (children, recursively one level)
-    const entry = componentRegistry[hoveredComponent]
-    if (entry) {
-      for (const child of entry.children) set.add(child)
-    }
-
-    return set
-  }, [hoveredComponent, hierarchy.parentMap])
-
-  const handleHover = useCallback((name: string) => setHoveredComponent(name), [])
-  const handleLeave = useCallback(() => setHoveredComponent(null), [])
-  const handleToggleUsedBy = useCallback((name: string) => {
-    setExpandedUsedBy(prev => {
-      const next = new Set(prev)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
-      return next
     })
-  }, [])
+    if (!search) return sorted
+    const lower = search.toLowerCase()
+    return sorted.filter(e => e.name.toLowerCase().includes(lower))
+  }, [data, search])
 
-  const totalFiltered = sorted.base.length + sorted.composed.length + sorted.complex.length
-  const totalAll = hierarchy.base.length + hierarchy.composed.length + hierarchy.complex.length
+  const selectedEntry = selected ? componentRegistry[selected] : null
 
   return (
-    <Div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <Div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
       {/* Header */}
       <Div className="space-y-2">
-        <Link href={`/${locale}/packages/ui/inspector`}>
-          <Span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">
-            &larr; Inspector
-          </Span>
+        <Link
+          href={`/${locale}/packages/ui/inspector`}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          &larr; Inspector
         </Link>
         <H1 className="text-2xl font-bold">Component Hierarchy</H1>
-        <P className="text-muted-foreground">
-          Genealogy of the design system — which primitives compose which components
+        <P className="text-muted-foreground text-sm">
+          Select a component to explore its dependency tree and reverse usage.
         </P>
       </Div>
 
-      {/* Stats bar */}
-      <Card variant="default">
-        <CardContent className="py-3">
-          <Div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            <Div>
-              <Span className="text-muted-foreground">Total: </Span>
-              <Span className="font-semibold">{totalAll}</Span>
-            </Div>
-            <Div className="flex items-center gap-1.5">
-              <Badge variant="success" size="sm">
-                Base
-              </Badge>
-              <Span className="font-semibold">{hierarchy.base.length}</Span>
-            </Div>
-            <Div className="flex items-center gap-1.5">
-              <Badge variant="info" size="sm">
-                Composed
-              </Badge>
-              <Span className="font-semibold">{hierarchy.composed.length}</Span>
-            </Div>
-            <Div className="flex items-center gap-1.5">
-              <Badge variant="purple" size="sm">
-                Complex
-              </Badge>
-              <Span className="font-semibold">{hierarchy.complex.length}</Span>
-            </Div>
-            {hierarchy.mostUsedPrimitive && hierarchy.mostUsedPrimitive.count > 0 && (
-              <Div>
-                <Span className="text-muted-foreground">Most used: </Span>
-                <Link href={`/${locale}/packages/ui/inspector/${hierarchy.mostUsedPrimitive.name}`}>
-                  <Span className="font-semibold hover:underline cursor-pointer">
-                    {hierarchy.mostUsedPrimitive.name}
-                  </Span>
-                </Link>
-                <Span className="text-muted-foreground">
-                  {' '}
-                  ({hierarchy.mostUsedPrimitive.count}x)
-                </Span>
-              </Div>
-            )}
-            {hierarchy.mostTokens && hierarchy.mostTokens.count > 0 && (
-              <Div>
-                <Span className="text-muted-foreground">Most tokens: </Span>
-                <Link href={`/${locale}/packages/ui/inspector/${hierarchy.mostTokens.name}`}>
-                  <Span className="font-semibold hover:underline cursor-pointer">
-                    {hierarchy.mostTokens.name}
-                  </Span>
-                </Link>
-                <Span className="text-muted-foreground"> ({hierarchy.mostTokens.count})</Span>
-              </Div>
-            )}
-          </Div>
-          {hierarchy.deepestChain.length > 1 && (
-            <Div className="mt-2 flex items-center gap-1 flex-wrap">
-              <Span className="text-sm text-muted-foreground">Deepest chain: </Span>
-              {hierarchy.deepestChain.map((name, i) => (
-                <Span key={`${name}-${i}`} className="flex items-center gap-1">
-                  {i > 0 && <Span className="text-muted-foreground text-xs">&rarr;</Span>}
-                  <Link href={`/${locale}/packages/ui/inspector/${name}`}>
-                    <Badge
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer hover:bg-accent text-[10px]"
-                    >
-                      {name}
-                    </Badge>
-                  </Link>
-                </Span>
-              ))}
-            </Div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Stats */}
+      <Div className="flex flex-wrap items-center gap-3 text-sm">
+        <Span className="font-medium">{data.entries.length} total</Span>
+        <Badge variant="success" size="sm">
+          Atom {data.counts.atom}
+        </Badge>
+        <Badge variant="info" size="sm">
+          Molecule {data.counts.molecule}
+        </Badge>
+        <Badge variant="purple" size="sm">
+          Organism {data.counts.organism}
+        </Badge>
+        <Badge variant="warning" size="sm">
+          Template {data.counts.template}
+        </Badge>
+        {data.mostUsed.name && (
+          <Span className="text-muted-foreground">
+            Most used:{' '}
+            <Span className="font-mono font-medium text-foreground">{data.mostUsed.name}</Span> (
+            {data.mostUsed.count}x)
+          </Span>
+        )}
+      </Div>
 
       {/* Search */}
-      <Div className="relative max-w-md">
-        <Input
-          placeholder="Search components..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="pr-8"
-        />
-        {search && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSearch('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-            aria-label="Clear search"
-          >
-            <Span className="text-sm font-medium">&#x2715;</Span>
-          </Button>
-        )}
-        {search && (
-          <P className="text-sm text-muted-foreground mt-1">
-            {totalFiltered} component{totalFiltered !== 1 ? 's' : ''} found
-          </P>
-        )}
+      <Input
+        placeholder="Search components..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        className="max-w-md"
+      />
+
+      {/* Horizontal scroll — all components as badges */}
+      <Div className="overflow-x-auto pb-2">
+        <Div className="flex gap-1 min-w-max">
+          {allEntries.map(entry => {
+            const config = levelConfig[entry.level]
+            const isSelected = selected === entry.name
+            const usage = data.usageCount.get(entry.name) || 0
+            return (
+              <Badge
+                key={entry.name}
+                variant={isSelected ? 'default' : config.badgeVariant}
+                size="sm"
+                className={`cursor-pointer transition-all text-xs shrink-0 ${
+                  isSelected ? 'ring-2 ring-primary scale-105' : 'hover:opacity-80'
+                }`}
+                onClick={() => setSelected(isSelected ? null : entry.name)}
+              >
+                {entry.name}
+                {usage > 0 && <Span className="ml-1 opacity-60">{usage}x</Span>}
+              </Badge>
+            )
+          })}
+        </Div>
       </Div>
 
-      {/* Three-column hierarchy */}
-      <Div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <HierarchyColumn
-          level="base"
-          entries={sorted.base}
-          locale={locale}
-          usageCountMap={hierarchy.usageCount}
-          parentMap={hierarchy.parentMap}
-          highlighted={highlighted}
-          onHover={handleHover}
-          onLeave={handleLeave}
-          expandedUsedBy={expandedUsedBy}
-          onToggleUsedBy={handleToggleUsedBy}
-        />
-        <HierarchyColumn
-          level="composed"
-          entries={sorted.composed}
-          locale={locale}
-          usageCountMap={hierarchy.usageCount}
-          parentMap={hierarchy.parentMap}
-          highlighted={highlighted}
-          onHover={handleHover}
-          onLeave={handleLeave}
-          expandedUsedBy={expandedUsedBy}
-          onToggleUsedBy={handleToggleUsedBy}
-        />
-        <HierarchyColumn
-          level="complex"
-          entries={sorted.complex}
-          locale={locale}
-          usageCountMap={hierarchy.usageCount}
-          parentMap={hierarchy.parentMap}
-          highlighted={highlighted}
-          onHover={handleHover}
-          onLeave={handleLeave}
-          expandedUsedBy={expandedUsedBy}
-          onToggleUsedBy={handleToggleUsedBy}
-        />
-      </Div>
+      {/* Selected component detail */}
+      {selectedEntry && (
+        <Div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Children tree (what it uses) */}
+          <Card variant="default">
+            <CardContent className="pt-4 space-y-3">
+              <Div className="flex items-center gap-2">
+                <H2 className="text-sm font-medium">Dependencies</H2>
+                <Span className="text-xs text-muted-foreground">What {selected} is built from</Span>
+              </Div>
+              {selectedEntry.children.length > 0 ? (
+                <HierarchyTree name={selected!} locale={locale} depth={0} visited={new Set()} />
+              ) : (
+                <P className="text-sm text-muted-foreground italic">
+                  Pure primitive — no UI component dependencies
+                </P>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Used by tree (what uses it) */}
+          <Card variant="default">
+            <CardContent className="pt-4 space-y-3">
+              <Div className="flex items-center gap-2">
+                <H2 className="text-sm font-medium">Used by</H2>
+                <Span className="text-xs text-muted-foreground">
+                  Components that consume {selected}
+                </Span>
+              </Div>
+              {(data.parentMap.get(selected!) || []).length > 0 ? (
+                <UsedByTree
+                  name={selected!}
+                  locale={locale}
+                  parentMap={data.parentMap}
+                  depth={0}
+                  visited={new Set()}
+                />
+              ) : (
+                <P className="text-sm text-muted-foreground italic">
+                  Not used by any other component
+                </P>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Component info */}
+          <Card variant="default" className="md:col-span-2">
+            <CardContent className="pt-4 space-y-2">
+              <Div className="flex items-center gap-2 flex-wrap">
+                <Link href={`/${locale}/packages/ui/inspector/${selected}`}>
+                  <H2 className="text-lg font-semibold font-mono hover:underline cursor-pointer">
+                    {selected}
+                  </H2>
+                </Link>
+                <Badge variant={levelConfig[selectedEntry.level].badgeVariant} size="sm">
+                  {levelConfig[selectedEntry.level].label}
+                </Badge>
+                {selectedEntry.providesTokens.length > 0 && (
+                  <Div className="flex items-center gap-1">
+                    <Span className="text-[10px] text-success">provides:</Span>
+                    {selectedEntry.providesTokens.map(t => (
+                      <Badge key={t} variant="success" size="sm" className="text-[10px]">
+                        {t}
+                      </Badge>
+                    ))}
+                  </Div>
+                )}
+                {selectedEntry.inheritsTokens.length > 0 && (
+                  <Div className="flex items-center gap-1">
+                    <Span className="text-[10px] text-info">inherits:</Span>
+                    {selectedEntry.inheritsTokens.map(t => (
+                      <Badge key={t} variant="info" size="sm" className="text-[10px]">
+                        {t}
+                      </Badge>
+                    ))}
+                  </Div>
+                )}
+              </Div>
+              <P className="text-xs text-muted-foreground">{selectedEntry.description}</P>
+              <P className="text-[10px] text-muted-foreground/60 font-mono">
+                {selectedEntry.sourcePath}
+              </P>
+            </CardContent>
+          </Card>
+        </Div>
+      )}
+
+      {/* No selection hint */}
+      {!selected && (
+        <Div className="text-center py-8">
+          <P className="text-muted-foreground">Click a component above to explore its hierarchy</P>
+        </Div>
+      )}
     </Div>
   )
 }
