@@ -489,6 +489,11 @@ export default function InspectorIndexPage() {
                 Token Lexicon
               </Badge>
             </Link>
+            <Link href={`/${locale}/packages/ui/inspector/hierarchy`}>
+              <Badge variant="outline" className="cursor-pointer hover:bg-accent transition-colors">
+                Component Hierarchy
+              </Badge>
+            </Link>
           </Div>
           <P className="text-sm text-muted-foreground">
             View the full recursive hierarchy of a component and how tokens propagate through all
