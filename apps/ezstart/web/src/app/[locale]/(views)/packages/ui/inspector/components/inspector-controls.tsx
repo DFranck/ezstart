@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Div, Label, P } from '@ezstart/ui/components'
+import { Button, Div, Span } from '@ezstart/ui/components'
 import { type TokenInfo } from '../registry'
 
 type InspectorControlsProps = {
@@ -9,7 +9,7 @@ type InspectorControlsProps = {
   onChange: (tokenName: string, value: string) => void
 }
 
-function TokenControlGroup({
+function TokenControlRow({
   token,
   currentValue,
   onChange,
@@ -22,24 +22,24 @@ function TokenControlGroup({
   if (!options || options.length === 0) return null
 
   return (
-    <Card variant="ghost" className="border-0 p-0">
-      <CardContent className="p-0 space-y-2">
-        <Label className="text-sm font-medium capitalize text-muted-foreground">{token.name}</Label>
-        <Div className="flex flex-wrap gap-1.5">
-          {options.map(option => (
-            <Button
-              key={option}
-              variant={currentValue === option ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => onChange(token.name, option)}
-              className="min-w-[70px]"
-            >
-              {option}
-            </Button>
-          ))}
-        </Div>
-      </CardContent>
-    </Card>
+    <Div className="flex items-center gap-2 flex-wrap">
+      <Span className="text-xs font-medium text-muted-foreground capitalize min-w-[60px]">
+        {token.name}
+      </Span>
+      <Div className="flex flex-wrap gap-1">
+        {options.map(option => (
+          <Button
+            key={option}
+            variant={currentValue === option ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onChange(token.name, option)}
+            className="h-6 px-2 text-xs"
+          >
+            {option}
+          </Button>
+        ))}
+      </Div>
+    </Div>
   )
 }
 
@@ -51,15 +51,14 @@ export function InspectorControls({ tokens, availableTokens, onChange }: Inspect
   const hasVisual = visualTokens.some(t => t.values && t.values.length > 0)
 
   return (
-    <Div className="space-y-4">
-      {/* Structural tokens section */}
+    <Div className="space-y-2">
       {hasStructural && (
-        <Div className="space-y-3">
-          <P className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-            Structural Tokens (auto-drill to children)
-          </P>
+        <Div className="space-y-1.5">
+          <Span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+            Structural (auto-drill)
+          </Span>
           {structuralTokens.map(tokenInfo => (
-            <TokenControlGroup
+            <TokenControlRow
               key={tokenInfo.name}
               token={tokenInfo}
               currentValue={tokens[tokenInfo.name] ?? 'default'}
@@ -69,17 +68,15 @@ export function InspectorControls({ tokens, availableTokens, onChange }: Inspect
         </Div>
       )}
 
-      {/* Separator between sections */}
-      {hasStructural && hasVisual && <Div className="border-t border-border" />}
+      {hasStructural && hasVisual && <Div className="border-t border-border/50" />}
 
-      {/* Visual tokens section */}
       {hasVisual && (
-        <Div className="space-y-3">
-          <P className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-            Visual Tokens (per-component)
-          </P>
+        <Div className="space-y-1.5">
+          <Span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+            Visual (per-component)
+          </Span>
           {visualTokens.map(tokenInfo => (
-            <TokenControlGroup
+            <TokenControlRow
               key={tokenInfo.name}
               token={tokenInfo}
               currentValue={tokens[tokenInfo.name] ?? 'default'}
