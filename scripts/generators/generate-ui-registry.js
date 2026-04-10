@@ -1395,13 +1395,33 @@ function main() {
       rootEntry.inheritsTokens = []
     }
 
-    // Children don't provide (that's from root in same file)
+    // Children: clean up file-level bleed
     for (const childName of children) {
       const childEntry = registry[childName]
       if (!childEntry) continue
+
+      // Children don't provide (that's from root in same file)
       if (childEntry.providesTokens.length > 0 && rootEntry.providesTokens.length > 0) {
         console.log(`  Cleaned providesTokens from compound child: ${childName}`)
         childEntry.providesTokens = []
+      }
+
+      // Children without their own design token props don't inherit
+      // (the file-level scan attributes root's useDesignTokens to all exports)
+      const designTokenPropNames = new Set([
+        'size',
+        'density',
+        'radius',
+        'intent',
+        'variant',
+        'colorScheme',
+      ])
+      const hasOwnTokenProps =
+        childEntry.tokens.length > 0 ||
+        childEntry.props.some(p => p.isDesignToken || designTokenPropNames.has(p.name))
+      if (childEntry.inheritsTokens.length > 0 && !hasOwnTokenProps) {
+        console.log(`  Cleaned inheritsTokens from tokenless compound child: ${childName}`)
+        childEntry.inheritsTokens = []
       }
     }
   }
