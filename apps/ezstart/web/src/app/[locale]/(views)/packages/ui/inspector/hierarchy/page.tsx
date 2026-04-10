@@ -203,7 +203,7 @@ export default function HierarchyPage() {
   const selectedEntry = selected ? componentRegistry[selected] : null
 
   return (
-    <Div className="max-w-6xl mx-auto px-4 py-8 space-y-6 overflow-x-hidden">
+    <Div className="max-w-6xl mx-auto px-4 py-8 space-y-6 w-full min-w-0">
       {/* Header */}
       <Div className="space-y-2">
         <Link
@@ -251,7 +251,7 @@ export default function HierarchyPage() {
       />
 
       {/* Horizontal scroll — all components as badges */}
-      <Div className="overflow-x-auto overflow-y-hidden max-w-full pb-2">
+      <Div className="overflow-x-auto overflow-y-hidden w-full min-w-0 pb-2">
         <Div className="flex gap-1 min-w-max">
           {allEntries.map(entry => {
             const config = levelConfig[entry.level]
