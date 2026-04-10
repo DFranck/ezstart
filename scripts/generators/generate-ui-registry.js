@@ -1086,6 +1086,80 @@ function resolveSpreadKeys(content, block) {
   return [...new Set(keys)]
 }
 
+// ─── Design Token Propagation Detection ────────────────────
+
+/** Known token names that can be provided/inherited via DesignTokenProvider */
+const KNOWN_CONTEXT_TOKENS = ['size', 'density', 'radius', 'intent', 'variant', 'colorScheme']
+
+/**
+ * Detect which design tokens a component provides via DesignTokenProvider.
+ * Scans for <DesignTokenProvider prop1={...} prop2={...}> and extracts prop names.
+ * Returns string[] of token names this component provides.
+ */
+function extractProvidedTokens(filePath) {
+  const content = readFile(filePath)
+  if (!content) return []
+
+  // Check if file uses DesignTokenProvider at all
+  if (!content.includes('DesignTokenProvider')) return []
+
+  const provided = new Set()
+
+  // Match <DesignTokenProvider followed by props until >
+  // We extract all prop names that match known tokens
+  const providerRegex = /<DesignTokenProvider\s+([^>]+)>/g
+  let match
+  while ((match = providerRegex.exec(content)) !== null) {
+    const propsStr = match[1]
+    // Extract prop names: word followed by = or just word (shorthand)
+    for (const token of KNOWN_CONTEXT_TOKENS) {
+      // Match token={...} or token (shorthand boolean)
+      const tokenRegex = new RegExp(`\\b${token}(?:\\s*=|\\s*[/}>])`)
+      if (tokenRegex.test(propsStr)) {
+        provided.add(token)
+      }
+    }
+  }
+
+  return [...provided]
+}
+
+/**
+ * Detect which design tokens a component inherits (reads) via useDesignTokens().
+ * Scans for useDesignTokens() usage, then finds property accesses like .size, .density, etc.
+ * Returns string[] of token names this component reads from context.
+ */
+function extractInheritedTokens(filePath) {
+  const content = readFile(filePath)
+  if (!content) return []
+
+  // Check if file uses useDesignTokens at all
+  if (!content.includes('useDesignTokens')) return []
+
+  const inherited = new Set()
+
+  // Look for property accesses on known token names anywhere in the file
+  // after useDesignTokens() is called. Patterns:
+  //   inherited.size, tokens.density, ctx.radius, etc.
+  //   Also: .intent (after variable name)
+  for (const token of KNOWN_CONTEXT_TOKENS) {
+    // Match: variableName.token where variableName could be anything
+    // We look for .token preceded by a word character (the variable name)
+    const accessRegex = new RegExp(`\\w+\\.${token}\\b`)
+    if (accessRegex.test(content)) {
+      // Make sure it's not just an import or type definition
+      // by checking it appears after useDesignTokens
+      const useIdx = content.indexOf('useDesignTokens')
+      const accessMatch = content.substring(useIdx).match(accessRegex)
+      if (accessMatch) {
+        inherited.add(token)
+      }
+    }
+  }
+
+  return [...inherited]
+}
+
 // ─── Compound Component Detection ──────────────────────────
 
 /**
@@ -1201,6 +1275,10 @@ function main() {
       // Extract composition slots
       const slots = extractSlots(sourcePath, name)
 
+      // Extract design token propagation info
+      const providesTokens = extractProvidedTokens(sourcePath)
+      const inheritsTokens = extractInheritedTokens(sourcePath)
+
       // Auto-determine level:
       //   complex  = imports other UI components AND has ReactNode slots
       //   composed = imports other UI components (no slots required)
@@ -1223,6 +1301,8 @@ function main() {
         props,
         children,
         slots,
+        providesTokens,
+        inheritsTokens,
         description,
         sourcePath: toRelativePath(sourcePath),
       }
@@ -1431,6 +1511,14 @@ function generateOutput(registry, popularChains) {
       entry.children.length > 0 ? `[${entry.children.map(c => `'${c}'`).join(', ')}]` : '[]'
     const props = formatProps(entry.props)
     const slots = formatSlots(entry.slots)
+    const providesTokens =
+      entry.providesTokens && entry.providesTokens.length > 0
+        ? `[${entry.providesTokens.map(t => `'${t}'`).join(', ')}]`
+        : '[]'
+    const inheritsTokens =
+      entry.inheritsTokens && entry.inheritsTokens.length > 0
+        ? `[${entry.inheritsTokens.map(t => `'${t}'`).join(', ')}]`
+        : '[]'
 
     return `  ${name}: {
     name: '${name}',
@@ -1439,6 +1527,8 @@ function generateOutput(registry, popularChains) {
     props: ${props},
     children: ${children},
     slots: ${slots},
+    providesTokens: ${providesTokens},
+    inheritsTokens: ${inheritsTokens},
     description: '${escapeString(entry.description)}',
     sourcePath: '${entry.sourcePath}',
   }`
@@ -1490,6 +1580,8 @@ export type ComponentEntry = {
   props: PropInfo[]
   children: string[]
   slots: SlotInfo[]
+  providesTokens: string[]
+  inheritsTokens: string[]
   description: string
   sourcePath: string
 }
