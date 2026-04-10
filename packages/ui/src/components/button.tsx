@@ -5,6 +5,13 @@ import * as React from 'react'
 import { cn } from '../lib/utils'
 import { buttonVariants } from '../lib/design-system/variants'
 import { useDesignTokens } from '../lib/design-system/DesignTokenContext'
+import { radius as radiusTokens } from '../lib/design-system/tokens'
+
+/** Density-based vertical padding adjustments for Button */
+const buttonDensityClasses: Record<string, string> = {
+  compact: 'py-0.5',
+  relaxed: 'py-3',
+}
 
 function Button({
   className,
@@ -18,12 +25,18 @@ function Button({
   }) {
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size) as VariantProps<typeof buttonVariants>['size']
+  const density = inherited.density as string | undefined
+  const inheritedRadius = inherited.radius as keyof typeof radiusTokens | undefined
   const Comp = asChild ? Slot : 'button'
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        density && buttonDensityClasses[density],
+        inheritedRadius && radiusTokens[inheritedRadius]
+      )}
       {...props}
     />
   )

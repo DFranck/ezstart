@@ -3,6 +3,7 @@ import * as React from 'react'
 import { cn } from '../../lib/utils'
 import { badgeVariants } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
+import { radius as radiusTokens } from '../../lib/design-system/tokens'
 
 /**
  * Badge Component - Display status, count, or label
@@ -49,6 +50,22 @@ const dotVariantClasses: Record<string, string> = {
   pink: 'bg-pink-600 dark:bg-pink-400',
 }
 
+/** Map inherited intent to Badge variant as fallback */
+const intentToVariantMap: Record<string, VariantProps<typeof badgeVariants>['variant']> = {
+  success: 'success',
+  warning: 'warning',
+  destructive: 'destructive',
+  danger: 'destructive',
+  info: 'info',
+  primary: 'default',
+}
+
+/** Density-based padding adjustments for Badge */
+const badgeDensityClasses: Record<string, string> = {
+  compact: 'py-0 px-1.5',
+  relaxed: 'py-1.5 px-4',
+}
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
   /** Show a dot indicator before the text */
@@ -59,7 +76,7 @@ export interface BadgeProps
 
 function Badge({
   className,
-  variant,
+  variant: variantProp,
   size: sizeProp,
   circle,
   circleSize,
@@ -70,7 +87,16 @@ function Badge({
 }: BadgeProps) {
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size) as VariantProps<typeof badgeVariants>['size']
-  const dotColor = variant ? dotVariantClasses[variant] : dotVariantClasses.default
+  const variant = (variantProp ??
+    (inherited.intent ? intentToVariantMap[inherited.intent] : undefined)) as VariantProps<
+    typeof badgeVariants
+  >['variant']
+  const density = inherited.density as string | undefined
+  const inheritedRadius = inherited.radius as keyof typeof radiusTokens | undefined
+  const dotColor =
+    (variantProp ?? variant)
+      ? (dotVariantClasses[(variantProp ?? variant) as string] ?? dotVariantClasses.default)
+      : dotVariantClasses.default
 
   // When circle=true, use circleSize instead of size
   const effectiveSize = circle ? undefined : size
@@ -80,6 +106,8 @@ function Badge({
     <div
       className={cn(
         badgeVariants({ variant, size: effectiveSize, circle, circleSize: effectiveCircleSize }),
+        density && badgeDensityClasses[density],
+        inheritedRadius && radiusTokens[inheritedRadius],
         className
       )}
       {...props}

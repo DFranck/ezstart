@@ -118,19 +118,19 @@ function Button({ size: sizeProp }) {
 
 ### Providers (push tokens)
 
-- Card (size, density)
+- Card (size, density, radius)
 - Table (size, density)
 - FloatingPanel (size)
 
 ### Consumers (inherit tokens)
 
-- **size**: Button, Badge, CardHeader, CardContent, CardFooter, SelectTrigger, Spinner, SkeletonAvatar, SkeletonCard, Stepper, Modal, SplitSection, SplitSectionItem, VersionSwitch, ThreadSidebarToggle
-- **density**: CardHeader, CardContent, CardFooter
-- **intent**: Tag
+- **size**: Button, Badge, Input, Textarea, CardHeader, CardContent, CardFooter, SelectTrigger, Spinner, SkeletonAvatar, SkeletonCard, Stepper, Modal, SplitSection, SplitSectionItem, VersionSwitch, ThreadSidebarToggle
+- **density**: Button, Badge, Input, Textarea, CardHeader, CardContent, CardFooter
+- **intent**: Tag, Badge (maps intent to variant fallback)
+- **radius**: Button, Badge, Input, Textarea, DialogContent
 
 ### Not yet wired
 
-- **radius**: no components yet
-- **intent**: only Tag (Badge, Button could benefit)
-- **density**: only Card family (Table rows, Input height could benefit)
-- **size**: Input, Textarea (need size prop added first)
+- **radius**: Card own border-radius (currently CVA-controlled), Table
+- **intent**: Button (skipped — variant covers this), Spinner, Alert
+- **density**: Table rows, Stepper, Modal

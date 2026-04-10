@@ -33,15 +33,28 @@ import {
 
 type DensityValue = 'compact' | 'default' | 'relaxed'
 
+type RadiusValue = 'none' | 'sm' | 'default' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
+
 interface CardProps extends React.ComponentProps<'div'>, VariantProps<typeof cardVariants> {
   /** Controls spacing density inside the card (padding, gap) */
   density?: DensityValue
+  /** Border radius token propagated to children (Card's own radius stays as CVA variant defines) */
+  radius?: RadiusValue
 }
 
-function Card({ className, variant, size, interactive, hover, density, ...props }: CardProps) {
+function Card({
+  className,
+  variant,
+  size,
+  interactive,
+  hover,
+  density,
+  radius,
+  ...props
+}: CardProps) {
   const resolvedDensity = density ?? 'default'
   return (
-    <DesignTokenProvider size={size ?? 'default'} density={density}>
+    <DesignTokenProvider size={size ?? 'default'} density={density} radius={radius}>
       <div
         data-slot="card"
         className={cn(
