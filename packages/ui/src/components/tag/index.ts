@@ -76,27 +76,70 @@ export {
   listingItemsVariantConfig,
   listingItemsSize,
   listingVariantsMeta,
+  // Additional HTML tags
+  figureVariantConfig,
+  fieldsetVariantConfig,
+  detailsVariantConfig,
+  dlVariantConfig,
+  figcaptionVariantConfig,
+  blockquoteVariantConfig,
+  preVariantConfig,
+  codeVariantConfig,
+  smallVariantConfig,
+  legendVariantConfig,
+  summaryVariantConfig,
+  dtVariantConfig,
+  ddVariantConfig,
 } from '../../lib/design-system/variants'
 
 // Aliases (all in one place)
 export {
+  // Container aliases
   Div,
   Section,
   Aside,
   Main,
   Nav,
   Article,
+  // Text aliases
   Span,
   Strong,
   P,
+  Em,
+  Small,
+  Mark,
+  // Heading aliases
   H1,
   H2,
   H3,
   H4,
   H5,
   H6,
+  // List aliases
   UL,
   LI,
   Ol,
+  // Definition list aliases
+  Dl,
+  Dt,
+  Dd,
+  // Code & preformatted aliases
+  Pre,
+  Code,
+  Blockquote,
+  // Media aliases
+  Figure,
+  Figcaption,
+  // Form grouping aliases
+  Fieldset,
+  Legend,
+  // Disclosure aliases
+  Details,
+  Summary,
+  // Misc aliases
+  Hr,
+  Time,
+  Address,
+  // Legacy aliases
   FooterTag,
 } from './src/aliases'

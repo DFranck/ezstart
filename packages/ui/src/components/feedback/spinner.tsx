@@ -2,16 +2,18 @@ import { cn } from '../../lib/utils'
 import { spinnerVariantConfig } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
+export type SpinnerSize = 'xs' | 'sm' | 'default' | 'lg' | 'xl' | /** @deprecated Use 'default' instead */ 'md'
+
 export interface SpinnerProps {
   /** Size of the spinner */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: SpinnerSize
   /** Variant style */
   variant?: 'default' | 'primary' | 'secondary' | 'accent' | 'destructive' | 'success' | 'fancy'
   /** Animation speed */
   speed?: 'slow' | 'normal' | 'fast'
   /** Optional text to display below spinner */
   text?: string
-  /** Text size */
+  /** @deprecated Use size instead */
   textSize?: 'xs' | 'sm' | 'md' | 'lg'
   /** Custom className */
   className?: string
@@ -58,7 +60,7 @@ export function Spinner({
   backdrop = false,
 }: SpinnerProps) {
   const inherited = useDesignTokens()
-  const size = (sizeProp ?? inherited.size ?? 'md') as NonNullable<SpinnerProps['size']>
+  const size = (sizeProp ?? inherited.size ?? 'default') as NonNullable<SpinnerProps['size']>
   const isFancy = variant === 'fancy'
 
   const spinner = isFancy ? (

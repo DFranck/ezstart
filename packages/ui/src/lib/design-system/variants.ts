@@ -76,9 +76,11 @@ export const formInputDefaultVariants = {
  */
 export const buttonVariantConfig = {
   size: {
+    xs: 'h-9 sm:h-7 rounded-md gap-1 px-2 has-[>svg]:px-1.5',
     default: 'h-11 sm:h-9 px-4 py-2 has-[>svg]:px-3',
     sm: 'h-11 sm:h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
     lg: 'h-11 sm:h-10 rounded-md px-6 has-[>svg]:px-4',
+    xl: 'h-14 sm:h-12 rounded-md px-8 has-[>svg]:px-5',
     icon: 'size-11 sm:size-9',
   },
   variant: {
@@ -194,7 +196,9 @@ export const cardContentVariantConfig = {
 export const dialogVariantConfig = {
   size: {
     sm: 'max-w-sm',
+    /** @deprecated Use 'default' instead of 'md' */
     md: 'max-w-md',
+    default: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-2xl',
     full: 'max-w-[95vw]',
@@ -229,9 +233,11 @@ export const badgeVariantConfig = {
   },
   size: {
     none: '', // No size classes - used for circle variant
+    xs: 'px-1 py-0 text-xs',
     default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '),
     sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '),
     lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '),
+    xl: 'px-4 py-1.5 text-lg',
   },
   circle: {
     true: 'aspect-square justify-center p-0',
@@ -953,6 +959,75 @@ export const listingItemsVariantConfig = {
 } as const
 
 // ============================================================================
+// CONFIG: ADDITIONAL HTML TAGS (Figure, Fieldset, Blockquote, etc.)
+// ============================================================================
+
+// --- Container-like tags ---
+
+export const figureVariantConfig = {
+  ...containerBase,
+} as const
+
+export const fieldsetVariantConfig = {
+  ...containerBase,
+} as const
+
+export const detailsVariantConfig = {
+  ...containerBase,
+} as const
+
+export const dlVariantConfig = {
+  ...containerBase,
+} as const
+
+// --- Text-like tags ---
+
+export const figcaptionVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const blockquoteVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const preVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const codeVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const smallVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const legendVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const summaryVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const dtVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+export const ddVariantConfig = {
+  ...textBase,
+  size: sizeText,
+} as const
+
+// ============================================================================
 // CONFIG: SPINNER
 // ============================================================================
 
@@ -960,7 +1035,9 @@ export const spinnerVariantConfig = {
   size: {
     xs: 'w-3 h-3 border-2',
     sm: 'w-4 h-4 border-2',
+    /** @deprecated Use 'default' instead of 'md' */
     md: 'w-6 h-6 border-2',
+    default: 'w-6 h-6 border-2',
     lg: 'w-8 h-8 border-3',
     xl: 'w-12 h-12 border-4',
   },
@@ -981,7 +1058,9 @@ export const spinnerVariantConfig = {
   fancyPulseSize: {
     xs: 'w-2 h-2 top-0.5 left-0.5',
     sm: 'w-2.5 h-2.5 top-0.5 left-0.5',
+    /** @deprecated Use 'default' instead of 'md' */
     md: 'w-4 h-4 top-1 left-1',
+    default: 'w-4 h-4 top-1 left-1',
     lg: 'w-5 h-5 top-1.5 left-1.5',
     xl: 'w-8 h-8 top-2 left-2',
   },
@@ -1144,7 +1223,9 @@ export const splitSectionVariants = cva('relative w-full', {
 export const floatingPanelVariantConfig = {
   size: {
     sm: 'w-80 max-h-96',
+    /** @deprecated Use 'default' instead of 'md' */
     md: 'w-96 max-h-[32rem]',
+    default: 'w-96 max-h-[32rem]',
     lg: 'w-[28rem] max-h-[40rem]',
     xl: 'w-[32rem] max-h-[48rem]',
     full: 'w-[90vw] h-[90vh]',
@@ -1159,7 +1240,7 @@ export const floatingPanelVariants = cva(
   {
     variants: floatingPanelVariantConfig,
     defaultVariants: {
-      size: 'md',
+      size: 'default',
     },
   }
 )
@@ -1435,6 +1516,69 @@ export const tagVariants = {
       button: false,
     },
   }),
+
+  // Container-like tags
+  figure: cva('', {
+    variants: figureVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', density: 'default' },
+  }),
+  fieldset: cva('', {
+    variants: fieldsetVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', density: 'default' },
+  }),
+  details: cva('', {
+    variants: detailsVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', density: 'default' },
+  }),
+  dl: cva('', {
+    variants: dlVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', density: 'default' },
+  }),
+
+  // Text-like tags
+  figcaption: cva('text-muted-foreground', {
+    variants: figcaptionVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  blockquote: cva('border-l-4 border-primary/30 pl-4 italic', {
+    variants: blockquoteVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  pre: cva('overflow-x-auto rounded-md bg-muted p-4 font-mono', {
+    variants: preVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  code: cva('rounded bg-muted px-1.5 py-0.5 font-mono', {
+    variants: codeVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  small: cva('', {
+    variants: smallVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  legend: cva('font-semibold', {
+    variants: legendVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  summary: cva('cursor-pointer font-medium', {
+    variants: summaryVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  dt: cva('font-semibold', {
+    variants: dtVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+  dd: cva('', {
+    variants: ddVariantConfig,
+    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+  }),
+
+  // Minimal pass-through tags (no variants, just base classes)
+  hr: cva('border-t border-border', { variants: {} }),
+  em: cva('italic', { variants: {} }),
+  mark: cva('bg-warning/30 text-foreground rounded-sm px-0.5', { variants: {} }),
+  time: cva('', { variants: {} }),
+  address: cva('not-italic', { variants: {} }),
 }
 
 export const tagVariantsKeys = Object.keys(tagVariants) as (keyof typeof tagVariants)[]
@@ -1524,6 +1668,30 @@ export const tagVariantsMeta: TagVariantsMetaMap = {
   // Listings
   ul: extractMetaKeys(listingContainersVariantConfig),
   li: extractMetaKeys(listingItemsVariantConfig),
+
+  // Container-like tags
+  figure: extractMetaKeys(figureVariantConfig),
+  fieldset: extractMetaKeys(fieldsetVariantConfig),
+  details: extractMetaKeys(detailsVariantConfig),
+  dl: extractMetaKeys(dlVariantConfig),
+
+  // Text-like tags
+  figcaption: extractMetaKeys(figcaptionVariantConfig),
+  blockquote: extractMetaKeys(blockquoteVariantConfig),
+  pre: extractMetaKeys(preVariantConfig),
+  code: extractMetaKeys(codeVariantConfig),
+  small: extractMetaKeys(smallVariantConfig),
+  legend: extractMetaKeys(legendVariantConfig),
+  summary: extractMetaKeys(summaryVariantConfig),
+  dt: extractMetaKeys(dtVariantConfig),
+  dd: extractMetaKeys(ddVariantConfig),
+
+  // Minimal pass-through tags
+  hr: {},
+  em: {},
+  mark: {},
+  time: {},
+  address: {},
 }
 
 // Individual meta exports for backward compatibility

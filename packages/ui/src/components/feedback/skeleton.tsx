@@ -50,16 +50,34 @@ interface SkeletonTextProps {
   className?: string
   /** Variant style */
   variant?: 'default' | 'lighter' | 'darker' | 'shimmer'
-  /** Line spacing */
+  /** @deprecated Use density instead */
   spacing?: 'tight' | 'normal' | 'loose'
+  /** Density token — maps to line spacing (compact→tight, default→normal, relaxed→loose) */
+  density?: 'compact' | 'default' | 'relaxed'
 }
+
+const densityToSpacing = {
+  compact: 'tight',
+  default: 'normal',
+  relaxed: 'loose',
+} as const
 
 function SkeletonText({
   lines = 3,
   className,
   variant = 'default',
-  spacing = 'normal',
+  spacing,
+  density,
 }: SkeletonTextProps) {
+  const inherited = useDesignTokens()
+  const resolvedSpacing: 'tight' | 'normal' | 'loose' =
+    spacing ??
+    (density
+      ? densityToSpacing[density]
+      : inherited.density
+        ? densityToSpacing[inherited.density as keyof typeof densityToSpacing]
+        : 'normal')
+
   const spacingClasses = {
     tight: 'gap-1.5',
     normal: 'gap-2',
@@ -67,7 +85,7 @@ function SkeletonText({
   }
 
   return (
-    <div className={cn('flex flex-col', spacingClasses[spacing], className)}>
+    <div className={cn('flex flex-col', spacingClasses[resolvedSpacing], className)}>
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton key={i} variant={variant} className={cn('h-4', i === lines - 1 && 'w-[80%]')} />
       ))}

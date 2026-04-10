@@ -85,24 +85,39 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
               <Div className="flex flex-wrap gap-1">
                 {entry.tokens.map(token => {
                   const status = token.status || 'standard'
+                  const isDeprecated = !!token.deprecatedBy
                   return (
                     <Badge
                       key={token.name}
                       variant={
-                        status === 'radix'
-                          ? 'outline'
-                          : status === 'candidate'
-                            ? 'warning'
-                            : status === 'specific'
-                              ? 'secondary'
-                              : token.category === 'structural'
-                                ? 'outline'
-                                : 'secondary'
+                        isDeprecated
+                          ? 'secondary'
+                          : status === 'radix'
+                            ? 'outline'
+                            : status === 'candidate'
+                              ? 'warning'
+                              : status === 'specific'
+                                ? 'secondary'
+                                : token.category === 'structural'
+                                  ? 'outline'
+                                  : 'secondary'
                       }
                       size="sm"
-                      className={status === 'specific' ? 'opacity-50' : undefined}
+                      className={`${status === 'specific' ? 'opacity-50' : ''}${isDeprecated ? ' opacity-60' : ''}`}
+                      title={
+                        isDeprecated
+                          ? `Deprecated — use "${token.deprecatedBy}" instead`
+                          : undefined
+                      }
                     >
-                      {token.name}
+                      <Span className={isDeprecated ? 'line-through' : undefined}>
+                        {token.name}
+                      </Span>
+                      {isDeprecated && (
+                        <Span className="ml-1 text-muted-foreground text-[10px]">
+                          &rarr; {token.deprecatedBy}
+                        </Span>
+                      )}
                     </Badge>
                   )
                 })}
@@ -261,6 +276,7 @@ export default function InspectorIndexPage() {
         consumers: number
         category: string
         status: TokenStatus
+        deprecatedBy?: string
       }
     >()
 
@@ -274,6 +290,7 @@ export default function InspectorIndexPage() {
           status: (token.status || 'standard') as TokenStatus,
         }
         s.explicit++
+        if (token.deprecatedBy) s.deprecatedBy = token.deprecatedBy
         stats.set(token.name, s)
       }
       for (const t of entry.providesTokens) {
@@ -449,6 +466,7 @@ export default function InspectorIndexPage() {
               const total = stat.explicit + stat.providers + stat.consumers
               const isActive = activeTokenFilter === name
               const status = stat.status
+              const isDeprecated = !!stat.deprecatedBy
               const details = [
                 stat.explicit > 0 && `${stat.explicit} props`,
                 stat.providers > 0 && `${stat.providers}P`,
@@ -463,20 +481,27 @@ export default function InspectorIndexPage() {
                   variant={
                     isActive
                       ? 'default'
-                      : status === 'radix'
-                        ? 'outline'
-                        : status === 'candidate'
-                          ? 'warning'
-                          : status === 'specific'
-                            ? 'secondary'
-                            : categoryBadgeVariant[stat.category] || 'outline'
+                      : isDeprecated
+                        ? 'secondary'
+                        : status === 'radix'
+                          ? 'outline'
+                          : status === 'candidate'
+                            ? 'warning'
+                            : status === 'specific'
+                              ? 'secondary'
+                              : categoryBadgeVariant[stat.category] || 'outline'
                   }
                   size="sm"
-                  className={`cursor-pointer hover:opacity-80 transition-opacity${status === 'specific' && !isActive ? ' opacity-50' : ''}`}
+                  className={`cursor-pointer hover:opacity-80 transition-opacity${status === 'specific' && !isActive ? ' opacity-50' : ''}${isDeprecated && !isActive ? ' opacity-60' : ''}`}
                   onClick={() => setActiveTokenFilter(isActive ? null : name)}
-                  title={`${name} (${stat.category}, ${status}) — ${stat.explicit} components, ${stat.providers} providers, ${stat.consumers} consumers`}
+                  title={`${name} (${stat.category}, ${status})${isDeprecated ? ` — deprecated, use "${stat.deprecatedBy}" instead` : ''} — ${stat.explicit} components, ${stat.providers} providers, ${stat.consumers} consumers`}
                 >
-                  <Span className="font-mono">{name}</Span>
+                  <Span className={`font-mono${isDeprecated ? ' line-through' : ''}`}>{name}</Span>
+                  {isDeprecated && (
+                    <Span className="ml-1 text-muted-foreground font-mono">
+                      &rarr; {stat.deprecatedBy}
+                    </Span>
+                  )}
                   <Span className="ml-1 opacity-60">{details || total}</Span>
                 </Badge>
               )

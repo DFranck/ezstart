@@ -101,13 +101,29 @@ function CommandEmpty({ ...props }: React.ComponentProps<typeof CommandPrimitive
 export interface CommandGroupProps
   extends
     React.ComponentProps<typeof CommandPrimitive.Group>,
-    VariantProps<typeof commandGroupVariants> {}
+    Omit<VariantProps<typeof commandGroupVariants>, 'headingVariant'> {
+  /** @deprecated Use intent instead */
+  headingVariant?: 'default' | 'healthy' | 'healthy-light' | 'degraded' | 'unhealthy' | null
+  /** Standard intent token — maps to headingVariant (success→healthy, warning→degraded, destructive→unhealthy) */
+  intent?: 'default' | 'success' | 'warning' | 'destructive'
+}
 
-function CommandGroup({ className, headingVariant, ...props }: CommandGroupProps) {
+const intentToHeadingVariant = {
+  default: 'default',
+  success: 'healthy',
+  warning: 'degraded',
+  destructive: 'unhealthy',
+} as const
+
+function CommandGroup({ className, headingVariant, intent, ...props }: CommandGroupProps) {
+  /** @deprecated headingVariant — Use intent instead */
+  const resolvedHeadingVariant =
+    headingVariant ?? (intent ? intentToHeadingVariant[intent] : undefined)
+
   return (
     <CommandPrimitive.Group
       data-slot="command-group"
-      className={cn(commandGroupVariants({ headingVariant }), className)}
+      className={cn(commandGroupVariants({ headingVariant: resolvedHeadingVariant }), className)}
       {...props}
     />
   )

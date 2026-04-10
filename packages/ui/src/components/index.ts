@@ -83,6 +83,7 @@ export {
   useDesignTokens,
   type DesignTokens,
 } from '../lib/design-system/DesignTokenContext'
+export { designPresets, getPreset } from '../lib/design-system/presets'
 
 // Existing subdirectories
 export * from './icon'

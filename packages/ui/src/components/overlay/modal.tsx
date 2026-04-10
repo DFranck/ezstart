@@ -3,7 +3,7 @@
 import { useDevice } from '../../hooks'
 import { cn } from '../../lib/utils'
 import { dialogVariantConfig } from '../../lib/design-system/variants'
-import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
+import { DesignTokenProvider, useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import {
   Dialog,
   DialogContent,
@@ -49,7 +49,7 @@ import {
  * </Modal>
  */
 
-export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full'
+export type ModalSize = 'sm' | 'default' | 'lg' | 'xl' | 'full' | /** @deprecated Use 'default' instead */ 'md'
 export type ModalScrollBehavior = 'inside' | 'outside'
 
 export interface ModalProps {
@@ -111,48 +111,50 @@ export const Modal = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent
-        className={cn(
-          'flex flex-col bg-background shadow-2xl',
-          // Size classes (will be most restrictive on desktop where size < 98vw from DialogContent)
-          SIZE_CLASSES[size],
-          // Scroll behavior
-          isMobile && 'max-w-[98vw]',
-          scrollBehavior === 'inside'
-            ? 'max-h-[90vh] overflow-hidden'
-            : 'max-h-[90vh] overflow-y-auto',
-          className
-        )}
-        showCloseButton={!noCross}
-        onEscapeKeyDown={handleEscapeKeyDown}
-      >
-        {/* Header */}
-        {propTitle || propDescription ? (
-          <DialogHeader>
-            <DialogTitle>
-              {propTitle ? propTitle : <div className="sr-only">Untitled Modal</div>}
-            </DialogTitle>
-            {propDescription && <DialogDescription>{propDescription}</DialogDescription>}
-          </DialogHeader>
-        ) : (
-          <DialogTitle className="sr-only">Modal</DialogTitle>
-        )}
-
-        {/* Content */}
-        <div
+    <DesignTokenProvider size={size}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <DialogContent
           className={cn(
-            scrollBehavior === 'inside' && 'overflow-auto flex-1',
-            scrollBehavior === 'inside' && 'max-h-[60vh]'
+            'flex flex-col bg-background shadow-2xl',
+            // Size classes (will be most restrictive on desktop where size < 98vw from DialogContent)
+            SIZE_CLASSES[size],
+            // Scroll behavior
+            isMobile && 'max-w-[98vw]',
+            scrollBehavior === 'inside'
+              ? 'max-h-[90vh] overflow-hidden'
+              : 'max-h-[90vh] overflow-y-auto',
+            className
           )}
+          showCloseButton={!noCross}
+          onEscapeKeyDown={handleEscapeKeyDown}
         >
-          {children}
-        </div>
+          {/* Header */}
+          {propTitle || propDescription ? (
+            <DialogHeader>
+              <DialogTitle>
+                {propTitle ? propTitle : <div className="sr-only">Untitled Modal</div>}
+              </DialogTitle>
+              {propDescription && <DialogDescription>{propDescription}</DialogDescription>}
+            </DialogHeader>
+          ) : (
+            <DialogTitle className="sr-only">Modal</DialogTitle>
+          )}
 
-        {/* Footer */}
-        {propFooter && <DialogFooter>{propFooter}</DialogFooter>}
-      </DialogContent>
-    </Dialog>
+          {/* Content */}
+          <div
+            className={cn(
+              scrollBehavior === 'inside' && 'overflow-auto flex-1',
+              scrollBehavior === 'inside' && 'max-h-[60vh]'
+            )}
+          >
+            {children}
+          </div>
+
+          {/* Footer */}
+          {propFooter && <DialogFooter>{propFooter}</DialogFooter>}
+        </DialogContent>
+      </Dialog>
+    </DesignTokenProvider>
   )
 }
 

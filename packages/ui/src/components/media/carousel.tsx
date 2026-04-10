@@ -6,6 +6,7 @@ import useEmblaCarousel, {
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import * as React from 'react';
 
+import { DesignTokenProvider } from '../../lib/design-system/DesignTokenContext';
 import { cn } from '../../lib/utils';
 import { Button } from '../button';
 
@@ -19,6 +20,8 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: 'horizontal' | 'vertical';
   setApi?: (api: CarouselApi) => void;
+  size?: string;
+  density?: string;
 };
 
 type CarouselContextProps = {
@@ -47,6 +50,8 @@ function Carousel({
   opts,
   setApi,
   plugins,
+  size,
+  density,
   className,
   children,
   ...props
@@ -118,16 +123,18 @@ function Carousel({
         canScrollNext,
       }}
     >
-      <div
-        onKeyDownCapture={handleKeyDown}
-        className={cn('relative', className)}
-        role='region'
-        aria-roledescription='carousel'
-        data-slot='carousel'
-        {...props}
-      >
-        {children}
-      </div>
+      <DesignTokenProvider size={size} density={density}>
+        <div
+          onKeyDownCapture={handleKeyDown}
+          className={cn('relative', className)}
+          role='region'
+          aria-roledescription='carousel'
+          data-slot='carousel'
+          {...props}
+        >
+          {children}
+        </div>
+      </DesignTokenProvider>
     </CarouselContext.Provider>
   );
 }

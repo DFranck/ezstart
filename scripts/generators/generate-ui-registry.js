@@ -46,14 +46,10 @@ const DS_CANDIDATE_TOKENS = new Set([
   'align',
   'interactive',
   'hover',
-  'bgMode',
   'spacing',
-  'padding',
-  'columns',
   'position',
   'direction',
   'indicator',
-  'height',
 ])
 
 /** Classify a token by its design-system status */
@@ -62,6 +58,19 @@ function classifyTokenStatus(name) {
   if (RADIX_TOKENS.has(name)) return 'radix'
   if (DS_CANDIDATE_TOKENS.has(name)) return 'candidate'
   return 'specific'
+}
+
+/** Tokens that have a preferred replacement — adds deprecatedBy in output */
+const DEPRECATED_TOKENS = {
+  tableSize: 'density',
+  textSize: 'size',
+  fancyPulseSize: 'size',
+  spacing: 'density',
+  cardVariant: 'variant',
+  headingVariant: 'variant',
+  actionButtonVariant: 'intent',
+  bgColor: 'intent',
+  alignment: 'align',
 }
 
 /** Props that are always design tokens */
@@ -186,10 +195,11 @@ function parseIndexExports(indexPath) {
     const names = match[1]
       .split(',')
       .map(n => {
+        // Strip all single-line comments (may span multiple lines within one comma-segment)
         const cleaned = n
-          .trim()
-          .replace(/\/\/.*$/, '')
+          .replace(/\/\/[^\n]*/g, '')
           .replace(/\/\*.*?\*\//g, '')
+          .trim()
         if (!cleaned) return null
         // Handle 'type X' entries within named exports
         if (cleaned.startsWith('type ')) return null
@@ -256,7 +266,7 @@ function isComponentName(name) {
   // Skip type-like names and data types
   if (['SlideData', 'Stat', 'Feature', 'UseCase', 'Step', 'StepButton'].includes(name)) return false
   // Skip known non-components (config exports, variant maps, internal providers, etc.)
-  const nonComponents = ['INTENT_ARIA_MAP', 'DesignTokenProvider', 'DesignTokenCtx']
+  const nonComponents = ['INTENT_ARIA_MAP', 'DesignTokenProvider', 'DesignTokenCtx', 'Tag']
   if (nonComponents.includes(name)) return false
   return true
 }
@@ -1003,26 +1013,55 @@ const CONFIG_TO_COMPONENT = {
  * Tags from aliases.tsx use createAlias(tagName).
  */
 const TAG_TO_COMPONENT = {
+  // Container aliases
   div: 'Div',
   section: 'Section',
   aside: 'Aside',
   main: 'Main',
   nav: 'Nav',
-  header: 'Header',
-  footer: 'FooterTag',
+  article: 'Article',
+  // Text aliases
   span: 'Span',
+  strong: 'Strong',
   p: 'P',
+  em: 'Em',
+  small: 'Small',
+  mark: 'Mark',
+  // Heading aliases
   h1: 'H1',
   h2: 'H2',
   h3: 'H3',
   h4: 'H4',
   h5: 'H5',
   h6: 'H6',
+  // List aliases
   ul: 'UL',
   li: 'LI',
-  article: 'Article',
-  strong: 'Strong',
   ol: 'Ol',
+  // Definition list aliases
+  dl: 'Dl',
+  dt: 'Dt',
+  dd: 'Dd',
+  // Code & preformatted aliases
+  pre: 'Pre',
+  code: 'Code',
+  blockquote: 'Blockquote',
+  // Media aliases
+  figure: 'Figure',
+  figcaption: 'Figcaption',
+  // Form grouping aliases
+  fieldset: 'Fieldset',
+  legend: 'Legend',
+  // Disclosure aliases
+  details: 'Details',
+  summary: 'Summary',
+  // Misc aliases
+  hr: 'Hr',
+  time: 'Time',
+  address: 'Address',
+  // Legacy aliases
+  header: 'Header',
+  footer: 'FooterTag',
 }
 
 /**
@@ -1105,6 +1144,33 @@ function extractTokensFromVariantsFile() {
           } else {
             i += keyMatch[0].length
           }
+          continue
+        }
+
+        // Handle key: variableName (variable reference instead of inline object)
+        const varRefMatch = configBlock.substring(i).match(/^(\w+)\s*:\s*(\w+)\s*[,\n\r}]/)
+        if (varRefMatch) {
+          const tokenName = varRefMatch[1]
+          const varName = varRefMatch[2]
+          if (!['true', 'false', 'as'].includes(tokenName)) {
+            // Resolve the variable to extract its keys as possible values
+            const varDefRegex = new RegExp(`(?:export\\s+)?const\\s+${varName}\\s*=\\s*\\{`, 's')
+            const varDefMatch = varDefRegex.exec(content)
+            if (varDefMatch) {
+              const varBlock = extractBraceBlock(content, varDefMatch.index + varDefMatch[0].length)
+              if (varBlock) {
+                const values = extractTopLevelKeys(varBlock)
+                tokenValues.set(tokenName, values)
+              } else {
+                // Variable found but block extraction failed — still register the token name
+                tokenValues.set(tokenName, [])
+              }
+            } else {
+              // Variable not found — still register the token name with empty values
+              tokenValues.set(tokenName, [])
+            }
+          }
+          i += varRefMatch[0].length
           continue
         }
       }
@@ -1741,12 +1807,13 @@ function main() {
     }
   }
 
-  // Step 2e: Propagate inheritsTokens from Tag to all createAlias components
+  // Step 2e: Detect Tag aliases created via createAlias() and enrich their registry entries.
   // Tag uses useDesignTokens() and resolves size/density/intent, but aliases (Div, H1, Section, etc.)
   // are in a separate file (aliases.tsx) that doesn't call useDesignTokens directly.
-  // Since aliases just render <Tag>, they inherit all of Tag's token capabilities.
+  // Since aliases just render <Tag as={tagName}>, they inherit all of Tag's token capabilities.
+  const TAG_INHERITED_TOKENS = ['size', 'density', 'intent']
   const tagEntry = registry['Tag']
-  if (tagEntry) {
+  {
     const aliasesPath = path.join(UI_PKG, 'tag/src/aliases.tsx')
     const aliasesContent = readFile(aliasesPath)
     if (aliasesContent) {
@@ -1756,19 +1823,24 @@ function main() {
       let aliasCount = 0
       while ((aliasMatch = aliasRegex.exec(aliasesContent)) !== null) {
         const aliasName = aliasMatch[1]
+        const htmlTag = aliasMatch[2]
         const aliasEntry = registry[aliasName]
-        if (aliasEntry && tagEntry.inheritsTokens.length > 0) {
-          // Merge Tag's inheritsTokens into the alias
-          const existing = new Set(aliasEntry.inheritsTokens)
-          for (const token of tagEntry.inheritsTokens) {
-            existing.add(token)
-          }
-          aliasEntry.inheritsTokens = [...existing]
-          aliasCount++
-        }
+        if (!aliasEntry) continue
+
+        // Set inheritsTokens — always use the canonical list (Tag resolves these from context)
+        const resolvedInherits = tagEntry && tagEntry.inheritsTokens.length > 0
+          ? [...tagEntry.inheritsTokens]
+          : [...TAG_INHERITED_TOKENS]
+        aliasEntry.inheritsTokens = resolvedInherits
+
+        // Set description to clearly mark this as a Tag alias
+        aliasEntry.description = `Tag alias for <${htmlTag}> — inherits all design tokens`
+        aliasEntry._isTagAlias = true
+
+        aliasCount++
       }
       if (aliasCount > 0) {
-        console.log(`\n  Propagated Tag inheritsTokens to ${aliasCount} aliases`)
+        console.log(`\n  Enriched ${aliasCount} Tag aliases with inheritsTokens and description`)
       }
     }
   }
@@ -1777,9 +1849,11 @@ function main() {
   console.log('\nAssigning Atomic Design levels (dependency-depth)...')
   classifyAtomicLevels(registry)
 
-  // Regenerate descriptions with final levels
+  // Regenerate descriptions with final levels (preserve Tag alias custom descriptions)
   for (const entry of Object.values(registry)) {
-    entry.description = generateDescription(entry.name, entry.level, entry.tokens, entry.children)
+    if (!entry._isTagAlias) {
+      entry.description = generateDescription(entry.name, entry.level, entry.tokens, entry.children)
+    }
   }
 
   // Step 3: Build popular chains from components with children
@@ -1906,7 +1980,9 @@ function generateOutput(registry, popularChains) {
                   : ''
               const status = classifyTokenStatus(t)
               const statusStr = status !== 'standard' ? `, status: '${status}'` : ''
-              return `{ name: '${t}', category: '${categorizeToken(t)}'${valuesStr}${statusStr} }`
+              const deprecatedBy = DEPRECATED_TOKENS[t]
+              const deprecatedStr = deprecatedBy ? `, deprecatedBy: '${deprecatedBy}'` : ''
+              return `{ name: '${t}', category: '${categorizeToken(t)}'${valuesStr}${statusStr}${deprecatedStr} }`
             })
             .join(', ')}]`
         : '[]'
@@ -1963,6 +2039,7 @@ export type TokenInfo = {
   category: TokenCategory
   values?: string[]
   status?: TokenStatus
+  deprecatedBy?: string
 }
 
 export type PropInfo = {

@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { getPreset } from './presets'
 
 /**
  * Design Token Context — @ezstart/ui
@@ -51,6 +52,8 @@ const DesignTokenCtx = createContext<DesignTokens>({})
 
 type DesignTokenProviderProps = {
   children: ReactNode
+  /** Apply a named preset (dashboard, landing, form, data, admin) */
+  preset?: string
 } & DesignTokens
 
 /**
@@ -64,6 +67,7 @@ type DesignTokenProviderProps = {
  */
 export function DesignTokenProvider({
   children,
+  preset,
   size,
   density,
   radius,
@@ -72,18 +76,35 @@ export function DesignTokenProvider({
   colorScheme,
 }: DesignTokenProviderProps) {
   const parent = useContext(DesignTokenCtx)
+  const presetTokens = preset ? getPreset(preset) : {}
 
   const merged = useMemo(() => {
+    // Priority: explicit prop > preset > parent context
     const next: DesignTokens = { ...parent }
-    // Only override if explicitly provided (not undefined)
+
+    // Apply preset values (lower priority than explicit props)
+    if (presetTokens.size !== undefined && size === undefined) next.size = presetTokens.size
+    if (presetTokens.density !== undefined && density === undefined)
+      next.density = presetTokens.density
+    if (presetTokens.radius !== undefined && radius === undefined)
+      next.radius = presetTokens.radius
+    if (presetTokens.intent !== undefined && intent === undefined)
+      next.intent = presetTokens.intent
+    if (presetTokens.variant !== undefined && variant === undefined)
+      next.variant = presetTokens.variant
+    if (presetTokens.colorScheme !== undefined && colorScheme === undefined)
+      next.colorScheme = presetTokens.colorScheme
+
+    // Apply explicit props (highest priority)
     if (size !== undefined) next.size = size
     if (density !== undefined) next.density = density
     if (radius !== undefined) next.radius = radius
     if (intent !== undefined) next.intent = intent
     if (variant !== undefined) next.variant = variant
     if (colorScheme !== undefined) next.colorScheme = colorScheme
+
     return next
-  }, [parent, size, density, radius, intent, variant, colorScheme])
+  }, [parent, preset, size, density, radius, intent, variant, colorScheme])
 
   return <DesignTokenCtx.Provider value={merged}>{children}</DesignTokenCtx.Provider>
 }

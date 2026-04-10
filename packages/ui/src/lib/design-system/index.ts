@@ -8,3 +8,4 @@
 export * from './tokens'
 export * from './variants'
 export { DesignTokenProvider, useDesignTokens, type DesignTokens } from './DesignTokenContext'
+export { designPresets, getPreset } from './presets'

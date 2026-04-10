@@ -1,6 +1,6 @@
 /* GreenPulse Theme Variables */
 
-:root {
+[data-app="green-pulse"] {
   /* Primary green for eco/sustainability theme */
   --gp-primary: oklch(0.6 0.18 145);
   --gp-primary-foreground: oklch(0.98 0.01 145);
@@ -19,7 +19,7 @@
   --gp-gradient-to: oklch(0.6 0.15 240); /* blue-600 */
 }
 
-.dark {
+[data-app="green-pulse"].dark {
   /* Primary green for eco/sustainability theme (dark mode) */
   --gp-primary: oklch(0.7 0.2 145);
   --gp-primary-foreground: oklch(0.15 0.05 145);

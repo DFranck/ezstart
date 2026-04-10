@@ -46,7 +46,9 @@ import { Div } from '../tag/src/aliases'
  * </Hero>
  */
 
-export interface HeroProps extends VariantProps<typeof heroVariants> {
+export interface HeroProps extends Omit<VariantProps<typeof heroVariants>, 'alignment'> {
+  /** @deprecated Use align instead */
+  alignment?: 'left' | 'center' | 'right' | null
   /** Unique ID for the section */
   id?: string
   /** Section size from Tag component */
@@ -79,6 +81,8 @@ export interface HeroProps extends VariantProps<typeof heroVariants> {
   brightness?: 'light' | 'dark' | 'auto'
   /** Custom content (overrides title/subtitle/paragraph) */
   children?: React.ReactNode
+  /** Standard align token — shorthand for alignment */
+  align?: 'left' | 'center' | 'right'
 }
 
 export const Hero = ({
@@ -98,9 +102,12 @@ export const Hero = ({
   overlayOpacity = 30,
   brightness = 'auto',
   height,
+  /** @deprecated Use align instead */
   alignment,
+  align,
   children,
 }: HeroProps) => {
+  const resolvedAlignment = align ?? alignment ?? 'center'
   const { isMobile } = useDevice()
 
   // Auto-detect brightness based on media presence
@@ -173,7 +180,7 @@ export const Hero = ({
   )
 
   return (
-    <Section id={id} size={size} className={cn(heroVariants({ height, alignment }), className)}>
+    <Section id={id} size={size} className={cn(heroVariants({ height, alignment: resolvedAlignment }), className)}>
       {/* ✅ Center mode: media as background overlay */}
       {layout === 'center' && (
         <>

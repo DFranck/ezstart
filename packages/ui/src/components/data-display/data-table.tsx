@@ -19,6 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Button } from '../button'
 import { Input } from '../forms/input'
 import { cn } from '../../lib/utils'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
 // ─── DataTable Column Header ─────────────────────────────────────────────────
 
@@ -114,8 +115,10 @@ interface DataTableProps<TData, TValue> {
   initialSorting?: SortingState
   /** Additional class for the wrapper */
   className?: string
-  /** Table size variant (compact | default | comfortable) */
+  /** @deprecated Use `density` instead. tableSize will be removed in a future version. */
   tableSize?: 'compact' | 'default' | 'comfortable'
+  /** Density token — controls spacing. Inherits from parent DesignTokenProvider. */
+  density?: 'compact' | 'default' | 'comfortable'
   /** Max height for scrollable table body (e.g. '300px') */
   maxHeight?: string
   /** Make the header sticky when scrolling (requires maxHeight) */
@@ -132,9 +135,16 @@ function DataTable<TData, TValue>({
   initialSorting,
   className,
   tableSize,
+  density,
   maxHeight,
   stickyHeader,
 }: DataTableProps<TData, TValue>) {
+  const inherited = useDesignTokens()
+  // density wins over tableSize; inherited context is fallback
+  const resolvedDensity = density ?? tableSize ?? inherited.density ?? 'default'
+  // Map 'relaxed' (standard token value) to 'comfortable' (DataTable-specific)
+  const mappedDensity = resolvedDensity === 'relaxed' ? 'comfortable' : resolvedDensity
+
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? [])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
@@ -174,7 +184,7 @@ function DataTable<TData, TValue>({
           className={maxHeight ? 'overflow-y-auto [&>div]:overflow-visible' : undefined}
           style={maxHeight ? { maxHeight } : undefined}
         >
-        <Table size={tableSize}>
+        <Table size={mappedDensity as 'compact' | 'default' | 'comfortable'}>
           <TableHeader className={stickyHeader ? 'sticky top-0 z-10 bg-background' : undefined}>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>

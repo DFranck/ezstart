@@ -4,6 +4,7 @@ import { forwardRef, useState, useEffect } from 'react'
 import { AnimatedIconToggle } from '../animated-icon-toggle'
 import { Button } from '../button'
 import { Input } from './input'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { cn } from '../../lib/utils'
 import { CheckIcon, XIcon } from 'lucide-react'
 
@@ -46,6 +47,8 @@ export interface PasswordInputProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   'type' | 'size'
 > {
+  /** Size token — passed to inner Input and toggle Button. Inherits from DesignTokenProvider if not set. */
+  size?: string
   /** Show password visibility toggle button */
   showToggle?: boolean
   /** Show password strength indicator */
@@ -91,6 +94,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   (
     {
       className,
+      size: sizeProp,
       showToggle = true,
       showStrength = false,
       showRequirements = false,
@@ -100,6 +104,8 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     },
     ref
   ) => {
+    const inherited = useDesignTokens()
+    const size = (sizeProp ?? inherited.size) as React.ComponentProps<typeof Input>['size']
     const [showPassword, setShowPassword] = useState(false)
     const [strength, setStrength] = useState(calculateStrength('', requirements))
 
@@ -123,6 +129,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             {...props}
             value={value}
             type={showPassword ? 'text' : 'password'}
+            size={size}
             className={cn('pr-10', className)}
             ref={ref}
           />

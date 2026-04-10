@@ -234,18 +234,41 @@ export default function InspectorChainPage({
                   )}
                   {entry.tokens.length > 0 && (
                     <Div className="flex flex-wrap gap-1">
-                      {entry.tokens.map(token => (
-                        <Badge
-                          key={token.name}
-                          variant={token.category === 'structural' ? 'outline' : 'secondary'}
-                          size="sm"
-                        >
-                          {token.name}
-                          <Span className="ml-1 text-muted-foreground text-[10px]">
-                            {token.category === 'structural' ? 'auto-drill' : 'per-component'}
-                          </Span>
-                        </Badge>
-                      ))}
+                      {entry.tokens.map(token => {
+                        const isDeprecated = !!token.deprecatedBy
+                        return (
+                          <Badge
+                            key={token.name}
+                            variant={
+                              isDeprecated
+                                ? 'secondary'
+                                : token.category === 'structural'
+                                  ? 'outline'
+                                  : 'secondary'
+                            }
+                            size="sm"
+                            className={isDeprecated ? 'opacity-60' : undefined}
+                            title={
+                              isDeprecated
+                                ? `Deprecated — use "${token.deprecatedBy}" instead`
+                                : undefined
+                            }
+                          >
+                            <Span className={isDeprecated ? 'line-through' : undefined}>
+                              {token.name}
+                            </Span>
+                            {isDeprecated ? (
+                              <Span className="ml-1 text-muted-foreground text-[10px]">
+                                &rarr; {token.deprecatedBy}
+                              </Span>
+                            ) : (
+                              <Span className="ml-1 text-muted-foreground text-[10px]">
+                                {token.category === 'structural' ? 'auto-drill' : 'per-component'}
+                              </Span>
+                            )}
+                          </Badge>
+                        )
+                      })}
                     </Div>
                   )}
                   {entry.providesTokens.length > 0 && (

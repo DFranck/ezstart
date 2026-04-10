@@ -86,6 +86,47 @@ Each token has pre-built CSS class maps in `tokens.ts`:
 | `intent`  | `intentContainer`                                | `intentText`           |
 | `radius`  | `radius`                                         | n/a                    |
 
+## Presets
+
+Presets are predefined token combinations for common layout types. They set sensible defaults at the layout level so individual components inherit the right tokens automatically.
+
+### Available Presets
+
+| Preset      | density   | size      | radius    | Use case                          |
+| ----------- | --------- | --------- | --------- | --------------------------------- |
+| `dashboard` | compact   | default   | md        | Dashboard layouts, admin panels   |
+| `landing`   | relaxed   | lg        | lg        | Landing pages, marketing          |
+| `form`      | default   | default   | default   | Form-heavy pages                  |
+| `data`      | compact   | sm        | sm        | Data tables, dense data views     |
+| `admin`     | compact   | default   | default   | Admin panels, back-office         |
+
+### Usage
+
+```tsx
+// Apply at layout level — all children inherit
+<DesignTokenProvider preset="dashboard">
+  {children}
+</DesignTokenProvider>
+
+// Explicit props override preset values
+<DesignTokenProvider preset="dashboard" size="lg">
+  {/* density=compact, radius=md from preset; size=lg from explicit prop */}
+</DesignTokenProvider>
+
+// Per-app preset
+<DesignTokenProvider preset="data">
+  <DataTable />  {/* inherits compact density, sm size */}
+</DesignTokenProvider>
+```
+
+### Priority
+
+```
+explicit prop > preset > parent context > component default
+```
+
+A preset fills in token values only where the explicit prop is not provided. This means you can use a preset as a base and override individual tokens as needed.
+
 ## Wiring Checklist
 
 ### Provider (container pushes tokens down)

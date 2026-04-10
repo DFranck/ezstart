@@ -1,6 +1,6 @@
 /* EZStart Theme Variables */
 
-:root {
+[data-app="ezstart"] {
   --ezstart: oklch(0.5413 0.2466 293.01);
   --brand: oklch(0.5413 0.2466 293.01);
   --brand-foreground: oklch(0.985 0 0);
@@ -24,7 +24,7 @@
   --platform-vercel-foreground: oklch(0.98 0 0);
 }
 
-.dark {
+[data-app="ezstart"].dark {
   --ezstart: oklch(0.5413 0.2466 293.01);
   --brand: oklch(0.5413 0.2466 293.01);
   --brand-foreground: oklch(0.985 0 0);

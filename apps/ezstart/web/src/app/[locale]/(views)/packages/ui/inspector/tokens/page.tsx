@@ -156,12 +156,18 @@ export default function TokenLexiconPage() {
   const tokenData = useMemo(() => {
     const map = new Map<
       string,
-      { components: string[]; allValues: Set<string>; valuesByComponent: Map<string, string[]> }
+      {
+        components: string[]
+        allValues: Set<string>
+        valuesByComponent: Map<string, string[]>
+        deprecatedBy?: string
+      }
     >()
     for (const [tokenName] of Object.entries(TOKEN_LEXICON)) {
       const components: string[] = []
       const allValues = new Set<string>()
       const valuesByComponent = new Map<string, string[]>()
+      let deprecatedBy: string | undefined
 
       for (const entry of Object.values(componentRegistry)) {
         const tokenMatch = entry.tokens.find(t => t.name === tokenName)
@@ -174,9 +180,15 @@ export default function TokenLexiconPage() {
             valuesByComponent.set(entry.name, tokenMatch.values)
             for (const v of tokenMatch.values) allValues.add(v)
           }
+          if (tokenMatch?.deprecatedBy) deprecatedBy = tokenMatch.deprecatedBy
         }
       }
-      map.set(tokenName, { components: components.sort(), allValues, valuesByComponent })
+      map.set(tokenName, {
+        components: components.sort(),
+        allValues,
+        valuesByComponent,
+        deprecatedBy,
+      })
     }
     return map
   }, [])
@@ -203,14 +215,24 @@ export default function TokenLexiconPage() {
         const components = data?.components ?? []
         const dynamicValues = data ? [...data.allValues].sort() : []
         const valuesByComponent = data?.valuesByComponent ?? new Map()
+        const deprecatedBy = data?.deprecatedBy
         // Use dynamic values from registry, fallback to hardcoded
         const displayValues = dynamicValues.length > 0 ? dynamicValues : (token.values ?? [])
 
         return (
-          <Card key={name} variant="default">
+          <Card key={name} variant="default" className={deprecatedBy ? 'opacity-75' : undefined}>
             <CardHeader className="pb-3">
               <Div className="flex items-center gap-2 flex-wrap">
-                <H2 className="text-lg font-semibold font-mono">{name}</H2>
+                <H2
+                  className={`text-lg font-semibold font-mono${deprecatedBy ? ' line-through text-muted-foreground' : ''}`}
+                >
+                  {name}
+                </H2>
+                {deprecatedBy && (
+                  <Badge variant="warning" size="sm">
+                    deprecated
+                  </Badge>
+                )}
                 <Badge variant={statusBadgeVariant[token.status]} size="sm">
                   {token.status}
                 </Badge>
@@ -223,6 +245,12 @@ export default function TokenLexiconPage() {
                   </Badge>
                 )}
               </Div>
+              {deprecatedBy && (
+                <P className="text-sm text-warning mt-1">
+                  Deprecated — use{' '}
+                  <Span className="font-mono font-semibold">{deprecatedBy}</Span> instead
+                </P>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               <P className="text-sm text-muted-foreground">{token.purpose}</P>

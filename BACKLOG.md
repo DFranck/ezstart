@@ -121,7 +121,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2.5 — Infra (2026-04-05)
 
-77. [ ] SSR auth middleware — `createProtectedMiddleware()` dans auth-sdk/rbac pour Next.js middleware. Zéro flash client, config déclarative (publicPaths, protectedPaths, adminPaths+roles). Remplace les AuthGuard/RequireRole client-side pour l'auth check. Toutes les apps utilisent le même pattern.
+77. [x] SSR auth middleware — `createProtectedMiddleware()` dans auth-sdk/middleware. Config déclarative (publicPaths, protectedPaths, adminPaths+roles). (already done)
 
 #### P2.6 — Layout & Design System (2026-04-05)
 
@@ -136,9 +136,9 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 #### P2.7 — EZStart Hub (2026-04-06)
 
-85. [ ] Rename /ez-libs → /packages — Documentation publique des packages (@ezstart/ui, auth-sdk, etc.)
-86. [ ] Rename /ez-features → /tools — Micro-apps standalone (QR, CV, business card) avec free/pro
-87. [ ] Admin hub centralisé — Fusionner /monitoring dans /admin, ajouter tabs EZAuth + EZPay
+85. [x] Rename /ez-libs → /packages — Documentation publique des packages (@ezstart/ui, auth-sdk, etc.) (already done)
+86. [x] Rename /ez-features → /tools — Micro-apps standalone (QR, CV, business card) avec free/pro (already done)
+87. [x] Admin hub centralisé — Monitoring + EZAuth + EZPay + AI tabs dans /admin. (already done)
 88. [ ] Landing page pro — Refonte home avec sections portfolio, tools, packages, apps
 
 #### P2.8 — SDK Admin Dashboards (2026-04-06)
@@ -157,7 +157,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 98. [x] ai-sdk `<AILayout>` — Composant client agnostique : wrappe Thread UI + logique AI (providers, cascade, streaming, conversations). Hook `useAIThread()` orchestre tout. Testé via /testchat dans GP. (done 2026-04-09)
 99. [ ] chat-sdk `<ChatLayout>` (futur) — Même pattern: wrappe Thread de packages/ui + logique chat temps réel (Socket.IO, rooms, typing indicators, presence, P2P). Les deux SDKs partagent le même design system via packages/ui.
 100.  [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
-101.  [ ] packages/ui: `<ImageCropper>` — composant réutilisable de crop d'image (zoom, rotation, presets ratio, responsive). Utilisé par FengShui (plan), gacha-analyzer (screenshots), profile pictures, etc. Basé sur react-easy-crop, intégré au design-system.
+101.  [x] packages/ui: `<ImageCropper>` — composant réutilisable dans packages/ui/src/components/media/image-cropper.tsx, exporté dans index. (already done)
 
 #### P2.10 — AI Centralization (2026-04-08)
 
@@ -196,10 +196,25 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 128. [x] GlobalProviderAccess enforcement — Chat endpoint vérifie isAppAuthorizedForProvider avant envoi. Explicit providerId → 403 si non autorisé. Cascade filtre les providers non autorisés. (done 2026-04-09). Reste: UI app masquer providers non-autorisés.
 129. [ ] Provider status/health dans l'UI — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
 130. [ ] utm_source tracking — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
-131. [x] Design System Inspector MVP — /packages/ui/inspector avec registry 14 composants, chaîne dynamique [...chain], contrôles density/size/variant/colorScheme, preview avec niveaux colorés, token flow diagram. (done 2026-04-10). Reste: auto-generate registry via AST script, props compatibility checker (vert/rouge drill vs missing).
-132. [ ] QuickSignUpForm/SignUpForm density — Le prop density existe mais n'impacte que le form spacing interne. Card/CardContent ont leurs propres paddings non affectés. Harmoniser density à travers tout le composant.
-133. [ ] Hide provider selector for non-admin users — Le combobox "Gemini 2.5 Flash" dans le chat ne doit être visible que par les admins. Les users voient juste "l'IA" sans savoir quel provider tourne. Seuls les admins gèrent les providers dans le panel admin.
+131. [x] Design System Inspector MVP — /packages/ui/inspector avec registry 210 composants, chaîne dynamique [...chain], contrôles dynamiques, preview avec niveaux atomiques, token flow diagnostic (rouge/vert/orange), hierarchy explorer, token lexicon. Per-component children detection dans le generator. (done 2026-04-10)
+132. [x] QuickSignUpForm density — DesignTokenProvider density wrapper pour propagation auto aux Card/CardContent/Input enfants. (done 2026-04-10)
+133. [x] Hide provider selector for non-admin users — AISelector visible uniquement pour admin/superadmin via useAuth(). (done 2026-04-10)
 134. [x] packages/ui atomic levels — Re-exports par niveau: base/ (46 primitifs), composed/ (33 composés), complex/ (10 complexes). Subpath exports dans package.json. Fichiers non déplacés, imports existants inchangés. (done 2026-04-09)
+
+#### P2.13 — Design Token System Refactoring (2026-04-10)
+
+135. [x] Registry generator refactor — Tag alias detection (38 aliases), token classification (standard/radix/candidate/specific), `deprecatedBy` field, multi-line export bug fix. 227 components registered. (done 2026-04-10)
+136. [x] Tag aliases expansion — 18 new aliases (Figure, Blockquote, Code, Pre, Fieldset, Legend, Details, Summary, Em, Small, Mark, Dl, Dt, Dd, Figcaption, Hr, Time, Address). CVA variants + types + exports. (done 2026-04-10)
+137. [x] DesignTokenProvider on containers — Modal (size), Dialog (radius), Sheet (size+density), AlertDialog (density), Accordion (density+size), Tabs (size+density). 6 new providers. (done 2026-04-10)
+138. [x] Context migration — Accordion, Tabs, Label, Checkbox now read inherited tokens via useDesignTokens() instead of hardcoded values. Fallback to previous defaults. (done 2026-04-10)
+139. [x] DataTable density deprecation — `density` prop added (standard token), `tableSize` marked @deprecated. Maps `relaxed`→`comfortable`. 100% backwards compatible. (done 2026-04-10)
+140. [x] Migrate deprecated tokens — Spinner textSize @deprecated, SkeletonText spacing→density, CommandGroup headingVariant→intent, CTA bgColor→intent, Hero alignment→align. FeatureGrid already uses standard `variant`. (done 2026-04-10)
+141. [x] Unify size scale — `xs` and `xl` added to Button/Badge. `default` alias for `md` in Spinner/Modal/FloatingPanel. All 5 standard values supported everywhere. Old values (@deprecated) still work. (done 2026-04-10)
+142. [x] Add providers to remaining organisms — Carousel (size+density), PasswordInput (size), Form (FormTokens wrapper). (done 2026-04-10)
+143. [x] Inspector deprecatedBy display — Strikethrough + `→ replacement` on main page, chain details, and token lexicon. Warning badge on deprecated token cards. (done 2026-04-10)
+144. [x] Theme presets — `preset` prop on DesignTokenProvider. 5 presets: dashboard, landing, form, data, admin. Priority: explicit > preset > parent. (done 2026-04-10)
+145. [x] Theme CSS scoping — `[data-app="xxx"]` selector on all 6 theme CSS files. `data-app` attribute on `<html>` in all 8 apps. globals.css unscoped (shared defaults). (done 2026-04-10)
+146. [x] FengShui /health fix — `/health` excluded from middleware matcher (no backend). (done 2026-04-10)
 
 #### P3 — DevOps / Testing
 
