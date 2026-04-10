@@ -360,60 +360,55 @@ export default function InspectorIndexPage() {
         </Section>
       )}
 
-      {/* Tokens */}
+      {/* Tokens — compact badge grid */}
       <Section className="space-y-3">
-        <H2 className="text-lg font-semibold">Tokens</H2>
-        <Div className="space-y-1">
-          {tokenStats.map(([name, stat]) => (
-            <Div
-              key={name}
-              onClick={() => setActiveTokenFilter(activeTokenFilter === name ? null : name)}
-              className={`flex items-center gap-3 px-3 py-1.5 rounded-md cursor-pointer transition-colors ${
-                activeTokenFilter === name
-                  ? 'bg-primary/10 border border-primary/30'
-                  : 'hover:bg-muted/50'
-              }`}
-            >
-              <Span className="font-mono text-sm w-28 shrink-0">{name}</Span>
-              <Badge variant={categoryBadgeVariant[stat.category] || 'outline'} size="sm">
-                {stat.category}
+        <Div className="flex items-center gap-3">
+          <H2 className="text-lg font-semibold">Tokens</H2>
+          {activeTokenFilter && (
+            <Div className="flex items-center gap-2">
+              <Badge variant="info" size="sm">
+                {activeTokenFilter}: {filteredComponentCount} component
+                {filteredComponentCount !== 1 ? 's' : ''}
               </Badge>
-              <Span className="text-xs text-muted-foreground">
-                {stat.explicit} component{stat.explicit !== 1 ? 's' : ''}
-              </Span>
-              <Span className="text-xs text-muted-foreground">
-                {stat.providers} provider{stat.providers !== 1 ? 's' : ''}
-              </Span>
-              <Span className="text-xs text-muted-foreground">
-                {stat.consumers} consumer{stat.consumers !== 1 ? 's' : ''}
-              </Span>
-              {activeTokenFilter === name && (
-                <Badge variant="outline" size="sm" className="ml-auto text-[10px]">
-                  Active
-                </Badge>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveTokenFilter(null)}
+                className="text-xs h-6 px-2"
+              >
+                Clear
+              </Button>
             </Div>
-          ))}
+          )}
+        </Div>
+        <Div className="flex flex-wrap gap-1.5">
+          {tokenStats.map(([name, stat]) => {
+            const total = stat.explicit + stat.providers + stat.consumers
+            const isActive = activeTokenFilter === name
+            const details = [
+              stat.explicit > 0 && `${stat.explicit} props`,
+              stat.providers > 0 && `${stat.providers}P`,
+              stat.consumers > 0 && `${stat.consumers}C`,
+            ]
+              .filter(Boolean)
+              .join(' · ')
+
+            return (
+              <Badge
+                key={name}
+                variant={isActive ? 'default' : categoryBadgeVariant[stat.category] || 'outline'}
+                size="sm"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setActiveTokenFilter(isActive ? null : name)}
+                title={`${name} (${stat.category}) — ${stat.explicit} components, ${stat.providers} providers, ${stat.consumers} consumers`}
+              >
+                <Span className="font-mono">{name}</Span>
+                <Span className="ml-1 opacity-60">{details || total}</Span>
+              </Badge>
+            )
+          })}
         </Div>
       </Section>
-
-      {/* Token filter indicator */}
-      {activeTokenFilter && filteredComponentCount !== null && (
-        <Div className="flex items-center gap-2">
-          <Badge variant="info">
-            Showing {filteredComponentCount} component
-            {filteredComponentCount !== 1 ? 's' : ''} with {activeTokenFilter}
-          </Badge>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setActiveTokenFilter(null)}
-            className="text-xs"
-          >
-            Clear filter
-          </Button>
-        </Div>
-      )}
 
       {/* Tree Explorer */}
       <Section className="space-y-3">
