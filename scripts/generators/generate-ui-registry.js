@@ -211,11 +211,8 @@ function isComponentName(name) {
   if (name.includes('VariantConfig') || name.includes('variantConfig')) return false
   // Skip type-like names and data types
   if (['SlideData', 'Stat', 'Feature', 'UseCase', 'Step', 'StepButton'].includes(name)) return false
-  // Skip known non-components (config exports, variant maps, etc.)
-  const nonComponents = [
-    'INTENT_ARIA_MAP',
-    // variant config objects (lowercase start but caught by PascalCase check anyway)
-  ]
+  // Skip known non-components (config exports, variant maps, internal providers, etc.)
+  const nonComponents = ['INTENT_ARIA_MAP', 'DesignTokenProvider', 'DesignTokenCtx']
   if (nonComponents.includes(name)) return false
   return true
 }
@@ -1382,6 +1379,32 @@ function main() {
   }
 
   console.log(`  Detected ${compoundCount} compound component groups`)
+
+  // Step 2d: Clean up provides/inherits for compound groups (file-level scan bleed)
+  // Card.tsx has DesignTokenProvider (in Card) and useDesignTokens (in CardHeader etc.)
+  // File-level scan wrongly attributes both to all exports. Fix:
+  // - Root that provides: clear its inheritsTokens (children inherit, not the root)
+  // - Children that don't provide: clear their providesTokens (root provides, not children)
+  for (const { root, children } of compoundGroups) {
+    const rootEntry = registry[root]
+    if (!rootEntry) continue
+
+    // Root is provider → doesn't inherit (that's from children in same file)
+    if (rootEntry.providesTokens.length > 0 && rootEntry.inheritsTokens.length > 0) {
+      console.log(`  Cleaned inheritsTokens from provider root: ${root}`)
+      rootEntry.inheritsTokens = []
+    }
+
+    // Children don't provide (that's from root in same file)
+    for (const childName of children) {
+      const childEntry = registry[childName]
+      if (!childEntry) continue
+      if (childEntry.providesTokens.length > 0 && rootEntry.providesTokens.length > 0) {
+        console.log(`  Cleaned providesTokens from compound child: ${childName}`)
+        childEntry.providesTokens = []
+      }
+    }
+  }
 
   // Step 3: Build popular chains from components with children
   const popularChains = buildPopularChains(registry)
