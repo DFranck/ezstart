@@ -74,13 +74,18 @@ function TagComponent<T extends SupportedAs = 'span'>({
   const tag = (as ?? 'span') as SupportedAs
   const inherited = useDesignTokens()
 
-  // Resolve intent: explicit prop wins, then context, then undefined (let CVA default handle it)
+  // Resolve design tokens: explicit prop wins, then context, then undefined (let CVA default)
   const propsRecord = props as Record<string, unknown>
   const resolvedIntent = (propsRecord.intent as string | undefined) ?? inherited.intent
-  const resolvedProps = useMemo(
-    () => (resolvedIntent !== undefined ? { ...props, intent: resolvedIntent } : props),
-    [props, resolvedIntent]
-  )
+  const resolvedSize = (propsRecord.size as string | undefined) ?? inherited.size
+  const resolvedDensity = (propsRecord.density as string | undefined) ?? inherited.density
+  const resolvedProps = useMemo(() => {
+    const merged = { ...props } as Record<string, unknown>
+    if (resolvedIntent !== undefined) merged.intent = resolvedIntent
+    if (resolvedSize !== undefined) merged.size = resolvedSize
+    if (resolvedDensity !== undefined) merged.density = resolvedDensity
+    return merged
+  }, [props, resolvedIntent, resolvedSize, resolvedDensity])
 
   const variantFn = tagVariants[tag as keyof typeof tagVariants]
   const variantClass = useMemo(
