@@ -216,6 +216,13 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 145. [x] Theme CSS scoping — `[data-app="xxx"]` selector on all 6 theme CSS files. `data-app` attribute on `<html>` in all 8 apps. globals.css unscoped (shared defaults). (done 2026-04-10)
 146. [x] FengShui /health fix — `/health` excluded from middleware matcher (no backend). (done 2026-04-10)
 
+#### P2.14 — Monitoring Enhancements (2026-04-11)
+
+147. [ ] Recharts graphs on /monitoring/health — latency p95 trending (7d/30d), uptime % timeline, error rate per service. Data already in MongoDB (HealthCheck model with responseTime + status + timestamp, TTL 30d). Use existing Recharts from packages/ui.
+148. [ ] Monitoring app-scoping (future) — Currently superadmin-only in EZStart. Each app could have `/admin/monitoring` filtered by appName. Requires: API query param `?appName=ezbill`, SDK component `<MonitoringDashboard appName="ezbill" />`. Low priority — only 1 superadmin user today.
+149. [ ] Monitoring package extraction (future) — Extract SystemOverview + hooks from ezstart/monitoring into `packages/monitoring/client` (UI) + keep `packages/monitoring` (types/collectors). Requires abstracting hardcoded project list. Blocked by: app-scoping design decision.
+150. [ ] CI audit trending (future) — Run check:dead-code, check:size, check:i18n in GitHub Actions. Parse results → store in MongoDB. Dashboard shows score evolution over time. Currently audits.json is static (score 96.6/100). Low priority while score is high.
+
 #### P3 — DevOps / Testing
 
 73. [x] Test coverage baseline — setup: @ezstart/test-utils package exists with vitest config factory, MongoDB memory server, seed helpers. Per-app test writing tracked in individual app backlogs.

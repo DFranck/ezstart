@@ -1,9 +1,14 @@
 'use client'
 
 import {
+  Badge,
   Card,
   CardContent,
   CardHeader,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
   Div,
   H3,
   P,
@@ -23,11 +28,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Legend,
   Area,
   AreaChart,
+  ReferenceLine,
 } from 'recharts'
 import { callApi } from '@/config/api'
 
@@ -69,8 +73,8 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
       if (!res.ok) throw new Error('Failed to fetch project history')
       return res.data
     },
-    staleTime: 60000, // 1 minute
-    refetchInterval: 300000, // 5 minutes
+    staleTime: 60000,
+    refetchInterval: 300000,
   })
 
   if (isLoading) {
@@ -104,49 +108,52 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
     )
   }
 
-  // Merge all services data by timestamp
-  const timeseriesMap = new Map<string, any>()
+  // Merge all services data by timestamp (rounded to nearest minute for alignment)
+  const timeseriesMap = new Map<string, Record<string, unknown>>()
+
+  const roundToMinute = (ts: string) => {
+    const d = new Date(ts)
+    d.setSeconds(0, 0)
+    return d
+  }
 
   data.services.forEach(service => {
     service.history.forEach(point => {
-      const timestamp = new Date(point.timestamp).toISOString()
-      const time = new Date(point.timestamp).toLocaleTimeString('en-US', {
+      const rounded = roundToMinute(point.timestamp)
+      const key = rounded.toISOString()
+      const time = rounded.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
       })
 
-      if (!timeseriesMap.has(timestamp)) {
-        timeseriesMap.set(timestamp, {
+      if (!timeseriesMap.has(key)) {
+        timeseriesMap.set(key, {
           timestamp: time,
-          fullTimestamp: new Date(point.timestamp).toLocaleString(),
+          fullTimestamp: rounded.toLocaleString(),
         })
       }
 
-      const entry = timeseriesMap.get(timestamp)!
+      const entry = timeseriesMap.get(key)!
       const serviceLabel = service.serviceId.replace(`${projectId}-`, '')
 
-      // Add response time
       if (point.responseTime !== null) {
         entry[`${serviceLabel}-responseTime`] = point.responseTime
       }
-
-      // Add status (1 = healthy, 0 = unhealthy)
       entry[`${serviceLabel}-status`] = point.status === 'healthy' ? 1 : 0
     })
   })
 
-  // Convert to array and sort by timestamp
   const chartData = Array.from(timeseriesMap.values()).sort(
-    (a, b) => new Date(a.fullTimestamp).getTime() - new Date(b.fullTimestamp).getTime()
+    (a, b) =>
+      new Date(a.fullTimestamp as string).getTime() - new Date(b.fullTimestamp as string).getTime()
   )
 
-  // Sample data if too many points (max 60 points for readability)
   const sampledData =
     chartData.length > 60
       ? chartData.filter((_, i) => i % Math.ceil(chartData.length / 60) === 0)
       : chartData
 
-  // Calculate overall stats
+  // Stats
   const overallStats = data.services.reduce(
     (acc, service) => {
       acc.totalChecks += service.totalChecks
@@ -170,10 +177,35 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
       ? Math.round(overallStats.totalResponseTime / overallStats.responseTimeCount)
       : null
 
-  const colors = {
-    api: 'hsl(var(--chart-1))',
-    web: 'hsl(var(--chart-2))',
-    status: 'hsl(var(--chart-3))',
+  const allResponseTimes = data.services
+    .flatMap(s => s.history.map(h => h.responseTime))
+    .filter((rt): rt is number => rt !== null)
+    .sort((a, b) => a - b)
+
+  const p50ResponseTime =
+    allResponseTimes.length > 0 ? allResponseTimes[Math.floor(allResponseTimes.length * 0.5)] : null
+
+  const p95ResponseTime =
+    allResponseTimes.length > 0
+      ? allResponseTimes[Math.floor(allResponseTimes.length * 0.95)]
+      : null
+
+  // Explicit hex colors for SVG compatibility
+  // (CSS lab()/oklch() theme vars don't work in SVG stroke/fill)
+  const COLORS = {
+    api: '#6366f1',
+    web: '#22c55e',
+    p95: '#f97316',
+  }
+
+  const responseTimeConfig: ChartConfig = {
+    'api-responseTime': { label: 'API Response Time', color: COLORS.api },
+    'web-responseTime': { label: 'WEB Response Time', color: COLORS.web },
+  }
+
+  const statusConfig: ChartConfig = {
+    'api-status': { label: 'API Status', color: COLORS.api },
+    'web-status': { label: 'WEB Status', color: COLORS.web },
   }
 
   return (
@@ -182,7 +214,7 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
         <Div className="flex items-start justify-between">
           <Div>
             <H3 size="h5">{projectName} - Trending Metrics</H3>
-            <Div className="flex gap-6 mt-2 text-sm">
+            <Div className="flex flex-wrap gap-x-6 gap-y-1 mt-2 text-sm">
               <P className="text-muted-foreground">
                 Overall Uptime:{' '}
                 <Span className="font-semibold text-foreground">{overallUptime}%</Span>
@@ -194,9 +226,34 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                 </Span>
               </P>
               <P className="text-muted-foreground">
+                p50:{' '}
+                <Span className="font-semibold text-foreground">
+                  {p50ResponseTime ? `${p50ResponseTime}ms` : 'N/A'}
+                </Span>
+              </P>
+              <P className="text-muted-foreground">
+                p95:{' '}
+                <Span className="font-semibold text-foreground text-warning">
+                  {p95ResponseTime ? `${p95ResponseTime}ms` : 'N/A'}
+                </Span>
+              </P>
+              <P className="text-muted-foreground">
                 Total Checks:{' '}
                 <Span className="font-semibold text-foreground">{overallStats.totalChecks}</Span>
               </P>
+            </Div>
+            <Div className="flex gap-2 mt-2">
+              <Badge
+                variant={
+                  Number(overallUptime) >= 99
+                    ? 'default'
+                    : Number(overallUptime) >= 95
+                      ? 'secondary'
+                      : 'destructive'
+                }
+              >
+                {hours <= 24 ? '24h' : hours <= 168 ? '7d' : '30d'}: {overallUptime}%
+              </Badge>
             </Div>
           </Div>
           <Select value={String(hours)} onValueChange={val => setHours(Number(val))}>
@@ -225,48 +282,56 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
               <H3 size="h6" className="mb-4">
                 Response Time (ms)
               </H3>
-              <ResponsiveContainer width="100%" height={250}>
+              <ChartContainer config={responseTimeConfig} className="h-[250px] w-full">
                 <AreaChart data={sampledData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="timestamp"
+                  <XAxis dataKey="timestamp" className="text-xs" />
+                  <YAxis
+                    yAxisId="api"
+                    orientation="left"
                     className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    stroke={COLORS.api}
+                    tickFormatter={v => `${v}ms`}
                   />
-                  <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: number, name: string) => {
-                      if (name.includes('responseTime')) {
-                        const serviceName = name.replace('-responseTime', '')
-                        return [`${value}ms`, serviceName.toUpperCase()]
-                      }
-                      return [value, name]
-                    }}
+                  <YAxis
+                    yAxisId="web"
+                    orientation="right"
+                    className="text-xs"
+                    stroke={COLORS.web}
+                    tickFormatter={v => `${v}ms`}
+                  />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value, name) => {
+                          const serviceName = String(name).replace('-responseTime', '')
+                          return [`${value}ms`, serviceName.toUpperCase()]
+                        }}
+                      />
+                    }
                   />
                   <Legend />
-                  {data.services.map((service, index) => {
+                  {data.services.map(service => {
                     const serviceLabel = service.serviceId.replace(`${projectId}-`, '')
+                    const color = serviceLabel === 'api' ? COLORS.api : COLORS.web
+                    const axisId = serviceLabel === 'api' ? 'api' : 'web'
                     return (
                       <Area
                         key={service.serviceId}
+                        yAxisId={axisId}
                         type="monotone"
                         dataKey={`${serviceLabel}-responseTime`}
-                        stroke={index === 0 ? colors.api : colors.web}
-                        fill={index === 0 ? colors.api : colors.web}
-                        fillOpacity={0.2}
+                        stroke={color}
+                        fill={color}
+                        fillOpacity={0.15}
                         strokeWidth={2}
+                        connectNulls
                         name={`${serviceLabel.toUpperCase()} Response Time`}
                       />
                     )
                   })}
                 </AreaChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </Div>
 
             {/* Status Chart */}
@@ -274,53 +339,45 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
               <H3 size="h6" className="mb-4">
                 Service Availability
               </H3>
-              <ResponsiveContainer width="100%" height={200}>
+              <ChartContainer config={statusConfig} className="h-[200px] w-full">
                 <LineChart data={sampledData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="timestamp"
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  />
+                  <XAxis dataKey="timestamp" className="text-xs" />
                   <YAxis
                     domain={[0, 1]}
                     ticks={[0, 1]}
                     tickFormatter={value => (value === 1 ? 'UP' : 'DOWN')}
                     className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: number, name: string) => {
-                      if (name.includes('status')) {
-                        const serviceName = name.replace('-status', '')
-                        return [value === 1 ? 'UP' : 'DOWN', serviceName.toUpperCase()]
-                      }
-                      return [value, name]
-                    }}
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value, name) => {
+                          const serviceName = String(name).replace('-status', '')
+                          return [Number(value) === 1 ? 'UP' : 'DOWN', serviceName.toUpperCase()]
+                        }}
+                      />
+                    }
                   />
                   <Legend />
-                  {data.services.map((service, index) => {
+                  {data.services.map(service => {
                     const serviceLabel = service.serviceId.replace(`${projectId}-`, '')
+                    const color = serviceLabel === 'api' ? COLORS.api : COLORS.web
                     return (
                       <Line
                         key={service.serviceId}
                         type="stepAfter"
                         dataKey={`${serviceLabel}-status`}
-                        stroke={index === 0 ? colors.api : colors.web}
+                        stroke={color}
                         strokeWidth={2}
                         dot={false}
+                        connectNulls
                         name={`${serviceLabel.toUpperCase()} Status`}
                       />
                     )
                   })}
                 </LineChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </Div>
           </Div>
         )}

@@ -105,11 +105,7 @@ export interface AuthMiddlewareConfig {
  * Determine the actual auth mode to use based on environment and configuration
  * Same logic as AuthProvider for consistency
  */
-function resolveAuthMode(
-  configuredMode: AuthMode,
-  hostname: string,
-  env: string
-): AuthMode {
+function resolveAuthMode(configuredMode: AuthMode, hostname: string, env: string): AuthMode {
   // Rule 1: Force localStorage in localhost (skip auth checks entirely)
   if (env === 'local') {
     return 'localStorage'
@@ -161,6 +157,13 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
 
   return function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
+
+    // Health check endpoint — returns 200 immediately for monitoring
+    // No auth check, no i18n redirect, no locale detection
+    if (pathname === '/health') {
+      return new NextResponse('OK', { status: 200 })
+    }
+
     const currentUrl = request.nextUrl.clone()
     const hostname = currentUrl.hostname
 
@@ -201,7 +204,6 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
         pathWithoutLocale === protectedPath || pathWithoutLocale.startsWith(`${protectedPath}/`)
       )
     })
-
 
     if (isProtectedPath) {
       // localStorage mode: Skip middleware auth checks (client-side handles auth)
@@ -257,7 +259,6 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
 
           return NextResponse.redirect(loginUrl)
         }
-
       }
 
       // jwt mode: Validate JWT token
@@ -270,7 +271,6 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
         return NextResponse.next()
       }
     }
-
 
     // If intl middleware provided, apply it
     if (intlMiddleware) {
@@ -287,7 +287,10 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
  * Excludes API routes, static files, etc.
  *
  * IMPORTANT: Next.js requires the config export to be a literal object in middleware.ts
- * You MUST copy-paste this directly in your middleware.ts file:
+ * You MUST copy-paste this directly in your middleware.ts file.
+ *
+ * NOTE: Do NOT exclude `/health` — the middleware handles it with an instant 200 response
+ * for monitoring health checks (no auth, no i18n, no redirect).
  *
  * @example
  * ```ts

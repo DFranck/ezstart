@@ -71,12 +71,14 @@ const ChartStyle = ({ config }: { config: ChartConfig }) => {
     {} as Record<string, string>
   )
 
+  const cssVars = Object.entries(colorConfig)
+    .map(([key, value]) => `  ${key}: ${value};`)
+    .join('\n')
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(colorConfig)
-          .map(([key, value]) => `${key}: ${value};`)
-          .join('\n'),
+        __html: `[data-chart="chart-container"] {\n${cssVars}\n}`,
       }}
     />
   )

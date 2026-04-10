@@ -10,5 +10,5 @@ export default createAuthMiddleware({
 })
 
 export const config = {
-  matcher: ['/((?!api|trpc|health|_next|_vercel|.*\\..*).*)'],
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
 }
