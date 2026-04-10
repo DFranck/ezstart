@@ -698,29 +698,39 @@ function extractChildren(filePath, allComponentNames) {
 function generateDescription(name, level, tokens, children) {
   const parts = []
 
-  if (level === 'base') {
+  if (level === 'atom') {
     if (tokens.length > 0) {
-      parts.push(`Base component with ${tokens.join(', ')} token${tokens.length > 1 ? 's' : ''}`)
+      parts.push(`Atomic component with ${tokens.join(', ')} token${tokens.length > 1 ? 's' : ''}`)
     } else {
-      parts.push('Base component')
+      parts.push('Atomic component')
     }
-  } else if (level === 'composed') {
+  } else if (level === 'molecule') {
     if (children.length > 0) {
-      parts.push(`Composed component using ${children.join(', ')}`)
+      parts.push(`Molecular component using ${children.join(', ')}`)
     } else {
-      parts.push('Composed component')
+      parts.push('Molecular component')
     }
     if (tokens.length > 0) {
       parts.push(`drills ${tokens.join(', ')} to children`)
     }
-  } else {
+  } else if (level === 'organism') {
     if (children.length > 0) {
-      parts.push(`Complex component orchestrating ${children.join(', ')}`)
+      parts.push(`Organism orchestrating ${children.join(', ')}`)
     } else {
-      parts.push('Complex component')
+      parts.push('Organism')
     }
     if (tokens.length > 0) {
       parts.push(`drills ${tokens.join(', ')} through children`)
+    }
+  } else {
+    // template
+    if (children.length > 0) {
+      parts.push(`Template layout with ${children.join(', ')}`)
+    } else {
+      parts.push('Template layout')
+    }
+    if (tokens.length > 0) {
+      parts.push(`orchestrates ${tokens.join(', ')} across sections`)
     }
   }
 
@@ -1257,6 +1267,44 @@ function detectCompoundGroups(registry) {
   return groups
 }
 
+// ─── Atomic Design Level Classification ─────────────────────
+
+/**
+ * Determine the Atomic Design level for a component.
+ * Uses DYNAMIC heuristics instead of hardcoded lists:
+ *
+ * Template: name ends with "Layout" (ClientLayout, ThreadLayout, AILayout, etc.)
+ * Organism: has slots (ReactNode composition points) + 3+ children, OR 5+ children
+ * Molecule: compound root (Card, Table, etc.) OR 3+ children
+ * Atom: everything else
+ *
+ * @param {string} name - Component name
+ * @param {object} entry - Registry entry (with children, slots, etc.)
+ * @param {object} allEntries - Full registry object
+ * @param {Set<string>} compoundRoots - Set of compound root component names
+ * @returns {'atom' | 'molecule' | 'organism' | 'template'}
+ */
+function determineLevel(name, entry, allEntries, compoundRoots) {
+  // Templates: any component named *Layout (page-level layout orchestrators)
+  if (name.endsWith('Layout')) return 'template'
+
+  // Molecules first: compound roots are always molecules (Card, Table, Dialog, etc.)
+  // even if they have many children — they're cohesive units, not orchestrators
+  if (compoundRoots.has(name)) return 'molecule'
+
+  // Organisms: non-compound components with slots (composition points) AND 3+ children,
+  // or components with many non-compound children (5+) indicating high orchestration
+  const hasSlots = entry.slots && entry.slots.length > 0
+  if (hasSlots && entry.children.length >= 3) return 'organism'
+  if (entry.children.length >= 5) return 'organism'
+
+  // Molecules: components that import 3+ other UI components
+  if (entry.children.length >= 3) return 'molecule'
+
+  // Everything else is an atom
+  return 'atom'
+}
+
 // ─── Main ───────────────────────────────────────────────────
 
 function main() {
@@ -1313,16 +1361,8 @@ function main() {
       const providesTokens = extractProvidedTokens(sourcePath)
       const inheritsTokens = extractInheritedTokens(sourcePath)
 
-      // Auto-determine level:
-      //   complex  = imports other UI components AND has ReactNode slots
-      //   composed = imports other UI components (no slots required)
-      //   base     = everything else
-      let level = 'base'
-      if (children.length > 0 && slots.length > 0) {
-        level = 'complex'
-      } else if (children.length > 0) {
-        level = 'composed'
-      }
+      // Level will be determined after compound detection (Step 2c)
+      let level = 'atom'
 
       // Generate description
       const description = generateDescription(name, level, tokens, children)
@@ -1396,10 +1436,8 @@ function main() {
     const entry = registry[root]
     if (!entry) continue
 
-    // Upgrade root level to "composed" unless it's already "complex"
-    if (entry.level === 'base') {
-      entry.level = 'composed'
-    }
+    // Mark root as compound (level will be assigned in Step 2f)
+    // No level change here — determineLevel handles it
 
     // Populate children array (merge with any existing children from import-based detection)
     const existingChildren = new Set(entry.children)
@@ -1495,6 +1533,22 @@ function main() {
     }
   }
 
+  // Step 2f: Assign Atomic Design levels using determineLevel()
+  console.log('\nAssigning Atomic Design levels...')
+  const compoundRoots = new Set(compoundGroups.map(g => g.root))
+  const levelCounts = { atom: 0, molecule: 0, organism: 0, template: 0 }
+
+  for (const [name, entry] of Object.entries(registry)) {
+    entry.level = determineLevel(name, entry, registry, compoundRoots)
+    levelCounts[entry.level]++
+    // Regenerate description with final level
+    entry.description = generateDescription(entry.name, entry.level, entry.tokens, entry.children)
+  }
+
+  console.log(
+    `  atom: ${levelCounts.atom}, molecule: ${levelCounts.molecule}, organism: ${levelCounts.organism}, template: ${levelCounts.template}`
+  )
+
   // Step 3: Build popular chains from components with children
   const popularChains = buildPopularChains(registry)
 
@@ -1519,30 +1573,31 @@ function main() {
 function buildPopularChains(registry) {
   const chains = []
 
-  // Find complex components that have composed children which have base children
+  // Find organism/template components that have molecule children which have atom children
   for (const entry of Object.values(registry)) {
-    if (entry.level !== 'complex' || entry.children.length === 0) continue
+    if ((entry.level !== 'organism' && entry.level !== 'template') || entry.children.length === 0)
+      continue
 
     for (const childName of entry.children) {
       const child = registry[childName]
       if (!child) continue
 
-      if (child.level === 'composed' && child.children.length > 0) {
-        // Find a base child
+      if (child.level === 'molecule' && child.children.length > 0) {
+        // Find an atom child
         for (const grandchildName of child.children) {
           const grandchild = registry[grandchildName]
-          if (grandchild && grandchild.level === 'base') {
+          if (grandchild && grandchild.level === 'atom') {
             chains.push({
               label: `${entry.name} → ${child.name} → ${grandchild.name}`,
               chain: [entry.name, child.name, grandchild.name],
             })
-            break // One chain per composed child is enough
+            break // One chain per molecule child is enough
           }
         }
       }
 
-      // Also add direct complex → base chains
-      if (child.level === 'base' && child.tokens.length > 0) {
+      // Also add direct organism → atom chains
+      if (child.level === 'atom' && child.tokens.length > 0) {
         chains.push({
           label: `${entry.name} → ${child.name}`,
           chain: [entry.name, child.name],
@@ -1551,18 +1606,18 @@ function buildPopularChains(registry) {
     }
   }
 
-  // Find composed → base chains
+  // Find molecule → atom chains
   for (const entry of Object.values(registry)) {
-    if (entry.level !== 'composed' || entry.children.length === 0) continue
+    if (entry.level !== 'molecule' || entry.children.length === 0) continue
 
     for (const childName of entry.children) {
       const child = registry[childName]
-      if (child && child.level === 'base' && child.tokens.length > 0) {
+      if (child && child.level === 'atom' && child.tokens.length > 0) {
         chains.push({
           label: `${entry.name} → ${child.name}`,
           chain: [entry.name, child.name],
         })
-        break // One per composed
+        break // One per molecule
       }
     }
   }
@@ -1580,9 +1635,10 @@ function generateOutput(registry, popularChains) {
   const entries = Object.entries(registry).sort(([a], [b]) => a.localeCompare(b))
 
   // Group by level for readability
-  const baseEntries = entries.filter(([, e]) => e.level === 'base')
-  const composedEntries = entries.filter(([, e]) => e.level === 'composed')
-  const complexEntries = entries.filter(([, e]) => e.level === 'complex')
+  const atomEntries = entries.filter(([, e]) => e.level === 'atom')
+  const moleculeEntries = entries.filter(([, e]) => e.level === 'molecule')
+  const organismEntries = entries.filter(([, e]) => e.level === 'organism')
+  const templateEntries = entries.filter(([, e]) => e.level === 'template')
 
   function formatProps(props) {
     if (props.length === 0) return '[]'
@@ -1663,7 +1719,7 @@ function generateOutput(registry, popularChains) {
 // Run: pnpm registry:update
 // DO NOT EDIT MANUALLY
 
-export type ComponentLevel = 'base' | 'composed' | 'complex'
+export type ComponentLevel = 'atom' | 'molecule' | 'organism' | 'template'
 
 export type TokenCategory = 'structural' | 'visual'
 
@@ -1719,14 +1775,17 @@ export function getVisualTokens(tokens: TokenInfo[]): TokenInfo[] {
 }
 
 export const componentRegistry: Record<string, ComponentEntry> = {
-  // ─── Base (${baseEntries.length} components) ──────────────────────────
-${baseEntries.map(formatEntry).join(',\n')},
+  // ─── Atom (${atomEntries.length} components) ──────────────────────────
+${atomEntries.map(formatEntry).join(',\n')},
 
-  // ─── Composed (${composedEntries.length} components) ────────────────────
-${composedEntries.map(formatEntry).join(',\n')},
+  // ─── Molecule (${moleculeEntries.length} components) ────────────────────
+${moleculeEntries.map(formatEntry).join(',\n')},
 
-  // ─── Complex (${complexEntries.length} components) ──────────────────────
-${complexEntries.map(formatEntry).join(',\n')},
+  // ─── Organism (${organismEntries.length} components) ──────────────────────
+${organismEntries.map(formatEntry).join(',\n')},
+
+  // ─── Template (${templateEntries.length} components) ──────────────────────
+${templateEntries.map(formatEntry).join(',\n')},
 }
 
 /** Get all entries for a given level */
