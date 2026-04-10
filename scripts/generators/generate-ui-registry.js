@@ -27,6 +27,43 @@ const MAIN_INDEX = path.join(UI_PKG, 'index.ts')
 
 const VARIANTS_FILE = path.join(ROOT, 'packages/ui/src/lib/design-system/variants.ts')
 
+/** Design system standard tokens — battle-tested, propagate through tree */
+const DS_STANDARD_TOKENS = new Set([
+  'size',
+  'variant',
+  'density',
+  'intent',
+  'radius',
+  'colorScheme',
+])
+
+/** Radix/shadcn standard tokens — keep as-is, don't propagate */
+const RADIX_TOKENS = new Set(['side', 'orientation'])
+
+/** Candidate tokens — could become DS standard if generalized */
+const DS_CANDIDATE_TOKENS = new Set([
+  'layout',
+  'align',
+  'interactive',
+  'hover',
+  'bgMode',
+  'spacing',
+  'padding',
+  'columns',
+  'position',
+  'direction',
+  'indicator',
+  'height',
+])
+
+/** Classify a token by its design-system status */
+function classifyTokenStatus(name) {
+  if (DS_STANDARD_TOKENS.has(name)) return 'standard'
+  if (RADIX_TOKENS.has(name)) return 'radix'
+  if (DS_CANDIDATE_TOKENS.has(name)) return 'candidate'
+  return 'specific'
+}
+
 /** Props that are always design tokens */
 const DESIGN_TOKEN_NAMES = new Set(['density', 'size', 'variant', 'colorScheme'])
 
@@ -1546,7 +1583,9 @@ function generateOutput(registry, popularChains) {
                 values && values.length > 0
                   ? `, values: [${values.map(v => `'${v}'`).join(', ')}]`
                   : ''
-              return `{ name: '${t}', category: '${categorizeToken(t)}'${valuesStr} }`
+              const status = classifyTokenStatus(t)
+              const statusStr = status !== 'standard' ? `, status: '${status}'` : ''
+              return `{ name: '${t}', category: '${categorizeToken(t)}'${valuesStr}${statusStr} }`
             })
             .join(', ')}]`
         : '[]'
@@ -1596,10 +1635,13 @@ export type ComponentLevel = 'base' | 'composed' | 'complex'
 
 export type TokenCategory = 'structural' | 'visual'
 
+export type TokenStatus = 'standard' | 'radix' | 'candidate' | 'specific'
+
 export type TokenInfo = {
   name: string
   category: TokenCategory
   values?: string[]
+  status?: TokenStatus
 }
 
 export type PropInfo = {

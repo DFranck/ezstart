@@ -24,6 +24,7 @@ import {
   popularChains,
   type ComponentEntry,
   type ComponentLevel,
+  type TokenStatus,
 } from './registry'
 
 const levelConfig: Record<
@@ -77,15 +78,29 @@ function ComponentCard({ entry, locale }: { entry: ComponentEntry; locale: strin
             )}
             {entry.tokens.length > 0 && (
               <Div className="flex flex-wrap gap-1">
-                {entry.tokens.map(token => (
-                  <Badge
-                    key={token.name}
-                    variant={token.category === 'structural' ? 'outline' : 'secondary'}
-                    size="sm"
-                  >
-                    {token.name}
-                  </Badge>
-                ))}
+                {entry.tokens.map(token => {
+                  const status = token.status || 'standard'
+                  return (
+                    <Badge
+                      key={token.name}
+                      variant={
+                        status === 'radix'
+                          ? 'outline'
+                          : status === 'candidate'
+                            ? 'warning'
+                            : status === 'specific'
+                              ? 'secondary'
+                              : token.category === 'structural'
+                                ? 'outline'
+                                : 'secondary'
+                      }
+                      size="sm"
+                      className={status === 'specific' ? 'opacity-50' : undefined}
+                    >
+                      {token.name}
+                    </Badge>
+                  )
+                })}
                 {entry.providesTokens.length > 0 && (
                   <Badge
                     variant="success"
@@ -230,11 +245,18 @@ export default function InspectorIndexPage() {
   const locale = params.locale as string
   const [search, setSearch] = useState('')
   const [activeTokenFilter, setActiveTokenFilter] = useState<string | null>(null)
+  const [activeStatusFilter, setActiveStatusFilter] = useState<TokenStatus | null>(null)
 
   const tokenStats = useMemo(() => {
     const stats = new Map<
       string,
-      { explicit: number; providers: number; consumers: number; category: string }
+      {
+        explicit: number
+        providers: number
+        consumers: number
+        category: string
+        status: TokenStatus
+      }
     >()
 
     for (const entry of Object.values(componentRegistry)) {
@@ -244,6 +266,7 @@ export default function InspectorIndexPage() {
           providers: 0,
           consumers: 0,
           category: token.category,
+          status: (token.status || 'standard') as TokenStatus,
         }
         s.explicit++
         stats.set(token.name, s)
@@ -254,6 +277,7 @@ export default function InspectorIndexPage() {
           providers: 0,
           consumers: 0,
           category: 'structural',
+          status: 'standard' as TokenStatus,
         }
         s.providers++
         stats.set(t, s)
@@ -264,6 +288,7 @@ export default function InspectorIndexPage() {
           providers: 0,
           consumers: 0,
           category: 'structural',
+          status: 'standard' as TokenStatus,
         }
         s.consumers++
         stats.set(t, s)
@@ -362,8 +387,39 @@ export default function InspectorIndexPage() {
 
       {/* Tokens — compact badge grid */}
       <Section className="space-y-3">
-        <Div className="flex items-center gap-3">
+        <Div className="flex items-center gap-3 flex-wrap">
           <H2 className="text-lg font-semibold">Tokens</H2>
+          {/* Status legend / filter */}
+          {(() => {
+            const counts = { standard: 0, radix: 0, candidate: 0, specific: 0 }
+            for (const [, stat] of tokenStats) counts[stat.status]++
+            const statusConfig: Record<
+              TokenStatus,
+              { label: string; variant: 'default' | 'outline' | 'warning' | 'secondary' }
+            > = {
+              standard: { label: 'standard', variant: 'default' },
+              radix: { label: 'radix', variant: 'outline' },
+              candidate: { label: 'candidate', variant: 'warning' },
+              specific: { label: 'specific', variant: 'secondary' },
+            }
+            return (
+              <Div className="flex gap-1.5">
+                {(Object.keys(statusConfig) as TokenStatus[]).map(status => (
+                  <Badge
+                    key={status}
+                    variant={activeStatusFilter === status ? 'info' : statusConfig[status].variant}
+                    size="sm"
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() =>
+                      setActiveStatusFilter(activeStatusFilter === status ? null : status)
+                    }
+                  >
+                    {statusConfig[status].label}: {counts[status]}
+                  </Badge>
+                ))}
+              </Div>
+            )
+          })()}
           {activeTokenFilter && (
             <Div className="flex items-center gap-2">
               <Badge variant="info" size="sm">
@@ -382,38 +438,58 @@ export default function InspectorIndexPage() {
           )}
         </Div>
         <Div className="flex flex-wrap gap-1.5">
-          {tokenStats.map(([name, stat]) => {
-            const total = stat.explicit + stat.providers + stat.consumers
-            const isActive = activeTokenFilter === name
-            const details = [
-              stat.explicit > 0 && `${stat.explicit} props`,
-              stat.providers > 0 && `${stat.providers}P`,
-              stat.consumers > 0 && `${stat.consumers}C`,
-            ]
-              .filter(Boolean)
-              .join(' · ')
+          {tokenStats
+            .filter(([, stat]) => !activeStatusFilter || stat.status === activeStatusFilter)
+            .map(([name, stat]) => {
+              const total = stat.explicit + stat.providers + stat.consumers
+              const isActive = activeTokenFilter === name
+              const status = stat.status
+              const details = [
+                stat.explicit > 0 && `${stat.explicit} props`,
+                stat.providers > 0 && `${stat.providers}P`,
+                stat.consumers > 0 && `${stat.consumers}C`,
+              ]
+                .filter(Boolean)
+                .join(' · ')
 
-            return (
-              <Badge
-                key={name}
-                variant={isActive ? 'default' : categoryBadgeVariant[stat.category] || 'outline'}
-                size="sm"
-                className="cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => setActiveTokenFilter(isActive ? null : name)}
-                title={`${name} (${stat.category}) — ${stat.explicit} components, ${stat.providers} providers, ${stat.consumers} consumers`}
-              >
-                <Span className="font-mono">{name}</Span>
-                <Span className="ml-1 opacity-60">{details || total}</Span>
-              </Badge>
-            )
-          })}
+              return (
+                <Badge
+                  key={name}
+                  variant={
+                    isActive
+                      ? 'default'
+                      : status === 'radix'
+                        ? 'outline'
+                        : status === 'candidate'
+                          ? 'warning'
+                          : status === 'specific'
+                            ? 'secondary'
+                            : categoryBadgeVariant[stat.category] || 'outline'
+                  }
+                  size="sm"
+                  className={`cursor-pointer hover:opacity-80 transition-opacity${status === 'specific' && !isActive ? ' opacity-50' : ''}`}
+                  onClick={() => setActiveTokenFilter(isActive ? null : name)}
+                  title={`${name} (${stat.category}, ${status}) — ${stat.explicit} components, ${stat.providers} providers, ${stat.consumers} consumers`}
+                >
+                  <Span className="font-mono">{name}</Span>
+                  <Span className="ml-1 opacity-60">{details || total}</Span>
+                </Badge>
+              )
+            })}
         </Div>
       </Section>
 
-      {/* Tree Explorer */}
+      {/* Tree Explorer + Token Lexicon */}
       <Section className="space-y-3">
         <Div className="space-y-1">
-          <H2 className="text-lg font-semibold">Tree Explorer</H2>
+          <Div className="flex items-center gap-3">
+            <H2 className="text-lg font-semibold">Tree Explorer</H2>
+            <Link href={`/${locale}/packages/ui/inspector/tokens`}>
+              <Badge variant="outline" className="cursor-pointer hover:bg-accent transition-colors">
+                Token Lexicon
+              </Badge>
+            </Link>
+          </Div>
           <P className="text-sm text-muted-foreground">
             View the full recursive hierarchy of a component and how tokens propagate through all
             descendants
