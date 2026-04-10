@@ -174,18 +174,31 @@ function LevelSection({
   level,
   locale,
   search,
+  activeTokenFilter,
 }: {
   level: ComponentLevel
   locale: string
   search: string
+  activeTokenFilter: string | null
 }) {
   const config = levelConfig[level]
   const allComponents = getComponentsByLevel(level)
   const components = useMemo(() => {
-    if (!search) return allComponents
-    const lower = search.toLowerCase()
-    return allComponents.filter(entry => entry.name.toLowerCase().includes(lower))
-  }, [allComponents, search])
+    let filtered = allComponents
+    if (search) {
+      const lower = search.toLowerCase()
+      filtered = filtered.filter(entry => entry.name.toLowerCase().includes(lower))
+    }
+    if (activeTokenFilter) {
+      filtered = filtered.filter(
+        entry =>
+          entry.tokens.some(t => t.name === activeTokenFilter) ||
+          entry.providesTokens.includes(activeTokenFilter) ||
+          entry.inheritsTokens.includes(activeTokenFilter)
+      )
+    }
+    return filtered
+  }, [allComponents, search, activeTokenFilter])
 
   if (components.length === 0) return null
 
@@ -207,10 +220,74 @@ function LevelSection({
   )
 }
 
+const categoryBadgeVariant: Record<string, 'outline' | 'secondary' | 'success'> = {
+  structural: 'outline',
+  visual: 'secondary',
+}
+
 export default function InspectorIndexPage() {
   const params = useParams()
   const locale = params.locale as string
   const [search, setSearch] = useState('')
+  const [activeTokenFilter, setActiveTokenFilter] = useState<string | null>(null)
+
+  const tokenStats = useMemo(() => {
+    const stats = new Map<
+      string,
+      { explicit: number; providers: number; consumers: number; category: string }
+    >()
+
+    for (const entry of Object.values(componentRegistry)) {
+      for (const token of entry.tokens) {
+        const s = stats.get(token.name) || {
+          explicit: 0,
+          providers: 0,
+          consumers: 0,
+          category: token.category,
+        }
+        s.explicit++
+        stats.set(token.name, s)
+      }
+      for (const t of entry.providesTokens) {
+        const s = stats.get(t) || {
+          explicit: 0,
+          providers: 0,
+          consumers: 0,
+          category: 'structural',
+        }
+        s.providers++
+        stats.set(t, s)
+      }
+      for (const t of entry.inheritsTokens) {
+        const s = stats.get(t) || {
+          explicit: 0,
+          providers: 0,
+          consumers: 0,
+          category: 'structural',
+        }
+        s.consumers++
+        stats.set(t, s)
+      }
+    }
+
+    return [...stats.entries()].sort(
+      (a, b) =>
+        b[1].explicit +
+        b[1].providers +
+        b[1].consumers -
+        (a[1].explicit + a[1].providers + a[1].consumers)
+    )
+  }, [])
+
+  const filteredComponentCount = useMemo(() => {
+    if (!activeTokenFilter) return null
+    return Object.values(componentRegistry).filter(
+      entry =>
+        entry.tokens.some(t => t.name === activeTokenFilter) ||
+        entry.providesTokens.includes(activeTokenFilter) ||
+        entry.inheritsTokens.includes(activeTokenFilter)
+    ).length
+  }, [activeTokenFilter])
 
   const totalFound = useMemo(() => {
     if (!search) return null
@@ -283,6 +360,61 @@ export default function InspectorIndexPage() {
         </Section>
       )}
 
+      {/* Tokens */}
+      <Section className="space-y-3">
+        <H2 className="text-lg font-semibold">Tokens</H2>
+        <Div className="space-y-1">
+          {tokenStats.map(([name, stat]) => (
+            <Div
+              key={name}
+              onClick={() => setActiveTokenFilter(activeTokenFilter === name ? null : name)}
+              className={`flex items-center gap-3 px-3 py-1.5 rounded-md cursor-pointer transition-colors ${
+                activeTokenFilter === name
+                  ? 'bg-primary/10 border border-primary/30'
+                  : 'hover:bg-muted/50'
+              }`}
+            >
+              <Span className="font-mono text-sm w-28 shrink-0">{name}</Span>
+              <Badge variant={categoryBadgeVariant[stat.category] || 'outline'} size="sm">
+                {stat.category}
+              </Badge>
+              <Span className="text-xs text-muted-foreground">
+                {stat.explicit} component{stat.explicit !== 1 ? 's' : ''}
+              </Span>
+              <Span className="text-xs text-muted-foreground">
+                {stat.providers} provider{stat.providers !== 1 ? 's' : ''}
+              </Span>
+              <Span className="text-xs text-muted-foreground">
+                {stat.consumers} consumer{stat.consumers !== 1 ? 's' : ''}
+              </Span>
+              {activeTokenFilter === name && (
+                <Badge variant="outline" size="sm" className="ml-auto text-[10px]">
+                  Active
+                </Badge>
+              )}
+            </Div>
+          ))}
+        </Div>
+      </Section>
+
+      {/* Token filter indicator */}
+      {activeTokenFilter && filteredComponentCount !== null && (
+        <Div className="flex items-center gap-2">
+          <Badge variant="info">
+            Showing {filteredComponentCount} component
+            {filteredComponentCount !== 1 ? 's' : ''} with {activeTokenFilter}
+          </Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setActiveTokenFilter(null)}
+            className="text-xs"
+          >
+            Clear filter
+          </Button>
+        </Div>
+      )}
+
       {/* Tree Explorer */}
       <Section className="space-y-3">
         <Div className="space-y-1">
@@ -312,9 +444,24 @@ export default function InspectorIndexPage() {
       </Section>
 
       {/* Component sections by level */}
-      <LevelSection level="complex" locale={locale} search={search} />
-      <LevelSection level="composed" locale={locale} search={search} />
-      <LevelSection level="base" locale={locale} search={search} />
+      <LevelSection
+        level="complex"
+        locale={locale}
+        search={search}
+        activeTokenFilter={activeTokenFilter}
+      />
+      <LevelSection
+        level="composed"
+        locale={locale}
+        search={search}
+        activeTokenFilter={activeTokenFilter}
+      />
+      <LevelSection
+        level="base"
+        locale={locale}
+        search={search}
+        activeTokenFilter={activeTokenFilter}
+      />
     </Div>
   )
 }
