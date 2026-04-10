@@ -1270,39 +1270,52 @@ function detectCompoundGroups(registry) {
 // ─── Atomic Design Level Classification ─────────────────────
 
 /**
- * Determine the Atomic Design level for a component.
- * Uses DYNAMIC heuristics instead of hardcoded lists:
+ * Classify ALL components using pure dependency-depth Atomic Design.
  *
- * Template: name ends with "Layout" (ClientLayout, ThreadLayout, AILayout, etc.)
- * Organism: has slots (ReactNode composition points) + 3+ children, OR 5+ children
- * Molecule: compound root (Card, Table, etc.) OR 3+ children
- * Atom: everything else
+ * Fully recursive — zero heuristics, zero hardcoded lists:
+ *   depth 0 = atom     (consumes NO UI components)
+ *   depth 1 = molecule (consumes at least 1 atom)
+ *   depth 2 = organism (consumes at least 1 molecule)
+ *   depth 3+ = template (consumes at least 1 organism)
  *
- * @param {string} name - Component name
- * @param {object} entry - Registry entry (with children, slots, etc.)
- * @param {object} allEntries - Full registry object
- * @param {Set<string>} compoundRoots - Set of compound root component names
- * @returns {'atom' | 'molecule' | 'organism' | 'template'}
+ * @param {object} registry - Full registry object
  */
-function determineLevel(name, entry, allEntries, compoundRoots) {
-  // Templates: any component named *Layout (page-level layout orchestrators)
-  if (name.endsWith('Layout')) return 'template'
+function classifyAtomicLevels(registry) {
+  const LEVELS = ['atom', 'molecule', 'organism', 'template']
+  const depthCache = new Map()
 
-  // Molecules first: compound roots are always molecules (Card, Table, Dialog, etc.)
-  // even if they have many children — they're cohesive units, not orchestrators
-  if (compoundRoots.has(name)) return 'molecule'
+  function getDepth(name, visited) {
+    if (depthCache.has(name)) return depthCache.get(name)
+    if (visited.has(name)) return 0 // circular → atom
+    visited.add(name)
 
-  // Organisms: non-compound components with slots (composition points) AND 3+ children,
-  // or components with many non-compound children (5+) indicating high orchestration
-  const hasSlots = entry.slots && entry.slots.length > 0
-  if (hasSlots && entry.children.length >= 3) return 'organism'
-  if (entry.children.length >= 5) return 'organism'
+    const entry = registry[name]
+    if (!entry || entry.children.length === 0) {
+      depthCache.set(name, 0)
+      return 0
+    }
 
-  // Molecules: components that import 3+ other UI components
-  if (entry.children.length >= 3) return 'molecule'
+    let maxChildDepth = -1
+    for (const childName of entry.children) {
+      const d = getDepth(childName, visited)
+      if (d > maxChildDepth) maxChildDepth = d
+    }
 
-  // Everything else is an atom
-  return 'atom'
+    const depth = Math.min(maxChildDepth + 1, 3) // cap at template (3)
+    depthCache.set(name, depth)
+    return depth
+  }
+
+  for (const name of Object.keys(registry)) {
+    const depth = getDepth(name, new Set())
+    registry[name].level = LEVELS[depth]
+  }
+
+  const counts = { atom: 0, molecule: 0, organism: 0, template: 0 }
+  for (const entry of Object.values(registry)) counts[entry.level]++
+  console.log(
+    `  atom: ${counts.atom}, molecule: ${counts.molecule}, organism: ${counts.organism}, template: ${counts.template}`
+  )
 }
 
 // ─── Main ───────────────────────────────────────────────────
@@ -1533,21 +1546,14 @@ function main() {
     }
   }
 
-  // Step 2f: Assign Atomic Design levels using determineLevel()
-  console.log('\nAssigning Atomic Design levels...')
-  const compoundRoots = new Set(compoundGroups.map(g => g.root))
-  const levelCounts = { atom: 0, molecule: 0, organism: 0, template: 0 }
+  // Step 2f: Assign Atomic Design levels using pure dependency-depth recursion
+  console.log('\nAssigning Atomic Design levels (dependency-depth)...')
+  classifyAtomicLevels(registry)
 
-  for (const [name, entry] of Object.entries(registry)) {
-    entry.level = determineLevel(name, entry, registry, compoundRoots)
-    levelCounts[entry.level]++
-    // Regenerate description with final level
+  // Regenerate descriptions with final levels
+  for (const entry of Object.values(registry)) {
     entry.description = generateDescription(entry.name, entry.level, entry.tokens, entry.children)
   }
-
-  console.log(
-    `  atom: ${levelCounts.atom}, molecule: ${levelCounts.molecule}, organism: ${levelCounts.organism}, template: ${levelCounts.template}`
-  )
 
   // Step 3: Build popular chains from components with children
   const popularChains = buildPopularChains(registry)
