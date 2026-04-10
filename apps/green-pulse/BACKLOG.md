@@ -20,9 +20,10 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 
 ### GP-002: Project access control commented out
 
-- **Status:** `planned`
+- **Status:** `done` (2026-04-09)
 - **Problem:** `getProjectById.ts` has access control check commented out (`// const { userId } = req.query`, `// const hasAccess = ...`). Any user can access any project by ID.
 - **Files:** `api/src/routes/projects/getProjectById.ts`
+- **Fix:** Implemented owner OR member access check using `req.userId`. Returns 403 if unauthorized.
 
 ### GP-003: Form config CRUD incomplete — no update/delete endpoints
 
@@ -51,9 +52,10 @@ Full audit of green-pulse web + API + strategic feature alignment with April 202
 
 ### GP-042: Theme routes missing auth (**Elevated to P0** per Audit 2026-04-06)
 
-- **Status:** `planned`
+- **Status:** `done` (2026-04-09)
 - **Problem:** `updateTheme.ts` has `// TODO: Get userId from auth middleware` comment. Theme CRUD is unprotected. `deleteTheme` also has a TODO for auth.
 - **Files:** `api/src/routes/theme/`
+- **Fix:** `updateTheme.ts` now uses `req.userId` for `updatedBy`. Auth middleware was already on parent router.
 
 ---
 

@@ -83,7 +83,7 @@ docRouter.post(
 
       const prompt = new AISystemPrompt({
         ...body,
-        updatedBy: req.user?.email || 'system',
+        updatedBy: (req as unknown as { user?: { email?: string } }).user?.email || 'system',
       })
 
       await prompt.save()

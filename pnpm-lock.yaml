@@ -1411,6 +1411,9 @@ importers:
 
   packages/ai-sdk:
     dependencies:
+      '@ezstart/auth-sdk':
+        specifier: workspace:*
+        version: link:../auth-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
@@ -1420,6 +1423,9 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../logger
+      '@ezstart/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@google/generative-ai':
         specifier: ^0.21.0
         version: 0.21.0
@@ -1439,9 +1445,6 @@ importers:
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
-      '@ezstart/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@types/node':
         specifier: ^22.10.2
         version: 22.19.2

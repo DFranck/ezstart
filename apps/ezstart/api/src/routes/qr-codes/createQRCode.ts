@@ -70,6 +70,8 @@ createQRCodeRouter.post(
 
       return sendSuccess(res, {
         id: qrCode._id.toString(),
+        userId: qrCode.userId,
+        userEmail: qrCode.userEmail,
         url: qrCode.url,
         title: qrCode.title,
         redirectType: qrCode.redirectType,
@@ -78,7 +80,9 @@ createQRCodeRouter.post(
         background: qrCode.background,
         errorCorrection: qrCode.errorCorrection,
         includeMargin: qrCode.includeMargin,
+        scansCount: qrCode.scansCount ?? 0,
         createdAt: qrCode.createdAt,
+        updatedAt: qrCode.updatedAt,
       })
     } catch (error) {
       logger.error('[QR Codes] Create error:', error)

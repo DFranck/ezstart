@@ -7,6 +7,7 @@ import { cn } from "../../lib/utils"
 import { buttonVariants } from "../button"
 import { padding, gap } from "../../lib/design-system/tokens"
 import { alertDialogVariantConfig } from "../../lib/design-system/variants"
+import { DesignTokenProvider } from "../../lib/design-system/DesignTokenContext"
 
 /**
  * AlertDialog Component - Enhanced with Variants
@@ -95,23 +96,31 @@ function AlertDialogOverlay({
   )
 }
 
+interface AlertDialogContentProps extends React.ComponentProps<typeof AlertDialogPrimitive.Content> {
+  /** Design token: density propagated to children */
+  density?: string
+}
+
 function AlertDialogContent({
   className,
+  density,
   ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Content>) {
+}: AlertDialogContentProps) {
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
-      <AlertDialogPrimitive.Content
-        data-slot="alert-dialog-content"
-        className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-lg border shadow-lg duration-200 sm:max-w-lg",
-          padding.lg, // px-4 py-4 sm:px-6 py-3
-          gap.relaxed, // gap-4 sm:gap-3
-          className
-        )}
-        {...props}
-      />
+      <DesignTokenProvider density={density}>
+        <AlertDialogPrimitive.Content
+          data-slot="alert-dialog-content"
+          className={cn(
+            "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-lg border shadow-lg duration-200 sm:max-w-lg",
+            padding.lg, // px-4 py-4 sm:px-6 py-3
+            gap.relaxed, // gap-4 sm:gap-3
+            className
+          )}
+          {...props}
+        />
+      </DesignTokenProvider>
     </AlertDialogPortal>
   )
 }

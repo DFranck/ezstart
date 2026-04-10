@@ -46,7 +46,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   const timeZone = getTimeZoneFromLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning className={inter.variable}>
+    <html lang={locale} suppressHydrationWarning data-app="gacha-analyzer" className={inter.variable}>
       <head>
         <ThemeStyleInjector appName="gacha-analyzer" />
       </head>

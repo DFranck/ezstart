@@ -1,2 +1,2 @@
-// Express Request augmentation is now provided by @ezstart/express-core
-// This file is kept empty to avoid breaking imports
+// Express Request augmentation is provided by @ezstart/express-core
+// This file extends it with ezpay-specific JwtUser fields

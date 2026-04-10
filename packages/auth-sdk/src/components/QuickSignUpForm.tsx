@@ -3,6 +3,7 @@
 import {
   Badge,
   Button,
+  DesignTokenProvider,
   Div,
   P,
   Form,
@@ -155,124 +156,128 @@ export function QuickSignUpForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className={
-          density === 'compact'
-            ? 'space-y-1.5'
-            : density === 'relaxed'
-              ? 'space-y-4 md:space-y-5'
-              : 'space-y-3 md:space-y-4'
-        }
-      >
-        {error && (
-          <Div
-            className={`bg-destructive/15 border border-destructive/50 text-destructive rounded-md ${density === 'compact' ? 'px-3 py-2 text-xs' : 'px-4 py-3'}`}
-          >
-            {error}
-          </Div>
-        )}
-
-        {description && (
-          <P
-            className={`text-muted-foreground text-center ${density === 'compact' ? 'text-xs mb-2' : 'text-sm mb-4'}`}
-          >
-            {description}
-          </P>
-        )}
-
-        <FormField
-          control={form.control}
-          name="username"
-          rules={{
-            required: t.required,
-          }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.username}</FormLabel>
-              <FormControl>
-                <Input type="text" placeholder={t.usernamePlaceholder} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+    <DesignTokenProvider density={density}>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className={
+            density === 'compact'
+              ? 'space-y-1.5'
+              : density === 'relaxed'
+                ? 'space-y-4 md:space-y-5'
+                : 'space-y-3 md:space-y-4'
+          }
+        >
+          {error && (
+            <Div
+              className={`bg-destructive/15 border border-destructive/50 text-destructive rounded-md ${density === 'compact' ? 'px-3 py-2 text-xs' : 'px-4 py-3'}`}
+            >
+              {error}
+            </Div>
           )}
-        />
 
-        <FormField
-          control={form.control}
-          name="email"
-          rules={{
-            required: t.required,
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: t.invalidEmail,
-            },
-          }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.email}</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder={t.emailPlaceholder} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          {description && (
+            <P
+              className={`text-muted-foreground text-center ${density === 'compact' ? 'text-xs mb-2' : 'text-sm mb-4'}`}
+            >
+              {description}
+            </P>
           )}
-        />
 
-        {!promoOpen ? (
-          <Button
-            type="button"
-            variant="link"
-            className="text-xs text-muted-foreground p-0 h-auto cursor-pointer"
-            onClick={() => setPromoOpen(true)}
-          >
-            {t.promoCodeToggle}
-          </Button>
-        ) : (
           <FormField
             control={form.control}
-            name="promoCode"
+            name="username"
+            rules={{
+              required: t.required,
+            }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs text-muted-foreground">{t.promoCodeLabel}</FormLabel>
+                <FormLabel>{t.username}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    placeholder={t.promoCodePlaceholder}
-                    className="h-8 text-sm"
-                    {...field}
-                    onChange={e => {
-                      field.onChange(e)
-                      setResolvedPromo(e.target.value)
-                    }}
-                  />
+                  <Input type="text" placeholder={t.usernamePlaceholder} {...field} />
                 </FormControl>
-                {promoIsValidating && (
-                  <P className="text-xs text-muted-foreground">{t.promoCodeChecking}</P>
-                )}
-                {promoIsValid === true && (
-                  <Badge variant="success" className="text-xs">
-                    {t.promoCodeApplied}
-                  </Badge>
-                )}
-                {promoIsValid === false && (
-                  <P className="text-xs text-destructive">{t.promoCodeInvalid}</P>
-                )}
+                <FormMessage />
               </FormItem>
             )}
           />
-        )}
 
-        <Button
-          type="submit"
-          disabled={loading || !form.formState.isValid}
-          className="w-full cursor-pointer"
-          variant="brand"
-        >
-          {loading ? t.submitting : t.submit}
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="email"
+            rules={{
+              required: t.required,
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: t.invalidEmail,
+              },
+            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t.email}</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder={t.emailPlaceholder} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {!promoOpen ? (
+            <Button
+              type="button"
+              variant="link"
+              className="text-xs text-muted-foreground p-0 h-auto cursor-pointer"
+              onClick={() => setPromoOpen(true)}
+            >
+              {t.promoCodeToggle}
+            </Button>
+          ) : (
+            <FormField
+              control={form.control}
+              name="promoCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs text-muted-foreground">
+                    {t.promoCodeLabel}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder={t.promoCodePlaceholder}
+                      className="h-8 text-sm"
+                      {...field}
+                      onChange={e => {
+                        field.onChange(e)
+                        setResolvedPromo(e.target.value)
+                      }}
+                    />
+                  </FormControl>
+                  {promoIsValidating && (
+                    <P className="text-xs text-muted-foreground">{t.promoCodeChecking}</P>
+                  )}
+                  {promoIsValid === true && (
+                    <Badge variant="success" className="text-xs">
+                      {t.promoCodeApplied}
+                    </Badge>
+                  )}
+                  {promoIsValid === false && (
+                    <P className="text-xs text-destructive">{t.promoCodeInvalid}</P>
+                  )}
+                </FormItem>
+              )}
+            />
+          )}
+
+          <Button
+            type="submit"
+            disabled={loading || !form.formState.isValid}
+            className="w-full cursor-pointer"
+            variant="brand"
+          >
+            {loading ? t.submitting : t.submit}
+          </Button>
+        </form>
+      </Form>
+    </DesignTokenProvider>
   )
 }

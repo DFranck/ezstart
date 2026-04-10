@@ -1,9 +1,24 @@
 'use client'
-import { createContext, ReactNode, useContext, useEffect, useMemo } from 'react'
+import { createContext, ReactNode, useContext, useEffect, useMemo, useRef } from 'react'
 import { AuthClient, createAuthClient } from './client.js'
 import { useAuthStore, type AuthMode } from './store.js'
 import { getCurrentEnvironment, isEzstartDomain } from '@ezstart/config'
 import { logger } from '@ezstart/logger'
+
+/**
+ * Decode JWT expiry (exp claim) without dependencies.
+ * Returns expiry timestamp in milliseconds, or null if decoding fails.
+ */
+function getTokenExpiry(token: string): number | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length < 2 || !parts[1]) return null
+    const payload = JSON.parse(atob(parts[1]))
+    return payload.exp ? payload.exp * 1000 : null
+  } catch {
+    return null
+  }
+}
 
 interface AuthContextValue {
   client: AuthClient
@@ -256,6 +271,65 @@ export function AuthProvider({
       }
     }
     // Only re-run if accessToken, refreshToken, or mode changes (not on every store update)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.accessToken, store.refreshToken, client])
+
+  // Proactive token refresh: schedule refresh 1 minute before JWT expiry
+  // This is an ADDITION to the 5-minute fallback interval above.
+  const proactiveTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    // Clear any previous proactive timer
+    if (proactiveTimerRef.current) {
+      clearTimeout(proactiveTimerRef.current)
+      proactiveTimerRef.current = null
+    }
+
+    const token = store.accessToken
+    if (!token || !store.refreshToken) return
+
+    const expiry = getTokenExpiry(token)
+    if (!expiry) return
+
+    const now = Date.now()
+    // Refresh 1 minute before expiry
+    const refreshAt = expiry - 60_000
+    const delay = refreshAt - now
+
+    if (delay <= 0) {
+      // Token already expired or within 1 minute of expiry — the 5-min interval will handle it
+      logger.debug('[AuthProvider] Token already near expiry, skipping proactive schedule')
+      return
+    }
+
+    logger.debug('[AuthProvider] Proactive refresh scheduled', {
+      expiresIn: Math.round((expiry - now) / 1000) + 's',
+      refreshIn: Math.round(delay / 1000) + 's',
+    })
+
+    proactiveTimerRef.current = setTimeout(async () => {
+      const rt = store.refreshToken
+      if (!rt) return
+      try {
+        const result = await client.refreshTokens(rt)
+        store.setTokens(result.accessToken, result.refreshToken)
+        store.updateUser(result.user)
+        logger.debug('[AuthProvider] Proactive refresh succeeded')
+      } catch (err) {
+        logger.debug('[AuthProvider] Proactive refresh failed, fallback interval will retry', {
+          error: err instanceof Error ? err.message : String(err),
+        })
+        // Don't logout here — let the 5-min interval or 401 retry handle it
+      }
+    }, delay)
+
+    return () => {
+      if (proactiveTimerRef.current) {
+        clearTimeout(proactiveTimerRef.current)
+        proactiveTimerRef.current = null
+      }
+    }
+    // Re-schedule when accessToken changes (new token after refresh/login)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.accessToken, store.refreshToken, client])
 

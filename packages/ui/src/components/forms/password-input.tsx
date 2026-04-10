@@ -4,6 +4,7 @@ import { forwardRef, useState, useEffect } from 'react'
 import { AnimatedIconToggle } from '../animated-icon-toggle'
 import { Button } from '../button'
 import { Input } from './input'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { cn } from '../../lib/utils'
 import { CheckIcon, XIcon } from 'lucide-react'
 
@@ -42,8 +43,12 @@ export interface PasswordRequirement {
   label: string
 }
 
-export interface PasswordInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface PasswordInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'size'
+> {
+  /** Size token — passed to inner Input and toggle Button. Inherits from DesignTokenProvider if not set. */
+  size?: string
   /** Show password visibility toggle button */
   showToggle?: boolean
   /** Show password strength indicator */
@@ -61,14 +66,17 @@ const DEFAULT_REQUIREMENTS: PasswordRequirement[] = [
   { test: /[0-9]/, label: 'One number' },
 ]
 
-function calculateStrength(password: string, requirements: PasswordRequirement[]): {
+function calculateStrength(
+  password: string,
+  requirements: PasswordRequirement[]
+): {
   score: number
   label: string
   color: string
 } {
   if (!password) return { score: 0, label: 'No password', color: 'bg-gray-300' }
 
-  const passed = requirements.filter((req) => req.test.test(password)).length
+  const passed = requirements.filter(req => req.test.test(password)).length
   const percentage = (passed / requirements.length) * 100
 
   if (percentage < 50) {
@@ -86,6 +94,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   (
     {
       className,
+      size: sizeProp,
       showToggle = true,
       showStrength = false,
       showRequirements = false,
@@ -95,6 +104,8 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     },
     ref
   ) => {
+    const inherited = useDesignTokens()
+    const size = (sizeProp ?? inherited.size) as React.ComponentProps<typeof Input>['size']
     const [showPassword, setShowPassword] = useState(false)
     const [strength, setStrength] = useState(calculateStrength('', requirements))
 
@@ -118,6 +129,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             {...props}
             value={value}
             type={showPassword ? 'text' : 'password'}
+            size={size}
             className={cn('pr-10', className)}
             ref={ref}
           />
@@ -135,9 +147,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                 icon2="lucide:EyeOff"
                 isToggled={showPassword}
               />
-              <span className="sr-only">
-                {showPassword ? 'Hide password' : 'Show password'}
-              </span>
+              <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
             </Button>
           )}
         </div>
@@ -147,12 +157,14 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Password strength:</span>
-              <span className={cn('font-medium', {
-                'text-destructive': strength.label === 'Weak',
-                'text-yellow-600 dark:text-yellow-500': strength.label === 'Fair',
-                'text-blue-600 dark:text-blue-500': strength.label === 'Good',
-                'text-green-600 dark:text-green-500': strength.label === 'Strong',
-              })}>
+              <span
+                className={cn('font-medium', {
+                  'text-destructive': strength.label === 'Weak',
+                  'text-yellow-600 dark:text-yellow-500': strength.label === 'Fair',
+                  'text-blue-600 dark:text-blue-500': strength.label === 'Good',
+                  'text-green-600 dark:text-green-500': strength.label === 'Strong',
+                })}
+              >
                 {strength.label}
               </span>
             </div>

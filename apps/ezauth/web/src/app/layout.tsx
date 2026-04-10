@@ -7,7 +7,7 @@ type Props = {
 
 export default function RootLayout({ children }: Props) {
   return (
-    <html suppressHydrationWarning>
+    <html suppressHydrationWarning data-app="ezauth">
       <body className="min-h-screen">{children}</body>
     </html>
   )

@@ -5,6 +5,7 @@ import { X } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
+import { DesignTokenProvider } from '../../lib/design-system/DesignTokenContext'
 
 const Sheet = DialogPrimitive.Root
 const SheetTrigger = DialogPrimitive.Trigger
@@ -34,6 +35,10 @@ interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.
   showCloseButton?: boolean
   /** Container element for the portal — if provided, sheet renders inside this element instead of fullscreen */
   container?: HTMLElement | null
+  /** Design token: size propagated to children */
+  size?: string
+  /** Design token: density propagated to children */
+  density?: string
 }
 
 function SheetContent({
@@ -42,6 +47,8 @@ function SheetContent({
   children,
   showCloseButton = true,
   container,
+  size,
+  density,
   ...props
 }: SheetContentProps) {
   const sideClasses = {
@@ -56,25 +63,27 @@ function SheetContent({
   return (
     <SheetPortal container={container}>
       {!container && <SheetOverlay />}
-      <DialogPrimitive.Content
-        data-slot="sheet-content"
-        className={cn(
-          'bg-background z-50 flex flex-col gap-4 shadow-lg transition ease-in-out',
-          container ? 'absolute' : 'fixed',
-          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300',
-          sideClasses[side],
-          className
-        )}
-        {...props}
-      >
-        {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none cursor-pointer">
-            <X className="size-4" />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
-        )}
-      </DialogPrimitive.Content>
+      <DesignTokenProvider size={size} density={density}>
+        <DialogPrimitive.Content
+          data-slot="sheet-content"
+          className={cn(
+            'bg-background z-50 flex flex-col gap-4 shadow-lg transition ease-in-out',
+            container ? 'absolute' : 'fixed',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300',
+            sideClasses[side],
+            className
+          )}
+          {...props}
+        >
+          {children}
+          {showCloseButton && (
+            <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none cursor-pointer">
+              <X className="size-4" />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+          )}
+        </DialogPrimitive.Content>
+      </DesignTokenProvider>
     </SheetPortal>
   )
 }

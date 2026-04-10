@@ -33,14 +33,15 @@
     "@tanstack/react-query": "^5.0.0",
     "openai": "^4.77.3",
     "zod": "^3.23.0",
-    "zustand": "^4.5.5"
+    "zustand": "^4.5.5",
+    "@ezstart/ui": "workspace:*",
+    "@ezstart/auth-sdk": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.3.1 || ^19.0.0"
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
-    "@ezstart/ui": "workspace:*",
     "@types/node": "^22.10.2",
     "@types/react": "^19.1.12",
     "react": "^19.1.1",

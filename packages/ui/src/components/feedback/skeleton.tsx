@@ -1,8 +1,9 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
-import { skeletonVariantConfig, skeletonCardSizeConfig } from '../../lib/design-system/variants'
+import { skeletonVariants, skeletonCardSizeConfig } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
 /**
  * Skeleton Component - Loading State Placeholders
@@ -27,16 +28,8 @@ import { skeletonVariantConfig, skeletonCardSizeConfig } from '../../lib/design-
  * <SkeletonTable rows={5} cols={4} />
  */
 
-const skeletonVariants = cva('animate-pulse rounded-md bg-muted', {
-  variants: skeletonVariantConfig,
-  defaultVariants: {
-    variant: 'default',
-  },
-})
-
 interface SkeletonProps
-  extends React.ComponentProps<'div'>,
-    VariantProps<typeof skeletonVariants> {}
+  extends React.ComponentProps<'div'>, VariantProps<typeof skeletonVariants> {}
 
 /**
  * Base Skeleton component
@@ -57,16 +50,34 @@ interface SkeletonTextProps {
   className?: string
   /** Variant style */
   variant?: 'default' | 'lighter' | 'darker' | 'shimmer'
-  /** Line spacing */
+  /** @deprecated Use density instead */
   spacing?: 'tight' | 'normal' | 'loose'
+  /** Density token — maps to line spacing (compact→tight, default→normal, relaxed→loose) */
+  density?: 'compact' | 'default' | 'relaxed'
 }
+
+const densityToSpacing = {
+  compact: 'tight',
+  default: 'normal',
+  relaxed: 'loose',
+} as const
 
 function SkeletonText({
   lines = 3,
   className,
   variant = 'default',
-  spacing = 'normal',
+  spacing,
+  density,
 }: SkeletonTextProps) {
+  const inherited = useDesignTokens()
+  const resolvedSpacing: 'tight' | 'normal' | 'loose' =
+    spacing ??
+    (density
+      ? densityToSpacing[density]
+      : inherited.density
+        ? densityToSpacing[inherited.density as keyof typeof densityToSpacing]
+        : 'normal')
+
   const spacingClasses = {
     tight: 'gap-1.5',
     normal: 'gap-2',
@@ -74,13 +85,9 @@ function SkeletonText({
   }
 
   return (
-    <div className={cn('flex flex-col', spacingClasses[spacing], className)}>
+    <div className={cn('flex flex-col', spacingClasses[resolvedSpacing], className)}>
       {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton
-          key={i}
-          variant={variant}
-          className={cn('h-4', i === lines - 1 && 'w-[80%]')}
-        />
+        <Skeleton key={i} variant={variant} className={cn('h-4', i === lines - 1 && 'w-[80%]')} />
       ))}
     </div>
   )
@@ -99,7 +106,9 @@ interface SkeletonAvatarProps {
   variant?: 'default' | 'lighter' | 'darker' | 'shimmer'
 }
 
-function SkeletonAvatar({ size = 'md', className, variant = 'default' }: SkeletonAvatarProps) {
+function SkeletonAvatar({ size: sizeProp, className, variant = 'default' }: SkeletonAvatarProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'md') as NonNullable<SkeletonAvatarProps['size']>
   const sizeClasses = {
     xs: 'h-6 w-6',
     sm: 'h-8 w-8',
@@ -136,8 +145,10 @@ function SkeletonCard({
   lines = 3,
   className,
   variant = 'default',
-  size = 'default',
+  size: sizeProp,
 }: SkeletonCardProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'default') as NonNullable<SkeletonCardProps['size']>
   const sizeClasses = skeletonCardSizeConfig
 
   return (
@@ -193,7 +204,10 @@ function SkeletonTable({
     <div className={cn('w-full overflow-hidden rounded-lg border border-border', className)}>
       <div className="w-full">
         {showHeader && (
-          <div className="grid gap-4 border-b border-border bg-muted/50 p-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+          <div
+            className="grid gap-4 border-b border-border bg-muted/50 p-4"
+            style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+          >
             {Array.from({ length: cols }).map((_, i) => (
               <Skeleton key={i} variant={variant} className="h-4" />
             ))}

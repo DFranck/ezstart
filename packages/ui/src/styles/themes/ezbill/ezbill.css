@@ -1,6 +1,6 @@
 /* EZBill Theme Variables and Utilities */
 
-:root {
+[data-app="ezbill"] {
   /* EZBill - Entity Colors */
   --ezbill-client: oklch(0.7 0.15 210); /* Cyan-Blue - Friendly, professional */
   --ezbill-client-foreground: oklch(0.25 0.08 210);
@@ -32,7 +32,7 @@
   --ezbill-pending-foreground: oklch(0.25 0.09 80);
 }
 
-.dark {
+[data-app="ezbill"].dark {
   /* EZBill - Semantic colors for badges and text */
   --ezbill-client: oklch(0.731 0.165 210);
   --ezbill-client-foreground: oklch(0.98 0.01 210);

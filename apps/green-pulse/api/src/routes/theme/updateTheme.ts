@@ -52,8 +52,7 @@ docRouter.put(
       // For now, we use a fixed appName 'green-pulse'
       const appName = 'green-pulse'
 
-      // TODO: Get userId from auth middleware
-      // const userId = req.user?.id
+      const userId = req.userId!
 
       // Upsert theme override
       // @ts-ignore - Mongoose type overload issue with lean option + exec()
@@ -63,7 +62,7 @@ docRouter.put(
           appName,
           overrides,
           updatedAt: new Date(),
-          // updatedBy: userId,
+          updatedBy: userId,
         },
         {
           upsert: true,

@@ -1,15 +1,35 @@
 # ASC-TCD
 
-Association website (web only, no API).
+Static association website. Web-only app (no dedicated API).
 
-## Run
+## Purpose
 
-`pnpm dev:asc`
+Public-facing website for the ASC-TCD association with informational content and member resources.
 
-## Env vars
+## Tech Stack
 
-Copy `web/.env.example` to `web/.env.local`.
+- **Web:** Next.js, next-intl, @ezstart/ui
+- **Deploy:** Vercel
 
-## Ports
+## Architecture
 
-- Web: 6141
+```
+asc-tcd/
+└── web/              # Next.js app (port 6141)
+    └── src/
+        ├── components/   # Page components
+        ├── hooks/        # Custom hooks
+        └── utils/        # Utilities
+```
+
+## Setup
+
+```bash
+cp web/.env.example web/.env.local
+pnpm dev asc
+```
+
+## Related
+
+- [@ezstart/auth-sdk](../../packages/auth-sdk) — SSO authentication
+- [@ezstart/ui](../../packages/ui) — UI components

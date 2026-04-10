@@ -9,6 +9,12 @@ export { AIProvider, useAIContext } from './provider.js'
 
 // Components
 export { AISelector } from './client/components/AISelector.js'
+export { AILayout } from './client/components/AILayout.js'
+export type {
+  AILayoutProps,
+  AILayoutTexts,
+  AILayoutSlots,
+} from './client/components/ai-layout-types.js'
 export { AIAdminDashboard } from './components/AIAdminDashboard.js'
 export type { AIAdminDashboardTexts } from './components/AIAdminDashboard.js'
 export type {
@@ -18,6 +24,8 @@ export type {
 
 // Hooks
 export { useAIChat } from './client/hooks/useAIChat.js'
+export { useAIThread } from './client/hooks/useAIThread.js'
+export type { UseAIThreadConfig, UseAIThreadReturn } from './client/hooks/useAIThread.js'
 export { useProviders } from './client/hooks/useProviders.js'
 export { useConversations, useConversation } from './client/hooks/useConversations.js'
 export { usePrompts } from './client/hooks/usePrompts.js'

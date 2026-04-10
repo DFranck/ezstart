@@ -13,10 +13,41 @@ import {
   type FieldValues,
 } from 'react-hook-form'
 
+import { DesignTokenProvider } from '../../lib/design-system/DesignTokenContext'
 import { cn } from '../../lib/utils'
 import { Label } from './label'
 
 const Form: typeof FormProvider = FormProvider
+
+/**
+ * FormTokens — wraps Form children with design tokens (size, density).
+ *
+ * Because FormProvider uses complex generics, we provide a separate wrapper
+ * rather than replacing Form itself. Use around or inside Form to propagate
+ * size/density to all form controls.
+ *
+ * @example
+ * <Form {...form}>
+ *   <FormTokens size="sm" density="compact">
+ *     <FormField ... />
+ *   </FormTokens>
+ * </Form>
+ */
+function FormTokens({
+  size,
+  density,
+  children,
+}: {
+  size?: string
+  density?: string
+  children: React.ReactNode
+}) {
+  return (
+    <DesignTokenProvider size={size} density={density}>
+      {children}
+    </DesignTokenProvider>
+  )
+}
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
@@ -151,5 +182,6 @@ export {
   FormItem,
   FormLabel,
   FormMessage,
+  FormTokens,
   useFormField
 }

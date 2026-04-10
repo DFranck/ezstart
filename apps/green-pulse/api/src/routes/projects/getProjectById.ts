@@ -28,10 +28,14 @@ docRouter.get(
         return sendError(res, 'Project not found', 404)
       }
 
-      // TODO: Check if user has access to this project
-      // const { userId } = req.query
-      // const hasAccess = project.ownerId === userId || project.members.some(m => m.userId === userId)
-      // if (!hasAccess) return 403
+      const userId = req.userId!
+      const hasAccess =
+        project.ownerId === userId ||
+        project.members?.some((m: { userId: string }) => m.userId === userId)
+
+      if (!hasAccess) {
+        return sendError(res, 'Forbidden - you do not have access to this project', 403)
+      }
 
       sendSuccess(res, project)
     } catch (error) {

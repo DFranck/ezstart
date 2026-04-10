@@ -27,11 +27,18 @@ export interface CTAProps extends React.HTMLAttributes<HTMLDivElement> {
   secondaryText?: string
   /** Secondary button href */
   secondaryHref?: string
-  /** Background color */
+  /** @deprecated Use intent instead */
   bgColor?: 'default' | 'primary' | 'muted'
+  /** Standard intent token — maps to bgColor (default→default, primary→primary) */
+  intent?: 'default' | 'primary'
 }
 
 // ========== CTA Component ==========
+
+const intentToBgColor = {
+  default: 'default',
+  primary: 'primary',
+} as const
 
 export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
   (
@@ -43,16 +50,19 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
       primaryHref = '#',
       secondaryText,
       secondaryHref = '#',
-      bgColor = 'default',
+      bgColor,
+      intent,
       className,
       ...props
     },
     ref
   ) => {
+    const resolvedBgColor: 'default' | 'primary' | 'muted' =
+      bgColor ?? (intent ? intentToBgColor[intent] : 'default')
     const containerClasses = cn(
       'relative overflow-hidden rounded-2xl',
       ctaVariantConfig.container[variant],
-      variant !== 'gradient' && ctaVariantConfig.bgColor[bgColor],
+      variant !== 'gradient' && ctaVariantConfig.bgColor[resolvedBgColor],
       className
     )
 
@@ -88,7 +98,7 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
               <p
                 className={cn(
                   'text-lg sm:text-xl mb-8',
-                  variant === 'gradient' || bgColor === 'primary'
+                  variant === 'gradient' || resolvedBgColor === 'primary'
                     ? 'text-primary-foreground/90'
                     : 'text-muted-foreground',
                   variant === 'centered' && 'max-w-2xl mx-auto'
@@ -105,7 +115,7 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
                   asChild
                   size="lg"
                   variant={
-                    variant === 'gradient' || bgColor === 'primary'
+                    variant === 'gradient' || resolvedBgColor === 'primary'
                       ? 'secondary'
                       : 'default'
                   }
@@ -120,7 +130,7 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
                     variant="outline"
                     className={cn(
                       'text-base px-8 py-6',
-                      (variant === 'gradient' || bgColor === 'primary') &&
+                      (variant === 'gradient' || resolvedBgColor === 'primary') &&
                         'border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10'
                     )}
                   >
@@ -137,7 +147,7 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
               <Button
                 asChild
                 size="lg"
-                variant={bgColor === 'primary' ? 'secondary' : 'default'}
+                variant={resolvedBgColor === 'primary' ? 'secondary' : 'default'}
                 className="text-base px-8 py-6 w-full sm:w-auto"
               >
                 <a href={primaryHref}>{primaryText}</a>

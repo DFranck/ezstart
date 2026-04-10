@@ -1,8 +1,9 @@
 import { ComponentProps, forwardRef } from 'react'
 import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { cva, type VariantProps } from 'class-variance-authority'
-import { tableVariantConfig } from '../../lib/design-system/variants'
+import { type VariantProps } from 'class-variance-authority'
+import { DesignTokenProvider } from '../../lib/design-system/DesignTokenContext'
+import { tableVariants } from '../../lib/design-system/variants'
 
 /**
  * Table Component - Enhanced with Variants & Sorting
@@ -42,27 +43,18 @@ import { tableVariantConfig } from '../../lib/design-system/variants'
  * </Table>
  */
 
-const tableVariants = cva('w-full caption-bottom text-base sm:text-sm', {
-  variants: tableVariantConfig,
-  defaultVariants: {
-    variant: 'default',
-    size: 'default',
-  },
-})
-
-export interface TableProps
-  extends ComponentProps<'table'>,
-    VariantProps<typeof tableVariants> {}
+export interface TableProps extends ComponentProps<'table'>, VariantProps<typeof tableVariants> {
+  /** Controls spacing density inside the table */
+  density?: 'compact' | 'default' | 'relaxed'
+}
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(
-  ({ className, variant, size, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-      <table
-        ref={ref}
-        className={cn(tableVariants({ variant, size }), className)}
-        {...props}
-      />
-    </div>
+  ({ className, variant, size, density, ...props }, ref) => (
+    <DesignTokenProvider size={size ?? 'default'} density={density}>
+      <div className="relative w-full overflow-auto">
+        <table ref={ref} className={cn(tableVariants({ variant, size }), className)} {...props} />
+      </div>
+    </DesignTokenProvider>
   )
 )
 Table.displayName = 'Table'
@@ -142,7 +134,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(
         tabIndex={sortable ? 0 : undefined}
         onKeyDown={
           sortable
-            ? (e) => {
+            ? e => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
                   onSort?.()

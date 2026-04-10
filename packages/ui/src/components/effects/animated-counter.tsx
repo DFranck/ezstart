@@ -30,37 +30,22 @@
 'use client'
 
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
-import { animatedCounterVariantConfig } from '../../lib/design-system/variants'
+import { animatedCounterVariants } from '../../lib/design-system/variants'
 
 // ========== Easing Functions ==========
 
 const easingFunctions = {
   linear: (t: number) => t,
   easeOutQuart: (t: number) => 1 - Math.pow(1 - t, 4),
-  easeInOutQuart: (t: number) =>
-    t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2,
+  easeInOutQuart: (t: number) => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2),
 }
-
-// ========== Variants ==========
-
-const animatedCounterVariants = cva(
-  'tabular-nums inline-block transition-colors', // Base: monospace numbers + smooth color transitions
-  {
-    variants: animatedCounterVariantConfig,
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-)
 
 // ========== Types ==========
 
 export interface AnimatedCounterProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof animatedCounterVariants> {
+  extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof animatedCounterVariants> {
   /** Target value to count to */
   value: number
   /** Starting value (default: 0) */

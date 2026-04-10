@@ -5,24 +5,41 @@ import * as React from 'react'
 
 import { cn } from '../../lib/utils'
 import { touchHeight, gap } from '../../lib/design-system/tokens'
+import { DesignTokenProvider, useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
-function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
+interface TabsProps extends React.ComponentProps<typeof TabsPrimitive.Root> {
+  /** Design token: size propagated to children */
+  size?: string
+  /** Design token: density propagated to children */
+  density?: string
+}
+
+function Tabs({ size, density, className, ...props }: TabsProps) {
   return (
-    <TabsPrimitive.Root
-      data-slot="tabs"
-      className={cn('flex flex-col', gap.default, className)}
-      {...props}
-    />
+    <DesignTokenProvider size={size} density={density}>
+      <TabsPrimitive.Root
+        data-slot="tabs"
+        className={cn('flex flex-col', gap.default, className)}
+        {...props}
+      />
+    </DesignTokenProvider>
   )
 }
 
 function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
+  const inherited = useDesignTokens()
+  const sizeClass = {
+    sm: touchHeight.sm,
+    default: touchHeight.default,
+    lg: touchHeight.lg,
+  }[(inherited.size ?? 'default') as 'sm' | 'default' | 'lg'] ?? touchHeight.default
+
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
         'bg-muted text-muted-foreground inline-flex items-center rounded-lg p-[3px]',
-        touchHeight.default, // h-11 sm:h-9 (44px mobile, 36px desktop)
+        sizeClass,
         // Responsive: scroll horizontally on small screens instead of wrapping
         'overflow-x-auto overflow-y-hidden',
         // Hide scrollbar using custom scrollbar styles

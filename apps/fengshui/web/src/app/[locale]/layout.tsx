@@ -69,7 +69,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning data-app="fengshui">
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
         <Script
           id="json-ld"

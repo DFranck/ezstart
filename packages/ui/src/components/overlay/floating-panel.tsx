@@ -1,22 +1,13 @@
 'use client'
 
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import { GripVertical, Maximize2, Minimize2, X } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '../../lib'
-import { floatingPanelVariantConfig } from '../../lib/design-system/variants'
+import { DesignTokenProvider } from '../../lib/design-system/DesignTokenContext'
+import { floatingPanelVariants } from '../../lib/design-system/variants'
 import { Button } from '../button'
-
-const floatingPanelVariants = cva(
-  'fixed z-50 bg-card border border-border rounded-lg shadow-lg flex flex-col overflow-hidden',
-  {
-    variants: floatingPanelVariantConfig,
-    defaultVariants: {
-      size: 'md',
-    },
-  }
-)
 
 export interface FloatingPanelProps
   extends
@@ -180,87 +171,89 @@ export function FloatingPanel({
   )
 
   return (
-    <div
-      ref={panelRef}
-      className={cn(
-        floatingPanelVariants({ size: isMaximized ? 'full' : size }),
-        isMinimized && 'h-auto max-h-none',
-        className
-      )}
-      style={{
-        left: isMaximized ? '5vw' : position.x,
-        top: isMaximized ? '5vh' : position.y,
-        transition: isDragging ? 'none' : 'all 0.2s ease',
-      }}
-      {...props}
-    >
-      {/* Header */}
+    <DesignTokenProvider size={size ?? 'default'}>
       <div
+        ref={panelRef}
         className={cn(
-          'flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/50',
-          draggable && 'cursor-move',
-          isDragging && 'cursor-grabbing'
+          floatingPanelVariants({ size: isMaximized ? 'full' : size }),
+          isMinimized && 'h-auto max-h-none',
+          className
         )}
-        onMouseDown={handleMouseDown}
+        style={{
+          left: isMaximized ? '5vw' : position.x,
+          top: isMaximized ? '5vh' : position.y,
+          transition: isDragging ? 'none' : 'all 0.2s ease',
+        }}
+        {...props}
       >
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          {draggable && <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
-          {title && (
-            <div className="text-sm font-semibold text-foreground flex items-center gap-2 flex-1 min-w-0">
-              {title}
-            </div>
+        {/* Header */}
+        <div
+          className={cn(
+            'flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/50',
+            draggable && 'cursor-move',
+            isDragging && 'cursor-grabbing'
           )}
+          onMouseDown={handleMouseDown}
+        >
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {draggable && <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+            {title && (
+              <div className="text-sm font-semibold text-foreground flex items-center gap-2 flex-1 min-w-0">
+                {title}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1">
+            {minimizable && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleMinimize}
+                className="h-6 w-6"
+                aria-label="Minimize panel"
+              >
+                <Minimize2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+
+            {maximizable && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleMaximize}
+                className="h-6 w-6"
+                aria-label="Maximize panel"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+
+            {closable && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-6 w-6"
+                aria-label="Close panel"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          {minimizable && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleMinimize}
-              className="h-6 w-6"
-              aria-label="Minimize panel"
-            >
-              <Minimize2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
+        {/* Content - scrollable */}
+        {!isMinimized && (
+          <div className="flex-1 overflow-auto p-4" onClick={e => e.stopPropagation()}>
+            {contentChildren}
+          </div>
+        )}
 
-          {maximizable && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleMaximize}
-              className="h-6 w-6"
-              aria-label="Maximize panel"
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
-
-          {closable && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-6 w-6"
-              aria-label="Close panel"
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
+        {/* Footer - sticky at bottom */}
+        {!isMinimized && footer}
       </div>
-
-      {/* Content - scrollable */}
-      {!isMinimized && (
-        <div className="flex-1 overflow-auto p-4" onClick={e => e.stopPropagation()}>
-          {contentChildren}
-        </div>
-      )}
-
-      {/* Footer - sticky at bottom */}
-      {!isMinimized && footer}
-    </div>
+    </DesignTokenProvider>
   )
 }
 

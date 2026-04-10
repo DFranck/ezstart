@@ -20,6 +20,7 @@ import { runWithFeedback } from '@ezstart/ui/utils'
 import { callApi, parseApiError } from '@/config/api'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { LoadingButton } from './loading-button'
 
 interface MarkPaidModalProps {
@@ -33,6 +34,9 @@ interface MarkPaidModalProps {
 export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: MarkPaidModalProps) {
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const tMarkPaid = useTranslations('markPaid')
+  const tCommon = useTranslations('common')
+  const tToast = useTranslations('toast')
 
   const [formData, setFormData] = useState<CreateReceipt & { paymentDate?: string }>({
     userId: '',
@@ -73,9 +77,9 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
         onSave()
         onClose()
       },
-      toastLoading: { message: 'Marking invoice as paid...' },
-      toastSuccess: { message: 'Invoice marked as paid and receipt created' },
-      toastError: { message: 'Failed to mark invoice as paid' },
+      toastLoading: { message: tToast('markPaidLoading') },
+      toastSuccess: { message: tToast('markPaidSuccess') },
+      toastError: { message: tToast('markPaidFailed') },
       onLoadingChange: setIsLoading,
     })
   }
@@ -84,22 +88,22 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Mark Invoice as Paid"
-      description="This will create a receipt and mark the invoice as paid."
+      title={tMarkPaid('title')}
+      description={tMarkPaid('description')}
       footer={
         <Div className="flex gap-2 justify-end">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <LoadingButton loading={isLoading} type="submit" form="mark-paid-form">
-            Mark as Paid
+            {tMarkPaid('markAsPaid')}
           </LoadingButton>
         </Div>
       }
     >
       <form id="mark-paid-form" onSubmit={handleSubmit} className="space-y-4">
         <Div>
-          <Label>Bill on behalf of</Label>
+          <Label>{tCommon('billOnBehalf')}</Label>
           <Select
             value={formData.companyId || 'personal'}
             onValueChange={value =>
@@ -107,10 +111,10 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select billing entity" />
+              <SelectValue placeholder={tCommon('selectBillingEntity')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="personal">Personal (your name)</SelectItem>
+              <SelectItem value="personal">{tCommon('personalName')}</SelectItem>
               {companies?.map(company => (
                 <SelectItem key={company._id} value={company._id}>
                   {company.companyName}
@@ -121,7 +125,7 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
         </Div>
 
         <Div>
-          <Label>Payment Date</Label>
+          <Label>{tMarkPaid('paymentDate')}</Label>
           <Input
             type="date"
             value={formData.paymentDate}
@@ -131,7 +135,7 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
         </Div>
 
         <Div>
-          <Label>Notes</Label>
+          <Label>{tCommon('notes')}</Label>
           <TextArea
             value={formData.notes}
             onChange={e => setFormData({ ...formData, notes: e.target.value })}

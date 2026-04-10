@@ -6,6 +6,7 @@ import * as React from 'react'
 
 import { touchSmall } from '../../lib/design-system/tokens'
 import { cn } from '../../lib/utils'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { Label } from './label'
 import { Span } from '../tag'
 
@@ -41,6 +42,13 @@ export interface CheckboxProps extends React.ComponentProps<typeof CheckboxPrimi
 
 const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
   ({ className, label, id, ...props }, ref) => {
+    const inherited = useDesignTokens()
+    const sizeClass = {
+      sm: 'size-4 sm:size-3.5',
+      default: touchSmall.checkbox,
+      lg: 'size-6 sm:size-5',
+    }[(inherited.size ?? 'default') as 'sm' | 'default' | 'lg'] ?? touchSmall.checkbox
+
     const checkboxElement = (
       <CheckboxPrimitive.Root
         ref={ref}
@@ -48,7 +56,7 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
         data-slot="checkbox"
         className={cn(
           'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
-          touchSmall.checkbox, // size-5 sm:size-4 (20px mobile, 16px desktop)
+          sizeClass,
           // Indeterminate state styling
           'data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground data-[state=indeterminate]:border-primary',
           className

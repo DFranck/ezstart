@@ -1,18 +1,45 @@
-# Game Analyzer (gacha-analyzer)
+# Gacha Analyzer
 
-Game screenshot scanner via OCR — extracts stats from mobile game items (runes, gear).
+Game screenshot scanner that extracts and analyzes item stats via OCR.
 
-Supported games: Summoners War, Nikke.
+## Purpose
 
-## Run
+Lets players scan screenshots of in-game items (runes, gear) to extract stats, evaluate quality, and track inventory. Supports Summoners War and Nikke.
 
-`pnpm dev:ga`
+## Tech Stack
 
-## Env vars
+- **Web:** Next.js, next-intl, React Query, @ezstart/ui
+- **API:** Express via @ezstart/express-core, MongoDB, @ezstart/ocr-sdk
+- **Deploy:** Vercel (web) + Railway (API)
 
-Copy `api/.env.example` to `api/.env.local`.
+## Architecture
 
-## Ports
+```
+gacha-analyzer/
+├── web/          # Scanner UI (port 6171)
+├── api/          # OCR + analysis API (port 6170)
+│   └── routes/   # scan-image, get-scans, game-config, feedback, reanalyze
+├── types/        # Shared types (game-specific models)
+└── config/       # Shared config
+```
 
-- API: 6170
-- Web: 6171
+## Setup
+
+```bash
+cp api/.env.example api/.env.local
+cp web/.env.example web/.env.local
+pnpm dev ga
+```
+
+## Key Features
+
+- Screenshot OCR scanning with zone-based extraction
+- Game-specific stat parsing and quality analysis
+- Scan history and re-analysis
+- User feedback loop for OCR accuracy improvement
+- Configurable game profiles
+
+## Related
+
+- [@ezstart/ocr-sdk](../../packages/ocr-sdk) — OCR engine and preprocessing
+- [@ezstart/auth-sdk](../../packages/auth-sdk) — SSO authentication

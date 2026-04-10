@@ -18,6 +18,8 @@ import type { ProviderResponse } from '@ezstart/ai-sdk'
 import { AIConversation } from '../../../models/AIConversation.js'
 import { getSystemPrompt, getSystemPromptDoc } from '../../../services/ai-prompt.service.js'
 import { getAppProviders } from '../../../services/app-provider.service.js'
+import { isAppAuthorizedForProvider } from '../../../services/provider-access.service.js'
+import { trackAIUsage } from '../../../services/ai-usage.service.js'
 
 const ChatRequestSchema = z.object({
   message: z.string().min(1).max(10000).describe('User message'),
@@ -34,6 +36,7 @@ export const sendMessageRouter = createRouterWithDoc(sendMessageRegistry, router
 sendMessageRouter.post(
   '/',
   async (req, res) => {
+    const startTime = Date.now()
     try {
       const validation = ChatRequestSchema.safeParse(req.body)
       if (!validation.success) {
@@ -121,12 +124,23 @@ sendMessageRouter.post(
       let usedProvider = 'unknown'
 
       if (providerId) {
-        // Client explicitly chose a provider
+        // Client explicitly chose a provider — check global authorization first
+        const isAuthorized = await isAppAuthorizedForProvider(appName, providerId)
+        if (!isAuthorized) {
+          return sendError(res, `Provider "${providerId}" is not available for this app`, 403)
+        }
         aiResponse = await UnifiedChat.send(message, providerId, sendOptions)
         usedProvider = providerId
       } else {
         // Cascade through app's enabled providers in priority order
-        const appProviders = await getAppProviders(appName)
+        const allAppProviders = await getAppProviders(appName)
+
+        // Filter out providers not authorized via GlobalProviderAccess
+        const appProviders = []
+        for (const provider of allAppProviders) {
+          const isAuthorized = await isAppAuthorizedForProvider(appName, provider.providerId)
+          if (isAuthorized) appProviders.push(provider)
+        }
         let lastError: Error | null = null
         let resolved = false
 
@@ -184,6 +198,18 @@ sendMessageRouter.post(
           logger.error('[AI Chat] Failed to save messages to conversation:', saveError)
         }
       }
+
+      // Track usage (fire-and-forget)
+      const endTime = Date.now()
+      trackAIUsage({
+        appName,
+        providerId: usedProvider,
+        userId: userId || undefined,
+        conversationId: conversationId || undefined,
+        tokensUsed: aiResponse.tokensUsed,
+        responseTime: endTime - startTime,
+        success: true,
+      }).catch(() => {}) // silent
 
       sendSuccess(res, {
         response: aiResponse.text,

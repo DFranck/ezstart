@@ -176,7 +176,7 @@ export function ConversationItem({
             }}
             className={cn(
               'p-1 rounded hover:bg-accent/50 transition-opacity cursor-pointer',
-              'opacity-0 group-hover:opacity-100',
+              'sm:opacity-0 sm:group-hover:opacity-100',
               isMenuOpen && 'opacity-100'
             )}
             aria-label="More actions"

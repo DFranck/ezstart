@@ -1,8 +1,9 @@
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-import { fontSize, paddingX, paddingY } from '../../lib/design-system/tokens'
-import { badgeVariantConfig } from '../../lib/design-system/variants'
 import { cn } from '../../lib/utils'
+import { badgeVariants } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
+import { radius as radiusTokens } from '../../lib/design-system/tokens'
 
 /**
  * Badge Component - Display status, count, or label
@@ -35,45 +36,6 @@ import { cn } from '../../lib/utils'
  * <Badge variant="success" pulse>Live</Badge>
  */
 
-const badgeVariants = cva(
-  'inline-flex items-center font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full',
-  {
-    variants: {
-      variant: {
-        ...badgeVariantConfig.variant,
-        primary: 'border-transparent bg-primary text-primary-foreground', // Alias for default
-        destructive: 'border-transparent bg-destructive text-destructive-foreground',
-        success: 'border-transparent bg-success/20 text-success dark:bg-success/10',
-        warning: 'border-transparent bg-warning/20 text-warning dark:bg-warning/10',
-        info: 'border-transparent bg-info/20 text-info dark:bg-info/10',
-        purple: 'border-transparent bg-purple-500/15 text-purple-700 dark:text-purple-300',
-        cyan: 'border-transparent bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
-        indigo: 'border-transparent bg-indigo-500/15 text-indigo-700 dark:text-indigo-300',
-        pink: 'border-transparent bg-pink-500/15 text-pink-700 dark:text-pink-300',
-      },
-      size: {
-        none: '', // No size classes - used for circle variant
-        default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '),
-        sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '),
-        lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '),
-      },
-      circle: {
-        true: 'aspect-square justify-center p-0',
-      },
-      circleSize: {
-        sm: 'w-8 h-8 text-sm',
-        md: 'w-10 h-10 text-base',
-        lg: 'w-12 h-12 text-xl',
-        xl: 'w-16 h-16 text-2xl',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-)
-
 const dotVariantClasses: Record<string, string> = {
   default: 'bg-primary',
   secondary: 'bg-secondary-foreground',
@@ -88,6 +50,22 @@ const dotVariantClasses: Record<string, string> = {
   pink: 'bg-pink-600 dark:bg-pink-400',
 }
 
+/** Map inherited intent to Badge variant as fallback */
+const intentToVariantMap: Record<string, VariantProps<typeof badgeVariants>['variant']> = {
+  success: 'success',
+  warning: 'warning',
+  destructive: 'destructive',
+  danger: 'destructive',
+  info: 'info',
+  primary: 'default',
+}
+
+/** Density-based padding adjustments for Badge */
+const badgeDensityClasses: Record<string, string> = {
+  compact: 'py-0 px-1.5',
+  relaxed: 'py-1.5 px-4',
+}
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
   /** Show a dot indicator before the text */
@@ -98,8 +76,8 @@ export interface BadgeProps
 
 function Badge({
   className,
-  variant,
-  size,
+  variant: variantProp,
+  size: sizeProp,
   circle,
   circleSize,
   dot,
@@ -107,7 +85,18 @@ function Badge({
   children,
   ...props
 }: BadgeProps) {
-  const dotColor = variant ? dotVariantClasses[variant] : dotVariantClasses.default
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size) as VariantProps<typeof badgeVariants>['size']
+  const variant = (variantProp ??
+    (inherited.intent ? intentToVariantMap[inherited.intent] : undefined)) as VariantProps<
+    typeof badgeVariants
+  >['variant']
+  const density = inherited.density as string | undefined
+  const inheritedRadius = inherited.radius as keyof typeof radiusTokens | undefined
+  const dotColor =
+    (variantProp ?? variant)
+      ? (dotVariantClasses[(variantProp ?? variant) as string] ?? dotVariantClasses.default)
+      : dotVariantClasses.default
 
   // When circle=true, use circleSize instead of size
   const effectiveSize = circle ? undefined : size
@@ -117,6 +106,8 @@ function Badge({
     <div
       className={cn(
         badgeVariants({ variant, size: effectiveSize, circle, circleSize: effectiveCircleSize }),
+        density && badgeDensityClasses[density],
+        inheritedRadius && radiusTokens[inheritedRadius],
         className
       )}
       {...props}

@@ -40,6 +40,11 @@ export class GeminiProvider implements IAIProvider {
 
     let content: string
 
+    // Streaming mode
+    if (options.streaming?.enabled) {
+      return this.handleStreaming(model, message, options)
+    }
+
     // With conversation history
     if (options.history && options.history.length > 0) {
       const history = options.history.map(msg => ({
@@ -74,6 +79,55 @@ export class GeminiProvider implements IAIProvider {
     return {
       text: content,
       extractedData: null,
+    }
+  }
+
+  private async handleStreaming(
+    model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>,
+    message: string,
+    options: ProviderSendOptions
+  ): Promise<ProviderResponse> {
+    let fullText = ''
+
+    if (options.history && options.history.length > 0) {
+      const history = options.history.map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
+      }))
+
+      const chat = model.startChat({ history })
+      const result = await chat.sendMessageStream(message)
+
+      for await (const chunk of result.stream) {
+        const text = chunk.text()
+        if (text) {
+          fullText += text
+          if (options.streaming?.onChunk) {
+            options.streaming.onChunk(text)
+          }
+        }
+      }
+    } else {
+      const result = await model.generateContentStream(message)
+
+      for await (const chunk of result.stream) {
+        const text = chunk.text()
+        if (text) {
+          fullText += text
+          if (options.streaming?.onChunk) {
+            options.streaming.onChunk(text)
+          }
+        }
+      }
+    }
+
+    if (options.streaming?.onComplete) {
+      options.streaming.onComplete(fullText)
+    }
+
+    return {
+      text: fullText,
+      tokensUsed: undefined,
     }
   }
 }

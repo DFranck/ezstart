@@ -1,22 +1,57 @@
 # @ezstart/express-core
 
-Express.js infrastructure and utilities for all @ezstart API services (MongoDB, middleware, error handling).
+Express.js infrastructure package for all @ezstart API services.
 
-## Install
+## Purpose
 
-`pnpm add @ezstart/express-core`
+Provides a standardized Express app factory with auto-configured CORS, MongoDB connection management, rate limiting, OpenAPI/Swagger docs, auth middleware, and error handling.
+
+## Tech Stack
+
+- Express.js, Mongoose, Zod OpenAPI, Swagger UI
+- Rate limiting (express-rate-limit), helmet, compression
+
+## Architecture
+
+```
+express-core/src/
+├── infra/             # createApp, startServer, connectToMongo
+├── middleware/        # Auth verification, error handling
+├── middlewares/       # Rate limiting (standard, strict, very strict)
+├── controller-factory/# Generic CRUD controller generator
+├── openapi/           # OpenAPI registry and Swagger UI setup
+├── config/            # Internal config
+├── helpers/           # Utility functions
+└── types/             # Shared types
+```
 
 ## Usage
 
 ```typescript
-import { createApp, createRouter, connectDB } from '@ezstart/express-core'
-import { corsMiddleware } from '@ezstart/express-core/cors'
+import {
+  createApp,
+  connectToMongo,
+  startServer,
+  getApiPort,
+  createRateLimiter,
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+} from '@ezstart/express-core'
+
+const app = createApp({ apiApp: 'myapp' }) // CORS auto-configured
+app.use(createRateLimiter()) // Rate limiting
+
+connectToMongo('mydb').then(() =>
+  startServer(app, { serviceName: 'MyApp', port: getApiPort('myapp') })
+)
 ```
 
-## Docs
+## Used By
 
-- [MONGODB-ARCHITECTURE.md](./MONGODB-ARCHITECTURE.md) — MongoDB patterns and conventions
+All API services: ezauth, ezbill, ezpay, ezstart, gacha-analyzer, green-pulse.
 
-## Used by
+## Related
 
-- apps/ezauth, ezbill, ezpay, ezstart, gacha-analyzer, green-pulse (api)
+- [@ezstart/config](../config) — URLs, ports, CORS origins
+- [MONGODB-ARCHITECTURE.md](./MONGODB-ARCHITECTURE.md) — MongoDB patterns

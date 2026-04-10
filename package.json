@@ -27,6 +27,7 @@
     "check:dead-code": "node scripts/tools/check-dead-code.js",
     "prepare": "husky",
     "setup:env": "node scripts/tools/setup-env.js",
+    "registry:update": "node scripts/generators/generate-ui-registry.js",
     "stripe": "stripe listen --forward-to localhost:6130/api/webhooks/stripe"
   },
   "lint-staged": {

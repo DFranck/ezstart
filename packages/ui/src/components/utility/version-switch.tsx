@@ -3,6 +3,7 @@
 import { Label, Switch } from '@ezstart/ui/components'
 import * as React from 'react'
 import { versionSwitchVariantConfig } from '../../lib/design-system/variants'
+import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
 export interface VersionSwitchProps {
   /**
@@ -36,8 +37,10 @@ export function VersionSwitch({
   v2Label = 'New Version',
   v2Suffix = '/v2',
   position = 'bottom-left',
-  size = 'default',
+  size: sizeProp,
 }: VersionSwitchProps) {
+  const inherited = useDesignTokens()
+  const size = (sizeProp ?? inherited.size ?? 'default') as NonNullable<VersionSwitchProps['size']>
   const [pathname, setPathname] = React.useState('')
   const [isV2, setIsV2] = React.useState(false)
 
