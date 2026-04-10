@@ -65,10 +65,17 @@ function classifyTokenStatus(name) {
 }
 
 /** Props that are always design tokens */
-const DESIGN_TOKEN_NAMES = new Set(['density', 'size', 'variant', 'colorScheme'])
+const DESIGN_TOKEN_NAMES = new Set([
+  'density',
+  'size',
+  'variant',
+  'colorScheme',
+  'intent',
+  'radius',
+])
 
 /** Structural tokens propagate through the component tree */
-const STRUCTURAL_TOKENS = new Set(['density', 'size'])
+const STRUCTURAL_TOKENS = new Set(['density', 'size', 'radius', 'intent'])
 
 /** Categorize a token as structural (propagates) or visual (local only) */
 function categorizeToken(name) {
