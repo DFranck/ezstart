@@ -20,7 +20,7 @@ function CompositionDiagnostic({
 }: {
   entry: { level: string; slots: SlotInfo[]; children: string[] }
 }) {
-  const isComplex = entry.level === 'complex'
+  const isComplex = entry.level === 'organism' || entry.level === 'template'
   const hasSlots = entry.slots.length > 0
   const hasImportedChildren = entry.children.length > 0
   const compositionSlots = entry.slots.filter(s => !s.isRenderProp)
@@ -163,22 +163,25 @@ export default function TreeExplorerPage({
                 <Badge variant="success" size="sm">
                   flows
                 </Badge>
-                <Span className="text-xs text-muted-foreground">Token auto-drills from parent</Span>
+                <Span className="text-xs text-muted-foreground">
+                  Token propagates through DesignTokenProvider
+                </Span>
               </Div>
               <Div className="flex items-center gap-2">
                 <Badge variant="warning" size="sm">
-                  lost
+                  ignored
                 </Badge>
                 <Span className="text-xs text-muted-foreground">
-                  Parent has token, child ignores it
+                  Parent provides, but child has no matching prop
                 </Span>
               </Div>
               <Div className="flex items-center gap-2">
                 <Badge variant="destructive" size="sm">
-                  uncontrollable
+                  unwired
                 </Badge>
                 <Span className="text-xs text-muted-foreground">
-                  Child needs token, parent doesn&apos;t provide
+                  Child inherits via useDesignTokens, but no ancestor provides it — needs
+                  DesignTokenProvider
                 </Span>
               </Div>
               <Div className="flex items-center gap-2">
@@ -186,7 +189,7 @@ export default function TreeExplorerPage({
                   local
                 </Badge>
                 <Span className="text-xs text-muted-foreground">
-                  Visual token, does not propagate
+                  Visual token — scoped to this component, no propagation
                 </Span>
               </Div>
               <Div className="flex items-center gap-2">

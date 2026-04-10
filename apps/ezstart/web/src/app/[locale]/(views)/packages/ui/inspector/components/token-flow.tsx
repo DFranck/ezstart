@@ -5,7 +5,7 @@ import { type TokenInfo, getTokenNames } from '../registry'
 
 type ChainItem = {
   name: string
-  level: 'base' | 'composed' | 'complex'
+  level: 'atom' | 'molecule' | 'organism' | 'template'
   tokens: TokenInfo[]
 }
 
@@ -14,10 +14,11 @@ type TokenFlowProps = {
   tokens: Record<string, string>
 }
 
-const LEVEL_BADGE_VARIANT: Record<string, 'purple' | 'info' | 'success'> = {
-  complex: 'purple',
-  composed: 'info',
-  base: 'success',
+const LEVEL_BADGE_VARIANT: Record<string, 'warning' | 'purple' | 'info' | 'success'> = {
+  template: 'warning',
+  organism: 'purple',
+  molecule: 'info',
+  atom: 'success',
 }
 
 type TokenStatus = 'flows' | 'lost' | 'has' | 'missing'

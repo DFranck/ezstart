@@ -664,35 +664,247 @@ function extractSlots(filePath, componentName) {
 }
 
 /**
- * Extract children components by scanning imports from other UI components.
- * Cross-references with all known component names.
+ * Extract the function body of a specific component from source text.
+ * Handles: function Name(, const Name = React.forwardRef(, const Name = React.memo(,
+ * const Name = (props) =>, const Name = createAlias(...)
+ * Returns the body text or null if boundaries can't be determined.
  */
-function extractChildren(filePath, allComponentNames) {
-  const content = readFile(filePath)
-  if (!content) return []
+function extractComponentBody(content, componentName) {
+  // Patterns to find the component definition start
+  const patterns = [
+    // function ComponentName(
+    new RegExp(`(?:export\\s+)?function\\s+${componentName}\\s*[<(]`),
+    // const ComponentName = React.forwardRef(
+    new RegExp(`(?:export\\s+)?const\\s+${componentName}\\s*=\\s*(?:React\\.)?forwardRef\\s*[<(]`),
+    // const ComponentName = React.memo(
+    new RegExp(`(?:export\\s+)?const\\s+${componentName}\\s*=\\s*(?:React\\.)?memo\\s*[<(]`),
+    // const ComponentName = (props) => { or const ComponentName = ({ ... }) => {
+    new RegExp(`(?:export\\s+)?const\\s+${componentName}\\s*=\\s*\\(`),
+    // const ComponentName = createAlias(...)
+    new RegExp(`(?:export\\s+)?const\\s+${componentName}\\s*=\\s*create[A-Z]`),
+  ]
 
-  const children = new Set()
+  let defStart = -1
+  for (const pattern of patterns) {
+    const match = pattern.exec(content)
+    if (match) {
+      defStart = match.index
+      break
+    }
+  }
 
-  // Find imports from relative paths (other UI components)
+  if (defStart === -1) return null
+
+  // Skip past generics <...> and parameter list (...) to find the function body brace.
+  // We need to track angle brackets and parentheses to avoid confusing
+  // destructuring braces inside params with the function body brace.
+  let i = defStart
+  let foundBodyBrace = false
+
+  // First, advance to the opening paren '(' of the function params.
+  // For 'function Name<T>(' we skip generics first; for 'const Name = (' we go straight to '('.
+  // For arrow functions after forwardRef/memo we need to find the inner function's '('.
+  let parenDepth = 0
+  let angleDepth = 0
+  let passedParams = false
+
+  while (i < content.length) {
+    const ch = content[i]
+
+    // Skip string literals
+    if (ch === "'" || ch === '"' || ch === '`') {
+      const quote = ch
+      i++
+      while (i < content.length && content[i] !== quote) {
+        if (content[i] === '\\') i++
+        i++
+      }
+      i++
+      continue
+    }
+
+    // Skip comments
+    if (ch === '/' && content[i + 1] === '/') {
+      while (i < content.length && content[i] !== '\n') i++
+      continue
+    }
+    if (ch === '/' && content[i + 1] === '*') {
+      i += 2
+      while (i < content.length - 1 && !(content[i] === '*' && content[i + 1] === '/')) i++
+      i += 2
+      continue
+    }
+
+    if (ch === '<') {
+      angleDepth++
+      i++
+      continue
+    }
+    if (ch === '>') {
+      angleDepth--
+      i++
+      continue
+    }
+
+    // Only track parens when not inside generics
+    if (angleDepth === 0) {
+      if (ch === '(') {
+        parenDepth++
+        i++
+        continue
+      }
+      if (ch === ')') {
+        parenDepth--
+        if (parenDepth === 0) {
+          passedParams = true
+          i++
+          continue
+        }
+        i++
+        continue
+      }
+
+      // After closing the param list, find the next '{' which is the function body
+      if (passedParams && ch === '{') {
+        foundBodyBrace = true
+        break
+      }
+    }
+
+    i++
+  }
+
+  if (!foundBodyBrace) return null
+
+  // Now count braces to find the matching closing brace
+  const bodyStart = i + 1
+  let depth = 1
+  i = bodyStart
+
+  while (i < content.length && depth > 0) {
+    const ch = content[i]
+
+    // Skip string literals (avoid counting braces inside strings/template literals)
+    if (ch === "'" || ch === '"' || ch === '`') {
+      const quote = ch
+      i++
+      while (i < content.length) {
+        if (content[i] === '\\') {
+          i += 2
+          continue
+        }
+        if (content[i] === quote) {
+          // For template literals, handle nested ${} expressions
+          if (quote === '`' && false) {
+            /* handled below */
+          }
+          break
+        }
+        // Template literal interpolation: skip ${...} blocks
+        if (quote === '`' && content[i] === '$' && content[i + 1] === '{') {
+          i += 2
+          let exprDepth = 1
+          while (i < content.length && exprDepth > 0) {
+            if (content[i] === '{') exprDepth++
+            else if (content[i] === '}') exprDepth--
+            if (exprDepth > 0) i++
+          }
+        }
+        i++
+      }
+      i++ // skip closing quote
+      continue
+    }
+
+    // Skip line comments
+    if (ch === '/' && content[i + 1] === '/') {
+      while (i < content.length && content[i] !== '\n') i++
+      continue
+    }
+
+    // Skip block comments
+    if (ch === '/' && content[i + 1] === '*') {
+      i += 2
+      while (i < content.length - 1 && !(content[i] === '*' && content[i + 1] === '/')) i++
+      i += 2
+      continue
+    }
+
+    if (ch === '{') depth++
+    else if (ch === '}') depth--
+
+    i++
+  }
+
+  if (depth !== 0) return null
+  return content.substring(bodyStart, i - 1)
+}
+
+/**
+ * Collect all imported UI component names from a file (file-level imports).
+ * Returns a Set of component names.
+ */
+function collectImportedComponents(content, allComponentNames) {
+  const imported = new Set()
+
   const importRegex = /import\s+\{([^}]+)\}\s+from\s+['"]\.\.?\/[^'"]+['"]/g
   let match
   while ((match = importRegex.exec(content)) !== null) {
     for (const part of match[1].split(',')) {
       const name = part.trim().replace(/\s+as\s+\w+/, '')
       if (name && allComponentNames.has(name) && isComponentName(name)) {
-        children.add(name)
+        imported.add(name)
       }
     }
   }
 
-  // Also check for imports from @ezstart/ui
   const pkgImportRegex = /import\s+\{([^}]+)\}\s+from\s+['"]@ezstart\/ui[^'"]*['"]/g
   while ((match = pkgImportRegex.exec(content)) !== null) {
     for (const part of match[1].split(',')) {
       const name = part.trim().replace(/\s+as\s+\w+/, '')
       if (name && allComponentNames.has(name) && isComponentName(name)) {
-        children.add(name)
+        imported.add(name)
       }
+    }
+  }
+
+  return imported
+}
+
+/**
+ * Extract children components for a specific component by scanning JSX usage
+ * within that component's function body. For single-export files, scans the
+ * whole file (same as before). For multi-export files, scans only the target
+ * component's body to avoid false attributions.
+ */
+function extractChildren(filePath, allComponentNames, componentName, exportsInFile) {
+  const content = readFile(filePath)
+  if (!content) return []
+
+  // Collect all imported UI component names at file level
+  const importedComponents = collectImportedComponents(content, allComponentNames)
+  if (importedComponents.size === 0) return []
+
+  // Single-export file: scan the whole file (original behavior)
+  if (!exportsInFile || exportsInFile.length <= 1) {
+    return [...importedComponents]
+  }
+
+  // Multi-export file: extract only this component's body and scan for JSX usage
+  const body = extractComponentBody(content, componentName)
+  if (!body) {
+    // Fallback: if we can't determine boundaries, return all imports
+    return [...importedComponents]
+  }
+
+  const children = new Set()
+  for (const name of importedComponents) {
+    // Check for JSX usage: <ComponentName or <ComponentName> or <ComponentName/> or <ComponentName\s
+    const jsxPattern = new RegExp(`<${name}[\\s/>]`)
+    // Also check for render-as-value usage: component={ComponentName} or render(ComponentName)
+    const valuePattern = new RegExp(`\\b${name}\\b`)
+    if (jsxPattern.test(body) || valuePattern.test(body)) {
+      children.add(name)
     }
   }
 
@@ -1342,6 +1554,13 @@ function main() {
   let processed = 0
   let skipped = 0
 
+  // Pre-compute: group all exported component names by their source file
+  const exportsByFile = new Map() // sourcePath → string[]
+  for (const [name, sourcePath] of mainEntries) {
+    if (!exportsByFile.has(sourcePath)) exportsByFile.set(sourcePath, [])
+    exportsByFile.get(sourcePath).push(name)
+  }
+
   for (const [name, sourcePath] of mainEntries) {
     try {
       // Extract props
@@ -1372,7 +1591,8 @@ function main() {
       const tokens = [...tokenSet]
 
       // Extract children (other UI components imported by this component)
-      const children = extractChildren(sourcePath, allComponentNames)
+      const exportsInFile = exportsByFile.get(sourcePath) || []
+      const children = extractChildren(sourcePath, allComponentNames, name, exportsInFile)
 
       // Extract composition slots
       const slots = extractSlots(sourcePath, name)

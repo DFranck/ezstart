@@ -15,15 +15,17 @@ import { InspectorControls } from '../components/inspector-controls'
 import { InspectorPreview } from '../components/inspector-preview'
 
 const levelOrder: Record<ComponentLevel, number> = {
-  complex: 0,
-  composed: 1,
-  base: 2,
+  template: 0,
+  organism: 1,
+  molecule: 2,
+  atom: 3,
 }
 
-const levelBadgeVariant: Record<ComponentLevel, 'success' | 'info' | 'purple'> = {
-  base: 'success',
-  composed: 'info',
-  complex: 'purple',
+const levelBadgeVariant: Record<ComponentLevel, 'success' | 'info' | 'purple' | 'warning'> = {
+  atom: 'success',
+  molecule: 'info',
+  organism: 'purple',
+  template: 'warning',
 }
 
 const STRUCTURAL_TOKEN_NAMES = new Set(['size', 'density', 'radius', 'intent'])
@@ -61,7 +63,7 @@ function validateChainOrder(entries: ComponentEntry[]): string[] {
     const next = entries[i + 1]
     if (current && next && levelOrder[current.level] > levelOrder[next.level]) {
       warnings.push(
-        `"${current.name}" (${current.level}) appears before "${next.name}" (${next.level}) — expected complex > composed > base order`
+        `"${current.name}" (${current.level}) appears before "${next.name}" (${next.level}) — expected template > organism > molecule > atom order`
       )
     }
   }

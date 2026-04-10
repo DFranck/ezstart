@@ -29,22 +29,27 @@ import {
 
 const levelConfig: Record<
   ComponentLevel,
-  { label: string; badgeVariant: 'success' | 'info' | 'purple'; description: string }
+  { label: string; badgeVariant: 'success' | 'info' | 'purple' | 'warning'; description: string }
 > = {
-  base: {
-    label: 'Base',
+  atom: {
+    label: 'Atom',
     badgeVariant: 'success',
     description: 'Primitive components that apply tokens directly',
   },
-  composed: {
-    label: 'Composed',
+  molecule: {
+    label: 'Molecule',
     badgeVariant: 'info',
-    description: 'Components that merge and drill tokens to 1-3 children',
+    description: 'Compound components that group atoms into reusable units',
   },
-  complex: {
-    label: 'Complex',
+  organism: {
+    label: 'Organism',
     badgeVariant: 'purple',
-    description: 'Orchestrators that drill tokens through deep hierarchies',
+    description: 'Self-contained sections with complex internal logic',
+  },
+  template: {
+    label: 'Template',
+    badgeVariant: 'warning',
+    description: 'Page-level layout orchestrators',
   },
 }
 
@@ -501,7 +506,7 @@ export default function InspectorIndexPage() {
           </P>
         </Div>
         <Div className="flex flex-wrap gap-2">
-          {getComponentsByLevel('complex')
+          {[...getComponentsByLevel('organism'), ...getComponentsByLevel('template')]
             .filter(entry => entry.children.length > 0)
             .map(entry => (
               <Link
@@ -509,7 +514,7 @@ export default function InspectorIndexPage() {
                 href={`/${locale}/packages/ui/inspector/explorer/${entry.name}`}
               >
                 <Badge
-                  variant="purple"
+                  variant={entry.level === 'template' ? 'warning' : 'purple'}
                   className="cursor-pointer hover:opacity-80 transition-opacity px-3 py-1.5 text-sm"
                 >
                   {entry.name}
@@ -521,19 +526,25 @@ export default function InspectorIndexPage() {
 
       {/* Component sections by level */}
       <LevelSection
-        level="complex"
+        level="template"
         locale={locale}
         search={search}
         activeTokenFilter={activeTokenFilter}
       />
       <LevelSection
-        level="composed"
+        level="organism"
         locale={locale}
         search={search}
         activeTokenFilter={activeTokenFilter}
       />
       <LevelSection
-        level="base"
+        level="molecule"
+        locale={locale}
+        search={search}
+        activeTokenFilter={activeTokenFilter}
+      />
+      <LevelSection
+        level="atom"
         locale={locale}
         search={search}
         activeTokenFilter={activeTokenFilter}

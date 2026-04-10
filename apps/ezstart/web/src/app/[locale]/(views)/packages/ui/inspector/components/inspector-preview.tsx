@@ -18,6 +18,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@ezstart/ui/components'
 import {
   type TokenInfo,
@@ -29,7 +32,7 @@ import {
 
 type ChainItem = {
   name: string
-  level: 'base' | 'composed' | 'complex'
+  level: 'atom' | 'molecule' | 'organism' | 'template'
   tokens: TokenInfo[]
   providesTokens: string[]
   inheritsTokens: string[]
@@ -48,15 +51,48 @@ type CompatibilityResult = {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  complex: 'border-l-purple-500',
-  composed: 'border-l-blue-500',
-  base: 'border-l-green-500',
+  template: 'border-l-amber-500',
+  organism: 'border-l-purple-500',
+  molecule: 'border-l-blue-500',
+  atom: 'border-l-green-500',
 }
 
-const LEVEL_BADGE_VARIANT: Record<string, 'purple' | 'info' | 'success'> = {
-  complex: 'purple',
-  composed: 'info',
-  base: 'success',
+const LEVEL_BADGE_VARIANT: Record<string, 'warning' | 'purple' | 'info' | 'success'> = {
+  template: 'warning',
+  organism: 'purple',
+  molecule: 'info',
+  atom: 'success',
+}
+
+const STANDARD_TOKEN_VALUES: Record<string, string[]> = {
+  size: ['xs', 'sm', 'default', 'lg', 'xl'],
+  density: ['compact', 'default', 'relaxed'],
+  radius: ['none', 'sm', 'default', 'md', 'lg', 'xl', '2xl', '3xl', 'full'],
+  intent: ['default', 'primary', 'success', 'warning', 'destructive', 'danger', 'info'],
+}
+
+function BadgeWithTooltip({
+  values,
+  tokenName,
+  children,
+}: {
+  values: string[]
+  tokenName?: string
+  children: ReactNode
+}) {
+  const resolvedValues =
+    values.length > 0 ? values : tokenName ? STANDARD_TOKEN_VALUES[tokenName] || [] : []
+  if (resolvedValues.length === 0) return <>{children}</>
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent>
+        <Span className="font-mono text-xs">
+          ({resolvedValues.length}) {resolvedValues.join(', ')}
+        </Span>
+      </TooltipContent>
+    </Tooltip>
+  )
 }
 
 function computeCompatibility(parent: ChainItem, child: ChainItem): CompatibilityResult {
@@ -80,53 +116,6 @@ function computeCompatibility(parent: ChainItem, child: ChainItem): Compatibilit
   const localVisual = [...allVisualNames]
 
   return { flows, lost, uncontrollable, localVisual }
-}
-
-function CompatibilityBadges({ parent, child }: { parent: ChainItem; child: ChainItem }) {
-  const { flows, lost, uncontrollable, localVisual } = computeCompatibility(parent, child)
-
-  if (
-    flows.length === 0 &&
-    lost.length === 0 &&
-    uncontrollable.length === 0 &&
-    localVisual.length === 0
-  ) {
-    return null
-  }
-
-  return (
-    <Div className="py-2 px-3 space-y-1.5 bg-muted/30 rounded-md border border-border/50">
-      <P className="text-xs font-medium text-muted-foreground">
-        {parent.name} &rarr; {child.name}
-      </P>
-      <Div className="flex flex-wrap gap-1.5">
-        {flows.map(token => (
-          <Badge key={`flow-${token}`} variant="success" size="sm">
-            <Span className="font-mono">{token}</Span>
-            <Span className="ml-1">flows</Span>
-          </Badge>
-        ))}
-        {lost.map(token => (
-          <Badge key={`lost-${token}`} variant="warning" size="sm">
-            <Span className="font-mono">{token}</Span>
-            <Span className="ml-1">not drilled — child doesn&apos;t accept</Span>
-          </Badge>
-        ))}
-        {uncontrollable.map(token => (
-          <Badge key={`unctl-${token}`} variant="destructive" size="sm">
-            <Span className="font-mono">{token}</Span>
-            <Span className="ml-1">uncontrollable — parent doesn&apos;t drill</Span>
-          </Badge>
-        ))}
-        {localVisual.map(token => (
-          <Badge key={`visual-${token}`} variant="secondary" size="sm">
-            <Span className="font-mono">{token}</Span>
-            <Span className="ml-1 text-muted-foreground">per-component — does not auto-drill</Span>
-          </Badge>
-        ))}
-      </Div>
-    </Div>
-  )
 }
 
 function renderBasePreview(name: string, tokens: Record<string, string>) {
@@ -303,7 +292,12 @@ function renderBasePreview(name: string, tokens: Record<string, string>) {
   }
 }
 
-function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: number): ReactNode {
+function renderChain(
+  chain: ChainItem[],
+  tokens: Record<string, string>,
+  depth: number,
+  ancestors: ChainItem[] = []
+): ReactNode {
   if (chain.length === 0) return null
 
   const [current, ...rest] = chain
@@ -312,13 +306,11 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
   const isLastInChain = rest.length === 0
   const registryEntry = componentRegistry[current.name]
   const hasRegistryChildren = registryEntry && registryEntry.children.length > 0
-  // A composed/complex component at the end of chain should show its children flow, not "applies"
-  const isLeaf = isLastInChain && (current.level === 'base' || !hasRegistryChildren)
+  // A molecule/organism/template component at the end of chain should show its children flow, not "applies"
+  const isLeaf = isLastInChain && (current.level === 'atom' || !hasRegistryChildren)
   const borderColor = LEVEL_COLORS[current.level] ?? 'border-l-muted'
   const badgeVariant = LEVEL_BADGE_VARIANT[current.level] ?? 'secondary'
-  const nextItem = rest[0]
-
-  // Build auto-expanded children for composed/complex at end of chain
+  // Build auto-expanded children for molecule/organism/template at end of chain
   const autoExpandedChildren: ChainItem[] = []
   if (isLastInChain && !isLeaf && registryEntry) {
     for (const childName of registryEntry.children) {
@@ -351,58 +343,96 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
       {/* Provides / Inherits context tokens */}
       {(current.providesTokens.length > 0 || current.inheritsTokens.length > 0) && (
         <Div className="flex flex-wrap gap-1.5">
-          {current.providesTokens.map(t => (
-            <Badge key={`provides-${t}`} variant="success" size="sm">
-              <Span className="text-success-foreground">&#8595; pushes</Span>{' '}
-              <Span className="font-mono">{t}</Span>
-            </Badge>
-          ))}
-          {current.inheritsTokens.map(t => (
-            <Badge key={`inherits-${t}`} variant="info" size="sm">
-              <Span className="text-info-foreground">&#8593; receives</Span>{' '}
-              <Span className="font-mono">{t}</Span>
-            </Badge>
-          ))}
-        </Div>
-      )}
-
-      {/* Token info */}
-      {current.tokens.length > 0 && (
-        <Div className="flex flex-wrap gap-1.5">
-          {current.tokens.map(tokenInfo => {
-            const isStructural = tokenInfo.category === 'structural'
-            const action = isLeaf ? 'applies' : isStructural ? 'auto-drill' : 'per-component'
+          {current.providesTokens.map(t => {
+            const nextChild = rest[0]
+            const childConsumes = nextChild
+              ? nextChild.inheritsTokens.includes(t) || nextChild.tokens.some(tok => tok.name === t)
+              : true
+            const parentValues = current.tokens.find(tok => tok.name === t)?.values || []
+            const childValues =
+              nextChild?.tokens.find(tok => tok.name === t)?.values ||
+              (nextChild &&
+                componentRegistry[nextChild.name]?.tokens.find(tok => tok.name === t)?.values) ||
+              []
+            const tokenValues = parentValues.length > 0 ? parentValues : childValues
             return (
-              <Badge
-                key={tokenInfo.name}
-                variant={isStructural ? 'outline' : 'secondary'}
-                size="sm"
-              >
-                <Span
-                  className={
-                    isLeaf
-                      ? 'text-success'
-                      : isStructural
-                        ? 'text-muted-foreground'
-                        : 'text-muted-foreground'
-                  }
-                >
-                  {action}
-                </Span>{' '}
-                <Span className="font-mono">{tokenInfo.name}</Span>
-                {tokens[tokenInfo.name] && (
-                  <Span className="text-primary ml-1">= {tokens[tokenInfo.name]}</Span>
-                )}
-              </Badge>
+              <BadgeWithTooltip key={`provides-${t}`} values={tokenValues} tokenName={t}>
+                <Badge variant={childConsumes ? 'success' : 'warning'} size="sm">
+                  <Span
+                    className={
+                      childConsumes ? 'text-success-foreground' : 'text-warning-foreground'
+                    }
+                  >
+                    &#8595; {childConsumes ? 'pushes' : 'pushes (ignored)'}
+                  </Span>{' '}
+                  <Span className="font-mono">{t}</Span>
+                </Badge>
+              </BadgeWithTooltip>
+            )
+          })}
+          {current.inheritsTokens.map(t => {
+            const hasProvider = ancestors.some(a => a.providesTokens.includes(t))
+            const registryTokenValues =
+              componentRegistry[current.name]?.tokens.find(tok => tok.name === t)?.values || []
+            const localTokenValues = current.tokens.find(tok => tok.name === t)?.values || []
+            const tokenValues = localTokenValues.length > 0 ? localTokenValues : registryTokenValues
+            return (
+              <BadgeWithTooltip key={`inherits-${t}`} values={tokenValues} tokenName={t}>
+                <Badge variant={hasProvider ? 'success' : 'destructive'} size="sm">
+                  <Span
+                    className={
+                      hasProvider ? 'text-success-foreground' : 'text-destructive-foreground'
+                    }
+                  >
+                    {hasProvider ? '\u2713 receives' : '\u2717'}
+                  </Span>{' '}
+                  <Span className="font-mono">{t}</Span>
+                  {!hasProvider && (
+                    <Span className="text-destructive-foreground ml-1">— no provider in chain</Span>
+                  )}
+                </Badge>
+              </BadgeWithTooltip>
             )
           })}
         </Div>
       )}
 
-      {/* Compatibility badges between this component and next in explicit chain */}
-      {nextItem && <CompatibilityBadges parent={current} child={nextItem} />}
+      {/* Token info — only visual (per-component) tokens and leaf applies */}
+      {current.tokens.length > 0 && (
+        <Div className="flex flex-wrap gap-1.5">
+          {current.tokens
+            .filter(tokenInfo => {
+              const isStructural = tokenInfo.category === 'structural'
+              // On leaf: show all (applies). Otherwise: skip structural (already shown by pushes/receives)
+              return isLeaf || !isStructural
+            })
+            .map(tokenInfo => {
+              const isStructural = tokenInfo.category === 'structural'
+              const action = isLeaf ? 'applies' : ''
+              return (
+                <BadgeWithTooltip
+                  key={tokenInfo.name}
+                  values={tokenInfo.values || []}
+                  tokenName={tokenInfo.name}
+                >
+                  <Badge variant={isLeaf && isStructural ? 'outline' : 'secondary'} size="sm">
+                    {action && (
+                      <>
+                        <Span className="text-success">{action}</Span>{' '}
+                      </>
+                    )}
+                    <Span className="font-mono">{tokenInfo.name}</Span>
+                    {tokens[tokenInfo.name] && (
+                      <Span className="text-primary ml-1">= {tokens[tokenInfo.name]}</Span>
+                    )}
+                  </Badge>
+                </BadgeWithTooltip>
+              )
+            })}
+        </Div>
+      )}
 
-      {/* Composition slots (required vs optional) for composed/complex at end of chain */}
+      {/* Composition slots (required vs optional) for molecule/organism/template at end of chain */}
       {isLastInChain &&
         !isLeaf &&
         registryEntry &&
@@ -520,7 +550,7 @@ function renderChain(chain: ChainItem[], tokens: Record<string, string>, depth: 
           {renderBasePreview(current.name, tokens)}
         </Div>
       ) : (
-        renderChain(rest, tokens, depth + 1)
+        renderChain(rest, tokens, depth + 1, [...ancestors, current])
       )}
     </Div>
   )

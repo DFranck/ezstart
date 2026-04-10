@@ -123,62 +123,6 @@ function HierarchyTree({
   )
 }
 
-// ─── "Used by" reverse tree ────────────────────────────────────
-
-function UsedByTree({
-  name,
-  locale,
-  parentMap,
-  depth,
-  visited,
-}: {
-  name: string
-  locale: string
-  parentMap: Map<string, string[]>
-  depth: number
-  visited: Set<string>
-}) {
-  const parents = parentMap.get(name) || []
-  if (parents.length === 0 || visited.has(name)) return null
-
-  const newVisited = new Set(visited)
-  newVisited.add(name)
-
-  return (
-    <Div className="space-y-1" style={{ marginLeft: depth > 0 ? 20 : 0 }}>
-      {parents.map(parentName => {
-        const parentEntry = componentRegistry[parentName]
-        const config = parentEntry ? levelConfig[parentEntry.level] : levelConfig.atom
-        return (
-          <Div key={parentName}>
-            <Div className="flex items-center gap-1.5">
-              {depth >= 0 && <Span className="text-muted-foreground text-xs">↑</Span>}
-              <Link href={`/${locale}/packages/ui/inspector/${parentName}`}>
-                <Badge
-                  variant={config.badgeVariant}
-                  size="sm"
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                >
-                  {parentName}
-                </Badge>
-              </Link>
-            </Div>
-            {depth < 3 && (
-              <UsedByTree
-                name={parentName}
-                locale={locale}
-                parentMap={parentMap}
-                depth={depth + 1}
-                visited={newVisited}
-              />
-            )}
-          </Div>
-        )
-      })}
-    </Div>
-  )
-}
-
 // ─── Main page ─────────────────────────────────────────────────
 
 export default function HierarchyPage() {
@@ -277,7 +221,7 @@ export default function HierarchyPage() {
 
       {/* Selected component detail */}
       {selectedEntry && (
-        <Div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Children tree (what it uses) */}
           <Card variant="default">
             <CardContent className="pt-4 space-y-3">
@@ -305,13 +249,26 @@ export default function HierarchyPage() {
                 </Span>
               </Div>
               {(data.parentMap.get(selected!) || []).length > 0 ? (
-                <UsedByTree
-                  name={selected!}
-                  locale={locale}
-                  parentMap={data.parentMap}
-                  depth={0}
-                  visited={new Set()}
-                />
+                <Div className="flex flex-wrap gap-1.5">
+                  {(data.parentMap.get(selected!) || []).map(parentName => {
+                    const parentEntry = componentRegistry[parentName]
+                    const config = parentEntry ? levelConfig[parentEntry.level] : levelConfig.atom
+                    return (
+                      <Link
+                        key={parentName}
+                        href={`/${locale}/packages/ui/inspector/${parentName}`}
+                      >
+                        <Badge
+                          variant={config.badgeVariant}
+                          size="sm"
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                        >
+                          {parentName}
+                        </Badge>
+                      </Link>
+                    )
+                  })}
+                </Div>
               ) : (
                 <P className="text-sm text-muted-foreground italic">
                   Not used by any other component
@@ -321,7 +278,7 @@ export default function HierarchyPage() {
           </Card>
 
           {/* Component info */}
-          <Card variant="default" className="md:col-span-2">
+          <Card variant="default" className="lg:col-span-2">
             <CardContent className="pt-4 space-y-2">
               <Div className="flex items-center gap-2 flex-wrap">
                 <Link href={`/${locale}/packages/ui/inspector/${selected}`}>

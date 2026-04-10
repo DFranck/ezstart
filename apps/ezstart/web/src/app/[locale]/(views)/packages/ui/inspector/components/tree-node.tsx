@@ -12,10 +12,11 @@ import {
 } from '../registry'
 import { computeCompatibility, type ChainItem } from './inspector-preview'
 
-const LEVEL_BADGE_VARIANT: Record<string, 'purple' | 'info' | 'success'> = {
-  complex: 'purple',
-  composed: 'info',
-  base: 'success',
+const LEVEL_BADGE_VARIANT: Record<string, 'warning' | 'purple' | 'info' | 'success'> = {
+  template: 'warning',
+  organism: 'purple',
+  molecule: 'info',
+  atom: 'success',
 }
 
 function entryToChainItem(entry: ComponentEntry): ChainItem {
@@ -45,16 +46,16 @@ function CompatibilityInline({ parent, child }: { parent: ComponentEntry; child:
     []
 
   for (const token of result.flows) {
-    badges.push({ label: `${token} flows`, variant: 'success' })
+    badges.push({ label: `${token} ✓ flows`, variant: 'success' })
   }
   for (const token of result.lost) {
-    badges.push({ label: `${token} lost`, variant: 'warning' })
+    badges.push({ label: `${token} ignored`, variant: 'warning' })
   }
   for (const token of result.uncontrollable) {
-    badges.push({ label: `${token} uncontrollable`, variant: 'destructive' })
+    badges.push({ label: `${token} unwired`, variant: 'destructive' })
   }
   for (const token of result.localVisual) {
-    badges.push({ label: `${token} per-component`, variant: 'secondary' })
+    badges.push({ label: `${token} local`, variant: 'secondary' })
   }
 
   if (badges.length === 0) return null
