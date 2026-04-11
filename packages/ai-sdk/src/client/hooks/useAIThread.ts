@@ -26,6 +26,8 @@ export type UseAIThreadConfig = {
   extraPayload?: Record<string, unknown>
   onError?: (error: Error) => void
   onConversationCreated?: (id: string) => void
+  /** Enable SSE streaming (uses /api/ai/chat/stream). Default: true */
+  streaming?: boolean
 }
 
 // ─── Return type ─────────────────────────────────────────────────────────────
@@ -89,7 +91,7 @@ function getIsAuthenticated(customGetToken?: () => string | null): boolean {
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
-  const { appName, locale, extraPayload, onError, onConversationCreated } = config
+  const { appName, locale, extraPayload, onError, onConversationCreated, streaming = true } = config
 
   // AIProvider context (gives us the AIClient)
   const { client } = useAIContext()
@@ -136,21 +138,46 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
 
   // ─── Build ThreadAPI config ──────────────────────────────────────────────
 
+  // Track conversationId received from the SSE meta event (for streaming mode)
+  const [streamConversationId, setStreamConversationId] = useState<string | null>(null)
+
+  // Process conversationId from stream meta events or non-stream responses
+  useEffect(() => {
+    if (!streamConversationId) return
+    if (streamConversationId === activeConversationId) return
+
+    logger.info(`[useAIThread] Conversation created: ${streamConversationId}`)
+    setActiveConversationId(streamConversationId)
+    loadConversations()
+    onConversationCreated?.(streamConversationId)
+    refreshConversation(streamConversationId)
+    setStreamConversationId(null)
+  }, [
+    streamConversationId,
+    activeConversationId,
+    loadConversations,
+    refreshConversation,
+    onConversationCreated,
+  ])
+
+  const chatEndpoint = streaming
+    ? `${getApiUrl('ezstart')}/api/ai/chat/stream`
+    : `${getApiUrl('ezstart')}/api/ai/chat`
+
   const threadConfig = useMemo(
     () => ({
-      endpoint: `${getApiUrl('ezstart')}/api/ai/chat`,
+      endpoint: chatEndpoint,
       method: 'POST' as const,
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      enableStreaming: true,
+      enableStreaming: streaming,
 
       formatRequest: (message: string) => {
         const payload: Record<string, unknown> = {
           message,
           appName,
-          stream: true,
           locale,
           ...extraPayload,
         }
@@ -165,35 +192,49 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
       },
 
       formatResponse: (rawData: unknown): string => {
-        const data = rawData as Record<string, unknown> & {
-          delta?: string
-          data?: Record<string, unknown>
-          response?: string
+        const data = rawData as Record<string, unknown>
+
+        // SSE streaming format: { type: "chunk", content: "..." }
+        if (data.type === 'chunk') {
+          return String(data.content || '')
         }
-        return String(data.delta || data.data?.response || data.response || '')
+
+        // SSE meta event: { type: "meta", provider: "...", conversationId: "..." }
+        // Capture conversationId from meta event (no text to return)
+        if (data.type === 'meta') {
+          const convId = data.conversationId as string | undefined
+          if (convId) {
+            setStreamConversationId(convId)
+          }
+          return ''
+        }
+
+        // SSE error event: { type: "error", error: "..." }
+        if (data.type === 'error') {
+          logger.error('[useAIThread] Stream error event:', data.error)
+          return ''
+        }
+
+        // Non-streaming JSON response: { data: { response, conversationId } }
+        const nested = data.data as Record<string, unknown> | undefined
+        return String(data.delta || nested?.response || data.response || '')
       },
 
       onSuccess: (rawData: unknown) => {
-        const data = rawData as Record<string, unknown> & {
-          data?: Record<string, unknown>
-        }
-        const conversationId = data.data?.conversationId as string | undefined
+        const data = rawData as Record<string, unknown>
 
-        // First message creates the conversation — capture its ID
+        // For streaming: conversationId is captured via meta event in formatResponse
+        // For non-streaming: extract from standard response format
+        const nested = data.data as Record<string, unknown> | undefined
+        const conversationId = (data.conversationId || nested?.conversationId) as string | undefined
+
         if (conversationId && !activeConversationId) {
-          logger.info(`[useAIThread] Conversation created: ${conversationId}`)
-          setActiveConversationId(conversationId)
-
-          // Reload conversation list
-          loadConversations()
-
-          // Notify parent
-          onConversationCreated?.(conversationId)
+          setStreamConversationId(conversationId)
         }
 
         // Refresh conversation cache so messages stay in sync
-        if (conversationId) {
-          refreshConversation(conversationId)
+        if (conversationId || activeConversationId) {
+          refreshConversation((conversationId || activeConversationId)!)
         }
       },
 
@@ -203,6 +244,8 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
       },
     }),
     [
+      chatEndpoint,
+      streaming,
       token,
       appName,
       locale,

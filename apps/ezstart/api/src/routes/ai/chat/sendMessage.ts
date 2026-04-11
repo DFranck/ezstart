@@ -21,12 +21,21 @@ import { getAppProviders } from '../../../services/app-provider.service.js'
 import { isAppAuthorizedForProvider } from '../../../services/provider-access.service.js'
 import { trackAIUsage } from '../../../services/ai-usage.service.js'
 
+const ImageInputSchema = z.object({
+  data: z.string().min(1).describe('Base64-encoded image data (without data URL prefix)'),
+  mimeType: z
+    .string()
+    .regex(/^image\/(jpeg|png|gif|webp)$/)
+    .describe('Image MIME type'),
+})
+
 const ChatRequestSchema = z.object({
   message: z.string().min(1).max(10000).describe('User message'),
   appName: z.string().min(1).max(50).describe('Application name for scoping'),
   providerId: z.string().optional().describe('AI provider ID (default: gemini-flash)'),
   conversationId: z.string().optional().describe('Existing conversation ID'),
   locale: z.string().max(5).optional().describe('Response language locale (en, fr, vi, etc.)'),
+  images: z.array(ImageInputSchema).max(10).optional().describe('Images for vision models'),
 })
 
 export const sendMessageRegistry = new OpenAPIRegistry()
@@ -43,7 +52,7 @@ sendMessageRouter.post(
         return sendValidationError(res, 'Invalid request format', validation.error.errors)
       }
 
-      const { message, appName, providerId, locale } = validation.data
+      const { message, appName, providerId, locale, images } = validation.data
       let { conversationId } = validation.data
 
       // userId comes from auth middleware (JWT), not from request body
@@ -117,6 +126,8 @@ sendMessageRouter.post(
         ...(promptDoc?.config?.maxTokens !== undefined && {
           maxTokens: promptDoc.config.maxTokens,
         }),
+        // Pass images for vision support
+        ...(images && images.length > 0 && { images }),
       }
 
       // Resolve provider: explicit choice → cascade through app providers

@@ -2,21 +2,33 @@
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
-import { Card, Div, P, Section, Spinner } from '@ezstart/ui/components'
+import { MonitoringDashboard } from '@ezstart/monitoring/client'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Div,
+  Icon,
+  Section,
+  Spinner,
+} from '@ezstart/ui/components'
 import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { SystemOverview } from './components/SystemOverview'
 import { useCountdown } from './hooks/useCountdown'
 import { useMonitoringAudits } from './hooks/useMonitoringAudits'
 import { useMonitoringErrors } from './hooks/useMonitoringErrors'
 import { useMonitoringProjects } from './hooks/useMonitoringProjects'
 import { useSocket } from './hooks/useSocket'
-import { getMetricsData } from './lib/utils'
 
 function MonitoringOverviewContent() {
   const t = useTranslations('monitoring')
+  const router = useRouter()
   const queryClient = useQueryClient()
-  const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
+  const { reset: resetCountdown } = useCountdown(300) // 5 minutes
 
   // Fetch all data
   const {
@@ -44,55 +56,108 @@ function MonitoringOverviewContent() {
   const audits = auditsData?.audits || []
   const errors = errorsData?.logs || []
 
-  // Get overview metrics
-  const metricsData = getMetricsData('projects', summary, audits, projects, errors)
-
   const isLoading = isLoadingProjects || isLoadingAudits || isLoadingErrors
-  const error = projectsError || auditsError || errorsError
+  const error =
+    projectsError || auditsError || errorsError
+      ? (projectsError || auditsError || errorsError) instanceof Error
+        ? projectsError || auditsError || errorsError
+        : new Error('Unknown error')
+      : null
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <Section size="full">
-        <Div className="flex flex-col items-center justify-center py-20 gap-4">
-          <Spinner size="xl" text={t('loading')} variant="fancy" />
+  // Quick Actions (app-specific navigation)
+  const quickActionsSlot = (
+    <Card variant="outline">
+      <CardHeader>
+        <CardTitle>{t('overview.quickActions.title')}</CardTitle>
+        <CardDescription>{t('manageDescription')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Div layout="grid" className="gap-3">
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={() => router.push('/monitoring/health')}
+          >
+            <Icon name="lucide:Boxes" className="w-4 h-4" />
+            {t('overview.quickActions.viewAllProjects')}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={() => router.push('/monitoring/audits')}
+          >
+            <Icon name="lucide:FileCheck" className="w-4 h-4" />
+            {t('overview.quickActions.runQualityAudits')}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={() => router.push('/monitoring/errors')}
+          >
+            <Icon name="lucide:Bug" className="w-4 h-4" />
+            {t('overview.quickActions.viewErrorLogs')}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={() => window.open('https://ezstart.sentry.io/insights/projects/', '_blank')}
+          >
+            <Icon name="lucide:ExternalLink" className="w-4 h-4" />
+            {t('overview.quickActions.openSentry')}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={() => window.open('https://vercel.com/ezstart/analytics', '_blank')}
+          >
+            <Icon name="lucide:BarChart3" className="w-4 h-4" />
+            {t('overview.quickActions.viewAnalytics')}
+          </Button>
         </Div>
-      </Section>
-    )
-  }
-
-  // Error state
-  if (error) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message === 'Failed to fetch'
-          ? t('apiOffline')
-          : error.message
-        : 'Unknown error'
-
-    return (
-      <Section size="full">
-        <Div className="flex items-center justify-center py-20">
-          <Div className="space-y-4 text-center max-w-lg">
-            <Div className="text-6xl">⚠️</Div>
-            <P className="text-destructive font-semibold">{t('failedToLoad')}</P>
-            <P className="text-muted-foreground">{errorMessage}</P>
-          </Div>
-        </Div>
-      </Section>
-    )
-  }
-
-  const minutes = Math.floor(secondsLeft / 60)
-  const seconds = secondsLeft % 60
+      </CardContent>
+    </Card>
+  )
 
   return (
-    <>
-      {/* System Overview Section */}
-      <Section size="full" className="mt-10">
-        <SystemOverview projects={projects} audits={audits} errors={errors} summary={summary} />
-      </Section>
-    </>
+    <Section size="full" className="mt-10">
+      <MonitoringDashboard
+        projects={projects}
+        audits={audits}
+        errors={errors}
+        summary={summary}
+        isLoading={isLoading}
+        error={error as Error | null}
+        quickActions={quickActionsSlot}
+        labels={{
+          loadingText: t('loading'),
+          errorTitle: t('failedToLoad'),
+          errorApiOffline: t('apiOffline'),
+          globalHealthTitle: t('overview.stats.globalHealth.title'),
+          globalHealthSubtitle: t('overview.stats.globalHealth.subtitle'),
+          servicesUptimeTitle: t('overview.stats.servicesUptime.title'),
+          servicesUptimeHealthy: t('overview.stats.servicesUptime.healthy'),
+          criticalErrorsTitle: t('overview.stats.criticalErrors.title'),
+          criticalErrorsSubtitle: t('overview.stats.criticalErrors.subtitle'),
+          avgResponseTimeTitle: t('overview.stats.avgResponseTime.title'),
+          avgResponseTimeSubtitle: t('overview.stats.avgResponseTime.subtitle'),
+          systemStatusTitle: t('overview.systemStatus.title'),
+          systemStatusDescription: t('systemStatusDescription'),
+          projectsHealthTitle: t('overview.systemStatus.projectsHealth.title'),
+          projectsHealthDescription: t('overview.systemStatus.projectsHealth.description'),
+          codeQualityTitle: t('overview.systemStatus.codeQuality.title'),
+          codeQualityDescription: t('overview.systemStatus.codeQuality.description'),
+          errorMonitoringTitle: t('overview.systemStatus.errorMonitoring.title'),
+          errorMonitoringDescription: t('overview.systemStatus.errorMonitoring.description'),
+          performanceTitle: t('overview.systemStatus.performance.title'),
+          performanceDescription: t('overview.systemStatus.performance.description'),
+          issuesLabel: t('overview.systemStatus.issues'),
+          recentActivityTitle: t('overview.recentActivity.title'),
+          recentActivityDescription: t('recentActivityDescription'),
+          noRecentActivity: t('overview.recentActivity.noRecentActivity'),
+          healthCheckPassed: t('overview.recentActivity.healthCheckPassed'),
+        }}
+      />
+    </Section>
   )
 }
 

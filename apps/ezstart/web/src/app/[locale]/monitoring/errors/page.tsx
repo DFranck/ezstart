@@ -7,12 +7,11 @@ import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import { HealthScoreCard, calculateErrorsHealth, getMetricsData } from '@ezstart/monitoring/client'
 import { MetricsOverview } from '../components/MetricsOverview'
-import { TabScore } from '../components/TabScore'
 import { useCountdown } from '../hooks/useCountdown'
 import { useMonitoringErrors } from '../hooks/useMonitoringErrors'
 import { useSocket } from '../hooks/useSocket'
-import { calculateErrorsHealth, getMetricsData } from '../lib/utils'
 import { ErrorsFeed } from './components/ErrorsFeed'
 
 function ErrorsMonitoringContent() {
@@ -93,7 +92,7 @@ function ErrorsMonitoringContent() {
 
         <Div layout="grid" size={'full'}>
           {/* Error Status Score */}
-          <TabScore
+          <HealthScoreCard
             score={errorsHealth.score}
             status={errorsHealth.status}
             title={t('errorStatusScore')}

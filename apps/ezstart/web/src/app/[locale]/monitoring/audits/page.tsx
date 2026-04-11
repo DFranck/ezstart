@@ -7,13 +7,16 @@ import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import {
+  AuditCard,
+  HealthScoreCard,
+  calculateAuditsHealth,
+  getMetricsData,
+} from '@ezstart/monitoring/client'
 import { MetricsOverview } from '../components/MetricsOverview'
-import { TabScore } from '../components/TabScore'
 import { useCountdown } from '../hooks/useCountdown'
 import { useMonitoringAudits } from '../hooks/useMonitoringAudits'
 import { useSocket } from '../hooks/useSocket'
-import { calculateAuditsHealth, getMetricsData } from '../lib/utils'
-import { AuditCard } from './components/AuditCard'
 import { AuditsFilters } from './components/AuditsFilters'
 
 function AuditsMonitoringContent() {
@@ -100,7 +103,7 @@ function AuditsMonitoringContent() {
 
         <Div layout="grid" size={'full'}>
           {/* Audits Quality Score */}
-          <TabScore
+          <HealthScoreCard
             score={auditsHealth.score}
             status={auditsHealth.status}
             title={t('auditsQualityScore')}
@@ -141,7 +144,7 @@ function AuditsMonitoringContent() {
                 <Div className={`grid ${gridCols} gap-4 mt-4`}>
                   {filteredAudits.map(audit => (
                     <Div key={audit.auditType} id={`audit-${audit.auditType}`}>
-                      <AuditCard audit={audit as Parameters<typeof AuditCard>[0]['audit']} />
+                      <AuditCard audit={audit} />
                     </Div>
                   ))}
                 </Div>

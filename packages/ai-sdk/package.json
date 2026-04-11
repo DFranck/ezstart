@@ -29,6 +29,7 @@
     "@ezstart/config": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",
     "@ezstart/logger": "workspace:*",
+    "@anthropic-ai/sdk": "^0.39.0",
     "@google/generative-ai": "^0.21.0",
     "@tanstack/react-query": "^5.0.0",
     "openai": "^4.77.3",

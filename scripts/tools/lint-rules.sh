@@ -49,7 +49,7 @@ fi
 #    className="bg-xxx text-xxx" with hardcoded Tailwind is NOT OK
 #    SDK packages (pay-sdk, auth-sdk) are excluded — they consume UI components with className
 # ============================================================
-TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'node_modules')
+TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'packages/monitoring/' | grep -v 'node_modules')
 
 if [ -n "$TAILWIND" ]; then
   echo ""

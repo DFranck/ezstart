@@ -7,6 +7,14 @@ export interface ChatMessage {
   content: string
 }
 
+/** Image data for vision-capable models */
+export interface ImageInput {
+  /** Base64-encoded image data (without data URL prefix) */
+  data: string
+  /** MIME type (e.g., 'image/jpeg', 'image/png', 'image/webp') */
+  mimeType: string
+}
+
 export interface ProviderSendOptions {
   systemPrompt?: string
   temperature?: number
@@ -18,6 +26,8 @@ export interface ProviderSendOptions {
     onComplete?: (fullText: string) => void
   }
   extractJson?: boolean
+  /** Images to include with the message (vision support) */
+  images?: ImageInput[]
 }
 
 export interface ProviderResponse {
