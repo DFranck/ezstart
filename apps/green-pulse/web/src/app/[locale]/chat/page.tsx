@@ -3,13 +3,12 @@
 import { LiaThread } from '@/components/lia/LiaThread'
 import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { AIProvider, useConversations } from '@ezstart/ai-sdk/client'
-import { LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import { getApiUrl } from '@ezstart/config'
 import { logger } from '@ezstart/logger'
-import { Card, CardContent, Div, H2, P, Section, Spinner } from '@ezstart/ui/components'
+import { Div } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
 import { useLocale, useTranslations } from 'next-intl'
-import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
 function LiaPageContent() {
@@ -123,62 +122,9 @@ function LiaPageContent() {
 }
 
 export default function LiaPage() {
-  const t = useTranslations('auth')
-
   return (
     <AIProvider appName="green-pulse" getToken={() => useAuthStore.getState().accessToken}>
-      <RequireAuth
-        loadingComponent={
-          <Section size="full">
-            <Spinner size="lg" />
-          </Section>
-        }
-        fallbackComponent={
-          <Section size="full">
-            <Card variant={'ghost'} className="max-w-md mx-auto text-center">
-              <CardContent className="py-12 space-y-6">
-                {/* Logo GreenPulse */}
-                <Div className="flex justify-center">
-                  <Image
-                    src="/logo_complet_light.svg"
-                    alt="GreenPulse.AI Logo"
-                    width={200}
-                    height={40}
-                    className="animate-glow-pulse-sm dark:hidden"
-                  />
-                  <Image
-                    src="/logo_complet_dark.svg"
-                    alt="GreenPulse.AI Logo"
-                    width={200}
-                    height={40}
-                    className="animate-glow-pulse-sm hidden dark:block"
-                  />
-                </Div>
-
-                {/* Positive messaging */}
-                <Div className="space-y-3">
-                  <H2 size="h4" className="text-gp-primary">
-                    {t('welcome.title')}
-                  </H2>
-                  <P className="text-muted-foreground">{t('welcome.description')}</P>
-                </Div>
-
-                {/* Login button */}
-                <LoginButton
-                  size="lg"
-                  className="bg-gp-primary hover:bg-gp-primary/80"
-                  alwaysShowText
-                  showIcon={false}
-                >
-                  {t('welcome.login')}
-                </LoginButton>
-              </CardContent>
-            </Card>
-          </Section>
-        }
-      >
-        <LiaPageContent />
-      </RequireAuth>
+      <LiaPageContent />
     </AIProvider>
   )
 }

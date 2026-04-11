@@ -22,7 +22,7 @@
  */
 
 import { Router, createRateLimiter } from '@ezstart/express-core'
-import { authMiddleware } from '../../middleware/auth.js'
+import { authMiddleware, optionalAuthMiddleware } from '../../middleware/auth.js'
 import chatRouter from './chat/sendMessage.js'
 import streamRouter from './chat/streamMessage.js'
 import conversationsRouter from './conversations/index.js'
@@ -34,15 +34,20 @@ import usageRouter from './usage/index.js'
 
 const router: import('express').Router = Router()
 
-// Chat burns external API keys — auth + moderate rate limiting (30 req/min per IP)
+// Chat — optional auth (anonymous users can chat, logged-in users get conversations saved)
 // Stream route BEFORE chat to avoid /chat catching /chat/stream
 router.use(
   '/chat/stream',
-  authMiddleware,
+  optionalAuthMiddleware,
   createRateLimiter({ windowMs: 60 * 1000, max: 30 }),
   streamRouter
 )
-router.use('/chat', authMiddleware, createRateLimiter({ windowMs: 60 * 1000, max: 30 }), chatRouter)
+router.use(
+  '/chat',
+  optionalAuthMiddleware,
+  createRateLimiter({ windowMs: 60 * 1000, max: 30 }),
+  chatRouter
+)
 router.use('/conversations', conversationsRouter)
 router.use('/prompts', promptsRouter)
 router.use('/providers', providersRouter)
