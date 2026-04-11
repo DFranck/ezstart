@@ -48,8 +48,22 @@ export class OpenAIProvider implements IAIProvider {
       })
     }
 
-    // Add current user message
-    messages.push({ role: 'user', content: message })
+    // Add current user message (with images if provided)
+    if (options.images && options.images.length > 0) {
+      const contentParts: OpenAI.Chat.ChatCompletionContentPart[] = [
+        { type: 'text', text: message },
+        ...options.images.map(
+          img =>
+            ({
+              type: 'image_url',
+              image_url: { url: `data:${img.mimeType};base64,${img.data}` },
+            }) as OpenAI.Chat.ChatCompletionContentPart
+        ),
+      ]
+      messages.push({ role: 'user', content: contentParts })
+    } else {
+      messages.push({ role: 'user', content: message })
+    }
 
     // JSON mode
     const responseFormat = options.extractJson ? { type: 'json_object' as const } : undefined

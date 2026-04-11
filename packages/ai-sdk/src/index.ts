@@ -18,6 +18,7 @@ export { OpenAIProvider } from './server/providers/openai.js'
 export type {
   IAIProvider,
   ChatMessage,
+  ImageInput,
   ProviderSendOptions,
   ProviderResponse,
 } from './server/providers/base.js'

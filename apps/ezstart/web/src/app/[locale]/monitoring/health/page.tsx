@@ -8,12 +8,12 @@ import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+import { HealthScoreCard } from '@ezstart/monitoring/client'
 import { MetricsOverview } from '../components/MetricsOverview'
-import { TabScore } from '../components/TabScore'
 import { useCountdown } from '../hooks/useCountdown'
 import { useMonitoringProjects } from '../hooks/useMonitoringProjects'
 import { useSocket } from '../hooks/useSocket'
-import { calculateOverallHealth, getMetricsData } from '../lib/utils'
+import { calculateOverallHealth, getMetricsData } from '@ezstart/monitoring/client'
 import type { ProjectHealth } from '@ezstart/monitoring'
 import { ProjectCard } from './components/ProjectCard'
 import { TrendingMetrics } from './components/TrendingMetrics'
@@ -98,7 +98,7 @@ function HealthMonitoringContent() {
 
         <Div layout="grid" size={'full'}>
           {/* Projects Health Score */}
-          <TabScore
+          <HealthScoreCard
             score={projectsHealth.score}
             status={projectsHealth.status}
             title={t('projectsHealthScore')}

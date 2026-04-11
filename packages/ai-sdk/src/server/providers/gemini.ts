@@ -3,6 +3,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import type { Content, Part } from '@google/generative-ai'
 import type { IAIProvider, ProviderSendOptions, ProviderResponse, ChatMessage } from './base.js'
 
 export interface GeminiProviderConfig {
@@ -27,6 +28,26 @@ export class GeminiProvider implements IAIProvider {
     }
   }
 
+  /**
+   * Build Gemini content parts from message text and optional images
+   */
+  private buildContentParts(message: string, options: ProviderSendOptions): Part[] {
+    const parts: Part[] = [{ text: message }]
+
+    if (options.images && options.images.length > 0) {
+      for (const image of options.images) {
+        parts.push({
+          inlineData: {
+            data: image.data,
+            mimeType: image.mimeType,
+          },
+        })
+      }
+    }
+
+    return parts
+  }
+
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {
     const model = this.genAI.getGenerativeModel({
       model: this.model,
@@ -38,6 +59,8 @@ export class GeminiProvider implements IAIProvider {
       },
     })
 
+    const contentParts = this.buildContentParts(message, options)
+    const hasImages = options.images && options.images.length > 0
     let content: string
 
     // Streaming mode
@@ -45,9 +68,9 @@ export class GeminiProvider implements IAIProvider {
       return this.handleStreaming(model, message, options)
     }
 
-    // With conversation history
-    if (options.history && options.history.length > 0) {
-      const history = options.history.map(msg => ({
+    // With conversation history (images not supported in chat mode — use generateContent)
+    if (options.history && options.history.length > 0 && !hasImages) {
+      const history: Content[] = options.history.map(msg => ({
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }],
       }))
@@ -56,8 +79,8 @@ export class GeminiProvider implements IAIProvider {
       const result = await chat.sendMessage(message)
       content = result.response.text()
     } else {
-      // Single message
-      const result = await model.generateContent(message)
+      // Single message or message with images
+      const result = await model.generateContent(contentParts)
       content = result.response.text()
     }
 
@@ -88,9 +111,11 @@ export class GeminiProvider implements IAIProvider {
     options: ProviderSendOptions
   ): Promise<ProviderResponse> {
     let fullText = ''
+    const contentParts = this.buildContentParts(message, options)
+    const hasImages = options.images && options.images.length > 0
 
-    if (options.history && options.history.length > 0) {
-      const history = options.history.map(msg => ({
+    if (options.history && options.history.length > 0 && !hasImages) {
+      const history: Content[] = options.history.map(msg => ({
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }],
       }))
@@ -108,7 +133,7 @@ export class GeminiProvider implements IAIProvider {
         }
       }
     } else {
-      const result = await model.generateContentStream(message)
+      const result = await model.generateContentStream(contentParts)
 
       for await (const chunk of result.stream) {
         const text = chunk.text()

@@ -1,3 +1,8 @@
+// TODO: Migrate to @ezstart/ai-sdk vision support once FengShui has a backend API.
+// Currently this runs client-side with GEMINI_API_KEY exposed via NEXT_PUBLIC_.
+// The ai-sdk vision support (ProviderSendOptions.images) is server-only.
+// Migration path: create a FengShui API endpoint that calls UnifiedChat.send()
+// with { images, extractJson: true } and the VALIDATION_PROMPT as message.
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { logger } from '@ezstart/logger'
 
@@ -56,9 +61,7 @@ Respond ONLY in JSON format:
 /**
  * Validate a floor plan image using Google Gemini Vision.
  */
-export async function validatePlanImage(
-  imageData: string
-): Promise<ValidationResult> {
+export async function validatePlanImage(imageData: string): Promise<ValidationResult> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not configured')

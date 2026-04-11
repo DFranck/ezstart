@@ -6,6 +6,7 @@
 import { logger } from '@ezstart/logger'
 import type { ProviderConfig, AIProviderInfo } from './types.js'
 import type { IAIProvider } from '../providers/base.js'
+import { AnthropicProvider } from '../providers/anthropic.js'
 import { GeminiProvider } from '../providers/gemini.js'
 import { OpenAIProvider } from '../providers/openai.js'
 
@@ -111,7 +112,10 @@ export class ProviderRegistry {
         })
 
       case 'anthropic':
-        throw new Error('Anthropic provider not yet implemented')
+        return new AnthropicProvider({
+          apiKey: config.apiKey,
+          model: config.model,
+        })
 
       case 'custom':
         throw new Error('Custom provider must be provided via constructor')
