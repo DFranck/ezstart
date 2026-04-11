@@ -90,20 +90,24 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
 
   const texts = props.texts ?? {}
   const slots = props.slots ?? {}
-  const showSidebar = props.showSidebar ?? isAuthenticated
+  const showSidebar = props.showSidebar ?? true
   const showProviderSelector = props.showProviderSelector ?? false
 
   // Build sidebar content
   const sidebar = showSidebar ? (
     <ThreadSidebar
-      conversations={conversations}
+      conversations={isAuthenticated ? conversations : []}
       activeConversationId={activeConversationId ?? undefined}
-      onConversationSelect={handleConversationSelect}
+      onConversationSelect={isAuthenticated ? handleConversationSelect : undefined}
       onNewConversation={handleNewConversation}
-      onRename={handleRename}
-      onDelete={handleDelete}
+      onRename={isAuthenticated ? handleRename : undefined}
+      onDelete={isAuthenticated ? handleDelete : undefined}
       newConversationLabel={texts.newChatLabel}
-      emptyState={texts.sidebarEmptyState}
+      emptyState={
+        isAuthenticated
+          ? texts.sidebarEmptyState
+          : (texts.loginPrompt ?? 'Log in to save your conversations')
+      }
       header={slots.sidebarHeader}
       footer={slots.sidebarFooter}
       beforeConversations={slots.sidebarBeforeConversations}
@@ -121,9 +125,7 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
         mobileFooterOffset={props.mobileFooterOffset}
         sidebar={sidebar}
         sidebarToggle={
-          showSidebar ? (
-            <ThreadSidebarToggle className="fixed left-4 top-4 z-50 lg:hidden" variant="default" />
-          ) : undefined
+          <ThreadSidebarToggle className="fixed left-4 top-4 z-50 lg:hidden" variant="default" />
         }
       >
         <Thread messages={messages} streamingText={streamingText}>

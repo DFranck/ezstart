@@ -11,6 +11,7 @@ export type AILayoutTexts = {
   loadingText?: string
   newChatLabel?: string
   sidebarEmptyState?: string
+  loginPrompt?: string
   sendLabel?: string
 }
 
