@@ -134,16 +134,22 @@ export function LiaThread({
 
   // Handle new conversation
   const handleNewConversation = useCallback(async () => {
-    try {
-      const newConv = await createConversation('New Chat')
-      if (newConv) {
-        setActiveConversationId(newConv.id)
-        clearMessages()
+    // Always clear current chat immediately (feedback)
+    setActiveConversationId(null)
+    clearMessages()
+
+    // If authenticated, also create a new conversation in DB
+    if (isAuthenticated) {
+      try {
+        const newConv = await createConversation('New Chat')
+        if (newConv) {
+          setActiveConversationId(newConv.id)
+        }
+      } catch (error) {
+        logger.error('Failed to create new conversation:', error)
       }
-    } catch (error) {
-      logger.error('Failed to create new conversation:', error)
     }
-  }, [createConversation, clearMessages, setActiveConversationId])
+  }, [createConversation, clearMessages, setActiveConversationId, isAuthenticated])
 
   // Handle conversation select (NO MORE REFETCH! Uses cache ✅)
   const handleConversationSelect = useCallback(
