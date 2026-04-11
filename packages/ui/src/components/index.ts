@@ -40,7 +40,6 @@ export * from './forms/textarea'
 export * from './media/carousel'
 export * from './media/chart'
 export * from './media/icon-gallery'
-export * from './media/image-cropper'
 export * from './media/img'
 export * from './media/uptime-graph'
 

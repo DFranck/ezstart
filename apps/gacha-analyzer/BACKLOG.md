@@ -427,13 +427,91 @@ apps/
 - [ ] Artifact card + /data artifacts
 - Pre-requis : definir le scoring system (pas de formule Barion pour les artifacts)
 
-### E11. Overlay/PiP pour afficher resultats sur le jeu `P3`
+### E11. Overlay gaming + scan speed optimization `P2`
 
 **Status :** `planned` | **Effort :** L
 
-- Picture-in-Picture API pour afficher un mini-overlay sur le jeu
-- Affiche le conseil (SELL/KEEP/UPGRADE) en temps reel
-- Necessite : Chrome PiP API + canvas rendering
+Objectif : pouvoir scroller ses runes in-game et voir SELL/KEEP/UPGRADE en temps reel sans quitter le jeu.
+
+#### E11a. Picture-in-Picture overlay (priorite)
+
+- [ ] Utiliser `documentPictureInPicture` API (Chrome 116+) pour mini-fenetre flottante
+- [ ] Contenu PiP : conseil (SELL/KEEP/UPGRADE) en gros + efficacite % + couleur tier
+- [ ] Fenetre PiP toujours visible par-dessus le jeu (alwaysOnTop natif du browser)
+- [ ] Auto-update a chaque scan (resultat pousse dans la fenetre PiP)
+- [ ] Taille compacte (~200x100px) positionnable par le user
+- [ ] Fallback : mode "mini-window" CSS pour navigateurs sans PiP
+
+#### E11b. Optimisation vitesse de detection
+
+- [ ] Reduire interval frame diff de 500ms a 200ms pour detection plus reactive
+- [ ] OCR local-first (Tesseract in-browser) au lieu d'appel API pour < 100ms
+- [ ] Pre-crop par zone (8 zones) en parallele au lieu de sequentiel
+- [ ] Cache intelligente : skip OCR si le hash du crop ROI n'a pas change
+
+#### E11c. Audio feedback
+
+- [ ] Son distinct par conseil : bip court = SELL, ding = KEEP, chime = UPGRADE
+- [ ] Volume configurable ou mute
+- [ ] Optionnel : TTS "sell" / "keep" / "upgrade" via SpeechSynthesis API
+
+#### E11d. Electron/Tauri overlay (futur)
+
+- [ ] App desktop avec fenetre transparente + clickthrough
+- [ ] Vrai overlay pixel-perfect par-dessus le jeu (comme SWLENS)
+- [ ] Necessite migration hors navigateur — scope long terme
+- [ ] Avantage : peut aussi capturer directement la fenetre du jeu sans getDisplayMedia
+
+### E11e. Extraire `@ezstart/capture-sdk` (package agnostique) `P2`
+
+**Status :** `planned` | **Effort :** M
+
+Extraire les hooks de capture de gacha-analyzer vers un package reutilisable multi-provider.
+
+**Fichiers source a extraire :**
+
+- `apps/gacha-analyzer/web/src/hooks/use-screen-capture.ts` → provider screen
+- `apps/gacha-analyzer/web/src/hooks/use-frame-diff.ts` → change detection
+- Logique ROI crop/preprocessing du scan page → utils
+
+**Status : DONE** — SDK cree avec providers, hooks, utils, components (ImageCropper, RoiSelector, BlackoutMask). gacha-analyzer refactore pour consommer le SDK.
+
+#### E11f. Interface de test SDK (capture-sdk playground) `P2`
+
+- [ ] Page de demo integree dans capture-sdk (comme pay-sdk a son test page)
+- [ ] Images de reference embarquees pour tester crop/preprocess/diff visuellement
+- [ ] Test visuel frame diff : charger 2 images, voir le score de changement
+- [ ] Test visuel preprocess : image source → grayscale → contrast → binarize (pipeline preview)
+- [ ] Test visuel crop : ROI draggable sur image de ref, voir le crop en temps reel
+- [ ] Test visuel mask : placer des blackout masks, voir le resultat
+- [ ] Test hash : comparer 2 images, voir le score de similarite
+- [ ] Tout 100% agnostique — zero ref game/app, juste les outils bruts du SDK
+- [ ] Accessible via route dans ezstart (/packages/capture-sdk/playground) ou standalone
+
+#### E11g. Bench configurable par game (gacha-analyzer) `P2`
+
+- [ ] Le bench actuel est hardcode SW — le rendre configurable par game
+- [ ] Interface pour add/remove/rename zones de detection (actuellement fixe a 8 zones)
+- [ ] Interface pour add/remove/rename masks (blackout regions)
+- [ ] Selection de template par game (SW rune, SW artifact, Nikke gear)
+- [ ] Layout editor : sauvegarder des configurations de zones/masks en DB par game
+- [ ] Utilise les outils agnostiques du SDK (RoiSelector, BlackoutMask, crop, preprocess)
+- [ ] Le game-specific reste dans l'app (noms de zones, presets par game, templates OCR)
+- [ ] Tout est configurable depuis l'UI — zero hardcode
+
+**Regle agnosticite :** zero ref a rune/gear/SW/Nikke — le SDK expose des primitives (capture, diff, crop, preview). Chaque app branche sa logique metier dessus.
+
+**Consumers potentiels :** gacha-analyzer (scan runes), fengshui (photo plan maison), ezbill (scan factures), futur apps OCR.
+
+- [ ] Creer `packages/capture-sdk/` avec structure standard
+- [ ] Extraire useScreenCapture → provider screen + hook useCapture
+- [ ] Extraire useFrameDiff → hook avec config (threshold, interval, masking)
+- [ ] Extraire crop/preprocess utils
+- [ ] Ajouter provider camera (getUserMedia) pour mobile
+- [ ] Ajouter provider upload (file input) comme fallback
+- [ ] Refactorer gacha-analyzer pour consommer `@ezstart/capture-sdk`
+- [ ] README + exemples d'usage
+- [ ] Tests unitaires
 
 ### E12. Multiple game support (au-dela de SW + Nikke) `P3`
 
@@ -465,6 +543,12 @@ apps/
 - A2 — Supprimer les `as unknown as` (aligner types)
 - E13 — Deploy Railway + Vercel
 - C1 — Mode upload photo pour mobile
+
+### Sprint 1.5 — Scan UX (overlay gaming)
+
+- E11a — PiP overlay (SELL/KEEP/UPGRADE flottant sur le jeu)
+- E11b — Optimisation vitesse (200ms frame diff, OCR local-first)
+- E11c — Audio feedback (sons par conseil)
 
 ### Sprint 2 — Qualite code
 

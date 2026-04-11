@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Div } from '@ezstart/ui/components'
 
 export interface RoiRect {
   x: number // % of container (0-100)
@@ -258,7 +257,7 @@ export function RoiSelector({ onChange, initialRoi, locked = false }: RoiSelecto
   const allHandles: Handle[] = [...corners, ...edges]
 
   return (
-    <Div
+    <div
       ref={overlayRef}
       style={{
         position: 'absolute',
@@ -268,7 +267,7 @@ export function RoiSelector({ onChange, initialRoi, locked = false }: RoiSelecto
       }}
     >
       {/* ROI rectangle */}
-      <Div
+      <div
         style={{
           position: 'absolute',
           left: `${roi.x}%`,
@@ -290,14 +289,14 @@ export function RoiSelector({ onChange, initialRoi, locked = false }: RoiSelecto
         {/* Resize handles (corners + edges) — hidden when locked */}
         {!locked &&
           allHandles.map(handle => (
-            <Div
+            <div
               key={handle}
               style={getHandleStyle(handle)}
               onMouseDown={e => handleMouseDown(e, 'resize', handle)}
               onTouchStart={e => handleTouchStart(e, 'resize', handle)}
             />
           ))}
-      </Div>
-    </Div>
+      </div>
+    </div>
   )
 }

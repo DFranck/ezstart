@@ -2,27 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react'
 
-interface MaskRegion {
-  x: number // % of frame (0-100)
-  y: number
-  width: number
-  height: number
-}
-
-interface UseFrameDiffOptions {
-  /** % of sampled pixels that must differ to consider a significant change (default: 5) */
-  threshold?: number
-  /** Minimum per-pixel grayscale difference to count as "changed" (default: 20) */
-  pixelThreshold?: number
-  /** Sample 1 pixel every N pixels for performance (default: 4) */
-  sampleRate?: number
-  /** Wait this many ms of stability before triggering onChange (default: 500) */
-  stabilizeMs?: number
-  /** Called once the frame has stabilized after a significant change */
-  onSignificantChange?: (frame: ImageData) => void
-  /** Masked regions to ignore in diff comparison (percentage coordinates 0-100) */
-  masks?: MaskRegion[]
-}
+import type { FrameDiffConfig, MaskRegion } from '../types'
 
 interface UseFrameDiffReturn {
   /** 0-100, percentage of sampled pixels that changed */
@@ -41,19 +21,18 @@ function computeGrayscale(r: number, g: number, b: number): number {
 
 /**
  * Compares successive frames and detects significant visual changes.
- * Designed for rune-scrolling detection in Summoners War screen capture.
  *
  * Uses grayscale sampling for performance: only 1/sampleRate pixels are compared,
  * and RGB is reduced to a single grayscale value before diffing.
  *
- * A stabilization debounce ensures the callback only fires once the user has
- * stopped scrolling and the image is no longer changing.
+ * A stabilization debounce ensures the callback only fires once the content has
+ * stopped changing and the image is no longer in motion.
  *
  * All intermediate values (diffScore, stability) are tracked via refs to avoid
  * re-rendering the parent on every frame. Only the stabilized result triggers
  * a state update.
  */
-export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffReturn {
+export function useFrameDiff(options: FrameDiffConfig = {}): UseFrameDiffReturn {
   const {
     threshold = 5,
     pixelThreshold = 20,
@@ -63,7 +42,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
     masks,
   } = options
 
-  // Only lastStableFrame uses state — it changes rarely (after stabilization)
+  // Only lastStableFrame uses state - it changes rarely (after stabilization)
   const [lastStableFrame, setLastStableFrame] = useState<ImageData | null>(null)
 
   // Track diffScore and isStable via refs to avoid re-renders on every frame
@@ -82,7 +61,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
       prevFrameRef.current = frame
 
       if (!prev) {
-        // First frame — nothing to compare yet
+        // First frame - nothing to compare yet
         return
       }
 
@@ -96,25 +75,15 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
       const totalPixels = frame.width * frame.height
 
       // Pre-compute masks in absolute pixel coordinates once per frame
-      const absMasks =
-        masks && Array.isArray(masks) && masks.length > 0
-          ? masks.map(m => ({
-              x1: Math.floor((m.x / 100) * frame.width),
-              y1: Math.floor((m.y / 100) * frame.height),
-              x2: Math.floor(((m.x + m.width) / 100) * frame.width),
-              y2: Math.floor(((m.y + m.height) / 100) * frame.height),
-            }))
-          : null
+      const absMasks = computeAbsoluteMasks(masks, frame.width, frame.height)
 
       let sampledCount = 0
       let changedCount = 0
-      let maskedCount = 0
 
       // Walk through pixels with the configured sample rate
       // Each pixel occupies 4 bytes (RGBA) in the ImageData array
       for (let i = 0; i < totalPixels; i += sampleRate) {
-        // Skip pixels inside masked regions — these must not influence
-        // either the numerator (changedCount) or the denominator (sampledCount)
+        // Skip pixels inside masked regions
         if (absMasks) {
           const px = i % frame.width
           const py = Math.floor(i / frame.width)
@@ -127,7 +96,6 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
             }
           }
           if (masked) {
-            maskedCount++
             continue
           }
         }
@@ -146,15 +114,14 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
         }
       }
 
-      // Score uses only non-masked pixels: changedCount / sampledCount
-      // maskedCount is tracked but excluded from both numerator and denominator
+      // Score uses only non-masked pixels
       const score = sampledCount > 0 ? (changedCount / sampledCount) * 100 : 0
       diffScoreRef.current = score
 
       const isSignificant = score >= threshold
 
       if (isSignificant) {
-        // Frame is changing — not stable (ref only, no re-render)
+        // Frame is changing - not stable (ref only, no re-render)
         isStableRef.current = false
         latestFrameRef.current = frame
 
@@ -184,4 +151,19 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
     processFrame,
     lastStableFrame,
   }
+}
+
+function computeAbsoluteMasks(
+  masks: MaskRegion[] | undefined,
+  width: number,
+  height: number
+): Array<{ x1: number; y1: number; x2: number; y2: number }> | null {
+  if (!masks || !Array.isArray(masks) || masks.length === 0) return null
+
+  return masks.map(m => ({
+    x1: Math.floor((m.x / 100) * width),
+    y1: Math.floor((m.y / 100) * height),
+    x2: Math.floor(((m.x + m.width) / 100) * width),
+    y2: Math.floor(((m.y + m.height) / 100) * height),
+  }))
 }
