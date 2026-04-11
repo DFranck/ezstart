@@ -6,6 +6,7 @@
     "settings": "Settings",
     "newChat": "New Chat",
     "emptyState": "Start a new conversation to get insights from LIA",
+    "loginPrompt": "Log in to save your conversations",
     "tools": {
       "dashboards": "Dashboards",
       "uploadFiles": "Upload files",

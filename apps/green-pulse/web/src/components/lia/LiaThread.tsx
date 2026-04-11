@@ -377,28 +377,22 @@ export function LiaThread({
       colorScheme="custom"
       customTheme={greenPulseThreadTheme}
       sidebarToggle={
-        // Only show sidebar toggle if authenticated
-        isAuthenticated ? (
-          <ThreadSidebarToggle className="fixed left-4 top-4 z-50 lg:hidden" variant="default" />
-        ) : undefined
+        <ThreadSidebarToggle className="fixed left-4 top-4 z-50 lg:hidden" variant="default" />
       }
       sidebar={
-        // Only show conversations list if authenticated
-        isAuthenticated ? (
-          <ThreadSidebar
-            header={header}
-            afterConversations={beforeConv}
-            footer={footer}
-            conversations={conversations}
-            activeConversationId={activeConversationId || undefined}
-            onConversationSelect={handleConversationSelect}
-            onNewConversation={handleNewConversation}
-            onRename={handleRename}
-            onDelete={handleDelete}
-            newConversationLabel={tChat('sidebar.newChat')}
-            emptyState={tChat('sidebar.emptyState')}
-          />
-        ) : undefined
+        <ThreadSidebar
+          header={header}
+          afterConversations={beforeConv}
+          footer={footer}
+          conversations={isAuthenticated ? conversations : []}
+          activeConversationId={activeConversationId || undefined}
+          onConversationSelect={isAuthenticated ? handleConversationSelect : undefined}
+          onNewConversation={handleNewConversation}
+          onRename={isAuthenticated ? handleRename : undefined}
+          onDelete={isAuthenticated ? handleDelete : undefined}
+          newConversationLabel={tChat('sidebar.newChat')}
+          emptyState={isAuthenticated ? tChat('sidebar.emptyState') : tChat('sidebar.loginPrompt')}
+        />
       }
     >
       <ThreadHeader />

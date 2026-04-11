@@ -6,6 +6,7 @@
     "settings": "Paramètres",
     "newChat": "Nouvelle discussion",
     "emptyState": "Démarrez une nouvelle conversation pour obtenir des informations de LIA",
+    "loginPrompt": "Connectez-vous pour sauvegarder vos conversations",
     "tools": {
       "dashboards": "Tableaux de bord",
       "uploadFiles": "Télécharger des fichiers",
