@@ -222,6 +222,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 148. [ ] Monitoring app-scoping (future) — Currently superadmin-only in EZStart. Each app could have `/admin/monitoring` filtered by appName. Requires: API query param `?appName=ezbill`, SDK component `<MonitoringDashboard appName="ezbill" />`. Low priority — only 1 superadmin user today.
 149. [ ] Monitoring package extraction (future) — Extract SystemOverview + hooks from ezstart/monitoring into `packages/monitoring/client` (UI) + keep `packages/monitoring` (types/collectors). Requires abstracting hardcoded project list. Blocked by: app-scoping design decision.
 150. [ ] CI audit trending (future) — Run check:dead-code, check:size, check:i18n in GitHub Actions. Parse results → store in MongoDB. Dashboard shows score evolution over time. Currently audits.json is static (score 96.6/100). Low priority while score is high.
+151. [ ] Auth callback error display — AuthCallback shows `[object Object]` instead of readable error message (e.g. "Rate limited, try again later"). Fix error extraction in auth-sdk callback handler.
 
 #### P3 — DevOps / Testing
 
