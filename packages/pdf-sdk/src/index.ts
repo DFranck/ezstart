@@ -9,3 +9,4 @@ export type {
   TextOptions,
   CaptureOptions,
 } from './core/types'
+export * from './hooks'

@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Cropper, { type Area } from 'react-easy-crop'
-import { cn } from '../../lib/utils'
+import { cn } from '../utils/cn'
 
 /* ------------------------------------------------------------------------------------------
  * Types
@@ -145,9 +145,7 @@ async function getCroppedImg(
   const ext = format === 'image/png' ? 'png' : 'jpg'
   const q = format === 'image/png' ? 1 : quality
 
-  const blob: Blob = await new Promise(resolve =>
-    out.toBlob(b => resolve(b as Blob), format, q)
-  )
+  const blob: Blob = await new Promise(resolve => out.toBlob(b => resolve(b as Blob), format, q))
   const file = new File([blob], `cropped.${ext}`, { type: format })
   const dataUrl = out.toDataURL(format, q)
 
@@ -161,7 +159,12 @@ async function getCroppedImg(
 
 type EdgeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
-interface CropRect { top: number; left: number; bottom: number; right: number }
+interface CropRect {
+  top: number
+  left: number
+  bottom: number
+  right: number
+}
 
 const EDGE_MIN_SIZE = 10 // minimum 10% in each dimension
 
@@ -170,8 +173,14 @@ function edgeClamp(v: number, min: number, max: number) {
 }
 
 const HANDLE_CURSORS: Record<EdgeHandle, string> = {
-  nw: 'nw-resize', n: 'n-resize', ne: 'ne-resize', e: 'e-resize',
-  se: 'se-resize', s: 's-resize', sw: 'sw-resize', w: 'w-resize',
+  nw: 'nw-resize',
+  n: 'n-resize',
+  ne: 'ne-resize',
+  e: 'e-resize',
+  se: 'se-resize',
+  s: 's-resize',
+  sw: 'sw-resize',
+  w: 'w-resize',
 }
 
 function EdgeDragCropper({
@@ -261,12 +270,19 @@ function EdgeDragCropper({
       cropRef.current = nc
     }
 
-    function handleEnd() { dragRef.current = null }
+    function handleEnd() {
+      dragRef.current = null
+    }
 
-    function onMouseMove(e: MouseEvent) { handleMove(e.clientX, e.clientY) }
+    function onMouseMove(e: MouseEvent) {
+      handleMove(e.clientX, e.clientY)
+    }
     function onTouchMove(e: TouchEvent) {
       const t = e.touches[0]
-      if (e.touches.length === 1 && t) { e.preventDefault(); handleMove(t.clientX, t.clientY) }
+      if (e.touches.length === 1 && t) {
+        e.preventDefault()
+        handleMove(t.clientX, t.clientY)
+      }
     }
 
     window.addEventListener('mousemove', onMouseMove)
@@ -282,14 +298,23 @@ function EdgeDragCropper({
   }, [])
 
   function startDrag(
-    clientX: number, clientY: number,
-    type: 'move' | 'resize', handle?: EdgeHandle
+    clientX: number,
+    clientY: number,
+    type: 'move' | 'resize',
+    handle?: EdgeHandle
   ) {
-    dragRef.current = { type, handle, startX: clientX, startY: clientY, startCrop: { ...cropRef.current } }
+    dragRef.current = {
+      type,
+      handle,
+      startX: clientX,
+      startY: clientY,
+      startCrop: { ...cropRef.current },
+    }
   }
 
   function onMD(e: React.MouseEvent, type: 'move' | 'resize', handle?: EdgeHandle) {
-    e.preventDefault(); e.stopPropagation()
+    e.preventDefault()
+    e.stopPropagation()
     startDrag(e.clientX, e.clientY, type, handle)
   }
   function onTS(e: React.TouchEvent, type: 'move' | 'resize', handle?: EdgeHandle) {
@@ -309,7 +334,14 @@ function EdgeDragCropper({
         width: ((c.right - c.left) / 100) * image.width,
         height: ((c.bottom - c.top) / 100) * image.height,
       }
-      const { dataUrl, file } = await getCroppedImg(src, px, 0, maxOutputWidth, outputQuality, outputFormat)
+      const { dataUrl, file } = await getCroppedImg(
+        src,
+        px,
+        0,
+        maxOutputWidth,
+        outputQuality,
+        outputFormat
+      )
       onCropDone(dataUrl, file)
     } finally {
       setIsApplying(false)
@@ -321,24 +353,64 @@ function EdgeDragCropper({
   function handleStyle(h: EdgeHandle): React.CSSProperties {
     const color = themeColor || 'hsl(var(--primary))'
     const base: React.CSSProperties = {
-      position: 'absolute', backgroundColor: color,
-      border: '2px solid white', borderRadius: 3,
+      position: 'absolute',
+      backgroundColor: color,
+      border: '2px solid white',
+      borderRadius: 3,
       boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-      zIndex: 30, pointerEvents: 'auto', touchAction: 'none',
+      zIndex: 30,
+      pointerEvents: 'auto',
+      touchAction: 'none',
       cursor: HANDLE_CURSORS[h],
     }
     const cs = 18 // corner size (was 14)
     const es = 28 // edge length (was 20)
     const et = 10 // edge thickness (was 8)
     switch (h) {
-      case 'nw': return { ...base, width: cs, height: cs, top: -cs / 2, left: -cs / 2 }
-      case 'ne': return { ...base, width: cs, height: cs, top: -cs / 2, right: -cs / 2 }
-      case 'sw': return { ...base, width: cs, height: cs, bottom: -cs / 2, left: -cs / 2 }
-      case 'se': return { ...base, width: cs, height: cs, bottom: -cs / 2, right: -cs / 2 }
-      case 'n': return { ...base, width: es, height: et, top: -et / 2, left: '50%', transform: 'translateX(-50%)' }
-      case 's': return { ...base, width: es, height: et, bottom: -et / 2, left: '50%', transform: 'translateX(-50%)' }
-      case 'e': return { ...base, width: et, height: es, right: -et / 2, top: '50%', transform: 'translateY(-50%)' }
-      case 'w': return { ...base, width: et, height: es, left: -et / 2, top: '50%', transform: 'translateY(-50%)' }
+      case 'nw':
+        return { ...base, width: cs, height: cs, top: -cs / 2, left: -cs / 2 }
+      case 'ne':
+        return { ...base, width: cs, height: cs, top: -cs / 2, right: -cs / 2 }
+      case 'sw':
+        return { ...base, width: cs, height: cs, bottom: -cs / 2, left: -cs / 2 }
+      case 'se':
+        return { ...base, width: cs, height: cs, bottom: -cs / 2, right: -cs / 2 }
+      case 'n':
+        return {
+          ...base,
+          width: es,
+          height: et,
+          top: -et / 2,
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }
+      case 's':
+        return {
+          ...base,
+          width: es,
+          height: et,
+          bottom: -et / 2,
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }
+      case 'e':
+        return {
+          ...base,
+          width: et,
+          height: es,
+          right: -et / 2,
+          top: '50%',
+          transform: 'translateY(-50%)',
+        }
+      case 'w':
+        return {
+          ...base,
+          width: et,
+          height: es,
+          left: -et / 2,
+          top: '50%',
+          transform: 'translateY(-50%)',
+        }
     }
   }
 
@@ -357,20 +429,34 @@ function EdgeDragCropper({
 
         {/* Dimmed overlays (4 regions around the crop rect) */}
         {/* Top */}
-        <div className="absolute left-0 top-0 bg-black/50 pointer-events-none" style={{ width: '100%', height: `${c.top}%` }} />
+        <div
+          className="absolute left-0 top-0 bg-black/50 pointer-events-none"
+          style={{ width: '100%', height: `${c.top}%` }}
+        />
         {/* Bottom */}
-        <div className="absolute left-0 bottom-0 bg-black/50 pointer-events-none" style={{ width: '100%', height: `${100 - c.bottom}%` }} />
+        <div
+          className="absolute left-0 bottom-0 bg-black/50 pointer-events-none"
+          style={{ width: '100%', height: `${100 - c.bottom}%` }}
+        />
         {/* Left */}
-        <div className="absolute left-0 bg-black/50 pointer-events-none" style={{ top: `${c.top}%`, width: `${c.left}%`, height: `${c.bottom - c.top}%` }} />
+        <div
+          className="absolute left-0 bg-black/50 pointer-events-none"
+          style={{ top: `${c.top}%`, width: `${c.left}%`, height: `${c.bottom - c.top}%` }}
+        />
         {/* Right */}
-        <div className="absolute right-0 bg-black/50 pointer-events-none" style={{ top: `${c.top}%`, width: `${100 - c.right}%`, height: `${c.bottom - c.top}%` }} />
+        <div
+          className="absolute right-0 bg-black/50 pointer-events-none"
+          style={{ top: `${c.top}%`, width: `${100 - c.right}%`, height: `${c.bottom - c.top}%` }}
+        />
 
         {/* Crop rectangle */}
         <div
           style={{
             position: 'absolute',
-            top: `${c.top}%`, left: `${c.left}%`,
-            width: `${c.right - c.left}%`, height: `${c.bottom - c.top}%`,
+            top: `${c.top}%`,
+            left: `${c.left}%`,
+            width: `${c.right - c.left}%`,
+            height: `${c.bottom - c.top}%`,
             border: `2px solid ${themeColor || 'hsl(var(--primary))'}`,
             boxSizing: 'border-box',
             cursor: 'move',

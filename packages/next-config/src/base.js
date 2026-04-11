@@ -1,4 +1,4 @@
-const DEFAULT_TRANSPILE_PACKAGES = ['@ezstart/ui', '@ezstart/auth-sdk']
+const DEFAULT_TRANSPILE_PACKAGES = ['@ezstart/ui', '@ezstart/auth-sdk', '@ezstart/capture-sdk']
 
 /**
  * Create a base Next.js config with configurable options

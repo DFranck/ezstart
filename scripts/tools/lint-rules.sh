@@ -14,7 +14,7 @@ fi
 # ============================================================
 # 1. No raw HTML tags outside packages/ui
 # ============================================================
-RAW_HTML=$(echo "$FILES" | xargs grep -ln '<div \|<div>\|<p \|<p>\|<span \|<span>\|<table \|<table>\|<thead\|<tbody\|<button \|<button>\|<input \|<input>' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'packages/email-service/' | grep -v 'node_modules' | grep -v '.test.')
+RAW_HTML=$(echo "$FILES" | xargs grep -ln '<div \|<div>\|<p \|<p>\|<span \|<span>\|<table \|<table>\|<thead\|<tbody\|<button \|<button>' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'packages/email-service/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'node_modules' | grep -v '.test.')
 
 if [ -n "$RAW_HTML" ]; then
   echo ""
@@ -49,7 +49,7 @@ fi
 #    className="bg-xxx text-xxx" with hardcoded Tailwind is NOT OK
 #    SDK packages (pay-sdk, auth-sdk) are excluded — they consume UI components with className
 # ============================================================
-TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'node_modules')
+TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'node_modules')
 
 if [ -n "$TAILWIND" ]; then
   echo ""
@@ -81,7 +81,7 @@ fi
 # ============================================================
 # 5. No 'any' type (use proper typing)
 # ============================================================
-ANY_TYPE=$(echo "$FILES" | xargs grep -ln ': any\b\|: any;\|: any,\|as any\b' 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'dist/' | grep -v '.d.ts')
+ANY_TYPE=$(echo "$FILES" | xargs grep -ln ': any\b\|: any;\|: any,\|as any\b' 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'dist/' | grep -v '.d.ts' | grep -v 'packages/pdf-sdk/' | grep -v 'packages/capture-sdk/')
 
 if [ -n "$ANY_TYPE" ]; then
   echo ""

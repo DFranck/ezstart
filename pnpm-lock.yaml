@@ -497,6 +497,9 @@ importers:
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
+      '@ezstart/pdf-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/pdf-sdk
       '@ezstart/rbac':
         specifier: workspace:*
         version: link:../../../packages/rbac
@@ -937,6 +940,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/capture-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/capture-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
@@ -1119,6 +1125,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/capture-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/capture-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
@@ -1460,6 +1469,9 @@ importers:
 
   packages/auth-sdk:
     dependencies:
+      '@ezstart/capture-sdk':
+        specifier: workspace:*
+        version: link:../capture-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
@@ -1503,6 +1515,31 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
+
+  packages/capture-sdk:
+    dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      react:
+        specifier: ^18 || ^19
+        version: 19.2.3
+      react-easy-crop:
+        specifier: ^5.5.6
+        version: 5.5.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      tailwind-merge:
+        specifier: ^3.0.1
+        version: 3.4.0
+    devDependencies:
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.7)
 
   packages/config:
     dependencies:
@@ -1852,6 +1889,9 @@ importers:
 
   packages/pdf-sdk:
     dependencies:
+      '@react-pdf/renderer':
+        specifier: ^4.3.0
+        version: 4.3.1(react@19.2.3)
       dom-to-image-more:
         specifier: ^3.4.5
         version: 3.7.2
@@ -1861,10 +1901,16 @@ importers:
       jspdf:
         specifier: ^4.2.0
         version: 4.2.0
+      react:
+        specifier: '>=18'
+        version: 19.2.3
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/react':
+        specifier: '*'
+        version: 19.2.7
 
   packages/playwright-config:
     devDependencies:

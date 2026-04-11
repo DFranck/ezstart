@@ -14,21 +14,21 @@ import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GameType } from '@gacha-analyzer/types'
-import type { RoiRect } from '@/components/roi-selector'
-import type { MaskRect } from '@/components/blackout-mask'
+import type { RoiRect, MaskRect } from '@ezstart/capture-sdk'
 import type { ZoneConfig } from '@/components/multi-zone-selector'
 import { getDefaultZones } from '@/components/multi-zone-selector'
 import { CapturePreview } from '@/components/capture-preview'
-import { preprocessForOcr } from '@/utils/image-preprocessing'
+import { useScan } from '@/hooks/use-scan'
 import {
+  cropImageData,
+  preprocessImageData,
   applyBlackoutMasks,
   canvasFromImageData,
-  cropImageData,
   imageDataToBlob,
-} from '@/utils/scan-image-utils'
-import { useScan } from '@/hooks/use-scan'
-import { useScreenCapture } from '@/hooks/use-screen-capture'
-import { useFrameDiff } from '@/hooks/use-frame-diff'
+  useCapture,
+  useFrameDiff,
+} from '@ezstart/capture-sdk'
+import type { CaptureFrame } from '@ezstart/capture-sdk'
 import {
   useGameLayouts,
   useGameLayout,
@@ -177,7 +177,7 @@ export default function BenchPage() {
       const maskedFrame =
         masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
 
-      const processed = preprocessForOcr(maskedFrame, {
+      const processed = preprocessImageData(maskedFrame, {
         scale: 2,
         contrast: 1.0,
         binarize: false,
@@ -207,7 +207,7 @@ export default function BenchPage() {
           masksRef.current.length > 0
             ? applyBlackoutMasks(fullCropped, masksRef.current)
             : fullCropped
-        const fullProcessed = preprocessForOcr(fullMasked, {
+        const fullProcessed = preprocessImageData(fullMasked, {
           scale: 2,
           contrast: 1.0,
           binarize: false,
@@ -223,7 +223,7 @@ export default function BenchPage() {
       const currentZones = zonesRef.current
       const zoneBlobPromises = currentZones.map(async zone => {
         const zoneCropped = cropImageData(maskedFrame, zone.rect)
-        const zoneProcessed = preprocessForOcr(zoneCropped, {
+        const zoneProcessed = preprocessImageData(zoneCropped, {
           scale: 2,
           contrast: 1.0,
           binarize: false,
@@ -295,9 +295,9 @@ export default function BenchPage() {
   })
 
   const handleFrame = useCallback(
-    (frame: ImageData) => {
-      fullFrameRef.current = frame
-      const cropped = cropImageData(frame, roiRef.current)
+    (frame: CaptureFrame) => {
+      fullFrameRef.current = frame.imageData
+      const cropped = cropImageData(frame.imageData, roiRef.current)
       processFrame(cropped)
     },
     [processFrame]
@@ -310,14 +310,15 @@ export default function BenchPage() {
     stopCapture,
     error: captureError,
     currentFrame,
-  } = useScreenCapture({
+  } = useCapture({
+    provider: 'screen',
     frameInterval: 500,
     onFrame: handleFrame,
   })
 
   const handleRescan = useCallback(() => {
-    if (!currentFrame || scanningRef.current) return
-    const cropped = cropImageData(currentFrame, roiRef.current)
+    if (!currentFrame?.imageData || scanningRef.current) return
+    const cropped = cropImageData(currentFrame.imageData, roiRef.current)
     runBenchScan(cropped)
   }, [currentFrame, runBenchScan])
 
@@ -408,7 +409,7 @@ export default function BenchPage() {
           isCapturing={isCapturing}
           isAnalyzing={isAnalyzing}
           isSupported={isSupported}
-          currentFrame={currentFrame}
+          currentFrame={currentFrame?.imageData ?? null}
           error={captureError}
           onStart={startCapture}
           onStop={stopCapture}

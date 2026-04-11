@@ -2,12 +2,10 @@
 
 import { Card, Div, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RoiRect } from '../roi-selector'
-import { RoiSelector } from '../roi-selector'
+import { RoiSelector, type RoiRect } from '@ezstart/capture-sdk'
 import type { ZoneConfig } from '../multi-zone-selector'
 import { MultiZoneSelector } from '../multi-zone-selector'
-import type { MaskRect } from '../blackout-mask'
-import { BlackoutMask } from '../blackout-mask'
+import { BlackoutMask, type MaskRect } from '@ezstart/capture-sdk'
 
 interface ViewPort {
   x: number

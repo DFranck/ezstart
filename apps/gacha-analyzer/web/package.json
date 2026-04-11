@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
+    "@ezstart/capture-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",
     "@ezstart/logger": "workspace:*",

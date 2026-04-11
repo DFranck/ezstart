@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@ezstart/logger'
-import { useGeneratePDF } from './use-generate-pdf'
+import { useGeneratePDF } from '@ezstart/pdf-sdk'
 import type { DocumentProps } from '@react-pdf/renderer'
 import type { ReactElement } from 'react'
 

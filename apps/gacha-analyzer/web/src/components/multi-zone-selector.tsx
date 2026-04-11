@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import type { RoiRect } from './roi-selector'
+import type { RoiRect } from '@ezstart/capture-sdk'
 import { Div, Span } from '@ezstart/ui/components'
 
 export type ZoneName =

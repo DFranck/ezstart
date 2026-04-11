@@ -4,7 +4,7 @@ export default createNextConfig({
   pwa: true,
   i18n: true,
   extend: {
-    transpilePackages: ['@ezstart/auth-sdk', '@ezstart/next-theme'],
+    transpilePackages: ['@ezstart/next-theme'],
 
     async rewrites() {
       return [

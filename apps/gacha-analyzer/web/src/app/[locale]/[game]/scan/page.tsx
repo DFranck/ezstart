@@ -16,23 +16,23 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import type { GameType, ScanResult } from '@gacha-analyzer/types'
-import type { RoiRect } from '@/components/roi-selector'
-import type { MaskRect } from '@/components/blackout-mask'
+import type { RoiRect, MaskRect } from '@ezstart/capture-sdk'
 import type { ZoneConfig } from '@/components/multi-zone-selector'
 import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { CapturePreview } from '@/components/capture-preview'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
-import { preprocessForOcr } from '@/utils/image-preprocessing'
+import { useScan } from '@/hooks/use-scan'
 import {
-  applyBlackoutMasks,
   cropImageData,
+  preprocessImageData,
+  applyBlackoutMasks,
   imageDataToBlob,
   imageDataToJpegBase64,
   quickHash,
-} from '@/utils/scan-image-utils'
-import { useScan } from '@/hooks/use-scan'
-import { useScreenCapture } from '@/hooks/use-screen-capture'
-import { useFrameDiff } from '@/hooks/use-frame-diff'
+  useCapture,
+  useFrameDiff,
+} from '@ezstart/capture-sdk'
+import type { CaptureFrame } from '@ezstart/capture-sdk'
 import { useGameLayouts, useGameLayout } from '@/hooks/use-game-config'
 import { ScanResults, ScanStatusBar } from './scan-results'
 
@@ -227,7 +227,7 @@ export default function GameScanPage() {
       // Apply blackout masks before preprocessing
       const maskedFrame =
         masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
-      const processed = preprocessForOcr(maskedFrame, {
+      const processed = preprocessImageData(maskedFrame, {
         scale: 2,
         contrast: 1.0,
         binarize: false,
@@ -248,7 +248,7 @@ export default function GameScanPage() {
           masksRef.current.length > 0
             ? applyBlackoutMasks(fullCropped, masksRef.current)
             : fullCropped
-        const fullProcessed = preprocessForOcr(fullMasked, {
+        const fullProcessed = preprocessImageData(fullMasked, {
           scale: 2,
           contrast: 1.0,
           binarize: false,
@@ -315,11 +315,11 @@ export default function GameScanPage() {
   })
 
   const handleFrame = useCallback(
-    (frame: ImageData) => {
+    (frame: CaptureFrame) => {
       // Save the full frame before cropping (for full-window OCR source)
-      fullFrameRef.current = frame
+      fullFrameRef.current = frame.imageData
       // Crop frame to ROI before feeding to diff for better sensitivity
-      const cropped = cropImageData(frame, roiRef.current)
+      const cropped = cropImageData(frame.imageData, roiRef.current)
       processFrame(cropped)
     },
     [processFrame]
@@ -332,7 +332,8 @@ export default function GameScanPage() {
     stopCapture,
     error: captureError,
     currentFrame,
-  } = useScreenCapture({
+  } = useCapture({
+    provider: 'screen',
     frameInterval: 500,
     onFrame: handleFrame,
   })
@@ -343,11 +344,11 @@ export default function GameScanPage() {
   }, [isCapturing])
 
   const handleRescan = useCallback(() => {
-    if (!currentFrame || scanningRef.current) return
+    if (!currentFrame?.imageData || scanningRef.current) return
     setCachedResult(null)
     scanningRef.current = true
     setScanCount(prev => prev + 1)
-    const cropped = cropImageData(currentFrame, roiRef.current)
+    const cropped = cropImageData(currentFrame.imageData, roiRef.current)
     lastHashRef.current = quickHash(cropped)
     const thumbnail = imageDataToJpegBase64(cropped)
     buildAndScan(cropped, thumbnail)
@@ -380,7 +381,7 @@ export default function GameScanPage() {
             isCapturing={isCapturing}
             isAnalyzing={isAnalyzing}
             isSupported={isSupported}
-            currentFrame={currentFrame}
+            currentFrame={currentFrame?.imageData ?? null}
             error={captureError}
             onStart={startCapture}
             onStop={stopCapture}

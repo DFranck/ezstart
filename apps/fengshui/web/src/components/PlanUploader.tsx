@@ -2,7 +2,8 @@
 'use client'
 
 import type { AiValidationResult } from '@/types/bagua'
-import { Button, Card, Div, Icon, ImageCropper, P, Progress, Span, Spinner } from '@ezstart/ui/components'
+import { Button, Card, Div, Icon, P, Progress, Span, Spinner } from '@ezstart/ui/components'
+import { ImageCropper } from '@ezstart/capture-sdk'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
@@ -380,15 +381,15 @@ export function PlanUploader({
               </P>
               <P className="text-sm text-muted-foreground">{t('uploader.clickToSelect')}</P>
               <P className="text-xs text-muted-foreground">{t('uploader.acceptedFormats')}</P>
-            {isProcessing && (
-              <Div className="w-full max-w-xs mt-4">
-                <Progress value={uploadProgress} className="h-2" />
-                <P className="text-xs text-muted-foreground mt-2">
-                  {t('uploader.processing')} {uploadProgress}%
-                </P>
-              </Div>
-            )}
-          </Div>
+              {isProcessing && (
+                <Div className="w-full max-w-xs mt-4">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <P className="text-xs text-muted-foreground mt-2">
+                    {t('uploader.processing')} {uploadProgress}%
+                  </P>
+                </Div>
+              )}
+            </Div>
           </Div>
         </Div>
       ) : (
@@ -452,7 +453,10 @@ export function PlanUploader({
                   <Card className="p-6 text-center max-w-sm">
                     {validationResult.score >= 50 ? (
                       <>
-                        <Icon name="lucide:CheckCircle" className="w-12 h-12 text-success mx-auto" />
+                        <Icon
+                          name="lucide:CheckCircle"
+                          className="w-12 h-12 text-success mx-auto"
+                        />
                         <P className="font-semibold mt-3">{t('validation.validTitle')}</P>
                         <P className="text-sm text-muted-foreground mt-1">
                           {t('validation.valid', {
@@ -463,18 +467,28 @@ export function PlanUploader({
                       </>
                     ) : validationResult.score >= 20 ? (
                       <>
-                        <Icon name="lucide:AlertTriangle" className="w-12 h-12 text-warning mx-auto" />
+                        <Icon
+                          name="lucide:AlertTriangle"
+                          className="w-12 h-12 text-warning mx-auto"
+                        />
                         <P className="font-semibold mt-3">{t('validation.poorQuality')}</P>
                         {validationResult.feedback && (
-                          <P className="text-sm text-muted-foreground mt-1">{validationResult.feedback}</P>
+                          <P className="text-sm text-muted-foreground mt-1">
+                            {validationResult.feedback}
+                          </P>
                         )}
                       </>
                     ) : (
                       <>
-                        <Icon name="lucide:XCircle" className="w-12 h-12 text-destructive mx-auto" />
+                        <Icon
+                          name="lucide:XCircle"
+                          className="w-12 h-12 text-destructive mx-auto"
+                        />
                         <P className="font-semibold mt-3">{t('validation.invalid')}</P>
                         {validationResult.feedback && (
-                          <P className="text-sm text-muted-foreground mt-1">{validationResult.feedback}</P>
+                          <P className="text-sm text-muted-foreground mt-1">
+                            {validationResult.feedback}
+                          </P>
                         )}
                         <Div className="flex gap-2 mt-4 justify-center">
                           <Button variant="outline" size="sm" onClick={removeFile}>
@@ -490,36 +504,42 @@ export function PlanUploader({
           )}
 
           {/* Two-button action bar: Ajuster + Valider — visible after validation, hidden during editing */}
-          {preview && isImage && !isEditing && !isValidating && validationResult && validationResult.score >= 20 && !showValidationOverlay && (
-            <>
-            <Div intent="info" className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg">
-              <Icon name="lucide:Info" className="w-4 h-4 shrink-0" />
-              <P className="text-sm">{t('validation.cropHint')}</P>
-            </Div>
-            <Div className="flex flex-col sm:flex-row gap-3 mt-4">
-              <Button
-                onClick={() => {
-                  setIsEditing(true)
-                  onEditingChange?.(true)
-                }}
-                variant="outline"
-                className="flex-1 min-h-[44px]"
-                type="button"
-              >
-                <Icon name="lucide:Crop" className="w-4 h-4 mr-2" />
-                {t('validation.adjustCrop')}
-              </Button>
-              <Button
-                onClick={() => onValidate?.()}
-                variant="brand"
-                className="flex-1 min-h-[44px]"
-                type="button"
-              >
-                {t('validation.validateAndContinue')}
-              </Button>
-            </Div>
-            </>
-          )}
+          {preview &&
+            isImage &&
+            !isEditing &&
+            !isValidating &&
+            validationResult &&
+            validationResult.score >= 20 &&
+            !showValidationOverlay && (
+              <>
+                <Div intent="info" className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg">
+                  <Icon name="lucide:Info" className="w-4 h-4 shrink-0" />
+                  <P className="text-sm">{t('validation.cropHint')}</P>
+                </Div>
+                <Div className="flex flex-col sm:flex-row gap-3 mt-4">
+                  <Button
+                    onClick={() => {
+                      setIsEditing(true)
+                      onEditingChange?.(true)
+                    }}
+                    variant="outline"
+                    className="flex-1 min-h-[44px]"
+                    type="button"
+                  >
+                    <Icon name="lucide:Crop" className="w-4 h-4 mr-2" />
+                    {t('validation.adjustCrop')}
+                  </Button>
+                  <Button
+                    onClick={() => onValidate?.()}
+                    variant="brand"
+                    className="flex-1 min-h-[44px]"
+                    type="button"
+                  >
+                    {t('validation.validateAndContinue')}
+                  </Button>
+                </Div>
+              </>
+            )}
 
           {/* Image editor */}
           {preview && isImage && isEditing && (
@@ -551,7 +571,6 @@ export function PlanUploader({
               }}
             />
           )}
-
         </Div>
       )}
     </Div>

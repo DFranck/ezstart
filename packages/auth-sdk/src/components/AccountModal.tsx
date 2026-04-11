@@ -6,7 +6,6 @@ import {
   Div,
   H3,
   Icon,
-  ImageCropper,
   Input,
   Label,
   Modal,
@@ -17,6 +16,7 @@ import {
   SheetTitle,
   Span,
 } from '@ezstart/ui/components'
+import { ImageCropper } from '@ezstart/capture-sdk'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth, useAuthContext } from '../provider.js'

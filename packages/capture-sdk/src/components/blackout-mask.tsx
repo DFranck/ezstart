@@ -1,8 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { Div, Span } from '@ezstart/ui/components'
+import { useEffect, useRef } from 'react'
 
 export interface MaskRect {
   id: string
@@ -23,6 +21,12 @@ interface BlackoutMaskProps {
   locked?: boolean
   /** Background color for mask rectangles (default: 'rgba(255, 0, 0, 1)') */
   maskColor?: string
+  /** i18n labels — provide translations from the consumer */
+  labels?: {
+    addMask?: string
+    removeMask?: string
+    maskLabel?: string
+  }
 }
 
 type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
@@ -41,8 +45,14 @@ export function BlackoutMask({
   parentRoi,
   locked = false,
   maskColor = 'rgba(255, 0, 0, 1)',
+  labels,
 }: BlackoutMaskProps) {
-  const t = useTranslations('bench')
+  const l = {
+    addMask: labels?.addMask ?? 'Add mask',
+    removeMask: labels?.removeMask ?? 'Remove mask',
+    maskLabel: labels?.maskLabel ?? 'Mask',
+  }
+
   const overlayRef = useRef<HTMLDivElement>(null)
 
   const dragRef = useRef<{
@@ -283,7 +293,7 @@ export function BlackoutMask({
   return (
     <>
       {/* Overlay container for mask rectangles */}
-      <Div
+      <div
         ref={overlayRef}
         style={{
           position: 'absolute',
@@ -300,7 +310,7 @@ export function BlackoutMask({
           const displayHeight = parentRoi ? (mask.height / 100) * parentRoi.height : mask.height
 
           return (
-            <Div
+            <div
               key={mask.id}
               style={{
                 position: 'absolute',
@@ -324,7 +334,7 @@ export function BlackoutMask({
             >
               {/* Label — hidden when locked */}
               {!locked && (
-                <Span
+                <span
                   style={{
                     position: 'absolute',
                     top: 2,
@@ -336,8 +346,8 @@ export function BlackoutMask({
                     lineHeight: 1,
                   }}
                 >
-                  Mask {idx + 1}
-                </Span>
+                  {l.maskLabel} {idx + 1}
+                </span>
               )}
 
               {/* Remove button — hidden when locked */}
@@ -366,8 +376,8 @@ export function BlackoutMask({
                     zIndex: 75,
                     padding: 0,
                   }}
-                  title={t('removeMask')}
-                  aria-label={t('removeMask')}
+                  title={l.removeMask}
+                  aria-label={l.removeMask}
                 >
                   ×
                 </button>
@@ -376,21 +386,21 @@ export function BlackoutMask({
               {/* Resize handles (corners + edges) — hidden when locked */}
               {!locked &&
                 allHandles.map(handle => (
-                  <Div
+                  <div
                     key={handle}
                     style={getHandleStyle(handle)}
                     onMouseDown={e => handleMouseDown(e, mask.id, 'resize', handle)}
                     onTouchStart={e => handleTouchStart(e, mask.id, 'resize', handle)}
                   />
                 ))}
-            </Div>
+            </div>
           )
         })}
-      </Div>
+      </div>
 
       {/* Add mask button — positioned below the overlay, hidden when locked */}
       {!locked && (
-        <Div
+        <div
           style={{
             position: 'absolute',
             bottom: 8,
@@ -406,12 +416,12 @@ export function BlackoutMask({
               onAdd()
             }}
             className="flex items-center gap-1 bg-black/60 hover:bg-black/80 text-white text-xs rounded-md px-2 py-1 transition-colors"
-            title={t('addMask')}
+            title={l.addMask}
           >
-            <Span className="text-sm font-bold">+</Span>
-            <Span>{t('masks')}</Span>
+            <span className="text-sm font-bold">+</span>
+            <span>{l.addMask}</span>
           </button>
-        </Div>
+        </div>
       )}
     </>
   )
