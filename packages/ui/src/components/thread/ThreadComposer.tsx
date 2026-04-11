@@ -57,6 +57,23 @@ export const ThreadComposer = React.memo(function ThreadComposer({
     resizeTextarea()
   }, [message, resizeTextarea])
 
+  // Auto-scroll composer into view when mobile keyboard opens
+  const composerRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null
+    if (!vv) return
+
+    const handleResize = () => {
+      // Keyboard is open when viewport height is significantly smaller than window height
+      if (vv.height < window.innerHeight * 0.8) {
+        composerRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+      }
+    }
+
+    vv.addEventListener('resize', handleResize)
+    return () => vv.removeEventListener('resize', handleResize)
+  }, [])
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
@@ -95,6 +112,7 @@ export const ThreadComposer = React.memo(function ThreadComposer({
 
   return (
     <div
+      ref={composerRef}
       className={cn(
         'w-full z-10 pb-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]',
         'transition-transform duration-300 ease-in-out',
