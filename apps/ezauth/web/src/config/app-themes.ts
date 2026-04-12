@@ -9,78 +9,73 @@ export interface AppTheme {
   logo?: string
   /** Logo for dark mode (if different) */
   logoDark?: string
-  /** Primary text color class */
+  /**
+   * Primary text color class — uses CSS var `--primary` which is overridden
+   * per-app via `data-app="xxx"` on the wrapper. So `text-primary` resolves
+   * to the app's brand color automatically.
+   */
   primaryColor: string
-  /** Background accent color class */
+  /** Background accent color class — same mechanism as primaryColor */
   bgAccent: string
-  /** Brand color (OKLCH value) — overrides --brand CSS variable for buttons */
-  brandColor?: string
-  /** Brand foreground color (OKLCH value) — overrides --brand-foreground */
-  brandForeground?: string
   /** Icon name for the app */
   icon?: KnownIconName
   /** Whether to show "One account, all EZStart apps!" message */
   showEzstartMessage?: boolean
 }
 
+const BASE_THEME: Pick<AppTheme, 'primaryColor' | 'bgAccent'> = {
+  primaryColor: 'text-primary',
+  bgAccent: 'bg-primary/10',
+}
+
 export const defaultTheme: AppTheme = {
+  ...BASE_THEME,
   name: 'EZStart',
   tagline: 'Your digital ecosystem',
   logo: '/logos/ezstart.svg',
-  primaryColor: 'text-primary',
-  bgAccent: 'bg-primary/10',
   icon: 'lucide:Rocket',
   showEzstartMessage: true,
 }
 
 export const appThemes: Record<string, AppTheme> = {
   ezstart: {
+    ...BASE_THEME,
     name: 'EZStart',
     tagline: 'Your digital ecosystem',
     logo: '/logos/ezstart.svg',
-    primaryColor: 'text-primary',
-    bgAccent: 'bg-primary/10',
     icon: 'lucide:Rocket',
     showEzstartMessage: true,
   },
   'green-pulse': {
+    ...BASE_THEME,
     name: 'GreenPulse.AI',
     tagline: 'Your AI Sustainability Assistant',
     logo: '/logos/greenpulse-light.svg',
     logoDark: '/logos/greenpulse-dark.svg',
-    primaryColor: 'text-gp-primary',
-    bgAccent: 'bg-gp-primary/10',
-    brandColor: 'oklch(0.6 0.18 145)',
-    brandForeground: 'oklch(0.98 0.01 145)',
     icon: 'lucide:Leaf',
     showEzstartMessage: false,
   },
   ezbill: {
+    ...BASE_THEME,
     name: 'EZBill',
     tagline: 'Professional Invoicing Made Easy',
     logo: '/logos/ezbill.svg',
-    primaryColor: 'text-ezbill',
-    bgAccent: 'bg-ezbill/10',
     icon: 'lucide:FileText',
     showEzstartMessage: true,
   },
   ezpay: {
+    ...BASE_THEME,
     name: 'EZPay',
     tagline: 'Secure Payment Solutions',
     logo: '/logos/ezpay.svg',
-    primaryColor: 'text-ezpay',
-    bgAccent: 'bg-ezpay/10',
     icon: 'lucide:CreditCard',
     showEzstartMessage: true,
   },
   fengshui: {
+    ...BASE_THEME,
     name: 'FengShui',
     tagline: 'AI-Powered Feng Shui Analysis',
     logo: '/logos/fengshui.svg',
-    primaryColor: 'text-fengshui',
-    bgAccent: 'bg-fengshui/10',
-    brandColor: 'oklch(0.78 0.16 80)',
-    brandForeground: 'oklch(0.15 0.05 80)',
     icon: 'lucide:Compass',
     showEzstartMessage: true,
   },

@@ -24,6 +24,7 @@ type ThreadSidebarProps = {
   onDelete?: (id: string) => void | Promise<void>
   onClose?: () => void // Callback to close sidebar (mobile)
   newConversationLabel?: string
+  newConversationDisabled?: boolean
   emptyState?: ReactNode
   header?: ReactNode // Custom content above "New conversation" button
   footer?: ReactNode // Custom content at bottom
@@ -42,6 +43,7 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
   onDelete,
   onClose,
   newConversationLabel = 'New conversation',
+  newConversationDisabled = false,
   emptyState,
   header,
   footer,
@@ -78,6 +80,7 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
             onClick={onNewConversation}
             className="w-full"
             variant="default"
+            disabled={newConversationDisabled}
             aria-label="Create new conversation"
           >
             <Icon name="lucide:Plus" size={16} className="mr-2" ariaHidden />

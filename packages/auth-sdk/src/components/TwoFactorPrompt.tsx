@@ -120,7 +120,7 @@ export function TwoFactorPrompt({
           type="submit"
           disabled={loading || code.length < 6}
           className="w-full cursor-pointer"
-          variant="brand"
+          variant="default"
         >
           {loading ? t.verifying : t.verify}
         </Button>

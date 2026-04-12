@@ -1,6 +1,14 @@
 /* EZBill Theme Variables and Utilities */
 
-[data-app="ezbill"] {
+[data-app='ezbill'] {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.65 0.17 240);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.95 0.02 240);
+  --secondary-foreground: oklch(0.3 0.08 240);
+  --accent: oklch(0.93 0.03 240);
+  --accent-foreground: oklch(0.3 0.08 240);
+
   /* EZBill - Entity Colors */
   --ezbill-client: oklch(0.7 0.15 210); /* Cyan-Blue - Friendly, professional */
   --ezbill-client-foreground: oklch(0.25 0.08 210);
@@ -32,7 +40,15 @@
   --ezbill-pending-foreground: oklch(0.25 0.09 80);
 }
 
-[data-app="ezbill"].dark {
+[data-app='ezbill'].dark {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.64 0.178 251);
+  --primary-foreground: oklch(0.98 0.01 250);
+  --secondary: oklch(0.25 0.04 240);
+  --secondary-foreground: oklch(0.95 0.01 240);
+  --accent: oklch(0.28 0.05 240);
+  --accent-foreground: oklch(0.95 0.01 240);
+
   /* EZBill - Semantic colors for badges and text */
   --ezbill-client: oklch(0.731 0.165 210);
   --ezbill-client-foreground: oklch(0.98 0.01 210);
@@ -40,7 +56,7 @@
   --ezbill-company-foreground: oklch(0.98 0.01 295);
   --ezbill-payment: oklch(0.754 0.184 146);
   --ezbill-payment-foreground: oklch(0.98 0.01 145);
-  --ezbill-invoice: oklch(0.640 0.178 251);
+  --ezbill-invoice: oklch(0.64 0.178 251);
   --ezbill-invoice-foreground: oklch(0.98 0.01 250);
   --ezbill-quote: oklch(0.723 0.174 75);
   --ezbill-quote-foreground: oklch(0.98 0.01 75);
@@ -50,7 +66,7 @@
   /* EZBill - Status states */
   --ezbill-draft: oklch(0.6 0.05 250);
   --ezbill-draft-foreground: oklch(0.9 0.02 250);
-  --ezbill-sent: oklch(0.640 0.178 251);
+  --ezbill-sent: oklch(0.64 0.178 251);
   --ezbill-sent-foreground: oklch(0.98 0.01 250);
   --ezbill-paid: oklch(0.754 0.184 146);
   --ezbill-paid-foreground: oklch(0.98 0.01 145);
@@ -143,21 +159,41 @@
 
   /* Light background gradients (for empty states) */
   .bg-gradient-client-light {
-    background: linear-gradient(to right, oklch(0.805 0.161 210 / 0.2), oklch(0.705 0.143 247 / 0.2));
+    background: linear-gradient(
+      to right,
+      oklch(0.805 0.161 210 / 0.2),
+      oklch(0.705 0.143 247 / 0.2)
+    );
   }
   .bg-gradient-invoice-light {
-    background: linear-gradient(to right, oklch(0.705 0.143 247 / 0.2), oklch(0.675 0.151 273 / 0.2));
+    background: linear-gradient(
+      to right,
+      oklch(0.705 0.143 247 / 0.2),
+      oklch(0.675 0.151 273 / 0.2)
+    );
   }
   .bg-gradient-quote-light {
     background: linear-gradient(to right, oklch(0.805 0.185 80 / 0.2), oklch(0.782 0.165 60 / 0.2));
   }
   .bg-gradient-payment-light {
-    background: linear-gradient(to right, oklch(0.805 0.175 145 / 0.2), oklch(0.782 0.147 166 / 0.2));
+    background: linear-gradient(
+      to right,
+      oklch(0.805 0.175 145 / 0.2),
+      oklch(0.782 0.147 166 / 0.2)
+    );
   }
   .bg-gradient-company-light {
-    background: linear-gradient(to right, oklch(0.675 0.151 273 / 0.2), oklch(0.715 0.206 298 / 0.2));
+    background: linear-gradient(
+      to right,
+      oklch(0.675 0.151 273 / 0.2),
+      oklch(0.715 0.206 298 / 0.2)
+    );
   }
   .bg-gradient-receipt-light {
-    background: linear-gradient(to right, oklch(0.715 0.206 298 / 0.2), oklch(0.703 0.195 340 / 0.2));
+    background: linear-gradient(
+      to right,
+      oklch(0.715 0.206 298 / 0.2),
+      oklch(0.703 0.195 340 / 0.2)
+    );
   }
 }

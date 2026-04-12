@@ -1,6 +1,14 @@
 /* GreenPulse Theme Variables */
 
-[data-app="green-pulse"] {
+[data-app='green-pulse'] {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.6 0.18 145);
+  --primary-foreground: oklch(0.98 0.01 145);
+  --secondary: oklch(0.95 0.03 160);
+  --secondary-foreground: oklch(0.2 0.05 160);
+  --accent: oklch(0.93 0.04 58);
+  --accent-foreground: oklch(0.2 0.05 58);
+
   /* Primary green for eco/sustainability theme */
   --gp-primary: oklch(0.6 0.18 145);
   --gp-primary-foreground: oklch(0.98 0.01 145);
@@ -19,7 +27,15 @@
   --gp-gradient-to: oklch(0.6 0.15 240); /* blue-600 */
 }
 
-[data-app="green-pulse"].dark {
+[data-app='green-pulse'].dark {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.7 0.2 145);
+  --primary-foreground: oklch(0.15 0.05 145);
+  --secondary: oklch(0.25 0.04 160);
+  --secondary-foreground: oklch(0.95 0.02 160);
+  --accent: oklch(0.28 0.05 58);
+  --accent-foreground: oklch(0.95 0.02 58);
+
   /* Primary green for eco/sustainability theme (dark mode) */
   --gp-primary: oklch(0.7 0.2 145);
   --gp-primary-foreground: oklch(0.15 0.05 145);

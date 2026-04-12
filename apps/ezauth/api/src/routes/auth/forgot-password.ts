@@ -16,6 +16,7 @@ import { emailService } from '../../services/email.service.js'
 import { passwordResetTemplate } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
+import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
 
 export const forgotPasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -30,6 +31,8 @@ const forgotPasswordRateLimiter = createVeryStrictRateLimiter({
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email format').describe('User email address'),
+  app: z.string().optional().describe('App requesting the password reset'),
+  redirect_uri: z.string().url().optional().describe('Redirect URI to return to after reset'),
 })
 
 const forgotPasswordResponseSchema = z.object({
@@ -43,7 +46,7 @@ const forgotPasswordController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid email address', parsed.error.issues)
     }
 
-    const { email } = parsed.data
+    const { email, app, redirect_uri } = parsed.data
     const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findOne({ email: email.toLowerCase() })
 
@@ -55,18 +58,20 @@ const forgotPasswordController = async (req: Request, res: Response) => {
         code: token,
         userId: user._id!.toString(),
         type: 'password-reset',
-        app: 'ezstart',
+        app: app || 'ezstart',
         expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
       })
 
       await authCode.save()
 
-      const resetUrl = `${getWebUrl('ezauth')}/reset-password?token=${token}`
+      const appDisplayName = getAppDisplayName(app)
+      const params = buildAuthEmailParams(token, app, redirect_uri)
+      const resetUrl = `${getWebUrl('ezauth')}/reset-password?${params}`
 
       await emailService.send({
         to: user.email,
-        subject: 'Reset your password',
-        html: passwordResetTemplate(resetUrl, 'EZAuth'),
+        subject: `[${appDisplayName}] Reset your password`,
+        html: passwordResetTemplate(resetUrl, appDisplayName),
       })
 
       logger.info({ email: user.email }, 'Password reset email sent')

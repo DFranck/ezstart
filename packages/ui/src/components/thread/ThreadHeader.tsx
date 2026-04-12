@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { cn } from '../../lib/utils'
-import { useThreadTheme } from './ThreadThemeContext'
 
 type ThreadHeaderProps = {
   left?: React.ReactNode
@@ -15,14 +14,12 @@ export const ThreadHeader = React.memo(function ThreadHeader({
   right,
   className,
 }: ThreadHeaderProps) {
-  const { theme } = useThreadTheme()
-
   return (
     <header
       className={cn(
         'flex items-center justify-between px-4 py-3 shrink-0',
-        theme.background,
-        theme.border,
+        'bg-background',
+        'border-b',
         className
       )}
     >

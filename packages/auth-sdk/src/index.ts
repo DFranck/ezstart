@@ -8,6 +8,7 @@ export type { AuthState, AuthMode } from './store.js'
 
 // Provider and hooks
 export { AuthProvider, useAuth, useAuthContext } from './provider.js'
+export { useAuthNavigation } from './hooks/useAuthNavigation.js'
 
 // Middleware (Next.js)
 export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware.js'
@@ -45,6 +46,11 @@ export type {
   ForgotPasswordFormProps,
   ForgotPasswordFormTexts,
 } from './components/ForgotPasswordForm.js'
+export { ResetPasswordForm } from './components/ResetPasswordForm.js'
+export type {
+  ResetPasswordFormProps,
+  ResetPasswordFormTexts,
+} from './components/ResetPasswordForm.js'
 export { OAuthButtons } from './components/OAuthButtons.js'
 export type {
   OAuthButtonsProps,
@@ -55,6 +61,13 @@ export { PasswordStrength } from './components/PasswordStrength.js'
 export type { PasswordStrengthProps, PasswordStrengthTexts } from './components/PasswordStrength.js'
 export { TwoFactorPrompt } from './components/TwoFactorPrompt.js'
 export type { TwoFactorPromptProps, TwoFactorPromptTexts } from './components/TwoFactorPrompt.js'
+export { VerifyEmailFlow } from './components/VerifyEmailFlow.js'
+export type { VerifyEmailFlowProps, VerifyEmailFlowTexts } from './components/VerifyEmailFlow.js'
+export { TwoFactorSettings } from './components/TwoFactorSettings.js'
+export type {
+  TwoFactorSettingsProps,
+  TwoFactorSettingsTexts,
+} from './components/TwoFactorSettings.js'
 
 // User components (Clerk-like pre-built UI)
 export { UserMenu } from './components/UserMenu.js'

@@ -118,16 +118,9 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
           let fullText = ''
           let lastData: unknown = null
 
-          // Add placeholder AI message for streaming
+          // Stream into streamingText only; final message is added when stream ends
+          // (avoids double bubble: placeholder in messages[] + streamingText loader)
           const aiMessageId = `ai-${Date.now()}`
-          const aiMessage: ThreadMessage = {
-            id: aiMessageId,
-            role: 'ai',
-            content: '',
-            timestamp: new Date().toISOString(),
-            streaming: true,
-          }
-          setMessages(prev => [...prev, aiMessage])
 
           try {
             while (true) {
@@ -146,18 +139,10 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
                     const data = JSON.parse(dataStr)
                     lastData = data
 
-                    // Extract text from the response
                     const text = formatResponse(data)
                     if (text) {
                       fullText += text
                       setStreamingText(fullText)
-
-                      // Update message content
-                      setMessages(prev =>
-                        prev.map(msg =>
-                          msg.id === aiMessageId ? { ...msg, content: fullText } : msg
-                        )
-                      )
                     }
                   } catch (e) {
                     logger.warn('Failed to parse SSE data:', dataStr)
@@ -171,14 +156,16 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
 
           const responseTime = Date.now() - requestStartTime
 
-          // Finalize the message
-          setMessages(prev =>
-            prev.map(msg =>
-              msg.id === aiMessageId
-                ? { ...msg, content: fullText, responseTime, streaming: false }
-                : msg
-            )
-          )
+          // Add finalized AI message once streaming is done
+          const finalMessage: ThreadMessage = {
+            id: aiMessageId,
+            role: 'ai',
+            content: fullText,
+            timestamp: new Date().toISOString(),
+            responseTime,
+            streaming: false,
+          }
+          setMessages(prev => [...prev, finalMessage])
 
           if (onSuccess && lastData) {
             onSuccess(lastData)

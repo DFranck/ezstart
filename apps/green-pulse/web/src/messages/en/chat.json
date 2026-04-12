@@ -1,4 +1,8 @@
 {
+  "welcomeTitle": "Welcome to GP.A",
+  "welcomeDescription": "Your AI assistant for sustainability and ESG reporting",
+  "composerPlaceholder": "Ask GP.A anything about sustainability...",
+  "loadingText": "LIA is thinking",
   "sidebar": {
     "myPlan": "My plan:",
     "myTools": "My tools:",

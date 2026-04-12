@@ -1,8 +1,6 @@
 'use client'
 
-import React from 'react'
-import { getAppTheme } from '@/config/app-themes'
-import { ForgotPasswordForm } from '@ezstart/auth-sdk'
+import { ForgotPasswordForm, useAuthNavigation } from '@ezstart/auth-sdk'
 import {
   Card,
   CardContent,
@@ -12,30 +10,16 @@ import {
   Div,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
 function ForgotPasswordContent() {
   const t = useTranslations('forgotPassword')
   const tValidation = useTranslations('validation')
-  const searchParams = useSearchParams()
-  const app = searchParams.get('app') || 'ezstart'
-  const theme = getAppTheme(app)
+  const navigation = useAuthNavigation()
+  const app = navigation.app || 'ezstart'
 
   return (
-    <Card
-      className="max-w-md w-full"
-      style={
-        theme.brandColor
-          ? ({
-              '--brand': theme.brandColor,
-              '--brand-foreground': theme.brandForeground ?? 'oklch(0.985 0 0)',
-              '--color-brand': 'var(--brand)',
-              '--color-brand-foreground': 'var(--brand-foreground)',
-            } as React.CSSProperties)
-          : undefined
-      }
-    >
+    <Card className="max-w-md w-full" data-app={app}>
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
         <CardDescription className="text-xs md:text-sm">{t('description')}</CardDescription>
@@ -43,7 +27,6 @@ function ForgotPasswordContent() {
 
       <CardContent className="space-y-4">
         <ForgotPasswordForm
-          backHref={`/login?${searchParams.toString()}`}
           texts={{
             email: t('email'),
             emailPlaceholder: t('emailPlaceholder'),

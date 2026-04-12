@@ -531,7 +531,7 @@ export function PlanUploader({
                   </Button>
                   <Button
                     onClick={() => onValidate?.()}
-                    variant="brand"
+                    variant="default"
                     className="flex-1 min-h-[44px]"
                     type="button"
                   >

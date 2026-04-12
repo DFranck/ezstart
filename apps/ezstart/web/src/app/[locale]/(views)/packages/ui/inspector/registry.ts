@@ -63,9 +63,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   AccordionContent: {
     name: 'AccordionContent',
     level: 'atom',
-    tokens: [{ name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] },
+      { name: 'size', category: 'structural' },
+    ],
     props: [
-      { name: 'density', type: '\'compact\' | \'default\' | \'relaxed\'', required: false, isDesignToken: true },
+      {
+        name: 'density',
+        type: "'compact' | 'default' | 'relaxed'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
     ],
     children: [],
@@ -78,9 +86,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   AccordionItem: {
     name: 'AccordionItem',
     level: 'atom',
-    tokens: [{ name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] },
+      { name: 'size', category: 'structural' },
+    ],
     props: [
-      { name: 'density', type: '\'compact\' | \'default\' | \'relaxed\'', required: false, isDesignToken: true },
+      {
+        name: 'density',
+        type: "'compact' | 'default' | 'relaxed'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
     ],
     children: [],
@@ -106,9 +122,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogAction',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -120,9 +134,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogCancel',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -134,9 +146,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogContent',
     level: 'atom',
     tokens: [{ name: 'density', category: 'structural' }],
-    props: [
-      { name: 'density', type: 'string', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'density', type: 'string', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -148,9 +158,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogDescription',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -162,9 +170,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogFooter',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -176,9 +182,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogHeader',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -190,9 +194,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogOverlay',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -204,9 +206,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogPortal',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -218,9 +218,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogTitle',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -232,9 +230,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AlertDialogTrigger',
     level: 'atom',
     tokens: [{ name: 'variant', category: 'visual' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -245,17 +241,39 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   AnimatedCounter: {
     name: 'AnimatedCounter',
     level: 'atom',
-    tokens: [{ name: 'easing', category: 'visual', values: ['linear', 'easeOutQuart', 'easeInOutQuart'], status: 'specific' }, { name: 'variant', category: 'visual', values: ['default', 'stats', 'metric', 'subtle', 'success', 'warning', 'destructive'] }, { name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl', 'h6', 'h5', 'h4', 'h3', 'h2', 'h1', 'giant'] }],
+    tokens: [
+      {
+        name: 'easing',
+        category: 'visual',
+        values: ['linear', 'easeOutQuart', 'easeInOutQuart'],
+        status: 'specific',
+      },
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'stats', 'metric', 'subtle', 'success', 'warning', 'destructive'],
+      },
+      {
+        name: 'size',
+        category: 'structural',
+        values: ['xs', 'sm', 'default', 'lg', 'xl', 'h6', 'h5', 'h4', 'h3', 'h2', 'h1', 'giant'],
+      },
+    ],
     props: [
       { name: 'value', type: 'number', required: true, isDesignToken: false },
       { name: 'startValue', type: 'number', required: false, isDesignToken: false },
       { name: 'duration', type: 'number', required: false, isDesignToken: false },
       { name: 'animate', type: 'boolean', required: false, isDesignToken: false },
       { name: 'decimals', type: 'number', required: false, isDesignToken: false },
-      { name: 'separator', type: '\',\' | \'.\' | \' \' | \'\'', required: false, isDesignToken: false },
+      { name: 'separator', type: "',' | '.' | ' ' | ''", required: false, isDesignToken: false },
       { name: 'prefix', type: 'string', required: false, isDesignToken: false },
       { name: 'suffix', type: 'string', required: false, isDesignToken: false },
-      { name: 'easing', type: '\'linear\' | \'easeOutQuart\' | \'easeInOutQuart\'', required: false, isDesignToken: true },
+      {
+        name: 'easing',
+        type: "'linear' | 'easeOutQuart' | 'easeInOutQuart'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'observeIntersection', type: 'boolean', required: false, isDesignToken: false },
     ],
     children: [],
@@ -280,7 +298,22 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Aside: {
     name: 'Aside',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }, { name: 'size', category: 'structural', values: ['none', 'xs', 'sm', 'md', 'lg', 'xl', 'full'] }, { name: 'layout', category: 'visual', values: ['col', 'grid', 'center'], status: 'candidate' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+      {
+        name: 'size',
+        category: 'structural',
+        values: ['none', 'xs', 'sm', 'md', 'lg', 'xl', 'full'],
+      },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['col', 'grid', 'center'],
+        status: 'candidate',
+      },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -293,13 +326,9 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'AuroraBackground',
     level: 'atom',
     tokens: [],
-    props: [
-      { name: 'showRadialGradient', type: 'boolean', required: false, isDesignToken: false },
-    ],
+    props: [{ name: 'showRadialGradient', type: 'boolean', required: false, isDesignToken: false }],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component',
@@ -320,7 +349,34 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Badge: {
     name: 'Badge',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'secondary', 'primary', 'destructive', 'outline', 'success', 'warning', 'info', 'purple', 'cyan', 'indigo', 'pink'] }, { name: 'size', category: 'structural', values: ['none', 'xs', 'default', 'sm', 'lg', 'xl'] }, { name: 'circle', category: 'visual', status: 'specific' }, { name: 'circleSize', category: 'visual', values: ['sm', 'md', 'lg', 'xl'], status: 'specific' }],
+    tokens: [
+      {
+        name: 'variant',
+        category: 'visual',
+        values: [
+          'default',
+          'secondary',
+          'primary',
+          'destructive',
+          'outline',
+          'success',
+          'warning',
+          'info',
+          'purple',
+          'cyan',
+          'indigo',
+          'pink',
+        ],
+      },
+      { name: 'size', category: 'structural', values: ['none', 'xs', 'default', 'sm', 'lg', 'xl'] },
+      { name: 'circle', category: 'visual', status: 'specific' },
+      {
+        name: 'circleSize',
+        category: 'visual',
+        values: ['sm', 'md', 'lg', 'xl'],
+        status: 'specific',
+      },
+    ],
     props: [
       { name: 'dot', type: 'boolean', required: false, isDesignToken: false },
       { name: 'pulse', type: 'boolean', required: false, isDesignToken: false },
@@ -335,7 +391,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Blockquote: {
     name: 'Blockquote',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -347,7 +407,14 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Button: {
     name: 'Button',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural', values: ['xs', 'default', 'sm', 'lg', 'xl', 'icon'] }, { name: 'variant', category: 'visual', values: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link', 'linkedin', 'brand'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['xs', 'default', 'sm', 'lg', 'xl', 'icon'] },
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link', 'linkedin'],
+      },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -371,9 +438,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CardContent: {
     name: 'CardContent',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'size', type: '\'xs\' | \'sm\' | \'default\' | \'lg\' | \'xl\'', required: false, isDesignToken: true },
+      {
+        name: 'size',
+        type: "'xs' | 'sm' | 'default' | 'lg' | 'xl'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'density', type: 'DensityValue', required: false, isDesignToken: true },
     ],
     children: [],
@@ -398,9 +473,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CardFooter: {
     name: 'CardFooter',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'size', type: '\'xs\' | \'sm\' | \'default\' | \'lg\' | \'xl\'', required: false, isDesignToken: true },
+      {
+        name: 'size',
+        type: "'xs' | 'sm' | 'default' | 'lg' | 'xl'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'density', type: 'DensityValue', required: false, isDesignToken: true },
     ],
     children: [],
@@ -413,9 +496,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CardHeader: {
     name: 'CardHeader',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'size', type: '\'xs\' | \'sm\' | \'default\' | \'lg\' | \'xl\'', required: false, isDesignToken: true },
+      {
+        name: 'size',
+        type: "'xs' | 'sm' | 'default' | 'lg' | 'xl'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'density', type: 'DensityValue', required: false, isDesignToken: true },
     ],
     children: [],
@@ -440,11 +531,25 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CarouselContent: {
     name: 'CarouselContent',
     level: 'atom',
-    tokens: [{ name: 'orientation', category: 'visual', values: ['horizontal', 'vertical'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'orientation',
+        category: 'visual',
+        values: ['horizontal', 'vertical'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'opts', type: 'CarouselOptions', required: false, isDesignToken: false },
       { name: 'plugins', type: 'CarouselPlugin', required: false, isDesignToken: false },
-      { name: 'orientation', type: '\'horizontal\' | \'vertical\'', required: false, isDesignToken: true },
+      {
+        name: 'orientation',
+        type: "'horizontal' | 'vertical'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'setApi', type: '(api: CarouselApi) => void', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -459,11 +564,25 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CarouselItem: {
     name: 'CarouselItem',
     level: 'atom',
-    tokens: [{ name: 'orientation', category: 'visual', values: ['horizontal', 'vertical'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'orientation',
+        category: 'visual',
+        values: ['horizontal', 'vertical'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'opts', type: 'CarouselOptions', required: false, isDesignToken: false },
       { name: 'plugins', type: 'CarouselPlugin', required: false, isDesignToken: false },
-      { name: 'orientation', type: '\'horizontal\' | \'vertical\'', required: false, isDesignToken: true },
+      {
+        name: 'orientation',
+        type: "'horizontal' | 'vertical'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'setApi', type: '(api: CarouselApi) => void', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -479,13 +598,9 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'ChartContainer',
     level: 'atom',
     tokens: [],
-    props: [
-      { name: 'config', type: 'ChartConfig', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'config', type: 'ChartConfig', required: true, isDesignToken: false }],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component',
@@ -495,13 +610,9 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'ChartLegendContent',
     level: 'atom',
     tokens: [],
-    props: [
-      { name: 'config', type: 'ChartConfig', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'config', type: 'ChartConfig', required: true, isDesignToken: false }],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component',
@@ -511,13 +622,9 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'ChartStyle',
     level: 'atom',
     tokens: [],
-    props: [
-      { name: 'config', type: 'ChartConfig', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'config', type: 'ChartConfig', required: true, isDesignToken: false }],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component',
@@ -526,11 +633,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   ChartTooltipContent: {
     name: 'ChartTooltipContent',
     level: 'atom',
-    tokens: [{ name: 'indicator', category: 'visual', values: ['line', 'dot', 'dashed'], status: 'candidate' }],
+    tokens: [
+      {
+        name: 'indicator',
+        category: 'visual',
+        values: ['line', 'dot', 'dashed'],
+        status: 'candidate',
+      },
+    ],
     props: [
       { name: 'hideLabel', type: 'boolean', required: false, isDesignToken: false },
       { name: 'hideIndicator', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'indicator', type: '\'line\' | \'dot\' | \'dashed\'', required: false, isDesignToken: true },
+      {
+        name: 'indicator',
+        type: "'line' | 'dot' | 'dashed'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'nameKey', type: 'string', required: false, isDesignToken: false },
       { name: 'labelKey', type: 'string', required: false, isDesignToken: false },
     ],
@@ -544,7 +663,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Code: {
     name: 'Code',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -568,10 +691,33 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CommandGroup: {
     name: 'CommandGroup',
     level: 'atom',
-    tokens: [{ name: 'intent', category: 'structural', values: ['default', 'success', 'warning', 'destructive'] }, { name: 'headingVariant', category: 'visual', values: ['default', 'healthy', 'degraded', 'unhealthy'], status: 'specific', deprecatedBy: 'variant' }],
+    tokens: [
+      {
+        name: 'intent',
+        category: 'structural',
+        values: ['default', 'success', 'warning', 'destructive'],
+      },
+      {
+        name: 'headingVariant',
+        category: 'visual',
+        values: ['default', 'healthy', 'degraded', 'unhealthy'],
+        status: 'specific',
+        deprecatedBy: 'variant',
+      },
+    ],
     props: [
-      { name: 'headingVariant', type: '\'default\' | \'healthy\' | \'healthy-light\' | \'degraded\' | \'unhealthy\' | null', required: false, isDesignToken: false },
-      { name: 'intent', type: '\'default\' | \'success\' | \'warning\' | \'destructive\'', required: false, isDesignToken: true },
+      {
+        name: 'headingVariant',
+        type: "'default' | 'healthy' | 'healthy-light' | 'degraded' | 'unhealthy' | null",
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'intent',
+        type: "'default' | 'success' | 'warning' | 'destructive'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: [],
     slots: [],
@@ -643,7 +789,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Dd: {
     name: 'Dd',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -659,7 +809,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     props: [
       { name: 'sections', type: 'DebugSection[]', required: true, isDesignToken: false },
       { name: 'title', type: 'string', required: false, isDesignToken: false },
-      { name: 'defaultPosition', type: '{ x: number; y: number }', required: false, isDesignToken: false },
+      {
+        name: 'defaultPosition',
+        type: '{ x: number; y: number }',
+        required: false,
+        isDesignToken: false,
+      },
     ],
     children: [],
     slots: [],
@@ -671,7 +826,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Details: {
     name: 'Details',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -794,7 +953,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Div: {
     name: 'Div',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }, { name: 'size', category: 'structural', values: ['default', 'xs', 'sm', 'md', 'lg', 'xl', 'full'] }, { name: 'layout', category: 'visual', values: ['default', 'col', 'row', 'grid', 'center', 'aside'], status: 'candidate' }, { name: 'withHeaderOffset', category: 'visual', status: 'specific' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+      {
+        name: 'size',
+        category: 'structural',
+        values: ['default', 'xs', 'sm', 'md', 'lg', 'xl', 'full'],
+      },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['default', 'col', 'row', 'grid', 'center', 'aside'],
+        status: 'candidate',
+      },
+      { name: 'withHeaderOffset', category: 'visual', status: 'specific' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -806,7 +981,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Dl: {
     name: 'Dl',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -818,7 +997,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Dt: {
     name: 'Dt',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -842,7 +1025,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Fieldset: {
     name: 'Fieldset',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -854,7 +1041,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Figcaption: {
     name: 'Figcaption',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -866,7 +1057,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Figure: {
     name: 'Figure',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -926,11 +1121,35 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   FlowConnector: {
     name: 'FlowConnector',
     level: 'atom',
-    tokens: [{ name: 'fromSide', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'specific' }, { name: 'toSide', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'specific' }, { name: 'pathStyle', category: 'visual', values: ['smooth', 'angular'], status: 'specific' }],
+    tokens: [
+      {
+        name: 'fromSide',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'specific',
+      },
+      {
+        name: 'toSide',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'specific',
+      },
+      { name: 'pathStyle', category: 'visual', values: ['smooth', 'angular'], status: 'specific' },
+    ],
     props: [
-      { name: 'fromSide', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
-      { name: 'toSide', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
-      { name: 'pathStyle', type: '\'smooth\' | \'angular\'', required: false, isDesignToken: true },
+      {
+        name: 'fromSide',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
+      {
+        name: 'toSide',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'pathStyle', type: "'smooth' | 'angular'", required: false, isDesignToken: true },
       { name: 'rounded', type: 'boolean', required: false, isDesignToken: false },
       { name: 'cornerRadius', type: 'number', required: false, isDesignToken: false },
       { name: 'strokeWidth', type: 'number', required: false, isDesignToken: false },
@@ -947,7 +1166,14 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Footer: {
     name: 'Footer',
     level: 'atom',
-    tokens: [{ name: 'layout', category: 'visual', values: ['simple', 'columns', 'stacked'], status: 'candidate' }],
+    tokens: [
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['simple', 'columns', 'stacked'],
+        status: 'candidate',
+      },
+    ],
     props: [
       { name: 'appName', type: 'string', required: false, isDesignToken: false },
       { name: 'creator', type: 'ReactNode', required: false, isDesignToken: false },
@@ -958,7 +1184,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'centerContent', type: 'ReactNode', required: false, isDesignToken: false },
       { name: 'rightContent', type: 'ReactNode', required: false, isDesignToken: false },
       { name: 'bottomContent', type: 'ReactNode', required: false, isDesignToken: false },
-      { name: 'layout', type: '\'simple\' | \'columns\' | \'stacked\'', required: false, isDesignToken: true },
+      {
+        name: 'layout',
+        type: "'simple' | 'columns' | 'stacked'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'containerClassName', type: 'string', required: false, isDesignToken: false },
       { name: 'mobileBreakpoint', type: 'number', required: false, isDesignToken: false },
       { name: 'stackOnMobile', type: 'boolean', required: false, isDesignToken: false },
@@ -980,7 +1211,18 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   FooterTag: {
     name: 'FooterTag',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural', values: ['xs', 'sm', 'xl', 'full', 'default'] }, { name: 'intent', category: 'structural' }, { name: 'layout', category: 'visual', values: ['default', 'centered', 'spaced'], status: 'candidate' }, { name: 'withFixedMobilebar', category: 'visual', status: 'specific' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'xl', 'full', 'default'] },
+      { name: 'intent', category: 'structural' },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['default', 'centered', 'spaced'],
+        status: 'candidate',
+      },
+      { name: 'withFixedMobilebar', category: 'visual', status: 'specific' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1052,7 +1294,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   H1: {
     name: 'H1',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1064,7 +1309,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   H2: {
     name: 'H2',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1076,7 +1324,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   H3: {
     name: 'H3',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1088,7 +1339,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   H4: {
     name: 'H4',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1100,7 +1354,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   H5: {
     name: 'H5',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1112,7 +1369,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   H6: {
     name: 'H6',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1148,21 +1408,60 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   ImageCropper: {
     name: 'ImageCropper',
     level: 'atom',
-    tokens: [{ name: 'mode', category: 'visual', values: ['pan-zoom', 'edge-drag', 'round'], status: 'specific' }, { name: 'outputFormat', category: 'visual', values: ['image/png', 'image/jpeg'], status: 'specific' }, { name: 'cropShape', category: 'visual', values: ['rect', 'round'], status: 'specific' }],
+    tokens: [
+      {
+        name: 'mode',
+        category: 'visual',
+        values: ['pan-zoom', 'edge-drag', 'round'],
+        status: 'specific',
+      },
+      {
+        name: 'outputFormat',
+        category: 'visual',
+        values: ['image/png', 'image/jpeg'],
+        status: 'specific',
+      },
+      { name: 'cropShape', category: 'visual', values: ['rect', 'round'], status: 'specific' },
+    ],
     props: [
       { name: 'src', type: 'string', required: true, isDesignToken: false },
-      { name: 'onCropComplete', type: '(croppedDataUrl: string, croppedFile: File) => void', required: true, isDesignToken: false },
+      {
+        name: 'onCropComplete',
+        type: '(croppedDataUrl: string, croppedFile: File) => void',
+        required: true,
+        isDesignToken: false,
+      },
       { name: 'onCancel', type: '() => void', required: false, isDesignToken: false },
-      { name: 'mode', type: '\'pan-zoom\' | \'edge-drag\' | \'round\'', required: false, isDesignToken: true },
-      { name: 'initialCrop', type: '{ top: number; left: number; bottom: number; right: number }', required: false, isDesignToken: false },
+      {
+        name: 'mode',
+        type: "'pan-zoom' | 'edge-drag' | 'round'",
+        required: false,
+        isDesignToken: true,
+      },
+      {
+        name: 'initialCrop',
+        type: '{ top: number; left: number; bottom: number; right: number }',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'aspectRatio', type: 'number', required: false, isDesignToken: false },
-      { name: 'aspectPresets', type: 'Array<{ label: string; value: number | undefined }>', required: false, isDesignToken: false },
+      {
+        name: 'aspectPresets',
+        type: 'Array<{ label: string; value: number | undefined }>',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'showRotation', type: 'boolean', required: false, isDesignToken: false },
       { name: 'showZoom', type: 'boolean', required: false, isDesignToken: false },
       { name: 'maxOutputWidth', type: 'number', required: false, isDesignToken: false },
       { name: 'outputQuality', type: 'number', required: false, isDesignToken: false },
-      { name: 'outputFormat', type: '\'image/png\' | \'image/jpeg\'', required: false, isDesignToken: true },
-      { name: 'cropShape', type: '\'rect\' | \'round\'', required: false, isDesignToken: true },
+      {
+        name: 'outputFormat',
+        type: "'image/png' | 'image/jpeg'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'cropShape', type: "'rect' | 'round'", required: false, isDesignToken: true },
       { name: 'themeColor', type: 'string', required: false, isDesignToken: false },
       { name: 'labels', type: '{', required: false, isDesignToken: false },
       { name: 'apply', type: 'string', required: false, isDesignToken: false },
@@ -1193,16 +1492,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   InfiniteMovingCards: {
     name: 'InfiniteMovingCards',
     level: 'atom',
-    tokens: [{ name: 'direction', category: 'visual', values: ['left', 'right'], status: 'candidate' }, { name: 'speed', category: 'visual', values: ['fast', 'normal', 'slow'], status: 'specific' }],
+    tokens: [
+      { name: 'direction', category: 'visual', values: ['left', 'right'], status: 'candidate' },
+      { name: 'speed', category: 'visual', values: ['fast', 'normal', 'slow'], status: 'specific' },
+    ],
     props: [
-      { name: 'direction', type: '\'left\' | \'right\'', required: false, isDesignToken: true },
-      { name: 'speed', type: '\'fast\' | \'normal\' | \'slow\'', required: false, isDesignToken: true },
+      { name: 'direction', type: "'left' | 'right'", required: false, isDesignToken: true },
+      { name: 'speed', type: "'fast' | 'normal' | 'slow'", required: false, isDesignToken: true },
       { name: 'pauseOnHover', type: 'boolean', required: false, isDesignToken: false },
     ],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component with direction, speed tokens',
@@ -1211,7 +1511,13 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Input: {
     name: 'Input',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] }, { name: 'density', category: 'structural' }, { name: 'radius', category: 'structural' }, { name: 'variant', category: 'visual', values: ['default', 'filled', 'ghost'] }, { name: 'intent', category: 'structural', values: ['default', 'destructive', 'success'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] },
+      { name: 'density', category: 'structural' },
+      { name: 'radius', category: 'structural' },
+      { name: 'variant', category: 'visual', values: ['default', 'filled', 'ghost'] },
+      { name: 'intent', category: 'structural', values: ['default', 'destructive', 'success'] },
+    ],
     props: [
       { name: 'startIcon', type: 'React.ReactNode', required: false, isDesignToken: false },
       { name: 'endIcon', type: 'React.ReactNode', required: false, isDesignToken: false },
@@ -1298,10 +1604,21 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   LandingStats: {
     name: 'LandingStats',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'centered', 'grid', 'inline', 'cards'] }],
+    tokens: [
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'centered', 'grid', 'inline', 'cards'],
+      },
+    ],
     props: [
       { name: 'stats', type: 'Stat[]', required: true, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'centered\' | \'grid\' | \'inline\' | \'cards\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'centered' | 'grid' | 'inline' | 'cards'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'animated', type: 'boolean', required: false, isDesignToken: false },
       { name: 'title', type: 'string', required: false, isDesignToken: false },
       { name: 'description', type: 'string', required: false, isDesignToken: false },
@@ -1316,7 +1633,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Legend: {
     name: 'Legend',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1328,7 +1649,24 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   LI: {
     name: 'LI',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural', values: ['default', 'xs', 'sm'] }, { name: 'layout', category: 'visual', values: ['default', 'col', 'row', 'grid', 'center', 'menu'], status: 'candidate' }, { name: 'button', category: 'visual', status: 'specific' }, { name: 'marker', category: 'visual', values: ['default', 'check', 'arrow', 'dash'], status: 'specific' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural', values: ['default', 'xs', 'sm'] },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['default', 'col', 'row', 'grid', 'center', 'menu'],
+        status: 'candidate',
+      },
+      { name: 'button', category: 'visual', status: 'specific' },
+      {
+        name: 'marker',
+        category: 'visual',
+        values: ['default', 'check', 'arrow', 'dash'],
+        status: 'specific',
+      },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1352,7 +1690,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Main: {
     name: 'Main',
     level: 'atom',
-    tokens: [{ name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }, { name: 'withHeaderOffset', category: 'visual', status: 'specific' }],
+    tokens: [
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+      { name: 'withHeaderOffset', category: 'visual', status: 'specific' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1381,7 +1723,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'isOpen', type: 'boolean', required: true, isDesignToken: false },
       { name: 'onClose', type: '() => void', required: true, isDesignToken: false },
       { name: 'navigationItems', type: 'NavigationLink[]', required: true, isDesignToken: false },
-      { name: 'LinkComponent', type: 'React.ComponentType<any> | string', required: false, isDesignToken: false },
+      {
+        name: 'LinkComponent',
+        type: 'React.ComponentType<any> | string',
+        required: false,
+        isDesignToken: false,
+      },
     ],
     children: [],
     slots: [],
@@ -1393,7 +1740,18 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Nav: {
     name: 'Nav',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'density', category: 'structural' }, { name: 'size', category: 'structural', values: ['none', 'xs', 'full'] }, { name: 'layout', category: 'visual', values: ['default', 'col', 'row', 'center'], status: 'candidate' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'density', category: 'structural' },
+      { name: 'size', category: 'structural', values: ['none', 'xs', 'full'] },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['default', 'col', 'row', 'center'],
+        status: 'candidate',
+      },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1429,7 +1787,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   P: {
     name: 'P',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural' }, { name: 'intent', category: 'structural' }, { name: 'weight', category: 'visual', values: ['normal', 'medium', 'semibold', 'bold'], status: 'specific' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural' },
+      { name: 'intent', category: 'structural' },
+      {
+        name: 'weight',
+        category: 'visual',
+        values: ['normal', 'medium', 'semibold', 'bold'],
+        status: 'specific',
+      },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1441,7 +1809,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Pre: {
     name: 'Pre',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1465,7 +1837,22 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Section: {
     name: 'Section',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'primary'] }, { name: 'size', category: 'structural', values: ['default', 'narrow', 'xs', 'sm', 'md', 'lg', 'xl', 'full'] }, { name: 'intent', category: 'structural' }, { name: 'layout', category: 'visual', values: ['col', 'grid', 'center'], status: 'candidate' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual', values: ['default', 'primary'] },
+      {
+        name: 'size',
+        category: 'structural',
+        values: ['default', 'narrow', 'xs', 'sm', 'md', 'lg', 'xl', 'full'],
+      },
+      { name: 'intent', category: 'structural' },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['col', 'grid', 'center'],
+        status: 'candidate',
+      },
+      { name: 'density', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1562,9 +1949,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'SelectTrigger',
     level: 'atom',
     tokens: [{ name: 'size', category: 'structural', values: ['sm', 'default'] }],
-    props: [
-      { name: 'size', type: '\'sm\' | \'default\'', required: false, isDesignToken: true },
-    ],
+    props: [{ name: 'size', type: "'sm' | 'default'", required: false, isDesignToken: true }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -1601,9 +1986,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetClose: {
     name: 'SheetClose',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1619,9 +2018,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetContent: {
     name: 'SheetContent',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1637,9 +2050,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetDescription: {
     name: 'SheetDescription',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1655,9 +2082,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetFooter: {
     name: 'SheetFooter',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1673,9 +2114,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetHeader: {
     name: 'SheetHeader',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1691,9 +2146,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetOverlay: {
     name: 'SheetOverlay',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1709,9 +2178,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetPortal: {
     name: 'SheetPortal',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1727,9 +2210,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetTitle: {
     name: 'SheetTitle',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1745,9 +2242,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SheetTrigger: {
     name: 'SheetTrigger',
     level: 'atom',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
@@ -1764,9 +2275,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'SimpleBadge',
     level: 'atom',
     tokens: [],
-    props: [
-      { name: 'label', type: 'string', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'label', type: 'string', required: true, isDesignToken: false }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -1777,10 +2286,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SkeletonAvatar: {
     name: 'SkeletonAvatar',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural', values: ['xs', 'sm', 'md', 'lg', 'xl'] }, { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'md', 'lg', 'xl'] },
+      { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] },
+    ],
     props: [
-      { name: 'size', type: '\'xs\' | \'sm\' | \'md\' | \'lg\' | \'xl\'', required: false, isDesignToken: true },
-      { name: 'variant', type: '\'default\' | \'lighter\' | \'darker\' | \'shimmer\'', required: false, isDesignToken: true },
+      {
+        name: 'size',
+        type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
+        required: false,
+        isDesignToken: true,
+      },
+      {
+        name: 'variant',
+        type: "'default' | 'lighter' | 'darker' | 'shimmer'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: [],
     slots: [],
@@ -1792,13 +2314,21 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SkeletonCard: {
     name: 'SkeletonCard',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] }, { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] }],
+    tokens: [
+      { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] },
+      { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] },
+    ],
     props: [
       { name: 'showHeader', type: 'boolean', required: false, isDesignToken: false },
       { name: 'showFooter', type: 'boolean', required: false, isDesignToken: false },
       { name: 'lines', type: 'number', required: false, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'lighter\' | \'darker\' | \'shimmer\'', required: false, isDesignToken: true },
-      { name: 'size', type: '\'sm\' | \'default\' | \'lg\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'lighter' | 'darker' | 'shimmer'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'size', type: "'sm' | 'default' | 'lg'", required: false, isDesignToken: true },
     ],
     children: [],
     slots: [],
@@ -1810,11 +2340,18 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SkeletonForm: {
     name: 'SkeletonForm',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] }],
+    tokens: [
+      { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] },
+    ],
     props: [
       { name: 'fields', type: 'number', required: false, isDesignToken: false },
       { name: 'showButton', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'lighter\' | \'darker\' | \'shimmer\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'lighter' | 'darker' | 'shimmer'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: [],
     slots: [],
@@ -1826,11 +2363,18 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SkeletonList: {
     name: 'SkeletonList',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] }],
+    tokens: [
+      { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] },
+    ],
     props: [
       { name: 'items', type: 'number', required: false, isDesignToken: false },
       { name: 'showAvatar', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'lighter\' | \'darker\' | \'shimmer\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'lighter' | 'darker' | 'shimmer'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: [],
     slots: [],
@@ -1842,12 +2386,19 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SkeletonTable: {
     name: 'SkeletonTable',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] }],
+    tokens: [
+      { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] },
+    ],
     props: [
       { name: 'rows', type: 'number', required: false, isDesignToken: false },
       { name: 'cols', type: 'number', required: false, isDesignToken: false },
       { name: 'showHeader', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'lighter\' | \'darker\' | \'shimmer\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'lighter' | 'darker' | 'shimmer'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: [],
     slots: [],
@@ -1859,12 +2410,37 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   SkeletonText: {
     name: 'SkeletonText',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] }, { name: 'spacing', category: 'visual', values: ['tight', 'normal', 'loose'], status: 'candidate', deprecatedBy: 'density' }, { name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] }],
+    tokens: [
+      { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] },
+      {
+        name: 'spacing',
+        category: 'visual',
+        values: ['tight', 'normal', 'loose'],
+        status: 'candidate',
+        deprecatedBy: 'density',
+      },
+      { name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] },
+    ],
     props: [
       { name: 'lines', type: 'number', required: false, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'lighter\' | \'darker\' | \'shimmer\'', required: false, isDesignToken: true },
-      { name: 'spacing', type: '\'tight\' | \'normal\' | \'loose\'', required: false, isDesignToken: true },
-      { name: 'density', type: '\'compact\' | \'default\' | \'relaxed\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'lighter' | 'darker' | 'shimmer'",
+        required: false,
+        isDesignToken: true,
+      },
+      {
+        name: 'spacing',
+        type: "'tight' | 'normal' | 'loose'",
+        required: false,
+        isDesignToken: true,
+      },
+      {
+        name: 'density',
+        type: "'compact' | 'default' | 'relaxed'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: [],
     slots: [],
@@ -1877,13 +2453,9 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'SkipLink',
     level: 'atom',
     tokens: [],
-    props: [
-      { name: 'href', type: 'string', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'href', type: 'string', required: true, isDesignToken: false }],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component',
@@ -1892,7 +2464,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Small: {
     name: 'Small',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1904,7 +2480,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Span: {
     name: 'Span',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural' }, { name: 'intent', category: 'structural' }, { name: 'variant', category: 'visual' }, { name: 'layout', category: 'visual', status: 'candidate' }],
+    tokens: [
+      { name: 'size', category: 'structural' },
+      { name: 'intent', category: 'structural' },
+      { name: 'variant', category: 'visual' },
+      { name: 'layout', category: 'visual', status: 'candidate' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1928,13 +2509,40 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Spinner: {
     name: 'Spinner',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural', values: ['xs', 'sm', 'md', 'default', 'lg', 'xl'] }, { name: 'variant', category: 'visual', values: ['default', 'primary', 'secondary', 'accent', 'destructive', 'success', 'fancy'] }, { name: 'speed', category: 'visual', values: ['slow', 'normal', 'fast'], status: 'specific' }, { name: 'textSize', category: 'visual', values: ['xs', 'sm', 'md', 'lg'], status: 'specific', deprecatedBy: 'size' }, { name: 'fancyPulseSize', category: 'visual', values: ['xs', 'sm', 'md', 'default', 'lg', 'xl'], status: 'specific', deprecatedBy: 'size' }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'md', 'default', 'lg', 'xl'] },
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'primary', 'secondary', 'accent', 'destructive', 'success', 'fancy'],
+      },
+      { name: 'speed', category: 'visual', values: ['slow', 'normal', 'fast'], status: 'specific' },
+      {
+        name: 'textSize',
+        category: 'visual',
+        values: ['xs', 'sm', 'md', 'lg'],
+        status: 'specific',
+        deprecatedBy: 'size',
+      },
+      {
+        name: 'fancyPulseSize',
+        category: 'visual',
+        values: ['xs', 'sm', 'md', 'default', 'lg', 'xl'],
+        status: 'specific',
+        deprecatedBy: 'size',
+      },
+    ],
     props: [
       { name: 'size', type: 'SpinnerSize', required: false, isDesignToken: true },
-      { name: 'variant', type: '\'default\' | \'primary\' | \'secondary\' | \'accent\' | \'destructive\' | \'success\' | \'fancy\'', required: false, isDesignToken: true },
-      { name: 'speed', type: '\'slow\' | \'normal\' | \'fast\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'primary' | 'secondary' | 'accent' | 'destructive' | 'success' | 'fancy'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'speed', type: "'slow' | 'normal' | 'fast'", required: false, isDesignToken: true },
       { name: 'text', type: 'string', required: false, isDesignToken: false },
-      { name: 'textSize', type: '\'xs\' | \'sm\' | \'md\' | \'lg\'', required: false, isDesignToken: true },
+      { name: 'textSize', type: "'xs' | 'sm' | 'md' | 'lg'", required: false, isDesignToken: true },
       { name: 'textClassName', type: 'string', required: false, isDesignToken: false },
       { name: 'fullScreen', type: 'boolean', required: false, isDesignToken: false },
       { name: 'backdrop', type: 'boolean', required: false, isDesignToken: false },
@@ -1953,7 +2561,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     props: [
       { name: 'stepId', type: 'string', required: true, isDesignToken: false },
       { name: 'data', type: 'Record<string, unknown>', required: true, isDesignToken: false },
-      { name: 'updateData', type: '(newData: Record<string, unknown>) => void', required: true, isDesignToken: false },
+      {
+        name: 'updateData',
+        type: '(newData: Record<string, unknown>) => void',
+        required: true,
+        isDesignToken: false,
+      },
     ],
     children: [],
     slots: [],
@@ -1977,7 +2590,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Summary: {
     name: 'Summary',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural' },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -1989,7 +2606,14 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Switch: {
     name: 'Switch',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'success', 'destructive', 'outline'] }, { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] }],
+    tokens: [
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'success', 'destructive', 'outline'],
+      },
+      { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -2052,7 +2676,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     tokens: [],
     props: [
       { name: 'sortable', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'sortDirection', type: '\'asc\' | \'desc\' | null', required: false, isDesignToken: false },
+      {
+        name: 'sortDirection',
+        type: "'asc' | 'desc' | null",
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'onSort', type: '() => void', required: false, isDesignToken: false },
     ],
     children: [],
@@ -2078,9 +2707,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'TableRow',
     level: 'atom',
     tokens: [],
-    props: [
-      { name: 'highlighted', type: 'boolean', required: false, isDesignToken: false },
-    ],
+    props: [{ name: 'highlighted', type: 'boolean', required: false, isDesignToken: false }],
     children: [],
     slots: [],
     providesTokens: [],
@@ -2091,7 +2718,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   TabsContent: {
     name: 'TabsContent',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -2106,7 +2736,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   TabsList: {
     name: 'TabsList',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -2121,7 +2754,10 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   TabsTrigger: {
     name: 'TabsTrigger',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -2136,7 +2772,11 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   TextArea: {
     name: 'TextArea',
     level: 'atom',
-    tokens: [{ name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }, { name: 'radius', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+      { name: 'radius', category: 'structural' },
+    ],
     props: [
       { name: 'label', type: 'string', required: false, isDesignToken: false },
       { name: 'autoResize', type: 'boolean', required: false, isDesignToken: false },
@@ -2165,9 +2805,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'animate', type: 'boolean', required: false, isDesignToken: false },
     ],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component with direction token',
@@ -2183,9 +2821,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'autoScroll', type: 'boolean', required: false, isDesignToken: false },
     ],
     children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Atomic component',
@@ -2208,23 +2844,6 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     inheritsTokens: [],
     description: 'Atomic component',
     sourcePath: 'packages/ui/src/components/thread/ThreadHeader.tsx',
-  },
-  ThreadThemeProvider: {
-    name: 'ThreadThemeProvider',
-    level: 'atom',
-    tokens: [{ name: 'colorScheme', category: 'visual' }],
-    props: [
-      { name: 'colorScheme', type: 'ColorScheme', required: false, isDesignToken: true },
-      { name: 'customTheme', type: 'Partial<ThreadTheme>', required: false, isDesignToken: false },
-    ],
-    children: [],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
-    providesTokens: [],
-    inheritsTokens: [],
-    description: 'Atomic component with colorScheme token',
-    sourcePath: 'packages/ui/src/components/thread/ThreadThemeContext.tsx',
   },
   ThreadWelcome: {
     name: 'ThreadWelcome',
@@ -2257,9 +2876,16 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Toaster: {
     name: 'Toaster',
     level: 'atom',
-    tokens: [{ name: 'theme', category: 'visual', values: ['light', 'dark', 'system'], status: 'specific' }],
+    tokens: [
+      {
+        name: 'theme',
+        category: 'visual',
+        values: ['light', 'dark', 'system'],
+        status: 'specific',
+      },
+    ],
     props: [
-      { name: 'theme', type: '\'light\' | \'dark\' | \'system\'', required: false, isDesignToken: true },
+      { name: 'theme', type: "'light' | 'dark' | 'system'", required: false, isDesignToken: true },
     ],
     children: [],
     slots: [],
@@ -2340,7 +2966,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   UL: {
     name: 'UL',
     level: 'atom',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'intent', category: 'structural' }, { name: 'size', category: 'structural', values: ['default', 'xs', 'sm', 'md', 'lg', 'xl'] }, { name: 'layout', category: 'visual', values: ['default', 'col', 'row', 'grid', 'center', 'menu'], status: 'candidate' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'intent', category: 'structural' },
+      { name: 'size', category: 'structural', values: ['default', 'xs', 'sm', 'md', 'lg', 'xl'] },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['default', 'col', 'row', 'grid', 'center', 'menu'],
+        status: 'candidate',
+      },
+    ],
     props: [],
     children: [],
     slots: [],
@@ -2378,7 +3014,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'slide', type: 'SlideData', required: true, isDesignToken: false },
       { name: 'index', type: 'number', required: true, isDesignToken: false },
       { name: 'current', type: 'number', required: true, isDesignToken: false },
-      { name: 'handleSlideClick', type: '(index: number) => void', required: true, isDesignToken: false },
+      {
+        name: 'handleSlideClick',
+        type: '(index: number) => void',
+        required: true,
+        isDesignToken: false,
+      },
     ],
     children: ['Icon'],
     slots: [],
@@ -2390,9 +3031,17 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   AccordionTrigger: {
     name: 'AccordionTrigger',
     level: 'molecule',
-    tokens: [{ name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] },
+      { name: 'size', category: 'structural' },
+    ],
     props: [
-      { name: 'density', type: '\'compact\' | \'default\' | \'relaxed\'', required: false, isDesignToken: true },
+      {
+        name: 'density',
+        type: "'compact' | 'default' | 'relaxed'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
     ],
     children: ['Icon'],
@@ -2405,15 +3054,34 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   AlertDialog: {
     name: 'AlertDialog',
     level: 'molecule',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'actionButtonVariant', category: 'visual', values: ['default', 'destructive', 'warning', 'info'], status: 'specific', deprecatedBy: 'intent' }],
-    props: [
-      { name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true },
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      {
+        name: 'actionButtonVariant',
+        category: 'visual',
+        values: ['default', 'destructive', 'warning', 'info'],
+        status: 'specific',
+        deprecatedBy: 'intent',
+      },
     ],
-    children: ['AlertDialogAction', 'AlertDialogCancel', 'AlertDialogContent', 'AlertDialogDescription', 'AlertDialogFooter', 'AlertDialogHeader', 'AlertDialogOverlay', 'AlertDialogPortal', 'AlertDialogTitle', 'AlertDialogTrigger'],
+    props: [{ name: 'variant', type: 'AlertDialogVariant', required: false, isDesignToken: true }],
+    children: [
+      'AlertDialogAction',
+      'AlertDialogCancel',
+      'AlertDialogContent',
+      'AlertDialogDescription',
+      'AlertDialogFooter',
+      'AlertDialogHeader',
+      'AlertDialogOverlay',
+      'AlertDialogPortal',
+      'AlertDialogTitle',
+      'AlertDialogTrigger',
+    ],
     slots: [],
     providesTokens: ['density'],
     inheritsTokens: [],
-    description: 'Molecular component using AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertDialogPortal, AlertDialogTitle, AlertDialogTrigger — drills variant, actionButtonVariant to children',
+    description:
+      'Molecular component using AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertDialogPortal, AlertDialogTitle, AlertDialogTrigger — drills variant, actionButtonVariant to children',
     sourcePath: 'packages/ui/src/components/feedback/alert-dialog.tsx',
   },
   AnimatedIconToggle: {
@@ -2451,26 +3119,64 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Card: {
     name: 'Card',
     level: 'molecule',
-    tokens: [{ name: 'density', category: 'structural' }, { name: 'radius', category: 'structural' }, { name: 'variant', category: 'visual', values: ['default', 'outline', 'ghost', 'floating', 'dark', 'premium', 'elevated'] }, { name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] }, { name: 'interactive', category: 'visual', status: 'candidate' }, { name: 'hover', category: 'visual', values: ['none', 'lift', 'glow', 'border', 'scale'], status: 'candidate' }],
+    tokens: [
+      { name: 'density', category: 'structural' },
+      { name: 'radius', category: 'structural' },
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'outline', 'ghost', 'floating', 'dark', 'premium', 'elevated'],
+      },
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'default', 'lg', 'xl'] },
+      { name: 'interactive', category: 'visual', status: 'candidate' },
+      {
+        name: 'hover',
+        category: 'visual',
+        values: ['none', 'lift', 'glow', 'border', 'scale'],
+        status: 'candidate',
+      },
+    ],
     props: [
       { name: 'density', type: 'DensityValue', required: false, isDesignToken: true },
       { name: 'radius', type: 'RadiusValue', required: false, isDesignToken: true },
     ],
-    children: ['CardAction', 'CardContent', 'CardDescription', 'CardFooter', 'CardHeader', 'CardTitle'],
+    children: [
+      'CardAction',
+      'CardContent',
+      'CardDescription',
+      'CardFooter',
+      'CardHeader',
+      'CardTitle',
+    ],
     slots: [],
     providesTokens: ['size', 'density', 'radius'],
     inheritsTokens: [],
-    description: 'Molecular component using CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle — drills density, radius, variant, size, interactive, hover to children',
+    description:
+      'Molecular component using CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle — drills density, radius, variant, size, interactive, hover to children',
     sourcePath: 'packages/ui/src/components/data-display/card.tsx',
   },
   CarouselNext: {
     name: 'CarouselNext',
     level: 'molecule',
-    tokens: [{ name: 'orientation', category: 'visual', values: ['horizontal', 'vertical'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'orientation',
+        category: 'visual',
+        values: ['horizontal', 'vertical'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'opts', type: 'CarouselOptions', required: false, isDesignToken: false },
       { name: 'plugins', type: 'CarouselPlugin', required: false, isDesignToken: false },
-      { name: 'orientation', type: '\'horizontal\' | \'vertical\'', required: false, isDesignToken: true },
+      {
+        name: 'orientation',
+        type: "'horizontal' | 'vertical'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'setApi', type: '(api: CarouselApi) => void', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -2485,11 +3191,25 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CarouselPrevious: {
     name: 'CarouselPrevious',
     level: 'molecule',
-    tokens: [{ name: 'orientation', category: 'visual', values: ['horizontal', 'vertical'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'orientation',
+        category: 'visual',
+        values: ['horizontal', 'vertical'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'opts', type: 'CarouselOptions', required: false, isDesignToken: false },
       { name: 'plugins', type: 'CarouselPlugin', required: false, isDesignToken: false },
-      { name: 'orientation', type: '\'horizontal\' | \'vertical\'', required: false, isDesignToken: true },
+      {
+        name: 'orientation',
+        type: "'horizontal' | 'vertical'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'setApi', type: '(api: CarouselApi) => void', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -2505,13 +3225,9 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'ChartLegend',
     level: 'molecule',
     tokens: [],
-    props: [
-      { name: 'config', type: 'ChartConfig', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'config', type: 'ChartConfig', required: true, isDesignToken: false }],
     children: ['ChartLegendContent'],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Molecular component using ChartLegendContent',
@@ -2520,11 +3236,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   ChartTooltip: {
     name: 'ChartTooltip',
     level: 'molecule',
-    tokens: [{ name: 'indicator', category: 'visual', values: ['line', 'dot', 'dashed'], status: 'candidate' }],
+    tokens: [
+      {
+        name: 'indicator',
+        category: 'visual',
+        values: ['line', 'dot', 'dashed'],
+        status: 'candidate',
+      },
+    ],
     props: [
       { name: 'hideLabel', type: 'boolean', required: false, isDesignToken: false },
       { name: 'hideIndicator', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'indicator', type: '\'line\' | \'dot\' | \'dashed\'', required: false, isDesignToken: true },
+      {
+        name: 'indicator',
+        type: "'line' | 'dot' | 'dashed'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'nameKey', type: 'string', required: false, isDesignToken: false },
       { name: 'labelKey', type: 'string', required: false, isDesignToken: false },
     ],
@@ -2539,9 +3267,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'Checkbox',
     level: 'molecule',
     tokens: [],
-    props: [
-      { name: 'label', type: 'string', required: false, isDesignToken: false },
-    ],
+    props: [{ name: 'label', type: 'string', required: false, isDesignToken: false }],
     children: ['Label', 'Span'],
     slots: [],
     providesTokens: [],
@@ -2556,7 +3282,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     props: [
       { name: 'variable', type: 'ThemeVariable', required: true, isDesignToken: false },
       { name: 'value', type: 'string', required: true, isDesignToken: false },
-      { name: 'onChange', type: '(varName: string, value: string) => void', required: true, isDesignToken: false },
+      {
+        name: 'onChange',
+        type: '(varName: string, value: string) => void',
+        required: true,
+        isDesignToken: false,
+      },
       { name: 'onReset', type: '(varName: string) => void', required: false, isDesignToken: false },
       { name: 'showReset', type: 'boolean', required: false, isDesignToken: false },
     ],
@@ -2579,9 +3310,24 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'unread', type: 'boolean', required: false, isDesignToken: false },
       { name: 'isActive', type: 'boolean', required: true, isDesignToken: false },
       { name: 'onSelect', type: '(id: string) => void', required: true, isDesignToken: false },
-      { name: 'onRename', type: '(id: string, newTitle: string) => void | Promise<void>', required: false, isDesignToken: false },
-      { name: 'onDelete', type: '(id: string) => void | Promise<void>', required: false, isDesignToken: false },
-      { name: 'formatTimestamp', type: '(date?: Date) => string', required: true, isDesignToken: false },
+      {
+        name: 'onRename',
+        type: '(id: string, newTitle: string) => void | Promise<void>',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'onDelete',
+        type: '(id: string) => void | Promise<void>',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'formatTimestamp',
+        type: '(date?: Date) => string',
+        required: true,
+        isDesignToken: false,
+      },
     ],
     children: ['Icon'],
     slots: [],
@@ -2593,23 +3339,67 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   CTA: {
     name: 'CTA',
     level: 'molecule',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'centered', 'split', 'minimal', 'gradient', 'bordered'] }, { name: 'bgColor', category: 'visual', values: ['default', 'primary', 'muted'], status: 'specific', deprecatedBy: 'intent' }, { name: 'intent', category: 'structural', values: ['default', 'primary'] }, { name: 'container', category: 'visual', values: ['default', 'centered', 'split', 'minimal', 'gradient', 'bordered'], status: 'specific' }, { name: 'content', category: 'visual', values: ['default', 'centered', 'split', 'minimal', 'gradient', 'bordered'], status: 'specific' }, { name: 'title', category: 'visual', values: ['default', 'minimal'], status: 'specific' }, { name: 'buttons', category: 'visual', values: ['default', 'centered', 'split'], status: 'specific' }],
+    tokens: [
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'centered', 'split', 'minimal', 'gradient', 'bordered'],
+      },
+      {
+        name: 'bgColor',
+        category: 'visual',
+        values: ['default', 'primary', 'muted'],
+        status: 'specific',
+        deprecatedBy: 'intent',
+      },
+      { name: 'intent', category: 'structural', values: ['default', 'primary'] },
+      {
+        name: 'container',
+        category: 'visual',
+        values: ['default', 'centered', 'split', 'minimal', 'gradient', 'bordered'],
+        status: 'specific',
+      },
+      {
+        name: 'content',
+        category: 'visual',
+        values: ['default', 'centered', 'split', 'minimal', 'gradient', 'bordered'],
+        status: 'specific',
+      },
+      { name: 'title', category: 'visual', values: ['default', 'minimal'], status: 'specific' },
+      {
+        name: 'buttons',
+        category: 'visual',
+        values: ['default', 'centered', 'split'],
+        status: 'specific',
+      },
+    ],
     props: [
-      { name: 'variant', type: '\'default\' | \'centered\' | \'split\' | \'minimal\' | \'gradient\' | \'bordered\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'centered' | 'split' | 'minimal' | 'gradient' | 'bordered'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'title', type: 'string', required: true, isDesignToken: false },
       { name: 'description', type: 'string', required: false, isDesignToken: false },
       { name: 'primaryText', type: 'string', required: true, isDesignToken: false },
       { name: 'primaryHref', type: 'string', required: false, isDesignToken: false },
       { name: 'secondaryText', type: 'string', required: false, isDesignToken: false },
       { name: 'secondaryHref', type: 'string', required: false, isDesignToken: false },
-      { name: 'bgColor', type: '\'default\' | \'primary\' | \'muted\'', required: false, isDesignToken: true },
-      { name: 'intent', type: '\'default\' | \'primary\'', required: false, isDesignToken: true },
+      {
+        name: 'bgColor',
+        type: "'default' | 'primary' | 'muted'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'intent', type: "'default' | 'primary'", required: false, isDesignToken: true },
     ],
     children: ['Button'],
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Molecular component using Button — drills variant, bgColor, intent, container, content, title, buttons to children',
+    description:
+      'Molecular component using Button — drills variant, bgColor, intent, container, content, title, buttons to children',
     sourcePath: 'packages/ui/src/components/landing/cta.tsx',
   },
   DataTableColumnHeader: {
@@ -2631,9 +3421,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     name: 'DataTablePagination',
     level: 'molecule',
     tokens: [],
-    props: [
-      { name: 'table', type: 'TanstackTable<TData>', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'table', type: 'TanstackTable<TData>', required: true, isDesignToken: false }],
     children: ['Button'],
     slots: [],
     providesTokens: [],
@@ -2644,30 +3432,62 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Dialog: {
     name: 'Dialog',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural', values: ['sm', 'md', 'default', 'lg', 'xl', 'full'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['sm', 'md', 'default', 'lg', 'xl', 'full'] },
+    ],
     props: [],
-    children: ['DialogClose', 'DialogContent', 'DialogDescription', 'DialogFooter', 'DialogHeader', 'DialogOverlay', 'DialogPortal', 'DialogTitle', 'DialogTrigger'],
+    children: [
+      'DialogClose',
+      'DialogContent',
+      'DialogDescription',
+      'DialogFooter',
+      'DialogHeader',
+      'DialogOverlay',
+      'DialogPortal',
+      'DialogTitle',
+      'DialogTrigger',
+    ],
     slots: [],
     providesTokens: ['radius'],
     inheritsTokens: [],
-    description: 'Molecular component using DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger — drills size to children',
+    description:
+      'Molecular component using DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger — drills size to children',
     sourcePath: 'packages/ui/src/components/overlay/dialog.tsx',
   },
   Dropdown: {
     name: 'Dropdown',
     level: 'molecule',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'align', category: 'visual', values: ['start', 'center', 'end'], status: 'candidate' }, { name: 'side', category: 'visual', values: ['top', 'bottom'], status: 'radix' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      {
+        name: 'align',
+        category: 'visual',
+        values: ['start', 'center', 'end'],
+        status: 'candidate',
+      },
+      { name: 'side', category: 'visual', values: ['top', 'bottom'], status: 'radix' },
+    ],
     props: [
       { name: 'label', type: 'React.ReactNode', required: false, isDesignToken: false },
       { name: 'trigger', type: 'React.ReactNode', required: false, isDesignToken: false },
       { name: 'items', type: 'DropdownItem[]', required: true, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'ghost\' | \'secondary\' | \'outline\' | \'destructive\' | \'link\' | null', required: false, isDesignToken: true },
-      { name: 'align', type: '\'start\' | \'center\' | \'end\'', required: false, isDesignToken: true },
-      { name: 'side', type: '\'top\' | \'bottom\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'ghost' | 'secondary' | 'outline' | 'destructive' | 'link' | null",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'align', type: "'start' | 'center' | 'end'", required: false, isDesignToken: true },
+      { name: 'side', type: "'top' | 'bottom'", required: false, isDesignToken: true },
       { name: 'fullWidth', type: 'boolean', required: false, isDesignToken: false },
       { name: 'menuClassName', type: 'string', required: false, isDesignToken: false },
       { name: 'open', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'onOpenChange', type: '(open: boolean) => void', required: false, isDesignToken: false },
+      {
+        name: 'onOpenChange',
+        type: '(open: boolean) => void',
+        required: false,
+        isDesignToken: false,
+      },
     ],
     children: ['Button', 'LI', 'UL'],
     slots: [
@@ -2676,16 +3496,24 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     ],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Molecular component using Button, LI, UL — drills variant, align, side to children',
+    description:
+      'Molecular component using Button, LI, UL — drills variant, align, side to children',
     sourcePath: 'packages/ui/src/components/navigation/dropdown.tsx',
   },
   FloatingPanel: {
     name: 'FloatingPanel',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural', values: ['sm', 'md', 'default', 'lg', 'xl', 'full'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['sm', 'md', 'default', 'lg', 'xl', 'full'] },
+    ],
     props: [
       { name: 'title', type: 'React.ReactNode', required: false, isDesignToken: false },
-      { name: 'defaultPosition', type: '{ x: number; y: number }', required: false, isDesignToken: false },
+      {
+        name: 'defaultPosition',
+        type: '{ x: number; y: number }',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'closable', type: 'boolean', required: false, isDesignToken: false },
       { name: 'onClose', type: '() => void', required: false, isDesignToken: false },
       { name: 'minimizable', type: 'boolean', required: false, isDesignToken: false },
@@ -2693,13 +3521,18 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'open', type: 'boolean', required: false, isDesignToken: false },
       { name: 'draggable', type: 'boolean', required: false, isDesignToken: false },
     ],
-    children: ['Button', 'FloatingPanelDescription', 'FloatingPanelFooter', 'FloatingPanelHeader', 'FloatingPanelTitle'],
-    slots: [
-      { name: 'title', required: false, isRenderProp: false, expectedComponents: [] },
+    children: [
+      'Button',
+      'FloatingPanelDescription',
+      'FloatingPanelFooter',
+      'FloatingPanelHeader',
+      'FloatingPanelTitle',
     ],
+    slots: [{ name: 'title', required: false, isRenderProp: false, expectedComponents: [] }],
     providesTokens: ['size'],
     inheritsTokens: [],
-    description: 'Molecular component using Button, FloatingPanelDescription, FloatingPanelFooter, FloatingPanelHeader, FloatingPanelTitle — drills size to children',
+    description:
+      'Molecular component using Button, FloatingPanelDescription, FloatingPanelFooter, FloatingPanelHeader, FloatingPanelTitle — drills size to children',
     sourcePath: 'packages/ui/src/components/overlay/floating-panel.tsx',
   },
   FormField: {
@@ -2729,7 +3562,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Header: {
     name: 'Header',
     level: 'molecule',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'size', category: 'structural', values: ['xs', 'sm', 'xl', 'full', 'default'] }, { name: 'intent', category: 'structural' }, { name: 'layout', category: 'visual', values: ['default', 'centered', 'spaced'], status: 'candidate' }, { name: 'position', category: 'visual', values: ['static', 'sticky', 'fixed', 'absolute'], status: 'candidate' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'size', category: 'structural', values: ['xs', 'sm', 'xl', 'full', 'default'] },
+      { name: 'intent', category: 'structural' },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['default', 'centered', 'spaced'],
+        status: 'candidate',
+      },
+      {
+        name: 'position',
+        category: 'visual',
+        values: ['static', 'sticky', 'fixed', 'absolute'],
+        status: 'candidate',
+      },
+    ],
     props: [],
     children: ['Div'],
     slots: [],
@@ -2741,13 +3590,52 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Hero: {
     name: 'Hero',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural', values: ['sm', 'md', 'lg', 'xl', 'full'] }, { name: 'layout', category: 'visual', values: ['center', 'grid'], status: 'candidate' }, { name: 'mediaPosition', category: 'visual', values: ['left', 'right'], status: 'specific' }, { name: 'brightness', category: 'visual', values: ['light', 'dark', 'auto'], status: 'specific' }, { name: 'align', category: 'visual', values: ['left', 'center', 'right'], status: 'candidate' }, { name: 'height', category: 'visual', values: ['sm', 'md', 'lg', 'viewport', 'auto'], status: 'specific' }, { name: 'alignment', category: 'visual', values: ['left', 'center', 'right'], status: 'specific', deprecatedBy: 'align' }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['sm', 'md', 'lg', 'xl', 'full'] },
+      { name: 'layout', category: 'visual', values: ['center', 'grid'], status: 'candidate' },
+      { name: 'mediaPosition', category: 'visual', values: ['left', 'right'], status: 'specific' },
+      {
+        name: 'brightness',
+        category: 'visual',
+        values: ['light', 'dark', 'auto'],
+        status: 'specific',
+      },
+      {
+        name: 'align',
+        category: 'visual',
+        values: ['left', 'center', 'right'],
+        status: 'candidate',
+      },
+      {
+        name: 'height',
+        category: 'visual',
+        values: ['sm', 'md', 'lg', 'viewport', 'auto'],
+        status: 'specific',
+      },
+      {
+        name: 'alignment',
+        category: 'visual',
+        values: ['left', 'center', 'right'],
+        status: 'specific',
+        deprecatedBy: 'align',
+      },
+    ],
     props: [
-      { name: 'alignment', type: '\'left\' | \'center\' | \'right\' | null', required: false, isDesignToken: false },
+      {
+        name: 'alignment',
+        type: "'left' | 'center' | 'right' | null",
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'id', type: 'string', required: false, isDesignToken: false },
-      { name: 'size', type: '\'sm\' | \'md\' | \'lg\' | \'xl\' | \'full\'', required: false, isDesignToken: true },
-      { name: 'layout', type: '\'center\' | \'grid\'', required: false, isDesignToken: true },
-      { name: 'mediaPosition', type: '\'left\' | \'right\'', required: false, isDesignToken: true },
+      {
+        name: 'size',
+        type: "'sm' | 'md' | 'lg' | 'xl' | 'full'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'layout', type: "'center' | 'grid'", required: false, isDesignToken: true },
+      { name: 'mediaPosition', type: "'left' | 'right'", required: false, isDesignToken: true },
       { name: 'videoSrc', type: 'string', required: false, isDesignToken: false },
       { name: 'posterSrc', type: 'string', required: false, isDesignToken: false },
       { name: 'imageSrc', type: 'string', required: false, isDesignToken: false },
@@ -2757,8 +3645,13 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'paragraph', type: 'React.ReactNode', required: false, isDesignToken: false },
       { name: 'overlay', type: 'boolean', required: false, isDesignToken: false },
       { name: 'overlayOpacity', type: 'number', required: false, isDesignToken: false },
-      { name: 'brightness', type: '\'light\' | \'dark\' | \'auto\'', required: false, isDesignToken: true },
-      { name: 'align', type: '\'left\' | \'center\' | \'right\'', required: false, isDesignToken: true },
+      {
+        name: 'brightness',
+        type: "'light' | 'dark' | 'auto'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'align', type: "'left' | 'center' | 'right'", required: false, isDesignToken: true },
     ],
     children: ['H1', 'P', 'Section', 'Div'],
     slots: [
@@ -2769,7 +3662,8 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     ],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Molecular component using H1, P, Section, Div — drills size, layout, mediaPosition, brightness, align, height, alignment to children',
+    description:
+      'Molecular component using H1, P, Section, Div — drills size, layout, mediaPosition, brightness, align, height, alignment to children',
     sourcePath: 'packages/ui/src/components/effects/hero.tsx',
   },
   IconGallery: {
@@ -2794,9 +3688,80 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   LandingHero: {
     name: 'LandingHero',
     level: 'molecule',
-    tokens: [{ name: 'variant', category: 'visual' }, { name: 'bgMode', category: 'visual', values: ['scroll', 'fixed'], status: 'specific' }, { name: 'container', category: 'visual', values: ['default', 'withImage', 'withVideo', 'withGradient', 'split', 'minimal', 'centered', 'withStats', 'withSearch', 'full'], status: 'specific' }, { name: 'contentWrapper', category: 'visual', values: ['default', 'withImage', 'withVideo', 'withGradient', 'split', 'minimal', 'centered', 'withStats', 'withSearch', 'full'], status: 'specific' }, { name: 'title', category: 'visual', values: ['default', 'withImage', 'withVideo', 'withGradient', 'split', 'minimal', 'centered', 'withStats', 'withSearch', 'full'], status: 'specific' }, { name: 'description', category: 'visual', values: ['default', 'withImage', 'withVideo', 'withGradient', 'split', 'minimal', 'centered', 'withStats', 'withSearch', 'full'], status: 'specific' }],
+    tokens: [
+      { name: 'variant', category: 'visual' },
+      { name: 'bgMode', category: 'visual', values: ['scroll', 'fixed'], status: 'specific' },
+      {
+        name: 'container',
+        category: 'visual',
+        values: [
+          'default',
+          'withImage',
+          'withVideo',
+          'withGradient',
+          'split',
+          'minimal',
+          'centered',
+          'withStats',
+          'withSearch',
+          'full',
+        ],
+        status: 'specific',
+      },
+      {
+        name: 'contentWrapper',
+        category: 'visual',
+        values: [
+          'default',
+          'withImage',
+          'withVideo',
+          'withGradient',
+          'split',
+          'minimal',
+          'centered',
+          'withStats',
+          'withSearch',
+          'full',
+        ],
+        status: 'specific',
+      },
+      {
+        name: 'title',
+        category: 'visual',
+        values: [
+          'default',
+          'withImage',
+          'withVideo',
+          'withGradient',
+          'split',
+          'minimal',
+          'centered',
+          'withStats',
+          'withSearch',
+          'full',
+        ],
+        status: 'specific',
+      },
+      {
+        name: 'description',
+        category: 'visual',
+        values: [
+          'default',
+          'withImage',
+          'withVideo',
+          'withGradient',
+          'split',
+          'minimal',
+          'centered',
+          'withStats',
+          'withSearch',
+          'full',
+        ],
+        status: 'specific',
+      },
+    ],
     props: [
-      { name: 'variant', type: '| \'default\'', required: false, isDesignToken: true },
+      { name: 'variant', type: "| 'default'", required: false, isDesignToken: true },
       { name: 'title', type: 'string', required: true, isDesignToken: false },
       { name: 'description', type: 'string', required: true, isDesignToken: false },
       { name: 'primaryCTA', type: 'string', required: false, isDesignToken: false },
@@ -2806,16 +3771,20 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'badge', type: 'string', required: false, isDesignToken: false },
       { name: 'image', type: 'string', required: false, isDesignToken: false },
       { name: 'video', type: 'string', required: false, isDesignToken: false },
-      { name: 'stats', type: '{ label: string; value: string }[]', required: false, isDesignToken: false },
-      { name: 'bgMode', type: '\'scroll\' | \'fixed\'', required: false, isDesignToken: true },
+      {
+        name: 'stats',
+        type: '{ label: string; value: string }[]',
+        required: false,
+        isDesignToken: false,
+      },
+      { name: 'bgMode', type: "'scroll' | 'fixed'", required: false, isDesignToken: true },
     ],
     children: ['Button', 'Badge', 'Section', 'Div', 'H1', 'P'],
-    slots: [
-      { name: 'children', required: false, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: false, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Molecular component using Button, Badge, Section, Div, H1, P — drills variant, bgMode, container, contentWrapper, title, description to children',
+    description:
+      'Molecular component using Button, Badge, Section, Div, H1, P — drills variant, bgMode, container, contentWrapper, title, description to children',
     sourcePath: 'packages/ui/src/components/landing/landing-hero.tsx',
   },
   MacbookScroll: {
@@ -2838,7 +3807,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'navigationItems', type: 'BottomNavItem[]', required: false, isDesignToken: false },
       { name: 'headerNavigation', type: 'NavigationLink[]', required: false, isDesignToken: false },
       { name: 'currentPath', type: 'string', required: false, isDesignToken: false },
-      { name: 'LinkComponent', type: 'React.ComponentType<any> | string', required: false, isDesignToken: false },
+      {
+        name: 'LinkComponent',
+        type: 'React.ComponentType<any> | string',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'logoIcon', type: 'KnownIconName', required: false, isDesignToken: false },
       { name: 'logoSrc', type: 'string', required: false, isDesignToken: false },
       { name: 'logoAlt', type: 'string', required: false, isDesignToken: false },
@@ -2869,9 +3843,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'inline', type: 'boolean', required: false, isDesignToken: false },
     ],
     children: ['Badge', 'Button'],
-    slots: [
-      { name: 'fallback', required: false, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'fallback', required: false, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Molecular component using Badge, Button',
@@ -2884,7 +3856,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     props: [
       { name: 'text', type: 'string', required: true, isDesignToken: false },
       { name: 'maxChars', type: 'number', required: false, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'link\' | \'description\' | null', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'link' | 'description' | null",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: ['Button', 'P'],
     slots: [],
@@ -2896,56 +3873,115 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Select: {
     name: 'Select',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] }, { name: 'variant', category: 'visual', values: ['default', 'filled', 'ghost'] }, { name: 'intent', category: 'structural', values: ['default', 'destructive', 'success'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] },
+      { name: 'variant', category: 'visual', values: ['default', 'filled', 'ghost'] },
+      { name: 'intent', category: 'structural', values: ['default', 'destructive', 'success'] },
+    ],
     props: [],
-    children: ['SelectContent', 'SelectGroup', 'SelectItem', 'SelectLabel', 'SelectScrollDownButton', 'SelectScrollUpButton', 'SelectSeparator', 'SelectTrigger', 'SelectValue'],
+    children: [
+      'SelectContent',
+      'SelectGroup',
+      'SelectItem',
+      'SelectLabel',
+      'SelectScrollDownButton',
+      'SelectScrollUpButton',
+      'SelectSeparator',
+      'SelectTrigger',
+      'SelectValue',
+    ],
     slots: [],
     providesTokens: [],
     inheritsTokens: ['size'],
-    description: 'Molecular component using SelectContent, SelectGroup, SelectItem, SelectLabel, SelectScrollDownButton, SelectScrollUpButton, SelectSeparator, SelectTrigger, SelectValue — drills size, variant, intent to children',
+    description:
+      'Molecular component using SelectContent, SelectGroup, SelectItem, SelectLabel, SelectScrollDownButton, SelectScrollUpButton, SelectSeparator, SelectTrigger, SelectValue — drills size, variant, intent to children',
     sourcePath: 'packages/ui/src/components/forms/select.tsx',
   },
   Sheet: {
     name: 'Sheet',
     level: 'molecule',
-    tokens: [{ name: 'side', category: 'visual', values: ['top', 'right', 'bottom', 'left'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'side',
+        category: 'visual',
+        values: ['top', 'right', 'bottom', 'left'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
-      { name: 'side', type: '\'top\' | \'right\' | \'bottom\' | \'left\'', required: false, isDesignToken: true },
+      {
+        name: 'side',
+        type: "'top' | 'right' | 'bottom' | 'left'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showCloseButton', type: 'boolean', required: false, isDesignToken: false },
       { name: 'container', type: 'HTMLElement | null', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
     ],
-    children: ['SheetClose', 'SheetContent', 'SheetDescription', 'SheetFooter', 'SheetHeader', 'SheetOverlay', 'SheetPortal', 'SheetTitle', 'SheetTrigger'],
+    children: [
+      'SheetClose',
+      'SheetContent',
+      'SheetDescription',
+      'SheetFooter',
+      'SheetHeader',
+      'SheetOverlay',
+      'SheetPortal',
+      'SheetTitle',
+      'SheetTrigger',
+    ],
     slots: [],
     providesTokens: ['size', 'density'],
     inheritsTokens: [],
-    description: 'Molecular component using SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger — drills side, size, density to children',
+    description:
+      'Molecular component using SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger — drills side, size, density to children',
     sourcePath: 'packages/ui/src/components/overlay/sheet.tsx',
   },
   Skeleton: {
     name: 'Skeleton',
     level: 'molecule',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] }],
+    tokens: [
+      { name: 'variant', category: 'visual', values: ['default', 'lighter', 'darker', 'shimmer'] },
+    ],
     props: [],
-    children: ['SkeletonAvatar', 'SkeletonCard', 'SkeletonForm', 'SkeletonList', 'SkeletonTable', 'SkeletonText'],
+    children: [
+      'SkeletonAvatar',
+      'SkeletonCard',
+      'SkeletonForm',
+      'SkeletonList',
+      'SkeletonTable',
+      'SkeletonText',
+    ],
     slots: [],
     providesTokens: [],
     inheritsTokens: ['size', 'density'],
-    description: 'Molecular component using SkeletonAvatar, SkeletonCard, SkeletonForm, SkeletonList, SkeletonTable, SkeletonText — drills variant to children',
+    description:
+      'Molecular component using SkeletonAvatar, SkeletonCard, SkeletonForm, SkeletonList, SkeletonTable, SkeletonText — drills variant to children',
     sourcePath: 'packages/ui/src/components/feedback/skeleton.tsx',
   },
   SplitSectionItem: {
     name: 'SplitSectionItem',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural', values: ['xs', 'sm', 'md', 'lg', 'xl', 'full', 'default'] }],
+    tokens: [
+      {
+        name: 'size',
+        category: 'structural',
+        values: ['xs', 'sm', 'md', 'lg', 'xl', 'full', 'default'],
+      },
+    ],
     props: [
-      { name: 'size', type: '\'xs\' | \'sm\' | \'md\' | \'lg\' | \'xl\' | \'full\' | \'default\'', required: false, isDesignToken: true },
+      {
+        name: 'size',
+        type: "'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | 'default'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: ['Div', 'Section'],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: ['size'],
     description: 'Molecular component using Div, Section — drills size to children',
@@ -2954,17 +3990,40 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Stepper: {
     name: 'Stepper',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] }, { name: 'variant', category: 'visual', values: ['default', 'minimal', 'pills'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] },
+      { name: 'variant', category: 'visual', values: ['default', 'minimal', 'pills'] },
+    ],
     props: [
       { name: 'steps', type: 'Step[]', required: true, isDesignToken: false },
       { name: 'initialStep', type: 'number', required: false, isDesignToken: false },
-      { name: 'initialStepData', type: 'Record<string, Record<string, unknown>>', required: false, isDesignToken: false },
-      { name: 'onStepChange', type: '(stepIndex: number, stepId: string) => void', required: false, isDesignToken: false },
-      { name: 'onComplete', type: '(allData: Record<string, Record<string, unknown>>) => void', required: false, isDesignToken: false },
+      {
+        name: 'initialStepData',
+        type: 'Record<string, Record<string, unknown>>',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'onStepChange',
+        type: '(stepIndex: number, stepId: string) => void',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'onComplete',
+        type: '(allData: Record<string, Record<string, unknown>>) => void',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'withHeaderOffset', type: 'boolean', required: false, isDesignToken: false },
       { name: 'showStepNumbers', type: 'boolean', required: false, isDesignToken: false },
       { name: 'allowStepNavigation', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'renderButtons', type: '(context: StepperContextType) => StepperButtons', required: false, isDesignToken: false },
+      {
+        name: 'renderButtons',
+        type: '(context: StepperContextType) => StepperButtons',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'size', type: 'StepperSize', required: false, isDesignToken: true },
       { name: 'variant', type: 'StepperVariant', required: false, isDesignToken: true },
       { name: 'headerOffsetTop', type: 'string', required: false, isDesignToken: false },
@@ -2973,25 +4032,20 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'theme', type: 'StepperTheme', required: false, isDesignToken: false },
     ],
     children: ['Div', 'TooltipProvider'],
-    slots: [
-      { name: 'children', required: false, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: false, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: ['size', 'variant'],
-    description: 'Molecular component using Div, TooltipProvider — drills size, variant to children',
+    description:
+      'Molecular component using Div, TooltipProvider — drills size, variant to children',
     sourcePath: 'packages/ui/src/components/navigation/stepper.tsx',
   },
   StepSummary: {
     name: 'StepSummary',
     level: 'molecule',
     tokens: [],
-    props: [
-      { name: 'button', type: 'StepButton', required: true, isDesignToken: false },
-    ],
+    props: [{ name: 'button', type: 'StepButton', required: true, isDesignToken: false }],
     children: ['Icon', 'Div', 'Span'],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: ['size', 'variant'],
     description: 'Molecular component using Icon, Div, Span',
@@ -3000,21 +4054,46 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Table: {
     name: 'Table',
     level: 'molecule',
-    tokens: [{ name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] }, { name: 'variant', category: 'visual', values: ['default', 'striped', 'bordered', 'hoverable'] }, { name: 'size', category: 'structural', values: ['compact', 'default', 'comfortable'] }],
-    props: [
-      { name: 'density', type: '\'compact\' | \'default\' | \'relaxed\'', required: false, isDesignToken: true },
+    tokens: [
+      { name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] },
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'striped', 'bordered', 'hoverable'],
+      },
+      { name: 'size', category: 'structural', values: ['compact', 'default', 'comfortable'] },
     ],
-    children: ['TableBody', 'TableCaption', 'TableCell', 'TableFooter', 'TableHead', 'TableHeader', 'TableRow'],
+    props: [
+      {
+        name: 'density',
+        type: "'compact' | 'default' | 'relaxed'",
+        required: false,
+        isDesignToken: true,
+      },
+    ],
+    children: [
+      'TableBody',
+      'TableCaption',
+      'TableCell',
+      'TableFooter',
+      'TableHead',
+      'TableHeader',
+      'TableRow',
+    ],
     slots: [],
     providesTokens: ['size', 'density'],
     inheritsTokens: [],
-    description: 'Molecular component using TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow — drills density, variant, size to children',
+    description:
+      'Molecular component using TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow — drills density, variant, size to children',
     sourcePath: 'packages/ui/src/components/data-display/table.tsx',
   },
   Tabs: {
     name: 'Tabs',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -3023,7 +4102,8 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     slots: [],
     providesTokens: ['size', 'density'],
     inheritsTokens: [],
-    description: 'Molecular component using TabsContent, TabsList, TabsTrigger — drills size, density to children',
+    description:
+      'Molecular component using TabsContent, TabsList, TabsTrigger — drills size, density to children',
     sourcePath: 'packages/ui/src/components/navigation/tabs.tsx',
   },
   ThreadComposer: {
@@ -3031,7 +4111,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     level: 'molecule',
     tokens: [],
     props: [
-      { name: 'onSubmit', type: '(message: string, files?: File[]) => Promise<void> | void', required: true, isDesignToken: false },
+      {
+        name: 'onSubmit',
+        type: '(message: string, files?: File[]) => Promise<void> | void',
+        required: true,
+        isDesignToken: false,
+      },
       { name: 'loading', type: 'boolean', required: false, isDesignToken: false },
       { name: 'disabled', type: 'boolean', required: false, isDesignToken: false },
       { name: 'placeholder', type: 'string', required: false, isDesignToken: false },
@@ -3039,14 +4124,24 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'showFileUpload', type: 'boolean', required: false, isDesignToken: false },
       { name: 'isNewThread', type: 'boolean', required: false, isDesignToken: false },
       { name: 'files', type: 'File[]', required: false, isDesignToken: false },
-      { name: 'onFilesChange', type: '(files: File[]) => void', required: false, isDesignToken: false },
+      {
+        name: 'onFilesChange',
+        type: '(files: File[]) => void',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'removeFileText', type: 'string', required: false, isDesignToken: false },
       { name: 'sendLabel', type: 'string', required: false, isDesignToken: false },
       { name: 'headerSlot', type: 'React.ReactNode', required: false, isDesignToken: false },
     ],
     children: ['Button'],
     slots: [
-      { name: 'welcomeMessage', required: false, isRenderProp: false, expectedComponents: ['ThreadWelcome', 'AISelector'] },
+      {
+        name: 'welcomeMessage',
+        required: false,
+        isRenderProp: false,
+        expectedComponents: ['ThreadWelcome', 'AISelector'],
+      },
       { name: 'headerSlot', required: false, isRenderProp: false, expectedComponents: [] },
     ],
     providesTokens: [],
@@ -3057,7 +4152,7 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   ThreadLayout: {
     name: 'ThreadLayout',
     level: 'molecule',
-    tokens: [{ name: 'colorScheme', category: 'visual' }],
+    tokens: [],
     props: [
       { name: 'sidebar', type: 'ReactNode', required: false, isDesignToken: false },
       { name: 'sidebarToggle', type: 'ReactNode', required: false, isDesignToken: false },
@@ -3066,19 +4161,37 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'headerOffset', type: 'string', required: false, isDesignToken: false },
       { name: 'mobileHeaderOffset', type: 'string', required: false, isDesignToken: false },
       { name: 'mobileFooterOffset', type: 'string', required: false, isDesignToken: false },
-      { name: 'onSidebarToggle', type: '(isOpen: boolean) => void', required: false, isDesignToken: false },
-      { name: 'colorScheme', type: 'ColorScheme', required: false, isDesignToken: true },
-      { name: 'customTheme', type: 'Partial<ThreadTheme>', required: false, isDesignToken: false },
+      {
+        name: 'onSidebarToggle',
+        type: '(isOpen: boolean) => void',
+        required: false,
+        isDesignToken: false,
+      },
     ],
-    children: ['Button', 'Icon', 'ThreadThemeProvider'],
+    children: ['Button', 'Icon'],
     slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: ['Thread', 'ThreadComposer', 'ThreadMessages'] },
-      { name: 'sidebar', required: false, isRenderProp: false, expectedComponents: ['ThreadSidebar'] },
-      { name: 'sidebarToggle', required: false, isRenderProp: false, expectedComponents: ['ThreadSidebarToggle'] },
+      {
+        name: 'children',
+        required: true,
+        isRenderProp: false,
+        expectedComponents: ['Thread', 'ThreadComposer', 'ThreadMessages'],
+      },
+      {
+        name: 'sidebar',
+        required: false,
+        isRenderProp: false,
+        expectedComponents: ['ThreadSidebar'],
+      },
+      {
+        name: 'sidebarToggle',
+        required: false,
+        isRenderProp: false,
+        expectedComponents: ['ThreadSidebarToggle'],
+      },
     ],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Molecular component using Button, Icon, ThreadThemeProvider — drills colorScheme to children',
+    description: 'Molecular component using Button, Icon — uses CSS variables for theming',
     sourcePath: 'packages/ui/src/components/thread/ThreadLayout.tsx',
   },
   ThreadMessage: {
@@ -3086,24 +4199,32 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     level: 'molecule',
     tokens: [{ name: 'role', category: 'visual', values: ['user', 'ai'], status: 'specific' }],
     props: [
-      { name: 'role', type: '\'user\' | \'ai\'', required: true, isDesignToken: true },
+      { name: 'role', type: "'user' | 'ai'", required: true, isDesignToken: true },
       { name: 'meta', type: 'ThreadMessageMeta', required: false, isDesignToken: false },
       { name: 'isLastUserMessage', type: 'boolean', required: false, isDesignToken: false },
       { name: 'onRetry', type: '() => void', required: false, isDesignToken: false },
       { name: 'onCopy', type: '(content: string) => void', required: false, isDesignToken: false },
-      { name: 'onEdit', type: '(messageId: string, newContent: string) => void', required: false, isDesignToken: false },
+      {
+        name: 'onEdit',
+        type: '(messageId: string, newContent: string) => void',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'messageId', type: 'string', required: false, isDesignToken: false },
       { name: 'hasResponse', type: 'boolean', required: false, isDesignToken: false },
       { name: 'retryText', type: 'string', required: false, isDesignToken: false },
       { name: 'showCopyButton', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'formatResponseTime', type: '(time: number) => string', required: false, isDesignToken: false },
+      {
+        name: 'formatResponseTime',
+        type: '(time: number) => string',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'userBubbleClassName', type: 'string', required: false, isDesignToken: false },
       { name: 'aiBubbleClassName', type: 'string', required: false, isDesignToken: false },
     ],
     children: ['Icon'],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Molecular component using Icon — drills role to children',
@@ -3112,10 +4233,27 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   ThreadSidebarToggle: {
     name: 'ThreadSidebarToggle',
     level: 'molecule',
-    tokens: [{ name: 'size', category: 'structural', values: ['sm', 'default', 'lg', 'icon'] }, { name: 'variant', category: 'visual', values: ['default', 'outline', 'ghost', 'link', 'destructive', 'secondary'] }],
+    tokens: [
+      { name: 'size', category: 'structural', values: ['sm', 'default', 'lg', 'icon'] },
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'outline', 'ghost', 'link', 'destructive', 'secondary'],
+      },
+    ],
     props: [
-      { name: 'size', type: '\'sm\' | \'default\' | \'lg\' | \'icon\'', required: false, isDesignToken: true },
-      { name: 'variant', type: '\'default\' | \'outline\' | \'ghost\' | \'link\' | \'destructive\' | \'secondary\'', required: false, isDesignToken: true },
+      {
+        name: 'size',
+        type: "'sm' | 'default' | 'lg' | 'icon'",
+        required: false,
+        isDesignToken: true,
+      },
+      {
+        name: 'variant',
+        type: "'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'iconSize', type: 'number', required: false, isDesignToken: false },
     ],
     children: ['Button', 'Icon'],
@@ -3128,7 +4266,13 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Tooltip: {
     name: 'Tooltip',
     level: 'molecule',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'info', 'success', 'warning', 'destructive'] }],
+    tokens: [
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'info', 'success', 'warning', 'destructive'],
+      },
+    ],
     props: [
       { name: 'variant', type: 'TooltipVariant', required: false, isDesignToken: true },
       { name: 'hideArrow', type: 'boolean', required: false, isDesignToken: false },
@@ -3137,7 +4281,8 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Molecular component using TooltipContent, TooltipProvider, TooltipTrigger — drills variant to children',
+    description:
+      'Molecular component using TooltipContent, TooltipProvider, TooltipTrigger — drills variant to children',
     sourcePath: 'packages/ui/src/components/feedback/tooltip.tsx',
   },
   TypewriterEffect: {
@@ -3155,13 +4300,26 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   VersionSwitch: {
     name: 'VersionSwitch',
     level: 'molecule',
-    tokens: [{ name: 'position', category: 'visual', values: ['bottom-left', 'bottom-right', 'top-left', 'top-right'], status: 'candidate' }, { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] }],
+    tokens: [
+      {
+        name: 'position',
+        category: 'visual',
+        values: ['bottom-left', 'bottom-right', 'top-left', 'top-right'],
+        status: 'candidate',
+      },
+      { name: 'size', category: 'structural', values: ['sm', 'default', 'lg'] },
+    ],
     props: [
       { name: 'v1Label', type: 'string', required: false, isDesignToken: false },
       { name: 'v2Label', type: 'string', required: false, isDesignToken: false },
       { name: 'v2Suffix', type: 'string', required: false, isDesignToken: false },
-      { name: 'position', type: '\'bottom-left\' | \'bottom-right\' | \'top-left\' | \'top-right\'', required: false, isDesignToken: true },
-      { name: 'size', type: '\'sm\' | \'default\' | \'lg\'', required: false, isDesignToken: true },
+      {
+        name: 'position',
+        type: "'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'",
+        required: false,
+        isDesignToken: true,
+      },
+      { name: 'size', type: "'sm' | 'default' | 'lg'", required: false, isDesignToken: true },
     ],
     children: ['Label', 'Switch'],
     slots: [],
@@ -3175,16 +4333,25 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   Accordion: {
     name: 'Accordion',
     level: 'organism',
-    tokens: [{ name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] }, { name: 'size', category: 'structural' }],
+    tokens: [
+      { name: 'density', category: 'structural', values: ['compact', 'default', 'relaxed'] },
+      { name: 'size', category: 'structural' },
+    ],
     props: [
-      { name: 'density', type: '\'compact\' | \'default\' | \'relaxed\'', required: false, isDesignToken: true },
+      {
+        name: 'density',
+        type: "'compact' | 'default' | 'relaxed'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
     ],
     children: ['AccordionContent', 'AccordionItem', 'AccordionTrigger'],
     slots: [],
     providesTokens: ['size', 'density'],
     inheritsTokens: [],
-    description: 'Organism orchestrating AccordionContent, AccordionItem, AccordionTrigger — drills density, size through children',
+    description:
+      'Organism orchestrating AccordionContent, AccordionItem, AccordionTrigger — drills density, size through children',
     sourcePath: 'packages/ui/src/components/data-display/accordion.tsx',
   },
   BackButton: {
@@ -3200,17 +4367,32 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Button, Icon, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger',
+    description:
+      'Organism orchestrating Button, Icon, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger',
     sourcePath: 'packages/ui/src/components/navigation/back-button.tsx',
   },
   Carousel: {
     name: 'Carousel',
     level: 'organism',
-    tokens: [{ name: 'orientation', category: 'visual', values: ['horizontal', 'vertical'], status: 'radix' }, { name: 'size', category: 'structural' }, { name: 'density', category: 'structural' }],
+    tokens: [
+      {
+        name: 'orientation',
+        category: 'visual',
+        values: ['horizontal', 'vertical'],
+        status: 'radix',
+      },
+      { name: 'size', category: 'structural' },
+      { name: 'density', category: 'structural' },
+    ],
     props: [
       { name: 'opts', type: 'CarouselOptions', required: false, isDesignToken: false },
       { name: 'plugins', type: 'CarouselPlugin', required: false, isDesignToken: false },
-      { name: 'orientation', type: '\'horizontal\' | \'vertical\'', required: false, isDesignToken: true },
+      {
+        name: 'orientation',
+        type: "'horizontal' | 'vertical'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'setApi', type: '(api: CarouselApi) => void', required: false, isDesignToken: false },
       { name: 'size', type: 'string', required: false, isDesignToken: true },
       { name: 'density', type: 'string', required: false, isDesignToken: true },
@@ -3219,21 +4401,44 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     slots: [],
     providesTokens: ['size', 'density'],
     inheritsTokens: [],
-    description: 'Organism orchestrating CarouselContent, CarouselItem, CarouselNext, CarouselPrevious — drills orientation, size, density through children',
+    description:
+      'Organism orchestrating CarouselContent, CarouselItem, CarouselNext, CarouselPrevious — drills orientation, size, density through children',
     sourcePath: 'packages/ui/src/components/media/carousel.tsx',
   },
   ClientLayout: {
     name: 'ClientLayout',
     level: 'organism',
-    tokens: [{ name: 'footerLayout', category: 'visual', values: ['simple', 'columns', 'stacked'], status: 'specific' }],
+    tokens: [
+      {
+        name: 'footerLayout',
+        category: 'visual',
+        values: ['simple', 'columns', 'stacked'],
+        status: 'specific',
+      },
+    ],
     props: [
       { name: 'appName', type: 'string', required: true, isDesignToken: false },
       { name: 'currentPath', type: 'string', required: false, isDesignToken: false },
       { name: 'showHeader', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'headerPosition', type: 'keyof typeof headerVariantConfig.position', required: false, isDesignToken: false },
+      {
+        name: 'headerPosition',
+        type: 'keyof typeof headerVariantConfig.position',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'headerLeftContent', type: 'React.ReactNode', required: false, isDesignToken: false },
-      { name: 'headerCenterContent', type: 'React.ReactNode', required: false, isDesignToken: false },
-      { name: 'headerRightContent', type: 'React.ReactNode', required: false, isDesignToken: false },
+      {
+        name: 'headerCenterContent',
+        type: 'React.ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'headerRightContent',
+        type: 'React.ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'navLinks', type: 'NavigationLink[]', required: false, isDesignToken: false },
       { name: 'bottomNavigation', type: 'NavigationItem[]', required: false, isDesignToken: false },
       { name: 'burgerNavigation', type: 'NavigationItem[]', required: false, isDesignToken: false },
@@ -3245,12 +4450,37 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'footerCopyrightYear', type: 'number', required: false, isDesignToken: false },
       { name: 'footerTopContent', type: 'React.ReactNode', required: false, isDesignToken: false },
       { name: 'footerLeftContent', type: 'React.ReactNode', required: false, isDesignToken: false },
-      { name: 'footerCenterContent', type: 'React.ReactNode', required: false, isDesignToken: false },
-      { name: 'footerRightContent', type: 'React.ReactNode', required: false, isDesignToken: false },
-      { name: 'footerBottomContent', type: 'React.ReactNode', required: false, isDesignToken: false },
-      { name: 'footerLayout', type: '\'simple\' | \'columns\' | \'stacked\'', required: false, isDesignToken: true },
+      {
+        name: 'footerCenterContent',
+        type: 'React.ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'footerRightContent',
+        type: 'React.ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'footerBottomContent',
+        type: 'React.ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'footerLayout',
+        type: "'simple' | 'columns' | 'stacked'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'footerStackOnMobile', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'LinkComponent', type: 'React.ComponentType<any> | string', required: false, isDesignToken: false },
+      {
+        name: 'LinkComponent',
+        type: 'React.ComponentType<any> | string',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'mobileLogoIcon', type: 'string', required: false, isDesignToken: false },
       { name: 'mobileLogoSrc', type: 'string', required: false, isDesignToken: false },
       { name: 'mobileLogoAlt', type: 'string', required: false, isDesignToken: false },
@@ -3275,7 +4505,8 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     ],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Burger, Button, Icon, SkipLink, Div, Main, Footer, Header — drills footerLayout through children',
+    description:
+      'Organism orchestrating Burger, Button, Icon, SkipLink, Div, Main, Footer, Header — drills footerLayout through children',
     sourcePath: 'packages/ui/src/components/layout/client-layout.tsx',
   },
   CommandDialog: {
@@ -3287,13 +4518,23 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Dialog, DialogTitle, DialogDescription, DialogContent, DialogHeader',
+    description:
+      'Organism orchestrating Dialog, DialogTitle, DialogDescription, DialogContent, DialogHeader',
     sourcePath: 'packages/ui/src/components/navigation/command.tsx',
   },
   DataTable: {
     name: 'DataTable',
     level: 'organism',
-    tokens: [{ name: 'tableSize', category: 'visual', values: ['compact', 'default', 'comfortable'], status: 'specific', deprecatedBy: 'density' }, { name: 'density', category: 'structural', values: ['compact', 'default', 'comfortable'] }],
+    tokens: [
+      {
+        name: 'tableSize',
+        category: 'visual',
+        values: ['compact', 'default', 'comfortable'],
+        status: 'specific',
+        deprecatedBy: 'density',
+      },
+      { name: 'density', category: 'structural', values: ['compact', 'default', 'comfortable'] },
+    ],
     props: [
       { name: 'columns', type: 'ColumnDef<TData, TValue>[]', required: true, isDesignToken: false },
       { name: 'data', type: 'TData[]', required: true, isDesignToken: false },
@@ -3302,35 +4543,76 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'pageSize', type: 'number', required: false, isDesignToken: false },
       { name: 'hidePagination', type: 'boolean', required: false, isDesignToken: false },
       { name: 'initialSorting', type: 'SortingState', required: false, isDesignToken: false },
-      { name: 'tableSize', type: '\'compact\' | \'default\' | \'comfortable\'', required: false, isDesignToken: true },
-      { name: 'density', type: '\'compact\' | \'default\' | \'comfortable\'', required: false, isDesignToken: true },
+      {
+        name: 'tableSize',
+        type: "'compact' | 'default' | 'comfortable'",
+        required: false,
+        isDesignToken: true,
+      },
+      {
+        name: 'density',
+        type: "'compact' | 'default' | 'comfortable'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'maxHeight', type: 'string', required: false, isDesignToken: false },
       { name: 'stickyHeader', type: 'boolean', required: false, isDesignToken: false },
     ],
-    children: ['Table', 'TableBody', 'TableCell', 'TableHead', 'TableHeader', 'TableRow', 'Input', 'DataTableColumnHeader', 'DataTablePagination'],
+    children: [
+      'Table',
+      'TableBody',
+      'TableCell',
+      'TableHead',
+      'TableHeader',
+      'TableRow',
+      'Input',
+      'DataTableColumnHeader',
+      'DataTablePagination',
+    ],
     slots: [],
     providesTokens: [],
     inheritsTokens: ['density'],
-    description: 'Organism orchestrating Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Input, DataTableColumnHeader, DataTablePagination — drills tableSize, density through children',
+    description:
+      'Organism orchestrating Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Input, DataTableColumnHeader, DataTablePagination — drills tableSize, density through children',
     sourcePath: 'packages/ui/src/components/data-display/data-table.tsx',
   },
   FeatureGrid: {
     name: 'FeatureGrid',
     level: 'organism',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'minimal', 'bordered', 'floating'] }, { name: 'columns', category: 'visual', values: ['2', '3', '4'], status: 'specific' }, { name: 'cardVariant', category: 'visual', values: ['default', 'minimal', 'bordered', 'floating'], status: 'specific', deprecatedBy: 'variant' }],
+    tokens: [
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'minimal', 'bordered', 'floating'],
+      },
+      { name: 'columns', category: 'visual', values: ['2', '3', '4'], status: 'specific' },
+      {
+        name: 'cardVariant',
+        category: 'visual',
+        values: ['default', 'minimal', 'bordered', 'floating'],
+        status: 'specific',
+        deprecatedBy: 'variant',
+      },
+    ],
     props: [
       { name: 'features', type: 'Feature[]', required: true, isDesignToken: false },
       { name: 'columns', type: '2 | 3 | 4', required: false, isDesignToken: false },
       { name: 'expandable', type: 'boolean', required: false, isDesignToken: false },
       { name: 'showKeywords', type: 'boolean', required: false, isDesignToken: false },
       { name: 'showUseCases', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'minimal\' | \'bordered\' | \'floating\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'minimal' | 'bordered' | 'floating'",
+        required: false,
+        isDesignToken: true,
+      },
     ],
     children: ['Card', 'CardContent', 'CardDescription', 'CardHeader', 'CardTitle', 'Badge'],
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Card, CardContent, CardDescription, CardHeader, CardTitle, Badge — drills variant, columns, cardVariant through children',
+    description:
+      'Organism orchestrating Card, CardContent, CardDescription, CardHeader, CardTitle, Badge — drills variant, columns, cardVariant through children',
     sourcePath: 'packages/ui/src/components/landing/feature-grid.tsx',
   },
   Form: {
@@ -3338,11 +4620,21 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     level: 'organism',
     tokens: [],
     props: [],
-    children: ['Label', 'FormControl', 'FormDescription', 'FormField', 'FormItem', 'FormLabel', 'FormMessage', 'FormTokens'],
+    children: [
+      'Label',
+      'FormControl',
+      'FormDescription',
+      'FormField',
+      'FormItem',
+      'FormLabel',
+      'FormMessage',
+      'FormTokens',
+    ],
     slots: [],
     providesTokens: ['size', 'density'],
     inheritsTokens: [],
-    description: 'Organism orchestrating Label, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, FormTokens',
+    description:
+      'Organism orchestrating Label, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, FormTokens',
     sourcePath: 'packages/ui/src/components/forms/form.tsx',
   },
   LayoutWithAside: {
@@ -3364,7 +4656,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     props: [
       { name: 'locales', type: 'string[]', required: true, isDesignToken: false },
       { name: 'currentLocale', type: 'string', required: true, isDesignToken: false },
-      { name: 'onLocaleChange', type: '(locale: string) => void', required: true, isDesignToken: false },
+      {
+        name: 'onLocaleChange',
+        type: '(locale: string) => void',
+        required: true,
+        isDesignToken: false,
+      },
     ],
     children: ['Icon', 'Dropdown'],
     slots: [],
@@ -3384,12 +4681,29 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'disableOverlayClick', type: 'boolean', required: false, isDesignToken: false },
       { name: 'disableEscapeKey', type: 'boolean', required: false, isDesignToken: false },
       { name: 'title', type: 'string | React.ReactNode', required: false, isDesignToken: false },
-      { name: 'description', type: 'string | React.ReactNode', required: false, isDesignToken: false },
+      {
+        name: 'description',
+        type: 'string | React.ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'footer', type: 'React.ReactNode', required: false, isDesignToken: false },
       { name: 'size', type: 'ModalSize', required: false, isDesignToken: true },
-      { name: 'scrollBehavior', type: 'ModalScrollBehavior', required: false, isDesignToken: false },
+      {
+        name: 'scrollBehavior',
+        type: 'ModalScrollBehavior',
+        required: false,
+        isDesignToken: false,
+      },
     ],
-    children: ['Dialog', 'DialogContent', 'DialogDescription', 'DialogFooter', 'DialogHeader', 'DialogTitle'],
+    children: [
+      'Dialog',
+      'DialogContent',
+      'DialogDescription',
+      'DialogFooter',
+      'DialogHeader',
+      'DialogTitle',
+    ],
     slots: [
       { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
       { name: 'title', required: false, isRenderProp: false, expectedComponents: [] },
@@ -3398,7 +4712,8 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     ],
     providesTokens: ['size'],
     inheritsTokens: ['size'],
-    description: 'Organism orchestrating Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle — drills size through children',
+    description:
+      'Organism orchestrating Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle — drills size through children',
     sourcePath: 'packages/ui/src/components/overlay/modal.tsx',
   },
   PasswordInput: {
@@ -3410,36 +4725,67 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'showToggle', type: 'boolean', required: false, isDesignToken: false },
       { name: 'showStrength', type: 'boolean', required: false, isDesignToken: false },
       { name: 'showRequirements', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'requirements', type: 'PasswordRequirement[]', required: false, isDesignToken: false },
+      {
+        name: 'requirements',
+        type: 'PasswordRequirement[]',
+        required: false,
+        isDesignToken: false,
+      },
     ],
     children: ['AnimatedIconToggle', 'Button', 'Input'],
     slots: [],
     providesTokens: [],
     inheritsTokens: ['size'],
-    description: 'Organism orchestrating AnimatedIconToggle, Button, Input — drills size through children',
+    description:
+      'Organism orchestrating AnimatedIconToggle, Button, Input — drills size through children',
     sourcePath: 'packages/ui/src/components/forms/password-input.tsx',
   },
   SplitSection: {
     name: 'SplitSection',
     level: 'organism',
-    tokens: [{ name: 'diagonalDirection', category: 'visual', values: ['left', 'right'], status: 'specific' }, { name: 'size', category: 'structural' }, { name: 'layout', category: 'visual', values: ['horizontal', 'vertical'], status: 'candidate' }, { name: 'align', category: 'visual', values: ['start', 'center', 'end', 'stretch'], status: 'candidate' }, { name: 'padding', category: 'visual', values: ['none', 'sm', 'md', 'lg', 'xl'], status: 'specific' }],
+    tokens: [
+      {
+        name: 'diagonalDirection',
+        category: 'visual',
+        values: ['left', 'right'],
+        status: 'specific',
+      },
+      { name: 'size', category: 'structural' },
+      {
+        name: 'layout',
+        category: 'visual',
+        values: ['horizontal', 'vertical'],
+        status: 'candidate',
+      },
+      {
+        name: 'align',
+        category: 'visual',
+        values: ['start', 'center', 'end', 'stretch'],
+        status: 'candidate',
+      },
+      {
+        name: 'padding',
+        category: 'visual',
+        values: ['none', 'sm', 'md', 'lg', 'xl'],
+        status: 'specific',
+      },
+    ],
     props: [
       { name: 'diagonal', type: 'boolean', required: false, isDesignToken: false },
       { name: 'diagonalAngle', type: 'number', required: false, isDesignToken: false },
-      { name: 'diagonalDirection', type: '\'left\' | \'right\'', required: false, isDesignToken: true },
+      { name: 'diagonalDirection', type: "'left' | 'right'", required: false, isDesignToken: true },
       { name: 'inverted', type: 'boolean', required: false, isDesignToken: false },
       { name: 'diagonalOn', type: 'number', required: false, isDesignToken: false },
       { name: 'bgClass', type: 'string', required: false, isDesignToken: false },
-      { name: 'size', type: 'keyof typeof size | \'default\'', required: false, isDesignToken: true },
+      { name: 'size', type: "keyof typeof size | 'default'", required: false, isDesignToken: true },
       { name: 'asSection', type: 'boolean', required: false, isDesignToken: false },
     ],
     children: ['Div', 'Section', 'SplitSectionItem'],
-    slots: [
-      { name: 'children', required: true, isRenderProp: false, expectedComponents: [] },
-    ],
+    slots: [{ name: 'children', required: true, isRenderProp: false, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: ['size'],
-    description: 'Organism orchestrating Div, Section, SplitSectionItem — drills diagonalDirection, size, layout, align, padding through children',
+    description:
+      'Organism orchestrating Div, Section, SplitSectionItem — drills diagonalDirection, size, layout, align, padding through children',
     sourcePath: 'packages/ui/src/components/layout/split-section.tsx',
   },
   ThemeEditor: {
@@ -3447,24 +4793,72 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     level: 'organism',
     tokens: [],
     props: [
-      { name: 'variables', type: '[...globalTheme.variables, ...appTheme.variables]', required: true, isDesignToken: false },
-      { name: 'metadata', type: '{ appName, version: \'1.0.0\' }', required: true, isDesignToken: false },
+      {
+        name: 'variables',
+        type: '[...globalTheme.variables, ...appTheme.variables]',
+        required: true,
+        isDesignToken: false,
+      },
+      {
+        name: 'metadata',
+        type: "{ appName, version: '1.0.0' }",
+        required: true,
+        isDesignToken: false,
+      },
       { name: 'onSave', type: 'updatedOverrides => {', required: true, isDesignToken: false },
       { name: 'action', type: 'async () => {', required: true, isDesignToken: false },
-      { name: 'toastLoading', type: '{ message: \'Saving theme...\' }', required: true, isDesignToken: false },
-      { name: 'toastSuccess', type: '{ message: \'Theme saved successfully!\' }', required: true, isDesignToken: false },
-      { name: 'toastError', type: '{ message: \'Failed to save theme\' }', required: true, isDesignToken: false },
+      {
+        name: 'toastLoading',
+        type: "{ message: 'Saving theme...' }",
+        required: true,
+        isDesignToken: false,
+      },
+      {
+        name: 'toastSuccess',
+        type: "{ message: 'Theme saved successfully!' }",
+        required: true,
+        isDesignToken: false,
+      },
+      {
+        name: 'toastError',
+        type: "{ message: 'Failed to save theme' }",
+        required: true,
+        isDesignToken: false,
+      },
       { name: 'onError', type: 'error => {', required: true, isDesignToken: false },
       { name: 'label', type: '(', required: true, isDesignToken: false },
-      { name: 'value', type: '\'reset-defaults\'', required: true, isDesignToken: false },
+      { name: 'value', type: "'reset-defaults'", required: true, isDesignToken: false },
       { name: 'onSelect', type: 'handleResetToDefaults', required: true, isDesignToken: false },
-      { name: 'disabled', type: '!isCustomized && !hasLocalChanges', required: true, isDesignToken: false },
+      {
+        name: 'disabled',
+        type: '!isCustomized && !hasLocalChanges',
+        required: true,
+        isDesignToken: false,
+      },
     ],
-    children: ['Button', 'Checkbox', 'Dropdown', 'FloatingPanel', 'FloatingPanelFooter', 'Icon', 'Spinner', 'Tabs', 'TabsContent', 'TabsList', 'TabsTrigger', 'Tooltip', 'TooltipContent', 'TooltipProvider', 'TooltipTrigger', 'ColorVariableEditor'],
+    children: [
+      'Button',
+      'Checkbox',
+      'Dropdown',
+      'FloatingPanel',
+      'FloatingPanelFooter',
+      'Icon',
+      'Spinner',
+      'Tabs',
+      'TabsContent',
+      'TabsList',
+      'TabsTrigger',
+      'Tooltip',
+      'TooltipContent',
+      'TooltipProvider',
+      'TooltipTrigger',
+      'ColorVariableEditor',
+    ],
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Button, Checkbox, Dropdown, FloatingPanel, FloatingPanelFooter, Icon, Spinner, Tabs, TabsContent, TabsList, TabsTrigger, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, ColorVariableEditor',
+    description:
+      'Organism orchestrating Button, Checkbox, Dropdown, FloatingPanel, FloatingPanelFooter, Icon, Spinner, Tabs, TabsContent, TabsList, TabsTrigger, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, ColorVariableEditor',
     sourcePath: 'packages/ui/src/components/theme-selector/theme-editor.tsx',
   },
   ThemeSelector: {
@@ -3472,11 +4866,29 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     level: 'organism',
     tokens: [],
     props: [],
-    children: ['Button', 'Checkbox', 'Dropdown', 'FloatingPanel', 'FloatingPanelFooter', 'Icon', 'Spinner', 'Tabs', 'TabsContent', 'TabsList', 'TabsTrigger', 'Tooltip', 'TooltipContent', 'TooltipProvider', 'TooltipTrigger', 'ColorVariableEditor'],
+    children: [
+      'Button',
+      'Checkbox',
+      'Dropdown',
+      'FloatingPanel',
+      'FloatingPanelFooter',
+      'Icon',
+      'Spinner',
+      'Tabs',
+      'TabsContent',
+      'TabsList',
+      'TabsTrigger',
+      'Tooltip',
+      'TooltipContent',
+      'TooltipProvider',
+      'TooltipTrigger',
+      'ColorVariableEditor',
+    ],
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Button, Checkbox, Dropdown, FloatingPanel, FloatingPanelFooter, Icon, Spinner, Tabs, TabsContent, TabsList, TabsTrigger, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, ColorVariableEditor',
+    description:
+      'Organism orchestrating Button, Checkbox, Dropdown, FloatingPanel, FloatingPanelFooter, Icon, Spinner, Tabs, TabsContent, TabsList, TabsTrigger, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, ColorVariableEditor',
     sourcePath: 'packages/ui/src/components/theme-selector/theme-editor.tsx',
   },
   ThreadMessages: {
@@ -3488,19 +4900,32 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'loading', type: 'boolean', required: false, isDesignToken: false },
       { name: 'streamingText', type: 'string', required: false, isDesignToken: false },
       { name: 'isNewThread', type: 'boolean', required: false, isDesignToken: false },
-      { name: 'renderMessage', type: '(message: TMessage, index: number) => React.ReactNode', required: false, isDesignToken: false },
+      {
+        name: 'renderMessage',
+        type: '(message: TMessage, index: number) => React.ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'loadingText', type: 'string', required: false, isDesignToken: false },
       { name: 'onRetry', type: '() => void', required: false, isDesignToken: false },
       { name: 'onCopy', type: '(content: string) => void', required: false, isDesignToken: false },
-      { name: 'onEdit', type: '(messageId: string, newContent: string) => void', required: false, isDesignToken: false },
-      { name: 'formatResponseTime', type: '(time: number) => string', required: false, isDesignToken: false },
+      {
+        name: 'onEdit',
+        type: '(messageId: string, newContent: string) => void',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'formatResponseTime',
+        type: '(time: number) => string',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'userBubbleClassName', type: 'string', required: false, isDesignToken: false },
       { name: 'aiBubbleClassName', type: 'string', required: false, isDesignToken: false },
     ],
     children: ['ThreadMessage'],
-    slots: [
-      { name: 'renderMessage', required: false, isRenderProp: true, expectedComponents: [] },
-    ],
+    slots: [{ name: 'renderMessage', required: false, isRenderProp: true, expectedComponents: [] }],
     providesTokens: [],
     inheritsTokens: [],
     description: 'Organism orchestrating ThreadMessage',
@@ -3513,10 +4938,25 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     props: [
       { name: 'conversations', type: 'Conversation[]', required: false, isDesignToken: false },
       { name: 'activeConversationId', type: 'string', required: false, isDesignToken: false },
-      { name: 'onConversationSelect', type: '(id: string) => void', required: false, isDesignToken: false },
+      {
+        name: 'onConversationSelect',
+        type: '(id: string) => void',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'onNewConversation', type: '() => void', required: false, isDesignToken: false },
-      { name: 'onRename', type: '(id: string, newTitle: string) => void | Promise<void>', required: false, isDesignToken: false },
-      { name: 'onDelete', type: '(id: string) => void | Promise<void>', required: false, isDesignToken: false },
+      {
+        name: 'onRename',
+        type: '(id: string, newTitle: string) => void | Promise<void>',
+        required: false,
+        isDesignToken: false,
+      },
+      {
+        name: 'onDelete',
+        type: '(id: string) => void | Promise<void>',
+        required: false,
+        isDesignToken: false,
+      },
       { name: 'onClose', type: '() => void', required: false, isDesignToken: false },
       { name: 'newConversationLabel', type: 'string', required: false, isDesignToken: false },
       { name: 'emptyState', type: 'ReactNode', required: false, isDesignToken: false },
@@ -3524,7 +4964,12 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'footer', type: 'ReactNode', required: false, isDesignToken: false },
       { name: 'beforeConversations', type: 'ReactNode', required: false, isDesignToken: false },
       { name: 'afterConversations', type: 'ReactNode', required: false, isDesignToken: false },
-      { name: 'renderConversation', type: '(conversation: Conversation, isActive: boolean) => ReactNode', required: false, isDesignToken: false },
+      {
+        name: 'renderConversation',
+        type: '(conversation: Conversation, isActive: boolean) => ReactNode',
+        required: false,
+        isDesignToken: false,
+      },
     ],
     children: ['Button', 'Icon', 'ConversationItem'],
     slots: [
@@ -3543,10 +4988,21 @@ export const componentRegistry: Record<string, ComponentEntry> = {
   UseCases: {
     name: 'UseCases',
     level: 'organism',
-    tokens: [{ name: 'variant', category: 'visual', values: ['default', 'timeline', 'comparison', 'cards'] }],
+    tokens: [
+      {
+        name: 'variant',
+        category: 'visual',
+        values: ['default', 'timeline', 'comparison', 'cards'],
+      },
+    ],
     props: [
       { name: 'cases', type: 'UseCase[]', required: true, isDesignToken: false },
-      { name: 'variant', type: '\'default\' | \'timeline\' | \'comparison\' | \'cards\'', required: false, isDesignToken: true },
+      {
+        name: 'variant',
+        type: "'default' | 'timeline' | 'comparison' | 'cards'",
+        required: false,
+        isDesignToken: true,
+      },
       { name: 'showMetrics', type: 'boolean', required: false, isDesignToken: false },
       { name: 'title', type: 'string', required: false, isDesignToken: false },
       { name: 'description', type: 'string', required: false, isDesignToken: false },
@@ -3555,7 +5011,8 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Card, CardContent, CardDescription, CardHeader, CardTitle, Badge — drills variant through children',
+    description:
+      'Organism orchestrating Card, CardContent, CardDescription, CardHeader, CardTitle, Badge — drills variant through children',
     sourcePath: 'packages/ui/src/components/landing/use-cases.tsx',
   },
   WelcomeModal: {
@@ -3571,11 +5028,22 @@ export const componentRegistry: Record<string, ComponentEntry> = {
       { name: 'onClose', type: '() => void', required: false, isDesignToken: false },
       { name: 'forceShow', type: 'boolean', required: false, isDesignToken: false },
     ],
-    children: ['Dialog', 'DialogContent', 'DialogHeader', 'DialogTitle', 'DialogDescription', 'DialogFooter', 'Button', 'Checkbox', 'Label'],
+    children: [
+      'Dialog',
+      'DialogContent',
+      'DialogHeader',
+      'DialogTitle',
+      'DialogDescription',
+      'DialogFooter',
+      'Button',
+      'Checkbox',
+      'Label',
+    ],
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Organism orchestrating Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Button, Checkbox, Label',
+    description:
+      'Organism orchestrating Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Button, Checkbox, Label',
     sourcePath: 'packages/ui/src/components/overlay/welcome-modal.tsx',
   },
 
@@ -3585,11 +5053,21 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     level: 'template',
     tokens: [],
     props: [],
-    children: ['CommandDialog', 'CommandEmpty', 'CommandGroup', 'CommandInput', 'CommandItem', 'CommandList', 'CommandSeparator', 'CommandShortcut'],
+    children: [
+      'CommandDialog',
+      'CommandEmpty',
+      'CommandGroup',
+      'CommandInput',
+      'CommandItem',
+      'CommandList',
+      'CommandSeparator',
+      'CommandShortcut',
+    ],
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Template layout with CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut',
+    description:
+      'Template layout with CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut',
     sourcePath: 'packages/ui/src/components/navigation/command.tsx',
   },
   LandingFAQ: {
@@ -3607,7 +5085,8 @@ export const componentRegistry: Record<string, ComponentEntry> = {
     slots: [],
     providesTokens: [],
     inheritsTokens: [],
-    description: 'Template layout with Accordion, AccordionContent, AccordionItem, AccordionTrigger',
+    description:
+      'Template layout with Accordion, AccordionContent, AccordionItem, AccordionTrigger',
     sourcePath: 'packages/ui/src/components/landing/faq.tsx',
   },
 }
@@ -3624,14 +5103,32 @@ export function getComponent(name: string): ComponentEntry | undefined {
 
 /** Predefined chains for quick exploration */
 export const popularChains = [
-  { label: 'Accordion → AccordionTrigger → Icon', chain: ['Accordion', 'AccordionTrigger', 'Icon'] },
+  {
+    label: 'Accordion → AccordionTrigger → Icon',
+    chain: ['Accordion', 'AccordionTrigger', 'Icon'],
+  },
   { label: 'DataTable → Table → TableBody', chain: ['DataTable', 'Table', 'TableBody'] },
-  { label: 'DataTable → DataTableColumnHeader → Button', chain: ['DataTable', 'DataTableColumnHeader', 'Button'] },
-  { label: 'DataTable → DataTablePagination → Button', chain: ['DataTable', 'DataTablePagination', 'Button'] },
+  {
+    label: 'DataTable → DataTableColumnHeader → Button',
+    chain: ['DataTable', 'DataTableColumnHeader', 'Button'],
+  },
+  {
+    label: 'DataTable → DataTablePagination → Button',
+    chain: ['DataTable', 'DataTablePagination', 'Button'],
+  },
   { label: 'Form → FormField → Label', chain: ['Form', 'FormField', 'Label'] },
   { label: 'Form → FormLabel → Label', chain: ['Form', 'FormLabel', 'Label'] },
-  { label: 'PasswordInput → AnimatedIconToggle → Icon', chain: ['PasswordInput', 'AnimatedIconToggle', 'Icon'] },
+  {
+    label: 'PasswordInput → AnimatedIconToggle → Icon',
+    chain: ['PasswordInput', 'AnimatedIconToggle', 'Icon'],
+  },
   { label: 'Carousel → CarouselNext → Button', chain: ['Carousel', 'CarouselNext', 'Button'] },
-  { label: 'Carousel → CarouselPrevious → Button', chain: ['Carousel', 'CarouselPrevious', 'Button'] },
-  { label: 'BackButton → Tooltip → TooltipContent', chain: ['BackButton', 'Tooltip', 'TooltipContent'] },
+  {
+    label: 'Carousel → CarouselPrevious → Button',
+    chain: ['Carousel', 'CarouselPrevious', 'Button'],
+  },
+  {
+    label: 'BackButton → Tooltip → TooltipContent',
+    chain: ['BackButton', 'Tooltip', 'TooltipContent'],
+  },
 ]

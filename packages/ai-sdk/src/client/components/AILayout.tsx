@@ -13,7 +13,6 @@ import {
   ThreadLayout,
   ThreadMessages,
   ThreadSidebar,
-  ThreadSidebarToggle,
   ThreadWelcome,
 } from '@ezstart/ui/components'
 
@@ -103,6 +102,7 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
       onRename={isAuthenticated ? handleRename : undefined}
       onDelete={isAuthenticated ? handleDelete : undefined}
       newConversationLabel={texts.newChatLabel}
+      newConversationDisabled={!isAuthenticated}
       emptyState={
         isAuthenticated
           ? texts.sidebarEmptyState
@@ -118,15 +118,12 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   return (
     <Div className={props.className}>
       <ThreadLayout
-        colorScheme={props.colorScheme}
-        customTheme={props.customTheme}
+        height={props.height ?? 'viewport'}
         headerOffset={props.headerOffset}
         mobileHeaderOffset={props.mobileHeaderOffset}
         mobileFooterOffset={props.mobileFooterOffset}
+        showSidebarCloseButton={props.showSidebarCloseButton}
         sidebar={sidebar}
-        sidebarToggle={
-          <ThreadSidebarToggle className="fixed left-4 top-4 z-50 lg:hidden" variant="default" />
-        }
       >
         <Thread messages={messages} streamingText={streamingText}>
           <ThreadMessages
