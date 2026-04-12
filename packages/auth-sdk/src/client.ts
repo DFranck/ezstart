@@ -1,4 +1,5 @@
 import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
+import { callApi } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import type { AuthToken, AuthUser } from './types.js'
 import type { AuthMode } from './store.js'
@@ -355,6 +356,50 @@ export class AuthClient {
       expiresIn: data.expiresIn,
       user: data.user,
     }
+  }
+
+  /**
+   * Create a cross-domain SSO handoff URL.
+   *
+   * If `targetUrl` is on the same origin as the current page, returns it unchanged (fast path).
+   * Otherwise requests a short-lived one-time code from ezauth, and returns the
+   * ezauth SSO callback URL that will exchange the code for httpOnly cookies on
+   * `.ezstart.xyz` before redirecting the user to the final destination.
+   *
+   * @param targetUrl Absolute URL the user should land on (e.g. ezauth settings).
+   * @param app       App name requesting the handoff (usually the current consumer app).
+   */
+  async createSsoHandoff({ targetUrl, app }: { targetUrl: string; app: string }): Promise<string> {
+    // Same-domain fast path: no handoff needed
+    if (typeof window !== 'undefined') {
+      const sameOriginTarget = new URL(targetUrl)
+      if (sameOriginTarget.origin === window.location.origin) {
+        return targetUrl
+      }
+    }
+
+    // Request a short-lived handoff code from ezauth
+    const response = await callApi<{ code: string; expiresIn: number }>('/auth/sso/authorize', {
+      appName: 'ezauth',
+      method: 'POST',
+      body: { app, redirectUri: targetUrl },
+    })
+
+    if (!response.ok || !response.data) {
+      throw new Error(response.error || 'Failed to initiate SSO handoff')
+    }
+
+    // Build the ezauth callback URL — preserve the target's locale so the
+    // callback page is rendered in the same language.
+    const target = new URL(targetUrl)
+    const locale = target.pathname.split('/')[1] || 'en'
+    const callbackPath = `/${locale}/auth/sso-callback`
+    const next = target.pathname + target.search
+
+    const callbackUrl = new URL(callbackPath, target.origin)
+    callbackUrl.searchParams.set('code', response.data.code)
+    callbackUrl.searchParams.set('next', next)
+    return callbackUrl.toString()
   }
 }
 

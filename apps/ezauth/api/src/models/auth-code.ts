@@ -5,10 +5,13 @@ interface AuthCodeDocument extends Document {
   code: string
   userId: string
   app: string
-  type: 'auth' | 'password-reset' | 'email-verification'
+  type: 'auth' | 'password-reset' | 'email-verification' | 'sso-handoff'
   redirectUri?: string
   expiresAt: Date
   isUsed: boolean
+  consumedAt?: Date
+  issuedFromIp?: string
+  issuedUa?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -26,7 +29,7 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
     },
     type: {
       type: String,
-      enum: ['auth', 'password-reset', 'email-verification'],
+      enum: ['auth', 'password-reset', 'email-verification', 'sso-handoff'],
       default: 'auth',
     },
     app: {
@@ -55,6 +58,15 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
     isUsed: {
       type: Boolean,
       default: false,
+    },
+    consumedAt: {
+      type: Date,
+    },
+    issuedFromIp: {
+      type: String,
+    },
+    issuedUa: {
+      type: String,
     },
   },
   {

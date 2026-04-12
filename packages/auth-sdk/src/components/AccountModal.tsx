@@ -185,6 +185,9 @@ export function AccountModal({
   const [sendingVerification, setSendingVerification] = useState(false)
   const navigation = useAuthNavigation()
 
+  // Advanced security (SSO handoff) state
+  const [redirecting, setRedirecting] = useState(false)
+
   const handleResendVerification = async () => {
     if (!user?.email || sendingVerification) return
     setSendingVerification(true)
@@ -636,16 +639,47 @@ export function AccountModal({
                 {/* Advanced security — link to ezauth settings (2FA, sessions, delete) */}
                 <Div className="space-y-2">
                   <H3 className="text-sm font-semibold text-foreground">{texts.securitySection}</H3>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full justify-between cursor-pointer"
-                  >
-                    <a href={ezauthSettingsUrl} target="_blank" rel="noopener noreferrer">
+                  {appName ? (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between cursor-pointer"
+                      onClick={async () => {
+                        if (redirecting) return
+                        setRedirecting(true)
+                        try {
+                          const url = await client.createSsoHandoff({
+                            targetUrl: ezauthSettingsUrl,
+                            app: appName,
+                          })
+                          window.location.href = url
+                        } catch (err) {
+                          toast.error(
+                            err instanceof Error ? err.message : 'Failed to open security settings'
+                          )
+                          setRedirecting(false)
+                        }
+                      }}
+                      disabled={redirecting}
+                    >
                       <Span>{texts.manageSecurity}</Span>
-                      <Icon name="lucide:ExternalLink" size={14} />
-                    </a>
-                  </Button>
+                      {redirecting ? (
+                        <Icon name="lucide:Loader2" size={14} className="animate-spin" />
+                      ) : (
+                        <Icon name="lucide:ExternalLink" size={14} />
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full justify-between cursor-pointer"
+                    >
+                      <a href={ezauthSettingsUrl} target="_blank" rel="noopener noreferrer">
+                        <Span>{texts.manageSecurity}</Span>
+                        <Icon name="lucide:ExternalLink" size={14} />
+                      </a>
+                    </Button>
+                  )}
                 </Div>
 
                 <Div className="h-px bg-border" />

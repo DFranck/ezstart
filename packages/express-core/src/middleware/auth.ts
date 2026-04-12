@@ -76,9 +76,13 @@ function extractAuth(req: Request, jwtSecret: string): ExtractResult | null {
   }
 
   // 3. Fallback: X-User-Id header (legacy / dev only — no user payload)
-  const headerUserId = req.headers['x-user-id'] as string | undefined
-  if (headerUserId && OBJECT_ID_REGEX.test(headerUserId)) {
-    return { userId: headerUserId }
+  // SECURITY: This header is trivially spoofable, so it MUST NOT be honored in
+  // production. Only accept it when NODE_ENV !== 'production' (dev/test).
+  if (process.env.NODE_ENV !== 'production') {
+    const headerUserId = req.headers['x-user-id'] as string | undefined
+    if (headerUserId && OBJECT_ID_REGEX.test(headerUserId)) {
+      return { userId: headerUserId }
+    }
   }
 
   return null

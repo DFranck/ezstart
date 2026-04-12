@@ -17,6 +17,8 @@ import deleteAccountRouter, { deleteAccountRegistry } from './delete-account.js'
 import updateProfileRouter, { updateProfileRegistry } from './update-profile.js'
 import changePasswordRouter, { changePasswordRegistry } from './change-password.js'
 import quickSignupRouter, { quickSignupRegistry } from './quick-signup.js'
+import ssoAuthorizeRouter, { ssoAuthorizeRegistry } from './sso-authorize.js'
+import ssoExchangeRouter, { ssoExchangeRegistry } from './sso-exchange.js'
 
 export const authRegistries = [
   registerRegistry,
@@ -38,6 +40,8 @@ export const authRegistries = [
   updateProfileRegistry,
   changePasswordRegistry,
   quickSignupRegistry,
+  ssoAuthorizeRegistry,
+  ssoExchangeRegistry,
 ]
 
 export const authRouters = [
@@ -60,4 +64,6 @@ export const authRouters = [
   updateProfileRouter,
   changePasswordRouter,
   quickSignupRouter,
+  ssoAuthorizeRouter,
+  ssoExchangeRouter,
 ]

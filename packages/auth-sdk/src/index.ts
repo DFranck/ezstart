@@ -2,6 +2,9 @@
 export { AuthClient, createAuthClient, detectAuthMode } from './client.js'
 export type { AuthClientConfig } from './client.js'
 
+// SSO helpers
+export { getEzauthUrl } from './lib/sso.js'
+
 // Store
 export { useAuthStore, useAuthStoreSSR, configureAuthStorage } from './store.js'
 export type { AuthState, AuthMode } from './store.js'
