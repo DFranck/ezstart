@@ -21,6 +21,7 @@ import { useForm } from 'react-hook-form'
 import { PasswordStrength } from './PasswordStrength.js'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
+import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -148,6 +149,8 @@ export function SignUpForm({
   texts,
 }: SignUpFormProps) {
   const t = { ...DEFAULT_TEXTS, ...texts }
+  const navigation = useAuthNavigation()
+  const resolvedBackToLoginHref = backToLoginHref ?? navigation.loginHref
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [registered, setRegistered] = useState(false)
@@ -270,27 +273,25 @@ export function SignUpForm({
         <Div className="text-4xl">&#9993;</Div>
         <P className="font-semibold text-lg">{t.checkEmail}</P>
         <P className="text-sm text-muted-foreground">{t.checkEmailDescription}</P>
-        {(onBackToLogin || backToLoginHref) && (
-          <Div className="pt-2">
-            {onBackToLogin ? (
-              <Button
-                type="button"
-                variant="link"
-                className="text-sm text-primary hover:opacity-80 font-medium cursor-pointer"
-                onClick={onBackToLogin}
-              >
-                {t.backToLogin}
-              </Button>
-            ) : (
-              <a
-                href={backToLoginHref}
-                className="text-sm text-primary hover:opacity-80 font-medium cursor-pointer"
-              >
-                {t.backToLogin}
-              </a>
-            )}
-          </Div>
-        )}
+        <Div className="pt-2">
+          {onBackToLogin ? (
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+              onClick={onBackToLogin}
+            >
+              {t.backToLogin}
+            </Button>
+          ) : (
+            <a
+              href={resolvedBackToLoginHref}
+              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+            >
+              {t.backToLogin}
+            </a>
+          )}
+        </Div>
       </Div>
     )
   }
@@ -490,7 +491,7 @@ export function SignUpForm({
             type="submit"
             disabled={loading}
             className="w-full cursor-pointer"
-            variant="brand"
+            variant="default"
           >
             {loading ? t.submitting : t.submit}
           </Button>

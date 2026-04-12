@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
+import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -98,6 +99,8 @@ export function SignInForm({
   texts,
 }: SignInFormProps) {
   const t = { ...DEFAULT_TEXTS, ...texts }
+  const navigation = useAuthNavigation()
+  const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
@@ -247,35 +250,33 @@ export function SignInForm({
             )}
           />
 
-          {(onForgotPassword || forgotPasswordHref) && (
-            <Div className="text-right">
-              <P size="xs">
-                {onForgotPassword ? (
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="p-0 h-auto text-xs text-primary hover:opacity-80 font-medium cursor-pointer"
-                    onClick={onForgotPassword}
-                  >
-                    {t.forgotPassword}
-                  </Button>
-                ) : (
-                  <a
-                    href={forgotPasswordHref}
-                    className="text-primary hover:opacity-80 font-medium cursor-pointer"
-                  >
-                    {t.forgotPassword}
-                  </a>
-                )}
-              </P>
-            </Div>
-          )}
+          <Div className="text-right">
+            <P size="xs">
+              {onForgotPassword ? (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="p-0 h-auto text-xs text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+                  onClick={onForgotPassword}
+                >
+                  {t.forgotPassword}
+                </Button>
+              ) : (
+                <a
+                  href={resolvedForgotPasswordHref}
+                  className="text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+                >
+                  {t.forgotPassword}
+                </a>
+              )}
+            </P>
+          </Div>
 
           <Button
             type="submit"
             disabled={loading || !form.formState.isValid}
             className="w-full cursor-pointer"
-            variant="brand"
+            variant="default"
           >
             {loading ? t.submitting : t.submit}
           </Button>

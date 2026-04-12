@@ -272,7 +272,7 @@ export function QuickSignUpForm({
             type="submit"
             disabled={loading || !form.formState.isValid}
             className="w-full cursor-pointer"
-            variant="brand"
+            variant="default"
           >
             {loading ? t.submitting : t.submit}
           </Button>

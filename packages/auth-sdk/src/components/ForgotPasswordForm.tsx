@@ -16,6 +16,7 @@ import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,8 @@ export function ForgotPasswordForm({
   texts,
 }: ForgotPasswordFormProps) {
   const t = { ...DEFAULT_TEXTS, ...texts }
+  const navigation = useAuthNavigation()
+  const resolvedBackHref = backHref ?? navigation.loginHref
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -109,27 +112,25 @@ export function ForgotPasswordForm({
     return (
       <Div className="space-y-4">
         <P className="text-center text-sm text-muted-foreground">{t.success}</P>
-        {(onBack || backHref) && (
-          <Div className="text-center">
-            {onBack ? (
-              <Button
-                type="button"
-                variant="link"
-                className="text-sm text-primary hover:opacity-80 font-medium cursor-pointer"
-                onClick={onBack}
-              >
-                {t.backToLogin}
-              </Button>
-            ) : (
-              <a
-                href={backHref}
-                className="text-sm text-primary hover:opacity-80 font-medium cursor-pointer"
-              >
-                {t.backToLogin}
-              </a>
-            )}
-          </Div>
-        )}
+        <Div className="text-center">
+          {onBack ? (
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+              onClick={onBack}
+            >
+              {t.backToLogin}
+            </Button>
+          ) : (
+            <a
+              href={resolvedBackHref}
+              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+            >
+              {t.backToLogin}
+            </a>
+          )}
+        </Div>
       </Div>
     )
   }
@@ -168,32 +169,30 @@ export function ForgotPasswordForm({
           type="submit"
           disabled={loading || !form.formState.isValid}
           className="w-full cursor-pointer"
-          variant="brand"
+          variant="default"
         >
           {loading ? t.submitting : t.submit}
         </Button>
 
-        {(onBack || backHref) && (
-          <Div className="text-center">
-            {onBack ? (
-              <Button
-                type="button"
-                variant="link"
-                className="text-sm text-primary hover:opacity-80 font-medium cursor-pointer"
-                onClick={onBack}
-              >
-                {t.backToLogin}
-              </Button>
-            ) : (
-              <a
-                href={backHref}
-                className="text-sm text-primary hover:opacity-80 font-medium cursor-pointer"
-              >
-                {t.backToLogin}
-              </a>
-            )}
-          </Div>
-        )}
+        <Div className="text-center">
+          {onBack ? (
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+              onClick={onBack}
+            >
+              {t.backToLogin}
+            </Button>
+          ) : (
+            <a
+              href={resolvedBackHref}
+              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
+            >
+              {t.backToLogin}
+            </a>
+          )}
+        </Div>
       </form>
     </Form>
   )
