@@ -60,6 +60,7 @@ export interface SignUpFormTexts {
   promoCodeApplied: string
   promoCodeToggle: string
   promoCodeInvalid: string
+  promoCodeRateLimited: string
   promoCodeChecking: string
   // OAuth texts (optional — only needed if showOAuth is true)
   continueWithGoogle?: string
@@ -122,6 +123,7 @@ const DEFAULT_TEXTS: SignUpFormTexts = {
   promoCodeApplied: 'Valid code!',
   promoCodeToggle: 'Have a promo code?',
   promoCodeInvalid: 'Invalid promo code',
+  promoCodeRateLimited: 'Please wait a moment and try again',
   promoCodeChecking: 'Checking...',
 }
 
@@ -162,6 +164,7 @@ export function SignUpForm({
     promoCode: resolvedPromo,
     setPromoCode: setResolvedPromo,
     isValid: promoIsValid,
+    isRateLimited: promoIsRateLimited,
     isValidating: promoIsValidating,
     isOpen: promoOpen,
     setIsOpen: setPromoOpen,
@@ -477,9 +480,14 @@ export function SignUpForm({
                       {t.promoCodeApplied}
                     </Badge>
                   )}
-                  {promoIsValid === false && (
+                  {promoIsValid === false && !promoIsRateLimited && (
                     <P size="xs" className="text-destructive">
                       {t.promoCodeInvalid}
+                    </P>
+                  )}
+                  {promoIsRateLimited && (
+                    <P size="xs" className="text-warning">
+                      {t.promoCodeRateLimited}
                     </P>
                   )}
                 </FormItem>

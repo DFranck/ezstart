@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, Card, CardContent, Div, Icon, Main, P, Spinner } from '@ezstart/ui/components'
+import { type AuthUser, useAuthStore } from '@ezstart/auth-sdk'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -31,6 +32,7 @@ function SsoCallbackContent() {
   const [status, setStatus] = useState<Status>('loading')
   const [error, setError] = useState<string>('')
   const [app, setApp] = useState<string>('ezauth')
+  const setAuth = useAuthStore(state => state.setAuth)
   const processedRef = useRef(false)
 
   useEffect(() => {
@@ -67,7 +69,8 @@ function SsoCallbackContent() {
     const exchange = async () => {
       try {
         const response = await callApi<{
-          user: unknown
+          user: AuthUser
+          refreshToken?: string
           redirect: string
         }>('/auth/sso/exchange', {
           appName: 'ezauth',
@@ -81,6 +84,13 @@ function SsoCallbackContent() {
 
         if (!response.data) {
           throw new Error(t('exchangeFailed'))
+        }
+
+        // Persist user to auth store so `useAuth().user` resolves on downstream pages
+        // (e.g. settings email-verification section). Access token lives in an httpOnly
+        // cookie set by the backend, so we pass `undefined` for it and use 'httpOnly' mode.
+        if (response.data.user) {
+          setAuth(response.data.user, undefined, 'httpOnly', response.data.refreshToken)
         }
 
         // Backend returns a safe redirect path — prefer it over the client-supplied `next`.
@@ -99,7 +109,7 @@ function SsoCallbackContent() {
     }
 
     exchange()
-  }, [searchParams, router, t])
+  }, [searchParams, router, t, setAuth])
 
   if (status === 'loading') {
     return (

@@ -105,7 +105,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:6130',
-      production: 'https://ezpay-api.up.railway.app',
+      production: 'https://ezpay-api.ezstart.xyz',
     },
   },
 

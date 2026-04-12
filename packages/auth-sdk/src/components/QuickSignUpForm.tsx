@@ -40,6 +40,7 @@ export interface QuickSignUpFormTexts {
   promoCodeApplied: string
   promoCodeToggle: string
   promoCodeInvalid: string
+  promoCodeRateLimited: string
   promoCodeChecking: string
 }
 
@@ -80,6 +81,7 @@ const DEFAULT_TEXTS: QuickSignUpFormTexts = {
   promoCodeApplied: 'Valid code!',
   promoCodeToggle: 'Have a promo code?',
   promoCodeInvalid: 'Invalid promo code',
+  promoCodeRateLimited: 'Please wait a moment and try again',
   promoCodeChecking: 'Checking...',
 }
 
@@ -110,6 +112,7 @@ export function QuickSignUpForm({
     promoCode: resolvedPromo,
     setPromoCode: setResolvedPromo,
     isValid: promoIsValid,
+    isRateLimited: promoIsRateLimited,
     isValidating: promoIsValidating,
     isOpen: promoOpen,
     setIsOpen: setPromoOpen,
@@ -260,8 +263,11 @@ export function QuickSignUpForm({
                       {t.promoCodeApplied}
                     </Badge>
                   )}
-                  {promoIsValid === false && (
+                  {promoIsValid === false && !promoIsRateLimited && (
                     <P className="text-xs text-destructive">{t.promoCodeInvalid}</P>
+                  )}
+                  {promoIsRateLimited && (
+                    <P className="text-xs text-warning">{t.promoCodeRateLimited}</P>
                   )}
                 </FormItem>
               )}

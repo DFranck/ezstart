@@ -308,6 +308,7 @@ export function AccountModal({
       toast.success(texts.passwordChanged)
       setCurrentPasswordValue('')
       setNewPasswordValue('')
+      setEditingPassword(false)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to change password')
     } finally {
