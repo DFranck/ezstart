@@ -1,6 +1,10 @@
 /**
  * GET /api/ai/app-providers
  * List app providers with optional filters (paginated)
+ *
+ * Each record is enriched with metadata from the global ProviderRegistry
+ * (name, capabilities, model, registered flag) so the chat UI can render
+ * provider selectors without a second round-trip to the global catalog.
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -12,6 +16,8 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/express-core'
+import { providerRegistry, enrichedAppProviderSchema } from '@ezstart/ai-sdk'
+import type { AIProviderInfo, ProviderCapabilities } from '@ezstart/ai-sdk'
 import { z } from 'zod'
 import { AppProvider } from '../../../models/AppProvider.js'
 
@@ -21,6 +27,31 @@ const listQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
   offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
+
+// Response envelope matches the monorepo-wide `{ success, data, meta }` shape.
+// `data.providers` are AppProvider documents enriched with global registry
+// metadata (name, capabilities, model, registered flag) so the chat UI can
+// render selectors without a second round-trip.
+const listAppProvidersResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    providers: z.array(enrichedAppProviderSchema),
+  }),
+  meta: z.object({
+    total: z.number(),
+    limit: z.number(),
+    offset: z.number(),
+  }),
+})
+
+const EMPTY_CAPABILITIES: ProviderCapabilities = {
+  text: false,
+  vision: false,
+  audio: false,
+  streaming: false,
+  functionCalling: false,
+  jsonMode: false,
+}
 
 export const listAppProvidersRegistry = new OpenAPIRegistry()
 const router: import('express').Router = Router()
@@ -51,11 +82,18 @@ docRouter.get(
         AppProvider.countDocuments(filter),
       ])
 
+      // Build lookup map from global registry for O(1) join
+      const registryMap = new Map<string, AIProviderInfo>(
+        providerRegistry.list().map(p => [p.id, p])
+      )
+
       sendSuccess(
         res,
         {
           providers: providers.map(p => {
             const doc = p as Record<string, unknown>
+            const registryEntry = registryMap.get(String(doc.providerId))
+
             return {
               ...p,
               _id: String(doc._id),
@@ -63,6 +101,11 @@ docRouter.get(
                 doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
               updatedAt:
                 doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
+              // Enrichment from global registry (fallback to empty values if provider removed)
+              name: registryEntry?.name ?? String(doc.providerId),
+              capabilities: registryEntry?.capabilities ?? EMPTY_CAPABILITIES,
+              model: registryEntry?.model ?? '',
+              registered: Boolean(registryEntry),
             }
           }),
         },
@@ -74,8 +117,10 @@ docRouter.get(
     }
   },
   {
-    summary: 'List app providers (paginated, optional filters)',
+    summary: 'List app providers (paginated, optional filters, enriched with registry metadata)',
     tags: ['AI App Providers'],
+    querySchema: listQuerySchema,
+    responseSchema: listAppProvidersResponseSchema,
   }
 )
 

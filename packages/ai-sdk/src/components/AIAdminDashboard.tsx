@@ -40,7 +40,7 @@ import type {
   PromptType,
   ProviderTarget,
   PaginationMeta,
-  AppProvider as AppProviderData,
+  EnrichedAppProvider as AppProviderData,
   PromptProvider,
 } from '../ai-types.js'
 import type { AIProviderInfo } from '../server/registry/types.js'

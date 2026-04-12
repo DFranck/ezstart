@@ -19,6 +19,7 @@ import type {
   ProviderTarget,
   PaginationMeta,
   AppProvider as AppProviderType,
+  EnrichedAppProvider,
   CreateAppProviderRequest,
   UpdateAppProviderRequest,
   GlobalProviderAccess as GlobalProviderAccessType,
@@ -195,7 +196,7 @@ export class AIClient {
     enabled?: boolean
     limit?: number
     offset?: number
-  }): Promise<{ providers: AppProviderType[]; meta: PaginationMeta }> {
+  }): Promise<{ providers: EnrichedAppProvider[]; meta: PaginationMeta }> {
     const query = new URLSearchParams()
     if (this.appName) query.set('appName', this.appName)
     if (params?.enabled !== undefined) query.set('enabled', String(params.enabled))

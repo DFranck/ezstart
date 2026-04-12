@@ -29,7 +29,7 @@ export type { UseAIThreadConfig, UseAIThreadReturn } from './client/hooks/useAIT
 export { useProviders } from './client/hooks/useProviders.js'
 export { useConversations, useConversation } from './client/hooks/useConversations.js'
 export { usePrompts } from './client/hooks/usePrompts.js'
-export { useAppProviders } from './client/hooks/useAppProviders.js'
+export { useAppProviders, useChatProviders } from './client/hooks/useAppProviders.js'
 
 // Store
 export { useAIStore } from './client/store/aiStore.js'
