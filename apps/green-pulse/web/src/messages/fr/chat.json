@@ -1,4 +1,8 @@
 {
+  "welcomeTitle": "Bienvenue sur GP.A",
+  "welcomeDescription": "Votre assistant IA pour le développement durable et le reporting ESG",
+  "composerPlaceholder": "Posez une question à GP.A sur le développement durable...",
+  "loadingText": "LIA réfléchit",
   "sidebar": {
     "myPlan": "Mon forfait :",
     "myTools": "Mes outils :",

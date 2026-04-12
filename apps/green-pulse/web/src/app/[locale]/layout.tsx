@@ -69,19 +69,16 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   const timeZone = getTimeZoneFromLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning data-app="green-pulse" className={`${gugi.variable} ${k2d.variable}`}>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      data-app="green-pulse"
+      className={`${gugi.variable} ${k2d.variable}`}
+    >
       <head>
         <ThemeStyleInjector appName="green-pulse" />
       </head>
-      <body
-        className="font-k2d"
-        style={
-          {
-            '--brand': 'oklch(0.6 0.18 145)',
-            '--brand-foreground': 'oklch(0.98 0.01 145)',
-          } as unknown as Record<string, string>
-        }
-      >
+      <body className="font-k2d">
         <Script
           id="json-ld-app"
           type="application/ld+json"

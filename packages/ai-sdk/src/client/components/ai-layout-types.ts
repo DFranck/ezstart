@@ -1,7 +1,6 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import type { ColorScheme, ThreadTheme } from '@ezstart/ui/components'
 import type { AppName } from '@ezstart/config/urls'
 
 export type AILayoutTexts = {
@@ -28,8 +27,6 @@ export type AILayoutSlots = {
 export type AILayoutProps = {
   appName: AppName
   locale?: string
-  colorScheme?: ColorScheme
-  customTheme?: Partial<ThreadTheme>
   texts?: AILayoutTexts
   slots?: AILayoutSlots
   extraPayload?: Record<string, unknown>
@@ -45,4 +42,6 @@ export type AILayoutProps = {
   mobileHeaderOffset?: string
   mobileFooterOffset?: string
   formatResponseTime?: (ms: number) => string
+  /** Show × close button inside the sidebar Sheet. Default: false (use burger/overlay to close) */
+  showSidebarCloseButton?: boolean
 }

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { getAppTheme } from '@/config/app-themes'
-import { SignUpForm } from '@ezstart/auth-sdk'
+import { SignUpForm, useAuthNavigation } from '@ezstart/auth-sdk'
 import {
   BackButton,
   Card,
@@ -16,7 +16,6 @@ import {
 } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { useTranslations } from 'next-intl'
 
@@ -25,25 +24,12 @@ function RegisterContent() {
   const tv = useTranslations('verifyEmail')
   const tApiErrors = useTranslations('apiErrors')
   const tOAuth = useTranslations('oauth')
-  const searchParams = useSearchParams()
-  const app = searchParams.get('app') || 'ezstart'
-  const redirect_uri = searchParams.get('redirect_uri')
+  const navigation = useAuthNavigation()
+  const app = navigation.app || 'ezstart'
   const theme = getAppTheme(app)
 
   return (
-    <Card
-      className="max-w-md w-full relative"
-      style={
-        theme.brandColor
-          ? ({
-              '--brand': theme.brandColor,
-              '--brand-foreground': theme.brandForeground ?? 'oklch(0.985 0 0)',
-              '--color-brand': 'var(--brand)',
-              '--color-brand-foreground': 'var(--brand-foreground)',
-            } as React.CSSProperties)
-          : undefined
-      }
-    >
+    <Card className="max-w-md w-full relative" data-app={app}>
       <Div className="absolute top-4 left-4">
         <BackButton />
       </Div>
@@ -65,10 +51,9 @@ function RegisterContent() {
       <CardContent className="space-y-4">
         <SignUpForm
           appName={app}
-          redirectUri={redirect_uri || undefined}
+          redirectUri={navigation.redirectUri}
           showOAuth
           oauthProviders={['google']}
-          backToLoginHref={`/login?${searchParams.toString()}`}
           texts={{
             email: t('email'),
             emailPlaceholder: t('emailPlaceholder'),
@@ -105,8 +90,8 @@ function RegisterContent() {
           <P size={'xs'}>
             {t('hasAccount')}{' '}
             <Link
-              href={`/login?${searchParams.toString()}`}
-              className={`${theme.primaryColor} hover:opacity-80 font-medium`}
+              href={navigation.loginHref}
+              className="text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline"
             >
               {t('login')}
             </Link>

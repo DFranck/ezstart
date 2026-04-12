@@ -1,4 +1,8 @@
 {
+  "welcomeTitle": "Chào mừng đến với GP.A",
+  "welcomeDescription": "Trợ lý AI của bạn cho phát triển bền vững và báo cáo ESG",
+  "composerPlaceholder": "Hỏi GP.A bất cứ điều gì về phát triển bền vững...",
+  "loadingText": "LIA đang suy nghĩ",
   "sidebar": {
     "myPlan": "Gói của tôi:",
     "myTools": "Công cụ của tôi:",
@@ -6,6 +10,7 @@
     "settings": "Cài đặt",
     "newChat": "Cuộc trò chuyện mới",
     "emptyState": "Bắt đầu cuộc trò chuyện mới để nhận thông tin từ LIA",
+    "loginPrompt": "Đăng nhập để lưu các cuộc trò chuyện của bạn",
     "tools": {
       "dashboards": "Bảng điều khiển",
       "uploadFiles": "Tải lên tệp",

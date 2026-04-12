@@ -1,131 +1,49 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, Div, P, Spinner } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
-import { logger } from '@ezstart/logger'
+import { VerifyEmailFlow, useAuthNavigation } from '@ezstart/auth-sdk'
+import { Card, CardContent, CardHeader, CardTitle, Div, Spinner } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Suspense, useCallback, useEffect, useState } from 'react'
-
-type VerifyState = 'verifying' | 'success' | 'already-verified' | 'invalid' | 'error'
+import { Suspense } from 'react'
 
 function VerifyEmailContent() {
   const t = useTranslations('verifyEmail')
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
-  const [state, setState] = useState<VerifyState>(token ? 'verifying' : 'invalid')
-
-  const verifyEmail = useCallback(async () => {
-    if (!token) {
-      setState('invalid')
-      return
-    }
-
-    try {
-      const response = await callApi('/auth/verify-email', {
-        appName: 'ezauth',
-        method: 'POST',
-        body: { token },
-      })
-
-      if (!response.ok) {
-        const errorMsg = response.error || parseApiError(response.data) || ''
-        if (errorMsg.includes('already verified')) {
-          setState('already-verified')
-        } else {
-          setState('invalid')
-        }
-        return
-      }
-
-      const result = response.data as { message?: string }
-      if (result?.message?.includes('already verified')) {
-        setState('already-verified')
-      } else {
-        setState('success')
-      }
-
-      logger.info('Email verified successfully')
-    } catch (err) {
-      logger.error('Email verification failed:', err)
-      setState('error')
-    }
-  }, [token])
-
-  useEffect(() => {
-    if (token) {
-      verifyEmail()
-    }
-  }, [token, verifyEmail])
+  const { app } = useAuthNavigation()
 
   return (
-    <Card className="max-w-md w-full">
+    <Card className="max-w-md w-full" data-app={app}>
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
       </CardHeader>
-
       <CardContent className="space-y-4">
-        {state === 'verifying' && (
-          <Div className="flex flex-col items-center gap-4 py-4">
-            <Spinner variant="primary" size="lg" />
-            <P className="text-sm text-muted-foreground">{t('verifying')}</P>
-          </Div>
-        )}
-
-        {state === 'success' && (
-          <Div className="space-y-4">
-            <P className="text-center text-sm text-success">{t('success')}</P>
-            <Div className="text-center">
-              <Link href="/login" className="text-sm text-primary hover:opacity-80 font-medium">
-                {t('backToLogin')}
-              </Link>
-            </Div>
-          </Div>
-        )}
-
-        {state === 'already-verified' && (
-          <Div className="space-y-4">
-            <P className="text-center text-sm text-muted-foreground">{t('alreadyVerified')}</P>
-            <Div className="text-center">
-              <Link href="/login" className="text-sm text-primary hover:opacity-80 font-medium">
-                {t('backToLogin')}
-              </Link>
-            </Div>
-          </Div>
-        )}
-
-        {state === 'invalid' && (
-          <Div className="space-y-4">
-            <P className="text-center text-sm text-destructive">{t('invalidToken')}</P>
-            <Div className="text-center">
-              <Link href="/login" className="text-sm text-primary hover:opacity-80 font-medium">
-                {t('backToLogin')}
-              </Link>
-            </Div>
-          </Div>
-        )}
-
-        {state === 'error' && (
-          <Div className="space-y-4">
-            <P className="text-center text-sm text-destructive">{t('error')}</P>
-            <Div className="text-center">
-              <Link href="/login" className="text-sm text-primary hover:opacity-80 font-medium">
-                {t('backToLogin')}
-              </Link>
-            </Div>
-          </Div>
-        )}
+        <VerifyEmailFlow
+          token={token}
+          texts={{
+            verifying: t('verifying'),
+            success: t('success'),
+            alreadyVerified: t('alreadyVerified'),
+            invalid: t('invalidToken'),
+            error: t('error'),
+            backToLogin: t('backToLogin'),
+            tryAgain: t('resendLink'),
+          }}
+        />
       </CardContent>
     </Card>
   )
 }
 
 export default function VerifyEmailPage() {
-  const t = useTranslations('login')
-
   return (
-    <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
+    <Suspense
+      fallback={
+        <Div className="flex justify-center py-8">
+          <Spinner variant="primary" size="lg" />
+        </Div>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   )

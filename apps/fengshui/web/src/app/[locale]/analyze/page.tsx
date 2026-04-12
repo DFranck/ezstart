@@ -3,11 +3,7 @@
 
 import { callApi } from '@/config/api'
 import { THEME_COLORS } from '@/lib/theme-colors'
-import {
-  clearStepperState,
-  getStepperState,
-  saveStepperState,
-} from '@/lib/local-plans'
+import { clearStepperState, getStepperState, saveStepperState } from '@/lib/local-plans'
 import type { CardinalStepData } from '@/types/bagua'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
@@ -250,7 +246,12 @@ export default function AnalyzePage() {
             canApply: boolean
             applyHandler: () => Promise<void>
           }
-          aiValidation?: { isValid: boolean; score: number; roomsDetected: number; feedback: string }
+          aiValidation?: {
+            isValid: boolean
+            score: number
+            roomsDetected: number
+            feedback: string
+          }
         }
         const isUploadStep = context.currentStep === 0
         const hasFile = uploadData?.file
@@ -304,8 +305,12 @@ export default function AnalyzePage() {
                         : t('analysis.save')
                       : t('common.login')
                     : t('common.next'),
-                  icon: isLastStep ? (isAuthenticated ? 'lucide:Save' : 'lucide:LogIn') : 'lucide:ArrowRight',
-                  variant: 'brand',
+                  icon: isLastStep
+                    ? isAuthenticated
+                      ? 'lucide:Save'
+                      : 'lucide:LogIn'
+                    : 'lucide:ArrowRight',
+                  variant: 'default',
                   disabled: (isUploadStep && !canProceedFromStep1) || (isLastStep && isSaving),
                   onClick: handleNext,
                   tooltip:
@@ -327,9 +332,7 @@ export default function AnalyzePage() {
                     icon: 'lucide:AlertCircle',
                     variant: 'outline',
                     disabled: true,
-                    tooltip: hasFile
-                      ? t('tooltips.validateCrop')
-                      : t('steps.upload.instructions'),
+                    tooltip: hasFile ? t('tooltips.validateCrop') : t('steps.upload.instructions'),
                   },
                 ]
               : undefined,

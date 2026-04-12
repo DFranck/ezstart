@@ -1,130 +1,168 @@
 'use client'
 
-import { LiaThread } from '@/components/lia/LiaThread'
-import { ThreadProvider } from '@/components/lia/ThreadProvider'
-import { AIProvider, useConversations } from '@ezstart/ai-sdk/client'
-import { useAuthStore } from '@ezstart/auth-sdk'
-import { getApiUrl } from '@ezstart/config'
-import { logger } from '@ezstart/logger'
-import { Div } from '@ezstart/ui/components'
-import { toast } from '@ezstart/ui/utils'
+import { AILayout } from '@ezstart/ai-sdk/client'
+import { UserMenu, useAuthStore } from '@ezstart/auth-sdk'
+import { useRBAC } from '@ezstart/rbac'
+import { Button, Div, Icon, Main, Nav, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useTheme } from 'next-themes'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useCallback, useMemo } from 'react'
 
-function LiaPageContent() {
-  const t = useTranslations('chat')
-  const locale = useLocale()
-
-  // Get user from Zustand store (localStorage 'ezauth-storage')
-  const { user, isAuthenticated, accessToken } = useAuthStore()
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
-  const [onConversationCreated, setOnConversationCreated] = useState<(() => void) | null>(null)
-
-  // AI provider is managed by admin — no user-facing selector
-  // Provider selection handled server-side via cascade/default
-
-  // Get refreshConversation to invalidate cache after sending message
-  const { refreshConversation } = useConversations()
-
-  const config = useMemo(
-    () => ({
-      endpoint: `${getApiUrl('ezstart')}/api/ai/chat`,
-      method: 'POST' as const,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      },
-      enableStreaming: true, // Auto-detects SSE vs JSON based on Content-Type
-      formatRequest: (message: string) => {
-        const payload: Record<string, unknown> = {
-          message,
-          appName: 'green-pulse', // Scope conversation to green-pulse
-          stream: true, // Request streaming (API decides via Content-Type)
-          extract_esg: false,
-          locale, // Pass locale so AI responds in the user's language
-          // Include userId if authenticated
-          ...(isAuthenticated && user?._id && { userId: user._id }),
-        }
-        // Provider is managed by admin cascade — no client-side selection
-        // Only include conversationId if it exists (avoid sending null)
-        if (activeConversationId) {
-          payload.conversationId = activeConversationId
-        }
-        return payload
-      },
-      formatResponse: (rawData: unknown): string => {
-        const data = rawData as Record<string, unknown> & {
-          delta?: string
-          data?: Record<string, unknown>
-          response?: string
-        }
-        return String(data.delta || data.data?.response || data.response || '')
-      },
-      onSuccess: (rawData: unknown) => {
-        const data = rawData as Record<string, unknown> & { data?: Record<string, unknown> }
-        const conversationId = data.data?.conversationId as string | undefined
-
-        // Save conversation_id for subsequent messages
-        if (conversationId && !activeConversationId) {
-          const userInfo = isAuthenticated && user?._id ? `userId: ${user._id}` : 'anonymous'
-          logger.info(`Conversation created: ${conversationId} (${userInfo})`)
-          setActiveConversationId(conversationId)
-          // Trigger conversation list reload
-          if (onConversationCreated) {
-            onConversationCreated()
-          }
-        }
-
-        // Refresh conversation to load new messages
-        if (conversationId) {
-          refreshConversation(conversationId)
-        }
-      },
-      onError: (error: Error) => {
-        logger.error('LIA Chat Error:', error)
-
-        // Map error messages to translated versions
-        let translatedError = t('errors.sendFailed')
-        if (error.message.includes('overloaded')) {
-          translatedError = t('errors.serviceOverloaded')
-        } else if (error.message.includes('quota')) {
-          translatedError = t('errors.quotaExceeded')
-        } else if (error.message.includes('configuration')) {
-          translatedError = t('errors.configError')
-        }
-
-        // Show translated error toast to user
-        toast.error(translatedError)
-      },
-    }),
-    [
-      isAuthenticated,
-      user,
-      accessToken,
-      activeConversationId,
-      onConversationCreated,
-      refreshConversation,
-      t,
-    ]
-  ) // Re-create when auth state, activeConversationId, selectedProvider, or refreshConversation changes
-
-  return (
-    <Div className="fixed inset-0 z-0">
-      <ThreadProvider config={config}>
-        <LiaThread
-          activeConversationId={activeConversationId}
-          setActiveConversationId={setActiveConversationId}
-          onRegisterConversationCreatedCallback={setOnConversationCreated}
-        />
-      </ThreadProvider>
-    </Div>
-  )
-}
+const FUTURE_TOOLS = [
+  { href: '/dashboard', labelKey: 'dashboards', icon: 'lucide:LayoutDashboard' as const },
+  { href: '/upload', labelKey: 'uploadFiles', icon: 'lucide:Upload' as const },
+  { href: '/documents', labelKey: 'documents', icon: 'lucide:FileText' as const },
+  { href: '/projects', labelKey: 'myProjects', icon: 'lucide:FolderKanban' as const },
+  { href: '/compliances', labelKey: 'compliances', icon: 'lucide:Shield' as const },
+]
 
 export default function LiaPage() {
+  const t = useTranslations('chat')
+  const tAuth = useTranslations('auth')
+  const locale = useLocale()
+  const pathname = usePathname()
+  const router = useRouter()
+  const theme = useTheme()
+  const { user } = useAuthStore()
+  const rbac = useRBAC(user, 'green-pulse')
+  const isAdmin = rbac.hasAnyRole(['admin', 'superadmin'])
+
+  const handleLocaleChange = useCallback(
+    (newLocale: string) => {
+      router.push(pathname.replace(`/${locale}`, `/${newLocale}`))
+    },
+    [pathname, locale, router]
+  )
+
+  const sidebarHeader = (
+    <Div className="h-14 flex items-center justify-center px-3">
+      <Button asChild variant="ghost" className="w-full">
+        <Link href="/">
+          <Image
+            src="/logo_complet_light.svg"
+            alt="GreenPulse.AI"
+            width={150}
+            height={32}
+            className="animate-glow-pulse-sm dark:hidden"
+          />
+          <Image
+            src="/logo_complet_dark.svg"
+            alt="GreenPulse.AI"
+            width={150}
+            height={32}
+            className="animate-glow-pulse-sm hidden dark:block"
+          />
+          <Span className="sr-only">GreenPulse.AI</Span>
+        </Link>
+      </Button>
+    </Div>
+  )
+
+  const toolsItems = useMemo(
+    () =>
+      FUTURE_TOOLS.map(item => ({
+        ...item,
+        label: t(`sidebar.tools.${item.labelKey}`),
+      })),
+    [t]
+  )
+
+  const sidebarFooter = (
+    <Div className="space-y-3">
+      {/* My plan section */}
+      <Div className="space-y-1">
+        <Div className="flex items-center gap-2 px-2 py-1">
+          <Icon name="lucide:Briefcase" size={16} className="text-muted-foreground" />
+          <Span className="text-xs font-medium text-muted-foreground">{t('sidebar.myPlan')}</Span>
+        </Div>
+        <Div className="px-2">
+          <Span className="text-sm font-semibold">{t('plans.free')}</Span>
+        </Div>
+      </Div>
+
+      <Div className="border-t mx-2" />
+
+      {/* Upgrade prompt + future tools (disabled) */}
+      <Div className="space-y-1">
+        <Div className="px-2 py-1">
+          <Span className="text-xs font-medium text-muted-foreground">
+            {t('sidebar.upgradePrompt')}
+          </Span>
+        </Div>
+        <Nav className="space-y-0.5">
+          {toolsItems.map(item => (
+            <Button
+              key={item.href}
+              variant="ghost"
+              size="sm"
+              disabled
+              className="w-full justify-start opacity-50 cursor-not-allowed h-8 px-2"
+            >
+              <Icon name={item.icon} className="mr-2" size={14} />
+              <Span className="text-xs">{item.label}</Span>
+            </Button>
+          ))}
+        </Nav>
+      </Div>
+
+      {/* User menu */}
+      <Div className="border-t pt-3">
+        <UserMenu
+          side="top"
+          variant="extended"
+          theme={theme}
+          className="w-full"
+          languages={[
+            { code: 'en', label: 'English' },
+            { code: 'fr', label: 'Français' },
+            { code: 'vi', label: 'Tiếng Việt' },
+          ]}
+          currentLocale={locale}
+          onLocaleChange={handleLocaleChange}
+          texts={{
+            signOut: tAuth('logout'),
+            manageAccount: t('sidebar.settings'),
+          }}
+        />
+      </Div>
+    </Div>
+  )
+
   return (
-    <AIProvider appName="green-pulse" getToken={() => useAuthStore.getState().accessToken}>
-      <LiaPageContent />
-    </AIProvider>
+    <Main className="h-dvh">
+      <AILayout
+        appName="green-pulse"
+        locale={locale}
+        height="viewport"
+        getToken={() => useAuthStore.getState().accessToken}
+        extraPayload={{ extract_esg: false }}
+        texts={{
+          welcomeTitle: t('welcomeTitle'),
+          welcomeDescription: t('welcomeDescription'),
+          composerPlaceholder: t('composerPlaceholder'),
+          loadingText: t('loadingText'),
+          newChatLabel: t('sidebar.newChat'),
+          sidebarEmptyState: t('sidebar.emptyState'),
+          loginPrompt: t('sidebar.loginPrompt'),
+        }}
+        slots={{
+          sidebarHeader,
+          sidebarFooter,
+          sidebarAfterConversations: isAdmin ? (
+            <Nav className="space-y-1 px-2">
+              <Button asChild variant="ghost" size="sm" className="w-full justify-start">
+                <Link href="/admin">
+                  <Icon name="lucide:Shield" className="mr-2" size={16} />
+                  Admin
+                </Link>
+              </Button>
+            </Nav>
+          ) : undefined,
+        }}
+      />
+    </Main>
   )
 }
