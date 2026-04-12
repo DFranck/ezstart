@@ -54,6 +54,8 @@ export interface UserMenuProps {
   side?: 'top' | 'bottom'
   /** Trigger style: 'icon' = avatar only, 'extended' = avatar + name + email */
   variant?: 'icon' | 'extended'
+  /** App name forwarded to AccountModal for the SSO deep link to ezauth settings */
+  appName?: string
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -80,6 +82,7 @@ export function UserMenu({
   googleOAuthUrl,
   side = 'bottom',
   variant = 'icon',
+  appName,
 }: UserMenuProps) {
   const { user, isAuthenticated, login, logout, isLoggingIn } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
@@ -216,6 +219,7 @@ export function UserMenu({
         currentLocale={currentLocale}
         onLocaleChange={onLocaleChange}
         googleOAuthUrl={googleOAuthUrl}
+        appName={appName}
       />
     </>
   )
