@@ -81,12 +81,6 @@ export interface AccountModalProps {
   onLocaleChange?: (locale: string) => void
   /** Google OAuth URL for "Connect account" button. If not provided, button stays disabled. */
   googleOAuthUrl?: string
-  /**
-   * App name used to build the deep link to ezauth settings (2FA, sessions,
-   * delete account). Passed as `?app=` query so ezauth keeps SSO scope.
-   * If omitted, the link will open ezauth settings without app scope.
-   */
-  appName?: string
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -161,10 +155,9 @@ export function AccountModal({
   currentLocale,
   onLocaleChange,
   googleOAuthUrl,
-  appName,
 }: AccountModalProps) {
   const { user, accessToken } = useAuth()
-  const { client } = useAuthContext()
+  const { client, appName } = useAuthContext()
   const store = useAuthStore()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
   const [activeTab, setActiveTab] = useState<Tab>('profile')

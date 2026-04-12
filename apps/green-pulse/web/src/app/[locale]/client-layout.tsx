@@ -107,7 +107,6 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
         <Div>
           {isAuthenticated ? (
             <UserMenu
-              appName="green-pulse"
               theme={theme}
               languages={[
                 { code: 'en', label: 'English' },

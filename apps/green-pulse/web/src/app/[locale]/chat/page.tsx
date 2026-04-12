@@ -111,7 +111,6 @@ export default function LiaPage() {
       {/* User menu */}
       <Div className="border-t pt-3">
         <UserMenu
-          appName="green-pulse"
           side="top"
           variant="extended"
           theme={theme}

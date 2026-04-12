@@ -22,6 +22,7 @@ function getTokenExpiry(token: string): number | null {
 
 interface AuthContextValue {
   client: AuthClient
+  appName: string
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -333,7 +334,7 @@ export function AuthProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.accessToken, store.refreshToken, client])
 
-  return <AuthContext.Provider value={{ client }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ client, appName }}>{children}</AuthContext.Provider>
 }
 
 export function useAuthContext() {
