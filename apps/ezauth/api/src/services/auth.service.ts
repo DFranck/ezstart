@@ -76,8 +76,11 @@ export class AuthService {
    */
   static async validateCredentials(data: LoginRequest): Promise<string> {
     const AuthUserModel = await getAuthUserModel()
+    // `email` field accepts either an email or a username (both are normalized
+    // to lowercase + trimmed at creation time).
+    const identifier = data.email.trim().toLowerCase()
     const user = await AuthUserModel.findOne({
-      $or: [{ email: data.email }, { username: data.email }],
+      $or: [{ email: identifier }, { username: identifier }],
     })
     if (!user) {
       throw new Error('Invalid credentials')
@@ -110,9 +113,10 @@ export class AuthService {
   ): Promise<AuthToken & { refreshToken: string }> {
     const AuthUserModel = await getAuthUserModel()
 
-    // Find user by email OR username
+    // Find user by email OR username (`email` field accepts either)
+    const identifier = data.email.trim().toLowerCase()
     const user = await AuthUserModel.findOne({
-      $or: [{ email: data.email }, { username: data.email }],
+      $or: [{ email: identifier }, { username: identifier }],
     })
 
     if (!user) {

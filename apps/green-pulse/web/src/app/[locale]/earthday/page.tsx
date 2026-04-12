@@ -1,23 +1,12 @@
 'use client'
 
-import { QuickSignUpForm, SignedIn, SignedOut, SignInForm } from '@ezstart/auth-sdk'
-import {
-  Button,
-  Card,
-  CardContent,
-  Div,
-  H1,
-  H2,
-  Icon,
-  LocaleSwitcher,
-  P,
-  PWAInstallPrompt,
-} from '@ezstart/ui/components'
+import { QuickSignUpForm, SignedOut, SignInForm } from '@ezstart/auth-sdk'
+import { Button, Card, CardContent, Div, H1, LocaleSwitcher, P } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
+import { toast } from '@ezstart/ui/utils'
 import { routing } from '../../../i18n/routing'
 
 function EarthDayContent() {
@@ -25,10 +14,7 @@ function EarthDayContent() {
   const searchParams = useSearchParams()
   const currentLocale = useLocale()
   const router = useRouter()
-  const [signupSuccess, setSignupSuccess] = useState(false)
-  const [signupPromo, setSignupPromo] = useState<string | null>(null)
   const [mode, setMode] = useState<'signup' | 'signin'>('signup')
-  const hasPromo = Boolean(searchParams.get('promo'))
 
   // Track utm_source for analytics
   useEffect(() => {
@@ -89,8 +75,11 @@ function EarthDayContent() {
                       density="compact"
                       description={t('signup.description')}
                       onSuccess={() => {
-                        setSignupSuccess(true)
-                        if (hasPromo) setSignupPromo(searchParams.get('promo'))
+                        const promo = searchParams.get('promo')
+                        if (promo) {
+                          toast.success(t('welcome.promoApplied'))
+                        }
+                        router.push('/chat')
                       }}
                       texts={{
                         username: t('signup.username'),
@@ -119,7 +108,7 @@ function EarthDayContent() {
                   </>
                 ) : (
                   <>
-                    <SignInForm appName="green-pulse" onSuccess={() => setSignupSuccess(false)} />
+                    <SignInForm appName="green-pulse" onSuccess={() => router.push('/chat')} />
                     <P className="text-xs text-center text-muted-foreground mt-4">
                       {t('auth.noAccount')}{' '}
                       <Button
@@ -136,42 +125,6 @@ function EarthDayContent() {
               </CardContent>
             </Card>
           </SignedOut>
-
-          <SignedIn>
-            <Card variant="floating" className="bg-background/90 backdrop-blur-md border-white/10">
-              <CardContent className="p-5 text-center">
-                <Icon name="lucide:PartyPopper" size={36} className="text-primary mx-auto mb-3" />
-                <H2 className="text-lg font-bold text-foreground mb-2">
-                  {signupSuccess ? t('welcome.justJoined') : t('welcome.back')}
-                </H2>
-                {signupPromo ? (
-                  <P className="text-sm text-green-400 mb-4">{t('welcome.promoApplied')}</P>
-                ) : (
-                  <P className="text-sm text-muted-foreground mb-4">{t('welcome.installHint')}</P>
-                )}
-
-                <PWAInstallPrompt
-                  installButtonText={t('welcome.installButton')}
-                  hideTitle
-                  hideDescription
-                  hideLater
-                  inline
-                  showInDev
-                  fallback={
-                    <Link href="/chat" className="block">
-                      <Button
-                        size="lg"
-                        className="w-full text-base font-semibold py-5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
-                      >
-                        {t('cta.start')}
-                        <Icon name="lucide:ArrowRight" size={20} className="ml-2" />
-                      </Button>
-                    </Link>
-                  }
-                />
-              </CardContent>
-            </Card>
-          </SignedIn>
         </Div>
       </Div>
     </Div>

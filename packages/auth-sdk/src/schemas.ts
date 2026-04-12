@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 // Request schemas
 export const loginRequestSchema = z.object({
-  email: z.string().email().describe('User email address'),
+  email: z.string().min(1, 'Email or username is required').describe('Email or username'),
   password: z.string().min(1).describe('User password'),
   app: z.string().min(1).describe('Application requesting authentication'),
   redirect_uri: z.string().url().optional().describe('OAuth redirect URI'),

@@ -17,10 +17,13 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { ImageCropper } from '@ezstart/capture-sdk'
+import { getWebUrl } from '@ezstart/config'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth, useAuthContext } from '../provider.js'
 import { useAuthStore } from '../store.js'
+import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
 import { UserAvatar } from './UserAvatar.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -56,6 +59,15 @@ export interface AccountModalTexts {
   changePassword: string
   createPassword: string
   passwordChanged: string
+  // Advanced security (link to ezauth settings)
+  securitySection: string
+  manageSecurity: string
+  // Email verification
+  emailVerified: string
+  emailUnverified: string
+  resendVerification: string
+  verificationSent: string
+  verifyError: string
 }
 
 export interface AccountModalProps {
@@ -69,6 +81,12 @@ export interface AccountModalProps {
   onLocaleChange?: (locale: string) => void
   /** Google OAuth URL for "Connect account" button. If not provided, button stays disabled. */
   googleOAuthUrl?: string
+  /**
+   * App name used to build the deep link to ezauth settings (2FA, sessions,
+   * delete account). Passed as `?app=` query so ezauth keeps SSO scope.
+   * If omitted, the link will open ezauth settings without app scope.
+   */
+  appName?: string
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -104,6 +122,15 @@ const DEFAULT_TEXTS: AccountModalTexts = {
   changePassword: 'Change password',
   createPassword: 'Create password',
   passwordChanged: 'Password changed successfully',
+  // Advanced security (link to ezauth settings)
+  securitySection: 'Advanced security',
+  manageSecurity: 'Manage 2FA & sessions',
+  // Email verification
+  emailVerified: 'Verified',
+  emailUnverified: 'Unverified',
+  resendVerification: 'Resend verification email',
+  verificationSent: 'Verification email sent. Check your inbox.',
+  verifyError: 'Failed to send verification email',
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -134,6 +161,7 @@ export function AccountModal({
   currentLocale,
   onLocaleChange,
   googleOAuthUrl,
+  appName,
 }: AccountModalProps) {
   const { user, accessToken } = useAuth()
   const { client } = useAuthContext()
@@ -160,7 +188,44 @@ export function AccountModal({
   const [newPasswordValue, setNewPasswordValue] = useState('')
   const [savingPassword, setSavingPassword] = useState(false)
 
+  // Email verification state
+  const [sendingVerification, setSendingVerification] = useState(false)
+  const navigation = useAuthNavigation()
+
+  const handleResendVerification = async () => {
+    if (!user?.email || sendingVerification) return
+    setSendingVerification(true)
+    try {
+      const response = await callApi('/auth/send-verification', {
+        appName: 'ezauth',
+        method: 'POST',
+        body: {
+          email: user.email,
+          ...(navigation.app && { app: navigation.app }),
+          ...(navigation.redirectUri && { redirect_uri: navigation.redirectUri }),
+        },
+      })
+      if (!response.ok) {
+        throw new Error(response.error || parseApiError(response.data) || texts.verifyError)
+      }
+      toast.success(texts.verificationSent)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : texts.verifyError)
+    } finally {
+      setSendingVerification(false)
+    }
+  }
+
   if (!user) return null
+
+  const isVerified = Boolean((user as { isVerified?: boolean }).isVerified)
+
+  // Build deep link to ezauth settings (2FA, sessions, delete account)
+  const ezauthSettingsLocale = currentLocale || 'en'
+  const ezauthSettingsUrl = (() => {
+    const base = `${getWebUrl('ezauth')}/${ezauthSettingsLocale}/settings`
+    return appName ? `${base}?app=${encodeURIComponent(appName)}` : base
+  })()
 
   const fullName = user.firstName
     ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
@@ -434,12 +499,42 @@ export function AccountModal({
                 {/* Email */}
                 <Div className="space-y-3">
                   <H3 className="text-sm font-semibold text-foreground">{texts.emailSection}</H3>
-                  <Div className="flex items-center gap-3 rounded-md border bg-card p-3">
-                    <Icon name="lucide:Mail" className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <Span className="text-sm text-foreground flex-1 truncate">{user.email}</Span>
-                    <Badge variant="secondary" className="text-xs shrink-0">
-                      {texts.primary}
-                    </Badge>
+                  <Div className="rounded-md border bg-card p-3 space-y-2">
+                    <Div className="flex items-center gap-3">
+                      <Icon name="lucide:Mail" className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <Span className="text-sm text-foreground flex-1 truncate">{user.email}</Span>
+                      <Badge variant="secondary" className="text-xs shrink-0">
+                        {texts.primary}
+                      </Badge>
+                      {isVerified ? (
+                        <Badge
+                          variant="outline"
+                          className="text-xs shrink-0 bg-success/15 text-success border-success/30"
+                        >
+                          <Icon name="lucide:CheckCircle2" size={12} className="mr-1" />
+                          {texts.emailVerified}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="text-xs shrink-0 bg-warning/15 text-warning border-warning/30"
+                        >
+                          <Icon name="lucide:AlertTriangle" size={12} className="mr-1" />
+                          {texts.emailUnverified}
+                        </Badge>
+                      )}
+                    </Div>
+                    {!isVerified && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full cursor-pointer"
+                        onClick={handleResendVerification}
+                        disabled={sendingVerification}
+                      >
+                        {sendingVerification ? '...' : texts.resendVerification}
+                      </Button>
+                    )}
                   </Div>
                 </Div>
 
@@ -540,6 +635,23 @@ export function AccountModal({
                       </Div>
                     </Div>
                   )}
+                </Div>
+
+                <Div className="h-px bg-border" />
+
+                {/* Advanced security — link to ezauth settings (2FA, sessions, delete) */}
+                <Div className="space-y-2">
+                  <H3 className="text-sm font-semibold text-foreground">{texts.securitySection}</H3>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full justify-between cursor-pointer"
+                  >
+                    <a href={ezauthSettingsUrl} target="_blank" rel="noopener noreferrer">
+                      <Span>{texts.manageSecurity}</Span>
+                      <Icon name="lucide:ExternalLink" size={14} />
+                    </a>
+                  </Button>
                 </Div>
 
                 <Div className="h-px bg-border" />

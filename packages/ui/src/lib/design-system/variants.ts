@@ -670,7 +670,8 @@ const textBase = {
 // --- Tag-specific token definitions ---
 
 // Heading
-export const baseHeadingClasses = 'font-display font-bold !leading-[1.3] text-center'
+// NOTE: typography-only defaults. No margin, no text-center — user decides alignment.
+export const baseHeadingClasses = 'font-display font-bold !leading-[1.3]'
 
 export const tagHeadingVariantConfig = {
   variant: variantText,
@@ -734,6 +735,7 @@ export const sectionSize = {
 } as const
 
 export const sectionLayout = {
+  default: '',
   col: 'flex flex-col justify-center items-center gap-4 md:gap-6 lg:gap-8',
   grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 items-center',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
@@ -751,12 +753,13 @@ export const DEFAULT_SECTION_VARIANTS = {
   variant: 'default',
   size: 'default',
   intent: 'default',
-  layout: 'col',
+  layout: 'default',
   density: 'default',
 } as const
 
 // Aside
 export const asideSize = {
+  default: '',
   none: '',
   xs: 'px-2 py-4 md:px-4 md:py-6',
   sm: 'px-4 py-6 md:px-8 md:py-10',
@@ -767,6 +770,7 @@ export const asideSize = {
 } as const
 
 export const asideLayout = {
+  default: '',
   col: 'flex flex-col gap-4 ',
   grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 ',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
@@ -781,8 +785,8 @@ export const asideVariantConfig = {
 export const DEFAULT_ASIDE_VARIANTS = {
   variant: 'default',
   intent: 'default',
-  size: 'md',
-  layout: 'center',
+  size: 'default',
+  layout: 'default',
   density: 'default',
   withHeaderOffset: false,
 } as const
@@ -868,10 +872,11 @@ export const footerVariantConfig = {
   },
   intent: intentContainer,
   layout: {
-    default: 'flex flex-col md:flex-row md:items-center md:justify-between gap-4',
+    default: '',
+    stacked: 'flex flex-col md:flex-row md:items-center md:justify-between gap-4',
     centered: 'flex flex-col items-center justify-center gap-4',
     spaced: 'flex flex-row justify-between items-center gap-4',
-  },
+  } as const,
   withFixedMobilebar: {
     true: 'pb-16',
     false: '',
@@ -1426,7 +1431,7 @@ export const tagVariants = {
     variants: asideVariantConfig,
     defaultVariants: DEFAULT_ASIDE_VARIANTS,
   }),
-  main: cva('w-full flex-1 flex flex-col items-center pb-12 md:pb-16', {
+  main: cva('w-full flex-1 flex flex-col', {
     variants: mainVariantConfig,
     defaultVariants: DEFAULT_MAIN_VARIANTS,
   }),
@@ -1434,21 +1439,21 @@ export const tagVariants = {
     variants: navVariantConfig,
     defaultVariants: DEFAULT_NAV_VARIANTS,
   }),
-  header: cva('flex container mx-auto w-full z-50', {
+  header: cva('w-full', {
     variants: headerVariantConfig,
     defaultVariants: {
       variant: 'default',
       size: 'full',
       intent: 'default',
       layout: 'default',
-      position: 'sticky',
+      position: 'static',
     },
   }),
-  footer: cva('container mx-auto w-full border-t border-border pt-4 pb-4', {
+  footer: cva('w-full', {
     variants: footerVariantConfig,
     defaultVariants: {
       variant: 'default',
-      size: 'full',
+      size: 'default',
       intent: 'default',
       layout: 'default',
       withFixedMobilebar: false,

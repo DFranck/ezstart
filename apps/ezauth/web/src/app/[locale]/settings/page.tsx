@@ -1,8 +1,10 @@
 'use client'
 
-import { TwoFactorSettings, useAuthNavigation } from '@ezstart/auth-sdk'
+import { TwoFactorSettings, useAuth, useAuthNavigation } from '@ezstart/auth-sdk'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import {
   BackButton,
+  Badge,
   Button,
   Card,
   CardContent,
@@ -10,16 +12,49 @@ import {
   CardHeader,
   CardTitle,
   Div,
+  Icon,
   P,
+  Span,
 } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function SettingsPage() {
   const t = useTranslations('twoFactor')
   const ts = useTranslations('settings')
-  const { app } = useAuthNavigation()
+  const { app, redirectUri } = useAuthNavigation()
+  const { user } = useAuth()
+  const [sendingVerification, setSendingVerification] = useState(false)
+  const [verifyStatus, setVerifyStatus] = useState<{
+    type: 'success' | 'error'
+    message: string
+  } | null>(null)
+
+  const handleResendVerification = async () => {
+    if (!user) return
+    setSendingVerification(true)
+    setVerifyStatus(null)
+    try {
+      const response = await callApi('/auth/send-verification', {
+        appName: 'ezauth',
+        method: 'POST',
+        body: { app, redirect_uri: redirectUri },
+      })
+      if (!response.ok) {
+        throw new Error(response.error || parseApiError(response.data) || ts('verifyError'))
+      }
+      setVerifyStatus({ type: 'success', message: ts('verificationSent') })
+    } catch (error) {
+      setVerifyStatus({
+        type: 'error',
+        message: error instanceof Error ? error.message : ts('verifyError'),
+      })
+    } finally {
+      setSendingVerification(false)
+    }
+  }
 
   return (
     <Card className="max-w-md w-full relative" data-app={app}>
@@ -36,6 +71,60 @@ export default function SettingsPage() {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {user && (
+          <Div className="space-y-2">
+            <P className="font-medium">{ts('emailSection')}</P>
+            <Div className="flex flex-col gap-2 rounded-md border bg-card p-3">
+              <Div className="flex items-center gap-3">
+                <Icon name="lucide:Mail" className="w-4 h-4 text-muted-foreground shrink-0" />
+                <Span className="text-sm text-foreground flex-1 truncate">{user.email}</Span>
+                {user.isVerified ? (
+                  <Badge
+                    variant="secondary"
+                    className="text-xs shrink-0 bg-success/15 text-success border-success/30"
+                  >
+                    <Icon name="lucide:CheckCircle2" className="w-3 h-3 mr-1" />
+                    {ts('emailVerified')}
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="secondary"
+                    className="text-xs shrink-0 bg-warning/15 text-warning border-warning/30"
+                  >
+                    <Icon name="lucide:AlertTriangle" className="w-3 h-3 mr-1" />
+                    {ts('emailUnverified')}
+                  </Badge>
+                )}
+              </Div>
+              {!user.isVerified && (
+                <Div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="cursor-pointer"
+                    onClick={handleResendVerification}
+                    disabled={sendingVerification}
+                  >
+                    <Icon name="lucide:Send" className="w-4 h-4 mr-1.5" />
+                    {ts('resendVerification')}
+                  </Button>
+                </Div>
+              )}
+              {verifyStatus && (
+                <P
+                  className={
+                    verifyStatus.type === 'success'
+                      ? 'text-xs text-success'
+                      : 'text-xs text-destructive'
+                  }
+                >
+                  {verifyStatus.message}
+                </P>
+              )}
+            </Div>
+          </Div>
+        )}
+
         <Div className="space-y-2">
           <P className="font-medium">{t('title')}</P>
           <TwoFactorSettings

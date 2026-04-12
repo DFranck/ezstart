@@ -99,6 +99,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
             </SignedOut>
             <SignedIn>
               <UserMenu
+                appName="ezstart"
                 avatarSize="sm"
                 theme={{ theme, setTheme }}
                 googleOAuthUrl={`${getApiUrl('ezauth')}/api/auth/google?app=ezstart`}
