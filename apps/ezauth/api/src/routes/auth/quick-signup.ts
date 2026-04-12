@@ -18,6 +18,7 @@ import { emailService } from '../../services/email.service.js'
 import { welcomeSetPasswordTemplate } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
+import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
 
 export const quickSignupRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -49,21 +50,6 @@ const errorSchema = z.object({
   success: z.literal(false).describe('Whether the operation succeeded'),
   error: z.string().describe('Error message if operation failed'),
 })
-
-/** Map app slug to display name for emails */
-function getAppDisplayName(app: string): string {
-  const names: Record<string, string> = {
-    ezstart: 'EZStart',
-    ezauth: 'EZAuth',
-    ezbill: 'EZBill',
-    ezpay: 'EZPay',
-    fengshui: 'FengShui',
-    'asc-tcd': 'ASC-TCD',
-    'green-pulse': 'GreenPulse',
-    'gacha-analyzer': 'Gacha Analyzer',
-  }
-  return names[app] || app
-}
 
 const quickSignupController = async (req: Request, res: Response) => {
   try {
@@ -130,13 +116,13 @@ const quickSignupController = async (req: Request, res: Response) => {
 
       await setPasswordCode.save()
 
-      const setPasswordUrl = `${getWebUrl('ezauth')}/reset-password?token=${token}`
+      const setPasswordUrl = `${getWebUrl('ezauth')}/reset-password?${buildAuthEmailParams(token, app)}`
       const appDisplayName = getAppDisplayName(app)
 
       await emailService.send({
         to: normalizedEmail,
         from: `${appDisplayName} <noreply@ezstart.xyz>`,
-        subject: emailSubject || `Welcome to ${appDisplayName} — Set up your password`,
+        subject: emailSubject || `[${appDisplayName}] Welcome — Set up your password`,
         html: welcomeSetPasswordTemplate(
           setPasswordUrl,
           appDisplayName,

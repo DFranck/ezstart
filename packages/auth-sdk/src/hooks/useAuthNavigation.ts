@@ -12,7 +12,9 @@ export function useAuthNavigation() {
   const searchParams = useSearchParams()
 
   return useMemo(() => {
-    const qs = searchParams?.toString() ?? ''
+    const params = new URLSearchParams(searchParams?.toString() ?? '')
+    params.delete('token')
+    const qs = params.toString()
     const suffix = qs ? `?${qs}` : ''
     const build = (path: string) => `${path}${suffix}`
 
