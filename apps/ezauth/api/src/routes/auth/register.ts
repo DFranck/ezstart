@@ -17,6 +17,7 @@ import { emailService } from '../../services/email.service.js'
 import { emailVerificationTemplate } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
+import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
 import {
   registerRequestSchema,
   authCodeResponseSchema,
@@ -59,12 +60,14 @@ const registerController = async (req: Request, res: Response) => {
 
         await verificationCode.save()
 
-        const verifyUrl = `${getWebUrl('ezauth')}/verify-email?token=${token}`
+        const appDisplayName = getAppDisplayName(parsed.data.app)
+        const params = buildAuthEmailParams(token, parsed.data.app, parsed.data.redirect_uri)
+        const verifyUrl = `${getWebUrl('ezauth')}/verify-email?${params}`
 
         await emailService.send({
           to: user.email,
-          subject: 'Verify your email address',
-          html: emailVerificationTemplate(verifyUrl, 'EZAuth'),
+          subject: `[${appDisplayName}] Verify your email address`,
+          html: emailVerificationTemplate(verifyUrl, appDisplayName),
         })
 
         logger.info({ email: user.email }, 'Verification email sent after registration')

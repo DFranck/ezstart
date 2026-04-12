@@ -17,6 +17,7 @@ import { emailService } from '../../services/email.service.js'
 import { emailVerificationTemplate } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
+import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
 
 export const sendVerificationRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -27,6 +28,15 @@ const sendVerificationRateLimiter = createVeryStrictRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 3,
   message: 'Too many verification email requests, please try again later.',
+})
+
+const sendVerificationRequestSchema = z.object({
+  app: z.string().optional().describe('App requesting the verification email'),
+  redirect_uri: z
+    .string()
+    .url()
+    .optional()
+    .describe('Redirect URI to return to after verification'),
 })
 
 const sendVerificationResponseSchema = z.object({
@@ -56,6 +66,10 @@ const sendVerificationController = async (req: Request, res: Response) => {
       return sendSuccess(res, { message: 'Email already verified' })
     }
 
+    const parsedBody = sendVerificationRequestSchema.safeParse(req.body ?? {})
+    const app = parsedBody.success ? parsedBody.data.app : undefined
+    const redirect_uri = parsedBody.success ? parsedBody.data.redirect_uri : undefined
+
     const AuthCodeModel = await getAuthCodeModel()
     const token = crypto.randomBytes(32).toString('hex')
 
@@ -63,18 +77,20 @@ const sendVerificationController = async (req: Request, res: Response) => {
       code: token,
       userId: user._id!.toString(),
       type: 'email-verification',
-      app: 'ezstart',
+      app: app || 'ezstart',
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     })
 
     await verificationCode.save()
 
-    const verifyUrl = `${getWebUrl('ezauth')}/verify-email?token=${token}`
+    const appDisplayName = getAppDisplayName(app)
+    const params = buildAuthEmailParams(token, app, redirect_uri)
+    const verifyUrl = `${getWebUrl('ezauth')}/verify-email?${params}`
 
     await emailService.send({
       to: user.email,
-      subject: 'Verify your email address',
-      html: emailVerificationTemplate(verifyUrl, 'EZAuth'),
+      subject: `[${appDisplayName}] Verify your email address`,
+      html: emailVerificationTemplate(verifyUrl, appDisplayName),
     })
 
     logger.info({ email: user.email }, 'Verification email resent')
@@ -94,6 +110,7 @@ docRouter.post(
   {
     summary: 'Resend email verification link',
     tags: ['Authentication'],
+    bodySchema: sendVerificationRequestSchema,
     responseSchema: sendVerificationResponseSchema,
     extraResponses: {
       401: { description: 'Authentication required', schema: errorSchema },
