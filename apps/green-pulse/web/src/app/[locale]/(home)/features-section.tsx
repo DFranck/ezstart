@@ -302,7 +302,7 @@ export function FeaturesSection() {
       </Section>
 
       {/* FAQ Section */}
-      <Section size={'xl'} className="bg-muted/30">
+      <Section size={'wide'} className="bg-muted/30">
         <Div className="container mx-auto max-w-4xl">
           <H2 size="h3" className="text-center mb-12">
             {t('faq.title')}
