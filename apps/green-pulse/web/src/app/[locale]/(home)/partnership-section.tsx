@@ -22,7 +22,7 @@ export function PartnershipSection() {
   const t = useTranslations('home')
 
   return (
-    <Section size={'xl'} id="partnership" className="bg-muted/30">
+    <Section size={'wide'} id="partnership" className="bg-muted/30">
       <Div className="container mx-auto">
         <H2 size="h3" className="text-center mb-4">
           {t('partnership.title')}

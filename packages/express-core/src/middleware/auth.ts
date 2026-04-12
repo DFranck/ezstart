@@ -46,7 +46,10 @@ function extractAuth(req: Request, jwtSecret: string): ExtractResult | null {
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7)
     try {
-      const decoded = jwt.verify(token, jwtSecret) as Record<string, unknown>
+      const decoded = jwt.verify(token, jwtSecret, { algorithms: ['HS256'] }) as Record<
+        string,
+        unknown
+      >
       const user = buildUserFromDecoded(decoded)
       if (user) {
         return { userId: user.userId, user }
@@ -65,7 +68,10 @@ function extractAuth(req: Request, jwtSecret: string): ExtractResult | null {
     ?.split('=')[1]
   if (cookieToken) {
     try {
-      const decoded = jwt.verify(cookieToken, jwtSecret) as Record<string, unknown>
+      const decoded = jwt.verify(cookieToken, jwtSecret, { algorithms: ['HS256'] }) as Record<
+        string,
+        unknown
+      >
       const user = buildUserFromDecoded(decoded)
       if (user) {
         return { userId: user.userId, user }

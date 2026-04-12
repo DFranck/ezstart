@@ -11,7 +11,7 @@ export interface OAuthAccountDocument extends Document {
   avatar?: string
   accessToken?: string // Encrypted at rest via AES-256-GCM
   refreshToken?: string // Encrypted at rest via AES-256-GCM
-  profile: Record<string, any> // Raw OAuth profile data
+  profile: Record<string, unknown> // Raw OAuth profile data
   createdAt: Date
   updatedAt: Date
   getDecryptedAccessToken(): string | undefined

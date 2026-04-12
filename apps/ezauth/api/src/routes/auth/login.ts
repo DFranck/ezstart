@@ -18,8 +18,7 @@ import {
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
 import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET!
+import { JWT_SECRET } from '../../config/env.js'
 
 export const loginRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -52,7 +51,7 @@ const loginController = async (req: Request, res: Response) => {
           type: '2fa_pending',
         },
         JWT_SECRET,
-        { expiresIn: '5m' }
+        { expiresIn: '5m', algorithm: 'HS256' }
       )
 
       return sendSuccess(res, {

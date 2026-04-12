@@ -13,8 +13,7 @@ import { AuthService } from '../../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET!
+import { JWT_SECRET } from '../../../config/env.js'
 
 export const twoFactorValidateRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -43,7 +42,7 @@ const validateController = async (req: Request, res: Response) => {
     // Verify the temp token
     let payload: { userId: string; app: string; redirect_uri?: string; type: string }
     try {
-      payload = jwt.verify(tempToken, JWT_SECRET) as typeof payload
+      payload = jwt.verify(tempToken, JWT_SECRET, { algorithms: ['HS256'] }) as typeof payload
     } catch {
       return sendError(res, 'Invalid or expired temporary token', 401)
     }

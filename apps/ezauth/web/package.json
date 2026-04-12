@@ -19,6 +19,8 @@
     "@ezstart/logger": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
+    "@tanstack/react-query": "^5.62.0",
+    "@tanstack/react-query-devtools": "^5.62.0",
     "autoprefixer": "^10.4.19",
     "deepmerge": "^4.3.1",
     "next": "15.5.9",
@@ -26,7 +28,8 @@
     "postcss": "^8.4.38",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-hook-form": "^7.54.3"
+    "react-hook-form": "^7.54.3",
+    "sonner": "^2.0.3"
   },
   "devDependencies": {
     "@ezstart/eslint-config": "workspace:*",

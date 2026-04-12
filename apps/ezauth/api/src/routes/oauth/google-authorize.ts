@@ -6,8 +6,9 @@ import {
 } from '@ezstart/express-core'
 import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+import crypto from 'crypto'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
-import passport from '../../config/passport.js'
+import passport, { signOAuthStateToken } from '../../config/passport.js'
 
 export const googleAuthorizeRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -18,10 +19,12 @@ const googleAuthorizeQuerySchema = z.object({
   redirect_uri: z.string().url().optional().describe('URL to redirect after OAuth completion'),
 })
 
+/** Cookie that mirrors the nonce in the signed state JWT (CSRF double-submit). */
+const OAUTH_STATE_COOKIE = 'oauth_state'
+
 /**
  * GET /auth/google
- * Initiate Google OAuth flow
- * Query params: app, redirect_uri
+ * Initiate Google OAuth flow with a signed, CSRF-protected state token.
  */
 docRouter.get(
   '/google',
@@ -33,12 +36,23 @@ docRouter.get(
 
     const { app, redirect_uri } = parsed.data
 
-    // Pass app and redirect_uri via state parameter
-    const state = JSON.stringify({ app, redirect_uri })
+    // CSRF protection: generate a random nonce, stash it in a short-lived
+    // httpOnly cookie AND embed it in a signed JWT used as the `state` param.
+    // Callback will verify both match.
+    const nonce = crypto.randomBytes(32).toString('hex')
+    const stateToken = signOAuthStateToken({ nonce, app, redirectUri: redirect_uri })
+
+    res.cookie(OAUTH_STATE_COOKIE, nonce, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 5 * 60 * 1000, // 5 minutes — matches JWT TTL
+      path: '/api/auth',
+    })
 
     passport.authenticate('google', {
       scope: ['profile', 'email'],
-      state,
+      state: stateToken,
     })(req, res, next)
   },
   {

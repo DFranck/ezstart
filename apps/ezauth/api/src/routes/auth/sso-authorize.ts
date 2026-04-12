@@ -21,7 +21,9 @@ import {
 } from '@ezstart/express-core'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { issueHandoffCode } from '../../services/sso.service.js'
+import { env } from '../../config/env.js'
 import { logger } from '@ezstart/logger/server'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 
@@ -55,6 +57,13 @@ const ssoAuthorizeController = async (req: Request, res: Response) => {
       return sendError(res, 'Authentication required', 401)
     }
 
+    // Optionally require verified email before issuing a cross-app SSO handoff.
+    // Gated by REQUIRE_VERIFIED_EMAIL_FOR_SSO so existing unverified production
+    // users are not locked out; enable once user migration is complete.
+    if (env.REQUIRE_VERIFIED_EMAIL_FOR_SSO && req.user && req.user.isVerified === false) {
+      return sendError(res, 'Email verification required before cross-app SSO', 403)
+    }
+
     const { code, expiresIn } = await issueHandoffCode({
       userId,
       app: parsed.data.app,
@@ -83,6 +92,7 @@ const ssoAuthorizeController = async (req: Request, res: Response) => {
 docRouter.post(
   '/sso/authorize',
   ssoAuthorizeRateLimiter,
+  verifyCookieCsrf,
   verifyTokenMiddleware,
   ssoAuthorizeController,
   {
@@ -93,6 +103,7 @@ docRouter.post(
     extraResponses: {
       400: { description: 'Invalid app or disallowed redirectUri', schema: errorResponseSchema },
       401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: { description: 'Email verification required', schema: errorResponseSchema },
       429: { description: 'Too many requests', schema: errorResponseSchema },
     },
   }

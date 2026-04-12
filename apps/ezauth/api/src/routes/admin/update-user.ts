@@ -10,9 +10,11 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { mapToRecord } from '../../utils/map-to-record.js'
+import { requireAdmin } from './require-admin.js'
+import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+import { adminUserSchema, adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const updateUserRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -29,11 +31,6 @@ const updateUserRequestSchema = z.object({
     .record(z.string(), z.array(z.enum(['admin', 'manager', 'beta-tester', 'client'])))
     .optional()
     .describe('Per-app roles mapping'),
-  // Legacy fields
-  roles: z
-    .array(z.enum(['superadmin', 'admin', 'manager', 'beta-tester', 'client']))
-    .optional()
-    .describe('Legacy roles array'),
   permissions: z.array(z.string()).optional().describe('User permissions'),
   features: z.array(z.string()).optional().describe('Enabled feature flags'),
   apps: z.array(z.string()).optional().describe('Accessible applications'),
@@ -42,31 +39,9 @@ const updateUserRequestSchema = z.object({
   managedBy: z.string().optional().describe('Manager user ID'),
 })
 
-const userSchema = z.object({
-  _id: z.string().describe('User unique identifier'),
-  email: z.string().describe('User email address'),
-  username: z.string().optional().describe('Username'),
-  globalRoles: z.array(z.string()).optional().describe('Global roles'),
-  appRoles: z.record(z.string(), z.array(z.string())).optional().describe('Per-app roles mapping'),
-  roles: z.array(z.string()).describe('User roles'),
-  permissions: z.array(z.string()).describe('User permissions'),
-  features: z.array(z.string()).describe('Enabled feature flags'),
-  apps: z.array(z.string()).optional().describe('Accessible applications'),
-  isVerified: z.boolean().optional().describe('Email verification status'),
-  organizationId: z.string().optional().describe('Organization ID'),
-  managedBy: z.string().optional().describe('Manager user ID'),
-  createdAt: z.string().describe('Creation date ISO string'),
-  updatedAt: z.string().describe('Last update date ISO string'),
-})
-
 const updateUserResponseSchema = z.object({
-  user: userSchema.describe('Updated user object'),
+  user: adminUserSchema.describe('Updated user object'),
   message: z.string().describe('Success message'),
-})
-
-const errorSchema = z.object({
-  error: z.string().describe('Error message'),
-  details: z.string().optional().describe('Additional error details'),
 })
 
 // Params validation schema
@@ -141,16 +116,10 @@ const updateUserController = async (req: Request, res: Response) => {
 
     await user.save()
 
+    // IMPORTANT: use toAuthUser() to avoid leaking passwordHash (previously
+    // `...user.toObject()` exposed the bcrypt hash in admin responses).
     sendSuccess(res, {
-      user: {
-        ...user.toObject(),
-        _id: String(user._id),
-        globalRoles: user.globalRoles || [],
-        appRoles: mapToRecord(user.appRoles),
-        permissions: user.permissions || [],
-        features: user.features || [],
-        isVerified: user.isVerified,
-      },
+      user: user.toAuthUser(),
       message: 'User updated successfully',
     })
   } catch (error: unknown) {
@@ -159,17 +128,24 @@ const updateUserController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.patch('/users/:id', verifyTokenMiddleware, updateUserController, {
-  summary: 'Update user (admin)',
-  tags: ['Admin'],
-  bodySchema: updateUserRequestSchema,
-  responseSchema: updateUserResponseSchema,
-  extraResponses: {
-    401: { description: 'Unauthorized', schema: errorSchema },
-    403: { description: 'Forbidden', schema: errorSchema },
-    404: { description: 'User not found', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema },
-  },
-})
+docRouter.patch(
+  '/users/:id',
+  verifyCookieCsrf,
+  verifyTokenMiddleware,
+  requireAdmin,
+  updateUserController,
+  {
+    summary: 'Update user (admin)',
+    tags: ['Admin'],
+    bodySchema: updateUserRequestSchema,
+    responseSchema: updateUserResponseSchema,
+    extraResponses: {
+      401: { description: 'Unauthorized', schema: adminErrorSchema },
+      403: { description: 'Forbidden', schema: adminErrorSchema },
+      404: { description: 'User not found', schema: adminErrorSchema },
+      500: { description: 'Server error', schema: adminErrorSchema },
+    },
+  }
+)
 
 export default router

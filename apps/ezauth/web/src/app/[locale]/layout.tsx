@@ -1,21 +1,24 @@
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
+import { getWebUrl } from '@ezstart/config'
 import { Providers } from '@/components/providers'
-import { Div, ErrorBoundary } from '@ezstart/ui/components'
+import { Div, ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
+import { getMessages, getTranslations } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import Script from 'next/script'
 import { ReactNode } from 'react'
+
+const DOMAIN = getWebUrl('ezauth', 'production')
 
 export const metadata = createMetadata({
   appName: 'EZAuth',
   description:
     'EZStart centralized authentication service - Secure SSO for all EZStart applications',
-  domain: 'https://ezauth.vercel.app',
+  domain: DOMAIN,
   keywords: ['authentication', 'SSO', 'OAuth2', 'login', 'ezstart'],
   themeColor: '#000000',
-  ogImage: 'https://ezauth.vercel.app/og-image.svg',
+  ogImage: `${DOMAIN}/og-image.svg`,
 })
 
 export const viewport = createViewport('#000000')
@@ -24,7 +27,7 @@ const jsonLd = createJsonLd({
   appName: 'EZAuth',
   description:
     'EZStart centralized authentication service - Secure SSO for all EZStart applications',
-  url: 'https://ezauth.vercel.app',
+  url: DOMAIN,
   applicationCategory: 'BusinessApplication',
 })
 
@@ -40,6 +43,7 @@ export function generateStaticParams() {
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params
   const messages = await getMessages()
+  const t = await getTranslations({ locale, namespace: 'common' })
 
   return (
     <html lang={locale} suppressHydrationWarning data-app="ezauth">
@@ -50,7 +54,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <ErrorBoundary title="Something went wrong in EZAuth">
+          <ErrorBoundary title={t('errorBoundary.title')}>
             <Providers>
               <Div className="bg-background text-foreground flex items-center justify-center mx-2 min-h-screen">
                 {children}
@@ -58,6 +62,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             </Providers>
           </ErrorBoundary>
         </NextIntlClientProvider>
+        <Toaster />
       </body>
     </html>
   )

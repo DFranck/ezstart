@@ -3,24 +3,52 @@ import { getOAuthAccountModel } from '../models/oauth-account.js'
 import { AuthCodeResponse } from '@ezstart/auth-sdk/server'
 import { AuthService } from './auth.service.js'
 import { logger } from '@ezstart/logger/server'
+import { isValidAvatarUrl } from '../utils/avatar.js'
+
+/**
+ * Returns the avatar only if it passes `isValidAvatarUrl` validation.
+ * Keeps untrusted provider URLs out of the DB without breaking account creation.
+ */
+function safeAvatar(avatar: string | undefined): string | undefined {
+  if (!avatar) return undefined
+  return isValidAvatarUrl(avatar) ? avatar : undefined
+}
 
 export interface OAuthProfile {
   provider: 'google' | 'github' | 'facebook' | 'apple'
   providerId: string
   email: string
+  /** Whether the provider has independently verified this email address. */
+  emailVerified: boolean
   displayName?: string
   firstName?: string
   lastName?: string
   avatar?: string
   accessToken?: string
   refreshToken?: string
-  rawProfile: Record<string, any>
+  rawProfile: Record<string, unknown>
+}
+
+/**
+ * Error thrown when auto-linking is refused for safety reasons.
+ * The route layer translates this to a 400 with a clear user message.
+ */
+export class OAuthLinkingRefusedError extends Error {
+  code = 'OAUTH_LINKING_REFUSED' as const
+  constructor(message: string) {
+    super(message)
+    this.name = 'OAuthLinkingRefusedError'
+  }
 }
 
 export class OAuthService {
   /**
-   * Handle OAuth callback - Link or create account
-   * Returns auth code for SSO flow
+   * Handle OAuth callback — link or create account. Returns auth code for SSO flow.
+   *
+   * Security: auto-linking only happens when BOTH sides have verified the email.
+   * If either side is unverified, we refuse and require the user to log in first
+   * (explicit linkage flow). This prevents an attacker who controls an unverified
+   * Google account from hijacking a local account sharing the same email.
    */
   static async handleOAuthCallback(
     profile: OAuthProfile,
@@ -30,37 +58,54 @@ export class OAuthService {
     const AuthUserModel = await getAuthUserModel()
     const OAuthAccountModel = await getOAuthAccountModel()
 
-    // 1. Check if OAuth account already exists
+    // 1. Existing OAuth link → login
     const existingOAuthAccount = await OAuthAccountModel.findOne({
       provider: profile.provider,
       providerId: profile.providerId,
     })
 
     if (existingOAuthAccount) {
-      // OAuth account exists → Login with existing user
-      logger.info(`✅ [OAuth] Existing ${profile.provider} account found for user ${existingOAuthAccount.userId}`)
+      logger.info(
+        `✅ [OAuth] Existing ${profile.provider} account found for user ${existingOAuthAccount.userId}`
+      )
 
       const user = await AuthUserModel.findById(existingOAuthAccount.userId)
       if (!user) {
         throw new Error('User not found for OAuth account')
       }
 
-      // Grant access to the requesting app if not already granted
       if (!user.apps.includes(app)) {
         user.apps.push(app)
         await user.save()
       }
 
-      // Generate auth code for SSO
-      return AuthService['generateAuthCode'](user._id!.toString(), app, redirectUri)
+      return AuthService.generateAuthCodePublic(user._id!.toString(), app, redirectUri)
     }
 
-    // 2. Check if user exists with same email (account linking)
+    // 2. Local user exists with this email → only auto-link if BOTH verified
     const existingUser = await AuthUserModel.findOne({ email: profile.email })
 
     if (existingUser) {
-      // User exists with same email → Link OAuth account
-      logger.info(`🔗 [OAuth] Linking ${profile.provider} account to existing user ${existingUser._id}`)
+      if (!profile.emailVerified || !existingUser.isVerified) {
+        logger.warn(
+          {
+            provider: profile.provider,
+            email: profile.email,
+            providerEmailVerified: profile.emailVerified,
+            localVerified: existingUser.isVerified,
+          },
+          '[OAuth] Refusing to auto-link — unverified email on one or both sides'
+        )
+        throw new OAuthLinkingRefusedError(
+          'An account with this email already exists. Please log in first, then link your Google account from your profile.'
+        )
+      }
+
+      logger.info(
+        `🔗 [OAuth] Linking ${profile.provider} account to verified user ${existingUser._id}`
+      )
+
+      const validatedAvatar = safeAvatar(profile.avatar)
 
       const oauthAccount = new OAuthAccountModel({
         userId: existingUser._id,
@@ -68,7 +113,7 @@ export class OAuthService {
         providerId: profile.providerId,
         email: profile.email,
         displayName: profile.displayName,
-        avatar: profile.avatar,
+        avatar: validatedAvatar,
         accessToken: profile.accessToken,
         refreshToken: profile.refreshToken,
         profile: profile.rawProfile,
@@ -76,56 +121,64 @@ export class OAuthService {
 
       await oauthAccount.save()
 
-      // Update user avatar if not set
-      if (!existingUser.avatar && profile.avatar) {
-        existingUser.avatar = profile.avatar
+      if (!existingUser.avatar && validatedAvatar) {
+        existingUser.avatar = validatedAvatar
         await existingUser.save()
       }
 
-      // Grant access to the requesting app
       if (!existingUser.apps.includes(app)) {
         existingUser.apps.push(app)
         await existingUser.save()
       }
 
-      return AuthService['generateAuthCode'](existingUser._id!.toString(), app, redirectUri)
+      return AuthService.generateAuthCodePublic(existingUser._id!.toString(), app, redirectUri)
     }
 
-    // 3. Create new user + OAuth account
+    // 3. Brand-new user — still require the provider to have verified the email
+    if (!profile.emailVerified) {
+      logger.warn(
+        { provider: profile.provider, email: profile.email },
+        '[OAuth] Refusing to create account from unverified provider email'
+      )
+      throw new OAuthLinkingRefusedError(
+        'Your Google account has no verified email. Please verify it with Google, then try again.'
+      )
+    }
+
     logger.info(`✨ [OAuth] Creating new user from ${profile.provider} account`)
 
     // Generate unique username from email or displayName
-    const baseUsername = profile.email.split('@')[0] || profile.displayName?.replace(/\s+/g, '').toLowerCase()
+    const baseUsername =
+      profile.email.split('@')[0] || profile.displayName?.replace(/\s+/g, '').toLowerCase()
     let username = baseUsername || 'user'
     let counter = 1
 
-    // Ensure username is unique
     while (await AuthUserModel.findOne({ username })) {
       username = `${baseUsername}${counter}`
       counter++
     }
+
+    const validatedAvatar = safeAvatar(profile.avatar)
 
     const newUser = new AuthUserModel({
       email: profile.email,
       username,
       firstName: profile.firstName,
       lastName: profile.lastName,
-      avatar: profile.avatar,
-      isVerified: true, // OAuth users are pre-verified
+      avatar: validatedAvatar,
+      isVerified: true, // Provider confirmed above
       apps: [app],
-      // passwordHash is optional for OAuth-only users
     })
 
     await newUser.save()
 
-    // Create OAuth account link
     const oauthAccount = new OAuthAccountModel({
       userId: newUser._id,
       provider: profile.provider,
       providerId: profile.providerId,
       email: profile.email,
       displayName: profile.displayName,
-      avatar: profile.avatar,
+      avatar: validatedAvatar,
       accessToken: profile.accessToken,
       refreshToken: profile.refreshToken,
       profile: profile.rawProfile,
@@ -133,7 +186,7 @@ export class OAuthService {
 
     await oauthAccount.save()
 
-    return AuthService['generateAuthCode'](newUser._id!.toString(), app, redirectUri)
+    return AuthService.generateAuthCodePublic(newUser._id!.toString(), app, redirectUri)
   }
 
   /**
@@ -151,7 +204,6 @@ export class OAuthService {
     const OAuthAccountModel = await getOAuthAccountModel()
     const AuthUserModel = await getAuthUserModel()
 
-    // Check if user has a password (can't unlink if OAuth-only)
     const user = await AuthUserModel.findById(userId)
     if (!user) {
       throw new Error('User not found')

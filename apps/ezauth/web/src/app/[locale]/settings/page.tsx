@@ -16,6 +16,7 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
+import { toast } from '@ezstart/ui/utils'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -27,15 +28,10 @@ export default function SettingsPage() {
   const { app, redirectUri } = useAuthNavigation()
   const { user } = useAuth()
   const [sendingVerification, setSendingVerification] = useState(false)
-  const [verifyStatus, setVerifyStatus] = useState<{
-    type: 'success' | 'error'
-    message: string
-  } | null>(null)
 
   const handleResendVerification = async () => {
     if (!user) return
     setSendingVerification(true)
-    setVerifyStatus(null)
     try {
       const response = await callApi('/auth/send-verification', {
         appName: 'ezauth',
@@ -45,12 +41,10 @@ export default function SettingsPage() {
       if (!response.ok) {
         throw new Error(response.error || parseApiError(response.data) || ts('verifyError'))
       }
-      setVerifyStatus({ type: 'success', message: ts('verificationSent') })
+      toast.success(ts('verificationSent'))
     } catch (error) {
-      setVerifyStatus({
-        type: 'error',
-        message: error instanceof Error ? error.message : ts('verifyError'),
-      })
+      const message = error instanceof Error ? error.message : ts('verifyError')
+      toast.error(message)
     } finally {
       setSendingVerification(false)
     }
@@ -109,17 +103,6 @@ export default function SettingsPage() {
                     {ts('resendVerification')}
                   </Button>
                 </Div>
-              )}
-              {verifyStatus && (
-                <P
-                  className={
-                    verifyStatus.type === 'success'
-                      ? 'text-xs text-success'
-                      : 'text-xs text-destructive'
-                  }
-                >
-                  {verifyStatus.message}
-                </P>
               )}
             </Div>
           </Div>

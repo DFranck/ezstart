@@ -1,6 +1,6 @@
 /**
- * Authentication middleware for verifying JWT tokens
- * Extracts user info from token and attaches to req.user
+ * Authentication middleware for verifying JWT tokens.
+ * Extracts user info from token and attaches to req.user.
  */
 
 import type { Request, Response, NextFunction } from 'express'
@@ -11,69 +11,73 @@ import { getAuthUserModel } from '../models/auth-user.js'
 import { updatePresenceByUserId } from '../services/presence.service.js'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
+import { JWT_SECRET } from '../config/env.js'
+import { ACCESS_COOKIE_NAME } from '../config/cookie.js'
 
-const JWT_SECRET = process.env.JWT_SECRET
-if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
+/** Extract a Bearer/cookie token from the request, or return undefined. */
+function extractToken(req: Request): string | undefined {
+  const authHeader = req.headers.authorization
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7)
+  }
+  const cookieToken = req.cookies?.[ACCESS_COOKIE_NAME]
+  if (typeof cookieToken === 'string' && cookieToken.length > 0) {
+    return cookieToken
+  }
+  return undefined
+}
+
+/** Load the user from Mongo and hydrate `req.user`. Returns false if not found. */
+async function attachUserToRequest(req: Request, userId: string): Promise<boolean> {
+  const AuthUser = await getAuthUserModel()
+  const user = await AuthUser.findById(userId).select('-passwordHash').lean()
+  if (!user) return false
+
+  const resolvedUserId = user._id.toString()
+  req.user = {
+    _id: resolvedUserId,
+    userId: resolvedUserId,
+    email: user.email,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatar: user.avatar,
+    isVerified: user.isVerified,
+    apps: user.apps,
+    globalRoles: user.globalRoles || [],
+    appRoles: mapToRecord(user.appRoles),
+    permissions: user.permissions || [],
+    features: user.features || [],
+    organizationId: user.organizationId,
+    managedBy: user.managedBy,
+    createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
+  }
+
+  // Fire-and-forget presence update (throttled, non-blocking)
+  updatePresenceByUserId(resolvedUserId)
+  return true
+}
 
 /**
- * Middleware to verify JWT token and attach user to request
- * Supports both Authorization header and httpOnly cookies
+ * Middleware to verify JWT token and attach user to request.
+ * Supports both Authorization header and httpOnly cookies.
  */
 export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
-    // Try to get token from Authorization header
-    let token: string | undefined
-
-    const authHeader = req.headers.authorization
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7)
-    }
-
-    // Fallback: Try to get token from httpOnly cookie
-    if (!token && req.cookies?.ezauth_token) {
-      token = req.cookies.ezauth_token
-    }
-
+    const token = extractToken(req)
     if (!token) {
       return sendError(res, 'Authentication required', 401)
     }
 
-    // Verify token
-    const payload = jwt.verify(token, JWT_SECRET!) as unknown as JWTPayload
+    const payload = jwt.verify(token, JWT_SECRET, {
+      algorithms: ['HS256'],
+    }) as unknown as JWTPayload
 
-    // Get full user from database to ensure fresh data
-    const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(payload.userId).select('-passwordHash').lean()
-
-    if (!user) {
+    const attached = await attachUserToRequest(req, payload.userId)
+    if (!attached) {
       return sendError(res, 'User not found', 401)
     }
-
-    const userId = user._id.toString()
-
-    // Attach user to request
-    req.user = {
-      _id: userId,
-      userId,
-      email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatar: user.avatar,
-      isVerified: user.isVerified,
-      apps: user.apps,
-      globalRoles: user.globalRoles || [],
-      appRoles: mapToRecord(user.appRoles),
-      permissions: user.permissions || [],
-      features: user.features || [],
-      organizationId: user.organizationId,
-      managedBy: user.managedBy,
-      createdAt: user.createdAt.toISOString(),
-      updatedAt: user.updatedAt.toISOString(),
-    }
-
-    // Fire-and-forget presence update (throttled, non-blocking)
-    updatePresenceByUserId(userId)
 
     next()
   } catch (error: unknown) {
@@ -89,64 +93,23 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
 }
 
 /**
- * Optional middleware - allows both authenticated and unauthenticated requests
- * Attaches user if token is valid, but doesn't reject if missing
+ * Optional middleware — allows both authenticated and unauthenticated requests.
+ * Attaches user if token is valid, but doesn't reject if missing.
  */
 export async function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
-    // Try to get token
-    let token: string | undefined
-
-    const authHeader = req.headers.authorization
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7)
-    }
-
-    if (!token && req.cookies?.ezauth_token) {
-      token = req.cookies.ezauth_token
-    }
-
-    // If no token, just continue without user
+    const token = extractToken(req)
     if (!token) {
       return next()
     }
 
-    // Verify token
-    const payload = jwt.verify(token, JWT_SECRET!) as unknown as JWTPayload
-
-    // Get full user from database
-    const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(payload.userId).select('-passwordHash').lean()
-
-    if (user) {
-      const userId = user._id.toString()
-      req.user = {
-        _id: userId,
-        userId,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatar: user.avatar,
-        isVerified: user.isVerified,
-        apps: user.apps,
-        globalRoles: user.globalRoles || [],
-        appRoles: mapToRecord(user.appRoles),
-        permissions: user.permissions || [],
-        features: user.features || [],
-        organizationId: user.organizationId,
-        managedBy: user.managedBy,
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
-      }
-
-      // Fire-and-forget presence update (throttled, non-blocking)
-      updatePresenceByUserId(userId)
-    }
-
+    const payload = jwt.verify(token, JWT_SECRET, {
+      algorithms: ['HS256'],
+    }) as unknown as JWTPayload
+    await attachUserToRequest(req, payload.userId)
     next()
-  } catch (error) {
-    // Silently fail - optional auth
+  } catch {
+    // Silently fail — optional auth
     next()
   }
 }

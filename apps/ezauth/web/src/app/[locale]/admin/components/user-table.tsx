@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,8 +24,11 @@ import {
   DataTableColumnHeader,
   type ColumnDef,
 } from '@ezstart/ui/components'
+import { toast } from '@ezstart/ui/utils'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { EditRolesModal } from './edit-roles-modal'
+import { AuthErrorBanner } from '@/components/AuthErrorBanner'
 
 // ========================================
 // Types
@@ -40,9 +43,10 @@ interface AdminUser {
   createdAt: string
 }
 
-interface UsersResponse {
-  data: AdminUser[]
-  meta: { total: number; limit: number; offset: number }
+interface ListUsersMeta {
+  total: number
+  limit: number
+  offset: number
 }
 
 // ========================================
@@ -52,17 +56,6 @@ interface UsersResponse {
 const PAGE_SIZE = 20
 
 // ========================================
-// Helpers
-// ========================================
-
-function formatDate(dateStr: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(dateStr))
-}
-
-// ========================================
 // Component
 // ========================================
 
@@ -70,14 +63,12 @@ export function UserTable() {
   const t = useTranslations('admin.users')
   const td = useTranslations('admin.dialog')
   const tr = useTranslations('admin.roles')
+  const tp = useTranslations('admin.pagination')
+  const locale = useLocale()
+  const queryClient = useQueryClient()
 
-  // Data state
-  const [users, setUsers] = useState<AdminUser[]>([])
-  const [loading, setLoading] = useState(true)
-  const [total, setTotal] = useState(0)
+  // Pagination + search state
   const [offset, setOffset] = useState(0)
-
-  // Search state
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -106,62 +97,65 @@ export function UserTable() {
     }
   }, [])
 
-  // Fetch users
-  const fetchUsers = useCallback(async () => {
-    setLoading(true)
-    try {
+  // React Query: fetch users (new API format { data, meta })
+  const {
+    data: usersData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['admin', 'users', offset, searchQuery],
+    queryFn: async () => {
       const query: Record<string, string> = {
         limit: String(PAGE_SIZE),
         offset: String(offset),
       }
       if (searchQuery) query.search = searchQuery
 
-      const response = await callApi<UsersResponse>('/admin/users', {
+      const response = await callApi<AdminUser[]>('/admin/users', {
         appName: 'ezauth',
         method: 'GET',
         query,
       })
-      if (response.ok) {
-        const result = response.data as { users?: AdminUser[]; pagination?: { total: number } }
-        setUsers(result.users || [])
-        setTotal(result.pagination?.total ?? 0)
+      if (!response.ok) {
+        throw new Error(response.error || parseApiError(response.data) || t('fetchError'))
       }
-    } catch {
-      // Error logged by callApi
-    } finally {
-      setLoading(false)
-    }
-  }, [offset, searchQuery])
+      return {
+        users: (response.data ?? []) as AdminUser[],
+        meta: (response.meta ?? { total: 0, limit: PAGE_SIZE, offset }) as ListUsersMeta,
+      }
+    },
+  })
 
-  useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
+  const users = usersData?.users ?? []
+  const total = usersData?.meta.total ?? 0
 
-  // Delete state
-  const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState('')
-
-  // Delete handler
-  const handleDeleteConfirm = useCallback(async () => {
-    if (!deleteDialog.userId) return
-    setDeleting(true)
-    setDeleteError('')
-    try {
-      const response = await callApi(`/admin/users/${deleteDialog.userId}`, {
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await callApi(`/admin/users/${userId}`, {
         appName: 'ezauth',
         method: 'DELETE',
       })
       if (!response.ok) {
         throw new Error(response.error || parseApiError(response.data) || t('deleteError'))
       }
+    },
+    onSuccess: () => {
+      toast.success(t('deleteSuccess'))
       setDeleteDialog({ open: false, userId: null })
-      fetchUsers()
-    } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : t('deleteError'))
-    } finally {
-      setDeleting(false)
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || t('deleteError'))
+    },
+  })
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (deleteDialog.userId) {
+      deleteMutation.mutate(deleteDialog.userId)
     }
-  }, [deleteDialog.userId, fetchUsers, t])
+  }, [deleteDialog.userId, deleteMutation])
 
   // Edit handler
   const handleEditClick = useCallback((user: AdminUser) => {
@@ -169,78 +163,96 @@ export function UserTable() {
     setEditOpen(true)
   }, [])
 
+  // Locale-aware date formatter
+  const formatDate = useCallback(
+    (dateStr: string): string =>
+      new Intl.DateTimeFormat(locale, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(dateStr)),
+    [locale]
+  )
+
   // DataTable columns
-  const columns: ColumnDef<AdminUser>[] = [
-    {
-      accessorKey: 'email',
-      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.email')} />,
-      cell: ({ row }) => <Span className="text-sm font-medium">{row.original.email}</Span>,
-    },
-    {
-      accessorKey: 'username',
-      header: ({ header }) => (
-        <DataTableColumnHeader header={header} title={t('columns.username')} />
-      ),
-      cell: ({ row }) => <Span className="text-sm">{row.original.username}</Span>,
-    },
-    {
-      id: 'roles',
-      header: t('columns.roles'),
-      enableSorting: false,
-      cell: ({ row }) => {
-        const global = row.original.globalRoles
-        const appEntries = Object.entries(row.original.appRoles)
-        if (global.length === 0 && appEntries.length === 0) {
-          return <Span className="text-muted-foreground text-sm">-</Span>
-        }
-        return (
-          <Div className="flex flex-wrap gap-1">
-            {global.map(role => (
-              <Badge
-                key={role}
-                variant={role === 'superadmin' ? 'destructive' : 'secondary'}
-                size="sm"
-              >
-                {tr(role as 'superadmin' | 'admin' | 'manager' | 'beta-tester' | 'client')}
-              </Badge>
-            ))}
-            {appEntries.map(([app, roles]) =>
-              roles.map(role => (
-                <Badge key={`${app}-${role}`} variant="outline" size="sm">
-                  {app}:{role}
-                </Badge>
-              ))
-            )}
-          </Div>
-        )
+  const columns: ColumnDef<AdminUser>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'email',
+        header: ({ header }) => (
+          <DataTableColumnHeader header={header} title={t('columns.email')} />
+        ),
+        cell: ({ row }) => <Span className="text-sm font-medium">{row.original.email}</Span>,
       },
-    },
-    {
-      accessorKey: 'createdAt',
-      header: ({ header }) => (
-        <DataTableColumnHeader header={header} title={t('columns.createdAt')} />
-      ),
-      cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.createdAt)}</Span>,
-    },
-    {
-      id: 'actions',
-      header: t('columns.actions'),
-      cell: ({ row }) => (
-        <Div className="flex gap-1">
-          <Button variant="outline" size="sm" onClick={() => handleEditClick(row.original)}>
-            {t('edit')}
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setDeleteDialog({ open: true, userId: row.original._id })}
-          >
-            {t('delete')}
-          </Button>
-        </Div>
-      ),
-    },
-  ]
+      {
+        accessorKey: 'username',
+        header: ({ header }) => (
+          <DataTableColumnHeader header={header} title={t('columns.username')} />
+        ),
+        cell: ({ row }) => <Span className="text-sm">{row.original.username}</Span>,
+      },
+      {
+        id: 'roles',
+        header: t('columns.roles'),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const global = row.original.globalRoles
+          const appEntries = Object.entries(row.original.appRoles)
+          if (global.length === 0 && appEntries.length === 0) {
+            return <Span className="text-muted-foreground text-sm">-</Span>
+          }
+          return (
+            <Div className="flex flex-wrap gap-1">
+              {global.map(role => (
+                <Badge
+                  key={role}
+                  variant={role === 'superadmin' ? 'destructive' : 'secondary'}
+                  size="sm"
+                >
+                  {tr(role as 'superadmin' | 'admin' | 'manager' | 'beta-tester' | 'client')}
+                </Badge>
+              ))}
+              {appEntries.map(([app, roles]) =>
+                roles.map(role => (
+                  <Badge key={`${app}-${role}`} variant="outline" size="sm">
+                    {app}:{role}
+                  </Badge>
+                ))
+              )}
+            </Div>
+          )
+        },
+      },
+      {
+        accessorKey: 'createdAt',
+        header: ({ header }) => (
+          <DataTableColumnHeader header={header} title={t('columns.createdAt')} />
+        ),
+        cell: ({ row }) => <Span className="text-sm">{formatDate(row.original.createdAt)}</Span>,
+      },
+      {
+        id: 'actions',
+        header: t('columns.actions'),
+        cell: ({ row }) => (
+          <Div className="flex gap-1">
+            <Button variant="outline" size="sm" onClick={() => handleEditClick(row.original)}>
+              {t('edit')}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setDeleteDialog({ open: true, userId: row.original._id })}
+            >
+              {t('delete')}
+            </Button>
+          </Div>
+        ),
+      },
+    ],
+    [t, tr, formatDate, handleEditClick]
+  )
+
+  const deleting = deleteMutation.isPending
+  const endIndex = Math.min(offset + PAGE_SIZE, total)
 
   return (
     <Div className="space-y-4">
@@ -252,8 +264,20 @@ export function UserTable() {
         className="w-full sm:w-80"
       />
 
+      {/* Error state */}
+      {isError && (
+        <Card className="p-6">
+          <Div className="space-y-3 text-center">
+            <P className="text-destructive text-sm">{t('fetchError')}</P>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              {td('retry')}
+            </Button>
+          </Div>
+        </Card>
+      )}
+
       {/* Table */}
-      {loading ? (
+      {!isError && isLoading ? (
         <Card className="p-8">
           <Div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -261,19 +285,19 @@ export function UserTable() {
             ))}
           </Div>
         </Card>
-      ) : users.length === 0 ? (
+      ) : !isError && users.length === 0 ? (
         <Card className="p-8">
           <P className="text-center text-muted-foreground">{t('noUsers')}</P>
         </Card>
-      ) : (
+      ) : !isError ? (
         <DataTable columns={columns} data={users} pageSize={PAGE_SIZE} />
-      )}
+      ) : null}
 
-      {/* Server-side pagination info */}
-      {!loading && total > PAGE_SIZE && (
+      {/* Server-side pagination */}
+      {!isLoading && !isError && total > PAGE_SIZE && (
         <Div className="flex items-center justify-between">
           <P className="text-sm text-muted-foreground">
-            {offset + 1}-{Math.min(offset + PAGE_SIZE, total)} / {total}
+            {tp('showing', { from: offset + 1, to: endIndex, total })}
           </P>
           <Div className="flex gap-2">
             <Button
@@ -282,7 +306,7 @@ export function UserTable() {
               disabled={offset === 0}
               onClick={() => setOffset(prev => Math.max(0, prev - PAGE_SIZE))}
             >
-              &larr;
+              {tp('previous')}
             </Button>
             <Button
               variant="outline"
@@ -290,7 +314,7 @@ export function UserTable() {
               disabled={offset + PAGE_SIZE >= total}
               onClick={() => setOffset(prev => prev + PAGE_SIZE)}
             >
-              &rarr;
+              {tp('next')}
             </Button>
           </Div>
         </Div>
@@ -301,7 +325,7 @@ export function UserTable() {
         user={editUser}
         open={editOpen}
         onOpenChange={setEditOpen}
-        onSaved={fetchUsers}
+        onSaved={() => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -317,10 +341,12 @@ export function UserTable() {
             <AlertDialogTitle>{t('confirmDeleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>{t('confirmDeleteDescription')}</AlertDialogDescription>
           </AlertDialogHeader>
-          {deleteError && (
-            <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
-              {deleteError}
-            </Div>
+          {deleteMutation.isError && (
+            <AuthErrorBanner>
+              {deleteMutation.error instanceof Error
+                ? deleteMutation.error.message
+                : t('deleteError')}
+            </AuthErrorBanner>
           )}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>{td('cancel')}</AlertDialogCancel>

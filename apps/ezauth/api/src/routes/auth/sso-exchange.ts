@@ -20,17 +20,18 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { z } from 'zod'
-import jwt from 'jsonwebtoken'
 import { consumeHandoffCode } from '../../services/sso.service.js'
-import { AuthService } from '../../services/auth.service.js'
+import { issueSession } from '../../services/auth.service.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { env } from '../../config/env.js'
 import { logger } from '@ezstart/logger/server'
-import { mapToRecord } from '../../utils/map-to-record.js'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
-
-const JWT_SECRET = process.env.JWT_SECRET
-if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
-const ACCESS_TOKEN_EXPIRES_IN = (process.env.ACCESS_TOKEN_EXPIRES_IN || '15m') as `${number}m`
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  buildAuthCookieOptions,
+  buildRefreshCookieOptions,
+} from '../../config/cookie.js'
 
 export const ssoExchangeRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -86,54 +87,35 @@ const ssoExchangeController = async (req: Request, res: Response) => {
       return sendError(res, 'User not found', 400)
     }
 
+    // Optionally require verified email before granting cross-app access via SSO.
+    // Gated by REQUIRE_VERIFIED_EMAIL_FOR_SSO (default off) to avoid locking out
+    // existing unverified production users; flip on after user migration.
+    if (env.REQUIRE_VERIFIED_EMAIL_FOR_SSO && !user.isVerified) {
+      logger.warn({ userId: user._id!.toString() }, 'SSO exchange refused: email not verified')
+      return sendError(res, 'Email verification required before cross-app SSO', 403)
+    }
+
     // Grant app access if missing (mirrors login behaviour)
     if (!user.apps.includes(consumed.app)) {
       user.apps.push(consumed.app)
       await user.save()
     }
 
-    // Build JWT payload identical to login path
-    const payload = {
-      userId: user._id!.toString(),
-      email: user.email,
-      username: user.username,
-      apps: user.apps,
-      globalRoles: user.globalRoles || [],
-      appRoles: mapToRecord(user.appRoles),
-      permissions: user.permissions || [],
-      features: user.features || [],
-    }
-    const accessToken = jwt.sign(payload, JWT_SECRET!, {
-      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+    // Reuse the shared session issuer (JWT + refresh token)
+    const session = await issueSession(user, {
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
     })
 
-    // Issue refresh token (stored hashed server-side)
-    const refreshToken = await AuthService.generateRefreshToken(
-      user._id!.toString(),
-      req.headers['user-agent'],
-      req.ip
-    )
+    // Cookie options mirror login-cookie.ts EXACTLY — centralized in config/cookie.ts.
+    res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions())
+    res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions())
 
-    // Cookie options mirror login-cookie.ts EXACTLY — same name, same shape.
-    // Scoped to the shared parent domain in prod so all *.ezstart.xyz apps
-    // see the session; undefined in dev (host-only cookie).
-    res.cookie('ezauth_token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000, // 15 minutes (matches access token TTL)
-      path: '/',
-      domain:
-        process.env.NODE_ENV === 'production'
-          ? process.env.COOKIE_DOMAIN || '.ezstart.xyz'
-          : undefined,
-    })
-
-    // Refresh token returned in body (matches login-cookie.ts pattern);
-    // client persists it in localStorage via the auth store.
+    // Refresh token returned in body (matches login-cookie.ts pattern) for
+    // localStorage-mode consumers; httpOnly consumers ignore it.
     return sendSuccess(res, {
       user: user.toAuthUser(),
-      refreshToken,
+      refreshToken: session.refreshToken,
       redirect: toRelativeRedirect(consumed.redirectUri),
     })
   } catch (error) {
@@ -154,6 +136,7 @@ docRouter.post('/sso/exchange', ssoExchangeRateLimiter, ssoExchangeController, {
       description: 'Invalid/expired/used code or app mismatch',
       schema: errorResponseSchema,
     },
+    403: { description: 'Email verification required', schema: errorResponseSchema },
     429: { description: 'Too many requests', schema: errorResponseSchema },
   },
 })

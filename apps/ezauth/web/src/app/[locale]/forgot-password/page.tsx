@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Div,
+  Spinner,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { Suspense } from 'react'
@@ -45,7 +46,13 @@ function ForgotPasswordContent() {
 
 export default function ForgotPasswordPage() {
   return (
-    <Suspense fallback={<Div className="animate-pulse bg-muted rounded h-32" />}>
+    <Suspense
+      fallback={
+        <Div className="flex items-center justify-center min-h-[200px]">
+          <Spinner variant="primary" size="lg" />
+        </Div>
+      }
+    >
       <ForgotPasswordContent />
     </Suspense>
   )

@@ -3,8 +3,8 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  createStrictRateLimiter,
   sendSuccess,
-  sendError,
 } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
@@ -14,29 +14,31 @@ import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
 import { hashRefreshToken, getRefreshTokenModel } from '../../models/refresh-token.js'
-
-const JWT_SECRET = process.env.JWT_SECRET
+import { JWT_SECRET } from '../../config/env.js'
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  buildAuthCookieClearOptions,
+  buildRefreshCookieClearOptions,
+} from '../../config/cookie.js'
+import { verifyCookieCsrf } from '../../middleware/csrf.js'
 
 export const logoutRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(logoutRegistry, router)
 
+const logoutRateLimiter = createStrictRateLimiter()
+
 const logoutRequestSchema = z.object({
-  refreshToken: z.string().optional().describe('Refresh token for obtaining new access tokens'),
+  refreshToken: z
+    .string()
+    .optional()
+    .describe('Refresh token (or provided via ezauth_refresh cookie)'),
 })
 
 const logoutResponseSchema = z.object({
   message: z.string().describe('Success message'),
 })
-
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/',
-  domain:
-    process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN || '.ezstart.xyz' : undefined,
-}
 
 /**
  * Extract userId from JWT (cookie or Authorization header).
@@ -51,13 +53,15 @@ function extractUserIdFromRequest(req: Request): string | null {
       token = authHeader.substring(7)
     }
 
-    if (!token && req.cookies?.ezauth_token) {
-      token = req.cookies.ezauth_token
+    if (!token && req.cookies?.[ACCESS_COOKIE_NAME]) {
+      token = req.cookies[ACCESS_COOKIE_NAME]
     }
 
-    if (!token || !JWT_SECRET) return null
+    if (!token) return null
 
-    const payload = jwt.verify(token, JWT_SECRET) as unknown as JWTPayload
+    const payload = jwt.verify(token, JWT_SECRET, {
+      algorithms: ['HS256'],
+    }) as unknown as JWTPayload
     return payload.userId ?? null
   } catch {
     // Token expired or invalid — still try to logout gracefully
@@ -65,10 +69,18 @@ function extractUserIdFromRequest(req: Request): string | null {
   }
 }
 
-// Logout: clear httpOnly cookie + revoke refresh tokens
+// Logout: clear httpOnly cookies + revoke refresh tokens
 const logoutController = async (req: Request, res: Response) => {
+  const clearCookies = () => {
+    res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions())
+    res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions())
+  }
+
   try {
-    const { refreshToken } = logoutRequestSchema.parse(req.body || {})
+    const parsedBody = logoutRequestSchema.safeParse(req.body ?? {})
+    const bodyRefreshToken = parsedBody.success ? parsedBody.data.refreshToken : undefined
+    const cookieRefreshToken: string | undefined = req.cookies?.[REFRESH_COOKIE_NAME]
+    const refreshToken = bodyRefreshToken || cookieRefreshToken
     const userId = extractUserIdFromRequest(req)
 
     if (refreshToken) {
@@ -91,23 +103,25 @@ const logoutController = async (req: Request, res: Response) => {
       }
     }
 
-    // Always clear httpOnly cookie
-    res.clearCookie('ezauth_token', COOKIE_OPTIONS)
+    clearCookies()
     sendSuccess(res, { message: 'Logged out successfully' })
   } catch (error) {
     logger.error('Logout error:', error)
-    // Still clear cookie even on error
-    res.clearCookie('ezauth_token', COOKIE_OPTIONS)
+    // Still clear cookies even on error
+    clearCookies()
     sendSuccess(res, { message: 'Logged out successfully' })
   }
 }
 
-docRouter.post('/logout', logoutController, {
-  summary: 'Logout, clear httpOnly cookie, and revoke refresh tokens',
+docRouter.post('/logout', logoutRateLimiter, verifyCookieCsrf, logoutController, {
+  summary: 'Logout, clear httpOnly cookies, and revoke refresh tokens',
   tags: ['Authentication'],
   bodySchema: logoutRequestSchema,
   responseSchema: logoutResponseSchema,
   status: 200,
+  extraResponses: {
+    429: { description: 'Too many requests', schema: errorResponseSchema },
+  },
 })
 
 export default router

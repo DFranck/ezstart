@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
+  createRateLimiter,
   OpenAPIRegistry,
   Router,
   sendSuccess,
@@ -19,6 +20,10 @@ import {
 export const verifyRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(verifyRegistry, router)
+
+// Per-endpoint rate limiter — /verify is called frequently by clients so we use
+// the standard 100 req/15min bucket rather than the strict auth limiter.
+const verifyRateLimiter = createRateLimiter()
 
 // Verify token validity
 const verifyController = async (req: Request, res: Response) => {
@@ -57,7 +62,7 @@ const verifyController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/verify', verifyController, {
+docRouter.post('/verify', verifyRateLimiter, verifyController, {
   summary: 'Verify token validity',
   tags: ['Authentication'],
   bodySchema: verifyRequestSchema,
@@ -65,6 +70,7 @@ docRouter.post('/verify', verifyController, {
   extraResponses: {
     401: { description: 'Invalid token', schema: errorResponseSchema },
     403: { description: 'No app access', schema: errorResponseSchema },
+    429: { description: 'Too many requests', schema: errorResponseSchema },
   },
 })
 

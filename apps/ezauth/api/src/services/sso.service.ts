@@ -22,6 +22,7 @@
 import crypto from 'crypto'
 import { logger } from '@ezstart/logger/server'
 import { getAuthCodeModel } from '../models/auth-code.js'
+import { env } from '../config/env.js'
 
 const HANDOFF_TTL_SECONDS = 60
 
@@ -30,7 +31,7 @@ const HANDOFF_TTL_SECONDS = 60
  * Expected format: comma-separated URLs (origin-only fragments or full URLs).
  */
 function getAllowedOrigins(): string[] {
-  const raw = process.env.SSO_ALLOWED_REDIRECTS || ''
+  const raw = env.SSO_ALLOWED_REDIRECTS || ''
   return raw
     .split(',')
     .map(s => s.trim())

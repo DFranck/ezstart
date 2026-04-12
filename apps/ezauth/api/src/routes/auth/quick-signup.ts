@@ -13,12 +13,12 @@ import { z } from 'zod'
 import crypto from 'crypto'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
-import { AuthService } from '../../services/auth.service.js'
 import { emailService } from '../../services/email.service.js'
 import { welcomeSetPasswordTemplate } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { issueSession } from '../../services/auth.service.js'
 
 export const quickSignupRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -41,9 +41,9 @@ const quickSignupSchema = z.object({
 })
 
 const quickSignupResponseSchema = z.object({
-  user: z.object({}).passthrough().describe('User data'),
-  accessToken: z.string().describe('JWT access token'),
-  refreshToken: z.string().describe('Refresh token'),
+  user: z.object({}).passthrough().describe('Authenticated user'),
+  accessToken: z.string().describe('JWT access token for the new session'),
+  refreshToken: z.string().describe('Refresh token to persist client-side (localStorage mode)'),
 })
 
 const errorSchema = z.object({
@@ -73,10 +73,11 @@ const quickSignupController = async (req: Request, res: Response) => {
       return sendError(res, 'User already exists with this email or username', 409)
     }
 
-    // Generate a random password the user never sees
+    // Generate a random password the user never sees — must be replaced via
+    // the emailed set-password link before the account is usable.
     const randomPassword = crypto.randomUUID()
 
-    // Create user with hasSetOwnPassword: false
+    // Create user with hasSetOwnPassword: false and isVerified: false.
     const user = new AuthUserModel({
       email: normalizedEmail,
       username: normalizedUsername,
@@ -89,19 +90,7 @@ const quickSignupController = async (req: Request, res: Response) => {
 
     await user.save()
 
-    // Generate access + refresh tokens (reuse loginWithToken flow internals)
-    const payload = {
-      email: normalizedEmail,
-      password: randomPassword,
-      app,
-    }
-
-    const authResult = await AuthService.loginWithToken(payload, {
-      userAgent: req.headers['user-agent'],
-      ip: req.ip,
-    })
-
-    // Send welcome email with set-password link
+    // Send welcome email with set-password link (doubles as email verification).
     try {
       const AuthCodeModel = await getAuthCodeModel()
       const token = crypto.randomBytes(32).toString('hex')
@@ -134,14 +123,24 @@ const quickSignupController = async (req: Request, res: Response) => {
 
       logger.info({ email: normalizedEmail, app }, 'Welcome email sent after quick-signup')
     } catch (emailError) {
-      // Don't fail signup if email sending fails
+      // Don't fail signup if email sending fails — the user can request another email.
       logger.error('Failed to send welcome email:', emailError)
     }
 
+    // Auto-login the user: the welcome email still doubles as email verification
+    // (they must click the link to mark isVerified=true and set a real password),
+    // but consumers like green-pulse/earthday need an immediate session to read
+    // the applied promo. OAuth account-takeover via unverified email is blocked
+    // separately in oauth.service.ts.
+    const session = await issueSession(user, {
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
+    })
+
     sendSuccess(res.status(201), {
-      user: authResult.user,
-      accessToken: authResult.access_token,
-      refreshToken: authResult.refreshToken,
+      user: session.user,
+      accessToken: session.access_token,
+      refreshToken: session.refreshToken,
     })
   } catch (error) {
     logger.error('Quick-signup error:', error)

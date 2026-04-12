@@ -1,9 +1,16 @@
 import crypto from 'crypto'
+import { env, JWT_SECRET } from '../config/env.js'
 
 const ALGORITHM = 'aes-256-gcm'
 
+/**
+ * Derive the AES key from `OAUTH_ENCRYPTION_KEY` when provided, otherwise fall
+ * back to `JWT_SECRET`. Documented in `.env.example` — `OAUTH_ENCRYPTION_KEY`
+ * is strongly recommended in production so rotating JWT_SECRET doesn't
+ * invalidate existing OAuth refresh tokens at rest.
+ */
 function getKey(): Buffer {
-  const secret = process.env.OAUTH_ENCRYPTION_KEY || process.env.JWT_SECRET
+  const secret = env.OAUTH_ENCRYPTION_KEY || JWT_SECRET
   if (!secret) throw new Error('OAUTH_ENCRYPTION_KEY or JWT_SECRET required for token encryption')
   return crypto.createHash('sha256').update(secret).digest()
 }

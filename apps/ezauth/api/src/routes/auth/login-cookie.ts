@@ -19,8 +19,13 @@ import {
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
 import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET!
+import { JWT_SECRET } from '../../config/env.js'
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  buildAuthCookieOptions,
+  buildRefreshCookieOptions,
+} from '../../config/cookie.js'
 
 export const loginCookieRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -54,7 +59,7 @@ const loginCookieController = async (req: Request, res: Response) => {
           mode: 'cookie',
         },
         JWT_SECRET,
-        { expiresIn: '5m' }
+        { expiresIn: '5m', algorithm: 'HS256' }
       )
 
       return sendSuccess(res, {
@@ -70,20 +75,12 @@ const loginCookieController = async (req: Request, res: Response) => {
       ip: req.ip,
     })
 
-    // Set httpOnly cookie with short-lived access token
-    res.cookie('ezauth_token', authResult.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000, // 15 minutes (matches access token TTL)
-      path: '/',
-      domain:
-        process.env.NODE_ENV === 'production'
-          ? process.env.COOKIE_DOMAIN || '.ezstart.xyz'
-          : undefined,
-    })
+    // Set httpOnly cookies — access (15m, path=/) + refresh (30d, path=/api/auth/refresh)
+    res.cookie(ACCESS_COOKIE_NAME, authResult.access_token, buildAuthCookieOptions())
+    res.cookie(REFRESH_COOKIE_NAME, authResult.refreshToken, buildRefreshCookieOptions())
 
-    // Return user info + refresh token
+    // Return user info + refresh token (refresh token duplicated in body for
+    // backwards-compat with the localStorage mode; httpOnly consumers ignore it)
     sendSuccess(res, {
       user: authResult.user,
       refreshToken: authResult.refreshToken,
@@ -95,18 +92,14 @@ const loginCookieController = async (req: Request, res: Response) => {
 }
 
 // Generate CSRF token (client calls GET before POST)
-docRouter.get(
-  '/login-cookie/csrf',
-  csrf.generateToken,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- createRouterWithDoc handler type mismatch
-  ((_req: Request, res: Response) => {
-    sendSuccess(res, { message: 'CSRF token generated' })
-  }) as any,
-  {
-    summary: 'Generate CSRF token for login-cookie',
-    tags: ['Authentication'],
-  }
-)
+const csrfTokenHandler = (_req: Request, res: Response): void => {
+  sendSuccess(res, { message: 'CSRF token generated' })
+}
+
+docRouter.get('/login-cookie/csrf', csrf.generateToken, csrfTokenHandler, {
+  summary: 'Generate CSRF token for login-cookie',
+  tags: ['Authentication'],
+})
 
 docRouter.post('/login-cookie', loginCookieRateLimiter, csrf.verifyToken, loginCookieController, {
   summary: 'Login with httpOnly cookie (dual-mode)',

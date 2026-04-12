@@ -24,8 +24,8 @@ const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Token is required').describe('Password reset token'),
   newPassword: z
     .string()
-    .min(6, 'Password must be at least 6 characters')
-    .describe('New password (min 6 characters)'),
+    .min(8, 'Password must be at least 8 characters')
+    .describe('New password (min 8 characters)'),
 })
 
 const resetPasswordResponseSchema = z.object({

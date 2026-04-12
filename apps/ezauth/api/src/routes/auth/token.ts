@@ -16,6 +16,12 @@ import {
   tokenResponseSchema,
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  buildAuthCookieOptions,
+  buildRefreshCookieOptions,
+} from '../../config/cookie.js'
 
 /** Strict rate limit: 10 requests per 5 minutes */
 const tokenRateLimiter = createStrictRateLimiter({
@@ -41,20 +47,10 @@ const tokenController = async (req: Request, res: Response) => {
       ip: req.ip,
     })
 
-    // DUAL-MODE: Set httpOnly cookie for apps using httpOnly mode
-    res.cookie('ezauth_token', token.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000, // 15 minutes (matches access token TTL)
-      path: '/',
-      domain:
-        process.env.NODE_ENV === 'production'
-          ? process.env.COOKIE_DOMAIN || '.ezstart.xyz'
-          : undefined,
-    })
+    // DUAL-MODE: Set httpOnly cookies (apps using cookie mode) + return tokens in body
+    res.cookie(ACCESS_COOKIE_NAME, token.access_token, buildAuthCookieOptions())
+    res.cookie(REFRESH_COOKIE_NAME, token.refreshToken, buildRefreshCookieOptions())
 
-    // Return token data including refresh token
     sendSuccess(res, {
       access_token: token.access_token,
       token_type: token.token_type,

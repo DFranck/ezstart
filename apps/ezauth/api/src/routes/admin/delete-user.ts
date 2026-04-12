@@ -12,8 +12,10 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { getOAuthAccountModel } from '../../models/oauth-account.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { requireAdmin } from './require-admin.js'
+import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+import { adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const deleteUserRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -25,11 +27,6 @@ const deleteUserParamsSchema = z.object({
 
 const deleteUserResponseSchema = z.object({
   message: z.string().describe('Success message'),
-})
-
-const errorSchema = z.object({
-  error: z.string().describe('Error message'),
-  details: z.string().optional().describe('Additional error details'),
 })
 
 const deleteUserController = async (req: Request, res: Response) => {
@@ -80,17 +77,24 @@ const deleteUserController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.delete('/users/:id', verifyTokenMiddleware, requireAdmin, deleteUserController, {
-  summary: 'Delete user (admin)',
-  tags: ['Admin'],
-  responseSchema: deleteUserResponseSchema,
-  extraResponses: {
-    400: { description: 'Bad request', schema: errorSchema },
-    401: { description: 'Unauthorized', schema: errorSchema },
-    403: { description: 'Forbidden', schema: errorSchema },
-    404: { description: 'User not found', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema },
-  },
-})
+docRouter.delete(
+  '/users/:id',
+  verifyCookieCsrf,
+  verifyTokenMiddleware,
+  requireAdmin,
+  deleteUserController,
+  {
+    summary: 'Delete user (admin)',
+    tags: ['Admin'],
+    responseSchema: deleteUserResponseSchema,
+    extraResponses: {
+      400: { description: 'Bad request', schema: adminErrorSchema },
+      401: { description: 'Unauthorized', schema: adminErrorSchema },
+      403: { description: 'Forbidden', schema: adminErrorSchema },
+      404: { description: 'User not found', schema: adminErrorSchema },
+      500: { description: 'Server error', schema: adminErrorSchema },
+    },
+  }
+)
 
 export default router

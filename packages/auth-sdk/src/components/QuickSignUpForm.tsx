@@ -143,9 +143,11 @@ export function QuickSignUpForm({
         ...(emailBody ? { emailBody } : {}),
       })
 
-      // Auto-login: store tokens + user
+      // Auto-login: the API issues a real session so consumers (e.g.
+      // green-pulse/earthday) can read the applied promo immediately.
+      // The user still needs to click the emailed set-password link to
+      // flip isVerified=true and set a real password.
       store.setAuth(result.user, result.accessToken, 'localStorage', result.refreshToken)
-
       logger.info('Quick signup successful')
       toast.success(t.successToast)
       onSuccess?.()

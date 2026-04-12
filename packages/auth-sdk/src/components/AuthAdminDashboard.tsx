@@ -51,9 +51,10 @@ interface AdminUser {
   createdAt: string
 }
 
-interface UsersApiResult {
-  users?: AdminUser[]
-  pagination?: { total: number; page: number; limit: number; totalPages: number }
+interface UsersApiMeta {
+  total: number
+  limit: number
+  offset: number
 }
 
 export interface AuthAdminDashboardTexts {
@@ -429,24 +430,23 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
   const fetchUsers = useCallback(async () => {
     setLoading(true)
     try {
-      const page = Math.floor(offset / PAGE_SIZE) + 1
       const query: Record<string, string> = {
         limit: String(PAGE_SIZE),
-        page: String(page),
+        offset: String(offset),
       }
       if (appName) query.app = appName
       if (searchQuery) query.search = searchQuery
 
-      const response = await callApi<UsersApiResult>('/admin/users', {
+      const response = await callApi<AdminUser[]>('/admin/users', {
         appName: 'ezauth',
         method: 'GET',
         query,
         accessToken: accessToken ?? undefined,
       })
       if (response.ok) {
-        const result = response.data as UsersApiResult
-        setUsers(result.users || [])
-        setTotal(result.pagination?.total ?? 0)
+        setUsers((response.data ?? []) as AdminUser[])
+        const meta = response.meta as UsersApiMeta | undefined
+        setTotal(meta?.total ?? 0)
       }
     } catch {
       // Error logged by callApi

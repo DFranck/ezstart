@@ -12,19 +12,19 @@ import {
   RegisterRequest,
   TokenRequest,
   AuthToken,
-  AuthCode,
   AuthCodeResponse,
   JWTPayload,
 } from '@ezstart/auth-sdk/server'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
+import { JWT_SECRET, env } from '../config/env.js'
+import { ACCESS_TOKEN_EXPIRES_SECONDS } from '../config/cookie.js'
 
-const JWT_SECRET = process.env.JWT_SECRET!
-if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
-const ACCESS_TOKEN_EXPIRES_IN = (process.env.ACCESS_TOKEN_EXPIRES_IN || '15m') as `${number}m`
+const ACCESS_TOKEN_EXPIRES_IN = env.ACCESS_TOKEN_EXPIRES_IN as `${number}m`
 const REFRESH_TOKEN_DAYS = 30
 
-function buildJwtPayload(user: AuthUserDocument) {
+/** Build the JWT payload for an authenticated user. Shared by login + SSO exchange. */
+export function buildJwtPayload(user: AuthUserDocument): JWTPayload {
   return {
     userId: user._id!.toString(),
     email: user.email,
@@ -34,6 +34,35 @@ function buildJwtPayload(user: AuthUserDocument) {
     appRoles: mapToRecord(user.appRoles),
     permissions: user.permissions || [],
     features: user.features || [],
+  }
+}
+
+/**
+ * Issue a full session (signed JWT + hashed refresh token) for a given user.
+ * Used by login, token exchange and SSO-exchange to remove duplication.
+ */
+export async function issueSession(
+  user: AuthUserDocument,
+  meta?: { userAgent?: string; ip?: string }
+): Promise<AuthToken & { refreshToken: string }> {
+  const payload = buildJwtPayload(user)
+  const accessToken = jwt.sign({ ...payload }, JWT_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+    algorithm: 'HS256',
+  })
+
+  const refreshToken = await AuthService.generateRefreshToken(
+    user._id!.toString(),
+    meta?.userAgent,
+    meta?.ip
+  )
+
+  return {
+    access_token: accessToken,
+    token_type: 'Bearer',
+    expires_in: ACCESS_TOKEN_EXPIRES_SECONDS,
+    user: user.toAuthUser(),
+    refreshToken,
   }
 }
 
@@ -135,24 +164,7 @@ export class AuthService {
       await user.save()
     }
 
-    // Generate short-lived access token
-    const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
-
-    // Generate refresh token
-    const rawRefreshToken = await this.generateRefreshToken(
-      user._id!.toString(),
-      meta?.userAgent,
-      meta?.ip
-    )
-
-    return {
-      access_token: accessToken,
-      token_type: 'Bearer',
-      expires_in: 15 * 60, // 15 minutes in seconds
-      user: user.toAuthUser(),
-      refreshToken: rawRefreshToken,
-    }
+    return issueSession(user, meta)
   }
 
   // Exchange code for token
@@ -192,32 +204,15 @@ export class AuthService {
       throw new Error('User not found')
     }
 
-    // Generate short-lived access token
-    const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
-
-    // Generate refresh token
-    const rawRefreshToken = await this.generateRefreshToken(
-      user._id!.toString(),
-      meta?.userAgent,
-      meta?.ip
-    )
-
-    return {
-      access_token: accessToken,
-      token_type: 'Bearer',
-      expires_in: 15 * 60, // 15 minutes in seconds
-      user: user.toAuthUser(),
-      refreshToken: rawRefreshToken,
-    }
+    return issueSession(user, meta)
   }
 
   // Verify JWT token
   static async verifyToken(token: string): Promise<JWTPayload> {
     try {
-      const payload = jwt.verify(token, JWT_SECRET) as JWTPayload
+      const payload = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as JWTPayload
       return payload
-    } catch (error) {
+    } catch {
       throw new Error('Invalid token')
     }
   }
@@ -346,24 +341,10 @@ export class AuthService {
       throw new Error('User not found')
     }
 
-    // Generate new access token
-    const payload = buildJwtPayload(user)
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN })
-
-    // Generate new refresh token
-    const newRawRefreshToken = await this.generateRefreshToken(
-      user._id!.toString(),
-      meta?.userAgent || storedToken.userAgent,
-      meta?.ip || storedToken.ip
-    )
-
-    return {
-      access_token: accessToken,
-      token_type: 'Bearer',
-      expires_in: 15 * 60,
-      user: user.toAuthUser(),
-      refreshToken: newRawRefreshToken,
-    }
+    return issueSession(user, {
+      userAgent: meta?.userAgent || storedToken.userAgent,
+      ip: meta?.ip || storedToken.ip,
+    })
   }
 
   /**

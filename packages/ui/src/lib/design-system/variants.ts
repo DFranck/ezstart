@@ -731,6 +731,7 @@ export const sectionSize = {
   md: 'max-w-4xl px-4 py-6 md:px-6 md:py-8',
   lg: 'max-w-5xl px-4 py-8 md:px-8 md:py-12',
   xl: 'max-w-6xl px-4 py-12 md:px-12 md:py-16',
+  wide: 'w-full px-4 py-12 md:px-12 md:py-16',
   full: 'min-h-screen  px-4 py-16 md:px-16 md:py-18',
 } as const
 
@@ -753,7 +754,7 @@ export const DEFAULT_SECTION_VARIANTS = {
   variant: 'default',
   size: 'default',
   intent: 'default',
-  layout: 'default',
+  layout: 'col',
   density: 'default',
 } as const
 
@@ -1431,7 +1432,7 @@ export const tagVariants = {
     variants: asideVariantConfig,
     defaultVariants: DEFAULT_ASIDE_VARIANTS,
   }),
-  main: cva('w-full flex-1 flex flex-col', {
+  main: cva('w-full flex-1 flex flex-col items-center pb-12 md:pb-16', {
     variants: mainVariantConfig,
     defaultVariants: DEFAULT_MAIN_VARIANTS,
   }),
