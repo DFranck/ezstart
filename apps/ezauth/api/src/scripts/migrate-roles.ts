@@ -5,11 +5,17 @@
  */
 
 import { connectToMongo } from '@ezstart/express-core'
+import { logger } from '@ezstart/logger/server'
 import { getAuthUserModel } from '../models/auth-user.js'
 
 async function migrateRoles() {
   try {
-    console.log('🚀 Starting roles migration...\n')
+    // Extra safeguard: never run destructive scripts in production automatically.
+    if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_PROD_MIGRATION) {
+      throw new Error('Refusing to run migration in production without ALLOW_PROD_MIGRATION=1')
+    }
+
+    logger.info('🚀 Starting roles migration...')
 
     // Connect to MongoDB
     await connectToMongo('ezauth')
@@ -17,7 +23,7 @@ async function migrateRoles() {
 
     // Find all users
     const users = await AuthUserModel.find({})
-    console.log(`📊 Found ${users.length} users to migrate\n`)
+    logger.info(`📊 Found ${users.length} users to migrate`)
 
     let migratedCount = 0
     let skippedCount = 0
@@ -26,61 +32,54 @@ async function migrateRoles() {
       // Skip if already migrated (has globalRoles or appRoles)
       const hasAppRoles = user.appRoles && user.appRoles.size > 0
       if (user.globalRoles?.length > 0 || hasAppRoles) {
-        console.log(`⏭️  Skipping ${user.email} - already migrated`)
+        logger.debug({ email: user.email }, '⏭️  Skipping — already migrated')
         skippedCount++
         continue
       }
 
       // Skip if no roles to migrate
       if (!user.roles || user.roles.length === 0) {
-        console.log(`⏭️  Skipping ${user.email} - no roles to migrate`)
+        logger.debug({ email: user.email }, '⏭️  Skipping — no roles to migrate')
         skippedCount++
         continue
       }
 
-      console.log(`\n🔄 Migrating ${user.email}...`)
-      console.log(`   Current roles: ${user.roles.join(', ')}`)
-      console.log(`   Apps: ${user.apps.join(', ')}`)
+      logger.info({ email: user.email, roles: user.roles, apps: user.apps }, '🔄 Migrating user')
 
       // Check if user has superadmin role
       if (user.roles.includes('superadmin')) {
         user.globalRoles = ['superadmin']
-        console.log(`   ✅ Set globalRoles: ['superadmin']`)
+        logger.debug({ email: user.email }, '✅ Set globalRoles to [superadmin]')
       }
 
       // Migrate other roles to app-specific roles
       const otherRoles = user.roles.filter(r => r !== 'superadmin')
 
       if (otherRoles.length > 0 && user.apps.length > 0) {
-        // Initialize appRoles Map if not exists
         if (!user.appRoles) {
           user.appRoles = new Map<string, string[]>()
         }
 
-        // Assign roles to all apps user has access to
         for (const app of user.apps) {
           user.appRoles.set(app, otherRoles)
-          console.log(`   ✅ Set appRoles['${app}']: [${otherRoles.join(', ')}]`)
+          logger.debug({ email: user.email, app, roles: otherRoles }, '✅ Set appRoles')
         }
       }
 
-      // Save user
       await user.save()
       migratedCount++
-      console.log(`   💾 Saved!`)
     }
 
-    console.log(`\n\n✅ Migration complete!`)
-    console.log(`   Migrated: ${migratedCount} users`)
-    console.log(`   Skipped: ${skippedCount} users`)
-    console.log(`   Total: ${users.length} users`)
+    logger.info(
+      { migrated: migratedCount, skipped: skippedCount, total: users.length },
+      '✅ Migration complete'
+    )
 
     process.exit(0)
   } catch (error) {
-    console.error('❌ Migration failed:', error)
+    logger.error({ err: error }, '❌ Migration failed')
     process.exit(1)
   }
 }
 
-// Run migration
 migrateRoles()

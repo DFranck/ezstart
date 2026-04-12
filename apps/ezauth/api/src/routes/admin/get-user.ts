@@ -12,33 +12,15 @@ import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+import { mapToRecord } from '../../utils/map-to-record.js'
+import { adminUserSchema, adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const getUserRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(getUserRegistry, router)
 
-// Schemas
-const userSchema = z.object({
-  _id: z.string().describe('User unique identifier'),
-  email: z.string().describe('User email address'),
-  username: z.string().optional().describe('Username'),
-  roles: z.array(z.string()).describe('User roles'),
-  permissions: z.array(z.string()).describe('User permissions'),
-  features: z.array(z.string()).describe('Enabled feature flags'),
-  apps: z.array(z.string()).optional().describe('Accessible applications'),
-  organizationId: z.string().optional().describe('Organization ID'),
-  managedBy: z.string().optional().describe('Manager user ID'),
-  createdAt: z.string().describe('Creation date ISO string'),
-  updatedAt: z.string().describe('Last update date ISO string'),
-})
-
 const getUserResponseSchema = z.object({
-  user: userSchema.describe('User object'),
-})
-
-const errorSchema = z.object({
-  error: z.string().describe('Error message'),
-  details: z.string().optional().describe('Additional error details'),
+  user: adminUserSchema.describe('User object'),
 })
 
 // Controller
@@ -70,6 +52,8 @@ const getUserController = async (req: Request, res: Response) => {
       user: {
         ...user,
         _id: user._id.toString(),
+        globalRoles: user.globalRoles || [],
+        appRoles: mapToRecord(user.appRoles as unknown as Map<string, string[]> | undefined),
         permissions: user.permissions || [],
         features: user.features || [],
       },
@@ -85,10 +69,10 @@ docRouter.get('/users/:id', verifyTokenMiddleware, requireAdmin, getUserControll
   tags: ['Admin'],
   responseSchema: getUserResponseSchema,
   extraResponses: {
-    401: { description: 'Unauthorized', schema: errorSchema },
-    403: { description: 'Forbidden', schema: errorSchema },
-    404: { description: 'User not found', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema },
+    401: { description: 'Unauthorized', schema: adminErrorSchema },
+    403: { description: 'Forbidden', schema: adminErrorSchema },
+    404: { description: 'User not found', schema: adminErrorSchema },
+    500: { description: 'Server error', schema: adminErrorSchema },
   },
 })
 

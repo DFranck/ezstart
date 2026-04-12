@@ -13,52 +13,38 @@ import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
+import { mapToRecord } from '../../utils/map-to-record.js'
+import {
+  adminUserSchema,
+  adminErrorSchema,
+  paginationMetaSchema,
+} from '../../types/admin-schemas.js'
 
 export const listUsersRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(listUsersRegistry, router)
 
-// Schemas
-const userSchema = z.object({
-  _id: z.string().describe('User unique identifier'),
-  email: z.string().describe('User email address'),
-  username: z.string().optional().describe('Username'),
-  roles: z.array(z.string()).describe('User roles'),
-  permissions: z.array(z.string()).describe('User permissions'),
-  features: z.array(z.string()).describe('Enabled feature flags'),
-  apps: z.array(z.string()).optional().describe('Accessible applications'),
-  organizationId: z.string().optional().describe('Organization ID'),
-  managedBy: z.string().optional().describe('Manager user ID'),
-  lastActiveAt: z.string().nullable().optional().describe('Last activity date ISO string'),
-  createdAt: z.string().describe('Creation date ISO string'),
-  updatedAt: z.string().describe('Last update date ISO string'),
-})
-
-const paginationSchema = z.object({
-  page: z.number().describe('Current page number'),
-  limit: z.number().describe('Items per page'),
-  total: z.number().describe('Total number of items'),
-  totalPages: z.number().describe('Total number of pages'),
-})
-
+// OpenAPI: list response matches the monorepo-wide `{ success, data, meta }` shape
 const listUsersResponseSchema = z.object({
-  users: z.array(userSchema).describe('List of users'),
-  pagination: paginationSchema.describe('Pagination metadata'),
+  success: z.literal(true),
+  data: z.array(adminUserSchema).describe('List of users'),
+  meta: paginationMetaSchema,
 })
 
-const errorSchema = z.object({
-  error: z.string().describe('Error message'),
-  details: z.string().optional().describe('Additional error details'),
-})
-
-// Query validation schema
+// Query validation schema — limit/offset aligned with every other paginated
+// list in the monorepo (green-pulse, ezbill, …).
 const listUsersQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().max(200).optional().default(50),
+  limit: z.coerce.number().int().positive().max(200).optional().default(20),
+  offset: z.coerce.number().int().min(0).optional().default(0),
   search: z.string().optional(),
   role: z.string().optional(),
   app: z.string().optional(),
 })
+
+/** Escape user input before embedding in a Mongo `$regex`. */
+function escapeRegex(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
 // Controller
 const listUsersController = async (req: Request, res: Response) => {
@@ -71,7 +57,7 @@ const listUsersController = async (req: Request, res: Response) => {
     }
 
     const AuthUser = await getAuthUserModel()
-    const { page, limit, search, role, app } = parsedQuery.data
+    const { limit, offset, search, role, app } = parsedQuery.data
     const query: Record<string, unknown> = {}
 
     // Superadmin sees all users, admin sees non-superadmins in their apps
@@ -87,11 +73,12 @@ const listUsersController = async (req: Request, res: Response) => {
       query.apps = { $in: [app] }
     }
 
-    // Search filter: match email or username (case-insensitive)
+    // Search filter: match email or username (case-insensitive, escaped → no ReDoS)
     if (search) {
+      const safe = escapeRegex(search)
       query.$or = [
-        { email: { $regex: search, $options: 'i' } },
-        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: safe, $options: 'i' } },
+        { username: { $regex: safe, $options: 'i' } },
       ]
     }
 
@@ -109,34 +96,26 @@ const listUsersController = async (req: Request, res: Response) => {
       AuthUser.find(query)
         .select('-passwordHash')
         .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
+        .skip(offset)
         .limit(limit)
         .lean(),
       AuthUser.countDocuments(query),
     ])
 
-    sendSuccess(res, {
-      users: users.map(
-        (
-          u: Record<string, unknown> & {
-            _id: { toString(): string }
-            permissions?: string[]
-            features?: string[]
-          }
-        ) => ({
-          ...u,
-          _id: u._id.toString(),
-          permissions: u.permissions || [],
-          features: u.features || [],
-        })
-      ),
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
+    const data = users.map(u => ({
+      ...u,
+      _id: u._id.toString(),
+      globalRoles: u.globalRoles || [],
+      appRoles: mapToRecord(u.appRoles as unknown as Map<string, string[]> | undefined),
+      permissions: u.permissions || [],
+      features: u.features || [],
+      createdAt: u.createdAt instanceof Date ? u.createdAt.toISOString() : String(u.createdAt),
+      updatedAt: u.updatedAt instanceof Date ? u.updatedAt.toISOString() : String(u.updatedAt),
+      lastActiveAt:
+        u.lastActiveAt instanceof Date ? u.lastActiveAt.toISOString() : (u.lastActiveAt ?? null),
+    }))
+
+    sendSuccess(res, data, { total, limit, offset })
   } catch (error: unknown) {
     logger.error('Error listing users:', error)
     sendError(res, 'Failed to list users', 500)
@@ -146,11 +125,12 @@ const listUsersController = async (req: Request, res: Response) => {
 docRouter.get('/users', verifyTokenMiddleware, requireAdmin, listUsersController, {
   summary: 'List all users (admin)',
   tags: ['Admin'],
+  querySchema: listUsersQuerySchema,
   responseSchema: listUsersResponseSchema,
   extraResponses: {
-    401: { description: 'Unauthorized', schema: errorSchema },
-    403: { description: 'Forbidden', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema },
+    401: { description: 'Unauthorized', schema: adminErrorSchema },
+    403: { description: 'Forbidden', schema: adminErrorSchema },
+    500: { description: 'Server error', schema: adminErrorSchema },
   },
 })
 

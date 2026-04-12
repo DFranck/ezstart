@@ -13,10 +13,12 @@ import {
   Spinner,
 } from '@ezstart/ui/components'
 import { BackButton } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/fetch-client'
+import { toast } from '@ezstart/ui/utils'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { useAuthStore } from '@ezstart/auth-sdk'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLocale, useTranslations } from 'next-intl'
+import { useCallback } from 'react'
 
 interface Session {
   id: string
@@ -27,115 +29,113 @@ interface Session {
   isCurrent: boolean
 }
 
-function parseUserAgent(ua: string | null): string {
-  if (!ua) return 'Unknown device'
-
-  // Extract browser
-  let browser = 'Unknown browser'
-  if (ua.includes('Firefox/')) browser = 'Firefox'
-  else if (ua.includes('Edg/')) browser = 'Edge'
-  else if (ua.includes('Chrome/')) browser = 'Chrome'
-  else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari'
-
-  // Extract OS
-  let os = 'Unknown OS'
-  if (ua.includes('Windows')) os = 'Windows'
-  else if (ua.includes('Mac OS')) os = 'macOS'
-  else if (ua.includes('Linux')) os = 'Linux'
-  else if (ua.includes('Android')) os = 'Android'
-  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
-
-  return `${browser} on ${os}`
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 export default function SessionsPage() {
   const t = useTranslations('sessions')
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [loading, setLoading] = useState(true)
-  const [revoking, setRevoking] = useState<string | null>(null)
-  const [revokingAll, setRevokingAll] = useState(false)
-  const [error, setError] = useState('')
-
+  const locale = useLocale()
+  const queryClient = useQueryClient()
   const refreshToken = useAuthStore(state => state.refreshToken)
 
-  const fetchSessions = useCallback(async () => {
-    try {
-      setLoading(true)
+  const parseUserAgent = useCallback(
+    (ua: string | null): string => {
+      if (!ua) return t('unknownDevice')
+
+      let browser = t('unknownBrowser')
+      if (ua.includes('Firefox/')) browser = 'Firefox'
+      else if (ua.includes('Edg/')) browser = 'Edge'
+      else if (ua.includes('Chrome/')) browser = 'Chrome'
+      else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari'
+
+      let os = t('unknownOS')
+      if (ua.includes('Windows')) os = 'Windows'
+      else if (ua.includes('Mac OS')) os = 'macOS'
+      else if (ua.includes('Linux')) os = 'Linux'
+      else if (ua.includes('Android')) os = 'Android'
+      else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
+
+      return t('deviceOn', { browser, os })
+    },
+    [t]
+  )
+
+  const formatDate = useCallback(
+    (iso: string): string =>
+      new Date(iso).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    [locale]
+  )
+
+  // React Query: fetch sessions
+  const {
+    data: sessions = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['sessions'],
+    queryFn: async () => {
       const headers: Record<string, string> = {}
       if (refreshToken) {
         headers['X-Refresh-Token'] = refreshToken
       }
-      const response = await callApi('/auth/sessions', {
+      const response = await callApi<{ sessions: Session[] } | Session[]>('/auth/sessions', {
         appName: 'ezauth',
         method: 'GET',
         headers,
       })
-      if (response.ok) {
-        const data = response.data as { sessions: Session[] }
-        setSessions(data.sessions)
+      if (!response.ok) {
+        throw new Error(response.error || parseApiError(response.data) || t('fetchError'))
       }
-    } catch {
-      setError(t('fetchError'))
-    } finally {
-      setLoading(false)
-    }
-  }, [t, refreshToken])
+      const data = response.data as { sessions?: Session[] } | Session[] | null
+      if (Array.isArray(data)) return data
+      return data?.sessions ?? []
+    },
+  })
 
-  useEffect(() => {
-    fetchSessions()
-  }, [fetchSessions])
-
-  const handleRevoke = async (sessionId: string) => {
-    setRevoking(sessionId)
-    setError('')
-    try {
+  // Revoke single session
+  const revokeMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
       const response = await callApi(`/auth/sessions/${sessionId}`, {
         appName: 'ezauth',
         method: 'DELETE',
       })
-      if (response.ok) {
-        setSessions(prev => prev.filter(s => s.id !== sessionId))
-      } else {
-        setError(t('revokeError'))
+      if (!response.ok) {
+        throw new Error(response.error || parseApiError(response.data) || t('revokeError'))
       }
-    } catch {
-      setError(t('revokeError'))
-    } finally {
-      setRevoking(null)
-    }
-  }
+      return sessionId
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || t('revokeError'))
+    },
+  })
 
-  const handleRevokeAll = async () => {
-    setRevokingAll(true)
-    setError('')
-    try {
+  // Revoke all sessions
+  const revokeAllMutation = useMutation({
+    mutationFn: async () => {
       const response = await callApi('/auth/sessions', {
         appName: 'ezauth',
         method: 'DELETE',
       })
-      if (response.ok) {
-        setSessions([])
-      } else {
-        setError(t('revokeAllError'))
+      if (!response.ok) {
+        throw new Error(response.error || parseApiError(response.data) || t('revokeAllError'))
       }
-    } catch {
-      setError(t('revokeAllError'))
-    } finally {
-      setRevokingAll(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || t('revokeAllError'))
+    },
+  })
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Div className="flex items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
@@ -155,13 +155,18 @@ export default function SessionsPage() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {error && (
-          <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
-            {error}
+        {isError && (
+          <Div className="space-y-3 text-center">
+            <P size="sm" className="text-destructive">
+              {t('fetchError')}
+            </P>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              {t('retry')}
+            </Button>
           </Div>
         )}
 
-        {sessions.length === 0 && (
+        {!isError && sessions.length === 0 && (
           <P size="sm" className="text-muted-foreground text-center">
             {t('noSessions')}
           </P>
@@ -196,10 +201,14 @@ export default function SessionsPage() {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => handleRevoke(session.id)}
-                disabled={revoking === session.id}
+                onClick={() => revokeMutation.mutate(session.id)}
+                disabled={revokeMutation.isPending && revokeMutation.variables === session.id}
               >
-                {revoking === session.id ? <Spinner size="sm" /> : t('revoke')}
+                {revokeMutation.isPending && revokeMutation.variables === session.id ? (
+                  <Spinner size="sm" />
+                ) : (
+                  t('revoke')
+                )}
               </Button>
             )}
           </Div>
@@ -209,10 +218,10 @@ export default function SessionsPage() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={handleRevokeAll}
-            disabled={revokingAll}
+            onClick={() => revokeAllMutation.mutate()}
+            disabled={revokeAllMutation.isPending}
           >
-            {revokingAll ? <Spinner size="sm" /> : t('revokeAll')}
+            {revokeAllMutation.isPending ? <Spinner size="sm" /> : t('revokeAll')}
           </Button>
         )}
       </CardContent>

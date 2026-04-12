@@ -1,8 +1,8 @@
 {
   "admin": {
     "title": "Tableau de bord Admin",
-    "accessDenied": "Acces refuse",
-    "accessDeniedDescription": "Vous devez avoir les privileges administrateur pour acceder a cette page.",
+    "accessDenied": "Accès refusé",
+    "accessDeniedDescription": "Vous devez avoir les privilèges administrateur pour accéder à cette page.",
     "tabs": {
       "users": "Utilisateurs"
     },
@@ -11,48 +11,49 @@
       "columns": {
         "email": "Email",
         "username": "Nom d'utilisateur",
-        "roles": "Roles",
-        "createdAt": "Date de creation",
+        "roles": "Rôles",
+        "createdAt": "Date de création",
         "actions": "Actions"
       },
       "edit": "Modifier",
       "delete": "Supprimer",
-      "noUsers": "Aucun utilisateur trouve.",
+      "noUsers": "Aucun utilisateur trouvé.",
       "confirmDeleteTitle": "Supprimer l'utilisateur",
-      "confirmDeleteDescription": "Etes-vous sur de vouloir supprimer cet utilisateur ? Cette action est irreversible.",
-      "deleteSuccess": "Utilisateur supprime avec succes.",
-      "deleteError": "Echec de la suppression de l'utilisateur.",
-      "loading": "Chargement des utilisateurs..."
+      "confirmDeleteDescription": "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.",
+      "deleteSuccess": "Utilisateur supprimé avec succès.",
+      "deleteError": "Échec de la suppression de l'utilisateur.",
+      "loading": "Chargement des utilisateurs...",
+      "fetchError": "Impossible de charger les utilisateurs."
     },
     "editRoles": {
-      "title": "Modifier les roles",
-      "subtitle": "Modifier les roles pour {email}",
-      "globalRoles": "Roles globaux",
-      "appRoles": "Roles par app ({app})",
+      "title": "Modifier les rôles",
+      "subtitle": "Modifier les rôles pour {email}",
+      "globalRoles": "Rôles globaux",
+      "appRoles": "Rôles par app ({app})",
       "save": "Enregistrer",
       "cancel": "Annuler",
       "saving": "Enregistrement...",
-      "editSuccess": "Roles mis a jour avec succes.",
-      "editError": "Echec de la mise a jour des roles.",
-      "noAppRoles": "Aucun role d'application assigne."
+      "editSuccess": "Rôles mis à jour avec succès.",
+      "editError": "Échec de la mise à jour des rôles.",
+      "noAppRoles": "Aucun rôle d'application assigné."
     },
     "roles": {
       "superadmin": "Super Admin",
       "admin": "Admin",
       "manager": "Manager",
-      "beta-tester": "Beta Testeur",
+      "beta-tester": "Bêta Testeur",
       "client": "Client"
     },
     "dialog": {
       "confirm": "Confirmer",
       "cancel": "Annuler",
       "loading": "Traitement en cours...",
-      "retry": "Reessayer",
+      "retry": "Réessayer",
       "close": "Fermer"
     },
     "pagination": {
       "showing": "Affichage {from}-{to} sur {total}",
-      "previous": "Precedent",
+      "previous": "Précédent",
       "next": "Suivant"
     }
   }

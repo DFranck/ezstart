@@ -41,11 +41,6 @@ interface AdminUser {
   createdAt: string
 }
 
-interface UsersResponse {
-  data: AdminUser[]
-  meta: { total: number; limit: number; offset: number }
-}
-
 // ========================================
 // Constants
 // ========================================
@@ -142,15 +137,14 @@ export function UsersTab() {
       }
       if (searchQuery) query.search = searchQuery
 
-      const response = await callApi<UsersResponse>('/admin/users', {
+      const response = await callApi<AdminUser[]>('/admin/users', {
         appName: 'ezauth',
         method: 'GET',
         query,
       })
       if (response.ok) {
-        const result = response.data as { users?: AdminUser[]; pagination?: { total: number } }
-        setUsers(result.users || [])
-        setTotal(result.pagination?.total ?? 0)
+        setUsers((response.data ?? []) as AdminUser[])
+        setTotal(response.meta?.total ?? 0)
       }
     } catch {
       // Error logged by callApi

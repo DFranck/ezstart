@@ -13,6 +13,8 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
+import { verifyCookieCsrf } from '../../middleware/csrf.js'
+import { isValidAvatarUrl, MAX_AVATAR_URL_LENGTH } from '../../utils/avatar.js'
 
 const { authMiddleware } = createAuthMiddleware()
 
@@ -23,7 +25,12 @@ const docRouter = createRouterWithDoc(updateProfileRegistry, router)
 const updateProfileSchema = z.object({
   firstName: z.string().trim().max(100).optional().describe('First name'),
   lastName: z.string().trim().max(100).optional().describe('Last name'),
-  avatar: z.string().optional().describe('Avatar URL or base64 data URI'),
+  avatar: z
+    .string()
+    .max(MAX_AVATAR_URL_LENGTH)
+    .refine(isValidAvatarUrl, 'Invalid avatar URL — must be https:// or data:image/(png|jpeg|webp)')
+    .optional()
+    .describe('Avatar URL (https://…) or base64 data URI (image/png|jpeg|webp, ≤100KB)'),
 })
 
 const updateProfileController = async (req: Request, res: Response) => {
@@ -61,7 +68,7 @@ const updateProfileController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.put('/profile', authMiddleware, updateProfileController, {
+docRouter.put('/profile', verifyCookieCsrf, authMiddleware, updateProfileController, {
   summary: 'Update own profile (firstName, lastName, avatar)',
   tags: ['User'],
   bodySchema: updateProfileSchema,

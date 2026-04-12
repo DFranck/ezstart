@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Div,
+  Spinner,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
@@ -43,7 +44,7 @@ function ResetPasswordContent() {
             success: t('success'),
             tryAgain: t('tryAgain'),
             backToLogin: t('backToLogin'),
-            fallbackError: 'An error occurred',
+            fallbackError: t('fallbackError'),
           }}
         />
       </CardContent>
@@ -53,7 +54,13 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<Div className="animate-pulse bg-muted rounded h-32" />}>
+    <Suspense
+      fallback={
+        <Div className="flex items-center justify-center min-h-[200px]">
+          <Spinner variant="primary" size="lg" />
+        </Div>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   )

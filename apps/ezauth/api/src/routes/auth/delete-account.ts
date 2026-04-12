@@ -14,6 +14,7 @@ import { getRefreshTokenModel } from '../../models/refresh-token.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
+import { verifyCookieCsrf } from '../../middleware/csrf.js'
 
 const { authMiddleware } = createAuthMiddleware()
 
@@ -54,7 +55,7 @@ const deleteAccountController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.delete('/account', authMiddleware, deleteAccountController, {
+docRouter.delete('/account', verifyCookieCsrf, authMiddleware, deleteAccountController, {
   summary: 'Delete own account (self-service)',
   tags: ['User'],
   responseSchema: deleteAccountResponseSchema,

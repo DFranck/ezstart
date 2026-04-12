@@ -320,7 +320,12 @@ export class AuthClient {
       throw new Error(result.error || result.data?.error || 'Quick signup failed')
     }
 
-    return result.data ?? result
+    const payload = result.data ?? result
+    return {
+      user: payload.user,
+      accessToken: payload.accessToken,
+      refreshToken: payload.refreshToken,
+    }
   }
 
   /**

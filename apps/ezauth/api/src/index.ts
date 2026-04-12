@@ -5,7 +5,6 @@ import {
   connectToMongo,
   createApp,
   createRateLimiter,
-  createStrictRateLimiter,
   getApiPort,
   startServer,
   createVersionedRouter,

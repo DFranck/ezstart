@@ -54,7 +54,9 @@ export const useAuthStore = create<AuthState>()(
         set({
           user,
           accessToken: mode === 'localStorage' ? (accessToken ?? null) : null,
-          refreshToken: refreshToken ?? null,
+          // In httpOnly mode the refresh token lives in a server-side cookie;
+          // never hold it in JS memory or localStorage.
+          refreshToken: mode === 'localStorage' ? (refreshToken ?? null) : null,
           isAuthenticated: true,
           mode,
           isLoggingIn: false,
@@ -65,7 +67,7 @@ export const useAuthStore = create<AuthState>()(
         set(state => ({
           ...state,
           accessToken: state.mode === 'localStorage' ? accessToken : null,
-          refreshToken,
+          refreshToken: state.mode === 'localStorage' ? refreshToken : null,
         }))
       },
 
@@ -96,8 +98,12 @@ export const useAuthStore = create<AuthState>()(
       name: _storageKey,
       partialize: state => ({
         user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
+        // Only persist accessToken in localStorage mode.
+        accessToken: state.mode === 'localStorage' ? state.accessToken : null,
+        // httpOnly mode stores the refresh token in a server-side cookie — NEVER
+        // mirror it to localStorage (XSS would otherwise hand an attacker a
+        // long-lived credential).
+        refreshToken: state.mode === 'localStorage' ? state.refreshToken : null,
         isAuthenticated: state.isAuthenticated,
         mode: state.mode,
       }),

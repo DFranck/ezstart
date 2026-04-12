@@ -17,7 +17,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@ezstart/ui/components'
+import { toast } from '@ezstart/ui/utils'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { useMutation } from '@tanstack/react-query'
+import { AuthErrorBanner } from '@/components/AuthErrorBanner'
 
 // ========================================
 // Types
@@ -55,8 +58,6 @@ export function EditRolesModal({ user, open, onOpenChange, onSaved }: EditRolesM
 
   const [globalRoles, setGlobalRoles] = useState<string[]>([])
   const [appRoles, setAppRoles] = useState<Record<string, string[]>>({})
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     if (user) {
@@ -79,11 +80,9 @@ export function EditRolesModal({ user, open, onOpenChange, onSaved }: EditRolesM
     })
   }, [])
 
-  const handleSave = useCallback(async () => {
-    if (!user) return
-    setSaving(true)
-    setError('')
-    try {
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error(t('editError'))
       const response = await callApi(`/admin/users/${user._id}`, {
         appName: 'ezauth',
         method: 'PATCH',
@@ -92,17 +91,20 @@ export function EditRolesModal({ user, open, onOpenChange, onSaved }: EditRolesM
       if (!response.ok) {
         throw new Error(response.error || parseApiError(response.data) || t('editError'))
       }
+    },
+    onSuccess: () => {
+      toast.success(t('editSuccess'))
       onSaved()
       onOpenChange(false)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('editError'))
-    } finally {
-      setSaving(false)
-    }
-  }, [user, globalRoles, appRoles, onSaved, onOpenChange, t])
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || t('editError'))
+    },
+  })
 
   if (!user) return null
 
+  const saving = saveMutation.isPending
   const appNames = Object.keys(appRoles)
 
   return (
@@ -114,10 +116,10 @@ export function EditRolesModal({ user, open, onOpenChange, onSaved }: EditRolesM
         </DialogHeader>
 
         <Div className="space-y-6 py-4">
-          {error && (
-            <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
-              {error}
-            </Div>
+          {saveMutation.isError && (
+            <AuthErrorBanner>
+              {saveMutation.error instanceof Error ? saveMutation.error.message : t('editError')}
+            </AuthErrorBanner>
           )}
 
           {/* Global Roles */}
@@ -173,7 +175,7 @@ export function EditRolesModal({ user, open, onOpenChange, onSaved }: EditRolesM
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t('cancel')}
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={() => saveMutation.mutate()} disabled={saving}>
             {saving ? <Spinner size="sm" /> : t('save')}
           </Button>
         </DialogFooter>

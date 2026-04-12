@@ -14,6 +14,7 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
+import { verifyCookieCsrf } from '../../middleware/csrf.js'
 
 const { authMiddleware } = createAuthMiddleware()
 
@@ -73,6 +74,7 @@ const changePasswordController = async (req: Request, res: Response) => {
 docRouter.put(
   '/change-password',
   createStrictRateLimiter(),
+  verifyCookieCsrf,
   authMiddleware,
   changePasswordController,
   {
