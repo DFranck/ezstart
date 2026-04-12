@@ -189,12 +189,13 @@ export function AccountModal({
     if (!user?.email || sendingVerification) return
     setSendingVerification(true)
     try {
+      const effectiveApp = navigation.app || appName
       const response = await callApi('/auth/send-verification', {
         appName: 'ezauth',
         method: 'POST',
         body: {
           email: user.email,
-          ...(navigation.app && { app: navigation.app }),
+          ...(effectiveApp && { app: effectiveApp }),
           ...(navigation.redirectUri && { redirect_uri: navigation.redirectUri }),
         },
       })

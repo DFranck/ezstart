@@ -1,6 +1,6 @@
 'use client'
 
-import { QuickSignUpForm, SignedOut, SignInForm } from '@ezstart/auth-sdk'
+import { QuickSignUpForm, SignedOut, SignInForm, useAuth } from '@ezstart/auth-sdk'
 import { Button, Card, CardContent, Div, H1, LocaleSwitcher, P } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -14,7 +14,15 @@ function EarthDayContent() {
   const searchParams = useSearchParams()
   const currentLocale = useLocale()
   const router = useRouter()
+  const { isAuthenticated } = useAuth()
   const [mode, setMode] = useState<'signup' | 'signin'>('signup')
+
+  // Redirect authenticated users to chat
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/chat')
+    }
+  }, [isAuthenticated, router])
 
   // Track utm_source for analytics
   useEffect(() => {
