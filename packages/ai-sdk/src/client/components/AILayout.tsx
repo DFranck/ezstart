@@ -118,6 +118,7 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   return (
     <Div className={props.className}>
       <ThreadLayout
+        height={props.height ?? 'viewport'}
         colorScheme={props.colorScheme}
         customTheme={props.customTheme}
         headerOffset={props.headerOffset}

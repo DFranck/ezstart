@@ -39,6 +39,8 @@ export type AILayoutProps = {
   onConversationCreated?: (id: string) => void
   getToken?: () => string | null
   className?: string
+  /** Container height: 'viewport' (full page), 'fill' (parent), or custom Tailwind class */
+  height?: 'viewport' | 'fill' | (string & {})
   headerOffset?: string
   mobileHeaderOffset?: string
   mobileFooterOffset?: string

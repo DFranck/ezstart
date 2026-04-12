@@ -66,7 +66,7 @@ export const useStepper = () => {
 export interface StepButton {
   label: string
   icon?: string
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'brand'
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
   disabled?: boolean
   hidden?: boolean
   onClick?: () => void
@@ -494,7 +494,7 @@ function StepperNavigation({
     next: {
       label: isLastStep ? 'Finish' : 'Next',
       icon: isLastStep ? 'lucide:Check' : 'lucide:ArrowRight',
-      variant: theme?.primaryColor ? 'ghost' : 'brand',
+      variant: theme?.primaryColor ? 'ghost' : 'default',
       onClick: onNext,
     },
   }
@@ -565,7 +565,7 @@ function StepperNavigation({
             <Button
               onClick={buttons.next.onClick}
               disabled={buttons.next.disabled}
-              variant={buttons.next.variant || 'brand'}
+              variant={buttons.next.variant || 'default'}
               size={size}
               className={buttons.next.className}
               style={theme?.primaryColor ? nextButtonStyle : undefined}

@@ -22,18 +22,21 @@ globals.css
 **Purpose:** Invoicing and billing application colors
 
 **44 CSS Variables:**
+
 - Entity colors: `--ezbill-client`, `--ezbill-company`, `--ezbill-payment`
 - Document types: `--ezbill-invoice`, `--ezbill-quote`, `--ezbill-receipt`
 - Status states: `--ezbill-draft`, `--ezbill-sent`, `--ezbill-paid`, `--ezbill-accepted`, `--ezbill-rejected`, `--ezbill-pending`
 - Each with corresponding `-foreground` variants
 
 **14 Gradient Utilities:**
+
 - `.bg-gradient-client`, `.bg-gradient-client-hover`, `.bg-gradient-client-light`
 - `.bg-gradient-invoice`, `.bg-gradient-invoice-hover`, `.bg-gradient-invoice-light`
 - `.bg-gradient-quote`, `.bg-gradient-payment` (shared)
 - `.bg-gradient-company`, `.bg-gradient-receipt`
 
 **Usage Example:**
+
 ```tsx
 // EZBill app components
 <Badge className="bg-ezbill-invoice text-ezbill-invoice-foreground">
@@ -50,11 +53,13 @@ globals.css
 **Purpose:** System monitoring and observability colors
 
 **14 CSS Variables:**
+
 - Status colors: `--status-healthy`, `--status-degraded`, `--status-unhealthy`, `--status-unknown`
 - Platform colors: `--platform-railway`, `--platform-render`, `--platform-vercel`
 - Each with corresponding `-foreground` variants
 
 **Usage Example:**
+
 ```tsx
 // Monitoring dashboard
 <Badge className="bg-status-healthy text-status-healthy-foreground">
@@ -71,15 +76,15 @@ globals.css
 **Purpose:** FengShui app brand colors
 
 **2 CSS Variables:**
+
 - `--fengshui-primary` - Main brand color (purple)
 - `--fengshui-secondary` - Secondary accent color
 
 **Usage Example:**
+
 ```tsx
 // FengShui app
-<Button className="bg-fengshui-primary text-white">
-  Analyze Plan
-</Button>
+<Button className="bg-fengshui-primary text-white">Analyze Plan</Button>
 ```
 
 ### EZStart Theme (`ezstart.css`)
@@ -87,14 +92,14 @@ globals.css
 **Purpose:** EZStart app brand color
 
 **1 CSS Variable:**
+
 - `--ezstart` - Brand identity color (purple)
 
 **Usage Example:**
+
 ```tsx
 // EZStart landing page
-<h1 className="text-ezstart">
-  Welcome to EZStart
-</h1>
+<h1 className="text-ezstart">Welcome to EZStart</h1>
 ```
 
 ## Adding a New Project Theme
@@ -118,7 +123,7 @@ Create `themes/[project].css` with your project's colors:
   /* Dark mode colors - adjust lightness/chroma for visibility */
   --project-primary: oklch(0.75 0.18 240);
   --project-primary-foreground: oklch(0.98 0.01 240);
-  --project-secondary: oklch(0.70 0.20 180);
+  --project-secondary: oklch(0.7 0.2 180);
   --project-secondary-foreground: oklch(0.98 0.01 180);
 }
 
@@ -138,19 +143,11 @@ If you need gradient classes or custom utilities:
 ```css
 @layer utilities {
   .bg-gradient-project {
-    background: linear-gradient(
-      to right,
-      oklch(0.75 0.15 240),
-      oklch(0.70 0.18 260)
-    );
+    background: linear-gradient(to right, oklch(0.75 0.15 240), oklch(0.7 0.18 260));
   }
 
   .bg-gradient-project-hover {
-    background: linear-gradient(
-      to right,
-      oklch(0.65 0.16 240),
-      oklch(0.60 0.19 260)
-    );
+    background: linear-gradient(to right, oklch(0.65 0.16 240), oklch(0.6 0.19 260));
   }
 }
 ```
@@ -176,11 +173,7 @@ Your theme variables are now globally accessible:
 import { Badge } from '@ezstart/ui/components'
 
 export function ProjectCard() {
-  return (
-    <Badge className="bg-project-primary text-project-primary-foreground">
-      Status
-    </Badge>
-  )
+  return <Badge className="bg-project-primary text-project-primary-foreground">Status</Badge>
 }
 ```
 
@@ -189,11 +182,13 @@ export function ProjectCard() {
 All themes use the **OKLCH color space** for better perceptual uniformity and dark mode support.
 
 **Format:** `oklch(lightness chroma hue [/ alpha])`
+
 - **Lightness** (0-1): 0 = black, 1 = white
 - **Chroma** (0-0.4): Color intensity (0 = gray)
 - **Hue** (0-360): Color angle (0 = red, 120 = green, 240 = blue)
 
 **Examples:**
+
 ```css
 /* Vibrant blue */
 --primary: oklch(0.7 0.15 240);
@@ -202,7 +197,7 @@ All themes use the **OKLCH color space** for better perceptual uniformity and da
 --success: oklch(0.75 0.17 145);
 
 /* Dark purple */
---brand: oklch(0.5413 0.2466 293.01);
+--primary: oklch(0.5413 0.2466 293.01);
 ```
 
 ## Dark Mode Support
@@ -224,6 +219,7 @@ All themes use the **OKLCH color space** for better perceptual uniformity and da
 ```
 
 **Guidelines:**
+
 - Light mode backgrounds: L = 0.65-0.75
 - Dark mode backgrounds: L = 0.70-0.85
 - Foregrounds: Always high contrast (L = 0.98 or L = 0.20-0.25)
@@ -240,10 +236,9 @@ CSS variables are automatically mapped to Tailwind utilities via `@theme inline`
 ```
 
 This enables:
+
 ```tsx
-<div className="bg-ezbill-invoice text-ezbill-invoice-foreground">
-  Invoice Badge
-</div>
+<div className="bg-ezbill-invoice text-ezbill-invoice-foreground">Invoice Badge</div>
 ```
 
 ## Best Practices
@@ -299,7 +294,7 @@ Use semantic names instead of color names:
 
 /* ❌ BAD - Generic colors (use globals.css) */
 --button-background: oklch(0.205 0 0); /* Use --primary instead */
---text-color: oklch(0.145 0 0);        /* Use --foreground instead */
+--text-color: oklch(0.145 0 0); /* Use --foreground instead */
 ```
 
 ## File Organization
@@ -318,11 +313,13 @@ themes/
 ## Migration Notes
 
 **Before (October 2025):**
+
 - All project-specific variables were in `globals.css`
 - 418 lines mixing generic and project code
 - Violated SRP (Single Responsibility Principle)
 
 **After (October 2025):**
+
 - Project themes separated into `themes/` directory
 - `globals.css` contains ONLY generic shadcn/ui styles (~195 lines)
 - All apps still have global access via `@import './themes/index.css'`

@@ -1,32 +1,53 @@
 'use client'
 
-import React, { ReactNode, useCallback, useState } from 'react'
+import React, { ReactNode, useCallback, useRef, useState } from 'react'
 import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Icon } from '../icon'
+import { Sheet, SheetContent, SheetTitle } from '../overlay/sheet'
 import { ThreadLayoutProvider } from './ThreadLayoutContext'
-import { ThreadThemeProvider, useThreadTheme } from './ThreadThemeContext'
-import { ColorScheme, ThreadTheme } from './types'
+
+/**
+ * Container height strategy for ThreadLayout.
+ * - 'viewport': full viewport height (h-dvh) — for full-page chat
+ * - 'fill': fill parent container (h-full) — for modals, panels, embedded chat
+ * - string: custom Tailwind class (e.g., 'h-[500px]', 'h-96') — for fixed height
+ */
+type ThreadHeight = 'viewport' | 'fill' | (string & {})
 
 type ThreadLayoutProps = {
+  /**
+   * Container height. Required for correct layout.
+   * - 'viewport': full page (h-dvh)
+   * - 'fill': fill parent (h-full) — use in modals/panels
+   * - custom: a Tailwind height class (e.g., 'h-[500px]')
+   */
+  height: ThreadHeight
   /** @slot Thread, ThreadComposer, ThreadMessages */
   children: ReactNode
-  /** @slot ThreadSidebar */
+  /** @slot ThreadSidebar content */
   sidebar?: ReactNode
-  /** @slot ThreadSidebarToggle */
-  sidebarToggle?: ReactNode // Custom toggle button. If provided, default button is hidden.
+  /** @slot Custom toggle button (replaces default burger) */
+  sidebarToggle?: ReactNode
   showSidebar?: boolean
   sidebarWidth?: string
-  headerOffset?: string // Offset for fixed header (e.g., 'top-16', 'top-20')
-  mobileHeaderOffset?: string // Mobile-only header offset (e.g., 'pt-16', 'mt-16')
-  mobileFooterOffset?: string // Mobile-only footer offset (e.g., 'pb-16', 'mb-16')
+  headerOffset?: string
+  mobileHeaderOffset?: string
+  mobileFooterOffset?: string
   className?: string
   onSidebarToggle?: (isOpen: boolean) => void
-  colorScheme?: ColorScheme
-  customTheme?: Partial<ThreadTheme>
+  /** Show × close button inside the sidebar Sheet (Radix). Default: false (use burger/overlay to close) */
+  showSidebarCloseButton?: boolean
+}
+
+function resolveHeight(height: ThreadHeight): { heightClass: string; positionClass: string } {
+  if (height === 'viewport') return { heightClass: 'h-dvh', positionClass: 'fixed inset-0 z-50' }
+  if (height === 'fill') return { heightClass: 'h-full', positionClass: 'relative w-full' }
+  return { heightClass: height, positionClass: 'relative w-full' }
 }
 
 const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
+  height = 'viewport',
   children,
   sidebar,
   sidebarToggle,
@@ -37,9 +58,11 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
   mobileFooterOffset,
   className,
   onSidebarToggle,
-}: Omit<ThreadLayoutProps, 'colorScheme' | 'customTheme'>) {
-  const { theme } = useThreadTheme()
+  showSidebarCloseButton = false,
+}: ThreadLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isFill = height !== 'viewport'
 
   const toggleSidebar = useCallback(() => {
     const newState = !isSidebarOpen
@@ -52,12 +75,17 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
     onSidebarToggle?.(false)
   }, [onSidebarToggle])
 
+  const { heightClass, positionClass } = resolveHeight(height)
+
+  // No sidebar — simple layout
   if (!showSidebar || !sidebar) {
     return (
       <div
         className={cn(
-          'w-full h-dvh flex flex-col',
-          theme.background,
+          'flex flex-col',
+          positionClass,
+          heightClass,
+          'bg-background',
           mobileHeaderOffset && `lg:pt-0 ${mobileHeaderOffset}`,
           mobileFooterOffset && `lg:pb-0 ${mobileFooterOffset}`,
           className
@@ -73,114 +101,63 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
       value={{ closeSidebar, toggleSidebar, isSidebarOpen, mobileFooterOffset }}
     >
       <div
+        ref={containerRef}
         className={cn(
-          'relative flex w-full h-dvh',
-          theme.background,
-          // Add padding-top based on headerOffset to prevent overlap
-          headerOffset === 'top-16'
-            ? 'pt-16'
-            : headerOffset === 'top-20'
-              ? 'pt-20'
-              : headerOffset === 'top-0'
-                ? ''
-                : headerOffset.startsWith('top-')
-                  ? headerOffset.replace('top-', 'pt-')
-                  : '',
+          'relative flex overflow-hidden',
+          positionClass,
+          heightClass,
+          'bg-background',
           mobileHeaderOffset && `lg:pt-0 ${mobileHeaderOffset}`,
           className
         )}
       >
-        {/* Mobile/Tablet Toggle Button - Default or Custom */}
-        {sidebarToggle ? (
-          sidebarToggle
-        ) : (
+        {/* Viewport: desktop sidebar as permanent aside, hidden on mobile */}
+        {!isFill && (
+          <aside
+            className={cn(
+              'hidden lg:flex lg:flex-col lg:shrink-0',
+              sidebarWidth,
+              heightClass,
+              'bg-background border-r'
+            )}
+          >
+            {sidebar}
+          </aside>
+        )}
+
+        {/* Burger toggle — absolute so it floats over content without pushing it */}
+        {!isSidebarOpen && (
           <Button
             onClick={toggleSidebar}
             size="icon"
-            variant="outline"
-            aria-expanded={isSidebarOpen}
-            aria-controls="thread-sidebar"
-            aria-label={
-              isSidebarOpen ? 'Close conversations sidebar' : 'Open conversations sidebar'
-            }
-            className={cn(
-              'fixed left-4 z-50 lg:hidden',
-              'shadow-lg backdrop-blur-sm bg-background/80',
-              headerOffset,
-              mobileHeaderOffset && mobileHeaderOffset.replace('pt-', 'top-').replace('mt-', 'top-')
-            )}
+            variant="default"
+            aria-label="Open sidebar"
+            className={cn('absolute left-3 top-3 z-20 shadow-lg', !isFill && 'lg:hidden')}
           >
-            <Icon name={isSidebarOpen ? 'lucide:X' : 'lucide:Menu'} size={20} ariaHidden />
+            <Icon name="lucide:Menu" size={20} ariaHidden />
           </Button>
         )}
 
-        {/* Sidebar - Desktop: always visible, Mobile/Tablet: overlay */}
-        <aside
-          id="thread-sidebar"
-          role="complementary"
-          aria-label="Conversations sidebar"
-          aria-hidden={!isSidebarOpen}
-          className={cn(
-            'fixed lg:sticky left-0 z-40',
-            'transition-transform duration-300 ease-in-out',
-            theme.sidebar?.background || 'bg-background',
-            theme.sidebar?.border || 'border-r',
-            'flex flex-col',
-            sidebarWidth,
-            headerOffset,
-            // Calculate height based on header offset
-            headerOffset === 'top-0'
-              ? 'h-dvh'
-              : headerOffset === 'top-16'
-                ? 'h-[calc(100dvh-4rem)]'
-                : headerOffset === 'top-20'
-                  ? 'h-[calc(100dvh-5rem)]'
-                  : 'h-[calc(100dvh-4rem)]', // default to top-16
-            // Mobile/Tablet: translate based on state
-            'lg:translate-x-0',
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          )}
-        >
-          {sidebar}
-        </aside>
+        {/* Sheet sidebar */}
+        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen} modal={!isFill}>
+          <SheetContent
+            side="left"
+            showCloseButton={showSidebarCloseButton}
+            container={isFill ? containerRef.current : undefined}
+            className={cn(sidebarWidth, 'p-0 gap-0', heightClass)}
+          >
+            <SheetTitle className="sr-only">Conversations</SheetTitle>
+            {sidebar}
+          </SheetContent>
+        </Sheet>
 
-        {/* Overlay - Mobile/Tablet only */}
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            onClick={toggleSidebar}
-            role="button"
-            aria-label="Close sidebar"
-          />
-        )}
-
-        {/* Main Content - Thread */}
-        <main
-          className={cn(
-            'flex-1 w-full flex flex-col',
-            headerOffset === 'top-0'
-              ? 'h-dvh'
-              : headerOffset === 'top-16'
-                ? 'h-[calc(100dvh-4rem)]'
-                : headerOffset === 'top-20'
-                  ? 'h-[calc(100dvh-5rem)]'
-                  : 'h-[calc(100dvh-4rem)]', // default to top-16
-            'lg:ml-0' // No margin on desktop, sidebar is sticky
-          )}
-        >
-          {children}
-        </main>
+        {/* Main content */}
+        <main className={cn('flex-1 min-w-0 flex flex-col', heightClass)}>{children}</main>
       </div>
     </ThreadLayoutProvider>
   )
 })
 
 export function ThreadLayout(props: ThreadLayoutProps) {
-  const { colorScheme = 'neutral', customTheme, ...layoutProps } = props
-
-  return (
-    <ThreadThemeProvider colorScheme={colorScheme} customTheme={customTheme}>
-      <ThreadLayoutInner {...layoutProps} />
-    </ThreadThemeProvider>
-  )
+  return <ThreadLayoutInner {...props} />
 }

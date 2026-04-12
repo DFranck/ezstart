@@ -1,13 +1,29 @@
 /* FengShui Theme Variables - Gold & Red palette */
 
-[data-app="fengshui"] {
+[data-app='fengshui'] {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.78 0.16 80);
+  --primary-foreground: oklch(0.2 0.08 80);
+  --secondary: oklch(0.95 0.03 28);
+  --secondary-foreground: oklch(0.3 0.08 28);
+  --accent: oklch(0.93 0.04 80);
+  --accent-foreground: oklch(0.3 0.08 80);
+
   --fengshui-primary: oklch(0.78 0.16 80);
-  --fengshui-secondary: oklch(0.52 0.20 28);
-  --fengshui-primary-dark: oklch(0.70 0.14 80);
+  --fengshui-secondary: oklch(0.52 0.2 28);
+  --fengshui-primary-dark: oklch(0.7 0.14 80);
   --fengshui-secondary-dark: oklch(0.45 0.18 28);
 }
 
-[data-app="fengshui"].dark {
+[data-app='fengshui'].dark {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.72 0.14 80);
+  --primary-foreground: oklch(0.98 0.01 80);
+  --secondary: oklch(0.25 0.05 28);
+  --secondary-foreground: oklch(0.95 0.02 28);
+  --accent: oklch(0.28 0.05 80);
+  --accent-foreground: oklch(0.95 0.02 80);
+
   --fengshui-primary: oklch(0.72 0.14 80);
   --fengshui-secondary: oklch(0.48 0.18 28);
   --fengshui-primary-dark: oklch(0.65 0.12 80);

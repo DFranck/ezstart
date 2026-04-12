@@ -6,7 +6,6 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Icon } from '../icon'
 import { ThreadMessageMeta } from './types'
-import { useThreadTheme } from './ThreadThemeContext'
 
 type ThreadMessageProps = {
   role: 'user' | 'ai'
@@ -41,7 +40,6 @@ export const ThreadMessage = React.memo(function ThreadMessage({
   userBubbleClassName,
   aiBubbleClassName,
 }: ThreadMessageProps) {
-  const { theme } = useThreadTheme()
   const isUser = role === 'user'
   const [isHover, setIsHover] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -50,17 +48,8 @@ export const ThreadMessage = React.memo(function ThreadMessage({
   const shouldShowRetry = isUser && isLastUserMessage && onRetry
   const shouldShowEditCopy = isUser && !isLastUserMessage && hasResponse && onEdit && messageId
 
-  // Get bubble styles from theme
-  const defaultUserBubble = clsx(
-    theme.message?.user?.background || 'bg-primary',
-    theme.message?.user?.text || 'text-primary-foreground',
-    theme.message?.user?.border
-  )
-  const defaultAiBubble = clsx(
-    theme.message?.ai?.background || 'bg-muted',
-    theme.message?.ai?.text || 'text-foreground',
-    theme.message?.ai?.border
-  )
+  const defaultUserBubble = clsx('bg-primary', 'text-primary-foreground')
+  const defaultAiBubble = clsx('bg-muted', 'text-foreground')
 
   const handleCopy = useCallback(() => {
     if (onCopy && typeof children === 'string') {
@@ -199,8 +188,14 @@ export const ThreadMessage = React.memo(function ThreadMessage({
                             <ol className="list-decimal ml-4 mb-2" {...props} />
                           ),
                           li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ReactMarkdown component type is complex
-                          code: ({ node, inline, ...props }: any) =>
+                          code: ({
+                            node,
+                            inline,
+                            ...props
+                          }: React.HTMLAttributes<HTMLElement> & {
+                            node?: unknown
+                            inline?: boolean
+                          }) =>
                             inline ? (
                               <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props} />
                             ) : (

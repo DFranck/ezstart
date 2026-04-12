@@ -60,7 +60,10 @@ export const ThreadComposer = React.memo(function ThreadComposer({
   // Auto-scroll composer into view when mobile keyboard opens
   const composerRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
-    const vv = typeof window !== 'undefined' ? window.visualViewport : null
+    // Only on touch devices (mobile keyboard)
+    const isTouchDevice =
+      typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    const vv = isTouchDevice ? window.visualViewport : null
     if (!vv) return
 
     const handleResize = () => {
@@ -120,7 +123,7 @@ export const ThreadComposer = React.memo(function ThreadComposer({
         className
       )}
     >
-      {welcomeMessage}
+      {welcomeMessage && <div className="mb-4">{welcomeMessage}</div>}
       <div className="px-4 max-w-4xl mx-auto">
         <form
           onSubmit={handleSubmit}

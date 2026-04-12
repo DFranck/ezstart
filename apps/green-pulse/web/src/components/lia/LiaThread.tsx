@@ -374,6 +374,7 @@ export function LiaThread({
 
   return (
     <ThreadLayout
+      height="viewport"
       colorScheme="custom"
       customTheme={greenPulseThreadTheme}
       sidebarToggle={
