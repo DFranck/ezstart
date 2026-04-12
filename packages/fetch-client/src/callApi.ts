@@ -1,7 +1,7 @@
 import { logger } from '@ezstart/logger'
 import type { AppName } from '@ezstart/config/urls'
 import { getApiUrl } from '@ezstart/config/urls'
-import type { ApiError, ApiMeta, ApiResponse, CallApiOptions, LogLevel } from './types'
+import type { ApiError, ApiMeta, ApiResponse, CallApiOptions, LogLevel } from './types.js'
 
 /**
  * Get access token from auth store if available (browser only)

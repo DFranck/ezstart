@@ -1,4 +1,4 @@
-import type { ApiError } from './types'
+import type { ApiError } from './types.js'
 
 /**
  * Parse API error response into human-readable message (always in English)

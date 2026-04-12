@@ -1,3 +1,3 @@
-export { callApi, createCallApi } from './callApi'
-export { parseApiError } from './parseApiError'
-export type { ApiResponse, ApiError, ApiMeta, HttpMethod, CallApiOptions } from './types'
+export { callApi, createCallApi } from './callApi.js'
+export { parseApiError } from './parseApiError.js'
+export type { ApiResponse, ApiError, ApiMeta, HttpMethod, CallApiOptions } from './types.js'
