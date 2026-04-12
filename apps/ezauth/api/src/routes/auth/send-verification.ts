@@ -89,6 +89,7 @@ const sendVerificationController = async (req: Request, res: Response) => {
 
     await emailService.send({
       to: user.email,
+      from: `${appDisplayName} <noreply@ezstart.xyz>`,
       subject: `[${appDisplayName}] Verify your email address`,
       html: emailVerificationTemplate(verifyUrl, appDisplayName),
     })

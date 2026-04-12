@@ -70,6 +70,7 @@ const forgotPasswordController = async (req: Request, res: Response) => {
 
       await emailService.send({
         to: user.email,
+        from: `${appDisplayName} <noreply@ezstart.xyz>`,
         subject: `[${appDisplayName}] Reset your password`,
         html: passwordResetTemplate(resetUrl, appDisplayName),
       })

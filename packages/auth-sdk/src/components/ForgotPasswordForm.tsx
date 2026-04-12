@@ -86,11 +86,17 @@ export function ForgotPasswordForm({
     setLoading(true)
     setError('')
 
+    const { app, redirectUri } = navigation
+
     try {
       const response = await callApi('/auth/forgot-password', {
         appName: 'ezauth',
         method: 'POST',
-        body: { email: formData.email },
+        body: {
+          email: formData.email,
+          ...(app && { app }),
+          ...(redirectUri && { redirect_uri: redirectUri }),
+        },
       })
 
       if (!response.ok) {
