@@ -6,35 +6,25 @@
 
 import { logger } from '@ezstart/logger'
 import { useEffect, useState } from 'react'
+import { useAIContext } from '../../provider.js'
 import { useAIStore, type AIProviderInfo } from '../store/aiStore.js'
-import { callApi } from '@ezstart/fetch-client'
-import type { AppName } from '@ezstart/config/urls'
 
-export function useProviders(appName: AppName = 'ezstart') {
+export function useProviders() {
+  const { client } = useAIContext()
   const { providers, setProviders, selectedProvider, setSelectedProvider } = useAIStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    // Skip fetch if we already have providers (prevents unnecessary requests)
-    if (providers.length > 0) {
-      return
-    }
-
+    // Always refetch on mount — the persisted `ai-store` is shared with
+    // `useChatProviders` (app-scoped, filtered), so a stale cache could show
+    // a truncated catalog in AIAdminDashboard after navigating admin→chat→admin.
     async function fetchProviders() {
       setLoading(true)
       setError(null)
       try {
-        const response = await callApi<AIProviderInfo[]>('/ai/providers', {
-          appName,
-          logLevel: 'errors',
-        })
-
-        if (response.ok && response.data) {
-          setProviders(response.data || [])
-        } else {
-          throw new Error('Failed to fetch providers')
-        }
+        const data: AIProviderInfo[] = await client.listProviders()
+        setProviders(data)
       } catch (err) {
         const error = err as Error
         setError(error)
@@ -52,7 +42,7 @@ export function useProviders(appName: AppName = 'ezstart') {
     }
 
     fetchProviders()
-  }, [appName, providers.length, setProviders])
+  }, [client, setProviders])
 
   return { providers, loading, error, selectedProvider, setSelectedProvider }
 }

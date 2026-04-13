@@ -173,6 +173,23 @@ export const appProviderSchema = z.object({
   updatedAt: z.string(),
 })
 
+// === Enriched App Provider (app-provider joined with global registry metadata) ===
+export const providerCapabilitiesSchema = z.object({
+  text: z.boolean(),
+  vision: z.boolean(),
+  audio: z.boolean(),
+  streaming: z.boolean(),
+  functionCalling: z.boolean(),
+  jsonMode: z.boolean(),
+})
+
+export const enrichedAppProviderSchema = appProviderSchema.extend({
+  name: z.string(),
+  capabilities: providerCapabilitiesSchema,
+  model: z.string(),
+  registered: z.boolean(),
+})
+
 export const createAppProviderSchema = z.object({
   appName: z.string().min(1).max(50),
   providerId: z

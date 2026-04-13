@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useThreadAPI } from '@ezstart/ui/hooks'
 import type { UseThreadAPIReturn } from '@ezstart/ui/hooks'
 import { useAIContext } from '../../provider.js'
-import { useProviders } from './useProviders.js'
+import { useChatProviders } from './useAppProviders.js'
 import { useConversations, useConversation } from './useConversations.js'
 import type { AIProviderInfo } from '../../server/registry/types.js'
 import type { AppName } from '@ezstart/config/urls'
@@ -106,12 +106,12 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   const token = getAuthToken()
   const isAuthenticated = !!token
 
-  // Providers
+  // Providers (app-scoped: join of DB app-provider config + global registry metadata)
   const {
     providers,
     selectedProvider,
     setSelectedProvider: rawSetSelectedProvider,
-  } = useProviders(appName)
+  } = useChatProviders()
 
   // Wrap setSelectedProvider to track explicit user choice
   const setSelectedProvider = useCallback(

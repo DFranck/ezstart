@@ -22,16 +22,17 @@ export const useAIStore = create<AIStore>()(
       providers: [],
       selectedProvider: null,
 
-      setProviders: (providers) => {
+      setProviders: providers => {
         const current = get().selectedProvider
+        const isCurrentStillAvailable = current !== null && providers.some(p => p.id === current)
         set({
           providers,
-          // Auto-select first provider if none selected
-          selectedProvider: current || providers[0]?.id || null,
+          // Keep current selection if still available, otherwise fall back to first provider
+          selectedProvider: isCurrentStillAvailable ? current : (providers[0]?.id ?? null),
         })
       },
 
-      setSelectedProvider: (id) => set({ selectedProvider: id }),
+      setSelectedProvider: id => set({ selectedProvider: id }),
     }),
     {
       name: 'ai-store',

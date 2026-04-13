@@ -19,6 +19,7 @@ import type {
   providerTargetSchema,
   promptProviderSchema,
   appProviderSchema,
+  enrichedAppProviderSchema,
   createAppProviderSchema,
   updateAppProviderSchema,
   providerTypeSchema,
@@ -48,6 +49,7 @@ export type PromptProvider = z.infer<typeof promptProviderSchema>
 
 // === App Providers ===
 export type AppProvider = z.infer<typeof appProviderSchema>
+export type EnrichedAppProvider = z.infer<typeof enrichedAppProviderSchema>
 export type CreateAppProviderRequest = z.infer<typeof createAppProviderSchema>
 export type UpdateAppProviderRequest = z.infer<typeof updateAppProviderSchema>
 export type ProviderType = z.infer<typeof providerTypeSchema>
