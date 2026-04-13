@@ -37,10 +37,12 @@ Pour les agents codeurs : voir [.claude/agents/coding-rules.md](.claude/agents/c
 
 ### Documentation Interne
 
-- [CLAUDE.md](./CLAUDE.md) - Configuration complète du monorepo
-- [DEPLOY.md](./DEPLOY.md) - Guide de déploiement
-- [docs/README.md](./docs/README.md) - Dashboard des audits
-- [docs/AUDIT-SUMMARY.md](./docs/AUDIT-SUMMARY.md) - Executive summary
+- [README.md](./README.md) - Vue d'ensemble du monorepo
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Guide contributeur (workflow, conventions)
+- [CLAUDE.md](./CLAUDE.md) - Pipeline & agents
+- [DEPLOY.md](./DEPLOY.md) - Guide de déploiement (Railway + Vercel)
+- [SECRETS.md](./SECRETS.md) - Architecture `.env` centralisée
+- [GENERATORS.md](./GENERATORS.md) - Pipeline de génération de code
 
 ### Guides Packages
 
@@ -50,12 +52,10 @@ Pour les agents codeurs : voir [.claude/agents/coding-rules.md](.claude/agents/c
 - [packages/auth-sdk/README.md](./packages/auth-sdk/README.md) - SDK authentification
 - [packages/pay-sdk/README.md](./packages/pay-sdk/README.md) - SDK paiement
 
-### Audits (16/16 Complete)
+### Audits
 
-Voir [docs/README.md](./docs/README.md) pour la liste complète des audits.
+Scores audit en direct dans [`docs/audits.json`](./docs/audits.json) (consommé par le dashboard de monitoring). Rapports détaillés (quand produits) dans [`docs/audits/`](./docs/audits/).
 
 ---
 
-**Last Updated:** 2025-10-26
-**Version:** 2.0.0
 **Maintainer:** @ezstart team

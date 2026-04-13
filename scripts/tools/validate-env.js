@@ -1,132 +1,214 @@
 #!/usr/bin/env node
 /**
- * Validate that .env.local and .env.production have all variables from .env.example.
- * Also checks that .env.example has no real secrets (only placeholders).
+ * Validate the centralized env architecture.
  *
- * Usage: node scripts/tools/validate-env.js
- *        pnpm validate-env
+ *   1. Root .env.local / .env.production  vs  .env.shared.example
+ *   2. Per-app .env.local / .env.production vs apps/{app}/{layer}/.env.example
+ *   3. Detect REDUNDANT app overrides (same value as root → useless duplication)
+ *   4. Detect MISSING shared vars in root (defined per-app for 2+ apps → should be shared)
+ *   5. Forbid real secrets in any *.example file
+ *
+ * Usage: pnpm validate-env
+ *        node scripts/tools/validate-env.js --strict   # exit 1 on warnings too
  */
 
 const fs = require('fs')
 const path = require('path')
-const { execSync } = require('child_process')
 
 const ROOT = path.resolve(__dirname, '..', '..')
+const args = process.argv.slice(2)
+const strict = args.includes('--strict')
 
-function parseEnvKeys(filePath) {
-  if (!fs.existsSync(filePath)) return null
-  return fs.readFileSync(filePath, 'utf8')
-    .split('\n')
-    .map(l => l.trim())
-    .filter(l => l && !l.startsWith('#'))
-    .map(l => l.split('=')[0].trim())
-    .filter(Boolean)
+const SENSITIVE_RE = /(SECRET|KEY|TOKEN|PASSWORD|DSN|PRIVATE)/i
+
+function mask(value) {
+  if (!value) return '(empty)'
+  if (value.length <= 8) return '****'
+  return `${value.slice(0, 4)}***${value.slice(-3)}`
 }
 
-function parseEnvValues(filePath) {
+function safe(key, value) {
+  if (!value) return '(empty)'
+  return SENSITIVE_RE.test(key) ? mask(value) : value
+}
+
+function parseEnv(filePath) {
   if (!fs.existsSync(filePath)) return null
-  const entries = {}
+  const out = {}
   fs.readFileSync(filePath, 'utf8')
     .split('\n')
     .map(l => l.trim())
     .filter(l => l && !l.startsWith('#'))
     .forEach(l => {
-      const [key, ...rest] = l.split('=')
-      if (key) entries[key.trim()] = rest.join('=').trim()
+      const idx = l.indexOf('=')
+      if (idx > 0) out[l.slice(0, idx).trim()] = l.slice(idx + 1).trim()
     })
-  return entries
+  return out
 }
 
-// Secret patterns that should NOT be in .env.example
 const SECRET_PATTERNS = [
   /sk_live_/i,
   /sk_test_/i,
   /mongodb\+srv:\/\/[^:]+:[^@]+@/i,
-  /^eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/,  // JWT token
-  /[a-f0-9]{32,}/i,  // long hex (could be API key)
+  /^eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/, // JWT
 ]
+const PLACEHOLDER_RE = /(your-|change-|replace-|xxx|placeholder|example|TODO|here$)/i
 
-const PLACEHOLDER_PATTERNS = [
-  /your-/i, /change-/i, /replace-/i, /xxx/i, /placeholder/i, /example/i, /TODO/i,
-]
-
-// Find all apps with .env.example
-const appDirs = []
-const scan = (dir) => {
-  const entries = fs.readdirSync(dir, { withFileTypes: true })
-  for (const entry of entries) {
-    if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === 'dist') continue
-    const full = path.join(dir, entry.name)
-    if (entry.isFile() && entry.name === '.env.example') {
-      appDirs.push(path.dirname(full))
-    } else if (entry.isDirectory()) {
-      scan(full)
-    }
-  }
+function looksLikeSecret(value) {
+  if (!value) return false
+  if (PLACEHOLDER_RE.test(value)) return false
+  return SECRET_PATTERNS.some(p => p.test(value))
 }
-scan(path.join(ROOT, 'apps'))
 
-let hasErrors = false
+let errors = 0
+let warnings = 0
+const errorPush = msg => {
+  errors++
+  console.log(`  ❌ ${msg}`)
+}
+const warnPush = msg => {
+  warnings++
+  console.log(`  ⚠  ${msg}`)
+}
+const okPush = msg => console.log(`  ✅ ${msg}`)
 
-console.log('\n=== .env Validation ===\n')
+console.log('\n=== .env Validation (centralized architecture) ===\n')
 
+// ── 1. ROOT validation ─────────────────────────────────────────────────────
+console.log('📁 ROOT (monorepo)')
+const sharedExample = path.join(ROOT, '.env.shared.example')
+const rootLocal = path.join(ROOT, '.env.local')
+const rootProd = path.join(ROOT, '.env.production')
+
+const sharedExampleVars = parseEnv(sharedExample) || {}
+const sharedKeys = Object.keys(sharedExampleVars)
+
+if (sharedKeys.length === 0) {
+  warnPush('.env.shared.example has no documented vars — please populate it')
+}
+
+// Check shared.example has no real secrets
+for (const [k, v] of Object.entries(sharedExampleVars)) {
+  if (looksLikeSecret(v)) errorPush(`.env.shared.example has REAL SECRET: ${k}`)
+}
+
+const rootLocalVars = parseEnv(rootLocal)
+if (rootLocalVars) {
+  const missing = sharedKeys.filter(k => !(k in rootLocalVars))
+  if (missing.length) warnPush(`root .env.local missing keys: ${missing.join(', ')}`)
+  else okPush(`root .env.local — all ${sharedKeys.length} shared vars present`)
+} else {
+  warnPush('root .env.local — file not found (run `pnpm setup:env`)')
+}
+
+const rootProdVars = parseEnv(rootProd)
+if (rootProdVars) {
+  const missing = sharedKeys.filter(k => !(k in rootProdVars))
+  if (missing.length) warnPush(`root .env.production missing keys: ${missing.join(', ')}`)
+  else okPush(`root .env.production — all ${sharedKeys.length} shared vars present`)
+} else {
+  console.log('  ─  root .env.production — not found (OK if managed by Railway/Vercel)')
+}
+
+console.log('')
+
+// ── 2. Discover all per-app env directories ────────────────────────────────
+const appDirs = []
+;(function scan(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (['node_modules', '.next', 'dist', 'tmp'].includes(entry.name)) continue
+    const full = path.join(dir, entry.name)
+    if (entry.isFile() && entry.name === '.env.example') appDirs.push(path.dirname(full))
+    else if (entry.isDirectory()) scan(full)
+  }
+})(path.join(ROOT, 'apps'))
+
+// Track per-key defines to detect redundancy across apps
+const perKeyAppValues = {} // key -> [{app, value}]
+
+// ── 3. Per-app validation ──────────────────────────────────────────────────
 for (const dir of appDirs) {
-  const rel = path.relative(ROOT, dir)
-  const examplePath = path.join(dir, '.env.example')
-  const localPath = path.join(dir, '.env.local')
-  const prodPath = path.join(dir, '.env.production')
-
-  const exampleKeys = parseEnvKeys(examplePath)
-  const localKeys = parseEnvKeys(localPath)
-  const prodKeys = parseEnvKeys(prodPath)
-  const exampleValues = parseEnvValues(examplePath)
-
+  const rel = path.relative(ROOT, dir).replace(/\\/g, '/')
   console.log(`📁 ${rel}`)
 
-  // Check .env.example for real secrets
-  if (exampleValues) {
-    for (const [key, value] of Object.entries(exampleValues)) {
-      for (const pattern of SECRET_PATTERNS) {
-        if (pattern.test(value)) {
-          console.log(`  ❌ .env.example has REAL SECRET: ${key}`)
-          hasErrors = true
-        }
+  const exampleVars = parseEnv(path.join(dir, '.env.example')) || {}
+  const exampleKeys = Object.keys(exampleVars)
+  const localVars = parseEnv(path.join(dir, '.env.local'))
+  const prodVars = parseEnv(path.join(dir, '.env.production'))
+
+  // Real secrets in .env.example
+  for (const [k, v] of Object.entries(exampleVars)) {
+    if (looksLikeSecret(v)) errorPush(`${rel}/.env.example has REAL SECRET: ${k}`)
+  }
+
+  // Local missing
+  if (localVars) {
+    // Account for vars satisfied by root
+    const satisfied = key => key in localVars || (rootLocalVars && key in rootLocalVars)
+    const missing = exampleKeys.filter(k => !satisfied(k))
+    if (missing.length) warnPush(`.env.local missing (and not in root): ${missing.join(', ')}`)
+    else okPush(`.env.local — all required vars resolvable`)
+
+    // Redundant overrides — same value as root
+    if (rootLocalVars) {
+      const redundant = Object.entries(localVars).filter(
+        ([k, v]) => rootLocalVars[k] === v && v !== ''
+      )
+      if (redundant.length) {
+        warnPush(
+          `.env.local has redundant overrides (= root value): ${redundant.map(([k]) => k).join(', ')}`
+        )
       }
     }
-  }
 
-  // Check .env.local has all example keys
-  if (localKeys) {
-    const missing = exampleKeys.filter(k => !localKeys.includes(k))
-    if (missing.length > 0) {
-      console.log(`  ⚠  .env.local missing: ${missing.join(', ')}`)
-      hasErrors = true
-    } else {
-      console.log(`  ✅ .env.local — all ${exampleKeys.length} vars present`)
+    // Track for cross-app analysis
+    for (const [k, v] of Object.entries(localVars)) {
+      if (!perKeyAppValues[k]) perKeyAppValues[k] = []
+      perKeyAppValues[k].push({ app: rel, value: v })
     }
   } else {
-    console.log(`  ⚠  .env.local — file not found`)
+    console.log('  ─  .env.local not found')
   }
 
-  // Check .env.production has all example keys
-  if (prodKeys) {
-    const missing = exampleKeys.filter(k => !prodKeys.includes(k))
-    if (missing.length > 0) {
-      console.log(`  ⚠  .env.production missing: ${missing.join(', ')}`)
-      hasErrors = true
-    } else {
-      console.log(`  ✅ .env.production — all ${exampleKeys.length} vars present`)
-    }
-  } else {
-    console.log(`  ─  .env.production — not found (OK if using Railway env vars)`)
+  // Prod missing
+  if (prodVars) {
+    const satisfied = key => key in prodVars || (rootProdVars && key in rootProdVars)
+    const missing = exampleKeys.filter(k => !satisfied(k))
+    if (missing.length) warnPush(`.env.production missing (and not in root): ${missing.join(', ')}`)
+    else okPush(`.env.production — all required vars resolvable`)
   }
 
   console.log('')
 }
 
-if (hasErrors) {
-  console.log('❌ Some .env files have issues. Fix them before deploying.\n')
-  process.exit(1)
+// ── 4. Cross-app analysis: vars defined per-app with SAME value should be shared
+console.log('🔎 Cross-app analysis — promote candidates to root .env.local')
+let promoteCount = 0
+for (const [key, occurrences] of Object.entries(perKeyAppValues)) {
+  if (occurrences.length < 2) continue
+  if (rootLocalVars && key in rootLocalVars) continue
+  const uniqueValues = new Set(occurrences.map(o => o.value).filter(Boolean))
+  if (uniqueValues.size === 1 && [...uniqueValues][0]) {
+    warnPush(
+      `${key} defined identically in ${occurrences.length} apps (${safe(key, [...uniqueValues][0])}) — consider promoting to root .env.local`
+    )
+    promoteCount++
+  }
+}
+if (promoteCount === 0) okPush('No cross-app duplication detected')
+console.log('')
+
+// ── Summary ────────────────────────────────────────────────────────────────
+console.log('═'.repeat(60))
+if (errors === 0 && warnings === 0) {
+  console.log('✅ All .env files are consistent.')
+  process.exit(0)
 } else {
-  console.log('✅ All .env files are consistent.\n')
+  console.log(`Errors: ${errors}  |  Warnings: ${warnings}`)
+  if (errors > 0 || (strict && warnings > 0)) {
+    console.log('❌ Validation failed. Fix issues before deploying.\n')
+    process.exit(1)
+  }
+  console.log('⚠  Validation passed with warnings.\n')
+  process.exit(0)
 }

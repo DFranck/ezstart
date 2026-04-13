@@ -2,6 +2,7 @@ import deepmerge from 'deepmerge'
 import { baseConfig } from './base.js'
 import { withI18n } from './withI18n.js'
 import { withPWA } from './withPWA.js'
+import { loadSharedEnv } from './withSharedEnv.js'
 import withBundleAnalyzer from './with-bundle-analyzer.js'
 
 /**
@@ -43,7 +44,12 @@ export function createNextConfig(options = {}) {
     i18nRequestPath = './src/i18n/request.ts',
     pwaOptions = {},
     extend = {},
+    app,
   } = options
+
+  // 🔐 Load monorepo-root shared env BEFORE Next.js reads anything.
+  // App-local .env.local still loaded natively by Next and wins on conflict.
+  loadSharedEnv(app)
 
   // Merge base config avec extensions custom
   let config = deepmerge(baseConfig, extend)

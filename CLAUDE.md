@@ -65,14 +65,19 @@ Pipeline de génération zero-maintenance. Voir [GENERATORS.md](./GENERATORS.md)
 
 ## Documentation
 
-| Doc                                      | Contenu                                                                           |
-| ---------------------------------------- | --------------------------------------------------------------------------------- |
-| [DEV-RULES.md](./DEV-RULES.md)           | Règles de développement (UI, TS, MongoDB, routing, tests, deploy, .env, packages) |
-| [BACKLOG.md](./BACKLOG.md)               | Index monorepo, "continue [projet]" pour reprendre                                |
-| [DEPLOY.md](./DEPLOY.md)                 | Guide Railway/Vercel                                                              |
-| [GENERATORS.md](./GENERATORS.md)         | Pipeline de générateurs (themes, UI registry, PWA icons)                          |
-| [.claude/agents/](./. claude/agents/)    | Rôles agents (coding-rules, code-quality, ux-quality, i18n, security, testing)    |
-| [.claude/pipeline/](./.claude/pipeline/) | Contexte par étape du pipeline (1-plan → 8-pr)                                    |
+| Doc                                      | Contenu                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------------------ |
+| [README.md](./README.md)                 | Vue d'ensemble, quick start, applications, architecture                        |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)     | Guide contributeur (hiérarchie composants, workflow, ajouter feature/endpoint) |
+| [DEV-RULES.md](./DEV-RULES.md)           | Index des règles dans `.claude/rules/` (UI, TS, MongoDB, routing, tests, ...)  |
+| [BACKLOG.md](./BACKLOG.md)               | Index monorepo, "continue [projet]" pour reprendre                             |
+| [DEPLOY.md](./DEPLOY.md)                 | Guide Railway/Vercel                                                           |
+| [SECRETS.md](./SECRETS.md)               | Architecture `.env` centralisée (`secrets-loader`, shared vs app-specific)     |
+| [GENERATORS.md](./GENERATORS.md)         | Pipeline de générateurs (themes, UI registry, PWA icons)                       |
+| [.claude/agents/](./.claude/agents/)     | Rôles agents (coding-rules, code-quality, ux-quality, i18n, security, testing) |
+| [.claude/rules/](./.claude/rules/)       | Règles détaillées par catégorie (chargées par DEV-RULES.md)                    |
+| [.claude/pipeline/](./.claude/pipeline/) | Contexte par étape du pipeline (1-plan → 8-pr)                                 |
+| [docs/audits.json](./docs/audits.json)   | Scores audit en direct (consommé par le dashboard monitoring)                  |
 
 ## Architecture
 

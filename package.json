@@ -18,6 +18,8 @@
     "dev:types": "tsc -b --watch tsconfig.build-packages.json",
     "rotate-secrets": "node scripts/tools/rotate-secrets.js",
     "validate-env": "node scripts/tools/validate-env.js",
+    "secrets:sync": "node scripts/tools/secrets-sync.js",
+    "secret:gen": "node scripts/tools/generate-secret.js",
     "generate": "turbo run generate",
     "postinstall": "turbo run generate || echo \"(postinstall) generate skipped — run 'pnpm generate' manually\"",
     "prebuild": "turbo run generate",
@@ -59,6 +61,7 @@
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "@next/bundle-analyzer": "^16.0.0",
+    "@sentry/cli": "^3.3.5",
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.14",
     "concurrently": "^9.1.2",
@@ -75,7 +78,8 @@
     "ts-prune": "^0.10.3",
     "tsx": "^4.20.3",
     "turbo": "^2.9.3",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "vercel": "^51.0.0"
   },
   "packageManager": "pnpm@10.12.2+sha256.07b2396c6c99a93b75b5f9ce22be9285c3b2533c49fec51b349d44798cf56b82",
   "engines": {

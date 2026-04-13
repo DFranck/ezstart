@@ -2,6 +2,7 @@
 export * from './urls.js'
 export * from './cors.js'
 export * from './env.js'
+export * from './secrets-loader.js'
 
 // Re-export commonly used functions
 export { URLS } from './urls.js'

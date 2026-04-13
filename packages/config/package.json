@@ -25,6 +25,11 @@
       "types": "./dist/env.d.ts",
       "import": "./dist/env.js",
       "require": "./dist/env.js"
+    },
+    "./secrets-loader": {
+      "types": "./dist/secrets-loader.d.ts",
+      "import": "./dist/secrets-loader.js",
+      "require": "./dist/secrets-loader.js"
     }
   },
   "scripts": {
@@ -34,7 +39,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@ezstart/logger": "workspace:*"
+    "@ezstart/logger": "workspace:*",
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
