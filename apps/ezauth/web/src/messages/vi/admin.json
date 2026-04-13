@@ -1,0 +1,60 @@
+{
+  "admin": {
+    "title": "Bảng điều khiển quản trị",
+    "accessDenied": "Truy cập bị từ chối",
+    "accessDeniedDescription": "Bạn cần có quyền quản trị viên để truy cập trang này.",
+    "tabs": {
+      "users": "Người dùng"
+    },
+    "users": {
+      "searchPlaceholder": "Tìm kiếm theo email hoặc tên đăng nhập...",
+      "columns": {
+        "email": "Email",
+        "username": "Tên đăng nhập",
+        "roles": "Vai trò",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      },
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "noUsers": "Không tìm thấy người dùng nào.",
+      "confirmDeleteTitle": "Xóa người dùng",
+      "confirmDeleteDescription": "Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác.",
+      "deleteSuccess": "Đã xóa người dùng thành công.",
+      "deleteError": "Không thể xóa người dùng.",
+      "loading": "Đang tải danh sách người dùng...",
+      "fetchError": "Không thể tải danh sách người dùng."
+    },
+    "editRoles": {
+      "title": "Chỉnh sửa vai trò",
+      "subtitle": "Cập nhật vai trò cho {email}",
+      "globalRoles": "Vai trò toàn cục",
+      "appRoles": "Vai trò theo ứng dụng ({app})",
+      "save": "Lưu thay đổi",
+      "cancel": "Hủy",
+      "saving": "Đang lưu...",
+      "editSuccess": "Đã cập nhật vai trò thành công.",
+      "editError": "Không thể cập nhật vai trò.",
+      "noAppRoles": "Chưa có vai trò ứng dụng nào được gán."
+    },
+    "roles": {
+      "superadmin": "Quản trị tối cao",
+      "admin": "Quản trị viên",
+      "manager": "Quản lý",
+      "beta-tester": "Người thử nghiệm Beta",
+      "client": "Khách hàng"
+    },
+    "dialog": {
+      "confirm": "Xác nhận",
+      "cancel": "Hủy",
+      "loading": "Đang xử lý...",
+      "retry": "Thử lại",
+      "close": "Đóng"
+    },
+    "pagination": {
+      "showing": "Hiển thị {from}-{to} trong tổng số {total}",
+      "previous": "Trước",
+      "next": "Tiếp"
+    }
+  }
+}

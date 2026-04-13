@@ -11,7 +11,7 @@ export type {
   TokenRequest,
   AuthCode,
   AuthCodeResponse,
-  JWTPayload
+  JWTPayload,
 } from './types.js'
 
 // Zod schemas pour validation et OpenAPI
@@ -20,10 +20,15 @@ export {
   registerRequestSchema,
   tokenRequestSchema,
   verifyRequestSchema,
+  forgotPasswordRequestSchema,
+  sendVerificationRequestSchema,
+  quickSignupRequestSchema,
+  supportedLocaleSchema,
+  emailOverrideSchema,
   authUserSchema,
   authCodeResponseSchema,
   tokenResponseSchema,
   userResponseSchema,
   verifyResponseSchema,
-  errorResponseSchema
+  errorResponseSchema,
 } from './schemas.js'

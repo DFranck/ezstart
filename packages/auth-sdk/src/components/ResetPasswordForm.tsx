@@ -18,8 +18,10 @@ import { logger } from '@ezstart/logger'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useLocale } from 'next-intl'
 import { PasswordStrength } from './PasswordStrength.js'
 import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -73,34 +75,13 @@ export interface ResetPasswordFormProps {
   onSuccess?: () => void
   /** Auto-redirect to login after success (default: true, 3s delay) */
   autoRedirect?: boolean
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   */
+  locale?: AuthLocale | string
+  /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<ResetPasswordFormTexts>
-}
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: ResetPasswordFormTexts = {
-  newPassword: 'New password',
-  newPasswordPlaceholder: 'Enter your new password',
-  confirmPassword: 'Confirm password',
-  confirmPasswordPlaceholder: 'Confirm your new password',
-  submit: 'Reset password',
-  submitting: 'Resetting...',
-  required: 'This field is required',
-  minLength: 'Must be at least {min} characters',
-  passwordMismatch: 'Passwords do not match',
-  invalidToken: 'Invalid or missing reset token. Please request a new password reset.',
-  success: 'Your password has been reset successfully. Redirecting to login...',
-  tryAgain: 'Try again',
-  backToLogin: 'Back to login',
-  fallbackError: 'An error occurred. Please try again.',
-  passwordWeak: 'Weak',
-  passwordFair: 'Fair',
-  passwordGood: 'Good',
-  passwordStrong: 'Strong',
-  validating: 'Validating link...',
-  tokenExpired: 'This reset link has expired or is invalid.',
-  requestNewLink: 'Request a new link',
-  errorInvalidToken: 'This reset link is invalid or expired.',
 }
 
 const MIN_PASSWORD_LENGTH = 8
@@ -123,9 +104,15 @@ export function ResetPasswordForm({
   onValidateToken,
   onSuccess,
   autoRedirect = true,
+  locale: propLocale,
   texts,
 }: ResetPasswordFormProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
+  const contextLocale = useLocale()
+  const locale = propLocale ?? contextLocale
+  const t: ResetPasswordFormTexts = {
+    ...getAuthTexts(locale, 'resetPassword'),
+    ...texts,
+  }
   const navigation = useAuthNavigation()
   const resolvedBackHref = backHref ?? navigation.loginHref
   const resolvedForgotHref = forgotPasswordHref ?? navigation.forgotPasswordHref

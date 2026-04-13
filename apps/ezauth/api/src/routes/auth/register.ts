@@ -15,6 +15,7 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
 import { emailVerificationTemplate } from '@ezstart/email-service'
+import type { EmailContext } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
@@ -64,14 +65,27 @@ const registerController = async (req: Request, res: Response) => {
         const params = buildAuthEmailParams(token, parsed.data.app, parsed.data.redirect_uri)
         const verifyUrl = `${getWebUrl('ezauth')}/verify-email?${params}`
 
+        const ctx: EmailContext = {
+          appName: appDisplayName,
+          appKey: parsed.data.app,
+          locale: parsed.data.locale,
+          overrides: parsed.data.emailOverride,
+        }
+        const rendered = emailVerificationTemplate({ verifyUrl }, ctx)
+
         await emailService.send({
           to: user.email,
-          from: `${appDisplayName} <noreply@ezstart.xyz>`,
-          subject: `[${appDisplayName}] Verify your email address`,
-          html: emailVerificationTemplate(verifyUrl, appDisplayName),
+          from: rendered.from ?? `${appDisplayName} <noreply@ezstart.xyz>`,
+          ...(rendered.replyTo ? { replyTo: rendered.replyTo } : {}),
+          subject: rendered.subject,
+          html: rendered.html,
+          ...(rendered.text ? { text: rendered.text } : {}),
         })
 
-        logger.info({ email: user.email }, 'Verification email sent after registration')
+        logger.info(
+          { email: user.email, locale: parsed.data.locale, appKey: parsed.data.app },
+          'Verification email sent after registration'
+        )
       }
     } catch (emailError) {
       // Don't fail registration if email sending fails

@@ -48,6 +48,24 @@ export interface LoginRequest {
   redirect_uri?: string
 }
 
+/**
+ * Per-send email overrides forwarded to `@ezstart/email-service` templates.
+ * Mirrors `EmailTemplateOverrides` there — kept in sync manually to avoid a
+ * runtime dependency cycle (`auth-sdk` stays email-provider agnostic).
+ */
+export interface EmailOverrideRequest {
+  subject?: string
+  heading?: string
+  intro?: string
+  ctaLabel?: string
+  outro?: string
+  from?: string
+  replyTo?: string
+  bodyHtml?: string
+}
+
+export type SupportedEmailLocale = 'en' | 'fr' | 'vi'
+
 export interface RegisterRequest {
   email: string
   username: string
@@ -57,6 +75,8 @@ export interface RegisterRequest {
   app: string
   redirect_uri?: string
   promoCode?: string // Promo code from referral/campaign
+  locale?: SupportedEmailLocale
+  emailOverride?: EmailOverrideRequest
 }
 
 export interface TokenRequest {

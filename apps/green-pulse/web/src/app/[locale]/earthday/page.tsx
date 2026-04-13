@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { toast } from '@ezstart/ui/utils'
 import { routing } from '../../../i18n/routing'
+import { earthdayEmailOverride } from '@/lib/emails/earthday-welcome'
 
 function EarthDayContent() {
   const t = useTranslations('earthday')
@@ -80,8 +81,11 @@ function EarthDayContent() {
                   <>
                     <QuickSignUpForm
                       appName="green-pulse"
+                      locale={currentLocale}
                       density="compact"
                       description={t('signup.description')}
+                      promoCode="EARTHDAY2026"
+                      emailOverride={earthdayEmailOverride}
                       onSuccess={() => {
                         const promo = searchParams.get('promo')
                         if (promo) {

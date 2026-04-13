@@ -15,6 +15,8 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
 import { welcomeSetPasswordTemplate } from '@ezstart/email-service'
+import type { EmailContext } from '@ezstart/email-service'
+import { quickSignupRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
@@ -26,19 +28,6 @@ const docRouter = createRouterWithDoc(quickSignupRegistry, router)
 
 // Rate limiting: 3 req/hour per IP (same as register)
 const quickSignupRateLimiter = createVeryStrictRateLimiter()
-
-const quickSignupSchema = z.object({
-  username: z
-    .string()
-    .min(1, 'Username is required')
-    .max(50, 'Username must be 50 characters or less')
-    .describe('Unique username'),
-  email: z.string().email('Invalid email format').describe('User email address'),
-  app: z.string().min(1, 'App name is required').describe('App requesting signup'),
-  promoCode: z.string().optional().describe('Promo code from referral/campaign'),
-  emailSubject: z.string().max(200).optional().describe('Custom email subject override'),
-  emailBody: z.string().max(2000).optional().describe('Custom message to include in the email'),
-})
 
 const quickSignupResponseSchema = z.object({
   user: z.object({}).passthrough().describe('Authenticated user'),
@@ -53,12 +42,12 @@ const errorSchema = z.object({
 
 const quickSignupController = async (req: Request, res: Response) => {
   try {
-    const parsed = quickSignupSchema.safeParse(req.body)
+    const parsed = quickSignupRequestSchema.safeParse(req.body)
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid quick-signup request', parsed.error.issues)
     }
 
-    const { username, email, app, promoCode, emailSubject, emailBody } = parsed.data
+    const { username, email, app, promoCode, locale, emailOverride } = parsed.data
     const normalizedUsername = username.trim().toLowerCase()
     const normalizedEmail = email.trim().toLowerCase()
 
@@ -108,20 +97,31 @@ const quickSignupController = async (req: Request, res: Response) => {
       const setPasswordUrl = `${getWebUrl('ezauth')}/reset-password?${buildAuthEmailParams(token, app)}`
       const appDisplayName = getAppDisplayName(app)
 
+      const ctx: EmailContext = {
+        appName: appDisplayName,
+        appKey: app,
+        locale,
+        overrides: emailOverride,
+      }
+      const rendered = welcomeSetPasswordTemplate(
+        {
+          setPasswordUrl,
+          username: normalizedUsername,
+          ...(promoCode ? { promoCode } : {}),
+        },
+        ctx
+      )
+
       await emailService.send({
         to: normalizedEmail,
-        from: `${appDisplayName} <noreply@ezstart.xyz>`,
-        subject: emailSubject || `[${appDisplayName}] Welcome — Set up your password`,
-        html: welcomeSetPasswordTemplate(
-          setPasswordUrl,
-          appDisplayName,
-          normalizedUsername,
-          emailBody,
-          promoCode
-        ),
+        from: rendered.from ?? `${appDisplayName} <noreply@ezstart.xyz>`,
+        ...(rendered.replyTo ? { replyTo: rendered.replyTo } : {}),
+        subject: rendered.subject,
+        html: rendered.html,
+        ...(rendered.text ? { text: rendered.text } : {}),
       })
 
-      logger.info({ email: normalizedEmail, app }, 'Welcome email sent after quick-signup')
+      logger.info({ email: normalizedEmail, app, locale }, 'Welcome email sent after quick-signup')
     } catch (emailError) {
       // Don't fail signup if email sending fails — the user can request another email.
       logger.error('Failed to send welcome email:', emailError)
@@ -151,7 +151,7 @@ const quickSignupController = async (req: Request, res: Response) => {
 docRouter.post('/quick-signup', quickSignupRateLimiter, quickSignupController, {
   summary: 'Quick signup with username + email (no password required)',
   tags: ['Authentication'],
-  bodySchema: quickSignupSchema,
+  bodySchema: quickSignupRequestSchema,
   responseSchema: quickSignupResponseSchema,
   status: 201,
   extraResponses: {

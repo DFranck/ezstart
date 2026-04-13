@@ -96,7 +96,12 @@ export type {
   AuthCode,
   AuthCodeResponse,
   JWTPayload,
+  EmailOverrideRequest,
 } from './types.js'
+
+// Embedded i18n dictionaries (EN/FR/VI) for auth forms
+export { getAuthTexts, en, fr, vi } from './i18n/index.js'
+export type { AuthLocale, AuthDict, FormKey } from './i18n/index.js'
 
 // Zod schemas for validation and OpenAPI
 export {

@@ -15,6 +15,8 @@ import { getAuthCodeModel } from '../../models/auth-code.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { emailService } from '../../services/email.service.js'
 import { emailVerificationTemplate } from '@ezstart/email-service'
+import type { EmailContext } from '@ezstart/email-service'
+import { sendVerificationRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
@@ -28,15 +30,6 @@ const sendVerificationRateLimiter = createVeryStrictRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 3,
   message: 'Too many verification email requests, please try again later.',
-})
-
-const sendVerificationRequestSchema = z.object({
-  app: z.string().optional().describe('App requesting the verification email'),
-  redirect_uri: z
-    .string()
-    .url()
-    .optional()
-    .describe('Redirect URI to return to after verification'),
 })
 
 const sendVerificationResponseSchema = z.object({
@@ -69,6 +62,10 @@ const sendVerificationController = async (req: Request, res: Response) => {
     const parsedBody = sendVerificationRequestSchema.safeParse(req.body ?? {})
     const app = parsedBody.success ? parsedBody.data.app : undefined
     const redirect_uri = parsedBody.success ? parsedBody.data.redirect_uri : undefined
+    const locale = parsedBody.success ? parsedBody.data.locale : 'en'
+    const emailOverride = parsedBody.success ? parsedBody.data.emailOverride : undefined
+
+    const appKey = app || 'ezstart'
 
     const AuthCodeModel = await getAuthCodeModel()
     const token = crypto.randomBytes(32).toString('hex')
@@ -77,7 +74,7 @@ const sendVerificationController = async (req: Request, res: Response) => {
       code: token,
       userId: user._id!.toString(),
       type: 'email-verification',
-      app: app || 'ezstart',
+      app: appKey,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     })
 
@@ -87,14 +84,24 @@ const sendVerificationController = async (req: Request, res: Response) => {
     const params = buildAuthEmailParams(token, app, redirect_uri)
     const verifyUrl = `${getWebUrl('ezauth')}/verify-email?${params}`
 
+    const ctx: EmailContext = {
+      appName: appDisplayName,
+      appKey,
+      locale,
+      overrides: emailOverride,
+    }
+    const rendered = emailVerificationTemplate({ verifyUrl }, ctx)
+
     await emailService.send({
       to: user.email,
-      from: `${appDisplayName} <noreply@ezstart.xyz>`,
-      subject: `[${appDisplayName}] Verify your email address`,
-      html: emailVerificationTemplate(verifyUrl, appDisplayName),
+      from: rendered.from ?? `${appDisplayName} <noreply@ezstart.xyz>`,
+      ...(rendered.replyTo ? { replyTo: rendered.replyTo } : {}),
+      subject: rendered.subject,
+      html: rendered.html,
+      ...(rendered.text ? { text: rendered.text } : {}),
     })
 
-    logger.info({ email: user.email }, 'Verification email resent')
+    logger.info({ email: user.email, locale, appKey }, 'Verification email resent')
 
     sendSuccess(res, { message: 'Verification email sent' })
   } catch (error) {

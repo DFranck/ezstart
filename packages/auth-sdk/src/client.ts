@@ -1,7 +1,7 @@
 import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
 import { callApi } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
-import type { AuthToken, AuthUser } from './types.js'
+import type { AuthToken, AuthUser, EmailOverrideRequest } from './types.js'
 import type { AuthMode } from './store.js'
 
 export interface AuthClientConfig {
@@ -301,9 +301,9 @@ export class AuthClient {
     username: string
     email: string
     app: string
+    locale?: string
     promoCode?: string
-    emailSubject?: string
-    emailBody?: string
+    emailOverride?: EmailOverrideRequest
   }): Promise<{ user: AuthUser; accessToken: string; refreshToken: string }> {
     const response = await fetch(`${this.config.baseURL}/quick-signup`, {
       method: 'POST',
