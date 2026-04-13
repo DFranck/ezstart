@@ -54,6 +54,7 @@ next-env.d.ts
 .claude/**/local/**
 .claude/**/*.local.*
 .claude/worktrees/
+.claude/scheduled_tasks.lock
 
 # Temporary logs and test files
 test-*.log
@@ -65,3 +66,12 @@ test-images/
 
 # Dev credentials (never commit)
 .dev-users.md
+
+# Local tmp (screenshots, scratch)
+tmp/
+
+# Auto-generated files — regenerated via `turbo run generate`
+# Source of truth lives in the non-generated counterpart (CSS, components, etc.).
+# Never commit these; never edit by hand.
+**/*.generated.ts
+**/generated/**

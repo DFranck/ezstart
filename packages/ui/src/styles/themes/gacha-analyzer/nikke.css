@@ -3,35 +3,35 @@
    Manufacturers, rarities, gear tiers
    ============================ */
 
-[data-app="gacha-analyzer"] {
+:root[data-app='gacha-analyzer'] {
   /* Manufacturer colors */
-  --nikke-elysion: oklch(0.62 0.18 240);      /* bleu */
-  --nikke-missilis: oklch(0.62 0.22 25);      /* rouge */
-  --nikke-tetra: oklch(0.65 0.18 145);        /* vert */
-  --nikke-pilgrim: oklch(0.78 0.16 85);       /* or/jaune */
-  --nikke-abnormal: oklch(0.58 0.2 290);      /* violet */
+  --nikke-elysion: oklch(0.62 0.18 240); /* bleu */
+  --nikke-missilis: oklch(0.62 0.22 25); /* rouge */
+  --nikke-tetra: oklch(0.65 0.18 145); /* vert */
+  --nikke-pilgrim: oklch(0.78 0.16 85); /* or/jaune */
+  --nikke-abnormal: oklch(0.58 0.2 290); /* violet */
 
   /* Rarity colors */
-  --nikke-r: oklch(0.6 0.02 0);               /* gris — R */
-  --nikke-sr: oklch(0.62 0.18 240);           /* bleu — SR */
-  --nikke-ssr: oklch(0.78 0.16 85);           /* or — SSR */
+  --nikke-r: oklch(0.6 0.02 0); /* gris — R */
+  --nikke-sr: oklch(0.62 0.18 240); /* bleu — SR */
+  --nikke-ssr: oklch(0.78 0.16 85); /* or — SSR */
 
   /* Gear tier colors */
-  --nikke-tier-low: oklch(0.6 0.02 0);        /* gris — T1-T3 */
-  --nikke-tier-mid: oklch(0.62 0.18 240);     /* bleu — T4-T6 */
-  --nikke-tier-high: oklch(0.58 0.2 290);     /* violet — T7-T8 */
-  --nikke-tier-max: oklch(0.78 0.16 85);      /* or — T9+ */
+  --nikke-tier-low: oklch(0.6 0.02 0); /* gris — T1-T3 */
+  --nikke-tier-mid: oklch(0.62 0.18 240); /* bleu — T4-T6 */
+  --nikke-tier-high: oklch(0.58 0.2 290); /* violet — T7-T8 */
+  --nikke-tier-max: oklch(0.78 0.16 85); /* or — T9+ */
 
   /* Stat type colors */
-  --nikke-stat-atk: oklch(0.65 0.22 25);      /* rouge - ATK */
-  --nikke-stat-def: oklch(0.62 0.18 240);     /* bleu - DEF */
-  --nikke-stat-hp: oklch(0.65 0.18 145);      /* vert - HP */
+  --nikke-stat-atk: oklch(0.65 0.22 25); /* rouge - ATK */
+  --nikke-stat-def: oklch(0.62 0.18 240); /* bleu - DEF */
+  --nikke-stat-hp: oklch(0.65 0.18 145); /* vert - HP */
   --nikke-stat-crit-rate: oklch(0.75 0.18 55); /* orange - Crit Rate */
-  --nikke-stat-crit-dmg: oklch(0.72 0.2 40);  /* orange-rouge - Crit DMG */
+  --nikke-stat-crit-dmg: oklch(0.72 0.2 40); /* orange-rouge - Crit DMG */
   --nikke-stat-charge-spd: oklch(0.6 0.2 290); /* violet - Charge SPD */
 }
 
-[data-app="gacha-analyzer"].dark {
+:root[data-app='gacha-analyzer'].dark {
   /* Manufacturer colors */
   --nikke-elysion: oklch(0.72 0.2 240);
   --nikke-missilis: oklch(0.7 0.24 25);

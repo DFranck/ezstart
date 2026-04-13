@@ -20,7 +20,9 @@
     "build": "tsc -b",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
-    "generate:themes": "tsx scripts/generate-theme-exports.ts"
+    "generate": "tsx scripts/generate.ts",
+    "generate:themes": "tsx scripts/generate-theme-exports.ts",
+    "generate:registry": "node scripts/generate-ui-registry.cjs"
   },
   "dependencies": {
     "@ezstart/config": "workspace:*",

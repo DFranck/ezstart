@@ -3,16 +3,16 @@
    Shared variables across all games
    ============================ */
 
-[data-app="gacha-analyzer"] {
+:root[data-app='gacha-analyzer'] {
   /* Stat tier colors (S/A/B/C/D — universal ranking) */
-  --ga-tier-s: oklch(0.75 0.18 55);        /* gold — S tier */
-  --ga-tier-a: oklch(0.6 0.2 290);         /* violet — A tier */
-  --ga-tier-b: oklch(0.65 0.18 240);       /* bleu — B tier */
-  --ga-tier-c: oklch(0.6 0.02 0);          /* gris — C tier */
-  --ga-tier-d: oklch(0.65 0.22 25);        /* rouge — D tier */
+  --ga-tier-s: oklch(0.75 0.18 55); /* gold — S tier */
+  --ga-tier-a: oklch(0.6 0.2 290); /* violet — A tier */
+  --ga-tier-b: oklch(0.65 0.18 240); /* bleu — B tier */
+  --ga-tier-c: oklch(0.6 0.02 0); /* gris — C tier */
+  --ga-tier-d: oklch(0.65 0.22 25); /* rouge — D tier */
 }
 
-[data-app="gacha-analyzer"].dark {
+:root[data-app='gacha-analyzer'].dark {
   --ga-tier-s: oklch(0.8 0.2 55);
   --ga-tier-a: oklch(0.7 0.22 290);
   --ga-tier-b: oklch(0.72 0.2 240);

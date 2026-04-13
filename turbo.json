@@ -2,8 +2,25 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
+    "generate": {
+      "inputs": [
+        "src/**/*.css",
+        "src/**/*.json",
+        "src/**/*.yaml",
+        "src/**/*.svg",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "scripts/**",
+        "package.json",
+        "public/logo.*",
+        "!src/**/*.generated.ts",
+        "!src/**/generated/**"
+      ],
+      "outputs": ["src/**/*.generated.ts", "src/**/generated/**"],
+      "cache": true
+    },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "**/dist/**"]
     },
@@ -11,7 +28,7 @@
       "dependsOn": ["^lint"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^typecheck", "generate"]
     },
     "dev": {
       "cache": false,

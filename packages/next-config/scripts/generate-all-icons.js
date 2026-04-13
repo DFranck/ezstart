@@ -87,7 +87,7 @@ async function generateIconsForApp(app) {
 async function main() {
   console.log('🚀 PWA Icon Generator - Batch Mode')
   console.log('📂 Monorepo root:', monorepoRoot)
-  console.log('=' .repeat(60))
+  console.log('='.repeat(60))
 
   // Find all web apps
   const apps = await findWebApps()
@@ -119,7 +119,7 @@ async function main() {
   }
 
   console.log(`\n📦 Generating icons for ${appsWithLogos.length} apps...`)
-  console.log('=' .repeat(60))
+  console.log('='.repeat(60))
 
   // Generate icons for all apps with logos
   const results = []
@@ -129,9 +129,9 @@ async function main() {
   }
 
   // Summary
-  console.log('\n' + '=' .repeat(60))
+  console.log('\n' + '='.repeat(60))
   console.log('📊 Summary:')
-  console.log('=' .repeat(60))
+  console.log('='.repeat(60))
 
   const successful = results.filter(r => r.success)
   const failed = results.filter(r => !r.success)

@@ -39,5 +39,8 @@
   },
   "bin": {
     "generate-pwa-icons": "./scripts/generate-icons.js"
+  },
+  "scripts": {
+    "generate:icons": "node scripts/generate-all-icons.js"
   }
 }

@@ -16,6 +16,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Regenerate auto-generated files and fail if the committed stubs
+      # drift from sources (outputs are gitignored; only the stubs/barrels
+      # that re-export them are tracked).
+      - name: Check generators are in sync
+        run: |
+          pnpm run generate
+          git diff --exit-code || (echo "::error::Generator outputs drifted — run 'pnpm generate' locally and commit." && exit 1)
       # Build packages + APIs only (webs are built by Vercel)
       - run: pnpm turbo build --filter='./packages/*' --filter='api-*' --filter='@ezbill/types' --filter='@ezbill/templates' --filter='@gacha-analyzer/types' --filter='@green-pulse/types'
       # Typecheck everything (fast, no build needed)

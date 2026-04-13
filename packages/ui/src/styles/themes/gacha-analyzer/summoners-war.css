@@ -3,25 +3,25 @@
    Roll quality, elements, stat colors
    ============================ */
 
-[data-app="gacha-analyzer"] {
+:root[data-app='gacha-analyzer'] {
   /* Roll quality colors (SW system) */
-  --ga-roll-legend: oklch(0.75 0.18 55);       /* orange/doré - Legend quality */
+  --ga-roll-legend: oklch(0.75 0.18 55); /* orange/doré - Legend quality */
   --ga-roll-legend-foreground: oklch(0.98 0.01 55);
-  --ga-roll-hero: oklch(0.6 0.2 290);          /* violet - Hero quality */
+  --ga-roll-hero: oklch(0.6 0.2 290); /* violet - Hero quality */
   --ga-roll-hero-foreground: oklch(0.98 0.01 290);
-  --ga-roll-rare: oklch(0.65 0.18 240);        /* bleu - Rare quality */
+  --ga-roll-rare: oklch(0.65 0.18 240); /* bleu - Rare quality */
   --ga-roll-rare-foreground: oklch(0.98 0.01 240);
-  --ga-roll-magic: oklch(0.7 0.18 145);        /* vert - Magic quality */
+  --ga-roll-magic: oklch(0.7 0.18 145); /* vert - Magic quality */
   --ga-roll-magic-foreground: oklch(0.98 0.01 145);
-  --ga-roll-normal: oklch(0.6 0.02 0);         /* gris - Normal quality */
+  --ga-roll-normal: oklch(0.6 0.02 0); /* gris - Normal quality */
   --ga-roll-normal-foreground: oklch(0.98 0.01 0);
 
   /* Tier colors (rune evaluation) */
-  --ga-tier-godlike: oklch(0.75 0.18 55);      /* orange/doré */
-  --ga-tier-great: oklch(0.6 0.2 290);         /* violet */
-  --ga-tier-good: oklch(0.65 0.18 240);        /* bleu */
-  --ga-tier-keep: oklch(0.7 0.02 0);           /* gris neutre */
-  --ga-tier-sell: oklch(0.65 0.22 25);         /* rouge */
+  --ga-tier-godlike: oklch(0.75 0.18 55); /* orange/doré */
+  --ga-tier-great: oklch(0.6 0.2 290); /* violet */
+  --ga-tier-good: oklch(0.65 0.18 240); /* bleu */
+  --ga-tier-keep: oklch(0.7 0.02 0); /* gris neutre */
+  --ga-tier-sell: oklch(0.65 0.22 25); /* rouge */
 
   /* Element colors (pour les monstres) */
   --ga-element-fire: oklch(0.65 0.22 25);
@@ -31,18 +31,18 @@
   --ga-element-dark: oklch(0.5 0.18 290);
 
   /* Stat type colors */
-  --ga-stat-spd: oklch(0.65 0.18 240);        /* bleu - Speed */
-  --ga-stat-crit: oklch(0.65 0.22 25);         /* rouge - CR/CD */
-  --ga-stat-atk: oklch(0.75 0.18 55);          /* orange - ATK */
-  --ga-stat-hp: oklch(0.7 0.18 145);           /* vert - HP */
-  --ga-stat-def: oklch(0.6 0.02 0);            /* gris - DEF */
-  --ga-stat-acc: oklch(0.6 0.2 290);           /* violet - ACC/RES */
+  --ga-stat-spd: oklch(0.65 0.18 240); /* bleu - Speed */
+  --ga-stat-crit: oklch(0.65 0.22 25); /* rouge - CR/CD */
+  --ga-stat-atk: oklch(0.75 0.18 55); /* orange - ATK */
+  --ga-stat-hp: oklch(0.7 0.18 145); /* vert - HP */
+  --ga-stat-def: oklch(0.6 0.02 0); /* gris - DEF */
+  --ga-stat-acc: oklch(0.6 0.2 290); /* violet - ACC/RES */
 
   /* Rune background (pour les masques en mode scan) */
   --ga-rune-bg: oklch(0.25 0.04 55);
 }
 
-[data-app="gacha-analyzer"].dark {
+:root[data-app='gacha-analyzer'].dark {
   --ga-roll-legend: oklch(0.8 0.2 55);
   --ga-roll-hero: oklch(0.7 0.22 290);
   --ga-roll-rare: oklch(0.72 0.2 240);

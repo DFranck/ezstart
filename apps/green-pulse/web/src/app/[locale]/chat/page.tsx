@@ -85,7 +85,7 @@ export default function LiaPage() {
 
       <Div className="border-t mx-2" />
 
-      {/* Upgrade prompt + future tools (disabled) */}
+      {/* Upgrade prompt + Admin link (if admin) + future tools (disabled) */}
       <Div className="space-y-1">
         <Div className="px-2 py-1">
           <Span className="text-xs font-medium text-muted-foreground">
@@ -93,6 +93,14 @@ export default function LiaPage() {
           </Span>
         </Div>
         <Nav className="space-y-0.5">
+          {isAdmin && (
+            <Button asChild variant="ghost" size="sm" className="w-full justify-start h-8 px-2">
+              <Link href="/admin">
+                <Icon name="lucide:Shield" className="mr-2" size={14} />
+                <Span className="text-xs">Admin</Span>
+              </Link>
+            </Button>
+          )}
           {toolsItems.map(item => (
             <Button
               key={item.href}
@@ -151,16 +159,6 @@ export default function LiaPage() {
         slots={{
           sidebarHeader,
           sidebarFooter,
-          sidebarAfterConversations: isAdmin ? (
-            <Nav className="space-y-1 px-2">
-              <Button asChild variant="ghost" size="sm" className="w-full justify-start">
-                <Link href="/admin">
-                  <Icon name="lucide:Shield" className="mr-2" size={16} />
-                  Admin
-                </Link>
-              </Button>
-            </Nav>
-          ) : undefined,
         }}
       />
     </Main>
