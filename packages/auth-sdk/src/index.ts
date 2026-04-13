@@ -96,6 +96,7 @@ export type {
   AuthCode,
   AuthCodeResponse,
   JWTPayload,
+  EmailOverrideRequest,
 } from './types.js'
 
 // Embedded i18n dictionaries (EN/FR/VI) for auth forms
