@@ -14,9 +14,11 @@ import {
 } from '@ezstart/ui/components'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
+import { useLocale } from 'next-intl'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -39,22 +41,13 @@ export interface ForgotPasswordFormProps {
   onBack?: () => void
   /** Href for back to login link (used if onBack is not provided) */
   backHref?: string
-  /** Override texts */
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   */
+  locale?: AuthLocale | string
+  /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<ForgotPasswordFormTexts>
-}
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: ForgotPasswordFormTexts = {
-  email: 'Email',
-  emailPlaceholder: 'Enter your email address',
-  submit: 'Send Reset Link',
-  submitting: 'Sending...',
-  required: 'This field is required',
-  invalidEmail: 'Please enter a valid email address',
-  success: 'If an account with that email exists, we sent a password reset link.',
-  backToLogin: 'Back to login',
-  fallbackError: 'An error occurred. Please try again.',
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -67,9 +60,15 @@ export function ForgotPasswordForm({
   onSuccess,
   onBack,
   backHref,
+  locale: propLocale,
   texts,
 }: ForgotPasswordFormProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
+  const contextLocale = useLocale()
+  const locale = propLocale ?? contextLocale
+  const t: ForgotPasswordFormTexts = {
+    ...getAuthTexts(locale, 'forgotPassword'),
+    ...texts,
+  }
   const navigation = useAuthNavigation()
   const resolvedBackHref = backHref ?? navigation.loginHref
   const [loading, setLoading] = useState(false)
@@ -94,6 +93,7 @@ export function ForgotPasswordForm({
         method: 'POST',
         body: {
           email: formData.email,
+          locale,
           ...(app && { app }),
           ...(redirectUri && { redirect_uri: redirectUri }),
         },

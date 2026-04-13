@@ -17,9 +17,11 @@ import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useLocale } from 'next-intl'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
 import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -61,24 +63,13 @@ export interface SignInFormProps {
   showOAuth?: boolean
   /** OAuth providers to display */
   oauthProviders?: OAuthProvider[]
-  /** Override texts */
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   */
+  locale?: AuthLocale | string
+  /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<SignInFormTexts>
-}
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: SignInFormTexts = {
-  emailOrUsername: 'Email or Username',
-  emailOrUsernamePlaceholder: 'Enter your email or username',
-  password: 'Password',
-  passwordPlaceholder: 'Enter your password',
-  forgotPassword: 'Forgot password?',
-  submit: 'Sign In',
-  submitting: 'Signing in...',
-  required: 'This field is required',
-  minLength: 'Minimum {min} characters',
-  noRedirectUri: 'No redirect URI configured',
-  fallbackError: 'An error occurred. Please try again.',
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -96,9 +87,12 @@ export function SignInForm({
   forgotPasswordHref,
   showOAuth = false,
   oauthProviders,
+  locale: propLocale,
   texts,
 }: SignInFormProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
+  const contextLocale = useLocale()
+  const locale = propLocale ?? contextLocale
+  const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const navigation = useAuthNavigation()
   const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
   const [loading, setLoading] = useState(false)

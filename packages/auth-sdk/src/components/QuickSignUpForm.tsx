@@ -16,11 +16,14 @@ import {
 } from '@ezstart/ui/components'
 import { toast } from 'sonner'
 import { logger } from '@ezstart/logger'
+import { useLocale } from 'next-intl'
 import { useAuthContext } from '../provider.js'
 import { useAuthStore } from '../store.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { usePromoCode } from './usePromoCode.js'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
+import type { EmailOverrideRequest } from '../types.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -53,36 +56,21 @@ export interface QuickSignUpFormProps {
   density?: 'compact' | 'default' | 'relaxed'
   /** Pre-filled promo code (auto-detected from URL ?promo= or localStorage if not provided) */
   promoCode?: string
-  /** Custom email subject override for the welcome email */
-  emailSubject?: string
-  /** Custom message to prepend in the welcome email body */
-  emailBody?: string
+  /**
+   * Per-send email overrides forwarded to the welcome email template
+   * (subject, from, replyTo, bodyHtml, etc.). Enables campaign-specific
+   * emails (e.g. Earth Day) without touching the shared template.
+   */
+  emailOverride?: EmailOverrideRequest
   /** Called after successful signup */
   onSuccess?: () => void
-  /** Override texts */
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   */
+  locale?: AuthLocale | string
+  /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<QuickSignUpFormTexts>
-}
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: QuickSignUpFormTexts = {
-  username: 'Username',
-  usernamePlaceholder: 'Choose a username',
-  email: 'Email',
-  emailPlaceholder: 'Enter your email',
-  submit: 'Quick Sign Up',
-  submitting: 'Creating account...',
-  required: 'This field is required',
-  invalidEmail: 'Please enter a valid email',
-  fallbackError: 'An error occurred. Please try again.',
-  successToast: 'Account created! Welcome aboard.',
-  promoCodeLabel: 'Promo code',
-  promoCodePlaceholder: 'Enter promo code',
-  promoCodeApplied: 'Valid code!',
-  promoCodeToggle: 'Have a promo code?',
-  promoCodeInvalid: 'Invalid promo code',
-  promoCodeRateLimited: 'Please wait a moment and try again',
-  promoCodeChecking: 'Checking...',
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -98,14 +86,19 @@ export function QuickSignUpForm({
   description,
   density = 'default',
   promoCode,
-  emailSubject,
-  emailBody,
+  emailOverride,
   onSuccess,
+  locale: propLocale,
   texts,
 }: QuickSignUpFormProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
   const { client } = useAuthContext()
   const store = useAuthStore()
+  const contextLocale = useLocale()
+  const locale = propLocale ?? contextLocale
+  const t: QuickSignUpFormTexts = {
+    ...getAuthTexts(locale, 'quickSignup'),
+    ...texts,
+  }
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const {
@@ -138,9 +131,9 @@ export function QuickSignUpForm({
         username: formData.username,
         email: formData.email,
         app: appName,
+        locale,
         ...(finalPromo ? { promoCode: finalPromo } : {}),
-        ...(emailSubject ? { emailSubject } : {}),
-        ...(emailBody ? { emailBody } : {}),
+        ...(emailOverride ? { emailOverride } : {}),
       })
 
       // Auto-login: the API issues a real session so consumers (e.g.

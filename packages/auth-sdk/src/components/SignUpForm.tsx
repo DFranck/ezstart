@@ -16,6 +16,7 @@ import {
 } from '@ezstart/ui/components'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
+import { useLocale } from 'next-intl'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -23,6 +24,7 @@ import { PasswordStrength } from './PasswordStrength.js'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
 import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -85,50 +87,18 @@ export interface SignUpFormProps {
   showOAuth?: boolean
   /** OAuth providers to display */
   oauthProviders?: OAuthProvider[]
-  /** Override texts */
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   */
+  locale?: AuthLocale | string
+  /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<SignUpFormTexts>
 }
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
 
 const MIN_PASSWORD_LENGTH = 8
-
-const DEFAULT_TEXTS: SignUpFormTexts = {
-  email: 'Email',
-  emailPlaceholder: 'Enter your email',
-  emailTaken: 'This email is already taken',
-  username: 'Username',
-  usernamePlaceholder: 'Choose a username',
-  usernameTaken: 'This username is already taken',
-  firstName: 'First Name',
-  firstNamePlaceholder: 'First name',
-  lastName: 'Last Name',
-  lastNamePlaceholder: 'Last name',
-  password: 'Password',
-  passwordPlaceholder: 'Choose a password',
-  passwordHint: 'At least 8 characters with a mix of letters, numbers, and symbols.',
-  confirmPassword: 'Confirm Password',
-  confirmPasswordPlaceholder: 'Confirm your password',
-  passwordMismatch: 'Passwords do not match',
-  submit: 'Sign Up',
-  submitting: 'Creating account...',
-  fallbackError: 'An error occurred. Please try again.',
-  checkEmail: 'Check your email',
-  checkEmailDescription:
-    'We sent you a verification email. Please click the link in the email to verify your account.',
-  backToLogin: 'Back to login',
-  passwordWeak: 'Weak',
-  passwordFair: 'Fair',
-  passwordGood: 'Good',
-  passwordStrong: 'Strong',
-  promoCodeLabel: 'Promo code',
-  promoCodePlaceholder: 'Enter promo code',
-  promoCodeApplied: 'Valid code!',
-  promoCodeToggle: 'Have a promo code?',
-  promoCodeInvalid: 'Invalid promo code',
-  promoCodeRateLimited: 'Please wait a moment and try again',
-  promoCodeChecking: 'Checking...',
-}
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -151,9 +121,12 @@ export function SignUpForm({
   backToLoginHref,
   showOAuth = false,
   oauthProviders,
+  locale: propLocale,
   texts,
 }: SignUpFormProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
+  const contextLocale = useLocale()
+  const locale = propLocale ?? contextLocale
+  const t: SignUpFormTexts = { ...getAuthTexts(locale, 'signUp'), ...texts }
   const navigation = useAuthNavigation()
   const resolvedBackToLoginHref = backToLoginHref ?? navigation.loginHref
   const [loading, setLoading] = useState(false)
@@ -254,6 +227,7 @@ export function SignUpForm({
           lastName: formData.lastName || undefined,
           app: appName,
           redirect_uri: redirectUri || undefined,
+          locale,
           ...(finalPromo ? { promoCode: finalPromo } : {}),
         },
       })
