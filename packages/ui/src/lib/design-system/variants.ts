@@ -30,12 +30,12 @@ import { isDebug } from '../debug'
  */
 
 // ============================================================================
-// CONFIG: FORM INPUT (Input, Select, TextArea, etc.)
+// CONFIG: FORM INPUT (Input, Select, Textarea, etc.)
 // ============================================================================
 
 /**
  * Config de variants pour form inputs
- * Usage: Input, Select, TextArea, PasswordInput
+ * Usage: Input, Select, Textarea, PasswordInput
  */
 export const formInputVariantConfig = {
   size: {

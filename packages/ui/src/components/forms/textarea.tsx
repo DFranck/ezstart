@@ -12,7 +12,7 @@ import {
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 
 /**
- * TextArea Component - Enhanced with Auto-Resize, Character Count & Design Tokens
+ * Textarea Component - Enhanced with Auto-Resize, Character Count & Design Tokens
  *
  * Accessible textarea with optional auto-resize, character counting, label,
  * and design token support (size, density, radius).
@@ -20,47 +20,47 @@ import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
  *
  * @example
  * // Basic usage
- * <TextArea label="Description" placeholder="Enter description..." />
+ * <Textarea label="Description" placeholder="Enter description..." />
  *
  * @example
  * // With auto-resize
- * <TextArea autoResize maxRows={10} />
+ * <Textarea autoResize maxRows={10} />
  *
  * @example
  * // With size
- * <TextArea size="sm" placeholder="Small textarea" />
+ * <Textarea size="sm" placeholder="Small textarea" />
  *
  * @example
  * // With character count
- * <TextArea showCharCount maxLength={500} />
+ * <Textarea showCharCount maxLength={500} />
  */
 
-type TextAreaSize = 'sm' | 'default' | 'lg'
-type TextAreaDensity = 'compact' | 'default' | 'relaxed'
-type TextAreaRadius = 'none' | 'sm' | 'default' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
+type TextareaSize = 'sm' | 'default' | 'lg'
+type TextareaDensity = 'compact' | 'default' | 'relaxed'
+type TextareaRadius = 'none' | 'sm' | 'default' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
 
 /** Size → fontSize + minHeight mapping */
-const sizeConfig: Record<TextAreaSize, { fontSize: string; minHeight: string }> = {
+const sizeConfig: Record<TextareaSize, { fontSize: string; minHeight: string }> = {
   sm: { fontSize: fontSize.sm, minHeight: 'min-h-[64px] sm:min-h-[48px]' },
   default: { fontSize: fontSize.base, minHeight: 'min-h-[80px] sm:min-h-[60px]' },
   lg: { fontSize: fontSize.lg, minHeight: 'min-h-[96px] sm:min-h-[72px]' },
 }
 
 /** Size → paddingX mapping */
-const sizePaddingX: Record<TextAreaSize, string> = {
+const sizePaddingX: Record<TextareaSize, string> = {
   sm: paddingX.sm,
   default: paddingX.default,
   lg: paddingX.lg,
 }
 
 /** Density → paddingY override */
-const densityPaddingY: Record<TextAreaDensity, string> = {
+const densityPaddingY: Record<TextareaDensity, string> = {
   compact: paddingY.xs,
   default: paddingY.default,
   relaxed: paddingY.md,
 }
 
-export interface TextAreaProps extends ComponentProps<'textarea'> {
+export interface TextareaProps extends ComponentProps<'textarea'> {
   /** Label text */
   label?: string
   /** Enable auto-resize based on content */
@@ -70,14 +70,14 @@ export interface TextAreaProps extends ComponentProps<'textarea'> {
   /** Show character count */
   showCharCount?: boolean
   /** Size of the textarea (font size + min-height) */
-  size?: TextAreaSize
+  size?: TextareaSize
   /** Density adjusts vertical padding */
-  density?: TextAreaDensity
+  density?: TextareaDensity
   /** Border radius */
-  radius?: TextAreaRadius
+  radius?: TextareaRadius
 }
 
-export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
       label,
@@ -95,9 +95,9 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     ref
   ) => {
     const inherited = useDesignTokens()
-    const size = (sizeProp ?? inherited.size ?? 'default') as TextAreaSize
-    const density = (densityProp ?? inherited.density ?? 'default') as TextAreaDensity
-    const resolvedRadius = (radiusProp ?? inherited.radius ?? 'default') as TextAreaRadius
+    const size = (sizeProp ?? inherited.size ?? 'default') as TextareaSize
+    const density = (densityProp ?? inherited.density ?? 'default') as TextareaDensity
+    const resolvedRadius = (radiusProp ?? inherited.radius ?? 'default') as TextareaRadius
 
     const [charCount, setCharCount] = useState(0)
     const internalRef = useRef<HTMLTextAreaElement>(null)
@@ -167,10 +167,6 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
   }
 )
 
-TextArea.displayName = 'TextArea'
+Textarea.displayName = 'Textarea'
 
-/**
- * Legacy export for backward compatibility
- * @deprecated Use named export TextArea instead
- */
-export default TextArea
+export default Textarea

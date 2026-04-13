@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
   Span,
-  TextArea,
+  Textarea,
   Div,
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
@@ -456,7 +456,7 @@ export function QuoteModal({
                       <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
                       {tCommon('description')} *
                     </Label>
-                    <TextArea
+                    <Textarea
                       placeholder={tFlatRate('descriptionPlaceholder')}
                       value={formData.description || ''}
                       onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -503,7 +503,7 @@ export function QuoteModal({
                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                 {tCommon('notes')}
               </Label>
-              <TextArea
+              <Textarea
                 value={formData.notes}
                 onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
@@ -517,7 +517,7 @@ export function QuoteModal({
                 <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 " />
                 {tCommon('termsConditions')}
               </Label>
-              <TextArea
+              <Textarea
                 value={formData.terms}
                 onChange={e => setFormData({ ...formData, terms: e.target.value })}
                 rows={3}

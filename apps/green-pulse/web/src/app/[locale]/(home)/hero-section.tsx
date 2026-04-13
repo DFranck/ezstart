@@ -77,10 +77,7 @@ export function HeroSection() {
         <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
           {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map(
             (feature: string, index: number) => (
-              <Badge
-                key={index}
-                className="rounded-full bg-gp-accent text-gp-accent-foreground px-4 py-1 text-sm font-medium"
-              >
+              <Badge key={index} size="lg" className="bg-gp-accent text-gp-accent-foreground">
                 {feature}
               </Badge>
             )

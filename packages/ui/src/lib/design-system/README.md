@@ -51,21 +51,22 @@ import {
 
 ```typescript
 // Heights
-touchHeight.sm        // h-10 sm:h-8      (40px → 32px)
-touchHeight.default   // h-11 sm:h-9      (44px → 36px) ⭐ STANDARD
-touchHeight.lg        // h-12 sm:h-10     (48px → 40px)
+touchHeight.sm // h-10 sm:h-8      (40px → 32px)
+touchHeight.default // h-11 sm:h-9      (44px → 36px) ⭐ STANDARD
+touchHeight.lg // h-12 sm:h-10     (48px → 40px)
 
 // Square sizes
-touchSize.sm          // size-10 sm:size-8
-touchSize.default     // size-11 sm:size-9  ⭐ STANDARD
-touchSize.lg          // size-12 sm:size-10
+touchSize.sm // size-10 sm:size-8
+touchSize.default // size-11 sm:size-9  ⭐ STANDARD
+touchSize.lg // size-12 sm:size-10
 
 // Small interactive (icons in inputs, checkboxes)
-touchSmall.icon       // w-5 h-5 sm:w-4 sm:h-4    (20px → 16px)
-touchSmall.checkbox   // size-5 sm:size-4         (20px → 16px)
+touchSmall.icon // w-5 h-5 sm:w-4 sm:h-4    (20px → 16px)
+touchSmall.checkbox // size-5 sm:size-4         (20px → 16px)
 ```
 
 **Usage - Input**:
+
 ```typescript
 <input
   className={cn(
@@ -77,6 +78,7 @@ touchSmall.checkbox   // size-5 sm:size-4         (20px → 16px)
 ```
 
 **Usage - Button Icon**:
+
 ```typescript
 <button className={cn(touchSize.default)}>
   <Icon className={touchSmall.icon} />
@@ -91,38 +93,39 @@ touchSmall.checkbox   // size-5 sm:size-4         (20px → 16px)
 
 ```typescript
 // Padding (all sides)
-padding.xs       // p-2 sm:p-1
-padding.sm       // p-3 sm:p-2
-padding.default  // p-4 sm:p-3
-padding.lg       // p-4 sm:p-6      ⭐ CARD/DIALOG
-padding.xl       // p-6 sm:p-8
+padding.xs // p-2 sm:p-1
+padding.sm // p-3 sm:p-2
+padding.default // p-4 sm:p-3
+padding.lg // p-4 sm:p-6      ⭐ CARD/DIALOG
+padding.xl // p-6 sm:p-8
 
 // Padding X (horizontal)
-paddingX.xs      // px-2 sm:px-1
-paddingX.sm      // px-3 sm:px-2
+paddingX.xs // px-2 sm:px-1
+paddingX.sm // px-3 sm:px-2
 paddingX.default // px-4 sm:px-3
-paddingX.lg      // px-4 sm:px-6    ⭐ CARD/DIALOG
-paddingX.xl      // px-6 sm:px-8
+paddingX.lg // px-4 sm:px-6    ⭐ CARD/DIALOG
+paddingX.xl // px-6 sm:px-8
 
 // Padding Y (vertical)
-paddingY.xs      // py-2 sm:py-1
-paddingY.sm      // py-3 sm:py-2
+paddingY.xs // py-2 sm:py-1
+paddingY.sm // py-3 sm:py-2
 paddingY.default // py-2 sm:py-2
-paddingY.lg      // py-4 sm:py-6
-paddingY.xl      // py-6 sm:py-8
+paddingY.lg // py-4 sm:py-6
+paddingY.xl // py-6 sm:py-8
 
 // Gap (flexbox/grid)
-gap.xs           // gap-1
-gap.tight        // gap-1.5 sm:gap-1
-gap.sm           // gap-2
-gap.default      // gap-2.5 sm:gap-2
-gap.normal       // gap-3 sm:gap-2.5
-gap.relaxed      // gap-4 sm:gap-3   ⭐ CARD CONTENT
-gap.spacious     // gap-5 sm:gap-4
-gap.loose        // gap-6 sm:gap-5
+gap.xs // gap-1
+gap.tight // gap-1.5 sm:gap-1
+gap.sm // gap-2
+gap.default // gap-2.5 sm:gap-2
+gap.normal // gap-3 sm:gap-2.5
+gap.relaxed // gap-4 sm:gap-3   ⭐ CARD CONTENT
+gap.spacious // gap-5 sm:gap-4
+gap.loose // gap-6 sm:gap-5
 ```
 
 **Usage - Card**:
+
 ```typescript
 <div className={cn(
   variantContainer.card,
@@ -141,26 +144,28 @@ gap.loose        // gap-6 sm:gap-5
 **Responsive font sizes**: Plus grand sur mobile pour lisibilité
 
 ```typescript
-fontSize.xs      // text-xs
-fontSize.sm      // text-sm
-fontSize.base    // text-base sm:text-sm    ⭐ INPUT (16px → 14px)
-fontSize.lg      // text-lg sm:text-base
-fontSize.xl      // text-xl sm:text-lg
-fontSize['2xl']  // text-2xl sm:text-xl
-fontSize.h6      // text-base sm:text-sm
-fontSize.h5      // text-lg sm:text-base
-fontSize.h4      // text-xl sm:text-lg
-fontSize.h3      // text-2xl sm:text-xl
-fontSize.h2      // text-3xl sm:text-2xl md:text-3xl
-fontSize.h1      // text-3xl sm:text-4xl md:text-5xl
-fontSize.giant   // text-4xl sm:text-5xl md:text-6xl
+fontSize.xs // text-xs
+fontSize.sm // text-sm
+fontSize.base // text-base sm:text-sm    ⭐ INPUT (16px → 14px)
+fontSize.lg // text-lg sm:text-base
+fontSize.xl // text-xl sm:text-lg
+fontSize['2xl'] // text-2xl sm:text-xl
+fontSize.h6 // text-base sm:text-sm
+fontSize.h5 // text-lg sm:text-base
+fontSize.h4 // text-xl sm:text-lg
+fontSize.h3 // text-2xl sm:text-xl
+fontSize.h2 // text-3xl sm:text-2xl md:text-3xl
+fontSize.h1 // text-3xl sm:text-4xl md:text-5xl
+fontSize.giant // text-4xl sm:text-5xl md:text-6xl
 ```
 
 **Pourquoi `text-base` sur mobile?**
+
 - 16px évite le zoom automatique iOS sur focus input
 - 14px sur desktop pour densité d'information
 
 **Usage - Input**:
+
 ```typescript
 <input
   className={cn(
@@ -176,20 +181,20 @@ fontSize.giant   // text-4xl sm:text-5xl md:text-6xl
 
 ```typescript
 // Border radius
-radius.xs        // rounded-sm
-radius.sm        // rounded
-radius.default   // rounded-md    ⭐ STANDARD
-radius.lg        // rounded-lg
-radius.xl        // rounded-xl
-radius.full      // rounded-full
+radius.xs // rounded-sm
+radius.sm // rounded
+radius.default // rounded-md    ⭐ STANDARD
+radius.lg // rounded-lg
+radius.xl // rounded-xl
+radius.full // rounded-full
 
 // Shadows
-shadow.xs        // shadow-xs
-shadow.sm        // shadow-sm
-shadow.default   // shadow        ⭐ STANDARD
-shadow.md        // shadow-md
-shadow.lg        // shadow-lg
-shadow.xl        // shadow-xl
+shadow.xs // shadow-xs
+shadow.sm // shadow-sm
+shadow.default // shadow        ⭐ STANDARD
+shadow.md // shadow-md
+shadow.lg // shadow-lg
+shadow.xl // shadow-xl
 ```
 
 ---
@@ -197,33 +202,37 @@ shadow.xl        // shadow-xl
 #### 5. Semantic Variants
 
 **Intent (état sémantique)**:
+
 ```typescript
-intentContainer.default      // État normal
-intentContainer.primary      // Action principale
-intentContainer.success      // Succès (vert)
-intentContainer.destructive  // Danger (rouge)
-intentContainer.warning      // Attention (orange)
-intentContainer.info         // Information (bleu)
+intentContainer.default // État normal
+intentContainer.primary // Action principale
+intentContainer.success // Succès (vert)
+intentContainer.destructive // Danger (rouge)
+intentContainer.warning // Attention (orange)
+intentContainer.info // Information (bleu)
 ```
 
 **Variant (style visuel)**:
+
 ```typescript
-variantContainer.card       // bg-card border shadow-sm
-variantContainer.outline    // border bg-background
-variantContainer.filled     // bg-muted
-variantContainer.floating   // shadow-lg
-variantContainer.ghost      // transparent
+variantContainer.card // bg-card border shadow-sm
+variantContainer.outline // border bg-background
+variantContainer.filled // bg-muted
+variantContainer.floating // shadow-lg
+variantContainer.ghost // transparent
 ```
 
 **Layout (arrangement)**:
+
 ```typescript
-layoutContainer.flexRow     // flex flex-row items-center
-layoutContainer.flexCol     // flex flex-col
-layoutContainer.grid        // grid
-layoutContainer.gridAuto    // grid grid-cols-[auto_1fr]
+layoutContainer.flexRow // flex flex-row items-center
+layoutContainer.flexCol // flex flex-col
+layoutContainer.grid // grid
+layoutContainer.gridAuto // grid grid-cols-[auto_1fr]
 ```
 
 **Usage - Card avec intent**:
+
 ```typescript
 <div className={cn(
   variantContainer.card,
@@ -239,10 +248,10 @@ layoutContainer.gridAuto    // grid grid-cols-[auto_1fr]
 #### 6. Responsive Utilities
 
 ```typescript
-responsive.modalWidth      // w-full max-w-lg
+responsive.modalWidth // w-full max-w-lg
 responsive.contentMaxWidth // max-w-4xl mx-auto
 responsive.containerPadding // px-4 sm:px-6 lg:px-8
-responsive.sectionSpacing  // space-y-6 sm:space-y-8
+responsive.sectionSpacing // space-y-6 sm:space-y-8
 ```
 
 ---
@@ -271,7 +280,7 @@ import {
 
 ### 1. Form Input Variant
 
-**Pour**: Input, Select, TextArea, PasswordInput
+**Pour**: Input, Select, Textarea, PasswordInput
 
 ```typescript
 import { createFormInputVariant, type FormInputVariants } from '@ezstart/ui/lib/design-system'
@@ -294,6 +303,7 @@ export const Input = ({ size, variant, intent, className, ...props }: InputProps
 ```
 
 **Variants disponibles**:
+
 ```typescript
 size: 'sm' | 'default' | 'lg'
 variant: 'default' | 'filled' | 'ghost'
@@ -340,6 +350,7 @@ export const Card = ({ size, variant, intent, className, ...props }: CardProps) 
 ```
 
 **Variants disponibles**:
+
 ```typescript
 size: 'xs' | 'sm' | 'default' | 'lg' | 'xl'
 variant: 'default' | 'outline' | 'filled' | 'floating' | 'ghost'
@@ -361,6 +372,7 @@ const dialogVariants = createDialogVariant(
 ```
 
 **Variants disponibles**:
+
 ```typescript
 size: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 ```
@@ -372,6 +384,7 @@ size: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 ### Exemple 1: Input (Before/After)
 
 **BEFORE** (hardcodé):
+
 ```typescript
 <input
   className="flex h-9 w-full rounded-md border px-3 py-1 text-base md:text-sm"
@@ -379,6 +392,7 @@ size: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 ```
 
 **AFTER** (tokens responsive):
+
 ```typescript
 import { touchHeight, paddingX, paddingY, fontSize, radius } from '@ezstart/ui/lib/design-system'
 
@@ -395,6 +409,7 @@ import { touchHeight, paddingX, paddingY, fontSize, radius } from '@ezstart/ui/l
 ```
 
 **Bénéfices**:
+
 - ✅ WCAG 2.1 AA compliance (44px mobile)
 - ✅ Pas de zoom iOS (16px font)
 - ✅ Compact sur desktop (36px, 14px font)
@@ -404,6 +419,7 @@ import { touchHeight, paddingX, paddingY, fontSize, radius } from '@ezstart/ui/l
 ### Exemple 2: Card (Before/After)
 
 **BEFORE** (hardcodé):
+
 ```typescript
 <div className="rounded-lg border bg-card p-6 shadow-sm">
   <div className="px-6 gap-1.5">Header</div>
@@ -412,6 +428,7 @@ import { touchHeight, paddingX, paddingY, fontSize, radius } from '@ezstart/ui/l
 ```
 
 **AFTER** (tokens responsive):
+
 ```typescript
 import { paddingX, paddingY, gap, variantContainer } from '@ezstart/ui/lib/design-system'
 
@@ -426,6 +443,7 @@ import { paddingX, paddingY, gap, variantContainer } from '@ezstart/ui/lib/desig
 ```
 
 **Bénéfices**:
+
 - ✅ Responsive: 16px mobile → 24px desktop (évite cramping)
 - ✅ Gap cohérent avec autres cards
 - ✅ Semantic variant (card = border + shadow)
@@ -435,6 +453,7 @@ import { paddingX, paddingY, gap, variantContainer } from '@ezstart/ui/lib/desig
 ### Exemple 3: Button Icon (Before/After)
 
 **BEFORE** (trop petit mobile):
+
 ```typescript
 <button className="size-9 rounded-md">
   <Icon className="w-4 h-4" />
@@ -442,6 +461,7 @@ import { paddingX, paddingY, gap, variantContainer } from '@ezstart/ui/lib/desig
 ```
 
 **AFTER** (WCAG compliant):
+
 ```typescript
 import { touchSize, touchSmall, radius } from '@ezstart/ui/lib/design-system'
 
@@ -451,6 +471,7 @@ import { touchSize, touchSmall, radius } from '@ezstart/ui/lib/design-system'
 ```
 
 **Bénéfices**:
+
 - ✅ Button: 44px mobile → 36px desktop (WCAG)
 - ✅ Icon: 20px mobile → 16px desktop (proportionnel)
 
@@ -461,12 +482,13 @@ import { touchSize, touchSmall, radius } from '@ezstart/ui/lib/design-system'
 ### 1. Mobile-First Approach
 
 **Toujours penser mobile d'abord**:
+
 ```typescript
 // ✅ BON
-touchHeight.default  // h-11 sm:h-9 (mobile grand → desktop compact)
+touchHeight.default // h-11 sm:h-9 (mobile grand → desktop compact)
 
 // ❌ MAUVAIS
-"h-9 md:h-11"  // desktop d'abord, contre-intuitif
+;('h-9 md:h-11') // desktop d'abord, contre-intuitif
 ```
 
 ---
@@ -474,12 +496,13 @@ touchHeight.default  // h-11 sm:h-9 (mobile grand → desktop compact)
 ### 2. Semantic Over Hardcoded
 
 **Utiliser tokens sémantiques**:
+
 ```typescript
 // ✅ BON
-variantContainer.card  // bg-card border shadow-sm
+variantContainer.card // bg-card border shadow-sm
 
 // ❌ MAUVAIS
-"bg-white border border-gray-200 shadow-sm"  // hardcodé, pas dark mode
+;('bg-white border border-gray-200 shadow-sm') // hardcodé, pas dark mode
 ```
 
 ---
@@ -487,15 +510,16 @@ variantContainer.card  // bg-card border shadow-sm
 ### 3. WCAG Compliance
 
 **44px minimum pour éléments interactifs**:
+
 ```typescript
 // ✅ BON - Buttons, Inputs, Tabs
-touchHeight.default  // 44px mobile
+touchHeight.default // 44px mobile
 
 // ✅ BON - Checkboxes, Radio, Small icons
-touchSmall.checkbox  // 20px mobile (minimum acceptable)
+touchSmall.checkbox // 20px mobile (minimum acceptable)
 
 // ❌ MAUVAIS
-"h-8"  // 32px, en dessous du minimum
+;('h-8') // 32px, en dessous du minimum
 ```
 
 ---
@@ -503,12 +527,13 @@ touchSmall.checkbox  // 20px mobile (minimum acceptable)
 ### 4. Consistent Spacing
 
 **Utiliser tokens de spacing**:
+
 ```typescript
 // ✅ BON - Card padding
-paddingX.lg  // px-4 sm:px-6 (cohérent avec tous les cards)
+paddingX.lg // px-4 sm:px-6 (cohérent avec tous les cards)
 
 // ❌ MAUVAIS
-"px-5"  // valeur arbitraire, incohérente
+;('px-5') // valeur arbitraire, incohérente
 ```
 
 ---
@@ -516,12 +541,13 @@ paddingX.lg  // px-4 sm:px-6 (cohérent avec tous les cards)
 ### 5. Responsive Typography
 
 **16px minimum sur mobile pour inputs**:
+
 ```typescript
 // ✅ BON - Input/Select
-fontSize.base  // text-base sm:text-sm (évite zoom iOS)
+fontSize.base // text-base sm:text-sm (évite zoom iOS)
 
 // ❌ MAUVAIS
-"text-sm"  // 14px partout, zoom iOS sur focus
+;('text-sm') // 14px partout, zoom iOS sur focus
 ```
 
 ---
@@ -531,40 +557,31 @@ fontSize.base  // text-base sm:text-sm (évite zoom iOS)
 ### ✅ Complétés (17 composants)
 
 **P0 - WCAG Critical:**
+
 1. **Input** - `touchHeight.default`, `fontSize.base`, `paddingX.default`
 2. **Checkbox** - `touchSmall.checkbox` (20px mobile → 16px desktop)
-3. **TextArea** - `fontSize.base`, responsive heights
+3. **Textarea** - `fontSize.base`, responsive heights
 
-**P1 - UX High:**
-4. **Select** - `touchHeight.default`, responsive trigger
-5. **Card** - `paddingX.lg`, `paddingY.lg`, `gap.relaxed`
-6. **Dialog** - `padding.lg`, responsive content
-7. **AlertDialog** - `padding.lg`, responsive content
-8. **Badge** - `fontSize.xs`, responsive sizes
-9. **Label** - `fontSize.base`
-10. **Accordion** - `paddingX.default`, `gap.default`
-11. **Tabs** - `touchHeight.default`, responsive triggers
-12. **Modal** - `responsive.modalWidth`
+**P1 - UX High:** 4. **Select** - `touchHeight.default`, responsive trigger 5. **Card** - `paddingX.lg`, `paddingY.lg`, `gap.relaxed` 6. **Dialog** - `padding.lg`, responsive content 7. **AlertDialog** - `padding.lg`, responsive content 8. **Badge** - `fontSize.xs`, responsive sizes 9. **Label** - `fontSize.base` 10. **Accordion** - `paddingX.default`, `gap.default` 11. **Tabs** - `touchHeight.default`, responsive triggers 12. **Modal** - `responsive.modalWidth`
 
-**P2 - Polish (Phase 3):**
-13. **Table** - Responsive font/padding all sizes (text-base sm:text-sm)
-14. **Skeleton** - Responsive padding (SkeletonCard variants)
-15. **Tooltip** - Verified (already optimal)
-16. **Button** - Foundation component (h-11 sm:h-9)
-17. **Tag** - Original inspiration component
+**P2 - Polish (Phase 3):** 13. **Table** - Responsive font/padding all sizes (text-base sm:text-sm) 14. **Skeleton** - Responsive padding (SkeletonCard variants) 15. **Tooltip** - Verified (already optimal) 16. **Button** - Foundation component (h-11 sm:h-9) 17. **Tag** - Original inspiration component
 
 ### 🔜 À Migrer (optionnel - 8 composants)
 
 **Form Components:**
+
 - Switch, RadioGroup, Slider
 
 **Overlay Components:**
+
 - Popover, DropdownMenu
 
 **Feedback:**
+
 - Toast, Alert
 
 **Utility:**
+
 - Avatar, Separator, Progress
 
 ---
@@ -589,26 +606,31 @@ fontSize.base  // text-base sm:text-sm (évite zoom iOS)
 ## 🎯 Roadmap
 
 ### Phase 1: Foundation ✅ COMPLETE
+
 - [x] Créer token system responsive (tokens.ts - 277 lines)
 - [x] Créer CVA helpers (variants.ts - helpers & configs)
 - [x] Migrer 12 composants prioritaires (Input, Card, Button, etc.)
 - [x] Documentation complète (README.md - 600+ lines)
 
 **Commits:**
+
 - `8e8de09a` - Design System foundation + 12 components
 - `72b4fad1` - Table + Skeleton responsive
 
 ### Phase 2: Polish ✅ COMPLETE
+
 - [x] Migrer 5 composants additionnels (Table, Skeleton, Tooltip, Button, Tag)
 - [x] Documenter migration patterns (Before/After examples)
 - [x] Créer composants composites (Modal wraps Dialog)
 
 **Achievements:**
+
 - 17/25 components migrated (68%)
 - 100% WCAG compliance on interactive elements
 - Mobile UX score: 70 → 91/100 (+21 points)
 
 ### Phase 3: Extension 🔜
+
 - [ ] Migrer 8 composants restants (Switch, Popover, etc.)
 - [ ] App-level implementations (Icon backgrounds, Safe-area)
 - [ ] Tree-shaking analysis

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -29,7 +30,7 @@ import { Label } from '../forms/label'
  *     { icon: "lucide:Users", title: "Manage Clients", description: "Keep track of all your clients" },
  *   ]}
  *   ctaText="Get Started"
- *   onClose={() => console.log('Modal closed')}
+ *   onClose={handleClose}
  * />
  */
 
@@ -99,39 +100,42 @@ export function WelcomeModal({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-2xl">{title}</DialogTitle>
-          {description && <DialogDescription className="text-base">{description}</DialogDescription>}
+          {description && (
+            <DialogDescription className="text-base">{description}</DialogDescription>
+          )}
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-start gap-4 rounded-lg border p-4 bg-muted/30">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-primary text-xl" role="img" aria-label={feature.title}>
-                  {/* Icon placeholder - apps can customize with their Icon component */}
-                  ✨
-                </span>
+        <DialogBody>
+          <div className="grid gap-4 py-4">
+            {features.map((feature, index) => (
+              <div key={index} className="flex items-start gap-4 rounded-lg border p-4 bg-muted/30">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-primary text-xl" role="img" aria-label={feature.title}>
+                    {/* Icon placeholder - apps can customize with their Icon component */}✨
+                  </span>
+                </div>
+                <div className="flex-1 space-y-1">
+                  <h3 className="font-semibold text-base">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                </div>
               </div>
-              <div className="flex-1 space-y-1">
-                <h3 className="font-semibold text-base">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="flex items-center space-x-2 mb-2">
-          <Checkbox
-            id="dont-show-again"
-            checked={dontShowAgain}
-            onCheckedChange={(checked) => setDontShowAgain(checked as boolean)}
-          />
-          <Label
-            htmlFor="dont-show-again"
-            className="text-sm font-normal cursor-pointer text-muted-foreground"
-          >
-            Don't show this again
-          </Label>
-        </div>
+          <div className="flex items-center space-x-2 mb-2">
+            <Checkbox
+              id="dont-show-again"
+              checked={dontShowAgain}
+              onCheckedChange={checked => setDontShowAgain(checked as boolean)}
+            />
+            <Label
+              htmlFor="dont-show-again"
+              className="text-sm font-normal cursor-pointer text-muted-foreground"
+            >
+              Don't show this again
+            </Label>
+          </div>
+        </DialogBody>
 
         <DialogFooter>
           <Button onClick={handleClose} className="w-full sm:w-auto">

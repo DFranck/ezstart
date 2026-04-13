@@ -3,18 +3,9 @@
 import { useState } from 'react'
 import { logger } from '@ezstart/logger'
 import { useRouter } from 'next/navigation'
-import { Button, Card, CardContent, Div, Label, P, Span } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Div, Label, Modal, P, Span } from '@ezstart/ui/components'
 import { useCreateFormInstance } from '@/hooks/useForms'
 import { useFormConfigs } from '@/hooks/useForms'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
 interface CreateFormInstanceDialogProps {
@@ -74,18 +65,31 @@ export function CreateFormInstanceDialog({
   const formConfigs: FormConfig[] = (configsData?.ok && configsData.data?.data) || []
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>{t('newForm')}</Button>
-      </DialogTrigger>
+    <>
+      <Button onClick={() => setOpen(true)}>{t('newForm')}</Button>
 
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-          <DialogDescription>{t('description')}</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <Modal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        size="xl"
+        title={t('title')}
+        description={t('description')}
+        footer={
+          <>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              {tActions('cancel')}
+            </Button>
+            <Button
+              type="submit"
+              form="create-form-instance-form"
+              disabled={!selectedConfigId || createFormInstance.isPending}
+            >
+              {createFormInstance.isPending ? tActions('creating') : t('createAndFill')}
+            </Button>
+          </>
+        }
+      >
+        <form id="create-form-instance-form" onSubmit={handleSubmit} className="space-y-6">
           {/* Form Template Selection */}
           <Div>
             <Label className="mb-3 block">{t('selectTemplate')}</Label>
@@ -190,17 +194,8 @@ export function CreateFormInstanceDialog({
               </Card>
             </Div>
           </Div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              {tActions('cancel')}
-            </Button>
-            <Button type="submit" disabled={!selectedConfigId || createFormInstance.isPending}>
-              {createFormInstance.isPending ? tActions('creating') : t('createAndFill')}
-            </Button>
-          </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   )
 }

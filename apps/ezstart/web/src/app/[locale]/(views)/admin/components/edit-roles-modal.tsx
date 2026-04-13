@@ -2,21 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import {
-  Button,
-  Checkbox,
-  Div,
-  H2,
-  Label,
-  P,
-  Spinner,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@ezstart/ui/components'
+import { Button, Checkbox, Div, H2, Label, P, Spinner, Modal } from '@ezstart/ui/components'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
 
 // ========================================
@@ -106,78 +92,78 @@ export function EditRolesModal({ user, open, onOpenChange, onSaved }: EditRolesM
   const appNames = Object.keys(appRoles)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-          <DialogDescription>{t('subtitle', { email: user.email })}</DialogDescription>
-        </DialogHeader>
-
-        <Div className="space-y-6 py-4">
-          {error && (
-            <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
-              {error}
-            </Div>
-          )}
-
-          {/* Global Roles */}
-          <Div className="space-y-3">
-            <H2 size="h5" className="font-semibold">
-              {t('globalRoles')}
-            </H2>
-            <Div className="space-y-2">
-              {GLOBAL_ROLES.map(role => (
-                <Div key={role} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`global-${role}`}
-                    checked={globalRoles.includes(role)}
-                    onCheckedChange={() => handleGlobalRoleToggle(role)}
-                  />
-                  <Label htmlFor={`global-${role}`} className="cursor-pointer">
-                    {tr(role)}
-                  </Label>
-                </Div>
-              ))}
-            </Div>
-          </Div>
-
-          {/* App Roles */}
-          {appNames.length > 0 ? (
-            appNames.map(app => (
-              <Div key={app} className="space-y-3">
-                <H2 size="h5" className="font-semibold">
-                  {t('appRoles', { app })}
-                </H2>
-                <Div className="space-y-2">
-                  {APP_ROLES.map(role => (
-                    <Div key={role} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`${app}-${role}`}
-                        checked={(appRoles[app] || []).includes(role)}
-                        onCheckedChange={() => handleAppRoleToggle(app, role)}
-                      />
-                      <Label htmlFor={`${app}-${role}`} className="cursor-pointer">
-                        {tr(role)}
-                      </Label>
-                    </Div>
-                  ))}
-                </Div>
-              </Div>
-            ))
-          ) : (
-            <P className="text-muted-foreground text-sm">{t('noAppRoles')}</P>
-          )}
-        </Div>
-
-        <DialogFooter>
+    <Modal
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      size="lg"
+      title={t('title')}
+      description={t('subtitle', { email: user.email })}
+      footer={
+        <>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t('cancel')}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? <Spinner size="sm" /> : t('save')}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    >
+      <Div className="space-y-6 py-4">
+        {error && (
+          <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
+            {error}
+          </Div>
+        )}
+
+        {/* Global Roles */}
+        <Div className="space-y-3">
+          <H2 size="h5" className="font-semibold">
+            {t('globalRoles')}
+          </H2>
+          <Div className="space-y-2">
+            {GLOBAL_ROLES.map(role => (
+              <Div key={role} className="flex items-center gap-2">
+                <Checkbox
+                  id={`global-${role}`}
+                  checked={globalRoles.includes(role)}
+                  onCheckedChange={() => handleGlobalRoleToggle(role)}
+                />
+                <Label htmlFor={`global-${role}`} className="cursor-pointer">
+                  {tr(role)}
+                </Label>
+              </Div>
+            ))}
+          </Div>
+        </Div>
+
+        {/* App Roles */}
+        {appNames.length > 0 ? (
+          appNames.map(app => (
+            <Div key={app} className="space-y-3">
+              <H2 size="h5" className="font-semibold">
+                {t('appRoles', { app })}
+              </H2>
+              <Div className="space-y-2">
+                {APP_ROLES.map(role => (
+                  <Div key={role} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`${app}-${role}`}
+                      checked={(appRoles[app] || []).includes(role)}
+                      onCheckedChange={() => handleAppRoleToggle(app, role)}
+                    />
+                    <Label htmlFor={`${app}-${role}`} className="cursor-pointer">
+                      {tr(role)}
+                    </Label>
+                  </Div>
+                ))}
+              </Div>
+            </Div>
+          ))
+        ) : (
+          <P className="text-muted-foreground text-sm">{t('noAppRoles')}</P>
+        )}
+      </Div>
+    </Modal>
   )
 }

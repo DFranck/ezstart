@@ -2,18 +2,9 @@
 
 import { useState } from 'react'
 import { logger } from '@ezstart/logger'
-import { Button, Div, Input, Label, P, TextArea } from '@ezstart/ui/components'
+import { Button, Div, Input, Label, Modal, P, Textarea } from '@ezstart/ui/components'
 import { useCreateProject } from '@/hooks/useProjects'
 import { useWorkspaces } from '@/hooks/useWorkspaces'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
 interface CreateProjectDialogProps {
@@ -72,18 +63,27 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>{t('newProject')}</Button>
-      </DialogTrigger>
+    <>
+      <Button onClick={() => setOpen(true)}>{t('newProject')}</Button>
 
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-          <DialogDescription>{t('description')}</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <Modal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        size="xl"
+        title={t('title')}
+        description={t('description')}
+        footer={
+          <>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              {tActions('cancel')}
+            </Button>
+            <Button type="submit" form="create-project-form" disabled={createProject.isPending}>
+              {createProject.isPending ? tActions('creating') : t('createProject')}
+            </Button>
+          </>
+        }
+      >
+        <form id="create-project-form" onSubmit={handleSubmit} className="space-y-4">
           <Div>
             <Label htmlFor="name">{t('name')}</Label>
             <Input
@@ -97,7 +97,7 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
 
           <Div>
             <Label htmlFor="description">{t('descriptionLabel')}</Label>
-            <TextArea
+            <Textarea
               id="description"
               value={description}
               onChange={e => setDescription(e.target.value)}
@@ -141,17 +141,8 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
               </Div>
             </Div>
           </Div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              {tActions('cancel')}
-            </Button>
-            <Button type="submit" disabled={createProject.isPending}>
-              {createProject.isPending ? tActions('creating') : t('createProject')}
-            </Button>
-          </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   )
 }

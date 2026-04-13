@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  TextArea,
+  Textarea,
 } from '@ezstart/ui/components'
 
 export type PromptConfig = {
@@ -398,7 +398,7 @@ export function PromptConfigEditor({ config, onChange }: PromptConfigEditorProps
       {/* Raw JSON View */}
       <Div className="pt-2">
         <P className="text-xs text-muted-foreground mb-2">Raw JSON (read-only)</P>
-        <TextArea
+        <Textarea
           value={JSON.stringify(config, null, 2)}
           readOnly
           className="font-mono text-xs bg-muted/30"

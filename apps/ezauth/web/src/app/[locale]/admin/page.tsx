@@ -1,11 +1,10 @@
 'use client'
 
+import { useEffect, useMemo } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
-import { useEffect } from 'react'
 import { Card, Div, H1, Main, P, Spinner } from '@ezstart/ui/components'
-import { useAuth } from '@ezstart/auth-sdk'
+import { AuthAdminDashboard, useAuth } from '@ezstart/auth-sdk'
 import { RequireRole } from '@ezstart/rbac'
-import { UserTable } from './components/user-table'
 
 // ========================================
 // Access Denied Fallback
@@ -60,6 +59,47 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 export default function AdminPage() {
   const t = useTranslations('admin')
+  const tu = useTranslations('admin.users')
+  const tr = useTranslations('admin.roles')
+  const td = useTranslations('admin.dialog')
+  const te = useTranslations('admin.editRoles')
+  const tp = useTranslations('admin.pagination')
+
+  const authTexts = useMemo(
+    () => ({
+      searchPlaceholder: tu('searchPlaceholder'),
+      columnEmail: tu('columns.email'),
+      columnUsername: tu('columns.username'),
+      columnRoles: tu('columns.roles'),
+      columnCreatedAt: tu('columns.createdAt'),
+      columnActions: tu('columns.actions'),
+      edit: tu('edit'),
+      delete: tu('delete'),
+      noUsers: tu('noUsers'),
+      confirmDeleteTitle: tu('confirmDeleteTitle'),
+      confirmDeleteDescription: tu('confirmDeleteDescription'),
+      cancel: td('cancel'),
+      confirm: td('confirm'),
+      deleteError: tu('deleteError'),
+      deleteSuccess: tu('deleteSuccess'),
+      editRolesTitle: te('title'),
+      editRolesSubtitle: te.raw('subtitle') as string,
+      globalRolesLabel: te('globalRoles'),
+      appRolesLabel: te.raw('appRoles') as string,
+      noAppRoles: te('noAppRoles'),
+      save: te('save'),
+      editError: te('editError'),
+      editSuccess: te('editSuccess'),
+      roleSuperadmin: tr('superadmin'),
+      roleAdmin: tr('admin'),
+      roleManager: tr('manager'),
+      roleBetaTester: tr('beta-tester'),
+      roleClient: tr('client'),
+      previous: tp('previous'),
+      next: tp('next'),
+    }),
+    [tu, tr, td, te, tp]
+  )
 
   return (
     <AuthGuard>
@@ -74,7 +114,7 @@ export default function AdminPage() {
             <H1 className="text-3xl font-bold">{t('title')}</H1>
           </Div>
 
-          <UserTable />
+          <AuthAdminDashboard texts={authTexts} />
         </Main>
       </RequireRole>
     </AuthGuard>

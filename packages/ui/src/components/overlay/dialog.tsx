@@ -63,7 +63,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] border shadow-lg duration-200 ',
+          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 flex w-full max-h-[90dvh] translate-x-[-50%] translate-y-[-50%] flex-col overflow-hidden border shadow-lg duration-200',
           radiusTokens[resolvedRadius],
           dialogContentPadding.default, // p-4 sm:p-6, gap-4 sm:gap-3 (mobile friendly)
           className
@@ -91,9 +91,15 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn('flex flex-col text-center sm:text-left', gap.default, className)}
+      className={cn('flex shrink-0 flex-col text-center sm:text-left', gap.default, className)}
       {...props}
     />
+  )
+}
+
+function DialogBody({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div data-slot="dialog-body" className={cn('flex-1 overflow-y-auto', className)} {...props} />
   )
 }
 
@@ -101,7 +107,11 @@ function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end', gap.default, className)}
+      className={cn(
+        'flex shrink-0 flex-col-reverse sm:flex-row sm:justify-end',
+        gap.default,
+        className
+      )}
       {...props}
     />
   )
@@ -132,6 +142,7 @@ function DialogDescription({
 
 export {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogDescription,
