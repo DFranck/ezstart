@@ -16,7 +16,11 @@
         "!src/**/*.generated.ts",
         "!src/**/generated/**"
       ],
-      "outputs": ["src/**/*.generated.ts", "src/**/generated/**"],
+      "outputs": [
+        "src/**/*.generated.ts",
+        "src/**/generated/**",
+        "../../apps/ezstart/web/src/app/**/inspector/registry.generated.ts"
+      ],
       "cache": true
     },
     "build": {
