@@ -3,12 +3,14 @@ import * as dotenv from 'dotenv'
 import express, { Express } from 'express'
 import type { AppName } from '@ezstart/config/urls'
 import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors'
+import { loadSharedEnv } from '@ezstart/config/secrets-loader'
 import { logger } from '@ezstart/logger/server'
 import { securityHeaders, securityHeadersPresets } from '../middleware/security-headers.js'
 
-// Load .env.local first (priority), then .env as fallback
+// Fallback for API services that don't pass `apiApp` (legacy):
+// load app-local .env.local from cwd first, then .env.
 dotenv.config({ path: '.env.local' })
-dotenv.config() // Fallback to .env if vars not set
+dotenv.config()
 
 export interface CreateAppOptions {
   /**
@@ -40,6 +42,12 @@ export interface CreateAppOptions {
 }
 
 export function createApp(options?: CreateAppOptions): Express {
+  // Load centralized env (root .env.{NODE_ENV} + app override).
+  // Safe even if root file missing — falls back to app-local dotenv above.
+  if (options?.apiApp) {
+    loadSharedEnv({ app: options.apiApp, layer: 'api' })
+  }
+
   const app = express()
 
   // Trust proxy - Required when behind reverse proxy (Railway, Vercel)

@@ -4,26 +4,9 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Monorepo](https://img.shields.io/badge/Monorepo-pnpm%20workspaces-orange)](https://pnpm.io/)
-[![Health Score](https://img.shields.io/badge/Health-85%2F100-brightgreen)](#-health--quality-score)
-[![Apps](https://img.shields.io/badge/Apps-7%20web%20%2B%205%20API-blueviolet)](#-applications)
+[![Apps](https://img.shields.io/badge/Apps-7%20web%20%2B%206%20API-blueviolet)](#-applications)
 
----
-
-## 📊 Health & Quality Score
-
-**Overall: 85/100** 🟢 Excellent
-
-| Category                                                | Score  | Status       |
-| ------------------------------------------------------- | ------ | ------------ |
-| [Architecture](./docs/audits/ARCHITECTURE-AUDIT.md)     | 95/100 | 🟢 Exemplary |
-| [Code Quality](./docs/audits/CODE-QUALITY-AUDIT.md)     | 92/100 | 🟢 Excellent |
-| [SEO](./docs/audits/SEO-AUDIT.md)                       | 85/100 | 🟢 Excellent |
-| [Infrastructure](./docs/audits/INFRASTRUCTURE-AUDIT.md) | 82/100 | 🟢 Very Good |
-| [Dependencies](./docs/audits/DEPENDENCIES-AUDIT.md)     | 80/100 | 🟢 Very Good |
-| [Monitoring](./docs/audits/MONITORING-AUDIT.md)         | 70/100 | 🟡 Fair      |
-
-📈 **Full Audit Dashboard**: [docs/README.md](./docs/README.md)
-📋 **Improvement Roadmap**: [docs/IMPROVEMENT-ROADMAP.md](./docs/IMPROVEMENT-ROADMAP.md)
+Live audit scores are tracked in [`docs/audits.json`](./docs/audits.json) and surfaced in the EZStart monitoring dashboard.
 
 ---
 
@@ -157,10 +140,9 @@ pnpm dev:status
 │   ├── monitoring/        # Health checks & metrics
 │   └── [11 more...]       # Config, types, utils
 │
-└── docs/                  # Documentation & audits
-    ├── README.md          # Audit dashboard
-    ├── audits/            # 16 complete audits
-    └── IMPROVEMENT-ROADMAP.md
+└── docs/                  # Audit data + long-form audit reports
+    ├── audits.json        # Live audit scores (consumed by monitoring)
+    └── audits/            # Long-form audit reports (when produced)
 ```
 
 ### Key Features
@@ -217,29 +199,26 @@ All URLs and ports are auto-configured via `@ezstart/config`.
 
 ## 📚 Documentation
 
-### Essential Reads
+### Root docs
 
-- **[CLAUDE.md](./CLAUDE.md)** - 📐 Complete development guide (architecture, patterns, conventions)
-- **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ **MANDATORY** development rules
-- **[docs/README.md](./docs/README.md)** - 📊 Audit dashboard (16/16 audits)
-- **[DEPLOY.md](./DEPLOY.md)** - 🚀 Deployment guide (Railway + Vercel)
+| File                                 | Purpose                                                           |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions, workflow, how to add a UI/feature/endpoint           |
+| [CLAUDE.md](./CLAUDE.md)             | Manager pipeline (8 steps), agents, dev servers                   |
+| [DEV-RULES.md](./DEV-RULES.md)       | Index of all rule files in `.claude/rules/` (mandatory)           |
+| [BACKLOG.md](./BACKLOG.md)           | Cross-project / monorepo backlog (per-app in `apps/*/BACKLOG.md`) |
+| [DEPLOY.md](./DEPLOY.md)             | Railway (APIs) + Vercel (web) deployment guide                    |
+| [SECRETS.md](./SECRETS.md)           | `.env` architecture, `secrets-loader`, shared vs app-specific     |
+| [GENERATORS.md](./GENERATORS.md)     | Zero-maintenance code generation pipeline                         |
 
-### Audits (16/16 Complete)
+### Audits
 
-All audits available in [docs/audits/](./docs/audits/):
-
-- Architecture, Code Quality, Dependencies, Security
-- Performance, SEO, Accessibility, Infrastructure
-- API, Web Apps, Testing, UX, i18n, Monitoring
+Audit scores live in [`docs/audits.json`](./docs/audits.json) (consumed by the monitoring dashboard).
+Long-form audit reports (when produced) are stored in [`docs/audits/`](./docs/audits/).
 
 ### Package Documentation
 
-Browse [packages/](./packages/) - Each package has a comprehensive README with:
-
-- Installation & setup
-- API reference
-- Usage examples
-- Migration guides
+Browse [packages/](./packages/) — each package has its own README with installation, API reference, and usage examples.
 
 ---
 
@@ -267,9 +246,9 @@ Browse [packages/](./packages/) - Each package has a comprehensive README with:
 
 ### Before You Start
 
-1. Read [DEV-RULES.md](./DEV-RULES.md) - **Mandatory rules**
-2. Read [CLAUDE.md](./CLAUDE.md) - Architecture & patterns
-3. Check [docs/IMPROVEMENT-ROADMAP.md](./docs/IMPROVEMENT-ROADMAP.md) - Current priorities
+1. Read [CONTRIBUTING.md](./CONTRIBUTING.md) — full contributor guide
+2. Read [DEV-RULES.md](./DEV-RULES.md) — index of mandatory rules
+3. Read [CLAUDE.md](./CLAUDE.md) — pipeline & agent workflow
 
 ### Development Workflow
 
@@ -284,12 +263,9 @@ Browse [packages/](./packages/) - Each package has a comprehensive README with:
 ## 📊 Stats
 
 - **7 Web Applications** (Next.js 15, React 19)
-- **5 API Services** (Express + Socket.IO)
-- **16 Shared Packages** (100% TypeScript)
-- **18/18 TypeCheck Coverage** (100%)
-- **17/17 Lint Coverage** (100%)
-- **16/16 Audits Complete** (100%)
-- **Overall Health: 85/100** (Excellent)
+- **6 API Services** (Express + Socket.IO)
+- **16+ Shared Packages** (100% TypeScript)
+- **100% TypeCheck Coverage** across all packages
 
 ---
 

@@ -7,14 +7,18 @@ scripts/
 ├── generators/          # Créent du code/des projets (réutilisables)
 │   ├── create-api.js
 │   ├── create-app.js
-│   ├── create-web-app.js
-│   └── generate-specialist-agents.js
+│   └── create-web-app.js
 ├── tools/               # Utilitaires dev (réutilisables)
 │   ├── kill-ports.ps1
 │   ├── dev-status.ps1
 │   ├── backup-mongodb.sh
 │   ├── convert-images-webp.js
-│   └── optimize-images.js
+│   ├── optimize-images.js
+│   ├── generate-secret.js
+│   ├── setup-env.js
+│   ├── validate-env.js
+│   ├── rotate-secrets.js
+│   └── secrets-sync.js
 └── monitoring/          # Health checks & audits
     ├── check-all-services.sh
     └── generate-audit-report.sh
