@@ -65,3 +65,6 @@ test-images/
 
 # Dev credentials (never commit)
 .dev-users.md
+
+# Local tmp (screenshots, scratch)
+tmp/
