@@ -52,6 +52,16 @@ when the var is owned by exactly one app.
 **Removed**: `EMAIL_FROM` is no longer an env var. Each app hardcodes its
 sender in its `email.service.ts` (`'EZAuth <noreply@ezstart.xyz>'`, etc.).
 
+**Resend two-key pattern**: Resend uses two separate keys by scope.
+
+- `RESEND_API_KEY` — sending-scoped, consumed by every app's `email.service.ts`
+  to send transactional emails. Limited scope (no access to `/emails` or
+  `/domains` admin endpoints).
+- `RESEND_FULL_ACCESS_API_KEY` — full-access, consumed only by the ezstart
+  services tab provider (`apps/ezstart/api/src/services/providers/resend.ts`)
+  for admin reads (list domains, usage stats). Falls back to `RESEND_API_KEY`
+  if unset (backward compat, with a /domains fallback on 401).
+
 Known app prefixes (kept in sync with `packages/config/src/secrets-loader.ts`):
 
 ```

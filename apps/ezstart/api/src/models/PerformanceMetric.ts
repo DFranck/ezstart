@@ -66,7 +66,7 @@ performanceMetricSchema.index({ endpoint: 1, timestamp: -1 })
 performanceMetricSchema.index({ timestamp: 1 }, { expireAfterSeconds: 7 * 24 * 60 * 60 })
 
 export async function getPerformanceMetricModel(): Promise<Model<IPerformanceMetric>> {
-  const mongoose = await connectToMongo('ezstart-monitoring')
+  const mongoose = await connectToMongo('ezstart')
   return (
     mongoose.models.PerformanceMetric ||
     mongoose.model<IPerformanceMetric>('PerformanceMetric', performanceMetricSchema)

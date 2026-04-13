@@ -24,11 +24,6 @@ interface ProjectsQueryData {
   projects?: {
     edges?: Array<{ node?: { id: string; name: string } }>
   }
-  me?: {
-    projects?: {
-      edges?: Array<{ node?: { id: string; name: string } }>
-    }
-  }
 }
 
 class RailwayAuthError extends Error {
@@ -96,10 +91,12 @@ export async function fetchStatus(): Promise<ProviderStatus> {
   }
 
   try {
-    // Count projects accessible to this token. Schema varies: try `me` first, fallback.
-    const query = `query { me { projects { edges { node { id name } } } } }`
+    // Count projects accessible to this token. Use root-level `projects` so this
+    // works for both user-scoped API tokens and team/workspace tokens (which don't
+    // have access to the user-scoped `me` query).
+    const query = `query { projects { edges { node { id name } } } }`
     const data = await gql<ProjectsQueryData>(token, query)
-    const edges = data.me?.projects?.edges ?? data.projects?.edges ?? []
+    const edges = data.projects?.edges ?? []
     const projectCount = edges.length
 
     const usage: UsageMetric[] = [

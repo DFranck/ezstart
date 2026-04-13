@@ -24,6 +24,12 @@ let isConnecting = false
 export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
   // Already connected - return immediately
   if (mongoose.connection.readyState === 1) {
+    if (mongoose.connection.name && mongoose.connection.name !== dbName) {
+      logger.warn(
+        `[MongoDB] connectToMongo('${dbName}') ignored — already connected to '${mongoose.connection.name}'. ` +
+          `Multi-DB in the same process is not supported; use a single DB per API.`
+      )
+    }
     return mongoose
   }
 
