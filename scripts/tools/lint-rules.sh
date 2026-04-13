@@ -97,7 +97,7 @@ fi
 # ============================================================
 # 6. No secrets in code
 # ============================================================
-SECRETS=$(echo "$FILES" | xargs grep -ln 'sk_live_\|sk_test_\|AKIA[A-Z0-9]\|password\s*=\s*["\x27][^"\x27]\+["\x27]' 2>/dev/null | grep -v '.env' | grep -v 'node_modules' | grep -v '.test.')
+SECRETS=$(echo "$FILES" | xargs grep -ln 'sk_live_[A-Za-z0-9]\{10,\}\|sk_test_[A-Za-z0-9]\{10,\}\|AKIA[A-Z0-9]\{16,\}\|password\s*=\s*["\x27][^"\x27]\+["\x27]' 2>/dev/null | grep -v '.env' | grep -v 'node_modules' | grep -v '.test.')
 
 if [ -n "$SECRETS" ]; then
   echo ""
