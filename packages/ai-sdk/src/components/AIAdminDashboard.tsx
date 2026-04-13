@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Card,
+  Checkbox,
   DataTable,
   DataTableColumnHeader,
   Dialog,
@@ -38,7 +39,6 @@ import type {
   SystemPrompt,
   ConversationListItem,
   PromptType,
-  ProviderTarget,
   PaginationMeta,
   EnrichedAppProvider as AppProviderData,
   PromptProvider,
@@ -66,6 +66,20 @@ export interface AIAdminDashboardTexts {
   promptStatus?: string
   promptActions?: string
   promptDescription?: string
+  promptApps?: string
+  promptProvidersColumn?: string
+  promptScope?: string
+  // Form labels (multi-select)
+  formAppsLabel?: string
+  formAppsAll?: string
+  formProvidersLabel?: string
+  formProvidersAll?: string
+  // Filters
+  filterByApps?: string
+  filterByProviders?: string
+  // Badges
+  badgeAllApps?: string
+  badgeAllProviders?: string
   // Prompt stats
   totalPrompts?: string
   activeCount?: string
@@ -133,6 +147,8 @@ export interface AIAdminDashboardTexts {
   totalTokens?: string
   estimatedCost?: string
   byProvider?: string
+  byApp?: string
+  cost?: string
   loadUsageError?: string
   noUsageData?: string
   requests?: string
@@ -180,6 +196,17 @@ const DEFAULT_TEXTS: Required<AIAdminDashboardTexts> = {
   promptStatus: 'Status',
   promptActions: 'Actions',
   promptDescription: 'Description',
+  promptApps: 'Apps',
+  promptProvidersColumn: 'Providers',
+  promptScope: 'Scope',
+  formAppsLabel: 'Apps',
+  formAppsAll: 'All apps',
+  formProvidersLabel: 'Providers',
+  formProvidersAll: 'All providers',
+  filterByApps: 'Filter by apps',
+  filterByProviders: 'Filter by providers',
+  badgeAllApps: 'All apps',
+  badgeAllProviders: 'All providers',
   totalPrompts: 'Total Prompts',
   activeCount: 'Active',
   defaultCount: 'Default',
@@ -239,6 +266,8 @@ const DEFAULT_TEXTS: Required<AIAdminDashboardTexts> = {
   totalTokens: 'Total Tokens',
   estimatedCost: 'Estimated Cost',
   byProvider: 'By Provider',
+  byApp: 'By App',
+  cost: 'Cost',
   loadUsageError: 'Failed to load usage stats',
   noUsageData: 'No usage data',
   requests: 'Requests',
@@ -298,7 +327,23 @@ function EmptyState({ message }: { message: string }) {
 // ========================================
 
 const PROMPT_TYPES: PromptType[] = ['general', 'extraction', 'validation', 'vision', 'custom']
-const PROVIDER_TARGETS: ProviderTarget[] = ['all', 'gemini', 'openai', 'anthropic']
+
+// Known apps in the monorepo (kept in sync with @ezstart/config app names).
+// '*' is a wildcard meaning "all apps".
+const KNOWN_APPS: string[] = [
+  '*',
+  'ezauth',
+  'ezbill',
+  'ezpay',
+  'ezstart',
+  'green-pulse',
+  'fengshui',
+  'asc-tcd',
+  'gacha-analyzer',
+]
+
+// Known provider targets. 'all' is the wildcard meaning "all providers".
+const KNOWN_PROVIDER_TARGETS: string[] = ['all', 'openai', 'gemini', 'anthropic']
 
 interface PromptProviderEntry {
   providerId: string
@@ -312,10 +357,11 @@ interface PromptFormData {
   description: string
   content: string
   type: PromptType
-  provider: ProviderTarget
+  apps: string[]
+  providers: string[]
   isActive: boolean
   isDefault: boolean
-  promptProviders: PromptProviderEntry[]
+  providerAssignments: PromptProviderEntry[]
 }
 
 const EMPTY_FORM: PromptFormData = {
@@ -324,22 +370,73 @@ const EMPTY_FORM: PromptFormData = {
   description: '',
   content: '',
   type: 'general',
-  provider: 'all',
+  // Default at create: all apps + all providers selected (incl. wildcard)
+  apps: [...KNOWN_APPS],
+  providers: [...KNOWN_PROVIDER_TARGETS],
   isActive: true,
   isDefault: false,
-  promptProviders: [],
+  providerAssignments: [],
 }
 
 const PROMPTS_PAGE_SIZE = 20
+
+/**
+ * Backward-compat: derive the apps[] for a prompt response.
+ * Some legacy responses may still expose `appName: string` instead of `apps: string[]`.
+ * Defensive: filters out non-string entries to avoid rendering objects as React children.
+ */
+function readPromptApps(prompt: SystemPrompt): string[] {
+  if (Array.isArray(prompt.apps) && prompt.apps.length > 0) {
+    const apps = prompt.apps.filter(
+      (a: unknown): a is string => typeof a === 'string' && a.length > 0
+    )
+    if (apps.length > 0) return apps
+  }
+  if (typeof prompt.appName === 'string' && prompt.appName) return [prompt.appName]
+  return []
+}
+
+/**
+ * Backward-compat: derive the providers[] (target list) for a prompt response.
+ * Handles 3 shapes:
+ *   1. New: `providers: string[]` (e.g. ['openai', 'gemini'] or ['all'])
+ *   2. Legacy single: `provider: string` (when providers is empty/null)
+ *   3. Legacy assignments: `providers: Array<{providerId, priority, _id}>`
+ *      (old per-app priority shape — schema renamed to `providerAssignments`,
+ *      but DB docs may still carry the assignment array under the `providers` key)
+ */
+function readPromptProviderTargets(prompt: SystemPrompt): string[] {
+  if (Array.isArray(prompt.providers) && prompt.providers.length > 0) {
+    const providers = prompt.providers
+      .map((p: unknown): string | null => {
+        if (typeof p === 'string') return p
+        if (p && typeof p === 'object' && 'providerId' in p) {
+          const id = (p as { providerId: unknown }).providerId
+          return typeof id === 'string' ? id : null
+        }
+        return null
+      })
+      .filter((s): s is string => typeof s === 'string' && s.length > 0)
+    if (providers.length > 0) return providers
+  }
+  if (typeof prompt.provider === 'string' && prompt.provider) return [prompt.provider]
+  return []
+}
 
 function PromptsTab({
   client,
   t,
   appProviders,
+  appName,
+  showFilters,
 }: {
   client: AIClient
   t: Required<AIAdminDashboardTexts>
   appProviders: AppProviderData[]
+  /** When set, the dashboard is scoped to a single app: hide Apps column + lock form Apps field. */
+  appName?: string
+  /** Show the apps/providers filter bar in the prompts tab header. */
+  showFilters?: boolean
 }) {
   const [prompts, setPrompts] = useState<SystemPrompt[]>([])
   const [loading, setLoading] = useState(true)
@@ -351,6 +448,11 @@ function PromptsTab({
   const [deletingKey, setDeletingKey] = useState<string | null>(null)
   const [form, setForm] = useState<PromptFormData>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  // Multi-select filters (only used when showFilters)
+  const [appsFilter, setAppsFilter] = useState<string[]>([])
+  const [providersFilter, setProvidersFilter] = useState<string[]>([])
+
+  const isPerApp = Boolean(appName)
 
   const fetchPrompts = useCallback(() => {
     setLoading(true)
@@ -368,31 +470,64 @@ function PromptsTab({
     fetchPrompts()
   }, [fetchPrompts])
 
+  // Client-side narrowing by appsFilter/providersFilter (server returns the broader set
+  // from `app=` query param). UX-friendly: avoids round-trips when toggling chips.
+  const visiblePrompts = useMemo(() => {
+    return prompts.filter(p => {
+      if (appsFilter.length > 0) {
+        const promptApps = readPromptApps(p)
+        const matches = appsFilter.some(a => promptApps.includes(a) || promptApps.includes('*'))
+        if (!matches) return false
+      }
+      if (providersFilter.length > 0) {
+        const promptProviders = readPromptProviderTargets(p)
+        const matches = providersFilter.some(
+          pv => promptProviders.includes(pv) || promptProviders.includes('all')
+        )
+        if (!matches) return false
+      }
+      return true
+    })
+  }, [prompts, appsFilter, providersFilter])
+
   const openCreateDialog = useCallback(() => {
     setEditingPrompt(null)
-    setForm(EMPTY_FORM)
+    if (isPerApp && appName) {
+      // Lock to the current app, defaults all providers checked
+      setForm({ ...EMPTY_FORM, apps: [appName] })
+    } else {
+      setForm(EMPTY_FORM)
+    }
     setDialogOpen(true)
-  }, [])
+  }, [isPerApp, appName])
 
-  const openEditDialog = useCallback((prompt: SystemPrompt) => {
-    setEditingPrompt(prompt)
-    setForm({
-      key: prompt.key,
-      name: prompt.name,
-      description: prompt.description || '',
-      content: prompt.content,
-      type: prompt.type,
-      provider: prompt.provider,
-      isActive: prompt.isActive,
-      isDefault: prompt.isDefault,
-      promptProviders: (prompt.providers || []).map(pp => ({
-        providerId: pp.providerId,
-        priority: pp.priority,
-        selected: true,
-      })),
-    })
-    setDialogOpen(true)
-  }, [])
+  const openEditDialog = useCallback(
+    (prompt: SystemPrompt) => {
+      setEditingPrompt(prompt)
+      const apps = readPromptApps(prompt)
+      const providers = readPromptProviderTargets(prompt)
+      setForm({
+        key: prompt.key,
+        name: prompt.name,
+        description: prompt.description || '',
+        content: prompt.content,
+        type: prompt.type,
+        // If per-app dashboard, force the apps array to [appName] regardless of the
+        // server-stored value — admin cannot cross-assign from a per-app view.
+        apps: isPerApp && appName ? [appName] : apps.length > 0 ? apps : [...KNOWN_APPS],
+        providers: providers.length > 0 ? providers : [...KNOWN_PROVIDER_TARGETS],
+        isActive: prompt.isActive,
+        isDefault: prompt.isDefault,
+        providerAssignments: (prompt.providerAssignments || []).map(pp => ({
+          providerId: pp.providerId,
+          priority: pp.priority,
+          selected: true,
+        })),
+      })
+      setDialogOpen(true)
+    },
+    [isPerApp, appName]
+  )
 
   const openDeleteDialog = useCallback((key: string) => {
     setDeletingKey(key)
@@ -402,22 +537,41 @@ function PromptsTab({
   const handleSave = useCallback(async () => {
     setSaving(true)
     try {
-      const selectedProviders: PromptProvider[] = form.promptProviders
+      const selectedAssignments: PromptProvider[] = form.providerAssignments
         .filter(pp => pp.selected)
         .map(pp => ({ providerId: pp.providerId, priority: pp.priority }))
 
+      // In per-app mode, force apps = [appName] at submit time (defensive)
+      const apps = isPerApp && appName ? [appName] : form.apps
+
+      // Client-side guards (mirror Zod schema constraints)
+      if (apps.length === 0) {
+        toast.error(t.savePromptError)
+        setSaving(false)
+        return
+      }
+      if (form.providers.length === 0) {
+        toast.error(t.savePromptError)
+        setSaving(false)
+        return
+      }
+
       if (editingPrompt) {
-        const { key: _key, promptProviders: _pp, ...updateData } = form
+        const { key: _key, providerAssignments: _pp, ...rest } = form
         await client.updatePrompt(editingPrompt.key, {
-          ...updateData,
-          providers: selectedProviders.length > 0 ? selectedProviders : undefined,
+          ...rest,
+          apps,
+          providers: form.providers,
+          providerAssignments: selectedAssignments.length > 0 ? selectedAssignments : undefined,
         })
         toast.success(t.promptUpdated)
       } else {
-        const { promptProviders: _pp, ...createData } = form
+        const { providerAssignments: _pp, ...rest } = form
         await client.createPrompt({
-          ...createData,
-          providers: selectedProviders.length > 0 ? selectedProviders : undefined,
+          ...rest,
+          apps,
+          providers: form.providers,
+          providerAssignments: selectedAssignments.length > 0 ? selectedAssignments : undefined,
         })
         toast.success(t.promptCreated)
       }
@@ -428,7 +582,7 @@ function PromptsTab({
     } finally {
       setSaving(false)
     }
-  }, [client, editingPrompt, form, fetchPrompts, t])
+  }, [client, editingPrompt, form, fetchPrompts, t, isPerApp, appName])
 
   const handleDelete = useCallback(async () => {
     if (!deletingKey) return
@@ -442,8 +596,8 @@ function PromptsTab({
     }
   }, [client, deletingKey, fetchPrompts, t])
 
-  const columns: ColumnDef<SystemPrompt>[] = useMemo(
-    () => [
+  const columns: ColumnDef<SystemPrompt>[] = useMemo(() => {
+    const cols: ColumnDef<SystemPrompt>[] = [
       {
         accessorKey: 'key',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.promptKey} />,
@@ -463,15 +617,68 @@ function PromptsTab({
           </Badge>
         ),
       },
-      {
-        accessorKey: 'provider',
-        header: ({ header }) => <DataTableColumnHeader header={header} title={t.promptProvider} />,
-        cell: ({ row }) => (
-          <Badge variant="secondary" size="sm">
-            {row.original.provider}
-          </Badge>
-        ),
+    ]
+
+    // Apps column — hidden in per-app dashboard (would just repeat the scope).
+    if (!isPerApp) {
+      cols.push({
+        id: 'apps',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.promptApps} />,
+        cell: ({ row }) => {
+          const apps = readPromptApps(row.original)
+          if (apps.includes('*')) {
+            return (
+              <Badge variant="primary" size="sm">
+                {t.badgeAllApps}
+              </Badge>
+            )
+          }
+          if (apps.length === 0) {
+            return <Span className="text-xs text-muted-foreground">{t.noData}</Span>
+          }
+          return (
+            <Div className="flex flex-wrap gap-1">
+              {apps.map(a => (
+                <Badge key={a} variant="secondary" size="sm">
+                  {a}
+                </Badge>
+              ))}
+            </Div>
+          )
+        },
+      })
+    }
+
+    cols.push({
+      id: 'providers',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t.promptProvidersColumn} />
+      ),
+      cell: ({ row }) => {
+        const providers = readPromptProviderTargets(row.original)
+        if (providers.includes('all')) {
+          return (
+            <Badge variant="primary" size="sm">
+              {t.badgeAllProviders}
+            </Badge>
+          )
+        }
+        if (providers.length === 0) {
+          return <Span className="text-xs text-muted-foreground">{t.noData}</Span>
+        }
+        return (
+          <Div className="flex flex-wrap gap-1">
+            {providers.map(p => (
+              <Badge key={p} variant="secondary" size="sm">
+                {p}
+              </Badge>
+            ))}
+          </Div>
+        )
       },
+    })
+
+    cols.push(
       {
         accessorKey: 'isActive',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.promptStatus} />,
@@ -494,10 +701,11 @@ function PromptsTab({
             </Button>
           </Div>
         ),
-      },
-    ],
-    [t, openEditDialog, openDeleteDialog]
-  )
+      }
+    )
+
+    return cols
+  }, [t, openEditDialog, openDeleteDialog, isPerApp])
 
   return (
     <Div className="space-y-4">
@@ -516,6 +724,60 @@ function PromptsTab({
         />
       </Div>
 
+      {/* Filter bar (only when not scoped to a single app via prop) */}
+      {showFilters && !isPerApp && (
+        <Card className="p-4">
+          <Div className="flex flex-col md:flex-row md:items-start gap-4">
+            <Div className="flex-1 space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wide">
+                {t.filterByApps}
+              </Label>
+              <Div className="flex flex-wrap gap-2">
+                {KNOWN_APPS.map(a => {
+                  const checked = appsFilter.includes(a)
+                  return (
+                    <Div key={a} className="flex items-center gap-2 px-2 py-1 rounded-md border">
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={c => {
+                          setAppsFilter(prev =>
+                            c === true ? [...prev, a] : prev.filter(x => x !== a)
+                          )
+                        }}
+                      />
+                      <Span className="text-xs">{a === '*' ? t.formAppsAll : a}</Span>
+                    </Div>
+                  )
+                })}
+              </Div>
+            </Div>
+            <Div className="flex-1 space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wide">
+                {t.filterByProviders}
+              </Label>
+              <Div className="flex flex-wrap gap-2">
+                {KNOWN_PROVIDER_TARGETS.map(p => {
+                  const checked = providersFilter.includes(p)
+                  return (
+                    <Div key={p} className="flex items-center gap-2 px-2 py-1 rounded-md border">
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={c => {
+                          setProvidersFilter(prev =>
+                            c === true ? [...prev, p] : prev.filter(x => x !== p)
+                          )
+                        }}
+                      />
+                      <Span className="text-xs">{p === 'all' ? t.formProvidersAll : p}</Span>
+                    </Div>
+                  )
+                })}
+              </Div>
+            </Div>
+          </Div>
+        </Card>
+      )}
+
       {/* Actions */}
       <Div className="flex justify-end">
         <Button onClick={openCreateDialog} size="sm">
@@ -531,10 +793,10 @@ function PromptsTab({
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
         </Div>
-      ) : prompts.length === 0 ? (
+      ) : visiblePrompts.length === 0 ? (
         <EmptyState message={t.noData} />
       ) : (
-        <DataTable columns={columns} data={prompts} pageSize={PROMPTS_PAGE_SIZE} />
+        <DataTable columns={columns} data={visiblePrompts} pageSize={PROMPTS_PAGE_SIZE} />
       )}
 
       {/* Server-side pagination */}
@@ -608,53 +870,101 @@ function PromptsTab({
                 rows={6}
               />
             </Div>
-            <Div className="grid grid-cols-2 gap-4">
-              <Div className="space-y-2">
-                <Label>{t.promptType}</Label>
-                <Select
-                  value={form.type}
-                  onValueChange={v => setForm(f => ({ ...f, type: v as PromptType }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROMPT_TYPES.map(type => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <Div className="space-y-2">
+              <Label>{t.promptType}</Label>
+              <Select
+                value={form.type}
+                onValueChange={v => setForm(f => ({ ...f, type: v as PromptType }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROMPT_TYPES.map(type => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Div>
+
+            {/* Apps multi-select — hidden in per-app dashboard mode (locked to [appName]) */}
+            {!isPerApp && (
+              <Div className="space-y-2 pt-2 border-t">
+                <Label>{t.formAppsLabel}</Label>
+                <Div className="flex flex-wrap gap-2">
+                  {KNOWN_APPS.map(a => {
+                    const checked = form.apps.includes(a)
+                    return (
+                      <Div
+                        key={a}
+                        className="flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/30"
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={c => {
+                            setForm(f => ({
+                              ...f,
+                              apps:
+                                c === true
+                                  ? [...f.apps.filter(x => x !== a), a]
+                                  : f.apps.filter(x => x !== a),
+                            }))
+                          }}
+                        />
+                        <Span className="text-sm">{a === '*' ? t.formAppsAll : a}</Span>
+                      </Div>
+                    )
+                  })}
+                </Div>
               </Div>
-              <Div className="space-y-2">
-                <Label>{t.promptProvider}</Label>
-                <Select
-                  value={form.provider}
-                  onValueChange={v => setForm(f => ({ ...f, provider: v as ProviderTarget }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROVIDER_TARGETS.map(provider => (
-                      <SelectItem key={provider} value={provider}>
-                        {provider}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            )}
+
+            {/* Providers (target list) multi-select */}
+            <Div className="space-y-2 pt-2 border-t">
+              <Label>{t.formProvidersLabel}</Label>
+              <Div className="flex flex-wrap gap-2">
+                {KNOWN_PROVIDER_TARGETS.map(p => {
+                  const checked = form.providers.includes(p)
+                  return (
+                    <Div
+                      key={p}
+                      className="flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/30"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={c => {
+                          setForm(f => ({
+                            ...f,
+                            providers:
+                              c === true
+                                ? [...f.providers.filter(x => x !== p), p]
+                                : f.providers.filter(x => x !== p),
+                          }))
+                        }}
+                      />
+                      <Span className="text-sm">{p === 'all' ? t.formProvidersAll : p}</Span>
+                    </Div>
+                  )
+                })}
               </Div>
             </Div>
-            {/* Provider assignment */}
+
+            {/* Per-app provider assignment (with priority) */}
             {appProviders.length > 0 && (
               <Div className="space-y-2 pt-2 border-t">
                 <Label>{t.promptProviders}</Label>
                 <Div className="space-y-2">
                   {appProviders
-                    .filter(ap => form.provider === 'all' || ap.providerType === form.provider)
+                    .filter(
+                      ap =>
+                        form.providers.includes('all') || form.providers.includes(ap.providerType)
+                    )
                     .map(ap => {
-                      const entry = form.promptProviders.find(pp => pp.providerId === ap.providerId)
+                      const entry = form.providerAssignments.find(
+                        pp => pp.providerId === ap.providerId
+                      )
                       const isSelected = entry?.selected ?? false
                       return (
                         <Div key={ap._id} className="flex items-center gap-3 p-2 rounded-md border">
@@ -662,13 +972,13 @@ function PromptsTab({
                             checked={isSelected}
                             onCheckedChange={checked => {
                               setForm(f => {
-                                const existing = f.promptProviders.find(
+                                const existing = f.providerAssignments.find(
                                   pp => pp.providerId === ap.providerId
                                 )
                                 if (existing) {
                                   return {
                                     ...f,
-                                    promptProviders: f.promptProviders.map(pp =>
+                                    providerAssignments: f.providerAssignments.map(pp =>
                                       pp.providerId === ap.providerId
                                         ? { ...pp, selected: checked }
                                         : pp
@@ -677,8 +987,8 @@ function PromptsTab({
                                 }
                                 return {
                                   ...f,
-                                  promptProviders: [
-                                    ...f.promptProviders,
+                                  providerAssignments: [
+                                    ...f.providerAssignments,
                                     { providerId: ap.providerId, priority: 1, selected: checked },
                                   ],
                                 }
@@ -708,7 +1018,7 @@ function PromptsTab({
                                 onChange={e =>
                                   setForm(f => ({
                                     ...f,
-                                    promptProviders: f.promptProviders.map(pp =>
+                                    providerAssignments: f.providerAssignments.map(pp =>
                                       pp.providerId === ap.providerId
                                         ? { ...pp, priority: Number(e.target.value) || 1 }
                                         : pp
@@ -722,7 +1032,7 @@ function PromptsTab({
                       )
                     })}
                   {appProviders.filter(
-                    ap => form.provider === 'all' || ap.providerType === form.provider
+                    ap => form.providers.includes('all') || form.providers.includes(ap.providerType)
                   ).length === 0 && <P className="text-sm text-muted-foreground">{t.noData}</P>}
                 </Div>
               </Div>
@@ -1295,14 +1605,83 @@ function ConversationsTab({ client, t }: { client: AIClient; t: Required<AIAdmin
 // Usage Tab
 // ========================================
 
+interface UsageBreakdownEntry {
+  requests: number
+  tokens: number
+  cost: number
+}
+
 interface UsageStatsData {
   totalRequests: number
   totalTokens: number
   estimatedCost: number
-  byProvider: Record<string, { requests: number; tokens: number }>
+  byProvider: Record<string, UsageBreakdownEntry>
+  byApp?: Record<string, UsageBreakdownEntry>
 }
 
-function UsageTab({ client, t }: { client: AIClient; t: Required<AIAdminDashboardTexts> }) {
+function UsageBreakdownCard({
+  title,
+  entries,
+  loading,
+  emptyMessage,
+  keyLabel,
+  t,
+}: {
+  title: string
+  entries: Array<[string, UsageBreakdownEntry]>
+  loading: boolean
+  emptyMessage: string
+  keyLabel: string
+  t: Required<AIAdminDashboardTexts>
+}) {
+  return (
+    <Card className="p-6">
+      <P className="text-sm font-medium mb-4">{title}</P>
+      {loading ? (
+        <Div className="space-y-2">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </Div>
+      ) : entries.length === 0 ? (
+        <EmptyState message={emptyMessage} />
+      ) : (
+        <Div className="space-y-2">
+          {entries.map(([id, data]) => (
+            <Div
+              key={`${keyLabel}-${id}`}
+              className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+            >
+              <Div className="flex items-center gap-2">
+                <Badge variant="outline" size="sm">
+                  {id}
+                </Badge>
+              </Div>
+              <Div className="flex items-center gap-4 text-sm">
+                <Span className="text-muted-foreground">
+                  {data.requests.toLocaleString()} {t.requests}
+                </Span>
+                <Span className="text-muted-foreground">
+                  {data.tokens.toLocaleString()} {t.tokens}
+                </Span>
+                <Span className="text-muted-foreground">${data.cost.toFixed(4)}</Span>
+              </Div>
+            </Div>
+          ))}
+        </Div>
+      )}
+    </Card>
+  )
+}
+
+function UsageTab({
+  client,
+  t,
+  scopedToApp,
+}: {
+  client: AIClient
+  t: Required<AIAdminDashboardTexts>
+  scopedToApp: boolean
+}) {
   const [stats, setStats] = useState<UsageStatsData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -1319,6 +1698,14 @@ function UsageTab({ client, t }: { client: AIClient; t: Required<AIAdminDashboar
     if (!stats?.byProvider) return []
     return Object.entries(stats.byProvider).sort(([, a], [, b]) => b.requests - a.requests)
   }, [stats])
+
+  const appEntries = useMemo(() => {
+    if (!stats?.byApp) return []
+    return Object.entries(stats.byApp).sort(([, a], [, b]) => b.requests - a.requests)
+  }, [stats])
+
+  // Hide By App breakdown when scoped to a single app (redundant)
+  const showByApp = !scopedToApp && stats?.byApp !== undefined
 
   return (
     <Div className="space-y-4">
@@ -1337,41 +1724,27 @@ function UsageTab({ client, t }: { client: AIClient; t: Required<AIAdminDashboar
         />
       </Div>
 
-      {/* By provider breakdown */}
-      <Card className="p-6">
-        <P className="text-sm font-medium mb-4">{t.byProvider}</P>
-        {loading ? (
-          <Div className="space-y-2">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-          </Div>
-        ) : providerEntries.length === 0 ? (
-          <EmptyState message={t.noUsageData} />
-        ) : (
-          <Div className="space-y-2">
-            {providerEntries.map(([providerId, data]) => (
-              <Div
-                key={providerId}
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-              >
-                <Div className="flex items-center gap-2">
-                  <Badge variant="outline" size="sm">
-                    {providerId}
-                  </Badge>
-                </Div>
-                <Div className="flex items-center gap-4 text-sm">
-                  <Span className="text-muted-foreground">
-                    {data.requests.toLocaleString()} {t.requests}
-                  </Span>
-                  <Span className="text-muted-foreground">
-                    {data.tokens.toLocaleString()} {t.tokens}
-                  </Span>
-                </Div>
-              </Div>
-            ))}
-          </Div>
+      {/* Breakdown grid */}
+      <Div className={showByApp ? 'grid grid-cols-1 lg:grid-cols-2 gap-4' : ''}>
+        <UsageBreakdownCard
+          title={t.byProvider}
+          entries={providerEntries}
+          loading={loading}
+          emptyMessage={t.noUsageData}
+          keyLabel="provider"
+          t={t}
+        />
+        {showByApp && (
+          <UsageBreakdownCard
+            title={t.byApp}
+            entries={appEntries}
+            loading={loading}
+            emptyMessage={t.noUsageData}
+            keyLabel="app"
+            t={t}
+          />
         )}
-      </Card>
+      </Div>
     </Div>
   )
 }
@@ -1427,7 +1800,13 @@ export function AIAdminDashboard({
         </TabsList>
 
         <TabsContent value="prompts" className="mt-4">
-          <PromptsTab client={client} t={t} appProviders={sharedAppProviders} />
+          <PromptsTab
+            client={client}
+            t={t}
+            appProviders={sharedAppProviders}
+            appName={appName}
+            showFilters={!appName || showAppFilter}
+          />
         </TabsContent>
 
         <TabsContent value="providers" className="mt-4">
@@ -1439,7 +1818,11 @@ export function AIAdminDashboard({
         </TabsContent>
 
         <TabsContent value="usage" className="mt-4">
-          <UsageTab client={client} t={t} />
+          <UsageTab
+            client={client}
+            t={t}
+            scopedToApp={Boolean(appName) || Boolean(showAppFilter && filterAppName)}
+          />
         </TabsContent>
       </Tabs>
     </Div>

@@ -1,6 +1,7 @@
 /**
  * PATCH /api/ai/prompts/:key
- * Update a system prompt (scoped by appName query param)
+ * Update a system prompt. Lookup is scoped via `?app=<appName>` query so the
+ * same `key` can exist across distinct app scopes.
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -13,14 +14,23 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { z } from 'zod'
-import { AISystemPrompt } from '../../../models/AISystemPrompt.js'
+import { AISystemPrompt, APPS_WILDCARD } from '../../../models/AISystemPrompt.js'
 import { clearPromptCache } from '../../../services/ai-prompt.service.js'
 
 const updatePromptQuerySchema = z.object({
-  appName: z.string().min(1).describe('Application name (required)'),
+  app: z
+    .string()
+    .min(1)
+    .describe('App scope used to locate the prompt (matches apps[] or legacy appName).'),
 })
 
 const UpdatePromptBodySchema = z.object({
+  apps: z.array(z.string().min(1).max(50)).min(1).optional().describe('New apps targeting list'),
+  providers: z
+    .array(z.string().min(1).max(50))
+    .min(1)
+    .optional()
+    .describe('New providers targeting list'),
   name: z.string().min(1).max(100).optional().describe('Prompt display name'),
   description: z.string().max(500).optional().describe('Prompt description'),
   content: z.string().min(1).max(10000).optional().describe('Prompt content template'),
@@ -28,14 +38,11 @@ const UpdatePromptBodySchema = z.object({
     .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
     .optional()
     .describe('Prompt category type'),
-  provider: z
-    .enum(['all', 'gemini', 'openai', 'anthropic'])
-    .optional()
-    .describe('Target AI provider'),
   isActive: z.boolean().optional().describe('Whether prompt is active'),
   isDefault: z.boolean().optional().describe('Whether this is the default prompt'),
+  priority: z.number().int().min(0).max(999).optional().describe('Composition priority'),
   variables: z.array(z.string()).optional().describe('Template variable names'),
-  providers: z
+  providerAssignments: z
     .array(
       z.object({
         providerId: z.string().min(1),
@@ -43,7 +50,7 @@ const UpdatePromptBodySchema = z.object({
       })
     )
     .optional()
-    .describe('Provider assignments with priority'),
+    .describe('Detailed provider assignments with per-provider priority'),
 })
 
 export const updatePromptRegistry = new OpenAPIRegistry()
@@ -60,7 +67,7 @@ docRouter.patch(
       if (!queryValidation.success) {
         return sendValidationError(res, 'Invalid query parameters', queryValidation.error.errors)
       }
-      const { appName } = queryValidation.data
+      const { app } = queryValidation.data
 
       const validation = UpdatePromptBodySchema.safeParse(req.body)
       if (!validation.success) {
@@ -68,17 +75,26 @@ docRouter.patch(
       }
       const body = validation.data
 
-      const prompt = await AISystemPrompt.findOne({ key, appName }).exec()
+      const prompt = await AISystemPrompt.findOne({
+        key,
+        $or: [{ apps: app }, { apps: APPS_WILDCARD }, { appName: app }],
+      }).exec()
 
       if (!prompt) {
         return sendError(res, 'Prompt not found', 404)
       }
 
-      // If setting as default, unset other defaults of same type + appName
+      // Demote conflicting defaults if this one becomes default.
       if (body.isDefault) {
         const type = body.type || prompt.type
+        const targetApps = body.apps || prompt.apps || (prompt.appName ? [prompt.appName] : [app])
         await AISystemPrompt.updateMany(
-          { type, appName, isDefault: true, key: { $ne: key } },
+          {
+            type,
+            isDefault: true,
+            key: { $ne: key },
+            $or: [{ apps: { $in: targetApps } }, { appName: { $in: targetApps } }],
+          },
           { $set: { isDefault: false } }
         )
       }
@@ -89,7 +105,6 @@ docRouter.patch(
 
       await prompt.save()
 
-      // Clear cache so next chat request gets updated prompt
       clearPromptCache()
 
       sendSuccess(res, {
@@ -104,7 +119,7 @@ docRouter.patch(
     }
   },
   {
-    summary: 'Update a system prompt (scoped by appName)',
+    summary: 'Update a system prompt (multi-app + multi-provider)',
     tags: ['AI Prompts'],
     bodySchema: UpdatePromptBodySchema,
   }

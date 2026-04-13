@@ -108,12 +108,17 @@ export const systemPromptSchema = z.object({
   content: z.string(),
   config: promptConfigSchema,
   type: promptTypeSchema,
-  provider: providerTargetSchema,
-  providers: z.array(promptProviderSchema).optional(),
+  // New multi-target fields (replaces `provider` single + `appName` single)
+  apps: z.array(z.string()),
+  providers: z.array(z.string()),
+  // Per-app provider assignments (with priority). Renamed from `providers` to free the name.
+  providerAssignments: z.array(promptProviderSchema).optional(),
+  // Legacy fields kept optional for backward compat with older API responses
+  appName: z.string().optional(),
+  provider: providerTargetSchema.optional(),
   isActive: z.boolean(),
   isDefault: z.boolean(),
   variables: z.array(z.string()).optional(),
-  appName: z.string(),
   updatedBy: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -129,12 +134,12 @@ export const createPromptSchema = z.object({
   content: z.string().min(1).max(10000),
   config: promptConfigSchema,
   type: promptTypeSchema.default('general'),
-  provider: providerTargetSchema.default('all'),
-  providers: z.array(promptProviderSchema).optional(),
+  apps: z.array(z.string().min(1)).min(1),
+  providers: z.array(z.string().min(1)).min(1),
+  providerAssignments: z.array(promptProviderSchema).optional(),
   isActive: z.boolean().default(true),
   isDefault: z.boolean().default(false),
   variables: z.array(z.string()).optional(),
-  appName: z.string().min(1),
 })
 
 export const updatePromptSchema = z.object({
@@ -143,8 +148,9 @@ export const updatePromptSchema = z.object({
   content: z.string().min(1).max(10000).optional(),
   config: promptConfigSchema,
   type: promptTypeSchema.optional(),
-  provider: providerTargetSchema.optional(),
-  providers: z.array(promptProviderSchema).optional(),
+  apps: z.array(z.string().min(1)).min(1).optional(),
+  providers: z.array(z.string().min(1)).min(1).optional(),
+  providerAssignments: z.array(promptProviderSchema).optional(),
   isActive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
   variables: z.array(z.string()).optional(),

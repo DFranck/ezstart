@@ -1,6 +1,6 @@
 /**
  * GET /api/ai/prompts/:key
- * Get a prompt by key and appName
+ * Get a prompt by key. Optional `?app=` constrains lookup to a given scope.
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -13,10 +13,15 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { z } from 'zod'
-import { AISystemPrompt } from '../../../models/AISystemPrompt.js'
+import {
+  AISystemPrompt,
+  APPS_WILDCARD,
+  normalizeLegacyPrompt,
+  type IAISystemPrompt,
+} from '../../../models/AISystemPrompt.js'
 
 const getPromptQuerySchema = z.object({
-  appName: z.string().min(1).optional().describe('Application name (optional)'),
+  app: z.string().min(1).optional().describe('Optional app scope used to locate the prompt'),
 })
 
 export const getPromptRegistry = new OpenAPIRegistry()
@@ -34,10 +39,12 @@ docRouter.get(
         return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
       }
 
-      const { appName } = validation.data
+      const { app } = validation.data
 
-      const filter: Record<string, string> = { key }
-      if (appName) filter.appName = appName
+      const filter: Record<string, unknown> = { key }
+      if (app) {
+        filter.$or = [{ apps: app }, { apps: APPS_WILDCARD }, { appName: app }]
+      }
 
       const prompt = await AISystemPrompt.findOne(filter).lean().exec()
 
@@ -45,9 +52,10 @@ docRouter.get(
         return sendError(res, 'Prompt not found', 404)
       }
 
+      const normalized = normalizeLegacyPrompt(prompt as Partial<IAISystemPrompt>)
       const doc = prompt as Record<string, unknown>
       sendSuccess(res, {
-        ...prompt,
+        ...normalized,
         _id: String(doc._id),
         createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
         updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
@@ -58,7 +66,7 @@ docRouter.get(
     }
   },
   {
-    summary: 'Get a system prompt by key (scoped by appName)',
+    summary: 'Get a system prompt by key',
     tags: ['AI Prompts'],
   }
 )
