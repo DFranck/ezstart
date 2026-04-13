@@ -26,6 +26,16 @@
       "import": "./dist/env.js",
       "require": "./dist/env.js"
     },
+    "./env-manifests": {
+      "types": "./dist/env-manifests.d.ts",
+      "import": "./dist/env-manifests.js",
+      "require": "./dist/env-manifests.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "require": "./dist/server.js"
+    },
     "./secrets-loader": {
       "types": "./dist/secrets-loader.d.ts",
       "import": "./dist/secrets-loader.js",

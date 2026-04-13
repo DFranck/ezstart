@@ -1,6 +1,7 @@
 /**
  * DELETE /api/ai/prompts/:key
- * Delete a system prompt. App scope provided via `?app=<appName>` query.
+ * Delete a system prompt. Optional `?app=<appName>` query scopes the lookup;
+ * admin/global callers omit it and lookup is by key only.
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -17,7 +18,11 @@ import { AISystemPrompt, APPS_WILDCARD } from '../../../models/AISystemPrompt.js
 import { clearPromptCache } from '../../../services/ai-prompt.service.js'
 
 const deletePromptQuerySchema = z.object({
-  app: z.string().min(1).describe('App scope used to locate the prompt to delete'),
+  app: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Optional app scope used to locate the prompt to delete'),
 })
 
 export const deletePromptRegistry = new OpenAPIRegistry()
@@ -36,10 +41,12 @@ docRouter.delete(
       }
       const { app } = validation.data
 
-      const prompt = await AISystemPrompt.findOne({
-        key,
-        $or: [{ apps: app }, { apps: APPS_WILDCARD }, { appName: app }],
-      }).exec()
+      const filter: Record<string, unknown> = { key }
+      if (app) {
+        filter.$or = [{ apps: app }, { apps: APPS_WILDCARD }, { appName: app }]
+      }
+
+      const prompt = await AISystemPrompt.findOne(filter).exec()
 
       if (!prompt) {
         return sendError(res, 'Prompt not found', 404)

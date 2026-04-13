@@ -59,8 +59,14 @@ export async function fetchStatus(): Promise<ProviderStatus> {
     return { ...base, error: 'Missing GITHUB_TOKEN env var' }
   }
 
+  // OAuth tokens (gho_*, ghu_*, ghs_*) use `Authorization: token <t>`.
+  // Personal access tokens (ghp_*) and fine-grained tokens (github_pat_*)
+  // work with either `Bearer` or `token`, but `Bearer` is the documented
+  // form for fine-grained tokens.
+  const isOauthToken = /^(gho_|ghu_|ghs_)/.test(token)
+  const authScheme = isOauthToken ? 'token' : 'Bearer'
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${token}`,
+    Authorization: `${authScheme} ${token}`,
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
   }

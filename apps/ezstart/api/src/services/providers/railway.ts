@@ -31,24 +31,50 @@ interface ProjectsQueryData {
   }
 }
 
-async function gql<T>(token: string, query: string): Promise<T> {
+class RailwayAuthError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'RailwayAuthError'
+  }
+}
+
+async function gqlTry<T>(
+  query: string,
+  headers: Record<string, string>
+): Promise<RailwayGraphQLResponse<T>> {
   const res = await fetch(RAILWAY_API, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({ query }),
   })
   if (!res.ok) {
     throw new Error(`Railway GraphQL HTTP ${res.status} ${res.statusText}`)
   }
-  const json = (await res.json()) as RailwayGraphQLResponse<T>
-  if (json.errors && json.errors.length > 0) {
-    throw new Error(`Railway GraphQL error: ${json.errors.map(e => e.message).join('; ')}`)
+  return (await res.json()) as RailwayGraphQLResponse<T>
+}
+
+async function gql<T>(token: string, query: string): Promise<T> {
+  // Try both auth header formats (Railway accepts Bearer for account/API tokens,
+  // Project-Access-Token for project tokens).
+  const attempts: Array<Record<string, string>> = [
+    { Authorization: `Bearer ${token}` },
+    { 'Project-Access-Token': token },
+  ]
+  let lastAuthError: string | null = null
+  for (const headers of attempts) {
+    const json = await gqlTry<T>(query, headers)
+    if (json.errors && json.errors.length > 0) {
+      const combined = json.errors.map(e => e.message).join('; ')
+      if (/not authorized|unauthorized|problem processing/i.test(combined)) {
+        lastAuthError = combined
+        continue // try next header format
+      }
+      throw new Error(`Railway GraphQL error: ${combined}`)
+    }
+    if (!json.data) throw new Error('Railway GraphQL returned no data')
+    return json.data
   }
-  if (!json.data) throw new Error('Railway GraphQL returned no data')
-  return json.data
+  throw new RailwayAuthError(lastAuthError ?? 'Railway not authorized')
 }
 
 export async function fetchStatus(): Promise<ProviderStatus> {
@@ -95,6 +121,14 @@ export async function fetchStatus(): Promise<ProviderStatus> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown Railway error'
     logger.warn('[providers/railway] fetch failed', { err: msg })
+    if (err instanceof RailwayAuthError) {
+      return {
+        ...base,
+        status: 'unknown',
+        statusMessage:
+          'RAILWAY_TOKEN is not authorized for the GraphQL API. If you copied it from ~/.railway/config.json, it is a session token. Create a proper API token at https://railway.app/account/tokens.',
+      }
+    }
     return { ...base, error: msg }
   }
 }
