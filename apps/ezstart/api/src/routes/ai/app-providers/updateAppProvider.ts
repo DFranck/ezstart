@@ -16,6 +16,11 @@ import { z } from 'zod'
 import { AppProvider } from '../../../models/AppProvider.js'
 
 const updateBodySchema = z.object({
+  apps: z
+    .array(z.string().min(1).max(50))
+    .min(1)
+    .optional()
+    .describe('Apps this provider is scoped to — use ["*"] for all apps'),
   enabled: z.boolean().optional().describe('Toggle provider on/off'),
   priority: z.number().int().min(1).max(99).optional().describe('Fallback order'),
   config: z
@@ -53,7 +58,22 @@ docRouter.patch(
       const { id } = paramsValidation.data
       const body = bodyValidation.data
 
-      const provider = await AppProvider.findByIdAndUpdate(id, { $set: body }, { new: true })
+      // If apps[] is being updated, also clear the legacy appName field so
+      // the doc is fully migrated to the new shape.
+      const update: Record<string, unknown> = { ...body }
+      const unset: Record<string, ''> = {}
+      if (body.apps) {
+        unset.appName = ''
+      }
+
+      const provider = await AppProvider.findByIdAndUpdate(
+        id,
+        {
+          $set: update,
+          ...(Object.keys(unset).length > 0 ? { $unset: unset } : {}),
+        },
+        { new: true }
+      )
         .lean()
         .exec()
 

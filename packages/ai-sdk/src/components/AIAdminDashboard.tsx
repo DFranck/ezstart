@@ -1105,6 +1105,7 @@ interface AppProviderFormData {
   providerType: 'gemini' | 'openai' | 'anthropic'
   priority: number
   enabled: boolean
+  apps: string[]
   configModel: string
   configTemperature: number
   configMaxTokens: string
@@ -1115,12 +1116,40 @@ const EMPTY_PROVIDER_FORM: AppProviderFormData = {
   providerType: 'gemini',
   priority: 1,
   enabled: true,
+  // Default at create: all apps selected (incl. '*' wildcard) — mirrors Prompts tab behavior
+  apps: [...KNOWN_APPS],
   configModel: '',
   configTemperature: 0.7,
   configMaxTokens: '',
 }
 
-function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDashboardTexts> }) {
+/**
+ * Backward-compat: derive the apps[] for a provider response.
+ * Legacy responses may still expose `appName: string` instead of `apps: string[]`.
+ */
+function readProviderApps(provider: AppProviderData): string[] {
+  const raw = provider as unknown as { apps?: unknown; appName?: unknown }
+  if (Array.isArray(raw.apps)) {
+    const apps = raw.apps.filter((a: unknown): a is string => typeof a === 'string' && a.length > 0)
+    if (apps.length > 0) return apps
+  }
+  if (typeof raw.appName === 'string' && raw.appName) return [raw.appName]
+  return []
+}
+
+function ProvidersTab({
+  client,
+  t,
+  appName,
+  showFilters,
+}: {
+  client: AIClient
+  t: Required<AIAdminDashboardTexts>
+  /** When set, the dashboard is scoped to a single app: hide Apps column + lock form Apps field. */
+  appName?: string
+  /** Show the apps filter bar in the providers tab header. */
+  showFilters?: boolean
+}) {
   const [globalProviders, setGlobalProviders] = useState<AIProviderInfo[]>([])
   const [globalLoading, setGlobalLoading] = useState(true)
   const [appProviders, setAppProviders] = useState<AppProviderData[]>([])
@@ -1132,6 +1161,10 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [form, setForm] = useState<AppProviderFormData>(EMPTY_PROVIDER_FORM)
   const [saving, setSaving] = useState(false)
+  // Multi-select apps filter (only used when showFilters)
+  const [appsFilter, setAppsFilter] = useState<string[]>([])
+
+  const isPerApp = Boolean(appName)
 
   const fetchGlobalProviders = useCallback(() => {
     setGlobalLoading(true)
@@ -1161,23 +1194,34 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
 
   const openCreateDialog = useCallback(() => {
     setEditingProvider(null)
-    setForm(EMPTY_PROVIDER_FORM)
+    if (isPerApp && appName) {
+      // Lock to the current app
+      setForm({ ...EMPTY_PROVIDER_FORM, apps: [appName] })
+    } else {
+      setForm(EMPTY_PROVIDER_FORM)
+    }
     setDialogOpen(true)
-  }, [])
+  }, [isPerApp, appName])
 
-  const openEditDialog = useCallback((provider: AppProviderData) => {
-    setEditingProvider(provider)
-    setForm({
-      providerId: provider.providerId,
-      providerType: provider.providerType,
-      priority: provider.priority,
-      enabled: provider.enabled,
-      configModel: provider.config?.model || '',
-      configTemperature: provider.config?.temperature ?? 0.7,
-      configMaxTokens: provider.config?.maxTokens ? String(provider.config.maxTokens) : '',
-    })
-    setDialogOpen(true)
-  }, [])
+  const openEditDialog = useCallback(
+    (provider: AppProviderData) => {
+      setEditingProvider(provider)
+      const apps = readProviderApps(provider)
+      setForm({
+        providerId: provider.providerId,
+        providerType: provider.providerType,
+        priority: provider.priority,
+        enabled: provider.enabled,
+        // In per-app mode, force apps = [appName] regardless of server value
+        apps: isPerApp && appName ? [appName] : apps.length > 0 ? apps : [...KNOWN_APPS],
+        configModel: provider.config?.model || '',
+        configTemperature: provider.config?.temperature ?? 0.7,
+        configMaxTokens: provider.config?.maxTokens ? String(provider.config.maxTokens) : '',
+      })
+      setDialogOpen(true)
+    },
+    [isPerApp, appName]
+  )
 
   const openDeleteDialog = useCallback((id: string) => {
     setDeletingId(id)
@@ -1199,8 +1243,19 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
     setSaving(true)
     try {
       const config = buildConfig(form)
+      // In per-app mode, force apps = [appName] at submit time (defensive)
+      const apps = isPerApp && appName ? [appName] : form.apps
+
+      // Client-side guard (mirror Zod schema constraints)
+      if (apps.length === 0) {
+        toast.error(t.saveProviderError)
+        setSaving(false)
+        return
+      }
+
       if (editingProvider) {
         await client.updateAppProvider(editingProvider._id, {
+          apps,
           enabled: form.enabled,
           priority: form.priority,
           config,
@@ -1208,6 +1263,7 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
         toast.success(t.providerUpdated)
       } else {
         await client.createAppProvider({
+          apps,
           providerId: form.providerId,
           providerType: form.providerType,
           priority: form.priority,
@@ -1223,7 +1279,7 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
     } finally {
       setSaving(false)
     }
-  }, [client, editingProvider, form, buildConfig, fetchAppProviders, t])
+  }, [client, editingProvider, form, buildConfig, fetchAppProviders, t, isPerApp, appName])
 
   const handleDelete = useCallback(async () => {
     if (!deletingId) return
@@ -1253,8 +1309,20 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
   const activeCount = appProviders.filter(p => p.enabled).length
   const inactiveCount = appProviders.filter(p => !p.enabled).length
 
-  const columns: ColumnDef<AppProviderData>[] = useMemo(
-    () => [
+  // Client-side narrowing by appsFilter (server returns the broader set).
+  const visibleProviders = useMemo(() => {
+    return appProviders.filter(p => {
+      if (appsFilter.length > 0) {
+        const providerApps = readProviderApps(p)
+        const matches = appsFilter.some(a => providerApps.includes(a) || providerApps.includes('*'))
+        if (!matches) return false
+      }
+      return true
+    })
+  }, [appProviders, appsFilter])
+
+  const columns: ColumnDef<AppProviderData>[] = useMemo(() => {
+    const cols: ColumnDef<AppProviderData>[] = [
       {
         accessorKey: 'providerId',
         header: ({ header }) => <DataTableColumnHeader header={header} title={t.providerIdLabel} />,
@@ -1271,6 +1339,39 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
           </Badge>
         ),
       },
+    ]
+
+    // Apps column — hidden in per-app dashboard (would just repeat the scope).
+    if (!isPerApp) {
+      cols.push({
+        id: 'apps',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.promptApps} />,
+        cell: ({ row }) => {
+          const apps = readProviderApps(row.original)
+          if (apps.includes('*')) {
+            return (
+              <Badge variant="primary" size="sm">
+                {t.badgeAllApps}
+              </Badge>
+            )
+          }
+          if (apps.length === 0) {
+            return <Span className="text-xs text-muted-foreground">{t.noData}</Span>
+          }
+          return (
+            <Div className="flex flex-wrap gap-1">
+              {apps.map(a => (
+                <Badge key={a} variant="secondary" size="sm">
+                  {a}
+                </Badge>
+              ))}
+            </Div>
+          )
+        },
+      })
+    }
+
+    cols.push(
       {
         id: 'modelOverride',
         header: t.modelOverride,
@@ -1312,10 +1413,11 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
             </Button>
           </Div>
         ),
-      },
-    ],
-    [t, handleToggle, openEditDialog, openDeleteDialog]
-  )
+      }
+    )
+
+    return cols
+  }, [t, handleToggle, openEditDialog, openDeleteDialog, isPerApp])
 
   return (
     <Div className="space-y-6">
@@ -1347,6 +1449,35 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
         )}
       </Div>
 
+      {/* Filter bar (only when not scoped to a single app via prop) */}
+      {showFilters && !isPerApp && (
+        <Card className="p-4">
+          <Div className="space-y-2">
+            <Label className="text-xs font-semibold uppercase tracking-wide">
+              {t.filterByApps}
+            </Label>
+            <Div className="flex flex-wrap gap-2">
+              {KNOWN_APPS.map(a => {
+                const checked = appsFilter.includes(a)
+                return (
+                  <Div key={a} className="flex items-center gap-2 px-2 py-1 rounded-md border">
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={c => {
+                        setAppsFilter(prev =>
+                          c === true ? [...prev, a] : prev.filter(x => x !== a)
+                        )
+                      }}
+                    />
+                    <Span className="text-xs">{a === '*' ? t.formAppsAll : a}</Span>
+                  </Div>
+                )
+              })}
+            </Div>
+          </Div>
+        </Card>
+      )}
+
       <Div className="space-y-4">
         <Div className="flex items-center justify-between">
           <P className="text-base font-semibold">{t.appProviders}</P>
@@ -1362,10 +1493,10 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
           </Div>
-        ) : appProviders.length === 0 ? (
+        ) : visibleProviders.length === 0 ? (
           <EmptyState message={t.noData} />
         ) : (
-          <DataTable columns={columns} data={appProviders} pageSize={20} />
+          <DataTable columns={columns} data={visibleProviders} pageSize={20} />
         )}
       </Div>
 
@@ -1421,6 +1552,39 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
               </Div>
             </>
           )}
+
+          {/* Apps multi-select — hidden in per-app dashboard mode (locked to [appName]) */}
+          {!isPerApp && (
+            <Div className="space-y-2 pt-2 border-t">
+              <Label>{t.formAppsLabel}</Label>
+              <Div className="flex flex-wrap gap-2">
+                {KNOWN_APPS.map(a => {
+                  const checked = form.apps.includes(a)
+                  return (
+                    <Div
+                      key={a}
+                      className="flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/30"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={c => {
+                          setForm(f => ({
+                            ...f,
+                            apps:
+                              c === true
+                                ? [...f.apps.filter(x => x !== a), a]
+                                : f.apps.filter(x => x !== a),
+                          }))
+                        }}
+                      />
+                      <Span className="text-sm">{a === '*' ? t.formAppsAll : a}</Span>
+                    </Div>
+                  )
+                })}
+              </Div>
+            </Div>
+          )}
+
           <Div className="grid grid-cols-2 gap-4">
             <Div className="space-y-2">
               <Label>{t.priorityLabel}</Label>
@@ -1811,7 +1975,12 @@ export function AIAdminDashboard({
         </TabsContent>
 
         <TabsContent value="providers" className="mt-4">
-          <ProvidersTab client={client} t={t} />
+          <ProvidersTab
+            client={client}
+            t={t}
+            appName={appName}
+            showFilters={!appName || showAppFilter}
+          />
         </TabsContent>
 
         <TabsContent value="conversations" className="mt-4">

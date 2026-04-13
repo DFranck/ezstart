@@ -63,6 +63,7 @@ export type UseAIThreadReturn = {
 
   // Providers
   providers: AIProviderInfo[]
+  providersLoading: boolean
   selectedProvider: string | null
   setSelectedProvider: (id: string) => void
 
@@ -109,6 +110,7 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   // Providers (app-scoped: join of DB app-provider config + global registry metadata)
   const {
     providers,
+    loading: providersLoading,
     selectedProvider,
     setSelectedProvider: rawSetSelectedProvider,
   } = useChatProviders()
@@ -367,6 +369,7 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
 
     // Providers
     providers,
+    providersLoading,
     selectedProvider,
     setSelectedProvider,
 

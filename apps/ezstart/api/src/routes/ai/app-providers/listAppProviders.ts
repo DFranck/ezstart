@@ -19,10 +19,16 @@ import {
 import { providerRegistry, enrichedAppProviderSchema } from '@ezstart/ai-sdk'
 import type { AIProviderInfo, ProviderCapabilities } from '@ezstart/ai-sdk'
 import { z } from 'zod'
-import { AppProvider } from '../../../models/AppProvider.js'
+import { AppProvider, normalizeLegacyAppProvider } from '../../../models/AppProvider.js'
 
 const listQuerySchema = z.object({
-  appName: z.string().min(1).optional().describe('Filter by app name (omit for all apps)'),
+  app: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Filter by app name — matches providers scoped to this app or "*" (omit for all)'),
+  // Kept for backward-compat with the old `appName` query param.
+  appName: z.string().min(1).optional().describe('[Deprecated] Use `app` instead.'),
   enabled: z.enum(['true', 'false']).optional().describe('Filter by enabled status'),
   limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
   offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
@@ -66,19 +72,22 @@ docRouter.get(
         return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
       }
 
-      const { appName, enabled, limit, offset } = validation.data
+      const { app, appName, enabled, limit, offset } = validation.data
+      const targetApp = app || appName
 
       const filter: Record<string, unknown> = {}
-      if (appName) filter.appName = appName
+      if (targetApp) {
+        filter.$or = [
+          { apps: targetApp },
+          { apps: '*' },
+          // backward compat — old docs with legacy `appName` field
+          { appName: targetApp },
+        ]
+      }
       if (enabled !== undefined) filter.enabled = enabled === 'true'
 
       const [providers, total] = await Promise.all([
-        AppProvider.find(filter)
-          .sort({ appName: 1, priority: 1 })
-          .skip(offset)
-          .limit(limit)
-          .lean()
-          .exec(),
+        AppProvider.find(filter).sort({ priority: 1 }).skip(offset).limit(limit).lean().exec(),
         AppProvider.countDocuments(filter),
       ])
 
@@ -91,18 +100,22 @@ docRouter.get(
         res,
         {
           providers: providers.map(p => {
-            const doc = p as Record<string, unknown>
-            const registryEntry = registryMap.get(String(doc.providerId))
+            const normalized = normalizeLegacyAppProvider(p as Record<string, unknown>)
+            const registryEntry = registryMap.get(String(normalized.providerId))
 
             return {
-              ...p,
-              _id: String(doc._id),
+              ...normalized,
+              _id: String(normalized._id),
               createdAt:
-                doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+                normalized.createdAt instanceof Date
+                  ? normalized.createdAt.toISOString()
+                  : normalized.createdAt,
               updatedAt:
-                doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
+                normalized.updatedAt instanceof Date
+                  ? normalized.updatedAt.toISOString()
+                  : normalized.updatedAt,
               // Enrichment from global registry (fallback to empty values if provider removed)
-              name: registryEntry?.name ?? String(doc.providerId),
+              name: registryEntry?.name ?? String(normalized.providerId),
               capabilities: registryEntry?.capabilities ?? EMPTY_CAPABILITIES,
               model: registryEntry?.model ?? '',
               registered: Boolean(registryEntry),
