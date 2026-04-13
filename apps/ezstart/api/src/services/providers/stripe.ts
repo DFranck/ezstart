@@ -49,7 +49,12 @@ export async function fetchStatus(): Promise<ProviderStatus> {
   }
 
   if (!key) {
-    return { ...base, error: 'Missing STRIPE_SECRET_KEY env var' }
+    return {
+      ...base,
+      status: 'unknown',
+      statusMessage:
+        'STRIPE_SECRET_KEY not set in ezstart API env. Add it to apps/ezstart/api/.env.local (or root .env.local to share across apps). Read-only usage — same key as ezpay is fine.',
+    }
   }
 
   const headers = { Authorization: `Bearer ${key}` }

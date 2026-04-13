@@ -24,10 +24,42 @@ interface AtlasCluster {
   replicationSpecs?: Array<{
     regionConfigs?: Array<{
       electableSpecs?: { instanceSize?: string; diskSizeGB?: number }
+      readOnlySpecs?: { instanceSize?: string }
+      analyticsSpecs?: { instanceSize?: string }
     }>
   }>
   diskSizeGB?: number
   stateName?: string
+  clusterType?: string
+  // Serverless / Flex clusters (M0/M2/M5) use different shapes
+  providerBackupEnabled?: boolean
+  backingProviderName?: string
+}
+
+/**
+ * Recursively search a cluster object for the first string value matching
+ * the tier pattern `M\d+` (e.g. M0, M2, M10, M30). Useful when Atlas response
+ * shapes differ across cluster types (dedicated vs flex vs serverless).
+ */
+function findTierString(obj: unknown, depth = 0): string | null {
+  if (depth > 6 || obj == null) return null
+  if (typeof obj === 'string') {
+    return /^M\d+$/.test(obj) ? obj : null
+  }
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      const hit = findTierString(item, depth + 1)
+      if (hit) return hit
+    }
+    return null
+  }
+  if (typeof obj === 'object') {
+    for (const value of Object.values(obj as Record<string, unknown>)) {
+      const hit = findTierString(value, depth + 1)
+      if (hit) return hit
+    }
+  }
+  return null
 }
 
 interface AtlasProject {
@@ -133,20 +165,42 @@ export async function fetchStatus(): Promise<ProviderStatus> {
       return { ...base, plan: 'No cluster', statusMessage: 'No clusters in project' }
     }
 
-    // Aggregate storage across clusters, tier = smallest (most limiting)
+    // Debug: log first cluster shape once to help diagnose parsing issues
+    if (clusters[0]) {
+      logger.debug('[providers/mongodb] first cluster shape', {
+        keys: Object.keys(clusters[0]),
+        sample: JSON.stringify(clusters[0]).slice(0, 500),
+      })
+    }
+
+    // Aggregate storage across clusters, tier = smallest (most limiting).
+    // Start from null (no fallback that could mis-report as paid tier).
     let totalDiskGB = 0
-    let minTier = 'M30'
+    let minTier: string | null = null
     for (const c of clusters) {
       const tier =
         c.replicationSpecs?.[0]?.regionConfigs?.[0]?.electableSpecs?.instanceSize ??
         c.providerSettings?.instanceSizeName ??
-        'Unknown'
+        findTierString(c) ??
+        null
       const disk =
         c.diskSizeGB ?? c.replicationSpecs?.[0]?.regionConfigs?.[0]?.electableSpecs?.diskSizeGB ?? 0
       totalDiskGB += disk
-      // Choose smallest tier by numeric suffix
-      const num = (s: string) => parseInt(s.replace(/[^0-9]/g, ''), 10) || 999
-      if (num(tier) < num(minTier)) minTier = tier
+      if (tier) {
+        const num = (s: string) => parseInt(s.replace(/[^0-9]/g, ''), 10)
+        if (minTier === null || num(tier) < num(minTier)) minTier = tier
+      }
+    }
+
+    // Fallback: no tier could be parsed from any cluster
+    if (minTier === null) {
+      return {
+        ...base,
+        plan: 'Unknown',
+        status: 'unknown',
+        statusMessage: 'Could not parse cluster tier from Atlas response',
+        dashboardUrl: `https://cloud.mongodb.com/v2/${projectId}`,
+      }
     }
 
     // Known storage limits per tier (GB)
