@@ -54,6 +54,15 @@ pnpm dev --list  # Voir toutes les apps
 - TOUJOURS dire au user quel script lancer
 - JAMAIS lancer un dev server sans prévenir
 
+## Generators
+
+Pipeline de génération zero-maintenance. Voir [GENERATORS.md](./GENERATORS.md).
+
+- Convention : chaque package qui génère expose `"generate"` dans son `package.json`
+- Sources committed (CSS, SVG, TS components) → outputs gitignored (`*.generated.ts`, `generated/**`)
+- Triggers auto : `postinstall`, `prebuild`, `pnpm dev:packages`, husky pre-commit, CI
+- Commandes : `pnpm generate` (all), `turbo run generate --filter=<pkg>` (ciblé)
+
 ## Documentation
 
 | Doc                                      | Contenu                                                                           |
@@ -61,6 +70,7 @@ pnpm dev --list  # Voir toutes les apps
 | [DEV-RULES.md](./DEV-RULES.md)           | Règles de développement (UI, TS, MongoDB, routing, tests, deploy, .env, packages) |
 | [BACKLOG.md](./BACKLOG.md)               | Index monorepo, "continue [projet]" pour reprendre                                |
 | [DEPLOY.md](./DEPLOY.md)                 | Guide Railway/Vercel                                                              |
+| [GENERATORS.md](./GENERATORS.md)         | Pipeline de générateurs (themes, UI registry, PWA icons)                          |
 | [.claude/agents/](./. claude/agents/)    | Rôles agents (coding-rules, code-quality, ux-quality, i18n, security, testing)    |
 | [.claude/pipeline/](./.claude/pipeline/) | Contexte par étape du pipeline (1-plan → 8-pr)                                    |
 

@@ -69,3 +69,9 @@ test-images/
 
 # Local tmp (screenshots, scratch)
 tmp/
+
+# Auto-generated files — regenerated via `turbo run generate`
+# Source of truth lives in the non-generated counterpart (CSS, components, etc.).
+# Never commit these; never edit by hand.
+**/*.generated.ts
+**/generated/**

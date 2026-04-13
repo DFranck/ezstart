@@ -1,1 +1,10 @@
+# Regenerate auto-generated files — fail fast if a generator errors.
+pnpm --silent run generate || {
+  echo ""
+  echo "  ❌ Generator failed. Fix the error above and retry."
+  echo "     Manual run: pnpm generate"
+  echo ""
+  exit 1
+}
+
 npx lint-staged

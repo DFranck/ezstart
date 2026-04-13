@@ -51,6 +51,14 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ### Cross-project items
 
+- [ ] **🔥 External-devs readiness — Phase 0 (prép funding)** — Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (ex: green-pulse) sans leur donner accès aux autres apps. Objectif : split apps standalone + packages publiés + rules auto-enforced. **~2 jours total.**
+  1. **GitHub Packages registry** — setup private npm registry, `publishConfig` dans chaque `packages/*/package.json`, test publish local (~30 min)
+  2. **`@ezstart/eslint-plugin`** — créer le package avec 5-10 règles core : `no-native-html` (bloque `<div>`/`<p>`/etc sans Tag), `prefer-tag-aliases`, `no-hardcoded-tailwind-colors`, `require-i18n-string` (toast/label), `no-console-log`, `no-local-ui-components` (forbid new components in apps/\*, force `@ezstart/ui`) (~4h)
+  3. **Test `scripts/generators/extract-app.js`** — extraire green-pulse en sandbox local, valider que `pnpm install && pnpm build` passe depuis le standalone, documenter les edge cases (~1h)
+  4. **CI auto-publish** — GitHub Action sur tag `v*.*.*` qui publish tous les `@ezstart/*` modifiés vers GitHub Packages (via changesets ou script custom) (~1h)
+  5. **Doc `CONTRIBUTING-EXTERNAL.md`** — workflow onboarding dev externe, comment proposer un change sur un package (PR via `packages/**` uniquement sur le monorepo), versioning & release (~1h)
+  6. **Test du pattern end-to-end** — simuler un dev externe : extract green-pulse, npm install les packages publiés, dev un composant, open PR, validate que les règles bloquent bien un `<div>` natif, etc. Valide la boucle complète avant d'onboard qqn en vrai.
+
 - [ ] **⏸️ Theme Overriding dynamic (paused)** — Projet `ThemeStyleInjector` + `/api/theme` endpoint pour que des clients non-devs puissent overwrite dynamiquement les couleurs de leur app depuis un éditeur visuel. Infra en place (`packages/next-theme/src/server/`) mais non câblée dans les apps (retirée de `green-pulse/layout.tsx` et `gacha-analyzer/layout.tsx` le 2026-04-13). Reprendre quand l'UI éditeur sera planifiée. En attendant : la source de vérité est le CSS statique (`packages/ui/src/styles/themes/{app}/{app}.css` avec `[data-app='{app}']` scope + global.css fallback).
 
 15. [x] Audit sécurité complet — 3 CRITICAL, 6 HIGH, 5 MEDIUM, 3 LOW identifiés
