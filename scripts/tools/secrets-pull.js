@@ -46,6 +46,11 @@ const targetFile = path.join(ROOT, '.env.production')
 // Vars that are ALWAYS shared (no prefix) even if seen in a single target.
 // These identify infrastructure-level secrets that never vary per app.
 const ALWAYS_SHARED = new Set([
+  'NODE_ENV',
+  'JWT_SECRET',
+  'STRIPE_SECRET_KEY',
+  'STRIPE_WEBHOOK_SECRET',
+  'STRIPE_PUBLISHABLE_KEY',
   'OPENAI_API_KEY',
   'ANTHROPIC_API_KEY',
   'GEMINI_API_KEY',

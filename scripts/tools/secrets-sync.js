@@ -50,6 +50,8 @@ function display(key, value) {
 // Shared vars we actively push to APIs (Railway). Anything else stays local.
 // Per-app vars with matching prefix are ALWAYS pushed (no allow-list needed).
 const RAILWAY_SHARED_ALLOWLIST = new Set([
+  'NODE_ENV',
+  'JWT_SECRET',
   'OPENAI_API_KEY',
   'ANTHROPIC_API_KEY',
   'GEMINI_API_KEY',
@@ -68,7 +70,25 @@ const RAILWAY_SHARED_ALLOWLIST = new Set([
 ])
 
 // Shared vars pushed to Vercel (web apps). NEXT_PUBLIC_* handled separately.
-const VERCEL_SHARED_ALLOWLIST = new Set(['SENTRY_AUTH_TOKEN', 'SENTRY_ORG_SLUG'])
+const VERCEL_SHARED_ALLOWLIST = new Set(['JWT_SECRET', 'SENTRY_AUTH_TOKEN', 'SENTRY_ORG_SLUG'])
+
+// Scoped shared vars: pushed ONLY to the listed targets. Used for "shared by
+// design but not every service needs them" (e.g. Stripe keys consumed by ezpay
+// for payments + ezstart for read-only dashboards).
+const SCOPED_SHARED_VARS = {
+  STRIPE_SECRET_KEY: {
+    railway: new Set(['ezpay-api', 'ezstart-api']),
+    vercel: new Set(['web-ezpay']),
+  },
+  STRIPE_WEBHOOK_SECRET: {
+    railway: new Set(['ezpay-api']),
+    vercel: new Set(),
+  },
+  STRIPE_PUBLISHABLE_KEY: {
+    railway: new Set(['ezpay-api']),
+    vercel: new Set(['web-ezpay']),
+  },
+}
 
 // ── Load source of truth ─────────────────────────────────────────────────
 const sourceFile = path.join(ROOT, '.env.production')
@@ -81,8 +101,8 @@ if (!source) {
 
 // ── Plan: which var goes where ───────────────────────────────────────────
 // For each (target, root-key) pair, compute the (platform key, value) to push.
-function buildPlan(targets, sharedAllowlist, { includePublic } = {}) {
-  // targets: [{ label, prefix }]
+function buildPlan(targets, sharedAllowlist, { includePublic, platform } = {}) {
+  // targets: [{ label, prefix, meta }]
   const plan = new Map() // targetLabel → [{ key, value }]
   for (const t of targets) plan.set(t.label, [])
 
@@ -91,6 +111,7 @@ function buildPlan(targets, sharedAllowlist, { includePublic } = {}) {
     if (!value) continue
 
     const isPublic = rootKey.startsWith('NEXT_PUBLIC_')
+    const scoped = SCOPED_SHARED_VARS[rootKey]
 
     for (const t of targets) {
       const { kind, exportedKey } = classifyKeyForTarget(rootKey, t.prefix)
@@ -102,6 +123,15 @@ function buildPlan(targets, sharedAllowlist, { includePublic } = {}) {
       // shared
       if (isPublic) {
         if (includePublic) plan.get(t.label).push({ key: exportedKey, value })
+        continue
+      }
+      if (scoped) {
+        const allowed = scoped[platform]
+        const targetName =
+          platform === 'railway' ? t.meta && t.meta.service : t.meta && t.meta.project
+        if (allowed && allowed.has(targetName)) {
+          plan.get(t.label).push({ key: exportedKey, value })
+        }
         continue
       }
       if (sharedAllowlist.has(rootKey)) {
@@ -138,7 +168,10 @@ if (!vercelOnly) {
     prefix: s.prefix,
     meta: s,
   }))
-  const plan = buildPlan(railwayTargets, RAILWAY_SHARED_ALLOWLIST, { includePublic: false })
+  const plan = buildPlan(railwayTargets, RAILWAY_SHARED_ALLOWLIST, {
+    includePublic: false,
+    platform: 'railway',
+  })
 
   const railwayAvailable = !isDryRun && cliAvailable('railway')
   if (!isDryRun && !railwayAvailable) {
@@ -181,7 +214,10 @@ if (!railwayOnly) {
     prefix: p.prefix,
     meta: p,
   }))
-  const plan = buildPlan(vercelTargets, VERCEL_SHARED_ALLOWLIST, { includePublic: true })
+  const plan = buildPlan(vercelTargets, VERCEL_SHARED_ALLOWLIST, {
+    includePublic: true,
+    platform: 'vercel',
+  })
 
   const vercelAvailable = !isDryRun && cliAvailable('vercel')
   if (!isDryRun && !vercelAvailable) {
