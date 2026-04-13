@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TextArea,
+  Textarea,
   Div,
   H4,
   Span,
@@ -72,7 +72,7 @@ export function ItemsTable({ items, onUpdateItem, onRemoveItem, onAddItem }: Ite
               {items.map((item, index) => (
                 <TableRow key={index} className="hover:bg-warning/5">
                   <TableCell className="p-3">
-                    <TextArea
+                    <Textarea
                       placeholder={tCommon('description')}
                       value={item.label}
                       onChange={e => onUpdateItem(index, 'label', e.target.value)}

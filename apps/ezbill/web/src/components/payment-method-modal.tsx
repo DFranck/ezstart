@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  TextArea,
+  Textarea,
   Div,
   H4,
   P,
@@ -387,7 +387,7 @@ export function PaymentMethodModal({
               <Icon name="lucide:Banknote" className="w-4 h-4 mr-2 text-ezbill-payment" />
               Instructions (Optional)
             </Label>
-            <TextArea
+            <Textarea
               value={formData.instructions || ''}
               onChange={e => setFormData({ ...formData, instructions: e.target.value })}
               placeholder="E.g., Cash payment accepted at office, bring exact change..."
@@ -478,7 +478,7 @@ export function PaymentMethodModal({
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-ezbill-payment" />
             Additional Instructions
           </Label>
-          <TextArea
+          <Textarea
             value={formData.instructions || ''}
             onChange={e => setFormData({ ...formData, instructions: e.target.value })}
             placeholder="Any special instructions for payments..."

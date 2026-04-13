@@ -8,15 +8,11 @@ import {
   Checkbox,
   DataTable,
   DataTableColumnHeader,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   Div,
   Icon,
   Input,
   Label,
+  Modal,
   P,
   Select,
   SelectContent,
@@ -30,7 +26,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  TextArea,
+  Textarea,
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
@@ -826,110 +822,90 @@ function PromptsTab({
         </Div>
       )}
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingPrompt ? t.editPrompt : t.createPrompt}</DialogTitle>
-          </DialogHeader>
-          <Div className="space-y-4 py-4">
-            {!editingPrompt && (
-              <Div className="space-y-2">
-                <Label>{t.promptKey}</Label>
-                <Input
-                  value={form.key}
-                  onChange={e => setForm(f => ({ ...f, key: e.target.value }))}
-                  placeholder={t.promptKeyPlaceholder}
-                />
-              </Div>
-            )}
+      {/* Create/Edit Modal */}
+      <Modal
+        isOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        size="xl"
+        title={editingPrompt ? t.editPrompt : t.createPrompt}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              {t.cancel}
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? t.loading : t.save}
+            </Button>
+          </>
+        }
+      >
+        <Div className="space-y-4 py-4">
+          {!editingPrompt && (
             <Div className="space-y-2">
-              <Label>{t.promptName}</Label>
+              <Label>{t.promptKey}</Label>
               <Input
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder={t.promptNamePlaceholder}
+                value={form.key}
+                onChange={e => setForm(f => ({ ...f, key: e.target.value }))}
+                placeholder={t.promptKeyPlaceholder}
               />
             </Div>
-            <Div className="space-y-2">
-              <Label>{t.promptDescription}</Label>
-              <Input
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder={t.promptDescriptionPlaceholder}
-              />
-            </Div>
-            <Div className="space-y-2">
-              <Label>{t.promptContent}</Label>
-              <TextArea
-                value={form.content}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setForm(f => ({ ...f, content: e.target.value }))
-                }
-                placeholder={t.promptContentPlaceholder}
-                rows={6}
-              />
-            </Div>
-            <Div className="space-y-2">
-              <Label>{t.promptType}</Label>
-              <Select
-                value={form.type}
-                onValueChange={v => setForm(f => ({ ...f, type: v as PromptType }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROMPT_TYPES.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Div>
+          )}
+          <Div className="space-y-2">
+            <Label>{t.promptName}</Label>
+            <Input
+              value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              placeholder={t.promptNamePlaceholder}
+            />
+          </Div>
+          <Div className="space-y-2">
+            <Label>{t.promptDescription}</Label>
+            <Input
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder={t.promptDescriptionPlaceholder}
+            />
+          </Div>
+          <Div className="space-y-2">
+            <Label>{t.promptContent}</Label>
+            <Textarea
+              value={form.content}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setForm(f => ({ ...f, content: e.target.value }))
+              }
+              placeholder={t.promptContentPlaceholder}
+              rows={6}
+            />
+          </Div>
+          <Div className="space-y-2">
+            <Label>{t.promptType}</Label>
+            <Select
+              value={form.type}
+              onValueChange={v => setForm(f => ({ ...f, type: v as PromptType }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PROMPT_TYPES.map(type => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Div>
 
-            {/* Apps multi-select — hidden in per-app dashboard mode (locked to [appName]) */}
-            {!isPerApp && (
-              <Div className="space-y-2 pt-2 border-t">
-                <Label>{t.formAppsLabel}</Label>
-                <Div className="flex flex-wrap gap-2">
-                  {KNOWN_APPS.map(a => {
-                    const checked = form.apps.includes(a)
-                    return (
-                      <Div
-                        key={a}
-                        className="flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/30"
-                      >
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={c => {
-                            setForm(f => ({
-                              ...f,
-                              apps:
-                                c === true
-                                  ? [...f.apps.filter(x => x !== a), a]
-                                  : f.apps.filter(x => x !== a),
-                            }))
-                          }}
-                        />
-                        <Span className="text-sm">{a === '*' ? t.formAppsAll : a}</Span>
-                      </Div>
-                    )
-                  })}
-                </Div>
-              </Div>
-            )}
-
-            {/* Providers (target list) multi-select */}
+          {/* Apps multi-select — hidden in per-app dashboard mode (locked to [appName]) */}
+          {!isPerApp && (
             <Div className="space-y-2 pt-2 border-t">
-              <Label>{t.formProvidersLabel}</Label>
+              <Label>{t.formAppsLabel}</Label>
               <Div className="flex flex-wrap gap-2">
-                {KNOWN_PROVIDER_TARGETS.map(p => {
-                  const checked = form.providers.includes(p)
+                {KNOWN_APPS.map(a => {
+                  const checked = form.apps.includes(a)
                   return (
                     <Div
-                      key={p}
+                      key={a}
                       className="flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/30"
                     >
                       <Checkbox
@@ -937,151 +913,173 @@ function PromptsTab({
                         onCheckedChange={c => {
                           setForm(f => ({
                             ...f,
-                            providers:
+                            apps:
                               c === true
-                                ? [...f.providers.filter(x => x !== p), p]
-                                : f.providers.filter(x => x !== p),
+                                ? [...f.apps.filter(x => x !== a), a]
+                                : f.apps.filter(x => x !== a),
                           }))
                         }}
                       />
-                      <Span className="text-sm">{p === 'all' ? t.formProvidersAll : p}</Span>
+                      <Span className="text-sm">{a === '*' ? t.formAppsAll : a}</Span>
                     </Div>
                   )
                 })}
               </Div>
             </Div>
+          )}
 
-            {/* Per-app provider assignment (with priority) */}
-            {appProviders.length > 0 && (
-              <Div className="space-y-2 pt-2 border-t">
-                <Label>{t.promptProviders}</Label>
-                <Div className="space-y-2">
-                  {appProviders
-                    .filter(
-                      ap =>
-                        form.providers.includes('all') || form.providers.includes(ap.providerType)
-                    )
-                    .map(ap => {
-                      const entry = form.providerAssignments.find(
-                        pp => pp.providerId === ap.providerId
-                      )
-                      const isSelected = entry?.selected ?? false
-                      return (
-                        <Div key={ap._id} className="flex items-center gap-3 p-2 rounded-md border">
-                          <Switch
-                            checked={isSelected}
-                            onCheckedChange={checked => {
-                              setForm(f => {
-                                const existing = f.providerAssignments.find(
-                                  pp => pp.providerId === ap.providerId
-                                )
-                                if (existing) {
-                                  return {
-                                    ...f,
-                                    providerAssignments: f.providerAssignments.map(pp =>
-                                      pp.providerId === ap.providerId
-                                        ? { ...pp, selected: checked }
-                                        : pp
-                                    ),
-                                  }
-                                }
-                                return {
-                                  ...f,
-                                  providerAssignments: [
-                                    ...f.providerAssignments,
-                                    { providerId: ap.providerId, priority: 1, selected: checked },
-                                  ],
-                                }
-                              })
-                            }}
-                          />
-                          <Div className="flex-1">
-                            <Span className="text-sm font-mono">{ap.providerId}</Span>
-                            <Badge variant="outline" size="sm" className="ml-2">
-                              {ap.providerType}
-                            </Badge>
-                            {!ap.enabled && (
-                              <Badge variant="secondary" size="sm" className="ml-1">
-                                {t.inactive}
-                              </Badge>
-                            )}
-                          </Div>
-                          {isSelected && (
-                            <Div className="flex items-center gap-1">
-                              <Label className="text-xs">{t.priorityLabel}</Label>
-                              <Input
-                                type="number"
-                                min={1}
-                                max={99}
-                                className="w-16 h-7 text-xs"
-                                value={entry?.priority ?? 1}
-                                onChange={e =>
-                                  setForm(f => ({
-                                    ...f,
-                                    providerAssignments: f.providerAssignments.map(pp =>
-                                      pp.providerId === ap.providerId
-                                        ? { ...pp, priority: Number(e.target.value) || 1 }
-                                        : pp
-                                    ),
-                                  }))
-                                }
-                              />
-                            </Div>
-                          )}
-                        </Div>
-                      )
-                    })}
-                  {appProviders.filter(
-                    ap => form.providers.includes('all') || form.providers.includes(ap.providerType)
-                  ).length === 0 && <P className="text-sm text-muted-foreground">{t.noData}</P>}
-                </Div>
-              </Div>
-            )}
-            <Div className="flex items-center gap-6">
-              <Div className="flex items-center gap-2">
-                <Switch
-                  checked={form.isActive}
-                  onCheckedChange={v => setForm(f => ({ ...f, isActive: v }))}
-                />
-                <Label>{t.active}</Label>
-              </Div>
-              <Div className="flex items-center gap-2">
-                <Switch
-                  checked={form.isDefault}
-                  onCheckedChange={v => setForm(f => ({ ...f, isDefault: v }))}
-                />
-                <Label>{t.defaultLabel}</Label>
-              </Div>
+          {/* Providers (target list) multi-select */}
+          <Div className="space-y-2 pt-2 border-t">
+            <Label>{t.formProvidersLabel}</Label>
+            <Div className="flex flex-wrap gap-2">
+              {KNOWN_PROVIDER_TARGETS.map(p => {
+                const checked = form.providers.includes(p)
+                return (
+                  <Div
+                    key={p}
+                    className="flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/30"
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={c => {
+                        setForm(f => ({
+                          ...f,
+                          providers:
+                            c === true
+                              ? [...f.providers.filter(x => x !== p), p]
+                              : f.providers.filter(x => x !== p),
+                        }))
+                      }}
+                    />
+                    <Span className="text-sm">{p === 'all' ? t.formProvidersAll : p}</Span>
+                  </Div>
+                )
+              })}
             </Div>
           </Div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              {t.cancel}
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? t.loading : t.save}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t.deletePrompt}</DialogTitle>
-          </DialogHeader>
-          <P className="py-4 text-muted-foreground">{t.deleteConfirm}</P>
-          <DialogFooter>
+          {/* Per-app provider assignment (with priority) */}
+          {appProviders.length > 0 && (
+            <Div className="space-y-2 pt-2 border-t">
+              <Label>{t.promptProviders}</Label>
+              <Div className="space-y-2">
+                {appProviders
+                  .filter(
+                    ap => form.providers.includes('all') || form.providers.includes(ap.providerType)
+                  )
+                  .map(ap => {
+                    const entry = form.providerAssignments.find(
+                      pp => pp.providerId === ap.providerId
+                    )
+                    const isSelected = entry?.selected ?? false
+                    return (
+                      <Div key={ap._id} className="flex items-center gap-3 p-2 rounded-md border">
+                        <Switch
+                          checked={isSelected}
+                          onCheckedChange={checked => {
+                            setForm(f => {
+                              const existing = f.providerAssignments.find(
+                                pp => pp.providerId === ap.providerId
+                              )
+                              if (existing) {
+                                return {
+                                  ...f,
+                                  providerAssignments: f.providerAssignments.map(pp =>
+                                    pp.providerId === ap.providerId
+                                      ? { ...pp, selected: checked }
+                                      : pp
+                                  ),
+                                }
+                              }
+                              return {
+                                ...f,
+                                providerAssignments: [
+                                  ...f.providerAssignments,
+                                  { providerId: ap.providerId, priority: 1, selected: checked },
+                                ],
+                              }
+                            })
+                          }}
+                        />
+                        <Div className="flex-1">
+                          <Span className="text-sm font-mono">{ap.providerId}</Span>
+                          <Badge variant="outline" size="sm" className="ml-2">
+                            {ap.providerType}
+                          </Badge>
+                          {!ap.enabled && (
+                            <Badge variant="secondary" size="sm" className="ml-1">
+                              {t.inactive}
+                            </Badge>
+                          )}
+                        </Div>
+                        {isSelected && (
+                          <Div className="flex items-center gap-1">
+                            <Label className="text-xs">{t.priorityLabel}</Label>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={99}
+                              className="w-16 h-7 text-xs"
+                              value={entry?.priority ?? 1}
+                              onChange={e =>
+                                setForm(f => ({
+                                  ...f,
+                                  providerAssignments: f.providerAssignments.map(pp =>
+                                    pp.providerId === ap.providerId
+                                      ? { ...pp, priority: Number(e.target.value) || 1 }
+                                      : pp
+                                  ),
+                                }))
+                              }
+                            />
+                          </Div>
+                        )}
+                      </Div>
+                    )
+                  })}
+                {appProviders.filter(
+                  ap => form.providers.includes('all') || form.providers.includes(ap.providerType)
+                ).length === 0 && <P className="text-sm text-muted-foreground">{t.noData}</P>}
+              </Div>
+            </Div>
+          )}
+          <Div className="flex items-center gap-6">
+            <Div className="flex items-center gap-2">
+              <Switch
+                checked={form.isActive}
+                onCheckedChange={v => setForm(f => ({ ...f, isActive: v }))}
+              />
+              <Label>{t.active}</Label>
+            </Div>
+            <Div className="flex items-center gap-2">
+              <Switch
+                checked={form.isDefault}
+                onCheckedChange={v => setForm(f => ({ ...f, isDefault: v }))}
+              />
+              <Label>{t.defaultLabel}</Label>
+            </Div>
+          </Div>
+        </Div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        title={t.deletePrompt}
+        footer={
+          <>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               {t.cancel}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
               {t.confirm}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </>
+        }
+      >
+        <P className="py-4 text-muted-foreground">{t.deleteConfirm}</P>
+      </Modal>
     </Div>
   )
 }
@@ -1371,132 +1369,135 @@ function ProvidersTab({ client, t }: { client: AIClient; t: Required<AIAdminDash
         )}
       </Div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingProvider ? t.editProvider : t.addProvider}</DialogTitle>
-          </DialogHeader>
-          <Div className="space-y-4 py-4">
-            {!editingProvider && (
-              <>
-                <Div className="space-y-2">
-                  <Label>{t.providerIdLabel}</Label>
-                  <Input
-                    value={form.providerId}
-                    onChange={e => setForm(f => ({ ...f, providerId: e.target.value }))}
-                    placeholder="gemini-flash"
-                  />
-                </Div>
-                <Div className="space-y-2">
-                  <Label>{t.providerTypeLabel}</Label>
-                  <Select
-                    value={form.providerType}
-                    onValueChange={v =>
-                      setForm(f => ({
-                        ...f,
-                        providerType: v as 'gemini' | 'openai' | 'anthropic',
-                      }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PROVIDER_TYPE_OPTIONS.map(pt => (
-                        <SelectItem key={pt} value={pt}>
-                          {pt}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Div>
-              </>
-            )}
-            <Div className="grid grid-cols-2 gap-4">
-              <Div className="space-y-2">
-                <Label>{t.priorityLabel}</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={99}
-                  value={form.priority}
-                  onChange={e => setForm(f => ({ ...f, priority: Number(e.target.value) || 1 }))}
-                />
-              </Div>
-              <Div className="flex items-end gap-2 pb-1">
-                <Switch
-                  checked={form.enabled}
-                  onCheckedChange={v => setForm(f => ({ ...f, enabled: v }))}
-                />
-                <Label>{form.enabled ? t.toggleEnabled : t.toggleDisabled}</Label>
-              </Div>
-            </Div>
-            <Div className="space-y-3 pt-2 border-t">
-              <P className="text-sm font-medium">{t.configLabel}</P>
-              <Div className="space-y-2">
-                <Label>{t.modelOverride}</Label>
-                <Input
-                  value={form.configModel}
-                  onChange={e => setForm(f => ({ ...f, configModel: e.target.value }))}
-                  placeholder="gemini-2.0-flash"
-                />
-              </Div>
-              <Div className="grid grid-cols-2 gap-4">
-                <Div className="space-y-2">
-                  <Label>
-                    {t.temperatureLabel}: {form.configTemperature.toFixed(1)}
-                  </Label>
-                  <Input
-                    type="range"
-                    min={0}
-                    max={2}
-                    step={0.1}
-                    value={form.configTemperature}
-                    onChange={e =>
-                      setForm(f => ({ ...f, configTemperature: Number(e.target.value) }))
-                    }
-                  />
-                </Div>
-                <Div className="space-y-2">
-                  <Label>{t.maxTokensLabel}</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={form.configMaxTokens}
-                    onChange={e => setForm(f => ({ ...f, configMaxTokens: e.target.value }))}
-                    placeholder="8192"
-                  />
-                </Div>
-              </Div>
-            </Div>
-          </Div>
-          <DialogFooter>
+      <Modal
+        isOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        size="lg"
+        title={editingProvider ? t.editProvider : t.addProvider}
+        footer={
+          <>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               {t.cancel}
             </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? t.loading : t.save}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </>
+        }
+      >
+        <Div className="space-y-4 py-4">
+          {!editingProvider && (
+            <>
+              <Div className="space-y-2">
+                <Label>{t.providerIdLabel}</Label>
+                <Input
+                  value={form.providerId}
+                  onChange={e => setForm(f => ({ ...f, providerId: e.target.value }))}
+                  placeholder="gemini-flash"
+                />
+              </Div>
+              <Div className="space-y-2">
+                <Label>{t.providerTypeLabel}</Label>
+                <Select
+                  value={form.providerType}
+                  onValueChange={v =>
+                    setForm(f => ({
+                      ...f,
+                      providerType: v as 'gemini' | 'openai' | 'anthropic',
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROVIDER_TYPE_OPTIONS.map(pt => (
+                      <SelectItem key={pt} value={pt}>
+                        {pt}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Div>
+            </>
+          )}
+          <Div className="grid grid-cols-2 gap-4">
+            <Div className="space-y-2">
+              <Label>{t.priorityLabel}</Label>
+              <Input
+                type="number"
+                min={1}
+                max={99}
+                value={form.priority}
+                onChange={e => setForm(f => ({ ...f, priority: Number(e.target.value) || 1 }))}
+              />
+            </Div>
+            <Div className="flex items-end gap-2 pb-1">
+              <Switch
+                checked={form.enabled}
+                onCheckedChange={v => setForm(f => ({ ...f, enabled: v }))}
+              />
+              <Label>{form.enabled ? t.toggleEnabled : t.toggleDisabled}</Label>
+            </Div>
+          </Div>
+          <Div className="space-y-3 pt-2 border-t">
+            <P className="text-sm font-medium">{t.configLabel}</P>
+            <Div className="space-y-2">
+              <Label>{t.modelOverride}</Label>
+              <Input
+                value={form.configModel}
+                onChange={e => setForm(f => ({ ...f, configModel: e.target.value }))}
+                placeholder="gemini-2.0-flash"
+              />
+            </Div>
+            <Div className="grid grid-cols-2 gap-4">
+              <Div className="space-y-2">
+                <Label>
+                  {t.temperatureLabel}: {form.configTemperature.toFixed(1)}
+                </Label>
+                <Input
+                  type="range"
+                  min={0}
+                  max={2}
+                  step={0.1}
+                  value={form.configTemperature}
+                  onChange={e =>
+                    setForm(f => ({ ...f, configTemperature: Number(e.target.value) }))
+                  }
+                />
+              </Div>
+              <Div className="space-y-2">
+                <Label>{t.maxTokensLabel}</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={form.configMaxTokens}
+                  onChange={e => setForm(f => ({ ...f, configMaxTokens: e.target.value }))}
+                  placeholder="8192"
+                />
+              </Div>
+            </Div>
+          </Div>
+        </Div>
+      </Modal>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t.deleteProvider}</DialogTitle>
-          </DialogHeader>
-          <P className="py-4 text-muted-foreground">{t.deleteProviderConfirm}</P>
-          <DialogFooter>
+      <Modal
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        title={t.deleteProvider}
+        footer={
+          <>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               {t.cancel}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
               {t.confirm}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </>
+        }
+      >
+        <P className="py-4 text-muted-foreground">{t.deleteProviderConfirm}</P>
+      </Modal>
     </Div>
   )
 }

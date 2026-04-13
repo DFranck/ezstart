@@ -85,7 +85,129 @@ className = 'text-destructive bg-destructive/10'
 <H2 size="h3" />                // Rendu h2 avec style h3
 ```
 
-### 4. i18n — TOUT texte user-facing traduit
+### 4. Modal > Dialog — TOUJOURS utiliser `<Modal>`
+
+❌ **INTERDIT** — `<Dialog>` direct hors `packages/ui/` :
+
+```tsx
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@ezstart/ui/components'
+
+;<Dialog open={isOpen} onOpenChange={setOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>...</DialogTitle>
+    </DialogHeader>
+    {body}
+    <DialogFooter>{actions}</DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+✅ **OBLIGATOIRE** — `<Modal>` qui abstrait Dialog avec max-h, sticky header/footer, scroll, size variants :
+
+```tsx
+import { Modal } from '@ezstart/ui/components'
+
+;<Modal
+  isOpen={isOpen}
+  onClose={() => setOpen(false)}
+  size="xl" // 'sm' | 'default' | 'lg' | 'xl' | 'full'
+  title="Edit Prompt"
+  description="Optional subtitle"
+  footer={
+    <>
+      <Button>Cancel</Button>
+      <Button>Save</Button>
+    </>
+  }
+  scrollBehavior="inside" // 'inside' (body scroll) | 'outside' (page scroll)
+>
+  {body}
+</Modal>
+```
+
+**Pourquoi** :
+
+- Modal gère automatiquement `max-h-[90dvh]`, sticky header/footer, body scrollable
+- Évite les bugs de débordement viewport (form long sans scroll)
+- API React-friendly (`isOpen`/`onClose` au lieu de `open`/`onOpenChange`)
+- Cohérence UX entre toutes les modals du monorepo
+
+**Mapping `max-w-*` → `size`** :
+| Tailwind | Modal size |
+| -------- | ---------- |
+| `max-w-md` | `'sm'` |
+| `max-w-lg` | `'default'` |
+| `max-w-xl` | `'lg'` |
+| `max-w-2xl` | `'xl'` |
+| `max-w-4xl`+ | `'full'` |
+
+**Exceptions légitimes** : usage interne dans `packages/ui/` (ex: `welcome-modal.tsx`, `command.tsx`, `alert-dialog.tsx`). Lint pre-commit bloque les imports `Dialog*` direct hors UI kit.
+
+### 5. Badge > custom span/div badge
+
+❌ **INTERDIT** — `<span>`/`<div>`/`<Span>`/`<Div>` avec classes badge-like :
+
+```tsx
+<span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs">
+  {label}
+</span>
+<Span className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">
+  {tag}
+</Span>
+```
+
+✅ **OBLIGATOIRE** — `<Badge>` from `@ezstart/ui/components` :
+
+```tsx
+import { Badge } from '@ezstart/ui/components'
+
+<Badge variant="default">{label}</Badge>
+<Badge variant="outline" size="xs" className="text-muted-foreground">{tag}</Badge>
+```
+
+**Variants disponibles** : `default`, `secondary`, `primary`, `destructive`, `outline`, `success`, `warning`, `info`, `purple`, `cyan`, `indigo`, `pink`.
+**Sizes** : `xs`, `sm`, `default`, `lg`, `xl` + variantes `circle` (`circleSize: sm|md|lg|xl`).
+**Extras** : prop `dot` pour indicateur, prop `pulse` pour animation real-time.
+
+**Exceptions légitimes** : couleurs custom non-prévues par les variants → utiliser `<Badge>` + `style`/`className` override pour la couleur uniquement, sans réinventer le pill.
+
+Lint pre-commit (rule #8) bloque les patterns `inline-flex + rounded-(full|md|sm) + px-*` ou `rounded-full + px-* + text-(xs|sm|[10/11/12]px)` hors UI kit.
+
+### 6. Button > custom inline link/button
+
+❌ **INTERDIT** — `<a>`, `<button>` natif ou tag custom avec styles button :
+
+```tsx
+<a href={url} className="inline-flex rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90">
+  {label}
+</a>
+<button className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+  {label}
+</button>
+```
+
+✅ **OBLIGATOIRE** — `<Button>` (avec `asChild` pour wrapper un Link/a) :
+
+```tsx
+import { Button } from '@ezstart/ui/components'
+
+<Button variant="default" className="w-full gap-2">{label}</Button>
+
+<Button asChild variant="default">
+  <Link href={url}>{label}</Link>
+</Button>
+```
+
+Lint pre-commit (rule #9) bloque les patterns `inline-flex + rounded-(md|lg|full) + px-* py-* + bg-(primary|secondary|destructive)` hors UI kit.
+
+### 7. i18n — TOUT texte user-facing traduit
 
 **TOUTE string visible par l'utilisateur DOIT passer par `next-intl`.**
 

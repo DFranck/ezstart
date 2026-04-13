@@ -5,6 +5,7 @@
 import type { Direction } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import {
+  Badge,
   Div,
   H3,
   H4,
@@ -115,16 +116,18 @@ export default function BaguaSectorCard({
         <Div className="min-w-0">
           <Div className="flex items-center gap-2">
             <H3 className="text-sm font-bold text-foreground truncate">{s.title}</H3>
-            <Span
-              className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold"
+            <Badge
+              variant="outline"
+              size="xs"
+              className="rounded-md"
               style={{
                 color: accent,
                 backgroundColor: `${accent}14`,
-                border: `1px solid ${accent}2A`,
+                borderColor: `${accent}2A`,
               }}
             >
               {s.element}
-            </Span>
+            </Badge>
           </Div>
           {s.summary && <P className="mt-1 text-xs text-muted-foreground">{s.summary}</P>}
         </Div>
@@ -136,13 +139,15 @@ export default function BaguaSectorCard({
         {has.keywords && (
           <Div className="mt-2 flex flex-wrap gap-1.5">
             {s.keywords!.map(k => (
-              <Span
+              <Badge
                 key={k}
-                className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground"
+                variant="outline"
+                size="xs"
+                className="text-muted-foreground"
                 style={{ borderColor: `${accent}26`, backgroundColor: `${accent}0D` }}
               >
                 {k}
-              </Span>
+              </Badge>
             ))}
           </Div>
         )}
@@ -230,14 +235,16 @@ function ListFlat(props: { title: string; items: string[]; icon: string; color: 
       <H4 className="mb-1 text-[11px] font-semibold text-foreground">{title}</H4>
       <Div className="flex flex-wrap gap-1.5">
         {items.map(it => (
-          <Span
+          <Badge
             key={it}
-            className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] text-foreground"
+            variant="outline"
+            size="xs"
+            className="gap-1 rounded-md text-foreground"
             style={{ borderColor: `${color}26`, backgroundColor: 'hsl(var(--background))' }}
           >
             <Icon name={icon as KnownIconName} className="h-3 w-3" style={{ color }} aria-hidden />
             {it}
-          </Span>
+          </Badge>
         ))}
       </Div>
     </Section>

@@ -8,23 +8,19 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
   Div,
   H3,
   Icon,
   Input,
   Label,
+  Modal,
   P,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  TextArea,
+  Textarea,
   Switch,
   Tabs,
   TabsContent,
@@ -386,148 +382,13 @@ export function PromptsManagement() {
       </Card>
 
       {/* Edit/Create Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingPrompt ? t('editPrompt') : t('createPrompt')}</DialogTitle>
-          </DialogHeader>
-
-          <Tabs defaultValue="prompt" className="py-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="prompt">
-                <Icon name="lucide:MessageSquare" className="mr-2" size={16} />
-                {t('promptContent')}
-              </TabsTrigger>
-              <TabsTrigger value="config">
-                <Icon name="lucide:Settings" className="mr-2" size={16} />
-                {t('configuration')}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="prompt" className="space-y-4">
-              <Div className="grid grid-cols-2 gap-4">
-                <Div>
-                  <Label htmlFor="key">{t('key')}</Label>
-                  <Input
-                    id="key"
-                    value={formData.key}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        key: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''),
-                      })
-                    }
-                    placeholder="e.g., general-esg-advisor"
-                    disabled={!!editingPrompt}
-                  />
-                </Div>
-                <Div>
-                  <Label htmlFor="name">{t('name')}</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., ESG Advisor"
-                  />
-                </Div>
-              </Div>
-
-              <Div>
-                <Label htmlFor="description">{t('description_label')}</Label>
-                <Input
-                  id="description"
-                  value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Brief description of this prompt"
-                />
-              </Div>
-
-              <Div className="grid grid-cols-2 gap-4">
-                <Div>
-                  <Label htmlFor="type">{t('type')}</Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value: SystemPrompt['type']) =>
-                      setFormData({ ...formData, type: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ALL_PROMPT_TYPES.map(t => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {t.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Div>
-                <Div>
-                  <Label htmlFor="provider">{t('provider')}</Label>
-                  <Select
-                    value={formData.provider}
-                    onValueChange={(value: SystemPrompt['provider']) =>
-                      setFormData({ ...formData, provider: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PROVIDERS.map(p => (
-                        <SelectItem key={p.value} value={p.value}>
-                          {p.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Div>
-              </Div>
-
-              <Div>
-                <Label htmlFor="content">{t('content')}</Label>
-                <TextArea
-                  id="content"
-                  value={formData.content}
-                  onChange={e => setFormData({ ...formData, content: e.target.value })}
-                  placeholder={t('contentPlaceholder')}
-                  className="min-h-[200px] font-mono text-sm"
-                />
-                <P className="text-xs text-muted-foreground mt-1">
-                  {t('characters', { count: formData.content.length })}
-                </P>
-              </Div>
-
-              <Div className="flex items-center gap-6">
-                <Div className="flex items-center gap-2">
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={checked => setFormData({ ...formData, isActive: checked })}
-                  />
-                  <Label htmlFor="isActive">{t('active')}</Label>
-                </Div>
-                <Div className="flex items-center gap-2">
-                  <Switch
-                    id="isDefault"
-                    checked={formData.isDefault}
-                    onCheckedChange={checked => setFormData({ ...formData, isDefault: checked })}
-                  />
-                  <Label htmlFor="isDefault">{t('setDefault')}</Label>
-                </Div>
-              </Div>
-            </TabsContent>
-
-            <TabsContent value="config">
-              <PromptConfigEditor
-                config={formData.config}
-                onChange={config => setFormData({ ...formData, config })}
-              />
-            </TabsContent>
-          </Tabs>
-
-          <DialogFooter>
+      <Modal
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        size="xl"
+        title={editingPrompt ? t('editPrompt') : t('createPrompt')}
+        footer={
+          <>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               {t('cancel')}
             </Button>
@@ -537,9 +398,144 @@ export function PromptsManagement() {
             >
               {editingPrompt ? t('update') : t('create')}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </>
+        }
+      >
+        <Tabs defaultValue="prompt" className="py-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="prompt">
+              <Icon name="lucide:MessageSquare" className="mr-2" size={16} />
+              {t('promptContent')}
+            </TabsTrigger>
+            <TabsTrigger value="config">
+              <Icon name="lucide:Settings" className="mr-2" size={16} />
+              {t('configuration')}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="prompt" className="space-y-4">
+            <Div className="grid grid-cols-2 gap-4">
+              <Div>
+                <Label htmlFor="key">{t('key')}</Label>
+                <Input
+                  id="key"
+                  value={formData.key}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      key: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''),
+                    })
+                  }
+                  placeholder="e.g., general-esg-advisor"
+                  disabled={!!editingPrompt}
+                />
+              </Div>
+              <Div>
+                <Label htmlFor="name">{t('name')}</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., ESG Advisor"
+                />
+              </Div>
+            </Div>
+
+            <Div>
+              <Label htmlFor="description">{t('description_label')}</Label>
+              <Input
+                id="description"
+                value={formData.description}
+                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Brief description of this prompt"
+              />
+            </Div>
+
+            <Div className="grid grid-cols-2 gap-4">
+              <Div>
+                <Label htmlFor="type">{t('type')}</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: SystemPrompt['type']) =>
+                    setFormData({ ...formData, type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ALL_PROMPT_TYPES.map(t => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Div>
+              <Div>
+                <Label htmlFor="provider">{t('provider')}</Label>
+                <Select
+                  value={formData.provider}
+                  onValueChange={(value: SystemPrompt['provider']) =>
+                    setFormData({ ...formData, provider: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROVIDERS.map(p => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Div>
+            </Div>
+
+            <Div>
+              <Label htmlFor="content">{t('content')}</Label>
+              <Textarea
+                id="content"
+                value={formData.content}
+                onChange={e => setFormData({ ...formData, content: e.target.value })}
+                placeholder={t('contentPlaceholder')}
+                className="min-h-[200px] font-mono text-sm"
+              />
+              <P className="text-xs text-muted-foreground mt-1">
+                {t('characters', { count: formData.content.length })}
+              </P>
+            </Div>
+
+            <Div className="flex items-center gap-6">
+              <Div className="flex items-center gap-2">
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={checked => setFormData({ ...formData, isActive: checked })}
+                />
+                <Label htmlFor="isActive">{t('active')}</Label>
+              </Div>
+              <Div className="flex items-center gap-2">
+                <Switch
+                  id="isDefault"
+                  checked={formData.isDefault}
+                  onCheckedChange={checked => setFormData({ ...formData, isDefault: checked })}
+                />
+                <Label htmlFor="isDefault">{t('setDefault')}</Label>
+              </Div>
+            </Div>
+          </TabsContent>
+
+          <TabsContent value="config">
+            <PromptConfigEditor
+              config={formData.config}
+              onChange={config => setFormData({ ...formData, config })}
+            />
+          </TabsContent>
+        </Tabs>
+      </Modal>
     </>
   )
 }

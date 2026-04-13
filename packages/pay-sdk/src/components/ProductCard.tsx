@@ -2,14 +2,18 @@
 
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
+  Div,
   Icon,
   P,
+  Span,
 } from '@ezstart/ui/components'
+import Image from 'next/image'
 import { PurchaseButton } from './PurchaseButton.js'
 import { SubscribeButton } from './SubscribeButton.js'
 import { formatCurrency } from '../utils/format-currency.js'
@@ -68,22 +72,23 @@ export function ProductCard({
     >
       {/* Badge */}
       {badgeLabel && (
-        <div className="absolute top-3 right-3 z-10">
+        <Div className="absolute top-3 right-3 z-10">
           <Badge variant="default" size="sm">
             {badgeLabel}
           </Badge>
-        </div>
+        </Div>
       )}
 
       {/* Image */}
       {image && (
-        <div className="relative w-full aspect-video overflow-hidden rounded-t-xl">
-          <img
+        <Div className="relative w-full aspect-video overflow-hidden rounded-t-xl">
+          <Image
             src={image}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
-        </div>
+        </Div>
       )}
 
       {/* Content */}
@@ -104,10 +109,10 @@ export function ProductCard({
         <P size="lg" className="font-bold">
           {formatCurrency(price, currency)}
           {type === 'subscription' && (
-            <span className="text-sm font-normal text-muted-foreground">
+            <Span className="text-sm font-normal text-muted-foreground">
               {' '}
               / {intervalCount === 12 ? 'yr' : intervalCount === 1 ? 'mo' : `${intervalCount}mo`}
-            </span>
+            </Span>
           )}
         </P>
       </CardContent>
@@ -126,14 +131,10 @@ export function ProductCard({
             userEmail={userEmail}
             userName={userName}
             trigger={
-              <button
-                type="button"
-                onClick={onBuy}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
+              <Button type="button" onClick={onBuy} variant="default" className="w-full gap-2">
                 <Icon name="lucide:ShoppingCart" className="w-4 h-4" />
                 {t.buyButton}
-              </button>
+              </Button>
             }
             texts={{ buyButton: t.buyButton }}
           />
@@ -150,14 +151,10 @@ export function ProductCard({
             userEmail={userEmail}
             userName={userName}
             trigger={
-              <button
-                type="button"
-                onClick={onBuy}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
+              <Button type="button" onClick={onBuy} variant="default" className="w-full gap-2">
                 <Icon name="lucide:CreditCard" className="w-4 h-4" />
                 {t.subscribeButton}
-              </button>
+              </Button>
             }
             texts={{ subscribeButton: t.subscribeButton }}
           />

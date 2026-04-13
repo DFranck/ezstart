@@ -11,7 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  TextArea,
+  Textarea,
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
@@ -366,7 +366,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
                   ))}
                 </SelectContent>
               </Select>
-              <TextArea
+              <Textarea
                 value={reportDescription}
                 onChange={e => setReportDescription(e.target.value)}
                 placeholder={t('report.descriptionPlaceholder')}

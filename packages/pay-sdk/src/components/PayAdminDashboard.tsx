@@ -7,16 +7,11 @@ import {
   Card,
   DataTable,
   DataTableColumnHeader,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   Div,
   Icon,
   Input,
   Label,
+  Modal,
   P,
   Select,
   SelectContent,
@@ -1024,172 +1019,13 @@ function CreatePromoDialog({
   ])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t.createPromoTitle}</DialogTitle>
-          <DialogDescription>{t.createPromo}</DialogDescription>
-        </DialogHeader>
-
-        <Div className={`space-y-4`}>
-          {/* Required section */}
-          <Div>
-            <P className={`text-xs text-muted-foreground font-medium mb-3`}>{t.promoRequired}</P>
-            <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
-              {/* Code */}
-              <Div className={`space-y-2`}>
-                <Label>{t.promoCode}</Label>
-                <Input
-                  value={code}
-                  onChange={e => setCode(e.target.value.toUpperCase())}
-                  placeholder="EARTHDAY2026"
-                />
-              </Div>
-
-              {/* App Name — only shown when no appName is provided (superadmin mode) */}
-              {!appName && (
-                <Div className={`space-y-2`}>
-                  <Label>{t.promoAppName}</Label>
-                  <Input
-                    value={promoAppName}
-                    onChange={e => setPromoAppName(e.target.value)}
-                    placeholder="green-pulse"
-                  />
-                </Div>
-              )}
-
-              {/* Discount Type */}
-              <Div className={`space-y-2`}>
-                <Label>{t.promoDiscountType}</Label>
-                <Select
-                  value={discountType}
-                  onValueChange={v => setDiscountType(v as PromoDiscountType)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percent">{t.promoDiscountPercent}</SelectItem>
-                    <SelectItem value="fixed">{t.promoDiscountFixed}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <P className={`text-xs text-muted-foreground mt-1`}>
-                  {discountType === 'percent'
-                    ? t.promoDiscountTypeHintPercent
-                    : t.promoDiscountTypeHintFixed}
-                </P>
-              </Div>
-
-              {/* Discount Value */}
-              <Div className={`space-y-2`}>
-                <Label>{t.promoDiscountValue}</Label>
-                <Div className={`relative`}>
-                  <Input
-                    type="number"
-                    value={discountValue}
-                    onChange={e => setDiscountValue(e.target.value)}
-                    placeholder={discountType === 'percent' ? '20' : '5.00'}
-                    className={discountType === 'percent' ? 'pr-8' : 'pr-12'}
-                  />
-                  <Span
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none`}
-                  >
-                    {discountType === 'percent' ? '%' : currency}
-                  </Span>
-                </Div>
-                <P className={`text-xs text-muted-foreground mt-1`}>
-                  {discountType === 'percent'
-                    ? t.promoDiscountValueHintPercent
-                    : t.promoDiscountValueHintFixed}
-                </P>
-              </Div>
-
-              {/* Duration */}
-              <Div className={`space-y-2`}>
-                <Label>{t.promoDuration}</Label>
-                <Select value={duration} onValueChange={v => setDuration(v as PromoDuration)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="once">{t.promoDurationOnce}</SelectItem>
-                    <SelectItem value="repeating">{t.promoDurationRepeating}</SelectItem>
-                    <SelectItem value="forever">{t.promoDurationForever}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <P className={`text-xs text-muted-foreground mt-1`}>
-                  {duration === 'once'
-                    ? t.promoDurationHintOnce
-                    : duration === 'repeating'
-                      ? t.promoDurationHintRepeating
-                      : t.promoDurationHintForever}
-                </P>
-              </Div>
-
-              {/* Duration in months (only for repeating — becomes required) */}
-              {duration === 'repeating' && (
-                <Div className={`space-y-2`}>
-                  <Label>{t.promoDurationInMonths}</Label>
-                  <Input
-                    type="number"
-                    value={durationInMonths}
-                    onChange={e => setDurationInMonths(e.target.value)}
-                    placeholder="3"
-                    min={1}
-                  />
-                </Div>
-              )}
-
-              {/* Currency (only for fixed — becomes required) */}
-              {discountType === 'fixed' && (
-                <Div className={`space-y-2`}>
-                  <Label>{t.promoCurrency}</Label>
-                  <Input
-                    value={currency}
-                    onChange={e => setCurrency(e.target.value.toUpperCase())}
-                    placeholder="EUR"
-                  />
-                </Div>
-              )}
-            </Div>
-          </Div>
-
-          {/* Optional section */}
-          <Div className={`border-t border-border pt-4`}>
-            <P className={`text-xs text-muted-foreground font-medium mb-3`}>
-              {t.promoOptionalSection}
-            </P>
-            <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
-              {/* Max uses */}
-              <Div className={`space-y-2`}>
-                <Label>{t.promoMaxUses}</Label>
-                <Input
-                  type="number"
-                  value={maxUses}
-                  onChange={e => setMaxUses(e.target.value)}
-                  placeholder={t.promoUnlimitedHint}
-                  min={1}
-                />
-                <P className={`text-xs text-muted-foreground mt-1`}>{t.promoMaxUsesHint}</P>
-              </Div>
-
-              {/* Expiry date */}
-              <Div className={`space-y-2`}>
-                <Label>{t.promoExpiryDate}</Label>
-                <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} />
-              </Div>
-            </Div>
-          </Div>
-
-          {/* Error — full width */}
-          {error && (
-            <Div>
-              <P className={`text-sm text-destructive`}>{error}</P>
-            </Div>
-          )}
-        </Div>
-
-        <DialogFooter>
+    <Modal
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      title={t.createPromoTitle}
+      description={t.createPromo}
+      footer={
+        <>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t.cancel}
           </Button>
@@ -1200,9 +1036,167 @@ function CreatePromoDialog({
             {saving && <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin mr-2`} />}
             {t.create}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    >
+      <Div className={`space-y-4`}>
+        {/* Required section */}
+        <Div>
+          <P className={`text-xs text-muted-foreground font-medium mb-3`}>{t.promoRequired}</P>
+          <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
+            {/* Code */}
+            <Div className={`space-y-2`}>
+              <Label>{t.promoCode}</Label>
+              <Input
+                value={code}
+                onChange={e => setCode(e.target.value.toUpperCase())}
+                placeholder="EARTHDAY2026"
+              />
+            </Div>
+
+            {/* App Name — only shown when no appName is provided (superadmin mode) */}
+            {!appName && (
+              <Div className={`space-y-2`}>
+                <Label>{t.promoAppName}</Label>
+                <Input
+                  value={promoAppName}
+                  onChange={e => setPromoAppName(e.target.value)}
+                  placeholder="green-pulse"
+                />
+              </Div>
+            )}
+
+            {/* Discount Type */}
+            <Div className={`space-y-2`}>
+              <Label>{t.promoDiscountType}</Label>
+              <Select
+                value={discountType}
+                onValueChange={v => setDiscountType(v as PromoDiscountType)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percent">{t.promoDiscountPercent}</SelectItem>
+                  <SelectItem value="fixed">{t.promoDiscountFixed}</SelectItem>
+                </SelectContent>
+              </Select>
+              <P className={`text-xs text-muted-foreground mt-1`}>
+                {discountType === 'percent'
+                  ? t.promoDiscountTypeHintPercent
+                  : t.promoDiscountTypeHintFixed}
+              </P>
+            </Div>
+
+            {/* Discount Value */}
+            <Div className={`space-y-2`}>
+              <Label>{t.promoDiscountValue}</Label>
+              <Div className={`relative`}>
+                <Input
+                  type="number"
+                  value={discountValue}
+                  onChange={e => setDiscountValue(e.target.value)}
+                  placeholder={discountType === 'percent' ? '20' : '5.00'}
+                  className={discountType === 'percent' ? 'pr-8' : 'pr-12'}
+                />
+                <Span
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none`}
+                >
+                  {discountType === 'percent' ? '%' : currency}
+                </Span>
+              </Div>
+              <P className={`text-xs text-muted-foreground mt-1`}>
+                {discountType === 'percent'
+                  ? t.promoDiscountValueHintPercent
+                  : t.promoDiscountValueHintFixed}
+              </P>
+            </Div>
+
+            {/* Duration */}
+            <Div className={`space-y-2`}>
+              <Label>{t.promoDuration}</Label>
+              <Select value={duration} onValueChange={v => setDuration(v as PromoDuration)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="once">{t.promoDurationOnce}</SelectItem>
+                  <SelectItem value="repeating">{t.promoDurationRepeating}</SelectItem>
+                  <SelectItem value="forever">{t.promoDurationForever}</SelectItem>
+                </SelectContent>
+              </Select>
+              <P className={`text-xs text-muted-foreground mt-1`}>
+                {duration === 'once'
+                  ? t.promoDurationHintOnce
+                  : duration === 'repeating'
+                    ? t.promoDurationHintRepeating
+                    : t.promoDurationHintForever}
+              </P>
+            </Div>
+
+            {/* Duration in months (only for repeating — becomes required) */}
+            {duration === 'repeating' && (
+              <Div className={`space-y-2`}>
+                <Label>{t.promoDurationInMonths}</Label>
+                <Input
+                  type="number"
+                  value={durationInMonths}
+                  onChange={e => setDurationInMonths(e.target.value)}
+                  placeholder="3"
+                  min={1}
+                />
+              </Div>
+            )}
+
+            {/* Currency (only for fixed — becomes required) */}
+            {discountType === 'fixed' && (
+              <Div className={`space-y-2`}>
+                <Label>{t.promoCurrency}</Label>
+                <Input
+                  value={currency}
+                  onChange={e => setCurrency(e.target.value.toUpperCase())}
+                  placeholder="EUR"
+                />
+              </Div>
+            )}
+          </Div>
+        </Div>
+
+        {/* Optional section */}
+        <Div className={`border-t border-border pt-4`}>
+          <P className={`text-xs text-muted-foreground font-medium mb-3`}>
+            {t.promoOptionalSection}
+          </P>
+          <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
+            {/* Max uses */}
+            <Div className={`space-y-2`}>
+              <Label>{t.promoMaxUses}</Label>
+              <Input
+                type="number"
+                value={maxUses}
+                onChange={e => setMaxUses(e.target.value)}
+                placeholder={t.promoUnlimitedHint}
+                min={1}
+              />
+              <P className={`text-xs text-muted-foreground mt-1`}>{t.promoMaxUsesHint}</P>
+            </Div>
+
+            {/* Expiry date */}
+            <Div className={`space-y-2`}>
+              <Label>{t.promoExpiryDate}</Label>
+              <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} />
+            </Div>
+          </Div>
+        </Div>
+
+        {/* Error — full width */}
+        {error && (
+          <Div>
+            <P className={`text-sm text-destructive`}>{error}</P>
+          </Div>
+        )}
+      </Div>
+    </Modal>
   )
 }
 
@@ -1300,146 +1294,13 @@ function CreatePlanDialog({
   ])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t.createPlanTitle}</DialogTitle>
-          <DialogDescription>{t.createPlan}</DialogDescription>
-        </DialogHeader>
-
-        <Div className={`space-y-4`}>
-          {/* Required section */}
-          <Div>
-            <P className={`text-xs text-muted-foreground font-medium mb-3`}>{t.promoRequired}</P>
-            <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
-              {/* Name */}
-              <Div className={`space-y-2`}>
-                <Label>{t.planName}</Label>
-                <Input value={name} onChange={e => setName(e.target.value)} placeholder="Pro" />
-              </Div>
-
-              {/* App Name — only shown when no appName is provided (superadmin mode) */}
-              {!appName && (
-                <Div className={`space-y-2`}>
-                  <Label>{t.promoAppName}</Label>
-                  <Input
-                    value={planAppName}
-                    onChange={e => setPlanAppName(e.target.value)}
-                    placeholder="green-pulse"
-                  />
-                </Div>
-              )}
-
-              {/* Amount */}
-              <Div className={`space-y-2`}>
-                <Label>{t.planAmount}</Label>
-                <Input
-                  type="number"
-                  value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  placeholder="999"
-                  min={0}
-                />
-                <P className={`text-xs text-muted-foreground mt-1`}>{t.planAmountHint}</P>
-              </Div>
-
-              {/* Currency */}
-              <Div className={`space-y-2`}>
-                <Label>{t.planCurrency}</Label>
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="GBP">GBP</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Div>
-
-              {/* Interval */}
-              <Div className={`space-y-2`}>
-                <Label>{t.planInterval}</Label>
-                <Select value={interval} onValueChange={v => setInterval(v as 'month' | 'year')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="month">{t.planIntervalMonth}</SelectItem>
-                    <SelectItem value="year">{t.planIntervalYear}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Div>
-
-              {/* Interval Count */}
-              <Div className={`space-y-2`}>
-                <Label>{t.planIntervalCount}</Label>
-                <Input
-                  type="number"
-                  value={intervalCount}
-                  onChange={e => setIntervalCount(e.target.value)}
-                  placeholder="1"
-                  min={1}
-                  max={12}
-                />
-                <P className={`text-xs text-muted-foreground mt-1`}>{t.planIntervalCountHint}</P>
-              </Div>
-            </Div>
-          </Div>
-
-          {/* Optional section */}
-          <Div className={`border-t border-border pt-4`}>
-            <P className={`text-xs text-muted-foreground font-medium mb-3`}>
-              {t.promoOptionalSection}
-            </P>
-            <Div className={`grid grid-cols-1 gap-4`}>
-              {/* Description */}
-              <Div className={`space-y-2`}>
-                <Label>{t.planDescription}</Label>
-                <Input
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  placeholder="Access to all features"
-                />
-              </Div>
-
-              <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
-                {/* Features */}
-                <Div className={`space-y-2`}>
-                  <Label>{t.planFeatures}</Label>
-                  <Input
-                    value={features}
-                    onChange={e => setFeatures(e.target.value)}
-                    placeholder="Feature 1, Feature 2, Feature 3"
-                  />
-                  <P className={`text-xs text-muted-foreground mt-1`}>{t.planFeaturesHint}</P>
-                </Div>
-
-                {/* Sort Order */}
-                <Div className={`space-y-2`}>
-                  <Label>{t.planSortOrder}</Label>
-                  <Input
-                    type="number"
-                    value={sortOrder}
-                    onChange={e => setSortOrder(e.target.value)}
-                    placeholder="0"
-                    min={0}
-                  />
-                </Div>
-              </Div>
-            </Div>
-          </Div>
-
-          {/* Error — full width */}
-          {error && (
-            <Div>
-              <P className={`text-sm text-destructive`}>{error}</P>
-            </Div>
-          )}
-        </Div>
-
-        <DialogFooter>
+    <Modal
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      title={t.createPlanTitle}
+      description={t.createPlan}
+      footer={
+        <>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t.cancel}
           </Button>
@@ -1450,9 +1311,141 @@ function CreatePlanDialog({
             {saving && <Icon name="lucide:Loader2" className={`w-4 h-4 animate-spin mr-2`} />}
             {t.create}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    >
+      <Div className={`space-y-4`}>
+        {/* Required section */}
+        <Div>
+          <P className={`text-xs text-muted-foreground font-medium mb-3`}>{t.promoRequired}</P>
+          <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
+            {/* Name */}
+            <Div className={`space-y-2`}>
+              <Label>{t.planName}</Label>
+              <Input value={name} onChange={e => setName(e.target.value)} placeholder="Pro" />
+            </Div>
+
+            {/* App Name — only shown when no appName is provided (superadmin mode) */}
+            {!appName && (
+              <Div className={`space-y-2`}>
+                <Label>{t.promoAppName}</Label>
+                <Input
+                  value={planAppName}
+                  onChange={e => setPlanAppName(e.target.value)}
+                  placeholder="green-pulse"
+                />
+              </Div>
+            )}
+
+            {/* Amount */}
+            <Div className={`space-y-2`}>
+              <Label>{t.planAmount}</Label>
+              <Input
+                type="number"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                placeholder="999"
+                min={0}
+              />
+              <P className={`text-xs text-muted-foreground mt-1`}>{t.planAmountHint}</P>
+            </Div>
+
+            {/* Currency */}
+            <Div className={`space-y-2`}>
+              <Label>{t.planCurrency}</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EUR">EUR</SelectItem>
+                  <SelectItem value="USD">USD</SelectItem>
+                  <SelectItem value="GBP">GBP</SelectItem>
+                </SelectContent>
+              </Select>
+            </Div>
+
+            {/* Interval */}
+            <Div className={`space-y-2`}>
+              <Label>{t.planInterval}</Label>
+              <Select value={interval} onValueChange={v => setInterval(v as 'month' | 'year')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month">{t.planIntervalMonth}</SelectItem>
+                  <SelectItem value="year">{t.planIntervalYear}</SelectItem>
+                </SelectContent>
+              </Select>
+            </Div>
+
+            {/* Interval Count */}
+            <Div className={`space-y-2`}>
+              <Label>{t.planIntervalCount}</Label>
+              <Input
+                type="number"
+                value={intervalCount}
+                onChange={e => setIntervalCount(e.target.value)}
+                placeholder="1"
+                min={1}
+                max={12}
+              />
+              <P className={`text-xs text-muted-foreground mt-1`}>{t.planIntervalCountHint}</P>
+            </Div>
+          </Div>
+        </Div>
+
+        {/* Optional section */}
+        <Div className={`border-t border-border pt-4`}>
+          <P className={`text-xs text-muted-foreground font-medium mb-3`}>
+            {t.promoOptionalSection}
+          </P>
+          <Div className={`grid grid-cols-1 gap-4`}>
+            {/* Description */}
+            <Div className={`space-y-2`}>
+              <Label>{t.planDescription}</Label>
+              <Input
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Access to all features"
+              />
+            </Div>
+
+            <Div className={`grid grid-cols-1 sm:grid-cols-2 gap-4`}>
+              {/* Features */}
+              <Div className={`space-y-2`}>
+                <Label>{t.planFeatures}</Label>
+                <Input
+                  value={features}
+                  onChange={e => setFeatures(e.target.value)}
+                  placeholder="Feature 1, Feature 2, Feature 3"
+                />
+                <P className={`text-xs text-muted-foreground mt-1`}>{t.planFeaturesHint}</P>
+              </Div>
+
+              {/* Sort Order */}
+              <Div className={`space-y-2`}>
+                <Label>{t.planSortOrder}</Label>
+                <Input
+                  type="number"
+                  value={sortOrder}
+                  onChange={e => setSortOrder(e.target.value)}
+                  placeholder="0"
+                  min={0}
+                />
+              </Div>
+            </Div>
+          </Div>
+        </Div>
+
+        {/* Error — full width */}
+        {error && (
+          <Div>
+            <P className={`text-sm text-destructive`}>{error}</P>
+          </Div>
+        )}
+      </Div>
+    </Modal>
   )
 }
 

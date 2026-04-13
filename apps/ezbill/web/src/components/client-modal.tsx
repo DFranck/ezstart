@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  TextArea,
+  Textarea,
   Div,
   H4,
   Span,
@@ -428,7 +428,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-ezbill-client" />
             Notes
           </Label>
-          <TextArea
+          <Textarea
             value={formData.notes}
             onChange={e => setFormData({ ...formData, notes: e.target.value })}
             className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"

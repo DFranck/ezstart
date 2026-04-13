@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { logger } from '@ezstart/logger'
-import { Button, Div, Input, Label, Modal, P, Strong, TextArea } from '@ezstart/ui/components'
+import { Button, Div, Input, Label, Modal, P, Strong, Textarea } from '@ezstart/ui/components'
 import { useCreateWorkspace } from '@/hooks/useWorkspaces'
 import { useTranslations } from 'next-intl'
 
@@ -114,7 +114,7 @@ export function CreateWorkspaceDialog() {
 
           <Div>
             <Label htmlFor="description">{t('descriptionLabel')}</Label>
-            <TextArea
+            <Textarea
               id="description"
               value={description}
               onChange={e => setDescription(e.target.value)}

@@ -6,6 +6,7 @@ import { dialogVariantConfig } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -120,14 +121,13 @@ export const Modal = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className={cn(
-          'flex flex-col bg-background shadow-2xl',
+          'bg-background shadow-2xl',
           // Size classes (will be most restrictive on desktop where size < 98vw from DialogContent)
           SIZE_CLASSES[size],
-          // Scroll behavior
+          // Mobile width override
           isMobile && 'max-w-[98vw]',
-          scrollBehavior === 'inside'
-            ? 'max-h-[90vh] overflow-hidden'
-            : 'max-h-[90vh] overflow-y-auto',
+          // Outside scroll: let the whole modal scroll instead of inside body
+          scrollBehavior === 'outside' && 'overflow-y-auto',
           className
         )}
         showCloseButton={!noCross}
@@ -146,14 +146,7 @@ export const Modal = ({
         )}
 
         {/* Content */}
-        <div
-          className={cn(
-            scrollBehavior === 'inside' && 'overflow-auto flex-1',
-            scrollBehavior === 'inside' && 'max-h-[60vh]'
-          )}
-        >
-          {children}
-        </div>
+        {scrollBehavior === 'inside' ? <DialogBody>{children}</DialogBody> : children}
 
         {/* Footer */}
         {propFooter && <DialogFooter>{propFooter}</DialogFooter>}

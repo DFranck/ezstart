@@ -1,6 +1,18 @@
 'use client'
 
-import { Button, Div, H2, Icon, Input, Label, Modal, P, TextArea } from '@ezstart/ui/components'
+import {
+  Button,
+  Checkbox,
+  Div,
+  H2,
+  Icon,
+  Input,
+  Label,
+  Modal,
+  P,
+  Span,
+  Textarea,
+} from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { usePay } from '../provider.js'
@@ -102,7 +114,7 @@ export function DonateModal({
 
   return (
     <>
-      <div onClick={() => setOpen(true)}>{trigger || <DonateButton>❤️ Donate</DonateButton>}</div>
+      <Div onClick={() => setOpen(true)}>{trigger || <DonateButton>❤️ Donate</DonateButton>}</Div>
 
       <Modal isOpen={open} onClose={() => setOpen(false)}>
         <form onSubmit={handleDonate} className="px-2 flex flex-col gap-4">
@@ -131,8 +143,8 @@ export function DonateModal({
                     setCustomAmount('')
                   }}
                 >
-                  <span className="text-2xl font-bold">{formatCurrency(val, currency)}</span>
-                  {val === amounts[1] && <span className="text-xs opacity-70">Popular</span>}
+                  <Span className="text-2xl font-bold">{formatCurrency(val, currency)}</Span>
+                  {val === amounts[1] && <Span className="text-xs opacity-70">Popular</Span>}
                 </Button>
               ))}
             </Div>
@@ -143,7 +155,7 @@ export function DonateModal({
             <Label htmlFor="custom-amount" className="mb-1 text-base font-semibold">
               {t.customAmountLabel}
             </Label>
-            <div className="relative">
+            <Div className="relative">
               <Input
                 id="custom-amount"
                 type="number"
@@ -154,7 +166,7 @@ export function DonateModal({
                 placeholder="0.00"
                 className="pl-7"
               />
-            </div>
+            </Div>
           </Div>
 
           {/* Message - Compact */}
@@ -162,7 +174,7 @@ export function DonateModal({
             <Label htmlFor="message" className="text-sm mb-1">
               {t.messageLabel}
             </Label>
-            <TextArea
+            <Textarea
               id="message"
               value={message}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
@@ -175,20 +187,16 @@ export function DonateModal({
 
           {/* Anonymous toggle - Simplified */}
           {userId && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <input
-                type="checkbox"
+            <Div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+              <Checkbox
                 id="anonymous"
                 checked={isAnonymous}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setIsAnonymous(e.target.checked)
-                }
-                className="w-4 h-4 rounded border-input"
+                onCheckedChange={checked => setIsAnonymous(checked === true)}
               />
               <Label htmlFor="anonymous" className="cursor-pointer text-sm font-normal">
                 {t.anonymousLabel}
               </Label>
-            </div>
+            </Div>
           )}
 
           {/* CTA Button - Large and attractive */}
@@ -199,23 +207,23 @@ export function DonateModal({
             className="w-full"
           >
             {isLoading ? (
-              <span className="flex items-center gap-2">
+              <Span className="flex items-center gap-2">
                 <Icon name="lucide:Loader2" className="w-5 h-5 animate-spin" />
                 {t.processingButton}
-              </span>
+              </Span>
             ) : (
-              <span className="flex items-center gap-2">
+              <Span className="flex items-center gap-2">
                 <Icon name="lucide:Heart" className="w-5 h-5" />
                 {t.donateButton} {formatCurrency(finalAmount, currency)}
-              </span>
+              </Span>
             )}
           </Button>
 
           {/* User info - Subtle */}
           {userId && !isAnonymous && userName && (
-            <p className="text-xs text-center text-muted-foreground">
-              {t.donatingAsLabel} <span className="font-medium">{userName}</span>
-            </p>
+            <P className="text-xs text-center text-muted-foreground">
+              {t.donatingAsLabel} <Span className="font-medium">{userName}</Span>
+            </P>
           )}
         </form>
       </Modal>

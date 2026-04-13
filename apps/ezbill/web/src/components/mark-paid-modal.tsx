@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  TextArea,
+  Textarea,
   Div,
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
@@ -136,7 +136,7 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
 
         <Div>
           <Label>{tCommon('notes')}</Label>
-          <TextArea
+          <Textarea
             value={formData.notes}
             onChange={e => setFormData({ ...formData, notes: e.target.value })}
             rows={3}

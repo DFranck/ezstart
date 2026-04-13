@@ -6,7 +6,7 @@ import {
   Icon,
   Input,
   Label,
-  TextArea,
+  Textarea,
   Div,
   Table,
   TableBody,
@@ -108,7 +108,7 @@ export function ItemsTable({ formData, setFormData }: ItemsTableProps) {
                   {formData.items?.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="min-w-[200px]">
-                        <TextArea
+                        <Textarea
                           placeholder="Description"
                           value={item.label}
                           onChange={e => updateLineItem(index, 'label', e.target.value)}
@@ -185,7 +185,7 @@ export function ItemsTable({ formData, setFormData }: ItemsTableProps) {
               <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
               Description *
             </Label>
-            <TextArea
+            <Textarea
               placeholder="Describe the work or service provided..."
               value={formData.description || ''}
               onChange={e => setFormData({ ...formData, description: e.target.value })}

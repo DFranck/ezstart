@@ -1,6 +1,6 @@
 'use client'
 
-import { Icon, Label, TextArea, Div, H3, Span } from '@ezstart/ui/components'
+import { Icon, Label, Textarea, Div, H3, Span } from '@ezstart/ui/components'
 import { CreateInvoice } from '@ezbill/types'
 
 interface InvoiceSummaryProps {
@@ -66,7 +66,7 @@ export function InvoiceSummary({
           <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
           Notes
         </Label>
-        <TextArea
+        <Textarea
           value={formData.notes}
           onChange={e => setFormData({ ...formData, notes: e.target.value })}
           rows={3}
@@ -80,7 +80,7 @@ export function InvoiceSummary({
           <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 text-primary" />
           Terms & Conditions
         </Label>
-        <TextArea
+        <Textarea
           value={formData.terms}
           onChange={e => setFormData({ ...formData, terms: e.target.value })}
           rows={3}
