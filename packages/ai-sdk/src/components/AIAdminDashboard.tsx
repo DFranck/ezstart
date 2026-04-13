@@ -383,20 +383,43 @@ const PROMPTS_PAGE_SIZE = 20
 /**
  * Backward-compat: derive the apps[] for a prompt response.
  * Some legacy responses may still expose `appName: string` instead of `apps: string[]`.
+ * Defensive: filters out non-string entries to avoid rendering objects as React children.
  */
 function readPromptApps(prompt: SystemPrompt): string[] {
-  if (Array.isArray(prompt.apps) && prompt.apps.length > 0) return prompt.apps
-  if (prompt.appName) return [prompt.appName]
+  if (Array.isArray(prompt.apps) && prompt.apps.length > 0) {
+    const apps = prompt.apps.filter(
+      (a: unknown): a is string => typeof a === 'string' && a.length > 0
+    )
+    if (apps.length > 0) return apps
+  }
+  if (typeof prompt.appName === 'string' && prompt.appName) return [prompt.appName]
   return []
 }
 
 /**
  * Backward-compat: derive the providers[] (target list) for a prompt response.
- * Legacy responses may still expose `provider: ProviderTarget` (single).
+ * Handles 3 shapes:
+ *   1. New: `providers: string[]` (e.g. ['openai', 'gemini'] or ['all'])
+ *   2. Legacy single: `provider: string` (when providers is empty/null)
+ *   3. Legacy assignments: `providers: Array<{providerId, priority, _id}>`
+ *      (old per-app priority shape — schema renamed to `providerAssignments`,
+ *      but DB docs may still carry the assignment array under the `providers` key)
  */
 function readPromptProviderTargets(prompt: SystemPrompt): string[] {
-  if (Array.isArray(prompt.providers) && prompt.providers.length > 0) return prompt.providers
-  if (prompt.provider) return [prompt.provider]
+  if (Array.isArray(prompt.providers) && prompt.providers.length > 0) {
+    const providers = prompt.providers
+      .map((p: unknown): string | null => {
+        if (typeof p === 'string') return p
+        if (p && typeof p === 'object' && 'providerId' in p) {
+          const id = (p as { providerId: unknown }).providerId
+          return typeof id === 'string' ? id : null
+        }
+        return null
+      })
+      .filter((s): s is string => typeof s === 'string' && s.length > 0)
+    if (providers.length > 0) return providers
+  }
+  if (typeof prompt.provider === 'string' && prompt.provider) return [prompt.provider]
   return []
 }
 
