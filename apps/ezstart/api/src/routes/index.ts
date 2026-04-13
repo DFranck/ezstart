@@ -17,6 +17,7 @@ import { providersRegistry } from './ai/providers/index.js'
 import { appProvidersRegistries } from './ai/app-providers/index.js'
 import { globalProvidersRegistries } from './ai/global-providers/index.js'
 import qrCodesRouter, { qrCodeRegistries } from './qr-codes/index.js'
+import adminRouter, { adminRegistries } from './admin/index.js'
 
 const router = Router()
 
@@ -33,6 +34,7 @@ router.use('/performance', performanceRouter)
 router.use('/scheduler', schedulerRouter)
 router.use('/ai', aiRouter)
 router.use('/qr-codes', qrCodesRouter)
+router.use('/admin', adminRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -63,6 +65,7 @@ router.get('/', (_, res) => {
       aiAppProviders: '/api/ai/app-providers',
       aiGlobalProviders: '/api/ai/global-providers',
       qrCodes: '/api/qr-codes',
+      adminServices: '/api/admin/services',
       docs: '/api/docs',
     },
   })
@@ -81,6 +84,7 @@ export const registries = [
   ...appProvidersRegistries,
   ...globalProvidersRegistries,
   ...qrCodeRegistries,
+  ...adminRegistries,
 ]
 
 // Re-export setScheduler for backward compatibility

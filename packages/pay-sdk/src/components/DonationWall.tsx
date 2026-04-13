@@ -30,7 +30,9 @@ function getInitials(name: string): string {
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString(undefined, {
+  // Use a fixed locale to avoid SSR/CSR hydration mismatches
+  // (Node falls back to en-US, browser uses navigator.language).
+  return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
   })

@@ -11,22 +11,25 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  * PWA Icon sizes required for full compatibility
  */
 const PWA_SIZES = [16, 32, 72, 96, 128, 144, 152, 192, 384, 512]
-const FAVICON_SIZES = [16, 32, 48]
+const MASKABLE_SIZES = [192, 512] // sizes generated as both transparent + maskable variant
 const APPLE_TOUCH_ICON_SIZE = 180
+
+const DEFAULT_BRAND_COLOR = '#000000'
+const DEFAULT_LOGO_SAFE_ZONE = 0.8
 
 /**
  * Find logo source file in public directory
  */
 async function findLogoSource(publicDir) {
   const possibleSources = [
-    'logo.svg', // ⭐ Priorité 1: SVG vectoriel (meilleure qualité)
-    'logo.png', // Priorité 2: PNG haute résolution
-    'logo-source.svg', // Priorité 3: SVG source alternative
-    'logo-source.png', // Priorité 4: PNG source alternative
-    'icon.svg', // Priorité 5: SVG icon fallback
-    'icon.png', // Priorité 6: PNG icon fallback
-    'logo.jpg', // Priorité 7: JPG (pas de transparence)
-    'logo.jpeg', // Priorité 8: JPEG (pas de transparence)
+    'logo.svg',
+    'logo.png',
+    'logo-source.svg',
+    'logo-source.png',
+    'icon.svg',
+    'icon.png',
+    'logo.jpg',
+    'logo.jpeg',
   ]
 
   for (const source of possibleSources) {
@@ -43,10 +46,61 @@ async function findLogoSource(publicDir) {
 }
 
 /**
+ * Load brand config from public/manifest.config.json
+ * Falls back to reading manifest.json theme_color, then DEFAULT_BRAND_COLOR.
+ */
+async function loadBrandConfig(publicDir) {
+  const configPath = path.join(publicDir, 'manifest.config.json')
+  try {
+    const raw = await fs.readFile(configPath, 'utf-8')
+    const cfg = JSON.parse(raw)
+    return {
+      brandColor: cfg.brandColor || DEFAULT_BRAND_COLOR,
+      logoSafeZone:
+        typeof cfg.logoSafeZone === 'number' ? cfg.logoSafeZone : DEFAULT_LOGO_SAFE_ZONE,
+    }
+  } catch {
+    // Fallback: try manifest.json theme_color
+    try {
+      const manifestRaw = await fs.readFile(path.join(publicDir, 'manifest.json'), 'utf-8')
+      const manifest = JSON.parse(manifestRaw)
+      if (manifest.theme_color) {
+        return { brandColor: manifest.theme_color, logoSafeZone: DEFAULT_LOGO_SAFE_ZONE }
+      }
+    } catch {
+      // ignore
+    }
+    return { brandColor: DEFAULT_BRAND_COLOR, logoSafeZone: DEFAULT_LOGO_SAFE_ZONE }
+  }
+}
+
+/**
+ * Convert hex color (#rrggbb or #rgb) to {r,g,b}
+ */
+function hexToRgb(hex) {
+  const clean = hex.replace('#', '').trim()
+  let normalized = clean
+  if (clean.length === 3) {
+    normalized = clean
+      .split('')
+      .map(c => c + c)
+      .join('')
+  }
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+    console.warn(`⚠️ Invalid hex color "${hex}", falling back to #000000`)
+    return { r: 0, g: 0, b: 0 }
+  }
+  return {
+    r: parseInt(normalized.slice(0, 2), 16),
+    g: parseInt(normalized.slice(2, 4), 16),
+    b: parseInt(normalized.slice(4, 6), 16),
+  }
+}
+
+/**
  * Generate fallback logo with app name
  */
 function generateFallbackLogo(appName) {
-  // Extract app name from cwd (e.g., /apps/ezstart/web -> ezstart)
   const name = appName || 'App'
   const initials = name
     .split('-')
@@ -70,72 +124,121 @@ function generateFallbackLogo(appName) {
 }
 
 /**
- * Generate PWA icons from logo source (path or buffer)
+ * Generate transparent PWA icon at given size
  */
-async function generatePWAIcons(logoSource, outputDir) {
-  const sourceName = Buffer.isBuffer(logoSource) ? 'fallback SVG' : path.basename(logoSource)
-  console.log(`📦 Generating PWA icons from: ${sourceName}`)
-
-  // Create output directory
-  await fs.mkdir(outputDir, { recursive: true })
-
-  // Generate all PWA icon sizes
-  for (const size of PWA_SIZES) {
-    const outputPath = path.join(outputDir, `icon-${size}x${size}.png`)
-
-    await sharp(logoSource)
-      .resize(size, size, {
-        fit: 'contain',
-        background: { r: 255, g: 255, b: 255, alpha: 0 }, // Transparent background
-      })
-      .png({ quality: 100, compressionLevel: 9 })
-      .toFile(outputPath)
-
-    console.log(`  ✅ Generated icon-${size}x${size}.png`)
-  }
-
-  console.log(`🎉 Generated ${PWA_SIZES.length} PWA icons`)
+async function generateTransparentIcon(logoSource, outputPath, size) {
+  await sharp(logoSource)
+    .resize(size, size, {
+      fit: 'contain',
+      background: { r: 255, g: 255, b: 255, alpha: 0 },
+    })
+    .png({ quality: 100, compressionLevel: 9 })
+    .toFile(outputPath)
 }
 
 /**
- * Generate favicon.ico (multi-size)
+ * Generate maskable PWA icon at given size:
+ * - opaque canvas filled with brandColor
+ * - logo resized to size * safeZone, centered
+ */
+async function generateMaskableIcon(logoSource, outputPath, size, brandColor, safeZone) {
+  const { r, g, b } = hexToRgb(brandColor)
+  const innerSize = Math.round(size * safeZone)
+
+  // Resize logo to inner size with transparent bg
+  const logoBuffer = await sharp(logoSource)
+    .resize(innerSize, innerSize, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer()
+
+  // Create opaque background canvas and composite logo centered
+  await sharp({
+    create: {
+      width: size,
+      height: size,
+      channels: 4,
+      background: { r, g, b, alpha: 1 },
+    },
+  })
+    .composite([{ input: logoBuffer, gravity: 'center' }])
+    .png({ quality: 100, compressionLevel: 9 })
+    .toFile(outputPath)
+}
+
+/**
+ * Generate all PWA icons (transparent + maskable variants)
+ */
+async function generatePWAIcons(logoSource, outputDir, brandConfig) {
+  const sourceName = Buffer.isBuffer(logoSource) ? 'fallback SVG' : path.basename(logoSource)
+  console.log(`📦 Generating PWA icons from: ${sourceName}`)
+  console.log(`   brandColor=${brandConfig.brandColor} safeZone=${brandConfig.logoSafeZone}`)
+
+  await fs.mkdir(outputDir, { recursive: true })
+
+  // Transparent variants (all sizes — backward compat)
+  for (const size of PWA_SIZES) {
+    const outputPath = path.join(outputDir, `icon-${size}x${size}.png`)
+    await generateTransparentIcon(logoSource, outputPath, size)
+    console.log(`  ✅ icon-${size}x${size}.png (transparent)`)
+  }
+
+  // Maskable variants for Android adaptive icons (opaque + safe zone)
+  for (const size of MASKABLE_SIZES) {
+    const outputPath = path.join(outputDir, `icon-${size}x${size}-maskable.png`)
+    await generateMaskableIcon(
+      logoSource,
+      outputPath,
+      size,
+      brandConfig.brandColor,
+      brandConfig.logoSafeZone
+    )
+    console.log(`  ✅ icon-${size}x${size}-maskable.png (opaque ${brandConfig.brandColor})`)
+  }
+
+  console.log(
+    `🎉 Generated ${PWA_SIZES.length} transparent + ${MASKABLE_SIZES.length} maskable icons`
+  )
+}
+
+/**
+ * Generate favicon.png
  */
 async function generateFavicon(logoSource, publicDir) {
-  console.log(`📦 Generating favicon.ico`)
+  console.log(`📦 Generating favicon.png`)
+  const faviconPath = path.join(publicDir, 'favicon.png')
 
-  const faviconPath = path.join(publicDir, 'favicon.ico')
-
-  // Generate 16x16 as base (browsers will scale)
   await sharp(logoSource)
     .resize(32, 32, {
       fit: 'contain',
       background: { r: 255, g: 255, b: 255, alpha: 0 },
     })
     .png()
-    .toFile(faviconPath.replace('.ico', '.png'))
+    .toFile(faviconPath)
 
-  // Note: True multi-size .ico generation requires additional library
-  // For now, we generate a high-quality 32x32 PNG that Next.js will serve
-  console.log(`  ✅ Generated favicon.png (32x32)`)
+  console.log(`  ✅ favicon.png (32x32)`)
 }
 
 /**
- * Generate Apple Touch Icon
+ * Generate Apple Touch Icon (opaque with brand color background)
  */
-async function generateAppleTouchIcon(logoSource, publicDir) {
+async function generateAppleTouchIcon(logoSource, publicDir, brandConfig) {
   console.log(`📦 Generating apple-touch-icon.png`)
-
   const appleTouchPath = path.join(publicDir, 'apple-touch-icon.png')
 
-  await sharp(logoSource)
-    .resize(APPLE_TOUCH_ICON_SIZE, APPLE_TOUCH_ICON_SIZE, {
-      fit: 'contain',
-      background: { r: 255, g: 255, b: 255, alpha: 1 }, // Opaque white background for iOS
-    })
-    .png({ quality: 100 })
-    .toFile(appleTouchPath)
+  await generateMaskableIcon(
+    logoSource,
+    appleTouchPath,
+    APPLE_TOUCH_ICON_SIZE,
+    brandConfig.brandColor,
+    brandConfig.logoSafeZone
+  )
 
-  console.log(`  ✅ Generated apple-touch-icon.png (180x180)`)
+  console.log(
+    `  ✅ apple-touch-icon.png (${APPLE_TOUCH_ICON_SIZE}x${APPLE_TOUCH_ICON_SIZE} opaque ${brandConfig.brandColor})`
+  )
 }
 
 /**
@@ -143,7 +246,6 @@ async function generateAppleTouchIcon(logoSource, publicDir) {
  */
 async function main() {
   try {
-    // Get current working directory (should be app root)
     const cwd = process.cwd()
     const publicDir = path.join(cwd, 'public')
     const iconsDir = path.join(publicDir, 'icons')
@@ -152,6 +254,9 @@ async function main() {
     console.log(`📂 Working directory: ${cwd}`)
     console.log(`📂 Public directory: ${publicDir}`)
 
+    // Load brand config (manifest.config.json or fallback)
+    const brandConfig = await loadBrandConfig(publicDir)
+
     // Find logo source or use fallback
     let logoPath = await findLogoSource(publicDir)
     let logoBuffer
@@ -159,33 +264,26 @@ async function main() {
     if (!logoPath) {
       console.warn(`⚠️ No logo source found in ${publicDir}`)
       console.log(`📦 Generating fallback logo with app initials...`)
-
-      // Extract app name from cwd (e.g., /apps/ezstart/web -> ezstart)
       const appName = cwd.split(path.sep).reverse()[1] || 'app'
       logoBuffer = generateFallbackLogo(appName)
-
       console.log(`✅ Generated fallback logo for: ${appName}`)
-      console.log(`💡 Tip: Add logo.png or logo.svg to ${publicDir} for custom branding`)
     } else {
       console.log(`✅ Found logo source: ${path.basename(logoPath)}`)
     }
 
     console.log('')
 
-    // Generate all icons
-    await generatePWAIcons(logoPath || logoBuffer, iconsDir)
+    await generatePWAIcons(logoPath || logoBuffer, iconsDir, brandConfig)
     console.log('')
 
     await generateFavicon(logoPath || logoBuffer, publicDir)
     console.log('')
 
-    await generateAppleTouchIcon(logoPath || logoBuffer, publicDir)
+    await generateAppleTouchIcon(logoPath || logoBuffer, publicDir, brandConfig)
     console.log('')
 
     console.log(`🎉 All PWA icons generated successfully!`)
     console.log(`📍 Icons location: ${iconsDir}`)
-    console.log(`📍 Favicon location: ${publicDir}/favicon.png`)
-    console.log(`📍 Apple Touch Icon: ${publicDir}/apple-touch-icon.png`)
   } catch (error) {
     console.error('❌ Error generating icons:', error.message)
     process.exit(1)

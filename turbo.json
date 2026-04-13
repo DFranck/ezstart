@@ -13,13 +13,18 @@
         "scripts/**",
         "package.json",
         "public/logo.*",
+        "../../apps/*/web/public/logo.*",
+        "../../apps/*/web/public/manifest.config.json",
         "!src/**/*.generated.ts",
         "!src/**/generated/**"
       ],
       "outputs": [
         "src/**/*.generated.ts",
         "src/**/generated/**",
-        "../../apps/ezstart/web/src/app/**/inspector/registry.generated.ts"
+        "../../apps/ezstart/web/src/app/**/inspector/registry.generated.ts",
+        "../../apps/*/web/public/icons/**",
+        "../../apps/*/web/public/apple-touch-icon.png",
+        "../../apps/*/web/public/favicon.png"
       ],
       "cache": true
     },

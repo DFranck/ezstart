@@ -41,6 +41,7 @@
     "generate-pwa-icons": "./scripts/generate-icons.js"
   },
   "scripts": {
+    "generate": "node scripts/generate-all-icons.js",
     "generate:icons": "node scripts/generate-all-icons.js"
   }
 }

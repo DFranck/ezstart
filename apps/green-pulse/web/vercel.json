@@ -29,5 +29,10 @@
       "destination": "/en",
       "statusCode": 302
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "master": true
+    }
+  }
 }

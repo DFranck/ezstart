@@ -21,7 +21,7 @@ const HeroSection = ({ id }: Props) => {
       alt="Franck Dufournet"
       width={500}
       height={500}
-      className="rounded-full object-cover shadow-md bg-primary z-10 w-[150px] h-[150px] md:w-[300px] md:h-[300px]"
+      className="rounded-full object-cover shadow-md border-4 border-primary z-10 w-[150px] h-[150px] md:w-[300px] md:h-[300px]"
     />
   )
 
