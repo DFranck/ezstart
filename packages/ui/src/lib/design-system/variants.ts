@@ -855,9 +855,9 @@ export const headerVariantConfig = {
   },
   position: {
     static: '',
-    sticky: 'sticky top-0 left-0 right-0 ',
-    fixed: 'fixed top-0 left-0 right-0 ',
-    absolute: 'absolute top-0 left-0 right-0 ',
+    sticky: 'sticky top-0 left-0 right-0 z-50',
+    fixed: 'fixed top-0 left-0 right-0 z-50',
+    absolute: 'absolute top-0 left-0 right-0 z-50',
   },
 } as const
 
