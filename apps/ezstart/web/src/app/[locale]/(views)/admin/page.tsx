@@ -17,6 +17,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { MonitoringTab } from './components/monitoring-tab'
+import { ServicesTab } from './components/services-tab'
 
 function AdminPanelContent() {
   const t = useTranslations()
@@ -201,6 +202,7 @@ function AdminPanelContent() {
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>
           <TabsTrigger value="ezpay">{t('admin.tabs.ezpay')}</TabsTrigger>
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
+          <TabsTrigger value="services">{t('admin.tabs.services')}</TabsTrigger>
           <TabsTrigger value="ai">{t('admin.tabs.ai')}</TabsTrigger>
         </TabsList>
 
@@ -214,6 +216,10 @@ function AdminPanelContent() {
 
         <TabsContent value="monitoring" className="w-full">
           <MonitoringTab />
+        </TabsContent>
+
+        <TabsContent value="services" className="w-full">
+          <ServicesTab />
         </TabsContent>
 
         <TabsContent value="ai" className="w-full">

@@ -7,7 +7,25 @@
       "ezauth": "EZAuth",
       "ezpay": "EZPay",
       "monitoring": "Monitoring",
+      "services": "Services",
       "ai": "AI"
+    },
+    "services": {
+      "title": "External Services",
+      "subtitle": "Real-time status and usage of all providers",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing...",
+      "lastSync": "Last sync",
+      "plan": "Plan",
+      "monthlyCost": "Est. monthly cost",
+      "totalMonthlyCost": "Total estimated monthly cost",
+      "openDashboard": "Open dashboard",
+      "error": "Error",
+      "failedToLoad": "Failed to load services",
+      "statusHealthy": "Healthy",
+      "statusWarning": "Warning",
+      "statusCritical": "Critical",
+      "statusUnknown": "Unknown"
     },
     "users": {
       "searchPlaceholder": "Search by email or username...",
