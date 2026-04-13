@@ -7,7 +7,10 @@
 
 import { useState, useEffect } from 'react'
 import {
+  Button,
   Div,
+  H2,
+  P,
   Thread,
   ThreadComposer,
   ThreadLayout,
@@ -70,6 +73,7 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
     activeConversationId,
     isAuthenticated,
     providers,
+    providersLoading,
     selectedProvider,
     setSelectedProvider,
     sendMessage,
@@ -91,6 +95,16 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   const slots = props.slots ?? {}
   const showSidebar = props.showSidebar ?? true
   const showProviderSelector = props.showProviderSelector ?? false
+
+  // No providers available → empty state (avoid letting user send messages that will fail)
+  const noProviders = !providersLoading && providers.length === 0
+  const noProvidersTitle = texts.noProvidersTitle ?? 'No AI provider configured'
+  const noProvidersDescription =
+    texts.noProvidersDescription ??
+    'An admin needs to configure at least 1 AI provider before you can chat.'
+  const noProvidersCTA = texts.noProvidersCTA ?? 'Configure providers'
+  const noProvidersComposerPlaceholder =
+    texts.noProvidersComposerPlaceholder ?? 'AI providers not configured'
 
   // Build sidebar content
   const sidebar = showSidebar ? (
@@ -143,12 +157,26 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
         <ThreadComposer
           onSubmit={sendMessage}
           loading={loading}
-          placeholder={texts.composerPlaceholder}
+          disabled={noProviders}
+          placeholder={noProviders ? noProvidersComposerPlaceholder : texts.composerPlaceholder}
           sendLabel={texts.sendLabel}
           isNewThread={isNewThread}
           welcomeMessage={
             isNewThread
-              ? (slots.welcomeContent ?? (
+              ? (slots.welcomeContent ??
+                (noProviders ? (
+                  <Div className="flex flex-col items-center justify-center text-center text-foreground gap-3 px-4">
+                    <H2 className="text-xl font-semibold">{noProvidersTitle}</H2>
+                    <P className="text-sm text-muted-foreground max-w-md">
+                      {noProvidersDescription}
+                    </P>
+                    {isAdmin && (
+                      <Button asChild variant="default" size="sm" className="mt-2">
+                        <a href="/admin">{noProvidersCTA}</a>
+                      </Button>
+                    )}
+                  </Div>
+                ) : (
                   <>
                     <ThreadWelcome
                       show={isNewThread}
@@ -169,7 +197,7 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
                       )}
                     {slots.welcomeExtra}
                   </>
-                ))
+                )))
               : undefined
           }
         />

@@ -1,5 +1,6 @@
 import { logger } from '@ezstart/logger/server'
 import mongoose from 'mongoose'
+import { normalizeLegacyAppProvider } from '../models/AppProvider.js'
 
 interface ResolvedProvider {
   providerId: string
@@ -14,7 +15,13 @@ interface ResolvedProvider {
 
 /**
  * Get enabled providers for an app, ordered by priority.
- * Falls back to global defaults if no app-specific config exists.
+ *
+ * Resolution rules:
+ *   1. Providers whose `apps` array includes the queried `appName`
+ *   2. "God" providers with `apps: ['*']` (available to every app)
+ *   3. Legacy docs with `appName: <queriedApp>` (backward compat)
+ *
+ * Falls back to hardcoded defaults if no DB config exists.
  */
 export async function getAppProviders(appName: string): Promise<ResolvedProvider[]> {
   try {
@@ -28,7 +35,15 @@ export async function getAppProviders(appName: string): Promise<ResolvedProvider
       return getDefaultProviders()
     }
 
-    const providers = await AppProvider.find({ appName, enabled: true })
+    const providers = await AppProvider.find({
+      enabled: true,
+      $or: [
+        { apps: appName },
+        { apps: '*' },
+        // backward compat — old docs without `apps` array
+        { appName },
+      ],
+    })
       .sort({ priority: 1 })
       .lean()
       .exec()
@@ -37,12 +52,15 @@ export async function getAppProviders(appName: string): Promise<ResolvedProvider
       return getDefaultProviders()
     }
 
-    return providers.map((p: Record<string, unknown>) => ({
-      providerId: p.providerId as string,
-      providerType: p.providerType as string,
-      priority: p.priority as number,
-      config: p.config as ResolvedProvider['config'],
-    }))
+    return providers.map((p: Record<string, unknown>) => {
+      const normalized = normalizeLegacyAppProvider(p)
+      return {
+        providerId: normalized.providerId as string,
+        providerType: normalized.providerType as string,
+        priority: normalized.priority as number,
+        config: normalized.config as ResolvedProvider['config'],
+      }
+    })
   } catch (error) {
     logger.warn('[AppProvider] Failed to resolve, using defaults:', error)
     return getDefaultProviders()

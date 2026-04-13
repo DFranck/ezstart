@@ -12,6 +12,14 @@ export type AILayoutTexts = {
   sidebarEmptyState?: string
   loginPrompt?: string
   sendLabel?: string
+  /** Title shown when no AI provider is configured */
+  noProvidersTitle?: string
+  /** Description shown when no AI provider is configured */
+  noProvidersDescription?: string
+  /** CTA label (admin only) linking to provider admin page */
+  noProvidersCTA?: string
+  /** Composer placeholder when providers are not configured */
+  noProvidersComposerPlaceholder?: string
 }
 
 export type AILayoutSlots = {

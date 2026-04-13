@@ -169,7 +169,10 @@ export const appProviderConfigSchema = z
 
 export const appProviderSchema = z.object({
   _id: z.string(),
-  appName: z.string(),
+  // New multi-app field. '*' entry means "all apps".
+  apps: z.array(z.string()),
+  // Legacy single-app field kept optional for backward compat with older API responses.
+  appName: z.string().optional(),
   providerId: z.string(),
   providerType: providerTypeSchema,
   enabled: z.boolean(),
@@ -197,7 +200,7 @@ export const enrichedAppProviderSchema = appProviderSchema.extend({
 })
 
 export const createAppProviderSchema = z.object({
-  appName: z.string().min(1).max(50),
+  apps: z.array(z.string().min(1).max(50)).min(1),
   providerId: z
     .string()
     .min(1)
@@ -210,6 +213,7 @@ export const createAppProviderSchema = z.object({
 })
 
 export const updateAppProviderSchema = z.object({
+  apps: z.array(z.string().min(1).max(50)).min(1).optional(),
   enabled: z.boolean().optional(),
   priority: z.number().int().min(1).max(99).optional(),
   config: appProviderConfigSchema,

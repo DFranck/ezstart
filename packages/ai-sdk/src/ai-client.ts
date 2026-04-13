@@ -199,9 +199,12 @@ export class AIClient {
     enabled?: boolean
     limit?: number
     offset?: number
+    /** Override default app filter ('*' or empty = all apps). Defaults to client.appName when set. */
+    app?: string
   }): Promise<{ providers: EnrichedAppProvider[]; meta: PaginationMeta }> {
     const query = new URLSearchParams()
-    if (this.appName) query.set('appName', this.appName)
+    const appFilter = params?.app !== undefined ? params.app : this.appName
+    if (appFilter) query.set('app', appFilter)
     if (params?.enabled !== undefined) query.set('enabled', String(params.enabled))
     if (params?.limit) query.set('limit', String(params.limit))
     if (params?.offset) query.set('offset', String(params.offset))
@@ -209,11 +212,13 @@ export class AIClient {
   }
 
   async createAppProvider(
-    data: Omit<CreateAppProviderRequest, 'appName'>
+    data: Omit<CreateAppProviderRequest, 'apps'> & { apps?: string[] }
   ): Promise<AppProviderType> {
+    // Default to the client's current app scope if caller didn't provide apps[].
+    const apps = data.apps && data.apps.length > 0 ? data.apps : this.appName ? [this.appName] : []
     return this.fetch('/app-providers', {
       method: 'POST',
-      body: JSON.stringify({ ...data, appName: this.appName }),
+      body: JSON.stringify({ ...data, apps }),
     })
   }
 
