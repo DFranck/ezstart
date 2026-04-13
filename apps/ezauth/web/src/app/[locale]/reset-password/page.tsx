@@ -1,6 +1,7 @@
 'use client'
 
 import { ResetPasswordForm, useAuthNavigation } from '@ezstart/auth-sdk'
+import { callApi, parseApiErrorCode } from '@ezstart/fetch-client'
 import {
   Card,
   CardContent,
@@ -12,14 +13,33 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useCallback } from 'react'
+
+async function validateResetToken(token: string): Promise<{ valid: boolean; code?: string }> {
+  const response = await callApi<{ valid: boolean }>('/auth/validate-reset-token', {
+    appName: 'ezauth',
+    method: 'POST',
+    body: { token },
+  })
+
+  if (response.ok) {
+    return { valid: response.data?.valid === true }
+  }
+  return { valid: false, code: parseApiErrorCode(response.data) }
+}
 
 function ResetPasswordContent() {
   const t = useTranslations('resetPassword')
   const tValidation = useTranslations('validation')
+  const tPwd = useTranslations('passwordStrength')
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
-  const { app } = useAuthNavigation()
+  const { app, forgotPasswordHref } = useAuthNavigation()
+
+  const handleValidateToken = useCallback(
+    (tokenValue: string) => validateResetToken(tokenValue),
+    []
+  )
 
   return (
     <Card className="max-w-md w-full" data-app={app}>
@@ -30,6 +50,8 @@ function ResetPasswordContent() {
       <CardContent className="space-y-4">
         <ResetPasswordForm
           token={token}
+          onValidateToken={handleValidateToken}
+          requestNewLinkHref={forgotPasswordHref}
           texts={{
             newPassword: t('newPassword'),
             newPasswordPlaceholder: t('newPasswordPlaceholder'),
@@ -45,6 +67,14 @@ function ResetPasswordContent() {
             tryAgain: t('tryAgain'),
             backToLogin: t('backToLogin'),
             fallbackError: t('fallbackError'),
+            passwordWeak: tPwd('weak'),
+            passwordFair: tPwd('fair'),
+            passwordGood: tPwd('good'),
+            passwordStrong: tPwd('strong'),
+            validating: t('validating'),
+            tokenExpired: t('tokenExpired'),
+            requestNewLink: t('requestNewLink'),
+            errorInvalidToken: t('errorInvalidToken'),
           }}
         />
       </CardContent>
@@ -53,11 +83,13 @@ function ResetPasswordContent() {
 }
 
 export default function ResetPasswordPage() {
+  const t = useTranslations('resetPassword')
+
   return (
     <Suspense
       fallback={
         <Div className="flex items-center justify-center min-h-[200px]">
-          <Spinner variant="primary" size="lg" />
+          <Spinner variant="primary" size="lg" text={t('loading')} />
         </Div>
       }
     >

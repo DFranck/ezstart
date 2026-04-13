@@ -11,11 +11,14 @@ import {
   FormMessage,
   P,
   PasswordInput,
+  Spinner,
 } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { callApi, parseApiError, parseApiErrorCode } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { PasswordStrength } from './PasswordStrength.js'
 import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -36,6 +39,16 @@ export interface ResetPasswordFormTexts {
   tryAgain: string
   backToLogin: string
   fallbackError: string
+  // Password strength
+  passwordWeak: string
+  passwordFair: string
+  passwordGood: string
+  passwordStrong: string
+  // Pre-validation / token-expired states
+  validating: string
+  tokenExpired: string
+  requestNewLink: string
+  errorInvalidToken: string
 }
 
 export interface ResetPasswordFormProps {
@@ -45,6 +58,17 @@ export interface ResetPasswordFormProps {
   backHref?: string
   /** Forgot password href for "try again" link (defaults to useAuthNavigation().forgotPasswordHref) */
   forgotPasswordHref?: string
+  /**
+   * Href to request a new reset link (shown in "token expired" state).
+   * Defaults to `forgotPasswordHref` / useAuthNavigation().forgotPasswordHref.
+   */
+  requestNewLinkHref?: string
+  /**
+   * Optional pre-validation hook. When provided AND a token is present, called on mount
+   * to verify the token is still valid BEFORE showing the form.
+   * Should resolve with `{ valid: boolean, code?: string }`.
+   */
+  onValidateToken?: (token: string) => Promise<{ valid: boolean; code?: string }>
   /** Called after success (if provided, overrides auto-redirect to login) */
   onSuccess?: () => void
   /** Auto-redirect to login after success (default: true, 3s delay) */
@@ -69,9 +93,20 @@ const DEFAULT_TEXTS: ResetPasswordFormTexts = {
   tryAgain: 'Try again',
   backToLogin: 'Back to login',
   fallbackError: 'An error occurred. Please try again.',
+  passwordWeak: 'Weak',
+  passwordFair: 'Fair',
+  passwordGood: 'Good',
+  passwordStrong: 'Strong',
+  validating: 'Validating link...',
+  tokenExpired: 'This reset link has expired or is invalid.',
+  requestNewLink: 'Request a new link',
+  errorInvalidToken: 'This reset link is invalid or expired.',
 }
 
-const MIN_PASSWORD_LENGTH = 6
+const MIN_PASSWORD_LENGTH = 8
+const INVALID_TOKEN_CODE = 'INVALID_OR_EXPIRED_TOKEN'
+
+type ValidationState = 'idle' | 'validating' | 'valid' | 'invalid'
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -84,6 +119,8 @@ export function ResetPasswordForm({
   token,
   backHref,
   forgotPasswordHref,
+  requestNewLinkHref,
+  onValidateToken,
   onSuccess,
   autoRedirect = true,
   texts,
@@ -92,16 +129,45 @@ export function ResetPasswordForm({
   const navigation = useAuthNavigation()
   const resolvedBackHref = backHref ?? navigation.loginHref
   const resolvedForgotHref = forgotPasswordHref ?? navigation.forgotPasswordHref
+  const resolvedRequestNewLinkHref =
+    requestNewLinkHref ?? forgotPasswordHref ?? navigation.forgotPasswordHref
 
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [validationState, setValidationState] = useState<ValidationState>(
+    onValidateToken && token ? 'validating' : 'idle'
+  )
 
   const form = useForm<FormData>({
     defaultValues: { newPassword: '', confirmPassword: '' },
+    mode: 'onChange',
   })
 
+  const watchPassword = form.watch('newPassword')
   const minLengthMessage = t.minLength.replace('{min}', String(MIN_PASSWORD_LENGTH))
+
+  // Pre-validate token on mount when onValidateToken is provided
+  useEffect(() => {
+    if (!onValidateToken || !token) return
+    let cancelled = false
+
+    setValidationState('validating')
+    onValidateToken(token)
+      .then(result => {
+        if (cancelled) return
+        setValidationState(result.valid ? 'valid' : 'invalid')
+      })
+      .catch(err => {
+        if (cancelled) return
+        logger.warn('Reset token pre-validation failed', err)
+        setValidationState('invalid')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [onValidateToken, token])
 
   // Auto-redirect to login after success
   useEffect(() => {
@@ -138,7 +204,16 @@ export function ResetPasswordForm({
       })
 
       if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Request failed')
+        // Detect server-side "invalid/expired token" via error code → switch to expired view
+        const code = parseApiErrorCode(response.data)
+        if (code === INVALID_TOKEN_CODE) {
+          setValidationState('invalid')
+          setLoading(false)
+          return
+        }
+        // Prefer parseApiError (extracts Zod details[0].message) over generic response.error
+        const detailed = parseApiError(response.data)
+        throw new Error(detailed || response.error || t.fallbackError)
       }
 
       setSuccess(true)
@@ -150,21 +225,58 @@ export function ResetPasswordForm({
     }
   }
 
-  // No token → show invalid token message
+  // ── Render helpers ────────────────────────────────────────────────────────
+
+  const renderTokenExpired = () => (
+    <Div className="space-y-4">
+      <Div
+        role="alert"
+        className="bg-destructive/10 border border-destructive/40 text-destructive px-4 py-3 rounded-md text-sm text-center"
+      >
+        <P className="text-sm text-destructive m-0">{t.tokenExpired}</P>
+      </Div>
+      <Div className="text-center">
+        <Button asChild variant="default" className="w-full">
+          <Link href={resolvedRequestNewLinkHref}>{t.requestNewLink}</Link>
+        </Button>
+      </Div>
+      <Div className="text-center">
+        <Button asChild variant="link" className="text-sm text-muted-foreground">
+          <Link href={resolvedBackHref}>{t.backToLogin}</Link>
+        </Button>
+      </Div>
+    </Div>
+  )
+
+  // ── Early states ──────────────────────────────────────────────────────────
+
+  // No token → show invalid token message (existing behavior)
   if (!token) {
     return (
       <Div className="space-y-4">
         <P className="text-center text-sm text-destructive">{t.invalidToken}</P>
         <Div className="text-center">
-          <a
-            href={resolvedForgotHref}
-            className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline"
-          >
-            {t.tryAgain}
-          </a>
+          <Button asChild variant="link" className="text-sm text-muted-foreground">
+            <Link href={resolvedForgotHref}>{t.tryAgain}</Link>
+          </Button>
         </Div>
       </Div>
     )
+  }
+
+  // Pre-validation in progress
+  if (validationState === 'validating') {
+    return (
+      <Div className="flex flex-col items-center justify-center gap-3 py-6">
+        <Spinner variant="primary" size="lg" />
+        <P className="text-sm text-muted-foreground m-0">{t.validating}</P>
+      </Div>
+    )
+  }
+
+  // Token invalid (either pre-validation or server rejection on submit)
+  if (validationState === 'invalid') {
+    return renderTokenExpired()
   }
 
   // Success state
@@ -173,12 +285,9 @@ export function ResetPasswordForm({
       <Div className="space-y-4">
         <P className="text-center text-sm text-success">{t.success}</P>
         <Div className="text-center">
-          <a
-            href={resolvedBackHref}
-            className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline"
-          >
-            {t.backToLogin}
-          </a>
+          <Button asChild variant="link" className="text-sm text-muted-foreground">
+            <Link href={resolvedBackHref}>{t.backToLogin}</Link>
+          </Button>
         </Div>
       </Div>
     )
@@ -188,15 +297,15 @@ export function ResetPasswordForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
-          <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
+          <Div
+            role="alert"
+            className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm"
+          >
             {error}
             <Div className="mt-2">
-              <a
-                href={resolvedForgotHref}
-                className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline"
-              >
-                {t.tryAgain}
-              </a>
+              <Button asChild variant="link" className="text-sm text-muted-foreground">
+                <Link href={resolvedForgotHref}>{t.tryAgain}</Link>
+              </Button>
             </Div>
           </Div>
         )}
@@ -212,9 +321,22 @@ export function ResetPasswordForm({
             <FormItem>
               <FormLabel>{t.newPassword}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder={t.newPasswordPlaceholder} {...field} />
+                <PasswordInput
+                  minLength={MIN_PASSWORD_LENGTH}
+                  placeholder={t.newPasswordPlaceholder}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
+              <PasswordStrength
+                password={watchPassword}
+                texts={{
+                  weak: t.passwordWeak,
+                  fair: t.passwordFair,
+                  good: t.passwordGood,
+                  strong: t.passwordStrong,
+                }}
+              />
             </FormItem>
           )}
         />
@@ -230,7 +352,11 @@ export function ResetPasswordForm({
             <FormItem>
               <FormLabel>{t.confirmPassword}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder={t.confirmPasswordPlaceholder} {...field} />
+                <PasswordInput
+                  minLength={MIN_PASSWORD_LENGTH}
+                  placeholder={t.confirmPasswordPlaceholder}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -247,12 +373,9 @@ export function ResetPasswordForm({
         </Button>
 
         <Div className="text-center">
-          <a
-            href={resolvedBackHref}
-            className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline"
-          >
-            {t.backToLogin}
-          </a>
+          <Button asChild variant="link" className="text-sm text-muted-foreground">
+            <Link href={resolvedBackHref}>{t.backToLogin}</Link>
+          </Button>
         </Div>
       </form>
     </Form>

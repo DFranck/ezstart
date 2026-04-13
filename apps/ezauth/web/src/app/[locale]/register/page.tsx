@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { getAppTheme } from '@/config/app-themes'
 import { SignUpForm, useAuthNavigation } from '@ezstart/auth-sdk'
 import {
@@ -24,6 +23,7 @@ function RegisterContent() {
   const tv = useTranslations('verifyEmail')
   const tApiErrors = useTranslations('apiErrors')
   const tOAuth = useTranslations('oauth')
+  const tPwd = useTranslations('passwordStrength')
   const navigation = useAuthNavigation()
   const app = navigation.app || 'ezstart'
   const theme = getAppTheme(app)
@@ -77,10 +77,10 @@ function RegisterContent() {
             checkEmail: tv('checkEmail'),
             checkEmailDescription: tv('checkEmailDescription'),
             backToLogin: tv('backToLogin'),
-            passwordWeak: t('passwordStrength.weak'),
-            passwordFair: t('passwordStrength.fair'),
-            passwordGood: t('passwordStrength.good'),
-            passwordStrong: t('passwordStrength.strong'),
+            passwordWeak: tPwd('weak'),
+            passwordFair: tPwd('fair'),
+            passwordGood: tPwd('good'),
+            passwordStrong: tPwd('strong'),
             continueWithGoogle: tOAuth('continueWithGoogle'),
             orContinueWith: tOAuth('orContinueWith'),
           }}

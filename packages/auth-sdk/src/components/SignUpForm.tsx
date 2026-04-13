@@ -16,6 +16,7 @@ import {
 } from '@ezstart/ui/components'
 import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
+import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { PasswordStrength } from './PasswordStrength.js'
@@ -90,6 +91,8 @@ export interface SignUpFormProps {
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
 
+const MIN_PASSWORD_LENGTH = 8
+
 const DEFAULT_TEXTS: SignUpFormTexts = {
   email: 'Email',
   emailPlaceholder: 'Enter your email',
@@ -103,7 +106,7 @@ const DEFAULT_TEXTS: SignUpFormTexts = {
   lastNamePlaceholder: 'Last name',
   password: 'Password',
   passwordPlaceholder: 'Choose a password',
-  passwordHint: 'At least 6 characters with a mix of letters, numbers, and symbols.',
+  passwordHint: 'At least 8 characters with a mix of letters, numbers, and symbols.',
   confirmPassword: 'Confirm Password',
   confirmPasswordPlaceholder: 'Confirm your password',
   passwordMismatch: 'Passwords do not match',
@@ -287,12 +290,9 @@ export function SignUpForm({
               {t.backToLogin}
             </Button>
           ) : (
-            <a
-              href={resolvedBackToLoginHref}
-              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
-            >
-              {t.backToLogin}
-            </a>
+            <Button asChild variant="link" className="text-sm text-muted-foreground">
+              <Link href={resolvedBackToLoginHref}>{t.backToLogin}</Link>
+            </Button>
           )}
         </Div>
       </Div>
@@ -316,7 +316,10 @@ export function SignUpForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
           {error && (
-            <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
+            <Div
+              role="alert"
+              className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md"
+            >
               {error}
             </Div>
           )}
@@ -397,7 +400,7 @@ export function SignUpForm({
                 <FormControl>
                   <PasswordInput
                     required
-                    minLength={6}
+                    minLength={MIN_PASSWORD_LENGTH}
                     placeholder={t.passwordPlaceholder}
                     {...field}
                   />
@@ -430,7 +433,7 @@ export function SignUpForm({
                 <FormControl>
                   <PasswordInput
                     required
-                    minLength={6}
+                    minLength={MIN_PASSWORD_LENGTH}
                     placeholder={t.confirmPasswordPlaceholder}
                     {...field}
                   />

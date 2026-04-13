@@ -56,14 +56,14 @@ const resetPasswordController = async (req: Request, res: Response) => {
     })
 
     if (!authCode) {
-      return sendError(res, 'Invalid or expired reset token', 400)
+      return sendError(res, 'Invalid or expired reset token', 400, 'INVALID_OR_EXPIRED_TOKEN')
     }
 
     const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findById(authCode.userId)
 
     if (!user) {
-      return sendError(res, 'Invalid or expired reset token', 400)
+      return sendError(res, 'Invalid or expired reset token', 400, 'INVALID_OR_EXPIRED_TOKEN')
     }
 
     // Update password (pre-save hook will hash it)

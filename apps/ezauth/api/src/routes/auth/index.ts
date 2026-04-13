@@ -9,6 +9,7 @@ import refreshRouter, { refreshRegistry } from './refresh.js'
 import sessionsRouter, { sessionsRegistry } from './sessions.js'
 import forgotPasswordRouter, { forgotPasswordRegistry } from './forgot-password.js'
 import resetPasswordRouter, { resetPasswordRegistry } from './reset-password.js'
+import validateResetTokenRouter, { validateResetTokenRegistry } from './validate-reset-token.js'
 import verifyEmailRouter, { verifyEmailRegistry } from './verify-email.js'
 import sendVerificationRouter, { sendVerificationRegistry } from './send-verification.js'
 import checkAvailabilityRouter, { checkAvailabilityRegistry } from './check-availability.js'
@@ -32,6 +33,7 @@ export const authRegistries = [
   sessionsRegistry,
   forgotPasswordRegistry,
   resetPasswordRegistry,
+  validateResetTokenRegistry,
   verifyEmailRegistry,
   sendVerificationRegistry,
   checkAvailabilityRegistry,
@@ -56,6 +58,7 @@ export const authRouters = [
   sessionsRouter,
   forgotPasswordRouter,
   resetPasswordRouter,
+  validateResetTokenRouter,
   verifyEmailRouter,
   sendVerificationRouter,
   checkAvailabilityRouter,
