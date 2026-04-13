@@ -7,7 +7,15 @@
  */
 export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
 
-:root {
+:root[data-app='green-pulse'] {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.6 0.18 145);
+  --primary-foreground: oklch(0.98 0.01 145);
+  --secondary: oklch(0.95 0.03 160);
+  --secondary-foreground: oklch(0.2 0.05 160);
+  --accent: oklch(0.93 0.04 58);
+  --accent-foreground: oklch(0.2 0.05 58);
+
   /* Primary green for eco/sustainability theme */
   --gp-primary: oklch(0.6 0.18 145);
   --gp-primary-foreground: oklch(0.98 0.01 145);
@@ -16,13 +24,25 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
   --gp-secondary: oklch(0.65 0.12 160);
   --gp-secondary-foreground: oklch(0.2 0.05 160);
 
+  /* Accent warm color (amber) */
+  --gp-accent: oklch(0.666 0.179 58.318);
+  --gp-accent-foreground: oklch(0.98 0.01 58);
+
   /* Generic gradient (green to blue) */
   --gp-gradient-from: oklch(0.6 0.18 145); /* green-600 */
   --gp-gradient-via: oklch(0.65 0.17 160); /* emerald-600 */
   --gp-gradient-to: oklch(0.6 0.15 240); /* blue-600 */
 }
 
-.dark {
+:root[data-app='green-pulse'].dark {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.7 0.2 145);
+  --primary-foreground: oklch(0.15 0.05 145);
+  --secondary: oklch(0.25 0.04 160);
+  --secondary-foreground: oklch(0.95 0.02 160);
+  --accent: oklch(0.28 0.05 58);
+  --accent-foreground: oklch(0.95 0.02 58);
+
   /* Primary green for eco/sustainability theme (dark mode) */
   --gp-primary: oklch(0.7 0.2 145);
   --gp-primary-foreground: oklch(0.15 0.05 145);
@@ -30,6 +50,10 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
   /* Secondary colors (dark mode) */
   --gp-secondary: oklch(0.75 0.15 160);
   --gp-secondary-foreground: oklch(0.15 0.05 160);
+
+  /* Accent warm color (amber) - dark mode */
+  --gp-accent: oklch(0.7 0.19 58);
+  --gp-accent-foreground: oklch(0.15 0.05 58);
 
   /* Generic gradient (dark mode) */
   --gp-gradient-from: oklch(0.35 0.08 145); /* green-900 */
@@ -42,6 +66,11 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
   --color-gp-primary-foreground: var(--gp-primary-foreground);
   --color-gp-secondary: var(--gp-secondary);
   --color-gp-secondary-foreground: var(--gp-secondary-foreground);
+  --color-gp-accent: var(--gp-accent);
+  --color-gp-accent-foreground: var(--gp-accent-foreground);
+  --color-gp-gradient-from: var(--gp-gradient-from);
+  --color-gp-gradient-via: var(--gp-gradient-via);
+  --color-gp-gradient-to: var(--gp-gradient-to);
 }
 
 @layer utilities {

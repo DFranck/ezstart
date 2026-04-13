@@ -1,6 +1,5 @@
 import { getTimeZoneFromLocale } from '@/i18n/routing'
 import { Providers } from '@/providers/providers'
-import { ThemeStyleInjector } from '@ezstart/next-theme/server'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
@@ -15,7 +14,8 @@ const inter = Inter({
 
 export const metadata = createMetadata({
   appName: 'Gacha Analyzer',
-  description: 'AI-powered scanner for gacha game equipment. Scan your Summoners War runes and Nikke gear instantly.',
+  description:
+    'AI-powered scanner for gacha game equipment. Scan your Summoners War runes and Nikke gear instantly.',
   domain: 'https://gacha-analyzer.ezstart.xyz',
   keywords: [
     'summoners war',
@@ -27,9 +27,7 @@ export const metadata = createMetadata({
   ],
   themeColor: '#6366f1',
   icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
   },
 })
 
@@ -46,10 +44,12 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   const timeZone = getTimeZoneFromLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning data-app="gacha-analyzer" className={inter.variable}>
-      <head>
-        <ThemeStyleInjector appName="gacha-analyzer" />
-      </head>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      data-app="gacha-analyzer"
+      className={inter.variable}
+    >
       <body className="font-sans">
         <ErrorBoundary title="Something went wrong in Gacha Analyzer">
           <Providers

@@ -23,7 +23,7 @@ export const globalThemeCss = `:root {
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.88 0.17 135);
   --success-foreground: oklch(0.2 0.07 135);
   --warning: oklch(0.97 0.19 85);

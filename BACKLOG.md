@@ -51,6 +51,8 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ### Cross-project items
 
+- [ ] **⏸️ Theme Overriding dynamic (paused)** — Projet `ThemeStyleInjector` + `/api/theme` endpoint pour que des clients non-devs puissent overwrite dynamiquement les couleurs de leur app depuis un éditeur visuel. Infra en place (`packages/next-theme/src/server/`) mais non câblée dans les apps (retirée de `green-pulse/layout.tsx` et `gacha-analyzer/layout.tsx` le 2026-04-13). Reprendre quand l'UI éditeur sera planifiée. En attendant : la source de vérité est le CSS statique (`packages/ui/src/styles/themes/{app}/{app}.css` avec `[data-app='{app}']` scope + global.css fallback).
+
 15. [x] Audit sécurité complet — 3 CRITICAL, 6 HIGH, 5 MEDIUM, 3 LOW identifiés
 16. [x] Audit code quality — 20 problèmes identifiés, dead files + console.log packages fixés
 17. [x] READMEs à jour — 19 packages + 8 apps READMEs réécrits (minimal <30 lignes)

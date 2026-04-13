@@ -54,6 +54,7 @@ next-env.d.ts
 .claude/**/local/**
 .claude/**/*.local.*
 .claude/worktrees/
+.claude/scheduled_tasks.lock
 
 # Temporary logs and test files
 test-*.log

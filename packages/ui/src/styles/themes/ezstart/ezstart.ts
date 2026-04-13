@@ -7,7 +7,15 @@
  */
 export const ezstartThemeCss = `/* EZStart Theme Variables */
 
-:root {
+:root[data-app='ezstart'] {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.5413 0.2466 293.01);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.95 0.03 293);
+  --secondary-foreground: oklch(0.3 0.1 293);
+  --accent: oklch(0.93 0.04 293);
+  --accent-foreground: oklch(0.3 0.1 293);
+
   --ezstart: oklch(0.5413 0.2466 293.01);
 
   /* Monitoring - Status Colors */
@@ -29,7 +37,15 @@ export const ezstartThemeCss = `/* EZStart Theme Variables */
   --platform-vercel-foreground: oklch(0.98 0 0);
 }
 
-.dark {
+:root[data-app='ezstart'].dark {
+  /* Override shadcn primary/secondary/accent tokens */
+  --primary: oklch(0.6513 0.2466 293.01);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.25 0.05 293);
+  --secondary-foreground: oklch(0.95 0.02 293);
+  --accent: oklch(0.28 0.06 293);
+  --accent-foreground: oklch(0.95 0.02 293);
+
   --ezstart: oklch(0.5413 0.2466 293.01);
 
   /* Monitoring - Status Colors (Dark Mode) */
@@ -45,7 +61,7 @@ export const ezstartThemeCss = `/* EZStart Theme Variables */
   /* Monitoring - Platform Colors (Dark Mode) */
   --platform-railway: oklch(0.65 0.19 290); /* Brighter purple for dark */
   --platform-railway-foreground: oklch(0.98 0.01 290);
-  --platform-render: oklch(0.70 0.18 240); /* Brighter blue for dark */
+  --platform-render: oklch(0.7 0.18 240); /* Brighter blue for dark */
   --platform-render-foreground: oklch(0.98 0.01 240);
   --platform-vercel: oklch(0.98 0 0); /* White for dark mode */
   --platform-vercel-foreground: oklch(0.2 0 0);
