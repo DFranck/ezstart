@@ -33,15 +33,25 @@ export async function trackAIUsage(data: {
   }
 }
 
-export async function getUsageStats(
-  appName?: string,
-  days: number = 30
-): Promise<{
+export interface UsageBreakdownEntry {
+  requests: number
+  tokens: number
+  cost: number
+}
+
+export interface UsageStatsResult {
   totalRequests: number
   totalTokens: number
   estimatedCost: number
-  byProvider: Record<string, { requests: number; tokens: number }>
-}> {
+  byProvider: Record<string, UsageBreakdownEntry>
+  /** Omitted when filtered by a specific appName (redundant). */
+  byApp?: Record<string, UsageBreakdownEntry>
+}
+
+export async function getUsageStats(
+  appName?: string,
+  days: number = 30
+): Promise<UsageStatsResult> {
   const since = new Date()
   since.setDate(since.getDate() - days)
 
@@ -67,19 +77,52 @@ export async function getUsageStats(
         _id: '$providerId',
         requests: { $sum: 1 },
         tokens: { $sum: '$tokensUsed.total' },
+        cost: { $sum: '$estimatedCost' },
       },
     },
   ])
 
-  const byProvider: Record<string, { requests: number; tokens: number }> = {}
+  const byProvider: Record<string, UsageBreakdownEntry> = {}
   for (const entry of byProviderAgg) {
-    byProvider[entry._id] = { requests: entry.requests, tokens: entry.tokens }
+    byProvider[entry._id] = {
+      requests: entry.requests,
+      tokens: entry.tokens,
+      cost: entry.cost ?? 0,
+    }
   }
 
-  return {
+  const result: UsageStatsResult = {
     totalRequests: stats?.totalRequests ?? 0,
     totalTokens: stats?.totalTokens ?? 0,
     estimatedCost: stats?.estimatedCost ?? 0,
     byProvider,
   }
+
+  // Only include byApp breakdown when not filtered by a specific app
+  if (!appName) {
+    const byAppAgg = await AIUsage.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: '$appName',
+          requests: { $sum: 1 },
+          tokens: { $sum: '$tokensUsed.total' },
+          cost: { $sum: '$estimatedCost' },
+        },
+      },
+    ])
+
+    const byApp: Record<string, UsageBreakdownEntry> = {}
+    for (const entry of byAppAgg) {
+      byApp[entry._id] = {
+        requests: entry.requests,
+        tokens: entry.tokens,
+        cost: entry.cost ?? 0,
+      }
+    }
+
+    result.byApp = byApp
+  }
+
+  return result
 }

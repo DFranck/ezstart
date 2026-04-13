@@ -1,6 +1,8 @@
 /**
  * GET /api/ai/prompts
- * List system prompts scoped by appName
+ * List system prompts. Optional `?app=` filters to prompts that target that
+ * app (either explicitly via `apps[]`, the legacy `appName` field, or via the
+ * god-level `'*'` wildcard).
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -13,18 +15,29 @@ import {
   sendValidationError,
 } from '@ezstart/express-core'
 import { z } from 'zod'
-import { AISystemPrompt } from '../../../models/AISystemPrompt.js'
+import {
+  AISystemPrompt,
+  APPS_WILDCARD,
+  PROVIDERS_WILDCARD,
+  normalizeLegacyPrompt,
+  type IAISystemPrompt,
+} from '../../../models/AISystemPrompt.js'
 
 const listPromptsQuerySchema = z.object({
-  appName: z.string().min(1).optional().describe('Application name (optional — omit for all apps)'),
+  app: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Filter to prompts targeting this app (or god-level "*").'),
   type: z
     .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
     .optional()
     .describe('Filter by prompt type'),
   provider: z
-    .enum(['all', 'gemini', 'openai', 'anthropic'])
+    .string()
+    .min(1)
     .optional()
-    .describe('Filter by AI provider'),
+    .describe('Filter by provider (matches providers[] or "all").'),
   active: z.enum(['true', 'false']).optional().describe('Filter by active status'),
   limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
   offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
@@ -43,13 +56,28 @@ docRouter.get(
         return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
       }
 
-      const { appName, type, provider, active, limit, offset } = validation.data
+      const { app, type, provider, active, limit, offset } = validation.data
 
-      const filter: Record<string, unknown> = {}
-      if (appName) filter.appName = appName
-      if (type) filter.type = type
-      if (provider) filter.provider = provider
-      if (active !== undefined) filter.isActive = active === 'true'
+      const conditions: Record<string, unknown>[] = []
+      if (app) {
+        conditions.push({
+          $or: [{ apps: app }, { apps: APPS_WILDCARD }, { appName: app }],
+        })
+      }
+      if (provider) {
+        conditions.push({
+          $or: [
+            { providers: provider },
+            { providers: PROVIDERS_WILDCARD },
+            { provider },
+            { provider: PROVIDERS_WILDCARD },
+          ],
+        })
+      }
+      if (type) conditions.push({ type })
+      if (active !== undefined) conditions.push({ isActive: active === 'true' })
+
+      const filter = conditions.length > 0 ? { $and: conditions } : {}
 
       const [prompts, total] = await Promise.all([
         AISystemPrompt.find(filter)
@@ -65,9 +93,10 @@ docRouter.get(
         res,
         {
           prompts: prompts.map(p => {
+            const normalized = normalizeLegacyPrompt(p as Partial<IAISystemPrompt>)
             const doc = p as Record<string, unknown>
             return {
-              ...p,
+              ...normalized,
               _id: String(doc._id),
               createdAt:
                 doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
@@ -84,7 +113,7 @@ docRouter.get(
     }
   },
   {
-    summary: 'List system prompts (scoped by appName)',
+    summary: 'List system prompts (multi-app aware)',
     tags: ['AI Prompts'],
   }
 )

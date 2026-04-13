@@ -1,6 +1,6 @@
 /**
  * POST /api/ai/prompts
- * Create a new system prompt scoped by appName
+ * Create a new system prompt with multi-app + multi-provider assignment.
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -14,6 +14,7 @@ import {
 } from '@ezstart/express-core'
 import { z } from 'zod'
 import { AISystemPrompt } from '../../../models/AISystemPrompt.js'
+import { clearPromptCache } from '../../../services/ai-prompt.service.js'
 
 const CreatePromptBodySchema = z.object({
   key: z
@@ -22,7 +23,14 @@ const CreatePromptBodySchema = z.object({
     .max(50)
     .regex(/^[a-z0-9-_]+$/, 'Key must be lowercase alphanumeric with dashes/underscores')
     .describe('Unique prompt key identifier'),
-  appName: z.string().min(1).max(50).describe('Application name (required)'),
+  apps: z
+    .array(z.string().min(1).max(50))
+    .min(1)
+    .describe('List of target apps. Use ["*"] for god-level (all apps).'),
+  providers: z
+    .array(z.string().min(1).max(50))
+    .min(1)
+    .describe('List of target providers. Use ["all"] to apply to every provider.'),
   name: z.string().min(1).max(100).describe('Prompt display name'),
   description: z.string().max(500).optional().describe('Prompt description'),
   content: z.string().min(1).max(10000).describe('Prompt content template'),
@@ -30,14 +38,17 @@ const CreatePromptBodySchema = z.object({
     .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
     .default('general')
     .describe('Prompt category type'),
-  provider: z
-    .enum(['all', 'gemini', 'openai', 'anthropic'])
-    .default('all')
-    .describe('Target AI provider'),
   isActive: z.boolean().default(true).describe('Whether prompt is active'),
   isDefault: z.boolean().default(false).describe('Whether this is the default prompt'),
+  priority: z
+    .number()
+    .int()
+    .min(0)
+    .max(999)
+    .optional()
+    .describe('Composition priority (higher first within group)'),
   variables: z.array(z.string()).optional().describe('Template variable names'),
-  providers: z
+  providerAssignments: z
     .array(
       z.object({
         providerId: z.string().min(1),
@@ -45,7 +56,7 @@ const CreatePromptBodySchema = z.object({
       })
     )
     .optional()
-    .describe('Provider assignments with priority'),
+    .describe('Detailed provider assignments with per-provider priority'),
 })
 
 export const createPromptRegistry = new OpenAPIRegistry()
@@ -62,21 +73,31 @@ docRouter.post(
       }
       const body = validation.data
 
-      // Check if key already exists for this appName
+      // Uniqueness: a key collides with any existing doc that targets one of
+      // the same apps. Use $in so any overlap is rejected.
       const existing = await AISystemPrompt.findOne({
         key: body.key,
-        appName: body.appName,
+        $or: [{ apps: { $in: body.apps } }, { appName: { $in: body.apps } }],
       })
         .lean()
         .exec()
       if (existing) {
-        return sendError(res, 'A prompt with this key already exists for this app', 409)
+        return sendError(
+          res,
+          'A prompt with this key already exists for one of the target apps',
+          409
+        )
       }
 
-      // If setting as default, unset other defaults of same type + appName
+      // If marked default, demote previous defaults of the same type that
+      // share at least one of the target apps.
       if (body.isDefault) {
         await AISystemPrompt.updateMany(
-          { type: body.type, appName: body.appName, isDefault: true },
+          {
+            type: body.type,
+            isDefault: true,
+            $or: [{ apps: { $in: body.apps } }, { appName: { $in: body.apps } }],
+          },
           { $set: { isDefault: false } }
         )
       }
@@ -87,6 +108,7 @@ docRouter.post(
       })
 
       await prompt.save()
+      clearPromptCache()
 
       sendSuccess(res.status(201), {
         ...prompt.toObject(),
@@ -100,7 +122,7 @@ docRouter.post(
     }
   },
   {
-    summary: 'Create a new system prompt (scoped by appName)',
+    summary: 'Create a system prompt (multi-app + multi-provider)',
     tags: ['AI Prompts'],
     bodySchema: CreatePromptBodySchema,
   }

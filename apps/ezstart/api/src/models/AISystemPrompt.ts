@@ -5,6 +5,15 @@ const { Schema, model, models } = mongoose
 export type PromptType = 'general' | 'extraction' | 'validation' | 'vision' | 'custom'
 export type ProviderTarget = 'all' | 'gemini' | 'openai' | 'anthropic'
 
+/**
+ * Wildcard sentinel used in `apps[]` to mean "applies to every app" (god-level).
+ */
+export const APPS_WILDCARD = '*'
+/**
+ * Wildcard sentinel used in `providers[]` to mean "applies to every provider".
+ */
+export const PROVIDERS_WILDCARD = 'all'
+
 export interface PromptConfig {
   temperature?: number
   maxTokens?: number
@@ -30,18 +39,42 @@ export interface IPromptProvider {
 
 export interface IAISystemPrompt {
   key: string
-  appName: string
+  /**
+   * List of apps this prompt targets. Use `['*']` for god-level prompts that apply
+   * to every app. Multiple values compose (multi-app assignment).
+   */
+  apps: string[]
+  /**
+   * List of providers this prompt targets. Use `['all']` to apply to every provider.
+   * Multiple values compose (multi-provider assignment).
+   */
+  providers: string[]
   name: string
   description?: string
   content: string
   config?: PromptConfig
   type: PromptType
-  provider: ProviderTarget
-  providers?: IPromptProvider[]
   isActive: boolean
   isDefault: boolean
+  /**
+   * Optional ordering hint when composing multiple prompts (higher = injected later).
+   * Default 0.
+   */
+  priority?: number
+  /**
+   * Per-provider assignments with priority (legacy detailed mapping kept for UI).
+   */
+  providerAssignments?: IPromptProvider[]
   variables?: string[]
   updatedBy?: string
+  // ────────────────────────────────────────────────────────────────────────────
+  // Legacy fields — kept optional for backward compatibility while old documents
+  // are progressively migrated. New code MUST read from `apps[]` / `providers[]`.
+  // ────────────────────────────────────────────────────────────────────────────
+  /** @deprecated Use `apps[]`. Old single-app field. */
+  appName?: string
+  /** @deprecated Use `providers[]`. Old single-provider field. */
+  provider?: ProviderTarget
   createdAt: Date
   updatedAt: Date
 }
@@ -55,10 +88,23 @@ const aiSystemPromptSchema = new Schema<IAISystemPrompt>(
       trim: true,
       match: /^[a-z0-9-_]+$/,
     },
-    appName: {
-      type: String,
+    apps: {
+      type: [String],
       required: true,
-      index: true,
+      default: [],
+      validate: {
+        validator: (v: string[]) => Array.isArray(v) && v.length > 0,
+        message: 'apps must contain at least one entry (use ["*"] for all apps)',
+      },
+    },
+    providers: {
+      type: [String],
+      required: true,
+      default: ['all'],
+      validate: {
+        validator: (v: string[]) => Array.isArray(v) && v.length > 0,
+        message: 'providers must contain at least one entry (use ["all"] for all providers)',
+      },
     },
     name: {
       type: String,
@@ -83,11 +129,6 @@ const aiSystemPromptSchema = new Schema<IAISystemPrompt>(
       enum: ['general', 'extraction', 'validation', 'vision', 'custom'],
       default: 'general',
     },
-    provider: {
-      type: String,
-      enum: ['all', 'gemini', 'openai', 'anthropic'],
-      default: 'all',
-    },
     isActive: {
       type: Boolean,
       default: true,
@@ -96,7 +137,11 @@ const aiSystemPromptSchema = new Schema<IAISystemPrompt>(
       type: Boolean,
       default: false,
     },
-    providers: {
+    priority: {
+      type: Number,
+      default: 0,
+    },
+    providerAssignments: {
       type: [
         {
           providerId: { type: String, required: true },
@@ -112,16 +157,50 @@ const aiSystemPromptSchema = new Schema<IAISystemPrompt>(
     updatedBy: {
       type: String,
     },
+    // Legacy fields — preserved so old DB docs stay readable until migration.
+    appName: {
+      type: String,
+      required: false,
+    },
+    provider: {
+      type: String,
+      enum: ['all', 'gemini', 'openai', 'anthropic'],
+      required: false,
+    },
   },
   {
     timestamps: true,
   }
 )
 
-// Compound unique index: same key allowed across different apps
-aiSystemPromptSchema.index({ key: 1, appName: 1 }, { unique: true })
-// Index for quick lookups by type, provider, and active status scoped by appName
-aiSystemPromptSchema.index({ appName: 1, type: 1, provider: 1, isActive: 1 })
+// Primary lookup: find prompts that target a given app + type and are active.
+aiSystemPromptSchema.index({ apps: 1, type: 1, isActive: 1 })
+// Secondary: provider filtering during composition.
+aiSystemPromptSchema.index({ providers: 1 })
+// Uniqueness: a key is unique within its `apps` scope. Mongo's multikey index
+// on `apps` lets any array entry collide with another doc that shares it, which
+// is exactly what we want (one `key` per (key, app) pair).
+aiSystemPromptSchema.index({ key: 1, apps: 1 }, { unique: true })
+
+/**
+ * Backward-compat normalizer for documents that still hold the legacy
+ * `appName` / `provider` singular fields without populating the new arrays.
+ * Returns a shallow-cloned plain object with `apps[]` / `providers[]` always
+ * set so callers can rely on the new shape regardless of DB state.
+ */
+export function normalizeLegacyPrompt<T extends Partial<IAISystemPrompt>>(doc: T): T {
+  if (!doc) return doc
+  const out: T = { ...doc }
+  if ((!out.apps || out.apps.length === 0) && out.appName) {
+    out.apps = [out.appName]
+  }
+  if ((!out.providers || out.providers.length === 0) && out.provider) {
+    out.providers = [out.provider]
+  }
+  if (!out.apps || out.apps.length === 0) out.apps = [APPS_WILDCARD]
+  if (!out.providers || out.providers.length === 0) out.providers = [PROVIDERS_WILDCARD]
+  return out
+}
 
 export const AISystemPrompt: Model<IAISystemPrompt> =
   models.AISystemPrompt || model<IAISystemPrompt>('AISystemPrompt', aiSystemPromptSchema)

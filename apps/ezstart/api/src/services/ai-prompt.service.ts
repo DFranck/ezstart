@@ -1,6 +1,9 @@
 import { logger } from '@ezstart/logger/server'
 import {
   AISystemPrompt,
+  APPS_WILDCARD,
+  PROVIDERS_WILDCARD,
+  normalizeLegacyPrompt,
   type IAISystemPrompt,
   type PromptType,
   type ProviderTarget,
@@ -62,100 +65,132 @@ RULES:
   },
 }
 
+// ============================================================================
+// COMPOSED RESOLVER
+// ============================================================================
+
 /**
- * Get a system prompt by type, provider, and appName
- * Uses in-memory cache (5min TTL) to avoid DB query on every chat request
+ * Resolve and COMPOSE all active system prompts that match the given
+ * (type, provider, appName) tuple.
+ *
+ * Matching rules:
+ *  - `apps[]` contains `appName` OR `apps[]` contains `'*'` (god-level)
+ *  - `providers[]` contains `provider` OR `providers[]` contains `'all'`
+ *  - `type` strict match
+ *  - `isActive: true`
+ *
+ * Composition order:
+ *  1. God-level prompts (`apps` includes `'*'`) injected FIRST
+ *  2. App-scoped prompts injected AFTER (so they can specialize / override)
+ *  Within each group, ordering: `isDefault` desc, `priority` desc, `createdAt` asc.
+ *
+ * Backward compat: documents lacking the new `apps[]` / `providers[]` arrays
+ * (legacy `appName` / `provider`) are normalized in-memory before composition.
+ */
+export async function getComposedSystemPrompt(
+  type: PromptType = 'general',
+  provider: ProviderTarget = 'all',
+  appName: string
+): Promise<string> {
+  const cached = getFromCache(appName, type, provider)
+  if (cached) return cached
+
+  try {
+    // Build a query that tolerates BOTH new (apps[]/providers[]) and legacy
+    // (appName/provider) document shapes during the soft migration window.
+    const appMatch = {
+      $or: [
+        { apps: appName },
+        { apps: APPS_WILDCARD },
+        // Legacy fallback for un-migrated docs
+        { appName },
+      ],
+    }
+    const providerMatch = {
+      $or: [
+        { providers: provider },
+        { providers: PROVIDERS_WILDCARD },
+        // Legacy fallback
+        { provider },
+        { provider: PROVIDERS_WILDCARD },
+      ],
+    }
+
+    const raw = await AISystemPrompt.find({
+      $and: [appMatch, providerMatch, { type }, { isActive: true }],
+    })
+      .sort({ isDefault: -1, priority: -1, createdAt: 1 })
+      .lean()
+      .exec()
+
+    const prompts = raw.map(p => normalizeLegacyPrompt(p as Partial<IAISystemPrompt>))
+
+    if (prompts.length === 0) {
+      const fallback = DEFAULT_PROMPTS[type]
+      const content = fallback?.content || 'You are a helpful assistant.'
+      logger.info(
+        `[AIPromptService] No prompts matched for app=${appName} type=${type} provider=${provider}, using fallback`
+      )
+      setCache(appName, type, provider, content)
+      return content
+    }
+
+    // God-level first, then app-scoped (so app-scoped can specialize)
+    const godPrompts = prompts.filter(p => (p.apps ?? []).includes(APPS_WILDCARD))
+    const appPrompts = prompts.filter(p => !(p.apps ?? []).includes(APPS_WILDCARD))
+
+    const composed = [...godPrompts, ...appPrompts]
+      .map(p => p.content)
+      .filter((c): c is string => Boolean(c && c.trim().length > 0))
+      .join('\n\n---\n\n')
+
+    const finalContent =
+      composed || DEFAULT_PROMPTS[type]?.content || 'You are a helpful assistant.'
+    setCache(appName, type, provider, finalContent)
+    return finalContent
+  } catch (error) {
+    logger.error('[AIPromptService] Error composing prompt:', error)
+    return DEFAULT_PROMPTS[type]?.content || 'You are a helpful assistant.'
+  }
+}
+
+/**
+ * @deprecated Use {@link getComposedSystemPrompt}. Wrapper kept for backward
+ * compatibility with existing call sites.
  */
 export async function getSystemPrompt(
   type: PromptType = 'general',
   provider: ProviderTarget = 'all',
   appName: string
 ): Promise<string> {
-  // Check cache first
-  const cached = getFromCache(appName, type, provider)
-  if (cached) {
-    return cached
-  }
-
-  try {
-    // Try to find a prompt matching type, provider, and appName
-    let prompt = await AISystemPrompt.findOne({
-      appName,
-      type,
-      provider: { $in: [provider, 'all'] },
-      isActive: true,
-    })
-      .sort({ isDefault: -1, provider: 1 })
-      .lean()
-      .exec()
-
-    // If no prompt found, try just by type and appName
-    if (!prompt) {
-      prompt = await AISystemPrompt.findOne({
-        appName,
-        type,
-        isActive: true,
-      })
-        .sort({ isDefault: -1 })
-        .lean()
-        .exec()
-    }
-
-    if (prompt) {
-      setCache(appName, type, provider, prompt.content)
-      return prompt.content
-    }
-
-    // Fallback to default prompts
-    const fallback = DEFAULT_PROMPTS[type]
-    if (fallback) {
-      logger.info(`[AIPromptService] Using fallback prompt for app: ${appName}, type: ${type}`)
-      setCache(appName, type, provider, fallback.content)
-      return fallback.content
-    }
-
-    // Ultimate fallback
-    logger.warn(
-      `[AIPromptService] No prompt found for app: ${appName}, type: ${type}, using generic fallback`
-    )
-    const generic = 'You are a helpful assistant.'
-    setCache(appName, type, provider, generic)
-    return generic
-  } catch (error) {
-    logger.error('[AIPromptService] Error fetching prompt:', error)
-    return DEFAULT_PROMPTS[type]?.content || 'You are a helpful assistant.'
-  }
+  return getComposedSystemPrompt(type, provider, appName)
 }
 
 /**
- * Get full prompt document by type and appName (not just content string).
- * Useful when caller needs config, provider target, variables, etc.
+ * Get a single full prompt document for a (type, appName) — used by callers
+ * that need metadata (config, variables, providers list) rather than the
+ * composed string. Returns the highest-priority active doc.
  */
 export async function getSystemPromptDoc(
   type: PromptType = 'general',
   appName: string
 ): Promise<IAISystemPrompt | null> {
   try {
-    const cached = getFromCache(appName, type, 'all')
-    // Cache only stores content strings; for full doc we query DB
-    const prompt = await AISystemPrompt.findOne({
-      appName,
-      type,
-      isActive: true,
+    const raw = await AISystemPrompt.findOne({
+      $and: [
+        {
+          $or: [{ apps: appName }, { apps: APPS_WILDCARD }, { appName }],
+        },
+        { type },
+        { isActive: true },
+      ],
     })
-      .sort({ isDefault: -1 })
+      .sort({ isDefault: -1, priority: -1, createdAt: 1 })
       .lean()
       .exec()
 
-    if (prompt) {
-      // Also populate content cache as a side-effect
-      if (!cached) {
-        setCache(appName, type, prompt.provider, prompt.content)
-      }
-      return prompt as IAISystemPrompt
-    }
-
-    return null
+    if (!raw) return null
+    return normalizeLegacyPrompt(raw as Partial<IAISystemPrompt>) as IAISystemPrompt
   } catch (error) {
     logger.error('[AIPromptService] Error fetching prompt doc:', error)
     return null
@@ -163,12 +198,20 @@ export async function getSystemPromptDoc(
 }
 
 /**
- * Get a prompt by its unique key and appName
+ * Get a prompt by its unique key (optionally constrained to an app scope).
  */
 export async function getPromptByKey(key: string, appName: string): Promise<string | null> {
   try {
-    const prompt = await AISystemPrompt.findOne({ key, appName, isActive: true }).lean().exec()
-    return prompt?.content || null
+    const raw = await AISystemPrompt.findOne({
+      key,
+      isActive: true,
+      $or: [{ apps: appName }, { apps: APPS_WILDCARD }, { appName }],
+    })
+      .lean()
+      .exec()
+    if (!raw) return null
+    const doc = normalizeLegacyPrompt(raw as Partial<IAISystemPrompt>)
+    return doc?.content || null
   } catch (error) {
     logger.error('[AIPromptService] Error fetching prompt by key:', error)
     return null
@@ -180,7 +223,10 @@ export async function getPromptByKey(key: string, appName: string): Promise<stri
  */
 export async function seedDefaultPrompts(appName: string): Promise<void> {
   try {
-    const count = await AISystemPrompt.countDocuments({ appName })
+    // Match both new shape (apps array) and legacy (appName) docs
+    const count = await AISystemPrompt.countDocuments({
+      $or: [{ apps: appName }, { appName }],
+    })
     if (count > 0) {
       logger.info(
         `[AIPromptService] ${count} prompts already exist for app: ${appName}, skipping seed`
@@ -192,12 +238,12 @@ export async function seedDefaultPrompts(appName: string): Promise<void> {
 
     const prompts = Object.entries(DEFAULT_PROMPTS).map(([key, data]) => ({
       key,
-      appName,
+      apps: [appName],
+      providers: [PROVIDERS_WILDCARD],
       name: data.name,
       description: data.description,
       content: data.content,
       type: key as PromptType,
-      provider: 'all' as ProviderTarget,
       isActive: true,
       isDefault: true,
       updatedBy: 'system',

@@ -145,9 +145,12 @@ export class AIClient {
     active?: boolean
     limit?: number
     offset?: number
+    /** Override default app filter ('*' or empty = all apps). Defaults to client.appName when set. */
+    app?: string
   }): Promise<{ prompts: SystemPrompt[]; meta: PaginationMeta }> {
     const query = new URLSearchParams()
-    if (this.appName) query.set('appName', this.appName)
+    const appFilter = params?.app !== undefined ? params.app : this.appName
+    if (appFilter) query.set('app', appFilter)
     if (params?.type) query.set('type', params.type)
     if (params?.provider) query.set('provider', params.provider)
     if (params?.active !== undefined) query.set('active', String(params.active))
@@ -157,19 +160,19 @@ export class AIClient {
   }
 
   async getPrompt(key: string): Promise<SystemPrompt> {
-    const query = this.appName ? `?appName=${this.appName}` : ''
+    const query = this.appName ? `?app=${this.appName}` : ''
     return this.fetch(`/prompts/${key}${query}`)
   }
 
-  async createPrompt(data: Omit<CreatePromptRequest, 'appName'>): Promise<SystemPrompt> {
+  async createPrompt(data: CreatePromptRequest): Promise<SystemPrompt> {
     return this.fetch('/prompts', {
       method: 'POST',
-      body: JSON.stringify({ ...data, appName: this.appName }),
+      body: JSON.stringify(data),
     })
   }
 
   async updatePrompt(key: string, data: UpdatePromptRequest): Promise<SystemPrompt> {
-    const query = this.appName ? `?appName=${this.appName}` : ''
+    const query = this.appName ? `?app=${this.appName}` : ''
     return this.fetch(`/prompts/${key}${query}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -177,7 +180,7 @@ export class AIClient {
   }
 
   async deletePrompt(key: string): Promise<void> {
-    const query = this.appName ? `?appName=${this.appName}` : ''
+    const query = this.appName ? `?app=${this.appName}` : ''
     return this.fetch(`/prompts/${key}${query}`, { method: 'DELETE' })
   }
 
@@ -235,7 +238,8 @@ export class AIClient {
     totalRequests: number
     totalTokens: number
     estimatedCost: number
-    byProvider: Record<string, { requests: number; tokens: number }>
+    byProvider: Record<string, { requests: number; tokens: number; cost: number }>
+    byApp?: Record<string, { requests: number; tokens: number; cost: number }>
   }> {
     const query = new URLSearchParams()
     if (this.appName) query.set('appName', this.appName)
