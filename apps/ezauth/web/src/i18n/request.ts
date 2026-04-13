@@ -11,7 +11,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
-  const [common, auth, admin] = await Promise.all([
+  // Always load `en` as a fallback base so any missing keys in a non-default
+  // locale fall back to English rather than rendering the raw key.
+  const [commonEn, authEn, adminEn, common, auth, admin] = await Promise.all([
+    import(`../messages/en/common.json`),
+    import(`../messages/en/auth.json`),
+    import(`../messages/en/admin.json`),
     import(`../messages/${locale}/common.json`),
     import(`../messages/${locale}/auth.json`),
     import(`../messages/${locale}/admin.json`),
@@ -19,6 +24,13 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: merge.all([common.default, auth.default, admin.default]),
+    messages: merge.all([
+      commonEn.default,
+      authEn.default,
+      adminEn.default,
+      common.default,
+      auth.default,
+      admin.default,
+    ]),
   }
 })

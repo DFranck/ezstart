@@ -35,6 +35,27 @@ TypeScript strictness, code duplication, naming conventions, dead code, API stan
 - [ ] No duplicated utils (check packages/utils first)
 - [ ] No circular dependencies between packages
 
+## Checklist — Frontend ↔ Backend Contract (CRITICAL)
+
+When a backend validation rule is touched (Zod schema, route handler), the frontend MUST be verified:
+
+- [ ] Same validation constants (min/max length, regex) in frontend forms
+- [ ] Frontend displays backend Zod `details[].message` on 400 errors, not generic "Invalid request"
+- [ ] Response shape changes (e.g. `{ success, data, meta }`) checked across ALL consumers (grep call sites)
+- [ ] URL/endpoint changes propagated to every caller
+- [ ] Shared constants (e.g. `MIN_PASSWORD_LENGTH`) live in `packages/*` and are imported by both front and back — never hardcoded in two places
+
+## Checklist — Cross-Form Consistency
+
+When multiple forms handle the same concept (signup / reset-password / change-password / quick-signup), they MUST share:
+
+- [ ] Same password strength indicator component
+- [ ] Same min/max length constants (imported from shared source)
+- [ ] Same error display pattern (inline + detailed Zod error extraction)
+- [ ] Same i18n key namespace for shared strings ("password.tooShort", "password.mismatch"…)
+- [ ] Same confirm-password validation logic
+- [ ] Audit trigger: any form touched → verify sibling forms stay aligned
+
 ## Checklist — API Standards (merged from api-standards)
 
 - [ ] Response format: { success, data, meta? } via sendSuccess/sendError

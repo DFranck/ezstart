@@ -22,6 +22,18 @@ Verify client-side rendering is flawless: loading states, feedback, logging, and
 - [ ] `sonner` toast for ALL user feedback (zero alert(), zero window.confirm)
 - [ ] Toast messages use i18n (t() not hardcoded strings)
 - [ ] Error toasts show useful info (not generic "Something went wrong")
+- [ ] Backend Zod validation errors surfaced — extract `data.details[0].message` from 400 responses, don't show generic "Invalid request"
+
+## Checklist — Form Parity (CRITICAL)
+
+Siblings forms must be aligned. When you audit one form (signup / login / reset-password / change-password / quick-signup), grep its siblings and verify:
+
+- [ ] Same password strength indicator where password input exists
+- [ ] Same min/max length constants (ideally imported from a shared module, not hardcoded per form)
+- [ ] Same confirm-password pattern (field + mismatch validation)
+- [ ] Same inline error display (below input, not only at submit)
+- [ ] Same i18n namespace for shared strings (password.tooShort, password.mismatch…)
+- [ ] Trigger: any form touched → audit siblings to prevent drift
 
 ## Checklist — Logging
 

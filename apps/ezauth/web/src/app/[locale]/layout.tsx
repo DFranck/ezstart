@@ -43,7 +43,7 @@ export function generateStaticParams() {
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params
   const messages = await getMessages()
-  const t = await getTranslations({ locale, namespace: 'common' })
+  const t = await getTranslations({ locale })
 
   return (
     <html lang={locale} suppressHydrationWarning data-app="ezauth">

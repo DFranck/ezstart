@@ -2,7 +2,7 @@ import type { AppName } from '@ezstart/config/urls'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 
-export type ApiError = { error: string; [key: string]: unknown }
+export type ApiError = { error: string; code?: string; [key: string]: unknown }
 
 export type ApiResponse<T> =
   | {
