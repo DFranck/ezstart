@@ -1,7 +1,7 @@
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { Button, Icon, isValidIconName, LI, UL } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
-import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Link from 'next/link'
 
 type Props = { className?: string }
@@ -23,7 +23,7 @@ const ContactsList = ({ className }: Props): React.JSX.Element => {
     >
       {links.map(link => (
         <LI key={link.href}>
-          <Button asChild size={'sm'}>
+          <Button asChild size={'sm'} variant={'outline'}>
             <Link href={link.href} target="_blank" rel="noopener noreferrer">
               {isValidIconName(link.icon) ? <Icon name={link.icon} /> : <Icon name="lucide:Link" />}
               {!isMobile && link.label}

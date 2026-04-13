@@ -6,7 +6,7 @@ import React, { ComponentProps, ElementType, useMemo } from 'react'
 import { cn } from '../../../../lib/utils'
 import { useDesignTokens } from '../../../../lib/design-system/DesignTokenContext'
 import { CustomVariants, INTENT_ARIA_MAP, SupportedAs, TagAriaProps } from '../types'
-import { tagVariants } from '../../../../lib/design-system/variants'
+import { tagVariants, tagVariantsMeta } from '../../../../lib/design-system/variants'
 
 export type TagProps<T extends SupportedAs = 'span'> = Omit<ComponentProps<T>, never> & {
   as?: T
@@ -18,12 +18,21 @@ export type TagProps<T extends SupportedAs = 'span'> = Omit<ComponentProps<T>, n
 /**
  * Filter props to only pass valid DOM attributes.
  * Prevents React warnings for non-standard attributes.
+ *
+ * `variantKeys` lists the CVA variant prop names for the current tag — these
+ * are consumed by the variant function to produce classNames and must NEVER
+ * leak to the DOM (e.g. `withHeaderOffset`, `intent`, `density`, `layout`...).
  */
-function filterDomSafeProps(props: Record<string, unknown>): Record<string, unknown> {
+function filterDomSafeProps(
+  props: Record<string, unknown>,
+  variantKeys: ReadonlySet<string>
+): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(props).filter(([key, value]) => {
       // ref is handled separately — never spread it via domSafeProps
       if (key === 'ref') return false
+      // CVA variant props — consumed for className, must not reach DOM
+      if (variantKeys.has(key)) return false
       if (key.startsWith('data-') || key.startsWith('aria-')) return true
       if (key === 'id' || key === 'className' || key === 'style') return true
       if (key === 'role') return true
@@ -105,9 +114,16 @@ function TagComponent<T extends SupportedAs = 'span'>({
 
   const Component: ElementType = asChild ? Slot : as || 'span'
 
+  const variantKeys = useMemo(() => {
+    const meta = tagVariantsMeta[tag as keyof typeof tagVariantsMeta] as
+      | Record<string, unknown>
+      | undefined
+    return new Set<string>(meta ? Object.keys(meta) : [])
+  }, [tag])
+
   const domSafeProps = useMemo(
-    () => filterDomSafeProps(resolvedProps as Record<string, unknown>),
-    [resolvedProps]
+    () => filterDomSafeProps(resolvedProps as Record<string, unknown>, variantKeys),
+    [resolvedProps, variantKeys]
   )
 
   const ariaAttributes = useMemo(
