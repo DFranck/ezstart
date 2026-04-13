@@ -14,6 +14,8 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
 import { passwordResetTemplate } from '@ezstart/email-service'
+import type { EmailContext } from '@ezstart/email-service'
+import { forgotPasswordRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
@@ -29,24 +31,19 @@ const forgotPasswordRateLimiter = createVeryStrictRateLimiter({
   message: 'Too many password reset attempts, please try again later.',
 })
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email format').describe('User email address'),
-  app: z.string().optional().describe('App requesting the password reset'),
-  redirect_uri: z.string().url().optional().describe('Redirect URI to return to after reset'),
-})
-
 const forgotPasswordResponseSchema = z.object({
   message: z.string().describe('Response message'),
 })
 
 const forgotPasswordController = async (req: Request, res: Response) => {
   try {
-    const parsed = forgotPasswordSchema.safeParse(req.body)
+    const parsed = forgotPasswordRequestSchema.safeParse(req.body)
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid email address', parsed.error.issues)
     }
 
-    const { email, app, redirect_uri } = parsed.data
+    const { email, app, redirect_uri, locale, emailOverride } = parsed.data
+    const appKey = app || 'ezstart'
     const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findOne({ email: email.toLowerCase() })
 
@@ -58,7 +55,7 @@ const forgotPasswordController = async (req: Request, res: Response) => {
         code: token,
         userId: user._id!.toString(),
         type: 'password-reset',
-        app: app || 'ezstart',
+        app: appKey,
         expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
       })
 
@@ -68,14 +65,24 @@ const forgotPasswordController = async (req: Request, res: Response) => {
       const params = buildAuthEmailParams(token, app, redirect_uri)
       const resetUrl = `${getWebUrl('ezauth')}/reset-password?${params}`
 
+      const ctx: EmailContext = {
+        appName: appDisplayName,
+        appKey,
+        locale,
+        overrides: emailOverride,
+      }
+      const rendered = passwordResetTemplate({ resetUrl }, ctx)
+
       await emailService.send({
         to: user.email,
-        from: `${appDisplayName} <noreply@ezstart.xyz>`,
-        subject: `[${appDisplayName}] Reset your password`,
-        html: passwordResetTemplate(resetUrl, appDisplayName),
+        from: rendered.from ?? `${appDisplayName} <noreply@ezstart.xyz>`,
+        ...(rendered.replyTo ? { replyTo: rendered.replyTo } : {}),
+        subject: rendered.subject,
+        html: rendered.html,
+        ...(rendered.text ? { text: rendered.text } : {}),
       })
 
-      logger.info({ email: user.email }, 'Password reset email sent')
+      logger.info({ email: user.email, locale, appKey }, 'Password reset email sent')
     } else {
       logger.debug({ email }, 'Password reset requested for non-existent email')
     }
@@ -92,7 +99,7 @@ const forgotPasswordController = async (req: Request, res: Response) => {
 docRouter.post('/forgot-password', forgotPasswordRateLimiter, forgotPasswordController, {
   summary: 'Request password reset email',
   tags: ['Authentication'],
-  bodySchema: forgotPasswordSchema,
+  bodySchema: forgotPasswordRequestSchema,
   responseSchema: forgotPasswordResponseSchema,
   extraResponses: {
     429: {
