@@ -19,6 +19,8 @@
     "rotate-secrets": "node scripts/tools/rotate-secrets.js",
     "validate-env": "node scripts/tools/validate-env.js",
     "secrets:sync": "node scripts/tools/secrets-sync.js",
+    "secrets:pull": "node scripts/tools/secrets-pull.js",
+    "secrets:audit": "node scripts/tools/secrets-audit.js",
     "secret:gen": "node scripts/tools/generate-secret.js",
     "generate": "turbo run generate",
     "postinstall": "turbo run generate || echo \"(postinstall) generate skipped — run 'pnpm generate' manually\"",

@@ -161,6 +161,86 @@ pnpm secrets:sync -- --dry-run          # preview
 pnpm secrets:sync -- --vars KEY1,KEY2   # only specific vars
 ```
 
+### Vercel scope
+
+`secrets:pull` and `secrets:audit` need a team scope to link each project.
+Set one of these env vars (in your shell or root `.env.local`) to skip the
+probing:
+
+```bash
+VERCEL_SCOPE=dfrancks-projects   # preferred
+# or VERCEL_TEAM_SLUG / VERCEL_TEAM_ID
+```
+
+Without it, the scripts try `dfrancks-projects` then `odasie` in order.
+
+### `pnpm secrets:pull`
+
+Fetches production vars from all Vercel projects + Railway services and writes
+the **shared** ones (present identically in 2+ targets) to root
+`.env.production`. Values are masked in all stdout.
+
+```bash
+pnpm secrets:pull                    # fetch all, write root .env.production
+pnpm secrets:pull -- --dry-run       # preview, no write
+pnpm secrets:pull -- --vercel-only   # only Vercel
+pnpm secrets:pull -- --railway-only  # only Railway
+pnpm secrets:pull -- --merge         # keep existing local-only keys
+```
+
+Heuristic:
+
+- Var identical across **2+ targets** → **shared** → written to root.
+- Var present in **only 1 target** → app-specific → **not written**, reported.
+- Var with **different values** across targets → **conflict** → not written,
+  reported so you can resolve manually.
+
+A timestamped backup of the previous `.env.production` is always written to
+`tmp/secrets-pull-backup-<ts>.env.production` before overwriting.
+
+### `pnpm secrets:audit`
+
+Compares root `.env.production` against the current state of Vercel + Railway.
+Never modifies anything. Categories: **OK**, **MISSING IN CLOUD**,
+**MISSING IN LOCAL**, **DRIFT**, **CLOUD CONFLICT**.
+
+```bash
+pnpm secrets:audit                   # full audit, human output
+pnpm secrets:audit -- --vercel-only
+pnpm secrets:audit -- --railway-only
+pnpm secrets:audit -- --strict       # exit 1 if any drift (CI)
+pnpm secrets:audit -- --json         # machine-readable output
+```
+
+## Workflow bidirectionnel
+
+```bash
+# Bootstrap: pull the current cloud state
+pnpm secrets:pull
+
+# Edit .env.production (add new vars, fix values)
+
+# Audit before pushing
+pnpm secrets:audit
+
+# Push to cloud
+pnpm secrets:sync
+
+# Confirm no drift
+pnpm secrets:audit
+```
+
+**Conflict resolution**: if `secrets:pull` flags a conflict (same key, different
+values across targets) or `secrets:audit` flags a DRIFT, the fix is always
+manual — update `.env.production` to the intended value, then `secrets:sync`.
+
+**`--merge` mode**: on `secrets:pull`, preserves any key in your existing local
+`.env.production` that the cloud fetch didn't return. Use when you have
+local-only shared vars not yet pushed anywhere.
+
+**`--strict` in CI**: add a GitHub Action that runs `pnpm secrets:audit --strict`
+on a schedule — it exits 1 if the cloud drifted away from the repo intent.
+
 ### `pnpm secret:gen`
 
 Generate a cryptographically secure secret for ad-hoc use.
