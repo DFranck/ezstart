@@ -15,7 +15,13 @@
 import * as dotenv from 'dotenv'
 import path from 'path'
 import { existsSync, readdirSync } from 'fs'
-import { logger } from '@ezstart/logger/server'
+
+// NOTE: do NOT import @ezstart/logger here.
+// This file is loaded by Next.js configs and Express bootstraps. Pulling in
+// the logger drags Sentry's Node SDK (and therefore `async_hooks`) into the
+// client bundle whenever it transitively appears in a "use client" import
+// chain (e.g. via `@ezstart/config`). `console` is enough for boot-time
+// diagnostics — these run once at process start, output goes to stdout.
 
 export interface LoadEnvOptions {
   /** App name (e.g. 'ezbill'). Omit to only load root shared env. */
@@ -102,7 +108,8 @@ export function loadSharedEnv(opts: LoadEnvOptions = {}): void {
   }
 
   if (!opts.silent && loaded.length > 0) {
-    logger.info(`🔐 [env] Loaded: ${loaded.join(' → ')}`)
+    // eslint-disable-next-line no-console
+    console.info(`🔐 [env] Loaded: ${loaded.join(' → ')}`)
   }
 
   // 3. Validate required vars

@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import express, { Express } from 'express'
 import type { AppName } from '@ezstart/config/urls'
 import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors'
-import { loadSharedEnv } from '@ezstart/config/secrets-loader'
+import { loadSharedEnv } from '@ezstart/config/server'
 import { logger } from '@ezstart/logger/server'
 import { securityHeaders, securityHeadersPresets } from '../middleware/security-headers.js'
 
