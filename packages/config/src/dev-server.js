@@ -21,7 +21,7 @@ if (!appName) {
 }
 
 async function isPortFree(port) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const server = net.createServer()
     server.listen(port, () => {
       server.once('close', () => resolve(true))
@@ -58,12 +58,12 @@ async function startDev() {
       shell: true,
     })
 
-    child.on('error', (error) => {
+    child.on('error', error => {
       console.error('❌ Error starting dev server:', error)
       process.exit(1)
     })
 
-    child.on('exit', (code) => {
+    child.on('exit', code => {
       process.exit(code || 0)
     })
   } catch (error) {

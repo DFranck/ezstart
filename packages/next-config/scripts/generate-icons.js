@@ -19,14 +19,14 @@ const APPLE_TOUCH_ICON_SIZE = 180
  */
 async function findLogoSource(publicDir) {
   const possibleSources = [
-    'logo.svg',        // ⭐ Priorité 1: SVG vectoriel (meilleure qualité)
-    'logo.png',        // Priorité 2: PNG haute résolution
+    'logo.svg', // ⭐ Priorité 1: SVG vectoriel (meilleure qualité)
+    'logo.png', // Priorité 2: PNG haute résolution
     'logo-source.svg', // Priorité 3: SVG source alternative
     'logo-source.png', // Priorité 4: PNG source alternative
-    'icon.svg',        // Priorité 5: SVG icon fallback
-    'icon.png',        // Priorité 6: PNG icon fallback
-    'logo.jpg',        // Priorité 7: JPG (pas de transparence)
-    'logo.jpeg',       // Priorité 8: JPEG (pas de transparence)
+    'icon.svg', // Priorité 5: SVG icon fallback
+    'icon.png', // Priorité 6: PNG icon fallback
+    'logo.jpg', // Priorité 7: JPG (pas de transparence)
+    'logo.jpeg', // Priorité 8: JPEG (pas de transparence)
   ]
 
   for (const source of possibleSources) {
