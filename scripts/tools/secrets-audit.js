@@ -18,10 +18,13 @@
 
 const path = require('path')
 const {
+  RAILWAY_SERVICES,
+  VERCEL_PROJECTS,
   fetchVercelEnv,
   fetchRailwayEnv,
   buildVarIndex,
   classifyVar,
+  classifyKeyForTarget,
   parseEnvFile,
   mask,
 } = require('./lib/secrets-fetch')
@@ -34,7 +37,36 @@ const strict = args.includes('--strict')
 const asJson = args.includes('--json')
 
 const sourceFile = path.join(ROOT, '.env.production')
-const local = parseEnvFile(sourceFile) || {}
+const rawLocal = parseEnvFile(sourceFile) || {}
+
+// Unprefix per-app vars into per-target views, so we can compare with cloud
+// (which stores unprefixed names scoped to each service/project).
+//   localByTarget[targetLabel] = { unprefixedKey → value }
+const localByTarget = {}
+const allTargets = [
+  ...VERCEL_PROJECTS.map(p => ({ label: `vercel/${p.project}`, prefix: p.prefix })),
+  ...RAILWAY_SERVICES.map(s => ({ label: `railway/${s.service}`, prefix: s.prefix })),
+]
+for (const t of allTargets) localByTarget[t.label] = {}
+
+for (const [rootKey, value] of Object.entries(rawLocal)) {
+  for (const t of allTargets) {
+    const { kind, exportedKey } = classifyKeyForTarget(rootKey, t.prefix)
+    if (kind === 'foreign') continue
+    localByTarget[t.label][exportedKey] = value
+  }
+}
+
+// Flat "local" view: union of all per-target unprefixed views + shared vars.
+// Used by the existing comparison logic below as a best-effort overview.
+const local = {}
+for (const targetVars of Object.values(localByTarget)) {
+  for (const [k, v] of Object.entries(targetVars)) {
+    // First writer wins — per-app vars with differing values will be caught
+    // as conflicts by the cloud-side classifier anyway.
+    if (!(k in local)) local[k] = v
+  }
+}
 
 // ── Fetch ────────────────────────────────────────────────────────────────
 const silentLog = () => {}

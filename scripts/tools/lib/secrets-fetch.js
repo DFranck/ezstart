@@ -16,25 +16,59 @@ const path = require('path')
 const { execSync } = require('child_process')
 
 // ── Targets (kept in sync with secrets-sync.js) ──────────────────────────
+//
+// `prefix` is the root-env prefix used for per-app vars. Shared vars (no
+// prefix in root) are pushed as-is. Per-app vars with a DIFFERENT prefix
+// are filtered out so they never leak to the wrong platform.
 const RAILWAY_SERVICES = [
-  { service: 'ezauth-api', project: 'ezstart-apis' },
-  { service: 'ezbill-api', project: 'ezstart-apis' },
-  { service: 'ezpay-api', project: 'ezstart-apis' },
-  { service: 'gacha-analyzer-api', project: 'ezstart-apis' },
-  { service: 'greenpulse-api', project: 'TeamProjects' },
-  { service: 'ezstart-api', project: 'ezstart-apis' },
+  { service: 'ezauth-api', project: 'ezstart-apis', prefix: 'EZAUTH' },
+  { service: 'ezbill-api', project: 'ezstart-apis', prefix: 'EZBILL' },
+  { service: 'ezpay-api', project: 'ezstart-apis', prefix: 'EZPAY' },
+  { service: 'gacha-analyzer-api', project: 'ezstart-apis', prefix: 'GACHA_ANALYZER' },
+  { service: 'greenpulse-api', project: 'TeamProjects', prefix: 'GREENPULSE' },
+  { service: 'ezstart-api', project: 'ezstart-apis', prefix: 'EZSTART' },
 ]
 
 const VERCEL_PROJECTS = [
-  'web-ezstart',
-  'web-ezauth',
-  'web-ezbill',
-  'web-ezpay',
-  'web-green-pulse',
-  'web-fengshui',
-  'web-asc-tcd',
-  'web-gacha-analyzer',
+  { project: 'web-ezstart', prefix: 'EZSTART' },
+  { project: 'web-ezauth', prefix: 'EZAUTH' },
+  { project: 'web-ezbill', prefix: 'EZBILL' },
+  { project: 'web-ezpay', prefix: 'EZPAY' },
+  { project: 'web-green-pulse', prefix: 'GREENPULSE' },
+  { project: 'web-fengshui', prefix: 'FENGSHUI' },
+  { project: 'web-asc-tcd', prefix: 'ASC_TCD' },
+  { project: 'web-gacha-analyzer', prefix: 'GACHA_ANALYZER' },
 ]
+
+const KNOWN_APP_PREFIXES = [
+  'EZAUTH',
+  'EZBILL',
+  'EZPAY',
+  'EZSTART',
+  'GREENPULSE',
+  'GACHA_ANALYZER',
+  'FENGSHUI',
+  'ASC_TCD',
+]
+
+/**
+ * Classify a root-env key relative to a target's prefix.
+ *   - 'shared'  → no known prefix matched → push as-is.
+ *   - 'self'    → matches target prefix → strip prefix, push unprefixed.
+ *   - 'foreign' → matches a different known prefix → DO NOT push.
+ *
+ * NEXT_PUBLIC_* is always considered shared (Next convention).
+ */
+function classifyKeyForTarget(key, targetPrefix) {
+  if (key.startsWith('NEXT_PUBLIC_')) return { kind: 'shared', exportedKey: key }
+  for (const p of KNOWN_APP_PREFIXES) {
+    if (key.startsWith(`${p}_`)) {
+      if (p === targetPrefix) return { kind: 'self', exportedKey: key.slice(p.length + 1) }
+      return { kind: 'foreign', exportedKey: key }
+    }
+  }
+  return { kind: 'shared', exportedKey: key }
+}
 
 // ── Masking ──────────────────────────────────────────────────────────────
 const SENSITIVE_RE = /(SECRET|KEY|TOKEN|PASSWORD|DSN|PRIVATE)/i
@@ -129,6 +163,9 @@ function fetchVercelEnv({ cwd, projects = VERCEL_PROJECTS, scopes, log = () => {
     return result
   }
 
+  // Normalise: accept either ['name', ...] or [{project, prefix}, ...]
+  const projectList = projects.map(p => (typeof p === 'string' ? { project: p } : p))
+
   // Scopes to try in order. Env takes precedence; falls back to probing teams.
   const envScope =
     process.env.VERCEL_SCOPE || process.env.VERCEL_TEAM_SLUG || process.env.VERCEL_TEAM_ID || ''
@@ -137,7 +174,7 @@ function fetchVercelEnv({ cwd, projects = VERCEL_PROJECTS, scopes, log = () => {
   const tmpRoot = path.join(cwd || process.cwd(), 'tmp', 'secrets-vercel-fetch')
   fs.mkdirSync(tmpRoot, { recursive: true })
 
-  for (const project of projects) {
+  for (const { project } of projectList) {
     const projDir = path.join(tmpRoot, project)
     fs.mkdirSync(projDir, { recursive: true })
     const outFile = path.join(projDir, '.env.pull')

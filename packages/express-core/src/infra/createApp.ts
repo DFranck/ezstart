@@ -3,12 +3,15 @@ import * as dotenv from 'dotenv'
 import express, { Express } from 'express'
 import type { AppName } from '@ezstart/config/urls'
 import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors'
+import { getRequiredEnv, hasEnvManifest } from '@ezstart/config/env-manifests'
 import { loadSharedEnv } from '@ezstart/config/server'
 import { logger } from '@ezstart/logger/server'
 import { securityHeaders, securityHeadersPresets } from '../middleware/security-headers.js'
 
-// Fallback for API services that don't pass `apiApp` (legacy):
-// load app-local .env.local from cwd first, then .env.
+// Legacy fallback (deprecated): ONLY triggers for services that don't pass
+// `apiApp`. The canonical path is root-only `.env.{NODE_ENV}` loaded by
+// `loadSharedEnv({ app, layer })` inside createApp() below.
+// See SECRETS.md for the full architecture.
 dotenv.config({ path: '.env.local' })
 dotenv.config()
 
@@ -39,13 +42,35 @@ export interface CreateAppOptions {
   healthPath?: string
   /** Path for the root status endpoint (default: '/') */
   rootPath?: string
+  /**
+   * Required env vars (UNPREFIXED — runtime names).
+   *
+   * By default auto-resolved from `@ezstart/config/env-manifests` using
+   * `apiApp`. Override only for edge cases (tests, scripts, custom APIs not
+   * yet registered in the central manifest).
+   *
+   * Validated by `loadSharedEnv` right after loading the root `.env.{NODE_ENV}`.
+   * Throws a clear error at boot if any are missing.
+   */
+  requiredEnv?: readonly string[]
 }
 
 export function createApp(options?: CreateAppOptions): Express {
-  // Load centralized env (root .env.{NODE_ENV} + app override).
-  // Safe even if root file missing — falls back to app-local dotenv above.
+  // Load centralized env (root .env.{NODE_ENV}, prefix-aware).
+  // App-local .env files are ignored by design — see SECRETS.md.
   if (options?.apiApp) {
-    loadSharedEnv({ app: options.apiApp, layer: 'api' })
+    const required =
+      options.requiredEnv !== undefined
+        ? [...options.requiredEnv]
+        : hasEnvManifest(options.apiApp)
+          ? [...getRequiredEnv(options.apiApp)]
+          : undefined
+
+    loadSharedEnv({
+      app: options.apiApp,
+      layer: 'api',
+      required,
+    })
   }
 
   const app = express()

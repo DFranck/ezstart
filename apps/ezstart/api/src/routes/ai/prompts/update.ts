@@ -1,7 +1,7 @@
 /**
  * PATCH /api/ai/prompts/:key
- * Update a system prompt. Lookup is scoped via `?app=<appName>` query so the
- * same `key` can exist across distinct app scopes.
+ * Update a system prompt. Optional `?app=<appName>` query scopes the lookup
+ * for per-app callers. Admin/global callers omit it and lookup is by key only.
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -21,7 +21,8 @@ const updatePromptQuerySchema = z.object({
   app: z
     .string()
     .min(1)
-    .describe('App scope used to locate the prompt (matches apps[] or legacy appName).'),
+    .optional()
+    .describe('Optional app scope used to locate the prompt (matches apps[] or legacy appName).'),
 })
 
 const UpdatePromptBodySchema = z.object({
@@ -75,10 +76,12 @@ docRouter.patch(
       }
       const body = validation.data
 
-      const prompt = await AISystemPrompt.findOne({
-        key,
-        $or: [{ apps: app }, { apps: APPS_WILDCARD }, { appName: app }],
-      }).exec()
+      const filter: Record<string, unknown> = { key }
+      if (app) {
+        filter.$or = [{ apps: app }, { apps: APPS_WILDCARD }, { appName: app }]
+      }
+
+      const prompt = await AISystemPrompt.findOne(filter).exec()
 
       if (!prompt) {
         return sendError(res, 'Prompt not found', 404)
@@ -87,16 +90,20 @@ docRouter.patch(
       // Demote conflicting defaults if this one becomes default.
       if (body.isDefault) {
         const type = body.type || prompt.type
-        const targetApps = body.apps || prompt.apps || (prompt.appName ? [prompt.appName] : [app])
-        await AISystemPrompt.updateMany(
-          {
-            type,
-            isDefault: true,
-            key: { $ne: key },
-            $or: [{ apps: { $in: targetApps } }, { appName: { $in: targetApps } }],
-          },
-          { $set: { isDefault: false } }
-        )
+        const fallbackApps = app ? [app] : []
+        const targetApps =
+          body.apps || prompt.apps || (prompt.appName ? [prompt.appName] : fallbackApps)
+        if (targetApps.length > 0) {
+          await AISystemPrompt.updateMany(
+            {
+              type,
+              isDefault: true,
+              key: { $ne: key },
+              $or: [{ apps: { $in: targetApps } }, { appName: { $in: targetApps } }],
+            },
+            { $set: { isDefault: false } }
+          )
+        }
       }
 
       Object.assign(prompt, body, {
