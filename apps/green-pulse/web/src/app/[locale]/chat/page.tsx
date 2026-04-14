@@ -155,6 +155,10 @@ export default function LiaPage() {
           newChatLabel: t('sidebar.newChat'),
           sidebarEmptyState: t('sidebar.emptyState'),
           loginPrompt: t('sidebar.loginPrompt'),
+          loginPromptTitle: t('loginPromptTitle'),
+          loginPromptDescription: t('loginPromptDescription'),
+          loginPromptCTA: t('loginPromptCTA'),
+          loginPromptComposerPlaceholder: t('loginPromptComposerPlaceholder'),
         }}
         slots={{
           sidebarHeader,

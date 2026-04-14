@@ -3,6 +3,10 @@
   "welcomeDescription": "Your AI assistant for sustainability and ESG reporting",
   "composerPlaceholder": "Ask GP.A anything about sustainability...",
   "loadingText": "LIA is thinking",
+  "loginPromptTitle": "Sign in to start chatting",
+  "loginPromptDescription": "Log in to your account to chat with GP.A about sustainability and ESG.",
+  "loginPromptCTA": "Sign in",
+  "loginPromptComposerPlaceholder": "Sign in to chat",
   "sidebar": {
     "myPlan": "My plan:",
     "myTools": "My tools:",

@@ -3,6 +3,10 @@
   "welcomeDescription": "Trợ lý AI của bạn cho phát triển bền vững và báo cáo ESG",
   "composerPlaceholder": "Hỏi GP.A bất cứ điều gì về phát triển bền vững...",
   "loadingText": "LIA đang suy nghĩ",
+  "loginPromptTitle": "Đăng nhập để bắt đầu trò chuyện",
+  "loginPromptDescription": "Đăng nhập vào tài khoản của bạn để trò chuyện với GP.A về phát triển bền vững và ESG.",
+  "loginPromptCTA": "Đăng nhập",
+  "loginPromptComposerPlaceholder": "Đăng nhập để trò chuyện",
   "sidebar": {
     "myPlan": "Gói của tôi:",
     "myTools": "Công cụ của tôi:",

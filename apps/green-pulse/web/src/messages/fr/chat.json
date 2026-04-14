@@ -3,6 +3,10 @@
   "welcomeDescription": "Votre assistant IA pour le développement durable et le reporting ESG",
   "composerPlaceholder": "Posez une question à GP.A sur le développement durable...",
   "loadingText": "LIA réfléchit",
+  "loginPromptTitle": "Connectez-vous pour discuter",
+  "loginPromptDescription": "Connectez-vous à votre compte pour discuter avec GP.A du développement durable et de l'ESG.",
+  "loginPromptCTA": "Se connecter",
+  "loginPromptComposerPlaceholder": "Connectez-vous pour discuter",
   "sidebar": {
     "myPlan": "Mon forfait :",
     "myTools": "Mes outils :",

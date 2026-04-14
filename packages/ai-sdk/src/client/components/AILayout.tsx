@@ -19,7 +19,7 @@ import {
   ThreadWelcome,
 } from '@ezstart/ui/components'
 
-import { useAuth } from '@ezstart/auth-sdk'
+import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 
 import { AIProvider } from '../../provider.js'
 import { useAIThread } from '../hooks/useAIThread.js'
@@ -96,8 +96,18 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   const showSidebar = props.showSidebar ?? true
   const showProviderSelector = props.showProviderSelector ?? false
 
+  // Unauthenticated users always see a sign-in prompt (provider list is 401-gated)
+  const showLoginPrompt = !isAuthenticated
+  const loginPromptTitle = texts.loginPromptTitle ?? 'Sign in to start chatting'
+  const loginPromptDescription =
+    texts.loginPromptDescription ?? 'Log in to your account to chat with the AI assistant.'
+  const loginPromptCTA = texts.loginPromptCTA ?? 'Sign in'
+  const loginPromptComposerPlaceholder = texts.loginPromptComposerPlaceholder ?? 'Sign in to chat'
+
   // No providers available → empty state (avoid letting user send messages that will fail)
-  const noProviders = !providersLoading && providers.length === 0
+  // Only show this when authenticated (otherwise the 401-empty providers list would
+  // falsely trigger the admin message for logged-out users).
+  const noProviders = isAuthenticated && !providersLoading && providers.length === 0
   const noProvidersTitle = texts.noProvidersTitle ?? 'No AI provider configured'
   const noProvidersDescription =
     texts.noProvidersDescription ??
@@ -105,6 +115,13 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   const noProvidersCTA = texts.noProvidersCTA ?? 'Configure providers'
   const noProvidersComposerPlaceholder =
     texts.noProvidersComposerPlaceholder ?? 'AI providers not configured'
+
+  const composerDisabled = showLoginPrompt || noProviders
+  const composerPlaceholder = showLoginPrompt
+    ? loginPromptComposerPlaceholder
+    : noProviders
+      ? noProvidersComposerPlaceholder
+      : texts.composerPlaceholder
 
   // Build sidebar content
   const sidebar = showSidebar ? (
@@ -157,14 +174,28 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
         <ThreadComposer
           onSubmit={sendMessage}
           loading={loading}
-          disabled={noProviders}
-          placeholder={noProviders ? noProvidersComposerPlaceholder : texts.composerPlaceholder}
+          disabled={composerDisabled}
+          placeholder={composerPlaceholder}
           sendLabel={texts.sendLabel}
           isNewThread={isNewThread}
           welcomeMessage={
             isNewThread
               ? (slots.welcomeContent ??
-                (noProviders ? (
+                (showLoginPrompt ? (
+                  <Div className="flex flex-col items-center justify-center text-center text-foreground gap-3 px-4">
+                    <H2 className="text-xl font-semibold">{loginPromptTitle}</H2>
+                    <P className="text-sm text-muted-foreground max-w-md">
+                      {loginPromptDescription}
+                    </P>
+                    <LoginButton
+                      variant="default"
+                      size="sm"
+                      className="mt-2"
+                      alwaysShowText
+                      loginText={loginPromptCTA}
+                    />
+                  </Div>
+                ) : noProviders ? (
                   <Div className="flex flex-col items-center justify-center text-center text-foreground gap-3 px-4">
                     <H2 className="text-xl font-semibold">{noProvidersTitle}</H2>
                     <P className="text-sm text-muted-foreground max-w-md">

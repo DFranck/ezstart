@@ -20,6 +20,14 @@ export type AILayoutTexts = {
   noProvidersCTA?: string
   /** Composer placeholder when providers are not configured */
   noProvidersComposerPlaceholder?: string
+  /** Title shown when user is not authenticated */
+  loginPromptTitle?: string
+  /** Description shown when user is not authenticated */
+  loginPromptDescription?: string
+  /** CTA label for the sign-in button shown to unauthenticated users */
+  loginPromptCTA?: string
+  /** Composer placeholder when user is not authenticated */
+  loginPromptComposerPlaceholder?: string
 }
 
 export type AILayoutSlots = {
