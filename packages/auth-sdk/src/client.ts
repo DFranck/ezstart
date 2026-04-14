@@ -1,5 +1,5 @@
 import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
-import { callApi } from '@ezstart/fetch-client'
+import { callApi, parseApiError } from '@ezstart/fetch-client'
 import { logger } from '@ezstart/logger'
 import type { AuthToken, AuthUser, EmailOverrideRequest } from './types.js'
 import type { AuthMode } from './store.js'
@@ -288,7 +288,7 @@ export class AuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new Error(result.error || result.data?.error || 'Failed to change password')
+      throw new Error(parseApiError(result) || 'Failed to change password')
     }
   }
 
@@ -317,7 +317,7 @@ export class AuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new Error(result.error || result.data?.error || 'Quick signup failed')
+      throw new Error(parseApiError(result) || 'Quick signup failed')
     }
 
     const payload = result.data ?? result
