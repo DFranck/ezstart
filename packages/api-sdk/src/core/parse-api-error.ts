@@ -1,0 +1,114 @@
+import type { ApiErrorPayload } from './types.js'
+
+/**
+ * Parse an API error payload into a human-readable message (English).
+ *
+ * Handles formats (priority order):
+ * 1. Zod validation: `{ details: [{ message, path, code }] }` → first detail's `message`
+ * 2. Nested object : `{ error: { message, code } }` → `error.message`
+ * 3. Flat string   : `{ error: 'Invalid credentials' }` → the string
+ * 4. Direct message: `{ message: 'User not found' }` → the message
+ * 5. Fallback      : generic "An error occurred."
+ *
+ * Returns `null` ONLY when the input is nullish/empty — callers may use this
+ * to detect "no error payload" cases. All other cases produce a string.
+ */
+export function parseApiError(errorData: unknown): string | null {
+  if (errorData === null || errorData === undefined) return null
+
+  // Primitive string → return as-is
+  if (typeof errorData === 'string') {
+    return errorData.length > 0 ? errorData : null
+  }
+
+  if (typeof errorData !== 'object') {
+    return 'An error occurred. Please try again.'
+  }
+
+  const payload = errorData as ApiErrorPayload
+
+  // Empty object guard
+  if (Object.keys(payload).length === 0) return null
+
+  // 1. Zod validation details (most specific)
+  if (Array.isArray(payload.details) && payload.details.length > 0) {
+    const first = payload.details[0] as { message?: unknown } | null | undefined
+    if (first && typeof first.message === 'string' && first.message.length > 0) {
+      return first.message
+    }
+  }
+
+  // 2. Nested error object
+  if (typeof payload.error === 'object' && payload.error !== null) {
+    const nested = payload.error as { message?: unknown }
+    if (typeof nested.message === 'string' && nested.message.length > 0) {
+      return nested.message
+    }
+  }
+
+  // 3. Flat error string
+  if (typeof payload.error === 'string' && payload.error.length > 0) {
+    return payload.error
+  }
+
+  // 4. Direct message
+  if (typeof payload.message === 'string' && payload.message.length > 0) {
+    return payload.message
+  }
+
+  return 'An error occurred. Please try again.'
+}
+
+/**
+ * Extract a machine-readable error code from an API error payload.
+ *
+ * Supports:
+ * - Top-level : `{ code: 'INVALID_TOKEN' }`
+ * - Nested    : `{ error: { code: 'RATE_LIMIT_EXCEEDED' } }`
+ */
+export function parseApiErrorCode(errorData: unknown): string | undefined {
+  if (!errorData || typeof errorData !== 'object') return undefined
+
+  const payload = errorData as ApiErrorPayload
+
+  if (typeof payload.code === 'string' && payload.code.length > 0) {
+    return payload.code
+  }
+
+  if (typeof payload.error === 'object' && payload.error !== null) {
+    const nested = payload.error as { code?: unknown }
+    if (typeof nested.code === 'string' && nested.code.length > 0) {
+      return nested.code
+    }
+  }
+
+  return undefined
+}
+
+/**
+ * Extract retry-after hint from an API error payload (seconds).
+ *
+ * Supports:
+ * - Top-level : `{ retryAfter: 60 }` or `{ retryAfter: '60' }`
+ * - Nested    : `{ error: { retryAfter: '60' } }`
+ */
+export function parseRetryAfter(errorData: unknown): number | undefined {
+  if (!errorData || typeof errorData !== 'object') return undefined
+
+  const payload = errorData as ApiErrorPayload
+
+  const candidates: unknown[] = [payload.retryAfter]
+  if (typeof payload.error === 'object' && payload.error !== null) {
+    candidates.push((payload.error as { retryAfter?: unknown }).retryAfter)
+  }
+
+  for (const raw of candidates) {
+    if (typeof raw === 'number' && Number.isFinite(raw) && raw >= 0) return raw
+    if (typeof raw === 'string') {
+      const parsed = Number(raw)
+      if (Number.isFinite(parsed) && parsed >= 0) return parsed
+    }
+  }
+
+  return undefined
+}
