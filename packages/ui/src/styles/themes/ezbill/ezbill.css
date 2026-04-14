@@ -1,6 +1,6 @@
 /* EZBill Theme Variables and Utilities */
 
-[data-app='ezbill'] {
+:root[data-app='ezbill'] {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.65 0.17 240);
   --primary-foreground: oklch(0.985 0 0);
@@ -40,8 +40,7 @@
   --ezbill-pending-foreground: oklch(0.25 0.09 80);
 }
 
-[data-app='ezbill'].dark,
-.dark [data-app='ezbill'] {
+:root[data-app='ezbill'].dark {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.64 0.178 251);
   --primary-foreground: oklch(0.98 0.01 250);
