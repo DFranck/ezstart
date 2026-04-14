@@ -208,8 +208,8 @@ Scripts need a team scope to link each project. Set one of these (shell or root
 `.env.local`):
 
 ```bash
-VERCEL_SCOPE=dfrancks-projects   # preferred
-# or VERCEL_TEAM_SLUG / VERCEL_TEAM_ID
+VERCEL_SCOPE=ezstart            # preferred (URL slug — visible at vercel.com/ezstart)
+# or VERCEL_TEAM_ID=team_s1KxhxVX5g6qgwpFKvytTdMM (more stable, survives team renames)
 ```
 
 ### `pnpm secret:gen`

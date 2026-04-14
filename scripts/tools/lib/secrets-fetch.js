@@ -179,7 +179,7 @@ function fetchVercelEnv({ cwd, projects = VERCEL_PROJECTS, scopes, log = () => {
     fs.mkdirSync(projDir, { recursive: true })
     const outFile = path.join(projDir, '.env.pull')
 
-    const scopesToTry = candidateScopes || ['dfrancks-projects', 'odasie']
+    const scopesToTry = candidateScopes || ['ezstart', 'odasie']
     let linked = false
     let lastErr = null
 
