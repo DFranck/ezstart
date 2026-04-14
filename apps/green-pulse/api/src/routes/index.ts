@@ -13,10 +13,8 @@ export const globalRegistry = [
   ...themeRegistries,
 ]
 
-router
-  .use('/upload', uploadRoutes)
-  .use('/esg', esgRoutes)
-  .use('/webhooks', webhookRoutes)
-  .use('/theme', themeRoutes)
+// Feature children own their basePath via createRouterWithDoc(..., '/<resource>')
+// so they are mounted at '/' here to avoid double-mount with the helper basePath.
+router.use(uploadRoutes).use(esgRoutes).use(webhookRoutes).use(themeRoutes)
 
 export default router

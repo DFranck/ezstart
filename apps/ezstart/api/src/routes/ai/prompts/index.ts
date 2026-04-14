@@ -33,19 +33,20 @@ export const promptsRegistries = [
 
 const router: import('express').Router = Router()
 
-// All prompt routes require auth
-router.use(authMiddleware)
+// This parent is mounted at /api/ai (no /prompts prefix) — children own '/prompts'
+// basePath via createRouterWithDoc. Scope middlewares to '/prompts' so they don't
+// leak to sibling AI features (chat, conversations, providers, etc.).
+router.use('/prompts', authMiddleware)
+router.use('/prompts', (req, res, next) => {
+  // Apply admin requirement only on write methods (POST/PATCH/DELETE).
+  if (req.method === 'GET') return next()
+  return requireAdmin(req, res, next)
+})
 
-// Read routes — auth only (any authenticated user can list/get prompts)
 router.use(listPromptsRouter)
 router.use(getPromptRouter)
-
-// Write routes — admin only (create/update/delete prompts)
-const adminRouter: import('express').Router = Router()
-adminRouter.use(requireAdmin)
-adminRouter.use(createPromptRouter)
-adminRouter.use(updatePromptRouter)
-adminRouter.use(deletePromptRouter)
-router.use(adminRouter)
+router.use(createPromptRouter)
+router.use(updatePromptRouter)
+router.use(deletePromptRouter)
 
 export default router
