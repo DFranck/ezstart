@@ -238,7 +238,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 149. [ ] Monitoring package extraction (future) — Extract SystemOverview + hooks from ezstart/monitoring into `packages/monitoring/client` (UI) + keep `packages/monitoring` (types/collectors). Requires abstracting hardcoded project list. Blocked by: app-scoping design decision.
 150. [ ] CI audit trending (future) — Run check:dead-code, check:size, check:i18n in GitHub Actions. Parse results → store in MongoDB. Dashboard shows score evolution over time. Currently audits.json is static (score 96.6/100). Low priority while score is high.
 151. [ ] Auth callback error display — AuthCallback shows `[object Object]` instead of readable error message (e.g. "Rate limited, try again later"). Fix error extraction in auth-sdk callback handler.
-152. [ ] **`@ezstart/workspace-sdk`** (future) — multi-tenancy primitive: Workspace + Project + Members + Roles, factory agnostique suivant `.claude/rules/package-standard.md`. Utilisé par greenpulse-premium / ezbill / ezpay quand le besoin se concrétise. Le code green-pulse précédent (workspaces/projects/forms) a été supprimé en commit `<commit-pending>` pour repartir propre quand Premium lancera.
+152. [ ] **`@ezstart/workspace-sdk`** (future) — multi-tenancy primitive: Workspace + Project + Members + Roles, factory agnostique suivant `.claude/rules/package-standard.md`. Utilisé par greenpulse-premium / ezbill / ezpay quand le besoin se concrétise. Le code green-pulse précédent (workspaces/projects/forms) a été supprimé en commit `7f6aa9db` pour repartir propre quand Premium lancera.
 
 #### P3 — DevOps / Testing
 
