@@ -12,9 +12,11 @@ import { AppProvider } from '../models/AppProvider.js'
 
 // ============================================================================
 // CACHE - Avoid DB query on every chat request
+// Both caches are cleared on any prompt mutation (create/update/delete).
 // ============================================================================
-const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
+const CACHE_TTL_MS = 60 * 60 * 1000 // 1 hour (cleared on admin mutations)
 const promptCache = new Map<string, { content: string; expiresAt: number }>()
+const docCache = new Map<string, { doc: IAISystemPrompt | null; expiresAt: number }>()
 
 function getCacheKey(appName: string, type: PromptType, provider: ProviderTarget): string {
   return `${appName}:${type}:${provider}`
@@ -40,9 +42,14 @@ function setCache(
   promptCache.set(key, { content, expiresAt: Date.now() + CACHE_TTL_MS })
 }
 
+function getDocCacheKey(appName: string, type: PromptType): string {
+  return `${appName}:${type}`
+}
+
 /** Clear cache - call this when prompts are updated via admin */
 export function clearPromptCache(): void {
   promptCache.clear()
+  docCache.clear()
   logger.info('[AIPromptService] Cache cleared')
 }
 
@@ -175,6 +182,13 @@ export async function getSystemPromptDoc(
   type: PromptType = 'general',
   appName: string
 ): Promise<IAISystemPrompt | null> {
+  const cacheKey = getDocCacheKey(appName, type)
+  const cached = docCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.doc
+  }
+  if (cached) docCache.delete(cacheKey)
+
   try {
     const raw = await AISystemPrompt.findOne({
       $and: [
@@ -189,8 +203,14 @@ export async function getSystemPromptDoc(
       .lean()
       .exec()
 
-    if (!raw) return null
-    return normalizeLegacyPrompt(raw as Partial<IAISystemPrompt>) as IAISystemPrompt
+    const doc = raw
+      ? (normalizeLegacyPrompt(raw as Partial<IAISystemPrompt>) as IAISystemPrompt)
+      : null
+    docCache.set(cacheKey, { doc, expiresAt: Date.now() + CACHE_TTL_MS })
+    logger.info(
+      `[AIPromptService] Loaded prompt doc app=${appName} type=${type} name="${doc?.name ?? 'NONE'}" key="${doc?.key ?? 'NONE'}"`
+    )
+    return doc
   } catch (error) {
     logger.error('[AIPromptService] Error fetching prompt doc:', error)
     return null
