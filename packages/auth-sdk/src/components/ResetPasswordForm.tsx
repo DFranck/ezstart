@@ -13,7 +13,7 @@ import {
   PasswordInput,
   Spinner,
 } from '@ezstart/ui/components'
-import { callApi, parseApiError, parseApiErrorCode } from '@ezstart/fetch-client'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -184,28 +184,21 @@ export function ResetPasswordForm({
     setError('')
 
     try {
-      const response = await callApi('/auth/reset-password', {
+      await apiCall('/auth/reset-password', {
         appName: 'ezauth',
         method: 'POST',
         body: { token, newPassword: formData.newPassword },
       })
 
-      if (!response.ok) {
-        // Detect server-side "invalid/expired token" via error code → switch to expired view
-        const code = parseApiErrorCode(response.data)
-        if (code === INVALID_TOKEN_CODE) {
-          setValidationState('invalid')
-          setLoading(false)
-          return
-        }
-        // Prefer parseApiError (extracts Zod details[0].message) over generic response.error
-        const detailed = parseApiError(response.data)
-        throw new Error(detailed || response.error || t.fallbackError)
-      }
-
       setSuccess(true)
       logger.info('Password reset successfully')
     } catch (err) {
+      // Detect server-side "invalid/expired token" via error code → switch to expired view
+      if (ApiError.isApiError(err) && err.code === INVALID_TOKEN_CODE) {
+        setValidationState('invalid')
+        setLoading(false)
+        return
+      }
       setError(err instanceof Error ? err.message : t.fallbackError)
     } finally {
       setLoading(false)

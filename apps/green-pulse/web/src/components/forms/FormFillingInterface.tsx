@@ -2,7 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import { useFormInstance, useFormConfig } from '@/hooks/useForms'
-import { Badge, Button, Div, H1, P, Skeleton, SkeletonForm } from '@ezstart/ui/components'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Badge,
+  Button,
+  Div,
+  H1,
+  P,
+  Skeleton,
+  SkeletonForm,
+} from '@ezstart/ui/components'
 import { WorkspaceBreadcrumbs } from './WorkspaceBreadcrumbs'
 import { FormChatInterface } from './FormChatInterface'
 import { FormPreview } from './FormPreview'
@@ -21,17 +37,17 @@ export function FormFillingInterface({
   formInstanceId,
 }: FormFillingInterfaceProps) {
   const { data: instanceData, isLoading: instanceLoading } = useFormInstance(formInstanceId)
-  const instance = instanceData?.ok
-    ? (instanceData.data as {
+  const instance = instanceData as
+    | {
         formConfigId?: string
         mode?: string
         status?: string
         fields?: Record<string, unknown>
-      })
-    : undefined
+      }
+    | undefined
 
   const { data: configData, isLoading: configLoading } = useFormConfig(instance?.formConfigId || '')
-  const config = configData?.ok ? (configData.data as FormConfig) : undefined
+  const config = configData as FormConfig | undefined
 
   const updateInstance = useUpdateFormInstance(formInstanceId)
   const submitInstance = useSubmitFormInstance(formInstanceId)
@@ -69,10 +85,11 @@ export function FormFillingInterface({
     updateInstance.mutate({ fields })
   }
 
-  const handleSubmit = async () => {
-    if (window.confirm("Submit this form? You won't be able to edit it after submission.")) {
-      await submitInstance.mutateAsync()
-    }
+  const [confirmSubmit, setConfirmSubmit] = useState(false)
+  const handleSubmit = () => setConfirmSubmit(true)
+  const handleConfirmSubmit = async () => {
+    setConfirmSubmit(false)
+    await submitInstance.mutateAsync()
   }
 
   return (
@@ -142,6 +159,21 @@ export function FormFillingInterface({
           />
         </Div>
       </Div>
+
+      <AlertDialog open={confirmSubmit} onOpenChange={setConfirmSubmit}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Submit this form?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You won&apos;t be able to edit it after submission.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit}>Submit</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Div>
   )
 }

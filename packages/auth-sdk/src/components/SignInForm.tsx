@@ -13,7 +13,7 @@ import {
   Input,
   PasswordInput,
 } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -113,7 +113,11 @@ export function SignInForm({
     setError('')
 
     try {
-      const response = await callApi('/auth/login', {
+      const result = await apiCall<{
+        code?: string
+        requires2FA?: boolean
+        tempToken?: string
+      }>('/auth/login', {
         appName: 'ezauth',
         method: 'POST',
         body: {
@@ -123,16 +127,6 @@ export function SignInForm({
           redirect_uri: redirectUri || undefined,
         },
       })
-
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Login failed')
-      }
-
-      const result = response.data as {
-        code?: string
-        requires2FA?: boolean
-        tempToken?: string
-      }
 
       // Handle 2FA requirement
       if (result.requires2FA && result.tempToken) {

@@ -27,7 +27,7 @@ import {
   DataTableColumnHeader,
   type ColumnDef,
 } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall, type ApiMeta } from '@ezstart/api-sdk'
 import { toast } from '@ezstart/ui/utils'
 import { useAuthStore } from '../store.js'
 
@@ -274,15 +274,12 @@ function EditRolesModal({
     setSaving(true)
     setError('')
     try {
-      const response = await callApi(`/admin/users/${user._id}`, {
+      await apiCall(`/admin/users/${user._id}`, {
         appName: 'ezauth',
         method: 'PATCH',
         body: { globalRoles, appRoles },
-        accessToken: accessToken ?? undefined,
+        getToken: () => accessToken,
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t.editError)
-      }
       toast.success(t.editSuccess)
       onSaved()
       onOpenChange(false)
@@ -430,19 +427,19 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
       if (appName) query.app = appName
       if (searchQuery) query.search = searchQuery
 
-      const response = await callApi<AdminUser[]>('/admin/users', {
+      // Preserve envelope to access `meta.total` for server-side pagination.
+      const envelope = await apiCall<{ data: AdminUser[]; meta?: ApiMeta }>('/admin/users', {
         appName: 'ezauth',
         method: 'GET',
         query,
-        accessToken: accessToken ?? undefined,
+        getToken: () => accessToken,
+        preserveEnvelope: true,
       })
-      if (response.ok) {
-        setUsers((response.data ?? []) as AdminUser[])
-        const meta = response.meta as UsersApiMeta | undefined
-        setTotal(meta?.total ?? 0)
-      }
+      setUsers(envelope.data ?? [])
+      const meta = envelope.meta as UsersApiMeta | undefined
+      setTotal(meta?.total ?? 0)
     } catch {
-      // Error logged by callApi
+      // Error already logged by apiCall
     } finally {
       setLoading(false)
     }
@@ -462,14 +459,11 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
     setDeleting(true)
     setDeleteError('')
     try {
-      const response = await callApi(`/admin/users/${deleteDialog.userId}`, {
+      await apiCall(`/admin/users/${deleteDialog.userId}`, {
         appName: 'ezauth',
         method: 'DELETE',
-        accessToken: accessToken ?? undefined,
+        getToken: () => accessToken,
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t.deleteError)
-      }
       toast.success(t.deleteSuccess)
       setDeleteDialog({ open: false, userId: null })
       fetchUsers()
@@ -480,7 +474,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
     } finally {
       setDeleting(false)
     }
-  }, [deleteDialog.userId, fetchUsers, t])
+  }, [deleteDialog.userId, fetchUsers, t, accessToken])
 
   // Edit handler
   const handleEditClick = useCallback((user: AdminUser) => {

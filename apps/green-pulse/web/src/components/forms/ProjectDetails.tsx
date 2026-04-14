@@ -33,7 +33,7 @@ export function ProjectDetails({ projectId, workspaceSlug }: ProjectDetailsProps
     )
   }
 
-  const project = data?.ok ? data.data : undefined
+  const project = data
 
   if (!project) {
     return <P>Project not found</P>

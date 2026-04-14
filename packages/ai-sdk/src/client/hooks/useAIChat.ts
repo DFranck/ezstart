@@ -7,7 +7,7 @@
 import { logger } from '@ezstart/logger'
 import { useState, useCallback } from 'react'
 import { useAIStore } from '../store/aiStore.js'
-import { callApi } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import type { AppName } from '@ezstart/config/urls'
 
 interface ChatMessage {
@@ -44,7 +44,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
       setMessages(prev => [...prev, userMessage])
 
       try {
-        const response = await callApi<{ response: string; extractedData?: unknown }>('/ai/chat', {
+        const data = await apiCall<{ response: string; extractedData?: unknown }>('/ai/chat', {
           method: 'POST',
           body: {
             message: content,
@@ -53,9 +53,6 @@ export function useAIChat(options: UseAIChatOptions = {}) {
           },
           appName: options.appName || 'ezstart',
         })
-
-        if (!response.ok || !response.data) throw new Error('Empty response from AI')
-        const data = response.data
 
         // Add assistant message
         const assistantMessage: ChatMessage = {

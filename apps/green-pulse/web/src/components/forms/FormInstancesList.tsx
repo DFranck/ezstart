@@ -41,17 +41,7 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
     )
   }
 
-  // callApi wraps response as { ok, data: { success, data: [...] } }
-  type FormItem = {
-    _id: string
-    formConfigId?: string
-    mode?: string
-    status?: string
-    fields?: Record<string, unknown>
-    updatedAt?: string
-  }
-  const forms: FormItem[] =
-    (data?.ok ? (data.data as { data?: FormItem[] })?.data : undefined) || []
+  const forms = data ?? []
 
   if (forms.length === 0) {
     return (

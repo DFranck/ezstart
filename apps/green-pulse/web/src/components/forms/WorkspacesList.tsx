@@ -14,11 +14,9 @@ import {
 } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { useAuthStore } from '@ezstart/auth-sdk'
 
 export function WorkspacesList() {
-  const { data, isLoading, error } = useWorkspaces()
-  const { user } = useAuthStore()
+  const { data: workspaces = [], isLoading, error } = useWorkspaces()
   const t = useTranslations('forms.workspaces')
 
   if (isLoading) {
@@ -40,23 +38,6 @@ export function WorkspacesList() {
       </Card>
     )
   }
-
-  // callApi wraps response: { ok, data: { success, data: { workspaces } } }
-  type WorkspaceItem = {
-    _id: string
-    slug: string
-    name: string
-    description?: string
-    logoUrl?: string
-    currentUserRole?: string
-    projectCount?: number
-    memberCount?: number
-    status?: string
-  }
-  const innerData = data?.ok
-    ? (data.data as { data?: { workspaces?: WorkspaceItem[] } })
-    : undefined
-  const workspaces: WorkspaceItem[] = innerData?.data?.workspaces || []
 
   if (workspaces.length === 0) {
     return (

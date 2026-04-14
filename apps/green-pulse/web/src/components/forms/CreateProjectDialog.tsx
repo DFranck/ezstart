@@ -22,15 +22,10 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
   const [companySector, setCompanySector] = useState('')
 
   const createProject = useCreateProject()
-  const { data: workspacesData } = useWorkspaces()
+  const { data: workspaces = [] } = useWorkspaces()
 
-  // Find workspace ID from slug
-  // callApi wraps response: { ok, data: { success, data: { workspaces } } }
-  type WorkspaceItem = { _id: string; slug: string }
-  const innerData = workspacesData?.ok
-    ? (workspacesData.data as { data?: { workspaces?: WorkspaceItem[] } })
-    : undefined
-  const workspace = innerData?.data?.workspaces?.find(w => w.slug === workspaceSlug)
+  // Find workspace ID from slug (list is returned unwrapped by api-sdk)
+  const workspace = workspaces.find(w => w.slug === workspaceSlug)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

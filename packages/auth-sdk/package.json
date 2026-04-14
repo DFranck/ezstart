@@ -27,7 +27,7 @@
   "dependencies": {
     "@ezstart/capture-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/api-sdk": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "react-hook-form": "^7.68.0",

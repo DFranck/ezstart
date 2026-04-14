@@ -52,20 +52,7 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
     )
   }
 
-  // callApi wraps response: { ok, data: { success, data: [...] } }
-  type ProjectItem = {
-    _id: string
-    name: string
-    description?: string
-    status?: string
-    companyName?: string
-    companySector?: string
-    members?: unknown[]
-    formConfigIds?: unknown[]
-    updatedAt?: string
-  }
-  const projects: ProjectItem[] =
-    (data?.ok ? (data.data as { data?: ProjectItem[] })?.data : undefined) || []
+  const projects = data ?? []
 
   if (projects.length === 0) {
     return (

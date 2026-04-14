@@ -6,15 +6,28 @@ import { useAuthStore } from '@ezstart/auth-sdk'
 
 const WORKSPACES_KEY = ['workspaces']
 
+type WorkspaceItem = {
+  _id: string
+  slug: string
+  name: string
+  description?: string
+  logoUrl?: string
+  currentUserRole?: string
+  projectCount?: number
+  memberCount?: number
+  status?: string
+  [key: string]: unknown
+}
+
 export function useWorkspaces() {
   const { user } = useAuthStore()
 
-  return useQuery({
+  return useQuery<WorkspaceItem[]>({
     queryKey: [...WORKSPACES_KEY, user?._id],
     queryFn: async () => {
       if (!user?._id) throw new Error('User not authenticated')
 
-      return callApi('/workspaces', {
+      return callApi<WorkspaceItem[]>('/workspaces', {
         headers: {
           'x-user-id': user._id,
         },
@@ -27,12 +40,12 @@ export function useWorkspaces() {
 export function useWorkspace(id: string) {
   const { user } = useAuthStore()
 
-  return useQuery({
+  return useQuery<WorkspaceItem>({
     queryKey: ['workspace', id],
     queryFn: async () => {
       if (!user?._id) throw new Error('User not authenticated')
 
-      return callApi(`/workspaces/${id}`, {
+      return callApi<WorkspaceItem>(`/workspaces/${id}`, {
         headers: {
           'x-user-id': user._id,
         },
@@ -52,7 +65,7 @@ export function useCreateWorkspace() {
 
       return runWithFeedback({
         action: async () =>
-          callApi('/workspaces', {
+          callApi<WorkspaceItem>('/workspaces', {
             method: 'POST',
             body: data,
             headers: {
@@ -65,7 +78,6 @@ export function useCreateWorkspace() {
       })
     },
     onSuccess: () => {
-      // Invalidate the workspace list with userId in the key
       queryClient.invalidateQueries({ queryKey: [...WORKSPACES_KEY, user?._id] })
     },
   })
@@ -81,7 +93,7 @@ export function useUpdateWorkspace(id: string) {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/workspaces/${id}`, {
+          callApi<WorkspaceItem>(`/workspaces/${id}`, {
             method: 'PUT',
             body: data,
             headers: {
@@ -110,7 +122,7 @@ export function useDeleteWorkspace(id: string) {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/workspaces/${id}`, {
+          callApi<{ deleted: true }>(`/workspaces/${id}`, {
             method: 'DELETE',
             headers: {
               'x-user-id': user._id,

@@ -4,28 +4,35 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { callApi, runWithFeedback } from '@/config/api'
 import { useAuthStore } from '@ezstart/auth-sdk'
 
+export type ProjectItem = {
+  _id: string
+  name: string
+  description?: string
+  status?: string
+  companyName?: string
+  companySector?: string
+  companyAddress?: string
+  members?: unknown[]
+  formConfigIds?: unknown[]
+  updatedAt?: string
+  [key: string]: unknown
+}
+
 export function useProjects(userId?: string) {
-  return useQuery({
+  return useQuery<ProjectItem[]>({
     queryKey: ['projects', userId],
     queryFn: async () => {
-      return callApi(`/projects?userId=${userId || 'demo-user-1'}`)
+      return callApi<ProjectItem[]>(`/projects?userId=${userId || 'demo-user-1'}`)
     },
     enabled: !!userId,
   })
 }
 
 export function useProject(id: string) {
-  return useQuery({
+  return useQuery<ProjectItem>({
     queryKey: ['project', id],
     queryFn: async () => {
-      return callApi<{
-        name: string
-        description?: string
-        status?: string
-        companyName?: string
-        companySector?: string
-        companyAddress?: string
-      }>(`/projects/${id}`)
+      return callApi<ProjectItem>(`/projects/${id}`)
     },
     enabled: !!id,
   })
@@ -48,7 +55,7 @@ export function useCreateProject() {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/projects?userId=${user._id}`, {
+          callApi<ProjectItem>(`/projects?userId=${user._id}`, {
             method: 'POST',
             body: data,
           }),
@@ -82,7 +89,7 @@ export function useUpdateProject(id: string) {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/projects/${id}`, {
+          callApi<ProjectItem>(`/projects/${id}`, {
             method: 'PUT',
             body: data,
           }),
@@ -108,7 +115,7 @@ export function useDeleteProject(id: string) {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/projects/${id}`, {
+          callApi<{ deleted: true }>(`/projects/${id}`, {
             method: 'DELETE',
           }),
         toastLoading: { message: 'Deleting project...' },
@@ -122,11 +129,21 @@ export function useDeleteProject(id: string) {
   })
 }
 
+export type FormItem = {
+  _id: string
+  formConfigId?: string
+  mode?: string
+  status?: string
+  fields?: Record<string, unknown>
+  updatedAt?: string
+  [key: string]: unknown
+}
+
 export function useProjectForms(projectId: string) {
-  return useQuery({
+  return useQuery<FormItem[]>({
     queryKey: ['project', projectId, 'forms'],
     queryFn: async () => {
-      return callApi(`/projects/${projectId}/forms`)
+      return callApi<FormItem[]>(`/projects/${projectId}/forms`)
     },
     enabled: !!projectId,
   })

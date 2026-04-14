@@ -1,7 +1,7 @@
 'use client'
 
 import { Div, P, Spinner } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
@@ -77,24 +77,12 @@ export function VerifyEmailFlow({
     }
 
     try {
-      const response = await callApi('/auth/verify-email', {
+      const result = await apiCall<{ message?: string }>('/auth/verify-email', {
         appName: 'ezauth',
         method: 'POST',
         body: { token },
       })
 
-      if (!response.ok) {
-        const errorMsg = response.error || parseApiError(response.data) || ''
-        if (errorMsg.includes('already verified')) {
-          setState('already-verified')
-          onSuccess?.()
-        } else {
-          setState('invalid')
-        }
-        return
-      }
-
-      const result = response.data as { message?: string }
       if (result?.message?.includes('already verified')) {
         setState('already-verified')
       } else {
@@ -104,6 +92,15 @@ export function VerifyEmailFlow({
 
       logger.info('Email verified successfully')
     } catch (err) {
+      if (ApiError.isApiError(err)) {
+        if (err.message.includes('already verified')) {
+          setState('already-verified')
+          onSuccess?.()
+        } else {
+          setState('invalid')
+        }
+        return
+      }
       logger.error('Email verification failed:', err)
       setState('error')
     }

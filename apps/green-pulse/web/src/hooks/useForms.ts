@@ -4,27 +4,36 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { callApi, runWithFeedback } from '@/config/api'
 import { useAuthStore } from '@ezstart/auth-sdk'
 
+export type FormConfigItem = {
+  _id: string
+  name: string
+  description?: string
+  category?: string
+  icon?: string
+  extraction?: { fields?: unknown[] }
+  [key: string]: unknown
+}
+
+export type FormInstanceItem = {
+  _id: string
+  formConfigId?: string
+  mode?: string
+  status?: string
+  fields?: Record<string, unknown>
+  [key: string]: unknown
+}
+
 export function useFormConfigs() {
-  return useQuery({
+  return useQuery<FormConfigItem[]>({
     queryKey: ['form-configs'],
     queryFn: async () => {
-      return callApi<{
-        success: boolean
-        data: Array<{
-          _id: string
-          name: string
-          description?: string
-          category?: string
-          icon?: string
-          extraction?: { fields?: unknown[] }
-        }>
-      }>('/forms/configs')
+      return callApi<FormConfigItem[]>('/forms/configs')
     },
   })
 }
 
 export function useFormConfig(id: string) {
-  return useQuery({
+  return useQuery<Record<string, unknown>>({
     queryKey: ['form-config', id],
     queryFn: async () => {
       return callApi<Record<string, unknown>>(`/forms/configs/${id}`)
@@ -34,18 +43,18 @@ export function useFormConfig(id: string) {
 }
 
 export function useFormInstances(userId?: string) {
-  return useQuery({
+  return useQuery<FormInstanceItem[]>({
     queryKey: ['form-instances', userId],
     queryFn: async () => {
       if (!userId) throw new Error('User not authenticated')
-      return callApi<{ data: Array<Record<string, unknown>> }>(`/forms/instances?userId=${userId}`)
+      return callApi<FormInstanceItem[]>(`/forms/instances?userId=${userId}`)
     },
     enabled: !!userId,
   })
 }
 
 export function useFormInstance(id: string) {
-  return useQuery({
+  return useQuery<Record<string, unknown>>({
     queryKey: ['form-instance', id],
     queryFn: async () => {
       return callApi<Record<string, unknown>>(`/forms/instances/${id}`)
@@ -96,7 +105,7 @@ export function useUpdateFormInstance(id: string) {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/forms/instances/${id}`, {
+          callApi<FormInstanceItem>(`/forms/instances/${id}`, {
             method: 'PUT',
             body: data,
           }),
@@ -122,7 +131,7 @@ export function useSubmitFormInstance(id: string) {
 
       return runWithFeedback({
         action: async () =>
-          callApi(`/forms/instances/${id}/submit`, {
+          callApi<FormInstanceItem>(`/forms/instances/${id}/submit`, {
             method: 'POST',
           }),
         toastLoading: { message: 'Submitting form...' },
@@ -137,17 +146,23 @@ export function useSubmitFormInstance(id: string) {
   })
 }
 
+export type ExtractFormDataResult = {
+  extractedFields: Record<string, unknown>
+  aiResponse?: string
+  missingFields?: string[]
+}
+
 export function useExtractFormData() {
-  return useMutation({
-    mutationFn: async (data: {
+  return useMutation<
+    ExtractFormDataResult,
+    Error,
+    {
       formConfigId: string
       conversationHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>
-    }) => {
-      return callApi<{
-        extractedFields: Record<string, unknown>
-        aiResponse?: string
-        missingFields?: string[]
-      }>('/forms/extract', {
+    }
+  >({
+    mutationFn: async data => {
+      return callApi<ExtractFormDataResult>('/forms/extract', {
         method: 'POST',
         body: data,
       })

@@ -1,5 +1,5 @@
 import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall, ApiError, parseApiError } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import type { AuthToken, AuthUser, EmailOverrideRequest } from './types.js'
 import type { AuthMode } from './store.js'
@@ -384,14 +384,18 @@ export class AuthClient {
     }
 
     // Request a short-lived handoff code from ezauth
-    const response = await callApi<{ code: string; expiresIn: number }>('/auth/sso/authorize', {
-      appName: 'ezauth',
-      method: 'POST',
-      body: { app, redirectUri: targetUrl },
-    })
-
-    if (!response.ok || !response.data) {
-      throw new Error(response.error || 'Failed to initiate SSO handoff')
+    let data: { code: string; expiresIn: number }
+    try {
+      data = await apiCall<{ code: string; expiresIn: number }>('/auth/sso/authorize', {
+        appName: 'ezauth',
+        method: 'POST',
+        body: { app, redirectUri: targetUrl },
+      })
+    } catch (err) {
+      if (ApiError.isApiError(err)) {
+        throw new Error(err.message || 'Failed to initiate SSO handoff')
+      }
+      throw err
     }
 
     // Build the ezauth callback URL — preserve the target's locale so the
@@ -402,7 +406,7 @@ export class AuthClient {
     const next = target.pathname + target.search
 
     const callbackUrl = new URL(callbackPath, target.origin)
-    callbackUrl.searchParams.set('code', response.data.code)
+    callbackUrl.searchParams.set('code', data.code)
     callbackUrl.searchParams.set('next', next)
     return callbackUrl.toString()
   }

@@ -69,12 +69,10 @@ export function FormChatInterface({
         content: m.content,
       }))
 
-      const result = await extractMutation.mutateAsync({
+      const extractionData = await extractMutation.mutateAsync({
         formConfigId: formConfig.id,
         conversationHistory,
       })
-
-      const extractionData = result?.ok ? result.data : undefined
 
       if (extractionData) {
         // Update extracted fields

@@ -41,7 +41,7 @@ export function CreateFormInstanceDialog({
         mode,
       })
 
-      const formInstanceId = result?.data?._id
+      const formInstanceId = result?._id
 
       if (formInstanceId) {
         router.push(`/w/${workspaceSlug}/p/${projectId}/f/${formInstanceId}`)
@@ -53,16 +53,7 @@ export function CreateFormInstanceDialog({
     }
   }
 
-  // callApi wraps response as { ok, data: { success, data: [...] } }
-  type FormConfig = {
-    _id: string
-    name: string
-    description?: string
-    category?: string
-    icon?: string
-    extraction?: { fields?: unknown[] }
-  }
-  const formConfigs: FormConfig[] = (configsData?.ok && configsData.data?.data) || []
+  const formConfigs = configsData ?? []
 
   return (
     <>

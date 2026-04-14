@@ -17,10 +17,7 @@ export function FormInstanceHeader({
   projectId,
 }: FormInstanceHeaderProps) {
   const t = useTranslations('forms.forms')
-  const { data: formInstanceResponse, isLoading } = useFormInstance(formInstanceId)
-  const formInstance = formInstanceResponse?.ok
-    ? (formInstanceResponse.data as Record<string, unknown>)
-    : undefined
+  const { data: formInstance, isLoading } = useFormInstance(formInstanceId)
 
   if (isLoading) {
     return (

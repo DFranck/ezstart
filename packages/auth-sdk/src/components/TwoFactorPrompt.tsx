@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Div, Input, P } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 
@@ -62,17 +62,11 @@ export function TwoFactorPrompt({
     setError('')
 
     try {
-      const response = await callApi('/auth/2fa/validate', {
+      const result = await apiCall<{ code?: string }>('/auth/2fa/validate', {
         appName: 'ezauth',
         method: 'POST',
         body: { tempToken, code },
       })
-
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Invalid 2FA code')
-      }
-
-      const result = response.data as { code?: string }
 
       // Redirect with authorization code
       if (redirectUri && result.code) {
