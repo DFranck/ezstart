@@ -279,15 +279,15 @@ importers:
 
   apps/ezauth/web:
     dependencies:
+      '@ezstart/api-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/api-sdk
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
-      '@ezstart/fetch-client':
-        specifier: workspace:*
-        version: link:../../../packages/fetch-client
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
@@ -497,15 +497,15 @@ importers:
       '@ezbill/types':
         specifier: workspace:*
         version: link:../types
+      '@ezstart/api-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/api-sdk
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
-      '@ezstart/fetch-client':
-        specifier: workspace:*
-        version: link:../../../packages/fetch-client
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
@@ -816,15 +816,15 @@ importers:
       '@ezstart/ai-sdk':
         specifier: workspace:*
         version: link:../../../packages/ai-sdk
+      '@ezstart/api-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/api-sdk
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
-      '@ezstart/fetch-client':
-        specifier: workspace:*
-        version: link:../../../packages/fetch-client
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
@@ -952,6 +952,9 @@ importers:
 
   apps/fengshui/web:
     dependencies:
+      '@ezstart/api-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/api-sdk
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
@@ -961,9 +964,6 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
-      '@ezstart/fetch-client':
-        specifier: workspace:*
-        version: link:../../../packages/fetch-client
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
@@ -1137,6 +1137,9 @@ importers:
 
   apps/gacha-analyzer/web:
     dependencies:
+      '@ezstart/api-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/api-sdk
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
@@ -1146,9 +1149,6 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
-      '@ezstart/fetch-client':
-        specifier: workspace:*
-        version: link:../../../packages/fetch-client
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
@@ -1485,6 +1485,24 @@ importers:
         specifier: ^5.7.2
         version: 5.7.3
 
+  packages/api-contracts:
+    devDependencies:
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.2
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.19.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+
   packages/api-sdk:
     dependencies:
       '@ezstart/config':
@@ -1748,22 +1766,6 @@ importers:
       vitest:
         specifier: ^4.0.3
         version: 4.0.15(@edge-runtime/vm@3.2.0)(@opentelemetry/api@1.9.0)(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-
-  packages/fetch-client:
-    dependencies:
-      '@ezstart/config':
-        specifier: workspace:*
-        version: link:../config
-      '@ezstart/logger':
-        specifier: workspace:*
-        version: link:../logger
-    devDependencies:
-      '@ezstart/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
 
   packages/logger:
     dependencies:
