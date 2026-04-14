@@ -1681,7 +1681,7 @@ function ConversationsTab({ client, t }: { client: AIClient; t: Required<AIAdmin
   useEffect(() => {
     setLoading(true)
     client
-      .listConversations({ limit: CONVERSATIONS_PAGE_SIZE, offset })
+      .listConversations({ all: true, limit: CONVERSATIONS_PAGE_SIZE, offset })
       .then(result => {
         setConversations(result.conversations)
         setTotal(result.meta?.total ?? result.conversations.length)

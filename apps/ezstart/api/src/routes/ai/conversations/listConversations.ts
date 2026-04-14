@@ -17,7 +17,8 @@ import { AIConversation } from '../../../models/AIConversation.js'
 
 const listConversationsQuerySchema = z.object({
   appName: z.string().min(1).optional().describe('Application name (optional, omit for all apps)'),
-  userId: z.string().optional().describe('Filter by user ID'),
+  userId: z.string().optional().describe('Filter by user ID (superadmin only)'),
+  all: z.enum(['true', 'false']).optional().describe('List across all users (superadmin only)'),
   includeDeleted: z
     .enum(['true', 'false'])
     .optional()
@@ -43,11 +44,18 @@ listConversationsRouter.get(
         return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
       }
 
-      const { appName, userId, includeDeleted, limit, offset } = validation.data
+      const { appName, userId, all, includeDeleted, limit, offset } = validation.data
+
+      // Default: scope to the authenticated user. Only superadmins may either
+      //  - pass `?userId=X` to query a specific user, or
+      //  - pass `?all=true` to list across all users (admin dashboard).
+      const isSuperadmin = req.user?.globalRoles?.includes('superadmin') ?? false
+      const wantsAll = isSuperadmin && all === 'true'
+      const effectiveUserId = wantsAll ? undefined : isSuperadmin && userId ? userId : req.userId
 
       const query: Record<string, unknown> = {}
       if (appName) query.appName = appName
-      if (userId) query.userId = userId
+      if (effectiveUserId) query.userId = effectiveUserId
       if (!includeDeleted || includeDeleted === 'false') {
         query.deletedAt = null
       }

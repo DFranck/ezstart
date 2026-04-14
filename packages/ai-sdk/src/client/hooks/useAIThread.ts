@@ -2,7 +2,7 @@
 
 import { logger } from '@ezstart/logger'
 import { getApiUrl } from '@ezstart/config'
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useThreadAPI } from '@ezstart/ui/hooks'
 import type { UseThreadAPIReturn } from '@ezstart/ui/hooks'
@@ -85,6 +85,18 @@ function getAuthToken(customGetToken?: () => string | null): string | null {
   }
 }
 
+function getCurrentUserId(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const store = localStorage.getItem('ezauth-storage')
+    const parsed = store ? JSON.parse(store) : null
+    const id = parsed?.state?.user?._id ?? parsed?.state?.user?.id ?? null
+    return typeof id === 'string' && id.length > 0 ? id : null
+  } catch {
+    return null
+  }
+}
+
 function getIsAuthenticated(customGetToken?: () => string | null): boolean {
   return !!getAuthToken(customGetToken)
 }
@@ -98,9 +110,16 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   const { client } = useAIContext()
   const queryClient = useQueryClient()
 
+  // Auth (read identity each render to stay reactive)
+  const token = getAuthToken()
+  const isAuthenticated = !!token
+  const currentUserId = getCurrentUserId()
+
   // State
-  // Persist active conversation across reloads (scoped by app to avoid cross-app leaks)
-  const storageKey = `ai-sdk:activeConversationId:${appName}`
+  // Persist active conversation across reloads, scoped by app + user so that
+  // switching accounts on the same machine never leaks the previous user's
+  // active conversation id (which would 403 on access).
+  const storageKey = `ai-sdk:activeConversationId:${appName}:${currentUserId ?? 'anon'}`
   const [activeConversationId, setActiveConversationIdState] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null
     try {
@@ -124,10 +143,6 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   )
   // Track whether user explicitly chose a provider (vs auto-selected)
   const [userChoseProvider, setUserChoseProvider] = useState(false)
-
-  // Auth (read token each render to stay reactive)
-  const token = getAuthToken()
-  const isAuthenticated = !!token
 
   // Providers (app-scoped: join of DB app-provider config + global registry metadata)
   const {
@@ -287,6 +302,22 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   // ─── Thread API (messages, streaming, send, etc.) ────────────────────────
 
   const thread: UseThreadAPIReturn = useThreadAPI(threadConfig)
+
+  // ─── Reset on identity change (logout, account switch) ───────────────────
+  // Without this, switching accounts on the same machine keeps the previous
+  // user's activeConversationId / cached conversations / loaded messages,
+  // which then 403s on access.
+  const previousUserIdRef = useRef<string | null>(currentUserId)
+  useEffect(() => {
+    if (previousUserIdRef.current === currentUserId) return
+    previousUserIdRef.current = currentUserId
+
+    setActiveConversationIdState(null)
+    thread.clearMessages()
+    queryClient.invalidateQueries({ queryKey: ['ai-conversations', appName] })
+    queryClient.invalidateQueries({ queryKey: ['ai-conversation'] })
+    queryClient.invalidateQueries({ queryKey: ['ai-app-providers', appName] })
+  }, [currentUserId, appName, queryClient, thread.clearMessages])
 
   // ─── Load messages when switching conversations ──────────────────────────
   // Guards cover three races that caused visible flashes ("Welcome to X" after

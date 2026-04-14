@@ -94,12 +94,15 @@ export class AIClient {
 
   async listConversations(params?: {
     userId?: string
+    /** Superadmin-only: list across all users (admin dashboard). */
+    all?: boolean
     limit?: number
     offset?: number
   }): Promise<{ conversations: ConversationListItem[]; meta: PaginationMeta }> {
     const query = new URLSearchParams()
     if (this.appName) query.set('appName', this.appName)
     if (params?.userId) query.set('userId', params.userId)
+    if (params?.all) query.set('all', 'true')
     if (params?.limit) query.set('limit', String(params.limit))
     if (params?.offset) query.set('offset', String(params.offset))
     return this.fetch(`/conversations?${query}`)
