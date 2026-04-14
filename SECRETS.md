@@ -30,9 +30,37 @@ Root file contains two kinds of keys:
 
 | Kind        | Naming              | Example                                                            |
 | ----------- | ------------------- | ------------------------------------------------------------------ |
-| **Shared**  | No prefix           | `OPENAI_API_KEY`, `RESEND_API_KEY`                                 |
-| **Per-app** | `{APP_PREFIX}_NAME` | `EZAUTH_MONGO_URL`, `EZPAY_STRIPE_SECRET_KEY`                      |
+| **Shared**  | No prefix           | `OPENAI_API_KEY`, `RESEND_API_KEY`, `JWT_SECRET`, `STRIPE_*`       |
+| **Per-app** | `{APP_PREFIX}_NAME` | `EZAUTH_MONGO_URL`, `EZAUTH_GOOGLE_CLIENT_ID`                      |
 | Next public | `NEXT_PUBLIC_*`     | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (Next convention — no prefix) |
+
+**Rule**: a var is SHARED when its value is the same everywhere (or shared by
+design — e.g. `JWT_SECRET` across all apps for SSO interop). It is PER-APP
+only when the value genuinely differs per app (`MONGO_URL`, `SENTRY_DSN`) or
+when the var is owned by exactly one app.
+
+**Notable shared-by-design vars**:
+
+- `JWT_SECRET` — shared across all apps so SSO tokens minted by ezauth are
+  verifiable by every other app without re-keying.
+- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PUBLISHABLE_KEY` —
+  shared between `ezpay` (payments) and `ezstart` (read-only services tab). If
+  you ever want a restricted read-only key just for `ezstart`, re-prefix as
+  `EZSTART_STRIPE_*` in root.
+- `NODE_ENV` — Node defaults it, so never in the `required` manifest.
+
+**Removed**: `EMAIL_FROM` is no longer an env var. Each app hardcodes its
+sender in its `email.service.ts` (`'EZAuth <noreply@ezstart.xyz>'`, etc.).
+
+**Resend two-key pattern**: Resend uses two separate keys by scope.
+
+- `RESEND_API_KEY` — sending-scoped, consumed by every app's `email.service.ts`
+  to send transactional emails. Limited scope (no access to `/emails` or
+  `/domains` admin endpoints).
+- `RESEND_FULL_ACCESS_API_KEY` — full-access, consumed only by the ezstart
+  services tab provider (`apps/ezstart/api/src/services/providers/resend.ts`)
+  for admin reads (list domains, usage stats). Falls back to `RESEND_API_KEY`
+  if unset (backward compat, with a /domains fallback on 401).
 
 Known app prefixes (kept in sync with `packages/config/src/secrets-loader.ts`):
 
@@ -62,16 +90,21 @@ All required vars per API live in a **single central file**:
 `packages/config/src/env-manifests.ts`.
 
 ```ts
+export const SHARED_REQUIRED = ['JWT_SECRET']
+
 export const ENV_MANIFESTS = {
-  ezauth: { required: ['MONGO_URL', 'JWT_SECRET', 'OAUTH_STATE_SECRET'] },
-  ezbill: { required: ['MONGO_URL', 'JWT_SECRET'] },
+  ezauth: { required: ['MONGO_URL', 'OAUTH_STATE_SECRET'] },
+  ezbill: { required: ['MONGO_URL'] },
+  ezpay: { required: ['MONGO_URL', 'STRIPE_SECRET_KEY'] },
   // ...
 }
 ```
 
-`createApp({ apiApp: 'ezauth' })` auto-looks up the list — no per-app
-declaration needed. Missing vars throw a clear boot-time error pointing to
-the expected prefixed name (e.g. `EZAUTH_JWT_SECRET` in root).
+`getRequiredEnv(app)` auto-merges `SHARED_REQUIRED` with the app's entry so
+shared vars are always validated. `createApp({ apiApp: 'ezauth' })` looks up
+the list — no per-app declaration needed. Missing vars throw a clear boot-time
+error pointing to the expected name in root (shared = unprefixed,
+per-app = `{PREFIX}_VARNAME`).
 
 Override for edge cases only: `createApp({ apiApp, requiredEnv: [...] })`.
 
@@ -144,8 +177,8 @@ the root `.env.production` with the correct prefix per target.
 ```
 ezbill-api has MONGO_URL=...  →  written as EZBILL_MONGO_URL=... at root
 Same OPENAI_API_KEY in all services  →  written as OPENAI_API_KEY=... (shared)
-Different JWT_SECRET in each service  →  written as EZAUTH_JWT_SECRET=...,
-                                          EZBILL_JWT_SECRET=..., etc.
+Different MONGO_URL in each service   →  written as EZAUTH_MONGO_URL=...,
+                                          EZBILL_MONGO_URL=..., etc.
 ```
 
 ```bash

@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 /**
- * Rotate per-app secrets across the monorepo.
+ * Rotate shared JWT_SECRET (and ezauth's OAUTH_ENCRYPTION_KEY) across the
+ * monorepo.
  *
- * Per-app secrets (JWT_SECRET, OAUTH_ENCRYPTION_KEY) are written to
- * apps/{app}/{layer}/.env.{local|production}. Shared secrets (root
- * .env.local / .env.production) stay manual — use `pnpm secrets:sync`
- * to push them to platforms.
+ * - JWT_SECRET is SHARED across all apps (SSO). A single line in root
+ *   `.env.local` / `.env.production` is rewritten.
+ * - OAUTH_ENCRYPTION_KEY is EZAUTH-only, stored as `EZAUTH_OAUTH_ENCRYPTION_KEY`
+ *   in the root env file.
+ *
+ * Shared root env file is the source of truth. Platform env (Railway + Vercel)
+ * is pushed with the UNPREFIXED names (`JWT_SECRET`, `OAUTH_ENCRYPTION_KEY`).
  *
  * Usage:
  *   pnpm rotate-secrets                 # rotate dev + prod, push to Railway + Vercel
@@ -64,14 +68,6 @@ const VERCEL_PROJECTS = [
   'web-gacha-analyzer',
 ]
 
-const JWT_APPS = [
-  'apps/ezauth/api',
-  'apps/ezbill/api',
-  'apps/gacha-analyzer/api',
-  'apps/green-pulse/api',
-  'apps/ezpay/api',
-]
-
 console.log(
   isDryRun ? '\n🔍 DRY RUN — no files or remote env changes\n' : '\n🔐 Rotating secrets...\n'
 )
@@ -114,23 +110,23 @@ function updateEnvFile(filePath, secrets) {
   console.log(`  ${isDryRun ? '📝' : '✅'} ${filePath} — ${preview}`)
 }
 
-// ── DEV (.env.local) ──
+// ── DEV (root .env.local) ──
 if (doBoth || devOnly) {
-  console.log('── DEV (.env.local) ──')
-  for (const app of JWT_APPS) {
-    updateEnvFile(`${app}/.env.local`, { JWT_SECRET: devJwtSecret })
-  }
-  updateEnvFile('apps/ezauth/api/.env.local', { OAUTH_ENCRYPTION_KEY: devOauthEncKey })
+  console.log('── DEV (root .env.local) ──')
+  updateEnvFile('.env.local', {
+    JWT_SECRET: devJwtSecret,
+    EZAUTH_OAUTH_ENCRYPTION_KEY: devOauthEncKey,
+  })
   console.log('')
 }
 
-// ── PROD (.env.production) ──
+// ── PROD (root .env.production) ──
 if (doBoth || prodOnly) {
-  console.log('── PROD (.env.production) ──')
-  for (const app of JWT_APPS) {
-    updateEnvFile(`${app}/.env.production`, { JWT_SECRET: prodJwtSecret })
-  }
-  updateEnvFile('apps/ezauth/api/.env.production', { OAUTH_ENCRYPTION_KEY: prodOauthEncKey })
+  console.log('── PROD (root .env.production) ──')
+  updateEnvFile('.env.production', {
+    JWT_SECRET: prodJwtSecret,
+    EZAUTH_OAUTH_ENCRYPTION_KEY: prodOauthEncKey,
+  })
   console.log('')
 }
 
@@ -247,11 +243,12 @@ console.log('📋 Summary')
 console.log('═'.repeat(60))
 
 if (doBoth || devOnly) {
-  console.log(`  DEV  JWT_SECRET   = ${mask(devJwtSecret)}  (in .env.local files)`)
+  console.log(`  DEV  JWT_SECRET   = ${mask(devJwtSecret)}  (root .env.local, shared)`)
+  console.log(`  DEV  OAUTH_KEY    = ${mask(devOauthEncKey)}  (root .env.local, ezauth only)`)
 }
 if (doBoth || prodOnly) {
-  console.log(`  PROD JWT_SECRET   = ${mask(prodJwtSecret)}  (in .env.production files)`)
-  console.log(`  PROD OAUTH_KEY    = ${mask(prodOauthEncKey)}  (ezauth only)`)
+  console.log(`  PROD JWT_SECRET   = ${mask(prodJwtSecret)}  (root .env.production, shared)`)
+  console.log(`  PROD OAUTH_KEY    = ${mask(prodOauthEncKey)}  (root .env.production, ezauth only)`)
   if (railwayUpdated) console.log('  ⚡ Railway updated automatically.')
   if (vercelUpdated) console.log('  ⚡ Vercel updated automatically.')
   if (!noRailway && !railwayUpdated && !isDryRun)

@@ -36,7 +36,6 @@ const envSchema = z.object({
   REQUIRE_VERIFIED_EMAIL_FOR_SSO: z.coerce.boolean().default(false),
 
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().optional(),
 
   SENTRY_DSN: z.string().optional(),
 })

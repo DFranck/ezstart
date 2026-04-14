@@ -377,6 +377,7 @@ module.exports = {
   fetchRailwayEnv,
   listVercelTeams,
   buildVarIndex,
+  classifyKeyForTarget,
   classifyVar,
   renderEnvFile,
   groupIntoSections,

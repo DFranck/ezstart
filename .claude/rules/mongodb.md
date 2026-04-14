@@ -46,9 +46,12 @@ const doc = await MyModel.findOne({ ... })
    ```
 
 4. ✅ **Node.js LTS** (20.18.x) pour production
+
    ```json
    "engines": { "node": "20.18.x" }
    ```
+
+5. ⚠️ **1 DB par process API** — `connectToMongo(dbName)` est un singleton : le premier appel établit la connexion, tous les appels suivants avec un `dbName` différent sont **ignorés silencieusement** (un `logger.warn` trace l'incident). Ne jamais concevoir une API qui écrit dans plusieurs DBs via ce helper. Si tu as besoin d'une autre DB, crée une autre API ou utilise `mongoose.connection.useDb(name)` explicitement dans le code appelant.
 
 ### TypeScript Workaround
 

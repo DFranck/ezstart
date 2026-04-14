@@ -53,8 +53,8 @@ const healthCheckSchema = new Schema<IHealthCheck>(
 // Compound index for efficient queries
 healthCheckSchema.index({ serviceId: 1, timestamp: -1 })
 
-// TTL index to auto-delete old records after 30 days
-healthCheckSchema.index({ timestamp: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 })
+// TTL index to auto-delete old records after 7 days
+healthCheckSchema.index({ timestamp: 1 }, { expireAfterSeconds: 7 * 24 * 60 * 60 })
 
 /**
  * Factory function to get HealthCheck model attached to shared mongoose connection
@@ -67,6 +67,8 @@ healthCheckSchema.index({ timestamp: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 6
  * ```
  */
 export async function getHealthCheckModel(): Promise<Model<IHealthCheck>> {
-  const mongoose = await connectToMongo('ezstart-monitoring')
-  return mongoose.models.HealthCheck || mongoose.model<IHealthCheck>('HealthCheck', healthCheckSchema)
+  const mongoose = await connectToMongo('ezstart')
+  return (
+    mongoose.models.HealthCheck || mongoose.model<IHealthCheck>('HealthCheck', healthCheckSchema)
+  )
 }

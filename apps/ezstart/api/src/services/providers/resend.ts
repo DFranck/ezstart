@@ -4,7 +4,9 @@
  * Uses Resend REST API to fetch emails sent over the last 30 days.
  * Docs: https://resend.com/docs/api-reference
  *
- * Auth: RESEND_API_KEY.
+ * Auth: RESEND_FULL_ACCESS_API_KEY (preferred — admin reads on /emails and /domains).
+ *       Falls back to RESEND_API_KEY for backward compat (sending-scoped key may
+ *       return 401 on admin endpoints; a /domains fallback is attempted).
  */
 
 import { logger } from '@ezstart/logger/server'
@@ -26,7 +28,7 @@ interface ResendDomainListResponse {
 }
 
 export async function fetchStatus(): Promise<ProviderStatus> {
-  const key = process.env.RESEND_API_KEY
+  const key = process.env.RESEND_FULL_ACCESS_API_KEY ?? process.env.RESEND_API_KEY
 
   const base: ProviderStatus = {
     provider: 'resend',
@@ -40,7 +42,7 @@ export async function fetchStatus(): Promise<ProviderStatus> {
   }
 
   if (!key) {
-    return { ...base, error: 'Missing RESEND_API_KEY env var' }
+    return { ...base, error: 'Missing RESEND_FULL_ACCESS_API_KEY (or RESEND_API_KEY) env var' }
   }
 
   const headers = { Authorization: `Bearer ${key}` }
@@ -92,14 +94,14 @@ export async function fetchStatus(): Promise<ProviderStatus> {
             { label: 'Verified', current: verified, limit: null, unit: 'domains' },
           ],
           statusMessage:
-            'Resend key is sending-only. The /emails endpoint requires a full-access key. Create one at https://resend.com/api-keys with full permissions to see send stats.',
+            'Resend key is sending-only. The /emails endpoint requires a full-access key. Create one at https://resend.com/api-keys with full permissions and set it as RESEND_FULL_ACCESS_API_KEY to see send stats.',
         }
       }
       return {
         ...base,
         status: 'unknown',
         statusMessage:
-          'Resend key rejected (401). Create a full-access key at https://resend.com/api-keys.',
+          'Resend key rejected (401). Create a full-access key at https://resend.com/api-keys and set it as RESEND_FULL_ACCESS_API_KEY.',
       }
     }
 
