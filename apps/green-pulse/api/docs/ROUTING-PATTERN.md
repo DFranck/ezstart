@@ -120,18 +120,14 @@ export default router
 ```typescript
 import { Router } from '@ezstart/express-core'
 import conversationsRouter, { conversationRegistries } from './conversations/index.js'
-import formsRouter, { formRegistries } from './forms/index.js'
 import chatRouter, { chatRegistries } from './chat/index.js'
 
 const router = Router()
 
 // Combine all OpenAPI registries
-export const globalRegistry = [...conversationRegistries, ...formRegistries, ...chatRegistries]
+export const globalRegistry = [...conversationRegistries, ...chatRegistries]
 
-router
-  .use('/conversations', conversationsRouter)
-  .use('/forms', formsRouter)
-  .use('/chat', chatRouter)
+router.use('/conversations', conversationsRouter).use('/chat', chatRouter)
 
 export default router
 ```
@@ -237,7 +233,7 @@ router.delete('/:id', ...)
 ```typescript
 // routes/api.ts
 router.post('/conversations', ...)
-router.post('/forms', ...)
+router.post('/messages', ...)
 router.post('/chat', ...)
 ```
 

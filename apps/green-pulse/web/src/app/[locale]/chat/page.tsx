@@ -15,7 +15,6 @@ const FUTURE_TOOLS = [
   { href: '/dashboard', labelKey: 'dashboards', icon: 'lucide:LayoutDashboard' as const },
   { href: '/upload', labelKey: 'uploadFiles', icon: 'lucide:Upload' as const },
   { href: '/documents', labelKey: 'documents', icon: 'lucide:FileText' as const },
-  { href: '/projects', labelKey: 'myProjects', icon: 'lucide:FolderKanban' as const },
   { href: '/compliances', labelKey: 'compliances', icon: 'lucide:Shield' as const },
 ]
 
