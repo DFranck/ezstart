@@ -190,25 +190,31 @@ export async function getSystemPromptDoc(
   if (cached) docCache.delete(cacheKey)
 
   try {
-    const raw = await AISystemPrompt.findOne({
-      $and: [
-        {
-          $or: [{ apps: appName }, { apps: APPS_WILDCARD }, { appName }],
-        },
-        { type },
-        { isActive: true },
-      ],
+    // App-specific prompts ALWAYS win over god-level (apps: ['*']) defaults,
+    // regardless of isDefault. Otherwise a global isDefault: true prompt would
+    // shadow every per-app customization.
+    const appSpecific = await AISystemPrompt.findOne({
+      $and: [{ $or: [{ apps: appName }, { appName }] }, { type }, { isActive: true }],
     })
       .sort({ isDefault: -1, priority: -1, createdAt: 1 })
       .lean()
       .exec()
 
+    const raw =
+      appSpecific ??
+      (await AISystemPrompt.findOne({
+        $and: [{ apps: APPS_WILDCARD }, { type }, { isActive: true }],
+      })
+        .sort({ isDefault: -1, priority: -1, createdAt: 1 })
+        .lean()
+        .exec())
+
     const doc = raw
       ? (normalizeLegacyPrompt(raw as Partial<IAISystemPrompt>) as IAISystemPrompt)
       : null
     docCache.set(cacheKey, { doc, expiresAt: Date.now() + CACHE_TTL_MS })
-    logger.info(
-      `[AIPromptService] Loaded prompt doc app=${appName} type=${type} name="${doc?.name ?? 'NONE'}" key="${doc?.key ?? 'NONE'}"`
+    logger.warn(
+      `[AIPromptService] Loaded prompt doc app=${appName} type=${type} name="${doc?.name ?? 'NONE'}" key="${doc?.key ?? 'NONE'}" scope=${doc?.apps?.includes(APPS_WILDCARD) ? 'god' : 'app'}`
     )
     return doc
   } catch (error) {
