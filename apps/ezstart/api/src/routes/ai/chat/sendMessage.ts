@@ -93,10 +93,10 @@ sendMessageRouter.post(
         }
       }
 
-      // Get full prompt doc from DB (single query) with fallback
+      // Always compose god-level + app-specific (god first, app overrides).
+      // Doc lookup is kept only for config overrides (temperature, etc.).
       const promptDoc = await getSystemPromptDoc('general', appName)
-      const baseSystemPrompt =
-        promptDoc?.content || (await getSystemPrompt('general', 'all', appName))
+      const baseSystemPrompt = await getSystemPrompt('general', 'all', appName)
 
       // Add locale instruction to system prompt
       const localeMap: Record<string, string> = {

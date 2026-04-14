@@ -86,10 +86,12 @@ router.post('/', async (req, res) => {
       }
     }
 
-    // Build system prompt
+    // Build system prompt — always compose god-level + app-specific so global
+    // rules (formatting, language matching) are preserved while app identity
+    // (e.g. GP.A for green-pulse) specializes them. Doc lookup is only used
+    // for per-app config overrides (temperature, maxTokens, ...).
     const promptDoc = await getSystemPromptDoc('general', appName)
-    const baseSystemPrompt =
-      promptDoc?.content || (await getSystemPrompt('general', 'all', appName))
+    const baseSystemPrompt = await getSystemPrompt('general', 'all', appName)
 
     const localeMap: Record<string, string> = {
       en: 'English',
