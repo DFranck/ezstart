@@ -289,10 +289,14 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   const thread: UseThreadAPIReturn = useThreadAPI(threadConfig)
 
   // ─── Load messages when switching conversations ──────────────────────────
-  // Skip hydration while a send is in flight: the first message of a brand-new
-  // conversation triggers setActiveConversationId → useConversation refetch →
-  // API returns { messages: [] } (user msg not yet persisted) → loadMessages([])
-  // would wipe the optimistic user bubble and streaming assistant reply.
+  // Guards cover three races that caused visible flashes ("Welcome to X" after
+  // a send, then again after the stream ends):
+  //   1. Send in flight       → don't touch the thread, the UI is streaming.
+  //   2. Persistence lag      → API returned 0 messages but we already have
+  //                             optimistic local ones → skip.
+  //   3. No-op rehydrate      → server payload is the same tail as local
+  //                             state → skip (avoids setMessages-loops when
+  //                             React Query refetches the same conv).
   useEffect(() => {
     if (!conversationData?.messages) return
     if (thread.loading) return
@@ -306,8 +310,20 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
       })
     )
 
+    const serverLen = threadMessages.length
+    const localLen = thread.messages.length
+
+    if (serverLen === 0 && localLen > 0) return
+    if (serverLen === localLen && serverLen > 0) {
+      const lastLocal = thread.messages[localLen - 1]
+      const lastServer = threadMessages[serverLen - 1]
+      if (lastLocal?.content === lastServer?.content && lastLocal?.role === lastServer?.role) {
+        return
+      }
+    }
+
     thread.loadMessages(threadMessages)
-  }, [conversationData, thread.loadMessages, thread.loading])
+  }, [conversationData, thread.loadMessages, thread.loading, thread.messages])
 
   // ─── Conversation handlers ───────────────────────────────────────────────
 
@@ -323,10 +339,17 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
     }
   }, [createConversation, thread.clearMessages])
 
-  const handleConversationSelect = useCallback((id: string) => {
-    setActiveConversationId(id)
-    // React Query handles cache — useConversation(id) will fetch or serve from cache
-  }, [])
+  const handleConversationSelect = useCallback(
+    (id: string) => {
+      // Clear the thread immediately: otherwise selecting an empty conversation
+      // keeps the previous conv's messages visible until the (empty) API
+      // response arrives. The hydration effect will re-fill if the target conv
+      // actually has messages.
+      thread.clearMessages()
+      setActiveConversationId(id)
+    },
+    [thread.clearMessages, setActiveConversationId]
+  )
 
   const handleRename = useCallback(
     async (id: string, title: string) => {
