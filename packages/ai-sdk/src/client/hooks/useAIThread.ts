@@ -99,7 +99,29 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   const queryClient = useQueryClient()
 
   // State
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
+  // Persist active conversation across reloads (scoped by app to avoid cross-app leaks)
+  const storageKey = `ai-sdk:activeConversationId:${appName}`
+  const [activeConversationId, setActiveConversationIdState] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      return window.localStorage.getItem(storageKey)
+    } catch {
+      return null
+    }
+  })
+  const setActiveConversationId = useCallback(
+    (id: string | null) => {
+      setActiveConversationIdState(id)
+      if (typeof window === 'undefined') return
+      try {
+        if (id) window.localStorage.setItem(storageKey, id)
+        else window.localStorage.removeItem(storageKey)
+      } catch {
+        /* ignore storage failures */
+      }
+    },
+    [storageKey]
+  )
   // Track whether user explicitly chose a provider (vs auto-selected)
   const [userChoseProvider, setUserChoseProvider] = useState(false)
 
@@ -267,9 +289,13 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
   const thread: UseThreadAPIReturn = useThreadAPI(threadConfig)
 
   // ─── Load messages when switching conversations ──────────────────────────
-
+  // Skip hydration while a send is in flight: the first message of a brand-new
+  // conversation triggers setActiveConversationId → useConversation refetch →
+  // API returns { messages: [] } (user msg not yet persisted) → loadMessages([])
+  // would wipe the optimistic user bubble and streaming assistant reply.
   useEffect(() => {
     if (!conversationData?.messages) return
+    if (thread.loading) return
 
     const threadMessages: ThreadMessage[] = conversationData.messages.map(
       (msg: { role: string; content: string; timestamp?: Date | string }) => ({
@@ -281,7 +307,7 @@ export function useAIThread(config: UseAIThreadConfig): UseAIThreadReturn {
     )
 
     thread.loadMessages(threadMessages)
-  }, [conversationData, thread.loadMessages])
+  }, [conversationData, thread.loadMessages, thread.loading])
 
   // ─── Conversation handlers ───────────────────────────────────────────────
 
