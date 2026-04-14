@@ -25,14 +25,18 @@ export function useScans(options: UseScansOptions = {}): UseScansResult {
   const query = useQuery({
     queryKey: ['scans', { gameType, status, page, pageSize }],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (gameType) params.set('gameType', gameType)
-      if (status) params.set('status', status)
-      params.set('limit', pageSize.toString())
-      params.set('offset', offset.toString())
+      const queryParams: Record<string, string | number> = {
+        limit: pageSize,
+        offset,
+      }
+      if (gameType) queryParams.gameType = gameType
+      if (status) queryParams.status = status
 
-      const response = await callApi<Scan[]>(`/scans?${params}`)
-      return { scans: response.ok ? response.data : [], meta: response.meta }
+      const envelope = await callApi<{ data: Scan[]; meta?: { total?: number } }>('/scans', {
+        query: queryParams,
+        preserveEnvelope: true,
+      })
+      return { scans: envelope.data ?? [], meta: envelope.meta }
     },
   })
 

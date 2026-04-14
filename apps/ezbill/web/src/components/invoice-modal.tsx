@@ -1,5 +1,5 @@
 'use client'
-import { callApi, parseApiError, runWithFeedback } from '@/config/api'
+import { callApi, runWithFeedback } from '@/config/api'
 import {
   BaseLineItem,
   BillingType,
@@ -254,22 +254,22 @@ export function InvoiceModal({
       items: formData.billingType === 'flat-rate' ? [] : formData.items,
     }
 
+    const headers = user?._id ? { 'X-User-Id': user._id } : undefined
+
     return runWithFeedback({
       action: async () => {
         if (invoice) {
-          const res = await callApi(`/invoices/${invoice._id}`, {
+          await callApi(`/invoices/${invoice._id}`, {
             method: 'PUT',
-            userId: user?._id,
+            headers,
             body: dataToSend,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
-          const res = await callApi('/invoices', {
+          await callApi('/invoices', {
             method: 'POST',
-            userId: user?._id,
+            headers,
             body: dataToSend,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

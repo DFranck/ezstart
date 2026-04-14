@@ -40,10 +40,9 @@ export function ProjectCard({ project, isSelected }: ProjectCardProps) {
     queryKey: ['monitoring', 'project-history', project.id],
     queryFn: async () => {
       const res = await callApi<{ services: ServiceHistory[] }>(`/history/project/${project.id}`, {
-        query: { hours: '24' },
+        query: { hours: 24 },
       })
-      if (!res.ok) throw new Error('Failed to fetch history')
-      return res.data.services || []
+      return res.services || []
     },
     staleTime: 60000,
     refetchInterval: 300000,

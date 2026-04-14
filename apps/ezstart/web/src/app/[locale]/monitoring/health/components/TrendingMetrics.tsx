@@ -66,13 +66,10 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
 
   const { data, isLoading, error } = useQuery<ProjectHistoryResponse>({
     queryKey: ['monitoring', 'project-history', projectId, hours],
-    queryFn: async () => {
-      const res = await callApi<ProjectHistoryResponse>(`/history/project/${projectId}`, {
-        query: { hours: String(hours) },
-      })
-      if (!res.ok) throw new Error('Failed to fetch project history')
-      return res.data
-    },
+    queryFn: () =>
+      callApi<ProjectHistoryResponse>(`/history/project/${projectId}`, {
+        query: { hours },
+      }),
     staleTime: 60000,
     refetchInterval: 300000,
   })

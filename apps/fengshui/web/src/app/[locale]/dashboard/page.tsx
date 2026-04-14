@@ -54,7 +54,9 @@ export default function PlansPage() {
   const tc = useTranslations('common')
   const { user, isAuthenticated } = useAuth()
   const [isHydrated, setIsHydrated] = useState(false)
-  useEffect(() => { setIsHydrated(true) }, [])
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
   const queryClient = useQueryClient()
 
   const [page, setPage] = useState(0)
@@ -72,21 +74,22 @@ export default function PlansPage() {
   const { data, isLoading } = useQuery<AnalysesResponse>({
     queryKey: ['analyses', page, filterUserId],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        limit: String(limit),
-        offset: String(page * limit),
-      })
-      if (filterUserId) params.set('userId', filterUserId)
-      const res = await callApi(`/api/analyses?${params}`, { method: 'GET' })
-      return { data: res.data as Analysis[], meta: res.meta as AnalysesResponse['meta'] }
+      const query: Record<string, string | number> = {
+        limit,
+        offset: page * limit,
+      }
+      if (filterUserId) query.userId = filterUserId
+      const envelope = await callApi<{ data: Analysis[]; meta: AnalysesResponse['meta'] }>(
+        '/analyses',
+        { method: 'GET', query, preserveEnvelope: true }
+      )
+      return { data: envelope.data, meta: envelope.meta }
     },
     enabled: isAuthenticated,
   })
 
   const deleteMutation = useMutation({
-    mutationFn: async (analysisId: string) => {
-      await callApi(`/api/analyses/${analysisId}`, { method: 'DELETE' })
-    },
+    mutationFn: (analysisId: string) => callApi(`/analyses/${analysisId}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['analyses'] })
       toast.success(t('deleteConfirm.success'))

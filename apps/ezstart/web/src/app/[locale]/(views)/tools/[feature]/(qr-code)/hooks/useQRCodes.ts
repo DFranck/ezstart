@@ -52,22 +52,23 @@ export function useQRCodes(params: {
   return useQuery<QRCodesResponse & { meta: QRCodesMeta }>({
     queryKey: ['qr-codes', params.limit, params.offset, params.userId],
     queryFn: async () => {
-      const query: Record<string, string> = {
-        limit: String(params.limit),
-        offset: String(params.offset),
+      const query: Record<string, string | number> = {
+        limit: params.limit,
+        offset: params.offset,
       }
       if (params.userId) {
         query.userId = params.userId
       }
 
-      const response = await callApi<QRCodesResponse>('/qr-codes', { query })
-      if (!response.ok) {
-        throw new Error('Failed to fetch QR codes')
-      }
+      // Preserve envelope to access pagination meta alongside data
+      const envelope = await callApi<{ data: QRCodesResponse; meta: QRCodesMeta }>('/qr-codes', {
+        query,
+        preserveEnvelope: true,
+      })
 
       return {
-        ...response.data,
-        meta: response.meta as QRCodesMeta,
+        ...envelope.data,
+        meta: envelope.meta,
       }
     },
     enabled: params.enabled,
@@ -78,16 +79,11 @@ export function useCreateQRCode(t: (key: string) => string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (payload: CreateQRCodePayload) => {
-      const response = await callApi<SavedQRCode>('/qr-codes', {
+    mutationFn: (payload: CreateQRCodePayload) =>
+      callApi<SavedQRCode>('/qr-codes', {
         method: 'POST',
         body: payload,
-      })
-      if (!response.ok) {
-        throw new Error('Failed to save QR code')
-      }
-      return response.data
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] })
       toast.success(t('saved.saveSuccess'))
@@ -102,15 +98,10 @@ export function useDeleteQRCode(t: (key: string) => string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await callApi(`/qr-codes/${id}`, {
+    mutationFn: (id: string) =>
+      callApi(`/qr-codes/${id}`, {
         method: 'DELETE',
-      })
-      if (!response.ok) {
-        throw new Error('Failed to delete QR code')
-      }
-      return response.data
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] })
       toast.success(t('saved.deleteSuccess'))

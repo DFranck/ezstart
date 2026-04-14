@@ -1,4 +1,5 @@
-import { callApi, parseApiError } from '@/config/api'
+import { ApiError } from '@ezstart/api-sdk'
+import { callApi } from '@/config/api'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -26,16 +27,21 @@ export const useUserStore = create<UserStore>()(
 
       register: async (username: string) => {
         const trimmedUsername = username.toLowerCase().trim()
-        
-        // First try to get existing user
-        const getRes = await callApi<UserResponse>(`/users/${trimmedUsername}`, {
-          method: 'GET',
-        })
 
-        if (getRes.ok && getRes.data) {
-          const user = getRes.data.user
-          set({ user })
-          return user
+        // First try to get existing user
+        try {
+          const getRes = await callApi<UserResponse>(`/users/${trimmedUsername}`, {
+            method: 'GET',
+          })
+          if (getRes?.user) {
+            set({ user: getRes.user })
+            return getRes.user
+          }
+        } catch (err: unknown) {
+          // 404 is expected when user doesn't exist — fall through to create
+          if (!ApiError.isApiError(err) || err.status !== 404) {
+            throw err
+          }
         }
 
         // If user doesn't exist, create new one
@@ -44,9 +50,8 @@ export const useUserStore = create<UserStore>()(
           body: { username: trimmedUsername },
         })
 
-        if (!createRes.ok) throw new Error(parseApiError(createRes.data))
-        if (!createRes.data) throw new Error('No data returned from API')
-        const user = createRes.data.user
+        if (!createRes?.user) throw new Error('No data returned from API')
+        const user = createRes.user
         set({ user })
         return user
       },

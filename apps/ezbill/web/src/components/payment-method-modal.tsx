@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, parseApiError, runWithFeedback } from '@/config/api'
+import { callApi, runWithFeedback } from '@/config/api'
 import { PaymentMethod, PaymentMethodType } from '@ezbill/types'
 import {
   Button,
@@ -181,22 +181,22 @@ export function PaymentMethodModal({
       name: selectedType?.label || formData.type,
     }
 
+    const headers = user?._id ? { 'X-User-Id': user._id } : undefined
+
     return runWithFeedback({
       action: async () => {
         if (paymentMethod) {
-          const res = await callApi(`/payment-methods/${paymentMethod._id}`, {
+          await callApi(`/payment-methods/${paymentMethod._id}`, {
             method: 'PUT',
-            userId: user?._id,
+            headers,
             body: dataToSend,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
-          const res = await callApi('/payment-methods', {
+          await callApi('/payment-methods', {
             method: 'POST',
-            userId: user?._id,
+            headers,
             body: dataToSend,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

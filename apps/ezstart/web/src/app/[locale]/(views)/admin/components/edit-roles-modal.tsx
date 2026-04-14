@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button, Checkbox, Div, H2, Label, P, Spinner, Modal } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 
 // ========================================
 // Types
@@ -70,18 +70,17 @@ export function EditRolesModal({ user, open, onOpenChange, onSaved }: EditRolesM
     setSaving(true)
     setError('')
     try {
-      const response = await callApi(`/admin/users/${user._id}`, {
+      await apiCall(`/admin/users/${user._id}`, {
         appName: 'ezauth',
         method: 'PATCH',
         body: { globalRoles, appRoles },
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t('editError'))
-      }
       onSaved()
       onOpenChange(false)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('editError'))
+    } catch (err: unknown) {
+      const message =
+        ApiError.isApiError(err) || err instanceof Error ? err.message : t('editError')
+      setError(message)
     } finally {
       setSaving(false)
     }

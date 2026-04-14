@@ -42,13 +42,10 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
   const t = useTranslations('monitoring')
   const { data, isLoading, error } = useQuery<HistoryResponse>({
     queryKey: ['monitoring', 'history', serviceId, hours],
-    queryFn: async () => {
-      const res = await callApi<HistoryResponse>(`/history/${serviceId}`, {
-        query: { hours: String(hours) },
-      })
-      if (!res.ok) throw new Error('Failed to fetch history')
-      return res.data
-    },
+    queryFn: () =>
+      callApi<HistoryResponse>(`/history/${serviceId}`, {
+        query: { hours },
+      }),
     staleTime: 60000, // 1 minute
     refetchInterval: 300000, // 5 minutes
   })

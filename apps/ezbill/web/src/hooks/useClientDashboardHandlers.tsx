@@ -42,21 +42,15 @@ export function useClientDashboardHandlers() {
 
   const markInvoiceAsSent = async (invoice: Invoice) => {
     try {
-      const response = await callApi(`/invoices/${invoice._id}`, {
+      await callApi(`/invoices/${invoice._id}`, {
         method: 'PUT',
-        userId: userId,
+        headers: userId ? { 'X-User-Id': userId } : undefined,
         body: {
           status: 'sent',
         },
       })
-
-      if (response.ok) {
-        await refetchAll()
-        return true
-      } else {
-        toast.error(t('invoiceSendFailed'))
-        return false
-      }
+      await refetchAll()
+      return true
     } catch (error) {
       toast.error(t('invoiceSendError'))
       return false
@@ -197,21 +191,15 @@ export function useClientDashboardHandlers() {
 
   const markQuoteAsSent = async (quote: Quote) => {
     try {
-      const response = await callApi(`/quotes/${quote._id}`, {
+      await callApi(`/quotes/${quote._id}`, {
         method: 'PUT',
-        userId: userId,
+        headers: userId ? { 'X-User-Id': userId } : undefined,
         body: {
           status: 'sent',
         },
       })
-
-      if (response.ok) {
-        await refetchAll()
-        return true
-      } else {
-        toast.error(t('quoteSendFailed'))
-        return false
-      }
+      await refetchAll()
+      return true
     } catch (error) {
       toast.error(t('quoteSendError'))
       return false
@@ -227,19 +215,14 @@ export function useClientDashboardHandlers() {
     e?.stopPropagation()
 
     try {
-      const response = await callApi(`/quotes/${quote._id}`, {
+      await callApi(`/quotes/${quote._id}`, {
         method: 'PUT',
-        userId: userId,
+        headers: userId ? { 'X-User-Id': userId } : undefined,
         body: {
           status: 'accepted',
         },
       })
-
-      if (response.ok) {
-        await refetchAll()
-      } else {
-        toast.error(t('quoteAcceptFailed'))
-      }
+      await refetchAll()
     } catch (error) {
       toast.error(t('quoteAcceptError'))
     }
@@ -249,19 +232,14 @@ export function useClientDashboardHandlers() {
     e?.stopPropagation()
 
     try {
-      const response = await callApi(`/quotes/${quote._id}`, {
+      await callApi(`/quotes/${quote._id}`, {
         method: 'PUT',
-        userId: userId,
+        headers: userId ? { 'X-User-Id': userId } : undefined,
         body: {
           status: 'rejected',
         },
       })
-
-      if (response.ok) {
-        await refetchAll()
-      } else {
-        toast.error(t('quoteDeclineFailed'))
-      }
+      await refetchAll()
     } catch (error) {
       toast.error(t('quoteDeclineError'))
     }
@@ -302,16 +280,11 @@ export function useClientDashboardHandlers() {
     e?.stopPropagation()
 
     try {
-      const response = await callApi(`/quotes/${quote._id}`, {
+      await callApi(`/quotes/${quote._id}`, {
         method: 'DELETE',
-        userId: userId,
+        headers: userId ? { 'X-User-Id': userId } : undefined,
       })
-
-      if (response.ok) {
-        await refetchAll()
-      } else {
-        toast.error(t('quoteDeleteFailed'))
-      }
+      await refetchAll()
     } catch (error) {
       toast.error(t('quoteDeleteError'))
     }

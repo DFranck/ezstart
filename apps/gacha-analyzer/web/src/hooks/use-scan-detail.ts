@@ -5,10 +5,7 @@ import { callApi } from '@/config/api'
 export function useScanDetail(id: string) {
   return useQuery({
     queryKey: ['scan', id],
-    queryFn: async (): Promise<Scan | null> => {
-      const response = await callApi<Scan>(`/scans/${id}`)
-      return response.ok ? response.data : null
-    },
+    queryFn: () => callApi<Scan>(`/scans/${id}`),
     enabled: !!id,
   })
 }

@@ -24,15 +24,11 @@ export interface ErrorsData {
 
 async function fetchErrors(): Promise<ErrorsData> {
   const response = await callApi<{ logs: Array<ErrorLog & { type: string }> }>('/activity', {
-    query: { _t: String(Date.now()) },
+    query: { _t: Date.now() },
   })
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch error logs')
-  }
-
   // Filter only errors
-  const errorLogs = (response.data.logs || []).filter(log => log.type === 'error')
+  const errorLogs = (response.logs || []).filter(log => log.type === 'error')
 
   return { logs: errorLogs }
 }

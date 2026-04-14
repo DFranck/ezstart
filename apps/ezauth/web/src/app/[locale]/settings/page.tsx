@@ -1,7 +1,7 @@
 'use client'
 
 import { TwoFactorSettings, useAuth, useAuthNavigation } from '@ezstart/auth-sdk'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import {
   BackButton,
   Badge,
@@ -33,16 +33,13 @@ export default function SettingsPage() {
     if (!user) return
     setSendingVerification(true)
     try {
-      const response = await callApi('/auth/send-verification', {
+      await apiCall('/auth/send-verification', {
         appName: 'ezauth',
         method: 'POST',
         body: { app, redirect_uri: redirectUri },
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || ts('verifyError'))
-      }
       toast.success(ts('verificationSent'))
-    } catch (error) {
+    } catch (error: unknown) {
       const message = error instanceof Error ? error.message : ts('verifyError')
       toast.error(message)
     } finally {

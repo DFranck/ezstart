@@ -14,7 +14,7 @@ import {
 } from '@ezstart/ui/components'
 import { BackButton } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocale, useTranslations } from 'next-intl'
@@ -82,15 +82,11 @@ export default function SessionsPage() {
       if (refreshToken) {
         headers['X-Refresh-Token'] = refreshToken
       }
-      const response = await callApi<{ sessions: Session[] } | Session[]>('/auth/sessions', {
+      const data = await apiCall<{ sessions: Session[] } | Session[]>('/auth/sessions', {
         appName: 'ezauth',
         method: 'GET',
         headers,
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t('fetchError'))
-      }
-      const data = response.data as { sessions?: Session[] } | Session[] | null
       if (Array.isArray(data)) return data
       return data?.sessions ?? []
     },
@@ -99,13 +95,10 @@ export default function SessionsPage() {
   // Revoke single session
   const revokeMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      const response = await callApi(`/auth/sessions/${sessionId}`, {
+      await apiCall(`/auth/sessions/${sessionId}`, {
         appName: 'ezauth',
         method: 'DELETE',
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t('revokeError'))
-      }
       return sessionId
     },
     onSuccess: () => {
@@ -118,15 +111,11 @@ export default function SessionsPage() {
 
   // Revoke all sessions
   const revokeAllMutation = useMutation({
-    mutationFn: async () => {
-      const response = await callApi('/auth/sessions', {
+    mutationFn: () =>
+      apiCall('/auth/sessions', {
         appName: 'ezauth',
         method: 'DELETE',
-      })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t('revokeAllError'))
-      }
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] })
     },
