@@ -19,6 +19,7 @@
     // Infrastructure packages
     { "path": "./packages/email-service" },
     { "path": "./packages/express-core" },
+    { "path": "./packages/api-core" },
     { "path": "./packages/ui" },
     { "path": "./packages/auth-sdk" },
     { "path": "./packages/pay-sdk" },
