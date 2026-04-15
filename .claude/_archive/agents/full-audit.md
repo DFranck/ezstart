@@ -1,11 +1,13 @@
 # Role: Full Monorepo Auditor
 
 ## Quand utiliser
+
 Quand l'utilisateur dit "audite", "check", "valide", "vérifie" — lancer cet audit COMPLET. Ne PAS demander quoi vérifier. TOUT vérifier.
 
 ## Checklist EXHAUSTIVE — TOUT doit être vérifié
 
 ### 1. Packages (pour CHAQUE package dans packages/)
+
 - [ ] package.json : name correct (@ezstart/...), version, main/exports, dependencies à jour
 - [ ] tsconfig.json : extends correct, composite true, outDir dist
 - [ ] README.md : existe, à jour, <30 lignes, suit le template
@@ -16,7 +18,8 @@ Quand l'utilisateur dit "audite", "check", "valide", "vérifie" — lancer cet a
 - [ ] Logger : utilise @ezstart/logger, pas console.log
 - [ ] Tests : si le package a des tests, ils passent
 
-### 2. APIs (pour CHAQUE app dans apps/*/api/)
+### 2. APIs (pour CHAQUE app dans apps/\*/api/)
+
 - [ ] Utilise @ezstart/express-core (createApp, startServer)
 - [ ] Health endpoint (/health) — automatique via createApp
 - [ ] Swagger/OpenAPI (/docs) — registries passées à startServer
@@ -32,7 +35,8 @@ Quand l'utilisateur dit "audite", "check", "valide", "vérifie" — lancer cet a
 - [ ] Graceful shutdown (via express-core startServer)
 - [ ] MongoDB via connectToMongo (express-core)
 
-### 3. Frontends (pour CHAQUE app dans apps/*/web/)
+### 3. Frontends (pour CHAQUE app dans apps/\*/web/)
+
 - [ ] callApi wrapper dans src/config/api.ts avec appName
 - [ ] React Query : QueryProvider dans providers, useQuery/useMutation partout
 - [ ] Toast : sonner configuré dans layout, toast.success/error (pas alert())
@@ -48,6 +52,7 @@ Quand l'utilisateur dit "audite", "check", "valide", "vérifie" — lancer cet a
 - [ ] Dark mode : fonctionne (CSS variables OKLCH)
 
 ### 4. Infrastructure monorepo
+
 - [ ] pnpm install : passe sans erreur
 - [ ] turbo build : tous les packages/apps buildent
 - [ ] turbo typecheck : pas d'erreurs nouvelles
@@ -63,6 +68,7 @@ Quand l'utilisateur dit "audite", "check", "valide", "vérifie" — lancer cet a
 - [ ] README.md : existe pour chaque app et package
 
 ### 5. Cohérence cross-app
+
 - [ ] Même pattern callApi partout (ou justification si exception)
 - [ ] Même pattern React Query partout
 - [ ] Même pattern auth middleware partout
@@ -71,7 +77,9 @@ Quand l'utilisateur dit "audite", "check", "valide", "vérifie" — lancer cet a
 - [ ] Pas de dépendances circulaires
 
 ## Output
+
 Rapport avec :
+
 1. Score global /100
 2. Par app : score + problèmes
 3. Par package : score + problèmes

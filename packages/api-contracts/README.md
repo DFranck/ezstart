@@ -131,6 +131,6 @@ Adopting it in any project (internal or external) guarantees wire compatibility 
 
 ## Related
 
-- [package-standard.md](../../.claude/rules/package-standard.md) — how this package is built
+- [standard.md](../../.claude/rules/standard.md) — how this package is built
 - [@ezstart/api-sdk](../api-sdk/README.md) — HTTP client that consumes these contracts
 - [Zod](https://zod.dev) — schema validation runtime

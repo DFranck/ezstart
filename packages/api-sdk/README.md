@@ -138,6 +138,5 @@ Utilities for extracting a readable message, machine code, or retry hint from an
 
 ## Related
 
-- [.claude/rules/package-standard.md](../../.claude/rules/package-standard.md) — the standard this package follows
-- [.claude/rules/api.md](../../.claude/rules/api.md) — API conventions
+- [.claude/rules/standard.md](../../.claude/rules/standard.md) — the standard this package follows
 - [@ezstart/api-contracts](../api-contracts/README.md) — wire shapes (envelope, errors, pagination, auth) consumed by this SDK
