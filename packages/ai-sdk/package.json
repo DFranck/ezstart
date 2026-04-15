@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@ezstart/config": "workspace:*",
-    "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/api-sdk": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@anthropic-ai/sdk": "^0.39.0",
     "@google/generative-ai": "^0.21.0",

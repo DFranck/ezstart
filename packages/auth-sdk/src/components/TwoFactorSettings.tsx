@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Div, Input, P, Spinner } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -94,16 +94,11 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
 
   const fetchStatus = useCallback(async () => {
     try {
-      const response = await callApi('/auth/2fa/status', {
+      const data = await apiCall<{ isEnabled: boolean }>('/auth/2fa/status', {
         appName: 'ezauth',
         method: 'GET',
       })
-      if (response.ok) {
-        const data = response.data as { isEnabled: boolean }
-        setIs2FAEnabled(data.isEnabled)
-      } else {
-        setIs2FAEnabled(false)
-      }
+      setIs2FAEnabled(data.isEnabled)
     } catch (err) {
       logger.warn('Failed to fetch 2FA status:', err)
       setIs2FAEnabled(false)
@@ -118,14 +113,10 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
     setLoading(true)
     setError('')
     try {
-      const response = await callApi('/auth/2fa/setup', {
+      const data = await apiCall<{ qrCode: string; secret: string }>('/auth/2fa/setup', {
         appName: 'ezauth',
         method: 'POST',
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t.fallbackError)
-      }
-      const data = response.data as { qrCode: string; secret: string }
       setQrCode(data.qrCode)
       setSecret(data.secret)
       setPhase('qr')
@@ -141,15 +132,11 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
     setLoading(true)
     setError('')
     try {
-      const response = await callApi('/auth/2fa/verify', {
+      const data = await apiCall<{ backupCodes: string[] }>('/auth/2fa/verify', {
         appName: 'ezauth',
         method: 'POST',
         body: { code },
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t.invalidCode)
-      }
-      const data = response.data as { backupCodes: string[] }
       setBackupCodes(data.backupCodes)
       setPhase('backup')
       setIs2FAEnabled(true)
@@ -166,14 +153,11 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
     setLoading(true)
     setError('')
     try {
-      const response = await callApi('/auth/2fa/disable', {
+      await apiCall('/auth/2fa/disable', {
         appName: 'ezauth',
         method: 'POST',
         body: { code },
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || t.fallbackError)
-      }
       setIs2FAEnabled(false)
       setPhase('idle')
       setCode('')

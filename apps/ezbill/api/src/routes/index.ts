@@ -27,6 +27,7 @@ router
   .use('/payment-methods', paymentMethodRoutes)
   .use('/quotes', quoteRoutes)
   .use('/receipts', receiptRoutes)
-  .use('/users', usersRoutes)
+  // users children own '/users' basePath via createRouterWithDoc
+  .use(usersRoutes)
 
 export default router

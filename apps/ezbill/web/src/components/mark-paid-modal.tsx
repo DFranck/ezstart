@@ -17,7 +17,7 @@ import {
   Div,
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
-import { callApi, parseApiError } from '@/config/api'
+import { callApi } from '@/config/api'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
@@ -63,16 +63,15 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
     return runWithFeedback({
       action: async () => {
         // Use the dedicated mark-paid endpoint that handles both invoice update and receipt creation
-        const markPaidRes = await callApi(`/invoices/${invoice._id}/mark-paid`, {
+        await callApi(`/invoices/${invoice._id}/mark-paid`, {
           method: 'POST',
-          userId: user?._id,
+          headers: user?._id ? { 'X-User-Id': user._id } : undefined,
           body: {
             companyId: formData.companyId,
             paymentDate: formData.paymentDate,
             notes: formData.notes,
           },
         })
-        if (!markPaidRes.ok) throw new Error(parseApiError(markPaidRes.data))
 
         onSave()
         onClose()

@@ -18,7 +18,7 @@ import {
 } from '@ezstart/ui/components'
 import { ImageCropper } from '@ezstart/capture-sdk'
 import { getWebUrl } from '@ezstart/config'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth, useAuthContext } from '../provider.js'
@@ -193,7 +193,7 @@ export function AccountModal({
     setSendingVerification(true)
     try {
       const effectiveApp = navigation.app || appName
-      const response = await callApi('/auth/send-verification', {
+      await apiCall('/auth/send-verification', {
         appName: 'ezauth',
         method: 'POST',
         body: {
@@ -202,9 +202,6 @@ export function AccountModal({
           ...(navigation.redirectUri && { redirect_uri: navigation.redirectUri }),
         },
       })
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || texts.verifyError)
-      }
       toast.success(texts.verificationSent)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : texts.verifyError)

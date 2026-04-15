@@ -8,7 +8,7 @@
   "references": [
     { "path": "./packages/config" },
     { "path": "./packages/logger" },
-    { "path": "./packages/fetch-client" },
+    { "path": "./packages/api-contracts" },
     { "path": "./packages/ocr-sdk" },
     { "path": "./packages/rbac" },
     { "path": "./packages/email-service" },

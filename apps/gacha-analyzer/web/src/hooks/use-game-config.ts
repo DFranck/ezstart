@@ -14,16 +14,11 @@ interface GameLayoutData {
 
 type GameLayoutsResponse = GameLayoutData[]
 
-type GameLayoutResponse = GameLayoutData | null
-
 /** List all layouts for a game */
 export function useGameLayouts(gameType: string) {
   return useQuery({
     queryKey: ['game-layouts', gameType],
-    queryFn: async () => {
-      const response = await callApi<GameLayoutsResponse>(`/config/${gameType}`)
-      return response.ok ? response.data : []
-    },
+    queryFn: () => callApi<GameLayoutsResponse>(`/config/${gameType}`),
     staleTime: 1000 * 60 * 60,
   })
 }
@@ -32,10 +27,7 @@ export function useGameLayouts(gameType: string) {
 export function useGameLayout(gameType: string, layoutName: string) {
   return useQuery({
     queryKey: ['game-layout', gameType, layoutName],
-    queryFn: async () => {
-      const response = await callApi<GameLayoutResponse>(`/config/${gameType}/${layoutName}`)
-      return response.ok ? response.data : null
-    },
+    queryFn: () => callApi<GameLayoutData | null>(`/config/${gameType}/${layoutName}`),
     enabled: !!layoutName,
     staleTime: 1000 * 60 * 60,
   })
@@ -54,13 +46,11 @@ export function useSaveGameLayout(gameType: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ layoutName, ...input }: SaveGameLayoutInput & { layoutName: string }) => {
-      const response = await callApi<GameLayoutResponse>(`/config/${gameType}/${layoutName}`, {
+    mutationFn: ({ layoutName, ...input }: SaveGameLayoutInput & { layoutName: string }) =>
+      callApi<GameLayoutData | null>(`/config/${gameType}/${layoutName}`, {
         method: 'PUT',
         body: input,
-      })
-      return response.ok ? response.data : null
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['game-layouts', gameType] })
       queryClient.invalidateQueries({ queryKey: ['game-layout', gameType] })
@@ -73,11 +63,10 @@ export function useDeleteGameLayout(gameType: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (layoutName: string) => {
-      await callApi(`/config/${gameType}/${layoutName}`, {
+    mutationFn: (layoutName: string) =>
+      callApi(`/config/${gameType}/${layoutName}`, {
         method: 'DELETE',
-      })
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['game-layouts', gameType] })
       queryClient.invalidateQueries({ queryKey: ['game-layout', gameType] })
@@ -103,8 +92,7 @@ export function useGameConfig(gameType: string) {
     queryKey: ['game-config', gameType],
     queryFn: async () => {
       // Load the first layout as the "default" config for backward compat
-      const response = await callApi<GameLayoutsResponse>(`/config/${gameType}`)
-      const layouts = response.ok ? response.data : []
+      const layouts = await callApi<GameLayoutsResponse>(`/config/${gameType}`)
       return layouts.length > 0 ? layouts[0] : null
     },
     staleTime: 1000 * 60 * 60,
@@ -122,13 +110,11 @@ export function useSaveGameConfig(gameType: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (input: SaveGameConfigInput) => {
-      const response = await callApi<GameConfigResponse>(`/config/${gameType}/default`, {
+    mutationFn: (input: SaveGameConfigInput) =>
+      callApi<GameConfigResponse>(`/config/${gameType}/default`, {
         method: 'PUT',
         body: input,
-      })
-      return response.ok ? response.data : null
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['game-config', gameType] })
       queryClient.invalidateQueries({ queryKey: ['game-layouts', gameType] })

@@ -28,14 +28,19 @@ export const uploadRegistries = [
   getFileInfoRegistry,
 ]
 
-// Consolidate all action routers — all upload routes require authentication
+// Consolidate all action routers — all upload routes require authentication.
+// This parent is mounted at /api (no /upload prefix) — children own '/image',
+// '/audio', '/document', '/file/:fileId' basePaths via createRouterWithDoc.
+// We re-prefix them with '/upload' here so the final URL matches the original
+// /api/upload/<resource> shape, and scope auth middleware to '/upload' to
+// avoid leaking to sibling features.
 const router: import('express').Router = Router()
-router.use(authMiddleware)
+router.use('/upload', authMiddleware)
 
 router
-  .use('/audio', uploadAudioRouter) // POST /audio
-  .use('/image', uploadImageRouter) // POST /image
-  .use('/document', uploadDocumentRouter) // POST /document
-  .use('/file/:fileId', getFileInfoRouter) // GET /file/:fileId
+  .use('/upload', uploadAudioRouter)
+  .use('/upload', uploadImageRouter)
+  .use('/upload', uploadDocumentRouter)
+  .use('/upload', getFileInfoRouter)
 
 export default router

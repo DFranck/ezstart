@@ -16,8 +16,10 @@ export const usageRegistries = [usageStatsRegistry]
 
 const router: import('express').Router = Router()
 
-// All usage routes require auth
-router.use(authMiddleware)
+// This parent is mounted at /api/ai (no /usage prefix) — child owns '/usage'
+// basePath via createRouterWithDoc. Scope middleware to '/usage' so it doesn't
+// leak to sibling AI features.
+router.use('/usage', authMiddleware)
 router.use(statsRouter)
 
 export default router

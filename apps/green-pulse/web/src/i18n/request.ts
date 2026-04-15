@@ -9,10 +9,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale
   const finalLocale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
-  const [common, home, forms, chat, careers, payment, earthday] = await Promise.all([
+  const [common, home, chat, careers, payment, earthday] = await Promise.all([
     import(`../messages/${finalLocale}/common.json`),
     import(`../messages/${finalLocale}/home.json`),
-    import(`../messages/${finalLocale}/forms.json`),
     import(`../messages/${finalLocale}/chat.json`),
     import(`../messages/${finalLocale}/careers.json`),
     import(`../messages/${finalLocale}/payment.json`),
@@ -26,7 +25,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
       ...common.default,
       ...home.default,
       ...careers.default,
-      forms: forms.default,
       chat: chat.default,
       ...payment.default,
       ...earthday.default,

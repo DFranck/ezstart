@@ -33,7 +33,8 @@ router.use('/activity', activityRouter)
 router.use('/performance', performanceRouter)
 router.use('/scheduler', schedulerRouter)
 router.use('/ai', aiRouter)
-router.use('/qr-codes', qrCodesRouter)
+// qr-codes child routers own their basePath via createRouterWithDoc(..., '/qr-codes')
+router.use(qrCodesRouter)
 router.use('/admin', adminRouter)
 
 // Root endpoint

@@ -172,7 +172,7 @@ export default function AnalyzePage() {
           const planId = (uploadData.savedPlanId as string) || ''
           const imageData = (uploadData.preview as string) || undefined
 
-          await callApi('/api/analyses', {
+          await callApi('/analyses', {
             method: 'POST',
             body: {
               planId: planId || 'unsaved',

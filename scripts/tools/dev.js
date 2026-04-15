@@ -33,6 +33,7 @@ const SHORTCUTS = {
 const SDK_TO_APP = {
   '@ezstart/auth-sdk': 'ezauth',
   '@ezstart/pay-sdk': 'ezpay',
+  '@ezstart/ai-sdk': 'ezstart', // AI endpoints centralized on ezstart-api
 }
 
 // Extra dependencies not detected via SDK (e.g. CRM needs payment API)

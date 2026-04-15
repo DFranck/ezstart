@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, parseApiError, runWithFeedback } from '@/config/api'
+import { callApi, runWithFeedback } from '@/config/api'
 import { Company, CreateCompany } from '@ezbill/types'
 import { Button, Checkbox, Icon, Input, Label, Modal, Div, H4 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
@@ -67,22 +67,22 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
     const dataToSend = { ...formData, userId }
 
+    const headers = { 'X-User-Id': userId }
+
     return runWithFeedback({
       action: async () => {
         if (company) {
-          const res = await callApi(`/companies/${company._id}`, {
+          await callApi(`/companies/${company._id}`, {
             method: 'PUT',
-            userId: user?._id,
+            headers,
             body: dataToSend,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
-          const res = await callApi('/companies', {
+          await callApi('/companies', {
             method: 'POST',
-            userId: user?._id,
+            headers,
             body: dataToSend,
           })
-          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

@@ -6,10 +6,14 @@ import deleteThemeRouter, { deleteThemeRegistry } from './deleteTheme.js'
 
 const router: import('express').Router = Router()
 
-// GET theme is public, update/delete require authentication
+// This parent is mounted at /api (no /theme prefix) — children own '/theme'
+// basePath via createRouterWithDoc. Scope auth middleware to '/theme' so it
+// doesn't leak to sibling features (esg, upload, webhooks).
+// GET theme is public, update/delete require authentication.
 router.use(getThemeRouter)
-router.use(authMiddleware, updateThemeRouter)
-router.use(authMiddleware, deleteThemeRouter)
+router.use('/theme', authMiddleware)
+router.use(updateThemeRouter)
+router.use(deleteThemeRouter)
 
 export const themeRegistries = [getThemeRegistry, updateThemeRegistry, deleteThemeRegistry]
 

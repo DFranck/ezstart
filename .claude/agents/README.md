@@ -1,36 +1,26 @@
-# Agent Roles — @ezstart Monorepo
+# Agents — @ezstart Monorepo
+
+**Deux rôles uniques**, invoqués en boucle par Claude (architect) :
+
+| Role    | File                         | Purpose                                                                            |
+| ------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| dev     | [`dev.md`](./dev.md)         | Implémente la mission en respectant [`../rules/standard.md`](../rules/standard.md) |
+| auditor | [`auditor.md`](./auditor.md) | Vérifie que le livrable passe les 7 critères du standard — PASS ou FAIL            |
 
 ## Pipeline
 
-Every feature follows this pipeline. Claude (manager) orchestrates, agents execute:
-
-1. **PLAN** — Claude drafts plan, user validates
-2. **CODE** — Coding agents execute (DEV-RULES in prompt)
-3. **TEST** — tsc --noEmit + vitest + secrets grep
-4. **AUDIT** — Parallel audit agents before PR:
-   - `code-quality.md` — types, naming, API standards, dead code, packages
-   - `i18n-compliance.md` — all user-facing text translated, all languages
-   - `ux-quality.md` — states, toasts, logging, design tokens, React Query
-   - `security.md` — auth, secrets, injection (when routes/auth touched)
-5. **FIX** — If audit finds issues → fix agents → re-audit (loop until clean)
-6. **PR** — gh pr create (never direct push to master)
-
-## Available Roles
-
-| Role            | File                 | When                                                               |
-| --------------- | -------------------- | ------------------------------------------------------------------ |
-| Code Quality    | `code-quality.md`    | Every PR                                                           |
-| i18n Compliance | `i18n-compliance.md` | Every PR                                                           |
-| UX Quality      | `ux-quality.md`      | Every PR (if frontend touched)                                     |
-| Security        | `security.md`        | When auth/routes/secrets touched                                   |
-| Testing         | `testing.md`         | When setting up test infrastructure                                |
-| Full Audit      | `full-audit.md`      | Major milestones, new apps, periodic health check                  |
-| Coding Rules    | `coding-rules.md`    | Mandatory briefing for ALL coding agents — include in every prompt |
-
-## Usage
-
-Include the role file content in the agent prompt:
+Une seule boucle, documentée dans [`../pipeline/loop.md`](../pipeline/loop.md) :
 
 ```
-Read `.claude/agents/[role].md` for your role definition, then audit [target].
+user request
+      ↓
+     dev  →  auditor  →  PASS  →  Claude commits
+                 ↓ FAIL
+          dev fix  →  auditor  →  ...
 ```
+
+Pas d'étapes numérotées. Pas d'agents spécialisés par domaine (i18n, security, ux, etc.). Les domaines sont des sections du `standard.md`, pas des rôles séparés.
+
+## Rétro-compat
+
+Les anciens agents spécialisés sont archivés dans [`../_archive/agents/`](../_archive/agents/) pour référence historique. Ne PAS les invoquer directement — leur contenu a été absorbé dans `standard.md`.

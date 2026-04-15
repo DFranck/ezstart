@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { callApi } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import {
   Badge,
   Button,
@@ -49,10 +49,7 @@ type SystemPrompt = {
   updatedAt: string
 }
 
-type PromptsResponse = {
-  success: boolean
-  data: SystemPrompt[]
-}
+type PromptsResponse = SystemPrompt[]
 
 // Only show types currently implemented in /chat
 // extract_esg is hardcoded to false in chat/page.tsx, so only 'general' is used
@@ -103,31 +100,20 @@ export function PromptsManagement() {
 
   // Fetch prompts
   const { data, isLoading, error } = useQuery<PromptsResponse>({
-    queryKey: ['prompts'],
-    queryFn: async () => {
-      const response = await callApi<PromptsResponse>('/ai/prompts', {
-        appName: 'ezstart',
-      })
-      if (!response.ok || !response.data) {
-        throw new Error(`Failed to fetch prompts: ${response.status}`)
-      }
-      return response.data
-    },
+    queryKey: ['ezstart', '/ai/prompts'],
+    queryFn: () => apiCall<PromptsResponse>('/ai/prompts', { appName: 'ezstart' }),
   })
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const response = await callApi('/ai/prompts', {
+    mutationFn: (data: typeof formData) =>
+      apiCall('/ai/prompts', {
         appName: 'ezstart',
         method: 'POST',
         body: data,
-      })
-      if (!response.ok) throw new Error('Failed to create prompt')
-      return response.data
-    },
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['prompts'] })
+      queryClient.invalidateQueries({ queryKey: ['ezstart', '/ai/prompts'] })
       setIsDialogOpen(false)
       resetForm()
     },
@@ -135,17 +121,14 @@ export function PromptsManagement() {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ key, data }: { key: string; data: Partial<typeof formData> }) => {
-      const response = await callApi(`/ai/prompts/${key}`, {
+    mutationFn: ({ key, data }: { key: string; data: Partial<typeof formData> }) =>
+      apiCall(`/ai/prompts/${key}`, {
         appName: 'ezstart',
         method: 'PATCH',
         body: data,
-      })
-      if (!response.ok) throw new Error('Failed to update prompt')
-      return response.data
-    },
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['prompts'] })
+      queryClient.invalidateQueries({ queryKey: ['ezstart', '/ai/prompts'] })
       setIsDialogOpen(false)
       setEditingPrompt(null)
       resetForm()
@@ -154,16 +137,13 @@ export function PromptsManagement() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: async (key: string) => {
-      const response = await callApi(`/ai/prompts/${key}`, {
+    mutationFn: (key: string) =>
+      apiCall(`/ai/prompts/${key}`, {
         appName: 'ezstart',
         method: 'DELETE',
-      })
-      if (!response.ok) throw new Error('Failed to delete prompt')
-      return response.data
-    },
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['prompts'] })
+      queryClient.invalidateQueries({ queryKey: ['ezstart', '/ai/prompts'] })
     },
   })
 
@@ -234,7 +214,7 @@ export function PromptsManagement() {
   // Filter by active types only (general, extraction) + selected filter
   const activeTypes = PROMPT_TYPES.map(t => t.value)
   const filteredPrompts =
-    data?.data?.filter(p => {
+    data?.filter(p => {
       const isActiveType = activeTypes.includes(p.type)
       const matchesFilter = filter === 'all' ? true : p.type === filter
       return isActiveType && matchesFilter
@@ -302,7 +282,7 @@ export function PromptsManagement() {
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
             >
-              All ({data?.data?.filter(p => activeTypes.includes(p.type)).length || 0})
+              All ({data?.filter(p => activeTypes.includes(p.type)).length || 0})
             </Button>
             {PROMPT_TYPES.map(t => (
               <Button
@@ -311,7 +291,7 @@ export function PromptsManagement() {
                 variant={filter === t.value ? 'default' : 'outline'}
                 onClick={() => setFilter(t.value)}
               >
-                {t.label} ({data?.data?.filter(p => p.type === t.value).length || 0})
+                {t.label} ({data?.filter(p => p.type === t.value).length || 0})
               </Button>
             ))}
           </Div>

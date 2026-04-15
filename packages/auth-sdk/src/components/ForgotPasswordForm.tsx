@@ -12,7 +12,7 @@ import {
   FormMessage,
   Input,
 } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useLocale } from 'next-intl'
 import { useState } from 'react'
@@ -88,7 +88,7 @@ export function ForgotPasswordForm({
     const { app, redirectUri } = navigation
 
     try {
-      const response = await callApi('/auth/forgot-password', {
+      await apiCall('/auth/forgot-password', {
         appName: 'ezauth',
         method: 'POST',
         body: {
@@ -98,10 +98,6 @@ export function ForgotPasswordForm({
           ...(redirectUri && { redirect_uri: redirectUri }),
         },
       })
-
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Request failed')
-      }
 
       setSuccess(true)
       logger.info('Password reset email requested')

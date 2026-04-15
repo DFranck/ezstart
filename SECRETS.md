@@ -189,6 +189,75 @@ dashboards or CLIs.
 All scripts that DO run mask sensitive values (`*_SECRET`, `*_KEY`, `*_TOKEN`,
 `*_DSN`) in their output — plaintext is never logged.
 
+### Legacy behaviour (to be refactored)
+
+The sections below document the current `{APP}_` prefix-based mapping used
+by `pnpm secrets:sync / secrets:pull / secrets:audit`. After the generic
+root-var refactor, these scripts still expect prefixed input — they will be
+rewritten in a follow-up to invert the mapping. Until then:
+
+#### `pnpm secrets:sync` (legacy prefix convention)
+
+Pushes root `.env.production` → Railway + Vercel, stripping per-app prefixes
+for each matching target and filtering out foreign per-app vars.
+
+```
+EZBILL_MONGO_URL=...  →  pushed as MONGO_URL to railway/ezbill-api only
+OPENAI_API_KEY=...    →  pushed as OPENAI_API_KEY to every Railway + allow-listed Vercel
+EZAUTH_GOOGLE_*       →  NOT pushed to any project except ezauth-api / web-ezauth
+```
+
+```bash
+pnpm secrets:sync                       # push to all
+pnpm secrets:sync -- --vercel-only
+pnpm secrets:sync -- --railway-only
+pnpm secrets:sync -- --dry-run          # preview (all masked)
+pnpm secrets:sync -- --vars KEY1,KEY2   # only specific vars (root names)
+```
+
+#### `pnpm secrets:pull` (legacy prefix convention)
+
+Fetches production vars from every Vercel project + Railway service and writes
+the root `.env.production` with the correct prefix per target.
+
+```
+ezbill-api has MONGO_URL=...  →  written as EZBILL_MONGO_URL=... at root
+Same OPENAI_API_KEY in all services  →  written as OPENAI_API_KEY=... (shared)
+Different MONGO_URL in each service   →  written as EZAUTH_MONGO_URL=...,
+                                          EZBILL_MONGO_URL=..., etc.
+```
+
+```bash
+pnpm secrets:pull                    # fetch all, write root .env.production
+pnpm secrets:pull -- --dry-run       # preview, no write
+pnpm secrets:pull -- --vercel-only
+pnpm secrets:pull -- --railway-only
+pnpm secrets:pull -- --merge         # keep existing local-only keys
+```
+
+A timestamped backup is always written under `tmp/secrets-pull-backup-<ts>.env.production`.
+
+#### `pnpm secrets:audit` (legacy prefix convention)
+
+Compares root `.env.production` against the current state of Vercel + Railway.
+Never modifies anything.
+
+```bash
+pnpm secrets:audit                   # full audit
+pnpm secrets:audit -- --strict       # exit 1 on drift (CI)
+pnpm secrets:audit -- --json
+```
+
+### Vercel scope
+
+Scripts need a team scope to link each project. Set one of these (shell or root
+`.env.local`):
+
+```bash
+VERCEL_SCOPE=ezstart            # preferred (URL slug — visible at vercel.com/ezstart)
+# or VERCEL_TEAM_ID=team_s1KxhxVX5g6qgwpFKvytTdMM (more stable, survives team renames)
+```
+
 ### `pnpm secret:gen`
 
 Generate a crypto-secure secret for ad-hoc use. Unchanged by the migration.

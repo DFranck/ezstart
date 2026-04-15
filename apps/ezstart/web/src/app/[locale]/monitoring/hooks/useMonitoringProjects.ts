@@ -20,15 +20,9 @@ export interface ProjectsData {
 }
 
 async function fetchProjects(): Promise<ProjectsData> {
-  const response = await callApi<ProjectsData>('/projects', {
-    query: { _t: String(Date.now()) },
+  return callApi<ProjectsData>('/projects', {
+    query: { _t: Date.now() },
   })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch projects data')
-  }
-
-  return response.data
 }
 
 export function useMonitoringProjects() {

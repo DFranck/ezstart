@@ -2,7 +2,7 @@
 
 import { Button, Card, CardContent, Div, Icon, Main, P, Spinner } from '@ezstart/ui/components'
 import { type AuthUser, useAuthStore } from '@ezstart/auth-sdk'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useRef, useState } from 'react'
@@ -68,7 +68,7 @@ function SsoCallbackContent() {
 
     const exchange = async () => {
       try {
-        const response = await callApi<{
+        const data = await apiCall<{
           user: AuthUser
           refreshToken?: string
           redirect: string
@@ -78,27 +78,23 @@ function SsoCallbackContent() {
           body: { code, app: parsedApp },
         })
 
-        if (!response.ok) {
-          throw new Error(response.error || parseApiError(response.data) || t('exchangeFailed'))
-        }
-
-        if (!response.data) {
+        if (!data) {
           throw new Error(t('exchangeFailed'))
         }
 
         // Persist user to auth store so `useAuth().user` resolves on downstream pages
         // (e.g. settings email-verification section). Access token lives in an httpOnly
         // cookie set by the backend, so we pass `undefined` for it and use 'httpOnly' mode.
-        if (response.data.user) {
-          setAuth(response.data.user, undefined, 'httpOnly', response.data.refreshToken)
+        if (data.user) {
+          setAuth(data.user, undefined, 'httpOnly', data.refreshToken)
         }
 
         // Backend returns a safe redirect path — prefer it over the client-supplied `next`.
         // Validate it client-side to block open-redirect / XSS via crafted values.
-        const finalRedirect = response.data.redirect || next
+        const finalRedirect = data.redirect || next
         const safeRedirect = isSafeRelativePath(finalRedirect) ? finalRedirect : '/'
         router.replace(safeRedirect)
-      } catch (err) {
+      } catch (err: unknown) {
         logger.error(
           '[SSOCallback] Exchange failed:',
           err instanceof Error ? err.message : String(err)

@@ -20,6 +20,19 @@ type RouteDocOptions = {
 }
 
 export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, basePath = '') {
+  // When a basePath is provided, mount a dedicated sub-router so every handler
+  // registered through this helper is reachable at `basePath + path` in Express
+  // AND documented at the same path in OpenAPI. Without this, handlers were
+  // registered directly on `router` (ignoring basePath) causing the real URL
+  // to drift from the documented one.
+  // Retro-compat: when basePath is empty/'/', we keep registering directly on
+  // the caller-provided `router` (unchanged behavior).
+  const hasBasePath = basePath !== '' && basePath !== '/'
+  const targetRouter: Router = hasBasePath ? Router({ mergeParams: true }) : router
+  if (hasBasePath) {
+    router.use(basePath, targetRouter)
+  }
+
   function addRouteWithDoc(
     method: 'get' | 'post' | 'put' | 'patch' | 'delete',
     path: string,
@@ -116,7 +129,7 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, b
       request: Object.keys(requestDoc).length ? requestDoc : undefined,
       responses,
     })
-    ;(router[method] as (...args: unknown[]) => void)(path, ...middlewares)
+    ;(targetRouter[method] as (...args: unknown[]) => void)(path, ...middlewares)
   }
 
   return {

@@ -14,7 +14,7 @@ import {
   Input,
   PasswordInput,
 } from '@ezstart/ui/components'
-import { callApi, parseApiError } from '@ezstart/fetch-client'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useLocale } from 'next-intl'
 import Link from 'next/link'
@@ -171,19 +171,15 @@ export function SignUpForm({
 
     try {
       const params = new URLSearchParams({ [field]: value })
-      const response = await callApi(`/auth/check-availability?${params.toString()}`, {
+      const data = await apiCall<{
+        emailAvailable?: boolean
+        usernameAvailable?: boolean
+      }>(`/auth/check-availability?${params.toString()}`, {
         appName: 'ezauth',
         method: 'GET',
       })
-
-      if (response.ok) {
-        const data = response.data as {
-          emailAvailable?: boolean
-          usernameAvailable?: boolean
-        }
-        if (field === 'email') setEmailAvailable(data.emailAvailable ?? null)
-        else setUsernameAvailable(data.usernameAvailable ?? null)
-      }
+      if (field === 'email') setEmailAvailable(data.emailAvailable ?? null)
+      else setUsernameAvailable(data.usernameAvailable ?? null)
     } catch {
       // Silently fail — availability check is non-critical
     }
@@ -216,7 +212,7 @@ export function SignUpForm({
 
     try {
       const finalPromo = promoIsValid === true ? formData.promoCode?.trim() : undefined
-      const response = await callApi('/auth/register', {
+      await apiCall('/auth/register', {
         appName: 'ezauth',
         method: 'POST',
         body: {
@@ -232,15 +228,12 @@ export function SignUpForm({
         },
       })
 
-      if (!response.ok) {
-        throw new Error(response.error || parseApiError(response.data) || 'Registration failed')
-      }
-
       setRegistered(true)
       logger.info('Registration successful, verification email sent')
       onSuccess?.()
     } catch (err) {
-      const message = err instanceof Error ? err.message : t.fallbackError
+      const message =
+        ApiError.isApiError(err) || err instanceof Error ? err.message : t.fallbackError
       setError(message)
     } finally {
       setLoading(false)

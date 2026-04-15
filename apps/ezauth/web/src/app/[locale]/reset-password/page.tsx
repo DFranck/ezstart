@@ -1,7 +1,7 @@
 'use client'
 
 import { ResetPasswordForm, useAuthNavigation } from '@ezstart/auth-sdk'
-import { callApi, parseApiErrorCode } from '@ezstart/fetch-client'
+import { apiCall, ApiError, parseApiErrorCode } from '@ezstart/api-sdk'
 import {
   Card,
   CardContent,
@@ -16,16 +16,19 @@ import { useSearchParams } from 'next/navigation'
 import { Suspense, useCallback } from 'react'
 
 async function validateResetToken(token: string): Promise<{ valid: boolean; code?: string }> {
-  const response = await callApi<{ valid: boolean }>('/auth/validate-reset-token', {
-    appName: 'ezauth',
-    method: 'POST',
-    body: { token },
-  })
-
-  if (response.ok) {
-    return { valid: response.data?.valid === true }
+  try {
+    const data = await apiCall<{ valid: boolean }>('/auth/validate-reset-token', {
+      appName: 'ezauth',
+      method: 'POST',
+      body: { token },
+    })
+    return { valid: data?.valid === true }
+  } catch (err: unknown) {
+    if (ApiError.isApiError(err)) {
+      return { valid: false, code: parseApiErrorCode(err.data) }
+    }
+    return { valid: false }
   }
-  return { valid: false, code: parseApiErrorCode(response.data) }
 }
 
 function ResetPasswordContent() {

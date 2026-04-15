@@ -59,30 +59,26 @@ export default function SettingsPage() {
   const { data: deletedItems, isLoading: loading } = useQuery({
     queryKey: ['deleted-items', user?._id],
     queryFn: async () => {
-      const userId = user?._id
+      const headers = user?._id ? { 'X-User-Id': user._id } : undefined
+      const opts = { headers }
       const [clients, companies, quotes, invoices, receipts, paymentMethods] = await Promise.all([
-        callApi('/clients?deletedOnly=true&limit=100', { userId }),
-        callApi('/companies?deletedOnly=true&limit=100', { userId }),
-        callApi('/quotes?deletedOnly=true&limit=100', { userId }),
-        callApi('/invoices?deletedOnly=true&limit=100', { userId }),
-        callApi('/receipts?deletedOnly=true&limit=100', { userId }),
-        callApi('/payment-methods?deletedOnly=true&limit=100', { userId }),
+        callApi<Client[]>('/clients?deletedOnly=true&limit=100', opts),
+        callApi<Company[]>('/companies?deletedOnly=true&limit=100', opts),
+        callApi<Quote[]>('/quotes?deletedOnly=true&limit=100', opts),
+        callApi<Invoice[]>('/invoices?deletedOnly=true&limit=100', opts),
+        callApi<Receipt[]>('/receipts?deletedOnly=true&limit=100', opts),
+        callApi<PaymentMethod[]>('/payment-methods?deletedOnly=true&limit=100', opts),
       ])
 
-      // With auto-unwrap, response.data is already the array
-      const extractItems = (response: { ok: boolean; data: unknown }) => {
-        if (!response.ok || !response.data) return []
-        if (Array.isArray(response.data)) return response.data
-        return []
-      }
+      const safe = <T,>(value: T[] | null | undefined): T[] => (Array.isArray(value) ? value : [])
 
       return {
-        clients: extractItems(clients) as Client[],
-        companies: extractItems(companies) as Company[],
-        quotes: extractItems(quotes) as Quote[],
-        invoices: extractItems(invoices) as Invoice[],
-        receipts: extractItems(receipts) as Receipt[],
-        paymentMethods: extractItems(paymentMethods) as PaymentMethod[],
+        clients: safe(clients),
+        companies: safe(companies),
+        quotes: safe(quotes),
+        invoices: safe(invoices),
+        receipts: safe(receipts),
+        paymentMethods: safe(paymentMethods),
       }
     },
     enabled: !!user?._id,
@@ -104,7 +100,7 @@ export default function SettingsPage() {
       const endpoint = getApiEndpoint(type)
       await callApi(`/${endpoint}/${id}/restore`, {
         method: 'POST',
-        userId: user?._id,
+        headers: user?._id ? { 'X-User-Id': user._id } : undefined,
       })
       toast.success(tToast('itemRestored'))
       invalidateResourceType(type) // Invalidate only the specific resource
@@ -144,7 +140,7 @@ export default function SettingsPage() {
       const endpoint = getApiEndpoint(type)
       await callApi(`/${endpoint}/${id}/hard-delete`, {
         method: 'DELETE',
-        userId: user?._id,
+        headers: user?._id ? { 'X-User-Id': user._id } : undefined,
       })
       toast.success(tToast('itemDeleted'))
       invalidateResourceType(type) // Invalidate only the specific resource
@@ -169,7 +165,7 @@ export default function SettingsPage() {
     try {
       await callApi(`/companies/${company._id}`, {
         method: 'DELETE',
-        userId: user?._id,
+        headers: user?._id ? { 'X-User-Id': user._id } : undefined,
       })
       toast.success(tToast('companyDeleteSuccess', { name: company.companyName }))
       refetchAll()
@@ -194,7 +190,7 @@ export default function SettingsPage() {
     try {
       await callApi(`/payment-methods/${paymentMethod._id}`, {
         method: 'DELETE',
-        userId: user?._id,
+        headers: user?._id ? { 'X-User-Id': user._id } : undefined,
       })
       toast.success(tToast('paymentMethodDeleteSuccess', { name: paymentMethod.name }))
       refetchAll()

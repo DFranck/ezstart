@@ -61,11 +61,7 @@ export default function PdfPreviewPage() {
   // Fetch analysis
   const { data: analysis, isLoading } = useQuery<AnalysisData>({
     queryKey: ['analysis', id],
-    queryFn: async () => {
-      const res = await callApi(`/api/analyses/${id}`, { method: 'GET' })
-      if (!res.ok) throw new Error(res.error || 'Failed to load analysis')
-      return res.data as AnalysisData
-    },
+    queryFn: () => callApi<AnalysisData>(`/analyses/${id}`, { method: 'GET' }),
     enabled: !!id,
     retry: 5,
     retryDelay: attemptIndex => Math.min(1000 * (attemptIndex + 1), 5000),
