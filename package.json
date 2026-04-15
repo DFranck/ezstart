@@ -24,7 +24,7 @@
     "secrets:verify": "tsx scripts/secrets-verify.ts",
     "secrets:healthcheck": "tsx scripts/secrets-healthcheck.ts",
     "secrets:sync": "tsx scripts/secrets-push.ts",
-    "secrets:test": "tsx --test scripts/lib/__tests__/secrets-cli.test.ts scripts/lib/__tests__/secrets-push-plan.test.ts scripts/lib/__tests__/secrets-verify-ignored.test.ts",
+    "secrets:test": "tsx --test scripts/lib/__tests__/secrets-cli.test.ts scripts/lib/__tests__/secrets-cli-shell.test.ts scripts/lib/__tests__/secrets-push-plan.test.ts scripts/lib/__tests__/secrets-verify-ignored.test.ts",
     "secret:gen": "node scripts/tools/generate-secret.js",
     "generate": "turbo run generate",
     "postinstall": "turbo run generate || echo \"(postinstall) generate skipped — run 'pnpm generate' manually\"",

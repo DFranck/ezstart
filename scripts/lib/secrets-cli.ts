@@ -467,14 +467,31 @@ export function cliAvailable(cmd: string): boolean {
   return r.status === 0
 }
 
-export type ExecResult = { ok: boolean; stdout: string; stderr: string }
+export type ExecResult = {
+  ok: boolean
+  stdout: string
+  stderr: string
+  status: number | null
+}
+
+/**
+ * On Windows, `spawnSync(..., { shell: true })` routes every arg through
+ * cmd.exe, which DROPS empty-string args entirely (`foo "" bar` → `foo bar`).
+ * Some CLIs (notably `vercel env add <name> <environment> <gitbranch>`)
+ * rely on positional empty-string to mean "default / all branches".
+ * Emit `""` verbatim in that case so cmd.exe preserves the positional.
+ */
+function normalizeShellArgs(args: readonly string[]): readonly string[] {
+  if (process.platform !== 'win32') return args
+  return args.map(a => (a === '' ? '""' : a))
+}
 
 export function execCapture(
   cmd: string,
   args: readonly string[],
   opts: { cwd?: string; timeoutMs?: number; input?: string } = {}
 ): ExecResult {
-  const r = spawnSync(cmd, args, {
+  const r = spawnSync(cmd, normalizeShellArgs(args), {
     cwd: opts.cwd ?? ROOT,
     shell: true,
     timeout: opts.timeoutMs ?? 60_000,
@@ -483,7 +500,7 @@ export function execCapture(
   })
   const stdout = r.stdout ? r.stdout.toString('utf8') : ''
   const stderr = r.stderr ? r.stderr.toString('utf8') : ''
-  return { ok: r.status === 0, stdout, stderr }
+  return { ok: r.status === 0, stdout, stderr, status: r.status }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -498,9 +515,29 @@ export function railwayLink(t: RailwayTarget, envName: EnvName): ExecResult {
   )
 }
 
+/**
+ * Set a Railway variable by piping the value via stdin.
+ *
+ * Why `--stdin` + input (not `KEY=VALUE` inline):
+ *   - On Windows, `spawnSync(..., { shell: true })` routes through cmd.exe
+ *     which interprets `&`, `|`, `<`, `>`, `^` as shell metacharacters.
+ *     Values like `mongodb+srv://u:p@h/db?retryWrites=true&w=majority` are
+ *     truncated at the first `&` and cmd.exe tries to execute `w=majority`
+ *     as a command (`'w' is not recognized as an internal or external command`).
+ *   - `railway variable set --stdin KEY` reads the value from process stdin,
+ *     bypassing every shell quoting/escaping concern, on every platform.
+ *
+ * Source: https://docs.railway.app/reference/cli-api#variable-set
+ */
 export function railwaySetVar(key: string, value: string): ExecResult {
-  // `railway variable set KEY=VALUE` is the legacy form — we keep it.
-  return execCapture('railway', ['variable', 'set', `${key}=${value}`], {
+  return execCapture('railway', ['variable', 'set', '--stdin', key], {
+    timeoutMs: 30_000,
+    input: value,
+  })
+}
+
+export function railwayDeleteVar(key: string): ExecResult {
+  return execCapture('railway', ['variable', 'delete', key], {
     timeoutMs: 30_000,
   })
 }
@@ -545,11 +582,28 @@ export function vercelEnvPull(file: string, envName: EnvName, cwd: string): Exec
 
 export function vercelEnvRm(key: string, envName: EnvName, cwd: string): ExecResult {
   const target = vercelEnvTarget(envName)
-  return execCapture('vercel', ['env', 'rm', key, target, '--yes', '--cwd', cwd], {
-    timeoutMs: 30_000,
-  })
+  const scope = vercelScope()
+  const args = ['env', 'rm', key, target, '--yes', '--cwd', cwd]
+  if (scope) args.push('--scope', scope)
+  return execCapture('vercel', args, { timeoutMs: 30_000 })
 }
 
+/**
+ * Add an env var to a Vercel project.
+ *
+ * Why stdin (not `--value`):
+ *   - On Windows, `spawnSync(..., { shell: true })` routes every arg through
+ *     cmd.exe. Values containing `&`, `|`, `<`, `>`, `^` (e.g. MongoDB SRV
+ *     connection strings with `?retryWrites=true&w=majority`) are interpreted
+ *     as shell metacharacters and the command is truncated.
+ *   - `vercel env add <name> <environment> <gitbranch> < <file>` reads the
+ *     value from stdin instead, bypassing shell quoting entirely.
+ *   - Empty gitbranch positional (`""`) is still required for `preview`
+ *     in non-interactive mode (CLI 50+). `normalizeShellArgs()` maps `''`
+ *     to `'""'` on Windows so cmd.exe preserves it.
+ *
+ * Source: https://vercel.com/docs/cli/env (vercel env add [name] [environment] [gitbranch] < [file])
+ */
 export function vercelEnvAdd(
   key: string,
   value: string,
@@ -557,10 +611,11 @@ export function vercelEnvAdd(
   cwd: string
 ): ExecResult {
   const target = vercelEnvTarget(envName)
-  return execCapture('vercel', ['env', 'add', key, target, '--cwd', cwd], {
-    timeoutMs: 30_000,
-    input: value,
-  })
+  const scope = vercelScope()
+  // Positional gitbranch="" = "all preview branches" / no-op for dev+prod
+  const args = ['env', 'add', key, target, '', '--force', '--yes', '--cwd', cwd]
+  if (scope) args.push('--scope', scope)
+  return execCapture('vercel', args, { timeoutMs: 30_000, input: value })
 }
 
 // ─────────────────────────────────────────────────────────────

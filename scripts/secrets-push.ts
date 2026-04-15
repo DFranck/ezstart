@@ -36,6 +36,7 @@ import {
   parseEnvContent,
   parseEnvFile,
   parseFlags,
+  railwayDeleteVar,
   railwayLink,
   railwayListVars,
   railwaySetVar,
@@ -276,11 +277,19 @@ function renderPlan(rows: readonly PlanRow[], env: EnvName): void {
 /**
  * Apply the plan: ADD + UPDATE (+ DELETE when --confirm-delete).
  */
+type ApplyResult = {
+  pushed: number
+  failed: number
+  deleted: number
+  manualRequired: number
+  manualOps: string[]
+}
+
 function applyPlan(
   flags: CommonFlags,
   rows: readonly PlanRow[],
   entries: readonly PushEntry[]
-): { pushed: number; failed: number; deleted: number } {
+): ApplyResult {
   const railwayOK = !flags.vercelOnly && cliAvailable('railway')
   const vercelOK = !flags.railwayOnly && cliAvailable('vercel')
   if (!flags.vercelOnly && !railwayOK) {
@@ -321,6 +330,14 @@ function applyPlan(
   let pushed = 0
   let failed = 0
   let deleted = 0
+  let manualRequired = 0
+  const manualOps: string[] = []
+
+  /** Detects Railway CLI output that means "this op cannot run non-interactively". */
+  const isManualRequired = (stderr: string): boolean => {
+    const s = stderr.toLowerCase()
+    return s.includes('not supported') || s.includes('deprecated') || s.includes('unknown command')
+  }
 
   for (const [label, list] of byTarget) {
     const kind: 'railway' | 'vercel' = label.startsWith('railway/') ? 'railway' : 'vercel'
@@ -361,21 +378,17 @@ function applyPlan(
 
       for (const r of list) {
         if (r.op === 'delete') {
-          // Railway supports `variable delete KEY` but the CLI shape changed.
-          const res = {
-            ok: false as boolean,
-            stderr: 'railway delete not supported by legacy CLI; use dashboard',
-          }
-          // Try `variable delete`
-          const execRes = railwaySetVar(r.key, '') // set empty to tombstone
-          if (execRes.ok) {
-            res.ok = true
-          }
-          if (res.ok) {
+          const delRes = railwayDeleteVar(r.key)
+          if (delRes.ok) {
             deleted++
+          } else if (isManualRequired(delRes.stderr)) {
+            manualRequired++
+            const msg = `  ${label} [manual] delete ${r.key} via Railway dashboard (CLI unsupported)`
+            manualOps.push(`${label} :: DELETE ${r.key}`)
+            say(msg)
           } else {
             failed++
-            say(`  ${label} [x] DELETE ${r.key}: ${res.stderr}`)
+            say(`  ${label} [x] DELETE ${r.key}: ${delRes.stderr.split('\n')[0] ?? 'unknown'}`)
           }
           continue
         }
@@ -389,7 +402,8 @@ function applyPlan(
           pushed++
         } else {
           failed++
-          say(`  ${label} [x] ${entry.exportedKey}: ${setRes.stderr.split('\n')[0] ?? 'unknown'}`)
+          const firstErr = setRes.stderr.split('\n').find(l => l.trim().length > 0) ?? 'unknown'
+          say(`  ${label} [x] ${entry.exportedKey}: ${firstErr}`)
         }
       }
       say(`  ${label} [ok] ops=${list.length}`)
@@ -442,8 +456,37 @@ function applyPlan(
       linkedVercel.set(projectName, projDir)
     }
 
+    /**
+     * Extract the meaningful error message from a Vercel CLI failure.
+     * The CLI can emit:
+     *   - a `<claude-code-hint ... />` plugin banner (noise → skip)
+     *   - an `Error: ...` line on stderr (use it)
+     *   - a JSON `{"message": "..."}` error on stdout (extract it)
+     */
+    const parseVercelError = (res: {
+      stdout: string
+      stderr: string
+      status: number | null
+    }): string => {
+      const combined = [...res.stderr.split('\n'), ...res.stdout.split('\n')].map(l => l.trim())
+      // First, try to locate a JSON message block (CLI spits `{"message": "..."}`)
+      const joined = `${res.stdout}\n${res.stderr}`
+      const msgMatch = joined.match(/"message"\s*:\s*"([^"]+)"/)
+      if (msgMatch && msgMatch[1]) return msgMatch[1]
+      // Next, an `Error: …` line
+      const errLine = combined.find(l => /^(error|err):/i.test(l))
+      if (errLine) return errLine
+      // Next, first non-empty line that isn't a plugin hint banner
+      const meaningful = combined.find(
+        l =>
+          l.length > 0 && !l.startsWith('<claude-code-hint') && !l.startsWith('Retrieving project')
+      )
+      return meaningful ?? `exit ${res.status}`
+    }
+
     let ok = 0
     let ko = 0
+    const errorLines: string[] = []
     for (const r of list) {
       if (r.op === 'delete') {
         const rmRes = vercelEnvRm(r.key, flags.env, projDir)
@@ -452,7 +495,7 @@ function applyPlan(
         } else {
           ko++
           failed++
-          say(`  ${label} [x] DELETE ${r.key}: ${rmRes.stderr.split('\n')[0] ?? 'unknown'}`)
+          errorLines.push(`DELETE ${r.key}: ${parseVercelError(rmRes)}`)
         }
         continue
       }
@@ -460,9 +503,10 @@ function applyPlan(
       if (!entry) {
         ko++
         failed++
+        errorLines.push(`${r.key}: no push entry resolved`)
         continue
       }
-      vercelEnvRm(entry.exportedKey, flags.env, projDir) // best-effort cleanup
+      // With --force, vercelEnvAdd overwrites existing, no need to rm first
       const addRes = vercelEnvAdd(entry.exportedKey, entry.value, flags.env, projDir)
       if (addRes.ok) {
         ok++
@@ -470,9 +514,13 @@ function applyPlan(
       } else {
         ko++
         failed++
+        errorLines.push(`${entry.exportedKey}: ${parseVercelError(addRes)}`)
       }
     }
     say(`  ${label} [${ko === 0 ? 'ok' : 'warn'}] ${ok} pushed${ko ? `, ${ko} failed` : ''}`)
+    for (const err of errorLines) {
+      say(`    ${label} [x] ${err}`)
+    }
   }
 
   try {
@@ -481,7 +529,7 @@ function applyPlan(
     /* ignore */
   }
 
-  return { pushed, failed, deleted }
+  return { pushed, failed, deleted, manualRequired, manualOps }
 }
 
 async function main(): Promise<void> {
@@ -556,7 +604,18 @@ async function main(): Promise<void> {
 
   const res = applyPlan(flags, rows, entries)
   say('')
-  say(`[done] pushed=${res.pushed} deleted=${res.deleted} failed=${res.failed}`)
+  say(
+    `[done] pushed=${res.pushed} deleted=${res.deleted} failed=${res.failed}` +
+      (res.manualRequired > 0 ? ` manual-required=${res.manualRequired}` : '')
+  )
+  if (res.manualRequired > 0) {
+    say('')
+    say('── Manual dashboard actions required ──')
+    say('  The Railway/Vercel CLI does not support these ops non-interactively.')
+    say('  Apply them via the web dashboard:')
+    for (const op of res.manualOps) say(`    - ${op}`)
+    say('  Dashboard: https://railway.app/dashboard')
+  }
   say('')
   say(
     'Next step: pnpm secrets:healthcheck' + (flags.canary ? ` --service ${flags.canary}` : ' --all')
