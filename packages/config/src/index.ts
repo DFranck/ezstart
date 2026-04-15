@@ -6,6 +6,13 @@ export * from './env.js'
 export * from './env-resolvers.js'
 export { ENV_MANIFESTS, SHARED_REQUIRED, getRequiredEnv, hasEnvManifest } from './env-manifests.js'
 export type { ApiAppName } from './env-manifests.js'
+export {
+  VAR_TARGETS,
+  IGNORED_VARS,
+  resolveTargetApps,
+  type VarTarget,
+  type VarName,
+} from './secrets-targets.js'
 
 // Re-export commonly used functions
 export { URLS } from './urls.js'

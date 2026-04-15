@@ -170,6 +170,36 @@ Same as above — just document in the per-app `.env.example` doc stub.
 1. Define suffixed names: `MY_VAR_EZAUTH=`, `MY_VAR_EZBILL=`, ...
 2. Extend `getMyVar(app)` in `env-resolvers.ts` with the same fallback
    pattern as `getSentryDsn`.
+3. Declare it in `packages/config/src/secrets-targets.ts` with `suffixed: true`
+   so push/pull/audit know how to route it:
+
+```ts
+MY_VAR: { apps: ['ezauth', 'ezbill'], layer: 'api', suffixed: true },
+```
+
+### Registering new vars with secrets scripts
+
+Every new var must be added to `VAR_TARGETS` in
+`packages/config/src/secrets-targets.ts`, otherwise `secrets:push`/`audit`
+will log a `[warn] Unknown var, skipping` and silently leave it local-only.
+Pick the right shape:
+
+```ts
+// Plain per-app var pushed to Railway only
+STRIPE_SECRET_KEY: { apps: ['ezpay'], layer: 'api' },
+
+// NEXT_PUBLIC_* exposed on Vercel web project
+NEXT_PUBLIC_APP_NAME: { apps: ['green-pulse'], layer: 'web', client: true },
+
+// Shared everywhere
+JWT_SECRET: { apps: '*', layer: 'api' },
+
+// Templated — MONGO_URL resolves {app}/{env} before push, also lands on fengshui web
+MONGO_URL: { apps: '*', layer: 'api', template: true, webOverrides: ['fengshui'] },
+
+// Suffixed — per-app uniqueness without collisions at the root
+SENTRY_DSN: { apps: '*', layer: 'api', suffixed: true },
+```
 
 ## Production secrets
 
@@ -180,73 +210,147 @@ Never push root `.env.production` anywhere. Production values live in
 
 ## CLI commands
 
-⚠️ **Migration note**: `pnpm secrets:sync` / `secrets:pull` / `secrets:audit`
-still reference the legacy `{APP}_` prefix convention for Railway/Vercel
-interop. They will need a follow-up refactor to align with the generic root
-layout. Until then, push/pull cloud secrets manually via the Railway/Vercel
-dashboards or CLIs.
+Scripts live at the monorepo root (`scripts/secrets-{push,pull,audit}.ts`)
+and are driven by the declarative `VAR_TARGETS` map in
+[`packages/config/src/secrets-targets.ts`](./packages/config/src/secrets-targets.ts).
+That single source of truth tells each script, for every var used in
+`.env.{local,staging,production}`:
 
-All scripts that DO run mask sensitive values (`*_SECRET`, `*_KEY`, `*_TOKEN`,
-`*_DSN`) in their output — plaintext is never logged.
+- which apps consume it (`apps: '*'` or `['ezpay']`, etc.)
+- which runtime layer needs it (`layer: 'api' | 'web' | 'both'`)
+- whether it is templated (`MONGO_URL` with `{app}/{env}`),
+  suffixed (`SENTRY_DSN_EZAUTH`), client-exposed (`NEXT_PUBLIC_*`),
+  or requires web overrides (e.g. `fengshui` runs DB queries in route handlers
+  and therefore needs `MONGO_URL` on Vercel)
 
-### Legacy behaviour (to be refactored)
+All three scripts mask sensitive values (`*_KEY`, `*_SECRET`, `*_TOKEN`,
+`*_DSN`, `MONGO_URL`, `JWT_SECRET`) in their output — plaintext never lands on
+stdout.
 
-The sections below document the current `{APP}_` prefix-based mapping used
-by `pnpm secrets:sync / secrets:pull / secrets:audit`. After the generic
-root-var refactor, these scripts still expect prefixed input — they will be
-rewritten in a follow-up to invert the mapping. Until then:
+Shared flags:
 
-#### `pnpm secrets:sync` (legacy prefix convention)
+| Flag             | Effect                                                       |
+| ---------------- | ------------------------------------------------------------ |
+| `--env <name>`   | `local` / `staging` / `production` (default: `production`)   |
+| `--dry-run`      | **DEPRECATED** — alias of `--plan`. Prefer `--plan`.         |
+| `--vercel-only`  | Skip Railway                                                 |
+| `--railway-only` | Skip Vercel                                                  |
+| `--vars K1,K2`   | Restrict to the listed var names (declared in `VAR_TARGETS`) |
+| `--strict`       | (audit) exit 1 on any drift                                  |
+| `--json`         | (audit / healthcheck / verify) machine-readable output       |
+| `--merge`        | (pull) keep local-only keys not present in cloud             |
 
-Pushes root `.env.production` → Railway + Vercel, stripping per-app prefixes
-for each matching target and filtering out foreign per-app vars.
+## Safe push workflow
 
-```
-EZBILL_MONGO_URL=...  →  pushed as MONGO_URL to railway/ezbill-api only
-OPENAI_API_KEY=...    →  pushed as OPENAI_API_KEY to every Railway + allow-listed Vercel
-EZAUTH_GOOGLE_*       →  NOT pushed to any project except ezauth-api / web-ezauth
-```
-
-```bash
-pnpm secrets:sync                       # push to all
-pnpm secrets:sync -- --vercel-only
-pnpm secrets:sync -- --railway-only
-pnpm secrets:sync -- --dry-run          # preview (all masked)
-pnpm secrets:sync -- --vars KEY1,KEY2   # only specific vars (root names)
-```
-
-#### `pnpm secrets:pull` (legacy prefix convention)
-
-Fetches production vars from every Vercel project + Railway service and writes
-the root `.env.production` with the correct prefix per target.
-
-```
-ezbill-api has MONGO_URL=...  →  written as EZBILL_MONGO_URL=... at root
-Same OPENAI_API_KEY in all services  →  written as OPENAI_API_KEY=... (shared)
-Different MONGO_URL in each service   →  written as EZAUTH_MONGO_URL=...,
-                                          EZBILL_MONGO_URL=..., etc.
-```
+Pushing production secrets is a destructive operation. Use the Terraform-style
+phased workflow below for every production rollout — each phase is gated
+by an explicit flag so accidents require intent.
 
 ```bash
-pnpm secrets:pull                    # fetch all, write root .env.production
-pnpm secrets:pull -- --dry-run       # preview, no write
-pnpm secrets:pull -- --vercel-only
-pnpm secrets:pull -- --railway-only
-pnpm secrets:pull -- --merge         # keep existing local-only keys
+# Phase 1 — Pre-flight (fully local, no cloud I/O)
+pnpm secrets:verify                                      # cross-check mapping ↔ code ↔ .env.example
+pnpm secrets:push --env production --preflight          # validate .env.production
+
+# Phase 2 — Plan (diff local vs cloud, no changes applied)
+pnpm secrets:push --env production --plan
+
+# Phase 3 — Canary (apply to a single service, then smoke it)
+pnpm secrets:push --env production --canary ezbill-api --confirm
+pnpm secrets:healthcheck --service ezbill-api
+
+# Phase 4 — Full rollout (--confirm-delete is a SECOND opt-in for DELETE ops)
+pnpm secrets:push --env production --confirm --confirm-delete
+pnpm secrets:healthcheck --all
+
+# Rollback — push a prior backup verbatim
+pnpm secrets:push --env production --from-backup tmp/secrets-pull-backup-<ts>.env.production --confirm --confirm-delete
 ```
 
-A timestamped backup is always written under `tmp/secrets-pull-backup-<ts>.env.production`.
+### `pnpm secrets:verify`
 
-#### `pnpm secrets:audit` (legacy prefix convention)
-
-Compares root `.env.production` against the current state of Vercel + Railway.
-Never modifies anything.
+Cross-checks three sources: `process.env.X` usage in `apps/<app>/{api,web}/src`,
+per-app `.env.example` files, and `VAR_TARGETS`. Categorises every divergence
+as `STALE_EXAMPLE`, `MISSING_IN_MAPPING`, `OVER_SCOPED`, or `UNDER_SCOPED`.
 
 ```bash
-pnpm secrets:audit                   # full audit
-pnpm secrets:audit -- --strict       # exit 1 on drift (CI)
-pnpm secrets:audit -- --json
+pnpm secrets:verify          # full report (exit 1 on any divergence)
+pnpm secrets:verify --fix    # also print a candidate VAR_TARGETS patch (apply manually)
+pnpm secrets:verify --json   # machine-readable
 ```
+
+### `pnpm secrets:healthcheck`
+
+Hits `/api/health` on every API URL from `@ezstart/config`. Exits with the
+number of failing services (capped at 125) so CI can block a rollout.
+
+```bash
+pnpm secrets:healthcheck                               # all services, production
+pnpm secrets:healthcheck --env local
+pnpm secrets:healthcheck --service ezbill-api
+pnpm secrets:healthcheck --json --timeout 15000
+```
+
+### `pnpm secrets:push` (alias: `secrets:sync`)
+
+Pushes root `.env.{env}` → Railway services + Vercel projects. Suffixed vars
+are stripped to their base name per target; templated vars are resolved with
+the current app/env before push.
+
+Phase flags:
+
+| Flag                   | Effect                                                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--preflight`          | Validate `.env.{env}` only (placeholders, missing required, formats, backup freshness). No cloud I/O. |
+| `--plan` (default)     | Show ADD / UPDATE / NOOP / DELETE diff vs cloud. Masked values.                                       |
+| `--canary <svc>`       | Apply only to the service whose label ends with `/<svc>`.                                             |
+| `--confirm`            | Execute ADD + UPDATE ops.                                                                             |
+| `--confirm-delete`     | Required IN ADDITION to `--confirm` to execute DELETE ops.                                            |
+| `--from-backup <file>` | Read a backup file instead of `.env.{env}` (rollback).                                                |
+
+```bash
+pnpm secrets:push --env production                    # implicit --plan
+pnpm secrets:push --env production --preflight        # local validation only
+pnpm secrets:push --env production --plan             # preview diff
+pnpm secrets:push --env production --canary ezbill-api --confirm
+pnpm secrets:push --env production --confirm --confirm-delete
+pnpm secrets:push --env production --vars JWT_SECRET --confirm
+pnpm secrets:push --vercel-only --confirm
+```
+
+### `pnpm secrets:pull`
+
+Fetches live vars from every Railway service + Vercel project and reconstructs
+the root `.env.{env}` file. Suffixed vars are re-attached (`SENTRY_DSN` on
+railway/ezauth-api becomes `SENTRY_DSN_EZAUTH` at root). Templated vars
+(`MONGO_URL`) are NOT pulled — the root keeps the template form by design.
+
+A timestamped backup is always written to
+`tmp/secrets-pull-backup-<ts>.env.<env>` before overwriting.
+
+```bash
+pnpm secrets:pull --env production
+pnpm secrets:pull --env production --dry-run
+pnpm secrets:pull --env production --merge            # preserve local-only keys
+```
+
+### `pnpm secrets:audit`
+
+Compares root `.env.{env}` against the live state. Never mutates anything.
+
+```bash
+pnpm secrets:audit --env production
+pnpm secrets:audit --env production --strict          # exit 1 on drift
+pnpm secrets:audit --env production --json
+```
+
+Drift categories:
+
+| Category           | Meaning                                          |
+| ------------------ | ------------------------------------------------ |
+| `ok`               | Local matches cloud exactly                      |
+| `missing_in_cloud` | Local has it; cloud target doesn't → run push    |
+| `missing_in_local` | Cloud has it; local doesn't → run pull or ignore |
+| `drift`            | Values differ between local and cloud            |
 
 ### Vercel scope
 

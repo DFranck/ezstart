@@ -36,6 +36,11 @@
       "import": "./dist/env-resolvers.js",
       "require": "./dist/env-resolvers.js"
     },
+    "./secrets-targets": {
+      "types": "./dist/secrets-targets.d.ts",
+      "import": "./dist/secrets-targets.js",
+      "require": "./dist/secrets-targets.js"
+    },
     "./server": {
       "types": "./dist/server.d.ts",
       "import": "./dist/server.js",
