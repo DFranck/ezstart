@@ -11,7 +11,7 @@
  * - Prod: [app]-api.up.railway.app OR render
  */
 
-export type Environment = 'local' | 'development' | 'production'
+export type Environment = 'local' | 'development' | 'staging' | 'production'
 export type AppName =
   | 'ezstart'
   | 'ezauth'
@@ -26,11 +26,13 @@ export interface AppUrls {
   web: {
     local: string
     development: string
+    staging?: string
     production: string
   }
   api?: {
     local: string
     development?: string
+    staging?: string
     production: string
   }
 }
@@ -239,11 +241,33 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
 }
 
 /**
- * Get the current environment based on NODE_ENV or VERCEL_ENV
- * Supports both server-side (Node.js) and client-side (browser) detection
+ * Get the current environment based on DEPLOY_ENV, NODE_ENV, VERCEL_ENV, or hostname.
+ * Supports both server-side (Node.js) and client-side (browser) detection.
+ *
+ * Priority order (server-side):
+ *   1. DEPLOY_ENV (custom, set on Railway/Vercel staging environments)
+ *   2. VERCEL_ENV (preview staging deploys when VERCEL_GIT_COMMIT_REF === 'staging')
+ *   3. VERCEL_ENV (production/preview as reported by Vercel)
+ *   4. NODE_ENV === 'production' → 'production'
+ *   5. Default server-side → 'local'
  */
 export function getCurrentEnvironment(): Environment {
-  // Server-side: Check Vercel env var first
+  // Server-side: Explicit DEPLOY_ENV wins (our custom discriminator — set it to
+  // 'staging' on every Railway staging service and every Vercel staging env).
+  if (typeof process !== 'undefined' && process.env.DEPLOY_ENV) {
+    return process.env.DEPLOY_ENV as Environment
+  }
+
+  // Server-side: Vercel preview build of the 'staging' branch → treat as staging.
+  if (
+    typeof process !== 'undefined' &&
+    process.env.VERCEL_ENV === 'preview' &&
+    process.env.VERCEL_GIT_COMMIT_REF === 'staging'
+  ) {
+    return 'staging'
+  }
+
+  // Server-side: Check Vercel env var (production/preview as reported by Vercel)
   if (typeof process !== 'undefined' && process.env.VERCEL_ENV) {
     return process.env.VERCEL_ENV as Environment
   }
@@ -277,6 +301,11 @@ export function getCurrentEnvironment(): Environment {
       hostname === 'game-analyzer.ezstart.xyz'
     ) {
       return 'production'
+    }
+
+    // Staging (explicit subdomain pattern)
+    if (hostname.startsWith('staging.') || hostname.startsWith('staging-')) {
+      return 'staging'
     }
 
     // Development domains (Vercel preview)
@@ -346,15 +375,18 @@ export function isEzstartDomain(hostname: string): boolean {
 }
 
 /**
- * Get web URL for an app in the current environment
+ * Get web URL for an app in the current environment.
+ * Falls back to production when the requested environment is not configured
+ * (common for `staging` and `development` until Vercel/Railway URLs are wired).
  */
 export function getWebUrl(app: AppName, env?: Environment): string {
   const environment = env || getCurrentEnvironment()
-  return URLS[app].web[environment]
+  return URLS[app].web[environment] ?? URLS[app].web.production
 }
 
 /**
- * Get API URL for an app in the current environment
+ * Get API URL for an app in the current environment.
+ * Falls back to production when the requested environment is not configured.
  */
 export function getApiUrl(app: AppName, env?: Environment): string {
   const environment = env || getCurrentEnvironment()
@@ -364,12 +396,7 @@ export function getApiUrl(app: AppName, env?: Environment): string {
     throw new Error(`App ${app} does not have an API`)
   }
 
-  // For development, fallback to production API if not defined
-  if (environment === 'development' && !apiUrls.development) {
-    return apiUrls.production
-  }
-
-  return apiUrls[environment] || apiUrls.production
+  return apiUrls[environment] ?? apiUrls.production
 }
 
 /**
