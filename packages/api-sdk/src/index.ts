@@ -10,7 +10,7 @@
  *
  *    ```ts
  *    import { apiCall, apiQuery } from '@ezstart/api-sdk'
- *    const user = await apiCall<User>('/me', { appName: 'ezauth' })
+ *    const user = await apiCall<User>('/me', { appName: 'myapp' })
  *    ```
  *
  * 2. **External projects** — build your own client via the agnostic factory.
