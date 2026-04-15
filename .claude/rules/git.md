@@ -44,8 +44,9 @@ pnpm typecheck
 
 ### 4. Backlog Formatting
 
-- App backlogs (`apps/*/BACKLOG.md`) utilisent `- [ ]` (tirets), **PAS** de listes numérotées (`1. [ ]`). Cela évite les conflits de merge quand plusieurs personnes ajoutent des items.
-- Seul le BACKLOG racine du monorepo (`BACKLOG.md`) peut utiliser des numéros.
+- Un seul fichier `BACKLOG.md` (root) pour les items actifs + `BACKLOG-HISTORY.md` (root) pour l'archive des items terminés. Pas de backlog per-app.
+- Utiliser `- [ ]` / `- [x]` (tirets), **PAS** de listes numérotées (`1. [ ]`). Cela évite les conflits de merge quand plusieurs personnes ajoutent des items.
+- Claude déplace les `- [x]` de `BACKLOG.md` vers `BACKLOG-HISTORY.md` à chaque passe de maintenance.
 
 ### 5. Documentation README
 

@@ -201,15 +201,15 @@ All URLs and ports are auto-configured via `@ezstart/config`.
 
 ### Root docs
 
-| File                                 | Purpose                                                           |
-| ------------------------------------ | ----------------------------------------------------------------- |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions, workflow, how to add a UI/feature/endpoint           |
-| [CLAUDE.md](./CLAUDE.md)             | Manager pipeline (8 steps), agents, dev servers                   |
-| [DEV-RULES.md](./DEV-RULES.md)       | Index of all rule files in `.claude/rules/` (mandatory)           |
-| [BACKLOG.md](./BACKLOG.md)           | Cross-project / monorepo backlog (per-app in `apps/*/BACKLOG.md`) |
-| [DEPLOY.md](./DEPLOY.md)             | Railway (APIs) + Vercel (web) deployment guide                    |
-| [SECRETS.md](./SECRETS.md)           | `.env` architecture, `secrets-loader`, shared vs app-specific     |
-| [GENERATORS.md](./GENERATORS.md)     | Zero-maintenance code generation pipeline                         |
+| File                                 | Purpose                                                                                 |
+| ------------------------------------ | --------------------------------------------------------------------------------------- |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions, workflow, how to add a UI/feature/endpoint                                 |
+| [CLAUDE.md](./CLAUDE.md)             | Manager pipeline (8 steps), agents, dev servers                                         |
+| [DEV-RULES.md](./DEV-RULES.md)       | Index of all rule files in `.claude/rules/` (mandatory)                                 |
+| [BACKLOG.md](./BACKLOG.md)           | Single source of truth for active backlog (done items archived in `BACKLOG-HISTORY.md`) |
+| [DEPLOY.md](./DEPLOY.md)             | Railway (APIs) + Vercel (web) deployment guide                                          |
+| [SECRETS.md](./SECRETS.md)           | `.env` architecture, `secrets-loader`, shared vs app-specific                           |
+| [GENERATORS.md](./GENERATORS.md)     | Zero-maintenance code generation pipeline                                               |
 
 ### Audits
 

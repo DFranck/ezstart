@@ -68,7 +68,10 @@ function parseArgs(argv) {
         args.hasTypes = false
         break
       case '--depends-on':
-        args.dependsOn = argv[++i].split(',').map(s => s.trim()).filter(Boolean)
+        args.dependsOn = argv[++i]
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean)
         break
       case '--shortcut':
         args.shortcut = argv[++i]
@@ -89,10 +92,14 @@ function parseArgs(argv) {
 const args = parseArgs(process.argv)
 
 if (!args.name) {
-  console.error('Usage: node scripts/generators/insert-app.js --name <app-name> [--has-api] [--has-web] [--depends-on app1,app2] [--shortcut xx]')
+  console.error(
+    'Usage: node scripts/generators/insert-app.js --name <app-name> [--has-api] [--has-web] [--depends-on app1,app2] [--shortcut xx]'
+  )
   console.error('')
   console.error('Examples:')
-  console.error('  node scripts/generators/insert-app.js --name my-app --has-api --has-web --depends-on ezauth')
+  console.error(
+    '  node scripts/generators/insert-app.js --name my-app --has-api --has-web --depends-on ezauth'
+  )
   console.error('  node scripts/generators/insert-app.js --name my-tool --has-web --shortcut mt')
   process.exit(1)
 }
@@ -148,7 +155,9 @@ console.log(`  Display name: ${displayName}`)
 if (apiPort) console.log(`  API port: ${apiPort}`)
 if (webPort) console.log(`  Web port: ${webPort}`)
 console.log(`  Dev shortcut: pnpm dev:${shortcut}`)
-console.log(`  Components: ${[args.hasApi && 'api', args.hasWeb && 'web', args.hasTypes && 'types'].filter(Boolean).join(', ')}`)
+console.log(
+  `  Components: ${[args.hasApi && 'api', args.hasWeb && 'web', args.hasTypes && 'types'].filter(Boolean).join(', ')}`
+)
 if (args.dependsOn.length) console.log(`  Depends on: ${args.dependsOn.join(', ')}`)
 console.log()
 
@@ -163,15 +172,24 @@ if (args.hasApi) {
   writeFile(path.join(apiDir, 'package.json'), renderTemplate('api/package.json', vars))
   writeFile(path.join(apiDir, 'src', 'server.ts'), renderTemplate('api/index.ts', vars))
 
-  writeFile(path.join(apiDir, 'tsconfig.json'), JSON.stringify({
-    extends: '@ezstart/typescript-config/api.json',
-    compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist'],
-  }, null, 2))
+  writeFile(
+    path.join(apiDir, 'tsconfig.json'),
+    JSON.stringify(
+      {
+        extends: '@ezstart/typescript-config/api.json',
+        compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
+        include: ['src/**/*'],
+        exclude: ['node_modules', 'dist'],
+      },
+      null,
+      2
+    )
+  )
 
-  writeFile(path.join(apiDir, 'eslint.config.js'),
-    `import eslintConfig from '@ezstart/eslint-config/base'\n\nexport default [...eslintConfig]\n`)
+  writeFile(
+    path.join(apiDir, 'eslint.config.js'),
+    `import eslintConfig from '@ezstart/eslint-config/base'\n\nexport default [...eslintConfig]\n`
+  )
 
   const corsOrigin = webPort ? `http://localhost:${webPort}` : 'http://localhost:3000'
   const envContent = `# Server
@@ -202,22 +220,33 @@ if (args.hasWeb) {
 
   writeFile(path.join(webDir, 'package.json'), renderTemplate('web/package.json', vars))
 
-  writeFile(path.join(webDir, 'tsconfig.json'), JSON.stringify({
-    extends: '@ezstart/typescript-config/nextjs.json',
-    compilerOptions: {
-      composite: true,
-      incremental: true,
-      plugins: [{ name: 'next' }],
-      paths: { '@/*': ['./src/*'] },
-    },
-    include: ['next-env.d.ts', '**/*.ts', '**/*.tsx', '.next/types/**/*.ts'],
-    exclude: ['node_modules'],
-  }, null, 2))
+  writeFile(
+    path.join(webDir, 'tsconfig.json'),
+    JSON.stringify(
+      {
+        extends: '@ezstart/typescript-config/nextjs.json',
+        compilerOptions: {
+          composite: true,
+          incremental: true,
+          plugins: [{ name: 'next' }],
+          paths: { '@/*': ['./src/*'] },
+        },
+        include: ['next-env.d.ts', '**/*.ts', '**/*.tsx', '.next/types/**/*.ts'],
+        exclude: ['node_modules'],
+      },
+      null,
+      2
+    )
+  )
 
-  writeFile(path.join(webDir, 'eslint.config.js'),
-    `import eslintConfig from '@ezstart/eslint-config/next-js'\n\nexport default [...eslintConfig]\n`)
+  writeFile(
+    path.join(webDir, 'eslint.config.js'),
+    `import eslintConfig from '@ezstart/eslint-config/next-js'\n\nexport default [...eslintConfig]\n`
+  )
 
-  writeFile(path.join(webDir, 'tailwind.config.ts'), `import type { Config } from 'tailwindcss'
+  writeFile(
+    path.join(webDir, 'tailwind.config.ts'),
+    `import type { Config } from 'tailwindcss'
 import baseConfig from '@ezstart/tailwind-config/base.js'
 
 const config: Config = {
@@ -231,17 +260,23 @@ const config: Config = {
 }
 
 export default config
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'postcss.config.mjs'), `/** @type {import('postcss-load-config').Config} */
+  writeFile(
+    path.join(webDir, 'postcss.config.mjs'),
+    `/** @type {import('postcss-load-config').Config} */
 const config = {
   plugins: { "@tailwindcss/postcss": {} },
 }
 
 export default config
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'next.config.mjs'), `import createNextIntlPlugin from 'next-intl/plugin'
+  writeFile(
+    path.join(webDir, 'next.config.mjs'),
+    `import createNextIntlPlugin from 'next-intl/plugin'
 import withPWA from 'next-pwa'
 
 /** @type {import('next').NextConfig} */
@@ -259,10 +294,13 @@ const pwaConfig = withPWA({
 })
 
 export default withNextIntl(pwaConfig(baseConfig))
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'next-env.d.ts'),
-    `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.\n`)
+  writeFile(
+    path.join(webDir, 'next-env.d.ts'),
+    `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.\n`
+  )
 
   const apiUrl = apiPort ? `http://localhost:${apiPort}/api` : ''
   const webEnvContent = `# Application
@@ -275,7 +313,9 @@ ${apiUrl ? `\n# API URLs\nNEXT_PUBLIC_API_URL=${apiUrl}` : ''}
   writeFile(path.join(webDir, '.env.local'), webEnvContent)
 
   // i18n files
-  writeFile(path.join(webDir, 'src', 'i18n', 'routing.ts'), `import { defineRouting } from 'next-intl/routing'
+  writeFile(
+    path.join(webDir, 'src', 'i18n', 'routing.ts'),
+    `import { defineRouting } from 'next-intl/routing'
 
 export const routing = defineRouting({
   locales: ['en'],
@@ -292,9 +332,12 @@ export function getTimeZoneFromLocale(locale: string): string {
   }
   return timeZoneMap[locale] || 'UTC'
 }
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'src', 'i18n', 'request.ts'), `import merge from 'deepmerge'
+  writeFile(
+    path.join(webDir, 'src', 'i18n', 'request.ts'),
+    `import merge from 'deepmerge'
 import { getRequestConfig } from 'next-intl/server'
 import { routing } from './routing'
 
@@ -319,16 +362,22 @@ export default getRequestConfig(async ({ requestLocale }) => {
     messages: merge.all([common.default, home.default]),
   }
 })
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'src', 'i18n', 'navigation.ts'), `import { createNavigation } from 'next-intl/navigation'
+  writeFile(
+    path.join(webDir, 'src', 'i18n', 'navigation.ts'),
+    `import { createNavigation } from 'next-intl/navigation'
 import { routing } from './routing'
 
 export const { Link, useRouter, usePathname, redirect, getPathname } =
   createNavigation(routing)
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'src', 'middleware.ts'), `import createMiddleware from 'next-intl/middleware'
+  writeFile(
+    path.join(webDir, 'src', 'middleware.ts'),
+    `import createMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
 
 export default createMiddleware(routing)
@@ -336,40 +385,64 @@ export default createMiddleware(routing)
 export const config = {
   matcher: ['/((?!api|trpc|_next|_vercel|.*\\\\..*).*)'],
 }
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'src', 'messages', 'en', 'common.json'), JSON.stringify({
-    common: {
-      appName: displayName,
-      loading: 'Loading...',
-      error: 'An error occurred',
-      retry: 'Try again',
-    },
-  }, null, 2))
+  writeFile(
+    path.join(webDir, 'src', 'messages', 'en', 'common.json'),
+    JSON.stringify(
+      {
+        common: {
+          appName: displayName,
+          loading: 'Loading...',
+          error: 'An error occurred',
+          retry: 'Try again',
+        },
+      },
+      null,
+      2
+    )
+  )
 
-  writeFile(path.join(webDir, 'src', 'messages', 'en', 'home.json'), JSON.stringify({
-    home: {
-      title: `Welcome to ${displayName}`,
-      description: 'This app is pre-configured with all the essentials',
-      getStarted: 'Get Started',
-    },
-  }, null, 2))
+  writeFile(
+    path.join(webDir, 'src', 'messages', 'en', 'home.json'),
+    JSON.stringify(
+      {
+        home: {
+          title: `Welcome to ${displayName}`,
+          description: 'This app is pre-configured with all the essentials',
+          getStarted: 'Get Started',
+        },
+      },
+      null,
+      2
+    )
+  )
 
-  writeFile(path.join(webDir, 'public', 'manifest.json'), JSON.stringify({
-    name: displayName,
-    short_name: displayName,
-    description: `${displayName} application`,
-    start_url: '/',
-    display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#000000',
-    icons: [
-      { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-  }, null, 2))
+  writeFile(
+    path.join(webDir, 'public', 'manifest.json'),
+    JSON.stringify(
+      {
+        name: displayName,
+        short_name: displayName,
+        description: `${displayName} application`,
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#ffffff',
+        theme_color: '#000000',
+        icons: [
+          { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+        ],
+      },
+      null,
+      2
+    )
+  )
 
-  writeFile(path.join(webDir, 'src', 'providers', 'providers.tsx'), `'use client'
+  writeFile(
+    path.join(webDir, 'src', 'providers', 'providers.tsx'),
+    `'use client'
 
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
@@ -399,9 +472,12 @@ export function Providers({ children, locale, messages, timeZone }: ProvidersPro
     </NextIntlClientProvider>
   )
 }
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'src', 'app', '[locale]', 'layout.tsx'), `import { getTimeZoneFromLocale } from '@/i18n/routing'
+  writeFile(
+    path.join(webDir, 'src', 'app', '[locale]', 'layout.tsx'),
+    `import { getTimeZoneFromLocale } from '@/i18n/routing'
 import { Providers } from '@/providers/providers'
 import '@ezstart/ui/globals.css'
 import type { Metadata } from 'next'
@@ -435,9 +511,12 @@ export default async function RootLayout({
     </html>
   )
 }
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'src', 'app', '[locale]', 'page.tsx'), `'use client'
+  writeFile(
+    path.join(webDir, 'src', 'app', '[locale]', 'page.tsx'),
+    `'use client'
 
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
@@ -471,9 +550,12 @@ export default function HomePage() {
     </main>
   )
 }
-`)
+`
+  )
 
-  writeFile(path.join(webDir, 'src', 'scripts', 'dev-with-port.js'), `import { spawn } from 'child_process'
+  writeFile(
+    path.join(webDir, 'src', 'scripts', 'dev-with-port.js'),
+    `import { spawn } from 'child_process'
 import net from 'net'
 
 async function isPortFree(port) {
@@ -511,7 +593,8 @@ async function startDev() {
 }
 
 startDev()
-`)
+`
+  )
 }
 
 // --- Create Types ---
@@ -522,19 +605,26 @@ if (args.hasTypes) {
 
   writeFile(path.join(typesDir, 'package.json'), renderTemplate('types/package.json', vars))
 
-  writeFile(path.join(typesDir, 'tsconfig.json'), JSON.stringify({
-    extends: '@ezstart/typescript-config/library.json',
-    compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist'],
-  }, null, 2))
+  writeFile(
+    path.join(typesDir, 'tsconfig.json'),
+    JSON.stringify(
+      {
+        extends: '@ezstart/typescript-config/library.json',
+        compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
+        include: ['src/**/*'],
+        exclude: ['node_modules', 'dist'],
+      },
+      null,
+      2
+    )
+  )
 
   writeFile(path.join(typesDir, 'src', 'index.ts'), `// ${displayName} shared types\nexport {}\n`)
 }
 
-// --- Create BACKLOG.md & README.md ---
-console.log('Creating BACKLOG.md & README.md ...')
-writeFile(path.join(appDir, 'BACKLOG.md'), renderTemplate('BACKLOG.md', vars))
+// --- Create README.md ---
+// Note: BACKLOG is single-file at monorepo root (BACKLOG.md + BACKLOG-HISTORY.md) — no per-app backlog
+console.log('Creating README.md ...')
 writeFile(path.join(appDir, 'README.md'), renderTemplate('README.md', vars))
 
 // --- Register in monorepo ---
@@ -554,6 +644,5 @@ console.log(`  apps/${appName}/`)
 if (args.hasApi) console.log(`  ├── api/        Express API (port ${apiPort})`)
 if (args.hasWeb) console.log(`  ├── web/        Next.js frontend (port ${webPort})`)
 if (args.hasTypes) console.log(`  ├── types/      Shared TypeScript types`)
-console.log(`  ├── BACKLOG.md`)
 console.log(`  └── README.md`)
 console.log(`\nRun: pnpm dev:${shortcut}`)

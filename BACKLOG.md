@@ -1,285 +1,454 @@
-# 📋 Backlog — @ezstart Monorepo
+# @ezstart Monorepo Backlog
 
-**Ce fichier est la source de vérité pour les projets cross-project et infra.**
-**Les backlogs per-app sont dans `apps/[app]/BACKLOG.md`.**
+Source unique de vérité pour les items **en cours / à faire**. Les items terminés sont déplacés dans [BACKLOG-HISTORY.md](./BACKLOG-HISTORY.md).
 
-Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le workflow (plan → validation → agents).
+## Conventions
 
----
-
-## 📱 Applications
-
-| App            | Status      | Backlog                                                            |
-| -------------- | ----------- | ------------------------------------------------------------------ |
-| gacha-analyzer | in-progress | [apps/gacha-analyzer/BACKLOG.md](./apps/gacha-analyzer/BACKLOG.md) |
-| ezbill         | in-progress | [apps/ezbill/BACKLOG.md](./apps/ezbill/BACKLOG.md)                 |
-| ezauth         | maintained  | [apps/ezauth/BACKLOG.md](./apps/ezauth/BACKLOG.md)                 |
-| ezpay          | maintained  | [apps/ezpay/BACKLOG.md](./apps/ezpay/BACKLOG.md)                   |
-| ezstart        | maintained  | [apps/ezstart/BACKLOG.md](./apps/ezstart/BACKLOG.md)               |
-| green-pulse    | maintained  | [apps/green-pulse/BACKLOG.md](./apps/green-pulse/BACKLOG.md)       |
-| fengshui       | maintained  | [apps/fengshui/BACKLOG.md](./apps/fengshui/BACKLOG.md)             |
-| asc-tcd        | maintained  | [apps/asc-tcd/BACKLOG.md](./apps/asc-tcd/BACKLOG.md)               |
+- `- [ ]` item à faire / en cours
+- `- [x]` terminé → déplace vers `BACKLOG-HISTORY.md` à la prochaine passe
+- **Priorité** : items les plus importants en tête de section
+- **Blockers** : note `**Bloqué par :** <ref>` si dépendance explicite
+- Pour un item cross-app, préfixer par `[app]` quand utile
 
 ---
 
-## 🔧 Monorepo / Infra / Cross-project
+## Monorepo / Infrastructure
 
-### Pagination rule
+### External-devs readiness — Phase 0 (prép funding)
 
-- Toutes les APIs doivent supporter la pagination `{ data, pagination }` — implémenté sur ezauth, ezbill, ezpay, green-pulse, gacha-analyzer
+Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (ex: green-pulse) sans leur donner accès aux autres apps. Objectif : split apps standalone + packages publiés + rules auto-enforced. **~2 jours total.**
 
-### Package agnosticity
+- [ ] **GitHub Packages registry** — setup private npm registry, `publishConfig` dans chaque `packages/*/package.json`, test publish local (~30 min)
+- [ ] **`@ezstart/eslint-plugin`** — créer le package avec 5-10 règles core : `no-native-html` (bloque `<div>`/`<p>`/etc sans Tag), `prefer-tag-aliases`, `no-hardcoded-tailwind-colors`, `require-i18n-string` (toast/label), `no-console-log`, `no-local-ui-components` (forbid new components in apps/\*, force `@ezstart/ui`) (~4h)
+- [ ] **Test `scripts/generators/extract-app.js`** — extraire green-pulse en sandbox local, valider que `pnpm install && pnpm build` passe depuis le standalone, documenter les edge cases (~1h)
+- [ ] **CI auto-publish** — GitHub Action sur tag `v*.*.*` qui publish tous les `@ezstart/*` modifiés vers GitHub Packages (via changesets ou script custom) (~1h)
+- [ ] **Doc `CONTRIBUTING-EXTERNAL.md`** — workflow onboarding dev externe, comment proposer un change sur un package (PR via `packages/**` uniquement sur le monorepo), versioning & release (~1h)
+- [ ] **Test du pattern end-to-end** — simuler un dev externe : extract green-pulse, npm install les packages publiés, dev un composant, open PR, validate que les règles bloquent bien un `<div>` natif, etc. Valide la boucle complète avant d'onboard qqn en vrai.
+- [ ] **`extract-app.js` env handling** — quand une app est extraite standalone, elle perd l'accès au root `.env.local` du monorepo (qui centralise les secrets shared). Le script doit : (a) grep `process.env.*` dans la source de l'app pour identifier les vars utilisées, (b) extraire ces vars depuis root `.env.local` + app-local override, (c) générer un `.env.local` + `.env.example` autonomes dans le standalone, (d) doc dans `CONTRIBUTING-EXTERNAL.md` que le standalone est self-contained env-wise.
 
-- Tous les packages doivent être 100% agnostiques, pas de logique project-specific
+### Cross-cutting
 
-### Monorepo tooling
+- [ ] **Standardize admin dashboards UI/UX** — Actuellement chaque AdminDashboard (AI, Auth, Monitoring, EZPay, Services) utilise `DataTable`, `Badge`, `Card`, filters, pagination avec des micro-variations. Objectif : audit + uniformisation via wrappers/presets dans `@ezstart/ui` : (1) `AdminTable` preset avec columns factory + loading/empty states, (2) `AdminBadgeGroup` multi-badges truncate/tooltip, (3) `AdminFilters` pattern unifié, (4) `AdminPagination` preset, (5) guidelines layout admin page. À attaquer quand 3+ dashboards sont stabilisés.
+- [ ] **auth-sdk i18n embed pattern** — Pour composer les composants `@ezstart/auth-sdk` (QuickSignupForm, LoginForm, ResetPasswordForm) directement dans une app consumer. Options : (A) chaque app duplique les keys `messages/{locale}/auth.json` (drift garanti), ou (B) **créer `packages/auth-sdk/messages/{locale}/auth.json`** + helper `getAuthTexts(locale, formKey)` + doc pour merger dans next-intl provider. **Bloqué par :** le 1er composant auth embed hors ezauth web (probablement QuickSignup sur green-pulse earthday).
+- [ ] **Theme Overriding dynamic (paused)** — Projet `ThemeStyleInjector` + `/api/theme` endpoint pour que des clients non-devs puissent overwrite dynamiquement les couleurs de leur app depuis un éditeur visuel. Infra en place (`packages/next-theme/src/server/`) mais non câblée dans les apps (retirée de `green-pulse/layout.tsx` et `gacha-analyzer/layout.tsx` le 2026-04-13). Reprendre quand l'UI éditeur sera planifiée.
+- [ ] **insert-app.js reverse** — importer un standalone dans le monorepo (inverse de extract)
+- [ ] **Theme presets app-specific** — Presets déclaratifs par app (dashboard=compact, landing=relaxed)
+- [ ] **SSR Layout split** — Séparer `ClientLayout` en RSC + client islands
 
-1. [x] Husky + lint-staged — pre-commit hooks, prettier auto-format
-2. [x] GitHub Actions CI — build + typecheck on PR/push to master
-3. [x] Per-app BACKLOGs — chaque app a son BACKLOG.md, root = infra only
-4. [x] Specialized agent roles — `.claude/agents/` avec 8 rôles réutilisables
-5. [x] Pagination globale — toutes les APIs paginées (ezauth, ezbill, ezpay, green-pulse, gacha-analyzer)
-6. [x] Fix generators (create-app.js) — path bugs fixés, auto-register ports/tsconfig/scripts
-7. [x] insert-app.js — scaffolding complet avec wiring automatique + templates
-8. [x] extract-app.js — recursive dep analysis, copies app + packages, generates standalone config
-9. [x] new-monorepo.js — starter kit avec turbo/pnpm/husky/agents, remplace @ezstart par @[name]
-10. [x] Workspace validator — `scripts/tools/validate-workspace.js` vérifie tsconfig/scripts/config
-11. [x] Dynamic dev launcher — `scripts/tools/dev.js` avec auto-détection dépendances
-12. [x] callApi React Query integration — queryKey + queryFn helpers dans createCallApi
-13. [x] Rename cleanup — apps/game-analyzer supprimé, theme renommé
-14. [x] Theme gacha-analyzer — game-analyzer.css → gacha-analyzer.css dans packages/ui
+### Monitoring & audits CI
 
-### Cross-project items
+- [ ] **Recharts graphs on /monitoring/health** — latency p95 trending (7d/30d), uptime % timeline, error rate per service. Data déjà en MongoDB (HealthCheck model avec responseTime + status + timestamp, TTL 30d). Utiliser Recharts de `packages/ui`.
+- [ ] **Monitoring app-scoping (future)** — Currently superadmin-only in EZStart. Each app could have `/admin/monitoring` filtered by appName. Requires: API query param `?appName=ezbill`, SDK component `<MonitoringDashboard appName="ezbill" />`. Low priority — only 1 superadmin user today.
+- [ ] **Monitoring package extraction (future)** — Extract SystemOverview + hooks from ezstart/monitoring into `packages/monitoring/client` (UI) + keep `packages/monitoring` (types/collectors). **Bloqué par :** décision de design app-scoping.
+- [ ] **CI audit trending (future)** — Run `check:dead-code`, `check:size`, `check:i18n` in GitHub Actions. Parse results → MongoDB. Dashboard shows score evolution. Currently audits.json is static (score 96.6/100).
+- [ ] **Auth callback error display** — AuthCallback shows `[object Object]` instead of readable error message (e.g. "Rate limited, try again later"). Fix error extraction in auth-sdk callback handler.
+- [ ] **`@ezstart/workspace-sdk` (future)** — multi-tenancy primitive: Workspace + Project + Members + Roles, factory agnostique suivant `.claude/rules/standard.md`. Utilisé par greenpulse-premium / ezbill / ezpay quand le besoin se concrétise. Le code green-pulse précédent (workspaces/projects/forms) a été supprimé en commit `7f6aa9db`.
 
-- [ ] **🔥 External-devs readiness — Phase 0 (prép funding)** — Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (ex: green-pulse) sans leur donner accès aux autres apps. Objectif : split apps standalone + packages publiés + rules auto-enforced. **~2 jours total.**
-  1. **GitHub Packages registry** — setup private npm registry, `publishConfig` dans chaque `packages/*/package.json`, test publish local (~30 min)
-  2. **`@ezstart/eslint-plugin`** — créer le package avec 5-10 règles core : `no-native-html` (bloque `<div>`/`<p>`/etc sans Tag), `prefer-tag-aliases`, `no-hardcoded-tailwind-colors`, `require-i18n-string` (toast/label), `no-console-log`, `no-local-ui-components` (forbid new components in apps/\*, force `@ezstart/ui`) (~4h)
-  3. **Test `scripts/generators/extract-app.js`** — extraire green-pulse en sandbox local, valider que `pnpm install && pnpm build` passe depuis le standalone, documenter les edge cases (~1h)
-  4. **CI auto-publish** — GitHub Action sur tag `v*.*.*` qui publish tous les `@ezstart/*` modifiés vers GitHub Packages (via changesets ou script custom) (~1h)
-  5. **Doc `CONTRIBUTING-EXTERNAL.md`** — workflow onboarding dev externe, comment proposer un change sur un package (PR via `packages/**` uniquement sur le monorepo), versioning & release (~1h)
-  6. **Test du pattern end-to-end** — simuler un dev externe : extract green-pulse, npm install les packages publiés, dev un composant, open PR, validate que les règles bloquent bien un `<div>` natif, etc. Valide la boucle complète avant d'onboard qqn en vrai.
-  7. **`extract-app.js` env handling** — quand une app est extraite standalone, elle perd l'accès au root `.env.local` du monorepo (qui centralise les secrets shared). Le script doit : (a) grep `process.env.*` dans la source de l'app pour identifier les vars utilisées, (b) extraire ces vars depuis root `.env.local` + app-local override, (c) générer un `.env.local` + `.env.example` autonomes dans le standalone, (d) doc dans `CONTRIBUTING-EXTERNAL.md` que le standalone est self-contained env-wise.
+### AI platform
 
-- [ ] **Standardize admin dashboards UI/UX** — Actuellement chaque AdminDashboard (AI, Auth, Monitoring, EZPay, Services, etc.) utilise `DataTable`, `Badge`, `Card`, filters, pagination avec des micro-variations (styles, density, ordering, empty states, column alignment). Objectif : audit + uniformisation via des wrappers/presets dans `@ezstart/ui` : (1) `AdminTable` composant preset basé sur `DataTable` avec columns factory + loading/empty states standards, (2) `AdminBadgeGroup` pour les multi-badges (apps, providers, tags) avec truncate/tooltip cohérents, (3) `AdminFilters` pattern unifié (search + dropdowns multi), (4) `AdminPagination` preset, (5) guidelines de layout admin page (header + stats cards + tabs + content). Donne une UX consistante entre toutes les sections admin, plus facile à maintenir, nouvelle app admin en 1h. À attaquer quand 3+ dashboards admin sont stabilisés.
-
-- [ ] **auth-sdk i18n embed pattern** — Quand on voudra composer des composants `@ezstart/auth-sdk` (QuickSignupForm, LoginForm, ResetPasswordForm...) directement dans une app consumer (ex: greenpulse `/earthday`), il faut une source de vérité pour les traductions auth. Options : (A) chaque app duplique les keys dans `messages/{locale}/auth.json` (drift garanti), ou (B) **créer `packages/auth-sdk/messages/{locale}/auth.json`** + helper `getAuthTexts(locale, formKey)` + doc pour merger dans next-intl provider des consumers. Scope actuel (flow centralisé sur ezauth.ezstart.xyz) : pas bloquant. À déclencher **quand le 1er composant auth sera embed hors ezauth web** (probablement QuickSignup sur green-pulse earthday).
-
-- [ ] **⏸️ Theme Overriding dynamic (paused)** — Projet `ThemeStyleInjector` + `/api/theme` endpoint pour que des clients non-devs puissent overwrite dynamiquement les couleurs de leur app depuis un éditeur visuel. Infra en place (`packages/next-theme/src/server/`) mais non câblée dans les apps (retirée de `green-pulse/layout.tsx` et `gacha-analyzer/layout.tsx` le 2026-04-13). Reprendre quand l'UI éditeur sera planifiée. En attendant : la source de vérité est le CSS statique (`packages/ui/src/styles/themes/{app}/{app}.css` avec `[data-app='{app}']` scope + global.css fallback).
-
-15. [x] Audit sécurité complet — 3 CRITICAL, 6 HIGH, 5 MEDIUM, 3 LOW identifiés
-16. [x] Audit code quality — 20 problèmes identifiés, dead files + console.log packages fixés
-17. [x] READMEs à jour — 19 packages + 8 apps READMEs réécrits (minimal <30 lignes)
-18. [x] Standardiser les réponses API — helpers sendSuccess/sendError dans express-core + migration progressive
-19. [x] alert() → toast partout — ezbill + fengshui + ezstart fixés, 0 alert() restant
-
-### Sécurité (du rapport audit)
-
-20. [x] CRITICAL: EZBill auth — JWT Bearer + X-User-Id fallback (dev), JWT_SECRET requis
-21. [x] CRITICAL: JWT Secret — fallback supprimé, crash si non défini
-22. [x] MOVED → apps/ezpay/BACKLOG.md (config app, pas monorepo)
-23. [x] extract-app.js test — après extraction, vérifier automatiquement que pnpm install && pnpm build passent
-24. [ ] insert-app.js reverse — importer un standalone dans le monorepo (inverse de extract)
-25. [x] Zod validation sur TOUTES les routes API (ezauth, ezbill, ezpay, ezstart, green-pulse) — gacha-analyzer déjà fait
-26. [x] OpenAPI descriptions complètes — zéro warning au démarrage
-
-### Full audit 2026-03-29
-
-35. [x] Package audit — 19 packages audités, agnostic, scalable (Button brand, Badge CSS vars, Tag merge, globals agnostic)
-36. [x] Standardize usage — sendSuccess/sendError all APIs (107 violations), console→logger (173), fetch→callApi (12), pagination (15 endpoints), React Query (3 files)
-37. [x] Shared auth middleware — extracted to express-core (replaces 5 copy-pasted files)
-38. [x] Package refactoring — config registry, rbac configurable, next-theme generic, seo-config injectable
-39. [x] i18n compliance — ~275 strings translated across all apps
-40. [x] HTML→Tag migration — all 8 apps clean, 0 violations
-41. [x] Hardcoded colors→CSS vars — ~200+ fixed, ~20 legitimate remaining
-42. [x] Deduplicate components — 8 components moved to packages/ui
-43. [x] OAuth token encryption — AES-256-GCM in ezauth
-44. [x] Localhost URLs — 3 files fixed, using @ezstart/config
-45. [x] Reduce `any` types — 25 files fixed, all remaining `any` justified with eslint-disable
-46. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
-47. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
-48. [x] HIGH: EZPay — auth middleware sur GET routes sensibles
-49. [x] HIGH: login-cookie rate limiting — createStrictRateLimiter ajouté
-50. [x] HIGH: Debug logging auth codes — remplacé par logger.debug()
-51. [x] MEDIUM: Zod validation sur gacha-analyzer routes (get-scans, feedback, report, reanalyze, config)
-52. [x] Logger — filtre NODE_ENV ajouté (debug/info silencieux en prod)
-53. [x] Remplacer console.log par logger.debug() dans auth-sdk (7 logs clés restaurés)
-54. [x] CSRF protection — middleware created in express-core, applied to ezauth cookie routes
-55. [x] Json type adoption — Json type created in express-core, used where applicable (merged with #45)
-56. [x] Large component splitting — 10 components split (data-page, BaguaPreviewModal, capture-preview, invoice-modal, green-pulse landing, rune-card-compact, scan/page, bench/page, fengshui/page, quote-modal)
-57. [x] Dynamic import recharts — 6 components import recharts statically
-58. [x] Aria-labels — icon-only buttons across gacha-analyzer, fengshui now have aria-label
-
-### Cross-app audit 2026-03-31
-
-#### P0 — Security critical
-
-59. [x] Auth missing on write endpoints — green-pulse (9 routes), ezpay (3), ezstart (2) secured
-60. [x] App enum desynchronized — gacha-analyzer + ezpay added to app list
-61. [x] RBAC legacy migration — createRoleMiddleware in express-core, requireAdmin on ezauth admin
-62. [x] Rate limiting on public endpoints — /token, /waitlist/add, /waitlist/check-status
-
-#### P1 — Code quality cross-app
-
-63. [x] i18n enforcement — check:i18n script created
-64. [x] Mongoose typing — eliminate @ts-expect-error across APIs via express-core model factory
-65. [x] Zod schema deduplication — verified no actual duplication across SDKs
-66. [x] Currency formatter — formatCurrency + getCurrencySymbol in packages/ui
-67. [x] JWT payload builder — extracted helper in ezauth
-
-#### P2 — New packages / improvements
-
-68. [x] @ezstart/email-service — ResendProvider + ConsoleProvider + templates, provider-agnostic pattern
-69. [x] Socket.IO event constants — fixed mismatch in ezstart
-70. [x] Webhook validation middleware — createWebhookVerifier in express-core
-71. [x] Stripe key safety guard — fail fast if sk_live in dev or sk_test in prod
-72. [x] Centralize app themes — all 8 apps have defined themes in config
-
-#### P2.5 — Infra (2026-04-05)
-
-77. [x] SSR auth middleware — `createProtectedMiddleware()` dans auth-sdk/middleware. Config déclarative (publicPaths, protectedPaths, adminPaths+roles). (already done)
-
-#### P2.6 — Layout & Design System (2026-04-05)
-
-78. [x] Fix Header backdrop-blur à scroll y=0 — backdrop-blur déplacé dans condition !isTop
-79. [x] headerOverlay prop — ClientLayout overlay/block mode + ezstart home wired
-80. [x] Unified variant taxonomy — tokens + variants centralisés dans design-system, 30 composants migrés, 13 tag files supprimés
-81. [x] Density variant — compact/default/relaxed ajouté sur tous les container tags
-82. [ ] Theme presets — Presets déclaratifs par app (dashboard=compact, landing=relaxed)
-83. [ ] Theme CSS scoping — Remplacer `:root` par `[data-app="xxx"]` dans chaque theme CSS pour éviter les conflits de variables (--brand etc.) quand tous les thèmes sont chargés simultanément. Ajouter `data-app` sur `<body>` de chaque app.
-84. [x] Component reorganization — 56 fichiers réorganisés en 8 sous-dossiers catégorisés
-85. [ ] SSR Layout split — Séparer ClientLayout en RSC + client islands
-
-#### P2.7 — EZStart Hub (2026-04-06)
-
-85. [x] Rename /ez-libs → /packages — Documentation publique des packages (@ezstart/ui, auth-sdk, etc.) (already done)
-86. [x] Rename /ez-features → /tools — Micro-apps standalone (QR, CV, business card) avec free/pro (already done)
-87. [x] Admin hub centralisé — Monitoring + EZAuth + EZPay + AI tabs dans /admin. (already done)
-88. [ ] Landing page pro — Refonte home avec sections portfolio, tools, packages, apps
-
-#### P2.8 — SDK Admin Dashboards (2026-04-06)
-
-90. [x] auth-sdk: `<AuthAdminDashboard>` — extrait dans auth-sdk/client. Toutes les apps importent le même composant. (done 2026-04-09)
-91. [x] pay-sdk: `<PayAdminDashboard>` — extrait dans pay-sdk/client. (done 2026-04-09)
-92. [x] ai-sdk: `<AIAdminDashboard>` — Prompts CRUD, providers toggle, conversations list, showAppFilter. (done 2026-04-09)
-93. [ ] monitoring: Extraire `<MonitoringDashboard>` — déplacer SystemOverview + hooks depuis ezstart/monitoring vers un package ou export réutilisable.
-94. [x] ezstart admin: Tabs importent `<AuthAdminDashboard>`, `<PayAdminDashboard>`, `<AIAdminDashboard>`, `<MonitoringTab>` depuis les SDKs. (done 2026-04-09)
-
-#### P2.9 — AI SDK Enhancement (2026-04-06)
-
-95. [x] ai-sdk cascade/fallback — Provider cascade par priorité dans le chat. Si provider A échoue, fallback auto sur B. Implémenté dans sendMessage.ts. (done 2026-04-09)
-96. [x] ai-sdk usage tracking — AIUsage model + trackAIUsage service (fire-and-forget) + wired dans sendMessage.ts. (done 2026-04-09)
-97. [ ] ai-sdk vision support — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
-98. [x] ai-sdk `<AILayout>` — Composant client agnostique : wrappe Thread UI + logique AI (providers, cascade, streaming, conversations). Hook `useAIThread()` orchestre tout. Testé via /testchat dans GP. (done 2026-04-09)
-99. [ ] chat-sdk `<ChatLayout>` (futur) — Même pattern: wrappe Thread de packages/ui + logique chat temps réel (Socket.IO, rooms, typing indicators, presence, P2P). Les deux SDKs partagent le même design system via packages/ui.
-100.  [ ] ai-sdk: Fusionné avec #92 — AIAdminDashboard inclut le tab usage.
-101.  [x] packages/ui: `<ImageCropper>` — composant réutilisable dans packages/ui/src/components/media/image-cropper.tsx, exporté dans index. (already done)
-
-#### P2.10 — AI Centralization (2026-04-08)
-
-102. [x] Centraliser AI dans ezstart-api — Routes chat/conversations/providers/prompts migrées de green-pulse → ezstart API. `appName` scope tout. Auth + rate limiting + ownership checks. (done 2026-04-09)
-103. [x] ai-sdk routes agnostiques — `/api/ai/chat`, `/api/ai/conversations`, `/api/ai/providers`, `/api/ai/prompts`, `/api/ai/app-providers`, `/api/ai/global-providers`. Chaque route scopée par `appName`. (done 2026-04-09)
-104. [x] AI admin dashboard (`<AIAdminDashboard>`) — Composant SDK client. Prompts CRUD, providers toggle, conversations list. SuperAdmin (sans appName) voit tout. i18n FR+EN. Pagination. (done 2026-04-09)
-105. [x] ai-sdk prompt management — Modèle `AISystemPrompt` avec multi-provider assignment, config overrides. CRUD API + UI + seed defaults. Chat utilise prompt DB. (done 2026-04-09)
-106. [x] ai-sdk provider registry par app — Modèle `AppProvider` + `GlobalProviderAccess`. EZStart autorise, apps activent. Cascade/fallback dans le chat. (done 2026-04-09)
-107. [ ] Dynamic plans — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
-108. [ ] Theme CSS scoping — `[data-app]` selector au lieu de `:root` pour éviter conflits `--brand` quand tous les thèmes sont chargés simultanément.
-109. [x] Chat UX responsive — Sidebar toggle gauche, ConversationItem actions mobile, safe-area composer, welcome offset, padding symétrique. (done 2026-04-09)
-110. [x] Green-pulse chat locale — L'IA répond dans la langue de la locale (localeMap dans sendMessage.ts). (done 2026-04-09)
-111. [x] DEPLOY: Railway ezauth-api — Ajouter `--filter @ezstart/fetch-client --filter @ezstart/email-service` au build command. Redeploy. (done 2026-04-08)
-112. [x] Waitlist system removed — Entièrement supprimé (ezauth API/web, auth-sdk, green-pulse). QuickSignup le remplace. (done 2026-04-09)
-113. [x] QR Code persistence — Save en DB si connecté, page "Mes QR codes", admin voit tout. Model + CRUD + UI. (done 2026-04-09)
-114. [x] EZAuth/EZPay/EZStart admin dashboards — appName optionnel, superadmin voit tout avec colonne Apps. i18n variables fixées. (done 2026-04-09)
-115. [x] EZPay fixes — populateUserFromToken sur purchase/subscribe, validation fallback, any→unknown, rate limiting stats. (done 2026-04-09)
-116. [x] AI security audit — Auth sur chat, IDOR conversations, role enforcement prompts, ObjectId validation, @ts-expect-error removed, OpenAI model→gpt-4o. (done 2026-04-09)
-
-#### P2.11 — AI Platform Enhancements (post-MVP)
-
-117. [x] Usage tracking par app — AIUsage model + service créés. Tracking fire-and-forget dans sendMessage. (done 2026-04-09). Reste: dashboard stats UI dans AIAdminDashboard.
-118. [ ] Alertes quota — Notification (email/toast) quand une app atteint 80% de son quota tokens/coût. Bloquer à 100%.
-119. [ ] API key rotation — Pouvoir changer une clé API provider sans downtime. Hot-reload dans ProviderRegistry.
-120. [ ] Provider health check — Ping providers périodiquement, désactiver auto si down, réactiver quand up. Status dans dashboard.
-121. [ ] Rate limiting per-app — Limiter le nombre de requêtes AI par app (pas juste global IP). Basé sur AppProvider config.
-122. [ ] ai-sdk streaming — Exposer SSE streaming dans le chat endpoint. OpenAIProvider a déjà handleStreaming(). Route + frontend.
-123. [ ] ai-sdk vision support — Support images dans GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de @google/generative-ai direct.
-
-#### P2.12 — AI Intelligent Routing (post-MVP)
-
-124. [ ] Smart provider routing — Router automatiquement chaque message vers le provider le plus adapté dans une même conversation (ex: factuel→gemini, complexe→gpt-4o, vision→gemini). Critères: type de prompt, mots-clés, coût, complexité. User voit une conversation fluide.
-125. [ ] Provider model override dynamique — AppProvider.config.model doit être passé au ProviderRegistry au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
-126. [x] OpenAI billing setup — Crédits rechargés ($5), cascade testée E2E (gemini→openai→gemini). (done 2026-04-09)
-127. [ ] Anthropic provider — Implémenter AnthropicProvider dans ai-sdk (Claude API). Actuellement `throw new Error('not yet implemented')`.
-128. [x] GlobalProviderAccess enforcement — Chat endpoint vérifie isAppAuthorizedForProvider avant envoi. Explicit providerId → 403 si non autorisé. Cascade filtre les providers non autorisés. (done 2026-04-09). Reste: UI app masquer providers non-autorisés.
-129. [ ] Provider status/health dans l'UI — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
-130. [ ] utm_source tracking — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
-131. [x] Design System Inspector MVP — /packages/ui/inspector avec registry 210 composants, chaîne dynamique [...chain], contrôles dynamiques, preview avec niveaux atomiques, token flow diagnostic (rouge/vert/orange), hierarchy explorer, token lexicon. Per-component children detection dans le generator. (done 2026-04-10)
-132. [x] QuickSignUpForm density — DesignTokenProvider density wrapper pour propagation auto aux Card/CardContent/Input enfants. (done 2026-04-10)
-133. [x] Hide provider selector for non-admin users — AISelector visible uniquement pour admin/superadmin via useAuth(). (done 2026-04-10)
-134. [x] packages/ui atomic levels — Re-exports par niveau: base/ (46 primitifs), composed/ (33 composés), complex/ (10 complexes). Subpath exports dans package.json. Fichiers non déplacés, imports existants inchangés. (done 2026-04-09)
-
-#### P2.13 — Design Token System Refactoring (2026-04-10)
-
-135. [x] Registry generator refactor — Tag alias detection (38 aliases), token classification (standard/radix/candidate/specific), `deprecatedBy` field, multi-line export bug fix. 227 components registered. (done 2026-04-10)
-136. [x] Tag aliases expansion — 18 new aliases (Figure, Blockquote, Code, Pre, Fieldset, Legend, Details, Summary, Em, Small, Mark, Dl, Dt, Dd, Figcaption, Hr, Time, Address). CVA variants + types + exports. (done 2026-04-10)
-137. [x] DesignTokenProvider on containers — Modal (size), Dialog (radius), Sheet (size+density), AlertDialog (density), Accordion (density+size), Tabs (size+density). 6 new providers. (done 2026-04-10)
-138. [x] Context migration — Accordion, Tabs, Label, Checkbox now read inherited tokens via useDesignTokens() instead of hardcoded values. Fallback to previous defaults. (done 2026-04-10)
-139. [x] DataTable density deprecation — `density` prop added (standard token), `tableSize` marked @deprecated. Maps `relaxed`→`comfortable`. 100% backwards compatible. (done 2026-04-10)
-140. [x] Migrate deprecated tokens — Spinner textSize @deprecated, SkeletonText spacing→density, CommandGroup headingVariant→intent, CTA bgColor→intent, Hero alignment→align. FeatureGrid already uses standard `variant`. (done 2026-04-10)
-141. [x] Unify size scale — `xs` and `xl` added to Button/Badge. `default` alias for `md` in Spinner/Modal/FloatingPanel. All 5 standard values supported everywhere. Old values (@deprecated) still work. (done 2026-04-10)
-142. [x] Add providers to remaining organisms — Carousel (size+density), PasswordInput (size), Form (FormTokens wrapper). (done 2026-04-10)
-143. [x] Inspector deprecatedBy display — Strikethrough + `→ replacement` on main page, chain details, and token lexicon. Warning badge on deprecated token cards. (done 2026-04-10)
-144. [x] Theme presets — `preset` prop on DesignTokenProvider. 5 presets: dashboard, landing, form, data, admin. Priority: explicit > preset > parent. (done 2026-04-10)
-145. [x] Theme CSS scoping — `[data-app="xxx"]` selector on all 6 theme CSS files. `data-app` attribute on `<html>` in all 8 apps. globals.css unscoped (shared defaults). (done 2026-04-10)
-146. [x] FengShui /health fix — `/health` excluded from middleware matcher (no backend). (done 2026-04-10)
-
-#### P2.14 — Monitoring Enhancements (2026-04-11)
-
-147. [ ] Recharts graphs on /monitoring/health — latency p95 trending (7d/30d), uptime % timeline, error rate per service. Data already in MongoDB (HealthCheck model with responseTime + status + timestamp, TTL 30d). Use existing Recharts from packages/ui.
-148. [ ] Monitoring app-scoping (future) — Currently superadmin-only in EZStart. Each app could have `/admin/monitoring` filtered by appName. Requires: API query param `?appName=ezbill`, SDK component `<MonitoringDashboard appName="ezbill" />`. Low priority — only 1 superadmin user today.
-149. [ ] Monitoring package extraction (future) — Extract SystemOverview + hooks from ezstart/monitoring into `packages/monitoring/client` (UI) + keep `packages/monitoring` (types/collectors). Requires abstracting hardcoded project list. Blocked by: app-scoping design decision.
-150. [ ] CI audit trending (future) — Run check:dead-code, check:size, check:i18n in GitHub Actions. Parse results → store in MongoDB. Dashboard shows score evolution over time. Currently audits.json is static (score 96.6/100). Low priority while score is high.
-151. [ ] Auth callback error display — AuthCallback shows `[object Object]` instead of readable error message (e.g. "Rate limited, try again later"). Fix error extraction in auth-sdk callback handler.
-152. [ ] **`@ezstart/workspace-sdk`** (future) — multi-tenancy primitive: Workspace + Project + Members + Roles, factory agnostique suivant `.claude/rules/standard.md`. Utilisé par greenpulse-premium / ezbill / ezpay quand le besoin se concrétise. Le code green-pulse précédent (workspaces/projects/forms) a été supprimé en commit `7f6aa9db` pour repartir propre quand Premium lancera.
-
-#### P3 — DevOps / Testing
-
-73. [x] Test coverage baseline — setup: @ezstart/test-utils package exists with vitest config factory, MongoDB memory server, seed helpers. Per-app test writing tracked in individual app backlogs.
-74. [x] Dead code detector — check:dead-code script created
-75. [x] Component size limit — check:size script created
-76. [x] Pagination response consistency — all list endpoints return { data, meta: { total, limit, offset } }
+- [ ] **AI vision support** — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de `@google/generative-ai` direct.
+- [ ] **chat-sdk `<ChatLayout>` (futur)** — Même pattern que AILayout : wrappe Thread de packages/ui + logique chat temps réel (Socket.IO, rooms, typing indicators, presence, P2P). Les deux SDKs partagent le même design system via packages/ui.
+- [ ] **Dynamic plans** — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
+- [ ] **Alertes quota** — Notification (email/toast) quand une app atteint 80% de son quota tokens/coût. Bloquer à 100%.
+- [ ] **API key rotation** — Pouvoir changer une clé API provider sans downtime. Hot-reload dans ProviderRegistry.
+- [ ] **Provider health check** — Ping providers périodiquement, désactiver auto si down, réactiver quand up. Status dans dashboard.
+- [ ] **Rate limiting per-app** — Limiter le nombre de requêtes AI par app (pas juste global IP). Basé sur `AppProvider` config.
+- [ ] **AI streaming SSE** — Exposer SSE streaming dans le chat endpoint. OpenAIProvider a déjà `handleStreaming()`. Route + frontend.
+- [ ] **Smart provider routing** — Router automatiquement chaque message vers le provider le plus adapté dans une même conversation (ex: factuel→gemini, complexe→gpt-4o, vision→gemini). Critères: type de prompt, mots-clés, coût, complexité.
+- [ ] **Provider model override dynamique** — `AppProvider.config.model` doit être passé au `ProviderRegistry` au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
+- [ ] **Anthropic provider** — Implémenter `AnthropicProvider` dans ai-sdk (Claude API). Actuellement `throw new Error('not yet implemented')`.
+- [ ] **Provider status/health dans l'UI** — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
+- [ ] **utm_source tracking** — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
 
 ---
 
-## 📱 claude-mobile
+## Apps
 
-**Status :** `done` | **Dernière mise à jour :** 2026-03-22
+### ezstart (api 6100 / web 6101)
 
-### Résolution
+Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin panel + Feature demos (CV, QR, Business Card) + Libraries showcase. **Status:** maintained.
 
-L'utilisateur a un abonnement Anthropic Max plan qui inclut claude.ai/code.
-Flow : téléphone → claude.ai/code → GitHub → commit/push → Vercel auto-deploy.
-Pas besoin de VPS ni d'app custom.
+#### P1 — Bugs & code quality
+
+- [ ] **Hardcoded strings monitoring pages** — i18n violation. Remplacer par `t()` dans `errors/page.tsx`, `audits/page.tsx`, `page.tsx`, `TrendingGraph.tsx`, `ErrorsFeed.tsx` (severity labels, timeAgo strings, "Failed to load monitoring data", "Next update in:", score labels, no-audits message).
+
+#### P2 — API improvements
+
+- [ ] **Complete activity logs** — `activity/list.ts` a 3 TODOs (lignes 69-71) : fetch deployment events (Railway/Vercel webhooks), health changes from MongoDB, audit updates. Seul Sentry errors sont fetched.
+- [ ] **Remove mock history utility or guard it** — `api/src/utils/mockHistory.ts` pas importé en prod mais shippé. À supprimer ou test-only.
+
+#### P2 — Monitoring UX
+
+- [ ] **Uptime history page** — Pas de page dédiée pour l'historique uptime. `TrendingGraph` existe mais pas accessible depuis nav. Besoin `/monitoring/history` ou `/monitoring/health/:serviceId` avec time range configurable (24h, 7d, 30d).
+- [ ] **Fix `minutes`/`seconds` countdown unused in overview** — `monitoring/page.tsx` calcule mais n'affiche pas. "Next update in" manque sur l'overview.
+- [ ] **Responsive improvements** — `MetricsOverview` hidden on mobile (considérer version compacte). `TrendingGraph` axis labels peuvent overflow petits écrans. Quick Actions : switch `router.push` → `Link` pour prefetching.
+- [ ] **Dashboard navigation** — Pas de breadcrumbs ou sub-nav. Ajouter tab bar ou breadcrumb pour monitoring/health/errors/audits.
+- [ ] **Auto-refresh indicator** — Countdown timer doit afficher "Refreshing..." quand `isFetching=true`. Actuellement `isFetching` destructuré mais unused dans health/audits pages.
+
+#### P3 — Feature demos
+
+- [ ] **CV Generator — missing sections** — Form n'a que personal info + summary. `CVData` définit experience/education/skills/languages/certifications mais pas de sections form.
+- [ ] **CV Generator — PDF export** — `jspdf` et `html2canvas` installés mais aucun bouton download.
+- [ ] **QR Code — download button** — Canvas rendu mais aucun download (PNG/SVG).
+- [ ] **Business Card — download/print** — Idem, pas d'export. Feature section mentionne "Print Ready" mais aucune action.
+- [ ] **Feature demos access control inconsistency** — QR Code = `RequireAuth` seul. CV Generator et Business Card = `RequireAuth` + `RequireRole("superadmin")`. Choisir une ligne cohérente.
+
+#### P3 — Feature gaps
+
+- [ ] **Alert system activation** — Email + Slack alerting est codé mais nécessite ENV vars (`ALERT_EMAIL_ENABLED`, `ALERT_SLACK_ENABLED`, SMTP, Slack webhook). Ajouter `.env.example` + documentation + toggle admin UI ou test endpoint.
+- [ ] **Deployment status integration** — Routes `/api/deployments` utilisent `child_process.exec('git log')` qui ne fonctionne que sur repo cloné. Intégrer Railway/Vercel API pour last deploy time, build status, deploy URL.
+- [ ] **Real-time monitoring improvements** — Socket.IO n'émet que sur health check results. Pourrait émettre sur error threshold breached, deployment detected. Considérer SSE. Ajouter indicateur "live" quand socket connected.
+- [ ] **Performance dashboard page** — Endpoints existent (`/api/performance/:serviceId`, `/api/performance/:serviceId/endpoints`) avec p50/p95/p99 mais pas de page frontend. Ajouter `/monitoring/performance`.
+- [ ] **More feature demos** — Color palette generator, Markdown to PDF, Image compressor, Password generator, JSON formatter.
+- [ ] **Admin panel — CRM / CMS / UX overhaul** (priorité haute) — EZStart admin doit devenir le hub central (CRM + CMS + monitoring).
+  - **CRM — Gestion utilisateurs :** User creation from admin panel, deletion/deactivation (soft delete + motif), bulk operations (assign role, delete, export), server-side search + filters (email, username, role, app, date range), user detail page (profil, sessions, payments, apps), audit log admin actions, export CSV/JSON, stats dashboard (users actifs, inscriptions/jour, retention).
+  - **CMS — Gestion contenu :** CRUD projets landing page (order, visibility), feature demos (enable/disable, access), textes/traductions (edit inline, preview), upload assets, blog/announcements (v2).
+  - **UX Admin :** Sidebar nav (Dashboard, Users, Content, Monitoring, Settings), breadcrumbs, dark/light cohérent, mobile responsive, real-time notifications, quick actions (ban user, trigger health check, view logs).
+  - **Bloqué par :** RBAC propre (done via RBAC-1 EZAuth) — peut démarrer.
+
+#### P3 — Testing & DX
+
+- [ ] **API documentation** — Certaines routes utilisent `createRouterWithDoc` + OpenAPI (health, audits), d'autres non (activity, history, performance, projects, trigger, scheduler). Harmoniser.
+- [ ] **Duplicate HealthChecker instances** — Plusieurs routes créent leur propre `new HealthChecker()` (`health/list.ts`, `health/get-by-service.ts`, `health/history.ts`, `trigger.ts`). Chacune a sa propre in-memory history. Partager un singleton ou se baser uniquement sur MongoDB.
 
 ---
 
-<!-- Template pour nouveau projet :
+### ezauth (api 6110 / web 6111)
 
-## 🏷️ nom-du-projet
+SSO authentication service pour tout le monorepo. **Status:** maintained.
 
-**Status :** `planned` | `in-progress` | `blocked` | `done` | **Priorité :** haute/moyenne/basse | **Dernière mise à jour :** YYYY-MM-DD
+Tout le backlog audit 2026-03-29 (P0 security, P1 features, P2 code quality, P3 UX, P4 API) est terminé. Pas d'item actif connu à ce jour. Voir `BACKLOG-HISTORY.md` pour l'historique complet.
 
-### Objectif
-[Description courte]
+---
 
-### Architecture décidée
-[Structure fichiers]
+### ezbill (api 6120 / web 6121)
 
-### Décisions prises
-[Ce qui a été validé]
+Invoicing & billing pour les SME. **Status:** in-progress, priorité haute.
 
-### Étapes
-1. [ ] ...
+#### P0 — Before launch
 
-### Notes
-[Contexte important]
+- [ ] **i18n: Delete quote dialog hardcoded English** — "Delete Quote" et description.
+- [ ] **Security: Add per-user rate limiting on `/api/ai/extract-invoice-data`** — AI costs money.
+- [ ] **Feature: Stripe/PayPal checkout integration** — Generate payment links pour invoices.
+- [ ] **Feature: Email sending** — Envoyer invoices/quotes par email (Resend ou `@ezstart/email-service`).
+- [ ] **EB-060: Migrer exchange rates vers Frankfurter (zero-key) + extraire SDK `@ezstart/exchange-rate`** — `apps/ezbill/api/src/utils/fetch-exchange-rate.ts` appelle `api.exchangerate.host` qui requiert maintenant un `access_key`. Frankfurter (`api.frankfurter.app`) est free/no-key/illimité, data ECB officielle. Une fois migré, extraire en package shared consumable par ezpay + ezstart (multi-currency display). Var `EXCHANGE_RATE_API_KEY` à supprimer de `IGNORED_VARS` après migration.
 
--->
+#### P1 — Essential for pro
+
+- [ ] **Feature: Client portal** — Vue invoice non-authentifiée + payment flow via public link.
+- [ ] **Feature: Onboarding wizard** — Setup guidé (company → payment method → first invoice).
+- [ ] **Fix: Quote modal form non reset** — State persiste entre opens (contrairement à invoice-modal qui a useEffect reset).
+- [ ] **Fix: No confirmation dialog for quote accept/decline** — Clic Accept/Decline fire API call immédiatement sans confirmation.
+- [ ] **Fix: Share modal "Copy Link" copies blob URL** — Seulement valide dans tab courant. Useless pour partager.
+- [ ] **UX: Wire client search input on dashboard** — Skeleton existe mais pas hooked.
+- [ ] **UX: No invoice delete action** — Seulement via settings trash. QuoteCard a delete button mais pas InvoiceCard.
+- [ ] **UX: Date range filtering on client dashboard.**
+- [ ] **No overdue invoice detection** — Pas d'indicateur visuel pour past due date.
+- [ ] **PDF preview only for invoices/receipts** — Quotes montrent "click refresh" qui ne fait rien d'utile.
+- [ ] **v2 landing page placeholder** — "Dashboard Screenshot" au lieu d'image réelle.
+- [ ] **v2 landing page hardcoded strings** — "BEST VALUE", "Challenge", "Solution" non i18n.
+- [ ] **Feature: CSV/Excel export** — Pour invoices et clients.
+- [ ] **Code: Delete dead components** — `status-change-modal`, `login-section`, v1 cards, `CombinedRevenueChart`, `useUserStore`, `cleanup-old-auth`.
+- [ ] **Admin dashboard: DataTable-based** — Replicate ezauth pattern, puis add to ezstart admin hub.
+- [ ] **`billing-permissions.ts` dupliqué** — Entre `web/src/utils/` et `api/src/utils/`. Risque drift (web a `canDecline` alias, API non). Extraire en shared package ou `@ezbill/types`.
+
+#### P2 — Professional polish
+
+- [ ] **Remove 5 remaining `any` types** — `extractItems(response: any)` in settings, `doc?: any` + `openPreview(..., doc: any)` in client page, `cleanData: any` in payment-method-modal, `updateLineItem(... value: any)` in quote-modal.
+- [ ] **Refactor quote-modal.tsx (542-647 lines)** — Extract FormFields, ItemsTable, Summary.
+- [ ] **Client dashboard page (627 lines) too large** — Extract invoice/quote/receipt sections.
+- [ ] **Payment method modal (514 lines) split** — Extract bank transfer, crypto fields.
+- [ ] **Consolidate `useInvoicePDF.ts` and `use-generate-pdf.tsx`** — Into one hook.
+- [ ] **Invoice modal form data init duplicated** — Same 15-field object built twice (lines 59-80 and 90-113).
+- [ ] **Legacy v1 card components unused** — `ClientCard.tsx`, `CompanyCard.tsx`, `PaymentMethodCard.tsx` — dashboard utilise `_v2` versions.
+- [ ] **`protected-version-switch.tsx` + `v2/page.tsx`** — Suggèrent version toggle. Si v2 est default, remove v1 remnants.
+- [ ] **UX: Invoice number format customization** — Ex: FACTURE-2025-001.
+- [ ] **UX: Multi-currency revenue aggregation in charts.**
+- [ ] **UX: Bulk actions** — Select multiple invoices for delete/export/status change.
+- [ ] **UX: Empty state illustrations.**
+- [ ] **UX: Mobile action button overflow fix.**
+- [ ] **API `findWithQuery` limit=20 non utilisé** — Web fetche TOUT en une fois (no pagination in billing-provider). Pagination effective inutilisée.
+
+#### P3 — Nice to have
+
+- [ ] **Feature: Recurring invoices with cron scheduling.**
+- [ ] **Feature: Invoice templates (save/load).**
+- [ ] **Feature: Analytics dashboard (MRR/ARR).**
+- [ ] **Feature: Partial payments tracking.**
+- [ ] **Feature: Credit notes / refund tracking.**
+- [ ] **Feature: Tax profiles (save common tax rates).**
+- [ ] **Feature: Keyboard shortcuts.**
+- [ ] **Feature: Payment reminders** — Automated email quand invoice approche ou dépasse due date.
+- [ ] **Feature: Quote expiration reminders.**
+- [ ] **Feature: Duplicate invoice/quote** — One-click.
+- [ ] **Feature: Multi-user/team** — Invite team members per company.
+- [ ] **Feature: Dashboard date range picker.**
+- [ ] **Feature: Client statements** — All transactions per client.
+- [ ] **Feature: Expense tracking** — Revenue + expenses pour profit/loss view.
+- [ ] **Feature: Document attachments** — Contracts, receipts sur invoices/quotes.
+- [ ] **No animations/transitions between group-by modes** (month/week/status).
+- [ ] **Toast keys pattern** — create/created/createFailed séparés, pourrait utiliser interpolation.
+- [ ] **`create-test-user.ts` has ~30 console.log** — Déplacer en `scripts/` ou utiliser logger.
+- [ ] **No character limit on notes/terms/description** — Ni client, ni server.
+- [ ] **Testing: E2E invoice/quote/receipt flows.**
+- [ ] **Testing: API endpoint tests (target 60%+ coverage).**
+- [ ] **Testing: Service layer (markAsPaid, convertQuoteToInvoice).**
+- [ ] **Testing: Web component tests** (modals, forms, billing permissions).
+- [ ] **Testing: Exchange rate cron job.**
+- [ ] **Testing: Document number generation race conditions.**
+
+---
+
+### ezpay (api 6130 / web 6131)
+
+Payment system centralisé (donations, achats, abonnements, factures via Stripe). **Status:** maintained.
+
+#### Future — Features
+
+- [ ] **3.3 Landing page polish** — Page actuelle est une page de doc SDK, pas adaptée pour utilisateurs finaux. Vraie landing + CTA vers démos. Code snippets stylisés (`<pre>`/`<code>`).
+- [ ] **4.6 Idempotency-Key header** — Routes create (donate, purchase, subscribe) ne gèrent pas l'idempotence. Retry → 2e payment record (unique constraint paymentId empêche les doublons Stripe mais pas métier).
+- [ ] **5.1 Web `/dashboard` page** — Liste paginée "mes paiements" pour user connecté (API + SDK déjà fait).
+- [ ] **5.2 EZBill invoice integration** — Model Payment supporte `type: 'invoice'` avec metadata invoiceId/invoiceNumber. Aucune route API invoice. Créer routes + intégration EZBill.
+- [ ] **5.4 Email receipts** — Option 1 : `receipt_email` dans Stripe checkout. Option 2 : email custom via email-service après webhook `checkout.session.completed`.
+- [ ] **5.5 Payment analytics dashboard** — Revenue par période, paiements par type/status, graphiques évolution, top projets par revenue.
+- [ ] **6.1 `dist/` committed in repo** — `api/dist/` versionné. Supprimer du repo + ajouter `.gitignore`.
+- [ ] **P-ADMIN: Filtrage par app** — Chaque app (greenpulse, fengshui) voit ses propres produits dans admin.
+- [ ] **P-MARKETPLACE: CartProvider** — Panier multi-produits pour les apps.
+- [ ] **P-AI: AI Product Descriptions** — Route API EZPay utilisant `@ezstart/ai-sdk` pour générer descriptions produits. UI édit/valider. Multi-langue FR/EN automatique.
+- [ ] **EP-002: Clean stale pending payments** — Auto-archive/delete "pending" payments après 24h (abandoned checkouts).
+- [ ] **EP-005: SDK Payment Cards** — SubscriptionCard, DonationCard, PurchaseCard (auto-fetch plan/product data, checkout modal embedded). Apps passent `appName` + `planId`. Variants : default/featured/compact. Props: appName, planId/productId, className, variant, promoCode, onSuccess, onCancel, texts. **Priorité HIGH.**
+- [ ] **EP-006: Customer Portal (Stripe built-in)** — Portal hosted Stripe pour manage subscriptions, payment methods, invoices, cancel. API `POST /api/portal/session` → URL. SDK `useCustomerPortal()` ou `<ManageSubscriptionButton>`. Configurer portal features dans Stripe Dashboard.
+- [ ] **EP-007: Upgrade/Downgrade plans** — `PATCH /api/subscriptions/:id/change-plan` → `stripe.subscriptions.update()` new price. Proration auto. SDK `<ChangePlanButton currentPlan="pro" targetPlan="business" />`.
+- [ ] **EP-008: Trial periods** — Plan model `trialDays?: number`. Checkout passes `subscription_data.trial_period_days`. `useSubscriptionStatus()` a déjà `isTrialing`.
+- [ ] **EP-009: Invoice management** — `GET /api/invoices` (list from Stripe API, non stockées en DB), `GET /api/invoices/:id/pdf` (redirect Stripe URL). SDK `<InvoiceHistory>`. Admin tab in PayAdminDashboard.
+- [ ] **EP-010: Currency conversion in dashboard stats** — Save exchange rates à checkout time. Dashboard stats en currency base choisie admin.
+- [ ] **EP-011: Promo code targeting** — Plan-specific, type-specific (subscription only), product-specific. Currently universal.
+- [ ] **EP-012: Audit ALL DELETE endpoints for soft delete** — All DELETE cross-monorepo doit utiliser soft delete (`deletedAt`). Hard delete only for superadmin + confirmation. Check ezauth users, ezpay payments, green-pulse data. **Priorité HIGH.**
+
+---
+
+### green-pulse (api 6160 / web 6161)
+
+AI-powered ESG & energy resilience platform. Chat assistant (GP.A), workspace/project, blockchain credentials, admin panel. Target: SMEs Southeast Asia (2026 energy crisis, Vietnam ETS, EU CBAM). **Status:** active.
+
+#### P0 — Earth Day Conference (17 avril 2026)
+
+Deadline dur : conférence HCMUSTA HCMC. Audience: SME vietnamiens + ESG experts. Présence Amber via slide QR code + roll-up banner.
+
+- [ ] **GP-202: GP.A chat welcome message update** — Deadline 14 avril. Welcome + suggestions adaptés conference attendees (énergie, green credit, EU exports). Strings VN/EN (hardcoded acceptable pour deadline, i18n propre = Sprint 3).
+- [ ] **GP-203: Conference slide design** — Deadline 15 avril. 16:9 slide avec logo + photo Amber + QR code (→ `/earthday?utm_source=earthday&utm_medium=qrcode`) + headline VN/EN + credentials Amber + Earth Day co-branding. PowerPoint + PNG export.
+- [ ] **GP-204: Conference banner/roll-up design** — Deadline 14 avril (print lead time). Vertical 85x200cm ou A2. Print-ready PDF CMYK 300dpi bleed. Confirmer printer HCMC same-day/next-day.
+- [ ] **GP-205: Lead tracking & follow-up system (post-event)** — Welcome email J+1. Week-1 check-in. Admin dashboard Earth Day leads. Tag `source: earthday2026`. **Bloqué par :** GP-200, GP-201.
+- [ ] **GP-200 follow-up checklist** — Landing page form : stocker promoCode `EARTHDAY2026` sur user profile, utm_source tracking (cf. utm_source tracking cross-cutting).
+
+#### P0 — Security
+
+- [ ] **GP-003: Form config CRUD incomplete** — Create/list/getById seulement. Missing PUT/PATCH + DELETE. Admin ne peut pas edit/remove form templates. Files: `api/src/routes/forms/configs/`.
+- [ ] **GP-004: Prompts admin panel publicly accessible** — `/api/prompts` CRUD (create/update/delete system prompts) sans auth. Admin panel `/(views)/admin` besoin server-side role check. Files: `api/src/routes/prompts/index.ts`, `web/src/app/[locale]/(views)/admin/`.
+- [ ] **GP-005: Auth missing on form config CRUD routes** — Create/list/getById sans auth middleware. User non-authenticated peut créer/list form templates. Files: `api/src/routes/forms/configs/`.
+- [ ] **GP-006: Remove waitlist/RequireRole** — Open chat to all authenticated users. Remove `RequireRole` wrapper AND `BetaAccessRequest` component. Quicksignup remplace old waitlist flow. Remove dead waitlist code from `chat/page.tsx`.
+
+#### P1 — Code quality / type safety
+
+- [ ] **GP-010: 39 remaining `any` types across 16 files** — Key offenders: `useConversations.ts` (x2), `FormChatInterface.tsx` (x3), `FormFillingInterface.tsx` (x2), `FormPreview.tsx` (x2), `gemini.service.ts`, `openai.service.ts`, `formExtractor.service.ts` (x6), `types/src/api.ts` (x5), `types/src/formInstance.ts` (x7), `types/src/chat.ts` (x3), `page.tsx` (return type), `PromptConfigEditor.tsx`.
+- [ ] **GP-013: Stale/temp files at root** — `web/NEW_SECTIONS.tsx` (empty), `web/waitlist.json` (4 lines, shouldn't be in source), `api/test-openai.mjs` (41-line script, déplacer en `api/src/scripts/` ou remove).
+
+#### P1 — i18n / hardcoded strings
+
+- [ ] **GP-020: LiaThread hardcoded English** — "LIA is thinking", "Welcome to GP.A", "Your AI assistant...", "Ask GP.A anything...", inline `locale === 'fr' ?` au lieu d'i18n. Critical pour Vietnam/ASEAN (Vietnamese support = Plan 1 requirement).
+- [ ] **GP-021: FormChatInterface hardcoded English** — "Hello! I'm here to help...", "Thanks! I've extracted...", "Sorry, I had trouble...", "Still need:", "Analyzing...", "Send" button, "Type your message..." placeholder, "Form submitted - no more editing".
+- [ ] **GP-022: FormPreview hardcoded** — "Form Preview", "fields filled", "confident", "All fields filled!", "Enter {label}".
+- [ ] **GP-023: FormFillingInterface hardcoded** — "Form not found", "Submit Form", "Submitting...", `window.confirm("Submit this form?...")`.
+- [ ] **GP-024: Chat suggestions API hardcoded English** — `sendMessage.ts` et `chat-v2.ts` retournent "Tell me about your energy usage", "Review extracted data", etc.
+
+#### P1 — UX
+
+- [ ] **GP-030: Chat streaming not fully integrated** — Web config `stream: true` mais API `sendMessage.ts` retourne single JSON. `enableStreaming: true` auto-detect mais pas de réel incremental streaming.
+- [ ] **GP-031: Large components need decomposition** — `PromptsManagement.tsx` (545L), `LiaThread.tsx` (483L), `PromptConfigEditor.tsx` (424L), `chat/page.tsx` (381L, extract BetaAccessRequest), `careers/page.tsx` (370L), `features-section.tsx` (342L), `WaitlistManagement.tsx` (304L).
+- [ ] **GP-032: Mock AI model selector in LiaThread** — `MOCK_AI_MODELS` hardcoded, tous `enabled: false` sauf Gemini Flash. Vrai `AISelector` aussi rendu dans composer. 2 selectors simultanés.
+- [ ] **GP-033: Form filling responsive basic** — Split-screen chat+preview utilise `lg:` breakpoint. Fixed `h-screen` peut causer scroll issues mobile. Pas d'optimisation medium screens. Mobile-first = core requirement (60% target SMEs sont rural + phone).
+- [ ] **GP-034: `window.confirm` for form submission** — Remplacer par dialog `@ezstart/ui`.
+- [ ] **GP-035: Dark mode minimal in form components** — Seulement 2 usages `dark:` classes.
+- [ ] **GP-036: Conversation unread logic not implemented** — `listConversations.ts` retourne `unread: false` avec TODO.
+
+#### P2 — API quality
+
+- [ ] **GP-040: ESG routes no pagination** — Tous ESG endpoints lack pagination. Also no Zod validation on some routes.
+- [ ] **GP-041: ESG webhook handlers are stubs** — `handleEsgReport.ts` (134L) 4 TODOs : "Save to database", "Send email notification", "Send failure notification", "Update dashboard". Core webhook logic non implémentée.
+- [ ] **GP-042: Theme routes missing auth (deleteTheme)** — `deleteTheme` a un TODO pour auth (updateTheme fixé).
+- [ ] **GP-043: Chat v1 et v2 actives** — Redondance. Consolider en un seul. Files: `api/src/routes/chat/`, `api/src/routes/chat-v2.ts`.
+- [ ] **GP-044: Waitlist admin TODO** — `WaitlistManagement.tsx:95` : "If user exists, remove beta-tester role" — role removal on rejection non implémenté.
+- [ ] **GP-045: ESG extract_esg feature disabled** — `extract_esg` hardcoded `false` dans `chat/page.tsx`. Prompt types ('extraction') unused. Re-enabling = prerequis Plan 2 ESG data collection.
+- [ ] **GP-046: Conversations & messages pagination (frontend)** — API supporte déjà `limit/offset/meta` mais frontend load all conversations at once (max 20) et tous messages en single fetch. Besoin : (1) paginated/infinite scroll conversation list, (2) paginated message loading per conversation (oldest first, load more on scroll up). React Query avec cache keys propres.
+- [ ] **GP-047: Clean `esg.service.ts` (SaaS stub abandonné)** — Le service pointe vers `https://api.esg-saas.example` (fake URL) avec `ESG_CLIENT_ID/SECRET/BASE_URL` stubbed. L'archi Plan 2 (`GP-101 energy intensity`, `GP-102 ETS`, `GP-106 CBAM`) est **interne** — data model + UI natifs, pas de wrapper SaaS. Les vars `ESG_*` + `WEBHOOK_SIGNING_SECRET` sont en `IGNORED_VARS`. À faire au moment d'attaquer Plan 2 : supprimer `esg.service.ts`, remplacer les 5 routes `routes/esg/*` par de la logique interne, nettoyer IGNORED_VARS.
+
+#### P2 — Feature gaps
+
+- [ ] **GP-050: No form templates system** — Form configs seeded via `seedForms.ts` mais aucune UI admin pour CRUD form templates. Endpoint `createFormConfig` existe sans UI.
+- [ ] **GP-051: No form analytics/insights** — Pas de dashboard completion rates, avg fill time, field-level completion, AI extraction accuracy.
+- [ ] **GP-052: No form data export (CSV, PDF)** — Users ne peuvent pas download données submitted. Plan 2 core requirement (PDF/Word/Excel pour ESG reports).
+- [ ] **GP-053: No multi-language forms** — Form configs n'ont pas d'i18n support. Labels/descriptions/help mono-langue. Vietnamese + English minimum pour BIDV pilot.
+- [ ] **GP-054: No form versioning** — No version tracking. Editing affects all existing instances retroactively.
+- [ ] **GP-055: No collaboration features** — Workspace/project members existent dans model mais pas d'invite UI, real-time collab, activity feed, notifications.
+- [ ] **GP-056: No AI model selection per conversation** — Mock selector UI mais tous requests vont au même backend. Pas de persistence per-conversation.
+- [ ] **GP-057: No form field types beyond text/number** — `FormPreview.tsx` seulement `<Input type="text|number">`. Pas de select/dropdown, date picker, file upload, textarea, checkbox, radio, rich text. Photo upload avec tags = Plan 2 requirement pour field data (machines, equipment, energy meters).
+- [ ] **GP-058: No vocal mode implementation** — Dialog offre "Vocal Mode" mais pas de Web Speech API. Plan 1/2 requirement pour rural SME.
+- [ ] **GP-059: No ESG dashboard** — ESG routes existent (create project, push activity data, generate report) mais pas de web UI. Single biggest gap entre current state et Plan 2 MVP. **Blocker BIDV pilot.**
+- [ ] **GP-070: Admin dashboard DataTable** — Replicate ezauth pattern, add to ezstart admin hub.
+- [ ] **GP-071: Unit + integration + E2E tests** — 0 test files. Besoin unit tests services, integration tests API routes, E2E form filling + chat.
+
+#### P2 — Strategic features (April 2026 context)
+
+> Features répondant à la convergence : (1) crise énergie Hormuz, (2) Vietnam ETS Decree 29/2026, (3) NDAChain / Digital Technology Law, (4) EU CBAM effective 2026. Organisés par plan tier.
+
+- [ ] **GP-100: Energy vulnerability quick audit — Plan 1 (Awareness)** — Priorité HIGH. Diagnostic conversationnel énergie dans chat : sources, % coûts, dépendance supplier, backup options. Pas de data saved (Plan 1 stateless) mais summary + hook Plan 2. Nouveau system prompt GP.A combinant ESG + energy resilience. Remplacer suggestions générique par crisis-relevant. **Bloqué par :** GP-024, GP-020.
+- [ ] **GP-101: Energy intensity mapping module — Plan 2 (Casual)** — Priorité HIGH (BIDV pilot differentiator). Structured energy tracking : sources (grid, diesel, solar, LPG), volumes (kWh, litres, m3), unit cost, % OPEX. Intensity ratio (energy cost / revenue ou energy / unit). MoM evolution. AI reduction roadmap. Data model extends ESG Scope 1/2. New dashboard widget. **Bloqué par :** GP-059, GP-041.
+- [ ] **GP-102: ETS supply chain exposure assessment — Plan 2** — Priorité HIGH (market timing Decree 29/2026). Tool pour assess si SME est in supply chain des 110 facilities sous ETS (34 thermal, 25 steel, 51 cement). Inputs : clients/suppliers, sector, export destinations. AI cross-reference ETS-covered sectors + EU CBAM products. Outputs : risk score, affected relationships, compliance timeline, actions. Wizard 3-5 steps. **Bloqué par :** GP-057, GP-052.
+- [ ] **GP-103: Green loan eligibility scoring — Plan 2/3** — Priorité HIGH (core BIDV value prop). Auto-assess SME readiness pour SBV green credit. Éval : ESG data completeness, energy efficiency trajectory, sector alignment green taxonomy, documentation readiness. Score 0-100 + gaps + improvement roadmap + timeline. Plan 2 = self-service + PDF. Plan 3 = white-label BIDV + pre-filled loan app + calendar booking loan officers + portfolio dashboard. **Bloqué par :** GP-101, GP-059, GP-052.
+- [ ] **GP-104: Blockchain credential verification layer — Plan 3 (Pro)** — Priorité MEDIUM (V2 roadmap). Verifiable ESG credentials via blockchain hash verification. GreenPulse = digital notary (custodial wallet signe on behalf of SMEs). Hash + metadata on-chain, data reste en DB sovereign. NDAChain-compatible (W3C DID, permissioned blockchain, PoA + ZKP). Hash ESG snapshots à baseline/quarterly/annual. Credential URL verifiable (timestamped, tamper-proof). Tx fees : batch hashing. Files: `api/src/services/blockchain.service.ts`, `types/src/credential.ts`, `api/src/routes/credentials/`. **Bloqué par :** GP-059 + Plan 3 multi-site architecture.
+- [ ] **GP-105: Credential legal framework & ToS — Plan 3** — Priorité MEDIUM (parallel track avec GP-104). Legal framework GreenPulse = digital notary, not data guarantor. Custodial wallet terms, liability scope, data sovereignty, credential validity, dispute resolution. Align avec Vietnam Digital Technology Law. ToS addendum Plan 3 + credential issuance terms + data processing agreement bank partners. **NOT CODE — Legal counsel task.**
+- [ ] **GP-106: EU CBAM export readiness check — Plan 2** — Priorité HIGH (affecte 50K export-oriented SMEs VN). Tool pour exporters EU. Check product categories vs CBAM scope (iron, steel, aluminium, cement, fertiliser, electricity, hydrogen). Évaluate CBAM reporting documentation. Identifie CSRD requirements cascading from EU buyers. Plan d'action 6 mois. Wizard : products → markets → documentation → gaps → plan. **Bloqué par :** GP-057, GP-052.
+- [ ] **GP-107: Carbon credit readiness module — Plan 3 (Pro)** — Priorité LOW (relevant once ETS trading starts Hanoi Exchange). Assess eligibility offset mechanisms (30% compliance via credits). Tracks baseline emissions, verified reductions, methodology (CDM, JCM, Art 6.4). Pre-application docs. **Bloqué par :** GP-104, GP-101, GP-102.
+- [ ] **GP-108: BIDV white-label branding engine — Plan 3** — Priorité HIGH (BIDV pilot requirement). Config system pour banks deploy GreenPulse sous leur brand. Logo/colors/typography swap, custom domain, partner-specific prompts, co-branded reports, restricted user packages (1000 SME accounts/year). Bank staff UX : portfolio ESG health dashboard, client segmentation ("Green Loan Ready" >70 / "High Risk" <40), pipeline forecasting. Extends existing theme system. **Bloqué par :** GP-103, GP-059.
+
+#### P3 — Tech debt
+
+- [ ] **GP-060: Duplicate AI services** — `gemini.service.ts` (207L), `openai.service.ts` (200L), `lia.service.ts` (174L) overlapping. Should use `@ezstart/ai-sdk` UnifiedChat exclusivement.
+- [ ] **GP-062: Providers route missing response schema** — `providers.ts` : `// responseSchema: TODO: Add proper schema for AI provider list`.
+- [ ] **GP-063: `formExtractor.service.ts` largest (297L)** — Single file handles form config loading, AI prompt construction, response parsing, field extraction, confidence scoring. Split.
+
+---
+
+### fengshui (web 6151)
+
+Analyse Bagua avec upload plan, orientation boussole, étoiles volantes annuelles, génération PDF, système premium/donation. 3 langues (fr/en/es). **Status:** maintained.
+
+#### P0 — Must fix before launch
+
+- [ ] **Remove dead code** — `handleDirectPDFDownload` in `AnalysisStep.tsx` (L70-103), `InfoSection` in `BaguaOrientationsGrid.tsx` (L388-418), obsolete JSON files (`bagua.2025.fr.stars.json`, `bagua.fr.base.json`, `etoiles-volantes-2026.json`), `BaguaSectorCard.tsx`, `fengshui-data.ts`.
+- [ ] **Extract 7 hardcoded strings to i18n** — `pdf-preview.tsx` (3 FR strings), `BaguaOrientationsGrid.tsx` ("Element : "), `BaguaPreviewModal.tsx` ("Analyse Feng Shui Bagua"), `AuthCallbackPage` (2 EN strings), `client-layout.tsx` ("Made with ... serenity").
+- [ ] **SVG dark mode** — `BaguaWheel` text utilise hardcoded `fill="black"` (invisible dark mode).
+- [ ] **File upload validation** — Ajouter max 10MB + MIME type check.
+- [ ] **Remove unused dependencies** — `html2canvas`, `@react-pdf/renderer` (pdf-generator.ts utilise `dom-to-image` + `jspdf`).
+
+#### P1 — Quality polish
+
+- [ ] **Replace 3 `as any` casts** — `loadBaguaConfig.ts:60` (`{} as any`), `AnalysisStep.tsx:50/54` (`{} as any` pour sectorRefs).
+- [ ] **PDF generation performance** — Remplacer 3s hardcoded delay (`setTimeout(resolve, 3000)`) par readiness check.
+- [ ] **Error toasts for failed operations** — Config loading error laisse UI stuck sans message.
+- [ ] **Make SEO metadata dynamic** — Year in keywords/title. `layout.tsx` hardcode "2026", `page.tsx:36` `sessionStorage.getItem('lunar-popup-2026-seen')`.
+- [ ] **PDF dark mode fix** — PDF force `#ffffff` background mais `isDarkMode` passé à `PdfCaptureContainers` affecte text colors. PDF doit toujours render in light mode.
+- [ ] **PDF scrollbar hack** — `pdf-generator.ts` injecte global style pour hide scrollbars pendant generation (fragile).
+- [ ] **UX: Keyboard support for compass** — Arrow keys +/-5 degrees.
+- [ ] **UX: Remove commented rotation controls** — `CardinalPointsStep-v2.tsx` L170-210 (40 lignes commentées).
+- [ ] **UX: Reset rotation button** — `resetRotation()` existe dans `CardinalWheel` mais pas exposé UI.
+- [ ] **UX: PDF upload accepts PDFs** — Mais utilise `/api/pdf-preview` (route n'existe pas dans web-only app). Disable PDF upload ou implémenter.
+- [ ] **UX: Crop with pixel sliders too technical** — Simplifier avec presets (A4, square, free).
+- [ ] **UX: Stepper cast** — `AnalyzePage:101-108` `as unknown as Array<...>` pour steps.
+- [ ] **Admin dashboard DataTable** — Replicate pattern, add to ezstart admin hub.
+
+#### P2 — UX enhancements
+
+- [ ] **Feature: Local data persistence** — localStorage pour in-progress analysis (plan + bearing + preferences).
+- [ ] **Feature: Analysis history** — Thumbnails + metadata localStorage, cloud pour premium users.
+- [ ] **Feature: Export/import JSON configs.**
+- [ ] **Feature: Elements education page** — Interactive tooltips (5 elements, cycles productif/destructeur/affaiblissant).
+- [ ] **Feature: Enhanced PDF** — Multi-sector detail pages, premium remedies, element cycles, room recommendations.
+- [ ] **Feature: PDF branding** — Logo, brand colors, watermark free version.
+- [ ] **Code: Refactor `PlanUploader` (543L)** — Extract CropEditor.
+- [ ] **Code: Refactor `pdf-capture-containers` (489L)** — Factorize card rendering wheel/grid.
+- [ ] **Code: Refactor `BaguaOrientationsGrid` (435L).**
+- [ ] **Code: Extract `page.tsx` homepage sections (564L)** — HeroSection, BenefitsSection, ComparisonTable, CTASection, LunarPopup.
+- [ ] **UX: Accessibility** — ARIA labels on SVG, focus management in modals.
+- [ ] **UX: Compass badge contrast dark mode.**
+- [ ] **UX: Bearing display during drag** — Show degree real-time.
+- [ ] **UX: Snap-to-45 mode for compass precision.**
+- [ ] **SEO: Use i18n messages for `layout.tsx` title/description per locale.**
+- [ ] **SEO: Verify robots.ts and sitemap.ts coverage for localized routes.**
+
+#### P3 — Advanced features
+
+- [ ] **Feature: Multiple floor plans** — Multi-étages same bearing + side-by-side comparison.
+- [ ] **Feature: Room-level recommendations** — Mark rooms on plan, cross avec Bagua sector.
+- [ ] **Feature: AI-powered design suggestions** — Mood boards, ai-sdk image generation for premium.
+- [ ] **Feature: Share analysis via URL** — Base64 encoded link + social sharing + OG image.
+- [ ] **Testing: Unit tests for `loadBaguaConfig`, `usePremium`, E2E stepper flow.**
+
+---
+
+### asc-tcd (web 6141)
+
+Association website (sports/cultural activities). **Status:** maintained.
+
+Pas d'item actif connu.
+
+---
+
+### gacha-analyzer (api 6170 / web 6171)
+
+App scan/analyse screenshots jeux gacha (Summoners War runes, Nikke Goddess of Victory gear). OCR scripté (Tesseract + regex) + fallback IA optionnel. **Status:** in-progress, priorité haute.
+
+#### A — Bugs et dette technique
+
+- [ ] **A1. Scan doublons — cache hash pas efficace** `P0` `M` — `quickHash()` échantillonne ~1000 pixels, hash trop faible (32-bit). Même rune photographiée 2x = hash différent (bruit camera, compression). Solution : perceptual hash (pHash/dHash) sur crop ROI, tolerance Hamming.
+- [ ] **A2. `as unknown as` massif dans scan-service et reanalyze** `P1` `M` — 3x dans `scan-service.ts`, 3x dans `reanalyze-scan.ts`. Cause : `ParsedData` locale != `RuneData` de `@gacha-analyzer/types`, mêmes champs mais types séparés. Aligner ParsedData sur RuneData directement.
+- [ ] **A3. `Record<string, any>` dans 5 routes API** `P2` `S` — `get-scan.ts`, `feedback-scan.ts`, `report-scan.ts`, `reanalyze-scan.ts`, `import-monsters.ts`. Mongoose `.lean()` retourne type générique. Typer avec `Scan & { _id: Types.ObjectId }`.
+- [ ] **A4. `zones: any` et `masks: any` dans use-game-config.ts** `P2` `S` — Legacy hooks (`GameConfigData`). Typer avec `ZoneConfig[]`, `MaskRect[]` ou supprimer hooks deprecated.
+- [ ] **A5. `as any` dans scan detail page** `P2` `S` — `scan/[id]/page.tsx:237` + `:246`. `ScanResult.data` = union `RuneData | GearData` pas narrowé. Discriminated union avec champ `type` ou narrower via `gameType`.
+- [ ] **A6. TODO dans types/** `P2` `S` — `artifact-data.ts:7` (`atk: 100, // TODO: verify exact value`), `rune-data.ts:28-32` (3 TODO ranges flat stats hp/atk/def). Vérifier in-game.
+- [ ] **A7. Code dupliqué handleSignificantChange et handleRescan** `P2` `M` — Logique quasi identique (~80 lignes x2) dans `scan/page.tsx`. Extraire `buildScanPayload(frame, roi, masks, profile, presets)`.
+- [ ] **A8. `rune-card-compact.tsx` trop gros (1072L)** `P2` `M` — Extraire `rune-score-badge.tsx`, `rune-substat-list.tsx`, `rune-narrative.tsx`.
+- [ ] **A9. `scan-service.ts` trop gros (699L)** `P2` `M` — Extraire `ocr-pipeline.ts` (OCR + merge), garder DB write dans scan-service.
+- [ ] **A10. `rune-efficiency.ts` trop gros (1664L)** `P2` `L` — Extraire `gem-logic.ts`, `progressive-advice.ts`, `archetype-synergy.ts`.
+- [ ] **A11. Deprecated hooks use-game-config.ts** `P3` `S` — `useGameConfig` et `useSaveGameConfig` marqués @deprecated, utilisés nulle part. Supprimer.
+
+#### B — Qualité API
+
+- [ ] **B1. Pas d'auth sur POST /scan** `P1` `S` — `scan-image.ts` sans `authMiddleware`. N'importe qui peut poster des images → ressources OCR/Gemini. Ajouter `optionalAuthMiddleware` ou rate limit renforcé.
+- [ ] **B2. Thumbnails JPEG 50% stockés en MongoDB** `P2` `M` — Base64 ~50-100KB par scan dans document Scan. 10k scans = 500MB-1GB. Solution : S3/R2, ou compresser plus (25%, resize 200px).
+- [ ] **B3. Pas de cleanup vieux scans** `P2` `S` — Pas de TTL, pas de limite par user. Solution : TTL index MongoDB (90j ?) ou endpoint purge.
+- [ ] **B4. Image size limit non explicite** `P2` `S` — multer default = no limit. Limiter à 10MB, retourner 413.
+- [ ] **B5. Gemini fallback hardcode pour SW uniquement** `P3` `S` — `scan-service.ts:615` : `if (needsFallback && gameType === 'summoners-war')`. Nikke sans fallback IA. Généraliser prompt Gemini par jeu.
+
+#### C — UX / frontend
+
+- [ ] **C1. Pas de support mobile camera directe** `P1` `L` — `getDisplayMedia()` = desktop only. Sur mobile pas d'API screen capture. Ajouter mode "upload photo" (camera ou galerie). Alternative PWA + share target.
+- [ ] **C2. Hardcoded "Cached" string** `P2` `S` — `scan/page.tsx:622` `<Badge>Cached</Badge>` non traduit. `t('scan.statusBar.cached')`.
+- [ ] **C3. Emojis dans les selects** `P3` `S` — `history/page.tsx:200-201` emoji dans `SelectItem` (agree, disagree). Contraire DEV-RULES. Icons SVG ou badges colorés.
+- [ ] **C4. Inline SVG icons dans scan page** `P2` `S` — 2 inline SVG (settings gear, rescan arrows). Extraire fichier icons ou `lucide-react`.
+- [ ] **C5. Flash colors hardcoded rgba() inline** `P3` `S` — `scan/page.tsx:189-197` couleurs en dur. Commentaire explique (dynamic alpha) mais pourrait utiliser CSS custom properties + opacity.
+- [ ] **C6. History : filtres client-side sur données paginées serveur** `P1` `M` — 6 filtres (level, advice, set, slot, feedback, report) appliqués JS sur page courante. Filtrer "set=violent" → ne voit que violent de la page (20 items), pas tous en DB. Déplacer filtres côté serveur.
+- [ ] **C7. Nikke : pas de rune card / gear analysis** `P1` `XL` — Parser Nikke existe (8 tests) mais pas analyzer, pas gear card dédiée, pas /data Nikke. Cf. E1.
+
+#### D — Tests
+
+- [ ] **D2. Tests dupliqués dans 2 dossiers** `P3` `S` — `api/src/__tests__/` et `api/src/analyzers/rune-efficiency.test.ts` (304L) en plus de `api/src/__tests__/rune-efficiency.test.ts` (1206L). Consolider dans `__tests__/`.
+
+#### E — Feature gaps (roadmap)
+
+- [ ] **E1. Nikke gear analyzer** `P1` `XL` — Efficiency calculator (manufacturer bonuses, overload lines), gear card dédiée Nikke, page /data Nikke, gem/grind equivalent (reroll overload), advice system Nikke (keep/reroll/lock).
+- [ ] **E2. Detection grind existant (couleur verte in-game)** `P1` `L` — Stats grindées apparaissent vertes SW. OCR ne détecte pas couleur (grayscale preprocessing). Analyser pixels couleur avant grayscale, ou zone-based color detection. Impact: gem recommendations ne savent pas si stat déjà grindée.
+- [ ] **E3. Batch scanning (multi-rune)** `P2` `L` — Scanner toutes runes d'un monstre d'un coup (6 slots). Navigation auto entre runes via détection UI. Résumé monstre complet (efficiency totale, sets, synergies).
+- [ ] **E4. Fallback IA cascade (Gemini free tier)** `P2` `M` — Retry avec backoff, queue de fallback, cache résultats IA. Tester Claude Vision, GPT-4o.
+- [ ] **E5. Import depuis export JSON (SWEX/SWProxy)** `P2` `M` — Parser JSON export (runes + monstres + artefacts). Analyse massive sans OCR (100% précis). Dashboard : top runes, worst, à vendre, coverage par set.
+- [ ] **E6. Integration SWSTATS/Lucksack pour builds populaires** `P2` `M` — Fetch builds populaires APIs communautaires. Recommander monstres pour rune basée sur builds populaires. "Cette rune SPD/CR/CD/ATK% parfaite pour Savannah (usage: 89%)".
+- [ ] **E7. Rune optimizer (quelles runes garder pour quel monstre)** `P3` `XL` — Assignment optimal rune → monstre. NP-hard, heuristiques. **Bloqué par :** E5 ou E3.
+- [ ] **E8. Compare runes** `P3` `M` — Comparer 2+ runes côte à côte (même slot). Overlay différences (efficiency, rolls, gem potential).
+- [ ] **E9. Share rune analysis** `P3` `M` — Image/lien partageable d'une analyse. OG image previews social. Deep link scan detail.
+- [ ] **E10. Artifact analysis** `P3` `L` — Parser existe (33 substats, 10 tests). Reste : efficiency calculator artifacts (différents rolls/tiers), artifact card, /data artifacts. **Bloqué par :** définir scoring system (pas de Barion pour artifacts).
+- [ ] **E11a. PiP overlay gaming** — `documentPictureInPicture` API (Chrome 116+). Mini-fenêtre flottante : conseil (SELL/KEEP/UPGRADE) gros + efficacité % + couleur tier. Always on top. Auto-update. Compact ~200x100px positionnable. Fallback mode mini-window CSS.
+- [ ] **E11b. Optimisation vitesse détection** — Réduire frame diff interval 500ms → 200ms. OCR local-first (Tesseract in-browser) au lieu d'API pour <100ms. Pre-crop 8 zones en parallèle. Cache intelligent skip OCR si hash crop ROI inchangé.
+- [ ] **E11c. Audio feedback** — Son distinct par conseil : bip = SELL, ding = KEEP, chime = UPGRADE. Volume configurable ou mute. TTS "sell"/"keep"/"upgrade" via SpeechSynthesis API.
+- [ ] **E11d. Electron/Tauri overlay (futur)** — App desktop fenêtre transparente + clickthrough. Vrai overlay pixel-perfect over le jeu (comme SWLENS). Peut capturer directement fenêtre jeu sans getDisplayMedia.
+- [ ] **E11f. Interface de test SDK (capture-sdk playground)** `P2` — Page de démo intégrée capture-sdk. Images reference embarquées. Test visuel frame diff (charger 2 images, score). Test preprocess (source → grayscale → contrast → binarize). Test crop (ROI draggable). Test mask (blackout → résultat). Test hash (comparer 2 images). 100% agnostique. Route dans ezstart `/packages/capture-sdk/playground` ou standalone.
+- [ ] **E11g. Bench configurable par game** `P2` — Bench actuel hardcode SW. Rendre configurable par game. Interface add/remove/rename zones (fixe à 8 actuellement). Interface add/remove/rename masks. Selection template par game (SW rune, SW artifact, Nikke gear). Layout editor : sauvegarder zones/masks en DB par game. Utilise SDK (RoiSelector, BlackoutMask, crop, preprocess). Game-specific reste dans l'app (noms zones, presets par game, templates OCR). Tout configurable depuis UI.
+- [ ] **E12. Multiple game support (au-delà SW + Nikke)** `P3` `XL` — Architecture multi-game en place (config/games, images). Candidats : Epic Seven, Genshin Impact, Honkai Star Rail. Chaque jeu : parser, analyzer, types, game config, i18n, assets.
+- [ ] **E13. Deploy (Railway API + Vercel Web)** `P1` `M` — Railway service `gacha-analyzer-api`. Env vars Railway (MONGODB_URI, GEMINI_API_KEY, EZAUTH_URL). Vercel project web. Vérifier sharp fonctionne Railway. Tester OCR Tesseract Railway (binaire natif requis).
+
+---
+
+## Long-term (6+ mois)
+
+- [ ] **Mobile pilot (React Native + Expo)** — **Bloqué par :** api-sdk stable en prod
+- [ ] **ui-native miroir de `@ezstart/ui` pour cross-platform**
+- [ ] **Carbon credit marketplace (ETS trading post-Hanoi Exchange launch)** — Cf. GP-107

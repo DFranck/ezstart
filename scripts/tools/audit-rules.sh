@@ -89,21 +89,24 @@ if echo "$TARGET" | grep -q 'packages/'; then
   fi
 fi
 
-# 6. BACKLOG exists for apps
-if echo "$TARGET" | grep -q 'apps/'; then
-  APP_NAME=$(echo "$TARGET" | sed 's|/$||')
-  echo ""
-  echo "--- App BACKLOG ---"
-  if [ -f "$APP_NAME/BACKLOG.md" ]; then
-    LINES=$(wc -l < "$APP_NAME/BACKLOG.md")
-    PLANNED=$(grep -c 'planned' "$APP_NAME/BACKLOG.md" 2>/dev/null || echo 0)
-    IN_PROGRESS=$(grep -c 'in-progress' "$APP_NAME/BACKLOG.md" 2>/dev/null || echo 0)
-    DONE=$(grep -c '`done`' "$APP_NAME/BACKLOG.md" 2>/dev/null || echo 0)
-    echo "✅ BACKLOG.md exists ($LINES lines) — planned: $PLANNED, in-progress: $IN_PROGRESS, done: $DONE"
+# 6. Root BACKLOG (single source of truth for the monorepo)
+echo ""
+echo "--- Root BACKLOG ---"
+if [ -f "BACKLOG.md" ]; then
+  LINES=$(wc -l < "BACKLOG.md")
+  ACTIVE=$(grep -c '^- \[ \]' "BACKLOG.md" 2>/dev/null || echo 0)
+  DONE_PENDING_ARCHIVE=$(grep -c '^- \[x\]' "BACKLOG.md" 2>/dev/null || echo 0)
+  echo "✅ BACKLOG.md ($LINES lines) — active: $ACTIVE, done awaiting archive: $DONE_PENDING_ARCHIVE"
+  if [ -f "BACKLOG-HISTORY.md" ]; then
+    HIST_LINES=$(wc -l < "BACKLOG-HISTORY.md")
+    echo "✅ BACKLOG-HISTORY.md ($HIST_LINES lines)"
   else
-    echo "⚠️  BACKLOG.md missing for $APP_NAME"
+    echo "⚠️  BACKLOG-HISTORY.md missing"
     WARN_COUNT=$((WARN_COUNT + 1))
   fi
+else
+  echo "⚠️  BACKLOG.md missing at repo root"
+  WARN_COUNT=$((WARN_COUNT + 1))
 fi
 
 # 7. E2E-TESTS exists for apps with web
