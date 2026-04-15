@@ -1503,6 +1503,70 @@ importers:
         specifier: 3.23.8
         version: 3.23.8
 
+  packages/api-core:
+    dependencies:
+      '@asteasolutions/zod-to-openapi':
+        specifier: ^7.3.4
+        version: 7.3.4(zod@3.23.8)
+      '@ezstart/api-contracts':
+        specifier: workspace:*
+        version: link:../api-contracts
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: ^4.19.2
+        version: 4.22.1
+      express-rate-limit:
+        specifier: ^7.5.1
+        version: 7.5.1(express@4.22.1)
+      swagger-ui-express:
+        specifier: ^5.0.1
+        version: 5.0.1(express@4.22.1)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
+      '@types/express':
+        specifier: ^4.17.23
+        version: 4.17.25
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.2
+      '@types/supertest':
+        specifier: ^6.0.3
+        version: 6.0.3
+      '@types/swagger-ui-express':
+        specifier: ^4.1.8
+        version: 4.1.8
+      mongoose:
+        specifier: ^8.15.1
+        version: 8.20.2(socks@2.8.7)
+      socket.io:
+        specifier: ^4.8.1
+        version: 4.8.1
+      supertest:
+        specifier: ^7.1.4
+        version: 7.1.4
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.19.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
   packages/api-sdk:
     dependencies:
       '@ezstart/api-contracts':
@@ -1657,6 +1721,9 @@ importers:
 
   packages/eslint-config:
     devDependencies:
+      '@ezstart/eslint-plugin-ezstart':
+        specifier: workspace:*
+        version: link:../eslint-plugin-ezstart
       '@next/eslint-plugin-next':
         specifier: ^15.1.7
         version: 15.5.9

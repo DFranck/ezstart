@@ -8,7 +8,11 @@
     "./next-js": "./src/next.js",
     "./react-internal": "./src/react-internal.js"
   },
+  "peerDependencies": {
+    "@ezstart/eslint-plugin-ezstart": "workspace:*"
+  },
   "devDependencies": {
+    "@ezstart/eslint-plugin-ezstart": "workspace:*",
     "@next/eslint-plugin-next": "^15.1.7",
     "@typescript-eslint/eslint-plugin": "^8.24.1",
     "@typescript-eslint/parser": "^8.24.1",
