@@ -10,8 +10,5 @@ export {
   loadSharedEnv,
   maskedEnv,
   findMonorepoRoot,
-  appToPrefix,
-  KNOWN_APP_PREFIXES,
   type LoadEnvOptions,
-  type KnownAppPrefix,
 } from './secrets-loader.js'

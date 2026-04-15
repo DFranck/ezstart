@@ -35,18 +35,17 @@ const TARGET_DB = 'ezstart'
 const TTL_COLLECTION = 'healthchecks'
 
 async function main() {
-  // Load root .env.local so EZAUTH_MONGO_URL resolves (loader strips the prefix).
+  // Load root .env.local + resolve the ezauth MongoDB URL via the generic
+  // template (MONGO_URL in root contains {app}/{env} placeholders).
   const { loadSharedEnv } = require(
     path.resolve(__dirname, '..', '..', 'packages', 'config', 'dist', 'server.js')
   )
+  const { getMongoUrl } = require(
+    path.resolve(__dirname, '..', '..', 'packages', 'config', 'dist', 'env-resolvers.js')
+  )
   loadSharedEnv({ app: 'ezauth', layer: 'api' })
 
-  const MONGO_URL = process.env.MONGO_URL
-  if (!MONGO_URL) {
-    throw new Error(
-      '[cleanup-monitoring-db] MONGO_URL not set after loading root .env.local (expected EZAUTH_MONGO_URL).'
-    )
-  }
+  const MONGO_URL = getMongoUrl('ezauth')
 
   // Mongoose is hoisted inside express-core's node_modules in this pnpm workspace.
   const mongoose = require(

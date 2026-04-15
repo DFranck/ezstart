@@ -1,25 +1,19 @@
 /**
- * Monorepo-level env vars loader — ROOT-ONLY + PREFIXED ARCHITECTURE.
+ * Monorepo-level env vars loader — ROOT-ONLY + GENERIC (no prefix).
  *
- * All secrets live in a single file at the monorepo root:
- *   - `.env.local`      in development (NODE_ENV !== 'production')
- *   - `.env.production` in production
+ * All secrets live in a single file at the monorepo root, selected by
+ * deployment environment:
  *
- * Two kinds of vars are supported:
+ *   - `.env.local`      → local dev  (DEPLOY_ENV=local or unset)
+ *   - `.env.staging`    → staging    (DEPLOY_ENV=staging)
+ *   - `.env.production` → production (DEPLOY_ENV=production or NODE_ENV=production)
  *
- *   1. SHARED (no prefix) — loaded as-is, visible to every app.
- *      Example: `OPENAI_API_KEY`, `RESEND_API_KEY`, `GITHUB_TOKEN`.
+ * Every variable is loaded as-is into `process.env`. No prefix stripping, no
+ * per-app filtering. Values that need to vary per app are templated or
+ * resolved through helpers in `env-resolvers.ts` (see `getMongoUrl`, etc.).
  *
- *   2. PER-APP (`{APP}_VARNAME`) — stripped of prefix at runtime, but ONLY
- *      for the app currently booting. Vars for OTHER apps are ignored so
- *      they never leak into the wrong process.
- *      Example: `EZAUTH_MONGO_URL` → becomes `MONGO_URL` for the EZAuth API.
- *
- * `NEXT_PUBLIC_*` vars are NEVER prefixed (Next.js convention requires the
- * literal `NEXT_PUBLIC_` prefix to be readable from the client bundle).
- *
- * @see DEPLOY.md — "Secrets architecture"
- * @see SECRETS.md
+ * @see SECRETS.md — canonical documentation
+ * @see env-resolvers.ts — helpers for generic vars (`getMongoUrl`, `getJwtSecret`, `getSentryDsn`)
  */
 
 import * as dotenv from 'dotenv'
@@ -33,50 +27,17 @@ import { existsSync, readdirSync, readFileSync } from 'fs'
 // chain (e.g. via `@ezstart/config`). `console` is enough for boot-time
 // diagnostics — these run once at process start, output goes to stdout.
 
-/**
- * Known app prefixes. Vars starting with `{PREFIX}_` are treated as per-app.
- * - If the prefix matches the booting app, the stripped key is exported.
- * - If it matches a DIFFERENT app, the var is ignored (not leaked).
- * - If no known prefix matches, the var is treated as SHARED.
- *
- * Keep this list in sync with `apps/*` folder names (uppercased, `-` → `_`).
- */
-export const KNOWN_APP_PREFIXES = [
-  'EZAUTH',
-  'EZBILL',
-  'EZPAY',
-  'EZSTART',
-  'GREENPULSE',
-  'GACHA_ANALYZER',
-  'FENGSHUI',
-  'ASC_TCD',
-] as const
-
-export type KnownAppPrefix = (typeof KNOWN_APP_PREFIXES)[number]
-
-/**
- * Map an app folder name (kebab-case) to its env var prefix (UPPER_SNAKE).
- *   'green-pulse'    → 'GREENPULSE'
- *   'gacha-analyzer' → 'GACHA_ANALYZER'
- *   'ezauth'         → 'EZAUTH'
- */
-export function appToPrefix(app: string): string {
-  // Special cases: compact names we decided to keep unsegmented.
-  if (app === 'green-pulse') return 'GREENPULSE'
-  return app.toUpperCase().replace(/-/g, '_')
-}
-
 export interface LoadEnvOptions {
-  /** App name (e.g. 'ezbill'). Omit to only load shared env. */
+  /** App name (for logs only; no filtering is applied). */
   app?: string
-  /** API or web layer. Optional. */
+  /** API or web layer (for logs only). */
   layer?: 'api' | 'web'
   /**
-   * Required env keys to validate after loading (UNPREFIXED — use the
-   * runtime name, e.g. `MONGO_URL`, not `EZAUTH_MONGO_URL`).
+   * Required env keys to validate after loading (generic runtime names,
+   * e.g. `MONGO_URL`, `JWT_SECRET`).
    * Throws with a clear message if any are missing.
    */
-  required?: string[]
+  required?: readonly string[]
   /** Suppress info logs (useful for CLI scripts) */
   silent?: boolean
 }
@@ -117,33 +78,31 @@ function mask(value: string | undefined): string {
 }
 
 /**
- * Given the booting app prefix, classify a key:
- *   - 'shared'  → no known prefix matched, export as-is
- *   - 'self'    → key starts with `{myPrefix}_`, strip and export
- *   - 'foreign' → key starts with a different known prefix, IGNORE
+ * Pick the root env file for the current deploy environment.
+ *
+ * Priority:
+ *   1. DEPLOY_ENV=production  → .env.production
+ *   2. DEPLOY_ENV=staging     → .env.staging
+ *   3. DEPLOY_ENV=local       → .env.local
+ *   4. NODE_ENV=production    → .env.production
+ *   5. default                → .env.local
  */
-function classifyKey(
-  key: string,
-  myPrefix: string | null
-): { kind: 'shared' | 'self' | 'foreign'; exportedKey: string } {
-  // NEXT_PUBLIC_* are never prefixed — always shared (Next convention).
-  if (key.startsWith('NEXT_PUBLIC_')) return { kind: 'shared', exportedKey: key }
-
-  for (const prefix of KNOWN_APP_PREFIXES) {
-    if (key.startsWith(`${prefix}_`)) {
-      if (myPrefix && prefix === myPrefix) {
-        return { kind: 'self', exportedKey: key.slice(prefix.length + 1) }
-      }
-      return { kind: 'foreign', exportedKey: key }
-    }
-  }
-  return { kind: 'shared', exportedKey: key }
+function pickEnvFile(): string {
+  const deploy = process.env.DEPLOY_ENV
+  if (deploy === 'production') return '.env.production'
+  if (deploy === 'staging') return '.env.staging'
+  if (deploy === 'local') return '.env.local'
+  if (process.env.NODE_ENV === 'production') return '.env.production'
+  return '.env.local'
 }
 
 /**
- * Load env vars from the monorepo root, applying prefix stripping for the
- * booting app. Root file is the ONLY source — app-local `.env.local` files
- * are ignored by design (see SECRETS.md).
+ * Load env vars from the monorepo root. No prefix stripping, no filtering —
+ * every key in the file is exported verbatim. Per-app customization is
+ * achieved via templating and helpers (see `env-resolvers.ts`).
+ *
+ * App-local `.env.*` files are NOT read — the root file is the only source.
+ * (`apps/<app>/api/.env.test` is a special case loaded directly by vitest.)
  *
  * @example
  * ```ts
@@ -155,59 +114,40 @@ function classifyKey(
  * ```
  */
 export function loadSharedEnv(opts: LoadEnvOptions = {}): void {
-  const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local'
+  const envFile = pickEnvFile()
 
   const root = findMonorepoRoot()
   const rootEnv = path.join(root, envFile)
 
-  const myPrefix = opts.app ? appToPrefix(opts.app) : null
-
-  let sharedCount = 0
-  let selfCount = 0
-  let foreignCount = 0
+  let loadedCount = 0
 
   if (existsSync(rootEnv)) {
-    // dotenv.parse gives us the raw KV pairs without mutating process.env yet.
+    // dotenv.parse gives us the raw KV pairs without mutating process.env yet,
+    // so we can preserve the standard dotenv behaviour (shell-exported vars win).
     const parsed = dotenv.parse(readFileSync(rootEnv))
 
-    for (const [rawKey, rawVal] of Object.entries(parsed)) {
-      const { kind, exportedKey } = classifyKey(rawKey, myPrefix)
-
-      if (kind === 'foreign') {
-        foreignCount++
-        continue
-      }
-
-      // Don't override already-set env vars (mirrors dotenv default behaviour:
-      // shell-exported vars win over .env files).
-      if (process.env[exportedKey] !== undefined) continue
-
-      process.env[exportedKey] = rawVal
-
-      if (kind === 'self') selfCount++
-      else sharedCount++
+    for (const [key, val] of Object.entries(parsed)) {
+      if (process.env[key] !== undefined) continue
+      process.env[key] = val
+      loadedCount++
     }
   }
 
   if (!opts.silent) {
     // eslint-disable-next-line no-console
     console.info(
-      `🔐 [env] Loaded from root ${envFile}${opts.app ? ` for ${opts.app}` : ''}: ` +
-        `${sharedCount} shared, ${selfCount} app-specific` +
-        (foreignCount > 0 ? `, ${foreignCount} skipped (other apps)` : '')
+      `🔐 [env] Loaded root ${envFile}${opts.app ? ` for ${opts.app}/${opts.layer ?? 'api'}` : ''}: ${loadedCount} vars`
     )
   }
 
-  // Validate required vars (unprefixed — runtime names).
+  // Validate required vars (generic runtime names).
   if (opts.required && opts.required.length > 0) {
     const missing = opts.required.filter(k => !process.env[k])
     if (missing.length > 0) {
-      const prefixedHints = myPrefix
-        ? missing.map(k => `   - ${k}   (root: ${myPrefix}_${k})`).join('\n')
-        : missing.map(k => `   - ${k}`).join('\n')
+      const hints = missing.map(k => `   - ${k}`).join('\n')
       throw new Error(
         `❌ Missing required env vars${opts.app ? ` for ${opts.app}/${opts.layer ?? 'api'}` : ''}:\n` +
-          prefixedHints +
+          hints +
           `\n\nSet them in ${rootEnv}.`
       )
     }

@@ -24,11 +24,16 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 async function main() {
-  // Load root .env.local so EZAUTH_MONGO_URL resolves (loader strips the prefix).
+  // Load root .env.local + resolve the ezauth MongoDB URL via the generic
+  // template (MONGO_URL in root contains {app}/{env} placeholders).
   const { loadSharedEnv } = require(
     path.resolve(__dirname, '..', '..', 'packages', 'config', 'dist', 'server.js')
   )
+  const { getMongoUrl } = require(
+    path.resolve(__dirname, '..', '..', 'packages', 'config', 'dist', 'env-resolvers.js')
+  )
   loadSharedEnv({ app: 'ezauth', layer: 'api' })
+  process.env.MONGO_URL = getMongoUrl('ezauth')
 
   const { connectToMongo } = require(
     path.resolve(__dirname, '..', '..', 'packages', 'express-core', 'dist', 'index.js')

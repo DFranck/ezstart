@@ -1,45 +1,47 @@
 /**
  * Centralized manifest of required environment variables, per API app.
  *
- * Names are UNPREFIXED (runtime names) — the root `.env.{NODE_ENV}` stores
- * per-app vars with an `{APP}_` prefix that the loader strips at boot.
+ * All names are GENERIC (no app prefix) — the root `.env.{local,staging,production}`
+ * now stores every var without per-app prefixing, so what's required at runtime
+ * matches the root key verbatim.
  *
- * Shared vars (no prefix in root) are declared in `SHARED_REQUIRED` and
+ * Shared vars required by every API are declared in `SHARED_REQUIRED` and
  * auto-merged into every app's required list by `getRequiredEnv()`.
  *
- * Single source of truth, mirroring `urls.ts` / `ports.ts`.
  * Consumed by `createApp({ apiApp })` which auto-looks up the required list.
  */
 
 /**
- * Env vars required by EVERY API app (shared, unprefixed in root).
+ * Env vars required by EVERY API app.
  *
- * - `JWT_SECRET` — shared by design so SSO tokens minted by ezauth can be
- *   verified by every other app without re-keying.
+ * - `JWT_SECRET`  — shared by design (SSO tokens minted by ezauth must
+ *                    verify on every app without re-keying).
+ * - `MONGO_URL`   — generic template (`{app}-{env}` interpolated per app
+ *                    via `@ezstart/config/env-resolvers.getMongoUrl`).
  *
  * NOTE: `NODE_ENV` is intentionally NOT required — Node defaults it and every
  * deploy target sets it explicitly.
  */
-export const SHARED_REQUIRED = ['JWT_SECRET'] as const
+export const SHARED_REQUIRED = ['JWT_SECRET', 'MONGO_URL'] as const
 
 export const ENV_MANIFESTS = {
   ezauth: {
-    required: ['MONGO_URL', 'OAUTH_STATE_SECRET'],
+    required: ['OAUTH_STATE_SECRET'],
   },
   ezbill: {
-    required: ['MONGO_URL'],
+    required: [],
   },
   ezpay: {
-    required: ['MONGO_URL', 'STRIPE_SECRET_KEY'],
+    required: ['STRIPE_SECRET_KEY'],
   },
   ezstart: {
-    required: ['MONGO_URL'],
+    required: [],
   },
   'green-pulse': {
-    required: ['MONGO_URL'],
+    required: [],
   },
   'gacha-analyzer': {
-    required: ['MONGO_URL'],
+    required: [],
   },
 } as const satisfies Record<string, { required: readonly string[] }>
 

@@ -1,220 +1,197 @@
 # Secrets & Environment Variables
 
-**Architecture: root-only, prefixed.** One file at the monorepo root holds
-every secret for every app. Per-app vars are disambiguated by a prefix that
-the loader strips at boot.
+**Architecture: root-only, GENERIC (no app prefix).** One file per environment
+lives at the monorepo root and holds every secret for every app. Per-app
+values are either **templated** (`MONGO_URL` with `{app}`/`{env}`
+placeholders) or **suffixed** (`SENTRY_DSN_EZAUTH`) — never prefixed.
 
-Source of truth:
+Source of truth at runtime:
 
-- `@ezstart/config/secrets-loader` — used by APIs via `createApp({ apiApp, requiredEnv })`
+- `@ezstart/config/server` → `loadSharedEnv({ app, layer })` — used by APIs via
+  `createApp({ apiApp })` / `instrument.mts`
 - `@ezstart/next-config/withSharedEnv` — used by Next.js apps
+- `@ezstart/config/env-resolvers` → `getMongoUrl(app)`, `getJwtSecret()`,
+  `getSentryDsn(app)` — helpers that resolve generic root vars to per-app
+  values at the call site
 
 ## Layout
 
 ```
 @ezstart/
-├── .env.shared.example     # Template (committed) — documents vars + prefix convention
-├── .env.local              # DEV secrets for ALL apps (gitignored)
-├── .env.production         # PROD secrets for ALL apps (gitignored)
+├── .env.example         # Template (committed) — documents every var, no values
+├── .env.local           # DEV secrets for ALL apps (gitignored)
+├── .env.staging         # STAGING reference/runtime (gitignored)
+├── .env.production      # PROD reference (gitignored; Railway/Vercel is source of truth)
 │
 └── apps/{app}/{api|web}/
-    └── .env.example        # (optional) App-level docs (committed, no values)
+    └── .env.example     # Doc-only stub (committed) — lists what the app reads
+                         # from root. No secrets, no app-local .env.* files.
 ```
 
-**No more `apps/*/{api,web}/.env.local` files.** They were removed during the
-2026-04 migration. The loader ignores them by design.
+**No more app-local `.env.local` / `.env.production` files.** They were
+removed during the 2026-04 generic-env migration. Only
+`apps/ezauth/api/.env.test` survives (vitest loads it directly).
 
-## Prefix convention
+## Environment selection
 
-Root file contains two kinds of keys:
+The loader picks the right file based on `DEPLOY_ENV` and `NODE_ENV`:
 
-| Kind        | Naming              | Example                                                            |
-| ----------- | ------------------- | ------------------------------------------------------------------ |
-| **Shared**  | No prefix           | `OPENAI_API_KEY`, `RESEND_API_KEY`, `JWT_SECRET`, `STRIPE_*`       |
-| **Per-app** | `{APP_PREFIX}_NAME` | `EZAUTH_MONGO_URL`, `EZAUTH_GOOGLE_CLIENT_ID`                      |
-| Next public | `NEXT_PUBLIC_*`     | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (Next convention — no prefix) |
+| `DEPLOY_ENV` | `NODE_ENV`   | File loaded       |
+| ------------ | ------------ | ----------------- |
+| `production` | any          | `.env.production` |
+| `staging`    | any          | `.env.staging`    |
+| `local`      | any          | `.env.local`      |
+| _(unset)_    | `production` | `.env.production` |
+| _(unset)_    | _other_      | `.env.local`      |
 
-**Rule**: a var is SHARED when its value is the same everywhere (or shared by
-design — e.g. `JWT_SECRET` across all apps for SSO interop). It is PER-APP
-only when the value genuinely differs per app (`MONGO_URL`, `SENTRY_DSN`) or
-when the var is owned by exactly one app.
+Railway + Vercel set `DEPLOY_ENV=staging` / `production` explicitly on each
+service so ambiguity is impossible.
 
-**Notable shared-by-design vars**:
+## Generic naming conventions
 
-- `JWT_SECRET` — shared across all apps so SSO tokens minted by ezauth are
-  verifiable by every other app without re-keying.
-- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PUBLISHABLE_KEY` —
-  shared between `ezpay` (payments) and `ezstart` (read-only services tab). If
-  you ever want a restricted read-only key just for `ezstart`, re-prefix as
-  `EZSTART_STRIPE_*` in root.
-- `NODE_ENV` — Node defaults it, so never in the `required` manifest.
+Root env keys use GENERIC names — no `EZAUTH_` / `EZBILL_` / etc. prefixes.
+Two conventions let per-app values live at the root without collisions:
 
-**Removed**: `EMAIL_FROM` is no longer an env var. Each app hardcodes its
-sender in its `email.service.ts` (`'EZAuth <noreply@ezstart.xyz>'`, etc.).
+1. **Templating** — when the difference between apps is a simple substitution:
 
-**Resend two-key pattern**: Resend uses two separate keys by scope.
+   ```bash
+   MONGO_URL=mongodb+srv://.../{app}-{env}?retryWrites=true&w=majority
+   ```
 
-- `RESEND_API_KEY` — sending-scoped, consumed by every app's `email.service.ts`
-  to send transactional emails. Limited scope (no access to `/emails` or
-  `/domains` admin endpoints).
-- `RESEND_FULL_ACCESS_API_KEY` — full-access, consumed only by the ezstart
-  services tab provider (`apps/ezstart/api/src/services/providers/resend.ts`)
-  for admin reads (list domains, usage stats). Falls back to `RESEND_API_KEY`
-  if unset (backward compat, with a /domains fallback on 401).
+   App code calls `getMongoUrl('ezbill')` → `mongodb+srv://.../ezbill-dev?...`
+   in local, `.../ezbill-staging?...` in staging, `.../ezbill-prod?...` in
+   production.
 
-Known app prefixes (kept in sync with `packages/config/src/secrets-loader.ts`):
+2. **Suffixing** — when the value is genuinely unique per app (Sentry DSNs,
+   which identify distinct Sentry projects):
 
+   ```bash
+   SENTRY_DSN_EZAUTH=https://...@sentry.io/111
+   SENTRY_DSN_EZBILL=https://...@sentry.io/222
+   SENTRY_DSN_GREEN_PULSE=https://...@sentry.io/333
+   ```
+
+   App code calls `getSentryDsn('ezauth')`. Kebab-case app names
+   (`green-pulse`) are converted to `GREEN_PULSE` for the suffix.
+
+3. **Shared by design** — values that MUST be identical across every app
+   (`JWT_SECRET` for SSO interop) live at the root as-is and are read via
+   `getJwtSecret()`.
+
+4. **Single-consumer** — values that happen to be consumed by only one app
+   (`STRIPE_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `EXCHANGE_RATE_API_KEY`, ESG
+   integration keys) also live at the root with their plain names. No prefix
+   is needed because there's no ambiguity.
+
+5. **`NEXT_PUBLIC_*`** — Next.js convention, readable from the client bundle.
+   Never prefix these.
+
+## Helpers (`@ezstart/config/env-resolvers`)
+
+```ts
+import { getMongoUrl, getJwtSecret, getSentryDsn } from '@ezstart/config/env-resolvers'
+
+// In apps/{app}/api/src/instrument.mts, BEFORE any other import:
+loadSharedEnv({ app: 'ezauth', layer: 'api' })
+process.env.MONGO_URL = getMongoUrl('ezauth')
+const dsn = getSentryDsn('ezauth')
+if (dsn) process.env.SENTRY_DSN = dsn
+
+// Everywhere else, read process.env.MONGO_URL / process.env.JWT_SECRET directly —
+// they're already populated by the time business code runs.
 ```
-EZAUTH  EZBILL  EZPAY  EZSTART  GREENPULSE
-GACHA_ANALYZER  FENGSHUI  ASC_TCD
-```
 
-## How the loader works
-
-When the EZBill API boots and calls `loadSharedEnv({ app: 'ezbill', layer: 'api' })`:
-
-1. Opens root `.env.local` (dev) or `.env.production` (prod).
-2. For each key:
-   - `OPENAI_API_KEY` → shared, exported as-is → `process.env.OPENAI_API_KEY`.
-   - `EZBILL_MONGO_URL` → **self** prefix, stripped → `process.env.MONGO_URL`.
-   - `EZAUTH_GOOGLE_CLIENT_ID` → **foreign** prefix, **ignored** (no leak).
-   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` → shared (Next convention).
-3. Validates any `required: [...]` vars (use **unprefixed** names).
-
-App code keeps reading `process.env.MONGO_URL` — no changes needed in business
-logic. Only the root file needs the prefix.
+To add a new helper (e.g. a templated URL for a new shared service), extend
+`packages/config/src/env-resolvers.ts` with a focused function and unit tests
+in `packages/config/src/__tests__/env-resolvers.test.ts`.
 
 ## Required env manifest
 
-All required vars per API live in a **single central file**:
-`packages/config/src/env-manifests.ts`.
+`packages/config/src/env-manifests.ts` declares required vars per API:
 
 ```ts
-export const SHARED_REQUIRED = ['JWT_SECRET']
+export const SHARED_REQUIRED = ['JWT_SECRET', 'MONGO_URL']
 
 export const ENV_MANIFESTS = {
-  ezauth: { required: ['MONGO_URL', 'OAUTH_STATE_SECRET'] },
-  ezbill: { required: ['MONGO_URL'] },
-  ezpay: { required: ['MONGO_URL', 'STRIPE_SECRET_KEY'] },
+  ezauth: { required: ['OAUTH_STATE_SECRET'] },
+  ezbill: { required: [] },
+  ezpay: { required: ['STRIPE_SECRET_KEY'] },
   // ...
 }
 ```
 
-`getRequiredEnv(app)` auto-merges `SHARED_REQUIRED` with the app's entry so
-shared vars are always validated. `createApp({ apiApp: 'ezauth' })` looks up
-the list — no per-app declaration needed. Missing vars throw a clear boot-time
-error pointing to the expected name in root (shared = unprefixed,
-per-app = `{PREFIX}_VARNAME`).
+`getRequiredEnv(app)` merges `SHARED_REQUIRED` with the app's entry so shared
+vars are always validated. `createApp({ apiApp: 'ezauth' })` uses it
+automatically. Missing vars throw a clear boot-time error.
 
-Override for edge cases only: `createApp({ apiApp, requiredEnv: [...] })`.
+## API boot order
 
-## Load order at API boot
-
-`apps/{app}/api/src/instrument.mts` runs FIRST:
+`apps/{app}/api/src/instrument.mts` runs FIRST (imported before everything
+else from `index.ts`):
 
 ```ts
 import { loadSharedEnv } from '@ezstart/config/server'
-loadSharedEnv({ app: 'ezbill', layer: 'api' }) // populates process.env
+import { getMongoUrl, getSentryDsn } from '@ezstart/config/env-resolvers'
+
+loadSharedEnv({ app: 'ezauth', layer: 'api' })
+process.env.MONGO_URL = getMongoUrl('ezauth')
+const dsn = getSentryDsn('ezauth')
+if (dsn) process.env.SENTRY_DSN = dsn
+
 import { initSentry, Sentry } from '@ezstart/logger/server'
-// ...
+const sentry = initSentry('EZAuth API')
 ```
 
-Then `index.ts` imports `instrument.mjs` before anything else. This guarantees
-that `SENTRY_DSN`, `JWT_SECRET`, `MONGO_URL` are populated before Sentry init
-and before any module that reads them at import time (e.g. auth middleware).
+This guarantees that `JWT_SECRET`, `MONGO_URL`, `SENTRY_DSN` are populated
+before Sentry init and before any module that reads them at import time
+(e.g. auth middleware).
 
-## Adding a new shared var
+## Adding a new variable
 
-1. Add it (without value) to `.env.shared.example`.
-2. Add the real value to root `.env.local` (dev) and to Railway/Vercel
-   production envs.
-3. Consume it with `process.env.MY_VAR` — no code changes elsewhere.
+### Used by every app (shared)
 
-## Adding a new per-app var
+1. Add it (no value) to `.env.example`.
+2. Fill the real value in `.env.local` (dev) and on Railway/Vercel (prod).
+3. Consume via `process.env.MY_VAR` — no helper needed.
 
-1. Add `{PREFIX}_MY_VAR` to `.env.shared.example` and root `.env.local`.
-2. If required at boot, add the **unprefixed** name to the app's entry in
-   `packages/config/src/env-manifests.ts`.
-3. In code, read `process.env.MY_VAR` (unprefixed — the loader stripped it).
+### Used by one app only
+
+Same as above — just document in the per-app `.env.example` doc stub.
+
+### Varies per app via template
+
+1. Add a placeholder like `MY_VAR=foo-{app}-{env}` to `.env.example` and root
+   env files.
+2. Add a resolver helper in `env-resolvers.ts` + a unit test.
+3. Consume via the helper: `const v = getMyVar('ezbill')`.
+
+### Varies per app with unique values (e.g. API keys per project)
+
+1. Define suffixed names: `MY_VAR_EZAUTH=`, `MY_VAR_EZBILL=`, ...
+2. Extend `getMyVar(app)` in `env-resolvers.ts` with the same fallback
+   pattern as `getSentryDsn`.
 
 ## Production secrets
 
 Never push root `.env.production` anywhere. Production values live in
-**Railway** (per-API service) and **Vercel** (per-web-project).
-
-The sync scripts translate between the prefixed root file and the unprefixed
-platform env — see below.
+**Railway** (per-API service) and **Vercel** (per-web-project). The root
+`.env.production` file is a LOCAL REFERENCE only — used by `secrets:pull` /
+`secrets:audit` to compare against cloud state.
 
 ## CLI commands
 
-All scripts mask sensitive values (`*_SECRET`, `*_KEY`, `*_TOKEN`, `*_DSN`)
-in their output — plaintext is never logged.
+⚠️ **Migration note**: `pnpm secrets:sync` / `secrets:pull` / `secrets:audit`
+still reference the legacy `{APP}_` prefix convention for Railway/Vercel
+interop. They will need a follow-up refactor to align with the generic root
+layout. Until then, push/pull cloud secrets manually via the Railway/Vercel
+dashboards or CLIs.
 
-### `pnpm secrets:sync`
-
-Pushes root `.env.production` → Railway + Vercel, stripping per-app prefixes
-for each matching target and filtering out foreign per-app vars.
-
-```
-EZBILL_MONGO_URL=...  →  pushed as MONGO_URL to railway/ezbill-api only
-OPENAI_API_KEY=...    →  pushed as OPENAI_API_KEY to every Railway + allow-listed Vercel
-EZAUTH_GOOGLE_*       →  NOT pushed to any project except ezauth-api / web-ezauth
-```
-
-```bash
-pnpm secrets:sync                       # push to all
-pnpm secrets:sync -- --vercel-only
-pnpm secrets:sync -- --railway-only
-pnpm secrets:sync -- --dry-run          # preview (all masked)
-pnpm secrets:sync -- --vars KEY1,KEY2   # only specific vars (root names)
-```
-
-### `pnpm secrets:pull`
-
-Fetches production vars from every Vercel project + Railway service and writes
-the root `.env.production` with the correct prefix per target.
-
-```
-ezbill-api has MONGO_URL=...  →  written as EZBILL_MONGO_URL=... at root
-Same OPENAI_API_KEY in all services  →  written as OPENAI_API_KEY=... (shared)
-Different MONGO_URL in each service   →  written as EZAUTH_MONGO_URL=...,
-                                          EZBILL_MONGO_URL=..., etc.
-```
-
-```bash
-pnpm secrets:pull                    # fetch all, write root .env.production
-pnpm secrets:pull -- --dry-run       # preview, no write
-pnpm secrets:pull -- --vercel-only
-pnpm secrets:pull -- --railway-only
-pnpm secrets:pull -- --merge         # keep existing local-only keys
-```
-
-A timestamped backup is always written under `tmp/secrets-pull-backup-<ts>.env.production`.
-
-### `pnpm secrets:audit`
-
-Compares root `.env.production` against the current state of Vercel + Railway.
-Never modifies anything.
-
-```bash
-pnpm secrets:audit                   # full audit
-pnpm secrets:audit -- --strict       # exit 1 on drift (CI)
-pnpm secrets:audit -- --json
-```
-
-### Vercel scope
-
-Scripts need a team scope to link each project. Set one of these (shell or root
-`.env.local`):
-
-```bash
-VERCEL_SCOPE=dfrancks-projects   # preferred
-# or VERCEL_TEAM_SLUG / VERCEL_TEAM_ID
-```
+All scripts that DO run mask sensitive values (`*_SECRET`, `*_KEY`, `*_TOKEN`,
+`*_DSN`) in their output — plaintext is never logged.
 
 ### `pnpm secret:gen`
 
-Generate a crypto-secure secret for ad-hoc use.
+Generate a crypto-secure secret for ad-hoc use. Unchanged by the migration.
 
 ```bash
 pnpm secret:gen           # 64 bytes base64url
@@ -222,43 +199,33 @@ pnpm secret:gen 32
 pnpm secret:gen --hex
 ```
 
+### `pnpm rotate-secrets`
+
+Rotates `JWT_SECRET` + `OAUTH_ENCRYPTION_KEY` in root `.env.local` /
+`.env.production` and pushes to Railway + Vercel. Uses generic names only.
+
 ## Rollback
 
-Backups of every migration are kept under `tmp/prefix-migration-backup-<ts>/`
-(original root + all removed `apps/*/{api,web}/.env.local`).
-
-To restore:
+Git history contains the pre-migration root env files (`.env.shared.example`
+template, prefix-aware loader). To revert:
 
 ```bash
-# Re-copy the pre-migration root env
-cp tmp/prefix-migration-backup-<ts>/root.env.local .env.local
-cp tmp/prefix-migration-backup-<ts>/root.env.production .env.production
-
-# Re-copy each app-local (names encode the path with `_` separators)
-cp tmp/prefix-migration-backup-<ts>/apps_ezbill_api_.env.local apps/ezbill/api/.env.local
-# …etc.
+git log --all --full-history -- .env.shared.example
+git restore --source=<sha> --staged --worktree packages/config/src/secrets-loader.ts
+# …or simply revert the PR
 ```
-
-Revert the loader + `createApp` changes via git.
 
 ## Workflow summary
 
 ```bash
-# Bootstrap: pull current cloud state
-pnpm secrets:pull
+# Bootstrap local env
+pnpm setup:env            # copies .env.example → .env.local
 
-# Edit root .env.production (add new vars, fix values)
+# Edit .env.local — replace <DEV_PASSWORD> and other placeholders
 
-# Audit before pushing
-pnpm secrets:audit
+# Validate
+pnpm validate-env
 
-# Push to cloud
-pnpm secrets:sync
-
-# Confirm no drift
-pnpm secrets:audit
+# Start an app
+pnpm dev ez               # EZStart + EZAuth + EZPay
 ```
-
-**Conflict resolution**: if `secrets:pull` flags a conflict (same unprefixed
-key, different values across same-prefix targets) or `secrets:audit` flags
-DRIFT, the fix is always manual — update the root file, then `secrets:sync`.

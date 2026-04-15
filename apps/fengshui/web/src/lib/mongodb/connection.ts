@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { logger } from '@ezstart/logger'
+import { getMongoUrl } from '@ezstart/config/env-resolvers'
 
 /**
  * Lightweight MongoDB connection for Next.js API routes.
@@ -22,7 +23,14 @@ export async function connectToMongo(): Promise<typeof mongoose> {
 
   isConnecting = true
 
-  const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/fengshui'
+  // Resolve {app}/{env} from root MONGO_URL template; fall back to localhost
+  // if root env is unavailable (e.g. editor preview).
+  let MONGO_URL: string
+  try {
+    MONGO_URL = getMongoUrl('fengshui')
+  } catch {
+    MONGO_URL = 'mongodb://localhost:27017/fengshui-dev'
+  }
 
   mongoose.set('bufferCommands', false)
   mongoose.set('bufferTimeoutMS', 30000)
@@ -46,10 +54,7 @@ export async function connectToMongo(): Promise<typeof mongoose> {
     isConnecting = false
     return mongoose
   } catch (err) {
-    logger.error(
-      '[MongoDB] Failed to connect:',
-      err instanceof Error ? err.message : String(err)
-    )
+    logger.error('[MongoDB] Failed to connect:', err instanceof Error ? err.message : String(err))
     isConnecting = false
     throw err
   }
