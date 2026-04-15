@@ -1,37 +1,49 @@
-// Local copy of essential EZAuth types for better deployment compatibility
-// This avoids workspace dependency issues on Vercel/other deployment platforms
+/**
+ * Auth types consumed by EZAuth clients and middleware.
+ *
+ * Wire-level shapes (login/register/token/verify request bodies, the public
+ * `AuthUser` shape, email overrides) come from `@ezstart/api-contracts` — the
+ * single source of truth shared with `apps/ezauth/api`. Types defined here
+ * are SDK-specific extensions (extra RBAC fields the SDK expects on `AuthUser`,
+ * `AuthToken`, `AuthCode`, `JWTPayload`) or thin aliases kept for backward
+ * compatibility with existing consumers.
+ */
 
-export interface AuthUser {
-  _id: string
-  email: string
-  username: string
-  firstName?: string
-  lastName?: string
-  avatar?: string
-  isVerified: boolean
-  apps: string[]
+import type {
+  AuthUser as AuthUserContract,
+  EmailOverride,
+  LoginRequest as LoginRequestContract,
+  RegisterRequest as RegisterRequestContract,
+  SupportedLocale,
+  TokenRequest as TokenRequestContract,
+} from '@ezstart/api-contracts'
 
+/**
+ * Public user shape returned by EZAuth endpoints (`/me`, `/token`, `/refresh`).
+ *
+ * Extends the contract shape with SDK-/app-specific fields not yet part of the
+ * wire contract (RBAC split, presence, onboarding state, promo). These are
+ * all optional so consumers typing against the contract `AuthUser` remain
+ * compatible.
+ */
+export interface AuthUser extends AuthUserContract {
   // RBAC - Role-Based Access Control
-  globalRoles?: string[] // Cross-app roles (only 'superadmin' allowed)
-  appRoles?: Record<string, string[]> // App-specific roles: { 'green-pulse': ['admin'], 'ezbill': ['beta-tester'] }
-  permissions?: string[] // ['theme:edit', 'users:manage', 'analytics:view']
-  features?: string[] // ['beta-features', 'early-access', 'advanced-analytics']
-
-  // Metadata
-  organizationId?: string // For client managers
-  managedBy?: string // User ID of manager (for clients)
+  /** Cross-app roles (only 'superadmin' allowed). */
+  globalRoles?: string[]
+  /** App-specific roles: `{ 'myapp': ['admin'], 'otherapp': ['beta-tester'] }`. */
+  appRoles?: Record<string, string[]>
 
   // Promo
-  promoCode?: string // Promo code from referral/campaign
+  /** Promo code from referral/campaign. */
+  promoCode?: string
 
   // Password state
-  hasSetOwnPassword?: boolean // false for quick-signup users who haven't set a password yet
+  /** False for quick-signup users who haven't set a password yet. */
+  hasSetOwnPassword?: boolean
 
   // Presence
-  lastActiveAt?: string | null // ISO date string of last activity
-
-  createdAt: string
-  updatedAt: string
+  /** ISO date string of last activity. */
+  lastActiveAt?: string | null
 }
 
 export interface AuthToken {
@@ -41,49 +53,34 @@ export interface AuthToken {
   user: AuthUser
 }
 
-export interface LoginRequest {
-  email: string
-  password: string
-  app: string
-  redirect_uri?: string
-}
+/** Login request body — re-exported from `@ezstart/api-contracts`. */
+export type LoginRequest = LoginRequestContract
 
 /**
  * Per-send email overrides forwarded to `@ezstart/email-service` templates.
- * Mirrors `EmailTemplateOverrides` there — kept in sync manually to avoid a
- * runtime dependency cycle (`auth-sdk` stays email-provider agnostic).
+ *
+ * Alias of `EmailOverride` from `@ezstart/api-contracts` — kept under this
+ * name for backward compatibility with existing auth-sdk consumers.
  */
-export interface EmailOverrideRequest {
-  subject?: string
-  heading?: string
-  intro?: string
-  ctaLabel?: string
-  outro?: string
-  from?: string
-  replyTo?: string
-  bodyHtml?: string
+export type EmailOverrideRequest = EmailOverride
+
+/** Supported locales for user-facing emails — alias of `SupportedLocale`. */
+export type SupportedEmailLocale = SupportedLocale
+
+/**
+ * Register request body.
+ *
+ * Same shape as `RegisterRequest` from `@ezstart/api-contracts`, but `locale`
+ * stays optional here because consumers predate the contract's
+ * `.default('en')` and rely on omitting the field. Server-side validation
+ * (via the contract schema) applies the default regardless.
+ */
+export interface RegisterRequest extends Omit<RegisterRequestContract, 'locale'> {
+  locale?: SupportedLocale
 }
 
-export type SupportedEmailLocale = 'en' | 'fr' | 'vi'
-
-export interface RegisterRequest {
-  email: string
-  username: string
-  password: string
-  firstName?: string
-  lastName?: string
-  app: string
-  redirect_uri?: string
-  promoCode?: string // Promo code from referral/campaign
-  locale?: SupportedEmailLocale
-  emailOverride?: EmailOverrideRequest
-}
-
-export interface TokenRequest {
-  code: string
-  app: string
-  redirect_uri?: string
-}
+/** Token-exchange request body — re-exported from `@ezstart/api-contracts`. */
+export type TokenRequest = TokenRequestContract
 
 export interface AuthCode {
   code: string

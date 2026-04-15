@@ -12,21 +12,21 @@ import {
   type UseQueryOptions,
   type UseQueryResult,
 } from '@tanstack/react-query'
+import type { PaginatedResponse } from '@ezstart/api-contracts'
 import type { ApiError } from './api-error.js'
 import type { ApiCallOptions, HttpMethod, QueryParams } from './types.js'
 
 /**
- * Standard paginated response shape.
+ * Standard paginated response shape — re-exported from
+ * `@ezstart/api-contracts` for backward compatibility with consumers that
+ * import it from `@ezstart/api-sdk`.
  *
  * Per monorepo convention, every GET list endpoint MUST return:
  * `{ success: true, data: T[], meta: { total, limit, offset } }`.
  *
  * This is the unwrapped shape consumed by `useInfiniteQuery`.
  */
-export type PaginatedResponse<T> = {
-  data: T[]
-  meta: { total: number; limit: number; offset: number }
-}
+export type { PaginatedResponse }
 
 /**
  * Options accepted by `apiQuery(appName).useQuery`.

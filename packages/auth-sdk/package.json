@@ -25,9 +25,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/api-contracts": "workspace:*",
+    "@ezstart/api-sdk": "workspace:*",
     "@ezstart/capture-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "@ezstart/api-sdk": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "react-hook-form": "^7.68.0",

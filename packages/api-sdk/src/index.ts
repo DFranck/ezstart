@@ -78,6 +78,28 @@ export type {
   TokenStore,
 } from './core/types.js'
 
+// ---------------------------------------------------------------------------
+// Wire contracts re-exports (@ezstart/api-contracts — source of truth).
+// ---------------------------------------------------------------------------
+// Re-exposed here so SDK consumers have a single import site for both the
+// transport (SDK) and the wire shape (contracts). Importing the same symbols
+// directly from `@ezstart/api-contracts` is equivalent.
+
+export type {
+  ApiResponse,
+  ErrorPayload,
+  ErrorResponse,
+  PaginationMeta,
+  PaginationQuery,
+  SuccessResponse,
+} from '@ezstart/api-contracts'
+export {
+  ErrorCode,
+  isErrorResponse,
+  isSuccessResponse,
+  PaginationQuerySchema,
+} from '@ezstart/api-contracts'
+
 /**
  * Explicit helper for calling third-party HTTP APIs (GitHub, npm, etc.).
  *

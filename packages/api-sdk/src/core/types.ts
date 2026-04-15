@@ -3,24 +3,34 @@
  *
  * No coupling to `@ezstart/config`, `@ezstart/logger`, or any monorepo-
  * specific concept. Consumers configure the client via `createApiClient(config)`.
+ *
+ * Wire-level primitives (`ApiMeta`, `ErrorPayload`, `SuccessResponse`, ...) live
+ * in `@ezstart/api-contracts` — the single source of truth shared with the
+ * server. This module re-exports `ApiMeta` from there so SDK consumers still
+ * see the same symbol.
  */
+
+import type { ApiMeta as ContractsApiMeta } from '@ezstart/api-contracts'
 
 /** HTTP methods supported by the SDK. */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 /**
  * Standard `meta` shape of paginated or envelope responses.
+ *
+ * Re-exported from `@ezstart/api-contracts` so client and server agree on the
+ * exact wire shape.
  */
-export type ApiMeta = {
-  total?: number
-  limit?: number
-  offset?: number
-  [key: string]: unknown
-}
+export type ApiMeta = ContractsApiMeta
 
 /**
- * Raw shape of error payloads returned by APIs.
- * Intentionally permissive to support legacy + nested formats.
+ * Raw shape of error payloads accepted by {@link parseApiError}.
+ *
+ * Intentionally permissive — supports legacy (`{ error: 'string' }`), nested
+ * (`{ error: { message, code } }`), flat (`{ message, code }`) and Zod
+ * validation (`{ details: [...] }`) formats. The strict on-the-wire shape is
+ * `ErrorPayload` in `@ezstart/api-contracts`; this type is the PARSE-time
+ * superset the client is prepared to normalize.
  */
 export type ApiErrorPayload = {
   error?: unknown

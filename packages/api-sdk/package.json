@@ -43,6 +43,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@ezstart/api-contracts": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*"
   },
