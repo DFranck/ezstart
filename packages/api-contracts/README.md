@@ -20,10 +20,9 @@ import { isSuccessResponse, type ApiResponse } from '@ezstart/api-contracts'
 const body: ApiResponse<{ id: string; email: string }> = await fetchJson('/api/me')
 
 if (isSuccessResponse(body)) {
-  console.log(body.data.email)
+  body.data.email // → string (fully typed)
 } else {
-  // body.error is ErrorPayload | string
-  console.error(body.error)
+  body.error // → ErrorPayload | string (narrow at use-site)
 }
 ```
 
@@ -116,6 +115,10 @@ Zod schemas + inferred types for the core auth endpoints:
 - `EmailOverride` (optional per-send template overrides)
 
 More specialized flows (2FA enrollment, session listing, SSO authorize/exchange) are intentionally omitted from this first cut — they can be added without breaking these contracts.
+
+## Migration
+
+This is a **new** package — no prior version to migrate from. Consumers that previously defined envelope / pagination / error shapes locally can adopt `@ezstart/api-contracts` additively: re-export the canonical types from here and delete the local duplicates when ready. Adoption is per-scope (envelope OR pagination OR errors OR auth), nothing is all-or-nothing.
 
 ## Adoption
 

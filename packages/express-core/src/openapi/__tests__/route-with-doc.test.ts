@@ -11,38 +11,57 @@ type RegisteredPathEntry = {
 }
 
 /**
+ * Shape of Express 4/5 Router's internal `.stack` layers. Not exported by
+ * Express itself — we type it narrowly here so the introspection helpers
+ * below stay `any`-free.
+ */
+type RouteLayer = {
+  route?: {
+    path: string
+    methods: Record<string, unknown>
+  }
+  name?: string
+  handle?: IRouter & { stack?: RouteLayer[] }
+  regexp?: RegExp & { fast_slash?: boolean }
+}
+
+type RouterInternals = IRouter & { stack?: RouteLayer[] }
+
+type RegistryRouteDefinition = {
+  type: 'route'
+  route: { method: string; path: string }
+}
+
+/**
  * Collect every registered (method, path) tuple in an Express router, walking
  * sub-routers that were mounted via `router.use(prefix, subRouter)`.
  */
 function collectRoutes(router: IRouter, prefix = ''): RegisteredPathEntry[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stack: unknown[] = (router as any).stack ?? []
+  const stack: RouteLayer[] = (router as RouterInternals).stack ?? []
   const entries: RegisteredPathEntry[] = []
 
   for (const layer of stack) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const l = layer as any
-    if (l.route) {
-      // Leaf route: l.route.path is relative to the current router
-      const methods = Object.keys(l.route.methods) as RegisteredPathEntry['method'][]
+    if (layer.route) {
+      // Leaf route: layer.route.path is relative to the current router
+      const methods = Object.keys(layer.route.methods) as RegisteredPathEntry['method'][]
       for (const method of methods) {
-        entries.push({ type: 'route', method, path: prefix + l.route.path })
+        entries.push({ type: 'route', method, path: prefix + layer.route.path })
       }
-    } else if (l.name === 'router' && l.handle?.stack) {
+    } else if (layer.name === 'router' && layer.handle?.stack) {
       // Nested sub-router mounted via router.use(basePath, subRouter)
       // Express builds a regex from the mount path — extract the human form
-      // from `l.regexp.fast_slash` (true means mounted on '/') or fall back to
-      // parsing the regex source.
+      // from `layer.regexp.fast_slash` (true means mounted on '/') or fall
+      // back to parsing the regex source.
       let mountPath = ''
-      if (!l.regexp?.fast_slash) {
-        const regexSource = String(l.regexp)
+      if (!layer.regexp?.fast_slash) {
+        const regexSource = String(layer.regexp)
         // Match patterns like /^\/basepath\/?(?=\/|$)/i
         const match = regexSource.match(/^\/\^\\?\/([^\\?]+)/)
         if (match && match[1]) {
           mountPath = '/' + match[1].replace(/\\\//g, '/')
         }
       }
-      entries.push(...collectRoutes(l.handle, prefix + mountPath))
+      entries.push(...collectRoutes(layer.handle, prefix + mountPath))
     }
   }
 
@@ -50,13 +69,9 @@ function collectRoutes(router: IRouter, prefix = ''): RegisteredPathEntry[] {
 }
 
 function getRegistryPaths(registry: OpenAPIRegistry): Array<{ method: string; path: string }> {
-  return registry.definitions
+  return (registry.definitions as RegistryRouteDefinition[])
     .filter(d => d.type === 'route')
-    .map(d => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const route = (d as any).route
-      return { method: route.method, path: route.path }
-    })
+    .map(d => ({ method: d.route.method, path: d.route.path }))
 }
 
 describe('createRouterWithDoc', () => {
