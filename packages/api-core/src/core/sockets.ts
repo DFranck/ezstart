@@ -1,5 +1,5 @@
 /**
- * @internal Optional Socket.IO wrapper.
+ * Optional Socket.IO wrapper.
  *
  * `socket.io` is declared as an optional peer dependency — this module only
  * loads it when `createSocketServer()` is actually called, so consumers who
@@ -7,8 +7,8 @@
  */
 
 import type { Server as HttpServer } from 'http'
-import type { ServerLogger } from '../types.js'
-import { silentLogger } from './logger.js'
+import type { ServerLogger } from './types.js'
+import { silentLogger } from './internal/logger.js'
 
 /**
  * Config accepted by `createSocketServer`.

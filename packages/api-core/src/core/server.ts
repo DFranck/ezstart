@@ -8,7 +8,7 @@ import type { Express, Router } from 'express'
 import { createServer, type Server as HttpServer } from 'http'
 import * as swaggerUi from 'swagger-ui-express'
 import { silentLogger } from './internal/logger.js'
-import type { DbConnector } from './internal/db-connector.js'
+import type { DbConnector } from './db-connector.js'
 import type { ServerLogger } from './types.js'
 
 /**

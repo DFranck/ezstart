@@ -69,10 +69,10 @@ export type {
 } from './core/types.js'
 
 // DB connector contract (abstract — consumers inject their impl).
-export type { DbConnector } from './core/internal/db-connector.js'
+export type { DbConnector } from './core/db-connector.js'
 
 // Optional Socket.IO helper (dynamic import — truly optional).
-export { createSocketServer, type SocketServerConfig } from './core/internal/sockets.js'
+export { createSocketServer, type SocketServerConfig } from './core/sockets.js'
 
 // ---------------------------------------------------------------------------
 // @ezstart monorepo wrapper (optional — requires @ezstart/config + @ezstart/logger)

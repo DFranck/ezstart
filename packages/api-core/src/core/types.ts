@@ -103,7 +103,7 @@ export type ServerConfig = {
     verifyToken: TokenVerifier
   }
   /** Optional DB connector. The core never instantiates one — it just awaits it on boot. */
-  db?: import('./internal/db-connector.js').DbConnector
+  db?: import('./db-connector.js').DbConnector
   /** Raw body routes (webhooks). Registered BEFORE the JSON parser. */
   rawBodyRoutes?: string[]
   /** Path for the health endpoint. Default `/api/health`. */
