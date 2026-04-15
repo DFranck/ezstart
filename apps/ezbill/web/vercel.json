@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"master\" ]; then exit 0; else npx turbo-ignore web-ezbill; fi",
+  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"master\" ] && [ \"$VERCEL_GIT_COMMIT_REF\" != \"staging\" ]; then exit 0; else npx turbo-ignore web-ezbill; fi",
   "buildCommand": "pnpm turbo build --filter=web-ezbill...",
   "outputDirectory": ".next",
   "installCommand": "pnpm install --frozen-lockfile",
@@ -27,7 +27,8 @@
   ],
   "git": {
     "deploymentEnabled": {
-      "master": true
+      "master": true,
+      "staging": true
     }
   }
 }
