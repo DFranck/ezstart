@@ -1,71 +1,48 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
 import { Card, Div, H1, Main, P } from '@ezstart/ui/components'
 import { PayAdminDashboard } from '@ezstart/pay-sdk'
-import { hasAnyRole } from '@ezstart/auth-sdk'
-
-// ========================================
-// Auth helpers
-// ========================================
-
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = localStorage.getItem('ezauth-storage')
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      return parsed?.state?.accessToken || null
-    }
-  } catch {}
-  return null
-}
-
-function isAdmin(): boolean {
-  if (typeof window === 'undefined') return false
-  try {
-    const raw = localStorage.getItem('ezauth-storage')
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      const user = parsed?.state?.user
-      if (!user) return false
-      return hasAnyRole(user, ['superadmin', 'admin'], 'ezpay')
-    }
-  } catch {}
-  return false
-}
-
-// ========================================
-// Component
-// ========================================
+import { RequireAuth, RequireRole } from '@ezstart/auth-sdk'
 
 export default function AdminPage() {
   const t = useTranslations('admin')
 
-  // Auth state
-  const [token, setToken] = useState<string | null>(null)
-  const [authChecked, setAuthChecked] = useState(false)
+  return (
+    <RequireAuth
+      fallbackComponent={
+        <Main className="container mx-auto py-12 px-4">
+          <Div className="max-w-md mx-auto text-center">
+            <Card className="p-8">
+              <H1 className="text-2xl font-bold mb-4">{t('accessRequired')}</H1>
+              <P className="text-muted-foreground">{t('accessRequiredDescription')}</P>
+            </Card>
+          </Div>
+        </Main>
+      }
+    >
+      <RequireRole
+        roles={['superadmin', 'admin']}
+        appName="ezpay"
+        fallbackComponent={
+          <Main className="container mx-auto py-12 px-4">
+            <Div className="max-w-md mx-auto text-center">
+              <Card className="p-8">
+                <H1 className="text-2xl font-bold mb-4">{t('accessRequired')}</H1>
+                <P className="text-muted-foreground">{t('accessRequiredDescription')}</P>
+              </Card>
+            </Div>
+          </Main>
+        }
+      >
+        <AdminContent />
+      </RequireRole>
+    </RequireAuth>
+  )
+}
 
-  useEffect(() => {
-    setToken(getToken())
-    setAuthChecked(true)
-  }, [])
-
-  // ---- Auth guard ----
-  if (!authChecked) return null
-  if (!token || !isAdmin()) {
-    return (
-      <Main className="container mx-auto py-12 px-4">
-        <Div className="max-w-md mx-auto text-center">
-          <Card className="p-8">
-            <H1 className="text-2xl font-bold mb-4">{t('accessRequired')}</H1>
-            <P className="text-muted-foreground">{t('accessRequiredDescription')}</P>
-          </Card>
-        </Div>
-      </Main>
-    )
-  }
+function AdminContent() {
+  const t = useTranslations('admin')
 
   return (
     <PayAdminDashboard

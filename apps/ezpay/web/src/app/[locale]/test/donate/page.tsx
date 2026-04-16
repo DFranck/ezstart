@@ -28,7 +28,7 @@ export default function TestDonatePage() {
       {/* Donation Wall */}
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle>Donation Wall</CardTitle>
+          <CardTitle>{t('sections.donations')}</CardTitle>
         </CardHeader>
         <CardContent>
           <DonationWall limit={20} texts={{ noDonationsText: t('noDonations') }} />
