@@ -11,6 +11,7 @@ import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
 import { validatePromo, calculateDiscount, incrementUsage } from '../../services/promo.js'
+import { resolveConnectFee } from '../../services/connect-fee.js'
 import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -92,6 +93,9 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
+    // Resolve Connect fee if the user has an active connected account
+    const connectFee = userId ? await resolveConnectFee(userId, Math.round(finalAmount * 100)) : null
+
     const provider = getProvider()
     const session = await provider.createCheckoutSession({
       amount: finalAmount, // Discounted amount OK for one-time purchases
@@ -115,6 +119,13 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
             code: promoCode,
           }
         : undefined,
+      connect:
+        connectFee?.isConnect && connectFee.stripeAccountId && connectFee.applicationFeeAmount
+          ? {
+              destinationAccountId: connectFee.stripeAccountId,
+              applicationFeeAmount: connectFee.applicationFeeAmount,
+            }
+          : undefined,
     })
 
     // Detect live vs test mode from Stripe key

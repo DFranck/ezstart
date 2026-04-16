@@ -5,7 +5,9 @@ import { subscriptionsRegistries, subscriptionsRouters } from './subscriptions/i
 import { paymentsRegistries, paymentsRouters } from './payments/index.js'
 import { promosRegistries, promosRouters } from './promos/index.js'
 import { plansRegistries, plansRouters } from './plans/index.js'
+import { connectRegistries, connectRouters } from './connect/index.js'
 import webhooksRouter from './webhooks.js'
+import webhooksConnectRouter from './webhooks-connect.js'
 import testProductsRouter from './test-products.js'
 import type { Router as ExpressRouter } from 'express'
 
@@ -18,7 +20,9 @@ subscriptionsRouters.forEach(r => router.use('/', r))
 paymentsRouters.forEach(r => router.use('/', r))
 promosRouters.forEach(r => router.use('/', r))
 plansRouters.forEach(r => router.use('/', r))
+connectRouters.forEach(r => router.use('/', r))
 router.use('/', webhooksRouter)
+router.use('/', webhooksConnectRouter)
 router.use('/', testProductsRouter)
 
 // Health check
@@ -33,5 +37,6 @@ export const registries = [
   ...paymentsRegistries,
   ...promosRegistries,
   ...plansRegistries,
+  ...connectRegistries,
 ]
 export default router

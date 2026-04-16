@@ -12,9 +12,9 @@ import {
 } from '@ezstart/api-core'
 import routes, { registries } from './routes/index.js'
 
-// Create pre-configured server with Stripe webhook raw-body route
+// Create pre-configured server with Stripe webhook raw-body routes
 const server = createEzstartServer('ezpay', {
-  rawBodyRoutes: ['/api/webhooks/stripe'],
+  rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
 })
 const { app } = server
 

@@ -95,6 +95,16 @@ export class StripeProvider implements IPaymentProvider {
       unitAmount = this.applyDiscountToAmount(unitAmount, options.discount)
     }
 
+    // Build payment_intent_data with optional Connect params
+    const paymentIntentData: Record<string, unknown> = {}
+    if (options.customerEmail) {
+      paymentIntentData.receipt_email = options.customerEmail
+    }
+    if (options.connect) {
+      paymentIntentData.application_fee_amount = options.connect.applicationFeeAmount
+      paymentIntentData.transfer_data = { destination: options.connect.destinationAccountId }
+    }
+
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -111,14 +121,8 @@ export class StripeProvider implements IPaymentProvider {
       success_url: options.successUrl,
       cancel_url: options.cancelUrl,
       metadata: options.metadata,
-      ...(options.customerEmail
-        ? {
-            customer_email: options.customerEmail,
-            payment_intent_data: {
-              receipt_email: options.customerEmail,
-            },
-          }
-        : {}),
+      ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
+      ...(Object.keys(paymentIntentData).length > 0 ? { payment_intent_data: paymentIntentData } : {}),
     })
 
     return { sessionId: session.id, url: session.url }
@@ -130,6 +134,13 @@ export class StripeProvider implements IPaymentProvider {
     if (options.discount) {
       const coupon = await this.createStripeCoupon(options.discount, options.currency)
       discountsParam = [{ coupon: coupon.id }]
+    }
+
+    // Build subscription_data with optional Connect params
+    const subscriptionData: Record<string, unknown> = {}
+    if (options.connect) {
+      subscriptionData.application_fee_percent = options.connect.applicationFeeAmount
+      subscriptionData.transfer_data = { destination: options.connect.destinationAccountId }
     }
 
     const session = await this.stripe.checkout.sessions.create({
@@ -154,6 +165,9 @@ export class StripeProvider implements IPaymentProvider {
       metadata: options.metadata,
       ...(discountsParam ? { discounts: discountsParam } : {}),
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
+      ...(Object.keys(subscriptionData).length > 0
+        ? { subscription_data: subscriptionData }
+        : {}),
     })
 
     return { sessionId: session.id, url: session.url }

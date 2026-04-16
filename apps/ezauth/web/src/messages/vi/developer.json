@@ -12,7 +12,8 @@
     "expires": "Expires",
     "actions": "Actions",
     "never": "Never",
-    "noExpiry": "No expiry"
+    "noExpiry": "No expiry",
+    "usage": "Usage"
   },
   "status": {
     "active": "Active",
@@ -50,6 +51,19 @@
     "confirm": "This will revoke the current key and create a new one with the same configuration.",
     "submit": "Rotate",
     "success": "API key rotated"
+  },
+  "usage": {
+    "unlimited": "Unlimited",
+    "detailsTitle": "Usage — {name}",
+    "detailsDescription": "API key usage statistics for the current billing period",
+    "close": "Close",
+    "fetchError": "Failed to load usage data",
+    "quotaTitle": "Monthly Quota",
+    "quotaLabel": "{used} / {limit} requests",
+    "remaining": "{count} requests remaining",
+    "topEndpoints": "Top Endpoints",
+    "dailyBreakdown": "Daily Breakdown (last 14 days)",
+    "noUsage": "No usage recorded yet"
   },
   "retry": "Retry",
   "errors": {

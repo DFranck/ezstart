@@ -13,6 +13,7 @@ export interface ApiKeyDocument extends Document {
   expiresAt: Date | null
   createdAt: Date
   revokedAt: Date | null
+  quotaMonthly: number | null
 }
 
 const apiKeySchema = new Schema<ApiKeyDocument>(
@@ -62,6 +63,10 @@ const apiKeySchema = new Schema<ApiKeyDocument>(
     revokedAt: {
       type: Date,
       default: null,
+    },
+    quotaMonthly: {
+      type: Number,
+      default: 1000,
     },
   },
   {

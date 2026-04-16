@@ -53,6 +53,13 @@ export interface DiscountInfo {
 // Checkout Types
 // ========================================
 
+export interface ConnectParams {
+  /** Stripe connected account ID (acct_xxx) — destination for the payment */
+  destinationAccountId: string
+  /** Platform fee in minor currency units (cents) */
+  applicationFeeAmount: number
+}
+
 export interface CheckoutOptions {
   amount: number
   currency: string
@@ -62,6 +69,8 @@ export interface CheckoutOptions {
   cancelUrl: string
   customerEmail?: string
   discount?: DiscountInfo
+  /** Stripe Connect params — routes payment to a connected account with platform fee */
+  connect?: ConnectParams
 }
 
 export interface SubscriptionCheckoutOptions extends CheckoutOptions {

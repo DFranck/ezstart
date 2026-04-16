@@ -9,6 +9,21 @@ export interface ApiKeyItem {
   expiresAt: string | null
   createdAt: string
   revokedAt: string | null
+  quotaMonthly: number | null
+  usageThisMonth: number
+}
+
+export interface ApiKeyUsageResponse {
+  currentMonth: {
+    requestCount: number
+    topEndpoints: { endpoint: string; count: number }[]
+  }
+  daily: { date: string; requestCount: number }[]
+  quota: {
+    limit: number | null
+    used: number
+    remaining: number | null
+  }
 }
 
 export interface CreateApiKeyResponse {

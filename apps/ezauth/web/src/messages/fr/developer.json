@@ -12,7 +12,8 @@
     "expires": "Expiration",
     "actions": "Actions",
     "never": "Jamais",
-    "noExpiry": "Sans expiration"
+    "noExpiry": "Sans expiration",
+    "usage": "Utilisation"
   },
   "status": {
     "active": "Active",
@@ -50,6 +51,19 @@
     "confirm": "Cela révoquera la clé actuelle et en créera une nouvelle avec la même configuration.",
     "submit": "Renouveler",
     "success": "Clé API renouvelée"
+  },
+  "usage": {
+    "unlimited": "Illimité",
+    "detailsTitle": "Utilisation — {name}",
+    "detailsDescription": "Statistiques d'utilisation de la clé API pour la période en cours",
+    "close": "Fermer",
+    "fetchError": "Impossible de charger les données d'utilisation",
+    "quotaTitle": "Quota mensuel",
+    "quotaLabel": "{used} / {limit} requêtes",
+    "remaining": "{count} requêtes restantes",
+    "topEndpoints": "Endpoints les plus utilisés",
+    "dailyBreakdown": "Détail journalier (14 derniers jours)",
+    "noUsage": "Aucune utilisation enregistrée"
   },
   "retry": "Réessayer",
   "errors": {

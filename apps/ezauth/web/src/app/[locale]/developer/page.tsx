@@ -24,6 +24,7 @@ import type { ApiKeyItem, CreateApiKeyResponse } from './types'
 import { ApiKeysTable } from './components/ApiKeysTable'
 import { CreateKeyModal } from './components/CreateKeyModal'
 import { KeyCreatedModal } from './components/KeyCreatedModal'
+import { UsageDetailsModal } from './components/UsageDetailsModal'
 
 export default function DeveloperPage() {
   const t = useTranslations('developer')
@@ -34,6 +35,7 @@ export default function DeveloperPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [createdKey, setCreatedKey] = useState<string | null>(null)
   const [revokeTargetId, setRevokeTargetId] = useState<string | null>(null)
+  const [usageKeyId, setUsageKeyId] = useState<string | null>(null)
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -110,6 +112,9 @@ export default function DeveloperPage() {
     },
   })
 
+  // Find the key name for the usage modal
+  const usageKeyName = apiKeys.find((k) => k.id === usageKeyId)?.name ?? ''
+
   if (!isAuthReady || !user) {
     return (
       <Div className="flex items-center justify-center min-h-[50vh]">
@@ -158,6 +163,7 @@ export default function DeveloperPage() {
             keys={apiKeys}
             onRevoke={setRevokeTargetId}
             onRotate={(id) => rotateMutation.mutate(id)}
+            onViewUsage={setUsageKeyId}
             isRevoking={revokeMutation.isPending}
             isRotating={rotateMutation.isPending}
           />
@@ -177,6 +183,14 @@ export default function DeveloperPage() {
         isOpen={!!createdKey}
         onClose={() => setCreatedKey(null)}
         rawKey={createdKey}
+      />
+
+      {/* Usage Details Modal */}
+      <UsageDetailsModal
+        isOpen={!!usageKeyId}
+        onClose={() => setUsageKeyId(null)}
+        keyId={usageKeyId}
+        keyName={usageKeyName}
       />
 
       {/* Revoke Confirmation Dialog */}

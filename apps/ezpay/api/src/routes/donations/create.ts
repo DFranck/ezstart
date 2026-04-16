@@ -10,6 +10,7 @@ import {
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
+import { resolveConnectFee } from '../../services/connect-fee.js'
 import { optionalAuthMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -108,6 +109,9 @@ const createDonationHandler = async (req: Request, res: Response) => {
     // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
+    // Resolve Connect fee if the user has an active connected account
+    const connectFee = userId ? await resolveConnectFee(userId, Math.round(amount * 100)) : null
+
     // Create checkout session via provider
     const provider = getProvider()
     const session = await provider.createCheckoutSession({
@@ -125,6 +129,13 @@ const createDonationHandler = async (req: Request, res: Response) => {
       },
       successUrl: `${baseUrl}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/donate/cancel`,
+      connect:
+        connectFee?.isConnect && connectFee.stripeAccountId && connectFee.applicationFeeAmount
+          ? {
+              destinationAccountId: connectFee.stripeAccountId,
+              applicationFeeAmount: connectFee.applicationFeeAmount,
+            }
+          : undefined,
     })
 
     // Create payment record in DB

@@ -4,16 +4,25 @@ import { type ColumnDef, Badge, Button, DataTable, Div, Span, Code } from '@ezst
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 import type { ApiKeyItem } from '../types'
+import { UsageBadge } from './UsageBadge'
 
 interface ApiKeysTableProps {
   keys: ApiKeyItem[]
   onRevoke: (id: string) => void
   onRotate: (id: string) => void
+  onViewUsage: (id: string) => void
   isRevoking: boolean
   isRotating: boolean
 }
 
-export function ApiKeysTable({ keys, onRevoke, onRotate, isRevoking, isRotating }: ApiKeysTableProps) {
+export function ApiKeysTable({
+  keys,
+  onRevoke,
+  onRotate,
+  onViewUsage,
+  isRevoking,
+  isRotating,
+}: ApiKeysTableProps) {
   const t = useTranslations('developer')
   const locale = useLocale()
 
@@ -56,6 +65,23 @@ export function ApiKeysTable({ keys, onRevoke, onRotate, isRevoking, isRotating 
         },
       },
       {
+        id: 'usage',
+        header: t('table.usage'),
+        cell: ({ row }) => {
+          const { quotaMonthly, usageThisMonth, status } = row.original
+          if (status === 'revoked') return null
+          return (
+            <Div
+              className="cursor-pointer"
+              onClick={() => onViewUsage(row.original.id)}
+            >
+              <UsageBadge used={usageThisMonth} quota={quotaMonthly} />
+            </Div>
+          )
+        },
+        enableSorting: false,
+      },
+      {
         accessorKey: 'createdAt',
         header: t('table.created'),
         cell: ({ row }) => formatDate(row.original.createdAt),
@@ -64,12 +90,6 @@ export function ApiKeysTable({ keys, onRevoke, onRotate, isRevoking, isRotating 
         accessorKey: 'lastUsedAt',
         header: t('table.lastUsed'),
         cell: ({ row }) => formatDate(row.original.lastUsedAt),
-      },
-      {
-        accessorKey: 'expiresAt',
-        header: t('table.expires'),
-        cell: ({ row }) =>
-          row.original.expiresAt ? formatDate(row.original.expiresAt) : t('table.noExpiry'),
       },
       {
         id: 'actions',
@@ -100,7 +120,7 @@ export function ApiKeysTable({ keys, onRevoke, onRotate, isRevoking, isRotating 
         enableSorting: false,
       },
     ],
-    [t, locale, onRevoke, onRotate, isRevoking, isRotating]
+    [t, locale, onRevoke, onRotate, onViewUsage, isRevoking, isRotating]
   )
 
   return (
