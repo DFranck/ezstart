@@ -86,7 +86,21 @@ export class OAuthService {
     const existingUser = await AuthUserModel.findOne({ email: profile.email })
 
     if (existingUser) {
-      if (!profile.emailVerified || !existingUser.isVerified) {
+      // QuickSignup accounts (random password, never verified) can be safely
+      // auto-linked when the OAuth provider has verified the email — the local
+      // account was never "really" owned by the user via credentials.
+      const isQuickSignupGhost =
+        !existingUser.isVerified &&
+        !existingUser.hasSetOwnPassword &&
+        profile.emailVerified
+
+      if (isQuickSignupGhost) {
+        logger.info(
+          `🔗 [OAuth] Auto-linking ${profile.provider} to quickSignup ghost account ${existingUser._id} — provider verified email`
+        )
+        existingUser.isVerified = true
+        await existingUser.save()
+      } else if (!profile.emailVerified || !existingUser.isVerified) {
         logger.warn(
           {
             provider: profile.provider,
