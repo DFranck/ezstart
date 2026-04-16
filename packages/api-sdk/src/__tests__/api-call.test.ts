@@ -293,22 +293,9 @@ describe('apiCall', () => {
       jsonResponse({ success: false, error: { message: 'Business rule X' } }, { status: 200 })
     )
 
-    let caught: unknown
-    try {
-      await apiCall('/business', {
-        appName: 'ezauth',
-        baseUrl: TEST_BASE,
-        skipAuth: true,
-      })
-    } catch (err) {
-      caught = err
-    }
-
-    expect(ApiError.isApiError(caught)).toBe(true)
-    expect(caught).toMatchObject({
-      status: 200,
-      message: 'Business rule X',
-    })
+    await expect(
+      apiCall('/business', { appName: 'ezauth', baseUrl: TEST_BASE, skipAuth: true })
+    ).rejects.toMatchObject({ status: 200, message: 'Business rule X' })
   })
 
   it('handles empty (204-style) response without throwing', async () => {
