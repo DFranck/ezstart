@@ -317,6 +317,12 @@ export function getCurrentEnvironment(): Environment {
       return 'production'
     }
 
+    // Staging: Vercel preview deploys of the 'staging' branch
+    // Pattern: *-git-staging-*.vercel.app
+    if (hostname.includes('-git-staging-') && hostname.endsWith('.vercel.app')) {
+      return 'staging'
+    }
+
     // Staging (explicit subdomain pattern)
     if (hostname.startsWith('staging.') || hostname.startsWith('staging-')) {
       return 'staging'
