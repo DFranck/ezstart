@@ -1,9 +1,43 @@
 'use client'
-import { Spinner } from '@ezstart/ui/components'
+import { parseApiError } from '@ezstart/api-sdk'
+import { Button, Div, P, Spinner } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useAuth } from './provider.js'
+
+/** Module-level lock to prevent duplicate OAuth code exchanges. */
+const processingLocks = new Set<string>()
+
+/**
+ * Extract a human-readable message from an unknown auth error.
+ *
+ * Handles: envelope `{ error: { message, code } }`, flat `{ error: string }`,
+ * native `Error`, `Error` whose message is `[object Object]` (the bug this fixes),
+ * plain strings, and unknown/undefined shapes.
+ */
+function extractAuthErrorMessage(err: unknown, fallback: string): string {
+  // 1. Try API envelope parser first (handles { error: { message } }, details[], etc.)
+  const parsed = parseApiError(err)
+  if (parsed && parsed !== '[object Object]') return parsed
+
+  // 2. If native Error, check its `.message` but reject `[object Object]` (the bug)
+  if (err instanceof Error && err.message && err.message !== '[object Object]') {
+    return err.message
+  }
+
+  // 3. Try to pull a message from common nested shapes on Error.cause or similar
+  if (err instanceof Error && err.cause !== undefined) {
+    const fromCause = parseApiError(err.cause)
+    if (fromCause && fromCause !== '[object Object]') return fromCause
+  }
+
+  // 4. Plain string
+  if (typeof err === 'string' && err.length > 0 && err !== '[object Object]') return err
+
+  // 5. Last resort
+  return fallback
+}
 
 interface AuthCallbackPageProps {
   /** Redirect path after successful authentication. Defaults to '/' */
@@ -14,10 +48,12 @@ interface AuthCallbackPageProps {
   redirectMessage?: string
   /** Custom processing message. Defaults to 'Processing authentication...' */
   processingMessage?: string
+  /** Custom error title. Defaults to 'Authentication failed' */
+  errorTitle?: string
+  /** Custom no-code error message. Defaults to 'No authorization code found' */
+  noCodeMessage?: string
   /** Custom error button text. Defaults to 'Go Back' */
   errorButtonText?: string
-  /** Custom error button className */
-  errorButtonClassName?: string
 }
 
 function CallbackContent({
@@ -25,8 +61,9 @@ function CallbackContent({
   successMessage = 'Authentication successful!',
   redirectMessage = 'Redirecting...',
   processingMessage = 'Processing authentication...',
+  errorTitle = 'Authentication failed',
+  noCodeMessage = 'No authorization code found',
   errorButtonText = 'Go Back',
-  errorButtonClassName = 'px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
 }: AuthCallbackPageProps): React.ReactElement {
   const { handleCallback } = useAuth()
   const router = useRouter()
@@ -45,7 +82,7 @@ function CallbackContent({
       window.history.replaceState({}, document.title, window.location.pathname)
     } else if (!authCode && !code) {
       setStatus('error')
-      setError('No authorization code found')
+      setError(noCodeMessage)
     }
   }, [searchParams, code])
 
@@ -55,19 +92,15 @@ function CallbackContent({
       return
     }
 
-    // Global lock key based on the code to prevent multiple instances
+    // Module-level lock to prevent multiple instances processing the same code
     const lockKey = `auth_processing_${code}`
 
-    // Check if another instance is already processing this code
-    if (typeof window !== 'undefined' && (window as unknown as Record<string, boolean>)[lockKey]) {
+    if (processingLocks.has(lockKey)) {
       return
     }
 
     const processCallback = async () => {
-      // Set global lock
-      if (typeof window !== 'undefined') {
-        ;(window as unknown as Record<string, boolean>)[lockKey] = true
-      }
+      processingLocks.add(lockKey)
 
       try {
         await handleCallback(code)
@@ -88,17 +121,12 @@ function CallbackContent({
         // Redirect after successful auth
         setTimeout(() => router.push(finalRedirect), 1500)
       } catch (err) {
-        logger.error(
-          '[AuthCallback] Authentication failed:',
-          err instanceof Error ? err.message : String(err)
-        )
+        const message = extractAuthErrorMessage(err, 'Authentication failed. Please try again.')
+        logger.error('[AuthCallback] Authentication failed:', message)
         setStatus('error')
-        setError(err instanceof Error ? err.message : 'Authentication failed')
+        setError(message)
       } finally {
-        // Release global lock
-        if (typeof window !== 'undefined') {
-          delete (window as unknown as Record<string, boolean>)[lockKey]
-        }
+        processingLocks.delete(lockKey)
       }
     }
 
@@ -114,22 +142,22 @@ function CallbackContent({
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+      <Div className="min-h-screen flex items-center justify-center">
+        <Div className="flex flex-col items-center gap-4">
           <Spinner />
-          <p className="text-muted-foreground">{processingMessage}</p>
-        </div>
-      </div>
+          <P className="text-muted-foreground">{processingMessage}</P>
+        </Div>
+      </Div>
     )
   }
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+      <Div className="min-h-screen flex items-center justify-center">
+        <Div className="text-center">
+          <Div className="w-12 h-12 bg-success rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-6 h-6 text-white"
+              className="w-6 h-6 text-success-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -141,20 +169,25 @@ function CallbackContent({
                 d="M5 13l4 4L19 7"
               />
             </svg>
-          </div>
-          <p className="text-green-600 font-semibold">{successMessage}</p>
-          <p className="text-muted-foreground text-sm">{redirectMessage}</p>
-        </div>
-      </div>
+          </Div>
+          <P className="text-success font-semibold">{successMessage}</P>
+          <P className="text-muted-foreground text-sm">{redirectMessage}</P>
+        </Div>
+      </Div>
     )
   }
 
   // Error state
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <Div className="min-h-screen flex items-center justify-center">
+      <Div className="text-center">
+        <Div className="w-12 h-12 bg-destructive rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg
+            className="w-6 h-6 text-destructive-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -162,14 +195,14 @@ function CallbackContent({
               d="M6 18L18 6M6 6l12 12"
             />
           </svg>
-        </div>
-        <p className="text-red-600 font-semibold">Authentication failed</p>
-        <p className="text-muted-foreground text-sm mb-4">{error}</p>
-        <button onClick={() => router.push('/')} className={errorButtonClassName}>
+        </Div>
+        <P className="text-destructive font-semibold">{errorTitle}</P>
+        <P className="text-muted-foreground text-sm mb-4">{error}</P>
+        <Button onClick={() => router.push('/')} variant="default">
           {errorButtonText}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Div>
+    </Div>
   )
 }
 
@@ -191,15 +224,10 @@ function CallbackContent({
  *       redirectTo="/dashboard"
  *       successMessage="Welcome back!"
  *       redirectMessage="Taking you to dashboard..."
+ *       errorTitle="Login failed"
+ *       noCodeMessage="Missing authorization code"
  *     />
  *   )
- * }
- *
- * // With custom Button component
- * import { Button } from '@ezstart/ui/components'
- *
- * export default function CallbackPage() {
- *   return <AuthCallbackPage ButtonComponent={Button} />
  * }
  * ```
  */
@@ -207,9 +235,9 @@ export function AuthCallbackPage(props: AuthCallbackPageProps): React.ReactEleme
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
+        <Div className="min-h-screen flex items-center justify-center">
           <Spinner />
-        </div>
+        </Div>
       }
     >
       <CallbackContent {...props} />
