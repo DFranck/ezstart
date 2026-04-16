@@ -38,6 +38,10 @@ export const listConversationsRouter = createRouterWithDoc(
 listConversationsRouter.get(
   '/',
   async (req, res) => {
+    // Prevent HTTP caching — conversation list changes on every send
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+    res.setHeader('Pragma', 'no-cache')
+
     try {
       const validation = listConversationsQuerySchema.safeParse(req.query)
       if (!validation.success) {
