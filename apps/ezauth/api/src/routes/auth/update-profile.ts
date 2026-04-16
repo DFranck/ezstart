@@ -1,13 +1,12 @@
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
-  createAuthMiddleware,
   OpenAPIRegistry,
   Router,
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
@@ -15,8 +14,7 @@ import { z } from 'zod'
 import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { isValidAvatarUrl, MAX_AVATAR_URL_LENGTH } from '../../utils/avatar.js'
-
-const { authMiddleware } = createAuthMiddleware()
+import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
 
 export const updateProfileRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()

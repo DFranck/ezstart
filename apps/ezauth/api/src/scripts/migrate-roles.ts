@@ -4,7 +4,7 @@
  * Run with: node --loader ts-node/esm src/scripts/migrate-roles.ts
  */
 
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { logger } from '@ezstart/logger/server'
 import { getAuthUserModel } from '../models/auth-user.js'
 

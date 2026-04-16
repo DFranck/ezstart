@@ -14,7 +14,7 @@ import {
   sendSuccess,
   sendError,
   createRoleMiddleware,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 import { authMiddleware } from '../../middleware/auth.js'

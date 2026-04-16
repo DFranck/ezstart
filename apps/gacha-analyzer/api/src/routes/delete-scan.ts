@@ -3,7 +3,8 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError, findByIdAndDelete } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
+import { findByIdAndDelete } from '../utils/mongoose-query.js'
 import type { Router as ExpressRouter } from 'express'
 import { getScanModel } from '../models/scan.js'
 

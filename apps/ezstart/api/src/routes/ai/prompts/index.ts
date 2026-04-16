@@ -12,7 +12,7 @@
  * - DELETE /api/ai/prompts/:key      -> delete prompt
  */
 
-import { Router, createRoleMiddleware } from '@ezstart/express-core'
+import { Router, createRoleMiddleware } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import listPromptsRouter, { listPromptsRegistry } from './list.js'

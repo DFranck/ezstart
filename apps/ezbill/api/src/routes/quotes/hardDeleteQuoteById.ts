@@ -3,23 +3,18 @@
  * Hard delete Quote
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { paramsMongoIdSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/quote/quote.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { paramsMongoIdSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/quote/quote.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const hardDeleteQuoteByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const hardDeleteQuoteByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const hardDeleteQuoteByIdRouter = createRouterWithDoc(
   hardDeleteQuoteByIdRegistry,
   router,
   '/quotes'
-);
+)
 
 hardDeleteQuoteByIdRouter.delete(
   '/:id/hard-delete',
@@ -31,6 +26,6 @@ hardDeleteQuoteByIdRouter.delete(
     tags: ['Quotes'],
     paramsSchema: paramsMongoIdSchema,
   }
-);
+)
 
-export default router;
+export default router

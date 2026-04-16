@@ -1,8 +1,10 @@
-import { createAuthMiddleware } from '@ezstart/express-core'
+import { createEzstartAuth, type RequestHandler } from '@ezstart/api-core'
 import { hasAnyRole } from '@ezstart/rbac/client'
 import type { Request, Response, NextFunction } from 'express'
 
-export const { authMiddleware, optionalAuthMiddleware } = createAuthMiddleware()
+const auth = createEzstartAuth()
+export const authMiddleware: RequestHandler = auth.authMiddleware
+export const optionalAuthMiddleware: RequestHandler = auth.optionalAuthMiddleware
 
 /** User info decoded from the JWT token */
 export interface JwtUser {

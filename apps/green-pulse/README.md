@@ -9,7 +9,7 @@ Helps small and medium enterprises in Vietnam manage environmental compliance th
 ## Tech Stack
 
 - **Web:** Next.js, next-intl (vi/en/fr), React Query, @ezstart/ui
-- **API:** Express via @ezstart/express-core, MongoDB, @ezstart/ai-sdk
+- **API:** Express via @ezstart/api-core, MongoDB, @ezstart/ai-sdk
 - **Deploy:** Vercel (web) + Railway (API)
 
 ## Architecture

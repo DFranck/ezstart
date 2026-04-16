@@ -5,7 +5,7 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
 import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'

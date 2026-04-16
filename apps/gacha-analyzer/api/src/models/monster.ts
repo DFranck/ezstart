@@ -1,4 +1,4 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema } from 'mongoose'
 import type { Monster } from '@gacha-analyzer/types'
 

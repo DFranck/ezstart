@@ -1,4 +1,5 @@
 import { noAlertConfirm } from './rules/no-alert-confirm.js'
+import { noExpressCore } from './rules/no-express-core.js'
 import { noFetchClient } from './rules/no-fetch-client.js'
 import { noRawFetch } from './rules/no-raw-fetch.js'
 import { noRawHtml } from './rules/no-raw-html.js'
@@ -7,6 +8,7 @@ import { parseApiErrorRequired } from './rules/parse-api-error-required.js'
 const PLUGIN_NAME = '@ezstart/ezstart'
 
 const rules = {
+  'no-express-core': noExpressCore,
   'no-fetch-client': noFetchClient,
   'no-raw-fetch': noRawFetch,
   'parse-api-error-required': parseApiErrorRequired,
@@ -16,6 +18,7 @@ const rules = {
 
 /** All rules activated as `error`. */
 const recommendedRules = {
+  [`${PLUGIN_NAME}/no-express-core`]: 'error',
   [`${PLUGIN_NAME}/no-fetch-client`]: 'error',
   [`${PLUGIN_NAME}/no-raw-fetch`]: 'error',
   [`${PLUGIN_NAME}/parse-api-error-required`]: 'error',

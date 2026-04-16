@@ -3,22 +3,14 @@
  * Create a Client (authenticated)
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-} from '@ezstart/express-core';
-import { billingClientSchema, clientSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/client/client.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/api-core'
+import { billingClientSchema, clientSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/client/client.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const createClientRegistry = new OpenAPIRegistry();
-const router = Router();
-export const createClientRouter = createRouterWithDoc(
-  createClientRegistry,
-  router,
-  '/clients'
-);
+export const createClientRegistry = new OpenAPIRegistry()
+const router = Router()
+export const createClientRouter = createRouterWithDoc(createClientRegistry, router, '/clients')
 
 createClientRouter.post('/', authMiddleware, secureControllers.createSecureClientController, {
   summary: 'Create a Client (authenticated)',
@@ -26,6 +18,6 @@ createClientRouter.post('/', authMiddleware, secureControllers.createSecureClien
   bodySchema: billingClientSchema,
   responseSchema: clientSchema,
   status: 201,
-});
+})
 
-export default router;
+export default router

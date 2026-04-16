@@ -4,7 +4,7 @@
  * Get adaptive state for a specific service
  */
 
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import type { HealthCheckScheduler } from '../../services/healthCheckScheduler.js'
 import type { MonitoredServiceId } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'

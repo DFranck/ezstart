@@ -25,7 +25,7 @@ GreenPulse API provides endpoints for tracking carbon footprint, managing eco-fr
 - **Validation:** Zod with OpenAPI
 - **Authentication:** JWT
 - **File Upload:** Multer
-- **Infrastructure:** @ezstart/express-core
+- **Infrastructure:** @ezstart/api-core
 
 ## Installation
 
@@ -231,7 +231,7 @@ router.get('/api/carbon', authenticate, async (req, res) => {
 
 ## Related Packages
 
-- [@ezstart/express-core](../../../packages/express-core) - API infrastructure
+- [@ezstart/api-core](../../../packages/express-core) - API infrastructure
 - [@ezstart/types](../../../packages/types) - Shared types and schemas
 - [@green-pulse/types](../types) - GreenPulse-specific types
 - [web-green-pulse](../web) - Frontend application
@@ -272,7 +272,7 @@ Response: { "status": "ok" }
 
 ```typescript
 // routes/goals.ts
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { z } from '@ezstart/types'
 import { authenticate } from '../middleware/auth'
 

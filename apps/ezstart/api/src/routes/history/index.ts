@@ -4,7 +4,7 @@
  * Routes for health check history data
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import byProjectRouter from './by-project.js'
 import byServiceRouter from './by-service.js'
 

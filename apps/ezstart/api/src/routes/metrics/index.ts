@@ -4,7 +4,7 @@
  * Routes for monitoring metrics
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import rootRouter, { registry as rootRegistry } from './root.js'
 import dashboardRouter, { registry as dashboardRegistry } from './dashboard.js'
 

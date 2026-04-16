@@ -16,7 +16,6 @@
   "dependencies": {
     "@ezstart/api-core": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/ocr-sdk": "workspace:*",
     "@gacha-analyzer/types": "workspace:*",

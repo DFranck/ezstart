@@ -5,7 +5,7 @@ import { getMongoUrl } from '@ezstart/config/env-resolvers'
 /**
  * Lightweight MongoDB connection for Next.js API routes.
  * Singleton pattern — reuses connection across requests.
- * Avoids importing @ezstart/express-core (which pulls in Express).
+ * Avoids importing @ezstart/api-core (which pulls in Express).
  */
 let isConnecting = false
 

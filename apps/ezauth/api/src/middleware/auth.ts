@@ -6,7 +6,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
-import { sendError } from '@ezstart/express-core'
+import { sendError } from '@ezstart/api-core'
 import { getAuthUserModel } from '../models/auth-user.js'
 import { updatePresenceByUserId } from '../services/presence.service.js'
 import { logger } from '@ezstart/logger/server'

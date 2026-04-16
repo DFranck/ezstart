@@ -1,4 +1,4 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model } from 'mongoose'
 import bcrypt from 'bcryptjs'
 import { AuthUser } from '@ezstart/auth-sdk/server'

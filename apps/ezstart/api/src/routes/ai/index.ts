@@ -21,7 +21,7 @@
  * - DELETE /api/ai/prompts/:key                     -> delete prompt (auth)
  */
 
-import { Router, createRateLimiter } from '@ezstart/express-core'
+import { Router, createRateLimiter } from '@ezstart/api-core'
 import { optionalAuthMiddleware } from '../../middleware/auth.js'
 import chatRouter from './chat/sendMessage.js'
 import streamRouter from './chat/streamMessage.js'

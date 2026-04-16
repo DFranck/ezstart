@@ -12,7 +12,7 @@
  * - DELETE /api/companies/:id        -> deleteCompanyById
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import action routers
 import listCompaniesRouter, { listCompaniesRegistry } from './listCompanies.js'

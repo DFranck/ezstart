@@ -1,3 +1,5 @@
-import { createAuthMiddleware } from '@ezstart/express-core'
+import { createEzstartAuth, type RequestHandler } from '@ezstart/api-core'
 
-export const { authMiddleware, optionalAuthMiddleware } = createAuthMiddleware()
+const auth = createEzstartAuth()
+export const authMiddleware: RequestHandler = auth.authMiddleware
+export const optionalAuthMiddleware: RequestHandler = auth.optionalAuthMiddleware

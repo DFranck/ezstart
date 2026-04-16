@@ -76,28 +76,67 @@ export function sendError(
 }
 
 /**
- * Emit a validation error envelope from a `ZodError`.
+ * Emit a validation error envelope.
  *
- * Converts Zod issues into `{ path, message, code }` triples under
- * `error.details` and sets the standard `VALIDATION_ERROR` code.
+ * Accepts **two** call signatures for backward-compatibility with
+ * `@ezstart/express-core`:
+ *
+ * 1. **New (ZodError)** — converts Zod issues into `{ path, message, code }`
+ *    triples under `error.details`.
+ * 2. **Legacy (string + details[])** — forwards a human-readable message and
+ *    a pre-built details array.
  *
  * @example
  * ```ts
+ * // New — pass a ZodError directly
  * const parsed = schema.safeParse(req.body)
  * if (!parsed.success) return sendValidationError(res, parsed.error)
+ *
+ * // Legacy — pass a message string + details array
+ * if (!parsed.success) return sendValidationError(res, 'Invalid body', parsed.error.errors, 400)
  * ```
  */
 export function sendValidationError(
   res: Response,
   zodError: ZodError,
-  status = 422,
-  message = 'Validation error'
+  status?: number,
+  message?: string
+): Response
+export function sendValidationError(
+  res: Response,
+  message: string,
+  details?: unknown[],
+  status?: number
+): Response
+export function sendValidationError(
+  res: Response,
+  errorOrMessage: ZodError | string,
+  thirdArg?: number | unknown[],
+  fourthArg?: number | string
 ): Response {
-  const details = zodError.errors.map(issue => ({
-    path: issue.path.join('.'),
-    message: issue.message,
-    code: issue.code,
-  }))
+  // New signature: sendValidationError(res, ZodError, status?, message?)
+  if (
+    typeof errorOrMessage === 'object' &&
+    'errors' in errorOrMessage &&
+    'issues' in errorOrMessage
+  ) {
+    const status = typeof thirdArg === 'number' ? thirdArg : 422
+    const message = typeof fourthArg === 'string' ? fourthArg : 'Validation error'
+    const details = (errorOrMessage as ZodError).errors.map(issue => ({
+      path: issue.path.join('.'),
+      message: issue.message,
+      code: issue.code,
+    }))
+    return sendError(res, message, status, {
+      code: 'VALIDATION_ERROR',
+      details,
+    })
+  }
+
+  // Legacy signature: sendValidationError(res, 'message', details?, status?)
+  const message = errorOrMessage as string
+  const details = Array.isArray(thirdArg) ? thirdArg : []
+  const status = typeof fourthArg === 'number' ? fourthArg : 422
   return sendError(res, message, status, {
     code: 'VALIDATION_ERROR',
     details,

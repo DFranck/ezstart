@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError } from '@ezstart/api-core'
 import type { Router as ExpressRouter, Request, Response, NextFunction } from 'express'
 import { getWebUrl } from '@ezstart/config/urls'
 import { getAllowedOrigins } from '@ezstart/config/cors'

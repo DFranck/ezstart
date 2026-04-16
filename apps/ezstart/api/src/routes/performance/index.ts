@@ -4,7 +4,7 @@
  * Routes for performance metrics tracking
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import recordRouter from './record.js'
 import getByServiceRouter from './get-by-service.js'
 import endpointsRouter from './endpoints.js'

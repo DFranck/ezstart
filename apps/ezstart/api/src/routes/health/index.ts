@@ -4,7 +4,7 @@
  * Routes for service health monitoring
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import listRouter, { registry as listRegistry } from './list.js'
 import getByServiceRouter, { registry as getByServiceRegistry } from './get-by-service.js'
 import projectHistoryRouter, { registry as projectHistoryRegistry } from './project-history.js'

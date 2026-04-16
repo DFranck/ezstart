@@ -12,7 +12,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { AISystemPrompt, APPS_WILDCARD } from '../../../models/AISystemPrompt.js'
 import { clearPromptCache } from '../../../services/ai-prompt.service.js'

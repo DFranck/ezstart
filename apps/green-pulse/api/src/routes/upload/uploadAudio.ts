@@ -10,7 +10,7 @@ import {
   createRouterWithDoc,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import fs from 'fs'
 import { transcribeAudio } from '../../services/gemini.service.js'
 import { upload } from './multerConfig.js'

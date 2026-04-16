@@ -8,7 +8,7 @@
  * - GET  /api/users/:username -> getUserByUsername
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import action routers
 import createUserRouter, { createUserRegistry } from './createUser.js'

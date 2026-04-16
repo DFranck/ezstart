@@ -3,23 +3,18 @@
  * Hard delete Client (authenticated)
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { paramsMongoIdSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/client/client.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { paramsMongoIdSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/client/client.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const hardDeleteClientByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const hardDeleteClientByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const hardDeleteClientByIdRouter = createRouterWithDoc(
   hardDeleteClientByIdRegistry,
   router,
   '/clients'
-);
+)
 
 hardDeleteClientByIdRouter.delete(
   '/:id/hard-delete',
@@ -31,6 +26,6 @@ hardDeleteClientByIdRouter.delete(
     tags: ['Clients'],
     paramsSchema: paramsMongoIdSchema,
   }
-);
+)
 
-export default router;
+export default router

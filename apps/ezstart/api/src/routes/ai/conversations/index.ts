@@ -13,7 +13,7 @@
  * - POST   /api/ai/conversations/:id/restore  -> restoreConversation
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import listConversationsRouter, { listConversationsRegistry } from './listConversations.js'

@@ -1,9 +1,9 @@
-import { Receipt } from '@ezbill/types';
-import { connectToMongo } from '@ezstart/express-core';
-import { Model } from 'mongoose';
-import { createBillingDocSchema } from './billing-factory.js';
+import { Receipt } from '@ezbill/types'
+import { connectToMongo } from '@ezstart/api-core'
+import { Model } from 'mongoose'
+import { createBillingDocSchema } from './billing-factory.js'
 
-export type ReceiptDocument = Receipt;
+export type ReceiptDocument = Receipt
 
 const receiptSchema = createBillingDocSchema(
   {
@@ -14,13 +14,13 @@ const receiptSchema = createBillingDocSchema(
   },
   ['issued', 'refunded'],
   'issued'
-);
+)
 
 /**
  * Factory function to get Receipt model attached to shared connection
  * MUST be called after connectToMongo() has been initialized
  */
 export async function getReceiptModel(): Promise<Model<ReceiptDocument>> {
-  const mongoose = await connectToMongo('ezbill');
-  return mongoose.models.Receipt || mongoose.model<ReceiptDocument>('Receipt', receiptSchema);
+  const mongoose = await connectToMongo('ezbill')
+  return mongoose.models.Receipt || mongoose.model<ReceiptDocument>('Receipt', receiptSchema)
 }

@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { z } from 'zod'
 import { UnifiedChat } from '@ezstart/ai-sdk'
 import { AIConversation } from '../../../models/AIConversation.js'

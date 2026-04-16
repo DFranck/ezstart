@@ -9,7 +9,7 @@ Provides a single sign-on system with OAuth support, user management, and admin 
 ## Tech Stack
 
 - **Web:** Next.js, next-intl, @ezstart/ui
-- **API:** Express via @ezstart/express-core, MongoDB, JWT (httpOnly cookies)
+- **API:** Express via @ezstart/api-core, MongoDB, JWT (httpOnly cookies)
 - **Deploy:** Vercel (web) + Railway (API)
 
 ## Architecture

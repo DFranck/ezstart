@@ -4,7 +4,7 @@
  * Routes for project-grouped health checks
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import listRouter from './list.js'
 import getByIdRouter from './get-by-id.js'
 

@@ -12,7 +12,7 @@
  * - PATCH  /api/ai/app-providers/:id/toggle   -> toggle enabled/disabled
  */
 
-import { Router, createRoleMiddleware } from '@ezstart/express-core'
+import { Router, createRoleMiddleware } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import listAppProvidersRouter, { listAppProvidersRegistry } from './listAppProviders.js'

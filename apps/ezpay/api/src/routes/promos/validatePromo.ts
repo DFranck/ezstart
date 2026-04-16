@@ -7,7 +7,7 @@ import {
   sendError,
   sendValidationError,
   createStrictRateLimiter,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { validatePromo } from '../../services/promo.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'

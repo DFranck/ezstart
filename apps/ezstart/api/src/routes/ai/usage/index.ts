@@ -7,7 +7,7 @@
  * - GET /api/ai/usage/stats -> get usage statistics
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import statsRouter, { usageStatsRegistry } from './stats.js'

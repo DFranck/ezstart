@@ -5,7 +5,7 @@
  * Each registry is passed to startServer() for /docs generation.
  */
 
-import { OpenAPIRegistry } from '@ezstart/express-core'
+import { OpenAPIRegistry } from '@ezstart/api-core'
 import { z } from 'zod'
 
 // ---------------------------------------------------------------------------

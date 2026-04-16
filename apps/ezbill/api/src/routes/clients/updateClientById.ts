@@ -3,23 +3,18 @@
  * Update Client (authenticated)
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { billingClientSchema, paramsMongoIdSchema, clientSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/client/client.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { billingClientSchema, paramsMongoIdSchema, clientSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/client/client.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const updateClientByIdRegistry = new OpenAPIRegistry();
-const router = Router();
+export const updateClientByIdRegistry = new OpenAPIRegistry()
+const router = Router()
 export const updateClientByIdRouter = createRouterWithDoc(
   updateClientByIdRegistry,
   router,
   '/clients'
-);
+)
 
 updateClientByIdRouter.put(
   '/:id',
@@ -33,6 +28,6 @@ updateClientByIdRouter.put(
     paramsSchema: paramsMongoIdSchema,
     responseSchema: clientSchema,
   }
-);
+)
 
-export default router;
+export default router

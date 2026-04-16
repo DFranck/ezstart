@@ -1,4 +1,4 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Model, Document } from 'mongoose'
 
 export interface PlanDocument extends Document {

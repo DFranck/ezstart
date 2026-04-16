@@ -10,7 +10,7 @@ import {
   createRouterWithDoc,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import path from 'path'
 import { upload } from './multerConfig.js'
 

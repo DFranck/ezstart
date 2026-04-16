@@ -1,4 +1,4 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model, Types } from 'mongoose'
 import crypto from 'crypto'
 

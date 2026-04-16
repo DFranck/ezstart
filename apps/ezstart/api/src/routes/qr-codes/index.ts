@@ -10,7 +10,7 @@
  * - DELETE /api/qr-codes/:id      -> deleteQRCode
  */
 
-import { Router, createStrictRateLimiter } from '@ezstart/express-core'
+import { Router, createStrictRateLimiter } from '@ezstart/api-core'
 import { authMiddleware } from '../../middleware/auth.js'
 
 import createQRCodeRouter, { createQRCodeRegistry } from './createQRCode.js'

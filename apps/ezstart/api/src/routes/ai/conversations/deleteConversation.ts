@@ -11,7 +11,7 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { AIConversation } from '../../../models/AIConversation.js'
 
 export const deleteConversationRegistry = new OpenAPIRegistry()

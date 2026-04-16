@@ -6,7 +6,7 @@ import {
   createVeryStrictRateLimiter,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import crypto from 'crypto'

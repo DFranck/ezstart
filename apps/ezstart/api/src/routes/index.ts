@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import healthRouter, { healthRegistries } from './health/index.js'
 import auditRouter, { auditRegistries } from './audit/index.js'
 import deploymentRouter, { deploymentRegistries } from './deployment/index.js'

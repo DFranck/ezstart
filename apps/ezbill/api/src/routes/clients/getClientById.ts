@@ -3,23 +3,14 @@
  * Get Client by ID (authenticated)
  */
 
-import {
-  Router,
-  createRouterWithDoc,
-  OpenAPIRegistry,
-  validateParams,
-} from '@ezstart/express-core';
-import { paramsMongoIdSchema, clientSchema } from '@ezbill/types';
-import * as secureControllers from '../../controllers/client/client.secure-controllers.js';
-import { authMiddleware } from '../../middleware/auth.js';
+import { Router, createRouterWithDoc, OpenAPIRegistry, validateParams } from '@ezstart/api-core'
+import { paramsMongoIdSchema, clientSchema } from '@ezbill/types'
+import * as secureControllers from '../../controllers/client/client.secure-controllers.js'
+import { authMiddleware } from '../../middleware/auth.js'
 
-export const getClientByIdRegistry = new OpenAPIRegistry();
-const router = Router();
-export const getClientByIdRouter = createRouterWithDoc(
-  getClientByIdRegistry,
-  router,
-  '/clients'
-);
+export const getClientByIdRegistry = new OpenAPIRegistry()
+const router = Router()
+export const getClientByIdRouter = createRouterWithDoc(getClientByIdRegistry, router, '/clients')
 
 getClientByIdRouter.get(
   '/:id',
@@ -32,6 +23,6 @@ getClientByIdRouter.get(
     paramsSchema: paramsMongoIdSchema,
     responseSchema: clientSchema,
   }
-);
+)
 
-export default router;
+export default router

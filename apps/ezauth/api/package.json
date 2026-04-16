@@ -20,7 +20,6 @@
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/email-service": "workspace:*",
-    "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/rbac": "workspace:*",
     "@types/cookie-parser": "^1.4.10",

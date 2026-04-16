@@ -19,7 +19,7 @@
  * - POST   /api/quotes/:id/convert-to-invoice -> convertQuoteToInvoiceById
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import action routers
 import createQuoteRouter, { createQuoteRegistry } from './createQuote.js'

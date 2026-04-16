@@ -40,6 +40,7 @@ export const config = [
       '@typescript-eslint/no-namespace': 'off', // Allow namespaces
       '@typescript-eslint/no-empty-object-type': 'off', // Allow {} type
       // Universal @ezstart conventions
+      '@ezstart/ezstart/no-express-core': 'error',
       '@ezstart/ezstart/no-fetch-client': 'error',
       '@ezstart/ezstart/parse-api-error-required': 'warn',
       '@ezstart/ezstart/no-alert-confirm': 'warn',

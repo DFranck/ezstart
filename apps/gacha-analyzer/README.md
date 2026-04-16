@@ -9,7 +9,7 @@ Lets players scan screenshots of in-game items (runes, gear) to extract stats, e
 ## Tech Stack
 
 - **Web:** Next.js, next-intl, React Query, @ezstart/ui
-- **API:** Express via @ezstart/express-core, MongoDB, @ezstart/ocr-sdk
+- **API:** Express via @ezstart/api-core, MongoDB, @ezstart/ocr-sdk
 - **Deploy:** Vercel (web) + Railway (API)
 
 ## Architecture

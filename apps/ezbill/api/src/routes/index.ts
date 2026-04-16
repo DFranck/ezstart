@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import aiRoutes from './ai/index.js'
 import clientRoutes, { clientsRegistries } from './clients/index.js'
 import companiesRoutes, { companiesRegistries } from './companies/index.js'

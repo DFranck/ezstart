@@ -9,7 +9,7 @@ Handles donations, one-time purchases, and subscriptions via Stripe. Any app can
 ## Tech Stack
 
 - **Web:** Next.js, next-intl, @ezstart/ui
-- **API:** Express via @ezstart/express-core, MongoDB, Stripe SDK
+- **API:** Express via @ezstart/api-core, MongoDB, Stripe SDK
 - **Deploy:** Vercel (web) + Railway (API)
 
 ## Architecture

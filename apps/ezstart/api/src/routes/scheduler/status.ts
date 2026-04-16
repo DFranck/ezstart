@@ -4,7 +4,7 @@
  * Get adaptive scheduler status with current intervals for all services
  */
 
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import type { HealthCheckScheduler } from '../../services/healthCheckScheduler.js'
 import type { Request, Response } from 'express'
 

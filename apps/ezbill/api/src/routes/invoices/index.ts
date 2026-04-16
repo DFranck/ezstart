@@ -14,7 +14,7 @@
  * - POST   /api/invoices/:id/mark-paid    -> markInvoiceAsPaidById
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import action routers
 import createInvoiceRouter, { createInvoiceRegistry } from './createInvoice.js'

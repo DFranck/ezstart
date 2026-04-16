@@ -173,7 +173,6 @@ import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 
 ```tsx
 import { BuyButton } from '@ezstart/pay-sdk'
-
 ;<BuyButton
   projectId="green-pulse"
   productId="premium-report"
@@ -356,7 +355,6 @@ interface Payment {
 
 ```tsx
 import { ThemeProvider } from '@ezstart/next-theme'
-
 ;<ThemeProvider>
   <App />
 </ThemeProvider>
@@ -466,7 +464,7 @@ pnpm --filter web-ezpay start
 - `@ezstart/auth-sdk` - Authentication SDK
 - `@ezstart/ui` - UI Components
 - `@ezstart/next-theme` - Theme Provider
-- `@ezstart/express-core` - API Infrastructure
+- `@ezstart/api-core` - API Infrastructure
 
 ## 🔧 Development Commands
 

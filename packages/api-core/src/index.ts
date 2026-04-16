@@ -36,9 +36,11 @@ export {
 } from './core/middleware/rate-limit.js'
 export {
   createAuthMiddleware,
+  createRoleMiddleware,
   type AuthMiddlewareConfig,
   type AuthMiddlewares,
 } from './core/middleware/auth.js'
+export { createCsrfMiddleware } from './core/middleware/csrf.js'
 export { validateBody, validateParams, validateQuery } from './core/middleware/validate.js'
 
 // OpenAPI-aware router
@@ -48,6 +50,9 @@ export {
   type DocRouter,
   type RouteDocOptions,
 } from './core/router.js'
+
+// Backward compat alias
+export { createDocRouter as createRouterWithDoc } from './core/router.js'
 
 // OpenAPI helpers
 export {
@@ -90,5 +95,9 @@ export { createSocketServer, type SocketServerConfig } from './core/sockets.js'
 // ---------------------------------------------------------------------------
 // @ezstart monorepo wrapper (optional — requires @ezstart/config + @ezstart/logger)
 // ---------------------------------------------------------------------------
-export { createEzstartServer, type EzstartServerOptions } from './ezstart-server.js'
+export {
+  createEzstartAuth,
+  createEzstartServer,
+  type EzstartServerOptions,
+} from './ezstart-server.js'
 export { connectToMongo } from './connect-to-mongo.js'

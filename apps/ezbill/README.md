@@ -9,7 +9,7 @@ Streamlines invoice creation, client management, and billing workflows with AI-a
 ## Tech Stack
 
 - **Web:** Next.js, next-intl, React Query, @ezstart/ui
-- **API:** Express via @ezstart/express-core, MongoDB, @ezstart/ai-sdk
+- **API:** Express via @ezstart/api-core, MongoDB, @ezstart/ai-sdk
 - **Deploy:** Vercel (web) + Railway (API)
 
 ## Architecture

@@ -3,7 +3,7 @@ import {
   OpenAPIRegistry,
   Router,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import crypto from 'crypto'

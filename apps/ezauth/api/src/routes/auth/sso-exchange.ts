@@ -18,7 +18,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { consumeHandoffCode } from '../../services/sso.service.js'
 import { issueSession } from '../../services/auth.service.js'

@@ -18,7 +18,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'

@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import uploadRoutes, { uploadRegistries } from './upload/index.js'
 import esgRoutes, { esgRegistries } from './esg/index.js'
 import webhookRoutes, { webhookRegistries } from './webhooks/index.js'

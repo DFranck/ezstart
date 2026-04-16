@@ -14,8 +14,17 @@
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { getPort, type AppName } from '@ezstart/config/urls'
 import { logger as monorepoLogger } from '@ezstart/logger/server'
+import jwt from 'jsonwebtoken'
 import { createApiServer } from './core/create-server.js'
-import type { ApiServer, ServerConfig, ServerLogger, TokenVerifier } from './core/types.js'
+import { createAuthMiddleware } from './core/middleware/auth.js'
+import type { RequestHandler } from 'express'
+import type {
+  ApiServer,
+  AuthenticatedUser,
+  ServerConfig,
+  ServerLogger,
+  TokenVerifier,
+} from './core/types.js'
 
 /**
  * Options accepted by `createEzstartServer`.
@@ -88,4 +97,73 @@ export function createEzstartServer(
     rawBodyRoutes: options.rawBodyRoutes,
     logger,
   })
+}
+
+// ---------------------------------------------------------------------------
+// Backward-compatible auth convenience (monorepo only)
+// ---------------------------------------------------------------------------
+
+const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i
+
+/**
+ * Build an `AuthenticatedUser` from a decoded JWT payload.
+ * Returns `null` when the payload does not contain a valid userId.
+ */
+function buildUserFromDecoded(decoded: Record<string, unknown>): AuthenticatedUser | null {
+  const userId = (decoded.userId || decoded.sub || decoded.id) as string | undefined
+  if (!userId || !OBJECT_ID_REGEX.test(userId)) return null
+  return {
+    userId,
+    email: decoded.email as string | undefined,
+    username: decoded.username as string | undefined,
+    apps: decoded.apps as string[] | undefined,
+    globalRoles: decoded.globalRoles as string[] | undefined,
+    appRoles: decoded.appRoles as Record<string, string[]> | undefined,
+    permissions: decoded.permissions as string[] | undefined,
+    features: decoded.features as string[] | undefined,
+  }
+}
+
+/**
+ * Monorepo convenience that mirrors the old `express-core` behaviour:
+ *
+ * 1. Reads `JWT_SECRET` from the environment (or accepts an explicit override).
+ * 2. Verifies tokens with `jsonwebtoken` (HS256, Bearer header + cookie + dev
+ *    `X-User-Id` fallback).
+ * 3. Returns `{ authMiddleware, optionalAuthMiddleware }` — the legacy names
+ *    expected by all monorepo apps.
+ *
+ * @example
+ * ```ts
+ * import { createEzstartAuth } from '@ezstart/api-core'
+ *
+ * export const { authMiddleware, optionalAuthMiddleware } = createEzstartAuth()
+ * ```
+ */
+export function createEzstartAuth(jwtSecret?: string): {
+  authMiddleware: RequestHandler
+  optionalAuthMiddleware: RequestHandler
+} {
+  const secret = jwtSecret ?? process.env.JWT_SECRET
+  if (!secret) throw new Error('JWT_SECRET environment variable is required')
+
+  const verifyToken: TokenVerifier = token => {
+    try {
+      const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] }) as Record<
+        string,
+        unknown
+      >
+      return buildUserFromDecoded(decoded)
+    } catch {
+      // Token invalid — let the core middleware handle the 401
+      return null
+    }
+  }
+
+  const { requireAuth, optionalAuth } = createAuthMiddleware({
+    verifyToken,
+    cookieName: 'ezauth_token',
+  })
+
+  return { authMiddleware: requireAuth, optionalAuthMiddleware: optionalAuth }
 }

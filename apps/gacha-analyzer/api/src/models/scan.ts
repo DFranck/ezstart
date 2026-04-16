@@ -1,4 +1,4 @@
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema } from 'mongoose'
 import type { Scan, ScanResult } from '@gacha-analyzer/types'
 
@@ -12,21 +12,25 @@ const scanResultSchema = new Schema<ScanResult>(
     analysis: { type: Schema.Types.Mixed },
     partial: { type: Boolean },
     unreliable: { type: Boolean },
-    ocrSources: [{
-      name: { type: String },
-      confidence: { type: Number },
-      rawText: { type: String },
-      subsFound: { type: Number },
-      success: { type: Boolean },
-    }],
-    benchResults: [{
-      source: { type: String },
-      preset: { type: String },
-      confidence: { type: Number },
-      subsCount: { type: Number },
-      rawText: { type: String },
-      success: { type: Boolean },
-    }],
+    ocrSources: [
+      {
+        name: { type: String },
+        confidence: { type: Number },
+        rawText: { type: String },
+        subsFound: { type: Number },
+        success: { type: Boolean },
+      },
+    ],
+    benchResults: [
+      {
+        source: { type: String },
+        preset: { type: String },
+        confidence: { type: Number },
+        subsCount: { type: Number },
+        rawText: { type: String },
+        success: { type: Boolean },
+      },
+    ],
   },
   { _id: false }
 )
@@ -60,14 +64,20 @@ const scanSchema = new Schema<Scan>(
       comment: { type: String },
       createdAt: { type: Date },
     },
-    reports: [{
-      status: { type: String, enum: ['open', 'in-progress', 'resolved'], default: 'open' },
-      category: { type: String, enum: ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other'], required: true },
-      description: { type: String, required: true },
-      resolution: { type: String },
-      createdAt: { type: Date, default: Date.now },
-      updatedAt: { type: Date, default: Date.now },
-    }],
+    reports: [
+      {
+        status: { type: String, enum: ['open', 'in-progress', 'resolved'], default: 'open' },
+        category: {
+          type: String,
+          enum: ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other'],
+          required: true,
+        },
+        description: { type: String, required: true },
+        resolution: { type: String },
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
+      },
+    ],
     error: {
       type: String,
     },

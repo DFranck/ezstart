@@ -11,7 +11,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { z } from 'zod'
 import { UnifiedChat } from '@ezstart/ai-sdk'
 import type { ProviderResponse } from '@ezstart/ai-sdk'

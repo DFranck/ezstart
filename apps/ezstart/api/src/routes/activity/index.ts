@@ -8,7 +8,7 @@
  * - Audit updates
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import listRouter from './list.js'
 import errorsRouter from './errors.js'
 import statsRouter from './stats.js'

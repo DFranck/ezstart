@@ -10,7 +10,7 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { providerRegistry } from '@ezstart/ai-sdk'
 
 export const providersRegistry = new OpenAPIRegistry()

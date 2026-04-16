@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import type { Router as ExpressRouter } from 'express'
 import { authRegistries, authRouters } from './auth/index.js'
 import { oauthRegistries, oauthRouters } from './oauth/index.js'

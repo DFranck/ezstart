@@ -12,7 +12,7 @@
  * - DELETE /api/payment-methods/:id        -> deletePaymentMethodById
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import action routers
 import listPaymentMethodsRouter, { listPaymentMethodsRegistry } from './listPaymentMethods.js'

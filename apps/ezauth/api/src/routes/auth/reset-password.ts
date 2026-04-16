@@ -7,7 +7,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getAuthUserModel } from '../../models/auth-user.js'
@@ -56,14 +56,18 @@ const resetPasswordController = async (req: Request, res: Response) => {
     })
 
     if (!authCode) {
-      return sendError(res, 'Invalid or expired reset token', 400, 'INVALID_OR_EXPIRED_TOKEN')
+      return sendError(res, 'Invalid or expired reset token', 400, {
+        code: 'INVALID_OR_EXPIRED_TOKEN',
+      })
     }
 
     const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findById(authCode.userId)
 
     if (!user) {
-      return sendError(res, 'Invalid or expired reset token', 400, 'INVALID_OR_EXPIRED_TOKEN')
+      return sendError(res, 'Invalid or expired reset token', 400, {
+        code: 'INVALID_OR_EXPIRED_TOKEN',
+      })
     }
 
     // Update password (pre-save hook will hash it)

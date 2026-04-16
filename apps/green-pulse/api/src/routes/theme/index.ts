@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { authMiddleware } from '../../middleware/auth.js'
 import getThemeRouter, { getThemeRegistry } from './getTheme.js'
 import updateThemeRouter, { updateThemeRegistry } from './updateTheme.js'

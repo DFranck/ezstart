@@ -11,7 +11,7 @@
  * - DELETE /api/ai/global-providers/:id          -> delete global provider config
  */
 
-import { Router, createRoleMiddleware } from '@ezstart/express-core'
+import { Router, createRoleMiddleware } from '@ezstart/api-core'
 import { authMiddleware } from '../../../middleware/auth.js'
 
 import listGlobalProvidersRouter, { listGlobalProvidersRegistry } from './listGlobalProviders.js'

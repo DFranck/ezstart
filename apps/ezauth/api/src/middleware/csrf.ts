@@ -17,7 +17,7 @@
  */
 
 import type { Request, Response, NextFunction } from 'express'
-import { createCsrfMiddleware } from '@ezstart/express-core'
+import { createCsrfMiddleware } from '@ezstart/api-core'
 import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from '../config/cookie.js'
 
 const standardCsrf = createCsrfMiddleware()

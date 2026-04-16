@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { donationsRegistries, donationsRouters } from './donations/index.js'
 import { purchasesRegistries, purchasesRouters } from './purchases/index.js'
 import { subscriptionsRegistries, subscriptionsRouters } from './subscriptions/index.js'

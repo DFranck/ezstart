@@ -11,7 +11,7 @@
  * - GET  /api/upload/file/:fileId -> getFileInfo (file metadata)
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { authMiddleware } from '../../middleware/auth.js'
 
 // Import individual action routers

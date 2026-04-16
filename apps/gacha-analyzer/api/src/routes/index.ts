@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import type { Router as ExpressRouter } from 'express'
 import scanImageRoutes from './scan-image.js'
 import getScansRoutes from './get-scans.js'

@@ -138,3 +138,47 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig): AuthMiddlewa
 
   return { requireAuth, optionalAuth }
 }
+
+/**
+ * Create role-based access control middlewares.
+ * Checks globalRoles and appRoles fields.
+ *
+ * Must be used AFTER an auth middleware that attaches `req.user` with role information.
+ *
+ * @example
+ * ```ts
+ * import { createRoleMiddleware } from '@ezstart/api-core'
+ *
+ * const { requireAdmin, requireRole } = createRoleMiddleware()
+ *
+ * app.get('/api/admin', requireAuth, requireAdmin, handler)
+ * app.get('/api/editor', requireAuth, requireRole('editor'), handler)
+ * ```
+ */
+export function createRoleMiddleware() {
+  return {
+    requireAdmin: (req: Request, res: Response, next: NextFunction) => {
+      if (!req.userId && !req.user) return sendError(res, 'Authentication required', 401)
+      const user = req.user
+      const isAdmin =
+        user?.globalRoles?.includes('superadmin') ||
+        user?.globalRoles?.includes('admin') ||
+        Object.values(user?.appRoles || {})
+          .flat()
+          .includes('admin')
+      if (!isAdmin) return sendError(res, 'Admin access required', 403)
+      next()
+    },
+    requireRole: (role: string) => (req: Request, res: Response, next: NextFunction) => {
+      if (!req.userId && !req.user) return sendError(res, 'Authentication required', 401)
+      const user = req.user
+      const hasRole =
+        user?.globalRoles?.includes(role) ||
+        Object.values(user?.appRoles || {})
+          .flat()
+          .includes(role)
+      if (!hasRole) return sendError(res, `Role '${role}' required`, 403)
+      next()
+    },
+  }
+}

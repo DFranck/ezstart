@@ -9,7 +9,7 @@
  * - GET  /api/webhooks/health     -> healthCheck
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 
 // Import individual action routers
 import handleEsgReportRouter, { handleEsgReportRegistry } from './handleEsgReport.js'

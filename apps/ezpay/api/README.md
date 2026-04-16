@@ -208,7 +208,7 @@ apps/ezpay/api/
 
 ## 🛠️ Technologies
 
-- **Express.js** via `@ezstart/express-core`
+- **Express.js** via `@ezstart/api-core`
 - **MongoDB** via Mongoose
 - **Stripe** SDK v14
 - **TypeScript** with strict mode

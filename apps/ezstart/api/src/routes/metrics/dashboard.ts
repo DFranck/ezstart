@@ -4,7 +4,7 @@
  * Dashboard metrics endpoint - redirects to root metrics
  */
 
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/api-core'
 import type { Request, Response } from 'express'
 
 export const registry = new OpenAPIRegistry()

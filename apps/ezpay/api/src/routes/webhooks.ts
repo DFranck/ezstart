@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import { getProvider } from '../services/stripe.js'
 import { getPaymentModel } from '../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'

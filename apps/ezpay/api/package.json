@@ -18,7 +18,6 @@
   "dependencies": {
     "@ezstart/api-core": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/pay-sdk": "workspace:*",
     "@ezstart/rbac": "workspace:*",

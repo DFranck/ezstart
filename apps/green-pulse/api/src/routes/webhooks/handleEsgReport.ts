@@ -11,7 +11,7 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
-} from '@ezstart/express-core'
+} from '@ezstart/api-core'
 import { esgService } from '../../services/esg.service.js'
 import { WebhookEventSchema, type WebhookEvent } from '@green-pulse/types'
 

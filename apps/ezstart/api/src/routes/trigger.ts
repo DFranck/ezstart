@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, sendSuccess, sendError } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import { getHealthCheckModel } from '../models/HealthCheck.js'
 

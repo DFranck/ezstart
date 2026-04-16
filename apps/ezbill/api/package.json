@@ -22,7 +22,6 @@
     "@ezstart/api-core": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/email-service": "workspace:*",
-    "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "cors": "^2.8.5",
