@@ -1,98 +1,10 @@
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Icon,
-  KnownIconName,
-  Div,
-  H3,
-  P,
-  Span,
-} from '@ezstart/ui/components'
+'use client'
+
+import { Card, CardContent, Icon, KnownIconName, Div, H3, P, Span } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
-import { ReactNode, useState } from 'react'
-import { DeleteConfirmationDialog } from './delete-confirmation-dialog'
+import { ReactNode } from 'react'
 
-/** Returns a due date indicator badge based on status and date */
-function DueDateBadge({ status, dueDate }: { status: string; dueDate?: string }) {
-  if (status === 'paid') {
-    return (
-      <Badge variant="success" className="text-xs">
-        Paid
-      </Badge>
-    )
-  }
-
-  if (!dueDate) return null
-
-  const now = new Date()
-  const due = new Date(dueDate)
-  const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-
-  if (diffDays < 0) {
-    return (
-      <Badge variant="destructive" className="text-xs">
-        Overdue
-      </Badge>
-    )
-  }
-
-  if (diffDays <= 7) {
-    return (
-      <Badge variant="warning" className="text-xs">
-        Due soon
-      </Badge>
-    )
-  }
-
-  return null
-}
-
-/** Returns a validity indicator badge for quotes */
-function ValidityBadge({ status, validUntil }: { status: string; validUntil?: string }) {
-  if (status === 'accepted') {
-    return (
-      <Badge variant="success" className="text-xs">
-        Accepted
-      </Badge>
-    )
-  }
-
-  if (status === 'rejected' || status === 'declined') {
-    return (
-      <Badge variant="destructive" className="text-xs">
-        Declined
-      </Badge>
-    )
-  }
-
-  if (!validUntil) return null
-
-  const now = new Date()
-  const expiry = new Date(validUntil)
-  const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-
-  if (diffDays < 0) {
-    return (
-      <Badge variant="destructive" className="text-xs">
-        Expired
-      </Badge>
-    )
-  }
-
-  if (diffDays <= 7) {
-    return (
-      <Badge variant="warning" className="text-xs">
-        Expires soon
-      </Badge>
-    )
-  }
-
-  return null
-}
-
-interface BaseDocumentCardProps {
+export interface BaseDocumentCardProps {
   documentNumber: string
   status: string
   createdAt: string
@@ -141,6 +53,8 @@ export function DocumentCard({
     receipt: 'border-ezbill-receipt/20 hover:border-ezbill-receipt/40',
   }
 
+  const isCompact = type === 'invoice' || type === 'receipt'
+
   return (
     <Div className="group relative">
       <Card
@@ -158,7 +72,7 @@ export function DocumentCard({
         <CardContent>
           <Div
             className={
-              type === 'invoice' || type === 'receipt'
+              isCompact
                 ? 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'
                 : 'flex items-center justify-between'
             }
@@ -168,25 +82,22 @@ export function DocumentCard({
                 className={cn(
                   'rounded-xl flex items-center justify-center',
                   iconGradient,
-                  type === 'invoice' || type === 'receipt'
-                    ? 'w-10 h-10 sm:w-12 sm:h-12'
-                    : 'w-12 h-12'
+                  isCompact ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-12 h-12'
                 )}
               >
                 <Icon
                   name={icon}
-                  className={
-                    type === 'invoice' || type === 'receipt'
-                      ? 'w-5 h-5 sm:w-6 sm:h-6 text-white'
-                      : 'w-6 h-6 text-white'
-                  }
+                  className={cn(
+                    'text-primary-foreground',
+                    isCompact ? 'w-5 h-5 sm:w-6 sm:h-6' : 'w-6 h-6'
+                  )}
                 />
               </Div>
               <Div>
                 <H3
                   className={cn(
                     'font-semibold text-foreground',
-                    type === 'invoice' || type === 'receipt' ? 'text-base sm:text-lg' : 'text-lg'
+                    isCompact ? 'text-base sm:text-lg' : 'text-lg'
                   )}
                 >
                   #{documentNumber}
@@ -211,24 +122,16 @@ export function DocumentCard({
 
             <Div
               className={
-                type === 'invoice' || type === 'receipt'
+                isCompact
                   ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0'
                   : 'flex items-center space-x-4'
               }
             >
-              <Div
-                className={
-                  type === 'invoice' || type === 'receipt'
-                    ? 'text-left sm:text-right'
-                    : 'text-right'
-                }
-              >
+              <Div className={isCompact ? 'text-left sm:text-right' : 'text-right'}>
                 <P
                   className={cn(
                     'font-bold text-foreground',
-                    type === 'invoice' || type === 'receipt'
-                      ? 'text-lg sm:text-xl lg:text-2xl'
-                      : 'text-2xl'
+                    isCompact ? 'text-lg sm:text-xl lg:text-2xl' : 'text-2xl'
                   )}
                 >
                   ${total} {currency}
@@ -238,7 +141,7 @@ export function DocumentCard({
               {actions && (
                 <Div
                   className={
-                    type === 'invoice' || type === 'receipt'
+                    isCompact
                       ? 'flex flex-wrap gap-2 justify-start sm:justify-end'
                       : 'flex space-x-2'
                   }
@@ -257,317 +160,7 @@ export function DocumentCard({
   )
 }
 
-// Specialized Invoice Card
-interface InvoiceCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
-  dueDate?: string
-  permissions: {
-    canEdit?: boolean
-    canSend?: boolean
-    canMarkAsPaid?: boolean
-    reason?: string
-  }
-  onEdit: (e: React.MouseEvent) => void
-  onSend: (e: React.MouseEvent) => void
-  onDownload: (e: React.MouseEvent) => void
-  onDownloadReceipt?: (e: React.MouseEvent) => void
-  onMarkPaid: (e: React.MouseEvent) => void
-}
-
-export function InvoiceCard({
-  documentNumber,
-  status,
-  createdAt,
-  total,
-  currency,
-  dueDate,
-  permissions,
-  onClick,
-  onEdit,
-  onSend,
-  onDownload,
-  onDownloadReceipt,
-  onMarkPaid,
-  className,
-}: InvoiceCardProps) {
-  const statusConfig = {
-    paid: { bg: 'bg-ezbill-paid/10', text: 'text-ezbill-paid' },
-    sent: { bg: 'bg-ezbill-sent/10', text: 'text-ezbill-sent' },
-    draft: { bg: 'bg-ezbill-draft/10', text: 'text-ezbill-draft' },
-    default: { bg: 'bg-muted', text: 'text-muted-foreground' },
-  }
-
-  return (
-    <DocumentCard
-      type="invoice"
-      documentNumber={documentNumber}
-      status={status}
-      createdAt={createdAt}
-      total={total}
-      currency={currency}
-      icon="lucide:FileEdit"
-      iconGradient="bg-gradient-invoice"
-      focusRingColor="focus:ring-2 focus:ring-ezbill-invoice/30"
-      statusConfig={statusConfig}
-      onClick={onClick}
-      className={className}
-      additionalInfo={<DueDateBadge status={status} dueDate={dueDate} />}
-      actions={
-        <>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onEdit}
-            disabled={!permissions.canEdit}
-            title={!permissions.canEdit ? permissions.reason : undefined}
-            className={cn({ hidden: !permissions.canEdit })}
-          >
-            <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
-          </Button>
-          {permissions.canSend && (
-            <Button
-              size="sm"
-              onClick={onSend}
-              className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
-            >
-              <Icon name="lucide:Send" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-              <Span className="hidden xs:inline sm:hidden md:inline">Send</Span>
-            </Button>
-          )}
-          <Button size="sm" variant="outline" onClick={onDownload}>
-            <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-            <Span className="hidden xs:inline sm:hidden md:inline">Download</Span>
-          </Button>
-          {status === 'paid' && onDownloadReceipt && (
-            <Button size="sm" variant="outline" onClick={onDownloadReceipt}>
-              <Icon name="lucide:Receipt" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-              <Span className="hidden xs:inline sm:hidden md:inline">Receipt</Span>
-            </Button>
-          )}
-          {permissions.canMarkAsPaid && (
-            <Button
-              size="sm"
-              onClick={onMarkPaid}
-              className="bg-ezbill-paid hover:bg-ezbill-paid/90 text-ezbill-paid-foreground"
-            >
-              <Icon name="lucide:CheckCircle" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-              <Span className="hidden xs:inline sm:hidden md:inline">Mark Paid</Span>
-              <Span className="inline xs:hidden sm:inline md:hidden">Paid</Span>
-            </Button>
-          )}
-        </>
-      }
-    />
-  )
-}
-
-// Specialized Quote Card
-interface QuoteCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
-  validUntil?: string
-  permissions: {
-    canEdit?: boolean
-    canDelete?: boolean
-    canSend?: boolean
-    canAccept?: boolean
-    canDecline?: boolean
-    canConvertToInvoice?: boolean
-    reason?: string
-  }
-  onEdit: (e: React.MouseEvent) => void
-  onDelete?: (e: React.MouseEvent) => void
-  onSend?: (e: React.MouseEvent) => void
-  onAccept?: (e: React.MouseEvent) => void
-  onDecline?: (e: React.MouseEvent) => void
-  onDownload?: (e: React.MouseEvent) => void
-  onConvertToInvoice: (e: React.MouseEvent) => void
-}
-
-export function QuoteCard({
-  documentNumber,
-  status,
-  createdAt,
-  total,
-  currency,
-  validUntil,
-  permissions,
-  onClick,
-  onEdit,
-  onDelete,
-  onSend,
-  onAccept,
-  onDecline,
-  onDownload,
-  onConvertToInvoice,
-  className,
-}: QuoteCardProps) {
-  const [deleteDialog, setDeleteDialog] = useState(false)
-
-  const statusConfig = {
-    accepted: { bg: 'bg-ezbill-accepted/10', text: 'text-ezbill-accepted' },
-    rejected: { bg: 'bg-ezbill-rejected/10', text: 'text-ezbill-rejected' },
-    sent: { bg: 'bg-ezbill-sent/10', text: 'text-ezbill-sent' },
-    draft: { bg: 'bg-ezbill-draft/10', text: 'text-ezbill-draft' },
-    default: { bg: 'bg-muted', text: 'text-muted-foreground' },
-  }
-
-  return (
-    <>
-      <DocumentCard
-        type="quote"
-        documentNumber={documentNumber}
-        status={status}
-        createdAt={createdAt}
-        total={total}
-        currency={currency}
-        icon="lucide:FileText"
-        iconGradient="bg-gradient-quote"
-        focusRingColor="focus:ring-2 focus:ring-ezbill-quote/30"
-        statusConfig={statusConfig}
-        onClick={onClick}
-        className={className}
-        additionalInfo={
-          <>
-            <Span className="text-sm text-muted-foreground">
-              Valid until: {validUntil ? new Date(validUntil).toLocaleDateString() : '-'}
-            </Span>
-            <ValidityBadge status={status} validUntil={validUntil} />
-          </>
-        }
-        actions={
-          <>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onEdit}
-              disabled={!permissions.canEdit}
-              title={!permissions.canEdit ? permissions.reason : undefined}
-              className={cn({ hidden: !permissions.canEdit })}
-            >
-              <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
-            </Button>
-            {permissions.canDelete && onDelete && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={e => {
-                  e.stopPropagation()
-                  setDeleteDialog(true)
-                }}
-                className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
-              >
-                <Icon name="lucide:Trash2" className="w-5 h-5 sm:w-4 sm:h-4" />
-              </Button>
-            )}
-            {permissions.canSend && onSend && (
-              <Button
-                size="sm"
-                onClick={onSend}
-                className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
-              >
-                <Icon name="lucide:Send" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <Span className="hidden xs:inline sm:hidden md:inline">Send</Span>
-              </Button>
-            )}
-            {permissions.canAccept && onAccept && (
-              <Button
-                size="sm"
-                onClick={onAccept}
-                className="bg-ezbill-accepted hover:bg-ezbill-accepted/90 text-ezbill-accepted-foreground"
-              >
-                <Icon name="lucide:Check" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <Span className="hidden xs:inline sm:hidden md:inline">Accept</Span>
-              </Button>
-            )}
-            {permissions.canDecline && onDecline && (
-              <Button
-                size="sm"
-                onClick={onDecline}
-                className="bg-ezbill-rejected hover:bg-ezbill-rejected/90 text-ezbill-rejected-foreground"
-              >
-                <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <Span className="hidden xs:inline sm:hidden md:inline">Decline</Span>
-              </Button>
-            )}
-            {onDownload && (
-              <Button size="sm" variant="outline" onClick={onDownload}>
-                <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <Span className="hidden xs:inline sm:hidden md:inline">Download</Span>
-              </Button>
-            )}
-            {permissions.canConvertToInvoice && (
-              <Button
-                size="sm"
-                onClick={onConvertToInvoice}
-                className="bg-ezbill-invoice hover:bg-ezbill-invoice/90 text-ezbill-invoice-foreground"
-              >
-                <Icon name="lucide:ArrowRight" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <Span className="hidden xs:inline sm:hidden md:inline">Invoice</Span>
-              </Button>
-            )}
-          </>
-        }
-      />
-
-      <DeleteConfirmationDialog
-        isOpen={deleteDialog}
-        onClose={() => setDeleteDialog(false)}
-        onConfirm={() => {
-          if (onDelete) {
-            onDelete({} as React.MouseEvent)
-          }
-          setDeleteDialog(false)
-        }}
-        title="Delete Quote"
-        description={`Are you sure you want to delete quote #${documentNumber}? This will move it to trash.`}
-        confirmText="Delete Quote"
-      />
-    </>
-  )
-}
-
-// Specialized Receipt Card
-interface ReceiptCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
-  paymentDate?: string
-  onDownload?: (e: React.MouseEvent) => void
-}
-
-export function ReceiptCard({
-  documentNumber,
-  status,
-  createdAt,
-  total,
-  currency,
-  paymentDate,
-  onClick,
-  onDownload,
-  className,
-}: ReceiptCardProps) {
-  const statusConfig = {
-    refunded: { bg: 'bg-ezbill-rejected/10', text: 'text-ezbill-rejected' },
-    default: { bg: 'bg-ezbill-paid/10', text: 'text-ezbill-paid' },
-  }
-
-  return (
-    <DocumentCard
-      type="receipt"
-      documentNumber={documentNumber}
-      status={status}
-      createdAt={createdAt}
-      total={total}
-      currency={currency}
-      icon="lucide:Receipt"
-      iconGradient="bg-gradient-receipt"
-      focusRingColor="focus:ring-2 focus:ring-ezbill-receipt/30"
-      statusConfig={statusConfig}
-      onClick={onClick}
-      className={className}
-      actions={
-        onDownload && (
-          <Button size="sm" variant="outline" onClick={onDownload} title="Download receipt">
-            <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-            <Span className="hidden xs:inline sm:hidden md:inline">Download</Span>
-          </Button>
-        )
-      }
-    />
-  )
-}
+// Re-export specialized cards for backward compatibility
+export { InvoiceCard } from './InvoiceCard'
+export { QuoteCard } from './QuoteCard'
+export { ReceiptCard } from './ReceiptCard'

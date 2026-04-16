@@ -1,4 +1,14 @@
 {
+  "home": {
+    "description": "Professional invoicing and billing made simple. Create beautiful invoices, manage clients, and track payments with ease.",
+    "smartInvoicing": "Smart Invoicing",
+    "smartInvoicingDesc": "Create professional invoices and quotes in seconds with our intuitive interface",
+    "clientManagement": "Client Management",
+    "clientManagementDesc": "Organize your clients and companies with detailed contact information",
+    "paymentTracking": "Payment Tracking",
+    "paymentTrackingDesc": "Track payments and manage receipts to stay on top of your finances",
+    "getStarted": "Get Started"
+  },
   "landing": {
     "hero": {
       "badge": "No Monthly Fees • Own It Forever",
@@ -30,6 +40,8 @@
     "solution": {
       "title": "Own Your Invoicing System Forever",
       "description": "EZBill is a one-time purchase. No subscriptions, no limits, no surprises.",
+      "dashboardScreenshotLabel": "Dashboard Screenshot",
+      "dashboardScreenshotHint": "Image: ezbill-dashboard.webp (1920x1080)",
       "steps": {
         "step1": {
           "badge": "1",
@@ -120,11 +132,14 @@
         "yearCost": "$0/year after purchase",
         "limits": "Unlimited everything"
       },
+      "bestValue": "BEST VALUE",
       "savings": "Save $360-600 every year"
     },
     "useCases": {
       "title": "Built For Real Businesses",
       "subtitle": "From freelancers to growing agencies",
+      "challengeLabel": "Challenge",
+      "solutionLabel": "Solution",
       "cases": [
         {
           "persona": "Freelance Designer",
