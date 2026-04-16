@@ -32,3 +32,12 @@ export interface CreateApiKeyResponse {
   keyPrefix: string
   name: string
 }
+
+export interface PlanInfo {
+  id: string
+  name: string
+  price: number // monthly in cents
+  quotaMonthly: number | null // null = unlimited
+  maxKeys: number | null // null = unlimited
+  features: string[]
+}

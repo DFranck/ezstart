@@ -1,0 +1,100 @@
+{
+  "developer": {
+    "title": "Developer Portal",
+    "subtitle": "Manage your Stripe Connect account and monitor your platform activity",
+    "loginRequired": "Login Required",
+    "loginRequiredDescription": "You must be logged in to access the developer portal.",
+    "connect": {
+      "title": "Connect Status",
+      "notConnected": "No Stripe Account Connected",
+      "notConnectedDescription": "Connect your Stripe account to start accepting payments through the platform.",
+      "connectButton": "Connect your Stripe Account",
+      "accountInfo": "Account Information",
+      "businessName": "Business Name",
+      "accountType": "Account Type",
+      "accountTypeStandard": "Standard",
+      "accountTypeExpress": "Express",
+      "connectedSince": "Connected Since",
+      "status": "Status",
+      "statusPending": "Pending",
+      "statusActive": "Active",
+      "statusRestricted": "Restricted",
+      "statusDisabled": "Disabled",
+      "chargesEnabled": "Charges Enabled",
+      "payoutsEnabled": "Payouts Enabled",
+      "yes": "Yes",
+      "no": "No",
+      "onboard": {
+        "title": "Connect your Stripe Account",
+        "description": "Fill in your details to start the onboarding process.",
+        "email": "Business Email",
+        "emailPlaceholder": "you@business.com",
+        "businessName": "Business Name",
+        "businessNamePlaceholder": "Your Business",
+        "accountType": "Account Type",
+        "standard": "Standard (Full Stripe Dashboard)",
+        "express": "Express (Simplified Onboarding)",
+        "submit": "Start Onboarding",
+        "submitting": "Creating account..."
+      },
+      "disconnect": {
+        "button": "Disconnect Account",
+        "title": "Disconnect Stripe Account?",
+        "description": "This will remove your connected Stripe account from the platform. You will no longer be able to receive payments. This action cannot be undone.",
+        "confirm": "Disconnect",
+        "cancel": "Cancel"
+      },
+      "dashboard": {
+        "button": "Open Stripe Dashboard",
+        "loading": "Loading..."
+      }
+    },
+    "fees": {
+      "title": "Fee Summary",
+      "thisMonth": "This Month",
+      "totalFees": "Total Fees Paid",
+      "averageFee": "Average Fee",
+      "transactions": "Transactions",
+      "noData": "No transaction data available yet"
+    },
+    "transactions": {
+      "title": "Recent Transactions",
+      "date": "Date",
+      "amount": "Amount",
+      "fee": "Platform Fee",
+      "net": "Net Amount",
+      "status": "Status",
+      "noTransactions": "No transactions yet",
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "plans": {
+      "title": "Platform Plans",
+      "subtitle": "Choose a plan that fits your needs. Lower fees, more features.",
+      "current": "Current",
+      "upgrade": "Upgrade",
+      "comingSoon": "Plan upgrades are coming soon!",
+      "platformFee": "platform fee",
+      "perMonth": "/month",
+      "free": "Free",
+      "starter": {
+        "name": "Starter",
+        "description": "Perfect for getting started",
+        "features": "Basic dashboard, Email support"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "For growing businesses",
+        "features": "Advanced analytics, Priority email support"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "For high-volume platforms",
+        "features": "Custom analytics, Priority support, Dedicated account manager"
+      }
+    },
+    "loading": "Loading developer portal...",
+    "error": "Failed to load account data. Please try again."
+  }
+}

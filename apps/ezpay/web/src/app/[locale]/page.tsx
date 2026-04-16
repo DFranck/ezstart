@@ -5,6 +5,7 @@ import { AuthHeader } from './auth-header'
 
 export default function HomePage() {
   const t = useTranslations('home')
+  const nav = useTranslations('nav')
 
   return (
     <Main className="container mx-auto py-12 px-4">
@@ -58,12 +59,18 @@ export default function HomePage() {
           </Div>
         </Div>
 
-        {/* Link to Test Center */}
-        <Div className="mt-8">
+        {/* Navigation links */}
+        <Div className="mt-8 flex flex-wrap justify-center gap-4">
           <Button asChild variant="outline" size="lg">
             <Link href="/test">
               <Icon name="lucide:FlaskConical" className="w-5 h-5 mr-2" />
               {t('testCenter')}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/developer">
+              <Icon name="lucide:Code" className="w-5 h-5 mr-2" />
+              {nav('developer')}
             </Link>
           </Button>
         </Div>

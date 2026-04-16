@@ -65,6 +65,35 @@
     "dailyBreakdown": "Détail journalier (14 derniers jours)",
     "noUsage": "Aucune utilisation enregistrée"
   },
+  "billing": {
+    "title": "Facturation & Plans",
+    "description": "Gérez votre abonnement et vos limites d'utilisation",
+    "currentPlan": "Plan actuel",
+    "quotaLabel": "{quota} requêtes / mois",
+    "maxKeysLabel": "{count} clés API",
+    "unlimited": "Illimité",
+    "manageSubscription": "Gérer l'abonnement",
+    "choosePlan": "Choisissez votre plan",
+    "popular": "Le plus populaire",
+    "month": "mois",
+    "requestsPerMonth": "requêtes / mois",
+    "apiKeys": "clés API",
+    "currentLabel": "Plan actuel",
+    "upgrade": "Mettre à niveau",
+    "downgrade": "Rétrograder",
+    "comingSoon": "Bientôt disponible — les plans seront proposés prochainement",
+    "features": {
+      "communitySupport": "Support communautaire",
+      "emailSupport": "Support par email",
+      "priorityRateLimit": "Limite de débit prioritaire",
+      "dedicatedSupport": "Support dédié",
+      "sla": "SLA 99.9%"
+    }
+  },
+  "nav": {
+    "apiKeys": "Clés API",
+    "billing": "Facturation"
+  },
   "retry": "Réessayer",
   "errors": {
     "fetchFailed": "Impossible de charger les clés API",

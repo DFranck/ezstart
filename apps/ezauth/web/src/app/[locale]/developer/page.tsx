@@ -19,6 +19,7 @@ import { toast } from '@ezstart/ui/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import type { ApiKeyItem, CreateApiKeyResponse } from './types'
 import { ApiKeysTable } from './components/ApiKeysTable'
@@ -135,7 +136,12 @@ export default function DeveloperPage() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <Div className="flex justify-end">
+        <Div className="flex justify-between items-center">
+          <Link href="/developer/billing">
+            <Button variant="outline" size="sm">
+              {t('nav.billing')}
+            </Button>
+          </Link>
           <Button onClick={() => setShowCreateModal(true)}>{t('createKey')}</Button>
         </Div>
 

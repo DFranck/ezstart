@@ -65,6 +65,35 @@
     "dailyBreakdown": "Daily Breakdown (last 14 days)",
     "noUsage": "No usage recorded yet"
   },
+  "billing": {
+    "title": "Thanh toan & Goi dich vu",
+    "description": "Quan ly goi dang ky va gioi han su dung cua ban",
+    "currentPlan": "Goi hien tai",
+    "quotaLabel": "{quota} yeu cau / thang",
+    "maxKeysLabel": "{count} khoa API",
+    "unlimited": "Khong gioi han",
+    "manageSubscription": "Quan ly dang ky",
+    "choosePlan": "Chon goi dich vu",
+    "popular": "Pho bien nhat",
+    "month": "thang",
+    "requestsPerMonth": "yeu cau / thang",
+    "apiKeys": "khoa API",
+    "currentLabel": "Goi hien tai",
+    "upgrade": "Nang cap",
+    "downgrade": "Ha cap",
+    "comingSoon": "Sap co — cac goi dich vu se som duoc cung cap",
+    "features": {
+      "communitySupport": "Ho tro cong dong",
+      "emailSupport": "Ho tro qua email",
+      "priorityRateLimit": "Gioi han toc do uu tien",
+      "dedicatedSupport": "Ho tro chuyen trach",
+      "sla": "SLA 99.9%"
+    }
+  },
+  "nav": {
+    "apiKeys": "API Keys",
+    "billing": "Thanh toan"
+  },
   "retry": "Retry",
   "errors": {
     "fetchFailed": "Failed to load API keys",

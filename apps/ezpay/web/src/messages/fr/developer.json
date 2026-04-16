@@ -1,0 +1,100 @@
+{
+  "developer": {
+    "title": "Portail Développeur",
+    "subtitle": "Gérez votre compte Stripe Connect et suivez votre activité sur la plateforme",
+    "loginRequired": "Connexion requise",
+    "loginRequiredDescription": "Vous devez être connecté pour accéder au portail développeur.",
+    "connect": {
+      "title": "Statut de connexion",
+      "notConnected": "Aucun compte Stripe connecté",
+      "notConnectedDescription": "Connectez votre compte Stripe pour commencer à accepter des paiements via la plateforme.",
+      "connectButton": "Connecter votre compte Stripe",
+      "accountInfo": "Informations du compte",
+      "businessName": "Nom de l'entreprise",
+      "accountType": "Type de compte",
+      "accountTypeStandard": "Standard",
+      "accountTypeExpress": "Express",
+      "connectedSince": "Connecté depuis",
+      "status": "Statut",
+      "statusPending": "En attente",
+      "statusActive": "Actif",
+      "statusRestricted": "Restreint",
+      "statusDisabled": "Désactivé",
+      "chargesEnabled": "Paiements activés",
+      "payoutsEnabled": "Versements activés",
+      "yes": "Oui",
+      "no": "Non",
+      "onboard": {
+        "title": "Connecter votre compte Stripe",
+        "description": "Remplissez vos informations pour démarrer le processus d'intégration.",
+        "email": "Email professionnel",
+        "emailPlaceholder": "vous@entreprise.com",
+        "businessName": "Nom de l'entreprise",
+        "businessNamePlaceholder": "Votre Entreprise",
+        "accountType": "Type de compte",
+        "standard": "Standard (Tableau de bord Stripe complet)",
+        "express": "Express (Intégration simplifiée)",
+        "submit": "Démarrer l'intégration",
+        "submitting": "Création du compte..."
+      },
+      "disconnect": {
+        "button": "Déconnecter le compte",
+        "title": "Déconnecter le compte Stripe ?",
+        "description": "Cela supprimera votre compte Stripe connecté de la plateforme. Vous ne pourrez plus recevoir de paiements. Cette action est irréversible.",
+        "confirm": "Déconnecter",
+        "cancel": "Annuler"
+      },
+      "dashboard": {
+        "button": "Ouvrir le tableau de bord Stripe",
+        "loading": "Chargement..."
+      }
+    },
+    "fees": {
+      "title": "Résumé des frais",
+      "thisMonth": "Ce mois-ci",
+      "totalFees": "Total des frais payés",
+      "averageFee": "Frais moyens",
+      "transactions": "Transactions",
+      "noData": "Aucune donnée de transaction disponible"
+    },
+    "transactions": {
+      "title": "Transactions récentes",
+      "date": "Date",
+      "amount": "Montant",
+      "fee": "Frais plateforme",
+      "net": "Montant net",
+      "status": "Statut",
+      "noTransactions": "Aucune transaction",
+      "completed": "Terminé",
+      "pending": "En attente",
+      "failed": "Échoué"
+    },
+    "plans": {
+      "title": "Plans de la plateforme",
+      "subtitle": "Choisissez le plan qui vous convient. Moins de frais, plus de fonctionnalités.",
+      "current": "Actuel",
+      "upgrade": "Changer",
+      "comingSoon": "Les changements de plan arrivent bientôt !",
+      "platformFee": "frais plateforme",
+      "perMonth": "/mois",
+      "free": "Gratuit",
+      "starter": {
+        "name": "Starter",
+        "description": "Parfait pour débuter",
+        "features": "Tableau de bord basique, Support par email"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Pour les entreprises en croissance",
+        "features": "Analytiques avancées, Support email prioritaire"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Pour les plateformes à fort volume",
+        "features": "Analytiques personnalisées, Support prioritaire, Gestionnaire de compte dédié"
+      }
+    },
+    "loading": "Chargement du portail développeur...",
+    "error": "Impossible de charger les données du compte. Veuillez réessayer."
+  }
+}

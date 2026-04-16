@@ -65,6 +65,35 @@
     "dailyBreakdown": "Daily Breakdown (last 14 days)",
     "noUsage": "No usage recorded yet"
   },
+  "billing": {
+    "title": "Billing & Plans",
+    "description": "Manage your subscription plan and usage limits",
+    "currentPlan": "Current Plan",
+    "quotaLabel": "{quota} requests / month",
+    "maxKeysLabel": "{count} API keys",
+    "unlimited": "Unlimited",
+    "manageSubscription": "Manage Subscription",
+    "choosePlan": "Choose Your Plan",
+    "popular": "Most Popular",
+    "month": "month",
+    "requestsPerMonth": "requests / month",
+    "apiKeys": "API keys",
+    "currentLabel": "Current Plan",
+    "upgrade": "Upgrade",
+    "downgrade": "Downgrade",
+    "comingSoon": "Coming soon — plans will be available shortly",
+    "features": {
+      "communitySupport": "Community support",
+      "emailSupport": "Email support",
+      "priorityRateLimit": "Priority rate limit",
+      "dedicatedSupport": "Dedicated support",
+      "sla": "SLA 99.9%"
+    }
+  },
+  "nav": {
+    "apiKeys": "API Keys",
+    "billing": "Billing"
+  },
   "retry": "Retry",
   "errors": {
     "fetchFailed": "Failed to load API keys",
