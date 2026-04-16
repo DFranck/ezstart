@@ -7,8 +7,15 @@
  *   `.openapi(name)` when the extension is present.
  */
 
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import type { ZodTypeAny } from 'zod'
 import { z } from 'zod'
+
+// Ensure all Zod schemas have `.openapi()` available globally.
+// Without this, `generateInlineParameters` in zod-to-openapi v7 crashes
+// with `TypeError: schema.openapi is not a function` when processing
+// params/query schema properties.
+extendZodWithOpenApi(z)
 
 /**
  * @internal Walk refine/transform schemas and convert `ZodNativeEnum` → `z.enum`

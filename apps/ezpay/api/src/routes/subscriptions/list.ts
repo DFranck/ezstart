@@ -21,14 +21,17 @@ const docRouter = createRouterWithDoc(listSubscriptionsRegistry, router)
 // ========================================
 
 const subscriptionsQuerySchema = z.object({
-  projectId: z.string().optional().describe('Filter by project ID'),
-  userId: z.string().optional().describe('Filter by user ID'),
+  projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
+  userId: z.string().optional().openapi({ description: 'Filter by user ID' }),
   liveMode: z
     .enum(['true', 'false'])
     .optional()
-    .describe('Filter by live mode (true=production, false=test)'),
-  limit: z.coerce.number().default(20).describe('Number of subscriptions to return'),
-  offset: z.coerce.number().default(0).describe('Number of subscriptions to skip'),
+    .openapi({ description: 'Filter by live mode (true=production, false=test)' }),
+  limit: z.coerce
+    .number()
+    .default(20)
+    .openapi({ description: 'Number of subscriptions to return' }),
+  offset: z.coerce.number().default(0).openapi({ description: 'Number of subscriptions to skip' }),
 })
 
 const subscriptionsListResponseSchema = z.object({

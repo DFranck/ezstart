@@ -21,7 +21,7 @@ const docRouter = createRouterWithDoc(donationStatsRegistry, router)
 // ========================================
 
 const donationStatsQuerySchema = z.object({
-  projectId: z.string().optional().describe('Filter stats by project ID'),
+  projectId: z.string().optional().openapi({ description: 'Filter stats by project ID' }),
 })
 
 const donationStatsResponseSchema = z.object({

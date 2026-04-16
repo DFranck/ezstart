@@ -22,7 +22,7 @@ const docRouter = createRouterWithDoc(refundPaymentRegistry, router)
 // ========================================
 
 const refundParamsSchema = z.object({
-  paymentId: z.string().describe('Payment document ID or paymentId'),
+  paymentId: z.string().openapi({ description: 'Payment document ID or paymentId' }),
 })
 
 const refundResponseSchema = z.object({

@@ -26,7 +26,7 @@ const healthChecker = new HealthChecker()
 // ========================================
 
 const serviceIdParamSchema = z.object({
-  serviceId: z.string().describe('Unique identifier of the service'),
+  serviceId: z.string().openapi({ description: 'Unique identifier of the service' }),
 })
 
 const healthCheckResultSchema = z.object({

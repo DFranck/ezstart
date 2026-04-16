@@ -20,7 +20,7 @@ const docRouter = createRouterWithDoc(cleanupPaymentsRegistry, router)
 // ========================================
 
 const cleanupQuerySchema = z.object({
-  appName: z.string().optional().describe('Optional app name to scope deletion'),
+  appName: z.string().optional().openapi({ description: 'Optional app name to scope deletion' }),
 })
 
 const cleanupResponseSchema = z.object({

@@ -15,8 +15,16 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(googleAuthorizeRegistry, router)
 
 const googleAuthorizeQuerySchema = z.object({
-  app: z.string().min(1).default('ezstart').describe('Application name requesting OAuth'),
-  redirect_uri: z.string().url().optional().describe('URL to redirect after OAuth completion'),
+  app: z
+    .string()
+    .min(1)
+    .default('ezstart')
+    .openapi({ description: 'Application name requesting OAuth' }),
+  redirect_uri: z
+    .string()
+    .url()
+    .optional()
+    .openapi({ description: 'URL to redirect after OAuth completion' }),
 })
 
 /** Cookie that mirrors the nonce in the signed state JWT (CSRF double-submit). */

@@ -20,7 +20,7 @@ const docRouter = createRouterWithDoc(verifyPaymentRegistry, router)
 // ========================================
 
 const verifyPaymentParamsSchema = z.object({
-  sessionId: z.string().describe('Stripe checkout session ID'),
+  sessionId: z.string().openapi({ description: 'Stripe checkout session ID' }),
 })
 
 const paymentResponseSchema = z.object({

@@ -39,13 +39,13 @@ export const ErrorResponseSchema = z
 // Params schemas
 export const IdParamsSchema = z
   .object({
-    id: z.string().min(1).describe('Resource ID'),
+    id: z.string().min(1).openapi({ description: 'Resource ID' }),
   })
   .openapi({ title: 'ID Parameters' })
 
 export const JobIdParamsSchema = z
   .object({
-    jobId: z.string().min(1).describe('Job ID for status tracking'),
+    jobId: z.string().min(1).openapi({ description: 'Job ID for status tracking' }),
   })
   .openapi({ title: 'Job ID Parameters' })
 

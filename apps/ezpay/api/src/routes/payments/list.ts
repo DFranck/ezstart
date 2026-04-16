@@ -24,19 +24,31 @@ const paymentsQuerySchema = z.object({
   type: z
     .enum(['donation', 'purchase', 'subscription', 'invoice'])
     .optional()
-    .describe('Filter by payment type'),
+    .openapi({ description: 'Filter by payment type' }),
   status: z
     .enum(['pending', 'completed', 'failed', 'refunded', 'cancelled'])
     .optional()
-    .describe('Filter by payment status'),
-  projectId: z.string().optional().describe('Filter by project ID'),
-  search: z.string().optional().describe('Search by customer email (case-insensitive)'),
+    .openapi({ description: 'Filter by payment status' }),
+  projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
+  search: z
+    .string()
+    .optional()
+    .openapi({ description: 'Search by customer email (case-insensitive)' }),
   liveMode: z
     .enum(['true', 'false'])
     .optional()
-    .describe('Filter by live mode (true=production, false=test)'),
-  limit: z.coerce.number().min(1).max(100).default(20).describe('Number of payments to return'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of payments to skip'),
+    .openapi({ description: 'Filter by live mode (true=production, false=test)' }),
+  limit: z.coerce
+    .number()
+    .min(1)
+    .max(100)
+    .default(20)
+    .openapi({ description: 'Number of payments to return' }),
+  offset: z.coerce
+    .number()
+    .min(0)
+    .default(0)
+    .openapi({ description: 'Number of payments to skip' }),
 })
 
 const paymentsListResponseSchema = z.object({

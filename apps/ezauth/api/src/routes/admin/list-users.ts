@@ -41,17 +41,20 @@ const listUsersQuerySchema = z.object({
     .max(200)
     .optional()
     .default(20)
-    .describe('Page size (1-200, default 20)'),
+    .openapi({ description: 'Page size (1-200, default 20)' }),
   offset: z.coerce
     .number()
     .int()
     .min(0)
     .optional()
     .default(0)
-    .describe('Pagination offset (0-based, default 0)'),
-  search: z.string().optional().describe('Free-text search on email/username/name'),
-  role: z.string().optional().describe('Filter by role (globalRole or per-app role)'),
-  app: z.string().optional().describe('Filter by app membership'),
+    .openapi({ description: 'Pagination offset (0-based, default 0)' }),
+  search: z.string().optional().openapi({ description: 'Free-text search on email/username/name' }),
+  role: z
+    .string()
+    .optional()
+    .openapi({ description: 'Filter by role (globalRole or per-app role)' }),
+  app: z.string().optional().openapi({ description: 'Filter by app membership' }),
 })
 
 /** Escape user input before embedding in a Mongo `$regex`. */

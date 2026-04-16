@@ -29,7 +29,9 @@ const docRouter = createRouterWithDoc(registry, router)
 // ========================================
 
 const auditTypeParamSchema = z.object({
-  type: z.string().describe('Type of audit (security, performance, architecture, etc.)'),
+  type: z
+    .string()
+    .openapi({ description: 'Type of audit (security, performance, architecture, etc.)' }),
 })
 
 const specificAuditResponseSchema = z.object({

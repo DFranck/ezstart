@@ -21,10 +21,10 @@ const docRouter = createRouterWithDoc(listPurchasesRegistry, router)
 // ========================================
 
 const purchasesQuerySchema = z.object({
-  userId: z.string().optional().describe('Filter by user ID'),
-  projectId: z.string().optional().describe('Filter by project ID'),
-  limit: z.coerce.number().default(20).describe('Number of purchases to return'),
-  offset: z.coerce.number().default(0).describe('Number of purchases to skip'),
+  userId: z.string().optional().openapi({ description: 'Filter by user ID' }),
+  projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
+  limit: z.coerce.number().default(20).openapi({ description: 'Number of purchases to return' }),
+  offset: z.coerce.number().default(0).openapi({ description: 'Number of purchases to skip' }),
 })
 
 const purchasesListResponseSchema = z.object({

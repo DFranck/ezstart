@@ -26,11 +26,14 @@ const healthChecker = new HealthChecker()
 // ========================================
 
 const serviceIdParamSchema = z.object({
-  serviceId: z.string().describe('Unique identifier of the service'),
+  serviceId: z.string().openapi({ description: 'Unique identifier of the service' }),
 })
 
 const historyQuerySchema = z.object({
-  limit: z.coerce.number().default(50).describe('Number of history entries to return'),
+  limit: z.coerce
+    .number()
+    .default(50)
+    .openapi({ description: 'Number of history entries to return' }),
 })
 
 const historyResponseSchema = z.object({

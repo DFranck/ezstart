@@ -14,10 +14,22 @@ const router = Router()
 export const listCompaniesRouter = createRouterWithDoc(listCompaniesRegistry, router, '/companies')
 
 const listCompaniesQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().describe('Page number'),
-  limit: z.coerce.number().int().positive().max(100).optional().describe('Items per page'),
-  includeDeleted: z.enum(['true', 'false']).optional().describe('Include soft-deleted companies'),
-  deletedOnly: z.enum(['true', 'false']).optional().describe('Only return soft-deleted companies'),
+  page: z.coerce.number().int().positive().optional().openapi({ description: 'Page number' }),
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(100)
+    .optional()
+    .openapi({ description: 'Items per page' }),
+  includeDeleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .openapi({ description: 'Include soft-deleted companies' }),
+  deletedOnly: z
+    .enum(['true', 'false'])
+    .optional()
+    .openapi({ description: 'Only return soft-deleted companies' }),
 })
 
 const paginatedCompaniesSchema = z.object({

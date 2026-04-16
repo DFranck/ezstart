@@ -21,10 +21,21 @@ const docRouter = createRouterWithDoc(listPromosRegistry, router)
 // ========================================
 
 const listPromosQuerySchema = z.object({
-  appName: z.string().optional().describe('Filter by app name'),
-  active: z.enum(['true', 'false']).optional().describe('Filter by active status'),
-  limit: z.coerce.number().int().min(1).max(100).default(20).describe('Max results'),
-  offset: z.coerce.number().int().min(0).default(0).describe('Offset for pagination'),
+  appName: z.string().optional().openapi({ description: 'Filter by app name' }),
+  active: z.enum(['true', 'false']).optional().openapi({ description: 'Filter by active status' }),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(20)
+    .openapi({ description: 'Max results' }),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .default(0)
+    .openapi({ description: 'Offset for pagination' }),
 })
 
 const promosListResponseSchema = z.object({

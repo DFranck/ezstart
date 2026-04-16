@@ -26,12 +26,15 @@ const healthChecker = new HealthChecker()
 // ========================================
 
 const projectIdParamSchema = z.object({
-  projectId: z.string().describe('Project identifier (e.g. ezauth, ezbill)'),
+  projectId: z.string().openapi({ description: 'Project identifier (e.g. ezauth, ezbill)' }),
 })
 
 const projectHistoryQuerySchema = z.object({
-  hours: z.coerce.number().default(24).describe('Time range in hours'),
-  limit: z.coerce.number().default(100).describe('Number of history entries per service'),
+  hours: z.coerce.number().default(24).openapi({ description: 'Time range in hours' }),
+  limit: z.coerce
+    .number()
+    .default(100)
+    .openapi({ description: 'Number of history entries per service' }),
 })
 
 const projectHistoryResponseSchema = z.object({

@@ -9,7 +9,7 @@ import { userSchema } from '@ezbill/types'
 import { getUserByUsername } from '../../controllers/user/index.js'
 
 const usernameParamsSchema = z.object({
-  username: z.string().min(1).describe('Username to search for'),
+  username: z.string().min(1).openapi({ description: 'Username to search for' }),
 })
 
 export const getUserByUsernameRegistry = new OpenAPIRegistry()

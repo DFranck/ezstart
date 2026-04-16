@@ -91,10 +91,16 @@ scansRegistry.registerPath({
     'Returns paginated scan history, most recent first. Supports filtering by game type and status.',
   request: {
     query: z.object({
-      gameType: z.enum(['summoners-war', 'nikke']).optional().describe('Filter by game'),
-      status: z.enum(['completed', 'failed']).optional().describe('Filter by scan status'),
-      limit: z.string().optional().describe('Max results (default: 50)'),
-      offset: z.string().optional().describe('Skip N results (default: 0)'),
+      gameType: z
+        .enum(['summoners-war', 'nikke'])
+        .optional()
+        .openapi({ description: 'Filter by game' }),
+      status: z
+        .enum(['completed', 'failed'])
+        .optional()
+        .openapi({ description: 'Filter by scan status' }),
+      limit: z.string().optional().openapi({ description: 'Max results (default: 50)' }),
+      offset: z.string().optional().openapi({ description: 'Skip N results (default: 0)' }),
     }),
   },
   responses: {
@@ -129,7 +135,7 @@ scansRegistry.registerPath({
   description: 'Returns full scan data including OCR text, parsed rune data, and analysis.',
   request: {
     params: z.object({
-      id: z.string().describe('Scan ID'),
+      id: z.string().openapi({ description: 'Scan ID' }),
     }),
   },
   responses: {
@@ -157,7 +163,7 @@ scansRegistry.registerPath({
   summary: 'Delete a scan',
   request: {
     params: z.object({
-      id: z.string().describe('Scan ID'),
+      id: z.string().openapi({ description: 'Scan ID' }),
     }),
   },
   responses: {
@@ -191,13 +197,13 @@ scansRegistry.registerPath({
     'Re-runs the parser and analyzer on existing OCR text. Useful after parser/analyzer updates.',
   request: {
     params: z.object({
-      id: z.string().describe('Scan ID'),
+      id: z.string().openapi({ description: 'Scan ID' }),
     }),
     query: z.object({
       profile: z
         .enum(['early', 'mid', 'late'])
         .optional()
-        .describe('Player profile for re-analysis'),
+        .openapi({ description: 'Player profile for re-analysis' }),
     }),
   },
   responses: {
@@ -227,7 +233,7 @@ scansRegistry.registerPath({
   description: 'Rate whether the scan analysis was correct.',
   request: {
     params: z.object({
-      id: z.string().describe('Scan ID'),
+      id: z.string().openapi({ description: 'Scan ID' }),
     }),
     body: {
       content: {
@@ -267,7 +273,7 @@ scansRegistry.registerPath({
   description: 'Creates a new bug report on a scan. A scan can have multiple reports.',
   request: {
     params: z.object({
-      id: z.string().describe('Scan ID'),
+      id: z.string().openapi({ description: 'Scan ID' }),
     }),
     body: {
       content: {
@@ -310,8 +316,8 @@ scansRegistry.registerPath({
     'Update report status (open, in-progress, resolved). Resolution comment required when resolving.',
   request: {
     params: z.object({
-      id: z.string().describe('Scan ID'),
-      reportIndex: z.string().describe('Report index in the reports array'),
+      id: z.string().openapi({ description: 'Scan ID' }),
+      reportIndex: z.string().openapi({ description: 'Report index in the reports array' }),
     }),
     body: {
       content: {
@@ -388,16 +394,19 @@ monstersRegistry.registerPath({
       element: z
         .enum(['fire', 'water', 'wind', 'light', 'dark'])
         .optional()
-        .describe('Filter by element'),
+        .openapi({ description: 'Filter by element' }),
       archetype: z
         .enum(['attack', 'defense', 'support', 'hp'])
         .optional()
-        .describe('Filter by archetype'),
-      buildArchetype: z.string().optional().describe('Filter by build archetype'),
-      stars: z.string().optional().describe('Filter by natural stars (2-5)'),
-      search: z.string().optional().describe('Search by name'),
-      page: z.string().optional().describe('Page number (default: 1)'),
-      limit: z.string().optional().describe('Results per page (default: 50, max: 100)'),
+        .openapi({ description: 'Filter by archetype' }),
+      buildArchetype: z.string().optional().openapi({ description: 'Filter by build archetype' }),
+      stars: z.string().optional().openapi({ description: 'Filter by natural stars (2-5)' }),
+      search: z.string().optional().openapi({ description: 'Search by name' }),
+      page: z.string().optional().openapi({ description: 'Page number (default: 1)' }),
+      limit: z
+        .string()
+        .optional()
+        .openapi({ description: 'Results per page (default: 50, max: 100)' }),
     }),
   },
   responses: {
@@ -439,7 +448,7 @@ monstersRegistry.registerPath({
     'Returns all monsters matching a specific build archetype (e.g., speed-dps, cleave).',
   request: {
     params: z.object({
-      archetype: z.string().describe('Build archetype name'),
+      archetype: z.string().openapi({ description: 'Build archetype name' }),
     }),
   },
   responses: {
@@ -474,7 +483,7 @@ monstersRegistry.registerPath({
     'Returns top monsters that match given rune archetypes. Prioritizes nat4+, obtainable monsters.',
   request: {
     query: z.object({
-      archetypes: z.string().describe('Comma-separated list of rune archetypes'),
+      archetypes: z.string().openapi({ description: 'Comma-separated list of rune archetypes' }),
     }),
   },
   responses: {
@@ -515,7 +524,7 @@ configRegistry.registerPath({
   description: 'Returns all layout configurations for a game type.',
   request: {
     params: z.object({
-      gameType: z.enum(['summoners-war', 'nikke']).describe('Game type'),
+      gameType: z.enum(['summoners-war', 'nikke']).openapi({ description: 'Game type' }),
     }),
   },
   responses: {
@@ -542,8 +551,8 @@ configRegistry.registerPath({
   summary: 'Get a specific layout config',
   request: {
     params: z.object({
-      gameType: z.enum(['summoners-war', 'nikke']).describe('Game type'),
-      layoutName: z.string().describe('Layout name'),
+      gameType: z.enum(['summoners-war', 'nikke']).openapi({ description: 'Game type' }),
+      layoutName: z.string().openapi({ description: 'Layout name' }),
     }),
   },
   responses: {
@@ -574,8 +583,8 @@ configRegistry.registerPath({
   description: 'Creates or updates an OCR layout configuration (zones, masks, ROI, presets).',
   request: {
     params: z.object({
-      gameType: z.enum(['summoners-war', 'nikke']).describe('Game type'),
-      layoutName: z.string().describe('Layout name'),
+      gameType: z.enum(['summoners-war', 'nikke']).openapi({ description: 'Game type' }),
+      layoutName: z.string().openapi({ description: 'Layout name' }),
     }),
     body: {
       content: {
@@ -619,8 +628,8 @@ configRegistry.registerPath({
   summary: 'Delete a layout config',
   request: {
     params: z.object({
-      gameType: z.enum(['summoners-war', 'nikke']).describe('Game type'),
-      layoutName: z.string().describe('Layout name'),
+      gameType: z.enum(['summoners-war', 'nikke']).openapi({ description: 'Game type' }),
+      layoutName: z.string().openapi({ description: 'Layout name' }),
     }),
   },
   responses: {

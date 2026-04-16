@@ -26,12 +26,23 @@ const listQuerySchema = z.object({
     .string()
     .min(1)
     .optional()
-    .describe('Filter by app name — matches providers scoped to this app or "*" (omit for all)'),
+    .openapi({
+      description:
+        'Filter by app name — matches providers scoped to this app or "*" (omit for all)',
+    }),
   // Kept for backward-compat with the old `appName` query param.
-  appName: z.string().min(1).optional().describe('[Deprecated] Use `app` instead.'),
-  enabled: z.enum(['true', 'false']).optional().describe('Filter by enabled status'),
-  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
+  appName: z.string().min(1).optional().openapi({ description: '[Deprecated] Use `app` instead.' }),
+  enabled: z
+    .enum(['true', 'false'])
+    .optional()
+    .openapi({ description: 'Filter by enabled status' }),
+  limit: z.coerce
+    .number()
+    .min(1)
+    .max(100)
+    .default(20)
+    .openapi({ description: 'Maximum items per page' }),
+  offset: z.coerce.number().min(0).default(0).openapi({ description: 'Number of items to skip' }),
 })
 
 // Response envelope matches the monorepo-wide `{ success, data, meta }` shape.
