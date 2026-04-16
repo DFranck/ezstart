@@ -86,11 +86,22 @@ export function parseApiErrorCode(errorData: unknown): string | undefined {
 }
 
 /**
+ * Maximum retry-after value (seconds) the SDK will honor.
+ *
+ * Capped at 1 hour to prevent a malicious server from blocking clients
+ * indefinitely with an extreme `retryAfter` value.
+ */
+const MAX_RETRY_AFTER_SECONDS = 3600
+
+/**
  * Extract retry-after hint from an API error payload (seconds).
  *
  * Supports:
  * - Top-level : `{ retryAfter: 60 }` or `{ retryAfter: '60' }`
  * - Nested    : `{ error: { retryAfter: '60' } }`
+ *
+ * Values are capped at {@link MAX_RETRY_AFTER_SECONDS} (3600 = 1 hour)
+ * to prevent a malicious server from blocking clients indefinitely.
  */
 export function parseRetryAfter(errorData: unknown): number | undefined {
   if (!errorData || typeof errorData !== 'object') return undefined
@@ -103,10 +114,14 @@ export function parseRetryAfter(errorData: unknown): number | undefined {
   }
 
   for (const raw of candidates) {
-    if (typeof raw === 'number' && Number.isFinite(raw) && raw >= 0) return raw
+    if (typeof raw === 'number' && Number.isFinite(raw) && raw >= 0) {
+      return Math.min(raw, MAX_RETRY_AFTER_SECONDS)
+    }
     if (typeof raw === 'string') {
       const parsed = Number(raw)
-      if (Number.isFinite(parsed) && parsed >= 0) return parsed
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        return Math.min(parsed, MAX_RETRY_AFTER_SECONDS)
+      }
     }
   }
 

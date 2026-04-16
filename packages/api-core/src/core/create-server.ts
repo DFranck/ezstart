@@ -74,8 +74,8 @@ export function createApiServer(config: ServerConfig): ApiServer {
     }
   }
 
-  app.use(express.json())
-  app.use(express.urlencoded({ extended: true }))
+  app.use(express.json({ limit: '100kb' }))
+  app.use(express.urlencoded({ extended: true, limit: '100kb' }))
 
   // Health + root endpoints — mounted BEFORE global rate limiting so they
   // remain reachable even under heavy load (the limiter's `skipPaths` also

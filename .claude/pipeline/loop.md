@@ -1,6 +1,6 @@
 # Loop — the only pipeline
 
-Tout livrable (feature, fix, refactor, nouveau package) passe cette boucle. Pas d'étapes numérotées, pas d'agents spécialisés : juste `dev → auditor → fix → auditor → commit`.
+Tout livrable (feature, fix, refactor, nouveau package) passe cette boucle. 3 rôles : `dev` (implémente), `auditor` (vérifie standard.md), `hacker` (casse et prouve les bugs).
 
 ---
 
@@ -10,25 +10,44 @@ Tout livrable (feature, fix, refactor, nouveau package) passe cette boucle. Pas 
  user request
       ↓
  ┌──────────┐
- │   dev    │  lit standard.md, implémente, report changes
+ │   dev    │  lit standard.md, implémente, écrit tests
  └────┬─────┘
       ↓
  ┌──────────┐
  │ auditor  │  exécute audit complet standard.md, retourne PASS ou FAIL + list
  └────┬─────┘
       ↓
-   PASS ────────────→ commit + push
+   FAIL → dev fix → auditor → (boucle)
       ↓
-   FAIL
+   PASS
       ↓
  ┌──────────┐
- │   dev    │  fix les points FAIL listés
+ │  hacker  │  attaque le code, écrit tests qui prouvent les failles
  └────┬─────┘
       ↓
-   (boucle)
+   CLEAN ──────────→ commit + push
+      ↓
+   VULNS FOUND
+      ↓
+ ┌──────────┐
+ │   dev    │  fix les vulnérabilités
+ └────┬─────┘
+      ↓
+ ┌──────────┐
+ │  hacker  │  re-attaque le code fixé (nouveaux vecteurs possibles)
+ └────┬─────┘
+      ↓
+   (boucle jusqu'à CLEAN)
 ```
 
-**Règle absolue** : pas de commit tant que `auditor` retourne `PASS`. Jamais de "on verra plus tard".
+**Règle absolue** : pas de commit tant que `auditor` retourne `PASS` ET `hacker` retourne `CLEAN`. Jamais de "on verra plus tard".
+
+### Quand lancer le hacker ?
+
+- **Toujours** : routes API (auth, payment, admin, webhook)
+- **Toujours** : middleware (auth, CSRF, rate-limit, validation)
+- **Toujours** : services manipulant des données sensibles (OAuth, tokens, passwords, payments)
+- **Optionnel** : packages UI purs, config, documentation
 
 ---
 

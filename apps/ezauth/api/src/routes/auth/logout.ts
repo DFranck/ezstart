@@ -84,11 +84,17 @@ const logoutController = async (req: Request, res: Response) => {
     const userId = extractUserIdFromRequest(req)
 
     if (refreshToken) {
-      // Specific refresh token provided — revoke only that one
+      // Specific refresh token provided — revoke only that one (with ownership check)
       try {
         const RefreshTokenModel = await getRefreshTokenModel()
         const tokenHash = hashRefreshToken(refreshToken)
-        await RefreshTokenModel.updateOne({ tokenHash }, { $set: { isRevoked: true } })
+        // Only revoke if the token belongs to the requesting user (prevents
+        // an attacker from revoking another user's token via a guessed value)
+        const filter: Record<string, unknown> = { tokenHash }
+        if (userId) {
+          filter.userId = userId
+        }
+        await RefreshTokenModel.updateOne(filter, { $set: { isRevoked: true } })
         logger.debug('Revoked specific refresh token on logout')
       } catch (err) {
         logger.debug('Failed to revoke refresh token on logout:', err)

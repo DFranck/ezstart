@@ -40,7 +40,7 @@ const validateController = async (req: Request, res: Response) => {
     const { tempToken, code } = parsed.data
 
     // Verify the temp token
-    let payload: { userId: string; app: string; redirect_uri?: string; type: string }
+    let payload: { userId: string; app: string; redirect_uri?: string; type: string; mode?: string }
     try {
       payload = jwt.verify(tempToken, JWT_SECRET, { algorithms: ['HS256'] }) as typeof payload
     } catch {
@@ -49,6 +49,11 @@ const validateController = async (req: Request, res: Response) => {
 
     if (payload.type !== '2fa_pending') {
       return sendError(res, 'Invalid token type', 401)
+    }
+
+    // Reject cookie-mode tokens on this endpoint (they must use /login-cookie/2fa)
+    if (payload.mode === 'cookie') {
+      return sendError(res, 'This token must be validated via the cookie login flow', 400)
     }
 
     // Validate the TOTP code

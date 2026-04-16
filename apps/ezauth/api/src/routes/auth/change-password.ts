@@ -10,6 +10,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { getAuthCodeModel } from '../../models/auth-code.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
@@ -25,7 +26,7 @@ const changePasswordSchema = z.object({
     .string()
     .optional()
     .describe('Current password (not required for OAuth-only users)'),
-  newPassword: z.string().min(8).describe('New password (min 8 chars)'),
+  newPassword: z.string().min(8).max(128).describe('New password (min 8, max 128 chars)'),
 })
 
 const changePasswordController = async (req: Request, res: Response) => {
@@ -60,6 +61,17 @@ const changePasswordController = async (req: Request, res: Response) => {
     user.passwordHash = newPassword
     user.hasSetOwnPassword = true
     await user.save()
+
+    // Invalidate any pending password-reset tokens for this user
+    try {
+      const AuthCodeModel = await getAuthCodeModel()
+      await AuthCodeModel.updateMany(
+        { userId, type: 'password-reset', isUsed: false },
+        { $set: { isUsed: true } }
+      )
+    } catch (err) {
+      logger.warn('Failed to invalidate reset tokens after password change:', err)
+    }
 
     logger.info(`Password changed for user ${userId}`)
     sendSuccess(res, { message: 'Password changed successfully' })

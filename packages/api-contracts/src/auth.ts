@@ -42,20 +42,41 @@ import { z } from 'zod'
 // Shared primitives
 // ---------------------------------------------------------------------------
 
+/**
+ * Validates a redirect URI, rejecting dangerous protocols (`javascript:`,
+ * `data:`, `vbscript:`, `blob:`) that could be used for XSS or open-redirect
+ * attacks. Only `http:` and `https:` are allowed.
+ */
+const safeRedirectUri = z
+  .string()
+  .url()
+  .max(2048)
+  .refine(
+    (val) => {
+      try {
+        const { protocol } = new URL(val)
+        return protocol === 'http:' || protocol === 'https:'
+      } catch {
+        return false
+      }
+    },
+    { message: 'redirect_uri must use http or https protocol' }
+  )
+
 /** Locales supported by user-facing emails. Mirror of `@ezstart/email-service`. */
 export const SupportedLocaleSchema = z.enum(['en', 'fr', 'vi'])
 export type SupportedLocale = z.infer<typeof SupportedLocaleSchema>
 
 /** Per-send email overrides forwarded to templating (optional branding). */
 export const EmailOverrideSchema = z.object({
-  subject: z.string().optional().describe('Email subject override'),
-  heading: z.string().optional().describe('Email main heading override'),
-  intro: z.string().optional().describe('Email intro paragraph override'),
-  ctaLabel: z.string().optional().describe('Call-to-action button label override'),
-  outro: z.string().optional().describe('Email outro paragraph override'),
-  from: z.string().email().optional().describe('Sender email address override'),
-  replyTo: z.string().email().optional().describe('Reply-To email address override'),
-  bodyHtml: z.string().optional().describe('Full HTML body override'),
+  subject: z.string().max(500).optional().describe('Email subject override'),
+  heading: z.string().max(500).optional().describe('Email main heading override'),
+  intro: z.string().max(2000).optional().describe('Email intro paragraph override'),
+  ctaLabel: z.string().max(200).optional().describe('Call-to-action button label override'),
+  outro: z.string().max(2000).optional().describe('Email outro paragraph override'),
+  from: z.string().email().max(254).optional().describe('Sender email address override'),
+  replyTo: z.string().email().max(254).optional().describe('Reply-To email address override'),
+  bodyHtml: z.string().max(50_000).optional().describe('Full HTML body override'),
 })
 export type EmailOverride = z.infer<typeof EmailOverrideSchema>
 
@@ -96,10 +117,11 @@ export const LoginRequestSchema = z.object({
   email: z
     .string()
     .min(1, 'Email or username is required')
+    .max(254)
     .describe('User email address or username'),
-  password: z.string().min(1).describe('User password'),
-  app: z.string().min(1).describe('Target app identifier (ezauth, ezbill, etc.)'),
-  redirect_uri: z.string().url().optional().describe('OAuth redirect URI after authentication'),
+  password: z.string().min(1).max(128).describe('User password'),
+  app: z.string().min(1).max(100).describe('Target app identifier (ezauth, ezbill, etc.)'),
+  redirect_uri: safeRedirectUri.optional().describe('OAuth redirect URI after authentication'),
 })
 export type LoginRequest = z.infer<typeof LoginRequestSchema>
 
@@ -136,14 +158,14 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>
 // ---------------------------------------------------------------------------
 
 export const RegisterRequestSchema = z.object({
-  email: z.string().email().describe('User email address'),
-  username: z.string().min(1).describe('Unique username'),
-  password: z.string().min(8).describe('User password (min 8 characters)'),
-  firstName: z.string().optional().describe('User first name'),
-  lastName: z.string().optional().describe('User last name'),
-  app: z.string().min(1).describe('Target app identifier (ezauth, ezbill, etc.)'),
-  redirect_uri: z.string().url().optional().describe('OAuth redirect URI after registration'),
-  promoCode: z.string().optional().describe('Optional promo code to apply at signup'),
+  email: z.string().email().max(254).describe('User email address'),
+  username: z.string().min(1).max(50).describe('Unique username'),
+  password: z.string().min(8).max(128).describe('User password (8-128 characters)'),
+  firstName: z.string().max(100).optional().describe('User first name'),
+  lastName: z.string().max(100).optional().describe('User last name'),
+  app: z.string().min(1).max(100).describe('Target app identifier (ezauth, ezbill, etc.)'),
+  redirect_uri: safeRedirectUri.optional().describe('OAuth redirect URI after registration'),
+  promoCode: z.string().max(50).optional().describe('Optional promo code to apply at signup'),
   locale: SupportedLocaleSchema.optional()
     .default('en')
     .describe('Locale for user-facing emails (en, fr, vi)'),
@@ -163,9 +185,9 @@ export type RegisterResponse = z.infer<typeof RegisterResponseSchema>
 
 export const QuickSignupRequestSchema = z.object({
   username: z.string().min(1).max(50).describe('Unique username (max 50 characters)'),
-  email: z.string().email().describe('User email address'),
-  app: z.string().min(1).describe('Target app identifier (ezauth, ezbill, etc.)'),
-  promoCode: z.string().optional().describe('Optional promo code to apply at signup'),
+  email: z.string().email().max(254).describe('User email address'),
+  app: z.string().min(1).max(100).describe('Target app identifier (ezauth, ezbill, etc.)'),
+  promoCode: z.string().max(50).optional().describe('Optional promo code to apply at signup'),
   locale: SupportedLocaleSchema.optional()
     .default('en')
     .describe('Locale for user-facing emails (en, fr, vi)'),
@@ -180,9 +202,9 @@ export type QuickSignupRequest = z.infer<typeof QuickSignupRequestSchema>
 // ---------------------------------------------------------------------------
 
 export const ForgotPasswordRequestSchema = z.object({
-  email: z.string().email().describe('Email of the account to recover'),
-  app: z.string().optional().describe('Target app identifier (ezauth, ezbill, etc.)'),
-  redirect_uri: z.string().url().optional().describe('URL included in the reset email CTA'),
+  email: z.string().email().max(254).describe('Email of the account to recover'),
+  app: z.string().max(100).optional().describe('Target app identifier (ezauth, ezbill, etc.)'),
+  redirect_uri: safeRedirectUri.optional().describe('URL included in the reset email CTA'),
   locale: SupportedLocaleSchema.optional()
     .default('en')
     .describe('Locale for user-facing emails (en, fr, vi)'),
@@ -193,19 +215,19 @@ export const ForgotPasswordRequestSchema = z.object({
 export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequestSchema>
 
 export const ResetPasswordRequestSchema = z.object({
-  token: z.string().min(1).describe('Single-use reset token from the password reset email'),
-  newPassword: z.string().min(8).describe('New password (min 8 characters)'),
+  token: z.string().min(1).max(2048).describe('Single-use reset token from the password reset email'),
+  newPassword: z.string().min(8).max(128).describe('New password (8-128 characters)'),
 })
 export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>
 
 export const VerifyEmailRequestSchema = z.object({
-  token: z.string().min(1).describe('Single-use email verification token'),
+  token: z.string().min(1).max(2048).describe('Single-use email verification token'),
 })
 export type VerifyEmailRequest = z.infer<typeof VerifyEmailRequestSchema>
 
 export const SendVerificationRequestSchema = z.object({
-  app: z.string().optional().describe('Target app identifier (ezauth, ezbill, etc.)'),
-  redirect_uri: z.string().url().optional().describe('URL included in the verification email CTA'),
+  app: z.string().max(100).optional().describe('Target app identifier (ezauth, ezbill, etc.)'),
+  redirect_uri: safeRedirectUri.optional().describe('URL included in the verification email CTA'),
   locale: SupportedLocaleSchema.optional()
     .default('en')
     .describe('Locale for user-facing emails (en, fr, vi)'),
@@ -224,6 +246,7 @@ export const RefreshRequestSchema = z.object({
   refreshToken: z
     .string()
     .min(1)
+    .max(4096)
     .optional()
     .describe('Refresh token (omit when supplied via httpOnly cookie)'),
 })
@@ -242,11 +265,9 @@ export type RefreshResponse = z.infer<typeof RefreshResponseSchema>
 // ---------------------------------------------------------------------------
 
 export const TokenRequestSchema = z.object({
-  code: z.string().min(1).describe('Authorization code returned by the login endpoint'),
-  app: z.string().min(1).describe('Target app identifier (ezauth, ezbill, etc.)'),
-  redirect_uri: z
-    .string()
-    .url()
+  code: z.string().min(1).max(2048).describe('Authorization code returned by the login endpoint'),
+  app: z.string().min(1).max(100).describe('Target app identifier (ezauth, ezbill, etc.)'),
+  redirect_uri: safeRedirectUri
     .optional()
     .describe('OAuth redirect URI (must match the one used at login)'),
 })
@@ -265,8 +286,8 @@ export type TokenResponse = z.infer<typeof TokenResponseSchema>
 // ---------------------------------------------------------------------------
 
 export const VerifyRequestSchema = z.object({
-  token: z.string().min(1).describe('JWT access token to verify'),
-  app: z.string().optional().describe('Target app identifier (ezauth, ezbill, etc.)'),
+  token: z.string().min(1).max(4096).describe('JWT access token to verify'),
+  app: z.string().max(100).optional().describe('Target app identifier (ezauth, ezbill, etc.)'),
 })
 export type VerifyRequest = z.infer<typeof VerifyRequestSchema>
 

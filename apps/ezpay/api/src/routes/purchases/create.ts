@@ -10,7 +10,7 @@ import {
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
-import { validatePromo, calculateDiscount, incrementUsage } from '../../services/promo.js'
+import { validatePromo, calculateDiscount } from '../../services/promo.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -25,12 +25,11 @@ const docRouter = createRouterWithDoc(createPurchaseRegistry, router)
 // ========================================
 
 const createPurchaseSchema = z.object({
-  projectId: z.string().describe('Project identifier'),
+  projectId: z.string().max(100).describe('Project identifier'),
   productId: z.string().describe('Product identifier'),
   productName: z.string().describe('Product display name'),
   amount: z.number().positive().describe('Purchase amount in currency units'),
-  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
-  userId: z.string().optional().describe('EZAuth user ID if logged in'),
+  currency: z.string().regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code').default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
   promoCode: z.string().optional().describe('Optional promo code for discount'),
@@ -61,11 +60,13 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       productName,
       amount,
       currency = 'EUR',
-      userId,
       customerEmail,
       returnUrl,
       promoCode,
     } = validation.data
+
+    // Always use the authenticated user ID from JWT, never from the request body
+    const userId = req.userId
 
     // Promo code validation and discount calculation
     let finalAmount = amount
@@ -107,6 +108,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
         productId,
         productName,
         userId: userId || '',
+        promoId: promoId || '',
       },
       successUrl: `${baseUrl}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/purchase/cancel`,
@@ -151,10 +153,8 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       },
     })
 
-    // Increment promo usage after successful payment creation
-    if (promoId) {
-      await incrementUsage(promoId)
-    }
+    // Promo usage is incremented in the webhook handler (checkout.completed)
+    // to avoid wasting promo uses on abandoned checkouts
 
     logger.info(`💳 Purchase created - Session ID: ${session.sessionId}`)
 

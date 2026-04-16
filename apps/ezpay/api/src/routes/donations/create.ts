@@ -24,14 +24,13 @@ const docRouter = createRouterWithDoc(createDonationRegistry, router)
 // ========================================
 
 const createDonationSchema = z.object({
-  projectId: z.string().describe('Project identifier'),
+  projectId: z.string().max(100).describe('Project identifier'),
   projectName: z.string().optional().describe('Project display name'),
   amount: z.number().nonnegative().describe('Donation amount in currency units (0 = testimonial)'),
-  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
+  currency: z.string().regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code').default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   message: z.string().optional().describe('Optional message from donor'),
   isPublic: z.boolean().default(true).describe('Whether donation is shown publicly'),
   isAnonymous: z.boolean().default(false).describe('Whether donor wants to stay anonymous'),
-  userId: z.string().optional().describe('EZAuth user ID if logged in'),
   donorName: z.string().optional().describe('Donor name'),
   donorEmail: z.string().email().optional().describe('Donor email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
@@ -64,11 +63,13 @@ const createDonationHandler = async (req: Request, res: Response) => {
       message,
       isPublic = true,
       isAnonymous = false,
-      userId,
       donorName,
       donorEmail,
       returnUrl,
     } = validation.data
+
+    // Use the authenticated user ID from JWT if available, never from the request body
+    const userId = req.userId
 
     // Detect live vs test mode from Stripe key
     const livePrefix = 'sk_' + 'live_'

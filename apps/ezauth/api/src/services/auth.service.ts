@@ -71,9 +71,12 @@ export class AuthService {
   static async register(data: RegisterRequest): Promise<AuthCodeResponse> {
     const AuthUserModel = await getAuthUserModel()
 
+    const normalizedEmail = data.email.trim().toLowerCase()
+    const normalizedUsername = data.username.trim().toLowerCase()
+
     // Check if user already exists
     const existingUser = await AuthUserModel.findOne({
-      $or: [{ email: data.email }, { username: data.username }],
+      $or: [{ email: normalizedEmail }, { username: normalizedUsername }],
     })
 
     if (existingUser) {
@@ -82,8 +85,8 @@ export class AuthService {
 
     // Create new user
     const user = new AuthUserModel({
-      email: data.email,
-      username: data.username,
+      email: normalizedEmail,
+      username: normalizedUsername,
       passwordHash: data.password, // Will be hashed by pre-save hook
       firstName: data.firstName,
       lastName: data.lastName,
@@ -92,7 +95,19 @@ export class AuthService {
       ...(data.promoCode ? { promoCode: data.promoCode } : {}),
     })
 
-    await user.save()
+    try {
+      await user.save()
+    } catch (saveError: unknown) {
+      // Handle MongoDB duplicate key error (race condition with concurrent signups)
+      if (
+        saveError instanceof Error &&
+        'code' in saveError &&
+        (saveError as { code: number }).code === 11000
+      ) {
+        throw new Error('User already exists with this email or username')
+      }
+      throw saveError
+    }
 
     // Generate auth code
     return this.generateAuthCode(user._id!.toString(), data.app, data.redirect_uri)
@@ -117,6 +132,12 @@ export class AuthService {
 
     const isValidPassword = await user.comparePassword(data.password)
     if (!isValidPassword) {
+      // Provide a more helpful message for quick-signup users who never set a password
+      if (!user.hasSetOwnPassword) {
+        throw new Error(
+          "You haven't set a password yet. Use Google sign-in or click Forgot Password."
+        )
+      }
       throw new Error('Invalid credentials')
     }
 

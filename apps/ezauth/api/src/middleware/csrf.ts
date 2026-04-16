@@ -28,7 +28,7 @@ const ALLOWED_ORIGIN_PATTERNS = [
   /^https:\/\/.*\.ezstart\.xyz$/,
   /^https:\/\/.*\.ezstart\.vercel\.app$/,
   /^https:\/\/.*\.ai-greenpulse\.com$/,
-  /^https:\/\/.*\.up\.railway\.app$/,
+  /^https:\/\/(ezauth|ezbill|ezpay|ezstart|greenpulse|gacha-analyzer)-api(-staging)?\.up\.railway\.app$/,
 ]
 
 function isAllowedOrigin(origin: string): boolean {

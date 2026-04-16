@@ -22,8 +22,8 @@ const docRouter = createRouterWithDoc(listDonationsRegistry, router)
 
 const donationsQuerySchema = z.object({
   projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
-  limit: z.coerce.number().default(20).openapi({ description: 'Number of donations to return' }),
-  offset: z.coerce.number().default(0).openapi({ description: 'Number of donations to skip' }),
+  limit: z.coerce.number().min(1).max(100).default(20).openapi({ description: 'Number of donations to return' }),
+  offset: z.coerce.number().min(0).default(0).openapi({ description: 'Number of donations to skip' }),
 })
 
 const donationsListResponseSchema = z.object({

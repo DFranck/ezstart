@@ -127,7 +127,8 @@ describe('createApiServer (agnostic)', () => {
     const res = await request(app).get('/api/me').set('Authorization', 'Bearer invalid-jwt')
     expect(res.status).toBe(401)
     expect(res.body.error.code).toBe('INVALID_TOKEN')
-    expect(res.body.error.details).toBe('Token decode failure')
+    // Security fix: error details are no longer leaked to the client
+    expect(res.body.error.details).toBeUndefined()
   })
 
   it('auth middleware rejects empty Bearer value', async () => {

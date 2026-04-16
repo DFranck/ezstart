@@ -29,9 +29,11 @@ const subscriptionsQuerySchema = z.object({
     .openapi({ description: 'Filter by live mode (true=production, false=test)' }),
   limit: z.coerce
     .number()
+    .min(1)
+    .max(100)
     .default(20)
     .openapi({ description: 'Number of subscriptions to return' }),
-  offset: z.coerce.number().default(0).openapi({ description: 'Number of subscriptions to skip' }),
+  offset: z.coerce.number().min(0).default(0).openapi({ description: 'Number of subscriptions to skip' }),
 })
 
 const subscriptionsListResponseSchema = z.object({

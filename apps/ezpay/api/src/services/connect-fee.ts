@@ -36,7 +36,9 @@ export async function resolveConnectFee(
     return { isConnect: false }
   }
 
-  const feeAmount = Math.round((amountInCents * account.defaultFeePercent) / 100)
+  // Guard against negative amounts
+  const safeAmount = Math.max(0, amountInCents)
+  const feeAmount = Math.round((safeAmount * account.defaultFeePercent) / 100)
 
   return {
     isConnect: true,

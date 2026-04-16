@@ -154,7 +154,7 @@ export async function validateApiKey(req: Request, res: Response, next: NextFunc
 
     // Fire-and-forget: usage tracking
     const today = getTodayDate()
-    const sanitizedPath = req.path.replace(/\./g, '_')
+    const sanitizedPath = req.path.replace(/[.$]/g, '_')
     getApiKeyUsageModel()
       .then((ApiKeyUsage) =>
         ApiKeyUsage.updateOne(

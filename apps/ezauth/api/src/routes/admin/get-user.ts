@@ -5,6 +5,7 @@ import {
   Router,
   sendSuccess,
   sendError,
+  sendValidationError,
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
@@ -19,6 +20,14 @@ export const getUserRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(getUserRegistry, router)
 
+const getUserParamsSchema = z.object({
+  id: z
+    .string()
+    .min(1, 'User ID is required')
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
+    .describe('MongoDB ObjectId of the user to get'),
+})
+
 const getUserResponseSchema = z.object({
   user: adminUserSchema.describe('User object'),
 })
@@ -26,10 +35,15 @@ const getUserResponseSchema = z.object({
 // Controller
 const getUserController = async (req: Request, res: Response) => {
   try {
+    const parsedParams = getUserParamsSchema.safeParse(req.params)
+    if (!parsedParams.success) {
+      return sendValidationError(res, 'Invalid parameters', parsedParams.error.issues)
+    }
+
     const currentUser = req.user!
 
     const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(req.params.id).select('-passwordHash').lean()
+    const user = await AuthUser.findById(parsedParams.data.id).select('-passwordHash').lean()
 
     if (!user) {
       return sendError(res, 'User not found', 404)

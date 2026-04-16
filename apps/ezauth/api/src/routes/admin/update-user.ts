@@ -46,7 +46,11 @@ const updateUserResponseSchema = z.object({
 
 // Params validation schema
 const updateUserParamsSchema = z.object({
-  id: z.string().min(1, 'User ID is required').describe('MongoDB ObjectId of the user to update'),
+  id: z
+    .string()
+    .min(1, 'User ID is required')
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
+    .describe('MongoDB ObjectId of the user to update'),
 })
 
 // Controller
@@ -84,6 +88,19 @@ const updateUserController = async (req: Request, res: Response) => {
 
     // Update globalRoles (only superadmin can do this)
     if (body.globalRoles !== undefined) {
+      const targetIsSuperAdmin = user.globalRoles?.includes('superadmin')
+      const isSelf = parsedParams.data.id === currentUser._id
+
+      // Prevent modifying globalRoles of another superadmin (peer protection)
+      if (targetIsSuperAdmin && !isSelf) {
+        return sendError(res, 'Cannot modify globalRoles of another superadmin', 403)
+      }
+
+      // Prevent removing your own superadmin role (self-lockout protection)
+      if (isSelf && !body.globalRoles.includes('superadmin')) {
+        return sendError(res, 'Cannot remove your own superadmin role', 400)
+      }
+
       user.globalRoles = body.globalRoles
     }
 

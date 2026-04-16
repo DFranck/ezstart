@@ -34,6 +34,7 @@ async function attachUserToRequest(req: Request, userId: string): Promise<boolea
   if (!user) return false
 
   const resolvedUserId = user._id.toString()
+  req.userId = resolvedUserId
   req.user = {
     _id: resolvedUserId,
     userId: resolvedUserId,

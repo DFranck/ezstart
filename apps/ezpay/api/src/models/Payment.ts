@@ -26,11 +26,18 @@ export interface InvoiceMetadata {
   invoiceNumber?: string
 }
 
+export interface PromoMetadata {
+  promoCode?: string
+  originalAmount?: number
+  discountApplied?: number
+}
+
 /** Combined metadata type — all fields optional, used fields depend on payment type */
 export type PaymentMetadata = DonationMetadata &
   PurchaseMetadata &
   SubscriptionMetadata &
-  InvoiceMetadata
+  InvoiceMetadata &
+  PromoMetadata
 
 export interface PaymentDocument extends Document {
   // Project Info
@@ -88,7 +95,7 @@ const paymentSchema = new Schema<PaymentDocument>(
     },
 
     // Amount
-    amount: { type: Number, required: true },
+    amount: { type: Number, required: true, min: 0 },
     currency: { type: String, default: 'EUR' },
 
     // Customer Info (link avec EZAuth si connecté)

@@ -305,6 +305,7 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
         subscriptionId: (obj.subscription as string) ?? undefined,
         paymentMethod: (obj.payment_method_types as string[])?.[0],
         mode: (obj.mode as 'payment' | 'subscription') ?? 'payment',
+        metadata: (obj.metadata as Record<string, string>) ?? undefined,
       }
     case 'payment.refunded':
       return {

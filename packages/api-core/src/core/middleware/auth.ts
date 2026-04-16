@@ -113,10 +113,9 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig): AuthMiddlewa
         req.user = user
         next()
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         sendError(res, 'Authentication failed', 401, {
           code: 'INVALID_TOKEN',
-          details: err instanceof Error ? err.message : undefined,
         })
       })
   }

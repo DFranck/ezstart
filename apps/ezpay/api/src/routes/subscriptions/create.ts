@@ -11,7 +11,7 @@ import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getPlanModel } from '../../models/Plan.js'
 import { getProvider } from '../../services/stripe.js'
-import { validatePromo, calculateDiscount, incrementUsage } from '../../services/promo.js'
+import { validatePromo, calculateDiscount } from '../../services/promo.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -26,7 +26,7 @@ const docRouter = createRouterWithDoc(createSubscriptionRegistry, router)
 // ========================================
 
 const createSubscriptionSchema = z.object({
-  projectId: z.string().describe('Project identifier'),
+  projectId: z.string().max(100).describe('Project identifier'),
   planId: z.string().describe('Plan identifier'),
   planName: z.string().describe('Plan display name'),
   amount: z.number().positive().describe('Subscription amount per interval'),
@@ -40,8 +40,7 @@ const createSubscriptionSchema = z.object({
     .describe(
       'Number of months between billings (1=monthly, 3=quarterly, 6=semi-annual, 12=annual)'
     ),
-  currency: z.string().default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
-  userId: z.string().optional().describe('EZAuth user ID if logged in'),
+  currency: z.string().regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code').default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
   promoCode: z.string().optional().describe('Optional promo code for discount'),
@@ -74,11 +73,13 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       interval = 'month',
       intervalCount = 1,
       currency = 'EUR',
-      userId,
       customerEmail,
       returnUrl,
       promoCode,
     } = validation.data
+
+    // Always use the authenticated user ID from JWT, never from the request body
+    const userId = req.userId
 
     // Promo code validation and discount calculation
     let finalAmount = amount
@@ -127,6 +128,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
         planId,
         planName,
         userId: userId || '',
+        promoId: promoId || '',
       },
       successUrl: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/subscribe/cancel`,
@@ -174,10 +176,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       },
     })
 
-    // Increment promo usage after successful payment creation
-    if (promoId) {
-      await incrementUsage(promoId)
-    }
+    // Promo usage is incremented in the webhook handler (checkout.completed)
+    // to avoid wasting promo uses on abandoned checkouts
 
     logger.info(`💳 Subscription created - Session ID: ${session.sessionId}`)
 

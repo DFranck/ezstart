@@ -77,7 +77,19 @@ const quickSignupController = async (req: Request, res: Response) => {
       ...(promoCode ? { promoCode } : {}),
     })
 
-    await user.save()
+    try {
+      await user.save()
+    } catch (saveError: unknown) {
+      // Handle MongoDB duplicate key error (race condition with concurrent signups)
+      if (
+        saveError instanceof Error &&
+        'code' in saveError &&
+        (saveError as { code: number }).code === 11000
+      ) {
+        return sendError(res, 'User already exists with this email or username', 409)
+      }
+      throw saveError
+    }
 
     // Send welcome email with set-password link (doubles as email verification).
     try {

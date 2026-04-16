@@ -34,7 +34,7 @@ const updatePromoSchema = z.object({
     .positive()
     .optional()
     .describe('Discount value (e.g. 20 for 20% or 500 for $5.00)'),
-  currency: z.string().optional().describe('ISO 4217 currency code (required for fixed discounts)'),
+  currency: z.string().regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code').optional().describe('ISO 4217 currency code (required for fixed discounts)'),
   duration: z
     .enum(['once', 'repeating', 'forever'])
     .optional()
@@ -85,10 +85,22 @@ const updatePromoHandler = async (req: Request, res: Response) => {
     const { id } = paramsValidation.data
     const updates = validation.data
 
-    // Validate: percent discount must be between 1 and 100
+    const Promo = await getPromoModel()
+
+    // Validate: percent discount must be between 1 and 100.
+    // When only discountValue is updated, fetch the current discountType from DB.
+    let effectiveDiscountType = updates.discountType
+    if (!effectiveDiscountType && updates.discountValue !== undefined) {
+      const existing = await Promo.findById(id).lean()
+      if (!existing) {
+        return sendError(res, 'Promo not found', 404)
+      }
+      effectiveDiscountType = existing.discountType
+    }
+
     if (
-      updates.discountType === 'percent' &&
-      updates.discountValue &&
+      effectiveDiscountType === 'percent' &&
+      updates.discountValue !== undefined &&
       updates.discountValue > 100
     ) {
       return sendError(res, 'Percent discount cannot exceed 100', 400)
@@ -99,8 +111,6 @@ const updatePromoHandler = async (req: Request, res: Response) => {
     if (updates.expiresAt !== undefined) {
       updateData.expiresAt = updates.expiresAt ? new Date(updates.expiresAt) : null
     }
-
-    const Promo = await getPromoModel()
 
     const promo = await Promo.findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
 

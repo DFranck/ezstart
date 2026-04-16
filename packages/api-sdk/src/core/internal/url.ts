@@ -78,5 +78,6 @@ export function buildUrl(
   }
 
   const normalized = normalizeEndpoint(endpoint, prefix)
-  return appendQuery(`${baseUrl}${normalized}`, query)
+  const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+  return appendQuery(`${base}${normalized}`, query)
 }

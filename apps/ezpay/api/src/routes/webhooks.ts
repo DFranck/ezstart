@@ -2,6 +2,7 @@ import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import { getProvider } from '../services/stripe.js'
 import { getPaymentModel } from '../models/Payment.js'
+import { incrementUsage } from '../services/promo.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import type {
   WebhookCheckoutData,
@@ -64,6 +65,17 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           logger.error(`Payment not found in DB: ${data.sessionId}`)
         } else {
           logger.info(`Payment completed: ${data.sessionId}`)
+        }
+
+        // Increment promo usage now that payment is confirmed
+        const promoId = data.metadata?.promoId
+        if (promoId) {
+          try {
+            await incrementUsage(promoId)
+            logger.info(`Promo usage incremented: ${promoId}`)
+          } catch (promoErr) {
+            logger.error('Failed to increment promo usage:', promoErr instanceof Error ? promoErr : String(promoErr))
+          }
         }
         break
       }
@@ -211,8 +223,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
     sendSuccess(res, { received: true })
   } catch (error) {
+    // Log internally but always return 200 to Stripe to prevent retries
+    // and avoid leaking internal error details
     logger.error('Webhook processing error:', error instanceof Error ? error : String(error))
-    sendError(res, 'Webhook processing failed', 500)
+    sendSuccess(res, { received: true })
   }
 })
 

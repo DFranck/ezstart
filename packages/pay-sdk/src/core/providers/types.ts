@@ -143,6 +143,8 @@ export interface WebhookCheckoutData {
   subscriptionId?: string
   paymentMethod?: string
   mode: 'payment' | 'subscription'
+  /** Session metadata passed when creating the checkout */
+  metadata?: Record<string, string>
 }
 
 export interface WebhookRefundData {

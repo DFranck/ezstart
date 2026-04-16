@@ -91,7 +91,10 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
     if (type) query.type = type
     if (status) query.status = status
     if (projectId) query.projectId = projectId
-    if (search) query.customerEmail = { $regex: search, $options: 'i' }
+    if (search) {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      query.customerEmail = { $regex: escapedSearch, $options: 'i' }
+    }
     if (liveMode !== undefined) query.liveMode = liveMode === 'true'
 
     const [payments, total] = await Promise.all([

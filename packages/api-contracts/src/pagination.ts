@@ -100,8 +100,9 @@ export const PaginationQuerySchema = z.object({
     .number()
     .int()
     .min(0)
+    .max(1_000_000)
     .default(0)
-    .describe('Pagination offset (0-based, default 0)'),
+    .describe('Pagination offset (0-based, max 1M, default 0)'),
 })
 
 /**

@@ -25,7 +25,8 @@ const resetPasswordSchema = z.object({
   newPassword: z
     .string()
     .min(8, 'Password must be at least 8 characters')
-    .describe('New password (min 8 characters)'),
+    .max(128, 'Password must be at most 128 characters')
+    .describe('New password (min 8, max 128 characters)'),
 })
 
 const resetPasswordResponseSchema = z.object({
@@ -75,9 +76,12 @@ const resetPasswordController = async (req: Request, res: Response) => {
     user.hasSetOwnPassword = true
     await user.save()
 
-    // Mark token as used
-    authCode.isUsed = true
-    await authCode.save()
+    // Invalidate ALL pending password-reset tokens for this user (not just the one used).
+    // Prevents a second valid token from being reused after a successful reset.
+    await AuthCodeModel.updateMany(
+      { userId: authCode.userId, type: 'password-reset', isUsed: false },
+      { $set: { isUsed: true } }
+    )
 
     logger.info({ userId: user._id!.toString() }, 'Password reset successfully')
 

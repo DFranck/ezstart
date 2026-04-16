@@ -1,7 +1,7 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model } from 'mongoose'
 
-interface AuthCodeDocument extends Document {
+export interface AuthCodeDocument extends Document {
   code: string
   userId: string
   app: string

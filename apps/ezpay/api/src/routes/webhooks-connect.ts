@@ -55,11 +55,13 @@ router.post('/webhooks/stripe-connect', async (req: Request, res: Response) => {
 
     sendSuccess(res, { received: true })
   } catch (error) {
+    // Log internally but always return 200 to Stripe to prevent retries
+    // and avoid leaking internal error details
     logger.error(
       'Connect webhook processing error:',
       error instanceof Error ? error : String(error)
     )
-    sendError(res, 'Webhook processing failed', 500)
+    sendSuccess(res, { received: true })
   }
 })
 

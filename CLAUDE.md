@@ -2,19 +2,19 @@
 
 ## Role
 
-**Claude = Architecte / Manager.** Tout code passe par deux agents : `dev` (implémente) et `auditor` (vérifie), en boucle `dev → auditor → fix → auditor → commit`.
+**Claude = Architecte / Manager.** Tout code passe par trois agents : `dev` (implémente), `auditor` (vérifie standard.md) et `hacker` (casse et prouve les bugs), en boucle `dev → auditor → fix → hacker → fix → commit`.
 
 ## Pipeline
 
 **Une seule boucle**, documentée dans [`.claude/pipeline/loop.md`](./.claude/pipeline/loop.md).
 
 ```
-user request → dev → auditor → PASS → commit
-                       ↓ FAIL
-                    dev fix → auditor → ...
+user request → dev → auditor → PASS → hacker → CLEAN → commit
+                       ↓ FAIL              ↓ VULNS
+                    dev fix → ...       dev fix → hacker → ...
 ```
 
-Pas d'étapes numérotées, pas d'agents spécialisés par domaine. Le checklist unique est dans [`.claude/rules/standard.md`](./.claude/rules/standard.md).
+3 rôles : `dev` (implémente), `auditor` (vérifie standard.md), `hacker` (attaque le code, prouve les failles). Le checklist qualité est dans [`.claude/rules/standard.md`](./.claude/rules/standard.md).
 
 ## Règles
 
@@ -71,9 +71,10 @@ pnpm dev --list  # Voir toutes les apps
 | [SECRETS.md](./SECRETS.md)                                 | Architecture `.env` centralisée                          |
 | [GENERATORS.md](./GENERATORS.md)                           | Pipeline themes / UI registry / PWA icons                |
 | [`.claude/rules/standard.md`](./.claude/rules/standard.md) | **Le** checklist unique                                  |
-| [`.claude/pipeline/loop.md`](./.claude/pipeline/loop.md)   | La boucle `dev → auditor`                                |
+| [`.claude/pipeline/loop.md`](./.claude/pipeline/loop.md)   | La boucle `dev → auditor → hacker`                       |
 | [`.claude/agents/dev.md`](./.claude/agents/dev.md)         | Rôle implémenteur                                        |
 | [`.claude/agents/auditor.md`](./.claude/agents/auditor.md) | Rôle vérificateur                                        |
+| [`.claude/agents/hacker.md`](./.claude/agents/hacker.md)   | Rôle adversarial tester                                  |
 | [`.claude/_archive/`](./.claude/_archive/)                 | Anciens docs archivés (référence historique, non-actifs) |
 
 ## Architecture

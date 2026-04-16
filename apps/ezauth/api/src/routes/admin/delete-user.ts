@@ -22,7 +22,11 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(deleteUserRegistry, router)
 
 const deleteUserParamsSchema = z.object({
-  id: z.string().min(1, 'User ID is required').describe('MongoDB ObjectId of the user to delete'),
+  id: z
+    .string()
+    .min(1, 'User ID is required')
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
+    .describe('MongoDB ObjectId of the user to delete'),
 })
 
 const deleteUserResponseSchema = z.object({
@@ -58,6 +62,15 @@ const deleteUserController = async (req: Request, res: Response) => {
     const user = await AuthUser.findById(parsedParams.data.id)
     if (!user) {
       return sendError(res, 'User not found', 404)
+    }
+
+    // Prevent deleting another superadmin
+    if (user.globalRoles?.includes('superadmin')) {
+      return sendError(
+        res,
+        'Cannot delete a superadmin user. Only the user themselves can remove their superadmin status.',
+        403
+      )
     }
 
     // Cascade delete: OAuth accounts linked to this user
