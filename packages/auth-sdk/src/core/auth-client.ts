@@ -54,11 +54,22 @@ export class CoreAuthClient {
   private apiUrl: string
   private appName: string
   private redirectUri: string | undefined
+  private apiKey: string | undefined
 
   constructor(config: AuthClientConfig) {
     this.apiUrl = config.apiUrl
     this.appName = config.appName
     this.redirectUri = config.redirectUri
+    this.apiKey = config.apiKey
+  }
+
+  /** Build base headers, injecting `X-API-Key` when configured. */
+  private baseHeaders(extra?: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = { ...extra }
+    if (this.apiKey) {
+      headers['X-API-Key'] = this.apiKey
+    }
+    return headers
   }
 
   /** Update the redirect URI (useful when it can only be resolved client-side). */
@@ -85,7 +96,7 @@ export class CoreAuthClient {
   async exchangeCode(code: string): Promise<AuthToken> {
     const response = await fetch(`${this.apiUrl}/token`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: this.baseHeaders({ 'Content-Type': 'application/json' }),
       credentials: 'include',
       body: JSON.stringify({
         code,
@@ -114,7 +125,7 @@ export class CoreAuthClient {
   async loginWithCookie(email: string, password: string): Promise<AuthUser> {
     const response = await fetch(`${this.apiUrl}/login-cookie`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: this.baseHeaders({ 'Content-Type': 'application/json' }),
       credentials: 'include',
       body: JSON.stringify({
         email,
@@ -136,7 +147,7 @@ export class CoreAuthClient {
   /** Get current user info (dual-mode: httpOnly cookie OR accessToken). */
   async getCurrentUser(accessToken?: string): Promise<AuthUser> {
     const response = await fetch(`${this.apiUrl}/me`, {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      headers: this.baseHeaders(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
       credentials: 'include',
     })
 
@@ -155,7 +166,7 @@ export class CoreAuthClient {
     try {
       const response = await fetch(`${this.apiUrl}/verify`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.baseHeaders({ 'Content-Type': 'application/json' }),
         credentials: 'include',
         body: JSON.stringify({
           token: accessToken,
@@ -176,7 +187,7 @@ export class CoreAuthClient {
     try {
       await fetch(`${this.apiUrl}/logout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.baseHeaders({ 'Content-Type': 'application/json' }),
         credentials: 'include',
         body: JSON.stringify({ refreshToken }),
       })
@@ -192,10 +203,10 @@ export class CoreAuthClient {
   ): Promise<AuthUser> {
     const response = await fetch(`${this.apiUrl}/profile`, {
       method: 'PUT',
-      headers: {
+      headers: this.baseHeaders({
         'Content-Type': 'application/json',
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      },
+      }),
       credentials: 'include',
       body: JSON.stringify(data),
     })
@@ -217,10 +228,10 @@ export class CoreAuthClient {
   ): Promise<void> {
     const response = await fetch(`${this.apiUrl}/change-password`, {
       method: 'PUT',
-      headers: {
+      headers: this.baseHeaders({
         'Content-Type': 'application/json',
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      },
+      }),
       credentials: 'include',
       body: JSON.stringify(data),
     })
@@ -236,7 +247,7 @@ export class CoreAuthClient {
   async quickSignUp(data: QuickSignUpRequest): Promise<QuickSignUpResult> {
     const response = await fetch(`${this.apiUrl}/quick-signup`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: this.baseHeaders({ 'Content-Type': 'application/json' }),
       credentials: 'include',
       body: JSON.stringify(data),
     })
@@ -259,7 +270,7 @@ export class CoreAuthClient {
   async refreshTokens(refreshToken: string): Promise<RefreshResult> {
     const response = await fetch(`${this.apiUrl}/refresh`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: this.baseHeaders({ 'Content-Type': 'application/json' }),
       credentials: 'include',
       body: JSON.stringify({ refreshToken }),
     })

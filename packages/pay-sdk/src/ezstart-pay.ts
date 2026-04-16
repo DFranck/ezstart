@@ -25,8 +25,12 @@ export function createPayClient(
     ('baseURL' in config ? config.baseURL : undefined) ??
     autoApiUrl
 
+  const apiKey =
+    ('apiKey' in config ? config.apiKey : undefined) ?? process.env.NEXT_PUBLIC_EZPAY_API_KEY
+
   return new PayClient({
     ...config,
     apiUrl: resolvedApiUrl,
+    ...(apiKey ? { apiKey } : {}),
   })
 }

@@ -24,6 +24,8 @@ export interface AuthClientConfig {
   appName: string
   /** Redirect URI for OAuth code flow callback. */
   redirectUri?: string
+  /** Optional API key for server-to-server authentication (sent as `X-API-Key` header). */
+  apiKey?: string
   /** Optional custom storage for tokens (default: localStorage). */
   storage?: AuthStorage
   /** Storage key prefix (default: `'ezauth'`). */

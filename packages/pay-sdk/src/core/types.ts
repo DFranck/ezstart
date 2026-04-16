@@ -78,6 +78,8 @@ export interface PayClientConfig {
   appName: string
   /** Explicit return URL for payment redirects. Falls back to window.location origin. */
   returnUrl?: string
+  /** Optional API key for server-to-server authentication (sent as `X-API-Key` header). */
+  apiKey?: string
   /** Optional callback to retrieve the current auth token dynamically.
    *  When provided, the token is sent as `Authorization: Bearer <token>` on every request. */
   getToken?: () => string | null | undefined

@@ -39,9 +39,12 @@ export class PayClient {
     )
   }
 
-  /** Build headers with optional Authorization bearer token */
+  /** Build headers with optional Authorization bearer token and API key */
   private getHeaders(extra?: Record<string, string>): Record<string, string> {
     const headers: Record<string, string> = { ...extra }
+    if (this.config.apiKey) {
+      headers['X-API-Key'] = this.config.apiKey
+    }
     const token = this.config.getToken?.()
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
@@ -353,7 +356,8 @@ export class PayClient {
     const searchParams = new URLSearchParams({ appName })
 
     const response = await fetch(
-      `${this.config.apiUrl}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`
+      `${this.config.apiUrl}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`,
+      { headers: this.getHeaders() }
     )
 
     const result = await response.json()

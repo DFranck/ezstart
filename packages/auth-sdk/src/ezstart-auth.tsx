@@ -139,6 +139,8 @@ export interface AuthClientConfig {
   baseURL?: string
   appName: string
   redirectUri: string
+  /** Optional API key for server-to-server authentication. */
+  apiKey?: string
 }
 
 export class AuthClient extends CoreAuthClient {
@@ -150,10 +152,13 @@ export class AuthClient extends CoreAuthClient {
     const urls = getEZAuthUrls()
     const apiUrl = config.baseURL || urls.apiBaseURL
 
+    const apiKey = config.apiKey ?? process.env.NEXT_PUBLIC_EZAUTH_API_KEY
+
     super({
       apiUrl,
       appName: config.appName,
       redirectUri: config.redirectUri,
+      ...(apiKey ? { apiKey } : {}),
     })
 
     this.webBaseURL = urls.webBaseURL
