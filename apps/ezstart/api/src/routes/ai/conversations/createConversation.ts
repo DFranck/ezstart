@@ -38,12 +38,15 @@ createConversationRouter.post(
         return sendValidationError(res, 'Invalid request', validation.error.errors, 400)
       }
 
-      const { appName, title, userId } = validation.data
+      const { appName, title } = validation.data
+
+      // userId from JWT, never from body (prevents IDOR)
+      const userId = req.userId || req.user?._id?.toString()
 
       const conversation = await AIConversation.create({
         appName,
         title: title || 'New Chat',
-        userId,
+        userId: userId || null,
         messages: [],
       })
 
