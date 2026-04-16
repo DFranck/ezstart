@@ -50,7 +50,7 @@ function collectWebUrls(appName: string): string[] {
   const entry = registry[appName]
   if (!entry) return []
   const { web } = entry.urls
-  return [web.local, web.development, web.production].filter(Boolean)
+  return [web.local, web.development, web.staging, web.production].filter(Boolean) as string[]
 }
 
 /**

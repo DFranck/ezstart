@@ -67,10 +67,12 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6101',
       development: 'https://ezstart-web.vercel.app',
+      staging: 'https://ezstart-git-staging-ezstart.vercel.app',
       production: 'https://www.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:6100',
+      staging: 'https://ezstart-api-staging.up.railway.app',
       production: 'https://ezstart-api.ezstart.xyz',
     },
   },
@@ -79,10 +81,12 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6111',
       development: 'https://ezstart-ezauth.vercel.app',
+      staging: 'https://ezauth-git-staging-ezstart.vercel.app',
       production: 'https://ezauth.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:6110',
+      staging: 'https://ezauth-api-staging.up.railway.app',
       production: 'https://ezauth-api.ezstart.xyz',
     },
   },
@@ -91,10 +95,12 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6121',
       development: 'https://ezstart-ezbill.vercel.app',
+      staging: 'https://ezbill-git-staging-ezstart.vercel.app',
       production: 'https://ezbill.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:6120',
+      staging: 'https://ezbill-api-staging.up.railway.app',
       production: 'https://ezbill-api.ezstart.xyz',
     },
   },
@@ -103,10 +109,12 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6131',
       development: 'https://ezstart-ezpay.vercel.app',
+      staging: 'https://ezpay-git-staging-ezstart.vercel.app',
       production: 'https://ezpay.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:6130',
+      staging: 'https://ezpay-api-staging.up.railway.app',
       production: 'https://ezpay-api.ezstart.xyz',
     },
   },
@@ -120,6 +128,7 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6151',
       development: 'https://fengshui.vercel.app',
+      staging: 'https://fengshui-git-staging-ezstart.vercel.app',
       production: 'https://ezfengshui.ezstart.xyz',
     },
   },
@@ -128,6 +137,7 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6141',
       development: 'https://asc-tcd-web.vercel.app',
+      staging: 'https://asc-tcd-git-staging-ezstart.vercel.app',
       production: 'https://www.asc-tcd.com',
     },
   },
@@ -136,10 +146,12 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6161',
       development: 'https://green-pulse-web.vercel.app',
+      staging: 'https://green-pulse-web-git-staging-ezstart.vercel.app',
       production: 'https://www.ai-greenpulse.com',
     },
     api: {
       local: 'http://localhost:6160',
+      staging: 'https://greenpulse-api-staging.up.railway.app',
       production: 'https://greenpulse-api.up.railway.app',
     },
   },
@@ -148,10 +160,12 @@ export const URLS: Record<AppName, AppUrls> = {
     web: {
       local: 'http://localhost:6171',
       development: 'https://game-analyzer-web.vercel.app',
+      staging: 'https://game-analyzer-web-git-staging-ezstart.vercel.app',
       production: 'https://game-analyzer.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:6170',
+      staging: 'https://game-analyzer-api-staging.up.railway.app',
       production: 'https://game-analyzer-api.up.railway.app',
     },
   },
@@ -434,7 +448,7 @@ export function getCanonicalUrl(app: AppName, type: 'web' | 'api' = 'web'): stri
  */
 export function getAllWebUrls(app: AppName): string[] {
   const urls = URLS[app].web
-  return [urls.local, urls.development, urls.production].filter(Boolean)
+  return [urls.local, urls.development, urls.staging, urls.production].filter(Boolean) as string[]
 }
 
 /**
@@ -444,7 +458,9 @@ export function getAllApiUrls(app: AppName): string[] {
   const apiUrls = URLS[app].api
   if (!apiUrls) return []
 
-  return [apiUrls.local, apiUrls.development, apiUrls.production].filter(Boolean) as string[]
+  return [apiUrls.local, apiUrls.development, apiUrls.staging, apiUrls.production].filter(
+    Boolean
+  ) as string[]
 }
 
 /**
