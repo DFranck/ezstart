@@ -2,6 +2,28 @@
   "name": "@ezstart/auth-sdk",
   "version": "1.0.0",
   "description": "EZAuth React SDK for authentication",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/auth-sdk"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/auth-sdk",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "auth",
+    "sdk",
+    "react",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -51,6 +73,9 @@
     }
   },
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",

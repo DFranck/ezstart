@@ -37,6 +37,9 @@
     "check:i18n": "node scripts/tools/check-i18n.js",
     "check:size": "node scripts/tools/check-component-size.js",
     "check:dead-code": "node scripts/tools/check-dead-code.js",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "publish-packages": "pnpm turbo build && changeset publish",
     "prepare": "husky",
     "setup:env": "node scripts/tools/setup-env.js",
     "registry:update": "pnpm --filter @ezstart/ui generate:registry",
@@ -64,6 +67,8 @@
   },
   "devDependencies": {
     "@axe-core/react": "^4.11.0",
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.30.0",
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "@next/bundle-analyzer": "^16.0.0",

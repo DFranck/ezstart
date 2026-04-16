@@ -1,10 +1,35 @@
 {
   "name": "@ezstart/logger",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Structured logging with Pino for @ezstart monorepo",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/logger"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/logger",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "logger",
+    "logging",
+    "pino",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

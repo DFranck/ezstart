@@ -1,8 +1,30 @@
 {
   "name": "@ezstart/ui",
   "version": "0.1.0",
+  "description": "Shared UI component library for @ezstart monorepo",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/ui"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/ui",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "ui",
+    "components",
+    "react",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
-  "private": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "typesVersions": {

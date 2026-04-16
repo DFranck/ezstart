@@ -1,0 +1,41 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.3/schema.json",
+  "changelog": ["@changesets/changelog-github", { "repo": "DFranck/ezstart" }],
+  "commit": false,
+  "fixed": [],
+  "linked": [
+    ["@ezstart/api-core", "@ezstart/api-sdk", "@ezstart/api-contracts"]
+  ],
+  "access": "public",
+  "baseBranch": "master",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "api-ezauth",
+    "api-ezbill",
+    "api-ezpay",
+    "api-ezstart",
+    "api-gacha-analyzer",
+    "api-green-pulse",
+    "web-asc-tcd",
+    "web-ezauth",
+    "web-ezbill",
+    "web-ezpay",
+    "web-ezstart",
+    "web-fengshui",
+    "web-gacha-analyzer",
+    "web-green-pulse",
+    "@ezstart/eslint-config",
+    "@ezstart/eslint-plugin-ezstart",
+    "@ezstart/typescript-config",
+    "@ezstart/tailwind-config",
+    "@ezstart/playwright-config",
+    "@ezstart/test-utils",
+    "@ezstart/next-config",
+    "@ezstart/seo-config",
+    "@ezbill/types",
+    "@ezbill/templates",
+    "@ezbill/test-utils",
+    "@gacha-analyzer/types",
+    "@green-pulse/types"
+  ]
+}

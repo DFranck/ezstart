@@ -1,10 +1,37 @@
 {
   "name": "@ezstart/ai-sdk",
   "version": "1.0.0",
-  "type": "module",
   "description": "Unified AI SDK with multi-provider support (OpenAI, Gemini, Claude) for backend and frontend",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DFranck/ezstart.git",
+    "directory": "packages/ai-sdk"
+  },
+  "homepage": "https://github.com/DFranck/ezstart/tree/master/packages/ai-sdk",
+  "bugs": {
+    "url": "https://github.com/DFranck/ezstart/issues"
+  },
+  "keywords": [
+    "ai",
+    "openai",
+    "gemini",
+    "claude",
+    "sdk",
+    "ezstart"
+  ],
+  "author": "EzStart LLC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
