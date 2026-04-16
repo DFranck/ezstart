@@ -18,8 +18,6 @@
     "@ezstart/pay-sdk": "workspace:*",
     "@ezstart/api-sdk": "workspace:*",
     "@ezstart/logger": "workspace:*",
-    "@ezstart/next-theme": "workspace:*",
-    "@ezstart/rbac": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@green-pulse/types": "workspace:*",
     "@hookform/resolvers": "3.9.1",

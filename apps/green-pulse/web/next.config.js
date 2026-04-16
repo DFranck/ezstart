@@ -4,8 +4,6 @@ export default createNextConfig({
   pwa: true,
   i18n: true,
   extend: {
-    transpilePackages: ['@ezstart/next-theme'],
-
     async rewrites() {
       return [
         {

@@ -8,7 +8,7 @@
 // app/[locale]/layout.tsx
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ErrorBoundary } from '@ezstart/ui/components'
 import { Toaster } from 'sonner'

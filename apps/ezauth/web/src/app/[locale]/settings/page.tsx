@@ -17,7 +17,7 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState } from 'react'

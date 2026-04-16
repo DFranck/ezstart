@@ -3,7 +3,7 @@
 import { useNavLinks } from '@/hooks/useNavLinks'
 import { LoginButton, RequireAuth, SignedIn, SignedOut, UserMenu } from '@ezstart/auth-sdk'
 import { getApiUrl } from '@ezstart/config'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import { useTheme } from 'next-themes'
 import {
   ClientLayout as BaseClientLayout,

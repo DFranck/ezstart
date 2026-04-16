@@ -21,7 +21,6 @@
     "@ezstart/config": "workspace:*",
     "@ezstart/email-service": "workspace:*",
     "@ezstart/logger": "workspace:*",
-    "@ezstart/rbac": "workspace:*",
     "@types/cookie-parser": "^1.4.10",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",

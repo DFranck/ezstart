@@ -18,7 +18,6 @@
     "@ezstart/api-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",
-    "@ezstart/next-theme": "workspace:*",
     "@ezstart/pay-sdk": "workspace:*",
     "@ezstart/pdf-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",

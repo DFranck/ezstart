@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import {
   ClientLayout as BaseClientLayout,
   NavigationLink,

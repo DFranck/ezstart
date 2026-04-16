@@ -1,5 +1,5 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import { QueryProvider } from '@/providers/query-provider'

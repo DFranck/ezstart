@@ -3,7 +3,7 @@
 import React from 'react'
 import { getAppTheme } from '@/config/app-themes'
 import { SignInForm, useAuthNavigation } from '@ezstart/auth-sdk'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import {
   BackButton,
   Card,

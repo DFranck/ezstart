@@ -5,7 +5,7 @@ export default createNextConfig({
   i18n: true,
   i18nRequestPath: './src/i18n.ts',
   extend: {
-    transpilePackages: ['@ezstart/pay-sdk', '@ezstart/next-theme'],
+    transpilePackages: ['@ezstart/pay-sdk'],
     eslint: {
       ignoreDuringBuilds: true,
     },

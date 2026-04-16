@@ -1,6 +1,6 @@
 import { QueryProvider } from '@/providers/query-provider'
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { ErrorBoundary, Div } from '@ezstart/ui/components'

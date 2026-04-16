@@ -2,7 +2,7 @@
 
 import { AILayout } from '@ezstart/ai-sdk/client'
 import { UserMenu, useAuthStore } from '@ezstart/auth-sdk'
-import { useRBAC } from '@ezstart/rbac'
+import { useRBAC } from '@ezstart/auth-sdk'
 import { Button, Div, Icon, Main, Nav, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'

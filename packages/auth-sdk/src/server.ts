@@ -27,6 +27,20 @@ export {
   errorResponseSchema,
 } from './core/schemas.js'
 
+// RBAC server utilities (Express middleware)
+export {
+  requireAuth as rbacRequireAuth,
+  requireRole,
+  requireAnyRole,
+  requirePermission,
+  requireFeature,
+  canManageUser as rbacCanManageUser,
+} from './rbac/server.js'
+
+// RBAC types and helpers re-exported for server use
+export * from './rbac/types.js'
+export * from './rbac/helpers.js'
+
 // Request schemas from @ezstart/api-contracts
 export {
   loginRequestSchema,

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { AccessDenied, AuthAdminDashboard, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
 import { PayAdminDashboard } from '@ezstart/pay-sdk'
 import { AIAdminDashboard, AIProvider } from '@ezstart/ai-sdk/client'
 import {

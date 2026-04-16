@@ -1,6 +1,6 @@
 /**
  * Express User augmentation for EZAuth
- * Mirrors @ezstart/rbac express.d.ts
+ * Mirrors @ezstart/auth-sdk RBAC express.d.ts
  */
 
 declare global {

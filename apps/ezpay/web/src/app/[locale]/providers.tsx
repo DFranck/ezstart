@@ -2,7 +2,7 @@
 
 import { AuthProvider, useAuthStore, createAuthClient } from '@ezstart/auth-sdk'
 import { PayProvider } from '@ezstart/pay-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { ReactNode } from 'react'
 
 const authClient = createAuthClient({ appName: 'ezpay', redirectUri: '/auth/callback' })

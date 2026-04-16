@@ -13,7 +13,7 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { useTranslations } from 'next-intl'

@@ -14,7 +14,7 @@ import {
   ThreadSidebar,
   ThreadSidebarToggle,
 } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/next-theme'
+import { ThemeSwitcher } from '@ezstart/ui/theme'
 import { useState, useCallback, useMemo } from 'react'
 
 type PlaygroundMessage = {

@@ -1,5 +1,5 @@
 import { createEzstartAuth, type RequestHandler } from '@ezstart/api-core'
-import { hasAnyRole } from '@ezstart/rbac/client'
+import { hasAnyRole } from '@ezstart/auth-sdk/rbac/client'
 import type { Request, Response, NextFunction } from 'express'
 
 const auth = createEzstartAuth()
@@ -75,7 +75,7 @@ export function populateUserFromToken(req: Request, _res: Response, next: NextFu
 
 /**
  * Check if the authenticated user has admin/superadmin role.
- * Delegates to @ezstart/rbac hasAnyRole for consistent role checking.
+ * Delegates to @ezstart/auth-sdk hasAnyRole for consistent role checking.
  */
 export function isAdminUser(req: Request): boolean {
   if (!req.user) return false

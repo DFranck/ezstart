@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { Card, Div, H1, Main, P, Spinner } from '@ezstart/ui/components'
 import { AuthAdminDashboard, useAuth } from '@ezstart/auth-sdk'
-import { RequireRole } from '@ezstart/rbac'
+import { RequireRole } from '@ezstart/auth-sdk'
 
 // ========================================
 // Access Denied Fallback

@@ -3,7 +3,7 @@
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { GRADIENT_TEXT } from '@/lib/theme-colors'
 import { LoginButton, useAuth } from '@ezstart/auth-sdk'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import {
   ClientLayout as BaseClientLayout,
   Div,

@@ -17,7 +17,6 @@
     "@ezstart/api-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",
-    "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@gacha-analyzer/types": "workspace:*",
     "@tanstack/react-query": "^5.90.3",

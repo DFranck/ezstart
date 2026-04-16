@@ -13,11 +13,9 @@
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
-    "@ezstart/rbac": "workspace:*",
     "@ezstart/api-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",
-    "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@tanstack/react-query": "^5.62.0",
     "@tanstack/react-query-devtools": "^5.62.0",

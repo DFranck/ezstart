@@ -1,7 +1,7 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
 import { Aside, Button, Card, Div, Icon, Nav, Section, Spinner } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'

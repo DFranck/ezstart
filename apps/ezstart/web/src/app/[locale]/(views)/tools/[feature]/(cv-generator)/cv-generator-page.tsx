@@ -18,7 +18,7 @@ import {
   Spinner,
 } from '@ezstart/ui/components'
 import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac'
+import { RequireRole, InsufficientPermissions } from '@ezstart/auth-sdk'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'

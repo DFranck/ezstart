@@ -28,6 +28,26 @@
     "./middleware": {
       "types": "./dist/middleware/index.d.ts",
       "import": "./dist/middleware/index.js"
+    },
+    "./rbac": {
+      "types": "./dist/rbac/index.d.ts",
+      "import": "./dist/rbac/index.js"
+    },
+    "./rbac/client": {
+      "types": "./dist/rbac/client.d.ts",
+      "import": "./dist/rbac/client.js"
+    },
+    "./rbac/server": {
+      "types": "./dist/rbac/server.d.ts",
+      "import": "./dist/rbac/server.js"
+    },
+    "./rbac/types": {
+      "types": "./dist/rbac/types.d.ts",
+      "import": "./dist/rbac/types.js"
+    },
+    "./rbac/helpers": {
+      "types": "./dist/rbac/helpers.d.ts",
+      "import": "./dist/rbac/helpers.js"
     }
   },
   "type": "module",
@@ -49,6 +69,7 @@
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
+    "@types/express": "^4.17.17",
     "@types/node": "^20",
     "@types/react": "^19.1.12",
     "next": "^15.5.9",

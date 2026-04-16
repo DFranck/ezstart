@@ -2,7 +2,7 @@
 
 import { AIProvider } from '@ezstart/ai-sdk/client'
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { globalThemeCss, greenPulseThemeCss } from '@ezstart/ui/styles'
 import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
 import * as React from 'react'

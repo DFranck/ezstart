@@ -100,9 +100,6 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
@@ -291,9 +288,6 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/rbac':
         specifier: workspace:*
         version: link:../../../packages/rbac
@@ -509,9 +503,6 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/pdf-sdk':
         specifier: workspace:*
         version: link:../../../packages/pdf-sdk
@@ -673,9 +664,6 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/pay-sdk':
         specifier: workspace:*
         version: link:../../../packages/pay-sdk
@@ -831,9 +819,6 @@ importers:
       '@ezstart/monitoring':
         specifier: workspace:*
         version: link:../../../packages/monitoring
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/pay-sdk':
         specifier: workspace:*
         version: link:../../../packages/pay-sdk
@@ -967,9 +952,6 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/pay-sdk':
         specifier: workspace:*
         version: link:../../../packages/pay-sdk
@@ -1152,9 +1134,6 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
@@ -1338,9 +1317,6 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
-      '@ezstart/next-theme':
-        specifier: workspace:*
-        version: link:../../../packages/next-theme
       '@ezstart/pay-sdk':
         specifier: workspace:*
         version: link:../../../packages/pay-sdk
@@ -1640,6 +1616,9 @@ importers:
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/express':
+        specifier: ^4.17.17
+        version: 4.17.25
       '@types/node':
         specifier: ^20
         version: 20.19.26
@@ -1795,85 +1774,6 @@ importers:
         specifier: ^3.0.0
         version: 3.2.4(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.19.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/express-core:
-    dependencies:
-      '@asteasolutions/zod-to-openapi':
-        specifier: ^7.3.4
-        version: 7.3.4(zod@3.23.8)
-      '@ezstart/config':
-        specifier: workspace:*
-        version: link:../config
-      '@ezstart/logger':
-        specifier: workspace:*
-        version: link:../logger
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.5
-      dotenv:
-        specifier: ^16.5.0
-        version: 16.6.1
-      express:
-        specifier: ^4.19.2
-        version: 4.22.1
-      express-rate-limit:
-        specifier: ^7.5.1
-        version: 7.5.1(express@4.22.1)
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.3
-      mongoose:
-        specifier: ^8.15.1
-        version: 8.20.2(socks@2.8.7)
-      socket.io:
-        specifier: ^4.8.1
-        version: 4.8.1
-      swagger-autogen:
-        specifier: ^2.23.7
-        version: 2.23.7
-      swagger-ui-express:
-        specifier: ^5.0.1
-        version: 5.0.1(express@4.22.1)
-      yamljs:
-        specifier: ^0.3.0
-        version: 0.3.0
-      zod:
-        specifier: 3.23.8
-        version: 3.23.8
-    devDependencies:
-      '@ezstart/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
-      '@types/express':
-        specifier: ^4.17.23
-        version: 4.17.25
-      '@types/jsonwebtoken':
-        specifier: ^9.0.9
-        version: 9.0.10
-      '@types/socket.io':
-        specifier: ^3.0.2
-        version: 3.0.2
-      '@types/supertest':
-        specifier: ^6.0.3
-        version: 6.0.3
-      '@types/swagger-ui-express':
-        specifier: ^4.1.8
-        version: 4.1.8
-      '@types/yamljs':
-        specifier: ^0.2.34
-        version: 0.2.34
-      supertest:
-        specifier: ^7.1.4
-        version: 7.1.4
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
-      vitest:
-        specifier: ^4.0.3
-        version: 4.0.15(@edge-runtime/vm@3.2.0)(@opentelemetry/api@1.9.0)(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-
   packages/logger:
     dependencies:
       '@sentry/node':
@@ -1963,40 +1863,6 @@ importers:
       next:
         specifier: ^15.5.9
         version: 15.5.9(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
-
-  packages/next-theme:
-    dependencies:
-      '@ezstart/config':
-        specifier: workspace:*
-        version: link:../config
-      '@ezstart/logger':
-        specifier: workspace:*
-        version: link:../logger
-      '@ezstart/ui':
-        specifier: workspace:*
-        version: link:../ui
-      next:
-        specifier: ^15.5.9
-        version: 15.5.9(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.3
-    devDependencies:
-      '@ezstart/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      '@types/node':
-        specifier: ^24.10.0
-        version: 24.10.3
-      '@types/react':
-        specifier: ^19.1.12
-        version: 19.2.7
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -2245,6 +2111,9 @@ importers:
       motion:
         specifier: ^12.23.19
         version: 12.23.26(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react:
         specifier: ^19.1.1
         version: 19.2.3
@@ -6184,10 +6053,6 @@ packages:
   '@types/serve-static@2.2.0':
     resolution: {integrity: sha512-8mam4H1NHLtu7nmtalF7eyBH14QyOASmcxHhSfEoRyr0nP/YdoesEtU+uSRvMe96TW/HPTtkoKqQLl53N7UXMQ==}
 
-  '@types/socket.io@3.0.2':
-    resolution: {integrity: sha512-pu0sN9m5VjCxBZVK8hW37ZcMe8rjn4HHggBN5CbaRTvFwv5jOmuIRZEuddsBPa9Th0ts0SIo3Niukq+95cMBbQ==}
-    deprecated: This is a stub types definition. socket.io provides its own type definitions, so you do not need this installed.
-
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
 
@@ -6226,9 +6091,6 @@ packages:
 
   '@types/whatwg-url@13.0.0':
     resolution: {integrity: sha512-N8WXpbE6Wgri7KUSvrmQcqrMllKZ9uxkYWMt+mCSGwNc0Hsw9VQTW7ApqI4XNrx6/SaM2QQJCzMPDEXE058s+Q==}
-
-  '@types/yamljs@0.2.34':
-    resolution: {integrity: sha512-gJvfRlv9ErxdOv7ux7UsJVePtX54NAvQyd8ncoiFqK8G5aeHIfQfGH2fbruvjAQ9657HwAaO54waS+Dsk2QTUQ==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -6653,11 +6515,6 @@ packages:
   acorn-walk@8.3.4:
     resolution: {integrity: sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g==}
     engines: {node: '>=0.4.0'}
-
-  acorn@7.4.1:
-    resolution: {integrity: sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
 
   acorn@8.15.0:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
@@ -11268,9 +11125,6 @@ packages:
     resolution: {integrity: sha512-qsjeeq5YjBZ5eMdFuUa4ZosMLxgr5RZ+F+Y1OrDhuOCEInRMA3x74XdBtggJcj9kOeInz0WE+LgCPDkZFlBYJw==}
     engines: {node: '>=12.0.0'}
 
-  swagger-autogen@2.23.7:
-    resolution: {integrity: sha512-vr7uRmuV0DCxWc0wokLJAwX3GwQFJ0jwN+AWk0hKxre2EZwusnkGSGdVFd82u7fQLgwSTnbWkxUL7HXuz5LTZQ==}
-
   swagger-ui-dist@5.31.0:
     resolution: {integrity: sha512-zSUTIck02fSga6rc0RZP3b7J7wgHXwLea8ZjgLA3Vgnb8QeOl3Wou2/j5QkzSGeoz6HusP/coYuJl33aQxQZpg==}
 
@@ -12228,10 +12082,6 @@ packages:
   yaml@2.8.2:
     resolution: {integrity: sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A==}
     engines: {node: '>= 14.6'}
-    hasBin: true
-
-  yamljs@0.3.0:
-    resolution: {integrity: sha512-C/FsVVhht4iPQYXOInoxUM/1ELSf9EsgKH34FofQOp6hwCPrW4vG4w5++TED3xRUo8gD7l0P1J1dLlDYzODsTQ==}
     hasBin: true
 
   yargs-parser@18.1.3:
@@ -16388,6 +16238,7 @@ snapshots:
   '@types/node@24.10.3':
     dependencies:
       undici-types: 7.16.0
+    optional: true
 
   '@types/nodemailer@6.4.21':
     dependencies:
@@ -16473,14 +16324,6 @@ snapshots:
       '@types/http-errors': 2.0.5
       '@types/node': 20.19.26
 
-  '@types/socket.io@3.0.2':
-    dependencies:
-      socket.io: 4.8.1
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
   '@types/stack-utils@2.0.3': {}
 
   '@types/superagent@8.1.9':
@@ -16525,8 +16368,6 @@ snapshots:
   '@types/whatwg-url@13.0.0':
     dependencies:
       '@types/webidl-conversions': 7.0.3
-
-  '@types/yamljs@0.2.34': {}
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -17076,14 +16917,6 @@ snapshots:
     optionalDependencies:
       vite: 7.2.7(@types/node@22.19.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@vitest/mocker@4.0.15(vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
-    dependencies:
-      '@vitest/spy': 4.0.15
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 7.2.7(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-
   '@vitest/pretty-format@2.1.9':
     dependencies:
       tinyrainbow: 1.2.0
@@ -17265,8 +17098,6 @@ snapshots:
   acorn-walk@8.3.4:
     dependencies:
       acorn: 8.15.0
-
-  acorn@7.4.1: {}
 
   acorn@8.15.0: {}
 
@@ -22817,13 +22648,6 @@ snapshots:
   svg-pathdata@6.0.3:
     optional: true
 
-  swagger-autogen@2.23.7:
-    dependencies:
-      acorn: 7.4.1
-      deepmerge: 4.3.1
-      glob: 7.2.3
-      json5: 2.2.3
-
   swagger-ui-dist@5.31.0:
     dependencies:
       '@scarf/scarf': 1.4.0
@@ -23230,7 +23054,8 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.16.0: {}
+  undici-types@7.16.0:
+    optional: true
 
   undici@5.28.4:
     dependencies:
@@ -23560,23 +23385,6 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.2
 
-  vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
-    dependencies:
-      esbuild: 0.25.12
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
-      postcss: 8.5.6
-      rollup: 4.53.3
-      tinyglobby: 0.2.15
-    optionalDependencies:
-      '@types/node': 24.10.3
-      fsevents: 2.3.3
-      jiti: 2.6.1
-      lightningcss: 1.30.2
-      terser: 5.44.1
-      tsx: 4.21.0
-      yaml: 2.8.2
-
   vitest@2.1.9(@edge-runtime/vm@3.2.0)(@types/node@20.19.26)(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:
       '@vitest/expect': 2.1.9
@@ -23757,45 +23565,6 @@ snapshots:
       '@edge-runtime/vm': 3.2.0
       '@opentelemetry/api': 1.9.0
       '@types/node': 22.19.2
-    transitivePeerDependencies:
-      - jiti
-      - less
-      - lightningcss
-      - msw
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - terser
-      - tsx
-      - yaml
-
-  vitest@4.0.15(@edge-runtime/vm@3.2.0)(@opentelemetry/api@1.9.0)(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
-    dependencies:
-      '@vitest/expect': 4.0.15
-      '@vitest/mocker': 4.0.15(vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
-      '@vitest/pretty-format': 4.0.15
-      '@vitest/runner': 4.0.15
-      '@vitest/snapshot': 4.0.15
-      '@vitest/spy': 4.0.15
-      '@vitest/utils': 4.0.15
-      es-module-lexer: 1.7.0
-      expect-type: 1.3.0
-      magic-string: 0.30.21
-      obug: 2.1.1
-      pathe: 2.0.3
-      picomatch: 4.0.3
-      std-env: 3.10.0
-      tinybench: 2.9.0
-      tinyexec: 1.0.2
-      tinyglobby: 0.2.15
-      tinyrainbow: 3.0.3
-      vite: 7.2.7(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@edge-runtime/vm': 3.2.0
-      '@opentelemetry/api': 1.9.0
-      '@types/node': 24.10.3
     transitivePeerDependencies:
       - jiti
       - less
@@ -24146,11 +23915,6 @@ snapshots:
   yaml@1.10.2: {}
 
   yaml@2.8.2: {}
-
-  yamljs@0.3.0:
-    dependencies:
-      argparse: 1.0.10
-      glob: 7.2.3
 
   yargs-parser@18.1.3:
     dependencies:

@@ -1,7 +1,7 @@
 'use client'
 
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { globalThemeCss } from '@ezstart/ui/styles'
 import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
 import * as React from 'react'

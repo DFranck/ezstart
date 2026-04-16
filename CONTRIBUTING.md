@@ -197,9 +197,9 @@ routes/invoices/
 **Exemple complet — `listInvoices.ts` :**
 
 ```typescript
-import { Router } from '@ezstart/express-core'
+import { Router } from '@ezstart/api-core'
 import { z } from 'zod'
-import { sendSuccess, sendError } from '@ezstart/express-core'
+import { sendSuccess, sendError } from '@ezstart/api-core'
 import { Invoice } from '../../models/Invoice.js'
 
 const querySchema = z.object({

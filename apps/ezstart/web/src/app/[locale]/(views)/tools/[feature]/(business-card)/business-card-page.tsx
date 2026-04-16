@@ -2,7 +2,7 @@
 
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
 import {
   Button,
   Card,

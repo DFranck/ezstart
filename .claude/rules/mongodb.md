@@ -2,7 +2,7 @@
 
 ### Single Source of Truth : connectToMongo()
 
-**TOUJOURS** utiliser `connectToMongo(dbName)` depuis `@ezstart/express-core` :
+**TOUJOURS** utiliser `connectToMongo(dbName)` depuis `@ezstart/api-core` :
 
 ```typescript
 // ❌ MAUVAIS
@@ -11,7 +11,7 @@ mongoose.connect(process.env.MONGO_URL)
 const MyModel = mongoose.model('MyModel', schema)
 
 // ✅ BON
-import { connectToMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/api-core'
 import { Schema } from 'mongoose'
 
 // Factory function pour model

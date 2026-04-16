@@ -60,7 +60,7 @@ NEXT_PUBLIC_EZAUTH_API_URL=http://localhost:6110/api
 
 - **Framework** : Next.js 15.5.2 (App Router)
 - **UI** : @ezstart/ui (Radix UI + Tailwind CSS)
-- **Theme** : @ezstart/next-theme (dark/light mode)
+- **Theme** : @ezstart/ui/theme (dark/light mode)
 - **Charts** : Recharts (à venir)
 - **SDK** : @ezstart/pay-sdk (hooks et composants)
 
@@ -354,7 +354,7 @@ interface Payment {
 ### Theme Provider
 
 ```tsx
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 ;<ThemeProvider>
   <App />
 </ThemeProvider>
@@ -434,7 +434,7 @@ pnpm --filter web-ezpay start
 - `next` ^15.5.2 - Framework
 - `react` ^19.1.1 - UI Library
 - `@ezstart/ui` workspace:\* - Composants
-- `@ezstart/next-theme` workspace:\* - Theme provider
+- `@ezstart/ui/theme` workspace:\* - Theme provider
 - `@ezstart/pay-sdk` workspace:\* - SDK paiements
 - `next-themes` ^0.4.6 - Theme management
 
@@ -463,7 +463,7 @@ pnpm --filter web-ezpay start
 
 - `@ezstart/auth-sdk` - Authentication SDK
 - `@ezstart/ui` - UI Components
-- `@ezstart/next-theme` - Theme Provider
+- `@ezstart/ui/theme` - Theme Provider
 - `@ezstart/api-core` - API Infrastructure
 
 ## 🔧 Development Commands

@@ -2,7 +2,7 @@
 
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
-import { useRBAC } from '@ezstart/rbac'
+import { useRBAC } from '@ezstart/auth-sdk'
 import { useMessages } from 'next-intl'
 
 export type NavMenu = {

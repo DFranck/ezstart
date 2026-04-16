@@ -281,7 +281,7 @@ import withPWA from 'next-pwa'
 
 /** @type {import('next').NextConfig} */
 const baseConfig = {
-  transpilePackages: ['@ezstart/ui', '@ezstart/auth-sdk', '@ezstart/next-theme'],
+  transpilePackages: ['@ezstart/ui', '@ezstart/auth-sdk'],
 }
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
@@ -445,7 +445,7 @@ export const config = {
     `'use client'
 
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { ThemeProvider } from '@ezstart/ui/theme'
 import { NextIntlClientProvider } from 'next-intl'
 import { ReactNode } from 'react'
 
@@ -539,7 +539,7 @@ export default function HomePage() {
             <li>Internationalization (i18n) with next-intl</li>
             <li>Progressive Web App (PWA) support</li>
             <li>@ezstart/ui components library</li>
-            <li>@ezstart/next-theme & auth-sdk providers</li>
+            <li>@ezstart/ui/theme & auth-sdk providers</li>
             <li>Centralized TypeScript, ESLint, and Tailwind configs</li>
           </ul>
           <div className="pt-4">

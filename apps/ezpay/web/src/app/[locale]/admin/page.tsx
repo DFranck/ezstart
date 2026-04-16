@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { Card, Div, H1, Main, P } from '@ezstart/ui/components'
 import { PayAdminDashboard } from '@ezstart/pay-sdk'
-import { hasAnyRole } from '@ezstart/rbac'
+import { hasAnyRole } from '@ezstart/auth-sdk'
 
 // ========================================
 // Auth helpers

@@ -137,6 +137,66 @@ export type {
   EmailOverrideRequest,
 } from './core/types.js'
 
+// ── RBAC (Role-Based Access Control) ────────────────────────────────────────
+
+// Types & config
+export {
+  DEFAULT_ROLES,
+  DEFAULT_ROLE_HIERARCHY,
+  DEFAULT_ROLE_PERMISSIONS,
+  DEFAULT_ROLE_FEATURES,
+  ROLE_HIERARCHY,
+  ROLE_PERMISSIONS,
+  ROLE_FEATURES,
+  configureRBAC,
+  extendRBACConfig,
+  getRBACConfig,
+  matchesPermission,
+} from './rbac/types.js'
+export type {
+  DefaultRole,
+  Role,
+  Permission,
+  Feature,
+  AppRBACConfig,
+  RBACConfig,
+} from './rbac/types.js'
+
+// Client utilities
+export {
+  hasRole,
+  hasAnyRole,
+  hasAllRoles,
+  hasPermission,
+  hasAnyPermission,
+  hasAllPermissions,
+  hasFeature,
+  hasAnyFeature,
+  canManageUser,
+  getHighestRoleLevel,
+  isRoleHigherThan,
+  useRBAC,
+} from './rbac/client.js'
+
+// Helpers (UI utilities)
+export {
+  getRoleLabel,
+  getRoleColor,
+  getRoleIcon,
+  getRoleDescription,
+  sortRolesByHierarchy,
+  getHighestRole,
+} from './rbac/helpers.js'
+export type { RoleColor } from './rbac/helpers.js'
+
+// RBAC React components
+export { RoleBadge, RoleBadgeList } from './rbac/components/role-badge.js'
+export type { RoleBadgeProps, RoleBadgeListProps } from './rbac/components/role-badge.js'
+export { RequireRole } from './rbac/components/require-role.js'
+export type { RequireRoleProps } from './rbac/components/require-role.js'
+export { InsufficientPermissions } from './rbac/components/insufficient-permissions.js'
+export type { InsufficientPermissionsProps } from './rbac/components/insufficient-permissions.js'
+
 // ── i18n ─────────────────────────────────────────────────────────────────────
 
 export { getAuthTexts, en, fr, vi } from './i18n/index.js'

@@ -9,7 +9,7 @@
   "include": ["src/**/*", "../../../packages/types/**/*.d.ts"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../../packages/express-core" },
+    { "path": "../../../packages/api-core" },
     { "path": "../../../packages/auth-sdk" }
   ]
 }

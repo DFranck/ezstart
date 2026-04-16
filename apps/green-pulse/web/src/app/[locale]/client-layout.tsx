@@ -2,7 +2,7 @@
 import { routing } from '@/i18n/routing'
 import { UserMenu, useAuthStore } from '@ezstart/auth-sdk'
 import { useTheme } from 'next-themes'
-import { useRBAC } from '@ezstart/rbac'
+import { useRBAC } from '@ezstart/auth-sdk'
 import { Button, ClientLayout, Div, LocaleSwitcher, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'

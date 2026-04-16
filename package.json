@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "build:api": "pnpm --filter @ezstart/config --filter @ezstart/express-core build",
+    "build:api": "pnpm --filter @ezstart/config --filter @ezstart/api-core build",
     "build:ezstart-api": "pnpm build:api && turbo build --filter=api-ezstart",
     "build:ezauth-api": "pnpm build:api && turbo build --filter=api-ezauth",
     "build:ezpay-api": "pnpm build:api && turbo build --filter=api-ezpay",

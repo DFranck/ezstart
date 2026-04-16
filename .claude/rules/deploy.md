@@ -6,7 +6,7 @@
 
 ```bash
 pnpm install --frozen-lockfile --shamefully-hoist && \
-pnpm --filter @ezstart/config --filter @ezstart/express-core build && \
+pnpm --filter @ezstart/config --filter @ezstart/api-core build && \
 pnpm turbo build --filter=api-[appname]
 ```
 

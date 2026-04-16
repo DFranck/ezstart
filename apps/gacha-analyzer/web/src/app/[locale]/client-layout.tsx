@@ -1,7 +1,7 @@
 'use client'
 import { routing } from '@/i18n/routing'
 import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import { ClientLayout, Div, LocaleSwitcher, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
