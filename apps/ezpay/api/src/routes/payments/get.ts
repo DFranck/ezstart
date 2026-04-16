@@ -21,7 +21,7 @@ const docRouter = createRouterWithDoc(getPaymentRegistry, router)
 
 const paymentResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payment: z.any().optional().describe('Payment object'),
+  payment: z.record(z.unknown()).optional().describe('Payment object'),
   error: z.string().optional().describe('Error message if operation failed'),
 })
 

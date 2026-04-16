@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Modal, P } from '@ezstart/ui/components'
+import { Button, Div, Input, Modal, P } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
@@ -32,10 +32,10 @@ export function KeyCreatedModal({ isOpen, onClose, rawKey }: KeyCreatedModalProp
         </Button>
       }
     >
-      <div className="space-y-4">
+      <Div className="space-y-4">
         <P className="text-destructive font-medium">{t('warning')}</P>
 
-        <div className="flex items-center gap-2">
+        <Div className="flex items-center gap-2">
           <Input
             readOnly
             value={rawKey ?? ''}
@@ -44,8 +44,8 @@ export function KeyCreatedModal({ isOpen, onClose, rawKey }: KeyCreatedModalProp
           <Button variant="outline" size="sm" onClick={handleCopy}>
             {t('copyKey')}
           </Button>
-        </div>
-      </div>
+        </Div>
+      </Div>
     </Modal>
   )
 }

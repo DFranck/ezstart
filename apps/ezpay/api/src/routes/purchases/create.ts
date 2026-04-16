@@ -37,7 +37,7 @@ const createPurchaseSchema = z.object({
 
 const paymentResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payment: z.any().optional().describe('Payment object with details'),
+  payment: z.record(z.unknown()).optional().describe('Payment object with details'),
   checkoutUrl: z.string().optional().describe('Stripe checkout URL to redirect user'),
   error: z.string().optional().describe('Error message if operation failed'),
 })

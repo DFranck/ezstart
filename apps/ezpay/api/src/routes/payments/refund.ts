@@ -27,7 +27,7 @@ const refundParamsSchema = z.object({
 
 const refundResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payment: z.any().optional().describe('Updated payment object'),
+  payment: z.record(z.unknown()).optional().describe('Updated payment object'),
   error: z.string().optional().describe('Error message if operation failed'),
 })
 

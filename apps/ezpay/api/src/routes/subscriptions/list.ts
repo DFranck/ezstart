@@ -36,7 +36,7 @@ const subscriptionsQuerySchema = z.object({
 
 const subscriptionsListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payments: z.array(z.any()).describe('List of subscriptions'),
+  payments: z.array(z.record(z.unknown())).describe('List of subscriptions'),
   meta: z
     .object({
       total: z.number().describe('Total number of subscriptions matching the query'),

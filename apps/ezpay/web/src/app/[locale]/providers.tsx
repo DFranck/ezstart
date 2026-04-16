@@ -32,8 +32,8 @@ function handleAuthFailure() {
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider appName="ezpay">
-      <ThemeProvider>
+    <ThemeProvider>
+      <AuthProvider appName="ezpay">
         <PayProvider
           appName="ezpay"
           getToken={getToken}
@@ -42,7 +42,7 @@ export function Providers({ children }: { children: ReactNode }) {
         >
           {children}
         </PayProvider>
-      </ThemeProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

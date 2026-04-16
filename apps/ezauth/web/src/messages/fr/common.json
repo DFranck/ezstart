@@ -1,5 +1,15 @@
 {
   "errorBoundary": {
     "title": "Une erreur est survenue dans EZAuth"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "La page que vous recherchez n'existe pas.",
+    "backHome": "Retour a l'accueil"
+  },
+  "error": {
+    "title": "Une erreur est survenue",
+    "message": "Une erreur inattendue s'est produite. Veuillez reessayer.",
+    "retry": "Reessayer"
   }
 }

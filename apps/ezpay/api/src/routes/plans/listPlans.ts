@@ -39,7 +39,7 @@ const listPlansQuerySchema = z.object({
 
 const plansListResponseSchema = z.object({
   success: z.boolean().describe('Whether the request succeeded'),
-  data: z.array(z.any()).describe('Array of plan objects'),
+  data: z.array(z.record(z.unknown())).describe('Array of plan objects'),
   meta: z
     .object({
       total: z.number().describe('Total number of plans matching the filter'),

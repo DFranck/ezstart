@@ -29,7 +29,7 @@ const purchasesQuerySchema = z.object({
 
 const purchasesListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payments: z.array(z.any()).describe('List of purchases'),
+  payments: z.array(z.record(z.unknown())).describe('List of purchases'),
   meta: z
     .object({
       total: z.number().describe('Total number of purchases matching the query'),

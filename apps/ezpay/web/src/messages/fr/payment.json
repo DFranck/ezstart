@@ -43,7 +43,8 @@
     "gettingStarted": "Pour commencer",
     "installSdk": "1. Installer le SDK",
     "setupClient": "2. Configurer le client",
-    "useComponents": "3. Utiliser les composants"
+    "useComponents": "3. Utiliser les composants",
+    "testCenter": "Centre de test"
   },
   "success": {
     "donateTitle": "Merci !",

@@ -1,5 +1,15 @@
 {
   "errorBoundary": {
-    "title": "Đã xảy ra lỗi trong EZAuth"
+    "title": "Da xay ra loi trong EZAuth"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Trang ban tim khong ton tai.",
+    "backHome": "Quay lai trang chu"
+  },
+  "error": {
+    "title": "Da xay ra loi",
+    "message": "Da xay ra loi khong mong muon. Vui long thu lai.",
+    "retry": "Thu lai"
   }
 }

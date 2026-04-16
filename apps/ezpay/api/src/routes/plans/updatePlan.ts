@@ -45,7 +45,7 @@ const updatePlanSchema = z.object({
 
 const planResponseSchema = z.object({
   success: z.boolean().describe('Whether the request succeeded'),
-  data: z.any().optional().describe('Response payload (the plan object on success)'),
+  data: z.record(z.unknown()).optional().describe('Response payload (the plan object on success)'),
   error: z.string().optional().describe('Human-readable error message on failure'),
 })
 

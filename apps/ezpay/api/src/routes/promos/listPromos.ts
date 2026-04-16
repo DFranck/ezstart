@@ -40,7 +40,7 @@ const listPromosQuerySchema = z.object({
 
 const promosListResponseSchema = z.object({
   success: z.boolean().describe('Whether the request succeeded'),
-  data: z.array(z.any()).describe('Array of promo objects'),
+  data: z.array(z.record(z.unknown())).describe('Array of promo objects'),
   meta: z
     .object({
       total: z.number().describe('Total number of promos matching the filter'),

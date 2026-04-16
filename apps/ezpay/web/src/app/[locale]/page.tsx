@@ -63,7 +63,7 @@ export default function HomePage() {
           <Button asChild variant="outline" size="lg">
             <Link href="/test">
               <Icon name="lucide:FlaskConical" className="w-5 h-5 mr-2" />
-              Test Center
+              {t('testCenter')}
             </Link>
           </Button>
         </Div>

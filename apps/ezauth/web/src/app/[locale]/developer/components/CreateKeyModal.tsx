@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Label, Modal, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ezstart/ui/components'
+import { Button, Div, Input, Label, Modal, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -59,8 +59,8 @@ export function CreateKeyModal({ isOpen, onClose, onSubmit, isSubmitting }: Crea
         </Button>
       }
     >
-      <div className="space-y-4">
-        <div className="space-y-2">
+      <Div className="space-y-4">
+        <Div className="space-y-2">
           <Label htmlFor="key-name">{t('nameLabel')}</Label>
           <Input
             id="key-name"
@@ -69,9 +69,9 @@ export function CreateKeyModal({ isOpen, onClose, onSubmit, isSubmitting }: Crea
             onChange={e => setName(e.target.value)}
             maxLength={100}
           />
-        </div>
+        </Div>
 
-        <div className="space-y-2">
+        <Div className="space-y-2">
           <Label>{t('appScope')}</Label>
           <Select value={appName} onValueChange={setAppName}>
             <SelectTrigger>
@@ -81,9 +81,9 @@ export function CreateKeyModal({ isOpen, onClose, onSubmit, isSubmitting }: Crea
               <SelectItem value="*">{t('appScopeAll')}</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </Div>
 
-        <div className="space-y-2">
+        <Div className="space-y-2">
           <Label>{t('expiry')}</Label>
           <Select value={expiry} onValueChange={setExpiry}>
             <SelectTrigger>
@@ -96,8 +96,8 @@ export function CreateKeyModal({ isOpen, onClose, onSubmit, isSubmitting }: Crea
               <SelectItem value="1y">{t('expiry1y')}</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-      </div>
+        </Div>
+      </Div>
     </Modal>
   )
 }

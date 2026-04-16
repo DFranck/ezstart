@@ -47,7 +47,7 @@ const myPaymentsQuerySchema = z.object({
 
 const myPaymentsResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payments: z.array(z.any()).describe('List of payments'),
+  payments: z.array(z.record(z.unknown())).describe('List of payments'),
   meta: z
     .object({
       total: z.number().describe('Total number of payments matching the query'),

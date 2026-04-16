@@ -28,7 +28,7 @@ const donationsQuerySchema = z.object({
 
 const donationsListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payments: z.array(z.any()).describe('List of public donations'),
+  payments: z.array(z.record(z.unknown())).describe('List of public donations'),
   meta: z
     .object({
       total: z.number().describe('Total number of donations matching the query'),

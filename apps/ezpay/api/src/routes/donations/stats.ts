@@ -40,7 +40,7 @@ const donationStatsResponseSchema = z.object({
             .describe('Donation type breakdown'),
         })
         .describe('Breakdown by payment type'),
-      recent: z.array(z.any()).describe('Recent donations (last 5)'),
+      recent: z.array(z.record(z.unknown())).describe('Recent donations (last 5)'),
     })
     .describe('Donation statistics'),
 })

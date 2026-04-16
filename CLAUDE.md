@@ -29,6 +29,7 @@ Domaines spécifiques (applicables en plus du standard) :
 - [`.claude/rules/env.md`](./.claude/rules/env.md) — `.env.example`/`.env.local`/`.env.production`
 - [`.claude/rules/nextjs.md`](./.claude/rules/nextjs.md) — Provider stack (i18n + theme + auth)
 - [`.claude/rules/ui.md`](./.claude/rules/ui.md) — composants `@ezstart/ui`, classes sémantiques, i18n user-facing
+- [`.claude/rules/standard-saas.md`](./.claude/rules/standard-saas.md) — checklist apps SaaS (API + Web + Infra + features)
 
 ## Git
 
