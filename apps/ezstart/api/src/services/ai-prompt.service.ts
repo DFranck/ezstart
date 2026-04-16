@@ -318,29 +318,23 @@ const DEFAULT_APP_PROVIDERS: DefaultProviderDef[] = [
 /**
  * Seed default app providers for a specific app if none exist
  */
-export async function seedDefaultAppProviders(appName: string): Promise<void> {
+export async function seedDefaultAppProviders(): Promise<void> {
   try {
-    const count = await AppProvider.countDocuments({
-      $or: [{ apps: appName }, { appName }],
-    })
+    const count = await AppProvider.countDocuments({ apps: '*' })
     if (count > 0) {
-      logger.info(
-        `[AIPromptService] ${count} app providers already exist for app: ${appName}, skipping seed`
-      )
+      logger.info(`[AIPromptService] ${count} global app providers already exist, skipping seed`)
       return
     }
 
-    logger.info(`[AIPromptService] Seeding default app providers for app: ${appName}...`)
+    logger.info(`[AIPromptService] Seeding default global app providers...`)
 
     const providers = DEFAULT_APP_PROVIDERS.map(def => ({
       ...def,
-      apps: [appName],
+      apps: ['*'],
     }))
 
     await AppProvider.insertMany(providers)
-    logger.info(
-      `[AIPromptService] Seeded ${providers.length} default app providers for app: ${appName}`
-    )
+    logger.info(`[AIPromptService] Seeded ${providers.length} default global app providers`)
   } catch (error) {
     logger.error('[AIPromptService] Error seeding app providers:', error)
   }

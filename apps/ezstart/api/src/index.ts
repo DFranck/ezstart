@@ -66,7 +66,7 @@ connectToMongo('ezstart')
     seedDefaultPrompts('ezstart').catch(() => {
       /* non-blocking */
     })
-    seedDefaultAppProviders('ezstart').catch(() => {
+    seedDefaultAppProviders().catch(() => {
       /* non-blocking */
     })
     seedGlobalProviders().catch(() => {
