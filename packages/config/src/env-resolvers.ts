@@ -4,10 +4,11 @@
  * These helpers let shared env vars carry a small amount of dynamic shape so
  * the same root value can be consumed by every app:
  *
- *   MONGO_URL=mongodb+srv://.../{app}-{env}?...
- *     → getMongoUrl('ezbill')   // mongodb+srv://.../ezbill-dev?...       (local)
- *     → getMongoUrl('ezbill')   // mongodb+srv://.../ezbill-staging?...   (staging)
- *     → getMongoUrl('ezbill')   // mongodb+srv://.../ezbill-prod?...      (production)
+ *   MONGO_URL=mongodb+srv://.../{app}?...
+ *     → getMongoUrl('ezbill')   // mongodb+srv://.../ezbill?...
+ *
+ *   Each environment (local, staging, production) has its own MONGO_URL
+ *   pointing to a separate cluster. DB names are always just the app name.
  *
  *   SENTRY_DSN_EZAUTH=https://...
  *   SENTRY_DSN_EZBILL=https://...
@@ -27,16 +28,14 @@ import type { AppName } from './urls.js'
 import { getCurrentEnvironment } from './urls.js'
 
 /**
- * Database environment suffix.
- *   local / development → 'dev'
- *   staging             → 'staging'
- *   production          → 'prod'
+ * Database environment suffix — ALWAYS empty.
+ *
+ * Each environment (local, staging, production) has its own MONGO_URL
+ * pointing to a separate cluster/DB. The DB name is just the app name
+ * (e.g. 'ezauth', 'ezbill') — no '-dev'/'-staging'/'-prod' suffix needed.
  */
-function dbEnvSuffix(): 'dev' | 'staging' | 'prod' {
-  const env = getCurrentEnvironment()
-  if (env === 'local' || env === 'development') return 'dev'
-  if (env === 'staging') return 'staging'
-  return 'prod'
+function dbEnvSuffix(): string {
+  return ''
 }
 
 /**
@@ -73,7 +72,9 @@ export function getMongoUrl(app: AppName): string {
         '{app} / {env} placeholders.'
     )
   }
-  return tpl.replace(/\{app\}/g, app).replace(/\{env\}/g, dbEnvSuffix())
+  const suffix = dbEnvSuffix()
+  const dbName = suffix ? `${app}-${suffix}` : app
+  return tpl.replace(/\{app\}-\{env\}/g, dbName).replace(/\{app\}/g, app).replace(/\{env\}/g, suffix)
 }
 
 /**

@@ -40,28 +40,35 @@ describe('@ezstart/config - env-resolvers', () => {
       expect(() => getMongoUrl('ezbill')).toThrow(/MONGO_URL/)
     })
 
-    it('interpolates {app} and {env} for local environment', () => {
-      process.env.MONGO_URL = 'mongodb+srv://user:pw@host/{app}-{env}?retryWrites=true'
+    it('interpolates {app} placeholder (no env suffix)', () => {
+      process.env.MONGO_URL = 'mongodb+srv://user:pw@host/{app}?retryWrites=true'
       process.env.DEPLOY_ENV = 'local'
 
-      expect(getMongoUrl('ezbill')).toBe('mongodb+srv://user:pw@host/ezbill-dev?retryWrites=true')
+      expect(getMongoUrl('ezbill')).toBe('mongodb+srv://user:pw@host/ezbill?retryWrites=true')
       expect(getMongoUrl('green-pulse')).toBe(
-        'mongodb+srv://user:pw@host/green-pulse-dev?retryWrites=true'
+        'mongodb+srv://user:pw@host/green-pulse?retryWrites=true'
       )
     })
 
-    it('uses staging suffix when DEPLOY_ENV=staging', () => {
-      process.env.MONGO_URL = 'mongodb+srv://user:pw@host/{app}-{env}'
+    it('works the same in staging (each env has its own MONGO_URL)', () => {
+      process.env.MONGO_URL = 'mongodb+srv://user:pw@staging-host/{app}'
       process.env.DEPLOY_ENV = 'staging'
 
-      expect(getMongoUrl('ezauth')).toBe('mongodb+srv://user:pw@host/ezauth-staging')
+      expect(getMongoUrl('ezauth')).toBe('mongodb+srv://user:pw@staging-host/ezauth')
     })
 
-    it('uses prod suffix when DEPLOY_ENV=production', () => {
+    it('works the same in production', () => {
+      process.env.MONGO_URL = 'mongodb+srv://user:pw@prod-host/{app}'
+      process.env.DEPLOY_ENV = 'production'
+
+      expect(getMongoUrl('ezpay')).toBe('mongodb+srv://user:pw@prod-host/ezpay')
+    })
+
+    it('handles legacy {app}-{env} template (resolves to just app name)', () => {
       process.env.MONGO_URL = 'mongodb+srv://user:pw@host/{app}-{env}'
       process.env.DEPLOY_ENV = 'production'
 
-      expect(getMongoUrl('ezpay')).toBe('mongodb+srv://user:pw@host/ezpay-prod')
+      expect(getMongoUrl('ezpay')).toBe('mongodb+srv://user:pw@host/ezpay')
     })
 
     it('keeps the URL unchanged when it has no placeholders', () => {

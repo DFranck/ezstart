@@ -61,7 +61,7 @@ function AILayoutInner({ getToken: _getToken, ...props }: AILayoutProps) {
 }
 
 function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
-  const { user } = useAuth()
+  const { user, isLoggingOut } = useAuth()
   const isAdmin = user?.globalRoles?.includes('admin') || user?.globalRoles?.includes('superadmin')
 
   const {
@@ -97,7 +97,8 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   const showProviderSelector = props.showProviderSelector ?? false
 
   // Unauthenticated users always see a sign-in prompt (provider list is 401-gated)
-  const showLoginPrompt = !isAuthenticated
+  // During logout transition, keep showing the authenticated layout to avoid layout flash
+  const showLoginPrompt = !isAuthenticated && !isLoggingOut
   const loginPromptTitle = texts.loginPromptTitle ?? 'Sign in to start chatting'
   const loginPromptDescription =
     texts.loginPromptDescription ?? 'Log in to your account to chat with the AI assistant.'
@@ -124,18 +125,20 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
       : texts.composerPlaceholder
 
   // Build sidebar content
+  // During logout, keep showing authenticated sidebar to avoid layout flash
+  const effectivelyAuthenticated = isAuthenticated || isLoggingOut
   const sidebar = showSidebar ? (
     <ThreadSidebar
-      conversations={isAuthenticated ? conversations : []}
+      conversations={effectivelyAuthenticated ? conversations : []}
       activeConversationId={activeConversationId ?? undefined}
-      onConversationSelect={isAuthenticated ? handleConversationSelect : undefined}
+      onConversationSelect={effectivelyAuthenticated ? handleConversationSelect : undefined}
       onNewConversation={handleNewConversation}
-      onRename={isAuthenticated ? handleRename : undefined}
-      onDelete={isAuthenticated ? handleDelete : undefined}
+      onRename={effectivelyAuthenticated ? handleRename : undefined}
+      onDelete={effectivelyAuthenticated ? handleDelete : undefined}
       newConversationLabel={texts.newChatLabel}
-      newConversationDisabled={!isAuthenticated}
+      newConversationDisabled={!effectivelyAuthenticated}
       emptyState={
-        isAuthenticated
+        effectivelyAuthenticated
           ? texts.sidebarEmptyState
           : (texts.loginPrompt ?? 'Log in to save your conversations')
       }

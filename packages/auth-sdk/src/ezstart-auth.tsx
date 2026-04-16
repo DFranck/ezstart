@@ -566,6 +566,7 @@ export function useEzstartAuth() {
   }
 
   const logout = async () => {
+    store.setLoggingOut(true)
     const rt = store.refreshToken
     await client.logout(rt || undefined)
     store.logout()
@@ -611,6 +612,7 @@ export function useEzstartAuth() {
     accessToken: store.accessToken,
     isAuthenticated: store.isAuthenticated,
     isLoggingIn: store.isLoggingIn,
+    isLoggingOut: store.isLoggingOut,
     isAuthReady: store.isAuthReady,
     mode,
 

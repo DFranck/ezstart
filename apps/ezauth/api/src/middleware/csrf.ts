@@ -22,6 +22,19 @@ import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from '../config/cookie.js'
 
 const standardCsrf = createCsrfMiddleware()
 
+/** Trusted origins — JS fetch from these domains is not a CSRF vector. */
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^https:\/\/.*\.ezstart\.xyz$/,
+  /^https:\/\/.*\.ezstart\.vercel\.app$/,
+  /^https:\/\/.*\.ai-greenpulse\.com$/,
+  /^https:\/\/.*\.up\.railway\.app$/,
+]
+
+function isAllowedOrigin(origin: string): boolean {
+  return ALLOWED_ORIGIN_PATTERNS.some(pattern => pattern.test(origin))
+}
+
 /**
  * Apply CSRF verification only when the request carries an ezauth auth
  * cookie (access OR refresh). Bearer-token requests skip — they require
@@ -39,6 +52,14 @@ export function verifyCookieCsrf(req: Request, res: Response, next: NextFunction
     req.cookies?.[ACCESS_COOKIE_NAME] || req.cookies?.[REFRESH_COOKIE_NAME]
   )
   if (!hasAuthCookie) {
+    return next()
+  }
+
+  // Same-origin JS fetch — the Origin header proves the request comes from
+  // our own frontend (browsers enforce Origin on cross-origin fetches and
+  // never allow scripts to spoof it). Safe to skip double-submit CSRF.
+  const origin = req.headers.origin
+  if (origin && isAllowedOrigin(origin)) {
     return next()
   }
 
