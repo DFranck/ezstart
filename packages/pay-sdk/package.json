@@ -55,7 +55,9 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@ezstart/config": "workspace:*",
@@ -67,11 +69,16 @@
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^20",
     "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.0.2",
     "next": "^15.5.9",
     "react": "^19.1.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.4"
   },
   "peerDependencies": {
     "next": "^15",
