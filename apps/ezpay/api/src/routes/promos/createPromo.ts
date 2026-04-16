@@ -27,21 +27,16 @@ const createPromoSchema = z.object({
   discountValue: z.number().positive().describe('Discount value (20 = 20% or 500 = $5.00)'),
   currency: z.string().optional().describe('Currency code (required for fixed discounts)'),
   duration: z.enum(['once', 'repeating', 'forever']).describe('How long the discount applies'),
-  durationInMonths: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('Months for repeating duration'),
+  durationInMonths: z.number().int().min(1).optional().describe('Months for repeating duration'),
   maxUses: z.number().int().min(1).optional().describe('Max uses (null = unlimited)'),
   active: z.boolean().default(true).describe('Whether the promo is active'),
   expiresAt: z.string().datetime().optional().describe('Expiration date (ISO 8601)'),
 })
 
 const promoResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.any().optional().describe('Response payload (the promo object on success)'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================

@@ -25,22 +25,28 @@ const updatePlanParamsSchema = z.object({
 })
 
 const updatePlanSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  description: z.string().max(500).nullable().optional(),
-  amount: z.number().int().min(0).optional(),
-  currency: z.string().min(3).max(3).optional(),
-  interval: z.enum(['month', 'year']).optional(),
-  intervalCount: z.number().int().min(1).max(12).optional(),
-  features: z.array(z.string()).optional(),
-  active: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-  stripePriceId: z.string().nullable().optional(),
+  name: z.string().min(1).max(100).optional().describe('Plan name (e.g. Pro, Business)'),
+  description: z.string().max(500).nullable().optional().describe('Plan description'),
+  amount: z.number().int().min(0).optional().describe('Price in cents (e.g. 999 = 9.99)'),
+  currency: z.string().min(3).max(3).optional().describe('ISO 4217 currency code'),
+  interval: z.enum(['month', 'year']).optional().describe('Billing interval'),
+  intervalCount: z
+    .number()
+    .int()
+    .min(1)
+    .max(12)
+    .optional()
+    .describe('Number of intervals per billing cycle'),
+  features: z.array(z.string()).optional().describe('List of features included in the plan'),
+  active: z.boolean().optional().describe('Whether the plan is currently active'),
+  sortOrder: z.number().int().min(0).optional().describe('Display order for pricing pages'),
+  stripePriceId: z.string().nullable().optional().describe('Associated Stripe price ID'),
 })
 
 const planResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.any().optional().describe('Response payload (the plan object on success)'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================

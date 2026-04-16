@@ -26,19 +26,32 @@ const docRouter = createRouterWithDoc(listUsersRegistry, router)
 
 // OpenAPI: list response matches the monorepo-wide `{ success, data, meta }` shape
 const listUsersResponseSchema = z.object({
-  success: z.literal(true),
+  success: z.literal(true).describe('Always true for success responses'),
   data: z.array(adminUserSchema).describe('List of users'),
-  meta: paginationMetaSchema,
+  meta: paginationMetaSchema.describe('Pagination metadata'),
 })
 
 // Query validation schema — limit/offset aligned with every other paginated
 // list in the monorepo (green-pulse, ezbill, …).
 const listUsersQuerySchema = z.object({
-  limit: z.coerce.number().int().positive().max(200).optional().default(20),
-  offset: z.coerce.number().int().min(0).optional().default(0),
-  search: z.string().optional(),
-  role: z.string().optional(),
-  app: z.string().optional(),
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(200)
+    .optional()
+    .default(20)
+    .describe('Page size (1-200, default 20)'),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .default(0)
+    .describe('Pagination offset (0-based, default 0)'),
+  search: z.string().optional().describe('Free-text search on email/username/name'),
+  role: z.string().optional().describe('Filter by role (globalRole or per-app role)'),
+  app: z.string().optional().describe('Filter by app membership'),
 })
 
 /** Escape user input before embedding in a Mongo `$regex`. */

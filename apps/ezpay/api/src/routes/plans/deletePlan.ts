@@ -25,11 +25,13 @@ const deletePlanParamsSchema = z.object({
 })
 
 const deletePlanResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.object({
-    message: z.string(),
-  }),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z
+    .object({
+      message: z.string().describe('Success message'),
+    })
+    .describe('Response payload'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================

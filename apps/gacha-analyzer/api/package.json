@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/express-core build && pnpm --filter @gacha-analyzer/types build",
+    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/express-core build && pnpm --filter @gacha-analyzer/types build",
     "build": "tsc -b",
     "start": "node dist/index.js",
     "start:prod": "pnpm build && node dist/index.js",
@@ -14,6 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@ezstart/api-core": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",

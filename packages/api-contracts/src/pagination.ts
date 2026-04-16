@@ -89,8 +89,19 @@ export type PaginatedResponse<T> = {
  * ```
  */
 export const PaginationQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(100).default(20),
-  offset: z.coerce.number().int().min(0).default(0),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(20)
+    .describe('Page size (1-100, default 20)'),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .default(0)
+    .describe('Pagination offset (0-based, default 0)'),
 })
 
 /**

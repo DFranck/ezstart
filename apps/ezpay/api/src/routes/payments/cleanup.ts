@@ -29,7 +29,8 @@ const cleanupResponseSchema = z.object({
     .object({
       deletedCount: z.number().describe('Number of records deleted'),
     })
-    .optional(),
+    .optional()
+    .describe('Cleanup result payload (present on success)'),
   error: z.string().optional().describe('Error message if operation failed'),
 })
 
@@ -59,7 +60,9 @@ const cleanupPaymentsHandler = async (req: Request, res: Response) => {
     const Payment = await getPaymentModel()
     const result = await Payment.deleteMany(query)
 
-    logger.info(`🗑️ Cleanup: ${result.deletedCount} test payments deleted${appName ? ` for ${appName}` : ''}`)
+    logger.info(
+      `🗑️ Cleanup: ${result.deletedCount} test payments deleted${appName ? ` for ${appName}` : ''}`
+    )
 
     sendSuccess(res, { deletedCount: result.deletedCount })
   } catch (error) {

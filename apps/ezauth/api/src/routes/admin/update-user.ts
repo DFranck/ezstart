@@ -46,7 +46,7 @@ const updateUserResponseSchema = z.object({
 
 // Params validation schema
 const updateUserParamsSchema = z.object({
-  id: z.string().min(1, 'User ID is required'),
+  id: z.string().min(1, 'User ID is required').describe('MongoDB ObjectId of the user to update'),
 })
 
 // Controller

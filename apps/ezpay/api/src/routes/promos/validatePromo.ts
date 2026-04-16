@@ -29,15 +29,26 @@ const validatePromoQuerySchema = z.object({
 })
 
 const validatePromoResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.object({
-    valid: z.boolean(),
-    reason: z.string().optional(),
-    discountType: z.enum(['percent', 'fixed']).optional(),
-    discountValue: z.number().optional(),
-    currency: z.string().optional(),
-    duration: z.enum(['once', 'repeating', 'forever']).optional(),
-  }),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z
+    .object({
+      valid: z.boolean().describe('Whether the promo code is valid and usable'),
+      reason: z
+        .string()
+        .optional()
+        .describe('Reason the promo is invalid (only when valid is false)'),
+      discountType: z.enum(['percent', 'fixed']).optional().describe('Discount type'),
+      discountValue: z
+        .number()
+        .optional()
+        .describe('Discount value (e.g. 20 for 20% or 500 for $5.00)'),
+      currency: z.string().optional().describe('ISO 4217 currency code (for fixed discounts)'),
+      duration: z
+        .enum(['once', 'repeating', 'forever'])
+        .optional()
+        .describe('How long the discount applies'),
+    })
+    .describe('Validation result'),
 })
 
 // ========================================
@@ -53,7 +64,11 @@ const validatePromoHandler = async (req: Request, res: Response) => {
 
     const queryValidation = validatePromoQuerySchema.safeParse(req.query)
     if (!queryValidation.success) {
-      return sendValidationError(res, 'appName query parameter is required', queryValidation.error.errors)
+      return sendValidationError(
+        res,
+        'appName query parameter is required',
+        queryValidation.error.errors
+      )
     }
 
     const { code } = paramsValidation.data
@@ -83,16 +98,11 @@ const validatePromoHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get(
-  '/promos/validate/:code',
-  createStrictRateLimiter(),
-  validatePromoHandler,
-  {
-    summary: 'Validate a promo code (public, rate limited)',
-    tags: ['Promos'],
-    responseSchema: validatePromoResponseSchema,
-  }
-)
+docRouter.get('/promos/validate/:code', createStrictRateLimiter(), validatePromoHandler, {
+  summary: 'Validate a promo code (public, rate limited)',
+  tags: ['Promos'],
+  responseSchema: validatePromoResponseSchema,
+})
 
 export { validatePromoRegistry as registry, router }
 export default router

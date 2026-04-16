@@ -17,8 +17,8 @@ const errorResponse = (description: string) => ({
   content: {
     'application/json': {
       schema: z.object({
-        success: z.literal(false),
-        error: z.string(),
+        success: z.literal(false).describe('Always false for error responses'),
+        error: z.string().describe('Human-readable error message'),
       }),
     },
   },
@@ -36,7 +36,8 @@ scansRegistry.registerPath({
   path: '/scan',
   tags: ['Scans'],
   summary: 'Upload and scan a rune image',
-  description: 'Upload a rune screenshot with OCR analysis. Supports main image, alt image, full image, and individual zone crops.',
+  description:
+    'Upload a rune screenshot with OCR analysis. Supports main image, alt image, full image, and individual zone crops.',
   request: {
     body: {
       content: {
@@ -44,7 +45,10 @@ scansRegistry.registerPath({
           schema: z.object({
             image: z.string().describe('Main rune screenshot (required)'),
             gameType: z.enum(['summoners-war', 'nikke']).describe('Target game'),
-            profile: z.enum(['early', 'mid', 'late']).optional().describe('Player progression profile (default: mid)'),
+            profile: z
+              .enum(['early', 'mid', 'late'])
+              .optional()
+              .describe('Player progression profile (default: mid)'),
             benchMode: z.boolean().optional().describe('Run all OCR presets for comparison'),
             imageAlt: z.string().optional().describe('Alternative image for fallback OCR'),
             imageFull: z.string().optional().describe('Full-size screenshot'),
@@ -59,13 +63,15 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.object({
-              id: z.string().describe('Scan ID'),
-              gameType: z.string(),
-              status: z.enum(['completed', 'failed']),
-              result: z.any().describe('OCR + analysis result'),
-            }),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .object({
+                id: z.string().describe('Scan ID'),
+                gameType: z.string().describe('Game identifier (e.g. summoners-war, nikke)'),
+                status: z.enum(['completed', 'failed']).describe('Final scan status'),
+                result: z.any().describe('OCR + analysis result'),
+              })
+              .describe('Scan response payload'),
           }),
         },
       },
@@ -81,7 +87,8 @@ scansRegistry.registerPath({
   path: '/scans',
   tags: ['Scans'],
   summary: 'List scan history',
-  description: 'Returns paginated scan history, most recent first. Supports filtering by game type and status.',
+  description:
+    'Returns paginated scan history, most recent first. Supports filtering by game type and status.',
   request: {
     query: z.object({
       gameType: z.enum(['summoners-war', 'nikke']).optional().describe('Filter by game'),
@@ -96,13 +103,15 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.array(z.any()).describe('Array of scan objects'),
-            meta: z.object({
-              total: z.number(),
-              limit: z.number(),
-              offset: z.number(),
-            }),
+            meta: z
+              .object({
+                total: z.number().describe('Total number of scans matching the filter'),
+                limit: z.number().describe('Page size'),
+                offset: z.number().describe('Pagination offset'),
+              })
+              .describe('Pagination metadata'),
           }),
         },
       },
@@ -129,7 +138,7 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.any().describe('Full scan object'),
           }),
         },
@@ -157,8 +166,12 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.object({ deleted: z.literal(true) }),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .object({
+                deleted: z.literal(true).describe('Always true when the resource was deleted'),
+              })
+              .describe('Deletion confirmation payload'),
           }),
         },
       },
@@ -174,13 +187,17 @@ scansRegistry.registerPath({
   path: '/scans/{id}/reanalyze',
   tags: ['Scans'],
   summary: 'Re-analyze an existing scan',
-  description: 'Re-runs the parser and analyzer on existing OCR text. Useful after parser/analyzer updates.',
+  description:
+    'Re-runs the parser and analyzer on existing OCR text. Useful after parser/analyzer updates.',
   request: {
     params: z.object({
       id: z.string().describe('Scan ID'),
     }),
     query: z.object({
-      profile: z.enum(['early', 'mid', 'late']).optional().describe('Player profile for re-analysis'),
+      profile: z
+        .enum(['early', 'mid', 'late'])
+        .optional()
+        .describe('Player profile for re-analysis'),
     }),
   },
   responses: {
@@ -189,7 +206,7 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.any().describe('Updated scan object'),
           }),
         },
@@ -229,7 +246,7 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.any().describe('Updated scan object'),
           }),
         },
@@ -256,7 +273,9 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            category: z.enum(['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other']).describe('Report category'),
+            category: z
+              .enum(['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other'])
+              .describe('Report category'),
             description: z.string().describe('Problem description'),
           }),
         },
@@ -269,7 +288,7 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.any().describe('Updated scan object'),
           }),
         },
@@ -287,7 +306,8 @@ scansRegistry.registerPath({
   path: '/scans/{id}/report/{reportIndex}',
   tags: ['Scans'],
   summary: 'Update a report status',
-  description: 'Update report status (open, in-progress, resolved). Resolution comment required when resolving.',
+  description:
+    'Update report status (open, in-progress, resolved). Resolution comment required when resolving.',
   request: {
     params: z.object({
       id: z.string().describe('Scan ID'),
@@ -298,7 +318,10 @@ scansRegistry.registerPath({
         'application/json': {
           schema: z.object({
             status: z.enum(['open', 'in-progress', 'resolved']).describe('New status'),
-            resolution: z.string().optional().describe('Resolution comment (required when status is resolved)'),
+            resolution: z
+              .string()
+              .optional()
+              .describe('Resolution comment (required when status is resolved)'),
           }),
         },
       },
@@ -310,7 +333,7 @@ scansRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.any().describe('Updated scan object'),
           }),
         },
@@ -341,8 +364,10 @@ monstersRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.object({ imported: z.number().describe('Number of monsters imported') }),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .object({ imported: z.number().describe('Number of monsters imported') })
+              .describe('Import result payload'),
           }),
         },
       },
@@ -360,8 +385,14 @@ monstersRegistry.registerPath({
   description: 'Paginated monster list with filtering by element, archetype, stars, etc.',
   request: {
     query: z.object({
-      element: z.enum(['fire', 'water', 'wind', 'light', 'dark']).optional().describe('Filter by element'),
-      archetype: z.enum(['attack', 'defense', 'support', 'hp']).optional().describe('Filter by archetype'),
+      element: z
+        .enum(['fire', 'water', 'wind', 'light', 'dark'])
+        .optional()
+        .describe('Filter by element'),
+      archetype: z
+        .enum(['attack', 'defense', 'support', 'hp'])
+        .optional()
+        .describe('Filter by archetype'),
       buildArchetype: z.string().optional().describe('Filter by build archetype'),
       stars: z.string().optional().describe('Filter by natural stars (2-5)'),
       search: z.string().optional().describe('Search by name'),
@@ -375,16 +406,20 @@ monstersRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.object({
-              monsters: z.array(z.any()),
-              pagination: z.object({
-                page: z.number(),
-                limit: z.number(),
-                total: z.number(),
-                totalPages: z.number(),
-              }),
-            }),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .object({
+                monsters: z.array(z.any()).describe('Array of monster objects'),
+                pagination: z
+                  .object({
+                    page: z.number().describe('Current page number (1-based)'),
+                    limit: z.number().describe('Page size'),
+                    total: z.number().describe('Total number of monsters matching the filter'),
+                    totalPages: z.number().describe('Total number of pages'),
+                  })
+                  .describe('Pagination metadata'),
+              })
+              .describe('Paginated monsters response payload'),
           }),
         },
       },
@@ -400,7 +435,8 @@ monstersRegistry.registerPath({
   path: '/monsters/by-build/{archetype}',
   tags: ['Monsters'],
   summary: 'Monsters by build archetype',
-  description: 'Returns all monsters matching a specific build archetype (e.g., speed-dps, cleave).',
+  description:
+    'Returns all monsters matching a specific build archetype (e.g., speed-dps, cleave).',
   request: {
     params: z.object({
       archetype: z.string().describe('Build archetype name'),
@@ -412,12 +448,14 @@ monstersRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.object({
-              archetype: z.string(),
-              count: z.number(),
-              monsters: z.array(z.any()),
-            }),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .object({
+                archetype: z.string().describe('Build archetype that was queried'),
+                count: z.number().describe('Number of monsters returned'),
+                monsters: z.array(z.any()).describe('Array of monsters matching the archetype'),
+              })
+              .describe('Monsters-by-build response payload'),
           }),
         },
       },
@@ -432,7 +470,8 @@ monstersRegistry.registerPath({
   path: '/monsters/for-rune',
   tags: ['Monsters'],
   summary: 'Monsters matching rune archetypes',
-  description: 'Returns top monsters that match given rune archetypes. Prioritizes nat4+, obtainable monsters.',
+  description:
+    'Returns top monsters that match given rune archetypes. Prioritizes nat4+, obtainable monsters.',
   request: {
     query: z.object({
       archetypes: z.string().describe('Comma-separated list of rune archetypes'),
@@ -444,12 +483,14 @@ monstersRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.object({
-              archetypes: z.array(z.string()),
-              count: z.number(),
-              monsters: z.array(z.any()),
-            }),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .object({
+                archetypes: z.array(z.string()).describe('Rune archetypes that were queried'),
+                count: z.number().describe('Number of monsters returned'),
+                monsters: z.array(z.any()).describe('Top monsters matching the given archetypes'),
+              })
+              .describe('Monsters-for-rune response payload'),
           }),
         },
       },
@@ -483,7 +524,7 @@ configRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.array(z.any()).describe('Array of config objects'),
           }),
         },
@@ -511,8 +552,11 @@ configRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.any().nullable(),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .any()
+              .nullable()
+              .describe('Config object (null when the layout does not exist)'),
           }),
         },
       },
@@ -538,7 +582,10 @@ configRegistry.registerPath({
         'application/json': {
           schema: z.object({
             displayName: z.string().optional().describe('Human-readable name'),
-            bestPresets: z.array(z.string()).optional().describe('Best OCR presets for this layout'),
+            bestPresets: z
+              .array(z.string())
+              .optional()
+              .describe('Best OCR presets for this layout'),
             zones: z.any().optional().describe('Zone definitions'),
             masks: z.any().optional().describe('Mask definitions'),
             roi: z.any().optional().describe('Region of interest'),
@@ -553,7 +600,7 @@ configRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
+            success: z.literal(true).describe('Always true for success responses'),
             data: z.any().describe('Updated config object'),
           }),
         },
@@ -582,8 +629,12 @@ configRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            data: z.object({ deleted: z.literal(true) }),
+            success: z.literal(true).describe('Always true for success responses'),
+            data: z
+              .object({
+                deleted: z.literal(true).describe('Always true when the resource was deleted'),
+              })
+              .describe('Deletion confirmation payload'),
           }),
         },
       },
@@ -605,14 +656,18 @@ benchRegistry.registerPath({
   path: '/bench',
   tags: ['Bench'],
   summary: 'OCR benchmark',
-  description: 'Runs all OCR presets in parallel on an uploaded image and returns comparison results.',
+  description:
+    'Runs all OCR presets in parallel on an uploaded image and returns comparison results.',
   request: {
     body: {
       content: {
         'multipart/form-data': {
           schema: z.object({
             image: z.string().describe('Rune screenshot to benchmark'),
-            gameType: z.enum(['summoners-war', 'nikke']).optional().describe('Game type (default: summoners-war)'),
+            gameType: z
+              .enum(['summoners-war', 'nikke'])
+              .optional()
+              .describe('Game type (default: summoners-war)'),
           }),
         },
       },
@@ -624,20 +679,29 @@ benchRegistry.registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            success: z.literal(true),
-            benchId: z.string(),
-            results: z.array(z.object({
-              preset: z.string(),
-              confidence: z.number(),
-              substats: z.number(),
-              success: z.boolean(),
-              processingTimeMs: z.number(),
-            })),
-            bestPreset: z.string().nullable(),
-            image: z.object({
-              width: z.number(),
-              height: z.number(),
-            }),
+            success: z.literal(true).describe('Always true for success responses'),
+            benchId: z.string().describe('Unique identifier for this benchmark run'),
+            results: z
+              .array(
+                z.object({
+                  preset: z.string().describe('OCR preset name'),
+                  confidence: z.number().describe('OCR confidence percentage (0-100)'),
+                  substats: z.number().describe('Number of substats successfully parsed'),
+                  success: z.boolean().describe('Whether the parser succeeded on this preset'),
+                  processingTimeMs: z.number().describe('Preprocess + OCR + parse duration in ms'),
+                })
+              )
+              .describe('Per-preset benchmark results'),
+            bestPreset: z
+              .string()
+              .nullable()
+              .describe('Name of the best-performing preset (null when no results)'),
+            image: z
+              .object({
+                width: z.number().describe('Input image width in pixels'),
+                height: z.number().describe('Input image height in pixels'),
+              })
+              .describe('Input image metadata'),
           }),
         },
       },

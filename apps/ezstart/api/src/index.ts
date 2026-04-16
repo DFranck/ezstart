@@ -4,15 +4,13 @@ import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
-  createApp,
-  createRateLimiter,
-  startServer,
+  addVersionHeader,
   connectToMongo,
-  getApiPort,
+  createEzstartServer,
   createSocketServer,
   createVersionedRouter,
-  addVersionHeader,
-} from '@ezstart/express-core'
+  startServer,
+} from '@ezstart/api-core'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries, setScheduler } from './routes/index.js'
 import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
@@ -21,19 +19,14 @@ import { seedDefaultPrompts, seedDefaultAppProviders } from './services/ai-promp
 import { seedGlobalProviders } from './services/provider-access.service.js'
 import type { Server as IOServer } from 'socket.io'
 
-const PORT = getApiPort('ezstart')
+// Create pre-configured Express app (CORS auto-wired for ezstart hub)
+const server = createEzstartServer('ezstart')
+const { app } = server
 
-// Create Express app with CORS auto-configured
-// Monitoring API is called by ALL web apps (dashboard in EZStart)
-const app = createApp({ apiApp: 'ezstart' })
-
-// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
-app.use(createRateLimiter())
-
-// ✅ Add API version headers to all responses
+// API version headers on every response
 app.use(addVersionHeader('v1'))
 
-// Get CORS origins for Socket.IO (all web apps can connect)
+// CORS origins for Socket.IO (all web apps can connect to the monitoring hub)
 const socketCorsOrigins = getAllowedOrigins('ezstart')
 
 // Store Socket.IO instance to be used by scheduler
@@ -45,7 +38,10 @@ const healthCheckScheduler = new HealthCheckScheduler()
 // Expose scheduler to routes
 setScheduler(healthCheckScheduler)
 
-// Health check endpoint (non-versioned for simplicity)
+// Health check endpoint (non-versioned, returns scheduler status too)
+// Note: createEzstartServer already mounts GET /api/health with the basic
+// payload — this one overrides it with the scheduler snapshot, mounted BEFORE
+// versioned routes so it wins in the middleware chain.
 app.get('/api/health', (_, res) => {
   res.status(200).json({
     status: 'ok',
@@ -55,21 +51,18 @@ app.get('/api/health', (_, res) => {
   })
 })
 
-// ✅ API routes with versioning support (supports both /api and /api/v1)
+// Routes available at /api/* and /api/v1/*
 app.use(createVersionedRouter('/api', routes))
 
-// Sentry error handler (called automatically by expressIntegration)
-// MUST be AFTER all routes/controllers
+// Sentry error handler MUST be AFTER all routes/controllers
 Sentry.setupExpressErrorHandler(app)
 
-// Connect to MongoDB and start server
-// Wait for MongoDB to be fully ready before starting scheduler
+// Connect to MongoDB and start server.
+// Scheduler MUST start only after MongoDB is ready.
 connectToMongo('ezstart')
   .then(() => {
-    // Initialize AI providers after MongoDB is ready
     initializeAIProviders()
 
-    // Seed default AI prompts and app providers if none exist (for each known app)
     seedDefaultPrompts('ezstart').catch(() => {
       /* non-blocking */
     })
@@ -84,45 +77,52 @@ connectToMongo('ezstart')
       routes,
       registries,
       serviceName: 'Monitoring API',
-      port: PORT,
+      port: server.config.port,
+      logger: server.logger,
       onHttpServerReady: httpServer => {
-        // Create Socket.IO server with CORS matching Express CORS
-        io = createSocketServer(httpServer, {
+        // createSocketServer is async in api-core — fire-and-forget wire-up
+        // keeps the HTTP listener available immediately; the Socket.IO layer
+        // attaches as soon as the dynamic `socket.io` import resolves.
+        createSocketServer(httpServer, {
           corsOrigins: socketCorsOrigins,
           onConnection: socket => {
-            logger.info(`📡 [Socket.IO] Client connected from monitoring dashboard`)
-
+            logger.info('[Socket.IO] Client connected from monitoring dashboard')
             socket.on('disconnect', () => {
-              logger.info(`📡 [Socket.IO] Client disconnected`)
+              logger.info('[Socket.IO] Client disconnected')
             })
           },
+          logger: server.logger,
         })
-
-        // Pass Socket.IO instance to scheduler for real-time updates
-        healthCheckScheduler.setSocketIO(io)
+          .then(instance => {
+            io = instance
+            healthCheckScheduler.setSocketIO(io)
+          })
+          .catch(err => {
+            logger.error('[Socket.IO] Failed to initialize', err)
+          })
       },
     })
   })
   .then(() => {
-    logger.info('✅ [Scheduler] Starting health check scheduler...')
-    // Start background health check scheduler ONLY after MongoDB is ready
+    logger.info('[Scheduler] Starting health check scheduler...')
     healthCheckScheduler.start()
   })
   .catch(err => {
-    logger.error('❌ Failed to start Monitoring API', err)
+    logger.error('Failed to start Monitoring API', err)
     process.exit(1)
   })
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  logger.info('⏰ [Scheduler] SIGTERM received, stopping scheduler...')
+  logger.info('[Scheduler] SIGTERM received, stopping scheduler...')
   healthCheckScheduler.stop()
   process.exit(0)
 })
 
 process.on('SIGINT', () => {
-  logger.info('⏰ [Scheduler] SIGINT received, stopping scheduler...')
+  logger.info('[Scheduler] SIGINT received, stopping scheduler...')
   healthCheckScheduler.stop()
   process.exit(0)
 })
-// trigger deploy
+
+export { app }

@@ -36,8 +36,14 @@ const docRouter = createRouterWithDoc(ssoAuthorizeRegistry, router)
 const ssoAuthorizeRateLimiter = createStrictRateLimiter()
 
 const ssoAuthorizeRequestSchema = z.object({
-  app: z.string().min(1, 'app is required'),
-  redirectUri: z.string().url('redirectUri must be a valid URL'),
+  app: z
+    .string()
+    .min(1, 'app is required')
+    .describe('Target app identifier (ezauth, ezbill, etc.)'),
+  redirectUri: z
+    .string()
+    .url('redirectUri must be a valid URL')
+    .describe('URL on the target app to redirect to after SSO exchange'),
 })
 
 const ssoAuthorizeResponseSchema = z.object({

@@ -3,26 +3,21 @@ import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
-  connectToMongo,
-  createApp,
-  createRateLimiter,
-  startServer,
-  getApiPort,
-  createVersionedRouter,
   addVersionHeader,
-} from '@ezstart/express-core'
+  connectToMongo,
+  createEzstartServer,
+  createVersionedRouter,
+  startServer,
+} from '@ezstart/api-core'
 import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp({ apiApp: 'green-pulse' })
-const PORT = getApiPort('green-pulse')
+const server = createEzstartServer('green-pulse')
+const { app } = server
 
-// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
-app.use(createRateLimiter())
-
-// ✅ Add API version headers to all responses
+// API version headers on every response
 app.use(addVersionHeader('v1'))
 
-// ✅ API routes with versioning support (supports both /api and /api/v1)
+// Routes available at /api/* and /api/v1/*
 app.use(createVersionedRouter('/api', routes))
 
 // Sentry error handler MUST be AFTER all routes
@@ -30,16 +25,19 @@ Sentry.setupExpressErrorHandler(app)
 
 // Start server with MongoDB
 connectToMongo('greenpulse')
-  .then(() => {
-    return startServer(app, {
+  .then(() =>
+    startServer(app, {
       routes,
       registries: globalRegistry,
       basePath: '/api',
       serviceName: 'GreenPulse',
-      port: PORT,
+      port: server.config.port,
+      logger: server.logger,
     })
-  })
+  )
   .catch(err => {
-    logger.error('❌ Failed to start GreenPulse API', err)
+    logger.error('Failed to start GreenPulse API', err)
     process.exit(1)
   })
+
+export { app }

@@ -39,15 +39,21 @@ const listQuerySchema = z.object({
 // metadata (name, capabilities, model, registered flag) so the chat UI can
 // render selectors without a second round-trip.
 const listAppProvidersResponseSchema = z.object({
-  success: z.literal(true),
-  data: z.object({
-    providers: z.array(enrichedAppProviderSchema),
-  }),
-  meta: z.object({
-    total: z.number(),
-    limit: z.number(),
-    offset: z.number(),
-  }),
+  success: z.literal(true).describe('Always true for success responses'),
+  data: z
+    .object({
+      providers: z
+        .array(enrichedAppProviderSchema)
+        .describe('Enriched app provider records (joined with the global registry)'),
+    })
+    .describe('Response payload'),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of app providers matching the filter'),
+      limit: z.number().describe('Page size'),
+      offset: z.number().describe('Pagination offset'),
+    })
+    .describe('Pagination metadata'),
 })
 
 const EMPTY_CAPABILITIES: ProviderCapabilities = {

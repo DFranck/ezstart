@@ -27,13 +27,15 @@ const listPlansQuerySchema = z.object({
 })
 
 const plansListResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.array(z.any()),
-  meta: z.object({
-    total: z.number(),
-    limit: z.number(),
-    offset: z.number(),
-  }),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.array(z.any()).describe('Array of plan objects'),
+  meta: z
+    .object({
+      total: z.number().describe('Total number of plans matching the filter'),
+      limit: z.number().describe('Page size'),
+      offset: z.number().describe('Pagination offset'),
+    })
+    .describe('Pagination metadata'),
 })
 
 // ========================================

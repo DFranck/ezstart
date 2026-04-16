@@ -1,5 +1,11 @@
 # @ezstart/express-core
 
+> **DEPRECATED.** New code should import from **[@ezstart/api-core](../api-core/)** — the agnostic, publishable replacement.
+>
+> This package is kept as a transitional dependency for app code that has not yet been migrated (route files, models, middleware factories, controller-factory, mongoose query helpers, zod/OpenAPI helpers). The six API boot files (`apps/*/api/src/index.ts`) have already been migrated to `createEzstartServer` from `@ezstart/api-core`.
+>
+> Do not build new features on top of this package. Extend `@ezstart/api-core` instead, and update consumers incrementally.
+
 Express.js infrastructure package for all @ezstart API services.
 
 ## Purpose

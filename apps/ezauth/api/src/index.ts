@@ -2,14 +2,12 @@
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
 import {
-  connectToMongo,
-  createApp,
-  createRateLimiter,
-  getApiPort,
-  startServer,
-  createVersionedRouter,
   addVersionHeader,
-} from '@ezstart/express-core'
+  connectToMongo,
+  createEzstartServer,
+  createVersionedRouter,
+  startServer,
+} from '@ezstart/api-core'
 import routes, { allRegistries, authRouter, oauthRouter, adminRouter } from './routes/index.js'
 import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
@@ -21,61 +19,60 @@ import cors from 'cors'
 import { createCorsConfig } from '@ezstart/config/cors'
 import { logger } from '@ezstart/logger/server'
 
-const PORT = getApiPort('ezauth')
+const server = createEzstartServer('ezauth')
+const { app } = server
 
-// Create app with CORS configuration from @ezstart/config
-const app = createApp({ apiApp: 'ezauth' })
-
-// ✅ Override CORS to enable credentials (required for httpOnly cookies)
+// Override CORS to enable credentials (required for httpOnly cookies).
+// createEzstartServer already applies a CORS middleware, but EZAuth needs
+// `credentials: true` for cookie auth. Order: this one wins for
+// pre-flight responses since Express matches middlewares in registration
+// order — re-registering narrows the policy deterministically.
 app.use(
   cors({
     ...createCorsConfig('ezauth'),
-    credentials: true, // CRITICAL for httpOnly cookies
+    credentials: true,
   })
 )
 
-// ✅ Add cookie parser middleware (for httpOnly cookie support)
+// Cookie parser middleware (required for httpOnly cookie support)
 app.use(cookieParser())
 
-// ✅ Global rate limiting (100 req/15min per IP, excludes /api/health)
-// Per-route strict limiters are also applied on login endpoints (see routes/auth/)
-app.use(createRateLimiter())
-
-// Initialize Passport
+// Passport init (OAuth strategies registered elsewhere)
 app.use(passport.initialize())
 
-// ✅ Add API version headers to all responses
+// API version headers on every response
 app.use(addVersionHeader('v1'))
 
-// ✅ API routes with versioning support
-// /api/auth/* - All authentication (credentials + OAuth)
-// /api/admin/* - All admin/authorization routes
-app.use(createVersionedRouter('/api/auth', authRouter)) // /api/auth/login, /api/auth/register, /api/auth/token, etc.
-app.use(createVersionedRouter('/api/auth', oauthRouter)) // /api/auth/google, /api/auth/callback (OAuth)
-app.use(createVersionedRouter('/api/admin', adminRouter)) // /api/admin/users
+// Routes
+// /api/auth/*  — credentials + OAuth
+// /api/admin/* — authorization / user admin
+app.use(createVersionedRouter('/api/auth', authRouter))
+app.use(createVersionedRouter('/api/auth', oauthRouter))
+app.use(createVersionedRouter('/api/admin', adminRouter))
 
-// Sentry error handler (called automatically by expressIntegration)
-// MUST be AFTER all routes/controllers
+// Sentry error handler MUST be AFTER all routes/controllers
 Sentry.setupExpressErrorHandler(app)
 
-// Connect to MongoDB and start server
+// Connect to MongoDB, warm models, then start listening
 connectToMongo('ezauth')
   .then(async () => {
-    // Initialize models
     await getAuthUserModel()
     await getAuthCodeModel()
     await getOAuthAccountModel()
     await getTotpSecretModel()
-    logger.info('✅ [Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret')
+    logger.info('[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret')
 
     return startServer(app, {
       routes,
       registries: allRegistries,
       serviceName: 'EZAuth',
-      port: Number(PORT),
+      port: server.config.port,
+      logger: server.logger,
     })
   })
   .catch((err: unknown) => {
-    logger.error('❌ Failed to start EZAuth API', err)
+    logger.error('Failed to start EZAuth API', err)
     process.exit(1)
   })
+
+export { app }

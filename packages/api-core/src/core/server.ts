@@ -8,6 +8,7 @@ import type { Express, Router } from 'express'
 import { createServer, type Server as HttpServer } from 'http'
 import * as swaggerUi from 'swagger-ui-express'
 import { silentLogger } from './internal/logger.js'
+import { scanRegistriesForMissingDescriptions } from './openapi/check-missing-descriptions.js'
 import type { DbConnector } from './db-connector.js'
 import type { ServerLogger } from './types.js'
 
@@ -73,6 +74,10 @@ function mountOpenApi(
     paths: pathsCount,
     operations: operationsCount,
   })
+
+  // Surface schemas missing a `.describe()` annotation — silent when the
+  // injected logger is silent (default), otherwise emits debug entries.
+  scanRegistriesForMissingDescriptions(registries, logger)
 
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDoc))
 }

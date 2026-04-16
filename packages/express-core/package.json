@@ -1,7 +1,9 @@
 {
   "name": "@ezstart/express-core",
-  "description": "Express.js infrastructure and utilities for @ezstart API services",
+  "description": "DEPRECATED — Express.js infrastructure for @ezstart API services. Use @ezstart/api-core instead.",
   "version": "0.0.1",
+  "private": true,
+  "deprecated": "Use @ezstart/api-core instead. This package is kept for transitional app code that has not migrated yet (route files, models, middleware).",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",

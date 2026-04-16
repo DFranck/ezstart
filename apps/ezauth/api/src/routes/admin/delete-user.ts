@@ -22,7 +22,7 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(deleteUserRegistry, router)
 
 const deleteUserParamsSchema = z.object({
-  id: z.string().min(1, 'User ID is required'),
+  id: z.string().min(1, 'User ID is required').describe('MongoDB ObjectId of the user to delete'),
 })
 
 const deleteUserResponseSchema = z.object({

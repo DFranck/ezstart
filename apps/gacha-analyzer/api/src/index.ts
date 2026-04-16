@@ -3,44 +3,44 @@ import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
+  addVersionHeader,
   connectToMongo,
-  createApp,
-  createRateLimiter,
-  startServer,
-  Router,
-  getApiPort,
+  createEzstartServer,
   createVersionedRouter,
-  addVersionHeader
-} from '@ezstart/express-core'
+  startServer,
+} from '@ezstart/api-core'
 import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp({ apiApp: 'gacha-analyzer' })
-const PORT = getApiPort('gacha-analyzer')
+const server = createEzstartServer('gacha-analyzer')
+const { app } = server
 
-// Rate limiting protection (100 req/15min per IP, excludes /api/health)
-app.use(createRateLimiter())
-
-// Add API version headers to all responses
+// API version headers on every response
 app.use(addVersionHeader('v1'))
 
-// API routes with versioning support (supports both /api and /api/v1)
+// Routes available at /api/* and /api/v1/*
 app.use(createVersionedRouter('/api', routes))
 
 // Sentry error handler MUST be AFTER all routes
 Sentry.setupExpressErrorHandler(app)
 
 // Start server with MongoDB
+// NOTE: routes are already mounted above via createVersionedRouter — pass an
+// empty Router() to startServer so it doesn't mount them a second time, while
+// still generating the OpenAPI doc at /docs.
 connectToMongo('game-analyzer')
-  .then(async () => {
-    return startServer(app, {
+  .then(() =>
+    startServer(app, {
       routes,
       registries: globalRegistry,
       basePath: '/api',
       serviceName: 'GachaAnalyzer',
-      port: PORT,
+      port: server.config.port,
+      logger: server.logger,
     })
-  })
+  )
   .catch(err => {
     logger.error('Failed to start Gacha Analyzer API', err)
     process.exit(1)
   })
+
+export { app }

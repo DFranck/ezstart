@@ -25,20 +25,41 @@ const updatePromoParamsSchema = z.object({
 })
 
 const updatePromoSchema = z.object({
-  discountType: z.enum(['percent', 'fixed']).optional(),
-  discountValue: z.number().positive().optional(),
-  currency: z.string().optional(),
-  duration: z.enum(['once', 'repeating', 'forever']).optional(),
-  durationInMonths: z.number().int().min(1).optional(),
-  maxUses: z.number().int().min(1).nullable().optional(),
-  active: z.boolean().optional(),
-  expiresAt: z.string().datetime().nullable().optional(),
+  discountType: z
+    .enum(['percent', 'fixed'])
+    .optional()
+    .describe('Discount type (percent or fixed amount)'),
+  discountValue: z
+    .number()
+    .positive()
+    .optional()
+    .describe('Discount value (e.g. 20 for 20% or 500 for $5.00)'),
+  currency: z.string().optional().describe('ISO 4217 currency code (required for fixed discounts)'),
+  duration: z
+    .enum(['once', 'repeating', 'forever'])
+    .optional()
+    .describe('How long the discount applies'),
+  durationInMonths: z.number().int().min(1).optional().describe('Months for repeating duration'),
+  maxUses: z
+    .number()
+    .int()
+    .min(1)
+    .nullable()
+    .optional()
+    .describe('Maximum uses (null = unlimited)'),
+  active: z.boolean().optional().describe('Whether the promo is active'),
+  expiresAt: z
+    .string()
+    .datetime()
+    .nullable()
+    .optional()
+    .describe('Expiration date (ISO 8601, null = never)'),
 })
 
 const promoResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.any().optional().describe('Response payload (the promo object on success)'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================
@@ -65,7 +86,11 @@ const updatePromoHandler = async (req: Request, res: Response) => {
     const updates = validation.data
 
     // Validate: percent discount must be between 1 and 100
-    if (updates.discountType === 'percent' && updates.discountValue && updates.discountValue > 100) {
+    if (
+      updates.discountType === 'percent' &&
+      updates.discountValue &&
+      updates.discountValue > 100
+    ) {
       return sendError(res, 'Percent discount cannot exceed 100', 400)
     }
 

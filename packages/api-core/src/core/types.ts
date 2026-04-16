@@ -23,16 +23,27 @@ export type ApiMeta = ContractsApiMeta
 /**
  * Minimal user payload extracted from a verified access token.
  *
- * Applications are free to extend via the `extra` open bucket — the core
- * only relies on `userId` to populate `req.userId`.
+ * Applications are free to extend via the open bucket — the core only relies
+ * on `userId` to populate `req.userId`. Common monorepo fields (`apps`,
+ * `globalRoles`, `appRoles`, `features`, ...) are declared as optional so
+ * downstream consumers get proper inference without casting.
  */
 export type AuthenticatedUser = {
   userId: string
+  _id?: string
   email?: string
   username?: string
   roles?: string[]
+  /** Global roles (monorepo convention: `['superadmin' | 'admin' | ...]`). */
+  globalRoles?: string[]
+  /** Per-app role map (monorepo convention). */
+  appRoles?: Record<string, string[]>
+  /** Apps the user has access to (monorepo convention). */
+  apps?: string[]
   permissions?: string[]
-  /** Extra app-specific fields (appRoles, features, etc.). */
+  /** Feature flags granted to the user (monorepo convention). */
+  features?: string[]
+  /** Extra app-specific fields. */
   [key: string]: unknown
 }
 

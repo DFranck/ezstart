@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/express-core build && pnpm --filter @green-pulse/types build",
+    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/express-core build && pnpm --filter @green-pulse/types build",
     "build": "tsc -b",
     "start": "node dist/index.js",
     "start:prod": "pnpm build && node dist/index.js",
@@ -16,6 +16,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.0.0",
     "@ezstart/ai-sdk": "workspace:*",
+    "@ezstart/api-core": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",

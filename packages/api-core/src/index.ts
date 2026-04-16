@@ -49,6 +49,19 @@ export {
   type RouteDocOptions,
 } from './core/router.js'
 
+// OpenAPI helpers
+export {
+  checkMissingDescriptions,
+  scanRegistriesForMissingDescriptions,
+} from './core/openapi/check-missing-descriptions.js'
+
+// API versioning
+export {
+  addVersionHeader,
+  createVersionedRouter,
+  extractVersionFromPath,
+} from './core/versioning.js'
+
 // Re-exports from transitive deps — the monorepo centralizes on these
 // symbols so consumers don't need direct dependencies on `express` or
 // `@asteasolutions/zod-to-openapi`.
@@ -78,3 +91,4 @@ export { createSocketServer, type SocketServerConfig } from './core/sockets.js'
 // @ezstart monorepo wrapper (optional — requires @ezstart/config + @ezstart/logger)
 // ---------------------------------------------------------------------------
 export { createEzstartServer, type EzstartServerOptions } from './ezstart-server.js'
+export { connectToMongo } from './connect-to-mongo.js'

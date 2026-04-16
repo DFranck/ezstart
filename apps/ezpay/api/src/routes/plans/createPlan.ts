@@ -34,9 +34,9 @@ const createPlanSchema = z.object({
 })
 
 const planResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
+  success: z.boolean().describe('Whether the request succeeded'),
+  data: z.any().optional().describe('Response payload (the plan object on success)'),
+  error: z.string().optional().describe('Human-readable error message on failure'),
 })
 
 // ========================================

@@ -41,8 +41,14 @@ const docRouter = createRouterWithDoc(ssoExchangeRegistry, router)
 const ssoExchangeRateLimiter = createStrictRateLimiter()
 
 const ssoExchangeRequestSchema = z.object({
-  code: z.string().min(32, 'code is required'),
-  app: z.string().min(1, 'app is required'),
+  code: z
+    .string()
+    .min(32, 'code is required')
+    .describe('Single-use SSO handoff code from /sso-authorize'),
+  app: z
+    .string()
+    .min(1, 'app is required')
+    .describe('Target app identifier (ezauth, ezbill, etc.)'),
 })
 
 const ssoExchangeResponseSchema = z.object({

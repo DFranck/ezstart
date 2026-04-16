@@ -4,35 +4,27 @@ import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
+  addVersionHeader,
   connectToMongo,
-  createApp,
-  createRateLimiter,
-  getApiPort,
-  startServer,
+  createEzstartServer,
   createVersionedRouter,
-  addVersionHeader
-} from '@ezstart/express-core'
+  startServer,
+} from '@ezstart/api-core'
 import routes, { registries } from './routes/index.js'
 
-const PORT = getApiPort('ezpay')
-
-// Create app with raw body routes for webhook signature verification
-const app = createApp({
+// Create pre-configured server with Stripe webhook raw-body route
+const server = createEzstartServer('ezpay', {
   rawBodyRoutes: ['/api/webhooks/stripe'],
-  apiApp: 'ezpay',
 })
+const { app } = server
 
-// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
-app.use(createRateLimiter())
-
-// ✅ Add API version headers to all responses
+// API version headers on every response
 app.use(addVersionHeader('v1'))
 
-// ✅ API routes with versioning support (supports both /api and /api/v1)
+// Routes available at /api/* and /api/v1/*
 app.use(createVersionedRouter('/api', routes))
 
-// Sentry error handler (called automatically by expressIntegration)
-// MUST be AFTER all routes/controllers
+// Sentry error handler MUST be AFTER all routes/controllers
 Sentry.setupExpressErrorHandler(app)
 
 // Start server
@@ -42,10 +34,13 @@ connectToMongo('ezpay')
       routes,
       registries,
       serviceName: 'EZPay',
-      port: PORT,
+      port: server.config.port,
+      logger: server.logger,
     })
   )
   .catch(err => {
-    logger.error('❌ Failed to start EZPay API', err)
+    logger.error('Failed to start EZPay API', err)
     process.exit(1)
   })
+
+export { app }
