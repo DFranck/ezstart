@@ -42,7 +42,6 @@ export {
   AuthClient,
   createAuthClient,
   detectAuthMode,
-  getEzauthUrl,
   // Backward-compat: AuthProvider = EzstartAuthProvider
   EzstartAuthProvider as AuthProvider,
   useEzstartAuth as useAuth,
@@ -51,7 +50,7 @@ export {
 export type { AuthClientConfig } from './ezstart-auth.js'
 
 // SSO helpers
-export { getEzauthUrl as getEzauthSsoUrl } from './lib/sso.js'
+export { getEzauthUrl } from './lib/sso.js'
 
 // Hooks
 export { useAuthNavigation } from './hooks/useAuthNavigation.js'

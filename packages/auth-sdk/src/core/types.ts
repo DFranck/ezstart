@@ -93,7 +93,7 @@ export interface RefreshResult {
 export interface LoginRequest {
   email: string
   password: string
-  app?: string
+  app: string
   redirect_uri?: string
 }
 
@@ -103,7 +103,7 @@ export interface RegisterRequest {
   password: string
   firstName?: string
   lastName?: string
-  app?: string
+  app: string
   redirect_uri?: string
   locale?: string
   promoCode?: string
@@ -112,7 +112,7 @@ export interface RegisterRequest {
 export interface TokenRequest {
   code: string
   app: string
-  redirect_uri: string
+  redirect_uri?: string
 }
 
 export interface QuickSignUpRequest {
