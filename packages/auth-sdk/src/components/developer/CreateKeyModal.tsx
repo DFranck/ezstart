@@ -1,14 +1,27 @@
 'use client'
 
-import { Button, Div, Input, Label, Modal, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import {
+  Button,
+  Div,
+  Input,
+  Label,
+  Modal,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@ezstart/ui/components'
 import { useState } from 'react'
+import type { CreateApiKeyRequest } from '../../core/types.js'
+import type { CreateKeyModalTexts } from './types.js'
 
-interface CreateKeyModalProps {
+export interface CreateKeyModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: { name: string; appName: string; expiresAt: string | null }) => void
+  onSubmit: (data: CreateApiKeyRequest) => void
   isSubmitting: boolean
+  texts: CreateKeyModalTexts
 }
 
 function computeExpiryDate(option: string): string | null {
@@ -21,8 +34,13 @@ function computeExpiryDate(option: string): string | null {
   return now.toISOString()
 }
 
-export function CreateKeyModal({ isOpen, onClose, onSubmit, isSubmitting }: CreateKeyModalProps) {
-  const t = useTranslations('developer.create')
+export function CreateKeyModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isSubmitting,
+  texts,
+}: CreateKeyModalProps) {
   const [name, setName] = useState('')
   const [appName, setAppName] = useState('*')
   const [expiry, setExpiry] = useState('never')
@@ -47,7 +65,7 @@ export function CreateKeyModal({ isOpen, onClose, onSubmit, isSubmitting }: Crea
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={t('title')}
+      title={texts.title}
       size="default"
       footer={
         <Button
@@ -55,45 +73,45 @@ export function CreateKeyModal({ isOpen, onClose, onSubmit, isSubmitting }: Crea
           disabled={!name.trim() || isSubmitting}
           className="w-full"
         >
-          {isSubmitting ? t('submitting') : t('submit')}
+          {isSubmitting ? texts.submitting : texts.submit}
         </Button>
       }
     >
       <Div className="space-y-4">
         <Div className="space-y-2">
-          <Label htmlFor="key-name">{t('nameLabel')}</Label>
+          <Label htmlFor="key-name">{texts.nameLabel}</Label>
           <Input
             id="key-name"
-            placeholder={t('namePlaceholder')}
+            placeholder={texts.namePlaceholder}
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             maxLength={100}
           />
         </Div>
 
         <Div className="space-y-2">
-          <Label>{t('appScope')}</Label>
+          <Label>{texts.appScope}</Label>
           <Select value={appName} onValueChange={setAppName}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="*">{t('appScopeAll')}</SelectItem>
+              <SelectItem value="*">{texts.appScopeAll}</SelectItem>
             </SelectContent>
           </Select>
         </Div>
 
         <Div className="space-y-2">
-          <Label>{t('expiry')}</Label>
+          <Label>{texts.expiry}</Label>
           <Select value={expiry} onValueChange={setExpiry}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="never">{t('expiryNever')}</SelectItem>
-              <SelectItem value="30d">{t('expiry30d')}</SelectItem>
-              <SelectItem value="90d">{t('expiry90d')}</SelectItem>
-              <SelectItem value="1y">{t('expiry1y')}</SelectItem>
+              <SelectItem value="never">{texts.expiryNever}</SelectItem>
+              <SelectItem value="30d">{texts.expiry30d}</SelectItem>
+              <SelectItem value="90d">{texts.expiry90d}</SelectItem>
+              <SelectItem value="1y">{texts.expiry1y}</SelectItem>
             </SelectContent>
           </Select>
         </Div>

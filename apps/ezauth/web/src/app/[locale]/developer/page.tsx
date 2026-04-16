@@ -1,42 +1,19 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { apiCall } from '@ezstart/api-sdk'
-import {
-  BackButton,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Div,
-  P,
-  Spinner,
-} from '@ezstart/ui/components'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@ezstart/ui/components'
-import { toast } from '@ezstart/ui/utils'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useTranslations } from 'next-intl'
+import { DeveloperPortal } from '@ezstart/auth-sdk/components'
+import { BackButton, Button, Div, Spinner } from '@ezstart/ui/components'
+import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import type { ApiKeyItem, CreateApiKeyResponse } from './types'
-import { ApiKeysTable } from './components/ApiKeysTable'
-import { CreateKeyModal } from './components/CreateKeyModal'
-import { KeyCreatedModal } from './components/KeyCreatedModal'
-import { UsageDetailsModal } from './components/UsageDetailsModal'
+import { useEffect } from 'react'
+import type { DeveloperPortalTexts } from '@ezstart/auth-sdk/components'
 
 export default function DeveloperPage() {
   const t = useTranslations('developer')
+  const locale = useLocale()
   const { user, isAuthReady, isAuthenticated } = useAuth()
   const router = useRouter()
-  const queryClient = useQueryClient()
-
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [createdKey, setCreatedKey] = useState<string | null>(null)
-  const [revokeTargetId, setRevokeTargetId] = useState<string | null>(null)
-  const [usageKeyId, setUsageKeyId] = useState<string | null>(null)
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -44,77 +21,6 @@ export default function DeveloperPage() {
       router.replace('/login')
     }
   }, [isAuthReady, isAuthenticated, router])
-
-  // Fetch API keys
-  const {
-    data: apiKeys = [],
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ['api-keys'],
-    queryFn: () =>
-      apiCall<ApiKeyItem[]>('/keys', {
-        appName: 'ezauth',
-        method: 'GET',
-      }),
-    enabled: !!user,
-  })
-
-  // Create key mutation
-  const createMutation = useMutation({
-    mutationFn: (body: { name: string; appName: string; expiresAt: string | null }) =>
-      apiCall<CreateApiKeyResponse>('/keys', {
-        appName: 'ezauth',
-        method: 'POST',
-        body,
-      }),
-    onSuccess: (data) => {
-      setShowCreateModal(false)
-      setCreatedKey(data.key)
-      queryClient.invalidateQueries({ queryKey: ['api-keys'] })
-    },
-    onError: () => {
-      toast.error(t('errors.createFailed'))
-    },
-  })
-
-  // Revoke mutation
-  const revokeMutation = useMutation({
-    mutationFn: (id: string) =>
-      apiCall(`/keys/${id}`, {
-        appName: 'ezauth',
-        method: 'DELETE',
-      }),
-    onSuccess: () => {
-      toast.success(t('revoke.success'))
-      setRevokeTargetId(null)
-      queryClient.invalidateQueries({ queryKey: ['api-keys'] })
-    },
-    onError: () => {
-      toast.error(t('errors.revokeFailed'))
-    },
-  })
-
-  // Rotate mutation
-  const rotateMutation = useMutation({
-    mutationFn: (id: string) =>
-      apiCall<CreateApiKeyResponse>(`/keys/${id}/rotate`, {
-        appName: 'ezauth',
-        method: 'POST',
-      }),
-    onSuccess: (data) => {
-      toast.success(t('rotate.success'))
-      setCreatedKey(data.key)
-      queryClient.invalidateQueries({ queryKey: ['api-keys'] })
-    },
-    onError: () => {
-      toast.error(t('errors.rotateFailed'))
-    },
-  })
-
-  // Find the key name for the usage modal
-  const usageKeyName = apiKeys.find((k) => k.id === usageKeyId)?.name ?? ''
 
   if (!isAuthReady || !user) {
     return (
@@ -124,98 +30,91 @@ export default function DeveloperPage() {
     )
   }
 
+  const texts: DeveloperPortalTexts = {
+    title: t('title'),
+    description: t('description'),
+    createKey: t('createKey'),
+    noKeys: t('noKeys'),
+    retry: t('retry'),
+    fetchFailed: t('errors.fetchFailed'),
+    createFailed: t('errors.createFailed'),
+    revokeFailed: t('errors.revokeFailed'),
+    rotateFailed: t('errors.rotateFailed'),
+    revokeTitle: t('revoke.title'),
+    revokeConfirm: t('revoke.confirm'),
+    revokeSubmit: t('revoke.submit'),
+    revokeSuccess: t('revoke.success'),
+    rotateSuccess: t('rotate.success'),
+    cancel: t('created.done'),
+    table: {
+      name: t('table.name'),
+      keyPrefix: t('table.keyPrefix'),
+      status: t('table.status'),
+      created: t('table.created'),
+      lastUsed: t('table.lastUsed'),
+      actions: t('table.actions'),
+      never: t('table.never'),
+      usage: t('table.usage'),
+      statusActive: t('status.active'),
+      statusRevoked: t('status.revoked'),
+      rotate: t('rotate.submit'),
+      revoke: t('revoke.submit'),
+      unlimited: t('usage.unlimited'),
+    },
+    create: {
+      title: t('create.title'),
+      nameLabel: t('create.nameLabel'),
+      namePlaceholder: t('create.namePlaceholder'),
+      appScope: t('create.appScope'),
+      appScopeAll: t('create.appScopeAll'),
+      expiry: t('create.expiry'),
+      expiryNever: t('create.expiryNever'),
+      expiry30d: t('create.expiry30d'),
+      expiry90d: t('create.expiry90d'),
+      expiry1y: t('create.expiry1y'),
+      submit: t('create.submit'),
+      submitting: t('create.submitting'),
+    },
+    created: {
+      title: t('created.title'),
+      warning: t('created.warning'),
+      copied: t('created.copied'),
+      copyKey: t('created.copyKey'),
+      done: t('created.done'),
+    },
+    usage: {
+      detailsTitle: t('usage.detailsTitle', { name: '{name}' }),
+      detailsDescription: t('usage.detailsDescription'),
+      close: t('usage.close'),
+      fetchError: t('usage.fetchError'),
+      quotaTitle: t('usage.quotaTitle'),
+      quotaLabel: t('usage.quotaLabel', { used: '{used}', limit: '{limit}' }),
+      remaining: t('usage.remaining', { count: '{count}' }),
+      topEndpoints: t('usage.topEndpoints'),
+      dailyBreakdown: t('usage.dailyBreakdown'),
+      noUsage: t('usage.noUsage'),
+      unlimited: t('usage.unlimited'),
+    },
+  }
+
   return (
-    <Card className="max-w-3xl w-full relative">
+    <Div className="max-w-3xl w-full relative">
       <Div className="absolute top-4 left-4">
         <BackButton />
       </Div>
 
-      <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        <Div className="flex justify-between items-center">
+      <DeveloperPortal
+        enabled={!!user}
+        locale={locale}
+        texts={texts}
+        headerActions={
           <Link href="/developer/billing">
             <Button variant="outline" size="sm">
               {t('nav.billing')}
             </Button>
           </Link>
-          <Button onClick={() => setShowCreateModal(true)}>{t('createKey')}</Button>
-        </Div>
-
-        {isLoading && (
-          <Div className="flex justify-center py-8">
-            <Spinner variant="primary" size="md" />
-          </Div>
-        )}
-
-        {isError && (
-          <Div className="text-center space-y-3">
-            <P className="text-destructive">{t('errors.fetchFailed')}</P>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              {t('retry')}
-            </Button>
-          </Div>
-        )}
-
-        {!isLoading && !isError && apiKeys.length === 0 && (
-          <P className="text-muted-foreground text-center py-8">{t('noKeys')}</P>
-        )}
-
-        {!isLoading && !isError && apiKeys.length > 0 && (
-          <ApiKeysTable
-            keys={apiKeys}
-            onRevoke={setRevokeTargetId}
-            onRotate={(id) => rotateMutation.mutate(id)}
-            onViewUsage={setUsageKeyId}
-            isRevoking={revokeMutation.isPending}
-            isRotating={rotateMutation.isPending}
-          />
-        )}
-      </CardContent>
-
-      {/* Create Key Modal */}
-      <CreateKeyModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSubmit={(data) => createMutation.mutate(data)}
-        isSubmitting={createMutation.isPending}
+        }
       />
-
-      {/* Key Created Modal (shows raw key once) */}
-      <KeyCreatedModal
-        isOpen={!!createdKey}
-        onClose={() => setCreatedKey(null)}
-        rawKey={createdKey}
-      />
-
-      {/* Usage Details Modal */}
-      <UsageDetailsModal
-        isOpen={!!usageKeyId}
-        onClose={() => setUsageKeyId(null)}
-        keyId={usageKeyId}
-        keyName={usageKeyName}
-      />
-
-      {/* Revoke Confirmation Dialog */}
-      <AlertDialog open={!!revokeTargetId} onOpenChange={(open) => !open && setRevokeTargetId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('revoke.title')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('revoke.confirm')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('created.done')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => revokeTargetId && revokeMutation.mutate(revokeTargetId)}
-            >
-              {t('revoke.submit')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Card>
+    </Div>
   )
 }

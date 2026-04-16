@@ -2,38 +2,41 @@
 
 import { Button, Div, Input, Modal, P } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
+import type { KeyCreatedModalTexts } from './types.js'
 
-interface KeyCreatedModalProps {
+export interface KeyCreatedModalProps {
   isOpen: boolean
   onClose: () => void
   rawKey: string | null
+  texts: KeyCreatedModalTexts
 }
 
-export function KeyCreatedModal({ isOpen, onClose, rawKey }: KeyCreatedModalProps) {
-  const t = useTranslations('developer.created')
-
+export function KeyCreatedModal({ isOpen, onClose, rawKey, texts }: KeyCreatedModalProps) {
   const handleCopy = useCallback(async () => {
     if (!rawKey) return
-    await navigator.clipboard.writeText(rawKey)
-    toast.success(t('copied'))
-  }, [rawKey, t])
+    try {
+      await navigator.clipboard.writeText(rawKey)
+      toast.success(texts.copied)
+    } catch {
+      toast.error('Failed to copy to clipboard')
+    }
+  }, [rawKey, texts.copied])
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t('title')}
+      title={texts.title}
       size="lg"
       footer={
         <Button onClick={onClose} className="w-full">
-          {t('done')}
+          {texts.done}
         </Button>
       }
     >
       <Div className="space-y-4">
-        <P className="text-destructive font-medium">{t('warning')}</P>
+        <P className="text-destructive font-medium">{texts.warning}</P>
 
         <Div className="flex items-center gap-2">
           <Input
@@ -42,7 +45,7 @@ export function KeyCreatedModal({ isOpen, onClose, rawKey }: KeyCreatedModalProp
             className="font-mono text-sm"
           />
           <Button variant="outline" size="sm" onClick={handleCopy}>
-            {t('copyKey')}
+            {texts.copyKey}
           </Button>
         </Div>
       </Div>

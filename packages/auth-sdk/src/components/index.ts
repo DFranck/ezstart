@@ -56,3 +56,28 @@ export type { UserSettingsProps, UserSettingsTexts } from './UserSettings.js'
 // Admin
 export { AuthAdminDashboard } from './AuthAdminDashboard.js'
 export type { AuthAdminDashboardProps, AuthAdminDashboardTexts } from './AuthAdminDashboard.js'
+
+// Developer portal (API keys management)
+export {
+  DeveloperPortal,
+  ApiKeysTable,
+  CreateKeyModal,
+  KeyCreatedModal,
+  UsageDetailsModal,
+  UsageBadge,
+  defaultDeveloperPortalTexts,
+} from './developer/index.js'
+export type {
+  DeveloperPortalProps,
+  ApiKeysTableProps,
+  CreateKeyModalProps,
+  KeyCreatedModalProps,
+  UsageDetailsModalProps,
+  UsageBadgeProps,
+  DeveloperPortalTexts,
+  ApiKeysTableTexts,
+  CreateKeyModalTexts,
+  KeyCreatedModalTexts,
+  UsageDetailsModalTexts,
+  UsageBadgeTexts,
+} from './developer/index.js'

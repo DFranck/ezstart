@@ -24,3 +24,12 @@ export type {
   SignedInProps,
   SignedOutProps,
 } from './guards.js'
+
+// API Keys hooks
+export {
+  useApiKeys,
+  useApiKeyUsage,
+  useCreateApiKey,
+  useRevokeApiKey,
+  useRotateApiKey,
+} from './api-keys.js'

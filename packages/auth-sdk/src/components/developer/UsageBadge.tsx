@@ -1,27 +1,31 @@
 'use client'
 
-import { Badge, Div, Span } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { Badge, Div } from '@ezstart/ui/components'
+import type { UsageBadgeTexts } from './types.js'
 
-interface UsageBadgeProps {
+export interface UsageBadgeProps {
   used: number
   quota: number | null
+  texts?: UsageBadgeTexts
 }
 
-/** Get the badge variant based on usage percentage. */
 function getUsageVariant(percentage: number): 'success' | 'warning' | 'destructive' {
   if (percentage >= 80) return 'destructive'
   if (percentage >= 50) return 'warning'
   return 'success'
 }
 
-export function UsageBadge({ used, quota }: UsageBadgeProps) {
-  const t = useTranslations('developer.usage')
+function getBarColorClass(variant: 'success' | 'warning' | 'destructive'): string {
+  if (variant === 'destructive') return 'bg-destructive'
+  if (variant === 'warning') return 'bg-warning'
+  return 'bg-success'
+}
 
+export function UsageBadge({ used, quota, texts }: UsageBadgeProps) {
   if (quota === null) {
     return (
       <Badge variant="outline" size="sm">
-        {t('unlimited')}
+        {texts?.unlimited ?? 'Unlimited'}
       </Badge>
     )
   }
@@ -33,18 +37,12 @@ export function UsageBadge({ used, quota }: UsageBadgeProps) {
     <Div className="flex items-center gap-2">
       <Div className="w-16 h-2 rounded-full bg-muted overflow-hidden">
         <Div
-          className={`h-full rounded-full transition-all ${
-            variant === 'destructive'
-              ? 'bg-destructive'
-              : variant === 'warning'
-                ? 'bg-warning'
-                : 'bg-success'
-          }`}
-          style={{ width: `${percentage}%` }}
+          className={`h-full rounded-full transition-all ${getBarColorClass(variant)}`}
+          style={{ width: `${String(percentage)}%` }}
         />
       </Div>
       <Badge variant={variant} size="xs">
-        <Span>{percentage}%</Span>
+        {String(percentage)}%
       </Badge>
     </Div>
   )

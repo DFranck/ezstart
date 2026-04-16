@@ -1,184 +1,85 @@
 'use client'
 
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  Button,
-  Card,
-  CardContent,
-  Div,
-  H1,
-  Main,
-  P,
-  Skeleton,
-} from '@ezstart/ui/components'
+import { Button, Div, H1, Main, P, Skeleton } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import Link from 'next/link'
-import { payQuery, callApi } from '../../../config/api'
-import { ConnectStatusCard } from './components/connect-status-card'
-import { OnboardForm } from './components/onboard-form'
-import { FeeSummaryCard } from './components/fee-summary-card'
-import { RecentTransactions } from './components/recent-transactions'
+import {
+  DeveloperConnectDashboard,
+  type DeveloperConnectDashboardTexts,
+} from '@ezstart/pay-sdk/components'
 import { PlansSection } from './components/plans-section'
 import { AuthHeader } from '../auth-header'
 
-// ========================================
-// Types
-// ========================================
-
-type ConnectedAccount = {
-  stripeAccountId: string
-  email: string
-  businessName: string
-  accountType: 'standard' | 'express'
-  status: 'pending' | 'active' | 'restricted' | 'disabled'
-  chargesEnabled: boolean
-  payoutsEnabled: boolean
-  defaultFeePercent: number
-  onboardedAt: string | null
-  createdAt: string
-}
-
-type ConnectStatusResponse = {
-  connectedAccount: ConnectedAccount | null
-}
-
-type DashboardLinkResponse = {
-  loginLinkUrl: string
-  message?: string
-}
-
-type OnboardResponse = {
-  accountLinkUrl: string
-  connectedAccount: ConnectedAccount
-}
-
-// ========================================
-// Mock transaction data (until API endpoint exists)
-// ========================================
-
-const MOCK_TRANSACTIONS: {
-  id: string
-  date: string
-  amount: number
-  fee: number
-  net: number
-  status: 'completed' | 'pending' | 'failed'
-}[] = []
-
-// ========================================
-// Component
-// ========================================
-
 export default function DeveloperPage() {
   const t = useTranslations('developer')
+  const tc = useTranslations('developer.connect')
+  const tf = useTranslations('developer.fees')
   const { isAuthenticated } = useAuth()
-  const [disconnectOpen, setDisconnectOpen] = useState(false)
-  const [isDashboardLoading, setIsDashboardLoading] = useState(false)
 
-  // Fetch connect status
-  const {
-    data: statusData,
-    isLoading,
-    refetch,
-  } = payQuery.useQuery<ConnectStatusResponse>('/connect/status', {
-    enabled: isAuthenticated,
-  })
-
-  const account = statusData?.connectedAccount ?? null
-
-  // Onboard mutation
-  const onboardMutation = payQuery.useMutation<
-    OnboardResponse,
-    { email: string; businessName: string; type: 'standard' | 'express' }
-  >('/connect/onboard', {
-    onSuccess: (data) => {
-      if (data.accountLinkUrl) {
-        window.location.href = data.accountLinkUrl
-      }
+  // Build texts object from i18n
+  const dashboardTexts: DeveloperConnectDashboardTexts = {
+    connectStatus: {
+      title: tc('title'),
+      businessName: tc('businessName'),
+      accountType: tc('accountType'),
+      accountTypeStandard: tc('accountTypeStandard'),
+      accountTypeExpress: tc('accountTypeExpress'),
+      chargesEnabled: tc('chargesEnabled'),
+      payoutsEnabled: tc('payoutsEnabled'),
+      connectedSince: tc('connectedSince'),
+      yes: tc('yes'),
+      no: tc('no'),
+      statusPending: tc('statusPending'),
+      statusActive: tc('statusActive'),
+      statusRestricted: tc('statusRestricted'),
+      statusDisabled: tc('statusDisabled'),
+      dashboardButton: tc('dashboard.button'),
+      dashboardLoading: tc('dashboard.loading'),
+      disconnectButton: tc('disconnect.button'),
     },
-    onError: () => {
-      toast.error(t('error'))
+    onboardForm: {
+      title: tc('notConnected'),
+      description: tc('notConnectedDescription'),
+      emailLabel: tc('onboard.email'),
+      emailPlaceholder: tc('onboard.emailPlaceholder'),
+      businessNameLabel: tc('onboard.businessName'),
+      businessNamePlaceholder: tc('onboard.businessNamePlaceholder'),
+      accountTypeLabel: tc('onboard.accountType'),
+      standard: tc('onboard.standard'),
+      express: tc('onboard.express'),
+      submit: tc('onboard.submit'),
+      submitting: tc('onboard.submitting'),
     },
-  })
-
-  // ---- Handlers ----
-
-  async function handleOpenDashboard() {
-    setIsDashboardLoading(true)
-    try {
-      const data = await callApi<DashboardLinkResponse>('/connect/dashboard-link')
-      if (data.loginLinkUrl) {
-        window.open(data.loginLinkUrl, '_blank', 'noopener,noreferrer')
-      }
-    } catch {
-      toast.error(t('error'))
-    } finally {
-      setIsDashboardLoading(false)
-    }
+    feeSummary: {
+      title: tf('title'),
+      thisMonth: tf('thisMonth'),
+      totalFees: tf('totalFees'),
+      averageFee: tf('averageFee'),
+      transactions: tf('transactions'),
+    },
+    disconnectTitle: tc('disconnect.title'),
+    disconnectDescription: tc('disconnect.description'),
+    disconnectCancel: tc('disconnect.cancel'),
+    disconnectConfirm: tc('disconnect.confirm'),
+    error: t('error'),
   }
 
-  function handleDisconnect() {
-    setDisconnectOpen(true)
-  }
-
-  async function confirmDisconnect() {
-    try {
-      await callApi('/connect/disconnect', { method: 'DELETE' })
-      toast.success(t('connect.disconnect.button'))
-      setDisconnectOpen(false)
-      await refetch()
-    } catch {
-      toast.error(t('error'))
-    }
-  }
-
-  function handleOnboard(data: { email: string; businessName: string; type: 'standard' | 'express' }) {
-    onboardMutation.mutate(data)
-  }
-
-  // ---- Auth guard ----
+  // Auth guard
   if (!isAuthenticated) {
     return (
       <Main className="container mx-auto py-12 px-4">
         <AuthHeader />
         <Div className="max-w-md mx-auto text-center">
-          <Card className="p-8">
+          <Div className="p-8">
             <H1 className="text-2xl font-bold mb-4">{t('loginRequired')}</H1>
             <P className="text-muted-foreground">{t('loginRequiredDescription')}</P>
-          </Card>
+          </Div>
         </Div>
       </Main>
     )
   }
-
-  // ---- Loading ----
-  if (isLoading) {
-    return (
-      <Main className="container mx-auto py-12 px-4">
-        <AuthHeader />
-        <Div className="max-w-4xl mx-auto space-y-6">
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-48 w-full" />
-        </Div>
-      </Main>
-    )
-  }
-
-  // ---- Fee calculations (from mock data or account info) ----
-  const totalFees = MOCK_TRANSACTIONS.reduce((sum, tx) => sum + tx.fee, 0)
-  const avgFee = account?.defaultFeePercent ?? 5
-  const txCount = MOCK_TRANSACTIONS.length
 
   return (
     <Main className="container mx-auto py-12 px-4">
@@ -198,55 +99,16 @@ export default function DeveloperPage() {
           </Button>
         </Div>
 
-        {/* Connect section */}
-        {account ? (
-          <>
-            <ConnectStatusCard
-              account={account}
-              onOpenDashboard={handleOpenDashboard}
-              onDisconnect={handleDisconnect}
-              isDashboardLoading={isDashboardLoading}
-            />
-
-            {account.status === 'active' && (
-              <>
-                <FeeSummaryCard
-                  totalFees={totalFees}
-                  averageFeePercent={avgFee}
-                  transactionCount={txCount}
-                />
-                <RecentTransactions transactions={MOCK_TRANSACTIONS} />
-              </>
-            )}
-          </>
-        ) : (
-          <OnboardForm
-            onSubmit={handleOnboard}
-            isSubmitting={onboardMutation.isPending}
-          />
-        )}
+        {/* Connect dashboard from SDK */}
+        <DeveloperConnectDashboard
+          texts={dashboardTexts}
+          onError={(msg) => toast.error(msg)}
+          onDisconnect={() => toast.success(tc('disconnect.button'))}
+        />
 
         {/* Plans section (always visible) */}
-        <PlansSection currentFeePercent={account?.defaultFeePercent ?? 5} />
+        <PlansSection currentFeePercent={5} />
       </Div>
-
-      {/* Disconnect confirmation */}
-      <AlertDialog variant="destructive" open={disconnectOpen} onOpenChange={setDisconnectOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('connect.disconnect.title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('connect.disconnect.description')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('connect.disconnect.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDisconnect}>
-              {t('connect.disconnect.confirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Main>
   )
 }

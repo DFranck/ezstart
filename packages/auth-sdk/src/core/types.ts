@@ -171,3 +171,65 @@ export interface JWTPayload {
   iat?: number
   exp?: number
 }
+
+// ---------------------------------------------------------------------------
+// API Keys (Developer Portal)
+// ---------------------------------------------------------------------------
+
+/** An API key as returned by the list endpoint. */
+export interface ApiKeyItem {
+  id: string
+  keyPrefix: string
+  name: string
+  appName: string
+  permissions: string[]
+  status: 'active' | 'revoked'
+  lastUsedAt: string | null
+  expiresAt: string | null
+  createdAt: string
+  revokedAt: string | null
+  quotaMonthly: number | null
+  usageThisMonth: number
+}
+
+/** Usage stats for a single API key. */
+export interface ApiKeyUsageResponse {
+  currentMonth: {
+    requestCount: number
+    topEndpoints: { endpoint: string; count: number }[]
+  }
+  daily: { date: string; requestCount: number }[]
+  quota: {
+    limit: number | null
+    used: number
+    remaining: number | null
+  }
+}
+
+/** Response from create / rotate key endpoints. */
+export interface CreateApiKeyResponse {
+  id: string
+  key: string
+  keyPrefix: string
+  name: string
+}
+
+/** Body for the create-key mutation. */
+export interface CreateApiKeyRequest {
+  name: string
+  appName: string
+  expiresAt: string | null
+}
+
+/** Plan info for billing display. */
+export interface PlanInfo {
+  id: string
+  name: string
+  /** Monthly price in cents. */
+  price: number
+  /** Null means unlimited. */
+  quotaMonthly: number | null
+  /** Null means unlimited. */
+  maxKeys: number | null
+  features: string[]
+}

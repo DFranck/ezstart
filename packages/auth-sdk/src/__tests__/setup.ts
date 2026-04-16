@@ -1,5 +1,7 @@
-import '@testing-library/jest-dom/vitest'
-import { vi } from 'vitest'
+import * as matchers from '@testing-library/jest-dom/matchers'
+import { expect, vi } from 'vitest'
+
+expect.extend(matchers)
 
 // ---------------------------------------------------------------------------
 // Mock @ezstart/config/urls
@@ -218,6 +220,13 @@ vi.mock('@ezstart/ui/components', () => {
     FormControl,
     FormMessage,
     Select: passthrough('Select'),
+    SelectTrigger: passthrough('SelectTrigger'),
+    SelectValue: passthrough('SelectValue'),
+    SelectContent: passthrough('SelectContent'),
+    SelectItem: passthrough('SelectItem'),
+    Code: passthrough('Code', 'code'),
+    CardTitle: passthrough('CardTitle'),
+    CardDescription: passthrough('CardDescription'),
     Textarea: passthrough('Textarea', 'textarea'),
   }
 })

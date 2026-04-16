@@ -55,6 +55,15 @@ export { getEzauthUrl } from './lib/sso.js'
 // Hooks
 export { useAuthNavigation } from './hooks/useAuthNavigation.js'
 
+// API Keys hooks
+export {
+  useApiKeys,
+  useApiKeyUsage,
+  useCreateApiKey,
+  useRevokeApiKey,
+  useRotateApiKey,
+} from './react/api-keys.js'
+
 // ── Middleware (Next.js) ─────────────────────────────────────────────────────
 
 export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware.js'
@@ -112,6 +121,31 @@ export type {
   AuthAdminDashboardTexts,
 } from './components/AuthAdminDashboard.js'
 
+// Developer portal (API keys)
+export {
+  DeveloperPortal,
+  ApiKeysTable as DeveloperApiKeysTable,
+  CreateKeyModal,
+  KeyCreatedModal,
+  UsageDetailsModal,
+  UsageBadge,
+  defaultDeveloperPortalTexts,
+} from './components/developer/index.js'
+export type {
+  DeveloperPortalProps,
+  ApiKeysTableProps as DeveloperApiKeysTableProps,
+  CreateKeyModalProps,
+  KeyCreatedModalProps,
+  UsageDetailsModalProps,
+  UsageBadgeProps,
+  DeveloperPortalTexts,
+  ApiKeysTableTexts,
+  CreateKeyModalTexts,
+  KeyCreatedModalTexts,
+  UsageDetailsModalTexts,
+  UsageBadgeTexts,
+} from './components/developer/index.js'
+
 // User components
 export { UserMenu } from './components/UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './components/UserMenu.js'
@@ -135,6 +169,11 @@ export type {
   AuthCodeResponse,
   JWTPayload,
   EmailOverrideRequest,
+  ApiKeyItem,
+  ApiKeyUsageResponse,
+  CreateApiKeyResponse,
+  CreateApiKeyRequest,
+  PlanInfo,
 } from './core/types.js'
 
 // ── RBAC (Role-Based Access Control) ────────────────────────────────────────

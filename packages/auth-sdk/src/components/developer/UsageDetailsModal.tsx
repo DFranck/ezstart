@@ -1,6 +1,5 @@
 'use client'
 
-import { apiCall } from '@ezstart/api-sdk'
 import {
   Badge,
   Button,
@@ -13,41 +12,52 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
-import { useQuery } from '@tanstack/react-query'
-import { useTranslations } from 'next-intl'
-import type { ApiKeyUsageResponse } from '../types'
-import { UsageBadge } from './UsageBadge'
+import { useApiKeyUsage } from '../../react/api-keys.js'
+import type { UsageDetailsModalTexts } from './types.js'
+import { UsageBadge } from './UsageBadge.js'
 
-interface UsageDetailsModalProps {
+export interface UsageDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   keyId: string | null
   keyName: string
+  texts: UsageDetailsModalTexts
 }
 
-export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDetailsModalProps) {
-  const t = useTranslations('developer.usage')
+function getBarColor(used: number, limit: number): string {
+  const pct = limit > 0 ? (used / limit) * 100 : 0
+  if (pct >= 80) return 'bg-destructive'
+  if (pct >= 50) return 'bg-warning'
+  return 'bg-success'
+}
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['api-key-usage', keyId],
-    queryFn: () =>
-      apiCall<ApiKeyUsageResponse>(`/keys/${keyId}/usage`, {
-        appName: 'ezauth',
-        method: 'GET',
-      }),
-    enabled: !!keyId && isOpen,
-  })
+function interpolate(template: string, values: Record<string, string | number>): string {
+  let result = template
+  for (const [key, val] of Object.entries(values)) {
+    result = result.replace(`{${key}}`, String(val))
+  }
+  return result
+}
+
+export function UsageDetailsModal({
+  isOpen,
+  onClose,
+  keyId,
+  keyName,
+  texts,
+}: UsageDetailsModalProps) {
+  const { data, isLoading, isError } = useApiKeyUsage(keyId, isOpen)
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       size="xl"
-      title={t('detailsTitle', { name: keyName })}
-      description={t('detailsDescription')}
+      title={interpolate(texts.detailsTitle, { name: keyName })}
+      description={texts.detailsDescription}
       footer={
         <Button variant="outline" onClick={onClose}>
-          {t('close')}
+          {texts.close}
         </Button>
       }
     >
@@ -58,7 +68,7 @@ export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDeta
       )}
 
       {isError && (
-        <P className="text-destructive text-center py-4">{t('fetchError')}</P>
+        <P className="text-destructive text-center py-4">{texts.fetchError}</P>
       )}
 
       {data && (
@@ -68,17 +78,21 @@ export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDeta
             <CardContent className="pt-4">
               <Div className="flex items-center justify-between">
                 <Div>
-                  <H3 size="h4">{t('quotaTitle')}</H3>
+                  <H3 size="h4">{texts.quotaTitle}</H3>
                   <P className="text-muted-foreground text-sm">
                     {data.quota.limit !== null
-                      ? t('quotaLabel', {
+                      ? interpolate(texts.quotaLabel, {
                           used: data.quota.used,
                           limit: data.quota.limit,
                         })
-                      : t('unlimited')}
+                      : texts.unlimited}
                   </P>
                 </Div>
-                <UsageBadge used={data.quota.used} quota={data.quota.limit} />
+                <UsageBadge
+                  used={data.quota.used}
+                  quota={data.quota.limit}
+                  texts={{ unlimited: texts.unlimited }}
+                />
               </Div>
               {data.quota.limit !== null && (
                 <Div className="mt-3 w-full h-3 rounded-full bg-muted overflow-hidden">
@@ -88,14 +102,14 @@ export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDeta
                       data.quota.limit
                     )}`}
                     style={{
-                      width: `${Math.min(100, Math.round((data.quota.used / data.quota.limit) * 100))}%`,
+                      width: `${String(Math.min(100, Math.round((data.quota.used / data.quota.limit) * 100)))}%`,
                     }}
                   />
                 </Div>
               )}
               {data.quota.remaining !== null && (
                 <P className="text-muted-foreground text-xs mt-1">
-                  {t('remaining', { count: data.quota.remaining })}
+                  {interpolate(texts.remaining, { count: data.quota.remaining })}
                 </P>
               )}
             </CardContent>
@@ -105,7 +119,7 @@ export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDeta
           {data.currentMonth.topEndpoints.length > 0 && (
             <Div>
               <H3 size="h4" className="mb-2">
-                {t('topEndpoints')}
+                {texts.topEndpoints}
               </H3>
               <Div className="space-y-1">
                 {data.currentMonth.topEndpoints.map((ep) => (
@@ -125,11 +139,11 @@ export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDeta
             </Div>
           )}
 
-          {/* Daily breakdown (simple bar chart) */}
+          {/* Daily breakdown */}
           {data.daily.length > 0 && (
             <Div>
               <H3 size="h4" className="mb-2">
-                {t('dailyBreakdown')}
+                {texts.dailyBreakdown}
               </H3>
               <Div className="space-y-0.5">
                 {data.daily.slice(-14).map((day) => {
@@ -143,7 +157,7 @@ export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDeta
                       <Div className="flex-1 h-4 rounded bg-muted overflow-hidden">
                         <Div
                           className="h-full rounded bg-primary/70"
-                          style={{ width: `${widthPct}%` }}
+                          style={{ width: `${String(widthPct)}%` }}
                         />
                       </Div>
                       <Span className="text-xs text-muted-foreground w-10 text-right">
@@ -157,17 +171,10 @@ export function UsageDetailsModal({ isOpen, onClose, keyId, keyName }: UsageDeta
           )}
 
           {data.daily.length === 0 && data.currentMonth.requestCount === 0 && (
-            <P className="text-muted-foreground text-center py-4">{t('noUsage')}</P>
+            <P className="text-muted-foreground text-center py-4">{texts.noUsage}</P>
           )}
         </Div>
       )}
     </Modal>
   )
-}
-
-function getBarColor(used: number, limit: number): string {
-  const pct = limit > 0 ? (used / limit) * 100 : 0
-  if (pct >= 80) return 'bg-destructive'
-  if (pct >= 50) return 'bg-warning'
-  return 'bg-success'
 }

@@ -30,6 +30,11 @@ export type {
   AuthCode,
   AuthCodeResponse,
   JWTPayload,
+  ApiKeyItem,
+  ApiKeyUsageResponse,
+  CreateApiKeyResponse,
+  CreateApiKeyRequest,
+  PlanInfo,
 } from './types.js'
 
 // Schemas (response validation / OpenAPI)

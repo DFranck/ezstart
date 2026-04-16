@@ -33,6 +33,13 @@ export type {
   UpdatePlanRequest,
   PlanResponse,
   PlansListResponse,
+  ConnectedAccount,
+  ConnectAccountType,
+  ConnectAccountStatus,
+  ConnectStatusResponse,
+  ConnectOnboardRequest,
+  ConnectOnboardResponse,
+  ConnectDashboardLinkResponse,
 } from './core/types.js'
 
 // Schemas
@@ -81,6 +88,12 @@ export { usePurchases } from './react/hooks/usePurchases.js'
 export { useSubscriptions } from './react/hooks/useSubscriptions.js'
 export { useSubscriptionStatus } from './react/hooks/useSubscriptionStatus.js'
 export { usePaymentHistory } from './react/hooks/usePaymentHistory.js'
+
+// Connect hooks
+export { useConnectStatus } from './react/hooks/useConnectStatus.js'
+export { useConnectOnboard } from './react/hooks/useConnectOnboard.js'
+export { useConnectDashboardLink } from './react/hooks/useConnectDashboardLink.js'
+export { useConnectDisconnect } from './react/hooks/useConnectDisconnect.js'
 
 // ============================================================
 // Components (pre-built UI — depends on @ezstart/ui)
@@ -161,3 +174,25 @@ export type {
 } from './components/ProductGrid.js'
 export { PaymentHistory } from './components/PaymentHistory.js'
 export type { PaymentHistoryProps, PaymentHistoryTexts } from './components/PaymentHistory.js'
+
+// Stripe Connect
+export { ConnectStatusCard } from './components/ConnectStatusCard.js'
+export type {
+  ConnectStatusCardProps,
+  ConnectStatusCardTexts,
+} from './components/ConnectStatusCard.js'
+export { ConnectOnboardForm } from './components/ConnectOnboardForm.js'
+export type {
+  ConnectOnboardFormProps,
+  ConnectOnboardFormTexts,
+} from './components/ConnectOnboardForm.js'
+export { ConnectFeeSummary } from './components/ConnectFeeSummary.js'
+export type {
+  ConnectFeeSummaryProps,
+  ConnectFeeSummaryTexts,
+} from './components/ConnectFeeSummary.js'
+export { DeveloperConnectDashboard } from './components/DeveloperConnectDashboard.js'
+export type {
+  DeveloperConnectDashboardProps,
+  DeveloperConnectDashboardTexts,
+} from './components/DeveloperConnectDashboard.js'

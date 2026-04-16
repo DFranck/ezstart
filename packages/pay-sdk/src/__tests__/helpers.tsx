@@ -7,7 +7,7 @@ import React from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { PayProvider } from '../react/pay-provider.js'
 import { PayClient } from '../core/pay-client.js'
-import type { Payment, PaymentResponse, PaymentsListResponse } from '../core/types.js'
+import type { Payment, PaymentResponse, PaymentsListResponse, ConnectedAccount } from '../core/types.js'
 
 // ---------------------------------------------------------------------------
 // Mock PayClient — all methods return sensible defaults, individually mockable
@@ -106,6 +106,21 @@ export function createMockPayClient(overrides: Partial<PayClient> = {}): PayClie
     }),
 
     cleanupPayments: vi.fn().mockResolvedValue({ deletedCount: 0 }),
+
+    getConnectStatus: vi.fn().mockResolvedValue({
+      connectedAccount: null,
+    }),
+
+    connectOnboard: vi.fn().mockResolvedValue({
+      accountLinkUrl: 'https://connect.stripe.com/setup/test',
+      connectedAccount: makeConnectedAccount(),
+    }),
+
+    getConnectDashboardLink: vi.fn().mockResolvedValue({
+      loginLinkUrl: 'https://dashboard.stripe.com/test',
+    }),
+
+    disconnectAccount: vi.fn().mockResolvedValue({ success: true }),
   }
 
   // Apply overrides
@@ -121,6 +136,22 @@ export function createMockPayClient(overrides: Partial<PayClient> = {}): PayClie
 // ---------------------------------------------------------------------------
 
 let idCounter = 0
+
+export function makeConnectedAccount(overrides: Partial<ConnectedAccount> = {}): ConnectedAccount {
+  return {
+    stripeAccountId: 'acct_test123',
+    email: 'test@example.com',
+    businessName: 'Test Business',
+    accountType: 'standard',
+    status: 'active',
+    chargesEnabled: true,
+    payoutsEnabled: true,
+    defaultFeePercent: 5,
+    onboardedAt: '2026-01-15T10:00:00Z',
+    createdAt: '2026-01-15T10:00:00Z',
+    ...overrides,
+  }
+}
 
 export function makePayment(overrides: Partial<Payment> = {}): Payment {
   idCounter++

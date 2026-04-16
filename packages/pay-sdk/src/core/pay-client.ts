@@ -20,6 +20,10 @@ import type {
   PromoValidationResponse,
   PlanResponse,
   PlansListResponse,
+  ConnectStatusResponse,
+  ConnectOnboardRequest,
+  ConnectOnboardResponse,
+  ConnectDashboardLinkResponse,
 } from './types.js'
 
 export class PayClient {
@@ -490,6 +494,67 @@ export class PayClient {
 
     if (!response.ok) {
       throw new Error(result.error || 'Failed to delete plan')
+    }
+
+    return result
+  }
+
+  // ===== STRIPE CONNECT =====
+
+  async getConnectStatus(): Promise<ConnectStatusResponse> {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/status`, {
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to fetch connect status')
+    }
+
+    return result.data ?? result
+  }
+
+  async connectOnboard(data: ConnectOnboardRequest): Promise<ConnectOnboardResponse> {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/onboard`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to start onboarding')
+    }
+
+    return result.data ?? result
+  }
+
+  async getConnectDashboardLink(): Promise<ConnectDashboardLinkResponse> {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/dashboard-link`, {
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to get dashboard link')
+    }
+
+    return result.data ?? result
+  }
+
+  async disconnectAccount(): Promise<{ success: boolean }> {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/disconnect`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to disconnect account')
     }
 
     return result

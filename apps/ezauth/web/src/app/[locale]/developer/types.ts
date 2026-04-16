@@ -1,43 +1,10 @@
-export interface ApiKeyItem {
-  id: string
-  keyPrefix: string
-  name: string
-  appName: string
-  permissions: string[]
-  status: 'active' | 'revoked'
-  lastUsedAt: string | null
-  expiresAt: string | null
-  createdAt: string
-  revokedAt: string | null
-  quotaMonthly: number | null
-  usageThisMonth: number
-}
-
-export interface ApiKeyUsageResponse {
-  currentMonth: {
-    requestCount: number
-    topEndpoints: { endpoint: string; count: number }[]
-  }
-  daily: { date: string; requestCount: number }[]
-  quota: {
-    limit: number | null
-    used: number
-    remaining: number | null
-  }
-}
-
-export interface CreateApiKeyResponse {
-  id: string
-  key: string
-  keyPrefix: string
-  name: string
-}
-
-export interface PlanInfo {
-  id: string
-  name: string
-  price: number // monthly in cents
-  quotaMonthly: number | null // null = unlimited
-  maxKeys: number | null // null = unlimited
-  features: string[]
-}
+/**
+ * Re-export API key types from auth-sdk for local consumers (billing page).
+ * The canonical types live in @ezstart/auth-sdk/core.
+ */
+export type {
+  ApiKeyItem,
+  ApiKeyUsageResponse,
+  CreateApiKeyResponse,
+  PlanInfo,
+} from '@ezstart/auth-sdk'

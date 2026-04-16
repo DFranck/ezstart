@@ -59,3 +59,16 @@ export { ProductGrid } from './ProductGrid.js'
 export type { ProductGridProps, ProductGridTexts, ProductGridFilterOptions } from './ProductGrid.js'
 export { PaymentHistory } from './PaymentHistory.js'
 export type { PaymentHistoryProps, PaymentHistoryTexts } from './PaymentHistory.js'
+
+// Stripe Connect
+export { ConnectStatusCard } from './ConnectStatusCard.js'
+export type { ConnectStatusCardProps, ConnectStatusCardTexts } from './ConnectStatusCard.js'
+export { ConnectOnboardForm } from './ConnectOnboardForm.js'
+export type { ConnectOnboardFormProps, ConnectOnboardFormTexts } from './ConnectOnboardForm.js'
+export { ConnectFeeSummary } from './ConnectFeeSummary.js'
+export type { ConnectFeeSummaryProps, ConnectFeeSummaryTexts } from './ConnectFeeSummary.js'
+export { DeveloperConnectDashboard } from './DeveloperConnectDashboard.js'
+export type {
+  DeveloperConnectDashboardProps,
+  DeveloperConnectDashboardTexts,
+} from './DeveloperConnectDashboard.js'

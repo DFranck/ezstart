@@ -238,6 +238,44 @@ export interface PlansListResponse {
   }
 }
 
+// Stripe Connect Types
+export type ConnectAccountType = 'standard' | 'express'
+
+export type ConnectAccountStatus = 'pending' | 'active' | 'restricted' | 'disabled'
+
+export interface ConnectedAccount {
+  stripeAccountId: string
+  email: string
+  businessName: string
+  accountType: ConnectAccountType
+  status: ConnectAccountStatus
+  chargesEnabled: boolean
+  payoutsEnabled: boolean
+  defaultFeePercent: number
+  onboardedAt: string | null
+  createdAt: string
+}
+
+export interface ConnectStatusResponse {
+  connectedAccount: ConnectedAccount | null
+}
+
+export interface ConnectOnboardRequest {
+  email: string
+  businessName: string
+  type: ConnectAccountType
+}
+
+export interface ConnectOnboardResponse {
+  accountLinkUrl: string
+  connectedAccount: ConnectedAccount
+}
+
+export interface ConnectDashboardLinkResponse {
+  loginLinkUrl: string
+  message?: string
+}
+
 // API Requests
 export interface CreateDonationRequest {
   projectId: string

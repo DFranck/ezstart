@@ -1,18 +1,21 @@
 'use client'
 
 import { type ColumnDef, Badge, Button, DataTable, Div, Span, Code } from '@ezstart/ui/components'
-import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
-import type { ApiKeyItem } from '../types'
-import { UsageBadge } from './UsageBadge'
+import type { ApiKeyItem } from '../../core/types.js'
+import type { ApiKeysTableTexts } from './types.js'
+import { UsageBadge } from './UsageBadge.js'
 
-interface ApiKeysTableProps {
+export interface ApiKeysTableProps {
   keys: ApiKeyItem[]
   onRevoke: (id: string) => void
   onRotate: (id: string) => void
   onViewUsage: (id: string) => void
   isRevoking: boolean
   isRotating: boolean
+  texts: ApiKeysTableTexts
+  /** Locale used for date formatting (e.g. `'en'`, `'fr'`). Defaults to `'en'`. */
+  locale?: string
 }
 
 export function ApiKeysTable({
@@ -22,12 +25,11 @@ export function ApiKeysTable({
   onViewUsage,
   isRevoking,
   isRotating,
+  texts,
+  locale = 'en',
 }: ApiKeysTableProps) {
-  const t = useTranslations('developer')
-  const locale = useLocale()
-
   const formatDate = (iso: string | null): string => {
-    if (!iso) return t('table.never')
+    if (!iso) return texts.never
     return new Date(iso).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
@@ -39,14 +41,14 @@ export function ApiKeysTable({
     () => [
       {
         accessorKey: 'name',
-        header: t('table.name'),
+        header: texts.name,
         cell: ({ row }) => (
           <Span className="font-medium text-foreground">{row.original.name}</Span>
         ),
       },
       {
         accessorKey: 'keyPrefix',
-        header: t('table.keyPrefix'),
+        header: texts.keyPrefix,
         cell: ({ row }) => (
           <Code className="text-sm text-muted-foreground">{row.original.keyPrefix}...</Code>
         ),
@@ -54,19 +56,19 @@ export function ApiKeysTable({
       },
       {
         accessorKey: 'status',
-        header: t('table.status'),
+        header: texts.status,
         cell: ({ row }) => {
           const status = row.original.status
           return (
             <Badge variant={status === 'active' ? 'success' : 'destructive'}>
-              {t(`status.${status}`)}
+              {status === 'active' ? texts.statusActive : texts.statusRevoked}
             </Badge>
           )
         },
       },
       {
         id: 'usage',
-        header: t('table.usage'),
+        header: texts.usage,
         cell: ({ row }) => {
           const { quotaMonthly, usageThisMonth, status } = row.original
           if (status === 'revoked') return null
@@ -75,7 +77,11 @@ export function ApiKeysTable({
               className="cursor-pointer"
               onClick={() => onViewUsage(row.original.id)}
             >
-              <UsageBadge used={usageThisMonth} quota={quotaMonthly} />
+              <UsageBadge
+                used={usageThisMonth}
+                quota={quotaMonthly}
+                texts={{ unlimited: texts.unlimited }}
+              />
             </Div>
           )
         },
@@ -83,17 +89,17 @@ export function ApiKeysTable({
       },
       {
         accessorKey: 'createdAt',
-        header: t('table.created'),
+        header: texts.created,
         cell: ({ row }) => formatDate(row.original.createdAt),
       },
       {
         accessorKey: 'lastUsedAt',
-        header: t('table.lastUsed'),
+        header: texts.lastUsed,
         cell: ({ row }) => formatDate(row.original.lastUsedAt),
       },
       {
         id: 'actions',
-        header: t('table.actions'),
+        header: texts.actions,
         cell: ({ row }) => {
           if (row.original.status === 'revoked') return null
           return (
@@ -104,7 +110,7 @@ export function ApiKeysTable({
                 onClick={() => onRotate(row.original.id)}
                 disabled={isRotating}
               >
-                {t('rotate.submit')}
+                {texts.rotate}
               </Button>
               <Button
                 variant="destructive"
@@ -112,7 +118,7 @@ export function ApiKeysTable({
                 onClick={() => onRevoke(row.original.id)}
                 disabled={isRevoking}
               >
-                {t('revoke.submit')}
+                {texts.revoke}
               </Button>
             </Div>
           )
@@ -120,7 +126,7 @@ export function ApiKeysTable({
         enableSorting: false,
       },
     ],
-    [t, locale, onRevoke, onRotate, onViewUsage, isRevoking, isRotating]
+    [texts, locale, onRevoke, onRotate, onViewUsage, isRevoking, isRotating]
   )
 
   return (
