@@ -3,8 +3,8 @@
 import { Button, Div, H2, Icon, Input, Modal, P } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
-import { usePay, usePayContext } from '../provider.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { usePay, usePayContext } from '../react/pay-provider.js'
+import { formatCurrency } from '../core/format-currency.js'
 import { PromoCodeInput, type PromoValidation } from './PromoCodeInput.js'
 
 export interface SubscribeButtonTexts {

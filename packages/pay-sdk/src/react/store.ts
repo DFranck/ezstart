@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Payment } from './types.js'
+import type { Payment } from '../core/types.js'
 
 export interface PayState {
   payments: Payment[]

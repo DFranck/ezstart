@@ -15,8 +15,8 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
-import { usePay } from '../provider.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { usePay } from '../react/pay-provider.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface PurchaseCardProps {
   appName: string

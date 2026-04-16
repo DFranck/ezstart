@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePayContext } from '../provider.js'
-import type { Plan } from '../types.js'
+import { usePayContext } from '../react/pay-provider.js'
+import type { Plan } from '../core/types.js'
 import {
   Badge,
   Button,
@@ -18,7 +18,7 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { SubscribeButton } from './SubscribeButton.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface SubscriptionPlanCardProps {
   appName: string

@@ -8,10 +8,10 @@ import {
   TabsList,
   TabsTrigger,
 } from '@ezstart/ui/components'
-import { useDonations } from '../hooks/useDonations.js'
-import { usePurchases } from '../hooks/usePurchases.js'
-import { useSubscriptions } from '../hooks/useSubscriptions.js'
-import { usePaymentHistory } from '../hooks/usePaymentHistory.js'
+import { useDonations } from '../react/hooks/useDonations.js'
+import { usePurchases } from '../react/hooks/usePurchases.js'
+import { useSubscriptions } from '../react/hooks/useSubscriptions.js'
+import { usePaymentHistory } from '../react/hooks/usePaymentHistory.js'
 import { SubscriptionCard } from './SubscriptionCard.js'
 import { PaymentHistory } from './PaymentHistory.js'
 

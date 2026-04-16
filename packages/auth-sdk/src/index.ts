@@ -1,43 +1,77 @@
-// Client
-export { AuthClient, createAuthClient, detectAuthMode } from './client.js'
-export type { AuthClientConfig } from './client.js'
+/**
+ * Main barrel — re-exports core + react + monorepo wrapper + components.
+ *
+ * `import { AuthProvider, useAuth, AuthClient } from '@ezstart/auth-sdk'`
+ * continues to work unchanged.
+ */
+
+// ── Core (agnostic) ──────────────────────────────────────────────────────────
+
+export { CoreAuthClient, createCoreAuthClient } from './core/auth-client.js'
+export { AuthError } from './core/errors.js'
+export { TokenManager, createMemoryStorage, createLocalStorage } from './core/token-manager.js'
+
+// Core schemas (response validation)
+export {
+  authUserSchema,
+  authCodeResponseSchema,
+  tokenResponseSchema,
+  userResponseSchema,
+  verifyResponseSchema,
+  errorResponseSchema,
+} from './core/schemas.js'
+
+// ── React (hooks, provider, guards) ──────────────────────────────────────────
+
+export { useAuthStore, useAuthStoreSSR, configureAuthStorage } from './react/store.js'
+export type { AuthState } from './react/store.js'
+
+// React guards (also available via react/ barrel)
+export { RequireAuth, AccessDenied, SignedIn, SignedOut } from './react/guards.js'
+export type {
+  RequireAuthProps,
+  AccessDeniedProps,
+  SignedInProps,
+  SignedOutProps,
+} from './react/guards.js'
+
+// ── Monorepo wrapper (backward-compatible) ───────────────────────────────────
+
+// AuthClient with monorepo auto-config
+export {
+  AuthClient,
+  createAuthClient,
+  detectAuthMode,
+  getEzauthUrl,
+  // Backward-compat: AuthProvider = EzstartAuthProvider
+  EzstartAuthProvider as AuthProvider,
+  useEzstartAuth as useAuth,
+  useEzstartAuthContext as useAuthContext,
+} from './ezstart-auth.js'
+export type { AuthClientConfig } from './ezstart-auth.js'
 
 // SSO helpers
-export { getEzauthUrl } from './lib/sso.js'
+export { getEzauthUrl as getEzauthSsoUrl } from './lib/sso.js'
 
-// Store
-export { useAuthStore, useAuthStoreSSR, configureAuthStorage } from './store.js'
-export type { AuthState, AuthMode } from './store.js'
-
-// Provider and hooks
-export { AuthProvider, useAuth, useAuthContext } from './provider.js'
+// Hooks
 export { useAuthNavigation } from './hooks/useAuthNavigation.js'
 
-// Middleware (Next.js)
+// ── Middleware (Next.js) ─────────────────────────────────────────────────────
+
 export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware.js'
 export type { AuthMiddlewareConfig } from './middleware.js'
 
-// SSR Protected Middleware (Next.js Edge Runtime)
+// SSR Protected Middleware
 export { createProtectedMiddleware } from './middleware/index.js'
 export type { ProtectedMiddlewareConfig } from './middleware/index.js'
 
-// Components
+// ── Components (pre-built UI) ────────────────────────────────────────────────
+
 export { AuthCallbackPage } from './auth-callback-page.js'
 export { LoginButton } from './login-button.js'
 export type { LoginButtonProps } from './login-button.js'
-export { RequireAuth } from './require-auth.js'
-export type { RequireAuthProps } from './require-auth.js'
-export { AccessDenied } from './access-denied.js'
-export type { AccessDeniedProps } from './access-denied.js'
 
-// Admin dashboard
-export { AuthAdminDashboard } from './components/AuthAdminDashboard.js'
-export type {
-  AuthAdminDashboardProps,
-  AuthAdminDashboardTexts,
-} from './components/AuthAdminDashboard.js'
-
-// Auth form components (embeddable sign-in/sign-up forms)
+// Auth form components
 export { SignInForm } from './components/SignInForm.js'
 export type { SignInFormProps, SignInFormTexts } from './components/SignInForm.js'
 export { SignUpForm } from './components/SignUpForm.js'
@@ -72,7 +106,14 @@ export type {
   TwoFactorSettingsTexts,
 } from './components/TwoFactorSettings.js'
 
-// User components (Clerk-like pre-built UI)
+// Admin dashboard
+export { AuthAdminDashboard } from './components/AuthAdminDashboard.js'
+export type {
+  AuthAdminDashboardProps,
+  AuthAdminDashboardTexts,
+} from './components/AuthAdminDashboard.js'
+
+// User components
 export { UserMenu } from './components/UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './components/UserMenu.js'
 export { AccountModal } from './components/AccountModal.js'
@@ -81,15 +122,13 @@ export { UserAvatar } from './components/UserAvatar.js'
 export type { UserAvatarProps } from './components/UserAvatar.js'
 export { UserSettings } from './components/UserSettings.js'
 export type { UserSettingsProps, UserSettingsTexts } from './components/UserSettings.js'
-export { SignedIn } from './components/SignedIn.js'
-export type { SignedInProps } from './components/SignedIn.js'
-export { SignedOut } from './components/SignedOut.js'
-export type { SignedOutProps } from './components/SignedOut.js'
 
-// Re-export types
+// ── Types ────────────────────────────────────────────────────────────────────
+
 export type {
   AuthUser,
   AuthToken,
+  AuthMode,
   LoginRequest,
   RegisterRequest,
   TokenRequest,
@@ -97,22 +136,23 @@ export type {
   AuthCodeResponse,
   JWTPayload,
   EmailOverrideRequest,
-} from './types.js'
+} from './core/types.js'
 
-// Embedded i18n dictionaries (EN/FR/VI) for auth forms
+// ── i18n ─────────────────────────────────────────────────────────────────────
+
 export { getAuthTexts, en, fr, vi } from './i18n/index.js'
 export type { AuthLocale, AuthDict, FormKey } from './i18n/index.js'
 
-// Zod schemas for validation and OpenAPI
+// ── Request schemas (from @ezstart/api-contracts) ────────────────────────────
+
 export {
   loginRequestSchema,
   registerRequestSchema,
   tokenRequestSchema,
   verifyRequestSchema,
-  authUserSchema,
-  authCodeResponseSchema,
-  tokenResponseSchema,
-  userResponseSchema,
-  verifyResponseSchema,
-  errorResponseSchema,
+  forgotPasswordRequestSchema,
+  sendVerificationRequestSchema,
+  quickSignupRequestSchema,
+  supportedLocaleSchema,
+  emailOverrideSchema,
 } from './schemas.js'

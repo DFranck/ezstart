@@ -1,5 +1,9 @@
-import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
+/**
+ * Core PayClient — 100% agnostic, zero @ezstart/* deps.
+ * Uses `fetch()` directly. Requires `apiUrl` to be provided by the caller.
+ */
 import type {
+  PayClientConfig,
   CreateDonationRequest,
   CreatePurchaseRequest,
   CreateSubscriptionRequest,
@@ -7,9 +11,7 @@ import type {
   UpdatePromoRequest,
   CreatePlanRequest,
   UpdatePlanRequest,
-  PayClientConfig,
   Payment,
-  Plan,
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
@@ -20,27 +22,11 @@ import type {
   PlansListResponse,
 } from './types.js'
 
-// Helper to get the correct URLs based on environment
-function getEZPayUrls() {
-  // Detect environment (local, development, production)
-  const env = getCurrentEnvironment()
-
-  return {
-    apiBaseURL: `${getApiUrl('ezpay', env)}/api`,
-    webBaseURL: getWebUrl('ezpay', env),
-  }
-}
-
 export class PayClient {
   private config: PayClientConfig
-  private urls: ReturnType<typeof getEZPayUrls>
 
   constructor(config: PayClientConfig) {
-    this.urls = getEZPayUrls()
-    this.config = {
-      ...config,
-      baseURL: config.baseURL || this.urls.apiBaseURL,
-    }
+    this.config = config
   }
 
   /** Resolve return URL: explicit config > window.location origin > undefined */
@@ -108,7 +94,7 @@ export class PayClient {
       }
     }
 
-    const url = `${this.config.baseURL}/${path}?${searchParams.toString()}`
+    const url = `${this.config.apiUrl}/${path}?${searchParams.toString()}`
     const response = await this.fetchWithAuth(url, { headers: this.getHeaders() })
     const result = await response.json()
 
@@ -131,7 +117,7 @@ export class PayClient {
   async createDonation(data: CreateDonationRequest): Promise<PaymentResponse> {
     const returnUrl = this.getReturnUrl()
 
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/donate`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/donate`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
@@ -159,7 +145,7 @@ export class PayClient {
     if (projectId) searchParams.set('projectId', projectId)
 
     const response = await this.fetchWithAuth(
-      `${this.config.baseURL}/donations/stats?${searchParams.toString()}`,
+      `${this.config.apiUrl}/donations/stats?${searchParams.toString()}`,
       { headers: this.getHeaders() }
     )
 
@@ -177,7 +163,7 @@ export class PayClient {
   async createPurchase(data: CreatePurchaseRequest): Promise<PaymentResponse> {
     const returnUrl = this.getReturnUrl()
 
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/purchase`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/purchase`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
@@ -206,7 +192,7 @@ export class PayClient {
   async createSubscription(data: CreateSubscriptionRequest): Promise<PaymentResponse> {
     const returnUrl = this.getReturnUrl()
 
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/subscribe`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/subscribe`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ ...data, returnUrl }),
@@ -234,7 +220,7 @@ export class PayClient {
 
   async cancelSubscription(subscriptionId: string): Promise<{ success: boolean }> {
     const response = await this.fetchWithAuth(
-      `${this.config.baseURL}/subscriptions/${subscriptionId}/cancel`,
+      `${this.config.apiUrl}/subscriptions/${subscriptionId}/cancel`,
       {
         method: 'POST',
         headers: this.getHeaders(),
@@ -254,7 +240,7 @@ export class PayClient {
 
   async refundPayment(paymentId: string): Promise<{ success: boolean }> {
     const response = await this.fetchWithAuth(
-      `${this.config.baseURL}/payments/${paymentId}/refund`,
+      `${this.config.apiUrl}/payments/${paymentId}/refund`,
       {
         method: 'POST',
         headers: this.getHeaders(),
@@ -298,7 +284,7 @@ export class PayClient {
   }
 
   async getPayment(paymentId: string): Promise<Payment> {
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/payments/${paymentId}`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/payments/${paymentId}`, {
       headers: this.getHeaders(),
     })
 
@@ -314,7 +300,7 @@ export class PayClient {
   // ===== PROMOS =====
 
   async createPromo(data: CreatePromoRequest): Promise<PromoResponse> {
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/promos`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
@@ -343,7 +329,7 @@ export class PayClient {
     }
 
     const response = await this.fetchWithAuth(
-      `${this.config.baseURL}/promos?${searchParams.toString()}`,
+      `${this.config.apiUrl}/promos?${searchParams.toString()}`,
       { headers: this.getHeaders() }
     )
 
@@ -367,7 +353,7 @@ export class PayClient {
     const searchParams = new URLSearchParams({ appName })
 
     const response = await fetch(
-      `${this.config.baseURL}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`
+      `${this.config.apiUrl}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`
     )
 
     const result = await response.json()
@@ -380,7 +366,7 @@ export class PayClient {
   }
 
   async updatePromo(promoId: string, data: UpdatePromoRequest): Promise<PromoResponse> {
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos/${promoId}`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/promos/${promoId}`, {
       method: 'PATCH',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
@@ -396,7 +382,7 @@ export class PayClient {
   }
 
   async deletePromo(promoId: string): Promise<{ success: boolean }> {
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/promos/${promoId}`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/promos/${promoId}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     })
@@ -414,7 +400,7 @@ export class PayClient {
 
   async cleanupPayments(appName?: string): Promise<{ deletedCount: number }> {
     const params = appName ? `?appName=${appName}` : ''
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/payments/cleanup${params}`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/payments/cleanup${params}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     })
@@ -426,7 +412,7 @@ export class PayClient {
   // ===== PLANS =====
 
   async createPlan(data: CreatePlanRequest): Promise<PlanResponse> {
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/plans`, {
       method: 'POST',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
@@ -455,7 +441,7 @@ export class PayClient {
     }
 
     // Public endpoint — no auth needed, but include token if available
-    const url = `${this.config.baseURL}/plans?${searchParams.toString()}`
+    const url = `${this.config.apiUrl}/plans?${searchParams.toString()}`
     const response = await fetch(url, { headers: this.getHeaders() })
 
     const result = await response.json()
@@ -475,7 +461,7 @@ export class PayClient {
   }
 
   async updatePlan(planId: string, data: UpdatePlanRequest): Promise<PlanResponse> {
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans/${planId}`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/plans/${planId}`, {
       method: 'PATCH',
       headers: this.getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
@@ -491,7 +477,7 @@ export class PayClient {
   }
 
   async deletePlan(planId: string): Promise<{ success: boolean }> {
-    const response = await this.fetchWithAuth(`${this.config.baseURL}/plans/${planId}`, {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/plans/${planId}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     })
@@ -506,7 +492,7 @@ export class PayClient {
   }
 }
 
-// Helper function to create PayClient with auto-configured URLs
-export function createPayClient(config: Omit<PayClientConfig, 'baseURL'> & { baseURL?: string }) {
+/** Create a PayClient instance with the given config */
+export function createPayClient(config: PayClientConfig): PayClient {
   return new PayClient(config)
 }

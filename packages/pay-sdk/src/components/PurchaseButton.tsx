@@ -3,8 +3,8 @@
 import { Button, Div, H2, Icon, Modal, P } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
-import { usePay } from '../provider.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { usePay } from '../react/pay-provider.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface PurchaseButtonTexts {
   title?: string

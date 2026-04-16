@@ -16,7 +16,7 @@ import {
 import Image from 'next/image'
 import { PurchaseButton } from './PurchaseButton.js'
 import { SubscribeButton } from './SubscribeButton.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface ProductCardTexts {
   buyButton?: string

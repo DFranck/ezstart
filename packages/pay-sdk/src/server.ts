@@ -20,7 +20,7 @@ export type {
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
-} from './types.js'
+} from './core/types.js'
 
 // Zod schemas for validation and OpenAPI
 export {
@@ -35,10 +35,10 @@ export {
   paymentsListResponseSchema,
   statsResponseSchema,
   errorResponseSchema,
-} from './schemas.js'
+} from './core/schemas.js'
 
 // Providers (provider-agnostic payment abstraction)
-export { PaymentProviderRegistry, StripeProvider, ConsoleProvider } from './providers/index.js'
+export { PaymentProviderRegistry, StripeProvider, ConsoleProvider } from './core/providers/index.js'
 export type {
   IPaymentProvider,
   DiscountInfo,
@@ -53,4 +53,4 @@ export type {
   WebhookEventData,
   StripeProviderConfig,
   StripeInstance,
-} from './providers/index.js'
+} from './core/providers/index.js'

@@ -19,8 +19,8 @@ import {
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { toast } from 'sonner'
-import { usePay } from '../provider.js'
-import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
+import { usePay } from '../react/pay-provider.js'
+import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
 
 export interface DonationCardProps {
   appName: string

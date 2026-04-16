@@ -12,8 +12,8 @@ import {
   type ColumnDef,
 } from '@ezstart/ui/components'
 import type { KnownIconName } from '@ezstart/ui/components'
-import type { Payment, PaymentStatus, PaymentType } from '../types.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import type { Payment, PaymentStatus, PaymentType } from '../core/types.js'
+import { formatCurrency } from '../core/format-currency.js'
 
 export interface PaymentHistoryTexts {
   status?: Record<string, string>

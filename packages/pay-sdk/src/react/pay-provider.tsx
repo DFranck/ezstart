@@ -1,12 +1,12 @@
 'use client'
 
 import React, { createContext, useContext, useRef, useMemo, type ReactNode } from 'react'
-import { createPayClient } from './client.js'
+import { PayClient } from '../core/pay-client.js'
+import type { PayClientConfig } from '../core/types.js'
 import { usePayStore } from './store.js'
-import type { PayClientConfig } from './types.js'
 
 interface PayContextValue {
-  client: ReturnType<typeof createPayClient>
+  client: PayClient
 }
 
 const PayContext = createContext<PayContextValue | null>(null)
@@ -43,8 +43,9 @@ export function PayProvider({
   onAuthFailureRef.current = onAuthFailure ?? config?.onAuthFailure
 
   const client = useMemo(() => {
-    return createPayClient({
+    return new PayClient({
       appName,
+      apiUrl: config?.apiUrl ?? '',
       ...config,
       getToken: () => getTokenRef.current?.() ?? null,
       onTokenRefresh: () => onTokenRefreshRef.current?.() ?? Promise.resolve(null),

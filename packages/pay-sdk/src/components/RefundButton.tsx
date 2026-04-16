@@ -3,8 +3,8 @@
 import { Button, Icon } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useCallback, useState } from 'react'
-import { usePayContext } from '../provider.js'
-import { formatCurrency } from '../utils/format-currency.js'
+import { usePayContext } from '../react/pay-provider.js'
+import { formatCurrency } from '../core/format-currency.js'
 import { ConfirmActionDialog } from './ConfirmActionDialog.js'
 
 export interface RefundButtonTexts {

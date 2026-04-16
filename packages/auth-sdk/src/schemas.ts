@@ -1,4 +1,21 @@
-import { z } from 'zod'
+/**
+ * Schema re-exports for backward compatibility.
+ *
+ * Response schemas are in `core/schemas.ts` (agnostic).
+ * Request schemas come from `@ezstart/api-contracts` (monorepo source of truth).
+ */
+
+// Re-export core response schemas
+export {
+  authUserSchema,
+  authCodeResponseSchema,
+  tokenResponseSchema,
+  userResponseSchema,
+  verifyResponseSchema,
+  errorResponseSchema,
+} from './core/schemas.js'
+
+// Re-export request schemas from @ezstart/api-contracts (monorepo source of truth)
 import {
   EmailOverrideSchema,
   ForgotPasswordRequestSchema,
@@ -11,96 +28,12 @@ import {
   VerifyRequestSchema,
 } from '@ezstart/api-contracts'
 
-// ---------------------------------------------------------------------------
-// Request schemas — thin aliases to `@ezstart/api-contracts` (source of truth
-// for wire-level shapes). Exported under the original lowerCamelCase names
-// for backward compatibility with existing consumers.
-// ---------------------------------------------------------------------------
-
-/**
- * Supported locales for user-facing emails (en/fr/vi).
- * Re-exported from `@ezstart/api-contracts`.
- */
 export const supportedLocaleSchema = SupportedLocaleSchema
-
-/**
- * Per-send email overrides forwarded to `@ezstart/email-service` templates.
- * Re-exported from `@ezstart/api-contracts`.
- */
 export const emailOverrideSchema = EmailOverrideSchema
-
 export const loginRequestSchema = LoginRequestSchema
-
 export const registerRequestSchema = RegisterRequestSchema
-
 export const forgotPasswordRequestSchema = ForgotPasswordRequestSchema
-
 export const sendVerificationRequestSchema = SendVerificationRequestSchema
-
 export const quickSignupRequestSchema = QuickSignupRequestSchema
-
 export const tokenRequestSchema = TokenRequestSchema
-
 export const verifyRequestSchema = VerifyRequestSchema
-
-// Response schemas
-export const authUserSchema = z
-  .object({
-    _id: z.string().describe('User ID'),
-    email: z.string().describe('User email'),
-    username: z.string().describe('Username'),
-    firstName: z.string().optional().describe('First name'),
-    lastName: z.string().optional().describe('Last name'),
-    avatar: z.string().optional().describe('Avatar URL'),
-    isVerified: z.boolean().describe('Email verification status'),
-    apps: z.array(z.string()).describe('Accessible applications'),
-    // RBAC fields
-    roles: z.array(z.string()).optional().describe('User roles (superadmin, admin, manager, etc.)'),
-    permissions: z.array(z.string()).optional().describe('User permissions'),
-    features: z.array(z.string()).optional().describe('Enabled features'),
-    organizationId: z.string().optional().describe('Organization ID'),
-    managedBy: z.string().optional().describe('Manager user ID'),
-    createdAt: z.string().describe('Account creation timestamp'),
-    updatedAt: z.string().describe('Last update timestamp'),
-  })
-  .describe('User information')
-
-export const authCodeResponseSchema = z.object({
-  success: z.boolean().describe('Request success status'),
-  code: z.string().describe('Authorization code'),
-  expires_at: z.string().describe('Code expiration timestamp'),
-  message: z.string().describe('Success message'),
-})
-
-export const tokenResponseSchema = z.object({
-  success: z.boolean().describe('Request success status'),
-  access_token: z.string().describe('JWT access token'),
-  token_type: z.literal('Bearer').describe('Token type'),
-  expires_in: z.number().describe('Token expiration in seconds'),
-  user: authUserSchema,
-})
-
-export const userResponseSchema = z.object({
-  success: z.boolean().describe('Request success status'),
-  user: authUserSchema,
-})
-
-export const verifyResponseSchema = z.object({
-  success: z.boolean().describe('Request success status'),
-  valid: z.boolean().describe('Token validity status'),
-  payload: z
-    .object({
-      userId: z.string().describe('User ID'),
-      email: z.string().describe('User email'),
-      username: z.string().describe('Username'),
-      apps: z.array(z.string()).describe('Accessible applications'),
-      exp: z.number().describe('Token expiration timestamp'),
-    })
-    .optional()
-    .describe('Decoded token payload'),
-})
-
-export const errorResponseSchema = z.object({
-  success: z.literal(false).describe('Request success status'),
-  error: z.string().describe('Error message'),
-})

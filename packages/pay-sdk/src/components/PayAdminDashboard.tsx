@@ -36,9 +36,9 @@ import type {
   Promo,
   PromoDiscountType,
   PromoDuration,
-} from '../types.js'
-import { formatCurrency } from '../utils/format-currency.js'
-import { usePayContext } from '../provider.js'
+} from '../core/types.js'
+import { formatCurrency } from '../core/format-currency.js'
+import { usePayContext } from '../react/pay-provider.js'
 import { ConfirmActionDialog } from './ConfirmActionDialog.js'
 
 // ========================================

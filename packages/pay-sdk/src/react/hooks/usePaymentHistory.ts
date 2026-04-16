@@ -1,8 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { usePayContext } from '../provider.js'
-import type { Payment, PaymentType, PaymentStatus } from '../types.js'
+import { usePayContext } from '../pay-provider.js'
+import type { Payment, PaymentType, PaymentStatus } from '../../core/types.js'
 
 interface PaymentFilters {
   type?: PaymentType

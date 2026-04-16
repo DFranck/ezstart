@@ -1,6 +1,9 @@
-// Client (sans dépendances React/Next)
+// Client (sans dependances React/Next)
 export { AuthClient, createAuthClient } from './client.js'
 export type { AuthClientConfig } from './client.js'
+
+// Core client (agnostic)
+export { CoreAuthClient, createCoreAuthClient } from './core/auth-client.js'
 
 // Types pour les APIs
 export type {
@@ -12,9 +15,19 @@ export type {
   AuthCode,
   AuthCodeResponse,
   JWTPayload,
-} from './types.js'
+} from './core/types.js'
 
 // Zod schemas pour validation et OpenAPI
+export {
+  authUserSchema,
+  authCodeResponseSchema,
+  tokenResponseSchema,
+  userResponseSchema,
+  verifyResponseSchema,
+  errorResponseSchema,
+} from './core/schemas.js'
+
+// Request schemas from @ezstart/api-contracts
 export {
   loginRequestSchema,
   registerRequestSchema,
@@ -25,10 +38,4 @@ export {
   quickSignupRequestSchema,
   supportedLocaleSchema,
   emailOverrideSchema,
-  authUserSchema,
-  authCodeResponseSchema,
-  tokenResponseSchema,
-  userResponseSchema,
-  verifyResponseSchema,
-  errorResponseSchema,
 } from './schemas.js'

@@ -2,9 +2,9 @@
 
 import { useMemo } from 'react'
 import { Div, Icon, InfiniteMovingCards, P, Span } from '@ezstart/ui/components'
-import { useDonations } from '../hooks/useDonations.js'
-import { formatCurrency } from '../utils/format-currency.js'
-import type { Payment } from '../types.js'
+import { useDonations } from '../react/hooks/useDonations.js'
+import { formatCurrency } from '../core/format-currency.js'
+import type { Payment } from '../core/types.js'
 
 export interface DonationWallTexts {
   loadingText?: string

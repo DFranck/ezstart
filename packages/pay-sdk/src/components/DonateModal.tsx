@@ -15,9 +15,9 @@ import {
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
-import { usePay } from '../provider.js'
+import { usePay } from '../react/pay-provider.js'
 import { DonateButton } from './DonateButton.js'
-import { formatCurrency, getCurrencySymbol } from '../utils/format-currency.js'
+import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
 
 export interface DonateModalTexts {
   title?: string

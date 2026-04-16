@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus.js'
+import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
 
 interface FeatureGateProps {
   /** The feature name to check against the plan's features list */

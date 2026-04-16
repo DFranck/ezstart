@@ -71,9 +71,10 @@ export interface Invoice extends Payment {
   }
 }
 
-// Client Config
+// Client Config — agnostic, no @ezstart/* deps
 export interface PayClientConfig {
-  baseURL?: string
+  /** Base API URL (e.g. "https://api.example.com/api") */
+  apiUrl: string
   appName: string
   /** Explicit return URL for payment redirects. Falls back to window.location origin. */
   returnUrl?: string
@@ -84,6 +85,18 @@ export interface PayClientConfig {
    *  Should return the new access token, or null if refresh failed. */
   onTokenRefresh?: () => Promise<string | null>
   /** Optional callback invoked when token refresh fails (e.g. to trigger logout/redirect). */
+  onAuthFailure?: () => void
+}
+
+/**
+ * @deprecated Use `PayClientConfig` with `apiUrl` instead. Kept for backward compat.
+ */
+export interface LegacyPayClientConfig {
+  baseURL?: string
+  appName: string
+  returnUrl?: string
+  getToken?: () => string | null | undefined
+  onTokenRefresh?: () => Promise<string | null>
   onAuthFailure?: () => void
 }
 
