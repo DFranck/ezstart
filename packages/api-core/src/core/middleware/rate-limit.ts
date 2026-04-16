@@ -15,7 +15,7 @@ export interface RateLimitOptions {
   max?: number
   /** Custom user-facing message. */
   message?: string
-  /** Paths that bypass the limiter (default: `['/api/health']`). */
+  /** Paths that bypass the limiter (default: `['/health', '/api/health']`). */
   skipPaths?: string[]
 }
 
@@ -46,7 +46,7 @@ export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequ
     windowMs = 15 * 60 * 1000,
     max = isDev ? 1000 : 100,
     message = 'Too many requests from this IP, please try again later.',
-    skipPaths = ['/api/health'],
+    skipPaths = ['/health', '/api/health'],
   } = options
 
   const retryAfterSeconds = Math.ceil(windowMs / 1000)

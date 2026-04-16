@@ -19,7 +19,8 @@ import {
 import { silentLogger } from './internal/logger.js'
 import type { ApiServer, RateLimitPreset, ServerConfig, ServerLogger } from './types.js'
 
-const HEALTH_PATH_DEFAULT = '/api/health'
+const HEALTH_PATH_DEFAULT = '/health'
+const HEALTH_PATH_LEGACY = '/api/health'
 const ROOT_PATH_DEFAULT = '/'
 
 function resolveRateLimiter(preset: RateLimitPreset | undefined) {
@@ -78,17 +79,26 @@ export function createApiServer(config: ServerConfig): ApiServer {
 
   // Health + root endpoints — mounted BEFORE global rate limiting so they
   // remain reachable even under heavy load (the limiter's `skipPaths` also
-  // default to `/api/health`).
+  // defaults to `['/health', '/api/health']`).
   const healthPath = config.healthPath ?? HEALTH_PATH_DEFAULT
   const rootPath = config.rootPath ?? ROOT_PATH_DEFAULT
 
-  app.get(healthPath, (_req, res) => {
+  const healthHandler: express.RequestHandler = (_req, res) => {
     res.status(200).json({
       status: 'ok',
       service: serviceName,
       timestamp: new Date().toISOString(),
     })
-  })
+  }
+
+  app.get(healthPath, healthHandler)
+
+  // Legacy `/api/health` kept for backwards compatibility with clients that
+  // already target the old path.  Skipped when the caller explicitly set
+  // `healthPath` to something custom (they own the mapping).
+  if (!config.healthPath && healthPath !== HEALTH_PATH_LEGACY) {
+    app.get(HEALTH_PATH_LEGACY, healthHandler)
+  }
 
   app.get(rootPath, (_req, res) => {
     res.status(200).json({

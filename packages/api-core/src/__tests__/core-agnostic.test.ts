@@ -22,9 +22,14 @@ describe('createApiServer (agnostic)', () => {
     expect(config.serviceName).toBe('myapp')
     expect(typeof logger.info).toBe('function')
 
-    const health = await request(app).get('/api/health')
+    const health = await request(app).get('/health')
     expect(health.status).toBe(200)
     expect(health.body).toMatchObject({ status: 'ok', service: 'myapp' })
+
+    // Legacy path kept for backwards compatibility
+    const legacyHealth = await request(app).get('/api/health')
+    expect(legacyHealth.status).toBe(200)
+    expect(legacyHealth.body).toMatchObject({ status: 'ok', service: 'myapp' })
 
     const root = await request(app).get('/')
     expect(root.status).toBe(200)

@@ -117,7 +117,7 @@ export type ServerConfig = {
   db?: import('./db-connector.js').DbConnector
   /** Raw body routes (webhooks). Registered BEFORE the JSON parser. */
   rawBodyRoutes?: string[]
-  /** Path for the health endpoint. Default `/api/health`. */
+  /** Path for the health endpoint. Default `/health` (also mounts `/api/health` for compat). */
   healthPath?: string
   /** Path for the root status endpoint. Default `/`. */
   rootPath?: string

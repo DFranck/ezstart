@@ -63,8 +63,13 @@ describe('createEzstartServer (pre-configured wrapper)', () => {
     const { createEzstartServer } = await import('../ezstart-server.js')
 
     const { app } = createEzstartServer('ezstart')
-    const res = await request(app).get('/api/health')
+    const res = await request(app).get('/health')
     expect(res.status).toBe(200)
     expect(res.body).toMatchObject({ status: 'ok', service: 'ezstart' })
+
+    // Legacy /api/health still works
+    const legacy = await request(app).get('/api/health')
+    expect(legacy.status).toBe(200)
+    expect(legacy.body).toMatchObject({ status: 'ok', service: 'ezstart' })
   })
 })
