@@ -390,6 +390,7 @@ export function useAuth() {
   }
 
   const logout = async () => {
+    store.setLoggingOut(true)
     const rt = store.refreshToken
     // Call logout endpoint to clear cookie and revoke refresh token
     await client.logout(rt || undefined)
@@ -440,6 +441,7 @@ export function useAuth() {
     accessToken: store.accessToken,
     isAuthenticated: store.isAuthenticated,
     isLoggingIn: store.isLoggingIn,
+    isLoggingOut: store.isLoggingOut,
     isAuthReady: store.isAuthReady,
     mode, // ✅ Expose mode
 

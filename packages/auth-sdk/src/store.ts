@@ -14,6 +14,7 @@ export interface AuthState {
   isAuthenticated: boolean
   mode: AuthMode
   isLoggingIn: boolean
+  isLoggingOut: boolean
   isAuthReady: boolean
 
   // Actions
@@ -23,6 +24,7 @@ export interface AuthState {
   updateUser: (user: AuthUser) => void
   getMode: () => AuthMode
   setLoggingIn: (isLoggingIn: boolean) => void
+  setLoggingOut: (isLoggingOut: boolean) => void
 }
 
 const DEFAULT_STORAGE_KEY = 'ezauth-storage'
@@ -43,6 +45,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       mode: 'localStorage', // Will be auto-detected on first use
       isLoggingIn: false,
+      isLoggingOut: false,
       isAuthReady: false,
 
       setAuth: (
@@ -77,6 +80,7 @@ export const useAuthStore = create<AuthState>()(
           accessToken: null,
           refreshToken: null,
           isAuthenticated: false,
+          isLoggingOut: false,
           mode: 'localStorage', // Reset to default
         })
       },
@@ -92,6 +96,10 @@ export const useAuthStore = create<AuthState>()(
 
       setLoggingIn: (isLoggingIn: boolean) => {
         set({ isLoggingIn })
+      },
+
+      setLoggingOut: (isLoggingOut: boolean) => {
+        set({ isLoggingOut })
       },
     }),
     {
