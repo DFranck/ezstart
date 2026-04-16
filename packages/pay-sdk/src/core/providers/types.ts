@@ -58,6 +58,8 @@ export interface ConnectParams {
   destinationAccountId: string
   /** Platform fee in minor currency units (cents) */
   applicationFeeAmount: number
+  /** Account type: standard (full dashboard) or express (simplified onboarding) */
+  accountType?: 'standard' | 'express'
 }
 
 export interface CheckoutOptions {

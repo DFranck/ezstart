@@ -12,6 +12,7 @@ import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
 import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
+import type Stripe from 'stripe'
 import { z } from 'zod'
 
 export const onboardRegistry = new OpenAPIRegistry()
@@ -25,6 +26,10 @@ const docRouter = createRouterWithDoc(onboardRegistry, router)
 const onboardBodySchema = z.object({
   email: z.string().email().describe('Business email for the connected account'),
   businessName: z.string().min(1).describe('Business or individual name'),
+  type: z
+    .enum(['standard', 'express'])
+    .default('standard')
+    .describe('Account type: standard (full dashboard) or express (simplified onboarding)'),
 })
 
 const onboardResponseSchema = z.object({
@@ -45,7 +50,7 @@ const onboardHandler = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid onboard data', validation.error.errors)
     }
 
-    const { email, businessName } = validation.data
+    const { email, businessName, type: accountType } = validation.data
     const userId = req.userId as string
 
     const ConnectedAccount = await getConnectedAccountModel()
@@ -58,13 +63,27 @@ const onboardHandler = async (req: Request, res: Response) => {
 
     const stripe = getStripeInstance()
 
-    // Create Stripe Standard Connect account
-    const account = await stripe.accounts.create({
-      type: 'standard',
-      email,
-      business_profile: { name: businessName },
-      metadata: { userId },
-    })
+    // Create Stripe Connect account (standard or express)
+    const accountParams: Stripe.AccountCreateParams =
+      accountType === 'express'
+        ? {
+            type: 'express',
+            email,
+            business_profile: { name: businessName },
+            metadata: { userId },
+            capabilities: {
+              card_payments: { requested: true },
+              transfers: { requested: true },
+            },
+          }
+        : {
+            type: 'standard',
+            email,
+            business_profile: { name: businessName },
+            metadata: { userId },
+          }
+
+    const account = await stripe.accounts.create(accountParams)
 
     // Save to DB
     const connectedAccount = await ConnectedAccount.create({
@@ -72,6 +91,7 @@ const onboardHandler = async (req: Request, res: Response) => {
       stripeAccountId: account.id,
       email,
       businessName,
+      accountType,
       status: 'pending',
       chargesEnabled: false,
       payoutsEnabled: false,

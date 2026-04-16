@@ -22,7 +22,8 @@ const docRouter = createRouterWithDoc(dashboardLinkRegistry, router)
 
 const dashboardLinkResponseSchema = z.object({
   success: z.boolean(),
-  loginLinkUrl: z.string().optional().describe('Stripe Express Dashboard login link'),
+  loginLinkUrl: z.string().optional().describe('Stripe Dashboard login link'),
+  message: z.string().optional().describe('Additional info for standard accounts'),
   error: z.string().optional(),
 })
 
@@ -45,9 +46,17 @@ const dashboardLinkHandler = async (req: Request, res: Response) => {
     }
 
     const stripe = getStripeInstance()
-    const loginLink = await stripe.accounts.createLoginLink(account.stripeAccountId)
 
-    sendSuccess(res, { loginLinkUrl: loginLink.url })
+    // Express accounts use createLoginLink; Standard accounts manage their own Stripe dashboard
+    if (account.accountType === 'express') {
+      const loginLink = await stripe.accounts.createLoginLink(account.stripeAccountId)
+      sendSuccess(res, { loginLinkUrl: loginLink.url })
+    } else {
+      sendSuccess(res, {
+        loginLinkUrl: 'https://dashboard.stripe.com/',
+        message: 'Standard accounts manage their Stripe dashboard directly',
+      })
+    }
   } catch (error) {
     logger.error('Dashboard link error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to create dashboard link')

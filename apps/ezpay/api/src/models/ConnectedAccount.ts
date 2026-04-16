@@ -6,6 +6,7 @@ export interface ConnectedAccountDocument extends Document {
   stripeAccountId: string
   email: string
   businessName: string
+  accountType: 'standard' | 'express'
   status: 'pending' | 'active' | 'restricted' | 'disabled'
   chargesEnabled: boolean
   payoutsEnabled: boolean
@@ -21,6 +22,12 @@ const connectedAccountSchema = new Schema<ConnectedAccountDocument>(
     stripeAccountId: { type: String, required: true, unique: true, index: true },
     email: { type: String, required: true },
     businessName: { type: String, required: true },
+    accountType: {
+      type: String,
+      enum: ['standard', 'express'],
+      default: 'standard',
+      index: true,
+    },
     status: {
       type: String,
       enum: ['pending', 'active', 'restricted', 'disabled'],
