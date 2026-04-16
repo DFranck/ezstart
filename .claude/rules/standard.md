@@ -17,7 +17,7 @@
    - Wire contract (envelope, error, pagination) → `@ezstart/api-contracts`
    - Env/URL → `@ezstart/config`
    - Logger → `@ezstart/logger`
-   - Server framework → `@ezstart/express-core` (futur `@ezstart/api-core`)
+   - Server framework → `@ezstart/api-core`
 
    Si ça existe → `import`, jamais réimplémenter.
 
@@ -44,6 +44,62 @@
 
 ---
 
+## 0bis. Architecture SDK (packages consumer-facing)
+
+Tout package SDK qui expose de la logique client + UI suit le **split 3 couches**. Le consumer choisit son niveau d'intégration :
+
+| Couche            | Contenu                          | Peer deps               | Consumer type                                     |
+| ----------------- | -------------------------------- | ----------------------- | ------------------------------------------------- |
+| `src/core/`       | Client agnostique, types, errors | aucune (ou `zod`)       | Any JS (Vue, Svelte, vanilla, Node, React Native) |
+| `src/react/`      | Provider, hooks, guards          | `react`                 | React — construit son propre UI                   |
+| `src/components/` | Composants pré-faits             | `react` + `@ezstart/ui` | React — drop-in zero effort                       |
+
+**`package.json` exports** (3 entry points) :
+
+```json
+{
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./core": { "types": "./dist/core/index.d.ts", "import": "./dist/core/index.js" },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    }
+  }
+}
+```
+
+- `"."` → re-exporte core + react + monorepo wrapper (import par défaut)
+- `"./core"` → core seul (usage standalone non-React)
+- `"./components"` → composants UI (opt-in, nécessite `@ezstart/ui`)
+
+**Règles d'import entre couches** (sens unique, jamais remonter) :
+
+```
+core/  ←  react/  ←  components/
+              ←  ezstart-<name>.ts (monorepo wrapper)
+```
+
+- `core/` n'importe JAMAIS depuis `react/`, `components/`, ni `@ezstart/*`
+- `react/` importe depuis `core/` uniquement, jamais depuis `components/`
+- `components/` importe depuis `core/` et `react/`, utilise `@ezstart/ui`
+- `ezstart-<name>.ts` pré-câble le core avec `@ezstart/config` + `@ezstart/api-sdk`
+
+**Core factory pattern** :
+
+```ts
+// src/core/auth-client.ts
+export function createAuthClient(config: AuthClientConfig) {
+  // zero framework, zero @ezstart/*
+  return { login, logout, refresh, getUser, onTokenChange }
+}
+```
+
+**Packages concernés** : `auth-sdk`, `pay-sdk`, `ai-sdk`, tout futur SDK client.
+**Packages NON concernés** : `api-core` (serveur, pas de React), `api-contracts` (types purs), `config`, `logger`.
+
+---
+
 ## 1. Agnostique
 
 Le **core** de tout package doit être 100% agnostique monorepo, publishable npm standalone.
@@ -56,7 +112,7 @@ grep -rE "@ezstart/(config|logger)|ezauth-storage|getApiUrl|getWebUrl" packages/
 # → zéro match attendu (sauf dans un commentaire "No coupling to...")
 ```
 
-**Pattern** : `src/core/` agnostique + `src/<monorepo>-client.ts` wrapper thin qui pré-configure via factory `create<Name>(config)`.
+**Pattern** : `src/core/` agnostique + `src/ezstart-<name>.ts` wrapper thin qui pré-configure via factory `create<Name>(config)`.
 
 ---
 
@@ -120,6 +176,21 @@ grep -rnE "\bany\b|as unknown|@ts-expect-error|@ts-ignore|console\.(log|warn|err
 }
 ```
 
+Pour les SDK consumer-facing (cf. section 0bis), ajouter les entry points `./core` et `./components` :
+
+```json
+{
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./core": { "types": "./dist/core/index.d.ts", "import": "./dist/core/index.js" },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    }
+  }
+}
+```
+
 **Check** :
 
 ```bash
@@ -139,7 +210,10 @@ done
   - **Auth** : flow login, refresh expiré, localStorage corrompu, 2FA
   - **UI hook** : valeurs initiales, cleanup, race conditions sur unmount
   - **Schema validation** : bornes min/max, coerce, unknown keys, types nested
-- Tests core-agnostic indépendants des tests wrapper
+  - **SDK core** : factory create, config validation, token lifecycle, error handling
+  - **SDK react** : Provider mount/unmount, hook state transitions, context propagation
+  - **SDK components** : render, user interaction, loading/error states
+- Tests core-agnostic indépendants des tests react/components/wrapper
 - Aucun test flaky toléré
 
 ---
@@ -157,7 +231,9 @@ done
 
 ## Quickstart (monorepo)
 
-## Quickstart (external / standalone)
+## Quickstart (standalone React) <!-- SDK uniquement -->
+
+## Quickstart (standalone any JS) <!-- SDK avec core/ uniquement -->
 
 ## API
 
@@ -205,8 +281,11 @@ Règle activée en `error` → bloque commit (husky) + CI. Autofix quand possibl
 ## Grep-commands prêts à l'emploi (audit rapide)
 
 ```bash
-# Agnosticité core
+# Agnosticité core (zero @ezstart/*, zero React)
 grep -rnE "@ezstart/(config|logger)|ezauth-storage|getApiUrl" packages/<name>/src/core
+
+# SDK layer isolation (core/ must not import react/ or components/)
+grep -rnE "from '\.\./react|from '\.\./components|from 'react'" packages/<name>/src/core
 
 # TypeScript strict
 grep -rnE "\bany\b|as unknown|@ts-expect-error|@ts-ignore" packages/<name>/src

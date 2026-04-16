@@ -98,6 +98,20 @@ Review manuelle :
 - Est-ce que le dev a utilisé des primitives existantes où il aurait pu réinventer ?
 - Est-ce que les composants least-primitive sont utilisés (Modal over Dialog, AlertDialog over confirm, etc.) ?
 
+### Architecture SDK (section 0bis) — SDK consumer-facing uniquement
+
+```bash
+# core/ must not import react/ or components/ or any framework
+grep -rnE "from '\.\./react|from '\.\./components|from 'react'" <scope>/src/core
+```
+
+→ Attendu : zéro match
+
+- 3 entry points dans `exports` : `.`, `./core`, `./components` ?
+- `react/` importe seulement depuis `core/`, jamais depuis `components/` ?
+- `@ezstart/ui` en peer dep optionnelle (via `peerDependenciesMeta`) ?
+- Chaque couche testée indépendamment ?
+
 ---
 
 ## Format du rapport
