@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { Providers } from '@/components/providers'
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
 import { generateOrganizationSchema } from '@ezstart/seo-config'

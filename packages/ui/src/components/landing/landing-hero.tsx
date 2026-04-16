@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Hero Component - Landing Page Hero Section
  *
