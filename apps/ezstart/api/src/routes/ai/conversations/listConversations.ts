@@ -51,7 +51,8 @@ listConversationsRouter.get(
       //  - pass `?all=true` to list across all users (admin dashboard).
       const isSuperadmin = req.user?.globalRoles?.includes('superadmin') ?? false
       const wantsAll = isSuperadmin && all === 'true'
-      const effectiveUserId = wantsAll ? undefined : isSuperadmin && userId ? userId : req.userId
+      const currentUserId = req.userId || req.user?._id?.toString()
+      const effectiveUserId = wantsAll ? undefined : isSuperadmin && userId ? userId : currentUserId
 
       const query: Record<string, unknown> = {}
       if (appName) query.appName = appName
