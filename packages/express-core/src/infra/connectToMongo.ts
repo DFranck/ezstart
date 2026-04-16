@@ -6,6 +6,7 @@ import { logger } from '@ezstart/logger/server'
  * Prevents multiple simultaneous connection attempts
  */
 let isConnecting = false
+let registeredDbName: string | null = null
 
 /**
  * Unified MongoDB connection function for the entire monorepo.
@@ -24,9 +25,9 @@ let isConnecting = false
 export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
   // Already connected - return immediately
   if (mongoose.connection.readyState === 1) {
-    if (mongoose.connection.name && mongoose.connection.name !== dbName) {
+    if (registeredDbName && registeredDbName !== dbName) {
       logger.warn(
-        `[MongoDB] connectToMongo('${dbName}') ignored — already connected to '${mongoose.connection.name}'. ` +
+        `[MongoDB] connectToMongo('${dbName}') ignored — already connected as '${registeredDbName}'. ` +
           `Multi-DB in the same process is not supported; use a single DB per API.`
       )
     }
@@ -65,6 +66,7 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
 
   try {
     await mongoose.connect(MONGO_URL, options)
+    registeredDbName = dbName
 
     // Test the connection with a ping
     if (mongoose.connection.db) {
@@ -90,6 +92,7 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
 
       try {
         await mongoose.connect(`mongodb://localhost:27017/${dbName}`, options)
+        registeredDbName = dbName
 
         if (mongoose.connection.db) {
           await mongoose.connection.db.admin().ping()

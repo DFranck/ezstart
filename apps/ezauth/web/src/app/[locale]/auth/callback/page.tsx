@@ -9,7 +9,6 @@ export default async function CallbackPage() {
       successMessage={t('callback.success')}
       redirectMessage={t('callback.redirecting')}
       errorButtonText={t('callback.backToHome')}
-      errorButtonClassName="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
     />
   )
 }

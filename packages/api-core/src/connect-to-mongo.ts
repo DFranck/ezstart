@@ -16,6 +16,7 @@ import mongoose from 'mongoose'
 import { logger } from '@ezstart/logger/server'
 
 let isConnecting = false
+let registeredDbName: string | null = null
 
 const DEFAULT_OPTIONS = {
   serverSelectionTimeoutMS: 30_000,
@@ -42,9 +43,9 @@ const DEFAULT_OPTIONS = {
  */
 export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
   if (mongoose.connection.readyState === 1) {
-    if (mongoose.connection.name && mongoose.connection.name !== dbName) {
+    if (registeredDbName && registeredDbName !== dbName) {
       logger.warn(
-        `[MongoDB] connectToMongo('${dbName}') ignored — already connected to '${mongoose.connection.name}'. ` +
+        `[MongoDB] connectToMongo('${dbName}') ignored — already connected as '${registeredDbName}'. ` +
           `Multi-DB in the same process is not supported; use a single DB per API.`
       )
     }
@@ -70,6 +71,7 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
 
   try {
     await mongoose.connect(MONGO_URL, DEFAULT_OPTIONS)
+    registeredDbName = dbName
 
     if (mongoose.connection.db) {
       await mongoose.connection.db.admin().ping()
@@ -89,6 +91,7 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
       logger.info(`[MongoDB] Trying fallback to localhost:27017/${dbName}...`)
       try {
         await mongoose.connect(`mongodb://localhost:27017/${dbName}`, DEFAULT_OPTIONS)
+        registeredDbName = dbName
         if (mongoose.connection.db) {
           await mongoose.connection.db.admin().ping()
           logger.info(

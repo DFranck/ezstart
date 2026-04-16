@@ -10,7 +10,7 @@ const isDev = process.env.NODE_ENV !== 'production'
  * Override with LOG_LEVEL env var
  */
 const pinoLogger = pino({
-  level: process.env.LOG_LEVEL || (isDev ? 'debug' : 'warn'),
+  level: process.env.LOG_LEVEL || (isDev ? 'info' : 'warn'),
   transport: isDev
     ? {
         target: 'pino-pretty',
