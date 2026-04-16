@@ -206,6 +206,15 @@ Invoicing & billing pour les SME. **Status:** in-progress, priorité haute.
 
 Payment system centralisé (donations, achats, abonnements, factures via Stripe). **Status:** maintained.
 
+#### P0 — Stripe Connect (Platform/Marketplace)
+
+- [ ] **EP-020: Stripe Connect Platform setup** — Upgrade Stripe account to Platform. Enable Connect in Stripe Dashboard. OAuth flow for external devs to connect their Stripe accounts. New model `ConnectedAccount` (userId, stripeAccountId, status, onboardedAt). Routes: `POST /api/connect/onboard` → Stripe OAuth URL, `GET /api/connect/callback` → save account, `GET /api/connect/status`.
+- [ ] **EP-021: Connect webhook endpoint** — Separate `/api/webhooks/stripe-connect` for Connect events (`account.updated`, `payment_intent.succeeded` with transfers). Keep existing `/api/webhooks/stripe` for direct payments. Both use different webhook secrets.
+- [ ] **EP-022: Platform fee on transactions** — `application_fee_amount` on every checkout created for connected accounts. Configurable fee % per plan (default 3%). Fee goes to YOUR Stripe, payment goes to dev's Stripe. Model `PlatformFee` (transactionId, amount, connectedAccountId).
+- [ ] **EP-023: Connected accounts dashboard** — Admin page for connected devs: list accounts, see their transactions, total fees collected. Dev-facing: onboarding flow, account status, payout history.
+- [ ] **EP-024: pay-sdk Connect support** — `createPayClient({ apiUrl, apiKey, mode: 'connect' })`. When mode=connect, SDK passes apiKey and ezpay routes the payment through Connect. Agnostic core doesn't change — just a config flag that the API interprets.
+- [ ] **EP-025: Multi-provider architecture** — pay-sdk core `PayClient` already provider-agnostic. Add PayPal provider behind same API. Routes: `POST /api/checkout` accepts `provider: 'stripe' | 'paypal'`. SDK consumer chooses provider or lets API auto-select. **Bloqué par :** EP-020 stable first.
+
 #### Future — Features
 
 - [ ] **3.3 Landing page polish** — Page actuelle est une page de doc SDK, pas adaptée pour utilisateurs finaux. Vraie landing + CTA vers démos. Code snippets stylisés (`<pre>`/`<code>`).
