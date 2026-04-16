@@ -141,8 +141,23 @@ export async function startServer(app: Express, opts: StartServerOptions): Promi
   })
 
   onReady?.(server)
+  registerGracefulShutdown(server, { serviceName, db, onShutdown, logger })
 
+  return server
+}
+
+function registerGracefulShutdown(
+  server: HttpServer,
+  opts: {
+    serviceName: string
+    db?: DbConnector
+    onShutdown?: () => Promise<void> | void
+    logger: ServerLogger
+  }
+): void {
+  const { serviceName, db, onShutdown, logger } = opts
   const signals = ['SIGINT', 'SIGTERM'] as const
+
   for (const signal of signals) {
     process.on(signal, () => {
       logger.info(`[${serviceName}] Gracefully shutting down (${signal})`)
@@ -170,6 +185,4 @@ export async function startServer(app: Express, opts: StartServerOptions): Promi
       })
     })
   }
-
-  return server
 }

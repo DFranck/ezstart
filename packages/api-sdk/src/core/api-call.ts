@@ -1,5 +1,6 @@
 import { ApiError } from './api-error.js'
 import { resolveBaseUrl, type ResolvedConfig } from './internal/config.js'
+import { fetchWithRetry } from './internal/fetch-with-retry.js'
 import type { RefreshHelper } from './internal/refresh.js'
 import { buildBody, buildHeaders } from './internal/request.js'
 import { buildUrl } from './internal/url.js'
@@ -16,21 +17,19 @@ function buildInit(
   method: string,
   body: unknown,
   headers: Record<string, string>,
-  token: string | null,
   credentials: RequestCredentials,
   signal?: AbortSignal,
   accept?: string
-): RequestInit {
+): (token: string | null) => RequestInit {
   const { payload, isJsonBody } = buildBody(body)
-  const finalHeaders = buildHeaders(headers, token, { json: isJsonBody, accept })
 
-  return {
+  return (token: string | null) => ({
     method,
-    headers: finalHeaders,
+    headers: buildHeaders(headers, token, { json: isJsonBody, accept }),
     body: payload,
     credentials,
     signal,
-  }
+  })
 }
 
 /**
@@ -163,44 +162,19 @@ export function createApiCall(resolved: ResolvedConfig, refreshHelper: RefreshHe
 
     const tokenResult = resolveToken(resolved, options)
     const token = tokenResult instanceof Promise ? await tokenResult : tokenResult
-    const init = buildInit(method, body, headers, token, credentials, signal)
+    const initFactory = buildInit(method, body, headers, credentials, signal)
 
-    let res: Response
-    try {
-      res = await fetch(url, init)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Network request failed'
-      resolved.logger.warn('[apiCall] Network error', { url, method, error: message })
-      throw new ApiError(message, { status: 0, code: 'NETWORK_ERROR' })
-    }
-
-    // Auto-refresh on 401 (single-flight), retry once.
-    const canRefresh =
-      res.status === 401 &&
-      !skipRefresh &&
-      !options.skipAuth &&
-      token !== null &&
-      Boolean(resolved.refresh) &&
-      Boolean(resolved.tokenStore?.getRefreshToken)
-
-    if (canRefresh) {
-      const newToken = await refreshHelper.refresh()
-      if (newToken) {
-        resolved.logger.debug('[apiCall] Token refreshed, retrying request', { url, method })
-        const retryInit = buildInit(method, body, headers, newToken, credentials, signal)
-
-        let retryRes: Response
-        try {
-          retryRes = await fetch(url, retryInit)
-        } catch (err) {
-          const message = err instanceof Error ? err.message : 'Network request failed'
-          resolved.logger.warn('[apiCall] Network error', { url, method, error: message })
-          throw new ApiError(message, { status: 0, code: 'NETWORK_ERROR' })
-        }
-
-        return finalizeResponse<T>(retryRes, responseType, preserveEnvelope, resolved)
-      }
-    }
+    const res = await fetchWithRetry({
+      url,
+      method,
+      buildInit: initFactory,
+      token,
+      skipRefresh,
+      skipAuth: options.skipAuth ?? false,
+      resolved,
+      refreshHelper,
+      tag: 'apiCall',
+    })
 
     return finalizeResponse<T>(res, responseType, preserveEnvelope, resolved)
   }

@@ -72,44 +72,47 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
   try {
     await mongoose.connect(MONGO_URL, DEFAULT_OPTIONS)
     registeredDbName = dbName
-
-    if (mongoose.connection.db) {
-      await mongoose.connection.db.admin().ping()
-      logger.info(
-        `[MongoDB] Connected to '${mongoose.connection.name}' (${connectionSource}, read/write ready)`
-      )
-    } else {
-      logger.info(`[MongoDB] Connected to '${mongoose.connection.name}' (${connectionSource})`)
-    }
-
+    await logConnectionSuccess(connectionSource)
     isConnecting = false
     return mongoose
   } catch (err) {
     logger.error(`[MongoDB] Failed to connect:`, err instanceof Error ? err.message : String(err))
 
-    if (process.env.MONGO_URL) {
-      logger.info(`[MongoDB] Trying fallback to localhost:27017/${dbName}...`)
-      try {
-        await mongoose.connect(`mongodb://localhost:27017/${dbName}`, DEFAULT_OPTIONS)
-        registeredDbName = dbName
-        if (mongoose.connection.db) {
-          await mongoose.connection.db.admin().ping()
-          logger.info(
-            `[MongoDB] Connected to '${mongoose.connection.name}' (localhost, read/write ready)`
-          )
-        }
-        isConnecting = false
-        return mongoose
-      } catch (fallbackErr) {
-        logger.error(
-          '[MongoDB] Fallback connection also failed:',
-          fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)
-        )
-      }
-    }
+    const fallback = await tryFallbackConnection(dbName)
+    if (fallback) return fallback
 
     logger.error('[MongoDB] Cannot start API without database connection')
     isConnecting = false
     process.exit(1)
+  }
+}
+
+async function logConnectionSuccess(source: string): Promise<void> {
+  if (mongoose.connection.db) {
+    await mongoose.connection.db.admin().ping()
+    logger.info(
+      `[MongoDB] Connected to '${mongoose.connection.name}' (${source}, read/write ready)`
+    )
+  } else {
+    logger.info(`[MongoDB] Connected to '${mongoose.connection.name}' (${source})`)
+  }
+}
+
+async function tryFallbackConnection(dbName: string): Promise<typeof mongoose | null> {
+  if (!process.env.MONGO_URL) return null
+
+  logger.info(`[MongoDB] Trying fallback to localhost:27017/${dbName}...`)
+  try {
+    await mongoose.connect(`mongodb://localhost:27017/${dbName}`, DEFAULT_OPTIONS)
+    registeredDbName = dbName
+    await logConnectionSuccess('localhost')
+    isConnecting = false
+    return mongoose
+  } catch (fallbackErr) {
+    logger.error(
+      '[MongoDB] Fallback connection also failed:',
+      fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)
+    )
+    return null
   }
 }

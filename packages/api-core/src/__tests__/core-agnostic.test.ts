@@ -114,6 +114,64 @@ describe('createApiServer (agnostic)', () => {
     expect(ok.body).toEqual({ userId: 'u_cookie' })
   })
 
+  it('auth middleware returns 401 when verifier throws an error', async () => {
+    const verifyToken = vi.fn(async () => {
+      throw new Error('Token decode failure')
+    })
+
+    const { requireAuth } = createAuthMiddleware({ verifyToken })
+
+    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
+
+    const res = await request(app).get('/api/me').set('Authorization', 'Bearer invalid-jwt')
+    expect(res.status).toBe(401)
+    expect(res.body.error.code).toBe('INVALID_TOKEN')
+    expect(res.body.error.details).toBe('Token decode failure')
+  })
+
+  it('auth middleware rejects empty Bearer value', async () => {
+    const verifyToken = vi.fn(async () => null)
+
+    const { requireAuth } = createAuthMiddleware({ verifyToken })
+
+    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
+
+    const res = await request(app).get('/api/me').set('Authorization', 'Bearer ')
+    expect(res.status).toBe(401)
+    expect(res.body.error.code).toBe('UNAUTHORIZED')
+    // verifyToken should NOT be called for an empty bearer
+    expect(verifyToken).not.toHaveBeenCalled()
+  })
+
+  it('auth middleware rejects when cookie is missing and no bearer provided', async () => {
+    const verifyToken = vi.fn(async () => null)
+
+    const { requireAuth } = createAuthMiddleware({ verifyToken, cookieName: 'access_token' })
+
+    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
+
+    const res = await request(app).get('/api/me')
+    expect(res.status).toBe(401)
+    expect(res.body.error.code).toBe('UNAUTHORIZED')
+  })
+
+  it('auth middleware skips cookie fallback when cookieName is null', async () => {
+    const verifyToken = vi.fn(async (token: string, kind: 'bearer' | 'cookie') =>
+      kind === 'cookie' && token === 'tok' ? { userId: 'u_cookie' } : null
+    )
+
+    const { requireAuth } = createAuthMiddleware({ verifyToken, cookieName: null })
+
+    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
+
+    const res = await request(app).get('/api/me').set('Cookie', 'access_token=tok')
+    expect(res.status).toBe(401)
+  })
+
   it('has no @ezstart imports in the agnostic core (static check via module keys)', async () => {
     // A sanity guard: the core module should resolve without loading
     // @ezstart/config or @ezstart/logger at all. If someone adds a top-level
