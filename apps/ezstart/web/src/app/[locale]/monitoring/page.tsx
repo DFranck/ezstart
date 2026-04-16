@@ -61,7 +61,7 @@ function MonitoringOverviewContent() {
     projectsError || auditsError || errorsError
       ? (projectsError || auditsError || errorsError) instanceof Error
         ? projectsError || auditsError || errorsError
-        : new Error('Unknown error')
+        : new Error(t('unknownError'))
       : null
 
   // Quick Actions (app-specific navigation)

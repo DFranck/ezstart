@@ -69,7 +69,7 @@ function AuditsMonitoringContent() {
         ? error.message === 'Failed to fetch'
           ? t('apiOffline')
           : error.message
-        : 'Unknown error'
+        : t('unknownError')
 
     return (
       <Section size="full">

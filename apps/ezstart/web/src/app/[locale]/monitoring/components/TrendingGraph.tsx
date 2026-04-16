@@ -54,7 +54,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
     return (
       <Card>
         <CardHeader>
-          <H3 size="h5">{title || `${serviceId} - Trending`}</H3>
+          <H3 size="h5">{title || t('trending.title', { serviceId })}</H3>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
           <Spinner variant="fancy" />
@@ -67,7 +67,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
     return (
       <Card>
         <CardHeader>
-          <H3 size="h5">{title || `${serviceId} - Trending`}</H3>
+          <H3 size="h5">{title || t('trending.title', { serviceId })}</H3>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
           <P className="text-muted-foreground">{t('trending.unableToLoad')}</P>
@@ -96,7 +96,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
   return (
     <Card>
       <CardHeader>
-        <H3 size="h5">{title || `${serviceId} - Last ${hours}h`}</H3>
+        <H3 size="h5">{title || t('trending.titleWithHours', { serviceId, hours })}</H3>
         <Div className="flex gap-4 text-sm">
           <P className="text-muted-foreground">
             {t('trending.uptime')}{' '}
@@ -105,7 +105,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
           <P className="text-muted-foreground">
             {t('trending.avgResponse')}{' '}
             <Span className="font-semibold text-foreground">
-              {data.avgResponseTime ? `${data.avgResponseTime}ms` : 'N/A'}
+              {data.avgResponseTime ? `${data.avgResponseTime}ms` : t('trending.notAvailable')}
             </Span>
           </P>
           <P className="text-muted-foreground">
@@ -132,14 +132,18 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
                 yAxisId="left"
                 className="text-xs"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                label={{ value: 'Response Time (ms)', angle: -90, position: 'insideLeft' }}
+                label={{
+                  value: t('trending.responseTimeAxis'),
+                  angle: -90,
+                  position: 'insideLeft',
+                }}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
                 domain={[0, 1]}
                 ticks={[0, 1]}
-                tickFormatter={value => (value === 1 ? 'Healthy' : 'Down')}
+                tickFormatter={value => (value === 1 ? t('trending.healthy') : t('trending.down'))}
                 className="text-xs"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
@@ -151,8 +155,13 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
                 }}
                 labelStyle={{ color: 'hsl(var(--foreground))' }}
                 formatter={(value: number, name: string) => {
-                  if (name === 'responseTime') return [`${value}ms`, 'Response Time']
-                  if (name === 'status') return [value === 1 ? 'Healthy' : 'Down', 'Status']
+                  if (name === t('trending.responseTime'))
+                    return [`${value}ms`, t('trending.responseTime')]
+                  if (name === t('trending.status'))
+                    return [
+                      value === 1 ? t('trending.healthy') : t('trending.down'),
+                      t('trending.status'),
+                    ]
                   return [value, name]
                 }}
               />
@@ -164,7 +173,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
                 stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 dot={false}
-                name="Response Time"
+                name={t('trending.responseTime')}
               />
               <Line
                 yAxisId="right"
@@ -173,7 +182,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
                 stroke="hsl(var(--chart-2))"
                 strokeWidth={2}
                 dot={false}
-                name="Status"
+                name={t('trending.status')}
               />
             </LineChart>
           </ResponsiveContainer>
