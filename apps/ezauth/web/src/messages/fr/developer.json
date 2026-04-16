@@ -51,6 +51,7 @@
     "submit": "Renouveler",
     "success": "Clé API renouvelée"
   },
+  "retry": "Réessayer",
   "errors": {
     "fetchFailed": "Impossible de charger les clés API",
     "createFailed": "Impossible de créer la clé API",

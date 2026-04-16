@@ -127,10 +127,15 @@ export default function SettingsPage() {
           />
         </Div>
 
-        <Div className="border-t pt-4">
+        <Div className="border-t pt-4 space-y-2">
           <Link href="/settings/sessions">
             <Button variant="outline" className="w-full">
               {ts('sessions')}
+            </Button>
+          </Link>
+          <Link href="/developer">
+            <Button variant="outline" className="w-full">
+              {ts('apiKeys')}
             </Button>
           </Link>
         </Div>

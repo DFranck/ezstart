@@ -51,6 +51,7 @@
     "submit": "Rotate",
     "success": "API key rotated"
   },
+  "retry": "Retry",
   "errors": {
     "fetchFailed": "Failed to load API keys",
     "createFailed": "Failed to create API key",

@@ -1,7 +1,6 @@
 'use client'
 
-import { type ColumnDef } from '@tanstack/react-table'
-import { Badge, Button, DataTable } from '@ezstart/ui/components'
+import { type ColumnDef, Badge, Button, DataTable, Div, Span, Code } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 import type { ApiKeyItem } from '../types'
@@ -27,20 +26,20 @@ export function ApiKeysTable({ keys, onRevoke, onRotate, isRevoking, isRotating 
     })
   }
 
-  const columns: ColumnDef<ApiKeyItem, string>[] = useMemo(
+  const columns: ColumnDef<ApiKeyItem>[] = useMemo(
     () => [
       {
         accessorKey: 'name',
         header: t('table.name'),
         cell: ({ row }) => (
-          <span className="font-medium text-foreground">{row.original.name}</span>
+          <Span className="font-medium text-foreground">{row.original.name}</Span>
         ),
       },
       {
         accessorKey: 'keyPrefix',
         header: t('table.keyPrefix'),
         cell: ({ row }) => (
-          <code className="text-sm text-muted-foreground">{row.original.keyPrefix}...</code>
+          <Code className="text-sm text-muted-foreground">{row.original.keyPrefix}...</Code>
         ),
         enableSorting: false,
       },
@@ -78,7 +77,7 @@ export function ApiKeysTable({ keys, onRevoke, onRotate, isRevoking, isRotating 
         cell: ({ row }) => {
           if (row.original.status === 'revoked') return null
           return (
-            <div className="flex gap-1">
+            <Div className="flex gap-1">
               <Button
                 variant="outline"
                 size="sm"
@@ -95,7 +94,7 @@ export function ApiKeysTable({ keys, onRevoke, onRotate, isRevoking, isRotating 
               >
                 {t('revoke.submit')}
               </Button>
-            </div>
+            </Div>
           )
         },
         enableSorting: false,
