@@ -5,7 +5,7 @@ import type {
   UseApiInfiniteQueryOptions,
   UseApiMutationOptions,
   UseApiQueryOptions,
-} from '../core/react-query.js'
+} from '../react/react-query.js'
 
 /**
  * Hook behavior (`useQuery` / `useMutation` / `useInfiniteQuery`) relies on

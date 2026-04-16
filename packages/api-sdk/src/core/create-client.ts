@@ -1,7 +1,7 @@
 import { createApiCall } from './api-call.js'
 import { resolveConfig, type ResolvedConfig } from './internal/config.js'
 import { createRefreshHelper, type RefreshHelper } from './internal/refresh.js'
-import { createApiQuery } from './react-query.js'
+import { createApiQuery } from '../react/react-query.js'
 import { createApiStream } from './stream.js'
 import type { ApiCallOptions, ApiClientConfig, StreamCallbacks } from './types.js'
 

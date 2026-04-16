@@ -25,6 +25,14 @@ const api = apiQuery('myapp')
 const { data } = api.useQuery<Invoice[]>('/invoices', { query: { page: 1 } })
 ```
 
+## Quickstart (standalone any JS)
+
+Import only the framework-agnostic core — zero React dependency:
+
+```ts
+import { apiCall, createApiClient, ApiError } from '@ezstart/api-sdk/core'
+```
+
 ## Quickstart (external / standalone)
 
 Build your own agnostic client via the factory — no `@ezstart/*` imports required.
@@ -129,6 +137,23 @@ Utilities for extracting a readable message, machine code, or retry hint from an
 | `parseApiError(res.data)` on failure                   | `err.message` (already parsed)                           |
 | `createCallApi(appName)` + manual React Query wiring   | `apiQuery(appName).useQuery / useMutation`               |
 | `fetch('https://api.github.com/...')`                  | `fetchExternal('https://api.github.com/...')`            |
+
+## Architecture (3-layer)
+
+```
+src/
+├── core/           # Framework-agnostic: apiCall, apiStream, ApiError, createApiClient
+│   └── internal/   # Private helpers (config, refresh, request, url, fetch-with-retry)
+├── react/          # React Query hooks: createApiQuery, useQuery/useMutation/useInfiniteQuery
+├── ezstart-client.ts  # Monorepo-specific wiring (@ezstart/config, ezauth token store)
+└── index.ts        # Re-exports everything (backward-compatible "." entry point)
+```
+
+| Entry point              | Content                   | React required? |
+| ------------------------ | ------------------------- | --------------- |
+| `@ezstart/api-sdk`       | Everything (core + react) | Yes (peer)      |
+| `@ezstart/api-sdk/core`  | Agnostic primitives only  | No              |
+| `@ezstart/api-sdk/react` | React Query hooks + types | Yes             |
 
 ## Rules
 

@@ -35,32 +35,15 @@
 import { ApiError } from './core/api-error.js'
 import { parseApiError, parseApiErrorCode } from './core/parse-api-error.js'
 
-// Pre-configured @ezstart client (main consumption path for monorepo)
-export {
-  apiCall,
-  apiStream,
-  apiQuery,
-  ezstartClient,
-  __resetRefreshPromiseForTests,
-} from './ezstart-client.js'
-
-// Agnostic factory for external projects / custom configs
+// ---------------------------------------------------------------------------
+// Core — framework-agnostic primitives
+// ---------------------------------------------------------------------------
+export { createApiCall } from './core/api-call.js'
+export { ApiError } from './core/api-error.js'
 export { createApiClient } from './core/create-client.js'
 export type { ApiClient } from './core/create-client.js'
-
-// Errors and parsing helpers
-export { ApiError } from './core/api-error.js'
 export { parseApiError, parseApiErrorCode, parseRetryAfter } from './core/parse-api-error.js'
-
-// React Query helpers (types + factory consumed by `apiQuery`)
-export type {
-  PaginatedResponse,
-  UseApiInfiniteQueryOptions,
-  UseApiMutationOptions,
-  UseApiQueryOptions,
-} from './core/react-query.js'
-
-// Core types
+export { createApiStream } from './core/stream.js'
 export type {
   ApiCallOptions,
   ApiClientConfig,
@@ -77,6 +60,28 @@ export type {
   StreamCallbacks,
   TokenStore,
 } from './core/types.js'
+
+// ---------------------------------------------------------------------------
+// React — React Query hooks + types (requires @tanstack/react-query peer dep)
+// ---------------------------------------------------------------------------
+export { createApiQuery, type BoundApiCall } from './react/react-query.js'
+export type {
+  PaginatedResponse,
+  UseApiInfiniteQueryOptions,
+  UseApiMutationOptions,
+  UseApiQueryOptions,
+} from './react/react-query.js'
+
+// ---------------------------------------------------------------------------
+// Pre-configured @ezstart client (main consumption path for monorepo)
+// ---------------------------------------------------------------------------
+export {
+  apiCall,
+  apiStream,
+  apiQuery,
+  ezstartClient,
+  __resetRefreshPromiseForTests,
+} from './ezstart-client.js'
 
 // ---------------------------------------------------------------------------
 // Wire contracts re-exports (@ezstart/api-contracts — source of truth).

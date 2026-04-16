@@ -13,8 +13,8 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query'
 import type { PaginatedResponse } from '@ezstart/api-contracts'
-import type { ApiError } from './api-error.js'
-import type { ApiCallOptions, HttpMethod, QueryParams } from './types.js'
+import type { ApiError } from '../core/api-error.js'
+import type { ApiCallOptions, HttpMethod, QueryParams } from '../core/types.js'
 
 /**
  * Standard paginated response shape — re-exported from
