@@ -1,0 +1,60 @@
+{
+  "title": "Clés API",
+  "description": "Gérez vos clés API développeur pour un accès programmatique",
+  "createKey": "Créer une clé",
+  "noKeys": "Aucune clé API. Créez-en une pour commencer.",
+  "table": {
+    "name": "Nom",
+    "keyPrefix": "Clé",
+    "status": "Statut",
+    "created": "Créée le",
+    "lastUsed": "Dernière utilisation",
+    "expires": "Expiration",
+    "actions": "Actions",
+    "never": "Jamais",
+    "noExpiry": "Sans expiration"
+  },
+  "status": {
+    "active": "Active",
+    "revoked": "Révoquée"
+  },
+  "create": {
+    "title": "Créer une clé API",
+    "nameLabel": "Nom de la clé",
+    "namePlaceholder": "Mon App Production",
+    "appScope": "Portée applicative",
+    "appScopeAll": "Toutes les apps",
+    "expiry": "Expiration",
+    "expiryNever": "Jamais",
+    "expiry30d": "30 jours",
+    "expiry90d": "90 jours",
+    "expiry1y": "1 an",
+    "submit": "Créer",
+    "submitting": "Création..."
+  },
+  "created": {
+    "title": "Clé API créée",
+    "warning": "Sauvegardez cette clé maintenant. Vous ne pourrez plus la voir.",
+    "copied": "Clé copiée dans le presse-papier",
+    "copyKey": "Copier la clé",
+    "done": "Terminé"
+  },
+  "revoke": {
+    "title": "Révoquer la clé API",
+    "confirm": "Êtes-vous sûr de vouloir révoquer cette clé API ? Cette action est irréversible.",
+    "submit": "Révoquer",
+    "success": "Clé API révoquée"
+  },
+  "rotate": {
+    "title": "Renouveler la clé API",
+    "confirm": "Cela révoquera la clé actuelle et en créera une nouvelle avec la même configuration.",
+    "submit": "Renouveler",
+    "success": "Clé API renouvelée"
+  },
+  "errors": {
+    "fetchFailed": "Impossible de charger les clés API",
+    "createFailed": "Impossible de créer la clé API",
+    "revokeFailed": "Impossible de révoquer la clé API",
+    "rotateFailed": "Impossible de renouveler la clé API"
+  }
+}

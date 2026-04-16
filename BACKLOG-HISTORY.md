@@ -11,6 +11,11 @@ Quand la date exacte est inconnue, l'item est placé dans le mois/section où il
 
 ### Infrastructure
 
+- [x] 2026-04-16 — Migrate 6 APIs from `@ezstart/express-core` → `@ezstart/api-core`. 279 source files migrated, ESLint rule `no-express-core` blocks regressions, express-core package deleted.
+- [x] 2026-04-16 — Fix OpenAPI params schemas crash. Added `extendZodWithOpenApi(z)` to api-core + fixed 23 route files `.describe()` → `.openapi()`.
+- [x] 2026-04-16 — SDK 3-layer architecture (standard.md 0bis). api-sdk (core/react split), pay-sdk (core/react/components), auth-sdk (core/react/components + RBAC merged in). All packages standard-compliant.
+- [x] 2026-04-16 — Deleted deprecated packages: `@ezstart/fetch-client` (replaced by api-sdk), `@ezstart/express-core` (replaced by api-core), `@ezstart/next-theme` (merged into ui/theme). `@ezstart/rbac` merged into auth-sdk.
+- [x] 2026-04-16 — ESLint rules `no-express-core` and `no-fetch-client` set to `error` to block regressions on deleted packages.
 - [x] 2026-04-12 — Centralized env vars + scripts cleanup + root files audit (PR #40)
 - [x] 2026-04-15 — Scripts secrets push/pull/audit bidirectional workflow (PR #41)
 - [x] 2026-04-15 — Lean env vars + TEST_USER cleanup (PR #42)

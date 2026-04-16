@@ -23,7 +23,7 @@ apps/[app]/api/
 - ✅ `.env.local` → Dev avec secrets réels (gitignored)
 - ✅ `.env.production` → Production avec secrets réels (gitignored)
 - ❌ `.env` → NE PLUS UTILISER (confusion)
-- ✅ express-core charge `.env.local` en priorité
+- ✅ api-core charge `.env.local` en priorité
 
 ### 3. Variables PORT Obsolètes
 

@@ -1,0 +1,60 @@
+{
+  "title": "API Keys",
+  "description": "Manage your developer API keys for programmatic access",
+  "createKey": "Create New Key",
+  "noKeys": "No API keys yet. Create one to get started.",
+  "table": {
+    "name": "Name",
+    "keyPrefix": "Key",
+    "status": "Status",
+    "created": "Created",
+    "lastUsed": "Last Used",
+    "expires": "Expires",
+    "actions": "Actions",
+    "never": "Never",
+    "noExpiry": "No expiry"
+  },
+  "status": {
+    "active": "Active",
+    "revoked": "Revoked"
+  },
+  "create": {
+    "title": "Create API Key",
+    "nameLabel": "Key Name",
+    "namePlaceholder": "My App Production",
+    "appScope": "App Scope",
+    "appScopeAll": "All apps",
+    "expiry": "Expiry",
+    "expiryNever": "Never",
+    "expiry30d": "30 days",
+    "expiry90d": "90 days",
+    "expiry1y": "1 year",
+    "submit": "Create",
+    "submitting": "Creating..."
+  },
+  "created": {
+    "title": "API Key Created",
+    "warning": "Save this key now. You will not be able to see it again.",
+    "copied": "Key copied to clipboard",
+    "copyKey": "Copy Key",
+    "done": "Done"
+  },
+  "revoke": {
+    "title": "Revoke API Key",
+    "confirm": "Are you sure you want to revoke this API key? This action cannot be undone.",
+    "submit": "Revoke",
+    "success": "API key revoked"
+  },
+  "rotate": {
+    "title": "Rotate API Key",
+    "confirm": "This will revoke the current key and create a new one with the same configuration.",
+    "submit": "Rotate",
+    "success": "API key rotated"
+  },
+  "errors": {
+    "fetchFailed": "Failed to load API keys",
+    "createFailed": "Failed to create API key",
+    "revokeFailed": "Failed to revoke API key",
+    "rotateFailed": "Failed to rotate API key"
+  }
+}

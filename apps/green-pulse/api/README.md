@@ -231,7 +231,7 @@ router.get('/api/carbon', authenticate, async (req, res) => {
 
 ## Related Packages
 
-- [@ezstart/api-core](../../../packages/express-core) - API infrastructure
+- [@ezstart/api-core](../../../packages/api-core) - API infrastructure
 - [@ezstart/types](../../../packages/types) - Shared types and schemas
 - [@green-pulse/types](../types) - GreenPulse-specific types
 - [web-green-pulse](../web) - Frontend application

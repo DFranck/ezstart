@@ -311,7 +311,7 @@ export const config = {
 - [API Documentation](../api) - Backend API
 - [@ezstart/ui](../../../packages/ui) - UI components
 - [@ezstart/auth-sdk](../../../packages/auth-sdk) - Auth client
-- [@ezstart/ui/theme](../../../packages/next-theme) - Theme provider
+- [@ezstart/ui/theme](../../../packages/ui/src/theme) - Theme provider
 - [Next.js Docs](https://nextjs.org/docs)
 - [next-intl Docs](https://next-intl-docs.vercel.app)
 

@@ -160,4 +160,4 @@ See `apps/*/api/src/index.ts` during the migration window for per-app patches.
 - [.claude/rules/standard.md](../../.claude/rules/standard.md) — the standard this package follows
 - [@ezstart/api-contracts](../api-contracts/README.md) — wire shapes consumed by this server
 - [@ezstart/api-sdk](../api-sdk/README.md) — matching client SDK
-- [@ezstart/express-core](../express-core/README.md) — legacy package this one replaces
+- `@ezstart/express-core` — legacy package this one replaced (deleted)

@@ -16,4 +16,4 @@ export default config
 
 ## Used by
 
-All web apps, select APIs, and packages (express-core, ui).
+All web apps, select APIs, and packages (api-core, ui).

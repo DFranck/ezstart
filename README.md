@@ -128,17 +128,21 @@ pnpm dev:status
 │   ├── green-pulse/        # Sustainability (Next.js + API)
 │   └── monitoring/api      # Monitoring service
 │
-├── packages/               # Shared packages (16)
-│   ├── ui/                # UI components & design system
-│   ├── auth-sdk/          # Authentication client
-│   ├── pay-sdk/           # Payment client
-│   ├── express-core/      # API infrastructure
-│   ├── config/            # URLs & environment config
-│   ├── seo-config/        # SEO utilities (metadata, JSON-LD)
+├── packages/               # Shared packages (23)
+│   ├── ui/                # UI components, design system & theme (dark/light mode)
+│   ├── auth-sdk/          # Authentication client (core/react/components) + RBAC
+│   ├── pay-sdk/           # Payment client (core/react/components)
+│   ├── api-sdk/           # HTTP client (core/react)
+│   ├── api-core/          # API infrastructure (Express, MongoDB, OpenAPI)
+│   ├── api-contracts/     # Wire contracts (envelope, error, pagination)
+│   ├── ai-sdk/            # AI provider abstraction (multi-provider chat)
+│   ├── config/            # URLs, ports & environment config
 │   ├── logger/            # Pino structured logging
-│   ├── next-theme/        # Dark/light mode
 │   ├── monitoring/        # Health checks & metrics
-│   └── [11 more...]       # Config, types, utils
+│   ├── seo-config/        # SEO utilities (metadata, JSON-LD)
+│   └── [12 more...]      # next-config, eslint-config, eslint-plugin, tailwind-config,
+│                          # typescript-config, capture-sdk, ocr-sdk, pdf-sdk,
+│                          # email-service, test-utils, playwright-config
 │
 └── docs/                  # Audit data + long-form audit reports
     ├── audits.json        # Live audit scores (consumed by monitoring)
@@ -264,7 +268,7 @@ Browse [packages/](./packages/) — each package has its own README with install
 
 - **7 Web Applications** (Next.js 15, React 19)
 - **6 API Services** (Express + Socket.IO)
-- **16+ Shared Packages** (100% TypeScript)
+- **23 Shared Packages** (100% TypeScript)
 - **100% TypeCheck Coverage** across all packages
 
 ---

@@ -43,4 +43,4 @@ import { AIAdminDashboard } from '@ezstart/ai-sdk/client'
 
 ## Related
 
-- [@ezstart/express-core](../express-core) — API infrastructure for AI routes
+- [@ezstart/api-core](../api-core) — API infrastructure for AI routes

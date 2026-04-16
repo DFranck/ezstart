@@ -18,4 +18,4 @@ log.info('Server started', { port: 6100 })
 ## Used by
 
 - All API apps
-- packages/express-core
+- packages/api-core

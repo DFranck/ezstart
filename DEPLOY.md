@@ -13,7 +13,7 @@ Toutes les APIs utilisent le même pattern de configuration dans le Railway Dash
 - **Root Directory** : `/` (racine monorepo)
 - **Build Command** : `pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-{name}...`
 - **Start Command** : `pnpm --filter api-{name} start`
-- **Watch Paths** : `apps/{name}/api/**`, `packages/express-core/**`, `packages/config/**`, `packages/logger/**`, `packages/monitoring/**`
+- **Watch Paths** : `apps/{name}/api/**`, `packages/api-core/**`, `packages/config/**`, `packages/logger/**`, `packages/monitoring/**`
 - **Healthcheck** : `/health`
 
 | Service            | Projet Railway | URL Production                            |
@@ -76,7 +76,7 @@ apps/{name}/api/
 ```
 
 - `.env.example` : toujours à jour, contient placeholders
-- `.env.local` : valeurs réelles de dev, chargé par express-core
+- `.env.local` : valeurs réelles de dev, chargé par api-core
 - `.env.production` : référence pour les variables Railway
 
 ---

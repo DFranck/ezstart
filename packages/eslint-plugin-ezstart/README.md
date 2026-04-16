@@ -159,7 +159,7 @@ toast.error('Delete failed')
 
 This is a **new** package — there is nothing to migrate from. Existing projects adopt it incrementally by switching one rule to `error` at a time.
 
-The rules intentionally ship disabled by default for the monorepo: `@ezstart/eslint-config` will flip them to `error` once the legacy code (notably `@ezstart/fetch-client` imports) is fully migrated.
+The rules `no-express-core` and `no-fetch-client` are set to `error` — both legacy packages have been fully migrated and deleted (replaced by `@ezstart/api-core` and `@ezstart/api-sdk` respectively).
 
 ## Related
 

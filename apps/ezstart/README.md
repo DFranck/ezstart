@@ -42,5 +42,5 @@ pnpm dev ez
 ## Related
 
 - [@ezstart/ai-sdk](../../packages/ai-sdk) — AI provider abstraction
-- [@ezstart/api-core](../../packages/express-core) — API infrastructure
+- [@ezstart/api-core](../../packages/api-core) — API infrastructure
 - [@ezstart/config](../../packages/config) — URLs and ports

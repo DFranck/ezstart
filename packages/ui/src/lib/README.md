@@ -160,7 +160,7 @@ interface ClassArray extends Array<ClassValue> {}
 - **EZStart** - 6 components
 - **ASC-TCD** - 10 components
 - **FengShui** - 4 components
-- **packages/next-theme** - 1 component
+- **packages/ui/theme** - 1 component
 
 **Total:** 37+ usages
 

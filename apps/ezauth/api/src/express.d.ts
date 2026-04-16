@@ -15,6 +15,11 @@ declare global {
       apps?: string[]
       [key: string]: string | string[] | boolean | Record<string, string[]> | undefined
     }
+
+    interface Request {
+      apiKeyId?: string
+      apiKeyUserId?: string
+    }
   }
 }
 
