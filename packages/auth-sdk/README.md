@@ -38,10 +38,16 @@ auth-sdk/src/
 │   ├── TwoFactorSettings.tsx
 │   ├── VerifyEmailFlow.tsx
 │   ├── AuthAdminDashboard.tsx
+│   ├── UserDashboard.tsx
+│   ├── UserSettings.tsx
+│   ├── UserMenu.tsx
+│   ├── UserAvatar.tsx
+│   ├── developer/        # API keys management UI
 │   └── index.ts
 │
-├── ezstart-auth.tsx      # Monorepo wrapper (pre-wires @ezstart/config URLs)
-├── middleware.ts          # Next.js auth middleware
+├── middleware/            # Next.js auth middleware
+├── rbac/                 # Role-Based Access Control
+├── i18n/                 # Built-in translations (en, fr, vi)
 ├── server.ts             # Server-side schemas + client
 └── index.ts              # Main barrel: re-exports everything
 ```

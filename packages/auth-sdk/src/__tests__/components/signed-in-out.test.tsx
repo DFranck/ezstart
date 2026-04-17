@@ -4,13 +4,14 @@ import React from 'react'
 import { useAuthStore } from '../../react/store.js'
 import { createTestUser } from '../helpers.js'
 
-// Mock the provider that SignedIn/SignedOut use
-vi.mock('../../provider.js', () => ({
+// Mock the hooks that SignedIn/SignedOut use
+vi.mock('../../react/hooks.js', () => ({
   useAuth: () => {
     const store = useAuthStore()
     return {
       user: store.user,
       isAuthenticated: store.isAuthenticated,
+      isAuthReady: true,
     }
   },
 }))

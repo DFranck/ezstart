@@ -8,20 +8,27 @@ import { createTestUser } from '../helpers.js'
 const mockLogin = vi.fn()
 const mockLogout = vi.fn()
 
-vi.mock('../../provider.js', () => ({
+vi.mock('../../react/hooks.js', () => ({
   useAuth: () => {
     const store = useAuthStore()
     return {
       user: store.user,
       isAuthenticated: store.isAuthenticated,
       isLoggingIn: store.isLoggingIn,
+      isAuthReady: true,
       login: mockLogin,
       logout: mockLogout,
     }
   },
+}))
+
+vi.mock('../../react/auth-provider.js', () => ({
   useAuthContext: () => ({
     client: { getApiUrl: () => 'http://localhost:6110/api/auth' },
     appName: 'testapp',
+    webUrl: 'http://localhost:6111',
+    keyConfig: null,
+    scope: 'app',
   }),
 }))
 

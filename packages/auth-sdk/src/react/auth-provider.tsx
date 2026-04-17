@@ -163,7 +163,7 @@ export function AuthProvider({
   if (useHttpOnlyCookies !== undefined) {
     logger.warn(`[AuthSDK] useHttpOnlyCookies is deprecated`, {
       migration: 'Use authMode="httpOnly" instead',
-    } as unknown as undefined[])
+    })
     authMode = useHttpOnlyCookies ? 'httpOnly' : 'localStorage'
   }
 
@@ -226,13 +226,13 @@ export function AuthProvider({
           appName: config.appName,
           plan: config.plan,
           scope: config.scope,
-        } as unknown as undefined[])
+        })
       })
       .catch((err) => {
         if (cancelled) return
         logger.error('[AuthProvider] Failed to fetch key config', {
           error: err instanceof Error ? err.message : String(err),
-        } as unknown as undefined[])
+        })
       })
 
     return () => {
@@ -250,7 +250,7 @@ export function AuthProvider({
       configured: authMode,
       resolved: effectiveMode,
       current: currentMode,
-    } as unknown as undefined[])
+    })
 
     // Update mode if it changed
     if (currentMode !== effectiveMode) {
@@ -290,7 +290,7 @@ export function AuthProvider({
       } catch (err) {
         logger.debug('[AuthProvider] Silent refresh failed, logging out', {
           error: err instanceof Error ? err.message : String(err),
-        } as unknown as undefined[])
+        })
         store.logout()
         return false
       } finally {
@@ -334,7 +334,7 @@ export function AuthProvider({
           } else {
             logger.debug('[AuthProvider] httpOnly fetch error (not 401, keeping session)', {
               error: err?.message,
-            } as unknown as undefined[])
+            })
           }
         }
       }
@@ -378,7 +378,7 @@ export function AuthProvider({
     logger.debug('[AuthProvider] Proactive refresh scheduled', {
       expiresIn: Math.round((expiry - now) / 1000) + 's',
       refreshIn: Math.round(delay / 1000) + 's',
-    } as unknown as undefined[])
+    })
 
     proactiveTimerRef.current = setTimeout(async () => {
       const rt = store.refreshToken
@@ -391,7 +391,7 @@ export function AuthProvider({
       } catch (err) {
         logger.debug('[AuthProvider] Proactive refresh failed, fallback interval will retry', {
           error: err instanceof Error ? err.message : String(err),
-        } as unknown as undefined[])
+        })
       }
     }, delay)
 

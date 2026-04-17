@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Icon, KnownIconName } from '@ezstart/ui/components'
+import { Button, Icon, KnownIconName, Span } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useAuth } from '../react/hooks.js'
 
@@ -88,9 +88,9 @@ export function LoginButton({
           />
         )
       )}
-      <span className={alwaysShowText ? '' : 'hidden md:inline'}>
+      <Span className={alwaysShowText ? '' : 'hidden md:inline'}>
         {loading ? loadingText : buttonText}
-      </span>
+      </Span>
     </Button>
   )
 }

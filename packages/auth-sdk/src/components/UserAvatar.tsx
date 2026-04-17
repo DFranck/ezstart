@@ -1,5 +1,6 @@
 'use client'
 
+import { Span } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { useAuth } from '../react/hooks.js'
 
@@ -57,7 +58,7 @@ export function UserAvatar({ size = 'md', className, user: externalUser }: UserA
   }
 
   return (
-    <span
+    <Span
       className={cn(
         'rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium shrink-0 select-none',
         sizeClass,
@@ -66,6 +67,6 @@ export function UserAvatar({ size = 'md', className, user: externalUser }: UserA
       aria-label={user.username}
     >
       {initials}
-    </span>
+    </Span>
   )
 }
