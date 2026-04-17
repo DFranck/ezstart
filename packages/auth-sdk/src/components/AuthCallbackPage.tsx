@@ -70,25 +70,43 @@ function CallbackContent({
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string>('')
-  const [code, setCode] = useState<string | null>(null)
 
-  // Extract and clean URL immediately on first render
+  // Use a ref to capture the code synchronously on first render, before any
+  // URL cleanup or re-render can remove it from `searchParams`. This avoids
+  // the race condition where `window.history.replaceState` causes
+  // `useSearchParams` to re-render with an empty query string before the
+  // React state update from `setCode` has committed.
+  const codeRef = React.useRef<string | null>(null)
+
+  if (codeRef.current === null) {
+    // Try searchParams first (Next.js hook), then fall back to raw URL
+    // in case the hook hasn't synced yet.
+    const fromHook = searchParams.get('code')
+    const fromUrl =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('code')
+        : null
+    codeRef.current = fromHook || fromUrl || ''
+  }
+
+  const code = codeRef.current || null
+
+  // Clean URL once we've captured the code (fire-and-forget, no deps on searchParams)
   useEffect(() => {
-    const authCode = searchParams.get('code')
-
-    if (authCode && !code) {
-      setCode(authCode)
-      // Clean URL immediately to prevent any re-processing
+    if (code && typeof window !== 'undefined') {
       window.history.replaceState({}, document.title, window.location.pathname)
-    } else if (!authCode && !code) {
-      setStatus('error')
-      setError(noCodeMessage)
     }
-  }, [searchParams, code])
+  }, [code])
 
   // Process the saved code with global lock to prevent race conditions
   useEffect(() => {
-    if (!code || status !== 'loading') {
+    if (!code) {
+      setStatus('error')
+      setError(noCodeMessage)
+      return
+    }
+
+    if (status !== 'loading') {
       return
     }
 
@@ -138,7 +156,7 @@ function CallbackContent({
     return () => {
       clearTimeout(timeoutId)
     }
-  }, [code, handleCallback, router, status, redirectTo])
+  }, [code, handleCallback, router, status, redirectTo, noCodeMessage])
 
   if (status === 'loading') {
     return (
