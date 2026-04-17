@@ -286,14 +286,12 @@ export function getCurrentEnvironment(): Environment {
     return process.env.VERCEL_ENV as Environment
   }
 
-  // Server-side: Standard NODE_ENV
-  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
-    return 'production'
-  }
-
-  // Server-side: Not production = local development
+  // Server-side ONLY: Standard NODE_ENV (skip in browser — Next.js always
+  // sets NODE_ENV=production in client bundles, which would bypass hostname
+  // detection and always resolve to production URLs).
   // @ts-ignore - window may not exist in Node.js context
   if (typeof process !== 'undefined' && typeof window === 'undefined') {
+    if (process.env.NODE_ENV === 'production') return 'production'
     return 'local'
   }
 
