@@ -6,23 +6,27 @@ import { BackButton, Button, Div, Spinner } from '@ezstart/ui/components'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { DeveloperPortalTexts } from '@ezstart/auth-sdk/components'
 
 export default function DeveloperPage() {
   const t = useTranslations('developer')
   const locale = useLocale()
-  const { user, isAuthReady, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const router = useRouter()
 
-  // Redirect to login if not authenticated
+  // Wait for initial mount + store hydration
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  // Redirect to login if not authenticated (after hydration)
   useEffect(() => {
-    if (isAuthReady && !isAuthenticated) {
+    if (mounted && !isAuthenticated) {
       router.replace('/login')
     }
-  }, [isAuthReady, isAuthenticated, router])
+  }, [mounted, isAuthenticated, router])
 
-  if (!isAuthReady || !user) {
+  if (!mounted || !isAuthenticated || !user) {
     return (
       <Div className="flex items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
