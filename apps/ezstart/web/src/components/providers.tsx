@@ -1,25 +1,11 @@
 'use client'
 
-import { AuthProvider, useAuthStore, createAuthClient } from '@ezstart/auth-sdk'
+import { AuthProvider, useAuthStore } from '@ezstart/auth-sdk'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import * as React from 'react'
-
-const authClient = createAuthClient({ appName: 'ezstart', redirectUri: '/auth/callback' })
-
-async function handleTokenRefresh(): Promise<string | null> {
-  const { refreshToken } = useAuthStore.getState()
-  if (!refreshToken) return null
-  try {
-    const result = await authClient.refreshTokens(refreshToken)
-    useAuthStore.getState().setTokens(result.accessToken, result.refreshToken)
-    return result.accessToken
-  } catch {
-    return null
-  }
-}
 
 function handleAuthFailure() {
   useAuthStore.getState().logout()
@@ -51,12 +37,7 @@ export function Providers({
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider appName="ezstart" authMode="httpOnly">
-        <PayProvider
-          appName="ezstart"
-          getToken={() => useAuthStore.getState().accessToken}
-          onTokenRefresh={handleTokenRefresh}
-          onAuthFailure={handleAuthFailure}
-        >
+        <PayProviderWrapper>
           <NextThemesProvider
             attribute="class"
             defaultTheme="system"
@@ -68,8 +49,24 @@ export function Providers({
               {children}
             </NextIntlClientProvider>
           </NextThemesProvider>
-        </PayProvider>
+        </PayProviderWrapper>
       </AuthProvider>
     </QueryClientProvider>
+  )
+}
+
+/**
+ * Inner wrapper that can access auth context for token refresh.
+ * Must be inside AuthProvider.
+ */
+function PayProviderWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <PayProvider
+      appName="ezstart"
+      getToken={() => useAuthStore.getState().accessToken}
+      onAuthFailure={handleAuthFailure}
+    >
+      {children}
+    </PayProvider>
   )
 }

@@ -1,62 +1,78 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { resolveAuthMode, detectAuthMode } from '../../ezstart-auth.js'
+import { describe, it, expect } from 'vitest'
+import { resolveSDKConfig } from '../../core/auth-client.js'
 
-// These are mocked in setup.ts but we re-mock here with specific returns
-const mockGetCurrentEnvironment = vi.fn(() => 'local')
-const mockIsEzstartDomain = vi.fn((_host?: string) => false)
-const mockGetApiUrl = vi.fn((..._args: unknown[]) => 'http://localhost:6110')
+describe('resolveSDKConfig', () => {
+  it('resolves first-party mode with defaults', () => {
+    const result = resolveSDKConfig({
+      firstParty: true,
+      appName: 'ezauth',
+    })
 
-vi.mock('@ezstart/config/urls', () => ({
-  getApiUrl: (...args: unknown[]) => mockGetApiUrl(...args),
-  getWebUrl: vi.fn(() => 'http://localhost:6111'),
-  getCurrentEnvironment: () => mockGetCurrentEnvironment(),
-  isEzstartDomain: (host: string) => mockIsEzstartDomain(host),
-}))
-
-describe('resolveAuthMode', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+    expect(result.clientConfig.appName).toBe('ezauth')
+    expect(result.clientConfig.apiUrl).toContain('/api/auth')
+    expect(result.configPromise).toBeNull()
   })
 
-  it('forces localStorage in local env regardless of configured mode', () => {
-    const mode = resolveAuthMode('httpOnly', 'localhost', 'local')
-    expect(mode).toBe('localStorage')
+  it('resolves first-party mode with custom apiUrl', () => {
+    const result = resolveSDKConfig({
+      firstParty: true,
+      appName: 'ezauth',
+      apiUrl: 'https://custom-api.example.com',
+    })
+
+    expect(result.clientConfig.apiUrl).toBe('https://custom-api.example.com/api/auth')
+    expect(result.configPromise).toBeNull()
   })
 
-  it('allows httpOnly on ezstart domain in production', () => {
-    mockIsEzstartDomain.mockReturnValue(true)
-    const mode = resolveAuthMode('httpOnly', 'app.ezstart.com', 'production')
-    expect(mode).toBe('httpOnly')
+  it('resolves dev mode when no key and no firstParty', () => {
+    const result = resolveSDKConfig({})
+
+    expect(result.clientConfig.appName).toBe('dev')
+    expect(result.clientConfig.apiUrl).toContain('/api/auth')
+    expect(result.configPromise).toBeNull()
   })
 
-  it('falls back to localStorage when httpOnly on non-ezstart domain', () => {
-    mockIsEzstartDomain.mockReturnValue(false)
-    const mode = resolveAuthMode('httpOnly', 'custom-domain.com', 'production')
-    expect(mode).toBe('localStorage')
+  it('resolves dev mode with custom appName', () => {
+    const result = resolveSDKConfig({ appName: 'myapp' })
+
+    expect(result.clientConfig.appName).toBe('myapp')
+    expect(result.configPromise).toBeNull()
   })
 
-  it('requires jwtPublicKey for jwt mode, falls back to localStorage', () => {
-    const mode = resolveAuthMode('jwt', 'app.example.com', 'production')
-    expect(mode).toBe('localStorage')
+  it('returns configPromise when publishableKey is provided', async () => {
+    const result = resolveSDKConfig({
+      publishableKey: 'ezk_test_abc123',
+    })
+
+    // Client created with pending appName
+    expect(result.clientConfig.appName).toBe('pending')
+    expect(result.clientConfig.apiKey).toBe('ezk_test_abc123')
+    // Config promise is set (will fail in test env since no real API)
+    expect(result.configPromise).not.toBeNull()
+    expect(result.configPromise).toBeInstanceOf(Promise)
+
+    // Catch the expected rejection (no real API in test env)
+    await expect(result.configPromise).rejects.toThrow()
   })
 
-  it('allows jwt mode when jwtPublicKey is provided', () => {
-    const mode = resolveAuthMode('jwt', 'app.example.com', 'production', 'publickey123')
-    expect(mode).toBe('jwt')
+  it('uses custom apiUrl with publishableKey', async () => {
+    const result = resolveSDKConfig({
+      publishableKey: 'ezk_test_abc123',
+      apiUrl: 'https://my-auth.example.com',
+    })
+
+    expect(result.clientConfig.apiUrl).toBe('https://my-auth.example.com/api/auth')
+
+    // Catch the expected rejection (no real API in test env)
+    await result.configPromise?.catch(() => {})
   })
 
-  it('allows localStorage in production (with warning)', () => {
-    const mode = resolveAuthMode('localStorage', 'app.example.com', 'production')
-    expect(mode).toBe('localStorage')
-  })
-})
+  it('uses custom webUrl when provided', () => {
+    const result = resolveSDKConfig({
+      firstParty: true,
+      webUrl: 'https://auth.mydomain.com',
+    })
 
-describe('detectAuthMode', () => {
-  it('returns httpOnly when window is undefined (SSR)', () => {
-    // detectAuthMode checks typeof window, which in jsdom is defined
-    // We just verify it doesn't crash
-    const mode = detectAuthMode()
-    // In jsdom, window.location.hostname is 'localhost', env is 'local' → localStorage
-    expect(mode).toBe('localStorage')
+    expect(result.webUrl).toBe('https://auth.mydomain.com')
   })
 })

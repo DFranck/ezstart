@@ -143,6 +143,8 @@ export async function validateApiKey(req: Request, res: Response, next: NextFunc
     // Attach API key info to request
     req.apiKeyId = keyId
     req.apiKeyUserId = apiKey.userId
+    req.apiKeyScope = apiKey.scope || 'app'
+    req.apiKeyAppName = apiKey.appName || '*'
 
     // Fire-and-forget: update lastUsedAt
     ApiKey.updateOne(

@@ -20,6 +20,11 @@ import {
   Label,
   Modal,
   P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Skeleton,
   Span,
   Spinner,
@@ -30,6 +35,8 @@ import {
 import { apiCall, type ApiMeta } from '@ezstart/api-sdk'
 import { toast } from '@ezstart/ui/utils'
 import { useAuthStore } from '../store.js'
+import { useAuthContext } from '../react/auth-provider.js'
+import type { AuthScope } from '../core/types.js'
 
 // ========================================
 // Types
@@ -111,12 +118,19 @@ export interface AuthAdminDashboardTexts {
   // Pagination
   previous?: string
   next?: string
+
+  // App filter (platform/first-party scope)
+  allApps?: string
+  filterByApp?: string
 }
 
 export interface AuthAdminDashboardProps {
+  /** App name filter. For app-scoped keys, this is auto-set from the provider context. */
   appName?: string
   className?: string
   texts?: Partial<AuthAdminDashboardTexts>
+  /** Override scope detection (defaults to the scope from AuthProvider context). */
+  scope?: AuthScope
 }
 
 // ========================================
@@ -176,6 +190,8 @@ const DEFAULT_TEXTS: Required<AuthAdminDashboardTexts> = {
   roleClient: 'Client',
   previous: 'Previous',
   next: 'Next',
+  allApps: 'All apps',
+  filterByApp: 'Filter by app',
 }
 
 // ========================================
@@ -377,9 +393,26 @@ function EditRolesModal({
 // AuthAdminDashboard (main export)
 // ========================================
 
-export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashboardProps) {
+export function AuthAdminDashboard({ appName: appNameProp, className, texts, scope: scopeProp }: AuthAdminDashboardProps) {
   const t: Required<AuthAdminDashboardTexts> = { ...DEFAULT_TEXTS, ...texts }
   const accessToken = useAuthStore(state => state.accessToken)
+
+  // Resolve scope from context or prop
+  let contextScope: AuthScope = 'app'
+  try {
+    const ctx = useAuthContext()
+    contextScope = ctx.scope
+  } catch {
+    // AuthProvider not available, default to 'app'
+  }
+  const scope = scopeProp ?? contextScope
+
+  // For app-scoped keys, always filter by the provider's appName
+  const effectiveAppName = scope === 'app' ? appNameProp : undefined
+
+  // App filter for platform/first-party (user can select which app to view)
+  const [appFilter, setAppFilter] = useState<string>('')
+  const [availableApps, setAvailableApps] = useState<string[]>([])
 
   // Data state
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -417,6 +450,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
   }, [])
 
   // Fetch users
+  const activeAppFilter = effectiveAppName || appFilter || undefined
   const fetchUsers = useCallback(async () => {
     setLoading(true)
     try {
@@ -424,7 +458,7 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
         limit: String(PAGE_SIZE),
         offset: String(offset),
       }
-      if (appName) query.app = appName
+      if (activeAppFilter) query.app = activeAppFilter
       if (searchQuery) query.search = searchQuery
 
       // Preserve envelope to access `meta.total` for server-side pagination.
@@ -435,15 +469,30 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
         getToken: () => accessToken,
         preserveEnvelope: true,
       })
-      setUsers(envelope.data ?? [])
+      const fetchedUsers = envelope.data ?? []
+      setUsers(fetchedUsers)
       const meta = envelope.meta as UsersApiMeta | undefined
       setTotal(meta?.total ?? 0)
+
+      // Collect available apps from users for the app filter dropdown
+      if (scope !== 'app') {
+        const apps = new Set<string>()
+        for (const u of fetchedUsers) {
+          if (u.apps) {
+            for (const a of u.apps) apps.add(a)
+          }
+        }
+        setAvailableApps(prev => {
+          const merged = new Set([...prev, ...apps])
+          return [...merged].sort()
+        })
+      }
     } catch {
       // Error already logged by apiCall
     } finally {
       setLoading(false)
     }
-  }, [offset, searchQuery, appName, accessToken])
+  }, [offset, searchQuery, activeAppFilter, accessToken, scope])
 
   useEffect(() => {
     fetchUsers()
@@ -482,8 +531,8 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
     setEditOpen(true)
   }, [])
 
-  // DataTable columns
-  const showAppsColumn = !appName
+  // DataTable columns — show apps column when not filtering by a single app
+  const showAppsColumn = scope !== 'app'
   const columns: ColumnDef<AdminUser>[] = [
     {
       accessorKey: 'email',
@@ -624,13 +673,37 @@ export function AuthAdminDashboard({ appName, className, texts }: AuthAdminDashb
           </Card>
         </Div>
 
-        {/* Search */}
-        <Input
-          placeholder={t.searchPlaceholder}
-          value={searchInput}
-          onChange={e => handleSearchChange(e.target.value)}
-          className="w-full sm:w-80"
-        />
+        {/* Search + App filter */}
+        <Div className="flex flex-col sm:flex-row gap-3">
+          <Input
+            placeholder={t.searchPlaceholder}
+            value={searchInput}
+            onChange={e => handleSearchChange(e.target.value)}
+            className="w-full sm:w-80"
+          />
+          {/* App filter dropdown — only shown for platform/first-party scope */}
+          {scope !== 'app' && availableApps.length > 0 && (
+            <Select
+              value={appFilter}
+              onValueChange={(val: string) => {
+                setAppFilter(val === '__all__' ? '' : val)
+                setOffset(0)
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder={t.filterByApp} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">{t.allApps}</SelectItem>
+                {availableApps.map(app => (
+                  <SelectItem key={app} value={app}>
+                    {app}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </Div>
 
         {/* Table */}
         {loading ? (

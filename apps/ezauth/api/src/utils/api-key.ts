@@ -1,12 +1,19 @@
 import { randomBytes, createHash } from 'crypto'
 
-const API_KEY_PREFIX = 'ezk_'
 const RAW_KEY_LENGTH = 32
 
-/** Generate a raw API key with `ezk_` prefix + 32 hex chars. */
-export function generateRawApiKey(): string {
+/** Key prefix by scope. */
+const SCOPE_PREFIX = {
+  app: 'ezk_live_',
+  platform: 'ezk_admin_',
+} as const
+
+export type ApiKeyScope = 'app' | 'platform'
+
+/** Generate a raw API key with scope-based prefix + 32 hex chars. */
+export function generateRawApiKey(scope: ApiKeyScope = 'app'): string {
   const hex = randomBytes(RAW_KEY_LENGTH).toString('hex')
-  return `${API_KEY_PREFIX}${hex}`
+  return `${SCOPE_PREFIX[scope]}${hex}`
 }
 
 /** Hash an API key with SHA-256 for storage. */

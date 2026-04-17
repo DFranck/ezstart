@@ -1,12 +1,8 @@
 /**
  * Backward-compatibility shim.
  *
- * Re-exports the monorepo-specific AuthClient and factory from ezstart-auth.
- * Components and consumers that import from `./client.js` continue to work.
+ * Re-exports the core auth client. Components and consumers that
+ * import from `./client.js` continue to work.
  */
-export {
-  AuthClient,
-  createAuthClient,
-  detectAuthMode,
-  type AuthClientConfig,
-} from './ezstart-auth.js'
+export { CoreAuthClient as AuthClient, createCoreAuthClient as createAuthClient } from './core/auth-client.js'
+export type { AuthClientConfig } from './core/types.js'

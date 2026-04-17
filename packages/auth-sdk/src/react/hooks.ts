@@ -18,11 +18,15 @@ const noopLogger: AuthLogger = {
  */
 export function useAuth(logger?: AuthLogger) {
   const log = logger ?? noopLogger
-  const { client } = useAuthContext()
+  const { client, appName, webUrl, scope } = useAuthContext()
   const store = useAuthStore()
 
   const mode = store.getMode()
 
+  /**
+   * Redirect to the EZAuth login page.
+   * Saves the current URL for post-login redirect.
+   */
   const login = (additionalParams?: Record<string, string>): Promise<never> => {
     // Save current URL for post-login redirect
     if (typeof window !== 'undefined') {
@@ -30,29 +34,34 @@ export function useAuth(logger?: AuthLogger) {
       localStorage.setItem('ezauth_redirect_after_login', currentUrl)
     }
 
-    const apiUrl = client.getApiUrl()
-    // Derive web URL from API URL by removing /api/auth suffix
-    // e.g. https://api.example.com/api/auth → https://web.example.com
-    // For the redirect we need the web URL, but we only have the API URL in core.
-    // Use the redirectToLogin pattern with the web URL.
-    // Note: In the monorepo wrapper, this is overridden with proper URL resolution.
+    // Build redirect URI from current origin + locale
+    const redirectUri = buildRedirectUri()
+
     const params = new URLSearchParams({
-      app: client.getAppName(),
+      app: appName,
+      redirect_uri: redirectUri,
       ...(additionalParams ?? {}),
     })
 
-    // The core client doesn't know the web URL, so this is a placeholder.
-    // The monorepo wrapper overrides this via the ezstart-specific AuthProvider.
-    log.warn(
-      '[useAuth] login() redirect not available in core-only mode. Use the monorepo wrapper.'
-    )
+    const authUrl = `${webUrl}/login?${params.toString()}`
+    window.location.href = authUrl
     return new Promise(() => {})
   }
 
-  const register = (): Promise<never> => {
-    log.warn(
-      '[useAuth] register() redirect not available in core-only mode. Use the monorepo wrapper.'
-    )
+  /**
+   * Redirect to the EZAuth register page.
+   */
+  const register = (additionalParams?: Record<string, string>): Promise<never> => {
+    const redirectUri = buildRedirectUri()
+
+    const params = new URLSearchParams({
+      app: appName,
+      redirect_uri: redirectUri,
+      ...(additionalParams ?? {}),
+    })
+
+    const authUrl = `${webUrl}/register?${params.toString()}`
+    window.location.href = authUrl
     return new Promise(() => {})
   }
 
@@ -79,6 +88,7 @@ export function useAuth(logger?: AuthLogger) {
   }
 
   const logout = async () => {
+    store.setLoggingOut(true)
     const rt = store.refreshToken
     await client.logout(rt || undefined)
     store.logout()
@@ -119,8 +129,11 @@ export function useAuth(logger?: AuthLogger) {
     accessToken: store.accessToken,
     isAuthenticated: store.isAuthenticated,
     isLoggingIn: store.isLoggingIn,
+    isLoggingOut: store.isLoggingOut,
     isAuthReady: store.isAuthReady,
     mode,
+    /** Auth scope: 'app' (sees own app), 'platform' (sees all), 'first-party' (ezauth web). */
+    scope,
 
     // Actions
     login,
@@ -130,4 +143,21 @@ export function useAuth(logger?: AuthLogger) {
     verifyAndRefresh,
     setLoggingIn: store.setLoggingIn,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the OAuth redirect URI from the current browser URL.
+ * Detects locale prefix and builds: `{origin}/{locale}/auth/callback`
+ */
+function buildRedirectUri(): string {
+  if (typeof window === 'undefined') return '/auth/callback'
+  const pathParts = window.location.pathname.split('/')
+  const maybeLocale = pathParts[1]
+  const hasLocalePrefix = maybeLocale !== undefined && /^[a-z]{2,3}$/.test(maybeLocale)
+  const localePrefix = hasLocalePrefix ? `/${maybeLocale}` : ''
+  return `${window.location.origin}${localePrefix}/auth/callback`
 }

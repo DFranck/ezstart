@@ -76,13 +76,24 @@ const listUsersController = async (req: Request, res: Response) => {
     const { limit, offset, search, role, app } = parsedQuery.data
     const query: Record<string, unknown> = {}
 
-    // Superadmin sees all users, admin sees non-superadmins in their apps
-    if (!currentUser.globalRoles?.includes('superadmin')) {
-      query.globalRoles = { $ne: 'superadmin' }
-      if ((currentUser.apps?.length ?? 0) > 0) {
-        query.apps = { $in: currentUser.apps }
+    // API key scope-based filtering
+    const apiKeyScope = req.apiKeyScope
+    const apiKeyAppName = req.apiKeyAppName
+
+    if (apiKeyScope === 'app' && apiKeyAppName && apiKeyAppName !== '*') {
+      // App-scoped API key: only show users with this app
+      query.apps = { $in: [apiKeyAppName] }
+    } else if (!apiKeyScope) {
+      // Direct user auth (no API key) — use existing role-based logic
+      // Superadmin sees all users, admin sees non-superadmins in their apps
+      if (!currentUser.globalRoles?.includes('superadmin')) {
+        query.globalRoles = { $ne: 'superadmin' }
+        if ((currentUser.apps?.length ?? 0) > 0) {
+          query.apps = { $in: currentUser.apps }
+        }
       }
     }
+    // Platform-scoped API key: no filtering, sees all users
 
     // App filter: only show users who have logged into this app
     if (app) {

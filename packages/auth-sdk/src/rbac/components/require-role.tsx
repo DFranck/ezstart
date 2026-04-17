@@ -1,7 +1,7 @@
 'use client'
 
 import React, { type ReactNode } from 'react'
-import { useEzstartAuth as useAuth } from '../../ezstart-auth.js'
+import { useAuth } from '../../react/hooks.js'
 import { useRBAC } from '../client.js'
 import { type Role } from '../types.js'
 

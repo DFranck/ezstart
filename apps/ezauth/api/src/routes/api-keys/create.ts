@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
+import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
 
 export const createApiKeyRegistry = new OpenAPIRegistry()
@@ -30,6 +31,11 @@ const createApiKeyBodySchema = z.object({
     .optional()
     .default('*')
     .openapi({ description: 'App scope (default: all apps)' }),
+  scope: z
+    .enum(['app', 'platform'])
+    .optional()
+    .default('app')
+    .openapi({ description: 'Key scope: app (sees only own app) or platform (superadmin, sees all)' }),
   expiresAt: z
     .string()
     .datetime()
@@ -63,6 +69,17 @@ const createApiKeyController = async (req: Request, res: Response) => {
     }
 
     const userId = req.userId!
+    const { scope } = parsed.data
+
+    // Platform-scoped keys require superadmin
+    if (scope === 'platform') {
+      const AuthUser = await getAuthUserModel()
+      const user = await AuthUser.findById(userId).lean()
+      if (!user?.globalRoles?.includes('superadmin')) {
+        return sendError(res, 'Platform-scoped keys require superadmin role', 403)
+      }
+    }
+
     const ApiKey = await getApiKeyModel()
 
     // Enforce per-user limit
@@ -71,18 +88,22 @@ const createApiKeyController = async (req: Request, res: Response) => {
       return sendError(res, `Maximum ${MAX_KEYS_PER_USER} active API keys allowed`, 400)
     }
 
-    const rawKey = generateRawApiKey()
+    const rawKey = generateRawApiKey(scope)
     const hashedKey = hashApiKey(rawKey)
     const keyPrefix = extractKeyPrefix(rawKey)
 
     const expiresAt = parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null
+
+    // Platform keys always have appName '*'
+    const effectiveAppName = scope === 'platform' ? '*' : parsed.data.appName
 
     const apiKey = await ApiKey.create({
       key: hashedKey,
       keyPrefix,
       name: parsed.data.name,
       userId,
-      appName: parsed.data.appName,
+      appName: effectiveAppName,
+      scope,
       permissions: ['*'],
       status: 'active',
       expiresAt,

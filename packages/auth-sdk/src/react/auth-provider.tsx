@@ -1,7 +1,7 @@
 'use client'
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef } from 'react'
-import { CoreAuthClient } from '../core/auth-client.js'
-import type { AuthMode } from '../core/types.js'
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { CoreAuthClient, resolveSDKConfig } from '../core/auth-client.js'
+import type { AuthMode, AuthScope, AuthSDKConfig, PublishableKeyConfig } from '../core/types.js'
 import { useAuthStore } from './store.js'
 
 /**
@@ -38,12 +38,58 @@ const noopLogger: AuthLogger = {
 }
 
 // ---------------------------------------------------------------------------
+// Auth mode detection (agnostic, no @ezstart/config)
+// ---------------------------------------------------------------------------
+
+/**
+ * Auto-detect the auth mode based on the current environment.
+ * - localhost → localStorage (httpOnly cookies don't work cross-port)
+ * - same root domain as API → httpOnly
+ * - different domain → localStorage
+ */
+function detectAuthMode(apiUrl: string): AuthMode {
+  if (typeof window === 'undefined') return 'httpOnly'
+
+  const currentHost = window.location.hostname
+
+  if (currentHost === 'localhost' || currentHost.startsWith('127.0.0.1')) {
+    return 'localStorage'
+  }
+
+  try {
+    const apiHost = new URL(apiUrl).hostname
+    const getRootDomain = (hostname: string) => {
+      const parts = hostname.split('.')
+      if (parts.length <= 2) return hostname
+      return parts.slice(-2).join('.')
+    }
+
+    const currentRootDomain = getRootDomain(currentHost)
+    const apiRootDomain = getRootDomain(apiHost)
+
+    if (currentRootDomain === apiRootDomain) {
+      return 'httpOnly'
+    }
+  } catch {
+    // URL parsing failed, fallback to localStorage
+  }
+
+  return 'localStorage'
+}
+
+// ---------------------------------------------------------------------------
 // Context
 // ---------------------------------------------------------------------------
 
 interface AuthContextValue {
   client: CoreAuthClient
   appName: string
+  /** Web URL for login/register redirects. */
+  webUrl: string
+  /** Resolved key config (null until async fetch completes, or if no key). */
+  keyConfig: PublishableKeyConfig | null
+  /** Auth scope: 'app' (sees own app), 'platform' (sees all), 'first-party' (ezauth web). */
+  scope: AuthScope
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -54,29 +100,145 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export interface AuthProviderProps {
   children: ReactNode
-  /** Pre-configured auth client instance. */
-  client: CoreAuthClient
-  /** App name. */
-  appName: string
-  /** Auth mode (default: 'localStorage'). */
+
+  // ── Clerk-like API (preferred) ──────────────────────────────────────────
+
+  /**
+   * Publishable key (starts with `ezk_live_` or `ezk_test_`).
+   * If not provided, reads from `process.env.NEXT_PUBLIC_EZAUTH_KEY`.
+   */
+  publishableKey?: string
+
+  /**
+   * Provider mode:
+   * - `'standard'` (default) — uses publishableKey or dev defaults
+   * - `'first-party'` — for ezauth web itself, no key needed
+   */
+  mode?: 'standard' | 'first-party'
+
+  // ── Manual overrides ────────────────────────────────────────────────────
+
+  /** Override app name (auto-resolved from key in standard mode). */
+  appName?: string
+  /** Override API URL. */
+  apiUrl?: string
+  /** Override web URL (for login/register redirects). */
+  webUrl?: string
+  /** Override auth mode. Auto-detected if not set. */
   authMode?: AuthMode
-  /** Resolved auth mode (after environment checks). If not provided, `authMode` is used as-is. */
-  resolvedAuthMode?: AuthMode
-  /** Optional logger. */
+  /** JWT public key (required for jwt mode). */
+  jwtPublicKey?: string
+
+  // ── Optional ────────────────────────────────────────────────────────────
+
+  /** Optional logger instance. */
   logger?: AuthLogger
+
+  // ── Deprecated props (backward compat) ────────────────────────────────
+
+  /** @deprecated Use `authMode` instead. */
+  useHttpOnlyCookies?: boolean
 }
 
 export function AuthProvider({
   children,
-  client,
+  publishableKey,
+  mode = 'standard',
   appName,
-  authMode = 'localStorage',
-  resolvedAuthMode,
+  apiUrl,
+  webUrl,
+  authMode,
+  jwtPublicKey,
   logger = noopLogger,
+  useHttpOnlyCookies,
 }: AuthProviderProps) {
   const store = useAuthStore()
+  const keyConfigRef = useRef<PublishableKeyConfig | null>(null)
 
-  const effectiveMode = resolvedAuthMode ?? authMode
+  // Determine initial scope from mode prop
+  const initialScope: AuthScope = mode === 'first-party' ? 'first-party' : 'app'
+  const [resolvedScope, setResolvedScope] = useState<AuthScope>(initialScope)
+
+  // Handle deprecated prop
+  if (useHttpOnlyCookies !== undefined) {
+    logger.warn(`[AuthSDK] useHttpOnlyCookies is deprecated`, {
+      migration: 'Use authMode="httpOnly" instead',
+    } as unknown as undefined[])
+    authMode = useHttpOnlyCookies ? 'httpOnly' : 'localStorage'
+  }
+
+  // Resolve SDK config
+  const sdkConfig: AuthSDKConfig = useMemo(() => {
+    const key = publishableKey ?? (
+      typeof process !== 'undefined'
+        ? process.env?.NEXT_PUBLIC_EZAUTH_KEY
+        : undefined
+    )
+
+    return {
+      publishableKey: mode === 'first-party' ? undefined : (key ?? undefined),
+      firstParty: mode === 'first-party',
+      appName,
+      apiUrl,
+      webUrl,
+    }
+  }, [publishableKey, mode, appName, apiUrl, webUrl])
+
+  const resolved = useMemo(() => resolveSDKConfig(sdkConfig), [sdkConfig])
+
+  // Create the client (stable reference)
+  const client = useMemo(
+    () => new CoreAuthClient(resolved.clientConfig),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [resolved.clientConfig.apiUrl, resolved.clientConfig.appName]
+  )
+
+  const resolvedWebUrl = resolved.webUrl
+  const resolvedAppName = resolved.clientConfig.appName
+
+  // Resolve auth mode
+  const effectiveMode = useMemo(() => {
+    if (authMode) return authMode
+    return detectAuthMode(resolved.clientConfig.apiUrl)
+  }, [authMode, resolved.clientConfig.apiUrl])
+
+  // Fetch key config async if publishable key provided
+  useEffect(() => {
+    if (!resolved.configPromise) return
+
+    let cancelled = false
+    resolved.configPromise
+      .then((config) => {
+        if (cancelled) return
+        keyConfigRef.current = config
+        // Update client with resolved config
+        if (config.appName && config.appName !== 'pending') {
+          client.setAppName(config.appName)
+        }
+        if (config.apiUrl) {
+          client.setApiUrl(`${config.apiUrl}/api/auth`)
+        }
+        // Update scope from key config
+        if (config.scope) {
+          setResolvedScope(config.scope)
+        }
+        logger.info('[AuthProvider] Key config resolved', {
+          appName: config.appName,
+          plan: config.plan,
+          scope: config.scope,
+        } as unknown as undefined[])
+      })
+      .catch((err) => {
+        if (cancelled) return
+        logger.error('[AuthProvider] Failed to fetch key config', {
+          error: err instanceof Error ? err.message : String(err),
+        } as unknown as undefined[])
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [resolved.configPromise, client, logger])
 
   // Auto-detect and set mode on mount
   useEffect(() => {
@@ -88,7 +250,7 @@ export function AuthProvider({
       configured: authMode,
       resolved: effectiveMode,
       current: currentMode,
-    })
+    } as unknown as undefined[])
 
     // Update mode if it changed
     if (currentMode !== effectiveMode) {
@@ -128,7 +290,7 @@ export function AuthProvider({
       } catch (err) {
         logger.debug('[AuthProvider] Silent refresh failed, logging out', {
           error: err instanceof Error ? err.message : String(err),
-        })
+        } as unknown as undefined[])
         store.logout()
         return false
       } finally {
@@ -172,7 +334,7 @@ export function AuthProvider({
           } else {
             logger.debug('[AuthProvider] httpOnly fetch error (not 401, keeping session)', {
               error: err?.message,
-            })
+            } as unknown as undefined[])
           }
         }
       }
@@ -216,7 +378,7 @@ export function AuthProvider({
     logger.debug('[AuthProvider] Proactive refresh scheduled', {
       expiresIn: Math.round((expiry - now) / 1000) + 's',
       refreshIn: Math.round(delay / 1000) + 's',
-    })
+    } as unknown as undefined[])
 
     proactiveTimerRef.current = setTimeout(async () => {
       const rt = store.refreshToken
@@ -229,7 +391,7 @@ export function AuthProvider({
       } catch (err) {
         logger.debug('[AuthProvider] Proactive refresh failed, fallback interval will retry', {
           error: err instanceof Error ? err.message : String(err),
-        })
+        } as unknown as undefined[])
       }
     }, delay)
 
@@ -242,7 +404,16 @@ export function AuthProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.accessToken, store.refreshToken, client, logger])
 
-  const contextValue = useMemo(() => ({ client, appName }), [client, appName])
+  const contextValue = useMemo(
+    () => ({
+      client,
+      appName: resolvedAppName,
+      webUrl: resolvedWebUrl,
+      keyConfig: keyConfigRef.current,
+      scope: resolvedScope,
+    }),
+    [client, resolvedAppName, resolvedWebUrl, resolvedScope]
+  )
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
 }

@@ -19,6 +19,8 @@ declare global {
     interface Request {
       apiKeyId?: string
       apiKeyUserId?: string
+      apiKeyScope?: 'app' | 'platform'
+      apiKeyAppName?: string
     }
   }
 }

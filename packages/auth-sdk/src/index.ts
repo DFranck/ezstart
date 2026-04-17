@@ -1,13 +1,13 @@
 /**
- * Main barrel — re-exports core + react + monorepo wrapper + components.
+ * Main barrel — re-exports core + react + components.
  *
- * `import { AuthProvider, useAuth, AuthClient } from '@ezstart/auth-sdk'`
+ * `import { AuthProvider, useAuth } from '@ezstart/auth-sdk'`
  * continues to work unchanged.
  */
 
 // ── Core (agnostic) ──────────────────────────────────────────────────────────
 
-export { CoreAuthClient, createCoreAuthClient } from './core/auth-client.js'
+export { CoreAuthClient, createCoreAuthClient, fetchKeyConfig, resolveSDKConfig } from './core/auth-client.js'
 export { AuthError } from './core/errors.js'
 export { TokenManager, createMemoryStorage, createLocalStorage } from './core/token-manager.js'
 
@@ -23,10 +23,18 @@ export {
 
 // ── React (hooks, provider, guards) ──────────────────────────────────────────
 
+// THE provider — Clerk-like API
+export { AuthProvider, useAuthContext } from './react/auth-provider.js'
+export type { AuthProviderProps, AuthLogger } from './react/auth-provider.js'
+
+// THE hook
+export { useAuth } from './react/hooks.js'
+
+// Store
 export { useAuthStore, useAuthStoreSSR, configureAuthStorage } from './react/store.js'
 export type { AuthState } from './react/store.js'
 
-// React guards (also available via react/ barrel)
+// React guards
 export { RequireAuth, AccessDenied, SignedIn, SignedOut } from './react/guards.js'
 export type {
   RequireAuthProps,
@@ -34,26 +42,6 @@ export type {
   SignedInProps,
   SignedOutProps,
 } from './react/guards.js'
-
-// ── Monorepo wrapper (backward-compatible) ───────────────────────────────────
-
-// AuthClient with monorepo auto-config
-export {
-  AuthClient,
-  createAuthClient,
-  detectAuthMode,
-  // Backward-compat: AuthProvider = EzstartAuthProvider
-  EzstartAuthProvider as AuthProvider,
-  useEzstartAuth as useAuth,
-  useEzstartAuthContext as useAuthContext,
-} from './ezstart-auth.js'
-export type { AuthClientConfig } from './ezstart-auth.js'
-
-// SSO helpers
-export { getEzauthUrl } from './lib/sso.js'
-
-// Hooks
-export { useAuthNavigation } from './hooks/useAuthNavigation.js'
 
 // API Keys hooks
 export {
@@ -63,6 +51,18 @@ export {
   useRevokeApiKey,
   useRotateApiKey,
 } from './react/api-keys.js'
+
+// ── Backward-compat aliases ─────────────────────────────────────────────────
+
+// AuthClient = CoreAuthClient, createAuthClient = createCoreAuthClient
+export { CoreAuthClient as AuthClient, createCoreAuthClient as createAuthClient } from './core/auth-client.js'
+export type { AuthClientConfig } from './core/types.js'
+
+// SSO helpers (monorepo-specific, uses @ezstart/config)
+export { getEzauthUrl } from './lib/sso.js'
+
+// Hooks
+export { useAuthNavigation } from './hooks/useAuthNavigation.js'
 
 // ── Middleware (Next.js) ─────────────────────────────────────────────────────
 
@@ -162,6 +162,9 @@ export type {
   AuthUser,
   AuthToken,
   AuthMode,
+  AuthScope,
+  AuthSDKConfig,
+  PublishableKeyConfig,
   LoginRequest,
   RegisterRequest,
   TokenRequest,

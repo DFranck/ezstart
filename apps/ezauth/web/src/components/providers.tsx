@@ -7,7 +7,7 @@ import { QueryProvider } from './providers/QueryProvider'
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <AuthProvider appName="ezauth" authMode="httpOnly">
+      <AuthProvider mode="first-party" appName="ezauth" authMode="httpOnly">
         <QueryProvider>{children}</QueryProvider>
       </AuthProvider>
     </ThemeProvider>

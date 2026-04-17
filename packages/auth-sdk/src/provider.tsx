@@ -2,11 +2,7 @@
  * Backward-compatibility shim.
  *
  * Components in `components/` import `../provider.js` for `useAuth` and
- * `useAuthContext`. This file re-exports the monorepo-specific versions
- * so those imports continue to work without modification.
+ * `useAuthContext`. This file re-exports from the react layer.
  */
-export {
-  EzstartAuthProvider as AuthProvider,
-  useEzstartAuth as useAuth,
-  useEzstartAuthContext as useAuthContext,
-} from './ezstart-auth.js'
+export { AuthProvider, useAuthContext } from './react/auth-provider.js'
+export { useAuth } from './react/hooks.js'

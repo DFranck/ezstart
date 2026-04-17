@@ -6,6 +6,13 @@
  */
 
 // ---------------------------------------------------------------------------
+// Key scope
+// ---------------------------------------------------------------------------
+
+/** Scope of an API key or auth context. */
+export type AuthScope = 'app' | 'platform' | 'first-party'
+
+// ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
@@ -30,6 +37,67 @@ export interface AuthClientConfig {
   storage?: AuthStorage
   /** Storage key prefix (default: `'ezauth'`). */
   storageKey?: string
+}
+
+// ---------------------------------------------------------------------------
+// Publishable key / Clerk-like config
+// ---------------------------------------------------------------------------
+
+/**
+ * Configuration resolved from a publishable key via `GET /api/keys/config`.
+ * Returned by the EZAuth API when a valid publishable key is provided.
+ */
+export interface PublishableKeyConfig {
+  /** App name associated with this key. */
+  appName: string
+  /** Base URL of the auth API. */
+  apiUrl: string
+  /** Base URL of the auth web app (for login/register redirects). */
+  webUrl: string
+  /** Features enabled for this key's plan. */
+  features: string[]
+  /** Plan name (e.g. 'free', 'pro', 'business'). */
+  plan: string
+  /** Monthly quota (-1 means unlimited). */
+  quotaMonthly: number
+  /** Key scope: 'app' (sees only own app) or 'platform' (sees all apps). */
+  scope?: 'app' | 'platform'
+}
+
+/**
+ * High-level SDK configuration — Clerk-like API.
+ *
+ * Usage modes:
+ * 1. `publishableKey` provided → fetches config from EZAuth API
+ * 2. `mode: 'first-party'` → direct access (for ezauth web itself)
+ * 3. Neither + localhost → dev mode (permissive)
+ *
+ * For advanced / manual configuration, use `AuthClientConfig` with `createCoreAuthClient`.
+ */
+export interface AuthSDKConfig {
+  /**
+   * Publishable key (starts with `ezk_live_` or `ezk_test_`).
+   * Read from `NEXT_PUBLIC_EZAUTH_KEY` env var if not provided.
+   */
+  publishableKey?: string
+  /**
+   * Override the auth API URL (for self-hosted EZAuth).
+   * When using a publishable key, this is auto-resolved from key config.
+   */
+  apiUrl?: string
+  /**
+   * Override the auth web URL (for login/register redirects).
+   * When using a publishable key, this is auto-resolved from key config.
+   */
+  webUrl?: string
+  /**
+   * First-party mode — for ezauth web itself (no key needed, direct API access).
+   */
+  firstParty?: boolean
+  /**
+   * App name — required for first-party mode, auto-resolved from key otherwise.
+   */
+  appName?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -182,6 +250,7 @@ export interface ApiKeyItem {
   keyPrefix: string
   name: string
   appName: string
+  scope: 'app' | 'platform'
   permissions: string[]
   status: 'active' | 'revoked'
   lastUsedAt: string | null
@@ -218,6 +287,7 @@ export interface CreateApiKeyResponse {
 export interface CreateApiKeyRequest {
   name: string
   appName: string
+  scope?: 'app' | 'platform'
   expiresAt: string | null
 }
 

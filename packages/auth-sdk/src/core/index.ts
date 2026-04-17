@@ -5,7 +5,7 @@
  */
 
 // Auth client
-export { CoreAuthClient, createCoreAuthClient } from './auth-client.js'
+export { CoreAuthClient, createCoreAuthClient, fetchKeyConfig, resolveSDKConfig } from './auth-client.js'
 
 // Token storage
 export { TokenManager, createMemoryStorage, createLocalStorage } from './token-manager.js'
@@ -16,8 +16,11 @@ export { AuthError } from './errors.js'
 // Types
 export type {
   AuthClientConfig,
+  AuthSDKConfig,
+  AuthScope,
   AuthStorage,
   AuthMode,
+  PublishableKeyConfig,
   AuthUser,
   AuthToken,
   RefreshResult,

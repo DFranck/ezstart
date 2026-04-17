@@ -16,9 +16,11 @@
 import { AuthError } from './errors.js'
 import type {
   AuthClientConfig,
+  AuthSDKConfig,
   AuthToken,
   AuthUser,
   EmailOverrideRequest,
+  PublishableKeyConfig,
   QuickSignUpRequest,
   QuickSignUpResult,
   RefreshResult,
@@ -75,6 +77,16 @@ export class CoreAuthClient {
   /** Update the redirect URI (useful when it can only be resolved client-side). */
   setRedirectUri(uri: string): void {
     this.redirectUri = uri
+  }
+
+  /** Update the app name (used after async key config resolution). */
+  setAppName(name: string): void {
+    this.appName = name
+  }
+
+  /** Update the API URL (used after async key config resolution). */
+  setApiUrl(url: string): void {
+    this.apiUrl = url
   }
 
   /** Get the configured app name. */
@@ -310,4 +322,159 @@ export class CoreAuthClient {
  */
 export function createCoreAuthClient(config: AuthClientConfig): CoreAuthClient {
   return new CoreAuthClient(config)
+}
+
+// ---------------------------------------------------------------------------
+// Publishable key config fetching
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch app configuration from EZAuth API using a publishable key.
+ * The key acts as authentication — no user auth needed.
+ *
+ * @example
+ * ```ts
+ * const config = await fetchKeyConfig('ezk_live_abc123', 'https://api.ezauth.com')
+ * ```
+ */
+export async function fetchKeyConfig(
+  publishableKey: string,
+  apiBaseUrl: string
+): Promise<PublishableKeyConfig> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/keys/config?key=${encodeURIComponent(publishableKey)}`
+  )
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new AuthError(
+      parseError(result, 'Failed to fetch key config'),
+      response.status,
+      'KEY_CONFIG_ERROR'
+    )
+  }
+
+  const data = unwrapEnvelope<PublishableKeyConfig>(result)
+  return data
+}
+
+// ---------------------------------------------------------------------------
+// SDK config resolver
+// ---------------------------------------------------------------------------
+
+/** Default EZAuth API URL for production keys. */
+const EZAUTH_PRODUCTION_API = 'https://api-ezauth-production.up.railway.app'
+/** Default EZAuth Web URL for production. */
+const EZAUTH_PRODUCTION_WEB = 'https://ezauth.ezstart.xyz'
+/** Default EZAuth API URL for localhost development. */
+const EZAUTH_LOCAL_API = 'http://localhost:6110'
+/** Default EZAuth Web URL for localhost development. */
+const EZAUTH_LOCAL_WEB = 'http://localhost:6111'
+
+/**
+ * Check if we are running on localhost.
+ */
+function isLocalhost(): boolean {
+  if (typeof window === 'undefined') return false
+  const host = window.location.hostname
+  return host === 'localhost' || host === '127.0.0.1'
+}
+
+/**
+ * Detect the redirect URI from the current browser URL.
+ */
+function detectRedirectUri(): string {
+  if (typeof window === 'undefined') return '/auth/callback'
+  const pathParts = window.location.pathname.split('/')
+  const maybeLocale = pathParts[1]
+  const hasLocalePrefix = maybeLocale !== undefined && /^[a-z]{2,3}$/.test(maybeLocale)
+  const localePrefix = hasLocalePrefix ? `/${maybeLocale}` : ''
+  return `${window.location.origin}${localePrefix}/auth/callback`
+}
+
+/**
+ * Resolve the full SDK configuration into a CoreAuthClient config + web URL.
+ *
+ * Handles three modes:
+ * 1. Publishable key → needs async fetch (returns configPromise)
+ * 2. First-party → immediate config from env/defaults
+ * 3. Dev mode (no key + localhost) → permissive defaults
+ *
+ * @returns Resolved config with apiUrl, appName, webUrl, and optional configPromise
+ */
+export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
+  clientConfig: AuthClientConfig
+  webUrl: string
+  /** If a publishable key is provided, this promise resolves the full config. */
+  configPromise: Promise<PublishableKeyConfig> | null
+} {
+  const key = sdkConfig.publishableKey
+  const local = isLocalhost()
+
+  // Determine base URLs
+  const defaultApiUrl = local ? `${EZAUTH_LOCAL_API}/api/auth` : `${EZAUTH_PRODUCTION_API}/api/auth`
+  const defaultWebUrl = local ? EZAUTH_LOCAL_WEB : EZAUTH_PRODUCTION_WEB
+
+  if (sdkConfig.firstParty) {
+    // First-party mode: direct access, no key needed
+    const apiUrl = sdkConfig.apiUrl
+      ? `${sdkConfig.apiUrl}/api/auth`
+      : defaultApiUrl
+    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+    const appName = sdkConfig.appName ?? 'ezauth'
+
+    return {
+      clientConfig: {
+        apiUrl,
+        appName,
+        redirectUri: detectRedirectUri(),
+      },
+      webUrl,
+      configPromise: null,
+    }
+  }
+
+  if (key) {
+    // Publishable key mode: create client with defaults, then async-update from key config
+    const apiBaseUrl = sdkConfig.apiUrl
+      ? sdkConfig.apiUrl
+      : local
+        ? EZAUTH_LOCAL_API
+        : EZAUTH_PRODUCTION_API
+    const apiUrl = `${apiBaseUrl}/api/auth`
+    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+
+    // We create the client with placeholder appName; it will be updated after config fetch
+    const clientConfig: AuthClientConfig = {
+      apiUrl,
+      appName: sdkConfig.appName ?? 'pending',
+      apiKey: key,
+      redirectUri: detectRedirectUri(),
+    }
+
+    const configPromise = fetchKeyConfig(key, apiBaseUrl)
+
+    return {
+      clientConfig,
+      webUrl,
+      configPromise,
+    }
+  }
+
+  // Dev mode: no key, no first-party → permissive localhost defaults
+  const apiUrl = sdkConfig.apiUrl
+    ? `${sdkConfig.apiUrl}/api/auth`
+    : defaultApiUrl
+  const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+  const appName = sdkConfig.appName ?? 'dev'
+
+  return {
+    clientConfig: {
+      apiUrl,
+      appName,
+      redirectUri: detectRedirectUri(),
+    },
+    webUrl,
+    configPromise: null,
+  }
 }
