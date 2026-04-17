@@ -56,7 +56,7 @@ sendMessageRouter.post(
       let { conversationId } = validation.data
 
       // userId comes from auth middleware (JWT), not from request body
-      const userId = req.userId
+      const userId = req.userId || req.user?._id?.toString()
 
       // Auto-create conversation if not provided
       if (!conversationId) {

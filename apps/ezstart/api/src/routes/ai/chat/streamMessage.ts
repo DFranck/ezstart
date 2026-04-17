@@ -49,7 +49,7 @@ router.post('/', async (req, res) => {
     const { message, appName, providerId, locale, images } = validation.data
     let { conversationId } = validation.data
 
-    const userId = req.userId
+    const userId = req.userId || req.user?._id?.toString()
 
     // Auto-create conversation if not provided
     if (!conversationId) {

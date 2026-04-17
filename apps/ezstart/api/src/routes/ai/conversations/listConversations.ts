@@ -38,6 +38,10 @@ export const listConversationsRouter = createRouterWithDoc(
 listConversationsRouter.get(
   '/',
   async (req, res) => {
+    // Prevent HTTP caching — conversation list changes on every send
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+    res.setHeader('Pragma', 'no-cache')
+
     try {
       const validation = listConversationsQuerySchema.safeParse(req.query)
       if (!validation.success) {
@@ -51,7 +55,8 @@ listConversationsRouter.get(
       //  - pass `?all=true` to list across all users (admin dashboard).
       const isSuperadmin = req.user?.globalRoles?.includes('superadmin') ?? false
       const wantsAll = isSuperadmin && all === 'true'
-      const effectiveUserId = wantsAll ? undefined : isSuperadmin && userId ? userId : req.userId
+      const currentUserId = req.userId || req.user?._id?.toString()
+      const effectiveUserId = wantsAll ? undefined : isSuperadmin && userId ? userId : currentUserId
 
       const query: Record<string, unknown> = {}
       if (appName) query.appName = appName
