@@ -15,6 +15,7 @@ import { createContext, type ReactNode, useContext, useEffect, useMemo } from 'r
 import { CoreAuthClient } from './core/auth-client.js'
 import type { AuthMode, AuthUser, EmailOverrideRequest } from './core/types.js'
 import { useAuthStore } from './react/store.js'
+import { AuthProvider as CoreAuthProvider } from './react/auth-provider.js'
 
 // ---------------------------------------------------------------------------
 // Re-export the logger as the AuthLogger for the react provider
@@ -509,7 +510,13 @@ export function EzstartAuthProvider({
 
   return (
     <EzstartAuthContext.Provider value={{ client, appName }}>
-      {children}
+      <CoreAuthProvider
+        client={client}
+        appName={appName}
+        authMode={store.getMode()}
+      >
+        {children}
+      </CoreAuthProvider>
     </EzstartAuthContext.Provider>
   )
 }
