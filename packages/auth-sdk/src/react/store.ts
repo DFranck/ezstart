@@ -113,8 +113,15 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
         mode: state.mode,
       }),
-      onRehydrateStorage: () => () => {
-        useAuthStore.setState({ isAuthReady: true })
+      onRehydrateStorage: () => (state) => {
+        // Mark auth as ready after zustand rehydrates from localStorage.
+        // Also ensure isAuthReady is true if the user was already authenticated
+        // (covers edge cases where the callback fires late or not at all).
+        useAuthStore.setState({
+          isAuthReady: true,
+          // Restore isAuthenticated from persisted state in case it was lost
+          ...(state?.isAuthenticated && state?.user ? { isAuthenticated: true } : {}),
+        })
       },
     }
   )
