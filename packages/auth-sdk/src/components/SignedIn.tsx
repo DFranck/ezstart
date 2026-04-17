@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useAuth } from '../provider.js'
+import { useAuth } from '../react/hooks.js'
 
 export interface SignedInProps {
   children: ReactNode

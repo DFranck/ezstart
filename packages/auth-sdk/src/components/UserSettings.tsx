@@ -3,9 +3,9 @@
 import { Badge, Card, CardContent, CardHeader, Icon } from '@ezstart/ui/components'
 import { Div, H2, H3, P, Span } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
-import { useAuth } from '../provider.js'
+import { useAuth } from '../react/hooks.js'
 import { UserAvatar } from './UserAvatar.js'
-import type { AuthUser } from '../types.js'
+import type { AuthUser } from '../core/types.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

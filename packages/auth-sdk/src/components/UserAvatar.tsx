@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@ezstart/ui/lib'
-import { useAuth } from '../provider.js'
+import { useAuth } from '../react/hooks.js'
 
 export interface UserAvatarProps {
   /** Avatar size */

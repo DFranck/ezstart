@@ -4,7 +4,7 @@ import { Div, P, Spinner } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from '@ezstart/logger'
 import { useCallback, useEffect, useState } from 'react'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

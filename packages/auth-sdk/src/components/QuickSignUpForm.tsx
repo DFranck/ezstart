@@ -17,13 +17,13 @@ import {
 import { toast } from 'sonner'
 import { logger } from '@ezstart/logger'
 import { useLocale } from 'next-intl'
-import { useAuthContext } from '../provider.js'
-import { useAuthStore } from '../store.js'
+import { useAuthContext } from '../react/auth-provider.js'
+import { useAuthStore } from '../react/store.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { usePromoCode } from './usePromoCode.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
-import type { EmailOverrideRequest } from '../types.js'
+import type { EmailOverrideRequest } from '../core/types.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

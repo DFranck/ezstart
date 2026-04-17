@@ -4,7 +4,7 @@ import { Button, Div, P, Spinner } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { Suspense, useEffect, useState } from 'react'
-import { useAuth } from './provider.js'
+import { useAuth } from '../react/hooks.js'
 
 /** Module-level lock to prevent duplicate OAuth code exchanges. */
 const processingLocks = new Set<string>()

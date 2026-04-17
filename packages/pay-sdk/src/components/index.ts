@@ -60,6 +60,12 @@ export type { ProductGridProps, ProductGridTexts, ProductGridFilterOptions } fro
 export { PaymentHistory } from './PaymentHistory.js'
 export type { PaymentHistoryProps, PaymentHistoryTexts } from './PaymentHistory.js'
 
+// Pricing & Billing
+export { PricingPage } from './PricingPage.js'
+export type { PricingPageProps, PricingPageTexts } from './PricingPage.js'
+export { BillingDashboard } from './BillingDashboard.js'
+export type { BillingDashboardProps, BillingDashboardTexts } from './BillingDashboard.js'
+
 // Stripe Connect
 export { ConnectStatusCard } from './ConnectStatusCard.js'
 export type { ConnectStatusCardProps, ConnectStatusCardTexts } from './ConnectStatusCard.js'

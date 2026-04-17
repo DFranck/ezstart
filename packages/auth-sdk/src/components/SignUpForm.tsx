@@ -23,7 +23,7 @@ import { useForm } from 'react-hook-form'
 import { PasswordStrength } from './PasswordStrength.js'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────

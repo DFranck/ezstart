@@ -2,7 +2,7 @@
 
 import { Button, Icon, KnownIconName } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
-import { useAuth } from './provider.js'
+import { useAuth } from '../react/hooks.js'
 
 export interface LoginButtonProps {
   children?: React.ReactNode

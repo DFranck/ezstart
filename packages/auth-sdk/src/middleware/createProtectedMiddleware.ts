@@ -30,7 +30,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import type { JWTPayload } from '../types.js'
+import type { JWTPayload } from '../core/types.js'
 
 // ---------------------------------------------------------------------------
 // Types

@@ -53,6 +53,10 @@ export type { UserAvatarProps } from './UserAvatar.js'
 export { UserSettings } from './UserSettings.js'
 export type { UserSettingsProps, UserSettingsTexts } from './UserSettings.js'
 
+// User dashboard (compound)
+export { UserDashboard } from './UserDashboard.js'
+export type { UserDashboardProps, UserDashboardTexts } from './UserDashboard.js'
+
 // Admin
 export { AuthAdminDashboard } from './AuthAdminDashboard.js'
 export type { AuthAdminDashboardProps, AuthAdminDashboardTexts } from './AuthAdminDashboard.js'

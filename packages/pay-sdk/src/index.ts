@@ -71,11 +71,6 @@ export {
 export { formatCurrency, getCurrencySymbol } from './core/format-currency.js'
 
 // ============================================================
-// Monorepo wrapper (uses @ezstart/config for auto URL resolution)
-// ============================================================
-export { createPayClient } from './ezstart-pay.js'
-
-// ============================================================
 // React layer (provider, hooks, store)
 // ============================================================
 export { PayProvider, usePay, usePayContext } from './react/pay-provider.js'
@@ -88,6 +83,7 @@ export { usePurchases } from './react/hooks/usePurchases.js'
 export { useSubscriptions } from './react/hooks/useSubscriptions.js'
 export { useSubscriptionStatus } from './react/hooks/useSubscriptionStatus.js'
 export { usePaymentHistory } from './react/hooks/usePaymentHistory.js'
+export { usePlans } from './react/hooks/usePlans.js'
 
 // Connect hooks
 export { useConnectStatus } from './react/hooks/useConnectStatus.js'
@@ -174,6 +170,12 @@ export type {
 } from './components/ProductGrid.js'
 export { PaymentHistory } from './components/PaymentHistory.js'
 export type { PaymentHistoryProps, PaymentHistoryTexts } from './components/PaymentHistory.js'
+
+// Pricing & Billing
+export { PricingPage } from './components/PricingPage.js'
+export type { PricingPageProps, PricingPageTexts } from './components/PricingPage.js'
+export { BillingDashboard } from './components/BillingDashboard.js'
+export type { BillingDashboardProps, BillingDashboardTexts } from './components/BillingDashboard.js'
 
 // Stripe Connect
 export { ConnectStatusCard } from './components/ConnectStatusCard.js'

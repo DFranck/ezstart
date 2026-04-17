@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button, Dropdown, type DropdownItem, Icon, Div, Span } from '@ezstart/ui/components'
-import { useAuth } from '../provider.js'
+import { useAuth } from '../react/hooks.js'
 import { UserAvatar } from './UserAvatar.js'
 import { AccountModal } from './AccountModal.js'
 

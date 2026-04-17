@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocale } from 'next-intl'
 import { PasswordStrength } from './PasswordStrength.js'
-import { useAuthNavigation } from '../hooks/useAuthNavigation.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────

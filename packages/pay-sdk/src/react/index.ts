@@ -11,6 +11,7 @@ export { usePurchases } from './hooks/usePurchases.js'
 export { useSubscriptions } from './hooks/useSubscriptions.js'
 export { useSubscriptionStatus } from './hooks/useSubscriptionStatus.js'
 export { usePaymentHistory } from './hooks/usePaymentHistory.js'
+export { usePlans } from './hooks/usePlans.js'
 
 // Connect hooks
 export { useConnectStatus } from './hooks/useConnectStatus.js'

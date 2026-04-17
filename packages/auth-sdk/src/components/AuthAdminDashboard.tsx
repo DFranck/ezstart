@@ -34,7 +34,7 @@ import {
 } from '@ezstart/ui/components'
 import { apiCall, type ApiMeta } from '@ezstart/api-sdk'
 import { toast } from '@ezstart/ui/utils'
-import { useAuthStore } from '../store.js'
+import { useAuthStore } from '../react/store.js'
 import { useAuthContext } from '../react/auth-provider.js'
 import type { AuthScope } from '../core/types.js'
 

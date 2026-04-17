@@ -59,15 +59,15 @@ export { CoreAuthClient as AuthClient, createCoreAuthClient as createAuthClient 
 export type { AuthClientConfig } from './core/types.js'
 
 // SSO helpers (monorepo-specific, uses @ezstart/config)
-export { getEzauthUrl } from './lib/sso.js'
+export { getEzauthUrl } from './react/sso.js'
 
 // Hooks
-export { useAuthNavigation } from './hooks/useAuthNavigation.js'
+export { useAuthNavigation } from './react/useAuthNavigation.js'
 
 // ── Middleware (Next.js) ─────────────────────────────────────────────────────
 
-export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware.js'
-export type { AuthMiddlewareConfig } from './middleware.js'
+export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware/createAuthMiddleware.js'
+export type { AuthMiddlewareConfig } from './middleware/createAuthMiddleware.js'
 
 // SSR Protected Middleware
 export { createProtectedMiddleware } from './middleware/index.js'
@@ -75,9 +75,9 @@ export type { ProtectedMiddlewareConfig } from './middleware/index.js'
 
 // ── Components (pre-built UI) ────────────────────────────────────────────────
 
-export { AuthCallbackPage } from './auth-callback-page.js'
-export { LoginButton } from './login-button.js'
-export type { LoginButtonProps } from './login-button.js'
+export { AuthCallbackPage } from './components/AuthCallbackPage.js'
+export { LoginButton } from './components/LoginButton.js'
+export type { LoginButtonProps } from './components/LoginButton.js'
 
 // Auth form components
 export { SignInForm } from './components/SignInForm.js'
@@ -246,14 +246,25 @@ export type { AuthLocale, AuthDict, FormKey } from './i18n/index.js'
 
 // ── Request schemas (from @ezstart/api-contracts) ────────────────────────────
 
-export {
-  loginRequestSchema,
-  registerRequestSchema,
-  tokenRequestSchema,
-  verifyRequestSchema,
-  forgotPasswordRequestSchema,
-  sendVerificationRequestSchema,
-  quickSignupRequestSchema,
-  supportedLocaleSchema,
-  emailOverrideSchema,
-} from './schemas.js'
+// Request schemas from @ezstart/api-contracts (via aliased names for backward compat)
+import {
+  EmailOverrideSchema,
+  ForgotPasswordRequestSchema,
+  LoginRequestSchema,
+  QuickSignupRequestSchema,
+  RegisterRequestSchema,
+  SendVerificationRequestSchema,
+  SupportedLocaleSchema,
+  TokenRequestSchema,
+  VerifyRequestSchema,
+} from '@ezstart/api-contracts'
+
+export const loginRequestSchema = LoginRequestSchema
+export const registerRequestSchema = RegisterRequestSchema
+export const tokenRequestSchema = TokenRequestSchema
+export const verifyRequestSchema = VerifyRequestSchema
+export const forgotPasswordRequestSchema = ForgotPasswordRequestSchema
+export const sendVerificationRequestSchema = SendVerificationRequestSchema
+export const quickSignupRequestSchema = QuickSignupRequestSchema
+export const supportedLocaleSchema = SupportedLocaleSchema
+export const emailOverrideSchema = EmailOverrideSchema
