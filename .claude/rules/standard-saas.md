@@ -200,6 +200,64 @@ pnpm dev <app>
 
 ---
 
+## 5. SaaS Product Completeness
+
+Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch production. Composants UI via SDK ou `packages/ui/` uniquement (cf. `standard-ui.md`).
+
+### 5.1 Landing / Homepage
+
+- [ ] Page publique presentant le service (pas d'auth requise)
+- [ ] Value proposition claire + features
+- [ ] CTA : login / signup / pricing
+- [ ] Responsive mobile-first, dark mode
+- [ ] TOUS composants depuis SDK ou `packages/ui/` (zero custom)
+
+### 5.2 Auth Flow (Standalone)
+
+- [ ] Login fonctionne SANS redirect SSO (direct sur l'app)
+- [ ] Register fonctionne standalone
+- [ ] Forgot password fonctionne standalone
+- [ ] OAuth (Google) fonctionne
+- [ ] Tout via SDK components (`<AuthProvider />`, `<SignInForm />`, etc.)
+- [ ] Publishable key based (`NEXT_PUBLIC_EZAUTH_KEY`)
+
+### 5.3 User Dashboard (post-login)
+
+- [ ] Overview : mes apps / mes projets
+- [ ] Mes API keys (CRUD) — via auth-sdk DeveloperPortal
+- [ ] Mon usage / quotas
+- [ ] Mon plan + upgrade CTA — via pay-sdk PricingPage
+- [ ] Settings (profil, securite, 2FA) — via auth-sdk UserSettings
+- [ ] TOUT depuis SDK components, zero UI app-specific
+
+### 5.4 Pricing / Plans
+
+- [ ] Page pricing publique (Free / Pro / Enterprise)
+- [ ] Plans geres dans EZPay dashboard (pas hardcodes)
+- [ ] Checkout via pay-sdk (Stripe)
+- [ ] Plan actuel visible dans le user dashboard
+- [ ] Flow upgrade/downgrade
+- [ ] Via pay-sdk PricingPage component (auto-fetch plans depuis API)
+
+### 5.5 Admin Platform (superadmin)
+
+- [ ] Dashboard stats global
+- [ ] User management (CRUD, roles, ban)
+- [ ] Gestion de toutes les API keys
+- [ ] Stats usage global, revenue
+- [ ] Scope par key : app-scoped montre une app, platform-scoped montre tout
+- [ ] Via auth-sdk AuthAdminDashboard component
+
+### 5.6 Developer Experience
+
+- [ ] Page quickstart / getting started
+- [ ] Instructions d'installation SDK
+- [ ] API docs (Swagger `/docs`)
+- [ ] Exemples de code
+- [ ] Status page (uptime)
+
+---
+
 ## Grep-commands audit rapide
 
 ```bash
@@ -232,13 +290,13 @@ grep -rnE "bg-gray|bg-red|bg-blue|bg-green|text-gray|text-red" apps/<app>/web/sr
 
 ## Score par app (audit actuel 2026-04-16)
 
-| App | API | Web | Infra | SaaS | Total |
-|-----|-----|-----|-------|------|-------|
-| ezauth | 9/9 | 8/8 | OK | API keys done | Reference |
-| ezbill | 8/9 | 8/8 | OK | - | Excellent |
-| ezpay | 8/9 | 8/8 | OK | - | Excellent |
-| ezstart | 8/9 | 8/8 | OK | - | Excellent |
-| green-pulse | 8/9 | 8/8 | OK | - | Excellent |
-| gacha-analyzer | 8/9 | 7/8 | OK | - | Good (admin manquant) |
-| fengshui | N/A | 7/8 | OK | - | Good (admin manquant) |
-| asc-tcd | N/A | 7/8 | OK | - | Good (auth intentionnel) |
+| App | API | Web | Infra | SaaS Features | Product Completeness | Total |
+|-----|-----|-----|-------|----------------|---------------------|-------|
+| ezauth | 9/9 | 8/8 | OK | API keys done | Landing + Auth + Admin | Reference |
+| ezbill | 8/9 | 8/8 | OK | - | Landing only | Excellent |
+| ezpay | 8/9 | 8/8 | OK | - | Landing + Pricing | Excellent |
+| ezstart | 8/9 | 8/8 | OK | - | Landing only | Excellent |
+| green-pulse | 8/9 | 8/8 | OK | - | Landing only | Excellent |
+| gacha-analyzer | 8/9 | 7/8 | OK | - | - | Good (admin manquant) |
+| fengshui | N/A | 7/8 | OK | - | - | Good (admin manquant) |
+| asc-tcd | N/A | 7/8 | OK | - | - | Good (auth intentionnel) |

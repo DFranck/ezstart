@@ -29,7 +29,8 @@ Domaines spécifiques (applicables en plus du standard) :
 - [`.claude/rules/env.md`](./.claude/rules/env.md) — `.env.example`/`.env.local`/`.env.production`
 - [`.claude/rules/nextjs.md`](./.claude/rules/nextjs.md) — Provider stack (i18n + theme + auth)
 - [`.claude/rules/ui.md`](./.claude/rules/ui.md) — composants `@ezstart/ui`, classes sémantiques, i18n user-facing
-- [`.claude/rules/standard-saas.md`](./.claude/rules/standard-saas.md) — checklist apps SaaS (API + Web + Infra + features)
+- [`.claude/rules/standard-ui.md`](./.claude/rules/standard-ui.md) — checklist packages/ui/ et SDK components (architecture, responsive, dark mode)
+- [`.claude/rules/standard-saas.md`](./.claude/rules/standard-saas.md) — checklist apps SaaS (API + Web + Infra + features + product completeness)
 
 ## Git
 
@@ -84,7 +85,7 @@ pnpm dev --list  # Voir toutes les apps
 ├── packages/           # SDKs agnostiques publishables (api-sdk, api-contracts, ui, auth-sdk, ...)
 ├── apps/               # 8 apps (ezstart, ezauth, ezpay, ezbill, green-pulse, fengshui, asc-tcd, gacha-analyzer)
 ├── .claude/
-│   ├── rules/          # standard.md + 7 domain-specific
+│   ├── rules/          # standard.md + 8 domain-specific
 │   ├── agents/         # dev.md + auditor.md
 │   └── pipeline/       # loop.md (seul)
 └── BACKLOG.md
