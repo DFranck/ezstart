@@ -42,6 +42,9 @@ export interface BillingDashboardTexts {
   features: string
   active: string
   canceled: string
+  noPaymentsYet: string
+  perMonth: string
+  perYear: string
 }
 
 const DEFAULT_TEXTS: BillingDashboardTexts = {
@@ -65,6 +68,9 @@ const DEFAULT_TEXTS: BillingDashboardTexts = {
   features: 'Included features',
   active: 'Active',
   canceled: 'Canceled',
+  noPaymentsYet: 'No payments yet',
+  perMonth: 'month',
+  perYear: 'year',
 }
 
 export interface BillingDashboardProps {
@@ -74,6 +80,10 @@ export interface BillingDashboardProps {
   onUpgrade?: () => void
   /** Called when the user clicks "View all" on payment history */
   onViewAllPayments?: () => void
+  /** Called after a successful cancel to let parent refresh state */
+  onCancelSuccess?: () => void
+  /** Called when cancel fails with the error */
+  onCancelError?: (error: Error) => void
   /** Number of recent payments to show (default 5) */
   recentPaymentsCount?: number
   /** Customizable texts with English defaults */
@@ -86,6 +96,8 @@ export function BillingDashboard({
   userId,
   onUpgrade,
   onViewAllPayments,
+  onCancelSuccess,
+  onCancelError,
   recentPaymentsCount = 5,
   texts: textsProp,
   className,
@@ -106,10 +118,11 @@ export function BillingDashboard({
     setCanceling(true)
     try {
       await client.cancelSubscription(subscriptionId)
-      // Reload page to reflect updated status
-      window.location.reload()
-    } catch {
       setCanceling(false)
+      onCancelSuccess?.()
+    } catch (err) {
+      setCanceling(false)
+      onCancelError?.(err instanceof Error ? err : new Error('Cancel failed'))
     }
   }
 
@@ -149,8 +162,8 @@ export function BillingDashboard({
                   {formatCurrency(subStatus.subscription.amount / 100, subStatus.subscription.currency)}
                   {' / '}
                   {(subStatus.subscription.metadata?.interval as string) === 'year'
-                    ? 'year'
-                    : 'month'}
+                    ? t.perYear
+                    : t.perMonth}
                 </Span>
               </Div>
 
@@ -260,7 +273,7 @@ export function BillingDashboard({
           ) : payments.length === 0 ? (
             <Div className="text-center py-6">
               <Icon name="lucide:Receipt" className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-              <P className="text-muted-foreground text-sm">No payments yet</P>
+              <P className="text-muted-foreground text-sm">{t.noPaymentsYet}</P>
             </Div>
           ) : (
             <PaymentHistory payments={payments.slice(0, recentPaymentsCount)} />

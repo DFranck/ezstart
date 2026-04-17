@@ -5,9 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
-// ============================================================
-// Context — sidebar open/collapsed state shared across compound
-// ============================================================
+// --- Context ---
 
 interface DashboardContextValue {
   /** Whether the mobile/tablet sidebar overlay is open */
@@ -30,9 +28,7 @@ function useDashboard() {
   return ctx
 }
 
-// ============================================================
-// DashboardLayout — root shell
-// ============================================================
+// --- DashboardLayout ---
 
 interface DashboardLayoutProps extends React.ComponentProps<'div'> {
   /** Start with sidebar collapsed on desktop */
@@ -72,9 +68,7 @@ function DashboardLayout({
   )
 }
 
-// ============================================================
-// DashboardSidebar
-// ============================================================
+// --- DashboardSidebar ---
 
 const sidebarVariants = cva(
   'flex flex-col bg-card text-card-foreground border-r transition-all duration-300 ease-in-out',
@@ -130,9 +124,7 @@ function DashboardSidebar({ className, variant, children, ...props }: DashboardS
   )
 }
 
-// ============================================================
-// SidebarHeader
-// ============================================================
+// --- SidebarHeader ---
 
 function SidebarHeader({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -149,9 +141,7 @@ function SidebarHeader({ className, children, ...props }: React.ComponentProps<'
   )
 }
 
-// ============================================================
-// SidebarNav
-// ============================================================
+// --- SidebarNav ---
 
 function SidebarNav({ className, children, ...props }: React.ComponentProps<'nav'>) {
   return (
@@ -169,9 +159,7 @@ function SidebarNav({ className, children, ...props }: React.ComponentProps<'nav
   )
 }
 
-// ============================================================
-// SidebarSection — group of links with optional label
-// ============================================================
+// --- SidebarSection ---
 
 interface SidebarSectionProps extends React.ComponentProps<'div'> {
   /** Optional section label displayed above the group */
@@ -199,9 +187,7 @@ function SidebarSection({ className, label, children, ...props }: SidebarSection
   )
 }
 
-// ============================================================
-// SidebarLink
-// ============================================================
+// --- SidebarLink ---
 
 const sidebarLinkVariants = cva(
   'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
@@ -253,9 +239,7 @@ function SidebarLink({ className, active, icon, children, ...props }: SidebarLin
   )
 }
 
-// ============================================================
-// SidebarFooter
-// ============================================================
+// --- SidebarFooter ---
 
 function SidebarFooter({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -272,9 +256,7 @@ function SidebarFooter({ className, children, ...props }: React.ComponentProps<'
   )
 }
 
-// ============================================================
-// SidebarToggle — hamburger / collapse toggle
-// ============================================================
+// --- SidebarToggle ---
 
 interface SidebarToggleProps extends React.ComponentProps<'button'> {
   /** Controls which state to toggle: 'mobile' toggles the overlay, 'collapse' toggles desktop collapsed */
@@ -331,9 +313,7 @@ function SidebarToggle({ className, mode = 'mobile', ...props }: SidebarTogglePr
   )
 }
 
-// ============================================================
-// DashboardMain — right-side main area
-// ============================================================
+// --- DashboardMain ---
 
 function DashboardMain({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -347,9 +327,7 @@ function DashboardMain({ className, children, ...props }: React.ComponentProps<'
   )
 }
 
-// ============================================================
-// DashboardHeader — top bar inside main area
-// ============================================================
+// --- DashboardHeader ---
 
 function DashboardHeader({ className, children, ...props }: React.ComponentProps<'header'>) {
   return (
@@ -366,9 +344,7 @@ function DashboardHeader({ className, children, ...props }: React.ComponentProps
   )
 }
 
-// ============================================================
-// DashboardContent — scrollable main content area
-// ============================================================
+// --- DashboardContent ---
 
 function DashboardContent({ className, children, ...props }: React.ComponentProps<'main'>) {
   return (
@@ -381,10 +357,6 @@ function DashboardContent({ className, children, ...props }: React.ComponentProp
     </main>
   )
 }
-
-// ============================================================
-// Exports
-// ============================================================
 
 export {
   DashboardLayout,

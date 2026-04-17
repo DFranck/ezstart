@@ -5,9 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
-// ============================================================
-// Context — mobile menu open state shared across compound
-// ============================================================
+// --- Context — mobile menu open state shared across compound ---
 
 interface LandingContextValue {
   /** Whether the mobile menu is open */
@@ -26,9 +24,7 @@ function useLanding() {
   return ctx
 }
 
-// ============================================================
-// LandingLayout — root shell
-// ============================================================
+// --- LandingLayout — root shell ---
 
 function LandingLayout({ className, children, ...props }: React.ComponentProps<'div'>) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -69,9 +65,7 @@ function LandingLayout({ className, children, ...props }: React.ComponentProps<'
   )
 }
 
-// ============================================================
-// LandingHeader
-// ============================================================
+// --- LandingHeader ---
 
 const landingHeaderVariants = cva(
   'sticky top-0 z-40 w-full border-b backdrop-blur transition-colors duration-200',
@@ -105,9 +99,7 @@ function LandingHeader({ className, variant, children, ...props }: LandingHeader
   )
 }
 
-// ============================================================
-// LandingLogo
-// ============================================================
+// --- LandingLogo ---
 
 function LandingLogo({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -121,9 +113,7 @@ function LandingLogo({ className, children, ...props }: React.ComponentProps<'di
   )
 }
 
-// ============================================================
-// LandingNav — desktop nav links (hidden on mobile)
-// ============================================================
+// --- LandingNav — desktop nav links (hidden on mobile) ---
 
 function LandingNav({ className, children, ...props }: React.ComponentProps<'nav'>) {
   return (
@@ -139,9 +129,7 @@ function LandingNav({ className, children, ...props }: React.ComponentProps<'nav
   )
 }
 
-// ============================================================
-// LandingNavLink
-// ============================================================
+// --- LandingNavLink ---
 
 const landingNavLinkVariants = cva(
   'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
@@ -172,9 +160,7 @@ function LandingNavLink({ className, active, children, ...props }: LandingNavLin
   )
 }
 
-// ============================================================
-// LandingActions — right side of header (CTA buttons, etc.)
-// ============================================================
+// --- LandingActions — right side of header (CTA buttons, etc.) ---
 
 function LandingActions({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -188,9 +174,7 @@ function LandingActions({ className, children, ...props }: React.ComponentProps<
   )
 }
 
-// ============================================================
-// LandingMenuToggle — hamburger for mobile
-// ============================================================
+// --- LandingMenuToggle — hamburger for mobile ---
 
 function LandingMenuToggle({ className, ...props }: React.ComponentProps<'button'>) {
   const { menuOpen, setMenuOpen } = useLanding()
@@ -228,9 +212,7 @@ function LandingMenuToggle({ className, ...props }: React.ComponentProps<'button
   )
 }
 
-// ============================================================
-// LandingMobileMenu — mobile dropdown menu
-// ============================================================
+// --- LandingMobileMenu — mobile dropdown menu ---
 
 function LandingMobileMenu({ className, children, ...props }: React.ComponentProps<'div'>) {
   const { menuOpen, setMenuOpen } = useLanding()
@@ -264,9 +246,7 @@ function LandingMobileMenu({ className, children, ...props }: React.ComponentPro
   )
 }
 
-// ============================================================
-// LandingMobileLink
-// ============================================================
+// --- LandingMobileLink ---
 
 interface LandingMobileLinkProps extends React.ComponentProps<'a'> {
   active?: boolean
@@ -302,9 +282,7 @@ function LandingMobileLink({ className, active, children, ...props }: LandingMob
   )
 }
 
-// ============================================================
-// LandingHero
-// ============================================================
+// --- LandingHero ---
 
 function LandingHeroSection({ className, children, ...props }: React.ComponentProps<'section'>) {
   return (
@@ -322,9 +300,7 @@ function LandingHeroSection({ className, children, ...props }: React.ComponentPr
   )
 }
 
-// ============================================================
-// LandingSection — generic content section
-// ============================================================
+// --- LandingSection — generic content section ---
 
 const landingSectionVariants = cva('relative px-4 py-12 md:py-16 lg:py-24', {
   variants: {
@@ -358,9 +334,7 @@ function LandingSection({ className, variant, align, children, ...props }: Landi
   )
 }
 
-// ============================================================
-// LandingFooter
-// ============================================================
+// --- LandingFooter ---
 
 function LandingFooter({ className, children, ...props }: React.ComponentProps<'footer'>) {
   return (
@@ -377,9 +351,7 @@ function LandingFooter({ className, children, ...props }: React.ComponentProps<'
   )
 }
 
-// ============================================================
-// Exports
-// ============================================================
+// --- Exports ---
 
 export {
   LandingLayout,
