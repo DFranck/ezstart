@@ -35,7 +35,89 @@
 
 ---
 
-## 2. Responsive (OBLIGATOIRE)
+## 2. Component Patterns
+
+Deux patterns fondamentaux pour structurer les composants. Le choix est critique : utiliser le mauvais pattern degrade l'UX ou explose la complexite.
+
+### 2.1 Compound Components — le consumer controle la STRUCTURE
+
+**Usage** : layouts, containers, sections ou l'ordre et le contenu varient selon le contexte.
+
+**Exemples** : `DashboardLayout`, `Card`, `Dialog`, `Tabs`, `Accordion`
+
+**Pattern** : parent + enfants nommes, chacun exporte separement. Le consumer compose librement.
+
+```tsx
+// Compound: consumer controls structure
+<DashboardLayout>
+  <DashboardSidebar>
+    <SidebarNav>...</SidebarNav>
+  </DashboardSidebar>
+  <DashboardMain>
+    <DashboardHeader>...</DashboardHeader>
+    <DashboardContent>...</DashboardContent>
+  </DashboardMain>
+</DashboardLayout>
+```
+
+### 2.2 Abstraction Components — la structure est FIXE et uniforme
+
+**Usage** : composants ou le pattern doit etre identique partout dans l'app.
+
+**Exemples** : `Modal` (fixed: header+body+footer), `PricingCard` (fixed: name+price+features+CTA), `AlertDialog`, `Toast`
+
+**Pattern** : un seul composant avec props, structure imposee en interne. Le consumer fournit le contenu via props, ne peut pas reordonner.
+
+```tsx
+// Abstraction: structure enforced, consumer fills content
+<Modal
+  isOpen={open}
+  onClose={close}
+  title="Edit Profile"
+  footer={<Button>Save</Button>}
+>
+  {body content}
+</Modal>
+
+<PricingCard
+  name="Pro"
+  price={49}
+  period="month"
+  features={['Feature 1', 'Feature 2']}
+  cta="Upgrade"
+  onSelect={handleSelect}
+/>
+```
+
+### 2.3 Decision rule
+
+| Question | Compound | Abstraction |
+|----------|----------|-------------|
+| Can the consumer reorder sections? | Yes | No |
+| Must every instance look the same? | No | Yes |
+| Is it a layout/container? | Usually | Rarely |
+| Is it a specific UI pattern? | Rarely | Usually |
+| Examples | DashboardLayout, Card, Tabs | Modal, PricingCard, AlertDialog, Toast |
+
+### 2.4 Anti-patterns
+
+- **Compound when structure should be fixed** — leads to inconsistent UI across the app (every dev invents their own modal layout)
+- **Props-based when structure should be flexible** — leads to prop explosion (`sidebar={}`, `header={}`, `footer={}`, `leftPanel={}`, etc.)
+- **Duplicating a compound as an abstraction** — `PricingCard` is an abstraction OF `Card`, not a copy. It imports `Card` internally and enforces structure via props.
+
+### 2.5 SDK abstractions
+
+SDK components (`auth-sdk/components/`, `pay-sdk/components/`) are typically **abstractions** built ON TOP of `packages/ui/` compound components :
+
+- `DeveloperPortal` uses `Card`, `DataTable`, `Modal` internally
+- `PricingPage` uses `Card` (as PricingCard abstraction) + grid layout
+- `AuthAdminDashboard` uses `DataTable`, `Modal`, `Badge`
+
+The SDK consumer just does `<PricingPage />` — zero knowledge of the internals. The structure is enforced by the SDK, the consumer only provides configuration props.
+
+---
+
+## 3. Responsive (OBLIGATOIRE)
 
 ### 2.1 Regles
 
@@ -61,7 +143,7 @@
 
 ---
 
-## 3. Dark mode
+## 4. Dark mode
 
 - [ ] Chaque composant fonctionne en light ET dark mode
 - [ ] Utiliser les couleurs semantiques (auto-switch via ThemeProvider)
@@ -71,9 +153,9 @@
 
 ---
 
-## 4. Composants layout (packages/ui/)
+## 5. Composants layout (packages/ui/)
 
-### 4.1 Layouts disponibles
+### 5.1 Layouts disponibles
 
 | Composant         | Usage                                          | Mobile behavior                  |
 | ----------------- | ---------------------------------------------- | -------------------------------- |
@@ -83,7 +165,7 @@
 | `TopNav` / `Header` | Header responsive avec navigation            | Hamburger menu                   |
 | `MobileNav`       | Bottom nav ou drawer pour mobile               | Visible uniquement sous `md:`    |
 
-### 4.2 Regles layout
+### 5.2 Regles layout
 
 - [ ] Pure layout shells — ZERO logique metier, ZERO auth, ZERO appels API
 - [ ] Acceptent `children` pour la composition
@@ -92,7 +174,7 @@
 
 ---
 
-## 5. Separation des responsabilites — Quoi va OU
+## 6. Separation des responsabilites — Quoi va OU
 
 | Couche                     | Contenu                                                      | Exemples                                                    |
 | -------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
@@ -102,7 +184,7 @@
 | `ai-sdk/components/`       | Composants metier IA                                         | `ChatPanel`, `PromptEditor`                                 |
 | `apps/<app>/web/components/` | Composition UNIQUEMENT (import + render)                   | Pages qui assemblent SDK + UI, zero composant custom        |
 
-### 5.1 Regles d'import (sens unique)
+### 6.1 Regles d'import (sens unique)
 
 ```
 packages/ui/  <--  SDK components/  <--  app web/
@@ -115,7 +197,7 @@ packages/ui/  <--  SDK components/  <--  app web/
 
 ---
 
-## 6. `<Tag />` usage
+## 7. `<Tag />` usage
 
 - [ ] `<Tag />` (`Div`, `Span`, `P`, `H1`-`H6`, `Section`, `Main`, etc.) est pour la structure de page au niveau app uniquement
 - [ ] `packages/ui/` ne depend PAS de Tag en interne — utilise du HTML semantique ou ses propres abstractions
@@ -124,7 +206,7 @@ packages/ui/  <--  SDK components/  <--  app web/
 
 ---
 
-## 7. Audit grep commands
+## 8. Audit grep commands
 
 ```bash
 # Couleurs hardcodees (interdit dans packages/ui/)
@@ -154,7 +236,7 @@ grep -rnE "dark:" packages/ui/src/components/ --include="*.tsx" | grep -v "// al
 
 ---
 
-## 8. Checklist audit rapide
+## 9. Checklist audit rapide
 
 Avant chaque commit touchant `packages/ui/` ou un SDK `components/` :
 
