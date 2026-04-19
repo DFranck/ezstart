@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Badge,
   Card,
@@ -186,11 +186,7 @@ function formatDate(dateStr: string | undefined | null): string {
   }
 }
 
-function getDisplayName(user: {
-  firstName?: string
-  lastName?: string
-  username: string
-}): string {
+function getDisplayName(user: { firstName?: string; lastName?: string; username: string }): string {
   if (user.firstName) return user.firstName
   return user.username
 }
@@ -240,11 +236,13 @@ export function EZAuthDashboard({
   texts: textOverrides,
   className,
 }: EZAuthDashboardProps) {
-  const { user, isAuthenticated, isAuthReady, logout } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
   const [activeSection, setActiveSection] = useState<Section>(defaultSection)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
-  if (!isAuthReady) {
+  if (!mounted) {
     return <DashboardSkeleton />
   }
 
@@ -269,13 +267,13 @@ export function EZAuthDashboard({
         </SidebarHeader>
 
         <SidebarNav>
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <SidebarLink
               key={item.id}
               href="#"
               active={activeSection === item.id}
               icon={<Icon name={item.icon as 'lucide:Key'} className="h-4 w-4" />}
-              onClick={(e) => {
+              onClick={e => {
                 e.preventDefault()
                 setActiveSection(item.id)
               }}
@@ -289,9 +287,7 @@ export function EZAuthDashboard({
           <Div className="flex items-center gap-3">
             <UserAvatar size="sm" user={user} />
             <Div className="flex-1 min-w-0">
-              <P className="text-sm font-medium text-foreground truncate">
-                {getDisplayName(user)}
-              </P>
+              <P className="text-sm font-medium text-foreground truncate">{getDisplayName(user)}</P>
               <P className="text-xs text-muted-foreground truncate">{user.email}</P>
             </Div>
           </Div>
@@ -303,17 +299,13 @@ export function EZAuthDashboard({
         <DashboardHeader>
           <SidebarToggle mode="mobile" />
           <H2 className="text-lg font-semibold text-foreground">
-            {navItems.find((n) => n.id === activeSection)?.label}
+            {navItems.find(n => n.id === activeSection)?.label}
           </H2>
         </DashboardHeader>
 
         <DashboardContent>
           {activeSection === 'overview' && (
-            <OverviewSection
-              user={user}
-              appName={appName}
-              texts={texts}
-            />
+            <OverviewSection user={user} appName={appName} texts={texts} />
           )}
           {activeSection === 'api-keys' && (
             <DeveloperPortal
@@ -323,14 +315,9 @@ export function EZAuthDashboard({
               showAdminScope={isSuperadmin(user)}
             />
           )}
-          {activeSection === 'billing' && (
-            <BillingSection texts={texts} />
-          )}
+          {activeSection === 'billing' && <BillingSection texts={texts} />}
           {activeSection === 'settings' && (
-            <UserSettings
-              appName={appName}
-              texts={texts.settings}
-            />
+            <UserSettings appName={appName} texts={texts.settings} />
           )}
         </DashboardContent>
       </DashboardMain>
@@ -386,7 +373,7 @@ function OverviewSection({
 
       {/* Quick stats */}
       <Div className="grid gap-4 sm:grid-cols-2">
-        {stats.map((stat) => (
+        {stats.map(stat => (
           <Card key={stat.label}>
             <CardContent className="flex items-center gap-4 p-4 md:p-6">
               <Div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
@@ -424,7 +411,7 @@ function OverviewSection({
 
 function BillingSection({ texts }: { texts: EZAuthDashboardTexts }) {
   const currentPlanId = 'free'
-  const currentPlan = PLANS.find((p) => p.id === currentPlanId) ?? FREE_PLAN
+  const currentPlan = PLANS.find(p => p.id === currentPlanId) ?? FREE_PLAN
 
   const handleUpgrade = () => {
     toast.info(texts.comingSoon)
@@ -478,13 +465,10 @@ function BillingSection({ texts }: { texts: EZAuthDashboardTexts }) {
         <H2 className="text-lg font-semibold text-center">{texts.choosePlan}</H2>
 
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {PLANS.map((plan) => {
+          {PLANS.map(plan => {
             const isCurrent = plan.id === currentPlanId
             return (
-              <Card
-                key={plan.id}
-                className={cn('relative', plan.id === 'pro' && 'border-primary')}
-              >
+              <Card key={plan.id} className={cn('relative', plan.id === 'pro' && 'border-primary')}>
                 {plan.id === 'pro' && (
                   <Div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge variant="primary">{texts.popular}</Badge>
@@ -518,7 +502,7 @@ function BillingSection({ texts }: { texts: EZAuthDashboardTexts }) {
                         {texts.apiKeys}
                       </Span>
                     </Div>
-                    {plan.features.map((feature) => {
+                    {plan.features.map(feature => {
                       const textKey = FEATURE_MAP[feature]
                       const label = textKey ? (texts[textKey] as string) : feature
                       return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Badge,
   Card,
@@ -115,19 +115,18 @@ function formatDate(dateStr: string | undefined | null): string {
   }
 }
 
-function getDisplayName(user: {
-  firstName?: string
-  lastName?: string
-  username: string
-}): string {
+function getDisplayName(user: { firstName?: string; lastName?: string; username: string }): string {
   if (user.firstName) return user.firstName
   return user.username
 }
 
-function getUserRoleCount(user: {
-  globalRoles?: string[]
-  appRoles?: Record<string, string[]>
-}, appName?: string): number {
+function getUserRoleCount(
+  user: {
+    globalRoles?: string[]
+    appRoles?: Record<string, string[]>
+  },
+  appName?: string
+): number {
   let count = user.globalRoles?.length ?? 0
   if (appName && user.appRoles?.[appName]) {
     count += user.appRoles[appName].length
@@ -146,12 +145,14 @@ export function UserDashboard({
   texts: textOverrides,
   className,
 }: UserDashboardProps) {
-  const { user, isAuthenticated, isAuthReady } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
   const [activeTab, setActiveTab] = useState(defaultTab)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // Loading state
-  if (!isAuthReady) {
+  if (!mounted) {
     return <UserDashboardSkeleton className={className} />
   }
 
@@ -185,10 +186,7 @@ export function UserDashboard({
       </Div>
 
       {/* Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={v => setActiveTab(v as typeof activeTab)}
-      >
+      <Tabs value={activeTab} onValueChange={v => setActiveTab(v as typeof activeTab)}>
         <TabsList>
           {visibleTabs.includes('overview') && (
             <TabsTrigger value="overview">{texts.tabOverview}</TabsTrigger>
@@ -207,31 +205,21 @@ export function UserDashboard({
         {/* Overview */}
         {visibleTabs.includes('overview') && (
           <TabsContent value="overview">
-            <OverviewTab
-              user={user}
-              appName={appName}
-              texts={texts}
-            />
+            <OverviewTab user={user} appName={appName} texts={texts} />
           </TabsContent>
         )}
 
         {/* API Keys */}
         {visibleTabs.includes('api-keys') && (
           <TabsContent value="api-keys">
-            <DeveloperPortal
-              enabled={apiKeysEnabled}
-              texts={texts.developerPortal}
-            />
+            <DeveloperPortal enabled={apiKeysEnabled} texts={texts.developerPortal} />
           </TabsContent>
         )}
 
         {/* Settings */}
         {visibleTabs.includes('settings') && (
           <TabsContent value="settings">
-            <UserSettings
-              appName={appName}
-              texts={texts.settings}
-            />
+            <UserSettings appName={appName} texts={texts.settings} />
           </TabsContent>
         )}
 
@@ -353,7 +341,11 @@ function UsageTab({ usage, texts }: UsageTabProps) {
                 <Div
                   className={cn(
                     'h-full rounded-full transition-all',
-                    percentage >= 90 ? 'bg-destructive' : percentage >= 70 ? 'bg-warning' : 'bg-primary'
+                    percentage >= 90
+                      ? 'bg-destructive'
+                      : percentage >= 70
+                        ? 'bg-warning'
+                        : 'bg-primary'
                   )}
                   style={{ width: `${percentage}%` }}
                 />
