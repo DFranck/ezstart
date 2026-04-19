@@ -35,6 +35,12 @@
    | Theme color              | `bg-primary`, `text-foreground`             | OKLCH/hex hardcodé                               |
    | Error parsing            | `parseApiError()` + `ApiError.isApiError()` | `new Error(response.error)`                      |
 
+**SDK text props rule** :
+   - ALL user-facing text in SDK components MUST accept a `texts` prop with English defaults
+   - NEVER hardcode marketing taglines or app-specific strings in SDK components
+   - The consuming app provides translations via the `texts` prop
+   - SDK components are i18n-agnostic (no dependency on next-intl or any i18n library)
+
 3. **CRÉER SEULEMENT SI ABSENT** — Si le besoin n'existe NULLE PART :
    - Réutilisable par 2+ projets → créer dans `packages/` (respecter section 1-7 ci-dessous)
    - Vraiment app-specific → `apps/<x>/web/components/` ou `apps/<x>/utils/`

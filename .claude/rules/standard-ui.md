@@ -184,7 +184,20 @@ The SDK consumer just does `<PricingPage />` — zero knowledge of the internals
 | `ai-sdk/components/`       | Composants metier IA                                         | `ChatPanel`, `PromptEditor`                                 |
 | `apps/<app>/web/components/` | Composition UNIQUEMENT (import + render)                   | Pages qui assemblent SDK + UI, zero composant custom        |
 
-### 6.1 Regles d'import (sens unique)
+### 6.1 Layout consistency rule
+
+- ALL SaaS apps MUST use the same layout compounds (`LandingLayout`, `DashboardLayout`)
+- NO custom layouts per app — variations come from theme tokens and variants, not new components
+- If a layout doesn't fit, extend the existing compound (add variants), don't create a new one
+
+### 6.2 Reuse hierarchy (mandatory order)
+
+1. `packages/ui/` compounds -> for layout, visual structure
+2. SDK components (`auth-sdk`, `pay-sdk`) -> for business UI
+3. App web -> ONLY composition (import + arrange), ZERO custom components
+4. If a component is needed in 2+ apps -> it MUST be in a package, not the app
+
+### 6.3 Regles d'import (sens unique)
 
 ```
 packages/ui/  <--  SDK components/  <--  app web/

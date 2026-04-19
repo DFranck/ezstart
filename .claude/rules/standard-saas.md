@@ -211,6 +211,11 @@ Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch prod
 - [ ] CTA : login / signup / pricing
 - [ ] Responsive mobile-first, dark mode
 - [ ] TOUS composants depuis SDK ou `packages/ui/` (zero custom)
+- [ ] MUST use `LandingLayout` compound components from `@ezstart/ui`
+- [ ] Header: logo + nav + ThemeSwitcher + LocaleSwitcher + LoginButton/UserMenu (from auth-sdk)
+- [ ] Hero with value prop + CTA (adapts when user is authenticated: "Get Started" -> "Go to Dashboard")
+- [ ] Footer with link columns: Product, Company, Legal
+- [ ] ALL links must point to real pages (placeholder pages at minimum)
 
 ### 5.2 Auth Flow (Standalone)
 
@@ -238,6 +243,9 @@ Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch prod
 - [ ] Plan actuel visible dans le user dashboard
 - [ ] Flow upgrade/downgrade
 - [ ] Via pay-sdk PricingPage component (auto-fetch plans depuis API)
+- [ ] Plans MUST come from pay-sdk PricingPage component (auto-fetched from API)
+- [ ] NEVER hardcode pricing cards in the app
+- [ ] If no plans configured in EZPay: show "Pricing coming soon" placeholder
 
 ### 5.5 Admin Platform (superadmin)
 
@@ -255,6 +263,17 @@ Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch prod
 - [ ] API docs (Swagger `/docs`)
 - [ ] Exemples de code
 - [ ] Status page (uptime)
+
+### 5.7 Required Pages
+
+- [ ] `/privacy` — Privacy Policy (placeholder OK before launch)
+- [ ] `/terms` — Terms of Service
+- [ ] `/about` — About page
+- [ ] `/contact` — Contact page with email
+- [ ] `/docs` — Documentation (or link to external docs)
+- [ ] `/blog` — Blog (placeholder OK)
+- [ ] `/changelog` — Changelog
+- [ ] `/status` — Status page
 
 ---
 
