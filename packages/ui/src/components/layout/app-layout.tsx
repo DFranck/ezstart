@@ -5,9 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useState, forwardRef
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
-// ---------------------------------------------------------------------------
 // Context — mobile menu open state shared across compound
-// ---------------------------------------------------------------------------
 
 interface AppLayoutContextValue {
   /** Whether the mobile menu is open */
@@ -26,9 +24,7 @@ function useAppLayout() {
   return ctx
 }
 
-// ---------------------------------------------------------------------------
 // AppLayout — root shell, provides mobile menu context
-// ---------------------------------------------------------------------------
 
 const AppLayout = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, children, ...props }, ref) => {
@@ -73,9 +69,7 @@ const AppLayout = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 )
 AppLayout.displayName = 'AppLayout'
 
-// ---------------------------------------------------------------------------
 // AppHeader — sticky header, responsive
-// ---------------------------------------------------------------------------
 
 const appHeaderVariants = cva(
   'sticky top-0 z-40 w-full border-b backdrop-blur transition-colors duration-200',
@@ -113,9 +107,7 @@ const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(
 )
 AppHeader.displayName = 'AppHeader'
 
-// ---------------------------------------------------------------------------
 // AppLogo — image + text, links to home
-// ---------------------------------------------------------------------------
 
 const AppLogo = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, children, ...props }, ref) => {
@@ -133,9 +125,7 @@ const AppLogo = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 )
 AppLogo.displayName = 'AppLogo'
 
-// ---------------------------------------------------------------------------
 // AppNav — desktop nav links (hidden on mobile)
-// ---------------------------------------------------------------------------
 
 const AppNav = forwardRef<HTMLElement, React.ComponentProps<'nav'>>(
   ({ className, children, ...props }, ref) => {
@@ -155,9 +145,7 @@ const AppNav = forwardRef<HTMLElement, React.ComponentProps<'nav'>>(
 )
 AppNav.displayName = 'AppNav'
 
-// ---------------------------------------------------------------------------
 // AppNavLink — individual nav link with active prop
-// ---------------------------------------------------------------------------
 
 const appNavLinkVariants = cva(
   'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
@@ -193,9 +181,7 @@ const AppNavLink = forwardRef<HTMLAnchorElement, AppNavLinkProps>(
 )
 AppNavLink.displayName = 'AppNavLink'
 
-// ---------------------------------------------------------------------------
 // AppActions — right side slot (switchers, auth buttons, etc.)
-// ---------------------------------------------------------------------------
 
 const AppActions = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, children, ...props }, ref) => {
@@ -213,9 +199,7 @@ const AppActions = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 )
 AppActions.displayName = 'AppActions'
 
-// ---------------------------------------------------------------------------
 // AppMobileToggle — hamburger button, md:hidden
-// ---------------------------------------------------------------------------
 
 const AppMobileToggle = forwardRef<HTMLButtonElement, React.ComponentProps<'button'>>(
   ({ className, ...props }, ref) => {
@@ -257,9 +241,7 @@ const AppMobileToggle = forwardRef<HTMLButtonElement, React.ComponentProps<'butt
 )
 AppMobileToggle.displayName = 'AppMobileToggle'
 
-// ---------------------------------------------------------------------------
 // AppMobileMenu — full-width dropdown with backdrop
-// ---------------------------------------------------------------------------
 
 const AppMobileMenu = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, children, ...props }, ref) => {
@@ -295,9 +277,7 @@ const AppMobileMenu = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 )
 AppMobileMenu.displayName = 'AppMobileMenu'
 
-// ---------------------------------------------------------------------------
 // AppMobileLink — mobile nav link with auto-close
-// ---------------------------------------------------------------------------
 
 interface AppMobileLinkProps extends React.ComponentProps<'a'> {
   active?: boolean
@@ -337,9 +317,7 @@ const AppMobileLink = forwardRef<HTMLAnchorElement, AppMobileLinkProps>(
 )
 AppMobileLink.displayName = 'AppMobileLink'
 
-// ---------------------------------------------------------------------------
 // AppMain — main content area with proper padding/max-width
-// ---------------------------------------------------------------------------
 
 const AppMain = forwardRef<HTMLElement, React.ComponentProps<'main'>>(
   ({ className, children, ...props }, ref) => {
@@ -357,9 +335,7 @@ const AppMain = forwardRef<HTMLElement, React.ComponentProps<'main'>>(
 )
 AppMain.displayName = 'AppMain'
 
-// ---------------------------------------------------------------------------
 // AppContent — inner content wrapper (optional, for max-width constrained content)
-// ---------------------------------------------------------------------------
 
 const AppContent = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, children, ...props }, ref) => {
@@ -377,114 +353,12 @@ const AppContent = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 )
 AppContent.displayName = 'AppContent'
 
-// ---------------------------------------------------------------------------
-// AppFooter — footer with grid columns
-// ---------------------------------------------------------------------------
+// Re-export footer compound (split for file-size compliance)
 
-const AppFooter = forwardRef<HTMLElement, React.ComponentProps<'footer'>>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <footer
-        ref={ref}
-        data-slot="app-footer"
-        className={cn('mt-auto border-t bg-muted px-4 py-8 md:py-12', className)}
-        {...props}
-      >
-        <div className="container mx-auto max-w-6xl">{children}</div>
-      </footer>
-    )
-  }
-)
-AppFooter.displayName = 'AppFooter'
+export { AppFooter, FooterColumn, FooterLink, FooterBrand } from './app-footer'
+export type { FooterColumnProps, FooterBrandProps } from './app-footer'
 
-// ---------------------------------------------------------------------------
-// FooterColumn — column with title + links
-// ---------------------------------------------------------------------------
-
-interface FooterColumnProps extends React.ComponentProps<'div'> {
-  /** Column heading */
-  title: string
-}
-
-const FooterColumn = forwardRef<HTMLDivElement, FooterColumnProps>(
-  ({ className, title, children, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        data-slot="footer-column"
-        className={cn('flex flex-col gap-3', className)}
-        {...props}
-      >
-        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-        <ul className="flex flex-col gap-2">{children}</ul>
-      </div>
-    )
-  }
-)
-FooterColumn.displayName = 'FooterColumn'
-
-// ---------------------------------------------------------------------------
-// FooterLink — footer link
-// ---------------------------------------------------------------------------
-
-const FooterLink = forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <li>
-        <a
-          ref={ref}
-          data-slot="footer-link"
-          className={cn(
-            'text-sm text-muted-foreground transition-colors hover:text-foreground',
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </a>
-      </li>
-    )
-  }
-)
-FooterLink.displayName = 'FooterLink'
-
-// ---------------------------------------------------------------------------
-// FooterBrand — logo + tagline + copyright at bottom
-// ---------------------------------------------------------------------------
-
-interface FooterBrandProps extends React.ComponentProps<'div'> {
-  /** Tagline text below the logo */
-  tagline?: string
-  /** Copyright text */
-  copyright?: string
-}
-
-const FooterBrand = forwardRef<HTMLDivElement, FooterBrandProps>(
-  ({ className, tagline, copyright, children, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        data-slot="footer-brand"
-        className={cn('flex flex-col gap-2', className)}
-        {...props}
-      >
-        {/* Logo slot (children) */}
-        {children}
-        {tagline && (
-          <p className="text-sm text-muted-foreground">{tagline}</p>
-        )}
-        {copyright && (
-          <p className="text-xs text-muted-foreground">{copyright}</p>
-        )}
-      </div>
-    )
-  }
-)
-FooterBrand.displayName = 'FooterBrand'
-
-// ---------------------------------------------------------------------------
 // Exports
-// ---------------------------------------------------------------------------
 
 export {
   AppLayout,
@@ -498,10 +372,6 @@ export {
   AppMobileLink,
   AppMain,
   AppContent,
-  AppFooter,
-  FooterColumn,
-  FooterLink,
-  FooterBrand,
   useAppLayout,
 }
 
@@ -509,6 +379,4 @@ export type {
   AppHeaderProps,
   AppNavLinkProps,
   AppMobileLinkProps,
-  FooterColumnProps,
-  FooterBrandProps,
 }
