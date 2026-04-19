@@ -272,90 +272,13 @@ export default function HomePage() {
       {/* Pricing                                                          */}
       {/* ---------------------------------------------------------------- */}
       <LandingSection id="pricing" align="center">
-        <Div className="mb-12">
+        <Div className="py-8">
           <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t('pricingSectionTitle')}
           </H2>
           <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            {t('pricingSectionSubtitle')}
+            Pricing coming soon. EZAuth is currently free during the beta period.
           </P>
-        </Div>
-
-        <Div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Free */}
-          <Card className="flex flex-col">
-            <CardHeader className="text-center">
-              <H3 className="text-lg font-semibold">{t('pricingFreeTitle')}</H3>
-              <Div className="mt-2">
-                <Span className="text-4xl font-extrabold">{t('pricingFreePrice')}</Span>
-                <Span className="text-muted-foreground">{t('pricingFreePeriod')}</Span>
-              </Div>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col gap-4">
-              <Div className="flex-1 space-y-3">
-                {(['pricingFreeFeature1', 'pricingFreeFeature2', 'pricingFreeFeature3', 'pricingFreeFeature4'] as const).map((key) => (
-                  <Div key={key} className="flex items-center gap-2">
-                    <Icon name="lucide:Check" className="h-4 w-4 text-success shrink-0" />
-                    <Span className="text-sm">{t(key)}</Span>
-                  </Div>
-                ))}
-              </Div>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/register">{t('pricingFreeCta')}</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Pro */}
-          <Card className="relative flex flex-col border-primary">
-            <Div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge variant="primary">{t('pricingProBadge')}</Badge>
-            </Div>
-            <CardHeader className="text-center">
-              <H3 className="text-lg font-semibold">{t('pricingProTitle')}</H3>
-              <Div className="mt-2">
-                <Span className="text-4xl font-extrabold">{t('pricingProPrice')}</Span>
-                <Span className="text-muted-foreground">{t('pricingProPeriod')}</Span>
-              </Div>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col gap-4">
-              <Div className="flex-1 space-y-3">
-                {(['pricingProFeature1', 'pricingProFeature2', 'pricingProFeature3', 'pricingProFeature4', 'pricingProFeature5'] as const).map((key) => (
-                  <Div key={key} className="flex items-center gap-2">
-                    <Icon name="lucide:Check" className="h-4 w-4 text-success shrink-0" />
-                    <Span className="text-sm">{t(key)}</Span>
-                  </Div>
-                ))}
-              </Div>
-              <Button asChild className="w-full">
-                <Link href="/register">{t('pricingProCta')}</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Enterprise */}
-          <Card className="flex flex-col">
-            <CardHeader className="text-center">
-              <H3 className="text-lg font-semibold">{t('pricingEnterpriseTitle')}</H3>
-              <Div className="mt-2">
-                <Span className="text-4xl font-extrabold">{t('pricingEnterprisePrice')}</Span>
-                <Span className="text-muted-foreground">{t('pricingEnterprisePeriod')}</Span>
-              </Div>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col gap-4">
-              <Div className="flex-1 space-y-3">
-                {(['pricingEnterpriseFeature1', 'pricingEnterpriseFeature2', 'pricingEnterpriseFeature3', 'pricingEnterpriseFeature4', 'pricingEnterpriseFeature5'] as const).map((key) => (
-                  <Div key={key} className="flex items-center gap-2">
-                    <Icon name="lucide:Check" className="h-4 w-4 text-success shrink-0" />
-                    <Span className="text-sm">{t(key)}</Span>
-                  </Div>
-                ))}
-              </Div>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/contact">{t('pricingEnterpriseCta')}</Link>
-              </Button>
-            </CardContent>
-          </Card>
         </Div>
       </LandingSection>
 
