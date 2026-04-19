@@ -1,3 +1,4 @@
+export * from './app-layout'
 export { ClientLayout, type ClientLayoutProps } from './client-layout'
 export * from './dashboard-layout'
 export { Footer } from './footer'

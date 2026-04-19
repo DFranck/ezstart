@@ -26,6 +26,11 @@ function useLanding() {
 
 // --- LandingLayout — root shell ---
 
+/**
+ * @deprecated Use `AppLayout` from `./app-layout` instead.
+ * AppLayout provides a unified header + main + footer shell for ALL SaaS apps.
+ * LandingHeroSection and LandingSection remain valid for content inside AppMain.
+ */
 function LandingLayout({ className, children, ...props }: React.ComponentProps<'div'>) {
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -67,6 +72,10 @@ function LandingLayout({ className, children, ...props }: React.ComponentProps<'
 
 // --- LandingHeader ---
 
+/**
+ * @deprecated Use `AppHeader` from `./app-layout` instead.
+ * AppHeader is the unified header for all SaaS apps (landing + dashboard).
+ */
 const landingHeaderVariants = cva(
   'sticky top-0 z-40 w-full border-b backdrop-blur transition-colors duration-200',
   {
@@ -85,6 +94,9 @@ interface LandingHeaderProps
   extends React.ComponentProps<'header'>,
     VariantProps<typeof landingHeaderVariants> {}
 
+/**
+ * @deprecated Use `AppHeader` from `./app-layout` instead.
+ */
 function LandingHeader({ className, variant, children, ...props }: LandingHeaderProps) {
   return (
     <header
@@ -101,6 +113,9 @@ function LandingHeader({ className, variant, children, ...props }: LandingHeader
 
 // --- LandingLogo ---
 
+/**
+ * @deprecated Use `AppLogo` from `./app-layout` instead.
+ */
 function LandingLogo({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -115,6 +130,9 @@ function LandingLogo({ className, children, ...props }: React.ComponentProps<'di
 
 // --- LandingNav — desktop nav links (hidden on mobile) ---
 
+/**
+ * @deprecated Use `AppNav` from `./app-layout` instead.
+ */
 function LandingNav({ className, children, ...props }: React.ComponentProps<'nav'>) {
   return (
     <nav
@@ -148,6 +166,9 @@ interface LandingNavLinkProps
   extends React.ComponentProps<'a'>,
     VariantProps<typeof landingNavLinkVariants> {}
 
+/**
+ * @deprecated Use `AppNavLink` from `./app-layout` instead.
+ */
 function LandingNavLink({ className, active, children, ...props }: LandingNavLinkProps) {
   return (
     <a
@@ -162,6 +183,9 @@ function LandingNavLink({ className, active, children, ...props }: LandingNavLin
 
 // --- LandingActions — right side of header (CTA buttons, etc.) ---
 
+/**
+ * @deprecated Use `AppActions` from `./app-layout` instead.
+ */
 function LandingActions({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -176,6 +200,9 @@ function LandingActions({ className, children, ...props }: React.ComponentProps<
 
 // --- LandingMenuToggle — hamburger for mobile ---
 
+/**
+ * @deprecated Use `AppMobileToggle` from `./app-layout` instead.
+ */
 function LandingMenuToggle({ className, ...props }: React.ComponentProps<'button'>) {
   const { menuOpen, setMenuOpen } = useLanding()
 
@@ -214,6 +241,9 @@ function LandingMenuToggle({ className, ...props }: React.ComponentProps<'button
 
 // --- LandingMobileMenu — mobile dropdown menu ---
 
+/**
+ * @deprecated Use `AppMobileMenu` from `./app-layout` instead.
+ */
 function LandingMobileMenu({ className, children, ...props }: React.ComponentProps<'div'>) {
   const { menuOpen, setMenuOpen } = useLanding()
 
@@ -252,6 +282,9 @@ interface LandingMobileLinkProps extends React.ComponentProps<'a'> {
   active?: boolean
 }
 
+/**
+ * @deprecated Use `AppMobileLink` from `./app-layout` instead.
+ */
 function LandingMobileLink({ className, active, children, ...props }: LandingMobileLinkProps) {
   const { setMenuOpen } = useLanding()
 
@@ -336,6 +369,9 @@ function LandingSection({ className, variant, align, children, ...props }: Landi
 
 // --- LandingFooter ---
 
+/**
+ * @deprecated Use `AppFooter` + `FooterColumn` + `FooterLink` + `FooterBrand` from `./app-layout` instead.
+ */
 function LandingFooter({ className, children, ...props }: React.ComponentProps<'footer'>) {
   return (
     <footer

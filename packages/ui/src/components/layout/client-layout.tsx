@@ -14,6 +14,11 @@ import { Footer } from './footer'
 import { Header } from './header'
 import { NavigationItem, NavigationLink, isNavigationMenu } from './types'
 
+/**
+ * @deprecated Use the `AppLayout` compound component system from `./app-layout` instead.
+ * AppLayout provides a cleaner composition-based approach without prop explosion.
+ * Migration: replace `<ClientLayout>` with `<AppLayout>` + `<AppHeader>` + `<AppMain>` + `<AppFooter>`.
+ */
 export interface ClientLayoutProps {
   children: React.ReactNode
 
@@ -69,6 +74,11 @@ export interface ClientLayoutProps {
   mobileNavbarClassName?: string
 }
 
+/**
+ * @deprecated Use the `AppLayout` compound component system from `./app-layout` instead.
+ * AppLayout provides a cleaner composition-based approach without prop explosion.
+ * Migration: replace `<ClientLayout>` with `<AppLayout>` + `<AppHeader>` + `<AppMain>` + `<AppFooter>`.
+ */
 export function ClientLayout({
   children,
   appName,

@@ -155,15 +155,30 @@ The SDK consumer just does `<PricingPage />` — zero knowledge of the internals
 
 ## 5. Composants layout (packages/ui/)
 
-### 5.1 Layouts disponibles
+### 5.1 Layout hierarchy
 
-| Composant         | Usage                                          | Mobile behavior                  |
-| ----------------- | ---------------------------------------------- | -------------------------------- |
-| `DashboardLayout` | Sidebar + header + main content                | Sidebar collapse en drawer       |
-| `LandingLayout`   | Hero + sections + CTA + footer                 | Stack vertical, CTA plein width  |
-| `SidebarNav`      | Navigation sidebar collapsible                 | Drawer overlay                   |
-| `TopNav` / `Header` | Header responsive avec navigation            | Hamburger menu                   |
-| `MobileNav`       | Bottom nav ou drawer pour mobile               | Visible uniquement sous `md:`    |
+Three levels, each with a distinct role. Never mix them.
+
+| Level | Composant | Role | Contains |
+|-------|-----------|------|----------|
+| **Global shell** | `AppLayout` | Header + Main + Footer, same on EVERY page | `AppHeader`, `AppMain`, `AppFooter` |
+| **Content layout** | `DashboardLayout` | Sidebar + content, for dashboard/admin pages | Goes INSIDE `AppMain` |
+| **Content sections** | `LandingHeroSection`, `LandingSection` | Landing page content blocks | Go INSIDE `AppMain` |
+
+**Rules:**
+- The header and footer come from `AppLayout`, NEVER from individual pages
+- `DashboardLayout` lives inside `AppMain` (it handles sidebar + content area)
+- `LandingHeroSection` / `LandingSection` live inside `AppMain` (they handle content blocks)
+- `ClientLayout` and `LandingLayout` (header/footer parts) are **deprecated** — use `AppLayout` instead
+
+### 5.1b Legacy layouts (deprecated)
+
+| Composant         | Usage                                          | Replacement |
+| ----------------- | ---------------------------------------------- | ----------- |
+| `ClientLayout`    | All-in-one props-based layout                  | `AppLayout` compound system |
+| `LandingLayout`   | Landing shell with header + footer             | `AppLayout` compound system |
+| `LandingHeader`   | Landing page header                            | `AppHeader` |
+| `LandingFooter`   | Landing page footer                            | `AppFooter` + `FooterColumn` + `FooterLink` + `FooterBrand` |
 
 ### 5.2 Regles layout
 
