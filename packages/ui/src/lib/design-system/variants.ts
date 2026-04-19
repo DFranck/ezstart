@@ -1549,10 +1549,13 @@ export const tagVariants = {
     variants: blockquoteVariantConfig,
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),
-  pre: cva('overflow-x-auto rounded-lg bg-muted text-foreground p-4 font-mono text-sm', {
-    variants: preVariantConfig,
-    defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
-  }),
+  pre: cva(
+    'overflow-x-auto rounded-lg bg-muted text-foreground p-4 font-mono text-sm [&_code]:bg-transparent [&_code]:p-0 [&_code]:rounded-none',
+    {
+      variants: preVariantConfig,
+      defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
+    }
+  ),
   code: cva('font-mono text-sm bg-muted/50 px-1 py-0.5 rounded-sm', {
     variants: codeVariantConfig,
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
