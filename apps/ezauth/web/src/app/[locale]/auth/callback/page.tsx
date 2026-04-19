@@ -10,6 +10,9 @@ export default async function CallbackPage() {
         redirectTo="/admin"
         successMessage={t('callback.success')}
         redirectMessage={t('callback.redirecting')}
+        processingMessage={t('callback.processing')}
+        errorTitle={t('callback.errorTitle')}
+        noCodeMessage={t('callback.noCode')}
         errorButtonText={t('callback.backToHome')}
       />
     </Div>

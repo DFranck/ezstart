@@ -40,10 +40,18 @@ function unwrapEnvelope<T>(body: Record<string, unknown>): T {
 
 /** Parse an error from a response body. */
 function parseError(body: Record<string, unknown>, fallback: string): string {
+  // Handle structured envelope: { error: { message: "..." } }
+  if (body.error && typeof body.error === 'object') {
+    const errObj = body.error as Record<string, unknown>
+    if (typeof errObj.message === 'string') return errObj.message
+  }
+  // Handle flat error string: { error: "..." }
   if (typeof body.error === 'string') return body.error
+  // Handle nested data.error
   if (typeof (body.data as Record<string, unknown>)?.error === 'string') {
     return (body.data as Record<string, unknown>).error as string
   }
+  // Handle top-level message
   if (typeof body.message === 'string') return body.message
   return fallback
 }
