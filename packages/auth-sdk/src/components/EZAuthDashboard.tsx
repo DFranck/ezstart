@@ -27,8 +27,6 @@ import {
   Span,
   Button,
 } from '@ezstart/ui/components'
-import { cn } from '@ezstart/ui/lib'
-import { toast } from '@ezstart/ui/utils'
 import { useAuth } from '../react/hooks.js'
 import { UserMenu } from './UserMenu.js'
 import { UserSettings } from './UserSettings.js'
@@ -37,7 +35,6 @@ import { AuthAdminDashboard } from './AuthAdminDashboard.js'
 import type { AuthAdminDashboardTexts } from './AuthAdminDashboard.js'
 import type { UserSettingsTexts } from './UserSettings.js'
 import type { DeveloperPortalTexts } from './developer/types.js'
-import type { PlanInfo } from '../core/types.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -61,25 +58,7 @@ export interface EZAuthDashboardTexts {
   /** Billing section */
   billingTitle: string
   billingDescription: string
-  currentPlan: string
-  quotaLabel: string
-  maxKeysLabel: string
-  unlimited: string
-  manageSubscription: string
-  choosePlan: string
-  popular: string
-  month: string
-  requestsPerMonth: string
-  apiKeys: string
-  currentLabel: string
-  upgrade: string
-  downgrade: string
   comingSoon: string
-  featureCommunitySupport: string
-  featureEmailSupport: string
-  featurePriorityRateLimit: string
-  featureDedicatedSupport: string
-  featureSla: string
   /** Sign out */
   signOut: string
   /** Nested component overrides */
@@ -121,61 +100,12 @@ const DEFAULT_TEXTS: EZAuthDashboardTexts = {
   statsRoles: 'Roles',
   billingTitle: 'Billing & Plans',
   billingDescription: 'Manage your subscription plan and usage limits',
-  currentPlan: 'Current Plan',
-  quotaLabel: '{quota} requests / month',
-  maxKeysLabel: '{count} API keys',
-  unlimited: 'Unlimited',
-  manageSubscription: 'Manage Subscription',
-  choosePlan: 'Choose Your Plan',
-  popular: 'Most Popular',
-  month: 'month',
-  requestsPerMonth: 'requests / month',
-  apiKeys: 'API keys',
-  currentLabel: 'Current Plan',
-  upgrade: 'Upgrade',
-  downgrade: 'Downgrade',
-  comingSoon: 'Coming soon — plans will be available shortly',
-  featureCommunitySupport: 'Community support',
-  featureEmailSupport: 'Email support',
-  featurePriorityRateLimit: 'Priority rate limit',
-  featureDedicatedSupport: 'Dedicated support',
-  featureSla: 'SLA 99.9%',
+  comingSoon: 'Pricing coming soon',
   signOut: 'Sign Out',
   settings: {},
   developerPortal: {},
   admin: {},
 }
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const FREE_PLAN: PlanInfo = {
-  id: 'free',
-  name: 'Free',
-  price: 0,
-  quotaMonthly: 1000,
-  maxKeys: 1,
-  features: ['communitySupport'],
-}
-
-const PLANS: PlanInfo[] = [
-  FREE_PLAN,
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 2900,
-    quotaMonthly: 50000,
-    maxKeys: 10,
-    features: ['emailSupport', 'priorityRateLimit'],
-  },
-  {
-    id: 'business',
-    name: 'Business',
-    price: 9900,
-    quotaMonthly: null,
-    maxKeys: null,
-    features: ['dedicatedSupport', 'sla'],
-  },
-]
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -197,37 +127,8 @@ function getDisplayName(user: { firstName?: string; lastName?: string; username:
   return user.username
 }
 
-function getUserRoleCount(
-  user: { globalRoles?: string[]; appRoles?: Record<string, string[]> },
-  appName?: string
-): number {
-  let count = user.globalRoles?.length ?? 0
-  if (appName && user.appRoles?.[appName]) {
-    count += user.appRoles[appName].length
-  }
-  return count
-}
-
 function isSuperadmin(user: { globalRoles?: string[] }): boolean {
   return user.globalRoles?.includes('superadmin') ?? false
-}
-
-function formatPrice(cents: number): string {
-  if (cents === 0) return '$0'
-  return `$${(cents / 100).toFixed(0)}`
-}
-
-function formatQuota(quota: number | null, unlimitedLabel: string): string {
-  if (quota === null) return unlimitedLabel
-  return quota.toLocaleString()
-}
-
-const FEATURE_MAP: Record<string, keyof EZAuthDashboardTexts> = {
-  communitySupport: 'featureCommunitySupport',
-  emailSupport: 'featureEmailSupport',
-  priorityRateLimit: 'featurePriorityRateLimit',
-  dedicatedSupport: 'featureDedicatedSupport',
-  sla: 'featureSla',
 }
 
 type Section = 'overview' | 'api-keys' | 'billing' | 'settings' | 'admin'
@@ -325,7 +226,7 @@ export function EZAuthDashboard({
               showAdminScope={isSuperadmin(user)}
             />
           )}
-          {activeSection === 'billing' && <BillingSection texts={texts} />}
+          {activeSection === 'billing' && <BillingSection texts={texts} isAdmin={isAdmin} />}
           {activeSection === 'settings' && (
             <UserSettings appName={appName} texts={texts.settings} />
           )}
@@ -357,13 +258,9 @@ function OverviewSection({
   appName?: string
   texts: EZAuthDashboardTexts
 }) {
-  const appsCount = user.apps?.length ?? 0
-  const rolesCount = getUserRoleCount(user, appName)
-
-  const stats = [
-    { label: texts.statsApps, value: appsCount, icon: 'lucide:Layout' as const },
-    { label: texts.statsRoles, value: rolesCount, icon: 'lucide:Shield' as const },
-  ]
+  const apps = user.apps ?? []
+  const globalRoles = user.globalRoles ?? []
+  const appRoleEntries = Object.entries(user.appRoles ?? {})
 
   return (
     <Div className="space-y-6">
@@ -382,22 +279,64 @@ function OverviewSection({
         </Badge>
       </Div>
 
-      {/* Quick stats */}
-      <Div className="grid gap-4 sm:grid-cols-2">
-        {stats.map(stat => (
-          <Card key={stat.label}>
-            <CardContent className="flex items-center gap-4 p-4 md:p-6">
-              <Div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Icon name={stat.icon} className="h-5 w-5 text-primary" />
-              </Div>
-              <Div>
-                <P className="text-sm text-muted-foreground">{stat.label}</P>
-                <Span className="text-2xl font-bold text-foreground">{stat.value}</Span>
-              </Div>
-            </CardContent>
-          </Card>
-        ))}
-      </Div>
+      {/* Apps */}
+      <Card>
+        <CardContent className="flex items-center gap-4 p-4 md:p-6">
+          <Div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Icon name="lucide:Layout" className="h-5 w-5 text-primary" />
+          </Div>
+          <Div className="min-w-0">
+            <P className="text-sm text-muted-foreground mb-1">{texts.statsApps}</P>
+            <Div className="flex flex-wrap gap-1.5">
+              {apps.length > 0 ? (
+                apps.map(app => (
+                  <Badge key={app} variant="secondary" size="sm">
+                    {app}
+                  </Badge>
+                ))
+              ) : (
+                <Span className="text-sm text-muted-foreground">-</Span>
+              )}
+            </Div>
+          </Div>
+        </CardContent>
+      </Card>
+
+      {/* Roles */}
+      <Card>
+        <CardContent className="flex items-center gap-4 p-4 md:p-6">
+          <Div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Icon name="lucide:Shield" className="h-5 w-5 text-primary" />
+          </Div>
+          <Div className="min-w-0">
+            <P className="text-sm text-muted-foreground mb-1">{texts.statsRoles}</P>
+            <Div className="flex flex-wrap gap-1.5">
+              {globalRoles.length > 0 || appRoleEntries.length > 0 ? (
+                <>
+                  {globalRoles.map(role => (
+                    <Badge
+                      key={role}
+                      variant={role === 'superadmin' ? 'destructive' : 'primary'}
+                      size="sm"
+                    >
+                      {role}
+                    </Badge>
+                  ))}
+                  {appRoleEntries.map(([app, roles]) =>
+                    roles.map(role => (
+                      <Badge key={`${app}-${role}`} variant="outline" size="sm">
+                        {app}:{role}
+                      </Badge>
+                    ))
+                  )}
+                </>
+              ) : (
+                <Span className="text-sm text-muted-foreground">-</Span>
+              )}
+            </Div>
+          </Div>
+        </CardContent>
+      </Card>
 
       {/* User info card */}
       <Card>
@@ -420,21 +359,9 @@ function OverviewSection({
 
 // ─── Billing Section ─────────────────────────────────────────────────────────
 
-function BillingSection({ texts }: { texts: EZAuthDashboardTexts }) {
-  const currentPlanId = 'free'
-  const currentPlan = PLANS.find(p => p.id === currentPlanId) ?? FREE_PLAN
-
-  const handleUpgrade = () => {
-    toast.info(texts.comingSoon)
-  }
-
-  const handleManageSubscription = () => {
-    toast.info(texts.comingSoon)
-  }
-
+function BillingSection({ texts, isAdmin }: { texts: EZAuthDashboardTexts; isAdmin: boolean }) {
   return (
     <Div className="space-y-6">
-      {/* Current Plan */}
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-bold">{texts.billingTitle}</CardTitle>
@@ -442,108 +369,15 @@ function BillingSection({ texts }: { texts: EZAuthDashboardTexts }) {
         </CardHeader>
 
         <CardContent>
-          <Div className="flex items-center justify-between rounded-lg border bg-card p-4">
-            <Div className="space-y-1">
-              <Div className="flex items-center gap-2">
-                <P className="font-semibold text-lg">{texts.currentPlan}</P>
-                <Badge variant="primary">{currentPlan.name}</Badge>
-              </Div>
-              <P className="text-sm text-muted-foreground">
-                {texts.quotaLabel.replace(
-                  '{quota}',
-                  formatQuota(currentPlan.quotaMonthly, texts.unlimited)
-                )}
-              </P>
-              <P className="text-sm text-muted-foreground">
-                {texts.maxKeysLabel.replace(
-                  '{count}',
-                  currentPlan.maxKeys !== null ? String(currentPlan.maxKeys) : texts.unlimited
-                )}
-              </P>
-            </Div>
-            {currentPlanId !== 'free' && (
-              <Button variant="outline" size="sm" onClick={handleManageSubscription}>
-                <Icon name="lucide:Settings" className="w-4 h-4 mr-1.5" />
-                {texts.manageSubscription}
-              </Button>
+          <Div className="flex flex-col items-center gap-3 py-8 text-center">
+            <Icon name="lucide:CreditCard" className="h-12 w-12 text-muted-foreground/50" />
+            <P className="text-muted-foreground">{texts.comingSoon}</P>
+            {isAdmin && (
+              <P className="text-sm text-muted-foreground/70">Connect EZPay to configure plans</P>
             )}
           </Div>
         </CardContent>
       </Card>
-
-      {/* Plans Comparison */}
-      <Div className="space-y-4">
-        <H2 className="text-lg font-semibold text-center">{texts.choosePlan}</H2>
-
-        <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {PLANS.map(plan => {
-            const isCurrent = plan.id === currentPlanId
-            return (
-              <Card key={plan.id} className={cn('relative', plan.id === 'pro' && 'border-primary')}>
-                {plan.id === 'pro' && (
-                  <Div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge variant="primary">{texts.popular}</Badge>
-                  </Div>
-                )}
-
-                <CardHeader className="text-center pb-2">
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <Div className="mt-2">
-                    <Span className="text-3xl font-bold text-foreground">
-                      {formatPrice(plan.price)}
-                    </Span>
-                    {plan.price > 0 && (
-                      <Span className="text-muted-foreground text-sm">/{texts.month}</Span>
-                    )}
-                  </Div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  <Div className="space-y-2">
-                    <Div className="flex items-center gap-2">
-                      <Icon name="lucide:Zap" className="w-4 h-4 text-primary shrink-0" />
-                      <Span className="text-sm">
-                        {formatQuota(plan.quotaMonthly, texts.unlimited)} {texts.requestsPerMonth}
-                      </Span>
-                    </Div>
-                    <Div className="flex items-center gap-2">
-                      <Icon name="lucide:Key" className="w-4 h-4 text-primary shrink-0" />
-                      <Span className="text-sm">
-                        {plan.maxKeys !== null ? String(plan.maxKeys) : texts.unlimited}{' '}
-                        {texts.apiKeys}
-                      </Span>
-                    </Div>
-                    {plan.features.map(feature => {
-                      const textKey = FEATURE_MAP[feature]
-                      const label = textKey ? (texts[textKey] as string) : feature
-                      return (
-                        <Div key={feature} className="flex items-center gap-2">
-                          <Icon name="lucide:Check" className="w-4 h-4 text-success shrink-0" />
-                          <Span className="text-sm">{label}</Span>
-                        </Div>
-                      )
-                    })}
-                  </Div>
-
-                  {isCurrent ? (
-                    <Button variant="outline" className="w-full" disabled>
-                      {texts.currentLabel}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant={plan.id === 'pro' ? 'default' : 'outline'}
-                      className="w-full"
-                      onClick={handleUpgrade}
-                    >
-                      {plan.price > currentPlan.price ? texts.upgrade : texts.downgrade}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
-        </Div>
-      </Div>
     </Div>
   )
 }

@@ -110,8 +110,8 @@ function DashboardSidebar({ className, variant, children, ...props }: DashboardS
           'fixed inset-y-0 left-0 z-50 w-72',
           'transform transition-transform duration-300 ease-in-out',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: static sidebar
-          'lg:static lg:translate-x-0 lg:z-auto',
+          // Desktop: sticky sidebar that stays in place while content scrolls
+          'lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:z-auto lg:overflow-y-auto',
           collapsed ? 'lg:w-16' : 'lg:w-64',
           className
         )}

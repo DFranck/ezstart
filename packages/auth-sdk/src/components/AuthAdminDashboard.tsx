@@ -393,7 +393,12 @@ function EditRolesModal({
 // AuthAdminDashboard (main export)
 // ========================================
 
-export function AuthAdminDashboard({ appName: appNameProp, className, texts, scope: scopeProp }: AuthAdminDashboardProps) {
+export function AuthAdminDashboard({
+  appName: appNameProp,
+  className,
+  texts,
+  scope: scopeProp,
+}: AuthAdminDashboardProps) {
   const t: Required<AuthAdminDashboardTexts> = { ...DEFAULT_TEXTS, ...texts }
   const accessToken = useAuthStore(state => state.accessToken)
 
@@ -720,7 +725,9 @@ export function AuthAdminDashboard({ appName: appNameProp, className, texts, sco
             <P className="text-center text-muted-foreground">{t.noUsers}</P>
           </Card>
         ) : (
-          <DataTable columns={columns} data={users} pageSize={PAGE_SIZE} />
+          <Card className="overflow-hidden">
+            <DataTable columns={columns} data={users} pageSize={PAGE_SIZE} />
+          </Card>
         )}
 
         {/* Server-side pagination */}
