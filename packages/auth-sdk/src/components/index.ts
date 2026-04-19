@@ -5,6 +5,10 @@
  * Imports from `core/` and uses the monorepo wrapper for auth context.
  */
 
+// Dev mode banner
+export { DevModeBanner } from './DevModeBanner.js'
+export type { DevModeBannerProps } from './DevModeBanner.js'
+
 // Auth forms
 export { SignInForm } from './SignInForm.js'
 export type { SignInFormProps, SignInFormTexts } from './SignInForm.js'

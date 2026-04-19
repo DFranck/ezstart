@@ -18,7 +18,7 @@ const noopLogger: AuthLogger = {
  */
 export function useAuth(logger?: AuthLogger) {
   const log = logger ?? noopLogger
-  const { client, appName, webUrl, scope } = useAuthContext()
+  const { client, appName, webUrl, scope, publishableKey } = useAuthContext()
   const store = useAuthStore()
 
   const mode = store.getMode()
@@ -134,6 +134,8 @@ export function useAuth(logger?: AuthLogger) {
     mode,
     /** Auth scope: 'test'/'live' (single app), 'admin' (all apps), 'first-party' (ezauth web). */
     scope,
+    /** Raw publishable key string, or undefined if none configured. */
+    publishableKey,
 
     // Actions
     login,

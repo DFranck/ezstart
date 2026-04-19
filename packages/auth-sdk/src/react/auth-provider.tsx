@@ -98,6 +98,8 @@ interface AuthContextValue {
   keyConfig: PublishableKeyConfig | null
   /** Auth scope: 'test'/'live' (single app), 'admin' (all apps), 'first-party' (ezauth web). */
   scope: AuthScope
+  /** Raw publishable key string (e.g. `ezk_live_abc123`), or undefined if none. */
+  publishableKey: string | undefined
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -211,6 +213,21 @@ export function AuthProvider({
     if (authMode) return authMode
     return detected
   }, [authMode, resolved.clientConfig.apiUrl])
+
+  // Warn in production if no key and not first-party
+  useEffect(() => {
+    if (
+      mode !== 'first-party' &&
+      !sdkConfig.publishableKey &&
+      typeof process !== 'undefined' &&
+      process.env?.NODE_ENV === 'production'
+    ) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'EZAuth: No publishable key configured. Set NEXT_PUBLIC_EZAUTH_KEY in your environment.'
+      )
+    }
+  }, [mode, sdkConfig.publishableKey])
 
   // Fetch key config async if publishable key provided
   useEffect(() => {
@@ -421,8 +438,9 @@ export function AuthProvider({
       webUrl: resolvedWebUrl,
       keyConfig: keyConfigRef.current,
       scope: resolvedScope,
+      publishableKey: sdkConfig.publishableKey,
     }),
-    [client, resolvedAppName, resolvedWebUrl, resolvedScope]
+    [client, resolvedAppName, resolvedWebUrl, resolvedScope, sdkConfig.publishableKey]
   )
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

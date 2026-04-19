@@ -17,6 +17,7 @@ import { logger } from '@ezstart/logger'
 import { useLocale } from 'next-intl'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { DevModeBanner } from './DevModeBanner.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
@@ -199,6 +200,8 @@ export function ForgotPasswordForm({
             </a>
           )}
         </Div>
+
+        <DevModeBanner />
       </form>
     </Form>
   )

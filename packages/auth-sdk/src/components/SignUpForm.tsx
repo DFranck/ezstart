@@ -23,6 +23,7 @@ import { useForm } from 'react-hook-form'
 import { PasswordStrength } from './PasswordStrength.js'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
+import { DevModeBanner } from './DevModeBanner.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
@@ -475,6 +476,8 @@ export function SignUpForm({
           </Button>
         </form>
       </Form>
+
+      <DevModeBanner />
     </Div>
   )
 }
