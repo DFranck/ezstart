@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Div, P } from '@ezstart/ui/components'
 import { useAuth } from '../react/hooks.js'
 import { useAuthContext } from '../react/auth-provider.js'
@@ -37,6 +38,12 @@ function truncateKey(key: string): string {
  * ```
  */
 export function DevModeBanner({ className }: DevModeBannerProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  // Never render server-side (avoid hydration mismatch)
+  if (!mounted) return null
+
   // Zero footprint in production
   if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'development') {
     return null
