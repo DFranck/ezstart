@@ -84,8 +84,7 @@ const sidebarVariants = cva(
 )
 
 interface DashboardSidebarProps
-  extends React.ComponentProps<'aside'>,
-    VariantProps<typeof sidebarVariants> {}
+  extends React.ComponentProps<'aside'>, VariantProps<typeof sidebarVariants> {}
 
 function DashboardSidebar({ className, variant, children, ...props }: DashboardSidebarProps) {
   const { sidebarOpen, setSidebarOpen, collapsed } = useDashboard()
@@ -130,10 +129,7 @@ function SidebarHeader({ className, children, ...props }: React.ComponentProps<'
   return (
     <div
       data-slot="sidebar-header"
-      className={cn(
-        'flex h-14 shrink-0 items-center gap-2 border-b px-4',
-        className
-      )}
+      className={cn('flex h-14 shrink-0 items-center gap-2 border-b px-4', className)}
       {...props}
     >
       {children}
@@ -170,11 +166,7 @@ function SidebarSection({ className, label, children, ...props }: SidebarSection
   const { collapsed } = useDashboard()
 
   return (
-    <div
-      data-slot="sidebar-section"
-      className={cn('mb-2', className)}
-      {...props}
-    >
+    <div data-slot="sidebar-section" className={cn('mb-2', className)} {...props}>
       {label && !collapsed && (
         <span className="mb-1 block px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
@@ -202,7 +194,8 @@ const sidebarLinkVariants = cva(
   }
 )
 
-interface SidebarLinkProps extends React.ComponentProps<'a'>, VariantProps<typeof sidebarLinkVariants> {
+interface SidebarLinkProps
+  extends React.ComponentProps<'a'>, VariantProps<typeof sidebarLinkVariants> {
   /** Icon node rendered before the label */
   icon?: React.ReactNode
 }
@@ -245,10 +238,7 @@ function SidebarFooter({ className, children, ...props }: React.ComponentProps<'
   return (
     <div
       data-slot="sidebar-footer"
-      className={cn(
-        'mt-auto shrink-0 border-t px-4 py-3',
-        className
-      )}
+      className={cn('mt-auto shrink-0 border-t px-4 py-3', className)}
       {...props}
     >
       {children}
@@ -275,9 +265,14 @@ function SidebarToggle({ className, mode = 'mobile', ...props }: SidebarTogglePr
   }, [mode, sidebarOpen, setSidebarOpen, collapsed, setCollapsed])
 
   const isActive = mode === 'mobile' ? sidebarOpen : !collapsed
-  const label = mode === 'mobile'
-    ? (sidebarOpen ? 'Close sidebar' : 'Open sidebar')
-    : (collapsed ? 'Expand sidebar' : 'Collapse sidebar')
+  const label =
+    mode === 'mobile'
+      ? sidebarOpen
+        ? 'Close sidebar'
+        : 'Open sidebar'
+      : collapsed
+        ? 'Expand sidebar'
+        : 'Collapse sidebar'
 
   return (
     <button
@@ -287,6 +282,7 @@ function SidebarToggle({ className, mode = 'mobile', ...props }: SidebarTogglePr
         'inline-flex items-center justify-center rounded-md p-2',
         'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
         'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        mode === 'mobile' && 'lg:hidden',
         className
       )}
       onClick={handleClick}

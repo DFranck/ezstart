@@ -2,11 +2,21 @@
 
 import { Div } from '@ezstart/ui/components'
 import { useSearchParams } from 'next/navigation'
-import { Suspense, type ReactNode } from 'react'
+import { Suspense, useEffect, type ReactNode } from 'react'
 
 function AuthLayoutInner({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || undefined
+
+  useEffect(() => {
+    if (app) {
+      document.documentElement.dataset.app = app
+    }
+    return () => {
+      // Restore to ezauth when leaving auth pages
+      document.documentElement.dataset.app = 'ezauth'
+    }
+  }, [app])
 
   return (
     <Div className="min-h-screen flex items-center justify-center bg-background" data-app={app}>
