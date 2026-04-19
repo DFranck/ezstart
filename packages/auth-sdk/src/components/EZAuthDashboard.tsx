@@ -30,10 +30,16 @@ import {
 import { useAuth } from '../react/hooks.js'
 import { UserMenu } from './UserMenu.js'
 import { UserSettings } from './UserSettings.js'
+import { TwoFactorSettings } from './TwoFactorSettings.js'
+import { EmailVerificationStatus } from './EmailVerificationStatus.js'
+import { SessionsManager } from './SessionsManager.js'
 import { DeveloperPortal } from './developer/index.js'
 import { AuthAdminDashboard } from './AuthAdminDashboard.js'
 import type { AuthAdminDashboardTexts } from './AuthAdminDashboard.js'
 import type { UserSettingsTexts } from './UserSettings.js'
+import type { TwoFactorSettingsTexts } from './TwoFactorSettings.js'
+import type { EmailVerificationStatusTexts } from './EmailVerificationStatus.js'
+import type { SessionsManagerTexts } from './SessionsManager.js'
 import type { DeveloperPortalTexts } from './developer/types.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -61,8 +67,15 @@ export interface EZAuthDashboardTexts {
   comingSoon: string
   /** Sign out */
   signOut: string
+  /** Settings sub-section titles */
+  settingsEmailVerification: string
+  settingsTwoFactor: string
+  settingsSessions: string
   /** Nested component overrides */
   settings: Partial<UserSettingsTexts>
+  emailVerification: Partial<EmailVerificationStatusTexts>
+  twoFactor: Partial<TwoFactorSettingsTexts>
+  sessions: Partial<SessionsManagerTexts>
   developerPortal: Partial<DeveloperPortalTexts>
   admin: Partial<AuthAdminDashboardTexts>
 }
@@ -102,7 +115,13 @@ const DEFAULT_TEXTS: EZAuthDashboardTexts = {
   billingDescription: 'Manage your subscription plan and usage limits',
   comingSoon: 'Pricing coming soon',
   signOut: 'Sign Out',
+  settingsEmailVerification: 'Email Verification',
+  settingsTwoFactor: 'Two-Factor Authentication',
+  settingsSessions: 'Active Sessions',
   settings: {},
+  emailVerification: {},
+  twoFactor: {},
+  sessions: {},
   developerPortal: {},
   admin: {},
 }
@@ -227,13 +246,52 @@ export function EZAuthDashboard({
             />
           )}
           {activeSection === 'billing' && <BillingSection texts={texts} isAdmin={isAdmin} />}
-          {activeSection === 'settings' && (
-            <UserSettings appName={appName} texts={texts.settings} />
-          )}
+          {activeSection === 'settings' && <SettingsSection appName={appName} texts={texts} />}
           {activeSection === 'admin' && isAdmin && <AuthAdminDashboard texts={texts.admin} />}
         </DashboardContent>
       </DashboardMain>
     </DashboardLayout>
+  )
+}
+
+// ─── Settings Section ────────────────────────────────────────────────────────
+
+function SettingsSection({ appName, texts }: { appName?: string; texts: EZAuthDashboardTexts }) {
+  return (
+    <Div className="space-y-6 w-full max-w-lg mx-auto">
+      {/* Avatar + Personal Information + Roles + Connected Accounts */}
+      <UserSettings appName={appName} texts={texts.settings} />
+
+      {/* Email Verification */}
+      <Card>
+        <CardHeader>
+          <H3 className="text-sm font-medium text-foreground">{texts.settingsEmailVerification}</H3>
+        </CardHeader>
+        <CardContent>
+          <EmailVerificationStatus texts={texts.emailVerification} />
+        </CardContent>
+      </Card>
+
+      {/* Two-Factor Authentication */}
+      <Card>
+        <CardHeader>
+          <H3 className="text-sm font-medium text-foreground">{texts.settingsTwoFactor}</H3>
+        </CardHeader>
+        <CardContent>
+          <TwoFactorSettings texts={texts.twoFactor} />
+        </CardContent>
+      </Card>
+
+      {/* Active Sessions */}
+      <Card>
+        <CardHeader>
+          <H3 className="text-sm font-medium text-foreground">{texts.settingsSessions}</H3>
+        </CardHeader>
+        <CardContent>
+          <SessionsManager texts={texts.sessions} />
+        </CardContent>
+      </Card>
+    </Div>
   )
 }
 

@@ -40,6 +40,16 @@ export type { TwoFactorSettingsProps, TwoFactorSettingsTexts } from './TwoFactor
 export { VerifyEmailFlow } from './VerifyEmailFlow.js'
 export type { VerifyEmailFlowProps, VerifyEmailFlowTexts } from './VerifyEmailFlow.js'
 
+export { EmailVerificationStatus } from './EmailVerificationStatus.js'
+export type {
+  EmailVerificationStatusProps,
+  EmailVerificationStatusTexts,
+} from './EmailVerificationStatus.js'
+
+// Sessions
+export { SessionsManager } from './SessionsManager.js'
+export type { SessionsManagerProps, SessionsManagerTexts } from './SessionsManager.js'
+
 // User components
 export { UserMenu } from './UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './UserMenu.js'
