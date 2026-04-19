@@ -26,6 +26,9 @@ export function useAuth(logger?: AuthLogger) {
   /**
    * Redirect to the EZAuth login page.
    * Saves the current URL for post-login redirect.
+   *
+   * Uses `?key=` (publishable key) when available for Clerk-like identification.
+   * Falls back to `?app=` for first-party mode (ezauth web itself).
    */
   const login = (additionalParams?: Record<string, string>): Promise<never> => {
     // Save current URL for post-login redirect
@@ -38,10 +41,17 @@ export function useAuth(logger?: AuthLogger) {
     const redirectUri = buildRedirectUri()
 
     const params = new URLSearchParams({
-      app: appName,
       redirect_uri: redirectUri,
       ...(additionalParams ?? {}),
     })
+
+    // Use ?key= when a publishable key is configured (Clerk-like identification).
+    // Fall back to ?app= for first-party mode (no key).
+    if (publishableKey) {
+      params.set('key', publishableKey)
+    } else {
+      params.set('app', appName)
+    }
 
     const authUrl = `${webUrl}/login?${params.toString()}`
     window.location.href = authUrl
@@ -50,15 +60,23 @@ export function useAuth(logger?: AuthLogger) {
 
   /**
    * Redirect to the EZAuth register page.
+   *
+   * Uses `?key=` (publishable key) when available for Clerk-like identification.
+   * Falls back to `?app=` for first-party mode.
    */
   const register = (additionalParams?: Record<string, string>): Promise<never> => {
     const redirectUri = buildRedirectUri()
 
     const params = new URLSearchParams({
-      app: appName,
       redirect_uri: redirectUri,
       ...(additionalParams ?? {}),
     })
+
+    if (publishableKey) {
+      params.set('key', publishableKey)
+    } else {
+      params.set('app', appName)
+    }
 
     const authUrl = `${webUrl}/register?${params.toString()}`
     window.location.href = authUrl

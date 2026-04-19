@@ -95,6 +95,21 @@ export interface SignUpFormProps {
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<SignUpFormTexts>
+  /**
+   * When true, the form is rendered in preview mode: all inputs and submit
+   * button are disabled with reduced opacity. Useful when the publishable
+   * key is invalid — the form is visible but not usable.
+   */
+  disabled?: boolean
+  /**
+   * Key validation status for the DevModeBanner.
+   * - `'valid'` — key was validated successfully
+   * - `'invalid'` — key is invalid, revoked, or expired
+   * - `'missing'` — no key provided
+   */
+  keyStatus?: 'valid' | 'invalid' | 'missing'
+  /** Raw publishable key from URL (for DevModeBanner display). */
+  urlKey?: string
 }
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
@@ -124,6 +139,9 @@ export function SignUpForm({
   oauthProviders,
   locale: propLocale,
   texts,
+  disabled = false,
+  keyStatus,
+  urlKey,
 }: SignUpFormProps) {
   const contextLocale = useLocale()
   const locale = propLocale ?? contextLocale
@@ -268,7 +286,7 @@ export function SignUpForm({
   }
 
   return (
-    <Div className="space-y-3 md:space-y-4">
+    <Div className={`space-y-3 md:space-y-4 ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       {showOAuth && (
         <OAuthButtons
           appName={appName}
@@ -468,7 +486,7 @@ export function SignUpForm({
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={disabled || loading}
             className="w-full cursor-pointer"
             variant="default"
           >
@@ -477,7 +495,7 @@ export function SignUpForm({
         </form>
       </Form>
 
-      <DevModeBanner appName={appName} />
+      <DevModeBanner appName={appName} keyStatus={keyStatus} urlKey={urlKey} />
     </Div>
   )
 }

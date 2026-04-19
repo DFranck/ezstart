@@ -81,11 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-            {isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <LoginButton size="sm" loginText={t('navSignIn')} />
-            )}
+            {isAuthenticated ? <UserMenu /> : <LoginButton size="sm" loginText={t('navSignIn')} />}
           </Div>
           <AppMobileToggle />
         </AppActions>
@@ -101,11 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-            {isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <LoginButton className="w-full" loginText={t('navSignIn')} />
-            )}
+            {isAuthenticated ? <UserMenu /> : <LoginButton loginText={t('navSignIn')} />}
           </Div>
         </AppMobileMenu>
       </AppHeader>
@@ -134,10 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <FooterLinkItem href="/terms">{t('footerTerms')}</FooterLinkItem>
           </FooterColumn>
 
-          <FooterBrand
-            tagline={t('footerTagline')}
-            copyright={`\u00A9 ${t('footerCopyright')}`}
-          >
+          <FooterBrand tagline={t('footerTagline')} copyright={`\u00A9 ${t('footerCopyright')}`}>
             <Div className="flex items-center gap-2">
               <Image src="/logo.svg" alt="EZAuth" width={24} height={24} />
               <Span className="text-lg font-bold">EZAuth</Span>

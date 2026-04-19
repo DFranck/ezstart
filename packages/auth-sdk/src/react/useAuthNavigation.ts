@@ -4,9 +4,11 @@ import { useSearchParams } from 'next/navigation'
 import { useMemo } from 'react'
 
 /**
- * Returns navigation hrefs that auto-preserve the current `app` and
- * `redirect_uri` search params across auth pages (login, register,
+ * Returns navigation hrefs that auto-preserve the current `key` (or legacy `app`)
+ * and `redirect_uri` search params across auth pages (login, register,
  * forgot-password, reset-password).
+ *
+ * `?key=` takes priority over `?app=` when both are present.
  */
 export function useAuthNavigation() {
   const searchParams = useSearchParams()
@@ -18,8 +20,16 @@ export function useAuthNavigation() {
     const suffix = qs ? `?${qs}` : ''
     const build = (path: string) => `${path}${suffix}`
 
+    // ?key= takes priority — it IS the app identifier
+    const publishableKey = searchParams?.get('key') || undefined
+    // ?app= is the legacy fallback for first-party mode
+    const app = searchParams?.get('app') || undefined
+
     return {
-      app: searchParams?.get('app') || undefined,
+      /** Publishable key from `?key=` param (Clerk-like identification). */
+      publishableKey,
+      /** Legacy app name from `?app=` param (first-party fallback). */
+      app,
       redirectUri: searchParams?.get('redirect_uri') || undefined,
       loginHref: build('/login'),
       registerHref: build('/register'),

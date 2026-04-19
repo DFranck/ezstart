@@ -71,6 +71,21 @@ export interface SignInFormProps {
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<SignInFormTexts>
+  /**
+   * When true, the form is rendered in preview mode: all inputs and submit
+   * button are disabled with reduced opacity. Useful when the publishable
+   * key is invalid — the form is visible but not usable.
+   */
+  disabled?: boolean
+  /**
+   * Key validation status for the DevModeBanner.
+   * - `'valid'` — key was validated successfully
+   * - `'invalid'` — key is invalid, revoked, or expired
+   * - `'missing'` — no key provided
+   */
+  keyStatus?: 'valid' | 'invalid' | 'missing'
+  /** Raw publishable key from URL (for DevModeBanner display). */
+  urlKey?: string
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -90,6 +105,9 @@ export function SignInForm({
   oauthProviders,
   locale: propLocale,
   texts,
+  disabled = false,
+  keyStatus,
+  urlKey,
 }: SignInFormProps) {
   const contextLocale = useLocale()
   const locale = propLocale ?? contextLocale
@@ -182,7 +200,7 @@ export function SignInForm({
   }
 
   return (
-    <Div className="space-y-3 md:space-y-4">
+    <Div className={`space-y-3 md:space-y-4 ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       {showOAuth && (
         <OAuthButtons
           appName={appName}
@@ -214,7 +232,12 @@ export function SignInForm({
               <FormItem>
                 <FormLabel>{t.emailOrUsername}</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder={t.emailOrUsernamePlaceholder} {...field} />
+                  <Input
+                    type="text"
+                    placeholder={t.emailOrUsernamePlaceholder}
+                    disabled={disabled}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -232,7 +255,11 @@ export function SignInForm({
               <FormItem>
                 <FormLabel>{t.password}</FormLabel>
                 <FormControl>
-                  <PasswordInput placeholder={t.passwordPlaceholder} {...field} />
+                  <PasswordInput
+                    placeholder={t.passwordPlaceholder}
+                    disabled={disabled}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -247,6 +274,7 @@ export function SignInForm({
                   variant="link"
                   className="p-0 h-auto text-xs text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
                   onClick={onForgotPassword}
+                  disabled={disabled}
                 >
                   {t.forgotPassword}
                 </Button>
@@ -263,7 +291,7 @@ export function SignInForm({
 
           <Button
             type="submit"
-            disabled={loading || !form.formState.isValid}
+            disabled={disabled || loading || !form.formState.isValid}
             className="w-full cursor-pointer"
             variant="default"
           >
@@ -272,7 +300,7 @@ export function SignInForm({
         </form>
       </Form>
 
-      <DevModeBanner appName={appName} />
+      <DevModeBanner appName={appName} keyStatus={keyStatus} urlKey={urlKey} />
     </Div>
   )
 }

@@ -17,6 +17,7 @@ import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { useTranslations } from 'next-intl'
+import { useKeyConfig } from '@/hooks/useKeyConfig'
 
 function RegisterContent() {
   const t = useTranslations('register')
@@ -25,11 +26,22 @@ function RegisterContent() {
   const tOAuth = useTranslations('oauth')
   const tPwd = useTranslations('passwordStrength')
   const navigation = useAuthNavigation()
-  const app = navigation.app || 'ezstart'
+
+  // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
+  const keyConfig = useKeyConfig(navigation.publishableKey)
+  const app = keyConfig.appName ?? navigation.app ?? 'ezstart'
   const theme = getAppTheme(app)
+  const isKeyInvalid = keyConfig.status === 'invalid'
+  const bannerKeyStatus = navigation.publishableKey
+    ? keyConfig.status === 'valid'
+      ? ('valid' as const)
+      : keyConfig.status === 'invalid'
+        ? ('invalid' as const)
+        : undefined
+    : undefined
 
   return (
-    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto">
+    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto" data-app={app}>
       <Div className="absolute top-4 left-4">
         <BackButton />
       </Div>
@@ -49,6 +61,9 @@ function RegisterContent() {
           redirectUri={navigation.redirectUri}
           showOAuth
           oauthProviders={['google']}
+          disabled={isKeyInvalid}
+          keyStatus={bannerKeyStatus}
+          urlKey={navigation.publishableKey}
           texts={{
             email: t('email'),
             emailPlaceholder: t('emailPlaceholder'),

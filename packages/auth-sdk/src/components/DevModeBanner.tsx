@@ -11,8 +11,18 @@ import { useAuthContext } from '../react/auth-provider.js'
 
 export interface DevModeBannerProps {
   className?: string
-  /** Override app name (e.g., from ?app= query param) */
+  /** Override app name (e.g., resolved from ?key= or legacy ?app= param) */
   appName?: string
+  /**
+   * Key validation status:
+   * - `'valid'` — key was validated successfully
+   * - `'invalid'` — key is invalid, revoked, or expired
+   * - `'missing'` — no key provided (legacy ?app= mode or first-party)
+   * - `undefined` — not yet resolved (show nothing extra)
+   */
+  keyStatus?: 'valid' | 'invalid' | 'missing'
+  /** The raw publishable key from the URL (for display). */
+  urlKey?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -39,14 +49,21 @@ function truncateKey(key: string): string {
  * <DevModeBanner />
  * ```
  */
-export function DevModeBanner({ className, appName }: DevModeBannerProps) {
+export function DevModeBanner({ className, appName, keyStatus, urlKey }: DevModeBannerProps) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
   // Never render server-side (avoid hydration mismatch)
   if (!mounted) return null
 
-  return <DevModeBannerInner className={className} overrideAppName={appName} />
+  return (
+    <DevModeBannerInner
+      className={className}
+      overrideAppName={appName}
+      keyStatus={keyStatus}
+      urlKey={urlKey}
+    />
+  )
 }
 
 /**
@@ -56,6 +73,8 @@ export function DevModeBanner({ className, appName }: DevModeBannerProps) {
 function DevModeBannerInner({
   className,
   overrideAppName,
+  keyStatus,
+  urlKey,
 }: DevModeBannerProps & { overrideAppName?: string }) {
   const { scope, publishableKey } = useAuth()
   const { webUrl, appName: contextAppName } = useAuthContext()
@@ -74,8 +93,19 @@ function DevModeBannerInner({
   let icon: string
   let label: string
   let details: string | null = null
+  let isError = false
 
-  if (!publishableKey) {
+  // URL-level key status takes priority (set by the auth pages themselves)
+  if (keyStatus === 'invalid') {
+    icon = '\u{274C}' // red cross
+    label = 'Invalid API Key'
+    details = urlKey ? truncateKey(urlKey) : 'Key is invalid, revoked, or expired'
+    isError = true
+  } else if (keyStatus === 'valid') {
+    icon = '\u{2705}' // green check
+    label = `${appName}`
+    details = urlKey ? `Key: ${truncateKey(urlKey)}` : 'Valid key'
+  } else if (!publishableKey) {
     // No key configured — show link to get one
     icon = '\u{1F527}' // wrench emoji
     label = `Dev Mode — ${appName}`
@@ -93,13 +123,21 @@ function DevModeBannerInner({
   return (
     <Div
       className={[
-        'bg-muted/50 border border-border rounded-md p-2 text-xs text-muted-foreground',
+        'border rounded-md p-2 text-xs',
+        isError
+          ? 'bg-destructive/10 border-destructive/30 text-destructive'
+          : 'bg-muted/50 border-border text-muted-foreground',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <P size="xs" className="text-muted-foreground leading-relaxed">
+      <P
+        size="xs"
+        className={
+          isError ? 'text-destructive leading-relaxed' : 'text-muted-foreground leading-relaxed'
+        }
+      >
         {icon} {label}
         {details && (
           <>
@@ -108,9 +146,13 @@ function DevModeBannerInner({
           </>
         )}
       </P>
-      {!publishableKey && (
-        <P size="xs" className="text-muted-foreground mt-1">
-          Get your key{' \u2192 '}
+      {(keyStatus === 'invalid' || (!publishableKey && keyStatus !== 'valid')) && (
+        <P
+          size="xs"
+          className={isError ? 'text-destructive/80 mt-1' : 'text-muted-foreground mt-1'}
+        >
+          {keyStatus === 'invalid' ? 'Get a valid key' : 'Get your key'}
+          {' \u2192 '}
           <a
             href={developerUrl}
             target="_blank"

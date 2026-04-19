@@ -12,15 +12,19 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { Suspense } from 'react'
+import { useKeyConfig } from '@/hooks/useKeyConfig'
 
 function ForgotPasswordContent() {
   const t = useTranslations('forgotPassword')
   const tValidation = useTranslations('validation')
   const navigation = useAuthNavigation()
-  const app = navigation.app || 'ezauth'
+
+  // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
+  const keyConfig = useKeyConfig(navigation.publishableKey)
+  const app = keyConfig.appName ?? navigation.app ?? 'ezauth'
 
   return (
-    <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto" data-app={app}>
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
         <CardDescription className="text-xs md:text-sm">{t('description')}</CardDescription>
