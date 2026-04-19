@@ -1,6 +1,6 @@
 /* EZAuth Theme Variables */
 
-:root[data-app='ezauth'] {
+[data-app='ezauth'] {
   /* Override shadcn primary/secondary/accent tokens */
   /* Logo color: #00D9F7 (bright cyan/sky blue) */
   --primary: oklch(0.75 0.15 200);
@@ -19,7 +19,7 @@
   --ezauth-gradient-to: oklch(0.6 0.15 240);
 }
 
-:root[data-app='ezauth'].dark {
+.dark [data-app='ezauth'] {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.78 0.15 200);
   --primary-foreground: oklch(0.15 0.05 200);
@@ -47,10 +47,6 @@
 @layer utilities {
   /* EZAuth Generic Gradient */
   .bg-ezauth-gradient {
-    background: linear-gradient(
-      to right,
-      var(--ezauth-gradient-from),
-      var(--ezauth-gradient-to)
-    );
+    background: linear-gradient(to right, var(--ezauth-gradient-from), var(--ezauth-gradient-to));
   }
 }

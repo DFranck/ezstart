@@ -1,6 +1,6 @@
 /* EZPay Theme Variables */
 
-:root[data-app='ezpay'] {
+[data-app='ezpay'] {
   /* Override shadcn primary/secondary/accent tokens */
   /* Brand color: pink/rose (#E91E63 / rose-500) */
   --primary: oklch(0.6 0.22 350);
@@ -19,7 +19,7 @@
   --ezpay-gradient-to: oklch(0.55 0.2 320);
 }
 
-:root[data-app='ezpay'].dark {
+.dark [data-app='ezpay'] {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.65 0.22 350);
   --primary-foreground: oklch(0.15 0.05 350);
@@ -47,10 +47,6 @@
 @layer utilities {
   /* EZPay Generic Gradient */
   .bg-ezpay-gradient {
-    background: linear-gradient(
-      to right,
-      var(--ezpay-gradient-from),
-      var(--ezpay-gradient-to)
-    );
+    background: linear-gradient(to right, var(--ezpay-gradient-from), var(--ezpay-gradient-to));
   }
 }

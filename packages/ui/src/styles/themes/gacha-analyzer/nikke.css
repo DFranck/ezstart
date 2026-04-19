@@ -3,7 +3,7 @@
    Manufacturers, rarities, gear tiers
    ============================ */
 
-:root[data-app='gacha-analyzer'] {
+[data-app='gacha-analyzer'] {
   /* Manufacturer colors */
   --nikke-elysion: oklch(0.62 0.18 240); /* bleu */
   --nikke-missilis: oklch(0.62 0.22 25); /* rouge */
@@ -31,7 +31,7 @@
   --nikke-stat-charge-spd: oklch(0.6 0.2 290); /* violet - Charge SPD */
 }
 
-:root[data-app='gacha-analyzer'].dark {
+.dark [data-app='gacha-analyzer'] {
   /* Manufacturer colors */
   --nikke-elysion: oklch(0.72 0.2 240);
   --nikke-missilis: oklch(0.7 0.24 25);

@@ -3,7 +3,7 @@
    Roll quality, elements, stat colors
    ============================ */
 
-:root[data-app='gacha-analyzer'] {
+[data-app='gacha-analyzer'] {
   /* Roll quality colors (SW system) */
   --ga-roll-legend: oklch(0.75 0.18 55); /* orange/doré - Legend quality */
   --ga-roll-legend-foreground: oklch(0.98 0.01 55);
@@ -42,7 +42,7 @@
   --ga-rune-bg: oklch(0.25 0.04 55);
 }
 
-:root[data-app='gacha-analyzer'].dark {
+.dark [data-app='gacha-analyzer'] {
   --ga-roll-legend: oklch(0.8 0.2 55);
   --ga-roll-hero: oklch(0.7 0.22 290);
   --ga-roll-rare: oklch(0.72 0.2 240);
