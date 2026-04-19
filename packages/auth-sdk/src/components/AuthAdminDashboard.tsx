@@ -398,17 +398,18 @@ export function AuthAdminDashboard({ appName: appNameProp, className, texts, sco
   const accessToken = useAuthStore(state => state.accessToken)
 
   // Resolve scope from context or prop
-  let contextScope: AuthScope = 'app'
+  let contextScope: AuthScope = 'live'
   try {
     const ctx = useAuthContext()
     contextScope = ctx.scope
   } catch {
-    // AuthProvider not available, default to 'app'
+    // AuthProvider not available, default to 'live'
   }
   const scope = scopeProp ?? contextScope
 
-  // For app-scoped keys, always filter by the provider's appName
-  const effectiveAppName = scope === 'app' ? appNameProp : undefined
+  // For single-app scoped keys (test/live), always filter by the provider's appName
+  const isSingleAppScope = scope === 'test' || scope === 'live'
+  const effectiveAppName = isSingleAppScope ? appNameProp : undefined
 
   // App filter for platform/first-party (user can select which app to view)
   const [appFilter, setAppFilter] = useState<string>('')
@@ -475,7 +476,7 @@ export function AuthAdminDashboard({ appName: appNameProp, className, texts, sco
       setTotal(meta?.total ?? 0)
 
       // Collect available apps from users for the app filter dropdown
-      if (scope !== 'app') {
+      if (!isSingleAppScope) {
         const apps = new Set<string>()
         for (const u of fetchedUsers) {
           if (u.apps) {
@@ -532,7 +533,7 @@ export function AuthAdminDashboard({ appName: appNameProp, className, texts, sco
   }, [])
 
   // DataTable columns — show apps column when not filtering by a single app
-  const showAppsColumn = scope !== 'app'
+  const showAppsColumn = !isSingleAppScope
   const columns: ColumnDef<AdminUser>[] = [
     {
       accessorKey: 'email',
@@ -682,7 +683,7 @@ export function AuthAdminDashboard({ appName: appNameProp, className, texts, sco
             className="w-full sm:w-80"
           />
           {/* App filter dropdown — only shown for platform/first-party scope */}
-          {scope !== 'app' && availableApps.length > 0 && (
+          {!isSingleAppScope && availableApps.length > 0 && (
             <Select
               value={appFilter}
               onValueChange={(val: string) => {

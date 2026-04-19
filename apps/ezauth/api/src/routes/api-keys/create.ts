@@ -32,10 +32,10 @@ const createApiKeyBodySchema = z.object({
     .default('*')
     .openapi({ description: 'App scope (default: all apps)' }),
   scope: z
-    .enum(['app', 'platform'])
+    .enum(['test', 'live', 'admin'])
     .optional()
-    .default('app')
-    .openapi({ description: 'Key scope: app (sees only own app) or platform (superadmin, sees all)' }),
+    .default('live')
+    .openapi({ description: 'Key scope: test (sandbox), live (production), admin (superadmin only, all apps)' }),
   expiresAt: z
     .string()
     .datetime()
@@ -71,12 +71,12 @@ const createApiKeyController = async (req: Request, res: Response) => {
     const userId = req.userId!
     const { scope } = parsed.data
 
-    // Platform-scoped keys require superadmin
-    if (scope === 'platform') {
+    // Admin-scoped keys require superadmin
+    if (scope === 'admin') {
       const AuthUser = await getAuthUserModel()
       const user = await AuthUser.findById(userId).lean()
       if (!user?.globalRoles?.includes('superadmin')) {
-        return sendError(res, 'Platform-scoped keys require superadmin role', 403)
+        return sendError(res, 'Admin-scoped keys require superadmin role', 403)
       }
     }
 
@@ -94,8 +94,8 @@ const createApiKeyController = async (req: Request, res: Response) => {
 
     const expiresAt = parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null
 
-    // Platform keys always have appName '*'
-    const effectiveAppName = scope === 'platform' ? '*' : parsed.data.appName
+    // Admin keys always have appName '*'
+    const effectiveAppName = scope === 'admin' ? '*' : parsed.data.appName
 
     const apiKey = await ApiKey.create({
       key: hashedKey,

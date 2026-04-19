@@ -4,14 +4,15 @@ const RAW_KEY_LENGTH = 32
 
 /** Key prefix by scope. */
 const SCOPE_PREFIX = {
-  app: 'ezk_live_',
-  platform: 'ezk_admin_',
+  test: 'ezk_test_',
+  live: 'ezk_live_',
+  admin: 'ezk_admin_',
 } as const
 
-export type ApiKeyScope = 'app' | 'platform'
+export type ApiKeyScope = 'test' | 'live' | 'admin'
 
 /** Generate a raw API key with scope-based prefix + 32 hex chars. */
-export function generateRawApiKey(scope: ApiKeyScope = 'app'): string {
+export function generateRawApiKey(scope: ApiKeyScope = 'live'): string {
   const hex = randomBytes(RAW_KEY_LENGTH).toString('hex')
   return `${SCOPE_PREFIX[scope]}${hex}`
 }

@@ -36,7 +36,7 @@ const configResponseSchema = z.object({
     features: z.array(z.string()),
     plan: z.string(),
     quotaMonthly: z.number(),
-    scope: z.enum(['app', 'platform']),
+    scope: z.enum(['test', 'live', 'admin']),
   }),
 })
 
@@ -108,7 +108,7 @@ const configController = async (req: Request, res: Response) => {
       features,
       plan,
       quotaMonthly: apiKey.quotaMonthly ?? -1,
-      scope: apiKey.scope || 'app',
+      scope: apiKey.scope || 'live',
     })
   } catch (error: unknown) {
     logger.error('Key config endpoint error:', error)

@@ -88,7 +88,7 @@ interface AuthContextValue {
   webUrl: string
   /** Resolved key config (null until async fetch completes, or if no key). */
   keyConfig: PublishableKeyConfig | null
-  /** Auth scope: 'app' (sees own app), 'platform' (sees all), 'first-party' (ezauth web). */
+  /** Auth scope: 'test'/'live' (single app), 'admin' (all apps), 'first-party' (ezauth web). */
   scope: AuthScope
 }
 
@@ -156,7 +156,7 @@ export function AuthProvider({
   const keyConfigRef = useRef<PublishableKeyConfig | null>(null)
 
   // Determine initial scope from mode prop
-  const initialScope: AuthScope = mode === 'first-party' ? 'first-party' : 'app'
+  const initialScope: AuthScope = mode === 'first-party' ? 'first-party' : 'live'
   const [resolvedScope, setResolvedScope] = useState<AuthScope>(initialScope)
 
   // Handle deprecated prop

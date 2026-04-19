@@ -10,7 +10,7 @@
 // ---------------------------------------------------------------------------
 
 /** Scope of an API key or auth context. */
-export type AuthScope = 'app' | 'platform' | 'first-party'
+export type AuthScope = 'test' | 'live' | 'admin' | 'first-party'
 
 // ---------------------------------------------------------------------------
 // Config
@@ -60,8 +60,8 @@ export interface PublishableKeyConfig {
   plan: string
   /** Monthly quota (-1 means unlimited). */
   quotaMonthly: number
-  /** Key scope: 'app' (sees only own app) or 'platform' (sees all apps). */
-  scope?: 'app' | 'platform'
+  /** Key scope: 'test' (sandbox), 'live' (production), or 'admin' (superadmin, all apps). */
+  scope?: 'test' | 'live' | 'admin'
 }
 
 /**
@@ -250,7 +250,7 @@ export interface ApiKeyItem {
   keyPrefix: string
   name: string
   appName: string
-  scope: 'app' | 'platform'
+  scope: 'test' | 'live' | 'admin'
   permissions: string[]
   status: 'active' | 'revoked'
   lastUsedAt: string | null
@@ -287,7 +287,7 @@ export interface CreateApiKeyResponse {
 export interface CreateApiKeyRequest {
   name: string
   appName: string
-  scope?: 'app' | 'platform'
+  scope?: 'test' | 'live' | 'admin'
   expiresAt: string | null
 }
 

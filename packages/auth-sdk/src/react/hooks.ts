@@ -132,7 +132,7 @@ export function useAuth(logger?: AuthLogger) {
     isLoggingOut: store.isLoggingOut,
     isAuthReady: store.isAuthReady,
     mode,
-    /** Auth scope: 'app' (sees own app), 'platform' (sees all), 'first-party' (ezauth web). */
+    /** Auth scope: 'test'/'live' (single app), 'admin' (all apps), 'first-party' (ezauth web). */
     scope,
 
     // Actions

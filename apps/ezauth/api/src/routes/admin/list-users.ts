@@ -80,8 +80,8 @@ const listUsersController = async (req: Request, res: Response) => {
     const apiKeyScope = req.apiKeyScope
     const apiKeyAppName = req.apiKeyAppName
 
-    if (apiKeyScope === 'app' && apiKeyAppName && apiKeyAppName !== '*') {
-      // App-scoped API key: only show users with this app
+    if ((apiKeyScope === 'test' || apiKeyScope === 'live') && apiKeyAppName && apiKeyAppName !== '*') {
+      // Single-app scoped API key: only show users with this app
       query.apps = { $in: [apiKeyAppName] }
     } else if (!apiKeyScope) {
       // Direct user auth (no API key) — use existing role-based logic

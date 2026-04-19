@@ -26,6 +26,10 @@
       "namePlaceholder": "My App Production",
       "appScope": "App Scope",
       "appScopeAll": "All apps",
+      "keyScope": "Key Type",
+      "keyScopeTest": "Test — sandbox, rate limited",
+      "keyScopeLive": "Live — production, full access",
+      "keyScopeAdmin": "Admin — superadmin, all apps",
       "expiry": "Expiry",
       "expiryNever": "Never",
       "expiry30d": "30 days",
@@ -92,8 +96,10 @@
       }
     },
     "nav": {
+      "overview": "Overview",
       "apiKeys": "API Keys",
-      "billing": "Billing"
+      "billing": "Billing",
+      "settings": "Settings"
     },
     "retry": "Retry",
     "errors": {

@@ -26,6 +26,10 @@
       "namePlaceholder": "Mon App Production",
       "appScope": "Portée applicative",
       "appScopeAll": "Toutes les apps",
+      "keyScope": "Type de clé",
+      "keyScopeTest": "Test — sandbox, débit limité",
+      "keyScopeLive": "Live — production, accès complet",
+      "keyScopeAdmin": "Admin — superadmin, toutes les apps",
       "expiry": "Expiration",
       "expiryNever": "Jamais",
       "expiry30d": "30 jours",
@@ -92,8 +96,10 @@
       }
     },
     "nav": {
+      "overview": "Vue d'ensemble",
       "apiKeys": "Clés API",
-      "billing": "Facturation"
+      "billing": "Facturation",
+      "settings": "Paramètres"
     },
     "retry": "Réessayer",
     "errors": {

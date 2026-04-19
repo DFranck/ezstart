@@ -38,6 +38,8 @@ export interface DeveloperPortalProps {
   headerActions?: React.ReactNode
   /** Additional className on root Card. */
   className?: string
+  /** Show admin scope option in create modal (for superadmins). */
+  showAdminScope?: boolean
 }
 
 function mergeTexts(partial?: Partial<DeveloperPortalTexts>): DeveloperPortalTexts {
@@ -58,6 +60,7 @@ export function DeveloperPortal({
   texts: partialTexts,
   headerActions,
   className,
+  showAdminScope = false,
 }: DeveloperPortalProps) {
   const texts = mergeTexts(partialTexts)
 
@@ -158,6 +161,7 @@ export function DeveloperPortal({
         onSubmit={(data) => createMutation.mutate(data)}
         isSubmitting={createMutation.isPending}
         texts={texts.create}
+        showAdminScope={showAdminScope}
       />
 
       {/* Key Created Modal */}

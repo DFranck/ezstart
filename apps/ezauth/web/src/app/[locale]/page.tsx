@@ -1,11 +1,14 @@
 'use client'
 
+import { LoginButton, useAuth } from '@ezstart/auth-sdk'
+import { UserMenu } from '@ezstart/auth-sdk/components'
 import {
   Badge,
   Button,
   Card,
   CardContent,
   CardHeader,
+  Code,
   Div,
   H1,
   H2,
@@ -26,16 +29,13 @@ import {
   LocaleSwitcher,
   P,
   Pre,
-  Code,
   Span,
 } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/ui/theme'
-import { UserMenu } from '@ezstart/auth-sdk/components'
-import { useAuth, LoginButton } from '@ezstart/auth-sdk'
-import { useTranslations, useLocale } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 
 const LOCALES = ['en', 'fr', 'vi']
 
@@ -128,11 +128,7 @@ export default function HomePage() {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-            {isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <LoginButton size="sm" loginText={t('navSignIn')} />
-            )}
+            {isAuthenticated ? <UserMenu /> : <LoginButton size="sm" loginText={t('navSignIn')} />}
           </Div>
           <LandingMenuToggle />
         </LandingActions>
@@ -141,7 +137,7 @@ export default function HomePage() {
           <LandingMobileLink href="#features">{t('navFeatures')}</LandingMobileLink>
           <LandingMobileLink href="#pricing">{t('navPricing')}</LandingMobileLink>
           <LandingMobileLink href="/docs">{t('navDocs')}</LandingMobileLink>
-          <Div className="px-3 pt-2 flex flex-col gap-2">
+          <Div className="px-3 pt-2 flex gap-2 justify-end">
             <Div className="flex items-center gap-2">
               <LocaleSwitcher
                 locales={LOCALES}
@@ -253,9 +249,7 @@ export default function HomePage() {
                 <Icon name={icon} className="h-5 w-5 text-primary" />
                 <H3 className="text-lg font-semibold">{t(`howItWorks${key}Title`)}</H3>
               </Div>
-              <P className="max-w-xs text-sm text-muted-foreground">
-                {t(`howItWorks${key}Desc`)}
-              </P>
+              <P className="max-w-xs text-sm text-muted-foreground">{t(`howItWorks${key}Desc`)}</P>
             </Div>
           ))}
         </Div>
@@ -266,12 +260,8 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       <LandingSection variant="muted" align="center">
         <Div className="mb-12">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('codeSectionTitle')}
-          </H2>
-          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            {t('codeSectionSubtitle')}
-          </P>
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('codeSectionTitle')}</H2>
+          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">{t('codeSectionSubtitle')}</P>
         </Div>
 
         <Div className="mx-auto grid max-w-4xl gap-6 text-left">
@@ -326,12 +316,8 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       <LandingSection variant="accent" align="center">
         <Div className="py-8">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('ctaTitle')}
-          </H2>
-          <P className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            {t('ctaSubtitle')}
-          </P>
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('ctaTitle')}</H2>
+          <P className="mx-auto mt-4 max-w-xl text-muted-foreground">{t('ctaSubtitle')}</P>
           <Div className="mt-8">
             {isAuthenticated ? (
               <Button asChild size="lg">
@@ -405,16 +391,12 @@ export default function HomePage() {
               <Image src="/logo.svg" alt="EZAuth" width={24} height={24} />
               <Span className="text-lg font-bold">EZAuth</Span>
             </Div>
-            <P className="mt-2 text-sm text-muted-foreground">
-              Authentication as a Service
-            </P>
+            <P className="mt-2 text-sm text-muted-foreground">Authentication as a Service</P>
           </Div>
         </Div>
 
         <Div className="mt-8 border-t pt-8 text-center">
-          <P className="text-sm text-muted-foreground">
-            &copy; 2026 {t('footerCopyright')}
-          </P>
+          <P className="text-sm text-muted-foreground">&copy; 2026 {t('footerCopyright')}</P>
         </Div>
       </LandingFooter>
     </LandingLayout>

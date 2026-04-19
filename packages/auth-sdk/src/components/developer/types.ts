@@ -26,6 +26,10 @@ export interface CreateKeyModalTexts {
   namePlaceholder: string
   appScope: string
   appScopeAll: string
+  keyScope: string
+  keyScopeTest: string
+  keyScopeLive: string
+  keyScopeAdmin: string
   expiry: string
   expiryNever: string
   expiry30d: string
@@ -121,6 +125,10 @@ export const defaultDeveloperPortalTexts: DeveloperPortalTexts = {
     namePlaceholder: 'My App Production',
     appScope: 'App Scope',
     appScopeAll: 'All apps',
+    keyScope: 'Key Type',
+    keyScopeTest: 'Test — sandbox, rate limited',
+    keyScopeLive: 'Live — production, full access',
+    keyScopeAdmin: 'Admin — superadmin, all apps',
     expiry: 'Expiry',
     expiryNever: 'Never',
     expiry30d: '30 days',

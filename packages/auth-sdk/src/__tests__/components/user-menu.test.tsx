@@ -28,7 +28,7 @@ vi.mock('../../react/auth-provider.js', () => ({
     appName: 'testapp',
     webUrl: 'http://localhost:6111',
     keyConfig: null,
-    scope: 'app',
+    scope: 'live',
   }),
 }))
 

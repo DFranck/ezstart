@@ -1,7 +1,7 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, type Document, type Model } from 'mongoose'
 
-export type ApiKeyScope = 'app' | 'platform'
+export type ApiKeyScope = 'test' | 'live' | 'admin'
 
 export interface ApiKeyDocument extends Document {
   key: string
@@ -48,8 +48,8 @@ const apiKeySchema = new Schema<ApiKeyDocument>(
     },
     scope: {
       type: String,
-      enum: ['app', 'platform'],
-      default: 'app',
+      enum: ['test', 'live', 'admin'],
+      default: 'live',
     },
     permissions: {
       type: [String],

@@ -61,6 +61,10 @@ export type { UserDashboardProps, UserDashboardTexts } from './UserDashboard.js'
 export { AuthAdminDashboard } from './AuthAdminDashboard.js'
 export type { AuthAdminDashboardProps, AuthAdminDashboardTexts } from './AuthAdminDashboard.js'
 
+// Developer dashboard (full-page layout)
+export { EZAuthDashboard } from './EZAuthDashboard.js'
+export type { EZAuthDashboardProps, EZAuthDashboardTexts } from './EZAuthDashboard.js'
+
 // Developer portal (API keys management)
 export {
   DeveloperPortal,

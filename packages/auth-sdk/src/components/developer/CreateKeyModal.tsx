@@ -22,6 +22,8 @@ export interface CreateKeyModalProps {
   onSubmit: (data: CreateApiKeyRequest) => void
   isSubmitting: boolean
   texts: CreateKeyModalTexts
+  /** Show admin scope option (for superadmins only). */
+  showAdminScope?: boolean
 }
 
 function computeExpiryDate(option: string): string | null {
@@ -40,9 +42,11 @@ export function CreateKeyModal({
   onSubmit,
   isSubmitting,
   texts,
+  showAdminScope = false,
 }: CreateKeyModalProps) {
   const [name, setName] = useState('')
   const [appName, setAppName] = useState('*')
+  const [scope, setScope] = useState<'test' | 'live' | 'admin'>('live')
   const [expiry, setExpiry] = useState('never')
 
   const handleSubmit = () => {
@@ -50,6 +54,7 @@ export function CreateKeyModal({
     onSubmit({
       name: name.trim(),
       appName,
+      scope,
       expiresAt: computeExpiryDate(expiry),
     })
   }
@@ -57,6 +62,7 @@ export function CreateKeyModal({
   const handleClose = () => {
     setName('')
     setAppName('*')
+    setScope('live')
     setExpiry('never')
     onClose()
   }
@@ -87,6 +93,22 @@ export function CreateKeyModal({
             onChange={(e) => setName(e.target.value)}
             maxLength={100}
           />
+        </Div>
+
+        <Div className="space-y-2">
+          <Label>{texts.keyScope}</Label>
+          <Select value={scope} onValueChange={(v) => setScope(v as 'test' | 'live' | 'admin')}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="test">{texts.keyScopeTest}</SelectItem>
+              <SelectItem value="live">{texts.keyScopeLive}</SelectItem>
+              {showAdminScope && (
+                <SelectItem value="admin">{texts.keyScopeAdmin}</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
         </Div>
 
         <Div className="space-y-2">
