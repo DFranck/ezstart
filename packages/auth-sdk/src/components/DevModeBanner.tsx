@@ -44,11 +44,6 @@ export function DevModeBanner({ className }: DevModeBannerProps) {
   // Never render server-side (avoid hydration mismatch)
   if (!mounted) return null
 
-  // Zero footprint in production
-  if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'development') {
-    return null
-  }
-
   return <DevModeBannerInner className={className} />
 }
 
