@@ -134,88 +134,88 @@ export default function SessionsPage() {
 
   return (
     <Div className="flex flex-1 items-center justify-center px-2">
-    <Card className="max-w-lg w-full relative">
-      <Div className="absolute top-4 left-4">
-        <BackButton />
-      </Div>
+      <Card className="max-w-lg w-full relative">
+        <Div className="absolute top-4 left-4">
+          <BackButton />
+        </Div>
 
-      <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
-      </CardHeader>
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
+        </CardHeader>
 
-      <CardContent className="space-y-4">
-        {isError && (
-          <Div className="space-y-3 text-center">
-            <P size="sm" className="text-destructive">
-              {t('fetchError')}
-            </P>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              {t('retry')}
-            </Button>
-          </Div>
-        )}
-
-        {!isError && sessions.length === 0 && (
-          <P size="sm" className="text-muted-foreground text-center">
-            {t('noSessions')}
-          </P>
-        )}
-
-        {sessions.map(session => (
-          <Div
-            key={session.id}
-            className={`flex items-center justify-between border rounded-lg p-3 gap-3 ${
-              session.isCurrent ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : ''
-            }`}
-          >
-            <Div className="flex-1 min-w-0">
-              <Div className="flex items-center gap-2">
-                <P size="sm" className="font-medium truncate">
-                  {parseUserAgent(session.userAgent)}
-                </P>
-                {session.isCurrent && (
-                  <Badge variant="default" className="shrink-0 text-xs">
-                    {t('currentSession')}
-                  </Badge>
-                )}
-              </Div>
-              <P size="xs" className="text-muted-foreground">
-                {session.ip || t('unknownIp')}
+        <CardContent className="space-y-4">
+          {isError && (
+            <Div className="space-y-3 text-center">
+              <P size="sm" className="text-destructive">
+                {t('fetchError')}
               </P>
-              <P size="xs" className="text-muted-foreground">
-                {t('createdAt', { date: formatDate(session.createdAt) })}
-              </P>
-            </Div>
-            {!session.isCurrent && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => revokeMutation.mutate(session.id)}
-                disabled={revokeMutation.isPending && revokeMutation.variables === session.id}
-              >
-                {revokeMutation.isPending && revokeMutation.variables === session.id ? (
-                  <Spinner size="sm" />
-                ) : (
-                  t('revoke')
-                )}
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                {t('retry')}
               </Button>
-            )}
-          </Div>
-        ))}
+            </Div>
+          )}
 
-        {sessions.length > 1 && (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => revokeAllMutation.mutate()}
-            disabled={revokeAllMutation.isPending}
-          >
-            {revokeAllMutation.isPending ? <Spinner size="sm" /> : t('revokeAll')}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+          {!isError && sessions.length === 0 && (
+            <P size="sm" className="text-muted-foreground text-center">
+              {t('noSessions')}
+            </P>
+          )}
+
+          {sessions.map(session => (
+            <Div
+              key={session.id}
+              className={`flex items-center justify-between border rounded-lg p-3 gap-3 ${
+                session.isCurrent ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : ''
+              }`}
+            >
+              <Div className="flex-1 min-w-0">
+                <Div className="flex items-center gap-2">
+                  <P size="sm" className="font-medium truncate">
+                    {parseUserAgent(session.userAgent)}
+                  </P>
+                  {session.isCurrent && (
+                    <Badge variant="default" className="shrink-0 text-xs">
+                      {t('currentSession')}
+                    </Badge>
+                  )}
+                </Div>
+                <P size="xs" className="text-muted-foreground">
+                  {session.ip || t('unknownIp')}
+                </P>
+                <P size="xs" className="text-muted-foreground">
+                  {t('createdAt', { date: formatDate(session.createdAt) })}
+                </P>
+              </Div>
+              {!session.isCurrent && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => revokeMutation.mutate(session.id)}
+                  disabled={revokeMutation.isPending && revokeMutation.variables === session.id}
+                >
+                  {revokeMutation.isPending && revokeMutation.variables === session.id ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    t('revoke')
+                  )}
+                </Button>
+              )}
+            </Div>
+          ))}
+
+          {sessions.length > 1 && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => revokeAllMutation.mutate()}
+              disabled={revokeAllMutation.isPending}
+            >
+              {revokeAllMutation.isPending ? <Spinner size="sm" /> : t('revokeAll')}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     </Div>
   )
 }

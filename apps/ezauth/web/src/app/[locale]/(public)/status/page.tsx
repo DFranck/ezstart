@@ -8,10 +8,10 @@ export default function StatusPage() {
           <H1 size="h2">Status</H1>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Badge variant="success" size="lg">All systems operational</Badge>
-          <P className="text-muted-foreground">
-            Service status monitoring coming soon.
-          </P>
+          <Badge variant="success" size="lg">
+            All systems operational
+          </Badge>
+          <P className="text-muted-foreground">Service status monitoring coming soon.</P>
         </CardContent>
       </Card>
     </Main>

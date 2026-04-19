@@ -9,8 +9,8 @@ export default function AboutPage() {
         </CardHeader>
         <CardContent>
           <P className="text-muted-foreground">
-            EZAuth is a centralized authentication service built by EZStart. It provides secure
-            SSO, API key management, OAuth2, 2FA, and role-based access control for all your
+            EZAuth is a centralized authentication service built by EZStart. It provides secure SSO,
+            API key management, OAuth2, 2FA, and role-based access control for all your
             applications.
           </P>
         </CardContent>

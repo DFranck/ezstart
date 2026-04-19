@@ -30,7 +30,7 @@ import {
 import { cn } from '@ezstart/ui/lib'
 import { toast } from '@ezstart/ui/utils'
 import { useAuth } from '../react/hooks.js'
-import { UserAvatar } from './UserAvatar.js'
+import { UserMenu } from './UserMenu.js'
 import { UserSettings } from './UserSettings.js'
 import { DeveloperPortal } from './developer/index.js'
 import type { UserSettingsTexts } from './UserSettings.js'
@@ -284,13 +284,7 @@ export function EZAuthDashboard({
         </SidebarNav>
 
         <SidebarFooter>
-          <Div className="flex items-center gap-3">
-            <UserAvatar size="sm" user={user} />
-            <Div className="flex-1 min-w-0">
-              <P className="text-sm font-medium text-foreground truncate">{getDisplayName(user)}</P>
-              <P className="text-xs text-muted-foreground truncate">{user.email}</P>
-            </Div>
-          </Div>
+          <UserMenu variant="extended" side="top" avatarSize="sm" />
         </SidebarFooter>
       </DashboardSidebar>
 
