@@ -1549,11 +1549,11 @@ export const tagVariants = {
     variants: blockquoteVariantConfig,
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),
-  pre: cva('overflow-x-auto rounded-md bg-muted p-4 font-mono', {
+  pre: cva('overflow-x-auto rounded-lg bg-muted text-foreground p-4 font-mono text-sm', {
     variants: preVariantConfig,
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),
-  code: cva('rounded bg-muted px-1.5 py-0.5 font-mono', {
+  code: cva('font-mono text-sm bg-muted/50 px-1 py-0.5 rounded-sm', {
     variants: codeVariantConfig,
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),
