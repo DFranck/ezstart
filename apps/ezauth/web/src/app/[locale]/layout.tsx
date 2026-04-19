@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import Script from 'next/script'
+import { headers } from 'next/headers'
 import { ReactNode } from 'react'
 
 const DOMAIN = getWebUrl('ezauth', 'production')
@@ -45,8 +46,17 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages()
   const t = await getTranslations({ locale })
 
+  // Read app theme set by middleware from ?app= search param.
+  // Sets data-app on <html> at SSR time — zero flash.
+  const headersList = await headers()
+  const appTheme = headersList.get('x-app-theme')
+
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      {...(appTheme && appTheme !== 'ezauth' ? { 'data-app': appTheme } : {})}
+    >
       <body className="min-h-screen">
         <Script
           id="json-ld"

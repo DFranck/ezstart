@@ -37,7 +37,7 @@ function ResetPasswordContent() {
   const tPwd = useTranslations('passwordStrength')
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
-  const { app, forgotPasswordHref } = useAuthNavigation()
+  const { forgotPasswordHref } = useAuthNavigation()
 
   const handleValidateToken = useCallback(
     (tokenValue: string) => validateResetToken(tokenValue),
@@ -45,7 +45,7 @@ function ResetPasswordContent() {
   )
 
   return (
-    <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto" data-app={app}>
+    <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
         <CardDescription className="text-xs md:text-sm">{t('description')}</CardDescription>

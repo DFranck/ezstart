@@ -1,6 +1,6 @@
 'use client'
 
-import { VerifyEmailFlow, useAuthNavigation } from '@ezstart/auth-sdk'
+import { VerifyEmailFlow } from '@ezstart/auth-sdk'
 import { Card, CardContent, CardHeader, CardTitle, Div, Spinner } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
@@ -10,10 +10,9 @@ function VerifyEmailContent() {
   const t = useTranslations('verifyEmail')
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
-  const { app } = useAuthNavigation()
 
   return (
-    <Card className="max-w-md w-full" data-app={app}>
+    <Card className="max-w-md w-full">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
       </CardHeader>
