@@ -120,7 +120,7 @@ export default function HomePage() {
 
         {/* Hero code preview */}
         <Div className="mx-auto mt-12 max-w-lg">
-          <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-left text-sm">
+          <Pre className="border text-left">
             <Code className="text-foreground">{`import { AuthProvider } from '@ezstart/auth-sdk'
 
 <AuthProvider appName="myapp">
@@ -201,7 +201,7 @@ export default function HomePage() {
             <Div className="mb-2 flex items-center gap-2">
               <Badge variant="secondary">{t('codeInstallLabel')}</Badge>
             </Div>
-            <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-sm">
+            <Pre className="border">
               <Code className="text-foreground">{CODE_INSTALL}</Code>
             </Pre>
           </Div>
@@ -211,7 +211,7 @@ export default function HomePage() {
             <Div className="mb-2 flex items-center gap-2">
               <Badge variant="secondary">{t('codeSetupLabel')}</Badge>
             </Div>
-            <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-sm">
+            <Pre className="border">
               <Code className="text-foreground">{CODE_SETUP}</Code>
             </Pre>
           </Div>
@@ -221,7 +221,7 @@ export default function HomePage() {
             <Div className="mb-2 flex items-center gap-2">
               <Badge variant="secondary">{t('codeUseLabel')}</Badge>
             </Div>
-            <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-sm">
+            <Pre className="border">
               <Code className="text-foreground">{CODE_USE}</Code>
             </Pre>
           </Div>
