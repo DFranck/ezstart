@@ -52,11 +52,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const appTheme = headersList.get('x-app-theme')
 
   return (
-    <html
-      lang={locale}
-      suppressHydrationWarning
-      {...(appTheme && appTheme !== 'ezauth' ? { 'data-app': appTheme } : {})}
-    >
+    <html lang={locale} suppressHydrationWarning data-app={appTheme || 'ezauth'}>
       <body className="min-h-screen">
         <Script
           id="json-ld"
