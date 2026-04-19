@@ -90,7 +90,7 @@ export default function HomePage() {
           <Div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/10 blur-3xl animate-pulse" />
         </Div>
 
-        <Badge variant="outline" className="mb-6">
+        <Badge variant="outline" className="mb-6 bg-primary/20 text-primary border-primary">
           <Icon name="lucide:Zap" className="mr-1 h-3 w-3" />
           Authentication as a Service
         </Badge>
