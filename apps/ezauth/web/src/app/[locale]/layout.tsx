@@ -46,7 +46,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const t = await getTranslations({ locale })
 
   return (
-    <html lang={locale} suppressHydrationWarning data-app="ezauth">
+    <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen">
         <Script
           id="json-ld"
