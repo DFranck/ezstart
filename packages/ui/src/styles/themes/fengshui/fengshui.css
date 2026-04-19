@@ -1,6 +1,6 @@
 /* FengShui Theme Variables - Gold & Red palette */
 
-[data-app='fengshui'] {
+:root[data-app='fengshui'] {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.78 0.16 80);
   --primary-foreground: oklch(0.2 0.08 80);
@@ -15,7 +15,7 @@
   --fengshui-secondary-dark: oklch(0.45 0.18 28);
 }
 
-.dark [data-app='fengshui'] {
+:root[data-app='fengshui'].dark {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.72 0.14 80);
   --primary-foreground: oklch(0.98 0.01 80);

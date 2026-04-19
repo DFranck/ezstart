@@ -1,6 +1,6 @@
 /* EZStart Theme Variables */
 
-[data-app='ezstart'] {
+:root[data-app='ezstart'] {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.5413 0.2466 293.01);
   --primary-foreground: oklch(0.985 0 0);
@@ -30,7 +30,7 @@
   --platform-vercel-foreground: oklch(0.98 0 0);
 }
 
-.dark [data-app='ezstart'] {
+:root[data-app='ezstart'].dark {
   /* Override shadcn primary/secondary/accent tokens */
   --primary: oklch(0.6513 0.2466 293.01);
   --primary-foreground: oklch(0.985 0 0);
