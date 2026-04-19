@@ -11,6 +11,8 @@ import { useAuthContext } from '../react/auth-provider.js'
 
 export interface DevModeBannerProps {
   className?: string
+  /** Override app name (e.g., from ?app= query param) */
+  appName?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -37,51 +39,55 @@ function truncateKey(key: string): string {
  * <DevModeBanner />
  * ```
  */
-export function DevModeBanner({ className }: DevModeBannerProps) {
+export function DevModeBanner({ className, appName }: DevModeBannerProps) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
   // Never render server-side (avoid hydration mismatch)
   if (!mounted) return null
 
-  return <DevModeBannerInner className={className} />
+  return <DevModeBannerInner className={className} overrideAppName={appName} />
 }
 
 /**
  * Inner component that uses hooks (separated so the production guard
  * can return null before any hooks are called).
  */
-function DevModeBannerInner({ className }: DevModeBannerProps) {
+function DevModeBannerInner({
+  className,
+  overrideAppName,
+}: DevModeBannerProps & { overrideAppName?: string }) {
   const { scope, publishableKey } = useAuth()
-  const { webUrl, appName } = useAuthContext()
+  const { webUrl, appName: contextAppName } = useAuthContext()
+
+  const appName = overrideAppName || contextAppName
 
   // Build the developer dashboard URL for getting an API key
   const developerUrl = `${webUrl}/developer?tab=api-keys`
+
+  // First-party mode without ?app= override — only visible to ezauth devs
+  // Don't show banner when there's an app override (user came from external app)
+  if (scope === 'first-party' && !overrideAppName) {
+    return null // Don't show banner on ezauth's own pages
+  }
 
   let icon: string
   let label: string
   let details: string | null = null
 
-  if (scope === 'first-party') {
-    // D) First-party mode
-    icon = '\u{1F3E0}' // house emoji
-    label = 'First-Party Mode'
-    details = 'EZAuth direct access'
-  } else if (!publishableKey) {
-    // A) No key configured
+  if (!publishableKey) {
+    // No key configured — show link to get one
     icon = '\u{1F527}' // wrench emoji
-    label = 'Development Mode'
+    label = `Dev Mode — ${appName}`
     details = 'No API key configured'
   } else if (scope === 'admin') {
-    // C) Admin key
     icon = '\u{1F451}' // crown emoji
-    label = 'Admin Mode'
-    details = `${truncateKey(publishableKey)} | Platform scope | All apps`
+    label = `Admin — ${appName}`
+    details = `${truncateKey(publishableKey)} | Platform scope`
   } else {
-    // B) Live/test key
     icon = '\u{1F511}' // key emoji
-    label = `${scope === 'live' ? 'Live' : 'Test'} Mode`
-    details = `${truncateKey(publishableKey)} | App: ${appName} | Scope: ${scope}`
+    label = `${scope === 'live' ? 'Live' : 'Test'} — ${appName}`
+    details = truncateKey(publishableKey)
   }
 
   return (

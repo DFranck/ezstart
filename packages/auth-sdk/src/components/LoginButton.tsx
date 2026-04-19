@@ -1,7 +1,7 @@
 'use client'
 
-import { Button, Icon, KnownIconName, Span } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
+import { Button, Icon, KnownIconName, Span } from '@ezstart/ui/components'
 import { useAuth } from '../react/hooks.js'
 
 export interface LoginButtonProps {

@@ -201,7 +201,7 @@ export function ForgotPasswordForm({
           )}
         </Div>
 
-        <DevModeBanner />
+        <DevModeBanner appName={appName} />
       </form>
     </Form>
   )

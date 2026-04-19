@@ -272,7 +272,7 @@ export function SignInForm({
         </form>
       </Form>
 
-      <DevModeBanner />
+      <DevModeBanner appName={appName} />
     </Div>
   )
 }

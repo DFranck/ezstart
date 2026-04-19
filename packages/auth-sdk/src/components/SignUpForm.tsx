@@ -477,7 +477,7 @@ export function SignUpForm({
         </form>
       </Form>
 
-      <DevModeBanner />
+      <DevModeBanner appName={appName} />
     </Div>
   )
 }
