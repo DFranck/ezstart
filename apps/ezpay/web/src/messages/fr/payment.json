@@ -31,21 +31,6 @@
     "failed": "Échoué",
     "refunded": "Remboursé"
   },
-  "home": {
-    "title": "EZPay",
-    "subtitle": "Système de paiement universel pour l'écosystème EZStart",
-    "donations": "Dons",
-    "donationsDescription": "Acceptez les dons avec témoignages et murs publics",
-    "purchases": "Achats",
-    "purchasesDescription": "Vendez des produits et articles in-app avec Stripe",
-    "subscriptions": "Abonnements",
-    "subscriptionsDescription": "Gérez les paiements récurrents et les plans premium",
-    "gettingStarted": "Pour commencer",
-    "installSdk": "1. Installer le SDK",
-    "setupClient": "2. Configurer le client",
-    "useComponents": "3. Utiliser les composants",
-    "testCenter": "Centre de test"
-  },
   "success": {
     "donateTitle": "Merci !",
     "donateMessage": "Votre don a été reçu avec succès. Votre générosité fait la différence !",

@@ -1,0 +1,64 @@
+{
+  "home": {
+    "navFeatures": "Fonctionnalités",
+    "navPricing": "Tarifs",
+    "navDocs": "Docs",
+    "navSignIn": "Connexion",
+
+    "heroTitle": "Paiements pour chaque app",
+    "heroSubtitle": "Système de paiement universel. Dons, abonnements, achats — un seul SDK.",
+    "heroCta": "Commencer gratuitement",
+    "heroCtaDashboard": "Aller au tableau de bord",
+    "heroCtaSecondary": "Voir la documentation",
+
+    "featuresSectionTitle": "Tout ce qu'il faut pour les paiements",
+    "featuresSectionSubtitle": "Acceptez les dons, vendez des produits, gérez les abonnements — le tout via une API unifiée propulsée par Stripe.",
+    "featureDonations": "Dons",
+    "featureDonationsDesc": "Acceptez les dons avec témoignages, murs de donateurs et montants personnalisables.",
+    "featurePurchases": "Achats",
+    "featurePurchasesDesc": "Vendez des produits et articles numériques en paiement unique. Reçu et livraison automatiques.",
+    "featureSubscriptions": "Abonnements",
+    "featureSubscriptionsDesc": "Gérez la facturation récurrente avec des intervalles flexibles — mensuel, trimestriel ou annuel.",
+    "featureStripeConnect": "Stripe Connect",
+    "featureStripeConnectDesc": "Construit sur Stripe pour un traitement fiable et conforme PCI dans le monde entier.",
+    "featurePromoCodes": "Codes promo",
+    "featurePromoCodesDesc": "Créez des codes de réduction en pourcentage ou montant fixe. Définissez expiration et limites d'utilisation.",
+    "featureWebhooks": "Webhooks",
+    "featureWebhooksDesc": "Notifications en temps réel pour succès, échec, remboursement et changements d'abonnement.",
+
+    "howItWorksSectionTitle": "Opérationnel en 3 étapes",
+    "howItWorksStep1Title": "Installer le SDK",
+    "howItWorksStep1Desc": "Ajoutez le SDK EZPay à votre projet avec une seule commande.",
+    "howItWorksStep2Title": "Ajouter le Provider",
+    "howItWorksStep2Desc": "Encapsulez votre app avec PayProvider. Connexion Stripe automatique.",
+    "howItWorksStep3Title": "Utiliser les composants",
+    "howItWorksStep3Desc": "Intégrez DonateModal, PurchaseButton ou SubscribeButton — prêt à encaisser.",
+
+    "codeSectionTitle": "Simple par conception",
+    "codeSectionSubtitle": "De l'installation à l'encaissement en moins de 5 minutes.",
+    "codeInstallLabel": "Installer",
+    "codeSetupLabel": "Configuration",
+    "codeUseLabel": "Utilisation",
+
+    "pricingSectionTitle": "Tarification simple et transparente",
+    "pricingSectionSubtitle": "Tarifs bientôt disponibles. EZPay est actuellement gratuit pendant la période bêta.",
+
+    "ctaTitle": "Prêt à accepter des paiements ?",
+    "ctaSubtitle": "Ajoutez dons, achats et abonnements à votre app en quelques minutes. Gratuit pendant la bêta.",
+    "ctaCta": "Commencer à construire gratuitement",
+
+    "footerProduct": "Produit",
+    "footerDocs": "Documentation",
+    "footerPricing": "Tarifs",
+    "footerChangelog": "Changelog",
+    "footerStatus": "Statut",
+    "footerCompany": "Entreprise",
+    "footerAbout": "À propos",
+    "footerBlog": "Blog",
+    "footerContact": "Contact",
+    "footerLegal": "Légal",
+    "footerPrivacy": "Politique de confidentialité",
+    "footerTerms": "Conditions d'utilisation",
+    "footerCopyright": "EzStart LLC. Tous droits réservés."
+  }
+}

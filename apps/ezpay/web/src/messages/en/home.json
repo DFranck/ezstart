@@ -1,0 +1,64 @@
+{
+  "home": {
+    "navFeatures": "Features",
+    "navPricing": "Pricing",
+    "navDocs": "Docs",
+    "navSignIn": "Sign In",
+
+    "heroTitle": "Payments for every app",
+    "heroSubtitle": "Universal payment system. Donations, subscriptions, purchases — one SDK.",
+    "heroCta": "Get Started Free",
+    "heroCtaDashboard": "Go to Dashboard",
+    "heroCtaSecondary": "View Documentation",
+
+    "featuresSectionTitle": "Everything you need for payments",
+    "featuresSectionSubtitle": "Accept donations, sell products, manage subscriptions — all through a single, unified API powered by Stripe.",
+    "featureDonations": "Donations",
+    "featureDonationsDesc": "Accept one-time donations with testimonials, public donation walls, and customizable amounts.",
+    "featurePurchases": "Purchases",
+    "featurePurchasesDesc": "Sell products and digital items with one-time payments. Automatic receipt and fulfillment.",
+    "featureSubscriptions": "Subscriptions",
+    "featureSubscriptionsDesc": "Manage recurring billing with flexible intervals — monthly, quarterly, or yearly plans.",
+    "featureStripeConnect": "Stripe Connect",
+    "featureStripeConnectDesc": "Built on Stripe for reliable, PCI-compliant payment processing worldwide.",
+    "featurePromoCodes": "Promo Codes",
+    "featurePromoCodesDesc": "Create discount codes with percentage or fixed amount off. Set expiration and usage limits.",
+    "featureWebhooks": "Webhooks",
+    "featureWebhooksDesc": "Real-time event notifications for payment success, failure, refund, and subscription changes.",
+
+    "howItWorksSectionTitle": "Up and running in 3 steps",
+    "howItWorksStep1Title": "Install the SDK",
+    "howItWorksStep1Desc": "Add the EZPay SDK to your project with a single command.",
+    "howItWorksStep2Title": "Add the Provider",
+    "howItWorksStep2Desc": "Wrap your app with PayProvider. Connect to Stripe automatically.",
+    "howItWorksStep3Title": "Use the Components",
+    "howItWorksStep3Desc": "Drop in DonateModal, PurchaseButton, or SubscribeButton — ready to collect payments.",
+
+    "codeSectionTitle": "Simple by design",
+    "codeSectionSubtitle": "From installation to collecting payments in under 5 minutes.",
+    "codeInstallLabel": "Install",
+    "codeSetupLabel": "Setup",
+    "codeUseLabel": "Use",
+
+    "pricingSectionTitle": "Simple, transparent pricing",
+    "pricingSectionSubtitle": "Pricing coming soon. EZPay is currently free during the beta period.",
+
+    "ctaTitle": "Ready to accept payments?",
+    "ctaSubtitle": "Add donations, purchases, and subscriptions to your app in minutes. Free during beta.",
+    "ctaCta": "Start Building for Free",
+
+    "footerProduct": "Product",
+    "footerDocs": "Documentation",
+    "footerPricing": "Pricing",
+    "footerChangelog": "Changelog",
+    "footerStatus": "Status",
+    "footerCompany": "Company",
+    "footerAbout": "About",
+    "footerBlog": "Blog",
+    "footerContact": "Contact",
+    "footerLegal": "Legal",
+    "footerPrivacy": "Privacy Policy",
+    "footerTerms": "Terms of Service",
+    "footerCopyright": "EzStart LLC. All rights reserved."
+  }
+}
