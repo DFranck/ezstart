@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
 export default function HomePage() {
-  const t = useTranslations('auth.home')
+  const t = useTranslations('home')
 
   return (
     <Div className="w-full max-w-3xl py-12 px-4">
