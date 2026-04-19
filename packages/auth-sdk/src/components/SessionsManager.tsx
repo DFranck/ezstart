@@ -185,7 +185,7 @@ export function SessionsManager({ texts, onSessionRevoked }: SessionsManagerProp
 
   if (loading) {
     return (
-      <Div className="flex items-center justify-center py-8">
+      <Div className="flex items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
       </Div>
     )

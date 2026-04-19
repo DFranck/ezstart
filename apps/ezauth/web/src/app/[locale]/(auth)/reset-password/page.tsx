@@ -45,7 +45,7 @@ function ResetPasswordContent() {
   )
 
   return (
-    <Card className="max-w-md w-full" data-app={app}>
+    <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto" data-app={app}>
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
         <CardDescription className="text-xs md:text-sm">{t('description')}</CardDescription>

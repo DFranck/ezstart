@@ -31,7 +31,7 @@ function LoginContent() {
   const theme = getAppTheme(app)
 
   return (
-    <Card className="max-w-md w-full relative" data-app={app}>
+    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto" data-app={app}>
       <Div className="absolute top-4 left-4">
         <BackButton />
       </Div>

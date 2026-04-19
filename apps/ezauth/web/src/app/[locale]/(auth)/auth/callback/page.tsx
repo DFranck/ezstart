@@ -7,7 +7,7 @@ export default async function CallbackPage() {
   return (
     <Div className="flex flex-1 items-center justify-center px-2">
       <AuthCallbackPage
-        redirectTo="/admin"
+        redirectTo="/developer"
         successMessage={t('success')}
         redirectMessage={t('redirecting')}
         processingMessage={t('processing')}

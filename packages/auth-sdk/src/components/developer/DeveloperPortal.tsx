@@ -10,7 +10,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@ezstart/ui/components'
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Div, P, Spinner } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Div,
+  P,
+  Spinner,
+} from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
 import { useState } from 'react'
 import type { ApiKeyItem } from '../../core/types.js'
@@ -69,15 +79,10 @@ export function DeveloperPortal({
   const [revokeTargetId, setRevokeTargetId] = useState<string | null>(null)
   const [usageKeyId, setUsageKeyId] = useState<string | null>(null)
 
-  const {
-    data: apiKeys = [] as ApiKeyItem[],
-    isLoading,
-    isError,
-    refetch,
-  } = useApiKeys(enabled)
+  const { data: apiKeys = [] as ApiKeyItem[], isLoading, isError, refetch } = useApiKeys(enabled)
 
   const createMutation = useCreateApiKey({
-    onSuccess: (data) => {
+    onSuccess: data => {
       setShowCreateModal(false)
       setCreatedKey(data.key)
     },
@@ -97,7 +102,7 @@ export function DeveloperPortal({
   })
 
   const rotateMutation = useRotateApiKey({
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast.success(texts.rotateSuccess)
       setCreatedKey(data.key)
     },
@@ -122,7 +127,7 @@ export function DeveloperPortal({
         </Div>
 
         {isLoading && (
-          <Div className="flex justify-center py-8">
+          <Div className="flex items-center justify-center min-h-[50vh]">
             <Spinner variant="primary" size="md" />
           </Div>
         )}
@@ -144,7 +149,7 @@ export function DeveloperPortal({
           <ApiKeysTable
             keys={apiKeys}
             onRevoke={setRevokeTargetId}
-            onRotate={(id) => rotateMutation.mutate(id)}
+            onRotate={id => rotateMutation.mutate(id)}
             onViewUsage={setUsageKeyId}
             isRevoking={revokeMutation.isPending}
             isRotating={rotateMutation.isPending}
@@ -158,7 +163,7 @@ export function DeveloperPortal({
       <CreateKeyModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSubmit={(data) => createMutation.mutate(data)}
+        onSubmit={data => createMutation.mutate(data)}
         isSubmitting={createMutation.isPending}
         texts={texts.create}
         showAdminScope={showAdminScope}
@@ -182,10 +187,7 @@ export function DeveloperPortal({
       />
 
       {/* Revoke Confirmation Dialog */}
-      <AlertDialog
-        open={!!revokeTargetId}
-        onOpenChange={(open) => !open && setRevokeTargetId(null)}
-      >
+      <AlertDialog open={!!revokeTargetId} onOpenChange={open => !open && setRevokeTargetId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{texts.revokeTitle}</AlertDialogTitle>

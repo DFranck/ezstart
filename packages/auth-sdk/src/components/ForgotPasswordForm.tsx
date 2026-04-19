@@ -35,6 +35,8 @@ export interface ForgotPasswordFormTexts {
 }
 
 export interface ForgotPasswordFormProps {
+  /** App name for the forgot-password request. Falls back to `?app=` param, then `'ezauth'`. */
+  appName?: string
   /** Called after successful password reset request */
   onSuccess?: () => void
   /** Called when user clicks "Back to login" */
@@ -57,6 +59,7 @@ type FormData = {
 }
 
 export function ForgotPasswordForm({
+  appName,
   onSuccess,
   onBack,
   backHref,
@@ -85,7 +88,8 @@ export function ForgotPasswordForm({
     setLoading(true)
     setError('')
 
-    const { app, redirectUri } = navigation
+    const { app: queryApp, redirectUri } = navigation
+    const resolvedApp = appName || queryApp || 'ezauth'
 
     try {
       await apiCall('/auth/forgot-password', {
@@ -94,7 +98,7 @@ export function ForgotPasswordForm({
         body: {
           email: formData.email,
           locale,
-          ...(app && { app }),
+          app: resolvedApp,
           ...(redirectUri && { redirect_uri: redirectUri }),
         },
       })
