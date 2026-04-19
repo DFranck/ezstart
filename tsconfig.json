@@ -14,7 +14,6 @@
     { "path": "./packages/api-contracts" },
     { "path": "./packages/api-sdk" },
     { "path": "./packages/ocr-sdk" },
-    { "path": "./packages/rbac" },
 
     // Infrastructure packages
     { "path": "./packages/email-service" },
