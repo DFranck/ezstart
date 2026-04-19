@@ -108,7 +108,7 @@ function DevModeBannerInner({
           </>
         )}
       </P>
-      {!publishableKey && scope !== 'first-party' && (
+      {!publishableKey && (
         <P size="xs" className="text-muted-foreground mt-1">
           Get your key{' \u2192 '}
           <a
