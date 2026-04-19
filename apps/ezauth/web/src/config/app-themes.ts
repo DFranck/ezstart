@@ -22,6 +22,11 @@ export const defaultTheme: AppTheme = {
 }
 
 export const appThemes: Record<string, AppTheme> = {
+  ezauth: {
+    ...BASE_THEME,
+    name: 'EZAuth',
+    showEzstartMessage: true,
+  },
   ezstart: {
     ...BASE_THEME,
     name: 'EZStart',

@@ -17,11 +17,11 @@ export const metadata = createMetadata({
     'EZStart centralized authentication service - Secure SSO for all EZStart applications',
   domain: DOMAIN,
   keywords: ['authentication', 'SSO', 'OAuth2', 'login', 'ezstart'],
-  themeColor: '#000000',
+  themeColor: '#00D9F7',
   ogImage: `${DOMAIN}/og-image.svg`,
 })
 
-export const viewport = createViewport('#000000')
+export const viewport = createViewport('#00D9F7')
 
 const jsonLd = createJsonLd({
   appName: 'EZAuth',
