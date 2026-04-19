@@ -1,106 +1,106 @@
 {
   "developer": {
-  "title": "API Keys",
-  "description": "Manage your developer API keys for programmatic access",
-  "createKey": "Create New Key",
-  "noKeys": "No API keys yet. Create one to get started.",
-  "table": {
-    "name": "Name",
-    "keyPrefix": "Key",
-    "status": "Status",
-    "created": "Created",
-    "lastUsed": "Last Used",
-    "expires": "Expires",
-    "actions": "Actions",
-    "never": "Never",
-    "noExpiry": "No expiry",
-    "usage": "Usage"
-  },
-  "status": {
-    "active": "Active",
-    "revoked": "Revoked"
-  },
-  "create": {
-    "title": "Create API Key",
-    "nameLabel": "Key Name",
-    "namePlaceholder": "My App Production",
-    "appScope": "App Scope",
-    "appScopeAll": "All apps",
-    "expiry": "Expiry",
-    "expiryNever": "Never",
-    "expiry30d": "30 days",
-    "expiry90d": "90 days",
-    "expiry1y": "1 year",
-    "submit": "Create",
-    "submitting": "Creating..."
-  },
-  "created": {
-    "title": "API Key Created",
-    "warning": "Save this key now. You will not be able to see it again.",
-    "copied": "Key copied to clipboard",
-    "copyKey": "Copy Key",
-    "done": "Done"
-  },
-  "revoke": {
-    "title": "Revoke API Key",
-    "confirm": "Are you sure you want to revoke this API key? This action cannot be undone.",
-    "submit": "Revoke",
-    "success": "API key revoked"
-  },
-  "rotate": {
-    "title": "Rotate API Key",
-    "confirm": "This will revoke the current key and create a new one with the same configuration.",
-    "submit": "Rotate",
-    "success": "API key rotated"
-  },
-  "usage": {
-    "unlimited": "Unlimited",
-    "detailsTitle": "Usage — {name}",
-    "detailsDescription": "API key usage statistics for the current billing period",
-    "close": "Close",
-    "fetchError": "Failed to load usage data",
-    "quotaTitle": "Monthly Quota",
-    "quotaLabel": "{used} / {limit} requests",
-    "remaining": "{count} requests remaining",
-    "topEndpoints": "Top Endpoints",
-    "dailyBreakdown": "Daily Breakdown (last 14 days)",
-    "noUsage": "No usage recorded yet"
-  },
-  "billing": {
-    "title": "Billing & Plans",
-    "description": "Manage your subscription plan and usage limits",
-    "currentPlan": "Current Plan",
-    "quotaLabel": "{quota} requests / month",
-    "maxKeysLabel": "{count} API keys",
-    "unlimited": "Unlimited",
-    "manageSubscription": "Manage Subscription",
-    "choosePlan": "Choose Your Plan",
-    "popular": "Most Popular",
-    "month": "month",
-    "requestsPerMonth": "requests / month",
-    "apiKeys": "API keys",
-    "currentLabel": "Current Plan",
-    "upgrade": "Upgrade",
-    "downgrade": "Downgrade",
-    "comingSoon": "Coming soon — plans will be available shortly",
-    "features": {
-      "communitySupport": "Community support",
-      "emailSupport": "Email support",
-      "priorityRateLimit": "Priority rate limit",
-      "dedicatedSupport": "Dedicated support",
-      "sla": "SLA 99.9%"
+    "title": "API Keys",
+    "description": "Manage your developer API keys for programmatic access",
+    "createKey": "Create New Key",
+    "noKeys": "No API keys yet. Create one to get started.",
+    "table": {
+      "name": "Name",
+      "keyPrefix": "Key",
+      "status": "Status",
+      "created": "Created",
+      "lastUsed": "Last Used",
+      "expires": "Expires",
+      "actions": "Actions",
+      "never": "Never",
+      "noExpiry": "No expiry",
+      "usage": "Usage"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "create": {
+      "title": "Create API Key",
+      "nameLabel": "Key Name",
+      "namePlaceholder": "My App Production",
+      "appScope": "App Scope",
+      "appScopeAll": "All apps",
+      "expiry": "Expiry",
+      "expiryNever": "Never",
+      "expiry30d": "30 days",
+      "expiry90d": "90 days",
+      "expiry1y": "1 year",
+      "submit": "Create",
+      "submitting": "Creating..."
+    },
+    "created": {
+      "title": "API Key Created",
+      "warning": "Save this key now. You will not be able to see it again.",
+      "copied": "Key copied to clipboard",
+      "copyKey": "Copy Key",
+      "done": "Done"
+    },
+    "revoke": {
+      "title": "Revoke API Key",
+      "confirm": "Are you sure you want to revoke this API key? This action cannot be undone.",
+      "submit": "Revoke",
+      "success": "API key revoked"
+    },
+    "rotate": {
+      "title": "Rotate API Key",
+      "confirm": "This will revoke the current key and create a new one with the same configuration.",
+      "submit": "Rotate",
+      "success": "API key rotated"
+    },
+    "usage": {
+      "unlimited": "Unlimited",
+      "detailsTitle": "Usage — {name}",
+      "detailsDescription": "API key usage statistics for the current billing period",
+      "close": "Close",
+      "fetchError": "Failed to load usage data",
+      "quotaTitle": "Monthly Quota",
+      "quotaLabel": "{used} / {limit} requests",
+      "remaining": "{count} requests remaining",
+      "topEndpoints": "Top Endpoints",
+      "dailyBreakdown": "Daily Breakdown (last 14 days)",
+      "noUsage": "No usage recorded yet"
+    },
+    "billing": {
+      "title": "Billing & Plans",
+      "description": "Manage your subscription plan and usage limits",
+      "currentPlan": "Current Plan",
+      "quotaLabel": "{quota} requests / month",
+      "maxKeysLabel": "{count} API keys",
+      "unlimited": "Unlimited",
+      "manageSubscription": "Manage Subscription",
+      "choosePlan": "Choose Your Plan",
+      "popular": "Most Popular",
+      "month": "month",
+      "requestsPerMonth": "requests / month",
+      "apiKeys": "API keys",
+      "currentLabel": "Current Plan",
+      "upgrade": "Upgrade",
+      "downgrade": "Downgrade",
+      "comingSoon": "Coming soon — plans will be available shortly",
+      "features": {
+        "communitySupport": "Community support",
+        "emailSupport": "Email support",
+        "priorityRateLimit": "Priority rate limit",
+        "dedicatedSupport": "Dedicated support",
+        "sla": "SLA 99.9%"
+      }
+    },
+    "nav": {
+      "apiKeys": "API Keys",
+      "billing": "Billing"
+    },
+    "retry": "Retry",
+    "errors": {
+      "fetchFailed": "Failed to load API keys",
+      "createFailed": "Failed to create API key",
+      "revokeFailed": "Failed to revoke API key",
+      "rotateFailed": "Failed to rotate API key"
     }
-  },
-  "nav": {
-    "apiKeys": "API Keys",
-    "billing": "Billing"
-  },
-  "retry": "Retry",
-  "errors": {
-    "fetchFailed": "Failed to load API keys",
-    "createFailed": "Failed to create API key",
-    "revokeFailed": "Failed to revoke API key",
-    "rotateFailed": "Failed to rotate API key"
-  }
   }
 }

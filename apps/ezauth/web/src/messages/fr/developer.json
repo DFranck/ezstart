@@ -1,106 +1,106 @@
 {
   "developer": {
-  "title": "Clés API",
-  "description": "Gérez vos clés API développeur pour un accès programmatique",
-  "createKey": "Créer une clé",
-  "noKeys": "Aucune clé API. Créez-en une pour commencer.",
-  "table": {
-    "name": "Nom",
-    "keyPrefix": "Clé",
-    "status": "Statut",
-    "created": "Créée le",
-    "lastUsed": "Dernière utilisation",
-    "expires": "Expiration",
-    "actions": "Actions",
-    "never": "Jamais",
-    "noExpiry": "Sans expiration",
-    "usage": "Utilisation"
-  },
-  "status": {
-    "active": "Active",
-    "revoked": "Révoquée"
-  },
-  "create": {
-    "title": "Créer une clé API",
-    "nameLabel": "Nom de la clé",
-    "namePlaceholder": "Mon App Production",
-    "appScope": "Portée applicative",
-    "appScopeAll": "Toutes les apps",
-    "expiry": "Expiration",
-    "expiryNever": "Jamais",
-    "expiry30d": "30 jours",
-    "expiry90d": "90 jours",
-    "expiry1y": "1 an",
-    "submit": "Créer",
-    "submitting": "Création..."
-  },
-  "created": {
-    "title": "Clé API créée",
-    "warning": "Sauvegardez cette clé maintenant. Vous ne pourrez plus la voir.",
-    "copied": "Clé copiée dans le presse-papier",
-    "copyKey": "Copier la clé",
-    "done": "Terminé"
-  },
-  "revoke": {
-    "title": "Révoquer la clé API",
-    "confirm": "Êtes-vous sûr de vouloir révoquer cette clé API ? Cette action est irréversible.",
-    "submit": "Révoquer",
-    "success": "Clé API révoquée"
-  },
-  "rotate": {
-    "title": "Renouveler la clé API",
-    "confirm": "Cela révoquera la clé actuelle et en créera une nouvelle avec la même configuration.",
-    "submit": "Renouveler",
-    "success": "Clé API renouvelée"
-  },
-  "usage": {
-    "unlimited": "Illimité",
-    "detailsTitle": "Utilisation — {name}",
-    "detailsDescription": "Statistiques d'utilisation de la clé API pour la période en cours",
-    "close": "Fermer",
-    "fetchError": "Impossible de charger les données d'utilisation",
-    "quotaTitle": "Quota mensuel",
-    "quotaLabel": "{used} / {limit} requêtes",
-    "remaining": "{count} requêtes restantes",
-    "topEndpoints": "Endpoints les plus utilisés",
-    "dailyBreakdown": "Détail journalier (14 derniers jours)",
-    "noUsage": "Aucune utilisation enregistrée"
-  },
-  "billing": {
-    "title": "Facturation & Plans",
-    "description": "Gérez votre abonnement et vos limites d'utilisation",
-    "currentPlan": "Plan actuel",
-    "quotaLabel": "{quota} requêtes / mois",
-    "maxKeysLabel": "{count} clés API",
-    "unlimited": "Illimité",
-    "manageSubscription": "Gérer l'abonnement",
-    "choosePlan": "Choisissez votre plan",
-    "popular": "Le plus populaire",
-    "month": "mois",
-    "requestsPerMonth": "requêtes / mois",
-    "apiKeys": "clés API",
-    "currentLabel": "Plan actuel",
-    "upgrade": "Mettre à niveau",
-    "downgrade": "Rétrograder",
-    "comingSoon": "Bientôt disponible — les plans seront proposés prochainement",
-    "features": {
-      "communitySupport": "Support communautaire",
-      "emailSupport": "Support par email",
-      "priorityRateLimit": "Limite de débit prioritaire",
-      "dedicatedSupport": "Support dédié",
-      "sla": "SLA 99.9%"
+    "title": "Clés API",
+    "description": "Gérez vos clés API développeur pour un accès programmatique",
+    "createKey": "Créer une clé",
+    "noKeys": "Aucune clé API. Créez-en une pour commencer.",
+    "table": {
+      "name": "Nom",
+      "keyPrefix": "Clé",
+      "status": "Statut",
+      "created": "Créée le",
+      "lastUsed": "Dernière utilisation",
+      "expires": "Expiration",
+      "actions": "Actions",
+      "never": "Jamais",
+      "noExpiry": "Sans expiration",
+      "usage": "Utilisation"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Révoquée"
+    },
+    "create": {
+      "title": "Créer une clé API",
+      "nameLabel": "Nom de la clé",
+      "namePlaceholder": "Mon App Production",
+      "appScope": "Portée applicative",
+      "appScopeAll": "Toutes les apps",
+      "expiry": "Expiration",
+      "expiryNever": "Jamais",
+      "expiry30d": "30 jours",
+      "expiry90d": "90 jours",
+      "expiry1y": "1 an",
+      "submit": "Créer",
+      "submitting": "Création..."
+    },
+    "created": {
+      "title": "Clé API créée",
+      "warning": "Sauvegardez cette clé maintenant. Vous ne pourrez plus la voir.",
+      "copied": "Clé copiée dans le presse-papier",
+      "copyKey": "Copier la clé",
+      "done": "Terminé"
+    },
+    "revoke": {
+      "title": "Révoquer la clé API",
+      "confirm": "Êtes-vous sûr de vouloir révoquer cette clé API ? Cette action est irréversible.",
+      "submit": "Révoquer",
+      "success": "Clé API révoquée"
+    },
+    "rotate": {
+      "title": "Renouveler la clé API",
+      "confirm": "Cela révoquera la clé actuelle et en créera une nouvelle avec la même configuration.",
+      "submit": "Renouveler",
+      "success": "Clé API renouvelée"
+    },
+    "usage": {
+      "unlimited": "Illimité",
+      "detailsTitle": "Utilisation — {name}",
+      "detailsDescription": "Statistiques d'utilisation de la clé API pour la période en cours",
+      "close": "Fermer",
+      "fetchError": "Impossible de charger les données d'utilisation",
+      "quotaTitle": "Quota mensuel",
+      "quotaLabel": "{used} / {limit} requêtes",
+      "remaining": "{count} requêtes restantes",
+      "topEndpoints": "Endpoints les plus utilisés",
+      "dailyBreakdown": "Détail journalier (14 derniers jours)",
+      "noUsage": "Aucune utilisation enregistrée"
+    },
+    "billing": {
+      "title": "Facturation & Plans",
+      "description": "Gérez votre abonnement et vos limites d'utilisation",
+      "currentPlan": "Plan actuel",
+      "quotaLabel": "{quota} requêtes / mois",
+      "maxKeysLabel": "{count} clés API",
+      "unlimited": "Illimité",
+      "manageSubscription": "Gérer l'abonnement",
+      "choosePlan": "Choisissez votre plan",
+      "popular": "Le plus populaire",
+      "month": "mois",
+      "requestsPerMonth": "requêtes / mois",
+      "apiKeys": "clés API",
+      "currentLabel": "Plan actuel",
+      "upgrade": "Mettre à niveau",
+      "downgrade": "Rétrograder",
+      "comingSoon": "Bientôt disponible — les plans seront proposés prochainement",
+      "features": {
+        "communitySupport": "Support communautaire",
+        "emailSupport": "Support par email",
+        "priorityRateLimit": "Limite de débit prioritaire",
+        "dedicatedSupport": "Support dédié",
+        "sla": "SLA 99.9%"
+      }
+    },
+    "nav": {
+      "apiKeys": "Clés API",
+      "billing": "Facturation"
+    },
+    "retry": "Réessayer",
+    "errors": {
+      "fetchFailed": "Impossible de charger les clés API",
+      "createFailed": "Impossible de créer la clé API",
+      "revokeFailed": "Impossible de révoquer la clé API",
+      "rotateFailed": "Impossible de renouveler la clé API"
     }
-  },
-  "nav": {
-    "apiKeys": "Clés API",
-    "billing": "Facturation"
-  },
-  "retry": "Réessayer",
-  "errors": {
-    "fetchFailed": "Impossible de charger les clés API",
-    "createFailed": "Impossible de créer la clé API",
-    "revokeFailed": "Impossible de révoquer la clé API",
-    "rotateFailed": "Impossible de renouveler la clé API"
-  }
   }
 }
