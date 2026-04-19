@@ -23,13 +23,21 @@ import {
   LandingNav,
   LandingNavLink,
   LandingSection,
+  LocaleSwitcher,
   P,
   Pre,
   Code,
   Span,
 } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { ThemeSwitcher } from '@ezstart/ui/theme'
+import { UserMenu } from '@ezstart/auth-sdk/components'
+import { useAuth, LoginButton } from '@ezstart/auth-sdk'
+import { useTranslations, useLocale } from 'next-intl'
+import { usePathname, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
+
+const LOCALES = ['en', 'fr', 'vi']
 
 // ---------------------------------------------------------------------------
 // Features data (icons are lucide names)
@@ -85,6 +93,15 @@ function Dashboard() {
 
 export default function HomePage() {
   const t = useTranslations('home')
+  const { isAuthenticated } = useAuth()
+  const locale = useLocale()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const handleLocaleChange = (newLocale: string) => {
+    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`)
+    router.push(newPathname)
+  }
 
   return (
     <LandingLayout>
@@ -93,7 +110,7 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       <LandingHeader>
         <LandingLogo>
-          <Icon name="lucide:Shield" className="h-7 w-7 text-primary" />
+          <Image src="/logo.svg" alt="EZAuth" width={28} height={28} />
           <Span className="text-lg font-bold tracking-tight">EZAuth</Span>
         </LandingLogo>
 
@@ -104,12 +121,19 @@ export default function HomePage() {
         </LandingNav>
 
         <LandingActions>
-          <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
-            <Link href="/login">{t('navSignIn')}</Link>
-          </Button>
-          <Button asChild size="sm" className="hidden md:inline-flex">
-            <Link href="/register">{t('navGetStarted')}</Link>
-          </Button>
+          <Div className="hidden md:flex items-center gap-2">
+            <LocaleSwitcher
+              locales={LOCALES}
+              currentLocale={locale}
+              onLocaleChange={handleLocaleChange}
+            />
+            <ThemeSwitcher />
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <LoginButton size="sm" loginText={t('navSignIn')} />
+            )}
+          </Div>
           <LandingMenuToggle />
         </LandingActions>
 
@@ -117,11 +141,20 @@ export default function HomePage() {
           <LandingMobileLink href="#features">{t('navFeatures')}</LandingMobileLink>
           <LandingMobileLink href="#pricing">{t('navPricing')}</LandingMobileLink>
           <LandingMobileLink href="/docs">{t('navDocs')}</LandingMobileLink>
-          <LandingMobileLink href="/login">{t('navSignIn')}</LandingMobileLink>
-          <Div className="px-3 pt-2">
-            <Button asChild className="w-full">
-              <Link href="/register">{t('navGetStarted')}</Link>
-            </Button>
+          <Div className="px-3 pt-2 flex flex-col gap-2">
+            <Div className="flex items-center gap-2">
+              <LocaleSwitcher
+                locales={LOCALES}
+                currentLocale={locale}
+                onLocaleChange={handleLocaleChange}
+              />
+              <ThemeSwitcher />
+            </Div>
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <LoginButton className="w-full" loginText={t('navSignIn')} />
+            )}
           </Div>
         </LandingMobileMenu>
       </LandingHeader>
@@ -357,7 +390,7 @@ export default function HomePage() {
           {/* Brand */}
           <Div>
             <Div className="flex items-center gap-2">
-              <Icon name="lucide:Shield" className="h-6 w-6 text-primary" />
+              <Image src="/logo.svg" alt="EZAuth" width={24} height={24} />
               <Span className="text-lg font-bold">EZAuth</Span>
             </Div>
             <P className="mt-2 text-sm text-muted-foreground">
