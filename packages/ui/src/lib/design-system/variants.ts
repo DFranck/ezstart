@@ -1550,7 +1550,7 @@ export const tagVariants = {
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),
   pre: cva(
-    'overflow-x-auto rounded-lg bg-muted text-foreground p-4 font-mono text-sm [&_code]:bg-transparent [&_code]:p-0 [&_code]:rounded-none',
+    'overflow-x-auto rounded-lg bg-muted/50 text-foreground p-4 font-mono text-sm [&_code]:bg-transparent [&_code]:p-0 [&_code]:rounded-none',
     {
       variants: preVariantConfig,
       defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
