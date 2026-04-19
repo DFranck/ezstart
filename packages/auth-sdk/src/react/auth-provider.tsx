@@ -1,5 +1,13 @@
 'use client'
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { CoreAuthClient, resolveSDKConfig } from '../core/auth-client.js'
 import type { AuthMode, AuthScope, AuthSDKConfig, PublishableKeyConfig } from '../core/types.js'
 import { useAuthStore } from './store.js'
@@ -169,11 +177,9 @@ export function AuthProvider({
 
   // Resolve SDK config
   const sdkConfig: AuthSDKConfig = useMemo(() => {
-    const key = publishableKey ?? (
-      typeof process !== 'undefined'
-        ? process.env?.NEXT_PUBLIC_EZAUTH_KEY
-        : undefined
-    )
+    const key =
+      publishableKey ??
+      (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_EZAUTH_KEY : undefined)
 
     return {
       publishableKey: mode === 'first-party' ? undefined : (key ?? undefined),
@@ -196,10 +202,14 @@ export function AuthProvider({
   const resolvedWebUrl = resolved.webUrl
   const resolvedAppName = resolved.clientConfig.appName
 
-  // Resolve auth mode
+  // Resolve auth mode — localhost ALWAYS uses localStorage because
+  // httpOnly cookies don't work cross-port (API :6110, Web :6111).
   const effectiveMode = useMemo(() => {
+    const detected = detectAuthMode(resolved.clientConfig.apiUrl)
+    // On localhost, always force localStorage regardless of authMode prop
+    if (detected === 'localStorage') return 'localStorage'
     if (authMode) return authMode
-    return detectAuthMode(resolved.clientConfig.apiUrl)
+    return detected
   }, [authMode, resolved.clientConfig.apiUrl])
 
   // Fetch key config async if publishable key provided
@@ -208,7 +218,7 @@ export function AuthProvider({
 
     let cancelled = false
     resolved.configPromise
-      .then((config) => {
+      .then(config => {
         if (cancelled) return
         keyConfigRef.current = config
         // Update client with resolved config
@@ -228,7 +238,7 @@ export function AuthProvider({
           scope: config.scope,
         })
       })
-      .catch((err) => {
+      .catch(err => {
         if (cancelled) return
         logger.error('[AuthProvider] Failed to fetch key config', {
           error: err instanceof Error ? err.message : String(err),

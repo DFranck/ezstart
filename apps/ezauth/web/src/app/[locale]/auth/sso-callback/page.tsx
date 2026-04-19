@@ -70,6 +70,7 @@ function SsoCallbackContent() {
       try {
         const data = await apiCall<{
           user: AuthUser
+          accessToken?: string
           refreshToken?: string
           redirect: string
         }>('/auth/sso/exchange', {
@@ -82,11 +83,17 @@ function SsoCallbackContent() {
           throw new Error(t('exchangeFailed'))
         }
 
-        // Persist user to auth store so `useAuth().user` resolves on downstream pages
-        // (e.g. settings email-verification section). Access token lives in an httpOnly
-        // cookie set by the backend, so we pass `undefined` for it and use 'httpOnly' mode.
+        // Persist user to auth store. On localhost, cookies don't work cross-port
+        // so we must use localStorage mode. In production (same domain), httpOnly is used.
         if (data.user) {
-          setAuth(data.user, undefined, 'httpOnly', data.refreshToken)
+          const isLocal =
+            window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          if (isLocal) {
+            // On localhost, tokens must be stored in localStorage (cookies can't cross ports)
+            setAuth(data.user, data.accessToken, 'localStorage', data.refreshToken)
+          } else {
+            setAuth(data.user, undefined, 'httpOnly', data.refreshToken)
+          }
         }
 
         // Backend returns a safe redirect path — prefer it over the client-supplied `next`.

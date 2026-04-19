@@ -53,6 +53,7 @@ const ssoExchangeRequestSchema = z.object({
 
 const ssoExchangeResponseSchema = z.object({
   user: z.object({}).passthrough().describe('Authenticated user'),
+  accessToken: z.string().describe('JWT access token (used in localStorage mode, e.g. localhost)'),
   refreshToken: z.string().describe('Refresh token to persist client-side (localStorage)'),
   redirect: z.string().describe('Relative path on the target app to redirect to'),
 })
@@ -117,10 +118,11 @@ const ssoExchangeController = async (req: Request, res: Response) => {
     res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions())
     res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions())
 
-    // Refresh token returned in body (matches login-cookie.ts pattern) for
-    // localStorage-mode consumers; httpOnly consumers ignore it.
+    // Tokens returned in body for localStorage-mode consumers (e.g. localhost
+    // where httpOnly cookies can't cross ports); httpOnly consumers ignore them.
     return sendSuccess(res, {
       user: user.toAuthUser(),
+      accessToken: session.access_token,
       refreshToken: session.refreshToken,
       redirect: toRelativeRedirect(consumed.redirectUri),
     })
