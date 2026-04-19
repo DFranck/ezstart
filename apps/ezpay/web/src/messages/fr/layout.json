@@ -1,10 +1,24 @@
 {
   "nav": {
-    "home": "Accueil",
-    "donate": "Faire un don",
-    "projects": "Projets",
-    "history": "Historique des paiements",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "docs": "Docs",
+    "signIn": "Connexion"
+  },
+  "footer": {
+    "product": "Produit",
     "docs": "Documentation",
-    "developer": "Développeur"
+    "pricing": "Tarifs",
+    "changelog": "Changelog",
+    "status": "Statut",
+    "company": "Entreprise",
+    "about": "À propos",
+    "blog": "Blog",
+    "contact": "Contact",
+    "legal": "Légal",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "tagline": "Paiements en tant que service",
+    "copyright": "EzStart LLC. Tous droits réservés."
   }
 }

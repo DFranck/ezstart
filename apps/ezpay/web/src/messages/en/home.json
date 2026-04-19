@@ -1,10 +1,5 @@
 {
   "home": {
-    "navFeatures": "Features",
-    "navPricing": "Pricing",
-    "navDocs": "Docs",
-    "navSignIn": "Sign In",
-
     "heroTitle": "Payments for every app",
     "heroSubtitle": "Universal payment system. Donations, subscriptions, purchases — one SDK.",
     "heroCta": "Get Started Free",
@@ -45,20 +40,6 @@
 
     "ctaTitle": "Ready to accept payments?",
     "ctaSubtitle": "Add donations, purchases, and subscriptions to your app in minutes. Free during beta.",
-    "ctaCta": "Start Building for Free",
-
-    "footerProduct": "Product",
-    "footerDocs": "Documentation",
-    "footerPricing": "Pricing",
-    "footerChangelog": "Changelog",
-    "footerStatus": "Status",
-    "footerCompany": "Company",
-    "footerAbout": "About",
-    "footerBlog": "Blog",
-    "footerContact": "Contact",
-    "footerLegal": "Legal",
-    "footerPrivacy": "Privacy Policy",
-    "footerTerms": "Terms of Service",
-    "footerCopyright": "EzStart LLC. All rights reserved."
+    "ctaCta": "Start Building for Free"
   }
 }
