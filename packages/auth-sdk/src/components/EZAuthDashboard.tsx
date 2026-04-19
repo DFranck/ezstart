@@ -33,6 +33,8 @@ import { useAuth } from '../react/hooks.js'
 import { UserMenu } from './UserMenu.js'
 import { UserSettings } from './UserSettings.js'
 import { DeveloperPortal } from './developer/index.js'
+import { AuthAdminDashboard } from './AuthAdminDashboard.js'
+import type { AuthAdminDashboardTexts } from './AuthAdminDashboard.js'
 import type { UserSettingsTexts } from './UserSettings.js'
 import type { DeveloperPortalTexts } from './developer/types.js'
 import type { PlanInfo } from '../core/types.js'
@@ -45,6 +47,7 @@ export interface EZAuthDashboardTexts {
   navApiKeys: string
   navBilling: string
   navSettings: string
+  navAdmin: string
   /** Sidebar brand */
   brand: string
   /** Overview section */
@@ -82,11 +85,12 @@ export interface EZAuthDashboardTexts {
   /** Nested component overrides */
   settings: Partial<UserSettingsTexts>
   developerPortal: Partial<DeveloperPortalTexts>
+  admin: Partial<AuthAdminDashboardTexts>
 }
 
 export interface EZAuthDashboardProps {
   /** Default active section. Defaults to `'overview'`. */
-  defaultSection?: 'overview' | 'api-keys' | 'billing' | 'settings'
+  defaultSection?: 'overview' | 'api-keys' | 'billing' | 'settings' | 'admin'
   /** App name for role display and API key scoping. */
   appName?: string
   /** Whether DeveloperPortal should fetch data. */
@@ -106,6 +110,7 @@ const DEFAULT_TEXTS: EZAuthDashboardTexts = {
   navApiKeys: 'API Keys',
   navBilling: 'Billing',
   navSettings: 'Settings',
+  navAdmin: 'Admin',
   brand: 'Developer',
   welcomeBack: 'Welcome back',
   memberSince: 'Member since',
@@ -138,6 +143,7 @@ const DEFAULT_TEXTS: EZAuthDashboardTexts = {
   signOut: 'Sign Out',
   settings: {},
   developerPortal: {},
+  admin: {},
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -224,7 +230,7 @@ const FEATURE_MAP: Record<string, keyof EZAuthDashboardTexts> = {
   sla: 'featureSla',
 }
 
-type Section = 'overview' | 'api-keys' | 'billing' | 'settings'
+type Section = 'overview' | 'api-keys' | 'billing' | 'settings' | 'admin'
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -250,11 +256,16 @@ export function EZAuthDashboard({
     return null
   }
 
+  const isAdmin = isSuperadmin(user) || (user.globalRoles?.includes('admin') ?? false)
+
   const navItems: { id: Section; label: string; icon: string }[] = [
     { id: 'overview', label: texts.navOverview, icon: 'lucide:LayoutDashboard' },
     { id: 'api-keys', label: texts.navApiKeys, icon: 'lucide:Key' },
     { id: 'billing', label: texts.navBilling, icon: 'lucide:CreditCard' },
     { id: 'settings', label: texts.navSettings, icon: 'lucide:Settings' },
+    ...(isAdmin
+      ? [{ id: 'admin' as Section, label: texts.navAdmin, icon: 'lucide:ShieldCheck' }]
+      : []),
   ]
 
   return (
@@ -262,8 +273,13 @@ export function EZAuthDashboard({
       {/* Sidebar */}
       <DashboardSidebar>
         <SidebarHeader>
-          <Icon name="lucide:Code" className="h-5 w-5 text-primary shrink-0" />
-          <Span className="font-semibold text-foreground">{texts.brand}</Span>
+          <a
+            href="/"
+            className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+          >
+            <Icon name="lucide:Code" className="h-5 w-5 text-primary shrink-0" />
+            <Span className="font-semibold">{texts.brand}</Span>
+          </a>
         </SidebarHeader>
 
         <SidebarNav>
@@ -313,6 +329,7 @@ export function EZAuthDashboard({
           {activeSection === 'settings' && (
             <UserSettings appName={appName} texts={texts.settings} />
           )}
+          {activeSection === 'admin' && isAdmin && <AuthAdminDashboard texts={texts.admin} />}
         </DashboardContent>
       </DashboardMain>
     </DashboardLayout>

@@ -46,7 +46,7 @@ export function CreateKeyModal({
 }: CreateKeyModalProps) {
   const [name, setName] = useState('')
   const [appName, setAppName] = useState('*')
-  const [scope, setScope] = useState<'test' | 'live' | 'admin'>('live')
+  const [scope, setScope] = useState<'live' | 'admin'>('live')
   const [expiry, setExpiry] = useState('never')
 
   const handleSubmit = () => {
@@ -74,11 +74,7 @@ export function CreateKeyModal({
       title={texts.title}
       size="default"
       footer={
-        <Button
-          onClick={handleSubmit}
-          disabled={!name.trim() || isSubmitting}
-          className="w-full"
-        >
+        <Button onClick={handleSubmit} disabled={!name.trim() || isSubmitting} className="w-full">
           {isSubmitting ? texts.submitting : texts.submit}
         </Button>
       }
@@ -90,23 +86,20 @@ export function CreateKeyModal({
             id="key-name"
             placeholder={texts.namePlaceholder}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             maxLength={100}
           />
         </Div>
 
         <Div className="space-y-2">
           <Label>{texts.keyScope}</Label>
-          <Select value={scope} onValueChange={(v) => setScope(v as 'test' | 'live' | 'admin')}>
+          <Select value={scope} onValueChange={v => setScope(v as 'live' | 'admin')}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="test">{texts.keyScopeTest}</SelectItem>
               <SelectItem value="live">{texts.keyScopeLive}</SelectItem>
-              {showAdminScope && (
-                <SelectItem value="admin">{texts.keyScopeAdmin}</SelectItem>
-              )}
+              {showAdminScope && <SelectItem value="admin">{texts.keyScopeAdmin}</SelectItem>}
             </SelectContent>
           </Select>
         </Div>

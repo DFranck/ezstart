@@ -1,8 +1,30 @@
+'use client'
+
 import { Div } from '@ezstart/ui/components'
-import type { ReactNode } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, type ReactNode } from 'react'
+
+function AuthLayoutInner({ children }: { children: ReactNode }) {
+  const searchParams = useSearchParams()
+  const app = searchParams.get('app') || undefined
+
+  return (
+    <Div className="min-h-screen flex items-center justify-center bg-background" data-app={app}>
+      {children}
+    </Div>
+  )
+}
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <Div className="min-h-screen flex items-center justify-center bg-background">{children}</Div>
+    <Suspense
+      fallback={
+        <Div className="min-h-screen flex items-center justify-center bg-background">
+          {children}
+        </Div>
+      }
+    >
+      <AuthLayoutInner>{children}</AuthLayoutInner>
+    </Suspense>
   )
 }

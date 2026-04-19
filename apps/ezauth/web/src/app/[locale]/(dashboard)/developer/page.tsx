@@ -10,6 +10,7 @@ import type { EZAuthDashboardTexts } from '@ezstart/auth-sdk/components'
 
 export default function DeveloperPage() {
   const t = useTranslations('developer')
+  const ta = useTranslations('admin')
   const locale = useLocale()
   const { user, isAuthenticated } = useAuth()
   const router = useRouter()
@@ -38,6 +39,7 @@ export default function DeveloperPage() {
     navApiKeys: t('nav.apiKeys'),
     navBilling: t('nav.billing'),
     navSettings: t('nav.settings', { defaultValue: 'Settings' }),
+    navAdmin: ta('title', { defaultValue: 'Admin' }),
     developerPortal: {
       title: t('title'),
       description: t('description'),
@@ -126,6 +128,38 @@ export default function DeveloperPage() {
     featurePriorityRateLimit: t('billing.features.priorityRateLimit'),
     featureDedicatedSupport: t('billing.features.dedicatedSupport'),
     featureSla: t('billing.features.sla'),
+    admin: {
+      searchPlaceholder: ta('users.searchPlaceholder'),
+      columnEmail: ta('users.columns.email'),
+      columnUsername: ta('users.columns.username'),
+      columnRoles: ta('users.columns.roles'),
+      columnCreatedAt: ta('users.columns.createdAt'),
+      columnActions: ta('users.columns.actions'),
+      edit: ta('users.edit'),
+      delete: ta('users.delete'),
+      noUsers: ta('users.noUsers'),
+      confirmDeleteTitle: ta('users.confirmDeleteTitle'),
+      confirmDeleteDescription: ta('users.confirmDeleteDescription'),
+      cancel: ta('dialog.cancel'),
+      confirm: ta('dialog.confirm'),
+      deleteError: ta('users.deleteError'),
+      deleteSuccess: ta('users.deleteSuccess'),
+      editRolesTitle: ta('editRoles.title'),
+      editRolesSubtitle: ta.raw('editRoles.subtitle') as string,
+      globalRolesLabel: ta('editRoles.globalRoles'),
+      appRolesLabel: ta.raw('editRoles.appRoles') as string,
+      noAppRoles: ta('editRoles.noAppRoles'),
+      save: ta('editRoles.save'),
+      editError: ta('editRoles.editError'),
+      editSuccess: ta('editRoles.editSuccess'),
+      roleSuperadmin: ta('roles.superadmin'),
+      roleAdmin: ta('roles.admin'),
+      roleManager: ta('roles.manager'),
+      roleBetaTester: ta('roles.beta-tester'),
+      roleClient: ta('roles.client'),
+      previous: ta('pagination.previous'),
+      next: ta('pagination.next'),
+    },
   }
 
   return <EZAuthDashboard locale={locale} texts={texts} />

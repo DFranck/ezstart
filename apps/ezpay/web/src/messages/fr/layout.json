@@ -1,24 +1,26 @@
 {
-  "nav": {
-    "features": "Fonctionnalités",
-    "pricing": "Tarifs",
-    "docs": "Docs",
-    "signIn": "Connexion"
-  },
-  "footer": {
-    "product": "Produit",
-    "docs": "Documentation",
-    "pricing": "Tarifs",
-    "changelog": "Changelog",
-    "status": "Statut",
-    "company": "Entreprise",
-    "about": "À propos",
-    "blog": "Blog",
-    "contact": "Contact",
-    "legal": "Légal",
-    "privacy": "Politique de confidentialité",
-    "terms": "Conditions d'utilisation",
-    "tagline": "Paiements en tant que service",
-    "copyright": "EzStart LLC. Tous droits réservés."
+  "layout": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "docs": "Docs",
+      "signIn": "Connexion"
+    },
+    "footer": {
+      "product": "Produit",
+      "docs": "Documentation",
+      "pricing": "Tarifs",
+      "changelog": "Changelog",
+      "status": "Statut",
+      "company": "Entreprise",
+      "about": "À propos",
+      "blog": "Blog",
+      "contact": "Contact",
+      "legal": "Légal",
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation",
+      "tagline": "Paiements en tant que service",
+      "copyright": "EzStart LLC. Tous droits réservés."
+    }
   }
 }

@@ -1,24 +1,26 @@
 {
-  "nav": {
-    "features": "Features",
-    "pricing": "Pricing",
-    "docs": "Docs",
-    "signIn": "Sign In"
-  },
-  "footer": {
-    "product": "Product",
-    "docs": "Documentation",
-    "pricing": "Pricing",
-    "changelog": "Changelog",
-    "status": "Status",
-    "company": "Company",
-    "about": "About",
-    "blog": "Blog",
-    "contact": "Contact",
-    "legal": "Legal",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "tagline": "Payments as a Service",
-    "copyright": "EzStart LLC. All rights reserved."
+  "layout": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "docs": "Docs",
+      "signIn": "Sign In"
+    },
+    "footer": {
+      "product": "Product",
+      "docs": "Documentation",
+      "pricing": "Pricing",
+      "changelog": "Changelog",
+      "status": "Status",
+      "company": "Company",
+      "about": "About",
+      "blog": "Blog",
+      "contact": "Contact",
+      "legal": "Legal",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "tagline": "Payments as a Service",
+      "copyright": "EzStart LLC. All rights reserved."
+    }
   }
 }
