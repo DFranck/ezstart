@@ -48,6 +48,7 @@ export default function SettingsPage() {
   }
 
   return (
+    <Div className="flex flex-1 items-center justify-center px-2">
     <Card className="max-w-md w-full relative" data-app={app}>
       <Div className="absolute top-4 left-4">
         <BackButton />
@@ -141,5 +142,6 @@ export default function SettingsPage() {
         </Div>
       </CardContent>
     </Card>
+    </Div>
   )
 }

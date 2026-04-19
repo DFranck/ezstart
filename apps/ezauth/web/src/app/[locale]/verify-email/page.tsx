@@ -37,14 +37,16 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense
-      fallback={
-        <Div className="flex justify-center py-8">
-          <Spinner variant="primary" size="lg" />
-        </Div>
-      }
-    >
-      <VerifyEmailContent />
-    </Suspense>
+    <Div className="flex flex-1 items-center justify-center px-2">
+      <Suspense
+        fallback={
+          <Div className="flex justify-center py-8">
+            <Spinner variant="primary" size="lg" />
+          </Div>
+        }
+      >
+        <VerifyEmailContent />
+      </Suspense>
+    </Div>
   )
 }

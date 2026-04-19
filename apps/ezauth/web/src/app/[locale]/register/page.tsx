@@ -106,8 +106,10 @@ export default function RegisterPage() {
   const t = useTranslations('register')
 
   return (
-    <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
-      <RegisterContent />
-    </Suspense>
+    <Div className="flex flex-1 items-center justify-center px-2">
+      <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
+        <RegisterContent />
+      </Suspense>
+    </Div>
   )
 }

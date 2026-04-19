@@ -126,13 +126,14 @@ export default function SessionsPage() {
 
   if (isLoading) {
     return (
-      <Div className="flex items-center justify-center min-h-[50vh]">
+      <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
       </Div>
     )
   }
 
   return (
+    <Div className="flex flex-1 items-center justify-center px-2">
     <Card className="max-w-lg w-full relative">
       <Div className="absolute top-4 left-4">
         <BackButton />
@@ -215,5 +216,6 @@ export default function SessionsPage() {
         )}
       </CardContent>
     </Card>
+    </Div>
   )
 }

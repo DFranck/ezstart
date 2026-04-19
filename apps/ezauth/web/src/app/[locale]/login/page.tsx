@@ -98,8 +98,10 @@ export default function LoginPage() {
   const t = useTranslations('login')
 
   return (
-    <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
-      <LoginContent />
-    </Suspense>
+    <Div className="flex flex-1 items-center justify-center px-2">
+      <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
+        <LoginContent />
+      </Suspense>
+    </Div>
   )
 }

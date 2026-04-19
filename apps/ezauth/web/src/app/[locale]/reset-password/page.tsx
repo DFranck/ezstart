@@ -89,14 +89,16 @@ export default function ResetPasswordPage() {
   const t = useTranslations('resetPassword')
 
   return (
-    <Suspense
-      fallback={
-        <Div className="flex items-center justify-center min-h-[200px]">
-          <Spinner variant="primary" size="lg" text={t('loading')} />
-        </Div>
-      }
-    >
-      <ResetPasswordContent />
-    </Suspense>
+    <Div className="flex flex-1 items-center justify-center px-2">
+      <Suspense
+        fallback={
+          <Div className="flex items-center justify-center min-h-[200px]">
+            <Spinner variant="primary" size="lg" text={t('loading')} />
+          </Div>
+        }
+      >
+        <ResetPasswordContent />
+      </Suspense>
+    </Div>
   )
 }

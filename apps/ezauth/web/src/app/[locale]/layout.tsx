@@ -56,7 +56,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ErrorBoundary title={t('errorBoundary.title')}>
             <Providers>
-              <Div className="bg-background text-foreground flex items-center justify-center mx-2 min-h-screen">
+              <Div className="bg-background text-foreground min-h-screen flex flex-col">
                 {children}
               </Div>
             </Providers>

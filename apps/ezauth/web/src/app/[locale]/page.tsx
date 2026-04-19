@@ -1,72 +1,454 @@
-import { Button, Card, CardContent, CardHeader, Div, H1, H2, P } from '@ezstart/ui/components'
+'use client'
+
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H1,
+  H2,
+  H3,
+  Icon,
+  LandingActions,
+  LandingFooter,
+  LandingHeader,
+  LandingHeroSection,
+  LandingLayout,
+  LandingLogo,
+  LandingMenuToggle,
+  LandingMobileLink,
+  LandingMobileMenu,
+  LandingNav,
+  LandingNavLink,
+  LandingSection,
+  P,
+  Pre,
+  Code,
+  Span,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+
+// ---------------------------------------------------------------------------
+// Features data (icons are lucide names)
+// ---------------------------------------------------------------------------
+const FEATURES = [
+  { key: 'Sso', icon: 'lucide:Fingerprint' as const },
+  { key: 'ApiKeys', icon: 'lucide:Key' as const },
+  { key: 'Oauth', icon: 'lucide:Globe' as const },
+  { key: '2fa', icon: 'lucide:ShieldCheck' as const },
+  { key: 'Rbac', icon: 'lucide:Users' as const },
+  { key: 'Security', icon: 'lucide:Lock' as const },
+] as const
+
+// ---------------------------------------------------------------------------
+// Steps data
+// ---------------------------------------------------------------------------
+const STEPS = [
+  { key: 'Step1', icon: 'lucide:Download' as const, step: '1' },
+  { key: 'Step2', icon: 'lucide:Code' as const, step: '2' },
+  { key: 'Step3', icon: 'lucide:Sparkles' as const, step: '3' },
+] as const
+
+// ---------------------------------------------------------------------------
+// Code snippets (static, no i18n needed)
+// ---------------------------------------------------------------------------
+const CODE_INSTALL = `npm install @ezstart/auth-sdk`
+
+const CODE_SETUP = `import { AuthProvider } from '@ezstart/auth-sdk'
+
+export default function App({ children }) {
+  return (
+    <AuthProvider appName="myapp">
+      {children}
+    </AuthProvider>
+  )
+}`
+
+const CODE_USE = `import { useAuth } from '@ezstart/auth-sdk'
+
+function Dashboard() {
+  const { user, isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <LoginButton />
+  }
+
+  return <h1>Welcome, {user.email}</h1>
+}`
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export default function HomePage() {
   const t = useTranslations('home')
 
   return (
-    <Div className="w-full max-w-3xl py-12 px-4">
-      {/* Hero */}
-      <Div className="text-center mb-12">
-        <H1 className="text-4xl font-bold tracking-tight mb-4">{t('title')}</H1>
-        <P className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">{t('subtitle')}</P>
-        <Div className="flex items-center justify-center gap-4">
+    <LandingLayout>
+      {/* ---------------------------------------------------------------- */}
+      {/* Header                                                           */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingHeader>
+        <LandingLogo>
+          <Icon name="lucide:Shield" className="h-7 w-7 text-primary" />
+          <Span className="text-lg font-bold tracking-tight">EZAuth</Span>
+        </LandingLogo>
+
+        <LandingNav>
+          <LandingNavLink href="#features">{t('navFeatures')}</LandingNavLink>
+          <LandingNavLink href="#pricing">{t('navPricing')}</LandingNavLink>
+          <LandingNavLink href="/docs">{t('navDocs')}</LandingNavLink>
+        </LandingNav>
+
+        <LandingActions>
+          <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
+            <Link href="/login">{t('navSignIn')}</Link>
+          </Button>
+          <Button asChild size="sm" className="hidden md:inline-flex">
+            <Link href="/register">{t('navGetStarted')}</Link>
+          </Button>
+          <LandingMenuToggle />
+        </LandingActions>
+
+        <LandingMobileMenu>
+          <LandingMobileLink href="#features">{t('navFeatures')}</LandingMobileLink>
+          <LandingMobileLink href="#pricing">{t('navPricing')}</LandingMobileLink>
+          <LandingMobileLink href="/docs">{t('navDocs')}</LandingMobileLink>
+          <LandingMobileLink href="/login">{t('navSignIn')}</LandingMobileLink>
+          <Div className="px-3 pt-2">
+            <Button asChild className="w-full">
+              <Link href="/register">{t('navGetStarted')}</Link>
+            </Button>
+          </Div>
+        </LandingMobileMenu>
+      </LandingHeader>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Hero                                                             */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingHeroSection>
+        <Badge variant="outline" className="mb-6">
+          <Icon name="lucide:Zap" className="mr-1 h-3 w-3" />
+          Authentication as a Service
+        </Badge>
+
+        <H1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+          {t('heroTitle')}
+        </H1>
+
+        <P className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+          {t('heroSubtitle')}
+        </P>
+
+        <Div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Button asChild size="lg">
-            <Link href="/login">{t('signIn')}</Link>
+            <Link href="/register">{t('heroCta')}</Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="/register">{t('signUp')}</Link>
+            <Link href="/docs">{t('heroCtaSecondary')}</Link>
           </Button>
         </Div>
-      </Div>
 
-      {/* Features */}
-      <Div className="grid sm:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <H2 size="h4" className="font-semibold">
-              {t('featureSso')}
-            </H2>
-          </CardHeader>
-          <CardContent>
-            <P className="text-sm text-muted-foreground">{t('featureSsoDesc')}</P>
-          </CardContent>
-        </Card>
+        {/* Hero code preview */}
+        <Div className="mx-auto mt-12 max-w-lg">
+          <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-left text-sm">
+            <Code className="text-foreground">{`import { AuthProvider } from '@ezstart/auth-sdk'
 
-        <Card>
-          <CardHeader>
-            <H2 size="h4" className="font-semibold">
-              {t('featureApiKeys')}
-            </H2>
-          </CardHeader>
-          <CardContent>
-            <P className="text-sm text-muted-foreground">{t('featureApiKeysDesc')}</P>
-          </CardContent>
-        </Card>
+<AuthProvider appName="myapp">
+  <App />
+</AuthProvider>`}</Code>
+          </Pre>
+        </Div>
+      </LandingHeroSection>
 
-        <Card>
-          <CardHeader>
-            <H2 size="h4" className="font-semibold">
-              {t('featureOauth')}
-            </H2>
-          </CardHeader>
-          <CardContent>
-            <P className="text-sm text-muted-foreground">{t('featureOauthDesc')}</P>
-          </CardContent>
-        </Card>
+      {/* ---------------------------------------------------------------- */}
+      {/* Features                                                         */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingSection id="features" variant="muted" align="center">
+        <Div className="mb-12">
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {t('featuresSectionTitle')}
+          </H2>
+          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            {t('featuresSectionSubtitle')}
+          </P>
+        </Div>
 
-        <Card>
-          <CardHeader>
-            <H2 size="h4" className="font-semibold">
-              {t('featureSecurity')}
-            </H2>
-          </CardHeader>
-          <CardContent>
-            <P className="text-sm text-muted-foreground">{t('featureSecurityDesc')}</P>
-          </CardContent>
-        </Card>
-      </Div>
-    </Div>
+        <Div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(({ key, icon }) => (
+            <Card key={key} className="text-left transition-shadow hover:shadow-md">
+              <CardHeader>
+                <Div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Icon name={icon} className="h-5 w-5 text-primary" />
+                </Div>
+                <H3 className="text-lg font-semibold">{t(`feature${key}`)}</H3>
+              </CardHeader>
+              <CardContent>
+                <P className="text-sm text-muted-foreground">{t(`feature${key}Desc`)}</P>
+              </CardContent>
+            </Card>
+          ))}
+        </Div>
+      </LandingSection>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* How it works                                                     */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingSection align="center">
+        <Div className="mb-12">
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {t('howItWorksSectionTitle')}
+          </H2>
+        </Div>
+
+        <Div className="grid gap-8 sm:grid-cols-3">
+          {STEPS.map(({ key, icon, step }) => (
+            <Div key={key} className="flex flex-col items-center gap-4">
+              <Div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl font-bold">
+                {step}
+              </Div>
+              <Div className="flex items-center gap-2">
+                <Icon name={icon} className="h-5 w-5 text-primary" />
+                <H3 className="text-lg font-semibold">{t(`howItWorks${key}Title`)}</H3>
+              </Div>
+              <P className="max-w-xs text-sm text-muted-foreground">
+                {t(`howItWorks${key}Desc`)}
+              </P>
+            </Div>
+          ))}
+        </Div>
+      </LandingSection>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Code examples                                                    */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingSection variant="muted" align="center">
+        <Div className="mb-12">
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {t('codeSectionTitle')}
+          </H2>
+          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            {t('codeSectionSubtitle')}
+          </P>
+        </Div>
+
+        <Div className="mx-auto grid max-w-4xl gap-6 text-left">
+          {/* Install */}
+          <Div>
+            <Div className="mb-2 flex items-center gap-2">
+              <Badge variant="secondary">{t('codeInstallLabel')}</Badge>
+            </Div>
+            <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-sm">
+              <Code className="text-foreground">{CODE_INSTALL}</Code>
+            </Pre>
+          </Div>
+
+          {/* Setup */}
+          <Div>
+            <Div className="mb-2 flex items-center gap-2">
+              <Badge variant="secondary">{t('codeSetupLabel')}</Badge>
+            </Div>
+            <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-sm">
+              <Code className="text-foreground">{CODE_SETUP}</Code>
+            </Pre>
+          </Div>
+
+          {/* Use */}
+          <Div>
+            <Div className="mb-2 flex items-center gap-2">
+              <Badge variant="secondary">{t('codeUseLabel')}</Badge>
+            </Div>
+            <Pre className="overflow-x-auto rounded-lg border bg-card p-4 text-sm">
+              <Code className="text-foreground">{CODE_USE}</Code>
+            </Pre>
+          </Div>
+        </Div>
+      </LandingSection>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Pricing                                                          */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingSection id="pricing" align="center">
+        <Div className="mb-12">
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {t('pricingSectionTitle')}
+          </H2>
+          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            {t('pricingSectionSubtitle')}
+          </P>
+        </Div>
+
+        <Div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Free */}
+          <Card className="flex flex-col">
+            <CardHeader className="text-center">
+              <H3 className="text-lg font-semibold">{t('pricingFreeTitle')}</H3>
+              <Div className="mt-2">
+                <Span className="text-4xl font-extrabold">{t('pricingFreePrice')}</Span>
+                <Span className="text-muted-foreground">{t('pricingFreePeriod')}</Span>
+              </Div>
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col gap-4">
+              <Div className="flex-1 space-y-3">
+                {(['pricingFreeFeature1', 'pricingFreeFeature2', 'pricingFreeFeature3', 'pricingFreeFeature4'] as const).map((key) => (
+                  <Div key={key} className="flex items-center gap-2">
+                    <Icon name="lucide:Check" className="h-4 w-4 text-success shrink-0" />
+                    <Span className="text-sm">{t(key)}</Span>
+                  </Div>
+                ))}
+              </Div>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/register">{t('pricingFreeCta')}</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Pro */}
+          <Card className="relative flex flex-col border-primary">
+            <Div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge variant="primary">{t('pricingProBadge')}</Badge>
+            </Div>
+            <CardHeader className="text-center">
+              <H3 className="text-lg font-semibold">{t('pricingProTitle')}</H3>
+              <Div className="mt-2">
+                <Span className="text-4xl font-extrabold">{t('pricingProPrice')}</Span>
+                <Span className="text-muted-foreground">{t('pricingProPeriod')}</Span>
+              </Div>
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col gap-4">
+              <Div className="flex-1 space-y-3">
+                {(['pricingProFeature1', 'pricingProFeature2', 'pricingProFeature3', 'pricingProFeature4', 'pricingProFeature5'] as const).map((key) => (
+                  <Div key={key} className="flex items-center gap-2">
+                    <Icon name="lucide:Check" className="h-4 w-4 text-success shrink-0" />
+                    <Span className="text-sm">{t(key)}</Span>
+                  </Div>
+                ))}
+              </Div>
+              <Button asChild className="w-full">
+                <Link href="/register">{t('pricingProCta')}</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Enterprise */}
+          <Card className="flex flex-col">
+            <CardHeader className="text-center">
+              <H3 className="text-lg font-semibold">{t('pricingEnterpriseTitle')}</H3>
+              <Div className="mt-2">
+                <Span className="text-4xl font-extrabold">{t('pricingEnterprisePrice')}</Span>
+                <Span className="text-muted-foreground">{t('pricingEnterprisePeriod')}</Span>
+              </Div>
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col gap-4">
+              <Div className="flex-1 space-y-3">
+                {(['pricingEnterpriseFeature1', 'pricingEnterpriseFeature2', 'pricingEnterpriseFeature3', 'pricingEnterpriseFeature4', 'pricingEnterpriseFeature5'] as const).map((key) => (
+                  <Div key={key} className="flex items-center gap-2">
+                    <Icon name="lucide:Check" className="h-4 w-4 text-success shrink-0" />
+                    <Span className="text-sm">{t(key)}</Span>
+                  </Div>
+                ))}
+              </Div>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/contact">{t('pricingEnterpriseCta')}</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </Div>
+      </LandingSection>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* CTA Banner                                                       */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingSection variant="accent" align="center">
+        <Div className="py-8">
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {t('ctaTitle')}
+          </H2>
+          <P className="mx-auto mt-4 max-w-xl text-muted-foreground">
+            {t('ctaSubtitle')}
+          </P>
+          <Div className="mt-8">
+            <Button asChild size="lg">
+              <Link href="/register">{t('ctaCta')}</Link>
+            </Button>
+          </Div>
+        </Div>
+      </LandingSection>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Footer                                                           */}
+      {/* ---------------------------------------------------------------- */}
+      <LandingFooter>
+        <Div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Product */}
+          <Div>
+            <H3 className="mb-4 text-sm font-semibold">{t('footerProduct')}</H3>
+            <Div className="space-y-2">
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/docs">{t('footerDocs')}</Link>
+              </P>
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="#pricing">{t('footerPricing')}</Link>
+              </P>
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/changelog">{t('footerChangelog')}</Link>
+              </P>
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/status">{t('footerStatus')}</Link>
+              </P>
+            </Div>
+          </Div>
+
+          {/* Company */}
+          <Div>
+            <H3 className="mb-4 text-sm font-semibold">{t('footerCompany')}</H3>
+            <Div className="space-y-2">
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/about">{t('footerAbout')}</Link>
+              </P>
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/blog">{t('footerBlog')}</Link>
+              </P>
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/contact">{t('footerContact')}</Link>
+              </P>
+            </Div>
+          </Div>
+
+          {/* Legal */}
+          <Div>
+            <H3 className="mb-4 text-sm font-semibold">{t('footerLegal')}</H3>
+            <Div className="space-y-2">
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/privacy">{t('footerPrivacy')}</Link>
+              </P>
+              <P className="text-sm text-muted-foreground hover:text-foreground">
+                <Link href="/terms">{t('footerTerms')}</Link>
+              </P>
+            </Div>
+          </Div>
+
+          {/* Brand */}
+          <Div>
+            <Div className="flex items-center gap-2">
+              <Icon name="lucide:Shield" className="h-6 w-6 text-primary" />
+              <Span className="text-lg font-bold">EZAuth</Span>
+            </Div>
+            <P className="mt-2 text-sm text-muted-foreground">
+              Authentication as a Service
+            </P>
+          </Div>
+        </Div>
+
+        <Div className="mt-8 border-t pt-8 text-center">
+          <P className="text-sm text-muted-foreground">
+            &copy; 2026 {t('footerCopyright')}
+          </P>
+        </Div>
+      </LandingFooter>
+    </LandingLayout>
   )
 }

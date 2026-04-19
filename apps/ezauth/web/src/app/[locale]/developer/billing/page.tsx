@@ -88,13 +88,14 @@ export default function BillingPage() {
 
   if (!isAuthReady || !user) {
     return (
-      <Div className="flex items-center justify-center min-h-[50vh]">
+      <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
       </Div>
     )
   }
 
   return (
+    <Div className="flex flex-1 items-center justify-center px-2">
     <Div className="max-w-4xl w-full space-y-6">
       {/* Current Plan */}
       <Card className="relative">
@@ -210,6 +211,7 @@ export default function BillingPage() {
           })}
         </Div>
       </Div>
+    </Div>
     </Div>
   )
 }

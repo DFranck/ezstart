@@ -28,7 +28,7 @@ export default function DeveloperPage() {
 
   if (!mounted || !isAuthenticated || !user) {
     return (
-      <Div className="flex items-center justify-center min-h-[50vh]">
+      <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
       </Div>
     )
@@ -102,23 +102,25 @@ export default function DeveloperPage() {
   }
 
   return (
-    <Div className="max-w-3xl w-full relative">
-      <Div className="absolute top-4 left-4">
-        <BackButton />
-      </Div>
+    <Div className="flex flex-1 items-center justify-center px-2">
+      <Div className="max-w-3xl w-full relative">
+        <Div className="absolute top-4 left-4">
+          <BackButton />
+        </Div>
 
-      <DeveloperPortal
-        enabled={!!user}
-        locale={locale}
-        texts={texts}
-        headerActions={
-          <Link href="/developer/billing">
-            <Button variant="outline" size="sm">
-              {t('nav.billing')}
-            </Button>
-          </Link>
-        }
-      />
+        <DeveloperPortal
+          enabled={!!user}
+          locale={locale}
+          texts={texts}
+          headerActions={
+            <Link href="/developer/billing">
+              <Button variant="outline" size="sm">
+                {t('nav.billing')}
+              </Button>
+            </Link>
+          }
+        />
+      </Div>
     </Div>
   )
 }
