@@ -83,7 +83,13 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       {/* Hero                                                             */}
       {/* ---------------------------------------------------------------- */}
-      <LandingHeroSection>
+      <LandingHeroSection className="overflow-hidden">
+        {/* Animated gradient background */}
+        <Div className="absolute inset-0 -z-10">
+          <Div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 animate-pulse" />
+          <Div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/10 blur-3xl animate-pulse" />
+        </Div>
+
         <Badge variant="outline" className="mb-6">
           <Icon name="lucide:Zap" className="mr-1 h-3 w-3" />
           Authentication as a Service

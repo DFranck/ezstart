@@ -85,7 +85,13 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       {/* Hero                                                             */}
       {/* ---------------------------------------------------------------- */}
-      <LandingHeroSection>
+      <LandingHeroSection className="overflow-hidden">
+        {/* Animated gradient background */}
+        <Div className="absolute inset-0 -z-10">
+          <Div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 animate-pulse" />
+          <Div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/10 blur-3xl animate-pulse" />
+        </Div>
+
         <Badge variant="outline" className="mb-6">
           <Icon name="lucide:Zap" className="mr-1 h-3 w-3" />
           Payments as a Service
@@ -176,9 +182,7 @@ export default function HomePage() {
                 <Icon name={icon} className="h-5 w-5 text-primary" />
                 <H3 className="text-lg font-semibold">{t(`howItWorks${key}Title`)}</H3>
               </Div>
-              <P className="max-w-xs text-sm text-muted-foreground">
-                {t(`howItWorks${key}Desc`)}
-              </P>
+              <P className="max-w-xs text-sm text-muted-foreground">{t(`howItWorks${key}Desc`)}</P>
             </Div>
           ))}
         </Div>
@@ -189,12 +193,8 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       <LandingSection variant="muted" align="center">
         <Div className="mb-12">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('codeSectionTitle')}
-          </H2>
-          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            {t('codeSectionSubtitle')}
-          </P>
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('codeSectionTitle')}</H2>
+          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">{t('codeSectionSubtitle')}</P>
         </Div>
 
         <Div className="mx-auto grid max-w-4xl gap-6 text-left">
@@ -249,12 +249,8 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       <LandingSection variant="accent" align="center">
         <Div className="py-8">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('ctaTitle')}
-          </H2>
-          <P className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            {t('ctaSubtitle')}
-          </P>
+          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('ctaTitle')}</H2>
+          <P className="mx-auto mt-4 max-w-xl text-muted-foreground">{t('ctaSubtitle')}</P>
           <Div className="mt-8">
             {isAuthenticated ? (
               <Button asChild size="lg">
