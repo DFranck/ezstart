@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { Card, Div, H1, Main, P, Spinner } from '@ezstart/ui/components'
 import { AuthAdminDashboard, useAuth } from '@ezstart/auth-sdk'
@@ -33,14 +33,18 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated } = useAuth()
   const locale = useLocale()
 
+  // Wait for initial mount + store hydration
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   useEffect(() => {
-    if (!isAuthenticated && !user) {
+    if (mounted && !isAuthenticated) {
       const loginUrl = `/${locale}/login?redirect_uri=${encodeURIComponent(window.location.origin + `/${locale}/auth/callback`)}&app=ezauth`
       window.location.href = loginUrl
     }
-  }, [isAuthenticated, user, locale])
+  }, [mounted, isAuthenticated, locale])
 
-  if (!isAuthenticated || !user) {
+  if (!mounted || !isAuthenticated || !user) {
     return (
       <Main className="container mx-auto py-12 px-4">
         <Div className="flex items-center justify-center min-h-[50vh]">

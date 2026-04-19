@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Div, H3, P, Span, Icon } from '@ezstart/ui/components'
 
+// TODO: Plans should come from pay-sdk PricingPage component wired to API.
+// Currently hardcoded until pay-sdk PricingPage is integrated.
 const PLANS = [
   {
     key: 'starter' as const,

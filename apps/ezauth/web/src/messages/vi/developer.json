@@ -1,4 +1,5 @@
 {
+  "developer": {
   "title": "API Keys",
   "description": "Manage your developer API keys for programmatic access",
   "createKey": "Create New Key",
@@ -100,5 +101,6 @@
     "createFailed": "Failed to create API key",
     "revokeFailed": "Failed to revoke API key",
     "rotateFailed": "Failed to rotate API key"
+  }
   }
 }

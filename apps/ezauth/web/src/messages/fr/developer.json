@@ -1,4 +1,5 @@
 {
+  "developer": {
   "title": "Clés API",
   "description": "Gérez vos clés API développeur pour un accès programmatique",
   "createKey": "Créer une clé",
@@ -100,5 +101,6 @@
     "createFailed": "Impossible de créer la clé API",
     "revokeFailed": "Impossible de révoquer la clé API",
     "rotateFailed": "Impossible de renouveler la clé API"
+  }
   }
 }

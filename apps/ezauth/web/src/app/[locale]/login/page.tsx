@@ -43,11 +43,6 @@ function LoginContent() {
           {t('signInToAccess')}{' '}
           <Span className={`${theme.primaryColor} font-semibold`}>{theme.name}</Span>
         </CardDescription>
-        {theme.showEzstartMessage && (
-          <P variant={'description'} size={'xs'} className="hidden md:block">
-            {t('oneAccountAllApps')}
-          </P>
-        )}
       </CardHeader>
 
       <CardContent className="space-y-4">

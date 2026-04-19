@@ -177,9 +177,15 @@ export default function HomePage() {
         </P>
 
         <Div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Button asChild size="lg">
-            <Link href="/register">{t('heroCta')}</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button asChild size="lg">
+              <Link href={`/${locale}/developer`}>{t('heroCtaDashboard')}</Link>
+            </Button>
+          ) : (
+            <Button asChild size="lg">
+              <Link href="/register">{t('heroCta')}</Link>
+            </Button>
+          )}
           <Button asChild variant="outline" size="lg">
             <Link href="/docs">{t('heroCtaSecondary')}</Link>
           </Button>
@@ -327,9 +333,15 @@ export default function HomePage() {
             {t('ctaSubtitle')}
           </P>
           <Div className="mt-8">
-            <Button asChild size="lg">
-              <Link href="/register">{t('ctaCta')}</Link>
-            </Button>
+            {isAuthenticated ? (
+              <Button asChild size="lg">
+                <Link href={`/${locale}/developer`}>{t('heroCtaDashboard')}</Link>
+              </Button>
+            ) : (
+              <Button asChild size="lg">
+                <Link href="/register">{t('ctaCta')}</Link>
+              </Button>
+            )}
           </Div>
         </Div>
       </LandingSection>

@@ -20,7 +20,7 @@ import {
 import { toast } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { PlanInfo } from '../types'
 
 const FREE_PLAN: PlanInfo = {
@@ -64,15 +64,19 @@ function formatQuota(quota: number | null, unlimitedLabel: string): string {
 
 export default function BillingPage() {
   const t = useTranslations('developer.billing')
-  const { user, isAuthReady, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const router = useRouter()
 
-  // Redirect to login if not authenticated
+  // Wait for initial mount + store hydration
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  // Redirect to login if not authenticated (after hydration)
   useEffect(() => {
-    if (isAuthReady && !isAuthenticated) {
+    if (mounted && !isAuthenticated) {
       router.replace('/login')
     }
-  }, [isAuthReady, isAuthenticated, router])
+  }, [mounted, isAuthenticated, router])
 
   // Current plan is always free for now (no API integration yet)
   const currentPlanId = 'free'
@@ -86,7 +90,7 @@ export default function BillingPage() {
     toast.info(t('comingSoon'))
   }
 
-  if (!isAuthReady || !user) {
+  if (!mounted || !isAuthenticated || !user) {
     return (
       <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
