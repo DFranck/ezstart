@@ -52,8 +52,9 @@ const rotateApiKeyController = async (req: Request, res: Response) => {
     oldKey.revokedAt = new Date()
     await oldKey.save()
 
-    // Create new key with same config
-    const rawKey = generateRawApiKey()
+    // Create new key with same config (preserve scope)
+    const scope = oldKey.scope || 'live'
+    const rawKey = generateRawApiKey(scope)
     const hashedKey = hashApiKey(rawKey)
     const keyPrefix = extractKeyPrefix(rawKey)
 
@@ -63,6 +64,7 @@ const rotateApiKeyController = async (req: Request, res: Response) => {
       name: oldKey.name,
       userId,
       appName: oldKey.appName,
+      scope,
       permissions: oldKey.permissions,
       status: 'active',
       expiresAt: oldKey.expiresAt,

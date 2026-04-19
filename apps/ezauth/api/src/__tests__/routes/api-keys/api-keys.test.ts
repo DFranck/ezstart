@@ -7,9 +7,12 @@ import { verifyTokenMiddleware } from '../../../middleware/auth.js'
 import { sendSuccess, sendError, sendValidationError } from '@ezstart/api-core'
 import { getApiKeyModel } from '../../../models/api-key.js'
 import { getApiKeyUsageModel } from '../../../models/api-key-usage.js'
+import { getAuthUserModel } from '../../../models/auth-user.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../../utils/api-key.js'
+import type { ApiKeyScope } from '../../../utils/api-key.js'
 import {
   createUser,
+  createAdminUser,
   createApiKey,
   generateAccessToken,
   cleanAllCollections,
@@ -41,8 +44,19 @@ function createApiKeysTestApp() {
   // POST /keys — create
   app.post('/keys', verifyTokenMiddleware, bridgeUserId, async (req, res) => {
     const userId = req.userId!
-    const { name, appName, expiresAt } = req.body || {}
+    const { name, appName, expiresAt, scope: rawScope } = req.body || {}
     if (!name) return sendValidationError(res, 'name is required', [])
+
+    const scope: ApiKeyScope = rawScope || 'live'
+
+    // Admin-scoped keys require superadmin
+    if (scope === 'admin') {
+      const AuthUser = await getAuthUserModel()
+      const user = await AuthUser.findById(userId).lean()
+      if (!user?.globalRoles?.includes('superadmin')) {
+        return sendError(res, 'Admin-scoped keys require superadmin role', 403)
+      }
+    }
 
     const ApiKey = await getApiKeyModel()
     const activeCount = await ApiKey.countDocuments({ userId, status: 'active' })
@@ -50,16 +64,19 @@ function createApiKeysTestApp() {
       return sendError(res, `Maximum ${MAX_KEYS_PER_USER} active API keys allowed`, 400)
     }
 
-    const rawKey = generateRawApiKey()
+    const rawKey = generateRawApiKey(scope)
     const hashedKey = hashApiKey(rawKey)
     const keyPrefix = extractKeyPrefix(rawKey)
+
+    const effectiveAppName = scope === 'admin' ? '*' : (appName || '*')
 
     const apiKey = await ApiKey.create({
       key: hashedKey,
       keyPrefix,
       name,
       userId,
-      appName: appName || '*',
+      appName: effectiveAppName,
+      scope,
       permissions: ['*'],
       status: 'active',
       expiresAt: expiresAt ? new Date(expiresAt) : null,
@@ -121,8 +138,9 @@ function createApiKeysTestApp() {
     oldKey.revokedAt = new Date()
     await oldKey.save()
 
-    // Create new
-    const rawKey = generateRawApiKey()
+    // Create new (preserve scope)
+    const scope = oldKey.scope || 'live'
+    const rawKey = generateRawApiKey(scope)
     const hashedKey = hashApiKey(rawKey)
     const keyPrefix = extractKeyPrefix(rawKey)
 
@@ -132,6 +150,7 @@ function createApiKeysTestApp() {
       name: oldKey.name,
       userId,
       appName: oldKey.appName,
+      scope,
       permissions: oldKey.permissions,
       status: 'active',
       expiresAt: oldKey.expiresAt,
@@ -367,6 +386,58 @@ describe('API Keys Routes', () => {
         .set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(400)
+    })
+  })
+
+  describe('Scope — admin scope restrictions + rotate preservation', () => {
+    it('should allow superadmin to create an admin-scoped key', async () => {
+      const admin = await createAdminUser({ email: 'scopeadmin@test.com', username: 'scopeadmin' })
+      const token = generateAccessToken(admin)
+
+      const res = await request(app)
+        .post('/keys')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Admin Key', scope: 'admin' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.key).toMatch(/^ezk_admin_/)
+    })
+
+    it('should reject admin-scoped key creation for non-superadmin', async () => {
+      const user = await createUser({ email: 'scopeuser@test.com', username: 'scopeuser' })
+      const token = generateAccessToken(user)
+
+      const res = await request(app)
+        .post('/keys')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Admin Key', scope: 'admin' })
+
+      expect(res.status).toBe(403)
+      expect(res.body.error.message).toContain('superadmin')
+    })
+
+    it('should preserve scope after rotate', async () => {
+      const user = await createUser({ email: 'scoperotate@test.com', username: 'scoperotate' })
+      const token = generateAccessToken(user)
+
+      // Create a test-scoped key directly in DB
+      const { doc: testKeyDoc } = await createApiKey(user._id!.toString(), {
+        name: 'Test Scope Key',
+        scope: 'test',
+      })
+
+      // Rotate
+      const res = await request(app)
+        .post(`/keys/${testKeyDoc._id.toString()}/rotate`)
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.key).toMatch(/^ezk_test_/) // New key keeps test scope prefix
+
+      // Verify in DB
+      const ApiKey = await getApiKeyModel()
+      const newKeyDoc = await ApiKey.findById(res.body.data.id)
+      expect(newKeyDoc?.scope).toBe('test')
     })
   })
 

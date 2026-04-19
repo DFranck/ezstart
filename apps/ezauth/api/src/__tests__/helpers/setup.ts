@@ -216,7 +216,8 @@ export async function createRefreshToken(userId: string) {
  */
 export async function createApiKey(userId: string, opts: Record<string, unknown> = {}) {
   const ApiKey = await getApiKeyModel()
-  const rawKey = generateRawApiKey()
+  const scope = (opts.scope as 'test' | 'live' | 'admin') ?? 'live'
+  const rawKey = generateRawApiKey(scope)
   const hashedKey = hashApiKey(rawKey)
   const keyPrefix = extractKeyPrefix(rawKey)
 
@@ -226,6 +227,7 @@ export async function createApiKey(userId: string, opts: Record<string, unknown>
     name: opts.name ?? 'Test Key',
     userId,
     appName: opts.appName ?? '*',
+    scope,
     permissions: opts.permissions ?? ['*'],
     status: opts.status ?? 'active',
     expiresAt: opts.expiresAt ?? null,
