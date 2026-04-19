@@ -1,8 +1,9 @@
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { getWebUrl } from '@ezstart/config'
+import { AppShell } from '@/components/app-shell'
 import { Providers } from '@/components/providers'
-import { Div, ErrorBoundary, Toaster } from '@ezstart/ui/components'
+import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
@@ -56,9 +57,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ErrorBoundary title={t('errorBoundary.title')}>
             <Providers>
-              <Div className="bg-background text-foreground min-h-screen flex flex-col">
-                {children}
-              </Div>
+              <AppShell>{children}</AppShell>
             </Providers>
           </ErrorBoundary>
         </NextIntlClientProvider>

@@ -1,7 +1,6 @@
 'use client'
 
-import { LoginButton, useAuth } from '@ezstart/auth-sdk'
-import { UserMenu } from '@ezstart/auth-sdk/components'
+import { useAuth } from '@ezstart/auth-sdk'
 import {
   Badge,
   Button,
@@ -14,30 +13,13 @@ import {
   H2,
   H3,
   Icon,
-  LandingActions,
-  LandingFooter,
-  LandingHeader,
   LandingHeroSection,
-  LandingLayout,
-  LandingLogo,
-  LandingMenuToggle,
-  LandingMobileLink,
-  LandingMobileMenu,
-  LandingNav,
-  LandingNavLink,
   LandingSection,
-  LocaleSwitcher,
   P,
   Pre,
-  Span,
 } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/ui/theme'
 import { useLocale, useTranslations } from 'next-intl'
-import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-
-const LOCALES = ['en', 'fr', 'vi']
 
 // ---------------------------------------------------------------------------
 // Features data (icons are lucide names)
@@ -95,66 +77,9 @@ export default function HomePage() {
   const t = useTranslations('home')
   const { isAuthenticated } = useAuth()
   const locale = useLocale()
-  const router = useRouter()
-  const pathname = usePathname()
-
-  const handleLocaleChange = (newLocale: string) => {
-    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`)
-    router.push(newPathname)
-  }
 
   return (
-    <LandingLayout>
-      {/* ---------------------------------------------------------------- */}
-      {/* Header                                                           */}
-      {/* ---------------------------------------------------------------- */}
-      <LandingHeader>
-        <LandingLogo>
-          <Image src="/logo.svg" alt="EZAuth" width={28} height={28} />
-          <Span className="text-lg font-bold tracking-tight">EZAuth</Span>
-        </LandingLogo>
-
-        <LandingNav>
-          <LandingNavLink href="#features">{t('navFeatures')}</LandingNavLink>
-          <LandingNavLink href="#pricing">{t('navPricing')}</LandingNavLink>
-          <LandingNavLink href="/docs">{t('navDocs')}</LandingNavLink>
-        </LandingNav>
-
-        <LandingActions>
-          <Div className="hidden md:flex items-center gap-2">
-            <LocaleSwitcher
-              locales={LOCALES}
-              currentLocale={locale}
-              onLocaleChange={handleLocaleChange}
-            />
-            <ThemeSwitcher />
-            {isAuthenticated ? <UserMenu /> : <LoginButton size="sm" loginText={t('navSignIn')} />}
-          </Div>
-          <LandingMenuToggle />
-        </LandingActions>
-
-        <LandingMobileMenu>
-          <LandingMobileLink href="#features">{t('navFeatures')}</LandingMobileLink>
-          <LandingMobileLink href="#pricing">{t('navPricing')}</LandingMobileLink>
-          <LandingMobileLink href="/docs">{t('navDocs')}</LandingMobileLink>
-          <Div className="px-3 pt-2 flex gap-2 justify-end">
-            <Div className="flex items-center gap-2">
-              <LocaleSwitcher
-                locales={LOCALES}
-                currentLocale={locale}
-                onLocaleChange={handleLocaleChange}
-              />
-              <ThemeSwitcher />
-            </Div>
-            {isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <LoginButton className="w-full" loginText={t('navSignIn')} />
-            )}
-          </Div>
-        </LandingMobileMenu>
-      </LandingHeader>
-
+    <>
       {/* ---------------------------------------------------------------- */}
       {/* Hero                                                             */}
       {/* ---------------------------------------------------------------- */}
@@ -331,74 +256,6 @@ export default function HomePage() {
           </Div>
         </Div>
       </LandingSection>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* Footer                                                           */}
-      {/* ---------------------------------------------------------------- */}
-      <LandingFooter>
-        <Div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Product */}
-          <Div>
-            <H3 className="mb-4 text-sm font-semibold">{t('footerProduct')}</H3>
-            <Div className="space-y-2">
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/docs">{t('footerDocs')}</Link>
-              </P>
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="#pricing">{t('footerPricing')}</Link>
-              </P>
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/changelog">{t('footerChangelog')}</Link>
-              </P>
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/status">{t('footerStatus')}</Link>
-              </P>
-            </Div>
-          </Div>
-
-          {/* Company */}
-          <Div>
-            <H3 className="mb-4 text-sm font-semibold">{t('footerCompany')}</H3>
-            <Div className="space-y-2">
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/about">{t('footerAbout')}</Link>
-              </P>
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/blog">{t('footerBlog')}</Link>
-              </P>
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/contact">{t('footerContact')}</Link>
-              </P>
-            </Div>
-          </Div>
-
-          {/* Legal */}
-          <Div>
-            <H3 className="mb-4 text-sm font-semibold">{t('footerLegal')}</H3>
-            <Div className="space-y-2">
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/privacy">{t('footerPrivacy')}</Link>
-              </P>
-              <P className="text-sm text-muted-foreground hover:text-foreground">
-                <Link href="/terms">{t('footerTerms')}</Link>
-              </P>
-            </Div>
-          </Div>
-
-          {/* Brand */}
-          <Div>
-            <Div className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="EZAuth" width={24} height={24} />
-              <Span className="text-lg font-bold">EZAuth</Span>
-            </Div>
-            <P className="mt-2 text-sm text-muted-foreground">Authentication as a Service</P>
-          </Div>
-        </Div>
-
-        <Div className="mt-8 border-t pt-8 text-center">
-          <P className="text-sm text-muted-foreground">&copy; 2026 {t('footerCopyright')}</P>
-        </Div>
-      </LandingFooter>
-    </LandingLayout>
+    </>
   )
 }
