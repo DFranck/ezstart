@@ -50,6 +50,8 @@ export interface DeveloperPortalProps {
   className?: string
   /** Show admin scope option in create modal (for superadmins). */
   showAdminScope?: boolean
+  /** Apps the user has access to — rendered as options in the App Scope dropdown. */
+  appOptions?: string[]
 }
 
 function mergeTexts(partial?: Partial<DeveloperPortalTexts>): DeveloperPortalTexts {
@@ -71,6 +73,7 @@ export function DeveloperPortal({
   headerActions,
   className,
   showAdminScope = false,
+  appOptions = [],
 }: DeveloperPortalProps) {
   const texts = mergeTexts(partialTexts)
 
@@ -167,6 +170,7 @@ export function DeveloperPortal({
         isSubmitting={createMutation.isPending}
         texts={texts.create}
         showAdminScope={showAdminScope}
+        appOptions={appOptions}
       />
 
       {/* Key Created Modal */}

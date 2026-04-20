@@ -25,6 +25,13 @@ export interface CreateKeyModalProps {
   texts: CreateKeyModalTexts
   /** Show admin scope option (for superadmins only). */
   showAdminScope?: boolean
+  /**
+   * List of apps the user has access to. Rendered as `<SelectItem>` in the
+   * App Scope dropdown. If empty and `showAdminScope` is `false`, the dropdown
+   * will have no selectable options — callers should ensure at least one is
+   * provided for non-superadmins.
+   */
+  appOptions?: string[]
 }
 
 type KeyType = 'publishable' | 'secret'
@@ -48,16 +55,20 @@ export function CreateKeyModal({
   isSubmitting,
   texts,
   showAdminScope = false,
+  appOptions = [],
 }: CreateKeyModalProps) {
+  // Default app: first available app, else '*' if superadmin, else '' (disables submit)
+  const defaultAppName = appOptions.length > 0 ? appOptions[0] : showAdminScope ? '*' : ''
+
   const [name, setName] = useState('')
-  const [appName, setAppName] = useState('*')
+  const [appName, setAppName] = useState(defaultAppName)
   const [type, setType] = useState<KeyType>('publishable')
   const [env, setEnv] = useState<KeyEnv>('live')
   const [scope, setScope] = useState<KeyScope>('user')
   const [expiry, setExpiry] = useState('never')
 
   const handleSubmit = () => {
-    if (!name.trim()) return
+    if (!name.trim() || !appName) return
     onSubmit({
       name: name.trim(),
       appName,
@@ -70,7 +81,7 @@ export function CreateKeyModal({
 
   const handleClose = () => {
     setName('')
-    setAppName('*')
+    setAppName(defaultAppName)
     setType('publishable')
     setEnv('live')
     setScope('user')
@@ -85,7 +96,11 @@ export function CreateKeyModal({
       title={texts.title}
       size="default"
       footer={
-        <Button onClick={handleSubmit} disabled={!name.trim() || isSubmitting} className="w-full">
+        <Button
+          onClick={handleSubmit}
+          disabled={!name.trim() || !appName || isSubmitting}
+          className="w-full"
+        >
           {isSubmitting ? texts.submitting : texts.submit}
         </Button>
       }
@@ -152,7 +167,12 @@ export function CreateKeyModal({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="*">{texts.appScopeAll}</SelectItem>
+              {showAdminScope && <SelectItem value="*">{texts.appScopeAll}</SelectItem>}
+              {appOptions.map(app => (
+                <SelectItem key={app} value={app}>
+                  {app}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Div>

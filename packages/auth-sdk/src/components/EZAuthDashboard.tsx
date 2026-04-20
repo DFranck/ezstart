@@ -243,6 +243,7 @@ export function EZAuthDashboard({
               locale={locale}
               texts={texts.developerPortal}
               showAdminScope={isSuperadmin(user)}
+              appOptions={user.apps ?? []}
             />
           )}
           {activeSection === 'billing' && <BillingSection texts={texts} isAdmin={isAdmin} />}

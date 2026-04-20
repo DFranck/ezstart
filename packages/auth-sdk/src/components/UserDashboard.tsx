@@ -212,7 +212,12 @@ export function UserDashboard({
         {/* API Keys */}
         {visibleTabs.includes('api-keys') && (
           <TabsContent value="api-keys">
-            <DeveloperPortal enabled={apiKeysEnabled} texts={texts.developerPortal} />
+            <DeveloperPortal
+              enabled={apiKeysEnabled}
+              texts={texts.developerPortal}
+              showAdminScope={user.globalRoles?.includes('superadmin') ?? false}
+              appOptions={user.apps ?? []}
+            />
           </TabsContent>
         )}
 
