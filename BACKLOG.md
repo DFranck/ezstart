@@ -82,6 +82,15 @@ Objectif : EZStart = hub admin central, agrège les panels admin de chaque app v
 - [ ] **EZHUB-004: SDK AdminDashboard `apiUrl` + `authToken` props** — chaque component admin accepte ces props pour pointer vers l'API distante (cross-origin).
 - [ ] **EZHUB-005: Migration admin panels ezauth/ezpay vers hub** — une fois EZHUB-001 à 004 fait, supprimer les routes `/admin` dans ezauth/web et ezpay/web (tout passe par ezstart/admin).
 
+#### P2 — Footer pages automation (après sprint ezauth+ezpay)
+
+Stratégie pour que les pages footer (docs, changelog, status, blog) soient **zero-maintenance manuelle**. Pattern suivi par Stripe/Clerk/Vercel : source de vérité = code/git, rendu MDX automatique.
+
+- [ ] **DOCS-001: `/docs` auto-render package READMEs** — page `/docs` render les `packages/*/README.md` en MDX avec nav sidebar (auth-sdk, pay-sdk, api-sdk, ui). Source de vérité = README packages, zéro duplication.
+- [ ] **DOCS-002: Setup `changesets` + `/changelog` auto** — `@changesets/cli` au monorepo : chaque `feat:`/`fix:` conventional commit → CHANGELOG.md auto-généré à chaque release. `/changelog` render le CHANGELOG en MDX.
+- [ ] **DOCS-003: `/status` public app-scoped** — endpoint `GET /api/status?app=xxx` (public, pas d'auth) retournant uptime % + incidents récents depuis MongoDB HealthCheck model. Page `/status` par app consomme cet endpoint. Réutilise infra existante `@ezstart/monitoring` + `ezstart` API.
+- [ ] **DOCS-004: Blog — keep or drop decision** — tout SaaS pro n'a pas de blog (Anthropic n'a qu'une section Research). Options : (a) placeholder "Coming soon" jusqu'au 1er post, (b) remplacer par `/customers` (testimonials), (c) supprimer du footer. Décision user à documenter ici.
+
 #### P1 — Bugs & code quality
 
 - [ ] **Hardcoded strings monitoring pages** — i18n violation. Remplacer par `t()` dans `errors/page.tsx`, `audits/page.tsx`, `page.tsx`, `TrendingGraph.tsx`, `ErrorsFeed.tsx` (severity labels, timeAgo strings, "Failed to load monitoring data", "Next update in:", score labels, no-audits message).
