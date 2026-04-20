@@ -36,10 +36,11 @@
    | Error parsing            | `parseApiError()` + `ApiError.isApiError()` | `new Error(response.error)`                      |
 
 **SDK text props rule** :
-   - ALL user-facing text in SDK components MUST accept a `texts` prop with English defaults
-   - NEVER hardcode marketing taglines or app-specific strings in SDK components
-   - The consuming app provides translations via the `texts` prop
-   - SDK components are i18n-agnostic (no dependency on next-intl or any i18n library)
+
+- ALL user-facing text in SDK components MUST accept a `texts` prop with English defaults
+- NEVER hardcode marketing taglines or app-specific strings in SDK components
+- The consuming app provides translations via the `texts` prop
+- SDK components are i18n-agnostic (no dependency on next-intl or any i18n library)
 
 3. **CRÉER SEULEMENT SI ABSENT** — Si le besoin n'existe NULLE PART :
    - Réutilisable par 2+ projets → créer dans `packages/` (respecter section 1-7 ci-dessous)
@@ -75,21 +76,21 @@ Tout package SDK qui expose de la logique client + UI suit le **split 3 couches*
 }
 ```
 
-- `"."` → re-exporte core + react + monorepo wrapper (import par défaut)
-- `"./core"` → core seul (usage standalone non-React)
-- `"./components"` → composants UI (opt-in, nécessite `@ezstart/ui`)
+- `"."` → re-exporte core + react + components (import par défaut, nécessite `@ezstart/ui`)
+- `"./core"` → core seul (usage standalone non-React, zéro peer dep UI)
+- `"./components"` → composants UI seuls (opt-in, nécessite `@ezstart/ui`)
 
 **Règles d'import entre couches** (sens unique, jamais remonter) :
 
 ```
 core/  ←  react/  ←  components/
-              ←  ezstart-<name>.ts (monorepo wrapper)
 ```
 
 - `core/` n'importe JAMAIS depuis `react/`, `components/`, ni `@ezstart/*`
 - `react/` importe depuis `core/` uniquement, jamais depuis `components/`
 - `components/` importe depuis `core/` et `react/`, utilise `@ezstart/ui`
-- `ezstart-<name>.ts` pré-câble le core avec `@ezstart/config` + `@ezstart/api-sdk`
+
+> **Deprecated — monorepo wrapper `ezstart-<name>.ts`** : le pattern d'un wrapper qui pré-câble le core avec `@ezstart/config`/`@ezstart/api-sdk` est **supprimé**. Le consumer (qu'il soit interne au monorepo ou externe) passe toujours `apiUrl` explicitement à `create<Name>Client({ apiUrl, appName })`. Zéro magie monorepo, un setup canonique partout.
 
 **Core factory pattern** :
 
@@ -118,7 +119,7 @@ grep -rE "@ezstart/(config|logger)|ezauth-storage|getApiUrl|getWebUrl" packages/
 # → zéro match attendu (sauf dans un commentaire "No coupling to...")
 ```
 
-**Pattern** : `src/core/` agnostique + `src/ezstart-<name>.ts` wrapper thin qui pré-configure via factory `create<Name>(config)`.
+**Pattern** : `src/core/` agnostique exposant `create<Name>Client({ apiUrl, appName, ... })`. Le consumer passe toujours `apiUrl` explicitement — pas de wrapper monorepo-magique. (Le pattern `src/ezstart-<name>.ts` est deprecated, cf. section 0bis.)
 
 ---
 
@@ -235,11 +236,11 @@ done
 
 ## Install
 
-## Quickstart (monorepo)
+## Quickstart — React with components (SDK avec `components/`)
 
-## Quickstart (standalone React) <!-- SDK uniquement -->
+## Quickstart — React hooks only (SDK avec `react/`)
 
-## Quickstart (standalone any JS) <!-- SDK avec core/ uniquement -->
+## Quickstart — Core only (SDK avec `core/`)
 
 ## API
 
@@ -256,7 +257,8 @@ done
 
 **Règles** :
 
-- Tous les `@example` en JSDoc utilisent `'myapp'` (générique). Zéro nom réel du monorepo (`green-pulse`, `ezbill`, etc.).
+- Les quickstarts sont organisés par **niveau d'intégration** (components > hooks > core), PAS par contexte de setup (monorepo vs standalone). Un SDK publishable doit s'utiliser à l'identique partout — `apiUrl` est TOUJOURS explicite dans les exemples, aucune magie monorepo.
+- Tous les `@example` en JSDoc utilisent `'myapp'` (générique) et des URLs explicites type `'https://api.example.com'`. Zéro nom réel du monorepo (`green-pulse`, `ezbill`, etc.), zéro `localhost`, zéro auto-résolution via `@ezstart/config`.
 - Pas de pavé marketing, pas d'emojis décoratifs ✨, pas de "Why" qui raconte l'histoire
 - Chaque export public documenté avec 1 phrase + `@example`
 - Exemples qui compilent (pas de pseudo-code)

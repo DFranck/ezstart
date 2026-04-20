@@ -52,25 +52,31 @@ auth-sdk/src/
 └── index.ts              # Main barrel: re-exports everything
 ```
 
-## Quickstart (monorepo)
+## Quickstart — React with components (full UI)
+
+Drop-in pre-built UI. Requires `@ezstart/ui` as peer dep.
 
 ```tsx
-import { AuthProvider, useAuth } from '@ezstart/auth-sdk'
+import { AuthProvider, SignInForm, useAuth } from '@ezstart/auth-sdk'
 
-// Wrap app
-;<AuthProvider appName="myapp" authMode="httpOnly">
+;<AuthProvider apiUrl="https://auth.example.com/api/auth" appName="myapp" authMode="httpOnly">
   <App />
 </AuthProvider>
 
-// Use in components
-const { user, login, logout, isAuthenticated } = useAuth()
+// In your app
+function Page() {
+  const { user, login, logout, isAuthenticated } = useAuth()
+  return isAuthenticated ? <Dashboard /> : <SignInForm />
+}
 ```
 
-## Quickstart (standalone React)
+## Quickstart — React hooks only (no UI)
+
+Build your own UI. Only `react` as peer dep.
 
 ```tsx
-import { createCoreAuthClient } from '@ezstart/auth-sdk/core'
 import { AuthProvider, useAuth } from '@ezstart/auth-sdk/react'
+import { createCoreAuthClient } from '@ezstart/auth-sdk/core'
 
 const client = createCoreAuthClient({
   apiUrl: 'https://auth.example.com/api/auth',
@@ -82,7 +88,9 @@ const client = createCoreAuthClient({
 </AuthProvider>
 ```
 
-## Quickstart (standalone any JS)
+## Quickstart — Core only (any JS, no React)
+
+Use from Vue, Svelte, vanilla JS, Node, React Native. Zero framework deps.
 
 ```ts
 import { createCoreAuthClient } from '@ezstart/auth-sdk/core'

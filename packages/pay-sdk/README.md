@@ -31,25 +31,46 @@ pay-sdk/src/
 │   ├── PayAdminDashboard.tsx, UserPaymentDashboard.tsx
 │   └── ... (FeatureGate, PromoCodeInput, RefundButton, etc.)
 │
-├── ezstart-pay.ts           # Monorepo wrapper (auto-resolves API URL via @ezstart/config)
 ├── server.ts                # Server-safe exports (types + schemas + providers, no React)
 └── index.ts                 # Main barrel (re-exports everything)
 ```
 
-## Quickstart (monorepo)
+## Quickstart — React with components (full UI)
 
-```typescript
-import { PayProvider, DonateModal, useDonations } from '@ezstart/pay-sdk'
+Drop-in pre-built UI. Requires `@ezstart/ui` as peer dep.
 
-// Wrap your app
-<PayProvider appName="myapp">
+```tsx
+import { PayProvider, DonateModal, PricingPage } from '@ezstart/pay-sdk'
+
+;<PayProvider apiUrl="https://api.example.com/api" appName="myapp">
   <DonateModal projectId="proj_123" />
+  <PricingPage />
 </PayProvider>
 ```
 
-## Quickstart (external / standalone)
+## Quickstart — React hooks only (no UI)
 
-```typescript
+Build your own UI. Only `react` + `zustand` as peer deps.
+
+```tsx
+import { PayProvider, useDonations, useSubscriptions } from '@ezstart/pay-sdk/react'
+import { createPayClient } from '@ezstart/pay-sdk/core'
+
+const client = createPayClient({
+  apiUrl: 'https://api.example.com/api',
+  appName: 'myapp',
+})
+
+<PayProvider client={client} appName="myapp">
+  <App />
+</PayProvider>
+```
+
+## Quickstart — Core only (any JS, no React)
+
+Use from Vue, Svelte, vanilla JS, Node, React Native. Zero framework deps.
+
+```ts
 import { createPayClient } from '@ezstart/pay-sdk/core'
 
 const client = createPayClient({
@@ -58,6 +79,7 @@ const client = createPayClient({
 })
 
 const plans = await client.listPlans({ appName: 'myapp' })
+const donation = await client.createDonation({ projectId: 'proj_123', amount: 500 })
 ```
 
 ## API
