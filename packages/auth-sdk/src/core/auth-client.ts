@@ -167,7 +167,9 @@ export class CoreAuthClient {
   /** Get current user info (dual-mode: httpOnly cookie OR accessToken). */
   async getCurrentUser(accessToken?: string): Promise<AuthUser> {
     const response = await fetch(`${this.apiUrl}/me`, {
-      headers: this.baseHeaders(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
+      headers: this.baseHeaders(
+        accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
+      ),
       credentials: 'include',
     })
 
@@ -342,7 +344,7 @@ export function createCoreAuthClient(config: AuthClientConfig): CoreAuthClient {
  *
  * @example
  * ```ts
- * const config = await fetchKeyConfig('ezk_live_abc123', 'https://api.ezauth.com')
+ * const config = await fetchKeyConfig('ez_pk_live_abc123', 'https://api.ezauth.com')
  * ```
  */
 export async function fetchKeyConfig(
@@ -425,9 +427,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
 
   if (sdkConfig.firstParty) {
     // First-party mode: direct access, no key needed
-    const apiUrl = sdkConfig.apiUrl
-      ? `${sdkConfig.apiUrl}/api/auth`
-      : defaultApiUrl
+    const apiUrl = sdkConfig.apiUrl ? `${sdkConfig.apiUrl}/api/auth` : defaultApiUrl
     const webUrl = sdkConfig.webUrl ?? defaultWebUrl
     const appName = sdkConfig.appName ?? 'ezauth'
 
@@ -470,9 +470,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   }
 
   // Dev mode: no key, no first-party → permissive localhost defaults
-  const apiUrl = sdkConfig.apiUrl
-    ? `${sdkConfig.apiUrl}/api/auth`
-    : defaultApiUrl
+  const apiUrl = sdkConfig.apiUrl ? `${sdkConfig.apiUrl}/api/auth` : defaultApiUrl
   const webUrl = sdkConfig.webUrl ?? defaultWebUrl
   const appName = sdkConfig.appName ?? 'dev'
 

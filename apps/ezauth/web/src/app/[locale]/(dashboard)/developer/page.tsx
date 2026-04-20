@@ -77,10 +77,27 @@ export default function DeveloperPage() {
         namePlaceholder: t('create.namePlaceholder'),
         appScope: t('create.appScope'),
         appScopeAll: t('create.appScopeAll'),
-        keyScope: t('create.keyScope', { defaultValue: 'Key Type' }),
-        keyScopeTest: t('create.keyScopeTest', { defaultValue: 'Test — sandbox, rate limited' }),
-        keyScopeLive: t('create.keyScopeLive', { defaultValue: 'Live — production, full access' }),
-        keyScopeAdmin: t('create.keyScopeAdmin', { defaultValue: 'Admin — superadmin, all apps' }),
+        keyType: t('create.keyType', { defaultValue: 'Key Type' }),
+        keyTypePublishable: t('create.keyTypePublishable', {
+          defaultValue: 'Publishable — safe to expose client-side',
+        }),
+        keyTypeSecret: t('create.keyTypeSecret', {
+          defaultValue: 'Secret — server-only, never expose',
+        }),
+        keyEnv: t('create.keyEnv', { defaultValue: 'Environment' }),
+        keyEnvLive: t('create.keyEnvLive', { defaultValue: 'Live — production' }),
+        keyEnvTest: t('create.keyEnvTest', { defaultValue: 'Test — sandbox, rate limited' }),
+        keyScope: t('create.keyScope', { defaultValue: 'Permission Scope' }),
+        keyScopeUser: t('create.keyScopeUser', { defaultValue: 'User — standard permissions' }),
+        keyScopeReadonly: t('create.keyScopeReadonly', {
+          defaultValue: 'Read-only — cannot modify data',
+        }),
+        keyScopeAdmin: t('create.keyScopeAdmin', {
+          defaultValue: 'Admin — full access (superadmin only)',
+        }),
+        keyScopeAdminWarning: t('create.keyScopeAdminWarning', {
+          defaultValue: 'Admin scope grants full platform access. Use with caution.',
+        }),
         expiry: t('create.expiry'),
         expiryNever: t('create.expiryNever'),
         expiry30d: t('create.expiry30d'),

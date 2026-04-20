@@ -150,7 +150,13 @@ export function useAuth(logger?: AuthLogger) {
     isLoggingOut: store.isLoggingOut,
     isAuthReady: store.isAuthReady,
     mode,
-    /** Auth scope: 'test'/'live' (single app), 'admin' (all apps), 'first-party' (ezauth web). */
+    /**
+     * Auth context scope (legacy shape, kept for backwards compat):
+     * - 'test'/'live' = single-app context
+     * - 'admin' = platform-wide context
+     * - 'first-party' = ezauth's own pages
+     * Prefer deriving single-app vs platform-wide from `appName === '*'` directly.
+     */
     scope,
     /** Raw publishable key string, or undefined if none configured. */
     publishableKey,

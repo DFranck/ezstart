@@ -98,7 +98,10 @@ interface AuthContextValue {
   keyConfig: PublishableKeyConfig | null
   /** Auth scope: 'test'/'live' (single app), 'admin' (all apps), 'first-party' (ezauth web). */
   scope: AuthScope
-  /** Raw publishable key string (e.g. `ezk_live_abc123`), or undefined if none. */
+  /**
+   * Raw publishable key string (e.g., `ez_pk_live_...` for production, `ez_pk_test_...` for sandbox).
+   * Legacy `ezk_*` keys still accepted but deprecated (rotate by 2026-07-21).
+   */
   publishableKey: string | undefined
 }
 
@@ -114,8 +117,9 @@ export interface AuthProviderProps {
   // ── Clerk-like API (preferred) ──────────────────────────────────────────
 
   /**
-   * Publishable key (starts with `ezk_live_` or `ezk_test_`).
+   * Publishable key (e.g., `ez_pk_live_...` for production, `ez_pk_test_...` for sandbox).
    * If not provided, reads from `process.env.NEXT_PUBLIC_EZAUTH_KEY`.
+   * Legacy `ezk_*` keys still accepted but deprecated (rotate by 2026-07-21).
    */
   publishableKey?: string
 

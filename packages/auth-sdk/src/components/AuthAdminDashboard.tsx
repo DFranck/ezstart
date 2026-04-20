@@ -129,7 +129,10 @@ export interface AuthAdminDashboardProps {
   appName?: string
   className?: string
   texts?: Partial<AuthAdminDashboardTexts>
-  /** Override scope detection (defaults to the scope from AuthProvider context). */
+  /**
+   * @deprecated Scope no longer drives filtering. Single-app vs platform-wide
+   * is derived from `appName` (prop or AuthProvider context). Kept for backwards compat.
+   */
   scope?: AuthScope
 }
 
@@ -402,19 +405,26 @@ export function AuthAdminDashboard({
   const t: Required<AuthAdminDashboardTexts> = { ...DEFAULT_TEXTS, ...texts }
   const accessToken = useAuthStore(state => state.accessToken)
 
-  // Resolve scope from context or prop
-  let contextScope: AuthScope = 'live'
+  // Resolve appName from context or prop. The `scope` prop is accepted for
+  // backwards compat but no longer drives single-app vs platform-wide — that's
+  // derived from appName (see below).
+  void scopeProp
+  let contextAppName: string | undefined
   try {
     const ctx = useAuthContext()
-    contextScope = ctx.scope
+    contextAppName = ctx.appName
   } catch {
-    // AuthProvider not available, default to 'live'
+    // AuthProvider not available, fall back to prop only
   }
-  const scope = scopeProp ?? contextScope
 
-  // For single-app scoped keys (test/live), always filter by the provider's appName
-  const isSingleAppScope = scope === 'test' || scope === 'live'
-  const effectiveAppName = isSingleAppScope ? appNameProp : undefined
+  // Single-app vs platform-wide is driven by appName (not scope).
+  // appName='*' = platform-wide, any other value = single-app.
+  // Compatible with both legacy ezk_* keys (scope='test'/'live') and new
+  // ez_pk_/ez_sk_ keys (scope='admin'/'user'/'readonly').
+  const effectiveAppNameCandidate = appNameProp ?? contextAppName
+  const isSingleAppScope =
+    effectiveAppNameCandidate !== undefined && effectiveAppNameCandidate !== '*'
+  const effectiveAppName = isSingleAppScope ? effectiveAppNameCandidate : undefined
 
   // App filter for platform/first-party (user can select which app to view)
   const [appFilter, setAppFilter] = useState<string>('')
@@ -498,7 +508,7 @@ export function AuthAdminDashboard({
     } finally {
       setLoading(false)
     }
-  }, [offset, searchQuery, activeAppFilter, accessToken, scope])
+  }, [offset, searchQuery, activeAppFilter, accessToken, isSingleAppScope])
 
   useEffect(() => {
     fetchUsers()

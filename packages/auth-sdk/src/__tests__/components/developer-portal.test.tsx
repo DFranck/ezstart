@@ -113,6 +113,17 @@ describe('CreateKeyModal', () => {
     namePlaceholder: 'My App',
     appScope: 'App Scope',
     appScopeAll: 'All apps',
+    keyType: 'Key Type',
+    keyTypePublishable: 'Publishable',
+    keyTypeSecret: 'Secret',
+    keyEnv: 'Environment',
+    keyEnvLive: 'Live',
+    keyEnvTest: 'Test',
+    keyScope: 'Permission Scope',
+    keyScopeUser: 'User',
+    keyScopeReadonly: 'Read-only',
+    keyScopeAdmin: 'Admin',
+    keyScopeAdminWarning: 'Admin scope grants full access.',
     expiry: 'Expiry',
     expiryNever: 'Never',
     expiry30d: '30 days',
@@ -124,14 +135,26 @@ describe('CreateKeyModal', () => {
 
   it('renders nothing when closed', () => {
     const { container } = render(
-      <CreateKeyModal isOpen={false} onClose={vi.fn()} onSubmit={vi.fn()} isSubmitting={false} texts={defaultTexts} />
+      <CreateKeyModal
+        isOpen={false}
+        onClose={vi.fn()}
+        onSubmit={vi.fn()}
+        isSubmitting={false}
+        texts={defaultTexts}
+      />
     )
     expect(container.querySelector('[role="dialog"]')).toBeNull()
   })
 
   it('renders modal content when open', () => {
     render(
-      <CreateKeyModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn()} isSubmitting={false} texts={defaultTexts} />
+      <CreateKeyModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onSubmit={vi.fn()}
+        isSubmitting={false}
+        texts={defaultTexts}
+      />
     )
     // The modal body contains labels and inputs (footer with "Create" button is not rendered by mock)
     expect(screen.getByText('Key Name')).toBeTruthy()
@@ -157,7 +180,12 @@ describe('KeyCreatedModal', () => {
 
   it('shows warning and key when open', () => {
     render(
-      <KeyCreatedModal isOpen={true} onClose={vi.fn()} rawKey="ezk_secret123" texts={defaultTexts} />
+      <KeyCreatedModal
+        isOpen={true}
+        onClose={vi.fn()}
+        rawKey="ezk_secret123"
+        texts={defaultTexts}
+      />
     )
     expect(screen.getByText('Save this key now.')).toBeTruthy()
     expect(screen.getByDisplayValue('ezk_secret123')).toBeTruthy()

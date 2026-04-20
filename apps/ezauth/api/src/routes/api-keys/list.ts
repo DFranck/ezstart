@@ -22,7 +22,9 @@ const apiKeyItemSchema = z.object({
   keyPrefix: z.string(),
   name: z.string(),
   appName: z.string(),
-  scope: z.enum(['test', 'live', 'admin']),
+  // Scope enum includes legacy 'test'/'live' for backwards compat with pre-P2a keys in DB.
+  // New keys only use 'admin'|'user'|'readonly'. Removal deadline: 2026-07-21.
+  scope: z.enum(['test', 'live', 'admin', 'user', 'readonly']),
   permissions: z.array(z.string()),
   status: z.enum(['active', 'revoked']),
   lastUsedAt: z.string().nullable(),
@@ -49,14 +51,11 @@ const listApiKeysController = async (req: Request, res: Response) => {
     const ApiKey = await getApiKeyModel()
     const ApiKeyUsage = await getApiKeyUsageModel()
 
-    const keys = await ApiKey.find({ userId })
-      .select('-key')
-      .sort({ createdAt: -1 })
-      .lean()
+    const keys = await ApiKey.find({ userId }).select('-key').sort({ createdAt: -1 }).lean()
 
     // Get current month usage per key
     const monthPrefix = new Date().toISOString().slice(0, 7)
-    const keyIds = keys.map((k) => k._id.toString())
+    const keyIds = keys.map(k => k._id.toString())
     const usageAgg = await ApiKeyUsage.aggregate<{ _id: string; total: number }>([
       {
         $match: {
@@ -71,7 +70,7 @@ const listApiKeysController = async (req: Request, res: Response) => {
         },
       },
     ])
-    const usageMap = new Map(usageAgg.map((u) => [u._id, u.total]))
+    const usageMap = new Map(usageAgg.map(u => [u._id, u.total]))
 
     const data = keys.map(k => ({
       id: k._id.toString(),

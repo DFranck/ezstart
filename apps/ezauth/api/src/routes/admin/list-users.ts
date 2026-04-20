@@ -80,8 +80,11 @@ const listUsersController = async (req: Request, res: Response) => {
     const apiKeyScope = req.apiKeyScope
     const apiKeyAppName = req.apiKeyAppName
 
-    if ((apiKeyScope === 'test' || apiKeyScope === 'live') && apiKeyAppName && apiKeyAppName !== '*') {
-      // Single-app scoped API key: only show users with this app
+    // Single-app keys filter users by their appName.
+    // Platform-wide keys (appName='*') see all users.
+    // Based on appName (not scope), compatible with both legacy ezk_* keys
+    // and new ez_pk_/ez_sk_ keys.
+    if (apiKeyAppName && apiKeyAppName !== '*') {
       query.apps = { $in: [apiKeyAppName] }
     } else if (!apiKeyScope) {
       // Direct user auth (no API key) — use existing role-based logic
@@ -93,7 +96,7 @@ const listUsersController = async (req: Request, res: Response) => {
         }
       }
     }
-    // Platform-scoped API key: no filtering, sees all users
+    // Platform-scoped API key (appName='*' or no appName): no filtering, sees all users
 
     // App filter: only show users who have logged into this app
     if (app) {

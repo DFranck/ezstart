@@ -26,10 +26,20 @@ export interface CreateKeyModalTexts {
   namePlaceholder: string
   appScope: string
   appScopeAll: string
+  /** Key type (publishable vs secret). */
+  keyType: string
+  keyTypePublishable: string
+  keyTypeSecret: string
+  /** Key environment (live vs test). */
+  keyEnv: string
+  keyEnvLive: string
+  keyEnvTest: string
+  /** Permission scope (admin/user/readonly). */
   keyScope: string
-  keyScopeTest: string
-  keyScopeLive: string
+  keyScopeUser: string
+  keyScopeReadonly: string
   keyScopeAdmin: string
+  keyScopeAdminWarning: string
   expiry: string
   expiryNever: string
   expiry30d: string
@@ -125,10 +135,17 @@ export const defaultDeveloperPortalTexts: DeveloperPortalTexts = {
     namePlaceholder: 'My App Production',
     appScope: 'App Scope',
     appScopeAll: 'All apps',
-    keyScope: 'Key Type',
-    keyScopeTest: 'Test — sandbox, rate limited',
-    keyScopeLive: 'Live — production, full access',
-    keyScopeAdmin: 'Admin — superadmin, all apps',
+    keyType: 'Key Type',
+    keyTypePublishable: 'Publishable — safe to expose client-side',
+    keyTypeSecret: 'Secret — server-only, never expose',
+    keyEnv: 'Environment',
+    keyEnvLive: 'Live — production',
+    keyEnvTest: 'Test — sandbox, rate limited',
+    keyScope: 'Permission Scope',
+    keyScopeUser: 'User — standard permissions',
+    keyScopeReadonly: 'Read-only — cannot modify data',
+    keyScopeAdmin: 'Admin — full access (superadmin only)',
+    keyScopeAdminWarning: 'Admin scope grants full platform access. Use with caution.',
     expiry: 'Expiry',
     expiryNever: 'Never',
     expiry30d: '30 days',

@@ -9,7 +9,11 @@
 // Key scope
 // ---------------------------------------------------------------------------
 
-/** Scope of an API key or auth context. */
+/**
+ * Legacy auth scope — mixes env and ownership. Kept for backwards compat.
+ * New code should derive scope from the key's appName + scope metadata.
+ * @deprecated Use `ApiKeyScope` for permission and `key.appName` for ownership.
+ */
 export type AuthScope = 'test' | 'live' | 'admin' | 'first-party'
 
 // ---------------------------------------------------------------------------
@@ -60,7 +64,7 @@ export interface PublishableKeyConfig {
   plan: string
   /** Monthly quota (-1 means unlimited). */
   quotaMonthly: number
-  /** Key scope: 'test' (sandbox), 'live' (production), or 'admin' (superadmin, all apps). */
+  /** Legacy key scope (read from DB). For new keys use type+env+scope metadata. */
   scope?: 'test' | 'live' | 'admin'
 }
 
@@ -76,8 +80,9 @@ export interface PublishableKeyConfig {
  */
 export interface AuthSDKConfig {
   /**
-   * Publishable key (starts with `ezk_live_` or `ezk_test_`).
+   * Publishable key (e.g., `ez_pk_live_abc123...` or legacy `ezk_live_abc...`).
    * Read from `NEXT_PUBLIC_EZAUTH_KEY` env var if not provided.
+   * Legacy `ezk_*` keys deprecated — rotate to `ez_pk_` prefix by 2026-07-21.
    */
   publishableKey?: string
   /**
@@ -250,6 +255,7 @@ export interface ApiKeyItem {
   keyPrefix: string
   name: string
   appName: string
+  /** Legacy scope value from DB. New keys use scope='admin'|'user'|'readonly' metadata. */
   scope: 'test' | 'live' | 'admin'
   permissions: string[]
   status: 'active' | 'revoked'
@@ -281,13 +287,24 @@ export interface CreateApiKeyResponse {
   key: string
   keyPrefix: string
   name: string
+  /** Key type (optional, present on new keys created after P2a). */
+  type?: 'publishable' | 'secret'
+  /** Key environment (optional, present on new keys created after P2a). */
+  env?: 'live' | 'test'
+  /** Permission scope (optional, present on new keys created after P2a). */
+  scope?: 'admin' | 'user' | 'readonly'
 }
 
 /** Body for the create-key mutation. */
 export interface CreateApiKeyRequest {
   name: string
   appName: string
-  scope?: 'test' | 'live' | 'admin'
+  /** Key type: publishable (client-side safe) or secret (server-only). */
+  type?: 'publishable' | 'secret'
+  /** Environment: live (production) or test (sandbox). */
+  env?: 'live' | 'test'
+  /** Permission scope for the new key. */
+  scope?: 'admin' | 'user' | 'readonly'
   expiresAt: string | null
 }
 

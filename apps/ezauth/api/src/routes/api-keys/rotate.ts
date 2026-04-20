@@ -33,6 +33,8 @@ const rotateApiKeyResponseSchema = z.object({
     name: z.string(),
     type: z.enum(['publishable', 'secret']),
     env: z.enum(['live', 'test']),
+    // Scope enum includes legacy 'test'/'live' for backwards compat with pre-P2a keys in DB.
+    // New keys only use 'admin'|'user'|'readonly'. Removal deadline: 2026-07-21.
     scope: z.enum(['admin', 'user', 'readonly', 'test', 'live']),
   }),
 })

@@ -6,6 +6,7 @@ import {
   Input,
   Label,
   Modal,
+  P,
   Select,
   SelectContent,
   SelectItem,
@@ -25,6 +26,10 @@ export interface CreateKeyModalProps {
   /** Show admin scope option (for superadmins only). */
   showAdminScope?: boolean
 }
+
+type KeyType = 'publishable' | 'secret'
+type KeyEnv = 'live' | 'test'
+type KeyScope = 'admin' | 'user' | 'readonly'
 
 function computeExpiryDate(option: string): string | null {
   if (option === 'never') return null
@@ -46,7 +51,9 @@ export function CreateKeyModal({
 }: CreateKeyModalProps) {
   const [name, setName] = useState('')
   const [appName, setAppName] = useState('*')
-  const [scope, setScope] = useState<'live' | 'admin'>('live')
+  const [type, setType] = useState<KeyType>('publishable')
+  const [env, setEnv] = useState<KeyEnv>('live')
+  const [scope, setScope] = useState<KeyScope>('user')
   const [expiry, setExpiry] = useState('never')
 
   const handleSubmit = () => {
@@ -54,6 +61,8 @@ export function CreateKeyModal({
     onSubmit({
       name: name.trim(),
       appName,
+      type,
+      env,
       scope,
       expiresAt: computeExpiryDate(expiry),
     })
@@ -62,7 +71,9 @@ export function CreateKeyModal({
   const handleClose = () => {
     setName('')
     setAppName('*')
-    setScope('live')
+    setType('publishable')
+    setEnv('live')
+    setScope('user')
     setExpiry('never')
     onClose()
   }
@@ -92,16 +103,46 @@ export function CreateKeyModal({
         </Div>
 
         <Div className="space-y-2">
-          <Label>{texts.keyScope}</Label>
-          <Select value={scope} onValueChange={v => setScope(v as 'live' | 'admin')}>
+          <Label>{texts.keyType}</Label>
+          <Select value={type} onValueChange={v => setType(v as KeyType)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="live">{texts.keyScopeLive}</SelectItem>
+              <SelectItem value="publishable">{texts.keyTypePublishable}</SelectItem>
+              <SelectItem value="secret">{texts.keyTypeSecret}</SelectItem>
+            </SelectContent>
+          </Select>
+        </Div>
+
+        <Div className="space-y-2">
+          <Label>{texts.keyEnv}</Label>
+          <Select value={env} onValueChange={v => setEnv(v as KeyEnv)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="live">{texts.keyEnvLive}</SelectItem>
+              <SelectItem value="test">{texts.keyEnvTest}</SelectItem>
+            </SelectContent>
+          </Select>
+        </Div>
+
+        <Div className="space-y-2">
+          <Label>{texts.keyScope}</Label>
+          <Select value={scope} onValueChange={v => setScope(v as KeyScope)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="user">{texts.keyScopeUser}</SelectItem>
+              <SelectItem value="readonly">{texts.keyScopeReadonly}</SelectItem>
               {showAdminScope && <SelectItem value="admin">{texts.keyScopeAdmin}</SelectItem>}
             </SelectContent>
           </Select>
+          {scope === 'admin' && (
+            <P className="text-xs text-destructive">{texts.keyScopeAdminWarning}</P>
+          )}
         </Div>
 
         <Div className="space-y-2">
