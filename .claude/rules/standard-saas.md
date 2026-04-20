@@ -32,9 +32,16 @@
 
 ### 1.4 API Keys (quand applicable)
 
-- [ ] `validateApiKey` middleware disponible pour les routes consommées par des devs externes
-- [ ] Header `X-API-Key` supporté
-- [ ] Clés hashées en DB (sha256), jamais stockées en clair
+Voir [`standard-saas-keys.md`](./standard-saas-keys.md) pour la convention complète (naming, metadata, dogfood, bootstrap, migration).
+
+Checklist rapide :
+
+- [ ] Prefix suit `ez_(pk|sk)_(live|test)_` (pas de scope/app dans le prefix)
+- [ ] `type: 'publishable' | 'secret'` en metadata DB
+- [ ] Clés secret jamais en `NEXT_PUBLIC_*`
+- [ ] Seed script idempotent pour bootstrap (`pnpm --filter <api> seed:self-key`)
+- [ ] Header `X-API-Key` supporté côté API
+- [ ] Clés hashées (sha256) en DB, jamais en clair
 - [ ] `lastUsedAt` mis à jour (fire-and-forget)
 
 ### 1.5 Monitoring
@@ -249,12 +256,17 @@ Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch prod
 
 ### 5.5 Admin Platform (superadmin)
 
+Pattern **federated admin** : EZStart (hub) agrège les AdminDashboards de chaque SDK en tabs. Pas de panel admin dupliqué par app — un seul hub pour tout superadmin.
+
 - [ ] Dashboard stats global
 - [ ] User management (CRUD, roles, ban)
 - [ ] Gestion de toutes les API keys
 - [ ] Stats usage global, revenue
 - [ ] Scope par key : app-scoped montre une app, platform-scoped montre tout
-- [ ] Via auth-sdk AuthAdminDashboard component
+- [ ] Chaque SDK exporte son `<XxxAdminDashboard />` (auth-sdk `<AuthAdminDashboard />`, pay-sdk `<PayAdminDashboard />`, monitoring `<MonitoringDashboard />`, ...)
+- [ ] `apps/ezstart/web/src/app/[locale]/(dashboard)/admin/` embed ces components en tabs
+- [ ] Superadmin JWT global accepté par toutes les APIs (JWT_PUBLIC_KEY partagé, pas de clé par app pour le superadmin)
+- [ ] Chaque SDK AdminDashboard accepte `apiUrl` + `authToken` props pour fonctionner cross-origin
 
 ### 5.6 Developer Experience
 
@@ -309,13 +321,13 @@ grep -rnE "bg-gray|bg-red|bg-blue|bg-green|text-gray|text-red" apps/<app>/web/sr
 
 ## Score par app (audit actuel 2026-04-16)
 
-| App | API | Web | Infra | SaaS Features | Product Completeness | Total |
-|-----|-----|-----|-------|----------------|---------------------|-------|
-| ezauth | 9/9 | 8/8 | OK | API keys done | Landing + Auth + Admin | Reference |
-| ezbill | 8/9 | 8/8 | OK | - | Landing only | Excellent |
-| ezpay | 8/9 | 8/8 | OK | - | Landing + Pricing | Excellent |
-| ezstart | 8/9 | 8/8 | OK | - | Landing only | Excellent |
-| green-pulse | 8/9 | 8/8 | OK | - | Landing only | Excellent |
-| gacha-analyzer | 8/9 | 7/8 | OK | - | - | Good (admin manquant) |
-| fengshui | N/A | 7/8 | OK | - | - | Good (admin manquant) |
-| asc-tcd | N/A | 7/8 | OK | - | - | Good (auth intentionnel) |
+| App            | API | Web | Infra | SaaS Features | Product Completeness   | Total                    |
+| -------------- | --- | --- | ----- | ------------- | ---------------------- | ------------------------ |
+| ezauth         | 9/9 | 8/8 | OK    | API keys done | Landing + Auth + Admin | Reference                |
+| ezbill         | 8/9 | 8/8 | OK    | -             | Landing only           | Excellent                |
+| ezpay          | 8/9 | 8/8 | OK    | -             | Landing + Pricing      | Excellent                |
+| ezstart        | 8/9 | 8/8 | OK    | -             | Landing only           | Excellent                |
+| green-pulse    | 8/9 | 8/8 | OK    | -             | Landing only           | Excellent                |
+| gacha-analyzer | 8/9 | 7/8 | OK    | -             | -                      | Good (admin manquant)    |
+| fengshui       | N/A | 7/8 | OK    | -             | -                      | Good (admin manquant)    |
+| asc-tcd        | N/A | 7/8 | OK    | -             | -                      | Good (auth intentionnel) |

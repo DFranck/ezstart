@@ -28,6 +28,7 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 
 ### Cross-cutting
 
+- [ ] **CROSS-KEY-001: Migration `?app=` → `?key=ez_pk_live_*` pour toutes les apps consumer d'ezauth** — Actuellement seul ezpay a été partiellement migré vers le nouveau système de publishable key (défini dans `standard-saas-keys.md`). À faire : ezstart, ezbill, green-pulse, fengshui, asc-tcd, gacha-analyzer. Chaque app doit (1) avoir sa clé `ez_pk_live_<hex>` créée via dashboard ezauth, (2) ajouter `NEXT_PUBLIC_EZAUTH_KEY=` dans son `.env.local` + `.env.example`, (3) passer `publishableKey={...}` au `<AuthProvider>`, (4) supprimer `?app=` hardcoded des liens login/register. Bloqué par : finalisation du renommage prefixes `ezk_*` → `ez_pk_*`/`ez_sk_*` (EZ-KEY-001).
 - [ ] **npm publish setup** — In progress. Setup `npm publish --access public` for all `@ezstart/*` packages. Changesets for versioning + changelog. GitHub Action on tag `v*.*.*` auto-publishes modified packages. Packages: api-contracts, api-core, api-sdk, auth-sdk, pay-sdk, ui (phase 1).
 - [ ] **Developer API key system** — Après publish npm. Chaque SDK accepte `{ apiKey }` dans sa config. EZAuth dashboard génère des API keys par app. Middleware `validateApiKey` dans api-core. Free tier (ex: 1000 users auth, 100 transactions pay) → payant via EZPay subscriptions. Self-dogfood: toutes les apps monorepo utilisent le même système (clé admin gratuite / illimitée). Modèle Clerk/Stripe : SDK gratuit npm, service payant via API key + quotas.
 - [ ] **Developer dashboard (EZStart hub)** — Dashboard pour devs externes : créer un compte, générer API keys, voir usage/quotas, gérer billing via EZPay. Pages: `/developer/apps`, `/developer/keys`, `/developer/usage`, `/developer/billing`. Consomme auth-sdk + pay-sdk en dogfood.
@@ -70,6 +71,16 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 ### ezstart (api 6100 / web 6101)
 
 Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin panel + Feature demos (CV, QR, Business Card) + Libraries showcase. **Status:** maintained.
+
+#### P1 — Admin federation hub (après ezauth/ezpay nouveau key system finalisé)
+
+Objectif : EZStart = hub admin central, agrège les panels admin de chaque app via SDK components. Zero duplication, zero aller-retour entre apps pour un superadmin.
+
+- [ ] **EZHUB-001: Admin federation hub** — `apps/ezstart/web/src/app/[locale]/(dashboard)/admin/` en tabs qui embed `<AuthAdminDashboard />`, `<PayAdminDashboard />`, `<MonitoringDashboard />`, etc. Remplace les admin panels per-app.
+- [ ] **EZHUB-002: pay-sdk exporter `<PayAdminDashboard />`** — actuellement l'admin ezpay vit dans `apps/ezpay/web`, à extraire dans `@ezstart/pay-sdk/components` (agnostique, publishable).
+- [ ] **EZHUB-003: Superadmin JWT global** — même JWT accepté par ezauth-api + ezpay-api + ezstart-api (JWT_PUBLIC_KEY partagé). Pas de clé API par app pour le superadmin.
+- [ ] **EZHUB-004: SDK AdminDashboard `apiUrl` + `authToken` props** — chaque component admin accepte ces props pour pointer vers l'API distante (cross-origin).
+- [ ] **EZHUB-005: Migration admin panels ezauth/ezpay vers hub** — une fois EZHUB-001 à 004 fait, supprimer les routes `/admin` dans ezauth/web et ezpay/web (tout passe par ezstart/admin).
 
 #### P1 — Bugs & code quality
 
@@ -118,9 +129,28 @@ Landing page / portfolio + Monitoring dashboard (health, errors, audits) + Admin
 
 ### ezauth (api 6110 / web 6111)
 
-SSO authentication service pour tout le monorepo. **Status:** maintained.
+Authentication SaaS (Clerk clone) pour tout le monorepo + external devs. **Status:** active — en route vers publishable key Clerk/Stripe pattern.
 
-Tout le backlog audit 2026-03-29 (P0 security, P1 features, P2 code quality, P3 UX, P4 API) est terminé. Pas d'item actif connu à ce jour. Voir `BACKLOG-HISTORY.md` pour l'historique complet.
+#### P0 — Publishable key system finalization (audit live 2026-04-20)
+
+- [ ] **EZ-KEY-001: Renommer préfixes clés `ezk_*` → `ez_pk_*` / `ez_sk_*`** (Stripe/Clerk pattern)
+  - `apps/ezauth/api/src/utils/api-key.ts` : SCOPE_PREFIX refactor
+  - Ajouter distinction `type: 'publishable' | 'secret'` sur model ApiKey
+  - Migration douce : accepter `ezk_*` en lecture, n'écrire que les nouveaux
+  - Update tests unitaires + docs
+- [ ] **EZ-KEY-002: Fallback appName sur login/register first-party** = 'ezauth' (pas 'ezstart')
+  - `apps/ezauth/web/src/app/[locale]/(auth)/login/page.tsx:34`
+  - `apps/ezauth/web/src/app/[locale]/(auth)/register/page.tsx:32`
+  - Bug visible : "Sign in to access EZStart" sur ezauth's own login (confirmé live)
+- [ ] **EZ-KEY-003: DevModeBanner hide en first-party** (bug : reste visible car SignInForm forward toujours appName)
+  - Fix dans `packages/auth-sdk/src/components/SignInForm.tsx` (+ SignUpForm + ForgotPasswordForm)
+  - Ne forward `appName` à DevModeBanner que si context third-party (keyStatus ou urlKey set)
+- [ ] **EZ-KEY-004: EZAuth pricing page** utiliser `<PricingPage />` de pay-sdk (actuellement placeholder "Pricing coming soon")
+  - `apps/ezauth/web/src/app/[locale]/(public)/page.tsx:234` — section pricing à câbler
+  - Créer plans ezauth Free/Pro/Business dans EZPay admin
+- [ ] **EZ-KEY-005: Section Billing du dashboard EZAuth** — remplacer placeholder par composant pay-sdk (subscriptions, upgrade, invoices)
+
+#### Backlog 2026-03-29 — voir BACKLOG-HISTORY.md (terminé)
 
 ---
 
@@ -204,7 +234,21 @@ Invoicing & billing pour les SME. **Status:** in-progress, priorité haute.
 
 ### ezpay (api 6130 / web 6131)
 
-Payment system centralisé (donations, achats, abonnements, factures via Stripe). **Status:** maintained.
+Payment SaaS (Stripe clone) avec SDK publishable + SaaS dashboard. **Status:** active — doit consommer ezauth via publishable key comme un vrai SaaS externe.
+
+#### P0 — Publishable key integration avec EZAuth (audit live 2026-04-20)
+
+- [ ] **EZP-KEY-001: Configurer EZPay comme consumer SaaS externe d'EZAuth**
+  - Créer clé `ez_pk_live_...` pour ezpay via le dashboard EZAuth (one-time setup)
+  - Ajouter `NEXT_PUBLIC_EZAUTH_KEY=ez_pk_live_...` dans `.env.local` + `.env.example` ezpay
+  - Update `apps/ezpay/web/src/app/[locale]/providers.tsx` : `<AuthProvider publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY} />`
+  - Confirmer que LoginButton redirige vers ezauth avec `?key=ez_pk_...` (au lieu de `?app=ezpay` legacy)
+- [ ] **EZP-KEY-002: EZPay pricing page** utiliser `<PricingPage />` de pay-sdk (actuellement placeholder "Pricing coming soon" sur landing)
+  - Créer plans ezpay (Free + Stripe 2.9% / Pro + 1% / Business + 0%) dans EZPay admin
+  - Câbler section pricing landing sur les vrais plans
+- [ ] **EZP-KEY-003: Webhook EZPay → EZAuth pour activer clés payantes**
+  - Quand un user ezauth paie un plan via ezpay → ezpay webhook notifie ezauth → ezauth met à jour le plan de la clé
+  - Flow circulaire : ezauth dogfood ezpay pour billing, ezpay dogfood ezauth pour auth
 
 #### P0 — Stripe Connect (Platform/Marketplace)
 

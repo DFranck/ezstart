@@ -33,12 +33,19 @@ Three checks, ALL must pass:
    - Also checks `standard-saas.md` for apps
    - Also checks `standard-ui.md` for UI components
 2. **Hacker** — adversarial attack, writes tests that prove bugs
-3. **Fix** — dev agent fixes all issues found
+3. **Plan mode validation** — BEFORE any fix, Claude MUST enter plan mode (ExitPlanMode tool) and present the exact fix to the user:
+   - Files + line numbers to modify
+   - Exact change (old → new) for each location
+   - Impact analysis (what else might break)
+   - Wait for user approval — NEVER execute a fix without explicit validation
+4. **Fix** — only after plan approval, dev agent executes the approved fix
 
-Loop: `audit → hack → fix → audit → hack → fix → ...`
+Loop: `audit → hack → PLAN → approval → fix → audit → hack → PLAN → approval → fix → ...`
 Stop condition: **auditor PASS + hacker CLEAN, two times in a row**.
 
-If ANY standard is not respected → FAIL → fix → re-audit.
+If ANY standard is not respected → FAIL → propose plan → get approval → fix → re-audit.
+
+**Why plan mode is mandatory:** trust was lost after repeated regressions from batched fixes. Every change must be validated before execution, no exceptions.
 
 ### Step 3 — Unit tests
 
@@ -53,6 +60,7 @@ All tests must pass. Zero failures, zero skips (except documented).
 Create or update `E2E-TESTS.md` at the repo root (or per-app).
 
 Format:
+
 ```markdown
 - [ ] T01 — Login credentials — 2026-04-18
 - [ ] T02 — Admin dashboard render — 2026-04-18
@@ -64,6 +72,7 @@ Each test: checkbox / ID / description / result + comment if fail / date.
 ### Step 5 — E2E MCP tests
 
 Run ALL tests via Chrome DevTools MCP on dev (localhost) or staging. Do not stop at the first failure — run the entire test suite and collect all results.
+
 - Navigate to pages
 - Fill forms, click buttons
 - Verify renders, network requests, error states
@@ -106,11 +115,11 @@ Multiple non-conflicting tasks → agents in parallel. Each agent follows steps 
 
 ## The 3 agent roles
 
-| Role | Job | File |
-|------|-----|------|
-| `dev` | Implements code + tests | `.claude/agents/dev.md` |
-| `auditor` | Verifies ALL standards | `.claude/agents/auditor.md` |
-| `hacker` | Breaks code, proves bugs | `.claude/agents/hacker.md` |
+| Role      | Job                      | File                        |
+| --------- | ------------------------ | --------------------------- |
+| `dev`     | Implements code + tests  | `.claude/agents/dev.md`     |
+| `auditor` | Verifies ALL standards   | `.claude/agents/auditor.md` |
+| `hacker`  | Breaks code, proves bugs | `.claude/agents/hacker.md`  |
 
 ---
 
@@ -118,8 +127,8 @@ Multiple non-conflicting tasks → agents in parallel. Each agent follows steps 
 
 ALL standards must be checked at step 2:
 
-| Standard | Scope |
-|----------|-------|
-| `standard.md` | All packages (7 criteria) |
-| `standard-saas.md` | SaaS apps (API + Web + Infra + Product) |
-| `standard-ui.md` | UI components (responsive, patterns, design system) |
+| Standard           | Scope                                               |
+| ------------------ | --------------------------------------------------- |
+| `standard.md`      | All packages (7 criteria)                           |
+| `standard-saas.md` | SaaS apps (API + Web + Infra + Product)             |
+| `standard-ui.md`   | UI components (responsive, patterns, design system) |

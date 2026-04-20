@@ -31,6 +31,7 @@ Domaines spécifiques (applicables en plus du standard) :
 - [`.claude/rules/ui.md`](./.claude/rules/ui.md) — composants `@ezstart/ui`, classes sémantiques, i18n user-facing
 - [`.claude/rules/standard-ui.md`](./.claude/rules/standard-ui.md) — checklist packages/ui/ et SDK components (architecture, responsive, dark mode)
 - [`.claude/rules/standard-saas.md`](./.claude/rules/standard-saas.md) — checklist apps SaaS (API + Web + Infra + features + product completeness)
+- [`.claude/rules/standard-saas-keys.md`](./.claude/rules/standard-saas-keys.md) — API key naming convention (ez*pk*/ez*sk*), dogfood pattern, bootstrap, migration from ezk\_\*
 
 ## Git
 
