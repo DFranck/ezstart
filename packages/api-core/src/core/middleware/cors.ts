@@ -9,7 +9,7 @@ import type { RequestHandler } from 'express'
 import type { CorsConfig } from '../types.js'
 
 const DEFAULT_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
-const DEFAULT_HEADERS = ['Content-Type', 'Authorization', 'x-user-id']
+const DEFAULT_HEADERS = ['Content-Type', 'Authorization', 'x-user-id', 'x-api-key']
 
 /**
  * Build a CORS middleware from a `CorsConfig`.
