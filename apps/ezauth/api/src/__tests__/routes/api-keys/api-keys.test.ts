@@ -9,7 +9,8 @@ import { getApiKeyModel } from '../../../models/api-key.js'
 import { getApiKeyUsageModel } from '../../../models/api-key-usage.js'
 import { getAuthUserModel } from '../../../models/auth-user.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../../utils/api-key.js'
-import type { ApiKeyScope } from '../../../utils/api-key.js'
+import type { ApiKeyType, ApiKeyEnv } from '../../../utils/api-key.js'
+import type { ApiKeyScope } from '../../../models/api-key.js'
 import {
   createUser,
   createAdminUser,
@@ -44,17 +45,21 @@ function createApiKeysTestApp() {
   // POST /keys — create
   app.post('/keys', verifyTokenMiddleware, bridgeUserId, async (req, res) => {
     const userId = req.userId!
-    const { name, appName, expiresAt, scope: rawScope } = req.body || {}
+    const { name, appName, expiresAt, type: rawType, env: rawEnv, scope: rawScope } = req.body || {}
     if (!name) return sendValidationError(res, 'name is required', [])
 
-    const scope: ApiKeyScope = rawScope || 'live'
+    const type: ApiKeyType = rawType || 'publishable'
+    const env: ApiKeyEnv = rawEnv || 'live'
+    const scope: ApiKeyScope = rawScope || 'user'
+    const effectiveAppName: string = appName || '*'
 
-    // Admin-scoped keys require superadmin
-    if (scope === 'admin') {
+    // Cross-app keys require superadmin
+    if (effectiveAppName === '*') {
       const AuthUser = await getAuthUserModel()
       const user = await AuthUser.findById(userId).lean()
-      if (!user?.globalRoles?.includes('superadmin')) {
-        return sendError(res, 'Admin-scoped keys require superadmin role', 403)
+      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
+      if (!isSuperadmin) {
+        return sendError(res, 'Platform-wide keys (appName="*") require superadmin', 403)
       }
     }
 
@@ -64,11 +69,9 @@ function createApiKeysTestApp() {
       return sendError(res, `Maximum ${MAX_KEYS_PER_USER} active API keys allowed`, 400)
     }
 
-    const rawKey = generateRawApiKey(scope)
+    const rawKey = generateRawApiKey({ type, env })
     const hashedKey = hashApiKey(rawKey)
     const keyPrefix = extractKeyPrefix(rawKey)
-
-    const effectiveAppName = scope === 'admin' ? '*' : (appName || '*')
 
     const apiKey = await ApiKey.create({
       key: hashedKey,
@@ -76,6 +79,8 @@ function createApiKeysTestApp() {
       name,
       userId,
       appName: effectiveAppName,
+      type,
+      env,
       scope,
       permissions: ['*'],
       status: 'active',
@@ -87,6 +92,9 @@ function createApiKeysTestApp() {
       key: rawKey,
       keyPrefix,
       name: apiKey.name,
+      type,
+      env,
+      scope,
     })
   })
 
@@ -138,9 +146,11 @@ function createApiKeysTestApp() {
     oldKey.revokedAt = new Date()
     await oldKey.save()
 
-    // Create new (preserve scope)
-    const scope = oldKey.scope || 'live'
-    const rawKey = generateRawApiKey(scope)
+    // Create new (preserve type/env/scope)
+    const type: ApiKeyType = oldKey.type ?? 'publishable'
+    const env: ApiKeyEnv = oldKey.env ?? 'live'
+    const scope: ApiKeyScope = oldKey.scope ?? 'user'
+    const rawKey = generateRawApiKey({ type, env })
     const hashedKey = hashApiKey(rawKey)
     const keyPrefix = extractKeyPrefix(rawKey)
 
@@ -150,6 +160,8 @@ function createApiKeysTestApp() {
       name: oldKey.name,
       userId,
       appName: oldKey.appName,
+      type,
+      env,
       scope,
       permissions: oldKey.permissions,
       status: 'active',
@@ -161,6 +173,9 @@ function createApiKeysTestApp() {
       key: rawKey,
       keyPrefix,
       name: newKey.name,
+      type,
+      env,
+      scope,
     })
   })
 
@@ -210,20 +225,70 @@ describe('API Keys Routes', () => {
   })
 
   describe('POST /keys — create', () => {
-    it('should create a new API key', async () => {
+    it('should create a new API key (default publishable/live)', async () => {
       const user = await createUser({ email: 'keys@test.com', username: 'keysuser' })
       const token = generateAccessToken(user)
 
       const res = await request(app)
         .post('/keys')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'My Test Key' })
+        .send({ name: 'My Test Key', appName: 'myapp' })
 
       expect(res.status).toBe(200)
-      expect(res.body.data.key).toMatch(/^ezk_/)
+      expect(res.body.data.key).toMatch(/^ez_pk_live_/)
       expect(res.body.data.keyPrefix).toBeTruthy()
       expect(res.body.data.name).toBe('My Test Key')
+      expect(res.body.data.type).toBe('publishable')
+      expect(res.body.data.env).toBe('live')
+      expect(res.body.data.scope).toBe('user')
       expect(res.body.data.id).toBeTruthy()
+    })
+
+    it('should create a publishable test key (ez_pk_test_*)', async () => {
+      const user = await createUser({ email: 'pktestcreate@test.com', username: 'pktestcreate' })
+      const token = generateAccessToken(user)
+
+      const res = await request(app)
+        .post('/keys')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Test Key', appName: 'myapp', type: 'publishable', env: 'test' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.key).toMatch(/^ez_pk_test_/)
+    })
+
+    it('should create a secret live key for superadmin with platform scope', async () => {
+      const admin = await createAdminUser({ email: 'sk-admin@test.com', username: 'skadmin' })
+      const token = generateAccessToken(admin)
+
+      const res = await request(app)
+        .post('/keys')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: 'Platform Secret',
+          appName: '*',
+          type: 'secret',
+          env: 'live',
+          scope: 'admin',
+        })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.key).toMatch(/^ez_sk_live_/)
+      expect(res.body.data.type).toBe('secret')
+      expect(res.body.data.scope).toBe('admin')
+    })
+
+    it('should reject platform-wide (appName="*") key creation for non-superadmin', async () => {
+      const user = await createUser({ email: 'platform@test.com', username: 'platformuser' })
+      const token = generateAccessToken(user)
+
+      const res = await request(app)
+        .post('/keys')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Platform Key', appName: '*', type: 'secret', env: 'live', scope: 'admin' })
+
+      expect(res.status).toBe(403)
+      expect(res.body.error.message).toContain('superadmin')
     })
 
     it('should reject without auth', async () => {
@@ -235,10 +300,7 @@ describe('API Keys Routes', () => {
       const user = await createUser({ email: 'noname@test.com', username: 'nonameuser' })
       const token = generateAccessToken(user)
 
-      const res = await request(app)
-        .post('/keys')
-        .set('Authorization', `Bearer ${token}`)
-        .send({})
+      const res = await request(app).post('/keys').set('Authorization', `Bearer ${token}`).send({})
 
       expect(res.status).toBe(422)
     })
@@ -255,7 +317,7 @@ describe('API Keys Routes', () => {
       const res = await request(app)
         .post('/keys')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'One More Key' })
+        .send({ name: 'One More Key', appName: 'myapp' })
 
       expect(res.status).toBe(400)
       expect(res.body.error.message).toContain('Maximum')
@@ -270,9 +332,7 @@ describe('API Keys Routes', () => {
       await createApiKey(user._id!.toString(), { name: 'Key 1' })
       await createApiKey(user._id!.toString(), { name: 'Key 2' })
 
-      const res = await request(app)
-        .get('/keys')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/keys').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.data).toHaveLength(2)
@@ -286,9 +346,7 @@ describe('API Keys Routes', () => {
       await createApiKey(user1._id!.toString(), { name: 'My Key' })
       await createApiKey(user2._id!.toString(), { name: 'Their Key' })
 
-      const res = await request(app)
-        .get('/keys')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/keys').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.data).toHaveLength(1)
@@ -301,9 +359,7 @@ describe('API Keys Routes', () => {
 
       await createApiKey(user._id!.toString())
 
-      const res = await request(app)
-        .get('/keys')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/keys').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.data[0]).not.toHaveProperty('key')
@@ -341,7 +397,7 @@ describe('API Keys Routes', () => {
       expect(res.status).toBe(400)
     })
 
-    it('should return 404 for another user\'s key', async () => {
+    it("should return 404 for another user's key", async () => {
       const user1 = await createUser({ email: 'owner@test.com', username: 'owner' })
       const user2 = await createUser({ email: 'thief@test.com', username: 'thief' })
       const token2 = generateAccessToken(user2)
@@ -359,14 +415,19 @@ describe('API Keys Routes', () => {
     it('should rotate an active key (revoke old + create new)', async () => {
       const user = await createUser({ email: 'rotate@test.com', username: 'rotateuser' })
       const token = generateAccessToken(user)
-      const { doc: oldDoc } = await createApiKey(user._id!.toString(), { name: 'Original' })
+      const { doc: oldDoc } = await createApiKey(user._id!.toString(), {
+        name: 'Original',
+        type: 'publishable',
+        env: 'live',
+        scope: 'user',
+      })
 
       const res = await request(app)
         .post(`/keys/${oldDoc._id.toString()}/rotate`)
         .set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
-      expect(res.body.data.key).toMatch(/^ezk_/)
+      expect(res.body.data.key).toMatch(/^ez_pk_live_/)
       expect(res.body.data.id).not.toBe(oldDoc._id.toString()) // New ID
       expect(res.body.data.name).toBe('Original') // Same name
 
@@ -389,41 +450,45 @@ describe('API Keys Routes', () => {
     })
   })
 
-  describe('Scope — admin scope restrictions + rotate preservation', () => {
-    it('should allow superadmin to create an admin-scoped key', async () => {
+  describe('Type/env/scope — modern format + rotate preservation', () => {
+    it('should allow superadmin to create a platform secret admin key', async () => {
       const admin = await createAdminUser({ email: 'scopeadmin@test.com', username: 'scopeadmin' })
       const token = generateAccessToken(admin)
 
       const res = await request(app)
         .post('/keys')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'Admin Key', scope: 'admin' })
+        .send({ name: 'Admin Key', appName: '*', type: 'secret', env: 'live', scope: 'admin' })
 
       expect(res.status).toBe(200)
-      expect(res.body.data.key).toMatch(/^ezk_admin_/)
+      expect(res.body.data.key).toMatch(/^ez_sk_live_/)
+      expect(res.body.data.scope).toBe('admin')
     })
 
-    it('should reject admin-scoped key creation for non-superadmin', async () => {
+    it('should reject platform-wide secret key creation for non-superadmin', async () => {
       const user = await createUser({ email: 'scopeuser@test.com', username: 'scopeuser' })
       const token = generateAccessToken(user)
 
       const res = await request(app)
         .post('/keys')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'Admin Key', scope: 'admin' })
+        .send({ name: 'Admin Key', appName: '*', type: 'secret', env: 'live', scope: 'admin' })
 
       expect(res.status).toBe(403)
       expect(res.body.error.message).toContain('superadmin')
     })
 
-    it('should preserve scope after rotate', async () => {
+    it('should preserve type/env/scope after rotate', async () => {
       const user = await createUser({ email: 'scoperotate@test.com', username: 'scoperotate' })
       const token = generateAccessToken(user)
 
-      // Create a test-scoped key directly in DB
+      // Create a publishable/test/user key directly in DB
       const { doc: testKeyDoc } = await createApiKey(user._id!.toString(), {
-        name: 'Test Scope Key',
-        scope: 'test',
+        name: 'Test Env Key',
+        type: 'publishable',
+        env: 'test',
+        scope: 'user',
+        appName: 'myapp',
       })
 
       // Rotate
@@ -432,12 +497,17 @@ describe('API Keys Routes', () => {
         .set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
-      expect(res.body.data.key).toMatch(/^ezk_test_/) // New key keeps test scope prefix
+      expect(res.body.data.key).toMatch(/^ez_pk_test_/) // New key keeps publishable/test prefix
+      expect(res.body.data.type).toBe('publishable')
+      expect(res.body.data.env).toBe('test')
+      expect(res.body.data.scope).toBe('user')
 
       // Verify in DB
       const ApiKey = await getApiKeyModel()
       const newKeyDoc = await ApiKey.findById(res.body.data.id)
-      expect(newKeyDoc?.scope).toBe('test')
+      expect(newKeyDoc?.type).toBe('publishable')
+      expect(newKeyDoc?.env).toBe('test')
+      expect(newKeyDoc?.scope).toBe('user')
     })
   })
 

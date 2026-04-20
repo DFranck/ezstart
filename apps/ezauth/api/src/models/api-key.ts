@@ -1,7 +1,26 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, type Document, type Model } from 'mongoose'
 
-export type ApiKeyScope = 'test' | 'live' | 'admin'
+/**
+ * Key type — derived from modern prefix (`ez_pk_*` vs `ez_sk_*`).
+ * Optional on document for backwards compatibility with legacy `ezk_*` keys.
+ */
+export type ApiKeyType = 'publishable' | 'secret'
+
+/**
+ * Key environment — derived from modern prefix (`*_live_*` vs `*_test_*`).
+ * Optional on document for backwards compatibility.
+ */
+export type ApiKeyEnv = 'live' | 'test'
+
+/**
+ * Permission scope — metadata only, NOT in the key prefix.
+ *
+ * Modern values: `admin`, `user`, `readonly`.
+ * Legacy values kept in enum for read-compat with existing `ezk_*` docs:
+ * `test`, `live` (were used as scope==env in the old design).
+ */
+export type ApiKeyScope = 'admin' | 'user' | 'readonly' | 'test' | 'live'
 
 export interface ApiKeyDocument extends Document {
   key: string
@@ -9,6 +28,10 @@ export interface ApiKeyDocument extends Document {
   name: string
   userId: string
   appName: string
+  /** Key type — set on modern keys, absent on legacy docs. */
+  type?: ApiKeyType
+  /** Key environment — set on modern keys, absent on legacy docs. */
+  env?: ApiKeyEnv
   scope: ApiKeyScope
   permissions: string[]
   status: 'active' | 'revoked'
@@ -46,10 +69,21 @@ const apiKeySchema = new Schema<ApiKeyDocument>(
       type: String,
       default: '*',
     },
-    scope: {
+    type: {
       type: String,
-      enum: ['test', 'live', 'admin'],
-      default: 'live',
+      enum: ['publishable', 'secret'],
+      required: false,
+    },
+    env: {
+      type: String,
+      enum: ['live', 'test'],
+      required: false,
+    },
+    scope: {
+      // Modern values first; legacy 'test' / 'live' retained for read-compat with existing docs.
+      type: String,
+      enum: ['admin', 'user', 'readonly', 'test', 'live'],
+      default: 'user',
     },
     permissions: {
       type: [String],

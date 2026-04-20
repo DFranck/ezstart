@@ -9,8 +9,15 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { getApiKeyModel } from '../../models/api-key.js'
-import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
+import { getApiKeyModel, type ApiKeyScope } from '../../models/api-key.js'
+import {
+  generateRawApiKey,
+  hashApiKey,
+  extractKeyPrefix,
+  detectKeyFormat,
+  type ApiKeyType,
+  type ApiKeyEnv,
+} from '../../utils/api-key.js'
 import { logger } from '@ezstart/logger/server'
 
 export const rotateApiKeyRegistry = new OpenAPIRegistry()
@@ -24,6 +31,9 @@ const rotateApiKeyResponseSchema = z.object({
     key: z.string().openapi({ description: 'New full API key — only returned here' }),
     keyPrefix: z.string(),
     name: z.string(),
+    type: z.enum(['publishable', 'secret']),
+    env: z.enum(['live', 'test']),
+    scope: z.enum(['admin', 'user', 'readonly', 'test', 'live']),
   }),
 })
 
@@ -52,9 +62,14 @@ const rotateApiKeyController = async (req: Request, res: Response) => {
     oldKey.revokedAt = new Date()
     await oldKey.save()
 
-    // Create new key with same config (preserve scope)
-    const scope = oldKey.scope || 'live'
-    const rawKey = generateRawApiKey(scope)
+    // Create new key with same config — preserve type/env/scope.
+    // For legacy docs without type/env, derive them from the stored prefix.
+    const legacyFormat = oldKey.keyPrefix ? detectKeyFormat(oldKey.keyPrefix) : null
+    const type: ApiKeyType = oldKey.type ?? legacyFormat?.type ?? 'publishable'
+    const env: ApiKeyEnv = oldKey.env ?? legacyFormat?.env ?? 'live'
+    const scope: ApiKeyScope = oldKey.scope ?? 'user'
+
+    const rawKey = generateRawApiKey({ type, env })
     const hashedKey = hashApiKey(rawKey)
     const keyPrefix = extractKeyPrefix(rawKey)
 
@@ -64,6 +79,8 @@ const rotateApiKeyController = async (req: Request, res: Response) => {
       name: oldKey.name,
       userId,
       appName: oldKey.appName,
+      type,
+      env,
       scope,
       permissions: oldKey.permissions,
       status: 'active',
@@ -75,6 +92,9 @@ const rotateApiKeyController = async (req: Request, res: Response) => {
       key: rawKey,
       keyPrefix,
       name: newKey.name,
+      type,
+      env,
+      scope,
     })
   } catch (error: unknown) {
     logger.error('Rotate API key error:', error)

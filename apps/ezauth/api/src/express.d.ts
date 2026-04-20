@@ -19,7 +19,12 @@ declare global {
     interface Request {
       apiKeyId?: string
       apiKeyUserId?: string
-      apiKeyScope?: 'test' | 'live' | 'admin'
+      /**
+       * API key permission scope (metadata).
+       * Modern values: 'admin' | 'user' | 'readonly'.
+       * Legacy values retained for backwards compat: 'test' | 'live'.
+       */
+      apiKeyScope?: 'admin' | 'user' | 'readonly' | 'test' | 'live'
       apiKeyAppName?: string
     }
   }

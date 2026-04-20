@@ -19,7 +19,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getApiKeyModel } from '../../models/api-key.js'
-import { hashApiKey } from '../../utils/api-key.js'
+import { hashApiKey, detectKeyFormat } from '../../utils/api-key.js'
 import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 
@@ -36,7 +36,9 @@ const configResponseSchema = z.object({
     features: z.array(z.string()),
     plan: z.string(),
     quotaMonthly: z.number(),
-    scope: z.enum(['test', 'live', 'admin']),
+    type: z.enum(['publishable', 'secret']).optional(),
+    env: z.enum(['live', 'test']).optional(),
+    scope: z.enum(['admin', 'user', 'readonly', 'test', 'live']),
   }),
 })
 
@@ -70,6 +72,14 @@ const configController = async (req: Request, res: Response) => {
       return sendError(res, 'Missing key query parameter', 400)
     }
 
+    // Detect key format — warn on legacy ezk_* usage.
+    const format = detectKeyFormat(rawKey)
+    if (format?.isLegacy) {
+      logger.warn('Legacy ezk_* key detected, please rotate to ez_pk_/ez_sk_ by 2026-07-21', {
+        keyPrefix: rawKey.substring(0, 15),
+      })
+    }
+
     const hashedKey = hashApiKey(rawKey)
 
     // Rate limit
@@ -101,6 +111,12 @@ const configController = async (req: Request, res: Response) => {
     const plan = 'free'
     const features = apiKey.permissions ?? ['*']
 
+    // Resolve type/env: prefer stored fields, fall back to detecting from the stored prefix
+    // (handles legacy docs persisted before the prefix refactor).
+    const storedFormat = apiKey.keyPrefix ? detectKeyFormat(apiKey.keyPrefix) : null
+    const resolvedType = apiKey.type ?? storedFormat?.type
+    const resolvedEnv = apiKey.env ?? storedFormat?.env
+
     return sendSuccess(res, {
       appName: apiKey.appName || '*',
       apiUrl,
@@ -108,7 +124,9 @@ const configController = async (req: Request, res: Response) => {
       features,
       plan,
       quotaMonthly: apiKey.quotaMonthly ?? -1,
-      scope: apiKey.scope || 'live',
+      type: resolvedType,
+      env: resolvedEnv,
+      scope: apiKey.scope || 'user',
     })
   } catch (error: unknown) {
     logger.error('Key config endpoint error:', error)

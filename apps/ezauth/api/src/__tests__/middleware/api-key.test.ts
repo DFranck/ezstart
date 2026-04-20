@@ -6,6 +6,7 @@ import { validateApiKey } from '../../middleware/api-key.js'
 import { createUser, createApiKey, cleanAllCollections } from '../helpers/setup.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApiKeyUsageModel } from '../../models/api-key-usage.js'
+import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
 
 function createApiKeyTestApp() {
   const app = express()
@@ -57,9 +58,7 @@ describe('API Key Middleware', () => {
     const user = await createUser({ email: 'apikey@test.com', username: 'apikeytest' })
     const { rawKey, doc } = await createApiKey(user._id!.toString())
 
-    const res = await request(app)
-      .get('/api-key-test')
-      .set('X-API-Key', rawKey)
+    const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
 
     expect(res.status).toBe(200)
     expect(res.body.data.apiKeyId).toBe(doc._id.toString())
@@ -70,9 +69,7 @@ describe('API Key Middleware', () => {
     const user = await createUser({ email: 'apikey2@test.com', username: 'apikeytest2' })
     const { rawKey, doc } = await createApiKey(user._id!.toString())
 
-    const res = await request(app)
-      .get('/api-key-test')
-      .set('Authorization', `ApiKey ${rawKey}`)
+    const res = await request(app).get('/api-key-test').set('Authorization', `ApiKey ${rawKey}`)
 
     expect(res.status).toBe(200)
     expect(res.body.data.apiKeyId).toBe(doc._id.toString())
@@ -82,9 +79,7 @@ describe('API Key Middleware', () => {
     const user = await createUser({ email: 'revoked@test.com', username: 'revokedtest' })
     const { rawKey } = await createApiKey(user._id!.toString(), { status: 'revoked' })
 
-    const res = await request(app)
-      .get('/api-key-test')
-      .set('X-API-Key', rawKey)
+    const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
 
     expect(res.status).toBe(401)
     expect(res.body.error.message).toContain('revoked')
@@ -96,9 +91,7 @@ describe('API Key Middleware', () => {
       expiresAt: new Date(Date.now() - 1000), // Already expired
     })
 
-    const res = await request(app)
-      .get('/api-key-test')
-      .set('X-API-Key', rawKey)
+    const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
 
     expect(res.status).toBe(401)
     expect(res.body.error.message).toContain('expired')
@@ -121,9 +114,7 @@ describe('API Key Middleware', () => {
       endpoints: new Map(),
     })
 
-    const res = await request(app)
-      .get('/api-key-test')
-      .set('X-API-Key', rawKey)
+    const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
 
     expect(res.status).toBe(429)
     expect(res.body.error.message).toContain('quota exceeded')
@@ -146,10 +137,105 @@ describe('API Key Middleware', () => {
       endpoints: new Map(),
     })
 
-    const res = await request(app)
-      .get('/api-key-test')
-      .set('X-API-Key', rawKey)
+    const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
 
     expect(res.status).toBe(200)
+  })
+
+  describe('Prefix format acceptance', () => {
+    it('should accept modern publishable live key (ez_pk_live_*)', async () => {
+      const user = await createUser({ email: 'pklive@test.com', username: 'pkliveuser' })
+      const { rawKey, doc } = await createApiKey(user._id!.toString(), {
+        type: 'publishable',
+        env: 'live',
+        scope: 'user',
+      })
+
+      expect(rawKey.startsWith('ez_pk_live_')).toBe(true)
+
+      const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.apiKeyId).toBe(doc._id.toString())
+    })
+
+    it('should accept modern secret live key (ez_sk_live_*)', async () => {
+      const user = await createUser({ email: 'sklive@test.com', username: 'skliveuser' })
+      const { rawKey, doc } = await createApiKey(user._id!.toString(), {
+        type: 'secret',
+        env: 'live',
+        scope: 'admin',
+      })
+
+      expect(rawKey.startsWith('ez_sk_live_')).toBe(true)
+
+      const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.apiKeyId).toBe(doc._id.toString())
+    })
+
+    it('should accept modern publishable test key (ez_pk_test_*)', async () => {
+      const user = await createUser({ email: 'pktest@test.com', username: 'pktestuser' })
+      const { rawKey } = await createApiKey(user._id!.toString(), {
+        type: 'publishable',
+        env: 'test',
+        scope: 'user',
+      })
+
+      expect(rawKey.startsWith('ez_pk_test_')).toBe(true)
+
+      const res = await request(app).get('/api-key-test').set('X-API-Key', rawKey)
+
+      expect(res.status).toBe(200)
+    })
+
+    it('should accept legacy ezk_live_* key (backwards compat)', async () => {
+      // Seed a legacy-format key directly in DB (simulating a pre-refactor key).
+      const user = await createUser({ email: 'legacy@test.com', username: 'legacyuser' })
+      const ApiKey = await getApiKeyModel()
+      const legacyRawKey = `ezk_live_${'a'.repeat(64)}`
+      const hashed = hashApiKey(legacyRawKey)
+      const prefix = extractKeyPrefix(legacyRawKey)
+
+      await ApiKey.create({
+        key: hashed,
+        keyPrefix: prefix,
+        name: 'Legacy key',
+        userId: user._id!.toString(),
+        appName: '*',
+        scope: 'live',
+        permissions: ['*'],
+        status: 'active',
+        quotaMonthly: 1000,
+      })
+
+      const res = await request(app).get('/api-key-test').set('X-API-Key', legacyRawKey)
+
+      expect(res.status).toBe(200)
+    })
+
+    it('should reject a key with unknown/invalid format', async () => {
+      const res = await request(app)
+        .get('/api-key-test')
+        .set('X-API-Key', 'invalid_format_xxxxxxxxxxxxxxxx')
+
+      expect(res.status).toBe(401)
+    })
+
+    it('generateRawApiKey produces the expected prefixes', () => {
+      expect(generateRawApiKey({ type: 'publishable', env: 'live' })).toMatch(
+        /^ez_pk_live_[a-f0-9]{64}$/
+      )
+      expect(generateRawApiKey({ type: 'publishable', env: 'test' })).toMatch(
+        /^ez_pk_test_[a-f0-9]{64}$/
+      )
+      expect(generateRawApiKey({ type: 'secret', env: 'live' })).toMatch(
+        /^ez_sk_live_[a-f0-9]{64}$/
+      )
+      expect(generateRawApiKey({ type: 'secret', env: 'test' })).toMatch(
+        /^ez_sk_test_[a-f0-9]{64}$/
+      )
+    })
   })
 })

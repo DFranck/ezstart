@@ -8,7 +8,7 @@ import type { Request, Response, NextFunction } from 'express'
 import { sendError } from '@ezstart/api-core'
 import { getApiKeyModel } from '../models/api-key.js'
 import { getApiKeyUsageModel } from '../models/api-key-usage.js'
-import { hashApiKey } from '../utils/api-key.js'
+import { hashApiKey, detectKeyFormat } from '../utils/api-key.js'
 import { logger } from '@ezstart/logger/server'
 
 /** In-memory cache for monthly usage totals (TTL 5 min). */
@@ -109,6 +109,14 @@ export async function validateApiKey(req: Request, res: Response, next: NextFunc
       return sendError(res, 'API key required', 401)
     }
 
+    // Warn on legacy ezk_* key usage (backwards-compat window until 2026-07-21).
+    const format = detectKeyFormat(rawKey)
+    if (format?.isLegacy) {
+      logger.warn('Legacy ezk_* key detected, please rotate to ez_pk_/ez_sk_ by 2026-07-21', {
+        keyPrefix: rawKey.substring(0, 15),
+      })
+    }
+
     const hashedKey = hashApiKey(rawKey)
     const ApiKey = await getApiKeyModel()
 
@@ -147,18 +155,17 @@ export async function validateApiKey(req: Request, res: Response, next: NextFunc
     req.apiKeyAppName = apiKey.appName || '*'
 
     // Fire-and-forget: update lastUsedAt
-    ApiKey.updateOne(
-      { _id: apiKey._id },
-      { $set: { lastUsedAt: new Date() } }
-    ).catch((err: unknown) => {
-      logger.warn('Failed to update API key lastUsedAt:', err)
-    })
+    ApiKey.updateOne({ _id: apiKey._id }, { $set: { lastUsedAt: new Date() } }).catch(
+      (err: unknown) => {
+        logger.warn('Failed to update API key lastUsedAt:', err)
+      }
+    )
 
     // Fire-and-forget: usage tracking
     const today = getTodayDate()
     const sanitizedPath = req.path.replace(/[.$]/g, '_')
     getApiKeyUsageModel()
-      .then((ApiKeyUsage) =>
+      .then(ApiKeyUsage =>
         ApiKeyUsage.updateOne(
           { apiKeyId: keyId, date: today },
           {
