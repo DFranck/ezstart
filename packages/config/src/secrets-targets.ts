@@ -63,6 +63,7 @@ export const VAR_TARGETS = {
   // ── EZPay (Stripe) ──
   STRIPE_SECRET_KEY: { apps: ['ezpay', 'ezstart'], layer: 'api' },
   STRIPE_WEBHOOK_SECRET: { apps: ['ezpay'], layer: 'api' },
+  STRIPE_CONNECT_WEBHOOK_SECRET: { apps: ['ezpay'], layer: 'api' },
   STRIPE_PUBLISHABLE_KEY: { apps: ['ezpay'], layer: 'api' },
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: { apps: ['ezpay'], layer: 'web', client: true },
 
@@ -95,17 +96,16 @@ export const VAR_TARGETS = {
   HEALTH_CHECK_TIMEOUT: { apps: ['ezstart'], layer: 'api' },
   HEALTH_CHECK_RETRIES: { apps: ['ezstart'], layer: 'api' },
 
-  // ── GreenPulse (uploads + public bundle) ──
-  // ESG_* + WEBHOOK_SIGNING_SECRET → IGNORED_VARS (provider SaaS pas wired,
-  // stub code avec fallback '' — à réactiver au moment de l'intégration réelle)
-  MAX_FILE_SIZE: { apps: ['green-pulse'], layer: 'api' },
-  UPLOAD_DIR: { apps: ['green-pulse'], layer: 'api' },
-  CORS_ORIGIN: { apps: ['green-pulse'], layer: 'api' },
-  LOG_LEVEL: { apps: ['green-pulse'], layer: 'api' },
-  NEXT_PUBLIC_APP_NAME: { apps: ['green-pulse'], layer: 'web', client: true },
-  NEXT_PUBLIC_APP_DESCRIPTION: { apps: ['green-pulse'], layer: 'web', client: true },
-  NEXT_PUBLIC_MAX_FILE_SIZE: { apps: ['green-pulse'], layer: 'web', client: true },
-  NEXT_PUBLIC_ALLOWED_FILE_TYPES: { apps: ['green-pulse'], layer: 'web', client: true },
+  // ── Logger verbosity (consumed by every API via @ezstart/logger/server) ──
+  LOG_LEVEL: { apps: '*', layer: 'api' },
+
+  // ── EZAuth publishable key (per-app — DIFFERENT value per web app) ──
+  // Every web app has its own NEXT_PUBLIC_EZAUTH_KEY pointing to a distinct
+  // publishable key registered in the EZAuth admin dashboard.
+  NEXT_PUBLIC_EZAUTH_KEY: { apps: '*', layer: 'web', client: true },
+
+  // ── GreenPulse web rewrites ──
+  NEXT_PUBLIC_API_URL: { apps: ['green-pulse', 'gacha-analyzer'], layer: 'web', client: true },
 
   // ── Cross-domain JWT verify (apps NOT on *.ezstart.xyz) ──
   NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY: {

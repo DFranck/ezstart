@@ -25,8 +25,8 @@ describe('@ezstart/config - secrets-targets', () => {
       expect(VAR_TARGETS.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.layer).toBe('web')
     })
 
-    it('STRIPE_SECRET_KEY is scoped to ezpay', () => {
-      expect(VAR_TARGETS.STRIPE_SECRET_KEY.apps).toEqual(['ezpay'])
+    it('STRIPE_SECRET_KEY is scoped to ezpay + ezstart', () => {
+      expect(VAR_TARGETS.STRIPE_SECRET_KEY.apps).toEqual(['ezpay', 'ezstart'])
       expect(VAR_TARGETS.STRIPE_SECRET_KEY.layer).toBe('api')
     })
 
@@ -55,9 +55,11 @@ describe('@ezstart/config - secrets-targets', () => {
       ).toEqual(['fengshui'])
     })
 
-    it('ignores non-target apps when the var scopes explicitly', () => {
+    it('returns the var-scoped apps regardless of allApps when scoped explicitly', () => {
+      // STRIPE_SECRET_KEY scopes to ['ezpay', 'ezstart'] — output reflects the
+      // var scope, not the allApps list (allApps is only used for '*' scope).
       expect(resolveTargetApps('STRIPE_SECRET_KEY', ['ezpay', 'ezauth'], { layer: 'api' })).toEqual(
-        ['ezpay']
+        ['ezpay', 'ezstart']
       )
     })
 
