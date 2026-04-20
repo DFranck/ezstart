@@ -16,6 +16,7 @@
 
 import { connectToMongo } from '@ezstart/api-core'
 import { loadSharedEnv } from '@ezstart/config/server'
+import { getMongoUrl } from '@ezstart/config/env-resolvers'
 import { getApiKeyModel } from '../models/api-key.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../utils/api-key.js'
 
@@ -89,6 +90,10 @@ export async function seedSelfKey(): Promise<SeedSelfKeyResult> {
  */
 async function main(): Promise<void> {
   loadSharedEnv({ app: 'ezauth', layer: 'api' })
+  // Resolve MONGO_URL template ({app}-{env} → ezauth) like the API bootstrap does
+  // via instrument.mts. Without this, connectToMongo would use the literal
+  // template string as the DB name in Atlas.
+  process.env.MONGO_URL = getMongoUrl('ezauth')
   await connectToMongo('ezauth')
 
   const result = await seedSelfKey()
