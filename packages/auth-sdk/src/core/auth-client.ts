@@ -339,21 +339,50 @@ export function createCoreAuthClient(config: AuthClientConfig): CoreAuthClient {
 // ---------------------------------------------------------------------------
 
 /**
+ * Normalize a URL to a bare base (no trailing `/api/auth`, no trailing slash).
+ *
+ * Accepts either convention the SDK can receive from consumers:
+ * - Base URL:   `'https://api.example.com'`
+ * - Auth URL:   `'https://api.example.com/api/auth'` (low-level `AuthClientConfig` shape)
+ *
+ * Returns: `'https://api.example.com'` in both cases.
+ *
+ * This avoids URL construction bugs like `/api/auth/api/keys/config` when a
+ * consumer passes the auth URL to a function that expects the base.
+ *
+ * @internal
+ */
+function normalizeApiBaseUrl(input: string): string {
+  let base = input
+  if (base.endsWith('/api/auth')) {
+    base = base.slice(0, -'/api/auth'.length)
+  }
+  if (base.endsWith('/')) {
+    base = base.slice(0, -1)
+  }
+  return base
+}
+
+/**
  * Fetch app configuration from EZAuth API using a publishable key.
  * The key acts as authentication — no user auth needed.
  *
+ * Accepts either a bare base URL or an auth URL (with `/api/auth` suffix) —
+ * the function normalizes internally to avoid double-prefixing the path.
+ *
  * @example
  * ```ts
- * const config = await fetchKeyConfig('ez_pk_live_abc123', 'https://api.ezauth.com')
+ * // Both of these resolve to GET https://api.ezauth.com/api/keys/config
+ * await fetchKeyConfig('ez_pk_live_abc123', 'https://api.ezauth.com')
+ * await fetchKeyConfig('ez_pk_live_abc123', 'https://api.ezauth.com/api/auth')
  * ```
  */
 export async function fetchKeyConfig(
   publishableKey: string,
   apiBaseUrl: string
 ): Promise<PublishableKeyConfig> {
-  const response = await fetch(
-    `${apiBaseUrl}/api/keys/config?key=${encodeURIComponent(publishableKey)}`
-  )
+  const base = normalizeApiBaseUrl(apiBaseUrl)
+  const response = await fetch(`${base}/api/keys/config?key=${encodeURIComponent(publishableKey)}`)
   const result = await response.json()
 
   if (!response.ok) {
@@ -425,9 +454,15 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   const defaultApiUrl = local ? `${EZAUTH_LOCAL_API}/api/auth` : `${EZAUTH_PRODUCTION_API}/api/auth`
   const defaultWebUrl = local ? EZAUTH_LOCAL_WEB : EZAUTH_PRODUCTION_WEB
 
+  // Normalize the consumer-supplied apiUrl (if any) to a bare base URL.
+  // Accepts both `'http://host'` and `'http://host/api/auth'` conventions so
+  // downstream URL construction never ends up with `/api/auth/api/auth` or
+  // `/api/auth/api/keys/config` suffixes.
+  const consumerBaseUrl = sdkConfig.apiUrl ? normalizeApiBaseUrl(sdkConfig.apiUrl) : undefined
+
   if (sdkConfig.firstParty) {
     // First-party mode: direct access, no key needed
-    const apiUrl = sdkConfig.apiUrl ? `${sdkConfig.apiUrl}/api/auth` : defaultApiUrl
+    const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : defaultApiUrl
     const webUrl = sdkConfig.webUrl ?? defaultWebUrl
     const appName = sdkConfig.appName ?? 'ezauth'
 
@@ -444,11 +479,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
 
   if (key) {
     // Publishable key mode: create client with defaults, then async-update from key config
-    const apiBaseUrl = sdkConfig.apiUrl
-      ? sdkConfig.apiUrl
-      : local
-        ? EZAUTH_LOCAL_API
-        : EZAUTH_PRODUCTION_API
+    const apiBaseUrl = consumerBaseUrl ?? (local ? EZAUTH_LOCAL_API : EZAUTH_PRODUCTION_API)
     const apiUrl = `${apiBaseUrl}/api/auth`
     const webUrl = sdkConfig.webUrl ?? defaultWebUrl
 
@@ -470,7 +501,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   }
 
   // Dev mode: no key, no first-party → permissive localhost defaults
-  const apiUrl = sdkConfig.apiUrl ? `${sdkConfig.apiUrl}/api/auth` : defaultApiUrl
+  const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : defaultApiUrl
   const webUrl = sdkConfig.webUrl ?? defaultWebUrl
   const appName = sdkConfig.appName ?? 'dev'
 

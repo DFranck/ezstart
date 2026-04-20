@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Div, P } from '@ezstart/ui/components'
-import { useAuth } from '../react/hooks.js'
+import { useEffect, useState } from 'react'
 import { useAuthContext } from '../react/auth-provider.js'
+import { useAuth } from '../react/hooks.js'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -55,6 +55,13 @@ export function DevModeBanner({ className, appName, keyStatus, urlKey }: DevMode
 
   // Never render server-side (avoid hydration mismatch)
   if (!mounted) return null
+
+  // Never render in production — dev-only tool, zero footprint in prod bundles.
+  // Next.js statically replaces `process.env.NODE_ENV` at build time, so this
+  // branch is eliminated by the minifier for production builds.
+  // NOTE: no `typeof process` guard here — see P4-WIRE.1 (the guard defeats
+  // Next.js' static substitution and causes the env read to return undefined).
+  if (process.env.NODE_ENV === 'production') return null
 
   return (
     <DevModeBannerInner
@@ -108,7 +115,7 @@ function DevModeBannerInner({
   } else if (!publishableKey) {
     // No key configured — show link to get one
     icon = '\u{1F527}' // wrench emoji
-    label = `Dev Mode — ${appName}`
+    label = `Dev Mode`
     details = 'No API key configured'
   } else if (scope === 'admin') {
     icon = '\u{1F451}' // crown emoji
@@ -122,8 +129,9 @@ function DevModeBannerInner({
 
   return (
     <Div
+      intent={'warning'}
       className={[
-        'border rounded-md p-2 text-xs',
+        'border rounded-md p-2 text-xs flex justify-between',
         isError
           ? 'bg-destructive/10 border-destructive/30 text-destructive'
           : 'bg-muted/50 border-border text-muted-foreground',
@@ -147,19 +155,14 @@ function DevModeBannerInner({
         )}
       </P>
       {(keyStatus === 'invalid' || (!publishableKey && keyStatus !== 'valid')) && (
-        <P
-          size="xs"
-          className={isError ? 'text-destructive/80 mt-1' : 'text-muted-foreground mt-1'}
-        >
-          {keyStatus === 'invalid' ? 'Get a valid key' : 'Get your key'}
-          {' \u2192 '}
+        <P size="xs" className={isError ? 'text-destructive/80' : 'text-muted-foreground'}>
           <a
             href={developerUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary underline underline-offset-2 hover:text-primary/80"
           >
-            EZAuth Dashboard
+            {keyStatus === 'invalid' ? 'Get a valid key' : 'Get your key'}
           </a>
         </P>
       )}

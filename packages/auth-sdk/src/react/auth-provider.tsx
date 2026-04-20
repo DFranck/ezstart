@@ -183,9 +183,10 @@ export function AuthProvider({
 
   // Resolve SDK config
   const sdkConfig: AuthSDKConfig = useMemo(() => {
-    const key =
-      publishableKey ??
-      (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_EZAUTH_KEY : undefined)
+    // Next.js statically replaces `process.env.NEXT_PUBLIC_*` at build time.
+    // No runtime guard — `typeof process` short-circuits before the replacement
+    // and `process.env?` optional chaining disables the substitution.
+    const key = publishableKey ?? process.env.NEXT_PUBLIC_EZAUTH_KEY
 
     return {
       publishableKey: mode === 'first-party' ? undefined : (key ?? undefined),
@@ -220,11 +221,12 @@ export function AuthProvider({
 
   // Warn in production if no key and not first-party
   useEffect(() => {
+    // Next.js statically replaces `process.env.NODE_ENV` at build time.
+    // No runtime guard — same reason as `NEXT_PUBLIC_*` above.
     if (
       mode !== 'first-party' &&
       !sdkConfig.publishableKey &&
-      typeof process !== 'undefined' &&
-      process.env?.NODE_ENV === 'production'
+      process.env.NODE_ENV === 'production'
     ) {
       // eslint-disable-next-line no-console
       console.warn(
