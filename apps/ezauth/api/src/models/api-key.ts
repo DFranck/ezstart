@@ -40,6 +40,12 @@ export interface ApiKeyDocument extends Document {
   createdAt: Date
   revokedAt: Date | null
   quotaMonthly: number | null
+  /**
+   * Provenance marker — either a userId string or a system tag
+   * (e.g. `'system-seed'` for the bootstrap self-key).
+   * Optional for backwards compatibility with pre-provenance docs.
+   */
+  createdBy?: string
 }
 
 const apiKeySchema = new Schema<ApiKeyDocument>(
@@ -109,6 +115,11 @@ const apiKeySchema = new Schema<ApiKeyDocument>(
     quotaMonthly: {
       type: Number,
       default: 1000,
+    },
+    createdBy: {
+      type: String,
+      required: false,
+      index: true,
     },
   },
   {
