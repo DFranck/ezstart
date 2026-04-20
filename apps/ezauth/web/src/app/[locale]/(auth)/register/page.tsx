@@ -29,7 +29,7 @@ function RegisterContent() {
 
   // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
   const keyConfig = useKeyConfig(navigation.publishableKey)
-  const app = keyConfig.appName ?? navigation.app ?? 'ezstart'
+  const app = keyConfig.appName ?? navigation.app ?? 'ezauth'
   const theme = getAppTheme(app)
   const isKeyInvalid = keyConfig.status === 'invalid'
   const bannerKeyStatus = navigation.publishableKey
