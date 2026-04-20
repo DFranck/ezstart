@@ -11,5 +11,11 @@
     "title": "Something went wrong",
     "message": "An unexpected error occurred. Please try again.",
     "retry": "Try again"
+  },
+  "docs": {
+    "title": "EZAuth SDK Documentation",
+    "subtitle": "Get started with @ezstart/auth-sdk",
+    "apiReferenceButton": "API Reference (Swagger)",
+    "viewOnGithub": "View on GitHub"
   }
 }

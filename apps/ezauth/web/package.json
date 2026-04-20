@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/api-sdk": "workspace:*",
+    "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",

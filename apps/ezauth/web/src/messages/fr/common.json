@@ -11,5 +11,11 @@
     "title": "Une erreur est survenue",
     "message": "Une erreur inattendue s'est produite. Veuillez reessayer.",
     "retry": "Reessayer"
+  },
+  "docs": {
+    "title": "Documentation du SDK EZAuth",
+    "subtitle": "Demarrez avec @ezstart/auth-sdk",
+    "apiReferenceButton": "Reference API (Swagger)",
+    "viewOnGithub": "Voir sur GitHub"
   }
 }

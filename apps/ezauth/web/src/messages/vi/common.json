@@ -11,5 +11,11 @@
     "title": "Da xay ra loi",
     "message": "Da xay ra loi khong mong muon. Vui long thu lai.",
     "retry": "Thu lai"
+  },
+  "docs": {
+    "title": "Tai lieu SDK EZAuth",
+    "subtitle": "Bat dau voi @ezstart/auth-sdk",
+    "apiReferenceButton": "Tham khao API (Swagger)",
+    "viewOnGithub": "Xem tren GitHub"
   }
 }

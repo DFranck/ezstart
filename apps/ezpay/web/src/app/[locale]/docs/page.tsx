@@ -1,25 +1,59 @@
-import { Button, Card, CardContent, CardHeader, H1, P, Main } from '@ezstart/ui/components'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { getApiUrl } from '@ezstart/config'
+import {
+  Button,
+  Card,
+  CardContent,
+  Div,
+  H1,
+  Main,
+  MarkdownContent,
+  P,
+} from '@ezstart/ui/components'
+import { getTranslations } from 'next-intl/server'
 
-export default function DocsPage() {
+export const dynamic = 'force-static'
+
+async function loadReadme(): Promise<string> {
+  // Resolve relative to the app's cwd at build/runtime. Included in the serverless
+  // bundle via `outputFileTracingIncludes` in next.config.js.
+  const readmePath = join(process.cwd(), '../../../packages/pay-sdk/README.md')
+  try {
+    return await readFile(readmePath, 'utf-8')
+  } catch {
+    return '# Documentation\n\nSDK README not available.'
+  }
+}
+
+export default async function DocsPage() {
+  const t = await getTranslations('docs')
+  const readme = await loadReadme()
+  const apiDocsUrl = `${getApiUrl('ezpay')}/docs`
+  const githubUrl = 'https://github.com/DFranck/ezstart/tree/master/packages/pay-sdk'
+
   return (
-    <Main className="flex flex-1 items-center justify-center p-6">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <H1 size="h2">Documentation</H1>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <P className="text-muted-foreground">
-            Coming soon. In the meantime, check out the SDK README on GitHub.
-          </P>
-          <Button asChild variant="outline">
-            <a
-              href="https://github.com/DFranck/ezstart/tree/master/packages/pay-sdk"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View on GitHub
+    <Main className="container mx-auto max-w-4xl py-8 px-4 space-y-8">
+      <Div className="text-center space-y-4">
+        <H1 size="h1">{t('title')}</H1>
+        <P className="text-muted-foreground">{t('subtitle')}</P>
+        <Div className="flex flex-wrap justify-center gap-3">
+          <Button asChild variant="default">
+            <a href={apiDocsUrl} target="_blank" rel="noopener noreferrer">
+              {t('apiReferenceButton')}
             </a>
           </Button>
+          <Button asChild variant="outline">
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+              {t('viewOnGithub')}
+            </a>
+          </Button>
+        </Div>
+      </Div>
+
+      <Card>
+        <CardContent className="p-6 md:p-8">
+          <MarkdownContent content={readme} />
         </CardContent>
       </Card>
     </Main>

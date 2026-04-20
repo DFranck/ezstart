@@ -9,5 +9,9 @@ export default createNextConfig({
     eslint: {
       ignoreDuringBuilds: true,
     },
+    // Include SDK README in the serverless function bundle so /docs page can read it at runtime
+    outputFileTracingIncludes: {
+      '/**/docs/**': ['../../../packages/pay-sdk/README.md'],
+    },
   },
 })
