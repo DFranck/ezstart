@@ -50,7 +50,18 @@ export interface DeveloperPortalProps {
   className?: string
   /** Show admin scope option in create modal (for superadmins). */
   showAdminScope?: boolean
-  /** Apps the user has access to — rendered as options in the App Scope dropdown. */
+  /**
+   * Application context (P6+). When provided, the portal only shows keys for
+   * that application and the create-key modal pre-fills the app scope.
+   * When omitted, the portal falls back to legacy "all user keys" behaviour
+   * and shows a notice inviting the user to pick an application.
+   */
+  applicationId?: string
+  /**
+   * Legacy: apps the user has access to — rendered as options in the App Scope
+   * dropdown. Ignored when `applicationId` is provided.
+   * @deprecated Pass `applicationId` instead.
+   */
   appOptions?: string[]
 }
 
@@ -73,6 +84,7 @@ export function DeveloperPortal({
   headerActions,
   className,
   showAdminScope = false,
+  applicationId,
   appOptions = [],
 }: DeveloperPortalProps) {
   const texts = mergeTexts(partialTexts)
@@ -82,7 +94,13 @@ export function DeveloperPortal({
   const [revokeTargetId, setRevokeTargetId] = useState<string | null>(null)
   const [usageKeyId, setUsageKeyId] = useState<string | null>(null)
 
-  const { data: apiKeys = [] as ApiKeyItem[], isLoading, isError, refetch } = useApiKeys(enabled)
+  const { data: allApiKeys = [] as ApiKeyItem[], isLoading, isError, refetch } = useApiKeys(enabled)
+
+  // When an Application is selected, scope the displayed keys to it. Pre-P6
+  // keys without `applicationId` are excluded from that view.
+  const apiKeys = applicationId
+    ? allApiKeys.filter((k: ApiKeyItem) => k.applicationId === applicationId)
+    : allApiKeys
 
   const createMutation = useCreateApiKey({
     onSuccess: data => {
@@ -170,7 +188,8 @@ export function DeveloperPortal({
         isSubmitting={createMutation.isPending}
         texts={texts.create}
         showAdminScope={showAdminScope}
-        appOptions={appOptions}
+        applicationId={applicationId}
+        appOptions={applicationId ? undefined : appOptions}
       />
 
       {/* Key Created Modal */}

@@ -7,7 +7,12 @@
 
 // ── Core (agnostic) ──────────────────────────────────────────────────────────
 
-export { CoreAuthClient, createCoreAuthClient, fetchKeyConfig, resolveSDKConfig } from './core/auth-client.js'
+export {
+  CoreAuthClient,
+  createCoreAuthClient,
+  fetchKeyConfig,
+  resolveSDKConfig,
+} from './core/auth-client.js'
 export { AuthError } from './core/errors.js'
 export { TokenManager, createMemoryStorage, createLocalStorage } from './core/token-manager.js'
 
@@ -52,10 +57,23 @@ export {
   useRotateApiKey,
 } from './react/api-keys.js'
 
+// Applications hooks (P6)
+export {
+  useMyApplications,
+  useApplication,
+  useResolveApplicationByKey,
+  useCreateApplication,
+  useUpdateApplication,
+  useRevokeApplication,
+} from './react/applications.js'
+
 // ── Backward-compat aliases ─────────────────────────────────────────────────
 
 // AuthClient = CoreAuthClient, createAuthClient = createCoreAuthClient
-export { CoreAuthClient as AuthClient, createCoreAuthClient as createAuthClient } from './core/auth-client.js'
+export {
+  CoreAuthClient as AuthClient,
+  createCoreAuthClient as createAuthClient,
+} from './core/auth-client.js'
 export type { AuthClientConfig } from './core/types.js'
 
 // SSO helpers (monorepo-specific, uses @ezstart/config)
@@ -66,7 +84,10 @@ export { useAuthNavigation } from './react/useAuthNavigation.js'
 
 // ── Middleware (Next.js) ─────────────────────────────────────────────────────
 
-export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware/createAuthMiddleware.js'
+export {
+  createAuthMiddleware,
+  RECOMMENDED_MIDDLEWARE_MATCHER,
+} from './middleware/createAuthMiddleware.js'
 export type { AuthMiddlewareConfig } from './middleware/createAuthMiddleware.js'
 
 // SSR Protected Middleware
@@ -146,6 +167,26 @@ export type {
   UsageBadgeTexts,
 } from './components/developer/index.js'
 
+// Applications (P6 — multi-tenant entity)
+export {
+  ApplicationsList,
+  ApplicationCard,
+  CreateApplicationModal,
+  ApplicationDetailView,
+  defaultApplicationsFlowTexts,
+} from './components/applications/index.js'
+export type {
+  ApplicationsListProps,
+  ApplicationCardProps,
+  CreateApplicationModalProps,
+  ApplicationDetailViewProps,
+  ApplicationsListTexts,
+  ApplicationCardTexts,
+  CreateApplicationModalTexts,
+  ApplicationDetailViewTexts,
+  ApplicationsFlowTexts,
+} from './components/applications/index.js'
+
 // User components
 export { UserMenu } from './components/UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './components/UserMenu.js'
@@ -177,6 +218,10 @@ export type {
   CreateApiKeyResponse,
   CreateApiKeyRequest,
   PlanInfo,
+  Application,
+  CreateApplicationRequest,
+  UpdateApplicationRequest,
+  ApplicationResolveResponse,
 } from './core/types.js'
 
 // ── RBAC (Role-Based Access Control) ────────────────────────────────────────

@@ -5,7 +5,12 @@
  */
 
 // Auth client
-export { CoreAuthClient, createCoreAuthClient, fetchKeyConfig, resolveSDKConfig } from './auth-client.js'
+export {
+  CoreAuthClient,
+  createCoreAuthClient,
+  fetchKeyConfig,
+  resolveSDKConfig,
+} from './auth-client.js'
 
 // Token storage
 export { TokenManager, createMemoryStorage, createLocalStorage } from './token-manager.js'
@@ -38,6 +43,10 @@ export type {
   CreateApiKeyResponse,
   CreateApiKeyRequest,
   PlanInfo,
+  Application,
+  CreateApplicationRequest,
+  UpdateApplicationRequest,
+  ApplicationResolveResponse,
 } from './types.js'
 
 // Schemas (response validation / OpenAPI)
@@ -49,3 +58,14 @@ export {
   verifyResponseSchema,
   errorResponseSchema,
 } from './schemas.js'
+
+// API key crypto primitives (agnostic, shared across services)
+export {
+  generateRawApiKey,
+  hashApiKey,
+  extractKeyPrefix,
+  detectKeyFormat,
+  KEY_PREFIX,
+  LEGACY_PREFIXES,
+} from './api-keys-crypto.js'
+export type { ApiKeyType, ApiKeyEnv, ApiKeyScope, KeyFormat } from './api-keys-crypto.js'

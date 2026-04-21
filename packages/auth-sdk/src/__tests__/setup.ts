@@ -112,10 +112,7 @@ vi.mock('@ezstart/ui/components', () => {
   PasswordInput.displayName = 'PasswordInput'
 
   const Button = React.forwardRef(
-    (
-      props: Record<string, unknown> & { children?: React.ReactNode },
-      ref: unknown
-    ) => {
+    (props: Record<string, unknown> & { children?: React.ReactNode }, ref: unknown) => {
       const { variant, size, asChild, children, ...rest } = props
       return React.createElement('button', { ...rest, ref, 'data-variant': variant }, children)
     }
@@ -123,7 +120,10 @@ vi.mock('@ezstart/ui/components', () => {
   Button.displayName = 'Button'
 
   // Form components — use react-hook-form compatible shims
-  const Form = ({ children, ...props }: Record<string, unknown> & { children?: React.ReactNode }) => {
+  const Form = ({
+    children,
+    ...props
+  }: Record<string, unknown> & { children?: React.ReactNode }) => {
     return React.createElement('div', { 'data-testid': 'Form' }, children)
   }
 
@@ -174,9 +174,29 @@ vi.mock('@ezstart/ui/components', () => {
     Badge: passthrough('Badge', 'span'),
     Icon: passthrough('Icon', 'span'),
     Spinner: passthrough('Spinner', 'span'),
-    Modal: ({ children, isOpen }: { children?: React.ReactNode; isOpen?: boolean }) => {
+    Modal: ({
+      children,
+      isOpen,
+      footer,
+      title,
+      description,
+    }: {
+      children?: React.ReactNode
+      isOpen?: boolean
+      footer?: React.ReactNode
+      title?: React.ReactNode
+      description?: React.ReactNode
+    }) => {
       if (!isOpen) return null
-      return React.createElement('div', { 'data-testid': 'Modal', role: 'dialog' }, children)
+      return React.createElement(
+        'div',
+        { 'data-testid': 'Modal', role: 'dialog' },
+        title != null && React.createElement('div', { 'data-testid': 'ModalTitle' }, title),
+        description != null &&
+          React.createElement('div', { 'data-testid': 'ModalDescription' }, description),
+        children,
+        footer != null && React.createElement('div', { 'data-testid': 'ModalFooter' }, footer)
+      )
     },
     Sheet: passthrough('Sheet'),
     SheetContent: passthrough('SheetContent'),
@@ -193,14 +213,36 @@ vi.mock('@ezstart/ui/components', () => {
       children?: React.ReactNode
       [key: string]: unknown
     }) => {
-      return React.createElement(
-        'div',
-        { 'data-testid': 'Dropdown' },
-        trigger,
-        children
-      )
+      return React.createElement('div', { 'data-testid': 'Dropdown' }, trigger, children)
     },
     Checkbox: passthrough('Checkbox', 'input'),
+    Switch: React.forwardRef(
+      (
+        props: Record<string, unknown> & { onCheckedChange?: (v: boolean) => void },
+        ref: unknown
+      ) => {
+        const { onCheckedChange, checked, ...rest } = props
+        const domProps: Record<string, unknown> = {}
+        for (const [k, v] of Object.entries(rest)) {
+          if (
+            typeof v === 'string' ||
+            typeof v === 'number' ||
+            typeof v === 'boolean' ||
+            v == null
+          ) {
+            domProps[k] = v
+          }
+        }
+        return React.createElement('input', {
+          ...domProps,
+          type: 'checkbox',
+          checked: !!checked,
+          onChange: (e: { target: { checked: boolean } }) => onCheckedChange?.(e.target.checked),
+          'data-testid': 'Switch',
+          ref,
+        })
+      }
+    ),
     Skeleton: passthrough('Skeleton'),
     AlertDialog: passthrough('AlertDialog'),
     AlertDialogAction: passthrough('AlertDialogAction', 'button'),
@@ -235,11 +277,7 @@ vi.mock('@ezstart/ui/components', () => {
 // Mock @ezstart/ui/lib
 // ---------------------------------------------------------------------------
 vi.mock('@ezstart/ui/lib', () => ({
-  cn: (...args: unknown[]) =>
-    args
-      .flat()
-      .filter(Boolean)
-      .join(' '),
+  cn: (...args: unknown[]) => args.flat().filter(Boolean).join(' '),
 }))
 
 // ---------------------------------------------------------------------------

@@ -255,6 +255,8 @@ export interface ApiKeyItem {
   keyPrefix: string
   name: string
   appName: string
+  /** Application this key is scoped to (P6+). Optional for pre-P6 keys. */
+  applicationId?: string
   /** Legacy scope value from DB. New keys use scope='admin'|'user'|'readonly' metadata. */
   scope: 'test' | 'live' | 'admin'
   permissions: string[]
@@ -287,6 +289,8 @@ export interface CreateApiKeyResponse {
   key: string
   keyPrefix: string
   name: string
+  /** Application this key was scoped to (P6+). */
+  applicationId?: string
   /** Key type (optional, present on new keys created after P2a). */
   type?: 'publishable' | 'secret'
   /** Key environment (optional, present on new keys created after P2a). */
@@ -298,7 +302,15 @@ export interface CreateApiKeyResponse {
 /** Body for the create-key mutation. */
 export interface CreateApiKeyRequest {
   name: string
-  appName: string
+  /**
+   * App scope (legacy — pre-P6). New callers should pass `applicationId`
+   * instead; `appName` is kept for backwards compatibility and will be
+   * removed in a future major.
+   * @deprecated Use `applicationId`.
+   */
+  appName?: string
+  /** Application this key will belong to (P6+). Preferred over `appName`. */
+  applicationId?: string
   /** Key type: publishable (client-side safe) or secret (server-only). */
   type?: 'publishable' | 'secret'
   /** Environment: live (production) or test (sandbox). */
@@ -306,6 +318,51 @@ export interface CreateApiKeyRequest {
   /** Permission scope for the new key. */
   scope?: 'admin' | 'user' | 'readonly'
   expiresAt: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Applications (P6 — multi-tenant entity shared across services)
+// ---------------------------------------------------------------------------
+
+/**
+ * Application tenant — source of truth lives in EZAuth DB; other services
+ * (EZPay, etc.) reference it by `id`.
+ */
+export interface Application {
+  id: string
+  slug: string
+  name: string
+  description?: string
+  ownerId: string
+  metadata?: Record<string, unknown>
+  status: 'active' | 'archived'
+  createdAt: string
+  updatedAt: string
+}
+
+/** Body for `POST /applications`. */
+export interface CreateApplicationRequest {
+  slug: string
+  name: string
+  description?: string
+  metadata?: Record<string, unknown>
+}
+
+/** Body for `PATCH /applications/:id`. */
+export interface UpdateApplicationRequest {
+  name?: string
+  description?: string
+  metadata?: Record<string, unknown>
+}
+
+/** Response from `GET /applications/resolve?key=ez_pk_live_*`. */
+export interface ApplicationResolveResponse {
+  applicationId: string
+  slug: string
+  name: string
+  type?: 'publishable' | 'secret'
+  env?: 'live' | 'test'
+  scope?: 'admin' | 'user' | 'readonly'
 }
 
 /** Plan info for billing display. */

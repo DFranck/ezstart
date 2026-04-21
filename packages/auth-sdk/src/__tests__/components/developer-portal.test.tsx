@@ -17,6 +17,16 @@ vi.mock('../../react/api-keys.js', () => ({
   useRotateApiKey: (...args: unknown[]) => mockUseRotateApiKey(...args),
 }))
 
+// Mock applications hooks for CreateKeyModal (needs useApplication)
+vi.mock('../../react/applications.js', () => ({
+  useApplication: () => ({ data: null, isLoading: false, isError: false }),
+  useMyApplications: () => ({ data: [], isLoading: false, isError: false, refetch: vi.fn() }),
+  useResolveApplicationByKey: () => ({ data: null, isLoading: false, isError: false }),
+  useCreateApplication: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+  useUpdateApplication: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+  useRevokeApplication: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+}))
+
 const { DeveloperPortal } = await import('../../components/developer/DeveloperPortal.js')
 const { UsageBadge } = await import('../../components/developer/UsageBadge.js')
 const { CreateKeyModal } = await import('../../components/developer/CreateKeyModal.js')

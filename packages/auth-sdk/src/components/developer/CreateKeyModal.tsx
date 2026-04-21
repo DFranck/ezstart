@@ -12,9 +12,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Span,
 } from '@ezstart/ui/components'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { CreateApiKeyRequest } from '../../core/types.js'
+import { useApplication } from '../../react/applications.js'
 import type { CreateKeyModalTexts } from './types.js'
 
 export interface CreateKeyModalProps {
@@ -26,10 +28,15 @@ export interface CreateKeyModalProps {
   /** Show admin scope option (for superadmins only). */
   showAdminScope?: boolean
   /**
-   * List of apps the user has access to. Rendered as `<SelectItem>` in the
-   * App Scope dropdown. If empty and `showAdminScope` is `false`, the dropdown
-   * will have no selectable options — callers should ensure at least one is
-   * provided for non-superadmins.
+   * Application the new key will belong to (P6+). When provided, the app-scope
+   * field is displayed as read-only (pre-filled with the application slug).
+   */
+  applicationId?: string
+  /**
+   * Legacy: list of app slugs the user has access to. Used as a fallback when
+   * `applicationId` is not provided (pre-P6 callers). A `logger.warn` is logged
+   * when this path is taken.
+   * @deprecated Pass `applicationId` instead.
    */
   appOptions?: string[]
 }
@@ -55,33 +62,71 @@ export function CreateKeyModal({
   isSubmitting,
   texts,
   showAdminScope = false,
+  applicationId,
   appOptions = [],
 }: CreateKeyModalProps) {
-  // Default app: first available app, else '*' if superadmin, else '' (disables submit)
-  const defaultAppName = appOptions.length > 0 ? appOptions[0] : showAdminScope ? '*' : ''
+  // ---------------------------------------------------------------------------
+  // Resolve the app scope display: either from an Application (P6 path)
+  // or from legacy `appOptions` (pre-P6 fallback).
+  // ---------------------------------------------------------------------------
+  const { data: application } = useApplication(applicationId, !!applicationId && isOpen)
+
+  // Warn once if a legacy caller is relying on appOptions without applicationId
+  useEffect(() => {
+    if (!isOpen) return
+    if (!applicationId && appOptions.length > 0) {
+      // Keep this a plain console.warn to avoid a hard dep on @ezstart/logger
+      // from the components layer. auth-sdk core already uses logger.
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[auth-sdk] CreateKeyModal: `appOptions` is deprecated. Pass `applicationId` instead.'
+      )
+    }
+  }, [isOpen, applicationId, appOptions.length])
+
+  const legacyDefaultAppName = appOptions.length > 0 ? appOptions[0] : showAdminScope ? '*' : ''
 
   const [name, setName] = useState('')
-  const [appName, setAppName] = useState(defaultAppName)
+  const [legacyAppName, setLegacyAppName] = useState(legacyDefaultAppName)
   const [type, setType] = useState<KeyType>('publishable')
   const [env, setEnv] = useState<KeyEnv>('live')
   const [scope, setScope] = useState<KeyScope>('user')
   const [expiry, setExpiry] = useState('never')
 
+  // Reset legacy app when appOptions changes
+  useEffect(() => {
+    setLegacyAppName(legacyDefaultAppName)
+  }, [legacyDefaultAppName])
+
+  const canSubmitApp = applicationId ? !!application : !!legacyAppName
+  const canSubmit = !!name.trim() && canSubmitApp && !isSubmitting
+
   const handleSubmit = () => {
-    if (!name.trim() || !appName) return
-    onSubmit({
-      name: name.trim(),
-      appName,
-      type,
-      env,
-      scope,
-      expiresAt: computeExpiryDate(expiry),
-    })
+    if (!canSubmit) return
+    if (applicationId) {
+      onSubmit({
+        name: name.trim(),
+        applicationId,
+        type,
+        env,
+        scope,
+        expiresAt: computeExpiryDate(expiry),
+      })
+    } else {
+      onSubmit({
+        name: name.trim(),
+        appName: legacyAppName,
+        type,
+        env,
+        scope,
+        expiresAt: computeExpiryDate(expiry),
+      })
+    }
   }
 
   const handleClose = () => {
     setName('')
-    setAppName(defaultAppName)
+    setLegacyAppName(legacyDefaultAppName)
     setType('publishable')
     setEnv('live')
     setScope('user')
@@ -96,11 +141,7 @@ export function CreateKeyModal({
       title={texts.title}
       size="default"
       footer={
-        <Button
-          onClick={handleSubmit}
-          disabled={!name.trim() || !appName || isSubmitting}
-          className="w-full"
-        >
+        <Button onClick={handleSubmit} disabled={!canSubmit} className="w-full">
           {isSubmitting ? texts.submitting : texts.submit}
         </Button>
       }
@@ -161,20 +202,29 @@ export function CreateKeyModal({
         </Div>
 
         <Div className="space-y-2">
-          <Label>{texts.appScope}</Label>
-          <Select value={appName} onValueChange={setAppName}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {showAdminScope && <SelectItem value="*">{texts.appScopeAll}</SelectItem>}
-              {appOptions.map(app => (
-                <SelectItem key={app} value={app}>
-                  {app}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="key-app-scope">{texts.appScope}</Label>
+          {applicationId ? (
+            <Input id="key-app-scope" value={application?.slug ?? ''} readOnly disabled />
+          ) : (
+            <Select value={legacyAppName} onValueChange={setLegacyAppName}>
+              <SelectTrigger id="key-app-scope">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {showAdminScope && <SelectItem value="*">{texts.appScopeAll}</SelectItem>}
+                {appOptions.map(app => (
+                  <SelectItem key={app} value={app}>
+                    {app}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {applicationId && application?.name && (
+            <P className="text-xs text-muted-foreground">
+              <Span>{application.name}</Span>
+            </P>
+          )}
         </Div>
 
         <Div className="space-y-2">

@@ -33,3 +33,13 @@ export {
   useRevokeApiKey,
   useRotateApiKey,
 } from './api-keys.js'
+
+// Applications hooks (P6)
+export {
+  useMyApplications,
+  useApplication,
+  useResolveApplicationByKey,
+  useCreateApplication,
+  useUpdateApplication,
+  useRevokeApplication,
+} from './applications.js'

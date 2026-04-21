@@ -103,3 +103,23 @@ export type {
   UsageDetailsModalTexts,
   UsageBadgeTexts,
 } from './developer/index.js'
+
+// Applications (P6 — multi-tenant entity)
+export {
+  ApplicationsList,
+  ApplicationCard,
+  CreateApplicationModal,
+  ApplicationDetailView,
+  defaultApplicationsFlowTexts,
+} from './applications/index.js'
+export type {
+  ApplicationsListProps,
+  ApplicationCardProps,
+  CreateApplicationModalProps,
+  ApplicationDetailViewProps,
+  ApplicationsListTexts,
+  ApplicationCardTexts,
+  CreateApplicationModalTexts,
+  ApplicationDetailViewTexts,
+  ApplicationsFlowTexts,
+} from './applications/index.js'
