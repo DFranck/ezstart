@@ -2,7 +2,12 @@ import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import { getProvider } from '../services/stripe.js'
 import { getPaymentModel } from '../models/Payment.js'
+import { getPlanModel } from '../models/Plan.js'
 import { incrementUsage } from '../services/promo.js'
+import {
+  notifyEzauthSubscription,
+  type SubscriptionWebhookPayload,
+} from '../services/ezauth-subscription-webhook.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import type {
   WebhookCheckoutData,
@@ -10,6 +15,42 @@ import type {
   WebhookSubscriptionData,
   WebhookInvoiceData,
 } from '@ezstart/pay-sdk/providers'
+
+/**
+ * Map Stripe's subscription status enum to the narrowed status accepted by
+ * the ezauth subscription webhook receiver. Returns `null` for statuses that
+ * should NOT propagate (e.g. `incomplete_expired`, `unpaid`, `paused`).
+ */
+function mapStripeStatusToEzauth(
+  stripeStatus: string
+): SubscriptionWebhookPayload['status'] | null {
+  switch (stripeStatus) {
+    case 'active':
+      return 'active'
+    case 'canceled':
+      return 'canceled'
+    case 'past_due':
+      return 'past_due'
+    case 'trialing':
+      return 'trialing'
+    case 'incomplete':
+      return 'incomplete'
+    default:
+      return null
+  }
+}
+
+/**
+ * Extract Stripe event id from the provider-wrapped `WebhookEvent`. The
+ * pay-sdk Stripe provider exposes the raw Stripe event under `event.raw`,
+ * from which we pull the `id` field. Returns `null` if the shape is
+ * unexpected so callers can skip idempotent side-effects cleanly.
+ */
+function extractStripeEventId(raw: unknown): string | null {
+  if (typeof raw !== 'object' || raw === null) return null
+  const candidate = (raw as { id?: unknown }).id
+  return typeof candidate === 'string' && candidate.length > 0 ? candidate : null
+}
 
 const router: ExpressRouter = Router()
 
@@ -74,7 +115,53 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
             await incrementUsage(promoId)
             logger.info(`Promo usage incremented: ${promoId}`)
           } catch (promoErr) {
-            logger.error('Failed to increment promo usage:', promoErr instanceof Error ? promoErr : String(promoErr))
+            logger.error(
+              'Failed to increment promo usage:',
+              promoErr instanceof Error ? promoErr : String(promoErr)
+            )
+          }
+        }
+
+        // Cross-service: notify ezauth for subscription checkouts so it can
+        // grant roles/features on the user's Application. Fire-and-forget —
+        // the Payment row is the source of truth; grants are a side-effect.
+        if (data.mode === 'subscription' && data.subscriptionId) {
+          try {
+            const payment = await Payment.findOne({ paymentId: data.sessionId }).lean()
+            const planId = payment?.metadata?.planId
+            const userId = payment?.userId
+
+            if (planId && userId) {
+              const Plan = await getPlanModel()
+              const plan = await Plan.findById(planId).lean()
+              const grantsRoles = plan?.metadata?.grantsRoles
+              const grantsFeatures = plan?.metadata?.grantsFeatures
+              const applicationId = plan?.applicationId
+              const stripeEventId = extractStripeEventId(event.raw)
+
+              if (
+                applicationId &&
+                stripeEventId &&
+                ((grantsRoles && grantsRoles.length > 0) ||
+                  (grantsFeatures && grantsFeatures.length > 0))
+              ) {
+                await notifyEzauthSubscription({
+                  applicationId,
+                  userId,
+                  subscriptionId: data.subscriptionId,
+                  planId,
+                  stripeEventId,
+                  status: 'active',
+                  grantsRoles,
+                  grantsFeatures,
+                })
+              }
+            }
+          } catch (notifyErr) {
+            logger.warn(
+              '[ezauth-webhook] notify on checkout.completed failed (fire-and-forget)',
+              notifyErr instanceof Error ? notifyErr : String(notifyErr)
+            )
           }
         }
         break
@@ -114,6 +201,13 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         const mappedStatus = statusMap[data.status] || 'pending'
 
+        // Snapshot current subscription payment BEFORE the update so we can
+        // tell whether the Stripe status actually changed (avoid notifying
+        // ezauth for every heartbeat webhook).
+        const existingPayment = await Payment.findOne({
+          'metadata.subscriptionId': data.subscriptionId,
+        }).lean()
+
         const updateFields: Record<string, unknown> = { status: mappedStatus }
 
         // Track cancel-at-period-end state
@@ -130,16 +224,106 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         logger.info(
           `Subscription updated: ${data.subscriptionId} -> ${mappedStatus}${data.cancelAtPeriodEnd ? ' (canceling at period end)' : ''}`
         )
+
+        // Cross-service: notify ezauth ONLY when the status actually changed.
+        // Stripe emits `customer.subscription.updated` on many minor fields
+        // (payment method swap, etc.) and we don't want to spam grants.
+        try {
+          const statusChanged = !existingPayment || existingPayment.status !== mappedStatus
+          const ezauthStatus = mapStripeStatusToEzauth(data.status)
+          if (statusChanged && ezauthStatus && existingPayment) {
+            const planId = existingPayment.metadata?.planId
+            const userId = existingPayment.userId
+
+            if (planId && userId) {
+              const Plan = await getPlanModel()
+              const plan = await Plan.findById(planId).lean()
+              const grantsRoles = plan?.metadata?.grantsRoles
+              const grantsFeatures = plan?.metadata?.grantsFeatures
+              const applicationId = plan?.applicationId
+              const stripeEventId = extractStripeEventId(event.raw)
+
+              if (
+                applicationId &&
+                stripeEventId &&
+                ((grantsRoles && grantsRoles.length > 0) ||
+                  (grantsFeatures && grantsFeatures.length > 0))
+              ) {
+                await notifyEzauthSubscription({
+                  applicationId,
+                  userId,
+                  subscriptionId: data.subscriptionId,
+                  planId,
+                  stripeEventId,
+                  status: ezauthStatus,
+                  grantsRoles,
+                  grantsFeatures,
+                  currentPeriodEnd: data.currentPeriodEnd,
+                })
+              }
+            }
+          }
+        } catch (notifyErr) {
+          logger.warn(
+            '[ezauth-webhook] notify on subscription.updated failed (fire-and-forget)',
+            notifyErr instanceof Error ? notifyErr : String(notifyErr)
+          )
+        }
         break
       }
 
       case 'subscription.deleted': {
         const data = event.data as WebhookSubscriptionData
+
+        const existingPayment = await Payment.findOne({
+          'metadata.subscriptionId': data.subscriptionId,
+        }).lean()
+
         await Payment.updateOne(
           { 'metadata.subscriptionId': data.subscriptionId },
           { status: 'cancelled' }
         )
         logger.info(`Subscription cancelled: ${data.subscriptionId}`)
+
+        // Cross-service: revoke roles/features on ezauth.
+        try {
+          if (existingPayment) {
+            const planId = existingPayment.metadata?.planId
+            const userId = existingPayment.userId
+
+            if (planId && userId) {
+              const Plan = await getPlanModel()
+              const plan = await Plan.findById(planId).lean()
+              const grantsRoles = plan?.metadata?.grantsRoles
+              const grantsFeatures = plan?.metadata?.grantsFeatures
+              const applicationId = plan?.applicationId
+              const stripeEventId = extractStripeEventId(event.raw)
+
+              if (
+                applicationId &&
+                stripeEventId &&
+                ((grantsRoles && grantsRoles.length > 0) ||
+                  (grantsFeatures && grantsFeatures.length > 0))
+              ) {
+                await notifyEzauthSubscription({
+                  applicationId,
+                  userId,
+                  subscriptionId: data.subscriptionId,
+                  planId,
+                  stripeEventId,
+                  status: 'canceled',
+                  grantsRoles,
+                  grantsFeatures,
+                })
+              }
+            }
+          }
+        } catch (notifyErr) {
+          logger.warn(
+            '[ezauth-webhook] notify on subscription.deleted failed (fire-and-forget)',
+            notifyErr instanceof Error ? notifyErr : String(notifyErr)
+          )
+        }
         break
       }
 

@@ -1,0 +1,638 @@
+/**
+ * Integration tests for POST /api/subscriptions/webhook.
+ *
+ * Exercises the real router against a MongoMemoryServer.
+ */
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
+import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
+import express from 'express'
+import request from 'supertest'
+import { createHmac } from 'crypto'
+import webhookRouter from '../../../routes/subscriptions/webhook.js'
+import { getApplicationModel } from '../../../models/application.js'
+import { getSubscriptionEventModel } from '../../../models/subscription-event.js'
+import { getAuthUserModel } from '../../../models/auth-user.js'
+import { createUser, createApiKey, cleanAllCollections } from '../../helpers/setup.js'
+
+const SECRET = 'test-webhook-secret'
+
+function createTestApp() {
+  const app = express()
+  app.use(express.json())
+  app.use('/api', webhookRouter)
+  return app
+}
+
+function buildSigHeader(timestamp: string, body: string, secret = SECRET): string {
+  const sig = createHmac('sha256', secret).update(`${timestamp}.${body}`).digest('hex')
+  return `t=${timestamp},v1=${sig}`
+}
+
+interface PostOptions {
+  apiKey?: string
+  signature?: string
+  bodyOverride?: string
+}
+
+async function postWebhook(
+  app: express.Express,
+  payload: Record<string, unknown>,
+  opts: PostOptions = {}
+) {
+  const body = opts.bodyOverride ?? JSON.stringify(payload)
+  const timestamp = (payload.timestamp as string) ?? Math.floor(Date.now() / 1000).toString()
+  const signature = opts.signature ?? buildSigHeader(timestamp, body)
+
+  const req = request(app).post('/api/subscriptions/webhook')
+  if (opts.apiKey !== undefined) req.set('X-API-Key', opts.apiKey)
+  req.set('X-EZStart-Signature', signature)
+  req.set('Content-Type', 'application/json')
+  // supertest will set Content-Length; send the exact body string
+  return req.send(body)
+}
+
+describe('POST /api/subscriptions/webhook', () => {
+  let app: express.Express
+  let originalSecret: string | undefined
+
+  beforeAll(async () => {
+    await setupTestDatabase()
+    app = createTestApp()
+
+    const Application = await getApplicationModel()
+    try {
+      await Application.collection.dropIndexes()
+    } catch {
+      // ignore
+    }
+    await Application.createIndexes()
+
+    const SubscriptionEvent = await getSubscriptionEventModel()
+    try {
+      await SubscriptionEvent.collection.dropIndexes()
+    } catch {
+      // ignore
+    }
+    await SubscriptionEvent.createIndexes()
+  })
+
+  afterAll(async () => {
+    await teardownTestDatabase()
+  })
+
+  beforeEach(async () => {
+    originalSecret = process.env.EZAUTH_WEBHOOK_SECRET
+    process.env.EZAUTH_WEBHOOK_SECRET = SECRET
+    await cleanAllCollections()
+    const Application = await getApplicationModel()
+    await Application.deleteMany({})
+    const SubscriptionEvent = await getSubscriptionEventModel()
+    await SubscriptionEvent.deleteMany({})
+  })
+
+  afterEach(() => {
+    if (originalSecret === undefined) delete process.env.EZAUTH_WEBHOOK_SECRET
+    else process.env.EZAUTH_WEBHOOK_SECRET = originalSecret
+  })
+
+  describe('auth — X-API-Key', () => {
+    it('401 when X-API-Key is missing', async () => {
+      const user = await createUser()
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'active',
+        grantsRoles: ['pro'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: undefined })
+
+      expect(res.status).toBe(401)
+      expect(res.body.error.message).toMatch(/API key required/i)
+    })
+
+    it('401 when X-API-Key is unknown', async () => {
+      const user = await createUser()
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'active',
+        grantsRoles: ['pro'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: 'ez_sk_live_notreal' })
+
+      expect(res.status).toBe(401)
+      expect(res.body.error.message).toMatch(/Invalid API key/i)
+    })
+
+    it('403 when API key lacks admin scope', async () => {
+      const user = await createUser()
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+      const { rawKey } = await createApiKey(user._id!.toString(), {
+        scope: 'user',
+        type: 'secret',
+        env: 'live',
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'active',
+        grantsRoles: ['pro'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(403)
+      expect(res.body.error.message).toMatch(/admin scope/i)
+    })
+  })
+
+  describe('signature verification', () => {
+    it('401 when signature is invalid (wrong HMAC)', async () => {
+      const user = await createUser()
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'active',
+        grantsRoles: ['pro'],
+        timestamp: ts,
+      }
+      const badSig = `t=${ts},v1=${'0'.repeat(64)}`
+      const res = await postWebhook(app, payload, { apiKey: rawKey, signature: badSig })
+
+      expect(res.status).toBe(401)
+      expect(res.body.error.message).toMatch(/Invalid signature/i)
+    })
+
+    it('401 when signature header is malformed', async () => {
+      const user = await createUser()
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'active',
+        grantsRoles: ['pro'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey, signature: 'garbage' })
+
+      expect(res.status).toBe(401)
+      expect(res.body.error.message).toMatch(/signature/i)
+    })
+
+    it('401 when timestamp is > 5 minutes old (replay window)', async () => {
+      const user = await createUser()
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const oldTs = (Math.floor(Date.now() / 1000) - 10 * 60).toString() // 10 min old
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'active',
+        grantsRoles: ['pro'],
+        timestamp: oldTs,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(401)
+      expect(res.body.error.code).toBe('TIMESTAMP_EXPIRED')
+    })
+
+    it('401 when body timestamp does not match header timestamp', async () => {
+      const user = await createUser()
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const nowTs = Math.floor(Date.now() / 1000).toString()
+      const differentTs = (Number(nowTs) - 30).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'active',
+        grantsRoles: ['pro'],
+        timestamp: differentTs,
+      }
+      const body = JSON.stringify(payload)
+      // Signature computed with body timestamp but header uses nowTs
+      const sig = buildSigHeader(nowTs, body)
+      const res = await postWebhook(app, payload, {
+        apiKey: rawKey,
+        signature: sig,
+        bodyOverride: body,
+      })
+
+      expect(res.status).toBe(401)
+    })
+  })
+
+  describe('body validation', () => {
+    it('400 when body schema is invalid', async () => {
+      const user = await createUser()
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        // missing applicationId, userId, etc.
+        status: 'active',
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(400)
+    })
+
+    it('400 when status is an invalid enum value', async () => {
+      const user = await createUser()
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_1',
+        status: 'paused',
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(400)
+    })
+  })
+
+  describe('grants — active status', () => {
+    it('200 and adds grantsRoles to AuthUser.appRoles[slug]', async () => {
+      const user = await createUser({
+        email: 'grant@test.com',
+        username: 'grantuser',
+        appRoles: { acme: ['beta-tester'] },
+      })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_grant',
+        status: 'active',
+        grantsRoles: ['admin'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.applied).toBe(true)
+
+      const AuthUser = await getAuthUserModel()
+      const updated = await AuthUser.findById(user._id!.toString())
+      const acmeRoles = updated?.appRoles.get('acme') ?? []
+      expect(acmeRoles).toContain('admin')
+      expect(acmeRoles).toContain('beta-tester')
+    })
+
+    it('200 and adds grantsFeatures to AuthUser.features', async () => {
+      const user = await createUser({ email: 'feat@test.com', username: 'featuser' })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_feat',
+        status: 'active',
+        grantsFeatures: ['advanced-analytics', 'beta-dashboard'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.applied).toBe(true)
+
+      const AuthUser = await getAuthUserModel()
+      const updated = await AuthUser.findById(user._id!.toString()).lean()
+      expect(updated?.features).toEqual(
+        expect.arrayContaining(['advanced-analytics', 'beta-dashboard'])
+      )
+    })
+
+    it('does not duplicate roles/features already present', async () => {
+      const user = await createUser({
+        email: 'dedup@test.com',
+        username: 'dedupuser',
+        appRoles: { acme: ['admin'] },
+      })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_dedup',
+        status: 'active',
+        grantsRoles: ['admin', 'admin'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(200)
+      const AuthUser = await getAuthUserModel()
+      const updated = await AuthUser.findById(user._id!.toString())
+      const acmeRoles = updated?.appRoles.get('acme') ?? []
+      expect(acmeRoles.filter(r => r === 'admin')).toHaveLength(1)
+    })
+  })
+
+  describe('grants — canceled status (revoke)', () => {
+    it('200 and removes grantsRoles from AuthUser.appRoles[slug]', async () => {
+      const user = await createUser({
+        email: 'revoke@test.com',
+        username: 'revokeuser',
+        appRoles: { acme: ['admin', 'beta-tester'] },
+      })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_revoke',
+        status: 'canceled',
+        grantsRoles: ['admin'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.applied).toBe(true)
+
+      const AuthUser = await getAuthUserModel()
+      const updated = await AuthUser.findById(user._id!.toString())
+      const acmeRoles = updated?.appRoles.get('acme') ?? []
+      expect(acmeRoles).not.toContain('admin')
+      expect(acmeRoles).toContain('beta-tester')
+    })
+
+    it('200 and removes grantsFeatures from AuthUser.features', async () => {
+      const AuthUser = await getAuthUserModel()
+      const user = await createUser({ email: 'revf@test.com', username: 'revfuser' })
+      user.features = ['advanced-analytics', 'other-feature']
+      await user.save()
+
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_revf',
+        status: 'canceled',
+        grantsFeatures: ['advanced-analytics'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(200)
+      const updated = await AuthUser.findById(user._id!.toString()).lean()
+      expect(updated?.features).not.toContain('advanced-analytics')
+      expect(updated?.features).toContain('other-feature')
+    })
+  })
+
+  describe('idempotency', () => {
+    it('200 with applied=false when the same stripeEventId is posted twice', async () => {
+      const user = await createUser({
+        email: 'idem@test.com',
+        username: 'idemuser',
+      })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts1 = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_idem',
+        status: 'active',
+        grantsRoles: ['admin'],
+        timestamp: ts1,
+      }
+      const first = await postWebhook(app, payload, { apiKey: rawKey })
+      expect(first.status).toBe(200)
+      expect(first.body.data.applied).toBe(true)
+
+      // Second call with the same stripeEventId — must be a no-op.
+      // Re-sign with a fresh timestamp so it passes the replay window.
+      const ts2 = Math.floor(Date.now() / 1000).toString()
+      const payload2 = { ...payload, timestamp: ts2 }
+      const second = await postWebhook(app, payload2, { apiKey: rawKey })
+      expect(second.status).toBe(200)
+      expect(second.body.data.applied).toBe(false)
+      expect(second.body.data.alreadyApplied).toBe(true)
+
+      // Only one SubscriptionEvent row exists.
+      const SubscriptionEvent = await getSubscriptionEventModel()
+      const count = await SubscriptionEvent.countDocuments({ stripeEventId: 'evt_idem' })
+      expect(count).toBe(1)
+    })
+  })
+
+  describe('resource not found', () => {
+    it('404 when applicationId is unknown', async () => {
+      const user = await createUser({ email: 'nfa@test.com', username: 'nfauser' })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: '507f1f77bcf86cd799439011', // valid ObjectId but missing
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_nfa',
+        status: 'active',
+        grantsRoles: ['admin'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(404)
+      expect(res.body.error.code).toBe('APPLICATION_NOT_FOUND')
+    })
+
+    it('404 when userId is unknown', async () => {
+      const user = await createUser({ email: 'nfu@test.com', username: 'nfuuser' })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme',
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: '507f1f77bcf86cd799439011',
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_nfu',
+        status: 'active',
+        grantsRoles: ['admin'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(404)
+      expect(res.body.error.code).toBe('USER_NOT_FOUND')
+    })
+  })
+
+  describe('configuration', () => {
+    it('503 when EZAUTH_WEBHOOK_SECRET is not set', async () => {
+      delete process.env.EZAUTH_WEBHOOK_SECRET
+      const user = await createUser({ email: 'ns@test.com', username: 'nsuser' })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: '507f1f77bcf86cd799439011',
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_1',
+        planId: 'plan-1',
+        stripeEventId: 'evt_ns',
+        status: 'active',
+        grantsRoles: ['admin'],
+        timestamp: ts,
+      }
+      const res = await postWebhook(app, payload, { apiKey: rawKey })
+
+      expect(res.status).toBe(503)
+    })
+  })
+})

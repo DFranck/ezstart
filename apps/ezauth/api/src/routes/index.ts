@@ -5,6 +5,7 @@ import { oauthRegistries, oauthRouters } from './oauth/index.js'
 import { adminRegistries, adminRouters } from './admin/index.js'
 import { apiKeyRegistries, apiKeyRouters } from './api-keys/index.js'
 import { applicationRegistries, applicationRouters } from './applications/index.js'
+import { subscriptionRegistries, subscriptionRouters } from './subscriptions/index.js'
 
 // Create separate routers for each group
 export const authRouter: ExpressRouter = Router()
@@ -12,6 +13,7 @@ export const oauthRouter: ExpressRouter = Router()
 export const adminRouter: ExpressRouter = Router()
 export const apiKeysRouter: ExpressRouter = Router()
 export const applicationsRouter: ExpressRouter = Router()
+export const subscriptionsRouter: ExpressRouter = Router()
 
 export const allRegistries = [
   ...authRegistries,
@@ -19,6 +21,7 @@ export const allRegistries = [
   ...adminRegistries,
   ...apiKeyRegistries,
   ...applicationRegistries,
+  ...subscriptionRegistries,
 ]
 
 // Mount auth routes (login, register, etc.)
@@ -35,6 +38,9 @@ apiKeyRouters.forEach(r => apiKeysRouter.use('/', r))
 
 // Mount Application routes (multi-tenant entity CRUD + lookup/resolve)
 applicationRouters.forEach(r => applicationsRouter.use('/', r))
+
+// Mount Subscription routes (cross-service webhook receiver from EZPay)
+subscriptionRouters.forEach(r => subscriptionsRouter.use('/', r))
 
 // Default export for backward compatibility (auth routes)
 export default authRouter

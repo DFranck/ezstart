@@ -15,6 +15,7 @@ import routes, {
   adminRouter,
   apiKeysRouter,
   applicationsRouter,
+  subscriptionsRouter,
 } from './routes/index.js'
 import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
@@ -23,6 +24,7 @@ import { getOAuthAccountModel } from './models/oauth-account.js'
 import { getTotpSecretModel } from './models/totp-secret.js'
 import { getApiKeyModel } from './models/api-key.js'
 import { getApplicationModel } from './models/application.js'
+import { getSubscriptionEventModel } from './models/subscription-event.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { createCorsConfig } from '@ezstart/config/cors'
@@ -60,6 +62,7 @@ app.use(createVersionedRouter('/api/auth', oauthRouter))
 app.use(createVersionedRouter('/api/admin', adminRouter))
 app.use(createVersionedRouter('/api', apiKeysRouter))
 app.use(createVersionedRouter('/api', applicationsRouter))
+app.use(createVersionedRouter('/api', subscriptionsRouter))
 
 // Sentry error handler MUST be AFTER all routes/controllers
 Sentry.setupExpressErrorHandler(app)
@@ -73,8 +76,9 @@ connectToMongo('ezauth')
     await getTotpSecretModel()
     await getApiKeyModel()
     await getApplicationModel()
+    await getSubscriptionEventModel()
     logger.info(
-      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application'
+      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent'
     )
 
     return startServer(app, {
