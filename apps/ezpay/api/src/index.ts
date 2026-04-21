@@ -12,6 +12,18 @@ import {
 } from '@ezstart/api-core'
 import routes, { registries } from './routes/index.js'
 
+// Fail-fast in production if the S2S key for ezauth cross-service validation
+// is missing — without it `POST /api/keys` can't validate Applications against
+// ezauth and Phase G seed flows silently 404. In dev/staging a warn is enough.
+if (process.env.NODE_ENV === 'production' && !process.env.EZPAY_SERVER_EZAUTH_KEY) {
+  logger.error('EZPAY_SERVER_EZAUTH_KEY is required in production. Aborting boot.')
+  process.exit(1)
+} else if (!process.env.EZPAY_SERVER_EZAUTH_KEY) {
+  logger.warn(
+    'EZPAY_SERVER_EZAUTH_KEY not set — cross-service Application validation will fail on POST /api/keys'
+  )
+}
+
 // Create pre-configured server with Stripe webhook raw-body routes
 const server = createEzstartServer('ezpay', {
   rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
