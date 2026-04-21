@@ -1,0 +1,21 @@
+{
+  "billing": {
+    "title": "Facturation",
+    "subtitle": "Votre abonnement, les revenus de vos applications et la plateforme",
+    "loginRequired": "Connectez-vous pour consulter votre facturation",
+    "mySubscription": {
+      "title": "Mon abonnement",
+      "subtitle": "Gérez votre abonnement à la plateforme EZPay et consultez l'historique de vos paiements",
+      "noActive": "Vous n'avez pas d'abonnement actif. Choisissez un plan pour commencer.",
+      "managePortal": "Ouvrir le portail Stripe"
+    },
+    "myAppsRevenue": {
+      "title": "Revenus de mes applications",
+      "subtitle": "Paiements collectés sur les applications que vous possédez"
+    },
+    "platform": {
+      "title": "Vue plateforme",
+      "subtitle": "Tous les paiements, abonnements et statistiques de toutes les apps (superadmin)"
+    }
+  }
+}

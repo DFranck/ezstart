@@ -58,6 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppNavLink href="#features">{nav('features')}</AppNavLink>
           <AppNavLink href="#pricing">{nav('pricing')}</AppNavLink>
           <AppNavLink href="/docs">{nav('docs')}</AppNavLink>
+          {isAuthenticated && <AppNavLink href="/billing">{nav('billing')}</AppNavLink>}
         </AppNav>
 
         <AppActions>
@@ -68,11 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-            {isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <LoginButton size="sm" loginText={nav('signIn')} />
-            )}
+            {isAuthenticated ? <UserMenu /> : <LoginButton size="sm" loginText={nav('signIn')} />}
           </Div>
           <AppMobileToggle />
         </AppActions>
@@ -81,6 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppMobileLink href="#features">{nav('features')}</AppMobileLink>
           <AppMobileLink href="#pricing">{nav('pricing')}</AppMobileLink>
           <AppMobileLink href="/docs">{nav('docs')}</AppMobileLink>
+          {isAuthenticated && <AppMobileLink href="/billing">{nav('billing')}</AppMobileLink>}
           <Div className="px-3 pt-2 flex flex-col gap-2">
             <Div className="flex items-center gap-2">
               <LocaleSwitcher
@@ -141,10 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </P>
           </FooterColumn>
 
-          <FooterBrand
-            tagline={footer('tagline')}
-            copyright={`\u00A9 2026 ${footer('copyright')}`}
-          >
+          <FooterBrand tagline={footer('tagline')} copyright={`\u00A9 2026 ${footer('copyright')}`}>
             <Div className="flex items-center gap-2">
               <Image src="/logo.svg" alt="EZPay" width={24} height={24} />
               <Span className="text-lg font-bold">EZPay</Span>

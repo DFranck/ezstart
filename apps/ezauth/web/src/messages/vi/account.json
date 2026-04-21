@@ -1,0 +1,16 @@
+{
+  "account": {
+    "myProfile": {
+      "title": "Tài khoản của tôi",
+      "subtitle": "Hồ sơ, bảo mật, phiên đăng nhập và các ứng dụng đã kết nối"
+    },
+    "myAppsUsers": {
+      "title": "Người dùng ứng dụng của tôi",
+      "subtitle": "Người dùng đã đăng ký vào các ứng dụng bạn sở hữu"
+    },
+    "platform": {
+      "title": "Người dùng nền tảng",
+      "subtitle": "Tất cả người dùng trên mọi tenant (superadmin)"
+    }
+  }
+}

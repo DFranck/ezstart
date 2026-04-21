@@ -4,7 +4,8 @@
       "features": "Features",
       "pricing": "Pricing",
       "docs": "Docs",
-      "signIn": "Sign In"
+      "signIn": "Sign In",
+      "billing": "Billing"
     },
     "footer": {
       "product": "Product",

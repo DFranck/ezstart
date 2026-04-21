@@ -1,0 +1,16 @@
+{
+  "account": {
+    "myProfile": {
+      "title": "Mon compte",
+      "subtitle": "Profil, sécurité, sessions et applications connectées"
+    },
+    "myAppsUsers": {
+      "title": "Utilisateurs de mes apps",
+      "subtitle": "Utilisateurs inscrits aux applications dont vous êtes propriétaire"
+    },
+    "platform": {
+      "title": "Utilisateurs de la plateforme",
+      "subtitle": "Tous les utilisateurs de tous les tenants (superadmin)"
+    }
+  }
+}

@@ -5,17 +5,17 @@ import Link from 'next/link'
 import { Button, Div, H1, H3, Icon, LI, P, Section, Span, UL } from '@ezstart/ui/components'
 
 /**
- * Subscription checkout cancel landing page for EZPay.
+ * Subscription checkout cancel landing page.
  *
- * Stripe Checkout redirects here when the user aborts a subscription
- * checkout. We confirm no charge was made and route the user back to pricing.
+ * Stripe Checkout redirects here when the user aborts a subscription checkout.
+ * We confirm no charge was made and route the user back to pricing.
  */
 export default function SubscribeCancelPage() {
-  const t = useTranslations('cancel')
+  const t = useTranslations('subscribe.cancel')
   const locale = useLocale()
 
   return (
-    <Section size={'full'} className="relative pt-24 md:pt-32">
+    <Section size="full" className="relative pt-24 md:pt-32">
       <Div className="max-w-2xl mx-auto text-center px-4">
         <Div className="mb-12 flex justify-center">
           <Div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-muted flex items-center justify-center">
@@ -30,7 +30,7 @@ export default function SubscribeCancelPage() {
           <Span className="text-muted-foreground">{t('title')}</Span>
         </H1>
 
-        <P className="text-xl text-muted-foreground mb-12">{t('message')}</P>
+        <P className="text-xl text-muted-foreground mb-12">{t('description')}</P>
 
         <Div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Button asChild size="lg">

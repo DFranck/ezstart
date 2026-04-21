@@ -13,17 +13,33 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   // Always load `en` as a fallback base so any missing keys in a non-default
   // locale fall back to English rather than rendering the raw key.
-  const [commonEn, authEn, adminEn, developerEn, common, auth, admin, developer] =
-    await Promise.all([
-      import(`../messages/en/common.json`),
-      import(`../messages/en/auth.json`),
-      import(`../messages/en/admin.json`),
-      import(`../messages/en/developer.json`),
-      import(`../messages/${locale}/common.json`),
-      import(`../messages/${locale}/auth.json`),
-      import(`../messages/${locale}/admin.json`),
-      import(`../messages/${locale}/developer.json`),
-    ])
+  const [
+    commonEn,
+    authEn,
+    adminEn,
+    developerEn,
+    accountEn,
+    subscribeEn,
+    common,
+    auth,
+    admin,
+    developer,
+    account,
+    subscribe,
+  ] = await Promise.all([
+    import(`../messages/en/common.json`),
+    import(`../messages/en/auth.json`),
+    import(`../messages/en/admin.json`),
+    import(`../messages/en/developer.json`),
+    import(`../messages/en/account.json`),
+    import(`../messages/en/subscribe.json`),
+    import(`../messages/${locale}/common.json`),
+    import(`../messages/${locale}/auth.json`),
+    import(`../messages/${locale}/admin.json`),
+    import(`../messages/${locale}/developer.json`),
+    import(`../messages/${locale}/account.json`),
+    import(`../messages/${locale}/subscribe.json`),
+  ])
 
   return {
     locale,
@@ -32,10 +48,14 @@ export default getRequestConfig(async ({ requestLocale }) => {
       authEn.default,
       adminEn.default,
       developerEn.default,
+      accountEn.default,
+      subscribeEn.default,
       common.default,
       auth.default,
       admin.default,
       developer.default,
+      account.default,
+      subscribe.default,
     ]),
   }
 })

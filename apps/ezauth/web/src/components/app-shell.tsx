@@ -81,7 +81,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-            {isAuthenticated ? <UserMenu /> : <LoginButton size="sm" loginText={t('navSignIn')} />}
+            {isAuthenticated ? (
+              <UserMenu onManageAccount={() => router.push(`/${locale}/account`)} />
+            ) : (
+              <LoginButton size="sm" loginText={t('navSignIn')} />
+            )}
           </Div>
           <AppMobileToggle />
         </AppActions>
@@ -97,7 +101,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-            {isAuthenticated ? <UserMenu /> : <LoginButton loginText={t('navSignIn')} />}
+            {isAuthenticated ? (
+              <UserMenu onManageAccount={() => router.push(`/${locale}/account`)} />
+            ) : (
+              <LoginButton loginText={t('navSignIn')} />
+            )}
           </Div>
         </AppMobileMenu>
       </AppHeader>

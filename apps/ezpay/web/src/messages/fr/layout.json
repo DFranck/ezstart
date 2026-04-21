@@ -4,7 +4,8 @@
       "features": "Fonctionnalités",
       "pricing": "Tarifs",
       "docs": "Docs",
-      "signIn": "Connexion"
+      "signIn": "Connexion",
+      "billing": "Facturation"
     },
     "footer": {
       "product": "Produit",
