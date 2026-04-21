@@ -39,13 +39,22 @@ export const uiComponentsMock = {
   Icon: ({ name, ...props }: { name: string; [k: string]: unknown }) =>
     React.createElement('span', { 'data-testid': 'icon', 'data-icon': name, ...props }),
   Input: React.forwardRef<HTMLInputElement, Record<string, unknown>>(
-    ({ startIcon, ...props }, ref) =>
-      React.createElement('input', { ...props, ref })
+    ({ startIcon, ...props }, ref) => React.createElement('input', { ...props, ref })
   ),
-  Textarea: React.forwardRef<HTMLTextAreaElement, Record<string, unknown>>(
-    (props, ref) => React.createElement('textarea', { ...props, ref })
+  Textarea: React.forwardRef<HTMLTextAreaElement, Record<string, unknown>>((props, ref) =>
+    React.createElement('textarea', { ...props, ref })
   ),
-  Checkbox: ({ id, checked, onCheckedChange, ...props }: { id?: string; checked?: boolean; onCheckedChange?: (v: boolean) => void; [k: string]: unknown }) =>
+  Checkbox: ({
+    id,
+    checked,
+    onCheckedChange,
+    ...props
+  }: {
+    id?: string
+    checked?: boolean
+    onCheckedChange?: (v: boolean) => void
+    [k: string]: unknown
+  }) =>
     React.createElement('input', {
       type: 'checkbox',
       id,
@@ -54,15 +63,39 @@ export const uiComponentsMock = {
       ...props,
     }),
   Badge: makePassthrough('Badge', 'span'),
-  Modal: ({ isOpen, onClose, children, title, footer, ...props }: { isOpen: boolean; onClose: () => void; children: React.ReactNode; title?: string; footer?: React.ReactNode; [k: string]: unknown }) =>
+  Modal: ({
+    isOpen,
+    onClose,
+    children,
+    title,
+    footer,
+    ...props
+  }: {
+    isOpen: boolean
+    onClose: () => void
+    children: React.ReactNode
+    title?: string
+    footer?: React.ReactNode
+    [k: string]: unknown
+  }) =>
     isOpen
-      ? React.createElement('div', { 'data-testid': 'modal', role: 'dialog' },
+      ? React.createElement(
+          'div',
+          { 'data-testid': 'modal', role: 'dialog' },
           title ? React.createElement('h2', null, title) : null,
           children,
           footer
         )
       : null,
-  AlertDialog: ({ open, children, ...props }: { open?: boolean; children: React.ReactNode; [k: string]: unknown }) =>
+  AlertDialog: ({
+    open,
+    children,
+    ...props
+  }: {
+    open?: boolean
+    children: React.ReactNode
+    [k: string]: unknown
+  }) =>
     open !== false
       ? React.createElement('div', { 'data-testid': 'AlertDialog', ...props }, children)
       : null,
@@ -76,7 +109,15 @@ export const uiComponentsMock = {
   SelectContent: makePassthrough('SelectContent'),
   SelectItem: makePassthrough('SelectItem', 'option'),
   SelectValue: makePassthrough('SelectValue'),
-  Switch: ({ checked, onCheckedChange, ...props }: { checked?: boolean; onCheckedChange?: (v: boolean) => void; [k: string]: unknown }) =>
+  Switch: ({
+    checked,
+    onCheckedChange,
+    ...props
+  }: {
+    checked?: boolean
+    onCheckedChange?: (v: boolean) => void
+    [k: string]: unknown
+  }) =>
     React.createElement('input', {
       type: 'checkbox',
       role: 'switch',
@@ -95,16 +136,51 @@ export const uiComponentsMock = {
   Spinner: () => React.createElement('div', { 'data-testid': 'spinner' }),
   Img: ({ src, alt, ...props }: { src?: string; alt?: string; [k: string]: unknown }) =>
     React.createElement('img', { src, alt, ...props }),
-  DataTable: ({ data, columns }: { data: unknown[]; columns: unknown[] }) =>
-    React.createElement('table', { 'data-testid': 'data-table' },
-      React.createElement('tbody', null,
-        data.map((_, i) => React.createElement('tr', { key: i }))
+  Code: makePassthrough('Code', 'code'),
+  CardDescription: makePassthrough('CardDescription'),
+  AlertDialogAction: makePassthrough('AlertDialogAction', 'button'),
+  AlertDialogCancel: makePassthrough('AlertDialogCancel', 'button'),
+  DataTable: ({ data, columns }: { data: unknown[]; columns: unknown[] }) => {
+    // Render cells so row-level assertions work. Each column's `cell` renderer
+    // is called with `{ row: { original: dataItem } }`.
+    type Col = {
+      id?: string
+      header?: unknown
+      cell?: (ctx: { row: { original: unknown } }) => React.ReactNode
+    }
+    const cols = (columns ?? []) as Col[]
+    return React.createElement(
+      'table',
+      { 'data-testid': 'data-table' },
+      React.createElement(
+        'tbody',
+        null,
+        data.map((item, i) =>
+          React.createElement(
+            'tr',
+            { key: i, 'data-testid': 'data-table-row' },
+            cols.map((col, j) =>
+              React.createElement(
+                'td',
+                { key: j },
+                typeof col.cell === 'function' ? col.cell({ row: { original: item } }) : null
+              )
+            )
+          )
+        )
       )
-    ),
+    )
+  },
   DataTableColumnHeader: ({ title }: { title: string; header?: unknown }) =>
     React.createElement('th', null, title),
-  InfiniteMovingCards: ({ children }: { children: React.ReactNode; direction?: string; speed?: string; pauseOnHover?: boolean }) =>
-    React.createElement('div', { 'data-testid': 'infinite-cards' }, children),
+  InfiniteMovingCards: ({
+    children,
+  }: {
+    children: React.ReactNode
+    direction?: string
+    speed?: string
+    pauseOnHover?: boolean
+  }) => React.createElement('div', { 'data-testid': 'infinite-cards' }, children),
   Text: makePassthrough('Text', 'span'),
 }
 
@@ -150,8 +226,17 @@ export const uiUtilsMock = {
 // ---------------------------------------------------------------------------
 
 export const nextImageMock = {
-  default: ({ src, alt, fill, ...props }: { src: string; alt: string; fill?: boolean; [k: string]: unknown }) =>
-    React.createElement('img', { src, alt, ...props }),
+  default: ({
+    src,
+    alt,
+    fill,
+    ...props
+  }: {
+    src: string
+    alt: string
+    fill?: boolean
+    [k: string]: unknown
+  }) => React.createElement('img', { src, alt, ...props }),
 }
 
 // ---------------------------------------------------------------------------

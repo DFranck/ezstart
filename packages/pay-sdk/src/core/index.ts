@@ -32,6 +32,10 @@ export type {
   UpdatePlanRequest,
   PlanResponse,
   PlansListResponse,
+  PayApiKeyItem,
+  CreatePayApiKeyRequest,
+  CreatePayApiKeyResponse,
+  PayApiKeyUsageResponse,
 } from './types.js'
 
 // Schemas

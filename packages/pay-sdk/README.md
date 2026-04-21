@@ -41,7 +41,6 @@ Drop-in pre-built UI. Requires `@ezstart/ui` as peer dep.
 
 ```tsx
 import { PayProvider, DonateModal, PricingPage } from '@ezstart/pay-sdk'
-
 ;<PayProvider apiUrl="https://api.example.com/api" appName="myapp">
   <DonateModal projectId="proj_123" />
   <PricingPage />
@@ -107,6 +106,30 @@ const donation = await client.createDonation({ projectId: 'proj_123', amount: 50
 - `PayAdminDashboard`, `UserPaymentDashboard`
 - `FeatureGate`, `PromoCodeInput`, `RefundButton`, `ConfirmActionDialog`
 - `PaymentSuccessPage`, `PaymentHistory`, `ProductCard`, `ProductGrid`
+- `PayDeveloperPortal`, `CreatePayKeyModal` — API keys CRUD (create / rotate / revoke) scoped to an Application
+
+### Developer portal (API keys)
+
+Drop-in UI for the `ez_pk_*` / `ez_sk_*` API key lifecycle, scoped to an ezauth Application.
+
+```tsx
+import { PayDeveloperPortal } from '@ezstart/pay-sdk/components'
+;<PayDeveloperPortal
+  applicationId="app_123"
+  locale="en"
+  showSuperadminScope={currentUser.role === 'superadmin'}
+/>
+```
+
+Under the hood it uses the following hooks — usable standalone if you roll your own UI:
+
+- `usePayKeys({ applicationId?, enabled? })` — list keys for the Application
+- `useCreatePayKey({ onSuccess?, onError? })` — create a new key (the raw key is returned exactly once)
+- `useRevokePayKey({ onSuccess?, onError? })` — revoke an active key
+- `useRotatePayKey({ onSuccess?, onError? })` — atomically revoke + recreate, returns the fresh raw key
+- `usePayKeyUsage(keyId, { enabled? })` — per-key usage snapshot (current month + daily breakdown + quota)
+
+All user-facing strings are driven by the `texts` prop (English defaults provided). Zero i18n library dependency.
 
 ### Server (`@ezstart/pay-sdk/server`)
 

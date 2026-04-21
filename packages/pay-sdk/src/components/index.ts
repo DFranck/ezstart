@@ -78,3 +78,16 @@ export type {
   DeveloperConnectDashboardProps,
   DeveloperConnectDashboardTexts,
 } from './DeveloperConnectDashboard.js'
+
+// Developer Portal (API Keys — P6)
+export { PayDeveloperPortal } from './developer/PayDeveloperPortal.js'
+export type { PayDeveloperPortalProps } from './developer/PayDeveloperPortal.js'
+export { CreatePayKeyModal } from './developer/CreatePayKeyModal.js'
+export type { CreatePayKeyModalProps } from './developer/CreatePayKeyModal.js'
+export type {
+  PayDeveloperPortalTexts,
+  PayApiKeysTableTexts,
+  CreatePayKeyModalTexts,
+  KeyCreatedModalTexts as PayKeyCreatedModalTexts,
+} from './developer/types.js'
+export { defaultPayDeveloperPortalTexts } from './developer/types.js'

@@ -40,6 +40,10 @@ export type {
   ConnectOnboardRequest,
   ConnectOnboardResponse,
   ConnectDashboardLinkResponse,
+  PayApiKeyItem,
+  CreatePayApiKeyRequest,
+  CreatePayApiKeyResponse,
+  PayApiKeyUsageResponse,
 } from './core/types.js'
 
 // Schemas
@@ -90,6 +94,18 @@ export { useConnectStatus } from './react/hooks/useConnectStatus.js'
 export { useConnectOnboard } from './react/hooks/useConnectOnboard.js'
 export { useConnectDashboardLink } from './react/hooks/useConnectDashboardLink.js'
 export { useConnectDisconnect } from './react/hooks/useConnectDisconnect.js'
+
+// API Keys hooks (P6 — requires @tanstack/react-query peer dep)
+export { usePayKeys, PAY_KEYS_QUERY_KEY, payKeysQueryKey } from './react/hooks/usePayKeys.js'
+export type { UsePayKeysOptions } from './react/hooks/usePayKeys.js'
+export { useCreatePayKey } from './react/hooks/useCreatePayKey.js'
+export type { UseCreatePayKeyCallbacks } from './react/hooks/useCreatePayKey.js'
+export { useRevokePayKey } from './react/hooks/useRevokePayKey.js'
+export type { UseRevokePayKeyCallbacks } from './react/hooks/useRevokePayKey.js'
+export { useRotatePayKey } from './react/hooks/useRotatePayKey.js'
+export type { UseRotatePayKeyCallbacks } from './react/hooks/useRotatePayKey.js'
+export { usePayKeyUsage, payKeyUsageQueryKey } from './react/hooks/usePayKeyUsage.js'
+export type { UsePayKeyUsageOptions } from './react/hooks/usePayKeyUsage.js'
 
 // ============================================================
 // Components (pre-built UI — depends on @ezstart/ui)
@@ -198,3 +214,16 @@ export type {
   DeveloperConnectDashboardProps,
   DeveloperConnectDashboardTexts,
 } from './components/DeveloperConnectDashboard.js'
+
+// Developer Portal — API Keys (P6)
+export { PayDeveloperPortal } from './components/developer/PayDeveloperPortal.js'
+export type { PayDeveloperPortalProps } from './components/developer/PayDeveloperPortal.js'
+export { CreatePayKeyModal } from './components/developer/CreatePayKeyModal.js'
+export type { CreatePayKeyModalProps } from './components/developer/CreatePayKeyModal.js'
+export type {
+  PayDeveloperPortalTexts,
+  PayApiKeysTableTexts,
+  CreatePayKeyModalTexts,
+  KeyCreatedModalTexts as PayKeyCreatedModalTexts,
+} from './components/developer/types.js'
+export { defaultPayDeveloperPortalTexts } from './components/developer/types.js'
