@@ -16,10 +16,9 @@ import {
 } from '@ezstart/ui/components'
 import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
 import { usePaymentHistory } from '../react/hooks/usePaymentHistory.js'
-import { usePayContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 import { PaymentHistory } from './PaymentHistory.js'
-import { useState } from 'react'
+import { ManageSubscriptionButton } from './ManageSubscriptionButton.js'
 
 export interface BillingDashboardTexts {
   title: string
@@ -29,8 +28,9 @@ export interface BillingDashboardTexts {
   canceledNotice: string
   upgrade: string
   changePlan: string
-  cancelSubscription: string
-  cancelingSubscription: string
+  manageSubscription: string
+  manageSubscriptionLoading: string
+  manageSubscriptionError: string
   recentPayments: string
   viewAll: string
   noSubscription: string
@@ -55,8 +55,9 @@ const DEFAULT_TEXTS: BillingDashboardTexts = {
   canceledNotice: 'Your subscription will end on',
   upgrade: 'Upgrade',
   changePlan: 'Change plan',
-  cancelSubscription: 'Cancel subscription',
-  cancelingSubscription: 'Canceling...',
+  manageSubscription: 'Manage subscription',
+  manageSubscriptionLoading: 'Loading...',
+  manageSubscriptionError: 'Failed to open billing portal',
   recentPayments: 'Recent payments',
   viewAll: 'View all',
   noSubscription: 'No active subscription',
@@ -74,16 +75,19 @@ const DEFAULT_TEXTS: BillingDashboardTexts = {
 }
 
 export interface BillingDashboardProps {
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Kept for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id this dashboard is scoped to (preferred over `appName`). */
+  applicationId?: string
   userId?: string
   /** Called when the user clicks "Upgrade" or "Change plan" */
   onUpgrade?: () => void
   /** Called when the user clicks "View all" on payment history */
   onViewAllPayments?: () => void
-  /** Called after a successful cancel to let parent refresh state */
-  onCancelSuccess?: () => void
-  /** Called when cancel fails with the error */
-  onCancelError?: (error: Error) => void
+  /** URL to redirect to when the user leaves the Stripe portal (defaults to current page). */
+  manageReturnUrl?: string
   /** Number of recent payments to show (default 5) */
   recentPaymentsCount?: number
   /** Customizable texts with English defaults */
@@ -93,38 +97,29 @@ export interface BillingDashboardProps {
 
 export function BillingDashboard({
   appName,
+  applicationId,
   userId,
   onUpgrade,
   onViewAllPayments,
-  onCancelSuccess,
-  onCancelError,
+  manageReturnUrl,
   recentPaymentsCount = 5,
   texts: textsProp,
   className,
 }: BillingDashboardProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
-  const { client } = usePayContext()
-  const subStatus = useSubscriptionStatus({ userId: userId || '', appName })
+
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    // eslint-disable-next-line no-console -- deprecation warning for SDK consumers
+    console.warn(
+      '[pay-sdk] BillingDashboard `appName` prop is deprecated, use `applicationId` instead.'
+    )
+  }
+
+  const subStatus = useSubscriptionStatus({ userId: userId || '', applicationId, appName })
   const { payments, isLoading: paymentsLoading } = usePaymentHistory({
     userId,
     limit: recentPaymentsCount,
   })
-  const [canceling, setCanceling] = useState(false)
-
-  const handleCancel = async () => {
-    if (!subStatus.subscription) return
-    const subscriptionId =
-      (subStatus.subscription.metadata?.subscriptionId as string) || subStatus.subscription.id
-    setCanceling(true)
-    try {
-      await client.cancelSubscription(subscriptionId)
-      setCanceling(false)
-      onCancelSuccess?.()
-    } catch (err) {
-      setCanceling(false)
-      onCancelError?.(err instanceof Error ? err : new Error('Cancel failed'))
-    }
-  }
 
   if (subStatus.loading) {
     return (
@@ -145,7 +140,11 @@ export function BillingDashboard({
         <CardHeader>
           <Div className="flex items-center justify-between">
             <H3>{t.currentPlan}</H3>
-            <Badge variant={subStatus.isActive ? (subStatus.isCanceling ? 'warning' : 'success') : 'secondary'}>
+            <Badge
+              variant={
+                subStatus.isActive ? (subStatus.isCanceling ? 'warning' : 'success') : 'secondary'
+              }
+            >
               {subStatus.isActive ? (subStatus.isCanceling ? t.canceled : t.active) : t.freePlan}
             </Badge>
           </Div>
@@ -155,11 +154,12 @@ export function BillingDashboard({
             <>
               {/* Plan name and price */}
               <Div className="flex items-baseline gap-2">
-                <Span className="text-2xl font-bold">
-                  {subStatus.plan || t.freePlan}
-                </Span>
+                <Span className="text-2xl font-bold">{subStatus.plan || t.freePlan}</Span>
                 <Span className="text-muted-foreground">
-                  {formatCurrency(subStatus.subscription.amount / 100, subStatus.subscription.currency)}
+                  {formatCurrency(
+                    subStatus.subscription.amount / 100,
+                    subStatus.subscription.currency
+                  )}
                   {' / '}
                   {(subStatus.subscription.metadata?.interval as string) === 'year'
                     ? t.perYear
@@ -216,28 +216,24 @@ export function BillingDashboard({
                     {subStatus.isCanceling ? t.choosePlan : t.changePlan}
                   </Button>
                 )}
-                {!subStatus.isCanceling && (
-                  <Button
-                    variant="outline"
-                    onClick={handleCancel}
-                    disabled={canceling}
-                  >
-                    {canceling ? (
-                      <>
-                        <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
-                        {t.cancelingSubscription}
-                      </>
-                    ) : (
-                      t.cancelSubscription
-                    )}
-                  </Button>
-                )}
+                <ManageSubscriptionButton
+                  returnUrl={manageReturnUrl}
+                  variant="outline"
+                  texts={{
+                    label: t.manageSubscription,
+                    loading: t.manageSubscriptionLoading,
+                    error: t.manageSubscriptionError,
+                  }}
+                />
               </Div>
             </>
           ) : (
             /* No active subscription */
             <Div className="text-center py-6">
-              <Icon name="lucide:CreditCard" className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+              <Icon
+                name="lucide:CreditCard"
+                className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3"
+              />
               <P className="text-muted-foreground mb-1">{t.noSubscription}</P>
               <P className="text-muted-foreground text-sm mb-4">{t.noSubscriptionDescription}</P>
               {onUpgrade && (
@@ -272,7 +268,10 @@ export function BillingDashboard({
             </Div>
           ) : payments.length === 0 ? (
             <Div className="text-center py-6">
-              <Icon name="lucide:Receipt" className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+              <Icon
+                name="lucide:Receipt"
+                className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3"
+              />
               <P className="text-muted-foreground text-sm">{t.noPaymentsYet}</P>
             </Div>
           ) : (

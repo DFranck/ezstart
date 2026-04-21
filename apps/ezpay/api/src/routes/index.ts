@@ -7,6 +7,7 @@ import { promosRegistries, promosRouters } from './promos/index.js'
 import { plansRegistries, plansRouters } from './plans/index.js'
 import { connectRegistries, connectRouters } from './connect/index.js'
 import { apiKeyRegistries, apiKeyRouters } from './api-keys/index.js'
+import { billingRegistries, billingRouters } from './billing/index.js'
 import webhooksRouter from './webhooks.js'
 import webhooksConnectRouter from './webhooks-connect.js'
 import testProductsRouter from './test-products.js'
@@ -23,6 +24,7 @@ promosRouters.forEach(r => router.use('/', r))
 plansRouters.forEach(r => router.use('/', r))
 connectRouters.forEach(r => router.use('/', r))
 apiKeyRouters.forEach(r => router.use('/', r))
+billingRouters.forEach(r => router.use('/billing', r))
 router.use('/', webhooksRouter)
 router.use('/', webhooksConnectRouter)
 router.use('/', testProductsRouter)
@@ -41,5 +43,6 @@ export const registries = [
   ...plansRegistries,
   ...connectRegistries,
   ...apiKeyRegistries,
+  ...billingRegistries,
 ]
 export default router

@@ -1,5 +1,5 @@
 // Provider and context
-export { PayProvider, usePay, usePayContext } from './pay-provider.js'
+export { PayProvider, usePay, usePayContext, useApplicationContext } from './pay-provider.js'
 
 // Store
 export { usePayStore, usePayStoreSSR } from './store.js'
@@ -18,6 +18,9 @@ export { useConnectStatus } from './hooks/useConnectStatus.js'
 export { useConnectOnboard } from './hooks/useConnectOnboard.js'
 export { useConnectDashboardLink } from './hooks/useConnectDashboardLink.js'
 export { useConnectDisconnect } from './hooks/useConnectDisconnect.js'
+
+// Billing Portal (Stripe Customer Portal)
+export { useBillingPortal } from './hooks/useBillingPortal.js'
 
 // API Keys hooks (P6 — requires @tanstack/react-query peer dep)
 export { usePayKeys, PAY_KEYS_QUERY_KEY, payKeysQueryKey } from './hooks/usePayKeys.js'

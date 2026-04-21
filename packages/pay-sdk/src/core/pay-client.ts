@@ -4,6 +4,7 @@
  */
 import type {
   PayClientConfig,
+  ApplicationConfigResponse,
   CreateDonationRequest,
   CreatePurchaseRequest,
   CreateSubscriptionRequest,
@@ -24,6 +25,8 @@ import type {
   ConnectOnboardRequest,
   ConnectOnboardResponse,
   ConnectDashboardLinkResponse,
+  BillingPortalRequest,
+  BillingPortalResponse,
 } from './types.js'
 
 export class PayClient {
@@ -323,7 +326,11 @@ export class PayClient {
   }
 
   async listPromos(params?: {
+    /**
+     * @deprecated Use `applicationId` instead.
+     */
     appName?: string
+    applicationId?: string
     active?: boolean
     limit?: number
     offset?: number
@@ -436,7 +443,11 @@ export class PayClient {
   }
 
   async listPlans(params?: {
+    /**
+     * @deprecated Use `applicationId` instead.
+     */
     appName?: string
+    applicationId?: string
     active?: boolean
     limit?: number
     offset?: number
@@ -558,6 +569,78 @@ export class PayClient {
     }
 
     return result
+  }
+
+  // ===== APPLICATION CONFIG =====
+
+  /**
+   * Resolve the EZPay Application a publishable key belongs to.
+   *
+   * Calls the public `GET /api/keys/config?key=<publishableKey>` endpoint and
+   * returns the `{ applicationId, appSlug, apiUrl, webUrl, type, env, scope }`
+   * payload. No auth required — the key IS the auth.
+   *
+   * Consumers typically don't call this directly; `<PayProvider publishableKey="…" />`
+   * calls it on mount and injects the result into the React context.
+   *
+   * @example
+   * ```ts
+   * const cfg = await client.resolveApplicationByKey('ez_pk_live_abc')
+   * console.log(cfg.applicationId, cfg.appSlug)
+   * ```
+   */
+  async resolveApplicationByKey(publishableKey: string): Promise<ApplicationConfigResponse> {
+    if (!publishableKey) {
+      throw new Error('publishableKey is required to resolve application config')
+    }
+
+    const url = `${this.config.apiUrl}/keys/config?key=${encodeURIComponent(publishableKey)}`
+    const response = await fetch(url, { headers: { Accept: 'application/json' } })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result?.error || `Failed to resolve application (${response.status})`)
+    }
+
+    // Endpoint always wraps as `{ success: true, data: {...} }` — unwrap.
+    const payload: ApplicationConfigResponse = result?.data ?? result
+    if (!payload?.applicationId || !payload?.appSlug) {
+      throw new Error('Invalid application config response: missing applicationId or appSlug')
+    }
+
+    return payload
+  }
+
+  // ===== BILLING PORTAL (Stripe Customer Portal) =====
+
+  /**
+   * Create a Stripe Customer Portal session for the authenticated user.
+   *
+   * When `customerId` is omitted, the API resolves the Stripe customer from
+   * the user's most recent subscription payment. The returned `url` is a
+   * short-lived Stripe-hosted link — redirect the user there.
+   *
+   * @example
+   * ```ts
+   * const { url } = await client.createBillingPortalSession({ returnUrl: window.location.href })
+   * window.location.href = url
+   * ```
+   */
+  async createBillingPortalSession(params?: BillingPortalRequest): Promise<BillingPortalResponse> {
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/billing/portal`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(params ?? {}),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create billing portal session')
+    }
+
+    return result.data ?? result
   }
 }
 
