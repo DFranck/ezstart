@@ -67,6 +67,16 @@ export function buildSignatureHeader(secret: string, timestamp: string, body: st
 }
 
 /**
+ * Redact a secret/API key for safe logging — keeps the prefix + last 4 chars
+ * so the operator can tell which value is in use without leaking it.
+ */
+function redactSecret(value: string | undefined): string {
+  if (!value) return '<unset>'
+  if (value.length <= 10) return '<redacted>'
+  return `${value.slice(0, 8)}...${value.slice(-4)}`
+}
+
+/**
  * Notify EZAuth of a subscription lifecycle event. Fire-and-forget — NEVER
  * throws. If required env vars are missing, logs a warning and returns.
  *
@@ -86,15 +96,32 @@ export async function notifyEzauthSubscription(payload: SubscriptionWebhookPaylo
   const apiKey = process.env.EZPAY_SERVER_EZAUTH_KEY
 
   if (!secret) {
-    logger.warn('[ezauth-webhook] EZAUTH_WEBHOOK_SECRET not set, skipping', {
-      subscriptionId: payload.subscriptionId,
-    })
+    logger.warn(
+      '[ezauth-webhook] EZAUTH_WEBHOOK_SECRET not set — skipping cross-service grant. ' +
+        'Add EZAUTH_WEBHOOK_SECRET to apps/ezpay/api/.env.local (and match it in ' +
+        'apps/ezauth/api/.env.local) to enable subscription role grants.',
+      {
+        subscriptionId: payload.subscriptionId,
+        stripeEventId: payload.stripeEventId,
+        applicationId: payload.applicationId,
+        userId: payload.userId,
+      }
+    )
     return
   }
   if (!apiKey) {
-    logger.warn('[ezauth-webhook] EZPAY_SERVER_EZAUTH_KEY not set, skipping', {
-      subscriptionId: payload.subscriptionId,
-    })
+    logger.warn(
+      '[ezauth-webhook] EZPAY_SERVER_EZAUTH_KEY not set — skipping cross-service grant. ' +
+        'Generate a superadmin ez_sk_live_* key via the EZAuth dashboard and set ' +
+        'EZPAY_SERVER_EZAUTH_KEY in apps/ezpay/api/.env.local to enable subscription ' +
+        'role grants.',
+      {
+        subscriptionId: payload.subscriptionId,
+        stripeEventId: payload.stripeEventId,
+        applicationId: payload.applicationId,
+        userId: payload.userId,
+      }
+    )
     return
   }
 
@@ -102,12 +129,27 @@ export async function notifyEzauthSubscription(payload: SubscriptionWebhookPaylo
   const timestamp = Math.floor(Date.now() / 1000).toString()
   const body = JSON.stringify({ ...payload, timestamp })
   const signatureHeader = buildSignatureHeader(secret, timestamp, body)
+  const url = `${ezauthApiUrl}/api/subscriptions/webhook`
+
+  logger.info('[ezauth-webhook] notify sending', {
+    url,
+    subscriptionId: payload.subscriptionId,
+    stripeEventId: payload.stripeEventId,
+    applicationId: payload.applicationId,
+    userId: payload.userId,
+    status: payload.status,
+    grantsRoles: payload.grantsRoles,
+    grantsFeatures: payload.grantsFeatures,
+    apiKeyPrefix: redactSecret(apiKey),
+    secretPrefix: redactSecret(secret),
+    signatureTimestamp: timestamp,
+  })
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
 
   try {
-    const res = await fetch(`${ezauthApiUrl}/api/subscriptions/webhook`, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -119,19 +161,46 @@ export async function notifyEzauthSubscription(payload: SubscriptionWebhookPaylo
     })
     clearTimeout(timer)
 
+    // Always read the response body (small JSON payload) so we can surface
+    // the error/message in logs when the receiver rejects the request.
+    let responseText = ''
+    try {
+      responseText = await res.text()
+    } catch {
+      responseText = '<unreadable>'
+    }
+
     if (!res.ok) {
       logger.warn('[ezauth-webhook] notify non-2xx', {
+        url,
         status: res.status,
+        response: responseText,
         subscriptionId: payload.subscriptionId,
         stripeEventId: payload.stripeEventId,
+        applicationId: payload.applicationId,
+        userId: payload.userId,
+        apiKeyPrefix: redactSecret(apiKey),
+        secretPrefix: redactSecret(secret),
       })
+      return
     }
+
+    logger.info('[ezauth-webhook] notify succeeded', {
+      url,
+      status: res.status,
+      response: responseText,
+      subscriptionId: payload.subscriptionId,
+      stripeEventId: payload.stripeEventId,
+    })
   } catch (err) {
     clearTimeout(timer)
     logger.warn('[ezauth-webhook] notify failed (fire-and-forget)', {
+      url,
       error: err instanceof Error ? err.message : String(err),
       subscriptionId: payload.subscriptionId,
       stripeEventId: payload.stripeEventId,
+      applicationId: payload.applicationId,
+      userId: payload.userId,
     })
   }
 }

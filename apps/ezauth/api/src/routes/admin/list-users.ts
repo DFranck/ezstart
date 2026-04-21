@@ -9,6 +9,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { getApplicationModel } from '../../models/application.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
@@ -55,6 +56,10 @@ const listUsersQuerySchema = z.object({
     .optional()
     .openapi({ description: 'Filter by role (globalRole or per-app role)' }),
   app: z.string().optional().openapi({ description: 'Filter by app membership' }),
+  scope: z.enum(['mine', 'myApps', 'all']).optional().openapi({
+    description:
+      'Audience scope: "mine" (current user only), "myApps" (users registered to applications I own), "all" (all users, superadmin only).',
+  }),
 })
 
 /** Escape user input before embedding in a Mongo `$regex`. */
@@ -73,30 +78,49 @@ const listUsersController = async (req: Request, res: Response) => {
     }
 
     const AuthUser = await getAuthUserModel()
-    const { limit, offset, search, role, app } = parsedQuery.data
+    const { limit, offset, search, role, app, scope } = parsedQuery.data
     const query: Record<string, unknown> = {}
 
     // API key scope-based filtering
     const apiKeyScope = req.apiKeyScope
     const apiKeyAppName = req.apiKeyAppName
 
-    // Single-app keys filter users by their appName.
-    // Platform-wide keys (appName='*') see all users.
-    // Based on appName (not scope), compatible with both legacy ezk_* keys
-    // and new ez_pk_/ez_sk_ keys.
-    if (apiKeyAppName && apiKeyAppName !== '*') {
+    const isSuperadmin = currentUser.globalRoles?.includes('superadmin') === true
+
+    // RBAC-scoped audience selector (takes precedence over legacy behavior when set).
+    //   'all'     → no filter, superadmin only.
+    //   'myApps'  → users registered to Applications owned by the current user.
+    //   'mine'    → only the current user (singleton list).
+    if (scope === 'all') {
+      if (!isSuperadmin) {
+        return sendError(res, 'Superadmin access required for scope=all', 403)
+      }
+      // No filter — sees all users across all tenants.
+    } else if (scope === 'myApps') {
+      const Application = await getApplicationModel()
+      const ownedApps = await Application.find({ ownerId: currentUser._id }).select('slug').lean()
+      const ownedSlugs = ownedApps.map(a => a.slug)
+      if (ownedSlugs.length === 0) {
+        // No owned apps → empty result.
+        return sendSuccess(res, [], { total: 0, limit, offset })
+      }
+      query.apps = { $in: ownedSlugs }
+    } else if (scope === 'mine') {
+      query._id = currentUser._id
+    } else if (apiKeyAppName && apiKeyAppName !== '*') {
+      // Legacy behavior: single-app key filters users by their appName.
       query.apps = { $in: [apiKeyAppName] }
     } else if (!apiKeyScope) {
-      // Direct user auth (no API key) — use existing role-based logic
-      // Superadmin sees all users, admin sees non-superadmins in their apps
-      if (!currentUser.globalRoles?.includes('superadmin')) {
+      // Direct user auth (no API key, no scope) — legacy role-based logic.
+      // Superadmin sees all users, admin sees non-superadmins in their apps.
+      if (!isSuperadmin) {
         query.globalRoles = { $ne: 'superadmin' }
         if ((currentUser.apps?.length ?? 0) > 0) {
           query.apps = { $in: currentUser.apps }
         }
       }
     }
-    // Platform-scoped API key (appName='*' or no appName): no filtering, sees all users
+    // Platform-scoped API key (appName='*' or no appName, no explicit scope): no filtering.
 
     // App filter: only show users who have logged into this app
     if (app) {

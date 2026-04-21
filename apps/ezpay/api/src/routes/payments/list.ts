@@ -7,8 +7,10 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { hasRole } from '@ezstart/auth-sdk/rbac/client'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { listApplicationsByOwner } from '../../services/ezauth-client.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -21,6 +23,10 @@ const docRouter = createRouterWithDoc(listPaymentsRegistry, router)
 // ========================================
 
 const paymentsQuerySchema = z.object({
+  scope: z.enum(['mine', 'myApps', 'all']).optional().openapi({
+    description:
+      'RBAC scope: `mine` (own payments — default), `myApps` (app owner view), `all` (superadmin only)',
+  }),
   type: z
     .enum(['donation', 'purchase', 'subscription', 'invoice'])
     .optional()
@@ -64,6 +70,71 @@ const paymentsListResponseSchema = z.object({
 })
 
 // ========================================
+// Helpers
+// ========================================
+
+function isSuperadmin(req: Request): boolean {
+  const user = req.user as Parameters<typeof hasRole>[0] | undefined
+  if (!user) return false
+  return hasRole(user, 'superadmin')
+}
+
+function extractBearerToken(req: Request): string | undefined {
+  const authHeader = req.headers.authorization
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7)
+  }
+  const cookieHeader = req.headers.cookie || ''
+  return cookieHeader
+    .split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith('ezauth_token='))
+    ?.split('=')[1]
+}
+
+/**
+ * Build the Mongo query filter for the given RBAC scope.
+ * - `mine` (default): only the caller's own payments (via `userId`).
+ * - `myApps`: payments on Applications the caller owns (via `projectId IN [slugs]`)
+ *   UNION their own payments (so the caller sees revenue from owned apps + their
+ *   personal subscriptions).
+ * - `all`: no scope filter. Requires superadmin — otherwise caller gets 403.
+ */
+async function buildScopeFilter(
+  req: Request,
+  scope: 'mine' | 'myApps' | 'all'
+): Promise<{ filter: Record<string, unknown> | null; status?: number; error?: string }> {
+  if (!req.userId) {
+    return { filter: null, status: 401, error: 'Authentication required' }
+  }
+
+  if (scope === 'all') {
+    if (!isSuperadmin(req)) {
+      return { filter: null, status: 403, error: 'Superadmin access required for scope=all' }
+    }
+    return { filter: {} }
+  }
+
+  if (scope === 'myApps') {
+    const bearerToken = extractBearerToken(req)
+    const apps = await listApplicationsByOwner({ bearerToken })
+    const ownedSlugs = apps.map(a => a.slug)
+    if (ownedSlugs.length === 0) {
+      // No owned apps — fall back to just the user's own payments.
+      return { filter: { userId: req.userId } }
+    }
+    return {
+      filter: {
+        $or: [{ userId: req.userId }, { projectId: { $in: ownedSlugs } }],
+      },
+    }
+  }
+
+  // scope === 'mine' (default)
+  return { filter: { userId: req.userId } }
+}
+
+// ========================================
 // Route Handler
 // ========================================
 
@@ -74,19 +145,21 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
     }
-    const { type, status, projectId, search, liveMode, limit = 20, offset = 0 } = parsed.data
+    const { scope, type, status, projectId, search, liveMode, limit = 20, offset = 0 } = parsed.data
 
-    const query: Record<string, unknown> = {}
+    // Resolve effective scope:
+    // - Explicit `scope` query param takes precedence when provided.
+    // - Otherwise, preserve legacy behaviour: admins see everything, users see
+    //   only their own payments (equivalent to `scope=all` for admins, `mine`
+    //   for users).
+    const effectiveScope: 'mine' | 'myApps' | 'all' = scope ?? (isAdminUser(req) ? 'all' : 'mine')
 
-    // Non-admin users can only see their own payments
-    const isAdmin = isAdminUser(req)
-
-    if (!isAdmin) {
-      if (!req.userId) {
-        return sendSuccess(res, [], { total: 0, limit: Number(limit), offset: Number(offset) })
-      }
-      query.userId = req.userId
+    const scopeResult = await buildScopeFilter(req, effectiveScope)
+    if (!scopeResult.filter) {
+      return sendError(res, scopeResult.error || 'Forbidden', scopeResult.status ?? 403)
     }
+
+    const query: Record<string, unknown> = { ...scopeResult.filter }
 
     if (type) query.type = type
     if (status) query.status = status
@@ -114,7 +187,7 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
 // ========================================
 
 docRouter.get('/payments', authMiddleware, populateUserFromToken, listPaymentsHandler, {
-  summary: 'List payments (admin: all, user: own)',
+  summary: 'List payments (scoped: mine | myApps | all)',
   tags: ['Payments'],
   querySchema: paymentsQuerySchema,
   responseSchema: paymentsListResponseSchema,

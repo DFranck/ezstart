@@ -73,7 +73,11 @@ export type { UserDashboardProps, UserDashboardTexts } from './UserDashboard.js'
 
 // Admin
 export { AuthAdminDashboard } from './AuthAdminDashboard.js'
-export type { AuthAdminDashboardProps, AuthAdminDashboardTexts } from './AuthAdminDashboard.js'
+export type {
+  AuthAdminDashboardProps,
+  AuthAdminDashboardTexts,
+  AuthAdminAudienceScope,
+} from './AuthAdminDashboard.js'
 
 // Developer dashboard (full-page layout)
 export { EZAuthDashboard } from './EZAuthDashboard.js'

@@ -140,6 +140,7 @@ export { AuthAdminDashboard } from './components/AuthAdminDashboard.js'
 export type {
   AuthAdminDashboardProps,
   AuthAdminDashboardTexts,
+  AuthAdminAudienceScope,
 } from './components/AuthAdminDashboard.js'
 
 // Developer portal (API keys)

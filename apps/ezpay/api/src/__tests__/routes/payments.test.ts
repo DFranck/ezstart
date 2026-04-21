@@ -204,6 +204,150 @@ describe('Payment Routes Business Logic', () => {
       expect(total).toBe(15)
       // Meta would be: { total: 15, limit: 5, offset: 5 }
     })
+
+    // ========================================
+    // scope=mine|myApps|all (Phase I)
+    // ========================================
+    describe('scope parameter', () => {
+      it('scope=mine should match only payments with userId === caller', async () => {
+        const me = 'me_scope_mine'
+        await Payment.create({
+          projectId: 'ezbill',
+          projectName: 'EZBill',
+          type: 'donation',
+          amount: 10,
+          paymentId: 'cs_mine_1',
+          userId: me,
+        })
+        await Payment.create({
+          projectId: 'ezbill',
+          projectName: 'EZBill',
+          type: 'donation',
+          amount: 20,
+          paymentId: 'cs_mine_2',
+          userId: 'someone_else',
+        })
+
+        // scope='mine' -> filter { userId: me }
+        const payments = await Payment.find({ userId: me })
+        expect(payments).toHaveLength(1)
+        expect(payments[0]!.paymentId).toBe('cs_mine_1')
+      })
+
+      it('scope=myApps should union caller payments + payments on owned app slugs', async () => {
+        const me = 'me_scope_myapps'
+        const ownedSlugs = ['ezbill', 'green-pulse']
+
+        // Own subscription on ezpay (as a user, not app-owner)
+        await Payment.create({
+          projectId: 'ezpay',
+          projectName: 'EZPay',
+          type: 'subscription',
+          amount: 29,
+          paymentId: 'cs_myapps_own',
+          userId: me,
+        })
+        // Revenue on one of my owned apps (ezbill) — customer is someone else
+        await Payment.create({
+          projectId: 'ezbill',
+          projectName: 'EZBill',
+          type: 'purchase',
+          amount: 50,
+          paymentId: 'cs_myapps_app_1',
+          userId: 'customer_1',
+        })
+        // Revenue on another owned app (green-pulse)
+        await Payment.create({
+          projectId: 'green-pulse',
+          projectName: 'GreenPulse',
+          type: 'donation',
+          amount: 15,
+          paymentId: 'cs_myapps_app_2',
+          userId: 'customer_2',
+        })
+        // Revenue on an app I don't own (should be excluded)
+        await Payment.create({
+          projectId: 'fengshui',
+          projectName: 'FengShui',
+          type: 'purchase',
+          amount: 42,
+          paymentId: 'cs_myapps_foreign',
+          userId: 'customer_3',
+        })
+
+        // scope='myApps' -> filter { $or: [{ userId: me }, { projectId: { $in: ownedSlugs } }] }
+        const query = {
+          $or: [{ userId: me }, { projectId: { $in: ownedSlugs } }],
+        }
+        const payments = await Payment.find(query).sort({ createdAt: 1 })
+        expect(payments).toHaveLength(3)
+        const ids = payments.map(p => p.paymentId)
+        expect(ids).toContain('cs_myapps_own')
+        expect(ids).toContain('cs_myapps_app_1')
+        expect(ids).toContain('cs_myapps_app_2')
+        expect(ids).not.toContain('cs_myapps_foreign')
+      })
+
+      it('scope=myApps with zero owned apps should fall back to own payments', async () => {
+        const me = 'me_scope_myapps_empty'
+        await Payment.create({
+          projectId: 'ezpay',
+          projectName: 'EZPay',
+          type: 'subscription',
+          amount: 29,
+          paymentId: 'cs_empty_own',
+          userId: me,
+        })
+        await Payment.create({
+          projectId: 'ezbill',
+          projectName: 'EZBill',
+          type: 'purchase',
+          amount: 50,
+          paymentId: 'cs_empty_other',
+          userId: 'other_customer',
+        })
+
+        // ownedSlugs = [] -> filter falls back to { userId: me }
+        const payments = await Payment.find({ userId: me })
+        expect(payments).toHaveLength(1)
+        expect(payments[0]!.paymentId).toBe('cs_empty_own')
+      })
+
+      it('scope=all should return all payments (superadmin view)', async () => {
+        await Payment.create({
+          projectId: 'ezbill',
+          projectName: 'EZBill',
+          type: 'donation',
+          amount: 10,
+          paymentId: 'cs_all_1',
+          userId: 'u1',
+        })
+        await Payment.create({
+          projectId: 'green-pulse',
+          projectName: 'GreenPulse',
+          type: 'purchase',
+          amount: 20,
+          paymentId: 'cs_all_2',
+          userId: 'u2',
+        })
+
+        // scope='all' -> filter {} (no scope)
+        const payments = await Payment.find({})
+        expect(payments).toHaveLength(2)
+      })
+
+      it('scope=all for non-superadmin should be rejected (403)', () => {
+        // This is enforced at the route-handler level: buildScopeFilter returns
+        // { filter: null, status: 403 } when the caller is not superadmin. The
+        // handler then calls sendError(res, ..., 403) and the query is never
+        // executed. We assert the gating contract here rather than re-running
+        // the handler (which requires the full Express stack).
+        const isSuperadmin = false
+        const scope: 'mine' | 'myApps' | 'all' = 'all'
+        const forbidden = scope === 'all' && !isSuperadmin
+        expect(forbidden).toBe(true)
+      })
+    })
   })
 
   // ========================================

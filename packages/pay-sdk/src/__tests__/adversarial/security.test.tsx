@@ -52,13 +52,16 @@ describe('Price manipulation', () => {
 
   it('sends the amount from props to the server — server validates', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({
-        success: true,
-        data: {
-          payment: makePayment({ amount: 10 }),
-          checkoutUrl: 'https://checkout.stripe.com/test',
-        },
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            payment: makePayment({ amount: 10 }),
+            checkoutUrl: 'https://checkout.stripe.com/test',
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
     )
     vi.stubGlobal('fetch', fetchMock)
 
@@ -81,13 +84,16 @@ describe('Price manipulation', () => {
 
   it('checkout URL is server-generated — client cannot forge it', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({
-        success: true,
-        data: {
-          payment: makePayment(),
-          checkoutUrl: 'https://checkout.stripe.com/cs_test_abc123',
-        },
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            payment: makePayment(),
+            checkoutUrl: 'https://checkout.stripe.com/cs_test_abc123',
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
     )
     vi.stubGlobal('fetch', fetchMock)
 
@@ -142,17 +148,23 @@ describe('Promo code replay', () => {
       callCount++
       // First use succeeds, second fails
       if (callCount <= 1) {
-        return new Response(JSON.stringify({
-          success: true,
-          data: {
-            payment: makePayment(),
-            checkoutUrl: 'https://checkout.stripe.com/test',
-          },
-        }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              payment: makePayment(),
+              checkoutUrl: 'https://checkout.stripe.com/test',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
       }
-      return new Response(JSON.stringify({
-        error: 'Promo code already used',
-      }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+      return new Response(
+        JSON.stringify({
+          error: 'Promo code already used',
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
     })
     vi.stubGlobal('fetch', fetchMock)
 
@@ -184,10 +196,13 @@ describe('Promo code replay', () => {
     let validationCount = 0
     const fetchMock = vi.fn().mockImplementation(async () => {
       validationCount++
-      return new Response(JSON.stringify({
-        success: true,
-        data: { valid: true, discountType: 'percent', discountValue: 20, duration: 'once' },
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: { valid: true, discountType: 'percent', discountValue: 20, duration: 'once' },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
     })
     vi.stubGlobal('fetch', fetchMock)
 
@@ -410,6 +425,54 @@ describe('Auth token security', () => {
     const headers = fetchMock.mock.calls[0]?.[1]?.headers
     expect(headers?.Authorization).toBe('Bearer secret-jwt-token')
   })
+
+  it.each(['mine', 'myApps', 'all'] as const)(
+    'forwards scope=%s to the payments query string',
+    async scope => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ success: true, data: [], meta: { total: 0 } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+      vi.stubGlobal('fetch', fetchMock)
+
+      const client = new PayClient({
+        appName: 'test',
+        apiUrl: 'http://localhost:9999/api',
+        getToken: () => 'token',
+      })
+
+      await client.getPayments({ scope })
+
+      const url = fetchMock.mock.calls[0]?.[0] as string
+      expect(url).toContain(`scope=${scope}`)
+    }
+  )
+
+  it.each(['mine', 'myApps', 'all'] as const)(
+    'forwards scope=%s to the subscriptions query string',
+    async scope => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ success: true, data: [], meta: { total: 0 } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+      vi.stubGlobal('fetch', fetchMock)
+
+      const client = new PayClient({
+        appName: 'test',
+        apiUrl: 'http://localhost:9999/api',
+        getToken: () => 'token',
+      })
+
+      await client.getSubscriptions({ scope })
+
+      const url = fetchMock.mock.calls[0]?.[0] as string
+      expect(url).toContain(`scope=${scope}`)
+    }
+  )
 
   it('retries with refreshed token on 401', async () => {
     let callCount = 0

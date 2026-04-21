@@ -224,6 +224,13 @@ export class PayClient {
     limit?: number
     offset?: number
     liveMode?: string
+    /**
+     * RBAC scope applied by the API:
+     * - `mine` — only the caller's own subscriptions (default)
+     * - `myApps` — caller's own + subscriptions on Applications the caller owns
+     * - `all` — all subscriptions (superadmin only; 403 otherwise)
+     */
+    scope?: 'mine' | 'myApps' | 'all'
   }): Promise<PaymentsListResponse> {
     return this.fetchList('subscriptions', params)
   }
@@ -289,6 +296,13 @@ export class PayClient {
     liveMode?: string
     dateFrom?: string
     dateTo?: string
+    /**
+     * RBAC scope applied by the API:
+     * - `mine` — only the caller's own payments (default)
+     * - `myApps` — caller's own + payments on Applications the caller owns
+     * - `all` — all payments (superadmin only; 403 otherwise)
+     */
+    scope?: 'mine' | 'myApps' | 'all'
   }): Promise<PaymentsListResponse> {
     return this.fetchList('payments', params)
   }

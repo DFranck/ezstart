@@ -211,6 +211,43 @@ export async function getApplication(
 }
 
 /**
+ * GET `/api/applications` — owner-scoped list. Requires a Bearer JWT for the
+ * calling user. Returns the array of Applications that the user owns, or an
+ * empty array on 404/401/403/circuit-open. Used to resolve the set of app
+ * slugs a user is the owner of for `scope=myApps` on payments/subscriptions.
+ *
+ * @example
+ * const apps = await listApplicationsByOwner({ bearerToken })
+ * const slugs = apps.map(a => a.slug)
+ */
+export async function listApplicationsByOwner(
+  opts: EzauthClientOptions = {}
+): Promise<EzauthApplication[]> {
+  if (isCircuitOpen()) {
+    logger.warn('ezauth-client skipping call — circuit open', { op: 'listApplicationsByOwner' })
+    return []
+  }
+
+  const apiUrl = opts.apiUrl ?? getApiUrl('ezauth')
+  const url = `${apiUrl}/api/applications`
+  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS
+
+  try {
+    const data = await fetchEzauth<EzauthApplication[]>(
+      url,
+      { method: 'GET', headers: buildHeaders(opts) },
+      timeoutMs
+    )
+    recordSuccess()
+    return data ?? []
+  } catch (err) {
+    recordFailure()
+    logger.error('ezauth-client listApplicationsByOwner failed', { error: err })
+    return []
+  }
+}
+
+/**
  * GET `/api/applications/lookup?slug=...` — public (rate-limited). Returns
  * the minimal `{id, slug, name}` tuple if the slug maps to an active
  * Application, or `null` otherwise.

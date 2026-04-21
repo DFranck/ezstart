@@ -36,7 +36,6 @@ import { apiCall, type ApiMeta } from '@ezstart/api-sdk'
 import { toast } from '@ezstart/ui/utils'
 import { useAuthStore } from '../react/store.js'
 import { useAuthContext } from '../react/auth-provider.js'
-import type { AuthScope } from '../core/types.js'
 
 // ========================================
 // Types
@@ -124,16 +123,29 @@ export interface AuthAdminDashboardTexts {
   filterByApp?: string
 }
 
+/**
+ * RBAC audience scope for the admin dashboard — controls which population of
+ * users the table queries.
+ *
+ * - `'mine'`    — current user only (singleton).
+ * - `'myApps'`  — users registered to Applications the current user owns.
+ * - `'all'`     — all users across all tenants (requires `globalRoles: ['superadmin']`).
+ *
+ * When omitted, the backend falls back to the legacy behavior (API key /
+ * role-based filtering).
+ */
+export type AuthAdminAudienceScope = 'mine' | 'myApps' | 'all'
+
 export interface AuthAdminDashboardProps {
   /** App name filter. For app-scoped keys, this is auto-set from the provider context. */
   appName?: string
   className?: string
   texts?: Partial<AuthAdminDashboardTexts>
   /**
-   * @deprecated Scope no longer drives filtering. Single-app vs platform-wide
-   * is derived from `appName` (prop or AuthProvider context). Kept for backwards compat.
+   * Audience scope forwarded to the backend as `?scope=`. Drives the filtering
+   * layer that selects which users appear in the table (mine / myApps / all).
    */
-  scope?: AuthScope
+  scope?: AuthAdminAudienceScope
 }
 
 // ========================================
@@ -400,15 +412,14 @@ export function AuthAdminDashboard({
   appName: appNameProp,
   className,
   texts,
-  scope: scopeProp,
+  scope: audienceScope,
 }: AuthAdminDashboardProps) {
   const t: Required<AuthAdminDashboardTexts> = { ...DEFAULT_TEXTS, ...texts }
   const accessToken = useAuthStore(state => state.accessToken)
 
-  // Resolve appName from context or prop. The `scope` prop is accepted for
-  // backwards compat but no longer drives single-app vs platform-wide — that's
-  // derived from appName (see below).
-  void scopeProp
+  // Resolve appName from context or prop. Single-app vs platform-wide is
+  // derived from appName. The `scope` prop (audience) is forwarded to the
+  // backend as `?scope=` and selects the user population to display.
   let contextAppName: string | undefined
   try {
     const ctx = useAuthContext()
@@ -476,6 +487,7 @@ export function AuthAdminDashboard({
       }
       if (activeAppFilter) query.app = activeAppFilter
       if (searchQuery) query.search = searchQuery
+      if (audienceScope) query.scope = audienceScope
 
       // Preserve envelope to access `meta.total` for server-side pagination.
       const envelope = await apiCall<{ data: AdminUser[]; meta?: ApiMeta }>('/admin/users', {
@@ -508,7 +520,7 @@ export function AuthAdminDashboard({
     } finally {
       setLoading(false)
     }
-  }, [offset, searchQuery, activeAppFilter, accessToken, isSingleAppScope])
+  }, [offset, searchQuery, activeAppFilter, accessToken, isSingleAppScope, audienceScope])
 
   useEffect(() => {
     fetchUsers()

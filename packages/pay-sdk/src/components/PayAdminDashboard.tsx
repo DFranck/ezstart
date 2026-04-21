@@ -256,6 +256,19 @@ export interface PayAdminDashboardProps {
    * platform-wide superadmin view (requires `showAppFilter` for scoping).
    */
   applicationId?: string
+  /**
+   * RBAC scope applied to payment/subscription queries. Forwarded to the API
+   * via `?scope=` and enforced server-side:
+   * - `mine` — only the caller's own records (default; same as the legacy
+   *   non-admin behaviour)
+   * - `myApps` — caller's own records + records on Applications the caller
+   *   owns (app-owner revenue view)
+   * - `all` — every record across all tenants. Superadmin only; callers
+   *   without the role get a 403 from the API.
+   *
+   * Omit to preserve legacy behaviour (admin => all, user => mine).
+   */
+  scope?: 'mine' | 'myApps' | 'all'
   showAppFilter?: boolean
   testMode?: boolean
   className?: string
@@ -348,10 +361,12 @@ function PaymentsTab({
   appName,
   t,
   testMode,
+  scope,
 }: {
   appName?: string
   t: Required<PayAdminDashboardTexts>
   testMode?: boolean
+  scope?: 'mine' | 'myApps' | 'all'
 }) {
   const { client } = usePayContext()
 
@@ -400,7 +415,7 @@ function PaymentsTab({
   useEffect(() => {
     setStatsLoading(true)
     client
-      .getPayments({ limit: 100, liveMode: liveModeFilter, projectId: appName || undefined })
+      .getPayments({ limit: 100, liveMode: liveModeFilter, projectId: appName || undefined, scope })
       .then(result => {
         // Filter out subscriptions — they have their own tab
         const nonSubPayments = result.payments.filter(p => p.type !== 'subscription')
@@ -424,7 +439,7 @@ function PaymentsTab({
       })
       .catch(() => {})
       .finally(() => setStatsLoading(false))
-  }, [client, liveModeFilter, appName])
+  }, [client, liveModeFilter, appName, scope])
 
   // Fetch payments
   const fetchPayments = useCallback(() => {
@@ -434,6 +449,7 @@ function PaymentsTab({
       projectId: appName || undefined,
       liveMode: liveModeFilter,
     }
+    if (scope) params.scope = scope
     if (typeFilter !== 'all') params.type = typeFilter
     if (statusFilter !== 'all') params.status = statusFilter
 
@@ -455,7 +471,7 @@ function PaymentsTab({
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [client, typeFilter, statusFilter, searchQuery, liveModeFilter, appName])
+  }, [client, typeFilter, statusFilter, searchQuery, liveModeFilter, appName, scope])
 
   useEffect(() => {
     fetchPayments()
@@ -671,10 +687,12 @@ function SubscriptionsTab({
   appName,
   t,
   testMode,
+  scope,
 }: {
   appName?: string
   t: Required<PayAdminDashboardTexts>
   testMode?: boolean
+  scope?: 'mine' | 'myApps' | 'all'
 }) {
   const { client } = usePayContext()
 
@@ -700,7 +718,12 @@ function SubscriptionsTab({
     setLoading(true)
     setStatsLoading(true)
     client
-      .getSubscriptions({ limit: 100, liveMode: liveModeFilter, projectId: appName || undefined })
+      .getSubscriptions({
+        limit: 100,
+        liveMode: liveModeFilter,
+        projectId: appName || undefined,
+        scope,
+      })
       .then(result => {
         setSubscriptions(result.payments)
         let active = 0
@@ -721,7 +744,7 @@ function SubscriptionsTab({
         setLoading(false)
         setStatsLoading(false)
       })
-  }, [client, liveModeFilter, appName])
+  }, [client, liveModeFilter, appName, scope])
 
   useEffect(() => {
     fetchSubscriptions()
@@ -2108,6 +2131,7 @@ export function PayAdminDashboard({
   appName,
   showAppFilter,
   testMode,
+  scope,
   className,
   texts,
 }: PayAdminDashboardProps) {
@@ -2128,7 +2152,7 @@ export function PayAdminDashboard({
   useEffect(() => {
     if (!showAppFilter) return
     client
-      .getPayments({ limit: 100, liveMode: liveModeFilter })
+      .getPayments({ limit: 100, liveMode: liveModeFilter, scope })
       .then(result => {
         const apps = new Set<string>()
         for (const p of result.payments) {
@@ -2137,7 +2161,7 @@ export function PayAdminDashboard({
         setAppOptions(Array.from(apps).sort())
       })
       .catch(() => {})
-  }, [client, showAppFilter, liveModeFilter])
+  }, [client, showAppFilter, liveModeFilter, scope])
 
   // Effective appName: when filter is active and a specific app is selected, use it
   const effectiveAppName = showAppFilter && appFilter !== 'all' ? appFilter : appName
@@ -2196,11 +2220,11 @@ export function PayAdminDashboard({
         </TabsList>
 
         <TabsContent value="payments">
-          <PaymentsTab appName={effectiveAppName} t={t} testMode={testMode} />
+          <PaymentsTab appName={effectiveAppName} t={t} testMode={testMode} scope={scope} />
         </TabsContent>
 
         <TabsContent value="subscriptions">
-          <SubscriptionsTab appName={effectiveAppName} t={t} testMode={testMode} />
+          <SubscriptionsTab appName={effectiveAppName} t={t} testMode={testMode} scope={scope} />
         </TabsContent>
 
         <TabsContent value="promos">

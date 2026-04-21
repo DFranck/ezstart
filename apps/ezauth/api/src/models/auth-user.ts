@@ -102,7 +102,8 @@ const authUserSchema = new Schema<AuthUserDocument>(
       of: [
         {
           type: String,
-          enum: ['admin', 'manager', 'beta-tester', 'client'],
+          trim: true,
+          maxlength: 64, // Free-form role (e.g. 'admin', 'pro', 'enterprise', 'beta-tester'). Plan owners define their own.
         },
       ],
       default: {},

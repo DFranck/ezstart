@@ -28,9 +28,11 @@ const updateUserRequestSchema = z.object({
     .optional()
     .describe('Global roles to assign'),
   appRoles: z
-    .record(z.string(), z.array(z.enum(['admin', 'manager', 'beta-tester', 'client'])))
+    .record(z.string(), z.array(z.string().min(1).max(64)))
     .optional()
-    .describe('Per-app roles mapping'),
+    .describe(
+      'Per-app roles mapping (free-form strings, e.g. "admin", "pro", "enterprise", "beta-tester")'
+    ),
   permissions: z.array(z.string()).optional().describe('User permissions'),
   features: z.array(z.string()).optional().describe('Enabled feature flags'),
   apps: z.array(z.string()).optional().describe('Accessible applications'),

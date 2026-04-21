@@ -129,6 +129,7 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     // ---- 1. X-API-Key (admin scope) ------------------------------------
     const rawKey = req.headers['x-api-key']
     if (typeof rawKey !== 'string' || rawKey.length === 0) {
+      logger.warn('[subscriptions/webhook] rejected — missing X-API-Key header')
       return sendError(res, 'API key required', 401, { code: 'UNAUTHORIZED' })
     }
 
@@ -136,15 +137,29 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     const ApiKey = await getApiKeyModel()
     const apiKey = await ApiKey.findOne({ key: hashedKey }).lean()
     if (!apiKey) {
+      logger.warn('[subscriptions/webhook] rejected — X-API-Key not found in DB', {
+        apiKeyPrefix: rawKey.slice(0, 12),
+      })
       return sendError(res, 'Invalid API key', 401, { code: 'UNAUTHORIZED' })
     }
     if (apiKey.status !== 'active') {
+      logger.warn('[subscriptions/webhook] rejected — API key revoked', {
+        apiKeyId: String(apiKey._id),
+      })
       return sendError(res, 'API key has been revoked', 401, { code: 'UNAUTHORIZED' })
     }
     if (apiKey.expiresAt && new Date(apiKey.expiresAt) < new Date()) {
+      logger.warn('[subscriptions/webhook] rejected — API key expired', {
+        apiKeyId: String(apiKey._id),
+        expiresAt: apiKey.expiresAt,
+      })
       return sendError(res, 'API key has expired', 401, { code: 'UNAUTHORIZED' })
     }
     if (apiKey.scope !== 'admin') {
+      logger.warn('[subscriptions/webhook] rejected — API key lacks admin scope', {
+        apiKeyId: String(apiKey._id),
+        scope: apiKey.scope,
+      })
       return sendError(res, 'Admin scope required', 403, { code: 'FORBIDDEN' })
     }
 
@@ -159,6 +174,9 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
 
     const parsedSig = parseSignatureHeader(req.headers['x-ezstart-signature'] as string | undefined)
     if (!parsedSig) {
+      logger.warn('[subscriptions/webhook] rejected — missing/malformed signature header', {
+        headerPresent: !!req.headers['x-ezstart-signature'],
+      })
       return sendError(res, 'Missing or malformed signature header', 401, {
         code: 'INVALID_SIGNATURE',
       })
@@ -180,12 +198,22 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     const expectedSig = createHmac('sha256', secret).update(signedPayload).digest('hex')
 
     if (!signaturesMatch(expectedSig, parsedSig.signature)) {
+      logger.warn('[subscriptions/webhook] rejected — signature mismatch', {
+        timestamp: parsedSig.timestamp,
+        rawBodyLen: rawBody.length,
+        expectedPrefix: expectedSig.slice(0, 12),
+        providedPrefix: parsedSig.signature.slice(0, 12),
+      })
       return sendError(res, 'Invalid signature', 401, { code: 'INVALID_SIGNATURE' })
     }
 
     // The body's own `timestamp` must match the header `t=` to prevent
     // a signer from mixing two different timestamps.
     if (body.timestamp !== parsedSig.timestamp) {
+      logger.warn('[subscriptions/webhook] rejected — body/header timestamp mismatch', {
+        headerTimestamp: parsedSig.timestamp,
+        bodyTimestamp: body.timestamp,
+      })
       return sendError(res, 'Timestamp mismatch between header and body', 401, {
         code: 'INVALID_SIGNATURE',
       })
@@ -195,6 +223,11 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     const signedAtSec = Number(parsedSig.timestamp)
     const nowSec = Math.floor(Date.now() / 1000)
     if (!Number.isFinite(signedAtSec) || Math.abs(nowSec - signedAtSec) > REPLAY_WINDOW_SECONDS) {
+      logger.warn('[subscriptions/webhook] rejected — timestamp outside replay window', {
+        signedAtSec,
+        nowSec,
+        deltaSec: nowSec - signedAtSec,
+      })
       return sendError(res, 'Signature timestamp outside replay window', 401, {
         code: 'TIMESTAMP_EXPIRED',
       })
@@ -211,12 +244,20 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     const Application = await getApplicationModel()
     const application = await Application.findById(body.applicationId).lean()
     if (!application) {
+      logger.warn('[subscriptions/webhook] rejected — Application not found', {
+        applicationId: body.applicationId,
+        stripeEventId: body.stripeEventId,
+      })
       return sendError(res, 'Application not found', 404, { code: 'APPLICATION_NOT_FOUND' })
     }
 
     const AuthUser = await getAuthUserModel()
     const user = await AuthUser.findById(body.userId)
     if (!user) {
+      logger.warn('[subscriptions/webhook] rejected — User not found', {
+        userId: body.userId,
+        stripeEventId: body.stripeEventId,
+      })
       return sendError(res, 'User not found', 404, { code: 'USER_NOT_FOUND' })
     }
 

@@ -4,9 +4,15 @@ import express from 'express'
 import request from 'supertest'
 import cookieParser from 'cookie-parser'
 import { verifyTokenMiddleware } from '../../../middleware/auth.js'
-import { createRoleMiddleware, sendSuccess, sendError, sendValidationError } from '@ezstart/api-core'
+import {
+  createRoleMiddleware,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/api-core'
 import { getAuthUserModel } from '../../../models/auth-user.js'
 import { getOAuthAccountModel } from '../../../models/oauth-account.js'
+import { getApplicationModel } from '../../../models/application.js'
 import {
   createUser,
   createAdminUser,
@@ -27,13 +33,31 @@ function createAdminTestApp() {
   app.use(express.json())
   app.use(cookieParser())
 
-  // GET /admin/users — list users
+  // GET /admin/users — list users (mirrors list-users.ts scope logic)
   app.get('/admin/users', verifyTokenMiddleware, requireAdmin, async (req, res) => {
     const currentUser = req.user!
     const AuthUser = await getAuthUserModel()
     const query: Record<string, unknown> = {}
 
-    if (!currentUser.globalRoles?.includes('superadmin')) {
+    const scope = req.query.scope as 'mine' | 'myApps' | 'all' | undefined
+    const isSuperadmin = currentUser.globalRoles?.includes('superadmin') === true
+
+    if (scope === 'all') {
+      if (!isSuperadmin) {
+        return sendError(res, 'Superadmin access required for scope=all', 403)
+      }
+      // No filter
+    } else if (scope === 'myApps') {
+      const Application = await getApplicationModel()
+      const ownedApps = await Application.find({ ownerId: currentUser._id }).select('slug').lean()
+      const ownedSlugs = ownedApps.map(a => a.slug)
+      if (ownedSlugs.length === 0) {
+        return sendSuccess(res, [], { total: 0, limit: 20, offset: 0 })
+      }
+      query.apps = { $in: ownedSlugs }
+    } else if (scope === 'mine') {
+      query._id = currentUser._id
+    } else if (!isSuperadmin) {
       query.globalRoles = { $ne: 'superadmin' }
       if ((currentUser.apps?.length ?? 0) > 0) {
         query.apps = { $in: currentUser.apps }
@@ -148,9 +172,7 @@ describe('Admin Routes', () => {
       await createUser({ email: 'u1@test.com', username: 'user1' })
       await createUser({ email: 'u2@test.com', username: 'user2' })
 
-      const res = await request(app)
-        .get('/admin/users')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/admin/users').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       expect(res.body.success).toBe(true)
@@ -168,9 +190,7 @@ describe('Admin Routes', () => {
       const user = await createUser({ email: 'regular@test.com', username: 'regular' })
       const token = generateAccessToken(user)
 
-      const res = await request(app)
-        .get('/admin/users')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/admin/users').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(403)
     })
@@ -187,15 +207,107 @@ describe('Admin Routes', () => {
       // Create a regular user in ezbill
       await createUser({ email: 'bill-user@test.com', username: 'billuser', apps: ['ezbill'] })
 
-      const res = await request(app)
-        .get('/admin/users')
-        .set('Authorization', `Bearer ${token}`)
+      const res = await request(app).get('/admin/users').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
       // App admin should NOT see superadmin users
       const emails = res.body.data.map((u: { email: string }) => u.email)
       expect(emails).not.toContain('hidden@test.com')
       expect(emails).toContain('bill-user@test.com')
+    })
+
+    describe('scope query param', () => {
+      it('scope=all: superadmin sees all users (including other superadmins)', async () => {
+        const admin = await createAdminUser()
+        const token = generateAccessToken(admin)
+
+        await createAdminUser({ email: 'other-super@test.com', username: 'othersuper' })
+        await createUser({ email: 'regular@test.com', username: 'reg' })
+
+        const res = await request(app)
+          .get('/admin/users?scope=all')
+          .set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(200)
+        const emails = res.body.data.map((u: { email: string }) => u.email)
+        expect(emails).toContain('other-super@test.com')
+        expect(emails).toContain('regular@test.com')
+      })
+
+      it('scope=all: non-superadmin is rejected with 403', async () => {
+        const appAdmin = await createAppAdmin('ezbill', {
+          email: 'app-admin@test.com',
+          username: 'appadmin',
+        })
+        const token = generateAccessToken(appAdmin)
+
+        const res = await request(app)
+          .get('/admin/users?scope=all')
+          .set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(403)
+      })
+
+      it('scope=myApps: returns only users registered to apps I own', async () => {
+        const owner = await createAppAdmin('ezbill', {
+          email: 'owner@test.com',
+          username: 'owner',
+        })
+        const token = generateAccessToken(owner)
+
+        const Application = await getApplicationModel()
+        await Application.create({
+          slug: 'myapp-a',
+          name: 'My App A',
+          ownerId: owner._id!.toString(),
+          status: 'active',
+        })
+
+        await createUser({ email: 'in-a@test.com', username: 'ina', apps: ['myapp-a'] })
+        await createUser({ email: 'out@test.com', username: 'out', apps: ['otherapp'] })
+
+        const res = await request(app)
+          .get('/admin/users?scope=myApps')
+          .set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(200)
+        const emails = res.body.data.map((u: { email: string }) => u.email)
+        expect(emails).toContain('in-a@test.com')
+        expect(emails).not.toContain('out@test.com')
+      })
+
+      it('scope=myApps: returns empty list when user owns no applications', async () => {
+        const appAdmin = await createAppAdmin('ezbill', {
+          email: 'noapps@test.com',
+          username: 'noapps',
+        })
+        const token = generateAccessToken(appAdmin)
+
+        await createUser({ email: 'x@test.com', username: 'x', apps: ['ezbill'] })
+
+        const res = await request(app)
+          .get('/admin/users?scope=myApps')
+          .set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body.data).toEqual([])
+        expect(res.body.meta.total).toBe(0)
+      })
+
+      it('scope=mine: returns only the current user', async () => {
+        const admin = await createAdminUser()
+        const token = generateAccessToken(admin)
+
+        await createUser({ email: 'other@test.com', username: 'other' })
+
+        const res = await request(app)
+          .get('/admin/users?scope=mine')
+          .set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body.data).toHaveLength(1)
+        expect(res.body.data[0].email).toBe(admin.email)
+      })
     })
   })
 
