@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:self-key": "tsx src/scripts/seed-self-key.ts"
+    "seed:self-key": "tsx src/scripts/seed-self-key.ts",
+    "migrate:keys-to-apps": "tsx src/scripts/migrate-keys-to-applications.ts"
   },
   "dependencies": {
     "@ezstart/api-core": "workspace:*",

@@ -1,0 +1,124 @@
+/**
+ * PATCH /api/applications/:id — update name / description / metadata.
+ *
+ * `slug` is immutable. Owner OR superadmin only. Denies with 404 to avoid
+ * tenant existence leaks.
+ */
+
+import type { Request, Response } from 'express'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/api-core'
+import { Router as ExpressRouter } from 'express'
+import { z } from 'zod'
+import { Types } from 'mongoose'
+import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { getApplicationModel } from '../../models/application.js'
+import { getAuthUserModel } from '../../models/auth-user.js'
+import { logger } from '@ezstart/logger/server'
+
+export const updateApplicationRegistry = new OpenAPIRegistry()
+const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(updateApplicationRegistry, router)
+
+const updateApplicationBodySchema = z.object({
+  name: z.string().min(1).max(100).trim().optional(),
+  description: z.string().max(500).trim().nullable().optional(),
+  metadata: z.record(z.unknown()).nullable().optional(),
+})
+
+const applicationResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    id: z.string(),
+    slug: z.string(),
+    name: z.string(),
+    description: z.string().nullable().optional(),
+    ownerId: z.string(),
+    metadata: z.record(z.unknown()).nullable().optional(),
+    status: z.enum(['active', 'archived']),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+})
+
+const errorResponseSchema = z.object({
+  success: z.literal(false),
+  error: z.string(),
+})
+
+const updateApplicationController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!
+    const { id } = req.params
+
+    if (!id || !Types.ObjectId.isValid(id)) {
+      return sendError(res, 'Application not found', 404)
+    }
+
+    const parsed = updateApplicationBodySchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid request body', parsed.error.issues)
+    }
+
+    const Application = await getApplicationModel()
+    const app = await Application.findById(id)
+    if (!app) {
+      return sendError(res, 'Application not found', 404)
+    }
+
+    if (app.ownerId !== userId) {
+      const AuthUser = await getAuthUserModel()
+      const user = await AuthUser.findById(userId).lean()
+      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
+      if (!isSuperadmin) {
+        return sendError(res, 'Application not found', 404)
+      }
+    }
+
+    const { name, description, metadata } = parsed.data
+    if (name !== undefined) app.name = name
+    if (description !== undefined) {
+      app.description = description ?? undefined
+    }
+    if (metadata !== undefined) {
+      app.metadata = metadata ?? undefined
+    }
+
+    await app.save()
+
+    return sendSuccess(res, {
+      id: app._id.toString(),
+      slug: app.slug,
+      name: app.name,
+      description: app.description ?? null,
+      ownerId: app.ownerId,
+      metadata: app.metadata ?? null,
+      status: app.status,
+      createdAt: app.createdAt.toISOString(),
+      updatedAt: app.updatedAt.toISOString(),
+    })
+  } catch (error: unknown) {
+    logger.error('Update application error:', error)
+    return sendError(res, 'Failed to update application', 500)
+  }
+}
+
+docRouter.patch('/applications/:id', verifyTokenMiddleware, updateApplicationController, {
+  summary: 'Update Application name / description / metadata (slug is immutable)',
+  tags: ['Applications'],
+  bodySchema: updateApplicationBodySchema,
+  responseSchema: applicationResponseSchema,
+  extraResponses: {
+    401: { description: 'Authentication required', schema: errorResponseSchema },
+    404: { description: 'Application not found', schema: errorResponseSchema },
+    422: { description: 'Validation error', schema: errorResponseSchema },
+  },
+})
+
+export default router

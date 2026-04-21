@@ -8,13 +8,21 @@ import {
   createVersionedRouter,
   startServer,
 } from '@ezstart/api-core'
-import routes, { allRegistries, authRouter, oauthRouter, adminRouter, apiKeysRouter } from './routes/index.js'
+import routes, {
+  allRegistries,
+  authRouter,
+  oauthRouter,
+  adminRouter,
+  apiKeysRouter,
+  applicationsRouter,
+} from './routes/index.js'
 import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
 import { getAuthCodeModel } from './models/auth-code.js'
 import { getOAuthAccountModel } from './models/oauth-account.js'
 import { getTotpSecretModel } from './models/totp-secret.js'
 import { getApiKeyModel } from './models/api-key.js'
+import { getApplicationModel } from './models/application.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { createCorsConfig } from '@ezstart/config/cors'
@@ -51,6 +59,7 @@ app.use(createVersionedRouter('/api/auth', authRouter))
 app.use(createVersionedRouter('/api/auth', oauthRouter))
 app.use(createVersionedRouter('/api/admin', adminRouter))
 app.use(createVersionedRouter('/api', apiKeysRouter))
+app.use(createVersionedRouter('/api', applicationsRouter))
 
 // Sentry error handler MUST be AFTER all routes/controllers
 Sentry.setupExpressErrorHandler(app)
@@ -63,7 +72,10 @@ connectToMongo('ezauth')
     await getOAuthAccountModel()
     await getTotpSecretModel()
     await getApiKeyModel()
-    logger.info('[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey')
+    await getApplicationModel()
+    logger.info(
+      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application'
+    )
 
     return startServer(app, {
       routes,

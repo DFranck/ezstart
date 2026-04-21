@@ -1,5 +1,5 @@
 import { connectToMongo } from '@ezstart/api-core'
-import { Schema, type Document, type Model } from 'mongoose'
+import { Schema, Types, type Document, type Model } from 'mongoose'
 
 /**
  * Key type — derived from modern prefix (`ez_pk_*` vs `ez_sk_*`).
@@ -28,6 +28,13 @@ export interface ApiKeyDocument extends Document {
   name: string
   userId: string
   appName: string
+  /**
+   * Multi-tenant Application reference (P6+). When present, `appName` is a
+   * denormalised cache of `application.slug` for backwards-compatible SDK
+   * responses. Optional on legacy docs created before the P6 migration —
+   * the migration script `migrate-keys-to-applications.ts` backfills it.
+   */
+  applicationId?: Types.ObjectId
   /** Key type — set on modern keys, absent on legacy docs. */
   type?: ApiKeyType
   /** Key environment — set on modern keys, absent on legacy docs. */
@@ -74,6 +81,12 @@ const apiKeySchema = new Schema<ApiKeyDocument>(
     appName: {
       type: String,
       default: '*',
+    },
+    applicationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Application',
+      required: false,
+      index: true,
     },
     type: {
       type: String,
@@ -131,6 +144,8 @@ const apiKeySchema = new Schema<ApiKeyDocument>(
 
 // Compound index for user lookups
 apiKeySchema.index({ userId: 1, status: 1 })
+// Compound index for Application scope lookups (list active keys of an app)
+apiKeySchema.index({ applicationId: 1, status: 1 })
 
 /**
  * Factory function to get ApiKey model attached to shared connection.

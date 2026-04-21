@@ -9,8 +9,10 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+import { Types } from 'mongoose'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { getApiKeyModel } from '../../models/api-key.js'
+import { getApplicationModel, APPLICATION_SLUG_REGEX } from '../../models/application.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
@@ -21,18 +23,26 @@ const docRouter = createRouterWithDoc(createApiKeyRegistry, router)
 
 const createApiKeyBodySchema = z.object({
   name: z.string().min(1).max(100).trim().openapi({ description: 'Display name for the API key' }),
+  applicationId: z.string().optional().openapi({
+    description:
+      'Multi-tenant Application id this key belongs to. Required for app-scoped keys (P6+). Legacy `appName` accepted with warn until 2026-07-21.',
+  }),
   appName: z
     .string()
+    .min(1)
+    .max(32)
+    .refine(v => v === '*' || APPLICATION_SLUG_REGEX.test(v), {
+      message:
+        'Invalid appName format — must match /^[a-z0-9-]{2,32}$/ or be "*" for superadmin platform-wide keys',
+    })
     .optional()
-    .default('*')
-    .openapi({ description: 'App scope (default: all apps, requires superadmin)' }),
-  type: z
-    .enum(['publishable', 'secret'])
-    .optional()
-    .default('publishable')
     .openapi({
-      description: 'Key type: publishable (ez_pk_*, client-safe) or secret (ez_sk_*, server-only)',
+      description:
+        'DEPRECATED legacy app scope field — use `applicationId` instead. Still accepted for backwards compat until 2026-07-21. Must match /^[a-z0-9-]{2,32}$/. `"*"` still valid for superadmin platform-wide keys.',
     }),
+  type: z.enum(['publishable', 'secret']).optional().default('publishable').openapi({
+    description: 'Key type: publishable (ez_pk_*, client-safe) or secret (ez_sk_*, server-only)',
+  }),
   env: z
     .enum(['live', 'test'])
     .optional()
@@ -58,6 +68,8 @@ const createApiKeyResponseSchema = z.object({
     key: z.string().openapi({ description: 'Full API key — only returned on creation' }),
     keyPrefix: z.string(),
     name: z.string(),
+    appName: z.string(),
+    applicationId: z.string().nullable(),
     type: z.enum(['publishable', 'secret']),
     env: z.enum(['live', 'test']),
     scope: z.enum(['admin', 'user', 'readonly']),
@@ -79,18 +91,85 @@ const createApiKeyController = async (req: Request, res: Response) => {
     }
 
     const userId = req.userId!
-    const { type, env, scope, appName } = parsed.data
+    const { type, env, scope, applicationId, appName: legacyAppName } = parsed.data
 
-    // Cross-app keys (appName='*') require superadmin.
-    // Note: for a specific appName, any authenticated user can create keys.
-    // Ownership / app-admin verification will come with the org/company system later.
-    if (appName === '*') {
-      const AuthUser = await getAuthUserModel()
-      const user = await AuthUser.findById(userId).lean()
-      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
-      if (!isSuperadmin) {
-        return sendError(res, 'Platform-wide keys (appName="*") require superadmin', 403)
+    const AuthUser = await getAuthUserModel()
+    const user = await AuthUser.findById(userId).lean()
+    const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
+
+    // Resolve the Application for this key.
+    // Precedence: explicit `applicationId` > legacy `appName` find-or-create > `'*'` (superadmin).
+    let resolvedApplicationId: Types.ObjectId | null = null
+    let resolvedAppName: string = '*'
+
+    const Application = await getApplicationModel()
+
+    if (applicationId) {
+      if (!Types.ObjectId.isValid(applicationId)) {
+        return sendError(res, 'Invalid applicationId', 400)
       }
+      const app = await Application.findById(applicationId).lean()
+      if (!app) {
+        return sendError(res, 'Application not found', 404)
+      }
+      if (app.status !== 'active') {
+        return sendError(res, 'Application is archived', 400)
+      }
+      if (app.ownerId !== userId && !isSuperadmin) {
+        return sendError(res, 'Not allowed to create keys for this Application', 403)
+      }
+      resolvedApplicationId = app._id as Types.ObjectId
+      resolvedAppName = app.slug
+    } else if (legacyAppName && legacyAppName !== '*') {
+      // Defense-in-depth: Zod already validates the slug format, but we
+      // re-check here so the find-or-create path can never hit Mongoose with
+      // an invalid slug (which would surface as a 500 instead of a clean 400).
+      if (!APPLICATION_SLUG_REGEX.test(legacyAppName)) {
+        return sendValidationError(res, 'Invalid appName format — must match /^[a-z0-9-]{2,32}$/', [
+          {
+            code: 'custom',
+            path: ['appName'],
+            message: 'Invalid appName format — must match /^[a-z0-9-]{2,32}$/',
+          },
+        ])
+      }
+
+      logger.warn('Legacy appName field used, migrate to applicationId by 2026-07-21', {
+        userId,
+        appName: legacyAppName,
+      })
+
+      // Find-or-create path — mirrors migration logic so a key can be created
+      // with a slug before the owner explicitly provisions the Application.
+      const existingApp = await Application.findOne({ slug: legacyAppName }).lean()
+      if (existingApp) {
+        if (existingApp.ownerId !== userId && !isSuperadmin) {
+          return sendError(res, 'Not allowed to create keys for this Application', 403)
+        }
+        resolvedApplicationId = existingApp._id as Types.ObjectId
+        resolvedAppName = existingApp.slug
+      } else {
+        const created = await Application.create({
+          slug: legacyAppName,
+          name: legacyAppName,
+          ownerId: userId,
+          createdBy: userId,
+          status: 'active',
+        })
+        resolvedApplicationId = created._id as Types.ObjectId
+        resolvedAppName = created.slug
+      }
+    } else {
+      // Platform-wide `'*'` case — superadmin only. No Application link.
+      if (!isSuperadmin) {
+        return sendError(
+          res,
+          'Platform-wide keys (appName="*") require superadmin. Pass `applicationId` instead.',
+          403
+        )
+      }
+      resolvedApplicationId = null
+      resolvedAppName = '*'
     }
 
     const ApiKey = await getApiKeyModel()
@@ -112,7 +191,8 @@ const createApiKeyController = async (req: Request, res: Response) => {
       keyPrefix,
       name: parsed.data.name,
       userId,
-      appName,
+      appName: resolvedAppName,
+      applicationId: resolvedApplicationId ?? undefined,
       type,
       env,
       scope,
@@ -126,6 +206,8 @@ const createApiKeyController = async (req: Request, res: Response) => {
       key: rawKey,
       keyPrefix,
       name: apiKey.name,
+      appName: resolvedAppName,
+      applicationId: resolvedApplicationId?.toString() ?? null,
       type,
       env,
       scope,
@@ -145,9 +227,10 @@ docRouter.post('/keys', verifyTokenMiddleware, createApiKeyController, {
     400: { description: 'Validation error or limit reached', schema: errorResponseSchema },
     401: { description: 'Authentication required', schema: errorResponseSchema },
     403: {
-      description: 'Forbidden (platform-wide key requires superadmin)',
+      description: 'Forbidden (platform-wide or non-owned Application)',
       schema: errorResponseSchema,
     },
+    404: { description: 'Application not found', schema: errorResponseSchema },
   },
 })
 

@@ -17,12 +17,61 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { loadSharedEnv } from '@ezstart/config/server'
 import { getMongoUrl } from '@ezstart/config/env-resolvers'
+import { Types } from 'mongoose'
 import { getApiKeyModel } from '../models/api-key.js'
+import { getApplicationModel, type ApplicationDocument } from '../models/application.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../utils/api-key.js'
 
-/** Marker used to identify system-seeded keys for idempotence. */
+/** Marker used to identify system-seeded entities for idempotence. */
 const SYSTEM_SEED_MARKER = 'system-seed'
 const SELF_APP_NAME = 'ezauth'
+
+/**
+ * Applications upserted as part of the EZAuth bootstrap — one per sibling
+ * service we dogfood. Each service seeds its own key later via
+ * `pnpm --filter api-<service> seed:self-key`, but their Applications live
+ * here (source-of-truth for tenant identity).
+ */
+const DOGFOOD_APPLICATIONS: Array<{ slug: string; name: string }> = [
+  { slug: 'ezauth', name: 'EZAuth' },
+  { slug: 'ezpay', name: 'EZPay' },
+]
+
+/**
+ * Idempotent upsert of dogfood Applications. If an Application with the same
+ * slug and `createdBy='system-seed'` already exists, it is left untouched.
+ *
+ * Exported for testability.
+ */
+export async function seedDogfoodApplications(): Promise<
+  Array<{ slug: string; status: 'created' | 'already-exists'; doc: ApplicationDocument }>
+> {
+  const Application = await getApplicationModel()
+  const results: Array<{
+    slug: string
+    status: 'created' | 'already-exists'
+    doc: ApplicationDocument
+  }> = []
+
+  for (const { slug, name } of DOGFOOD_APPLICATIONS) {
+    const existing = await Application.findOne({ slug })
+    if (existing) {
+      results.push({ slug, status: 'already-exists', doc: existing })
+      continue
+    }
+
+    const created = await Application.create({
+      slug,
+      name,
+      ownerId: 'system',
+      createdBy: SYSTEM_SEED_MARKER,
+      status: 'active',
+    })
+    results.push({ slug, status: 'created', doc: created })
+  }
+
+  return results
+}
 
 /** Result of {@link seedSelfKey}. */
 export interface SeedSelfKeyResult {
@@ -43,6 +92,14 @@ export interface SeedSelfKeyResult {
  *          `{ status: 'created', rawKey }` when a new key was just persisted.
  */
 export async function seedSelfKey(): Promise<SeedSelfKeyResult> {
+  // Ensure dogfood Applications exist BEFORE seeding the self-key so the
+  // key can be linked to its tenant entity.
+  const apps = await seedDogfoodApplications()
+  const ezauthApp = apps.find(a => a.slug === SELF_APP_NAME)?.doc
+  if (!ezauthApp) {
+    throw new Error('seed-self-key: failed to ensure ezauth Application exists')
+  }
+
   const ApiKey = await getApiKeyModel()
 
   const existing = await ApiKey.findOne({
@@ -52,6 +109,14 @@ export async function seedSelfKey(): Promise<SeedSelfKeyResult> {
   }).lean()
 
   if (existing) {
+    // Self-heal: if the existing self-key predates P6 (no applicationId),
+    // link it now to the ezauth Application. Idempotent no-op otherwise.
+    if (!existing.applicationId) {
+      await ApiKey.updateOne(
+        { _id: existing._id },
+        { $set: { applicationId: ezauthApp._id as Types.ObjectId } }
+      )
+    }
     return {
       status: 'already-exists',
       keyPrefix: existing.keyPrefix,
@@ -68,6 +133,7 @@ export async function seedSelfKey(): Promise<SeedSelfKeyResult> {
     name: 'EZAuth self-key (system seed)',
     userId: 'system',
     appName: SELF_APP_NAME,
+    applicationId: ezauthApp._id as Types.ObjectId,
     type: 'publishable',
     env: 'live',
     scope: 'admin',
