@@ -18,6 +18,7 @@ import {
 } from '@ezstart/ui/components'
 import { usePlans } from '../react/hooks/usePlans.js'
 import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
+import { useApplicationContext } from '../react/pay-provider.js'
 import { SubscribeButton } from './SubscribeButton.js'
 import { formatCurrency } from '../core/format-currency.js'
 import type { Plan } from '../core/types.js'
@@ -103,6 +104,9 @@ export function PricingPage({
     )
   }
 
+  const { applicationId: ctxApplicationId } = useApplicationContext()
+  const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
+
   const { plans, isLoading, error, reload } = usePlans({ applicationId, appName, active: true })
   const subStatus = useSubscriptionStatus({
     userId: userId || '',
@@ -179,6 +183,7 @@ export function PricingPage({
               isCurrent={isCurrent}
               isFeatured={isFeatured}
               texts={t}
+              applicationId={effectiveApplicationId}
               userId={userId}
               userEmail={userEmail}
               userName={userName}
@@ -199,6 +204,7 @@ interface PlanCardProps {
   isCurrent: boolean
   isFeatured: boolean
   texts: PricingPageTexts
+  applicationId?: string
   userId?: string
   userEmail?: string
   userName?: string
@@ -213,6 +219,7 @@ function PlanCard({
   isCurrent,
   isFeatured,
   texts,
+  applicationId,
   userId,
   userEmail,
   userName,
@@ -275,7 +282,8 @@ function PlanCard({
         ) : (
           <SubscribeButton
             projectId={plan.appName}
-            priceId={plan.stripePriceId || plan.id}
+            applicationId={applicationId ?? plan.applicationId}
+            priceId={plan.id}
             planName={plan.name}
             amount={plan.amount / 100}
             intervalCount={plan.intervalCount}

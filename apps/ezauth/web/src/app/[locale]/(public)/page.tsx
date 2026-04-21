@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
+import { PricingPage } from '@ezstart/pay-sdk/components'
 import {
   Badge,
   Button,
@@ -20,6 +21,8 @@ import {
 } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
+
+const EZAUTH_APP_ID = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
 
 // ---------------------------------------------------------------------------
 // Features data (icons are lucide names)
@@ -189,7 +192,7 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- */}
       {/* Code examples                                                    */}
       {/* ---------------------------------------------------------------- */}
-      <LandingSection variant="muted" align="center">
+      <LandingSection align="center">
         <Div className="mb-12">
           <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('codeSectionTitle')}</H2>
           <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">{t('codeSectionSubtitle')}</P>
@@ -232,14 +235,24 @@ export default function HomePage() {
       {/* Pricing                                                          */}
       {/* ---------------------------------------------------------------- */}
       <LandingSection id="pricing" align="center">
-        <Div className="py-8">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('pricingSectionTitle')}
-          </H2>
-          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Pricing coming soon. EZAuth is currently free during the beta period.
-          </P>
-        </Div>
+        {EZAUTH_APP_ID ? (
+          <PricingPage
+            applicationId={EZAUTH_APP_ID}
+            texts={{
+              title: t('pricingSectionTitle'),
+              subtitle: t('pricingSectionSubtitle'),
+            }}
+          />
+        ) : (
+          <Div className="py-8">
+            <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              {t('pricingSectionTitle')}
+            </H2>
+            <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              {t('pricingSectionSubtitle')}
+            </P>
+          </Div>
+        )}
       </LandingSection>
 
       {/* ---------------------------------------------------------------- */}

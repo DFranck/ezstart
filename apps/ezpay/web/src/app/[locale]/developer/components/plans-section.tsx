@@ -1,99 +1,44 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Div, H3, P, Span, Icon } from '@ezstart/ui/components'
+import { PricingPage, type PricingPageTexts } from '@ezstart/pay-sdk/components'
+import { useAuth } from '@ezstart/auth-sdk'
 
-// TODO: Plans should come from pay-sdk PricingPage component wired to API.
-// Currently hardcoded until pay-sdk PricingPage is integrated.
-const PLANS = [
-  {
-    key: 'starter' as const,
-    feePercent: 5,
-    price: 0,
-  },
-  {
-    key: 'growth' as const,
-    feePercent: 3,
-    price: 49,
-  },
-  {
-    key: 'enterprise' as const,
-    feePercent: 1.5,
-    price: 199,
-  },
-]
+// EZPay self Application id (Application slug='ezpay' — dogfood plans).
+// The PricingPage auto-fetches active plans for this Application via usePlans.
+const EZPAY_APPLICATION_ID = '69e7017c0977c53844e4d077'
 
 type PlansSectionProps = {
-  currentFeePercent: number
+  /**
+   * @deprecated Kept for backward compatibility with the developer page.
+   * The new PricingPage resolves the current plan from subscription status.
+   */
+  currentFeePercent?: number
 }
 
-export function PlansSection({ currentFeePercent }: PlansSectionProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- currentFeePercent kept for API compat
+export function PlansSection(_props: PlansSectionProps) {
   const t = useTranslations('developer.plans')
+  const { user } = useAuth()
 
-  function handleUpgrade() {
-    toast.info(t('comingSoon'))
+  const texts: Partial<PricingPageTexts> = {
+    title: t('title'),
+    subtitle: t('subtitle'),
+    free: t('free'),
+    perMonth: t('perMonth').replace(/^\//, ''),
+    currentPlan: t('current'),
+    upgrade: t('upgrade'),
   }
 
-  function isCurrent(feePercent: number): boolean {
-    return Math.abs(currentFeePercent - feePercent) < 0.1
-  }
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon name="lucide:CreditCard" className="h-5 w-5 text-primary" />
-          {t('title')}
-        </CardTitle>
-        <P variant="description">{t('subtitle')}</P>
-      </CardHeader>
-      <CardContent>
-        <Div className="grid gap-4 sm:grid-cols-3">
-          {PLANS.map(plan => {
-            const current = isCurrent(plan.feePercent)
-            return (
-              <Div
-                key={plan.key}
-                className={`rounded-lg border p-4 space-y-3 ${current ? 'border-primary bg-primary/5' : ''}`}
-              >
-                <Div className="flex items-center justify-between">
-                  <H3 className="text-lg font-semibold">{t(`${plan.key}.name`)}</H3>
-                  {current && (
-                    <Badge variant="primary" size="sm">
-                      {t('current')}
-                    </Badge>
-                  )}
-                </Div>
-                <P size="sm" variant="description">
-                  {t(`${plan.key}.description`)}
-                </P>
-                <Div>
-                  <P className="text-2xl font-bold text-primary">
-                    {plan.price === 0 ? t('free') : `$${plan.price}`}
-                    {plan.price > 0 && (
-                      <Span className="text-sm text-muted-foreground font-normal">
-                        {t('perMonth')}
-                      </Span>
-                    )}
-                  </P>
-                  <P size="sm" className="text-muted-foreground">
-                    {plan.feePercent}% {t('platformFee')}
-                  </P>
-                </Div>
-                <P size="xs" variant="description">
-                  {t(`${plan.key}.features`)}
-                </P>
-                {!current && (
-                  <Button variant="outline" size="sm" className="w-full" onClick={handleUpgrade}>
-                    {t('upgrade')}
-                  </Button>
-                )}
-              </Div>
-            )
-          })}
-        </Div>
-      </CardContent>
-    </Card>
+    <PricingPage
+      applicationId={EZPAY_APPLICATION_ID}
+      userId={user?._id}
+      userEmail={user?.email}
+      userName={fullName}
+      texts={texts}
+    />
   )
 }

@@ -16,6 +16,7 @@ import {
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig } from '@/hooks/useKeyConfig'
 
@@ -26,12 +27,21 @@ function RegisterContent() {
   const tOAuth = useTranslations('oauth')
   const tPwd = useTranslations('passwordStrength')
   const navigation = useAuthNavigation()
+  const params = useParams<{ locale: string }>()
+  const locale = params?.locale ?? 'en'
 
   // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
   const keyConfig = useKeyConfig(navigation.publishableKey)
   const app = keyConfig.appName ?? navigation.app ?? 'ezauth'
   const theme = getAppTheme(app)
   const isKeyInvalid = keyConfig.status === 'invalid'
+  // First-party fallback: default redirect_uri to ezauth's own callback page
+  // when the user lands on /register directly (no third-party ?redirect_uri=).
+  const resolvedRedirectUri =
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}/${locale}/auth/callback`
+      : undefined)
   const bannerKeyStatus = navigation.publishableKey
     ? keyConfig.status === 'valid'
       ? ('valid' as const)
@@ -58,7 +68,7 @@ function RegisterContent() {
       <CardContent className="space-y-4">
         <SignUpForm
           appName={app}
-          redirectUri={navigation.redirectUri}
+          redirectUri={resolvedRedirectUri}
           showOAuth
           oauthProviders={['google']}
           disabled={isKeyInvalid}

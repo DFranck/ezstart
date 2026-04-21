@@ -17,6 +17,7 @@ import {
 } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig } from '@/hooks/useKeyConfig'
 
@@ -28,12 +29,23 @@ function LoginContent() {
   const tOAuth = useTranslations('oauth')
   const tTwoFactor = useTranslations('twoFactor')
   const navigation = useAuthNavigation()
+  const params = useParams<{ locale: string }>()
+  const locale = params?.locale ?? 'en'
 
   // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
   const keyConfig = useKeyConfig(navigation.publishableKey)
   const app = keyConfig.appName ?? navigation.app ?? 'ezauth'
   const theme = getAppTheme(app)
   const isKeyInvalid = keyConfig.status === 'invalid'
+  // First-party fallback: if no ?redirect_uri= is passed (user lands on
+  // ezauth's own /login directly), default to ezauth's own callback page so
+  // the SDK's code-flow exchanges the authorization code for a session cookie
+  // and lands the user on /developer (AuthCallbackPage default).
+  const resolvedRedirectUri =
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}/${locale}/auth/callback`
+      : undefined)
   const bannerKeyStatus = navigation.publishableKey
     ? keyConfig.status === 'valid'
       ? ('valid' as const)
@@ -60,7 +72,7 @@ function LoginContent() {
       <CardContent className="space-y-4">
         <SignInForm
           appName={app}
-          redirectUri={navigation.redirectUri}
+          redirectUri={resolvedRedirectUri}
           showOAuth
           oauthProviders={['google']}
           disabled={isKeyInvalid}
