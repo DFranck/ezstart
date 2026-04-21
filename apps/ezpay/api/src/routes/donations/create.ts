@@ -25,9 +25,19 @@ const docRouter = createRouterWithDoc(createDonationRegistry, router)
 
 const createDonationSchema = z.object({
   projectId: z.string().max(100).describe('Project identifier'),
+  applicationId: z
+    .string()
+    .optional()
+    .describe(
+      'ezauth Application id receiving the donation (required when not authenticated via API key)'
+    ),
   projectName: z.string().optional().describe('Project display name'),
   amount: z.number().nonnegative().describe('Donation amount in currency units (0 = testimonial)'),
-  currency: z.string().regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code').default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
+  currency: z
+    .string()
+    .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
+    .default('EUR')
+    .describe('Currency code (EUR, USD, GBP, etc.)'),
   message: z.string().optional().describe('Optional message from donor'),
   isPublic: z.boolean().default(true).describe('Whether donation is shown publicly'),
   isAnonymous: z.boolean().default(false).describe('Whether donor wants to stay anonymous'),
@@ -57,6 +67,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
 
     const {
       projectId,
+      applicationId: bodyApplicationId,
       projectName,
       amount,
       currency = 'EUR',
@@ -110,8 +121,24 @@ const createDonationHandler = async (req: Request, res: Response) => {
     // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
-    // Resolve Connect fee if the user has an active connected account
-    const connectFee = userId ? await resolveConnectFee(userId, Math.round(amount * 100)) : null
+    // Resolve the target Application id:
+    //   1. API-key auth → middleware populates `req.apiKeyApplicationId`
+    //   2. Public/JWT auth → caller passes `applicationId` in body
+    //   3. Neither → 422 (cannot route Connect fee without the owner)
+    const applicationId = req.apiKeyApplicationId ?? bodyApplicationId
+    if (!applicationId) {
+      return sendValidationError(res, 'applicationId required', [
+        {
+          code: 'custom',
+          path: ['applicationId'],
+          message:
+            'applicationId is required when not authenticated via API key (body field or X-API-Key)',
+        },
+      ])
+    }
+
+    // Resolve Connect fee for the target Application
+    const connectFee = await resolveConnectFee(applicationId, Math.round(amount * 100))
 
     // Create checkout session via provider
     const provider = getProvider()
@@ -131,9 +158,10 @@ const createDonationHandler = async (req: Request, res: Response) => {
       successUrl: `${baseUrl}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/donate/cancel`,
       connect:
-        connectFee?.isConnect && connectFee.stripeAccountId && connectFee.applicationFeeAmount
+        connectFee.isConnect && connectFee.stripeAccountId
           ? {
               destinationAccountId: connectFee.stripeAccountId,
+              // One-shots use cents-based fee
               applicationFeeAmount: connectFee.applicationFeeAmount,
             }
           : undefined,

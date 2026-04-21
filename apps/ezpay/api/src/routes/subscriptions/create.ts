@@ -27,6 +27,12 @@ const docRouter = createRouterWithDoc(createSubscriptionRegistry, router)
 
 const createSubscriptionSchema = z.object({
   projectId: z.string().max(100).describe('Project identifier'),
+  applicationId: z
+    .string()
+    .optional()
+    .describe(
+      'ezauth Application id owning the checkout (required when not authenticated via API key)'
+    ),
   planId: z.string().describe('Plan identifier'),
   planName: z.string().describe('Plan display name'),
   amount: z.number().positive().describe('Subscription amount per interval'),
@@ -40,7 +46,11 @@ const createSubscriptionSchema = z.object({
     .describe(
       'Number of months between billings (1=monthly, 3=quarterly, 6=semi-annual, 12=annual)'
     ),
-  currency: z.string().regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code').default('EUR').describe('Currency code (EUR, USD, GBP, etc.)'),
+  currency: z
+    .string()
+    .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
+    .default('EUR')
+    .describe('Currency code (EUR, USD, GBP, etc.)'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
   promoCode: z.string().optional().describe('Optional promo code for discount'),
@@ -67,6 +77,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     const {
       projectId,
+      applicationId: bodyApplicationId,
       planId,
       planName,
       amount,
@@ -80,6 +91,22 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     // Always use the authenticated user ID from JWT, never from the request body
     const userId = req.userId
+
+    // Resolve the target Application id:
+    //   1. API-key auth → middleware populates `req.apiKeyApplicationId`
+    //   2. Bearer/JWT auth → caller passes `applicationId` in body
+    //   3. Neither → 422 (cannot route Connect fee without the owner)
+    const applicationId = req.apiKeyApplicationId ?? bodyApplicationId
+    if (!applicationId) {
+      return sendValidationError(res, 'applicationId required', [
+        {
+          code: 'custom',
+          path: ['applicationId'],
+          message:
+            'applicationId is required when not authenticated via API key (body field or X-API-Key)',
+        },
+      ])
+    }
 
     // Promo code validation and discount calculation
     let finalAmount = amount
@@ -112,8 +139,9 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
-    // Resolve Connect fee if the user has an active connected account
-    const connectFee = userId ? await resolveConnectFee(userId, Math.round(amount * 100)) : null
+    // Resolve Connect fee for the target Application (may be the caller's
+    // own app via API-key auth, or a body-supplied id for Bearer flows).
+    const connectFee = await resolveConnectFee(applicationId, Math.round(amount * 100))
 
     const provider = getProvider()
     const session = await provider.createSubscriptionCheckout({
@@ -142,10 +170,12 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
           }
         : undefined,
       connect:
-        connectFee?.isConnect && connectFee.stripeAccountId && connectFee.applicationFeeAmount
+        connectFee.isConnect && connectFee.stripeAccountId
           ? {
               destinationAccountId: connectFee.stripeAccountId,
-              applicationFeeAmount: connectFee.applicationFeeAmount,
+              // Subscriptions prefer percent — Stripe applies it to every
+              // recurring invoice automatically via `application_fee_percent`.
+              applicationFeePercent: connectFee.applicationFeePercent,
             }
           : undefined,
     })
