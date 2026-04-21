@@ -8,16 +8,27 @@ interface FeatureGateProps {
   feature: string
   /** User ID to check subscription for */
   userId?: string
-  /** App name to resolve plan features */
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Kept for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id (preferred). Falls back to context when absent. */
+  applicationId?: string
   /** Fallback content when feature is not available */
   fallback?: ReactNode
   /** Content to render when the user has access to the feature */
   children: ReactNode
 }
 
-export function FeatureGate({ feature, userId, appName, fallback, children }: FeatureGateProps) {
-  const { loading, features } = useSubscriptionStatus({ userId, appName })
+export function FeatureGate({
+  feature,
+  userId,
+  appName,
+  applicationId,
+  fallback,
+  children,
+}: FeatureGateProps) {
+  const { loading, features } = useSubscriptionStatus({ userId, appName, applicationId })
 
   if (loading) return null
   if (!features.includes(feature)) return fallback ? <>{fallback}</> : null

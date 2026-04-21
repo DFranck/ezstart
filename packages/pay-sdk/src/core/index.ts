@@ -5,6 +5,7 @@ export { PayClient, createPayClient } from './pay-client.js'
 export type {
   PayClientConfig,
   LegacyPayClientConfig,
+  ApplicationConfigResponse,
   Payment,
   Donation,
   Purchase,

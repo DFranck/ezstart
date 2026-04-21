@@ -3,7 +3,7 @@
 import { Button, Div, H2, Icon, Input, Modal, P } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useState } from 'react'
-import { usePay, usePayContext } from '../react/pay-provider.js'
+import { usePay, useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 import { PromoCodeInput, type PromoValidation } from './PromoCodeInput.js'
 
@@ -22,6 +22,8 @@ export interface SubscribeButtonTexts {
 
 export interface SubscribeButtonProps {
   projectId: string
+  /** Ezauth Application id (preferred). When omitted, resolves from PayProvider context. */
+  applicationId?: string
   priceId: string
   planName: string
   amount: number
@@ -42,6 +44,7 @@ export interface SubscribeButtonProps {
 
 export function SubscribeButton({
   projectId,
+  applicationId,
   priceId,
   planName,
   amount,
@@ -58,6 +61,8 @@ export function SubscribeButton({
   texts,
 }: SubscribeButtonProps) {
   const { createSubscription, isLoading } = usePay()
+  const { applicationId: ctxApplicationId } = useApplicationContext()
+  const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
   const [open, setOpen] = useState(false)
   const [promoCode, setPromoCode] = useState(promoCodeProp || '')
   const [promoValidation, setPromoValidation] = useState<PromoValidation | null>(null)
@@ -92,6 +97,7 @@ export function SubscribeButton({
     try {
       const result = await createSubscription({
         projectId,
+        ...(effectiveApplicationId ? { applicationId: effectiveApplicationId } : {}),
         planId: priceId,
         planName,
         amount,

@@ -75,7 +75,22 @@ export interface Invoice extends Payment {
 export interface PayClientConfig {
   /** Base API URL (e.g. "https://api.example.com/api") */
   apiUrl: string
-  appName: string
+  /**
+   * Legacy app-slug identifier (e.g. `'ezbill'`). Kept for backward compatibility
+   * with existing consumers. Prefer `applicationId` for new code — it resolves
+   * to the Application document id in ezauth and unambiguously scopes requests
+   * regardless of slug renames.
+   *
+   * @deprecated Use `applicationId` instead. This field will be removed once all
+   * consumers migrate (target: 2026-07).
+   */
+  appName?: string
+  /**
+   * Ezauth Application id the client is scoped to. When provided, takes
+   * precedence over `appName` in list/query operations. Typically populated
+   * automatically by `<PayProvider publishableKey="…" />` via `/api/keys/config`.
+   */
+  applicationId?: string
   /** Explicit return URL for payment redirects. Falls back to window.location origin. */
   returnUrl?: string
   /** Optional API key for server-to-server authentication (sent as `X-API-Key` header). */
@@ -88,6 +103,25 @@ export interface PayClientConfig {
   onTokenRefresh?: () => Promise<string | null>
   /** Optional callback invoked when token refresh fails (e.g. to trigger logout/redirect). */
   onAuthFailure?: () => void
+}
+
+/**
+ * Response shape returned by `GET /api/keys/config?key=<publishableKey>`
+ * (ezpay). Used by the React provider to auto-wire `applicationId` / `appSlug`
+ * from a single public key.
+ *
+ * Fields marked optional are not strictly required for client-side wiring — the
+ * `apiUrl` / `webUrl` come from the ezpay environment config and should only be
+ * used for cross-checks.
+ */
+export interface ApplicationConfigResponse {
+  applicationId: string
+  appSlug: string
+  apiUrl?: string
+  webUrl?: string
+  type?: 'publishable' | 'secret'
+  env?: 'live' | 'test'
+  scope?: 'admin' | 'user' | 'readonly'
 }
 
 /**
@@ -110,7 +144,13 @@ export type PromoDuration = 'once' | 'repeating' | 'forever'
 export interface Promo {
   id: string
   code: string
+  /**
+   * @deprecated Read `applicationId` instead. Retained while the backend
+   * dual-writes during the 90-day migration window.
+   */
   appName: string
+  /** Ezauth Application id this promo belongs to. */
+  applicationId?: string
   discountType: PromoDiscountType
   discountValue: number
   currency?: string
@@ -126,7 +166,12 @@ export interface Promo {
 
 export interface CreatePromoRequest {
   code: string
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Kept for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id this promo belongs to. Takes precedence over `appName`. */
+  applicationId?: string
   discountType: PromoDiscountType
   discountValue: number
   currency?: string
@@ -181,7 +226,13 @@ export interface PromosListResponse {
 export interface Plan {
   id: string
   name: string
+  /**
+   * @deprecated Read `applicationId` instead. Retained while the backend
+   * dual-writes during the 90-day migration window.
+   */
   appName: string
+  /** Ezauth Application id this plan belongs to. */
+  applicationId?: string
   description?: string
   amount: number
   currency: string
@@ -197,7 +248,12 @@ export interface Plan {
 
 export interface CreatePlanRequest {
   name: string
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Kept for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id this plan belongs to. Takes precedence over `appName`. */
+  applicationId?: string
   description?: string
   amount: number
   currency: string
@@ -244,6 +300,14 @@ export type ConnectAccountType = 'standard' | 'express'
 export type ConnectAccountStatus = 'pending' | 'active' | 'restricted' | 'disabled'
 
 export interface ConnectedAccount {
+  /** Ezauth Application id this account belongs to (one account per app). */
+  applicationId: string
+  /**
+   * `true` when this points at the shared platform (EZStart LLC) Stripe account
+   * used by dogfood apps. `false` when the app has onboarded its own external
+   * Stripe Connect account.
+   */
+  isPlatformAccount: boolean
   stripeAccountId: string
   email: string
   businessName: string
@@ -261,9 +325,22 @@ export interface ConnectStatusResponse {
 }
 
 export interface ConnectOnboardRequest {
+  /** Required — the Application the new Connect account belongs to. */
+  applicationId: string
   email: string
   businessName: string
   type: ConnectAccountType
+}
+
+/**
+ * Body accepted by `PATCH /api/connect/accounts/:applicationId` — superadmin-only
+ * switchability between platform and external Stripe accounts.
+ */
+export interface ConnectConvertRequest {
+  /** New Stripe account id (must start with `acct_`). */
+  stripeAccountId: string
+  /** `true` = platform dogfood account, `false` = external Connect account. */
+  isPlatformAccount: boolean
 }
 
 export interface ConnectOnboardResponse {
@@ -276,9 +353,39 @@ export interface ConnectDashboardLinkResponse {
   message?: string
 }
 
+// Billing Portal (Stripe Customer Portal)
+
+/**
+ * Response payload returned by `POST /api/billing/portal`.
+ *
+ * The `url` is a short-lived Stripe-hosted portal URL — redirect the user
+ * there (e.g. `window.location.href = url`).
+ */
+export interface BillingPortalResponse {
+  url: string
+}
+
+/**
+ * Body accepted by `POST /api/billing/portal`. When `customerId` is omitted,
+ * the route resolves the customer from the authenticated user's most recent
+ * subscription.
+ */
+export interface BillingPortalRequest {
+  /** URL the customer is redirected to after leaving the portal. */
+  returnUrl?: string
+  /** Explicit Stripe customer id — skips auto-resolution from subscriptions. */
+  customerId?: string
+}
+
 // API Requests
 export interface CreateDonationRequest {
   projectId: string
+  /**
+   * Ezauth Application id the donation is scoped to. Preferred over `projectId`
+   * for new code — the backend will resolve `projectId` to an application
+   * during the 90-day migration window.
+   */
+  applicationId?: string
   amount: number
   currency?: string
   message?: string
@@ -291,6 +398,11 @@ export interface CreateDonationRequest {
 
 export interface CreatePurchaseRequest {
   projectId: string
+  /**
+   * Ezauth Application id the purchase is scoped to. Preferred over `projectId`
+   * for new code.
+   */
+  applicationId?: string
   productId: string
   productName: string
   amount: number
@@ -304,6 +416,11 @@ export interface CreatePurchaseRequest {
 
 export interface CreateSubscriptionRequest {
   projectId: string
+  /**
+   * Ezauth Application id the subscription is scoped to. Preferred over
+   * `projectId` for new code.
+   */
+  applicationId?: string
   planId: string
   planName: string
   amount: number

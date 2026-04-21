@@ -57,8 +57,16 @@ const DEFAULT_TEXTS: PricingPageTexts = {
 }
 
 export interface PricingPageProps {
-  /** Override the default app name from PayProvider context */
+  /**
+   * @deprecated Use `applicationId` instead. Falls back to PayProvider context
+   * when omitted.
+   */
   appName?: string
+  /**
+   * Ezauth Application id this pricing page is scoped to. Takes precedence over
+   * `appName`. When omitted, resolves from PayProvider context.
+   */
+  applicationId?: string
   /** User info for subscription checkout */
   userId?: string
   userEmail?: string
@@ -75,6 +83,7 @@ export interface PricingPageProps {
 
 export function PricingPage({
   appName,
+  applicationId,
   userId,
   userEmail,
   userName,
@@ -84,10 +93,21 @@ export function PricingPage({
   className,
 }: PricingPageProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
-  const { plans, isLoading, error, reload } = usePlans({ appName, active: true })
+
+  // Emit deprecation warning once when appName is used without applicationId.
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    // eslint-disable-next-line no-console -- one-shot deprecation signal for SDK consumers
+    console.warn(
+      '[pay-sdk] PricingPage `appName` prop is deprecated, use `applicationId` instead. ' +
+        'Falling back to legacy appName resolution.'
+    )
+  }
+
+  const { plans, isLoading, error, reload } = usePlans({ applicationId, appName, active: true })
   const subStatus = useSubscriptionStatus({
     userId: userId || '',
-    appName: appName || '',
+    applicationId,
+    appName,
   })
 
   const currentPlanName = subStatus.plan
@@ -218,14 +238,10 @@ function PlanCard({
 
       <CardHeader>
         <H3>{plan.name}</H3>
-        {plan.description && (
-          <P className="text-muted-foreground text-sm">{plan.description}</P>
-        )}
+        {plan.description && <P className="text-muted-foreground text-sm">{plan.description}</P>}
         <Div className="mt-4">
           <Span className="text-4xl font-bold">{price}</Span>
-          {!isFree && (
-            <Span className="text-muted-foreground"> / {intervalLabel}</Span>
-          )}
+          {!isFree && <Span className="text-muted-foreground"> / {intervalLabel}</Span>}
         </Div>
       </CardHeader>
 

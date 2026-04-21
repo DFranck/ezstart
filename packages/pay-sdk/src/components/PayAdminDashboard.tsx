@@ -245,7 +245,17 @@ export interface PayAdminDashboardTexts {
 }
 
 export interface PayAdminDashboardProps {
+  /**
+   * @deprecated Use `applicationId` instead. Kept for backward compatibility.
+   * Filters plans/promos/subscriptions/payments by the legacy `appName` field.
+   */
   appName?: string
+  /**
+   * Ezauth Application id to scope the dashboard to. When provided, the
+   * dashboard loads data for this application only. Omit to show the
+   * platform-wide superadmin view (requires `showAppFilter` for scoping).
+   */
+  applicationId?: string
   showAppFilter?: boolean
   testMode?: boolean
   className?: string

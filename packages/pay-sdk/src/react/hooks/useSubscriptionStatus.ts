@@ -22,11 +22,16 @@ interface SubscriptionStatus {
 
 interface UseSubscriptionStatusParams {
   userId?: string
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Kept for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id (preferred). Falls back to `appName` / context when absent. */
+  applicationId?: string
 }
 
 export function useSubscriptionStatus(params: UseSubscriptionStatusParams): SubscriptionStatus {
-  const { client } = usePayContext()
+  const { client, applicationId: ctxApplicationId, appSlug: ctxAppSlug } = usePayContext()
   const [status, setStatus] = useState<SubscriptionStatus>({
     loading: true,
     isActive: false,
@@ -36,6 +41,10 @@ export function useSubscriptionStatus(params: UseSubscriptionStatusParams): Subs
     periodEnd: null,
     subscription: null,
   })
+
+  const effectiveApplicationId = params.applicationId ?? ctxApplicationId ?? undefined
+  const effectiveAppName =
+    params.appName ?? (effectiveApplicationId ? undefined : (ctxAppSlug ?? undefined))
 
   const load = useCallback(async () => {
     if (!params.userId) {
@@ -58,7 +67,11 @@ export function useSubscriptionStatus(params: UseSubscriptionStatusParams): Subs
       let features: string[] = (activeSub.metadata?.features as string[]) || []
       if (features.length === 0) {
         try {
-          const plansRes = await client.listPlans({ appName: params.appName, active: true })
+          const plansRes = await client.listPlans({
+            applicationId: effectiveApplicationId,
+            appName: effectiveAppName,
+            active: true,
+          })
           const plans = plansRes.data || []
           const plan = plans.find(p => p.name === activeSub.metadata?.planName)
           features = plan?.features || []
@@ -79,7 +92,7 @@ export function useSubscriptionStatus(params: UseSubscriptionStatusParams): Subs
     } catch {
       setStatus(prev => ({ ...prev, loading: false }))
     }
-  }, [client, params.userId, params.appName])
+  }, [client, params.userId, effectiveApplicationId, effectiveAppName])
 
   useEffect(() => {
     load()

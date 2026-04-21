@@ -23,7 +23,13 @@ import { usePay } from '../react/pay-provider.js'
 import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
 
 export interface DonationCardProps {
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. This field was never wired into
+   * the donation request — `projectId` carries the routing information.
+   */
+  appName?: string
+  /** Ezauth Application id (preferred, forwarded on the donation request). */
+  applicationId?: string
   projectId: string
   projectName?: string
   className?: string
@@ -83,7 +89,8 @@ const DEFAULT_TEXTS: DonationCardTexts = {
 }
 
 export function DonationCard({
-  appName,
+  appName: _appName,
+  applicationId,
   projectId,
   projectName,
   className,
@@ -127,6 +134,7 @@ export function DonationCard({
     try {
       const result = await createDonation({
         projectId,
+        ...(applicationId ? { applicationId } : {}),
         amount,
         currency,
         isPublic: true,

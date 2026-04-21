@@ -15,11 +15,17 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
-import { usePay } from '../react/pay-provider.js'
+import { usePay, useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 
 export interface PurchaseCardProps {
-  appName: string
+  /**
+   * @deprecated Use `applicationId` instead. Forwarded as `projectId` on the
+   * purchase request for backward compatibility.
+   */
+  appName?: string
+  /** Ezauth Application id (preferred, forwarded on the purchase request). */
+  applicationId?: string
   productId: string
   productName: string
   amount: number
@@ -61,6 +67,7 @@ const DEFAULT_TEXTS: PurchaseCardTexts = {
 
 export function PurchaseCard({
   appName,
+  applicationId,
   productId,
   productName,
   amount,
@@ -76,6 +83,9 @@ export function PurchaseCard({
 }: PurchaseCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
   const { createPurchase, isLoading } = usePay()
+  const { applicationId: ctxApplicationId, appSlug: ctxAppSlug } = useApplicationContext()
+  const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
+  const effectiveProjectId = appName ?? ctxAppSlug ?? ''
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
   const price = formatCurrency(amount, currency)
@@ -83,7 +93,8 @@ export function PurchaseCard({
   const handlePurchase = async () => {
     try {
       const result = await createPurchase({
-        projectId: appName,
+        projectId: effectiveProjectId,
+        ...(effectiveApplicationId ? { applicationId: effectiveApplicationId } : {}),
         productId,
         productName,
         amount,
