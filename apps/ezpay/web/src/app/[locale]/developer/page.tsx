@@ -2,7 +2,17 @@
 
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { Button, Div, H1, Main, P, Skeleton } from '@ezstart/ui/components'
+import {
+  Button,
+  Div,
+  H1,
+  Main,
+  P,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import Link from 'next/link'
 import {
@@ -10,10 +20,13 @@ import {
   type DeveloperConnectDashboardTexts,
 } from '@ezstart/pay-sdk/components'
 import { PlansSection } from './components/plans-section'
+import { ApplicationsTab } from './components/applications-tab'
+import { PayKeysTab } from './components/pay-keys-tab'
 import { AuthHeader } from '../auth-header'
 
 export default function DeveloperPage() {
   const t = useTranslations('developer')
+  const tt = useTranslations('developer.tabs')
   const tc = useTranslations('developer.connect')
   const tf = useTranslations('developer.fees')
   const { isAuthenticated } = useAuth()
@@ -85,7 +98,7 @@ export default function DeveloperPage() {
     <Main className="container mx-auto py-12 px-4">
       <AuthHeader />
 
-      <Div className="max-w-4xl mx-auto space-y-8">
+      <Div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <Div className="flex items-center justify-between">
           <Div>
@@ -99,15 +112,35 @@ export default function DeveloperPage() {
           </Button>
         </Div>
 
-        {/* Connect dashboard from SDK */}
-        <DeveloperConnectDashboard
-          texts={dashboardTexts}
-          onError={(msg) => toast.error(msg)}
-          onDisconnect={() => toast.success(tc('disconnect.button'))}
-        />
+        {/* Tabs */}
+        <Tabs defaultValue="applications" className="w-full">
+          <TabsList className="flex w-full flex-wrap justify-start gap-1 md:w-auto">
+            <TabsTrigger value="applications">{tt('applications')}</TabsTrigger>
+            <TabsTrigger value="apiKeys">{tt('apiKeys')}</TabsTrigger>
+            <TabsTrigger value="stripeConnect">{tt('stripeConnect')}</TabsTrigger>
+            <TabsTrigger value="plans">{tt('plans')}</TabsTrigger>
+          </TabsList>
 
-        {/* Plans section (always visible) */}
-        <PlansSection currentFeePercent={5} />
+          <TabsContent value="applications" className="mt-6">
+            <ApplicationsTab />
+          </TabsContent>
+
+          <TabsContent value="apiKeys" className="mt-6">
+            <PayKeysTab />
+          </TabsContent>
+
+          <TabsContent value="stripeConnect" className="mt-6 space-y-6">
+            <DeveloperConnectDashboard
+              texts={dashboardTexts}
+              onError={msg => toast.error(msg)}
+              onDisconnect={() => toast.success(tc('disconnect.button'))}
+            />
+          </TabsContent>
+
+          <TabsContent value="plans" className="mt-6">
+            <PlansSection currentFeePercent={5} />
+          </TabsContent>
+        </Tabs>
       </Div>
     </Main>
   )
