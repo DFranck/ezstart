@@ -9,6 +9,36 @@ Quand la date exacte est inconnue, l'item est placé dans le mois/section où il
 
 ## 2026-04
 
+### Apps — P6 multi-tenant Application + P7 Stripe Connect monetization (2026-04-21)
+
+**P6 — Application multi-tenant cross-service** (commits a3432a2d → 9dc9cd4f, validated E2E via MCP)
+
+- [x] 2026-04-21 — **EZ-KEY-001**: Renommer préfixes clés `ezk_*` → `ez_pk_*` / `ez_sk_*` (Stripe/Clerk pattern). KEY*PREFIX map, detectKeyFormat(), generateRawApiKey({type,env}). Backwards compat ezk*\* preserved (P6-A).
+- [x] 2026-04-21 — **EZP-KEY-001**: EZPay consumer SaaS d'EZAuth via publishable key. NEXT*PUBLIC_EZAUTH_KEY=ez_pk_live*\*, AuthProvider config, LoginButton redirect ?key=. Validated E2E (P6).
+- [x] 2026-04-21 — **P6-A**: EZAuth Application model (slug/name/ownerId/metadata) + 7 routes /api/applications/\* (CRUD + lookup + resolve) + migration script + seed dogfood (ezauth+ezpay Applications) + 75 tests.
+- [x] 2026-04-21 — **P6-B**: auth-sdk Application hooks (useMyApplications/useApplication/useCreate/Update/Revoke/ResolveByKey) + components (ApplicationsList/Card/CreateModal/DetailView) + promoted api-keys-crypto to SDK core (agnostic) + 51 tests.
+- [x] 2026-04-21 — **P6-C**: EZAuth web /developer refacto with ApplicationsList + [id] detail route + i18n EN/FR/VI.
+- [x] 2026-04-21 — **P6-D**: EZPay API ApiKey model with applicationId + middleware validateApiKey (SHA-256 hot path, no cross-service per request) + 7 routes /api/keys/\* + ezauth-client S2S (5s timeout, circuit breaker 3 fails→30s) + 87 tests.
+- [x] 2026-04-21 — **P6-E**: pay-sdk usePayKeys/useCreate/Revoke/Rotate/Usage hooks + PayDeveloperPortal + CreatePayKeyModal (re-export KeyCreatedModal from auth-sdk) + 31 tests.
+- [x] 2026-04-21 — **P6-F**: EZPay web /developer tabs (Applications/API Keys/Stripe Connect/Plans) + /developer/applications/[id] detail stacking auth-sdk + pay-sdk dashboards + i18n.
+- [x] 2026-04-21 — **P6-G**: EZPay seed-self-key idempotent script bootstrap (lookup Application ezpay via ezauth public lookup endpoint, no S2S key needed).
+
+**P7 — Stripe Connect true monetization** (commits aee8a7fb → a7eeda40, validated E2E checkout 4242 → webhook → DB update)
+
+- [x] 2026-04-21 — **P7-C4**: Stripe subscription fee bugfix — application_fee_percent (0-100) for subs, application_fee_amount (cents) for one-shots. ConnectOptions augmented + 13 tests.
+- [x] 2026-04-21 — **P7-A / EZP-KEY-002**: Plan.applicationId + stripeProductId + metadata.grantsRoles/grantsFeatures/feePercent + auto-sync Stripe Product/Price (deterministic idempotency) + owner-scoped CRUD + migrate-plans-to-applications + seed-ezpay-plans (Starter Free 5% / Growth 49€ 3% / Enterprise 199€ 1.5%) + 41 tests.
+- [x] 2026-04-21 — **P7-B / EP-020/021**: ConnectedAccount.applicationId unique + isPlatformAccount flag + migration backfill + seed platform dogfood for all EZStart apps (ezauth/ezpay/ezstart/ezbill/green-pulse/fengshui/asc-tcd/gacha-analyzer) + switchability route PATCH /api/connect/accounts/:id (superadmin spin-off) + 30 tests.
+- [x] 2026-04-21 — **P7-C / EP-022**: connect-fee resolver(applicationId) with dogfood skip (isPlatformAccount=true → no transfer_data, no fee) + resolveActiveEzpayPlan (Starter/Growth/Enterprise tier) + caller updates in subscriptions/donations/purchases routes + 33 tests.
+- [x] 2026-04-21 — **P7-D / EP-006**: Stripe Customer Portal POST /api/billing/portal (platform-side call, correct for Connect destination subs) + PayClient.createBillingPortalSession + useBillingPortal hook + ManageSubscriptionButton component + integrated in BillingDashboard + 18 tests.
+- [x] 2026-04-21 — **P7-E / EP-024**: pay-sdk migrate appName→applicationId. PayProvider accepts publishableKey prop, fetches /keys/config once on mount, stores applicationId in context + components updated (PricingPage/SubscribeButton/etc.) + useApplicationContext hook + 12 tests.
+- [x] 2026-04-21 — **P7-F / EZP-KEY-003**: cross-service subscription webhook EZPay→EZAuth via HMAC-SHA256 signed S2S call + new EZAuth POST /api/subscriptions/webhook receiver + SubscriptionEvent idempotency model (unique stripeEventId index) + role/feature grant/revoke logic + 41 tests.
+- [x] 2026-04-21 — **P7-G / EP-023**: pay-sdk PlansManager + PlanEditorDialog + EZPay web /developer/applications/[id]/plans/ page + i18n + 16 tests.
+- [x] 2026-04-21 — **P7-H**: E2E MCP full validation. Created Acme Pro €19/mo + EZAuth Free/Pro/Enterprise plans → Stripe Products/Prices auto-synced. Stripe Checkout test 4242 → Payment status=completed → cross-service webhook OK.
+- [x] 2026-04-21 — **P7-I / EZ-KEY-005**: Unified /en/billing page ezpay with RBAC sections (My subscription / My apps revenue / Platform). PayAdminDashboard accepts scope prop ('mine'|'myApps'|'all') forwarded to backend. /api/payments + /api/subscriptions accept ?scope= query. Nav link added. 11 tests.
+- [x] 2026-04-21 — **P7-J**: Unified /en/account page ezauth with RBAC sections (My profile / My apps users / Platform users). AuthAdminDashboard repurposed scope prop to AuthAdminAudienceScope ('mine'|'myApps'|'all'). /api/admin/users accept ?scope= query. UserMenu link onManageAccount → /account. 5 tests.
+- [x] 2026-04-21 — **PricingPage applicationId fix**: PricingPage propagates applicationId prop to SubscribeButton + planId now uses Plan.\_id (DB ObjectId) instead of stripePriceId for backend Plan.findById lookup.
+- [x] 2026-04-21 — **PayProvider apiUrl config fix**: providers.tsx adds config={{ apiUrl: NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }} so PayClient resolves ezpay API instead of relative paths.
+
 ### Infrastructure
 
 - [x] 2026-04-16 — Migrate 6 APIs from `@ezstart/express-core` → `@ezstart/api-core`. 279 source files migrated, ESLint rule `no-express-core` blocks regressions, express-core package deleted.

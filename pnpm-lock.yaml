@@ -297,6 +297,9 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../../../packages/logger
+      '@ezstart/pay-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/pay-sdk
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui

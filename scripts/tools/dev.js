@@ -216,6 +216,14 @@ function main() {
     process.exit(1)
   }
 
+  // Kill dev ports before starting servers (avoids EADDRINUSE)
+  console.log('\nKilling dev ports...')
+  try {
+    execSync('pnpm kill:ports', { cwd: ROOT, stdio: 'inherit' })
+  } catch (err) {
+    console.warn(`kill:ports failed but continuing: ${err.message}`)
+  }
+
   // Clean .next directories
   const nextDirs = getNextDirs([...allApps])
   for (const dir of nextDirs) {

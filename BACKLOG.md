@@ -140,26 +140,36 @@ Stratégie pour que les pages footer (docs, changelog, status, blog) soient **ze
 
 Authentication SaaS (Clerk clone) pour tout le monorepo + external devs. **Status:** active — en route vers publishable key Clerk/Stripe pattern.
 
-#### P0 — Publishable key system finalization (audit live 2026-04-20)
+#### P0 — Post-P7 (next steps après dogfood Stripe Connect validated 2026-04-21)
 
-- [ ] **EZ-KEY-001: Renommer préfixes clés `ezk_*` → `ez_pk_*` / `ez_sk_*`** (Stripe/Clerk pattern)
-  - `apps/ezauth/api/src/utils/api-key.ts` : SCOPE_PREFIX refactor
-  - Ajouter distinction `type: 'publishable' | 'secret'` sur model ApiKey
-  - Migration douce : accepter `ezk_*` en lecture, n'écrire que les nouveaux
-  - Update tests unitaires + docs
+- [ ] **EZ-AUTO-ROLES**: Auto-set `appRoles[slug]: ['admin']` au create d'Application + migration backfill
+  - `apps/ezauth/api/src/routes/applications/create.ts` : ajouter `$set: { [\`appRoles.${slug}\`]: ['admin'] }` au updateOne
+  - Script migration `migrate-app-owners-to-admin-role.ts` : pour chaque Application existante → setter `ownerId.appRoles[slug] = ['admin']`
+  - Bénéfice : check JWT direct au lieu de fetch Application + compare ownerId. Future-proof pour multi-tenant Org (override granulaire).
 - [ ] **EZ-KEY-002: Fallback appName sur login/register first-party** = 'ezauth' (pas 'ezstart')
   - `apps/ezauth/web/src/app/[locale]/(auth)/login/page.tsx:34`
   - `apps/ezauth/web/src/app/[locale]/(auth)/register/page.tsx:32`
-  - Bug visible : "Sign in to access EZStart" sur ezauth's own login (confirmé live)
-- [ ] **EZ-KEY-003: DevModeBanner hide en first-party** (bug : reste visible car SignInForm forward toujours appName)
-  - Fix dans `packages/auth-sdk/src/components/SignInForm.tsx` (+ SignUpForm + ForgotPasswordForm)
-  - Ne forward `appName` à DevModeBanner que si context third-party (keyStatus ou urlKey set)
-- [ ] **EZ-KEY-004: EZAuth pricing page** utiliser `<PricingPage />` de pay-sdk (actuellement placeholder "Pricing coming soon")
-  - `apps/ezauth/web/src/app/[locale]/(public)/page.tsx:234` — section pricing à câbler
-  - Créer plans ezauth Free/Pro/Business dans EZPay admin
-- [ ] **EZ-KEY-005: Section Billing du dashboard EZAuth** — remplacer placeholder par composant pay-sdk (subscriptions, upgrade, invoices)
+  - Vérifier post-P6 si encore reproductible
+- [ ] **EZ-KEY-003: DevModeBanner hide en first-party**
+  - Vérifier post-P6 si encore reproductible
+- [ ] **PER-APP-BILLING-001 (P8): Billing dashboard local sur chaque app consumer EZPay**
+  - Embed `<BillingDashboard appName="<current-app>" userId={user._id}/>` sur ezauth, ezbill, green-pulse, fengshui, asc-tcd web
+  - L'user voit SES subs locales à chaque app (sub EZAuth Pro sur ezauth, sub Green-Pulse Premium sur green-pulse, etc.)
+  - Réduit friction (pas besoin d'aller sur ezpay pour voir billing per-app)
+  - Section "All subs" sur `/en/dashboard` ezstart hub (futur EZHUB) agrège cross-apps
+  - Bloqué par `UI-CONSOLIDATE-001` pour pattern unifié
 
-#### Backlog 2026-03-29 — voir BACKLOG-HISTORY.md (terminé)
+- [ ] **UI-CONSOLIDATE-001 (P8): Unified `/en/dashboard` avec sidebar conditionnelle RBAC** — **REUSE `<EZAuthDashboard/>` from auth-sdk** (déjà existant avec sidebar Overview/API Keys/Billing/Settings/Admin) au lieu de tout refaire. Wirer `/en/dashboard` qui render `<EZAuthDashboard/>` + extend pour billing/account sections. Mirror le pattern sur ezpay/ezstart/ezbill avec `<PayDashboard/>` etc.
+  - Pour le webhook role grant qui n'applique pas après subscribe (Plan a grantsRoles mais user.appRoles reste vide après checkout completed) — investigate logs api-ezpay pour `[ezauth-webhook]` traces. Probablement notify call fail silencieusement quelque part. — Consolider `/account`, `/developer`, `/billing` (et futurs) en UN dashboard avec sidebar pattern Stripe/Clerk
+  - Sections (sidebar) : Overview / Account / Applications / API Keys / Billing / Usage / Settings + (admin) Users / Apps / Platform
+  - Conditional rendering selon `user.globalRoles` + `appRoles` + `hasOwnedApps`
+  - Routes : `/en/dashboard/[section]` avec layout sidebar partagé
+  - Deprecate `/account`, `/developer`, `/billing` (redirect 301)
+  - Mirror sur ezpay web (et autres apps quand elles auront leur dashboard)
+  - **Pourquoi** : actuellement chevauchements logiques entre `/account` et `/developer` (les 2 sont des "tableaux de bord"), et `/billing` est une route séparée alors qu'il est conceptuellement une section. Pattern pro : Stripe Dashboard, Clerk Dashboard, Linear, Vercel — tous ont 1 seul dashboard avec sidebar.
+  - **Bénéfices** : zéro friction navigation, 1 URL à retenir, RBAC sections progressive disclosure, cohérence cross-apps EZStart
+
+#### Backlog 2026-03-29 + P6/P7 done — voir BACKLOG-HISTORY.md
 
 ---
 
@@ -245,28 +255,42 @@ Invoicing & billing pour les SME. **Status:** in-progress, priorité haute.
 
 Payment SaaS (Stripe clone) avec SDK publishable + SaaS dashboard. **Status:** active — doit consommer ezauth via publishable key comme un vrai SaaS externe.
 
-#### P0 — Publishable key integration avec EZAuth (audit live 2026-04-20)
+#### P0 — Post-P7 (config staging/prod après dogfood validated 2026-04-21)
 
-- [ ] **EZP-KEY-001: Configurer EZPay comme consumer SaaS externe d'EZAuth**
-  - Créer clé `ez_pk_live_...` pour ezpay via le dashboard EZAuth (one-time setup)
-  - Ajouter `NEXT_PUBLIC_EZAUTH_KEY=ez_pk_live_...` dans `.env.local` + `.env.example` ezpay
-  - Update `apps/ezpay/web/src/app/[locale]/providers.tsx` : `<AuthProvider publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY} />`
-  - Confirmer que LoginButton redirige vers ezauth avec `?key=ez_pk_...` (au lieu de `?app=ezpay` legacy)
-- [ ] **EZP-KEY-002: EZPay pricing page** utiliser `<PricingPage />` de pay-sdk (actuellement placeholder "Pricing coming soon" sur landing)
-  - Créer plans ezpay (Free + Stripe 2.9% / Pro + 1% / Business + 0%) dans EZPay admin
-  - Câbler section pricing landing sur les vrais plans
-- [ ] **EZP-KEY-003: Webhook EZPay → EZAuth pour activer clés payantes**
-  - Quand un user ezauth paie un plan via ezpay → ezpay webhook notifie ezauth → ezauth met à jour le plan de la clé
-  - Flow circulaire : ezauth dogfood ezpay pour billing, ezpay dogfood ezauth pour auth
+- [ ] **EZP-PROD-001: Setup `EZPAY_PLATFORM_STRIPE_ACCOUNT_ID`** dans staging + prod
+  - Récupérer `acct_*` du compte Stripe EZStart LLC sur dashboard.stripe.com
+  - Ajouter `EZPAY_PLATFORM_STRIPE_ACCOUNT_ID=acct_xxx` dans Railway api-ezpay env vars (staging + prod)
+  - Re-run `pnpm --filter api-ezpay migrate:connected-accounts-to-apps` pour seed platform ConnectedAccount sur 8 apps EZStart (skip auto si env var absent)
+- [ ] **EZP-PROD-002: Generate `EZPAY_SERVER_EZAUTH_KEY`** dans staging + prod
+  - Login superadmin sur ezauth dashboard (staging URL puis prod)
+  - Create key `ez_sk_live_*` scoped Application "ezpay", scope: admin, type: secret
+  - Set dans Railway api-ezpay env vars `EZPAY_SERVER_EZAUTH_KEY=ez_sk_live_*`
+- [ ] **EZP-PROD-003: Generate `EZAUTH_WEBHOOK_SECRET`** identical des 2 côtés (staging + prod)
+  - `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` → hex 64 chars
+  - Set dans Railway api-ezpay AND api-ezauth env vars
+- [ ] **EZP-PROD-004: Run all migrations en staging + prod**
+  - `pnpm --filter api-ezauth migrate:keys-to-apps` (P6-A backfill)
+  - `pnpm --filter api-ezpay migrate:plans-to-apps` (P7-A backfill)
+  - `pnpm --filter api-ezpay migrate:connected-accounts-to-apps` (P7-B backfill + platform seed)
+  - `pnpm --filter api-ezauth seed:self-key` + copy `NEXT_PUBLIC_EZAUTH_KEY` dans web env
+  - `pnpm --filter api-ezpay seed:plans` (P7-A seed Starter/Growth/Enterprise EZPay)
+  - `pnpm --filter api-ezpay seed:self-key` + copy `NEXT_PUBLIC_EZPAY_KEY` dans web env
+- [ ] **EZP-PROD-005: Configurer Stripe Webhook prod** dans dashboard.stripe.com
+  - Endpoint URL : `https://api-ezpay.up.railway.app/api/webhooks/stripe` (production URL)
+  - Events : `checkout.session.completed`, `customer.subscription.*`, `invoice.*`, `charge.refunded`
+  - Copy `STRIPE_WEBHOOK_SECRET` (whsec\_\*) dans Railway env vars (différent du local Stripe CLI)
+  - Idem pour staging avec son URL Railway
+- [ ] **EZP-LANDING-001: EZPay landing page embed `<PricingPage />`** au lieu du placeholder "Pricing coming soon"
+  - `apps/ezpay/web/src/app/[locale]/(public)/page.tsx` — section pricing
+  - Embed `<PricingPage applicationId="<ezpay-app-id>" />` (les 3 plans seedés Starter/Growth/Enterprise)
+- [ ] **EZP-CONNECT-001: Onboarding Stripe Connect Express pour devs externes (test e2e)**
+  - Créer un compte test acme dans ezauth, login, créer Application, attempt onboarding Stripe Connect
+  - Vérifier ConnectedAccount stocké correctement, status=active après KYC
+  - Test split payment réel : carte 4242 sur acme app embed → split AcmeBank + EZStartBank avec fee 5% (Starter par défaut)
 
-#### P0 — Stripe Connect (Platform/Marketplace)
+#### Future — Features post-P7
 
-- [ ] **EP-020: Stripe Connect Platform setup** — Upgrade Stripe account to Platform. Enable Connect in Stripe Dashboard. OAuth flow for external devs to connect their Stripe accounts. New model `ConnectedAccount` (userId, stripeAccountId, status, onboardedAt). Routes: `POST /api/connect/onboard` → Stripe OAuth URL, `GET /api/connect/callback` → save account, `GET /api/connect/status`.
-- [ ] **EP-021: Connect webhook endpoint** — Separate `/api/webhooks/stripe-connect` for Connect events (`account.updated`, `payment_intent.succeeded` with transfers). Keep existing `/api/webhooks/stripe` for direct payments. Both use different webhook secrets.
-- [ ] **EP-022: Platform fee on transactions** — `application_fee_amount` on every checkout created for connected accounts. Configurable fee % per plan (default 3%). Fee goes to YOUR Stripe, payment goes to dev's Stripe. Model `PlatformFee` (transactionId, amount, connectedAccountId).
-- [ ] **EP-023: Connected accounts dashboard** — Admin page for connected devs: list accounts, see their transactions, total fees collected. Dev-facing: onboarding flow, account status, payout history.
-- [ ] **EP-024: pay-sdk Connect support** — `createPayClient({ apiUrl, apiKey, mode: 'connect' })`. When mode=connect, SDK passes apiKey and ezpay routes the payment through Connect. Agnostic core doesn't change — just a config flag that the API interprets.
-- [ ] **EP-025: Multi-provider architecture** — pay-sdk core `PayClient` already provider-agnostic. Add PayPal provider behind same API. Routes: `POST /api/checkout` accepts `provider: 'stripe' | 'paypal'`. SDK consumer chooses provider or lets API auto-select. **Bloqué par :** EP-020 stable first.
+- [ ] **EP-025: Multi-provider architecture** — pay-sdk core `PayClient` already provider-agnostic. Add PayPal provider behind same API. Routes: `POST /api/checkout` accepts `provider: 'stripe' | 'paypal'`. SDK consumer chooses provider or lets API auto-select.
 
 #### Future — Features
 
