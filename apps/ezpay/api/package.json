@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:self-key": "tsx src/scripts/seed-self-key.ts"
+    "seed:self-key": "tsx src/scripts/seed-self-key.ts",
+    "seed:plans": "tsx src/scripts/seed-ezpay-plans.ts",
+    "migrate:connected-accounts-to-apps": "tsx src/scripts/migrate-connected-accounts-to-applications.ts",
+    "migrate:plans-to-apps": "tsx src/scripts/migrate-plans-to-applications.ts"
   },
   "dependencies": {
     "@ezstart/api-core": "workspace:*",

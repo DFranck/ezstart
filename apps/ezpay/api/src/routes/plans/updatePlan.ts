@@ -7,10 +7,13 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
-import { getPlanModel } from '../../models/Plan.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+import { getPlanModel } from '../../models/Plan.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { getApplication } from '../../services/ezauth-client.js'
+import { getStripeInstance } from '../../services/stripe-connect.js'
+import { repriceStripePlan, type PlanPriceSnapshot } from '../../services/stripe-plan-sync.js'
 
 export const updatePlanRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -23,6 +26,14 @@ const docRouter = createRouterWithDoc(updatePlanRegistry, router)
 const updatePlanParamsSchema = z.object({
   id: z.string().min(1).describe('Plan ID'),
 })
+
+const planMetadataSchema = z
+  .object({
+    grantsRoles: z.array(z.string()).optional(),
+    grantsFeatures: z.array(z.string()).optional(),
+    feePercent: z.number().min(0).max(100).optional(),
+  })
+  .optional()
 
 const updatePlanSchema = z.object({
   name: z.string().min(1).max(100).optional().describe('Plan name (e.g. Pro, Business)'),
@@ -40,7 +51,7 @@ const updatePlanSchema = z.object({
   features: z.array(z.string()).optional().describe('List of features included in the plan'),
   active: z.boolean().optional().describe('Whether the plan is currently active'),
   sortOrder: z.number().int().min(0).optional().describe('Display order for pricing pages'),
-  stripePriceId: z.string().nullable().optional().describe('Associated Stripe price ID'),
+  metadata: planMetadataSchema.describe('Structured extras (roles, features, feePercent)'),
 })
 
 const planResponseSchema = z.object({
@@ -50,13 +61,31 @@ const planResponseSchema = z.object({
 })
 
 // ========================================
+// Helpers
+// ========================================
+
+function extractBearerToken(req: Request): string | undefined {
+  const authHeader = req.headers.authorization
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7)
+  }
+  const cookieHeader = req.headers.cookie || ''
+  return cookieHeader
+    .split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith('ezauth_token='))
+    ?.split('=')[1]
+}
+
+// ========================================
 // Route Handler
 // ========================================
 
 const updatePlanHandler = async (req: Request, res: Response) => {
   try {
-    if (!isAdminUser(req)) {
-      return sendError(res, 'Admin access required', 403)
+    const userId = req.userId
+    if (!userId) {
+      return sendError(res, 'Authentication required', 401)
     }
 
     const paramsValidation = updatePlanParamsSchema.safeParse(req.params)
@@ -73,14 +102,80 @@ const updatePlanHandler = async (req: Request, res: Response) => {
     const updates = validation.data
 
     const Plan = await getPlanModel()
-
-    const plan = await Plan.findByIdAndUpdate(id, updates, { new: true, runValidators: true })
-
+    const plan = await Plan.findById(id)
     if (!plan) {
       return sendError(res, 'Plan not found', 404)
     }
 
-    logger.info(`Plan updated: ${plan.name} for ${plan.appName}`)
+    // Ownership gate — resolve the Plan's Application and check the caller.
+    const bearerToken = extractBearerToken(req)
+    const application = await getApplication(plan.applicationId, { bearerToken })
+    if (!application) {
+      return sendError(res, 'Application not found', 404)
+    }
+    if (application.ownerId !== userId && !isAdminUser(req)) {
+      return sendError(res, 'Forbidden', 403)
+    }
+
+    // Capture the previous price snapshot BEFORE mutating, so we can detect
+    // whether any price-defining field changed and know what the old price
+    // looked like if we need to reprice.
+    const prevSnapshot: PlanPriceSnapshot = {
+      amount: plan.amount,
+      currency: plan.currency,
+      interval: plan.interval,
+      intervalCount: plan.intervalCount,
+    }
+
+    // Apply updates to the document (so Stripe sync sees the new values).
+    if (updates.name !== undefined) plan.name = updates.name
+    if (updates.description !== undefined) plan.description = updates.description ?? undefined
+    if (updates.amount !== undefined) plan.amount = updates.amount
+    if (updates.currency !== undefined) plan.currency = updates.currency
+    if (updates.interval !== undefined) plan.interval = updates.interval
+    if (updates.intervalCount !== undefined) plan.intervalCount = updates.intervalCount
+    if (updates.features !== undefined) plan.features = updates.features
+    if (updates.active !== undefined) plan.active = updates.active
+    if (updates.sortOrder !== undefined) plan.sortOrder = updates.sortOrder
+    if (updates.metadata !== undefined) plan.metadata = updates.metadata
+
+    const priceChanged =
+      (updates.amount !== undefined && updates.amount !== prevSnapshot.amount) ||
+      (updates.currency !== undefined && updates.currency !== prevSnapshot.currency) ||
+      (updates.interval !== undefined && updates.interval !== prevSnapshot.interval) ||
+      (updates.intervalCount !== undefined && updates.intervalCount !== prevSnapshot.intervalCount)
+
+    const productMetaChanged = updates.name !== undefined || updates.description !== undefined
+
+    if (priceChanged) {
+      try {
+        const newPriceId = await repriceStripePlan(plan, prevSnapshot)
+        plan.stripePriceId = newPriceId
+      } catch (err) {
+        logger.error('updatePlan: Stripe reprice failed', err instanceof Error ? err : String(err))
+        return sendError(res, 'Stripe sync failed, please retry', 502)
+      }
+    }
+
+    if (productMetaChanged && plan.stripeProductId) {
+      try {
+        const stripe = getStripeInstance()
+        await stripe.products.update(plan.stripeProductId, {
+          name: plan.name,
+          description: plan.description,
+        })
+      } catch (err) {
+        logger.warn('updatePlan: Stripe product metadata update failed', {
+          planId: String(plan._id),
+          productId: plan.stripeProductId,
+          error: err instanceof Error ? err.message : String(err),
+        })
+      }
+    }
+
+    await plan.save()
+
+    logger.info(`Plan updated: ${plan.name} for applicationId=${plan.applicationId}`)
 
     sendSuccess(res, { plan })
   } catch (error) {
@@ -94,7 +189,7 @@ const updatePlanHandler = async (req: Request, res: Response) => {
 // ========================================
 
 docRouter.patch('/plans/:id', authMiddleware, populateUserFromToken, updatePlanHandler, {
-  summary: 'Update a subscription plan (admin only)',
+  summary: 'Update a subscription plan (owner or superadmin)',
   tags: ['Plans'],
   bodySchema: updatePlanSchema,
   responseSchema: planResponseSchema,

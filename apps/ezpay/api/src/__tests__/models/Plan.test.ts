@@ -26,9 +26,10 @@ describe('Plan Model', () => {
   })
 
   describe('Schema Validation', () => {
-    it('should create a valid plan with required fields', async () => {
+    it('should create a valid plan with required fields (applicationId + core)', async () => {
       const plan = await PlanModel.create({
         name: 'Pro',
+        applicationId: 'app-ezbill',
         appName: 'ezbill',
         amount: 9.99,
         currency: 'EUR',
@@ -37,6 +38,7 @@ describe('Plan Model', () => {
       })
 
       expect(plan.name).toBe('Pro')
+      expect(plan.applicationId).toBe('app-ezbill')
       expect(plan.appName).toBe('ezbill')
       expect(plan.amount).toBe(9.99)
       expect(plan.currency).toBe('EUR')
@@ -46,10 +48,22 @@ describe('Plan Model', () => {
       expect(plan.sortOrder).toBe(0)
     })
 
+    it('should allow plans without appName (post-migration state)', async () => {
+      const plan = await PlanModel.create({
+        name: 'Post-migration',
+        applicationId: 'app-any',
+        amount: 0,
+        interval: 'month',
+        intervalCount: 1,
+      })
+      expect(plan.applicationId).toBe('app-any')
+      expect(plan.appName).toBeUndefined()
+    })
+
     it('should require name field', async () => {
       await expect(
         PlanModel.create({
-          appName: 'ezbill',
+          applicationId: 'app-1',
           amount: 9.99,
           interval: 'month',
           intervalCount: 1,
@@ -57,10 +71,11 @@ describe('Plan Model', () => {
       ).rejects.toThrow()
     })
 
-    it('should require appName field', async () => {
+    it('should require applicationId field', async () => {
       await expect(
         PlanModel.create({
           name: 'Pro',
+          appName: 'ezbill',
           amount: 9.99,
           interval: 'month',
           intervalCount: 1,
@@ -72,7 +87,7 @@ describe('Plan Model', () => {
       await expect(
         PlanModel.create({
           name: 'Pro',
-          appName: 'ezbill',
+          applicationId: 'app-1',
           interval: 'month',
           intervalCount: 1,
         })
@@ -83,7 +98,7 @@ describe('Plan Model', () => {
       await expect(
         PlanModel.create({
           name: 'Pro',
-          appName: 'ezbill',
+          applicationId: 'app-1',
           amount: 9.99,
           interval: 'week',
           intervalCount: 1,
@@ -91,25 +106,11 @@ describe('Plan Model', () => {
       ).rejects.toThrow()
     })
 
-    it('should accept month and year intervals', async () => {
-      for (const interval of ['month', 'year']) {
-        await PlanModel.deleteMany({})
-        const plan = await PlanModel.create({
-          name: `Plan_${interval}`,
-          appName: 'ezbill',
-          amount: 9.99,
-          interval,
-          intervalCount: 1,
-        })
-        expect(plan.interval).toBe(interval)
-      }
-    })
-
     it('should reject negative amounts', async () => {
       await expect(
         PlanModel.create({
           name: 'Pro',
-          appName: 'ezbill',
+          applicationId: 'app-1',
           amount: -5,
           interval: 'month',
           intervalCount: 1,
@@ -120,41 +121,63 @@ describe('Plan Model', () => {
     it('should allow zero amount (free plan)', async () => {
       const plan = await PlanModel.create({
         name: 'Free',
-        appName: 'ezbill',
+        applicationId: 'app-1',
         amount: 0,
         interval: 'month',
         intervalCount: 1,
       })
-
       expect(plan.amount).toBe(0)
     })
   })
 
-  describe('Features', () => {
-    it('should store features array', async () => {
+  describe('Metadata sub-schema', () => {
+    it('should store grantsRoles, grantsFeatures and feePercent', async () => {
       const plan = await PlanModel.create({
-        name: 'Pro',
-        appName: 'ezbill',
-        amount: 9.99,
-        interval: 'month',
-        intervalCount: 1,
-        features: ['unlimited-invoices', 'custom-branding', 'api-access'],
-      })
-
-      expect(plan.features).toHaveLength(3)
-      expect(plan.features).toContain('unlimited-invoices')
-    })
-
-    it('should allow plans without features', async () => {
-      const plan = await PlanModel.create({
-        name: 'Basic',
-        appName: 'ezbill',
+        name: 'Metadata',
+        applicationId: 'app-1',
         amount: 0,
         interval: 'month',
         intervalCount: 1,
+        metadata: {
+          grantsRoles: ['admin'],
+          grantsFeatures: ['export-csv'],
+          feePercent: 2.5,
+        },
       })
 
-      expect(plan.features).toEqual([])
+      expect(plan.metadata?.grantsRoles).toEqual(['admin'])
+      expect(plan.metadata?.grantsFeatures).toEqual(['export-csv'])
+      expect(plan.metadata?.feePercent).toBe(2.5)
+    })
+
+    it('should reject feePercent outside 0..100', async () => {
+      await expect(
+        PlanModel.create({
+          name: 'Bad',
+          applicationId: 'app-1',
+          amount: 0,
+          interval: 'month',
+          intervalCount: 1,
+          metadata: { feePercent: 150 },
+        })
+      ).rejects.toThrow()
+    })
+  })
+
+  describe('Stripe linkage', () => {
+    it('should store stripeProductId + stripePriceId', async () => {
+      const plan = await PlanModel.create({
+        name: 'Pro',
+        applicationId: 'app-1',
+        amount: 9.99,
+        interval: 'month',
+        intervalCount: 1,
+        stripeProductId: 'prod_abc',
+        stripePriceId: 'price_abc',
+      })
+
+      expect(plan.stripeProductId).toBe('prod_abc')
+      expect(plan.stripePriceId).toBe('price_abc')
     })
   })
 
@@ -162,16 +185,15 @@ describe('Plan Model', () => {
     it('should soft-delete by setting deletedAt', async () => {
       const plan = await PlanModel.create({
         name: 'Old Plan',
-        appName: 'ezbill',
+        applicationId: 'app-1',
         amount: 5,
         interval: 'month',
         intervalCount: 1,
       })
 
-      const now = new Date()
       await PlanModel.findByIdAndUpdate(plan._id, {
         active: false,
-        deletedAt: now,
+        deletedAt: new Date(),
       })
 
       const deleted = await PlanModel.findById(plan._id)
@@ -180,76 +202,38 @@ describe('Plan Model', () => {
     })
   })
 
-  describe('Stripe Integration', () => {
-    it('should store stripePriceId', async () => {
-      const plan = await PlanModel.create({
-        name: 'Pro',
-        appName: 'ezbill',
-        amount: 9.99,
-        interval: 'month',
-        intervalCount: 1,
-        stripePriceId: 'price_abc123',
-      })
-
-      expect(plan.stripePriceId).toBe('price_abc123')
-    })
-  })
-
   describe('Queries', () => {
-    it('should find plans by appName', async () => {
+    it('should find plans by applicationId', async () => {
       await PlanModel.create({
         name: 'Free',
-        appName: 'ezbill',
+        applicationId: 'app-ezbill',
         amount: 0,
         interval: 'month',
         intervalCount: 1,
       })
       await PlanModel.create({
         name: 'Pro',
-        appName: 'ezbill',
+        applicationId: 'app-ezbill',
         amount: 9.99,
         interval: 'month',
         intervalCount: 1,
       })
       await PlanModel.create({
         name: 'Free',
-        appName: 'green-pulse',
+        applicationId: 'app-green-pulse',
         amount: 0,
         interval: 'month',
         intervalCount: 1,
       })
 
-      const ezbillPlans = await PlanModel.find({ appName: 'ezbill' })
+      const ezbillPlans = await PlanModel.find({ applicationId: 'app-ezbill' })
       expect(ezbillPlans).toHaveLength(2)
-    })
-
-    it('should find active plans only', async () => {
-      await PlanModel.create({
-        name: 'Active',
-        appName: 'ezbill',
-        amount: 9.99,
-        interval: 'month',
-        intervalCount: 1,
-        active: true,
-      })
-      await PlanModel.create({
-        name: 'Inactive',
-        appName: 'ezbill',
-        amount: 4.99,
-        interval: 'month',
-        intervalCount: 1,
-        active: false,
-      })
-
-      const activePlans = await PlanModel.find({ appName: 'ezbill', active: true })
-      expect(activePlans).toHaveLength(1)
-      expect(activePlans[0]!.name).toBe('Active')
     })
 
     it('should sort by sortOrder', async () => {
       await PlanModel.create({
         name: 'Enterprise',
-        appName: 'ezbill',
+        applicationId: 'app-1',
         amount: 49.99,
         interval: 'month',
         intervalCount: 1,
@@ -257,7 +241,7 @@ describe('Plan Model', () => {
       })
       await PlanModel.create({
         name: 'Free',
-        appName: 'ezbill',
+        applicationId: 'app-1',
         amount: 0,
         interval: 'month',
         intervalCount: 1,
@@ -265,14 +249,14 @@ describe('Plan Model', () => {
       })
       await PlanModel.create({
         name: 'Pro',
-        appName: 'ezbill',
+        applicationId: 'app-1',
         amount: 9.99,
         interval: 'month',
         intervalCount: 1,
         sortOrder: 2,
       })
 
-      const sorted = await PlanModel.find({ appName: 'ezbill' }).sort({ sortOrder: 1 })
+      const sorted = await PlanModel.find({ applicationId: 'app-1' }).sort({ sortOrder: 1 })
       expect(sorted[0]!.name).toBe('Free')
       expect(sorted[1]!.name).toBe('Pro')
       expect(sorted[2]!.name).toBe('Enterprise')

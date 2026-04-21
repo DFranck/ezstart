@@ -33,6 +33,7 @@ describe('Subscription Routes Business Logic', () => {
     it('should create a pending subscription payment with plan features snapshot', async () => {
       const plan = await Plan.create({
         name: 'Pro',
+        applicationId: 'app-ezbill',
         appName: 'ezbill',
         amount: 9.99,
         interval: 'month',
