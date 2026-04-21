@@ -56,8 +56,23 @@ export interface DiscountInfo {
 export interface ConnectParams {
   /** Stripe connected account ID (acct_xxx) — destination for the payment */
   destinationAccountId: string
-  /** Platform fee in minor currency units (cents) */
-  applicationFeeAmount: number
+  /**
+   * Platform fee in minor currency units (cents).
+   *
+   * - One-shot payments (`createCheckoutSession`): used as `application_fee_amount` (cents).
+   * - Subscriptions (`createSubscriptionCheckout`): used as LEGACY fallback only. The provider
+   *   computes a percent from `applicationFeeAmount / unitAmountInCents`. Prefer
+   *   `applicationFeePercent` for subscriptions.
+   */
+  applicationFeeAmount?: number
+  /**
+   * Platform fee percentage (0-100, up to 2 decimals).
+   *
+   * Used exclusively for subscriptions (`application_fee_percent`). Ignored for one-shots.
+   * Prefer this over `applicationFeeAmount` for recurring charges, since Stripe's
+   * `application_fee_percent` is a percent — not a cents amount.
+   */
+  applicationFeePercent?: number
   /** Account type: standard (full dashboard) or express (simplified onboarding) */
   accountType?: 'standard' | 'express'
 }

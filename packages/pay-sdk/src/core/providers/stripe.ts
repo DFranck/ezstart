@@ -9,6 +9,7 @@ import type {
   IPaymentProvider,
   CheckoutOptions,
   CheckoutResult,
+  ConnectParams,
   SubscriptionCheckoutOptions,
   PaymentVerification,
   RefundResult,
@@ -101,7 +102,10 @@ export class StripeProvider implements IPaymentProvider {
       paymentIntentData.receipt_email = options.customerEmail
     }
     if (options.connect) {
-      paymentIntentData.application_fee_amount = options.connect.applicationFeeAmount
+      // One-shot payments use `application_fee_amount` (cents).
+      if (typeof options.connect.applicationFeeAmount === 'number') {
+        paymentIntentData.application_fee_amount = options.connect.applicationFeeAmount
+      }
       paymentIntentData.transfer_data = { destination: options.connect.destinationAccountId }
     }
 
@@ -122,7 +126,9 @@ export class StripeProvider implements IPaymentProvider {
       cancel_url: options.cancelUrl,
       metadata: options.metadata,
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
-      ...(Object.keys(paymentIntentData).length > 0 ? { payment_intent_data: paymentIntentData } : {}),
+      ...(Object.keys(paymentIntentData).length > 0
+        ? { payment_intent_data: paymentIntentData }
+        : {}),
     })
 
     return { sessionId: session.id, url: session.url }
@@ -136,10 +142,15 @@ export class StripeProvider implements IPaymentProvider {
       discountsParam = [{ coupon: coupon.id }]
     }
 
+    const unitAmount = Math.round(options.amount * 100) // FULL price in cents, coupon handles discount
+
     // Build subscription_data with optional Connect params
     const subscriptionData: Record<string, unknown> = {}
     if (options.connect) {
-      subscriptionData.application_fee_percent = options.connect.applicationFeeAmount
+      const feePercent = resolveApplicationFeePercent(options.connect, unitAmount)
+      if (feePercent !== undefined) {
+        subscriptionData.application_fee_percent = feePercent
+      }
       subscriptionData.transfer_data = { destination: options.connect.destinationAccountId }
     }
 
@@ -150,7 +161,7 @@ export class StripeProvider implements IPaymentProvider {
           price_data: {
             currency: options.currency.toLowerCase(),
             product_data: { name: options.description },
-            unit_amount: Math.round(options.amount * 100), // FULL price, coupon handles discount
+            unit_amount: unitAmount,
             recurring: {
               interval: 'month',
               interval_count: options.intervalCount ?? 1,
@@ -165,9 +176,7 @@ export class StripeProvider implements IPaymentProvider {
       metadata: options.metadata,
       ...(discountsParam ? { discounts: discountsParam } : {}),
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
-      ...(Object.keys(subscriptionData).length > 0
-        ? { subscription_data: subscriptionData }
-        : {}),
+      ...(Object.keys(subscriptionData).length > 0 ? { subscription_data: subscriptionData } : {}),
     })
 
     return { sessionId: session.id, url: session.url }
@@ -343,4 +352,54 @@ function extractEventData(type: WebhookEventType, event: StripeWebhookEvent): We
     default:
       return {}
   }
+}
+
+// ========================================
+// Connect Fee Helpers
+// ========================================
+
+/**
+ * Resolve the `application_fee_percent` value for a subscription checkout.
+ *
+ * Rules:
+ * - If `applicationFeePercent` is provided, validate it is in [0, 100] and round to 2 decimals.
+ * - Otherwise, if `applicationFeeAmount` is provided (legacy), compute
+ *   `(applicationFeeAmount / unitAmountInCents) * 100` rounded to 2 decimals.
+ * - If neither is provided, return `undefined` (no platform fee).
+ *
+ * @throws Error if `applicationFeePercent` is out of range [0, 100].
+ * @throws Error if the derived fee percent from legacy amount is out of range.
+ * @internal
+ */
+export function resolveApplicationFeePercent(
+  connect: ConnectParams,
+  unitAmountInCents: number
+): number | undefined {
+  if (typeof connect.applicationFeePercent === 'number') {
+    return validateAndRoundFeePercent(connect.applicationFeePercent, 'applicationFeePercent')
+  }
+
+  if (typeof connect.applicationFeeAmount === 'number') {
+    if (unitAmountInCents <= 0) {
+      throw new Error(
+        'Cannot derive application_fee_percent from applicationFeeAmount when unit amount is zero or negative. ' +
+          'Pass applicationFeePercent explicitly for subscriptions.'
+      )
+    }
+    const derived = (connect.applicationFeeAmount / unitAmountInCents) * 100
+    return validateAndRoundFeePercent(derived, 'derived applicationFeePercent')
+  }
+
+  return undefined
+}
+
+function validateAndRoundFeePercent(value: number, label: string): number {
+  if (!Number.isFinite(value)) {
+    throw new Error(`Invalid ${label}: must be a finite number, got ${value}`)
+  }
+  if (value < 0 || value > 100) {
+    throw new Error(`Invalid ${label}: must be between 0 and 100 (inclusive), got ${value}`)
+  }
+  // Stripe accepts up to 2 decimals on application_fee_percent.
+  return Math.round(value * 100) / 100
 }
