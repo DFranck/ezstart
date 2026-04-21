@@ -35,6 +35,7 @@ describe('Stripe Connect Webhook Handler', () => {
   describe('account.updated event', () => {
     it('should update account to active when charges and payouts enabled', async () => {
       await ConnectedAccountModel.create({
+        applicationId: 'app_webhook_1',
         userId: 'user_webhook_1',
         stripeAccountId: 'acct_webhook_1',
         email: 'webhook1@example.com',
@@ -72,6 +73,7 @@ describe('Stripe Connect Webhook Handler', () => {
 
     it('should update account to restricted when details submitted but not fully enabled', async () => {
       await ConnectedAccountModel.create({
+        applicationId: 'app_webhook_2',
         userId: 'user_webhook_2',
         stripeAccountId: 'acct_webhook_2',
         email: 'webhook2@example.com',
@@ -93,6 +95,7 @@ describe('Stripe Connect Webhook Handler', () => {
 
     it('should keep account as pending when nothing submitted yet', async () => {
       await ConnectedAccountModel.create({
+        applicationId: 'app_webhook_3',
         userId: 'user_webhook_3',
         stripeAccountId: 'acct_webhook_3',
         email: 'webhook3@example.com',
@@ -114,6 +117,7 @@ describe('Stripe Connect Webhook Handler', () => {
 
     it('should set onboardedAt only when becoming active', async () => {
       await ConnectedAccountModel.create({
+        applicationId: 'app_webhook_4',
         userId: 'user_webhook_4',
         stripeAccountId: 'acct_webhook_4',
         email: 'webhook4@example.com',
@@ -142,6 +146,7 @@ describe('Stripe Connect Webhook Handler', () => {
 
     it('should handle Standard account type activation', async () => {
       await ConnectedAccountModel.create({
+        applicationId: 'app_std_active',
         userId: 'user_std_active',
         stripeAccountId: 'acct_std_active',
         email: 'std@example.com',
@@ -167,6 +172,7 @@ describe('Stripe Connect Webhook Handler', () => {
 
     it('should handle Express account type activation', async () => {
       await ConnectedAccountModel.create({
+        applicationId: 'app_exp_active',
         userId: 'user_exp_active',
         stripeAccountId: 'acct_exp_active',
         email: 'exp@example.com',

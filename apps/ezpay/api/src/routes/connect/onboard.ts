@@ -10,7 +10,8 @@ import {
 import { getApiUrl } from '@ezstart/config'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { getApplication } from '../../services/ezauth-client.js'
+import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import type Stripe from 'stripe'
 import { z } from 'zod'
@@ -24,6 +25,10 @@ const docRouter = createRouterWithDoc(onboardRegistry, router)
 // ========================================
 
 const onboardBodySchema = z.object({
+  applicationId: z
+    .string()
+    .min(1)
+    .describe('Ezauth Application id this Connect account will be scoped to'),
   email: z.string().email().describe('Business email for the connected account'),
   businessName: z.string().min(1).describe('Business or individual name'),
   type: z
@@ -40,6 +45,25 @@ const onboardResponseSchema = z.object({
 })
 
 // ========================================
+// Helpers
+// ========================================
+
+/** Extract the raw JWT the caller sent so we can propagate it to ezauth. */
+function extractBearerToken(req: Request): string | undefined {
+  const authHeader = req.headers.authorization
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7)
+  }
+  const cookieHeader = req.headers.cookie || ''
+  const cookieToken = cookieHeader
+    .split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith('ezauth_token='))
+    ?.split('=')[1]
+  return cookieToken
+}
+
+// ========================================
 // Route Handler
 // ========================================
 
@@ -50,15 +74,29 @@ const onboardHandler = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid onboard data', validation.error.errors)
     }
 
-    const { email, businessName, type: accountType } = validation.data
+    const { applicationId, email, businessName, type: accountType } = validation.data
     const userId = req.userId as string
+
+    // Cross-service ownership check — the caller must own the Application
+    // (or be superadmin). Matches the api-keys create flow.
+    const bearerToken = extractBearerToken(req)
+    const application = await getApplication(applicationId, { bearerToken })
+    if (!application) {
+      return sendError(res, 'Application not found', 404)
+    }
+    if (application.status !== 'active') {
+      return sendError(res, 'Application is archived', 400)
+    }
+    if (application.ownerId !== userId && !isAdminUser(req)) {
+      return sendError(res, 'Not allowed to onboard Connect for this Application', 403)
+    }
 
     const ConnectedAccount = await getConnectedAccountModel()
 
-    // Check if user already has a connected account
-    const existing = await ConnectedAccount.findOne({ userId })
+    // One ConnectedAccount per Application — reject if one already exists.
+    const existing = await ConnectedAccount.findOne({ applicationId })
     if (existing) {
-      return sendError(res, 'User already has a connected account', 409)
+      return sendError(res, 'Application already has a connected account', 409)
     }
 
     const stripe = getStripeInstance()
@@ -70,7 +108,7 @@ const onboardHandler = async (req: Request, res: Response) => {
             type: 'express',
             email,
             business_profile: { name: businessName },
-            metadata: { userId },
+            metadata: { userId, applicationId },
             capabilities: {
               card_payments: { requested: true },
               transfers: { requested: true },
@@ -80,14 +118,16 @@ const onboardHandler = async (req: Request, res: Response) => {
             type: 'standard',
             email,
             business_profile: { name: businessName },
-            metadata: { userId },
+            metadata: { userId, applicationId },
           }
 
     const account = await stripe.accounts.create(accountParams)
 
     // Save to DB
     const connectedAccount = await ConnectedAccount.create({
+      applicationId,
       userId,
+      isPlatformAccount: false,
       stripeAccountId: account.id,
       email,
       businessName,
@@ -107,7 +147,9 @@ const onboardHandler = async (req: Request, res: Response) => {
       type: 'account_onboarding',
     })
 
-    logger.info(`Connect account created: ${account.id} for user ${userId}`)
+    logger.info(
+      `Connect account created: ${account.id} for user ${userId} (application ${applicationId})`
+    )
 
     sendSuccess(res, {
       accountLinkUrl: accountLink.url,
@@ -124,7 +166,7 @@ const onboardHandler = async (req: Request, res: Response) => {
 // ========================================
 
 docRouter.post('/connect/onboard', authMiddleware, populateUserFromToken, onboardHandler, {
-  summary: 'Create a Stripe Connect account and start onboarding',
+  summary: 'Create a Stripe Connect account scoped to an Application and start onboarding',
   tags: ['Connect'],
   bodySchema: onboardBodySchema,
   responseSchema: onboardResponseSchema,
@@ -132,3 +174,4 @@ docRouter.post('/connect/onboard', authMiddleware, populateUserFromToken, onboar
 })
 
 export { onboardRegistry as registry, router }
+export default router

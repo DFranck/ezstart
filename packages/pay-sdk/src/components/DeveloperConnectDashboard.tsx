@@ -34,6 +34,13 @@ export interface DeveloperConnectDashboardTexts {
 }
 
 export interface DeveloperConnectDashboardProps {
+  /**
+   * Required — the ezauth Application this Connect account is scoped to.
+   * Forwarded to the onboarding form and the onboard call so the API can
+   * validate ownership and persist the account with the correct
+   * `applicationId`.
+   */
+  applicationId: string
   className?: string
   texts?: DeveloperConnectDashboardTexts
   /** Callback when onboarding returns an account link URL */
@@ -53,6 +60,7 @@ export interface DeveloperConnectDashboardProps {
 }
 
 export function DeveloperConnectDashboard({
+  applicationId,
   className,
   texts,
   onOnboardRedirect,
@@ -69,13 +77,19 @@ export function DeveloperConnectDashboard({
 
   const t = {
     disconnectTitle: texts?.disconnectTitle ?? 'Disconnect Account',
-    disconnectDescription: texts?.disconnectDescription ?? 'Are you sure you want to disconnect your Stripe account?',
+    disconnectDescription:
+      texts?.disconnectDescription ?? 'Are you sure you want to disconnect your Stripe account?',
     disconnectCancel: texts?.disconnectCancel ?? 'Cancel',
     disconnectConfirm: texts?.disconnectConfirm ?? 'Disconnect',
     error: texts?.error ?? 'An error occurred',
   }
 
-  async function handleOnboard(data: { email: string; businessName: string; type: ConnectAccountType }) {
+  async function handleOnboard(data: {
+    applicationId: string
+    email: string
+    businessName: string
+    type: ConnectAccountType
+  }) {
     try {
       const result = await onboard(data)
       if (result.accountLinkUrl) {
@@ -149,6 +163,7 @@ export function DeveloperConnectDashboard({
           </>
         ) : (
           <ConnectOnboardForm
+            applicationId={applicationId}
             onSubmit={handleOnboard}
             isSubmitting={isOnboarding}
             texts={texts?.onboardForm}

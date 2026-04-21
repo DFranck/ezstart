@@ -5,6 +5,7 @@ import {
   OpenAPIRegistry,
   sendSuccess,
   sendError,
+  sendValidationError,
 } from '@ezstart/api-core'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
@@ -20,6 +21,13 @@ const docRouter = createRouterWithDoc(dashboardLinkRegistry, router)
 // Zod Schemas
 // ========================================
 
+const dashboardLinkQuerySchema = z.object({
+  applicationId: z
+    .string()
+    .min(1)
+    .describe('Ezauth Application id — scopes the dashboard link to a specific Connect account'),
+})
+
 const dashboardLinkResponseSchema = z.object({
   success: z.boolean(),
   loginLinkUrl: z.string().optional().describe('Stripe Dashboard login link'),
@@ -33,9 +41,16 @@ const dashboardLinkResponseSchema = z.object({
 
 const dashboardLinkHandler = async (req: Request, res: Response) => {
   try {
+    const queryValidation = dashboardLinkQuerySchema.safeParse(req.query)
+    if (!queryValidation.success) {
+      return sendValidationError(res, 'Invalid dashboard-link query', queryValidation.error.errors)
+    }
+
     const userId = req.userId as string
+    const { applicationId } = queryValidation.data
+
     const ConnectedAccount = await getConnectedAccountModel()
-    const account = await ConnectedAccount.findOne({ userId }).lean()
+    const account = await ConnectedAccount.findOne({ applicationId, userId }).lean()
 
     if (!account) {
       return sendError(res, 'No connected account found', 404)
@@ -73,10 +88,12 @@ docRouter.get(
   populateUserFromToken,
   dashboardLinkHandler,
   {
-    summary: 'Get Stripe Express Dashboard login link for connected account',
+    summary: 'Get Stripe Express Dashboard login link for a specific Application Connect account',
     tags: ['Connect'],
+    querySchema: dashboardLinkQuerySchema,
     responseSchema: dashboardLinkResponseSchema,
   }
 )
 
 export { dashboardLinkRegistry as registry, router }
+export default router

@@ -19,7 +19,19 @@ import {
   registry as dashboardLinkRegistry,
   router as dashboardLinkRouter,
 } from './dashboard-link.js'
+import { registry as convertRegistry, router as convertRouter } from './convert.js'
 
-export const connectRegistries = [onboardRegistry, statusRegistry, dashboardLinkRegistry]
+export const connectRegistries = [
+  onboardRegistry,
+  statusRegistry,
+  dashboardLinkRegistry,
+  convertRegistry,
+]
 
-export const connectRouters = [onboardRouter, callbackRouter, statusRouter, dashboardLinkRouter]
+export const connectRouters = [
+  onboardRouter,
+  callbackRouter,
+  statusRouter,
+  dashboardLinkRouter,
+  convertRouter,
+]

@@ -34,13 +34,25 @@ export interface ConnectOnboardFormTexts {
 }
 
 export interface ConnectOnboardFormProps {
-  onSubmit: (data: { email: string; businessName: string; type: ConnectAccountType }) => void
+  /**
+   * Required — the ezauth Application this Connect account will be scoped to.
+   * Passed through to the API so the server can validate ownership and persist
+   * the account with the correct `applicationId`.
+   */
+  applicationId: string
+  onSubmit: (data: {
+    applicationId: string
+    email: string
+    businessName: string
+    type: ConnectAccountType
+  }) => void
   isSubmitting?: boolean
   className?: string
   texts?: ConnectOnboardFormTexts
 }
 
 export function ConnectOnboardForm({
+  applicationId,
   onSubmit,
   isSubmitting = false,
   className,
@@ -67,7 +79,7 @@ export function ConnectOnboardForm({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email || !businessName) return
-    onSubmit({ email, businessName, type: accountType })
+    onSubmit({ applicationId, email, businessName, type: accountType })
   }
 
   return (
@@ -82,29 +94,35 @@ export function ConnectOnboardForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Div className="space-y-2">
-            <P size="sm" className="font-medium">{t.emailLabel}</P>
+            <P size="sm" className="font-medium">
+              {t.emailLabel}
+            </P>
             <Input
               type="email"
               placeholder={t.emailPlaceholder}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
             />
           </Div>
           <Div className="space-y-2">
-            <P size="sm" className="font-medium">{t.businessNameLabel}</P>
+            <P size="sm" className="font-medium">
+              {t.businessNameLabel}
+            </P>
             <Input
               placeholder={t.businessNamePlaceholder}
               value={businessName}
-              onChange={(e) => setBusinessName(e.target.value)}
+              onChange={e => setBusinessName(e.target.value)}
               required
             />
           </Div>
           <Div className="space-y-2">
-            <P size="sm" className="font-medium">{t.accountTypeLabel}</P>
+            <P size="sm" className="font-medium">
+              {t.accountTypeLabel}
+            </P>
             <Select
               value={accountType}
-              onValueChange={(v) => setAccountType(v as ConnectAccountType)}
+              onValueChange={v => setAccountType(v as ConnectAccountType)}
             >
               <SelectTrigger>
                 <SelectValue />

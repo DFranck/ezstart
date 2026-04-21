@@ -31,6 +31,7 @@ describe('ConnectedAccount Model', () => {
   describe('Schema Validation', () => {
     it('should create a valid connected account with required fields', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_123',
         userId: 'user_123',
         stripeAccountId: 'acct_abc123',
         email: 'business@example.com',
@@ -38,7 +39,9 @@ describe('ConnectedAccount Model', () => {
         accountType: 'standard',
       })
 
+      expect(account.applicationId).toBe('app_123')
       expect(account.userId).toBe('user_123')
+      expect(account.isPlatformAccount).toBe(false)
       expect(account.stripeAccountId).toBe('acct_abc123')
       expect(account.email).toBe('business@example.com')
       expect(account.businessName).toBe('Test Business')
@@ -50,9 +53,44 @@ describe('ConnectedAccount Model', () => {
       expect(account.onboardedAt).toBeNull()
     })
 
+    it('should default isPlatformAccount to false', async () => {
+      const account = await ConnectedAccountModel.create({
+        applicationId: 'app_default',
+        userId: 'user_default',
+        stripeAccountId: 'acct_default',
+        email: 'default@example.com',
+        businessName: 'Default Biz',
+      })
+      expect(account.isPlatformAccount).toBe(false)
+    })
+
+    it('should accept isPlatformAccount: true', async () => {
+      const account = await ConnectedAccountModel.create({
+        applicationId: 'app_platform',
+        userId: 'system',
+        isPlatformAccount: true,
+        stripeAccountId: 'acct_platform_shared',
+        email: 'platform@ezstart.dev',
+        businessName: 'EZStart Platform',
+      })
+      expect(account.isPlatformAccount).toBe(true)
+    })
+
+    it('should require applicationId', async () => {
+      await expect(
+        ConnectedAccountModel.create({
+          userId: 'user_123',
+          stripeAccountId: 'acct_abc123',
+          email: 'test@example.com',
+          businessName: 'Test',
+        })
+      ).rejects.toThrow()
+    })
+
     it('should require userId', async () => {
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_missing_user',
           stripeAccountId: 'acct_abc123',
           email: 'test@example.com',
           businessName: 'Test',
@@ -63,6 +101,7 @@ describe('ConnectedAccount Model', () => {
     it('should require stripeAccountId', async () => {
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_missing_stripe',
           userId: 'user_123',
           email: 'test@example.com',
           businessName: 'Test',
@@ -73,6 +112,7 @@ describe('ConnectedAccount Model', () => {
     it('should require email', async () => {
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_missing_email',
           userId: 'user_123',
           stripeAccountId: 'acct_abc123',
           businessName: 'Test',
@@ -83,6 +123,7 @@ describe('ConnectedAccount Model', () => {
     it('should require businessName', async () => {
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_missing_name',
           userId: 'user_123',
           stripeAccountId: 'acct_abc123',
           email: 'test@example.com',
@@ -94,6 +135,7 @@ describe('ConnectedAccount Model', () => {
   describe('Account Types', () => {
     it('should accept standard account type', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_std',
         userId: 'user_std',
         stripeAccountId: 'acct_std',
         email: 'std@example.com',
@@ -105,6 +147,7 @@ describe('ConnectedAccount Model', () => {
 
     it('should accept express account type', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_exp',
         userId: 'user_exp',
         stripeAccountId: 'acct_exp',
         email: 'exp@example.com',
@@ -117,6 +160,7 @@ describe('ConnectedAccount Model', () => {
     it('should reject invalid account type', async () => {
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_bad',
           userId: 'user_bad',
           stripeAccountId: 'acct_bad',
           email: 'bad@example.com',
@@ -130,6 +174,7 @@ describe('ConnectedAccount Model', () => {
   describe('Status Transitions', () => {
     it('should default to pending status', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_new',
         userId: 'user_new',
         stripeAccountId: 'acct_new',
         email: 'new@example.com',
@@ -140,6 +185,7 @@ describe('ConnectedAccount Model', () => {
 
     it('should update to active status', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_active',
         userId: 'user_active',
         stripeAccountId: 'acct_active',
         email: 'active@example.com',
@@ -165,6 +211,7 @@ describe('ConnectedAccount Model', () => {
 
     it('should update to restricted status', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_restricted',
         userId: 'user_restricted',
         stripeAccountId: 'acct_restricted',
         email: 'restricted@example.com',
@@ -185,6 +232,7 @@ describe('ConnectedAccount Model', () => {
       for (const status of statuses) {
         await ConnectedAccountModel.deleteMany({})
         const account = await ConnectedAccountModel.create({
+          applicationId: `app_${status}`,
           userId: `user_${status}`,
           stripeAccountId: `acct_${status}`,
           email: `${status}@example.com`,
@@ -199,6 +247,7 @@ describe('ConnectedAccount Model', () => {
   describe('Fee Configuration', () => {
     it('should default to 3% fee', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_fee',
         userId: 'user_fee',
         stripeAccountId: 'acct_fee',
         email: 'fee@example.com',
@@ -209,6 +258,7 @@ describe('ConnectedAccount Model', () => {
 
     it('should allow custom fee percentage', async () => {
       const account = await ConnectedAccountModel.create({
+        applicationId: 'app_custom_fee',
         userId: 'user_custom',
         stripeAccountId: 'acct_custom',
         email: 'custom@example.com',
@@ -221,6 +271,7 @@ describe('ConnectedAccount Model', () => {
     it('should reject fee below 0', async () => {
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_neg',
           userId: 'user_neg',
           stripeAccountId: 'acct_neg',
           email: 'neg@example.com',
@@ -233,6 +284,7 @@ describe('ConnectedAccount Model', () => {
     it('should reject fee above 100', async () => {
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_high',
           userId: 'user_high',
           stripeAccountId: 'acct_high',
           email: 'high@example.com',
@@ -244,9 +296,10 @@ describe('ConnectedAccount Model', () => {
   })
 
   describe('Unique Constraints', () => {
-    it('should enforce unique userId', async () => {
+    it('should enforce unique applicationId', async () => {
       await ConnectedAccountModel.create({
-        userId: 'user_unique',
+        applicationId: 'app_unique',
+        userId: 'user_a',
         stripeAccountId: 'acct_1',
         email: 'unique1@example.com',
         businessName: 'Business 1',
@@ -254,7 +307,8 @@ describe('ConnectedAccount Model', () => {
 
       await expect(
         ConnectedAccountModel.create({
-          userId: 'user_unique',
+          applicationId: 'app_unique',
+          userId: 'user_b',
           stripeAccountId: 'acct_2',
           email: 'unique2@example.com',
           businessName: 'Business 2',
@@ -262,8 +316,29 @@ describe('ConnectedAccount Model', () => {
       ).rejects.toThrow()
     })
 
+    it('should NOT enforce unique userId (multiple apps per user)', async () => {
+      await ConnectedAccountModel.create({
+        applicationId: 'app_a',
+        userId: 'user_multi',
+        stripeAccountId: 'acct_a',
+        email: 'a@example.com',
+        businessName: 'Biz A',
+      })
+
+      const second = await ConnectedAccountModel.create({
+        applicationId: 'app_b',
+        userId: 'user_multi',
+        stripeAccountId: 'acct_b',
+        email: 'b@example.com',
+        businessName: 'Biz B',
+      })
+      expect(second.userId).toBe('user_multi')
+      expect(second.applicationId).toBe('app_b')
+    })
+
     it('should enforce unique stripeAccountId', async () => {
       await ConnectedAccountModel.create({
+        applicationId: 'app_stripe_a',
         userId: 'user_a',
         stripeAccountId: 'acct_shared',
         email: 'a@example.com',
@@ -272,12 +347,47 @@ describe('ConnectedAccount Model', () => {
 
       await expect(
         ConnectedAccountModel.create({
+          applicationId: 'app_stripe_b',
           userId: 'user_b',
           stripeAccountId: 'acct_shared',
           email: 'b@example.com',
           businessName: 'Business B',
         })
       ).rejects.toThrow()
+    })
+  })
+
+  describe('Conversion metadata', () => {
+    it('persists previousStripeAccountId + transitionedAt + transitionedBy', async () => {
+      const account = await ConnectedAccountModel.create({
+        applicationId: 'app_convert',
+        userId: 'user_convert',
+        stripeAccountId: 'acct_original',
+        email: 'conv@example.com',
+        businessName: 'Convert Biz',
+        isPlatformAccount: true,
+      })
+
+      const now = new Date()
+      await ConnectedAccountModel.updateOne(
+        { _id: account._id },
+        {
+          stripeAccountId: 'acct_new_external',
+          isPlatformAccount: false,
+          metadata: {
+            previousStripeAccountId: 'acct_original',
+            transitionedAt: now,
+            transitionedBy: 'user_admin',
+          },
+        }
+      )
+
+      const updated = await ConnectedAccountModel.findById(account._id).lean()
+      expect(updated?.stripeAccountId).toBe('acct_new_external')
+      expect(updated?.isPlatformAccount).toBe(false)
+      expect(updated?.metadata?.previousStripeAccountId).toBe('acct_original')
+      expect(updated?.metadata?.transitionedAt).toEqual(now)
+      expect(updated?.metadata?.transitionedBy).toBe('user_admin')
     })
   })
 })
