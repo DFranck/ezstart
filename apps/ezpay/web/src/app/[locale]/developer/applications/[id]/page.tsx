@@ -4,7 +4,19 @@ import { useAuth } from '@ezstart/auth-sdk'
 import { ApplicationDetailView } from '@ezstart/auth-sdk/components'
 import type { ApplicationDetailViewTexts } from '@ezstart/auth-sdk/components'
 import { PayDeveloperPortal, type PayDeveloperPortalTexts } from '@ezstart/pay-sdk/components'
-import { Div, H2, P, Spinner } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Div,
+  H2,
+  P,
+  Spinner,
+} from '@ezstart/ui/components'
+import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -20,6 +32,7 @@ import { useEffect, useState } from 'react'
 export default function ApplicationDetailPage() {
   const t = useTranslations('developer.applications.detail')
   const tp = useTranslations('developer.payKeys')
+  const tpm = useTranslations('developer.plansManager')
   const locale = useLocale()
   const params = useParams()
   const router = useRouter()
@@ -163,6 +176,27 @@ export default function ApplicationDetailPage() {
         texts={payTexts}
         showSuperadminScope={isSuperadmin}
       />
+
+      <Div className="border-t" />
+
+      <Card>
+        <CardHeader className="pb-4">
+          <Div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <Div className="space-y-1">
+              <CardTitle className="text-xl md:text-2xl font-bold">{tpm('title')}</CardTitle>
+              <CardDescription>{tpm('subtitle')}</CardDescription>
+            </Div>
+            <Button asChild>
+              <Link href={`/${locale}/developer/applications/${applicationId}/plans`}>
+                {tpm('createButton')}
+              </Link>
+            </Button>
+          </Div>
+        </CardHeader>
+        <CardContent>
+          <P className="text-muted-foreground text-sm">{tpm('subtitle')}</P>
+        </CardContent>
+      </Card>
     </Div>
   )
 }

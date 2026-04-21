@@ -252,6 +252,69 @@
         "features": "Custom analytics, Priority support, Dedicated account manager"
       }
     },
+    "plansManager": {
+      "title": "Plans",
+      "subtitle": "Manage subscription plans for this application",
+      "createButton": "Create Plan",
+      "empty": "No plans yet. Create your first plan.",
+      "columns": {
+        "name": "Name",
+        "price": "Price",
+        "interval": "Interval",
+        "status": "Status",
+        "features": "Features",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "edit": "Edit",
+        "archive": "Archive",
+        "archiveConfirm": "Archive plan",
+        "archiveCancel": "Cancel",
+        "archiveConfirmDescription": "This plan will no longer be available for new subscriptions. Existing subscriptions continue on the archived price."
+      },
+      "editor": {
+        "createTitle": "Create a new plan",
+        "editTitle": "Edit plan",
+        "nameLabel": "Name",
+        "namePlaceholder": "Pro",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Professional plan with advanced features",
+        "amountLabel": "Price",
+        "amountPlaceholder": "19.00",
+        "currencyLabel": "Currency",
+        "intervalLabel": "Billing interval",
+        "intervalMonth": "Monthly",
+        "intervalYear": "Yearly",
+        "intervalCountLabel": "Interval count",
+        "intervalCountHelp": "Bill every N months/years (default 1)",
+        "featuresLabel": "Features",
+        "featuresHelp": "Comma-separated features shown in PricingPage",
+        "grantsRolesLabel": "Grants roles",
+        "grantsRolesHelp": "Comma-separated roles granted to user on subscribe",
+        "grantsFeaturesLabel": "Grants features",
+        "grantsFeaturesHelp": "Comma-separated features granted",
+        "sortOrderLabel": "Sort order",
+        "activeLabel": "Active",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "validation": {
+          "nameRequired": "Name is required",
+          "amountInvalid": "Price must be a positive number",
+          "intervalCountRange": "Interval count must be between 1 and 12"
+        }
+      },
+      "toast": {
+        "created": "Plan created",
+        "updated": "Plan updated",
+        "archived": "Plan archived",
+        "error": "An error occurred"
+      }
+    },
     "loading": "Loading developer portal...",
     "error": "Failed to load account data. Please try again."
   }

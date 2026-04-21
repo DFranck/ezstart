@@ -63,8 +63,17 @@ export type { PaymentHistoryProps, PaymentHistoryTexts } from './PaymentHistory.
 // Pricing & Billing
 export { PricingPage } from './PricingPage.js'
 export type { PricingPageProps, PricingPageTexts } from './PricingPage.js'
+export { PlansManager, defaultPlansManagerTexts } from './PlansManager.js'
+export type { PlansManagerProps, PlansManagerTexts } from './PlansManager.js'
+export { PlanEditorDialog, defaultPlanEditorDialogTexts } from './PlanEditorDialog.js'
+export type { PlanEditorDialogProps, PlanEditorDialogTexts } from './PlanEditorDialog.js'
 export { BillingDashboard } from './BillingDashboard.js'
 export type { BillingDashboardProps, BillingDashboardTexts } from './BillingDashboard.js'
+export { ManageSubscriptionButton } from './ManageSubscriptionButton.js'
+export type {
+  ManageSubscriptionButtonProps,
+  ManageSubscriptionButtonTexts,
+} from './ManageSubscriptionButton.js'
 
 // Stripe Connect
 export { ConnectStatusCard } from './ConnectStatusCard.js'

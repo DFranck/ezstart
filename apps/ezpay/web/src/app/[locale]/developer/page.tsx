@@ -130,7 +130,14 @@ export default function DeveloperPage() {
           </TabsContent>
 
           <TabsContent value="stripeConnect" className="mt-6 space-y-6">
+            {/*
+             * TODO(P7): wire an Application picker above this dashboard so the
+             * user can choose which Application's Connect account to manage.
+             * For now the dashboard is scoped to an empty id and will be
+             * replaced by the picker once the selected-app context ships.
+             */}
             <DeveloperConnectDashboard
+              applicationId=""
               texts={dashboardTexts}
               onError={msg => toast.error(msg)}
               onDisconnect={() => toast.success(tc('disconnect.button'))}

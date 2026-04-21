@@ -252,6 +252,69 @@
         "features": "Analytiques personnalisées, Support prioritaire, Gestionnaire de compte dédié"
       }
     },
+    "plansManager": {
+      "title": "Plans",
+      "subtitle": "Gérez les plans d'abonnement de cette application",
+      "createButton": "Créer un plan",
+      "empty": "Aucun plan pour le moment. Créez votre premier plan.",
+      "columns": {
+        "name": "Nom",
+        "price": "Prix",
+        "interval": "Intervalle",
+        "status": "Statut",
+        "features": "Fonctionnalités",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "actions": {
+        "edit": "Modifier",
+        "archive": "Archiver",
+        "archiveConfirm": "Archiver le plan",
+        "archiveCancel": "Annuler",
+        "archiveConfirmDescription": "Ce plan ne sera plus disponible pour de nouveaux abonnements. Les abonnements existants continuent au tarif archivé."
+      },
+      "editor": {
+        "createTitle": "Créer un nouveau plan",
+        "editTitle": "Modifier le plan",
+        "nameLabel": "Nom",
+        "namePlaceholder": "Pro",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Plan professionnel avec fonctionnalités avancées",
+        "amountLabel": "Prix",
+        "amountPlaceholder": "19.00",
+        "currencyLabel": "Devise",
+        "intervalLabel": "Intervalle de facturation",
+        "intervalMonth": "Mensuel",
+        "intervalYear": "Annuel",
+        "intervalCountLabel": "Nombre d'intervalles",
+        "intervalCountHelp": "Facturer tous les N mois/années (par défaut 1)",
+        "featuresLabel": "Fonctionnalités",
+        "featuresHelp": "Fonctionnalités séparées par des virgules, affichées dans PricingPage",
+        "grantsRolesLabel": "Rôles accordés",
+        "grantsRolesHelp": "Rôles séparés par des virgules, accordés à l'utilisateur à la souscription",
+        "grantsFeaturesLabel": "Fonctionnalités accordées",
+        "grantsFeaturesHelp": "Fonctionnalités séparées par des virgules, accordées à la souscription",
+        "sortOrderLabel": "Ordre d'affichage",
+        "activeLabel": "Actif",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "validation": {
+          "nameRequired": "Le nom est obligatoire",
+          "amountInvalid": "Le prix doit être un nombre positif",
+          "intervalCountRange": "Le nombre d'intervalles doit être entre 1 et 12"
+        }
+      },
+      "toast": {
+        "created": "Plan créé",
+        "updated": "Plan mis à jour",
+        "archived": "Plan archivé",
+        "error": "Une erreur est survenue"
+      }
+    },
     "loading": "Chargement du portail développeur...",
     "error": "Impossible de charger les données du compte. Veuillez réessayer."
   }
