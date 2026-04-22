@@ -58,7 +58,6 @@ Drop-in pre-built UI. Requires `@ezstart/ui` as peer dep.
 
 ```tsx
 import { AuthProvider, SignInForm, useAuth } from '@ezstart/auth-sdk'
-
 ;<AuthProvider apiUrl="https://auth.example.com/api/auth" appName="myapp" authMode="httpOnly">
   <App />
 </AuthProvider>
@@ -146,6 +145,45 @@ const me = await client.getCurrentUser()
 
 - Schemas for API validation (login, register, token, verify)
 - Type exports for server-side code
+
+## Configuration safety
+
+`resolveSDKConfig` (used internally by `<AuthProvider>`) **fails fast** with
+`AuthError({ code: 'CONFIG_ERROR' })` instead of silently falling back to
+localhost or a hardcoded vendor host when run off-localhost. This prevents
+broken production flows that only surface at login time.
+
+Throws when:
+
+1. **No URL signals** — off-localhost with no `apiUrl`, no `publishableKey`,
+   and no `firstParty: true`. Fix: pass an explicit `apiUrl` (or use a
+   `publishableKey`).
+2. **`publishableKey` without `apiUrl` off-localhost** — the SDK can't know
+   where to call `/api/keys/config`. Fix: pass `apiUrl` alongside the key.
+3. **`firstParty: true` without an explicit `appName` off-localhost** —
+   defaulting to `'ezauth'` would cause cross-tenant request leaks (every
+   auth call carries `app=ezauth`). Fix: always set `appName` explicitly
+   when enabling first-party mode in staging/prod.
+4. **`webUrl` resolves to `localhost` off-localhost** — usually means the
+   `NEXT_PUBLIC_EZAUTH_WEB_URL` env var is missing or empty in the target
+   environment. Without this guard the user would be redirected to
+   `http://localhost:6111` at login/register time. Fix: set the env var or
+   pass `webUrl` explicitly to your provider.
+
+Localhost (`localhost`, `*.localhost`, `127.0.0.1`, `0.0.0.0`, `::1`) keeps
+permissive defaults so zero-config dev still works.
+
+### SSR / Next.js note
+
+`isLocalhost()` returns `false` when `window` is `undefined` (server side),
+so any of the cases above will throw during SSR/RSC if the corresponding
+signal is missing. Two safe patterns:
+
+- **Explicit apiUrl**: pass `apiUrl` (and `webUrl` when non-defaults are in
+  play) as literal strings to the provider — it resolves identically on
+  server and client.
+- **Client-only provider**: render `<AuthProvider>` behind a `'use client'`
+  boundary so the hostname check happens in the browser.
 
 ## Migration from flat structure
 

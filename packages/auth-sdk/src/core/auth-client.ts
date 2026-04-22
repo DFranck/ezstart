@@ -401,22 +401,126 @@ export async function fetchKeyConfig(
 // SDK config resolver
 // ---------------------------------------------------------------------------
 
-/** Default EZAuth API URL for production keys. */
-const EZAUTH_PRODUCTION_API = 'https://api-ezauth-production.up.railway.app'
-/** Default EZAuth Web URL for production. */
-const EZAUTH_PRODUCTION_WEB = 'https://ezauth.ezstart.xyz'
-/** Default EZAuth API URL for localhost development. */
-const EZAUTH_LOCAL_API = 'http://localhost:6110'
-/** Default EZAuth Web URL for localhost development. */
-const EZAUTH_LOCAL_WEB = 'http://localhost:6111'
+/**
+ * Default API URL for localhost development only.
+ *
+ * Agnostic convention: localhost dev envs commonly boot the auth API on a
+ * well-known port, so defaulting to `http://localhost:6110` here keeps the
+ * dev DX zero-config without coupling the SDK to any specific deployment.
+ *
+ * For any non-localhost environment (staging, production, self-hosted,
+ * preview, etc.), the consumer MUST pass `apiUrl` explicitly (or a
+ * `publishableKey` whose `/api/keys/config` response provides the URL).
+ * The SDK intentionally does NOT ship hardcoded monorepo-specific fallbacks.
+ */
+const DEFAULT_LOCAL_API = 'http://localhost:6110'
+/** Default Web URL for localhost development only. Same rationale as above. */
+const DEFAULT_LOCAL_WEB = 'http://localhost:6111'
+
+/**
+ * Thrown when `resolveSDKConfig` is invoked outside localhost without any of
+ * the signals that would let it resolve an API URL: no `firstParty`, no
+ * `publishableKey`, no explicit `apiUrl`.
+ *
+ * Fail-fast, no silent fallback to a vendor-specific production URL.
+ */
+const MISSING_API_URL_MESSAGE =
+  'auth-sdk: cannot resolve apiUrl. Provide one of: ' +
+  '`publishableKey` (auto-resolves via /api/keys/config), ' +
+  '`apiUrl` (explicit override), ' +
+  'or `firstParty: true` with `apiUrl`. ' +
+  'Running on localhost falls back to http://localhost:6110 automatically.'
+
+/**
+ * Thrown when `firstParty: true` is used off-localhost without an explicit
+ * `appName`. Defaulting to `'ezauth'` silently on a non-ezauth app would
+ * cause every auth request to carry `app=ezauth`, which is a cross-tenant
+ * leak (sessions, keys, quotas attributed to the wrong tenant).
+ *
+ * Localhost is intentionally permissive to preserve zero-config dev DX.
+ */
+const MISSING_FIRST_PARTY_APP_NAME_MESSAGE =
+  'auth-sdk: first-party mode requires an explicit `appName` off-localhost. ' +
+  'Defaulting to `"ezauth"` silently would leak cross-tenant requests.'
+
+/**
+ * Thrown when a resolved `webUrl` still points at localhost while the app
+ * itself is running off-localhost. This usually means an env var such as
+ * `NEXT_PUBLIC_EZAUTH_WEB_URL` is missing or empty in the target
+ * environment — without this guard the user would be redirected to
+ * `http://localhost:6111` at login/register time and the auth flow would
+ * silently break in production.
+ */
+const WEB_URL_LOCALHOST_TRAP_MESSAGE =
+  'auth-sdk: webUrl resolves to localhost but the app is not running on ' +
+  'localhost. Set `NEXT_PUBLIC_EZAUTH_WEB_URL` (or an equivalent env var) ' +
+  'or pass `webUrl` explicitly to your provider.'
+
+/**
+ * Assert that a `webUrl` is safe for the current environment. Throws when
+ * the app runs off-localhost but `webUrl` still resolves to a localhost
+ * host. Localhost apps may point anywhere (including other localhost
+ * ports), so no check is applied when `isLocal` is true.
+ *
+ * Matches `http://localhost`, `https://localhost`, and the `.localhost`
+ * TLD variants so multi-tenant dev URLs (e.g. `https://app.localhost`)
+ * also trip the guard when used unintentionally in prod.
+ */
+function assertWebUrlNotLocalhostOffLocal(webUrl: string, isLocal: boolean): void {
+  if (isLocal) return
+  try {
+    const parsed = new URL(webUrl)
+    const host = parsed.hostname
+    if (
+      host === 'localhost' ||
+      host.endsWith('.localhost') ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '[::1]' ||
+      host === '::1'
+    ) {
+      throw new AuthError(WEB_URL_LOCALHOST_TRAP_MESSAGE, 0, 'CONFIG_ERROR')
+    }
+  } catch (err) {
+    if (err instanceof AuthError) throw err
+    // Malformed URL: fall back to string contains to avoid false negatives.
+    if (webUrl.includes('localhost') || webUrl.includes('127.0.0.1')) {
+      throw new AuthError(WEB_URL_LOCALHOST_TRAP_MESSAGE, 0, 'CONFIG_ERROR')
+    }
+  }
+}
 
 /**
  * Check if we are running on localhost.
+ *
+ * Covers:
+ * - `localhost`
+ * - `*.localhost` TLD (RFC 6761, used by Chrome for multi-tenant local dev)
+ * - `127.0.0.1` (IPv4 loopback)
+ * - `0.0.0.0` (unspecified IPv4, often bound in dev)
+ * - `[::1]` / `::1` (IPv6 loopback, bracketed or bare)
+ *
+ * Returns `false` when `window` is undefined (SSR / Node). Consumers running
+ * the SDK in a server-rendered context (Next.js SSR/RSC) MUST either:
+ * - Pass an explicit `apiUrl` so `resolveSDKConfig` never needs to guess from
+ *   hostname, OR
+ * - Load the provider behind a `'use client'` boundary so this helper only
+ *   ever evaluates in the browser.
+ *
+ * Without one of the above, `resolveSDKConfig` will throw a CONFIG_ERROR at
+ * SSR time because no URL signals are available.
  */
 function isLocalhost(): boolean {
   if (typeof window === 'undefined') return false
   const host = window.location.hostname
-  return host === 'localhost' || host === '127.0.0.1'
+  return (
+    host === 'localhost' ||
+    host.endsWith('.localhost') ||
+    host === '127.0.0.1' ||
+    host === '0.0.0.0' ||
+    host === '[::1]' ||
+    host === '::1'
+  )
 }
 
 /**
@@ -450,21 +554,40 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   const key = sdkConfig.publishableKey
   const local = isLocalhost()
 
-  // Determine base URLs
-  const defaultApiUrl = local ? `${EZAUTH_LOCAL_API}/api/auth` : `${EZAUTH_PRODUCTION_API}/api/auth`
-  const defaultWebUrl = local ? EZAUTH_LOCAL_WEB : EZAUTH_PRODUCTION_WEB
-
   // Normalize the consumer-supplied apiUrl (if any) to a bare base URL.
   // Accepts both `'http://host'` and `'http://host/api/auth'` conventions so
   // downstream URL construction never ends up with `/api/auth/api/auth` or
   // `/api/auth/api/keys/config` suffixes.
   const consumerBaseUrl = sdkConfig.apiUrl ? normalizeApiBaseUrl(sdkConfig.apiUrl) : undefined
 
+  // Fail-fast in non-localhost environments when the consumer hasn't provided
+  // any of the signals required to resolve a URL. Silent hardcoded fallbacks
+  // to vendor-specific production hosts are forbidden by the agnostic
+  // packaging rules — the consumer must always opt-in explicitly.
+  if (!local && !sdkConfig.firstParty && !key && !consumerBaseUrl) {
+    throw new AuthError(MISSING_API_URL_MESSAGE, 0, 'CONFIG_ERROR')
+  }
+
+  // Localhost-only default. Non-local callers never reach a default: they
+  // must have supplied `consumerBaseUrl`, `firstParty`, or a `key` above.
+  const localDefaultApiUrl = `${DEFAULT_LOCAL_API}/api/auth`
+  const localDefaultWebUrl = DEFAULT_LOCAL_WEB
+
   if (sdkConfig.firstParty) {
-    // First-party mode: direct access, no key needed
-    const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : defaultApiUrl
-    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+    // First-party mode: direct access, no key needed.
+    //
+    // Security guard: off-localhost, `appName` must be explicit. Defaulting
+    // to `'ezauth'` on a non-ezauth first-party app would silently mislabel
+    // every outbound request with the wrong tenant (cross-tenant leak).
+    if (!local && sdkConfig.appName === undefined) {
+      throw new AuthError(MISSING_FIRST_PARTY_APP_NAME_MESSAGE, 0, 'CONFIG_ERROR')
+    }
+
+    const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : localDefaultApiUrl
+    const webUrl = sdkConfig.webUrl ?? localDefaultWebUrl
     const appName = sdkConfig.appName ?? 'ezauth'
+
+    assertWebUrlNotLocalhostOffLocal(webUrl, local)
 
     return {
       clientConfig: {
@@ -478,10 +601,18 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   }
 
   if (key) {
-    // Publishable key mode: create client with defaults, then async-update from key config
-    const apiBaseUrl = consumerBaseUrl ?? (local ? EZAUTH_LOCAL_API : EZAUTH_PRODUCTION_API)
+    // Publishable key mode: create client with defaults, then async-update
+    // from key config. In non-localhost envs without a consumer-provided
+    // `apiUrl`, we can't know where to send the `/api/keys/config` request,
+    // so we require explicit `apiUrl` alongside the key off localhost.
+    if (!local && !consumerBaseUrl) {
+      throw new AuthError(MISSING_API_URL_MESSAGE, 0, 'CONFIG_ERROR')
+    }
+    const apiBaseUrl = consumerBaseUrl ?? DEFAULT_LOCAL_API
     const apiUrl = `${apiBaseUrl}/api/auth`
-    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+    const webUrl = sdkConfig.webUrl ?? localDefaultWebUrl
+
+    assertWebUrlNotLocalhostOffLocal(webUrl, local)
 
     // We create the client with placeholder appName; it will be updated after config fetch
     const clientConfig: AuthClientConfig = {
@@ -500,10 +631,13 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
     }
   }
 
-  // Dev mode: no key, no first-party → permissive localhost defaults
-  const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : defaultApiUrl
-  const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+  // Dev mode: no key, no first-party → permissive localhost defaults.
+  // Non-localhost callers already threw above.
+  const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : localDefaultApiUrl
+  const webUrl = sdkConfig.webUrl ?? localDefaultWebUrl
   const appName = sdkConfig.appName ?? 'dev'
+
+  assertWebUrlNotLocalhostOffLocal(webUrl, local)
 
   return {
     clientConfig: {
