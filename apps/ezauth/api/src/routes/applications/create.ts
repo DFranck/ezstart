@@ -108,8 +108,18 @@ const createApplicationController = async (req: Request, res: Response) => {
     // Append slug to user's apps[] if absent — keeps the post-P5 RBAC surface
     // consistent so the owner automatically sees the new Application in their
     // "My apps" dashboard (pattern used by register flow too).
+    //
+    // Also seed `appRoles[slug] = ['admin']` so downstream "is admin of this
+    // app" checks can rely on the JWT's appRoles map directly, without having
+    // to fetch the Application document and compare ownerId.
     const AuthUser = await getAuthUserModel()
-    await AuthUser.updateOne({ _id: userId }, { $addToSet: { apps: slug } })
+    await AuthUser.updateOne(
+      { _id: userId },
+      {
+        $addToSet: { apps: slug },
+        $set: { [`appRoles.${slug}`]: ['admin'] },
+      }
+    )
 
     return sendSuccess(res, {
       id: app._id.toString(),

@@ -96,6 +96,68 @@ describe('Applications Routes', () => {
       expect(refreshed?.apps).toContain('ezstart')
     })
 
+    it('seeds appRoles[slug]=["admin"] for the owner on create', async () => {
+      const user = await createUser({
+        email: 'roleowner@test.com',
+        username: 'roleowner',
+      })
+      const token = generateAccessToken(user)
+
+      await request(app)
+        .post('/api/applications')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ slug: 'roleapp', name: 'Role App' })
+
+      const AuthUser = await getAuthUserModel()
+      const refreshed = await AuthUser.findById(user._id).lean<{
+        appRoles?: Record<string, string[]> | Map<string, string[]>
+      }>()
+
+      // `lean()` may return the Map as a plain object or a Map depending on
+      // the driver version — normalize before asserting.
+      const roles = refreshed?.appRoles
+      const roleList =
+        roles instanceof Map
+          ? (roles.get('roleapp') ?? [])
+          : ((roles as Record<string, string[]> | undefined)?.roleapp ?? [])
+      expect(roleList).toContain('admin')
+    })
+
+    it('preserves existing appRoles when creating another application', async () => {
+      const user = await createUser({
+        email: 'multi@test.com',
+        username: 'multi',
+      })
+      const token = generateAccessToken(user)
+
+      await request(app)
+        .post('/api/applications')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ slug: 'first', name: 'First' })
+
+      await request(app)
+        .post('/api/applications')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ slug: 'second', name: 'Second' })
+
+      const AuthUser = await getAuthUserModel()
+      const refreshed = await AuthUser.findById(user._id).lean<{
+        appRoles?: Record<string, string[]> | Map<string, string[]>
+      }>()
+
+      const roles = refreshed?.appRoles
+      const first =
+        roles instanceof Map
+          ? (roles.get('first') ?? [])
+          : ((roles as Record<string, string[]> | undefined)?.first ?? [])
+      const second =
+        roles instanceof Map
+          ? (roles.get('second') ?? [])
+          : ((roles as Record<string, string[]> | undefined)?.second ?? [])
+      expect(first).toContain('admin')
+      expect(second).toContain('admin')
+    })
+
     it('returns 422 on invalid slug', async () => {
       const user = await createUser({ email: 'u@test.com', username: 'u' })
       const token = generateAccessToken(user)

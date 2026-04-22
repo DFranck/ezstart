@@ -7,6 +7,7 @@ import {
   type ApplicationsFlowTexts,
   type EZAuthDashboardTexts,
 } from '@ezstart/auth-sdk/components'
+import { BillingDashboard, ManageSubscriptionButton } from '@ezstart/pay-sdk/components'
 import { Div, Spinner } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -150,6 +151,15 @@ export default function DashboardPage() {
     </Div>
   )
 
+  // Slot: Billing — shows the user's own EZAuth subscription (via pay-sdk) +
+  // Manage button that opens the Stripe Customer Portal.
+  const billingSlot = (
+    <Div className="space-y-6">
+      <BillingDashboard appName="ezauth" userId={user._id} />
+      <ManageSubscriptionButton />
+    </Div>
+  )
+
   // Fallback account label reuse for screen-reader-friendly descriptions.
   void tAccount
 
@@ -162,6 +172,7 @@ export default function DashboardPage() {
       texts={dashboardTexts}
       slots={{
         applications: applicationsSlot,
+        billing: billingSlot,
       }}
     />
   )

@@ -12,6 +12,7 @@ import {
 import {
   BillingDashboard,
   DeveloperConnectDashboard,
+  ManageSubscriptionButton,
   PayAdminDashboard,
   type DeveloperConnectDashboardTexts,
 } from '@ezstart/pay-sdk/components'
@@ -104,6 +105,7 @@ export default function EZPayDashboardPage() {
           <P className="text-sm text-muted-foreground">{tBilling('mySubscription.subtitle')}</P>
         </Div>
         <BillingDashboard userId={user._id} appName="ezpay" />
+        <ManageSubscriptionButton />
       </Div>
 
       {/* Section 2 — My apps revenue */}
