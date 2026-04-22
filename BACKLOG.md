@@ -12,6 +12,16 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 ---
 
+## Reste avant P10 (post P9)
+
+- [ ] **P7-RBAC-FIX** — Fix BillingDashboard `applicationId` filter end-to-end (en cours, agent dev fixe 3 vulns hacker)
+- [ ] **P7-H E2E matrice** — 6 cas: 3 types (purchase/donation/sub) × 2 routages (dogfood/externe Connect+fee) sur staging via MCP. Actuellement seul le scenario subscription externe a été validé E2E.
+- [ ] **EZP-CONNECT-001** — Stripe Connect Express KYC E2E (clic manuel user requis)
+- [ ] **Cleanup Vercel orphans** — 8 projets `web-*` sans déploiement à supprimer via CLI
+- [ ] **Verify staging migrations** — confirmer que les 5 migrations idempotentes sont bien tournées sur DB staging
+
+---
+
 ## Monorepo / Infrastructure
 
 ### External-devs readiness — Phase 0 (prép funding)
@@ -140,36 +150,7 @@ Stratégie pour que les pages footer (docs, changelog, status, blog) soient **ze
 
 Authentication SaaS (Clerk clone) pour tout le monorepo + external devs. **Status:** active — en route vers publishable key Clerk/Stripe pattern.
 
-#### P0 — Post-P7 (next steps après dogfood Stripe Connect validated 2026-04-21)
-
-- [ ] **EZ-AUTO-ROLES**: Auto-set `appRoles[slug]: ['admin']` au create d'Application + migration backfill
-  - `apps/ezauth/api/src/routes/applications/create.ts` : ajouter `$set: { [\`appRoles.${slug}\`]: ['admin'] }` au updateOne
-  - Script migration `migrate-app-owners-to-admin-role.ts` : pour chaque Application existante → setter `ownerId.appRoles[slug] = ['admin']`
-  - Bénéfice : check JWT direct au lieu de fetch Application + compare ownerId. Future-proof pour multi-tenant Org (override granulaire).
-- [ ] **EZ-KEY-002: Fallback appName sur login/register first-party** = 'ezauth' (pas 'ezstart')
-  - `apps/ezauth/web/src/app/[locale]/(auth)/login/page.tsx:34`
-  - `apps/ezauth/web/src/app/[locale]/(auth)/register/page.tsx:32`
-  - Vérifier post-P6 si encore reproductible
-- [ ] **EZ-KEY-003: DevModeBanner hide en first-party**
-  - Vérifier post-P6 si encore reproductible
-- [ ] **PER-APP-BILLING-001 (P8): Billing dashboard local sur chaque app consumer EZPay**
-  - Embed `<BillingDashboard appName="<current-app>" userId={user._id}/>` sur ezauth, ezbill, green-pulse, fengshui, asc-tcd web
-  - L'user voit SES subs locales à chaque app (sub EZAuth Pro sur ezauth, sub Green-Pulse Premium sur green-pulse, etc.)
-  - Réduit friction (pas besoin d'aller sur ezpay pour voir billing per-app)
-  - Section "All subs" sur `/en/dashboard` ezstart hub (futur EZHUB) agrège cross-apps
-  - Bloqué par `UI-CONSOLIDATE-001` pour pattern unifié
-
-- [ ] **UI-CONSOLIDATE-001 (P8): Unified `/en/dashboard` avec sidebar conditionnelle RBAC** — **REUSE `<EZAuthDashboard/>` from auth-sdk** (déjà existant avec sidebar Overview/API Keys/Billing/Settings/Admin) au lieu de tout refaire. Wirer `/en/dashboard` qui render `<EZAuthDashboard/>` + extend pour billing/account sections. Mirror le pattern sur ezpay/ezstart/ezbill avec `<PayDashboard/>` etc.
-  - Pour le webhook role grant qui n'applique pas après subscribe (Plan a grantsRoles mais user.appRoles reste vide après checkout completed) — investigate logs api-ezpay pour `[ezauth-webhook]` traces. Probablement notify call fail silencieusement quelque part. — Consolider `/account`, `/developer`, `/billing` (et futurs) en UN dashboard avec sidebar pattern Stripe/Clerk
-  - Sections (sidebar) : Overview / Account / Applications / API Keys / Billing / Usage / Settings + (admin) Users / Apps / Platform
-  - Conditional rendering selon `user.globalRoles` + `appRoles` + `hasOwnedApps`
-  - Routes : `/en/dashboard/[section]` avec layout sidebar partagé
-  - Deprecate `/account`, `/developer`, `/billing` (redirect 301)
-  - Mirror sur ezpay web (et autres apps quand elles auront leur dashboard)
-  - **Pourquoi** : actuellement chevauchements logiques entre `/account` et `/developer` (les 2 sont des "tableaux de bord"), et `/billing` est une route séparée alors qu'il est conceptuellement une section. Pattern pro : Stripe Dashboard, Clerk Dashboard, Linear, Vercel — tous ont 1 seul dashboard avec sidebar.
-  - **Bénéfices** : zéro friction navigation, 1 URL à retenir, RBAC sections progressive disclosure, cohérence cross-apps EZStart
-
-#### Backlog 2026-03-29 + P6/P7 done — voir BACKLOG-HISTORY.md
+#### Backlog 2026-03-29 + P6/P7/P8/P9 done — voir BACKLOG-HISTORY.md
 
 ---
 
@@ -306,9 +287,6 @@ Payment SaaS (Stripe clone) avec SDK publishable + SaaS dashboard. **Status:** a
 - [ ] **P-AI: AI Product Descriptions** — Route API EZPay utilisant `@ezstart/ai-sdk` pour générer descriptions produits. UI édit/valider. Multi-langue FR/EN automatique.
 - [ ] **EP-002: Clean stale pending payments** — Auto-archive/delete "pending" payments après 24h (abandoned checkouts).
 - [ ] **EP-005: SDK Payment Cards** — SubscriptionCard, DonationCard, PurchaseCard (auto-fetch plan/product data, checkout modal embedded). Apps passent `appName` + `planId`. Variants : default/featured/compact. Props: appName, planId/productId, className, variant, promoCode, onSuccess, onCancel, texts. **Priorité HIGH.**
-- [ ] **EP-006: Customer Portal (Stripe built-in)** — Portal hosted Stripe pour manage subscriptions, payment methods, invoices, cancel. API `POST /api/portal/session` → URL. SDK `useCustomerPortal()` ou `<ManageSubscriptionButton>`. Configurer portal features dans Stripe Dashboard.
-- [ ] **EP-007: Upgrade/Downgrade plans** — `PATCH /api/subscriptions/:id/change-plan` → `stripe.subscriptions.update()` new price. Proration auto. SDK `<ChangePlanButton currentPlan="pro" targetPlan="business" />`.
-- [ ] **EP-008: Trial periods** — Plan model `trialDays?: number`. Checkout passes `subscription_data.trial_period_days`. `useSubscriptionStatus()` a déjà `isTrialing`.
 - [ ] **EP-009: Invoice management** — `GET /api/invoices` (list from Stripe API, non stockées en DB), `GET /api/invoices/:id/pdf` (redirect Stripe URL). SDK `<InvoiceHistory>`. Admin tab in PayAdminDashboard.
 - [ ] **EP-010: Currency conversion in dashboard stats** — Save exchange rates à checkout time. Dashboard stats en currency base choisie admin.
 - [ ] **EP-011: Promo code targeting** — Plan-specific, type-specific (subscription only), product-specific. Currently universal.
@@ -541,3 +519,14 @@ App scan/analyse screenshots jeux gacha (Summoners War runes, Nikke Goddess of V
 - [ ] **Mobile pilot (React Native + Expo)** — **Bloqué par :** api-sdk stable en prod
 - [ ] **ui-native miroir de `@ezstart/ui` pour cross-platform**
 - [ ] **Carbon credit marketplace (ETS trading post-Hanoi Exchange launch)** — Cf. GP-107
+
+---
+
+## Dette technique (non-blocker)
+
+- [ ] **PAY-SDK-SPLIT** — `packages/pay-sdk/src/core/pay-client.ts` (727 lignes) et `types.ts` (644 lignes) dépassent la limite 400 lignes. Splitter en `types/payments.ts`, `types/promos.ts`, `types/plans.ts` etc.
+- [ ] **PAY-SDK-ABORT-SIGNAL** — Étendre le pattern AbortSignal (threadé end-to-end dans `getPayments` / `usePaymentHistory` pour VULN-2) aux autres hooks list pay-sdk : `useSubscriptions`, `usePurchases`, `useDonations`, `usePlans`, `useSubscriptionStatus`. Ajouter `signal?: AbortSignal` sur `getSubscriptions`/`getPurchases`/`getDonations`/`listPlans` dans `pay-client.ts`, câbler un `AbortController` dans chaque hook, annuler sur unmount + dep change. Même motif pour auth-sdk hooks qui font des list fetch. Eviter les gaspillages réseau + race conditions sur scope change.
+- [ ] **AUTH-MW-JWT-001** — TODO `apps/ezauth/api/src/routes/api-keys/config.ts:112` — quand billing implémenté, resolve plan/features depuis subscription user
+- [ ] **AUTH-RATE-001** — TODO `apps/ezauth/api/src/routes/auth/sso-authorize.ts:34` — per-userId rate limiting
+- [ ] **USER-EDIT-001** — TODO `packages/auth-sdk/src/components/UserSettings.tsx:33` — edit profile feature
+- [ ] **AUTH-MW-JWT-002** — TODO `packages/auth-sdk/src/middleware/createAuthMiddleware.ts:266` — JWT validation

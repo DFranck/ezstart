@@ -9,6 +9,29 @@ Quand la date exacte est inconnue, l'item est placé dans le mois/section où il
 
 ## 2026-04
 
+### Apps — P8 UI consolidate + per-app billing + EZ-AUTO-ROLES (2026-04-22)
+
+- [x] 2026-04-22 — **UI-CONSOLIDATE-001**: Unified `/dashboard` sidebar pattern (Stripe/Clerk-style). Consolidated `/account`, `/developer`, `/billing` in one dashboard with sidebar + RBAC conditional sections (Overview / Account / Applications / API Keys / Billing / Usage / Settings + admin Users / Apps / Platform). Routes `/en/dashboard/[section]`. Deprecated old routes with 301 redirects. Mirror on ezpay/ezstart/ezbill. Commit `25abeed9`.
+- [x] 2026-04-22 — **PER-APP-BILLING-001**: Wired `<BillingDashboard appName="<current-app>" userId={user._id}/>` slot on ezauth, ezbill, green-pulse, fengshui, asc-tcd web. Users see their local subs per app without going to ezpay. Commit `f5c8166a`.
+- [x] 2026-04-22 — **EZ-AUTO-ROLES**: Auto-set `appRoles[slug]: ['admin']` on Application create (`apps/ezauth/api/src/routes/applications/create.ts`). Migration script `migrate-app-owners-to-admin-role.ts` backfills existing Applications. Enables direct JWT role check instead of fetch Application + compare ownerId. Future-proof for multi-tenant Org. Commit `f5c8166a`.
+- [x] 2026-04-22 — **EZ-KEY-002**: Login/register first-party fallback `appName='ezauth'` (not 'ezstart'). Fixed in `apps/ezauth/web/src/app/[locale]/(auth)/login/page.tsx` + `register/page.tsx`.
+- [x] 2026-04-22 — **EZ-KEY-003**: DevModeBanner hidden in first-party mode.
+
+### Apps — P9 Trial + Annual + Stripe Tax + Customer Portal config + ChangePlan (2026-04-22)
+
+- [x] 2026-04-22 — **EP-008 Trial periods**: Plan model `trialDays?: number`. Checkout passes `subscription_data.trial_period_days`. PricingPage displays trial badge. `useSubscriptionStatus()` already has `isTrialing`. Commit `6b002095`.
+- [x] 2026-04-22 — **PricingPage annual/monthly toggle**: Monthly/Annual billing period switcher on PricingPage + Save N% badge when annual discount configured.
+- [x] 2026-04-22 — **Stripe automatic_tax**: Enabled `automatic_tax: { enabled: true }` on Checkout Sessions for VAT/sales tax compliance.
+- [x] 2026-04-22 — **configure-stripe-portal.ts script**: Idempotent script to configure Stripe Customer Portal features (cancel, update payment method, download invoices, etc.) via API. Run once per Stripe account.
+- [x] 2026-04-22 — **EP-007 ChangePlan**: `POST /api/subscriptions/:id/change-plan` endpoint calls `stripe.subscriptions.update()` with new price + proration. SDK `<ChangePlanButton currentPlan targetPlan />` component exported. Commit `6b002095`.
+
+### Apps — Bug fixes (2026-04-22)
+
+- [x] 2026-04-22 — **Auth callback redirect URI fallback**: login/register first-party correctly falls back when no app context.
+- [x] 2026-04-22 — **PayProvider apiUrl missing config fix**: providers.tsx adds `config={{ apiUrl: NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}`.
+- [x] 2026-04-22 — **AuthUser.appRoles enum removed**: Free-form `maxlength: 64` instead of hardcoded enum, allows apps to define their own role vocabulary.
+- [x] 2026-04-22 — **Staging Stripe keys**: Fixed staging env using `sk_live_*` by accident → reverted to `sk_test_*` for safety.
+
 ### Apps — P6 multi-tenant Application + P7 Stripe Connect monetization (2026-04-21)
 
 **P6 — Application multi-tenant cross-service** (commits a3432a2d → 9dc9cd4f, validated E2E via MCP)
