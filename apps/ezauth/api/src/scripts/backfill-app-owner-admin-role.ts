@@ -18,6 +18,7 @@
  *   pnpm --filter api-ezauth migrate:owner-admin-role
  */
 
+import { Types } from 'mongoose'
 import { connectToMongo } from '@ezstart/api-core'
 import { loadSharedEnv } from '@ezstart/config/server'
 import { getMongoUrl } from '@ezstart/config/env-resolvers'
@@ -31,7 +32,12 @@ export interface BackfillResult {
   rolesAdded: number
   /** Users whose `apps[]` gained the slug. */
   appsAdded: number
-  /** Applications skipped because the owner document is missing. */
+  /**
+   * Applications skipped because the owner cannot be resolved —
+   * either the `ownerId` is not a valid ObjectId (e.g. the literal
+   * `'system'` seeded by bootstrap scripts) or the owner document
+   * no longer exists in `auth_users`.
+   */
   missingOwners: number
 }
 
@@ -58,6 +64,13 @@ export async function backfillAppOwnerAdminRole(): Promise<BackfillResult> {
   for (const app of apps) {
     const { slug, ownerId } = app
     if (!slug || !ownerId) continue
+
+    // Skip non-ObjectId owners (e.g. `'system'` used by `seed-self-key.ts`)
+    // — Mongoose would otherwise throw `CastError` on findById.
+    if (!Types.ObjectId.isValid(ownerId)) {
+      result.missingOwners += 1
+      continue
+    }
 
     const owner = await AuthUser.findById(ownerId).lean()
     if (!owner) {
