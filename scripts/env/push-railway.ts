@@ -7,20 +7,27 @@
  *
  * Examples:
  *   pnpm env:push:railway ezauth staging
- *   pnpm env:push:railway ezpay staging --from local --override DEPLOY_ENV=staging,STRIPE_WEBHOOK_SECRET=whsec_xxx
- *   pnpm env:push:railway ezpay staging --from local --override DEPLOY_ENV=staging --dry-run
+ *   pnpm env:push:railway ezpay production
+ *   pnpm env:push:railway ezpay staging --override STRIPE_WEBHOOK_SECRET=whsec_xxx --dry-run
  *
- * Reads:
- *   <repo>/.env.<from|env>
- *   apps/<app>/api/.env.<from|env>
+ * Cascade (Next.js-style) — target env determines merge order:
+ *   local       → .env.local
+ *   staging     → .env.local  ←  .env.staging
+ *   production  → .env.local  ←  .env.staging  ←  .env.production
+ *
+ * Each layer reads both root and per-app file. Later layers override earlier ones.
+ * Use --from <env> to force a single source (disables cascade).
+ *
+ * Production blocklist: TEST_*, DEBUG_*, _LOCAL_*, DEV_* are filtered out.
+ * Override with --include-blocked KEY1,KEY2.
  *
  * Flags:
- *   --from <env>        Source env file to read (default: <env>). Use "local" to reuse dev config.
- *   --override KEY=VAL  Comma-separated KEY=VALUE pairs, applied LAST (override everything).
- *   --dry-run           Print merged vars without calling Railway CLI.
+ *   --from <env>             Skip cascade, read only .env.<from>.
+ *   --override KEY=VAL       Comma-separated KEY=VAL, applied LAST.
+ *   --include-blocked KEYS   Comma-separated keys to keep in production despite blocklist.
+ *   --dry-run                Print merged vars without pushing.
  *
- * Resolves templating ({app} in MONGO_URL) and pushes via `railway variables`.
- * Precedence (lowest → highest): root <from> < per-app <from> < --override.
+ * Precedence (lowest → highest): cascade layers < --override.
  *
  * Requires: Railway CLI installed (https://docs.railway.app/develop/cli).
  */
@@ -50,7 +57,9 @@ function fail(msg: string): never {
 }
 
 function checkRailwayCli(): void {
-  const result = spawnSync('railway', ['--version'], { encoding: 'utf-8' })
+  // On Windows, npm/pnpm global bins are .cmd shims — spawnSync without
+  // `shell: true` can't find them on PATH.
+  const result = spawnSync('railway', ['--version'], { encoding: 'utf-8', shell: true })
   if (result.status !== 0) {
     fail('Railway CLI not found. Install via:\n  npm i -g @railway/cli\n  OR  brew install railway')
   }
@@ -74,11 +83,24 @@ function mask(value: string | undefined): string {
 interface ParsedFlags {
   from?: string
   overrides: Record<string, string>
+  includeBlocked: Set<string>
   dryRun: boolean
 }
 
+const PRODUCTION_BLOCKLIST = [/^TEST_/, /^DEBUG_/, /^_LOCAL_/, /^DEV_/]
+
+function isBlockedInProduction(key: string): boolean {
+  return PRODUCTION_BLOCKLIST.some(re => re.test(key))
+}
+
+function cascadeOrder(env: string): string[] {
+  if (env === 'production') return ['local', 'staging', 'production']
+  if (env === 'staging') return ['local', 'staging']
+  return ['local']
+}
+
 function parseFlags(flags: string[]): ParsedFlags {
-  const result: ParsedFlags = { overrides: {}, dryRun: false }
+  const result: ParsedFlags = { overrides: {}, includeBlocked: new Set(), dryRun: false }
   for (let i = 0; i < flags.length; i++) {
     const flag = flags[i]
     if (flag === '--from') {
@@ -97,6 +119,15 @@ function parseFlags(flags: string[]): ParsedFlags {
         const val = trimmed.slice(eqIdx + 1)
         if (!key) fail(`Invalid --override entry "${trimmed}" — empty key`)
         result.overrides[key] = val
+      }
+    } else if (flag === '--include-blocked') {
+      const value = flags[++i]
+      if (!value) fail('--include-blocked requires a value (e.g. --include-blocked TEST_USER)')
+      for (const key of value
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)) {
+        result.includeBlocked.add(key)
       }
     } else if (flag === '--dry-run') {
       result.dryRun = true
@@ -121,43 +152,72 @@ if (!['local', 'staging', 'production'].includes(env)) {
 }
 
 const flags = parseFlags(rest)
-const sourceEnv = flags.from ?? env
-if (!['local', 'staging', 'production'].includes(sourceEnv)) {
-  fail(`Invalid --from "${sourceEnv}" — must be one of: local | staging | production`)
-}
 
 const ROOT = findMonorepoRoot()
-const envFile = `.env.${sourceEnv}`
-const rootEnvPath = path.join(ROOT, envFile)
-const appEnvPath = path.join(ROOT, 'apps', app, 'api', envFile)
+const layers = flags.from ? [flags.from] : cascadeOrder(env)
+for (const layer of layers) {
+  if (!['local', 'staging', 'production'].includes(layer)) {
+    fail(`Invalid env layer "${layer}" — must be one of: local | staging | production`)
+  }
+}
 
 console.log(`🚂 env:push:railway — ${app} → ${env}${flags.dryRun ? ' (dry-run)' : ''}`)
-if (sourceEnv !== env) console.log(`   source:  .env.${sourceEnv} (via --from)`)
-console.log(`   root:    ${rootEnvPath}`)
-console.log(`   per-app: ${appEnvPath}`)
+if (flags.from) {
+  console.log(`   source:  .env.${flags.from} (via --from, cascade disabled)`)
+} else {
+  console.log(`   cascade: ${layers.map(l => `.env.${l}`).join(' ← ')}`)
+}
 if (Object.keys(flags.overrides).length > 0) {
   console.log(`   override: ${Object.keys(flags.overrides).join(', ')}`)
 }
 console.log('')
 
-if (!existsSync(rootEnvPath)) fail(`Root env file missing: ${rootEnvPath}`)
-if (!existsSync(appEnvPath))
-  console.log(`⚠️  No per-app env file at ${appEnvPath} — using root only`)
-
 if (!flags.dryRun) checkRailwayCli()
 
-// ── Merge: root first, per-app overrides, then --override flag ──
+// ── Merge cascade: each layer adds root + per-app, later layers override ──
 const merged: Record<string, string> = {}
-const rootVars = parseEnvFile(rootEnvPath)
-const appVars = parseEnvFile(appEnvPath)
-
-for (const [k, v] of Object.entries(rootVars)) merged[k] = v
-for (const [k, v] of Object.entries(appVars)) merged[k] = v
+for (const layer of layers) {
+  const envFile = `.env.${layer}`
+  const rootEnvPath = path.join(ROOT, envFile)
+  const appEnvPath = path.join(ROOT, 'apps', app, 'api', envFile)
+  const rootVars = parseEnvFile(rootEnvPath)
+  const appVars = parseEnvFile(appEnvPath)
+  const rootCount = Object.keys(rootVars).length
+  const appCount = Object.keys(appVars).length
+  if (rootCount === 0 && appCount === 0) {
+    console.log(`   (layer ${layer}: no vars — skipped)`)
+    continue
+  }
+  console.log(`   layer ${layer}: +${rootCount} root, +${appCount} per-app`)
+  for (const [k, v] of Object.entries(rootVars)) merged[k] = v
+  for (const [k, v] of Object.entries(appVars)) merged[k] = v
+}
 for (const [k, v] of Object.entries(flags.overrides)) merged[k] = v
+
+// Production blocklist — filter TEST_*, DEBUG_*, _LOCAL_*, DEV_* unless --include-blocked.
+if (env === 'production') {
+  const blocked: string[] = []
+  for (const key of Object.keys(merged)) {
+    if (isBlockedInProduction(key) && !flags.includeBlocked.has(key)) {
+      delete merged[key]
+      blocked.push(key)
+    }
+  }
+  if (blocked.length > 0) {
+    console.log(
+      `\n⚠️  Skipped ${blocked.length} vars (production blocklist): ${blocked.join(', ')}\n` +
+        `   Override with: --include-blocked ${blocked.join(',')}`
+    )
+  }
+}
 
 // Resolve templating ({app})
 for (const [k, v] of Object.entries(merged)) {
   if (v.includes('{app}')) merged[k] = resolveTemplating(v, app)
+}
+
+if (Object.keys(merged).length === 0) {
+  fail('No vars to push — check that .env.<layer> files exist at root and/or apps/<app>/api/')
 }
 
 // ── Push ────────────────────────────────────────────────────
@@ -180,7 +240,7 @@ if (flags.dryRun) {
   process.exit(0)
 }
 
-const result = spawnSync('railway', args, { stdio: 'inherit' })
+const result = spawnSync('railway', args, { stdio: 'inherit', shell: true })
 if (result.status !== 0) fail(`Railway CLI exited with status ${result.status}`)
 
 console.log(`\n✅ Pushed ${Object.keys(merged).length} vars to Railway service "${app}"`)
