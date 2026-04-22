@@ -82,7 +82,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
             <ThemeSwitcher />
             {isAuthenticated ? (
-              <UserMenu onManageAccount={() => router.push(`/${locale}/account`)} />
+              <UserMenu
+                onManageAccount={() => router.push(`/${locale}/dashboard?section=account`)}
+              />
             ) : (
               <LoginButton size="sm" loginText={t('navSignIn')} />
             )}
@@ -102,7 +104,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
             <ThemeSwitcher />
             {isAuthenticated ? (
-              <UserMenu onManageAccount={() => router.push(`/${locale}/account`)} />
+              <UserMenu
+                onManageAccount={() => router.push(`/${locale}/dashboard?section=account`)}
+              />
             ) : (
               <LoginButton loginText={t('navSignIn')} />
             )}

@@ -1,26 +1,19 @@
 import { cva, type VariantProps } from 'class-variance-authority'
+import { isDebug } from '../debug'
 import {
-  touchHeight,
-  touchSize,
-  padding,
-  paddingX,
-  paddingY,
-  gap,
+  densityContainer,
   fontSize,
-  radius,
-  shadow,
+  gap,
   intentContainer,
   intentText,
+  layoutText,
+  paddingX,
+  paddingY,
+  sizeText,
+  touchHeight,
   variantContainer,
   variantText,
-  layoutContainer,
-  layoutText,
-  densityContainer,
-  densityText,
-  sizeContainer,
-  sizeText,
 } from './tokens'
-import { isDebug } from '../debug'
 
 /**
  * Variants Réutilisables - @ezstart/ui
@@ -1550,7 +1543,7 @@ export const tagVariants = {
     defaultVariants: { variant: 'default', intent: 'default', size: 'default' },
   }),
   pre: cva(
-    'overflow-x-auto rounded-lg bg-muted/50 text-foreground p-4 font-mono text-sm [&_code]:bg-transparent [&_code]:p-0 [&_code]:rounded-none',
+    'overflow-x-auto rounded-lg bg-muted/20 text-foreground p-4 font-mono text-sm [&_code]:bg-transparent [&_code]:p-0 [&_code]:rounded-none',
     {
       variants: preVariantConfig,
       defaultVariants: { variant: 'default', intent: 'default', size: 'default' },

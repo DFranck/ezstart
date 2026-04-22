@@ -40,7 +40,7 @@ function LoginContent() {
   // First-party fallback: if no ?redirect_uri= is passed (user lands on
   // ezauth's own /login directly), default to ezauth's own callback page so
   // the SDK's code-flow exchanges the authorization code for a session cookie
-  // and lands the user on /developer (AuthCallbackPage default).
+  // and lands the user on /dashboard (AuthCallbackPage default).
   const resolvedRedirectUri =
     navigation.redirectUri ??
     (typeof window !== 'undefined'

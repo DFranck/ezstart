@@ -1,0 +1,40 @@
+{
+  "dashboard": {
+    "brand": "EZAuth",
+    "nav": {
+      "overview": "Tổng quan",
+      "account": "Tài khoản",
+      "applications": "Ứng dụng",
+      "apiKeys": "Khóa API",
+      "billing": "Thanh toán",
+      "usage": "Sử dụng",
+      "settings": "Cài đặt",
+      "users": "Người dùng",
+      "platform": "Nền tảng"
+    },
+    "welcomeBack": "Chào mừng trở lại",
+    "memberSince": "Thành viên từ",
+    "plan": "Gói",
+    "planFree": "Miễn phí",
+    "stats": {
+      "apiKeys": "Khóa API",
+      "apps": "Ứng dụng",
+      "roles": "Vai trò"
+    },
+    "billing": {
+      "title": "Thanh toán & Gói",
+      "description": "Quản lý gói đăng ký và giới hạn sử dụng",
+      "comingSoon": "Giá sẽ sớm có"
+    },
+    "usage": {
+      "title": "Sử dụng & Phân tích",
+      "description": "Thống kê sử dụng cá nhân",
+      "comingSoon": "Phân tích sử dụng sẽ sớm có"
+    },
+    "settings": {
+      "emailVerification": "Xác minh email",
+      "twoFactor": "Xác thực hai yếu tố",
+      "sessions": "Phiên hoạt động"
+    }
+  }
+}

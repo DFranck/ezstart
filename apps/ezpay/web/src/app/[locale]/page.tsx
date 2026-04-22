@@ -108,7 +108,7 @@ export default function HomePage() {
         <Div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           {isAuthenticated ? (
             <Button asChild size="lg">
-              <Link href={`/${locale}/developer`}>{t('heroCtaDashboard')}</Link>
+              <Link href={`/${locale}/dashboard`}>{t('heroCtaDashboard')}</Link>
             </Button>
           ) : (
             <Button asChild size="lg">
@@ -254,7 +254,7 @@ export default function HomePage() {
           <Div className="mt-8">
             {isAuthenticated ? (
               <Button asChild size="lg">
-                <Link href={`/${locale}/developer`}>{t('heroCtaDashboard')}</Link>
+                <Link href={`/${locale}/dashboard`}>{t('heroCtaDashboard')}</Link>
               </Button>
             ) : (
               <Button asChild size="lg">

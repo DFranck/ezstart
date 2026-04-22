@@ -1,0 +1,35 @@
+{
+  "dashboard": {
+    "brand": "EZPay",
+    "nav": {
+      "overview": "Overview",
+      "account": "Account",
+      "applications": "Applications",
+      "apiKeys": "API Keys",
+      "billing": "Billing",
+      "usage": "Usage",
+      "settings": "Settings",
+      "users": "Users",
+      "platform": "Platform"
+    },
+    "welcomeBack": "Welcome back",
+    "memberSince": "Member since",
+    "plan": "Plan",
+    "planFree": "Free",
+    "billing": {
+      "title": "Billing & Plans",
+      "description": "Manage your subscription plan and usage limits",
+      "comingSoon": "Pricing coming soon"
+    },
+    "usage": {
+      "title": "Usage & Analytics",
+      "description": "Personal usage statistics across your apps",
+      "comingSoon": "Usage analytics coming soon"
+    },
+    "settings": {
+      "emailVerification": "Email Verification",
+      "twoFactor": "Two-Factor Authentication",
+      "sessions": "Active Sessions"
+    }
+  }
+}

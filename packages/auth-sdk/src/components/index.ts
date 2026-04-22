@@ -81,7 +81,13 @@ export type {
 
 // Developer dashboard (full-page layout)
 export { EZAuthDashboard } from './EZAuthDashboard.js'
-export type { EZAuthDashboardProps, EZAuthDashboardTexts } from './EZAuthDashboard.js'
+export type {
+  EZAuthDashboardProps,
+  EZAuthDashboardTexts,
+  EZAuthDashboardSection,
+  EZAuthDashboardSlots,
+  EZAuthDashboardExtraSection,
+} from './EZAuthDashboard.js'
 
 // Developer portal (API keys management)
 export {

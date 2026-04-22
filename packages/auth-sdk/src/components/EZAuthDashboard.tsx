@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   Badge,
   Card,
@@ -25,7 +27,6 @@ import {
   SidebarToggle,
   Skeleton,
   Span,
-  Button,
 } from '@ezstart/ui/components'
 import { useAuth } from '../react/hooks.js'
 import { UserMenu } from './UserMenu.js'
@@ -44,13 +45,41 @@ import type { DeveloperPortalTexts } from './developer/types.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+/**
+ * Canonical section identifiers for the unified dashboard. Mirrors the
+ * Stripe / Clerk sidebar pattern: progressive disclosure based on RBAC.
+ */
+export type EZAuthDashboardSection =
+  | 'overview'
+  | 'account'
+  | 'applications'
+  | 'api-keys'
+  | 'billing'
+  | 'usage'
+  | 'settings'
+  | 'users'
+  | 'platform'
+
+/**
+ * Visibility rules for each section.
+ * - `always`: every authenticated user sees it
+ * - `ownsApps`: only when the user owns at least one Application
+ * - `admin`: admin OR superadmin
+ * - `superadmin`: superadmin only
+ */
+type SectionVisibility = 'always' | 'ownsApps' | 'admin' | 'superadmin'
+
 export interface EZAuthDashboardTexts {
-  /** Sidebar nav labels */
+  /** Sidebar nav labels (keys mirror the section ids) */
   navOverview: string
+  navAccount: string
+  navApplications: string
   navApiKeys: string
   navBilling: string
+  navUsage: string
   navSettings: string
-  navAdmin: string
+  navUsers: string
+  navPlatform: string
   /** Sidebar brand */
   brand: string
   /** Overview section */
@@ -61,10 +90,14 @@ export interface EZAuthDashboardTexts {
   statsApiKeys: string
   statsApps: string
   statsRoles: string
-  /** Billing section */
+  /** Billing section defaults */
   billingTitle: string
   billingDescription: string
   comingSoon: string
+  /** Usage section defaults */
+  usageTitle: string
+  usageDescription: string
+  usageComingSoon: string
   /** Sign out */
   signOut: string
   /** Settings sub-section titles */
@@ -80,30 +113,82 @@ export interface EZAuthDashboardTexts {
   admin: Partial<AuthAdminDashboardTexts>
 }
 
+/**
+ * Slot overrides. Consumer apps can inject app-specific content for sections
+ * that need routing / app-scoped SDK components (e.g. `ApplicationsList`,
+ * `BillingDashboard`, `UserDashboard`).
+ *
+ * If a slot is omitted the section falls back to the built-in content (or a
+ * "coming soon" placeholder for pure app-specific sections like `platform`).
+ */
+export interface EZAuthDashboardSlots {
+  overview?: ReactNode
+  account?: ReactNode
+  applications?: ReactNode
+  apiKeys?: ReactNode
+  billing?: ReactNode
+  usage?: ReactNode
+  settings?: ReactNode
+  users?: ReactNode
+  platform?: ReactNode
+}
+
+/**
+ * Extra section injected at a specific position. Lets consumer apps (e.g.
+ * ezpay) add product-specific sidebar entries like "Stripe Connect" or
+ * "Plans" without forking the dashboard.
+ */
+export interface EZAuthDashboardExtraSection {
+  /** Unique id (used in `?section=` and as React key). Must not collide with the canonical ids. */
+  id: string
+  /** Sidebar label (already translated). */
+  label: string
+  /** Lucide icon name (e.g. `'lucide:Plug'`). */
+  icon: string
+  /** Content rendered when the section is active. */
+  content: ReactNode
+  /** Visibility rule. Defaults to `'always'`. */
+  visibility?: SectionVisibility
+}
+
 export interface EZAuthDashboardProps {
-  /** Default active section. Defaults to `'overview'`. */
-  defaultSection?: 'overview' | 'api-keys' | 'billing' | 'settings' | 'admin'
+  /** Default active section when no `?section=` is present. Defaults to `'overview'`. */
+  defaultSection?: EZAuthDashboardSection
   /** App name for role display and API key scoping. */
   appName?: string
-  /** Whether DeveloperPortal should fetch data. */
+  /** Whether DeveloperPortal should fetch data (when using the default slot). */
   apiKeysEnabled?: boolean
+  /** Whether the current user owns at least one Application (gates sections). */
+  hasOwnedApps?: boolean
   /** Locale for date formatting. */
   locale?: string
   /** All user-facing strings. Falls back to English defaults. */
   texts?: Partial<EZAuthDashboardTexts>
+  /** Slot overrides for app-specific content. */
+  slots?: EZAuthDashboardSlots
   /** Additional className on root wrapper. */
   className?: string
+  /** Explicit list of sections to render. When omitted, all sections visible
+   * under the RBAC rules are shown. Use this to hide/reorder tabs. */
+  sections?: EZAuthDashboardSection[]
+  /** Extra app-specific sections added after the canonical ones but before
+   * the admin (`users`/`platform`) sections. */
+  extraSections?: EZAuthDashboardExtraSection[]
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
 
 const DEFAULT_TEXTS: EZAuthDashboardTexts = {
   navOverview: 'Overview',
+  navAccount: 'Account',
+  navApplications: 'Applications',
   navApiKeys: 'API Keys',
   navBilling: 'Billing',
+  navUsage: 'Usage',
   navSettings: 'Settings',
-  navAdmin: 'Admin',
-  brand: 'Developer',
+  navUsers: 'Users',
+  navPlatform: 'Platform',
+  brand: 'Dashboard',
   welcomeBack: 'Welcome back',
   memberSince: 'Member since',
   plan: 'Plan',
@@ -114,6 +199,9 @@ const DEFAULT_TEXTS: EZAuthDashboardTexts = {
   billingTitle: 'Billing & Plans',
   billingDescription: 'Manage your subscription plan and usage limits',
   comingSoon: 'Pricing coming soon',
+  usageTitle: 'Usage & Analytics',
+  usageDescription: 'Personal usage statistics across your apps',
+  usageComingSoon: 'Usage analytics coming soon',
   signOut: 'Sign Out',
   settingsEmailVerification: 'Email Verification',
   settingsTwoFactor: 'Two-Factor Authentication',
@@ -124,6 +212,43 @@ const DEFAULT_TEXTS: EZAuthDashboardTexts = {
   sessions: {},
   developerPortal: {},
   admin: {},
+}
+
+// Default section order when `sections` prop is not provided.
+const DEFAULT_SECTION_ORDER: EZAuthDashboardSection[] = [
+  'overview',
+  'account',
+  'applications',
+  'api-keys',
+  'billing',
+  'usage',
+  'users',
+  'platform',
+  'settings',
+]
+
+const SECTION_VISIBILITY: Record<EZAuthDashboardSection, SectionVisibility> = {
+  overview: 'always',
+  account: 'always',
+  applications: 'always',
+  'api-keys': 'always',
+  billing: 'always',
+  usage: 'always',
+  settings: 'always',
+  users: 'admin',
+  platform: 'superadmin',
+}
+
+const SECTION_ICONS: Record<EZAuthDashboardSection, string> = {
+  overview: 'lucide:LayoutDashboard',
+  account: 'lucide:User',
+  applications: 'lucide:AppWindow',
+  'api-keys': 'lucide:Key',
+  billing: 'lucide:CreditCard',
+  usage: 'lucide:BarChart3',
+  settings: 'lucide:Settings',
+  users: 'lucide:Users',
+  platform: 'lucide:ShieldCheck',
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -150,7 +275,32 @@ function isSuperadmin(user: { globalRoles?: string[] }): boolean {
   return user.globalRoles?.includes('superadmin') ?? false
 }
 
-type Section = 'overview' | 'api-keys' | 'billing' | 'settings' | 'admin'
+function isAdminOrSuperadmin(user: { globalRoles?: string[] }): boolean {
+  return isSuperadmin(user) || (user.globalRoles?.includes('admin') ?? false)
+}
+
+function navLabelFor(section: EZAuthDashboardSection, texts: EZAuthDashboardTexts): string {
+  switch (section) {
+    case 'overview':
+      return texts.navOverview
+    case 'account':
+      return texts.navAccount
+    case 'applications':
+      return texts.navApplications
+    case 'api-keys':
+      return texts.navApiKeys
+    case 'billing':
+      return texts.navBilling
+    case 'usage':
+      return texts.navUsage
+    case 'settings':
+      return texts.navSettings
+    case 'users':
+      return texts.navUsers
+    case 'platform':
+      return texts.navPlatform
+  }
+}
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -158,15 +308,45 @@ export function EZAuthDashboard({
   defaultSection = 'overview',
   appName,
   apiKeysEnabled = true,
+  hasOwnedApps = false,
   locale = 'en',
   texts: textOverrides,
+  slots,
   className,
+  sections: sectionsProp,
+  extraSections,
 }: EZAuthDashboardProps) {
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
-  const [activeSection, setActiveSection] = useState<Section>(defaultSection)
+  const searchParams = useSearchParams()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+
+  const extras = extraSections ?? []
+  const extraIds = extras.map(e => e.id)
+  const allKnownIds: string[] = [...DEFAULT_SECTION_ORDER, ...extraIds]
+
+  // Compute the initial section from `?section=...` query (deeplink) when
+  // available, otherwise fall back to `defaultSection`.
+  const querySection = searchParams?.get('section') ?? null
+  const initialSection: string = useMemo(() => {
+    if (querySection && allKnownIds.includes(querySection)) {
+      return querySection
+    }
+    return defaultSection
+  }, [querySection, defaultSection, allKnownIds.join(',')])
+
+  const [activeSection, setActiveSection] = useState<string>(initialSection)
+
+  // When the query-string changes (e.g. router.replace from a nav link),
+  // follow it.
+  useEffect(() => {
+    if (querySection && allKnownIds.includes(querySection)) {
+      setActiveSection(querySection)
+    }
+    // Intentionally not re-running on allKnownIds change (we hash via join).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [querySection])
 
   if (!mounted) {
     return <DashboardSkeleton />
@@ -176,17 +356,58 @@ export function EZAuthDashboard({
     return null
   }
 
-  const isAdmin = isSuperadmin(user) || (user.globalRoles?.includes('admin') ?? false)
+  const isAdmin = isAdminOrSuperadmin(user)
+  const isSuper = isSuperadmin(user)
 
-  const navItems: { id: Section; label: string; icon: string }[] = [
-    { id: 'overview', label: texts.navOverview, icon: 'lucide:LayoutDashboard' },
-    { id: 'api-keys', label: texts.navApiKeys, icon: 'lucide:Key' },
-    { id: 'billing', label: texts.navBilling, icon: 'lucide:CreditCard' },
-    { id: 'settings', label: texts.navSettings, icon: 'lucide:Settings' },
-    ...(isAdmin
-      ? [{ id: 'admin' as Section, label: texts.navAdmin, icon: 'lucide:ShieldCheck' }]
-      : []),
+  const shouldShow = (vis: SectionVisibility): boolean => {
+    switch (vis) {
+      case 'always':
+        return true
+      case 'ownsApps':
+        return hasOwnedApps
+      case 'admin':
+        return isAdmin
+      case 'superadmin':
+        return isSuper
+    }
+  }
+
+  // Visibility filter — drops canonical sections the current user can't see.
+  const canonicalSections = (sectionsProp ?? DEFAULT_SECTION_ORDER).filter(section =>
+    shouldShow(SECTION_VISIBILITY[section])
+  )
+
+  // Filter extra sections by their visibility.
+  const visibleExtras = extras.filter(e => shouldShow(e.visibility ?? 'always'))
+
+  // Build nav items. Canonical non-admin sections first, then extras, then
+  // admin sections (`users`/`platform`).
+  const canonicalNonAdmin = canonicalSections.filter(s => s !== 'users' && s !== 'platform')
+  const canonicalAdmin = canonicalSections.filter(s => s === 'users' || s === 'platform')
+
+  const navItems: { id: string; label: string; icon: string }[] = [
+    ...canonicalNonAdmin.map(section => ({
+      id: section,
+      label: navLabelFor(section, texts),
+      icon: SECTION_ICONS[section],
+    })),
+    ...visibleExtras.map(e => ({ id: e.id, label: e.label, icon: e.icon })),
+    ...canonicalAdmin.map(section => ({
+      id: section,
+      label: navLabelFor(section, texts),
+      icon: SECTION_ICONS[section],
+    })),
   ]
+
+  // If the currently-active section is no longer visible (RBAC flip or custom
+  // `sections` list), fall back to the first visible section.
+  const visibleIds = navItems.map(n => n.id)
+  const effectiveSection: string = visibleIds.includes(activeSection)
+    ? activeSection
+    : (visibleIds[0] ?? 'overview')
+
+  const activeExtra = visibleExtras.find(e => e.id === effectiveSection)
+  const isCanonical = DEFAULT_SECTION_ORDER.includes(effectiveSection as EZAuthDashboardSection)
 
   return (
     <DashboardLayout className={className}>
@@ -207,7 +428,7 @@ export function EZAuthDashboard({
             <SidebarLink
               key={item.id}
               href="#"
-              active={activeSection === item.id}
+              active={effectiveSection === item.id}
               icon={<Icon name={item.icon as 'lucide:Key'} className="h-4 w-4" />}
               onClick={e => {
                 e.preventDefault()
@@ -229,33 +450,120 @@ export function EZAuthDashboard({
         <DashboardHeader>
           <SidebarToggle mode="mobile" />
           <H2 className="text-lg font-semibold text-foreground">
-            {navItems.find(n => n.id === activeSection)?.label}
+            {navItems.find(n => n.id === effectiveSection)?.label}
           </H2>
         </DashboardHeader>
 
         <DashboardContent>
-          {activeSection === 'overview' && (
-            <OverviewSection user={user} appName={appName} texts={texts} />
-          )}
-          {activeSection === 'api-keys' && (
-            <DeveloperPortal
-              enabled={apiKeysEnabled}
+          {activeExtra ? (
+            activeExtra.content
+          ) : isCanonical ? (
+            <SectionRenderer
+              section={effectiveSection as EZAuthDashboardSection}
+              user={user}
+              appName={appName}
+              apiKeysEnabled={apiKeysEnabled}
               locale={locale}
-              texts={texts.developerPortal}
-              showAdminScope={isSuperadmin(user)}
-              appOptions={user.apps ?? []}
+              texts={texts}
+              slots={slots}
+              isAdmin={isAdmin}
+              isSuper={isSuper}
             />
-          )}
-          {activeSection === 'billing' && <BillingSection texts={texts} isAdmin={isAdmin} />}
-          {activeSection === 'settings' && <SettingsSection appName={appName} texts={texts} />}
-          {activeSection === 'admin' && isAdmin && <AuthAdminDashboard texts={texts.admin} />}
+          ) : null}
         </DashboardContent>
       </DashboardMain>
     </DashboardLayout>
   )
 }
 
-// ─── Settings Section ────────────────────────────────────────────────────────
+// ─── Section renderer ────────────────────────────────────────────────────────
+
+interface SectionRendererProps {
+  section: EZAuthDashboardSection
+  user: {
+    email: string
+    username: string
+    firstName?: string
+    lastName?: string
+    avatar?: string
+    apps?: string[]
+    globalRoles?: string[]
+    appRoles?: Record<string, string[]>
+    createdAt: string
+  }
+  appName?: string
+  apiKeysEnabled: boolean
+  locale: string
+  texts: EZAuthDashboardTexts
+  slots?: EZAuthDashboardSlots
+  isAdmin: boolean
+  isSuper: boolean
+}
+
+function SectionRenderer({
+  section,
+  user,
+  appName,
+  apiKeysEnabled,
+  locale,
+  texts,
+  slots,
+  isAdmin,
+  isSuper,
+}: SectionRendererProps) {
+  switch (section) {
+    case 'overview':
+      return slots?.overview ?? <OverviewSection user={user} texts={texts} />
+
+    case 'account':
+      return slots?.account ?? <SettingsSection appName={appName} texts={texts} />
+
+    case 'applications':
+      return (
+        slots?.applications ?? (
+          <PlaceholderSection
+            icon="lucide:AppWindow"
+            title={texts.navApplications}
+            description="Configure this section by passing `slots.applications` from your app."
+          />
+        )
+      )
+
+    case 'api-keys':
+      return (
+        slots?.apiKeys ?? (
+          <DeveloperPortal
+            enabled={apiKeysEnabled}
+            locale={locale}
+            texts={texts.developerPortal}
+            showAdminScope={isSuper}
+            appOptions={user.apps ?? []}
+          />
+        )
+      )
+
+    case 'billing':
+      return slots?.billing ?? <BillingSection texts={texts} isAdmin={isAdmin} />
+
+    case 'usage':
+      return slots?.usage ?? <UsageSection texts={texts} />
+
+    case 'settings':
+      return slots?.settings ?? <SettingsSection appName={appName} texts={texts} />
+
+    case 'users':
+      return (
+        slots?.users ?? (
+          <AuthAdminDashboard scope={isSuper ? 'all' : 'myApps'} appName="*" texts={texts.admin} />
+        )
+      )
+
+    case 'platform':
+      return slots?.platform ?? <AuthAdminDashboard scope="all" appName="*" texts={texts.admin} />
+  }
+}
+
+// ─── Settings / Account Section ──────────────────────────────────────────────
 
 function SettingsSection({ appName, texts }: { appName?: string; texts: EZAuthDashboardTexts }) {
   return (
@@ -300,7 +608,6 @@ function SettingsSection({ appName, texts }: { appName?: string; texts: EZAuthDa
 
 function OverviewSection({
   user,
-  appName,
   texts,
 }: {
   user: {
@@ -314,7 +621,6 @@ function OverviewSection({
     appRoles?: Record<string, string[]>
     createdAt: string
   }
-  appName?: string
   texts: EZAuthDashboardTexts
 }) {
   const apps = user.apps ?? []
@@ -434,6 +740,58 @@ function BillingSection({ texts, isAdmin }: { texts: EZAuthDashboardTexts; isAdm
             {isAdmin && (
               <P className="text-sm text-muted-foreground/70">Connect EZPay to configure plans</P>
             )}
+          </Div>
+        </CardContent>
+      </Card>
+    </Div>
+  )
+}
+
+// ─── Usage Section ───────────────────────────────────────────────────────────
+
+function UsageSection({ texts }: { texts: EZAuthDashboardTexts }) {
+  return (
+    <Div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-bold">{texts.usageTitle}</CardTitle>
+          <CardDescription>{texts.usageDescription}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Div className="flex flex-col items-center gap-3 py-8 text-center">
+            <Icon name="lucide:BarChart3" className="h-12 w-12 text-muted-foreground/50" />
+            <P className="text-muted-foreground">{texts.usageComingSoon}</P>
+          </Div>
+        </CardContent>
+      </Card>
+    </Div>
+  )
+}
+
+// ─── Placeholder Section ─────────────────────────────────────────────────────
+
+function PlaceholderSection({
+  icon,
+  title,
+  description,
+}: {
+  icon: string
+  title: string
+  description: string
+}) {
+  return (
+    <Div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-bold">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Div className="flex flex-col items-center gap-3 py-8 text-center">
+            <Icon
+              name={icon as 'lucide:AppWindow'}
+              className="h-12 w-12 text-muted-foreground/50"
+            />
+            <P className="text-muted-foreground">{description}</P>
           </Div>
         </CardContent>
       </Card>

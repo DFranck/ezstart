@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppNavLink href="#features">{nav('features')}</AppNavLink>
           <AppNavLink href="#pricing">{nav('pricing')}</AppNavLink>
           <AppNavLink href="/docs">{nav('docs')}</AppNavLink>
-          {isAuthenticated && <AppNavLink href="/billing">{nav('billing')}</AppNavLink>}
+          {isAuthenticated && <AppNavLink href="/dashboard">{nav('dashboard')}</AppNavLink>}
         </AppNav>
 
         <AppActions>
@@ -69,7 +69,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-            {isAuthenticated ? <UserMenu /> : <LoginButton size="sm" loginText={nav('signIn')} />}
+            {isAuthenticated ? (
+              <UserMenu
+                onManageAccount={() => router.push(`/${locale}/dashboard?section=account`)}
+              />
+            ) : (
+              <LoginButton size="sm" loginText={nav('signIn')} />
+            )}
           </Div>
           <AppMobileToggle />
         </AppActions>
@@ -78,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppMobileLink href="#features">{nav('features')}</AppMobileLink>
           <AppMobileLink href="#pricing">{nav('pricing')}</AppMobileLink>
           <AppMobileLink href="/docs">{nav('docs')}</AppMobileLink>
-          {isAuthenticated && <AppMobileLink href="/billing">{nav('billing')}</AppMobileLink>}
+          {isAuthenticated && <AppMobileLink href="/dashboard">{nav('dashboard')}</AppMobileLink>}
           <Div className="px-3 pt-2 flex flex-col gap-2">
             <Div className="flex items-center gap-2">
               <LocaleSwitcher
@@ -89,7 +95,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <ThemeSwitcher />
             </Div>
             {isAuthenticated ? (
-              <UserMenu />
+              <UserMenu
+                onManageAccount={() => router.push(`/${locale}/dashboard?section=account`)}
+              />
             ) : (
               <LoginButton className="w-full" loginText={nav('signIn')} />
             )}

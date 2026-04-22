@@ -5,7 +5,8 @@
       "pricing": "Tarifs",
       "docs": "Docs",
       "signIn": "Connexion",
-      "billing": "Facturation"
+      "billing": "Facturation",
+      "dashboard": "Tableau de bord"
     },
     "footer": {
       "product": "Produit",

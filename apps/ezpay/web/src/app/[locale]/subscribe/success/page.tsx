@@ -35,7 +35,7 @@ function SubscribeSuccessContent() {
 
   useEffect(() => {
     if (countdown <= 0) {
-      router.push(`/${locale}/billing`)
+      router.push(`/${locale}/dashboard?section=billing`)
       return
     }
     const timer = setTimeout(() => setCountdown(c => c - 1), 1000)
@@ -64,7 +64,7 @@ function SubscribeSuccessContent() {
 
         <Div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Button asChild size="lg">
-            <Link href={`/${locale}/billing`}>
+            <Link href={`/${locale}/dashboard?section=billing`}>
               <Icon name="lucide:LayoutDashboard" className="w-5 h-5 mr-2" />
               {t('goToBilling')}
             </Link>

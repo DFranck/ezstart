@@ -73,8 +73,8 @@ export default function ApplicationDetailPage() {
         locale={locale}
         texts={texts}
         showAdminScope={isSuperadmin}
-        onBack={() => router.push(`/${locale}/developer`)}
-        onArchived={() => router.push(`/${locale}/developer`)}
+        onBack={() => router.push(`/${locale}/dashboard?section=applications`)}
+        onArchived={() => router.push(`/${locale}/dashboard?section=applications`)}
       />
     </Div>
   )

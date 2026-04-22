@@ -23,7 +23,7 @@ import {
  *
  * Stripe Checkout redirects here after a completed subscription checkout with
  * `session_id` in the query string. We display a success screen and auto
- * redirect to `/${locale}/account` after a short delay so the user lands on
+ * redirect to `/${locale}/dashboard` after a short delay so the user lands on
  * the dashboard with freshly-granted roles (applied server-side by the
  * EZPay -> EZAuth webhook).
  */
@@ -37,7 +37,7 @@ function SubscribeSuccessContent() {
 
   useEffect(() => {
     if (countdown <= 0) {
-      router.push(`/${locale}/account`)
+      router.push(`/${locale}/dashboard`)
       return
     }
     const timer = setTimeout(() => setCountdown(c => c - 1), 1000)
@@ -66,7 +66,7 @@ function SubscribeSuccessContent() {
 
         <Div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Button asChild size="lg">
-            <Link href={`/${locale}/account`}>
+            <Link href={`/${locale}/dashboard`}>
               <Icon name="lucide:LayoutDashboard" className="w-5 h-5 mr-2" />
               {t('goToDashboard')}
             </Link>

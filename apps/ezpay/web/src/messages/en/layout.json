@@ -5,7 +5,8 @@
       "pricing": "Pricing",
       "docs": "Docs",
       "signIn": "Sign In",
-      "billing": "Billing"
+      "billing": "Billing",
+      "dashboard": "Dashboard"
     },
     "footer": {
       "product": "Product",
