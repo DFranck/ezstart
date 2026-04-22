@@ -31,6 +31,7 @@ export type {
   Plan,
   CreatePlanRequest,
   UpdatePlanRequest,
+  GetPaymentsParams,
   PlanResponse,
   PlansListResponse,
   ConnectedAccount,

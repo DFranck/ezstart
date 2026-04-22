@@ -11,6 +11,8 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { PayProvider, useApplicationContext } from '../../react/pay-provider.js'
 import { usePayStore } from '../../react/store.js'
 
+const ORIGINAL_NODE_ENV = process.env.NODE_ENV
+
 function Wrapper({
   children,
   publishableKey,
@@ -37,8 +39,14 @@ function Wrapper({
 describe('PayProvider — applicationId resolution', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    process.env.NODE_ENV = ORIGINAL_NODE_ENV
     // Reset zustand store between tests
-    usePayStore.setState({ applicationId: null, appSlug: null, isReady: false })
+    usePayStore.setState({
+      applicationId: null,
+      appSlug: null,
+      isReady: false,
+      applicationResolutionStatus: 'idle',
+    })
   })
 
   it('fetches /keys/config when publishableKey is provided and resolves applicationId', async () => {
@@ -139,8 +147,8 @@ describe('PayProvider — applicationId resolution', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('gracefully degrades on fetch failure and logs a warning', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  it('does NOT fail-open on fetch failure — status=failed, isReady=false (VULN-1)', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const fetchMock = vi.fn(
       async () =>
         new Response(JSON.stringify({ error: 'Invalid API key' }), {
@@ -159,17 +167,114 @@ describe('PayProvider — applicationId resolution', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.isReady).toBe(true)
+      expect(result.current.applicationResolutionStatus).toBe('failed')
     })
 
+    // Fail-closed: applicationId stays null AND isReady stays false.
+    // Prevents usePaymentHistory from silently downgrading to cross-app scope.
     expect(result.current.applicationId).toBeNull()
-    expect(result.current.appSlug).toBe('ezbill')
-    expect(warnSpy).toHaveBeenCalled()
-    const message = warnSpy.mock.calls[0]?.[0] as string
+    expect(result.current.isReady).toBe(false)
+    expect(errorSpy).toHaveBeenCalled()
+    const message = errorSpy.mock.calls[0]?.[0] as string
     expect(message).toContain('[pay-sdk]')
     expect(message).toContain('Failed to resolve application')
+    expect(message).toContain('Scoped queries will be blocked')
 
-    warnSpy.mockRestore()
+    errorSpy.mockRestore()
+  })
+
+  it('exposes applicationResolutionStatus: pending → ready on successful resolve', async () => {
+    let resolveFetch: ((res: Response) => void) | null = null
+    const fetchMock = vi.fn(
+      () =>
+        new Promise<Response>(resolve => {
+          resolveFetch = resolve
+        })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }) => <Wrapper publishableKey="ez_pk_test_slow">{children}</Wrapper>,
+    })
+
+    // Initially pending
+    await waitFor(() => {
+      expect(result.current.applicationResolutionStatus).toBe('pending')
+    })
+    expect(result.current.isReady).toBe(false)
+
+    // Now resolve the fetch
+    resolveFetch?.(
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: { applicationId: 'app_ok', appSlug: 'ezbill' },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    )
+
+    await waitFor(() => {
+      expect(result.current.applicationResolutionStatus).toBe('ready')
+    })
+    expect(result.current.applicationId).toBe('app_ok')
+    expect(result.current.isReady).toBe(true)
+  })
+
+  it('logs console.error in dev when mounted with only legacy appName (VULN-3)', async () => {
+    process.env.NODE_ENV = 'development'
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }) => <Wrapper appName="ezpay">{children}</Wrapper>,
+    })
+
+    await waitFor(() => {
+      expect(errorSpy).toHaveBeenCalled()
+    })
+
+    const message = errorSpy.mock.calls[0]?.[0] as string
+    expect(message).toContain('[pay-sdk]')
+    expect(message).toContain('only `appName`')
+    expect(message).toContain('deprecated')
+    errorSpy.mockRestore()
+  })
+
+  it('does NOT log the legacy warning when applicationId is provided', async () => {
+    process.env.NODE_ENV = 'development'
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }) => (
+        <Wrapper applicationId="app_123" appName="ezpay">
+          {children}
+        </Wrapper>
+      ),
+    })
+
+    await new Promise(r => setTimeout(r, 20))
+    // No legacy warning should have fired
+    const legacyWarnings = errorSpy.mock.calls.filter(call =>
+      (call[0] as string)?.includes('only `appName`')
+    )
+    expect(legacyWarnings).toHaveLength(0)
+    errorSpy.mockRestore()
+  })
+
+  it('does NOT log legacy warning in production even when only appName is provided', async () => {
+    process.env.NODE_ENV = 'production'
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }) => <Wrapper appName="ezpay">{children}</Wrapper>,
+    })
+
+    await new Promise(r => setTimeout(r, 20))
+    const legacyWarnings = errorSpy.mock.calls.filter(call =>
+      (call[0] as string)?.includes('only `appName`')
+    )
+    expect(legacyWarnings).toHaveLength(0)
+    errorSpy.mockRestore()
   })
 
   it('syncs resolved context to the zustand store', async () => {

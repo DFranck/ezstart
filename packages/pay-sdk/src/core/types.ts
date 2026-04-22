@@ -506,6 +506,49 @@ export interface ChangePlanResponse {
   newStripePriceId: string
 }
 
+/**
+ * Query parameters accepted by `PayClient.getPayments()` (and the
+ * `GET /api/payments` route).
+ *
+ * `applicationId` scopes the result to a single Ezauth Application — the API
+ * resolves it to the underlying app slug and filters `projectId` accordingly.
+ * When omitted, payments from every application the caller has access to are
+ * returned (legacy behaviour, back-compat only).
+ */
+export interface GetPaymentsParams {
+  userId?: string
+  projectId?: string
+  /**
+   * Ezauth Application id to scope the listing to (preferred). When provided,
+   * the API combines this filter with the RBAC scope via AND — a regular user
+   * sees only their own payments on this application, a `myApps` caller sees
+   * revenue for this application only, and a superadmin (`scope=all`) also
+   * remains scoped to this application.
+   */
+  applicationId?: string
+  limit?: number
+  offset?: number
+  type?: string
+  status?: string
+  liveMode?: string
+  dateFrom?: string
+  dateTo?: string
+  /**
+   * RBAC scope applied by the API:
+   * - `mine` — only the caller's own payments (default)
+   * - `myApps` — caller's own + payments on Applications the caller owns
+   * - `all` — all payments (superadmin only; 403 otherwise)
+   */
+  scope?: 'mine' | 'myApps' | 'all'
+  /**
+   * Optional `AbortSignal` propagated to the underlying `fetch` call. When the
+   * signal is aborted, the in-flight HTTP request is cancelled at the network
+   * layer (not just discarded UI-side). Used by `usePaymentHistory` to avoid
+   * wasting server bandwidth on stale-scope reads when the user switches apps.
+   */
+  signal?: AbortSignal
+}
+
 // API Responses
 export interface PaymentResponse {
   success: boolean

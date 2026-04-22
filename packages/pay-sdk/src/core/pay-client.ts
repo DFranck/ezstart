@@ -14,6 +14,7 @@ import type {
   UpdatePlanRequest,
   ChangePlanRequest,
   ChangePlanResponse,
+  GetPaymentsParams,
   Payment,
   PaymentResponse,
   PaymentsListResponse,
@@ -97,7 +98,8 @@ export class PayClient {
    */
   private async fetchList(
     path: string,
-    params?: Record<string, string | number | undefined>
+    params?: Record<string, string | number | undefined>,
+    options?: { signal?: AbortSignal }
   ): Promise<PaymentsListResponse> {
     const searchParams = new URLSearchParams()
     if (params) {
@@ -107,7 +109,10 @@ export class PayClient {
     }
 
     const url = `${this.config.apiUrl}/${path}?${searchParams.toString()}`
-    const response = await this.fetchWithAuth(url, { headers: this.getHeaders() })
+    const response = await this.fetchWithAuth(url, {
+      headers: this.getHeaders(),
+      signal: options?.signal,
+    })
     const result = await response.json()
 
     if (!response.ok) {
@@ -322,25 +327,51 @@ export class PayClient {
 
   // ===== GENERAL =====
 
-  async getPayments(params?: {
-    userId?: string
-    projectId?: string
-    limit?: number
-    offset?: number
-    type?: string
-    status?: string
-    liveMode?: string
-    dateFrom?: string
-    dateTo?: string
-    /**
-     * RBAC scope applied by the API:
-     * - `mine` — only the caller's own payments (default)
-     * - `myApps` — caller's own + payments on Applications the caller owns
-     * - `all` — all payments (superadmin only; 403 otherwise)
-     */
-    scope?: 'mine' | 'myApps' | 'all'
-  }): Promise<PaymentsListResponse> {
-    return this.fetchList('payments', params)
+  /**
+   * List payments scoped by RBAC + optional `applicationId`.
+   *
+   * `applicationId` filters payments to a single Ezauth Application (the API
+   * resolves it to the underlying slug and filters `projectId`). When the
+   * caller omits `applicationId` but the client was constructed with one
+   * (via `<PayProvider publishableKey>` or explicit config), the client's
+   * `applicationId` is injected automatically — this is what keeps the
+   * `<BillingDashboard>` of each app scoped to its own payments.
+   *
+   * Pass `applicationId: ''` explicitly to opt out of the auto-injection
+   * (e.g. for a cross-app superadmin view).
+   *
+   * @example
+   * // Scoped to the current app (applicationId comes from PayProvider)
+   * await client.getPayments({ userId: 'u_1' })
+   *
+   * // Explicit scope to another app
+   * await client.getPayments({ userId: 'u_1', applicationId: 'app_123' })
+   *
+   * // Superadmin cross-app view (bypass auto-injection)
+   * await client.getPayments({ scope: 'all', applicationId: '' })
+   */
+  async getPayments(params?: GetPaymentsParams): Promise<PaymentsListResponse> {
+    const merged: Record<string, string | number | undefined> = {
+      userId: params?.userId,
+      projectId: params?.projectId,
+      applicationId: params?.applicationId,
+      limit: params?.limit,
+      offset: params?.offset,
+      type: params?.type,
+      status: params?.status,
+      liveMode: params?.liveMode,
+      dateFrom: params?.dateFrom,
+      dateTo: params?.dateTo,
+      scope: params?.scope,
+    }
+    if (merged.applicationId === undefined && this.config.applicationId) {
+      merged.applicationId = this.config.applicationId
+    }
+    // Empty string → caller explicitly opted out of scoping; drop before sending.
+    if (merged.applicationId === '') {
+      merged.applicationId = undefined
+    }
+    return this.fetchList('payments', merged, { signal: params?.signal })
   }
 
   async getPayment(paymentId: string): Promise<Payment> {

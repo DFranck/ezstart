@@ -34,6 +34,7 @@ export type {
   UpdatePlanRequest,
   ChangePlanRequest,
   ChangePlanResponse,
+  GetPaymentsParams,
   PlanResponse,
   PlansListResponse,
   PayApiKeyItem,

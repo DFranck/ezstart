@@ -95,8 +95,30 @@ const donation = await client.createDonation({ projectId: 'proj_123', amount: 50
 
 - `<PayProvider>` -- context provider wrapping PayClient
 - `usePay()` -- payment operations with loading/error state
-- `useDonations()`, `usePurchases()`, `useSubscriptions()`, `usePaymentHistory()`
-- `useSubscriptionStatus()` -- check active subscription + features
+- `useDonations()`, `usePurchases()`, `useSubscriptions()`, `usePaymentHistory({ userId?, applicationId? })`
+- `useSubscriptionStatus({ userId, applicationId? })` -- check active subscription + features
+
+`usePaymentHistory` and `BillingDashboard` are **RBAC-scoped by `applicationId`**. When
+the enclosing `<PayProvider publishableKey>` resolves an application context,
+the scoping is automatic — each app's BillingDashboard only shows its own
+payments, even if the user has paid on other ezstart apps. Pass
+`applicationId: ''` to opt out (e.g. a superadmin cross-app view).
+
+#### Resolution lifecycle — `applicationResolutionStatus`
+
+`useApplicationContext()` exposes an `applicationResolutionStatus` field that
+tracks the publishableKey resolution lifecycle:
+
+- `idle` — provider mounted without `publishableKey` and without `applicationId` (legacy `appName`-only, cross-app possible, discouraged)
+- `pending` — publishableKey resolve in flight
+- `ready` — applicationId is known (explicit prop or successful resolve)
+- `failed` — publishableKey resolve threw (network / auth / 5xx)
+
+`usePaymentHistory` and `BillingDashboard` check this status and **refuse to
+issue scoped queries** when `status === 'failed'` (fail-closed, not fail-open)
+— this prevents cross-app payment leaks on transient resolve errors. A failed
+state surfaces as an explicit error message; refresh the page or re-mount the
+provider to retry.
 
 ### Components (`@ezstart/pay-sdk/components`)
 

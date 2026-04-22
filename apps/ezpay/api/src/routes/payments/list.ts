@@ -10,7 +10,7 @@ import {
 import { hasRole } from '@ezstart/auth-sdk/rbac/client'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
-import { listApplicationsByOwner } from '../../services/ezauth-client.js'
+import { getApplication, listApplicationsByOwner } from '../../services/ezauth-client.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -26,6 +26,10 @@ const paymentsQuerySchema = z.object({
   scope: z.enum(['mine', 'myApps', 'all']).optional().openapi({
     description:
       'RBAC scope: `mine` (own payments — default), `myApps` (app owner view), `all` (superadmin only)',
+  }),
+  applicationId: z.string().optional().openapi({
+    description:
+      'Restrict results to a single Ezauth Application (resolved to the underlying project slug). Combined with `scope` via AND.',
   }),
   type: z
     .enum(['donation', 'purchase', 'subscription', 'invoice'])
@@ -145,7 +149,17 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
     }
-    const { scope, type, status, projectId, search, liveMode, limit = 20, offset = 0 } = parsed.data
+    const {
+      scope,
+      applicationId,
+      type,
+      status,
+      projectId,
+      search,
+      liveMode,
+      limit = 20,
+      offset = 0,
+    } = parsed.data
 
     // Resolve effective scope:
     // - Explicit `scope` query param takes precedence when provided.
@@ -169,6 +183,30 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
       query.customerEmail = { $regex: escapedSearch, $options: 'i' }
     }
     if (liveMode !== undefined) query.liveMode = liveMode === 'true'
+
+    // `applicationId` is combined with the RBAC scope via AND: a regular user
+    // with `scope=mine` who passes `applicationId=app_x` only sees their own
+    // payments for app_x; a superadmin with `scope=all` still gets scoped to
+    // app_x. This is what prevents BillingDashboard cross-app leaks.
+    // Resolved AFTER the other filters so it authoritatively sets `projectId`.
+    if (applicationId) {
+      const app = await getApplication(applicationId, {
+        bearerToken: extractBearerToken(req),
+      })
+      if (!app) {
+        // Fail-closed: unknown/forbidden application → return 0 results instead
+        // of leaking the scope filter. This also handles the ezauth circuit
+        // being open (we must not widen the result set in that case).
+        return sendSuccess(res, [], { total: 0, limit: Number(limit), offset: Number(offset) })
+      }
+      // When both `applicationId` and `projectId` are supplied, require them to
+      // match — otherwise the caller is sending contradictory filters and we
+      // fail-closed rather than silently favouring one over the other.
+      if (projectId && projectId !== app.slug) {
+        return sendSuccess(res, [], { total: 0, limit: Number(limit), offset: Number(offset) })
+      }
+      query.projectId = app.slug
+    }
 
     const [payments, total] = await Promise.all([
       Payment.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)),

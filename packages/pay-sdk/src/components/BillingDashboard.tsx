@@ -16,6 +16,7 @@ import {
 } from '@ezstart/ui/components'
 import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
 import { usePaymentHistory } from '../react/hooks/usePaymentHistory.js'
+import { useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 import { PaymentHistory } from './PaymentHistory.js'
 import { ManageSubscriptionButton } from './ManageSubscriptionButton.js'
@@ -45,6 +46,9 @@ export interface BillingDashboardTexts {
   noPaymentsYet: string
   perMonth: string
   perYear: string
+  /** Shown when the PayProvider failed to resolve the publishableKey (VULN-1 fix). */
+  contextUnavailableTitle: string
+  contextUnavailableDescription: string
 }
 
 const DEFAULT_TEXTS: BillingDashboardTexts = {
@@ -72,6 +76,9 @@ const DEFAULT_TEXTS: BillingDashboardTexts = {
   noPaymentsYet: 'No payments yet',
   perMonth: 'month',
   perYear: 'year',
+  contextUnavailableTitle: 'Billing context unavailable',
+  contextUnavailableDescription:
+    'We could not resolve your billing application. Please refresh the page or contact support if the problem persists.',
 }
 
 export interface BillingDashboardProps {
@@ -115,11 +122,44 @@ export function BillingDashboard({
     )
   }
 
-  const subStatus = useSubscriptionStatus({ userId: userId || '', applicationId, appName })
+  // Resolve effective applicationId:
+  // - Explicit prop wins (cross-app view / superadmin)
+  // - Otherwise fall back to the PayProvider context (resolved via publishableKey)
+  // This guarantees each app's BillingDashboard is RBAC-scoped to its own
+  // Application, preventing cross-app payment leaks.
+  const { applicationId: ctxApplicationId, applicationResolutionStatus } = useApplicationContext()
+  const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
+
+  const subStatus = useSubscriptionStatus({
+    userId: userId || '',
+    applicationId: effectiveApplicationId,
+    appName,
+  })
   const { payments, isLoading: paymentsLoading } = usePaymentHistory({
     userId,
+    applicationId: effectiveApplicationId,
     limit: recentPaymentsCount,
   })
+
+  // VULN-1: when the publishableKey resolution failed, render an explicit
+  // error state instead of silently showing cross-app payments.
+  if (applicationResolutionStatus === 'failed' && applicationId === undefined) {
+    return (
+      <Div className={`space-y-6 ${className || ''}`}>
+        <H2>{t.title}</H2>
+        <Card>
+          <CardContent className="py-10 text-center">
+            <Icon
+              name="lucide:AlertTriangle"
+              className="w-10 h-10 text-destructive/60 mx-auto mb-3"
+            />
+            <H3 className="mb-2">{t.contextUnavailableTitle}</H3>
+            <P className="text-muted-foreground text-sm">{t.contextUnavailableDescription}</P>
+          </CardContent>
+        </Card>
+      </Div>
+    )
+  }
 
   if (subStatus.loading) {
     return (

@@ -1,6 +1,18 @@
 import { create } from 'zustand'
 import type { Payment } from '../core/types.js'
 
+/**
+ * Application context resolution lifecycle:
+ * - `idle`: provider mounted without publishableKey and without applicationId
+ *   (legacy `appName`-only path — cross-app queries possible, discouraged).
+ * - `pending`: publishableKey provided, resolution in flight.
+ * - `ready`: applicationId available (explicit prop or successful resolve).
+ * - `failed`: publishableKey was provided but resolution threw (network/auth/etc.).
+ *   Consumers MUST treat `failed` as "no scope available" and refuse to make
+ *   scoped queries (to avoid cross-app leaks via silent downgrade).
+ */
+export type ApplicationResolutionStatus = 'idle' | 'pending' | 'ready' | 'failed'
+
 export interface PayState {
   payments: Payment[]
   isLoading: boolean
@@ -9,8 +21,13 @@ export interface PayState {
   applicationId: string | null
   /** Human-friendly application slug (null until resolved). */
   appSlug: string | null
-  /** True once the app context has been resolved (or resolution failed). */
+  /**
+   * `true` ONLY when `applicationResolutionStatus === 'ready'` or `'idle'`.
+   * `false` while pending AND on resolution failure (prevents fail-open).
+   */
   isReady: boolean
+  /** Explicit resolution lifecycle — safer than `isReady` alone for RBAC gating. */
+  applicationResolutionStatus: ApplicationResolutionStatus
   setPayments: (payments: Payment[]) => void
   setLoading: (isLoading: boolean) => void
   setError: (error: string | null) => void
@@ -20,6 +37,7 @@ export interface PayState {
     applicationId: string | null
     appSlug: string | null
     isReady: boolean
+    applicationResolutionStatus: ApplicationResolutionStatus
   }) => void
 }
 
@@ -30,6 +48,7 @@ export const usePayStore = create<PayState>(set => ({
   applicationId: null,
   appSlug: null,
   isReady: false,
+  applicationResolutionStatus: 'idle',
   setPayments: payments => set({ payments }),
   setLoading: isLoading => set({ isLoading }),
   setError: error => set({ error }),
@@ -48,6 +67,7 @@ export function usePayStoreSSR() {
       applicationId: null,
       appSlug: null,
       isReady: false,
+      applicationResolutionStatus: 'idle' as ApplicationResolutionStatus,
       setPayments: () => {},
       setLoading: () => {},
       setError: () => {},

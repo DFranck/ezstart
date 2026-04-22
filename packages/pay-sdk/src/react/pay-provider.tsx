@@ -11,7 +11,7 @@ import React, {
 } from 'react'
 import { PayClient } from '../core/pay-client.js'
 import type { PayClientConfig } from '../core/types.js'
-import { usePayStore } from './store.js'
+import { usePayStore, type ApplicationResolutionStatus } from './store.js'
 
 interface PayContextValue {
   client: PayClient
@@ -22,8 +22,22 @@ interface PayContextValue {
   applicationId: string | null
   /** Human-friendly application slug (e.g. "ezbill"). `null` until resolved. */
   appSlug: string | null
-  /** True once the application context is resolved (or explicitly provided). */
+  /**
+   * `true` once the application context is resolved (explicit applicationId or
+   * successful publishableKey resolve) OR when the legacy `appName`-only path
+   * is used (no resolution possible). NEVER `true` on a transient resolve
+   * failure — that case surfaces as `applicationResolutionStatus === 'failed'`.
+   */
   isReady: boolean
+  /**
+   * Explicit resolution lifecycle:
+   * - `idle` — no publishableKey provided (legacy `appName`-only, cross-app possible)
+   * - `pending` — publishableKey provided, resolve in flight
+   * - `ready` — applicationId is known (explicit or successfully resolved)
+   * - `failed` — publishableKey was given but the resolve call threw. Consumers
+   *   MUST NOT fall back to cross-app queries when status is `failed`.
+   */
+  applicationResolutionStatus: ApplicationResolutionStatus
 }
 
 const PayContext = createContext<PayContextValue | null>(null)
@@ -33,6 +47,11 @@ interface PayProviderProps {
   /**
    * Legacy app-slug identifier. Kept for backward compatibility with existing
    * consumers. Prefer `applicationId` or `publishableKey` for new code.
+   *
+   * Using `appName` alone (without `applicationId` or `publishableKey`) puts
+   * the provider in the `idle` resolution state — downstream queries that
+   * depend on `applicationId` will fall back to cross-app scope. This path
+   * emits a `console.error` in dev to encourage migration.
    *
    * @deprecated Use `applicationId` or `publishableKey` instead.
    */
@@ -92,41 +111,84 @@ export function PayProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- callbacks are handled via refs
   }, [appName, applicationIdProp, config])
 
-  // Resolved application context (seeded from props if available, else fetched).
-  const initialApplicationId = applicationIdProp ?? config?.applicationId ?? null
-  const initialIsReady = initialApplicationId !== null
-  const [applicationId, setApplicationId] = useState<string | null>(initialApplicationId)
+  // Determine initial state based on which props are provided.
+  const explicitApplicationId = applicationIdProp ?? config?.applicationId ?? null
+  const initialStatus: ApplicationResolutionStatus = explicitApplicationId
+    ? 'ready'
+    : publishableKey
+      ? 'pending'
+      : 'idle'
+
+  const [applicationId, setApplicationId] = useState<string | null>(explicitApplicationId)
   const [appSlug, setAppSlug] = useState<string | null>(
-    initialApplicationId ? (appName ?? null) : null
+    explicitApplicationId ? (appName ?? null) : null
   )
-  const [isReady, setIsReady] = useState<boolean>(initialIsReady || !publishableKey)
+  // `isReady` tracks "safe to render downstream queries" — true only for `ready` / `idle`.
+  // Pending AND failed both keep `isReady=false` to prevent fail-open cross-app queries.
+  const [resolutionStatus, setResolutionStatus] =
+    useState<ApplicationResolutionStatus>(initialStatus)
 
   const setApplicationContext = usePayStore(state => state.setApplicationContext)
+
+  // VULN-3: dev-time warning for legacy `appName`-only path.
+  useEffect(() => {
+    if (
+      !publishableKey &&
+      !applicationIdProp &&
+      !config?.applicationId &&
+      appName &&
+      typeof window !== 'undefined' &&
+      process.env.NODE_ENV !== 'production'
+    ) {
+      // eslint-disable-next-line no-console -- dev-only deprecation error for SDK consumers
+      console.error(
+        '[pay-sdk] PayProvider was mounted with only `appName` (legacy). ' +
+          'BillingDashboard and other scoped queries require `publishableKey` or ' +
+          '`applicationId` to prevent cross-app data leaks. The legacy `appName` ' +
+          'fallback is deprecated and will be removed in a future release.'
+      )
+    }
+  }, [publishableKey, applicationIdProp, config?.applicationId, appName])
 
   // Resolve applicationId from publishableKey if provided and not already set.
   useEffect(() => {
     // If explicit applicationId is provided, no need to fetch.
     if (applicationIdProp || config?.applicationId) {
-      setApplicationId(applicationIdProp ?? config?.applicationId ?? null)
+      const id = applicationIdProp ?? config?.applicationId ?? null
+      setApplicationId(id)
       setAppSlug(appName ?? null)
-      setIsReady(true)
+      setResolutionStatus('ready')
       setApplicationContext({
-        applicationId: applicationIdProp ?? config?.applicationId ?? null,
+        applicationId: id,
         appSlug: appName ?? null,
         isReady: true,
+        applicationResolutionStatus: 'ready',
       })
       return
     }
 
-    // No publishableKey → nothing to resolve, mark ready with null context.
+    // No publishableKey → legacy `appName`-only (idle). Cross-app possible.
     if (!publishableKey) {
       setAppSlug(appName ?? null)
-      setIsReady(true)
-      setApplicationContext({ applicationId: null, appSlug: appName ?? null, isReady: true })
+      setResolutionStatus('idle')
+      setApplicationContext({
+        applicationId: null,
+        appSlug: appName ?? null,
+        isReady: true,
+        applicationResolutionStatus: 'idle',
+      })
       return
     }
 
-    // Fetch config from /keys/config exactly once.
+    // publishableKey provided → mark pending and fetch.
+    setResolutionStatus('pending')
+    setApplicationContext({
+      applicationId: null,
+      appSlug: null,
+      isReady: false,
+      applicationResolutionStatus: 'pending',
+    })
+
     let cancelled = false
     client
       .resolveApplicationByKey(publishableKey)
@@ -134,25 +196,35 @@ export function PayProvider({
         if (cancelled) return
         setApplicationId(cfg.applicationId)
         setAppSlug(cfg.appSlug)
-        setIsReady(true)
+        setResolutionStatus('ready')
         setApplicationContext({
           applicationId: cfg.applicationId,
           appSlug: cfg.appSlug,
           isReady: true,
+          applicationResolutionStatus: 'ready',
         })
       })
       .catch((err: unknown) => {
         if (cancelled) return
         const message = err instanceof Error ? err.message : String(err)
-        // Graceful degradation: log and mark ready with null context.
-        // eslint-disable-next-line no-console -- opt-in warning for misconfigured SDK usage
-        console.warn(
+        // VULN-1: NO fail-open. Keep applicationId=null AND isReady=false so
+        // downstream hooks (usePaymentHistory, etc.) can detect the failure
+        // and refuse to run a cross-app query.
+        // eslint-disable-next-line no-console -- visible misconfig / transient error signal
+        console.error(
           `[pay-sdk] Failed to resolve application from publishableKey: ${message}. ` +
-            `Falling back to legacy appName resolution.`
+            `Scoped queries will be blocked (applicationResolutionStatus='failed'). ` +
+            `Retry by refreshing the page or re-mounting the PayProvider.`
         )
-        setAppSlug(appName ?? null)
-        setIsReady(true)
-        setApplicationContext({ applicationId: null, appSlug: appName ?? null, isReady: true })
+        setApplicationId(null)
+        setAppSlug(null)
+        setResolutionStatus('failed')
+        setApplicationContext({
+          applicationId: null,
+          appSlug: null,
+          isReady: false,
+          applicationResolutionStatus: 'failed',
+        })
       })
 
     return () => {
@@ -161,9 +233,17 @@ export function PayProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we intentionally resolve once per (client, publishableKey) pair
   }, [client, publishableKey, applicationIdProp, config?.applicationId])
 
+  const isReady = resolutionStatus === 'ready' || resolutionStatus === 'idle'
+
   const contextValue = useMemo(
-    () => ({ client, applicationId, appSlug, isReady }),
-    [client, applicationId, appSlug, isReady]
+    () => ({
+      client,
+      applicationId,
+      appSlug,
+      isReady,
+      applicationResolutionStatus: resolutionStatus,
+    }),
+    [client, applicationId, appSlug, isReady, resolutionStatus]
   )
 
   return <PayContext.Provider value={contextValue}>{children}</PayContext.Provider>
@@ -178,11 +258,15 @@ export function usePayContext() {
 }
 
 /**
- * Convenience hook exposing only the resolved application context (id + slug + ready).
+ * Convenience hook exposing only the resolved application context (id + slug + ready + status).
+ *
+ * Consumers that gate RBAC-sensitive queries should check `applicationResolutionStatus`
+ * and refuse to fetch when it is `'failed'` (prevents cross-app leaks on transient errors).
  *
  * @example
  * ```tsx
- * const { applicationId, appSlug, isReady } = useApplicationContext()
+ * const { applicationId, isReady, applicationResolutionStatus } = useApplicationContext()
+ * if (applicationResolutionStatus === 'failed') return <ErrorState />
  * if (!isReady) return <Spinner />
  * ```
  */
@@ -190,9 +274,10 @@ export function useApplicationContext(): {
   applicationId: string | null
   appSlug: string | null
   isReady: boolean
+  applicationResolutionStatus: ApplicationResolutionStatus
 } {
-  const { applicationId, appSlug, isReady } = usePayContext()
-  return { applicationId, appSlug, isReady }
+  const { applicationId, appSlug, isReady, applicationResolutionStatus } = usePayContext()
+  return { applicationId, appSlug, isReady, applicationResolutionStatus }
 }
 
 export function usePay() {
