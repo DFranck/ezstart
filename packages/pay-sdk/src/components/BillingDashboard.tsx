@@ -196,10 +196,7 @@ export function BillingDashboard({
               <Div className="flex items-baseline gap-2">
                 <Span className="text-2xl font-bold">{subStatus.plan || t.freePlan}</Span>
                 <Span className="text-muted-foreground">
-                  {formatCurrency(
-                    subStatus.subscription.amount / 100,
-                    subStatus.subscription.currency
-                  )}
+                  {formatCurrency(subStatus.subscription.amount, subStatus.subscription.currency)}
                   {' / '}
                   {(subStatus.subscription.metadata?.interval as string) === 'year'
                     ? t.perYear
