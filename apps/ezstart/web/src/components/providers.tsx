@@ -36,7 +36,13 @@ export function Providers({
 }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider appName="ezstart" authMode="httpOnly">
+      <AuthProvider
+        appName="ezstart"
+        authMode="httpOnly"
+        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
+        webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+        publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
+      >
         <PayProviderWrapper>
           <NextThemesProvider
             attribute="class"
@@ -63,6 +69,8 @@ function PayProviderWrapper({ children }: { children: React.ReactNode }) {
   return (
     <PayProvider
       appName="ezstart"
+      config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
+      publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
       getToken={() => useAuthStore.getState().accessToken}
       onAuthFailure={handleAuthFailure}
     >

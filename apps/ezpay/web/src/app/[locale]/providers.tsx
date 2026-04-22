@@ -17,10 +17,16 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryProvider>
       <ThemeProvider>
-        <AuthProvider appName="ezpay">
+        <AuthProvider
+          appName="ezpay"
+          apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
+          webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+          publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
+        >
           <PayProvider
             appName="ezpay"
             config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
+            publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
             getToken={() => useAuthStore.getState().accessToken}
             onAuthFailure={handleAuthFailure}
           >

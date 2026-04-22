@@ -25,6 +25,9 @@ export function Providers({
       <AuthProvider
         appName="gacha-analyzer"
         authMode="httpOnly"
+        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
+        webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+        publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
         jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}
       >
         <ThemeProvider

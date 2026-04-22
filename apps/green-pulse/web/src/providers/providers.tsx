@@ -23,7 +23,13 @@ export function Providers({
 }) {
   return (
     <QueryProvider>
-      <AuthProvider appName="green-pulse" authMode="localStorage">
+      <AuthProvider
+        appName="green-pulse"
+        authMode="localStorage"
+        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
+        webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+        publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
+      >
         <AIProvider appName="green-pulse">
           <ThemeProvider
             attribute="class"

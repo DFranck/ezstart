@@ -15,7 +15,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider
         appName="ezauth"
         authMode="httpOnly"
+        mode="first-party"
         apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
+        webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
       >
         <QueryProvider>
           {/*
