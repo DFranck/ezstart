@@ -33,6 +33,7 @@ export default function ApplicationDetailPage() {
   const t = useTranslations('developer.applications.detail')
   const tp = useTranslations('developer.payKeys')
   const tpm = useTranslations('developer.plansManager')
+  const tc = useTranslations('developer.connect')
   const locale = useLocale()
   const params = useParams()
   const router = useRouter()
@@ -176,6 +177,27 @@ export default function ApplicationDetailPage() {
         texts={payTexts}
         showSuperadminScope={isSuperadmin}
       />
+
+      <Div className="border-t" />
+
+      <Card>
+        <CardHeader className="pb-4">
+          <Div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <Div className="space-y-1">
+              <CardTitle className="text-xl md:text-2xl font-bold">{tc('title')}</CardTitle>
+              <CardDescription>{tc('notConnectedDescription')}</CardDescription>
+            </Div>
+            <Button asChild>
+              <Link href={`/${locale}/developer/applications/${applicationId}/connect`}>
+                {tc('manageButton')}
+              </Link>
+            </Button>
+          </Div>
+        </CardHeader>
+        <CardContent>
+          <P className="text-muted-foreground text-sm">{tc('notConnectedDescription')}</P>
+        </CardContent>
+      </Card>
 
       <Div className="border-t" />
 

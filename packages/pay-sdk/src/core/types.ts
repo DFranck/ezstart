@@ -372,6 +372,12 @@ export interface ConnectOnboardRequest {
   email: string
   businessName: string
   type: ConnectAccountType
+  /**
+   * Optional — user locale (e.g. `'en'`, `'fr'`) propagated to the
+   * post-onboarding callback so the API redirects the user back to the
+   * correct locale route in the EZPay web UI. Defaults to `'en'` server-side.
+   */
+  locale?: string
 }
 
 /**

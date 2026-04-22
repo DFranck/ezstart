@@ -593,8 +593,11 @@ export class PayClient {
 
   // ===== STRIPE CONNECT =====
 
-  async getConnectStatus(): Promise<ConnectStatusResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/status`, {
+  async getConnectStatus(params?: { applicationId?: string }): Promise<ConnectStatusResponse> {
+    const query = params?.applicationId
+      ? `?applicationId=${encodeURIComponent(params.applicationId)}`
+      : ''
+    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/status${query}`, {
       headers: this.getHeaders(),
     })
 

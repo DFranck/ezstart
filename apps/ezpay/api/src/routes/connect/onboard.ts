@@ -12,6 +12,7 @@ import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
 import { getApplication } from '../../services/ezauth-client.js'
 import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { generateConnectState } from '../../utils/connect-state.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import type Stripe from 'stripe'
 import { z } from 'zod'
@@ -35,6 +36,14 @@ const onboardBodySchema = z.object({
     .enum(['standard', 'express'])
     .default('standard')
     .describe('Account type: standard (full dashboard) or express (simplified onboarding)'),
+  locale: z
+    .string()
+    .min(2)
+    .max(5)
+    .optional()
+    .describe(
+      'User locale propagated to the post-onboarding redirect back to the EZPay web UI (e.g. "en", "fr"). Defaults to "en" server-side.'
+    ),
 })
 
 const onboardResponseSchema = z.object({
@@ -74,7 +83,7 @@ const onboardHandler = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid onboard data', validation.error.errors)
     }
 
-    const { applicationId, email, businessName, type: accountType } = validation.data
+    const { applicationId, email, businessName, type: accountType, locale } = validation.data
     const userId = req.userId as string
 
     // Cross-service ownership check — the caller must own the Application
@@ -138,12 +147,24 @@ const onboardHandler = async (req: Request, res: Response) => {
       defaultFeePercent: 3,
     })
 
-    // Create account link for onboarding
+    // Create account link for onboarding. Both `refresh_url` and `return_url`
+    // point at our API callback which (a) syncs the account status from Stripe
+    // and (b) 302-redirects the user back to the per-Application Connect page
+    // in the EZPay web UI. Preserving `locale` keeps the user on the same
+    // language after Stripe hands them back.
     const baseUrl = getApiUrl('ezpay')
+    const localeQuery = locale ? `&locale=${encodeURIComponent(locale)}` : ''
+    // Signed state — carries the applicationId through Stripe's redirect so
+    // the callback can verify the request originated from THIS onboard and
+    // cannot be forged by a third party hitting /connect/callback directly.
+    // (base64url, no padding — safe to embed in a URL without
+    // `encodeURIComponent`.)
+    const state = generateConnectState({ applicationId })
+    const callbackUrl = `${baseUrl}/api/connect/callback?account_id=${account.id}${localeQuery}&state=${state}`
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${baseUrl}/api/connect/callback?account_id=${account.id}`,
-      return_url: `${baseUrl}/api/connect/callback?account_id=${account.id}`,
+      refresh_url: callbackUrl,
+      return_url: callbackUrl,
       type: 'account_onboarding',
     })
 

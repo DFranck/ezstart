@@ -41,6 +41,12 @@ export interface DeveloperConnectDashboardProps {
    * `applicationId`.
    */
   applicationId: string
+  /**
+   * Optional — user locale (e.g. `'en'`, `'fr'`) forwarded to the onboarding
+   * API so Stripe's post-onboarding callback redirects the user back to the
+   * matching locale route on the EZPay web UI.
+   */
+  locale?: string
   className?: string
   texts?: DeveloperConnectDashboardTexts
   /** Callback when onboarding returns an account link URL */
@@ -61,6 +67,7 @@ export interface DeveloperConnectDashboardProps {
 
 export function DeveloperConnectDashboard({
   applicationId,
+  locale,
   className,
   texts,
   onOnboardRedirect,
@@ -69,7 +76,9 @@ export function DeveloperConnectDashboard({
   onDisconnect: onDisconnectCallback,
   feeData,
 }: DeveloperConnectDashboardProps) {
-  const { account, isLoading, refetch } = useConnectStatus()
+  const { account, isLoading, refetch } = useConnectStatus({
+    applicationId: applicationId || undefined,
+  })
   const { onboard, isPending: isOnboarding } = useConnectOnboard()
   const { openDashboard, isLoading: isDashboardLoading } = useConnectDashboardLink()
   const { disconnect } = useConnectDisconnect()
@@ -91,7 +100,7 @@ export function DeveloperConnectDashboard({
     type: ConnectAccountType
   }) {
     try {
-      const result = await onboard(data)
+      const result = await onboard({ ...data, locale })
       if (result.accountLinkUrl) {
         if (onOnboardRedirect) {
           onOnboardRedirect(result.accountLinkUrl)

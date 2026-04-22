@@ -163,7 +163,12 @@
       }
     },
     "connect": {
-      "title": "Connect Status",
+      "title": "Stripe Connect",
+      "manageButton": "Manage Connect",
+      "callback": {
+        "complete": "Stripe Connect account activated",
+        "refresh": "Stripe requires more information before your account can be activated"
+      },
       "notConnected": "No Stripe Account Connected",
       "notConnectedDescription": "Connect your Stripe account to start accepting payments through the platform.",
       "connectButton": "Connect your Stripe Account",
@@ -200,7 +205,8 @@
         "title": "Disconnect Stripe Account?",
         "description": "This will remove your connected Stripe account from the platform. You will no longer be able to receive payments. This action cannot be undone.",
         "confirm": "Disconnect",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "success": "Stripe account disconnected"
       },
       "dashboard": {
         "button": "Open Stripe Dashboard",

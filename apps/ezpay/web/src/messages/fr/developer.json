@@ -163,7 +163,12 @@
       }
     },
     "connect": {
-      "title": "Statut de connexion",
+      "title": "Stripe Connect",
+      "manageButton": "Gérer Connect",
+      "callback": {
+        "complete": "Compte Stripe Connect activé",
+        "refresh": "Stripe demande plus d'informations avant d'activer votre compte"
+      },
       "notConnected": "Aucun compte Stripe connecté",
       "notConnectedDescription": "Connectez votre compte Stripe pour commencer à accepter des paiements via la plateforme.",
       "connectButton": "Connecter votre compte Stripe",
@@ -200,7 +205,8 @@
         "title": "Déconnecter le compte Stripe ?",
         "description": "Cela supprimera votre compte Stripe connecté de la plateforme. Vous ne pourrez plus recevoir de paiements. Cette action est irréversible.",
         "confirm": "Déconnecter",
-        "cancel": "Annuler"
+        "cancel": "Annuler",
+        "success": "Compte Stripe déconnecté"
       },
       "dashboard": {
         "button": "Ouvrir le tableau de bord Stripe",
