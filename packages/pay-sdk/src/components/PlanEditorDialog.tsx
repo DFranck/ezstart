@@ -34,10 +34,9 @@ type Currency = 'EUR' | 'USD' | 'GBP'
 type Interval = 'month' | 'year'
 
 /**
- * Backend accepts a structured `metadata` block on plan create/update. The
- * SDK core types (which we cannot extend from this layer) do not yet expose
- * it — we describe the shape locally and cast at submit time. Kept in sync
- * with `apps/ezpay/api/src/routes/plans/{createPlan,updatePlan}.ts`.
+ * Local copy of the metadata shape to avoid a circular import from core.
+ * Kept in sync with `apps/ezpay/api/src/routes/plans/{createPlan,updatePlan}.ts`
+ * and with `PlanMetadata` in `../core/types.ts`.
  *
  * @internal
  */
@@ -45,6 +44,8 @@ interface PlanMetadata {
   grantsRoles?: string[]
   grantsFeatures?: string[]
   feePercent?: number
+  billingGroup?: string
+  discountVsMonthly?: number
 }
 
 export interface PlanEditorDialogTexts {
@@ -68,6 +69,12 @@ export interface PlanEditorDialogTexts {
   grantsRolesHelp: string
   grantsFeaturesLabel: string
   grantsFeaturesHelp: string
+  trialDaysLabel: string
+  trialDaysHelp: string
+  billingGroupLabel: string
+  billingGroupHelp: string
+  discountVsMonthlyLabel: string
+  discountVsMonthlyHelp: string
   sortOrderLabel: string
   activeLabel: string
   cancel: string
@@ -77,6 +84,8 @@ export interface PlanEditorDialogTexts {
     nameRequired: string
     amountInvalid: string
     intervalCountRange: string
+    trialDaysRange: string
+    discountVsMonthlyRange: string
   }
   toast: {
     created: string
@@ -106,6 +115,13 @@ export const defaultPlanEditorDialogTexts: PlanEditorDialogTexts = {
   grantsRolesHelp: 'Comma-separated roles granted to user on subscribe',
   grantsFeaturesLabel: 'Grants features',
   grantsFeaturesHelp: 'Comma-separated features granted',
+  trialDaysLabel: 'Trial period (days)',
+  trialDaysHelp: 'Free-trial duration between 0 and 90 days. Leave at 0 to disable.',
+  billingGroupLabel: 'Billing group',
+  billingGroupHelp:
+    'Logical identifier that links Monthly / Yearly variants of the same tier (e.g. "pro").',
+  discountVsMonthlyLabel: 'Yearly savings vs. monthly (%)',
+  discountVsMonthlyHelp: 'Displayed as "Save N%" on the pricing page toggle. Yearly plans only.',
   sortOrderLabel: 'Sort order',
   activeLabel: 'Active',
   cancel: 'Cancel',
@@ -115,6 +131,8 @@ export const defaultPlanEditorDialogTexts: PlanEditorDialogTexts = {
     nameRequired: 'Name is required',
     amountInvalid: 'Price must be a positive number',
     intervalCountRange: 'Interval count must be between 1 and 12',
+    trialDaysRange: 'Trial days must be between 0 and 90',
+    discountVsMonthlyRange: 'Yearly savings must be between 0 and 100',
   },
   toast: {
     created: 'Plan created',
@@ -190,6 +208,9 @@ export function PlanEditorDialog({
   const [features, setFeatures] = useState('')
   const [grantsRoles, setGrantsRoles] = useState('')
   const [grantsFeatures, setGrantsFeatures] = useState('')
+  const [trialDays, setTrialDays] = useState('0')
+  const [billingGroup, setBillingGroup] = useState('')
+  const [discountVsMonthly, setDiscountVsMonthly] = useState('')
   const [sortOrder, setSortOrder] = useState('0')
   const [active, setActive] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -197,6 +218,8 @@ export function PlanEditorDialog({
     name?: string
     amount?: string
     intervalCount?: string
+    trialDays?: string
+    discountVsMonthly?: string
   }>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -205,6 +228,7 @@ export function PlanEditorDialog({
     if (!isOpen) return
     if (plan) {
       const metadata = (plan as Plan & { metadata?: PlanMetadata }).metadata
+      const planTrialDays = (plan as Plan & { trialDays?: number }).trialDays
       setName(plan.name)
       setDescription(plan.description ?? '')
       setAmount(formatCentsToAmount(plan.amount))
@@ -214,6 +238,11 @@ export function PlanEditorDialog({
       setFeatures((plan.features ?? []).join(', '))
       setGrantsRoles((metadata?.grantsRoles ?? []).join(', '))
       setGrantsFeatures((metadata?.grantsFeatures ?? []).join(', '))
+      setTrialDays(String(planTrialDays ?? 0))
+      setBillingGroup(metadata?.billingGroup ?? '')
+      setDiscountVsMonthly(
+        typeof metadata?.discountVsMonthly === 'number' ? String(metadata.discountVsMonthly) : ''
+      )
       setSortOrder(String(plan.sortOrder ?? 0))
       setActive(plan.active)
     } else {
@@ -226,6 +255,9 @@ export function PlanEditorDialog({
       setFeatures('')
       setGrantsRoles('')
       setGrantsFeatures('')
+      setTrialDays('0')
+      setBillingGroup('')
+      setDiscountVsMonthly('')
       setSortOrder('0')
       setActive(true)
     }
@@ -235,14 +267,28 @@ export function PlanEditorDialog({
 
   function validate(): {
     valid: boolean
-    errors: { name?: string; amount?: string; intervalCount?: string }
+    errors: {
+      name?: string
+      amount?: string
+      intervalCount?: string
+      trialDays?: string
+      discountVsMonthly?: string
+    }
     parsed?: {
       amountCents: number
       intervalCountN: number
       sortOrderN: number
+      trialDaysN: number
+      discountVsMonthlyN?: number
     }
   } {
-    const errors: { name?: string; amount?: string; intervalCount?: string } = {}
+    const errors: {
+      name?: string
+      amount?: string
+      intervalCount?: string
+      trialDays?: string
+      discountVsMonthly?: string
+    } = {}
 
     if (!name.trim()) {
       errors.name = texts.validation.nameRequired
@@ -256,6 +302,21 @@ export function PlanEditorDialog({
     const intervalCountN = Number(intervalCount)
     if (!Number.isInteger(intervalCountN) || intervalCountN < 1 || intervalCountN > 12) {
       errors.intervalCount = texts.validation.intervalCountRange
+    }
+
+    const trialDaysN = Number(trialDays)
+    if (!Number.isInteger(trialDaysN) || trialDaysN < 0 || trialDaysN > 90) {
+      errors.trialDays = texts.validation.trialDaysRange
+    }
+
+    let discountVsMonthlyN: number | undefined
+    if (discountVsMonthly.trim() !== '') {
+      const n = Number(discountVsMonthly)
+      if (!Number.isFinite(n) || n < 0 || n > 100) {
+        errors.discountVsMonthly = texts.validation.discountVsMonthlyRange
+      } else {
+        discountVsMonthlyN = Math.round(n * 100) / 100
+      }
     }
 
     const sortOrderN = Number(sortOrder)
@@ -272,6 +333,8 @@ export function PlanEditorDialog({
             amountCents: amountCents ?? 0,
             intervalCountN,
             sortOrderN: safeSortOrder,
+            trialDaysN,
+            discountVsMonthlyN,
           },
     }
   }
@@ -288,10 +351,17 @@ export function PlanEditorDialog({
     const feats = parseCsv(grantsFeatures)
     if (roles.length > 0) metadata.grantsRoles = roles
     if (feats.length > 0) metadata.grantsFeatures = feats
+    const billingGroupTrimmed = billingGroup.trim()
+    if (billingGroupTrimmed.length > 0) metadata.billingGroup = billingGroupTrimmed
+    if (result.parsed.discountVsMonthlyN !== undefined) {
+      metadata.discountVsMonthly = result.parsed.discountVsMonthlyN
+    }
+
+    const trialDaysPayload = result.parsed.trialDaysN > 0 ? result.parsed.trialDaysN : 0
 
     try {
       if (isEdit && plan) {
-        const payload: UpdatePlanRequest & { metadata?: PlanMetadata } = {
+        const payload: UpdatePlanRequest = {
           name: name.trim(),
           description: description.trim() || null,
           amount: result.parsed.amountCents,
@@ -301,9 +371,13 @@ export function PlanEditorDialog({
           features: parseCsv(features),
           sortOrder: result.parsed.sortOrderN,
           active,
+          // Always send trialDays so clearing the field from a non-zero value
+          // propagates to the backend. 0 disables the trial (equivalent to
+          // "no trial").
+          trialDays: trialDaysPayload,
         }
         if (Object.keys(metadata).length > 0) payload.metadata = metadata
-        const response = await client.updatePlan(plan.id, payload as UpdatePlanRequest)
+        const response = await client.updatePlan(plan.id, payload)
         toast.success(texts.toast.updated)
         const saved =
           (response as { data?: { plan?: Plan }; plan?: Plan }).data?.plan ??
@@ -311,7 +385,7 @@ export function PlanEditorDialog({
         if (saved && onSaved) onSaved(saved)
         onClose()
       } else {
-        const payload: CreatePlanRequest & { metadata?: PlanMetadata } = {
+        const payload: CreatePlanRequest = {
           name: name.trim(),
           applicationId,
           description: description.trim() || undefined,
@@ -322,8 +396,9 @@ export function PlanEditorDialog({
           features: parseCsv(features),
           sortOrder: result.parsed.sortOrderN,
         }
+        if (trialDaysPayload > 0) payload.trialDays = trialDaysPayload
         if (Object.keys(metadata).length > 0) payload.metadata = metadata
-        const response = await client.createPlan(payload as CreatePlanRequest)
+        const response = await client.createPlan(payload)
         toast.success(texts.toast.created)
         const saved =
           (response as { data?: { plan?: Plan }; plan?: Plan }).data?.plan ??
@@ -482,6 +557,60 @@ export function PlanEditorDialog({
           />
           <P className="text-xs text-muted-foreground">{texts.grantsFeaturesHelp}</P>
         </Div>
+
+        <Div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Div className="space-y-2">
+            <Label htmlFor="plan-trial-days">{texts.trialDaysLabel}</Label>
+            <Input
+              id="plan-trial-days"
+              type="number"
+              min={0}
+              max={90}
+              value={trialDays}
+              onChange={e => setTrialDays(e.target.value)}
+              aria-invalid={!!fieldErrors.trialDays}
+            />
+            {fieldErrors.trialDays ? (
+              <P className="text-xs text-destructive">{fieldErrors.trialDays}</P>
+            ) : (
+              <P className="text-xs text-muted-foreground">{texts.trialDaysHelp}</P>
+            )}
+          </Div>
+
+          <Div className="space-y-2">
+            <Label htmlFor="plan-billing-group">{texts.billingGroupLabel}</Label>
+            <Input
+              id="plan-billing-group"
+              value={billingGroup}
+              onChange={e => setBillingGroup(e.target.value)}
+              placeholder="pro"
+              maxLength={100}
+            />
+            <P className="text-xs text-muted-foreground">{texts.billingGroupHelp}</P>
+          </Div>
+        </Div>
+
+        {interval === 'year' && (
+          <Div className="space-y-2">
+            <Label htmlFor="plan-discount-vs-monthly">{texts.discountVsMonthlyLabel}</Label>
+            <Input
+              id="plan-discount-vs-monthly"
+              type="number"
+              min={0}
+              max={100}
+              step={1}
+              value={discountVsMonthly}
+              onChange={e => setDiscountVsMonthly(e.target.value)}
+              placeholder="20"
+              aria-invalid={!!fieldErrors.discountVsMonthly}
+            />
+            {fieldErrors.discountVsMonthly ? (
+              <P className="text-xs text-destructive">{fieldErrors.discountVsMonthly}</P>
+            ) : (
+              <P className="text-xs text-muted-foreground">{texts.discountVsMonthlyHelp}</P>
+            )}
+          </Div>
+        )}
 
         <Div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Div className="space-y-2">

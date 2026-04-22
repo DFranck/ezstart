@@ -248,4 +248,47 @@ describe('PATCH /plans/:id — update', () => {
     const res = await patchPlan(app, '507f1f77bcf86cd799439011', { amount: 4900 })
     expect(res.status).toBe(401)
   })
+
+  it('updates trialDays and persists metadata.billingGroup without a reprice', async () => {
+    const plan = await seedPlan()
+    okApp()
+
+    const res = await patchPlan(app, String(plan._id), {
+      trialDays: 30,
+      metadata: {
+        billingGroup: 'ezauth-pro',
+      },
+    })
+
+    expect(res.status).toBe(200)
+    expect(repriceMock).not.toHaveBeenCalled()
+
+    const stored = await Plan.findById(plan._id)
+    expect(stored?.trialDays).toBe(30)
+    expect(stored?.metadata?.billingGroup).toBe('ezauth-pro')
+  })
+
+  it('clears trialDays when null is sent', async () => {
+    const plan = await seedPlan()
+    plan.trialDays = 14
+    await plan.save()
+    okApp()
+
+    const res = await patchPlan(app, String(plan._id), { trialDays: null })
+
+    expect(res.status).toBe(200)
+    const stored = await Plan.findById(plan._id)
+    expect(stored?.trialDays).toBeUndefined()
+  })
+
+  it('rejects trialDays outside the 0-90 range', async () => {
+    const plan = await seedPlan()
+    okApp()
+
+    const res = await patchPlan(app, String(plan._id), { trialDays: 100 })
+    expect([400, 422]).toContain(res.status)
+
+    const stored = await Plan.findById(plan._id)
+    expect(stored?.trialDays).toBeUndefined()
+  })
 })

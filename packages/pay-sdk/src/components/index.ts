@@ -74,6 +74,8 @@ export type {
   ManageSubscriptionButtonProps,
   ManageSubscriptionButtonTexts,
 } from './ManageSubscriptionButton.js'
+export { ChangePlanButton, defaultChangePlanButtonTexts } from './ChangePlanButton.js'
+export type { ChangePlanButtonProps, ChangePlanButtonTexts } from './ChangePlanButton.js'
 
 // Stripe Connect
 export { ConnectStatusCard } from './ConnectStatusCard.js'

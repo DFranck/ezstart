@@ -93,6 +93,15 @@ export default function ApplicationPlansPage() {
       grantsRolesHelp: te('grantsRolesHelp'),
       grantsFeaturesLabel: te('grantsFeaturesLabel'),
       grantsFeaturesHelp: te('grantsFeaturesHelp'),
+      // P9-A/B fields — SDK default English labels are used until the messages
+      // catalogue adds translations under `developer.plansManager.editor.*`.
+      trialDaysLabel: 'Trial period (days)',
+      trialDaysHelp: 'Free-trial duration between 0 and 90 days. Leave at 0 to disable.',
+      billingGroupLabel: 'Billing group',
+      billingGroupHelp: 'Logical identifier that links Monthly / Yearly variants (e.g. "pro").',
+      discountVsMonthlyLabel: 'Yearly savings vs. monthly (%)',
+      discountVsMonthlyHelp:
+        'Displayed as "Save N%" on the pricing page toggle. Yearly plans only.',
       sortOrderLabel: te('sortOrderLabel'),
       activeLabel: te('activeLabel'),
       cancel: te('cancel'),
@@ -102,6 +111,8 @@ export default function ApplicationPlansPage() {
         nameRequired: te('validation.nameRequired'),
         amountInvalid: te('validation.amountInvalid'),
         intervalCountRange: te('validation.intervalCountRange'),
+        trialDaysRange: 'Trial days must be between 0 and 90',
+        discountVsMonthlyRange: 'Yearly savings must be between 0 and 100',
       },
       toast: {
         created: t('toast.created'),

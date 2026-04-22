@@ -126,6 +126,7 @@ export class StripeProvider implements IPaymentProvider {
       cancel_url: options.cancelUrl,
       metadata: options.metadata,
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
+      ...(options.automaticTax ? { automatic_tax: { enabled: true } } : {}),
       ...(Object.keys(paymentIntentData).length > 0
         ? { payment_intent_data: paymentIntentData }
         : {}),
@@ -144,7 +145,7 @@ export class StripeProvider implements IPaymentProvider {
 
     const unitAmount = Math.round(options.amount * 100) // FULL price in cents, coupon handles discount
 
-    // Build subscription_data with optional Connect params
+    // Build subscription_data with optional Connect params + trial
     const subscriptionData: Record<string, unknown> = {}
     if (options.connect) {
       const feePercent = resolveApplicationFeePercent(options.connect, unitAmount)
@@ -152,6 +153,9 @@ export class StripeProvider implements IPaymentProvider {
         subscriptionData.application_fee_percent = feePercent
       }
       subscriptionData.transfer_data = { destination: options.connect.destinationAccountId }
+    }
+    if (typeof options.trialPeriodDays === 'number' && options.trialPeriodDays > 0) {
+      subscriptionData.trial_period_days = options.trialPeriodDays
     }
 
     const session = await this.stripe.checkout.sessions.create({
@@ -176,6 +180,7 @@ export class StripeProvider implements IPaymentProvider {
       metadata: options.metadata,
       ...(discountsParam ? { discounts: discountsParam } : {}),
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
+      ...(options.automaticTax ? { automatic_tax: { enabled: true } } : {}),
       ...(Object.keys(subscriptionData).length > 0 ? { subscription_data: subscriptionData } : {}),
     })
 

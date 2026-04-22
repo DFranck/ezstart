@@ -132,16 +132,27 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       }
     }
 
-    // Fetch the plan to snapshot its features at checkout time
+    // Fetch the plan to snapshot its features at checkout time.
+    // Also pull `trialDays` so we can forward it to the Stripe Checkout
+    // session as `subscription_data.trial_period_days`.
     const Plan = await getPlanModel()
     const plan = await Plan.findById(planId).lean()
     const snapshotFeatures = plan?.features || []
+    const trialPeriodDays =
+      plan && typeof plan.trialDays === 'number' && plan.trialDays > 0 ? plan.trialDays : undefined
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
     // Resolve Connect fee for the target Application (may be the caller's
     // own app via API-key auth, or a body-supplied id for Bearer flows).
     const connectFee = await resolveConnectFee(applicationId, Math.round(amount * 100))
+
+    // Enable Stripe automatic tax on subscription checkouts by default.
+    // Consumers must configure Stripe Tax in the Stripe Dashboard
+    // (Settings → Tax) — otherwise Stripe will still accept the request and
+    // charge no tax. Opt out via env var for merchants that handle tax
+    // externally.
+    const automaticTax = process.env.STRIPE_AUTOMATIC_TAX !== 'false'
 
     const provider = getProvider()
     const session = await provider.createSubscriptionCheckout({
@@ -160,6 +171,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       },
       successUrl: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/subscribe/cancel`,
+      automaticTax,
+      ...(trialPeriodDays !== undefined ? { trialPeriodDays } : {}),
       discount: validatedPromo
         ? {
             type: validatedPromo.discountType,

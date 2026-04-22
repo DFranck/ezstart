@@ -14,6 +14,21 @@ export interface PlanMetadata {
   grantsRoles?: string[]
   grantsFeatures?: string[]
   feePercent?: number
+  /**
+   * Logical grouping identifier that links a Monthly plan to its Yearly
+   * variant (and vice versa). Two Plans sharing the same `billingGroup` are
+   * treated as alternative billing cycles of the same tier by the PricingPage
+   * Monthly/Yearly toggle.
+   *
+   * Convention: use a stable slug (e.g. `"ezauth-pro"`). Case-sensitive.
+   */
+  billingGroup?: string
+  /**
+   * Headline savings (in %) of the Yearly variant vs the Monthly variant in
+   * the same `billingGroup`. Purely decorative — rendered as "Save 20%" on
+   * the PricingPage toggle. Validated to 0-100.
+   */
+  discountVsMonthly?: number
 }
 
 /**
@@ -43,6 +58,15 @@ export interface PlanDocument extends Document {
   stripeProductId?: string
   /** Stripe Price id (set by `stripe-plan-sync.syncPlanToStripe`). */
   stripePriceId?: string
+  /**
+   * Free-trial duration in days (0-90). `0` or `undefined` disables the trial.
+   *
+   * Applied to the Stripe Checkout Session via
+   * `subscription_data.trial_period_days` when the subscription is created.
+   * Stripe Prices themselves are not parameterised with a trial — the trial
+   * belongs to the Subscription / Checkout Session creation call.
+   */
+  trialDays?: number
   metadata?: PlanMetadata
   createdAt: Date
   updatedAt: Date
@@ -53,6 +77,8 @@ const planMetadataSchema = new Schema<PlanMetadata>(
     grantsRoles: { type: [String], default: undefined },
     grantsFeatures: { type: [String], default: undefined },
     feePercent: { type: Number, min: 0, max: 100 },
+    billingGroup: { type: String },
+    discountVsMonthly: { type: Number, min: 0, max: 100 },
   },
   { _id: false }
 )
@@ -77,6 +103,7 @@ const planSchema = new Schema<PlanDocument>(
     sortOrder: { type: Number, default: 0 },
     stripeProductId: { type: String },
     stripePriceId: { type: String },
+    trialDays: { type: Number, min: 0, max: 90 },
     metadata: { type: planMetadataSchema, default: undefined },
   },
   {

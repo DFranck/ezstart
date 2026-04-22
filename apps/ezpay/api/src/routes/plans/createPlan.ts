@@ -27,6 +27,8 @@ const planMetadataSchema = z
     grantsRoles: z.array(z.string()).optional(),
     grantsFeatures: z.array(z.string()).optional(),
     feePercent: z.number().min(0).max(100).optional(),
+    billingGroup: z.string().min(1).max(100).optional(),
+    discountVsMonthly: z.number().min(0).max(100).optional(),
   })
   .optional()
 
@@ -43,7 +45,16 @@ const createPlanSchema = z.object({
   intervalCount: z.number().int().min(1).max(12).default(1).describe('Number of intervals'),
   features: z.array(z.string()).optional().describe('List of features'),
   sortOrder: z.number().int().min(0).default(0).describe('Display order'),
-  metadata: planMetadataSchema.describe('Structured extras (roles, features, feePercent)'),
+  trialDays: z
+    .number()
+    .int()
+    .min(0)
+    .max(90)
+    .optional()
+    .describe('Free-trial duration in days (0-90). 0 / omitted disables the trial.'),
+  metadata: planMetadataSchema.describe(
+    'Structured extras (roles, features, feePercent, billingGroup, discountVsMonthly)'
+  ),
 })
 
 const planResponseSchema = z.object({

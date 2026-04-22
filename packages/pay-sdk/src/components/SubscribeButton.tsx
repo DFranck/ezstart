@@ -18,6 +18,11 @@ export interface SubscribeButtonTexts {
   intervalCountTemplate?: string
   promoCodePlaceholder?: string
   promoCodeLabel?: string
+  /**
+   * Template for the trial disclosure line shown inside the modal, e.g.
+   * "Includes {days} days free trial — cancel anytime.". Use `{days}`.
+   */
+  trialNoteTemplate?: string
 }
 
 export interface SubscribeButtonProps {
@@ -33,6 +38,12 @@ export interface SubscribeButtonProps {
   userId?: string
   userEmail?: string
   userName?: string
+  /**
+   * Free-trial duration (in days) attached to the plan. When set to a
+   * positive value, a trial disclosure is shown inside the subscribe modal.
+   * The backend is the source of truth — this prop is purely for display.
+   */
+  trialDays?: number
   /** Pre-filled promo code. When set, the promo input is shown with this value. */
   promoCode?: string
   /** Show an inline promo code input inside the subscribe modal. Default false. */
@@ -54,6 +65,7 @@ export function SubscribeButton({
   userId,
   userEmail,
   userName,
+  trialDays,
   promoCode: promoCodeProp,
   showPromoInput = false,
   trigger,
@@ -76,7 +88,14 @@ export function SubscribeButton({
     intervalMonth: texts?.intervalMonth || 'month',
     intervalYear: texts?.intervalYear || 'year',
     promoCodeLabel: texts?.promoCodeLabel || 'Promo code',
+    trialNoteTemplate:
+      texts?.trialNoteTemplate || 'Includes {days} days free trial — cancel anytime.',
   }
+
+  const trialNote =
+    typeof trialDays === 'number' && trialDays > 0
+      ? t.trialNoteTemplate.replace('{days}', String(trialDays))
+      : null
 
   // Smart interval display: 1→month, 12→year, other→N months
   const intervalLabel =
@@ -151,6 +170,11 @@ export function SubscribeButton({
             <P size={'lg'} className="font-bold">
               {formatCurrency(amount, currency)} / {intervalLabel}
             </P>
+            {trialNote && (
+              <P size="sm" className="text-muted-foreground">
+                {trialNote}
+              </P>
+            )}
           </Div>
 
           {/* User info */}

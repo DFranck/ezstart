@@ -274,6 +274,72 @@ describe('POST /plans — create', () => {
     expect(res.status).toBe(401)
   })
 
+  it('persists trialDays, billingGroup and discountVsMonthly when provided', async () => {
+    getApplicationMock.mockResolvedValue({
+      id: 'app-1',
+      slug: 'ezauth',
+      name: 'EZAuth',
+      ownerId: 'user-1',
+      status: 'active',
+      createdAt: '2026-04-20T00:00:00.000Z',
+      updatedAt: '2026-04-20T00:00:00.000Z',
+    })
+    syncPlanToStripeMock.mockResolvedValue({
+      stripeProductId: 'prod_y',
+      stripePriceId: 'price_y',
+    })
+
+    const res = await postPlans(app, {
+      name: 'Pro Yearly',
+      applicationId: 'app-1',
+      amount: 9900,
+      interval: 'year',
+      trialDays: 14,
+      metadata: {
+        billingGroup: 'ezauth-pro',
+        discountVsMonthly: 20,
+      },
+    })
+
+    expect(res.status).toBe(201)
+    const stored = await Plan.findOne({ applicationId: 'app-1', name: 'Pro Yearly' })
+    expect(stored?.trialDays).toBe(14)
+    expect(stored?.metadata?.billingGroup).toBe('ezauth-pro')
+    expect(stored?.metadata?.discountVsMonthly).toBe(20)
+  })
+
+  it('rejects trialDays outside the 0-90 range', async () => {
+    getApplicationMock.mockResolvedValue({
+      id: 'app-1',
+      slug: 'ezbill',
+      name: 'EZBill',
+      ownerId: 'user-1',
+      status: 'active',
+      createdAt: '2026-04-20T00:00:00.000Z',
+      updatedAt: '2026-04-20T00:00:00.000Z',
+    })
+
+    const tooMany = await postPlans(app, {
+      name: 'Bad trial',
+      applicationId: 'app-1',
+      amount: 100,
+      interval: 'month',
+      trialDays: 91,
+    })
+    expect([400, 422]).toContain(tooMany.status)
+
+    const negative = await postPlans(app, {
+      name: 'Neg trial',
+      applicationId: 'app-1',
+      amount: 100,
+      interval: 'month',
+      trialDays: -1,
+    })
+    expect([400, 422]).toContain(negative.status)
+
+    expect(syncPlanToStripeMock).not.toHaveBeenCalled()
+  })
+
   it('rejects archived Applications with 400', async () => {
     getApplicationMock.mockResolvedValue({
       id: 'app-1',

@@ -223,6 +223,32 @@ export interface PromosListResponse {
 }
 
 // Plan Types
+
+/**
+ * Structured extras attached to a Plan. Mirrors `PlanMetadata` in the backend
+ * (`apps/ezpay/api/src/models/Plan.ts`).
+ */
+export interface PlanMetadata {
+  /** Roles granted to the user when the subscription activates (JWT claim materialisation). */
+  grantsRoles?: string[]
+  /** Features granted to the user when the subscription activates. */
+  grantsFeatures?: string[]
+  /** Platform application fee percent applied to Connect charges for this plan (0-100). */
+  feePercent?: number
+  /**
+   * Logical grouping identifier that links a Monthly plan to its Yearly
+   * variant. Two plans sharing the same `billingGroup` are treated as
+   * alternative billing cycles of the same tier by PricingPage's
+   * Monthly/Yearly toggle.
+   */
+  billingGroup?: string
+  /**
+   * Headline savings (in %) of the Yearly variant vs the Monthly variant in
+   * the same billingGroup. Purely decorative (rendered as "Save 20%").
+   */
+  discountVsMonthly?: number
+}
+
 export interface Plan {
   id: string
   name: string
@@ -242,6 +268,14 @@ export interface Plan {
   active: boolean
   sortOrder: number
   stripePriceId?: string
+  /**
+   * Free-trial duration in days (0-90). `0` or `undefined` disables the
+   * trial. Applied to Stripe Checkout subscription sessions via
+   * `subscription_data.trial_period_days`.
+   */
+  trialDays?: number
+  /** Structured extras: grants, fee %, billing group, yearly discount. */
+  metadata?: PlanMetadata
   createdAt: string
   updatedAt: string
 }
@@ -262,6 +296,10 @@ export interface CreatePlanRequest {
   features?: string[]
   sortOrder?: number
   stripePriceId?: string
+  /** Free-trial duration in days (0-90). */
+  trialDays?: number
+  /** Structured extras — billingGroup, discountVsMonthly, grants, fee %. */
+  metadata?: PlanMetadata
 }
 
 export interface UpdatePlanRequest {
@@ -275,6 +313,10 @@ export interface UpdatePlanRequest {
   active?: boolean
   sortOrder?: number
   stripePriceId?: string | null
+  /** Free-trial duration in days (0-90). `null` clears the trial. */
+  trialDays?: number | null
+  /** Structured extras — pass `null` as individual entries to clear them. */
+  metadata?: PlanMetadata
 }
 
 export interface PlanResponse {
@@ -431,6 +473,37 @@ export interface CreateSubscriptionRequest {
   customerName?: string
   customerEmail?: string
   promoCode?: string
+}
+
+/**
+ * Body accepted by `POST /api/subscriptions/:subscriptionId/change-plan`.
+ *
+ * Swaps the Stripe Price on an active subscription (upgrade / downgrade).
+ * Proration is controlled by `prorationBehavior` and defaults to
+ * `create_prorations` (Stripe's standard behaviour — the next invoice is
+ * prorated to reflect the immediate change).
+ */
+export interface ChangePlanRequest {
+  /** Target Plan id (EZPay, NOT Stripe Price id). */
+  newPlanId: string
+  /**
+   * Stripe proration behaviour:
+   * - `create_prorations` (default): standard proration on the next invoice.
+   * - `none`: no proration — new price kicks in at the next billing cycle.
+   * - `always_invoice`: always bill the prorated amount immediately.
+   */
+  prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice'
+}
+
+/**
+ * Response payload returned by `POST /api/subscriptions/:subscriptionId/change-plan`.
+ */
+export interface ChangePlanResponse {
+  subscriptionId: string
+  status: string
+  currentPeriodEnd: number
+  newPlanId: string
+  newStripePriceId: string
 }
 
 // API Responses

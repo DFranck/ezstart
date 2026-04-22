@@ -12,6 +12,8 @@ import type {
   UpdatePromoRequest,
   CreatePlanRequest,
   UpdatePlanRequest,
+  ChangePlanRequest,
+  ChangePlanResponse,
   Payment,
   PaymentResponse,
   PaymentsListResponse,
@@ -251,6 +253,40 @@ export class PayClient {
     }
 
     return result
+  }
+
+  /**
+   * Change the plan on an active subscription (upgrade / downgrade).
+   *
+   * Calls `POST /subscriptions/:id/change-plan` which swaps the Stripe Price
+   * on the subscription item using the provided proration behaviour.
+   *
+   * @example
+   * await client.changeSubscriptionPlan('sub_123', {
+   *   newPlanId: 'plan_pro_yearly_id',
+   *   prorationBehavior: 'create_prorations',
+   * })
+   */
+  async changeSubscriptionPlan(
+    subscriptionId: string,
+    data: ChangePlanRequest
+  ): Promise<ChangePlanResponse> {
+    const response = await this.fetchWithAuth(
+      `${this.config.apiUrl}/subscriptions/${subscriptionId}/change-plan`,
+      {
+        method: 'POST',
+        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data),
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to change subscription plan')
+    }
+
+    return result.data ?? result
   }
 
   // ===== REFUNDS =====

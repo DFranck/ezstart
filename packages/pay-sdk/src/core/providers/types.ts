@@ -88,11 +88,25 @@ export interface CheckoutOptions {
   discount?: DiscountInfo
   /** Stripe Connect params — routes payment to a connected account with platform fee */
   connect?: ConnectParams
+  /**
+   * Enable Stripe automatic tax calculation on the Checkout Session.
+   *
+   * Requires Stripe Tax to be configured in the Stripe Dashboard
+   * (Settings → Tax) — otherwise Stripe rejects the request at checkout time.
+   * Defaults to `false` when omitted to preserve backwards compatibility.
+   */
+  automaticTax?: boolean
 }
 
 export interface SubscriptionCheckoutOptions extends CheckoutOptions {
   interval: 'month'
   intervalCount?: number
+  /**
+   * Free-trial duration in days applied to the subscription created by this
+   * checkout (`subscription_data.trial_period_days`). Range: 1-730 per Stripe.
+   * Omit / `0` disables the trial.
+   */
+  trialPeriodDays?: number
 }
 
 export interface CheckoutResult {

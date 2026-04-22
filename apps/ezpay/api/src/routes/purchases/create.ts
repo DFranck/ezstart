@@ -124,6 +124,9 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
     // Resolve Connect fee for the target Application
     const connectFee = await resolveConnectFee(applicationId, Math.round(finalAmount * 100))
 
+    // Stripe automatic tax — opt-out via env var. See subscribe route for details.
+    const automaticTax = process.env.STRIPE_AUTOMATIC_TAX !== 'false'
+
     const provider = getProvider()
     const session = await provider.createCheckoutSession({
       amount: finalAmount, // Discounted amount OK for one-time purchases
@@ -139,6 +142,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       },
       successUrl: `${baseUrl}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/purchase/cancel`,
+      automaticTax,
       discount: validatedPromo
         ? {
             type: validatedPromo.discountType,

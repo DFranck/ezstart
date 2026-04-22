@@ -32,6 +32,8 @@ const planMetadataSchema = z
     grantsRoles: z.array(z.string()).optional(),
     grantsFeatures: z.array(z.string()).optional(),
     feePercent: z.number().min(0).max(100).optional(),
+    billingGroup: z.string().min(1).max(100).optional(),
+    discountVsMonthly: z.number().min(0).max(100).optional(),
   })
   .optional()
 
@@ -51,7 +53,17 @@ const updatePlanSchema = z.object({
   features: z.array(z.string()).optional().describe('List of features included in the plan'),
   active: z.boolean().optional().describe('Whether the plan is currently active'),
   sortOrder: z.number().int().min(0).optional().describe('Display order for pricing pages'),
-  metadata: planMetadataSchema.describe('Structured extras (roles, features, feePercent)'),
+  trialDays: z
+    .number()
+    .int()
+    .min(0)
+    .max(90)
+    .nullable()
+    .optional()
+    .describe('Free-trial duration in days (0-90). 0 / null disables the trial.'),
+  metadata: planMetadataSchema.describe(
+    'Structured extras (roles, features, feePercent, billingGroup, discountVsMonthly)'
+  ),
 })
 
 const planResponseSchema = z.object({
@@ -137,6 +149,9 @@ const updatePlanHandler = async (req: Request, res: Response) => {
     if (updates.features !== undefined) plan.features = updates.features
     if (updates.active !== undefined) plan.active = updates.active
     if (updates.sortOrder !== undefined) plan.sortOrder = updates.sortOrder
+    if (updates.trialDays !== undefined) {
+      plan.trialDays = updates.trialDays ?? undefined
+    }
     if (updates.metadata !== undefined) plan.metadata = updates.metadata
 
     const priceChanged =
