@@ -111,11 +111,11 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
           className
         )}
       >
-        {/* Viewport: desktop sidebar as permanent aside, hidden on mobile */}
+        {/* Viewport: tablet+ sidebar as permanent aside, hidden on mobile (<768px) */}
         {!isFill && (
           <aside
             className={cn(
-              'hidden lg:flex lg:flex-col lg:shrink-0',
+              'hidden md:flex md:flex-col md:shrink-0',
               sidebarWidth,
               heightClass,
               'bg-background border-r'
@@ -125,14 +125,15 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
           </aside>
         )}
 
-        {/* Burger toggle — absolute so it floats over content without pushing it */}
+        {/* Burger toggle — absolute so it floats over content without pushing it.
+            Only on mobile (<768px); tablet/desktop use permanent aside above. */}
         {!isSidebarOpen && (
           <Button
             onClick={toggleSidebar}
             size="icon"
             variant="default"
             aria-label="Open sidebar"
-            className={cn('absolute left-3 top-3 z-20 shadow-lg', !isFill && 'lg:hidden')}
+            className={cn('absolute left-3 top-3 z-20 shadow-lg', !isFill && 'md:hidden')}
           >
             <Icon name="lucide:Menu" size={20} ariaHidden />
           </Button>
