@@ -20,6 +20,7 @@ import { Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig } from '@/hooks/useKeyConfig'
+import { deriveAppHintFromRedirectUri } from '@/hooks/useDerivedApp'
 
 function LoginContent() {
   const t = useTranslations('login')
@@ -32,9 +33,22 @@ function LoginContent() {
   const params = useParams<{ locale: string }>()
   const locale = params?.locale ?? 'en'
 
-  // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
+  // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy).
+  //
+  // Platform-scoped keys (`scope === 'admin'`, e.g. ezauth self-seed key)
+  // return `appName: 'ezauth'` from the config endpoint. When such a key is
+  // used by a different app (e.g. ezpay reusing the admin key during
+  // bootstrap), we must NOT white-label as EZAuth — fall back to the hint
+  // from `?app=` or the `redirect_uri` subdomain so the user sees the
+  // correct brand / theme for the app they are signing into.
   const keyConfig = useKeyConfig(navigation.publishableKey)
-  const app = keyConfig.appName ?? navigation.app ?? 'ezauth'
+  const isPlatformKey = keyConfig.scope === 'admin'
+  const redirectUriAppHint = deriveAppHintFromRedirectUri(navigation.redirectUri)
+  const resolvedAppFromKey =
+    isPlatformKey && (navigation.app || redirectUriAppHint)
+      ? (navigation.app ?? redirectUriAppHint)
+      : keyConfig.appName
+  const app = resolvedAppFromKey ?? navigation.app ?? 'ezauth'
   const theme = getAppTheme(app)
   const isKeyInvalid = keyConfig.status === 'invalid'
   // First-party fallback: if no ?redirect_uri= is passed (user lands on

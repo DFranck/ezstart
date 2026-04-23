@@ -5,7 +5,9 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAuth, useMyApplications } from '@ezstart/auth-sdk'
 import {
+  ApplicationsList,
   EZAuthDashboard,
+  type ApplicationsFlowTexts,
   type EZAuthDashboardExtraSection,
   type EZAuthDashboardTexts,
 } from '@ezstart/auth-sdk/components'
@@ -38,9 +40,10 @@ export default function EZPayDashboardPage() {
   const tBilling = useTranslations('billing')
   const tTabs = useTranslations('developer.tabs')
   const tAdmin = useTranslations('admin')
+  const tApps = useTranslations('developer.applications')
   const locale = useLocale()
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, login } = useAuth()
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -49,9 +52,10 @@ export default function EZPayDashboardPage() {
 
   useEffect(() => {
     if (mounted && !isAuthenticated) {
-      router.replace(`/${locale}/login`)
+      // Redirect to EZAuth login (ezpay has no local /login route — auth lives on ezauth)
+      login()
     }
-  }, [mounted, isAuthenticated, router, locale])
+  }, [mounted, isAuthenticated, login])
 
   if (!mounted || !isAuthenticated || !user) {
     return (
@@ -92,6 +96,69 @@ export default function EZPayDashboardPage() {
       searchPlaceholder: tAdmin('filters.searchEmail'),
     },
   }
+
+  // Applications slot — list the user's Applications. Wired to our Next router
+  // so clicking "Manage" navigates to the per-app detail page where both
+  // EZAuth and EZPay keys for that tenant are displayed side by side.
+  const applicationsTexts: Partial<ApplicationsFlowTexts> = {
+    list: {
+      title: tApps('title'),
+      description: tApps('description'),
+      newApplication: tApps('newApplication'),
+      loading: tApps('loading'),
+      errorTitle: tApps('errorTitle'),
+      errorDescription: tApps('errorDescription'),
+      retry: tApps('retry'),
+      emptyTitle: tApps('emptyTitle'),
+      emptyDescription: tApps('emptyDescription'),
+      emptyCta: tApps('emptyCta'),
+      showArchived: tApps('showArchived'),
+      showAll: tApps('showAll'),
+    },
+    card: {
+      manage: tApps('card.manage'),
+      archive: tApps('card.archive'),
+      archiveTitle: tApps('card.archiveTitle'),
+      archiveConfirm: tApps('card.archiveConfirm'),
+      archiveConfirmCascade: tApps('card.archiveConfirmCascade'),
+      archiveCancel: tApps('card.archiveCancel'),
+      archiveSubmit: tApps('card.archiveSubmit'),
+      archiveSuccess: tApps('card.archiveSuccess'),
+      archiveFailed: tApps('card.archiveFailed'),
+      statusActive: tApps('card.statusActive'),
+      statusArchived: tApps('card.statusArchived'),
+      createdLabel: tApps('card.createdLabel'),
+      keysLabel: tApps('card.keysLabel'),
+    },
+    create: {
+      title: tApps('create.title'),
+      description: tApps('create.description'),
+      nameLabel: tApps('create.nameLabel'),
+      namePlaceholder: tApps('create.namePlaceholder'),
+      slugLabel: tApps('create.slugLabel'),
+      slugPlaceholder: tApps('create.slugPlaceholder'),
+      slugHelp: tApps('create.slugHelp'),
+      slugInvalid: tApps('create.slugInvalid'),
+      slugTaken: tApps('create.slugTaken'),
+      descriptionLabel: tApps('create.descriptionLabel'),
+      descriptionPlaceholder: tApps('create.descriptionPlaceholder'),
+      cancel: tApps('create.cancel'),
+      submit: tApps('create.submit'),
+      submitting: tApps('create.submitting'),
+      createFailed: tApps('create.createFailed'),
+    },
+  }
+
+  const applicationsSlot = (
+    <Div className="space-y-6">
+      <ApplicationsList
+        locale={locale}
+        texts={applicationsTexts}
+        showSuperadminAllToggle={isSuperadmin}
+        onSelectApplication={app => router.push(`/${locale}/developer/applications/${app.id}`)}
+      />
+    </Div>
+  )
 
   // Billing slot — EZPay-specific BillingDashboard + "my apps revenue" + "platform overview".
   const billingSlot = (
@@ -159,6 +226,7 @@ export default function EZPayDashboardPage() {
       hasOwnedApps={hasOwnedApps}
       texts={dashboardTexts}
       slots={{
+        applications: applicationsSlot,
         billing: billingSlot,
       }}
       extraSections={extraSections}

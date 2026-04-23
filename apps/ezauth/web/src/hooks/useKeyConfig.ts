@@ -15,6 +15,14 @@ export interface KeyConfigState {
   status: 'idle' | 'loading' | 'valid' | 'invalid'
   /** Resolved app name from the key config, or undefined. */
   appName: string | undefined
+  /**
+   * Key scope from the config endpoint:
+   * - `'admin'` — platform-wide key (e.g. ezauth self-seed). Do NOT use
+   *   `appName` for white-labeling; fall back to the caller's app hint.
+   * - `'user' | 'readonly'` — per-tenant key; `appName` is authoritative.
+   * - Legacy `'test' | 'live'` — backwards compat; treat as per-tenant.
+   */
+  scope: 'admin' | 'user' | 'readonly' | 'test' | 'live' | undefined
 }
 
 /**
@@ -28,31 +36,32 @@ export function useKeyConfig(publishableKey: string | undefined): KeyConfigState
   const [state, setState] = useState<KeyConfigState>(() => ({
     status: publishableKey ? 'loading' : 'idle',
     appName: undefined,
+    scope: undefined,
   }))
 
   useEffect(() => {
     if (!publishableKey) {
-      setState({ status: 'idle', appName: undefined })
+      setState({ status: 'idle', appName: undefined, scope: undefined })
       return
     }
 
     let cancelled = false
-    setState({ status: 'loading', appName: undefined })
+    setState({ status: 'loading', appName: undefined, scope: undefined })
 
     apiCall<{
       appName: string
-      scope: string
+      scope: KeyConfigState['scope']
     }>(`/keys/config?key=${encodeURIComponent(publishableKey)}`, {
       appName: 'ezauth',
       method: 'GET',
     })
       .then(data => {
         if (cancelled) return
-        setState({ status: 'valid', appName: data.appName })
+        setState({ status: 'valid', appName: data.appName, scope: data.scope })
       })
       .catch(() => {
         if (cancelled) return
-        setState({ status: 'invalid', appName: undefined })
+        setState({ status: 'invalid', appName: undefined, scope: undefined })
       })
 
     return () => {

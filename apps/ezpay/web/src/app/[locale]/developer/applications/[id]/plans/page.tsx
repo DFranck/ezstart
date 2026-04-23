@@ -21,16 +21,17 @@ export default function ApplicationPlansPage() {
   const locale = useLocale()
   const params = useParams()
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, login } = useAuth()
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
   useEffect(() => {
     if (mounted && !isAuthenticated) {
-      router.replace(`/${locale}/login`)
+      // Redirect to EZAuth login (ezpay has no local /login route — auth lives on ezauth)
+      login()
     }
-  }, [mounted, isAuthenticated, router, locale])
+  }, [mounted, isAuthenticated, login])
 
   const applicationId = typeof params?.id === 'string' ? params.id : ''
 

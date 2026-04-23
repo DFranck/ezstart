@@ -240,12 +240,23 @@ export function AuthProvider({
     if (!resolved.configPromise) return
 
     let cancelled = false
+    const consumerAppName = sdkConfig.appName
     resolved.configPromise
       .then(config => {
         if (cancelled) return
         keyConfigRef.current = config
-        // Update client with resolved config
-        if (config.appName && config.appName !== 'pending') {
+        // Update client app name ONLY if the consumer did NOT provide one OR
+        // the provided name is the placeholder `'pending'`. When the consumer
+        // passes an explicit `appName` (e.g. `<AuthProvider appName="ezpay">`),
+        // that value is authoritative — it declares which app the SDK serves.
+        // Platform-scoped keys (`scope: 'admin'`) return the key owner's app
+        // (often `ezauth`), which would misroute `/auth/login` & `/auth/token`
+        // calls to the wrong tenant and break the callback exchange.
+        if (
+          config.appName &&
+          config.appName !== 'pending' &&
+          (!consumerAppName || consumerAppName === 'pending')
+        ) {
           client.setAppName(config.appName)
         }
         if (config.apiUrl) {
@@ -259,6 +270,7 @@ export function AuthProvider({
           appName: config.appName,
           plan: config.plan,
           scope: config.scope,
+          consumerAppName,
         })
       })
       .catch(err => {
