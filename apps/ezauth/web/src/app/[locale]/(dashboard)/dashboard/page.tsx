@@ -153,9 +153,13 @@ export default function DashboardPage() {
 
   // Slot: Billing — shows the user's own EZAuth subscription (via pay-sdk) +
   // Manage button that opens the Stripe Customer Portal.
+  //
+  // The EZAuth PayProvider is intentionally mounted without a `publishableKey`
+  // (ezauth keys can't resolve ezpay's `/api/keys/config`), so we pass the
+  // Application id explicitly here to scope the dashboard to EZAuth plans.
   const billingSlot = (
     <Div className="space-y-6">
-      <BillingDashboard appName="ezauth" userId={user._id} />
+      <BillingDashboard applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID} userId={user._id} />
       <ManageSubscriptionButton />
     </Div>
   )

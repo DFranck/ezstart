@@ -263,8 +263,20 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
 
       // jwt mode: Validate JWT token
       if (resolvedMode === 'jwt') {
-        // TODO: Implement JWT validation
-        // For now, skip middleware check (client-side will handle)
+        // TODO(AUTH-MW-JWT-002): Implement edge-compatible JWT validation.
+        //
+        // Scope decisions required before implementing:
+        // - Token source: `Authorization: Bearer <jwt>` header, `ezauth_token`
+        //   cookie, or both (cookie as a fallback for non-XHR navigations)?
+        // - `JWT_PUBLIC_KEY` format: raw PEM vs JWK vs JWKS URL (rotation).
+        // - Dependency: `jose` (edge-compatible) must be added as a peer dep
+        //   to keep the middleware runnable in the Next.js Edge runtime.
+        // - Failure mode: 401 JSON for XHR, 302 redirect to EZAuth `/login`
+        //   (with `return_to`) for navigation requests.
+        //
+        // Until this is implemented, we deliberately skip the middleware
+        // check and rely on the client-side `useAuth` guard to redirect
+        // unauthenticated users from protected pages.
         if (intlMiddleware) {
           return intlMiddleware(request)
         }

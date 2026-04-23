@@ -169,7 +169,8 @@ export default function EZPayDashboardPage() {
           <H2 className="text-xl font-semibold">{tBilling('mySubscription.title')}</H2>
           <P className="text-sm text-muted-foreground">{tBilling('mySubscription.subtitle')}</P>
         </Div>
-        <BillingDashboard userId={user._id} appName="ezpay" />
+        {/* applicationId is resolved from PayProvider context (publishableKey → /api/keys/config). */}
+        <BillingDashboard userId={user._id} />
         <ManageSubscriptionButton />
       </Div>
 

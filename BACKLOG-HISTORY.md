@@ -9,6 +9,36 @@ Quand la date exacte est inconnue, l'item est placé dans le mois/section où il
 
 ## 2026-04
 
+### Apps — P7 closure + Stripe Connect dogfood + UX fixes (2026-04-23)
+
+**P7 full closure — all 8 phases A-H validated E2E on staging** (commits a3432a2d → cccb28bb)
+
+- [x] 2026-04-23 — **P7-H E2E matrice**: Subscription dogfood scenario validated end-to-end on staging via MCP (Stripe test card 4242 → webhook → DB update → role grant). Non-dogfood Connect handoff scenario also validated (subscription externe → split fee).
+- [x] 2026-04-23 — **P7-RBAC-FIX**: 3 hacker vulnerabilities closed on `BillingDashboard` `applicationId` filter. `useSubscriptionStatus` / `usePaymentHistory` / `useApplicationContext` now refuse cross-app queries when `applicationResolutionStatus === 'failed'`. `PayProvider` no longer fails open on transient `resolveApplicationByKey` errors. Commits merged to staging.
+- [x] 2026-04-23 — **Stripe Connect per-app scoping**: ConnectedAccount onboarding now scopes by `applicationId` (not just user) so an owner can onboard multiple apps independently. Connect route moved under `/developer/applications/<id>/connect` with the correct `applicationId` pre-filled. Fixes previous "Invalid onboard data" 400. Commit `cccb28bb`.
+- [x] 2026-04-23 — **Connect callback HMAC-signed state**: the Stripe Connect return URL now ships an HMAC-signed `state` payload (shared secret between ezpay API + web callback) to prevent an attacker from swapping an `accountId` in the redirect. Commit `cccb28bb`.
+
+**UX batch — 6 cross-service dashboard bugs fixed** (commit a5c08d56)
+
+- [x] 2026-04-23 — **Login redirect fix**: redirect after login now lands on the `return_to` param when present (was falling back to `/` after session establishment).
+- [x] 2026-04-23 — **Whitelabel `scope=admin` fallback**: AuthAdminDashboard on whitelabel apps correctly falls back to `scope='admin'` when `scope='myApps'` returns empty.
+- [x] 2026-04-23 — **Callback `appName` authoritative**: auth callback now uses the `app` param from the OAuth handoff as authoritative (no silent override to the ezauth-web first-party fallback).
+- [x] 2026-04-23 — **`/developer` nav link**: Dashboard sidebar nav now links to `/developer` on non-ezauth apps (was 404'ing because the old ezauth-only route had moved).
+- [x] 2026-04-23 — **Apps listing cross-app**: `ApplicationsList` on ezpay/ezstart dashboards now correctly shows apps the current user owns across all services (was limited to the caller's own app).
+- [x] 2026-04-23 — **Connect route 404 fix**: `/developer/applications/[id]/connect` page restored after P6 refacto (was removed by mistake).
+
+### Packages — auth-sdk callback error parsing (2026-04-16)
+
+- [x] 2026-04-16 — **Auth callback error display**: `AuthCallbackPage` now routes unknown errors through `extractAuthErrorMessage()` which tries `parseApiError` (envelope + details), falls back to `Error.message` (rejecting `[object Object]`), then to `Error.cause`, then to the raw string, before using the provided fallback. Fixes the "[object Object]" display that appeared on rate-limited / validation callbacks. Commit `a7a26d40`.
+
+### Infra — Staging readiness for P7 (2026-04-23)
+
+- [x] 2026-04-23 — **Staging migrations verified**: ran 5 idempotent scripts on DB staging — `migrate:keys-to-apps`, `migrate:plans-to-apps`, `migrate:connected-accounts-to-apps`, `seed:self-key` (ezauth + ezpay), `seed:plans` (ezpay dogfood). All green.
+- [x] 2026-04-23 — **Staging publishable keys rotated**: regenerated `NEXT_PUBLIC_EZAUTH_KEY` + `NEXT_PUBLIC_EZPAY_KEY` for staging and pushed them to Vercel per-app env vars.
+- [x] 2026-04-23 — **Stripe webhook secret fix**: corrected `STRIPE_WEBHOOK_SECRET` mismatch between Stripe dashboard endpoint and Railway env var on api-ezpay staging.
+- [x] 2026-04-23 — **Backfill ObjectId guard fix**: `migrate-connected-accounts-to-apps` now skips rows with a malformed legacy `appName` string when no `Application` can be resolved, instead of crashing.
+- [x] 2026-04-23 — **Vercel orphans cleanup**: removed 8 orphan `web-*` Vercel projects that had no deployment attached (via `vercel projects rm`).
+
 ### Apps — P8 UI consolidate + per-app billing + EZ-AUTO-ROLES (2026-04-22)
 
 - [x] 2026-04-22 — **UI-CONSOLIDATE-001**: Unified `/dashboard` sidebar pattern (Stripe/Clerk-style). Consolidated `/account`, `/developer`, `/billing` in one dashboard with sidebar + RBAC conditional sections (Overview / Account / Applications / API Keys / Billing / Usage / Settings + admin Users / Apps / Platform). Routes `/en/dashboard/[section]`. Deprecated old routes with 301 redirects. Mirror on ezpay/ezstart/ezbill. Commit `25abeed9`.

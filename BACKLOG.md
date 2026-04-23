@@ -14,11 +14,17 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 ## Reste avant P10 (post P9)
 
-- [ ] **P7-RBAC-FIX** — Fix BillingDashboard `applicationId` filter end-to-end (en cours, agent dev fixe 3 vulns hacker)
-- [ ] **P7-H E2E matrice** — 6 cas: 3 types (purchase/donation/sub) × 2 routages (dogfood/externe Connect+fee) sur staging via MCP. Actuellement seul le scenario subscription externe a été validé E2E.
-- [ ] **EZP-CONNECT-001** — Stripe Connect Express KYC E2E (clic manuel user requis)
-- [ ] **Cleanup Vercel orphans** — 8 projets `web-*` sans déploiement à supprimer via CLI
-- [ ] **Verify staging migrations** — confirmer que les 5 migrations idempotentes sont bien tournées sur DB staging
+- [ ] **EZP-CONNECT-001** — Stripe Connect Express KYC E2E (clic manuel user requis — user doit compléter onboarding Stripe sur staging)
+
+---
+
+## Known minor issues post-P7 (2026-04-23)
+
+Non-bloquants, à traiter opportunistiquement. Certains attendent CROSS-KEY-001 ou la suite P8/P9.
+
+- [ ] **pay-sdk `appName` deprecation warnings — remaining consumers**: green-pulse `admin/payments` (`PayAdminDashboard appName="green-pulse"`) + green-pulse `admin/test-payments` (`PayProvider appName="green-pulse"`) still emit the dev-only deprecation error. Migration blocked on **CROSS-KEY-001** (green-pulse needs its own `NEXT_PUBLIC_EZAUTH_KEY` + publishable-key-resolvable Application id before `applicationId` can be passed). ezauth + ezpay dashboards have been migrated on 2026-04-23.
+- [ ] **Sidebar nav `#` anchors**: several links in the unified dashboard sidebar still point to `#` placeholders instead of real client routes. UX minor — no 404 (anchor stays on page), but breadcrumb / deep link doesn't work.
+- [ ] **Connect app stuck pending — no "Resume onboarding" button**: when a Connect onboarding flow is started and abandoned before KYC, the ConnectedAccount stays `status=pending` with no UI affordance to resume. Today the user must re-trigger via the `Stripe Connect` tab, which creates a new onboarding link server-side but the existing pending row is never rehydrated in the UI.
 
 ---
 
@@ -55,7 +61,6 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 - [ ] **Monitoring app-scoping (future)** — Currently superadmin-only in EZStart. Each app could have `/admin/monitoring` filtered by appName. Requires: API query param `?appName=ezbill`, SDK component `<MonitoringDashboard appName="ezbill" />`. Low priority — only 1 superadmin user today.
 - [ ] **Monitoring package extraction (future)** — Extract SystemOverview + hooks from ezstart/monitoring into `packages/monitoring/client` (UI) + keep `packages/monitoring` (types/collectors). **Bloqué par :** décision de design app-scoping.
 - [ ] **CI audit trending (future)** — Run `check:dead-code`, `check:size`, `check:i18n` in GitHub Actions. Parse results → MongoDB. Dashboard shows score evolution. Currently audits.json is static (score 96.6/100).
-- [ ] **Auth callback error display** — AuthCallback shows `[object Object]` instead of readable error message (e.g. "Rate limited, try again later"). Fix error extraction in auth-sdk callback handler.
 - [ ] **`@ezstart/workspace-sdk` (future)** — multi-tenancy primitive: Workspace + Project + Members + Roles, factory agnostique suivant `.claude/rules/standard.md`. Utilisé par greenpulse-premium / ezbill / ezpay quand le besoin se concrétise. Le code green-pulse précédent (workspaces/projects/forms) a été supprimé en commit `7f6aa9db`.
 
 ### AI platform
