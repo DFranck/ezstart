@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { getAppTheme } from '@/config/app-themes'
 import { SignInForm, useAuthNavigation } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
@@ -15,12 +15,19 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
+import { toast } from '@ezstart/ui/utils'
 import Link from 'next/link'
-import { Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useKeyConfig } from '@/hooks/useKeyConfig'
+import { useKeyConfig, type KeyConfigState } from '@/hooks/useKeyConfig'
 import { deriveAppHintFromRedirectUri } from '@/hooks/useDerivedApp'
+
+/**
+ * Max retry delay when the server did not provide a `Retry-After` header or
+ * returned an unreasonably large value. Keeps the user unblocked even under
+ * sustained rate-limiting.
+ */
+const MAX_RATE_LIMIT_RETRY_SECONDS = 10
 
 function LoginContent() {
   const t = useTranslations('login')
@@ -41,7 +48,11 @@ function LoginContent() {
   // bootstrap), we must NOT white-label as EZAuth — fall back to the hint
   // from `?app=` or the `redirect_uri` subdomain so the user sees the
   // correct brand / theme for the app they are signing into.
-  const keyConfig = useKeyConfig(navigation.publishableKey)
+  // `retryTick` is a nonce used to force `useKeyConfig` to re-probe after a
+  // `rate_limited` or `error` state — the publishable key itself stays the
+  // same, only the effect's dependency changes.
+  const [retryTick, setRetryTick] = useState(0)
+  const keyConfig = useKeyConfig(navigation.publishableKey, retryTick)
   const isPlatformKey = keyConfig.scope === 'admin'
   const redirectUriAppHint = deriveAppHintFromRedirectUri(navigation.redirectUri)
   const resolvedAppFromKey =
@@ -50,7 +61,13 @@ function LoginContent() {
       : keyConfig.appName
   const app = resolvedAppFromKey ?? navigation.app ?? 'ezauth'
   const theme = getAppTheme(app)
-  const isKeyInvalid = keyConfig.status === 'invalid'
+
+  // Form is ONLY disabled during the initial "loading" probe (explicit pending
+  // state). For `invalid` / `rate_limited` / `error`, the form remains
+  // enabled so the user is never stuck in a silent dead-end — they either
+  // see a toast explaining the situation OR the auto-retry unblocks them.
+  const isProbing = keyConfig.status === 'loading'
+
   // First-party fallback: if no ?redirect_uri= is passed (user lands on
   // ezauth's own /login directly), default to ezauth's own callback page so
   // the SDK's code-flow exchanges the authorization code for a session cookie
@@ -67,6 +84,55 @@ function LoginContent() {
         ? ('invalid' as const)
         : undefined
     : undefined
+
+  // Surface the terminal key-validation outcomes to the user so the form is
+  // NEVER silently locked. Each status shows at most one toast (toast.id is
+  // unique per status so re-renders do not stack duplicates).
+  const lastToastStatusRef = useRef<KeyConfigState['status'] | null>(null)
+  useEffect(() => {
+    if (keyConfig.status === lastToastStatusRef.current) return
+
+    if (keyConfig.status === 'invalid') {
+      toast.error(t('keyInvalid'), { id: 'key-config-invalid' })
+      lastToastStatusRef.current = 'invalid'
+    } else if (keyConfig.status === 'rate_limited') {
+      const retrySeconds = Math.min(
+        keyConfig.retryAfter && keyConfig.retryAfter > 0
+          ? keyConfig.retryAfter
+          : MAX_RATE_LIMIT_RETRY_SECONDS,
+        MAX_RATE_LIMIT_RETRY_SECONDS
+      )
+      toast.info(t('keyRateLimited', { seconds: String(retrySeconds) }), {
+        id: 'key-config-rate-limited',
+      })
+      lastToastStatusRef.current = 'rate_limited'
+    } else if (keyConfig.status === 'error') {
+      toast.error(t('keyUnavailable'), { id: 'key-config-error' })
+      lastToastStatusRef.current = 'error'
+    } else if (keyConfig.status === 'valid' || keyConfig.status === 'idle') {
+      lastToastStatusRef.current = keyConfig.status
+    }
+  }, [keyConfig.status, keyConfig.retryAfter, t])
+
+  // Auto-retry on rate limit: schedule a single re-probe after `retryAfter`
+  // seconds (clamped to MAX_RATE_LIMIT_RETRY_SECONDS). Bumping `retryTick`
+  // re-runs the `useKeyConfig` effect via the publishable-key dep.
+  useEffect(() => {
+    if (keyConfig.status !== 'rate_limited') return
+    const delay =
+      Math.min(
+        keyConfig.retryAfter && keyConfig.retryAfter > 0
+          ? keyConfig.retryAfter
+          : MAX_RATE_LIMIT_RETRY_SECONDS,
+        MAX_RATE_LIMIT_RETRY_SECONDS
+      ) * 1000
+    const timer = window.setTimeout(() => {
+      setRetryTick(n => n + 1)
+    }, delay)
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [keyConfig.status, keyConfig.retryAfter])
 
   return (
     <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto" data-app={app}>
@@ -89,7 +155,7 @@ function LoginContent() {
           redirectUri={resolvedRedirectUri}
           showOAuth
           oauthProviders={['google']}
-          disabled={isKeyInvalid}
+          disabled={isProbing}
           keyStatus={bannerKeyStatus}
           urlKey={navigation.publishableKey}
           texts={{
