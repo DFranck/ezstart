@@ -46,6 +46,12 @@ const SYSTEM_SEED_MARKER = 'system-seed-consumer'
  */
 export const CONSUMER_APP_SLUGS: ReadonlyArray<{ slug: string; name: string }> = [
   { slug: 'ezstart', name: 'EZStart' },
+  // EZPay is included here even though it is seeded as a dogfood Application by
+  // `seed-self-key` — this script only ensures the Application exists and mints
+  // a tenant-scoped publishable key (`scope='user'`) that the EZPay web app can
+  // expose via `NEXT_PUBLIC_EZAUTH_KEY`. The prior admin workaround (using
+  // EZAuth's own admin key) is dropped once this key is wired in Vercel.
+  { slug: 'ezpay', name: 'EZPay' },
   { slug: 'ezbill', name: 'EZBill' },
   { slug: 'green-pulse', name: 'GreenPulse' },
   { slug: 'fengshui', name: 'Feng Shui 2026' },

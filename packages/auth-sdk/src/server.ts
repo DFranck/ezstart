@@ -1,8 +1,15 @@
+// Feature gate (server-only — app+user context aware)
+export { hasFeature } from './server/features.js'
+export type { HasFeatureInput, HasFeatureApp, HasFeatureUser } from './server/features.js'
+
 // Core client (agnostic)
 export { CoreAuthClient, createCoreAuthClient } from './core/auth-client.js'
 
 // Backward-compat aliases
-export { CoreAuthClient as AuthClient, createCoreAuthClient as createAuthClient } from './core/auth-client.js'
+export {
+  CoreAuthClient as AuthClient,
+  createCoreAuthClient as createAuthClient,
+} from './core/auth-client.js'
 export type { AuthClientConfig } from './core/types.js'
 
 // Types pour les APIs
