@@ -1,14 +1,34 @@
 /**
  * Anthropic (Claude) Provider
+ *
+ * Implements `IAIProvider` on top of `@anthropic-ai/sdk`.
+ *
+ * Supports:
+ * - Non-streaming `sendMessage` via Messages API
+ * - Streaming via `messages.stream` (SSE events handled by the SDK)
+ * - Vision (base64 images)
+ * - System prompts (passed via `system` param, not as a message role)
+ * - JSON extraction (`extractJson: true`)
+ *
+ * Errors are surfaced as `Anthropic.APIError` subclasses:
+ * - `AuthenticationError` (401) — invalid API key
+ * - `RateLimitError` (429) — rate limit / quota exceeded
+ * - `InternalServerError` (5xx) — including `overloaded_error`
+ * - `APIConnectionError` — network failures
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse, ChatMessage } from './base.js'
+import type { IAIProvider, ProviderSendOptions, ProviderResponse } from './base.js'
 
 export interface AnthropicProviderConfig {
   apiKey?: string
   model?: string
 }
+
+/** Default model — latest Sonnet (stable alias). */
+const DEFAULT_MODEL = 'claude-sonnet-4-5'
+const DEFAULT_MAX_TOKENS = 4096
+const DEFAULT_TEMPERATURE = 0.7
 
 export class AnthropicProvider implements IAIProvider {
   private client: Anthropic
@@ -17,7 +37,7 @@ export class AnthropicProvider implements IAIProvider {
   constructor(config: AnthropicProviderConfig = {}) {
     const apiKey = config.apiKey || process.env.ANTHROPIC_API_KEY
     this.client = new Anthropic({ apiKey })
-    this.model = config.model || 'claude-sonnet-4-20250514'
+    this.model = config.model || DEFAULT_MODEL
     this.validateConfig()
   }
 
@@ -73,8 +93,8 @@ export class AnthropicProvider implements IAIProvider {
       model: this.model,
       messages,
       system: options.systemPrompt || undefined,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens || 4096,
+      temperature: options.temperature ?? DEFAULT_TEMPERATURE,
+      max_tokens: options.maxTokens || DEFAULT_MAX_TOKENS,
     })
 
     const textBlock = response.content.find(block => block.type === 'text')
@@ -120,8 +140,8 @@ export class AnthropicProvider implements IAIProvider {
       model: this.model,
       messages,
       system: options.systemPrompt || undefined,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens || 4096,
+      temperature: options.temperature ?? DEFAULT_TEMPERATURE,
+      max_tokens: options.maxTokens || DEFAULT_MAX_TOKENS,
     })
 
     let fullText = ''

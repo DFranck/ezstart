@@ -9,6 +9,10 @@ Quand la date exacte est inconnue, l'item est placé dans le mois/section où il
 
 ## 2026-04
 
+### Packages — ai-sdk AnthropicProvider finalisation (2026-04-23)
+
+- [x] 2026-04-23 — **Anthropic provider** — `AnthropicProvider` dans `packages/ai-sdk/src/server/providers/anthropic.ts` était déjà implémenté (commit 030074bc) mais (1) non exporté depuis `src/index.ts`, (2) sans aucun test, (3) modèle par défaut obsolète. Corrigé : `AnthropicProvider` + config types exportés (alongside OpenAI/Gemini), default model = `claude-sonnet-4-5` (+ constantes `DEFAULT_MAX_TOKENS` / `DEFAULT_TEMPERATURE`), vitest infra ajouté (`vitest.config.ts` + `__tests__/setup.ts`), **21 tests** (`anthropic.test.ts`) couvrent constructor/validateConfig, sendMessage non-stream (temperature/maxTokens/history/systemPrompt filter/empty-text), vision (base64 images), JSON extraction (valid + malformed), streaming (onChunk/onComplete + finalMessage errors), error handling (401 Auth, 429 RateLimit, 5xx overloaded_error, APIConnectionError). README mis à jour (section Providers avec tableau + quickstart direct/registry). L'entrée backlog disait `throw new Error('not yet implemented')` mais c'était obsolète — fermé pour de bon.
+
 ### Cross-cutting — Consumer app publishable keys + pay-sdk migration (2026-04-23)
 
 - [x] 2026-04-23 — **CROSS-KEY-001: Publishable key migration for 6 consumer apps**: seed script `apps/ezauth/api/src/scripts/seed-consumer-app-keys.ts` creates one `ez_pk_live_*` publishable key per consumer app (ezstart, ezbill, green-pulse, fengshui, asc-tcd, gacha-analyzer) linked to its Application doc (scope='user', createdBy='system-seed-consumer'). Idempotent — re-runs are no-ops. Ran on Railway staging (6 keys generated). Each app's `.env.local` + `.env.example` updated with `NEXT_PUBLIC_EZAUTH_KEY=`. All AuthProviders already wired `publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}`. No `?app=` hardcoded links found (Mission 4 no-op). Keys captured in `tmp/consumer-app-keys-2026-04-23.txt` (gitignored). Tests: 5 new vitest specs in `__tests__/scripts/seed-consumer-app-keys.test.ts`.

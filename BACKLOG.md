@@ -73,7 +73,6 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 - [ ] **AI streaming SSE** — Exposer SSE streaming dans le chat endpoint. OpenAIProvider a déjà `handleStreaming()`. Route + frontend.
 - [ ] **Smart provider routing** — Router automatiquement chaque message vers le provider le plus adapté dans une même conversation (ex: factuel→gemini, complexe→gpt-4o, vision→gemini). Critères: type de prompt, mots-clés, coût, complexité.
 - [ ] **Provider model override dynamique** — `AppProvider.config.model` doit être passé au `ProviderRegistry` au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
-- [ ] **Anthropic provider** — Implémenter `AnthropicProvider` dans ai-sdk (Claude API). Actuellement `throw new Error('not yet implemented')`.
 - [ ] **Provider status/health dans l'UI** — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
 - [ ] **utm_source tracking** — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
 
