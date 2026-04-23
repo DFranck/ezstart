@@ -51,6 +51,7 @@ router.get('/', (_, res) => {
       metrics: '/api/metrics',
       history: '/api/history/:serviceId',
       projectHistory: '/api/history/project/:projectId',
+      historyAggregate: '/api/history/aggregate',
       activity: '/api/activity',
       activityErrors: '/api/activity/errors',
       activityStats: '/api/activity/stats',

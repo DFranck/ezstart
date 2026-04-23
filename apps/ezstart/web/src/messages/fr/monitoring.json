@@ -9,6 +9,32 @@
       "detailsSubtitle": "État de santé détaillé pour chaque projet",
       "noProjects": "Aucun projet trouvé"
     },
+    "charts": {
+      "title": "Tendances historiques",
+      "description": "Latence, disponibilité et taux d'erreur agrégés sur tous les services",
+      "period": {
+        "7d": "7 derniers jours",
+        "30d": "30 derniers jours"
+      },
+      "latency": {
+        "title": "Latence p95",
+        "description": "Temps de réponse au 95e percentile par intervalle (ms)",
+        "yLabel": "ms"
+      },
+      "uptime": {
+        "title": "Disponibilité",
+        "description": "Ratio de checks réussis par intervalle (%)",
+        "yLabel": "%"
+      },
+      "errorRate": {
+        "title": "Taux d'erreur par service",
+        "description": "Checks en échec sur la période (%)",
+        "yLabel": "%"
+      },
+      "empty": "Aucune donnée disponible pour cette période",
+      "error": "Échec du chargement des graphiques",
+      "loading": "Chargement des graphiques..."
+    },
     "auditsPage": {
       "title": "Audits de Qualité",
       "description": "Audits de qualité complets sur toutes les catégories du monorepo",

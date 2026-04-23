@@ -9,6 +9,32 @@
       "detailsSubtitle": "Detailed health status for each project",
       "noProjects": "No projects found"
     },
+    "charts": {
+      "title": "Historical Trends",
+      "description": "Aggregated latency, uptime and error rate across all services",
+      "period": {
+        "7d": "Last 7 days",
+        "30d": "Last 30 days"
+      },
+      "latency": {
+        "title": "Latency p95",
+        "description": "95th percentile response time per bucket (ms)",
+        "yLabel": "ms"
+      },
+      "uptime": {
+        "title": "Uptime",
+        "description": "Healthy checks ratio per bucket (%)",
+        "yLabel": "%"
+      },
+      "errorRate": {
+        "title": "Error rate per service",
+        "description": "Unhealthy checks over the period (%)",
+        "yLabel": "%"
+      },
+      "empty": "No data available for this period",
+      "error": "Failed to load chart data",
+      "loading": "Loading charts..."
+    },
     "auditsPage": {
       "title": "Quality Audits",
       "description": "Comprehensive quality audits across all categories of the monorepo",
