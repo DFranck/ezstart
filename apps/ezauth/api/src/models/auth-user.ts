@@ -26,6 +26,7 @@ export interface AuthUserDocument extends Document {
   managedBy?: string // User ID of manager (for clients)
 
   promoCode?: string
+  utmSource?: string
 
   hasSetOwnPassword: boolean
 
@@ -131,6 +132,11 @@ const authUserSchema = new Schema<AuthUserDocument>(
     },
     promoCode: {
       type: String,
+      default: undefined,
+    },
+    utmSource: {
+      type: String,
+      maxlength: 128,
       default: undefined,
     },
     hasSetOwnPassword: {

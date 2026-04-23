@@ -182,6 +182,7 @@ export interface RegisterRequest {
   redirect_uri?: string
   locale?: string
   promoCode?: string
+  utmSource?: string
 }
 
 export interface TokenRequest {
@@ -196,6 +197,7 @@ export interface QuickSignUpRequest {
   app: string
   locale?: string
   promoCode?: string
+  utmSource?: string
   emailOverride?: EmailOverrideRequest
 }
 

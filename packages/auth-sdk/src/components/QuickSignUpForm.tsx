@@ -22,6 +22,7 @@ import { useAuthStore } from '../react/store.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { usePromoCode } from './usePromoCode.js'
+import { readUtmSource } from './utmSource.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 import type { EmailOverrideRequest } from '../core/types.js'
 
@@ -127,12 +128,18 @@ export function QuickSignUpForm({
 
     try {
       const finalPromo = promoIsValid === true ? formData.promoCode?.trim() : undefined
+      // Marketing attribution: read utm_source persisted client-side (by the
+      // landing page or router middleware) and forward it to the backend so
+      // it can be stored on the user alongside the promo code. Trimmed and
+      // capped client-side; the API schema enforces max 128 chars as well.
+      const utmSource = readUtmSource()
       const result = await client.quickSignUp({
         username: formData.username,
         email: formData.email,
         app: appName,
         locale,
         ...(finalPromo ? { promoCode: finalPromo } : {}),
+        ...(utmSource ? { utmSource } : {}),
         ...(emailOverride ? { emailOverride } : {}),
       })
 

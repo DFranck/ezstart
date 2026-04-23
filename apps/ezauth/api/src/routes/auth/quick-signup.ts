@@ -47,7 +47,7 @@ const quickSignupController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid quick-signup request', parsed.error.issues)
     }
 
-    const { username, email, app, promoCode, locale, emailOverride } = parsed.data
+    const { username, email, app, promoCode, utmSource, locale, emailOverride } = parsed.data
     const normalizedUsername = username.trim().toLowerCase()
     const normalizedEmail = email.trim().toLowerCase()
 
@@ -75,6 +75,7 @@ const quickSignupController = async (req: Request, res: Response) => {
       isVerified: false,
       hasSetOwnPassword: false,
       ...(promoCode ? { promoCode } : {}),
+      ...(utmSource ? { utmSource } : {}),
     })
 
     try {

@@ -23,6 +23,7 @@ import { useForm } from 'react-hook-form'
 import { PasswordStrength } from './PasswordStrength.js'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
+import { readUtmSource } from './utmSource.js'
 import { DevModeBanner } from './DevModeBanner.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
@@ -231,6 +232,7 @@ export function SignUpForm({
 
     try {
       const finalPromo = promoIsValid === true ? formData.promoCode?.trim() : undefined
+      const utmSource = readUtmSource()
       await apiCall('/auth/register', {
         appName: 'ezauth',
         method: 'POST',
@@ -244,6 +246,7 @@ export function SignUpForm({
           redirect_uri: redirectUri || undefined,
           locale,
           ...(finalPromo ? { promoCode: finalPromo } : {}),
+          ...(utmSource ? { utmSource } : {}),
         },
       })
 

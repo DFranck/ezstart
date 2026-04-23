@@ -52,7 +52,7 @@ const safeRedirectUri = z
   .url()
   .max(2048)
   .refine(
-    (val) => {
+    val => {
       try {
         const { protocol } = new URL(val)
         return protocol === 'http:' || protocol === 'https:'
@@ -166,6 +166,11 @@ export const RegisterRequestSchema = z.object({
   app: z.string().min(1).max(100).describe('Target app identifier (ezauth, ezbill, etc.)'),
   redirect_uri: safeRedirectUri.optional().describe('OAuth redirect URI after registration'),
   promoCode: z.string().max(50).optional().describe('Optional promo code to apply at signup'),
+  utmSource: z
+    .string()
+    .max(128)
+    .optional()
+    .describe('Optional marketing attribution source (utm_source)'),
   locale: SupportedLocaleSchema.optional()
     .default('en')
     .describe('Locale for user-facing emails (en, fr, vi)'),
@@ -188,6 +193,11 @@ export const QuickSignupRequestSchema = z.object({
   email: z.string().email().max(254).describe('User email address'),
   app: z.string().min(1).max(100).describe('Target app identifier (ezauth, ezbill, etc.)'),
   promoCode: z.string().max(50).optional().describe('Optional promo code to apply at signup'),
+  utmSource: z
+    .string()
+    .max(128)
+    .optional()
+    .describe('Optional marketing attribution source (utm_source)'),
   locale: SupportedLocaleSchema.optional()
     .default('en')
     .describe('Locale for user-facing emails (en, fr, vi)'),
@@ -215,7 +225,11 @@ export const ForgotPasswordRequestSchema = z.object({
 export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequestSchema>
 
 export const ResetPasswordRequestSchema = z.object({
-  token: z.string().min(1).max(2048).describe('Single-use reset token from the password reset email'),
+  token: z
+    .string()
+    .min(1)
+    .max(2048)
+    .describe('Single-use reset token from the password reset email'),
   newPassword: z.string().min(8).max(128).describe('New password (8-128 characters)'),
 })
 export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>

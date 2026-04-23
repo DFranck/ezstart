@@ -55,7 +55,7 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 
 ### Monitoring & audits CI
 
-- [ ] **Recharts graphs on /monitoring/health** — latency p95 trending (7d/30d), uptime % timeline, error rate per service. Data déjà en MongoDB (HealthCheck model avec responseTime + status + timestamp, TTL 30d). Utiliser Recharts de `packages/ui`.
+- [x] **Recharts graphs on /monitoring/health** — latency p95 trending (7d/30d), uptime % timeline, error rate per service. Data déjà en MongoDB (HealthCheck model avec responseTime + status + timestamp, TTL 30d). Utiliser Recharts de `packages/ui`. _(2026-04-23: New `/api/history/aggregate` endpoint + `HealthCharts.tsx` with `LineChart` (p95), `AreaChart` (uptime%), `BarChart` (error rate per service). 7d/30d tabs, theme tokens for colors, i18n EN/FR, 7 tests passing.)_
 - [ ] **Monitoring app-scoping (future)** — Currently superadmin-only in EZStart. Each app could have `/admin/monitoring` filtered by appName. Requires: API query param `?appName=ezbill`, SDK component `<MonitoringDashboard appName="ezbill" />`. Low priority — only 1 superadmin user today.
 - [ ] **Monitoring package extraction (future)** — Extract SystemOverview + hooks from ezstart/monitoring into `packages/monitoring/client` (UI) + keep `packages/monitoring` (types/collectors). **Bloqué par :** décision de design app-scoping.
 - [ ] **CI audit trending (future)** — Run `check:dead-code`, `check:size`, `check:i18n` in GitHub Actions. Parse results → MongoDB. Dashboard shows score evolution. Currently audits.json is static (score 96.6/100).
@@ -73,7 +73,7 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 - [ ] **Smart provider routing** — Router automatiquement chaque message vers le provider le plus adapté dans une même conversation (ex: factuel→gemini, complexe→gpt-4o, vision→gemini). Critères: type de prompt, mots-clés, coût, complexité.
 - [ ] **Provider model override dynamique** — `AppProvider.config.model` doit être passé au `ProviderRegistry` au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
 - [ ] **Provider status/health dans l'UI** — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.
-- [ ] **utm_source tracking** — Send utm_source from localStorage to backend during quicksignup. Store on user model alongside promoCode. Currently only stored client-side.
+- [x] **utm_source tracking** — Send utm_source from localStorage to backend during quicksignup + register. Stored on auth_users alongside promoCode. Schema cap 128 chars, shared `readUtmSource()` helper in auth-sdk. (2026-04-23)
 
 ---
 

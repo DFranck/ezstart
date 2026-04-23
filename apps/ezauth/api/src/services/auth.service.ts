@@ -93,6 +93,7 @@ export class AuthService {
       apps: [data.app], // Grant access to the requesting app
       isVerified: false, // Requires email verification
       ...(data.promoCode ? { promoCode: data.promoCode } : {}),
+      ...(data.utmSource ? { utmSource: data.utmSource } : {}),
     })
 
     try {

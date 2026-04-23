@@ -33,16 +33,12 @@ describe('password max length (bcrypt DoS)', () => {
 
   it('LoginRequestSchema rejects passwords > 128 chars', () => {
     const hugePassword = 'a'.repeat(10_000)
-    expect(() =>
-      LoginRequestSchema.parse({ ...base, password: hugePassword })
-    ).toThrow()
+    expect(() => LoginRequestSchema.parse({ ...base, password: hugePassword })).toThrow()
   })
 
   it('LoginRequestSchema accepts password at 128 chars', () => {
     const pw128 = 'a'.repeat(128)
-    expect(
-      LoginRequestSchema.parse({ ...base, password: pw128 }).password
-    ).toBe(pw128)
+    expect(LoginRequestSchema.parse({ ...base, password: pw128 }).password).toBe(pw128)
   })
 
   it('RegisterRequestSchema rejects passwords > 128 chars', () => {
@@ -80,8 +76,7 @@ describe('password max length (bcrypt DoS)', () => {
   it('ResetPasswordRequestSchema accepts newPassword at 128 chars', () => {
     const pw128 = 'a'.repeat(128)
     expect(
-      ResetPasswordRequestSchema.parse({ token: 'tok_abc', newPassword: pw128 })
-        .newPassword
+      ResetPasswordRequestSchema.parse({ token: 'tok_abc', newPassword: pw128 }).newPassword
     ).toBe(pw128)
   })
 })
@@ -137,9 +132,7 @@ describe('email max length', () => {
   it('ForgotPasswordRequestSchema rejects email > 254 chars', () => {
     const longLocal = 'a'.repeat(243)
     const hugeEmail = `${longLocal}@example.com`
-    expect(() =>
-      ForgotPasswordRequestSchema.parse({ email: hugeEmail })
-    ).toThrow()
+    expect(() => ForgotPasswordRequestSchema.parse({ email: hugeEmail })).toThrow()
   })
 
   it('QuickSignupRequestSchema rejects email > 254 chars', () => {
@@ -161,39 +154,27 @@ describe('email max length', () => {
 
 describe('EmailOverrideSchema field limits', () => {
   it('rejects subject > 500 chars', () => {
-    expect(() =>
-      EmailOverrideSchema.parse({ subject: 'a'.repeat(501) })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ subject: 'a'.repeat(501) })).toThrow()
   })
 
   it('rejects bodyHtml > 50_000 chars', () => {
-    expect(() =>
-      EmailOverrideSchema.parse({ bodyHtml: 'a'.repeat(50_001) })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ bodyHtml: 'a'.repeat(50_001) })).toThrow()
   })
 
   it('rejects heading > 500 chars', () => {
-    expect(() =>
-      EmailOverrideSchema.parse({ heading: 'a'.repeat(501) })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ heading: 'a'.repeat(501) })).toThrow()
   })
 
   it('rejects intro > 2000 chars', () => {
-    expect(() =>
-      EmailOverrideSchema.parse({ intro: 'a'.repeat(2001) })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ intro: 'a'.repeat(2001) })).toThrow()
   })
 
   it('rejects outro > 2000 chars', () => {
-    expect(() =>
-      EmailOverrideSchema.parse({ outro: 'a'.repeat(2001) })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ outro: 'a'.repeat(2001) })).toThrow()
   })
 
   it('rejects ctaLabel > 200 chars', () => {
-    expect(() =>
-      EmailOverrideSchema.parse({ ctaLabel: 'a'.repeat(201) })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ ctaLabel: 'a'.repeat(201) })).toThrow()
   })
 
   it('accepts fields within limits', () => {
@@ -259,29 +240,24 @@ describe('LoginRequestSchema email field (dual purpose)', () => {
   const base = { password: 'secret', app: 'myapp' }
 
   it('accepts a valid email', () => {
-    expect(
-      LoginRequestSchema.parse({ ...base, email: 'user@test.com' }).email
-    ).toBe('user@test.com')
+    expect(LoginRequestSchema.parse({ ...base, email: 'user@test.com' }).email).toBe(
+      'user@test.com'
+    )
   })
 
   it('accepts a username (non-email string)', () => {
-    expect(
-      LoginRequestSchema.parse({ ...base, email: 'myusername' }).email
-    ).toBe('myusername')
+    expect(LoginRequestSchema.parse({ ...base, email: 'myusername' }).email).toBe('myusername')
   })
 
   it('rejects email/username > 254 chars', () => {
-    expect(() =>
-      LoginRequestSchema.parse({ ...base, email: 'a'.repeat(255) })
-    ).toThrow()
+    expect(() => LoginRequestSchema.parse({ ...base, email: 'a'.repeat(255) })).toThrow()
   })
 
   it('accepts email/username at 254 chars', () => {
     const long254 = 'a'.repeat(254)
-    expect(
-      LoginRequestSchema.parse({ ...base, password: 'secret', email: long254 })
-        .email
-    ).toBe(long254)
+    expect(LoginRequestSchema.parse({ ...base, password: 'secret', email: long254 }).email).toBe(
+      long254
+    )
   })
 })
 
@@ -336,22 +312,16 @@ describe('token field max length', () => {
   })
 
   it('VerifyEmailRequestSchema rejects token > 2048 chars', () => {
-    expect(() =>
-      VerifyEmailRequestSchema.parse({ token: 'a'.repeat(2049) })
-    ).toThrow()
+    expect(() => VerifyEmailRequestSchema.parse({ token: 'a'.repeat(2049) })).toThrow()
   })
 
   it('VerifyRequestSchema rejects token > 4096 chars', () => {
     // JWT tokens can be longer than simple tokens
-    expect(() =>
-      VerifyRequestSchema.parse({ token: 'a'.repeat(4097) })
-    ).toThrow()
+    expect(() => VerifyRequestSchema.parse({ token: 'a'.repeat(4097) })).toThrow()
   })
 
   it('RefreshRequestSchema rejects refreshToken > 4096 chars', () => {
-    expect(() =>
-      RefreshRequestSchema.parse({ refreshToken: 'a'.repeat(4097) })
-    ).toThrow()
+    expect(() => RefreshRequestSchema.parse({ refreshToken: 'a'.repeat(4097) })).toThrow()
   })
 })
 
@@ -385,12 +355,69 @@ describe('promoCode max length', () => {
 })
 
 // ---------------------------------------------------------------------------
+// 9b. utmSource max length
+// ---------------------------------------------------------------------------
+
+describe('utmSource max length', () => {
+  it('RegisterRequestSchema accepts utmSource up to 128 chars', () => {
+    expect(() =>
+      RegisterRequestSchema.parse({
+        email: 'a@b.com',
+        username: 'user',
+        password: 'longpassword',
+        app: 'myapp',
+        utmSource: 'a'.repeat(128),
+      })
+    ).not.toThrow()
+  })
+
+  it('RegisterRequestSchema rejects utmSource > 128 chars', () => {
+    expect(() =>
+      RegisterRequestSchema.parse({
+        email: 'a@b.com',
+        username: 'user',
+        password: 'longpassword',
+        app: 'myapp',
+        utmSource: 'a'.repeat(129),
+      })
+    ).toThrow()
+  })
+
+  it('QuickSignupRequestSchema accepts utmSource up to 128 chars', () => {
+    expect(() =>
+      QuickSignupRequestSchema.parse({
+        username: 'user',
+        email: 'a@b.com',
+        app: 'myapp',
+        utmSource: 'a'.repeat(128),
+      })
+    ).not.toThrow()
+  })
+
+  it('QuickSignupRequestSchema rejects utmSource > 128 chars', () => {
+    expect(() =>
+      QuickSignupRequestSchema.parse({
+        username: 'user',
+        email: 'a@b.com',
+        app: 'myapp',
+        utmSource: 'a'.repeat(129),
+      })
+    ).toThrow()
+  })
+})
+
+// ---------------------------------------------------------------------------
 // 10. redirect_uri — reject dangerous protocols (XSS/open-redirect)
 // ---------------------------------------------------------------------------
 
 describe('redirect_uri protocol safety', () => {
   const loginBase = { email: 'user@test.com', password: 'secret', app: 'myapp' }
-  const registerBase = { email: 'a@b.com', username: 'user', password: 'longpassword', app: 'myapp' }
+  const registerBase = {
+    email: 'a@b.com',
+    username: 'user',
+    password: 'longpassword',
+    app: 'myapp',
+  }
 
   it('LoginRequestSchema rejects javascript: URI', () => {
     expect(() =>
@@ -400,19 +427,24 @@ describe('redirect_uri protocol safety', () => {
 
   it('LoginRequestSchema rejects data: URI', () => {
     expect(() =>
-      LoginRequestSchema.parse({ ...loginBase, redirect_uri: 'data:text/html,<script>alert(1)</script>' })
+      LoginRequestSchema.parse({
+        ...loginBase,
+        redirect_uri: 'data:text/html,<script>alert(1)</script>',
+      })
     ).toThrow()
   })
 
   it('LoginRequestSchema accepts https: URI', () => {
     expect(
-      LoginRequestSchema.parse({ ...loginBase, redirect_uri: 'https://example.com/cb' }).redirect_uri
+      LoginRequestSchema.parse({ ...loginBase, redirect_uri: 'https://example.com/cb' })
+        .redirect_uri
     ).toBe('https://example.com/cb')
   })
 
   it('LoginRequestSchema accepts http: URI (dev)', () => {
     expect(
-      LoginRequestSchema.parse({ ...loginBase, redirect_uri: 'http://localhost:3000/cb' }).redirect_uri
+      LoginRequestSchema.parse({ ...loginBase, redirect_uri: 'http://localhost:3000/cb' })
+        .redirect_uri
     ).toBe('http://localhost:3000/cb')
   })
 
@@ -430,7 +462,11 @@ describe('redirect_uri protocol safety', () => {
 
   it('TokenRequestSchema rejects javascript: URI', () => {
     expect(() =>
-      TokenRequestSchema.parse({ code: 'auth_code', app: 'myapp', redirect_uri: 'javascript:alert(document.cookie)' })
+      TokenRequestSchema.parse({
+        code: 'auth_code',
+        app: 'myapp',
+        redirect_uri: 'javascript:alert(document.cookie)',
+      })
     ).toThrow()
   })
 
@@ -448,16 +484,14 @@ describe('redirect_uri protocol safety', () => {
 
   it('redirect_uri max length 2048', () => {
     const longUrl = 'https://example.com/' + 'a'.repeat(2030)
-    expect(() =>
-      LoginRequestSchema.parse({ ...loginBase, redirect_uri: longUrl })
-    ).toThrow()
+    expect(() => LoginRequestSchema.parse({ ...loginBase, redirect_uri: longUrl })).toThrow()
   })
 
   it('redirect_uri accepts at 2048 chars', () => {
     const url = 'https://example.com/' + 'a'.repeat(2028) // 20 + 2028 = 2048
-    expect(
-      LoginRequestSchema.parse({ ...loginBase, redirect_uri: url }).redirect_uri
-    ).toHaveLength(2048)
+    expect(LoginRequestSchema.parse({ ...loginBase, redirect_uri: url }).redirect_uri).toHaveLength(
+      2048
+    )
   })
 })
 
@@ -469,17 +503,13 @@ describe('EmailOverride from/replyTo max length', () => {
   it('rejects from email > 254 chars', () => {
     const longLocal = 'a'.repeat(243)
     const longEmail = `${longLocal}@example.com` // 243 + 12 = 255 chars
-    expect(() =>
-      EmailOverrideSchema.parse({ from: longEmail })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ from: longEmail })).toThrow()
   })
 
   it('rejects replyTo email > 254 chars', () => {
     const longLocal = 'a'.repeat(243)
     const longEmail = `${longLocal}@example.com` // 255 chars
-    expect(() =>
-      EmailOverrideSchema.parse({ replyTo: longEmail })
-    ).toThrow()
+    expect(() => EmailOverrideSchema.parse({ replyTo: longEmail })).toThrow()
   })
 
   it('accepts from email at 254 chars', () => {

@@ -135,4 +135,38 @@ describe('Quick Signup Logic', () => {
     const saved = await AuthUser.findById(user._id)
     expect(saved?.promoCode).toBe('EARTH2026')
   })
+
+  it('should store utmSource when provided', async () => {
+    const AuthUser = await getAuthUserModel()
+
+    const user = new AuthUser({
+      email: 'utm@example.com',
+      username: 'utmuser',
+      passwordHash: 'random-placeholder',
+      apps: ['green-pulse'],
+      isVerified: false,
+      hasSetOwnPassword: false,
+      utmSource: 'twitter',
+    })
+    await user.save()
+
+    const saved = await AuthUser.findById(user._id)
+    expect(saved?.utmSource).toBe('twitter')
+  })
+
+  it('should reject utmSource longer than 128 chars (mongoose maxlength)', async () => {
+    const AuthUser = await getAuthUserModel()
+
+    const user = new AuthUser({
+      email: 'utmlong@example.com',
+      username: 'utmlonguser',
+      passwordHash: 'random-placeholder',
+      apps: ['green-pulse'],
+      isVerified: false,
+      hasSetOwnPassword: false,
+      utmSource: 'a'.repeat(129),
+    })
+
+    await expect(user.save()).rejects.toThrow()
+  })
 })

@@ -114,4 +114,33 @@ describe('Register Route Logic', () => {
     const user = await AuthUser.findOne({ email: 'promo@example.com' })
     expect(user?.promoCode).toBe('SAVE20')
   })
+
+  it('should store utmSource when provided', async () => {
+    const AuthUser = await getAuthUserModel()
+
+    await AuthService.register({
+      email: 'utm@example.com',
+      username: 'utmuser',
+      password: 'StrongPass123!',
+      app: 'ezstart',
+      utmSource: 'product-hunt',
+    })
+
+    const user = await AuthUser.findOne({ email: 'utm@example.com' })
+    expect(user?.utmSource).toBe('product-hunt')
+  })
+
+  it('should leave utmSource undefined when not provided', async () => {
+    const AuthUser = await getAuthUserModel()
+
+    await AuthService.register({
+      email: 'noutm@example.com',
+      username: 'noutmuser',
+      password: 'StrongPass123!',
+      app: 'ezstart',
+    })
+
+    const user = await AuthUser.findOne({ email: 'noutm@example.com' })
+    expect(user?.utmSource).toBeUndefined()
+  })
 })
