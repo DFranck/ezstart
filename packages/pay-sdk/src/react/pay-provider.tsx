@@ -130,6 +130,17 @@ export function PayProvider({
 
   const setApplicationContext = usePayStore(state => state.setApplicationContext)
 
+  /**
+   * REG-1 guard — tracks which `publishableKey` has already been resolved (or
+   * attempted) by this provider instance. Ensures a single `/keys/config` call
+   * per mounted provider + key pair, even if a stale effect fires because
+   * React / dev tools / Strict Mode re-run it, or an ancestor re-renders with
+   * a new closure. Without this ref, a transient 429 (or any fetch error)
+   * combined with a re-render loop could hammer the auth API at > 30 req/min
+   * and lock the user out via rate limit.
+   */
+  const resolvedKeyRef = useRef<string | null>(null)
+
   // VULN-3: dev-time warning for legacy `appName`-only path.
   useEffect(() => {
     if (
@@ -179,6 +190,16 @@ export function PayProvider({
       })
       return
     }
+
+    // REG-1: if we've already attempted to resolve this publishableKey, do NOT
+    // re-fetch. Even when the previous attempt failed (e.g. 429 rate limit), a
+    // loop of re-attempts would make the situation worse. The consumer must
+    // remount the provider (or reload the page) to retry — this is the same
+    // contract already documented in the `.catch` log message below.
+    if (resolvedKeyRef.current === publishableKey) {
+      return
+    }
+    resolvedKeyRef.current = publishableKey
 
     // publishableKey provided → mark pending and fetch.
     setResolutionStatus('pending')

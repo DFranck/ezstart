@@ -35,6 +35,12 @@ import { useEffect, useState } from 'react'
  */
 const applicationId = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
 
+/**
+ * EZPay API base URL — required by `<PayProvider>` so pay-sdk hooks hit the
+ * ezpay API instead of the Next.js origin.
+ */
+const EZPAY_API_URL = process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130'
+
 function TestContent() {
   const t = useTranslations('admin.testPayments')
   const { user } = useAuth()
@@ -191,7 +197,11 @@ export default function TestPaymentsPage() {
   return (
     <>
       <H1 className="mb-6">{t('testPayments.pageTitle')}</H1>
-      <PayProvider applicationId={applicationId} getToken={() => accessToken}>
+      <PayProvider
+        applicationId={applicationId}
+        config={{ apiUrl: EZPAY_API_URL }}
+        getToken={() => accessToken}
+      >
         <TestContent />
       </PayProvider>
     </>

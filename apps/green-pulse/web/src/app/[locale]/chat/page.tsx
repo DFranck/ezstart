@@ -27,6 +27,14 @@ const FUTURE_TOOLS = [
 const GREEN_PULSE_APPLICATION_ID = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
 
 /**
+ * EZPay API base URL — required by `<PayProvider>` so hooks like `usePlans`
+ * hit the ezpay API instead of the Next.js origin (which would return 307/404
+ * for `/plans`). Falls back to the local dev port when unset so DX stays
+ * zero-config on localhost.
+ */
+const EZPAY_API_URL = process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130'
+
+/**
  * Renders the user's current plan label dynamically from the pay-sdk plans
  * list. Defaults to the lowest-priced active plan (the Free tier).
  *
@@ -118,6 +126,7 @@ export default function LiaPage() {
           {GREEN_PULSE_APPLICATION_ID ? (
             <PayProvider
               applicationId={GREEN_PULSE_APPLICATION_ID}
+              config={{ apiUrl: EZPAY_API_URL }}
               getToken={() => useAuthStore.getState().accessToken}
             >
               <CurrentPlanLabel />

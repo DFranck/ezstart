@@ -310,6 +310,176 @@ describe('PayProvider — applicationId resolution', () => {
   })
 })
 
+describe('PayProvider — REG-1 infinite loop guard on /keys/config', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    usePayStore.setState({
+      applicationId: null,
+      appSlug: null,
+      isReady: false,
+      applicationResolutionStatus: 'idle',
+    })
+  })
+
+  it('does NOT re-fetch /keys/config when the provider re-renders with the same publishableKey', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            success: true,
+            data: { applicationId: 'app_once', appSlug: 'ezpay' },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { result, rerender } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <Wrapper publishableKey="ez_pk_test_stable">{children}</Wrapper>
+      ),
+    })
+
+    await waitFor(() => {
+      expect(result.current.applicationResolutionStatus).toBe('ready')
+    })
+
+    // Re-render several times with the SAME publishableKey — must NOT re-fetch.
+    rerender()
+    rerender()
+    rerender()
+    rerender()
+    await new Promise(r => setTimeout(r, 30))
+
+    const configCalls = fetchMock.mock.calls.filter(call => {
+      const url = typeof call[0] === 'string' ? call[0] : ''
+      return url.includes('/keys/config')
+    })
+    expect(configCalls).toHaveLength(1)
+  })
+
+  it('does NOT retry /keys/config in a loop when the first attempt returns 429', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ success: false, error: 'Rate limited' }), {
+          status: 429,
+          headers: { 'Content-Type': 'application/json' },
+        })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { result, rerender } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <Wrapper publishableKey="ez_pk_test_rate_limited">{children}</Wrapper>
+      ),
+    })
+
+    await waitFor(() => {
+      expect(result.current.applicationResolutionStatus).toBe('failed')
+    })
+
+    // Several re-renders after the failure — must not trigger more calls.
+    rerender()
+    rerender()
+    rerender()
+    await new Promise(r => setTimeout(r, 30))
+
+    const configCalls = fetchMock.mock.calls.filter(call => {
+      const url = typeof call[0] === 'string' ? call[0] : ''
+      return url.includes('/keys/config')
+    })
+    expect(configCalls).toHaveLength(1)
+    errorSpy.mockRestore()
+  })
+})
+
+describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    usePayStore.setState({
+      applicationId: null,
+      appSlug: null,
+      isReady: false,
+      applicationResolutionStatus: 'idle',
+    })
+  })
+
+  it('forwards `config.apiUrl` to PayClient so `/plans` hits the ezpay API (absolute URL)', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ success: true, data: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { usePlans } = await import('../../react/hooks/usePlans.js')
+
+    const { result } = renderHook(() => usePlans({ active: true }), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <Wrapper applicationId="app_scoped_xyz">{children}</Wrapper>
+      ),
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    // The plans call MUST hit the absolute EZPay URL, not the window origin.
+    const plansCall = fetchMock.mock.calls.find(call => {
+      const url = typeof call[0] === 'string' ? call[0] : ''
+      return url.includes('/plans')
+    })
+    expect(plansCall).toBeDefined()
+    const plansUrl = plansCall?.[0] as string
+    expect(plansUrl.startsWith('http://api.example.com/api/plans')).toBe(true)
+  })
+
+  it('when `config.apiUrl` is missing, falls back to relative URL (regression guard)', async () => {
+    // Without config.apiUrl, PayClient defaults apiUrl to ''. The resulting
+    // `/plans` URL will be resolved against the current origin — which in a
+    // browser context is exactly the REG-2 bug: green-pulse web origin
+    // instead of ezpay API. This test documents the required behaviour
+    // when `apiUrl` IS provided (absolute URL) vs when it's missing
+    // (relative fallback) so future refactors don't silently regress.
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ success: true, data: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { usePlans } = await import('../../react/hooks/usePlans.js')
+
+    const WrapperNoApiUrl = ({ children }: { children: React.ReactNode }) => (
+      <PayProvider applicationId="app_no_url">{children}</PayProvider>
+    )
+
+    const { result } = renderHook(() => usePlans({ active: true }), {
+      wrapper: WrapperNoApiUrl,
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    const plansCall = fetchMock.mock.calls.find(call => {
+      const url = typeof call[0] === 'string' ? call[0] : ''
+      return url.includes('/plans')
+    })
+    expect(plansCall).toBeDefined()
+    const plansUrl = plansCall?.[0] as string
+    // Without apiUrl, the call starts with `/plans` — a relative URL that
+    // would hit the hosting origin (the REG-2 bug). The fix is at the
+    // consumer side: pass `config.apiUrl` explicitly.
+    expect(plansUrl.startsWith('/plans')).toBe(true)
+  })
+})
+
 describe('PayClient.resolveApplicationByKey', () => {
   afterEach(() => {
     vi.restoreAllMocks()
