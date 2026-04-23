@@ -64,6 +64,7 @@ export {
   useResolveApplicationByKey,
   useCreateApplication,
   useUpdateApplication,
+  useUpdateApplicationTheme,
   useRevokeApplication,
 } from './react/applications.js'
 

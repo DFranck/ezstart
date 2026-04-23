@@ -58,6 +58,7 @@ export interface ApplicationDetailViewTexts {
   back: string
   tabKeys: string
   tabSettings: string
+  tabTheme: string
   loading: string
   errorTitle: string
   errorDescription: string
@@ -82,6 +83,26 @@ export interface ApplicationDetailViewTexts {
   archiveSubmit: string
   archiveSuccess: string
   archiveFailed: string
+  // Theme editor tab
+  themeTitle: string
+  themeDescription: string
+  themeEnableLabel: string
+  themeEnableHelp: string
+  themeProLockedLabel: string
+  themePrimaryLabel: string
+  themeBackgroundLabel: string
+  themeForegroundLabel: string
+  themeAccentLabel: string
+  themeLogoLabel: string
+  themeLogoPlaceholder: string
+  themeReset: string
+  themeSave: string
+  themeSaving: string
+  themeSaveSuccess: string
+  themeSaveFailed: string
+  themePreviewTitle: string
+  themePreviewSubtitle: string
+  themePreviewSignInCta: string
 }
 
 export interface ApplicationsFlowTexts {
@@ -144,6 +165,7 @@ export const defaultApplicationsFlowTexts: ApplicationsFlowTexts = {
     back: 'Back to applications',
     tabKeys: 'API Keys',
     tabSettings: 'Settings',
+    tabTheme: 'Theme',
     loading: 'Loading application...',
     errorTitle: 'Failed to load application',
     errorDescription: 'Something went wrong. Please try again.',
@@ -169,5 +191,26 @@ export const defaultApplicationsFlowTexts: ApplicationsFlowTexts = {
     archiveSubmit: 'Archive',
     archiveSuccess: 'Application archived',
     archiveFailed: 'Failed to archive application',
+    themeTitle: 'White-label theme',
+    themeDescription:
+      'Override the colors of the EZAuth login page for users of this application. Leave a field empty to inherit the default theme.',
+    themeEnableLabel: 'Apply theme to auth pages',
+    themeEnableHelp:
+      'When enabled, the colors below replace the default EZAuth theme on login, register, and password-reset pages for this application.',
+    themeProLockedLabel: 'Included in EZAuth Pro',
+    themePrimaryLabel: 'Primary',
+    themeBackgroundLabel: 'Background',
+    themeForegroundLabel: 'Foreground (text)',
+    themeAccentLabel: 'Accent',
+    themeLogoLabel: 'Logo URL (optional)',
+    themeLogoPlaceholder: 'https://cdn.example.com/logo.svg',
+    themeReset: 'Reset',
+    themeSave: 'Save theme',
+    themeSaving: 'Saving...',
+    themeSaveSuccess: 'Theme saved',
+    themeSaveFailed: 'Failed to save theme',
+    themePreviewTitle: 'Welcome back',
+    themePreviewSubtitle: 'Sign in to continue',
+    themePreviewSignInCta: 'Sign in',
   },
 }

@@ -11,6 +11,28 @@ import { Schema, type Document, type Model } from 'mongoose'
 export type ApplicationStatus = 'active' | 'archived'
 
 /**
+ * White-label theme tokens persisted on the Application document.
+ *
+ * All fields are OPTIONAL — an application can override as few or as many
+ * design tokens as it wants. Unset tokens inherit the default EZAuth theme
+ * (or the CSS preset for `data-app="<slug>"` when one exists).
+ *
+ * Values are expected to be valid CSS color strings. Both OKLCH
+ * (`oklch(0.7 0.15 210)`) and hex (`#00D9F7`) formats are accepted — the
+ * browser parses them identically when injected as `--primary: <value>`.
+ *
+ * `logo` is a URL to the tenant's logo asset (future feature, not rendered
+ * yet by the current SSR layout — reserved for THEME-LOGO-UPLOAD-001).
+ */
+export interface ApplicationTheme {
+  primary?: string
+  background?: string
+  foreground?: string
+  accent?: string
+  logo?: string
+}
+
+/**
  * Mongoose document for a multi-tenant Application entity.
  *
  * Applications live in the EZAuth database and are the source-of-truth for
@@ -27,6 +49,13 @@ export type ApplicationStatus = 'active' | 'archived'
  * `createdBy` is either a userId string OR a system tag such as
  * `'system-seed'` or `'migration-P6'` — useful for idempotent bootstrap
  * scripts and data provenance audits.
+ *
+ * `theme` + `themeEnabled` back the white-label feature (EZAuth Pro). The
+ * UI for editing the theme is always shown in the dashboard, but
+ * `themeEnabled` is gated at activation time (require a Pro subscription
+ * via billing — see `subscription-event.ts`). When disabled, the theme is
+ * stored but NOT applied by SSR — the app falls back to the default CSS
+ * preset for `data-app="<slug>"`.
  */
 export interface ApplicationDocument extends Document {
   slug: string
@@ -36,6 +65,27 @@ export interface ApplicationDocument extends Document {
   metadata?: Record<string, unknown>
   createdBy?: string
   status: ApplicationStatus
+  theme?: ApplicationTheme
+  themeEnabled: boolean
+  /**
+   * Marks an Application as platform-owned (dogfood).
+   *
+   * `true` → owned by EzStart LLC itself. Pro/paid features bypass the billing
+   * plan check when evaluated through {@link hasFeature} — the platform never
+   * needs to pay itself for its own capabilities. Toggled ON by the
+   * `seed:platform-owned` script for each of the 8 EzStart-owned apps
+   * (ezauth, ezpay, ezstart, ezbill, green-pulse, fengshui, asc-tcd,
+   * gacha-analyzer).
+   *
+   * `false` (default) → regular tenant. Feature availability is driven by the
+   * app's Plan (`grantsFeatures[]`) or the user's app role (`pro` role).
+   *
+   * This flag is intentionally NOT exposed via the self-service dashboard. It
+   * can only be flipped by a superadmin (future: API route + UI) or by the
+   * seed script. Persisted on the Application so cross-service checks (EZPay,
+   * future services) can read it without a secondary lookup.
+   */
+  isPlatformOwned: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -45,6 +95,39 @@ export interface ApplicationDocument extends Document {
  * Exported for reuse in route validation (Zod `.regex()`).
  */
 export const APPLICATION_SLUG_REGEX: RegExp = /^[a-z0-9-]{2,32}$/
+
+/**
+ * Max length for any inline theme token value (CSS color string). Used as a
+ * cheap defence against accidentally large payloads; the Zod layer enforces
+ * stricter semantic validation (color format) at request time.
+ */
+export const APPLICATION_THEME_TOKEN_MAX = 64
+
+/**
+ * Max length for the `theme.logo` URL. Blob/S3 URLs comfortably fit in 2KB.
+ */
+export const APPLICATION_THEME_LOGO_MAX = 2048
+
+const applicationThemeSchema = new Schema<ApplicationTheme>(
+  {
+    primary: { type: String, required: false, trim: true, maxlength: APPLICATION_THEME_TOKEN_MAX },
+    background: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: APPLICATION_THEME_TOKEN_MAX,
+    },
+    foreground: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: APPLICATION_THEME_TOKEN_MAX,
+    },
+    accent: { type: String, required: false, trim: true, maxlength: APPLICATION_THEME_TOKEN_MAX },
+    logo: { type: String, required: false, trim: true, maxlength: APPLICATION_THEME_LOGO_MAX },
+  },
+  { _id: false }
+)
 
 const applicationSchema = new Schema<ApplicationDocument>(
   {
@@ -89,6 +172,22 @@ const applicationSchema = new Schema<ApplicationDocument>(
       type: String,
       enum: ['active', 'archived'],
       default: 'active',
+      index: true,
+    },
+    theme: {
+      type: applicationThemeSchema,
+      required: false,
+      default: undefined,
+    },
+    themeEnabled: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    isPlatformOwned: {
+      type: Boolean,
+      required: true,
+      default: false,
       index: true,
     },
   },

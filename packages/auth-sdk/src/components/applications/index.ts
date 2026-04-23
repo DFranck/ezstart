@@ -16,6 +16,9 @@ export type { CreateApplicationModalProps } from './CreateApplicationModal.js'
 export { ApplicationDetailView } from './ApplicationDetailView.js'
 export type { ApplicationDetailViewProps } from './ApplicationDetailView.js'
 
+export { ApplicationThemeEditor } from './ApplicationThemeEditor.js'
+export type { ApplicationThemeEditorProps } from './ApplicationThemeEditor.js'
+
 // Texts types & defaults
 export type {
   ApplicationsListTexts,

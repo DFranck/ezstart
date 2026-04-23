@@ -18,11 +18,20 @@ import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { serializeApplication } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
 
 export const listApplicationsRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(listApplicationsRegistry, router)
+
+const themeTokenSchema = z.object({
+  primary: z.string().optional(),
+  background: z.string().optional(),
+  foreground: z.string().optional(),
+  accent: z.string().optional(),
+  logo: z.string().optional(),
+})
 
 const applicationItemSchema = z.object({
   id: z.string(),
@@ -32,6 +41,9 @@ const applicationItemSchema = z.object({
   ownerId: z.string(),
   metadata: z.record(z.unknown()).nullable().optional(),
   status: z.enum(['active', 'archived']),
+  theme: themeTokenSchema.nullable().optional(),
+  themeEnabled: z.boolean(),
+  isPlatformOwned: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })
@@ -66,17 +78,7 @@ const listApplicationsController = async (req: Request, res: Response) => {
     const Application = await getApplicationModel()
     const apps = await Application.find(query).sort({ createdAt: -1 }).lean()
 
-    const data = apps.map(a => ({
-      id: a._id.toString(),
-      slug: a.slug,
-      name: a.name,
-      description: a.description ?? null,
-      ownerId: a.ownerId,
-      metadata: a.metadata ?? null,
-      status: a.status,
-      createdAt: a.createdAt.toISOString(),
-      updatedAt: a.updatedAt.toISOString(),
-    }))
+    const data = apps.map(a => serializeApplication(a))
 
     return sendSuccess(res, data)
   } catch (error: unknown) {

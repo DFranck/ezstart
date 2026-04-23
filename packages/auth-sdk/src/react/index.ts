@@ -41,5 +41,6 @@ export {
   useResolveApplicationByKey,
   useCreateApplication,
   useUpdateApplication,
+  useUpdateApplicationTheme,
   useRevokeApplication,
 } from './applications.js'

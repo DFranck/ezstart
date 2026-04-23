@@ -327,8 +327,31 @@ export interface CreateApiKeyRequest {
 // ---------------------------------------------------------------------------
 
 /**
+ * White-label theme tokens persisted on an Application.
+ *
+ * All fields are optional — an Application can override as few or as many
+ * design tokens as it wants. Unset tokens inherit the default EZAuth theme
+ * (or the CSS preset keyed on `data-app="<slug>"`).
+ *
+ * Values are CSS color strings (hex, `oklch()`, `hsl()`, or `rgb()`). `logo`
+ * is a full `https:` URL to the tenant's logo asset (not rendered yet by
+ * the first iteration of the auth pages — reserved for THEME-LOGO-UPLOAD).
+ */
+export interface ApplicationTheme {
+  primary?: string
+  background?: string
+  foreground?: string
+  accent?: string
+  logo?: string
+}
+
+/**
  * Application tenant — source of truth lives in EZAuth DB; other services
  * (EZPay, etc.) reference it by `id`.
+ *
+ * `theme` + `themeEnabled` back the EZAuth Pro white-label feature.
+ * `themeEnabled` is shown as a toggle in the dashboard and gated on plan
+ * activation — when `false`, SSR falls back to the default preset.
  */
 export interface Application {
   id: string
@@ -338,6 +361,17 @@ export interface Application {
   ownerId: string
   metadata?: Record<string, unknown>
   status: 'active' | 'archived'
+  theme?: ApplicationTheme | null
+  themeEnabled?: boolean
+  /**
+   * Platform-owned flag (dogfood). `true` for the apps owned by the
+   * platform operator — grants free access to paid features via the
+   * server-side `hasFeature()` helper (see `@ezstart/auth-sdk/server`).
+   *
+   * Not exposed to the self-service dashboard — flipped via a superadmin
+   * seed script or a future superadmin-only API route.
+   */
+  isPlatformOwned?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -355,6 +389,18 @@ export interface UpdateApplicationRequest {
   name?: string
   description?: string
   metadata?: Record<string, unknown>
+}
+
+/**
+ * Body for `PATCH /applications/:id/theme`.
+ *
+ * Either field may be sent on its own — callers can toggle `themeEnabled`
+ * without touching the tokens, or update the tokens while leaving the
+ * enable flag alone. Passing `theme: null` clears the saved tokens.
+ */
+export interface UpdateApplicationThemeRequest {
+  theme?: ApplicationTheme | null
+  themeEnabled?: boolean
 }
 
 /** Response from `GET /applications/resolve?key=ez_pk_live_*`. */

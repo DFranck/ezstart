@@ -40,6 +40,7 @@ import { DeveloperPortal } from '../developer/DeveloperPortal.js'
 import type { DeveloperPortalTexts } from '../developer/types.js'
 import type { ApplicationDetailViewTexts } from './types.js'
 import { defaultApplicationsFlowTexts } from './types.js'
+import { ApplicationThemeEditor } from './ApplicationThemeEditor.js'
 
 export interface ApplicationDetailViewProps {
   applicationId: string
@@ -55,6 +56,14 @@ export interface ApplicationDetailViewProps {
   onArchived?: () => void
   /** Show admin scope option in the Create Key modal (for superadmins). */
   showAdminScope?: boolean
+  /**
+   * Enable the `themeEnabled` toggle in the Theme tab. Pass `false` when the
+   * owner does not have the EZAuth Pro feature — the tokens remain editable
+   * (so users can preview) but cannot be activated on the auth pages.
+   * Default: `true` (the feature is always editable in the current plan
+   * matrix).
+   */
+  canEnableTheme?: boolean
 }
 
 function mergeTexts(partial?: Partial<ApplicationDetailViewTexts>): ApplicationDetailViewTexts {
@@ -70,6 +79,7 @@ export function ApplicationDetailView({
   onBack,
   onArchived,
   showAdminScope = false,
+  canEnableTheme = true,
 }: ApplicationDetailViewProps) {
   const texts = mergeTexts(partialTexts)
 
@@ -186,6 +196,7 @@ export function ApplicationDetailView({
         <TabsList>
           <TabsTrigger value="keys">{texts.tabKeys}</TabsTrigger>
           <TabsTrigger value="settings">{texts.tabSettings}</TabsTrigger>
+          <TabsTrigger value="theme">{texts.tabTheme}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="keys">
@@ -194,6 +205,14 @@ export function ApplicationDetailView({
             locale={locale}
             showAdminScope={showAdminScope}
             texts={developerPortalTexts}
+          />
+        </TabsContent>
+
+        <TabsContent value="theme">
+          <ApplicationThemeEditor
+            application={application}
+            canEnableTheme={canEnableTheme}
+            texts={texts}
           />
         </TabsContent>
 

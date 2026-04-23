@@ -86,6 +86,19 @@ vi.mock('@ezstart/ui/components', () => {
     AlertDialogFooter: passthrough('AlertDialogFooter'),
     AlertDialogHeader: passthrough('AlertDialogHeader'),
     AlertDialogTitle: passthrough('AlertDialogTitle'),
+    Switch: React.forwardRef((props: Record<string, unknown>, ref: unknown) => {
+      const { checked, onCheckedChange, ...rest } = props as Record<string, unknown> & {
+        checked?: boolean
+        onCheckedChange?: (v: boolean) => void
+      }
+      return React.createElement('input', {
+        type: 'checkbox',
+        checked: !!checked,
+        onChange: (e: { target: { checked: boolean } }) => onCheckedChange?.(e.target.checked),
+        ref,
+        ...rest,
+      })
+    }),
   }
 })
 
@@ -108,6 +121,7 @@ vi.mock('../../../components/developer/DeveloperPortal.js', () => ({
 const mockUseApplication = vi.fn()
 const mockUseUpdateApplication = vi.fn()
 const mockUseRevokeApplication = vi.fn()
+const mockUseUpdateApplicationTheme = vi.fn()
 
 vi.mock('../../../react/applications.js', () => ({
   useMyApplications: () => ({
@@ -124,6 +138,7 @@ vi.mock('../../../react/applications.js', () => ({
   }),
   useCreateApplication: () => ({ mutate: vi.fn(), isPending: false }),
   useUpdateApplication: (...args: unknown[]) => mockUseUpdateApplication(...args),
+  useUpdateApplicationTheme: (...args: unknown[]) => mockUseUpdateApplicationTheme(...args),
   useRevokeApplication: (...args: unknown[]) => mockUseRevokeApplication(...args),
 }))
 
@@ -174,6 +189,13 @@ function setup(overrides: SetupArgs = {}) {
   })
   mockUseUpdateApplication.mockReturnValue(overrides.update ?? defaultUpdate)
   mockUseRevokeApplication.mockReturnValue(overrides.revoke ?? defaultRevoke)
+  mockUseUpdateApplicationTheme.mockReturnValue({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+    isSuccess: false,
+    isError: false,
+  })
 }
 
 describe('ApplicationDetailView', () => {

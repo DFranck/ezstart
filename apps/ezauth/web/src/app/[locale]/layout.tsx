@@ -9,6 +9,7 @@ import { routing } from '@/i18n/routing'
 import Script from 'next/script'
 import { headers } from 'next/headers'
 import { ReactNode } from 'react'
+import { resolveSsrTheme, renderThemeStyle } from '@/server/theme-ssr'
 
 const DOMAIN = getWebUrl('ezauth', 'production')
 
@@ -46,13 +47,27 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages()
   const t = await getTranslations({ locale })
 
-  // Read app theme set by middleware from ?app= search param.
-  // Sets data-app on <html> at SSR time — zero flash.
+  // Read app theme + tokens set by middleware from ?app= or ?key= search
+  // params. Sets data-app on <html> at SSR time AND injects the per-tenant
+  // CSS variable overrides inline, so the first-render paint is already
+  // white-labeled (zero flash for EZAuth Pro tenants).
   const headersList = await headers()
-  const appTheme = headersList.get('x-app-theme')
+  const { appName: ssrAppName, theme: ssrTheme } = resolveSsrTheme(headersList)
+  const themeCss = renderThemeStyle(ssrAppName, ssrTheme)
 
   return (
-    <html lang={locale} suppressHydrationWarning data-app={appTheme || 'ezauth'}>
+    <html lang={locale} suppressHydrationWarning data-app={ssrAppName}>
+      <head>
+        {themeCss ? (
+          <style
+            id="ezauth-tenant-theme"
+            // The inline CSS is built from a narrow allow-list of tokens
+            // validated by `isSafeCssValue` — `<`, `{`, `}`, `;` are rejected
+            // so `dangerouslySetInnerHTML` is safe here.
+            dangerouslySetInnerHTML={{ __html: themeCss }}
+          />
+        ) : null}
+      </head>
       <body className="min-h-screen">
         <Script
           id="json-ld"

@@ -19,11 +19,20 @@ import { Types } from 'mongoose'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { serializeApplication } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
 
 export const getApplicationRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(getApplicationRegistry, router)
+
+const themeTokenSchema = z.object({
+  primary: z.string().optional(),
+  background: z.string().optional(),
+  foreground: z.string().optional(),
+  accent: z.string().optional(),
+  logo: z.string().optional(),
+})
 
 const applicationResponseSchema = z.object({
   success: z.literal(true),
@@ -35,6 +44,9 @@ const applicationResponseSchema = z.object({
     ownerId: z.string(),
     metadata: z.record(z.unknown()).nullable().optional(),
     status: z.enum(['active', 'archived']),
+    theme: themeTokenSchema.nullable().optional(),
+    themeEnabled: z.boolean(),
+    isPlatformOwned: z.boolean(),
     createdAt: z.string(),
     updatedAt: z.string(),
   }),
@@ -70,17 +82,7 @@ const getApplicationController = async (req: Request, res: Response) => {
       }
     }
 
-    return sendSuccess(res, {
-      id: app._id.toString(),
-      slug: app.slug,
-      name: app.name,
-      description: app.description ?? null,
-      ownerId: app.ownerId,
-      metadata: app.metadata ?? null,
-      status: app.status,
-      createdAt: app.createdAt.toISOString(),
-      updatedAt: app.updatedAt.toISOString(),
-    })
+    return sendSuccess(res, serializeApplication(app))
   } catch (error: unknown) {
     logger.error('Get application error:', error)
     return sendError(res, 'Failed to fetch application', 500)

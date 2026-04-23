@@ -284,6 +284,7 @@ export async function createApiKey(userId: string, opts: Record<string, unknown>
     status: opts.status ?? 'active',
     expiresAt: opts.expiresAt ?? null,
     quotaMonthly: opts.quotaMonthly ?? 1000,
+    ...(opts.applicationId ? { applicationId: opts.applicationId } : {}),
   })
 
   return { rawKey, hashedKey, keyPrefix, doc }

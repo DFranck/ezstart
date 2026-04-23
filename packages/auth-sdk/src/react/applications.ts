@@ -15,6 +15,7 @@ import type {
   ApplicationResolveResponse,
   CreateApplicationRequest,
   UpdateApplicationRequest,
+  UpdateApplicationThemeRequest,
 } from '../core/types.js'
 
 /** Query keys for cache invalidation. */
@@ -163,6 +164,43 @@ export function useUpdateApplication(callbacks?: MutationCallbacks<Application>)
   return useMutation({
     mutationFn: ({ id, data }: UpdateApplicationInput) =>
       apiCall<Application>(`/applications/${id}`, {
+        appName: 'ezauth',
+        method: 'PATCH',
+        body: data,
+      }),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [...APPLICATIONS_KEY] })
+      queryClient.invalidateQueries({ queryKey: applicationKey(variables.id) })
+      callbacks?.onSuccess?.(data)
+    },
+    onError: (error: Error) => {
+      callbacks?.onError?.(error)
+    },
+  })
+}
+
+interface UpdateApplicationThemeInput {
+  id: string
+  data: UpdateApplicationThemeRequest
+}
+
+/**
+ * Mutation to update an Application's white-label theme tokens and/or the
+ * `themeEnabled` flag. Server validates every color string against a strict
+ * allow-list (hex / oklch / hsl / rgb) and rejects anything that could
+ * inject CSS.
+ *
+ * @example
+ * ```tsx
+ * const update = useUpdateApplicationTheme({ onSuccess: () => toast.success('Theme saved') })
+ * update.mutate({ id: 'app_123', data: { theme: { primary: '#00D9F7' }, themeEnabled: true } })
+ * ```
+ */
+export function useUpdateApplicationTheme(callbacks?: MutationCallbacks<Application>) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: UpdateApplicationThemeInput) =>
+      apiCall<Application>(`/applications/${id}/theme`, {
         appName: 'ezauth',
         method: 'PATCH',
         body: data,
