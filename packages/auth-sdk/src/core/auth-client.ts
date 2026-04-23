@@ -536,20 +536,43 @@ function detectRedirectUri(): string {
 }
 
 /**
+ * Descriptor for the async publishable-key → app config fetch the caller must
+ * perform when `resolveSDKConfig` returns a non-null `keyFetch`. The fetch is
+ * intentionally NOT started here so that `resolveSDKConfig` is a pure function
+ * safe to call from `useMemo` (React may recompute memoized values more than
+ * once per dep change — firing the fetch from inside the memo would hammer
+ * `/api/keys/config` and trip the 30 req/min rate limit).
+ */
+export interface PendingKeyFetch {
+  /** The publishable key to resolve. */
+  publishableKey: string
+  /** Normalized API base (no `/api/auth` or trailing slash), ready for `fetchKeyConfig`. */
+  apiBaseUrl: string
+}
+
+/**
  * Resolve the full SDK configuration into a CoreAuthClient config + web URL.
  *
  * Handles three modes:
- * 1. Publishable key → needs async fetch (returns configPromise)
+ * 1. Publishable key → returns a `keyFetch` descriptor the caller must pass to
+ *    `fetchKeyConfig()` inside an effect (NOT during render).
  * 2. First-party → immediate config from env/defaults
  * 3. Dev mode (no key + localhost) → permissive defaults
  *
- * @returns Resolved config with apiUrl, appName, webUrl, and optional configPromise
+ * **Pure function** — no side effects, safe to call from `useMemo`. The actual
+ * network request is deferred to the caller's effect.
+ *
+ * @returns Resolved config with apiUrl, appName, webUrl, and an optional
+ *          `keyFetch` descriptor the caller resolves asynchronously.
  */
 export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   clientConfig: AuthClientConfig
   webUrl: string
-  /** If a publishable key is provided, this promise resolves the full config. */
-  configPromise: Promise<PublishableKeyConfig> | null
+  /**
+   * Descriptor the caller must pass to `fetchKeyConfig()` from an effect when
+   * a publishable key was provided. `null` otherwise.
+   */
+  keyFetch: PendingKeyFetch | null
 } {
   const key = sdkConfig.publishableKey
   const local = isLocalhost()
@@ -596,7 +619,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
         redirectUri: detectRedirectUri(),
       },
       webUrl,
-      configPromise: null,
+      keyFetch: null,
     }
   }
 
@@ -622,12 +645,16 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
       redirectUri: detectRedirectUri(),
     }
 
-    const configPromise = fetchKeyConfig(key, apiBaseUrl)
-
+    // CRITICAL: return a descriptor, NOT a started promise. React may call
+    // this function from `useMemo` multiple times (memos are not a semantic
+    // guarantee of single execution). Starting the fetch here would hammer
+    // `/api/keys/config` and trip the 30 req/min rate limit. The caller is
+    // expected to invoke `fetchKeyConfig(publishableKey, apiBaseUrl)` from
+    // an effect guarded against duplicate fires.
     return {
       clientConfig,
       webUrl,
-      configPromise,
+      keyFetch: { publishableKey: key, apiBaseUrl },
     }
   }
 
@@ -646,6 +673,6 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
       redirectUri: detectRedirectUri(),
     },
     webUrl,
-    configPromise: null,
+    keyFetch: null,
   }
 }

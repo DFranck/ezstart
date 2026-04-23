@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { CoreAuthClient, resolveSDKConfig } from '../core/auth-client.js'
+import { CoreAuthClient, fetchKeyConfig, resolveSDKConfig } from '../core/auth-client.js'
 import type { AuthMode, AuthScope, AuthSDKConfig, PublishableKeyConfig } from '../core/types.js'
 import { useAuthStore } from './store.js'
 
@@ -235,13 +235,32 @@ export function AuthProvider({
     }
   }, [mode, sdkConfig.publishableKey])
 
-  // Fetch key config async if publishable key provided
+  /**
+   * REG-1 guard — tracks which `publishableKey` has already been resolved (or
+   * attempted) by this provider instance. Ensures a single `/keys/config` call
+   * per mounted provider + key pair, even when the effect fires multiple times
+   * (StrictMode dev double-invoke, ancestor re-renders producing new closures,
+   * zustand store subscription triggering render loops, etc.). Without this
+   * ref a transient 429 or any re-render cascade would hammer the auth API
+   * at > 30 req/min and lock the user out via rate limit.
+   */
+  const resolvedKeyRef = useRef<string | null>(null)
+
+  // Fetch key config async if publishable key provided.
+  //
+  // CRITICAL: the fetch lives in the effect (NOT in `resolveSDKConfig`) so
+  // that a render-phase memo re-computation can never fire it. The REG-1 guard
+  // above prevents duplicate fetches across re-runs of this effect.
   useEffect(() => {
-    if (!resolved.configPromise) return
+    const keyFetch = resolved.keyFetch
+    if (!keyFetch) return
+    if (resolvedKeyRef.current === keyFetch.publishableKey) return
+    resolvedKeyRef.current = keyFetch.publishableKey
 
     let cancelled = false
     const consumerAppName = sdkConfig.appName
-    resolved.configPromise
+
+    fetchKeyConfig(keyFetch.publishableKey, keyFetch.apiBaseUrl)
       .then(config => {
         if (cancelled) return
         keyConfigRef.current = config
@@ -283,7 +302,12 @@ export function AuthProvider({
     return () => {
       cancelled = true
     }
-  }, [resolved.configPromise, client, logger])
+    // sdkConfig.appName is intentionally excluded — it's read once on mount to
+    // preserve the consumer's explicit appName (cross-tenant guard). Including
+    // it would re-run the effect when the parent re-renders with a new
+    // `sdkConfig` memo identity, defeating the REG-1 guard.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolved.keyFetch, client, logger])
 
   // Auto-detect and set mode on mount
   useEffect(() => {

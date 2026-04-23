@@ -10,7 +10,7 @@ describe('resolveSDKConfig', () => {
 
     expect(result.clientConfig.appName).toBe('ezauth')
     expect(result.clientConfig.apiUrl).toContain('/api/auth')
-    expect(result.configPromise).toBeNull()
+    expect(result.keyFetch).toBeNull()
   })
 
   it('resolves first-party mode with custom apiUrl', () => {
@@ -21,7 +21,7 @@ describe('resolveSDKConfig', () => {
     })
 
     expect(result.clientConfig.apiUrl).toBe('https://custom-api.example.com/api/auth')
-    expect(result.configPromise).toBeNull()
+    expect(result.keyFetch).toBeNull()
   })
 
   it('resolves dev mode when no key and no firstParty', () => {
@@ -29,17 +29,17 @@ describe('resolveSDKConfig', () => {
 
     expect(result.clientConfig.appName).toBe('dev')
     expect(result.clientConfig.apiUrl).toContain('/api/auth')
-    expect(result.configPromise).toBeNull()
+    expect(result.keyFetch).toBeNull()
   })
 
   it('resolves dev mode with custom appName', () => {
     const result = resolveSDKConfig({ appName: 'myapp' })
 
     expect(result.clientConfig.appName).toBe('myapp')
-    expect(result.configPromise).toBeNull()
+    expect(result.keyFetch).toBeNull()
   })
 
-  it('returns configPromise when publishableKey is provided', async () => {
+  it('returns a keyFetch descriptor when publishableKey is provided (no side effect)', () => {
     const result = resolveSDKConfig({
       publishableKey: 'ezk_test_abc123',
     })
@@ -47,24 +47,22 @@ describe('resolveSDKConfig', () => {
     // Client created with pending appName
     expect(result.clientConfig.appName).toBe('pending')
     expect(result.clientConfig.apiKey).toBe('ezk_test_abc123')
-    // Config promise is set (will fail in test env since no real API)
-    expect(result.configPromise).not.toBeNull()
-    expect(result.configPromise).toBeInstanceOf(Promise)
-
-    // Catch the expected rejection (no real API in test env)
-    await expect(result.configPromise).rejects.toThrow()
+    // Key fetch descriptor is set — synchronous, no network yet.
+    // This is load-bearing for the infinite-loop guard: `resolveSDKConfig` is
+    // pure and safe to call from `useMemo`.
+    expect(result.keyFetch).not.toBeNull()
+    expect(result.keyFetch?.publishableKey).toBe('ezk_test_abc123')
+    expect(typeof result.keyFetch?.apiBaseUrl).toBe('string')
   })
 
-  it('uses custom apiUrl with publishableKey', async () => {
+  it('uses custom apiUrl with publishableKey', () => {
     const result = resolveSDKConfig({
       publishableKey: 'ezk_test_abc123',
       apiUrl: 'https://my-auth.example.com',
     })
 
     expect(result.clientConfig.apiUrl).toBe('https://my-auth.example.com/api/auth')
-
-    // Catch the expected rejection (no real API in test env)
-    await result.configPromise?.catch(() => {})
+    expect(result.keyFetch?.apiBaseUrl).toBe('https://my-auth.example.com')
   })
 
   it('uses custom webUrl when provided', () => {
@@ -135,7 +133,7 @@ describe('resolveSDKConfig', () => {
       expect(result.clientConfig.apiUrl).toBe('https://auth.example.com/api/auth')
     })
 
-    it('accepts publishableKey with explicit apiUrl off-localhost', async () => {
+    it('accepts publishableKey with explicit apiUrl off-localhost', () => {
       stubNonLocalhost()
       const result = resolveSDKConfig({
         publishableKey: 'ez_pk_live_abc123',
@@ -144,7 +142,9 @@ describe('resolveSDKConfig', () => {
       })
       expect(result.clientConfig.apiUrl).toBe('https://auth.example.com/api/auth')
       expect(result.clientConfig.apiKey).toBe('ez_pk_live_abc123')
-      await result.configPromise?.catch(() => {})
+      expect(result.keyFetch).not.toBeNull()
+      expect(result.keyFetch?.publishableKey).toBe('ez_pk_live_abc123')
+      expect(result.keyFetch?.apiBaseUrl).toBe('https://auth.example.com')
     })
 
     it('throws when publishableKey provided off-localhost without apiUrl', () => {

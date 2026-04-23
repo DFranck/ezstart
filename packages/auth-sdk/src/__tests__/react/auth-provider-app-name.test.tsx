@@ -58,19 +58,22 @@ vi.mock('../../core/auth-client.js', () => {
         appName: config.appName ?? 'pending',
       },
       webUrl: 'http://example.com',
-      configPromise: config.publishableKey
-        ? Promise.resolve({
-            appName: 'ezauth',
-            apiUrl: 'http://api.example.com',
-            webUrl: 'http://web.example.com',
-            features: ['*'],
-            plan: 'free',
-            quotaMonthly: -1,
-            scope: 'admin' as const,
-          })
+      keyFetch: config.publishableKey
+        ? {
+            publishableKey: config.publishableKey,
+            apiBaseUrl: 'http://localhost:6110',
+          }
         : null,
     })),
-    fetchKeyConfig: vi.fn(),
+    fetchKeyConfig: vi.fn(async () => ({
+      appName: 'ezauth',
+      apiUrl: 'http://api.example.com',
+      webUrl: 'http://web.example.com',
+      features: ['*'],
+      plan: 'free',
+      quotaMonthly: -1,
+      scope: 'admin' as const,
+    })),
     __mockInstances: instances,
   }
 })
