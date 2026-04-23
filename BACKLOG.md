@@ -64,7 +64,7 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 ### AI platform
 
 - [ ] **chat-sdk `<ChatLayout>` (futur)** — Même pattern que AILayout : wrappe Thread de packages/ui + logique chat temps réel (Socket.IO, rooms, typing indicators, presence, P2P). Les deux SDKs partagent le même design system via packages/ui.
-- [ ] **Dynamic plans** — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
+- [x] **Dynamic plans** — green-pulse `/chat` sidebar plan label is now dynamic via `usePlans({ active: true })` wrapped in `<PayProvider applicationId={NEXT_PUBLIC_EZAUTH_APP_ID}>`. New idempotent seed script `apps/ezpay/api/src/scripts/seed-green-pulse-plans.ts` (`pnpm --filter api-ezpay seed:green-pulse-plans`) creates the Free "Self-Awareness" plan (amount=0, no Stripe sync). Hardcoded i18n keys `plans.{free,premium,golden}` removed (replaced by `plans.{loading,noPlan}`). Tests: 3 new + 550 ezpay green. Local commit only — needs `seed:green-pulse-plans` run on prod to materialise the plan. (2026-04-23)
 - [ ] **Alertes quota** — Notification (email/toast) quand une app atteint 80% de son quota tokens/coût. Bloquer à 100%.
 - [ ] **API key rotation** — Pouvoir changer une clé API provider sans downtime. Hot-reload dans ProviderRegistry.
 - [ ] **Provider health check** — Ping providers périodiquement, désactiver auto si down, réactiver quand up. Status dans dashboard.

@@ -24,9 +24,8 @@
     }
   },
   "plans": {
-    "free": "Self-Awareness (Forfait gratuit)",
-    "premium": "Forfait Premium",
-    "golden": "Forfait Golden"
+    "loading": "Chargement du forfait…",
+    "noPlan": "Aucun forfait actif"
   },
   "errors": {
     "sendFailed": "Échec de l'envoi du message. Veuillez réessayer.",

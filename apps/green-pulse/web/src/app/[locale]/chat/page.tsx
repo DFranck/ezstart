@@ -3,6 +3,7 @@
 import { AILayout } from '@ezstart/ai-sdk/client'
 import { UserMenu, useAuthStore } from '@ezstart/auth-sdk'
 import { useRBAC } from '@ezstart/auth-sdk'
+import { PayProvider, usePlans } from '@ezstart/pay-sdk'
 import { Button, Div, Icon, Main, Nav, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
@@ -17,6 +18,42 @@ const FUTURE_TOOLS = [
   { href: '/documents', labelKey: 'documents', icon: 'lucide:FileText' as const },
   { href: '/compliances', labelKey: 'compliances', icon: 'lucide:Shield' as const },
 ]
+
+/**
+ * GreenPulse `green-pulse` Application id resolved at build time. Used to
+ * scope the pay-sdk plans query to the green-pulse tenant. Optional — when
+ * unset the sidebar renders the i18n fallback label instead of fetching.
+ */
+const GREEN_PULSE_APPLICATION_ID = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
+
+/**
+ * Renders the user's current plan label dynamically from the pay-sdk plans
+ * list. Defaults to the lowest-priced active plan (the Free tier).
+ *
+ * Graceful states:
+ *  - loading → localized "loading" placeholder
+ *  - error / empty → localized "no plan" placeholder
+ *  - success → `plan.name` from EZPay (single source of truth)
+ */
+function CurrentPlanLabel() {
+  const t = useTranslations('chat')
+  const { plans, isLoading, error } = usePlans({ active: true })
+
+  if (isLoading) {
+    return <Span className="text-sm font-semibold">{t('plans.loading')}</Span>
+  }
+
+  if (error || plans.length === 0) {
+    return <Span className="text-sm font-semibold">{t('plans.noPlan')}</Span>
+  }
+
+  // Default plan = lowest sortOrder (the Free tier seeded by ezpay).
+  const defaultPlan = plans[0]
+  if (!defaultPlan) {
+    return <Span className="text-sm font-semibold">{t('plans.noPlan')}</Span>
+  }
+  return <Span className="text-sm font-semibold">{defaultPlan.name}</Span>
+}
 
 export default function LiaPage() {
   const t = useTranslations('chat')
@@ -78,7 +115,16 @@ export default function LiaPage() {
           <Span className="text-xs font-medium text-muted-foreground">{t('sidebar.myPlan')}</Span>
         </Div>
         <Div className="px-2">
-          <Span className="text-sm font-semibold">{t('plans.free')}</Span>
+          {GREEN_PULSE_APPLICATION_ID ? (
+            <PayProvider
+              applicationId={GREEN_PULSE_APPLICATION_ID}
+              getToken={() => useAuthStore.getState().accessToken}
+            >
+              <CurrentPlanLabel />
+            </PayProvider>
+          ) : (
+            <Span className="text-sm font-semibold">{t('plans.noPlan')}</Span>
+          )}
         </Div>
       </Div>
 
