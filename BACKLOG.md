@@ -153,6 +153,8 @@ Authentication SaaS (Clerk clone) pour tout le monorepo + external devs. **Statu
 
 #### Backlog 2026-03-29 + P6/P7/P8/P9 done — voir BACKLOG-HISTORY.md
 
+- [ ] **THEME-TENANT-CUSTOM-001** — Support custom theme per-tenant on auth pages. Actuellement le theme white-label est pré-câblé via CSS statique `:root[data-app='<app>']`. Pour permettre à chaque tenant (application cliente dans ezauth) de définir ses propres couleurs sans rebuild UI package : (a) ajouter `theme?: { primary: string, foreground: string, background: string, accent: string }` dans le schema `Application` ezauth, (b) `GET /api/keys/config` return ce theme quand présent, (c) login/register/forgot-password injectent ces vars CSS inline (`<style>:root { --primary: ...; }</style>`) si `theme` présent, sinon fallback au pattern actuel `data-app=<slug>`. Permet à un external dev d'avoir son brand sans toucher au code monorepo.
+
 ---
 
 ### ezbill (api 6120 / web 6121)

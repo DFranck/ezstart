@@ -19,6 +19,7 @@ import { Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig } from '@/hooks/useKeyConfig'
+import { useDynamicAppTheme } from '@/hooks/useDynamicAppTheme'
 
 function RegisterContent() {
   const t = useTranslations('register')
@@ -35,6 +36,10 @@ function RegisterContent() {
   const app = keyConfig.appName ?? navigation.app ?? 'ezauth'
   const theme = getAppTheme(app)
   const isKeyInvalid = keyConfig.status === 'invalid'
+
+  // Sync <html data-app="..."> on the client so the per-app theme CSS kicks
+  // in (middleware only sets the SSR header for `?app=` legacy, not `?key=`).
+  useDynamicAppTheme(app)
   // First-party fallback: default redirect_uri to ezauth's own callback page
   // when the user lands on /register directly (no third-party ?redirect_uri=).
   const resolvedRedirectUri =

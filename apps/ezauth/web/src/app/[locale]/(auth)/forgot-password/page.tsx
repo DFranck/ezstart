@@ -13,6 +13,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { Suspense } from 'react'
 import { useKeyConfig } from '@/hooks/useKeyConfig'
+import { useDynamicAppTheme } from '@/hooks/useDynamicAppTheme'
 
 function ForgotPasswordContent() {
   const t = useTranslations('forgotPassword')
@@ -22,6 +23,10 @@ function ForgotPasswordContent() {
   // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
   const keyConfig = useKeyConfig(navigation.publishableKey)
   const app = keyConfig.appName ?? navigation.app ?? 'ezauth'
+
+  // Sync <html data-app="..."> on the client so the per-app theme CSS kicks
+  // in (middleware only sets the SSR header for `?app=` legacy, not `?key=`).
+  useDynamicAppTheme(app)
 
   return (
     <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto" data-app={app}>

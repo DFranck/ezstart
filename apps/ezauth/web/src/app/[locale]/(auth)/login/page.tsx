@@ -21,6 +21,7 @@ import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig, type KeyConfigState } from '@/hooks/useKeyConfig'
 import { deriveAppHintFromRedirectUri } from '@/hooks/useDerivedApp'
+import { useDynamicAppTheme } from '@/hooks/useDynamicAppTheme'
 
 /**
  * Max retry delay when the server did not provide a `Retry-After` header or
@@ -61,6 +62,10 @@ function LoginContent() {
       : keyConfig.appName
   const app = resolvedAppFromKey ?? navigation.app ?? 'ezauth'
   const theme = getAppTheme(app)
+
+  // Sync <html data-app="..."> on the client so the per-app theme CSS kicks
+  // in (middleware only sets the SSR header for `?app=` legacy, not `?key=`).
+  useDynamicAppTheme(app)
 
   // Form is ONLY disabled during the initial "loading" probe (explicit pending
   // state). For `invalid` / `rate_limited` / `error`, the form remains
