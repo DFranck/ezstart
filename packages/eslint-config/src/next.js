@@ -47,12 +47,16 @@ export const nextJsConfig = [
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       // @ezstart app-web conventions (next.js only — these rules are scoped
-      // internally to `apps/<app>/web/src/**`).
-      // TODO: upgrade both to `error` once the current backlog is cleared:
+      // internally to `apps/<app>/web/src/**` or packages/ui|*-sdk/src/components/**).
+      // TODO: upgrade to `error` once the current backlog is cleared.
       //   - `no-raw-fetch`: ~8 matches across 6 files (2 useExternalStats + 4 app files)
       //   - `no-raw-html`: ~46 matches across 22 files (mostly gacha-analyzer + cv-generator)
+      //   - `require-i18n-string` / `no-local-ui-components`: Phase 0 external-devs readiness
+      //     — expose debt without blocking commits.
       '@ezstart/ezstart/no-raw-fetch': 'warn',
       '@ezstart/ezstart/no-raw-html': 'warn',
+      '@ezstart/ezstart/require-i18n-string': 'warn',
+      '@ezstart/ezstart/no-local-ui-components': 'warn',
     },
   },
 ]

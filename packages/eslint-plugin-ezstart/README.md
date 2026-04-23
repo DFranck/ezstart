@@ -60,6 +60,24 @@ export default [
 
 No runtime dependency on the rest of the `@ezstart` monorepo.
 
+## Presets
+
+| Preset        | Severity policy                                               | Use when                          |
+| ------------- | ------------------------------------------------------------- | --------------------------------- |
+| `recommended` | `error` on hard rules, `warn` on rules exposing existing debt | Default — adopt progressively     |
+| `strict`      | All rules set to `error`                                      | After sweeping the codebase clean |
+
+```js
+import ezstart from '@ezstart/eslint-plugin-ezstart'
+
+export default [
+  {
+    plugins: { '@ezstart/ezstart': ezstart },
+    rules: ezstart.configs.strict.rules, // or .recommended
+  },
+]
+```
+
 ## API
 
 ### `no-fetch-client`
@@ -153,6 +171,112 @@ import { AlertDialog } from '@ezstart/ui/components'
 // ✅ notification
 import { toast } from 'sonner'
 toast.error('Delete failed')
+```
+
+### `no-console-log`
+
+Disallows `console.log`, `console.warn`, `console.error`, `console.info`, `console.debug` in source files. Use `@ezstart/logger` for consistent leveled logging.
+
+- Severity: `warn` (recommended) / `error` (strict)
+- Autofix: no
+- Allowed: `__tests__/`, `*.test.ts`, `*.spec.ts`, `scripts/`, `bin/`, `*.config.ts`, `packages/logger/**`
+
+```ts
+// ❌
+console.log('user logged in')
+console.error('boom', err)
+
+// ✅
+import { logger } from '@ezstart/logger'
+logger.info('user logged in')
+logger.error('boom', err)
+```
+
+### `no-hardcoded-tailwind-colors`
+
+Flags raw Tailwind palette utilities (`bg-red-500`, `text-gray-700`, `border-indigo-200`, ...) in JSX `className`, class-name helpers (`cn`, `clsx`, `classnames`, `tw`). Forces semantic tokens.
+
+- Severity: `warn` (recommended) / `error` (strict)
+- Autofix: no (the right semantic token depends on intent)
+
+```tsx
+// ❌
+<div className="bg-gray-100 text-gray-900 border-gray-200" />
+<button className="bg-indigo-500 hover:bg-indigo-600 text-white" />
+
+// ✅
+<div className="bg-card text-foreground border" />
+<button className="bg-primary hover:bg-primary/90 text-primary-foreground" />
+```
+
+### `no-dialog-outside-ui`
+
+Blocks `Dialog` / `DialogContent` / `DialogHeader` / ... imports from `@ezstart/ui` outside `packages/ui/`. App and SDK code must use higher-level abstractions.
+
+- Severity: `warn` (recommended) / `error` (strict)
+- Autofix: no
+
+```tsx
+// ❌
+import { Dialog, DialogContent } from '@ezstart/ui/components'
+
+// ✅ generic modal
+import { Modal } from '@ezstart/ui/components'
+
+// ✅ destructive confirm
+import { AlertDialog } from '@ezstart/ui/components'
+
+// ✅ notification
+import { toast } from 'sonner'
+```
+
+### `require-i18n-string`
+
+Heuristic-based. Warns when a hardcoded user-facing string (2+ words, starts with uppercase) appears in:
+
+- JSX text: `<Button>Save Changes</Button>`
+- User-facing props: `placeholder`, `label`, `title`, `description`, `aria-label`, `alt`, `helperText`
+- `toast.success/error/info/...` arguments
+- `alert()`, `confirm()`, `prompt()` arguments
+
+Scoped to `apps/*/web/src/**` and `packages/{ui,*-sdk}/src/components/**`.
+
+- Severity: `warn` (recommended) / `error` (strict)
+- Autofix: no
+
+```tsx
+// ❌
+<Button>Save Changes</Button>
+<Input placeholder="Enter your email" />
+toast.success('Profile updated successfully')
+
+// ✅
+const t = useTranslations('profile')
+<Button>{t('saveChanges')}</Button>
+<Input placeholder={t('emailPlaceholder')} />
+toast.success(t('profileUpdated'))
+```
+
+### `no-local-ui-components`
+
+Warns when `apps/<app>/web/src/components/**` defines a visual primitive (intrinsic JSX element with 3+ Tailwind-like className tokens). Visual primitives should live in `@ezstart/ui` or an SDK `components/` layer.
+
+- Severity: `warn`
+- Autofix: no
+
+```tsx
+// ❌ apps/myapp/web/src/components/FancyCard.tsx
+export const FancyCard = ({ children }) => (
+  <div className="flex items-center gap-4 rounded-md bg-card p-4">{children}</div>
+)
+
+// ✅ app does composition only
+import { Card, CardContent } from '@ezstart/ui/components'
+export const MyPage = () => (
+  <Card>
+    <CardContent>...</CardContent>
+  </Card>
+)
 ```
 
 ## Migration

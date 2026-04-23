@@ -14,8 +14,10 @@ import tseslint from 'typescript-eslint'
  *   ~23 matches across pay-sdk/auth-sdk/ui)
  * - `no-alert-confirm` → `warn` (TODO: upgrade to `error` after sweep — currently ~8 matches
  *   across pay-sdk/ui + green-pulse/gacha-analyzer/asc-tcd web apps)
+ * - `no-console-log` → `warn` (Phase 0 external-devs — progressive cleanup; force @ezstart/logger)
  *
- * Next.js/web-only rules (`no-raw-fetch`, `no-raw-html`) live in `./next.js`.
+ * Next.js/web-only rules (`no-raw-fetch`, `no-raw-html`, `no-hardcoded-tailwind-colors`,
+ * `no-dialog-outside-ui`, `require-i18n-string`, `no-local-ui-components`) live in `./next.js`.
  *
  * @type {import("eslint").Linter.Config}
  * */
@@ -44,6 +46,9 @@ export const config = [
       '@ezstart/ezstart/no-fetch-client': 'error',
       '@ezstart/ezstart/parse-api-error-required': 'warn',
       '@ezstart/ezstart/no-alert-confirm': 'warn',
+      '@ezstart/ezstart/no-console-log': 'warn',
+      '@ezstart/ezstart/no-hardcoded-tailwind-colors': 'warn',
+      '@ezstart/ezstart/no-dialog-outside-ui': 'warn',
     },
   },
   {

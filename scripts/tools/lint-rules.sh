@@ -24,7 +24,7 @@ fi
 #    className="bg-xxx text-xxx" with hardcoded Tailwind is NOT OK
 #    SDK packages (pay-sdk, auth-sdk) are excluded — they consume UI components with className
 # ============================================================
-TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'packages/monitoring/' | grep -v 'node_modules')
+TAILWIND=$(echo "$FILES" | xargs grep -ln 'className="[^"]*\(bg-\|text-\|flex\|grid\|p-\|m-\|w-\|h-\|border\|rounded\|gap-\|space-\|hidden\|block\|inline\|absolute\|relative\|overflow\)' 2>/dev/null | grep 'packages/' | grep -v 'packages/ui/' | grep -v 'packages/pay-sdk/' | grep -v 'packages/auth-sdk/' | grep -v 'packages/ai-sdk/' | grep -v 'packages/capture-sdk/' | grep -v 'packages/pdf-sdk/' | grep -v 'packages/monitoring/' | grep -v 'packages/eslint-plugin-ezstart/' | grep -v 'node_modules' | grep -v '\.test\.' | grep -v '__tests__')
 
 if [ -n "$TAILWIND" ]; then
   echo ""
@@ -72,7 +72,7 @@ fi
 # 7. No direct Dialog usage outside UI kit (use <Modal> instead)
 #    Modal abstracts Dialog with proper max-h, sticky header/footer, scroll, size variants
 # ============================================================
-DIRECT_DIALOG=$(echo "$FILES" | xargs grep -lEn '(^|[^a-zA-Z])DialogContent|(^|[^a-zA-Z])DialogHeader|(^|[^a-zA-Z])DialogFooter|(^|[^a-zA-Z])DialogBody' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'node_modules' | grep -v '.test.' | grep -v '.generated.' | grep -v '\.md$' | grep -v '\.sh$' | grep -v 'CHANGELOG')
+DIRECT_DIALOG=$(echo "$FILES" | xargs grep -lEn '(^|[^a-zA-Z])DialogContent|(^|[^a-zA-Z])DialogHeader|(^|[^a-zA-Z])DialogFooter|(^|[^a-zA-Z])DialogBody' 2>/dev/null | grep -v 'packages/ui/' | grep -v 'packages/eslint-plugin-ezstart/' | grep -v 'node_modules' | grep -v '\.test\.' | grep -v '__tests__' | grep -v '.generated.' | grep -v '\.md$' | grep -v '\.sh$' | grep -v 'CHANGELOG')
 
 if [ -n "$DIRECT_DIALOG" ]; then
   echo ""
