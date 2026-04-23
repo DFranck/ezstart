@@ -63,7 +63,6 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 
 ### AI platform
 
-- [ ] **AI vision support** — Support images au GeminiProvider. FengShui validate doit utiliser ai-sdk au lieu de `@google/generative-ai` direct.
 - [ ] **chat-sdk `<ChatLayout>` (futur)** — Même pattern que AILayout : wrappe Thread de packages/ui + logique chat temps réel (Socket.IO, rooms, typing indicators, presence, P2P). Les deux SDKs partagent le même design system via packages/ui.
 - [ ] **Dynamic plans** — Remplacer "Self-Awareness (Free plan)" hardcodé par vrais plans depuis EZPay. Créer plan Free en prod.
 - [ ] **Alertes quota** — Notification (email/toast) quand une app atteint 80% de son quota tokens/coût. Bloquer à 100%.

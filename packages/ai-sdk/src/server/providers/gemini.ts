@@ -4,7 +4,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Content, Part } from '@google/generative-ai'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse, ChatMessage } from './base.js'
+import type { IAIProvider, ProviderSendOptions, ProviderResponse } from './base.js'
 
 export interface GeminiProviderConfig {
   apiKey?: string
