@@ -20,6 +20,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 import {
   assertValidModelName,
+  extractErrorMessage,
+  type HealthCheckResult,
   type IAIProvider,
   type ProviderSendOptions,
   type ProviderResponse,
@@ -59,6 +61,32 @@ export class AnthropicProvider implements IAIProvider {
   setModel(newModel: string): void {
     assertValidModelName(newModel)
     this.model = newModel
+  }
+
+  /**
+   * Cheap health check — sends a 1-token ping. Anthropic has no no-cost
+   * auth probe (no list-models endpoint equivalent in the SDK), so we use
+   * `max_tokens: 1` to minimize cost while still validating credentials.
+   */
+  async healthCheck(signal?: AbortSignal): Promise<HealthCheckResult> {
+    const started = Date.now()
+    try {
+      await this.client.messages.create(
+        {
+          model: this.model,
+          max_tokens: 1,
+          messages: [{ role: 'user', content: 'ping' }],
+        },
+        { signal }
+      )
+      return { ok: true, latencyMs: Date.now() - started }
+    } catch (error) {
+      return {
+        ok: false,
+        latencyMs: Date.now() - started,
+        error: extractErrorMessage(error),
+      }
+    }
   }
 
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {

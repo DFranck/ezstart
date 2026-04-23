@@ -5,6 +5,8 @@
 import OpenAI from 'openai'
 import {
   assertValidModelName,
+  extractErrorMessage,
+  type HealthCheckResult,
   type IAIProvider,
   type ProviderSendOptions,
   type ProviderResponse,
@@ -39,6 +41,25 @@ export class OpenAIProvider implements IAIProvider {
   setModel(newModel: string): void {
     assertValidModelName(newModel)
     this.model = newModel
+  }
+
+  /**
+   * Cheap health check via `models.list()` — uses the API key but doesn't
+   * consume any tokens. Aborts with the provided signal.
+   */
+  async healthCheck(signal?: AbortSignal): Promise<HealthCheckResult> {
+    const started = Date.now()
+    try {
+      // `models.list()` accepts an optional RequestOptions with signal
+      await this.client.models.list({ signal })
+      return { ok: true, latencyMs: Date.now() - started }
+    } catch (error) {
+      return {
+        ok: false,
+        latencyMs: Date.now() - started,
+        error: extractErrorMessage(error),
+      }
+    }
   }
 
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {

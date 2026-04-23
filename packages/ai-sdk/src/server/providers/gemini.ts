@@ -6,6 +6,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Content, Part } from '@google/generative-ai'
 import {
   assertValidModelName,
+  extractErrorMessage,
+  type HealthCheckResult,
   type IAIProvider,
   type ProviderSendOptions,
   type ProviderResponse,
@@ -40,6 +42,36 @@ export class GeminiProvider implements IAIProvider {
   setModel(newModel: string): void {
     assertValidModelName(newModel)
     this.model = newModel
+  }
+
+  /**
+   * Cheap health check — sends a minimal generateContent call with
+   * `maxOutputTokens: 1`. The Gemini SDK does not expose a no-cost auth
+   * probe, so a 1-token ping is the cheapest path that still validates
+   * credentials and network. Aborts with the provided signal.
+   */
+  async healthCheck(signal?: AbortSignal): Promise<HealthCheckResult> {
+    const started = Date.now()
+    try {
+      const model = this.genAI.getGenerativeModel({
+        model: this.model,
+        generationConfig: { maxOutputTokens: 1 },
+      })
+      await model.generateContent(
+        {
+          contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
+          // Gemini SDK supports AbortSignal via the request options arg
+        },
+        { signal }
+      )
+      return { ok: true, latencyMs: Date.now() - started }
+    } catch (error) {
+      return {
+        ok: false,
+        latencyMs: Date.now() - started,
+        error: extractErrorMessage(error),
+      }
+    }
   }
 
   /**

@@ -4,12 +4,21 @@
  */
 
 // Registry
-export { ProviderRegistry, providerRegistry } from './server/registry/ProviderRegistry.js'
+export {
+  ProviderRegistry,
+  providerRegistry,
+  PROVIDER_STATUS_CHANGED_EVENT,
+} from './server/registry/ProviderRegistry.js'
+export type { ProviderStatusSnapshot } from './server/registry/ProviderRegistry.js'
 export type {
   ProviderConfig,
   AIProviderInfo,
   AIProviderType,
   ProviderCapabilities,
+  ProviderHealthState,
+  ProviderHealthStatus,
+  HealthCheckRunnerOptions,
+  ProviderStatusChangedPayload,
 } from './server/registry/types.js'
 
 // Providers
@@ -25,8 +34,13 @@ export type {
   ImageInput,
   ProviderSendOptions,
   ProviderResponse,
+  HealthCheckResult,
 } from './server/providers/base.js'
-export { assertValidModelName } from './server/providers/base.js'
+export {
+  assertValidModelName,
+  defaultHealthCheck,
+  extractErrorMessage,
+} from './server/providers/base.js'
 
 // Core
 export { UnifiedChat } from './server/core/UnifiedChat.js'
