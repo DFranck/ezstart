@@ -69,7 +69,7 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 - [ ] **API key rotation** — Pouvoir changer une clé API provider sans downtime. Hot-reload dans ProviderRegistry.
 - [ ] **Provider health check** — Ping providers périodiquement, désactiver auto si down, réactiver quand up. Status dans dashboard.
 - [ ] **Rate limiting per-app** — Limiter le nombre de requêtes AI par app (pas juste global IP). Basé sur `AppProvider` config.
-- [ ] **AI streaming SSE** — Exposer SSE streaming dans le chat endpoint. OpenAIProvider a déjà `handleStreaming()`. Route + frontend.
+- [x] **AI streaming SSE** — Route `POST /api/ai/chat/stream` (ezstart-api) + hooks SDK `useAIThread` / nouveau `useAIChatStream` (lightweight). Tests unitaires `OpenAIProvider.handleStreaming` + parser SSE `readSseStream` (adversarial: chunk boundaries, CRLF, JSON malformé, abort, erreur mid-stream). (2026-04-23)
 - [ ] **Smart provider routing** — Router automatiquement chaque message vers le provider le plus adapté dans une même conversation (ex: factuel→gemini, complexe→gpt-4o, vision→gemini). Critères: type de prompt, mots-clés, coût, complexité.
 - [ ] **Provider model override dynamique** — `AppProvider.config.model` doit être passé au `ProviderRegistry` au runtime (pas fixé au startup). Permettre de changer le modèle par app sans redémarrer.
 - [ ] **Provider status/health dans l'UI** — Afficher le status (active/quota expired/error/disabled) dans les dashboards admin. Si un provider a plus de quota, le marquer visuellement et le masquer côté user.

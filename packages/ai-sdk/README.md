@@ -118,6 +118,67 @@ const provider = providerRegistry.getInstance('claude-prod')
 const result = await provider.sendMessage('Hello')
 ```
 
+## Streaming (SSE)
+
+The AI SDK supports Server-Sent Events for token-by-token streaming end-to-end.
+
+### Backend — SSE route
+
+`apps/ezstart/api` exposes `POST /api/ai/chat/stream` which emits:
+
+```
+data: {"type":"meta","provider":"openai","conversationId":"..."}\n\n
+data: {"type":"chunk","content":"Hel"}\n\n
+data: {"type":"chunk","content":"lo"}\n\n
+data: [DONE]\n\n
+```
+
+On server-side provider failure mid-stream, an error frame is emitted before `[DONE]`:
+
+```
+data: {"type":"error","error":"provider offline"}\n\n
+data: [DONE]\n\n
+```
+
+The backend handles client abort (`req.on('close')`) and forwards provider errors as SSE events when the response headers have already been sent.
+
+### Frontend — `useAIChatStream` (minimal)
+
+Lightweight React hook for consumers that own their own message list:
+
+```tsx
+import { useAIChatStream } from '@ezstart/ai-sdk/client'
+
+function ChatBox() {
+  const { send, streamingText, fullText, loading, error, abort } = useAIChatStream({
+    appName: 'myapp',
+    onChunk: chunk => console.log('chunk:', chunk),
+    onComplete: text => console.log('final:', text),
+  })
+
+  return (
+    <>
+      <button onClick={() => send('Tell me a joke')} disabled={loading}>
+        Send
+      </button>
+      <pre>{streamingText || fullText}</pre>
+      {error && <p role="alert">{error}</p>}
+      {loading && <button onClick={abort}>Cancel</button>}
+    </>
+  )
+}
+```
+
+### Frontend — `useAIThread` (full)
+
+For the full experience (conversations, provider switching, persistence) use `useAIThread`, which wraps `useAIChatStream` semantics inside the conversation machinery.
+
+```tsx
+import { useAIThread } from '@ezstart/ai-sdk/client'
+
+const thread = useAIThread({ appName: 'myapp', streaming: true })
+```
+
 ## Environment variables
 
 Add to your API `.env.local` / `.env.example`:
