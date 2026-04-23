@@ -511,16 +511,28 @@ function assertWebUrlNotLocalhostOffLocal(webUrl: string, isLocal: boolean): voi
  * SSR time because no URL signals are available.
  */
 function isLocalhost(): boolean {
-  if (typeof window === 'undefined') return false
-  const host = window.location.hostname
-  return (
-    host === 'localhost' ||
-    host.endsWith('.localhost') ||
-    host === '127.0.0.1' ||
-    host === '0.0.0.0' ||
-    host === '[::1]' ||
-    host === '::1'
-  )
+  // Browser: authoritative — check hostname directly.
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    return (
+      host === 'localhost' ||
+      host.endsWith('.localhost') ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '[::1]' ||
+      host === '::1'
+    )
+  }
+  // SSR / Node: use env signals. `VERCEL_ENV` is always set on Vercel (dev
+  // preview/production alike), while Next.js local dev only exposes
+  // `NODE_ENV === 'development'`. If we are running under Next dev without
+  // any Vercel deploy marker, we are on localhost — even though the window
+  // global does not exist yet for this server render pass.
+  if (typeof process !== 'undefined' && process.env) {
+    if (process.env.VERCEL_ENV || process.env.RAILWAY_ENVIRONMENT) return false
+    if (process.env.NODE_ENV === 'development') return true
+  }
+  return false
 }
 
 /**
