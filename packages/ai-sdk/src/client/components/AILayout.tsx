@@ -116,6 +116,8 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
   const noProvidersCTA = texts.noProvidersCTA ?? 'Configure providers'
   const noProvidersComposerPlaceholder =
     texts.noProvidersComposerPlaceholder ?? 'AI providers not configured'
+  const adminHref = props.adminHref ?? '/admin'
+  const onAdminClick = props.onAdminClick
 
   const composerDisabled = showLoginPrompt || noProviders
   const composerPlaceholder = showLoginPrompt
@@ -204,11 +206,22 @@ function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {
                     <P className="text-sm text-muted-foreground max-w-md">
                       {noProvidersDescription}
                     </P>
-                    {isAdmin && (
-                      <Button asChild variant="default" size="sm" className="mt-2">
-                        <a href="/admin">{noProvidersCTA}</a>
-                      </Button>
-                    )}
+                    {isAdmin &&
+                      (onAdminClick ? (
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          className="mt-2"
+                          onClick={onAdminClick}
+                        >
+                          {noProvidersCTA}
+                        </Button>
+                      ) : (
+                        <Button asChild variant="default" size="sm" className="mt-2">
+                          <a href={adminHref}>{noProvidersCTA}</a>
+                        </Button>
+                      ))}
                   </Div>
                 ) : (
                   <>

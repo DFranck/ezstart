@@ -60,4 +60,18 @@ export type AILayoutProps = {
   formatResponseTime?: (ms: number) => string
   /** Show × close button inside the sidebar Sheet. Default: false (use burger/overlay to close) */
   showSidebarCloseButton?: boolean
+  /**
+   * Href for the admin "Configure providers" CTA shown when no AI providers are
+   * configured (admin-only). Consumers should pass a locale-prefixed path
+   * (e.g. `` `/${locale}/admin` ``) to avoid hitting a non-localized 404.
+   * Defaults to `'/admin'`. When omitted **and** no `onAdminClick` is given,
+   * the button falls back to `/admin` (legacy behavior).
+   */
+  adminHref?: string
+  /**
+   * Optional click handler for the admin "Configure providers" CTA. When
+   * provided, the button invokes this callback instead of navigating to
+   * `adminHref` (useful for SPA navigation or custom routing).
+   */
+  onAdminClick?: () => void
 }

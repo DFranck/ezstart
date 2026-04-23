@@ -173,6 +173,7 @@ export default function DashboardPage() {
       locale={locale}
       apiKeysEnabled
       hasOwnedApps={hasOwnedApps}
+      homeHref={`/${locale}`}
       texts={dashboardTexts}
       slots={{
         applications: applicationsSlot,

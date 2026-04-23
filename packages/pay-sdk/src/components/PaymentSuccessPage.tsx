@@ -7,6 +7,12 @@ import React, { Suspense, useEffect, useState } from 'react'
 export interface PaymentSuccessPageProps {
   /** Redirect path after successful payment. Defaults to '/' */
   redirectTo?: string
+  /**
+   * Fallback href used by the error-state "Go Back" button when no `session_id`
+   * is present. Defaults to `'/'`. Consumers should pass a locale-prefixed
+   * path (e.g. `` `/${locale}` ``) to avoid hitting the non-localized root 404.
+   */
+  fallbackHref?: string
   /** Custom success message. Defaults to 'Payment successful!' */
   successMessage?: string
   /** Custom redirect message. Defaults to 'Redirecting...' */
@@ -21,6 +27,7 @@ export interface PaymentSuccessPageProps {
 
 function SuccessContent({
   redirectTo = '/',
+  fallbackHref = '/',
   successMessage = 'Payment successful!',
   redirectMessage = 'Redirecting...',
   errorMessage = 'Payment verification failed',
@@ -105,7 +112,7 @@ function SuccessContent({
           </svg>
         </div>
         <p className="text-red-600 font-semibold">{errorMessage}</p>
-        <button onClick={() => router.push('/')} className={errorButtonClassName}>
+        <button onClick={() => router.push(fallbackHref)} className={errorButtonClassName}>
           {errorButtonText}
         </button>
       </div>

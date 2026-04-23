@@ -174,6 +174,18 @@ export interface EZAuthDashboardProps {
   /** Extra app-specific sections added after the canonical ones but before
    * the admin (`users`/`platform`) sections. */
   extraSections?: EZAuthDashboardExtraSection[]
+  /**
+   * Href for the sidebar brand link (top-left logo).
+   * Defaults to `'/'`. Consumers should pass a locale-prefixed path
+   * (e.g. `` `/${locale}` ``) to avoid hitting the non-localized root 404.
+   */
+  homeHref?: string
+  /**
+   * Optional click handler for the sidebar brand. When provided, the brand
+   * becomes a `<button>` that invokes this callback instead of navigating to
+   * `homeHref` (useful for SPA navigation or custom behavior).
+   */
+  onHomeClick?: () => void
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -315,6 +327,8 @@ export function EZAuthDashboard({
   className,
   sections: sectionsProp,
   extraSections,
+  homeHref = '/',
+  onHomeClick,
 }: EZAuthDashboardProps) {
   const { user, isAuthenticated } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
@@ -414,13 +428,24 @@ export function EZAuthDashboard({
       {/* Sidebar */}
       <DashboardSidebar>
         <SidebarHeader>
-          <a
-            href="/"
-            className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-          >
-            <Icon name="lucide:Code" className="h-5 w-5 text-primary shrink-0" />
-            <Span className="font-semibold">{texts.brand}</Span>
-          </a>
+          {onHomeClick ? (
+            <button
+              type="button"
+              onClick={onHomeClick}
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors bg-transparent border-0 p-0 cursor-pointer"
+            >
+              <Icon name="lucide:Code" className="h-5 w-5 text-primary shrink-0" />
+              <Span className="font-semibold">{texts.brand}</Span>
+            </button>
+          ) : (
+            <a
+              href={homeHref}
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+            >
+              <Icon name="lucide:Code" className="h-5 w-5 text-primary shrink-0" />
+              <Span className="font-semibold">{texts.brand}</Span>
+            </a>
+          )}
         </SidebarHeader>
 
         <SidebarNav>

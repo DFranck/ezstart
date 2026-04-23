@@ -42,6 +42,12 @@ function extractAuthErrorMessage(err: unknown, fallback: string): string {
 interface AuthCallbackPageProps {
   /** Redirect path after successful authentication. Defaults to '/' */
   redirectTo?: string
+  /**
+   * Fallback href used by the error-state "Go Back" button when authentication
+   * fails. Defaults to `'/'`. Consumers should pass a locale-prefixed path
+   * (e.g. `` `/${locale}` ``) to avoid hitting the non-localized root 404.
+   */
+  fallbackHref?: string
   /** Custom success message. Defaults to 'Authentication successful!' */
   successMessage?: string
   /** Custom redirect message. Defaults to 'Redirecting...' */
@@ -58,6 +64,7 @@ interface AuthCallbackPageProps {
 
 function CallbackContent({
   redirectTo = '/',
+  fallbackHref = '/',
   successMessage = 'Authentication successful!',
   redirectMessage = 'Redirecting...',
   processingMessage = 'Processing authentication...',
@@ -83,9 +90,7 @@ function CallbackContent({
     // in case the hook hasn't synced yet.
     const fromHook = searchParams.get('code')
     const fromUrl =
-      typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search).get('code')
-        : null
+      typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('code') : null
     codeRef.current = fromHook || fromUrl || ''
   }
 
@@ -216,7 +221,7 @@ function CallbackContent({
         </Div>
         <P className="text-destructive font-semibold">{errorTitle}</P>
         <P className="text-muted-foreground text-sm mb-4">{error}</P>
-        <Button onClick={() => router.push('/')} variant="default">
+        <Button onClick={() => router.push(fallbackHref)} variant="default">
           {errorButtonText}
         </Button>
       </Div>

@@ -14,6 +14,7 @@
  * - Strong CTAs
  */
 
+import { RegisterButton } from '@ezstart/auth-sdk'
 import {
   Badge,
   Button,
@@ -81,13 +82,13 @@ export default function LandingV2Page() {
             <P className="text-xl text-primary-foreground/90 max-w-2xl">{t('hero.description')}</P>
 
             {/* CTA Button */}
-            <Button
-              asChild
+            <RegisterButton
               size="lg"
+              alwaysShowText
               className="bg-primary-foreground text-ezbill-invoice hover:bg-primary-foreground/90 text-lg px-8 py-6"
             >
-              <Link href="/signup">{t('hero.cta')}</Link>
-            </Button>
+              {t('hero.cta')}
+            </RegisterButton>
           </Div>
         </Div>
       </Section>
@@ -239,7 +240,7 @@ export default function LandingV2Page() {
       </Section>
 
       {/* Comparison Section */}
-      <Section size="xl" className="bg-gradient-to-br from-background to-muted/20">
+      <Section id="pricing" size="xl" className="bg-gradient-to-br from-background to-muted/20">
         <Div className="text-center mb-12">
           <H2 size="h3" className="mb-4">
             {t('comparison.title')}
@@ -351,20 +352,20 @@ export default function LandingV2Page() {
             <P className="text-xl text-primary-foreground/90">{t('cta.description')}</P>
 
             <Div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                asChild
+              <RegisterButton
                 size="lg"
+                alwaysShowText
                 className="bg-primary-foreground text-ezbill-invoice hover:bg-primary-foreground/90 text-lg px-8 py-6"
               >
-                <Link href="/signup">{t('cta.primary')}</Link>
-              </Button>
+                {t('cta.primary')}
+              </RegisterButton>
               <Button
                 asChild
                 size="lg"
                 variant="outline"
                 className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
               >
-                <Link href="/pricing">{t('cta.secondary')}</Link>
+                <Link href="#pricing">{t('cta.secondary')}</Link>
               </Button>
             </Div>
 

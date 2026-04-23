@@ -12,7 +12,7 @@ import {
   Div,
   Span,
 } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 
 interface ClientHeaderProps {
@@ -24,10 +24,11 @@ interface ClientHeaderProps {
 export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientHeaderProps) {
   const tDashboard = useTranslations('dashboard')
   const tClient = useTranslations('client')
+  const locale = useLocale()
   return (
     <Div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 w-full">
       <Link
-        href="/dashboard"
+        href={`/${locale}/dashboard`}
         className="inline-flex items-center text-ezbill-client hover:text-ezbill-client/80 font-medium transition-colors mb-4 group"
       >
         <Icon

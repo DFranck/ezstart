@@ -24,6 +24,7 @@ import {
   Span,
   TextGradient,
 } from '@ezstart/ui/components'
+import { useLocale } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -54,6 +55,7 @@ type OssPackageData = {
 
 export default function SaasPreviewPage(): React.JSX.Element {
   const t = useSafeTranslations('saas-preview')
+  const locale = useLocale()
 
   const products = t.raw('products.items') as ProductCardData[]
   const projects = t.raw('portfolio.projects') as PortfolioProjectData[]
@@ -295,7 +297,7 @@ export default function SaasPreviewPage(): React.JSX.Element {
           </P>
           <Div layout="row" className="gap-3 mt-6 flex-wrap justify-center">
             <Button asChild size="lg">
-              <Link href="/en/donate">
+              <Link href={`/${locale}/donate`}>
                 <Icon name="fa:FaHeart" size={16} />
                 <Span className="ml-2">{t('support.donateCta')}</Span>
               </Link>

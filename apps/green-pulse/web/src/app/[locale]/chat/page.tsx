@@ -199,6 +199,7 @@ export default function LiaPage() {
         appName="green-pulse"
         locale={locale}
         height="viewport"
+        adminHref={`/${locale}/admin`}
         getToken={() => useAuthStore.getState().accessToken}
         extraPayload={{ extract_esg: false }}
         texts={{

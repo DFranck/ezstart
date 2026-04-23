@@ -225,6 +225,7 @@ export default function EZPayDashboardPage() {
       locale={locale}
       apiKeysEnabled
       hasOwnedApps={hasOwnedApps}
+      homeHref={`/${locale}`}
       texts={dashboardTexts}
       slots={{
         applications: applicationsSlot,
