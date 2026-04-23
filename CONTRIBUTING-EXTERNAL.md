@@ -150,6 +150,64 @@ Test setup (`vitest.config.ts`, `.env.test`) is preserved. Note that `.env.test`
 
 ---
 
+## Re-importing a standalone
+
+If you've been working on a standalone (extracted via `extract-app.js`) and now want to fold it back into a monorepo clone — for example, to contribute a bug fix or a new feature you prototyped in isolation — use the reverse script:
+
+```bash
+# Import a standalone into the monorepo under apps/<name>/
+node scripts/generators/insert-app.js <standalone-path> <app-name>
+
+# Dry run first to see what would happen
+node scripts/generators/insert-app.js /tmp/my-fork test-imported --dry-run
+
+# Overwrite an existing apps/<name>/ (dangerous — double-check)
+node scripts/generators/insert-app.js /tmp/my-fork my-app --force
+
+# Force layer detection for single-layer standalones
+node scripts/generators/insert-app.js ./my-web-only my-app --layer web
+```
+
+### What the script does
+
+1. **Detects layout** — multi-layer (`web/`, `api/`, `types/` subfolders) vs single-layer (the standalone itself is one layer).
+2. **Copies each layer** to `apps/<app-name>/<layer>/`, skipping `node_modules/`, `dist/`, `.next/`, build caches, and all `.env*` files (those are re-integrated separately).
+3. **Rewrites every per-layer `package.json`**:
+   - `name` becomes `web-<app-name>` / `api-<app-name>` / `@<app-name>/types` (monorepo convention).
+   - All `@ezstart/*` deps become `workspace:*`.
+   - If the standalone's root `package.json` is named `<old-app>-standalone`, any `@<old-app>/*` deps are renamed to `@<app-name>/*` so cross-layer refs stay consistent.
+4. **Diffs env against the monorepo root `.env.local`**:
+   - Standalone vars whose value matches root exactly are treated as shared → NOT written per-app.
+   - Remaining vars go into `apps/<app-name>/<layer>/.env.local`.
+   - A matching `.env.example` is written alongside (same keys, empty values).
+
+### What the script does NOT do (by design)
+
+The reverse script is deliberately conservative on monorepo wiring — these choices are project-specific and the script has no way to guess them safely:
+
+- **Ports** — `packages/config/src/urls.ts` is not modified. Pick free ports manually and add the app to the `AppName` union, `URLS`, and `PROJECT_METADATA` records.
+- **Root `tsconfig.json`** — no references added. Add `{ "path": "./apps/<name>/<layer>" }` entries in the `references` array.
+- **Root `package.json` dev script** — no `dev:<shortcut>` script added. Add one if you want a convenience shortcut.
+
+The script prints a reminder checklist of these steps at the end.
+
+### After re-importing
+
+```bash
+# Still at the monorepo root
+pnpm install
+pnpm --filter web-<app-name> typecheck
+pnpm --filter api-<app-name> typecheck
+```
+
+**Rotate every secret in the imported `.env.local` files** — they came from your fork's env and may leak into git history if you forget. `JWT_SECRET`, `MONGO_URL`, `NEXT_PUBLIC_EZAUTH_KEY`, Stripe keys, OAuth client secrets — all of them.
+
+### Round-trip integrity
+
+`extract-app.js` + `insert-app.js` are designed as an idempotent pair. Source trees (`src/**`) are preserved exactly; only `package.json` names and dep versions change.
+
+---
+
 ## Contributing to packages (back to the monorepo)
 
 If you find a bug or want to improve a `@ezstart/*` package:
@@ -241,5 +299,6 @@ The copied `SENTRY_DSN` points to the monorepo's Sentry org. Replace with your o
 - [SECRETS.md](./SECRETS.md) — env architecture
 - [.claude/rules/standard.md](./.claude/rules/standard.md) — package quality checklist
 - [scripts/generators/extract-app.js](./scripts/generators/extract-app.js) — extraction script source
+- [scripts/generators/insert-app.js](./scripts/generators/insert-app.js) — reverse (re-import) script source
 
 Found a bug in the script? Open an issue at [DFranck/ezstart/issues](https://github.com/DFranck/ezstart/issues) with the command you ran, the error output, and the app you tried to extract.
