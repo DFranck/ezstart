@@ -131,7 +131,7 @@ export const createPromptSchema = z.object({
     .regex(/^[a-z0-9-_]+$/),
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  content: z.string().min(1).max(10000),
+  content: z.string().min(1).max(50000),
   config: promptConfigSchema,
   type: promptTypeSchema.default('general'),
   apps: z.array(z.string().min(1)).min(1),
@@ -145,7 +145,7 @@ export const createPromptSchema = z.object({
 export const updatePromptSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
-  content: z.string().min(1).max(10000).optional(),
+  content: z.string().min(1).max(50000).optional(),
   config: promptConfigSchema,
   type: promptTypeSchema.optional(),
   apps: z.array(z.string().min(1)).min(1).optional(),

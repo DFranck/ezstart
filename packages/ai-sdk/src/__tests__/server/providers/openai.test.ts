@@ -195,6 +195,24 @@ describe('OpenAIProvider', () => {
       const result = await p.sendMessage('hi')
       expect(result.text).toBe('')
     })
+
+    it('applies default temperature (0.7) and max_tokens (4096) when not provided', async () => {
+      chatCompletionsCreate.mockResolvedValueOnce(makeResponse('ok'))
+      const p = new OpenAIProvider({ apiKey: 'sk-test' })
+      await p.sendMessage('hi')
+      expect(chatCompletionsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ temperature: 0.7, max_tokens: 4096 })
+      )
+    })
+
+    it('applies custom temperature and maxTokens when provided', async () => {
+      chatCompletionsCreate.mockResolvedValueOnce(makeResponse('ok'))
+      const p = new OpenAIProvider({ apiKey: 'sk-test' })
+      await p.sendMessage('hi', { temperature: 0.2, maxTokens: 1024 })
+      expect(chatCompletionsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ temperature: 0.2, max_tokens: 1024 })
+      )
+    })
   })
 
   describe('vision (images)', () => {

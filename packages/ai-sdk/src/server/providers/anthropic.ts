@@ -34,8 +34,17 @@ export interface AnthropicProviderConfig {
 
 /** Default model — latest Sonnet (stable alias). */
 const DEFAULT_MODEL = 'claude-sonnet-4-5'
-const DEFAULT_MAX_TOKENS = 4096
-const DEFAULT_TEMPERATURE = 0.7
+
+/**
+ * Sensible defaults applied when the caller (prompt config, AppProvider config,
+ * or direct `options`) does NOT provide an explicit value. Exported so tests
+ * and other providers can reference the same source of truth.
+ *
+ * Mirrored in {@link GeminiProvider} / {@link OpenAIProvider} for consistent
+ * conversational behaviour across providers.
+ */
+export const DEFAULT_MAX_TOKENS = 4096
+export const DEFAULT_TEMPERATURE = 0.7
 
 export class AnthropicProvider implements IAIProvider {
   private client: Anthropic
@@ -140,7 +149,7 @@ export class AnthropicProvider implements IAIProvider {
       messages,
       system: options.systemPrompt || undefined,
       temperature: options.temperature ?? DEFAULT_TEMPERATURE,
-      max_tokens: options.maxTokens || DEFAULT_MAX_TOKENS,
+      max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
     })
 
     const textBlock = response.content.find(block => block.type === 'text')
@@ -188,7 +197,7 @@ export class AnthropicProvider implements IAIProvider {
       messages,
       system: options.systemPrompt || undefined,
       temperature: options.temperature ?? DEFAULT_TEMPERATURE,
-      max_tokens: options.maxTokens || DEFAULT_MAX_TOKENS,
+      max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
     })
 
     let fullText = ''

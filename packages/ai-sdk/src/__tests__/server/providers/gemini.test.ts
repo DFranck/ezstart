@@ -25,12 +25,14 @@ const {
   startChatMock,
   sendMessageFn,
   sendMessageStreamFn,
+  getGenerativeModelSpy,
 } = vi.hoisted(() => ({
   generateContent: vi.fn(),
   generateContentStream: vi.fn(),
   startChatMock: vi.fn(),
   sendMessageFn: vi.fn(),
   sendMessageStreamFn: vi.fn(),
+  getGenerativeModelSpy: vi.fn(),
 }))
 
 vi.mock('@google/generative-ai', () => {
@@ -45,7 +47,10 @@ vi.mock('@google/generative-ai', () => {
     constructor(apiKey: string) {
       this.apiKey = apiKey
     }
-    getGenerativeModel(_params: unknown): MockGenerativeModel {
+    getGenerativeModel(params: unknown): MockGenerativeModel {
+      // Capture the config so tests can assert on systemInstruction /
+      // generationConfig (temperature, maxOutputTokens, ...).
+      getGenerativeModelSpy(params)
       return new MockGenerativeModel()
     }
   }
@@ -94,6 +99,7 @@ describe('GeminiProvider', () => {
     startChatMock.mockReset()
     sendMessageFn.mockReset()
     sendMessageStreamFn.mockReset()
+    getGenerativeModelSpy.mockReset()
     // startChat() returns an object with sendMessage / sendMessageStream
     startChatMock.mockImplementation(() => ({
       sendMessage: sendMessageFn,
@@ -139,6 +145,41 @@ describe('GeminiProvider', () => {
       const result = await p.sendMessage('hello')
       expect(result.text).toBe('Bonjour')
       expect(result.extractedData).toBeNull()
+    })
+
+    it('applies default temperature (0.7) and maxOutputTokens (4096) when not provided', async () => {
+      generateContent.mockResolvedValueOnce(makeNonStreamResponse('ok'))
+      const p = new GeminiProvider({ apiKey: 'gem-test' })
+      await p.sendMessage('hi')
+      const params = getGenerativeModelSpy.mock.calls[0]?.[0] as {
+        generationConfig?: { temperature?: number; maxOutputTokens?: number }
+      }
+      expect(params.generationConfig?.temperature).toBe(0.7)
+      expect(params.generationConfig?.maxOutputTokens).toBe(4096)
+    })
+
+    it('applies custom temperature and maxTokens when provided', async () => {
+      generateContent.mockResolvedValueOnce(makeNonStreamResponse('ok'))
+      const p = new GeminiProvider({ apiKey: 'gem-test' })
+      await p.sendMessage('hi', { temperature: 0.2, maxTokens: 1024 })
+      const params = getGenerativeModelSpy.mock.calls[0]?.[0] as {
+        generationConfig?: { temperature?: number; maxOutputTokens?: number }
+      }
+      expect(params.generationConfig?.temperature).toBe(0.2)
+      expect(params.generationConfig?.maxOutputTokens).toBe(1024)
+    })
+
+    it('injects systemPrompt as systemInstruction (not as a user message)', async () => {
+      generateContent.mockResolvedValueOnce(makeNonStreamResponse('ok'))
+      const p = new GeminiProvider({ apiKey: 'gem-test' })
+      await p.sendMessage('hi', { systemPrompt: 'You are GP.A, an ESG advisor.' })
+      const params = getGenerativeModelSpy.mock.calls[0]?.[0] as {
+        systemInstruction?: string
+      }
+      expect(params.systemInstruction).toBe('You are GP.A, an ESG advisor.')
+      // And the user message part should NOT contain the system prompt
+      const parts = generateContent.mock.calls[0]?.[0] as Array<Record<string, unknown>>
+      expect(parts).toEqual([{ text: 'hi' }])
     })
 
     it('passes text as the first part when no images are provided', async () => {
