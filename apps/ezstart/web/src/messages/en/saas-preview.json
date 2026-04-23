@@ -1,0 +1,177 @@
+{
+  "saas-preview": {
+    "hero": {
+      "badge": "Draft preview",
+      "title": "SaaS building blocks for indie devs",
+      "subtitle": "EzStart ships the plumbing so you can ship the product: auth, payments, analytics and more — production-ready, open-source, ready to drop into your stack.",
+      "ctaPrimary": "Explore products",
+      "ctaSecondary": "Meet the founder"
+    },
+    "products": {
+      "title": "Our SaaS lineup",
+      "subtitle": "One monorepo, seven services. Use them standalone or stitched together.",
+      "visitCta": "Visit app",
+      "items": [
+        {
+          "slug": "ezauth",
+          "name": "EZAuth",
+          "tagline": "Authentication, sessions and RBAC",
+          "description": "Drop-in auth: email/password, OAuth, 2FA, API keys, admin dashboards. Dogfooded across every EzStart app.",
+          "iconName": "custom:Ezauth",
+          "href": "https://ezauth-git-staging-ezstart.vercel.app",
+          "badge": "Core"
+        },
+        {
+          "slug": "ezpay",
+          "name": "EZPay",
+          "tagline": "Payments, subscriptions and connect",
+          "description": "Stripe-powered billing with per-app scoping, HMAC-signed callbacks, donation widgets and federated dashboards.",
+          "iconName": "custom:Ezpay",
+          "href": "https://ezpay-git-staging-ezstart.vercel.app",
+          "badge": "Core"
+        },
+        {
+          "slug": "ezbill",
+          "name": "EZBill",
+          "tagline": "Invoicing for solo devs and freelancers",
+          "description": "Create clients, send invoices, track payments. Minimal friction, opinionated UX, works out of the box.",
+          "iconName": "custom:Ezbill",
+          "href": "https://ezbill-git-staging-ezstart.vercel.app"
+        },
+        {
+          "slug": "ezstart",
+          "name": "EZStart Hub",
+          "tagline": "Federated admin and monitoring",
+          "description": "Platform hub: manage every app, user and API key from a single superadmin dashboard.",
+          "iconName": "custom:Ezstart",
+          "href": "https://ezstart-git-staging-ezstart.vercel.app",
+          "badge": "Hub"
+        },
+        {
+          "slug": "green-pulse",
+          "name": "GreenPulse",
+          "tagline": "AI-assisted ESG data collection",
+          "description": "Turn 45-minute paper forms into 8-15 minute AI-assisted workflows. Multi-modal inputs, multi-tenant by design.",
+          "iconName": "fa:FaLeaf",
+          "href": "https://ezstart-green-pulse.vercel.app"
+        },
+        {
+          "slug": "fengshui",
+          "name": "FengShui",
+          "tagline": "BaZi and chinese astrology reports",
+          "description": "Generate birth charts and compatibility reports powered by classical BaZi calculus.",
+          "iconName": "fa:FaCompass",
+          "href": "https://ezstart-fengshui.vercel.app"
+        },
+        {
+          "slug": "asc-tcd",
+          "name": "ASC-TCD",
+          "tagline": "Club management for badminton",
+          "description": "Members, seasons, matches and championship rankings for the ASC-TCD sports club.",
+          "iconName": "fa:FaTableTennis",
+          "href": "https://ezstart-asc-tcd.vercel.app"
+        }
+      ]
+    },
+    "founder": {
+      "badge": "Solo founder",
+      "title": "Built by Franck Dufournet",
+      "tagline": "Full-stack engineer, CTO-for-hire, turning side projects into SaaS since 2020.",
+      "bio": "Franck is the one-person engineering team behind EzStart LLC. Ten years of frontend, five in full-stack, three running production MongoDB / Node / React stacks for clients from DeFi to ESG. Obsessed with agnostic packages, clean provider stacks, and shipping boring reliable software.",
+      "skills": [
+        "TypeScript",
+        "Next.js",
+        "Node.js",
+        "MongoDB",
+        "PostgreSQL",
+        "React Query",
+        "Tailwind",
+        "Stripe"
+      ],
+      "ctaProjects": "See selected work"
+    },
+    "portfolio": {
+      "title": "Selected client work",
+      "subtitle": "A few highlights from the last three years.",
+      "viewCta": "View project",
+      "privateLabel": "Private project",
+      "projects": [
+        {
+          "title": "Coreum DEX Platform",
+          "subtitle": "Full-stack DeFi on Cosmos",
+          "summary": "Led a full SQL-to-Prisma migration (3-4x perf), built SSE real-time infra for 200+ pools, shipped WebSocket chat and PnL analytics. 320 hours across 8 weeks.",
+          "tech": ["Prisma", "PostgreSQL", "SSE", "WebSocket", "Next.js"],
+          "private": true
+        },
+        {
+          "title": "GreenPulse — AI Form System",
+          "subtitle": "Intelligent ESG data collection",
+          "summary": "Architected 72 endpoints, 6 MongoDB models and multi-tenant workspaces. AI extraction via Gemini with OpenAI fallback, manual + chat + vocal fillers.",
+          "tech": ["Next.js", "MongoDB", "Gemini", "React Query", "Zod"],
+          "href": "https://www.ai-greenpulse.com/"
+        },
+        {
+          "title": "ClausIA — Legal AI",
+          "subtitle": "AI contract analysis",
+          "summary": "Built the frontend for a legal-tech startup: contract upload, clause-by-clause review, explainable AI suggestions, session-based billing.",
+          "tech": ["Next.js", "TypeScript", "TailwindCSS", "Stripe"],
+          "private": true
+        }
+      ]
+    },
+    "oss": {
+      "title": "Open-source packages",
+      "subtitle": "Every primitive behind EzStart is publishable on npm. Use one, use all.",
+      "githubCta": "Browse on GitHub",
+      "items": [
+        {
+          "name": "auth-sdk",
+          "scope": "@ezstart/auth-sdk",
+          "description": "React + core clients for authentication, sessions, API keys and admin dashboards."
+        },
+        {
+          "name": "pay-sdk",
+          "scope": "@ezstart/pay-sdk",
+          "description": "Payments, subscriptions, donations and checkout flows backed by Stripe."
+        },
+        {
+          "name": "ai-sdk",
+          "scope": "@ezstart/ai-sdk",
+          "description": "Provider-agnostic AI client with streaming, thread management and multi-model fallback."
+        },
+        {
+          "name": "ui",
+          "scope": "@ezstart/ui",
+          "description": "Tailwind + CVA component kit with dark mode, semantic tokens and 50+ primitives."
+        },
+        {
+          "name": "api-core",
+          "scope": "@ezstart/api-core",
+          "description": "Express factory with auth, rate-limit, CORS, health, OpenAPI and Sentry wired in."
+        },
+        {
+          "name": "api-sdk",
+          "scope": "@ezstart/api-sdk",
+          "description": "Typed HTTP client with envelope unwrap, refresh flow and abort support."
+        }
+      ]
+    },
+    "support": {
+      "badge": "Support the project",
+      "title": "Like what you see?",
+      "description": "EzStart is a one-person bootstrapped company. Every coffee keeps the servers on and the commits flowing.",
+      "donateCta": "Buy me a coffee",
+      "starCta": "Star on GitHub"
+    },
+    "contact": {
+      "title": "Work with me",
+      "description": "Need a CTO for your next launch, a freelance full-stack engineer or just a second pair of eyes? Let’s talk.",
+      "emailCta": "Send an email"
+    },
+    "footer": {
+      "company": "EzStart LLC",
+      "llcInfo": "Registered in Wyoming, USA. Operating globally. Built and maintained by Franck Dufournet.",
+      "draftNote": "Draft preview — this page is a hybrid SaaS + portfolio exploration, not yet the public landing."
+    }
+  }
+}
