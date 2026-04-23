@@ -525,7 +525,7 @@ App scan/analyse screenshots jeux gacha (Summoners War runes, Nikke Goddess of V
 
 ## Dette technique (non-blocker)
 
-- [ ] **PAY-SDK-SPLIT** — `packages/pay-sdk/src/core/pay-client.ts` (727 lignes) et `types.ts` (644 lignes) dépassent la limite 400 lignes. Splitter en `types/payments.ts`, `types/promos.ts`, `types/plans.ts` etc.
+- [x] **PAY-SDK-SPLIT** (2026-04-23) — `pay-client.ts` (727→356 lignes) et `types.ts` (644→61 barrel) splittés en `core/types/{common,payments,promos,plans,connect,billing,api-keys}.ts` + `core/methods/{http,donations,purchases,subscriptions,payments,promos,plans,connect,billing}.ts`. PayClient reste l'orchestrateur, méthodes délèguent à des fonctions pures. Zéro breaking change (surface publique identique, barrel `types.ts` préservé). 388/388 tests PASS, tous consumers typecheck OK.
 - [ ] **PAY-SDK-ABORT-SIGNAL** — Étendre le pattern AbortSignal (threadé end-to-end dans `getPayments` / `usePaymentHistory` pour VULN-2) aux autres hooks list pay-sdk : `useSubscriptions`, `usePurchases`, `useDonations`, `usePlans`, `useSubscriptionStatus`. Ajouter `signal?: AbortSignal` sur `getSubscriptions`/`getPurchases`/`getDonations`/`listPlans` dans `pay-client.ts`, câbler un `AbortController` dans chaque hook, annuler sur unmount + dep change. Même motif pour auth-sdk hooks qui font des list fetch. Eviter les gaspillages réseau + race conditions sur scope change.
 - [ ] **AUTH-MW-JWT-001** — TODO `apps/ezauth/api/src/routes/api-keys/config.ts:112` — quand billing implémenté, resolve plan/features depuis subscription user
 - [ ] **AUTH-RATE-001** — TODO `apps/ezauth/api/src/routes/auth/sso-authorize.ts:34` — per-userId rate limiting

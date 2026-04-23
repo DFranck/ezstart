@@ -1,6 +1,9 @@
 /**
  * Core PayClient — 100% agnostic, zero @ezstart/* deps.
  * Uses `fetch()` directly. Requires `apiUrl` to be provided by the caller.
+ *
+ * The class is a thin orchestrator: each method delegates to a pure function
+ * in `./methods/<domain>.ts`. Shared HTTP helpers live in `./methods/http.ts`.
  */
 import type {
   PayClientConfig,
@@ -30,36 +33,80 @@ import type {
   ConnectDashboardLinkResponse,
   BillingPortalRequest,
   BillingPortalResponse,
-} from './types.js'
+} from './types/index.js'
+import {
+  buildHeaders,
+  fetchList,
+  fetchWithAuth,
+  resolveReturnUrl,
+  type PayClientInternal,
+} from './methods/http.js'
+import {
+  createDonation as createDonationImpl,
+  getDonations as getDonationsImpl,
+  getDonationStats as getDonationStatsImpl,
+} from './methods/donations.js'
+import {
+  createPurchase as createPurchaseImpl,
+  getPurchases as getPurchasesImpl,
+} from './methods/purchases.js'
+import {
+  cancelSubscription as cancelSubscriptionImpl,
+  changeSubscriptionPlan as changeSubscriptionPlanImpl,
+  createSubscription as createSubscriptionImpl,
+  getSubscriptions as getSubscriptionsImpl,
+  type GetSubscriptionsParams,
+} from './methods/subscriptions.js'
+import {
+  cleanupPayments as cleanupPaymentsImpl,
+  getMyPayments as getMyPaymentsImpl,
+  getPayment as getPaymentImpl,
+  getPayments as getPaymentsImpl,
+  refundPayment as refundPaymentImpl,
+} from './methods/payments.js'
+import {
+  createPromo as createPromoImpl,
+  deletePromo as deletePromoImpl,
+  listPromos as listPromosImpl,
+  updatePromo as updatePromoImpl,
+  validatePromo as validatePromoImpl,
+  type ListPromosParams,
+} from './methods/promos.js'
+import {
+  createPlan as createPlanImpl,
+  deletePlan as deletePlanImpl,
+  listPlans as listPlansImpl,
+  updatePlan as updatePlanImpl,
+  type ListPlansParams,
+} from './methods/plans.js'
+import {
+  connectOnboard as connectOnboardImpl,
+  disconnectAccount as disconnectAccountImpl,
+  getConnectDashboardLink as getConnectDashboardLinkImpl,
+  getConnectStatus as getConnectStatusImpl,
+} from './methods/connect.js'
+import {
+  createBillingPortalSession as createBillingPortalSessionImpl,
+  resolveApplicationByKey as resolveApplicationByKeyImpl,
+} from './methods/billing.js'
 
-export class PayClient {
-  private config: PayClientConfig
+export class PayClient implements PayClientInternal {
+  readonly config: PayClientConfig
 
   constructor(config: PayClientConfig) {
     this.config = config
   }
 
+  // ===== INTERNAL (exposed via PayClientInternal for method modules) =====
+
   /** Resolve return URL: explicit config > window.location origin > undefined */
-  private getReturnUrl(): string | undefined {
-    return (
-      this.config.returnUrl ??
-      (typeof window !== 'undefined'
-        ? `${window.location.protocol}//${window.location.host}`
-        : undefined)
-    )
+  getReturnUrl(): string | undefined {
+    return resolveReturnUrl(this.config)
   }
 
   /** Build headers with optional Authorization bearer token and API key */
-  private getHeaders(extra?: Record<string, string>): Record<string, string> {
-    const headers: Record<string, string> = { ...extra }
-    if (this.config.apiKey) {
-      headers['X-API-Key'] = this.config.apiKey
-    }
-    const token = this.config.getToken?.()
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
-    return headers
+  getHeaders(extra?: Record<string, string>): Record<string, string> {
+    return buildHeaders(this.config, extra)
   }
 
   /**
@@ -67,197 +114,62 @@ export class PayClient {
    * `onTokenRefresh` callback is configured, refresh the token and retry once.
    * If the refresh itself fails, invoke `onAuthFailure` (logout / redirect).
    */
-  private async fetchWithAuth(url: string, options: RequestInit): Promise<Response> {
-    let response = await fetch(url, options)
-
-    if (response.status === 401 && this.config.onTokenRefresh) {
-      try {
-        const newToken = await this.config.onTokenRefresh()
-        if (newToken) {
-          const retryHeaders = new Headers(options.headers)
-          retryHeaders.set('Authorization', `Bearer ${newToken}`)
-          response = await fetch(url, { ...options, headers: retryHeaders })
-        }
-      } catch {
-        this.config.onAuthFailure?.()
-        return response
-      }
-    }
-
-    // If still 401 after retry (or no refresh callback), signal auth failure
-    if (response.status === 401) {
-      this.config.onAuthFailure?.()
-    }
-
-    return response
+  fetchWithAuth(url: string, options: RequestInit): Promise<Response> {
+    return fetchWithAuth(this.config, url, options)
   }
 
   /**
    * Centralized list fetcher — normalizes API response { success, data, meta }
    * into { payments, total } format expected by hooks.
    */
-  private async fetchList(
+  fetchList(
     path: string,
     params?: Record<string, string | number | undefined>,
     options?: { signal?: AbortSignal }
   ): Promise<PaymentsListResponse> {
-    const searchParams = new URLSearchParams()
-    if (params) {
-      for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined && value !== '') searchParams.set(key, String(value))
-      }
-    }
-
-    const url = `${this.config.apiUrl}/${path}?${searchParams.toString()}`
-    const response = await this.fetchWithAuth(url, {
-      headers: this.getHeaders(),
-      signal: options?.signal,
-    })
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || `Failed to fetch ${path}`)
-    }
-
-    // Normalize: API returns { success, data, meta } → { payments, total }
-    const rawList = result.data || result.payments || []
-    const payments = rawList.map((p: Payment & { _id?: string }) => ({
-      ...p,
-      id: p.id || p._id,
-    }))
-
-    return { success: true, payments, total: result.meta?.total ?? payments.length }
+    return fetchList(this, path, params, options)
   }
 
   // ===== DONATIONS =====
 
-  async createDonation(data: CreateDonationRequest): Promise<PaymentResponse> {
-    const returnUrl = this.getReturnUrl()
-
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/donate`, {
-      method: 'POST',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ ...data, returnUrl }),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create donation')
-    }
-
-    // Unwrap standard { success, data } response
-    return result.data ?? result
+  createDonation(data: CreateDonationRequest): Promise<PaymentResponse> {
+    return createDonationImpl(this, data)
   }
 
-  async getDonations(params?: {
-    projectId?: string
-    limit?: number
-  }): Promise<PaymentsListResponse> {
-    return this.fetchList('donations', params)
+  getDonations(params?: { projectId?: string; limit?: number }): Promise<PaymentsListResponse> {
+    return getDonationsImpl(this, params)
   }
 
-  async getDonationStats(projectId?: string): Promise<StatsResponse> {
-    const searchParams = new URLSearchParams()
-    if (projectId) searchParams.set('projectId', projectId)
-
-    const response = await this.fetchWithAuth(
-      `${this.config.apiUrl}/donations/stats?${searchParams.toString()}`,
-      { headers: this.getHeaders() }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to fetch donation stats')
-    }
-
-    return result
+  getDonationStats(projectId?: string): Promise<StatsResponse> {
+    return getDonationStatsImpl(this, projectId)
   }
 
   // ===== PURCHASES =====
 
-  async createPurchase(data: CreatePurchaseRequest): Promise<PaymentResponse> {
-    const returnUrl = this.getReturnUrl()
-
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/purchase`, {
-      method: 'POST',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ ...data, returnUrl }),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create purchase')
-    }
-
-    // Unwrap standard { success, data } response
-    return result.data ?? result
+  createPurchase(data: CreatePurchaseRequest): Promise<PaymentResponse> {
+    return createPurchaseImpl(this, data)
   }
 
-  async getPurchases(params?: {
+  getPurchases(params?: {
     userId?: string
     limit?: number
     offset?: number
   }): Promise<PaymentsListResponse> {
-    return this.fetchList('purchases', params)
+    return getPurchasesImpl(this, params)
   }
 
   // ===== SUBSCRIPTIONS =====
 
-  async createSubscription(data: CreateSubscriptionRequest): Promise<PaymentResponse> {
-    const returnUrl = this.getReturnUrl()
-
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/subscribe`, {
-      method: 'POST',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ ...data, returnUrl }),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create subscription')
-    }
-
-    // Unwrap standard { success, data } response
-    return result.data ?? result
+  createSubscription(data: CreateSubscriptionRequest): Promise<PaymentResponse> {
+    return createSubscriptionImpl(this, data)
   }
 
-  async getSubscriptions(params?: {
-    userId?: string
-    projectId?: string
-    limit?: number
-    offset?: number
-    liveMode?: string
-    /**
-     * RBAC scope applied by the API:
-     * - `mine` — only the caller's own subscriptions (default)
-     * - `myApps` — caller's own + subscriptions on Applications the caller owns
-     * - `all` — all subscriptions (superadmin only; 403 otherwise)
-     */
-    scope?: 'mine' | 'myApps' | 'all'
-  }): Promise<PaymentsListResponse> {
-    return this.fetchList('subscriptions', params)
+  getSubscriptions(params?: GetSubscriptionsParams): Promise<PaymentsListResponse> {
+    return getSubscriptionsImpl(this, params)
   }
 
-  async cancelSubscription(subscriptionId: string): Promise<{ success: boolean }> {
-    const response = await this.fetchWithAuth(
-      `${this.config.apiUrl}/subscriptions/${subscriptionId}/cancel`,
-      {
-        method: 'POST',
-        headers: this.getHeaders(),
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to cancel subscription')
-    }
-
-    return result
+  cancelSubscription(subscriptionId: string): Promise<{ success: boolean }> {
+    return cancelSubscriptionImpl(this, subscriptionId)
   }
 
   /**
@@ -272,57 +184,28 @@ export class PayClient {
    *   prorationBehavior: 'create_prorations',
    * })
    */
-  async changeSubscriptionPlan(
+  changeSubscriptionPlan(
     subscriptionId: string,
     data: ChangePlanRequest
   ): Promise<ChangePlanResponse> {
-    const response = await this.fetchWithAuth(
-      `${this.config.apiUrl}/subscriptions/${subscriptionId}/change-plan`,
-      {
-        method: 'POST',
-        headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(data),
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to change subscription plan')
-    }
-
-    return result.data ?? result
+    return changeSubscriptionPlanImpl(this, subscriptionId, data)
   }
 
   // ===== REFUNDS =====
 
-  async refundPayment(paymentId: string): Promise<{ success: boolean }> {
-    const response = await this.fetchWithAuth(
-      `${this.config.apiUrl}/payments/${paymentId}/refund`,
-      {
-        method: 'POST',
-        headers: this.getHeaders(),
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to refund payment')
-    }
-
-    return result
+  refundPayment(paymentId: string): Promise<{ success: boolean }> {
+    return refundPaymentImpl(this, paymentId)
   }
 
   // ===== MY PAYMENTS =====
 
-  async getMyPayments(params?: {
+  getMyPayments(params?: {
     type?: string
     status?: string
     limit?: number
     offset?: number
   }): Promise<PaymentsListResponse> {
-    return this.fetchList('payments/me', params)
+    return getMyPaymentsImpl(this, params)
   }
 
   // ===== GENERAL =====
@@ -350,309 +233,76 @@ export class PayClient {
    * // Superadmin cross-app view (bypass auto-injection)
    * await client.getPayments({ scope: 'all', applicationId: '' })
    */
-  async getPayments(params?: GetPaymentsParams): Promise<PaymentsListResponse> {
-    const merged: Record<string, string | number | undefined> = {
-      userId: params?.userId,
-      projectId: params?.projectId,
-      applicationId: params?.applicationId,
-      limit: params?.limit,
-      offset: params?.offset,
-      type: params?.type,
-      status: params?.status,
-      liveMode: params?.liveMode,
-      dateFrom: params?.dateFrom,
-      dateTo: params?.dateTo,
-      scope: params?.scope,
-    }
-    if (merged.applicationId === undefined && this.config.applicationId) {
-      merged.applicationId = this.config.applicationId
-    }
-    // Empty string → caller explicitly opted out of scoping; drop before sending.
-    if (merged.applicationId === '') {
-      merged.applicationId = undefined
-    }
-    return this.fetchList('payments', merged, { signal: params?.signal })
+  getPayments(params?: GetPaymentsParams): Promise<PaymentsListResponse> {
+    return getPaymentsImpl(this, params)
   }
 
-  async getPayment(paymentId: string): Promise<Payment> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/payments/${paymentId}`, {
-      headers: this.getHeaders(),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to fetch payment')
-    }
-
-    return result.payment
+  getPayment(paymentId: string): Promise<Payment> {
+    return getPaymentImpl(this, paymentId)
   }
 
   // ===== PROMOS =====
 
-  async createPromo(data: CreatePromoRequest): Promise<PromoResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/promos`, {
-      method: 'POST',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(data),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create promo')
-    }
-
-    return result.data ?? result
+  createPromo(data: CreatePromoRequest): Promise<PromoResponse> {
+    return createPromoImpl(this, data)
   }
 
-  async listPromos(params?: {
-    /**
-     * @deprecated Use `applicationId` instead.
-     */
-    appName?: string
-    applicationId?: string
-    active?: boolean
-    limit?: number
-    offset?: number
-  }): Promise<PromosListResponse> {
-    const searchParams = new URLSearchParams()
-    if (params) {
-      for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined && value !== '') searchParams.set(key, String(value))
-      }
-    }
-
-    const response = await this.fetchWithAuth(
-      `${this.config.apiUrl}/promos?${searchParams.toString()}`,
-      { headers: this.getHeaders() }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to list promos')
-    }
-
-    // Map MongoDB _id to id for SDK type compatibility
-    const data = result.data ?? result.promos ?? []
-    const promos = data.map((p: Record<string, unknown>) => ({
-      ...p,
-      id: p.id || p._id,
-    }))
-
-    return { ...result, data: promos, promos }
+  listPromos(params?: ListPromosParams): Promise<PromosListResponse> {
+    return listPromosImpl(this, params)
   }
 
-  async validatePromo(code: string, appName: string): Promise<PromoValidationResponse> {
-    const searchParams = new URLSearchParams({ appName })
-
-    const response = await fetch(
-      `${this.config.apiUrl}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`,
-      { headers: this.getHeaders() }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to validate promo')
-    }
-
-    return result
+  validatePromo(code: string, appName: string): Promise<PromoValidationResponse> {
+    return validatePromoImpl(this, code, appName)
   }
 
-  async updatePromo(promoId: string, data: UpdatePromoRequest): Promise<PromoResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/promos/${promoId}`, {
-      method: 'PATCH',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(data),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to update promo')
-    }
-
-    return result.data ?? result
+  updatePromo(promoId: string, data: UpdatePromoRequest): Promise<PromoResponse> {
+    return updatePromoImpl(this, promoId, data)
   }
 
-  async deletePromo(promoId: string): Promise<{ success: boolean }> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/promos/${promoId}`, {
-      method: 'DELETE',
-      headers: this.getHeaders(),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to delete promo')
-    }
-
-    return result
+  deletePromo(promoId: string): Promise<{ success: boolean }> {
+    return deletePromoImpl(this, promoId)
   }
 
   // ===== CLEANUP =====
 
-  async cleanupPayments(appName?: string): Promise<{ deletedCount: number }> {
-    const params = appName ? `?appName=${appName}` : ''
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/payments/cleanup${params}`, {
-      method: 'DELETE',
-      headers: this.getHeaders(),
-    })
-    const result = await response.json()
-    if (!response.ok) throw new Error(result.error || 'Failed to cleanup')
-    return result.data ?? result
+  cleanupPayments(appName?: string): Promise<{ deletedCount: number }> {
+    return cleanupPaymentsImpl(this, appName)
   }
 
   // ===== PLANS =====
 
-  async createPlan(data: CreatePlanRequest): Promise<PlanResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/plans`, {
-      method: 'POST',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(data),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create plan')
-    }
-
-    return result.data ?? result
+  createPlan(data: CreatePlanRequest): Promise<PlanResponse> {
+    return createPlanImpl(this, data)
   }
 
-  async listPlans(params?: {
-    /**
-     * @deprecated Use `applicationId` instead.
-     */
-    appName?: string
-    applicationId?: string
-    active?: boolean
-    limit?: number
-    offset?: number
-  }): Promise<PlansListResponse> {
-    const searchParams = new URLSearchParams()
-    if (params) {
-      for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined && value !== '') searchParams.set(key, String(value))
-      }
-    }
-
-    // Public endpoint — no auth needed, but include token if available
-    const url = `${this.config.apiUrl}/plans?${searchParams.toString()}`
-    const response = await fetch(url, { headers: this.getHeaders() })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to list plans')
-    }
-
-    // Map MongoDB _id to id for SDK type compatibility
-    const data = result.data ?? result.plans ?? []
-    const plans = data.map((p: Record<string, unknown>) => ({
-      ...p,
-      id: p.id || p._id,
-    }))
-
-    return { ...result, data: plans }
+  listPlans(params?: ListPlansParams): Promise<PlansListResponse> {
+    return listPlansImpl(this, params)
   }
 
-  async updatePlan(planId: string, data: UpdatePlanRequest): Promise<PlanResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/plans/${planId}`, {
-      method: 'PATCH',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(data),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to update plan')
-    }
-
-    return result.data ?? result
+  updatePlan(planId: string, data: UpdatePlanRequest): Promise<PlanResponse> {
+    return updatePlanImpl(this, planId, data)
   }
 
-  async deletePlan(planId: string): Promise<{ success: boolean }> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/plans/${planId}`, {
-      method: 'DELETE',
-      headers: this.getHeaders(),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to delete plan')
-    }
-
-    return result
+  deletePlan(planId: string): Promise<{ success: boolean }> {
+    return deletePlanImpl(this, planId)
   }
 
   // ===== STRIPE CONNECT =====
 
-  async getConnectStatus(params?: { applicationId?: string }): Promise<ConnectStatusResponse> {
-    const query = params?.applicationId
-      ? `?applicationId=${encodeURIComponent(params.applicationId)}`
-      : ''
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/status${query}`, {
-      headers: this.getHeaders(),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to fetch connect status')
-    }
-
-    return result.data ?? result
+  getConnectStatus(params?: { applicationId?: string }): Promise<ConnectStatusResponse> {
+    return getConnectStatusImpl(this, params)
   }
 
-  async connectOnboard(data: ConnectOnboardRequest): Promise<ConnectOnboardResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/onboard`, {
-      method: 'POST',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(data),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to start onboarding')
-    }
-
-    return result.data ?? result
+  connectOnboard(data: ConnectOnboardRequest): Promise<ConnectOnboardResponse> {
+    return connectOnboardImpl(this, data)
   }
 
-  async getConnectDashboardLink(): Promise<ConnectDashboardLinkResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/dashboard-link`, {
-      headers: this.getHeaders(),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to get dashboard link')
-    }
-
-    return result.data ?? result
+  getConnectDashboardLink(): Promise<ConnectDashboardLinkResponse> {
+    return getConnectDashboardLinkImpl(this)
   }
 
-  async disconnectAccount(): Promise<{ success: boolean }> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/connect/disconnect`, {
-      method: 'DELETE',
-      headers: this.getHeaders(),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to disconnect account')
-    }
-
-    return result
+  disconnectAccount(): Promise<{ success: boolean }> {
+    return disconnectAccountImpl(this)
   }
 
   // ===== APPLICATION CONFIG =====
@@ -673,27 +323,8 @@ export class PayClient {
    * console.log(cfg.applicationId, cfg.appSlug)
    * ```
    */
-  async resolveApplicationByKey(publishableKey: string): Promise<ApplicationConfigResponse> {
-    if (!publishableKey) {
-      throw new Error('publishableKey is required to resolve application config')
-    }
-
-    const url = `${this.config.apiUrl}/keys/config?key=${encodeURIComponent(publishableKey)}`
-    const response = await fetch(url, { headers: { Accept: 'application/json' } })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result?.error || `Failed to resolve application (${response.status})`)
-    }
-
-    // Endpoint always wraps as `{ success: true, data: {...} }` — unwrap.
-    const payload: ApplicationConfigResponse = result?.data ?? result
-    if (!payload?.applicationId || !payload?.appSlug) {
-      throw new Error('Invalid application config response: missing applicationId or appSlug')
-    }
-
-    return payload
+  resolveApplicationByKey(publishableKey: string): Promise<ApplicationConfigResponse> {
+    return resolveApplicationByKeyImpl(this, publishableKey)
   }
 
   // ===== BILLING PORTAL (Stripe Customer Portal) =====
@@ -711,20 +342,8 @@ export class PayClient {
    * window.location.href = url
    * ```
    */
-  async createBillingPortalSession(params?: BillingPortalRequest): Promise<BillingPortalResponse> {
-    const response = await this.fetchWithAuth(`${this.config.apiUrl}/billing/portal`, {
-      method: 'POST',
-      headers: this.getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(params ?? {}),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create billing portal session')
-    }
-
-    return result.data ?? result
+  createBillingPortalSession(params?: BillingPortalRequest): Promise<BillingPortalResponse> {
+    return createBillingPortalSessionImpl(this, params)
   }
 }
 

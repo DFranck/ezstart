@@ -1,13 +1,9 @@
-// Backward-compat barrel — the type definitions now live in `./types/<domain>.ts`.
-// New code should import from the domain-specific files (or `./types/index.js`)
-// directly; this file is kept to avoid breaking changes for consumers that
-// imported from `./types.js` pre-split.
+// Barrel re-export for all pay-sdk core types.
+// Grouped by domain: common (config), payments, promos, plans, connect, billing, api-keys.
+
+export type { PayClientConfig, LegacyPayClientConfig, ApplicationConfigResponse } from './common.js'
+
 export type {
-  // common
-  PayClientConfig,
-  LegacyPayClientConfig,
-  ApplicationConfigResponse,
-  // payments
   PaymentType,
   PaymentStatus,
   PaymentProvider,
@@ -25,7 +21,9 @@ export type {
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
-  // promos
+} from './payments.js'
+
+export type {
   PromoDiscountType,
   PromoDuration,
   Promo,
@@ -34,14 +32,18 @@ export type {
   PromoValidationResponse,
   PromoResponse,
   PromosListResponse,
-  // plans
+} from './promos.js'
+
+export type {
   PlanMetadata,
   Plan,
   CreatePlanRequest,
   UpdatePlanRequest,
   PlanResponse,
   PlansListResponse,
-  // connect
+} from './plans.js'
+
+export type {
   ConnectAccountType,
   ConnectAccountStatus,
   ConnectedAccount,
@@ -50,12 +52,13 @@ export type {
   ConnectConvertRequest,
   ConnectOnboardResponse,
   ConnectDashboardLinkResponse,
-  // billing portal
-  BillingPortalResponse,
-  BillingPortalRequest,
-  // api keys
+} from './connect.js'
+
+export type { BillingPortalResponse, BillingPortalRequest } from './billing.js'
+
+export type {
   PayApiKeyItem,
   CreatePayApiKeyRequest,
   CreatePayApiKeyResponse,
   PayApiKeyUsageResponse,
-} from './types/index.js'
+} from './api-keys.js'
