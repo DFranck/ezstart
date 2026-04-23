@@ -140,7 +140,22 @@ sendMessageRouter.post(
         if (!isAuthorized) {
           return sendError(res, `Provider "${providerId}" is not available for this app`, 403)
         }
-        aiResponse = await UnifiedChat.send(message, providerId, sendOptions)
+        // Lookup AppProvider config for runtime model override (per-request, non-mutating).
+        const allAppProviders = await getAppProviders(appName)
+        const explicitProvider = allAppProviders.find(p => p.providerId === providerId)
+        const explicitOptions = {
+          ...sendOptions,
+          ...(explicitProvider?.config?.model && { model: explicitProvider.config.model }),
+          ...(explicitProvider?.config?.temperature !== undefined &&
+            promptDoc?.config?.temperature === undefined && {
+              temperature: explicitProvider.config.temperature,
+            }),
+          ...(explicitProvider?.config?.maxTokens !== undefined &&
+            promptDoc?.config?.maxTokens === undefined && {
+              maxTokens: explicitProvider.config.maxTokens,
+            }),
+        }
+        aiResponse = await UnifiedChat.send(message, providerId, explicitOptions)
         usedProvider = providerId
       } else {
         // Cascade through app's enabled providers in priority order
@@ -159,6 +174,9 @@ sendMessageRouter.post(
           try {
             const providerOptions = {
               ...sendOptions,
+              // Per-request model override from AppProvider.config (runtime,
+              // non-mutating — concurrent requests for other apps stay intact).
+              ...(provider.config?.model && { model: provider.config.model }),
               // Provider-level config overrides (prompt config takes precedence if set)
               ...(provider.config?.temperature !== undefined &&
                 promptDoc?.config?.temperature === undefined && {

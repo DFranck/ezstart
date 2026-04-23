@@ -4,7 +4,12 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Content, Part } from '@google/generative-ai'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse } from './base.js'
+import {
+  assertValidModelName,
+  type IAIProvider,
+  type ProviderSendOptions,
+  type ProviderResponse,
+} from './base.js'
 
 export interface GeminiProviderConfig {
   apiKey?: string
@@ -28,6 +33,15 @@ export class GeminiProvider implements IAIProvider {
     }
   }
 
+  getModel(): string {
+    return this.model
+  }
+
+  setModel(newModel: string): void {
+    assertValidModelName(newModel)
+    this.model = newModel
+  }
+
   /**
    * Build Gemini content parts from message text and optional images
    */
@@ -49,8 +63,12 @@ export class GeminiProvider implements IAIProvider {
   }
 
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {
+    // Per-request model override — does NOT mutate `this.model`.
+    if (options.model !== undefined) assertValidModelName(options.model)
+    const requestModel = options.model ?? this.model
+
     const model = this.genAI.getGenerativeModel({
-      model: this.model,
+      model: requestModel,
       systemInstruction: options.systemPrompt,
       generationConfig: {
         temperature: options.temperature ?? 0.7,

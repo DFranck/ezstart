@@ -26,6 +26,7 @@ export type {
   ProviderSendOptions,
   ProviderResponse,
 } from './server/providers/base.js'
+export { assertValidModelName } from './server/providers/base.js'
 
 // Core
 export { UnifiedChat } from './server/core/UnifiedChat.js'

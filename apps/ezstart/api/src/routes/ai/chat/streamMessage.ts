@@ -117,16 +117,24 @@ router.post('/', async (req, res) => {
     // Resolve provider
     let usedProvider = 'unknown'
     let resolvedProviderId = providerId
+    // AppProvider config used to apply runtime overrides (model / temperature /
+    // maxTokens) for the picked provider, without mutating the registry.
+    let resolvedAppProviderConfig:
+      | { model?: string; temperature?: number; maxTokens?: number }
+      | undefined
+
+    const allAppProviders = await getAppProviders(appName)
 
     if (!resolvedProviderId) {
-      const allAppProviders = await getAppProviders(appName)
       const appProviders = []
       for (const provider of allAppProviders) {
         const isAuthorized = await isAppAuthorizedForProvider(appName, provider.providerId)
         if (isAuthorized) appProviders.push(provider)
       }
       if (appProviders.length > 0) {
-        resolvedProviderId = appProviders[0]!.providerId
+        const picked = appProviders[0]!
+        resolvedProviderId = picked.providerId
+        resolvedAppProviderConfig = picked.config
       } else {
         res.write(`data: ${JSON.stringify({ error: 'No providers available for this app' })}\n\n`)
         res.write('data: [DONE]\n\n')
@@ -143,6 +151,9 @@ router.post('/', async (req, res) => {
         res.end()
         return
       }
+      resolvedAppProviderConfig = allAppProviders.find(
+        p => p.providerId === resolvedProviderId
+      )?.config
     }
 
     usedProvider = resolvedProviderId
@@ -159,12 +170,19 @@ router.post('/', async (req, res) => {
         role: msg.role as 'user' | 'assistant' | 'system',
         content: msg.content,
       })),
-      ...(promptDoc?.config?.temperature !== undefined && {
-        temperature: promptDoc.config.temperature,
-      }),
-      ...(promptDoc?.config?.maxTokens !== undefined && {
-        maxTokens: promptDoc.config.maxTokens,
-      }),
+      // Per-request model override from AppProvider.config (runtime, non-mutating).
+      ...(resolvedAppProviderConfig?.model && { model: resolvedAppProviderConfig.model }),
+      // Provider-level temperature/maxTokens — only when prompt doc didn't set one.
+      ...(promptDoc?.config?.temperature !== undefined
+        ? { temperature: promptDoc.config.temperature }
+        : resolvedAppProviderConfig?.temperature !== undefined
+          ? { temperature: resolvedAppProviderConfig.temperature }
+          : {}),
+      ...(promptDoc?.config?.maxTokens !== undefined
+        ? { maxTokens: promptDoc.config.maxTokens }
+        : resolvedAppProviderConfig?.maxTokens !== undefined
+          ? { maxTokens: resolvedAppProviderConfig.maxTokens }
+          : {}),
       // Pass images for vision support
       ...(images && images.length > 0 && { images }),
       streaming: {

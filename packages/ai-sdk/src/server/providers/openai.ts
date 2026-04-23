@@ -3,7 +3,12 @@
  */
 
 import OpenAI from 'openai'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse } from './base.js'
+import {
+  assertValidModelName,
+  type IAIProvider,
+  type ProviderSendOptions,
+  type ProviderResponse,
+} from './base.js'
 
 export interface OpenAIProviderConfig {
   apiKey?: string
@@ -27,7 +32,19 @@ export class OpenAIProvider implements IAIProvider {
     }
   }
 
+  getModel(): string {
+    return this.model
+  }
+
+  setModel(newModel: string): void {
+    assertValidModelName(newModel)
+    this.model = newModel
+  }
+
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {
+    // Per-request model override — does NOT mutate `this.model`.
+    const requestModel = options.model ?? this.model
+    if (options.model !== undefined) assertValidModelName(options.model)
     // Build messages array
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = []
 
@@ -70,12 +87,12 @@ export class OpenAIProvider implements IAIProvider {
 
     // Streaming mode
     if (options.streaming?.enabled) {
-      return this.handleStreaming(messages, options)
+      return this.handleStreaming(messages, options, requestModel)
     }
 
     // Regular mode (non-streaming)
     const response = await this.client.chat.completions.create({
-      model: this.model,
+      model: requestModel,
       messages,
       temperature: options.temperature ?? 0.7,
       max_tokens: options.maxTokens,
@@ -121,10 +138,11 @@ export class OpenAIProvider implements IAIProvider {
 
   private async handleStreaming(
     messages: OpenAI.Chat.ChatCompletionMessageParam[],
-    options: ProviderSendOptions
+    options: ProviderSendOptions,
+    model: string
   ): Promise<ProviderResponse> {
     const stream = await this.client.chat.completions.create({
-      model: this.model,
+      model,
       messages,
       temperature: options.temperature ?? 0.7,
       max_tokens: options.maxTokens,

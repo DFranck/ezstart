@@ -18,7 +18,12 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-import type { IAIProvider, ProviderSendOptions, ProviderResponse } from './base.js'
+import {
+  assertValidModelName,
+  type IAIProvider,
+  type ProviderSendOptions,
+  type ProviderResponse,
+} from './base.js'
 
 export interface AnthropicProviderConfig {
   apiKey?: string
@@ -47,7 +52,20 @@ export class AnthropicProvider implements IAIProvider {
     }
   }
 
+  getModel(): string {
+    return this.model
+  }
+
+  setModel(newModel: string): void {
+    assertValidModelName(newModel)
+    this.model = newModel
+  }
+
   async sendMessage(message: string, options: ProviderSendOptions = {}): Promise<ProviderResponse> {
+    // Per-request model override — does NOT mutate `this.model` so concurrent
+    // calls and parallel `setModel()` updates stay isolated.
+    const requestModel = options.model ?? this.model
+    if (options.model !== undefined) assertValidModelName(options.model)
     // Build messages array (Anthropic uses user/assistant roles only, system is separate)
     const messages: Anthropic.MessageParam[] = []
 
@@ -85,12 +103,12 @@ export class AnthropicProvider implements IAIProvider {
 
     // Streaming mode
     if (options.streaming?.enabled) {
-      return this.handleStreaming(messages, options)
+      return this.handleStreaming(messages, options, requestModel)
     }
 
     // Regular mode (non-streaming)
     const response = await this.client.messages.create({
-      model: this.model,
+      model: requestModel,
       messages,
       system: options.systemPrompt || undefined,
       temperature: options.temperature ?? DEFAULT_TEMPERATURE,
@@ -134,10 +152,11 @@ export class AnthropicProvider implements IAIProvider {
 
   private async handleStreaming(
     messages: Anthropic.MessageParam[],
-    options: ProviderSendOptions
+    options: ProviderSendOptions,
+    model: string
   ): Promise<ProviderResponse> {
     const stream = this.client.messages.stream({
-      model: this.model,
+      model,
       messages,
       system: options.systemPrompt || undefined,
       temperature: options.temperature ?? DEFAULT_TEMPERATURE,
