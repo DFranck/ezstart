@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * env:push:railway — push merged (root + per-app api) env to Railway service.
+ * env:push:railway — push merged per-app env to Railway service.
  *
  * Usage:
  *   pnpm env:push:railway <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run]
@@ -10,13 +10,18 @@
  *   pnpm env:push:railway ezpay production
  *   pnpm env:push:railway ezpay staging --override STRIPE_WEBHOOK_SECRET=whsec_xxx --dry-run
  *
- * Cascade (Next.js-style) — target env determines merge order:
- *   local       → .env.local
- *   staging     → .env.local  ←  .env.staging
- *   production  → .env.local  ←  .env.staging  ←  .env.production
+ * Cascade (PER-APP ONLY — no root layer, lowest → highest precedence):
+ *   local       → apps/<app>/api/.env.local
+ *   staging     → apps/<app>/api/.env.local  ←  apps/<app>/api/.env.staging
+ *   production  → apps/<app>/api/.env.local  ←  apps/<app>/api/.env.staging  ←  apps/<app>/api/.env.production
  *
- * Each layer reads both root and per-app file. Later layers override earlier ones.
- * Use --from <env> to force a single source (disables cascade).
+ * Later layers override earlier ones. The production cascade includes `.env.staging`
+ * so deployed (non-dev) defaults — cluster URLs, cookie domains, `NODE_ENV=production`
+ * — cascade once and `.env.production` only holds the values that DIFFER from staging
+ * (prod MongoDB cluster, `sk_live_*` Stripe keys, prod webhook secrets, etc.).
+ *
+ * Missing layers are silently skipped. Use `--from <env>` to bypass the cascade and
+ * force a single source file.
  *
  * Production blocklist: TEST_*, DEBUG_*, _LOCAL_*, DEV_* are filtered out.
  * Override with --include-blocked KEY1,KEY2.
@@ -36,6 +41,8 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import * as dotenv from 'dotenv'
+
+type TargetEnv = 'local' | 'staging' | 'production'
 
 function findMonorepoRoot(start: string = process.cwd()): string {
   let dir = path.resolve(start)
@@ -65,8 +72,8 @@ function checkRailwayCli(): void {
   }
 }
 
-function parseEnvFile(absPath: string): Record<string, string> {
-  if (!existsSync(absPath)) return {}
+function parseEnvFile(absPath: string): Record<string, string> | null {
+  if (!existsSync(absPath)) return null
   return dotenv.parse(readFileSync(absPath))
 }
 
@@ -81,7 +88,7 @@ function mask(value: string | undefined): string {
 }
 
 interface ParsedFlags {
-  from?: string
+  from?: TargetEnv
   overrides: Record<string, string>
   includeBlocked: Set<string>
   dryRun: boolean
@@ -93,20 +100,92 @@ function isBlockedInProduction(key: string): boolean {
   return PRODUCTION_BLOCKLIST.some(re => re.test(key))
 }
 
-function cascadeOrder(env: string): string[] {
-  if (env === 'production') return ['local', 'staging', 'production']
+/**
+ * Return the cascade of env layers for a target env, from lowest to highest precedence.
+ * local      → ['local']
+ * staging    → ['local', 'staging']
+ * production → ['local', 'staging', 'production']
+ *
+ * The production cascade includes staging so non-dev defaults (cluster URL,
+ * NODE_ENV=production, cookie domains) flow through once and `.env.production`
+ * only holds values that DIFFER from staging (prod DB cluster, live Stripe
+ * secrets, prod webhook secrets).
+ */
+export function cascadeLayers(env: TargetEnv): TargetEnv[] {
+  if (env === 'local') return ['local']
   if (env === 'staging') return ['local', 'staging']
-  return ['local']
+  return ['local', 'staging', 'production']
 }
 
-function parseFlags(flags: string[]): ParsedFlags {
+export interface LoadMergedEnvInput {
+  /** Absolute path to the monorepo root. */
+  root: string
+  /** App slug (e.g. 'ezauth'). */
+  app: string
+  /** Target environment. Drives the cascade. */
+  targetEnv: TargetEnv
+  /**
+   * If provided, bypass the cascade and load a SINGLE env file level.
+   * Typical use: `--from local` to push local values verbatim to staging.
+   */
+  fromOverride?: TargetEnv
+  /** --override KEY=VALUE pairs applied LAST. */
+  overrides?: Record<string, string>
+  /**
+   * Function that reads an env file and returns its keys, or `null` if the
+   * file does not exist. Defaults to the real filesystem reader. Swappable
+   * for tests (to avoid touching disk).
+   */
+  readEnv?: (absPath: string) => Record<string, string> | null
+}
+
+export interface LoadMergedEnvResult {
+  merged: Record<string, string>
+  sources: Array<{ level: TargetEnv; path: string; exists: boolean }>
+}
+
+/**
+ * Merge per-app env files following the cascade.
+ *
+ * Precedence (lowest → highest):
+ *   app .env.local < app .env.<env> < overrides
+ *
+ * When `fromOverride` is set, ONLY that layer is loaded, cascade is bypassed.
+ */
+export function loadMergedEnv(input: LoadMergedEnvInput): LoadMergedEnvResult {
+  const { root, app, targetEnv, fromOverride, overrides = {}, readEnv = parseEnvFile } = input
+
+  const layers: TargetEnv[] = fromOverride ? [fromOverride] : cascadeLayers(targetEnv)
+
+  const merged: Record<string, string> = {}
+  const sources: LoadMergedEnvResult['sources'] = []
+
+  for (const level of layers) {
+    const file = `.env.${level}`
+    const absPath = path.join(root, 'apps', app, 'api', file)
+    const parsed = readEnv(absPath)
+    sources.push({ level, path: absPath, exists: parsed !== null })
+    if (!parsed) continue
+    for (const [k, v] of Object.entries(parsed)) merged[k] = v
+  }
+
+  // --override flag (highest precedence, applied last)
+  for (const [k, v] of Object.entries(overrides)) merged[k] = v
+
+  return { merged, sources }
+}
+
+export function parseFlags(flags: string[]): ParsedFlags {
   const result: ParsedFlags = { overrides: {}, includeBlocked: new Set(), dryRun: false }
   for (let i = 0; i < flags.length; i++) {
     const flag = flags[i]
     if (flag === '--from') {
       const value = flags[++i]
       if (!value) fail('--from requires a value (e.g. --from local)')
-      result.from = value
+      if (!['local', 'staging', 'production'].includes(value)) {
+        fail(`Invalid --from "${value}" — must be one of: local | staging | production`)
+      }
+      result.from = value as TargetEnv
     } else if (flag === '--override') {
       const value = flags[++i]
       if (!value) fail('--override requires a value (e.g. --override KEY=VAL,KEY2=VAL2)')
@@ -138,109 +217,155 @@ function parseFlags(flags: string[]): ParsedFlags {
   return result
 }
 
-// ── Args ────────────────────────────────────────────────────
-const [, , app, env, ...rest] = process.argv
-if (!app || !env) {
-  fail(
-    'Usage: pnpm env:push:railway <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run]\n' +
-      '  Example: pnpm env:push:railway ezauth staging\n' +
-      '  Example: pnpm env:push:railway ezpay staging --from local --override DEPLOY_ENV=staging'
-  )
-}
-if (!['local', 'staging', 'production'].includes(env)) {
-  fail(`Invalid env "${env}" — must be one of: local | staging | production`)
-}
-
-const flags = parseFlags(rest)
-
-const ROOT = findMonorepoRoot()
-const layers = flags.from ? [flags.from] : cascadeOrder(env)
-for (const layer of layers) {
-  if (!['local', 'staging', 'production'].includes(layer)) {
-    fail(`Invalid env layer "${layer}" — must be one of: local | staging | production`)
+// ── CLI entry ───────────────────────────────────────────────
+// Only execute the CLI body when run directly (not when imported by tests).
+const isDirectRun = (() => {
+  try {
+    const entry = process.argv[1] ? path.resolve(process.argv[1]) : ''
+    const self = path.resolve(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'))
+    return entry === self
+  } catch {
+    return true
   }
-}
+})()
 
-console.log(`🚂 env:push:railway — ${app} → ${env}${flags.dryRun ? ' (dry-run)' : ''}`)
-if (flags.from) {
-  console.log(`   source:  .env.${flags.from} (via --from, cascade disabled)`)
-} else {
-  console.log(`   cascade: ${layers.map(l => `.env.${l}`).join(' ← ')}`)
-}
-if (Object.keys(flags.overrides).length > 0) {
-  console.log(`   override: ${Object.keys(flags.overrides).join(', ')}`)
-}
-console.log('')
-
-if (!flags.dryRun) checkRailwayCli()
-
-// ── Merge cascade: each layer adds root + per-app, later layers override ──
-const merged: Record<string, string> = {}
-for (const layer of layers) {
-  const envFile = `.env.${layer}`
-  const rootEnvPath = path.join(ROOT, envFile)
-  const appEnvPath = path.join(ROOT, 'apps', app, 'api', envFile)
-  const rootVars = parseEnvFile(rootEnvPath)
-  const appVars = parseEnvFile(appEnvPath)
-  const rootCount = Object.keys(rootVars).length
-  const appCount = Object.keys(appVars).length
-  if (rootCount === 0 && appCount === 0) {
-    console.log(`   (layer ${layer}: no vars — skipped)`)
-    continue
-  }
-  console.log(`   layer ${layer}: +${rootCount} root, +${appCount} per-app`)
-  for (const [k, v] of Object.entries(rootVars)) merged[k] = v
-  for (const [k, v] of Object.entries(appVars)) merged[k] = v
-}
-for (const [k, v] of Object.entries(flags.overrides)) merged[k] = v
-
-// Production blocklist — filter TEST_*, DEBUG_*, _LOCAL_*, DEV_* unless --include-blocked.
-if (env === 'production') {
-  const blocked: string[] = []
-  for (const key of Object.keys(merged)) {
-    if (isBlockedInProduction(key) && !flags.includeBlocked.has(key)) {
-      delete merged[key]
-      blocked.push(key)
-    }
-  }
-  if (blocked.length > 0) {
-    console.log(
-      `\n⚠️  Skipped ${blocked.length} vars (production blocklist): ${blocked.join(', ')}\n` +
-        `   Override with: --include-blocked ${blocked.join(',')}`
+if (isDirectRun) {
+  const [, , app, env, ...rest] = process.argv
+  if (!app || !env) {
+    fail(
+      'Usage: pnpm env:push:railway <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run]\n' +
+        '  Example: pnpm env:push:railway ezauth staging\n' +
+        '  Example: pnpm env:push:railway ezpay staging --from local --override DEPLOY_ENV=staging'
     )
   }
+  if (!['local', 'staging', 'production'].includes(env)) {
+    fail(`Invalid env "${env}" — must be one of: local | staging | production`)
+  }
+
+  const flags = parseFlags(rest)
+
+  const ROOT = findMonorepoRoot()
+  const targetEnv = env as TargetEnv
+
+  const { merged, sources } = loadMergedEnv({
+    root: ROOT,
+    app,
+    targetEnv,
+    fromOverride: flags.from,
+    overrides: flags.overrides,
+  })
+
+  console.info(`🚂 env:push:railway — ${app} → ${env}${flags.dryRun ? ' (dry-run)' : ''}`)
+  if (flags.from) {
+    console.info(`   source:  SINGLE layer .env.${flags.from} (via --from, cascade bypassed)`)
+  } else {
+    const levels = cascadeLayers(targetEnv).join(' → ')
+    console.info(`   cascade: ${levels}`)
+  }
+  for (const s of sources) {
+    const status = s.exists ? '✓' : '·'
+    console.info(`   ${status} [${s.level}] ${s.path}`)
+  }
+  if (Object.keys(flags.overrides).length > 0) {
+    console.info(`   override: ${Object.keys(flags.overrides).join(', ')}`)
+  }
+  console.info('')
+
+  // At least one layer must exist
+  const anyExists = sources.some(s => s.exists)
+  if (!anyExists) {
+    fail(
+      `No env files found for ${app} targeting ${env}. Checked:\n  ${sources.map(s => s.path).join('\n  ')}`
+    )
+  }
+
+  if (!flags.dryRun) checkRailwayCli()
+
+  // Production blocklist — filter TEST_*, DEBUG_*, _LOCAL_*, DEV_* unless --include-blocked.
+  if (env === 'production') {
+    const blocked: string[] = []
+    for (const key of Object.keys(merged)) {
+      if (isBlockedInProduction(key) && !flags.includeBlocked.has(key)) {
+        delete merged[key]
+        blocked.push(key)
+      }
+    }
+    if (blocked.length > 0) {
+      console.info(
+        `\n⚠️  Skipped ${blocked.length} vars (production blocklist): ${blocked.join(', ')}\n` +
+          `   Override with: --include-blocked ${blocked.join(',')}`
+      )
+    }
+  }
+
+  // Resolve templating ({app})
+  for (const [k, v] of Object.entries(merged)) {
+    if (v.includes('{app}')) merged[k] = resolveTemplating(v, app)
+  }
+
+  if (Object.keys(merged).length === 0) {
+    fail(`No vars to push — check that apps/${app}/api/.env.<layer> files have content`)
+  }
+
+  // ── Push ────────────────────────────────────────────────────
+  // Railway service names = `<app>-api` convention (ezauth-api, ezpay-api, etc.)
+  const service = `${app}-api`
+  const action = flags.dryRun ? 'Would push' : 'Pushing'
+  console.info(`${action} ${Object.keys(merged).length} vars to Railway service "${service}"...\n`)
+
+  // Log (with masking) what we will push before any actual CLI call.
+  for (const [k, v] of Object.entries(merged)) {
+    const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
+    console.info(`  ${k}=${mask(v)}${marker}`)
+  }
+
+  if (flags.dryRun) {
+    console.info(
+      `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to "${service}"`
+    )
+    process.exit(0)
+  }
+
+  // Use `railway variable set KEY --stdin` to pass the value via stdin instead
+  // of via argv. Rationale:
+  //   - values with `&`, `|`, `<`, `>`, spaces, quotes (eg. mongodb URLs) break
+  //     the command line when joined via shell or passed to .cmd shims
+  //   - stdin is a binary-safe channel — zero shell interpretation
+  //   - `shell: true` is required to execute `railway.cmd` on Windows, but
+  //     since the value never touches argv we don't care about cmd parsing
+  //   - `--skip-deploys` on all but the last call avoids N redeploys; the
+  //     final call omits it so Railway redeploys once with the full new env
+  //   - Empty values are skipped: Railway rejects them via stdin. Empty env
+  //     vars in source files represent "intentionally absent" — Railway will
+  //     simply not have that var, matching local behavior.
+  const allEntries = Object.entries(merged)
+  const skipped: string[] = []
+  const entries = allEntries.filter(([k, v]) => {
+    if (v === '') {
+      skipped.push(k)
+      return false
+    }
+    return true
+  })
+  if (skipped.length > 0) {
+    console.info(`\n⏭  Skipped ${skipped.length} empty vars: ${skipped.join(', ')}`)
+  }
+  let pushed = 0
+  for (let i = 0; i < entries.length; i++) {
+    const [k, v] = entries[i]
+    const isLast = i === entries.length - 1
+    const args = ['variable', 'set', '--service', service, k, '--stdin']
+    if (!isLast) args.push('--skip-deploys')
+    const result = spawnSync('railway', args, {
+      input: v,
+      stdio: ['pipe', 'inherit', 'inherit'],
+      shell: true,
+    })
+    if (result.status !== 0) {
+      fail(`Railway CLI exited with status ${result.status} on variable "${k}"`)
+    }
+    pushed++
+  }
+
+  console.info(`\n✅ Pushed ${pushed} vars to Railway service "${service}"`)
 }
-
-// Resolve templating ({app})
-for (const [k, v] of Object.entries(merged)) {
-  if (v.includes('{app}')) merged[k] = resolveTemplating(v, app)
-}
-
-if (Object.keys(merged).length === 0) {
-  fail('No vars to push — check that .env.<layer> files exist at root and/or apps/<app>/api/')
-}
-
-// ── Push ────────────────────────────────────────────────────
-const action = flags.dryRun ? 'Would push' : 'Pushing'
-console.log(`${action} ${Object.keys(merged).length} vars to Railway service for ${app}...\n`)
-
-// `railway variables --set "KEY=VALUE" --set "KEY2=VALUE2" --service <svc>`
-// Use one --set per var to be explicit and avoid shell quoting issues.
-const args = ['variables', '--service', app]
-for (const [k, v] of Object.entries(merged)) {
-  args.push('--set', `${k}=${v}`)
-  const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
-  console.log(`  ${k}=${mask(v)}${marker}`)
-}
-
-if (flags.dryRun) {
-  console.log(
-    `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to "${app}"`
-  )
-  process.exit(0)
-}
-
-const result = spawnSync('railway', args, { stdio: 'inherit', shell: true })
-if (result.status !== 0) fail(`Railway CLI exited with status ${result.status}`)
-
-console.log(`\n✅ Pushed ${Object.keys(merged).length} vars to Railway service "${app}"`)

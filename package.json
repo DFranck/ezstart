@@ -28,6 +28,7 @@
     "env:validate": "tsx scripts/env/validate.ts",
     "env:push:railway": "tsx scripts/env/push-railway.ts",
     "env:push:vercel": "tsx scripts/env/push-vercel.ts",
+    "env:push:all": "tsx scripts/env/push-all.ts",
     "secret:gen": "node scripts/tools/generate-secret.js",
     "generate": "turbo run generate",
     "postinstall": "turbo run generate || echo \"(postinstall) generate skipped — run 'pnpm generate' manually\"",

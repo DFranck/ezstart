@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * env:push:vercel — push merged (root + per-app web) env to Vercel project.
+ * env:push:vercel — push merged per-app web env to Vercel project.
  *
  * Usage:
  *   pnpm env:push:vercel <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run]
@@ -13,28 +13,24 @@
  *   pnpm env:push:vercel ezpay production --override NEXT_PUBLIC_X=custom
  *   pnpm env:push:vercel ezpay staging --dry-run
  *
- * Cascade (Next.js-style overlay — lowest → highest precedence):
+ * Cascade (PER-APP ONLY — no root layer, lowest → highest precedence):
  *
- *   local       →  root .env.local
- *                  apps/<app>/web/.env.local
+ *   local       →  apps/<app>/web/.env.local
  *
- *   staging     →  root .env.local
- *                  root .env.staging                (staging overrides)
- *                  apps/<app>/web/.env.local
- *                  apps/<app>/web/.env.staging      (staging overrides)
+ *   staging     →  apps/<app>/web/.env.local
+ *                  apps/<app>/web/.env.staging   (staging overrides)
  *
- *   production  →  root .env.local
- *                  root .env.staging
- *                  root .env.production             (final override)
- *                  apps/<app>/web/.env.local
- *                  apps/<app>/web/.env.staging
- *                  apps/<app>/web/.env.production   (final override)
+ *   production  →  apps/<app>/web/.env.local
+ *                  apps/<app>/web/.env.staging   (shared staging+prod defaults)
+ *                  apps/<app>/web/.env.production (prod-only overrides)
  *
  *   --override KEY=VAL is applied LAST and beats every file-level value.
  *
- * .env.staging and .env.production should contain ONLY the keys that DIFFER from
- * .env.local (or from the previous layer). Duplicating base values is discouraged —
- * the cascade fills them in automatically. Missing layers are silently skipped.
+ * `.env.staging` holds the values shared by staging AND production (non-dev defaults:
+ * cluster URLs, `DEPLOY_ENV=production`, production CDN origins, cookie domains).
+ * `.env.production` holds ONLY the keys that DIFFER from staging (live Stripe
+ * publishable keys, production API URLs, production webhook targets). Missing layers
+ * are silently skipped.
  *
  * Flags:
  *   --from <env>        Use a SINGLE source env file (bypass cascade). Useful when
@@ -44,7 +40,7 @@
  *   --dry-run           Print merged vars without calling Vercel CLI.
  *
  * Final precedence (lowest → highest):
- *   root cascade < per-app cascade < --override
+ *   cascade layers < --override
  *
  * Requires: Vercel CLI installed (https://vercel.com/docs/cli).
  */
@@ -115,6 +111,11 @@ function vercelGitBranch(env: string): string | null {
  * local      → ['local']
  * staging    → ['local', 'staging']
  * production → ['local', 'staging', 'production']
+ *
+ * The production cascade includes staging so non-dev defaults (cluster URL,
+ * NODE_ENV=production, cookie domains) flow through once and `.env.production`
+ * only holds values that DIFFER from staging (prod DB cluster, live Stripe
+ * secrets, prod webhook secrets).
  */
 export function cascadeLayers(env: TargetEnv): TargetEnv[] {
   if (env === 'local') return ['local']
@@ -130,9 +131,8 @@ export interface LoadMergedEnvInput {
   /** Target environment. Drives the cascade. */
   targetEnv: TargetEnv
   /**
-   * If provided, bypass the cascade and load a SINGLE env file level
-   * (still root + per-app for that one level). Typical use: `--from local`
-   * to push local values verbatim to preview.
+   * If provided, bypass the cascade and load a SINGLE env file level.
+   * Typical use: `--from local` to push local values verbatim to preview.
    */
   fromOverride?: TargetEnv
   /** --override KEY=VALUE pairs applied LAST. */
@@ -147,19 +147,16 @@ export interface LoadMergedEnvInput {
 
 export interface LoadMergedEnvResult {
   merged: Record<string, string>
-  sources: Array<{ level: TargetEnv; scope: 'root' | 'app'; path: string; exists: boolean }>
+  sources: Array<{ level: TargetEnv; path: string; exists: boolean }>
 }
 
 /**
- * Merge root + per-app env files following the cascade.
+ * Merge per-app web env files following the cascade.
  *
  * Precedence (lowest → highest):
- *   root local < root staging < root prod
- *   < per-app local < per-app staging < per-app prod
- *   < overrides
+ *   app .env.local < app .env.<env> < overrides
  *
- * When `fromOverride` is set, ONLY that layer is loaded (root + per-app), the
- * cascade is bypassed. This is equivalent to the legacy single-source behavior.
+ * When `fromOverride` is set, ONLY that layer is loaded, the cascade is bypassed.
  */
 export function loadMergedEnv(input: LoadMergedEnvInput): LoadMergedEnvResult {
   const { root, app, targetEnv, fromOverride, overrides = {}, readEnv = parseEnvFile } = input
@@ -169,34 +166,23 @@ export function loadMergedEnv(input: LoadMergedEnvInput): LoadMergedEnvResult {
   const merged: Record<string, string> = {}
   const sources: LoadMergedEnvResult['sources'] = []
 
-  // 1. Root cascade (lowest precedence)
-  for (const level of layers) {
-    const file = `.env.${level}`
-    const absPath = path.join(root, file)
-    const parsed = readEnv(absPath)
-    sources.push({ level, scope: 'root', path: absPath, exists: parsed !== null })
-    if (!parsed) continue
-    for (const [k, v] of Object.entries(parsed)) merged[k] = v
-  }
-
-  // 2. Per-app cascade (overrides root)
   for (const level of layers) {
     const file = `.env.${level}`
     const absPath = path.join(root, 'apps', app, 'web', file)
     const parsed = readEnv(absPath)
-    sources.push({ level, scope: 'app', path: absPath, exists: parsed !== null })
+    sources.push({ level, path: absPath, exists: parsed !== null })
     if (!parsed) continue
     for (const [k, v] of Object.entries(parsed)) merged[k] = v
   }
 
-  // 3. --override flag (highest precedence, applied last)
+  // --override flag (highest precedence, applied last)
   for (const [k, v] of Object.entries(overrides)) merged[k] = v
 
   return { merged, sources }
 }
 
 interface ParsedFlags {
-  from?: string
+  from?: TargetEnv
   overrides: Record<string, string>
   dryRun: boolean
 }
@@ -208,7 +194,10 @@ export function parseFlags(flags: string[]): ParsedFlags {
     if (flag === '--from') {
       const value = flags[++i]
       if (!value) fail('--from requires a value (e.g. --from local)')
-      result.from = value
+      if (!['local', 'staging', 'production'].includes(value)) {
+        fail(`Invalid --from "${value}" — must be one of: local | staging | production`)
+      }
+      result.from = value as TargetEnv
     } else if (flag === '--override') {
       const value = flags[++i]
       if (!value) fail('--override requires a value (e.g. --override KEY=VAL,KEY2=VAL2)')
@@ -257,42 +246,38 @@ if (isDirectRun) {
   }
 
   const flags = parseFlags(rest)
-  if (flags.from && !['local', 'staging', 'production'].includes(flags.from)) {
-    fail(`Invalid --from "${flags.from}" — must be one of: local | staging | production`)
-  }
 
   const ROOT = findMonorepoRoot()
   const targetEnv = env as TargetEnv
-  const fromOverride = flags.from as TargetEnv | undefined
 
   const { merged, sources } = loadMergedEnv({
     root: ROOT,
     app,
     targetEnv,
-    fromOverride,
+    fromOverride: flags.from,
     overrides: flags.overrides,
   })
 
   const branchSuffix = vercelGitBranch(env) ? ` branch=${vercelGitBranch(env)}` : ''
-  console.log(
+  console.info(
     `▲ env:push:vercel — ${app}/web → ${env} (Vercel ${vercelEnvName(env)}${branchSuffix})${flags.dryRun ? ' (dry-run)' : ''}`
   )
-  if (fromOverride) {
-    console.log(`   source:  SINGLE layer .env.${fromOverride} (via --from, cascade bypassed)`)
+  if (flags.from) {
+    console.info(`   source:  SINGLE layer .env.${flags.from} (via --from, cascade bypassed)`)
   } else {
     const levels = cascadeLayers(targetEnv).join(' → ')
-    console.log(`   cascade: ${levels}`)
+    console.info(`   cascade: ${levels}`)
   }
   for (const s of sources) {
     const status = s.exists ? '✓' : '·'
-    console.log(`   ${status} [${s.scope}/${s.level}] ${s.path}`)
+    console.info(`   ${status} [${s.level}] ${s.path}`)
   }
   if (Object.keys(flags.overrides).length > 0) {
-    console.log(`   override: ${Object.keys(flags.overrides).join(', ')}`)
+    console.info(`   override: ${Object.keys(flags.overrides).join(', ')}`)
   }
-  console.log('')
+  console.info('')
 
-  // At least one layer must exist (root .env.local is the baseline for any cascade)
+  // At least one layer must exist
   const anyExists = sources.some(s => s.exists)
   if (!anyExists) {
     fail(
@@ -306,14 +291,16 @@ if (isDirectRun) {
   const vercelTarget = vercelEnvName(env)
 
   const action = flags.dryRun ? 'Would push' : 'Pushing'
-  console.log(`${action} ${Object.keys(merged).length} vars to Vercel project (cwd=${webDir})...\n`)
+  console.info(
+    `${action} ${Object.keys(merged).length} vars to Vercel project (cwd=${webDir})...\n`
+  )
 
   if (flags.dryRun) {
     for (const [k, v] of Object.entries(merged)) {
       const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
-      console.log(`  ${k}=${mask(v)}${marker}`)
+      console.info(`  ${k}=${mask(v)}${marker}`)
     }
-    console.log(
+    console.info(
       `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to "${app}" (${vercelTarget})`
     )
     process.exit(0)
@@ -322,9 +309,16 @@ if (isDirectRun) {
   const gitBranch = vercelGitBranch(env)
   let pushed = 0
   let failed = 0
+  const skipped: string[] = []
   for (const [k, v] of Object.entries(merged)) {
+    // Skip empty vars — Vercel `env add` requires a non-empty value.
+    // Empty represents "intentionally absent" in source files.
+    if (v === '') {
+      skipped.push(k)
+      continue
+    }
     const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
-    console.log(`  ${k}=${mask(v)}${marker}`)
+    console.info(`  ${k}=${mask(v)}${marker}`)
     // Remove args — scope to the same branch the push targets (if any) so we
     // don't nuke vars on other preview branches.
     const rmArgs = ['env', 'rm', k, vercelTarget]
@@ -354,8 +348,11 @@ if (isDirectRun) {
       console.error(`     ↳ failed (status ${result.status})`)
     }
   }
+  if (skipped.length > 0) {
+    console.info(`\n⏭  Skipped ${skipped.length} empty vars: ${skipped.join(', ')}`)
+  }
 
-  console.log(
+  console.info(
     `\n${failed === 0 ? '✅' : '⚠️ '} Pushed ${pushed}/${Object.keys(merged).length} vars to Vercel project "${app}"`
   )
   if (failed > 0) process.exit(1)

@@ -1,75 +1,59 @@
 # Secrets & Environment Variables
 
-**Architecture: HYBRID (root + per-app), GENERIC names (no app prefix).**
-Shared vars (must-be-identical) live at the monorepo root; everything else
-lives in `apps/<app>/<api|web>/.env.<env>`. Per-app values override root for
-duplicate keys.
+**Architecture: PER-APP ONLY.** There is no root `.env.*` layer. Every app owns
+its full set of env vars in `apps/<app>/<api|web>/.env.<layer>`. Shared values
+(e.g. `JWT_SECRET`, `MONGO_URL`) are intentionally duplicated across each app
+that needs them — duplication is preferred to a hybrid/root layer because it
+keeps per-app deploy artifacts (Railway service, Vercel project) fully
+self-contained and trivially auditable.
 
 Source of truth at runtime:
 
-- `@ezstart/config/server` → `loadSharedEnv({ app, layer })` — used by APIs
-  via `instrument.mts`. Loads root then per-app, merges into `process.env`.
+- `@ezstart/config/server` → `loadSharedEnv({ app, layer })` — used by APIs in
+  their `instrument.mts`. Loads `apps/<app>/<layer>/.env.<env>` only.
 - `@ezstart/next-config/withSharedEnv` — used by Next.js apps. Auto-detects
   the app name from cwd (`apps/<app>/web`).
 - `@ezstart/config/env-resolvers` → `getMongoUrl(app)`, `getJwtSecret()`,
-  `getSentryDsn(app)` — helpers that resolve generic root vars to per-app
-  values at the call site.
+  `getSentryDsn(app)` — resolvers for templated or suffixed vars.
 
 ## Layout
 
 ```
 @ezstart/
-├── .env.example         # Root template (committed) — SHARED vars only
-├── .env.local           # Root SHARED dev vars (gitignored)
-├── .env.staging         # Root SHARED staging vars (gitignored)
-├── .env.production      # Root SHARED prod ref (gitignored; cloud is the source)
-│
 └── apps/<app>/<api|web>/
     ├── .env.example     # Per-app template (committed) — declares what this app reads
-    ├── .env.local       # Per-app dev secrets (gitignored)
-    ├── .env.staging     # Per-app staging vars (gitignored)
-    └── .env.production  # Per-app prod ref (gitignored)
+    ├── .env.local       # Per-app dev values (gitignored)
+    ├── .env.staging     # Per-app staging overrides (gitignored)
+    └── .env.production  # Per-app production overrides (gitignored)
 ```
 
-`apps/ezauth/api/.env.test` is a separate vitest-only file (loaded directly
-by `vitest.config.ts`).
+`apps/ezauth/api/.env.test` is a separate vitest-only file (loaded directly by
+`vitest.config.ts`).
 
-## Load order
+## Cascade — DRY per-app layering
 
-1. **Root** `.env.<env>` is loaded first (no override of shell-set vars).
-2. **Per-app** `apps/<app>/<layer>/.env.<env>` is loaded second
-   (overrides root for duplicate keys).
+Per-app files follow a **cascade** from lowest to highest precedence. Each
+higher layer only needs to hold the values that DIFFER from the previous
+layer. Missing layers are silently skipped.
 
-Both layers populate the same `process.env` namespace. After both are loaded,
-`required` vars (if any) are validated — missing vars throw at boot.
+| Target env   | Cascade (lowest → highest)                        |
+| ------------ | ------------------------------------------------- |
+| `local`      | `.env.local`                                      |
+| `staging`    | `.env.local` ← `.env.staging`                     |
+| `production` | `.env.local` ← `.env.staging` ← `.env.production` |
 
-## Shared vs per-app — what goes where?
+**Why production includes staging?** Staging and production share most of
+their "non-dev" defaults (cluster URLs pointing at a real Atlas host,
+`DEPLOY_ENV=production`, cookie domain on a real TLD, Sentry DSN, etc.).
+Keeping those in `.env.staging` means `.env.production` only holds the true
+deltas:
 
-### SHARED (root only — must be identical across apps)
+- prod MongoDB cluster URL
+- `sk_live_*` Stripe keys / live webhook secrets
+- prod-only API URLs and Vercel domains
 
-| Var                 | Purpose                              |
-| ------------------- | ------------------------------------ |
-| `JWT_SECRET`        | SSO token signing — identical key    |
-| `MONGO_URL`         | Templated `{app}` placeholder        |
-| `SENTRY_AUTH_TOKEN` | Org-level Sentry token (build-time)  |
-| `SENTRY_ORG_SLUG`   | Sentry org slug (defaults `ezstart`) |
-| `DEPLOY_ENV`        | `local` / `staging` / `production`   |
-
-(`NODE_ENV` is set by Node/runner, never in `.env`.)
-
-### PER-APP API (lives in `apps/<app>/api/.env.<env>`)
-
-- App-specific Sentry DSN (`SENTRY_DSN`)
-- Provider credentials (Stripe, Google OAuth, AI providers, Resend, etc.)
-- Feature toggles (`PAYMENT_PROVIDER`, `RUN_EXCHANGE_RATES_ON_START`)
-- Per-app config (`COOKIE_DOMAIN`, `OAUTH_STATE_SECRET`, `LOG_LEVEL`)
-
-### PER-APP WEB (lives in `apps/<app>/web/.env.<env>`)
-
-- `NEXT_PUBLIC_EZAUTH_KEY` — **different value per web app** (publishable key)
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — Stripe client (where applicable)
-- `NEXT_PUBLIC_API_URL` — for apps with `next.config.js` rewrites
-- `NEXT_PUBLIC_DEBUG` — opt-in client debug flag
+This keeps every env file DRY and the diff between staging and prod trivially
+small and reviewable.
 
 ## Environment selection
 
@@ -81,112 +65,169 @@ Both layers populate the same `process.env` namespace. After both are loaded,
 | _(unset)_    | `production` | `.env.production` |
 | _(unset)_    | _other_      | `.env.local`      |
 
-Railway + Vercel set `DEPLOY_ENV=staging` / `production` explicitly on each
-service so ambiguity is impossible.
+Railway and Vercel set `DEPLOY_ENV=staging` / `production` explicitly on each
+service so runtime ambiguity is impossible.
 
-## Generic naming conventions
+## What lives where?
 
-Root env keys use GENERIC names — no `EZAUTH_` / `EZBILL_` / etc. prefixes.
-Two conventions let per-app values live at the root without collisions:
+### Per-app API (`apps/<app>/api/.env.<env>`)
 
-1. **Templating** — `MONGO_URL=mongodb+srv://.../{app}?...`
-   App code calls `getMongoUrl('ezbill')`.
-2. **Suffixing** — `SENTRY_DSN_EZAUTH=...` (legacy; preferred form is now
-   per-app `SENTRY_DSN` in `apps/<app>/api/.env.local`).
-3. **Shared by design** — `JWT_SECRET` lives at the root because every app
-   must verify tokens minted by EZAuth.
-4. **`NEXT_PUBLIC_*`** — Next.js convention, readable from the client bundle.
-   Per-app values go in `apps/<app>/web/.env.local`.
+- Shared values duplicated per-app: `JWT_SECRET`, `MONGO_URL`,
+  `SENTRY_AUTH_TOKEN`, `SENTRY_ORG_SLUG`, `DEPLOY_ENV`, `NODE_ENV`
+- App-specific Sentry DSN (`SENTRY_DSN` or `SENTRY_DSN_<APP>`)
+- Provider credentials (Stripe, Google OAuth, AI providers, Resend, etc.)
+- Feature toggles (`PAYMENT_PROVIDER`, `RUN_EXCHANGE_RATES_ON_START`, …)
+- Per-app config (`COOKIE_DOMAIN`, `OAUTH_STATE_SECRET`, `LOG_LEVEL`)
 
-## Helpers (`@ezstart/config/env-resolvers`)
+### Per-app Web (`apps/<app>/web/.env.<env>`)
+
+- `NEXT_PUBLIC_EZAUTH_KEY` — **different value per web app** (publishable key)
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — where applicable
+- `NEXT_PUBLIC_API_URL` — for apps with `next.config.js` rewrites
+- `NEXT_PUBLIC_DEBUG` — opt-in client debug flag
+- `NODE_ENV`, `DEPLOY_ENV` — compiled into the client bundle / SSR branches
+
+Web apps do NOT read server secrets like `JWT_SECRET` or `MONGO_URL`.
+
+## Templating helpers (`@ezstart/config/env-resolvers`)
+
+Generic vars like `MONGO_URL=mongodb+srv://.../{app}?...` use `{app}`
+templating so one cluster URL covers every API:
 
 ```ts
 import { getMongoUrl, getJwtSecret, getSentryDsn } from '@ezstart/config/env-resolvers'
 
 // In apps/{app}/api/src/instrument.mts, BEFORE any other import:
-loadSharedEnv({ app: 'ezauth', layer: 'api' }) // loads root + per-app
+loadSharedEnv({ app: 'ezauth', layer: 'api' })
 process.env.MONGO_URL = getMongoUrl('ezauth') // expands {app}
 const dsn = getSentryDsn('ezauth') // checks SENTRY_DSN_EZAUTH then SENTRY_DSN
 if (dsn) process.env.SENTRY_DSN = dsn
-
-// Everywhere else, read process.env.MONGO_URL / JWT_SECRET directly.
 ```
 
 ## Required env manifest
 
 `packages/config/src/env-manifests.ts` declares required vars per API and
-`createApp({ apiApp: 'ezauth' })` validates them at boot. Missing vars throw
-a clear error referencing both root and per-app file paths.
+`createApp({ apiApp: 'ezauth' })` validates them at boot. Missing vars throw a
+clear error referencing the per-app file paths.
 
 ## Adding a new variable
 
-### Used by every app (truly shared)
-
-1. Add it to root `.env.example` (no value).
-2. Fill the real value in root `.env.local`.
-3. Consume via `process.env.MY_VAR`.
-
 ### Used by one app
 
-1. Add it to `apps/<app>/<layer>/.env.example` (template).
+1. Add it to `apps/<app>/<layer>/.env.example` (template, no value).
 2. Fill the real value in `apps/<app>/<layer>/.env.local`.
-3. Declare in `packages/config/src/secrets-targets.ts` so push/pull scripts
-   know how to route it.
+3. Consume via `process.env.MY_VAR`.
+
+### Shared by multiple apps (duplicated by design)
+
+1. Add it to every consumer app's `apps/<app>/<layer>/.env.example`.
+2. Fill the same value in each app's `.env.local`.
+3. (Optional) Add it to the `env:validate` cross-app consistency check if
+   drift would break interop (like `JWT_SECRET`).
 
 ## Validator — `pnpm env:validate`
 
-Verifies the hybrid layout:
+Verifies per-app env layout:
 
-- Required SHARED vars present in root
-- For each shared var, if a per-app file also defines it, value MATCHES root
-- Per-app `.env.example` keys with empty placeholders are present in `.env.local`
+- Every app declares the vars it consumes in its `.env.example`.
+- Shared vars (if declared in the cross-app consistency list) have matching
+  values across apps in the target env.
+- Per-app `.env.example` keys with empty placeholders are present in `.env.local`.
 
 ```bash
 pnpm env:validate                # checks .env.local (default)
 pnpm env:validate --env=staging  # checks .env.staging
 ```
 
-Exit code: 0 on success, 1 on drift / missing.
+Exit code `0` on success, `1` on drift or missing values.
 
 ## Push to cloud
 
-### Railway (per-app API services)
+### One app at a time
 
 ```bash
+# Railway (per-API service)
 pnpm env:push:railway <app> <env>
-# Example:
+pnpm env:push:railway ezauth staging --dry-run
 pnpm env:push:railway ezauth staging
-```
 
-Reads root `.env.<env>` + `apps/<app>/api/.env.<env>`, merges (per-app
-wins), resolves `{app}` templating, and pushes via `railway variables --set`.
-
-Requires Railway CLI: `npm i -g @railway/cli`.
-
-### Vercel (per-app web projects)
-
-```bash
+# Vercel (per-web project)
 pnpm env:push:vercel <app> <env>
-# Example:
+pnpm env:push:vercel ezpay production --dry-run
 pnpm env:push:vercel ezpay production
 ```
 
-Reads root + `apps/<app>/web/.env.<env>`, merges, pushes via
-`vercel env add` (cwd set to `apps/<app>/web` for project linking).
+Both scripts merge the cascade (`.env.local` → `.env.staging` → `.env.production`
+for production targets) and push the flattened result. Railway uses
+`railway variables --set`; Vercel uses `vercel env add`.
 
-Requires Vercel CLI: `npm i -g vercel`.
+Flags common to both:
+
+| Flag                 | Effect                                                |
+| -------------------- | ----------------------------------------------------- |
+| `--dry-run`          | Print the merged vars without calling the remote CLI. |
+| `--from <env>`       | Bypass the cascade and load a SINGLE source file.     |
+| `--override K=V,...` | Apply a final override (wins over every file layer).  |
+
+Railway-only: `--include-blocked` to force-push `TEST_*` / `DEBUG_*` /
+`_LOCAL_*` / `DEV_*` vars that are otherwise filtered out of production pushes.
+
+### All apps at once — `env:push:all`
+
+```bash
+pnpm env:push:all <env> [--dry-run] [--only-api] [--only-web]
+                        [--apps <csv>] [--continue-on-error]
+
+# Examples
+pnpm env:push:all staging --dry-run
+pnpm env:push:all production --apps ezauth,ezpay
+pnpm env:push:all staging --only-web
+pnpm env:push:all production --continue-on-error
+```
+
+Loops over the 8 monorepo apps and, for each, calls `env:push:railway` (if the
+app has an `api/` package) then `env:push:vercel` (if it has a `web/`
+package). Fail-fast by default — `--continue-on-error` pushes every app and
+reports failures at the end.
+
+Requires both CLIs: `npm i -g @railway/cli vercel`.
 
 ## Production secrets
 
-Never push root `.env.production` anywhere. Production values live in
-**Railway** (per-API service) and **Vercel** (per-web-project). The local
-`.env.production` files are LOCAL REFERENCE only.
+Never treat local `.env.production` files as the source of truth for
+production — they are LOCAL REFERENCE only. The live sources are:
+
+- **Railway** — per-API service vars (pushed via `env:push:railway`).
+- **Vercel** — per-web project vars (pushed via `env:push:vercel`).
+
+## Pre-merge-to-production checklist
+
+Before merging a feature branch that affects env vars into `master` / a prod
+deploy:
+
+- [ ] Every new var is declared in `apps/<app>/<layer>/.env.example`.
+- [ ] The same var is filled in `apps/<app>/<layer>/.env.local` (dev works).
+- [ ] If the var differs in staging/prod, it is set in `.env.staging` and/or
+      `.env.production` at the per-app level.
+- [ ] `pnpm env:validate --env=staging` passes (no drift / no missing).
+- [ ] `pnpm env:push:all staging --dry-run` shows the expected set of vars per
+      app (no surprises, no secret leaking into wrong app).
+- [ ] `pnpm env:push:all production --dry-run` idem.
+- [ ] Any required migration has been run (or scheduled) against the staging
+      DB first.
+- [ ] Any required seed has been run on staging (e.g. `seed:self-key`,
+      `seed:ezauth-plans`).
+- [ ] `pnpm typecheck` and `pnpm test` are green on the branch.
+- [ ] After merge, push cascade runs:
+      `pnpm env:push:all staging` → deploy staging → smoke test →
+      `pnpm env:push:all production` → deploy production.
 
 ## Legacy `secrets:*` scripts
 
-The pre-migration `secrets:push`/`secrets:pull`/`secrets:audit`/`secrets:verify`
-commands are still present but operate on the legacy single-root model.
-Prefer the new `env:*` commands for hybrid layout.
+The pre-migration `secrets:push` / `secrets:pull` / `secrets:audit` /
+`secrets:verify` commands are still present in `package.json` but operate on
+the old single-root model. Prefer the new `env:*` commands above. The
+`secrets:*` commands will be removed once all call sites have been migrated.
 
 ```bash
 pnpm secrets:audit --env production           # legacy — diff root vs cloud
@@ -196,28 +237,30 @@ pnpm secrets:healthcheck                       # production health pings
 
 ## Backups
 
-Pre-migration root .env backups live in `tmp/env-backup-root-<timestamp>.env`
-(gitignored). To roll back to the pre-hybrid model:
-
-```bash
-cp tmp/env-backup-root-<timestamp>.env .env.local
-git checkout HEAD -- packages/config/src/secrets-loader.ts packages/next-config/src/withSharedEnv.js
-rm -rf apps/*/api/.env.local apps/*/web/.env.local  # CAUTION: removes per-app secrets
-```
+Pre-migration root `.env.*` backups live in
+`tmp/env-backup-root-<timestamp>.env` (gitignored). To roll back to the
+pre-per-app model, restore those files and `git restore` the loaders. This is
+generally unnecessary — the per-app layout is strictly more explicit.
 
 ## Workflow summary
 
 ```bash
-# Bootstrap local env after fresh clone
-cp .env.example .env.local
+# Bootstrap local env after a fresh clone
 for d in apps/*/api apps/*/web; do
-  [ -f "$d/.env.example" ] && cp "$d/.env.example" "$d/.env.local"
+  [ -f "$d/.env.example" ] && [ ! -f "$d/.env.local" ] && cp "$d/.env.example" "$d/.env.local"
 done
-# Then edit each .env.local — replace placeholders with real values
+# Edit each .env.local — replace placeholders with real values
 
 # Validate
 pnpm env:validate
 
 # Start dev servers
 pnpm dev ez               # EZStart + EZAuth + EZPay
+
+# Push env to cloud (staging first, then prod)
+pnpm env:push:all staging --dry-run
+pnpm env:push:all staging
+# ... deploy + smoke test ...
+pnpm env:push:all production --dry-run
+pnpm env:push:all production
 ```
