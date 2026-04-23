@@ -1,3 +1,11 @@
+// Graceful fallback (shared across all pay-sdk components)
+export { PayNotConfiguredCard, classifyPayError } from './common/PayNotConfiguredCard.js'
+export type {
+  PayNotConfiguredCardProps,
+  PayNotConfiguredReason,
+  PayNotConfiguredTexts,
+} from './common/PayNotConfiguredCard.js'
+
 // Donations
 export { DonateButton } from './DonateButton.js'
 export { DonateModal } from './DonateModal.js'

@@ -20,6 +20,7 @@ import { useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 import { PaymentHistory } from './PaymentHistory.js'
 import { ManageSubscriptionButton } from './ManageSubscriptionButton.js'
+import { PayNotConfiguredCard, type PayNotConfiguredTexts } from './common/PayNotConfiguredCard.js'
 
 export interface BillingDashboardTexts {
   title: string
@@ -99,6 +100,18 @@ export interface BillingDashboardProps {
   recentPaymentsCount?: number
   /** Customizable texts with English defaults */
   texts?: Partial<BillingDashboardTexts>
+  /**
+   * Overrides for the graceful fallback card rendered when the PayProvider
+   * resolution failed. Keys are optional — English defaults are used when
+   * omitted.
+   */
+  notConfiguredTexts?: PayNotConfiguredTexts
+  /**
+   * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
+   * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
+   * to `'en'`.
+   */
+  locale?: string
   className?: string
 }
 
@@ -111,6 +124,8 @@ export function BillingDashboard({
   manageReturnUrl,
   recentPaymentsCount = 5,
   texts: textsProp,
+  notConfiguredTexts,
+  locale = 'en',
   className,
 }: BillingDashboardProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
@@ -127,8 +142,13 @@ export function BillingDashboard({
   // - Otherwise fall back to the PayProvider context (resolved via publishableKey)
   // This guarantees each app's BillingDashboard is RBAC-scoped to its own
   // Application, preventing cross-app payment leaks.
-  const { applicationId: ctxApplicationId, applicationResolutionStatus } = useApplicationContext()
+  const {
+    applicationId: ctxApplicationId,
+    applicationResolutionStatus,
+    payWebUrl,
+  } = useApplicationContext()
   const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
 
   const subStatus = useSubscriptionStatus({
     userId: userId || '',
@@ -147,16 +167,15 @@ export function BillingDashboard({
     return (
       <Div className={`space-y-6 ${className || ''}`}>
         <H2>{t.title}</H2>
-        <Card>
-          <CardContent className="py-10 text-center">
-            <Icon
-              name="lucide:AlertTriangle"
-              className="w-10 h-10 text-destructive/60 mx-auto mb-3"
-            />
-            <H3 className="mb-2">{t.contextUnavailableTitle}</H3>
-            <P className="text-muted-foreground text-sm">{t.contextUnavailableDescription}</P>
-          </CardContent>
-        </Card>
+        <PayNotConfiguredCard
+          reason="resolve-failed"
+          dashboardUrl={dashboardUrl}
+          texts={{
+            title: notConfiguredTexts?.title ?? t.contextUnavailableTitle,
+            description: notConfiguredTexts?.description ?? t.contextUnavailableDescription,
+            cta: notConfiguredTexts?.cta,
+          }}
+        />
       </Div>
     )
   }

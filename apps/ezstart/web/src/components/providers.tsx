@@ -64,13 +64,20 @@ export function Providers({
 /**
  * Inner wrapper that can access auth context for token refresh.
  * Must be inside AuthProvider.
+ *
+ * NOTE — `applicationId` is the ezauth Application id for ezstart. We use
+ * `applicationId` over `publishableKey` here because ezstart is the hub: it
+ * talks to the ezpay API on behalf of the ezstart app (no separate ezpay
+ * publishable key needed). The ezauth JWT carries the user identity and
+ * `applicationId` scopes the ezpay queries to the ezstart tenant.
  */
 function PayProviderWrapper({ children }: { children: React.ReactNode }) {
   return (
     <PayProvider
+      applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID ?? ''}
       appName="ezstart"
       config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
-      publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
+      payWebUrl={process.env.NEXT_PUBLIC_EZPAY_WEB_URL ?? 'http://localhost:6131'}
       getToken={() => useAuthStore.getState().accessToken}
       onAuthFailure={handleAuthFailure}
     >

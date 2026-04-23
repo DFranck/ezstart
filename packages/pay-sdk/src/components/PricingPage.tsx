@@ -22,6 +22,11 @@ import { useApplicationContext } from '../react/pay-provider.js'
 import { SubscribeButton } from './SubscribeButton.js'
 import { formatCurrency } from '../core/format-currency.js'
 import type { Plan, PlanMetadata } from '../core/types.js'
+import {
+  PayNotConfiguredCard,
+  classifyPayError,
+  type PayNotConfiguredTexts,
+} from './common/PayNotConfiguredCard.js'
 
 export interface PricingPageTexts {
   title: string
@@ -142,6 +147,18 @@ export interface PricingPageProps {
    * toggle is hidden entirely and all plans are shown as-is.
    */
   defaultBillingCycle?: BillingCycle
+  /**
+   * Overrides for the graceful fallback card rendered when plans fetch
+   * fails or the PayProvider resolution failed. Keys are optional — English
+   * defaults are used when omitted.
+   */
+  notConfiguredTexts?: PayNotConfiguredTexts
+  /**
+   * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
+   * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
+   * to `'en'`.
+   */
+  locale?: string
   /** Additional CSS class */
   className?: string
 }
@@ -156,6 +173,8 @@ export function PricingPage({
   texts: textsProp,
   onSelectPlan,
   defaultBillingCycle = 'month',
+  notConfiguredTexts,
+  locale = 'en',
   className,
 }: PricingPageProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
@@ -169,8 +188,13 @@ export function PricingPage({
     )
   }
 
-  const { applicationId: ctxApplicationId } = useApplicationContext()
+  const {
+    applicationId: ctxApplicationId,
+    applicationResolutionStatus,
+    payWebUrl,
+  } = useApplicationContext()
   const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
 
   const { plans, isLoading, error, reload } = usePlans({ applicationId, appName, active: true })
   const subStatus = useSubscriptionStatus({
@@ -225,7 +249,36 @@ export function PricingPage({
     )
   }
 
+  // Pay provider resolution failed — render a graceful "Get your key" CTA
+  // rather than the plans error screen (which can't help the user).
+  if (applicationResolutionStatus === 'failed') {
+    return (
+      <Div className={`w-full max-w-6xl mx-auto px-4 py-12 ${className || ''}`}>
+        <PayNotConfiguredCard
+          reason="resolve-failed"
+          dashboardUrl={dashboardUrl}
+          texts={notConfiguredTexts}
+        />
+      </Div>
+    )
+  }
+
   if (error) {
+    // Classify the error — network failures get a "service unreachable" card,
+    // auth failures get "invalid key", everything else gets the generic retry
+    // UI (which is still valuable: plans can be reloaded without a new key).
+    const reason = classifyPayError(error)
+    if (reason) {
+      return (
+        <Div className={`w-full max-w-6xl mx-auto px-4 py-12 ${className || ''}`}>
+          <PayNotConfiguredCard
+            reason={reason}
+            dashboardUrl={dashboardUrl}
+            texts={notConfiguredTexts}
+          />
+        </Div>
+      )
+    }
     return (
       <Div className={`w-full max-w-6xl mx-auto px-4 py-12 text-center ${className || ''}`}>
         <Icon name="lucide:AlertTriangle" className="w-12 h-12 text-destructive mx-auto mb-4" />

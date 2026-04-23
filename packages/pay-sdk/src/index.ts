@@ -78,7 +78,7 @@ export { formatCurrency, getCurrencySymbol } from './core/format-currency.js'
 // ============================================================
 // React layer (provider, hooks, store)
 // ============================================================
-export { PayProvider, usePay, usePayContext } from './react/pay-provider.js'
+export { PayProvider, usePay, usePayContext, useApplicationContext } from './react/pay-provider.js'
 export { usePayStore, usePayStoreSSR } from './react/store.js'
 export type { PayState } from './react/store.js'
 
@@ -111,6 +111,14 @@ export type { UsePayKeyUsageOptions } from './react/hooks/usePayKeyUsage.js'
 // ============================================================
 // Components (pre-built UI — depends on @ezstart/ui)
 // ============================================================
+
+// Graceful fallback (shared)
+export { PayNotConfiguredCard, classifyPayError } from './components/common/PayNotConfiguredCard.js'
+export type {
+  PayNotConfiguredCardProps,
+  PayNotConfiguredReason,
+  PayNotConfiguredTexts,
+} from './components/common/PayNotConfiguredCard.js'
 
 // Donations
 export { DonateButton } from './components/DonateButton.js'

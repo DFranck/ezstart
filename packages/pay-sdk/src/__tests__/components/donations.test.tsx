@@ -142,10 +142,7 @@ describe('DonateModal', () => {
   it('uses custom texts', async () => {
     render(
       <Wrapper>
-        <DonateModal
-          projectId="proj1"
-          texts={{ title: 'Help us!', donateButton: 'Give' }}
-        />
+        <DonateModal projectId="proj1" texts={{ title: 'Help us!', donateButton: 'Give' }} />
       </Wrapper>
     )
 
@@ -213,11 +210,7 @@ describe('DonationCard', () => {
   it('renders featured variant with badge', () => {
     render(
       <Wrapper>
-        <DonationCard
-          appName="test-app"
-          projectId="proj1"
-          variant="featured"
-        />
+        <DonationCard appName="test-app" projectId="proj1" variant="featured" />
       </Wrapper>
     )
     expect(screen.getByText('One-time donation')).toBeInTheDocument()
@@ -226,11 +219,7 @@ describe('DonationCard', () => {
   it('allows custom amount input when allowCustomAmount=true', () => {
     render(
       <Wrapper>
-        <DonationCard
-          appName="test-app"
-          projectId="proj1"
-          allowCustomAmount
-        />
+        <DonationCard appName="test-app" projectId="proj1" allowCustomAmount />
       </Wrapper>
     )
 
@@ -241,11 +230,7 @@ describe('DonationCard', () => {
   it('replaces project name in title', () => {
     render(
       <Wrapper>
-        <DonationCard
-          appName="test-app"
-          projectId="proj1"
-          projectName="GreenPulse"
-        />
+        <DonationCard appName="test-app" projectId="proj1" projectName="GreenPulse" />
       </Wrapper>
     )
     expect(screen.getByText('Support GreenPulse')).toBeInTheDocument()
@@ -342,7 +327,7 @@ describe('DonationWall', () => {
     expect(screen.getByText('Great project!')).toBeInTheDocument()
   })
 
-  it('shows error state on fetch failure', async () => {
+  it('shows the graceful PayNotConfiguredCard on fetch failure', async () => {
     setupFetchMock([
       {
         url: '/donations',
@@ -357,8 +342,10 @@ describe('DonationWall', () => {
       </Wrapper>
     )
 
+    // The graceful card replaces the scary red "Error: ..." banner.
+    // Default reason for an unclassified fetch error is `fetch-failed`.
     await waitFor(() => {
-      expect(screen.getByText(/Error/)).toBeInTheDocument()
+      expect(screen.getByText(/Payments service unreachable/i)).toBeInTheDocument()
     })
   })
 
@@ -372,10 +359,7 @@ describe('DonationWall', () => {
 
     render(
       <Wrapper>
-        <DonationWall
-          projectId="proj1"
-          texts={{ noDonationsText: 'Be the first!' }}
-        />
+        <DonationWall projectId="proj1" texts={{ noDonationsText: 'Be the first!' }} />
       </Wrapper>
     )
 

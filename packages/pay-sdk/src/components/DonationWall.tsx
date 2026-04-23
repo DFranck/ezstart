@@ -3,14 +3,26 @@
 import { useMemo } from 'react'
 import { Div, Icon, InfiniteMovingCards, P, Span } from '@ezstart/ui/components'
 import { useDonations } from '../react/hooks/useDonations.js'
+import { useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 import type { Payment } from '../core/types.js'
+import {
+  PayNotConfiguredCard,
+  classifyPayError,
+  type PayNotConfiguredTexts,
+} from './common/PayNotConfiguredCard.js'
 
 export interface DonationWallTexts {
   loadingText?: string
   errorText?: string
   noDonationsText?: string
   anonymousLabel?: string
+  /**
+   * Overrides for the graceful fallback card rendered when the pay-sdk is
+   * unconfigured or a donations fetch fails. Keys are optional — English
+   * defaults are used when omitted.
+   */
+  notConfigured?: PayNotConfiguredTexts
 }
 
 interface DonationWallProps {
@@ -19,6 +31,12 @@ interface DonationWallProps {
   className?: string
   texts?: DonationWallTexts
   noDonationsText?: string
+  /**
+   * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
+   * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
+   * to `'en'`.
+   */
+  locale?: string
 }
 
 function getInitials(name: string): string {
@@ -80,8 +98,10 @@ export function DonationWall({
   className,
   texts,
   noDonationsText: legacyNoDonationsText,
+  locale = 'en',
 }: DonationWallProps) {
   const { donations, isLoading, error } = useDonations({ projectId, limit })
+  const { applicationResolutionStatus, payWebUrl } = useApplicationContext()
 
   const t = {
     loadingText: texts?.loadingText || 'Loading donations...',
@@ -92,6 +112,8 @@ export function DonationWall({
       'No donations yet. Be the first to support!',
     anonymousLabel: texts?.anonymousLabel || 'Anonymous',
   }
+
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
 
   const sortedDonations = useMemo(() => {
     if (!donations?.length) return []
@@ -120,17 +142,33 @@ export function DonationWall({
     )
   }
 
-  if (error) {
+  // Pay provider resolution failed — publishable key is invalid / network down
+  // during `/keys/config`. Render the graceful fallback rather than silently
+  // hiding the section.
+  if (applicationResolutionStatus === 'failed') {
     return (
       <Div className={className}>
-        <Div
-          className={`flex items-center justify-center gap-2 p-8 rounded-lg bg-destructive/10 border border-destructive/20`}
-        >
-          <Icon name="lucide:AlertCircle" className={`w-5 h-5 text-destructive`} />
-          <P className={`text-destructive font-medium`}>
-            {t.errorText}: {error}
-          </P>
-        </Div>
+        <PayNotConfiguredCard
+          reason="resolve-failed"
+          dashboardUrl={dashboardUrl}
+          texts={texts?.notConfigured}
+        />
+      </Div>
+    )
+  }
+
+  if (error) {
+    // Classify the error and pick the matching fallback reason. Unknown
+    // errors default to `fetch-failed` since the most common cause is the
+    // ezpay API being unreachable.
+    const reason = classifyPayError(error) ?? 'fetch-failed'
+    return (
+      <Div className={className}>
+        <PayNotConfiguredCard
+          reason={reason}
+          dashboardUrl={dashboardUrl}
+          texts={texts?.notConfigured}
+        />
       </Div>
     )
   }

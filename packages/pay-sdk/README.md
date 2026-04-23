@@ -117,8 +117,53 @@ tracks the publishableKey resolution lifecycle:
 `usePaymentHistory` and `BillingDashboard` check this status and **refuse to
 issue scoped queries** when `status === 'failed'` (fail-closed, not fail-open)
 — this prevents cross-app payment leaks on transient resolve errors. A failed
-state surfaces as an explicit error message; refresh the page or re-mount the
-provider to retry.
+state surfaces as a graceful `<PayNotConfiguredCard />` (see below); refresh
+the page or create a new key to retry.
+
+#### Graceful degradation — `<PayNotConfiguredCard />`
+
+When the SDK is unconfigured (missing `applicationId` / `publishableKey`), or
+when a downstream fetch fails with a network / 401 / 403 error, pay-sdk
+components (`<DonationWall>`, `<DonationCard>`, `<BillingDashboard>`,
+`<PricingPage>`) now render a graceful `<PayNotConfiguredCard />` with a
+"Get your key" CTA linking to the ezpay developer portal — instead of a
+scary red "Failed to fetch" banner.
+
+The card picks one of four reasons automatically:
+
+- `missing-key` — no publishable key / applicationId provided
+- `resolve-failed` — `/keys/config` threw (invalid key / rate limit)
+- `fetch-failed` — a downstream fetch threw a network error
+- `invalid-key` — a downstream call returned 401 / 403
+
+Each reason ships with English defaults (title, description, CTA). Consumers
+override via the component's `notConfiguredTexts` prop.
+
+To build the CTA link, `<PayProvider>` accepts a `payWebUrl` prop pointing
+to the ezpay web origin (e.g. `https://ezpay.ezstart.xyz`). When omitted, it
+auto-detects `http://localhost:6131` for localhost dev; in production the
+consumer MUST pass it explicitly — otherwise the fallback card renders the
+copy without the CTA button.
+
+```tsx
+<PayProvider
+  applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID}
+  config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL }}
+  payWebUrl={process.env.NEXT_PUBLIC_EZPAY_WEB_URL}
+>
+  <DonationWall projectId="myproject" locale={locale} />
+</PayProvider>
+```
+
+Consumer components (`DonationWall`, `DonationCard`, `BillingDashboard`,
+`PricingPage`) also accept an optional `locale` prop (defaults to `'en'`)
+used to build the `{payWebUrl}/{locale}/developer` dashboard URL. SDK stays
+i18n-agnostic — pass `useLocale()` from your i18n library.
+
+The `fetch-failed` reason is silenced in production by default: users see a
+muted "Temporarily unavailable" placeholder instead of "Payments service
+unreachable". Override via `silentInProduction={false}` if you want the full
+card on transient infra issues too.
 
 ### Components (`@ezstart/pay-sdk/components`)
 
@@ -129,6 +174,7 @@ provider to retry.
 - `FeatureGate`, `PromoCodeInput`, `RefundButton`, `ConfirmActionDialog`
 - `PaymentSuccessPage`, `PaymentHistory`, `ProductCard`, `ProductGrid`
 - `PayDeveloperPortal`, `CreatePayKeyModal` — API keys CRUD (create / rotate / revoke) scoped to an Application
+- `PayNotConfiguredCard` — graceful fallback rendered by pay-sdk components when the SDK is unconfigured or a downstream fetch fails
 
 ### Developer portal (API keys)
 

@@ -16,5 +16,8 @@ export default defineConfig({
       NODE_ENV: 'test',
     },
     setupFiles: ['./src/__tests__/setup.ts'],
+    // Never run tests from `dist/` — it contains stale compiled copies that
+    // drift out of sync with `src/` and cause spurious failures.
+    exclude: ['**/node_modules/**', '**/dist/**'],
   },
 })

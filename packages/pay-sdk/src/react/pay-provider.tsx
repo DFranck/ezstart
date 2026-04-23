@@ -38,6 +38,16 @@ interface PayContextValue {
    *   MUST NOT fall back to cross-app queries when status is `failed`.
    */
   applicationResolutionStatus: ApplicationResolutionStatus
+  /**
+   * Public ezpay web URL — where the developer portal (API keys CRUD) lives.
+   * Used by pay-sdk components to build "Get your key" CTAs in graceful
+   * fallback cards when the SDK is unconfigured or its queries fail.
+   *
+   * Different from `ApplicationConfigResponse.webUrl` (which is the ezauth
+   * web URL returned by `/keys/config`). `null` when the consumer did not
+   * provide a value and auto-detection failed (non-localhost production).
+   */
+  payWebUrl: string | null
 }
 
 const PayContext = createContext<PayContextValue | null>(null)
@@ -76,6 +86,34 @@ interface PayProviderProps {
   onTokenRefresh?: () => Promise<string | null>
   /** Optional callback invoked when token refresh fails (e.g. to trigger logout/redirect). */
   onAuthFailure?: () => void
+  /**
+   * Public ezpay web URL — where the developer portal (API keys CRUD) lives.
+   * Used by pay-sdk components to build "Get your key" CTAs in graceful
+   * fallback cards. Example: `https://ezpay.ezstart.xyz`.
+   *
+   * When omitted, auto-detected from `config.apiUrl` for localhost dev
+   * (`http://localhost:6130` → `http://localhost:6131`). In production the
+   * consumer MUST pass this explicitly — otherwise fallback cards render
+   * without the CTA button.
+   */
+  payWebUrl?: string
+}
+
+/**
+ * Auto-detect the ezpay web URL for localhost dev when the consumer did not
+ * provide `payWebUrl` explicitly. Falls back to `null` for any non-localhost
+ * origin so we never silently link users to a wrong host in production.
+ *
+ * @internal
+ */
+function resolvePayWebUrl(explicit: string | undefined, apiUrl: string | undefined): string | null {
+  if (explicit && explicit.length > 0) return explicit
+  if (!apiUrl) return null
+  // Only auto-wire localhost — production MUST be explicit.
+  if (/^http:\/\/localhost:\d+/i.test(apiUrl)) {
+    return 'http://localhost:6131'
+  }
+  return null
 }
 
 export function PayProvider({
@@ -87,6 +125,7 @@ export function PayProvider({
   getToken,
   onTokenRefresh,
   onAuthFailure,
+  payWebUrl,
 }: PayProviderProps) {
   // Use refs so the client always calls the latest callbacks without re-creating the client
   const getTokenRef = useRef(getToken ?? config?.getToken)
@@ -256,6 +295,11 @@ export function PayProvider({
 
   const isReady = resolutionStatus === 'ready' || resolutionStatus === 'idle'
 
+  const resolvedPayWebUrl = useMemo(
+    () => resolvePayWebUrl(payWebUrl, config?.apiUrl),
+    [payWebUrl, config?.apiUrl]
+  )
+
   const contextValue = useMemo(
     () => ({
       client,
@@ -263,8 +307,9 @@ export function PayProvider({
       appSlug,
       isReady,
       applicationResolutionStatus: resolutionStatus,
+      payWebUrl: resolvedPayWebUrl,
     }),
-    [client, applicationId, appSlug, isReady, resolutionStatus]
+    [client, applicationId, appSlug, isReady, resolutionStatus, resolvedPayWebUrl]
   )
 
   return <PayContext.Provider value={contextValue}>{children}</PayContext.Provider>
@@ -296,9 +341,17 @@ export function useApplicationContext(): {
   appSlug: string | null
   isReady: boolean
   applicationResolutionStatus: ApplicationResolutionStatus
+  /**
+   * Ezpay web URL (e.g. `https://ezpay.ezstart.xyz`) — where the developer
+   * portal lives. Used to build "Get your key" CTAs in graceful fallback
+   * cards. `null` when the provider couldn't auto-detect (non-localhost and
+   * no `payWebUrl` prop provided).
+   */
+  payWebUrl: string | null
 } {
-  const { applicationId, appSlug, isReady, applicationResolutionStatus } = usePayContext()
-  return { applicationId, appSlug, isReady, applicationResolutionStatus }
+  const { applicationId, appSlug, isReady, applicationResolutionStatus, payWebUrl } =
+    usePayContext()
+  return { applicationId, appSlug, isReady, applicationResolutionStatus, payWebUrl }
 }
 
 export function usePay() {

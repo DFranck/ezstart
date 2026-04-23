@@ -3,11 +3,12 @@
 import { useAuth } from '@ezstart/auth-sdk'
 import { DonationCard, DonationWall } from '@ezstart/pay-sdk'
 import { Div, H1, Main, P, Section } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 export default function DonatePage(): React.JSX.Element {
   const t = useTranslations('donate.landing')
   const tSupport = useTranslations('support')
+  const locale = useLocale()
   const { user, isAuthenticated } = useAuth()
 
   return (
@@ -28,6 +29,7 @@ export default function DonatePage(): React.JSX.Element {
               presetAmounts={[5, 10, 25]}
               currency="EUR"
               allowCustomAmount
+              locale={locale}
               userId={isAuthenticated ? user?._id : undefined}
               userEmail={isAuthenticated ? user?.email : undefined}
               userName={isAuthenticated ? user?.username : undefined}
@@ -42,6 +44,7 @@ export default function DonatePage(): React.JSX.Element {
             projectId="ezstart"
             limit={10}
             className="w-full max-w-3xl"
+            locale={locale}
             texts={{
               loadingText: tSupport('wall.loadingText'),
               errorText: tSupport('wall.errorText'),

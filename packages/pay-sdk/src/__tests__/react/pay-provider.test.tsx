@@ -480,6 +480,90 @@ describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
   })
 })
 
+describe('PayProvider — payWebUrl propagation', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    usePayStore.setState({
+      applicationId: null,
+      appSlug: null,
+      isReady: false,
+      applicationResolutionStatus: 'idle',
+    })
+  })
+
+  it('exposes the explicit payWebUrl prop through useApplicationContext', async () => {
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <PayProvider
+          applicationId="app_123"
+          payWebUrl="https://ezpay.example.com"
+          config={{ apiUrl: 'https://ezpay-api.example.com/api' }}
+        >
+          {children}
+        </PayProvider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current.isReady).toBe(true))
+    expect(result.current.payWebUrl).toBe('https://ezpay.example.com')
+  })
+
+  it('auto-detects localhost ezpay web when only localhost apiUrl is provided', async () => {
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <PayProvider applicationId="app_123" config={{ apiUrl: 'http://localhost:6130' }}>
+          {children}
+        </PayProvider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current.isReady).toBe(true))
+    // Localhost auto-wiring resolves the ezpay web dev port (6131).
+    expect(result.current.payWebUrl).toBe('http://localhost:6131')
+  })
+
+  it('returns null payWebUrl when apiUrl is a non-localhost production host', async () => {
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <PayProvider applicationId="app_123" config={{ apiUrl: 'https://ezpay-api.ezstart.xyz' }}>
+          {children}
+        </PayProvider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current.isReady).toBe(true))
+    expect(result.current.payWebUrl).toBeNull()
+  })
+
+  it('returns null payWebUrl when neither prop nor apiUrl is provided', async () => {
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <PayProvider applicationId="app_123">{children}</PayProvider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current.isReady).toBe(true))
+    expect(result.current.payWebUrl).toBeNull()
+  })
+
+  it('explicit payWebUrl wins over localhost auto-detection', async () => {
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <PayProvider
+          applicationId="app_123"
+          payWebUrl="https://override.example.com"
+          config={{ apiUrl: 'http://localhost:6130' }}
+        >
+          {children}
+        </PayProvider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current.isReady).toBe(true))
+    expect(result.current.payWebUrl).toBe('https://override.example.com')
+  })
+})
+
 describe('PayClient.resolveApplicationByKey', () => {
   afterEach(() => {
     vi.restoreAllMocks()

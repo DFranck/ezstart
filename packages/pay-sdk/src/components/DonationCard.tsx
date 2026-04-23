@@ -19,8 +19,9 @@ import {
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { toast } from 'sonner'
-import { usePay } from '../react/pay-provider.js'
+import { usePay, useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
+import { PayNotConfiguredCard, type PayNotConfiguredTexts } from './common/PayNotConfiguredCard.js'
 
 export interface DonationCardProps {
   /**
@@ -50,6 +51,19 @@ export interface DonationCardProps {
   userEmail?: string
   userName?: string
   texts?: Partial<DonationCardTexts>
+  /**
+   * Overrides for the graceful fallback card rendered when the PayProvider
+   * resolution failed (missing / invalid publishable key, ezpay API down on
+   * `/keys/config`). Keys are optional — English defaults are used when
+   * omitted.
+   */
+  notConfiguredTexts?: PayNotConfiguredTexts
+  /**
+   * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
+   * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
+   * to `'en'`.
+   */
+  locale?: string
 }
 
 export interface DonationCardTexts {
@@ -105,9 +119,13 @@ export function DonationCard({
   userEmail,
   userName,
   texts: textsProp,
+  notConfiguredTexts,
+  locale = 'en',
 }: DonationCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
   const { createDonation, isLoading } = usePay()
+  const { applicationResolutionStatus, payWebUrl } = useApplicationContext()
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
   const [message, setMessage] = useState('')
@@ -158,6 +176,21 @@ export function DonationCard({
     } catch (error) {
       logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
     }
+  }
+
+  // Graceful fallback — the PayProvider could not resolve the application
+  // context (missing key, ezpay /keys/config down, invalid key). Rendering
+  // the form would break on submit, so we surface a helpful CTA instead.
+  if (applicationResolutionStatus === 'failed') {
+    return (
+      <PayNotConfiguredCard
+        reason="resolve-failed"
+        dashboardUrl={dashboardUrl}
+        texts={notConfiguredTexts}
+        className={className}
+        variant={isCompact ? 'compact' : 'default'}
+      />
+    )
   }
 
   if (isCompact) {
