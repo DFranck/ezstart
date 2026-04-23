@@ -9,6 +9,11 @@ Quand la date exacte est inconnue, l'item est placé dans le mois/section où il
 
 ## 2026-04
 
+### Cross-cutting — Consumer app publishable keys + pay-sdk migration (2026-04-23)
+
+- [x] 2026-04-23 — **CROSS-KEY-001: Publishable key migration for 6 consumer apps**: seed script `apps/ezauth/api/src/scripts/seed-consumer-app-keys.ts` creates one `ez_pk_live_*` publishable key per consumer app (ezstart, ezbill, green-pulse, fengshui, asc-tcd, gacha-analyzer) linked to its Application doc (scope='user', createdBy='system-seed-consumer'). Idempotent — re-runs are no-ops. Ran on Railway staging (6 keys generated). Each app's `.env.local` + `.env.example` updated with `NEXT_PUBLIC_EZAUTH_KEY=`. All AuthProviders already wired `publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}`. No `?app=` hardcoded links found (Mission 4 no-op). Keys captured in `tmp/consumer-app-keys-2026-04-23.txt` (gitignored). Tests: 5 new vitest specs in `__tests__/scripts/seed-consumer-app-keys.test.ts`.
+- [x] 2026-04-23 — **pay-sdk `appName` deprecation closure — green-pulse admin/payments + admin/test-payments**: both pages migrated from `appName="green-pulse"` to `applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID}` (PayProvider + PayAdminDashboard + `client.listPlans()`). Unblocked by CROSS-KEY-001. Last two legacy consumers — pay-sdk is now 100% on the `applicationId` path.
+
 ### Apps — P7 closure + Stripe Connect dogfood + UX fixes (2026-04-23)
 
 **P7 full closure — all 8 phases A-H validated E2E on staging** (commits a3432a2d → cccb28bb)

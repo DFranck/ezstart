@@ -28,6 +28,13 @@ import {
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
+/**
+ * Application id resolved at build time from `NEXT_PUBLIC_EZAUTH_APP_ID`
+ * (see `.env.local`). Required to scope pay-sdk queries to the green-pulse
+ * tenant instead of the deprecated `appName` legacy path.
+ */
+const applicationId = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
+
 function TestContent() {
   const t = useTranslations('admin.testPayments')
   const { user } = useAuth()
@@ -38,7 +45,7 @@ function TestContent() {
 
   useEffect(() => {
     client
-      .listPlans({ appName: 'green-pulse', active: true })
+      .listPlans({ applicationId, active: true })
       .then(res => setPlans(res.data || []))
       .catch(() => {})
       .finally(() => setPlansLoading(false))
@@ -184,7 +191,7 @@ export default function TestPaymentsPage() {
   return (
     <>
       <H1 className="mb-6">{t('testPayments.pageTitle')}</H1>
-      <PayProvider appName="green-pulse" getToken={() => accessToken}>
+      <PayProvider applicationId={applicationId} getToken={() => accessToken}>
         <TestContent />
       </PayProvider>
     </>

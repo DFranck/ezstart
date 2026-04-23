@@ -22,7 +22,6 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 Non-bloquants, à traiter opportunistiquement. Certains attendent CROSS-KEY-001 ou la suite P8/P9.
 
-- [ ] **pay-sdk `appName` deprecation warnings — remaining consumers**: green-pulse `admin/payments` (`PayAdminDashboard appName="green-pulse"`) + green-pulse `admin/test-payments` (`PayProvider appName="green-pulse"`) still emit the dev-only deprecation error. Migration blocked on **CROSS-KEY-001** (green-pulse needs its own `NEXT_PUBLIC_EZAUTH_KEY` + publishable-key-resolvable Application id before `applicationId` can be passed). ezauth + ezpay dashboards have been migrated on 2026-04-23.
 - [ ] **Sidebar nav `#` anchors**: several links in the unified dashboard sidebar still point to `#` placeholders instead of real client routes. UX minor — no 404 (anchor stays on page), but breadcrumb / deep link doesn't work.
 - [ ] **Connect app stuck pending — no "Resume onboarding" button**: when a Connect onboarding flow is started and abandoned before KYC, the ConnectedAccount stays `status=pending` with no UI affordance to resume. Today the user must re-trigger via the `Stripe Connect` tab, which creates a new onboarding link server-side but the existing pending row is never rehydrated in the UI.
 
@@ -44,7 +43,6 @@ Rendre le monorepo "hire-ready" pour accueillir des devs externes sur une app (e
 
 ### Cross-cutting
 
-- [ ] **CROSS-KEY-001: Migration `?app=` → `?key=ez_pk_live_*` pour toutes les apps consumer d'ezauth** — Actuellement seul ezpay a été partiellement migré vers le nouveau système de publishable key (défini dans `standard-saas-keys.md`). À faire : ezstart, ezbill, green-pulse, fengshui, asc-tcd, gacha-analyzer. Chaque app doit (1) avoir sa clé `ez_pk_live_<hex>` créée via dashboard ezauth, (2) ajouter `NEXT_PUBLIC_EZAUTH_KEY=` dans son `.env.local` + `.env.example`, (3) passer `publishableKey={...}` au `<AuthProvider>`, (4) supprimer `?app=` hardcoded des liens login/register. Bloqué par : finalisation du renommage prefixes `ezk_*` → `ez_pk_*`/`ez_sk_*` (EZ-KEY-001).
 - [ ] **npm publish setup** — In progress. Setup `npm publish --access public` for all `@ezstart/*` packages. Changesets for versioning + changelog. GitHub Action on tag `v*.*.*` auto-publishes modified packages. Packages: api-contracts, api-core, api-sdk, auth-sdk, pay-sdk, ui (phase 1).
 - [ ] **Developer API key system** — Après publish npm. Chaque SDK accepte `{ apiKey }` dans sa config. EZAuth dashboard génère des API keys par app. Middleware `validateApiKey` dans api-core. Free tier (ex: 1000 users auth, 100 transactions pay) → payant via EZPay subscriptions. Self-dogfood: toutes les apps monorepo utilisent le même système (clé admin gratuite / illimitée). Modèle Clerk/Stripe : SDK gratuit npm, service payant via API key + quotas.
 - [ ] **Developer dashboard (EZStart hub)** — Dashboard pour devs externes : créer un compte, générer API keys, voir usage/quotas, gérer billing via EZPay. Pages: `/developer/apps`, `/developer/keys`, `/developer/usage`, `/developer/billing`. Consomme auth-sdk + pay-sdk en dogfood.
