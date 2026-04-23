@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '@ezstart/auth-sdk'
+import { RegisterButton, useAuth } from '@ezstart/auth-sdk'
 import {
   Badge,
   Button,
@@ -111,9 +111,9 @@ export default function HomePage() {
               <Link href={`/${locale}/dashboard`}>{t('heroCtaDashboard')}</Link>
             </Button>
           ) : (
-            <Button asChild size="lg">
-              <Link href="/register">{t('heroCta')}</Link>
-            </Button>
+            <RegisterButton size="lg" alwaysShowText>
+              {t('heroCta')}
+            </RegisterButton>
           )}
           <Button asChild variant="outline" size="lg">
             <Link href="/docs">{t('heroCtaSecondary')}</Link>
@@ -257,9 +257,9 @@ export default function HomePage() {
                 <Link href={`/${locale}/dashboard`}>{t('heroCtaDashboard')}</Link>
               </Button>
             ) : (
-              <Button asChild size="lg">
-                <Link href="/register">{t('ctaCta')}</Link>
-              </Button>
+              <RegisterButton size="lg" alwaysShowText>
+                {t('ctaCta')}
+              </RegisterButton>
             )}
           </Div>
         </Div>

@@ -99,6 +99,8 @@ export type { ProtectedMiddlewareConfig } from './middleware/index.js'
 export { AuthCallbackPage } from './components/AuthCallbackPage.js'
 export { LoginButton } from './components/LoginButton.js'
 export type { LoginButtonProps } from './components/LoginButton.js'
+export { RegisterButton } from './components/RegisterButton.js'
+export type { RegisterButtonProps } from './components/RegisterButton.js'
 
 // Auth form components
 export { SignInForm } from './components/SignInForm.js'
