@@ -51,6 +51,17 @@ export interface ForgotPasswordFormProps {
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<ForgotPasswordFormTexts>
+  /**
+   * Key validation status for the DevModeBanner. Matches the prop on
+   * `SignInForm` / `SignUpForm` so all three auth forms surface the same
+   * dev-mode diagnostic when a consumer key is attached to the URL.
+   * - `'valid'`   — key was validated successfully
+   * - `'invalid'` — key is invalid, revoked, or expired
+   * - `'missing'` — no key provided
+   */
+  keyStatus?: 'valid' | 'invalid' | 'missing'
+  /** Raw publishable key from URL (for DevModeBanner display). */
+  urlKey?: string
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -66,6 +77,8 @@ export function ForgotPasswordForm({
   backHref,
   locale: propLocale,
   texts,
+  keyStatus,
+  urlKey,
 }: ForgotPasswordFormProps) {
   const contextLocale = useLocale()
   const locale = propLocale ?? contextLocale
@@ -201,7 +214,12 @@ export function ForgotPasswordForm({
           )}
         </Div>
 
-        <DevModeBanner appName={appName} locale={navigation.locale} />
+        <DevModeBanner
+          appName={appName}
+          keyStatus={keyStatus}
+          urlKey={urlKey}
+          locale={navigation.locale}
+        />
       </form>
     </Form>
   )

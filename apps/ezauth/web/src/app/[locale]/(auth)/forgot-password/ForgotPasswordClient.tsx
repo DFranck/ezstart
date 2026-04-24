@@ -32,6 +32,18 @@ function ForgotPasswordContent({ ssrAppName }: ForgotPasswordContentProps) {
   const keyConfig = useKeyConfig(navigation.publishableKey)
   const app = keyConfig.appName ?? navigation.app ?? ssrAppName ?? 'ezauth'
 
+  // Surface the same DevModeBanner state as SignInForm / SignUpForm so a
+  // consumer arriving on /forgot-password with a valid `?key=` sees the
+  // green confirmation banner (instead of the misleading "No API key
+  // configured" dev fallback).
+  const bannerKeyStatus = navigation.publishableKey
+    ? keyConfig.status === 'valid'
+      ? ('valid' as const)
+      : keyConfig.status === 'invalid'
+        ? ('invalid' as const)
+        : undefined
+    : undefined
+
   return (
     <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto">
       <CardHeader className="text-center pb-4">
@@ -42,6 +54,8 @@ function ForgotPasswordContent({ ssrAppName }: ForgotPasswordContentProps) {
       <CardContent className="space-y-4">
         <ForgotPasswordForm
           appName={app}
+          keyStatus={bannerKeyStatus}
+          urlKey={navigation.publishableKey}
           texts={{
             email: t('email'),
             emailPlaceholder: t('emailPlaceholder'),
