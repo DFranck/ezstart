@@ -79,7 +79,7 @@ await startServer(app, { routes: router, port: 3000, logger })
 
 Factory that returns `{ app, config, logger }`. Wires trust-proxy, CORS, JSON parser, health + root endpoints, and optional global rate limiting.
 
-Key config: `port`, `serviceName`, `cors` (`'*'` or `{ origins: string[] }`), `rateLimit` (preset + options), `rawBodyRoutes`, `db`, `logger`.
+Key config: `port`, `serviceName`, `cookieAuthRoutes` (path prefixes for cookie-authenticated endpoints) + `cookieAuthAllowlist` (first-party origins for strict CORS), `rateLimit` (preset + options), `rawBodyRoutes`, `db`, `logger`. The legacy `cors` option is still honored for backcompat but is deprecated — see the "CORS policy" section below.
 
 ### `startServer(app, opts): Promise<http.Server>`
 
@@ -96,9 +96,36 @@ Emit the envelope shapes defined by `@ezstart/api-contracts`:
 ### Middlewares
 
 - `createRateLimiter(opts)` (plus `createStrictRateLimiter`, `createVeryStrictRateLimiter`, `createModerateRateLimiter`)
-- `createCorsMiddleware(config)` — wraps the `cors` package
+- `createPermissiveCorsMiddleware(opts?)` — Tier 1/2 CORS (`ACAO: *`, `credentials: false`). Applied globally by `createApiServer` unless the legacy `cors` option is passed.
+- `createStrictCorsMiddleware({ allowlist, ... })` — Tier 3 CORS for cookie-authenticated routes. Reflects the origin only when it matches the allowlist (exact string or regex) and sets `credentials: true`.
+- `createCorsMiddleware(config)` — **deprecated** wrapper around the `cors` package. Use the permissive/strict factories instead.
 - `createAuthMiddleware({ verifyToken, cookieName? })` — returns `{ requireAuth, optionalAuth }`. The verifier is fully injected (JWT, PASETO, opaque session — all equivalent). Hydrates `req.userId` and `req.user`.
 - `validateBody(schema)` / `validateQuery(schema)` / `validateParams(schema)` — Zod validators that populate `req.validatedBody` / `req.validatedQuery` / `req.validatedParams`.
+
+### CORS policy (3-tier)
+
+`createApiServer` (and `createEzstartServer`) implement a 3-tier CORS model aligned with Stripe / Clerk / Supabase. See `.claude/rules/standard-saas-cors.md` for the full rationale.
+
+| Tier         | Auth mode                                           | Example endpoints                                       | CORS                                                              |
+| ------------ | --------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------- |
+| **1** Public | Publishable key (`?key=ez_pk_*`) or none            | `GET /api/keys/config`, `GET /api/plans`, `GET /health` | `ACAO: *`, `credentials: false`                                   |
+| **2** Bearer | `Authorization: Bearer <JWT>`                       | `POST /api/donations`, `GET /api/users/me`              | `ACAO: *`, `credentials: false`                                   |
+| **3** Cookie | `Cookie: session=<httpOnly>` (auto-sent by browser) | `POST /api/auth/login`, `POST /api/auth/refresh`        | `ACAO: <reflected origin>`, `credentials: true`, strict allowlist |
+
+Opt-in strict CORS per route prefix via `cookieAuthRoutes` + `cookieAuthAllowlist`:
+
+```ts
+createEzstartServer('ezauth', {
+  cookieAuthRoutes: ['/api/auth/login', '/api/auth/refresh', '/api/auth/logout'],
+  cookieAuthAllowlist: [
+    'https://ezauth.ezstart.xyz',
+    /^https:\/\/ezauth-[a-z0-9]+-ezstart\.vercel\.app$/,
+    'http://localhost:6111',
+  ],
+})
+```
+
+All other paths (Tier 1/2) automatically receive permissive CORS — external consumers can call them from any origin without registering their domain, as expected for a SaaS API.
 
 ### `createDocRouter(registry, router, basePath?): DocRouter`
 

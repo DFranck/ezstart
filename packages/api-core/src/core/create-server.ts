@@ -9,7 +9,11 @@
 
 import express, { type Express } from 'express'
 import './express-aug.js'
-import { createCorsMiddleware } from './middleware/cors.js'
+import {
+  createCorsMiddleware,
+  createPermissiveCorsMiddleware,
+  createStrictCorsMiddleware,
+} from './middleware/cors.js'
 import {
   createModerateRateLimiter,
   createRateLimiter,
@@ -64,8 +68,55 @@ export function createApiServer(config: ServerConfig): ApiServer {
   // is exposed via X-Forwarded-For — critical for rate limiting.
   app.set('trust proxy', true)
 
-  // CORS (default: open — caller should override in production).
-  app.use(createCorsMiddleware(config.cors ?? '*'))
+  // CORS — 3-tier policy (see .claude/rules/standard-saas-cors.md).
+  //
+  // 1. Permissive CORS (`ACAO: *`, `credentials: false`) applies to every
+  //    path NOT listed in `cookieAuthRoutes`. Safe for Tier 1 (public /
+  //    publishable-key) and Tier 2 (Bearer-auth) endpoints because neither
+  //    relies on cookies.
+  //
+  // 2. Strict CORS applies ONLY to paths matching a `cookieAuthRoutes`
+  //    prefix: reflects origin only when it matches `cookieAuthAllowlist`,
+  //    sends `credentials: true`. Required for Tier 3 (cookie-auth) to
+  //    block CSRF from arbitrary origins.
+  //
+  // The two middlewares are mutually exclusive per-path — they never stack
+  // on the same request. Stacking would cause the permissive `ACAO: *`
+  // header to leak into rejected strict responses.
+  //
+  // The legacy `cors` option is honored for backcompat: when provided, it
+  // wins over the 3-tier defaults (single middleware applied globally). New
+  // code should use `cookieAuthRoutes` + `cookieAuthAllowlist` instead.
+  if (config.cors !== undefined) {
+    // Legacy path — single global CORS middleware.
+    app.use(createCorsMiddleware(config.cors))
+  } else {
+    const cookieRoutes = config.cookieAuthRoutes ?? []
+    const cookieAllowlist = config.cookieAuthAllowlist ?? []
+
+    if (cookieRoutes.length > 0 && cookieAllowlist.length === 0) {
+      logger.warn(
+        '[api-core] cookieAuthRoutes set but cookieAuthAllowlist is empty — all cross-origin cookie requests will be rejected',
+        { cookieAuthRoutes: cookieRoutes }
+      )
+    }
+
+    // Register strict middlewares FIRST so they claim cookie-auth paths
+    // before the permissive fallback ever runs.
+    for (const prefix of cookieRoutes) {
+      app.use(prefix, createStrictCorsMiddleware({ allowlist: cookieAllowlist, logger }))
+    }
+
+    // Permissive fallback — only runs when no strict middleware already
+    // handled the response (i.e. the path is not under `cookieAuthRoutes`).
+    const permissive = createPermissiveCorsMiddleware()
+    const isCookiePath = (url: string): boolean =>
+      cookieRoutes.some(prefix => url === prefix || url.startsWith(`${prefix}/`))
+    app.use((req, res, next) => {
+      if (cookieRoutes.length > 0 && isCookiePath(req.path)) return next()
+      permissive(req, res, next)
+    })
+  }
 
   // Raw body routes (webhooks) must be registered BEFORE the JSON parser.
   if (config.rawBodyRoutes) {

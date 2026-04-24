@@ -4,8 +4,13 @@
  * Wires the agnostic `createApiServer` factory with monorepo-specific
  * concerns:
  * - Port resolution via `@ezstart/config` (`getPort(appName, 'api')`).
- * - CORS auto-configured from `@ezstart/config` (`getAllowedOrigins`).
+ * - 3-tier CORS policy (permissive global + strict per-route on cookie
+ *   paths). First-party origins are derived from `@ezstart/config`
+ *   (`getAllowedOrigins`) unless the caller provides an explicit
+ *   `cookieAuthAllowlist`.
  * - Logging through `@ezstart/logger`.
+ *
+ * See `.claude/rules/standard-saas-cors.md` for the CORS rationale.
  *
  * Consumers in the monorepo should import `createEzstartServer` from
  * `@ezstart/api-core` directly.
@@ -21,6 +26,7 @@ import type { RequestHandler } from 'express'
 import type {
   ApiServer,
   AuthenticatedUser,
+  CookieAuthAllowlistEntry,
   ServerConfig,
   ServerLogger,
   TokenVerifier,
@@ -45,6 +51,39 @@ export type EzstartServerOptions = {
   rawBodyRoutes?: string[]
   /** Logger override (default: `@ezstart/logger`). */
   logger?: ServerLogger
+  /**
+   * Path prefixes that set cookies and therefore require strict CORS.
+   * Default: `[]` (no cookie routes — the API is fully Bearer / publishable-key
+   * based).
+   *
+   * Example for `api-ezauth`:
+   * ```ts
+   * cookieAuthRoutes: [
+   *   '/api/auth/login',
+   *   '/api/auth/refresh',
+   *   '/api/auth/logout',
+   *   '/api/auth/oauth',
+   * ]
+   * ```
+   */
+  cookieAuthRoutes?: string[]
+  /**
+   * First-party origins allowed to call the cookie-auth routes. Accepts
+   * exact strings or regex (useful for Vercel preview deploys).
+   *
+   * When omitted, falls back to `getAllowedOrigins(appName)` from
+   * `@ezstart/config` (the monorepo first-party web URLs).
+   *
+   * Example:
+   * ```ts
+   * cookieAuthAllowlist: [
+   *   'https://ezauth.ezstart.xyz',
+   *   /^https:\/\/ezauth-[a-z0-9]+-ezstart\.vercel\.app$/,
+   *   'http://localhost:6111',
+   * ]
+   * ```
+   */
+  cookieAuthAllowlist?: readonly CookieAuthAllowlistEntry[]
 }
 
 type LoggerLike = {
@@ -84,13 +123,22 @@ export function createEzstartServer(
   const port =
     options.port ??
     (process.env.PORT ? Number.parseInt(process.env.PORT, 10) : getPort(appName, 'api'))
-  const origins = getAllowedOrigins(appName)
   const logger = options.logger ?? adaptLogger(monorepoLogger)
+
+  const cookieAuthRoutes = options.cookieAuthRoutes ?? []
+  // When the caller doesn't supply an explicit allowlist, fall back to the
+  // monorepo first-party origins (same-app + declared consumers). This keeps
+  // the previous behaviour for apps that haven't been migrated yet.
+  const cookieAuthAllowlist =
+    options.cookieAuthAllowlist ?? (cookieAuthRoutes.length > 0 ? getAllowedOrigins(appName) : [])
 
   return createApiServer({
     port,
     serviceName: appName,
-    cors: { origins, credentials: true },
+    // Note: `cors` is intentionally omitted so the 3-tier defaults kick in
+    // inside `createApiServer`. See .claude/rules/standard-saas-cors.md.
+    cookieAuthRoutes,
+    cookieAuthAllowlist,
     rateLimit: options.rateLimit ?? { preset: 'standard' },
     auth: options.auth,
     db: options.db,

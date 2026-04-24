@@ -18,7 +18,7 @@
 
 - [ ] Auth middleware sur toutes les routes protégées (`authMiddleware` ou `verifyTokenMiddleware`)
 - [ ] Rate limiting global (preset `standard` minimum, `strict` sur auth routes)
-- [ ] CORS configuré via `createEzstartServer` (origins auto-détectées par app)
+- [ ] **CORS** via `createEzstartServer` avec politique 3-tier (public/Bearer → `*`, cookie-auth → allowlist strict) — cf. [`standard-saas-cors.md`](./standard-saas-cors.md). **Jamais** de `CORS_ORIGINS` env var pour les consumers externes.
 - [ ] Input validation Zod sur TOUT body/params/query (jamais `req.body` brut)
 - [ ] `sendError()` / `sendSuccess()` / `sendValidationError()` — jamais `res.json()` direct
 - [ ] Pas de secrets dans le code (cf. `data-protection.md`)

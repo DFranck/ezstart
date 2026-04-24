@@ -19,8 +19,10 @@ import { seedDefaultPrompts, seedDefaultAppProviders } from './services/ai-promp
 import { seedGlobalProviders } from './services/provider-access.service.js'
 import type { Server as IOServer } from 'socket.io'
 
-// Create pre-configured Express app (CORS auto-wired for ezstart hub)
-const server = createEzstartServer('ezstart')
+// Create pre-configured Express app.
+// No cookie-auth routes: EZStart hub consumes EZAuth for identity, no own cookies.
+// Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
+const server = createEzstartServer('ezstart', { cookieAuthRoutes: [] })
 const { app } = server
 
 // API version headers on every response

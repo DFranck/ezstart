@@ -26,7 +26,14 @@ export {
 } from './core/responses.js'
 
 // Middlewares
-export { createCorsMiddleware } from './core/middleware/cors.js'
+export {
+  createCorsMiddleware,
+  createPermissiveCorsMiddleware,
+  createStrictCorsMiddleware,
+  type PermissiveCorsOptions,
+  type StrictCorsEntry,
+  type StrictCorsOptions,
+} from './core/middleware/cors.js'
 export {
   createModerateRateLimiter,
   createRateLimiter,
@@ -79,6 +86,7 @@ export type {
   ApiMeta,
   ApiServer,
   AuthenticatedUser,
+  CookieAuthAllowlistEntry,
   CorsConfig,
   RateLimitPreset,
   ServerConfig,

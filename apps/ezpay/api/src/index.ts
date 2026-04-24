@@ -24,9 +24,14 @@ if (process.env.NODE_ENV === 'production' && !process.env.EZPAY_SERVER_EZAUTH_KE
   )
 }
 
-// Create pre-configured server with Stripe webhook raw-body routes
+// Create pre-configured server with Stripe webhook raw-body routes.
+// No cookie-auth routes: EZPay is a pure Bearer/publishable-key API — it
+// consumes EZAuth JWTs but never sets its own cookies. Tier 1/2 permissive
+// CORS (ACAO: *) applies to every endpoint.
+// See .claude/rules/standard-saas-cors.md.
 const server = createEzstartServer('ezpay', {
   rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
+  cookieAuthRoutes: [],
 })
 const { app } = server
 

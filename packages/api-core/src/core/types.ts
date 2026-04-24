@@ -71,9 +71,14 @@ export type ServerLogger = {
 }
 
 /**
- * CORS configuration. When `corsOrigins` is `'*'` every origin is accepted
- * (discouraged in production). Array form restricts to the listed origins
- * with `credentials: true`.
+ * Legacy CORS configuration. When `corsOrigins` is `'*'` every origin is
+ * accepted (discouraged in production). Array form restricts to the listed
+ * origins with `credentials: true`.
+ *
+ * @deprecated Prefer the 3-tier model exposed via `ServerConfig`:
+ * permissive CORS is applied globally and `cookieAuthRoutes` /
+ * `cookieAuthAllowlist` opt-in strict CORS on cookie-authenticated paths.
+ * See `.claude/rules/standard-saas-cors.md`.
  */
 export type CorsConfig =
   | '*'
@@ -83,6 +88,12 @@ export type CorsConfig =
       methods?: string[]
       allowedHeaders?: string[]
     }
+
+/**
+ * Entry in a strict CORS allowlist. Accepts an exact origin string or a
+ * regex — regex is typically used for Vercel preview deploys.
+ */
+export type CookieAuthAllowlistEntry = string | RegExp
 
 /**
  * Rate-limiter preset. The core ships four presets (standard / strict /
@@ -98,8 +109,45 @@ export type ServerConfig = {
   port: number
   /** Human-readable name used in logs / OpenAPI title. */
   serviceName?: string
-  /** CORS policy. Default `'*'`. */
+  /**
+   * Legacy CORS policy. Default `'*'`.
+   *
+   * @deprecated New code should rely on the 3-tier defaults:
+   * permissive CORS (`*`) is applied globally and `cookieAuthRoutes` +
+   * `cookieAuthAllowlist` opt-in strict CORS on cookie-auth paths. This
+   * field is preserved to avoid a breaking change during the migration
+   * window.
+   */
   cors?: CorsConfig
+  /**
+   * Path prefixes that set cookies (Tier 3 — cookie-authenticated).
+   * For every prefix listed here, a strict CORS middleware is registered
+   * that reflects the origin only when it matches `cookieAuthAllowlist`
+   * and sends `credentials: true`. All other paths keep the permissive
+   * policy (`Access-Control-Allow-Origin: *`, `credentials: false`).
+   *
+   * @example
+   * ```ts
+   * cookieAuthRoutes: ['/api/auth/login', '/api/auth/refresh']
+   * ```
+   */
+  cookieAuthRoutes?: string[]
+  /**
+   * First-party origins allowed to call the cookie-auth routes. Each entry
+   * is either an exact string match or a regex (typically for Vercel
+   * preview deploys). Required when `cookieAuthRoutes` is non-empty —
+   * leaving it empty blocks all cross-origin cookie requests.
+   *
+   * @example
+   * ```ts
+   * cookieAuthAllowlist: [
+   *   'https://ezauth.ezstart.xyz',
+   *   /^https:\/\/ezauth-[a-z0-9]+-ezstart\.vercel\.app$/,
+   *   'http://localhost:6111',
+   * ]
+   * ```
+   */
+  cookieAuthAllowlist?: readonly CookieAuthAllowlistEntry[]
   /**
    * When set, `createApiServer` returns an app with `createRateLimiter()`
    * already applied globally. Omit to apply rate limiting manually.

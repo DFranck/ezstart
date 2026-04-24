@@ -12,7 +12,9 @@ import {
 } from '@ezstart/api-core'
 import routes, { globalRegistry } from './routes/index.js'
 
-const server = createEzstartServer('ezbill')
+// No cookie-auth routes: EZBill consumes EZAuth for identity, no own cookies.
+// Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
+const server = createEzstartServer('ezbill', { cookieAuthRoutes: [] })
 const { app } = server
 
 // API version headers on every response
