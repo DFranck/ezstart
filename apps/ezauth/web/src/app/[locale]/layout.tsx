@@ -65,6 +65,21 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning data-app="ezauth">
       <head>
+        {/*
+          Sync the `theme` cookie (written by middleware from `?theme=` URL
+          param on cross-origin login redirects) into `localStorage` BEFORE
+          next-themes' own blocking script reads storage. Without this, the
+          consumer's preference never reaches next-themes (which reads only
+          localStorage, not cookies) and ezauth renders its own stored scheme
+          instead of matching the consumer. The cookie is consumed on read so
+          subsequent navigations don't keep resetting the user's preference.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var m=document.cookie.match(/(?:^|; )theme=([^;]+)/);if(!m)return;var v=decodeURIComponent(m[1]);if(v==='light'||v==='dark'||v==='system'){if(localStorage.getItem('theme')!==v){localStorage.setItem('theme',v);}document.cookie='theme=; path=/; max-age=0; SameSite=Lax';}}catch(e){}})()",
+          }}
+        />
         {themeCss ? (
           <style
             id="ezauth-tenant-theme"
