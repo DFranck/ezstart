@@ -1,5 +1,18 @@
-import * as Sentry from '@sentry/node'
 import { config } from 'dotenv'
+
+// Sentry is loaded lazily inside `initSentry`. Top-level `import '@sentry/node'`
+// triggers OpenTelemetry HTTP/Express auto-instrumentation as a side effect —
+// on Railway's managed Node runtime this causes every request carrying a
+// non-empty `Origin` header to 500 out before Express sees it, regardless
+// of the options passed to `Sentry.init`. Keeping the import inside the
+// DSN-gated branch means OTEL stays dormant when SENTRY_DSN is unset (dev)
+// and only activates after an explicit opt-in via `initSentry(appName)`.
+//
+// The public `Sentry` re-export at the bottom is a lazy getter too, so
+// call-sites such as `Sentry.captureException` work the same way without
+// eagerly triggering OTEL.
+type SentryModule = typeof import('@sentry/node')
+let loadedSentry: SentryModule | undefined
 
 /**
  * Initialize Sentry for error tracking and monitoring
@@ -27,6 +40,13 @@ export function initSentry(appName: string) {
     console.log(`⚠️  [Sentry] ${appName}: DSN not provided, skipping initialization`)
     return undefined
   }
+
+  // Lazy-load `@sentry/node` only now that we know a DSN is configured.
+  // The import + its OpenTelemetry auto-instrumentation only kicks in for
+  // APIs that explicitly opt in via initSentry().
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- sync lazy load to avoid top-level OTEL hook
+  loadedSentry = require('@sentry/node') as SentryModule
+  const Sentry = loadedSentry
 
   // Initialize Sentry with standard configuration.
   //
@@ -67,6 +87,19 @@ export function initSentry(appName: string) {
 }
 
 /**
- * Export Sentry for direct usage (captureException, captureMessage, etc.)
+ * Lazy Sentry proxy — returns the loaded SDK when `initSentry()` has been
+ * called, otherwise a no-op stub. Call-sites can use `Sentry.captureException`
+ * without eagerly triggering the top-level import + OpenTelemetry hook.
  */
-export { Sentry }
+export const Sentry = new Proxy(
+  {},
+  {
+    get(_target, prop: string) {
+      if (loadedSentry) {
+        return (loadedSentry as unknown as Record<string, unknown>)[prop]
+      }
+      // Stub: return a no-op function so the call-site doesn't crash.
+      return (..._args: unknown[]) => undefined
+    },
+  }
+) as SentryModule
