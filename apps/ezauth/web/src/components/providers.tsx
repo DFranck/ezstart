@@ -23,13 +23,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <QueryProvider>
           {/*
-            PayProvider is intentionally NOT given a `publishableKey`.
-            NEXT_PUBLIC_EZAUTH_KEY is an EZAUTH publishable key — passing it
+            PayProvider is scoped via `applicationId` (not `publishableKey`):
+            NEXT_PUBLIC_EZAUTH_KEY is an EZAUTH publishable key; passing it
             here would make PayProvider call ezpay `/api/keys/config` with an
-            ezauth key and 404. PricingPage receives `applicationId` directly
-            from NEXT_PUBLIC_EZAUTH_APP_ID on the landing page instead.
+            ezauth key and 404. Using `applicationId` bypasses the key-config
+            resolve and scopes ezpay queries directly to the ezauth tenant.
           */}
           <PayProvider
+            applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID ?? ''}
             appName="ezauth"
             config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
             locale={locale}

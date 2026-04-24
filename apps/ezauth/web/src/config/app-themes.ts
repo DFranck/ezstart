@@ -52,6 +52,16 @@ export const appThemes: Record<string, AppTheme> = {
     name: 'FengShui',
     showEzstartMessage: true,
   },
+  'asc-tcd': {
+    ...BASE_THEME,
+    name: 'ASC-TCD',
+    showEzstartMessage: false,
+  },
+  'gacha-analyzer': {
+    ...BASE_THEME,
+    name: 'Gacha Analyzer',
+    showEzstartMessage: true,
+  },
 }
 
 /**

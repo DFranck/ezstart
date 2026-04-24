@@ -498,7 +498,12 @@ export function SignUpForm({
         </form>
       </Form>
 
-      <DevModeBanner appName={appName} keyStatus={keyStatus} urlKey={urlKey} />
+      <DevModeBanner
+        appName={appName}
+        keyStatus={keyStatus}
+        urlKey={urlKey}
+        locale={navigation.locale}
+      />
     </Div>
   )
 }

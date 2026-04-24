@@ -23,6 +23,13 @@ export interface DevModeBannerProps {
   keyStatus?: 'valid' | 'invalid' | 'missing'
   /** The raw publishable key from the URL (for display). */
   urlKey?: string
+  /**
+   * BCP-47 locale used to prefix the "Get your key" developer portal URL.
+   * Defaults to `'en'`. Consumers rendering inside Next.js `[locale]` routes
+   * should pass the active locale so the link resolves to the matching
+   * locale route.
+   */
+  locale?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -49,7 +56,13 @@ function truncateKey(key: string): string {
  * <DevModeBanner />
  * ```
  */
-export function DevModeBanner({ className, appName, keyStatus, urlKey }: DevModeBannerProps) {
+export function DevModeBanner({
+  className,
+  appName,
+  keyStatus,
+  urlKey,
+  locale,
+}: DevModeBannerProps) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -69,6 +82,7 @@ export function DevModeBanner({ className, appName, keyStatus, urlKey }: DevMode
       overrideAppName={appName}
       keyStatus={keyStatus}
       urlKey={urlKey}
+      locale={locale}
     />
   )
 }
@@ -82,14 +96,16 @@ function DevModeBannerInner({
   overrideAppName,
   keyStatus,
   urlKey,
+  locale,
 }: DevModeBannerProps & { overrideAppName?: string }) {
   const { scope, publishableKey } = useAuth()
   const { webUrl, appName: contextAppName } = useAuthContext()
 
   const appName = overrideAppName || contextAppName
+  const resolvedLocale = locale && locale.length > 0 ? locale : 'en'
 
   // Build the developer dashboard URL for getting an API key
-  const developerUrl = `${webUrl}/developer?tab=api-keys`
+  const developerUrl = `${webUrl}/${resolvedLocale}/developer?tab=api-keys`
 
   // First-party mode without ?app= override — only visible to ezauth devs
   // Don't show banner when there's an app override (user came from external app)
