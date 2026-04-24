@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/node'
-import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { config } from 'dotenv'
 
 /**
@@ -29,22 +28,25 @@ export function initSentry(appName: string) {
     return undefined
   }
 
-  // Initialize Sentry with standard configuration
+  // Initialize Sentry with standard configuration.
+  //
+  // Performance monitoring is intentionally disabled (`tracesSampleRate: 0`,
+  // no `nodeProfilingIntegration`) because the `@opentelemetry/instrumentation-
+  // express` auto-wrap shipped with `@sentry/node` v10+ interferes with the
+  // `cors` package's response-header write path on Railway's managed Node
+  // runtime. Symptom on staging: every request carrying an `Origin` header
+  // returned HTTP 500 with Express's default error HTML — zero CORS headers
+  // — while the same build on localhost (where SENTRY_DSN is unset so this
+  // branch was skipped) correctly reflected the origin. Keeping error
+  // tracking but disabling tracing + profiling restores the expected
+  // cross-origin behaviour. Re-enable tracing later once OTEL has a stable
+  // Express wrapper that plays nicely with `cors`.
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     environment: process.env.NODE_ENV || 'development',
-
-    // Send IP address and user info for better error tracking
     sendDefaultPii: true,
-
-    // Performance monitoring
-    tracesSampleRate: 1.0, // 100% of traces (adjust for production if needed)
-    profilesSampleRate: 1.0, // 100% of profiles
-
-    // Integrations
-    integrations: [
-      nodeProfilingIntegration(),
-    ],
+    tracesSampleRate: 0,
+    profilesSampleRate: 0,
   })
 
   // Log successful initialization
