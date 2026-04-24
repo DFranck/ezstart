@@ -78,9 +78,7 @@ describe('Server factory — security', () => {
 
       // 200KB payload — should be rejected by express.json() default 100kb limit
       const largePayload = { data: 'x'.repeat(200 * 1024) }
-      const res = await request(app)
-        .post('/api/test')
-        .send(largePayload)
+      const res = await request(app).post('/api/test').send(largePayload)
       // Express default is 100kb — this exceeds it
       expect(res.status).toBe(413) // Payload Too Large
     })
@@ -93,9 +91,7 @@ describe('Server factory — security', () => {
 
       // 50KB payload — within limits
       const normalPayload = { data: 'x'.repeat(50 * 1024) }
-      const res = await request(app)
-        .post('/api/test')
-        .send(normalPayload)
+      const res = await request(app).post('/api/test').send(normalPayload)
       expect(res.status).toBe(200)
     })
 
@@ -110,9 +106,7 @@ describe('Server factory — security', () => {
 
       // Exactly at the boundary (just under 100kb)
       const borderPayload = { data: 'x'.repeat(90 * 1024) }
-      const res = await request(app)
-        .post('/api/test')
-        .send(borderPayload)
+      const res = await request(app).post('/api/test').send(borderPayload)
       expect(res.status).toBe(200)
     })
   })
@@ -132,9 +126,7 @@ describe('Server factory — security', () => {
         res.json({ ip: req.ip })
       })
 
-      await request(app)
-        .get('/ip')
-        .set('X-Forwarded-For', '203.0.113.50')
+      await request(app).get('/ip').set('X-Forwarded-For', '203.0.113.50')
 
       // With trust proxy, Express uses X-Forwarded-For
       expect(capturedIp).toBe('203.0.113.50')
@@ -143,16 +135,17 @@ describe('Server factory — security', () => {
 
   // ─── Default CORS is open ───
   describe('Default CORS policy', () => {
-    it('FINDING: default CORS is * (open) when no cors config provided', async () => {
+    it('FINDING: default CORS is permissive (reflects origin) when no cors config provided', async () => {
       const { app } = createApiServer({ port: 0 })
       app.get('/test', (_req, res) => res.json({ ok: true }))
 
-      const res = await request(app)
-        .get('/test')
-        .set('Origin', 'https://evil.com')
-      expect(res.headers['access-control-allow-origin']).toBe('*')
-      // This is documented: "default: open — caller should override in production"
-      // But it means any server created without explicit CORS is wide open.
+      const res = await request(app).get('/test').set('Origin', 'https://evil.com')
+      // Permissive middleware reflects the request origin and sets
+      // credentials: true so SDKs using `credentials: 'include'` work.
+      // Tier 3 cookie-auth routes must be opt-in via cookieAuthRoutes +
+      // cookieAuthAllowlist to restrict origins.
+      expect(res.headers['access-control-allow-origin']).toBe('https://evil.com')
+      expect(res.headers['access-control-allow-credentials']).toBe('true')
     })
   })
 

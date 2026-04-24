@@ -28,9 +28,9 @@ Chaque route d'API @ezstart tombe dans **exactement une** des 3 classes :
 
 **Exemples** : `GET /api/keys/config`, `GET /api/plans?applicationId=`, `GET /api/payments/donations?projectId=`, `GET /api/health`, `GET /api/applications/:id/public`
 
-**CORS** : `Access-Control-Allow-Origin: *`, `credentials: false`
+**CORS** : `Access-Control-Allow-Origin: <origin reflété>`, `Access-Control-Allow-Credentials: true`
 
-**Justification** : pas de cookies, pas de secrets, aucun risque CSRF.
+**Justification** : pas de cookies utilisés côté serveur (endpoints les ignorent), donc aucun CSRF. On reflète l'origin plutôt que `*` pour rester compatible avec `credentials: 'include'` côté client (les SDK @ezstart envoient `credentials: 'include'` par défaut). Le wildcard `*` est incompatible avec `credentials: 'include'` par spec CORS.
 
 ### Tier 2 — Bearer-authenticated stateless
 
@@ -38,9 +38,9 @@ Chaque route d'API @ezstart tombe dans **exactement une** des 3 classes :
 
 **Exemples** : `POST /api/donations`, `POST /api/subscriptions`, `GET /api/users/me`, `PATCH /api/applications/:id/theme`, `POST /api/connect/onboard`
 
-**CORS** : `Access-Control-Allow-Origin: *`, `credentials: false`, `Access-Control-Allow-Headers: Authorization, Content-Type, X-API-Key, X-EZStart-Signature`
+**CORS** : `Access-Control-Allow-Origin: <origin reflété>`, `Access-Control-Allow-Credentials: true`, `Access-Control-Allow-Headers: Authorization, Content-Type, X-API-Key, X-EZStart-Signature`
 
-**Justification** : le token JWT est explicitement envoyé par le code consumer (jamais automatiquement). Pas de CSRF.
+**Justification** : le token JWT est explicitement envoyé par le code consumer (jamais automatiquement). Pas de CSRF. Même logique que Tier 1 pour la compatibilité `credentials: 'include'`.
 
 ### Tier 3 — Cookie-authenticated (strict)
 

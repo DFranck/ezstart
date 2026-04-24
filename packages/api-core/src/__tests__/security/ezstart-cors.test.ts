@@ -24,11 +24,11 @@ describe('createApiServer — 3-tier CORS integration', () => {
         .get('/api/keys/config')
         .set('Origin', 'https://random-consumer.example.com')
       expect(res.status).toBe(200)
-      expect(res.headers['access-control-allow-origin']).toBe('*')
-      expect(res.headers['access-control-allow-credentials']).toBeUndefined()
+      expect(res.headers['access-control-allow-origin']).toBe('https://random-consumer.example.com')
+      expect(res.headers['access-control-allow-credentials']).toBe('true')
     })
 
-    it('Bearer-auth route from any origin → ACAO: *', async () => {
+    it('Bearer-auth route from any origin → reflected ACAO + credentials true', async () => {
       const { app } = createApiServer({ port: 0 })
       app.post('/api/donations', (_req, res) => res.json({ ok: true }))
 
@@ -37,10 +37,10 @@ describe('createApiServer — 3-tier CORS integration', () => {
         .set('Origin', 'https://any-site.example.com')
         .set('Authorization', 'Bearer x')
       expect(res.status).toBe(200)
-      expect(res.headers['access-control-allow-origin']).toBe('*')
+      expect(res.headers['access-control-allow-origin']).toBe('https://any-site.example.com')
     })
 
-    it('OPTIONS preflight on any path → 204 + ACAO: *', async () => {
+    it('OPTIONS preflight on any path → 204 + reflected ACAO', async () => {
       const { app } = createApiServer({ port: 0 })
 
       const res = await request(app)
@@ -48,7 +48,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
         .set('Origin', 'https://random.com')
         .set('Access-Control-Request-Method', 'POST')
       expect(res.status).toBe(204)
-      expect(res.headers['access-control-allow-origin']).toBe('*')
+      expect(res.headers['access-control-allow-origin']).toBe('https://random.com')
     })
   })
 
@@ -139,8 +139,8 @@ describe('createApiServer — 3-tier CORS integration', () => {
         .get('/api/keys/config')
         .set('Origin', 'https://random-tiers-domain.com')
       expect(res.status).toBe(200)
-      expect(res.headers['access-control-allow-origin']).toBe('*')
-      expect(res.headers['access-control-allow-credentials']).toBeUndefined()
+      expect(res.headers['access-control-allow-origin']).toBe('https://random-tiers-domain.com')
+      expect(res.headers['access-control-allow-credentials']).toBe('true')
     })
 
     it('multiple cookieAuthRoutes prefixes are all strict', async () => {

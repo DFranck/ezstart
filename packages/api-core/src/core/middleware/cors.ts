@@ -84,6 +84,20 @@ export type StrictCorsOptions = {
 /**
  * Tier 1 + Tier 2 CORS middleware (public + Bearer endpoints).
  *
+ * Reflects the request `Origin` header and sets `credentials: true` so SDK
+ * fetches that use `credentials: 'include'` (a common default for clients
+ * like `@ezstart/auth-sdk`) can complete. Reflecting the origin is safe
+ * here because Tier 1/2 endpoints are designed to be origin-agnostic —
+ * they authenticate via publishable key (query param) or Bearer token
+ * (explicit header) and **never** via cookies. Even if the browser sends
+ * a session cookie with the request, the endpoints ignore it.
+ *
+ * A wildcard `Access-Control-Allow-Origin: *` would be slightly stricter
+ * but incompatible with `credentials: 'include'` per the CORS spec
+ * ([fetch spec §3.2.4](https://fetch.spec.whatwg.org/#cors-protocol)).
+ * Origin reflection gives the same "any external consumer can call" UX
+ * without breaking credentialed fetches.
+ *
  * Safe to apply globally to every API — downstream strict middlewares
  * registered on cookie-auth prefixes will override the headers for those
  * specific paths.
@@ -91,15 +105,19 @@ export type StrictCorsOptions = {
  * @example
  * ```ts
  * app.use(createPermissiveCorsMiddleware())
- * // → `Access-Control-Allow-Origin: *`, `credentials: false`
+ * // → reflects `Origin`, `Access-Control-Allow-Credentials: true`
  * ```
  */
 export function createPermissiveCorsMiddleware(
   options: PermissiveCorsOptions = {}
 ): RequestHandler {
   const opts: CorsOptions = {
-    origin: '*',
-    credentials: false,
+    // Reflect any origin. `true` tells the `cors` package to echo the
+    // request `Origin` header back in `Access-Control-Allow-Origin`. That
+    // keeps the "allow every external consumer" semantics while staying
+    // compatible with `credentials: 'include'` on the client side.
+    origin: true,
+    credentials: true,
     methods: options.methods ?? DEFAULT_METHODS,
     allowedHeaders: options.allowedHeaders ?? PERMISSIVE_ALLOWED_HEADERS,
     exposedHeaders: options.exposedHeaders ?? PERMISSIVE_EXPOSED_HEADERS,
@@ -155,10 +173,12 @@ export function createStrictCorsMiddleware(options: StrictCorsOptions): RequestH
       if (!allowed && logger) {
         logger.warn('[cors] Blocked cross-origin request', { origin })
       }
-      // Passing an Error here aligns with the `cors` package convention —
-      // the middleware responds with a CORS-less 500 which browsers treat
-      // as a rejected preflight.
-      callback(allowed ? null : new Error('Not allowed by CORS'), allowed)
+      // Pass `null` (no error) with `false` so the `cors` package simply
+      // omits the `Access-Control-Allow-Origin` header — the browser then
+      // blocks the request naturally without reaching our default error
+      // handler. Passing an `Error` would propagate through Express and
+      // leak a 500 HTML stack trace to the caller.
+      callback(null, allowed)
     },
     credentials: true,
     methods: methods ?? DEFAULT_METHODS,

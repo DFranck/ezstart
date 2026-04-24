@@ -143,23 +143,23 @@ describe('createCorsMiddleware (legacy) — security', () => {
 })
 
 describe('createPermissiveCorsMiddleware (Tier 1/2) — public + Bearer', () => {
-  it('allows any origin with ACAO: *', async () => {
+  it('reflects any origin in ACAO (so credentialed fetches work)', async () => {
     const app = express()
     app.use(createPermissiveCorsMiddleware())
     app.get('/test', (_req, res) => res.json({ ok: true }))
 
     const res = await request(app).get('/test').set('Origin', 'https://random-consumer.example.com')
     expect(res.status).toBe(200)
-    expect(res.headers['access-control-allow-origin']).toBe('*')
+    expect(res.headers['access-control-allow-origin']).toBe('https://random-consumer.example.com')
   })
 
-  it('NEVER sets credentials: true (spec-invalid combo with ACAO: *)', async () => {
+  it('sets credentials: true so SDKs sending `credentials: include` are not blocked', async () => {
     const app = express()
     app.use(createPermissiveCorsMiddleware())
     app.get('/test', (_req, res) => res.json({ ok: true }))
 
     const res = await request(app).get('/test').set('Origin', 'https://random.example.com')
-    expect(res.headers['access-control-allow-credentials']).toBeUndefined()
+    expect(res.headers['access-control-allow-credentials']).toBe('true')
   })
 
   it('exposes X-Request-Id and Retry-After by default', async () => {
@@ -193,7 +193,7 @@ describe('createPermissiveCorsMiddleware (Tier 1/2) — public + Bearer', () => 
     expect(allowed).toContain('X-EZStart-Signature')
   })
 
-  it('preflight OPTIONS returns 204 with ACAO: *', async () => {
+  it('preflight OPTIONS returns 204 with reflected origin + credentials true', async () => {
     const app = express()
     app.use(createPermissiveCorsMiddleware())
 
@@ -202,8 +202,8 @@ describe('createPermissiveCorsMiddleware (Tier 1/2) — public + Bearer', () => 
       .set('Origin', 'https://random.com')
       .set('Access-Control-Request-Method', 'POST')
     expect(res.status).toBe(204)
-    expect(res.headers['access-control-allow-origin']).toBe('*')
-    expect(res.headers['access-control-allow-credentials']).toBeUndefined()
+    expect(res.headers['access-control-allow-origin']).toBe('https://random.com')
+    expect(res.headers['access-control-allow-credentials']).toBe('true')
   })
 
   it('accepts custom methods / headers / exposedHeaders overrides', async () => {
