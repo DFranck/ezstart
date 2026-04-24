@@ -33,6 +33,7 @@ Domaines spécifiques (applicables en plus du standard) :
 - [`.claude/rules/standard-saas.md`](./.claude/rules/standard-saas.md) — checklist apps SaaS (API + Web + Infra + features + product completeness)
 - [`.claude/rules/standard-saas-keys.md`](./.claude/rules/standard-saas-keys.md) — API key naming convention (ez*pk*/ez*sk*), dogfood pattern, bootstrap, migration from ezk\_\*
 - [`.claude/rules/standard-saas-cors.md`](./.claude/rules/standard-saas-cors.md) — CORS 3-tier policy (public/Bearer → `*`, cookie-auth → allowlist), jamais de `CORS_ORIGINS` env var pour les consumers externes
+- [`.claude/rules/standard-architecture.md`](./.claude/rules/standard-architecture.md) — modèle 3-tier platform (Tier 1 SaaS services : ezauth+ezpay / Tier 2 consumer apps / Tier 3 platform hub : ezstart). Decision tree pour placer toute feature. À lire AVANT toute nouvelle feature.
 
 ## Git
 

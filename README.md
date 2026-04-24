@@ -114,6 +114,40 @@ pnpm dev:status
 
 ## 🏗️ Architecture
 
+### Platform model (3 tiers)
+
+@ezstart follows a 3-tier SaaS platform architecture inspired by Stripe + Clerk + Vercel:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  Tier 3 — Platform hub (cross-cutting meta-features)       │
+│  ezstart : ia-sdk gateway, monitoring, federated admin,    │
+│  docs, status, audit logs cross-tenant                     │
+└────────────────────────┬───────────────────────────────────┘
+                         │ federates admin from ↓
+        ┌────────────────┴──────────────────────────┐
+        │ Tier 1 — Per-app SaaS services            │
+        │ ezauth  (auth)          ezpay  (payments) │
+        │ Clerk/Auth0 pattern     Stripe pattern    │
+        │ per-Application DB scoping + publishable  │
+        │ keys  (externally consumable)             │
+        └───────┬──────────────────┬────────────────┘
+                │ ez_pk_live_...   │
+                ▼                  ▼
+        ┌────────────────────────────────────────────┐
+        │ Tier 2 — Consumer apps                     │
+        │ ezbill, green-pulse, fengshui, asc-tcd,    │
+        │ gacha-analyzer, ezstart (dogfood), + any   │
+        │ third-party external customer              │
+        └────────────────────────────────────────────┘
+```
+
+- **Tier 1 SaaS services** (`ezauth`, `ezpay`) are designed to be consumed by any developer (internal apps OR third parties) via publishable keys + SDKs. Each Application tenant gets its own DB scope, theme, plans, keys.
+- **Tier 2 consumer apps** use the SDKs (`@ezstart/auth-sdk`, `@ezstart/pay-sdk`) with their own publishable keys. Zero monorepo coupling — they could be extracted into separate repos and still work.
+- **Tier 3 platform hub** (`ezstart`) owns features that don't fit a per-Application model: AI gateway (`@ezstart/ai-sdk`), federated admin (aggregates Tier-1 admin dashboards), status page, docs portal.
+
+The full placement rule tree + anti-patterns are documented in [`.claude/rules/standard-architecture.md`](./.claude/rules/standard-architecture.md). Every new feature must be classified into a tier before implementation.
+
 ### Monorepo Structure
 
 ```
