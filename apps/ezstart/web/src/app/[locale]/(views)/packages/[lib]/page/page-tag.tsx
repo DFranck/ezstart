@@ -19,7 +19,7 @@ import {
   Section,
   tagVariantsKeys,
 } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { HeaderLib } from '../components/header-lib'
 
 const EzTagPage = (): React.JSX.Element => {

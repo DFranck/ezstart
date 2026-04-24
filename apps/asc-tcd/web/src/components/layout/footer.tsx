@@ -4,7 +4,7 @@ import { Div, Span, Tag } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 export function Footer() {
   const { isMobile } = useDevice()

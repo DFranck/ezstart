@@ -89,6 +89,7 @@ Toaster (sonner, hors providers)
 - [ ] TOUT texte user-facing via `useTranslations()` / `t()`
 - [ ] Pas de string hardcodée visible par l'utilisateur
 - [ ] `next-intl` middleware configuré (routing `[locale]`)
+- [ ] Tous les `<Link>` importés depuis `@/i18n/navigation` (jamais `next/link`) — enforced par `eslint-plugin-ezstart/no-next-link-in-locale-apps`. Garantit que les URLs incluent la locale active (pas de 307 redirect).
 
 ### 2.3 Theme & UI
 
@@ -97,6 +98,7 @@ Toaster (sonner, hors providers)
 - [ ] Composants `@ezstart/ui/components` (jamais HTML natif, cf. `ui.md`)
 - [ ] Dark mode fonctionnel
 - [ ] Responsive (mobile-first, breakpoints Tailwind)
+- [ ] Zéro URL hardcoded externe (Vercel preview, ancien domaine) — utiliser env vars pour les URLs cross-app (ex: `NEXT_PUBLIC_EZSTART_WEB_URL`)
 
 ### 2.4 SEO
 

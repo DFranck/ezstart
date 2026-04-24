@@ -5,6 +5,7 @@ import { noExpressCore } from './rules/no-express-core.js'
 import { noFetchClient } from './rules/no-fetch-client.js'
 import { noHardcodedTailwindColors } from './rules/no-hardcoded-tailwind-colors.js'
 import { noLocalUiComponents } from './rules/no-local-ui-components.js'
+import { noNextLinkInLocaleApps } from './rules/no-next-link-in-locale-apps.js'
 import { noRawFetch } from './rules/no-raw-fetch.js'
 import { noRawHtml } from './rules/no-raw-html.js'
 import { parseApiErrorRequired } from './rules/parse-api-error-required.js'
@@ -24,6 +25,7 @@ const rules = {
   'no-dialog-outside-ui': noDialogOutsideUi,
   'require-i18n-string': requireI18nString,
   'no-local-ui-components': noLocalUiComponents,
+  'no-next-link-in-locale-apps': noNextLinkInLocaleApps,
 } as const
 
 /**
@@ -44,6 +46,7 @@ const recommendedRules = {
   [`${PLUGIN_NAME}/no-dialog-outside-ui`]: 'warn',
   [`${PLUGIN_NAME}/require-i18n-string`]: 'warn',
   [`${PLUGIN_NAME}/no-local-ui-components`]: 'warn',
+  [`${PLUGIN_NAME}/no-next-link-in-locale-apps`]: 'error',
 } as const
 
 /**

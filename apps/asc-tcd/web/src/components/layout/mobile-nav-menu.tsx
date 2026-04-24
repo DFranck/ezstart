@@ -1,7 +1,7 @@
 'use client'
 import { useNavLinks } from '@/hooks/useNavLinks'
 import { Button, Div, Icon, Nav, Span } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useState } from 'react'
 interface Props {
   variant?: 'default' | 'ghost' | 'secondary' | 'outline' | 'destructive' | 'link'

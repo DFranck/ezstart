@@ -8,7 +8,7 @@ import { Button, Div, Icon, Main, Nav, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 

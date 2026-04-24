@@ -3,7 +3,7 @@
 import { Badge, Button, Div, H1, H2, P, Section, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useEffect, useState } from 'react'
 
 export function HeroSection() {

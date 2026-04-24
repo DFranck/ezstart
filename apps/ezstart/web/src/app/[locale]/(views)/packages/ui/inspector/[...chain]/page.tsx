@@ -2,7 +2,7 @@
 
 import { use, useMemo, useState } from 'react'
 import { Badge, Card, CardContent, CardHeader, Div, H1, H2, P, Span } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import {
   componentRegistry,
   getComponent,

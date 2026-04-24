@@ -19,7 +19,7 @@ import {
   Pre,
 } from '@ezstart/ui/components'
 import { useTranslations, useLocale } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 // ---------------------------------------------------------------------------
 // Features data (icons are lucide names)

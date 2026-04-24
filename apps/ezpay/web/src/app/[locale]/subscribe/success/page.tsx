@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import {
   Button,
   Div,

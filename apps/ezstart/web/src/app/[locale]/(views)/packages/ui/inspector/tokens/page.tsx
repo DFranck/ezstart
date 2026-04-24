@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { Badge, Card, CardContent, CardHeader, Div, H1, H2, P, Span } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useParams } from 'next/navigation'
 import { componentRegistry, type TokenStatus } from '../registry'
 
@@ -247,8 +247,8 @@ export default function TokenLexiconPage() {
               </Div>
               {deprecatedBy && (
                 <P className="text-sm text-warning mt-1">
-                  Deprecated — use{' '}
-                  <Span className="font-mono font-semibold">{deprecatedBy}</Span> instead
+                  Deprecated — use <Span className="font-mono font-semibold">{deprecatedBy}</Span>{' '}
+                  instead
                 </P>
               )}
             </CardHeader>

@@ -15,7 +15,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 
@@ -24,6 +24,8 @@ type ClientLayoutProps = {
   showSettingsButton?: boolean
   showLogoutButton?: boolean
 }
+
+const EZSTART_WEB_URL = process.env.NEXT_PUBLIC_EZSTART_WEB_URL ?? 'https://ezstart.ezstart.xyz'
 
 const ClientLayout = ({
   children,
@@ -114,7 +116,7 @@ const ClientLayout = ({
         <>
           {t('layout.madeBy')}
           <a
-            href="https://ezstart-web.vercel.app/fr"
+            href={EZSTART_WEB_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline ml-2"

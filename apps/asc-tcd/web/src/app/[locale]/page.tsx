@@ -2,7 +2,7 @@
 
 import { Button, Div, H2, Hero, Icon, Main, P, Section, Span } from '@ezstart/ui/components'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 export default function Page() {
   return (

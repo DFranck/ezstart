@@ -2,7 +2,7 @@
 
 import { Button, Div, H1, Icon, P, Section, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 interface ErrorPageProps {
   error: Error & { digest?: string }

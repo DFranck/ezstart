@@ -5,7 +5,7 @@ import { logger } from '@ezstart/logger'
 import { Button, Div, H1, H3, Icon, LI, P, Section, Span, UL } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 

@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -18,7 +19,7 @@ import {
   UL,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 export default function CareersPage() {
   const t = useTranslations('careers')
@@ -51,9 +52,9 @@ export default function CareersPage() {
                   <H3 size="h4" className="mb-2">
                     {t('bdRole.title')}
                   </H3>
-                  <Span className="inline-block bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-sm font-semibold animate-pulse">
+                  <Badge variant="destructive" size="default" pulse>
                     {t('openings.badge')}
-                  </Span>
+                  </Badge>
                 </Div>
               </Div>
 
@@ -76,12 +77,14 @@ export default function CareersPage() {
 
               <Div className="flex flex-wrap gap-2">
                 {(t.raw('bdRole.tags') as string[]).map((tag, index) => (
-                  <Span
+                  <Badge
                     key={index}
-                    className="bg-gp-primary/10 text-gp-primary border border-gp-primary px-3 py-1 rounded-full text-sm font-medium"
+                    variant="outline"
+                    size="default"
+                    className="bg-gp-primary/10 text-gp-primary border-gp-primary"
                   >
                     {tag}
-                  </Span>
+                  </Badge>
                 ))}
               </Div>
             </CardHeader>

@@ -57,6 +57,9 @@ export const nextJsConfig = [
       '@ezstart/ezstart/no-raw-html': 'warn',
       '@ezstart/ezstart/require-i18n-string': 'warn',
       '@ezstart/ezstart/no-local-ui-components': 'warn',
+      // Enforce locale-aware Link imports in apps/*/web/src so hrefs always
+      // include the active locale (no 307 redirect dance). Autofixable.
+      '@ezstart/ezstart/no-next-link-in-locale-apps': 'error',
     },
   },
 ]

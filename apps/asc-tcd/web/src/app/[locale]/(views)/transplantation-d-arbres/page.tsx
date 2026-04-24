@@ -16,7 +16,7 @@ import {
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useEffect, useRef } from 'react'
 
 export default function PageTransplantationArbres() {

@@ -3,8 +3,9 @@
 import { LibraryContentLink, LibraryItem } from '@/types/library'
 import { getTranslationArray } from '@ezstart/ui/lib'
 import { customIconMap, H3, Icon, LI, Main, P, Section, UL } from '@ezstart/ui/components'
+import type { CustomIconName } from '@ezstart/ui/components'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useMemo } from 'react'
 import IconPlayground from '../(Icon)/IconPlayground'
 import { HeaderLib } from '../components/header-lib'
@@ -48,8 +49,7 @@ const EzIconPage = (): React.JSX.Element => {
           <UL size={'default'} layout="row" className="justify-center">
             {customIcons.map(name => (
               <LI key={name} layout={'center'} size={'sm'} className="md:w-28 aspect-square">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic icon name */}
-                <Icon name={`custom:${name}` as any} size={32} />
+                <Icon name={`custom:${name}` as `custom:${CustomIconName}`} size={32} />
                 <P className="text-xs text-center">{name}</P>
               </LI>
             ))}

@@ -36,7 +36,7 @@ import {
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 import TestimonialsSection from './TestimonialsSection'
 import UseCasesSection from './UseCasesSection'

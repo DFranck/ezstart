@@ -5,7 +5,7 @@ import { Button, Div, H3, H4, Icon, P, Section } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
   const { isMobile } = useDevice()

@@ -13,7 +13,7 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { useMonitoringErrors, type ErrorLog } from '../../hooks'
 

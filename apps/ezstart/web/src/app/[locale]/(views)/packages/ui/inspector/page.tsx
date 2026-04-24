@@ -16,7 +16,7 @@ import {
   Section,
   Span,
 } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useParams } from 'next/navigation'
 import {
   componentRegistry,

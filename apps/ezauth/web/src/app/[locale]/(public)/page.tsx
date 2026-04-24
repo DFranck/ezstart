@@ -20,7 +20,7 @@ import {
   Pre,
 } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 const EZAUTH_APP_ID = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
 

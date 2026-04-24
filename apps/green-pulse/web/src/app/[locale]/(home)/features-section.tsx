@@ -5,6 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  Badge,
   Button,
   Card,
   CardContent,
@@ -23,7 +24,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 export function FeaturesSection() {
   const t = useTranslations('home')
@@ -238,12 +239,14 @@ export function FeaturesSection() {
 
                   <Div className="flex-shrink-0 flex flex-wrap md:flex-col gap-2 md:justify-end md:items-end">
                     {useCase.badges.map((badge, badgeIndex) => (
-                      <Span
+                      <Badge
                         key={badgeIndex}
-                        className="bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap"
+                        variant="secondary"
+                        size="default"
+                        className="whitespace-nowrap font-bold"
                       >
                         {badge}
-                      </Span>
+                      </Badge>
                     ))}
                   </Div>
                 </Div>

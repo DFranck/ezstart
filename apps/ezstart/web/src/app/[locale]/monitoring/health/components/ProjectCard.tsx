@@ -19,7 +19,7 @@ import {
 import { cn } from '@ezstart/ui/lib'
 import { useQuery } from '@tanstack/react-query'
 import { callApi } from '@/config/api'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 interface ProjectCardProps {
   project: ProjectHealth

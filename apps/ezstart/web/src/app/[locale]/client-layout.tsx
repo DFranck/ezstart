@@ -18,7 +18,7 @@ import {
 import { logger } from '@ezstart/logger'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useLocale, useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { usePathname, useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
 

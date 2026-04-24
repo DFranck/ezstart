@@ -4,7 +4,7 @@ import { LibraryItem } from '@/types/library'
 import { Button, Div, H3, Icon, P, Span } from '@ezstart/ui/components'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useEffect, useState } from 'react'
 
 export const MotionP = motion.create(P)
