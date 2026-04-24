@@ -47,6 +47,15 @@ export function initSentry(appName: string) {
     sendDefaultPii: true,
     tracesSampleRate: 0,
     profilesSampleRate: 0,
+    // Disable ALL default integrations. `@sentry/node` v10+ auto-registers
+    // `@opentelemetry/instrumentation-http` + `-express`, which (on Railway's
+    // managed Node runtime) swallows incoming requests carrying an `Origin`
+    // header and kicks them straight into Express's default 500 error
+    // handler — never reaching our CORS middleware. Passing an empty
+    // integrations array keeps Sentry alive for manual `captureException`
+    // calls from our own code but skips the intrusive auto-wrappers.
+    integrations: [],
+    defaultIntegrations: false,
   })
 
   // Log successful initialization
