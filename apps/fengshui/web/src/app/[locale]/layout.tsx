@@ -93,6 +93,7 @@ export default async function RootLayout({
                       apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130',
                     }}
                     publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
+                    locale={locale}
                   >
                     <ClientLayout>{children}</ClientLayout>
                   </PayProvider>

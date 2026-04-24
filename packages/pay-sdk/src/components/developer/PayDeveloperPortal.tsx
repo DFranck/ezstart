@@ -41,6 +41,7 @@ import { KeyCreatedModal } from '@ezstart/auth-sdk'
 import { useMemo, useState } from 'react'
 import type { PayApiKeyItem } from '../../core/types.js'
 import { useCreatePayKey, usePayKeys, useRevokePayKey, useRotatePayKey } from '../../react/index.js'
+import { usePayLocale } from '../../react/pay-provider.js'
 import { CreatePayKeyModal } from './CreatePayKeyModal.js'
 import type { PayDeveloperPortalTexts } from './types.js'
 import { defaultPayDeveloperPortalTexts } from './types.js'
@@ -50,7 +51,10 @@ export interface PayDeveloperPortalProps {
   applicationId?: string
   /** Whether the user is authenticated and data should be fetched. */
   enabled?: boolean
-  /** Locale for date formatting. Defaults to `'en'`. */
+  /**
+   * Locale for date formatting. When omitted, inherits from
+   * `<PayProvider locale={…}>` context (default `'en'`).
+   */
   locale?: string
   /** All user-facing strings. Falls back to English defaults. */
   texts?: Partial<PayDeveloperPortalTexts>
@@ -77,13 +81,15 @@ function mergeTexts(partial?: Partial<PayDeveloperPortalTexts>): PayDeveloperPor
 export function PayDeveloperPortal({
   applicationId,
   enabled = true,
-  locale = 'en',
+  locale,
   texts: partialTexts,
   headerActions,
   className,
   showSuperadminScope = false,
 }: PayDeveloperPortalProps) {
   const texts = mergeTexts(partialTexts)
+  const contextLocale = usePayLocale()
+  const resolvedLocale = locale ?? contextLocale
 
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [createdKey, setCreatedKey] = useState<string | null>(null)
@@ -128,7 +134,7 @@ export function PayDeveloperPortal({
 
   const formatDate = (iso: string | null): string => {
     if (!iso) return texts.table.never
-    return new Date(iso).toLocaleDateString(locale, {
+    return new Date(iso).toLocaleDateString(resolvedLocale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -201,7 +207,7 @@ export function PayDeveloperPortal({
         enableSorting: false,
       },
     ],
-    [texts.table, locale, rotateMutation, revokeMutation]
+    [texts.table, resolvedLocale, rotateMutation, revokeMutation]
   )
 
   return (

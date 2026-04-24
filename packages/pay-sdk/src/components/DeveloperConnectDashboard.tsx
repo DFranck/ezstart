@@ -17,6 +17,7 @@ import { useConnectStatus } from '../react/hooks/useConnectStatus.js'
 import { useConnectOnboard } from '../react/hooks/useConnectOnboard.js'
 import { useConnectDashboardLink } from '../react/hooks/useConnectDashboardLink.js'
 import { useConnectDisconnect } from '../react/hooks/useConnectDisconnect.js'
+import { useApplicationContext } from '../react/pay-provider.js'
 import { ConnectStatusCard, type ConnectStatusCardTexts } from './ConnectStatusCard.js'
 import { ConnectOnboardForm, type ConnectOnboardFormTexts } from './ConnectOnboardForm.js'
 import { ConnectFeeSummary, type ConnectFeeSummaryTexts } from './ConnectFeeSummary.js'
@@ -44,7 +45,8 @@ export interface DeveloperConnectDashboardProps {
   /**
    * Optional — user locale (e.g. `'en'`, `'fr'`) forwarded to the onboarding
    * API so Stripe's post-onboarding callback redirects the user back to the
-   * matching locale route on the EZPay web UI.
+   * matching locale route on the EZPay web UI. When omitted, inherits from
+   * `<PayProvider locale={…}>` context (default `'en'`).
    */
   locale?: string
   className?: string
@@ -83,6 +85,8 @@ export function DeveloperConnectDashboard({
   const { openDashboard, isLoading: isDashboardLoading } = useConnectDashboardLink()
   const { disconnect } = useConnectDisconnect()
   const [disconnectOpen, setDisconnectOpen] = useState(false)
+  const { locale: contextLocale } = useApplicationContext()
+  const resolvedLocale = locale ?? contextLocale
 
   const t = {
     disconnectTitle: texts?.disconnectTitle ?? 'Disconnect Account',
@@ -100,7 +104,7 @@ export function DeveloperConnectDashboard({
     type: ConnectAccountType
   }) {
     try {
-      const result = await onboard({ ...data, locale })
+      const result = await onboard({ ...data, locale: resolvedLocale })
       if (result.accountLinkUrl) {
         if (onOnboardRedirect) {
           onOnboardRedirect(result.accountLinkUrl)

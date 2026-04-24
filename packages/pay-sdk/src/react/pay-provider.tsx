@@ -48,6 +48,14 @@ interface PayContextValue {
    * provide a value and auto-detection failed (non-localhost production).
    */
   payWebUrl: string | null
+  /**
+   * BCP-47 locale inherited by every downstream pay-sdk component (used to
+   * build locale-prefixed URLs such as the "Get your key" CTA). Set once on
+   * `<PayProvider locale={…}>`; components may still override per-render via
+   * their own `locale` prop. Defaults to `'en'` when the consumer did not
+   * provide one.
+   */
+  locale: string
 }
 
 const PayContext = createContext<PayContextValue | null>(null)
@@ -97,6 +105,16 @@ interface PayProviderProps {
    * without the CTA button.
    */
   payWebUrl?: string
+  /**
+   * BCP-47 locale propagated to every downstream pay-sdk component (used to
+   * build locale-prefixed URLs such as the "Get your key" CTA). Consumers
+   * using Next.js App Router typically pass `locale` from `params.locale` or
+   * `useLocale()` (next-intl). When omitted, falls back to `'en'`.
+   *
+   * Components still accept a per-instance `locale` override via their own
+   * prop, but the common case is to set it once here.
+   */
+  locale?: string
 }
 
 /**
@@ -126,6 +144,7 @@ export function PayProvider({
   onTokenRefresh,
   onAuthFailure,
   payWebUrl,
+  locale,
 }: PayProviderProps) {
   // Use refs so the client always calls the latest callbacks without re-creating the client
   const getTokenRef = useRef(getToken ?? config?.getToken)
@@ -300,6 +319,8 @@ export function PayProvider({
     [payWebUrl, config?.apiUrl]
   )
 
+  const resolvedLocale = locale && locale.length > 0 ? locale : 'en'
+
   const contextValue = useMemo(
     () => ({
       client,
@@ -308,8 +329,9 @@ export function PayProvider({
       isReady,
       applicationResolutionStatus: resolutionStatus,
       payWebUrl: resolvedPayWebUrl,
+      locale: resolvedLocale,
     }),
-    [client, applicationId, appSlug, isReady, resolutionStatus, resolvedPayWebUrl]
+    [client, applicationId, appSlug, isReady, resolutionStatus, resolvedPayWebUrl, resolvedLocale]
   )
 
   return <PayContext.Provider value={contextValue}>{children}</PayContext.Provider>
@@ -336,6 +358,18 @@ export function usePayContext() {
  * if (!isReady) return <Spinner />
  * ```
  */
+/**
+ * Safe locale accessor that returns the locale from the surrounding
+ * `<PayProvider>` when one is mounted, or falls back to `'en'` when used
+ * outside a provider (e.g. in isolated unit tests). Prefer this over
+ * `useApplicationContext().locale` when a component may be rendered both
+ * inside and outside a provider tree.
+ */
+export function usePayLocale(): string {
+  const context = useContext(PayContext)
+  return context?.locale ?? 'en'
+}
+
 export function useApplicationContext(): {
   applicationId: string | null
   appSlug: string | null
@@ -348,10 +382,16 @@ export function useApplicationContext(): {
    * no `payWebUrl` prop provided).
    */
   payWebUrl: string | null
+  /**
+   * BCP-47 locale inherited from `<PayProvider locale={…}>`. Defaults to
+   * `'en'` when the consumer did not provide one. Components may still
+   * override per-render via their own `locale` prop.
+   */
+  locale: string
 } {
-  const { applicationId, appSlug, isReady, applicationResolutionStatus, payWebUrl } =
+  const { applicationId, appSlug, isReady, applicationResolutionStatus, payWebUrl, locale } =
     usePayContext()
-  return { applicationId, appSlug, isReady, applicationResolutionStatus, payWebUrl }
+  return { applicationId, appSlug, isReady, applicationResolutionStatus, payWebUrl, locale }
 }
 
 export function usePay() {

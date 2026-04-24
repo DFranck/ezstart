@@ -40,7 +40,7 @@ import { toast } from '@ezstart/ui/utils'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Plan } from '../core/types.js'
 import { formatCurrency } from '../core/format-currency.js'
-import { usePayContext } from '../react/pay-provider.js'
+import { usePayContext, usePayLocale } from '../react/pay-provider.js'
 import {
   PlanEditorDialog,
   type PlanEditorDialogTexts,
@@ -156,6 +156,10 @@ function mergeTexts(partial?: Partial<PlansManagerTexts>): PlansManagerTexts {
 export interface PlansManagerProps {
   applicationId: string
   texts?: Partial<PlansManagerTexts>
+  /**
+   * BCP-47 locale passed to `formatCurrency`. When omitted, inherits from
+   * `<PayProvider locale={…}>` context (default `'en'`).
+   */
   locale?: string
   className?: string
   /** Reserved for future detail view. Currently unused. */
@@ -187,11 +191,13 @@ async function fetchAllPlans(
 export function PlansManager({
   applicationId,
   texts: partialTexts,
-  locale = 'en',
+  locale,
   className,
 }: PlansManagerProps) {
   const texts = mergeTexts(partialTexts)
   const { client } = usePayContext()
+  const contextLocale = usePayLocale()
+  const resolvedLocale = locale ?? contextLocale
 
   const [plans, setPlans] = useState<Plan[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -275,7 +281,9 @@ export function PlansManager({
         cell: ({ row }) => {
           const { amount, currency } = row.original
           return (
-            <Span className="tabular-nums">{formatCurrency(amount / 100, currency, locale)}</Span>
+            <Span className="tabular-nums">
+              {formatCurrency(amount / 100, currency, resolvedLocale)}
+            </Span>
           )
         },
       },
@@ -339,7 +347,7 @@ export function PlansManager({
         enableSorting: false,
       },
     ]
-  }, [texts, locale, handleEdit, isArchiving])
+  }, [texts, resolvedLocale, handleEdit, isArchiving])
 
   return (
     <Card className={className}>

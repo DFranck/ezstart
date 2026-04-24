@@ -155,8 +155,8 @@ export interface PricingPageProps {
   notConfiguredTexts?: PayNotConfiguredTexts
   /**
    * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
-   * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
-   * to `'en'`.
+   * When omitted, inherits from `<PayProvider locale={…}>` context
+   * (default `'en'`).
    */
   locale?: string
   /** Additional CSS class */
@@ -174,7 +174,7 @@ export function PricingPage({
   onSelectPlan,
   defaultBillingCycle = 'month',
   notConfiguredTexts,
-  locale = 'en',
+  locale,
   className,
 }: PricingPageProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
@@ -192,9 +192,11 @@ export function PricingPage({
     applicationId: ctxApplicationId,
     applicationResolutionStatus,
     payWebUrl,
+    locale: contextLocale,
   } = useApplicationContext()
   const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
-  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
+  const resolvedLocale = locale ?? contextLocale
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined
 
   const { plans, isLoading, error, reload } = usePlans({ applicationId, appName, active: true })
   const subStatus = useSubscriptionStatus({

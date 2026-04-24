@@ -108,8 +108,8 @@ export interface BillingDashboardProps {
   notConfiguredTexts?: PayNotConfiguredTexts
   /**
    * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
-   * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
-   * to `'en'`.
+   * When omitted, inherits from `<PayProvider locale={…}>` context
+   * (default `'en'`).
    */
   locale?: string
   className?: string
@@ -125,7 +125,7 @@ export function BillingDashboard({
   recentPaymentsCount = 5,
   texts: textsProp,
   notConfiguredTexts,
-  locale = 'en',
+  locale,
   className,
 }: BillingDashboardProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
@@ -146,9 +146,11 @@ export function BillingDashboard({
     applicationId: ctxApplicationId,
     applicationResolutionStatus,
     payWebUrl,
+    locale: contextLocale,
   } = useApplicationContext()
   const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
-  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
+  const resolvedLocale = locale ?? contextLocale
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined
 
   const subStatus = useSubscriptionStatus({
     userId: userId || '',

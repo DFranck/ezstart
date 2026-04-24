@@ -3,6 +3,7 @@
 import { AuthProvider, useAuthStore } from '@ezstart/auth-sdk'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ThemeProvider } from '@ezstart/ui/theme'
+import { useLocale } from 'next-intl'
 import { QueryProvider } from './providers/QueryProvider'
 
 function handleAuthFailure() {
@@ -10,6 +11,7 @@ function handleAuthFailure() {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const locale = useLocale()
   return (
     <ThemeProvider>
       <AuthProvider
@@ -30,6 +32,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <PayProvider
             appName="ezauth"
             config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
+            locale={locale}
             getToken={() => useAuthStore.getState().accessToken}
             onAuthFailure={handleAuthFailure}
           >

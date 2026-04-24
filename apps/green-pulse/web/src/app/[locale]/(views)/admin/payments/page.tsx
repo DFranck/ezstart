@@ -3,7 +3,7 @@
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { PayAdminDashboard, PayProvider } from '@ezstart/pay-sdk'
 import { H1, P } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 /**
  * Application id resolved at build time from `NEXT_PUBLIC_EZAUTH_APP_ID`
@@ -20,6 +20,7 @@ const EZPAY_API_URL = process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost
 
 export default function AdminPaymentsPage() {
   const t = useTranslations('admin')
+  const locale = useLocale()
   const { accessToken } = useAuthStore()
 
   return (
@@ -29,6 +30,7 @@ export default function AdminPaymentsPage() {
       <PayProvider
         applicationId={applicationId}
         config={{ apiUrl: EZPAY_API_URL }}
+        locale={locale}
         getToken={() => accessToken}
       >
         <PayAdminDashboard applicationId={applicationId} />

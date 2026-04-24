@@ -43,7 +43,7 @@ export function Providers({
         webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
         publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
       >
-        <PayProviderWrapper>
+        <PayProviderWrapper locale={locale}>
           <NextThemesProvider
             attribute="class"
             defaultTheme="system"
@@ -71,13 +71,14 @@ export function Providers({
  * publishable key needed). The ezauth JWT carries the user identity and
  * `applicationId` scopes the ezpay queries to the ezstart tenant.
  */
-function PayProviderWrapper({ children }: { children: React.ReactNode }) {
+function PayProviderWrapper({ children, locale }: { children: React.ReactNode; locale: Locale }) {
   return (
     <PayProvider
       applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID ?? ''}
       appName="ezstart"
       config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
       payWebUrl={process.env.NEXT_PUBLIC_EZPAY_WEB_URL ?? 'http://localhost:6131'}
+      locale={locale}
       getToken={() => useAuthStore.getState().accessToken}
       onAuthFailure={handleAuthFailure}
     >

@@ -25,7 +25,7 @@ import {
   P,
   Skeleton,
 } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 /**
@@ -192,6 +192,7 @@ function TestContent() {
 
 export default function TestPaymentsPage() {
   const t = useTranslations('admin')
+  const locale = useLocale()
   const { accessToken } = useAuthStore()
 
   return (
@@ -200,6 +201,7 @@ export default function TestPaymentsPage() {
       <PayProvider
         applicationId={applicationId}
         config={{ apiUrl: EZPAY_API_URL }}
+        locale={locale}
         getToken={() => accessToken}
       >
         <TestContent />

@@ -60,6 +60,7 @@ export interface DonationCardProps {
   notConfiguredTexts?: PayNotConfiguredTexts
   /**
    * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
+   * When omitted, inherits from `<PayProvider locale={…}>` context (default `'en'`).
    * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
    * to `'en'`.
    */
@@ -120,12 +121,13 @@ export function DonationCard({
   userName,
   texts: textsProp,
   notConfiguredTexts,
-  locale = 'en',
+  locale,
 }: DonationCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
   const { createDonation, isLoading } = usePay()
-  const { applicationResolutionStatus, payWebUrl } = useApplicationContext()
-  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
+  const { applicationResolutionStatus, payWebUrl, locale: contextLocale } = useApplicationContext()
+  const resolvedLocale = locale ?? contextLocale
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
   const [message, setMessage] = useState('')

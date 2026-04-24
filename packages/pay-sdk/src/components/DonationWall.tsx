@@ -33,6 +33,7 @@ interface DonationWallProps {
   noDonationsText?: string
   /**
    * BCP-47 locale used to build the developer portal URL (e.g. `en`, `fr`).
+   * When omitted, inherits from `<PayProvider locale={…}>` context (default `'en'`).
    * SDK stays i18n-agnostic — consumers should pass `useLocale()`. Defaults
    * to `'en'`.
    */
@@ -98,10 +99,11 @@ export function DonationWall({
   className,
   texts,
   noDonationsText: legacyNoDonationsText,
-  locale = 'en',
+  locale,
 }: DonationWallProps) {
   const { donations, isLoading, error } = useDonations({ projectId, limit })
-  const { applicationResolutionStatus, payWebUrl } = useApplicationContext()
+  const { applicationResolutionStatus, payWebUrl, locale: contextLocale } = useApplicationContext()
+  const resolvedLocale = locale ?? contextLocale
 
   const t = {
     loadingText: texts?.loadingText || 'Loading donations...',
@@ -113,7 +115,7 @@ export function DonationWall({
     anonymousLabel: texts?.anonymousLabel || 'Anonymous',
   }
 
-  const dashboardUrl = payWebUrl ? `${payWebUrl}/${locale}/developer` : undefined
+  const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined
 
   const sortedDonations = useMemo(() => {
     if (!donations?.length) return []

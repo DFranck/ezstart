@@ -127,6 +127,7 @@ export default function LiaPage() {
             <PayProvider
               applicationId={GREEN_PULSE_APPLICATION_ID}
               config={{ apiUrl: EZPAY_API_URL }}
+              locale={locale}
               getToken={() => useAuthStore.getState().accessToken}
             >
               <CurrentPlanLabel />
