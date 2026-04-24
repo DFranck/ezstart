@@ -140,5 +140,12 @@ export function renderThemeStyle(appName: string, theme: KeyConfigTheme | null):
   // code path — a malformed slug indicates upstream tampering.
   if (!SAFE_KEY_RE.test(appName)) return ''
   if (!theme.primary) return ''
-  return `:root{--primary:${theme.primary};}`
+  // Match the selector specificity of `packages/ui/src/styles/themes/ezauth/
+  // ezauth.css` (`:root[data-app='ezauth']` in light, `:root[data-app='ezauth']
+  // .dark` in dark). Those ezauth.css rules always apply because the layout
+  // pins `<html data-app="ezauth">`. Our injected `<style>` comes AFTER in
+  // the render tree, so matching specificity + later source order wins the
+  // cascade in both light and dark modes.
+  const v = theme.primary
+  return `:root[data-app='ezauth']{--primary:${v};}:root[data-app='ezauth'].dark{--primary:${v};}`
 }

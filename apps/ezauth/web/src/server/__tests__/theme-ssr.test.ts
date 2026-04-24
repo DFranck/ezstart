@@ -97,19 +97,21 @@ describe('renderThemeStyle', () => {
     expect(renderThemeStyle('ezpay', null)).toBe('')
   })
 
-  it('emits ONLY --primary under a bare :root selector', () => {
+  it('emits --primary under selectors matching ezauth.css specificity (light + dark)', () => {
     const css = renderThemeStyle('ezpay', { primary: '#00D9F7' })
-    expect(css).toBe(':root{--primary:#00D9F7;}')
+    expect(css).toBe(
+      ":root[data-app='ezauth']{--primary:#00D9F7;}:root[data-app='ezauth'].dark{--primary:#00D9F7;}"
+    )
   })
 
-  it('does NOT scope by data-app anymore', () => {
+  it('scopes the override to the ezauth-pinned data-app root', () => {
     const css = renderThemeStyle('ezpay', { primary: '#00D9F7' })
-    expect(css).not.toContain('data-app')
+    expect(css).toContain("[data-app='ezauth']")
   })
 
-  it('does NOT emit a .dark override', () => {
+  it('emits a .dark override so the tenant primary also wins in dark mode', () => {
     const css = renderThemeStyle('ezpay', { primary: '#00D9F7' })
-    expect(css).not.toContain('.dark')
+    expect(css).toContain('.dark{--primary:#00D9F7;}')
   })
 
   it('does NOT emit legacy background/foreground/accent tokens even when present', () => {
@@ -119,7 +121,9 @@ describe('renderThemeStyle', () => {
       foreground: '#000',
       accent: '#f0f',
     })
-    expect(css).toBe(':root{--primary:#00D9F7;}')
+    expect(css).toBe(
+      ":root[data-app='ezauth']{--primary:#00D9F7;}:root[data-app='ezauth'].dark{--primary:#00D9F7;}"
+    )
     expect(css).not.toContain('--background')
     expect(css).not.toContain('--foreground')
     expect(css).not.toContain('--accent')
