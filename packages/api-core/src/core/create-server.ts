@@ -68,6 +68,17 @@ export function createApiServer(config: ServerConfig): ApiServer {
   // is exposed via X-Forwarded-For — critical for rate limiting.
   app.set('trust proxy', true)
 
+  // TEMP diag: log every request at the entry of the Express middleware
+  // chain so we can distinguish "request reaches Express" vs "rejected
+  // upstream" in Railway logs. Remove after staging is healthy.
+  app.use((req, _res, next) => {
+    // eslint-disable-next-line no-console -- prod diag
+    console.log(
+      `[pre-cors-diag] ${req.method} ${req.path} origin=${req.headers.origin ?? '(none)'}`
+    )
+    next()
+  })
+
   // CORS — 3-tier policy (see .claude/rules/standard-saas-cors.md).
   //
   // 1. Permissive CORS (`ACAO: *`, `credentials: false`) applies to every
