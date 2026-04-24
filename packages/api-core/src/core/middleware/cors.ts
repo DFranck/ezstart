@@ -113,21 +113,35 @@ export type StrictCorsOptions = {
 export function createPermissiveCorsMiddleware(
   options: PermissiveCorsOptions = {}
 ): RequestHandler {
-  const opts: CorsOptions = {
-    // Explicit reflect-origin callback. Equivalent to `origin: true` but
-    // easier to reason about when diagnosing production 500s: the callback
-    // form guarantees no upstream `cors` package branch can throw because
-    // of a missing/malformed `Origin` header — we always return
-    // `(null, true)` and let the package write the appropriate headers.
-    origin(_origin, callback) {
-      callback(null, true)
-    },
-    credentials: true,
-    methods: options.methods ?? DEFAULT_METHODS,
-    allowedHeaders: options.allowedHeaders ?? PERMISSIVE_ALLOWED_HEADERS,
-    exposedHeaders: options.exposedHeaders ?? PERMISSIVE_EXPOSED_HEADERS,
+  // Hand-rolled CORS instead of the `cors` package. On Railway's managed
+  // Node runtime the package's `origin: true` / callback branches produce
+  // an unhandled 500 on every request carrying an `Origin` header, even
+  // after disabling `@sentry/node` tracing — the same build works fine on
+  // localhost. Rather than keep guessing at the interaction, we short-
+  // circuit into a tiny manual implementation that does exactly what we
+  // need: reflect the request origin, allow credentials, handle the
+  // preflight OPTIONS, and move on.
+  const methods = (options.methods ?? DEFAULT_METHODS).join(',')
+  const allowedHeaders = (options.allowedHeaders ?? PERMISSIVE_ALLOWED_HEADERS).join(',')
+  const exposedHeaders = (options.exposedHeaders ?? PERMISSIVE_EXPOSED_HEADERS).join(',')
+
+  return function permissiveCors(req, res, next) {
+    const origin = req.headers.origin
+    res.setHeader('Vary', 'Origin')
+    if (typeof origin === 'string' && origin.length > 0) {
+      res.setHeader('Access-Control-Allow-Origin', origin)
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+    }
+    res.setHeader('Access-Control-Expose-Headers', exposedHeaders)
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', methods)
+      res.setHeader('Access-Control-Allow-Headers', allowedHeaders)
+      res.setHeader('Access-Control-Max-Age', '86400')
+      res.status(204).end()
+      return
+    }
+    next()
   }
-  return cors(opts)
 }
 
 function matchesAllowlist(origin: string, allowlist: readonly StrictCorsEntry[]): boolean {
