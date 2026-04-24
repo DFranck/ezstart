@@ -13,7 +13,8 @@ import {
   Spinner,
 } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
-import { Link } from '@/i18n/navigation'
+// eslint-disable-next-line @ezstart/ezstart/no-next-link-in-locale-apps -- `navigation.loginHref` already includes the locale prefix; the i18n Link would re-prepend it (→ /en/en/login). TODO: refactor useAuthNavigation to expose unprefixed `loginPath` + `searchSuffix` so we can migrate cleanly.
+import Link from 'next/link'
 import { Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'

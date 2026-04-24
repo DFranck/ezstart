@@ -15,7 +15,8 @@ import {
   Spinner,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { Link } from '@/i18n/navigation'
+// eslint-disable-next-line @ezstart/ezstart/no-next-link-in-locale-apps -- `navigation.registerHref` already includes the locale prefix; the i18n Link would re-prepend it (→ /en/en/register). TODO: refactor useAuthNavigation to expose unprefixed `registerPath` + `searchSuffix` so we can migrate cleanly.
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig, type KeyConfigState } from '@/hooks/useKeyConfig'
