@@ -4,9 +4,11 @@
  * Three factories implementing the @ezstart 3-tier CORS policy:
  *
  * - `createPermissiveCorsMiddleware` — **Tier 1 + 2** (public + Bearer).
- *   Emits `Access-Control-Allow-Origin: *` with `credentials: false`. Safe
- *   because publishable keys (`ez_pk_*`) are public by design and Bearer
- *   tokens are never sent automatically by the browser cross-origin.
+ *   Reflects the request `Origin` back in `Access-Control-Allow-Origin`
+ *   and sets `credentials: true` so SDK fetches using
+ *   `credentials: 'include'` are spec-compatible. Safe because Tier 1/2
+ *   endpoints authenticate via publishable key (`ez_pk_*`) or Bearer
+ *   token — never via cookies, even when one is sent.
  *
  * - `createStrictCorsMiddleware` — **Tier 3** (cookie-authenticated).
  *   Reflects the request origin only when it matches a string/regex
