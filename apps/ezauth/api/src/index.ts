@@ -1,6 +1,27 @@
-// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
-import './instrument.mjs'
-import { Sentry } from './instrument.mjs'
+// TEMP DIAG: Sentry import disabled to isolate the staging CORS 500 bug.
+// `@sentry/node` v10 auto-loads OpenTelemetry HTTP instrumentation as a
+// side effect of importing this module — even when `Sentry.init` is called
+// with `integrations: []` and `defaultIntegrations: false`. When OTEL's
+// HTTP wrapper is active on Railway's managed Node runtime, every request
+// carrying a non-empty `Origin` header is rejected with HTTP 500 before
+// Express's first middleware sees it (verified via `[pre-cors-diag]` log:
+// fires for `origin=(none)` requests, never for origin-bearing ones).
+//
+// Re-enable Sentry once the OTEL HTTP integration interaction with `cors`
+// / Railway is understood (or once we move to a Sentry version that lets
+// us opt out of the HTTP wrap cleanly).
+//
+// Original lines (kept for restore):
+//   import './instrument.mjs'
+//   import { Sentry } from './instrument.mjs'
+//
+// Stub Sentry export so `Sentry.setupExpressErrorHandler(app)` below
+// remains a no-op without code changes downstream.
+const Sentry = {
+  setupExpressErrorHandler: (_app: unknown) => {
+    // intentionally no-op while Sentry is disabled
+  },
+} as const
 import {
   addVersionHeader,
   connectToMongo,
