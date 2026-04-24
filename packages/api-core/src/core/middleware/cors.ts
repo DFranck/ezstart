@@ -126,21 +126,32 @@ export function createPermissiveCorsMiddleware(
   const exposedHeaders = (options.exposedHeaders ?? PERMISSIVE_EXPOSED_HEADERS).join(',')
 
   return function permissiveCors(req, res, next) {
-    const origin = req.headers.origin
-    res.setHeader('Vary', 'Origin')
-    if (typeof origin === 'string' && origin.length > 0) {
-      res.setHeader('Access-Control-Allow-Origin', origin)
-      res.setHeader('Access-Control-Allow-Credentials', 'true')
+    try {
+      // TEMP diag: log every permissive CORS hit so we can see in Railway
+      // logs whether this middleware runs at all (and with what origin).
+      // Remove once staging is confirmed healthy.
+      // eslint-disable-next-line no-console -- intentional prod debug log
+      console.log(`[cors-diag] ${req.method} ${req.path} origin=${req.headers.origin ?? '(none)'}`)
+      const origin = req.headers.origin
+      res.setHeader('Vary', 'Origin')
+      if (typeof origin === 'string' && origin.length > 0) {
+        res.setHeader('Access-Control-Allow-Origin', origin)
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+      }
+      res.setHeader('Access-Control-Expose-Headers', exposedHeaders)
+      if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Methods', methods)
+        res.setHeader('Access-Control-Allow-Headers', allowedHeaders)
+        res.setHeader('Access-Control-Max-Age', '86400')
+        res.status(204).end()
+        return
+      }
+      next()
+    } catch (err) {
+      // eslint-disable-next-line no-console -- intentional prod debug log
+      console.error('[cors-diag] permissive middleware threw', err)
+      throw err
     }
-    res.setHeader('Access-Control-Expose-Headers', exposedHeaders)
-    if (req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Methods', methods)
-      res.setHeader('Access-Control-Allow-Headers', allowedHeaders)
-      res.setHeader('Access-Control-Max-Age', '86400')
-      res.status(204).end()
-      return
-    }
-    next()
   }
 }
 
