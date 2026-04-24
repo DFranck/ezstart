@@ -13,25 +13,27 @@ import {
 import { useTranslations } from 'next-intl'
 import { Suspense } from 'react'
 import { useKeyConfig } from '@/hooks/useKeyConfig'
-import { useDynamicAppTheme } from '@/hooks/useDynamicAppTheme'
 
-function ForgotPasswordContent({ ssrAppName }: { ssrAppName: string | null }) {
+interface ForgotPasswordContentProps {
+  ssrAppName: string | null
+  ssrAppDisplayName: string | null
+}
+
+function ForgotPasswordContent({ ssrAppName }: ForgotPasswordContentProps) {
+  // Display name intentionally unused on this page — the forgot-password form
+  // only needs the app slug for the email template context.
   const t = useTranslations('forgotPassword')
   const tValidation = useTranslations('validation')
   const navigation = useAuthNavigation()
 
-  // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
+  // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy).
+  // The display name is not rendered on this page, so we only need the slug
+  // (passed to the form for the email template context).
   const keyConfig = useKeyConfig(navigation.publishableKey)
-  // SSR-resolved app takes precedence over the `'ezauth'` default so the
-  // first render already matches the real consumer brand (zero flash).
   const app = keyConfig.appName ?? navigation.app ?? ssrAppName ?? 'ezauth'
 
-  // Sync <html data-app="..."> on the client so the per-app theme CSS kicks
-  // in (middleware only sets the SSR header for `?app=` legacy, not `?key=`).
-  useDynamicAppTheme(app)
-
   return (
-    <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto" data-app={app}>
+    <Card className="max-w-md w-full max-h-[90vh] overflow-y-auto">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
         <CardDescription className="text-xs md:text-sm">{t('description')}</CardDescription>
@@ -56,7 +58,15 @@ function ForgotPasswordContent({ ssrAppName }: { ssrAppName: string | null }) {
   )
 }
 
-export default function ForgotPasswordClient({ ssrAppName }: { ssrAppName: string | null }) {
+interface ForgotPasswordClientProps {
+  ssrAppName: string | null
+  ssrAppDisplayName: string | null
+}
+
+export default function ForgotPasswordClient({
+  ssrAppName,
+  ssrAppDisplayName,
+}: ForgotPasswordClientProps) {
   return (
     <Div className="flex flex-1 items-center justify-center px-2">
       <Suspense
@@ -66,7 +76,7 @@ export default function ForgotPasswordClient({ ssrAppName }: { ssrAppName: strin
           </Div>
         }
       >
-        <ForgotPasswordContent ssrAppName={ssrAppName} />
+        <ForgotPasswordContent ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
       </Suspense>
     </Div>
   )

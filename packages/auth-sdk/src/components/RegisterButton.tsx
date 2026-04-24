@@ -3,6 +3,7 @@
 import { logger } from '@ezstart/logger'
 import { Button, Icon, KnownIconName, Span } from '@ezstart/ui/components'
 import { useAuth } from '../react/hooks.js'
+import { detectCurrentThemePreference } from './themePreference.js'
 
 export interface RegisterButtonProps {
   children?: React.ReactNode
@@ -18,6 +19,11 @@ export interface RegisterButtonProps {
   loading?: boolean
   /** Always show text on all screen sizes (disable responsive hiding) */
   alwaysShowText?: boolean
+  /**
+   * Override the theme preference propagated to the EZAuth auth pages via
+   * `?theme=<value>`. Same semantics as {@link LoginButton.theme}.
+   */
+  theme?: 'light' | 'dark' | 'system'
 }
 
 /**
@@ -49,6 +55,7 @@ export function RegisterButton({
   onClick,
   loading: externalLoading,
   alwaysShowText = false,
+  theme,
 }: RegisterButtonProps) {
   const { register, isLoggingIn, setLoggingIn } = useAuth()
 
@@ -63,7 +70,9 @@ export function RegisterButton({
     setLoggingIn(true)
 
     try {
-      await register() // redirects, so loading state persists
+      const resolvedTheme = theme ?? detectCurrentThemePreference()
+      const extraParams = resolvedTheme ? { theme: resolvedTheme } : undefined
+      await register(extraParams) // redirects, so loading state persists
     } catch (error) {
       logger.error(
         'Register redirect failed:',

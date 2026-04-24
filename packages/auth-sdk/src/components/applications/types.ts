@@ -90,9 +90,14 @@ export interface ApplicationDetailViewTexts {
   themeEnableHelp: string
   themeProLockedLabel: string
   themePrimaryLabel: string
-  themeBackgroundLabel: string
-  themeForegroundLabel: string
-  themeAccentLabel: string
+  /**
+   * Legacy label fields — kept optional for backwards compatibility with
+   * consumers that still translate them, but they are NOT rendered by
+   * `ApplicationThemeEditor` anymore (primary-only UI since 2026-04-24).
+   */
+  themeBackgroundLabel?: string
+  themeForegroundLabel?: string
+  themeAccentLabel?: string
   themeLogoLabel: string
   themeLogoPlaceholder: string
   themeReset: string
@@ -193,15 +198,12 @@ export const defaultApplicationsFlowTexts: ApplicationsFlowTexts = {
     archiveFailed: 'Failed to archive application',
     themeTitle: 'White-label theme',
     themeDescription:
-      'Override the colors of the EZAuth login page for users of this application. Leave a field empty to inherit the default theme.',
+      'Override the primary color of the EZAuth login page for users of this application. Light/dark mode stays driven by each user preference.',
     themeEnableLabel: 'Apply theme to auth pages',
     themeEnableHelp:
-      'When enabled, the colors below replace the default EZAuth theme on login, register, and password-reset pages for this application.',
+      'When enabled, the primary color below replaces the default EZAuth accent on login, register, and password-reset pages for this application. Light/dark mode still follows each user own preference.',
     themeProLockedLabel: 'Included in EZAuth Pro',
-    themePrimaryLabel: 'Primary',
-    themeBackgroundLabel: 'Background',
-    themeForegroundLabel: 'Foreground (text)',
-    themeAccentLabel: 'Accent',
+    themePrimaryLabel: 'Primary color',
     themeLogoLabel: 'Logo URL (optional)',
     themeLogoPlaceholder: 'https://cdn.example.com/logo.svg',
     themeReset: 'Reset',

@@ -265,5 +265,39 @@ describe('Application white-label theme', () => {
       expect(res.status).toBe(200)
       expect(res.body.data.theme).toBeUndefined()
     })
+
+    it('exposes appDisplayName from Application.name when key is bound to an Application', async () => {
+      const user = await createUser({ email: 'o@test.com', username: 'o' })
+      const Application = await getApplicationModel()
+      const appDoc = await Application.create({
+        slug: 'acme',
+        name: 'Acme Corp',
+        ownerId: user._id!.toString(),
+      })
+
+      const { rawKey } = await createApiKey(user._id!.toString(), {
+        appName: 'acme',
+        scope: 'user',
+        applicationId: appDoc._id.toString(),
+      })
+
+      const res = await request(app).get(`/api/keys/config?key=${encodeURIComponent(rawKey)}`)
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.appDisplayName).toBe('Acme Corp')
+    })
+
+    it('omits appDisplayName when key has no applicationId', async () => {
+      const user = await createUser({ email: 'o@test.com', username: 'o' })
+      const { rawKey } = await createApiKey(user._id!.toString(), {
+        appName: 'someapp',
+        scope: 'user',
+      })
+
+      const res = await request(app).get(`/api/keys/config?key=${encodeURIComponent(rawKey)}`)
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.appDisplayName).toBeUndefined()
+    })
   })
 })

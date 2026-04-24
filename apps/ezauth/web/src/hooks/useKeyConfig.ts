@@ -22,6 +22,14 @@ export interface KeyConfigState {
   /** Resolved app name from the key config, or undefined. */
   appName: string | undefined
   /**
+   * Human-readable Application name resolved from the key config
+   * (`Application.name` on the API side). Undefined when the key is not
+   * bound to an Application (platform-wide admin keys) or when the API
+   * hasn't returned it yet. Callers MUST fall back to a prettified
+   * `appName` when missing.
+   */
+  appDisplayName: string | undefined
+  /**
    * Key scope from the config endpoint:
    * - `'admin'` — platform-wide key (e.g. ezauth self-seed). Do NOT use
    *   `appName` for white-labeling; fall back to the caller's app hint.
@@ -40,6 +48,7 @@ export interface KeyConfigState {
 const IDLE_STATE: KeyConfigState = {
   status: 'idle',
   appName: undefined,
+  appDisplayName: undefined,
   scope: undefined,
   httpStatus: undefined,
   errorMessage: undefined,
@@ -81,6 +90,7 @@ export function useKeyConfig(
 
     apiCall<{
       appName: string
+      appDisplayName?: string
       scope: KeyConfigState['scope']
     }>(`/keys/config?key=${encodeURIComponent(publishableKey)}`, {
       appName: 'ezauth',
@@ -91,6 +101,7 @@ export function useKeyConfig(
         setState({
           status: 'valid',
           appName: data.appName,
+          appDisplayName: data.appDisplayName,
           scope: data.scope,
           httpStatus: 200,
           errorMessage: undefined,
@@ -107,6 +118,7 @@ export function useKeyConfig(
           setState({
             status: 'rate_limited',
             appName: undefined,
+            appDisplayName: undefined,
             scope: undefined,
             httpStatus,
             errorMessage,
@@ -120,6 +132,7 @@ export function useKeyConfig(
           setState({
             status: 'error',
             appName: undefined,
+            appDisplayName: undefined,
             scope: undefined,
             httpStatus,
             errorMessage,
@@ -132,6 +145,7 @@ export function useKeyConfig(
         setState({
           status: 'invalid',
           appName: undefined,
+          appDisplayName: undefined,
           scope: undefined,
           httpStatus,
           errorMessage,

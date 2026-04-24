@@ -7,6 +7,22 @@ import { fetchKeyConfigCached } from './server/key-config-cache'
 /** Allowed app values for legacy `?app=` theme scoping */
 const VALID_APPS = new Set(['ezauth', 'ezstart', 'ezbill', 'ezpay', 'green-pulse', 'fengshui'])
 
+/**
+ * Valid `?theme=` values forwarded from a consumer app. Matches the values
+ * accepted by `next-themes` (`light`, `dark`, `system`) — anything else is
+ * rejected silently so a malicious caller can't inject arbitrary text into
+ * the cookie (the cookie is read by next-themes without further
+ * validation, so defense-in-depth is worth it).
+ */
+const VALID_THEME_PREFERENCES = new Set(['light', 'dark', 'system'])
+
+/**
+ * Name of the cookie `next-themes` reads by default. If the consumer
+ * customised `ThemeProvider` with a non-default `storageKey`, this needs
+ * to be kept in sync (ezauth uses the default today).
+ */
+const THEME_COOKIE_NAME = 'theme'
+
 const intlMiddleware = createMiddleware(routing)
 
 /**
@@ -28,6 +44,13 @@ export default async function middleware(request: NextRequest) {
   // ?key= (publishable key) takes priority over ?app= (legacy).
   const keyParam = request.nextUrl.searchParams.get('key')
   const appParam = request.nextUrl.searchParams.get('app')?.toLowerCase()
+  // `?theme=light|dark|system` — propagated from the consumer app via
+  // <LoginButton>/<RegisterButton>. Cascades to a cookie read by next-themes
+  // on the next render pass so the ezauth auth pages match the consumer's
+  // current scheme out of the box (no flash, no manual sync).
+  const themeParam = request.nextUrl.searchParams.get('theme')
+  const validThemePreference =
+    themeParam && VALID_THEME_PREFERENCES.has(themeParam) ? themeParam : undefined
 
   // Mutate the incoming request's headers so server components reading
   // `headers()` during the render pass see our custom `x-app-*` keys. This
@@ -44,6 +67,9 @@ export default async function middleware(request: NextRequest) {
       const config = await fetchKeyConfigCached(keyParam, resolveApiUrl())
       if (config) {
         request.headers.set('x-app-theme', config.appName)
+        if (config.appDisplayName) {
+          request.headers.set('x-app-display-name', config.appDisplayName)
+        }
         if (config.theme) {
           // Stringify only the minimal token set — drops undefined keys so
           // the header stays small and predictable.
@@ -61,8 +87,31 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  // next-intl middleware handles locale routing
-  return intlMiddleware(request)
+  // next-intl middleware handles locale routing. Capture its response so we
+  // can attach the theme cookie to it before returning.
+  const response = intlMiddleware(request)
+
+  // Propagate the consumer's light/dark preference by writing next-themes'
+  // cookie on the response. This is picked up on the NEXT render pass, so a
+  // fresh navigation to `/login?theme=dark` already paints in dark mode
+  // (zero flash). We keep the cookie scoped to `/` with `SameSite=Lax` so it
+  // works for the OAuth redirect flow (cross-site top-level navigation is
+  // still considered same-site for SameSite=Lax).
+  //
+  // When the consumer later switches scheme on the ezauth page via the
+  // `<ThemeSwitcher>`, next-themes writes the same cookie itself —
+  // overwriting our middleware-set value cleanly.
+  if (validThemePreference) {
+    response.cookies.set(THEME_COOKIE_NAME, validThemePreference, {
+      path: '/',
+      sameSite: 'lax',
+      // No `Secure` flag — cookie must be readable in dev (http://localhost).
+      // Next-themes reads cookies JS-side, so `HttpOnly` is never set.
+      maxAge: 60 * 60 * 24 * 365, // 1 year, matches next-themes default
+    })
+  }
+
+  return response
 }
 
 export const config = {

@@ -4,7 +4,8 @@ import ForgotPasswordClient from './ForgotPasswordClient'
 
 export default async function ForgotPasswordPage() {
   const h = await headers()
-  const { appName } = resolveSsrTheme(h)
+  const { appName, appDisplayName } = resolveSsrTheme(h)
   const ssrAppName = appName && appName !== 'ezauth' ? appName : null
-  return <ForgotPasswordClient ssrAppName={ssrAppName} />
+  const ssrAppDisplayName = appDisplayName ?? null
+  return <ForgotPasswordClient ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
 }

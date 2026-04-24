@@ -233,6 +233,18 @@ Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch prod
 - [ ] Tout via SDK components (`<AuthProvider />`, `<SignInForm />`, etc.)
 - [ ] Publishable key based (`NEXT_PUBLIC_EZAUTH_KEY`)
 
+#### White-label theme — primary-only (2026-04-24)
+
+**Règle :** le consumer définit UNIQUEMENT la couleur `primary` dans son Application. Le mode clair/sombre est géré automatiquement par `next-themes` côté ezauth et propagé entre les deux apps via le paramètre `?theme=`.
+
+- [ ] Dashboard theme editor expose `primary` + `logo` + toggle `themeEnabled` uniquement (pas de background/foreground/accent)
+- [ ] SSR middleware injecte `<style>:root{--primary:<db-value>;}</style>` — pas d'override scopé par `data-app`
+- [ ] Layout ezauth fixe `data-app="ezauth"` (pas de propagation du slug consumer)
+- [ ] `<LoginButton>` / `<RegisterButton>` auto-détectent la préférence light/dark du consumer et l'envoient via `?theme=<light|dark|system>` à l'ezauth
+- [ ] `<AuthCallbackPage>` lit `?theme=` au retour et applique la préférence sur le consumer (pour le cas où l'utilisateur a switché sur la page ezauth)
+- [ ] Backend Zod schema garde les 4 champs en backcompat, mais seul `primary` est rendu en CSS
+- [ ] `/api/keys/config` expose `appDisplayName` (depuis `Application.name`) pour le rendu "Sign in to access \<brand\>" — fallback `prettifySlug(appName)` quand absent
+
 ### 5.3 User Dashboard (post-login)
 
 - [ ] Overview : mes apps / mes projets

@@ -1,7 +1,6 @@
 'use client'
 
 import { Suspense, useEffect, useRef, useState } from 'react'
-import { getAppTheme } from '@/config/app-themes'
 import { SignInForm, useAuthNavigation } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import {
@@ -21,7 +20,7 @@ import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig, type KeyConfigState } from '@/hooks/useKeyConfig'
 import { deriveAppHintFromRedirectUri } from '@/hooks/useDerivedApp'
-import { useDynamicAppTheme } from '@/hooks/useDynamicAppTheme'
+import { prettifySlug } from '@/server/theme-ssr'
 
 /**
  * Max retry delay when the server did not provide a `Retry-After` header or
@@ -32,15 +31,23 @@ const MAX_RATE_LIMIT_RETRY_SECONDS = 10
 
 interface LoginContentProps {
   /**
-   * SSR-resolved app name from the middleware `x-app-theme` header.
-   * Used as the initial / fallback app slug so first render matches SSR
-   * and avoids the `ezauth` → real-app flash while the client probe runs.
-   * `null` when no key was provided on the URL (first-party login).
+   * SSR-resolved app slug from the middleware `x-app-theme` header. Used as
+   * the initial / fallback app slug so first render matches SSR and avoids
+   * the `ezauth` → real-app flash while the client probe runs. `null` when
+   * no key was provided on the URL (first-party login).
    */
   ssrAppName: string | null
+  /**
+   * SSR-resolved Application.name (e.g. `'GreenPulse.AI'`) from the
+   * middleware `x-app-display-name` header. `null` when no key was
+   * provided OR when the Application has no `name` set. Rendered in the
+   * "Sign in to access <display name>" copy to give the user the proper
+   * brand name on first paint.
+   */
+  ssrAppDisplayName: string | null
 }
 
-function LoginContent({ ssrAppName }: LoginContentProps) {
+function LoginContent({ ssrAppName, ssrAppDisplayName }: LoginContentProps) {
   const t = useTranslations('login')
   const tForgot = useTranslations('forgotPassword')
   const tValidation = useTranslations('validation')
@@ -73,11 +80,10 @@ function LoginContent({ ssrAppName }: LoginContentProps) {
   // SSR-resolved app takes precedence over the `'ezauth'` default so the
   // first render already matches the real consumer brand (zero flash).
   const app = resolvedAppFromKey ?? navigation.app ?? ssrAppName ?? 'ezauth'
-  const theme = getAppTheme(app)
-
-  // Sync <html data-app="..."> on the client so the per-app theme CSS kicks
-  // in (middleware only sets the SSR header for `?app=` legacy, not `?key=`).
-  useDynamicAppTheme(app)
+  // Resolve the display name: client keyConfig wins (freshest), then the
+  // SSR header, then a prettified slug fallback. This replaces the
+  // deprecated hardcoded `getAppTheme(app).name` lookup.
+  const appDisplayName = keyConfig.appDisplayName ?? ssrAppDisplayName ?? prettifySlug(app)
 
   // Form is ONLY disabled during the initial "loading" probe (explicit pending
   // state). For `invalid` / `rate_limited` / `error`, the form remains
@@ -152,7 +158,7 @@ function LoginContent({ ssrAppName }: LoginContentProps) {
   }, [keyConfig.status, keyConfig.retryAfter])
 
   return (
-    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto" data-app={app}>
+    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto">
       <Div className="absolute top-4 left-4">
         <BackButton />
       </Div>
@@ -161,8 +167,7 @@ function LoginContent({ ssrAppName }: LoginContentProps) {
       </Div>
       <CardHeader className="text-center pb-4">
         <CardDescription className="text-xs md:text-sm">
-          {t('signInToAccess')}{' '}
-          <Span className={`${theme.primaryColor} font-semibold`}>{theme.name}</Span>
+          {t('signInToAccess')} <Span className="text-primary font-semibold">{appDisplayName}</Span>
         </CardDescription>
       </CardHeader>
 
@@ -213,13 +218,18 @@ function LoginContent({ ssrAppName }: LoginContentProps) {
   )
 }
 
-export default function LoginClient({ ssrAppName }: { ssrAppName: string | null }) {
+interface LoginClientProps {
+  ssrAppName: string | null
+  ssrAppDisplayName: string | null
+}
+
+export default function LoginClient({ ssrAppName, ssrAppDisplayName }: LoginClientProps) {
   const t = useTranslations('login')
 
   return (
     <Div className="flex flex-1 items-center justify-center px-2">
       <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
-        <LoginContent ssrAppName={ssrAppName} />
+        <LoginContent ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
       </Suspense>
     </Div>
   )

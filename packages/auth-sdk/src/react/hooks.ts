@@ -29,6 +29,14 @@ export function useAuth(logger?: AuthLogger) {
    *
    * Uses `?key=` (publishable key) when available for Clerk-like identification.
    * Falls back to `?app=` for first-party mode (ezauth web itself).
+   *
+   * **Theme propagation** — pass `additionalParams.theme` (values:
+   * `'light' | 'dark' | 'system'`) to forward the consumer's current
+   * color scheme to the ezauth auth pages. Callers typically pass
+   * `theme: resolvedTheme` from `next-themes/useTheme()` so the ezauth
+   * UI paints in the same scheme without a flash. EZAuth's middleware
+   * validates the value and silently drops anything outside the
+   * whitelist.
    */
   const login = (additionalParams?: Record<string, string>): Promise<never> => {
     // Save current URL for post-login redirect
@@ -62,7 +70,8 @@ export function useAuth(logger?: AuthLogger) {
    * Redirect to the EZAuth register page.
    *
    * Uses `?key=` (publishable key) when available for Clerk-like identification.
-   * Falls back to `?app=` for first-party mode.
+   * Falls back to `?app=` for first-party mode. Accepts the same
+   * `additionalParams.theme` propagation as {@link login}.
    */
   const register = (additionalParams?: Record<string, string>): Promise<never> => {
     const redirectUri = buildRedirectUri()

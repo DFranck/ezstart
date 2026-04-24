@@ -1,6 +1,5 @@
 'use client'
 
-import { getAppTheme } from '@/config/app-themes'
 import { SignUpForm, useAuthNavigation } from '@ezstart/auth-sdk'
 import {
   BackButton,
@@ -19,9 +18,14 @@ import { Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useKeyConfig } from '@/hooks/useKeyConfig'
-import { useDynamicAppTheme } from '@/hooks/useDynamicAppTheme'
+import { prettifySlug } from '@/server/theme-ssr'
 
-function RegisterContent({ ssrAppName }: { ssrAppName: string | null }) {
+interface RegisterContentProps {
+  ssrAppName: string | null
+  ssrAppDisplayName: string | null
+}
+
+function RegisterContent({ ssrAppName, ssrAppDisplayName }: RegisterContentProps) {
   const t = useTranslations('register')
   const tv = useTranslations('verifyEmail')
   const tApiErrors = useTranslations('apiErrors')
@@ -36,12 +40,9 @@ function RegisterContent({ ssrAppName }: { ssrAppName: string | null }) {
   // SSR-resolved app takes precedence over the `'ezauth'` default so the
   // first render already matches the real consumer brand (zero flash).
   const app = keyConfig.appName ?? navigation.app ?? ssrAppName ?? 'ezauth'
-  const theme = getAppTheme(app)
+  const appDisplayName = keyConfig.appDisplayName ?? ssrAppDisplayName ?? prettifySlug(app)
   const isKeyInvalid = keyConfig.status === 'invalid'
 
-  // Sync <html data-app="..."> on the client so the per-app theme CSS kicks
-  // in (middleware only sets the SSR header for `?app=` legacy, not `?key=`).
-  useDynamicAppTheme(app)
   // First-party fallback: default redirect_uri to ezauth's own callback page
   // when the user lands on /register directly (no third-party ?redirect_uri=).
   const resolvedRedirectUri =
@@ -58,7 +59,7 @@ function RegisterContent({ ssrAppName }: { ssrAppName: string | null }) {
     : undefined
 
   return (
-    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto" data-app={app}>
+    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto">
       <Div className="absolute top-4 left-4">
         <BackButton />
       </Div>
@@ -68,7 +69,7 @@ function RegisterContent({ ssrAppName }: { ssrAppName: string | null }) {
       <CardHeader className="text-center pb-4">
         <CardDescription className="text-xs md:text-sm">
           {t('createAccountToAccess')}{' '}
-          <Span className={`${theme.primaryColor} font-medium`}>{theme.name}</Span>
+          <Span className="text-primary font-medium">{appDisplayName}</Span>
         </CardDescription>
       </CardHeader>
 
@@ -129,13 +130,18 @@ function RegisterContent({ ssrAppName }: { ssrAppName: string | null }) {
   )
 }
 
-export default function RegisterClient({ ssrAppName }: { ssrAppName: string | null }) {
+interface RegisterClientProps {
+  ssrAppName: string | null
+  ssrAppDisplayName: string | null
+}
+
+export default function RegisterClient({ ssrAppName, ssrAppDisplayName }: RegisterClientProps) {
   const t = useTranslations('register')
 
   return (
     <Div className="flex flex-1 items-center justify-center px-2">
       <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
-        <RegisterContent ssrAppName={ssrAppName} />
+        <RegisterContent ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
       </Suspense>
     </Div>
   )

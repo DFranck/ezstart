@@ -33,6 +33,16 @@ const configResponseSchema = z.object({
   success: z.literal(true),
   data: z.object({
     appName: z.string(),
+    /**
+     * Human-readable display name of the owning Application (from
+     * `Application.name` in the DB, e.g. `'GreenPulse.AI'`). Used by the
+     * EZAuth auth pages to render a proper brand name on the "Sign in to
+     * access <AppDisplayName>" line without relying on any hardcoded lookup
+     * table. Absent when the key is not bound to a specific Application
+     * (e.g. platform-wide admin keys). Callers MUST fall back to a sensible
+     * default (prettified slug) when this field is missing.
+     */
+    appDisplayName: z.string().optional(),
     apiUrl: z.string(),
     webUrl: z.string(),
     features: z.array(z.string()),
@@ -46,8 +56,11 @@ const configResponseSchema = z.object({
     /**
      * White-label theme tokens for the owning Application. Only present when
      * the Application has `themeEnabled=true` AND at least one token set.
-     * Each token is an optional CSS color string. Consumers inject these as
-     * `--primary: <value>` overrides to white-label the auth pages.
+     * Only `primary` is actively used by the EZAuth auth pages — the other
+     * tokens (background, foreground, accent) are kept in the schema for
+     * backwards compatibility with older clients but are NOT rendered as
+     * CSS overrides. Light/dark mode is handled by ezauth's own
+     * `next-themes` stack, so only `--primary` is injected.
      */
     theme: applicationThemeSchema.optional(),
   }),
@@ -83,6 +96,12 @@ function isRateLimited(keyHash: string): boolean {
  */
 interface CachedKeyConfig {
   appName: string
+  /**
+   * Human-readable Application name resolved from `Application.name`.
+   * Optional — absent for keys without a bound Application. Consumers MUST
+   * fall back to a prettified slug when missing.
+   */
+  appDisplayName?: string
   apiUrl: string
   webUrl: string
   features: string[]
@@ -200,26 +219,34 @@ const configController = async (req: Request, res: Response) => {
     const resolvedEnv = apiKey.env ?? storedFormat?.env
 
     // Resolve the owning Application's theme tokens when white-labeling is
-    // enabled. Theme is OPTIONAL — absence means the app inherits the
-    // default CSS preset keyed on `data-app="<slug>"`.
+    // enabled, and the human-readable display name in the same DB round trip.
+    // Theme is OPTIONAL — absence means no white-label override is injected
+    // and the default EZAuth theme applies. `appDisplayName` is OPTIONAL too —
+    // platform-wide keys have no bound Application.
     let theme: CachedKeyConfig['theme']
+    let appDisplayName: string | undefined
     if (apiKey.applicationId) {
       const Application = await getApplicationModel()
       const appDoc = await Application.findById(apiKey.applicationId).lean()
-      if (appDoc && appDoc.themeEnabled && appDoc.theme) {
-        const hasAnyToken =
-          !!appDoc.theme.primary ||
-          !!appDoc.theme.background ||
-          !!appDoc.theme.foreground ||
-          !!appDoc.theme.accent ||
-          !!appDoc.theme.logo
-        if (hasAnyToken) {
-          theme = {
-            primary: appDoc.theme.primary,
-            background: appDoc.theme.background,
-            foreground: appDoc.theme.foreground,
-            accent: appDoc.theme.accent,
-            logo: appDoc.theme.logo,
+      if (appDoc) {
+        if (appDoc.name) {
+          appDisplayName = appDoc.name
+        }
+        if (appDoc.themeEnabled && appDoc.theme) {
+          const hasAnyToken =
+            !!appDoc.theme.primary ||
+            !!appDoc.theme.background ||
+            !!appDoc.theme.foreground ||
+            !!appDoc.theme.accent ||
+            !!appDoc.theme.logo
+          if (hasAnyToken) {
+            theme = {
+              primary: appDoc.theme.primary,
+              background: appDoc.theme.background,
+              foreground: appDoc.theme.foreground,
+              accent: appDoc.theme.accent,
+              logo: appDoc.theme.logo,
+            }
           }
         }
       }
@@ -227,6 +254,7 @@ const configController = async (req: Request, res: Response) => {
 
     const payload: CachedKeyConfig = {
       appName: apiKey.appName || '*',
+      ...(appDisplayName ? { appDisplayName } : {}),
       apiUrl,
       webUrl,
       features,

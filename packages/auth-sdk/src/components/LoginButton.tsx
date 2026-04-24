@@ -3,6 +3,7 @@
 import { logger } from '@ezstart/logger'
 import { Button, Icon, KnownIconName, Span } from '@ezstart/ui/components'
 import { useAuth } from '../react/hooks.js'
+import { detectCurrentThemePreference } from './themePreference.js'
 
 export interface LoginButtonProps {
   children?: React.ReactNode
@@ -19,6 +20,16 @@ export interface LoginButtonProps {
   loading?: boolean
   /** Always show text on all screen sizes (disable responsive hiding) */
   alwaysShowText?: boolean
+  /**
+   * Override the theme preference propagated to the EZAuth auth pages via
+   * `?theme=<value>`. Values: `'light' | 'dark' | 'system'`. When omitted,
+   * the component auto-detects the current preference from the
+   * `document.documentElement.classList` (set by `next-themes` on the
+   * consumer) so the ezauth UI paints in the same scheme — zero flash on
+   * redirect. Pass an explicit value only when the consumer does not use
+   * next-themes or when a specific override is desired.
+   */
+  theme?: 'light' | 'dark' | 'system'
 }
 
 export function LoginButton({
@@ -35,6 +46,7 @@ export function LoginButton({
   onClick,
   loading: externalLoading,
   alwaysShowText = false,
+  theme,
 }: LoginButtonProps) {
   const { login, logout, isAuthenticated, isLoggingIn, setLoggingIn } = useAuth()
 
@@ -57,7 +69,13 @@ export function LoginButton({
         logout() // logout is synchronous, just resets store
         setLoggingIn(false)
       } else {
-        await login() // login redirects, so no need to reset loading
+        // Resolve the theme value propagated to ezauth: caller override takes
+        // priority, otherwise we sniff the consumer's current scheme from
+        // the DOM (set by `next-themes`) so the ezauth UI opens in the same
+        // light/dark mode — zero flash on redirect.
+        const resolvedTheme = theme ?? detectCurrentThemePreference()
+        const extraParams = resolvedTheme ? { theme: resolvedTheme } : undefined
+        await login(extraParams) // login redirects, so no need to reset loading
       }
     } catch (error) {
       logger.error(

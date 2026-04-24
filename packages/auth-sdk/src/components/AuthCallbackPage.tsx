@@ -5,9 +5,41 @@ import { logger } from '@ezstart/logger'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useAuth } from '../react/hooks.js'
+import type { ThemePreference } from './themePreference.js'
 
 /** Module-level lock to prevent duplicate OAuth code exchanges. */
 const processingLocks = new Set<string>()
+
+/**
+ * Apply a theme preference propagated from the ezauth auth pages by writing
+ * the `theme` cookie that `next-themes` reads. Kept as a cookie write
+ * (rather than importing `next-themes`) so the SDK has zero runtime
+ * dependency on the theming library — the consumer's next-themes instance
+ * picks up the cookie on the next render tick. Returns silently when the
+ * value is not in the whitelist or when executed server-side.
+ */
+function applyCallbackThemePreference(value: string | null | undefined): void {
+  if (typeof document === 'undefined') return
+  if (value !== 'light' && value !== 'dark' && value !== 'system') return
+  const preference: ThemePreference = value
+  // SameSite=Lax + path=/ mirrors next-themes' own cookie shape. 1 year
+  // expiry matches the next-themes default so the preference survives
+  // across sessions until the user changes it.
+  const maxAge = 60 * 60 * 24 * 365
+  document.cookie = `theme=${preference}; path=/; max-age=${maxAge}; samesite=lax`
+  // Nudge next-themes to pick it up immediately by mirroring the class on
+  // <html>. This is a best-effort — next-themes will reconcile on its own
+  // effect, but doing it here removes a brief flash.
+  const root = document.documentElement
+  if (preference === 'dark') {
+    root.classList.remove('light')
+    root.classList.add('dark')
+  } else if (preference === 'light') {
+    root.classList.remove('dark')
+    root.classList.add('light')
+  }
+  // 'system' → let next-themes resolve via media query on its next effect.
+}
 
 /**
  * Extract a human-readable message from an unknown auth error.
@@ -84,6 +116,9 @@ function CallbackContent({
   // `useSearchParams` to re-render with an empty query string before the
   // React state update from `setCode` has committed.
   const codeRef = React.useRef<string | null>(null)
+  // Same rationale as `codeRef` — capture `?theme=` synchronously before
+  // the history replace below wipes the query string.
+  const themeRef = React.useRef<string | null>(null)
 
   if (codeRef.current === null) {
     // Try searchParams first (Next.js hook), then fall back to raw URL
@@ -94,7 +129,26 @@ function CallbackContent({
     codeRef.current = fromHook || fromUrl || ''
   }
 
+  if (themeRef.current === null) {
+    const fromHook = searchParams.get('theme')
+    const fromUrl =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('theme')
+        : null
+    themeRef.current = fromHook || fromUrl || ''
+  }
+
   const code = codeRef.current || null
+  const themeFromCallback = themeRef.current || null
+
+  // Apply the consumer's theme preference propagated from ezauth via
+  // `?theme=`. The value is whitelisted inside `applyCallbackThemePreference`
+  // so anything malformed is a no-op. This makes the ezauth → consumer
+  // round trip preserve the user's light/dark choice: if the user switched
+  // scheme on the ezauth login page, the consumer adopts it on callback.
+  useEffect(() => {
+    applyCallbackThemePreference(themeFromCallback)
+  }, [themeFromCallback])
 
   // Clean URL once we've captured the code (fire-and-forget, no deps on searchParams)
   useEffect(() => {

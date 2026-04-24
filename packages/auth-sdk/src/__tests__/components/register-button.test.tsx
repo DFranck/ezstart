@@ -93,4 +93,44 @@ describe('RegisterButton', () => {
     )
     expect(screen.getByRole('button')).toHaveTextContent('Please wait...')
   })
+
+  it('propagates explicit theme prop to register() as ?theme= param', async () => {
+    render(<RegisterButton theme="dark">Sign up</RegisterButton>)
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button'))
+    })
+
+    expect(registerMock).toHaveBeenCalledTimes(1)
+    expect(registerMock).toHaveBeenCalledWith({ theme: 'dark' })
+  })
+
+  it('auto-detects theme from document.documentElement.classList when prop is omitted', async () => {
+    document.documentElement.classList.add('dark')
+    try {
+      render(<RegisterButton>Sign up</RegisterButton>)
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button'))
+      })
+
+      expect(registerMock).toHaveBeenCalledTimes(1)
+      expect(registerMock).toHaveBeenCalledWith({ theme: 'dark' })
+    } finally {
+      document.documentElement.classList.remove('dark')
+    }
+  })
+
+  it('omits theme param when no signal is available', async () => {
+    // Ensure clean DOM state
+    document.documentElement.className = ''
+    render(<RegisterButton>Sign up</RegisterButton>)
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button'))
+    })
+
+    expect(registerMock).toHaveBeenCalledTimes(1)
+    expect(registerMock).toHaveBeenCalledWith(undefined)
+  })
 })

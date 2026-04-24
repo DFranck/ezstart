@@ -14,6 +14,12 @@
 
 export interface KeyConfigTheme {
   primary?: string
+  /**
+   * Legacy fields retained for backwards compatibility with older API
+   * responses. The SSR renderer intentionally does NOT emit CSS overrides
+   * for these tokens — light/dark mode is driven by next-themes and
+   * overriding those tokens would collide with the user's theme preference.
+   */
   background?: string
   foreground?: string
   accent?: string
@@ -22,6 +28,13 @@ export interface KeyConfigTheme {
 
 export interface KeyConfigResponse {
   appName: string
+  /**
+   * Human-readable Application name (e.g. `'GreenPulse.AI'`), resolved from
+   * `Application.name` in the DB. Optional — absent for platform-wide keys
+   * that are not bound to a specific Application. Consumers MUST fall back
+   * to a prettified `appName` when missing.
+   */
+  appDisplayName?: string
   apiUrl: string
   webUrl: string
   features: string[]
@@ -131,15 +144,20 @@ function isValidConfigEnvelope(
   if (v.success !== true) return false
   if (!v.data || typeof v.data !== 'object') return false
   const d = v.data as Record<string, unknown>
-  return (
-    typeof d.appName === 'string' &&
-    typeof d.apiUrl === 'string' &&
-    typeof d.webUrl === 'string' &&
-    Array.isArray(d.features) &&
-    typeof d.plan === 'string' &&
-    typeof d.quotaMonthly === 'number' &&
-    typeof d.scope === 'string'
-  )
+  if (
+    typeof d.appName !== 'string' ||
+    typeof d.apiUrl !== 'string' ||
+    typeof d.webUrl !== 'string' ||
+    !Array.isArray(d.features) ||
+    typeof d.plan !== 'string' ||
+    typeof d.quotaMonthly !== 'number' ||
+    typeof d.scope !== 'string'
+  ) {
+    return false
+  }
+  // Optional fields: validate when present to reject garbage shapes early.
+  if (d.appDisplayName !== undefined && typeof d.appDisplayName !== 'string') return false
+  return true
 }
 
 /**

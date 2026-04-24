@@ -48,15 +48,22 @@ export default async function LocaleLayout({ children, params }: Props) {
   const t = await getTranslations({ locale })
 
   // Read app theme + tokens set by middleware from ?app= or ?key= search
-  // params. Sets data-app on <html> at SSR time AND injects the per-tenant
-  // CSS variable overrides inline, so the first-render paint is already
-  // white-labeled (zero flash for EZAuth Pro tenants).
+  // params. Injects the per-tenant `--primary` override inline so the
+  // first-render paint is already white-labeled (zero flash for EZAuth Pro
+  // tenants).
+  //
+  // `data-app` is intentionally FIXED to `"ezauth"` on the `<html>` root:
+  // ezauth's own theme CSS is always the baseline, and the DB theme
+  // override only touches `--primary` via a bare `:root{}` rule. This kills
+  // the old hardcoded per-app CSS coupling (`<html data-app="green-pulse">`
+  // inheriting `green-pulse.css`) — the DB is now the single source of
+  // truth for white-label styling on auth pages.
   const headersList = await headers()
   const { appName: ssrAppName, theme: ssrTheme } = resolveSsrTheme(headersList)
   const themeCss = renderThemeStyle(ssrAppName, ssrTheme)
 
   return (
-    <html lang={locale} suppressHydrationWarning data-app={ssrAppName}>
+    <html lang={locale} suppressHydrationWarning data-app="ezauth">
       <head>
         {themeCss ? (
           <style

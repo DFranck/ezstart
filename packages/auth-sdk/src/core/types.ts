@@ -52,8 +52,15 @@ export interface AuthClientConfig {
  * Returned by the EZAuth API when a valid publishable key is provided.
  */
 export interface PublishableKeyConfig {
-  /** App name associated with this key. */
+  /** App name slug associated with this key (e.g. `'green-pulse'`). */
   appName: string
+  /**
+   * Human-readable Application name (e.g. `'GreenPulse.AI'`). Optional —
+   * absent for platform-wide keys (no bound Application) or for older API
+   * deployments that predate this field. Consumers MUST fall back to a
+   * prettified `appName` when missing.
+   */
+  appDisplayName?: string
   /** Base URL of the auth API. */
   apiUrl: string
   /** Base URL of the auth web app (for login/register redirects). */

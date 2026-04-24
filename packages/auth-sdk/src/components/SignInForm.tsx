@@ -23,6 +23,7 @@ import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js
 import { DevModeBanner } from './DevModeBanner.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
+import { detectCurrentThemePreference } from './themePreference.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -159,6 +160,15 @@ export function SignInForm({
         logger.info('Redirecting to:', redirectUri)
         const url = new URL(redirectUri)
         url.searchParams.set('code', result.code)
+        // Forward the current ezauth theme preference back to the consumer
+        // so if the user switched scheme on the auth page via the
+        // ThemeSwitcher, the consumer adopts the new preference on
+        // callback. `detectCurrentThemePreference` returns `undefined`
+        // when no signal is available — we omit the param in that case.
+        const themePref = detectCurrentThemePreference()
+        if (themePref) {
+          url.searchParams.set('theme', themePref)
+        }
         window.location.href = url.toString()
         return
       }

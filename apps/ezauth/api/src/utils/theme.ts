@@ -69,6 +69,15 @@ const logoUrl = z
  * Zod schema for `ApplicationTheme`. All fields are optional — the client
  * sends only the tokens it wants to override. Omitted tokens inherit the
  * default theme.
+ *
+ * **Primary-only policy (2026-04-24):** only `primary` is actively rendered
+ * by the EZAuth auth pages. The `background`, `foreground`, and `accent`
+ * fields are KEPT in the schema for backwards compatibility with older
+ * clients and to support future power-user scenarios, but the EZAuth SSR
+ * renderer explicitly ignores them — light/dark mode is handled by
+ * next-themes so overriding those tokens would conflict with the user's
+ * theme preference. The dashboard theme editor exposes only `primary`
+ * + `logo` + `themeEnabled` to reflect this contract.
  */
 export const applicationThemeSchema = z
   .object({
