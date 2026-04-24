@@ -1,6 +1,6 @@
 {
   "name": "@ezstart/api-core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Unified Express-based API server framework (agnostic core + optional @ezstart wrapper)",
   "sideEffects": false,
   "license": "MIT",

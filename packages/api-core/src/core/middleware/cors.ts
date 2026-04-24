@@ -114,11 +114,14 @@ export function createPermissiveCorsMiddleware(
   options: PermissiveCorsOptions = {}
 ): RequestHandler {
   const opts: CorsOptions = {
-    // Reflect any origin. `true` tells the `cors` package to echo the
-    // request `Origin` header back in `Access-Control-Allow-Origin`. That
-    // keeps the "allow every external consumer" semantics while staying
-    // compatible with `credentials: 'include'` on the client side.
-    origin: true,
+    // Explicit reflect-origin callback. Equivalent to `origin: true` but
+    // easier to reason about when diagnosing production 500s: the callback
+    // form guarantees no upstream `cors` package branch can throw because
+    // of a missing/malformed `Origin` header — we always return
+    // `(null, true)` and let the package write the appropriate headers.
+    origin(_origin, callback) {
+      callback(null, true)
+    },
     credentials: true,
     methods: options.methods ?? DEFAULT_METHODS,
     allowedHeaders: options.allowedHeaders ?? PERMISSIVE_ALLOWED_HEADERS,
