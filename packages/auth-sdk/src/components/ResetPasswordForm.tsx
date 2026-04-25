@@ -14,11 +14,10 @@ import {
   Spinner,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useLocale } from 'next-intl'
 import { PasswordStrength } from './PasswordStrength.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
@@ -76,7 +75,8 @@ export interface ResetPasswordFormProps {
   /** Auto-redirect to login after success (default: true, 3s delay) */
   autoRedirect?: boolean
   /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/reset-password` → `'fr'`).
    * Any keys provided in `texts` take precedence over the localized defaults.
    */
   locale?: AuthLocale | string
@@ -107,13 +107,12 @@ export function ResetPasswordForm({
   locale: propLocale,
   texts,
 }: ResetPasswordFormProps) {
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
   const t: ResetPasswordFormTexts = {
     ...getAuthTexts(locale, 'resetPassword'),
     ...texts,
   }
-  const navigation = useAuthNavigation()
   const resolvedBackHref = backHref ?? navigation.loginHref
   const resolvedForgotHref = forgotPasswordHref ?? navigation.forgotPasswordHref
   const resolvedRequestNewLinkHref =

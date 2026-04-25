@@ -13,8 +13,7 @@ import {
   Input,
 } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
-import { useLocale } from 'next-intl'
+import { logger } from './internal-logger.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { DevModeBanner } from './DevModeBanner.js'
@@ -45,8 +44,10 @@ export interface ForgotPasswordFormProps {
   /** Href for back to login link (used if onBack is not provided) */
   backHref?: string
   /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
-   * Any keys provided in `texts` take precedence over the localized defaults.
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/forgot-password` →
+   * `'fr'`). Any keys provided in `texts` take precedence over the
+   * localized defaults.
    */
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
@@ -80,13 +81,12 @@ export function ForgotPasswordForm({
   keyStatus,
   urlKey,
 }: ForgotPasswordFormProps) {
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
   const t: ForgotPasswordFormTexts = {
     ...getAuthTexts(locale, 'forgotPassword'),
     ...texts,
   }
-  const navigation = useAuthNavigation()
   const resolvedBackHref = backHref ?? navigation.loginHref
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -214,8 +214,11 @@ export function ForgotPasswordForm({
           )}
         </Div>
 
+        {/* See note in SignInForm.tsx — only override appName when the URL
+            surfaced a real key/legacy app= signal so the first-party early
+            return in DevModeBanner can fire on ezauth's own pages. */}
         <DevModeBanner
-          appName={appName}
+          {...(appName && (urlKey || keyStatus) ? { appName } : {})}
           keyStatus={keyStatus}
           urlKey={urlKey}
           locale={navigation.locale}

@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { forwardRef } from 'react'
+import { Slot } from '@radix-ui/react-slot'
 import { cn } from '../../lib/utils'
 
 // ---------------------------------------------------------------------------
@@ -54,11 +55,26 @@ FooterColumn.displayName = 'FooterColumn'
 // FooterLink — footer link
 // ---------------------------------------------------------------------------
 
-const FooterLink = forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
-  ({ className, children, ...props }, ref) => {
+interface FooterLinkProps extends React.ComponentProps<'a'> {
+  /**
+   * When true, render the immediate child (e.g. a locale-aware `<Link>`) instead
+   * of a native `<a>`. The `<li>` wrapper is preserved either way so consumers
+   * keep semantic list markup.
+   *
+   * @example
+   * <FooterLink asChild>
+   *   <Link href="/privacy">Privacy</Link>
+   * </FooterLink>
+   */
+  asChild?: boolean
+}
+
+const FooterLink = forwardRef<HTMLAnchorElement, FooterLinkProps>(
+  ({ className, asChild = false, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : 'a'
     return (
       <li>
-        <a
+        <Comp
           ref={ref}
           data-slot="footer-link"
           className={cn(
@@ -68,7 +84,7 @@ const FooterLink = forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
           {...props}
         >
           {children}
-        </a>
+        </Comp>
       </li>
     )
   }
@@ -97,12 +113,8 @@ const FooterBrand = forwardRef<HTMLDivElement, FooterBrandProps>(
       >
         {/* Logo slot (children) */}
         {children}
-        {tagline && (
-          <p className="text-sm text-muted-foreground">{tagline}</p>
-        )}
-        {copyright && (
-          <p className="text-xs text-muted-foreground">{copyright}</p>
-        )}
+        {tagline && <p className="text-sm text-muted-foreground">{tagline}</p>}
+        {copyright && <p className="text-xs text-muted-foreground">{copyright}</p>}
       </div>
     )
   }
@@ -115,4 +127,4 @@ FooterBrand.displayName = 'FooterBrand'
 
 export { AppFooter, FooterColumn, FooterLink, FooterBrand }
 
-export type { FooterColumnProps, FooterBrandProps }
+export type { FooterColumnProps, FooterLinkProps, FooterBrandProps }

@@ -23,7 +23,7 @@ import {
 } from '../components/component-mocks.js'
 import { setupFetchMock, makePayment } from '../helpers.js'
 import { PayProvider } from '../../react/pay-provider.js'
-import { PayClient } from '../../core/pay-client.js'
+import { createPayClient } from '../../core/pay-client.js'
 import { useSubscriptionStatus } from '../../react/hooks/useSubscriptionStatus.js'
 
 vi.mock('@ezstart/ui/components', () => uiComponentsMock)
@@ -65,7 +65,7 @@ describe('Price manipulation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
     await client.createPurchase({
       projectId: 'proj1',
       productId: 'prod1',
@@ -97,7 +97,7 @@ describe('Price manipulation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
     const result = await client.createPurchase({
       projectId: 'proj1',
       productId: 'prod1',
@@ -120,7 +120,7 @@ describe('Price manipulation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
 
     await expect(
       client.createPurchase({
@@ -168,7 +168,7 @@ describe('Promo code replay', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
 
     // First call succeeds
     const result = await client.createSubscription({
@@ -206,7 +206,7 @@ describe('Promo code replay', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
 
     // Fire two validation requests simultaneously
     await Promise.all([
@@ -414,7 +414,7 @@ describe('Auth token security', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
       getToken: () => 'secret-jwt-token',
@@ -437,7 +437,7 @@ describe('Auth token security', () => {
       )
       vi.stubGlobal('fetch', fetchMock)
 
-      const client = new PayClient({
+      const client = createPayClient({
         appName: 'test',
         apiUrl: 'http://localhost:9999/api',
         getToken: () => 'token',
@@ -461,7 +461,7 @@ describe('Auth token security', () => {
       )
       vi.stubGlobal('fetch', fetchMock)
 
-      const client = new PayClient({
+      const client = createPayClient({
         appName: 'test',
         apiUrl: 'http://localhost:9999/api',
         getToken: () => 'token',
@@ -493,7 +493,7 @@ describe('Auth token security', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const onAuthFailure = vi.fn()
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
       getToken: () => 'expired-token',
@@ -520,7 +520,7 @@ describe('Auth token security', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const onAuthFailure = vi.fn()
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
       getToken: () => 'expired-token',
@@ -549,7 +549,7 @@ describe('Auth token security', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
       apiKey: 'epk_test123',
@@ -570,7 +570,7 @@ describe('Auth token security', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
       getToken: () => 'my-secret-token',
@@ -595,7 +595,7 @@ describe('Stripe key exposure', () => {
     // Stripe publishable key is only needed in the browser when loading Stripe.js
     // which is NOT handled by this SDK (it just receives checkout URLs from the server)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
     })
@@ -613,7 +613,7 @@ describe('Stripe key exposure', () => {
     // This means the Stripe secret key only lives on the server
 
     // Verify PayClient methods use fetch() to call the API, not Stripe.js
-    const client = new PayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
 
     // All payment creation methods return a checkoutUrl from the server
     // There is no `stripe.redirectToCheckout()` or `stripe.createPaymentIntent()`

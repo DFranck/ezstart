@@ -7,7 +7,7 @@
  * the network layer rather than merely discarding the response UI-side.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { PayClient } from '../../core/pay-client.js'
+import { createPayClient } from '../../core/pay-client.js'
 
 describe('PayClient.getPayments — AbortSignal propagation', () => {
   afterEach(() => {
@@ -23,7 +23,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
     })
@@ -44,7 +44,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
     })
@@ -75,7 +75,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
     })
@@ -104,7 +104,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = new PayClient({
+    const client = createPayClient({
       appName: 'test',
       apiUrl: 'http://localhost:9999/api',
       getToken: () => 'expired',

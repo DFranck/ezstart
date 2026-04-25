@@ -15,9 +15,9 @@ import {
   Input,
 } from '@ezstart/ui/components'
 import { toast } from 'sonner'
-import { logger } from '@ezstart/logger'
-import { useLocale } from 'next-intl'
+import { logger } from './internal-logger.js'
 import { useAuthContext } from '../react/auth-provider.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { useAuthStore } from '../react/store.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -66,12 +66,21 @@ export interface QuickSignUpFormProps {
   /** Called after successful signup */
   onSuccess?: () => void
   /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
-   * Any keys provided in `texts` take precedence over the localized defaults.
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname. Any keys provided in `texts`
+   * take precedence over the localized defaults.
    */
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<QuickSignUpFormTexts>
+  /**
+   * EZPay-compatible API base URL used to validate promo codes. When
+   * omitted, promo validation is disabled. Pass the same value the
+   * consumer already uses for `<PayProvider apiUrl=...>`.
+   *
+   * @example 'https://pay.example.com'
+   */
+  promoApiUrl?: string
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -91,11 +100,12 @@ export function QuickSignUpForm({
   onSuccess,
   locale: propLocale,
   texts,
+  promoApiUrl,
 }: QuickSignUpFormProps) {
   const { client } = useAuthContext()
   const store = useAuthStore()
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
   const t: QuickSignUpFormTexts = {
     ...getAuthTexts(locale, 'quickSignup'),
     ...texts,
@@ -110,7 +120,7 @@ export function QuickSignUpForm({
     isValidating: promoIsValidating,
     isOpen: promoOpen,
     setIsOpen: setPromoOpen,
-  } = usePromoCode(appName, promoCode)
+  } = usePromoCode(appName, promoCode, promoApiUrl)
 
   const form = useForm<FormData>({
     defaultValues: {

@@ -1,7 +1,6 @@
 'use client'
 
 import { Badge, Button, Card, CardContent, Icon, P } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
 import { useCallback, useState } from 'react'
 import { usePayContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
@@ -101,10 +100,8 @@ export function SubscriptionCard({
         await client.cancelSubscription(subscriptionId)
       }
     } catch (err) {
-      logger.error(
-        'Failed to cancel subscription:',
-        err instanceof Error ? err.message : String(err)
-      )
+      // Re-throw so the surrounding ConfirmActionDialog can surface the
+      // error in its own UI (state='error' + toast). No need to log here.
       throw err
     }
   }, [subscriptionId, onCancel, client])

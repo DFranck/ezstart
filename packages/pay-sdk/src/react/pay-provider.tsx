@@ -9,7 +9,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react'
-import { PayClient } from '../core/pay-client.js'
+import { createPayClient, type PayClient } from '../core/pay-client.js'
 import type { PayClientConfig } from '../core/types.js'
 import { usePayStore, type ApplicationResolutionStatus } from './store.js'
 
@@ -157,7 +157,7 @@ export function PayProvider({
   onAuthFailureRef.current = onAuthFailure ?? config?.onAuthFailure
 
   const client = useMemo(() => {
-    return new PayClient({
+    return createPayClient({
       appName,
       applicationId: applicationIdProp ?? config?.applicationId,
       apiUrl: config?.apiUrl ?? '',

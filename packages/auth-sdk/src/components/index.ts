@@ -1,8 +1,11 @@
 /**
  * Components layer — pre-built UI components.
  *
- * Peer dependencies: `react`, `@ezstart/ui`, `next-intl`, `next`, `sonner`.
- * Imports from `core/` and uses the monorepo wrapper for auth context.
+ * Peer dependencies: `react`, `@ezstart/ui`, `next`, `sonner`.
+ * Imports from `core/` and `react/` only — zero coupling to any i18n
+ * library. All user-facing strings are accepted via `texts` props with
+ * English defaults and the active locale is detected from the URL
+ * pathname (`useAuthNavigation().locale`).
  */
 
 // Dev mode banner

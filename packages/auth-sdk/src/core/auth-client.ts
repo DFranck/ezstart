@@ -30,12 +30,21 @@ import type {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Unwrap API envelope `{ data: T }` → `T`, or return flat response. */
+/**
+ * Unwrap API envelope `{ data: T }` → `T`, or return the flat response.
+ *
+ * The wire shape is `Record<string, unknown>` because we receive raw JSON,
+ * but the caller has already typed the expected payload via the generic.
+ * `Record<string, unknown>` and a typed object overlap structurally, so we
+ * cast through the generic itself rather than the unsafe `unknown` bridge.
+ *
+ * @internal
+ */
 function unwrapEnvelope<T>(body: Record<string, unknown>): T {
   if ('data' in body && body.data !== undefined) {
     return body.data as T
   }
-  return body as unknown as T
+  return body as T
 }
 
 /** Parse an error from a response body. */

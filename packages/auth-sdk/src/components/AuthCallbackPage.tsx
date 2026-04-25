@@ -1,7 +1,7 @@
 'use client'
 import { parseApiError } from '@ezstart/api-sdk'
 import { Button, Div, P, Spinner } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useAuth } from '../react/hooks.js'

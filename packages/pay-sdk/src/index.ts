@@ -1,7 +1,8 @@
 // ============================================================
 // Core (agnostic — zero React, zero @ezstart/*)
 // ============================================================
-export { PayClient } from './core/pay-client.js'
+export { createPayClient } from './core/pay-client.js'
+export type { PayClient } from './core/pay-client.js'
 export type { PayClientConfig } from './core/types.js'
 
 // Re-export types

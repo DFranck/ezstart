@@ -14,10 +14,9 @@ import {
   PasswordInput,
 } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useLocale } from 'next-intl'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
 import { DevModeBanner } from './DevModeBanner.js'
@@ -66,7 +65,8 @@ export interface SignInFormProps {
   /** OAuth providers to display */
   oauthProviders?: OAuthProvider[]
   /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/login` → `'fr'`).
    * Any keys provided in `texts` take precedence over the localized defaults.
    */
   locale?: AuthLocale | string
@@ -110,10 +110,9 @@ export function SignInForm({
   keyStatus,
   urlKey,
 }: SignInFormProps) {
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
-  const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
+  const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -310,8 +309,15 @@ export function SignInForm({
         </form>
       </Form>
 
+      {/*
+        Only pass `appName` as override when the caller surfaced a real URL
+        signal (a key/legacy app= param). Without this guard the banner can
+        never honour its first-party early-return (`scope === 'first-party' &&
+        !overrideAppName`) on ezauth's own pages, so the "Dev Mode — No API
+        key configured" hint leaks onto first-party pages.
+      */}
       <DevModeBanner
-        appName={appName}
+        {...(urlKey || keyStatus ? { appName } : {})}
         keyStatus={keyStatus}
         urlKey={urlKey}
         locale={navigation.locale}

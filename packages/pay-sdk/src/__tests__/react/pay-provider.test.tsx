@@ -570,8 +570,8 @@ describe('PayClient.resolveApplicationByKey', () => {
   })
 
   it('throws when publishableKey is empty', async () => {
-    const { PayClient } = await import('../../core/pay-client.js')
-    const client = new PayClient({ apiUrl: 'http://api.example.com/api' })
+    const { createPayClient } = await import('../../core/pay-client.js')
+    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
     await expect(client.resolveApplicationByKey('')).rejects.toThrow('publishableKey is required')
   })
 
@@ -585,8 +585,8 @@ describe('PayClient.resolveApplicationByKey', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const { PayClient } = await import('../../core/pay-client.js')
-    const client = new PayClient({ apiUrl: 'http://api.example.com/api' })
+    const { createPayClient } = await import('../../core/pay-client.js')
+    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
     await expect(client.resolveApplicationByKey('ez_pk_test_bad')).rejects.toThrow(
       'Invalid application config response'
     )
@@ -602,8 +602,8 @@ describe('PayClient.resolveApplicationByKey', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const { PayClient } = await import('../../core/pay-client.js')
-    const client = new PayClient({ apiUrl: 'http://api.example.com/api' })
+    const { createPayClient } = await import('../../core/pay-client.js')
+    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
     await expect(client.resolveApplicationByKey('ez_pk_test_rl')).rejects.toThrow('Rate limited')
   })
 
@@ -628,8 +628,8 @@ describe('PayClient.resolveApplicationByKey', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const { PayClient } = await import('../../core/pay-client.js')
-    const client = new PayClient({ apiUrl: 'http://api.example.com/api' })
+    const { createPayClient } = await import('../../core/pay-client.js')
+    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
     const cfg = await client.resolveApplicationByKey('ez_pk_live_ok')
 
     expect(cfg.applicationId).toBe('app_ok')

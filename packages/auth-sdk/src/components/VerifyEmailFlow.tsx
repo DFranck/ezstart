@@ -2,7 +2,7 @@
 
 import { Div, P, Spinner } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 

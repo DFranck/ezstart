@@ -33,16 +33,21 @@ auth-sdk/src/
 │   ├── QuickSignUpForm.tsx
 │   ├── ForgotPasswordForm.tsx
 │   ├── ResetPasswordForm.tsx
-│   ├── AccountModal.tsx
+│   ├── AccountModal.tsx        # orchestrator — sub-sections in account/
+│   ├── account/                # AccountProfileSection, AccountSettingsSection, sso-handoff
 │   ├── TwoFactorPrompt.tsx
 │   ├── TwoFactorSettings.tsx
 │   ├── VerifyEmailFlow.tsx
-│   ├── AuthAdminDashboard.tsx
+│   ├── AuthAdminDashboard.tsx  # orchestrator — sub-components in admin/
+│   ├── admin/                  # AdminUsersTable, EditRolesModal, AdminStatsCards
+│   ├── EZAuthDashboard.tsx     # orchestrator — sub-components in dashboard/
+│   ├── dashboard/              # SectionRenderer, OverviewSection, BillingSection, ...
 │   ├── UserDashboard.tsx
 │   ├── UserSettings.tsx
 │   ├── UserMenu.tsx
 │   ├── UserAvatar.tsx
-│   ├── developer/        # API keys management UI
+│   ├── internal-logger.ts      # silent no-op logger (no @ezstart/logger dep)
+│   ├── developer/              # API keys management UI
 │   └── index.ts
 │
 ├── middleware/            # Next.js auth middleware
@@ -145,6 +150,75 @@ const me = await client.getCurrentUser()
 
 - Schemas for API validation (login, register, token, verify)
 - Type exports for server-side code
+
+## i18n — `texts` prop pattern (no i18n library required)
+
+The components layer is **agnostic of any i18n library** — it does not import
+`next-intl`, `react-intl`, or anything similar. All user-facing strings are
+accepted via a `texts?: Partial<...Texts>` prop with English defaults baked in,
+and the active locale is auto-detected from the URL pathname (e.g.
+`/fr/login` → `'fr'`) so the bundled `en | fr | vi` dictionaries pick the
+right language out of the box.
+
+```tsx
+import { useTranslations } from 'next-intl' // your i18n lib (or any other)
+import { SignInForm } from '@ezstart/auth-sdk/components'
+
+function LoginPage() {
+  const t = useTranslations('auth.signIn')
+  return (
+    <SignInForm
+      appName="myapp"
+      texts={{
+        emailOrUsername: t('emailLabel'),
+        password: t('passwordLabel'),
+        submit: t('submit'),
+        // ... only override what you need; rest falls back to EN/FR/VI defaults
+      }}
+    />
+  )
+}
+```
+
+If you do not pass `texts`, the form renders with the bundled localized
+defaults — pass `locale="fr"` (or any other supported tag) to force a
+specific language without touching `texts`.
+
+## Federated admin (cross-origin embedding)
+
+`<AuthAdminDashboard>` accepts `apiUrl` and `authToken` overrides so a
+platform hub (Tier 3 — e.g. `apps/ezstart/web/admin`) can embed the user
+management table cross-origin while forwarding a platform-wide superadmin
+JWT instead of the local session token.
+
+```tsx
+import { AuthAdminDashboard } from '@ezstart/auth-sdk/components'
+
+;<AuthAdminDashboard
+  apiUrl="https://auth.example.com"
+  authToken={() => mySuperadminJwt}
+  scope="all"
+  appName="*"
+/>
+```
+
+When `apiUrl` and `authToken` are omitted, the component falls back to the
+surrounding `<AuthProvider>` configuration (single-app standalone mode).
+
+## Theme handoff (`?theme=`)
+
+`<LoginButton>` and `<RegisterButton>` propagate the consumer's current
+light/dark scheme to the EZAuth web app via `?theme=<light|dark|system>` so
+the auth pages render in the same scheme — zero flash on redirect. The
+matching `<AuthCallbackPage>` reads the param on the way back and writes
+the `theme` cookie that `next-themes` picks up, so a user who switched
+scheme on the auth pages keeps the new preference on the consumer.
+
+Override the auto-detected value with the optional `theme` prop:
+
+```tsx
+<LoginButton theme="dark">Sign in</LoginButton>
+```
 
 ## Configuration safety
 

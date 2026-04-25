@@ -79,6 +79,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -95,6 +96,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "@tanstack/react-query": "^5.80.7",
     "@testing-library/jest-dom": "^6.9.1",
@@ -114,7 +116,6 @@
   "peerDependencies": {
     "@tanstack/react-query": "^5",
     "next": "^15",
-    "next-intl": "^4",
     "react": "^18",
     "sonner": "^1 || ^2"
   },

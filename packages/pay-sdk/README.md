@@ -203,6 +203,30 @@ All user-facing strings are driven by the `texts` prop (English defaults provide
 
 - Types + Zod schemas (no React deps)
 - `StripeProvider`, `ConsoleProvider`, `PaymentProviderRegistry`
+- `verifyWebhookSignature({ provider, stripe, payload, signature, secret })` — provider-agnostic helper that wraps `stripe.webhooks.constructEvent` (today) and returns a normalised `WebhookEvent`. Throws on invalid signatures so handlers can return `400` directly.
+
+```ts
+import Stripe from 'stripe'
+import { verifyWebhookSignature } from '@ezstart/pay-sdk/server'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
+app.post('/webhooks/stripe', (req, res) => {
+  try {
+    const event = verifyWebhookSignature({
+      provider: 'stripe',
+      stripe,
+      payload: req.rawBody,
+      signature: req.headers['stripe-signature'] as string,
+      secret: process.env.STRIPE_WEBHOOK_SECRET!,
+    })
+    // `event.type` is one of WebhookEventType (typed)
+    res.json({ received: true })
+  } catch {
+    res.status(400).end()
+  }
+})
+```
 
 ## Migration
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Div, Span } from '@ezstart/ui/components'
-import { getApiUrl } from '@ezstart/config/urls'
+import { useAuthContext } from '../react/auth-provider.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -21,6 +21,12 @@ export interface OAuthButtonsProps {
   providers?: OAuthProvider[]
   /** Override texts */
   texts?: Partial<OAuthButtonsTexts>
+  /**
+   * Override the EZAuth API base URL used to start the OAuth flow.
+   * Defaults to the URL configured on the surrounding `<AuthProvider>`.
+   * Pass an explicit value when rendering outside an `AuthProvider`.
+   */
+  apiUrl?: string
 }
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
@@ -30,24 +36,71 @@ const DEFAULT_TEXTS: OAuthButtonsTexts = {
   orContinueWith: 'or continue with',
 }
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Strip a trailing `/api/auth` (or `/api`) suffix from the SDK-internal
+ * client URL so the OAuth endpoint can re-append `/api/auth/google`.
+ *
+ * @internal
+ */
+function normalizeOAuthBase(url: string): string {
+  let base = url
+  if (base.endsWith('/api/auth')) {
+    base = base.slice(0, -'/api/auth'.length)
+  } else if (base.endsWith('/api')) {
+    base = base.slice(0, -'/api'.length)
+  }
+  if (base.endsWith('/')) base = base.slice(0, -1)
+  return base
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Display OAuth provider buttons that redirect to the EZAuth API to start
+ * a third-party login flow.
+ *
+ * The API base URL is resolved from (in order): the `apiUrl` prop, the
+ * surrounding `<AuthProvider>` configuration, or — as a last resort — the
+ * current page origin. The component never imports `@ezstart/config` so it
+ * remains agnostic to any monorepo-specific URL helpers.
+ *
+ * @example
+ * ```tsx
+ * <OAuthButtons appName="myapp" redirectUri="https://app.example.com/auth/callback" />
+ * ```
+ */
 export function OAuthButtons({
   appName,
   redirectUri,
   providers = ['google'],
   texts,
+  apiUrl,
 }: OAuthButtonsProps) {
   const t = { ...DEFAULT_TEXTS, ...texts }
 
+  // ALWAYS call the hook (rules of hooks). The provider is optional, so we
+  // wrap in try/catch to fall back to window.origin when no provider is in
+  // the tree. This keeps the hook order stable across renders.
+  let providerApiUrl: string | undefined
+  try {
+    providerApiUrl = useAuthContext().client.getApiUrl()
+  } catch {
+    providerApiUrl = undefined
+  }
+
+  const resolvedApiUrl =
+    apiUrl ?? providerApiUrl ?? (typeof window !== 'undefined' ? window.location.origin : undefined)
+
   const handleGoogleLogin = () => {
-    const apiUrl = getApiUrl('ezauth')
+    if (!resolvedApiUrl) return
+    const base = normalizeOAuthBase(resolvedApiUrl)
     const params = new URLSearchParams({
       app: appName,
       ...(redirectUri && { redirect_uri: redirectUri }),
     })
-
-    window.location.href = `${apiUrl}/api/auth/google?${params.toString()}`
+    window.location.href = `${base}/api/auth/google?${params.toString()}`
   }
 
   return (

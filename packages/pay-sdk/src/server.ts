@@ -54,3 +54,7 @@ export type {
   StripeProviderConfig,
   StripeInstance,
 } from './core/providers/index.js'
+
+// Webhook signature verification (provider-agnostic helper)
+export { verifyWebhookSignature } from './core/verify-webhook-signature.js'
+export type { VerifyWebhookSignatureOptions } from './core/verify-webhook-signature.js'

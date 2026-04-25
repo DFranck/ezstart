@@ -1,124 +1,41 @@
 'use client'
 
+/**
+ * Pricing page that fetches plans for an Application and renders one card per
+ * plan with monthly/yearly toggle, "Most popular" highlight, trial badge and
+ * subscribe CTA.
+ *
+ * Internally split into `./pricing/` sub-components:
+ * - `PricingHeader` — title, subtitle, monthly/yearly toggle
+ * - `PricingPlanCard` — single plan card (price, features, CTA)
+ *
+ * Peer dependencies: `@ezstart/ui` + an enclosing `<PayProvider>`.
+ */
+
+import { Button, Div, Icon, P, Skeleton } from '@ezstart/ui/components'
 import { useMemo, useState } from 'react'
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  Div,
-  H2,
-  H3,
-  Icon,
-  P,
-  Skeleton,
-  Span,
-} from '@ezstart/ui/components'
 import { usePlans } from '../react/hooks/usePlans.js'
 import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
 import { useApplicationContext } from '../react/pay-provider.js'
-import { SubscribeButton } from './SubscribeButton.js'
 import { formatCurrency } from '../core/format-currency.js'
-import type { Plan, PlanMetadata } from '../core/types.js'
+import type { Plan } from '../core/types.js'
 import {
   PayNotConfiguredCard,
   classifyPayError,
   type PayNotConfiguredTexts,
 } from './common/PayNotConfiguredCard.js'
+import { PricingHeader } from './pricing/PricingHeader.js'
+import { PricingPlanCard } from './pricing/PricingPlanCard.js'
+import {
+  DEFAULT_PRICING_TEXTS,
+  groupPlansForToggle,
+  type BillingCycle,
+  type PricingPageTexts,
+} from './pricing/pricing-types.js'
 
-export interface PricingPageTexts {
-  title: string
-  subtitle: string
-  free: string
-  perMonth: string
-  perYear: string
-  currentPlan: string
-  upgrade: string
-  getStarted: string
-  popular: string
-  loading: string
-  errorLoading: string
-  retry: string
-  noPlans: string
-  contactSales: string
-  /** Toggle label for monthly billing. */
-  billingMonthly: string
-  /** Toggle label for yearly billing. */
-  billingYearly: string
-  /**
-   * Template shown next to the Yearly toggle when at least one plan has
-   * `metadata.discountVsMonthly`. Use `{percent}` placeholder.
-   */
-  saveTemplate: string
-  /** Template for the trial badge. Use `{days}` placeholder. */
-  trialBadgeTemplate: string
-}
-
-const DEFAULT_TEXTS: PricingPageTexts = {
-  title: 'Choose your plan',
-  subtitle: 'Start free, upgrade anytime',
-  free: 'Free',
-  perMonth: 'month',
-  perYear: 'year',
-  currentPlan: 'Current plan',
-  upgrade: 'Upgrade',
-  getStarted: 'Get started',
-  popular: 'Most popular',
-  loading: 'Loading plans...',
-  errorLoading: 'Failed to load plans',
-  retry: 'Retry',
-  noPlans: 'No plans available',
-  contactSales: 'Contact sales',
-  billingMonthly: 'Monthly',
-  billingYearly: 'Yearly',
-  saveTemplate: 'Save {percent}%',
-  trialBadgeTemplate: '{days} days free trial',
-}
-
-type BillingCycle = 'month' | 'year'
-
-/**
- * Group plans by `metadata.billingGroup`, falling back to `name` for legacy
- * plans without the metadata. Within each group, plans are split by
- * `interval` so the toggle can switch between them.
- *
- * Plans that don't have a yearly variant keep their monthly card visible
- * regardless of the toggle state (graceful fallback).
- *
- * @internal
- */
-export function groupPlansForToggle(plans: Plan[]): {
-  groups: Map<string, { month?: Plan; year?: Plan }>
-  hasYearly: boolean
-  maxYearlyDiscount: number
-} {
-  const groups = new Map<string, { month?: Plan; year?: Plan }>()
-  let hasYearly = false
-  let maxYearlyDiscount = 0
-
-  for (const plan of plans) {
-    const metadata = (plan as Plan & { metadata?: PlanMetadata }).metadata
-    const key = metadata?.billingGroup?.trim() || plan.name.trim()
-    const existing = groups.get(key) ?? {}
-    if (plan.interval === 'year') {
-      existing.year = plan
-      hasYearly = true
-      if (
-        typeof metadata?.discountVsMonthly === 'number' &&
-        metadata.discountVsMonthly > maxYearlyDiscount
-      ) {
-        maxYearlyDiscount = metadata.discountVsMonthly
-      }
-    } else {
-      existing.month = plan
-    }
-    groups.set(key, existing)
-  }
-
-  return { groups, hasYearly, maxYearlyDiscount }
-}
+// Re-export types + helpers that consumers import from this module.
+export { groupPlansForToggle } from './pricing/pricing-types.js'
+export type { PricingPageTexts } from './pricing/pricing-types.js'
 
 export interface PricingPageProps {
   /**
@@ -177,7 +94,7 @@ export function PricingPage({
   locale,
   className,
 }: PricingPageProps) {
-  const t = { ...DEFAULT_TEXTS, ...textsProp }
+  const t = { ...DEFAULT_PRICING_TEXTS, ...textsProp }
 
   // Emit deprecation warning once when appName is used without applicationId.
   if (appName && !applicationId && typeof window !== 'undefined') {
@@ -307,52 +224,14 @@ export function PricingPage({
 
   return (
     <Div className={`w-full max-w-6xl mx-auto px-4 py-12 ${className || ''}`}>
-      {/* Header */}
-      <Div className="text-center mb-8">
-        <H2 size="h1">{t.title}</H2>
-        <P className="text-muted-foreground text-lg mt-2">{t.subtitle}</P>
-      </Div>
+      <PricingHeader
+        texts={t}
+        hasYearly={hasYearly}
+        billingCycle={billingCycle}
+        onCycleChange={setBillingCycle}
+        savingsLabel={savingsLabel}
+      />
 
-      {/* Monthly / Yearly toggle — only shown when at least one yearly variant exists */}
-      {hasYearly && (
-        <Div className="flex items-center justify-center gap-2 mb-10">
-          <Div
-            role="tablist"
-            aria-label="Billing cycle"
-            className="inline-flex items-center rounded-full border bg-muted p-1"
-          >
-            <Button
-              type="button"
-              role="tab"
-              aria-selected={billingCycle === 'month'}
-              variant={billingCycle === 'month' ? 'default' : 'ghost'}
-              size="sm"
-              className="rounded-full"
-              onClick={() => setBillingCycle('month')}
-            >
-              {t.billingMonthly}
-            </Button>
-            <Button
-              type="button"
-              role="tab"
-              aria-selected={billingCycle === 'year'}
-              variant={billingCycle === 'year' ? 'default' : 'ghost'}
-              size="sm"
-              className="rounded-full"
-              onClick={() => setBillingCycle('year')}
-            >
-              {t.billingYearly}
-            </Button>
-          </Div>
-          {savingsLabel && (
-            <Badge variant="success" className="ml-2">
-              {savingsLabel}
-            </Badge>
-          )}
-        </Div>
-      )}
-
-      {/* Plans grid */}
       <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
         {visiblePlans.map((plan, index) => {
           const isFree = plan.amount === 0
@@ -362,7 +241,7 @@ export function PricingPage({
           const intervalLabel = plan.interval === 'year' ? t.perYear : t.perMonth
 
           return (
-            <PlanCard
+            <PricingPlanCard
               key={plan.id}
               plan={plan}
               price={price}
@@ -381,124 +260,5 @@ export function PricingPage({
         })}
       </Div>
     </Div>
-  )
-}
-
-interface PlanCardProps {
-  plan: Plan
-  price: string
-  intervalLabel: string
-  isFree: boolean
-  isCurrent: boolean
-  isFeatured: boolean
-  texts: PricingPageTexts
-  applicationId?: string
-  userId?: string
-  userEmail?: string
-  userName?: string
-  onSelectPlan?: (plan: Plan) => void
-}
-
-function PlanCard({
-  plan,
-  price,
-  intervalLabel,
-  isFree,
-  isCurrent,
-  isFeatured,
-  texts,
-  applicationId,
-  userId,
-  userEmail,
-  userName,
-  onSelectPlan,
-}: PlanCardProps) {
-  const ctaLabel = isCurrent ? texts.currentPlan : isFree ? texts.getStarted : texts.upgrade
-  const trialDays = (plan as Plan & { trialDays?: number }).trialDays
-  const trialLabel =
-    !isFree && typeof trialDays === 'number' && trialDays > 0
-      ? texts.trialBadgeTemplate.replace('{days}', String(trialDays))
-      : null
-
-  return (
-    <Card
-      className={`relative flex flex-col ${isFeatured ? 'border-primary shadow-lg lg:scale-105' : ''}`}
-    >
-      {/* Badges */}
-      {isFeatured && !isCurrent && (
-        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" variant="default">
-          {texts.popular}
-        </Badge>
-      )}
-      {isCurrent && (
-        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" variant="success">
-          {texts.currentPlan}
-        </Badge>
-      )}
-
-      <CardHeader>
-        <H3>{plan.name}</H3>
-        {plan.description && <P className="text-muted-foreground text-sm">{plan.description}</P>}
-        <Div className="mt-4">
-          <Span className="text-4xl font-bold">{price}</Span>
-          {!isFree && <Span className="text-muted-foreground"> / {intervalLabel}</Span>}
-        </Div>
-        {trialLabel && (
-          <Badge variant="info" className="mt-2 self-start">
-            {trialLabel}
-          </Badge>
-        )}
-      </CardHeader>
-
-      <CardContent className="flex-1">
-        {plan.features && plan.features.length > 0 && (
-          <Div className="space-y-3">
-            {plan.features.map((feature, i) => (
-              <Div key={i} className="flex items-start gap-2">
-                <Icon name="lucide:Check" className="w-4 h-4 text-success shrink-0 mt-0.5" />
-                <Span className="text-sm">{feature}</Span>
-              </Div>
-            ))}
-          </Div>
-        )}
-      </CardContent>
-
-      <CardFooter>
-        {onSelectPlan ? (
-          <Button
-            variant={isFeatured ? 'default' : 'outline'}
-            className="w-full"
-            disabled={isCurrent}
-            onClick={() => onSelectPlan(plan)}
-          >
-            {ctaLabel}
-          </Button>
-        ) : isFree || isCurrent ? (
-          <Button variant="outline" className="w-full" disabled={isCurrent}>
-            {ctaLabel}
-          </Button>
-        ) : (
-          <SubscribeButton
-            projectId={plan.appName}
-            applicationId={applicationId ?? plan.applicationId}
-            priceId={plan.id}
-            planName={plan.name}
-            amount={plan.amount / 100}
-            intervalCount={plan.intervalCount}
-            currency={plan.currency}
-            userId={userId}
-            userEmail={userEmail}
-            userName={userName}
-            trialDays={(plan as Plan & { trialDays?: number }).trialDays}
-            showPromoInput
-            trigger={
-              <Button variant={isFeatured ? 'default' : 'outline'} className="w-full">
-                {ctaLabel}
-              </Button>
-            }
-          />
-        )}
-      </CardFooter>
-    </Card>
   )
 }

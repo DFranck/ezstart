@@ -17,7 +17,6 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
 import { toast } from 'sonner'
 import { usePay, useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
@@ -176,7 +175,7 @@ export function DonationCard({
         toast.success(texts.thankYou)
       }
     } catch (error) {
-      logger.error('Donation failed:', error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : String(error))
     }
   }
 

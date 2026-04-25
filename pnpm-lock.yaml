@@ -1634,6 +1634,9 @@ importers:
         specifier: ^4.5.5
         version: 4.5.7(@types/react@19.2.7)(react@19.2.3)
     devDependencies:
+      '@ezstart/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -1927,9 +1930,6 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
-      '@ezstart/logger':
-        specifier: workspace:*
-        version: link:../logger
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1943,6 +1943,9 @@ importers:
         specifier: ^4.5.5
         version: 4.5.7(@types/react@19.2.7)(react@19.2.3)
     devDependencies:
+      '@ezstart/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -2216,12 +2219,18 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.9
         version: 19.2.3(@types/react@19.2.7)
+      jsdom:
+        specifier: ^29.0.2
+        version: 29.0.2(@noble/hashes@2.0.1)
       tailwindcss:
         specifier: ^4.0.8
         version: 4.1.18
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
+      vitest:
+        specifier: ^4.1.4
+        version: 4.1.4(@edge-runtime/vm@3.2.0)(@opentelemetry/api@1.9.0)(@types/node@20.19.26)(jsdom@29.0.2(@noble/hashes@2.0.1))(vite@7.2.7(@types/node@20.19.26)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
 
 packages:
 

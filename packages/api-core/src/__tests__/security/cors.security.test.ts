@@ -355,4 +355,70 @@ describe('createStrictCorsMiddleware (Tier 3) — cookie-auth', () => {
     const nope = await request(app).get('/auth').set('Origin', 'https://random.com')
     expect(nope.headers['access-control-allow-origin']).toBeUndefined()
   })
+
+  // ─── SSO cross-app exchange (e.g. /api/auth/token) ───
+  describe('X-API-Key in strict CORS (SSO exchange routes)', () => {
+    it('preflight requesting X-API-Key returns it in Access-Control-Allow-Headers', async () => {
+      const app = express()
+      app.use(createStrictCorsMiddleware({ allowlist: ['http://localhost:6131'] }))
+
+      const res = await request(app)
+        .options('/api/auth/token')
+        .set('Origin', 'http://localhost:6131')
+        .set('Access-Control-Request-Method', 'POST')
+        .set('Access-Control-Request-Headers', 'x-api-key,content-type')
+      expect(res.status).toBe(204)
+      const allowed = res.headers['access-control-allow-headers'] ?? ''
+      expect(allowed).toContain('X-API-Key')
+      expect(allowed).toContain('Content-Type')
+    })
+
+    it('default strict allowed headers include X-API-Key, Content-Type, Authorization', async () => {
+      const app = express()
+      app.use(createStrictCorsMiddleware({ allowlist: ['https://consumer.example.com'] }))
+
+      const res = await request(app)
+        .options('/api/auth/token')
+        .set('Origin', 'https://consumer.example.com')
+        .set('Access-Control-Request-Method', 'POST')
+        .set('Access-Control-Request-Headers', 'X-API-Key')
+      expect(res.status).toBe(204)
+      const allowed = res.headers['access-control-allow-headers'] ?? ''
+      expect(allowed).toContain('X-API-Key')
+      expect(allowed).toContain('Authorization')
+      expect(allowed).toContain('Content-Type')
+    })
+
+    it('strict CORS still rejects unallowed origins even when requesting X-API-Key', async () => {
+      const app = express()
+      app.use(createStrictCorsMiddleware({ allowlist: ['http://localhost:6131'] }))
+
+      const res = await request(app)
+        .options('/api/auth/token')
+        .set('Origin', 'https://evil.com')
+        .set('Access-Control-Request-Method', 'POST')
+        .set('Access-Control-Request-Headers', 'x-api-key')
+      expect(res.headers['access-control-allow-origin']).toBeUndefined()
+    })
+
+    it('explicit allowedHeaders override removes X-API-Key from defaults', async () => {
+      const app = express()
+      app.use(
+        createStrictCorsMiddleware({
+          allowlist: ['https://consumer.example.com'],
+          allowedHeaders: ['Content-Type', 'Authorization'],
+        })
+      )
+
+      const res = await request(app)
+        .options('/api/auth/login')
+        .set('Origin', 'https://consumer.example.com')
+        .set('Access-Control-Request-Method', 'POST')
+        .set('Access-Control-Request-Headers', 'Content-Type,Authorization')
+      expect(res.status).toBe(204)
+      const allowed = res.headers['access-control-allow-headers'] ?? ''
+      expect(allowed).not.toContain('X-API-Key')
+      expect(allowed).toContain('Authorization')
+    })
+  })
 })

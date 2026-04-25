@@ -4,154 +4,46 @@
  * Drop-in dashboard for managing EZPay subscription plans for a single
  * ezauth Application.
  *
- * Surfaces CRUD on plans via {@link PayClient.listPlans}, {@link
- * PayClient.createPlan}, {@link PayClient.updatePlan} and
- * {@link PayClient.deletePlan}. The Stripe product/price is synced on the
- * backend when a plan is created or updated — there is no direct Stripe
- * integration on the client.
+ * Surfaces CRUD on plans via `PayClient.listPlans`, `PayClient.createPlan`,
+ * `PayClient.updatePlan` and `PayClient.deletePlan`. The Stripe product/price
+ * is synced on the backend when a plan is created or updated — there is no
+ * direct Stripe integration on the client.
+ *
+ * Internally split into `./plans-manager/` sub-components (column defs, archive
+ * dialog) and the `PlanEditorDialog` for create/edit.
  *
  * Peer dependencies: `@ezstart/ui` + an enclosing `<PayProvider>`.
  */
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  Badge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  type ColumnDef,
   DataTable,
   Div,
   P,
-  Span,
   Spinner,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Plan } from '../core/types.js'
-import { formatCurrency } from '../core/format-currency.js'
 import { usePayContext, usePayLocale } from '../react/pay-provider.js'
+import { PlanEditorDialog } from './PlanEditorDialog.js'
+import { PlanArchiveDialog } from './plans-manager/PlanArchiveDialog.js'
 import {
-  PlanEditorDialog,
-  type PlanEditorDialogTexts,
-  defaultPlanEditorDialogTexts,
-} from './PlanEditorDialog.js'
+  defaultPlansManagerTexts,
+  mergePlansManagerTexts,
+  type PlansManagerTexts,
+} from './plans-manager/plans-manager-types.js'
+import { usePlansColumns } from './plans-manager/use-plans-columns.js'
 
-export interface PlansManagerTexts {
-  title: string
-  subtitle: string
-  createButton: string
-  empty: string
-  loading: string
-  fetchFailed: string
-  retry: string
-  columns: {
-    name: string
-    price: string
-    interval: string
-    status: string
-    features: string
-    actions: string
-  }
-  status: {
-    active: string
-    inactive: string
-  }
-  intervals: {
-    month: string
-    year: string
-  }
-  actions: {
-    edit: string
-    archive: string
-    archiveConfirm: string
-    archiveCancel: string
-    archiveConfirmDescription: string
-  }
-  toast: {
-    created: string
-    updated: string
-    archived: string
-    error: string
-  }
-  editor: PlanEditorDialogTexts
-}
-
-export const defaultPlansManagerTexts: PlansManagerTexts = {
-  title: 'Plans',
-  subtitle: 'Manage subscription plans for this application',
-  createButton: 'Create Plan',
-  empty: 'No plans yet. Create your first plan.',
-  loading: 'Loading plans...',
-  fetchFailed: 'Failed to load plans',
-  retry: 'Retry',
-  columns: {
-    name: 'Name',
-    price: 'Price',
-    interval: 'Interval',
-    status: 'Status',
-    features: 'Features',
-    actions: 'Actions',
-  },
-  status: {
-    active: 'Active',
-    inactive: 'Inactive',
-  },
-  intervals: {
-    month: 'Monthly',
-    year: 'Yearly',
-  },
-  actions: {
-    edit: 'Edit',
-    archive: 'Archive',
-    archiveConfirm: 'Archive plan',
-    archiveCancel: 'Cancel',
-    archiveConfirmDescription:
-      'This plan will no longer be available for new subscriptions. Existing subscriptions continue on the archived price.',
-  },
-  toast: {
-    created: 'Plan created',
-    updated: 'Plan updated',
-    archived: 'Plan archived',
-    error: 'An error occurred',
-  },
-  editor: defaultPlanEditorDialogTexts,
-}
-
-function mergeTexts(partial?: Partial<PlansManagerTexts>): PlansManagerTexts {
-  if (!partial) return defaultPlansManagerTexts
-  return {
-    ...defaultPlansManagerTexts,
-    ...partial,
-    columns: { ...defaultPlansManagerTexts.columns, ...partial.columns },
-    status: { ...defaultPlansManagerTexts.status, ...partial.status },
-    intervals: { ...defaultPlansManagerTexts.intervals, ...partial.intervals },
-    actions: { ...defaultPlansManagerTexts.actions, ...partial.actions },
-    toast: { ...defaultPlansManagerTexts.toast, ...partial.toast },
-    editor: {
-      ...defaultPlansManagerTexts.editor,
-      ...partial.editor,
-      validation: {
-        ...defaultPlansManagerTexts.editor.validation,
-        ...partial.editor?.validation,
-      },
-      toast: {
-        ...defaultPlansManagerTexts.editor.toast,
-        ...partial.editor?.toast,
-      },
-    },
-  }
-}
+export {
+  defaultPlansManagerTexts,
+  type PlansManagerTexts,
+} from './plans-manager/plans-manager-types.js'
 
 export interface PlansManagerProps {
   applicationId: string
@@ -194,7 +86,7 @@ export function PlansManager({
   locale,
   className,
 }: PlansManagerProps) {
-  const texts = mergeTexts(partialTexts)
+  const texts = mergePlansManagerTexts(partialTexts)
   const { client } = usePayContext()
   const contextLocale = usePayLocale()
   const resolvedLocale = locale ?? contextLocale
@@ -244,6 +136,14 @@ export function PlansManager({
     reload()
   }, [reload])
 
+  const handleArchive = useCallback((plan: Plan) => {
+    setArchiveTarget(plan)
+  }, [])
+
+  const handleArchiveCancel = useCallback(() => {
+    setArchiveTarget(null)
+  }, [])
+
   const handleArchiveConfirm = useCallback(async () => {
     if (!archiveTarget) return
     setIsArchiving(true)
@@ -259,95 +159,13 @@ export function PlansManager({
     }
   }, [archiveTarget, client, reload, texts.toast.archived, texts.toast.error])
 
-  const columns = useMemo<ColumnDef<Plan>[]>(() => {
-    return [
-      {
-        accessorKey: 'name',
-        header: texts.columns.name,
-        cell: ({ row }) => (
-          <Div className="flex flex-col">
-            <P className="font-medium">{row.original.name}</P>
-            {row.original.description && (
-              <P className="text-xs text-muted-foreground line-clamp-1">
-                {row.original.description}
-              </P>
-            )}
-          </Div>
-        ),
-      },
-      {
-        accessorKey: 'amount',
-        header: texts.columns.price,
-        cell: ({ row }) => {
-          const { amount, currency } = row.original
-          return (
-            <Span className="tabular-nums">
-              {formatCurrency(amount / 100, currency, resolvedLocale)}
-            </Span>
-          )
-        },
-      },
-      {
-        accessorKey: 'interval',
-        header: texts.columns.interval,
-        cell: ({ row }) => {
-          const { interval, intervalCount } = row.original
-          const base = interval === 'month' ? texts.intervals.month : texts.intervals.year
-          return (
-            <Span className="text-sm">
-              {intervalCount > 1 ? `${base} × ${intervalCount}` : base}
-            </Span>
-          )
-        },
-      },
-      {
-        accessorKey: 'active',
-        header: texts.columns.status,
-        cell: ({ row }) =>
-          row.original.active ? (
-            <Badge variant="success">{texts.status.active}</Badge>
-          ) : (
-            <Badge variant="secondary">{texts.status.inactive}</Badge>
-          ),
-      },
-      {
-        id: 'features',
-        header: texts.columns.features,
-        cell: ({ row }) => {
-          const count = row.original.features?.length ?? 0
-          return <Span className="text-sm text-muted-foreground">{count}</Span>
-        },
-        enableSorting: false,
-      },
-      {
-        id: 'actions',
-        header: texts.columns.actions,
-        cell: ({ row }) => (
-          <Div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleEdit(row.original)}
-              disabled={isArchiving}
-            >
-              {texts.actions.edit}
-            </Button>
-            {row.original.active && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setArchiveTarget(row.original)}
-                disabled={isArchiving}
-              >
-                {texts.actions.archive}
-              </Button>
-            )}
-          </Div>
-        ),
-        enableSorting: false,
-      },
-    ]
-  }, [texts, resolvedLocale, handleEdit, isArchiving])
+  const columns = usePlansColumns({
+    texts,
+    resolvedLocale,
+    isArchiving,
+    onEdit: handleEdit,
+    onArchive: handleArchive,
+  })
 
   return (
     <Card className={className}>
@@ -397,27 +215,13 @@ export function PlansManager({
         texts={texts.editor}
       />
 
-      <AlertDialog
-        open={!!archiveTarget}
-        onOpenChange={open => !open && !isArchiving && setArchiveTarget(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{texts.actions.archiveConfirm}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {texts.actions.archiveConfirmDescription}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isArchiving}>
-              {texts.actions.archiveCancel}
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleArchiveConfirm} disabled={isArchiving}>
-              {texts.actions.archive}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <PlanArchiveDialog
+        target={archiveTarget}
+        isArchiving={isArchiving}
+        onConfirm={handleArchiveConfirm}
+        onCancel={handleArchiveCancel}
+        texts={texts}
+      />
     </Card>
   )
 }

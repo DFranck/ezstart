@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { createContext, useCallback, useContext, useEffect, useState, forwardRef } from 'react'
+import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
@@ -86,8 +87,7 @@ const appHeaderVariants = cva(
 )
 
 interface AppHeaderProps
-  extends React.ComponentProps<'header'>,
-    VariantProps<typeof appHeaderVariants> {}
+  extends React.ComponentProps<'header'>, VariantProps<typeof appHeaderVariants> {}
 
 const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(
   ({ className, variant, children, ...props }, ref) => {
@@ -109,17 +109,31 @@ AppHeader.displayName = 'AppHeader'
 
 // AppLogo — image + text, links to home
 
-const AppLogo = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, children, ...props }, ref) => {
+interface AppLogoProps extends React.ComponentProps<'div'> {
+  /**
+   * When true, render the immediate child (e.g. a `<Link>`) instead of a `<div>`.
+   * The child receives the merged className and a11y props via Radix `<Slot>`.
+   *
+   * @example
+   * <AppLogo asChild>
+   *   <Link href="/">Brand</Link>
+   * </AppLogo>
+   */
+  asChild?: boolean
+}
+
+const AppLogo = forwardRef<HTMLDivElement, AppLogoProps>(
+  ({ className, asChild = false, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : 'div'
     return (
-      <div
+      <Comp
         ref={ref}
         data-slot="app-logo"
         className={cn('flex shrink-0 items-center gap-2', className)}
         {...props}
       >
         {children}
-      </div>
+      </Comp>
     )
   }
 )
@@ -161,13 +175,26 @@ const appNavLinkVariants = cva(
 )
 
 interface AppNavLinkProps
-  extends React.ComponentProps<'a'>,
-    VariantProps<typeof appNavLinkVariants> {}
+  extends React.ComponentProps<'a'>, VariantProps<typeof appNavLinkVariants> {
+  /**
+   * When true, render the immediate child (e.g. a locale-aware `<Link>`) instead
+   * of a native `<a>`. Required to get SPA navigation in Next.js apps — passing
+   * `href` directly produces a full reload AND skips the locale prefix added by
+   * `next-intl`'s `<Link>` (causing a 307 redirect).
+   *
+   * @example
+   * <AppNavLink asChild active={pathname === '/dashboard'}>
+   *   <Link href="/dashboard">Dashboard</Link>
+   * </AppNavLink>
+   */
+  asChild?: boolean
+}
 
 const AppNavLink = forwardRef<HTMLAnchorElement, AppNavLinkProps>(
-  ({ className, active, children, ...props }, ref) => {
+  ({ className, active, asChild = false, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : 'a'
     return (
-      <a
+      <Comp
         ref={ref}
         data-slot="app-nav-link"
         aria-current={active ? 'page' : undefined}
@@ -175,7 +202,7 @@ const AppNavLink = forwardRef<HTMLAnchorElement, AppNavLinkProps>(
         {...props}
       >
         {children}
-      </a>
+      </Comp>
     )
   }
 )
@@ -281,10 +308,22 @@ AppMobileMenu.displayName = 'AppMobileMenu'
 
 interface AppMobileLinkProps extends React.ComponentProps<'a'> {
   active?: boolean
+  /**
+   * When true, render the immediate child (e.g. a locale-aware `<Link>`) instead
+   * of a native `<a>`. Radix `<Slot>` composes the auto-close handler with the
+   * child's own `onClick`, so the menu still closes when the child handles
+   * navigation.
+   *
+   * @example
+   * <AppMobileLink asChild active={pathname === '/dashboard'}>
+   *   <Link href="/dashboard">Dashboard</Link>
+   * </AppMobileLink>
+   */
+  asChild?: boolean
 }
 
 const AppMobileLink = forwardRef<HTMLAnchorElement, AppMobileLinkProps>(
-  ({ className, active, children, onClick, ...props }, ref) => {
+  ({ className, active, asChild = false, children, onClick, ...props }, ref) => {
     const { setMenuOpen } = useAppLayout()
 
     const handleClick = useCallback(
@@ -295,8 +334,10 @@ const AppMobileLink = forwardRef<HTMLAnchorElement, AppMobileLinkProps>(
       [setMenuOpen, onClick]
     )
 
+    const Comp = asChild ? Slot : 'a'
+
     return (
-      <a
+      <Comp
         ref={ref}
         data-slot="app-mobile-link"
         className={cn(
@@ -311,7 +352,7 @@ const AppMobileLink = forwardRef<HTMLAnchorElement, AppMobileLinkProps>(
         onClick={handleClick}
       >
         {children}
-      </a>
+      </Comp>
     )
   }
 )
@@ -322,12 +363,7 @@ AppMobileLink.displayName = 'AppMobileLink'
 const AppMain = forwardRef<HTMLElement, React.ComponentProps<'main'>>(
   ({ className, children, ...props }, ref) => {
     return (
-      <main
-        ref={ref}
-        data-slot="app-main"
-        className={cn('flex-1', className)}
-        {...props}
-      >
+      <main ref={ref} data-slot="app-main" className={cn('flex-1', className)} {...props}>
         {children}
       </main>
     )
@@ -356,7 +392,7 @@ AppContent.displayName = 'AppContent'
 // Re-export footer compound (split for file-size compliance)
 
 export { AppFooter, FooterColumn, FooterLink, FooterBrand } from './app-footer'
-export type { FooterColumnProps, FooterBrandProps } from './app-footer'
+export type { FooterColumnProps, FooterLinkProps, FooterBrandProps } from './app-footer'
 
 // Exports
 
@@ -375,8 +411,4 @@ export {
   useAppLayout,
 }
 
-export type {
-  AppHeaderProps,
-  AppNavLinkProps,
-  AppMobileLinkProps,
-}
+export type { AppHeaderProps, AppLogoProps, AppNavLinkProps, AppMobileLinkProps }

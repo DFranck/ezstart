@@ -219,7 +219,9 @@ export function AuthProvider({
     return detected
   }, [authMode, resolved.clientConfig.apiUrl])
 
-  // Warn in production if no key and not first-party
+  // Warn in production if no key and not first-party.
+  // Routed through the injected logger (defaults to silent no-op per the
+  // SDK agnostic packaging rule — consumers opt-in by passing `logger`).
   useEffect(() => {
     // Next.js statically replaces `process.env.NODE_ENV` at build time.
     // No runtime guard — same reason as `NEXT_PUBLIC_*` above.
@@ -228,12 +230,11 @@ export function AuthProvider({
       !sdkConfig.publishableKey &&
       process.env.NODE_ENV === 'production'
     ) {
-      // eslint-disable-next-line no-console
-      console.warn(
+      logger.warn(
         'EZAuth: No publishable key configured. Set NEXT_PUBLIC_EZAUTH_KEY in your environment.'
       )
     }
-  }, [mode, sdkConfig.publishableKey])
+  }, [mode, sdkConfig.publishableKey, logger])
 
   /**
    * REG-1 guard — tracks which `publishableKey` has already been resolved (or

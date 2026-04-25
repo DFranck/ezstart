@@ -6,15 +6,20 @@
 import React from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { PayProvider } from '../react/pay-provider.js'
-import { PayClient } from '../core/pay-client.js'
-import type { Payment, PaymentResponse, PaymentsListResponse, ConnectedAccount } from '../core/types.js'
+import { createPayClient, type PayClient } from '../core/pay-client.js'
+import type {
+  Payment,
+  PaymentResponse,
+  PaymentsListResponse,
+  ConnectedAccount,
+} from '../core/types.js'
 
 // ---------------------------------------------------------------------------
 // Mock PayClient — all methods return sensible defaults, individually mockable
 // ---------------------------------------------------------------------------
 
 export function createMockPayClient(overrides: Partial<PayClient> = {}): PayClient {
-  const client = new PayClient({
+  const client = createPayClient({
     appName: 'test-app',
     apiUrl: 'http://localhost:9999/api',
   })
@@ -187,7 +192,10 @@ export function createWrapper(options: WrapperOptions = {}) {
 
   function TestWrapper({ children }: { children: React.ReactNode }) {
     return (
-      <PayProvider appName={options.appName ?? 'test-app'} config={{ apiUrl: 'http://localhost:9999/api' }}>
+      <PayProvider
+        appName={options.appName ?? 'test-app'}
+        config={{ apiUrl: 'http://localhost:9999/api' }}
+      >
         {children}
       </PayProvider>
     )
@@ -214,7 +222,10 @@ export function renderWithPay(
 
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <PayProvider appName={options.appName ?? 'test-app'} config={{ apiUrl: 'http://localhost:9999/api' }}>
+      <PayProvider
+        appName={options.appName ?? 'test-app'}
+        config={{ apiUrl: 'http://localhost:9999/api' }}
+      >
         {children}
       </PayProvider>
     )
@@ -239,13 +250,12 @@ type FetchMockRule = {
 
 export function setupFetchMock(rules: FetchMockRule[]) {
   const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+    const url =
+      typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
     const method = init?.method?.toUpperCase() ?? 'GET'
 
     for (const rule of rules) {
-      const urlMatch = typeof rule.url === 'string'
-        ? url.includes(rule.url)
-        : rule.url.test(url)
+      const urlMatch = typeof rule.url === 'string' ? url.includes(rule.url) : rule.url.test(url)
 
       if (urlMatch && (!rule.method || rule.method === method)) {
         return new Response(JSON.stringify(rule.response), {

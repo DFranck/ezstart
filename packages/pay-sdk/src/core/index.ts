@@ -1,5 +1,9 @@
-// Core pay client
-export { PayClient, createPayClient } from './pay-client.js'
+// Core pay client — exposes the factory as the public API; the underlying
+// class is exported as a TYPE ONLY so consumers can annotate variables
+// without instantiating it directly. Use `createPayClient(config)` to build
+// instances.
+export { createPayClient } from './pay-client.js'
+export type { PayClient } from './pay-client.js'
 
 // Types
 export type {

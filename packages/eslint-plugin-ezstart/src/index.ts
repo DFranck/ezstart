@@ -1,3 +1,4 @@
+import { authSdk } from './rules/auth-sdk.js'
 import { noAlertConfirm } from './rules/no-alert-confirm.js'
 import { noConsoleLog } from './rules/no-console-log.js'
 import { noDialogOutsideUi } from './rules/no-dialog-outside-ui.js'
@@ -9,6 +10,7 @@ import { noNextLinkInLocaleApps } from './rules/no-next-link-in-locale-apps.js'
 import { noRawFetch } from './rules/no-raw-fetch.js'
 import { noRawHtml } from './rules/no-raw-html.js'
 import { parseApiErrorRequired } from './rules/parse-api-error-required.js'
+import { paySdk } from './rules/pay-sdk.js'
 import { requireI18nString } from './rules/require-i18n-string.js'
 
 const PLUGIN_NAME = '@ezstart/ezstart'
@@ -26,6 +28,8 @@ const rules = {
   'require-i18n-string': requireI18nString,
   'no-local-ui-components': noLocalUiComponents,
   'no-next-link-in-locale-apps': noNextLinkInLocaleApps,
+  'pay-sdk': paySdk,
+  'auth-sdk': authSdk,
 } as const
 
 /**
@@ -47,6 +51,8 @@ const recommendedRules = {
   [`${PLUGIN_NAME}/require-i18n-string`]: 'warn',
   [`${PLUGIN_NAME}/no-local-ui-components`]: 'warn',
   [`${PLUGIN_NAME}/no-next-link-in-locale-apps`]: 'error',
+  [`${PLUGIN_NAME}/pay-sdk`]: 'error',
+  [`${PLUGIN_NAME}/auth-sdk`]: 'error',
 } as const
 
 /**

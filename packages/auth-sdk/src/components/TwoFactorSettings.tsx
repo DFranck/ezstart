@@ -2,7 +2,7 @@
 
 import { Button, Div, Input, P, Spinner } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import { useCallback, useEffect, useState } from 'react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────

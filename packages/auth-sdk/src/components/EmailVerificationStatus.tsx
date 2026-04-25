@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Badge, Button, Div, Icon, P, Span, Spinner } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import { useAuth } from '../react/hooks.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────

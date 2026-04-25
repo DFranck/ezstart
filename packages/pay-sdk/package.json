@@ -57,19 +57,20 @@
     "dev": "tsc -b --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@ezstart/api-sdk": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "sonner": "^2.0.3",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "@tanstack/react-query": "^5.80.7",
     "@testing-library/jest-dom": "^6.9.1",

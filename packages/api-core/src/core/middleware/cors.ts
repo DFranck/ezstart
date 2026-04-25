@@ -56,10 +56,18 @@ const PERMISSIVE_ALLOWED_HEADERS = [
 const PERMISSIVE_EXPOSED_HEADERS = ['X-Request-Id', 'Retry-After']
 
 /**
- * Strict-mode default headers. Narrower than permissive: no `X-API-Key`
- * (cookie-auth routes never accept a publishable key) and no dev header.
+ * Strict-mode default headers. Narrower than permissive: no dev `X-User-Id`
+ * and no `X-EZStart-Signature`.
+ *
+ * `X-API-Key` is included because some cookie-issuing routes are also
+ * cross-app SSO exchange endpoints (e.g. `/api/auth/token`) that require a
+ * publishable key in the request to identify the consumer tenant before
+ * setting the session cookie. The publishable key is not a CSRF risk:
+ * unlike cookies, custom headers like `X-API-Key` are never auto-sent by
+ * the browser — every request carrying one is initiated explicitly by the
+ * consumer SDK.
  */
-const STRICT_ALLOWED_HEADERS = ['Content-Type', 'Authorization']
+const STRICT_ALLOWED_HEADERS = ['Content-Type', 'Authorization', 'X-API-Key']
 
 export type PermissiveCorsOptions = {
   /** Override the default methods (`GET/POST/PUT/DELETE/PATCH/OPTIONS`). */

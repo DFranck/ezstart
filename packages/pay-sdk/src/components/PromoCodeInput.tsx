@@ -1,7 +1,6 @@
 'use client'
 
 import { Badge, Button, Div, Icon, Input, P } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { usePayContext } from '../react/pay-provider.js'
 import type { PromoValidationResponse } from '../core/types.js'
@@ -91,14 +90,12 @@ export function PromoCodeInput({
       const result: PromoValidation = response.data
       setValidation(result)
       onValidated?.(result)
-    } catch (error) {
+    } catch {
+      // Validation failure surfaces in the UI via `setValidation(invalid)`.
+      // No need to log — the user sees the error immediately.
       const invalid: PromoValidation = { valid: false, reason: 'Validation failed' }
       setValidation(invalid)
       onValidated?.(invalid)
-      logger.error(
-        'Promo validation failed:',
-        error instanceof Error ? error.message : String(error)
-      )
     } finally {
       setIsValidating(false)
     }

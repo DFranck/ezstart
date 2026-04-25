@@ -1,7 +1,6 @@
 'use client'
 
 import { Button, Icon } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
 import { useCallback, useState } from 'react'
 import { usePayContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
@@ -71,7 +70,6 @@ export function RefundButton({
       onSuccess?.()
     } catch (err) {
       const message = err instanceof Error ? err.message : t.error
-      logger.error('Refund failed:', message)
       onError?.(message)
       throw err
     }

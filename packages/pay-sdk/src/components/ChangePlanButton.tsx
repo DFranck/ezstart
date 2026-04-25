@@ -42,7 +42,6 @@ import {
   SelectValue,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { logger } from '@ezstart/logger'
 import { usePayContext } from '../react/pay-provider.js'
 import type { ChangePlanRequest } from '../core/types.js'
 
@@ -190,7 +189,6 @@ export function ChangePlanButton({
       onChanged?.(response.newPlanId ?? targetPlanId)
     } catch (err) {
       const message = err instanceof Error ? err.message : texts.toast.error
-      logger.error('ChangePlanButton: change plan failed', err instanceof Error ? err : message)
       toast.error(message)
     } finally {
       setIsSubmitting(false)

@@ -2,7 +2,7 @@
 
 import { Button, Div, Input, P } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import { useState } from 'react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────

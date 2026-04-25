@@ -15,8 +15,7 @@ import {
   PasswordInput,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
-import { useLocale } from 'next-intl'
+import { logger } from './internal-logger.js'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -90,7 +89,8 @@ export interface SignUpFormProps {
   /** OAuth providers to display */
   oauthProviders?: OAuthProvider[]
   /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to `useLocale()`.
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/register` → `'fr'`).
    * Any keys provided in `texts` take precedence over the localized defaults.
    */
   locale?: AuthLocale | string
@@ -111,6 +111,15 @@ export interface SignUpFormProps {
   keyStatus?: 'valid' | 'invalid' | 'missing'
   /** Raw publishable key from URL (for DevModeBanner display). */
   urlKey?: string
+  /**
+   * EZPay-compatible API base URL used to validate promo codes
+   * (`?promo=` URL param or manually entered). When omitted, promo
+   * validation is disabled entirely. Pass the same value the consumer
+   * already uses for `<PayProvider apiUrl=...>`.
+   *
+   * @example 'https://pay.example.com'
+   */
+  promoApiUrl?: string
 }
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
@@ -143,11 +152,11 @@ export function SignUpForm({
   disabled = false,
   keyStatus,
   urlKey,
+  promoApiUrl,
 }: SignUpFormProps) {
-  const contextLocale = useLocale()
-  const locale = propLocale ?? contextLocale
-  const t: SignUpFormTexts = { ...getAuthTexts(locale, 'signUp'), ...texts }
   const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
+  const t: SignUpFormTexts = { ...getAuthTexts(locale, 'signUp'), ...texts }
   const resolvedBackToLoginHref = backToLoginHref ?? navigation.loginHref
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -164,7 +173,7 @@ export function SignUpForm({
     isValidating: promoIsValidating,
     isOpen: promoOpen,
     setIsOpen: setPromoOpen,
-  } = usePromoCode(appName, promoCode)
+  } = usePromoCode(appName, promoCode, promoApiUrl)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -498,8 +507,11 @@ export function SignUpForm({
         </form>
       </Form>
 
+      {/* See note in SignInForm.tsx — only override appName when the URL
+          surfaced a real key/legacy app= signal so the first-party early
+          return in DevModeBanner can fire on ezauth's own pages. */}
       <DevModeBanner
-        appName={appName}
+        {...(urlKey || keyStatus ? { appName } : {})}
         keyStatus={keyStatus}
         urlKey={urlKey}
         locale={navigation.locale}

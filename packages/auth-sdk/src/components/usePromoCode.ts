@@ -1,22 +1,30 @@
 'use client'
 
-import { getApiUrl } from '@ezstart/config'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 export type PromoValidationStatus = 'valid' | 'invalid' | 'rate-limited'
 
 /**
- * Validate a promo code against the ezpay API (where promo codes are managed).
- * Returns 'valid' if the code is accepted, 'rate-limited' if the API returns 429,
- * and 'invalid' for any other non-OK response or network error.
+ * Validate a promo code against an EZPay-compatible API.
+ *
+ * Returns:
+ * - `'valid'` when the API responds 200 with `{ data: { valid: true } }`
+ * - `'rate-limited'` when the API responds 429
+ * - `'invalid'` for any other non-OK response or network error
+ *
+ * @internal
  */
-async function validatePromoCodeApi(code: string, appName: string): Promise<PromoValidationStatus> {
+async function validatePromoCodeApi(
+  code: string,
+  appName: string,
+  apiUrl: string
+): Promise<PromoValidationStatus> {
   try {
-    const baseUrl = getApiUrl('ezpay')
+    const base = apiUrl.replace(/\/+$/, '')
     const params = new URLSearchParams({ appName })
     const res = await fetch(
-      `${baseUrl}/api/promos/validate/${encodeURIComponent(code)}?${params.toString()}`
+      `${base}/api/promos/validate/${encodeURIComponent(code)}?${params.toString()}`
     )
     if (res.status === 429) return 'rate-limited'
     if (!res.ok) return 'invalid'
@@ -28,19 +36,20 @@ async function validatePromoCodeApi(code: string, appName: string): Promise<Prom
 }
 
 /**
- * Resolves a promo code with priority: prop > URL ?promo= > empty.
- * Validates promo codes against the ezpay API with debounce.
+ * Resolves a promo code with priority: prop > URL `?promo=` > empty.
+ * Validates promo codes against an EZPay-compatible API with debounce.
  *
- * Returns:
- * - promoCode: the current code string
- * - setPromoCode: setter for manual input
- * - isValid: null (not checked yet), true, or false
- * - isRateLimited: whether the last validation was blocked by rate limiting (429)
- * - isValidating: whether a validation request is in-flight
- * - isOpen: whether the promo section should be visible
- * - setIsOpen: toggle the promo section
+ * The API base URL is required so the hook stays agnostic of any
+ * monorepo URL helpers — pass the same value the consumer already uses
+ * for `<PayProvider apiUrl=...>`. When `apiUrl` is empty / undefined
+ * the hook returns `isValid: null` and never fires a network request.
+ *
+ * @example
+ * ```tsx
+ * const promo = usePromoCode('myapp', urlPromo, 'https://api.example.com')
+ * ```
  */
-export function usePromoCode(appName: string, propPromoCode?: string) {
+export function usePromoCode(appName: string, propPromoCode?: string, apiUrl?: string) {
   const searchParams = useSearchParams()
   const urlPromo = searchParams?.get('promo') ?? ''
 
@@ -66,11 +75,19 @@ export function usePromoCode(appName: string, propPromoCode?: string) {
       return
     }
 
+    // No API URL configured — promo validation is opt-in.
+    if (!apiUrl) {
+      setIsValid(null)
+      setIsRateLimited(false)
+      setIsValidating(false)
+      return
+    }
+
     // Skip debounce for initial auto-detected code (validate immediately)
     if (!initialValidationDone.current && trimmed === initialPromo.trim() && initialPromo) {
       initialValidationDone.current = true
       setIsValidating(true)
-      validatePromoCodeApi(trimmed, appName).then(status => {
+      validatePromoCodeApi(trimmed, appName, apiUrl).then(status => {
         setIsValid(status === 'valid')
         setIsRateLimited(status === 'rate-limited')
         setIsValidating(false)
@@ -89,7 +106,7 @@ export function usePromoCode(appName: string, propPromoCode?: string) {
     setIsRateLimited(false)
 
     timerRef.current = setTimeout(() => {
-      validatePromoCodeApi(trimmed, appName).then(status => {
+      validatePromoCodeApi(trimmed, appName, apiUrl).then(status => {
         setIsValid(status === 'valid')
         setIsRateLimited(status === 'rate-limited')
         setIsValidating(false)
@@ -99,7 +116,7 @@ export function usePromoCode(appName: string, propPromoCode?: string) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [promoCode, initialPromo, appName])
+  }, [promoCode, initialPromo, appName, apiUrl])
 
   return {
     promoCode,

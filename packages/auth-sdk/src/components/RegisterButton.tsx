@@ -1,6 +1,6 @@
 'use client'
 
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 import { Button, Icon, KnownIconName, Span } from '@ezstart/ui/components'
 import { useAuth } from '../react/hooks.js'
 import { detectCurrentThemePreference } from './themePreference.js'

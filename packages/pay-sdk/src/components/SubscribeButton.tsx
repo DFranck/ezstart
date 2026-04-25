@@ -1,7 +1,7 @@
 'use client'
 
-import { Button, Div, H2, Icon, Input, Modal, P } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
+import { Button, Div, Icon, Modal, P } from '@ezstart/ui/components'
+import { toast } from '@ezstart/ui/utils'
 import { useState } from 'react'
 import { usePay, useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
@@ -82,7 +82,10 @@ export function SubscribeButton({
   // Default texts with fallback
   const t = {
     title: texts?.title || `Subscribe to ${planName}`,
-    description: texts?.description || description || '',
+    // Provided to Modal as the accessible description (DialogDescription) —
+    // satisfies the modal's `aria-describedby` accessibility requirement and
+    // ensures screen-reader users hear context before the form fields.
+    description: texts?.description || description || `Confirm your subscription to ${planName}.`,
     subscribeButton: texts?.subscribeButton || 'Subscribe now',
     processingButton: texts?.processingButton || 'Processing...',
     intervalMonth: texts?.intervalMonth || 'month',
@@ -134,7 +137,7 @@ export function SubscribeButton({
         window.location.href = result.checkoutUrl
       }
     } catch (error) {
-      logger.error('Subscription failed:', error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -149,21 +152,18 @@ export function SubscribeButton({
         )}
       </div>
 
-      <Modal isOpen={open} onClose={() => setOpen(false)}>
+      <Modal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title={
+          <span className="flex items-center gap-2">
+            <Icon name="lucide:CreditCard" className="w-5 h-5" />
+            {t.title}
+          </span>
+        }
+        description={t.description}
+      >
         <form onSubmit={handleSubscribe} className="px-2 flex flex-col gap-4">
-          {/* Header */}
-          <Div layout={'center'}>
-            <H2 size={'h4'} className="flex items-center justify-center gap-2">
-              <Icon name="lucide:CreditCard" className="w-8 h-8 text-white" />
-              {t.title}
-            </H2>
-            {t.description && (
-              <P size={'sm'} variant={'description'}>
-                {t.description}
-              </P>
-            )}
-          </Div>
-
           {/* Plan info */}
           <Div className="p-4 rounded-lg bg-muted/50 flex flex-col gap-2">
             <P className="font-semibold">{planName}</P>

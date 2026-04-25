@@ -1,18 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 
-// Control the values returned by `next-intl` / `next/navigation` per-test.
-let mockLocale = 'en'
+// Control the values returned by `next/navigation` per-test. The hook now
+// detects the locale from `usePathname()` (no `next-intl` dep), so the
+// pathname is the source of truth for locale.
+let mockPathname = '/en/login'
 let mockSearchParams = new URLSearchParams()
-
-vi.mock('next-intl', async importOriginal => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return {
-    ...actual,
-    useLocale: () => mockLocale,
-    useTranslations: () => (key: string) => key,
-  }
-})
 
 vi.mock('next/navigation', async importOriginal => {
   const actual = (await importOriginal()) as Record<string, unknown>
@@ -20,7 +13,7 @@ vi.mock('next/navigation', async importOriginal => {
     ...actual,
     useSearchParams: () => mockSearchParams,
     useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
-    usePathname: () => '/',
+    usePathname: () => mockPathname,
   }
 })
 
@@ -28,7 +21,7 @@ const { useAuthNavigation } = await import('../../react/useAuthNavigation.js')
 
 describe('useAuthNavigation', () => {
   beforeEach(() => {
-    mockLocale = 'en'
+    mockPathname = '/en/login'
     mockSearchParams = new URLSearchParams()
   })
 
@@ -53,7 +46,7 @@ describe('useAuthNavigation', () => {
   })
 
   it('prefixes generated hrefs with the active locale (fr)', () => {
-    mockLocale = 'fr'
+    mockPathname = '/fr/login'
     mockSearchParams = new URLSearchParams()
 
     const { result } = renderHook(() => useAuthNavigation())
@@ -63,6 +56,32 @@ describe('useAuthNavigation', () => {
     expect(result.current.registerHref).toBe('/fr/register')
     expect(result.current.forgotPasswordHref).toBe('/fr/forgot-password')
     expect(result.current.resetPasswordHref).toBe('/fr/reset-password')
+  })
+
+  it('exposes unprefixed paths + searchSuffix for locale-aware <Link>', () => {
+    mockPathname = '/en/login'
+    mockSearchParams = new URLSearchParams('key=ez_pk_live_abc&redirect_uri=https://example.com')
+
+    const { result } = renderHook(() => useAuthNavigation())
+
+    // Unprefixed paths — safe with i18n <Link> (no locale double-prefix)
+    expect(result.current.loginPath).toBe('/login')
+    expect(result.current.registerPath).toBe('/register')
+    expect(result.current.forgotPasswordPath).toBe('/forgot-password')
+    expect(result.current.resetPasswordPath).toBe('/reset-password')
+    // searchSuffix carries propagated query
+    expect(result.current.searchSuffix).toBe(
+      '?key=ez_pk_live_abc&redirect_uri=https%3A%2F%2Fexample.com'
+    )
+  })
+
+  it('searchSuffix is empty when no propagated query', () => {
+    mockPathname = '/en/login'
+    mockSearchParams = new URLSearchParams()
+
+    const { result } = renderHook(() => useAuthNavigation())
+
+    expect(result.current.searchSuffix).toBe('')
   })
 
   it('strips the reserved `token` search param from propagated query', () => {
@@ -84,7 +103,7 @@ describe('useAuthNavigation', () => {
   })
 
   it('buildAuthPath respects the locale prefix and current query', () => {
-    mockLocale = 'en'
+    mockPathname = '/en/login'
     mockSearchParams = new URLSearchParams('key=abc')
 
     const { result } = renderHook(() => useAuthNavigation())

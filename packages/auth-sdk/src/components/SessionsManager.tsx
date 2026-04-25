@@ -15,7 +15,7 @@ import {
   Spinner,
 } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
-import { logger } from '@ezstart/logger'
+import { logger } from './internal-logger.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

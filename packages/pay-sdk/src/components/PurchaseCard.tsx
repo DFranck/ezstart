@@ -14,7 +14,7 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
+import { toast } from '@ezstart/ui/utils'
 import { usePay, useApplicationContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 
@@ -108,7 +108,7 @@ export function PurchaseCard({
         window.location.href = result.checkoutUrl
       }
     } catch (error) {
-      logger.error('Purchase failed:', error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : String(error))
     }
   }
 
