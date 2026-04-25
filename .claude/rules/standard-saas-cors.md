@@ -82,13 +82,40 @@ createEzstartServer('ezauth', {
 
 ### 3.3 Implémentation (Express middleware)
 
-Deux middlewares chaînés, appliqués **par route** (pas globalement) :
+Deux middlewares chaînés, appliqués **par route** (pas globalement). Voir l'implémentation canonique dans `packages/api-core/src/core/middleware/cors.ts` :
 
 ```ts
-// 1. Middleware permissif sur tout
-app.use(cors({ origin: '*', credentials: false, exposedHeaders: ['X-Request-Id'] }))
+// 1. Permissive middleware (Tier 1+2) — hand-rolled, NOT the `cors` npm package.
+// Reflects Origin + credentials:true (NOT '*') because credentials:include
+// in fetch is incompatible with ACAO: '*' per W3C spec.
+//
+// Why hand-rolled instead of cors() npm:
+// - Historic incompatibility (2026-04-23) with @sentry/node v10+
+//   OpenTelemetry HTTP/Express auto-instrumentation on Railway managed Node.
+//   Sentry has since been removed (see commit chore/remove-sentry), so
+//   either approach works now. Keeping hand-roll for explicit 3-tier control.
+// - Cleaner per-route gating logic (Tier 3 strict allowlist for cookie auth)
 
-// 2. Middleware strict uniquement sur les routes cookie-auth (override le 1er)
+return function permissiveCors(req, res, next) {
+  const origin = req.headers.origin
+  res.setHeader('Vary', 'Origin')
+  if (typeof origin === 'string' && origin.length > 0) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+  }
+  res.setHeader('Access-Control-Expose-Headers', exposedHeaders)
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', methods)
+    res.setHeader('Access-Control-Allow-Headers', allowedHeaders)
+    res.setHeader('Access-Control-Max-Age', '86400')
+    res.status(204).end()
+    return
+  }
+  next()
+}
+
+// 2. Strict middleware (Tier 3 cookie auth) — uses cors() npm package
+// with origin allowlist (regex/string match) + credentials:true
 for (const prefix of cookieAuthRoutes) {
   app.use(
     prefix,
@@ -98,13 +125,15 @@ for (const prefix of cookieAuthRoutes) {
         const allowed = cookieAuthAllowlist.some(entry =>
           typeof entry === 'string' ? entry === origin : entry.test(origin)
         )
-        cb(allowed ? null : new Error('CORS blocked'), allowed)
+        cb(null, allowed) // null + false → omit ACAO, no Express 500 leak
       },
       credentials: true,
     })
   )
 }
 ```
+
+> **2026-04-23 incident** : `@sentry/node` v10+ ships with OpenTelemetry HTTP/Express auto-instrumentation that intercepts `setHeader` calls. On Railway managed Node, this caused HTTP 500 on every request carrying a non-empty `Origin` header. Sentry was subsequently removed (commit `chore/remove-sentry`) and the hand-rolled CORS middleware kept for explicit 3-tier control. The two-tier split (hand-rolled permissive + `cors` package strict) is the canonical pattern for `@ezstart` APIs.
 
 ### 3.4 Anti-patterns interdits
 

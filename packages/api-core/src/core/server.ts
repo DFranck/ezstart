@@ -8,6 +8,7 @@ import type { Express, Router } from 'express'
 import { createServer, type Server as HttpServer } from 'http'
 import * as swaggerUi from 'swagger-ui-express'
 import { silentLogger } from './internal/logger.js'
+import { createErrorHandler } from './middleware/error-handler.js'
 import { scanRegistriesForMissingDescriptions } from './openapi/check-missing-descriptions.js'
 import type { DbConnector } from './db-connector.js'
 import type { ServerLogger } from './types.js'
@@ -123,6 +124,13 @@ export async function startServer(app: Express, opts: StartServerOptions): Promi
 
   app.use(basePath || '/', routes)
   mountOpenApi(app, registries, basePath, serviceName, logger)
+
+  // Global error handler — registered LAST so it catches anything thrown
+  // by the routers / middlewares mounted above. Critical for SaaS-grade
+  // behaviour: re-applies CORS headers on errors so browsers can read the
+  // structured `sendError`-shaped response, and never leaks stack traces
+  // in production.
+  app.use(createErrorHandler({ logger }))
 
   const server = createServer(app)
   onHttpServerReady?.(server)

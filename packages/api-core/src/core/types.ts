@@ -171,6 +171,12 @@ export type ServerConfig = {
   rootPath?: string
   /** Logger override. Default is silent (no-op). */
   logger?: ServerLogger
+  /**
+   * Toggle Helmet security headers (HSTS, X-Frame-Options, X-Content-Type-Options,
+   * Referrer-Policy, ...). Default `true`. Set to `false` only when the
+   * caller mounts its own helmet config — most consumers should leave it on.
+   */
+  security?: boolean
 }
 
 /**

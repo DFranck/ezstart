@@ -48,6 +48,7 @@ export {
   type AuthMiddlewares,
 } from './core/middleware/auth.js'
 export { createCsrfMiddleware } from './core/middleware/csrf.js'
+export { createErrorHandler, type ErrorHandlerConfig } from './core/middleware/error-handler.js'
 export { validateBody, validateParams, validateQuery } from './core/middleware/validate.js'
 
 // OpenAPI-aware router

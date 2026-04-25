@@ -182,6 +182,54 @@ See `apps/*/api/src/index.ts` during the migration window for per-app patches.
 - Never hard-code `Authorization` parsing — use `createAuthMiddleware` with a verifier.
 - Logger is silent by default in the agnostic core; opt-in by passing your own logger (`@ezstart/logger`, `pino`, `winston`, ...).
 
+## Troubleshooting
+
+### CORS returns 500 with empty headers
+
+If your API returns HTTP 500 with no `Access-Control-Allow-Origin` header on
+requests carrying an `Origin` header, check:
+
+1. **Custom error middleware** — ensure `createErrorHandler` is registered as
+   the LAST middleware (after all routers). `startServer` does this
+   automatically. If you build your server manually with `createApiServer` and
+   skip `startServer`, you MUST add `app.use(createErrorHandler({ logger }))`
+   yourself, AFTER every router. Otherwise unhandled exceptions land in
+   Express's default error path: HTML 500 + zero CORS headers + stack trace
+   leak in production.
+
+2. **OpenTelemetry / Sentry** — `@sentry/node` v10+ ships OpenTelemetry HTTP/Express
+   auto-instrumentation that intercepts `setHeader`. On managed Node runtimes
+   (Railway in particular) this caused 500 errors on every Origin-bearing
+   request in 2026-04. The CORS middleware in this package is hand-rolled
+   (not the `cors` npm package) for explicit control. If you re-introduce
+   Sentry: lazy-load it, set `defaultIntegrations: false`, or migrate to
+   `@sentry/node-core` (no OTEL bundled).
+
+3. **Helmet `crossOriginResourcePolicy`** — Helmet's default `same-origin`
+   blocks cross-origin responses. `createApiServer` ships `cross-origin`
+   when `config.security` is enabled (default). If you mount your own
+   helmet config, do the same:
+
+   ```ts
+   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
+   ```
+
+### Cookie auth routes refuse cross-origin requests
+
+Tier 3 (cookie-auth) routes use a strict allowlist. If a legitimate caller
+gets blocked, add their origin to `cookieAuthAllowlist` (string or regex):
+
+```ts
+createApiServer({
+  port,
+  cookieAuthRoutes: ['/api/auth/login', '/api/auth/refresh'],
+  cookieAuthAllowlist: ['https://app.example.com', /^https:\/\/preview-[a-z0-9]+\.example\.com$/],
+})
+```
+
+Public/Bearer routes are NEVER subject to the allowlist — they always reflect
+the request origin so any consumer can call them.
+
 ## Related
 
 - [.claude/rules/standard.md](../../.claude/rules/standard.md) — the standard this package follows

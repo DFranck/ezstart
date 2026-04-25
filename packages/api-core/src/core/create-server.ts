@@ -8,12 +8,14 @@
  */
 
 import express, { type Express } from 'express'
+import helmet from 'helmet'
 import './express-aug.js'
 import {
   createCorsMiddleware,
   createPermissiveCorsMiddleware,
   createStrictCorsMiddleware,
 } from './middleware/cors.js'
+import { createErrorHandler } from './middleware/error-handler.js'
 import {
   createModerateRateLimiter,
   createRateLimiter,
@@ -68,16 +70,18 @@ export function createApiServer(config: ServerConfig): ApiServer {
   // is exposed via X-Forwarded-For — critical for rate limiting.
   app.set('trust proxy', true)
 
-  // TEMP diag: log every request at the entry of the Express middleware
-  // chain so we can distinguish "request reaches Express" vs "rejected
-  // upstream" in Railway logs. Remove after staging is healthy.
-  app.use((req, _res, next) => {
-    // eslint-disable-next-line no-console -- prod diag
-    console.log(
-      `[pre-cors-diag] ${req.method} ${req.path} origin=${req.headers.origin ?? '(none)'}`
+  // Security headers (Helmet). Opt-out via `config.security: false` for
+  // services that need to set their own helmet config (rare). Defaults are
+  // SaaS-friendly: cross-origin resource sharing enabled, CSP disabled
+  // (Next.js consumers manage their own).
+  if (config.security !== false) {
+    app.use(
+      helmet({
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        contentSecurityPolicy: false,
+      })
     )
-    next()
-  })
+  }
 
   // CORS — 3-tier policy (see .claude/rules/standard-saas-cors.md).
   //

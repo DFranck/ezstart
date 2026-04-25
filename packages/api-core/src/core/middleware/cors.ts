@@ -127,11 +127,6 @@ export function createPermissiveCorsMiddleware(
 
   return function permissiveCors(req, res, next) {
     try {
-      // TEMP diag: log every permissive CORS hit so we can see in Railway
-      // logs whether this middleware runs at all (and with what origin).
-      // Remove once staging is confirmed healthy.
-      // eslint-disable-next-line no-console -- intentional prod debug log
-      console.log(`[cors-diag] ${req.method} ${req.path} origin=${req.headers.origin ?? '(none)'}`)
       const origin = req.headers.origin
       res.setHeader('Vary', 'Origin')
       if (typeof origin === 'string' && origin.length > 0) {
@@ -148,9 +143,11 @@ export function createPermissiveCorsMiddleware(
       }
       next()
     } catch (err) {
-      // eslint-disable-next-line no-console -- intentional prod debug log
-      console.error('[cors-diag] permissive middleware threw', err)
-      throw err
+      // Forward to the global error handler (registered last in
+      // `createApiServer`). The handler re-applies CORS headers and emits a
+      // structured `sendError`-style response so browsers can read the body
+      // even when something deeper in the stack throws synchronously.
+      next(err)
     }
   }
 }
