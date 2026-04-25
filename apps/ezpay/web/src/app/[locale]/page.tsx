@@ -1,50 +1,50 @@
 'use client'
 
 import { RegisterButton, useAuth } from '@ezstart/auth-sdk'
+import { PricingPage } from '@ezstart/pay-sdk/components'
 import {
-  Badge,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Code,
+  CodeBlock,
+  CTA,
   Div,
-  H1,
+  FeatureGrid,
   H2,
-  H3,
+  HowItWorksSteps,
   Icon,
-  LandingHeroSection,
+  LandingHero,
   LandingSection,
   P,
-  Pre,
 } from '@ezstart/ui/components'
-import { useTranslations, useLocale } from 'next-intl'
+import type { KnownIconName } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 
-// ---------------------------------------------------------------------------
-// Features data (icons are lucide names)
-// ---------------------------------------------------------------------------
-const FEATURES = [
-  { key: 'Donations', icon: 'lucide:Heart' as const },
-  { key: 'Purchases', icon: 'lucide:ShoppingCart' as const },
-  { key: 'Subscriptions', icon: 'lucide:RefreshCw' as const },
-  { key: 'StripeConnect', icon: 'lucide:CreditCard' as const },
-  { key: 'PromoCodes', icon: 'lucide:Ticket' as const },
-  { key: 'Webhooks', icon: 'lucide:Webhook' as const },
-] as const
+const EZPAY_APP_ID = process.env.NEXT_PUBLIC_EZPAY_APP_ID
 
 // ---------------------------------------------------------------------------
-// Steps data
+// Static data (icons, code snippets) — keys come from i18n
 // ---------------------------------------------------------------------------
-const STEPS = [
-  { key: 'Step1', icon: 'lucide:Download' as const, step: '1' },
-  { key: 'Step2', icon: 'lucide:Code' as const, step: '2' },
-  { key: 'Step3', icon: 'lucide:Sparkles' as const, step: '3' },
+
+const FEATURE_KEYS = [
+  'Donations',
+  'Purchases',
+  'Subscriptions',
+  'StripeConnect',
+  'PromoCodes',
+  'Webhooks',
 ] as const
 
-// ---------------------------------------------------------------------------
-// Code snippets (static, no i18n needed)
-// ---------------------------------------------------------------------------
+const FEATURE_ICONS: Record<(typeof FEATURE_KEYS)[number], KnownIconName> = {
+  Donations: 'lucide:Heart',
+  Purchases: 'lucide:ShoppingCart',
+  Subscriptions: 'lucide:RefreshCw',
+  StripeConnect: 'lucide:CreditCard',
+  PromoCodes: 'lucide:Ticket',
+  Webhooks: 'lucide:Webhook',
+}
+
+const STEP_ICONS: KnownIconName[] = ['lucide:Download', 'lucide:Code', 'lucide:Sparkles']
+
 const CODE_INSTALL = `npm install @ezstart/pay-sdk`
 
 const CODE_SETUP = `import { PayProvider } from '@ezstart/pay-sdk'
@@ -78,191 +78,114 @@ function Shop() {
 export default function HomePage() {
   const t = useTranslations('home')
   const { isAuthenticated } = useAuth()
-  const locale = useLocale()
+
+  const features = FEATURE_KEYS.map(key => ({
+    icon: <Icon name={FEATURE_ICONS[key]} className="h-6 w-6 text-primary" />,
+    title: t(`feature${key}`),
+    description: t(`feature${key}Desc`),
+  }))
+
+  const steps = STEP_ICONS.map((icon, index) => ({
+    step: String(index + 1),
+    icon,
+    title: t(`howItWorksStep${index + 1}Title`),
+    description: t(`howItWorksStep${index + 1}Desc`),
+  }))
+
+  const primaryCTA = isAuthenticated ? (
+    <Button asChild size="lg" className="text-base px-8 py-6">
+      <Link href="/dashboard">{t('heroCtaDashboard')}</Link>
+    </Button>
+  ) : (
+    <RegisterButton size="lg" alwaysShowText className="text-base px-8 py-6">
+      {t('heroCta')}
+    </RegisterButton>
+  )
+
+  const secondaryCTA = (
+    <Button asChild size="lg" variant="outline" className="text-base px-8 py-6">
+      <Link href="/docs">{t('heroCtaSecondary')}</Link>
+    </Button>
+  )
+
+  const ctaBannerCTA = isAuthenticated ? (
+    <Button asChild size="lg" className="text-base px-8 py-6">
+      <Link href="/dashboard">{t('heroCtaDashboard')}</Link>
+    </Button>
+  ) : (
+    <RegisterButton size="lg" alwaysShowText className="text-base px-8 py-6">
+      {t('ctaCta')}
+    </RegisterButton>
+  )
 
   return (
     <>
-      {/* ---------------------------------------------------------------- */}
-      {/* Hero                                                             */}
-      {/* ---------------------------------------------------------------- */}
-      <LandingHeroSection className="overflow-hidden">
-        {/* Animated gradient background */}
-        <Div className="absolute inset-0 -z-10">
-          <Div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 animate-pulse" />
-          <Div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/10 blur-3xl animate-pulse" />
-        </Div>
+      <LandingHero
+        variant="withGradient"
+        align="center"
+        badge={t('heroBadge')}
+        title={t('heroTitle')}
+        description={t('heroSubtitle')}
+        primaryCTASlot={primaryCTA}
+        secondaryCTASlot={secondaryCTA}
+      />
 
-        <Badge variant="outline" className="mb-6">
-          <Icon name="lucide:Zap" className="mr-1 h-3 w-3" />
-          Payments as a Service
-        </Badge>
+      <LandingSection
+        id="features"
+        variant="muted"
+        align="center"
+        title={t('featuresSectionTitle')}
+        subtitle={t('featuresSectionSubtitle')}
+      >
+        <FeatureGrid features={features} columns={3} />
+      </LandingSection>
 
-        <H1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-          {t('heroTitle')}
-        </H1>
+      <LandingSection align="center" title={t('howItWorksSectionTitle')}>
+        <HowItWorksSteps steps={steps} />
+      </LandingSection>
 
-        <P className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-          {t('heroSubtitle')}
-        </P>
-
-        <Div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          {isAuthenticated ? (
-            <Button asChild size="lg">
-              <Link href={`/${locale}/dashboard`}>{t('heroCtaDashboard')}</Link>
-            </Button>
-          ) : (
-            <RegisterButton size="lg" alwaysShowText>
-              {t('heroCta')}
-            </RegisterButton>
-          )}
-          <Button asChild variant="outline" size="lg">
-            <Link href="/docs">{t('heroCtaSecondary')}</Link>
-          </Button>
-        </Div>
-
-        {/* Hero code preview */}
-        <Div className="mx-auto mt-12 max-w-lg">
-          <Pre className="border text-left">
-            <Code className="text-foreground">{`import { PayProvider } from '@ezstart/pay-sdk'
-
-<PayProvider appName="myapp">
-  <App />
-</PayProvider>`}</Code>
-          </Pre>
-        </Div>
-      </LandingHeroSection>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* Features                                                         */}
-      {/* ---------------------------------------------------------------- */}
-      <LandingSection id="features" variant="muted" align="center">
-        <Div className="mb-12">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('featuresSectionTitle')}
-          </H2>
-          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            {t('featuresSectionSubtitle')}
-          </P>
-        </Div>
-
-        <Div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map(({ key, icon }) => (
-            <Card key={key} className="text-left transition-shadow hover:shadow-md">
-              <CardHeader>
-                <Div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon name={icon} className="h-5 w-5 text-primary" />
-                </Div>
-                <H3 className="text-lg font-semibold">{t(`feature${key}`)}</H3>
-              </CardHeader>
-              <CardContent>
-                <P className="text-sm text-muted-foreground">{t(`feature${key}Desc`)}</P>
-              </CardContent>
-            </Card>
-          ))}
+      <LandingSection
+        variant="muted"
+        align="center"
+        title={t('codeSectionTitle')}
+        subtitle={t('codeSectionSubtitle')}
+      >
+        <Div className="mx-auto grid max-w-4xl gap-6">
+          <CodeBlock label={t('codeInstallLabel')} code={CODE_INSTALL} />
+          <CodeBlock label={t('codeSetupLabel')} code={CODE_SETUP} />
+          <CodeBlock label={t('codeUseLabel')} code={CODE_USE} />
         </Div>
       </LandingSection>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* How it works                                                     */}
-      {/* ---------------------------------------------------------------- */}
-      <LandingSection align="center">
-        <Div className="mb-12">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('howItWorksSectionTitle')}
-          </H2>
-        </Div>
-
-        <Div className="grid gap-8 sm:grid-cols-3">
-          {STEPS.map(({ key, icon, step }) => (
-            <Div key={key} className="flex flex-col items-center gap-4">
-              <Div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl font-bold">
-                {step}
-              </Div>
-              <Div className="flex items-center gap-2">
-                <Icon name={icon} className="h-5 w-5 text-primary" />
-                <H3 className="text-lg font-semibold">{t(`howItWorks${key}Title`)}</H3>
-              </Div>
-              <P className="max-w-xs text-sm text-muted-foreground">{t(`howItWorks${key}Desc`)}</P>
-            </Div>
-          ))}
-        </Div>
-      </LandingSection>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* Code examples                                                    */}
-      {/* ---------------------------------------------------------------- */}
-      <LandingSection variant="muted" align="center">
-        <Div className="mb-12">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('codeSectionTitle')}</H2>
-          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">{t('codeSectionSubtitle')}</P>
-        </Div>
-
-        <Div className="mx-auto grid max-w-4xl gap-6 text-left">
-          {/* Install */}
-          <Div>
-            <Div className="mb-2 flex items-center gap-2">
-              <Badge variant="secondary">{t('codeInstallLabel')}</Badge>
-            </Div>
-            <Pre className="border">
-              <Code className="text-foreground">{CODE_INSTALL}</Code>
-            </Pre>
-          </Div>
-
-          {/* Setup */}
-          <Div>
-            <Div className="mb-2 flex items-center gap-2">
-              <Badge variant="secondary">{t('codeSetupLabel')}</Badge>
-            </Div>
-            <Pre className="border">
-              <Code className="text-foreground">{CODE_SETUP}</Code>
-            </Pre>
-          </Div>
-
-          {/* Use */}
-          <Div>
-            <Div className="mb-2 flex items-center gap-2">
-              <Badge variant="secondary">{t('codeUseLabel')}</Badge>
-            </Div>
-            <Pre className="border">
-              <Code className="text-foreground">{CODE_USE}</Code>
-            </Pre>
-          </Div>
-        </Div>
-      </LandingSection>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* Pricing                                                          */}
-      {/* ---------------------------------------------------------------- */}
       <LandingSection id="pricing" align="center">
-        <Div className="py-8">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t('pricingSectionTitle')}
-          </H2>
-          <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            {t('pricingSectionSubtitle')}
-          </P>
-        </Div>
+        {EZPAY_APP_ID ? (
+          <PricingPage
+            applicationId={EZPAY_APP_ID}
+            texts={{
+              title: t('pricingSectionTitle'),
+              subtitle: t('pricingSectionSubtitle'),
+            }}
+          />
+        ) : (
+          <Div className="py-8">
+            <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              {t('pricingSectionTitle')}
+            </H2>
+            <P className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              {t('pricingSectionSubtitle')}
+            </P>
+          </Div>
+        )}
       </LandingSection>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* CTA Banner                                                       */}
-      {/* ---------------------------------------------------------------- */}
-      <LandingSection variant="accent" align="center">
-        <Div className="py-8">
-          <H2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('ctaTitle')}</H2>
-          <P className="mx-auto mt-4 max-w-xl text-muted-foreground">{t('ctaSubtitle')}</P>
-          <Div className="mt-8">
-            {isAuthenticated ? (
-              <Button asChild size="lg">
-                <Link href={`/${locale}/dashboard`}>{t('heroCtaDashboard')}</Link>
-              </Button>
-            ) : (
-              <RegisterButton size="lg" alwaysShowText>
-                {t('ctaCta')}
-              </RegisterButton>
-            )}
-          </Div>
-        </Div>
+      <LandingSection align="center">
+        <CTA
+          variant="centered"
+          intent="primary"
+          title={t('ctaTitle')}
+          description={t('ctaSubtitle')}
+          primaryCTASlot={ctaBannerCTA}
+        />
       </LandingSection>
     </>
   )

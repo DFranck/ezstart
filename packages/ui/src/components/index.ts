@@ -2,6 +2,7 @@
 export * from './data-display/accordion'
 export * from './data-display/badge'
 export * from './data-display/card'
+export * from './data-display/code-block'
 export * from './data-display/data-table'
 export * from './data-display/markdown-content'
 export * from './data-display/simple-badge'
