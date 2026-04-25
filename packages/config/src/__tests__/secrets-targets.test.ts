@@ -15,11 +15,6 @@ describe('@ezstart/config - secrets-targets', () => {
       expect(VAR_TARGETS.MONGO_URL.webOverrides).toContain('fengshui')
     })
 
-    it('SENTRY_DSN is suffixed', () => {
-      expect(VAR_TARGETS.SENTRY_DSN.suffixed).toBe(true)
-      expect(VAR_TARGETS.SENTRY_DSN.layer).toBe('api')
-    })
-
     it('NEXT_PUBLIC_* vars are marked as client-exposed', () => {
       expect(VAR_TARGETS.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.client).toBe(true)
       expect(VAR_TARGETS.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.layer).toBe('web')
@@ -28,10 +23,6 @@ describe('@ezstart/config - secrets-targets', () => {
     it('STRIPE_SECRET_KEY is scoped to ezpay + ezstart', () => {
       expect(VAR_TARGETS.STRIPE_SECRET_KEY.apps).toEqual(['ezpay', 'ezstart'])
       expect(VAR_TARGETS.STRIPE_SECRET_KEY.layer).toBe('api')
-    })
-
-    it('SENTRY_AUTH_TOKEN is layer "both" (API + web for source maps upload)', () => {
-      expect(VAR_TARGETS.SENTRY_AUTH_TOKEN.layer).toBe('both')
     })
   })
 
@@ -61,12 +52,6 @@ describe('@ezstart/config - secrets-targets', () => {
       expect(resolveTargetApps('STRIPE_SECRET_KEY', ['ezpay', 'ezauth'], { layer: 'api' })).toEqual(
         ['ezpay', 'ezstart']
       )
-    })
-
-    it('layer="both" matches regardless of queried layer', () => {
-      const all: AppName[] = ['ezauth', 'ezbill', 'ezpay']
-      expect(resolveTargetApps('SENTRY_AUTH_TOKEN', all, { layer: 'api' })).toEqual(all)
-      expect(resolveTargetApps('SENTRY_AUTH_TOKEN', all, { layer: 'web' })).toEqual(all)
     })
 
     it('client NEXT_PUBLIC_* returns its scoped apps on web layer', () => {

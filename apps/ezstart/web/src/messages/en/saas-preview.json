@@ -147,7 +147,7 @@
         {
           "name": "api-core",
           "scope": "@ezstart/api-core",
-          "description": "Express factory with auth, rate-limit, CORS, health, OpenAPI and Sentry wired in."
+          "description": "Express factory with auth, rate-limit, CORS, health and OpenAPI wired in."
         },
         {
           "name": "api-sdk",

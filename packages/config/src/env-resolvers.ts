@@ -10,22 +10,14 @@
  *   Each environment (local, staging, production) has its own MONGO_URL
  *   pointing to a separate cluster. DB names are always just the app name.
  *
- *   SENTRY_DSN_EZAUTH=https://...
- *   SENTRY_DSN_EZBILL=https://...
- *     → getSentryDsn('ezauth')  // reads SENTRY_DSN_EZAUTH
- *
  * Conventions:
  *   - Root env vars are generic (no `EZXXX_` prefix). Per-app values that can
  *     be templated (MONGO_URL) use `{app}` / `{env}` placeholders.
- *   - When a value is genuinely unique per app (Sentry DSNs identify a
- *     distinct Sentry project each), we use an app-suffixed name so it stays
- *     self-documenting: `SENTRY_DSN_{APP_UPPER}`.
  *   - `JWT_SECRET` is shared across all apps by design (SSO tokens minted by
  *     ezauth must verify everywhere without re-keying).
  */
 
 import type { AppName } from './urls.js'
-import { getCurrentEnvironment } from './urls.js'
 
 /**
  * Database environment suffix — ALWAYS empty.
@@ -74,7 +66,10 @@ export function getMongoUrl(app: AppName): string {
   }
   const suffix = dbEnvSuffix()
   const dbName = suffix ? `${app}-${suffix}` : app
-  return tpl.replace(/\{app\}-\{env\}/g, dbName).replace(/\{app\}/g, app).replace(/\{env\}/g, suffix)
+  return tpl
+    .replace(/\{app\}-\{env\}/g, dbName)
+    .replace(/\{app\}/g, app)
+    .replace(/\{env\}/g, suffix)
 }
 
 /**
@@ -94,20 +89,4 @@ export function getJwtSecret(): string {
     )
   }
   return secret
-}
-
-/**
- * Resolve the Sentry DSN for the given app.
- *
- * Reads `SENTRY_DSN_{APP_UPPER}` (e.g. `SENTRY_DSN_EZAUTH`). Sentry DSNs are
- * per-project by design so we can't template them — instead we scope by
- * suffix. Falls back to a generic `SENTRY_DSN` if the app-specific one is
- * absent (convenient for one-off scripts).
- *
- * Returns `undefined` when nothing is configured — callers decide whether to
- * warn or proceed silently.
- */
-export function getSentryDsn(app: AppName): string | undefined {
-  const suffix = appToEnvSuffix(app)
-  return process.env[`SENTRY_DSN_${suffix}`] ?? process.env.SENTRY_DSN
 }

@@ -13,8 +13,8 @@ Source of truth at runtime:
   their `instrument.mts`. Loads `apps/<app>/<layer>/.env.<env>` only.
 - `@ezstart/next-config/withSharedEnv` — used by Next.js apps. Auto-detects
   the app name from cwd (`apps/<app>/web`).
-- `@ezstart/config/env-resolvers` → `getMongoUrl(app)`, `getJwtSecret()`,
-  `getSentryDsn(app)` — resolvers for templated or suffixed vars.
+- `@ezstart/config/env-resolvers` → `getMongoUrl(app)`, `getJwtSecret()` —
+  resolvers for templated vars.
 
 ## Layout
 
@@ -44,9 +44,8 @@ layer. Missing layers are silently skipped.
 
 **Why production includes staging?** Staging and production share most of
 their "non-dev" defaults (cluster URLs pointing at a real Atlas host,
-`DEPLOY_ENV=production`, cookie domain on a real TLD, Sentry DSN, etc.).
-Keeping those in `.env.staging` means `.env.production` only holds the true
-deltas:
+`DEPLOY_ENV=production`, cookie domain on a real TLD, etc.). Keeping those
+in `.env.staging` means `.env.production` only holds the true deltas:
 
 - prod MongoDB cluster URL
 - `sk_live_*` Stripe keys / live webhook secrets
@@ -72,9 +71,8 @@ service so runtime ambiguity is impossible.
 
 ### Per-app API (`apps/<app>/api/.env.<env>`)
 
-- Shared values duplicated per-app: `JWT_SECRET`, `MONGO_URL`,
-  `SENTRY_AUTH_TOKEN`, `SENTRY_ORG_SLUG`, `DEPLOY_ENV`, `NODE_ENV`
-- App-specific Sentry DSN (`SENTRY_DSN` or `SENTRY_DSN_<APP>`)
+- Shared values duplicated per-app: `JWT_SECRET`, `MONGO_URL`, `DEPLOY_ENV`,
+  `NODE_ENV`
 - Provider credentials (Stripe, Google OAuth, AI providers, Resend, etc.)
 - Feature toggles (`PAYMENT_PROVIDER`, `RUN_EXCHANGE_RATES_ON_START`, …)
 - Per-app config (`COOKIE_DOMAIN`, `OAUTH_STATE_SECRET`, `LOG_LEVEL`)
@@ -95,13 +93,11 @@ Generic vars like `MONGO_URL=mongodb+srv://.../{app}?...` use `{app}`
 templating so one cluster URL covers every API:
 
 ```ts
-import { getMongoUrl, getJwtSecret, getSentryDsn } from '@ezstart/config/env-resolvers'
+import { getMongoUrl, getJwtSecret } from '@ezstart/config/env-resolvers'
 
 // In apps/{app}/api/src/instrument.mts, BEFORE any other import:
 loadSharedEnv({ app: 'ezauth', layer: 'api' })
 process.env.MONGO_URL = getMongoUrl('ezauth') // expands {app}
-const dsn = getSentryDsn('ezauth') // checks SENTRY_DSN_EZAUTH then SENTRY_DSN
-if (dsn) process.env.SENTRY_DSN = dsn
 ```
 
 ## Required env manifest

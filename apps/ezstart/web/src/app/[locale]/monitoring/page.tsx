@@ -100,14 +100,6 @@ function MonitoringOverviewContent() {
           <Button
             variant="outline"
             className="w-full justify-start gap-2"
-            onClick={() => window.open('https://ezstart.sentry.io/insights/projects/', '_blank')}
-          >
-            <Icon name="lucide:ExternalLink" className="w-4 h-4" />
-            {t('overview.quickActions.openSentry')}
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2"
             onClick={() => window.open('https://vercel.com/ezstart/analytics', '_blank')}
           >
             <Icon name="lucide:BarChart3" className="w-4 h-4" />

@@ -10,7 +10,6 @@ import { fetchStatus as railwayFetch } from './railway.js'
 import { fetchStatus as mongoFetch } from './mongodb.js'
 import { fetchStatus as stripeFetch } from './stripe.js'
 import { fetchStatus as resendFetch } from './resend.js'
-import { fetchStatus as sentryFetch } from './sentry.js'
 import { fetchStatus as anthropicFetch } from './anthropic.js'
 import { fetchStatus as openaiFetch } from './openai.js'
 import { fetchStatus as geminiFetch } from './gemini.js'
@@ -64,12 +63,6 @@ const PROVIDERS: ProviderDefinition[] = [
     displayName: 'Resend',
     fetch: resendFetch,
     dashboardUrl: 'https://resend.com/emails',
-  },
-  {
-    name: 'sentry',
-    displayName: 'Sentry',
-    fetch: sentryFetch,
-    dashboardUrl: 'https://sentry.io/',
   },
   {
     name: 'anthropic',

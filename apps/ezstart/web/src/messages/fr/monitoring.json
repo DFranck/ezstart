@@ -113,7 +113,7 @@
     "unknownError": "Erreur inconnue",
     "retry": "Réessayer",
     "errorLogs": "Journaux d'Erreurs",
-    "errorLogsDescription": "Erreurs récentes capturées de tous les projets (intégration Sentry)",
+    "errorLogsDescription": "Erreurs récentes capturées de tous les projets",
     "refreshing": "Rafraîchissement...",
     "allClear": "Tout est OK !",
     "allSystemsOperational": "Aucune erreur détectée. Tous les systèmes opérationnels",
@@ -205,7 +205,6 @@
         "viewAllProjects": "Voir Tous les Projets",
         "runQualityAudits": "Lancer les Audits Qualité",
         "viewErrorLogs": "Voir les Logs d'Erreurs",
-        "openSentry": "Ouvrir Sentry",
         "viewAnalytics": "Voir Analytics (Vercel)"
       }
     }

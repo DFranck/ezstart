@@ -115,16 +115,6 @@ describe('validateKnownFormats', () => {
     })
     assert.equal(issues.length, 0)
   })
-  it('rejects malformed SENTRY_DSN', () => {
-    const issues = validateKnownFormats({ SENTRY_DSN: 'not-a-dsn' })
-    assert.equal(issues.length, 1)
-  })
-  it('accepts valid SENTRY_DSN', () => {
-    const issues = validateKnownFormats({
-      SENTRY_DSN: 'https://abc123@o12345.ingest.sentry.io/1234567',
-    })
-    assert.equal(issues.length, 0)
-  })
 })
 
 // ────────────────────────────────────────────────────────────

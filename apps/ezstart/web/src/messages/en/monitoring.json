@@ -113,7 +113,7 @@
     "unknownError": "Unknown error",
     "retry": "Retry",
     "errorLogs": "Error Logs",
-    "errorLogsDescription": "Recent errors captured from all projects (Sentry integration)",
+    "errorLogsDescription": "Recent errors captured from all projects",
     "refreshing": "Refreshing...",
     "allClear": "All Clear!",
     "allSystemsOperational": "No errors detected. All systems operational",
@@ -205,7 +205,6 @@
         "viewAllProjects": "View All Projects",
         "runQualityAudits": "Run Quality Audits",
         "viewErrorLogs": "View Error Logs",
-        "openSentry": "Open Sentry Dashboard",
         "viewAnalytics": "View Analytics (Vercel)"
       }
     }

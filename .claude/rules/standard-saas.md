@@ -11,7 +11,6 @@
 - [ ] `createEzstartServer(appName)` utilisé (pas `createApp` ni `express()` direct)
 - [ ] `/health` + `/api/health` répondent `{ status: 'ok' }` (via api-core, automatique)
 - [ ] `connectToMongo(dbName)` au boot (factory pattern, cf. `mongodb.md`)
-- [ ] Sentry configuré (`instrument.mts` avec `initSentry('AppName API')`)
 - [ ] Graceful shutdown (automatique via `startServer`)
 
 ### 1.2 Sécurité
@@ -46,7 +45,7 @@ Checklist rapide :
 
 ### 1.5 Monitoring
 
-- [ ] Sentry error tracking configuré
+- [ ] Pino logs (`@ezstart/logger/server`) → Railway/Vercel log aggregation. Sentry retiré 2026-04-25 (incident OTEL/Express CORS sur Railway). Re-add `@sentry/node-core` (sans OTEL) plus tard si dashboard centralisé devient utile.
 - [ ] Logger `@ezstart/logger` utilisé (jamais `console.log`)
 - [ ] Health checks incluent la connectivité DB
 
@@ -314,9 +313,6 @@ ls apps/<app>/web/src/messages/
 
 # SEO files
 ls apps/<app>/web/src/app/robots.ts apps/<app>/web/src/app/sitemap.ts
-
-# Sentry configured
-grep -l "initSentry\|Sentry" apps/<app>/api/src/instrument.mts
 
 # Auth on routes
 grep -rn "authMiddleware\|verifyTokenMiddleware\|RequireAuth\|RequireRole" apps/<app>/

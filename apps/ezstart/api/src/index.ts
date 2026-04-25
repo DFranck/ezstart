@@ -1,7 +1,6 @@
 // Updated: 2025-11-15 - App-specific roles support
-// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
+// Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
-import { Sentry } from './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
   addVersionHeader,
@@ -55,9 +54,6 @@ app.get('/api/health', (_, res) => {
 
 // Routes available at /api/* and /api/v1/*
 app.use(createVersionedRouter('/api', routes))
-
-// Sentry error handler MUST be AFTER all routes/controllers
-Sentry.setupExpressErrorHandler(app)
 
 // Connect to MongoDB and start server.
 // Scheduler MUST start only after MongoDB is ready.

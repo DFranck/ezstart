@@ -110,7 +110,7 @@ Stratégie pour que les pages footer (docs, changelog, status, blog) soient **ze
 
 #### P2 — API improvements
 
-- [ ] **Complete activity logs** — `activity/list.ts` a 3 TODOs (lignes 69-71) : fetch deployment events (Railway/Vercel webhooks), health changes from MongoDB, audit updates. Seul Sentry errors sont fetched.
+- [ ] **Complete activity logs** — `activity/list.ts` a 3 TODOs : fetch deployment events (Railway/Vercel webhooks), health changes from MongoDB, audit updates. Aucune source live raccordée (Sentry retiré 2026-04-25).
 - [ ] **Remove mock history utility or guard it** — `api/src/utils/mockHistory.ts` pas importé en prod mais shippé. À supprimer ou test-only.
 
 #### P2 — Monitoring UX

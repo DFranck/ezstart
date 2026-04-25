@@ -20,7 +20,7 @@ apps/<app>/<api|web>/
 
 **Load order :**
 
-1. Root `.env.<env>` chargé EN PREMIER (vars partagées : JWT_SECRET, MONGO_URL, SENTRY_AUTH_TOKEN, SENTRY_ORG_SLUG, DEPLOY_ENV)
+1. Root `.env.<env>` chargé EN PREMIER (vars partagées : JWT_SECRET, MONGO_URL, DEPLOY_ENV)
 2. `apps/<app>/<layer>/.env.<env>` chargé ensuite — **override** si même clé
 
 **Workflow :**
@@ -31,7 +31,7 @@ apps/<app>/<api|web>/
 
 ### 2. Règles Critiques
 
-- ✅ **Shared vars** (JWT_SECRET, MONGO_URL, SENTRY_AUTH_TOKEN, SENTRY_ORG_SLUG, DEPLOY_ENV) → root `.env.<env>` UNIQUEMENT
+- ✅ **Shared vars** (JWT_SECRET, MONGO_URL, DEPLOY_ENV) → root `.env.<env>` UNIQUEMENT
 - ✅ **Per-app vars** (Stripe keys, OAuth secrets, GEMINI_API_KEY, NEXT_PUBLIC_EZAUTH_KEY, etc.) → `apps/<app>/<layer>/.env.<env>`
 - ✅ `.env.example` → Template SANS secrets (committé) à TOUS les niveaux
 - ✅ `.env.local` / `.env.staging` / `.env.production` → gitignored, JAMAIS committés
@@ -68,7 +68,6 @@ pnpm env:push:vercel <app> <env>      # ex: pnpm env:push:vercel ezpay productio
 
 - `getMongoUrl(app)` — résout `{app}` dans MONGO_URL template
 - `getJwtSecret()` — lit JWT_SECRET (root)
-- `getSentryDsn(app)` — fallback `SENTRY_DSN_<APP>` puis `SENTRY_DSN`
 
 ### 6. Backups
 

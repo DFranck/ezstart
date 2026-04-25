@@ -1,7 +1,6 @@
-// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 // Updated: 2025-11-15 - App-specific roles support
+// Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
-import { Sentry } from './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
   addVersionHeader,
@@ -22,9 +21,6 @@ app.use(addVersionHeader('v1'))
 
 // Routes available at /api/* and /api/v1/*
 app.use(createVersionedRouter('/api', routes))
-
-// Sentry error handler MUST be AFTER all routes
-Sentry.setupExpressErrorHandler(app)
 
 connectToMongo('ezbill')
   .then(() =>

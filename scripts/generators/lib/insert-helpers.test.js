@@ -136,7 +136,7 @@ test('diffEnvAgainstRoot: matches become shared, differs go per-app', () => {
   const root = new Map([
     ['JWT_SECRET', 'abc123'],
     ['MONGO_URL', 'mongodb://root'],
-    ['SENTRY_ORG_SLUG', 'ezstart'],
+    ['DEPLOY_ENV', 'local'],
   ])
   const standalone = new Map([
     ['JWT_SECRET', 'abc123'], // matches root -> shared

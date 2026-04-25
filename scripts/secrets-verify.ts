@@ -3,8 +3,8 @@
  * Cross-check env var declarations between three sources of truth:
  *
  *   1. Code usage            — grep `process.env.XXX` across apps/<app>/{api,web}/src
- *                              + helper calls: `getMongoUrl('<app>')`, `getSentryDsn('<app>')`,
- *                              `getJwtSecret()` which imply MONGO_URL / SENTRY_DSN / JWT_SECRET
+ *                              + helper calls: `getMongoUrl('<app>')`,
+ *                              `getJwtSecret()` which imply MONGO_URL / JWT_SECRET
  *                              are consumed by that app.
  *   2. `.env.example` files  — per-app stubs under `apps/<app>/{api,web}/.env.example`
  *   3. `VAR_TARGETS`         — declared mapping in `@ezstart/config/secrets-targets`
@@ -97,7 +97,6 @@ function* walkSource(dir: string): Generator<string> {
 const PROCESS_ENV_RE =
   /process\s*\.\s*env\s*(?:\.\s*([A-Z_][A-Z0-9_]*)|\[\s*['"`]([A-Z_][A-Z0-9_]*)['"`]\s*\])/g
 const GET_MONGO_RE = /getMongoUrl\s*\(\s*['"`]([a-z0-9-]+)['"`]\s*\)/g
-const GET_SENTRY_RE = /getSentryDsn\s*\(\s*['"`]([a-z0-9-]+)['"`]\s*\)/g
 const GET_JWT_RE = /getJwtSecret\s*\(\s*\)/g
 
 function scanApp(app: AppName, layer: Layer, usage: CodeUsage): void {
@@ -133,12 +132,6 @@ function scanApp(app: AppName, layer: Layer, usage: CodeUsage): void {
       ;(usage.MONGO_URL ??= new Set()).add(app)
       // If app literal in the call differs from current app, still attribute to current
       mm = GET_MONGO_RE.exec(content)
-    }
-    GET_SENTRY_RE.lastIndex = 0
-    let ms = GET_SENTRY_RE.exec(content)
-    while (ms !== null) {
-      ;(usage.SENTRY_DSN ??= new Set()).add(app)
-      ms = GET_SENTRY_RE.exec(content)
     }
   }
 }
@@ -240,7 +233,7 @@ function verify(): { findings: Finding[]; counts: Record<FindingKind, number> } 
     // Skip intentionally-ignored vars (ALERT_*, ALLOW_PROD_MIGRATION, PAYMENT_PROVIDER)
     if (IGNORED_SET.has(key)) continue
 
-    // Suffixed keys (SENTRY_DSN_EZAUTH) are aliases of their base
+    // Suffixed keys ({VAR}_{APP}) are aliases of their base
     const baseKey = stripSuffixKey(key)
     const resolved = baseKey ?? key
 
@@ -252,7 +245,7 @@ function verify(): { findings: Finding[]; counts: Record<FindingKind, number> } 
       for (const a of codeUsage[baseKey] ?? []) codeApps.add(a)
     }
     const exampleApps = exampleUsage[key] ?? new Set<AppName>()
-    // .env.example may list the SUFFIXED name (e.g. SENTRY_DSN_EZAUTH) — still count it
+    // .env.example may list the SUFFIXED name (e.g. {VAR}_EZAUTH) — still count it
     if (baseKey) {
       for (const a of exampleUsage[baseKey] ?? []) exampleApps.add(a)
     }

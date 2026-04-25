@@ -4,8 +4,7 @@
  * For every var name used in `.env.{local,staging,production}`, declares:
  *  - which apps consume it (for push → which Railway services / Vercel projects)
  *  - which layer (api / web / both)
- *  - whether it is templated (`{app}`/`{env}` interpolation) or suffixed
- *    (read via `getSentryDsn(app)` → `SENTRY_DSN_{APP_UPPER}`)
+ *  - whether it is templated (`{app}`/`{env}` interpolation)
  *  - whether it is a `NEXT_PUBLIC_*` var (exposed to the browser bundle)
  *  - `webOverrides` for the rare case where a var normally API-only must
  *    also be pushed to a specific web project (e.g. `fengshui` which has
@@ -24,7 +23,11 @@ export type VarTarget = {
   layer: 'api' | 'web' | 'both'
   /** `{app}`/`{env}` placeholder substitution via getMongoUrl() etc. */
   template?: boolean
-  /** `SENTRY_DSN_EZAUTH` pattern — push to each app under its suffixed name */
+  /**
+   * App-suffixed root key pattern — root holds `{VAR}_{APP_UPPER}` per app
+   * and the platform receives the bare `{VAR}` name. Currently unused; kept
+   * for forward compat (was previously used by `SENTRY_DSN_EZAUTH` etc.).
+   */
   suffixed?: boolean
   /** NEXT_PUBLIC_* — exposed to the browser bundle (Vercel only) */
   client?: boolean
@@ -36,13 +39,6 @@ export const VAR_TARGETS = {
   // ── Shared (every app) ──
   JWT_SECRET: { apps: '*', layer: 'api' },
   MONGO_URL: { apps: '*', layer: 'api', template: true, webOverrides: ['fengshui'] },
-
-  // ── Sentry runtime (per-app suffixed) ──
-  SENTRY_DSN: { apps: '*', layer: 'api', suffixed: true },
-
-  // ── Sentry build-time (source maps upload) ──
-  SENTRY_AUTH_TOKEN: { apps: '*', layer: 'both' },
-  SENTRY_ORG_SLUG: { apps: '*', layer: 'both' },
 
   // ── EZAuth (OAuth + cookies + email) ──
   OAUTH_STATE_SECRET: { apps: ['ezauth'], layer: 'api' },

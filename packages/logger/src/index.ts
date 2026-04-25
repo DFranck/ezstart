@@ -1,8 +1,8 @@
 /**
- * Browser-safe logger (no Sentry, no Pino)
+ * Browser-safe logger (no Pino)
  *
  * Use this in web apps (Next.js client components)
- * For server-side logging with Sentry, use '@ezstart/logger/server'
+ * For server-side logging with Pino, use '@ezstart/logger/server'
  *
  * Filtering:
  * - debug/info: Only log when NODE_ENV !== 'production'

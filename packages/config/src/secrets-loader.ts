@@ -2,7 +2,7 @@
  * Monorepo-level env vars loader — HYBRID (root + per-app).
  *
  * Two-layer load:
- *   1. ROOT shared vars   → `<repo>/.env.{env}`           (must-be-identical: JWT_SECRET, MONGO_URL, SENTRY_AUTH_TOKEN, SENTRY_ORG_SLUG, DEPLOY_ENV)
+ *   1. ROOT shared vars   → `<repo>/.env.{env}`           (must-be-identical: JWT_SECRET, MONGO_URL, DEPLOY_ENV)
  *   2. Per-app overrides  → `apps/<app>/<layer>/.env.{env}` (app-specific vars; values override root if duplicate)
  *
  * Files per environment:
@@ -15,7 +15,7 @@
  * `@ezstart/next-config/withSharedEnv` which passes the same shape.
  *
  * @see SECRETS.md — canonical documentation
- * @see env-resolvers.ts — helpers (`getMongoUrl`, `getJwtSecret`, `getSentryDsn`)
+ * @see env-resolvers.ts — helpers (`getMongoUrl`, `getJwtSecret`)
  */
 
 import * as dotenv from 'dotenv'
@@ -23,11 +23,9 @@ import path from 'path'
 import { existsSync, readdirSync, readFileSync } from 'fs'
 
 // NOTE: do NOT import @ezstart/logger here.
-// This file is loaded by Next.js configs and Express bootstraps. Pulling in
-// the logger drags Sentry's Node SDK (and therefore `async_hooks`) into the
-// client bundle whenever it transitively appears in a "use client" import
-// chain (e.g. via `@ezstart/config`). `console` is enough for boot-time
-// diagnostics — these run once at process start, output goes to stdout.
+// This file is loaded by Next.js configs and Express bootstraps. `console` is
+// enough for boot-time diagnostics — these run once at process start, output
+// goes to stdout.
 
 export interface LoadEnvOptions {
   /** App name — used to locate `apps/<app>/<layer>/.env.{env}`. */

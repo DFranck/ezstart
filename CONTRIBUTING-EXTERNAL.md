@@ -99,7 +99,7 @@ Copied values are starting points, NOT production secrets. Before running anythi
    ```
 2. **Replace `MONGO_URL`** — the copied template uses the monorepo's MongoDB Atlas cluster. Point to your own cluster (and your own database name).
 3. **Generate fresh API keys** (`NEXT_PUBLIC_EZAUTH_KEY`, etc.) — copied keys are scoped to the monorepo's deployment and won't work in your environment.
-4. **Set vars listed as `# NOT FOUND in monorepo env files`** — these are commented-out hints; uncomment and fill them in if your fork uses those features (Sentry, ESG provider, OAuth, etc.).
+4. **Set vars listed as `# NOT FOUND in monorepo env files`** — these are commented-out hints; uncomment and fill them in if your fork uses those features (ESG provider, OAuth, etc.).
 
 ### Per-environment env files
 
@@ -285,10 +285,6 @@ The copied `NEXT_PUBLIC_EZAUTH_KEY` is scoped to the monorepo's EZAuth instance 
 1. Run your own EZAuth instance (or extract `ezauth` separately)
 2. Generate a publishable key via `pnpm --filter api-ezauth seed:self-key`
 3. Update `.env.local` in your app standalone
-
-### Sentry errors not appearing in your project
-
-The copied `SENTRY_DSN` points to the monorepo's Sentry org. Replace with your own DSN, or remove the var entirely (Sentry init is no-op without a DSN).
 
 ---
 

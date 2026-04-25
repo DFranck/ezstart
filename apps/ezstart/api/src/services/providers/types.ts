@@ -12,7 +12,6 @@ export type ProviderName =
   | 'mongodb'
   | 'stripe'
   | 'resend'
-  | 'sentry'
   | 'anthropic'
   | 'openai'
   | 'gemini'

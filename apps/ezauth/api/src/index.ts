@@ -1,10 +1,5 @@
-// Import Sentry FIRST (instrument.mts initializes Sentry before anything
-// else). `@ezstart/logger` now lazy-loads `@sentry/node` inside
-// `initSentry()` so no OpenTelemetry side effect triggers until Sentry is
-// actually activated, which restores CORS on Railway while keeping error
-// tracking available on environments where SENTRY_DSN is set.
+// Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
-import { Sentry } from './instrument.mjs'
 import {
   addVersionHeader,
   connectToMongo,
@@ -90,9 +85,6 @@ app.use(createVersionedRouter('/api/admin', adminRouter))
 app.use(createVersionedRouter('/api', apiKeysRouter))
 app.use(createVersionedRouter('/api', applicationsRouter))
 app.use(createVersionedRouter('/api', subscriptionsRouter))
-
-// Sentry error handler MUST be AFTER all routes/controllers
-Sentry.setupExpressErrorHandler(app)
 
 // Connect to MongoDB, warm models, then start listening
 connectToMongo('ezauth')

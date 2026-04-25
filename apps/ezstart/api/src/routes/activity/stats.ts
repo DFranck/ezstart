@@ -2,11 +2,13 @@
  * GET /api/activity/stats
  *
  * Get activity statistics (counts by type, severity, project)
+ *
+ * NOTE: Sentry was removed 2026-04-25 — counters return zero until a
+ * replacement collector is wired in (deployments / health / audits).
  */
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError } from '@ezstart/api-core'
-import { createSentryClient } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -18,10 +20,8 @@ export const router: ReturnType<typeof Router> = Router()
 
 const getStatsHandler = async (req: Request, res: Response) => {
   try {
-    const parsed = statsQuerySchema.safeParse(req.query)
-    const { since = '7d' } = parsed.success ? parsed.data : (req.query as Record<string, string>)
+    statsQuerySchema.safeParse(req.query)
 
-    const sentryClient = createSentryClient()
     const stats = {
       errors: 0,
       deployments: 0,
@@ -36,28 +36,9 @@ const getStatsHandler = async (req: Request, res: Response) => {
       },
     }
 
-    // Fetch Sentry errors
-    if (sentryClient) {
-      try {
-        const issues = await sentryClient.fetchIssues({
-          status: 'unresolved',
-          limit: 100,
-          since,
-        })
-        const errorLogs = sentryClient.issuesToActivityLogs(issues)
-
-        stats.errors = errorLogs.length
-        errorLogs.forEach(log => {
-          stats.bySeverity[log.severity]++
-        })
-      } catch (error) {
-        logger.error('[Activity] Failed to fetch Sentry stats:', error)
-      }
-    }
-
     sendSuccess(res, stats)
   } catch (error) {
-    logger.error('[Activity] Error fetching activity stats:', error)
+    logger.error({ err: error }, '[Activity] Error fetching activity stats')
     sendError(res, error instanceof Error ? error.message : 'Failed to fetch activity stats')
   }
 }

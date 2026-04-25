@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { appToEnvSuffix, getJwtSecret, getMongoUrl, getSentryDsn } from '../env-resolvers.js'
+import { appToEnvSuffix, getJwtSecret, getMongoUrl } from '../env-resolvers.js'
 
 describe('@ezstart/config - env-resolvers', () => {
   const originalEnv = { ...process.env }
@@ -7,12 +7,7 @@ describe('@ezstart/config - env-resolvers', () => {
   beforeEach(() => {
     // Reset between tests
     for (const key of Object.keys(process.env)) {
-      if (
-        key.startsWith('MONGO_URL') ||
-        key.startsWith('JWT_SECRET') ||
-        key.startsWith('SENTRY_DSN') ||
-        key === 'DEPLOY_ENV'
-      ) {
+      if (key.startsWith('MONGO_URL') || key.startsWith('JWT_SECRET') || key === 'DEPLOY_ENV') {
         delete process.env[key]
       }
     }
@@ -94,39 +89,6 @@ describe('@ezstart/config - env-resolvers', () => {
     it('returns the JWT_SECRET value', () => {
       process.env.JWT_SECRET = 'my-super-secret-value'
       expect(getJwtSecret()).toBe('my-super-secret-value')
-    })
-  })
-
-  describe('getSentryDsn', () => {
-    it('returns undefined when nothing is configured', () => {
-      expect(getSentryDsn('ezbill')).toBeUndefined()
-    })
-
-    it('reads per-app suffixed DSN when available', () => {
-      process.env.SENTRY_DSN_EZBILL = 'https://ezbill-dsn@sentry.io/1'
-      process.env.SENTRY_DSN_EZAUTH = 'https://ezauth-dsn@sentry.io/2'
-
-      expect(getSentryDsn('ezbill')).toBe('https://ezbill-dsn@sentry.io/1')
-      expect(getSentryDsn('ezauth')).toBe('https://ezauth-dsn@sentry.io/2')
-    })
-
-    it('honors kebab→underscore conversion for app names', () => {
-      process.env.SENTRY_DSN_GREEN_PULSE = 'https://gp-dsn@sentry.io/3'
-
-      expect(getSentryDsn('green-pulse')).toBe('https://gp-dsn@sentry.io/3')
-    })
-
-    it('falls back to generic SENTRY_DSN when app-specific is absent', () => {
-      process.env.SENTRY_DSN = 'https://fallback@sentry.io/0'
-
-      expect(getSentryDsn('ezbill')).toBe('https://fallback@sentry.io/0')
-    })
-
-    it('prefers app-specific DSN over generic fallback', () => {
-      process.env.SENTRY_DSN = 'https://fallback@sentry.io/0'
-      process.env.SENTRY_DSN_EZBILL = 'https://ezbill-dsn@sentry.io/1'
-
-      expect(getSentryDsn('ezbill')).toBe('https://ezbill-dsn@sentry.io/1')
     })
   })
 })

@@ -24,7 +24,7 @@ const pinoLogger = pino({
 })
 
 /**
- * Server-side logger with Pino + Sentry
+ * Server-side logger with Pino
  *
  * Use this ONLY in server environments (APIs, Next.js server components)
  * For client-side logging, use '@ezstart/logger' instead
@@ -75,6 +75,3 @@ export const logger = {
 }
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug'
-
-// Export Sentry utilities
-export { initSentry, Sentry } from './sentry.js'

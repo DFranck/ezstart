@@ -7,7 +7,7 @@
  *
  *   - templated vars (MONGO_URL)   → expected value is the RESOLVED
  *                                    `{app}/{env}` string for each service
- *   - suffixed vars  (SENTRY_DSN)  → expected per-service = local SENTRY_DSN_{APP}
+ *   - suffixed vars  (currently none) → expected per-service = local {VAR}_{APP}
  *   - plain vars                   → expected = local value pushed to each target
  *
  * Exit code: 0 if clean, 1 when --strict and any drift is found.

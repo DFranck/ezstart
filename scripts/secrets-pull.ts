@@ -7,8 +7,8 @@
  * belongs where.
  *
  * Rules:
- *   - `suffixed` vars (SENTRY_DSN): each Railway service's SENTRY_DSN is
- *     rewritten to `SENTRY_DSN_{APP}` in the root file.
+ *   - `suffixed` vars (currently none): each Railway service's `{VAR}` is
+ *     rewritten to `{VAR}_{APP}` in the root file.
  *   - `template` vars (MONGO_URL): NOT pulled (template lives in root, each
  *     platform stores its resolved value — pulling would lose the template).
  *     Instead, we emit a warning if one is missing from the root.

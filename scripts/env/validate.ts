@@ -3,7 +3,7 @@
  * env:validate — verify the hybrid root + per-app env layout.
  *
  * Checks:
- *   1. Required SHARED vars exist in root .env.{env} (JWT_SECRET, MONGO_URL, SENTRY_AUTH_TOKEN, SENTRY_ORG_SLUG, DEPLOY_ENV)
+ *   1. Required SHARED vars exist in root .env.{env} (JWT_SECRET, MONGO_URL, DEPLOY_ENV)
  *   2. For each shared var, if a per-app .env.{env} also defines it, verify
  *      the value MATCHES root (drift detection)
  *   3. For each app, every key declared in `.env.example` is present in `.env.local`
@@ -42,13 +42,7 @@ const envFlag =
 const envFile = `.env.${envFlag}`
 
 // ── Shared vars (must be identical across every layer that defines them) ──
-const SHARED_VARS = [
-  'JWT_SECRET',
-  'MONGO_URL',
-  'SENTRY_AUTH_TOKEN',
-  'SENTRY_ORG_SLUG',
-  'DEPLOY_ENV',
-]
+const SHARED_VARS = ['JWT_SECRET', 'MONGO_URL', 'DEPLOY_ENV']
 
 // ── Required at root ────────────────────────────────────────
 const REQUIRED_AT_ROOT = ['JWT_SECRET', 'MONGO_URL']

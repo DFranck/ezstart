@@ -276,7 +276,7 @@ export function buildPushPlan(
     // --vars filter (case-sensitive match on declared var name)
     if (restrict && !restrict.includes(varName)) continue
 
-    // ── Suffixed vars (SENTRY_DSN → SENTRY_DSN_EZAUTH per app) ──
+    // ── Suffixed vars ({VAR} → {VAR}_{APP_UPPER} per app in root) ──
     if (target.suffixed) {
       const apiApps = resolveTargetApps(varName, allApps, { layer: 'api' })
       for (const app of apiApps) {
@@ -376,7 +376,7 @@ export function findUnknownVars(source: Record<string, string>): string[] {
   )
   return Object.keys(source).filter(k => {
     if (known.has(k)) return false
-    // SENTRY_DSN_EZAUTH matches the suffixed family
+    // {VAR}_{APP} matches the suffixed family of {VAR}
     for (const base of suffixed) {
       if (k.startsWith(`${base}_`)) return false
     }
@@ -717,18 +717,6 @@ export function validateKnownFormats(vars: Record<string, string>): PreflightIss
         })
         continue
       }
-    }
-
-    if (key.startsWith('SENTRY_DSN')) {
-      // Accept https://... URLs hosted on any Sentry domain
-      if (!/^https:\/\/[^@]+@[^/]+\/\d+$/.test(value)) {
-        issues.push({
-          kind: 'invalid_format',
-          key,
-          detail: 'SENTRY_DSN must match https://<key>@<host>/<project-id>',
-        })
-      }
-      continue
     }
 
     // Anything ending with _URL or explicitly URL-shaped — try parsing

@@ -31,15 +31,15 @@
 
 ## 3. Monitoring Dashboard
 
-| ID    | Test                 | Comment tester                                  | Derniere date | Status |
-| ----- | -------------------- | ----------------------------------------------- | ------------- | ------ |
-| S3-14 | Overview             | Health global, count erreurs, count audits      | —             | ⏳     |
-| S3-15 | Real-time Socket.IO  | Donnees se mettent a jour sans refresh          | —             | ⏳     |
-| S3-16 | Health page          | Status par service (healthy/degraded/unhealthy) | —             | ⏳     |
-| S3-17 | Health — history     | Historique uptime 24h/7d/30d                    | —             | ⏳     |
-| S3-18 | Errors page          | Feed erreurs Sentry, filtres severity           | —             | ⏳     |
-| S3-19 | Audits page          | Scores audits, details, filtres                 | —             | ⏳     |
-| S3-20 | Trigger manual check | POST trigger → refresh donnees                  | —             | ⏳     |
+| ID    | Test                 | Comment tester                                                              | Derniere date | Status |
+| ----- | -------------------- | --------------------------------------------------------------------------- | ------------- | ------ |
+| S3-14 | Overview             | Health global, count erreurs, count audits                                  | —             | ⏳     |
+| S3-15 | Real-time Socket.IO  | Donnees se mettent a jour sans refresh                                      | —             | ⏳     |
+| S3-16 | Health page          | Status par service (healthy/degraded/unhealthy)                             | —             | ⏳     |
+| S3-17 | Health — history     | Historique uptime 24h/7d/30d                                                | —             | ⏳     |
+| S3-18 | Errors page          | Feed erreurs (placeholder — pas de source live raccordée), filtres severity | —             | ⏳     |
+| S3-19 | Audits page          | Scores audits, details, filtres                                             | —             | ⏳     |
+| S3-20 | Trigger manual check | POST trigger → refresh donnees                                              | —             | ⏳     |
 
 ## 4. Admin Panel
 

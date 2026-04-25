@@ -96,11 +96,6 @@ describe('isPlatformVar', () => {
       assert.equal(isPlatformVar('NEXT_PUBLIC_APP_NAME'), false)
     })
 
-    it('does NOT match SENTRY_DSN / SENTRY_DSN_EZAUTH', () => {
-      assert.equal(isPlatformVar('SENTRY_DSN'), false)
-      assert.equal(isPlatformVar('SENTRY_DSN_EZAUTH'), false)
-    })
-
     it('does NOT match STRIPE_SECRET_KEY / VERCEL_TOKEN / VERCEL_TEAM_ID', () => {
       assert.equal(isPlatformVar('STRIPE_SECRET_KEY'), false)
       assert.equal(isPlatformVar('VERCEL_TOKEN'), false)
