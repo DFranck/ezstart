@@ -161,6 +161,132 @@ import { cn } from '@ezstart/ui/lib'
 pnpm --filter @ezstart/ui ui:add [component-name]
 ```
 
+## Landing primitives
+
+Drop-in abstractions for building marketing landing pages. Each one is data-driven (props in, layout out) so consumer apps stay short and consistent.
+
+### `<LandingHero>`
+
+10 visual variants (`default`, `withImage`, `withVideo`, `withGradient`, `split`, `minimal`, `centered`, `withStats`, `withSearch`, `full`). Renders badge + title + description + 1-2 CTAs.
+
+```tsx
+import { LandingHero, Button } from '@ezstart/ui/components'
+
+<LandingHero
+  variant="withGradient"
+  align="center"
+  badge="Authentication as a Service"
+  title="Authentication for every app"
+  description="One SDK. Any framework. Zero config."
+  primaryCTA="Get Started Free"
+  primaryCTAHref="/register"
+  secondaryCTA="View Documentation"
+  secondaryCTAHref="/docs"
+/>
+
+// With ReactNode CTA slots (escape hatch for SDK buttons like RegisterButton)
+<LandingHero
+  variant="withGradient"
+  align="center"
+  title={t('heroTitle')}
+  description={t('heroSubtitle')}
+  primaryCTASlot={<RegisterButton size="lg">{t('cta')}</RegisterButton>}
+  secondaryCTASlot={<Button asChild size="lg" variant="outline"><Link href="/docs">{t('docs')}</Link></Button>}
+/>
+```
+
+### `<FeatureGrid>`
+
+Data-driven feature cards in a responsive 2/3/4-column grid.
+
+```tsx
+import { FeatureGrid, Icon } from '@ezstart/ui/components'
+
+const features = [
+  {
+    icon: <Icon name="lucide:Fingerprint" className="h-6 w-6 text-primary" />,
+    title: 'Single Sign-On',
+    description: 'One account across all your applications.',
+  },
+  // ... more features
+]
+
+<FeatureGrid features={features} columns={3} variant="default" />
+```
+
+Variants: `default`, `minimal`, `bordered`, `floating`. Optional flags: `expandable`, `showKeywords`, `showUseCases`.
+
+### `<HowItWorksSteps>`
+
+Numbered circle + icon + title + description per step, in a responsive grid (2/3/4 cols).
+
+```tsx
+import { HowItWorksSteps } from '@ezstart/ui/components'
+
+const steps = [
+  { step: '1', icon: 'lucide:Download', title: 'Install the SDK', description: 'Add the SDK with a single command.' },
+  { step: '2', icon: 'lucide:Code', title: 'Add the Provider', description: 'Wrap your app with AuthProvider.' },
+  { step: '3', icon: 'lucide:Sparkles', title: 'Use the hooks', description: 'Access user data with simple hooks.' },
+]
+
+<HowItWorksSteps steps={steps} columns={3} />
+```
+
+### `<CodeBlock>`
+
+Optional Badge label + bordered `<pre><code>` block. Drop-in replacement for hand-rolled code preview blocks.
+
+```tsx
+import { CodeBlock } from '@ezstart/ui/components'
+
+<CodeBlock label="Install" code="npm install @ezstart/auth-sdk" />
+<CodeBlock label="Setup" code={`import { AuthProvider } from '@ezstart/auth-sdk'`} />
+```
+
+### `<CTA>`
+
+Call-to-action banner (centered/split/gradient variants). Title + description + 1-2 buttons.
+
+```tsx
+import { CTA, Button } from '@ezstart/ui/components'
+
+<CTA
+  variant="centered"
+  intent="primary"
+  title="Ready to get started?"
+  description="Add authentication in minutes."
+  primaryText="Start Free"
+  primaryHref="/register"
+/>
+
+// With ReactNode slots
+<CTA
+  variant="centered"
+  intent="primary"
+  title={t('ctaTitle')}
+  description={t('ctaSubtitle')}
+  primaryCTASlot={<RegisterButton size="lg">{t('cta')}</RegisterButton>}
+/>
+```
+
+### `<LandingSection>`
+
+Section wrapper with optional `title` + `subtitle` header, `variant` (default/muted/accent), and `align` (left/center/right). Use to wrap any landing content section.
+
+```tsx
+import { LandingSection, FeatureGrid } from '@ezstart/ui/components'
+
+;<LandingSection
+  id="features"
+  variant="muted"
+  align="center"
+  title="Everything you need"
+  subtitle="Enterprise-grade with a developer-first approach."
+>
+  <FeatureGrid features={features} columns={3} />
+</LandingSection>
+```
+
 ## Used By
 
 All web apps and packages (auth-sdk, pay-sdk, ai-sdk, rbac, next-theme).

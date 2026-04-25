@@ -42,16 +42,22 @@ export interface HeroProps extends React.HTMLAttributes<HTMLElement> {
   title: string
   /** Hero description */
   description: string
-  /** Primary CTA text */
+  /** Primary CTA text (string-based — use primaryCTASlot for custom ReactNode) */
   primaryCTA?: string
   /** Primary CTA link */
   primaryCTAHref?: string
-  /** Secondary CTA text */
+  /** Custom primary CTA ReactNode (overrides primaryCTA when provided) */
+  primaryCTASlot?: React.ReactNode
+  /** Secondary CTA text (string-based — use secondaryCTASlot for custom ReactNode) */
   secondaryCTA?: string
   /** Secondary CTA link */
   secondaryCTAHref?: string
+  /** Custom secondary CTA ReactNode (overrides secondaryCTA when provided) */
+  secondaryCTASlot?: React.ReactNode
   /** Badge text (appears above title) */
   badge?: string
+  /** Text alignment override (independent of variant). Defaults derived from variant. */
+  align?: 'left' | 'center'
   /** Image URL (for withImage variant) */
   image?: string
   /** Video URL (for withVideo variant) */
@@ -74,9 +80,12 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
       description,
       primaryCTA,
       primaryCTAHref = '#',
+      primaryCTASlot,
       secondaryCTA,
       secondaryCTAHref = '#',
+      secondaryCTASlot,
       badge,
+      align,
       image,
       video,
       stats,
@@ -89,6 +98,9 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     ref
   ) => {
     const [isVideoLoaded, setIsVideoLoaded] = React.useState(false)
+
+    // Resolve alignment: explicit prop wins, else 'centered' variant defaults to center
+    const isCentered = align === 'center' || (align === undefined && variant === 'centered')
 
     // Merge background-attachment into style when bgMode is fixed
     const mergedStyle =
@@ -104,7 +116,8 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     // Content wrapper classes
     const contentWrapperClasses = cn(
       'container mx-auto px-4 sm:px-6 lg:px-8',
-      landingHeroVariantConfig.contentWrapper[variant]
+      landingHeroVariantConfig.contentWrapper[variant],
+      isCentered && variant !== 'split' && 'text-center'
     )
 
     // Title classes
@@ -113,7 +126,8 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     // Description classes
     const descriptionClasses = cn(
       'text-muted-foreground',
-      landingHeroVariantConfig.description[variant]
+      landingHeroVariantConfig.description[variant],
+      isCentered && 'mx-auto'
     )
 
     const hasBackgroundImage = mergedStyle?.backgroundImage
@@ -156,7 +170,7 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
           <Div className={variant === 'split' ? 'order-1' : ''}>
             {/* Badge */}
             {badge && (
-              <Div className={cn('mb-6', variant === 'centered' && 'flex justify-center')}>
+              <Div className={cn('mb-6', isCentered && 'flex justify-center')}>
                 <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
                   {badge}
                 </Badge>
@@ -170,17 +184,21 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
             <P className={cn(descriptionClasses, 'mb-8')}>{description}</P>
 
             {/* CTAs */}
-            <Div className={cn('flex flex-wrap gap-4', variant === 'centered' && 'justify-center')}>
-              {primaryCTA && (
-                <Button asChild size="lg" className="text-base px-8 py-6">
-                  <a href={primaryCTAHref}>{primaryCTA}</a>
-                </Button>
-              )}
-              {secondaryCTA && (
-                <Button asChild size="lg" variant="outline" className="text-base px-8 py-6">
-                  <a href={secondaryCTAHref}>{secondaryCTA}</a>
-                </Button>
-              )}
+            <Div className={cn('flex flex-wrap gap-4', isCentered && 'justify-center')}>
+              {primaryCTASlot
+                ? primaryCTASlot
+                : primaryCTA && (
+                    <Button asChild size="lg" className="text-base px-8 py-6">
+                      <a href={primaryCTAHref}>{primaryCTA}</a>
+                    </Button>
+                  )}
+              {secondaryCTASlot
+                ? secondaryCTASlot
+                : secondaryCTA && (
+                    <Button asChild size="lg" variant="outline" className="text-base px-8 py-6">
+                      <a href={secondaryCTAHref}>{secondaryCTA}</a>
+                    </Button>
+                  )}
             </Div>
 
             {/* Stats (for withStats variant) */}

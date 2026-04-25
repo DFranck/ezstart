@@ -17,8 +17,11 @@ export type { UseCasesProps, UseCase } from './use-cases'
 export { FAQ as LandingFAQ } from './faq'
 export type { FAQProps as LandingFAQProps, FAQItem } from './faq'
 
-export { CTA } from './cta'
+export { CTA, CTA as Cta } from './cta'
 export type { CTAProps } from './cta'
 
 export { Stats as LandingStats } from './stats'
 export type { StatsProps as LandingStatsProps, Stat } from './stats'
+
+export { HowItWorksSteps } from './how-it-works-steps'
+export type { HowItWorksStepsProps, HowItWorksStep } from './how-it-works-steps'

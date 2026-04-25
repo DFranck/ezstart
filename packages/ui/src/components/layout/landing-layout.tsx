@@ -91,8 +91,7 @@ const landingHeaderVariants = cva(
 )
 
 interface LandingHeaderProps
-  extends React.ComponentProps<'header'>,
-    VariantProps<typeof landingHeaderVariants> {}
+  extends React.ComponentProps<'header'>, VariantProps<typeof landingHeaderVariants> {}
 
 /**
  * @deprecated Use `AppHeader` from `./app-layout` instead.
@@ -163,8 +162,7 @@ const landingNavLinkVariants = cva(
 )
 
 interface LandingNavLinkProps
-  extends React.ComponentProps<'a'>,
-    VariantProps<typeof landingNavLinkVariants> {}
+  extends React.ComponentProps<'a'>, VariantProps<typeof landingNavLinkVariants> {}
 
 /**
  * @deprecated Use `AppNavLink` from `./app-layout` instead.
@@ -268,9 +266,7 @@ function LandingMobileMenu({ className, children, ...props }: React.ComponentPro
         aria-label="Mobile navigation"
         {...props}
       >
-        <nav className="flex flex-col gap-1">
-          {children}
-        </nav>
+        <nav className="flex flex-col gap-1">{children}</nav>
       </div>
     </>
   )
@@ -352,17 +348,39 @@ const landingSectionVariants = cva('relative px-4 py-12 md:py-16 lg:py-24', {
 })
 
 interface LandingSectionProps
-  extends React.ComponentProps<'section'>,
-    VariantProps<typeof landingSectionVariants> {}
+  extends
+    Omit<React.ComponentProps<'section'>, 'title'>,
+    VariantProps<typeof landingSectionVariants> {
+  /** Optional section title (rendered as h2 above children) */
+  title?: React.ReactNode
+  /** Optional section subtitle (rendered as p below the title) */
+  subtitle?: React.ReactNode
+}
 
-function LandingSection({ className, variant, align, children, ...props }: LandingSectionProps) {
+function LandingSection({
+  className,
+  variant,
+  align,
+  title,
+  subtitle,
+  children,
+  ...props
+}: LandingSectionProps) {
   return (
     <section
       data-slot="landing-section"
       className={cn(landingSectionVariants({ variant, align }), className)}
       {...props}
     >
-      <div className="container mx-auto max-w-6xl">{children}</div>
+      <div className="container mx-auto max-w-6xl">
+        {(title || subtitle) && (
+          <div className="mb-12">
+            {title && <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>}
+            {subtitle && <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">{subtitle}</p>}
+          </div>
+        )}
+        {children}
+      </div>
     </section>
   )
 }
@@ -376,10 +394,7 @@ function LandingFooter({ className, children, ...props }: React.ComponentProps<'
   return (
     <footer
       data-slot="landing-footer"
-      className={cn(
-        'mt-auto border-t bg-muted px-4 py-8 md:py-12',
-        className
-      )}
+      className={cn('mt-auto border-t bg-muted px-4 py-8 md:py-12', className)}
       {...props}
     >
       <div className="container mx-auto max-w-6xl">{children}</div>
@@ -405,9 +420,4 @@ export {
   useLanding,
 }
 
-export type {
-  LandingHeaderProps,
-  LandingNavLinkProps,
-  LandingMobileLinkProps,
-  LandingSectionProps,
-}
+export type { LandingHeaderProps, LandingNavLinkProps, LandingMobileLinkProps, LandingSectionProps }
