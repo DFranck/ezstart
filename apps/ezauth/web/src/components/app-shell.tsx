@@ -60,17 +60,23 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AppLayout>
       {/* ----- Header ----- */}
       <AppHeader>
-        <AppLogo>
-          <Link href={`/${locale}`} className="flex items-center gap-2">
+        <AppLogo asChild>
+          <Link href="/">
             <Image src="/logo.svg" alt="EZAuth" width={28} height={28} />
             <Span className="text-lg font-bold tracking-tight">EZAuth</Span>
           </Link>
         </AppLogo>
 
         <AppNav>
-          <AppNavLink href="#features">{t('navFeatures')}</AppNavLink>
-          <AppNavLink href="#pricing">{t('navPricing')}</AppNavLink>
-          <AppNavLink href="/docs">{t('navDocs')}</AppNavLink>
+          <AppNavLink asChild>
+            <Link href="#features">{t('navFeatures')}</Link>
+          </AppNavLink>
+          <AppNavLink asChild>
+            <Link href="#pricing">{t('navPricing')}</Link>
+          </AppNavLink>
+          <AppNavLink asChild>
+            <Link href="/docs">{t('navDocs')}</Link>
+          </AppNavLink>
         </AppNav>
 
         <AppActions>
@@ -93,9 +99,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         </AppActions>
 
         <AppMobileMenu>
-          <AppMobileLink href="#features">{t('navFeatures')}</AppMobileLink>
-          <AppMobileLink href="#pricing">{t('navPricing')}</AppMobileLink>
-          <AppMobileLink href="/docs">{t('navDocs')}</AppMobileLink>
+          <AppMobileLink asChild>
+            <Link href="#features">{t('navFeatures')}</Link>
+          </AppMobileLink>
+          <AppMobileLink asChild>
+            <Link href="#pricing">{t('navPricing')}</Link>
+          </AppMobileLink>
+          <AppMobileLink asChild>
+            <Link href="/docs">{t('navDocs')}</Link>
+          </AppMobileLink>
           <Div className="flex items-center justify-end gap-2 px-3 pt-2">
             <LocaleSwitcher
               locales={LOCALES}

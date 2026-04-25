@@ -1,10 +1,37 @@
 {
   "admin": {
     "title": "Bảng điều khiển quản trị",
+    "subtitle": "Quản lý người dùng, vai trò và cài đặt nền tảng.",
+    "loading": "Đang tải bảng điều khiển quản trị...",
     "accessDenied": "Truy cập bị từ chối",
     "accessDeniedDescription": "Bạn cần có quyền quản trị viên để truy cập trang này.",
+    "scope": {
+      "label": "Phạm vi đối tượng",
+      "all": "Tất cả người dùng (nền tảng)",
+      "myApps": "Người dùng trong ứng dụng của tôi",
+      "mine": "Chỉ tôi"
+    },
     "tabs": {
       "users": "Người dùng"
+    },
+    "dashboard": {
+      "totalUsers": "Tổng số người dùng",
+      "online": "Trực tuyến",
+      "superadmins": "Quản trị tối cao",
+      "admins": "Quản trị viên",
+      "withAppRoles": "Có vai trò ứng dụng",
+      "noUsers": "Không tìm thấy người dùng nào.",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "onlineLabel": "Trực tuyến",
+      "minutesAgo": "{count} phút trước",
+      "hoursAgo": "{count} giờ trước",
+      "daysAgo": "{count} ngày trước",
+      "previous": "Trước",
+      "next": "Tiếp",
+      "allApps": "Tất cả ứng dụng",
+      "filterByApp": "Lọc theo ứng dụng",
+      "save": "Lưu"
     },
     "users": {
       "searchPlaceholder": "Tìm kiếm theo email hoặc tên đăng nhập...",

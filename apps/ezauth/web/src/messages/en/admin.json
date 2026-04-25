@@ -1,10 +1,37 @@
 {
   "admin": {
     "title": "Admin Dashboard",
+    "subtitle": "Manage users, roles, and platform-wide settings.",
+    "loading": "Loading admin dashboard...",
     "accessDenied": "Access Denied",
     "accessDeniedDescription": "You need administrator privileges to access this page.",
+    "scope": {
+      "label": "Audience scope",
+      "all": "All users (platform)",
+      "myApps": "Users in my applications",
+      "mine": "Just me"
+    },
     "tabs": {
       "users": "Users"
+    },
+    "dashboard": {
+      "totalUsers": "Total users",
+      "online": "Online",
+      "superadmins": "Superadmins",
+      "admins": "Admins",
+      "withAppRoles": "With app roles",
+      "noUsers": "No users found.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "onlineLabel": "Online",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago",
+      "previous": "Previous",
+      "next": "Next",
+      "allApps": "All apps",
+      "filterByApp": "Filter by app",
+      "save": "Save"
     },
     "users": {
       "searchPlaceholder": "Search by email or username...",

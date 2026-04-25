@@ -1,6 +1,6 @@
 'use client'
 
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { Button, Div, H1, H3, Icon, LI, P, Section, Span, UL } from '@ezstart/ui/components'
 
@@ -12,7 +12,6 @@ import { Button, Div, H1, H3, Icon, LI, P, Section, Span, UL } from '@ezstart/ui
  */
 export default function SubscribeCancelPage() {
   const t = useTranslations('subscribe.cancel')
-  const locale = useLocale()
 
   return (
     <Section size="full" className="relative pt-24 md:pt-32">
@@ -34,13 +33,13 @@ export default function SubscribeCancelPage() {
 
         <Div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Button asChild size="lg">
-            <Link href={`/${locale}/#pricing`}>
+            <Link href="/#pricing">
               <Icon name="lucide:CreditCard" className="w-5 h-5 mr-2" />
               {t('backToPricing')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href={`/${locale}`}>
+            <Link href="/">
               <Icon name="lucide:Home" className="w-5 h-5 mr-2" />
               {t('backHome')}
             </Link>

@@ -1,10 +1,37 @@
 {
   "admin": {
     "title": "Tableau de bord Admin",
+    "subtitle": "Gérez les utilisateurs, les rôles et les paramètres de la plateforme.",
+    "loading": "Chargement du tableau de bord admin...",
     "accessDenied": "Accès refusé",
     "accessDeniedDescription": "Vous devez avoir les privilèges administrateur pour accéder à cette page.",
+    "scope": {
+      "label": "Périmètre d'audience",
+      "all": "Tous les utilisateurs (plateforme)",
+      "myApps": "Utilisateurs de mes applications",
+      "mine": "Moi uniquement"
+    },
     "tabs": {
       "users": "Utilisateurs"
+    },
+    "dashboard": {
+      "totalUsers": "Utilisateurs au total",
+      "online": "En ligne",
+      "superadmins": "Super-administrateurs",
+      "admins": "Administrateurs",
+      "withAppRoles": "Avec rôles app",
+      "noUsers": "Aucun utilisateur trouvé.",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "onlineLabel": "En ligne",
+      "minutesAgo": "il y a {count} min",
+      "hoursAgo": "il y a {count} h",
+      "daysAgo": "il y a {count} j",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "allApps": "Toutes les apps",
+      "filterByApp": "Filtrer par app",
+      "save": "Enregistrer"
     },
     "users": {
       "searchPlaceholder": "Rechercher par email ou nom d'utilisateur...",
