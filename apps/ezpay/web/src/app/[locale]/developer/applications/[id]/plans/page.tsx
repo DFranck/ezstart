@@ -76,6 +76,7 @@ export default function ApplicationPlansPage() {
     editor: {
       createTitle: te('createTitle'),
       editTitle: te('editTitle'),
+      dialogDescription: te('dialogDescription'),
       nameLabel: te('nameLabel'),
       namePlaceholder: te('namePlaceholder'),
       descriptionLabel: te('descriptionLabel'),

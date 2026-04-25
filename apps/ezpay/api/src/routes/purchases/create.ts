@@ -12,6 +12,7 @@ import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
 import { validatePromo, calculateDiscount } from '../../services/promo.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
+import { mapStripeError } from '../../utils/stripe-error.js'
 import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -192,6 +193,13 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
+    const stripeMapped = mapStripeError(error)
+    if (stripeMapped) {
+      logger.warn(
+        `Stripe rejected purchase checkout (${stripeMapped.code}): ${stripeMapped.message}`
+      )
+      return sendError(res, stripeMapped.message, stripeMapped.status, { code: stripeMapped.code })
+    }
     logger.error('Create purchase error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to create purchase')
   }

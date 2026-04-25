@@ -189,7 +189,7 @@ export default function ApplicationDetailPage() {
               <CardDescription>{tc('notConnectedDescription')}</CardDescription>
             </Div>
             <Button asChild>
-              <Link href={`/${locale}/developer/applications/${applicationId}/connect`}>
+              <Link href={`/developer/applications/${applicationId}/connect`}>
                 {tc('manageButton')}
               </Link>
             </Button>
@@ -210,7 +210,7 @@ export default function ApplicationDetailPage() {
               <CardDescription>{tpm('subtitle')}</CardDescription>
             </Div>
             <Button asChild>
-              <Link href={`/${locale}/developer/applications/${applicationId}/plans`}>
+              <Link href={`/developer/applications/${applicationId}/plans`}>
                 {tpm('createButton')}
               </Link>
             </Button>

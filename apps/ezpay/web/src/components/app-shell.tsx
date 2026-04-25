@@ -47,18 +47,28 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AppLayout>
       {/* ---- Header ---- */}
       <AppHeader>
-        <AppLogo>
-          <Link href={`/${locale}`} className="flex items-center gap-2">
+        <AppLogo asChild>
+          <Link href="/">
             <Image src="/logo.svg" alt="EZPay" width={28} height={28} />
             <Span className="text-lg font-bold tracking-tight">EZPay</Span>
           </Link>
         </AppLogo>
 
         <AppNav>
-          <AppNavLink href="#features">{nav('features')}</AppNavLink>
-          <AppNavLink href="#pricing">{nav('pricing')}</AppNavLink>
-          <AppNavLink href="/docs">{nav('docs')}</AppNavLink>
-          {isAuthenticated && <AppNavLink href="/dashboard">{nav('dashboard')}</AppNavLink>}
+          <AppNavLink asChild>
+            <Link href="#features">{nav('features')}</Link>
+          </AppNavLink>
+          <AppNavLink asChild>
+            <Link href="#pricing">{nav('pricing')}</Link>
+          </AppNavLink>
+          <AppNavLink asChild>
+            <Link href="/docs">{nav('docs')}</Link>
+          </AppNavLink>
+          {isAuthenticated && (
+            <AppNavLink asChild>
+              <Link href="/dashboard">{nav('dashboard')}</Link>
+            </AppNavLink>
+          )}
         </AppNav>
 
         <AppActions>
@@ -81,10 +91,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         </AppActions>
 
         <AppMobileMenu>
-          <AppMobileLink href="#features">{nav('features')}</AppMobileLink>
-          <AppMobileLink href="#pricing">{nav('pricing')}</AppMobileLink>
-          <AppMobileLink href="/docs">{nav('docs')}</AppMobileLink>
-          {isAuthenticated && <AppMobileLink href="/dashboard">{nav('dashboard')}</AppMobileLink>}
+          <AppMobileLink asChild>
+            <Link href="#features">{nav('features')}</Link>
+          </AppMobileLink>
+          <AppMobileLink asChild>
+            <Link href="#pricing">{nav('pricing')}</Link>
+          </AppMobileLink>
+          <AppMobileLink asChild>
+            <Link href="/docs">{nav('docs')}</Link>
+          </AppMobileLink>
+          {isAuthenticated && (
+            <AppMobileLink asChild>
+              <Link href="/dashboard">{nav('dashboard')}</Link>
+            </AppMobileLink>
+          )}
           <Div className="px-3 pt-2 flex flex-col gap-2">
             <Div className="flex items-center gap-2">
               <LocaleSwitcher

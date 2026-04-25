@@ -64,13 +64,13 @@ function SubscribeSuccessContent() {
 
         <Div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Button asChild size="lg">
-            <Link href={`/${locale}/dashboard?section=billing`}>
+            <Link href="/dashboard?section=billing">
               <Icon name="lucide:LayoutDashboard" className="w-5 h-5 mr-2" />
               {t('goToBilling')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href={`/${locale}`}>
+            <Link href="/">
               <Icon name="lucide:Home" className="w-5 h-5 mr-2" />
               {t('backHome')}
             </Link>

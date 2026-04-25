@@ -11,6 +11,7 @@ import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
+import { mapStripeError } from '../../utils/stripe-error.js'
 import { optionalAuthMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -193,6 +194,13 @@ const createDonationHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
+    const stripeMapped = mapStripeError(error)
+    if (stripeMapped) {
+      logger.warn(
+        `Stripe rejected donation checkout (${stripeMapped.code}): ${stripeMapped.message}`
+      )
+      return sendError(res, stripeMapped.message, stripeMapped.status, { code: stripeMapped.code })
+    }
     logger.error('Create donation error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to create donation')
   }

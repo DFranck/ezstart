@@ -1,4 +1,4 @@
-import { Router } from '@ezstart/api-core'
+import { Router, sendSuccess } from '@ezstart/api-core'
 import { donationsRegistries, donationsRouters } from './donations/index.js'
 import { purchasesRegistries, purchasesRouters } from './purchases/index.js'
 import { subscriptionsRegistries, subscriptionsRouters } from './subscriptions/index.js'
@@ -31,7 +31,7 @@ router.use('/', testProductsRouter)
 
 // Health check
 router.get('/health', (_, res) => {
-  res.json({ status: 'ok', service: 'EZPay API' })
+  sendSuccess(res, { status: 'ok', service: 'EZPay API' })
 })
 
 export const registries = [

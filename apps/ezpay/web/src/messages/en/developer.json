@@ -285,6 +285,7 @@
       "editor": {
         "createTitle": "Create a new plan",
         "editTitle": "Edit plan",
+        "dialogDescription": "Configure pricing, features and access grants for this plan.",
         "nameLabel": "Name",
         "namePlaceholder": "Pro",
         "descriptionLabel": "Description",
