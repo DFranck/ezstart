@@ -8,6 +8,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { TotpService } from '../../../services/totp.service.js'
+import { AuditLogService } from '../../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
@@ -30,6 +31,11 @@ const verifyController = async (req: Request, res: Response) => {
 
     const userId = req.userId!
     const { backupCodes } = await TotpService.verifyAndEnable(userId, parsed.data.code)
+
+    void AuditLogService.createFromRequest(req, {
+      userId,
+      action: '2fa_enabled',
+    })
 
     sendSuccess(res, {
       message: '2FA enabled successfully',

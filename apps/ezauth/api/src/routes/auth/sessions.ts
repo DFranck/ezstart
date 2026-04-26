@@ -8,6 +8,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { hashRefreshToken } from '../../models/refresh-token.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
@@ -58,6 +59,11 @@ const revokeSessionController = async (req: Request, res: Response) => {
       return sendError(res, 'Session ID is required', 400)
     }
     await AuthService.revokeRefreshToken(id, req.userId!)
+    void AuditLogService.createFromRequest(req, {
+      userId: req.userId!,
+      action: 'session_revoked',
+      metadata: { sessionId: id },
+    })
     sendSuccess(res, { message: 'Session revoked successfully' })
   } catch (error) {
     logger.error('Revoke session error:', error)

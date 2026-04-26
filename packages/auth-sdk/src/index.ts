@@ -138,6 +138,18 @@ export type {
   TwoFactorSettingsTexts,
 } from './components/TwoFactorSettings.js'
 
+// Audit log (user activity)
+export { AuditLogSection } from './components/audit-log-section.js'
+export type { AuditLogSectionProps, AuditLogSectionTexts } from './components/audit-log-section.js'
+export { useAuditLog } from './react/audit-log.js'
+export type {
+  AuditLogAction,
+  AuditLogEntry,
+  AuditLogFilters,
+  AuditLogListResponse,
+  AuditLogMetadata,
+} from './core/types.js'
+
 // Admin dashboard
 export { AuthAdminDashboard } from './components/AuthAdminDashboard.js'
 export type {
@@ -145,6 +157,60 @@ export type {
   AuthAdminDashboardTexts,
   AuthAdminAudienceScope,
 } from './components/AuthAdminDashboard.js'
+
+// Admin Applications dashboard (cross-tenant CRUD)
+export { AdminApplicationsDashboard } from './components/AdminApplicationsDashboard.js'
+export type {
+  AdminApplicationsDashboardProps,
+  AdminApplicationsTexts,
+} from './components/AdminApplicationsDashboard.js'
+
+// Admin — feature flags + maintenance mode
+export { AdminFeatureFlagsSection } from './components/admin/AdminFeatureFlagsSection.js'
+export type {
+  AdminFeatureFlagsSectionProps,
+  AdminFeatureFlagsSectionTexts,
+} from './components/admin/AdminFeatureFlagsSection.js'
+export { AdminMaintenanceModeSection } from './components/admin/AdminMaintenanceModeSection.js'
+export type {
+  AdminMaintenanceModeSectionProps,
+  AdminMaintenanceModeSectionTexts,
+} from './components/admin/AdminMaintenanceModeSection.js'
+export { MaintenanceBanner } from './components/admin/MaintenanceBanner.js'
+export type {
+  MaintenanceBannerProps,
+  MaintenanceBannerTexts,
+} from './components/admin/MaintenanceBanner.js'
+
+// Admin — platform analytics overview (superadmin only)
+export { AdminAnalyticsSection } from './components/admin/AdminAnalyticsSection.js'
+export type {
+  AdminAnalyticsSectionProps,
+  AdminAnalyticsSectionTexts,
+} from './components/admin/AdminAnalyticsSection.js'
+export { useAdminAnalyticsOverview } from './react/admin-analytics.js'
+export type {
+  AdminAnalyticsOverview,
+  AdminAnalyticsSignupTrendPoint,
+  AdminAnalyticsTopApp,
+} from './core/types.js'
+
+// Hooks — feature flags + maintenance mode
+export { useFeatureFlags, useUpdateFeatureFlag } from './react/feature-flags.js'
+export {
+  useMaintenanceMode,
+  useUpdateMaintenanceMode,
+  useMaintenanceStatus,
+} from './react/maintenance-mode.js'
+
+// Types — feature flags + maintenance mode
+export type {
+  FeatureFlag,
+  FeatureFlagScope,
+  UpdateFeatureFlagRequest,
+  MaintenanceMode,
+  UpdateMaintenanceModeRequest,
+} from './core/types.js'
 
 // Developer portal (API keys)
 export {
@@ -200,6 +266,16 @@ export { UserAvatar } from './components/UserAvatar.js'
 export type { UserAvatarProps } from './components/UserAvatar.js'
 export { UserSettings } from './components/UserSettings.js'
 export type { UserSettingsProps, UserSettingsTexts } from './components/UserSettings.js'
+
+// Delete account
+export {
+  DeleteAccountSection,
+  DEFAULT_DELETE_ACCOUNT_TEXTS,
+} from './components/DeleteAccountSection.js'
+export type {
+  DeleteAccountSectionProps,
+  DeleteAccountSectionTexts,
+} from './components/DeleteAccountSection.js'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

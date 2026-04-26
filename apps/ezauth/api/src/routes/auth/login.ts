@@ -10,6 +10,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { TotpService } from '../../services/totp.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
@@ -63,6 +64,13 @@ const loginController = async (req: Request, res: Response) => {
 
     // No 2FA — proceed with normal login
     const authCode = await AuthService.login(parsed.data)
+
+    // Fire-and-forget audit log entry. Failure must NEVER block login.
+    void AuditLogService.createFromRequest(req, {
+      userId,
+      action: 'login',
+      appName: parsed.data.app,
+    })
 
     sendSuccess(res, {
       code: authCode.code,

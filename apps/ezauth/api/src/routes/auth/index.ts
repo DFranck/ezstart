@@ -20,6 +20,8 @@ import changePasswordRouter, { changePasswordRegistry } from './change-password.
 import quickSignupRouter, { quickSignupRegistry } from './quick-signup.js'
 import ssoAuthorizeRouter, { ssoAuthorizeRegistry } from './sso-authorize.js'
 import ssoExchangeRouter, { ssoExchangeRegistry } from './sso-exchange.js'
+import meOAuthProvidersRouter, { meOAuthProvidersRegistry } from './me-oauth-providers.js'
+import auditLogRouter, { auditLogRegistry } from './audit-log.js'
 
 export const authRegistries = [
   registerRegistry,
@@ -44,6 +46,8 @@ export const authRegistries = [
   quickSignupRegistry,
   ssoAuthorizeRegistry,
   ssoExchangeRegistry,
+  meOAuthProvidersRegistry,
+  auditLogRegistry,
 ]
 
 export const authRouters = [
@@ -69,4 +73,6 @@ export const authRouters = [
   quickSignupRouter,
   ssoAuthorizeRouter,
   ssoExchangeRouter,
+  meOAuthProvidersRouter,
+  auditLogRouter,
 ]

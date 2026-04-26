@@ -8,9 +8,8 @@
       "apiKeys": "Clés d'API",
       "billing": "Facturation",
       "usage": "Utilisation",
-      "settings": "Paramètres",
-      "users": "Utilisateurs",
-      "platform": "Plateforme"
+      "activity": "Activité",
+      "settings": "Paramètres"
     },
     "welcomeBack": "Bon retour",
     "memberSince": "Membre depuis",
@@ -26,6 +25,40 @@
       "description": "Gérez votre abonnement et vos limites d'utilisation",
       "comingSoon": "Tarification bientôt disponible"
     },
+    "invoices": {
+      "title": "Factures",
+      "description": "Votre historique de facturation",
+      "empty": "Aucune facture pour le moment",
+      "emptyDescription": "Vos factures apparaîtront ici dès leur émission.",
+      "filter": {
+        "all": "Toutes",
+        "paid": "Payées",
+        "pending": "En attente",
+        "failed": "Échouées"
+      },
+      "download": "Télécharger le PDF",
+      "viewReceipt": "Voir le reçu",
+      "loading": "Chargement des factures...",
+      "errorTitle": "Impossible de charger les factures",
+      "errorDescription": "Une erreur est survenue lors du chargement de votre historique de facturation.",
+      "retry": "Réessayer",
+      "contextUnavailableTitle": "Contexte de facturation indisponible",
+      "contextUnavailableDescription": "Nous n'avons pas pu résoudre votre application de facturation. Veuillez rafraîchir la page ou contacter le support si le problème persiste.",
+      "columns": {
+        "date": "Date",
+        "description": "Description",
+        "amount": "Montant",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "status": {
+        "paid": "Payée",
+        "pending": "En attente",
+        "failed": "Échouée",
+        "refunded": "Remboursée",
+        "cancelled": "Annulée"
+      }
+    },
     "usage": {
       "title": "Utilisation & Analytiques",
       "description": "Statistiques d'utilisation personnelles",
@@ -34,7 +67,70 @@
     "settings": {
       "emailVerification": "Vérification d'email",
       "twoFactor": "Authentification à deux facteurs",
-      "sessions": "Sessions actives"
+      "sessions": "Sessions actives",
+      "connectedAccounts": "Comptes connectés"
+    },
+    "oauthProviders": {
+      "title": "Comptes connectés",
+      "description": "Connectez-vous plus rapidement en liant vos fournisseurs d'identité favoris.",
+      "connected": "Connecté",
+      "notConnected": "Non connecté",
+      "connect": "Connecter",
+      "disconnect": "Déconnecter",
+      "disconnecting": "Déconnexion…",
+      "comingSoon": "Bientôt disponible",
+      "confirmDisconnectTitle": "Déconnecter {provider} ?",
+      "confirmDisconnectDescription": "Vous ne pourrez plus vous connecter avec {provider}. Vous pourrez le reconnecter à tout moment.",
+      "cancel": "Annuler",
+      "disconnectSuccess": "{provider} a été déconnecté.",
+      "disconnectError": "Échec de la déconnexion de {provider}",
+      "cannotDisconnectLastMethod": "C'est votre seul moyen de connexion. Définissez un mot de passe avant de le déconnecter.",
+      "noProvidersAvailable": "Aucun fournisseur d'identité n'est disponible pour le moment.",
+      "loading": "Chargement des fournisseurs…",
+      "googleProvider": "Google",
+      "githubProvider": "GitHub",
+      "discordProvider": "Discord",
+      "microsoftProvider": "Microsoft"
+    },
+    "platformAdmin": {
+      "title": "Admin Plateforme",
+      "description": "Gérez tous les utilisateurs, applications et paramètres de la plateforme.",
+      "cta": "Ouvrir l'admin"
+    },
+    "auditLog": {
+      "title": "Journal d'activité",
+      "description": "Actions récentes effectuées sur votre compte.",
+      "retentionFree": "30 derniers jours",
+      "retentionPro": "365 derniers jours",
+      "empty": "Aucune activité enregistrée pour le moment.",
+      "loading": "Chargement de l'activité...",
+      "error": "Échec du chargement du journal d'activité.",
+      "retry": "Réessayer",
+      "filterLabel": "Filtre",
+      "filterAll": "Toutes les actions",
+      "filterLogin": "Connexion & Déconnexion",
+      "filterSecurity": "Sécurité",
+      "filterApiKeys": "Clés d'API",
+      "filterProfile": "Profil",
+      "columnDate": "Date",
+      "columnAction": "Action",
+      "columnDetails": "Détails",
+      "columnStatus": "Statut",
+      "statusOk": "OK",
+      "actions": {
+        "login": "Connexion",
+        "logout": "Déconnexion",
+        "password_change": "Mot de passe modifié",
+        "email_change": "Email modifié",
+        "oauth_link": "Compte OAuth lié",
+        "oauth_unlink": "Compte OAuth délié",
+        "2fa_enabled": "2FA activée",
+        "2fa_disabled": "2FA désactivée",
+        "session_revoked": "Session révoquée",
+        "api_key_created": "Clé API créée",
+        "api_key_revoked": "Clé API révoquée",
+        "profile_updated": "Profil mis à jour"
+      }
     }
   }
 }

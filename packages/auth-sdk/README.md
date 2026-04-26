@@ -322,6 +322,36 @@ import { AuthProvider, useAuth } from '@ezstart/auth-sdk/react' // No @ezstart/u
 import { SignInForm } from '@ezstart/auth-sdk/components' // Full UI
 ```
 
+## Roadmap & Known Limitations
+
+`@ezstart/auth-sdk` ships a complete MVP for email/password + OAuth Google + 2FA + sessions + RBAC + API keys management. It covers 80% of standard SaaS authentication needs out-of-the-box.
+
+The following features are on the roadmap for future releases:
+
+### Authentication methods
+
+- 🔄 **Magic Link** (passwordless email login)
+- 🔄 **Passkey / WebAuthn** (biometric / hardware key auth)
+- 🔄 **Additional OAuth providers**: GitHub, Discord, Microsoft, Apple
+
+### User account management
+
+- 🔄 **Account deletion flow** with confirmation + grace period
+- 🔄 **Email change flow** with new email verification
+- 🔄 **GDPR data export** (download user data as JSON/ZIP)
+
+### Compliance
+
+- 🔄 **Consent banner / Cookie management** (GDPR/CCPA compliance widget)
+
+If you need any of these features now, you can:
+
+- Implement them on top of the SDK using the exposed `core/` client primitives
+- Open an issue or PR on [GitHub](https://github.com/DFranck/ezstart/issues)
+- Use the `auth-sdk/core` package standalone if you need a non-React integration
+
+The SDK currently powers EZAuth.dev as its reference implementation. We dogfood every feature before it ships.
+
 ## Related
 
 - [EZAuth app](../../apps/ezauth) — The auth service this SDK connects to

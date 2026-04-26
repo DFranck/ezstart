@@ -10,6 +10,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { getApiKeyModel } from '../../models/api-key.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 
 export const revokeApiKeyRegistry = new OpenAPIRegistry()
@@ -44,6 +45,16 @@ const revokeApiKeyController = async (req: Request, res: Response) => {
     apiKey.status = 'revoked'
     apiKey.revokedAt = new Date()
     await apiKey.save()
+
+    void AuditLogService.createFromRequest(req, {
+      userId,
+      action: 'api_key_revoked',
+      appName: apiKey.appName,
+      metadata: {
+        apiKeyId: apiKey._id.toString(),
+        keyPrefix: apiKey.keyPrefix,
+      },
+    })
 
     sendSuccess(res, { message: 'API key revoked' })
   } catch (error: unknown) {

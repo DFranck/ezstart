@@ -1,9 +1,10 @@
 'use client'
 
 import { Card, CardContent, CardHeader, Div, H3 } from '@ezstart/ui/components'
-import { AuthAdminDashboard } from '../AuthAdminDashboard.js'
+import { AuditLogSection } from '../audit-log-section.js'
 import { DeveloperPortal } from '../developer/index.js'
 import { EmailVerificationStatus } from '../EmailVerificationStatus.js'
+import { OAuthProvidersSection } from '../oauth-providers-section.js'
 import { SessionsManager } from '../SessionsManager.js'
 import { TwoFactorSettings } from '../TwoFactorSettings.js'
 import { UserSettings } from '../UserSettings.js'
@@ -32,7 +33,9 @@ interface SectionRendererProps {
   locale: string
   texts: EZAuthDashboardTexts
   slots?: EZAuthDashboardSlots
+  /** Admin / superadmin OR. Forwarded to the BillingSection hint. */
   isAdmin: boolean
+  /** Superadmin only. Forwarded to DeveloperPortal for the admin scope toggle. */
   isSuper: boolean
 }
 
@@ -90,18 +93,11 @@ export function SectionRenderer({
     case 'usage':
       return slots?.usage ?? <UsageSection texts={texts} />
 
+    case 'activity':
+      return slots?.activity ?? <AuditLogSection locale={locale} texts={texts.auditLog} />
+
     case 'settings':
       return slots?.settings ?? <SettingsBlock appName={appName} texts={texts} />
-
-    case 'users':
-      return (
-        slots?.users ?? (
-          <AuthAdminDashboard scope={isSuper ? 'all' : 'myApps'} appName="*" texts={texts.admin} />
-        )
-      )
-
-    case 'platform':
-      return slots?.platform ?? <AuthAdminDashboard scope="all" appName="*" texts={texts.admin} />
   }
 }
 
@@ -141,6 +137,8 @@ function SettingsBlock({ appName, texts }: { appName?: string; texts: EZAuthDash
           <SessionsManager texts={texts.sessions} />
         </CardContent>
       </Card>
+
+      <OAuthProvidersSection appName={appName} texts={texts.oauthProviders} />
     </Div>
   )
 }

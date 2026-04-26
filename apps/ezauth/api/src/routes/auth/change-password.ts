@@ -11,6 +11,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
@@ -74,6 +75,10 @@ const changePasswordController = async (req: Request, res: Response) => {
     }
 
     logger.info(`Password changed for user ${userId}`)
+    void AuditLogService.createFromRequest(req, {
+      userId,
+      action: 'password_change',
+    })
     sendSuccess(res, { message: 'Password changed successfully' })
   } catch (error) {
     logger.error('Change password error:', error)

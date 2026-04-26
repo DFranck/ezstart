@@ -1,0 +1,82 @@
+{
+  "about": {
+    "title": "Gioi thieu EZAuth",
+    "leadHeading": "Xac thuc tap trung cho cac ung dung hien dai",
+    "leadBody": "EZAuth la dich vu danh tinh cung cap suc manh cho cac ung dung EZStart. Chung toi cung cap dang nhap mot lan an toan, quan ly khoa API, OAuth2, xac thuc da yeu to va kiem soat truy cap dua tren vai tro tren mot nen tang than thien voi nha phat trien.",
+    "missionHeading": "Su menh",
+    "missionBody": "Chung toi tin rang xac thuc nen don gian de tich hop, minh bach voi nguoi dung cuoi va khong bao gio bi xem nhe ve mat bao mat. EZAuth giup cac doi ngu san pham tap trung vao logic nghiep vu trong khi chung toi xu ly lop danh tinh.",
+    "techHeading": "Cong nghe",
+    "techBody": "EZAuth duoc xay dung tren TypeScript, Next.js, Express va MongoDB. Toan bo stack la ma nguon mo va duoc phat trien trong monorepo @ezstart tren GitHub. Cac SDK duoc xuat ban tren npm de moi du an co the ap dung EZAuth trong vai phut.",
+    "ctaHeading": "Bat dau",
+    "ctaBody": "Doc tai lieu hoac tao tai khoan de bat dau tich hop EZAuth ngay hom nay.",
+    "ctaDocs": "Doc tai lieu",
+    "ctaContact": "Lien he"
+  },
+  "privacy": {
+    "title": "Chinh sach bao mat",
+    "lastUpdatedLabel": "Cap nhat lan cuoi",
+    "lastUpdatedValue": "25 thang 4 nam 2026",
+    "summaryHeading": "Tom tat",
+    "summaryBody": "EZAuth ton trong quyen rieng tu cua ban. Chinh sach bao mat day du dang duoc nhom phap ly cua chung toi hoan thien va se duoc cong bo truoc khi ra mat chinh thuc.",
+    "scopeHeading": "Du lieu thu thap",
+    "scopeBody": "Chung toi chi thu thap du lieu can thiet de xac thuc va van hanh dich vu: dia chi e-mail, mat khau da bam, dinh danh nha cung cap OAuth, sieu du lieu phien va nhat ky kiem toan toi thieu. Chung toi khong bao gio ban du lieu ca nhan.",
+    "contactHeading": "Co cau hoi ?",
+    "contactBody": "Hay lien he voi chung toi neu can chi tiet ve cach du lieu cua ban duoc xu ly.",
+    "contactCta": "Lien he"
+  },
+  "terms": {
+    "title": "Dieu khoan dich vu",
+    "lastUpdatedLabel": "Cap nhat lan cuoi",
+    "lastUpdatedValue": "25 thang 4 nam 2026",
+    "summaryHeading": "Tom tat",
+    "summaryBody": "EZAuth duoc cung cap nguyen trang trong khi chung toi hoan thien dieu khoan voi nhom phap ly. Dieu khoan day du se duoc cong bo truoc khi ra mat chinh thuc.",
+    "useHeading": "Su dung hop ly",
+    "useBody": "Khi su dung EZAuth ban dong y tuan thu phap luat hien hanh, khong lam dung dich vu va bao mat thong tin dang nhap cua minh. Chung toi co quyen tam ngung tai khoan vi pham nhung nguyen tac nay.",
+    "contactHeading": "Co cau hoi ?",
+    "contactBody": "Hay lien he voi chung toi neu co bat ky cau hoi nao ve dieu khoan.",
+    "contactCta": "Lien he"
+  },
+  "blog": {
+    "title": "Blog",
+    "leadHeading": "Goc nhin, ban phat hanh va ghi chu ky thuat",
+    "leadBody": "Blog cua chung toi sap ra mat. Chung toi se chia se cap nhat san pham, phan tich ky thuat chuyen sau va cac thuc hanh tot ve bao mat lien quan den xac thuc va trai nghiem nha phat trien.",
+    "subscribeHeading": "Cap nhat thong tin",
+    "subscribeBody": "Theo doi du an tren GitHub hoac lien he chung toi de duoc thong bao khi blog hoat dong.",
+    "subscribeCta": "Xem tren GitHub"
+  },
+  "changelog": {
+    "title": "Nhat ky thay doi",
+    "subtitle": "Cac thay doi dang chu y cua EZAuth, theo thu tu thoi gian dao nguoc.",
+    "githubLabel": "Lich su phat hanh day du",
+    "githubCta": "Xem release tren GitHub",
+    "entries": {
+      "v01Title": "v0.1.0 — Ban xem truoc cong khai dau tien",
+      "v01Date": "25 thang 4 nam 2026",
+      "v01Body": "Ban xem truoc cong khai dau tien cua EZAuth. Bao gom dang nhap qua e-mail va OAuth, quan ly khoa API, kiem soat truy cap theo vai tro, Application da tenant va theming nhan trang."
+    }
+  },
+  "status": {
+    "title": "Trang thai",
+    "summaryBadge": "Tat ca he thong dang hoat dong",
+    "summaryBody": "EZAuth hien dang hoat dong binh thuong. Bang dieu khien trang thai truc tiep voi cac chi so uptime va lich su su co dang duoc phat trien.",
+    "componentsHeading": "Thanh phan dich vu",
+    "components": {
+      "apiName": "API xac thuc",
+      "apiStatus": "Hoat dong",
+      "dashboardName": "Bang dieu khien web",
+      "dashboardStatus": "Hoat dong",
+      "oauthName": "Nha cung cap OAuth",
+      "oauthStatus": "Hoat dong"
+    },
+    "incidentsHeading": "Su co",
+    "incidentsBody": "Khong co su co nao dang hoat dong."
+  },
+  "contact": {
+    "title": "Lien he chung toi",
+    "leadBody": "Can ho tro tich hop EZAuth, bao loi hay thao luan ve truong hop su dung cua ban ? Chung toi thuong phan hoi trong vong mot ngay lam viec.",
+    "emailLabel": "E-mail",
+    "emailCta": "Gui e-mail cho chung toi",
+    "githubLabel": "GitHub",
+    "githubCta": "Mo issue"
+  }
+}

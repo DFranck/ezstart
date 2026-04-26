@@ -15,6 +15,7 @@ import { getApiKeyModel } from '../../models/api-key.js'
 import { getApplicationModel, APPLICATION_SLUG_REGEX } from '../../models/application.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 
 export const createApiKeyRegistry = new OpenAPIRegistry()
@@ -199,6 +200,19 @@ const createApiKeyController = async (req: Request, res: Response) => {
       permissions: ['*'],
       status: 'active',
       expiresAt,
+    })
+
+    void AuditLogService.createFromRequest(req, {
+      userId,
+      action: 'api_key_created',
+      appName: resolvedAppName,
+      metadata: {
+        apiKeyId: apiKey._id.toString(),
+        keyPrefix,
+        type,
+        env,
+        scope,
+      },
     })
 
     sendSuccess(res, {

@@ -8,6 +8,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
@@ -107,6 +108,14 @@ const logoutController = async (req: Request, res: Response) => {
       } catch (err) {
         logger.debug('Failed to revoke all user tokens on logout:', err)
       }
+    }
+
+    if (userId) {
+      // Fire-and-forget audit log entry — failure must not block logout.
+      void AuditLogService.createFromRequest(req, {
+        userId,
+        action: 'logout',
+      })
     }
 
     clearCookies()

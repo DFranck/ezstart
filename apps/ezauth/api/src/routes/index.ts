@@ -6,6 +6,7 @@ import { adminRegistries, adminRouters } from './admin/index.js'
 import { apiKeyRegistries, apiKeyRouters } from './api-keys/index.js'
 import { applicationRegistries, applicationRouters } from './applications/index.js'
 import { subscriptionRegistries, subscriptionRouters } from './subscriptions/index.js'
+import maintenanceStatusRouter, { maintenanceStatusRegistry } from './maintenance-status.js'
 
 // Create separate routers for each group
 export const authRouter: ExpressRouter = Router()
@@ -14,6 +15,7 @@ export const adminRouter: ExpressRouter = Router()
 export const apiKeysRouter: ExpressRouter = Router()
 export const applicationsRouter: ExpressRouter = Router()
 export const subscriptionsRouter: ExpressRouter = Router()
+export const publicRouter: ExpressRouter = Router()
 
 export const allRegistries = [
   ...authRegistries,
@@ -22,6 +24,7 @@ export const allRegistries = [
   ...apiKeyRegistries,
   ...applicationRegistries,
   ...subscriptionRegistries,
+  maintenanceStatusRegistry,
 ]
 
 // Mount auth routes (login, register, etc.)
@@ -41,6 +44,9 @@ applicationRouters.forEach(r => applicationsRouter.use('/', r))
 
 // Mount Subscription routes (cross-service webhook receiver from EZPay)
 subscriptionRouters.forEach(r => subscriptionsRouter.use('/', r))
+
+// Mount public maintenance status route
+publicRouter.use('/', maintenanceStatusRouter)
 
 // Default export for backward compatibility (auth routes)
 export default authRouter

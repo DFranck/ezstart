@@ -32,6 +32,15 @@ export interface AuthUserDocument extends Document {
 
   lastActiveAt?: Date | null
 
+  // Soft-deletion lifecycle (account deletion grace period).
+  // When `deletedAt` is set, the account is locked (no login, no token issue),
+  // and `scheduledHardDeleteAt` indicates when a future cron will purge the
+  // record permanently. Users can restore by signing back in during the
+  // grace period (out of scope for the initial route; restore is opt-in
+  // and lives in a separate endpoint).
+  deletedAt?: Date | null
+  scheduledHardDeleteAt?: Date | null
+
   createdAt: Date
   updatedAt: Date
 
@@ -144,6 +153,14 @@ const authUserSchema = new Schema<AuthUserDocument>(
       default: true,
     },
     lastActiveAt: {
+      type: Date,
+      default: null,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    scheduledHardDeleteAt: {
       type: Date,
       default: null,
     },

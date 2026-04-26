@@ -420,6 +420,105 @@ export interface ApplicationResolveResponse {
   scope?: 'admin' | 'user' | 'readonly'
 }
 
+// ---------------------------------------------------------------------------
+// Audit log (user activity)
+// ---------------------------------------------------------------------------
+
+/**
+ * Loggable user actions tracked by the audit log. New action types must be
+ * appended here AND mirrored in the backend `AUDIT_LOG_ACTIONS` enum.
+ */
+export type AuditLogAction =
+  | 'login'
+  | 'logout'
+  | 'password_change'
+  | 'email_change'
+  | 'oauth_link'
+  | 'oauth_unlink'
+  | '2fa_enabled'
+  | '2fa_disabled'
+  | 'session_revoked'
+  | 'api_key_created'
+  | 'api_key_revoked'
+  | 'profile_updated'
+
+/** Free-form metadata recorded alongside an audit log entry. */
+export interface AuditLogMetadata {
+  ip?: string | null
+  userAgent?: string | null
+  location?: string | null
+  [key: string]: unknown
+}
+
+/** A single audit log entry as returned by `GET /me/audit-log`. */
+export interface AuditLogEntry {
+  id: string
+  userId: string
+  appName: string
+  action: AuditLogAction
+  metadata: AuditLogMetadata
+  /** ISO 8601 timestamp. */
+  createdAt: string
+  /** ISO 8601 TTL deadline. */
+  expiresAt: string
+}
+
+/** Filters accepted by the audit log listing endpoint. */
+export interface AuditLogFilters {
+  /** Page size (1–100). Defaults to 20 server-side. */
+  limit?: number
+  /** Pagination offset. Defaults to 0 server-side. */
+  offset?: number
+  /** Optional action type filter. */
+  action?: AuditLogAction
+}
+
+/** Paginated list shape returned by the audit log endpoint. */
+export interface AuditLogListResponse {
+  items: AuditLogEntry[]
+  total: number
+  limit: number
+  offset: number
+}
+
+// ---------------------------------------------------------------------------
+// Admin analytics (superadmin platform overview)
+// ---------------------------------------------------------------------------
+
+/** One bucket of the daily signup trend (last 30 days). */
+export interface AdminAnalyticsSignupTrendPoint {
+  /** ISO date `YYYY-MM-DD` (UTC). */
+  date: string
+  /** Number of new users created on this day. */
+  count: number
+}
+
+/** Top app entry for the analytics overview. */
+export interface AdminAnalyticsTopApp {
+  /** Application slug or `'*'` wildcard for platform-scoped users. */
+  appName: string
+  /** Number of users registered to this app. */
+  userCount: number
+}
+
+/**
+ * Platform analytics overview returned by `GET /api/admin/analytics/overview`.
+ * Superadmin only — see `getAdminAnalyticsOverview()` on the auth client.
+ */
+export interface AdminAnalyticsOverview {
+  totalUsers: number
+  newUsersThisMonth: number
+  activeUsersLast30Days: number
+  /** 0-100, one decimal place. */
+  verifiedUsersPct: number
+  /** 0-100, one decimal place. */
+  twoFactorEnabledPct: number
+  totalApplications: number
+  totalApiKeys: number
+  signupTrend: AdminAnalyticsSignupTrendPoint[]
+  topAppsByUsers: AdminAnalyticsTopApp[]
+}
+
 /** Plan info for billing display. */
 export interface PlanInfo {
   id: string
@@ -431,4 +530,94 @@ export interface PlanInfo {
   /** Null means unlimited. */
   maxKeys: number | null
   features: string[]
+}
+
+// ---------------------------------------------------------------------------
+// OAuth providers (linked accounts)
+// ---------------------------------------------------------------------------
+
+/** Identifier for any OAuth provider known to the platform. */
+export type OAuthProviderId = 'google' | 'github' | 'facebook' | 'apple' | 'microsoft' | 'discord'
+
+/**
+ * One OAuth provider currently linked to the authenticated user.
+ *
+ * Returned by `GET /api/auth/me/oauth-providers`.
+ */
+export interface ConnectedOAuthProvider {
+  /** Provider identifier (e.g. `'google'`). */
+  provider: OAuthProviderId | string
+  /** Email reported by the provider at link time. */
+  email: string
+  /** Display name surfaced by the provider, if available. */
+  displayName?: string
+  /** ISO timestamp of when the user linked the provider. */
+  connectedAt: string
+}
+
+// ---------------------------------------------------------------------------
+// Feature flags + maintenance mode (admin)
+// ---------------------------------------------------------------------------
+
+/** Audience scope of a feature flag — `'global'` (platform-wide) or `'app'`. */
+export type FeatureFlagScope = 'global' | 'app'
+
+/**
+ * Runtime feature flag returned by `GET /api/admin/feature-flags`.
+ */
+export interface FeatureFlag {
+  /** Mongo ObjectId of the flag document. */
+  _id: string
+  /** Stable identifier (lowercase, dot- or dash-separated). */
+  key: string
+  /** Whether the flag is currently active. */
+  enabled: boolean
+  /** Audience scope (`global` or `app`). */
+  scope: FeatureFlagScope
+  /** App slug when scope === 'app'. */
+  appName?: string
+  /** Optional human-readable description. */
+  description?: string
+  /** UserId of the last admin to flip the flag. */
+  updatedBy?: string
+  /** ISO creation timestamp. */
+  createdAt: string
+  /** ISO last-update timestamp. */
+  updatedAt: string
+}
+
+/** Body accepted by `PATCH /api/admin/feature-flags/:key`. */
+export interface UpdateFeatureFlagRequest {
+  enabled: boolean
+  scope?: FeatureFlagScope
+  appName?: string
+  description?: string
+}
+
+/**
+ * Platform-wide maintenance-mode state returned by both the public
+ * `/api/maintenance-status` endpoint and the admin `/api/admin/maintenance-mode`
+ * endpoint.
+ */
+export interface MaintenanceMode {
+  /** Whether maintenance mode is currently active. */
+  enabled: boolean
+  /** Banner message displayed to users (may be empty). */
+  message: string
+  /** ISO datetime when maintenance was enabled, or null if disabled. */
+  startedAt: string | null
+  /** Optional ISO datetime when maintenance is expected to end. */
+  scheduledEnd: string | null
+  /** UserId of the last admin to flip the toggle (admin endpoint only). */
+  updatedBy?: string
+  /** ISO last-update timestamp (admin endpoint only). */
+  updatedAt?: string
+}
+
+/** Body accepted by `PUT /api/admin/maintenance-mode`. */
+export interface UpdateMaintenanceModeRequest {
+  enabled: boolean
+  message?: string
+  /** ISO datetime or `null` to clear the scheduled end. */
+  scheduledEnd?: string | null
 }

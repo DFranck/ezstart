@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   DashboardContent,
@@ -66,8 +66,7 @@ export interface EZAuthDashboardProps {
   /** Explicit list of sections to render. When omitted, all sections visible
    * under the RBAC rules are shown. Use this to hide/reorder tabs. */
   sections?: EZAuthDashboardSection[]
-  /** Extra app-specific sections added after the canonical ones but before
-   * the admin (`users`/`platform`) sections. */
+  /** Extra app-specific sections added after the canonical ones. */
   extraSections?: EZAuthDashboardExtraSection[]
   /**
    * Href for the sidebar brand link (top-left logo).
@@ -81,6 +80,15 @@ export interface EZAuthDashboardProps {
    * `homeHref` (useful for SPA navigation or custom behavior).
    */
   onHomeClick?: () => void
+  /**
+   * Optional content rendered in the sidebar footer, ABOVE the user menu.
+   * Typical use: an "Admin Platform" CTA card visible only to superadmins,
+   * linking to a dedicated `/admin` route (Vercel / Stripe pattern).
+   *
+   * Visibility / RBAC are the consumer's responsibility — pass `null`
+   * for users who shouldn't see it.
+   */
+  sidebarFooterExtra?: ReactNode
 }
 
 /**
@@ -114,6 +122,7 @@ export function EZAuthDashboard({
   extraSections,
   homeHref = '/',
   onHomeClick,
+  sidebarFooterExtra,
 }: EZAuthDashboardProps) {
   const { user, isAuthenticated } = useAuth()
   const texts: EZAuthDashboardTexts = { ...DEFAULT_DASHBOARD_TEXTS, ...textOverrides }
@@ -179,23 +188,16 @@ export function EZAuthDashboard({
   // Filter extra sections by their visibility.
   const visibleExtras = extras.filter(e => shouldShow(e.visibility ?? 'always'))
 
-  // Build nav items. Canonical non-admin sections first, then extras, then
-  // admin sections (`users`/`platform`).
-  const canonicalNonAdmin = canonicalSections.filter(s => s !== 'users' && s !== 'platform')
-  const canonicalAdmin = canonicalSections.filter(s => s === 'users' || s === 'platform')
-
+  // Build nav items: canonical sections first, then app-specific extras.
+  // Admin features (manage all users / applications) live in a dedicated
+  // `/admin` route — consumers expose them via `sidebarFooterExtra`.
   const navItems: { id: string; label: string; icon: string }[] = [
-    ...canonicalNonAdmin.map(section => ({
+    ...canonicalSections.map(section => ({
       id: section,
       label: navLabelFor(section, texts),
       icon: SECTION_ICONS[section],
     })),
     ...visibleExtras.map(e => ({ id: e.id, label: e.label, icon: e.icon })),
-    ...canonicalAdmin.map(section => ({
-      id: section,
-      label: navLabelFor(section, texts),
-      icon: SECTION_ICONS[section],
-    })),
   ]
 
   // If the currently-active section is no longer visible (RBAC flip or custom
@@ -250,6 +252,7 @@ export function EZAuthDashboard({
         </SidebarNav>
 
         <SidebarFooter>
+          {sidebarFooterExtra}
           <UserMenu variant="extended" side="top" avatarSize="sm" />
         </SidebarFooter>
       </DashboardSidebar>

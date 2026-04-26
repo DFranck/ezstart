@@ -43,10 +43,20 @@ export type {
   CreateApiKeyResponse,
   CreateApiKeyRequest,
   PlanInfo,
+  ConnectedOAuthProvider,
+  OAuthProviderId,
   Application,
   CreateApplicationRequest,
   UpdateApplicationRequest,
   ApplicationResolveResponse,
+  AuditLogAction,
+  AuditLogEntry,
+  AuditLogFilters,
+  AuditLogListResponse,
+  AuditLogMetadata,
+  AdminAnalyticsOverview,
+  AdminAnalyticsSignupTrendPoint,
+  AdminAnalyticsTopApp,
 } from './types.js'
 
 // Schemas (response validation / OpenAPI)

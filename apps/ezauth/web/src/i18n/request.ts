@@ -21,6 +21,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     accountEn,
     dashboardEn,
     subscribeEn,
+    legalEn,
     common,
     auth,
     admin,
@@ -28,6 +29,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     account,
     dashboard,
     subscribe,
+    legal,
   ] = await Promise.all([
     import(`../messages/en/common.json`),
     import(`../messages/en/auth.json`),
@@ -36,6 +38,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/en/account.json`),
     import(`../messages/en/dashboard.json`),
     import(`../messages/en/subscribe.json`),
+    import(`../messages/en/legal.json`),
     import(`../messages/${locale}/common.json`),
     import(`../messages/${locale}/auth.json`),
     import(`../messages/${locale}/admin.json`),
@@ -43,6 +46,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/account.json`),
     import(`../messages/${locale}/dashboard.json`),
     import(`../messages/${locale}/subscribe.json`),
+    import(`../messages/${locale}/legal.json`),
   ])
 
   return {
@@ -55,6 +59,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       accountEn.default,
       dashboardEn.default,
       subscribeEn.default,
+      legalEn.default,
       common.default,
       auth.default,
       admin.default,
@@ -62,6 +67,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       account.default,
       dashboard.default,
       subscribe.default,
+      legal.default,
     ]),
   }
 })

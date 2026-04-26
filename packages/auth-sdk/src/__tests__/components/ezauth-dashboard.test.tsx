@@ -155,4 +155,37 @@ describe('EZAuthDashboard — home nav (homeHref / onHomeClick)', () => {
     expect(button).not.toBeNull()
     expect(anchor).toBeNull()
   })
+
+  it('renders sidebarFooterExtra in the sidebar footer', () => {
+    render(
+      <EZAuthDashboard
+        appName="testapp"
+        sidebarFooterExtra={<div data-testid="admin-cta">Admin CTA</div>}
+      />
+    )
+    act(() => {})
+    expect(screen.getByTestId('admin-cta')).toBeInTheDocument()
+  })
+})
+
+describe('EZAuthDashboard — section model (Vercel/Stripe pattern)', () => {
+  it('DEFAULT_SECTION_ORDER excludes "users" and "platform"', async () => {
+    const types = await import('../../components/dashboard/types.js')
+    expect(types.DEFAULT_SECTION_ORDER).not.toContain('users')
+    expect(types.DEFAULT_SECTION_ORDER).not.toContain('platform')
+  })
+
+  it('SECTION_VISIBILITY does not declare admin-only canonical sections', async () => {
+    const types = await import('../../components/dashboard/types.js')
+    const visibilities = Object.values(types.SECTION_VISIBILITY)
+    expect(visibilities).not.toContain('admin')
+    expect(visibilities).not.toContain('superadmin')
+  })
+
+  it('does not render Users / Platform sidebar entries by default', () => {
+    render(<EZAuthDashboard appName="testapp" />)
+    act(() => {})
+    expect(screen.queryByText('Users')).toBeNull()
+    expect(screen.queryByText('Platform')).toBeNull()
+  })
 })

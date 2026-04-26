@@ -11,6 +11,22 @@
     "platform": {
       "title": "Platform users",
       "subtitle": "All users across all tenants (superadmin)"
+    },
+    "deleteAccount": {
+      "navLabel": "Danger zone",
+      "title": "Delete account",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "triggerLabel": "Delete my account",
+      "confirmTitle": "Are you absolutely sure?",
+      "confirmDescription": "This will schedule your account for deletion in 30 days. You can cancel during this period by signing in again.",
+      "emailLabel": "Type your email to confirm",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password (required)",
+      "passwordPlaceholder": "Your account password",
+      "cancel": "Cancel",
+      "confirm": "Delete my account",
+      "successMessage": "Your account has been scheduled for deletion.",
+      "errorMessage": "Failed to delete account"
     }
   }
 }

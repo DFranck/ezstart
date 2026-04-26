@@ -16,6 +16,7 @@ import routes, {
   apiKeysRouter,
   applicationsRouter,
   subscriptionsRouter,
+  publicRouter,
 } from './routes/index.js'
 import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
@@ -25,6 +26,8 @@ import { getTotpSecretModel } from './models/totp-secret.js'
 import { getApiKeyModel } from './models/api-key.js'
 import { getApplicationModel } from './models/application.js'
 import { getSubscriptionEventModel } from './models/subscription-event.js'
+import { getFeatureFlagModel } from './models/feature-flag.js'
+import { getMaintenanceModeModel } from './models/maintenance-mode.js'
 import cookieParser from 'cookie-parser'
 import { logger } from '@ezstart/logger/server'
 
@@ -85,6 +88,7 @@ app.use(createVersionedRouter('/api/admin', adminRouter))
 app.use(createVersionedRouter('/api', apiKeysRouter))
 app.use(createVersionedRouter('/api', applicationsRouter))
 app.use(createVersionedRouter('/api', subscriptionsRouter))
+app.use(createVersionedRouter('/api', publicRouter))
 
 // Connect to MongoDB, warm models, then start listening
 connectToMongo('ezauth')
@@ -96,8 +100,10 @@ connectToMongo('ezauth')
     await getApiKeyModel()
     await getApplicationModel()
     await getSubscriptionEventModel()
+    await getFeatureFlagModel()
+    await getMaintenanceModeModel()
     logger.info(
-      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent'
+      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent, FeatureFlag, MaintenanceMode'
     )
 
     return startServer(app, {

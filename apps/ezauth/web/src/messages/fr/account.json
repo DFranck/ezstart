@@ -11,6 +11,22 @@
     "platform": {
       "title": "Utilisateurs de la plateforme",
       "subtitle": "Tous les utilisateurs de tous les tenants (superadmin)"
+    },
+    "deleteAccount": {
+      "navLabel": "Zone dangereuse",
+      "title": "Supprimer le compte",
+      "description": "Supprimez définitivement votre compte et toutes les données associées. Cette action est irréversible.",
+      "triggerLabel": "Supprimer mon compte",
+      "confirmTitle": "Êtes-vous absolument sûr ?",
+      "confirmDescription": "Votre compte sera programmé pour suppression dans 30 jours. Vous pouvez annuler durant cette période en vous reconnectant.",
+      "emailLabel": "Tapez votre e-mail pour confirmer",
+      "emailPlaceholder": "vous@exemple.com",
+      "passwordLabel": "Mot de passe (requis)",
+      "passwordPlaceholder": "Votre mot de passe",
+      "cancel": "Annuler",
+      "confirm": "Supprimer mon compte",
+      "successMessage": "Votre compte a été programmé pour suppression.",
+      "errorMessage": "Échec de la suppression du compte"
     }
   }
 }

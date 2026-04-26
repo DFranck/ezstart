@@ -77,6 +77,15 @@ export { PlanEditorDialog, defaultPlanEditorDialogTexts } from './PlanEditorDial
 export type { PlanEditorDialogProps, PlanEditorDialogTexts } from './PlanEditorDialog.js'
 export { BillingDashboard } from './BillingDashboard.js'
 export type { BillingDashboardProps, BillingDashboardTexts } from './BillingDashboard.js'
+export {
+  InvoiceHistorySection,
+  defaultInvoiceHistorySectionTexts,
+} from './InvoiceHistorySection.js'
+export type {
+  InvoiceHistorySectionProps,
+  InvoiceHistorySectionTexts,
+  InvoiceStatusFilter,
+} from './InvoiceHistorySection.js'
 export { ManageSubscriptionButton } from './ManageSubscriptionButton.js'
 export type {
   ManageSubscriptionButtonProps,

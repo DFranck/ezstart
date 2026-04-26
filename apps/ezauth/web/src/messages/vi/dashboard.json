@@ -8,9 +8,8 @@
       "apiKeys": "Khóa API",
       "billing": "Thanh toán",
       "usage": "Sử dụng",
-      "settings": "Cài đặt",
-      "users": "Người dùng",
-      "platform": "Nền tảng"
+      "activity": "Hoạt động",
+      "settings": "Cài đặt"
     },
     "welcomeBack": "Chào mừng trở lại",
     "memberSince": "Thành viên từ",
@@ -26,6 +25,40 @@
       "description": "Quản lý gói đăng ký và giới hạn sử dụng",
       "comingSoon": "Giá sẽ sớm có"
     },
+    "invoices": {
+      "title": "Hóa đơn",
+      "description": "Lịch sử thanh toán của bạn",
+      "empty": "Chưa có hóa đơn nào",
+      "emptyDescription": "Hóa đơn của bạn sẽ xuất hiện ở đây khi được phát hành.",
+      "filter": {
+        "all": "Tất cả",
+        "paid": "Đã thanh toán",
+        "pending": "Đang chờ",
+        "failed": "Thất bại"
+      },
+      "download": "Tải PDF",
+      "viewReceipt": "Xem biên lai",
+      "loading": "Đang tải hóa đơn...",
+      "errorTitle": "Không thể tải hóa đơn",
+      "errorDescription": "Đã xảy ra lỗi khi tải lịch sử hóa đơn của bạn.",
+      "retry": "Thử lại",
+      "contextUnavailableTitle": "Không có ngữ cảnh hóa đơn",
+      "contextUnavailableDescription": "Chúng tôi không thể giải quyết ứng dụng thanh toán của bạn. Vui lòng làm mới trang hoặc liên hệ hỗ trợ nếu sự cố vẫn tiếp diễn.",
+      "columns": {
+        "date": "Ngày",
+        "description": "Mô tả",
+        "amount": "Số tiền",
+        "status": "Trạng thái",
+        "actions": "Hành động"
+      },
+      "status": {
+        "paid": "Đã thanh toán",
+        "pending": "Đang chờ",
+        "failed": "Thất bại",
+        "refunded": "Đã hoàn tiền",
+        "cancelled": "Đã hủy"
+      }
+    },
     "usage": {
       "title": "Sử dụng & Phân tích",
       "description": "Thống kê sử dụng cá nhân",
@@ -34,7 +67,70 @@
     "settings": {
       "emailVerification": "Xác minh email",
       "twoFactor": "Xác thực hai yếu tố",
-      "sessions": "Phiên hoạt động"
+      "sessions": "Phiên hoạt động",
+      "connectedAccounts": "Tài khoản đã kết nối"
+    },
+    "oauthProviders": {
+      "title": "Tài khoản đã kết nối",
+      "description": "Đăng nhập nhanh hơn bằng cách liên kết các nhà cung cấp danh tính yêu thích của bạn.",
+      "connected": "Đã kết nối",
+      "notConnected": "Chưa kết nối",
+      "connect": "Kết nối",
+      "disconnect": "Ngắt kết nối",
+      "disconnecting": "Đang ngắt kết nối…",
+      "comingSoon": "Sắp ra mắt",
+      "confirmDisconnectTitle": "Ngắt kết nối {provider}?",
+      "confirmDisconnectDescription": "Bạn sẽ không thể đăng nhập bằng {provider} nữa. Bạn có thể kết nối lại bất cứ lúc nào.",
+      "cancel": "Huỷ",
+      "disconnectSuccess": "Đã ngắt kết nối {provider}.",
+      "disconnectError": "Không thể ngắt kết nối {provider}",
+      "cannotDisconnectLastMethod": "Đây là cách đăng nhập duy nhất. Hãy đặt mật khẩu trước khi ngắt kết nối.",
+      "noProvidersAvailable": "Chưa có nhà cung cấp danh tính nào.",
+      "loading": "Đang tải nhà cung cấp…",
+      "googleProvider": "Google",
+      "githubProvider": "GitHub",
+      "discordProvider": "Discord",
+      "microsoftProvider": "Microsoft"
+    },
+    "platformAdmin": {
+      "title": "Quản trị nền tảng",
+      "description": "Quản lý tất cả người dùng, ứng dụng và cài đặt nền tảng.",
+      "cta": "Mở trang quản trị"
+    },
+    "auditLog": {
+      "title": "Nhật ký hoạt động",
+      "description": "Các hành động gần đây trên tài khoản của bạn.",
+      "retentionFree": "30 ngày qua",
+      "retentionPro": "365 ngày qua",
+      "empty": "Chưa có hoạt động nào được ghi nhận.",
+      "loading": "Đang tải hoạt động...",
+      "error": "Không thể tải nhật ký hoạt động.",
+      "retry": "Thử lại",
+      "filterLabel": "Bộ lọc",
+      "filterAll": "Tất cả hành động",
+      "filterLogin": "Đăng nhập & Đăng xuất",
+      "filterSecurity": "Bảo mật",
+      "filterApiKeys": "Khóa API",
+      "filterProfile": "Hồ sơ",
+      "columnDate": "Ngày",
+      "columnAction": "Hành động",
+      "columnDetails": "Chi tiết",
+      "columnStatus": "Trạng thái",
+      "statusOk": "OK",
+      "actions": {
+        "login": "Đăng nhập",
+        "logout": "Đăng xuất",
+        "password_change": "Đã đổi mật khẩu",
+        "email_change": "Đã đổi email",
+        "oauth_link": "Đã liên kết OAuth",
+        "oauth_unlink": "Đã hủy liên kết OAuth",
+        "2fa_enabled": "Đã bật 2FA",
+        "2fa_disabled": "Đã tắt 2FA",
+        "session_revoked": "Đã thu hồi phiên",
+        "api_key_created": "Đã tạo khóa API",
+        "api_key_revoked": "Đã thu hồi khóa API",
+        "profile_updated": "Đã cập nhật hồ sơ"
+      }
     }
   }
 }

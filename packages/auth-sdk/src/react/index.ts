@@ -34,6 +34,9 @@ export {
   useRotateApiKey,
 } from './api-keys.js'
 
+// OAuth provider management hooks (linked accounts)
+export { useOAuthProviders, useDisconnectOAuthProvider } from './oauth-providers.js'
+
 // Applications hooks (P6)
 export {
   useMyApplications,
@@ -44,3 +47,9 @@ export {
   useUpdateApplicationTheme,
   useRevokeApplication,
 } from './applications.js'
+
+// Audit log hook
+export { useAuditLog } from './audit-log.js'
+
+// Admin analytics hook (superadmin platform overview)
+export { useAdminAnalyticsOverview } from './admin-analytics.js'

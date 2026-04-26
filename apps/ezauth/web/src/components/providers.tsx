@@ -1,13 +1,37 @@
 'use client'
 
 import { AuthProvider, useAuthStore } from '@ezstart/auth-sdk'
+import { MaintenanceBanner } from '@ezstart/auth-sdk/components'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ThemeProvider } from '@ezstart/ui/theme'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { QueryProvider } from './providers/QueryProvider'
 
 function handleAuthFailure() {
   useAuthStore.getState().logout()
+}
+
+/**
+ * Inner shell that mounts the platform-wide `<MaintenanceBanner>` on top of
+ * the page content. Lives below `<QueryProvider>` because the banner uses
+ * React Query (polling `/api/maintenance-status`).
+ */
+function PlatformShell({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('admin.maintenanceMode.banner')
+  return (
+    <>
+      <MaintenanceBanner
+        sticky
+        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
+        texts={{
+          heading: t('heading'),
+          scheduledEndLabel: t('scheduledEndLabel'),
+          dismissAriaLabel: t('dismissAriaLabel'),
+        }}
+      />
+      {children}
+    </>
+  )
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -53,7 +77,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             getToken={() => useAuthStore.getState().accessToken}
             onAuthFailure={handleAuthFailure}
           >
-            {children}
+            <PlatformShell>{children}</PlatformShell>
           </PayProvider>
         </QueryProvider>
       </AuthProvider>

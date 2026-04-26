@@ -12,6 +12,10 @@
 export { DevModeBanner } from './DevModeBanner.js'
 export type { DevModeBannerProps } from './DevModeBanner.js'
 
+// Auth error banner (destructive feedback for auth forms / modals)
+export { AuthErrorBanner } from './auth-error-banner.js'
+export type { AuthErrorBannerProps, AuthErrorBannerTexts } from './auth-error-banner.js'
+
 // Guards loader (styled wrapper around the agnostic <RequireAuth /> default)
 export { RequireAuthLoader } from './RequireAuthLoader.js'
 export type { RequireAuthLoaderProps } from './RequireAuthLoader.js'
@@ -35,6 +39,14 @@ export type { ResetPasswordFormProps, ResetPasswordFormTexts } from './ResetPass
 // OAuth
 export { OAuthButtons } from './OAuthButtons.js'
 export type { OAuthButtonsProps, OAuthButtonsTexts, OAuthProvider } from './OAuthButtons.js'
+
+// OAuth provider management section (Connected accounts card)
+export { OAuthProvidersSection, DEFAULT_OAUTH_PROVIDERS } from './oauth-providers-section.js'
+export type {
+  OAuthProvidersSectionProps,
+  OAuthProvidersSectionTexts,
+  OAuthProvidersSectionProvider,
+} from './oauth-providers-section.js'
 
 // Password
 export { PasswordStrength } from './PasswordStrength.js'
@@ -61,6 +73,10 @@ export type {
 export { SessionsManager } from './SessionsManager.js'
 export type { SessionsManagerProps, SessionsManagerTexts } from './SessionsManager.js'
 
+// Audit log (user activity)
+export { AuditLogSection } from './audit-log-section.js'
+export type { AuditLogSectionProps, AuditLogSectionTexts } from './audit-log-section.js'
+
 // User components
 export { UserMenu } from './UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './UserMenu.js'
@@ -74,6 +90,13 @@ export type { UserAvatarProps } from './UserAvatar.js'
 export { UserSettings } from './UserSettings.js'
 export type { UserSettingsProps, UserSettingsTexts } from './UserSettings.js'
 
+// Delete account (danger zone)
+export { DeleteAccountSection, DEFAULT_DELETE_ACCOUNT_TEXTS } from './DeleteAccountSection.js'
+export type {
+  DeleteAccountSectionProps,
+  DeleteAccountSectionTexts,
+} from './DeleteAccountSection.js'
+
 // User dashboard (compound)
 export { UserDashboard } from './UserDashboard.js'
 export type { UserDashboardProps, UserDashboardTexts } from './UserDashboard.js'
@@ -85,6 +108,33 @@ export type {
   AuthAdminDashboardTexts,
   AuthAdminAudienceScope,
 } from './AuthAdminDashboard.js'
+
+export { AdminApplicationsDashboard } from './AdminApplicationsDashboard.js'
+export type {
+  AdminApplicationsDashboardProps,
+  AdminApplicationsTexts,
+} from './AdminApplicationsDashboard.js'
+
+// Admin — feature flags + maintenance mode
+export { AdminFeatureFlagsSection } from './admin/AdminFeatureFlagsSection.js'
+export type {
+  AdminFeatureFlagsSectionProps,
+  AdminFeatureFlagsSectionTexts,
+} from './admin/AdminFeatureFlagsSection.js'
+
+// Admin — platform analytics overview (superadmin only)
+export { AdminAnalyticsSection } from './admin/AdminAnalyticsSection.js'
+export type {
+  AdminAnalyticsSectionProps,
+  AdminAnalyticsSectionTexts,
+} from './admin/AdminAnalyticsSection.js'
+export { AdminMaintenanceModeSection } from './admin/AdminMaintenanceModeSection.js'
+export type {
+  AdminMaintenanceModeSectionProps,
+  AdminMaintenanceModeSectionTexts,
+} from './admin/AdminMaintenanceModeSection.js'
+export { MaintenanceBanner } from './admin/MaintenanceBanner.js'
+export type { MaintenanceBannerProps, MaintenanceBannerTexts } from './admin/MaintenanceBanner.js'
 
 // Developer dashboard (full-page layout)
 export { EZAuthDashboard } from './EZAuthDashboard.js'

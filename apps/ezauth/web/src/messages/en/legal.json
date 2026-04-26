@@ -1,0 +1,82 @@
+{
+  "about": {
+    "title": "About EZAuth",
+    "leadHeading": "Centralized authentication for modern applications",
+    "leadBody": "EZAuth is the identity service powering EZStart applications. We provide secure single sign-on, API key management, OAuth2, multi-factor authentication, and role-based access control through one developer-friendly platform.",
+    "missionHeading": "Our mission",
+    "missionBody": "We believe that authentication should be effortless to integrate, transparent for end users, and never an afterthought for security. EZAuth lets product teams focus on their domain logic while we handle the identity layer.",
+    "techHeading": "Technology",
+    "techBody": "EZAuth is built on TypeScript, Next.js, Express, and MongoDB. The full stack is open-source and developed in the @ezstart monorepo on GitHub. SDKs are published to npm so any project can adopt EZAuth in minutes.",
+    "ctaHeading": "Get started",
+    "ctaBody": "Read the documentation or create an account to start integrating EZAuth today.",
+    "ctaDocs": "Read the docs",
+    "ctaContact": "Contact us"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "April 25, 2026",
+    "summaryHeading": "Summary",
+    "summaryBody": "EZAuth respects your privacy. Our full privacy policy is being finalized with our legal team and will be published before the public launch.",
+    "scopeHeading": "What we collect",
+    "scopeBody": "We collect only the data required to authenticate you and operate the service: email address, hashed password, OAuth provider identifiers, session metadata, and minimal audit logs. We never sell personal data.",
+    "contactHeading": "Questions?",
+    "contactBody": "Reach out to us if you need details about how your data is processed.",
+    "contactCta": "Contact us"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "April 25, 2026",
+    "summaryHeading": "Summary",
+    "summaryBody": "EZAuth is provided on an as-is basis while we finalize our terms with our legal team. The full terms of service will be published before the public launch.",
+    "useHeading": "Acceptable use",
+    "useBody": "By using EZAuth you agree to follow applicable laws, to not abuse the service, and to keep your credentials secure. We reserve the right to suspend accounts that violate these principles.",
+    "contactHeading": "Questions?",
+    "contactBody": "Reach out to us with any question about these terms.",
+    "contactCta": "Contact us"
+  },
+  "blog": {
+    "title": "Blog",
+    "leadHeading": "Insights, releases, and engineering notes",
+    "leadBody": "Our blog is launching soon. We will share product updates, technical deep-dives, and security best practices around authentication and developer experience.",
+    "subscribeHeading": "Stay in the loop",
+    "subscribeBody": "Follow the project on GitHub or contact us to be notified when the blog goes live.",
+    "subscribeCta": "View on GitHub"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "subtitle": "Notable changes to EZAuth, in reverse chronological order.",
+    "githubLabel": "Full release history",
+    "githubCta": "View releases on GitHub",
+    "entries": {
+      "v01Title": "v0.1.0 — Initial public preview",
+      "v01Date": "April 25, 2026",
+      "v01Body": "First public preview of EZAuth. Includes email and OAuth sign-in, API key management, role-based access control, multi-tenant Applications, and white-label theming."
+    }
+  },
+  "status": {
+    "title": "Status",
+    "summaryBadge": "All systems operational",
+    "summaryBody": "EZAuth is currently operating normally. A live status dashboard with uptime metrics and incident history is in development.",
+    "componentsHeading": "Service components",
+    "components": {
+      "apiName": "Authentication API",
+      "apiStatus": "Operational",
+      "dashboardName": "Web dashboard",
+      "dashboardStatus": "Operational",
+      "oauthName": "OAuth providers",
+      "oauthStatus": "Operational"
+    },
+    "incidentsHeading": "Incidents",
+    "incidentsBody": "No active incidents reported."
+  },
+  "contact": {
+    "title": "Contact us",
+    "leadBody": "Need help integrating EZAuth, reporting an issue, or discussing your use case? We typically reply within one business day.",
+    "emailLabel": "Email",
+    "emailCta": "Send us an email",
+    "githubLabel": "GitHub",
+    "githubCta": "Open an issue"
+  }
+}

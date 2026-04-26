@@ -1,14 +1,21 @@
 import type { ReactNode } from 'react'
-import type { AuthAdminDashboardTexts } from '../AuthAdminDashboard.js'
 import type { UserSettingsTexts } from '../UserSettings.js'
 import type { TwoFactorSettingsTexts } from '../TwoFactorSettings.js'
 import type { EmailVerificationStatusTexts } from '../EmailVerificationStatus.js'
 import type { SessionsManagerTexts } from '../SessionsManager.js'
 import type { DeveloperPortalTexts } from '../developer/types.js'
+import type { OAuthProvidersSectionTexts } from '../oauth-providers-section.js'
+import type { AuditLogSectionTexts } from '../audit-log-section.js'
 
 /**
- * Canonical section identifiers for the unified dashboard. Mirrors the
- * Stripe / Clerk sidebar pattern: progressive disclosure based on RBAC.
+ * Canonical section identifiers for the unified `/dashboard`. Mirrors the
+ * Stripe / Clerk / Vercel sidebar pattern: this is the **user space** —
+ * always scoped to the current user. Platform-superadmin features (manage
+ * all users, all applications) live in a dedicated `/admin` route via the
+ * `<AuthAdminDashboard>` SDK component, NOT inside this sidebar.
+ *
+ * Consumer apps that need to expose admin entry points should render an
+ * "Admin Platform" CTA via `sidebarFooterExtra` (or a dedicated route).
  */
 export type EZAuthDashboardSection =
   | 'overview'
@@ -17,9 +24,8 @@ export type EZAuthDashboardSection =
   | 'api-keys'
   | 'billing'
   | 'usage'
+  | 'activity'
   | 'settings'
-  | 'users'
-  | 'platform'
 
 /**
  * Visibility rules for each section.
@@ -38,9 +44,8 @@ export interface EZAuthDashboardTexts {
   navApiKeys: string
   navBilling: string
   navUsage: string
+  navActivity: string
   navSettings: string
-  navUsers: string
-  navPlatform: string
   /** Sidebar brand */
   brand: string
   /** Overview section */
@@ -65,13 +70,15 @@ export interface EZAuthDashboardTexts {
   settingsEmailVerification: string
   settingsTwoFactor: string
   settingsSessions: string
+  settingsConnectedAccounts: string
   /** Nested component overrides */
   settings: Partial<UserSettingsTexts>
   emailVerification: Partial<EmailVerificationStatusTexts>
   twoFactor: Partial<TwoFactorSettingsTexts>
   sessions: Partial<SessionsManagerTexts>
   developerPortal: Partial<DeveloperPortalTexts>
-  admin: Partial<AuthAdminDashboardTexts>
+  oauthProviders: Partial<OAuthProvidersSectionTexts>
+  auditLog: Partial<AuditLogSectionTexts>
 }
 
 /**
@@ -85,9 +92,8 @@ export interface EZAuthDashboardSlots {
   apiKeys?: ReactNode
   billing?: ReactNode
   usage?: ReactNode
+  activity?: ReactNode
   settings?: ReactNode
-  users?: ReactNode
-  platform?: ReactNode
 }
 
 /**
@@ -114,9 +120,8 @@ export const DEFAULT_DASHBOARD_TEXTS: EZAuthDashboardTexts = {
   navApiKeys: 'API Keys',
   navBilling: 'Billing',
   navUsage: 'Usage',
+  navActivity: 'Activity',
   navSettings: 'Settings',
-  navUsers: 'Users',
-  navPlatform: 'Platform',
   brand: 'Dashboard',
   welcomeBack: 'Welcome back',
   memberSince: 'Member since',
@@ -135,16 +140,22 @@ export const DEFAULT_DASHBOARD_TEXTS: EZAuthDashboardTexts = {
   settingsEmailVerification: 'Email Verification',
   settingsTwoFactor: 'Two-Factor Authentication',
   settingsSessions: 'Active Sessions',
+  settingsConnectedAccounts: 'Connected accounts',
   settings: {},
   emailVerification: {},
   twoFactor: {},
   sessions: {},
   developerPortal: {},
-  admin: {},
+  oauthProviders: {},
+  auditLog: {},
 }
 
 /**
  * Default order for the canonical sections when `sections` prop is not provided.
+ *
+ * Note: `users` and `platform` are intentionally absent — they belong to the
+ * dedicated `/admin` route (Vercel / Stripe pattern). The dashboard is the
+ * user space, always scoped to the current user.
  */
 export const DEFAULT_SECTION_ORDER: EZAuthDashboardSection[] = [
   'overview',
@@ -153,8 +164,7 @@ export const DEFAULT_SECTION_ORDER: EZAuthDashboardSection[] = [
   'api-keys',
   'billing',
   'usage',
-  'users',
-  'platform',
+  'activity',
   'settings',
 ]
 
@@ -165,9 +175,8 @@ export const SECTION_VISIBILITY: Record<EZAuthDashboardSection, SectionVisibilit
   'api-keys': 'always',
   billing: 'always',
   usage: 'always',
+  activity: 'always',
   settings: 'always',
-  users: 'admin',
-  platform: 'superadmin',
 }
 
 export const SECTION_ICONS: Record<EZAuthDashboardSection, string> = {
@@ -177,9 +186,8 @@ export const SECTION_ICONS: Record<EZAuthDashboardSection, string> = {
   'api-keys': 'lucide:Key',
   billing: 'lucide:CreditCard',
   usage: 'lucide:BarChart3',
+  activity: 'lucide:History',
   settings: 'lucide:Settings',
-  users: 'lucide:Users',
-  platform: 'lucide:ShieldCheck',
 }
 
 export function navLabelFor(section: EZAuthDashboardSection, texts: EZAuthDashboardTexts): string {
@@ -196,12 +204,10 @@ export function navLabelFor(section: EZAuthDashboardSection, texts: EZAuthDashbo
       return texts.navBilling
     case 'usage':
       return texts.navUsage
+    case 'activity':
+      return texts.navActivity
     case 'settings':
       return texts.navSettings
-    case 'users':
-      return texts.navUsers
-    case 'platform':
-      return texts.navPlatform
   }
 }
 
