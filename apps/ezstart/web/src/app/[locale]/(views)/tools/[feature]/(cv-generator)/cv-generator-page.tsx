@@ -15,7 +15,6 @@ import {
   P,
   Section,
   Span,
-  Spinner,
 } from '@ezstart/ui/components'
 import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
 import { RequireRole, InsufficientPermissions } from '@ezstart/auth-sdk'
@@ -465,11 +464,6 @@ export default function CVGeneratorPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>

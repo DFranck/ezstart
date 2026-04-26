@@ -1,7 +1,7 @@
 'use client'
 
 import { useNavLinks } from '@/hooks/useNavLinks'
-import { LoginButton, RequireAuth, SignedIn, SignedOut, UserMenu } from '@ezstart/auth-sdk'
+import { LoginButton, SignedIn, SignedOut, UserMenu } from '@ezstart/auth-sdk'
 import { getApiUrl } from '@ezstart/config'
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import { useTheme } from 'next-themes'
@@ -176,7 +176,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
         {children}
       </BaseClientLayout>
       {isMobile && (
-        <RequireAuth>
+        <SignedIn>
           <PWAInstallPrompt
             appName={t('pwa.install.title')}
             description={t('pwa.install.description')}
@@ -184,7 +184,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
             laterButtonText={t('pwa.install.laterButton')}
             // showInDev
           />
-        </RequireAuth>
+        </SignedIn>
       )}
     </>
   )

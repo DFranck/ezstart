@@ -162,11 +162,6 @@ export default function HealthMonitoringPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>

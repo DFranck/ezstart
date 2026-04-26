@@ -1,7 +1,11 @@
 'use client'
 
 import { RequireAuth, RequireRole } from '@ezstart/auth-sdk'
-import { AuthAdminDashboard, type AuthAdminDashboardTexts } from '@ezstart/auth-sdk/components'
+import {
+  AuthAdminDashboard,
+  type AuthAdminDashboardTexts,
+  RequireAuthLoader,
+} from '@ezstart/auth-sdk/components'
 import {
   Card,
   CardContent,
@@ -12,7 +16,6 @@ import {
   H1,
   P,
   Span,
-  Spinner,
   Tabs,
   TabsContent,
   TabsList,
@@ -94,13 +97,7 @@ export default function AdminPage() {
   }
 
   return (
-    <RequireAuth
-      loadingComponent={
-        <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
-          <Spinner variant="primary" size="lg" text={t('loading')} />
-        </Div>
-      }
-    >
+    <RequireAuth loadingComponent={<RequireAuthLoader text={t('loading')} />}>
       <RequireRole
         roles="superadmin"
         fallbackComponent={

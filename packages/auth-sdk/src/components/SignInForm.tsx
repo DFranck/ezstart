@@ -20,9 +20,11 @@ import { useForm } from 'react-hook-form'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
 import { DevModeBanner } from './DevModeBanner.js'
+import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 import { detectCurrentThemePreference } from './themePreference.js'
+import { buildPostLoginRedirect } from './postLoginRedirect.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -111,6 +113,7 @@ export function SignInForm({
   urlKey,
 }: SignInFormProps) {
   const navigation = useAuthNavigation()
+  const { handleCallback } = useAuth()
   const locale = propLocale ?? navigation.locale
   const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
@@ -154,21 +157,55 @@ export function SignInForm({
         return
       }
 
-      // Redirect with authorization code
+      // Redirect with authorization code.
+      //
+      // `buildPostLoginRedirect` distinguishes two flows:
+      //
+      // 1. **Cross-origin SSO** (foreign consumer app) — append `?code=`
+      //    so the consumer's `/auth/callback` can exchange it, plus
+      //    `?theme=` so the consumer adopts the user's last-chosen
+      //    scheme. `detectCurrentThemePreference` returns `undefined`
+      //    when no signal is available — the param is omitted in that
+      //    case.
+      //
+      // 2. **Same-origin first-party** (e.g. ezauth dogfood hitting
+      //    `/admin` on its own origin) — there is no `/auth/callback`
+      //    handler on the destination, so the SDK MUST exchange the
+      //    code itself BEFORE navigating. Otherwise the destination
+      //    page renders with no tokens in the store, `RequireAuth`
+      //    flips to unauthenticated, and we redirect right back to
+      //    `/login` — an infinite loop. We reuse `handleCallback`
+      //    (the same primitive `<AuthCallbackPage>` calls in the SSO
+      //    flow) so both paths share one code-exchange code path.
       if (redirectUri && result.code) {
         logger.info('Redirecting to:', redirectUri)
         const url = new URL(redirectUri)
-        url.searchParams.set('code', result.code)
-        // Forward the current ezauth theme preference back to the consumer
-        // so if the user switched scheme on the auth page via the
-        // ThemeSwitcher, the consumer adopts the new preference on
-        // callback. `detectCurrentThemePreference` returns `undefined`
-        // when no signal is available — we omit the param in that case.
-        const themePref = detectCurrentThemePreference()
-        if (themePref) {
-          url.searchParams.set('theme', themePref)
+        const isSameOrigin = url.origin === window.location.origin
+
+        if (isSameOrigin) {
+          try {
+            await handleCallback(result.code)
+          } catch (exchangeError) {
+            logger.error(
+              'Same-origin code exchange failed:',
+              exchangeError instanceof Error ? exchangeError.message : String(exchangeError)
+            )
+            throw exchangeError instanceof Error ? exchangeError : new Error(t.fallbackError)
+          }
+          window.location.href = url.toString()
+          return
         }
-        window.location.href = url.toString()
+
+        // Cross-origin: forward the code (and theme) so the consumer's
+        // `/auth/callback` can perform the exchange itself.
+        const themePref = detectCurrentThemePreference()
+        const target = buildPostLoginRedirect(
+          redirectUri,
+          result.code,
+          themePref,
+          window.location.origin
+        )
+        window.location.href = target
         return
       }
 

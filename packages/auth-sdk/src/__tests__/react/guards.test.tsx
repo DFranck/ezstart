@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import React from 'react'
 import { useAuthStore } from '../../react/store.js'
@@ -20,11 +20,65 @@ vi.mock('../../react/auth-provider.js', () => ({
 // Import guards after mocking
 const { RequireAuth, AccessDenied, SignedIn, SignedOut } = await import('../../react/guards.js')
 
+// ---------------------------------------------------------------------------
+// window.location.href stub helper
+// ---------------------------------------------------------------------------
+//
+// jsdom's `window.location` ignores assignments to `href` by default and
+// triggers a "Not implemented: navigation" warning. We replace `location`
+// with a plain object spy so we can assert the assignment.
+function stubLocation(pathname: string) {
+  const calls: string[] = []
+  const fakeLocation: Record<string, unknown> = {
+    pathname,
+    search: '',
+    hash: '',
+    origin: 'http://localhost',
+    get href() {
+      return `http://localhost${pathname}`
+    },
+    set href(value: string) {
+      calls.push(value)
+    },
+    assign: (value: string) => {
+      calls.push(value)
+    },
+    replace: (value: string) => {
+      calls.push(value)
+    },
+  }
+  const original = window.location
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    writable: true,
+    value: fakeLocation,
+  })
+  return {
+    calls,
+    restore: () => {
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        writable: true,
+        value: original,
+      })
+    },
+  }
+}
+
 describe('RequireAuth', () => {
+  let stub: ReturnType<typeof stubLocation> | null = null
+
   beforeEach(() => {
     act(() => {
       useAuthStore.getState().logout()
     })
+  })
+
+  afterEach(() => {
+    if (stub) {
+      stub.restore()
+      stub = null
+    }
   })
 
   it('renders children when authenticated', async () => {
@@ -46,6 +100,8 @@ describe('RequireAuth', () => {
   })
 
   it('renders fallback when NOT authenticated', async () => {
+    stub = stubLocation('/en/admin')
+
     render(
       <RequireAuth fallbackComponent={<div data-testid="fallback">Please login</div>}>
         <div data-testid="protected">Secret content</div>
@@ -56,11 +112,15 @@ describe('RequireAuth', () => {
 
     expect(screen.queryByTestId('protected')).not.toBeInTheDocument()
     expect(screen.getByTestId('fallback')).toBeInTheDocument()
+    // Explicit fallback disables the default auto-redirect.
+    expect(stub.calls).toHaveLength(0)
   })
 
-  it('renders nothing when NOT authenticated and no fallback', async () => {
+  it('renders nothing when NOT authenticated and fallbackComponent={null} (silent opt-out)', async () => {
+    stub = stubLocation('/en/admin')
+
     const { container } = render(
-      <RequireAuth>
+      <RequireAuth fallbackComponent={null}>
         <div data-testid="protected">Secret content</div>
       </RequireAuth>
     )
@@ -69,6 +129,8 @@ describe('RequireAuth', () => {
 
     expect(screen.queryByTestId('protected')).not.toBeInTheDocument()
     expect(container.innerHTML).toBe('')
+    // Explicit `null` fallback also disables the default auto-redirect.
+    expect(stub.calls).toHaveLength(0)
   })
 
   it('renders loading component during hydration', () => {
@@ -84,21 +146,191 @@ describe('RequireAuth', () => {
     expect(container).toBeTruthy()
   })
 
+  // -------------------------------------------------------------------------
+  // Default loading fallback (NEW) — when `loadingComponent` is omitted,
+  // the guard renders an agnostic SVG spinner with role="status".
+  // -------------------------------------------------------------------------
+
+  it('renders default loading fallback when no loadingComponent is provided', () => {
+    const { container } = render(
+      <RequireAuth>
+        <div data-testid="protected">Secret content</div>
+      </RequireAuth>
+    )
+
+    // Synchronously (before hydration effect), the default loader is rendered.
+    // We assert via role="status" + the inline SVG.
+    const status = container.querySelector('[role="status"]')
+    expect(status).not.toBeNull()
+    expect(status?.getAttribute('aria-busy')).toBe('true')
+    expect(container.querySelector('svg')).not.toBeNull()
+  })
+
+  it('renders custom loadingComponent instead of the default when provided', () => {
+    const { container } = render(
+      <RequireAuth loadingComponent={<div data-testid="custom-loading">Custom loader</div>}>
+        <div>Content</div>
+      </RequireAuth>
+    )
+
+    // Custom loader present
+    expect(container.querySelector('[data-testid="custom-loading"]')).not.toBeNull()
+    // Default SVG spinner absent
+    expect(container.querySelector('svg')).toBeNull()
+  })
+
+  it('renders nothing during hydration when loadingComponent={null} (explicit opt-out)', () => {
+    const { container } = render(
+      <RequireAuth loadingComponent={null} fallbackComponent={null}>
+        <div>Content</div>
+      </RequireAuth>
+    )
+
+    // Explicit null suppresses the default loader entirely.
+    // We check there's no SVG (default loader signature) and no role="status".
+    expect(container.querySelector('svg')).toBeNull()
+    expect(container.querySelector('[role="status"]')).toBeNull()
+  })
+
   it('redirects when redirectTo is set and user is NOT authenticated', async () => {
-    const originalHref = window.location.href
+    stub = stubLocation('/en/admin')
 
     render(
-      <RequireAuth redirectTo="/login">
+      <RequireAuth redirectTo="/custom-login">
         <div>Content</div>
       </RequireAuth>
     )
 
     await act(async () => {})
 
-    // The component sets window.location.href
-    // In jsdom this may not actually navigate, but we verify the assignment
-    // Since there's no mock, we just verify no children render
     expect(screen.queryByText('Content')).not.toBeInTheDocument()
+    expect(stub.calls).toContain('/custom-login')
+  })
+
+  // -------------------------------------------------------------------------
+  // Default behavior — auto-redirect to {locale}/login?redirect_uri=<absolute>
+  //
+  // The `redirect_uri` MUST be an ABSOLUTE URL (origin + path + search + hash)
+  // because the ezauth backend `/api/auth/login` Zod schema validates it
+  // strictly with `z.string().url()` + http/https protocol check. Sending a
+  // relative path triggers a 422 VALIDATION_ERROR after the user submits the
+  // login form (E2E-FIX-16).
+  // -------------------------------------------------------------------------
+
+  it('auto-redirects to /{locale}/login?redirect_uri=<absolute URL> when no fallback nor redirectTo', async () => {
+    stub = stubLocation('/en/admin')
+
+    render(
+      <RequireAuth>
+        <div>Protected</div>
+      </RequireAuth>
+    )
+
+    await act(async () => {})
+
+    expect(screen.queryByText('Protected')).not.toBeInTheDocument()
+    expect(stub.calls).toHaveLength(1)
+    expect(stub.calls[0]).toBe(
+      '/en/login?redirect_uri=' + encodeURIComponent('http://localhost/en/admin')
+    )
+    // Sanity: the encoded redirect_uri starts with http:// or https:// so the
+    // backend Zod URL validator accepts it.
+    const decoded = decodeURIComponent(
+      (stub.calls[0] as string).split('redirect_uri=')[1] as string
+    )
+    expect(decoded.startsWith('http://') || decoded.startsWith('https://')).toBe(true)
+  })
+
+  it('auto-redirects respecting custom loginPath', async () => {
+    stub = stubLocation('/fr/dashboard')
+
+    render(
+      <RequireAuth loginPath="/auth/signin">
+        <div>Protected</div>
+      </RequireAuth>
+    )
+
+    await act(async () => {})
+
+    expect(stub.calls).toHaveLength(1)
+    expect(stub.calls[0]).toBe(
+      '/fr/auth/signin?redirect_uri=' + encodeURIComponent('http://localhost/fr/dashboard')
+    )
+  })
+
+  it('auto-redirects to /login (no locale prefix) when URL has no locale segment', async () => {
+    stub = stubLocation('/admin')
+
+    render(
+      <RequireAuth>
+        <div>Protected</div>
+      </RequireAuth>
+    )
+
+    await act(async () => {})
+
+    expect(stub.calls).toHaveLength(1)
+    expect(stub.calls[0]).toBe(
+      '/login?redirect_uri=' + encodeURIComponent('http://localhost/admin')
+    )
+  })
+
+  it('preserves search and hash in the redirect_uri', async () => {
+    stub = stubLocation('/en/admin')
+    // Override search/hash on the fake location
+    ;(window.location as unknown as { search: string }).search = '?tab=users'
+    ;(window.location as unknown as { hash: string }).hash = '#row-3'
+
+    render(
+      <RequireAuth>
+        <div>Protected</div>
+      </RequireAuth>
+    )
+
+    await act(async () => {})
+
+    expect(stub.calls).toHaveLength(1)
+    expect(stub.calls[0]).toBe(
+      '/en/login?redirect_uri=' + encodeURIComponent('http://localhost/en/admin?tab=users#row-3')
+    )
+  })
+
+  it('redirect_uri is an absolute http(s) URL accepted by backend Zod url() validator', async () => {
+    stub = stubLocation('/en/admin')
+
+    render(
+      <RequireAuth>
+        <div>Protected</div>
+      </RequireAuth>
+    )
+
+    await act(async () => {})
+
+    expect(stub.calls).toHaveLength(1)
+    const queryStart = (stub.calls[0] as string).indexOf('redirect_uri=')
+    expect(queryStart).toBeGreaterThan(-1)
+    const encoded = (stub.calls[0] as string).slice(queryStart + 'redirect_uri='.length)
+    const decoded = decodeURIComponent(encoded)
+    // Mirrors the backend `LoginRequestSchema` in @ezstart/api-contracts:
+    //   z.string().url().refine(u => /^https?:/.test(new URL(u).protocol), ...)
+    expect(() => new URL(decoded)).not.toThrow()
+    expect(['http:', 'https:']).toContain(new URL(decoded).protocol)
+  })
+
+  it('redirectTo overrides the default auto-redirect', async () => {
+    stub = stubLocation('/en/admin')
+
+    render(
+      <RequireAuth redirectTo="/sso/start">
+        <div>Protected</div>
+      </RequireAuth>
+    )
+
+    await act(async () => {})
+
+    expect(stub.calls).toContain('/sso/start')
+    // Auto-redirect path must NOT have been called
+    expect(stub.calls.some(c => c.includes('redirect_uri='))).toBe(false)
   })
 })
 
@@ -106,9 +338,7 @@ describe('AccessDenied', () => {
   it('renders default title and message', () => {
     render(<AccessDenied />)
     expect(screen.getByText('Access Denied')).toBeInTheDocument()
-    expect(
-      screen.getByText('You must be logged in to access this page.')
-    ).toBeInTheDocument()
+    expect(screen.getByText('You must be logged in to access this page.')).toBeInTheDocument()
   })
 
   it('renders custom title and message', () => {

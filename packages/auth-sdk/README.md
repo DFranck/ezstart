@@ -123,9 +123,52 @@ const me = await client.getCurrentUser()
 - `<AuthProvider>` — Context provider with auto-refresh
 - `useAuth()` — Main hook (user, login, logout, isAuthenticated)
 - `useAuthStore()` — Zustand store (direct access)
-- `<RequireAuth>` — Route protection wrapper
-- `<SignedIn>` / `<SignedOut>` — Conditional rendering
+- `<RequireAuth>` — Route protection wrapper (auto-redirects to login by default — see below)
+- `<SignedIn>` / `<SignedOut>` — Conditional rendering for partial UI (no redirect)
 - `<AccessDenied>` — Fallback component
+
+#### `<RequireAuth>` unauthenticated behavior
+
+When the user is not authenticated, `<RequireAuth>` picks ONE behavior in
+this priority order:
+
+1. If `redirectTo` is set → `window.location.href = redirectTo`.
+2. If `fallbackComponent` is set (even as `null`) → renders it.
+3. **Default** → auto-redirects to `{locale}{loginPath}?redirect_uri={current path}`
+   so the user is brought back here after sign-in.
+
+```tsx
+// 1. Default — auto-redirect to /{locale}/login?redirect_uri=...
+<RequireAuth>
+  <Dashboard />
+</RequireAuth>
+
+// 2. Custom login path (still auto-builds the locale prefix and redirect_uri)
+<RequireAuth loginPath="/auth/signin">
+  <Dashboard />
+</RequireAuth>
+
+// 3. Custom fallback UI (no redirect)
+<RequireAuth fallbackComponent={<AccessDenied />}>
+  <Dashboard />
+</RequireAuth>
+
+// 4. Silent opt-out (no redirect, render nothing) — use for conditional
+//    UI elements like an install prompt that should only appear when
+//    signed in. Prefer `<SignedIn>` for this case when possible.
+<RequireAuth fallbackComponent={null}>
+  <PWAInstallPrompt />
+</RequireAuth>
+
+// 5. Custom redirect destination (full URL or path)
+<RequireAuth redirectTo="https://auth.example.com/sso">
+  <Dashboard />
+</RequireAuth>
+```
+
+`loginPath` defaults to `'/login'`. The locale prefix is detected from the
+current `window.location.pathname` (matches `^/[a-z]{2,3}/`) and is omitted
+when no locale segment is present.
 
 ### Components (`@ezstart/auth-sdk/components`)
 
@@ -193,7 +236,6 @@ JWT instead of the local session token.
 
 ```tsx
 import { AuthAdminDashboard } from '@ezstart/auth-sdk/components'
-
 ;<AuthAdminDashboard
   apiUrl="https://auth.example.com"
   authToken={() => mySuperadminJwt}

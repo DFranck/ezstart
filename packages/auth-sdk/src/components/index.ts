@@ -12,6 +12,10 @@
 export { DevModeBanner } from './DevModeBanner.js'
 export type { DevModeBannerProps } from './DevModeBanner.js'
 
+// Guards loader (styled wrapper around the agnostic <RequireAuth /> default)
+export { RequireAuthLoader } from './RequireAuthLoader.js'
+export type { RequireAuthLoaderProps } from './RequireAuthLoader.js'
+
 // Auth forms
 export { SignInForm } from './SignInForm.js'
 export type { SignInFormProps, SignInFormTexts } from './SignInForm.js'

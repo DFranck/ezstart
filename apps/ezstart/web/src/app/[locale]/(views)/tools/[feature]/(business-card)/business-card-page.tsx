@@ -22,7 +22,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Spinner,
 } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { BusinessCardCanvas } from './components/business-card-canvas'
@@ -335,11 +334,6 @@ export default function BusinessCardGeneratorPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>

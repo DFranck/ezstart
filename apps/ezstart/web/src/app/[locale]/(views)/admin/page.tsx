@@ -9,7 +9,6 @@ import {
   Card,
   Div,
   Section,
-  Spinner,
   Tabs,
   TabsContent,
   TabsList,
@@ -237,11 +236,6 @@ export default function AdminPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>

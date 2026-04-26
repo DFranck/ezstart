@@ -1,3 +1,4 @@
+import '@ezstart/ui/globals.css'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { getWebUrl } from '@ezstart/config'
@@ -73,8 +74,16 @@ export default async function LocaleLayout({ children, params }: Props) {
           localStorage, not cookies) and ezauth renders its own stored scheme
           instead of matching the consumer. The cookie is consumed on read so
           subsequent navigations don't keep resetting the user's preference.
+
+          Wrapped in `next/script` with `beforeInteractive` strategy so Next.js
+          (Turbopack 15.5+) controls insertion order relative to its injected
+          polyfills (`polyfill-nomodule.js`). A bare `<script>` in `<head>`
+          collides with that polyfill at the same DOM slot and triggers a
+          hydration mismatch on reload.
         */}
-        <script
+        <Script
+          id="theme-cookie-sync"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html:
               "(function(){try{var m=document.cookie.match(/(?:^|; )theme=([^;]+)/);if(!m)return;var v=decodeURIComponent(m[1]);if(v==='light'||v==='dark'||v==='system'){if(localStorage.getItem('theme')!==v){localStorage.setItem('theme',v);}document.cookie='theme=; path=/; max-age=0; SameSite=Lax';}}catch(e){}})()",

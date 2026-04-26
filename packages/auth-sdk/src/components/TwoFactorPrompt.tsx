@@ -4,6 +4,8 @@ import { Button, Div, Input, P } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useState } from 'react'
+import { detectCurrentThemePreference } from './themePreference.js'
+import { buildPostLoginRedirect } from './postLoginRedirect.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -68,12 +70,22 @@ export function TwoFactorPrompt({
         body: { tempToken, code },
       })
 
-      // Redirect with authorization code
+      // Redirect with authorization code.
+      //
+      // Same logic as `SignInForm` — see `buildPostLoginRedirect` for the
+      // full rationale. Cross-origin → SSO code flow (append `?code=` and
+      // `?theme=`). Same-origin → direct redirect (cookie already set by
+      // the API response, no callback handler on the destination page).
       if (redirectUri && result.code) {
         logger.info('2FA validated, redirecting')
-        const url = new URL(redirectUri)
-        url.searchParams.set('code', result.code)
-        window.location.href = url.toString()
+        const themePref = detectCurrentThemePreference()
+        const target = buildPostLoginRedirect(
+          redirectUri,
+          result.code,
+          themePref,
+          window.location.origin
+        )
+        window.location.href = target
         return
       }
 

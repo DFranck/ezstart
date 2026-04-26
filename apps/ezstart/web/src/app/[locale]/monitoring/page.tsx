@@ -13,7 +13,6 @@ import {
   Div,
   Icon,
   Section,
-  Spinner,
 } from '@ezstart/ui/components'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -158,11 +157,6 @@ export default function MonitoringOverviewPage() {
 
   return (
     <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
       fallbackComponent={
         <Section size="full">
           <Card variant={'ghost'}>
