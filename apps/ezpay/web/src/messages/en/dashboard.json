@@ -8,9 +8,7 @@
       "apiKeys": "API Keys",
       "billing": "Billing",
       "usage": "Usage",
-      "settings": "Settings",
-      "users": "Users",
-      "platform": "Platform"
+      "settings": "Settings"
     },
     "welcomeBack": "Welcome back",
     "memberSince": "Member since",

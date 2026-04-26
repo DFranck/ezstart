@@ -173,8 +173,69 @@ card on transient infra issues too.
 - `PayAdminDashboard`, `UserPaymentDashboard`
 - `FeatureGate`, `PromoCodeInput`, `RefundButton`, `ConfirmActionDialog`
 - `PaymentSuccessPage`, `PaymentHistory`, `ProductCard`, `ProductGrid`
+- `SubscribeSuccessPage`, `SubscribeCancelPage`, `DonateSuccessPage`, `DonateCancelPage`, `PurchaseSuccessPage`, `PurchaseCancelPage` — drop-in Stripe Checkout callback landings
 - `PayDeveloperPortal`, `CreatePayKeyModal` — API keys CRUD (create / rotate / revoke) scoped to an Application
 - `PayNotConfiguredCard` — graceful fallback rendered by pay-sdk components when the SDK is unconfigured or a downstream fetch fails
+
+### Stripe Checkout callback pages
+
+Drop-in landing pages for Stripe Checkout `success_url` / `cancel_url` redirects. Each component reads `?session_id=` from the URL, displays the appropriate confirmation, and (on success) optionally auto-redirects after a short delay. All strings are overridable via the `texts` prop with English defaults.
+
+```tsx
+'use client'
+import { SubscribeSuccessPage, SubscribeCancelPage } from '@ezstart/pay-sdk/components'
+
+// app/subscribe/success/page.tsx
+export default function Success() {
+  return <SubscribeSuccessPage redirectTo="/dashboard" redirectDelayMs={3000} />
+}
+
+// app/subscribe/cancel/page.tsx
+export default function Cancel() {
+  return <SubscribeCancelPage backToPricingHref="/#pricing" />
+}
+```
+
+With i18n (next-intl example) — pass `{seconds}` / `{id}` placeholders through verbatim so the component can interpolate them at render time:
+
+```tsx
+'use client'
+import { useLocale, useTranslations } from 'next-intl'
+import { SubscribeSuccessPage } from '@ezstart/pay-sdk/components'
+
+export default function Page() {
+  const t = useTranslations('subscribe.success')
+  const locale = useLocale()
+  return (
+    <SubscribeSuccessPage
+      redirectTo={`/${locale}/dashboard`}
+      texts={{
+        title: t('title'),
+        description: t('description'),
+        // {seconds} stays literal so the SDK can interpolate the live countdown
+        redirectingLabel: t('redirecting', { seconds: '{seconds}' }),
+        ctaLabel: t('goToDashboard'),
+        stepsTitle: t('whatNext'),
+        steps: [t('emailConfirmation'), t('accessGranted'), t('receiptAvailable')],
+        referenceLabel: t('reference', { id: '{id}' }),
+      }}
+    />
+  )
+}
+```
+
+Available callback components — props mirror this shape:
+
+| Component              | Hero icon            | Auto-redirect default | Primary CTA default |
+| ---------------------- | -------------------- | --------------------- | ------------------- |
+| `SubscribeSuccessPage` | `lucide:CheckCircle` | 3000 ms               | "Go to dashboard"   |
+| `SubscribeCancelPage`  | `lucide:XCircle`     | —                     | "Back to pricing"   |
+| `DonateSuccessPage`    | `lucide:Heart`       | off (0 ms)            | "Back to home"      |
+| `DonateCancelPage`     | `lucide:XCircle`     | —                     | "Try Again"         |
+| `PurchaseSuccessPage`  | `lucide:ShoppingBag` | off (0 ms)            | "Back to home"      |
+| `PurchaseCancelPage`   | `lucide:XCircle`     | —                     | "Try Again"         |
+
+Set `redirectDelayMs={0}` to disable the success-page auto-redirect. Pass `onComplete` to fire a callback (analytics, log) right before the router push.
 
 ### Developer portal (API keys)
 

@@ -182,6 +182,20 @@ export const uiComponentsMock = {
     pauseOnHover?: boolean
   }) => React.createElement('div', { 'data-testid': 'infinite-cards' }, children),
   Text: makePassthrough('Text', 'span'),
+  // Semantic HTML5 + list elements (used by checkout callback pages)
+  Main: makePassthrough('Main', 'main'),
+  Section: makePassthrough('Section', 'section'),
+  Header: makePassthrough('Header', 'header'),
+  Footer: makePassthrough('Footer', 'footer'),
+  Article: makePassthrough('Article', 'article'),
+  Aside: makePassthrough('Aside', 'aside'),
+  Nav: makePassthrough('Nav', 'nav'),
+  UL: makePassthrough('UL', 'ul'),
+  OL: makePassthrough('OL', 'ol'),
+  LI: makePassthrough('LI', 'li'),
+  H4: makePassthrough('H4', 'h4'),
+  H5: makePassthrough('H5', 'h5'),
+  H6: makePassthrough('H6', 'h6'),
 }
 
 // ---------------------------------------------------------------------------

@@ -39,7 +39,6 @@ export default function EZPayDashboardPage() {
   const t = useTranslations('dashboard')
   const tBilling = useTranslations('billing')
   const tTabs = useTranslations('developer.tabs')
-  const tAdmin = useTranslations('admin')
   const tApps = useTranslations('developer.applications')
   const locale = useLocale()
   const router = useRouter()
@@ -76,8 +75,6 @@ export default function EZPayDashboardPage() {
     navBilling: t('nav.billing'),
     navUsage: t('nav.usage'),
     navSettings: t('nav.settings'),
-    navUsers: t('nav.users'),
-    navPlatform: t('nav.platform'),
     brand: t('brand'),
     welcomeBack: t('welcomeBack'),
     memberSince: t('memberSince'),
@@ -92,9 +89,6 @@ export default function EZPayDashboardPage() {
     settingsEmailVerification: t('settings.emailVerification'),
     settingsTwoFactor: t('settings.twoFactor'),
     settingsSessions: t('settings.sessions'),
-    admin: {
-      searchPlaceholder: tAdmin('filters.searchEmail'),
-    },
   }
 
   // Applications slot — list the user's Applications. Wired to our Next router

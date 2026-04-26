@@ -1,7 +1,13 @@
 'use client'
 
 import { useMemo } from 'react'
-import { AccessDenied, AuthAdminDashboard, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import {
+  AccessDenied,
+  AdminAnalyticsSection,
+  AuthAdminDashboard,
+  LoginButton,
+  RequireAuth,
+} from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
 import { PayAdminDashboard } from '@ezstart/pay-sdk'
 import { AIAdminDashboard, AIProvider } from '@ezstart/ai-sdk/client'
@@ -194,16 +200,49 @@ function AdminPanelContent() {
     [ta, td]
   )
 
+  const analyticsTexts = useMemo(
+    () => ({
+      title: t('admin.analytics.title'),
+      subtitle: t('admin.analytics.subtitle'),
+      totalUsers: t('admin.analytics.totalUsers'),
+      newUsersThisMonth: t('admin.analytics.newUsersThisMonth'),
+      activeUsersLast30Days: t('admin.analytics.activeUsersLast30Days'),
+      activeUsersHint: t('admin.analytics.activeUsersHint'),
+      verifiedUsers: t('admin.analytics.verifiedUsers'),
+      twoFactorEnabled: t('admin.analytics.twoFactorEnabled'),
+      totalApplications: t('admin.analytics.totalApplications'),
+      totalApiKeys: t('admin.analytics.totalApiKeys'),
+      signupTrendTitle: t('admin.analytics.signupTrendTitle'),
+      signupTrendDescription: t('admin.analytics.signupTrendDescription'),
+      signupTrendEmpty: t('admin.analytics.signupTrendEmpty'),
+      signupSeriesLabel: t('admin.analytics.signupSeriesLabel'),
+      signupAxisLabel: t('admin.analytics.signupAxisLabel'),
+      topAppsTitle: t('admin.analytics.topAppsTitle'),
+      topAppsDescription: t('admin.analytics.topAppsDescription'),
+      topAppsEmpty: t('admin.analytics.topAppsEmpty'),
+      topAppsAppColumn: t('admin.analytics.topAppsAppColumn'),
+      topAppsUsersColumn: t('admin.analytics.topAppsUsersColumn'),
+      loadError: t('admin.analytics.loadError'),
+      retry: td('retry'),
+    }),
+    [t, td]
+  )
+
   return (
     <Div className="w-full max-w-7xl mx-auto px-4 my-10">
-      <Tabs defaultValue="ezauth" className="w-full">
+      <Tabs defaultValue="analytics" className="w-full">
         <TabsList>
+          <TabsTrigger value="analytics">{t('admin.tabs.analytics')}</TabsTrigger>
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>
           <TabsTrigger value="ezpay">{t('admin.tabs.ezpay')}</TabsTrigger>
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
           <TabsTrigger value="services">{t('admin.tabs.services')}</TabsTrigger>
           <TabsTrigger value="ai">{t('admin.tabs.ai')}</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="analytics" className="w-full">
+          <AdminAnalyticsSection texts={analyticsTexts} />
+        </TabsContent>
 
         <TabsContent value="ezauth" className="w-full">
           <AuthAdminDashboard texts={authTexts} />

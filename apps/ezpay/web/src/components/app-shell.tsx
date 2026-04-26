@@ -2,28 +2,9 @@
 
 import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 import { UserMenu } from '@ezstart/auth-sdk/components'
-import {
-  AppActions,
-  AppFooter,
-  AppHeader,
-  AppLayout,
-  AppLogo,
-  AppMain,
-  AppMobileLink,
-  AppMobileMenu,
-  AppMobileToggle,
-  AppNav,
-  AppNavLink,
-  Div,
-  FooterBrand,
-  FooterColumn,
-  LocaleSwitcher,
-  P,
-  Span,
-} from '@ezstart/ui/components'
+import { LocaleSwitcher, SaaSAppShell } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/ui/theme'
 import { useLocale, useTranslations } from 'next-intl'
-import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { usePathname, useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
@@ -43,138 +24,67 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.push(newPathname)
   }
 
+  const navLinks = [
+    { href: '#features', label: nav('features') },
+    { href: '#pricing', label: nav('pricing') },
+    { href: '/docs', label: nav('docs') },
+    ...(isAuthenticated ? [{ href: '/dashboard', label: nav('dashboard') }] : []),
+  ]
+
+  const authActions = (
+    <>
+      <LocaleSwitcher
+        locales={LOCALES}
+        currentLocale={locale}
+        onLocaleChange={handleLocaleChange}
+      />
+      <ThemeSwitcher />
+      {isAuthenticated ? (
+        <UserMenu onManageAccount={() => router.push(`/${locale}/dashboard?section=account`)} />
+      ) : (
+        <LoginButton size="sm" loginText={nav('signIn')} />
+      )}
+    </>
+  )
+
   return (
-    <AppLayout>
-      {/* ---- Header ---- */}
-      <AppHeader>
-        <AppLogo asChild>
-          <Link href="/">
-            <Image src="/logo.svg" alt="EZPay" width={28} height={28} />
-            <Span className="text-lg font-bold tracking-tight">EZPay</Span>
-          </Link>
-        </AppLogo>
-
-        <AppNav>
-          <AppNavLink asChild>
-            <Link href="#features">{nav('features')}</Link>
-          </AppNavLink>
-          <AppNavLink asChild>
-            <Link href="#pricing">{nav('pricing')}</Link>
-          </AppNavLink>
-          <AppNavLink asChild>
-            <Link href="/docs">{nav('docs')}</Link>
-          </AppNavLink>
-          {isAuthenticated && (
-            <AppNavLink asChild>
-              <Link href="/dashboard">{nav('dashboard')}</Link>
-            </AppNavLink>
-          )}
-        </AppNav>
-
-        <AppActions>
-          <Div className="hidden items-center gap-2 md:flex">
-            <LocaleSwitcher
-              locales={LOCALES}
-              currentLocale={locale}
-              onLocaleChange={handleLocaleChange}
-            />
-            <ThemeSwitcher />
-            {isAuthenticated ? (
-              <UserMenu
-                onManageAccount={() => router.push(`/${locale}/dashboard?section=account`)}
-              />
-            ) : (
-              <LoginButton size="sm" loginText={nav('signIn')} />
-            )}
-          </Div>
-          <AppMobileToggle />
-        </AppActions>
-
-        <AppMobileMenu>
-          <AppMobileLink asChild>
-            <Link href="#features">{nav('features')}</Link>
-          </AppMobileLink>
-          <AppMobileLink asChild>
-            <Link href="#pricing">{nav('pricing')}</Link>
-          </AppMobileLink>
-          <AppMobileLink asChild>
-            <Link href="/docs">{nav('docs')}</Link>
-          </AppMobileLink>
-          {isAuthenticated && (
-            <AppMobileLink asChild>
-              <Link href="/dashboard">{nav('dashboard')}</Link>
-            </AppMobileLink>
-          )}
-          <Div className="px-3 pt-2 flex flex-col gap-2">
-            <Div className="flex items-center gap-2">
-              <LocaleSwitcher
-                locales={LOCALES}
-                currentLocale={locale}
-                onLocaleChange={handleLocaleChange}
-              />
-              <ThemeSwitcher />
-            </Div>
-            {isAuthenticated ? (
-              <UserMenu
-                onManageAccount={() => router.push(`/${locale}/dashboard?section=account`)}
-              />
-            ) : (
-              <LoginButton className="w-full" loginText={nav('signIn')} />
-            )}
-          </Div>
-        </AppMobileMenu>
-      </AppHeader>
-
-      {/* ---- Main ---- */}
-      <AppMain>{children}</AppMain>
-
-      {/* ---- Footer ---- */}
-      <AppFooter>
-        <Div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          <FooterColumn title={footer('product')}>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/docs">{footer('docs')}</Link>
-            </P>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="#pricing">{footer('pricing')}</Link>
-            </P>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/changelog">{footer('changelog')}</Link>
-            </P>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/status">{footer('status')}</Link>
-            </P>
-          </FooterColumn>
-
-          <FooterColumn title={footer('company')}>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/about">{footer('about')}</Link>
-            </P>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/blog">{footer('blog')}</Link>
-            </P>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/contact">{footer('contact')}</Link>
-            </P>
-          </FooterColumn>
-
-          <FooterColumn title={footer('legal')}>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/privacy">{footer('privacy')}</Link>
-            </P>
-            <P className="text-sm text-muted-foreground hover:text-foreground">
-              <Link href="/terms">{footer('terms')}</Link>
-            </P>
-          </FooterColumn>
-
-          <FooterBrand tagline={footer('tagline')} copyright={`\u00A9 2026 ${footer('copyright')}`}>
-            <Div className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="EZPay" width={24} height={24} />
-              <Span className="text-lg font-bold">EZPay</Span>
-            </Div>
-          </FooterBrand>
-        </Div>
-      </AppFooter>
-    </AppLayout>
+    <SaaSAppShell
+      brand={{ name: 'EZPay', logoSrc: '/logo.svg' }}
+      navLinks={navLinks}
+      footerColumns={[
+        {
+          title: footer('product'),
+          links: [
+            { href: '/docs', label: footer('docs') },
+            { href: '#pricing', label: footer('pricing') },
+            { href: '/changelog', label: footer('changelog') },
+            { href: '/status', label: footer('status') },
+          ],
+        },
+        {
+          title: footer('company'),
+          links: [
+            { href: '/about', label: footer('about') },
+            { href: '/blog', label: footer('blog') },
+            { href: '/contact', label: footer('contact') },
+          ],
+        },
+        {
+          title: footer('legal'),
+          links: [
+            { href: '/privacy', label: footer('privacy') },
+            { href: '/terms', label: footer('terms') },
+          ],
+        },
+      ]}
+      footerBrand={{
+        tagline: footer('tagline'),
+        copyright: `© 2026 ${footer('copyright')}`,
+      }}
+      authActions={authActions}
+      LinkComponent={Link}
+    >
+      {children}
+    </SaaSAppShell>
   )
 }

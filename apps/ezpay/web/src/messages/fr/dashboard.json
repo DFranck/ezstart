@@ -8,9 +8,7 @@
       "apiKeys": "Clés d'API",
       "billing": "Facturation",
       "usage": "Utilisation",
-      "settings": "Paramètres",
-      "users": "Utilisateurs",
-      "platform": "Plateforme"
+      "settings": "Paramètres"
     },
     "welcomeBack": "Bon retour",
     "memberSince": "Membre depuis",
