@@ -29,6 +29,7 @@ import {
   TabsTrigger,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
+import { EzauthScopeIndicator } from '@/components/ezauth-scope-indicator'
 
 /**
  * `/admin` — EZAuth's self-owned admin entry point.
@@ -219,9 +220,12 @@ export default function AdminPage() {
         }
       >
         <Div className="container mx-auto py-8 px-4 space-y-6">
-          <Div className="space-y-1">
-            <H1 size="h2">{t('title')}</H1>
-            <P className="text-muted-foreground">{t('subtitle')}</P>
+          <Div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <Div className="space-y-1">
+              <H1 size="h2">{t('title')}</H1>
+              <P className="text-muted-foreground">{t('subtitle')}</P>
+            </Div>
+            <EzauthScopeIndicator scope="admin" />
           </Div>
 
           {/*

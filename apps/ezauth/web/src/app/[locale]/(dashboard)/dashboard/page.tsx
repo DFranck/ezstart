@@ -21,6 +21,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/navigation'
+import { EzauthScopeIndicator } from '@/components/ezauth-scope-indicator'
 
 /**
  * Unified `/dashboard` — Stripe/Clerk style sidebar with progressive-disclosure
@@ -344,6 +345,7 @@ export default function DashboardPage() {
       }}
       extraSections={[dangerZoneSection]}
       sidebarFooterExtra={platformAdminCta}
+      topBarExtra={<EzauthScopeIndicator scope="user" />}
     />
   )
 }

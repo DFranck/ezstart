@@ -16,6 +16,14 @@ export type { DevModeBannerProps } from './DevModeBanner.js'
 export { AuthErrorBanner } from './auth-error-banner.js'
 export type { AuthErrorBannerProps, AuthErrorBannerTexts } from './auth-error-banner.js'
 
+// Scope context indicator (Stripe-style "Personal" vs "Platform admin" header badge + toggle)
+export { ScopeContextIndicator } from './scope-context-indicator.js'
+export type {
+  ScopeContextIndicatorProps,
+  ScopeContextIndicatorTexts,
+  ScopeContextIndicatorLinkProps,
+} from './scope-context-indicator.js'
+
 // Guards loader (styled wrapper around the agnostic <RequireAuth /> default)
 export { RequireAuthLoader } from './RequireAuthLoader.js'
 export type { RequireAuthLoaderProps } from './RequireAuthLoader.js'

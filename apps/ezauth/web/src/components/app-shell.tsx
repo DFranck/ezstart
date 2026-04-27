@@ -8,8 +8,18 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { usePathname, useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { EzauthScopeIndicator } from './ezauth-scope-indicator'
 
 const LOCALES = ['en', 'fr', 'vi']
+
+const ADMIN_SCOPE_PREFIXES = ['/admin']
+const USER_SCOPE_PREFIXES = ['/dashboard', '/account', '/developer']
+
+function detectScope(pathname: string): 'user' | 'admin' | null {
+  if (ADMIN_SCOPE_PREFIXES.some(p => pathname.includes(p))) return 'admin'
+  if (USER_SCOPE_PREFIXES.some(p => pathname.includes(p))) return 'user'
+  return null
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const t = useTranslations('layout')
@@ -19,6 +29,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
 
   const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
+  const scope = detectScope(pathname)
+  const showScopeIndicator = isAuthenticated && scope !== null
 
   const handleLocaleChange = (newLocale: string) => {
     const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`)
@@ -51,6 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const authActions = (
     <>
+      {showScopeIndicator && scope !== null && <EzauthScopeIndicator scope={scope} />}
       <LocaleSwitcher
         locales={LOCALES}
         currentLocale={locale}

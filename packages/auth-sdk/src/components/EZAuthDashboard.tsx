@@ -89,6 +89,14 @@ export interface EZAuthDashboardProps {
    * for users who shouldn't see it.
    */
   sidebarFooterExtra?: ReactNode
+  /**
+   * Optional content rendered on the right side of the dashboard top bar
+   * (next to the section title). Typical use: a `<ScopeContextIndicator />`
+   * to show the current "Personal account" / "Platform admin" scope on the
+   * dashboard surface (Stripe Dashboard pattern). Visibility / RBAC are the
+   * consumer's responsibility — pass `null` to hide.
+   */
+  topBarExtra?: ReactNode
 }
 
 /**
@@ -123,6 +131,7 @@ export function EZAuthDashboard({
   homeHref = '/',
   onHomeClick,
   sidebarFooterExtra,
+  topBarExtra,
 }: EZAuthDashboardProps) {
   const { user, isAuthenticated } = useAuth()
   const texts: EZAuthDashboardTexts = { ...DEFAULT_DASHBOARD_TEXTS, ...textOverrides }
@@ -263,6 +272,9 @@ export function EZAuthDashboard({
           <H2 className="text-lg font-semibold text-foreground">
             {navItems.find(n => n.id === effectiveSection)?.label}
           </H2>
+          {topBarExtra ? (
+            <Span className="ml-auto inline-flex items-center gap-2">{topBarExtra}</Span>
+          ) : null}
         </DashboardHeader>
 
         <DashboardContent>
