@@ -6,7 +6,7 @@ const intlMiddleware = createIntlMiddleware(routing)
 
 export default createAuthMiddleware({
   appName: 'gacha-analyzer',
-  authMode: 'jwt',
+  authMode: 'httpOnly',
   protectedPaths: [],
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,
