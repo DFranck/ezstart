@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * SaaSAppShell — abstraction component on top of `<AppLayout>` compound.
+ * AppShell — abstraction component on top of `<AppLayout>` compound.
  *
  * Enforces the canonical SaaS app chrome (logo + nav + auth actions in header,
  * link columns + brand block in footer) so every internal product (ezauth,
@@ -11,6 +11,9 @@
  * The `LinkComponent` prop lets consumers inject their locale-aware Link
  * wrapper (e.g. `next-intl`'s `<Link>`); when omitted the component falls back
  * to a plain `<a>` so it stays agnostic and publishable standalone.
+ *
+ * Naming follows Mantine/Chakra conventions: `<AppShell>` is the standard
+ * primitive name for "header + main + footer" layout abstractions.
  */
 
 import * as React from 'react'
@@ -38,7 +41,7 @@ import {
 // ---------------------------------------------------------------------------
 
 /** App brand identity (logo asset + display name). */
-export interface SaaSAppShellBrand {
+export interface AppShellBrand {
   /** Display name (e.g. "EZAuth", "EZPay"). */
   name: string
   /** Logo asset URL (relative path or absolute URL). */
@@ -48,39 +51,39 @@ export interface SaaSAppShellBrand {
 }
 
 /** Top-nav link entry — `href` is consumer-relative (locale prefix added by `LinkComponent`). */
-export interface SaaSAppShellNavLink {
+export interface AppShellNavLink {
   href: string
   label: string
 }
 
 /** Footer column with title + link list. */
-export interface SaaSAppShellFooterColumn {
+export interface AppShellFooterColumn {
   title: string
   links: { href: string; label: string }[]
 }
 
 /** Footer brand block (tagline + copyright text). */
-export interface SaaSAppShellFooterBrand {
+export interface AppShellFooterBrand {
   tagline: string
   copyright: string
 }
 
 /** Minimal Link contract — accepts `href` + `children` and an optional `className`. */
-export interface SaaSAppShellLinkProps {
+export interface AppShellLinkProps {
   href: string
   children: React.ReactNode
   className?: string
 }
 
-export interface SaaSAppShellProps {
+export interface AppShellProps {
   /** App brand identity (logo + name). Rendered in header logo + footer brand. */
-  brand: SaaSAppShellBrand
+  brand: AppShellBrand
   /** Top nav links — rendered in `<AppNav>` (desktop) AND `<AppMobileMenu>`. */
-  navLinks: SaaSAppShellNavLink[]
+  navLinks: AppShellNavLink[]
   /** Footer link columns (typically Product / Company / Legal). */
-  footerColumns: SaaSAppShellFooterColumn[]
+  footerColumns: AppShellFooterColumn[]
   /** Footer brand block (tagline + copyright). */
-  footerBrand: SaaSAppShellFooterBrand
+  footerBrand: AppShellFooterBrand
   /**
    * Right-side action slot: usually `<LocaleSwitcher>`, `<ThemeSwitcher>`,
    * `<UserMenu>` or `<LoginButton>`. Rendered in both the desktop actions zone
@@ -93,9 +96,9 @@ export interface SaaSAppShellProps {
    *
    * @example
    * import { Link } from '@/i18n/navigation'
-   * <SaaSAppShell LinkComponent={Link} ... />
+   * <AppShell LinkComponent={Link} ... />
    */
-  LinkComponent?: React.ComponentType<SaaSAppShellLinkProps>
+  LinkComponent?: React.ComponentType<AppShellLinkProps>
   /** Page content rendered inside `<AppMain>`. */
   children: React.ReactNode
 }
@@ -104,7 +107,7 @@ export interface SaaSAppShellProps {
 // Default LinkComponent — plain anchor (kept agnostic).
 // ---------------------------------------------------------------------------
 
-function DefaultLink({ href, children, className }: SaaSAppShellLinkProps) {
+function DefaultLink({ href, children, className }: AppShellLinkProps) {
   return (
     <a href={href} className={className}>
       {children}
@@ -116,7 +119,7 @@ function DefaultLink({ href, children, className }: SaaSAppShellLinkProps) {
 // Component
 // ---------------------------------------------------------------------------
 
-export function SaaSAppShell({
+export function AppShell({
   brand,
   navLinks,
   footerColumns,
@@ -124,7 +127,7 @@ export function SaaSAppShell({
   authActions,
   LinkComponent = DefaultLink,
   children,
-}: SaaSAppShellProps) {
+}: AppShellProps) {
   const logoAlt = brand.logoAlt ?? brand.name
 
   return (
@@ -197,4 +200,4 @@ export function SaaSAppShell({
   )
 }
 
-SaaSAppShell.displayName = 'SaaSAppShell'
+AppShell.displayName = 'AppShell'

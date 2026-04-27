@@ -6,14 +6,14 @@ export { Header } from './header'
 export * from './landing-layout'
 export * from './layout-with-aside'
 export {
-  SaaSAppShell,
-  type SaaSAppShellProps,
-  type SaaSAppShellBrand,
-  type SaaSAppShellNavLink,
-  type SaaSAppShellFooterColumn,
-  type SaaSAppShellFooterBrand,
-  type SaaSAppShellLinkProps,
-} from './saas-app-shell'
+  AppShell,
+  type AppShellProps,
+  type AppShellBrand,
+  type AppShellNavLink,
+  type AppShellFooterColumn,
+  type AppShellFooterBrand,
+  type AppShellLinkProps,
+} from './app-shell'
 export { MobileNavMenu } from './mobile-nav-menu'
 export { MobileNavbar } from './mobile-navbar'
 export * from './split-section'

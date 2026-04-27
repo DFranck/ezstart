@@ -1,7 +1,9 @@
 'use client'
 
+import { Link } from '@/i18n/navigation'
 import { RegisterButton, useAuth } from '@ezstart/auth-sdk'
 import { PricingPage } from '@ezstart/pay-sdk/components'
+import type { KnownIconName } from '@ezstart/ui/components'
 import {
   Button,
   CodeBlock,
@@ -15,9 +17,7 @@ import {
   LandingSection,
   P,
 } from '@ezstart/ui/components'
-import type { KnownIconName } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
 
 const EZAUTH_APP_ID = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
 
@@ -112,7 +112,7 @@ export default function HomePage() {
   return (
     <>
       <LandingHero
-        variant="withGradient"
+        variant="full"
         align="center"
         badge={t('heroBadge')}
         title={t('heroTitle')}

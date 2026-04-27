@@ -17,11 +17,11 @@
  */
 
 import * as React from 'react'
-import { cn } from '../../lib/utils'
 import { landingHeroVariantConfig } from '../../lib/design-system/variants'
+import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Badge } from '../data-display/badge'
-import { Section, Div, H1, P } from '../tag'
+import { Div, H1, P, Section } from '../tag'
 
 // ========== Base Types ==========
 

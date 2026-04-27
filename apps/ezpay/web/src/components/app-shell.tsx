@@ -2,7 +2,7 @@
 
 import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 import { UserMenu } from '@ezstart/auth-sdk/components'
-import { LocaleSwitcher, SaaSAppShell } from '@ezstart/ui/components'
+import { LocaleSwitcher, AppShell as BaseAppShell } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/ui/theme'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
@@ -48,7 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   )
 
   return (
-    <SaaSAppShell
+    <BaseAppShell
       brand={{ name: 'EZPay', logoSrc: '/logo.svg' }}
       navLinks={navLinks}
       footerColumns={[
@@ -85,6 +85,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       LinkComponent={Link}
     >
       {children}
-    </SaaSAppShell>
+    </BaseAppShell>
   )
 }

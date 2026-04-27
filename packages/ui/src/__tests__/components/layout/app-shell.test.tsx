@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import * as React from 'react'
 
-import { SaaSAppShell } from '../../../components/layout/saas-app-shell'
+import { AppShell } from '../../../components/layout/app-shell'
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -35,17 +35,17 @@ const footerBrand = { tagline: 'Tagline here', copyright: '© 2026 Acme' }
 // Default rendering — agnostic <a> fallback
 // ---------------------------------------------------------------------------
 
-describe('SaaSAppShell — default LinkComponent', () => {
+describe('AppShell — default LinkComponent', () => {
   it('renders brand name + logo in header and footer', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
         footerBrand={footerBrand}
       >
         <div data-testid="page-content">Hello</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     // Brand name appears twice (header logo + footer brand)
@@ -58,14 +58,14 @@ describe('SaaSAppShell — default LinkComponent', () => {
 
   it('renders all nav links as anchors with the right hrefs', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
         footerBrand={footerBrand}
       >
         <div>content</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     // Desktop nav (hidden on mobile via CSS but rendered)
@@ -79,14 +79,14 @@ describe('SaaSAppShell — default LinkComponent', () => {
 
   it('renders footer columns with link items wrapped in <li>', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
         footerBrand={footerBrand}
       >
         <div>content</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     expect(screen.getByText('Product')).toBeInTheDocument()
@@ -100,14 +100,14 @@ describe('SaaSAppShell — default LinkComponent', () => {
 
   it('renders the footer tagline + copyright', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
         footerBrand={footerBrand}
       >
         <div>content</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     expect(screen.getByText('Tagline here')).toBeInTheDocument()
@@ -116,7 +116,7 @@ describe('SaaSAppShell — default LinkComponent', () => {
 
   it('renders authActions slot in the desktop actions zone', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
@@ -124,7 +124,7 @@ describe('SaaSAppShell — default LinkComponent', () => {
         authActions={<button data-testid="cta">Sign in</button>}
       >
         <div>content</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     // authActions is rendered (twice in the DOM: desktop slot + mobile drawer
@@ -135,14 +135,14 @@ describe('SaaSAppShell — default LinkComponent', () => {
 
   it('uses logoAlt when provided, falls back to brand.name otherwise', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={{ ...brand, logoAlt: 'Acme custom alt' }}
         navLinks={navLinks}
         footerColumns={footerColumns}
         footerBrand={footerBrand}
       >
         <div>content</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     expect(screen.getAllByAltText('Acme custom alt').length).toBe(2)
@@ -150,14 +150,14 @@ describe('SaaSAppShell — default LinkComponent', () => {
 
   it('renders the children inside the main content area', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
         footerBrand={footerBrand}
       >
         <div data-testid="page-content">Hello world</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     const main = screen.getByTestId('page-content')
@@ -170,7 +170,7 @@ describe('SaaSAppShell — default LinkComponent', () => {
 // Custom LinkComponent injection
 // ---------------------------------------------------------------------------
 
-describe('SaaSAppShell — custom LinkComponent', () => {
+describe('AppShell — custom LinkComponent', () => {
   it('uses the injected LinkComponent for nav and footer links', () => {
     function FakeLink({
       href,
@@ -189,7 +189,7 @@ describe('SaaSAppShell — custom LinkComponent', () => {
     }
 
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
@@ -197,7 +197,7 @@ describe('SaaSAppShell — custom LinkComponent', () => {
         LinkComponent={FakeLink}
       >
         <div>content</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     expect(screen.getAllByTestId('fake-/features').length).toBeGreaterThanOrEqual(1)
@@ -211,10 +211,10 @@ describe('SaaSAppShell — custom LinkComponent', () => {
 // Mobile menu — toggle behavior
 // ---------------------------------------------------------------------------
 
-describe('SaaSAppShell — mobile menu', () => {
+describe('AppShell — mobile menu', () => {
   it('renders the mobile drawer with nav links + auth actions when toggled open', () => {
     render(
-      <SaaSAppShell
+      <AppShell
         brand={brand}
         navLinks={navLinks}
         footerColumns={footerColumns}
@@ -222,7 +222,7 @@ describe('SaaSAppShell — mobile menu', () => {
         authActions={<button data-testid="cta">Sign in</button>}
       >
         <div>content</div>
-      </SaaSAppShell>
+      </AppShell>
     )
 
     // Toggle hamburger
