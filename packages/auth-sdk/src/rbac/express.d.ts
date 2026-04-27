@@ -2,8 +2,6 @@
  * Type declarations for Express Request with user property
  */
 
-import type { Role } from './types'
-
 declare global {
   namespace Express {
     interface User {

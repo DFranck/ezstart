@@ -36,6 +36,10 @@ export function requireRole(role: Role, appName?: string) {
       return res.status(401).json({ success: false, error: 'Authentication required' })
     }
 
+    // Safe cast: Express.User and AuthUser share the same shape (`_id`,
+    // `email`, `globalRoles`, `appRoles`, ...) but the Express augmentation
+    // adds a permissive index signature that prevents direct structural
+    // assignment, hence the `unknown` bridge.
     if (!hasRole(req.user as unknown as AuthUser, role, appName)) {
       return res.status(403).json({ success: false, error: 'Insufficient role' })
     }

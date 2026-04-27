@@ -37,8 +37,14 @@ export const ssoExchangeRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(ssoExchangeRegistry, router)
 
-// Rate limit to mitigate code-guessing (even though codes are 256-bit random)
-const ssoExchangeRateLimiter = createStrictRateLimiter()
+// Rate limit to mitigate code-guessing (even though codes are 256-bit random).
+// 10 req/min/IP — slightly more permissive than login because legitimate cross-app
+// SSO bursts (user lands on /auth/callback for several apps in quick succession)
+// are normal, while brute-forcing 256-bit handoff codes is computationally absurd.
+const ssoExchangeRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 10,
+})
 
 const ssoExchangeRequestSchema = z.object({
   code: z

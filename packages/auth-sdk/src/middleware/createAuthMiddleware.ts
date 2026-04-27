@@ -146,10 +146,12 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
   const {
     appName,
     authMode = 'localStorage',
-    jwtPublicKey,
+    // jwtPublicKey is reserved for future signature verification on external domains
+    jwtPublicKey: _jwtPublicKey,
     protectedPaths,
     locales = ['en', 'fr'],
-    defaultLocale = 'en',
+    // defaultLocale is reserved for future locale-aware redirects when intlMiddleware is omitted
+    defaultLocale: _defaultLocale = 'en',
     cookieName = 'ezauth_session',
     intlMiddleware,
     debug = false,

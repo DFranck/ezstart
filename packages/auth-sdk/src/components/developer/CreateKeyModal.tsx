@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from 'react'
 import type { CreateApiKeyRequest } from '../../core/types.js'
 import { useApplication } from '../../react/applications.js'
+import { logger } from '../internal-logger.js'
 import type { CreateKeyModalTexts } from './types.js'
 
 export interface CreateKeyModalProps {
@@ -75,10 +76,10 @@ export function CreateKeyModal({
   useEffect(() => {
     if (!isOpen) return
     if (!applicationId && appOptions.length > 0) {
-      // Keep this a plain console.warn to avoid a hard dep on @ezstart/logger
-      // from the components layer. auth-sdk core already uses logger.
-      // eslint-disable-next-line no-console
-      console.warn(
+      // Use the silent-by-default internal logger (no @ezstart/logger dep) so
+      // consumers who wire `<AuthProvider logger={...} />` see the warning
+      // and the rest stay quiet.
+      logger.warn(
         '[auth-sdk] CreateKeyModal: `appOptions` is deprecated. Pass `applicationId` instead.'
       )
     }

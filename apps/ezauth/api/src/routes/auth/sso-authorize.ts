@@ -32,8 +32,12 @@ const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(ssoAuthorizeRegistry, router)
 
 // TODO: prefer per-userId rate limiting once express-core exposes a userId keyer.
-// For now, IP-based strict limiter (5 req/min) is sufficient given the 60s TTL.
-const ssoAuthorizeRateLimiter = createStrictRateLimiter()
+// 10 req/min/IP — matches sso-exchange budget so a normal cross-app SSO burst
+// (user navigates to several apps in quick succession) doesn't get throttled.
+const ssoAuthorizeRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 10,
+})
 
 const ssoAuthorizeRequestSchema = z.object({
   app: z

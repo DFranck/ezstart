@@ -3,7 +3,7 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
-  createVeryStrictRateLimiter,
+  createStrictRateLimiter,
   sendSuccess,
   sendError,
   sendValidationError,
@@ -29,8 +29,14 @@ export const registerRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(registerRegistry, router)
 
-// ✅ Rate limiting for register endpoint (3 req/hour per IP)
-const registerRateLimiter = createVeryStrictRateLimiter()
+// Rate limiting for register endpoint — 3 req/min per IP (anti-spam account creation).
+// Stricter than login (5/min) because each successful POST triggers an email send +
+// DB insert; abuse vector for both spam and resource exhaustion.
+const registerRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 3,
+  message: 'Too many registration attempts, please try again later.',
+})
 
 // Register new user
 const registerController = async (req: Request, res: Response) => {

@@ -172,17 +172,55 @@ when no locale segment is present.
 
 ### Components (`@ezstart/auth-sdk/components`)
 
+**Auth flows**
+
 - `<SignInForm>` — Login form with OAuth and 2FA support
 - `<SignUpForm>` — Registration form with password strength and promo codes
 - `<QuickSignUpForm>` — Passwordless signup (username + email only)
 - `<ForgotPasswordForm>` / `<ResetPasswordForm>` — Password recovery
 - `<TwoFactorPrompt>` / `<TwoFactorSettings>` — 2FA UI
-- `<VerifyEmailFlow>` — Email verification page
+- `<VerifyEmailFlow>` / `<EmailVerificationStatus>` — Email verification flow + inline status
+- `<OAuthButtons>` / `<OAuthProvidersSection>` — OAuth sign-in buttons + connected providers manager
+- `<LoginButton>` / `<RegisterButton>` — Header CTAs with theme propagation
+- `<AuthCallbackPage>` — OAuth/SSO callback handler page
+
+**User account**
+
 - `<AccountModal>` — Clerk-like account management modal
 - `<UserMenu>` — Dropdown user menu with avatar
 - `<UserAvatar>` — Avatar with initials fallback
 - `<UserSettings>` — Settings display page
+- `<UserDashboard>` — Compound user dashboard
+- `<SessionsManager>` — Active sessions list with revoke
+- `<DeleteAccountSection>` — Soft-delete with confirmation + grace period
+- `<AuditLogSection>` — User activity log
+
+**Admin**
+
 - `<AuthAdminDashboard>` — Admin user management with DataTable
+- `<AdminApplicationsDashboard>` — Tenant Applications CRUD (P6+)
+- `<AdminFeatureFlagsSection>` — Platform feature flags
+- `<AdminAnalyticsSection>` — Platform analytics overview (superadmin only)
+- `<AdminMaintenanceModeSection>` / `<MaintenanceBanner>` — Maintenance window control
+
+**Developer (API keys)**
+
+- `<DeveloperPortal>` — Full developer dashboard (keys CRUD + usage)
+- `<ApiKeysTable>` — Standalone keys table
+- `<CreateKeyModal>` / `<KeyCreatedModal>` — Key creation flow
+- `<UsageDetailsModal>` / `<UsageBadge>` — Per-key usage drill-down
+
+**Applications (P6 — multi-tenant)**
+
+- `<ApplicationsList>` / `<ApplicationCard>` — Owner's Applications list
+- `<CreateApplicationModal>` — New Application wizard
+- `<ApplicationDetailView>` — Application settings + theme + keys
+
+**Feedback / utility**
+
+- `<DevModeBanner>` — Dev environment indicator
+- `<AuthErrorBanner>` — Inline destructive feedback
+- `<RequireAuthLoader>` — Styled wrapper around `<RequireAuth>`
 
 ### Middleware
 
@@ -354,9 +392,12 @@ The SDK currently powers EZAuth.dev as its reference implementation. We dogfood 
 
 ## Related
 
-- [EZAuth app](../../apps/ezauth) — The auth service this SDK connects to
+- [EZAuth API](../../apps/ezauth/api) — Reference auth service this SDK is built against
+- [EZAuth web](../../apps/ezauth/web) — Reference dashboard / hosted login pages
+- [@ezstart/pay-sdk](../pay-sdk) — Companion payments SDK (same 3-layer architecture)
 - [@ezstart/api-contracts](../api-contracts) — Wire-level request/response schemas
-- [@ezstart/ui](../ui) — UI components used by the components layer
+- [@ezstart/api-sdk](../api-sdk) — HTTP client primitives (`apiCall`, `apiQuery`)
+- [@ezstart/ui](../ui) — UI primitives consumed by the `components/` layer
 
 ## Used By
 

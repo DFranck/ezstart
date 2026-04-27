@@ -162,7 +162,8 @@ export function AuthProvider({
   apiUrl,
   webUrl,
   authMode,
-  jwtPublicKey,
+  // jwtPublicKey is reserved for future client-side JWT signature verification
+  jwtPublicKey: _jwtPublicKey,
   logger = noopLogger,
   useHttpOnlyCookies,
 }: AuthProviderProps) {
@@ -344,7 +345,6 @@ export function AuthProvider({
       return
     }
 
-    let intervalId: NodeJS.Timeout
     let refreshing = false
 
     const tryRefresh = async (): Promise<boolean> => {
@@ -411,12 +411,10 @@ export function AuthProvider({
     }
 
     verifyToken()
-    intervalId = setInterval(verifyToken, 5 * 60 * 1000)
+    const intervalId = setInterval(verifyToken, 5 * 60 * 1000)
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
+      clearInterval(intervalId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.accessToken, store.refreshToken, client, logger])

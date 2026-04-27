@@ -6,8 +6,8 @@
  */
 
 import * as React from 'react'
-import { cn } from '../../lib/utils'
 import { ctaVariantConfig } from '../../lib/design-system/variants'
+import { cn } from '../../lib/utils'
 import { Button } from '../button'
 
 // ========== Types ==========

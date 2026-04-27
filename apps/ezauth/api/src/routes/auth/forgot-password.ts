@@ -3,7 +3,7 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
-  createVeryStrictRateLimiter,
+  createStrictRateLimiter,
   sendSuccess,
   sendValidationError,
 } from '@ezstart/api-core'
@@ -24,10 +24,13 @@ export const forgotPasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(forgotPasswordRegistry, router)
 
-/** Strict rate limit: 3 requests per 15 minutes */
-const forgotPasswordRateLimiter = createVeryStrictRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  max: 3,
+// Rate limit — 2 req/min per IP (anti email-bombing).
+// Each successful POST triggers a password-reset email send; we want the tightest
+// safe budget. The handler always returns 200 so legitimate users typing the wrong
+// email won't see the limiter, but a bot spamming addresses hits the wall fast.
+const forgotPasswordRateLimiter = createStrictRateLimiter({
+  windowMs: 60_000,
+  max: 2,
   message: 'Too many password reset attempts, please try again later.',
 })
 

@@ -1,19 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Div,
-  H3,
-  Icon,
-  P,
-  Span,
-  Spinner,
-} from '@ezstart/ui/components'
+import { Badge, Button, Div, Icon, P, Span, Spinner } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 

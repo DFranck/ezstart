@@ -23,7 +23,6 @@ import type {
   AuthToken,
   AuthUser,
   ConnectedOAuthProvider,
-  EmailOverrideRequest,
   PublishableKeyConfig,
   QuickSignUpRequest,
   QuickSignUpResult,
