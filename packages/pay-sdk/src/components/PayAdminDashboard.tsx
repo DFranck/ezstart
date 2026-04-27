@@ -212,6 +212,8 @@ export interface PayAdminDashboardTexts {
   planAmountHint?: string
   planIntervalCountHint?: string
   planFeaturesHint?: string
+  planTrialDays?: string
+  planTrialDaysHint?: string
 
   // Plan section labels
   plansSection?: string
@@ -1260,6 +1262,7 @@ function CreatePlanDialog({
   const [interval, setInterval] = useState<'month' | 'year'>('month')
   const [intervalCount, setIntervalCount] = useState('1')
   const [features, setFeatures] = useState('')
+  const [trialDays, setTrialDays] = useState('')
   const [sortOrder, setSortOrder] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -1275,6 +1278,7 @@ function CreatePlanDialog({
       setInterval('month')
       setIntervalCount('1')
       setFeatures('')
+      setTrialDays('')
       setSortOrder('')
       setError(null)
     }
@@ -1298,6 +1302,7 @@ function CreatePlanDialog({
         interval,
         intervalCount: Number(intervalCount),
         features: featuresArray.length > 0 ? featuresArray : undefined,
+        trialDays: trialDays ? Number(trialDays) : undefined,
         sortOrder: sortOrder ? Number(sortOrder) : undefined,
       })
       toast.success(t.createPlanSuccess)
@@ -1320,6 +1325,7 @@ function CreatePlanDialog({
     interval,
     intervalCount,
     features,
+    trialDays,
     sortOrder,
     onCreated,
     onOpenChange,
@@ -1467,6 +1473,20 @@ function CreatePlanDialog({
                   min={0}
                 />
               </Div>
+
+              {/* Trial Days */}
+              <Div className={`space-y-2`}>
+                <Label>{t.planTrialDays}</Label>
+                <Input
+                  type="number"
+                  value={trialDays}
+                  onChange={e => setTrialDays(e.target.value)}
+                  placeholder="0"
+                  min={0}
+                  max={90}
+                />
+                <P className={`text-xs text-muted-foreground mt-1`}>{t.planTrialDaysHint}</P>
+              </Div>
             </Div>
           </Div>
         </Div>
@@ -1601,6 +1621,16 @@ function PlansSection({ appName, t }: { appName?: string; t: Required<PayAdminDa
           <DataTableColumnHeader header={header} title={t.planFeaturesHeader} />
         ),
         cell: ({ row }) => <Span className={`text-sm`}>{row.original.features?.length || 0}</Span>,
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'trialDays',
+        header: ({ header }) => <DataTableColumnHeader header={header} title={t.planTrialDays} />,
+        cell: ({ row }) => (
+          <Span className="text-sm">
+            {row.original.trialDays ? `${row.original.trialDays}d` : '—'}
+          </Span>
+        ),
         enableSorting: false,
       },
       {
@@ -2085,6 +2115,8 @@ const DEFAULT_TEXTS: Required<PayAdminDashboardTexts> = {
   planAmountHint: 'Price in cents (e.g., 999 = 9.99, 2999 = 29.99)',
   planIntervalCountHint: '1 = monthly, 3 = quarterly, 6 = semi-annual, 12 = annual',
   planFeaturesHint: 'Comma-separated list of features included in this plan',
+  planTrialDays: 'Trial Days',
+  planTrialDaysHint: 'Number of free trial days before first charge (0 = no trial)',
 
   // Plan section labels
   plansSection: 'Plans',

@@ -12,6 +12,8 @@ export interface SubscribeButtonTexts {
   description?: string
   subscribeButton?: string
   processingButton?: string
+  /** Button text when plan has a free trial. Use {days} placeholder. */
+  startTrialButton?: string
   intervalMonth?: string
   intervalYear?: string
   /** Template for multi-interval display, e.g. "{count} months". Use {count} placeholder. */
@@ -40,7 +42,8 @@ export interface SubscribeButtonProps {
   userName?: string
   /**
    * Free-trial duration (in days) attached to the plan. When set to a
-   * positive value, a trial disclosure is shown inside the subscribe modal.
+   * positive value, a trial disclosure is shown inside the subscribe modal
+   * and the CTA changes to "Start N-day free trial".
    * The backend is the source of truth — this prop is purely for display.
    */
   trialDays?: number
@@ -86,7 +89,11 @@ export function SubscribeButton({
     // satisfies the modal's `aria-describedby` accessibility requirement and
     // ensures screen-reader users hear context before the form fields.
     description: texts?.description || description || `Confirm your subscription to ${planName}.`,
-    subscribeButton: texts?.subscribeButton || 'Subscribe now',
+    subscribeButton:
+      typeof trialDays === 'number' && trialDays > 0
+        ? texts?.startTrialButton?.replace('{days}', String(trialDays)) ||
+          `Start ${trialDays}-day free trial`
+        : texts?.subscribeButton || 'Subscribe now',
     processingButton: texts?.processingButton || 'Processing...',
     intervalMonth: texts?.intervalMonth || 'month',
     intervalYear: texts?.intervalYear || 'year',
@@ -167,6 +174,11 @@ export function SubscribeButton({
           {/* Plan info */}
           <Div className="p-4 rounded-lg bg-muted/50 flex flex-col gap-2">
             <P className="font-semibold">{planName}</P>
+            {typeof trialDays === 'number' && trialDays > 0 && (
+              <P size="sm" className="text-success font-medium">
+                {trialDays}-day free trial
+              </P>
+            )}
             <P size={'lg'} className="font-bold">
               {formatCurrency(amount, currency)} / {intervalLabel}
             </P>

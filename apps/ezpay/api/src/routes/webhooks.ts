@@ -208,7 +208,12 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           'metadata.subscriptionId': data.subscriptionId,
         }).lean()
 
-        const updateFields: Record<string, unknown> = { status: mappedStatus }
+        const updateFields: Record<string, unknown> = {
+          status: mappedStatus,
+          // Persist the raw Stripe subscription status so consumers (e.g.
+          // useSubscriptionStatus) can detect `trialing` vs plain `active`.
+          'metadata.subscriptionStatus': data.status,
+        }
 
         // Track cancel-at-period-end state
         if (data.cancelAtPeriodEnd !== undefined) {

@@ -8,6 +8,8 @@ interface SubscriptionStatus {
   loading: boolean
   /** Has an active subscription */
   isActive: boolean
+  /** Subscription is in a free trial period */
+  isTrialing: boolean
   /** Cancel requested but still active until period end */
   isCanceling: boolean
   /** Plan name from subscription metadata */
@@ -35,6 +37,7 @@ export function useSubscriptionStatus(params: UseSubscriptionStatusParams): Subs
   const [status, setStatus] = useState<SubscriptionStatus>({
     loading: true,
     isActive: false,
+    isTrialing: false,
     isCanceling: false,
     plan: null,
     features: [],
@@ -80,9 +83,11 @@ export function useSubscriptionStatus(params: UseSubscriptionStatusParams): Subs
         }
       }
 
+      const subStatus = activeSub.metadata?.subscriptionStatus as string | undefined
       setStatus({
         loading: false,
         isActive: true,
+        isTrialing: subStatus === 'trialing',
         isCanceling: activeSub.cancelAtPeriodEnd || false,
         plan: (activeSub.metadata?.planName as string) || null,
         features,
