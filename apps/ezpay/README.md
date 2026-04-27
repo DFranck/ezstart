@@ -42,3 +42,4 @@ pnpm dev pay
 
 - [@ezstart/pay-sdk](../../packages/pay-sdk) — Client SDK for integrating payments
 - [FengShui](../fengshui) — Example app using EZPay
+- [ROADMAP.md](./ROADMAP.md) — Feature roadmap and gap analysis vs Stripe/Lemon/Paddle
