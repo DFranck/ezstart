@@ -42,3 +42,4 @@ pnpm dev ez   # or any app that depends on auth: pnpm dev bill, pnpm dev gp, etc
 
 - [@ezstart/auth-sdk](../../packages/auth-sdk) — Client SDK consumed by all apps
 - [OAUTH-SETUP.md](./OAUTH-SETUP.md) — OAuth provider configuration
+- [ROADMAP.md](./ROADMAP.md) — Gap analysis vs Clerk/Auth0/Supabase + future features priorisées (P4 Organizations, P5 Magic Link/Passkey, P6 SAML/Enterprise, P7 Polish)
