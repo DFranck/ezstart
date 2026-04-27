@@ -81,6 +81,132 @@ const plans = await client.listPlans({ appName: 'myapp' })
 const donation = await client.createDonation({ projectId: 'proj_123', amount: 500 })
 ```
 
+## Choosing your payment UX
+
+EZPay wraps **Stripe Checkout (hosted)** by default — that's the recommended pattern for 99% of use cases. Stripe Elements (embedded) is supported via direct Stripe SDK integration, but EZPay focuses on the hosted flow.
+
+### Pattern A — Hosted Stripe Checkout (recommended)
+
+User clicks "Subscribe" → redirected to a Stripe-hosted checkout page → after payment, lands back on your app via SDK callback pages.
+
+```tsx
+// 1. In your pricing page
+import { SubscribeButton, DonateModal, PurchaseButton } from '@ezstart/pay-sdk/components'
+
+<SubscribeButton
+  planId="plan_pro"
+  successUrl="/subscribe/success"
+  cancelUrl="/subscribe/cancel"
+/>
+
+<DonateModal
+  amounts={[5, 10, 25, 100]}
+  successUrl="/donate/success"
+/>
+
+<PurchaseButton
+  productId="ebook_pro"
+  amount={29}
+  successUrl="/purchase/success"
+/>
+
+// 2. Add SDK callback pages (drop-in, zero config)
+// src/app/subscribe/success/page.tsx
+import { SubscribeSuccessPage } from '@ezstart/pay-sdk/components'
+export default () => <SubscribeSuccessPage redirectTo="/dashboard" />
+
+// src/app/subscribe/cancel/page.tsx
+import { SubscribeCancelPage } from '@ezstart/pay-sdk/components'
+export default () => <SubscribeCancelPage backToPricingHref="/#pricing" />
+
+// Same for: <DonateSuccessPage>, <DonateCancelPage>, <PurchaseSuccessPage>, <PurchaseCancelPage>
+```
+
+**Pros:**
+
+- Zero PCI compliance burden (Stripe handles)
+- Auto multi-currency, EU VAT, Apple Pay, Google Pay, etc.
+- Always up-to-date payment methods
+- Mobile-optimized natively
+- Built-in 3D Secure / SCA
+- Drop-in SDK = ~5 min integration vs days of Elements custom code
+
+**Cons:**
+
+- Redirect to Stripe domain (1 brand visible)
+- Less control over checkout UI
+
+**Best for:** 99% of products. Indie SaaS, marketplaces, B2C, B2B. Default choice.
+
+### Pattern B — Embedded Stripe Elements (advanced)
+
+For cases where you absolutely need checkout on YOUR domain (some Enterprise compliance, ultra-custom UX), you can integrate Stripe Elements directly. EZPay does NOT provide pre-wired Elements components — you'd use Stripe's `@stripe/react-stripe-js` directly + EZPay backend API for subscription/payment creation.
+
+```tsx
+// You handle Elements yourself (advanced)
+import { Elements, PaymentElement } from '@stripe/react-stripe-js'
+import { usePayClient } from '@ezstart/pay-sdk'
+
+// Create payment intent via EZPay backend
+const client = usePayClient()
+const { clientSecret } = await client.createPaymentIntent({ amount: 999 })
+
+<Elements stripe={stripePromise} options={{ clientSecret }}>
+  <PaymentElement />
+</Elements>
+
+// Then handle confirm via stripe.confirmPayment()
+```
+
+**Pros:** 100% your domain, full UX control, no redirect.
+**Cons:** PCI compliance burden, more code, must handle 3DS / SCA / etc.
+
+**Best for:** Enterprise compliance requirements, ultra-custom checkout UI. Rare.
+
+### Pattern C (recommended) — Use Hosted by default
+
+Just use Pattern A (hosted Stripe Checkout). EZPay was designed for this. It's what 99% of products need.
+
+### Why not embed everything?
+
+Stripe Checkout (hosted) handles:
+
+- PCI DSS compliance (massive cost savings vs DIY)
+- EU VAT, US sales tax (Stripe Tax)
+- Apple Pay, Google Pay, Link, BNPL automatically
+- 3D Secure, SCA (EU compliance)
+- Receipts, invoices in Stripe Customer Portal
+- Multi-currency display
+- Localization 30+ languages
+- Mobile-optimized
+- Ongoing updates (you don't maintain UI)
+
+Embedding all this yourself = months of work + ongoing maintenance. EZPay's hosted approach = minutes of work + Stripe maintains.
+
+### Components matrix
+
+| Component                                           | Use case                                                   |
+| --------------------------------------------------- | ---------------------------------------------------------- |
+| `<SubscribeButton />`                               | Recurring subscription via Stripe Checkout                 |
+| `<DonateButton />`                                  | One-shot donation                                          |
+| `<DonateModal />`                                   | Donation with amount picker                                |
+| `<PurchaseButton />`                                | One-shot product purchase                                  |
+| `<PricingPage />`                                   | Auto-fetch + display plans + Subscribe buttons             |
+| `<SubscribeSuccessPage />`                          | `/subscribe/success` callback handler                      |
+| `<SubscribeCancelPage />`                           | `/subscribe/cancel` callback handler                       |
+| `<DonateSuccessPage />`, `<DonateCancelPage />`     | Donate callbacks                                           |
+| `<PurchaseSuccessPage />`, `<PurchaseCancelPage />` | Purchase callbacks                                         |
+| `<BillingDashboard />`                              | User's subscriptions + history + payment methods           |
+| `<ManageSubscriptionButton />`                      | Link to Stripe Customer Portal (cancel, update card, etc.) |
+| `<InvoiceHistorySection />`                         | User's invoices (DataTable + filter + download)            |
+| `<PayAdminDashboard />`                             | Cross-tenant admin (federated)                             |
+
+All components accept:
+
+- `texts?: Partial<XTexts>` — i18n override (English defaults)
+- `onSuccess` / `onError` callbacks where relevant
+- `className` for style overrides
+
 ## API
 
 ### Core (`@ezstart/pay-sdk/core`)

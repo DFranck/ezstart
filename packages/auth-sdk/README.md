@@ -108,6 +108,105 @@ const user = await client.loginWithCookie('user@example.com', 'password')
 const me = await client.getCurrentUser()
 ```
 
+## Choosing your auth UX — Hosted vs Embedded
+
+EZAuth supports **two patterns** for authentication UX. Pick the one that fits your product:
+
+### Pattern A — Hosted login (redirect to ezauth)
+
+User clicks "Sign in" → redirected to a hosted EZAuth login page → after auth, redirected back to your app with a session.
+
+```tsx
+// 1. In your app shell
+import { LoginButton, AuthProvider } from '@ezstart/auth-sdk'
+
+;<AuthProvider config={{ apiUrl: 'https://api.example.com', appName: 'myapp' }}>
+  <LoginButton /> {/* That's it — handles redirect, callback, session */}
+</AuthProvider>
+
+// 2. Add the callback page
+// src/app/auth/callback/page.tsx
+import { AuthCallbackPage } from '@ezstart/auth-sdk/components'
+export default () => <AuthCallbackPage />
+```
+
+✅ **Pros**: zero auth UI code, central security, cross-app SSO trivial, white-label theme automatic.
+⚠️ **Cons**: redirect can disrupt UX, "powered by EZAuth" visible.
+
+**Best for**: MVP / startup pressed, B2B multi-tenant, Enterprise SaaS, marketplaces with cross-app SSO.
+
+---
+
+### Pattern B — Embedded forms (in your app)
+
+User stays on YOUR domain. You build your own `/login`, `/register`, etc. pages and drop in EZAuth form components.
+
+```tsx
+// src/app/login/page.tsx
+'use client'
+import { SignInForm } from '@ezstart/auth-sdk/components'
+import { useRouter } from 'next/navigation'
+
+export default function LoginPage() {
+  const router = useRouter()
+  return (
+    <SignInForm
+      appName="myapp"
+      onSuccess={() => router.push('/dashboard')}
+      texts={{ submit: 'Continue' /* ...customize */ }}
+    />
+  )
+}
+
+// Similarly for /register, /forgot-password, /reset-password, /verify-email
+```
+
+✅ **Pros**: 100% your branding, seamless UX (no redirect), better mobile/PWA, control everything.
+⚠️ **Cons**: more pages to build (5+ pages), security spread across your domains, you maintain UI updates.
+
+**Best for**: B2C consumer SaaS, indie products, mobile-first apps, brand-conscious products.
+
+---
+
+### Pattern C — Both (dev choice)
+
+You can mix: hosted login button on landing + embedded forms in dashboard, or vice versa. EZAuth supports both natively.
+
+### Choose by use case
+
+| Your product                    | Recommended pattern         |
+| ------------------------------- | --------------------------- |
+| MVP / pressed startup           | A (Hosted) — zero work      |
+| B2C consumer SaaS (Notion-like) | B (Embedded) — branding     |
+| B2B multi-tenant                | A (Hosted) — cross-app SSO  |
+| Marketplace                     | A + B mix                   |
+| Mobile-first / PWA              | B (Embedded) — no redirect  |
+| Enterprise SaaS                 | A (Hosted) — security audit |
+| Indie product                   | B (Embedded) — conversion   |
+
+### Components matrix
+
+| Component                | Pattern | Drop-in location              |
+| ------------------------ | ------- | ----------------------------- |
+| `<LoginButton />`        | A       | App header / CTA              |
+| `<RegisterButton />`     | A       | App header / CTA              |
+| `<AuthCallbackPage />`   | A       | `/auth/callback` route        |
+| `<SignInForm />`         | B       | Your `/login` page            |
+| `<SignUpForm />`         | B       | Your `/register` page         |
+| `<ForgotPasswordForm />` | B       | Your `/forgot-password` page  |
+| `<ResetPasswordForm />`  | B       | Your `/reset-password` page   |
+| `<VerifyEmailFlow />`    | B       | Your `/verify-email` page     |
+| `<TwoFactorPrompt />`    | B       | Inside SignInForm flow (auto) |
+| `<UserMenu />`           | A or B  | Header (works with both)      |
+| `<EZAuthDashboard />`    | A or B  | Your `/dashboard` route       |
+
+All form components accept:
+
+- `texts?: Partial<XTexts>` — i18n override (English defaults)
+- `onSuccess?: () => void` — callback
+- `onError?: (err: Error) => void` — callback
+- Standard `className` for style overrides
+
 ## API
 
 ### Core (`@ezstart/auth-sdk/core`)
