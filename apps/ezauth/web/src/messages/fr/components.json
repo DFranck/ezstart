@@ -7,6 +7,7 @@
     "sidebarSearchPlaceholder": "Filtrer les composants…",
     "sidebarEmpty": "Aucun composant ne correspond.",
     "sidebarShortcutHint": "Utilisez le raccourci pour ouvrir la palette.",
+    "backToHome": "Retour à EZAuth",
     "paletteTitle": "Palette de composants Auth SDK",
     "paletteDescription": "Cherchez parmi tous les composants @ezstart/auth-sdk.",
     "palettePlaceholder": "Chercher un composant…",

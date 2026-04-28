@@ -7,6 +7,7 @@
     "sidebarSearchPlaceholder": "Filter components…",
     "sidebarEmpty": "No components match your search.",
     "sidebarShortcutHint": "Press the shortcut to open the command palette.",
+    "backToHome": "Back to EZAuth",
     "paletteTitle": "Auth SDK component palette",
     "paletteDescription": "Search across every @ezstart/auth-sdk component.",
     "palettePlaceholder": "Search components…",

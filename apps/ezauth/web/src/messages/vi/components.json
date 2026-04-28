@@ -7,6 +7,7 @@
     "sidebarSearchPlaceholder": "Lọc thành phần…",
     "sidebarEmpty": "Không có thành phần nào phù hợp.",
     "sidebarShortcutHint": "Nhấn phím tắt để mở bảng lệnh.",
+    "backToHome": "Quay lại EZAuth",
     "paletteTitle": "Bảng lệnh thành phần Auth SDK",
     "paletteDescription": "Tìm kiếm trong tất cả thành phần @ezstart/auth-sdk.",
     "palettePlaceholder": "Tìm thành phần…",

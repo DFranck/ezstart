@@ -32,12 +32,12 @@ export function ComponentSidebar() {
 
   return (
     <>
-      {/* Mobile toggle */}
+      {/* Mobile toggle — anchored just below the showcase top bar (h-14). */}
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="lg:hidden fixed left-2 top-16 z-30"
+        className="lg:hidden fixed left-2 top-[3.75rem] z-30"
         onClick={() => setOpen(true)}
         aria-label={t('sidebarOpen')}
       >
