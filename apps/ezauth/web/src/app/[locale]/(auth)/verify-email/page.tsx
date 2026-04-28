@@ -1,59 +1,7 @@
 'use client'
 
-import { VerifyEmailFlow } from '@ezstart/auth-sdk'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Div,
-  Section,
-  Spinner,
-} from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
-import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
-
-function VerifyEmailContent() {
-  const t = useTranslations('verifyEmail')
-  const searchParams = useSearchParams()
-  const token = searchParams.get('token')
-
-  return (
-    <Card className="max-w-md w-full">
-      <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl md:text-2xl font-bold">{t('title')}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <VerifyEmailFlow
-          token={token}
-          texts={{
-            verifying: t('verifying'),
-            success: t('success'),
-            alreadyVerified: t('alreadyVerified'),
-            invalid: t('invalidToken'),
-            error: t('error'),
-            backToLogin: t('backToLogin'),
-            tryAgain: t('resendLink'),
-          }}
-        />
-      </CardContent>
-    </Card>
-  )
-}
+import { VerifyEmailCard } from '@ezstart/auth-sdk/components'
 
 export default function VerifyEmailPage() {
-  return (
-    <Section className="px-2">
-      <Suspense
-        fallback={
-          <Div className="flex justify-center py-8">
-            <Spinner variant="primary" size="lg" />
-          </Div>
-        }
-      >
-        <VerifyEmailContent />
-      </Suspense>
-    </Section>
-  )
+  return <VerifyEmailCard />
 }

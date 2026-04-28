@@ -1,149 +1,17 @@
 'use client'
 
-import { SignUpForm, useAuthNavigation } from '@ezstart/auth-sdk'
-import {
-  BackButton,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  Div,
-  P,
-  Section,
-  Span,
-  Spinner,
-} from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/ui/theme/components'
-import { Link } from '@/i18n/navigation'
-import { Suspense } from 'react'
-import { useParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useKeyConfig } from '@/hooks/useKeyConfig'
-import { prettifySlug } from '@/server/theme-ssr'
-
-interface RegisterContentProps {
-  ssrAppName: string | null
-  ssrAppDisplayName: string | null
-}
-
-function RegisterContent({ ssrAppName, ssrAppDisplayName }: RegisterContentProps) {
-  const t = useTranslations('register')
-  const tv = useTranslations('verifyEmail')
-  const tApiErrors = useTranslations('apiErrors')
-  const tOAuth = useTranslations('oauth')
-  const tPwd = useTranslations('passwordStrength')
-  const navigation = useAuthNavigation()
-  const params = useParams<{ locale: string }>()
-  const locale = params?.locale ?? 'en'
-
-  // Resolve app from ?key= (publishable key) or fallback to ?app= (legacy)
-  const keyConfig = useKeyConfig(navigation.publishableKey)
-  // SSR-resolved app takes precedence over the `'ezauth'` default so the
-  // first render already matches the real consumer brand (zero flash).
-  const app = keyConfig.appName ?? navigation.app ?? ssrAppName ?? 'ezauth'
-  const appDisplayName = keyConfig.appDisplayName ?? ssrAppDisplayName ?? prettifySlug(app)
-  const isKeyInvalid = keyConfig.status === 'invalid'
-
-  // First-party fallback: default redirect_uri to ezauth's own callback page
-  // when the user lands on /register directly (no third-party ?redirect_uri=).
-  const resolvedRedirectUri =
-    navigation.redirectUri ??
-    (typeof window !== 'undefined'
-      ? `${window.location.origin}/${locale}/auth/callback`
-      : undefined)
-  const bannerKeyStatus = navigation.publishableKey
-    ? keyConfig.status === 'valid'
-      ? ('valid' as const)
-      : keyConfig.status === 'invalid'
-        ? ('invalid' as const)
-        : undefined
-    : undefined
-
-  return (
-    <Card className="max-w-md w-full relative max-h-[90vh] overflow-y-auto">
-      <Div className="absolute top-4 left-4">
-        <BackButton />
-      </Div>
-      <Div className="absolute top-4 right-4">
-        <ThemeSwitcher />
-      </Div>
-      <CardHeader className="text-center pb-4">
-        <CardDescription className="text-xs md:text-sm">
-          {t('createAccountToAccess')}{' '}
-          <Span className="text-primary font-medium">{appDisplayName}</Span>
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        <SignUpForm
-          appName={app}
-          redirectUri={resolvedRedirectUri}
-          showOAuth
-          oauthProviders={['google']}
-          disabled={isKeyInvalid}
-          keyStatus={bannerKeyStatus}
-          urlKey={navigation.publishableKey}
-          texts={{
-            email: t('email'),
-            emailPlaceholder: t('emailPlaceholder'),
-            emailTaken: t('emailTaken'),
-            username: t('username'),
-            usernamePlaceholder: t('usernamePlaceholder'),
-            usernameTaken: t('usernameTaken'),
-            firstName: t('firstName'),
-            firstNamePlaceholder: t('firstNamePlaceholder'),
-            lastName: t('lastName'),
-            lastNamePlaceholder: t('lastNamePlaceholder'),
-            password: t('password'),
-            passwordPlaceholder: t('passwordPlaceholder'),
-            passwordHint: t('passwordHint'),
-            confirmPassword: t('confirmPassword'),
-            confirmPasswordPlaceholder: t('confirmPasswordPlaceholder'),
-            passwordMismatch: t('passwordMismatch'),
-            submit: t('submit'),
-            submitting: t('submitting'),
-            fallbackError: tApiErrors('fallback'),
-            checkEmail: tv('checkEmail'),
-            checkEmailDescription: tv('checkEmailDescription'),
-            backToLogin: tv('backToLogin'),
-            passwordWeak: tPwd('weak'),
-            passwordFair: tPwd('fair'),
-            passwordGood: tPwd('good'),
-            passwordStrong: tPwd('strong'),
-            continueWithGoogle: tOAuth('continueWithGoogle'),
-            orContinueWith: tOAuth('orContinueWith'),
-          }}
-        />
-
-        <Div className="text-center">
-          <P size={'xs'}>
-            {t('hasAccount')}{' '}
-            <Link
-              href={`${navigation.loginPath}${navigation.searchSuffix}`}
-              className="text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline"
-            >
-              {t('login')}
-            </Link>
-          </P>
-        </Div>
-      </CardContent>
-    </Card>
-  )
-}
+import { SignUpCard } from '@ezstart/auth-sdk/components'
 
 interface RegisterClientProps {
   ssrAppName: string | null
   ssrAppDisplayName: string | null
 }
 
+/**
+ * Thin client wrapper around `<SignUpCard>` — forwards SSR-resolved brand
+ * info from the server `page.tsx`. All chrome, key-config, OAuth, promo
+ * codes, password strength, footer cross-link live in the SDK Card.
+ */
 export default function RegisterClient({ ssrAppName, ssrAppDisplayName }: RegisterClientProps) {
-  const t = useTranslations('register')
-
-  return (
-    <Section className="px-2">
-      <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
-        <RegisterContent ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
-      </Suspense>
-    </Section>
-  )
+  return <SignUpCard ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
 }
