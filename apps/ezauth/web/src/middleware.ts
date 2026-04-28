@@ -23,31 +23,6 @@ const VALID_THEME_PREFERENCES = new Set(['light', 'dark', 'system'])
  */
 const THEME_COOKIE_NAME = 'theme'
 
-/**
- * Path fragments that render their own full-screen chrome (auth forms,
- * dashboard, admin, developer, account). Matched via `pathname.includes(...)`
- * so locale-prefixed URLs (`/en/login`, `/fr/dashboard`, etc.) hit without
- * per-locale entries.
- *
- * Mirrors `BARE_PREFIXES` in `components/app-shell.tsx`. The middleware
- * injects `x-route-mode: bare | full` based on this list so the layout can
- * decide chrome rendering SSR-correctly (no client `usePathname()` swap).
- */
-// Auth routes (`/login`, `/register`, etc.) are intentionally NOT bare:
-// they render an empty page + a `<SignInModal>` (etc.) portal, so we want
-// the public landing chrome (header + footer) visible BEHIND the modal
-// backdrop — Vercel / Linear "intercepted modal" pattern. Closing the
-// modal navigates back to home with chrome already in place (no flash).
-//
-// `/docs` is bare (covers /docs, /docs/components, /docs/api, /docs/guides,
-// etc. as we expand): the docs umbrella ships its own DocsTopBar + sidebar
-// chrome and we don't want it double-framed by the public AppShell.
-const BARE_ROUTE_PREFIXES = ['/auth/', '/dashboard', '/admin', '/developer', '/account', '/docs']
-
-function isBareRoutePathname(pathname: string): boolean {
-  return BARE_ROUTE_PREFIXES.some(prefix => pathname.includes(prefix))
-}
-
 const intlMiddleware = createMiddleware(routing)
 
 /**
@@ -64,14 +39,6 @@ export default async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname === '/health') {
     return new NextResponse('OK', { status: 200 })
   }
-
-  // Bare-route detection (SSR-correct chrome decision). Layout reads this
-  // header via `headers().get('x-route-mode')` and short-circuits the
-  // `<AppShell>` chrome on auth/dashboard/admin/etc. routes — eliminating the
-  // landing-chrome flash that used to happen on `/dashboard` direct loads
-  // (where the client `usePathname()` only ran post-hydration).
-  const routeMode = isBareRoutePathname(request.nextUrl.pathname) ? 'bare' : 'full'
-  request.headers.set('x-route-mode', routeMode)
 
   // Resolve app theme from URL params.
   // ?key= (publishable key) takes priority over ?app= (legacy).

@@ -3,7 +3,6 @@ import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { getWebUrl } from '@ezstart/config'
 import { Providers } from '@/components/providers'
-import { AppShell } from '@/components/app-shell'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import { getServerAuth } from '@ezstart/auth-sdk/server'
 import { logger } from '@ezstart/logger/server'
@@ -103,15 +102,6 @@ export default async function LocaleLayout({ children, params }: Props) {
   // (the script's reconciliation is the source of truth post-hydration).
   const ssrThemeClass = await resolveSsrThemeClass()
 
-  // Route mode — set by middleware via `x-route-mode` header. `'bare'` means
-  // the route renders its own full-screen chrome (auth forms, dashboard,
-  // admin, developer, account) and AppShell must short-circuit to bare
-  // children. Resolving this server-side eliminates the landing-chrome flash
-  // on `/dashboard` direct loads (the legacy client `usePathname()` only ran
-  // after hydration, so the SSR payload always shipped landing chrome).
-  const routeModeHeader = headersList.get('x-route-mode')
-  const routeMode: 'bare' | 'full' = routeModeHeader === 'bare' ? 'bare' : 'full'
-
   // SSR auth bootstrap (Clerk-style) — kills the LoginButton flash in
   // httpOnly mode. Reads the session cookie from the inbound request,
   // resolves the user via `/api/auth/me` server-side, and seeds the Zustand
@@ -178,18 +168,18 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ErrorBoundary title={t('errorBoundary.title')}>
-            <Providers initialUser={initialUser}>
-              {/*
-                AppShell mounted at the locale-root level — sits ABOVE the
-                `(public)`/`(dashboard)`/`(auth)` route groups so it persists
-                across cross-group navigations (e.g. `/admin` -> `/`) instead
-                of remounting from scratch each time. AppShell internally
-                detects auth/dashboard routes (login/register/dashboard/...)
-                and short-circuits to bare `children` without chrome, while
-                staying mounted.
-              */}
-              <AppShell routeMode={routeMode}>{children}</AppShell>
-            </Providers>
+            {/*
+              Root layout owns ONLY providers (NextIntl + ErrorBoundary +
+              ThemeProvider + AuthProvider via <Providers>). The page chrome
+              (AppShell for marketing, DashboardLayout for app, bare for
+              focused tasks) is owned by each ROUTE GROUP layout in
+              `(public)/`, `(app)/`, `(auth)/`, `(bare)/`.
+              Pattern Stripe / Clerk / Vercel — keeps each surface focused
+              on its concern, eliminates conditional chrome short-circuits,
+              and lets Next.js naturally re-render the right shell on
+              cross-group navigation (no stale routeMode cache).
+            */}
+            <Providers initialUser={initialUser}>{children}</Providers>
           </ErrorBoundary>
         </NextIntlClientProvider>
         <Toaster />

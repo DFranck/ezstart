@@ -4,13 +4,13 @@ import type { ReactNode } from 'react'
 /**
  * Auth route group layout (login/register/forgot-password/reset/verify).
  *
- * Renders forms full-bleed inside a centered `<Main>`. The locale-root
- * `<AppShell>` short-circuits to bare `children` for `/login`, `/register`,
- * `/forgot-password`, `/reset-password`, `/verify-email` and `/auth/*` (cf.
- * `BARE_PREFIXES` in `app-shell.tsx`), so no header/footer chrome is rendered
- * around these screens. AppShell stays MOUNTED above us though — combined
- * with the SSR `initialUser` bootstrap from `getServerAuth()`, this kills
- * the LoginButton flash that used to appear on cross-group navigations.
+ * Renders forms full-bleed inside a centered `<Main>`. The auth pages
+ * themselves mount a `<SignInModal>` (etc.) portal with `backdrop='opaque'`
+ * — the modal IS the page surface; the centered Main provides a pleasant
+ * fallback during the SSR → hydration window before the Radix portal mounts.
+ *
+ * No AppShell chrome here — sibling route groups (`(public)`, `(dashboard)`,
+ * `(bare)`) own their own layouts independently.
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
