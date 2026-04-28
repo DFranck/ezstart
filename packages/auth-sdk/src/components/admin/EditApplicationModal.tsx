@@ -4,20 +4,23 @@ import { Button, Div, Input, Label, Modal, P, Spinner, Textarea } from '@ezstart
 import { toast } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
 import { useUpdateApplication } from '../../react/applications.js'
-import type { AdminApplicationRow, AdminApplicationsTexts } from './AdminApplications.types.js'
+import type {
+  AdminApplicationRow,
+  AuthApplicationsSectionTexts,
+} from './AdminApplications.types.js'
 
 export interface EditApplicationModalProps {
   application: AdminApplicationRow | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onSaved: () => void
-  t: Required<AdminApplicationsTexts>
+  t: Required<AuthApplicationsSectionTexts>
 }
 
 /**
  * Modal that lets a superadmin edit name / description of an Application.
  * Slug is immutable per backend contract. Internal sub-component of
- * `<AdminApplicationsDashboard>`.
+ * `<AuthAdminDashboard>`.
  *
  * @internal
  */

@@ -29,15 +29,23 @@ export {
 // ── React (hooks, provider, guards) ──────────────────────────────────────────
 
 // THE provider — Clerk-like API
-export { AuthProvider, useAuthContext } from './react/auth-provider.js'
+export {
+  AuthProvider,
+  useAuthContext,
+  useAuthStore,
+  useAuthStoreSelector,
+  useAuthStoreApi,
+  useAuthStoreSSR,
+  useAuthStoreGetSnapshot,
+} from './react/auth-provider.js'
 export type { AuthProviderProps, AuthLogger } from './react/auth-provider.js'
 
 // THE hook
 export { useAuth } from './react/hooks.js'
 
-// Store
-export { useAuthStore, useAuthStoreSSR, configureAuthStorage } from './react/store.js'
-export type { AuthState } from './react/store.js'
+// Store factory (advanced — usually consumed via `<AuthProvider>`)
+export { createAuthStore, configureAuthStorage } from './react/store.js'
+export type { AuthState, AuthStoreApi, CreateAuthStoreOptions } from './react/store.js'
 
 // React guards
 export { RequireAuth, AccessDenied, SignedIn, SignedOut } from './react/guards.js'
@@ -150,44 +158,26 @@ export type {
   AuditLogMetadata,
 } from './core/types.js'
 
-// Admin dashboard
+// Admin — all-in-one console with internal tabs
+// (Overview, Users, Applications, Settings). Auto-scoped server-side via
+// JWT (`req.derivedScope`). Drop-in for both EZAuth's own `/admin` page
+// and the EZStart hub federated admin (Tier 3 cross-origin).
 export { AuthAdminDashboard } from './components/AuthAdminDashboard.js'
 export type {
   AuthAdminDashboardProps,
   AuthAdminDashboardTexts,
-  AuthAdminAudienceScope,
 } from './components/AuthAdminDashboard.js'
 
-// Admin Applications dashboard (cross-tenant CRUD)
-export { AdminApplicationsDashboard } from './components/AdminApplicationsDashboard.js'
-export type {
-  AdminApplicationsDashboardProps,
-  AdminApplicationsTexts,
-} from './components/AdminApplicationsDashboard.js'
-
-// Admin — feature flags + maintenance mode
-export { AdminFeatureFlagsSection } from './components/admin/AdminFeatureFlagsSection.js'
-export type {
-  AdminFeatureFlagsSectionProps,
-  AdminFeatureFlagsSectionTexts,
-} from './components/admin/AdminFeatureFlagsSection.js'
-export { AdminMaintenanceModeSection } from './components/admin/AdminMaintenanceModeSection.js'
-export type {
-  AdminMaintenanceModeSectionProps,
-  AdminMaintenanceModeSectionTexts,
-} from './components/admin/AdminMaintenanceModeSection.js'
+// Maintenance banner — public, used outside the admin dashboard (e.g. in
+// app shells to surface platform-wide maintenance status to end users).
 export { MaintenanceBanner } from './components/admin/MaintenanceBanner.js'
 export type {
   MaintenanceBannerProps,
   MaintenanceBannerTexts,
 } from './components/admin/MaintenanceBanner.js'
 
-// Admin — platform analytics overview (superadmin only)
-export { AdminAnalyticsSection } from './components/admin/AdminAnalyticsSection.js'
-export type {
-  AdminAnalyticsSectionProps,
-  AdminAnalyticsSectionTexts,
-} from './components/admin/AdminAnalyticsSection.js'
+// Admin analytics overview hook (used internally by the dashboard but
+// re-exported for advanced consumers building a custom layout).
 export { useAdminAnalyticsOverview } from './react/admin-analytics.js'
 export type {
   AdminAnalyticsOverview,

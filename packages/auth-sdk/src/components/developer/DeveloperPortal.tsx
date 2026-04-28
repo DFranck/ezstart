@@ -36,6 +36,7 @@ import { ApiKeysTable } from './ApiKeysTable.js'
 import { CreateKeyModal } from './CreateKeyModal.js'
 import { KeyCreatedModal } from './KeyCreatedModal.js'
 import { UsageDetailsModal } from './UsageDetailsModal.js'
+import { logger } from '../internal-logger.js'
 
 export interface DeveloperPortalProps {
   /** Whether the user is authenticated and data should be fetched. */
@@ -63,6 +64,14 @@ export interface DeveloperPortalProps {
    * @deprecated Pass `applicationId` instead.
    */
   appOptions?: string[]
+  /**
+   * Server-side pre-fetched API keys (via `getServerApiKeys()` from
+   * `@ezstart/auth-sdk/server`). When provided, the React Query cache is
+   * seeded with this value so the very first paint already shows the keys
+   * table — no client `<Spinner>` flash. React Query still revalidates in
+   * the background to keep the data fresh.
+   */
+  initialKeys?: ApiKeyItem[]
 }
 
 function mergeTexts(partial?: Partial<DeveloperPortalTexts>): DeveloperPortalTexts {
@@ -86,15 +95,29 @@ export function DeveloperPortal({
   showAdminScope = false,
   applicationId,
   appOptions = [],
+  initialKeys,
 }: DeveloperPortalProps) {
   const texts = mergeTexts(partialTexts)
+
+  // Surface deprecation warning when consumer passes the legacy `appOptions` prop
+  // without an explicit `applicationId`.
+  if (!applicationId && appOptions.length > 0 && typeof window !== 'undefined') {
+    logger.warn(
+      '[auth-sdk] DeveloperPortal: `appOptions` is deprecated. Pass `applicationId` instead.'
+    )
+  }
 
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [createdKey, setCreatedKey] = useState<string | null>(null)
   const [revokeTargetId, setRevokeTargetId] = useState<string | null>(null)
   const [usageKeyId, setUsageKeyId] = useState<string | null>(null)
 
-  const { data: allApiKeys = [] as ApiKeyItem[], isLoading, isError, refetch } = useApiKeys(enabled)
+  const {
+    data: allApiKeys = [] as ApiKeyItem[],
+    isLoading,
+    isError,
+    refetch,
+  } = useApiKeys(enabled, initialKeys ? { initialData: initialKeys } : undefined)
 
   // When an Application is selected, scope the displayed keys to it. Pre-P6
   // keys without `applicationId` are excluded from that view.

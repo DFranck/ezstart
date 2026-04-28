@@ -23,8 +23,7 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from '../react/hooks.js'
-import { useAuthContext } from '../react/auth-provider.js'
-import { useAuthStore } from '../react/store.js'
+import { useAuthContext, useAuthStoreApi } from '../react/auth-provider.js'
 
 /**
  * User-facing strings for {@link DeleteAccountSection}. All keys are required
@@ -127,7 +126,7 @@ export function DeleteAccountSection({
   const texts: DeleteAccountSectionTexts = { ...DEFAULT_DELETE_ACCOUNT_TEXTS, ...textOverrides }
   const { user, accessToken } = useAuth()
   const { client } = useAuthContext()
-  const store = useAuthStore()
+  const storeApi = useAuthStoreApi()
 
   const [open, setOpen] = useState(false)
   const [emailValue, setEmailValue] = useState('')
@@ -169,7 +168,7 @@ export function DeleteAccountSection({
       } catch {
         // Logout failures are non-blocking — local store is cleared regardless.
       }
-      store.logout()
+      storeApi.getState().logout()
       if (typeof window !== 'undefined') {
         window.location.href = '/?accountDeleted=true'
       }

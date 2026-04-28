@@ -1,8 +1,7 @@
 'use client'
 
 import type { AuthLogger } from './auth-provider.js'
-import { useAuthContext } from './auth-provider.js'
-import { useAuthStore } from './store.js'
+import { useAuthContext, useAuthStore, useAuthStoreApi } from './auth-provider.js'
 
 const noopLogger: AuthLogger = {
   debug: () => {},
@@ -20,6 +19,7 @@ export function useAuth(logger?: AuthLogger) {
   const log = logger ?? noopLogger
   const { client, appName, webUrl, scope, publishableKey } = useAuthContext()
   const store = useAuthStore()
+  const storeApi = useAuthStoreApi()
 
   const mode = store.getMode()
 
@@ -97,14 +97,18 @@ export function useAuth(logger?: AuthLogger) {
       const authResult = await client.exchangeCode(code)
 
       if (mode === 'httpOnly') {
-        store.setAuth(authResult.user, undefined, 'httpOnly', authResult.refresh_token)
+        storeApi
+          .getState()
+          .setAuth(authResult.user, undefined, 'httpOnly', authResult.refresh_token)
       } else {
-        store.setAuth(
-          authResult.user,
-          authResult.access_token,
-          'localStorage',
-          authResult.refresh_token
-        )
+        storeApi
+          .getState()
+          .setAuth(
+            authResult.user,
+            authResult.access_token,
+            'localStorage',
+            authResult.refresh_token
+          )
       }
 
       return authResult.user
@@ -115,34 +119,35 @@ export function useAuth(logger?: AuthLogger) {
   }
 
   const logout = async () => {
-    store.setLoggingOut(true)
-    const rt = store.refreshToken
+    storeApi.getState().setLoggingOut(true)
+    const rt = storeApi.getState().refreshToken
     await client.logout(rt || undefined)
-    store.logout()
+    storeApi.getState().logout()
   }
 
   const verifyAndRefresh = async () => {
-    if (mode === 'localStorage' && store.accessToken) {
+    const current = storeApi.getState()
+    if (mode === 'localStorage' && current.accessToken) {
       try {
-        const user = await client.getCurrentUser(store.accessToken)
-        store.updateUser(user)
+        const user = await client.getCurrentUser(current.accessToken)
+        storeApi.getState().updateUser(user)
         return user
       } catch (error: unknown) {
         log.error('Failed to refresh user:', error instanceof Error ? error.message : String(error))
         if ((error as { status?: number })?.status === 401) {
-          store.logout()
+          storeApi.getState().logout()
         }
         throw error
       }
     } else if (mode === 'httpOnly') {
       try {
         const user = await client.getCurrentUser()
-        store.updateUser(user)
+        storeApi.getState().updateUser(user)
         return user
       } catch (error: unknown) {
         log.error('Failed to refresh user:', error instanceof Error ? error.message : String(error))
         if ((error as { status?: number })?.status === 401) {
-          store.logout()
+          storeApi.getState().logout()
         }
         throw error
       }

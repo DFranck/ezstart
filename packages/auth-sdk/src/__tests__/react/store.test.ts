@@ -1,22 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { act, renderHook } from '@testing-library/react'
-import { useAuthStore, configureAuthStorage, useAuthStoreSSR } from '../../react/store.js'
+import { act } from '@testing-library/react'
+import { createAuthStore, configureAuthStorage } from '../../react/store.js'
 import { createTestUser } from '../helpers.js'
 
-describe('useAuthStore', () => {
+describe('createAuthStore', () => {
+  let store: ReturnType<typeof createAuthStore>
+
   beforeEach(() => {
-    // Reset store to initial state
-    act(() => {
-      useAuthStore.getState().logout()
-      useAuthStore.setState({ isAuthReady: false })
-    })
     localStorage.clear()
+    store = createAuthStore({ broadcastChannel: false })
   })
 
   // ─── Initial state ──────────────────────────────────────────────────────
 
-  it('has correct initial state', () => {
-    const state = useAuthStore.getState()
+  it('has correct initial state when no initialUser is provided', () => {
+    const state = store.getState()
     expect(state.user).toBeNull()
     expect(state.accessToken).toBeNull()
     expect(state.refreshToken).toBeNull()
@@ -26,15 +24,24 @@ describe('useAuthStore', () => {
     expect(state.mode).toBe('localStorage')
   })
 
+  it('boots authenticated when initialUser is provided (SSR bootstrap)', () => {
+    const user = createTestUser()
+    const ssrStore = createAuthStore({ initialUser: user, broadcastChannel: false })
+    const state = ssrStore.getState()
+    expect(state.user).toEqual(user)
+    expect(state.isAuthenticated).toBe(true)
+    expect(state.isAuthReady).toBe(true)
+  })
+
   // ─── setAuth ────────────────────────────────────────────────────────────
 
   it('setAuth sets user, tokens, and isAuthenticated', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'access-token', 'localStorage', 'refresh-token')
+      store.getState().setAuth(user, 'access-token', 'localStorage', 'refresh-token')
     })
 
-    const state = useAuthStore.getState()
+    const state = store.getState()
     expect(state.user).toEqual(user)
     expect(state.accessToken).toBe('access-token')
     expect(state.refreshToken).toBe('refresh-token')
@@ -46,10 +53,10 @@ describe('useAuthStore', () => {
   it('setAuth in httpOnly mode does NOT store tokens in state', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'access-tok', 'httpOnly', 'refresh-tok')
+      store.getState().setAuth(user, 'access-tok', 'httpOnly', 'refresh-tok')
     })
 
-    const state = useAuthStore.getState()
+    const state = store.getState()
     expect(state.user).toEqual(user)
     expect(state.accessToken).toBeNull()
     expect(state.refreshToken).toBeNull()
@@ -62,27 +69,27 @@ describe('useAuthStore', () => {
   it('setTokens updates tokens in localStorage mode', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'old-at', 'localStorage', 'old-rt')
+      store.getState().setAuth(user, 'old-at', 'localStorage', 'old-rt')
     })
     act(() => {
-      useAuthStore.getState().setTokens('new-at', 'new-rt')
+      store.getState().setTokens('new-at', 'new-rt')
     })
 
-    expect(useAuthStore.getState().accessToken).toBe('new-at')
-    expect(useAuthStore.getState().refreshToken).toBe('new-rt')
+    expect(store.getState().accessToken).toBe('new-at')
+    expect(store.getState().refreshToken).toBe('new-rt')
   })
 
-  it('setTokens does NOT update tokens in httpOnly mode', () => {
+  it('setTokens in httpOnly mode does NOT mutate tokens (security)', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, undefined, 'httpOnly')
+      store.getState().setAuth(user, undefined, 'httpOnly')
     })
     act(() => {
-      useAuthStore.getState().setTokens('new-at', 'new-rt')
+      store.getState().setTokens('new-at', 'new-rt')
     })
 
-    expect(useAuthStore.getState().accessToken).toBeNull()
-    expect(useAuthStore.getState().refreshToken).toBeNull()
+    expect(store.getState().accessToken).toBeNull()
+    expect(store.getState().refreshToken).toBeNull()
   })
 
   // ─── logout ─────────────────────────────────────────────────────────────
@@ -90,131 +97,112 @@ describe('useAuthStore', () => {
   it('logout clears all auth state', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at', 'localStorage', 'rt')
+      store.getState().setAuth(user, 'at', 'localStorage', 'rt')
     })
     act(() => {
-      useAuthStore.getState().logout()
+      store.getState().logout()
     })
 
-    const state = useAuthStore.getState()
+    const state = store.getState()
     expect(state.user).toBeNull()
     expect(state.accessToken).toBeNull()
     expect(state.refreshToken).toBeNull()
     expect(state.isAuthenticated).toBe(false)
     expect(state.isLoggingOut).toBe(false)
-    expect(state.mode).toBe('localStorage') // Reset to default
+    expect(state.mode).toBe('localStorage')
   })
 
   // ─── updateUser ─────────────────────────────────────────────────────────
 
-  it('updateUser replaces user while keeping other state', () => {
+  it('updateUser updates only the user field', () => {
     const user = createTestUser()
+    const updatedUser = { ...user, firstName: 'Updated' }
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at', 'localStorage', 'rt')
+      store.getState().setAuth(user, 'at', 'localStorage', 'rt')
+    })
+    act(() => {
+      store.getState().updateUser(updatedUser)
     })
 
-    const updatedUser = createTestUser({ firstName: 'Updated' })
-    act(() => {
-      useAuthStore.getState().updateUser(updatedUser)
-    })
-
-    expect(useAuthStore.getState().user?.firstName).toBe('Updated')
-    expect(useAuthStore.getState().accessToken).toBe('at')
+    expect(store.getState().user?.firstName).toBe('Updated')
+    expect(store.getState().accessToken).toBe('at')
   })
 
   // ─── getMode ────────────────────────────────────────────────────────────
 
-  it('getMode returns the current auth mode', () => {
-    expect(useAuthStore.getState().getMode()).toBe('localStorage')
+  it('getMode returns the current mode', () => {
+    expect(store.getState().getMode()).toBe('localStorage')
 
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, undefined, 'httpOnly')
+      store.getState().setAuth(user, undefined, 'httpOnly')
     })
-    expect(useAuthStore.getState().getMode()).toBe('httpOnly')
+    expect(store.getState().getMode()).toBe('httpOnly')
   })
 
-  // ─── setLoggingIn / setLoggingOut ───────────────────────────────────────
+  // ─── isLoggingIn / isLoggingOut ────────────────────────────────────────
 
-  it('setLoggingIn toggles the flag', () => {
+  it('setLoggingIn updates isLoggingIn', () => {
     act(() => {
-      useAuthStore.getState().setLoggingIn(true)
+      store.getState().setLoggingIn(true)
     })
-    expect(useAuthStore.getState().isLoggingIn).toBe(true)
+    expect(store.getState().isLoggingIn).toBe(true)
 
     act(() => {
-      useAuthStore.getState().setLoggingIn(false)
+      store.getState().setLoggingIn(false)
     })
-    expect(useAuthStore.getState().isLoggingIn).toBe(false)
+    expect(store.getState().isLoggingIn).toBe(false)
   })
 
-  it('setLoggingOut toggles the flag', () => {
+  it('setLoggingOut updates isLoggingOut', () => {
     act(() => {
-      useAuthStore.getState().setLoggingOut(true)
+      store.getState().setLoggingOut(true)
     })
-    expect(useAuthStore.getState().isLoggingOut).toBe(true)
+    expect(store.getState().isLoggingOut).toBe(true)
 
     act(() => {
-      useAuthStore.getState().setLoggingOut(false)
+      store.getState().setLoggingOut(false)
     })
-    expect(useAuthStore.getState().isLoggingOut).toBe(false)
+    expect(store.getState().isLoggingOut).toBe(false)
   })
 
-  // ─── persist (partialize) ──────────────────────────────────────────────
+  // ─── partialize / persistence (security) ───────────────────────────────
 
-  it('does NOT persist tokens in httpOnly mode to localStorage', () => {
+  it('partialize: in httpOnly mode, NEVER persists tokens to localStorage', () => {
     const user = createTestUser()
+    const channelKey = 'auth-test-httponly-' + Date.now()
+    const persistStore = createAuthStore({ storageKey: channelKey, broadcastChannel: false })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'secret-at', 'httpOnly', 'secret-rt')
+      persistStore.getState().setAuth(user, 'secret-at', 'httpOnly', 'secret-rt')
     })
 
-    // Check what zustand persisted
-    const raw = localStorage.getItem('ezauth-storage')
-    if (raw) {
-      const stored = JSON.parse(raw)
-      expect(stored.state?.accessToken).toBeNull()
-      expect(stored.state?.refreshToken).toBeNull()
-    }
+    const persisted = JSON.parse(localStorage.getItem(channelKey) ?? '{}')
+    expect(persisted?.state?.accessToken).toBeNull()
+    expect(persisted?.state?.refreshToken).toBeNull()
+    expect(persisted?.state?.user).toBeTruthy()
+    expect(persisted?.state?.isAuthenticated).toBe(true)
+    expect(persisted?.state?.mode).toBe('httpOnly')
   })
-})
 
-// ─── useAuthStoreSSR ──────────────────────────────────────────────────────
+  // ─── configureAuthStorage (legacy) ─────────────────────────────────────
 
-describe('useAuthStoreSSR', () => {
-  beforeEach(() => {
+  it('configureAuthStorage exists as a deprecated no-op API', () => {
+    // Just verifies the function is callable without throwing.
+    expect(() => configureAuthStorage('test-key')).not.toThrow()
+  })
+
+  // ─── multiple stores are isolated ──────────────────────────────────────
+
+  it('multiple stores created via the factory are fully isolated', () => {
+    const a = createAuthStore({ storageKey: 'a-' + Date.now(), broadcastChannel: false })
+    const b = createAuthStore({ storageKey: 'b-' + Date.now(), broadcastChannel: false })
+
+    const userA = createTestUser({ _id: 'user-a' })
     act(() => {
-      useAuthStore.getState().logout()
-    })
-  })
-
-  it('returns default state before mount (SSR)', () => {
-    const { result } = renderHook(() => useAuthStoreSSR())
-    // Before useEffect fires, user should be null
-    expect(result.current.user).toBeNull()
-    expect(result.current.isAuthenticated).toBe(false)
-  })
-
-  it('returns real store state after mount', async () => {
-    const user = createTestUser()
-    act(() => {
-      useAuthStore.getState().setAuth(user, 'at', 'localStorage', 'rt')
+      a.getState().setAuth(userA, 'at-a', 'localStorage', 'rt-a')
     })
 
-    const { result } = renderHook(() => useAuthStoreSSR())
-
-    // After mount, useEffect sets mounted=true
-    // We need to wait for the effect
-    await act(async () => {})
-
-    expect(result.current.user).toEqual(user)
-    expect(result.current.isAuthenticated).toBe(true)
-  })
-})
-
-// ─── configureAuthStorage ─────────────────────────────────────────────────
-
-describe('configureAuthStorage', () => {
-  it('is callable without error', () => {
-    expect(() => configureAuthStorage('custom-key')).not.toThrow()
+    expect(a.getState().user?._id).toBe('user-a')
+    expect(b.getState().user).toBeNull()
   })
 })

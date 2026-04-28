@@ -276,7 +276,9 @@ export function AccountProfileSection({
       {/* Member since */}
       <Div className="space-y-1">
         <H3 className="text-sm font-semibold text-foreground">{texts.memberSince}</H3>
-        <P className="text-sm text-muted-foreground">{formatAccountDate(user.createdAt)}</P>
+        <P className="text-sm text-muted-foreground">
+          {formatAccountDate(user.createdAt, texts.dateLocale)}
+        </P>
       </Div>
     </>
   )

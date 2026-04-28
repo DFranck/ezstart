@@ -270,6 +270,13 @@ vi.mock('@ezstart/ui/components', () => {
     CardTitle: passthrough('CardTitle'),
     CardDescription: passthrough('CardDescription'),
     Textarea: passthrough('Textarea', 'textarea'),
+    Tabs: passthrough('Tabs'),
+    TabsList: passthrough('TabsList'),
+    TabsTrigger: passthrough('TabsTrigger', 'button'),
+    TabsContent: passthrough('TabsContent'),
+    ChartContainer: passthrough('ChartContainer'),
+    ChartTooltip: passthrough('ChartTooltip'),
+    ChartTooltipContent: passthrough('ChartTooltipContent'),
   }
 })
 

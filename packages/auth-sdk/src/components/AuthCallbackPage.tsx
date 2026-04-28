@@ -104,7 +104,7 @@ function CallbackContent({
   noCodeMessage = 'No authorization code found',
   errorButtonText = 'Go Back',
 }: AuthCallbackPageProps): React.ReactElement {
-  const { handleCallback } = useAuth()
+  const { handleCallback, isAuthenticated } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
@@ -160,6 +160,25 @@ function CallbackContent({
   // Process the saved code with global lock to prevent race conditions
   useEffect(() => {
     if (!code) {
+      // No code present in the URL. Two distinct cases:
+      //   1. User is ALREADY authenticated (e.g. same-origin login already
+      //      exchanged the code locally and navigated here, or session was
+      //      restored from cookie/localStorage). Treat this as a normal
+      //      "post-login landing" and redirect to `redirectTo` instead of
+      //      surfacing a misleading error.
+      //   2. User is anonymous and arrived without a code. That IS an error
+      //      (broken SSO flow, manual URL paste, browser back-button after
+      //      logout). Surface `noCodeMessage` so the consumer can offer a
+      //      "Go to login" recovery button.
+      if (isAuthenticated) {
+        setStatus('success')
+        if (typeof window !== 'undefined') {
+          // Use a hard navigation so the destination paints in its
+          // post-auth SSR state, not a stale client-side route transition.
+          window.location.href = redirectTo
+        }
+        return
+      }
       setStatus('error')
       setError(noCodeMessage)
       return
@@ -215,7 +234,7 @@ function CallbackContent({
     return () => {
       clearTimeout(timeoutId)
     }
-  }, [code, handleCallback, router, status, redirectTo, noCodeMessage])
+  }, [code, handleCallback, router, status, redirectTo, noCodeMessage, isAuthenticated])
 
   if (status === 'loading') {
     return (

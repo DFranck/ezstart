@@ -1,10 +1,12 @@
 'use client'
 
+import { Button, Div, Dropdown, type DropdownItem, Icon, Span } from '@ezstart/ui/components'
 import { useState } from 'react'
-import { Button, Dropdown, type DropdownItem, Icon, Div, Span } from '@ezstart/ui/components'
+import { toast } from 'sonner'
 import { useAuth } from '../react/hooks.js'
-import { UserAvatar } from './UserAvatar.js'
 import { AccountModal } from './AccountModal.js'
+import { LoginButton, type LoginButtonProps } from './LoginButton.js'
+import { UserAvatar } from './UserAvatar.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -24,7 +26,18 @@ export interface UserMenuItem {
 export interface UserMenuTexts {
   signIn: string
   signOut: string
+  signingOut: string
+  signOutSuccess: string
+  signOutError: string
   manageAccount: string
+  /** "Theme" row label (only rendered when `theme` prop is provided). */
+  themeLabel: string
+  /** Trailing label shown when current scheme is `'light'`. */
+  themeLight: string
+  /** Trailing label shown when current scheme is `'dark'`. */
+  themeDark: string
+  /** Trailing label shown when current scheme is `'system'` / unset. */
+  themeSystem: string
 }
 
 export interface UserMenuProps {
@@ -54,6 +67,40 @@ export interface UserMenuProps {
   side?: 'top' | 'bottom'
   /** Trigger style: 'icon' = avatar only, 'extended' = avatar + name + email */
   variant?: 'icon' | 'extended'
+  /**
+   * Where to navigate after a successful logout. Defaults to `'/'`.
+   * The SDK calls `window.location.href = redirectAfterLogout` AFTER the
+   * server-side `/logout` round-trip completes (cookies cleared, refresh
+   * tokens revoked, audit log written) — this guarantees the destination
+   * paints in the unauthenticated state, no stale `RequireAuth` flicker.
+   * Pass `false` to disable the redirect (the consumer handles navigation).
+   */
+  redirectAfterLogout?: string | false
+  /**
+   * Optional callback fired BEFORE the redirect (after store cleanup).
+   * Useful for clearing app-specific caches (React Query, SWR, IndexedDB)
+   * or showing a toast.
+   */
+  onLogout?: () => void
+  /**
+   * Hide the embedded sign-in button rendered when the user is not
+   * authenticated. Defaults to `false` — `<UserMenu>` is the canonical
+   * single drop-in for both states (logged-in dropdown + logged-out CTA),
+   * so consumers don't have to maintain a `{isAuthenticated ? <UserMenu /> :
+   * <LoginButton />}` ternary that triggers an unmount/remount cycle on
+   * auth state changes.
+   *
+   * Pass `true` for layouts that mount their own sign-in CTA elsewhere
+   * (e.g. a hero "Get started" button that doubles as the auth entry point).
+   */
+  hideSignIn?: boolean
+  /**
+   * Override props forwarded to the embedded `<LoginButton>` (sign-in CTA
+   * shown when the user is not authenticated). The default visual mirrors
+   * the menu's `variant` so the trigger keeps a consistent rhythm
+   * (`'icon'` -> ghost icon button, `'extended'` -> default with text).
+   */
+  signInProps?: Partial<LoginButtonProps>
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -61,7 +108,14 @@ export interface UserMenuProps {
 const DEFAULT_TEXTS: UserMenuTexts = {
   signIn: 'Sign in',
   signOut: 'Sign out',
+  signingOut: 'Signing out…',
+  signOutSuccess: 'You have been signed out',
+  signOutError: 'Failed to sign out — please try again',
   manageAccount: 'Manage account',
+  themeLabel: 'Theme',
+  themeLight: 'Light',
+  themeDark: 'Dark',
+  themeSystem: 'System',
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -80,23 +134,124 @@ export function UserMenu({
   googleOAuthUrl,
   side = 'bottom',
   variant = 'icon',
+  redirectAfterLogout = '/',
+  onLogout,
+  hideSignIn = false,
+  signInProps,
 }: UserMenuProps) {
-  const { user, isAuthenticated, login, logout, isLoggingIn } = useAuth()
+  const { user, isAuthenticated, login, logout, isLoggingIn, setLoggingIn, isLoggingOut } =
+    useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
   const [showAccount, setShowAccount] = useState(false)
 
-  // ── Not authenticated: show sign-in button ──
+  // Pro logout flow:
+  //   1. POST /api/auth/logout (server revokes refresh token, clears cookies,
+  //      writes audit log entry) — already handled by `useAuth().logout()`
+  //   2. Local store reset + cross-tab BroadcastChannel notification — idem
+  //   3. Run consumer `onLogout` hook (clear React Query cache, etc.)
+  //   4. Toast + hard navigation to `redirectAfterLogout` so the next page
+  //      paints in the unauthenticated SSR state instead of bouncing through
+  //      a `<RequireAuth>` redirect on the current route.
+  const handleLogout = async () => {
+    try {
+      await logout()
+      onLogout?.()
+      toast.success(texts.signOutSuccess)
+      if (redirectAfterLogout !== false && typeof window !== 'undefined') {
+        window.location.href = redirectAfterLogout
+      }
+    } catch (err) {
+      toast.error(texts.signOutError)
+      // The store has been reset locally even on API failure (cf
+      // `useAuth().logout()`), so we still navigate so the user lands on a
+      // page that matches the (now logged-out) state.
+      if (redirectAfterLogout !== false && typeof window !== 'undefined') {
+        window.location.href = redirectAfterLogout
+      }
+      throw err
+    }
+  }
+
+  // ── Not authenticated: render the SAME visual trigger shape as the
+  // authenticated state, just with a generic placeholder (UserCircle icon
+  // for `'icon'` variant, "Sign in" row for `'extended'`) and `onClick =
+  // login()`. Mirroring the authenticated trigger keeps the chrome stable
+  // across auth state changes — the consumer mounts `<UserMenu />` once and
+  // visits both states without an unmount/remount that would interrupt
+  // in-flight toasts (e.g. the post-logout success toast).
+  //
+  // Override the visual via `signInProps`: pass any `LoginButtonProps`
+  // (`variant`, `size`, `icon`, `loginText`, ...) — when present, we
+  // delegate to `<LoginButton>` instead of the matching round / extended
+  // shape. Useful when the design wants a colored CTA in the not-auth state.
   if (!isAuthenticated || !user) {
+    if (hideSignIn) return null
+
+    if (signInProps) {
+      return (
+        <LoginButton
+          loginText={texts.signIn}
+          {...signInProps}
+          className={signInProps.className ?? className}
+        />
+      )
+    }
+
+    const handleSignInClick = () => {
+      if (isLoggingIn) return
+      // `useAuth().login()` performs a hard `window.location.href` redirect
+      // and never sets `isLoggingIn` itself — the caller is responsible for
+      // flipping the flag so subscribers (this button's spinner / disabled
+      // state, RequireAuth's loader, etc.) reflect the in-flight redirect.
+      // Mirror what `<LoginButton>` does to keep the spinner visible from
+      // click → cross-app navigation.
+      setLoggingIn(true)
+      void login()
+    }
+
+    if (variant === 'icon') {
+      return (
+        <Button
+          variant="default"
+          size="icon"
+          className={`rounded-full cursor-pointer ${className ?? ''}`.trim()}
+          aria-label={texts.signIn}
+          onClick={handleSignInClick}
+          disabled={isLoggingIn}
+        >
+          <Icon
+            name={isLoggingIn ? 'fa:FaSpinner' : 'fa:FaUser'}
+            spin={isLoggingIn}
+            className="w-5 h-5"
+          />
+        </Button>
+      )
+    }
+
+    // `'extended'` — same horizontal row as the authenticated trigger
+    // (avatar circle + label column), with placeholder avatar + "Sign in".
     return (
       <Button
         variant="default"
-        size="default"
-        className={className}
-        onClick={() => login()}
+        className={`w-full justify-start h-auto py-2 px-2 cursor-pointer ${className ?? ''}`.trim()}
+        aria-label={texts.signIn}
+        onClick={handleSignInClick}
         disabled={isLoggingIn}
       >
-        <Icon name="lucide:LogIn" className="w-4 h-4 mr-2" />
-        {isLoggingIn ? '...' : texts.signIn}
+        <Div className="flex items-center gap-2 w-full min-w-0">
+          <Div
+            className={`flex items-center justify-center rounded-full ${
+              avatarSize === 'lg' ? 'h-10 w-10' : avatarSize === 'sm' ? 'h-7 w-7' : 'h-8 w-8'
+            }`}
+          >
+            <Icon
+              name={isLoggingIn ? 'fa:FaSpinner' : 'fa:FaUser'}
+              spin={isLoggingIn}
+              className="w-4 h-4"
+            />
+          </Div>
+          <Span className="text-sm font-medium truncate text-left">{texts.signIn}</Span>
+        </Div>
       </Button>
     )
   }
@@ -160,15 +315,85 @@ export function UserMenu({
     })
   }
 
-  // 4. Divider + Sign out (destructive)
+  // 4. Embedded personalization switchers — only render when the consumer
+  //    passes the matching config props. The SDK ships the UI; the consumer
+  //    decides via prop presence whether to expose it. Stripe / Clerk pattern:
+  //    user menu ALSO surfaces theme + locale toggles so the consumer never
+  //    has to wire these into a custom row beside the dropdown.
+  const hasThemeSwitcher = !!theme && typeof theme.setTheme === 'function'
+  const hasLocaleSwitcher = Array.isArray(languages) && languages.length > 1 && !!onLocaleChange
+
+  if (hasThemeSwitcher || hasLocaleSwitcher) {
+    const prevItem = items[items.length - 1]
+    if (prevItem) prevItem.divider = true
+  }
+
+  if (hasThemeSwitcher && theme) {
+    const currentTheme = theme.theme ?? 'system'
+    const nextTheme =
+      currentTheme === 'light' ? 'dark' : currentTheme === 'dark' ? 'system' : 'light'
+    const themeIcon =
+      currentTheme === 'dark'
+        ? 'lucide:Moon'
+        : currentTheme === 'light'
+          ? 'lucide:Sun'
+          : 'lucide:Monitor'
+    const themeLabel =
+      currentTheme === 'dark'
+        ? texts.themeDark
+        : currentTheme === 'light'
+          ? texts.themeLight
+          : texts.themeSystem
+    items.push({
+      label: (
+        <Div className="flex items-center justify-between gap-2 w-full">
+          <Span className="text-sm">{texts.themeLabel}</Span>
+          <Span className="text-xs text-muted-foreground">{themeLabel}</Span>
+        </Div>
+      ),
+      value: '_theme-toggle',
+      icon: <Icon name={themeIcon} className="w-4 h-4" />,
+      onSelect: () => theme.setTheme(nextTheme),
+    })
+  }
+
+  if (hasLocaleSwitcher && languages && onLocaleChange) {
+    languages.forEach(lang => {
+      const isCurrent = lang.code === currentLocale
+      items.push({
+        label: (
+          <Div className="flex items-center justify-between gap-2 w-full">
+            <Span className="text-sm">{lang.label}</Span>
+            {isCurrent ? <Icon name="lucide:Check" className="w-4 h-4 text-primary" /> : null}
+          </Div>
+        ),
+        value: `_locale-${lang.code}`,
+        icon: <Icon name="lucide:Globe" className="w-4 h-4" />,
+        onSelect: () => {
+          if (!isCurrent) onLocaleChange(lang.code)
+        },
+      })
+    })
+  }
+
+  // 5. Divider + Sign out (destructive)
   const lastItem = items[items.length - 1]
   if (lastItem) lastItem.divider = true
 
   items.push({
-    label: <Span className="text-destructive">{texts.signOut}</Span>,
+    label: (
+      <Span className="text-destructive">{isLoggingOut ? texts.signingOut : texts.signOut}</Span>
+    ),
     value: '_sign-out',
-    icon: <Icon name="lucide:LogOut" className="w-4 h-4 text-destructive" />,
-    onSelect: () => logout(),
+    icon: (
+      <Icon
+        name={isLoggingOut ? 'fa:FaSpinner' : 'lucide:LogOut'}
+        spin={isLoggingOut}
+        className="w-4 h-4 text-destructive"
+      />
+    ),
+    disabled: isLoggingOut,
+    onSelect: handleLogout,
   })
 
   // ── Render ──

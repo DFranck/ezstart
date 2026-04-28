@@ -1,24 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import React from 'react'
-import { useAuthStore } from '../../react/store.js'
+import { RequireAuth, AccessDenied, SignedIn, SignedOut } from '../../react/guards.js'
+import { createTestStore, TestAuthProvider } from '../testProvider.js'
 import { createTestUser } from '../helpers.js'
-
-// Guards import useAuth from ./hooks.js, which calls useAuthContext from ./auth-provider.js.
-// We mock auth-provider to provide the context without a real AuthProvider wrapper.
-vi.mock('../../react/auth-provider.js', () => ({
-  useAuthContext: () => ({
-    client: {
-      getApiUrl: () => 'http://localhost:6110/api/auth',
-      getAppName: () => 'testapp',
-    },
-    appName: 'testapp',
-  }),
-  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
-
-// Import guards after mocking
-const { RequireAuth, AccessDenied, SignedIn, SignedOut } = await import('../../react/guards.js')
+import type { AuthStoreApi } from '../../react/store.js'
 
 // ---------------------------------------------------------------------------
 // window.location.href stub helper
@@ -65,13 +51,19 @@ function stubLocation(pathname: string) {
   }
 }
 
+function makeWrapper(store: AuthStoreApi) {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <TestAuthProvider store={store}>{children}</TestAuthProvider>
+  }
+}
+
 describe('RequireAuth', () => {
   let stub: ReturnType<typeof stubLocation> | null = null
+  let store: AuthStoreApi
 
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore({ storageKey: 'guards-require-' + Math.random() })
   })
 
   afterEach(() => {
@@ -84,13 +76,16 @@ describe('RequireAuth', () => {
   it('renders children when authenticated', async () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth>
-        <div data-testid="protected">Secret content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth>
+          <div data-testid="protected">Secret content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     // Wait for hydration effect
@@ -102,10 +97,13 @@ describe('RequireAuth', () => {
   it('renders fallback when NOT authenticated', async () => {
     stub = stubLocation('/en/admin')
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth fallbackComponent={<div data-testid="fallback">Please login</div>}>
-        <div data-testid="protected">Secret content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth fallbackComponent={<div data-testid="fallback">Please login</div>}>
+          <div data-testid="protected">Secret content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -119,10 +117,13 @@ describe('RequireAuth', () => {
   it('renders nothing when NOT authenticated and fallbackComponent={null} (silent opt-out)', async () => {
     stub = stubLocation('/en/admin')
 
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <RequireAuth fallbackComponent={null}>
-        <div data-testid="protected">Secret content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth fallbackComponent={null}>
+          <div data-testid="protected">Secret content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -134,10 +135,13 @@ describe('RequireAuth', () => {
   })
 
   it('renders loading component during hydration', () => {
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <RequireAuth loadingComponent={<div data-testid="loading">Loading...</div>}>
-        <div>Content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth loadingComponent={<div data-testid="loading">Loading...</div>}>
+          <div>Content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     // Before useEffect runs, isHydrated is false
@@ -152,10 +156,13 @@ describe('RequireAuth', () => {
   // -------------------------------------------------------------------------
 
   it('renders default loading fallback when no loadingComponent is provided', () => {
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <RequireAuth>
-        <div data-testid="protected">Secret content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth>
+          <div data-testid="protected">Secret content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     // Synchronously (before hydration effect), the default loader is rendered.
@@ -167,10 +174,13 @@ describe('RequireAuth', () => {
   })
 
   it('renders custom loadingComponent instead of the default when provided', () => {
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <RequireAuth loadingComponent={<div data-testid="custom-loading">Custom loader</div>}>
-        <div>Content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth loadingComponent={<div data-testid="custom-loading">Custom loader</div>}>
+          <div>Content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     // Custom loader present
@@ -180,14 +190,16 @@ describe('RequireAuth', () => {
   })
 
   it('renders nothing during hydration when loadingComponent={null} (explicit opt-out)', () => {
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <RequireAuth loadingComponent={null} fallbackComponent={null}>
-        <div>Content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth loadingComponent={null} fallbackComponent={null}>
+          <div>Content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     // Explicit null suppresses the default loader entirely.
-    // We check there's no SVG (default loader signature) and no role="status".
     expect(container.querySelector('svg')).toBeNull()
     expect(container.querySelector('[role="status"]')).toBeNull()
   })
@@ -195,10 +207,13 @@ describe('RequireAuth', () => {
   it('redirects when redirectTo is set and user is NOT authenticated', async () => {
     stub = stubLocation('/en/admin')
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth redirectTo="/custom-login">
-        <div>Content</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth redirectTo="/custom-login">
+          <div>Content</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -209,21 +224,18 @@ describe('RequireAuth', () => {
 
   // -------------------------------------------------------------------------
   // Default behavior — auto-redirect to {locale}/login?redirect_uri=<absolute>
-  //
-  // The `redirect_uri` MUST be an ABSOLUTE URL (origin + path + search + hash)
-  // because the ezauth backend `/api/auth/login` Zod schema validates it
-  // strictly with `z.string().url()` + http/https protocol check. Sending a
-  // relative path triggers a 422 VALIDATION_ERROR after the user submits the
-  // login form (E2E-FIX-16).
   // -------------------------------------------------------------------------
 
   it('auto-redirects to /{locale}/login?redirect_uri=<absolute URL> when no fallback nor redirectTo', async () => {
     stub = stubLocation('/en/admin')
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth>
-        <div>Protected</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth>
+          <div>Protected</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -233,8 +245,6 @@ describe('RequireAuth', () => {
     expect(stub.calls[0]).toBe(
       '/en/login?redirect_uri=' + encodeURIComponent('http://localhost/en/admin')
     )
-    // Sanity: the encoded redirect_uri starts with http:// or https:// so the
-    // backend Zod URL validator accepts it.
     const decoded = decodeURIComponent(
       (stub.calls[0] as string).split('redirect_uri=')[1] as string
     )
@@ -244,10 +254,13 @@ describe('RequireAuth', () => {
   it('auto-redirects respecting custom loginPath', async () => {
     stub = stubLocation('/fr/dashboard')
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth loginPath="/auth/signin">
-        <div>Protected</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth loginPath="/auth/signin">
+          <div>Protected</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -261,10 +274,13 @@ describe('RequireAuth', () => {
   it('auto-redirects to /login (no locale prefix) when URL has no locale segment', async () => {
     stub = stubLocation('/admin')
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth>
-        <div>Protected</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth>
+          <div>Protected</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -277,14 +293,16 @@ describe('RequireAuth', () => {
 
   it('preserves search and hash in the redirect_uri', async () => {
     stub = stubLocation('/en/admin')
-    // Override search/hash on the fake location
     ;(window.location as unknown as { search: string }).search = '?tab=users'
     ;(window.location as unknown as { hash: string }).hash = '#row-3'
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth>
-        <div>Protected</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth>
+          <div>Protected</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -298,10 +316,13 @@ describe('RequireAuth', () => {
   it('redirect_uri is an absolute http(s) URL accepted by backend Zod url() validator', async () => {
     stub = stubLocation('/en/admin')
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth>
-        <div>Protected</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth>
+          <div>Protected</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -311,8 +332,6 @@ describe('RequireAuth', () => {
     expect(queryStart).toBeGreaterThan(-1)
     const encoded = (stub.calls[0] as string).slice(queryStart + 'redirect_uri='.length)
     const decoded = decodeURIComponent(encoded)
-    // Mirrors the backend `LoginRequestSchema` in @ezstart/api-contracts:
-    //   z.string().url().refine(u => /^https?:/.test(new URL(u).protocol), ...)
     expect(() => new URL(decoded)).not.toThrow()
     expect(['http:', 'https:']).toContain(new URL(decoded).protocol)
   })
@@ -320,10 +339,13 @@ describe('RequireAuth', () => {
   it('redirectTo overrides the default auto-redirect', async () => {
     stub = stubLocation('/en/admin')
 
+    const Wrapper = makeWrapper(store)
     render(
-      <RequireAuth redirectTo="/sso/start">
-        <div>Protected</div>
-      </RequireAuth>
+      <Wrapper>
+        <RequireAuth redirectTo="/sso/start">
+          <div>Protected</div>
+        </RequireAuth>
+      </Wrapper>
     )
 
     await act(async () => {})
@@ -359,31 +381,38 @@ describe('AccessDenied', () => {
 })
 
 describe('SignedIn', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore({ storageKey: 'guards-signed-in-' + Math.random() })
   })
 
   it('renders children when authenticated', () => {
     act(() => {
-      useAuthStore.getState().setAuth(createTestUser(), 'tok')
+      store.getState().setAuth(createTestUser(), 'tok')
     })
 
+    const Wrapper = makeWrapper(store)
     render(
-      <SignedIn>
-        <div data-testid="auth-content">Authenticated</div>
-      </SignedIn>
+      <Wrapper>
+        <SignedIn>
+          <div data-testid="auth-content">Authenticated</div>
+        </SignedIn>
+      </Wrapper>
     )
 
     expect(screen.getByTestId('auth-content')).toBeInTheDocument()
   })
 
   it('renders nothing when NOT authenticated', () => {
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <SignedIn>
-        <div>Should not show</div>
-      </SignedIn>
+      <Wrapper>
+        <SignedIn>
+          <div>Should not show</div>
+        </SignedIn>
+      </Wrapper>
     )
 
     expect(container.innerHTML).toBe('')
@@ -391,17 +420,21 @@ describe('SignedIn', () => {
 })
 
 describe('SignedOut', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore({ storageKey: 'guards-signed-out-' + Math.random() })
   })
 
   it('renders children when NOT authenticated', () => {
+    const Wrapper = makeWrapper(store)
     render(
-      <SignedOut>
-        <div data-testid="guest-content">Please login</div>
-      </SignedOut>
+      <Wrapper>
+        <SignedOut>
+          <div data-testid="guest-content">Please login</div>
+        </SignedOut>
+      </Wrapper>
     )
 
     expect(screen.getByTestId('guest-content')).toBeInTheDocument()
@@ -409,13 +442,16 @@ describe('SignedOut', () => {
 
   it('renders nothing when authenticated', () => {
     act(() => {
-      useAuthStore.getState().setAuth(createTestUser(), 'tok')
+      store.getState().setAuth(createTestUser(), 'tok')
     })
 
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <SignedOut>
-        <div>Should not show</div>
-      </SignedOut>
+      <Wrapper>
+        <SignedOut>
+          <div>Should not show</div>
+        </SignedOut>
+      </Wrapper>
     )
 
     expect(container.innerHTML).toBe('')

@@ -40,6 +40,8 @@ export const en = {
     promoCodeChecking: 'Checking...',
     continueWithGoogle: 'Continue with Google',
     orContinueWith: 'Or continue with',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
   },
   signIn: {
     emailOrUsername: 'Email or Username',
@@ -60,6 +62,8 @@ export const en = {
     twoFactorBack: 'Back',
     continueWithGoogle: 'Continue with Google',
     orContinueWith: 'Or continue with',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
   },
   forgotPassword: {
     email: 'Email',
@@ -95,6 +99,8 @@ export const en = {
     tokenExpired: 'This reset link has expired or is invalid.',
     requestNewLink: 'Request a new link',
     errorInvalidToken: 'This reset link is invalid or expired.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
   },
   quickSignup: {
     username: 'Username',

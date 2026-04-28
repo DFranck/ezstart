@@ -21,7 +21,7 @@ export interface UsersApiMeta {
   offset: number
 }
 
-export interface AuthAdminDashboardTexts {
+export interface AuthUsersSectionTexts {
   // Stats
   totalUsers?: string
   online?: string
@@ -80,21 +80,15 @@ export interface AuthAdminDashboardTexts {
   // Pagination
   previous?: string
   next?: string
+  /** "{count} row(s)" template. */
+  rows?: string
+  /** "Page {current} of {total}" template. */
+  pageOf?: string
 
   // App filter (platform/first-party scope)
   allApps?: string
   filterByApp?: string
 }
-
-/**
- * RBAC audience scope for the admin dashboard — controls which population of
- * users the table queries.
- *
- * - `'mine'`    — current user only (singleton).
- * - `'myApps'`  — users registered to Applications the current user owns.
- * - `'all'`     — all users across all tenants (requires `globalRoles: ['superadmin']`).
- */
-export type AuthAdminAudienceScope = 'mine' | 'myApps' | 'all'
 
 export const ADMIN_PAGE_SIZE = 20
 const ONLINE_THRESHOLD_MS = 5 * 60 * 1000
@@ -102,7 +96,7 @@ const ONLINE_THRESHOLD_MS = 5 * 60 * 1000
 export const ADMIN_GLOBAL_ROLES = ['superadmin', 'admin'] as const
 export const ADMIN_APP_ROLES = ['admin', 'manager', 'beta-tester', 'client'] as const
 
-export const DEFAULT_ADMIN_TEXTS: Required<AuthAdminDashboardTexts> = {
+export const DEFAULT_USERS_TEXTS: Required<AuthUsersSectionTexts> = {
   totalUsers: 'Total users',
   online: 'Online',
   superadmins: 'Superadmins',
@@ -145,12 +139,14 @@ export const DEFAULT_ADMIN_TEXTS: Required<AuthAdminDashboardTexts> = {
   roleClient: 'Client',
   previous: 'Previous',
   next: 'Next',
+  rows: '{count} row(s)',
+  pageOf: 'Page {current} of {total}',
   allApps: 'All apps',
   filterByApp: 'Filter by app',
 }
 
-export function formatAdminDate(dateStr: string): string {
-  return new Intl.DateTimeFormat('en-US', {
+export function formatAdminDate(dateStr: string, locale?: string): string {
+  return new Intl.DateTimeFormat(locale ?? undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(dateStr))
@@ -163,7 +159,7 @@ export function isAdminUserOnline(lastActiveAt?: string | null): boolean {
 
 export function getAdminRelativeTime(
   lastActiveAt: string | null | undefined,
-  t: Required<AuthAdminDashboardTexts>
+  t: Required<AuthUsersSectionTexts>
 ): string {
   if (!lastActiveAt) return '-'
   const diffMs = Date.now() - new Date(lastActiveAt).getTime()
@@ -177,7 +173,7 @@ export function getAdminRelativeTime(
   return t.daysAgo.replace('{count}', String(diffDays))
 }
 
-export function getAdminRoleLabel(role: string, t: Required<AuthAdminDashboardTexts>): string {
+export function getAdminRoleLabel(role: string, t: Required<AuthUsersSectionTexts>): string {
   const map: Record<string, string> = {
     superadmin: t.roleSuperadmin,
     admin: t.roleAdmin,

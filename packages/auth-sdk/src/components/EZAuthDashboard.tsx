@@ -17,6 +17,7 @@ import {
   SidebarToggle,
   Span,
 } from '@ezstart/ui/components'
+import type { ApiKeyItem, Application, AuditLogEntry } from '../core/types.js'
 import { useAuth } from '../react/hooks.js'
 import { UserMenu } from './UserMenu.js'
 import { DashboardSkeleton } from './dashboard/sections.js'
@@ -97,6 +98,29 @@ export interface EZAuthDashboardProps {
    * consumer's responsibility — pass `null` to hide.
    */
   topBarExtra?: ReactNode
+  /**
+   * Server-side pre-fetched API keys (via `getServerApiKeys()` from
+   * `@ezstart/auth-sdk/server`). Forwarded to the default `<DeveloperPortal>`
+   * slot so the keys table renders on the very first paint — no client
+   * `<Spinner>` flash on dashboard / api-keys section loads.
+   */
+  initialKeys?: ApiKeyItem[]
+  /**
+   * Server-side pre-fetched audit log entries (via `getServerAuditLog()`).
+   * Forwarded to the default `<AuditLogSection>` slot so the activity table
+   * renders on the very first paint when the user lands on the activity
+   * section.
+   */
+  initialAuditEntries?: AuditLogEntry[]
+  /**
+   * Server-side pre-fetched applications owned by the current user (via
+   * `getServerApplications()`). Forwarded to the default applications slot
+   * (when the consumer lets the SDK render its own `<ApplicationsList>`).
+   * Currently the ezauth dashboard wires Applications via `slots.applications`
+   * to integrate with its router, so this prop is exposed for SDK consumers
+   * that rely on the default slot.
+   */
+  initialApplications?: Application[]
 }
 
 /**
@@ -132,12 +156,13 @@ export function EZAuthDashboard({
   onHomeClick,
   sidebarFooterExtra,
   topBarExtra,
+  initialKeys,
+  initialAuditEntries,
+  initialApplications,
 }: EZAuthDashboardProps) {
   const { user, isAuthenticated } = useAuth()
   const texts: EZAuthDashboardTexts = { ...DEFAULT_DASHBOARD_TEXTS, ...textOverrides }
   const searchParams = useSearchParams()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
 
   const extras = extraSections ?? []
   const extraIds = extras.map(e => e.id)
@@ -165,12 +190,14 @@ export function EZAuthDashboard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [querySection])
 
-  if (!mounted) {
-    return <DashboardSkeleton />
-  }
-
+  // No `mounted` guard — the Zustand store is hydrated synchronously with
+  // `initialUser` from `getServerAuth()` (cf. `<AuthProvider initialUser>`),
+  // so `isAuthenticated` reflects the right state on the FIRST render in both
+  // SSR and client. Using a `mounted` guard here would throw away the
+  // server-rendered HTML and force a skeleton flash on every page load —
+  // exactly the anti-pattern the SSR refactor was built to eliminate.
   if (!isAuthenticated || !user) {
-    return null
+    return <DashboardSkeleton />
   }
 
   const isAdmin = isAdminOrSuperadmin(user)
@@ -291,6 +318,9 @@ export function EZAuthDashboard({
               slots={slots}
               isAdmin={isAdmin}
               isSuper={isSuper}
+              initialKeys={initialKeys}
+              initialAuditEntries={initialAuditEntries}
+              initialApplications={initialApplications}
             />
           ) : null}
         </DashboardContent>

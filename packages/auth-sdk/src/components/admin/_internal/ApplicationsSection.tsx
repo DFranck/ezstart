@@ -22,56 +22,52 @@ import {
   Spinner,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { useMyApplications, useRevokeApplication } from '../react/applications.js'
-import { CreateApplicationModal } from './applications/CreateApplicationModal.js'
-import { defaultApplicationsFlowTexts } from './applications/types.js'
-import type { CreateApplicationModalTexts } from './applications/types.js'
-import { AdminApplicationsStatsCards } from './admin/AdminApplicationsStatsCards.js'
-import { AdminApplicationsTable } from './admin/AdminApplicationsTable.js'
-import { EditApplicationModal } from './admin/EditApplicationModal.js'
+import { useMyApplications, useRevokeApplication } from '../../../react/applications.js'
+import { CreateApplicationModal } from '../../applications/CreateApplicationModal.js'
+import { defaultApplicationsFlowTexts } from '../../applications/types.js'
+import type { CreateApplicationModalTexts } from '../../applications/types.js'
+import { AdminApplicationsStatsCards } from '../AdminApplicationsStatsCards.js'
+import { AdminApplicationsTable } from '../AdminApplicationsTable.js'
+import { EditApplicationModal } from '../EditApplicationModal.js'
 import {
   ADMIN_APPLICATIONS_PAGE_SIZE,
   type AdminApplicationRow,
-  type AdminApplicationsTexts,
-  DEFAULT_ADMIN_APPLICATIONS_TEXTS,
-} from './admin/AdminApplications.types.js'
-
-// Re-export public types for consumers
-export type { AdminApplicationsTexts } from './admin/AdminApplications.types.js'
+  type AuthApplicationsSectionTexts,
+  DEFAULT_APPLICATIONS_TEXTS,
+} from '../AdminApplications.types.js'
 
 type StatusFilter = 'all' | 'active' | 'archived'
 
-export interface AdminApplicationsDashboardProps {
+export interface AuthApplicationsSectionProps {
   className?: string
   /** Partial texts override — falls back to English defaults. */
-  texts?: Partial<AdminApplicationsTexts>
+  texts?: Partial<AuthApplicationsSectionTexts>
   /**
    * Partial texts override for the create-application modal — falls back to
    * the SDK English defaults exposed by `defaultApplicationsFlowTexts.create`.
    */
   createTexts?: Partial<CreateApplicationModalTexts>
+  /** BCP47 locale for date/time formatting. */
+  locale?: string
 }
 
 /**
- * Federated-admin Applications dashboard. Renders a filterable + paginated
- * cross-tenant table of Applications with edit / archive / create actions.
+ * Internal Applications-management section embedded in `<AuthAdminDashboard>`.
  *
  * Auth model: relies on the surrounding `<AuthProvider>` to supply the
  * superadmin bearer token. The underlying `useMyApplications` hook calls
- * `GET /api/applications?all=true` which is rejected by the API for any
- * non-superadmin caller.
+ * `GET /api/applications?all=true` which the API rejects for any
+ * non-superadmin caller (auto-derived scope).
  *
- * @example Standalone
- * ```tsx
- * <AdminApplicationsDashboard />
- * ```
+ * @internal
  */
-export function AdminApplicationsDashboard({
+export function AuthApplicationsSection({
   className,
   texts,
   createTexts,
-}: AdminApplicationsDashboardProps) {
-  const t: Required<AdminApplicationsTexts> = { ...DEFAULT_ADMIN_APPLICATIONS_TEXTS, ...texts }
+  locale,
+}: AuthApplicationsSectionProps) {
+  const t: Required<AuthApplicationsSectionTexts> = { ...DEFAULT_APPLICATIONS_TEXTS, ...texts }
 
   // Server query — always cross-tenant for the admin dashboard
   const {
@@ -224,6 +220,7 @@ export function AdminApplicationsDashboard({
             setEditOpen(true)
           }}
           onArchive={app => setArchiveDialog({ open: true, app })}
+          locale={locale}
         />
 
         {/* Pagination */}

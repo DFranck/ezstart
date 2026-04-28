@@ -92,6 +92,13 @@ export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './UserMenu.js'
 export { AccountModal } from './AccountModal.js'
 export type { AccountModalProps, AccountModalTexts } from './AccountModal.js'
 
+// V2 — SaaS-pro user dropdown (Stripe / Clerk parity). Mounts side-by-side
+// with `<UserMenu>` (V1) for A/B comparison before retiring V1.
+export { UserMenuV2 } from './user-menu-v2/UserMenuV2.js'
+export type { UserMenuV2Props, UserMenuV2Item, UserMenuV2Texts } from './user-menu-v2/types.js'
+export { AccountModalV2 } from './user-menu-v2/AccountModalV2.js'
+export type { AccountModalV2Props, AccountModalV2Texts } from './user-menu-v2/AccountModalV2.js'
+
 export { UserAvatar } from './UserAvatar.js'
 export type { UserAvatarProps } from './UserAvatar.js'
 
@@ -109,38 +116,20 @@ export type {
 export { UserDashboard } from './UserDashboard.js'
 export type { UserDashboardProps, UserDashboardTexts } from './UserDashboard.js'
 
-// Admin
+// Admin — all-in-one console with internal tabs (Overview, Users, Applications, Settings)
+//
+// Auto-scoped server-side via JWT (`req.derivedScope`):
+// - superadmin -> all tenants
+// - app admin   -> owned Applications
+// - user        -> own account
+//
+// Drop-in component for both the EZAuth web app's own `/admin` page and
+// the EZStart hub's federated admin (Tier 3 embedding cross-origin).
 export { AuthAdminDashboard } from './AuthAdminDashboard.js'
-export type {
-  AuthAdminDashboardProps,
-  AuthAdminDashboardTexts,
-  AuthAdminAudienceScope,
-} from './AuthAdminDashboard.js'
+export type { AuthAdminDashboardProps, AuthAdminDashboardTexts } from './AuthAdminDashboard.js'
 
-export { AdminApplicationsDashboard } from './AdminApplicationsDashboard.js'
-export type {
-  AdminApplicationsDashboardProps,
-  AdminApplicationsTexts,
-} from './AdminApplicationsDashboard.js'
-
-// Admin — feature flags + maintenance mode
-export { AdminFeatureFlagsSection } from './admin/AdminFeatureFlagsSection.js'
-export type {
-  AdminFeatureFlagsSectionProps,
-  AdminFeatureFlagsSectionTexts,
-} from './admin/AdminFeatureFlagsSection.js'
-
-// Admin — platform analytics overview (superadmin only)
-export { AdminAnalyticsSection } from './admin/AdminAnalyticsSection.js'
-export type {
-  AdminAnalyticsSectionProps,
-  AdminAnalyticsSectionTexts,
-} from './admin/AdminAnalyticsSection.js'
-export { AdminMaintenanceModeSection } from './admin/AdminMaintenanceModeSection.js'
-export type {
-  AdminMaintenanceModeSectionProps,
-  AdminMaintenanceModeSectionTexts,
-} from './admin/AdminMaintenanceModeSection.js'
+// Maintenance banner — public, used outside the admin dashboard (e.g. in
+// app shells to surface platform-wide maintenance status to end users).
 export { MaintenanceBanner } from './admin/MaintenanceBanner.js'
 export type { MaintenanceBannerProps, MaintenanceBannerTexts } from './admin/MaintenanceBanner.js'
 

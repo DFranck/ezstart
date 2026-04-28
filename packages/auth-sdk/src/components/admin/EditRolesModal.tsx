@@ -8,7 +8,7 @@ import {
   ADMIN_APP_ROLES,
   ADMIN_GLOBAL_ROLES,
   type AdminUser,
-  type AuthAdminDashboardTexts,
+  type AuthUsersSectionTexts,
   getAdminRoleLabel,
 } from './types.js'
 
@@ -17,7 +17,7 @@ export interface EditRolesModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSaved: () => void
-  t: Required<AuthAdminDashboardTexts>
+  t: Required<AuthUsersSectionTexts>
   /**
    * Resolve the bearer token for admin API calls. May return null when no
    * token is available — the call will proceed unauthenticated and the

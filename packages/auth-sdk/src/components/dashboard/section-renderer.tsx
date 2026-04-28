@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, Div, H3 } from '@ezstart/ui/components'
+import type { ApiKeyItem, Application, AuditLogEntry } from '../../core/types.js'
 import { AuditLogSection } from '../audit-log-section.js'
 import { DeveloperPortal } from '../developer/index.js'
 import { EmailVerificationStatus } from '../EmailVerificationStatus.js'
@@ -37,6 +38,16 @@ interface SectionRendererProps {
   isAdmin: boolean
   /** Superadmin only. Forwarded to DeveloperPortal for the admin scope toggle. */
   isSuper: boolean
+  /** SSR pre-fetched API keys — forwarded to default DeveloperPortal slot. */
+  initialKeys?: ApiKeyItem[]
+  /** SSR pre-fetched audit entries — forwarded to default AuditLogSection. */
+  initialAuditEntries?: AuditLogEntry[]
+  /**
+   * SSR pre-fetched applications — currently unused at the SectionRenderer
+   * level (the ezauth dashboard wires Applications via `slots.applications`),
+   * accepted for forward-compat when SDK consumers rely on the default slot.
+   */
+  initialApplications?: Application[]
 }
 
 /**
@@ -55,10 +66,14 @@ export function SectionRenderer({
   slots,
   isAdmin,
   isSuper,
+  initialKeys,
+  initialAuditEntries,
+  // initialApplications is currently unused — see SectionRendererProps doc.
+  initialApplications: _initialApplications,
 }: SectionRendererProps) {
   switch (section) {
     case 'overview':
-      return slots?.overview ?? <OverviewSection user={user} texts={texts} />
+      return slots?.overview ?? <OverviewSection user={user} texts={texts} locale={locale} />
 
     case 'account':
       return slots?.account ?? <SettingsBlock appName={appName} texts={texts} />
@@ -83,6 +98,7 @@ export function SectionRenderer({
             texts={texts.developerPortal}
             showAdminScope={isSuper}
             appOptions={user.apps ?? []}
+            initialKeys={initialKeys}
           />
         )
       )
@@ -94,7 +110,15 @@ export function SectionRenderer({
       return slots?.usage ?? <UsageSection texts={texts} />
 
     case 'activity':
-      return slots?.activity ?? <AuditLogSection locale={locale} texts={texts.auditLog} />
+      return (
+        slots?.activity ?? (
+          <AuditLogSection
+            locale={locale}
+            texts={texts.auditLog}
+            initialEntries={initialAuditEntries}
+          />
+        )
+      )
 
     case 'settings':
       return slots?.settings ?? <SettingsBlock appName={appName} texts={texts} />

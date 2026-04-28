@@ -33,6 +33,19 @@ export interface SessionsManagerTexts {
   revokedSuccess: string
   revokedAllSuccess: string
   unknownDevice: string
+  /** Localizable relative-time labels (e.g. "1m ago" / "il y a 1m"). */
+  justNow: string
+  /** Pattern with `{n}` placeholder, e.g. `"{n}m ago"` or `"il y a {n}m"`. */
+  minutesAgo: string
+  hoursAgo: string
+  daysAgo: string
+  /**
+   * Locale code (BCP-47) used for `Intl.DateTimeFormat` of older sessions.
+   * Falls back to the browser locale when omitted.
+   */
+  dateLocale?: string
+  /** Suffix joining browser + OS, e.g. ` on ` or ` sur `. Defaults to ` on `. */
+  deviceOnSeparator: string
 }
 
 export interface SessionsManagerProps {
@@ -60,12 +73,17 @@ const DEFAULT_TEXTS: SessionsManagerTexts = {
   revokedSuccess: 'Session revoked successfully.',
   revokedAllSuccess: 'All other sessions revoked.',
   unknownDevice: 'Unknown device',
+  justNow: 'Just now',
+  minutesAgo: '{n}m ago',
+  hoursAgo: '{n}h ago',
+  daysAgo: '{n}d ago',
+  deviceOnSeparator: ' on ',
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function parseUserAgent(ua: string | null): string {
-  if (!ua) return 'Unknown device'
+function parseUserAgent(ua: string | null, separator: string, fallback: string): string {
+  if (!ua) return fallback
   // Simple extraction — browser name + OS
   const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge', 'Opera']
   const browser = browsers.find(b => ua.includes(b)) ?? 'Browser'
@@ -79,10 +97,10 @@ function parseUserAgent(ua: string | null): string {
   ]
   const os = osPatterns.find(([pattern]) => pattern.test(ua))?.[1] ?? ''
 
-  return os ? `${browser} on ${os}` : browser
+  return os ? `${browser}${separator}${os}` : browser
 }
 
-function formatRelativeDate(dateStr: string): string {
+function formatRelativeDate(dateStr: string, t: SessionsManagerTexts): string {
   try {
     const date = new Date(dateStr)
     const now = new Date()
@@ -91,11 +109,11 @@ function formatRelativeDate(dateStr: string): string {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
-    return date.toLocaleDateString(undefined, {
+    if (diffMins < 1) return t.justNow
+    if (diffMins < 60) return t.minutesAgo.replace('{n}', String(diffMins))
+    if (diffHours < 24) return t.hoursAgo.replace('{n}', String(diffHours))
+    if (diffDays < 7) return t.daysAgo.replace('{n}', String(diffDays))
+    return date.toLocaleDateString(t.dateLocale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -203,7 +221,7 @@ export function SessionsManager({ texts, onSessionRevoked }: SessionsManagerProp
                 <Div className="min-w-0">
                   <Div className="flex items-center gap-2">
                     <P className="text-sm font-medium text-foreground truncate">
-                      {parseUserAgent(session.userAgent)}
+                      {parseUserAgent(session.userAgent, t.deviceOnSeparator, t.unknownDevice)}
                     </P>
                     {session.isCurrent && (
                       <Badge variant="success" size="xs">
@@ -218,7 +236,7 @@ export function SessionsManager({ texts, onSessionRevoked }: SessionsManagerProp
                       </Span>
                     )}
                     <Span className="text-xs text-muted-foreground">
-                      {t.createdAt}: {formatRelativeDate(session.createdAt)}
+                      {t.createdAt}: {formatRelativeDate(session.createdAt, t)}
                     </Span>
                   </Div>
                 </Div>

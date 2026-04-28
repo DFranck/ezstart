@@ -31,6 +31,7 @@ import {
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
+import type { ApiKeyItem, Application } from '../../core/types.js'
 import {
   useApplication,
   useRevokeApplication,
@@ -64,6 +65,19 @@ export interface ApplicationDetailViewProps {
    * matrix).
    */
   canEnableTheme?: boolean
+  /**
+   * Server-side pre-fetched application (via `getServerApplication()` from
+   * `@ezstart/auth-sdk/server`). When provided, React Query is seeded with
+   * this value so the detail tabs render on the very first paint — no
+   * `<Skeleton>` flash on direct loads of `/developer/[id]`.
+   */
+  initialApplication?: Application
+  /**
+   * Server-side pre-fetched API keys (via `getServerApiKeys()`). Forwarded
+   * to the embedded `<DeveloperPortal>` so the keys table is also
+   * SSR-bootstrapped on the API Keys tab.
+   */
+  initialKeys?: ApiKeyItem[]
 }
 
 function mergeTexts(partial?: Partial<ApplicationDetailViewTexts>): ApplicationDetailViewTexts {
@@ -80,10 +94,21 @@ export function ApplicationDetailView({
   onArchived,
   showAdminScope = false,
   canEnableTheme = true,
+  initialApplication,
+  initialKeys,
 }: ApplicationDetailViewProps) {
   const texts = mergeTexts(partialTexts)
 
-  const { data: application, isLoading, isError, refetch } = useApplication(applicationId, true)
+  const {
+    data: application,
+    isLoading,
+    isError,
+    refetch,
+  } = useApplication(
+    applicationId,
+    true,
+    initialApplication ? { initialData: initialApplication } : undefined
+  )
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -205,6 +230,7 @@ export function ApplicationDetailView({
             locale={locale}
             showAdminScope={showAdminScope}
             texts={developerPortalTexts}
+            initialKeys={initialKeys}
           />
         </TabsContent>
 

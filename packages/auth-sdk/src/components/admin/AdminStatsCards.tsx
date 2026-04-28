@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, Div, P } from '@ezstart/ui/components'
-import type { AuthAdminDashboardTexts } from './types.js'
+import type { AuthUsersSectionTexts } from './types.js'
 
 export interface AdminStatsCardsProps {
   total: number
@@ -9,7 +9,7 @@ export interface AdminStatsCardsProps {
   superadminCount: number
   adminCount: number
   withAppRoles: number
-  t: Required<AuthAdminDashboardTexts>
+  t: Required<AuthUsersSectionTexts>
 }
 
 /**

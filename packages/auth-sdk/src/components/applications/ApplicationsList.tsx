@@ -41,6 +41,16 @@ export interface ApplicationsListProps {
   className?: string
   /** Optional map of `applicationId → key count` to display on each card. */
   keyCounts?: Record<string, number>
+  /**
+   * Server-side pre-fetched applications (via `getServerApplications()` from
+   * `@ezstart/auth-sdk/server`). When provided, the React Query cache is
+   * seeded so the very first paint already shows the list — no client
+   * `<Spinner>` flash. React Query still revalidates in the background.
+   *
+   * NOTE: only applies to the default toggle state (no archived, not all).
+   * Switching toggles re-fetches normally.
+   */
+  initialApplications?: Application[]
 }
 
 function mergeTexts(partial?: Partial<ApplicationsFlowTexts>): ApplicationsFlowTexts {
@@ -62,6 +72,7 @@ export function ApplicationsList({
   showSuperadminAllToggle = false,
   className,
   keyCounts,
+  initialApplications,
 }: ApplicationsListProps) {
   const texts = mergeTexts(partialTexts)
 
@@ -69,12 +80,21 @@ export function ApplicationsList({
   const [all, setAll] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
 
+  // Only seed the cache while the toggles match the default state used by
+  // the SSR helper (no archived, not all). Switching either toggle changes
+  // the query key so the seed naturally falls off and a fresh fetch runs.
+  const canSeed = initialApplications && !includeArchived && !all
+
   const {
     data: applications = [],
     isLoading,
     isError,
     refetch,
-  } = useMyApplications(true, { includeArchived, all })
+  } = useMyApplications(true, {
+    includeArchived,
+    all,
+    initialData: canSeed ? initialApplications : undefined,
+  })
 
   const revokeMutation = useRevokeApplication({
     onSuccess: () => {

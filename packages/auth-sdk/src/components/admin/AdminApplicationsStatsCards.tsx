@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, Div, P } from '@ezstart/ui/components'
-import type { AdminApplicationsTexts } from './AdminApplications.types.js'
+import type { AuthApplicationsSectionTexts } from './AdminApplications.types.js'
 
 export interface AdminApplicationsStatsCardsProps {
   total: number
@@ -9,12 +9,12 @@ export interface AdminApplicationsStatsCardsProps {
   archivedCount: number
   platformOwnedCount: number
   themedCount: number
-  t: Required<AdminApplicationsTexts>
+  t: Required<AuthApplicationsSectionTexts>
 }
 
 /**
  * 5-up stats cards rendered above the admin Applications table. Internal
- * sub-component of `<AdminApplicationsDashboard>`.
+ * sub-component of `<AuthAdminDashboard>`.
  *
  * @internal
  */

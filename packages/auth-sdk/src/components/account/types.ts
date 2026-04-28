@@ -44,6 +44,8 @@ export interface AccountModalTexts {
   resendVerification: string
   verificationSent: string
   verifyError: string
+  // BCP-47 locale used to format member-since etc.
+  dateLocale?: string
 }
 
 export const DEFAULT_ACCOUNT_TEXTS: AccountModalTexts = {
@@ -90,9 +92,9 @@ export type AccountTab = 'profile' | 'settings'
  *
  * @internal
  */
-export function formatAccountDate(dateStr: string): string {
+export function formatAccountDate(dateStr: string, locale?: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    return new Date(dateStr).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

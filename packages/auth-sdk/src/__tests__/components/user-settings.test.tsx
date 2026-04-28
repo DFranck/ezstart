@@ -1,31 +1,32 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import React from 'react'
-import { useAuthStore } from '../../react/store.js'
+import { UserSettings } from '../../components/UserSettings.js'
+import { createTestStore, TestAuthProvider } from '../testProvider.js'
+import type { AuthStoreApi } from '../../react/store.js'
 import { createTestUser } from '../helpers.js'
 
-vi.mock('../../react/hooks.js', () => ({
-  useAuth: () => {
-    const store = useAuthStore()
-    return {
-      user: store.user,
-      isAuthenticated: store.isAuthenticated,
-      isAuthReady: true,
-    }
-  },
-}))
-
-const { UserSettings } = await import('../../components/UserSettings.js')
+function makeWrapper(store: AuthStoreApi) {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <TestAuthProvider store={store}>{children}</TestAuthProvider>
+  }
+}
 
 describe('UserSettings', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore()
   })
 
   it('renders nothing when not authenticated', () => {
-    const { container } = render(<UserSettings />)
+    const Wrapper = makeWrapper(store)
+    const { container } = render(
+      <Wrapper>
+        <UserSettings />
+      </Wrapper>
+    )
     expect(container.innerHTML).toBe('')
   })
 
@@ -38,10 +39,15 @@ describe('UserSettings', () => {
       createdAt: '2024-01-15T00:00:00.000Z',
     })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings />
+      </Wrapper>
+    )
     expect(screen.getByText('john@example.com')).toBeInTheDocument()
     // "johndoe" appears as @johndoe in the header and as value in the info row
     expect(screen.getAllByText('johndoe').length).toBeGreaterThanOrEqual(1)
@@ -52,10 +58,15 @@ describe('UserSettings', () => {
   it('renders avatar when showAvatar=true (default)', () => {
     const user = createTestUser({ firstName: 'A', lastName: 'B' })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings />
+      </Wrapper>
+    )
     // Avatar renders initials "AB"
     expect(screen.getByText('AB')).toBeInTheDocument()
   })
@@ -63,10 +74,15 @@ describe('UserSettings', () => {
   it('hides email when showEmail=false', () => {
     const user = createTestUser({ email: 'hidden@example.com' })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings showEmail={false} />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings showEmail={false} />
+      </Wrapper>
+    )
     expect(screen.queryByText('hidden@example.com')).not.toBeInTheDocument()
   })
 
@@ -76,10 +92,15 @@ describe('UserSettings', () => {
       appRoles: { myapp: ['admin'] },
     })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings appName="myapp" />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings appName="myapp" />
+      </Wrapper>
+    )
     expect(screen.getByText('superadmin')).toBeInTheDocument()
     expect(screen.getByText('admin')).toBeInTheDocument()
   })
@@ -87,10 +108,15 @@ describe('UserSettings', () => {
   it('shows connected accounts section by default', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings />
+      </Wrapper>
+    )
     expect(screen.getByText('Connected Accounts')).toBeInTheDocument()
     expect(screen.getByText('Google')).toBeInTheDocument()
   })
@@ -98,26 +124,34 @@ describe('UserSettings', () => {
   it('hides connected accounts when showConnectedAccounts=false', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings showConnectedAccounts={false} />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings showConnectedAccounts={false} />
+      </Wrapper>
+    )
     expect(screen.queryByText('Connected Accounts')).not.toBeInTheDocument()
   })
 
   it('uses custom texts', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
+    const Wrapper = makeWrapper(store)
     render(
-      <UserSettings
-        texts={{
-          personalInfo: 'Informations personnelles',
-          email: 'Courriel',
-        }}
-      />
+      <Wrapper>
+        <UserSettings
+          texts={{
+            personalInfo: 'Informations personnelles',
+            email: 'Courriel',
+          }}
+        />
+      </Wrapper>
     )
     expect(screen.getByText('Informations personnelles')).toBeInTheDocument()
     expect(screen.getByText('Courriel')).toBeInTheDocument()
@@ -128,10 +162,15 @@ describe('UserSettings', () => {
       avatar: 'https://lh3.googleusercontent.com/photo.jpg',
     })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings />
+      </Wrapper>
+    )
     // Email appears in the info row AND in the connected account section
     expect(screen.getAllByText('test@example.com').length).toBeGreaterThanOrEqual(2)
     // Should NOT show "Not connected"
@@ -141,10 +180,15 @@ describe('UserSettings', () => {
   it('shows Not connected for non-Google avatars', () => {
     const user = createTestUser({ avatar: undefined })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserSettings />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserSettings />
+      </Wrapper>
+    )
     expect(screen.getByText('Not connected')).toBeInTheDocument()
   })
 })

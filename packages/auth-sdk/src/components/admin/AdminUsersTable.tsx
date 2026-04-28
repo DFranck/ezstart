@@ -15,7 +15,7 @@ import {
 import {
   ADMIN_PAGE_SIZE,
   type AdminUser,
-  type AuthAdminDashboardTexts,
+  type AuthUsersSectionTexts,
   formatAdminDate,
   getAdminRelativeTime,
   getAdminRoleLabel,
@@ -28,9 +28,11 @@ export interface AdminUsersTableProps {
   total: number
   /** Whether the optional `apps` column should be rendered. */
   showAppsColumn: boolean
-  t: Required<AuthAdminDashboardTexts>
+  t: Required<AuthUsersSectionTexts>
   onEdit: (user: AdminUser) => void
   onDelete: (userId: string) => void
+  /** BCP47 locale for date formatting. */
+  locale?: string
 }
 
 /**
@@ -48,6 +50,7 @@ export function AdminUsersTable({
   t,
   onEdit,
   onDelete,
+  locale,
 }: AdminUsersTableProps) {
   const columns: ColumnDef<AdminUser>[] = [
     {
@@ -134,7 +137,9 @@ export function AdminUsersTable({
     {
       accessorKey: 'createdAt',
       header: ({ header }) => <DataTableColumnHeader header={header} title={t.columnCreatedAt} />,
-      cell: ({ row }) => <Span className="text-sm">{formatAdminDate(row.original.createdAt)}</Span>,
+      cell: ({ row }) => (
+        <Span className="text-sm">{formatAdminDate(row.original.createdAt, locale)}</Span>
+      ),
     },
     {
       id: 'actions',
@@ -174,7 +179,18 @@ export function AdminUsersTable({
 
   return (
     <Card className="overflow-hidden">
-      <DataTable columns={columns} data={users} pageSize={ADMIN_PAGE_SIZE} />
+      <DataTable
+        columns={columns}
+        data={users}
+        pageSize={ADMIN_PAGE_SIZE}
+        texts={{
+          previous: t.previous,
+          next: t.next,
+          rows: t.rows,
+          pageOf: t.pageOf,
+          empty: t.noUsers,
+        }}
+      />
       <Span className="sr-only">{total} total</Span>
     </Card>
   )

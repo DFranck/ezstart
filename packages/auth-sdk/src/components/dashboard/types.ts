@@ -56,6 +56,9 @@ export interface EZAuthDashboardTexts {
   statsApiKeys: string
   statsApps: string
   statsRoles: string
+  /** User info row labels */
+  labelEmail: string
+  labelUsername: string
   /** Billing section defaults */
   billingTitle: string
   billingDescription: string
@@ -125,6 +128,8 @@ export const DEFAULT_DASHBOARD_TEXTS: EZAuthDashboardTexts = {
   brand: 'Dashboard',
   welcomeBack: 'Welcome back',
   memberSince: 'Member since',
+  labelEmail: 'Email',
+  labelUsername: 'Username',
   plan: 'Plan',
   planFree: 'Free',
   statsApiKeys: 'API Keys',

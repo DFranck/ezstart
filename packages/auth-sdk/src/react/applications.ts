@@ -28,6 +28,16 @@ interface UseMyApplicationsOptions {
   all?: boolean
   /** Include archived applications. */
   includeArchived?: boolean
+  /**
+   * Pre-resolved applications (from a server-side fetch via
+   * `getServerApplications()`). When provided, React Query seeds the cache
+   * so the first paint of the consumer renders immediately — no client
+   * loading state. The hook still revalidates in the background.
+   *
+   * NOTE: only seeds the query that matches the current `all`/
+   * `includeArchived` filters; switching toggles re-fetches normally.
+   */
+  initialData?: Application[]
 }
 
 // ---------------------------------------------------------------------------
@@ -43,7 +53,7 @@ interface UseMyApplicationsOptions {
  * ```
  */
 export function useMyApplications(enabled = true, options: UseMyApplicationsOptions = {}) {
-  const { all = false, includeArchived = false } = options
+  const { all = false, includeArchived = false, initialData } = options
   const search = new URLSearchParams()
   if (all) search.set('all', 'true')
   if (includeArchived) search.set('includeArchived', 'true')
@@ -58,7 +68,19 @@ export function useMyApplications(enabled = true, options: UseMyApplicationsOpti
         method: 'GET',
       }),
     enabled,
+    initialData,
   })
+}
+
+/** Optional configuration for {@link useApplication}. */
+export interface UseApplicationOptions {
+  /**
+   * Pre-resolved application (from a server-side fetch via
+   * `getServerApplication()`). When provided, React Query seeds the cache so
+   * the first paint of the consumer renders immediately — no client loading
+   * state. The hook still revalidates in the background.
+   */
+  initialData?: Application
 }
 
 /**
@@ -68,8 +90,19 @@ export function useMyApplications(enabled = true, options: UseMyApplicationsOpti
  * ```tsx
  * const { data } = useApplication('app_123')
  * ```
+ *
+ * @example
+ * ```tsx
+ * // SSR-bootstrapped (kills the spinner flash on direct loads)
+ * const { data } = useApplication(id, true, { initialData: serverApp })
+ * ```
  */
-export function useApplication(id: string | null | undefined, enabled = true) {
+export function useApplication(
+  id: string | null | undefined,
+  enabled = true,
+  options: UseApplicationOptions = {}
+) {
+  const { initialData } = options
   return useQuery({
     queryKey: applicationKey(id ?? ''),
     queryFn: () =>
@@ -78,6 +111,7 @@ export function useApplication(id: string | null | undefined, enabled = true) {
         method: 'GET',
       }),
     enabled: !!id && enabled,
+    initialData,
   })
 }
 

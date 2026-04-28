@@ -38,8 +38,15 @@ auth-sdk/src/
 │   ├── TwoFactorPrompt.tsx
 │   ├── TwoFactorSettings.tsx
 │   ├── VerifyEmailFlow.tsx
-│   ├── AuthAdminDashboard.tsx  # orchestrator — sub-components in admin/
-│   ├── admin/                  # AdminUsersTable, EditRolesModal, AdminStatsCards
+│   ├── AuthAdminDashboard.tsx  # all-in-one console (Tabs orchestrator)
+│   ├── admin/
+│   │   ├── _internal/          # OverviewSection, UsersSection, ApplicationsSection, SettingsSection
+│   │   ├── AdminUsersTable.tsx
+│   │   ├── AdminStatsCards.tsx
+│   │   ├── AdminApplicationsTable.tsx
+│   │   ├── EditRolesModal.tsx
+│   │   ├── EditApplicationModal.tsx
+│   │   └── MaintenanceBanner.tsx  # public, used outside admin
 │   ├── EZAuthDashboard.tsx     # orchestrator — sub-components in dashboard/
 │   ├── dashboard/              # SectionRenderer, OverviewSection, BillingSection, ...
 │   ├── UserDashboard.tsx
@@ -53,7 +60,8 @@ auth-sdk/src/
 ├── middleware/            # Next.js auth middleware
 ├── rbac/                 # Role-Based Access Control
 ├── i18n/                 # Built-in translations (en, fr, vi)
-├── server.ts             # Server-side schemas + client
+├── server/                # Server-only barrel: getServerAuth, hasFeature,
+│                          # schemas + types — zero React, zero browser
 └── index.ts              # Main barrel: re-exports everything
 ```
 
@@ -108,6 +116,74 @@ const user = await client.loginWithCookie('user@example.com', 'password')
 const me = await client.getCurrentUser()
 ```
 
+## Quickstart — SSR auth (Next.js App Router)
+
+Eliminate the **`<LoginButton>` flash** that occurs on the first paint when
+running in `httpOnly` cookie mode. The session cookie isn't readable from
+JavaScript, so the client `<AuthProvider>` defaults to
+`isAuthenticated: false` until its async `/me` call resolves — for ~50–200ms
+the chrome shows the wrong UI (LoginButton instead of UserMenu). The fix is
+the **Clerk-style pattern**: resolve the user server-side and seed the
+provider synchronously via `initialUser`.
+
+```tsx
+// app/[locale]/layout.tsx (Server Component)
+import { getServerAuth } from '@ezstart/auth-sdk/server'
+import { headers } from 'next/headers'
+import { Providers } from '@/components/providers'
+
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const headersList = await headers()
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL!,
+    cookieHeader: headersList.get('cookie'),
+  })
+
+  return (
+    <html>
+      <body>
+        <Providers initialUser={initialUser}>{children}</Providers>
+      </body>
+    </html>
+  )
+}
+```
+
+```tsx
+// components/providers.tsx
+'use client'
+import { AuthProvider, type AuthUser } from '@ezstart/auth-sdk'
+
+export function Providers({
+  children,
+  initialUser,
+}: {
+  children: React.ReactNode
+  initialUser?: AuthUser | null
+}) {
+  return (
+    <AuthProvider
+      appName="myapp"
+      authMode="httpOnly"
+      apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL!}
+      initialUser={initialUser}
+    >
+      {children}
+    </AuthProvider>
+  )
+}
+```
+
+That's it — `<UserMenu>`, `<LoginButton>`, `<RequireAuth>`, `<SignedIn>`,
+`<SignedOut>` and any `useAuth()` consumer all render the right state on
+the very first frame. No flash on initial load, no flash on cross-group
+navigations (e.g. `/dashboard` → `/`) when the chrome remounts.
+
+`getServerAuth()` is server-only — import from `@ezstart/auth-sdk/server`.
+It returns `null` for anonymous requests (no cookie, expired session,
+network error), in which case the legacy client-side bootstrap takes over
+seamlessly. Safe to call from any Server Component or Route Handler.
+
 ## Choosing your auth UX — Hosted vs Embedded
 
 EZAuth supports **two patterns** for authentication UX. Pick the one that fits your product:
@@ -119,7 +195,6 @@ User clicks "Sign in" → redirected to a hosted EZAuth login page → after aut
 ```tsx
 // 1. In your app shell
 import { LoginButton, AuthProvider } from '@ezstart/auth-sdk'
-
 ;<AuthProvider config={{ apiUrl: 'https://api.example.com', appName: 'myapp' }}>
   <LoginButton /> {/* That's it — handles redirect, callback, session */}
 </AuthProvider>
@@ -219,12 +294,71 @@ All form components accept:
 
 ### React (`@ezstart/auth-sdk/react`)
 
-- `<AuthProvider>` — Context provider with auto-refresh
+- `<AuthProvider>` — Context provider with auto-refresh, **owns the per-tree
+  Zustand store** (Clerk-style SSR setup — see _SSR + initialUser_ below)
 - `useAuth()` — Main hook (user, login, logout, isAuthenticated)
-- `useAuthStore()` — Zustand store (direct access)
+- `useAuthStore()` — Bound hook reading the per-Provider store via Context.
+  Throws when called outside `<AuthProvider>`. Accepts an optional selector.
+- `useAuthStoreApi()` — Returns the store instance (for imperative
+  `getState()`/`setState()`/`subscribe()` access from inside the React tree)
+- `useAuthStoreGetSnapshot()` — Returns a stable `() => state` reader for
+  closures passed to non-React APIs (e.g. `getToken={() => snap().accessToken}`)
+- `createAuthStore(options)` — Low-level factory exposed for tests / advanced
+  setups. **Always** wrap usage in `useState(() => createAuthStore(...))` —
+  module-level instantiation breaks Next.js SSR.
 - `<RequireAuth>` — Route protection wrapper (auto-redirects to login by default — see below)
 - `<SignedIn>` / `<SignedOut>` — Conditional rendering for partial UI (no redirect)
 - `<AccessDenied>` — Fallback component
+
+#### SSR + `initialUser` (no LoginButton flash)
+
+The Provider **owns** the Zustand store and creates it via
+`useState(() => createAuthStore({ initialUser }))`. This guarantees one
+store per React tree AND that `initialUser` is part of the very first
+state snapshot React observes. Result: subscribers reading `useAuth()`
+see the SSR-correct `isAuthenticated` value on the FIRST render — no
+flash from `<LoginButton>` to `<UserMenu>` while the async `/me` resolves.
+
+```tsx
+// app/[locale]/layout.tsx — Server Component
+import { getServerAuth } from '@ezstart/auth-sdk/server'
+import { Providers } from '@/components/providers'
+
+export default async function LocaleLayout({ children }) {
+  const initialUser = await getServerAuth()
+  return <Providers initialUser={initialUser}>{children}</Providers>
+}
+
+// components/providers.tsx — Client Component
+;('use client')
+import { AuthProvider, type AuthUser } from '@ezstart/auth-sdk'
+
+export function Providers({
+  initialUser,
+  children,
+}: {
+  initialUser: AuthUser | null
+  children: React.ReactNode
+}) {
+  return (
+    <AuthProvider
+      appName="myapp"
+      publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
+      authMode="httpOnly"
+      initialUser={initialUser}
+    >
+      {children}
+    </AuthProvider>
+  )
+}
+```
+
+> **Breaking change vs ≤ 1.0.0** — `useAuthStore` is no longer a
+> module-level Zustand singleton. `useAuthStore.getState()` /
+> `useAuthStore.setState()` no longer exist. Use `useAuthStoreApi()` (or
+> `useAuthStoreGetSnapshot()` for closures) inside the React tree.
+> `configureAuthStorage()` is deprecated — pass `storageKey` to
+> `<AuthProvider>` instead.
 
 #### `<RequireAuth>` unauthenticated behavior
 
@@ -296,11 +430,13 @@ when no locale segment is present.
 
 **Admin**
 
-- `<AuthAdminDashboard>` — Admin user management with DataTable
-- `<AdminApplicationsDashboard>` — Tenant Applications CRUD (P6+)
-- `<AdminFeatureFlagsSection>` — Platform feature flags
-- `<AdminAnalyticsSection>` — Platform analytics overview (superadmin only)
-- `<AdminMaintenanceModeSection>` / `<MaintenanceBanner>` — Maintenance window control
+- `<AuthAdminDashboard>` — All-in-one admin console with internal tabs
+  (Overview / Users / Applications / Settings). Auto-scoped server-side via
+  JWT (`req.derivedScope`): superadmin sees all tenants, app admin sees
+  owned Applications, regular user sees own account. Drop-in for both
+  EZAuth's own `/admin` page and the EZStart hub's federated admin.
+- `<MaintenanceBanner>` — Maintenance window status banner (public, used
+  outside the admin console in app shells)
 
 **Developer (API keys)**
 
@@ -367,22 +503,53 @@ specific language without touching `texts`.
 ## Federated admin (cross-origin embedding)
 
 `<AuthAdminDashboard>` accepts `apiUrl` and `authToken` overrides so a
-platform hub (Tier 3 — e.g. `apps/ezstart/web/admin`) can embed the user
-management table cross-origin while forwarding a platform-wide superadmin
+platform hub (Tier 3 — e.g. `apps/ezstart/web/admin`) can embed the full
+admin console cross-origin while forwarding a platform-wide superadmin
 JWT instead of the local session token.
 
 ```tsx
 import { AuthAdminDashboard } from '@ezstart/auth-sdk/components'
-;<AuthAdminDashboard
-  apiUrl="https://auth.example.com"
-  authToken={() => mySuperadminJwt}
-  scope="all"
-  appName="*"
-/>
+;<AuthAdminDashboard apiUrl="https://auth.example.com" authToken={() => mySuperadminJwt} />
 ```
 
 When `apiUrl` and `authToken` are omitted, the component falls back to the
 surrounding `<AuthProvider>` configuration (single-app standalone mode).
+
+The dashboard is **auto-scoped server-side** via the JWT — no `appName` /
+`scope` props are required. The backend derives scope from `req.user`:
+
+- `globalRoles: ['superadmin']` -> all tenants
+- App-level `admin` role -> owned Applications only
+- Regular user -> own account
+
+Localize labels via the `texts` prop (per-tab nested objects):
+
+```tsx
+<AuthAdminDashboard
+  texts={{
+    tabOverview: "Vue d'ensemble",
+    tabUsers: 'Utilisateurs',
+    overview: { title: 'Statistiques plateforme' },
+    users: { searchPlaceholder: 'Rechercher...' },
+    applications: { createApplication: 'Nouvelle App' },
+    settings: {
+      featureFlags: { title: 'Drapeaux de fonctionnalite' },
+      maintenance: { title: 'Mode maintenance' },
+    },
+  }}
+/>
+```
+
+### Migration from pre-Wave 1B (Apr 2026)
+
+The previous shape exposed five separate components — `<AuthAdminDashboard>`
+(users only), `<AdminApplicationsDashboard>`, `<AdminAnalyticsSection>`,
+`<AdminFeatureFlagsSection>`, `<AdminMaintenanceModeSection>`. They are
+**replaced** by the single `<AuthAdminDashboard>` console with internal tabs.
+Consumer apps (ezauth/web, ezstart/web) must drop the props
+`appName` / `scope` / `applicationId` and assemble the per-tab text overrides
+into a single `texts` object as shown above. `<MaintenanceBanner>` remains
+a separate top-level export for use in app shells.
 
 ## Theme handoff (`?theme=`)
 

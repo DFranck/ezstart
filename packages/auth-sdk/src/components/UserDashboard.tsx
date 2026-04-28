@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Badge,
   Card,
@@ -11,7 +11,6 @@ import {
   H3,
   Icon,
   P,
-  Skeleton,
   Span,
   Tabs,
   TabsContent,
@@ -148,15 +147,9 @@ export function UserDashboard({
   const { user, isAuthenticated } = useAuth()
   const texts = { ...DEFAULT_TEXTS, ...textOverrides }
   const [activeTab, setActiveTab] = useState(defaultTab)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
 
-  // Loading state
-  if (!mounted) {
-    return <UserDashboardSkeleton className={className} />
-  }
-
-  // Not authenticated
+  // Not authenticated — SSR initialUser bootstrap means this renders correctly
+  // on the very first paint when the user is signed in. No mount guard needed.
   if (!isAuthenticated || !user) {
     return null
   }
@@ -378,28 +371,6 @@ function InfoRow({ icon, label, value }: { icon: string; label: string; value: s
       <Div className="flex-1 min-w-0">
         <P className="text-xs text-muted-foreground">{label}</P>
         <Span className="text-sm text-foreground truncate">{value}</Span>
-      </Div>
-    </Div>
-  )
-}
-
-function UserDashboardSkeleton({ className }: { className?: string }) {
-  return (
-    <Div className={cn('w-full max-w-4xl mx-auto space-y-6', className)}>
-      {/* Header skeleton */}
-      <Div className="flex items-center gap-4">
-        <Skeleton className="h-16 w-16 rounded-full" />
-        <Div className="space-y-2">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-32" />
-        </Div>
-      </Div>
-      {/* Tabs skeleton */}
-      <Skeleton className="h-10 w-full max-w-md" />
-      {/* Content skeleton */}
-      <Div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
       </Div>
     </Div>
   )

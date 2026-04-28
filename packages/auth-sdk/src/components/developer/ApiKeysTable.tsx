@@ -42,9 +42,7 @@ export function ApiKeysTable({
       {
         accessorKey: 'name',
         header: texts.name,
-        cell: ({ row }) => (
-          <Span className="font-medium text-foreground">{row.original.name}</Span>
-        ),
+        cell: ({ row }) => <Span className="font-medium text-foreground">{row.original.name}</Span>,
       },
       {
         accessorKey: 'keyPrefix',
@@ -73,10 +71,7 @@ export function ApiKeysTable({
           const { quotaMonthly, usageThisMonth, status } = row.original
           if (status === 'revoked') return null
           return (
-            <Div
-              className="cursor-pointer"
-              onClick={() => onViewUsage(row.original.id)}
-            >
+            <Div className="cursor-pointer" onClick={() => onViewUsage(row.original.id)}>
               <UsageBadge
                 used={usageThisMonth}
                 quota={quotaMonthly}
@@ -135,6 +130,12 @@ export function ApiKeysTable({
       data={keys}
       pageSize={10}
       density="compact"
+      texts={{
+        previous: texts.paginationPrevious,
+        next: texts.paginationNext,
+        rows: texts.paginationRows,
+        pageOf: texts.paginationPageOf,
+      }}
     />
   )
 }

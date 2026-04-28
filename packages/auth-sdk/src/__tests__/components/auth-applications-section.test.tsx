@@ -18,8 +18,8 @@ vi.mock('../../react/applications.js', () => ({
   useRevokeApplication: (...args: unknown[]) => mockUseRevokeApplication(...args),
 }))
 
-const { AdminApplicationsDashboard } =
-  await import('../../components/AdminApplicationsDashboard.js')
+const { AuthApplicationsSection } =
+  await import('../../components/admin/_internal/ApplicationsSection.js')
 
 const fakeApp = (overrides: Partial<Application> = {}): Application => ({
   id: 'app_1',
@@ -71,19 +71,19 @@ function setup(overrides?: { data?: Application[]; isLoading?: boolean; isError?
   mockUseCreateApplication.mockReturnValue(defaultCreate)
 }
 
-describe('AdminApplicationsDashboard', () => {
+describe('AuthApplicationsSection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setup()
   })
 
   it('renders empty state when no applications', () => {
-    render(<AdminApplicationsDashboard />)
+    render(<AuthApplicationsSection />)
     expect(screen.getByText('No applications found.')).toBeTruthy()
   })
 
   it('renders the New Application CTA', () => {
-    render(<AdminApplicationsDashboard />)
+    render(<AuthApplicationsSection />)
     expect(screen.getByText('New Application')).toBeTruthy()
   })
 
@@ -96,7 +96,7 @@ describe('AdminApplicationsDashboard', () => {
         fakeApp({ id: 'app_4', slug: 'thm', themeEnabled: true }),
       ],
     })
-    render(<AdminApplicationsDashboard />)
+    render(<AuthApplicationsSection />)
     // Stats labels (English defaults)
     expect(screen.getByText('Total')).toBeTruthy()
     expect(screen.getByText('Active')).toBeTruthy()
@@ -112,7 +112,7 @@ describe('AdminApplicationsDashboard', () => {
         fakeApp({ id: 'app_2', slug: 'beta', name: 'Beta App' }),
       ],
     })
-    const { container } = render(<AdminApplicationsDashboard />)
+    const { container } = render(<AuthApplicationsSection />)
     // DataTable mock renders as a passthrough Div (cell render functions are
     // not invoked in tests). Verify the table testid is present.
     expect(container.querySelector('[data-testid="DataTable"]')).toBeTruthy()
@@ -120,21 +120,21 @@ describe('AdminApplicationsDashboard', () => {
 
   it('shows skeletons while loading', () => {
     setup({ isLoading: true })
-    const { container } = render(<AdminApplicationsDashboard />)
+    const { container } = render(<AuthApplicationsSection />)
     const skeletons = container.querySelectorAll('[data-testid="Skeleton"]')
     expect(skeletons.length).toBeGreaterThan(0)
   })
 
   it('does not render the empty state when applications are present', () => {
     setup({ data: [fakeApp()] })
-    render(<AdminApplicationsDashboard />)
+    render(<AuthApplicationsSection />)
     expect(screen.queryByText('No applications found.')).toBeNull()
   })
 
   it('passes custom texts override to UI', () => {
     setup({ data: [] })
     render(
-      <AdminApplicationsDashboard
+      <AuthApplicationsSection
         texts={{
           createApplication: 'Nouvelle App',
           noApplications: 'Aucune app trouvee.',
@@ -147,7 +147,7 @@ describe('AdminApplicationsDashboard', () => {
 
   it('opens the create modal when New Application is clicked', () => {
     setup({ data: [] })
-    render(<AdminApplicationsDashboard />)
+    render(<AuthApplicationsSection />)
     fireEvent.click(screen.getByText('New Application'))
     // CreateApplicationModal renders inside a Modal when isOpen=true
     const modals = screen.queryAllByTestId('Modal')
@@ -156,7 +156,7 @@ describe('AdminApplicationsDashboard', () => {
 
   it('renders status filter options', () => {
     setup({ data: [] })
-    render(<AdminApplicationsDashboard />)
+    render(<AuthApplicationsSection />)
     expect(screen.getByText('All statuses')).toBeTruthy()
     expect(screen.getByText('Active only')).toBeTruthy()
     expect(screen.getByText('Archived only')).toBeTruthy()

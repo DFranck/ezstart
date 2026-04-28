@@ -1,7 +1,6 @@
 'use client'
 
 import { Div, P } from '@ezstart/ui/components'
-import { useEffect, useState } from 'react'
 import { useAuthContext } from '../react/auth-provider.js'
 import { useAuth } from '../react/hooks.js'
 
@@ -63,12 +62,6 @@ export function DevModeBanner({
   urlKey,
   locale,
 }: DevModeBannerProps) {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
-  // Never render server-side (avoid hydration mismatch)
-  if (!mounted) return null
-
   // Never render in production — dev-only tool, zero footprint in prod bundles.
   // Next.js statically replaces `process.env.NODE_ENV` at build time, so this
   // branch is eliminated by the minifier for production builds.

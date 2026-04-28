@@ -52,6 +52,11 @@ export interface AuditLogSectionTexts {
   statusOk: string
   /** Per-action labels */
   actions: Record<AuditLogAction, string>
+  /** Pagination — DataTable */
+  paginationPrevious?: string
+  paginationNext?: string
+  paginationRows?: string
+  paginationPageOf?: string
 }
 
 export interface AuditLogSectionProps {
@@ -67,6 +72,17 @@ export interface AuditLogSectionProps {
   enabled?: boolean
   /** Additional className on the root card. */
   className?: string
+  /**
+   * Server-side pre-fetched audit log entries (via `getServerAuditLog()`
+   * from `@ezstart/auth-sdk/server`). When provided, the React Query cache
+   * is seeded so the very first paint already shows the table — no client
+   * `<Spinner>` flash. React Query still revalidates in the background to
+   * keep the data fresh.
+   *
+   * NOTE: only applies to the default page (`offset=0`, no action filter).
+   * Subsequent filter switches re-fetch normally.
+   */
+  initialEntries?: AuditLogEntry[]
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
@@ -105,6 +121,10 @@ const DEFAULT_TEXTS: AuditLogSectionTexts = {
     api_key_revoked: 'API key revoked',
     profile_updated: 'Profile updated',
   },
+  paginationPrevious: 'Previous',
+  paginationNext: 'Next',
+  paginationRows: '{count} row(s)',
+  paginationPageOf: 'Page {current} of {total}',
 }
 
 // Filter group → set of action types it expands to.
@@ -152,6 +172,7 @@ export function AuditLogSection({
   texts: textOverrides,
   enabled = true,
   className,
+  initialEntries,
 }: AuditLogSectionProps) {
   const texts: AuditLogSectionTexts = {
     ...DEFAULT_TEXTS,
@@ -166,9 +187,23 @@ export function AuditLogSection({
   const groupActions = FILTER_GROUPS[filterGroup] ?? []
   const singleAction = groupActions.length === 1 ? groupActions[0] : undefined
 
+  // Seed the cache with SSR-prefetched entries when present. Only applies to
+  // the initial query (`offset=0`, no action filter) — once the user toggles
+  // a filter, the new query key bypasses the seed and fetches fresh data.
+  const initialAuditData =
+    initialEntries && filterGroup === 'all' && !singleAction
+      ? {
+          items: initialEntries,
+          total: initialEntries.length,
+          limit: pageSize,
+          offset: 0,
+        }
+      : undefined
+
   const { data, isLoading, isError, refetch, isFetching } = useAuditLog(
     { limit: pageSize, offset: 0, action: singleAction },
-    enabled
+    enabled,
+    initialAuditData ? { initialData: initialAuditData } : undefined
   )
 
   const allItems = data?.items ?? []
@@ -281,7 +316,18 @@ export function AuditLogSection({
             <P className="text-sm text-muted-foreground">{texts.empty}</P>
           </Div>
         ) : (
-          <DataTable columns={columns} data={visibleItems} pageSize={pageSize} density="compact" />
+          <DataTable
+            columns={columns}
+            data={visibleItems}
+            pageSize={pageSize}
+            density="compact"
+            texts={{
+              previous: texts.paginationPrevious,
+              next: texts.paginationNext,
+              rows: texts.paginationRows,
+              pageOf: texts.paginationPageOf,
+            }}
+          />
         )}
       </CardContent>
     </Card>

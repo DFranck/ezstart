@@ -39,6 +39,8 @@ export const vi: AuthDict = {
     promoCodeChecking: 'Đang kiểm tra...',
     continueWithGoogle: 'Tiếp tục với Google',
     orContinueWith: 'Hoặc tiếp tục với',
+    showPassword: 'Hiện mật khẩu',
+    hidePassword: 'Ẩn mật khẩu',
   },
   signIn: {
     emailOrUsername: 'Email hoặc tên đăng nhập',
@@ -59,6 +61,8 @@ export const vi: AuthDict = {
     twoFactorBack: 'Quay lại',
     continueWithGoogle: 'Tiếp tục với Google',
     orContinueWith: 'Hoặc tiếp tục với',
+    showPassword: 'Hiện mật khẩu',
+    hidePassword: 'Ẩn mật khẩu',
   },
   forgotPassword: {
     email: 'Email',
@@ -90,6 +94,8 @@ export const vi: AuthDict = {
     passwordFair: 'Trung bình',
     passwordGood: 'Khá',
     passwordStrong: 'Mạnh',
+    showPassword: 'Hiện mật khẩu',
+    hidePassword: 'Ẩn mật khẩu',
     validating: 'Đang xác thực liên kết...',
     tokenExpired: 'Liên kết đặt lại này đã hết hạn hoặc không hợp lệ.',
     requestNewLink: 'Yêu cầu liên kết mới',

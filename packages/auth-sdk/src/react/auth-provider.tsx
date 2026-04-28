@@ -1,16 +1,24 @@
 'use client'
 import {
-  createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react'
+import { useStore } from 'zustand'
 import { CoreAuthClient, fetchKeyConfig, resolveSDKConfig } from '../core/auth-client.js'
-import type { AuthMode, AuthScope, AuthSDKConfig, PublishableKeyConfig } from '../core/types.js'
-import { useAuthStore } from './store.js'
+import type {
+  AuthMode,
+  AuthScope,
+  AuthSDKConfig,
+  AuthUser,
+  PublishableKeyConfig,
+} from '../core/types.js'
+import { AuthContext, AuthStoreContext } from './__contexts.js'
+import { type AuthState, type AuthStoreApi, createAuthStore, getLegacyStorageKey } from './store.js'
 
 /**
  * Decode JWT expiry (exp claim) without dependencies.
@@ -86,28 +94,6 @@ function detectAuthMode(apiUrl: string): AuthMode {
 }
 
 // ---------------------------------------------------------------------------
-// Context
-// ---------------------------------------------------------------------------
-
-interface AuthContextValue {
-  client: CoreAuthClient
-  appName: string
-  /** Web URL for login/register redirects. */
-  webUrl: string
-  /** Resolved key config (null until async fetch completes, or if no key). */
-  keyConfig: PublishableKeyConfig | null
-  /** Auth scope: 'test'/'live' (single app), 'admin' (all apps), 'first-party' (ezauth web). */
-  scope: AuthScope
-  /**
-   * Raw publishable key string (e.g., `ez_pk_live_...` for production, `ez_pk_test_...` for sandbox).
-   * Legacy `ezk_*` keys still accepted but deprecated (rotate by 2026-07-21).
-   */
-  publishableKey: string | undefined
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null)
-
-// ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
 
@@ -148,6 +134,23 @@ export interface AuthProviderProps {
   /** Optional logger instance. */
   logger?: AuthLogger
 
+  /**
+   * Optional initial user state — typically resolved server-side via
+   * `getServerAuth()` from `@ezstart/auth-sdk/server`.
+   *
+   * When provided, the per-Provider Zustand store boots with
+   * `{ user: initialUser, isAuthenticated: true, isAuthReady: true }`
+   * **synchronously**, before any subscriber renders. This eliminates
+   * the `<LoginButton>` flash that would otherwise occur in `httpOnly`
+   * mode while the async `/me` request resolves.
+   *
+   * Pass `null` (or omit) to fall back to the legacy client-side bootstrap.
+   */
+  initialUser?: AuthUser | null
+
+  /** Override the localStorage key used by the persist middleware. */
+  storageKey?: string
+
   // ── Deprecated props (backward compat) ────────────────────────────────
 
   /** @deprecated Use `authMode` instead. */
@@ -166,8 +169,33 @@ export function AuthProvider({
   jwtPublicKey: _jwtPublicKey,
   logger = noopLogger,
   useHttpOnlyCookies,
+  initialUser,
+  storageKey,
 }: AuthProviderProps) {
-  const store = useAuthStore()
+  // ── Per-Provider Zustand store (Clerk-style SSR setup) ──────────────────
+  //
+  // Creating the store inside `useState` guarantees one store per Provider
+  // instance and that `initialUser` is available synchronously on the first
+  // render. The factory hands React a store whose initial state already
+  // reflects the SSR user, so subscribers never observe a transient
+  // `{ user: null, isAuthenticated: false }` between mount and the legacy
+  // post-mount hydration. This is the canonical Next.js + Zustand setup.
+  const [store] = useState(() =>
+    createAuthStore({
+      initialUser,
+      storageKey: storageKey ?? getLegacyStorageKey(),
+    })
+  )
+
+  // Tear down the cross-tab BroadcastChannel when the provider unmounts
+  // (HMR, route-level provider remount, tests, etc.).
+  useEffect(() => {
+    return () => {
+      store.__cleanup()
+    }
+  }, [store])
+
+  const storeState = useStore(store)
   const keyConfigRef = useRef<PublishableKeyConfig | null>(null)
 
   // Determine initial scope from mode prop
@@ -315,7 +343,8 @@ export function AuthProvider({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const currentMode = store.getMode()
+    const current = store.getState()
+    const currentMode = current.getMode()
 
     logger.debug('[AuthProvider] Mode resolved', {
       configured: authMode,
@@ -325,14 +354,14 @@ export function AuthProvider({
 
     // Update mode if it changed
     if (currentMode !== effectiveMode) {
-      if (store.isAuthenticated) {
-        const user = store.user
+      if (current.isAuthenticated) {
+        const user = current.user
         if (user) {
-          store.setAuth(
+          current.setAuth(
             user,
-            store.accessToken || undefined,
+            current.accessToken || undefined,
             effectiveMode,
-            store.refreshToken || undefined
+            current.refreshToken || undefined
           )
         }
       }
@@ -348,20 +377,21 @@ export function AuthProvider({
     let refreshing = false
 
     const tryRefresh = async (): Promise<boolean> => {
-      const rt = store.refreshToken
+      const current = store.getState()
+      const rt = current.refreshToken
       if (!rt || refreshing) return false
       refreshing = true
       try {
         const result = await client.refreshTokens(rt)
-        store.setTokens(result.accessToken, result.refreshToken)
-        store.updateUser(result.user)
+        store.getState().setTokens(result.accessToken, result.refreshToken)
+        store.getState().updateUser(result.user)
         logger.debug('[AuthProvider] Silently refreshed tokens')
         return true
       } catch (err) {
         logger.debug('[AuthProvider] Silent refresh failed, logging out', {
           error: err instanceof Error ? err.message : String(err),
         })
-        store.logout()
+        store.getState().logout()
         return false
       } finally {
         refreshing = false
@@ -369,23 +399,24 @@ export function AuthProvider({
     }
 
     const verifyToken = async () => {
-      const mode = store.getMode()
+      const current = store.getState()
+      const verifyMode = current.getMode()
 
-      if (mode === 'localStorage' && store.accessToken) {
-        const isValid = await client.verifyToken(store.accessToken)
+      if (verifyMode === 'localStorage' && current.accessToken) {
+        const isValid = await client.verifyToken(current.accessToken)
         if (!isValid) {
           const refreshed = await tryRefresh()
           if (!refreshed) {
             logger.debug('[AuthProvider] Token invalid and refresh failed, logging out')
           }
         }
-      } else if (mode === 'localStorage' && !store.accessToken && store.refreshToken) {
+      } else if (verifyMode === 'localStorage' && !current.accessToken && current.refreshToken) {
         await tryRefresh()
-      } else if (mode === 'httpOnly') {
+      } else if (verifyMode === 'httpOnly') {
         try {
           const user = await client.getCurrentUser()
           if (user) {
-            store.updateUser(user)
+            store.getState().updateUser(user)
           }
         } catch (error: unknown) {
           const err = error as { message?: string; status?: number }
@@ -417,7 +448,7 @@ export function AuthProvider({
       clearInterval(intervalId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.accessToken, store.refreshToken, client, logger])
+  }, [storeState.accessToken, storeState.refreshToken, client, logger, store])
 
   // Proactive token refresh: schedule refresh 1 minute before JWT expiry
   const proactiveTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -428,8 +459,8 @@ export function AuthProvider({
       proactiveTimerRef.current = null
     }
 
-    const token = store.accessToken
-    if (!token || !store.refreshToken) return
+    const token = storeState.accessToken
+    if (!token || !storeState.refreshToken) return
 
     const expiry = getTokenExpiry(token)
     if (!expiry) return
@@ -449,12 +480,12 @@ export function AuthProvider({
     })
 
     proactiveTimerRef.current = setTimeout(async () => {
-      const rt = store.refreshToken
+      const rt = store.getState().refreshToken
       if (!rt) return
       try {
         const result = await client.refreshTokens(rt)
-        store.setTokens(result.accessToken, result.refreshToken)
-        store.updateUser(result.user)
+        store.getState().setTokens(result.accessToken, result.refreshToken)
+        store.getState().updateUser(result.user)
         logger.debug('[AuthProvider] Proactive refresh succeeded')
       } catch (err) {
         logger.debug('[AuthProvider] Proactive refresh failed, fallback interval will retry', {
@@ -470,7 +501,7 @@ export function AuthProvider({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.accessToken, store.refreshToken, client, logger])
+  }, [storeState.accessToken, storeState.refreshToken, client, logger, store])
 
   const contextValue = useMemo(
     () => ({
@@ -484,7 +515,11 @@ export function AuthProvider({
     [client, resolvedAppName, resolvedWebUrl, resolvedScope, sdkConfig.publishableKey]
   )
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  return (
+    <AuthStoreContext.Provider value={store}>
+      <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    </AuthStoreContext.Provider>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -497,4 +532,77 @@ export function useAuthContext() {
     throw new Error('useAuthContext must be used within AuthProvider')
   }
   return context
+}
+
+/**
+ * Read the per-Provider Zustand store via React Context. Throws when
+ * called outside of `<AuthProvider>` to surface SSR setup mistakes.
+ *
+ * @example
+ * ```tsx
+ * const user = useAuthStoreSelector(s => s.user)
+ * ```
+ */
+export function useAuthStoreSelector<T>(selector: (state: AuthState) => T): T {
+  const store = useContext(AuthStoreContext)
+  if (!store) {
+    throw new Error('useAuthStoreSelector must be used within <AuthProvider>')
+  }
+  return useStore(store, selector)
+}
+
+/**
+ * Bound hook reading the per-Provider Zustand store via React Context.
+ * Throws when called outside `<AuthProvider>` to surface SSR-incompatible
+ * setups (the legacy module-level `useAuthStore.getState()` pattern is
+ * removed — for imperative access use {@link useAuthStoreApi} or
+ * {@link useAuthStoreGetSnapshot}).
+ *
+ * - `useAuthStore()` → returns the full state (subscribes to all changes)
+ * - `useAuthStore(selector)` → subscribes to a slice
+ */
+export function useAuthStore(): AuthState
+export function useAuthStore<T>(selector: (state: AuthState) => T): T
+export function useAuthStore<T>(selector?: (state: AuthState) => T): T | AuthState {
+  const store = useContext(AuthStoreContext)
+  if (!store) {
+    throw new Error('useAuthStore must be used within <AuthProvider>')
+  }
+  return useStore(store, (selector ?? ((s: AuthState) => s)) as (state: AuthState) => T)
+}
+
+/**
+ * Internal accessor — read the store instance from the current Provider.
+ * Used by SDK components that need imperative `getState()`/`setState()`
+ * access (e.g. closures passed to non-React code).
+ */
+export function useAuthStoreApi(): AuthStoreApi {
+  const store = useContext(AuthStoreContext)
+  if (!store) {
+    throw new Error('useAuthStoreApi must be used within <AuthProvider>')
+  }
+  return store
+}
+
+/**
+ * SSR-safe variant — returns the full state. Kept for backwards
+ * compatibility; prefer {@link useAuthStore} which is now SSR-correct
+ * by construction (the store is created with `initialUser` at mount time).
+ *
+ * @deprecated Use `useAuthStore()` directly.
+ */
+export function useAuthStoreSSR(): AuthState {
+  return useAuthStore()
+}
+
+/**
+ * Read the active store snapshot **inside a React event handler or
+ * effect** without subscribing. Useful for closures passed outside the
+ * React render path (e.g. `getToken={() => useAuthStoreGetState().accessToken}`
+ * is wrong; instead use `const get = useAuthStoreGetSnapshot()` once and
+ * pass `getToken={() => get().accessToken}`).
+ */
+export function useAuthStoreGetSnapshot(): () => AuthState {
+  const store = useAuthStoreApi()
+  return useCallback(() => store.getState(), [store])
 }

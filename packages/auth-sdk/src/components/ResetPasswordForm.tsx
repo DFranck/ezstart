@@ -50,6 +50,9 @@ export interface ResetPasswordFormTexts {
   tokenExpired: string
   requestNewLink: string
   errorInvalidToken: string
+  // PasswordInput visibility toggle (sr-only)
+  showPassword?: string
+  hidePassword?: string
 }
 
 export interface ResetPasswordFormProps {
@@ -303,6 +306,10 @@ export function ResetPasswordForm({
                 <PasswordInput
                   minLength={MIN_PASSWORD_LENGTH}
                   placeholder={t.newPasswordPlaceholder}
+                  texts={{
+                    showPassword: t.showPassword,
+                    hidePassword: t.hidePassword,
+                  }}
                   {...field}
                 />
               </FormControl>
@@ -334,6 +341,10 @@ export function ResetPasswordForm({
                 <PasswordInput
                   minLength={MIN_PASSWORD_LENGTH}
                   placeholder={t.confirmPasswordPlaceholder}
+                  texts={{
+                    showPassword: t.showPassword,
+                    hidePassword: t.hidePassword,
+                  }}
                   {...field}
                 />
               </FormControl>

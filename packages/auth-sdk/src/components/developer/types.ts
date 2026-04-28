@@ -18,6 +18,12 @@ export interface ApiKeysTableTexts {
   rotate: string
   revoke: string
   unlimited: string
+  /** Pagination — DataTable */
+  paginationPrevious?: string
+  paginationNext?: string
+  /** Format strings, e.g. `'{count} row(s)'` and `'Page {current} of {total}'`. */
+  paginationRows?: string
+  paginationPageOf?: string
 }
 
 export interface CreateKeyModalTexts {
@@ -128,6 +134,10 @@ export const defaultDeveloperPortalTexts: DeveloperPortalTexts = {
     rotate: 'Rotate',
     revoke: 'Revoke',
     unlimited: 'Unlimited',
+    paginationPrevious: 'Previous',
+    paginationNext: 'Next',
+    paginationRows: '{count} row(s)',
+    paginationPageOf: 'Page {current} of {total}',
   },
   create: {
     title: 'Create API Key',

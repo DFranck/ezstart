@@ -19,14 +19,14 @@ import {
   type ChartConfig,
 } from '@ezstart/ui/components'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-import { useAdminAnalyticsOverview } from '../../react/admin-analytics.js'
-import type { AdminAnalyticsOverview } from '../../core/types.js'
+import { useAdminAnalyticsOverview } from '../../../react/admin-analytics.js'
+import type { AdminAnalyticsOverview } from '../../../core/types.js'
 
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
 
-export interface AdminAnalyticsSectionTexts {
+export interface AuthOverviewSectionTexts {
   title?: string
   subtitle?: string
 
@@ -59,7 +59,7 @@ export interface AdminAnalyticsSectionTexts {
   retry?: string
 }
 
-const DEFAULT_TEXTS: Required<AdminAnalyticsSectionTexts> = {
+export const DEFAULT_OVERVIEW_TEXTS: Required<AuthOverviewSectionTexts> = {
   title: 'Platform analytics',
   subtitle: 'Real-time platform-wide stats. Superadmin only.',
   totalUsers: 'Total users',
@@ -84,9 +84,9 @@ const DEFAULT_TEXTS: Required<AdminAnalyticsSectionTexts> = {
   retry: 'Retry',
 }
 
-export interface AdminAnalyticsSectionProps {
+export interface AuthOverviewSectionProps {
   className?: string
-  texts?: Partial<AdminAnalyticsSectionTexts>
+  texts?: Partial<AuthOverviewSectionTexts>
   /**
    * Override the EZAuth API base URL. Required for federated admin
    * (Tier 3 hub embedding the SDK cross-origin).
@@ -115,7 +115,7 @@ function shortDateLabel(iso: string): string {
   }).format(d)
 }
 
-/** Compact percent display: 12.5 → `12.5%`. */
+/** Compact percent display: 12.5 -> `12.5%`. */
 function pctLabel(value: number): string {
   return `${value.toFixed(1)}%`
 }
@@ -130,33 +130,22 @@ function pctTrendVariant(value: number, threshold = 0): 'success' | 'default' {
 // ---------------------------------------------------------------------------
 
 /**
- * Platform analytics dashboard section for the superadmin admin page.
+ * Internal overview section embedded in `<AuthAdminDashboard>`.
  *
  * Renders a responsive grid of stat cards (totals + percentages), a 30-day
  * signup trend area chart, and a top-5 apps table — all driven by a single
- * `GET /admin/analytics/overview` call.
+ * `GET /admin/analytics/overview` call (auto-scoped via JWT).
  *
- * @example Standalone (uses surrounding AuthProvider)
- * ```tsx
- * <AdminAnalyticsSection />
- * ```
- *
- * @example Federated admin (Tier 3 hub embedding cross-origin)
- * ```tsx
- * <AdminAnalyticsSection
- *   apiUrl="https://auth.example.com"
- *   authToken={() => superadminJwt}
- * />
- * ```
+ * @internal
  */
-export function AdminAnalyticsSection({
+export function AuthOverviewSection({
   className,
   texts,
   apiUrl,
   authToken,
   refetchIntervalMs = 0,
-}: AdminAnalyticsSectionProps) {
-  const t: Required<AdminAnalyticsSectionTexts> = { ...DEFAULT_TEXTS, ...texts }
+}: AuthOverviewSectionProps) {
+  const t: Required<AuthOverviewSectionTexts> = { ...DEFAULT_OVERVIEW_TEXTS, ...texts }
   const { data, isLoading, isError, refetch } = useAdminAnalyticsOverview({
     apiUrl,
     authToken,
@@ -214,7 +203,7 @@ export function AdminAnalyticsSection({
 interface StatsGridProps {
   loading: boolean
   data: AdminAnalyticsOverview | undefined
-  t: Required<AdminAnalyticsSectionTexts>
+  t: Required<AuthOverviewSectionTexts>
 }
 
 function StatsGrid({ loading, data, t }: StatsGridProps) {
@@ -297,7 +286,7 @@ function StatCard({ label, value, hint, trendBadge }: StatCardProps) {
 interface SignupTrendChartProps {
   loading: boolean
   data: AdminAnalyticsOverview | undefined
-  t: Required<AdminAnalyticsSectionTexts>
+  t: Required<AuthOverviewSectionTexts>
 }
 
 function SignupTrendChart({ loading, data, t }: SignupTrendChartProps) {
@@ -375,7 +364,7 @@ function SignupTrendChart({ loading, data, t }: SignupTrendChartProps) {
 interface TopAppsTableProps {
   loading: boolean
   data: AdminAnalyticsOverview | undefined
-  t: Required<AdminAnalyticsSectionTexts>
+  t: Required<AuthOverviewSectionTexts>
 }
 
 function TopAppsTable({ loading, data, t }: TopAppsTableProps) {

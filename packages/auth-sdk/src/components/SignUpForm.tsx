@@ -69,6 +69,9 @@ export interface SignUpFormTexts {
   // OAuth texts (optional — only needed if showOAuth is true)
   continueWithGoogle?: string
   orContinueWith?: string
+  // PasswordInput visibility toggle (sr-only)
+  showPassword?: string
+  hidePassword?: string
 }
 
 export interface SignUpFormProps {
@@ -400,6 +403,10 @@ export function SignUpForm({
                     required
                     minLength={MIN_PASSWORD_LENGTH}
                     placeholder={t.passwordPlaceholder}
+                    texts={{
+                      showPassword: t.showPassword,
+                      hidePassword: t.hidePassword,
+                    }}
                     {...field}
                   />
                 </FormControl>
@@ -433,6 +440,10 @@ export function SignUpForm({
                     required
                     minLength={MIN_PASSWORD_LENGTH}
                     placeholder={t.confirmPasswordPlaceholder}
+                    texts={{
+                      showPassword: t.showPassword,
+                      hidePassword: t.hidePassword,
+                    }}
                     {...field}
                   />
                 </FormControl>

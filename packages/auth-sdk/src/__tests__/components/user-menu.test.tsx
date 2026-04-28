@@ -1,64 +1,59 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import React from 'react'
-import { useAuthStore } from '../../react/store.js'
+import { UserMenu } from '../../components/UserMenu.js'
+import { createTestStore, TestAuthProvider } from '../testProvider.js'
+import type { AuthStoreApi } from '../../react/store.js'
 import { createTestUser } from '../helpers.js'
 
-// Mock provider
-const mockLogin = vi.fn()
-const mockLogout = vi.fn()
-
-vi.mock('../../react/hooks.js', () => ({
-  useAuth: () => {
-    const store = useAuthStore()
-    return {
-      user: store.user,
-      isAuthenticated: store.isAuthenticated,
-      isLoggingIn: store.isLoggingIn,
-      isAuthReady: true,
-      login: mockLogin,
-      logout: mockLogout,
-    }
-  },
-}))
-
-vi.mock('../../react/auth-provider.js', () => ({
-  useAuthContext: () => ({
-    client: { getApiUrl: () => 'http://localhost:6110/api/auth' },
-    appName: 'testapp',
-    webUrl: 'http://localhost:6111',
-    keyConfig: null,
-    scope: 'live',
-  }),
-}))
-
-const { UserMenu } = await import('../../components/UserMenu.js')
+function makeWrapper(store: AuthStoreApi) {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <TestAuthProvider store={store}>{children}</TestAuthProvider>
+  }
+}
 
 describe('UserMenu', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
-    vi.clearAllMocks()
+    localStorage.clear()
+    store = createTestStore()
   })
 
   it('shows sign-in button when not authenticated', () => {
-    render(<UserMenu />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserMenu />
+      </Wrapper>
+    )
     expect(screen.getByText('Sign in')).toBeInTheDocument()
   })
 
   it('uses custom sign-in text', () => {
-    render(<UserMenu texts={{ signIn: 'Se connecter', signOut: 'Deconnexion', manageAccount: 'Mon compte' }} />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserMenu
+          texts={{ signIn: 'Se connecter', signOut: 'Deconnexion', manageAccount: 'Mon compte' }}
+        />
+      </Wrapper>
+    )
     expect(screen.getByText('Se connecter')).toBeInTheDocument()
   })
 
   it('renders dropdown trigger when authenticated', () => {
     const user = createTestUser({ firstName: 'Alice', lastName: 'Wonder' })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserMenu />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserMenu />
+      </Wrapper>
+    )
     // Should show avatar with initials
     expect(screen.getByText('AW')).toBeInTheDocument()
   })
@@ -66,10 +61,15 @@ describe('UserMenu', () => {
   it('renders extended variant with name and email', () => {
     const user = createTestUser({ firstName: 'Bob', lastName: 'Smith', email: 'bob@example.com' })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserMenu variant="extended" />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserMenu variant="extended" />
+      </Wrapper>
+    )
     expect(screen.getByText('Bob Smith')).toBeInTheDocument()
     expect(screen.getByText('bob@example.com')).toBeInTheDocument()
   })
@@ -77,10 +77,15 @@ describe('UserMenu', () => {
   it('renders username when no first/last name', () => {
     const user = createTestUser({ firstName: undefined, lastName: undefined, username: 'cooluser' })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
 
-    render(<UserMenu variant="extended" />)
+    const Wrapper = makeWrapper(store)
+    render(
+      <Wrapper>
+        <UserMenu variant="extended" />
+      </Wrapper>
+    )
     expect(screen.getByText('cooluser')).toBeInTheDocument()
   })
 })

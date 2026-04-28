@@ -23,6 +23,18 @@ const apiKeyUsageKey = (keyId: string) => ['api-key-usage', keyId] as const
 // Queries
 // ---------------------------------------------------------------------------
 
+/** Options for {@link useApiKeys}. */
+export interface UseApiKeysOptions {
+  /**
+   * Pre-resolved API keys (from a server-side fetch via
+   * `getServerApiKeys()`). When provided, React Query seeds the cache so the
+   * first paint of `<DeveloperPortal>` already shows the table — no client
+   * `<Spinner>` flash. The hook still revalidates in the background to keep
+   * the data fresh.
+   */
+  initialData?: ApiKeyItem[]
+}
+
 /**
  * Fetch the current user's API keys.
  *
@@ -30,8 +42,16 @@ const apiKeyUsageKey = (keyId: string) => ['api-key-usage', keyId] as const
  * ```tsx
  * const { data, isLoading } = useApiKeys(!!user)
  * ```
+ *
+ * SSR companion: pass server-side pre-fetched keys to skip the initial
+ * loading state.
+ *
+ * @example
+ * ```tsx
+ * const { data } = useApiKeys(true, { initialData: serverKeys })
+ * ```
  */
-export function useApiKeys(enabled = true) {
+export function useApiKeys(enabled = true, options?: UseApiKeysOptions) {
   return useQuery({
     queryKey: API_KEYS_KEY,
     queryFn: () =>
@@ -40,6 +60,7 @@ export function useApiKeys(enabled = true) {
         method: 'GET',
       }),
     enabled,
+    initialData: options?.initialData,
   })
 }
 
@@ -90,7 +111,7 @@ export function useCreateApiKey(callbacks?: MutationCallbacks<CreateApiKeyRespon
         method: 'POST',
         body,
       }),
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: [...API_KEYS_KEY] })
       callbacks?.onSuccess?.(data)
     },
@@ -144,7 +165,7 @@ export function useRotateApiKey(callbacks?: MutationCallbacks<CreateApiKeyRespon
         appName: 'ezauth',
         method: 'POST',
       }),
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: [...API_KEYS_KEY] })
       callbacks?.onSuccess?.(data)
     },

@@ -15,7 +15,7 @@ import {
 import {
   ADMIN_APPLICATIONS_PAGE_SIZE,
   type AdminApplicationRow,
-  type AdminApplicationsTexts,
+  type AuthApplicationsSectionTexts,
   formatAdminApplicationDate,
 } from './AdminApplications.types.js'
 
@@ -23,13 +23,15 @@ export interface AdminApplicationsTableProps {
   applications: AdminApplicationRow[]
   loading: boolean
   total: number
-  t: Required<AdminApplicationsTexts>
+  t: Required<AuthApplicationsSectionTexts>
   onEdit: (app: AdminApplicationRow) => void
   onArchive: (app: AdminApplicationRow) => void
+  /** BCP47 locale for date formatting. */
+  locale?: string
 }
 
 /**
- * Renders the Applications table (DataTable) used by `<AdminApplicationsDashboard>`.
+ * Renders the Applications table (DataTable) used by `<AuthAdminDashboard>`.
  * Internal sub-component — extracted to keep each file under the 400-line policy ceiling.
  *
  * @internal
@@ -41,6 +43,7 @@ export function AdminApplicationsTable({
   t,
   onEdit,
   onArchive,
+  locale,
 }: AdminApplicationsTableProps) {
   const columns: ColumnDef<AdminApplicationRow>[] = [
     {
@@ -123,7 +126,9 @@ export function AdminApplicationsTable({
       accessorKey: 'createdAt',
       header: ({ header }) => <DataTableColumnHeader header={header} title={t.columnCreatedAt} />,
       cell: ({ row }) => (
-        <Span className="text-sm">{formatAdminApplicationDate(row.original.createdAt)}</Span>
+        <Span className="text-sm">
+          {formatAdminApplicationDate(row.original.createdAt, locale)}
+        </Span>
       ),
     },
     {
@@ -166,7 +171,18 @@ export function AdminApplicationsTable({
 
   return (
     <Card className="overflow-hidden">
-      <DataTable columns={columns} data={applications} pageSize={ADMIN_APPLICATIONS_PAGE_SIZE} />
+      <DataTable
+        columns={columns}
+        data={applications}
+        pageSize={ADMIN_APPLICATIONS_PAGE_SIZE}
+        texts={{
+          previous: t.previous,
+          next: t.next,
+          rows: t.rows,
+          pageOf: t.pageOf,
+          empty: t.noApplications,
+        }}
+      />
       <Span className="sr-only">{total} total</Span>
     </Card>
   )

@@ -39,6 +39,8 @@ export const fr: AuthDict = {
     promoCodeChecking: 'Vérification...',
     continueWithGoogle: 'Continuer avec Google',
     orContinueWith: 'Ou continuer avec',
+    showPassword: 'Afficher le mot de passe',
+    hidePassword: 'Masquer le mot de passe',
   },
   signIn: {
     emailOrUsername: "Email ou nom d'utilisateur",
@@ -59,6 +61,8 @@ export const fr: AuthDict = {
     twoFactorBack: 'Retour',
     continueWithGoogle: 'Continuer avec Google',
     orContinueWith: 'Ou continuer avec',
+    showPassword: 'Afficher le mot de passe',
+    hidePassword: 'Masquer le mot de passe',
   },
   forgotPassword: {
     email: 'Email',
@@ -91,6 +95,8 @@ export const fr: AuthDict = {
     passwordFair: 'Moyen',
     passwordGood: 'Bon',
     passwordStrong: 'Fort',
+    showPassword: 'Afficher le mot de passe',
+    hidePassword: 'Masquer le mot de passe',
     validating: 'Validation du lien...',
     tokenExpired: "Ce lien de réinitialisation a expiré ou n'est plus valide.",
     requestNewLink: 'Demander un nouveau lien',

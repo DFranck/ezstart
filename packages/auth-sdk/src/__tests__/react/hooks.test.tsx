@@ -1,52 +1,41 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import React from 'react'
-import { useAuthStore } from '../../react/store.js'
+import { useAuth } from '../../react/hooks.js'
+import { createTestStore, TestAuthProvider } from '../testProvider.js'
 import { createTestUser } from '../helpers.js'
 
-// Mock the auth-provider to provide context
-vi.mock('../../react/auth-provider.js', () => {
-  const mockClient = {
-    getApiUrl: () => 'http://localhost:6110/api/auth',
-    getAppName: () => 'testapp',
-    exchangeCode: vi.fn(),
-    getCurrentUser: vi.fn(),
-    logout: vi.fn(),
-    verifyToken: vi.fn(),
-    refreshTokens: vi.fn(),
-  }
-
-  return {
-    useAuthContext: () => ({
-      client: mockClient,
-      appName: 'testapp',
-    }),
-    AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    __mockClient: mockClient,
-  }
-})
-
-const { useAuth } = await import('../../react/hooks.js')
-const { __mockClient: mockClient } = (await import('../../react/auth-provider.js')) as unknown as {
-  __mockClient: {
+describe('useAuth hook', () => {
+  let store: ReturnType<typeof createTestStore>
+  let mockClient: {
     exchangeCode: ReturnType<typeof vi.fn>
     getCurrentUser: ReturnType<typeof vi.fn>
     logout: ReturnType<typeof vi.fn>
     verifyToken: ReturnType<typeof vi.fn>
     refreshTokens: ReturnType<typeof vi.fn>
   }
-}
 
-describe('useAuth hook', () => {
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore()
+    mockClient = {
+      exchangeCode: vi.fn(),
+      getCurrentUser: vi.fn(),
+      logout: vi.fn(),
+      verifyToken: vi.fn(),
+      refreshTokens: vi.fn(),
+    }
     vi.clearAllMocks()
   })
 
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <TestAuthProvider store={store} client={mockClient as never}>
+      {children}
+    </TestAuthProvider>
+  )
+
   it('returns default unauthenticated state', () => {
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
     expect(result.current.user).toBeNull()
     expect(result.current.isAuthenticated).toBe(false)
     expect(result.current.accessToken).toBeNull()
@@ -57,10 +46,10 @@ describe('useAuth hook', () => {
   it('reflects store state when authenticated', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'access-token', 'localStorage', 'refresh-token')
+      store.getState().setAuth(user, 'access-token', 'localStorage', 'refresh-token')
     })
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
     expect(result.current.user).toEqual(user)
     expect(result.current.isAuthenticated).toBe(true)
     expect(result.current.accessToken).toBe('access-token')
@@ -76,7 +65,7 @@ describe('useAuth hook', () => {
       refresh_token: 'new-rt',
     })
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     let returnedUser
     await act(async () => {
@@ -84,15 +73,15 @@ describe('useAuth hook', () => {
     })
 
     expect(returnedUser).toEqual(user)
-    expect(useAuthStore.getState().isAuthenticated).toBe(true)
-    expect(useAuthStore.getState().user).toEqual(user)
-    expect(useAuthStore.getState().accessToken).toBe('new-at')
+    expect(store.getState().isAuthenticated).toBe(true)
+    expect(store.getState().user).toEqual(user)
+    expect(store.getState().accessToken).toBe('new-at')
   })
 
   it('handleCallback throws on exchange error', async () => {
     mockClient.exchangeCode.mockRejectedValueOnce(new Error('Invalid code'))
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     await expect(
       act(async () => {
@@ -104,32 +93,32 @@ describe('useAuth hook', () => {
   it('logout calls client.logout and clears store', async () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at', 'localStorage', 'rt')
+      store.getState().setAuth(user, 'at', 'localStorage', 'rt')
     })
 
     mockClient.logout.mockResolvedValueOnce(undefined)
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     await act(async () => {
       await result.current.logout()
     })
 
     expect(mockClient.logout).toHaveBeenCalledWith('rt')
-    expect(useAuthStore.getState().isAuthenticated).toBe(false)
-    expect(useAuthStore.getState().user).toBeNull()
+    expect(store.getState().isAuthenticated).toBe(false)
+    expect(store.getState().user).toBeNull()
   })
 
   it('verifyAndRefresh fetches current user in localStorage mode', async () => {
     const user = createTestUser()
     const updatedUser = createTestUser({ firstName: 'Refreshed' })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at', 'localStorage', 'rt')
+      store.getState().setAuth(user, 'at', 'localStorage', 'rt')
     })
 
     mockClient.getCurrentUser.mockResolvedValueOnce(updatedUser)
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     let refreshedUser
     await act(async () => {
@@ -137,19 +126,19 @@ describe('useAuth hook', () => {
     })
 
     expect(refreshedUser).toEqual(updatedUser)
-    expect(useAuthStore.getState().user?.firstName).toBe('Refreshed')
+    expect(store.getState().user?.firstName).toBe('Refreshed')
   })
 
   it('verifyAndRefresh logs out on 401 error', async () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at', 'localStorage', 'rt')
+      store.getState().setAuth(user, 'at', 'localStorage', 'rt')
     })
 
     const error = Object.assign(new Error('Unauthorized'), { status: 401 })
     mockClient.getCurrentUser.mockRejectedValueOnce(error)
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     await expect(
       act(async () => {
@@ -157,11 +146,11 @@ describe('useAuth hook', () => {
       })
     ).rejects.toThrow()
 
-    expect(useAuthStore.getState().isAuthenticated).toBe(false)
+    expect(store.getState().isAuthenticated).toBe(false)
   })
 
   it('verifyAndRefresh returns null when no token', async () => {
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     let res
     await act(async () => {
@@ -172,12 +161,12 @@ describe('useAuth hook', () => {
   })
 
   it('setLoggingIn updates the store', () => {
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     act(() => {
       result.current.setLoggingIn(true)
     })
 
-    expect(useAuthStore.getState().isLoggingIn).toBe(true)
+    expect(store.getState().isLoggingIn).toBe(true)
   })
 })

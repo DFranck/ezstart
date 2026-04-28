@@ -40,6 +40,9 @@ export interface SignInFormTexts {
   minLength: string
   noRedirectUri: string
   fallbackError: string
+  // PasswordInput visibility toggle (sr-only)
+  showPassword?: string
+  hidePassword?: string
   // 2FA texts (optional — only needed if 2FA is enabled)
   twoFactorPrompt?: string
   twoFactorCodePlaceholder?: string
@@ -117,6 +120,22 @@ export function SignInForm({
   const locale = propLocale ?? navigation.locale
   const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
+
+  // Resolve redirectUri with sensible defaults so consumers (including the
+  // first-party ezauth/web dogfooder) don't have to compute it themselves:
+  //
+  // 1. Explicit `redirectUri` prop (highest priority — caller knows best).
+  // 2. `?redirect_uri=` URL param (cross-app SSO arriving from a consumer).
+  // 3. Same-origin default → `/{locale}/dashboard`. The SDK detects same
+  //    origin in the submit handler and runs `handleCallback()` BEFORE the
+  //    navigation, so the destination receives the user already authenticated
+  //    — no `/auth/callback` bounce required for first-party logins.
+  const resolvedRedirectUri =
+    redirectUri ??
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
+      : undefined)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
@@ -146,7 +165,7 @@ export function SignInForm({
           email: formData.email,
           password: formData.password,
           app: appName,
-          redirect_uri: redirectUri || undefined,
+          redirect_uri: resolvedRedirectUri || undefined,
         },
       })
 
@@ -177,9 +196,9 @@ export function SignInForm({
       //    `/login` — an infinite loop. We reuse `handleCallback`
       //    (the same primitive `<AuthCallbackPage>` calls in the SSO
       //    flow) so both paths share one code-exchange code path.
-      if (redirectUri && result.code) {
-        logger.info('Redirecting to:', redirectUri)
-        const url = new URL(redirectUri)
+      if (resolvedRedirectUri && result.code) {
+        logger.info('Redirecting to:', resolvedRedirectUri)
+        const url = new URL(resolvedRedirectUri)
         const isSameOrigin = url.origin === window.location.origin
 
         if (isSameOrigin) {
@@ -200,7 +219,7 @@ export function SignInForm({
         // `/auth/callback` can perform the exchange itself.
         const themePref = detectCurrentThemePreference()
         const target = buildPostLoginRedirect(
-          redirectUri,
+          resolvedRedirectUri,
           result.code,
           themePref,
           window.location.origin
@@ -304,6 +323,10 @@ export function SignInForm({
                   <PasswordInput
                     placeholder={t.passwordPlaceholder}
                     disabled={disabled}
+                    texts={{
+                      showPassword: t.showPassword,
+                      hidePassword: t.hidePassword,
+                    }}
                     {...field}
                   />
                 </FormControl>

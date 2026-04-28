@@ -28,6 +28,18 @@ function auditLogKey(filters: AuditLogFilters) {
   ] as const
 }
 
+/** Options for {@link useAuditLog}. */
+export interface UseAuditLogOptions {
+  /**
+   * Pre-resolved audit log response (from a server-side fetch via
+   * `getServerAuditLog()`). When provided, React Query seeds the cache so
+   * the first paint of `<AuditLogSection>` already shows the table — no
+   * client `<Spinner>` flash. The hook still revalidates in the background
+   * to keep the data fresh.
+   */
+  initialData?: AuditLogListResponse
+}
+
 /**
  * Fetch the current user's audit log entries.
  *
@@ -35,8 +47,20 @@ function auditLogKey(filters: AuditLogFilters) {
  * ```tsx
  * const { data, isLoading } = useAuditLog({ limit: 20, offset: 0 })
  * ```
+ *
+ * SSR companion: pass server-side pre-fetched data to skip the initial
+ * loading state.
+ *
+ * @example
+ * ```tsx
+ * const { data } = useAuditLog({ limit: 20 }, true, { initialData: serverEntries })
+ * ```
  */
-export function useAuditLog(filters: AuditLogFilters = {}, enabled = true) {
+export function useAuditLog(
+  filters: AuditLogFilters = {},
+  enabled = true,
+  options?: UseAuditLogOptions
+) {
   return useQuery({
     queryKey: auditLogKey(filters),
     queryFn: () => {
@@ -52,5 +76,6 @@ export function useAuditLog(filters: AuditLogFilters = {}, enabled = true) {
       })
     },
     enabled,
+    initialData: options?.initialData,
   })
 }

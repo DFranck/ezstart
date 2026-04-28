@@ -15,8 +15,7 @@ import { ImageCropper } from '@ezstart/capture-sdk'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from '../react/hooks.js'
-import { useAuthContext } from '../react/auth-provider.js'
-import { useAuthStore } from '../react/store.js'
+import { useAuthContext, useAuthStoreApi } from '../react/auth-provider.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { AccountProfileSection } from './account/AccountProfileSection.js'
 import { AccountSettingsSection } from './account/AccountSettingsSection.js'
@@ -90,7 +89,7 @@ export function AccountModal({
 }: AccountModalProps) {
   const { user, accessToken } = useAuth()
   const { client, appName, webUrl: contextWebUrl } = useAuthContext()
-  const store = useAuthStore()
+  const storeApi = useAuthStoreApi()
   // Resolve the EZAuth web URL: explicit prop > AuthProvider context value.
   // The component never imports `@ezstart/config` so it stays agnostic.
   const resolvedEzauthWebUrl = ezauthWebUrl ?? contextWebUrl
@@ -131,7 +130,7 @@ export function AccountModal({
         { avatar: croppedDataUrl },
         accessToken || undefined
       )
-      store.updateUser(updatedUser)
+      storeApi.getState().updateUser(updatedUser)
       toast.success(texts.profileUpdated)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update avatar')
@@ -232,7 +231,7 @@ export function AccountModal({
                 navigation={{ app: navigation.app, redirectUri: navigation.redirectUri }}
                 texts={texts}
                 googleOAuthUrl={googleOAuthUrl}
-                onUserUpdated={updated => store.updateUser(updated)}
+                onUserUpdated={updated => storeApi.getState().updateUser(updated)}
                 onAvatarFilePicked={handleAvatarFilePicked}
                 savingAvatar={savingAvatar}
               />

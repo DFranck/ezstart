@@ -1,77 +1,85 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import React from 'react'
-import { useAuthStore } from '../../react/store.js'
+import { SignedIn } from '../../components/SignedIn.js'
+import { SignedOut } from '../../components/SignedOut.js'
+import { createTestStore, TestAuthProvider } from '../testProvider.js'
+import type { AuthStoreApi } from '../../react/store.js'
 import { createTestUser } from '../helpers.js'
 
-// Mock the hooks that SignedIn/SignedOut use
-vi.mock('../../react/hooks.js', () => ({
-  useAuth: () => {
-    const store = useAuthStore()
-    return {
-      user: store.user,
-      isAuthenticated: store.isAuthenticated,
-      isAuthReady: true,
-    }
-  },
-}))
-
-const { SignedIn } = await import('../../components/SignedIn.js')
-const { SignedOut } = await import('../../components/SignedOut.js')
+function makeWrapper(store: AuthStoreApi) {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <TestAuthProvider store={store}>{children}</TestAuthProvider>
+  }
+}
 
 describe('SignedIn (component layer)', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore()
   })
 
   it('renders children when authenticated', () => {
     act(() => {
-      useAuthStore.getState().setAuth(createTestUser(), 'tok')
+      store.getState().setAuth(createTestUser(), 'tok')
     })
+    const Wrapper = makeWrapper(store)
     render(
-      <SignedIn>
-        <span data-testid="inner">Visible</span>
-      </SignedIn>
+      <Wrapper>
+        <SignedIn>
+          <span data-testid="inner">Visible</span>
+        </SignedIn>
+      </Wrapper>
     )
     expect(screen.getByTestId('inner')).toBeInTheDocument()
   })
 
   it('renders nothing when NOT authenticated', () => {
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <SignedIn>
-        <span>Hidden</span>
-      </SignedIn>
+      <Wrapper>
+        <SignedIn>
+          <span>Hidden</span>
+        </SignedIn>
+      </Wrapper>
     )
     expect(container.innerHTML).toBe('')
   })
 })
 
 describe('SignedOut (component layer)', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore()
   })
 
   it('renders children when NOT authenticated', () => {
+    const Wrapper = makeWrapper(store)
     render(
-      <SignedOut>
-        <span data-testid="guest">Login please</span>
-      </SignedOut>
+      <Wrapper>
+        <SignedOut>
+          <span data-testid="guest">Login please</span>
+        </SignedOut>
+      </Wrapper>
     )
     expect(screen.getByTestId('guest')).toBeInTheDocument()
   })
 
   it('renders nothing when authenticated', () => {
     act(() => {
-      useAuthStore.getState().setAuth(createTestUser(), 'tok')
+      store.getState().setAuth(createTestUser(), 'tok')
     })
+    const Wrapper = makeWrapper(store)
     const { container } = render(
-      <SignedOut>
-        <span>Hidden</span>
-      </SignedOut>
+      <Wrapper>
+        <SignedOut>
+          <span>Hidden</span>
+        </SignedOut>
+      </Wrapper>
     )
     expect(container.innerHTML).toBe('')
   })

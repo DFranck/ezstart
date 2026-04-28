@@ -1,5 +1,5 @@
 /**
- * Internal shared types and constants for the AdminApplicationsDashboard split.
+ * Internal shared types and constants for the Applications section of `<AuthAdminDashboard>`.
  *
  * @internal
  */
@@ -9,7 +9,7 @@ import type { Application } from '../../core/types.js'
 /** Display row used by the admin Applications table. */
 export type AdminApplicationRow = Application
 
-export interface AdminApplicationsTexts {
+export interface AuthApplicationsSectionTexts {
   // Header
   title?: string
   subtitle?: string
@@ -77,11 +77,15 @@ export interface AdminApplicationsTexts {
   // Pagination
   previous?: string
   next?: string
+  /** "{count} row(s)" template. */
+  rows?: string
+  /** "Page {current} of {total}" template. */
+  pageOf?: string
 }
 
 export const ADMIN_APPLICATIONS_PAGE_SIZE = 20
 
-export const DEFAULT_ADMIN_APPLICATIONS_TEXTS: Required<AdminApplicationsTexts> = {
+export const DEFAULT_APPLICATIONS_TEXTS: Required<AuthApplicationsSectionTexts> = {
   title: 'Applications',
   subtitle: 'Manage Applications across all tenants.',
   totalApplications: 'Total',
@@ -131,10 +135,12 @@ export const DEFAULT_ADMIN_APPLICATIONS_TEXTS: Required<AdminApplicationsTexts> 
   archiveSuccess: 'Application archived successfully.',
   previous: 'Previous',
   next: 'Next',
+  rows: '{count} row(s)',
+  pageOf: 'Page {current} of {total}',
 }
 
-export function formatAdminApplicationDate(dateStr: string): string {
-  return new Intl.DateTimeFormat('en-US', {
+export function formatAdminApplicationDate(dateStr: string, locale?: string): string {
+  return new Intl.DateTimeFormat(locale ?? undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(dateStr))

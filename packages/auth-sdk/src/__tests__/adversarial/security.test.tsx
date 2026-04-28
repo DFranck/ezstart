@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { act } from '@testing-library/react'
-import { useAuthStore } from '../../react/store.js'
+import { createTestStore } from '../testProvider.js'
+import type { AuthStoreApi } from '../../react/store.js'
 import { createTestUser } from '../helpers.js'
-import type { AuthUser } from '../../core/types.js'
 
 /**
  * Adversarial / hacker tests for auth-sdk.
@@ -15,37 +15,38 @@ import type { AuthUser } from '../../core/types.js'
  */
 
 describe('Token Storage Security', () => {
+  let store: AuthStoreApi
+  const STORAGE_KEY = 'ezauth-test-storage-security'
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
     localStorage.clear()
+    store = createTestStore({ storageKey: STORAGE_KEY })
   })
 
   it('clears accessToken from state on logout', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'secret-access-token', 'localStorage', 'secret-rt')
+      store.getState().setAuth(user, 'secret-access-token', 'localStorage', 'secret-rt')
     })
-    expect(useAuthStore.getState().accessToken).toBe('secret-access-token')
+    expect(store.getState().accessToken).toBe('secret-access-token')
 
     act(() => {
-      useAuthStore.getState().logout()
+      store.getState().logout()
     })
-    expect(useAuthStore.getState().accessToken).toBeNull()
-    expect(useAuthStore.getState().refreshToken).toBeNull()
-    expect(useAuthStore.getState().user).toBeNull()
-    expect(useAuthStore.getState().isAuthenticated).toBe(false)
+    expect(store.getState().accessToken).toBeNull()
+    expect(store.getState().refreshToken).toBeNull()
+    expect(store.getState().user).toBeNull()
+    expect(store.getState().isAuthenticated).toBe(false)
   })
 
   it('never stores tokens in localStorage for httpOnly mode', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'secret-at', 'httpOnly', 'secret-rt')
+      store.getState().setAuth(user, 'secret-at', 'httpOnly', 'secret-rt')
     })
 
     // Check zustand persist storage
-    const raw = localStorage.getItem('ezauth-storage')
+    const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const stored = JSON.parse(raw)
       expect(stored.state?.accessToken).toBeNull()
@@ -53,36 +54,36 @@ describe('Token Storage Security', () => {
     }
 
     // Also check in-memory state
-    expect(useAuthStore.getState().accessToken).toBeNull()
-    expect(useAuthStore.getState().refreshToken).toBeNull()
+    expect(store.getState().accessToken).toBeNull()
+    expect(store.getState().refreshToken).toBeNull()
   })
 
   it('setTokens is a no-op in httpOnly mode (tokens stay null)', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, undefined, 'httpOnly')
+      store.getState().setAuth(user, undefined, 'httpOnly')
     })
 
     // Attempt to inject tokens
     act(() => {
-      useAuthStore.getState().setTokens('injected-at', 'injected-rt')
+      store.getState().setTokens('injected-at', 'injected-rt')
     })
 
-    expect(useAuthStore.getState().accessToken).toBeNull()
-    expect(useAuthStore.getState().refreshToken).toBeNull()
+    expect(store.getState().accessToken).toBeNull()
+    expect(store.getState().refreshToken).toBeNull()
   })
 
   it('localStorage is clean after logout (no stale tokens)', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at-123', 'localStorage', 'rt-456')
+      store.getState().setAuth(user, 'at-123', 'localStorage', 'rt-456')
     })
 
     act(() => {
-      useAuthStore.getState().logout()
+      store.getState().logout()
     })
 
-    const raw = localStorage.getItem('ezauth-storage')
+    const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const stored = JSON.parse(raw)
       expect(stored.state?.accessToken).toBeNull()
@@ -94,10 +95,11 @@ describe('Token Storage Security', () => {
 })
 
 describe('XSS in User Fields', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore()
   })
 
   it('stores XSS payload in user fields without executing (store is data, not HTML)', () => {
@@ -117,17 +119,17 @@ describe('XSS in User Fields', () => {
       })
 
       act(() => {
-        useAuthStore.getState().setAuth(user, 'tok')
+        store.getState().setAuth(user, 'tok')
       })
 
       // The store should store these as plain strings, never executing them
-      const stored = useAuthStore.getState().user!
+      const stored = store.getState().user!
       expect(stored.username).toBe(payload)
       expect(stored.firstName).toBe(payload)
       expect(stored.lastName).toBe(payload)
 
       act(() => {
-        useAuthStore.getState().logout()
+        store.getState().logout()
       })
     }
   })
@@ -137,20 +139,18 @@ describe('XSS in User Fields', () => {
       avatar: 'javascript:alert("xss")',
     })
     act(() => {
-      useAuthStore.getState().setAuth(user, 'tok')
+      store.getState().setAuth(user, 'tok')
     })
-    // The store stores the raw string — it's up to React's JSX escaping
-    // to prevent execution. This test verifies the store doesn't sanitize
-    // (it shouldn't — that's the render layer's job).
-    expect(useAuthStore.getState().user?.avatar).toBe('javascript:alert("xss")')
+    expect(store.getState().user?.avatar).toBe('javascript:alert("xss")')
   })
 })
 
 describe('State Transition Edge Cases', () => {
+  let store: AuthStoreApi
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore()
   })
 
   it('double login: second setAuth overwrites first', () => {
@@ -158,88 +158,85 @@ describe('State Transition Edge Cases', () => {
     const user2 = createTestUser({ _id: 'user-2', email: 'b@b.com' })
 
     act(() => {
-      useAuthStore.getState().setAuth(user1, 'at1', 'localStorage', 'rt1')
+      store.getState().setAuth(user1, 'at1', 'localStorage', 'rt1')
     })
     act(() => {
-      useAuthStore.getState().setAuth(user2, 'at2', 'localStorage', 'rt2')
+      store.getState().setAuth(user2, 'at2', 'localStorage', 'rt2')
     })
 
-    expect(useAuthStore.getState().user?._id).toBe('user-2')
-    expect(useAuthStore.getState().accessToken).toBe('at2')
+    expect(store.getState().user?._id).toBe('user-2')
+    expect(store.getState().accessToken).toBe('at2')
   })
 
   it('logout during pending setLoggingIn', () => {
     act(() => {
-      useAuthStore.getState().setLoggingIn(true)
+      store.getState().setLoggingIn(true)
     })
-    expect(useAuthStore.getState().isLoggingIn).toBe(true)
+    expect(store.getState().isLoggingIn).toBe(true)
 
     act(() => {
-      useAuthStore.getState().logout()
+      store.getState().logout()
     })
-    // After logout, isLoggingIn should still be whatever it was
-    // (logout doesn't explicitly reset isLoggingIn, but setAuth does)
-    // This tests the state consistency
-    expect(useAuthStore.getState().isAuthenticated).toBe(false)
+    expect(store.getState().isAuthenticated).toBe(false)
   })
 
   it('setAuth resets isLoggingIn to false', () => {
     act(() => {
-      useAuthStore.getState().setLoggingIn(true)
+      store.getState().setLoggingIn(true)
     })
-    expect(useAuthStore.getState().isLoggingIn).toBe(true)
+    expect(store.getState().isLoggingIn).toBe(true)
 
     act(() => {
-      useAuthStore.getState().setAuth(createTestUser(), 'tok')
+      store.getState().setAuth(createTestUser(), 'tok')
     })
-    expect(useAuthStore.getState().isLoggingIn).toBe(false)
+    expect(store.getState().isLoggingIn).toBe(false)
   })
 
   it('logout resets isLoggingOut to false', () => {
     act(() => {
-      useAuthStore.getState().setAuth(createTestUser(), 'tok')
-      useAuthStore.getState().setLoggingOut(true)
+      store.getState().setAuth(createTestUser(), 'tok')
+      store.getState().setLoggingOut(true)
     })
-    expect(useAuthStore.getState().isLoggingOut).toBe(true)
+    expect(store.getState().isLoggingOut).toBe(true)
 
     act(() => {
-      useAuthStore.getState().logout()
+      store.getState().logout()
     })
-    expect(useAuthStore.getState().isLoggingOut).toBe(false)
+    expect(store.getState().isLoggingOut).toBe(false)
   })
 
   it('updateUser does not change auth state when called without prior login', () => {
-    // updateUser on an empty store should not make isAuthenticated true
     act(() => {
-      useAuthStore.getState().updateUser(createTestUser())
+      store.getState().updateUser(createTestUser())
     })
-    // User is set but isAuthenticated remains false
-    expect(useAuthStore.getState().user).toBeTruthy()
-    expect(useAuthStore.getState().isAuthenticated).toBe(false)
+    expect(store.getState().user).toBeTruthy()
+    expect(store.getState().isAuthenticated).toBe(false)
   })
 })
 
 describe('Mode Switching Security', () => {
+  let store: AuthStoreApi
+  const STORAGE_KEY = 'ezauth-test-storage-mode'
+
   beforeEach(() => {
-    act(() => {
-      useAuthStore.getState().logout()
-    })
+    localStorage.clear()
+    store = createTestStore({ storageKey: STORAGE_KEY })
   })
 
   it('switching from localStorage to httpOnly clears tokens from state', () => {
     const user = createTestUser()
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at-secret', 'localStorage', 'rt-secret')
+      store.getState().setAuth(user, 'at-secret', 'localStorage', 'rt-secret')
     })
-    expect(useAuthStore.getState().accessToken).toBe('at-secret')
+    expect(store.getState().accessToken).toBe('at-secret')
 
     // Switch to httpOnly
     act(() => {
-      useAuthStore.getState().setAuth(user, 'at-secret', 'httpOnly', 'rt-secret')
+      store.getState().setAuth(user, 'at-secret', 'httpOnly', 'rt-secret')
     })
-    expect(useAuthStore.getState().accessToken).toBeNull()
-    expect(useAuthStore.getState().refreshToken).toBeNull()
-    expect(useAuthStore.getState().isAuthenticated).toBe(true)
+    expect(store.getState().accessToken).toBeNull()
+    expect(store.getState().refreshToken).toBeNull()
+    expect(store.getState().isAuthenticated).toBe(true)
   })
 
   it('partialize only persists tokens in localStorage mode', () => {
@@ -247,9 +244,9 @@ describe('Mode Switching Security', () => {
 
     // Set in localStorage mode
     act(() => {
-      useAuthStore.getState().setAuth(user, 'visible-at', 'localStorage', 'visible-rt')
+      store.getState().setAuth(user, 'visible-at', 'localStorage', 'visible-rt')
     })
-    let raw = localStorage.getItem('ezauth-storage')
+    let raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const stored = JSON.parse(raw)
       expect(stored.state?.accessToken).toBe('visible-at')
@@ -258,9 +255,9 @@ describe('Mode Switching Security', () => {
 
     // Switch to httpOnly
     act(() => {
-      useAuthStore.getState().setAuth(user, 'should-not-persist', 'httpOnly', 'should-not-persist')
+      store.getState().setAuth(user, 'should-not-persist', 'httpOnly', 'should-not-persist')
     })
-    raw = localStorage.getItem('ezauth-storage')
+    raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const stored = JSON.parse(raw)
       expect(stored.state?.accessToken).toBeNull()

@@ -14,6 +14,7 @@ import {
   P,
   Skeleton,
   Span,
+  Spinner,
   DashboardLayout,
   DashboardSidebar,
   DashboardMain,
@@ -30,10 +31,10 @@ import type { EZAuthDashboardTexts } from './types.js'
  *
  * @internal
  */
-export function formatDashboardDate(dateStr: string | undefined | null): string {
+export function formatDashboardDate(dateStr: string | undefined | null, locale?: string): string {
   if (!dateStr) return '-'
   try {
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    return new Date(dateStr).toLocaleDateString(locale ?? undefined, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -72,6 +73,7 @@ interface OverviewSectionProps {
     createdAt: string
   }
   texts: EZAuthDashboardTexts
+  locale?: string
 }
 
 /**
@@ -80,7 +82,7 @@ interface OverviewSectionProps {
  *
  * @internal
  */
-export function OverviewSection({ user, texts }: OverviewSectionProps) {
+export function OverviewSection({ user, texts, locale }: OverviewSectionProps) {
   const apps = user.apps ?? []
   const globalRoles = user.globalRoles ?? []
   const appRoleEntries = Object.entries(user.appRoles ?? {})
@@ -94,7 +96,7 @@ export function OverviewSection({ user, texts }: OverviewSectionProps) {
             {texts.welcomeBack}, {getDashboardDisplayName(user)}
           </H2>
           <P className="text-sm text-muted-foreground">
-            {texts.memberSince} {formatDashboardDate(user.createdAt)}
+            {texts.memberSince} {formatDashboardDate(user.createdAt, locale)}
           </P>
         </Div>
         <Badge variant="outline" size="sm">
@@ -167,12 +169,12 @@ export function OverviewSection({ user, texts }: OverviewSectionProps) {
           <H3 className="text-sm font-medium text-foreground">{texts.navOverview}</H3>
         </CardHeader>
         <CardContent className="space-y-3">
-          <InfoRow icon="lucide:Mail" label="Email" value={user.email} />
-          <InfoRow icon="lucide:AtSign" label="Username" value={user.username} />
+          <InfoRow icon="lucide:Mail" label={texts.labelEmail} value={user.email} />
+          <InfoRow icon="lucide:AtSign" label={texts.labelUsername} value={user.username} />
           <InfoRow
             icon="lucide:Calendar"
             label={texts.memberSince}
-            value={formatDashboardDate(user.createdAt)}
+            value={formatDashboardDate(user.createdAt, locale)}
           />
         </CardContent>
       </Card>
@@ -295,35 +297,28 @@ function InfoRow({ icon, label, value }: { icon: string; label: string; value: s
  *
  * @internal
  */
-export function DashboardSkeleton() {
+/**
+ * Loading placeholder rendered when the dashboard cannot resolve a user
+ * (typically a transient state when navigating from a public page to
+ * `/dashboard` before the SSR auth bootstrap completes, or while the
+ * `RequireAuth` guard is redirecting an unauthenticated visitor to `/login`).
+ *
+ * Renders a centered full-viewport spinner with an accessible label so the
+ * user knows the page is loading rather than broken. Replaces the previous
+ * skeleton-grid placeholder which was mounted unconditionally on every page
+ * load via a now-removed `mounted` guard.
+ *
+ * @internal
+ */
+export function DashboardSkeleton({ text = 'Loading dashboard…' }: { text?: string } = {}) {
   return (
-    <DashboardLayout>
-      <DashboardSidebar>
-        <SidebarHeader>
-          <Skeleton className="h-5 w-5" />
-          <Skeleton className="h-5 w-24" />
-        </SidebarHeader>
-        <Div className="px-2 py-4 space-y-2">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-        </Div>
-      </DashboardSidebar>
-      <DashboardMain>
-        <DashboardHeader>
-          <Skeleton className="h-6 w-32" />
-        </DashboardHeader>
-        <DashboardContent>
-          <Div className="space-y-4">
-            <Skeleton className="h-8 w-64" />
-            <Div className="grid gap-4 sm:grid-cols-2">
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </Div>
-          </Div>
-        </DashboardContent>
-      </DashboardMain>
-    </DashboardLayout>
+    <Div
+      className="fixed inset-0 z-40 flex items-center justify-center bg-background"
+      aria-busy="true"
+      role="status"
+      aria-label={text}
+    >
+      <Spinner variant="primary" size="lg" text={text} />
+    </Div>
   )
 }

@@ -16,9 +16,8 @@ import {
 } from '@ezstart/ui/components'
 import { toast } from 'sonner'
 import { logger } from './internal-logger.js'
-import { useAuthContext } from '../react/auth-provider.js'
+import { useAuthContext, useAuthStoreApi } from '../react/auth-provider.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
-import { useAuthStore } from '../react/store.js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { usePromoCode } from './usePromoCode.js'
@@ -103,7 +102,7 @@ export function QuickSignUpForm({
   promoApiUrl,
 }: QuickSignUpFormProps) {
   const { client } = useAuthContext()
-  const store = useAuthStore()
+  const storeApi = useAuthStoreApi()
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
   const t: QuickSignUpFormTexts = {
@@ -157,7 +156,9 @@ export function QuickSignUpForm({
       // green-pulse/earthday) can read the applied promo immediately.
       // The user still needs to click the emailed set-password link to
       // flip isVerified=true and set a real password.
-      store.setAuth(result.user, result.accessToken, 'localStorage', result.refreshToken)
+      storeApi
+        .getState()
+        .setAuth(result.user, result.accessToken, 'localStorage', result.refreshToken)
       logger.info('Quick signup successful')
       toast.success(t.successToast)
       onSuccess?.()
