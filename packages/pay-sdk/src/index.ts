@@ -79,7 +79,15 @@ export { formatCurrency, getCurrencySymbol } from './core/format-currency.js'
 // ============================================================
 // React layer (provider, hooks, store)
 // ============================================================
-export { PayProvider, usePay, usePayContext, useApplicationContext } from './react/pay-provider.js'
+export {
+  PayProvider,
+  usePay,
+  usePayContext,
+  useApplicationContext,
+  usePayLocale,
+  usePayLogger,
+} from './react/pay-provider.js'
+export type { Logger } from './react/pay-provider.js'
 export { usePayStore, usePayStoreSSR } from './react/store.js'
 export type { PayState } from './react/store.js'
 

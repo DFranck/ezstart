@@ -1,5 +1,13 @@
 // Provider and context
-export { PayProvider, usePay, usePayContext, useApplicationContext } from './pay-provider.js'
+export {
+  PayProvider,
+  usePay,
+  usePayContext,
+  useApplicationContext,
+  usePayLocale,
+  usePayLogger,
+} from './pay-provider.js'
+export type { Logger } from './pay-provider.js'
 
 // Store
 export { usePayStore, usePayStoreSSR } from './store.js'

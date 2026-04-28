@@ -16,7 +16,7 @@ import { Button, Div, Icon, P, Skeleton } from '@ezstart/ui/components'
 import { useMemo, useState } from 'react'
 import { usePlans } from '../react/hooks/usePlans.js'
 import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
-import { useApplicationContext } from '../react/pay-provider.js'
+import { useApplicationContext, usePayLogger } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 import type { Plan } from '../core/types.js'
 import {
@@ -95,11 +95,11 @@ export function PricingPage({
   className,
 }: PricingPageProps) {
   const t = { ...DEFAULT_PRICING_TEXTS, ...textsProp }
+  const log = usePayLogger()
 
   // Emit deprecation warning once when appName is used without applicationId.
   if (appName && !applicationId && typeof window !== 'undefined') {
-    // eslint-disable-next-line no-console -- one-shot deprecation signal for SDK consumers
-    console.warn(
+    log.warn(
       '[pay-sdk] PricingPage `appName` prop is deprecated, use `applicationId` instead. ' +
         'Falling back to legacy appName resolution.'
     )

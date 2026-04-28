@@ -18,7 +18,7 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { toast } from 'sonner'
-import { usePay, useApplicationContext } from '../react/pay-provider.js'
+import { usePay, useApplicationContext, usePayLogger } from '../react/pay-provider.js'
 import { formatCurrency, getCurrencySymbol } from '../core/format-currency.js'
 import { PayNotConfiguredCard, type PayNotConfiguredTexts } from './common/PayNotConfiguredCard.js'
 
@@ -103,7 +103,7 @@ const DEFAULT_TEXTS: DonationCardTexts = {
 }
 
 export function DonationCard({
-  appName: _appName,
+  appName,
   applicationId,
   projectId,
   projectName,
@@ -124,6 +124,15 @@ export function DonationCard({
 }: DonationCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
   const { createDonation, isLoading } = usePay()
+  const log = usePayLogger()
+
+  // Surface deprecation warning when consumer passes the legacy `appName` prop.
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    log.warn(
+      '[pay-sdk] DonationCard `appName` prop is deprecated, use `applicationId` instead. ' +
+        '`appName` was never wired into the donation request — `projectId` carries the routing.'
+    )
+  }
   const { applicationResolutionStatus, payWebUrl, locale: contextLocale } = useApplicationContext()
   const resolvedLocale = locale ?? contextLocale
   const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined

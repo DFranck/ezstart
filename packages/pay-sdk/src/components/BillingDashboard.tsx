@@ -16,7 +16,7 @@ import {
 } from '@ezstart/ui/components'
 import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
 import { usePaymentHistory } from '../react/hooks/usePaymentHistory.js'
-import { useApplicationContext } from '../react/pay-provider.js'
+import { useApplicationContext, usePayLogger } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 import { PaymentHistory } from './PaymentHistory.js'
 import { ManageSubscriptionButton } from './ManageSubscriptionButton.js'
@@ -100,6 +100,8 @@ export interface BillingDashboardProps {
   recentPaymentsCount?: number
   /** Customizable texts with English defaults */
   texts?: Partial<BillingDashboardTexts>
+  /** Optional overrides forwarded to the embedded `<PaymentHistory>` table. */
+  paymentHistoryTexts?: import('./PaymentHistory.js').PaymentHistoryTexts
   /**
    * Overrides for the graceful fallback card rendered when the PayProvider
    * resolution failed. Keys are optional — English defaults are used when
@@ -124,15 +126,16 @@ export function BillingDashboard({
   manageReturnUrl,
   recentPaymentsCount = 5,
   texts: textsProp,
+  paymentHistoryTexts,
   notConfiguredTexts,
   locale,
   className,
 }: BillingDashboardProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
+  const log = usePayLogger()
 
   if (appName && !applicationId && typeof window !== 'undefined') {
-    // eslint-disable-next-line no-console -- deprecation warning for SDK consumers
-    console.warn(
+    log.warn(
       '[pay-sdk] BillingDashboard `appName` prop is deprecated, use `applicationId` instead.'
     )
   }
@@ -333,7 +336,10 @@ export function BillingDashboard({
               <P className="text-muted-foreground text-sm">{t.noPaymentsYet}</P>
             </Div>
           ) : (
-            <PaymentHistory payments={payments.slice(0, recentPaymentsCount)} />
+            <PaymentHistory
+              payments={payments.slice(0, recentPaymentsCount)}
+              texts={paymentHistoryTexts}
+            />
           )}
         </CardContent>
       </Card>

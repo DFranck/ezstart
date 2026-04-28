@@ -25,6 +25,13 @@ export interface PaymentHistoryTexts {
   typeHeader?: string
   productHeader?: string
   appHeader?: string
+  /** BCP-47 locale for `Intl.DateTimeFormat` of the date column. */
+  dateLocale?: string
+  /** Pagination — DataTable */
+  paginationPrevious?: string
+  paginationNext?: string
+  paginationRows?: string
+  paginationPageOf?: string
 }
 
 export interface PaymentHistoryProps {
@@ -97,7 +104,8 @@ function buildColumns(
     statusHeader: string
     appHeader: string
   },
-  showAppColumn: boolean
+  showAppColumn: boolean,
+  dateLocale?: string
 ): ColumnDef<Payment, unknown>[] {
   const columns: ColumnDef<Payment, unknown>[] = [
     {
@@ -105,7 +113,7 @@ function buildColumns(
       header: ({ header }) => <DataTableColumnHeader header={header} title={headers.dateHeader} />,
       cell: ({ row }) => (
         <Span>
-          {new Date(row.original.createdAt).toLocaleDateString(undefined, {
+          {new Date(row.original.createdAt).toLocaleDateString(dateLocale, {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -227,7 +235,8 @@ export function PaymentHistory({
       statusHeader: t.statusHeader,
       appHeader: t.appHeader,
     },
-    showAppColumn
+    showAppColumn,
+    texts?.dateLocale
   )
 
   return (
@@ -237,6 +246,12 @@ export function PaymentHistory({
         data={payments}
         pageSize={10}
         initialSorting={[{ id: 'createdAt', desc: true }]}
+        texts={{
+          previous: texts?.paginationPrevious,
+          next: texts?.paginationNext,
+          rows: texts?.paginationRows,
+          pageOf: texts?.paginationPageOf,
+        }}
       />
     </Div>
   )

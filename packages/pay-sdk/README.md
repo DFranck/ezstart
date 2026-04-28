@@ -296,7 +296,8 @@ card on transient infra issues too.
 - `DonateButton`, `DonateModal`, `DonationCard`, `DonationWall`
 - `PurchaseButton`, `PurchaseCard`
 - `SubscribeButton`, `SubscriptionCard`, `SubscriptionPlanCard`
-- `PayAdminDashboard`, `UserPaymentDashboard`
+- `PayAdminDashboard` -- canonical 5-tab admin console (Overview / Payments / Subscriptions / Plans / Promos), auto-scoped server-side via JWT
+- `UserPaymentDashboard`
 - `FeatureGate`, `PromoCodeInput`, `RefundButton`, `ConfirmActionDialog`
 - `PaymentSuccessPage`, `PaymentHistory`, `ProductCard`, `ProductGrid`
 - `SubscribeSuccessPage`, `SubscribeCancelPage`, `DonateSuccessPage`, `DonateCancelPage`, `PurchaseSuccessPage`, `PurchaseCancelPage` — drop-in Stripe Checkout callback landings
@@ -414,6 +415,70 @@ app.post('/webhooks/stripe', (req, res) => {
   }
 })
 ```
+
+### PayAdminDashboard
+
+Canonical pay-sdk admin console. Drop-in component that ships the entire ezpay admin surface as 5 internal tabs:
+
+1. **Overview** -- platform analytics (revenue by currency, total payments, active subscriptions, MRR proxy, 30-day revenue trend, top apps by revenue) hitting `GET /admin/analytics/overview`
+2. **Payments** -- completed/failed/refunded/pending payments with refund actions
+3. **Subscriptions** -- active subscriptions + MRR + cancel actions
+4. **Plans** -- subscription plan CRUD
+5. **Promos** -- promo code CRUD
+
+Auto-scoped server-side via JWT -- superadmin sees every tenant, app-owner sees their owned apps, regular user sees only their own records. The component accepts NO scoping props.
+
+```tsx
+'use client'
+import { PayAdminDashboard, PayProvider } from '@ezstart/pay-sdk'
+
+export default function AdminPage() {
+  return (
+    <PayProvider publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}>
+      <PayAdminDashboard />
+    </PayProvider>
+  )
+}
+```
+
+With i18n (next-intl) -- `texts` deep-merges into all 5 sections:
+
+```tsx
+const t = useTranslations('admin.pay')
+<PayAdminDashboard
+  texts={{
+    tabOverview: t('tabs.overview'),
+    tabPayments: t('tabs.payments'),
+    tabSubscriptions: t('tabs.subscriptions'),
+    tabPlans: t('tabs.plans'),
+    tabPromos: t('tabs.promos'),
+    overview: { title: t('overview.title'), totalRevenue: t('overview.totalRevenue') },
+    payments: { totalRevenue: t('payments.totalRevenue'), refund: t('payments.refund') },
+    plans: { createPlan: t('plans.create') },
+  }}
+/>
+```
+
+Test mode (sandbox dashboards) -- enables a top banner + bulk destructive actions (refund-all, cancel-all, delete-all):
+
+```tsx
+<PayAdminDashboard testMode />
+```
+
+#### Breaking changes vs the previous API
+
+The dashboard is now **auto-scoped server-side** via JWT. The following props were removed:
+
+| Removed prop    | Why                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| `scope`         | Server derives from caller role: `superadmin` -> all, app-owner -> myApps, user -> mine.   |
+| `appName`       | Use the `<PayProvider publishableKey>` -- the SDK resolves the matching app automatically. |
+| `applicationId` | Same as above; provider context drives the scope.                                          |
+| `showAppFilter` | Per-app filtering is now done by issuing different publishable keys to different mounts.   |
+
+The `texts` prop changed shape from a flat dictionary to a nested object grouped by section (`overview`, `payments`, `subscriptions`, `plans`, `promos`) to keep i18n keys organized as the dashboard grows.
+
+The Overview tab requires `GET /admin/analytics/overview` on the ezpay API. When the endpoint returns 404, the tab renders a "coming soon" placeholder so the dashboard stays usable in environments where the analytics endpoint hasn't been deployed yet.
 
 ## Migration
 

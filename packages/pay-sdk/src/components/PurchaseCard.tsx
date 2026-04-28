@@ -15,7 +15,7 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
-import { usePay, useApplicationContext } from '../react/pay-provider.js'
+import { usePay, useApplicationContext, usePayLogger } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
 
 export interface PurchaseCardProps {
@@ -83,7 +83,14 @@ export function PurchaseCard({
 }: PurchaseCardProps) {
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
   const { createPurchase, isLoading } = usePay()
+  const log = usePayLogger()
   const { applicationId: ctxApplicationId, appSlug: ctxAppSlug } = useApplicationContext()
+
+  // Surface deprecation warning when consumer passes the legacy `appName` prop.
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    log.warn('[pay-sdk] PurchaseCard `appName` prop is deprecated, use `applicationId` instead.')
+  }
+
   const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
   const effectiveProjectId = appName ?? ctxAppSlug ?? ''
   const isFeatured = variant === 'featured'

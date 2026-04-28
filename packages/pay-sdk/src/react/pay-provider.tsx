@@ -9,9 +9,43 @@ import React, {
   useState,
   type ReactNode,
 } from 'react'
+import type { Logger } from '@ezstart/logger'
 import { createPayClient, type PayClient } from '../core/pay-client.js'
 import type { PayClientConfig } from '../core/types.js'
 import { usePayStore, type ApplicationResolutionStatus } from './store.js'
+
+/**
+ * Default logger that mirrors the previous hard-coded `console.error`
+ * behaviour. Consumers can opt out by passing `logger={silentLogger}` (or
+ * any custom {@link Logger} implementation) to `<PayProvider>`.
+ *
+ * pay-sdk is publishable npm-standalone — components MUST stay agnostic
+ * of `@ezstart/logger` at runtime. The default logger therefore wraps
+ * `console.*` directly. Consumers wanting Pino integration pass it via
+ * the `logger` prop.
+ *
+ * @internal
+ */
+/* eslint-disable @ezstart/ezstart/no-console-log -- this IS the console fallback for the default Pay logger; consumers opt-in to a real sink via the `logger` prop */
+const consoleLogger: Logger = {
+  debug: (msgOrObj: string | object, dataOrMsg?: unknown) =>
+    typeof msgOrObj === 'string'
+      ? console.debug(msgOrObj, dataOrMsg ?? '')
+      : console.debug(String(dataOrMsg ?? ''), msgOrObj),
+  info: (msgOrObj: string | object, dataOrMsg?: unknown) =>
+    typeof msgOrObj === 'string'
+      ? console.info(msgOrObj, dataOrMsg ?? '')
+      : console.info(String(dataOrMsg ?? ''), msgOrObj),
+  warn: (msgOrObj: string | object, dataOrMsg?: unknown) =>
+    typeof msgOrObj === 'string'
+      ? console.warn(msgOrObj, dataOrMsg ?? '')
+      : console.warn(String(dataOrMsg ?? ''), msgOrObj),
+  error: (msgOrObj: string | object, dataOrMsg?: unknown) =>
+    typeof msgOrObj === 'string'
+      ? console.error(msgOrObj, dataOrMsg ?? '')
+      : console.error(String(dataOrMsg ?? ''), msgOrObj),
+}
+/* eslint-enable @ezstart/ezstart/no-console-log */
 
 interface PayContextValue {
   client: PayClient
@@ -56,6 +90,13 @@ interface PayContextValue {
    * provide one.
    */
   locale: string
+  /**
+   * Diagnostic logger injected via `<PayProvider logger={...}>` (defaults to
+   * a thin `console.*` adapter). Exposed so SDK components can surface
+   * deprecation / misconfiguration signals through the consumer-controlled
+   * sink instead of writing directly to `console`.
+   */
+  logger: Logger
 }
 
 const PayContext = createContext<PayContextValue | null>(null)
@@ -115,6 +156,22 @@ interface PayProviderProps {
    * prop, but the common case is to set it once here.
    */
   locale?: string
+  /**
+   * Optional {@link Logger} instance used to surface SDK diagnostics
+   * (deprecation warnings, publishable-key resolve failures, ...). Defaults
+   * to a thin `console.*` adapter so existing consumers keep seeing the
+   * same messages.
+   *
+   * Pass a silent or scoped logger (`@ezstart/logger`, Pino child, custom
+   * sink, etc.) to redirect or suppress these signals.
+   *
+   * @example
+   * ```tsx
+   * import { logger } from '@ezstart/logger'
+   * <PayProvider logger={logger} ... />
+   * ```
+   */
+  logger?: Logger
 }
 
 /**
@@ -145,7 +202,12 @@ export function PayProvider({
   onAuthFailure,
   payWebUrl,
   locale,
+  logger: loggerProp,
 }: PayProviderProps) {
+  // Resolve the diagnostic logger once — refs keep callbacks stable below.
+  const log = loggerProp ?? consoleLogger
+  const logRef = useRef(log)
+  logRef.current = log
   // Use refs so the client always calls the latest callbacks without re-creating the client
   const getTokenRef = useRef(getToken ?? config?.getToken)
   getTokenRef.current = getToken ?? config?.getToken
@@ -209,8 +271,7 @@ export function PayProvider({
       typeof window !== 'undefined' &&
       process.env.NODE_ENV !== 'production'
     ) {
-      // eslint-disable-next-line no-console -- dev-only deprecation error for SDK consumers
-      console.error(
+      logRef.current.error(
         '[pay-sdk] PayProvider was mounted with only `appName` (legacy). ' +
           'BillingDashboard and other scoped queries require `publishableKey` or ' +
           '`applicationId` to prevent cross-app data leaks. The legacy `appName` ' +
@@ -289,8 +350,7 @@ export function PayProvider({
         // VULN-1: NO fail-open. Keep applicationId=null AND isReady=false so
         // downstream hooks (usePaymentHistory, etc.) can detect the failure
         // and refuse to run a cross-app query.
-        // eslint-disable-next-line no-console -- visible misconfig / transient error signal
-        console.error(
+        logRef.current.error(
           `[pay-sdk] Failed to resolve application from publishableKey: ${message}. ` +
             `Scoped queries will be blocked (applicationResolutionStatus='failed'). ` +
             `Retry by refreshing the page or re-mounting the PayProvider.`
@@ -330,8 +390,18 @@ export function PayProvider({
       applicationResolutionStatus: resolutionStatus,
       payWebUrl: resolvedPayWebUrl,
       locale: resolvedLocale,
+      logger: log,
     }),
-    [client, applicationId, appSlug, isReady, resolutionStatus, resolvedPayWebUrl, resolvedLocale]
+    [
+      client,
+      applicationId,
+      appSlug,
+      isReady,
+      resolutionStatus,
+      resolvedPayWebUrl,
+      resolvedLocale,
+      log,
+    ]
   )
 
   return <PayContext.Provider value={contextValue}>{children}</PayContext.Provider>
@@ -370,6 +440,36 @@ export function usePayLocale(): string {
   return context?.locale ?? 'en'
 }
 
+/**
+ * Silent fallback logger used when {@link usePayLogger} is called outside
+ * a `<PayProvider>` (typical in isolated unit tests). Keeps components
+ * usable without a provider while staying entirely silent — production
+ * components MUST always render under a provider, so missing one is a
+ * test-only concern, not a runtime concern.
+ *
+ * @internal
+ */
+const silentPayLogger: Logger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+}
+
+/**
+ * Returns the {@link Logger} provided to `<PayProvider logger={...}>`. When
+ * called outside any provider (e.g. in isolated unit tests), returns a
+ * silent no-op logger so components never throw on missing context.
+ *
+ * SDK components use this to surface deprecation / misconfiguration
+ * messages through the consumer-controlled sink instead of writing to
+ * `console.*` directly.
+ */
+export function usePayLogger(): Logger {
+  const context = useContext(PayContext)
+  return context?.logger ?? silentPayLogger
+}
+
 export function useApplicationContext(): {
   applicationId: string | null
   appSlug: string | null
@@ -393,6 +493,13 @@ export function useApplicationContext(): {
     usePayContext()
   return { applicationId, appSlug, isReady, applicationResolutionStatus, payWebUrl, locale }
 }
+
+/**
+ * Re-export of the canonical {@link Logger} interface from
+ * `@ezstart/logger`. SDK consumers can import this from `@ezstart/pay-sdk`
+ * directly — no extra peer dependency needed.
+ */
+export type { Logger } from '@ezstart/logger'
 
 export function usePay() {
   const { client } = usePayContext()

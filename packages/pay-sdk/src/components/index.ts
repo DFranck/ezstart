@@ -55,6 +55,17 @@ export type {
 } from './UserPaymentDashboard.js'
 export { PayAdminDashboard } from './PayAdminDashboard.js'
 export type { PayAdminDashboardProps, PayAdminDashboardTexts } from './PayAdminDashboard.js'
+export type {
+  PayAnalyticsOverview,
+  PayOverviewSectionTexts,
+  PayPaymentsSectionTexts,
+  PaySubscriptionsSectionTexts,
+  PayPlansSectionTexts,
+  PayPromosSectionTexts,
+  PayRevenueByCurrency,
+  PayRevenueTrendPoint,
+  PayTopApp,
+} from './admin/_internal/types.js'
 
 // Payment Success
 export { PaymentSuccessPage } from './PaymentSuccessPage.js'

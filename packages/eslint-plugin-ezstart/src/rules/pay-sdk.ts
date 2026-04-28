@@ -77,6 +77,17 @@ export const paySdk = createRule({
 
     return {
       ImportDeclaration(node) {
+        // Type-only imports (`import type { Foo }` or `import { type Foo }`)
+        // are erased at compile time and add no runtime coupling. Allow them
+        // so the SDK can re-use canonical types (e.g. `Logger` from
+        // `@ezstart/logger`) without bundling the package.
+        if (node.importKind === 'type') return
+        const allSpecifiersTypeOnly =
+          node.specifiers.length > 0 &&
+          node.specifiers.every(
+            spec => spec.type === 'ImportSpecifier' && spec.importKind === 'type'
+          )
+        if (allSpecifiersTypeOnly) return
         check(node.source.value, node.source)
       },
       ImportExpression(node) {

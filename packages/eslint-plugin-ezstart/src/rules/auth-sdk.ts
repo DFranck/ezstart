@@ -68,6 +68,19 @@ export const authSdk = createRule({
         const source = node.source.value
         if (typeof source !== 'string') return
         if (!FORBIDDEN_PACKAGES.has(source)) return
+        // Type-only imports (`import type { Foo } from ...`) are erased at
+        // compile time and do NOT add a runtime dependency. Allow them so
+        // SDKs can re-use canonical type definitions (e.g. `Logger` from
+        // `@ezstart/logger`) without coupling the bundle.
+        if (node.importKind === 'type') return
+        // Allow `import { type Foo } from ...` when EVERY specifier is
+        // type-only. The TS compiler erases the import in that case.
+        const allSpecifiersTypeOnly =
+          node.specifiers.length > 0 &&
+          node.specifiers.every(
+            spec => spec.type === 'ImportSpecifier' && spec.importKind === 'type'
+          )
+        if (allSpecifiersTypeOnly) return
         context.report({
           node: node.source,
           messageId: 'forbidden',

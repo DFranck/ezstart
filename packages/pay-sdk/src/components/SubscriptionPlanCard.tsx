@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePayContext, useApplicationContext } from '../react/pay-provider.js'
+import { usePayContext, useApplicationContext, usePayLogger } from '../react/pay-provider.js'
 import type { Plan } from '../core/types.js'
 import {
   Badge,
@@ -74,10 +74,18 @@ export function SubscriptionPlanCard({
   texts: textsProp,
 }: SubscriptionPlanCardProps) {
   const { client } = usePayContext()
+  const log = usePayLogger()
   const { applicationId: ctxApplicationId, appSlug: ctxAppSlug } = useApplicationContext()
   const [plan, setPlan] = useState<Plan | null>(null)
   const [loading, setLoading] = useState(true)
   const texts = { ...DEFAULT_TEXTS, ...textsProp }
+
+  // Surface deprecation warning when consumer passes the legacy `appName` prop.
+  if (appName && !applicationId && typeof window !== 'undefined') {
+    log.warn(
+      '[pay-sdk] SubscriptionPlanCard `appName` prop is deprecated, use `applicationId` instead.'
+    )
+  }
 
   const effectiveApplicationId = applicationId ?? ctxApplicationId ?? undefined
   const effectiveAppName =

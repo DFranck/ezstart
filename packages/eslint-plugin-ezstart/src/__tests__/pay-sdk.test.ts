@@ -39,6 +39,17 @@ ruleTester.run('pay-sdk', paySdk, {
       filename: CORE_FILE,
       code: "import { logger } from '@ezstart/logger'",
     },
+    // Type-only logger import is allowed in components (erased at build,
+    // zero runtime coupling). Lets the SDK re-use the canonical Logger
+    // shape from @ezstart/logger without bundling it.
+    {
+      filename: COMPONENT_FILE,
+      code: "import type { Logger } from '@ezstart/logger'",
+    },
+    {
+      filename: COMPONENT_FILE,
+      code: "import { type Logger } from '@ezstart/logger'",
+    },
   ],
   invalid: [
     // logger forbidden in pay-sdk components.
