@@ -1,6 +1,7 @@
 'use client'
 
-import { SignUpCard } from '@ezstart/auth-sdk/components'
+import { SignUpModal } from '@ezstart/auth-sdk/components'
+import { useRouter } from '@/i18n/navigation'
 
 interface RegisterClientProps {
   ssrAppName: string | null
@@ -8,10 +9,18 @@ interface RegisterClientProps {
 }
 
 /**
- * Thin client wrapper around `<SignUpCard>` — forwards SSR-resolved brand
+ * Thin client wrapper around `<SignUpModal>` — forwards SSR-resolved brand
  * info from the server `page.tsx`. All chrome, key-config, OAuth, promo
- * codes, password strength, footer cross-link live in the SDK Card.
+ * codes, password strength, footer cross-link live in the SDK Modal.
  */
 export default function RegisterClient({ ssrAppName, ssrAppDisplayName }: RegisterClientProps) {
-  return <SignUpCard ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
+  const router = useRouter()
+  return (
+    <SignUpModal
+      isOpen
+      onClose={() => router.push('/')}
+      ssrAppName={ssrAppName}
+      ssrAppDisplayName={ssrAppDisplayName}
+    />
+  )
 }

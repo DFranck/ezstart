@@ -1,7 +1,9 @@
 'use client'
 
-import { VerifyEmailCard } from '@ezstart/auth-sdk/components'
+import { VerifyEmailModal } from '@ezstart/auth-sdk/components'
+import { useRouter } from '@/i18n/navigation'
 
 export default function VerifyEmailPage() {
-  return <VerifyEmailCard />
+  const router = useRouter()
+  return <VerifyEmailModal isOpen onClose={() => router.push('/')} />
 }

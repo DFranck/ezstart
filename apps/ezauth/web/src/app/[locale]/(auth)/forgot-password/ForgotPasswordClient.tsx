@@ -1,6 +1,7 @@
 'use client'
 
-import { ForgotPasswordCard } from '@ezstart/auth-sdk/components'
+import { ForgotPasswordModal } from '@ezstart/auth-sdk/components'
+import { useRouter } from '@/i18n/navigation'
 
 interface ForgotPasswordClientProps {
   ssrAppName: string | null
@@ -8,9 +9,10 @@ interface ForgotPasswordClientProps {
 }
 
 /**
- * Thin client wrapper around `<ForgotPasswordCard>` — forwards SSR-resolved
- * app slug for context. All chrome and form behaviour live in the SDK Card.
+ * Thin client wrapper around `<ForgotPasswordModal>` — forwards SSR-resolved
+ * app slug for context. All chrome and form behaviour live in the SDK Modal.
  */
 export default function ForgotPasswordClient({ ssrAppName }: ForgotPasswordClientProps) {
-  return <ForgotPasswordCard ssrAppName={ssrAppName} />
+  const router = useRouter()
+  return <ForgotPasswordModal isOpen onClose={() => router.push('/')} ssrAppName={ssrAppName} />
 }
