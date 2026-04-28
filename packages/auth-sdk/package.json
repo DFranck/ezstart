@@ -43,6 +43,10 @@
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
     },
+    "./components/registry": {
+      "types": "./dist/components/auth-sdk-registry.d.ts",
+      "import": "./dist/components/auth-sdk-registry.js"
+    },
     "./server": {
       "types": "./dist/server/index.d.ts",
       "import": "./dist/server/index.js"
@@ -79,6 +83,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",
+    "generate": "node scripts/generate-registry.cjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
