@@ -129,7 +129,13 @@ export default async function LocaleLayout({ children, params }: Props) {
   })
 
   return (
-    <html lang={locale} suppressHydrationWarning data-app="ezauth" className={ssrThemeClass}>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      data-app="ezauth"
+      data-scroll-behavior="smooth"
+      className={ssrThemeClass}
+    >
       <head>
         {/*
           Sync the `theme` cookie (written by middleware from `?theme=` URL

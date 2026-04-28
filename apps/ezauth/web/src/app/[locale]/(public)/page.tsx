@@ -5,6 +5,7 @@ import { RegisterButton, useAuth } from '@ezstart/auth-sdk'
 import { PricingPage } from '@ezstart/pay-sdk/components'
 import type { KnownIconName } from '@ezstart/ui/components'
 import {
+  AuroraEffect,
   Button,
   CodeBlock,
   CTA,
@@ -119,24 +120,7 @@ export default function HomePage() {
         description={t('heroSubtitle')}
         primaryCTASlot={primaryCTA}
         secondaryCTASlot={secondaryCTA}
-        backgroundSlot={
-          <>
-            {/* Layer 1 — diagonal gradient using tenant `--primary` via Tailwind
-                semantic tokens (handles `/N` opacity for oklch automatically). */}
-            <Div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-background to-accent/15" />
-            {/* Layer 2 — soft top highlight using primary tint for depth */}
-            <Div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-primary/10 to-transparent" />
-            {/* Layer 3 — subtle dotted grid for tactile depth (Linear style).
-                Currentcolor inherits `text-foreground`, so it auto-flips for
-                light/dark mode. */}
-            <Div
-              aria-hidden
-              className="absolute inset-0 opacity-[0.15] [background-image:radial-gradient(circle,currentColor_1px,transparent_1px)] [background-size:24px_24px] text-foreground"
-            />
-            {/* Layer 4 — bottom vignette for smooth hero-to-section transition */}
-            <Div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-b from-transparent to-background" />
-          </>
-        }
+        backgroundSlot={<AuroraEffect />}
       />
 
       <LandingSection

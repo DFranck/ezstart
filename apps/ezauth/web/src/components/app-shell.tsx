@@ -3,8 +3,8 @@
 import { Link } from '@/i18n/navigation'
 import { useAuth } from '@ezstart/auth-sdk'
 import { UserMenuV2, type UserMenuItem } from '@ezstart/auth-sdk/components'
-import { AppShell as BaseAppShell } from '@ezstart/ui/components'
-import { useTheme } from '@ezstart/ui/theme'
+import { AppShell as BaseAppShell, LocaleSwitcher } from '@ezstart/ui/components'
+import { ThemeSwitcher, useTheme } from '@ezstart/ui/theme'
 import { useLocale, useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
@@ -95,11 +95,22 @@ export function AppShell({ children, routeMode = 'full' }: AppShellProps) {
       : []),
   ]
 
-  // Scope indicator stays in the desktop actions zone (`authActions`) since
-  // it's a contextual badge, not a primary affordance — collapses into the
-  // mobile drawer where it's still discoverable but not cramped at the top.
-  const authActions =
-    showScopeIndicator && scope !== null ? <EzauthScopeIndicator scope={scope} /> : null
+  // `authActions` = standalone header switchers (theme + locale + scope
+  // indicator). Rendered desktop next to nav, collapsed into mobile drawer.
+  // Anonymous users still need direct access to theme/locale even though
+  // they don't have a UserMenu dropdown — that's why we expose them here in
+  // addition to embedding them inside the UserMenuV2 dropdown for logged-in.
+  const authActions = (
+    <>
+      {showScopeIndicator && scope !== null && <EzauthScopeIndicator scope={scope} />}
+      <LocaleSwitcher
+        locales={LANGUAGES.map(l => l.code)}
+        currentLocale={locale}
+        onLocaleChange={handleLocaleChange}
+      />
+      <ThemeSwitcher />
+    </>
+  )
 
   // UserMenu lives in `persistentActions` so it stays glued to the right of
   // the header on mobile (next to the burger toggle) instead of being hidden

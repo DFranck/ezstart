@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useState, forwardRef
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
+import { useOnScroll } from '../../hooks/use-on-scroll'
 
 // Context — mobile menu open state shared across compound
 
@@ -80,16 +81,25 @@ AppLayout.displayName = 'AppLayout'
 //   hero — Linear / Vercel / Framer pattern). The header automatically gets
 //   `variant='transparent'` if no variant is passed.
 
-const appHeaderVariants = cva('w-full border-b backdrop-blur transition-colors duration-200', {
+const appHeaderVariants = cva('w-full transition-colors duration-200', {
   variants: {
     variant: {
-      default: 'bg-background/80',
+      default: 'border-b backdrop-blur bg-background/80',
       transparent: 'bg-transparent border-transparent',
-      solid: 'bg-background',
+      solid: 'border-b bg-background',
     },
     mode: {
+      // Stays in document flow, sticks to viewport top on scroll. Pushes
+      // content down by its own height (h-16). Default for most pages.
       sticky: 'sticky top-0 z-40',
-      overlay: 'absolute inset-x-0 top-0 z-40',
+      // Pulled OUT of the flex flow (so the next section can render full
+      // 100vh under the header) but still pinned to the viewport top via
+      // `fixed` so the header stays visible during scroll. Pair with a
+      // hero that has its own 100vh height — when the user scrolls past
+      // the hero, the header overlays the next section (use a `solid` /
+      // `default` variant + a scroll listener if you want it to switch
+      // background on scroll, out of scope for the base component).
+      overlay: 'fixed inset-x-0 top-0 z-40',
     },
   },
   defaultVariants: { variant: 'default', mode: 'sticky' },
@@ -100,17 +110,40 @@ interface AppHeaderProps
 
 const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(
   ({ className, variant, mode, children, ...props }, ref) => {
-    // Overlay mode defaults to transparent variant unless explicitly overridden
-    const resolvedVariant = variant ?? (mode === 'overlay' ? 'transparent' : 'default')
+    // Scroll-aware behavior for overlay mode (Vercel / Linear / Stripe pattern):
+    // at scrollY=0 → fully transparent + larger padding (py-4, h-20 inner row);
+    // on scroll → semi-transparent bg + backdrop-blur + smaller padding (py-2,
+    // h-16 inner row) for legibility over content. Smooth transition.
+    const scrollY = useOnScroll()
+    const isAtTop = scrollY === 0
+    const isOverlay = mode === 'overlay'
+
+    // Resolve variant : overlay defaults to transparent at top, then auto-flips
+    // to a translucent solid on scroll so the header stays readable above any
+    // section that scrolls under it (image, video, dense content).
+    const resolvedVariant = variant ?? (isOverlay && isAtTop ? 'transparent' : 'default')
+
     return (
       <header
         ref={ref}
         data-slot="app-header"
         data-mode={mode ?? 'sticky'}
-        className={cn(appHeaderVariants({ variant: resolvedVariant, mode }), className)}
+        data-at-top={isAtTop}
+        className={cn(
+          appHeaderVariants({ variant: resolvedVariant, mode }),
+          // Animate the bg + padding swap when in overlay mode.
+          isOverlay && 'transition-all duration-200 ease-out',
+          className
+        )}
         {...props}
       >
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6 lg:px-8">
+        <div
+          className={cn(
+            'container mx-auto flex items-center justify-between px-4 md:px-6 lg:px-8 transition-all duration-200 ease-out',
+            // At top of overlay → larger row, no border. Scrolled → compact.
+            isOverlay && isAtTop ? 'h-20' : 'h-16'
+          )}
+        >
           {children}
         </div>
       </header>
@@ -178,8 +211,14 @@ const appNavLinkVariants = cva(
   {
     variants: {
       active: {
-        true: 'text-foreground',
-        false: 'text-muted-foreground hover:text-foreground hover:bg-accent',
+        // Active = full foreground + slightly bolder weight to clearly mark
+        // the current section (sidebar / breadcrumb pattern).
+        true: 'text-foreground font-semibold',
+        // Inactive = `text-foreground/70` so links stay legible over
+        // transparent / image / aurora backgrounds (the previous
+        // `text-muted-foreground` washed out on bright hero overlays).
+        // Hover bumps to full foreground.
+        false: 'text-foreground/70 hover:text-foreground hover:bg-accent',
       },
     },
     defaultVariants: { active: false },
