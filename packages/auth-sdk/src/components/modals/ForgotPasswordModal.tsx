@@ -1,7 +1,7 @@
 'use client'
 
-import { Div, Spinner } from '@ezstart/ui/components'
-import { Suspense, type ReactNode } from 'react'
+import { Button, Div, Spinner } from '@ezstart/ui/components'
+import { Suspense, useState, type ReactNode } from 'react'
 import { useAuthNavigation } from '../../react/useAuthNavigation.js'
 import { useKeyConfig } from '../../react/useKeyConfig.js'
 import { getAuthTexts } from '../../i18n/index.js'
@@ -58,6 +58,10 @@ function ForgotPasswordModalInner({
   } as Required<ForgotPasswordModalTexts>
   const formTexts = t as Partial<ForgotPasswordFormTexts>
 
+  // Lifted from `<ForgotPasswordForm>` via `onSubmittingChange` so the
+  // external submit button (rendered in the Modal footer) can show its own
+  // spinner and disable itself while the form is submitting.
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const keyConfig = useKeyConfig(navigation.publishableKey)
   const app = keyConfig.appName ?? navigation.app ?? ssrAppName ?? 'ezauth'
   const bannerKeyStatus = navigation.publishableKey
@@ -68,12 +72,36 @@ function ForgotPasswordModalInner({
         : undefined
     : undefined
 
+  // External submit button rendered in the Modal footer (anchored below the
+  // form body, separated by the modal footer border). Wired to the form via
+  // HTML `<button form="...">` association — the actual submission still
+  // runs `<ForgotPasswordForm>`'s `onSubmit`. No cross-link; the form keeps
+  // its inline "Back to login" CTA inside the body.
+  const formId = 'ezstart-forgot-password-form'
+  const submitLabel = t.submit ?? 'Send Reset Link'
+  const submittingLabel = t.submitting ?? 'Sending...'
+
+  const footer = (
+    <Div className="w-full flex flex-col gap-3">
+      <Button
+        type="submit"
+        form={formId}
+        disabled={isSubmitting}
+        className="w-full cursor-pointer"
+        variant="default"
+      >
+        {isSubmitting ? submittingLabel : submitLabel}
+      </Button>
+    </Div>
+  )
+
   return (
     <AuthModalShell
       isOpen={isOpen}
       onClose={onClose}
       title={t.cardTitle}
       subtitle={t.cardSubtitle}
+      footer={footer}
       logo={logo}
       {...modalShellProps}
     >
@@ -83,6 +111,9 @@ function ForgotPasswordModalInner({
         urlKey={navigation.publishableKey}
         locale={propLocale ?? locale}
         texts={formTexts}
+        formId={formId}
+        hideSubmitButton
+        onSubmittingChange={setIsSubmitting}
         {...formProps}
       />
     </AuthModalShell>

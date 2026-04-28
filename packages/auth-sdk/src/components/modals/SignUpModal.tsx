@@ -1,7 +1,7 @@
 'use client'
 
-import { Div, Span, Spinner } from '@ezstart/ui/components'
-import { Suspense, type ReactNode } from 'react'
+import { Button, Div, P, Span, Spinner } from '@ezstart/ui/components'
+import { Suspense, useState, type ReactNode } from 'react'
 import { useAuthNavigation } from '../../react/useAuthNavigation.js'
 import { prettifySlug, useKeyConfig } from '../../react/useKeyConfig.js'
 import { getAuthTexts } from '../../i18n/index.js'
@@ -62,6 +62,10 @@ function SignUpModalInner({
   } as Required<SignUpModalTexts>
   const formTexts = t as Partial<SignUpFormTexts>
 
+  // Lifted from `<SignUpForm>` via `onSubmittingChange` so the external
+  // submit button (rendered in the Modal footer) can show its own spinner
+  // and disable itself while the form is submitting.
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const keyConfig = useKeyConfig(navigation.publishableKey)
   const app = keyConfig.appName ?? navigation.app ?? ssrAppName ?? 'ezauth'
   const appDisplayName = keyConfig.appDisplayName ?? ssrAppDisplayName ?? prettifySlug(app)
@@ -92,16 +96,36 @@ function SignUpModalInner({
     t.cardSubtitle
   )
 
+  // External submit button rendered in the Modal footer (anchored below the
+  // form body, separated by the modal footer border). Wired to the form via
+  // HTML `<button form="...">` association — the actual submission still
+  // runs `<SignUpForm>`'s `onSubmit`. The `isSubmitting` state mirrors the
+  // form's internal `loading` flag (lifted via `onSubmittingChange`).
+  const formId = 'ezstart-signup-form'
+  const submitLabel = t.submit ?? 'Sign Up'
+  const submittingLabel = t.submitting ?? 'Creating account...'
+
   const footer = (
-    <>
-      {t.haveAccount}{' '}
-      <a
-        href={navigation.loginHref}
-        className="text-primary font-medium underline-offset-4 hover:underline"
+    <Div className="w-full flex flex-col gap-3">
+      <Button
+        type="submit"
+        form={formId}
+        disabled={isKeyInvalid || isSubmitting}
+        className="w-full cursor-pointer"
+        variant="default"
       >
-        {t.loginLink}
-      </a>
-    </>
+        {isSubmitting ? submittingLabel : submitLabel}
+      </Button>
+      <P size="xs" className="text-center w-full">
+        {t.haveAccount}{' '}
+        <a
+          href={navigation.loginHref}
+          className="text-primary font-medium underline-offset-4 hover:underline"
+        >
+          {t.loginLink}
+        </a>
+      </P>
+    </Div>
   )
 
   return (
@@ -124,6 +148,9 @@ function SignUpModalInner({
         urlKey={navigation.publishableKey}
         locale={propLocale ?? locale}
         texts={formTexts}
+        formId={formId}
+        hideSubmitButton
+        onSubmittingChange={setIsSubmitting}
         {...formProps}
       />
     </AuthModalShell>

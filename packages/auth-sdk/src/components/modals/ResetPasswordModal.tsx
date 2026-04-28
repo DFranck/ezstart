@@ -1,8 +1,8 @@
 'use client'
 
 import { apiCall, ApiError, parseApiErrorCode } from '@ezstart/api-sdk'
-import { Div, Spinner } from '@ezstart/ui/components'
-import { Suspense, useCallback, type ReactNode } from 'react'
+import { Button, Div, Spinner } from '@ezstart/ui/components'
+import { Suspense, useCallback, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { getAuthTexts } from '../../i18n/index.js'
 import {
@@ -90,12 +90,39 @@ function ResetPasswordModalInner({
     [onValidateToken]
   )
 
+  // Lifted from `<ResetPasswordForm>` so the external submit button (rendered
+  // in the Modal footer) tracks the form's submission + visibility state.
+  // `isSubmittable` is `false` when the form is showing one of its
+  // intermediate states (validating / token-expired / success) and the
+  // password-input form is not rendered — in that case we hide the footer
+  // submit entirely so the user isn't presented with a no-op CTA.
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmittable, setIsSubmittable] = useState(false)
+  const formId = 'ezstart-reset-password-form'
+  const submitLabel = t.submit ?? 'Reset password'
+  const submittingLabel = t.submitting ?? 'Resetting...'
+
+  const footer = isSubmittable ? (
+    <Div className="w-full flex flex-col gap-3">
+      <Button
+        type="submit"
+        form={formId}
+        disabled={isSubmitting}
+        className="w-full cursor-pointer"
+        variant="default"
+      >
+        {isSubmitting ? submittingLabel : submitLabel}
+      </Button>
+    </Div>
+  ) : undefined
+
   return (
     <AuthModalShell
       isOpen={isOpen}
       onClose={onClose}
       title={t.cardTitle}
       subtitle={t.cardSubtitle}
+      footer={footer}
       logo={logo}
       {...modalShellProps}
     >
@@ -105,6 +132,10 @@ function ResetPasswordModalInner({
         requestNewLinkHref={navigation.forgotPasswordHref}
         locale={propLocale ?? locale}
         texts={formTexts}
+        formId={formId}
+        hideSubmitButton
+        onSubmittingChange={setIsSubmitting}
+        onSubmittableChange={setIsSubmittable}
         {...formProps}
       />
     </AuthModalShell>

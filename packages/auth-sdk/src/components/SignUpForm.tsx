@@ -123,7 +123,27 @@ export interface SignUpFormProps {
    * @example 'https://pay.example.com'
    */
   promoApiUrl?: string
+  /**
+   * DOM `id` of the underlying `<form>` element. Used by `<SignUpModal>` to
+   * render its primary submit button OUTSIDE the form (in the Modal footer
+   * slot) via the standard HTML `<button form="...">` association.
+   */
+  formId?: string
+  /**
+   * Hide the in-form primary submit button. Used by `<SignUpModal>` so the
+   * submit button can be rendered in the Modal footer instead. Secondary
+   * controls (OAuth buttons, promo-code toggle) STAY visible.
+   */
+  hideSubmitButton?: boolean
+  /**
+   * Notified whenever the form's internal `loading` state flips. Lets a
+   * parent (e.g. `<SignUpModal>`) wire its external submit button's spinner
+   * + disabled state without owning the submission logic.
+   */
+  onSubmittingChange?: (isSubmitting: boolean) => void
 }
+
+const DEFAULT_FORM_ID = 'ezstart-signup-form'
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
 
@@ -156,6 +176,9 @@ export function SignUpForm({
   keyStatus,
   urlKey,
   promoApiUrl,
+  formId = DEFAULT_FORM_ID,
+  hideSubmitButton = false,
+  onSubmittingChange,
 }: SignUpFormProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
@@ -192,6 +215,13 @@ export function SignUpForm({
   })
 
   const watchPassword = form.watch('password')
+
+  // Lift `loading` out so a parent (e.g. `<SignUpModal>` rendering an
+  // external submit button in the Modal footer) can mirror the spinner /
+  // disabled state without owning the submission flow.
+  useEffect(() => {
+    onSubmittingChange?.(loading)
+  }, [loading, onSubmittingChange])
 
   // Debounced availability check
   const checkAvailability = useCallback(async (field: 'email' | 'username', value: string) => {
@@ -315,7 +345,7 @@ export function SignUpForm({
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+        <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
           {error && (
             <Div
               role="alert"
@@ -507,14 +537,16 @@ export function SignUpForm({
             />
           )}
 
-          <Button
-            type="submit"
-            disabled={disabled || loading}
-            className="w-full cursor-pointer"
-            variant="default"
-          >
-            {loading ? t.submitting : t.submit}
-          </Button>
+          {!hideSubmitButton && (
+            <Button
+              type="submit"
+              disabled={disabled || loading}
+              className="w-full cursor-pointer"
+              variant="default"
+            >
+              {loading ? t.submitting : t.submit}
+            </Button>
+          )}
         </form>
       </Form>
 

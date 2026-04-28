@@ -1,6 +1,6 @@
 'use client'
 
-import { Div, Span, Spinner } from '@ezstart/ui/components'
+import { Button, Div, P, Span, Spinner } from '@ezstart/ui/components'
 import { toast } from '@ezstart/ui/utils'
 import { Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useAuthNavigation } from '../../react/useAuthNavigation.js'
@@ -103,6 +103,10 @@ function SignInModalInner({
   // `rate_limited` or `error` state — the publishable key itself stays the
   // same, only the effect's dependency changes.
   const [retryTick, setRetryTick] = useState(0)
+  // Lifted from `<SignInForm>` via `onSubmittingChange` so the external
+  // submit button (rendered in the Modal footer) can show its own spinner
+  // and disable itself while the form is submitting.
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const keyConfig = useKeyConfig(navigation.publishableKey, retryTick)
   const isPlatformKey = keyConfig.scope === 'admin'
   const redirectUriAppHint = deriveAppHintFromRedirectUri(navigation.redirectUri)
@@ -181,16 +185,36 @@ function SignInModalInner({
     t.cardSubtitle
   )
 
+  // External submit button rendered in the Modal footer (anchored below the
+  // form body, separated by the modal footer border). Wired to the form via
+  // HTML `<button form="...">` association — the actual submission still
+  // runs `<SignInForm>`'s `onSubmit`. The `isSubmitting` state mirrors the
+  // form's internal `loading` flag (lifted via `onSubmittingChange`).
+  const formId = 'ezstart-signin-form'
+  const submitLabel = t.submit ?? 'Sign In'
+  const submittingLabel = t.submitting ?? 'Signing in...'
+
   const footer = (
-    <>
-      {t.noAccount}{' '}
-      <a
-        href={navigation.registerHref}
-        className="text-primary font-medium underline-offset-4 hover:underline"
+    <Div className="w-full flex flex-col gap-3">
+      <Button
+        type="submit"
+        form={formId}
+        disabled={isProbing || isSubmitting}
+        className="w-full cursor-pointer"
+        variant="default"
       >
-        {t.registerLink}
-      </a>
-    </>
+        {isSubmitting ? submittingLabel : submitLabel}
+      </Button>
+      <P size="xs" className="text-center w-full">
+        {t.noAccount}{' '}
+        <a
+          href={navigation.registerHref}
+          className="text-primary font-medium underline-offset-4 hover:underline"
+        >
+          {t.registerLink}
+        </a>
+      </P>
+    </Div>
   )
 
   return (
@@ -212,6 +236,9 @@ function SignInModalInner({
         urlKey={navigation.publishableKey}
         locale={propLocale ?? locale}
         texts={formTexts}
+        formId={formId}
+        hideSubmitButton
+        onSubmittingChange={setIsSubmitting}
         {...formProps}
       />
     </AuthModalShell>

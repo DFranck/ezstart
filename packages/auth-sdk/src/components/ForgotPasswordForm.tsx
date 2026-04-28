@@ -14,7 +14,7 @@ import {
 } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { DevModeBanner } from './DevModeBanner.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
@@ -63,7 +63,28 @@ export interface ForgotPasswordFormProps {
   keyStatus?: 'valid' | 'invalid' | 'missing'
   /** Raw publishable key from URL (for DevModeBanner display). */
   urlKey?: string
+  /**
+   * DOM `id` of the underlying `<form>` element. Used by
+   * `<ForgotPasswordModal>` to render its primary submit button OUTSIDE the
+   * form (in the Modal footer slot) via the standard HTML `<button form="...">`
+   * association.
+   */
+  formId?: string
+  /**
+   * Hide the in-form primary submit button. Used by `<ForgotPasswordModal>`
+   * so the submit button can be rendered in the Modal footer instead.
+   * Secondary controls ("Back to login" link) STAY visible.
+   */
+  hideSubmitButton?: boolean
+  /**
+   * Notified whenever the form's internal `loading` state flips. Lets a
+   * parent (e.g. `<ForgotPasswordModal>`) wire its external submit button's
+   * spinner + disabled state without owning the submission logic.
+   */
+  onSubmittingChange?: (isSubmitting: boolean) => void
 }
+
+const DEFAULT_FORM_ID = 'ezstart-forgot-password-form'
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -80,6 +101,9 @@ export function ForgotPasswordForm({
   texts,
   keyStatus,
   urlKey,
+  formId = DEFAULT_FORM_ID,
+  hideSubmitButton = false,
+  onSubmittingChange,
 }: ForgotPasswordFormProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
@@ -95,6 +119,13 @@ export function ForgotPasswordForm({
   const form = useForm<FormData>({
     defaultValues: { email: '' },
   })
+
+  // Lift `loading` out so a parent (e.g. `<ForgotPasswordModal>` rendering an
+  // external submit button in the Modal footer) can mirror the spinner /
+  // disabled state without owning the submission flow.
+  useEffect(() => {
+    onSubmittingChange?.(loading)
+  }, [loading, onSubmittingChange])
 
   const onSubmit = async (formData: FormData) => {
     if (loading) return
@@ -157,7 +188,7 @@ export function ForgotPasswordForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+      <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
           <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md text-sm">
             {error}
@@ -185,14 +216,16 @@ export function ForgotPasswordForm({
           )}
         />
 
-        <Button
-          type="submit"
-          disabled={loading || !form.formState.isValid}
-          className="w-full cursor-pointer"
-          variant="default"
-        >
-          {loading ? t.submitting : t.submit}
-        </Button>
+        {!hideSubmitButton && (
+          <Button
+            type="submit"
+            disabled={loading || !form.formState.isValid}
+            className="w-full cursor-pointer"
+            variant="default"
+          >
+            {loading ? t.submitting : t.submit}
+          </Button>
+        )}
 
         <Div className="text-center">
           {onBack ? (

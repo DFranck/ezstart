@@ -85,7 +85,38 @@ export interface ResetPasswordFormProps {
   locale?: AuthLocale | string
   /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<ResetPasswordFormTexts>
+  /**
+   * DOM `id` of the underlying `<form>` element. Used by `<ResetPasswordModal>`
+   * to render its primary submit button OUTSIDE the form (in the Modal footer
+   * slot) via the standard HTML `<button form="...">` association.
+   *
+   * Note: only applied to the password-input form state. The intermediate
+   * "validating" / "token expired" / "success" states still render their own
+   * inline CTAs (those are navigation links, not form submissions).
+   */
+  formId?: string
+  /**
+   * Hide the in-form primary submit button. Used by `<ResetPasswordModal>` so
+   * the submit button can be rendered in the Modal footer instead. Only
+   * affects the password-input form state.
+   */
+  hideSubmitButton?: boolean
+  /**
+   * Notified whenever the form's internal `loading` state flips. Lets a
+   * parent (e.g. `<ResetPasswordModal>`) wire its external submit button's
+   * spinner + disabled state without owning the submission logic.
+   */
+  onSubmittingChange?: (isSubmitting: boolean) => void
+  /**
+   * Notified whenever the form transitions in/out of its submittable state
+   * (token present + valid + not yet submitted). Lets a parent (e.g.
+   * `<ResetPasswordModal>`) hide its external submit button when the form
+   * is showing its own intermediate UI (validating, token-expired, success).
+   */
+  onSubmittableChange?: (isSubmittable: boolean) => void
 }
+
+const DEFAULT_FORM_ID = 'ezstart-reset-password-form'
 
 const MIN_PASSWORD_LENGTH = 8
 const INVALID_TOKEN_CODE = 'INVALID_OR_EXPIRED_TOKEN'
@@ -109,6 +140,10 @@ export function ResetPasswordForm({
   autoRedirect = true,
   locale: propLocale,
   texts,
+  formId = DEFAULT_FORM_ID,
+  hideSubmitButton = false,
+  onSubmittingChange,
+  onSubmittableChange,
 }: ResetPasswordFormProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
@@ -135,6 +170,22 @@ export function ResetPasswordForm({
 
   const watchPassword = form.watch('newPassword')
   const minLengthMessage = t.minLength.replace('{min}', String(MIN_PASSWORD_LENGTH))
+
+  // Lift `loading` out so a parent (e.g. `<ResetPasswordModal>` rendering an
+  // external submit button in the Modal footer) can mirror the spinner /
+  // disabled state without owning the submission flow.
+  useEffect(() => {
+    onSubmittingChange?.(loading)
+  }, [loading, onSubmittingChange])
+
+  // Lift "is the password-input form being rendered?" so the parent modal
+  // can hide its external submit button when the form is showing one of its
+  // intermediate states (validating / token-expired / success).
+  const isSubmittable =
+    !!token && validationState !== 'validating' && validationState !== 'invalid' && !success
+  useEffect(() => {
+    onSubmittableChange?.(isSubmittable)
+  }, [isSubmittable, onSubmittableChange])
 
   // Pre-validate token on mount when onValidateToken is provided
   useEffect(() => {
@@ -277,7 +328,7 @@ export function ResetPasswordForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+      <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
           <Div
             role="alert"
@@ -353,14 +404,16 @@ export function ResetPasswordForm({
           )}
         />
 
-        <Button
-          type="submit"
-          disabled={loading || !form.formState.isValid}
-          className="w-full"
-          variant="default"
-        >
-          {loading ? t.submitting : t.submit}
-        </Button>
+        {!hideSubmitButton && (
+          <Button
+            type="submit"
+            disabled={loading || !form.formState.isValid}
+            className="w-full"
+            variant="default"
+          >
+            {loading ? t.submitting : t.submit}
+          </Button>
+        )}
 
         <Div className="text-center">
           <Button asChild variant="link" className="text-sm text-muted-foreground">

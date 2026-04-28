@@ -1,6 +1,6 @@
 'use client'
 
-import { Div, Modal, P, Span } from '@ezstart/ui/components'
+import { Div, Modal, type ModalBackdrop, Span } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import type { ReactNode } from 'react'
 
@@ -17,7 +17,15 @@ export interface AuthModalShellProps {
   subtitle?: ReactNode
   /** Form content (the actual `<SignInForm>` / `<SignUpForm>` / etc.). */
   children: ReactNode
-  /** Footer cross-link content (e.g. "Don't have an account? Sign up"). */
+  /**
+   * Footer content. Typically the primary submit button (anchored at the
+   * bottom of the modal, separated from the form body by the footer border)
+   * stacked above any cross-link (e.g. "Don't have an account? Sign up").
+   *
+   * Passed as a raw `ReactNode` so callers control the layout — the shell
+   * forwards it directly to the underlying `<Modal>` footer slot without
+   * adding wrapping markup.
+   */
   footer?: ReactNode
   /** Brand logo shown center-top above the title. */
   logo?: ReactNode
@@ -27,6 +35,21 @@ export interface AuthModalShellProps {
   size?: 'sm' | 'default' | 'lg'
   /** Extra className appended to the Modal content. */
   className?: string
+  /**
+   * Backdrop variant. `'default'` (semi-transparent — chrome visible behind)
+   * for embedded use. `'opaque'` (solid background + blur) when the modal
+   * IS the page (auth route, full-screen onboarding) to hide the chrome.
+   * Defaults to `'default'`.
+   */
+  backdrop?: ModalBackdrop
+  /**
+   * Disable closing the modal by clicking the backdrop. Pair with
+   * `disableEscapeKey` when the modal is the page surface so the close X
+   * is the only dismiss path.
+   */
+  disableOverlayClick?: boolean
+  /** Disable closing the modal by pressing Escape. */
+  disableEscapeKey?: boolean
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -55,6 +78,9 @@ export function AuthModalShell({
   showThemeSwitcher = true,
   size = 'default',
   className,
+  backdrop,
+  disableOverlayClick,
+  disableEscapeKey,
 }: AuthModalShellProps) {
   // Build a centered header node for the Modal `title` prop. Modal wraps the
   // node inside Radix `DialogTitle` (renders as `<h2>`), so we use inline-safe
@@ -76,12 +102,6 @@ export function AuthModalShell({
     <Span className="block text-center text-xs md:text-sm text-muted-foreground">{subtitle}</Span>
   ) : undefined
 
-  const footerNode = footer ? (
-    <P size="xs" className="text-center w-full">
-      {footer}
-    </P>
-  ) : undefined
-
   return (
     <Modal
       isOpen={isOpen}
@@ -90,8 +110,11 @@ export function AuthModalShell({
       scrollBehavior="inside"
       title={headerNode}
       {...(descriptionNode ? { description: descriptionNode } : {})}
-      {...(footerNode ? { footer: footerNode } : {})}
+      {...(footer ? { footer } : {})}
       {...(className ? { className } : {})}
+      {...(backdrop ? { backdrop } : {})}
+      {...(disableOverlayClick ? { disableOverlayClick } : {})}
+      {...(disableEscapeKey ? { disableEscapeKey } : {})}
     >
       {showThemeSwitcher && (
         <Div className="absolute top-3 left-3 z-10">

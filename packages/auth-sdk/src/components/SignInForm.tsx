@@ -15,7 +15,7 @@ import {
 } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
@@ -92,7 +92,29 @@ export interface SignInFormProps {
   keyStatus?: 'valid' | 'invalid' | 'missing'
   /** Raw publishable key from URL (for DevModeBanner display). */
   urlKey?: string
+  /**
+   * DOM `id` of the underlying `<form>` element. Used by `<SignInModal>` to
+   * render its primary submit button OUTSIDE the form (in the Modal footer
+   * slot) via the standard HTML `<button form="...">` association. Defaults
+   * to a stable internal id; pass an explicit value only when wiring an
+   * external submit button yourself.
+   */
+  formId?: string
+  /**
+   * Hide the in-form primary submit button. Used by `<SignInModal>` so the
+   * submit button can be rendered in the Modal footer instead. Secondary
+   * controls (OAuth buttons, "Forgot password?" link) STAY visible.
+   */
+  hideSubmitButton?: boolean
+  /**
+   * Notified whenever the form's internal `loading` state flips. Lets a
+   * parent (e.g. `<SignInModal>`) wire its external submit button's spinner
+   * + disabled state without owning the submission logic.
+   */
+  onSubmittingChange?: (isSubmitting: boolean) => void
 }
+
+const DEFAULT_FORM_ID = 'ezstart-signin-form'
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -114,6 +136,9 @@ export function SignInForm({
   disabled = false,
   keyStatus,
   urlKey,
+  formId = DEFAULT_FORM_ID,
+  hideSubmitButton = false,
+  onSubmittingChange,
 }: SignInFormProps) {
   const navigation = useAuthNavigation()
   const { handleCallback } = useAuth()
@@ -139,6 +164,13 @@ export function SignInForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
+
+  // Lift `loading` out so a parent (e.g. `<SignInModal>` rendering an
+  // external submit button in the Modal footer) can mirror the spinner /
+  // disabled state without owning the submission flow.
+  useEffect(() => {
+    onSubmittingChange?.(loading)
+  }, [loading, onSubmittingChange])
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -279,7 +311,7 @@ export function SignInForm({
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+        <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
           {error && (
             <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
               {error}
@@ -358,14 +390,16 @@ export function SignInForm({
             </P>
           </Div>
 
-          <Button
-            type="submit"
-            disabled={disabled || loading || !form.formState.isValid}
-            className="w-full cursor-pointer"
-            variant="default"
-          >
-            {loading ? t.submitting : t.submit}
-          </Button>
+          {!hideSubmitButton && (
+            <Button
+              type="submit"
+              disabled={disabled || loading || !form.formState.isValid}
+              className="w-full cursor-pointer"
+              variant="default"
+            >
+              {loading ? t.submitting : t.submit}
+            </Button>
+          )}
         </form>
       </Form>
 
