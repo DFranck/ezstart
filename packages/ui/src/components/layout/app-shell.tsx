@@ -91,6 +91,16 @@ export interface AppShellProps {
    */
   authActions?: React.ReactNode
   /**
+   * Always-visible action slot rendered to the LEFT of the mobile burger
+   * toggle (desktop : rendered inline with `authActions`). Use for the
+   * primary identity affordance (`<UserMenu>`) so it stays a single tap
+   * away on mobile instead of being buried inside the burger drawer —
+   * Stripe / Clerk / Vercel pattern.
+   *
+   * Anything passed here is ALSO hidden from the drawer to avoid duplication.
+   */
+  persistentActions?: React.ReactNode
+  /**
    * Locale-aware Link component (e.g. from `next-intl/navigation`). Receives
    * `{ href, children, className? }`. Defaults to `<a>` for agnostic usage.
    *
@@ -99,6 +109,22 @@ export interface AppShellProps {
    * <AppShell LinkComponent={Link} ... />
    */
   LinkComponent?: React.ComponentType<AppShellLinkProps>
+  /**
+   * Header rendering mode :
+   *
+   * - `'sticky'` (default) — header stays in flow, takes `h-16`, `sticky top-0`,
+   *   `bg-background/80 backdrop-blur`. Content below starts AFTER the header.
+   * - `'overlay'` — header is positioned `absolute top-0` (NOT in flow),
+   *   transparent background, no border. Lets the FIRST page section render
+   *   full-viewport UNDER the header (hero with `100vh`, image background,
+   *   video background). Apply when the immediately-following content has its
+   *   own dark/textured background that contrasts with the header text — pair
+   *   with `<LandingHero variant="full" backgroundSlot={...} />` for immersive
+   *   Linear / Vercel / Framer-style heroes.
+   *
+   * @default 'sticky'
+   */
+  headerMode?: 'sticky' | 'overlay'
   /** Page content rendered inside `<AppMain>`. */
   children: React.ReactNode
 }
@@ -125,7 +151,9 @@ export function AppShell({
   footerColumns,
   footerBrand,
   authActions,
+  persistentActions,
   LinkComponent = DefaultLink,
+  headerMode = 'sticky',
   children,
 }: AppShellProps) {
   const logoAlt = brand.logoAlt ?? brand.name
@@ -133,7 +161,7 @@ export function AppShell({
   return (
     <AppLayout>
       {/* ----- Header ----- */}
-      <AppHeader>
+      <AppHeader mode={headerMode}>
         <AppLogo asChild>
           <LinkComponent href="/">
             <Img src={brand.logoSrc} alt={logoAlt} width={28} height={28} />
@@ -152,6 +180,9 @@ export function AppShell({
         <AppActions>
           <Div className="hidden items-center gap-2 md:flex">{authActions}</Div>
           <AppMobileToggle />
+          {persistentActions ? (
+            <Div className="flex items-center gap-2">{persistentActions}</Div>
+          ) : null}
         </AppActions>
 
         <AppMobileMenu>

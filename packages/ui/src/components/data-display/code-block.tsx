@@ -33,13 +33,13 @@ export interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
 export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
   ({ code, label, language: _language, className, ...props }, ref) => {
     return (
-      <Div ref={ref} className={cn('text-left', className)} {...props}>
+      <Div ref={ref} className={cn('text-left min-w-0', className)} {...props}>
         {label && (
           <Div className="mb-2 flex items-center gap-2">
             <Badge variant="secondary">{label}</Badge>
           </Div>
         )}
-        <Pre className="border">
+        <Pre className="border max-w-full">
           <Code className="text-foreground">{code}</Code>
         </Pre>
       </Div>

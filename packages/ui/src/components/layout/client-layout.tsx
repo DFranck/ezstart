@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { MobileNavbar } from '.'
-import { useDevice, useOnScroll } from '../../hooks'
+import { useDeprecationWarning, useDevice, useOnScroll } from '../../hooks'
 import { cn } from '../../lib'
 import { Burger } from '../burger'
 import { Button } from '../button'
@@ -133,6 +133,7 @@ export function ClientLayout({
   footerClassName,
   mobileNavbarClassName,
 }: ClientLayoutProps) {
+  useDeprecationWarning('ClientLayout', 'AppLayout from @ezstart/ui')
   const { isMobile, isTablet, isDesktop } = useDevice()
   const scrollY = useOnScroll()
   const isTop = scrollY === 0

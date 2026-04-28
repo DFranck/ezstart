@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * CTA Component - Call-to-Action Section
  *
@@ -6,6 +8,8 @@
  */
 
 import * as React from 'react'
+import { warnDeprecation } from '@ezstart/logger'
+import { toast } from 'sonner'
 import { ctaVariantConfig } from '../../lib/design-system/variants'
 import { cn } from '../../lib/utils'
 import { Button } from '../button'
@@ -63,6 +67,15 @@ export const CTA = React.forwardRef<HTMLDivElement, CTAProps>(
     },
     ref
   ) => {
+    // Surface deprecation warning when consumer passes the legacy `bgColor` prop.
+    React.useEffect(() => {
+      if (bgColor !== undefined) {
+        warnDeprecation('CTA.bgColor', 'intent prop', {
+          toast: msg => toast.warning(msg),
+        })
+      }
+    }, [bgColor])
+
     const resolvedBgColor: 'default' | 'primary' | 'muted' =
       bgColor ?? (intent ? intentToBgColor[intent] : 'default')
     const containerClasses = cn(

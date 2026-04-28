@@ -70,32 +70,44 @@ const AppLayout = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 )
 AppLayout.displayName = 'AppLayout'
 
-// AppHeader — sticky header, responsive
+// AppHeader — sticky (default) or overlay header, responsive
+//
+// - `mode='sticky'` (default) — header stays in flow, takes h-16, `sticky top-0`,
+//   `bg-background/80 backdrop-blur`. Content below starts AFTER the header.
+// - `mode='overlay'` — header is `absolute inset-x-0 top-0 z-40`, OUT of the
+//   flex flow. The first page section renders full-viewport UNDER the header
+//   (use with `LandingHero variant="full"` + `backgroundSlot` for immersive
+//   hero — Linear / Vercel / Framer pattern). The header automatically gets
+//   `variant='transparent'` if no variant is passed.
 
-const appHeaderVariants = cva(
-  'sticky top-0 z-40 w-full border-b backdrop-blur transition-colors duration-200',
-  {
-    variants: {
-      variant: {
-        default: 'bg-background/80',
-        transparent: 'bg-transparent border-transparent',
-        solid: 'bg-background',
-      },
+const appHeaderVariants = cva('w-full border-b backdrop-blur transition-colors duration-200', {
+  variants: {
+    variant: {
+      default: 'bg-background/80',
+      transparent: 'bg-transparent border-transparent',
+      solid: 'bg-background',
     },
-    defaultVariants: { variant: 'default' },
-  }
-)
+    mode: {
+      sticky: 'sticky top-0 z-40',
+      overlay: 'absolute inset-x-0 top-0 z-40',
+    },
+  },
+  defaultVariants: { variant: 'default', mode: 'sticky' },
+})
 
 interface AppHeaderProps
-  extends React.ComponentProps<'header'>, VariantProps<typeof appHeaderVariants> {}
+  extends Omit<React.ComponentProps<'header'>, 'mode'>, VariantProps<typeof appHeaderVariants> {}
 
 const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(
-  ({ className, variant, children, ...props }, ref) => {
+  ({ className, variant, mode, children, ...props }, ref) => {
+    // Overlay mode defaults to transparent variant unless explicitly overridden
+    const resolvedVariant = variant ?? (mode === 'overlay' ? 'transparent' : 'default')
     return (
       <header
         ref={ref}
         data-slot="app-header"
-        className={cn(appHeaderVariants({ variant }), className)}
+        data-mode={mode ?? 'sticky'}
+        className={cn(appHeaderVariants({ variant: resolvedVariant, mode }), className)}
         {...props}
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6 lg:px-8">

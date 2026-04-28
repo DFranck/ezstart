@@ -1,9 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useDevice } from '../../hooks'
+import { useDeprecationWarning } from '../../hooks/use-deprecation-warning'
 import { cn } from '../../lib/utils'
 import { dialogVariantConfig } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
+import { warnDeprecation } from '@ezstart/logger'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogBody,
@@ -105,6 +109,15 @@ export const Modal = ({
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size ?? 'lg') as ModalSize
   const { isMobile } = useDevice()
+
+  // Surface deprecation warning when consumer passes the legacy 'md' size value.
+  useEffect(() => {
+    if (sizeProp === ('md' as ModalSize)) {
+      warnDeprecation("Modal size='md'", "size='default'", {
+        toast: msg => toast.warning(msg),
+      })
+    }
+  }, [sizeProp])
   const handleOpenChange = (open: boolean) => {
     if (!open && !disableOverlayClick && onClose) {
       onClose()
@@ -159,4 +172,11 @@ export const Modal = ({
  * Legacy export for backward compatibility
  * @deprecated Use named export Modal instead
  */
-export default Modal
+function DeprecatedDefaultModal(props: ModalProps) {
+  useDeprecationWarning('Modal default export', 'named export `Modal` from @ezstart/ui/components')
+  return <Modal {...props} />
+}
+
+DeprecatedDefaultModal.displayName = 'DeprecatedDefaultModal'
+
+export default DeprecatedDefaultModal

@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils'
 import { badgeVariants } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
 import { radius as radiusTokens } from '../../lib/design-system/tokens'
+import { useDeprecationWarning } from '../../hooks/use-deprecation-warning'
 
 /**
  * Badge Component - Display status, count, or label
@@ -135,4 +136,11 @@ export { Badge, badgeVariants }
  * Legacy export for backward compatibility
  * @deprecated Use named export Badge instead
  */
-export default Badge
+function DeprecatedDefaultBadge(props: BadgeProps) {
+  useDeprecationWarning('Badge default export', 'named export `Badge` from @ezstart/ui/components')
+  return <Badge {...props} />
+}
+
+DeprecatedDefaultBadge.displayName = 'DeprecatedDefaultBadge'
+
+export default DeprecatedDefaultBadge

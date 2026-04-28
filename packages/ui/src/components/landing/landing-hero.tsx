@@ -66,6 +66,55 @@ export interface HeroProps extends React.HTMLAttributes<HTMLElement> {
   stats?: { label: string; value: string }[]
   /** Background scroll behavior */
   bgMode?: 'scroll' | 'fixed'
+  /**
+   * Custom background rendered behind the hero content (`absolute inset-0
+   * z-0`, `pointer-events-none`). Accepts ANY ReactNode — `<img>`, `<video>`,
+   * Three.js canvas, Lottie animation, gradient div, particle system, etc.
+   * Replaces the variant-derived background (`withImage` / `withVideo` /
+   * `withGradient`) when provided — the variant still drives layout/typography
+   * but the background comes from this slot.
+   *
+   * To darken the background for text legibility, add an overlay layer in the
+   * slot itself :
+   *
+   * ```tsx
+   * <Hero backgroundSlot={
+   *   <>
+   *     <img src="/hero.jpg" alt="" className="h-full w-full object-cover" />
+   *     <Div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40" />
+   *   </>
+   * } ... />
+   * ```
+   *
+   * @example Image background
+   * ```tsx
+   * <Hero
+   *   variant="full"
+   *   backgroundSlot={
+   *     <img src="/hero.jpg" alt="" className="h-full w-full object-cover" />
+   *   }
+   *   title="..."
+   *   description="..."
+   * />
+   * ```
+   *
+   * @example Video background
+   * ```tsx
+   * <Hero
+   *   variant="full"
+   *   backgroundSlot={
+   *     <video src="/hero.mp4" autoPlay loop muted playsInline className="h-full w-full object-cover" />
+   *   }
+   *   ...
+   * />
+   * ```
+   *
+   * @example Custom component (Three.js, Lottie, particle, etc.)
+   * ```tsx
+   * <Hero variant="full" backgroundSlot={<MyThreeScene />} ... />
+   * ```
+   */
+  backgroundSlot?: React.ReactNode
   /** Custom content below description */
   children?: React.ReactNode
 }
@@ -90,6 +139,7 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
       video,
       stats,
       bgMode = 'scroll',
+      backgroundSlot,
       className,
       children,
       style,
@@ -98,6 +148,11 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
     ref
   ) => {
     const [isVideoLoaded, setIsVideoLoaded] = React.useState(false)
+
+    // backgroundSlot wins over variant-driven backgrounds (image/video/gradient).
+    // Skip the built-in renderers when a custom slot is provided so we don't
+    // stack two backgrounds on top of each other.
+    const hasCustomBackground = Boolean(backgroundSlot)
 
     // Resolve alignment: explicit prop wins, else 'centered' variant defaults to center
     const isCentered = align === 'center' || (align === undefined && variant === 'centered')
@@ -134,11 +189,22 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
 
     return (
       <Section ref={ref} className={containerClasses} {...props} style={mergedStyle}>
-        {/* Dark overlay for background images */}
-        {hasBackgroundImage && <Div className="absolute inset-0 bg-black/50 z-0" />}
+        {/* Custom background slot (wins over variant-driven backgrounds).
+            `pointer-events-none` so interactive content (CTAs, video controls)
+            stays clickable. Inner content is free to override per-element. */}
+        {backgroundSlot && (
+          <Div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            {backgroundSlot}
+          </Div>
+        )}
 
-        {/* Background Video */}
-        {variant === 'withVideo' && video && (
+        {/* Dark overlay for background images (skipped when custom slot wins). */}
+        {!hasCustomBackground && hasBackgroundImage && (
+          <Div className="absolute inset-0 bg-black/50 z-0" />
+        )}
+
+        {/* Background Video (skipped when custom slot wins). */}
+        {!hasCustomBackground && variant === 'withVideo' && video && (
           <Div className="absolute inset-0 -z-10">
             <video
               autoPlay
@@ -157,8 +223,8 @@ export const Hero = React.forwardRef<HTMLElement, HeroProps>(
           </Div>
         )}
 
-        {/* Gradient Background */}
-        {variant === 'withGradient' && (
+        {/* Gradient Background (skipped when custom slot wins). */}
+        {!hasCustomBackground && variant === 'withGradient' && (
           <Div className="absolute inset-0 -z-10">
             <Div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
             <Div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />

@@ -4,6 +4,7 @@ import * as React from 'react'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
+import { useDeprecationWarning } from '../../hooks/use-deprecation-warning'
 
 // --- Context — mobile menu open state shared across compound ---
 
@@ -32,6 +33,7 @@ function useLanding() {
  * LandingHeroSection and LandingSection remain valid for content inside AppMain.
  */
 function LandingLayout({ className, children, ...props }: React.ComponentProps<'div'>) {
+  useDeprecationWarning('LandingLayout', 'AppLayout from @ezstart/ui')
   const [menuOpen, setMenuOpen] = useState(false)
 
   // Close menu on escape
@@ -97,6 +99,7 @@ interface LandingHeaderProps
  * @deprecated Use `AppHeader` from `./app-layout` instead.
  */
 function LandingHeader({ className, variant, children, ...props }: LandingHeaderProps) {
+  useDeprecationWarning('LandingHeader', 'AppHeader from @ezstart/ui')
   return (
     <header
       data-slot="landing-header"
@@ -116,6 +119,7 @@ function LandingHeader({ className, variant, children, ...props }: LandingHeader
  * @deprecated Use `AppLogo` from `./app-layout` instead.
  */
 function LandingLogo({ className, children, ...props }: React.ComponentProps<'div'>) {
+  useDeprecationWarning('LandingLogo', 'AppLogo from @ezstart/ui')
   return (
     <div
       data-slot="landing-logo"
@@ -133,6 +137,7 @@ function LandingLogo({ className, children, ...props }: React.ComponentProps<'di
  * @deprecated Use `AppNav` from `./app-layout` instead.
  */
 function LandingNav({ className, children, ...props }: React.ComponentProps<'nav'>) {
+  useDeprecationWarning('LandingNav', 'AppNav from @ezstart/ui')
   return (
     <nav
       data-slot="landing-nav"
@@ -168,6 +173,7 @@ interface LandingNavLinkProps
  * @deprecated Use `AppNavLink` from `./app-layout` instead.
  */
 function LandingNavLink({ className, active, children, ...props }: LandingNavLinkProps) {
+  useDeprecationWarning('LandingNavLink', 'AppNavLink from @ezstart/ui')
   return (
     <a
       data-slot="landing-nav-link"
@@ -185,6 +191,7 @@ function LandingNavLink({ className, active, children, ...props }: LandingNavLin
  * @deprecated Use `AppActions` from `./app-layout` instead.
  */
 function LandingActions({ className, children, ...props }: React.ComponentProps<'div'>) {
+  useDeprecationWarning('LandingActions', 'AppActions from @ezstart/ui')
   return (
     <div
       data-slot="landing-actions"
@@ -202,6 +209,7 @@ function LandingActions({ className, children, ...props }: React.ComponentProps<
  * @deprecated Use `AppMobileToggle` from `./app-layout` instead.
  */
 function LandingMenuToggle({ className, ...props }: React.ComponentProps<'button'>) {
+  useDeprecationWarning('LandingMenuToggle', 'AppMobileToggle from @ezstart/ui')
   const { menuOpen, setMenuOpen } = useLanding()
 
   return (
@@ -243,6 +251,7 @@ function LandingMenuToggle({ className, ...props }: React.ComponentProps<'button
  * @deprecated Use `AppMobileMenu` from `./app-layout` instead.
  */
 function LandingMobileMenu({ className, children, ...props }: React.ComponentProps<'div'>) {
+  useDeprecationWarning('LandingMobileMenu', 'AppMobileMenu from @ezstart/ui')
   const { menuOpen, setMenuOpen } = useLanding()
 
   if (!menuOpen) return null
@@ -282,6 +291,7 @@ interface LandingMobileLinkProps extends React.ComponentProps<'a'> {
  * @deprecated Use `AppMobileLink` from `./app-layout` instead.
  */
 function LandingMobileLink({ className, active, children, ...props }: LandingMobileLinkProps) {
+  useDeprecationWarning('LandingMobileLink', 'AppMobileLink from @ezstart/ui')
   const { setMenuOpen } = useLanding()
 
   const handleClick = useCallback(
@@ -391,6 +401,10 @@ function LandingSection({
  * @deprecated Use `AppFooter` + `FooterColumn` + `FooterLink` + `FooterBrand` from `./app-layout` instead.
  */
 function LandingFooter({ className, children, ...props }: React.ComponentProps<'footer'>) {
+  useDeprecationWarning(
+    'LandingFooter',
+    'AppFooter + FooterColumn + FooterLink + FooterBrand from @ezstart/ui'
+  )
   return (
     <footer
       data-slot="landing-footer"

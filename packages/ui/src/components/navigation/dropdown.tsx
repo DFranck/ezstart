@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { cn } from '../../lib/utils'
 import { dropdownPositionConfig } from '../../lib/design-system/variants'
+import { useDeprecationWarning } from '../../hooks/use-deprecation-warning'
 import { Button } from '../button'
 import { LI, UL } from '../tag'
 
@@ -249,4 +250,14 @@ export function Dropdown({
  * Legacy export for backward compatibility
  * @deprecated Use named export Dropdown instead
  */
-export default Dropdown
+function DeprecatedDefaultDropdown(props: DropdownProps) {
+  useDeprecationWarning(
+    'Dropdown default export',
+    'named export `Dropdown` from @ezstart/ui/components'
+  )
+  return <Dropdown {...props} />
+}
+
+DeprecatedDefaultDropdown.displayName = 'DeprecatedDefaultDropdown'
+
+export default DeprecatedDefaultDropdown

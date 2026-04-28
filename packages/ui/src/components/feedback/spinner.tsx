@@ -1,5 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
+import { warnDeprecation } from '@ezstart/logger'
+import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
 import { spinnerVariantConfig } from '../../lib/design-system/variants'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
@@ -70,6 +73,25 @@ export function Spinner({
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size ?? 'default') as NonNullable<SpinnerProps['size']>
   const isFancy = variant === 'fancy'
+
+  // Surface deprecation warnings for legacy size value and `textSize` prop.
+  useEffect(() => {
+    if (sizeProp === ('md' as SpinnerSize)) {
+      warnDeprecation("Spinner size='md'", "size='default'", {
+        toast: msg => toast.warning(msg),
+      })
+    }
+  }, [sizeProp])
+  useEffect(() => {
+    // textSize default is 'sm' — only warn when consumer explicitly passes a non-default value.
+    // Detection trick : we can't differentiate default 'sm' from explicit 'sm', so we accept
+    // the false negative for 'sm' and warn on every other explicit value.
+    if (textSize !== 'sm') {
+      warnDeprecation('Spinner.textSize', 'size prop', {
+        toast: msg => toast.warning(msg),
+      })
+    }
+  }, [textSize])
 
   const spinner = isFancy ? (
     // Fancy variant with pulse effect (EZBill style)

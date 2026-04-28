@@ -91,7 +91,7 @@ const markdownComponents: Components = {
     return <code className={className}>{children}</code>
   },
   pre: ({ children }) => (
-    <Pre className="my-4 overflow-x-auto rounded-lg bg-muted p-4 text-sm font-mono border border-border">
+    <Pre className="my-4 max-w-full overflow-x-auto rounded-lg bg-muted p-4 text-sm font-mono border border-border">
       {children}
     </Pre>
   ),
@@ -132,7 +132,7 @@ const markdownComponents: Components = {
  */
 export function MarkdownContent({ content, className }: MarkdownContentProps) {
   return (
-    <Div className={cn('max-w-none', className)}>
+    <Div className={cn('min-w-0 max-w-none break-words', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}

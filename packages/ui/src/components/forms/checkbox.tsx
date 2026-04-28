@@ -7,6 +7,7 @@ import * as React from 'react'
 import { touchSmall } from '../../lib/design-system/tokens'
 import { cn } from '../../lib/utils'
 import { useDesignTokens } from '../../lib/design-system/DesignTokenContext'
+import { useDeprecationWarning } from '../../hooks/use-deprecation-warning'
 import { Label } from './label'
 import { Span } from '../tag'
 
@@ -43,11 +44,12 @@ export interface CheckboxProps extends React.ComponentProps<typeof CheckboxPrimi
 const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
   ({ className, label, id, ...props }, ref) => {
     const inherited = useDesignTokens()
-    const sizeClass = {
-      sm: 'size-4 sm:size-3.5',
-      default: touchSmall.checkbox,
-      lg: 'size-6 sm:size-5',
-    }[(inherited.size ?? 'default') as 'sm' | 'default' | 'lg'] ?? touchSmall.checkbox
+    const sizeClass =
+      {
+        sm: 'size-4 sm:size-3.5',
+        default: touchSmall.checkbox,
+        lg: 'size-6 sm:size-5',
+      }[(inherited.size ?? 'default') as 'sm' | 'default' | 'lg'] ?? touchSmall.checkbox
 
     const checkboxElement = (
       <CheckboxPrimitive.Root
@@ -97,4 +99,17 @@ export { Checkbox }
  * Legacy export for backward compatibility
  * @deprecated Use named export Checkbox instead
  */
-export default Checkbox
+const DeprecatedDefaultCheckbox = React.forwardRef<
+  React.ElementRef<typeof CheckboxPrimitive.Root>,
+  CheckboxProps
+>((props, ref) => {
+  useDeprecationWarning(
+    'Checkbox default export',
+    'named export `Checkbox` from @ezstart/ui/components'
+  )
+  return <Checkbox ref={ref} {...props} />
+})
+
+DeprecatedDefaultCheckbox.displayName = 'DeprecatedDefaultCheckbox'
+
+export default DeprecatedDefaultCheckbox
