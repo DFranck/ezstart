@@ -1,5 +1,7 @@
 ## 🔐 Environnements et Secrets — Hybrid root + per-app (post ENV-2)
 
+**Toutes les règles de ce fichier sont 🔴 P0** (architecture .env non-négociable). Voir `standard.md` pour le système de priorisation global et `standard-saas-security.md` §5 pour les aspects security secrets management (rotation, vault).
+
 ### 1. Architecture .env Standardisée
 
 **Hybrid root + per-app — 3 ou 4 fichiers par layer :**
@@ -73,6 +75,41 @@ pnpm env:push:vercel <app> <env>      # ex: pnpm env:push:vercel ezpay productio
 
 Avant toute migration des fichiers env, backup dans `tmp/env-backup-*` (gitignored).
 
-### 7. Documentation complète
+### 7. Cookie Domain — cross-port SSR en dev
+
+- [ ] 🟠 P1 : En dev (`NODE_ENV !== 'production'`), si APIs et Webs tournent sur des ports différents de `localhost` (ex: API 6110 + Web 6111), set `Domain: 'localhost'` sur les cookies httpOnly. Sinon le browser ne send PAS le cookie cross-port → SSR auth ne marche pas en dev (`getServerAuth()` retourne toujours `null`).
+- [ ] 🟠 P1 : En prod, `Domain: '.ezstart.xyz'` (cross-subdomain) — pattern différent, à NE PAS confondre.
+- [ ] 🟠 P1 : Helper `getCookieDomain()` centralisé dans chaque API (`apps/<app>/api/src/config/cookie.ts`) — JAMAIS de logique cookie inline dans les routes.
+
+```ts
+// ✅ BON — apps/ezauth/api/src/config/cookie.ts
+export function getCookieDomain(): string | undefined {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.COOKIE_DOMAIN ?? '.ezstart.xyz' // cross-subdomain prod
+  }
+  // 🔒 Dev cross-port (6110 API + 6111 Web) — Domain=localhost requis
+  return 'localhost'
+}
+
+// ❌ INTERDIT — host-only cookie en dev = casse le cross-port
+export function getCookieDomain(): string | undefined {
+  if (process.env.NODE_ENV === 'production') return '.ezstart.xyz'
+  return undefined // host-only → cookie attaché à 6110 only, pas envoyé sur 6111
+}
+```
+
+**Pourquoi** : un cookie sans `Domain` attribute est "host-only" → attaché à `localhost:6110` strictement, pas envoyé sur `localhost:6111`. Avec `Domain=localhost`, il devient "domain cookie" → envoyé sur tous les ports de localhost. C'est dev-only ; en prod on veut le strict opposé (subdomain scoping via `.ezstart.xyz`).
+
+**Audit grep** :
+
+```bash
+# Cookie domain handling existe par API
+ls apps/*/api/src/config/cookie.ts 2>/dev/null
+
+# Cookie sans domain en dev (suspicious)
+grep -rn "getCookieDomain\|cookie.*domain" apps/*/api/src/ --include="*.ts"
+```
+
+### 8. Documentation complète
 
 Voir [SECRETS.md](../../SECRETS.md) pour la doc canonique.

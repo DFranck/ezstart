@@ -2,6 +2,26 @@
 
 **Source de vérité pour toute app (API + Web).** Complémentaire à `standard.md` (packages). Chaque app passe ce checklist avant deploy prod. Pas d'exception.
 
+## Légende des priorités
+
+- **🔴 P0 / MVP** — bloquant pour launch first paying customer
+- **🟠 P1 / V1** — nécessaire dans les 3 mois post-launch
+- **🟡 P2 / V2** — devient "vraiment pro"
+- **🟢 P3 / V3+** — excellence long-terme
+- **⚡ QW** — Quick Win, < 1 jour, annotation EN PLUS de P\_
+
+Items sans annotation explicite = **🔴 P0** (la base non-négociable). Voir `standard.md` "Système de priorisation" pour le pattern global.
+
+Pour les domaines transverses détaillés, voir aussi :
+
+- [`standard-saas-perf.md`](./standard-saas-perf.md) — performance, bundle, Lighthouse
+- [`standard-saas-security.md`](./standard-saas-security.md) — headers, auth, audit logs, GDPR
+- [`standard-saas-a11y.md`](./standard-saas-a11y.md) — WCAG 2.1 AA
+- [`standard-saas-observability.md`](./standard-saas-observability.md) — Sentry, status page, deep health
+- [`standard-saas-data.md`](./standard-saas-data.md) — migrations, API versioning, soft delete
+- [`standard-saas-billing.md`](./standard-saas-billing.md) — plans, dunning, tax, refunds
+- [`standard-sdk-dx.md`](./standard-sdk-dx.md) — SDK developer experience
+
 ---
 
 ## 1. API — Backend
@@ -64,23 +84,26 @@ curl http://localhost:<port>/docs
 
 ## 2. Web — Frontend
 
-### 2.1 Provider Stack (obligatoire dans `layout.tsx`)
+### 2.1 Provider Stack (obligatoire dans `layout.tsx`) — SSR-FIRST
+
+Voir [`nextjs.md` §1](./nextjs.md) pour la règle complète et le code de référence. Résumé :
 
 ```
-NextIntlClientProvider
+NextIntlClientProvider (messages SSR via getMessages)
   └─ ErrorBoundary
-       └─ ThemeProvider (@ezstart/ui/theme)
-            └─ AuthProvider (@ezstart/auth-sdk)
+       └─ ThemeProvider (@ezstart/ui/theme — initialTheme SSR)
+            └─ AuthProvider (@ezstart/auth-sdk — initialUser SSR via getServerAuth)
                  └─ [QueryProvider si data-heavy]
                       └─ {children}
 Toaster (sonner, hors providers)
 ```
 
-- [ ] `NextIntlClientProvider` avec `messages` + `locale`
+- [ ] `NextIntlClientProvider` avec `messages` + `locale` (déjà SSR par défaut)
 - [ ] `ErrorBoundary` de `@ezstart/ui/components`
-- [ ] `ThemeProvider` de `@ezstart/ui/theme` (pas next-themes direct)
-- [ ] `AuthProvider` avec `appName` + `authMode` configurés
+- [ ] `ThemeProvider` de `@ezstart/ui/theme` avec **`initialTheme` SSR-bootstrapped** + `<html className=...>` server-side
+- [ ] `AuthProvider` avec `appName` + `authMode` + **`initialUser` SSR-bootstrapped** via `@ezstart/auth-sdk/server` `getServerAuth({ apiUrl, cookieHeader })` quand `authMode='httpOnly'`
 - [ ] `Toaster` de sonner pour les notifications
+- [ ] **Anti-flash check** : navigation A/B (logout / refresh / `/dashboard` → `/`) ne montre JAMAIS LoginButton avant UserMenu ni light avant dark — si flash visible = SSR bootstrap manquant ou cassé
 
 ### 2.2 i18n
 
@@ -214,25 +237,31 @@ Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch prod
 
 ### 5.1 Landing / Homepage
 
-- [ ] Page publique presentant le service (pas d'auth requise)
-- [ ] Value proposition claire + features
-- [ ] CTA : login / signup / pricing
-- [ ] Responsive mobile-first, dark mode
-- [ ] TOUS composants depuis SDK ou `packages/ui/` (zero custom)
-- [ ] MUST use `LandingLayout` compound components from `@ezstart/ui`
-- [ ] Header: logo + nav + ThemeSwitcher + LocaleSwitcher + LoginButton/UserMenu (from auth-sdk)
-- [ ] Hero with value prop + CTA (adapts when user is authenticated: "Get Started" -> "Go to Dashboard")
-- [ ] Footer with link columns: Product, Company, Legal
-- [ ] ALL links must point to real pages (placeholder pages at minimum)
+- [ ] 🔴 P0 : Page publique presentant le service (pas d'auth requise)
+- [ ] 🔴 P0 : Value proposition claire + features
+- [ ] 🔴 P0 : CTA : login / signup / pricing
+- [ ] 🔴 P0 : Responsive mobile-first, dark mode
+- [ ] 🔴 P0 : TOUS composants depuis SDK ou `packages/ui/` (zero custom)
+- [ ] 🔴 P0 : MUST use `LandingLayout` compound components from `@ezstart/ui`
+- [ ] 🔴 P0 : Header: logo + nav + ThemeSwitcher + LocaleSwitcher + LoginButton/UserMenu (from auth-sdk)
+- [ ] 🔴 P0 : Hero with value prop + CTA (adapts when user is authenticated: "Get Started" -> "Go to Dashboard")
+- [ ] 🔴 P0 : Footer with link columns: Product, Company, Legal
+- [ ] 🔴 P0 : ALL links must point to real pages (placeholder pages at minimum)
+- [ ] 🟠 P1 : Social proof section (testimonials, logos, customer count) (1-2 jours)
+- [ ] 🟠 P1 : Comparison table vs competitors (1 jour)
 
 ### 5.2 Auth Flow (Standalone)
 
-- [ ] Login fonctionne SANS redirect SSO (direct sur l'app)
-- [ ] Register fonctionne standalone
-- [ ] Forgot password fonctionne standalone
-- [ ] OAuth (Google) fonctionne
-- [ ] Tout via SDK components (`<AuthProvider />`, `<SignInForm />`, etc.)
-- [ ] Publishable key based (`NEXT_PUBLIC_EZAUTH_KEY`)
+- [ ] 🔴 P0 : Login fonctionne SANS redirect SSO (direct sur l'app)
+- [ ] 🔴 P0 : Register fonctionne standalone
+- [ ] 🔴 P0 : Forgot password fonctionne standalone
+- [ ] 🔴 P0 : OAuth (Google) fonctionne
+- [ ] 🔴 P0 : Tout via SDK components (`<AuthProvider />`, `<SignInForm />`, etc.)
+- [ ] 🔴 P0 : Publishable key based (`NEXT_PUBLIC_EZAUTH_KEY`)
+- [ ] 🔴 P0 : Email verification gate (cf. `standard-saas-security.md` §2)
+- [ ] 🟠 P1 : 2FA TOTP optional (cf. `standard-saas-security.md` §2)
+- [ ] 🔴 P0 : 2FA mandatory pour admin/superadmin (cf. `standard-saas-security.md` §2)
+- [ ] 🟠 P1 : Session management UI (list devices, revoke per-device)
 
 #### White-label theme — primary-only (2026-04-24)
 
@@ -248,24 +277,32 @@ Chaque app SaaS (ezauth, ezpay, futur) doit avoir ces features avant launch prod
 
 ### 5.3 User Dashboard (post-login)
 
-- [ ] Overview : mes apps / mes projets
-- [ ] Mes API keys (CRUD) — via auth-sdk DeveloperPortal
-- [ ] Mon usage / quotas
-- [ ] Mon plan + upgrade CTA — via pay-sdk PricingPage
-- [ ] Settings (profil, securite, 2FA) — via auth-sdk UserSettings
-- [ ] TOUT depuis SDK components, zero UI app-specific
+- [ ] 🔴 P0 : Overview : mes apps / mes projets
+- [ ] 🔴 P0 : Mes API keys (CRUD) — via auth-sdk DeveloperPortal
+- [ ] 🟠 P1 : Mon usage / quotas
+- [ ] 🟠 P1 : Mon plan + upgrade CTA — via pay-sdk PricingPage
+- [ ] 🔴 P0 : Settings (profil, securite, 2FA) — via auth-sdk UserSettings
+- [ ] 🔴 P0 : TOUT depuis SDK components, zero UI app-specific
+- [ ] 🔴 P0 : Account deletion (GDPR) — via auth-sdk account-deletion-form
+- [ ] 🔴 P0 : Data export (GDPR) — pattern à étendre à toutes les apps
 
 ### 5.4 Pricing / Plans
 
-- [ ] Page pricing publique (Free / Pro / Enterprise)
-- [ ] Plans geres dans EZPay dashboard (pas hardcodes)
-- [ ] Checkout via pay-sdk (Stripe)
-- [ ] Plan actuel visible dans le user dashboard
-- [ ] Flow upgrade/downgrade
-- [ ] Via pay-sdk PricingPage component (auto-fetch plans depuis API)
-- [ ] Plans MUST come from pay-sdk PricingPage component (auto-fetched from API)
-- [ ] NEVER hardcode pricing cards in the app
-- [ ] If no plans configured in EZPay: show "Pricing coming soon" placeholder
+- [ ] 🔴 P0 : Page pricing publique (Free / Pro / Enterprise)
+- [ ] 🔴 P0 : Plans geres dans EZPay dashboard (pas hardcodes)
+- [ ] 🔴 P0 : Checkout via pay-sdk (Stripe)
+- [ ] 🔴 P0 : Plan actuel visible dans le user dashboard
+- [ ] 🔴 P0 : Flow upgrade/downgrade
+- [ ] 🔴 P0 : Via pay-sdk PricingPage component (auto-fetch plans depuis API)
+- [ ] 🔴 P0 : Plans MUST come from pay-sdk PricingPage component (auto-fetched from API)
+- [ ] 🔴 P0 : NEVER hardcode pricing cards in the app
+- [ ] 🔴 P0 : If no plans configured in EZPay: show "Pricing coming soon" placeholder
+- [ ] 🟠 P1 : Past-due banner UI quand subscription past_due (cf. `standard-saas-billing.md` §4)
+- [ ] 🟠 P1 : Update payment method UI (Stripe Customer Portal)
+- [ ] 🔴 P0 : SCA / 3DS testé (`standard-saas-billing.md` §2)
+- [ ] 🔴 P0 (EU) : Stripe Tax activé (TVA EU OSS, cf. `standard-saas-billing.md` §6)
+- [ ] 🟠 P1 : Dunning emails (Stripe Smart Retries) configuré
+- [ ] 🟠 P1 : Invoice PDF téléchargeable (cf. `standard-saas-billing.md` §5)
 
 ### 5.5 Admin Platform (superadmin)
 
@@ -283,22 +320,27 @@ Pattern **federated admin** : EZStart (hub) agrège les AdminDashboards de chaqu
 
 ### 5.6 Developer Experience
 
-- [ ] Page quickstart / getting started
-- [ ] Instructions d'installation SDK
-- [ ] API docs (Swagger `/docs`)
-- [ ] Exemples de code
-- [ ] Status page (uptime)
+Cf. [`standard-sdk-dx.md`](./standard-sdk-dx.md) pour le détail des SDKs publishable.
+
+- [ ] 🔴 P0 : Page quickstart / getting started
+- [ ] 🔴 P0 : Instructions d'installation SDK
+- [ ] 🔴 P0 : API docs (Swagger `/docs`)
+- [ ] 🔴 P0 : Exemples de code
+- [ ] 🔴 P0 : Status page (uptime) — cf. `standard-saas-observability.md` §4
 
 ### 5.7 Required Pages
 
-- [ ] `/privacy` — Privacy Policy (placeholder OK before launch)
-- [ ] `/terms` — Terms of Service
-- [ ] `/about` — About page
-- [ ] `/contact` — Contact page with email
-- [ ] `/docs` — Documentation (or link to external docs)
-- [ ] `/blog` — Blog (placeholder OK)
-- [ ] `/changelog` — Changelog
-- [ ] `/status` — Status page
+- [ ] 🔴 P0 : `/privacy` — Privacy Policy (placeholder OK before launch)
+- [ ] 🔴 P0 : `/terms` — Terms of Service
+- [ ] 🔴 P0 : `/about` — About page
+- [ ] 🔴 P0 : `/contact` — Contact page with email
+- [ ] 🔴 P0 : `/docs` — Documentation (or link to external docs)
+- [ ] 🟠 P1 : `/blog` — Blog (placeholder OK)
+- [ ] 🟠 P1 : `/changelog` — Changelog
+- [ ] 🔴 P0 : `/status` — Status page
+- [ ] 🟠 P1 (EU) : Cookie consent banner (Cookiebot ou custom — bloquer analytics tant que pas accept)
+- [ ] 🟠 P1 ⚡QW : `/security` page + `security.txt` (cf. `standard-saas-security.md` §10)
+- [ ] 🟠 P1 : `/refund-policy` (si paid plans, cf. `standard-saas-billing.md` §11)
 
 ---
 

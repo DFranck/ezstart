@@ -4,6 +4,29 @@
 
 ---
 
+## Système de priorisation (utilisé dans tous les standards)
+
+Chaque check-item est annoté avec une priorité unique + optionnellement Quick Win :
+
+- **🔴 P0 / MVP** — bloquant pour launch first paying customer (security, basic UX, no critical bug)
+- **🟠 P1 / V1** — nécessaire dans les 3 mois post-launch (compliance, scaling early, UX crédibilité)
+- **🟡 P2 / V2** — devient "vraiment pro" (UX polish, extra security, observability complète)
+- **🟢 P3 / V3+** — excellence long-terme (visual regression, mutation testing, multi-region)
+- **⚡ QW** — Quick Win, < 1 jour, annotation EN PLUS de P\_ (jamais à la place)
+
+Format : `- [ ] 🔴 P0 ⚡QW : <action> (effort estimé)`
+
+Les sections de checklist sans priorité explicite dans le présent `standard.md` sont **toutes P0** (la base de qualité non-négociable des packages).
+
+Cette priorisation sert pour :
+
+1. **Lancer un nouveau SaaS** — focus P0, ignore le reste
+2. **Auditer un SaaS existant** — identifier les gaps par priorité, planifier le sprint suivant
+
+Les fichiers `standard-saas-perf.md`, `standard-saas-security.md`, `standard-saas-a11y.md`, `standard-saas-observability.md`, `standard-saas-data.md`, `standard-saas-billing.md`, `standard-sdk-dx.md` complètent ce checklist par domaine, tous priorisés.
+
+---
+
 ## 0. Hiérarchie de décision (avant toute ligne de code)
 
 **Ordre obligatoire**, valable pour TOUT ce qu'on veut produire (type, util, composant, hook, API, SDK) :
@@ -104,6 +127,45 @@ export function createAuthClient(config: AuthClientConfig) {
 
 **Packages concernés** : `auth-sdk`, `pay-sdk`, `ai-sdk`, tout futur SDK client.
 **Packages NON concernés** : `api-core` (serveur, pas de React), `api-contracts` (types purs), `config`, `logger`.
+
+**Stateful stores (Zustand / Jotai / Redux) — factory + Context obligatoire** :
+
+Tout SDK qui expose un store global **DOIT** suivre le pattern factory + React Context. Les stores module-level sont **interdits** : ils cassent Next.js SSR (le serveur et le client se retrouvent avec deux stores différents → React détecte un mismatch d'hydratation → flash visible côté client).
+
+```ts
+// ❌ INTERDIT — store module-level (incompatible SSR)
+export const useAuthStore = create<AuthState>()(persist(...))
+
+// ✅ OBLIGATOIRE — factory + per-Provider Context
+export function createAuthStore(options: { initialUser?: User | null }) {
+  return create<AuthState>()(persist(
+    () => ({ user: options.initialUser ?? null, ... }),
+    { name: options.storageKey ?? 'default' }
+  ))
+}
+
+// Dans le Provider :
+const [store] = useState(() => createAuthStore({ initialUser }))
+return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
+
+// Hook de lecture :
+export function useAuthStore<T>(selector: (s: AuthState) => T): T {
+  const store = useContext(StoreContext)
+  if (!store) throw new Error('useAuthStore must be used within <AuthProvider>')
+  return useStore(store, selector)
+}
+```
+
+**Règles** :
+
+- Le store est créé dans `useState(() => createStore({ initialState }))` du Provider — garantit une instance par tree React et `initialState` synchrone à la première render
+- `initialState` (typiquement `initialUser` SSR-resolved) est **passé au factory**, pas mutaté post-mount via `useEffect` ou `setState`
+- L'accès imperative (`getState()`, `setState()`) se fait uniquement via un hook bound au Context (`useStoreApi()`) — jamais via un export module
+- Les closures non-React (callbacks `getToken`, etc.) reçoivent un `useStoreGetSnapshot()` créé dans le tree
+
+**Test de non-régression** : un test qui rend le Provider avec `initialUser={...}` doit observer `isAuthenticated: true` sur la **première** render snapshot du subscriber. Si le test passe seulement après `await act(async () => {})`, le pattern est cassé.
+
+**Référence** : doc Zustand officielle "Setup with Next.js" (https://zustand.docs.pmnd.rs/guides/nextjs).
 
 ---
 

@@ -1,5 +1,7 @@
 ## 🗄️ MongoDB - Connexion Centralisée
 
+**Toutes les règles de ce fichier sont 🔴 P0** (pattern de connexion non-négociable). Voir `standard.md` pour le système de priorisation global et `standard-saas-data.md` pour migrations / backups / API versioning étendus.
+
 ### Single Source of Truth : connectToMongo()
 
 **TOUJOURS** utiliser `connectToMongo(dbName)` depuis `@ezstart/api-core` :

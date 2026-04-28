@@ -1,5 +1,9 @@
 ## 🚨 RÈGLES CRITIQUES - PROTECTION DES DONNÉES (2025-10-26)
 
+**Toutes les règles de ce fichier sont 🔴 P0 (non-négociables) — il n'y a pas de "P1" sur la protection prod.** Voir `standard.md` pour le système de priorisation global.
+
+Pour les aspects étendus (backups testés, restore drill, point-in-time recovery, soft delete, migrations) voir [`standard-saas-data.md`](./standard-saas-data.md).
+
 **⚠️ INCIDENT:** Le 26/10/2025, des tests ont supprimé TOUTES les données de production MongoDB (users, clients, invoices). Ces règles DOIVENT être suivies pour éviter que ça se reproduise.
 
 ### ❌ INTERDICTIONS ABSOLUES

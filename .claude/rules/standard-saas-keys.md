@@ -113,7 +113,24 @@ Les anciennes clés utilisaient `ezk_test_`, `ezk_live_`, `ezk_admin_` avec le s
 
 ---
 
-## 7. Checklist audit
+## 7. Test mode keys — data isolation (Stripe-pattern)
+
+Les test keys (`ez_pk_test_*`, `ez_sk_test_*`) ne sont PAS juste un prefix différent — elles activent un mode complet d'isolation des données. Pattern obligatoire pour tout SaaS qui touche aux user data.
+
+- [ ] 🔴 P0 : Test keys et live keys du MÊME consumer ont leurs propres data sets isolés (pas de leak possible test ↔ live)
+- [ ] 🔴 P0 : Middleware API extrait le `env` (live/test) du prefix de la key et l'attache à `req.mode`
+- [ ] 🔴 P0 : TOUTES les queries DB sont scopées par `isTestMode: req.mode === 'test'` (filter automatique en base)
+- [ ] 🔴 P0 : Stripe pay-sdk : si la key est test → utiliser `STRIPE_TEST_SECRET_KEY` (sinon `STRIPE_SECRET_KEY` live)
+- [ ] 🔴 P0 : Webhook handlers test/live dispatch séparé (header `Stripe-Signature-Test` ou endpoint `/api/webhooks/stripe-test`)
+- [ ] 🟠 P1 : Dashboard toggle "Live / Test" persistant via cookie, banner visible "TEST MODE"
+- [ ] 🟠 P1 : Quotas illimitées en test, billing désactivé sur test data
+- [ ] 🟠 P1 : Test data flushable par admin (audit-logged)
+
+(cf. `standard-saas-data.md` §4 pour le pattern complet)
+
+---
+
+## 8. Checklist audit
 
 Avant merge d'un PR touchant les clés API :
 
@@ -125,3 +142,4 @@ Avant merge d'un PR touchant les clés API :
 - [ ] README du service mis à jour avec le nouveau format
 - [ ] `.env.example` du service mis à jour
 - [ ] Seed script idempotent (tests)
+- [ ] Test mode isolation testée (live key ne peut PAS read/write test data, ni inverse)

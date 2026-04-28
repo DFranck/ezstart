@@ -1,5 +1,7 @@
 ## 📝 Git et Documentation
 
+**Toutes les règles de ce fichier sont 🔴 P0** (workflow non-négociable). Voir `standard.md` pour le système de priorisation global.
+
 ### 1. Commits - Structure Recommandée
 
 ```
