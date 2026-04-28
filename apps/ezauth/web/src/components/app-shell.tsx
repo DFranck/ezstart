@@ -19,6 +19,26 @@ const LANGUAGES = [
 const ADMIN_SCOPE_PREFIXES = ['/admin']
 const USER_SCOPE_PREFIXES = ['/dashboard', '/account', '/developer']
 
+// Mirror of `BARE_ROUTE_PREFIXES` in `middleware.ts` — kept in sync because
+// Next.js shared layouts (`[locale]/layout.tsx`) are NOT re-rendered on
+// soft client navigation between sibling pages, so the SSR-resolved
+// `routeMode` prop becomes stale on cross-route nav (e.g. /fr -> /fr/components).
+// We re-evaluate from `usePathname()` client-side so the AppShell short-
+// circuit decision matches the current URL even when the layout cache
+// holds the value from the initial page load.
+const BARE_ROUTE_PREFIXES = [
+  '/auth/',
+  '/dashboard',
+  '/admin',
+  '/developer',
+  '/account',
+  '/components',
+]
+
+function isBareRoutePathname(pathname: string): boolean {
+  return BARE_ROUTE_PREFIXES.some(prefix => pathname.includes(prefix))
+}
+
 function detectScope(pathname: string): 'user' | 'admin' | null {
   if (ADMIN_SCOPE_PREFIXES.some(p => pathname.includes(p))) return 'admin'
   if (USER_SCOPE_PREFIXES.some(p => pathname.includes(p))) return 'user'
@@ -52,11 +72,20 @@ export function AppShell({ children, routeMode = 'full' }: AppShellProps) {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
 
-  // Bare routes (auth forms, dashboard, admin) ship their own full-screen
-  // chrome — return children un-wrapped so the landing AppShell doesn't
-  // double-frame them. `routeMode` is decided SSR-side by the middleware so
-  // the very first paint already matches (no client `usePathname()` swap).
-  if (routeMode === 'bare') return <>{children}</>
+  // Bare routes (auth forms, dashboard, admin, components showcase) ship
+  // their own full-screen chrome — return children un-wrapped so the
+  // landing AppShell doesn't double-frame them.
+  //
+  // Two-source decision:
+  // 1. `routeMode` SSR prop (from middleware `x-route-mode` header) →
+  //    correct on first paint, no flash.
+  // 2. `isBareRoutePathname(pathname)` client check → handles soft nav
+  //    between sibling routes where the shared `[locale]/layout.tsx` is
+  //    NOT re-rendered (Next.js layout cache) and the SSR `routeMode`
+  //    prop becomes stale. Without this, navigating /fr -> /fr/components
+  //    keeps the AppShell mounted because the layout never re-runs the
+  //    `headers()` lookup.
+  if (routeMode === 'bare' || isBareRoutePathname(pathname)) return <>{children}</>
 
   const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
   const scope = detectScope(pathname)
