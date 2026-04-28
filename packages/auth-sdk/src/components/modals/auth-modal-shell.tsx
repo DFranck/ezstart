@@ -103,25 +103,40 @@ export function AuthModalShell({
   ) : undefined
 
   return (
-    <Modal
-      isOpen={isOpen}
-      {...(onClose ? { onClose } : {})}
-      size={size}
-      scrollBehavior="inside"
-      title={headerNode}
-      {...(descriptionNode ? { description: descriptionNode } : {})}
-      {...(footer ? { footer } : {})}
-      {...(className ? { className } : {})}
-      {...(backdrop ? { backdrop } : {})}
-      {...(disableOverlayClick ? { disableOverlayClick } : {})}
-      {...(disableEscapeKey ? { disableEscapeKey } : {})}
-    >
-      {showThemeSwitcher && (
-        <Div className="absolute top-3 left-3 z-10">
-          <ThemeSwitcher />
-        </Div>
+    <>
+      {/*
+        SSR backdrop placeholder — kills the chrome-flash window when the
+        Modal is used as a full page (auth routes). Radix Dialog mounts via
+        `createPortal()` which is client-only, so during SSR → hydration the
+        page chrome is briefly visible before the Modal portal lands. We paint
+        an SSR-safe `Div` with the same opaque backdrop styling at z-40 so the
+        chrome is hidden from the very first paint. Once Radix's overlay
+        mounts at z-50 with the same color, this placeholder is fully covered
+        — visually indistinguishable from a single-layer overlay.
+      */}
+      {isOpen && backdrop === 'opaque' && (
+        <Div aria-hidden className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl" />
       )}
-      <Div className="space-y-4">{children}</Div>
-    </Modal>
+      <Modal
+        isOpen={isOpen}
+        {...(onClose ? { onClose } : {})}
+        size={size}
+        scrollBehavior="inside"
+        title={headerNode}
+        {...(descriptionNode ? { description: descriptionNode } : {})}
+        {...(footer ? { footer } : {})}
+        {...(className ? { className } : {})}
+        {...(backdrop ? { backdrop } : {})}
+        {...(disableOverlayClick ? { disableOverlayClick } : {})}
+        {...(disableEscapeKey ? { disableEscapeKey } : {})}
+      >
+        {showThemeSwitcher && (
+          <Div className="absolute top-3 left-3 z-10">
+            <ThemeSwitcher />
+          </Div>
+        )}
+        <Div className="space-y-4">{children}</Div>
+      </Modal>
+    </>
   )
 }
