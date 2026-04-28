@@ -5,17 +5,17 @@
   "notFound": {
     "title": "404",
     "message": "La page que vous recherchez n'existe pas.",
-    "backHome": "Retour a l'accueil"
+    "backHome": "Retour à l'accueil"
   },
   "error": {
     "title": "Une erreur est survenue",
-    "message": "Une erreur inattendue s'est produite. Veuillez reessayer.",
-    "retry": "Reessayer"
+    "message": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "retry": "Réessayer"
   },
   "docs": {
     "title": "Documentation du SDK EZAuth",
-    "subtitle": "Demarrez avec @ezstart/auth-sdk",
-    "apiReferenceButton": "Reference API (Swagger)",
+    "subtitle": "Démarrez avec @ezstart/auth-sdk",
+    "apiReferenceButton": "Référence API (Swagger)",
     "viewOnGithub": "Voir sur GitHub"
   }
 }

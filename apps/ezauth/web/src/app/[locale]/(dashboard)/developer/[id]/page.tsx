@@ -1,98 +1,44 @@
-'use client'
+import { headers } from 'next/headers'
+import { getServerApiKeys, getServerApplication } from '@ezstart/auth-sdk/server'
+import { logger } from '@ezstart/logger/server'
+import { DeveloperDetailClient } from './DeveloperDetailClient'
 
-import { useAuth } from '@ezstart/auth-sdk'
-import { ApplicationDetailView } from '@ezstart/auth-sdk/components'
-import type { ApplicationDetailViewTexts } from '@ezstart/auth-sdk/components'
-import { Div, Spinner } from '@ezstart/ui/components'
-import { useLocale, useTranslations } from 'next-intl'
-import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+/**
+ * `/developer/[id]` — Server Component shell for the Application detail page.
+ *
+ * Pre-fetches the Application document AND the user's API keys server-side
+ * via the SSR helpers (`getServerApplication`, `getServerApiKeys`) using the
+ * inbound session cookie. Both results are forwarded to
+ * `<DeveloperDetailClient>` which seeds React Query so the detail tabs
+ * (Keys, Settings, Theme) render on the very first paint with no
+ * `<Skeleton>` / `<Spinner>` flash.
+ *
+ * When the user is anonymous (no cookie) or the Application is missing /
+ * forbidden, each helper returns `null` and the client component falls back
+ * to the legacy client-side behavior (loading state + redirect to `/login`
+ * when applicable).
+ */
+export default async function ApplicationDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const headersList = await headers()
+  const cookieHeader = headersList.get('cookie')
+  const apiUrl = process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'
 
-export default function ApplicationDetailPage() {
-  const t = useTranslations('developer.applications.detail')
-  const locale = useLocale()
-  const params = useParams()
-  const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
-
-  // Wait for initial mount + store hydration
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
-  // Redirect to login if not authenticated (after hydration)
-  useEffect(() => {
-    if (mounted && !isAuthenticated) {
-      router.replace(`/${locale}/login`)
-    }
-  }, [mounted, isAuthenticated, router, locale])
-
-  if (!mounted || !isAuthenticated || !user) {
-    return (
-      <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
-        <Spinner variant="primary" size="lg" />
-      </Div>
-    )
-  }
-
-  const applicationId = typeof params?.id === 'string' ? params.id : ''
-
-  const isSuperadmin = user.globalRoles?.includes('superadmin') ?? false
-
-  const texts: Partial<ApplicationDetailViewTexts> = {
-    back: t('back'),
-    tabKeys: t('tabKeys'),
-    tabSettings: t('tabSettings'),
-    tabTheme: t('tabTheme'),
-    loading: t('loading'),
-    errorTitle: t('errorTitle'),
-    errorDescription: t('errorDescription'),
-    retry: t('retry'),
-    settingsTitle: t('settingsTitle'),
-    settingsDescription: t('settingsDescription'),
-    settingsNameLabel: t('settingsNameLabel'),
-    settingsDescriptionLabel: t('settingsDescriptionLabel'),
-    settingsSave: t('settingsSave'),
-    settingsSaving: t('settingsSaving'),
-    settingsSaveSuccess: t('settingsSaveSuccess'),
-    settingsSaveFailed: t('settingsSaveFailed'),
-    archiveSectionTitle: t('archiveSectionTitle'),
-    archiveSectionDescription: t('archiveSectionDescription'),
-    archiveButton: t('archiveButton'),
-    archiveConfirmTitle: t('archiveConfirmTitle'),
-    archiveConfirmDescription: t('archiveConfirmDescription'),
-    archiveConfirmCascade: t('archiveConfirmCascade'),
-    archiveCancel: t('archiveCancel'),
-    archiveSubmit: t('archiveSubmit'),
-    archiveSuccess: t('archiveSuccess'),
-    archiveFailed: t('archiveFailed'),
-    themeTitle: t('themeTitle'),
-    themeDescription: t('themeDescription'),
-    themeEnableLabel: t('themeEnableLabel'),
-    themeEnableHelp: t('themeEnableHelp'),
-    themeProLockedLabel: t('themeProLockedLabel'),
-    themePrimaryLabel: t('themePrimaryLabel'),
-    themeLogoLabel: t('themeLogoLabel'),
-    themeLogoPlaceholder: t('themeLogoPlaceholder'),
-    themeReset: t('themeReset'),
-    themeSave: t('themeSave'),
-    themeSaving: t('themeSaving'),
-    themeSaveSuccess: t('themeSaveSuccess'),
-    themeSaveFailed: t('themeSaveFailed'),
-    themePreviewTitle: t('themePreviewTitle'),
-    themePreviewSubtitle: t('themePreviewSubtitle'),
-    themePreviewSignInCta: t('themePreviewSignInCta'),
-  }
+  // The two fetches are independent — run them in parallel.
+  const [initialApplication, initialKeys] = await Promise.all([
+    getServerApplication({ apiUrl, cookieHeader, id, logger }),
+    getServerApiKeys({ apiUrl, cookieHeader, logger }),
+  ])
 
   return (
-    <Div className="container mx-auto max-w-6xl px-4 py-8">
-      <ApplicationDetailView
-        applicationId={applicationId}
-        locale={locale}
-        texts={texts}
-        showAdminScope={isSuperadmin}
-        onBack={() => router.push(`/${locale}/dashboard?section=applications`)}
-        onArchived={() => router.push(`/${locale}/dashboard?section=applications`)}
-      />
-    </Div>
+    <DeveloperDetailClient
+      applicationId={id}
+      initialApplication={initialApplication ?? undefined}
+      initialKeys={initialKeys ?? undefined}
+    />
   )
 }

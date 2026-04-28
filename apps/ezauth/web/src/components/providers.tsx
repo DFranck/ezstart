@@ -1,15 +1,17 @@
 'use client'
 
-import { AuthProvider, useAuthStore } from '@ezstart/auth-sdk'
+import {
+  AuthProvider,
+  useAuthStoreGetSnapshot,
+  useAuthStoreApi,
+  type AuthUser,
+} from '@ezstart/auth-sdk'
 import { MaintenanceBanner } from '@ezstart/auth-sdk/components'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ThemeProvider } from '@ezstart/ui/theme'
 import { useLocale, useTranslations } from 'next-intl'
+import { useCallback } from 'react'
 import { QueryProvider } from './providers/QueryProvider'
-
-function handleAuthFailure() {
-  useAuthStore.getState().logout()
-}
 
 /**
  * Inner shell that mounts the platform-wide `<MaintenanceBanner>` on top of
@@ -34,7 +36,47 @@ function PlatformShell({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+/**
+ * Bridge component: lives INSIDE `<AuthProvider>` so it can read the auth
+ * store via Context. Wires the `getToken` + `onAuthFailure` callbacks for
+ * `<PayProvider>` (which sits in the same React tree but consumes the
+ * auth store imperatively). Splitting this out keeps the bridge logic
+ * close to the SDK plumbing it depends on.
+ */
+function PayBridge({ children, locale }: { children: React.ReactNode; locale: string }) {
+  const getSnapshot = useAuthStoreGetSnapshot()
+  const storeApi = useAuthStoreApi()
+  const onAuthFailure = useCallback(() => {
+    storeApi.getState().logout()
+  }, [storeApi])
+  return (
+    <PayProvider
+      applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID ?? ''}
+      appName="ezauth"
+      config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
+      locale={locale}
+      getToken={() => getSnapshot().accessToken}
+      onAuthFailure={onAuthFailure}
+    >
+      <PlatformShell>{children}</PlatformShell>
+    </PayProvider>
+  )
+}
+
+export function Providers({
+  children,
+  initialUser,
+}: {
+  children: React.ReactNode
+  /**
+   * SSR-resolved user — passed down from the locale-root layout, which calls
+   * `getServerAuth()` from `@ezstart/auth-sdk/server` against the request
+   * cookie. Hydrates the auth store synchronously on first render so the
+   * AppShell renders the right chrome (UserMenu vs LoginButton) on the very
+   * first paint — no flash on initial load or cross-group navigations.
+   */
+  initialUser?: AuthUser | null
+}) {
   const locale = useLocale()
   return (
     <ThemeProvider>
@@ -60,6 +102,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
         apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
         webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+        initialUser={initialUser}
       >
         <QueryProvider>
           {/*
@@ -69,16 +112,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             ezauth key and 404. Using `applicationId` bypasses the key-config
             resolve and scopes ezpay queries directly to the ezauth tenant.
           */}
-          <PayProvider
-            applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID ?? ''}
-            appName="ezauth"
-            config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
-            locale={locale}
-            getToken={() => useAuthStore.getState().accessToken}
-            onAuthFailure={handleAuthFailure}
-          >
-            <PlatformShell>{children}</PlatformShell>
-          </PayProvider>
+          <PayBridge locale={locale}>{children}</PayBridge>
         </QueryProvider>
       </AuthProvider>
     </ThemeProvider>

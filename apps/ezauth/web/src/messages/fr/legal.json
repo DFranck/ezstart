@@ -1,79 +1,79 @@
 {
   "about": {
-    "title": "A propos d'EZAuth",
-    "leadHeading": "Authentification centralisee pour les applications modernes",
-    "leadBody": "EZAuth est le service d'identite qui alimente les applications EZStart. Nous proposons l'authentification unique securisee, la gestion des cles API, OAuth2, l'authentification multi-facteurs et le controle d'acces par roles via une plateforme pensee pour les developpeurs.",
+    "title": "À propos d'EZAuth",
+    "leadHeading": "Authentification centralisée pour les applications modernes",
+    "leadBody": "EZAuth est le service d'identité qui alimente les applications EZStart. Nous proposons l'authentification unique sécurisée, la gestion des clés API, OAuth2, l'authentification multi-facteurs et le contrôle d'accès par rôles via une plateforme pensée pour les développeurs.",
     "missionHeading": "Notre mission",
-    "missionBody": "Nous pensons que l'authentification doit etre simple a integrer, transparente pour les utilisateurs et jamais reportee a plus tard du cote securite. EZAuth permet aux equipes produit de se concentrer sur leur metier pendant que nous gerons la couche d'identite.",
+    "missionBody": "Nous pensons que l'authentification doit être simple à intégrer, transparente pour les utilisateurs et jamais reportée à plus tard du côté sécurité. EZAuth permet aux équipes produit de se concentrer sur leur métier pendant que nous gérons la couche d'identité.",
     "techHeading": "Technologie",
-    "techBody": "EZAuth est construit en TypeScript, Next.js, Express et MongoDB. La pile complete est open source et developpee dans le monorepo @ezstart sur GitHub. Les SDK sont publies sur npm pour qu'un projet puisse adopter EZAuth en quelques minutes.",
-    "ctaHeading": "Demarrer",
-    "ctaBody": "Lisez la documentation ou creez un compte pour integrer EZAuth des aujourd'hui.",
+    "techBody": "EZAuth est construit en TypeScript, Next.js, Express et MongoDB. La pile complète est open source et développée dans le monorepo @ezstart sur GitHub. Les SDK sont publiés sur npm pour qu'un projet puisse adopter EZAuth en quelques minutes.",
+    "ctaHeading": "Démarrer",
+    "ctaBody": "Lisez la documentation ou créez un compte pour intégrer EZAuth dès aujourd'hui.",
     "ctaDocs": "Lire la documentation",
     "ctaContact": "Nous contacter"
   },
   "privacy": {
-    "title": "Politique de confidentialite",
-    "lastUpdatedLabel": "Derniere mise a jour",
+    "title": "Politique de confidentialité",
+    "lastUpdatedLabel": "Dernière mise à jour",
     "lastUpdatedValue": "25 avril 2026",
-    "summaryHeading": "Resume",
-    "summaryBody": "EZAuth respecte votre vie privee. Notre politique complete est en cours de finalisation avec notre equipe juridique et sera publiee avant le lancement public.",
-    "scopeHeading": "Donnees collectees",
-    "scopeBody": "Nous collectons uniquement les donnees necessaires a votre authentification et a l'exploitation du service : adresse e-mail, mot de passe hache, identifiants des fournisseurs OAuth, metadonnees de session et journaux d'audit minimaux. Nous ne vendons jamais de donnees personnelles.",
+    "summaryHeading": "Résumé",
+    "summaryBody": "EZAuth respecte votre vie privée. Notre politique complète est en cours de finalisation avec notre équipe juridique et sera publiée avant le lancement public.",
+    "scopeHeading": "Données collectées",
+    "scopeBody": "Nous collectons uniquement les données nécessaires à votre authentification et à l'exploitation du service : adresse e-mail, mot de passe haché, identifiants des fournisseurs OAuth, métadonnées de session et journaux d'audit minimaux. Nous ne vendons jamais de données personnelles.",
     "contactHeading": "Une question ?",
-    "contactBody": "Contactez-nous pour obtenir des details sur le traitement de vos donnees.",
+    "contactBody": "Contactez-nous pour obtenir des détails sur le traitement de vos données.",
     "contactCta": "Nous contacter"
   },
   "terms": {
     "title": "Conditions d'utilisation",
-    "lastUpdatedLabel": "Derniere mise a jour",
+    "lastUpdatedLabel": "Dernière mise à jour",
     "lastUpdatedValue": "25 avril 2026",
-    "summaryHeading": "Resume",
-    "summaryBody": "EZAuth est fourni en l'etat le temps que nous finalisions nos conditions avec notre equipe juridique. Les conditions complete seront publiees avant le lancement public.",
+    "summaryHeading": "Résumé",
+    "summaryBody": "EZAuth est fourni en l'état le temps que nous finalisions nos conditions avec notre équipe juridique. Les conditions complètes seront publiées avant le lancement public.",
     "useHeading": "Usage acceptable",
-    "useBody": "En utilisant EZAuth vous vous engagez a respecter les lois en vigueur, a ne pas abuser du service et a securiser vos identifiants. Nous nous reservons le droit de suspendre tout compte qui enfreint ces principes.",
+    "useBody": "En utilisant EZAuth vous vous engagez à respecter les lois en vigueur, à ne pas abuser du service et à sécuriser vos identifiants. Nous nous réservons le droit de suspendre tout compte qui enfreint ces principes.",
     "contactHeading": "Une question ?",
     "contactBody": "Contactez-nous pour toute question sur ces conditions.",
     "contactCta": "Nous contacter"
   },
   "blog": {
     "title": "Blog",
-    "leadHeading": "Reflexions, sorties et notes d'ingenierie",
-    "leadBody": "Notre blog arrive bientot. Nous y partagerons des nouveautes produit, des analyses techniques approfondies et les bonnes pratiques de securite autour de l'authentification et de l'experience developpeur.",
-    "subscribeHeading": "Restez informe",
-    "subscribeBody": "Suivez le projet sur GitHub ou contactez-nous pour etre prevenu de la mise en ligne du blog.",
+    "leadHeading": "Réflexions, sorties et notes d'ingénierie",
+    "leadBody": "Notre blog arrive bientôt. Nous y partagerons des nouveautés produit, des analyses techniques approfondies et les bonnes pratiques de sécurité autour de l'authentification et de l'expérience développeur.",
+    "subscribeHeading": "Restez informé",
+    "subscribeBody": "Suivez le projet sur GitHub ou contactez-nous pour être prévenu de la mise en ligne du blog.",
     "subscribeCta": "Voir sur GitHub"
   },
   "changelog": {
     "title": "Journal des changements",
-    "subtitle": "Changements notables d'EZAuth, du plus recent au plus ancien.",
+    "subtitle": "Changements notables d'EZAuth, du plus récent au plus ancien.",
     "githubLabel": "Historique complet des sorties",
     "githubCta": "Voir les releases sur GitHub",
     "entries": {
-      "v01Title": "v0.1.0 — Premiere preview publique",
+      "v01Title": "v0.1.0 — Première preview publique",
       "v01Date": "25 avril 2026",
-      "v01Body": "Premiere preview publique d'EZAuth. Inclut la connexion par e-mail et OAuth, la gestion des cles API, le controle d'acces par roles, les Applications multi-tenant et le theming en marque blanche."
+      "v01Body": "Première preview publique d'EZAuth. Inclut la connexion par e-mail et OAuth, la gestion des clés API, le contrôle d'accès par rôles, les Applications multi-tenant et le theming en marque blanche."
     }
   },
   "status": {
     "title": "Statut",
-    "summaryBadge": "Tous les systemes operationnels",
-    "summaryBody": "EZAuth fonctionne actuellement normalement. Un tableau de bord en direct avec des metriques d'uptime et un historique des incidents est en developpement.",
+    "summaryBadge": "Tous les systèmes opérationnels",
+    "summaryBody": "EZAuth fonctionne actuellement normalement. Un tableau de bord en direct avec des métriques d'uptime et un historique des incidents est en développement.",
     "componentsHeading": "Composants du service",
     "components": {
       "apiName": "API d'authentification",
-      "apiStatus": "Operationnel",
+      "apiStatus": "Opérationnel",
       "dashboardName": "Tableau de bord web",
-      "dashboardStatus": "Operationnel",
+      "dashboardStatus": "Opérationnel",
       "oauthName": "Fournisseurs OAuth",
-      "oauthStatus": "Operationnel"
+      "oauthStatus": "Opérationnel"
     },
     "incidentsHeading": "Incidents",
-    "incidentsBody": "Aucun incident actif signale."
+    "incidentsBody": "Aucun incident actif signalé."
   },
   "contact": {
     "title": "Nous contacter",
-    "leadBody": "Besoin d'aide pour integrer EZAuth, signaler un probleme ou discuter de votre cas d'usage ? Nous repondons generalement sous un jour ouvre.",
+    "leadBody": "Besoin d'aide pour intégrer EZAuth, signaler un problème ou discuter de votre cas d'usage ? Nous répondons généralement sous un jour ouvré.",
     "emailLabel": "E-mail",
     "emailCta": "Nous envoyer un e-mail",
     "githubLabel": "GitHub",

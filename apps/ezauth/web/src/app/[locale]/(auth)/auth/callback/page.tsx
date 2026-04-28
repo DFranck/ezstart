@@ -1,11 +1,11 @@
 import { AuthCallbackPage } from '@ezstart/auth-sdk'
-import { Div } from '@ezstart/ui/components'
+import { Section } from '@ezstart/ui/components'
 import { getTranslations } from 'next-intl/server'
 
 export default async function CallbackPage() {
   const t = await getTranslations('callback')
   return (
-    <Div className="flex flex-1 items-center justify-center px-2">
+    <Section className="px-2">
       <AuthCallbackPage
         redirectTo="/dashboard"
         successMessage={t('success')}
@@ -15,6 +15,6 @@ export default async function CallbackPage() {
         noCodeMessage={t('noCode')}
         errorButtonText={t('backToHome')}
       />
-    </Div>
+    </Section>
   )
 }

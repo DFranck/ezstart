@@ -1,8 +1,10 @@
 'use client'
 
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { deriveAppHintFromRedirectUri } from '@/hooks/useDerivedApp'
+import { useKeyConfig, type KeyConfigState } from '@/hooks/useKeyConfig'
+import { Link } from '@/i18n/navigation'
+import { prettifySlug } from '@/server/theme-ssr'
 import { SignInForm, useAuthNavigation } from '@ezstart/auth-sdk'
-import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import {
   BackButton,
   Card,
@@ -11,16 +13,15 @@ import {
   CardHeader,
   Div,
   P,
+  Section,
   Span,
   Spinner,
 } from '@ezstart/ui/components'
+import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import { toast } from '@ezstart/ui/utils'
-import { Link } from '@/i18n/navigation'
-import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useKeyConfig, type KeyConfigState } from '@/hooks/useKeyConfig'
-import { deriveAppHintFromRedirectUri } from '@/hooks/useDerivedApp'
-import { prettifySlug } from '@/server/theme-ssr'
+import { useParams } from 'next/navigation'
+import { Suspense, useEffect, useRef, useState } from 'react'
 
 /**
  * Max retry delay when the server did not provide a `Retry-After` header or
@@ -91,15 +92,11 @@ function LoginContent({ ssrAppName, ssrAppDisplayName }: LoginContentProps) {
   // see a toast explaining the situation OR the auto-retry unblocks them.
   const isProbing = keyConfig.status === 'loading'
 
-  // First-party fallback: if no ?redirect_uri= is passed (user lands on
-  // ezauth's own /login directly), default to ezauth's own callback page so
-  // the SDK's code-flow exchanges the authorization code for a session cookie
-  // and lands the user on /dashboard (AuthCallbackPage default).
-  const resolvedRedirectUri =
-    navigation.redirectUri ??
-    (typeof window !== 'undefined'
-      ? `${window.location.origin}/${locale}/auth/callback`
-      : undefined)
+  // The SDK's `<SignInForm>` resolves the redirect URI itself (explicit
+  // prop > URL `?redirect_uri=` > same-origin `/dashboard` fallback). Pass
+  // the URL param explicitly only if you want to override the SDK default
+  // (e.g. land on `/admin` instead of `/dashboard` for superadmin flows).
+  const resolvedRedirectUri = navigation.redirectUri
   const bannerKeyStatus = navigation.publishableKey
     ? keyConfig.status === 'valid'
       ? ('valid' as const)
@@ -227,10 +224,10 @@ export default function LoginClient({ ssrAppName, ssrAppDisplayName }: LoginClie
   const t = useTranslations('login')
 
   return (
-    <Div className="flex flex-1 items-center justify-center px-2">
+    <Section className="px-2">
       <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
         <LoginContent ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
       </Suspense>
-    </Div>
+    </Section>
   )
 }

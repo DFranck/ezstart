@@ -75,12 +75,26 @@ function sanitizeDisplayName(value: string | null | undefined): string | undefin
  * last-resort fallback — tenants owning a real Application should set
  * `name` so this never runs in production.
  *
+ * Known platform brand names get a special-case mapping to preserve their
+ * canonical capitalization (EZAuth, EZPay, etc.) — `'ezauth'` would otherwise
+ * render as `'Ezauth'`.
+ *
  * @example
  *   prettifySlug('green-pulse') // 'Green Pulse'
- *   prettifySlug('ezpay')       // 'Ezpay'
+ *   prettifySlug('ezauth')      // 'EZAuth'
+ *   prettifySlug('ezpay')       // 'EZPay'
  */
+const KNOWN_BRAND_NAMES: Record<string, string> = {
+  ezauth: 'EZAuth',
+  ezpay: 'EZPay',
+  ezbill: 'EZBill',
+  ezstart: 'EZStart',
+}
+
 export function prettifySlug(slug: string): string {
   if (!slug) return ''
+  const lower = slug.toLowerCase()
+  if (KNOWN_BRAND_NAMES[lower]) return KNOWN_BRAND_NAMES[lower]
   return slug
     .split('-')
     .filter(part => part.length > 0)

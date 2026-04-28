@@ -1,7 +1,15 @@
 'use client'
 
 import { VerifyEmailFlow } from '@ezstart/auth-sdk'
-import { Card, CardContent, CardHeader, CardTitle, Div, Spinner } from '@ezstart/ui/components'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Div,
+  Section,
+  Spinner,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
@@ -36,7 +44,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Div className="flex flex-1 items-center justify-center px-2">
+    <Section className="px-2">
       <Suspense
         fallback={
           <Div className="flex justify-center py-8">
@@ -46,6 +54,6 @@ export default function VerifyEmailPage() {
       >
         <VerifyEmailContent />
       </Suspense>
-    </Div>
+    </Section>
   )
 }

@@ -51,8 +51,8 @@ export default async function DocsPage() {
         </Div>
       </Div>
 
-      <Card>
-        <CardContent className="p-6 md:p-8">
+      <Card className="w-full min-w-0 overflow-hidden">
+        <CardContent className="p-6 md:p-8 min-w-0">
           <MarkdownContent content={readme} />
         </CardContent>
       </Card>

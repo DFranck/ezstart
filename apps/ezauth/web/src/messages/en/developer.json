@@ -14,7 +14,11 @@
       "actions": "Actions",
       "never": "Never",
       "noExpiry": "No expiry",
-      "usage": "Usage"
+      "usage": "Usage",
+      "paginationPrevious": "Previous",
+      "paginationNext": "Next",
+      "paginationRows": "{count} row(s)",
+      "paginationPageOf": "Page {current} of {total}"
     },
     "status": {
       "active": "Active",
@@ -171,6 +175,8 @@
         "retry": "Retry",
         "settingsTitle": "Settings",
         "settingsDescription": "Update application name and description. Slug is immutable.",
+        "settingsSlugLabel": "Slug",
+        "settingsSlugHelp": "Slug is immutable.",
         "settingsNameLabel": "Application Name",
         "settingsDescriptionLabel": "Description",
         "settingsSave": "Save Changes",

@@ -9,6 +9,7 @@ import {
   CardHeader,
   Div,
   P,
+  Section,
   Span,
   Spinner,
 } from '@ezstart/ui/components'
@@ -139,10 +140,10 @@ export default function RegisterClient({ ssrAppName, ssrAppDisplayName }: Regist
   const t = useTranslations('register')
 
   return (
-    <Div className="flex flex-1 items-center justify-center px-2">
+    <Section className="px-2">
       <Suspense fallback={<Spinner variant="primary" size="lg" text={t('loading')} />}>
         <RegisterContent ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
       </Suspense>
-    </Div>
+    </Section>
   )
 }

@@ -12,10 +12,33 @@
       "mine": "Moi uniquement"
     },
     "tabs": {
+      "overview": "Vue d'ensemble",
       "users": "Utilisateurs",
-      "plans": "Plans",
       "applications": "Applications",
       "settings": "Paramètres"
+    },
+    "overview": {
+      "title": "Analytics plateforme",
+      "subtitle": "Statistiques temps réel de la plateforme. Superadmin uniquement.",
+      "totalUsers": "Total utilisateurs",
+      "newUsersThisMonth": "Nouveaux ce mois-ci",
+      "activeUsersLast30Days": "Actifs (30j)",
+      "activeUsersHint": "Utilisateurs vus dans les 30 derniers jours",
+      "verifiedUsers": "Vérifiés",
+      "twoFactorEnabled": "2FA activée",
+      "totalApplications": "Applications",
+      "totalApiKeys": "Clés API",
+      "signupTrendTitle": "Inscriptions (30 derniers jours)",
+      "signupTrendDescription": "Nouveaux comptes par jour",
+      "signupTrendEmpty": "Aucune inscription dans les 30 derniers jours.",
+      "signupSeriesLabel": "Inscriptions",
+      "signupAxisLabel": "Date",
+      "topAppsTitle": "Top apps par utilisateurs",
+      "topAppsDescription": "Applications classées par nombre d'utilisateurs inscrits.",
+      "topAppsEmpty": "Aucune inscription d'app pour le moment.",
+      "topAppsAppColumn": "App",
+      "topAppsUsersColumn": "Utilisateurs",
+      "loadError": "Échec du chargement des analytics."
     },
     "featureFlags": {
       "title": "Feature flags",
@@ -127,6 +150,8 @@
       "daysAgo": "il y a {count} j",
       "previous": "Précédent",
       "next": "Suivant",
+      "rows": "{count} ligne(s)",
+      "pageOf": "Page {current} sur {total}",
       "allApps": "Toutes les apps",
       "filterByApp": "Filtrer par app",
       "save": "Enregistrer"
@@ -136,6 +161,7 @@
       "columns": {
         "email": "Email",
         "username": "Nom d'utilisateur",
+        "apps": "Applications",
         "roles": "Rôles",
         "createdAt": "Date de création",
         "actions": "Actions"

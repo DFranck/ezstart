@@ -3,14 +3,45 @@ import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { getWebUrl } from '@ezstart/config'
 import { Providers } from '@/components/providers'
+import { AppShell } from '@/components/app-shell'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
+import { logger } from '@ezstart/logger/server'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import Script from 'next/script'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { ReactNode } from 'react'
 import { resolveSsrTheme, renderThemeStyle } from '@/server/theme-ssr'
+
+/**
+ * Resolve the user's resolved scheme (`'dark' | 'light' | undefined`) for
+ * SSR-side className injection on `<html>`. Combines two sources, in order:
+ *
+ * 1. `x-theme-preference` request header — set by middleware when the URL
+ *    contains `?theme=light|dark|system`. Wins on cross-app SSO redirects
+ *    (consumer just sent us the preference for THIS request).
+ * 2. `theme` cookie — written by next-themes after the user toggled scheme
+ *    on a previous ezauth page, OR by middleware on a previous request.
+ *    Used for in-app navigations where no `?theme=` is present.
+ *
+ * Returns `undefined` when the value is `'system'` or absent — the inline
+ * next-themes blocking script will then resolve via `prefers-color-scheme`.
+ * We intentionally do NOT try to second-guess the OS preference server-side
+ * (we can't read it) — a brief FOIT (flash of initial theme = unstyled root)
+ * is acceptable when the user has expressed no preference; what we are
+ * killing is FOWT (Flash of Wrong Theme), which happens when we DO know the
+ * preference but render with the wrong default.
+ */
+async function resolveSsrThemeClass(): Promise<'dark' | undefined> {
+  const headersList = await headers()
+  const cookieStore = await cookies()
+  const fromHeader = headersList.get('x-theme-preference')
+  const fromCookie = cookieStore.get('theme')?.value
+  const value = fromHeader ?? fromCookie
+  return value === 'dark' ? 'dark' : undefined
+}
 
 const DOMAIN = getWebUrl('ezauth', 'production')
 
@@ -63,8 +94,42 @@ export default async function LocaleLayout({ children, params }: Props) {
   const { appName: ssrAppName, theme: ssrTheme } = resolveSsrTheme(headersList)
   const themeCss = renderThemeStyle(ssrAppName, ssrTheme)
 
+  // SSR theme class — kills FOWT on cross-app SSO redirects. When the
+  // consumer sends `?theme=dark`, the middleware injects the
+  // `x-theme-preference` header on this request and we paint `<html
+  // class="dark">` directly in the SSR payload. next-themes' blocking
+  // script still runs after hydration and reconciles localStorage; with
+  // `suppressHydrationWarning` set on `<html>`, any divergence is silenced
+  // (the script's reconciliation is the source of truth post-hydration).
+  const ssrThemeClass = await resolveSsrThemeClass()
+
+  // Route mode — set by middleware via `x-route-mode` header. `'bare'` means
+  // the route renders its own full-screen chrome (auth forms, dashboard,
+  // admin, developer, account) and AppShell must short-circuit to bare
+  // children. Resolving this server-side eliminates the landing-chrome flash
+  // on `/dashboard` direct loads (the legacy client `usePathname()` only ran
+  // after hydration, so the SSR payload always shipped landing chrome).
+  const routeModeHeader = headersList.get('x-route-mode')
+  const routeMode: 'bare' | 'full' = routeModeHeader === 'bare' ? 'bare' : 'full'
+
+  // SSR auth bootstrap (Clerk-style) — kills the LoginButton flash in
+  // httpOnly mode. Reads the session cookie from the inbound request,
+  // resolves the user via `/api/auth/me` server-side, and seeds the Zustand
+  // store synchronously when `<AuthProvider>` mounts (via `initialUser`).
+  // The first paint of `<UserMenu>` / `<LoginButton>` / `<RequireAuth>` then
+  // reflects the right state — no async client-side gap during which the
+  // store defaults to `isAuthenticated: false`. Anonymous requests still
+  // work: `getServerAuth()` returns `null` and the legacy client-side
+  // bootstrap takes over.
+  const cookieHeader = headersList.get('cookie')
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
+    cookieHeader,
+    logger,
+  })
+
   return (
-    <html lang={locale} suppressHydrationWarning data-app="ezauth">
+    <html lang={locale} suppressHydrationWarning data-app="ezauth" className={ssrThemeClass}>
       <head>
         {/*
           Sync the `theme` cookie (written by middleware from `?theme=` URL
@@ -107,7 +172,18 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ErrorBoundary title={t('errorBoundary.title')}>
-            <Providers>{children}</Providers>
+            <Providers initialUser={initialUser}>
+              {/*
+                AppShell mounted at the locale-root level — sits ABOVE the
+                `(public)`/`(dashboard)`/`(auth)` route groups so it persists
+                across cross-group navigations (e.g. `/admin` -> `/`) instead
+                of remounting from scratch each time. AppShell internally
+                detects auth/dashboard routes (login/register/dashboard/...)
+                and short-circuits to bare `children` without chrome, while
+                staying mounted.
+              */}
+              <AppShell routeMode={routeMode}>{children}</AppShell>
+            </Providers>
           </ErrorBoundary>
         </NextIntlClientProvider>
         <Toaster />

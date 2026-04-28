@@ -1,16 +1,20 @@
 'use client'
 
-import { LoginButton, useAuth } from '@ezstart/auth-sdk'
-import { UserMenu, type UserMenuItem } from '@ezstart/auth-sdk/components'
-import { LocaleSwitcher, AppShell as BaseAppShell } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/ui/theme'
-import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
+import { useAuth } from '@ezstart/auth-sdk'
+import { UserMenuV2, type UserMenuItem } from '@ezstart/auth-sdk/components'
+import { AppShell as BaseAppShell } from '@ezstart/ui/components'
+import { useTheme } from '@ezstart/ui/theme'
+import { useLocale, useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { EzauthScopeIndicator } from './ezauth-scope-indicator'
 
-const LOCALES = ['en', 'fr', 'vi']
+const LANGUAGES = [
+  { code: 'en', label: 'EN' },
+  { code: 'fr', label: 'FR' },
+  { code: 'vi', label: 'VI' },
+]
 
 const ADMIN_SCOPE_PREFIXES = ['/admin']
 const USER_SCOPE_PREFIXES = ['/dashboard', '/account', '/developer']
@@ -21,16 +25,51 @@ function detectScope(pathname: string): 'user' | 'admin' | null {
   return null
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export interface AppShellProps {
+  children: ReactNode
+  /**
+   * Chrome rendering mode — resolved server-side by the layout reading the
+   * `x-route-mode` header injected by `middleware.ts`. `'bare'` means the
+   * route renders its own full-screen chrome (auth forms, dashboard, admin,
+   * developer, account) and we short-circuit to bare children. `'full'` mounts
+   * the public landing chrome (header + footer).
+   *
+   * Resolving this in the layout (instead of the legacy client
+   * `usePathname()` swap) eliminates the landing-chrome flash on direct loads
+   * of `/dashboard`, `/admin`, etc.: the SSR payload already ships the right
+   * shell, so the very first paint is correct.
+   */
+  routeMode?: 'bare' | 'full'
+}
+
+export function AppShell({ children, routeMode = 'full' }: AppShellProps) {
   const t = useTranslations('layout')
+  const tMenu = useTranslations('layout.userMenuV2')
+  const tAccount = useTranslations('layout.accountModalV2')
   const { isAuthenticated, user } = useAuth()
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
+
+  // Bare routes (auth forms, dashboard, admin) ship their own full-screen
+  // chrome — return children un-wrapped so the landing AppShell doesn't
+  // double-frame them. `routeMode` is decided SSR-side by the middleware so
+  // the very first paint already matches (no client `usePathname()` swap).
+  if (routeMode === 'bare') return <>{children}</>
 
   const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
   const scope = detectScope(pathname)
   const showScopeIndicator = isAuthenticated && scope !== null
+
+  // Immersive header on the public landing home only — overlay positions the
+  // header `absolute top-0` so the hero (`<LandingHero variant="full" />`)
+  // can render full-viewport (100vh) under it. All other public pages keep
+  // the default sticky header. Pathname is locale-prefixed by next-intl
+  // (`/en`, `/fr`, `/vi`) so we strip the leading 3-char segment before
+  // comparing to `/`.
+  const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/'
+  const headerMode: 'sticky' | 'overlay' = pathWithoutLocale === '/' ? 'overlay' : 'sticky'
 
   const handleLocaleChange = (newLocale: string) => {
     const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`)
@@ -44,11 +83,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       href: `/${locale}/dashboard`,
       icon: 'lucide:LayoutDashboard',
     },
-    {
-      label: t('userMenuDeveloper'),
-      href: `/${locale}/developer`,
-      icon: 'lucide:Code',
-    },
     ...(isSuperadmin
       ? [
           {
@@ -61,21 +95,95 @@ export function AppShell({ children }: { children: ReactNode }) {
       : []),
   ]
 
-  const authActions = (
-    <>
-      {showScopeIndicator && scope !== null && <EzauthScopeIndicator scope={scope} />}
-      <LocaleSwitcher
-        locales={LOCALES}
-        currentLocale={locale}
-        onLocaleChange={handleLocaleChange}
-      />
-      <ThemeSwitcher />
-      {isAuthenticated ? (
-        <UserMenu extraItems={extraItems} />
-      ) : (
-        <LoginButton size="sm" loginText={t('navSignIn')} />
-      )}
-    </>
+  // Scope indicator stays in the desktop actions zone (`authActions`) since
+  // it's a contextual badge, not a primary affordance — collapses into the
+  // mobile drawer where it's still discoverable but not cramped at the top.
+  const authActions =
+    showScopeIndicator && scope !== null ? <EzauthScopeIndicator scope={scope} /> : null
+
+  // UserMenu lives in `persistentActions` so it stays glued to the right of
+  // the header on mobile (next to the burger toggle) instead of being hidden
+  // inside the burger drawer — Stripe / Clerk / Vercel pattern.
+  const persistentActions = (
+    <UserMenuV2
+      extraItems={extraItems}
+      texts={{
+        signIn: t('navSignIn'),
+        manageAccount: tMenu('manageAccount'),
+        signOut: tMenu('signOut'),
+        signingOut: tMenu('signingOut'),
+        signOutSuccess: tMenu('signOutSuccess'),
+        signOutError: tMenu('signOutError'),
+        signOutAllDevices: tMenu('signOutAllDevices'),
+        signOutAllSuccess: tMenu('signOutAllSuccess'),
+        signOutAllError: tMenu('signOutAllError'),
+        emailVerified: tMenu('emailVerified'),
+        emailUnverified: tMenu('emailUnverified'),
+        resendVerification: tMenu('resendVerification'),
+        verificationSent: tMenu('verificationSent'),
+        verifyError: tMenu('verifyError'),
+        themeLabel: tMenu('themeLabel'),
+        themeLight: tMenu('themeLight'),
+        themeDark: tMenu('themeDark'),
+        themeSystem: tMenu('themeSystem'),
+        notifications: tMenu('notifications'),
+        notificationsBadgeLabel: tMenu('notificationsBadgeLabel'),
+        helpAndResources: tMenu('helpAndResources'),
+        helpCenter: tMenu('helpCenter'),
+        keyboardShortcuts: tMenu('keyboardShortcuts'),
+        keyboardShortcutsHint: tMenu('keyboardShortcutsHint'),
+        status: tMenu('status'),
+        changelog: tMenu('changelog'),
+        managePlan: tMenu('managePlan'),
+      }}
+      accountModalTexts={{
+        title: tAccount('title'),
+        needHelp: tAccount('needHelp'),
+        toggleNavigation: tAccount('toggleNavigation'),
+        profileTab: tAccount('profileTab'),
+        settingsTab: tAccount('settingsTab'),
+        updateProfile: tAccount('updateProfile'),
+        emailSection: tAccount('emailSection'),
+        primary: tAccount('primary'),
+        connectedAccounts: tAccount('connectedAccounts'),
+        connectAccount: tAccount('connectAccount'),
+        themeSection: tAccount('themeSection'),
+        themeLight: tAccount('themeLight'),
+        themeDark: tAccount('themeDark'),
+        themeSystem: tAccount('themeSystem'),
+        languageSection: tAccount('languageSection'),
+        memberSince: tAccount('memberSince'),
+        firstName: tAccount('firstName'),
+        lastName: tAccount('lastName'),
+        save: tAccount('save'),
+        cancel: tAccount('cancel'),
+        profileUpdated: tAccount('profileUpdated'),
+        changeAvatar: tAccount('changeAvatar'),
+        cropAvatar: tAccount('cropAvatar'),
+        passwordSection: tAccount('passwordSection'),
+        currentPassword: tAccount('currentPassword'),
+        newPassword: tAccount('newPassword'),
+        changePassword: tAccount('changePassword'),
+        createPassword: tAccount('createPassword'),
+        passwordChanged: tAccount('passwordChanged'),
+        securitySection: tAccount('securitySection'),
+        manageSecurity: tAccount('manageSecurity'),
+        emailVerified: tAccount('emailVerified'),
+        emailUnverified: tAccount('emailUnverified'),
+        resendVerification: tAccount('resendVerification'),
+        verificationSent: tAccount('verificationSent'),
+        verifyError: tAccount('verifyError'),
+        dateLocale: locale,
+      }}
+      theme={theme ? { theme, setTheme } : undefined}
+      languages={LANGUAGES}
+      currentLocale={locale}
+      onLocaleChange={handleLocaleChange}
+      planLabel="Free"
+      helpHref={`/${locale}/docs`}
+      statusHref={`/${locale}/status`}
+      changelogHref={`/${locale}/changelog`}
+    />
   )
 
   return (
@@ -117,7 +225,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         copyright: `© ${t('footerCopyright')}`,
       }}
       authActions={authActions}
+      persistentActions={persistentActions}
       LinkComponent={Link}
+      headerMode={headerMode}
     >
       {children}
     </BaseAppShell>

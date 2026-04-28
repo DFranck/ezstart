@@ -14,7 +14,11 @@
       "actions": "Actions",
       "never": "Jamais",
       "noExpiry": "Sans expiration",
-      "usage": "Utilisation"
+      "usage": "Utilisation",
+      "paginationPrevious": "Précédent",
+      "paginationNext": "Suivant",
+      "paginationRows": "{count} ligne(s)",
+      "paginationPageOf": "Page {current} sur {total}"
     },
     "status": {
       "active": "Active",
@@ -171,6 +175,8 @@
         "retry": "Réessayer",
         "settingsTitle": "Paramètres",
         "settingsDescription": "Modifiez le nom et la description. Le slug est immuable.",
+        "settingsSlugLabel": "Slug",
+        "settingsSlugHelp": "Le slug est immuable.",
         "settingsNameLabel": "Nom de l'application",
         "settingsDescriptionLabel": "Description",
         "settingsSave": "Enregistrer",

@@ -12,10 +12,33 @@
       "mine": "Just me"
     },
     "tabs": {
+      "overview": "Overview",
       "users": "Users",
-      "plans": "Plans",
       "applications": "Applications",
       "settings": "Settings"
+    },
+    "overview": {
+      "title": "Platform analytics",
+      "subtitle": "Real-time platform-wide stats. Superadmin only.",
+      "totalUsers": "Total users",
+      "newUsersThisMonth": "New this month",
+      "activeUsersLast30Days": "Active (30d)",
+      "activeUsersHint": "Users seen in the last 30 days",
+      "verifiedUsers": "Verified",
+      "twoFactorEnabled": "2FA enabled",
+      "totalApplications": "Applications",
+      "totalApiKeys": "API keys",
+      "signupTrendTitle": "Signups (last 30 days)",
+      "signupTrendDescription": "Daily new accounts",
+      "signupTrendEmpty": "No signups in the last 30 days.",
+      "signupSeriesLabel": "Signups",
+      "signupAxisLabel": "Date",
+      "topAppsTitle": "Top apps by users",
+      "topAppsDescription": "Applications ranked by registered user count.",
+      "topAppsEmpty": "No app registrations yet.",
+      "topAppsAppColumn": "App",
+      "topAppsUsersColumn": "Users",
+      "loadError": "Failed to load analytics."
     },
     "featureFlags": {
       "title": "Feature flags",
@@ -127,6 +150,8 @@
       "daysAgo": "{count}d ago",
       "previous": "Previous",
       "next": "Next",
+      "rows": "{count} row(s)",
+      "pageOf": "Page {current} of {total}",
       "allApps": "All apps",
       "filterByApp": "Filter by app",
       "save": "Save"
@@ -136,6 +161,7 @@
       "columns": {
         "email": "Email",
         "username": "Username",
+        "apps": "Applications",
         "roles": "Roles",
         "createdAt": "Created At",
         "actions": "Actions"

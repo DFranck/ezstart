@@ -23,6 +23,33 @@ const VALID_THEME_PREFERENCES = new Set(['light', 'dark', 'system'])
  */
 const THEME_COOKIE_NAME = 'theme'
 
+/**
+ * Path fragments that render their own full-screen chrome (auth forms,
+ * dashboard, admin, developer, account). Matched via `pathname.includes(...)`
+ * so locale-prefixed URLs (`/en/login`, `/fr/dashboard`, etc.) hit without
+ * per-locale entries.
+ *
+ * Mirrors `BARE_PREFIXES` in `components/app-shell.tsx`. The middleware
+ * injects `x-route-mode: bare | full` based on this list so the layout can
+ * decide chrome rendering SSR-correctly (no client `usePathname()` swap).
+ */
+const BARE_ROUTE_PREFIXES = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/auth/',
+  '/dashboard',
+  '/admin',
+  '/developer',
+  '/account',
+]
+
+function isBareRoutePathname(pathname: string): boolean {
+  return BARE_ROUTE_PREFIXES.some(prefix => pathname.includes(prefix))
+}
+
 const intlMiddleware = createMiddleware(routing)
 
 /**
@@ -39,6 +66,14 @@ export default async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname === '/health') {
     return new NextResponse('OK', { status: 200 })
   }
+
+  // Bare-route detection (SSR-correct chrome decision). Layout reads this
+  // header via `headers().get('x-route-mode')` and short-circuits the
+  // `<AppShell>` chrome on auth/dashboard/admin/etc. routes — eliminating the
+  // landing-chrome flash that used to happen on `/dashboard` direct loads
+  // (where the client `usePathname()` only ran post-hydration).
+  const routeMode = isBareRoutePathname(request.nextUrl.pathname) ? 'bare' : 'full'
+  request.headers.set('x-route-mode', routeMode)
 
   // Resolve app theme from URL params.
   // ?key= (publishable key) takes priority over ?app= (legacy).
@@ -101,6 +136,13 @@ export default async function middleware(request: NextRequest) {
   // When the consumer later switches scheme on the ezauth page via the
   // `<ThemeSwitcher>`, next-themes writes the same cookie itself —
   // overwriting our middleware-set value cleanly.
+  //
+  // ALSO inject `x-theme-preference` request header so the SSR layout can
+  // read the preference SYNCHRONOUSLY on this very render (no roundtrip
+  // through the cookie + client-side script). This is what kills the FOWT
+  // (Flash of Wrong Theme) on cross-app SSO redirects: with the header
+  // present, the layout emits `<html class="dark">` directly in the SSR
+  // payload, so the very first paint already matches the consumer.
   if (validThemePreference) {
     response.cookies.set(THEME_COOKIE_NAME, validThemePreference, {
       path: '/',
@@ -109,6 +151,7 @@ export default async function middleware(request: NextRequest) {
       // Next-themes reads cookies JS-side, so `HttpOnly` is never set.
       maxAge: 60 * 60 * 24 * 365, // 1 year, matches next-themes default
     })
+    request.headers.set('x-theme-preference', validThemePreference)
   }
 
   return response

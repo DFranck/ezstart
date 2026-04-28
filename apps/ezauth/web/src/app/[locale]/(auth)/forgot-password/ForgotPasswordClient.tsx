@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Div,
+  Section,
   Spinner,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
@@ -82,7 +83,7 @@ export default function ForgotPasswordClient({
   ssrAppDisplayName,
 }: ForgotPasswordClientProps) {
   return (
-    <Div className="flex flex-1 items-center justify-center px-2">
+    <Section className="px-2">
       <Suspense
         fallback={
           <Div className="flex items-center justify-center min-h-[200px]">
@@ -92,6 +93,6 @@ export default function ForgotPasswordClient({
       >
         <ForgotPasswordContent ssrAppName={ssrAppName} ssrAppDisplayName={ssrAppDisplayName} />
       </Suspense>
-    </Div>
+    </Section>
   )
 }
