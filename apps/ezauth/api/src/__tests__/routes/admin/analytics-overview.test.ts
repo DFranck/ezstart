@@ -55,6 +55,11 @@ describe('GET /admin/analytics/overview', () => {
 
   beforeEach(async () => {
     await cleanAllCollections()
+    // cleanAllCollections() doesn't include Application/TotpSecret — clean
+    // them here so scoped-view tests don't leak Apps into the next case.
+    const Application = await getApplicationModel()
+    const TotpSecret = await getTotpSecretModel()
+    await Promise.all([Application.deleteMany({}), TotpSecret.deleteMany({})])
   })
 
   it('rejects unauthenticated requests with 401', async () => {
@@ -62,21 +67,28 @@ describe('GET /admin/analytics/overview', () => {
     expect(res.status).toBe(401)
   })
 
-  it('rejects non-superadmin (app admin) with 403', async () => {
+  it('returns scoped overview for app admin (no longer 403)', async () => {
     const appAdmin = await createAppAdmin('ezbill', {
       email: 'app-admin@test.com',
       username: 'appadmin',
     })
     const token = generateAccessToken(appAdmin)
 
+    // App admin without owned applications → empty/zero snapshot.
     const res = await request(app)
       .get('/admin/analytics/overview')
       .set('Authorization', `Bearer ${token}`)
 
-    expect(res.status).toBe(403)
+    expect(res.status).toBe(200)
+    expect(res.body.success).toBe(true)
+    expect(res.body.data.totalUsers).toBe(0)
+    expect(res.body.data.totalApplications).toBe(0)
+    expect(res.body.data.totalApiKeys).toBe(0)
+    expect(res.body.data.signupTrend).toHaveLength(30)
+    expect(res.body.data.topAppsByUsers).toEqual([])
   })
 
-  it('rejects regular user with 403', async () => {
+  it('rejects regular user with 403 (requireAdmin gate)', async () => {
     const user = await createUser({ email: 'reg@test.com', username: 'reg' })
     const token = generateAccessToken(user)
 
@@ -85,6 +97,54 @@ describe('GET /admin/analytics/overview', () => {
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(403)
+  })
+
+  it('returns scoped overview for app admin restricted to their owned apps', async () => {
+    const appAdmin = await createAppAdmin('ezbill', {
+      email: 'admin-with-apps@test.com',
+      username: 'adminwithapps',
+    })
+    const token = generateAccessToken(appAdmin)
+
+    const Application = await getApplicationModel()
+    await Application.create({
+      slug: 'owned-app-1',
+      name: 'Owned 1',
+      ownerId: appAdmin._id!.toString(),
+      status: 'active',
+    })
+    await Application.create({
+      slug: 'owned-app-2',
+      name: 'Owned 2',
+      ownerId: appAdmin._id!.toString(),
+      status: 'active',
+    })
+    // App owned by someone else — should NOT appear in counts.
+    const otherOwner = await createUser({ email: 'other-owner@test.com', username: 'oo' })
+    await Application.create({
+      slug: 'foreign-app',
+      name: 'Foreign',
+      ownerId: otherOwner._id!.toString(),
+      status: 'active',
+    })
+
+    // Users registered to owned-app-1 / owned-app-2 / foreign-app.
+    await createUser({ email: 'in-owned@test.com', username: 'inowned', apps: ['owned-app-1'] })
+    await createUser({ email: 'in-other@test.com', username: 'inother', apps: ['owned-app-2'] })
+    await createUser({ email: 'foreign@test.com', username: 'foreign', apps: ['foreign-app'] })
+
+    const res = await request(app)
+      .get('/admin/analytics/overview')
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    // 2 owned apps (foreign excluded).
+    expect(res.body.data.totalApplications).toBe(2)
+    // 2 users registered to owned apps (foreign-app user excluded).
+    expect(res.body.data.totalUsers).toBe(2)
+    // topAppsByUsers contains only owned-app slugs.
+    const slugs = res.body.data.topAppsByUsers.map((a: { appName: string }) => a.appName)
+    expect(slugs).not.toContain('foreign-app')
   })
 
   it('returns aggregated overview for superadmin', async () => {

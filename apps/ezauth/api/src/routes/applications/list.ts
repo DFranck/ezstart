@@ -7,6 +7,7 @@
 
 import type { Request, Response } from 'express'
 import {
+  attachDerivedScope,
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
@@ -17,7 +18,6 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { getApplicationModel } from '../../models/application.js'
-import { getAuthUserModel } from '../../models/auth-user.js'
 import { serializeApplication } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
 
@@ -61,19 +61,21 @@ const errorResponseSchema = z.object({
 const listApplicationsController = async (req: Request, res: Response) => {
   try {
     const userId = req.userId!
-    const all = req.query.all === 'true'
+    // Audience scope is server-derived from the JWT (`attachDerivedScope`):
+    // - 'all'    → superadmin: every Application across all owners.
+    // - 'myApps' → admin: Applications I own.
+    // - 'mine'   → regular user: same — Applications I own.
+    //
+    // Backwards-compat: `?all=true` is preserved for the superadmin platform
+    // view but is now redundant (the derived scope already widens to all).
+    const derivedScope = req.derivedScope ?? 'mine'
+    const legacyAll = req.query.all === 'true'
 
-    let query: Record<string, unknown> = { ownerId: userId }
-
-    if (all) {
-      const AuthUser = await getAuthUserModel()
-      const user = await AuthUser.findById(userId).lean()
-      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
-      if (!isSuperadmin) {
-        return sendError(res, '`?all=true` requires superadmin', 403)
-      }
-      query = {}
+    if (legacyAll && derivedScope !== 'all') {
+      return sendError(res, '`?all=true` requires superadmin', 403)
     }
+
+    const query: Record<string, unknown> = derivedScope === 'all' ? {} : { ownerId: userId }
 
     const Application = await getApplicationModel()
     const apps = await Application.find(query).sort({ createdAt: -1 }).lean()
@@ -87,17 +89,23 @@ const listApplicationsController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/applications', verifyTokenMiddleware, listApplicationsController, {
-  summary: 'List Applications owned by the current user (or all, for superadmin)',
-  tags: ['Applications'],
-  responseSchema: listApplicationsResponseSchema,
-  extraResponses: {
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    403: {
-      description: 'Forbidden (`?all=true` requires superadmin)',
-      schema: errorResponseSchema,
+docRouter.get(
+  '/applications',
+  verifyTokenMiddleware,
+  attachDerivedScope,
+  listApplicationsController,
+  {
+    summary: 'List Applications (auto-scoped: superadmin = all, others = owned)',
+    tags: ['Applications'],
+    responseSchema: listApplicationsResponseSchema,
+    extraResponses: {
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description: 'Forbidden (`?all=true` requires superadmin)',
+        schema: errorResponseSchema,
+      },
     },
-  },
-})
+  }
+)
 
 export default router

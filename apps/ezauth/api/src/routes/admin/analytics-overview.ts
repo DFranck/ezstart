@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import {
+  attachDerivedScope,
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
@@ -132,13 +133,12 @@ function fillSignupTrend(
 const analyticsOverviewController = async (req: Request, res: Response) => {
   try {
     const currentUser = req.user!
-    const isSuperadmin = currentUser.globalRoles?.includes('superadmin') === true
-
-    // Platform-wide analytics are superadmin only — same gate as `?scope=all`
-    // on /admin/users (cf. .claude/rules/standard-saas.md §1.2 + scope policy).
-    if (!isSuperadmin) {
-      return sendError(res, 'Superadmin access required for platform analytics', 403)
-    }
+    // Audience scope is server-derived from the JWT (`attachDerivedScope`).
+    // - 'all'    → superadmin: platform-wide stats, no filter.
+    // - 'myApps' → app-admin: stats restricted to apps the caller owns.
+    // - 'mine'   → regular user: shouldn't reach here (gated by requireAdmin),
+    //              return a singleton view to be safe.
+    const derivedScope = req.derivedScope ?? 'mine'
 
     const [AuthUser, Application, ApiKey, TotpSecret] = await Promise.all([
       getAuthUserModel(),
@@ -146,6 +146,23 @@ const analyticsOverviewController = async (req: Request, res: Response) => {
       getApiKeyModel(),
       getTotpSecretModel(),
     ])
+
+    // Resolve scope filter — set of app slugs the caller is allowed to see.
+    // - undefined → no app filter (superadmin platform-wide view).
+    // - []        → empty result set (app-admin without owned apps OR `mine`).
+    // - [...]     → restrict counts/aggregations to these slugs.
+    let scopedAppSlugs: string[] | undefined
+    let ownerFilter: Record<string, unknown> | undefined
+    if (derivedScope === 'myApps') {
+      const ownedApps = await Application.find({ ownerId: currentUser._id }).select('slug').lean()
+      scopedAppSlugs = ownedApps.map(a => a.slug)
+      ownerFilter = { ownerId: currentUser._id }
+    } else if (derivedScope === 'mine') {
+      // Singleton view — keeps the response shape stable for non-superadmins
+      // who somehow reach the endpoint (e.g., role demotion mid-session).
+      scopedAppSlugs = currentUser.apps ?? []
+      ownerFilter = { ownerId: currentUser._id }
+    }
 
     const now = new Date()
     const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0))
@@ -155,7 +172,39 @@ const analyticsOverviewController = async (req: Request, res: Response) => {
     trendStart.setUTCDate(trendStart.getUTCDate() - (TREND_DAYS - 1))
 
     // Exclude soft-deleted users from EVERY count (deletedAt = null/missing).
-    const liveUserFilter = { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }
+    const liveUserFilter: Record<string, unknown> = {
+      $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+    }
+
+    // Apply scope filter to user-level queries when relevant.
+    const scopedUserFilter: Record<string, unknown> = scopedAppSlugs
+      ? { ...liveUserFilter, apps: { $in: scopedAppSlugs } }
+      : liveUserFilter
+
+    // Short-circuit when scope yields zero apps (no owned apps for an
+    // app-admin) — return a fully-zeroed snapshot instead of running queries.
+    if (scopedAppSlugs && scopedAppSlugs.length === 0) {
+      const empty: AnalyticsOverview = {
+        totalUsers: 0,
+        newUsersThisMonth: 0,
+        activeUsersLast30Days: 0,
+        verifiedUsersPct: 0,
+        twoFactorEnabledPct: 0,
+        totalApplications: 0,
+        totalApiKeys: 0,
+        signupTrend: fillSignupTrend([], TREND_DAYS),
+        topAppsByUsers: [],
+      }
+      return sendSuccess(res, empty)
+    }
+
+    const applicationCountFilter: Record<string, unknown> = ownerFilter
+      ? { ...ownerFilter, status: 'active' }
+      : { status: 'active' }
+
+    const apiKeyCountFilter: Record<string, unknown> = scopedAppSlugs
+      ? { status: 'active', appName: { $in: scopedAppSlugs } }
+      : { status: 'active' }
 
     const [
       totalUsers,
@@ -168,20 +217,41 @@ const analyticsOverviewController = async (req: Request, res: Response) => {
       signupTrendBuckets,
       topAppsAggregation,
     ] = await Promise.all([
-      AuthUser.countDocuments(liveUserFilter),
-      AuthUser.countDocuments({ ...liveUserFilter, createdAt: { $gte: startOfMonth } }),
-      AuthUser.countDocuments({ ...liveUserFilter, lastActiveAt: { $gte: activeSince } }),
-      AuthUser.countDocuments({ ...liveUserFilter, isVerified: true }),
-      Application.countDocuments({ status: 'active' }),
-      ApiKey.countDocuments({ status: 'active' }),
-      // 2FA adoption = users with an ENABLED TOTP secret. The schema enforces
-      // one secret per user (unique userId), so we don't need `distinct`.
-      TotpSecret.countDocuments({ isEnabled: true }),
+      AuthUser.countDocuments(scopedUserFilter),
+      AuthUser.countDocuments({ ...scopedUserFilter, createdAt: { $gte: startOfMonth } }),
+      AuthUser.countDocuments({ ...scopedUserFilter, lastActiveAt: { $gte: activeSince } }),
+      AuthUser.countDocuments({ ...scopedUserFilter, isVerified: true }),
+      Application.countDocuments(applicationCountFilter),
+      ApiKey.countDocuments(apiKeyCountFilter),
+      // 2FA adoption — when scoped, restrict to users in the scope's app set.
+      scopedAppSlugs
+        ? AuthUser.aggregate<{ count: number }>([
+            { $match: scopedUserFilter },
+            {
+              $lookup: {
+                from: 'totpsecrets',
+                let: { userIdStr: { $toString: '$_id' } },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ['$userId', '$$userIdStr'] },
+                      isEnabled: true,
+                    },
+                  },
+                  { $limit: 1 },
+                ],
+                as: 'totp',
+              },
+            },
+            { $match: { 'totp.0': { $exists: true } } },
+            { $count: 'count' },
+          ]).then(rows => rows[0]?.count ?? 0)
+        : TotpSecret.countDocuments({ isEnabled: true }),
       // Signup trend (last 30 days, daily buckets, UTC)
       AuthUser.aggregate<{ date: string; count: number }>([
         {
           $match: {
-            ...liveUserFilter,
+            ...scopedUserFilter,
             createdAt: { $gte: trendStart },
           },
         },
@@ -196,10 +266,12 @@ const analyticsOverviewController = async (req: Request, res: Response) => {
         { $project: { _id: 0, date: '$_id', count: 1 } },
         { $sort: { date: 1 } },
       ]),
-      // Top apps by registered user count (unwind apps[] array → group by slug)
+      // Top apps by registered user count — when scoped, intersect with the
+      // owned slug set to only surface apps the caller can see.
       AuthUser.aggregate<{ appName: string; userCount: number }>([
-        { $match: liveUserFilter },
+        { $match: scopedUserFilter },
         { $unwind: { path: '$apps', preserveNullAndEmptyArrays: false } },
+        ...(scopedAppSlugs ? [{ $match: { apps: { $in: scopedAppSlugs } } }] : []),
         { $group: { _id: '$apps', userCount: { $sum: 1 } } },
         { $project: { _id: 0, appName: '$_id', userCount: 1 } },
         { $sort: { userCount: -1 } },
@@ -230,14 +302,15 @@ docRouter.get(
   '/analytics/overview',
   verifyTokenMiddleware,
   requireAdmin,
+  attachDerivedScope,
   analyticsOverviewController,
   {
-    summary: 'Platform analytics overview (superadmin only)',
+    summary: 'Analytics overview (auto-scoped: superadmin = platform, admin = owned apps)',
     tags: ['Admin'],
     responseSchema: analyticsOverviewResponseSchema,
     extraResponses: {
       401: { description: 'Unauthorized', schema: adminErrorSchema },
-      403: { description: 'Forbidden — superadmin required', schema: adminErrorSchema },
+      403: { description: 'Forbidden — admin role required', schema: adminErrorSchema },
       500: { description: 'Server error', schema: adminErrorSchema },
     },
   }

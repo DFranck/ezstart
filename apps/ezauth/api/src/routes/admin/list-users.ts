@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import {
+  attachDerivedScope,
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
@@ -58,7 +59,7 @@ const listUsersQuerySchema = z.object({
   app: z.string().optional().openapi({ description: 'Filter by app membership' }),
   scope: z.enum(['mine', 'myApps', 'all']).optional().openapi({
     description:
-      'Audience scope: "mine" (current user only), "myApps" (users registered to applications I own), "all" (all users, superadmin only).',
+      'Optional debugging override (superadmin only). The scope is auto-derived from the JWT roles by `attachDerivedScope`; non-superadmins cannot escalate via this param.',
   }),
 })
 
@@ -78,49 +79,40 @@ const listUsersController = async (req: Request, res: Response) => {
     }
 
     const AuthUser = await getAuthUserModel()
-    const { limit, offset, search, role, app, scope } = parsedQuery.data
+    const { limit, offset, search, role, app } = parsedQuery.data
     const query: Record<string, unknown> = {}
 
-    // API key scope-based filtering
+    // API key scope-based filtering — used as a secondary constraint when the
+    // caller authenticated with a single-app API key (legacy contract).
     const apiKeyScope = req.apiKeyScope
     const apiKeyAppName = req.apiKeyAppName
 
-    const isSuperadmin = currentUser.globalRoles?.includes('superadmin') === true
+    // Audience selector — derived server-side from `req.user` by
+    // `attachDerivedScope`. Superadmins may override via `?scope=` (handled
+    // by the middleware), non-superadmins cannot escalate.
+    const derivedScope = req.derivedScope ?? 'mine'
 
-    // RBAC-scoped audience selector (takes precedence over legacy behavior when set).
-    //   'all'     → no filter, superadmin only.
-    //   'myApps'  → users registered to Applications owned by the current user.
-    //   'mine'    → only the current user (singleton list).
-    if (scope === 'all') {
-      if (!isSuperadmin) {
-        return sendError(res, 'Superadmin access required for scope=all', 403)
-      }
-      // No filter — sees all users across all tenants.
-    } else if (scope === 'myApps') {
+    if (derivedScope === 'all') {
+      // Platform-wide view — no scope filter.
+    } else if (derivedScope === 'myApps') {
       const Application = await getApplicationModel()
       const ownedApps = await Application.find({ ownerId: currentUser._id }).select('slug').lean()
       const ownedSlugs = ownedApps.map(a => a.slug)
       if (ownedSlugs.length === 0) {
-        // No owned apps → empty result.
+        // No owned apps → empty result (app-admin without applications).
         return sendSuccess(res, [], { total: 0, limit, offset })
       }
       query.apps = { $in: ownedSlugs }
-    } else if (scope === 'mine') {
+    } else {
+      // 'mine' — single user view (regular authenticated user).
       query._id = currentUser._id
-    } else if (apiKeyAppName && apiKeyAppName !== '*') {
-      // Legacy behavior: single-app key filters users by their appName.
-      query.apps = { $in: [apiKeyAppName] }
-    } else if (!apiKeyScope) {
-      // Direct user auth (no API key, no scope) — legacy role-based logic.
-      // Superadmin sees all users, admin sees non-superadmins in their apps.
-      if (!isSuperadmin) {
-        query.globalRoles = { $ne: 'superadmin' }
-        if ((currentUser.apps?.length ?? 0) > 0) {
-          query.apps = { $in: currentUser.apps }
-        }
-      }
     }
-    // Platform-scoped API key (appName='*' or no appName, no explicit scope): no filtering.
+
+    // Single-app API key narrows the result set further (orthogonal to the
+    // RBAC scope above). A platform-scoped key (appName='*') doesn't filter.
+    if (apiKeyAppName && apiKeyAppName !== '*' && apiKeyScope) {
+      query.apps = { $in: [apiKeyAppName] }
+    }
 
     // App filter: only show users who have logged into this app
     if (app) {
@@ -176,16 +168,23 @@ const listUsersController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/users', verifyTokenMiddleware, requireAdmin, listUsersController, {
-  summary: 'List all users (admin)',
-  tags: ['Admin'],
-  querySchema: listUsersQuerySchema,
-  responseSchema: listUsersResponseSchema,
-  extraResponses: {
-    401: { description: 'Unauthorized', schema: adminErrorSchema },
-    403: { description: 'Forbidden', schema: adminErrorSchema },
-    500: { description: 'Server error', schema: adminErrorSchema },
-  },
-})
+docRouter.get(
+  '/users',
+  verifyTokenMiddleware,
+  requireAdmin,
+  attachDerivedScope,
+  listUsersController,
+  {
+    summary: 'List all users (admin)',
+    tags: ['Admin'],
+    querySchema: listUsersQuerySchema,
+    responseSchema: listUsersResponseSchema,
+    extraResponses: {
+      401: { description: 'Unauthorized', schema: adminErrorSchema },
+      403: { description: 'Forbidden', schema: adminErrorSchema },
+      500: { description: 'Server error', schema: adminErrorSchema },
+    },
+  }
+)
 
 export default router

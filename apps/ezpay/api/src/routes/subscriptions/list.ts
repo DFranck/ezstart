@@ -1,15 +1,15 @@
 import { logger } from '@ezstart/logger/server'
 import {
   Router,
+  attachDerivedScope,
   createRouterWithDoc,
   OpenAPIRegistry,
   sendSuccess,
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
-import { hasRole } from '@ezstart/auth-sdk/rbac/client'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import { listApplicationsByOwner } from '../../services/ezauth-client.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -25,7 +25,7 @@ const docRouter = createRouterWithDoc(listSubscriptionsRegistry, router)
 const subscriptionsQuerySchema = z.object({
   scope: z.enum(['mine', 'myApps', 'all']).optional().openapi({
     description:
-      'RBAC scope: `mine` (own subscriptions — default), `myApps` (app owner view), `all` (superadmin only)',
+      'Optional debugging override (superadmin only). The scope is auto-derived from the JWT roles by `attachDerivedScope`.',
   }),
   projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
   userId: z.string().optional().openapi({ description: 'Filter by user ID' }),
@@ -62,12 +62,6 @@ const subscriptionsListResponseSchema = z.object({
 // Helpers
 // ========================================
 
-function isSuperadmin(req: Request): boolean {
-  const user = req.user as Parameters<typeof hasRole>[0] | undefined
-  if (!user) return false
-  return hasRole(user, 'superadmin')
-}
-
 function extractBearerToken(req: Request): string | undefined {
   const authHeader = req.headers.authorization
   if (authHeader?.startsWith('Bearer ')) {
@@ -84,33 +78,23 @@ function extractBearerToken(req: Request): string | undefined {
 async function buildScopeFilter(
   req: Request,
   scope: 'mine' | 'myApps' | 'all'
-): Promise<{ filter: Record<string, unknown> | null; status?: number; error?: string }> {
-  if (!req.userId) {
-    return { filter: null, status: 401, error: 'Authentication required' }
-  }
-
+): Promise<Record<string, unknown>> {
+  const userId = req.userId
   if (scope === 'all') {
-    if (!isSuperadmin(req)) {
-      return { filter: null, status: 403, error: 'Superadmin access required for scope=all' }
-    }
-    return { filter: {} }
+    return {}
   }
-
   if (scope === 'myApps') {
     const bearerToken = extractBearerToken(req)
     const apps = await listApplicationsByOwner({ bearerToken })
     const ownedSlugs = apps.map(a => a.slug)
     if (ownedSlugs.length === 0) {
-      return { filter: { userId: req.userId } }
+      return { userId }
     }
     return {
-      filter: {
-        $or: [{ userId: req.userId }, { projectId: { $in: ownedSlugs } }],
-      },
+      $or: [{ userId }, { projectId: { $in: ownedSlugs } }],
     }
   }
-
-  return { filter: { userId: req.userId } }
+  return { userId }
 }
 
 // ========================================
@@ -124,19 +108,17 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
     }
-    const { scope, projectId, userId, liveMode, limit, offset } = parsed.data
+    const { projectId, userId, liveMode, limit, offset } = parsed.data
 
-    // Resolve effective scope: explicit param wins; else preserve legacy
-    // behaviour (admin => all, user => mine).
-    const effectiveScope: 'mine' | 'myApps' | 'all' = scope ?? (isAdminUser(req) ? 'all' : 'mine')
+    // Audience scope is server-derived from the JWT (`attachDerivedScope`).
+    // The `?scope=` query param is honoured ONLY for superadmins as a
+    // debugging hatch (handled in the middleware).
+    const effectiveScope = req.derivedScope ?? 'mine'
 
-    const scopeResult = await buildScopeFilter(req, effectiveScope)
-    if (!scopeResult.filter) {
-      return sendError(res, scopeResult.error || 'Forbidden', scopeResult.status ?? 403)
-    }
+    const scopeFilter = await buildScopeFilter(req, effectiveScope)
 
     const query: Record<string, unknown> = {
-      ...scopeResult.filter,
+      ...scopeFilter,
       type: 'subscription',
     }
 
@@ -164,12 +146,19 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/subscriptions', authMiddleware, populateUserFromToken, getSubscriptionsHandler, {
-  summary: 'List subscriptions (scoped: mine | myApps | all)',
-  tags: ['Subscriptions'],
-  querySchema: subscriptionsQuerySchema,
-  responseSchema: subscriptionsListResponseSchema,
-})
+docRouter.get(
+  '/subscriptions',
+  authMiddleware,
+  populateUserFromToken,
+  attachDerivedScope,
+  getSubscriptionsHandler,
+  {
+    summary: 'List subscriptions (auto-scoped: superadmin = all, admin = owned apps, user = own)',
+    tags: ['Subscriptions'],
+    querySchema: subscriptionsQuerySchema,
+    responseSchema: subscriptionsListResponseSchema,
+  }
+)
 
 export { listSubscriptionsRegistry as registry, router }
 export default router

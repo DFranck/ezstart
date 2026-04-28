@@ -4,12 +4,7 @@ import express from 'express'
 import request from 'supertest'
 import cookieParser from 'cookie-parser'
 import { verifyTokenMiddleware } from '../../../middleware/auth.js'
-import {
-  createRoleMiddleware,
-  sendSuccess,
-  sendError,
-  sendValidationError,
-} from '@ezstart/api-core'
+import { attachDerivedScope, createRoleMiddleware, sendSuccess, sendError } from '@ezstart/api-core'
 import { getAuthUserModel } from '../../../models/auth-user.js'
 import { getOAuthAccountModel } from '../../../models/oauth-account.js'
 import { getApplicationModel } from '../../../models/application.js'
@@ -33,51 +28,51 @@ function createAdminTestApp() {
   app.use(express.json())
   app.use(cookieParser())
 
-  // GET /admin/users — list users (mirrors list-users.ts scope logic)
-  app.get('/admin/users', verifyTokenMiddleware, requireAdmin, async (req, res) => {
-    const currentUser = req.user!
-    const AuthUser = await getAuthUserModel()
-    const query: Record<string, unknown> = {}
+  // GET /admin/users — list users (mirrors list-users.ts auto-scoping logic)
+  app.get(
+    '/admin/users',
+    verifyTokenMiddleware,
+    requireAdmin,
+    attachDerivedScope,
+    async (req, res) => {
+      const currentUser = req.user!
+      const AuthUser = await getAuthUserModel()
+      const query: Record<string, unknown> = {}
 
-    const scope = req.query.scope as 'mine' | 'myApps' | 'all' | undefined
-    const isSuperadmin = currentUser.globalRoles?.includes('superadmin') === true
+      // Audience scope is server-derived from `req.user`. Superadmins may
+      // override via `?scope=` (handled by `attachDerivedScope`).
+      const derivedScope = req.derivedScope ?? 'mine'
 
-    if (scope === 'all') {
-      if (!isSuperadmin) {
-        return sendError(res, 'Superadmin access required for scope=all', 403)
+      if (derivedScope === 'all') {
+        // No filter — superadmin platform-wide view.
+      } else if (derivedScope === 'myApps') {
+        const Application = await getApplicationModel()
+        const ownedApps = await Application.find({ ownerId: currentUser._id }).select('slug').lean()
+        const ownedSlugs = ownedApps.map(a => a.slug)
+        if (ownedSlugs.length === 0) {
+          return sendSuccess(res, [], { total: 0, limit: 20, offset: 0 })
+        }
+        query.apps = { $in: ownedSlugs }
+      } else {
+        // 'mine' — single user view.
+        query._id = currentUser._id
       }
-      // No filter
-    } else if (scope === 'myApps') {
-      const Application = await getApplicationModel()
-      const ownedApps = await Application.find({ ownerId: currentUser._id }).select('slug').lean()
-      const ownedSlugs = ownedApps.map(a => a.slug)
-      if (ownedSlugs.length === 0) {
-        return sendSuccess(res, [], { total: 0, limit: 20, offset: 0 })
-      }
-      query.apps = { $in: ownedSlugs }
-    } else if (scope === 'mine') {
-      query._id = currentUser._id
-    } else if (!isSuperadmin) {
-      query.globalRoles = { $ne: 'superadmin' }
-      if ((currentUser.apps?.length ?? 0) > 0) {
-        query.apps = { $in: currentUser.apps }
-      }
+
+      const [users, total] = await Promise.all([
+        AuthUser.find(query).select('-passwordHash').sort({ createdAt: -1 }).limit(20).lean(),
+        AuthUser.countDocuments(query),
+      ])
+
+      const data = users.map(u => ({
+        ...u,
+        _id: u._id.toString(),
+        globalRoles: u.globalRoles || [],
+        appRoles: mapToRecord(u.appRoles as unknown as Map<string, string[]> | undefined),
+      }))
+
+      sendSuccess(res, data, { total, limit: 20, offset: 0 })
     }
-
-    const [users, total] = await Promise.all([
-      AuthUser.find(query).select('-passwordHash').sort({ createdAt: -1 }).limit(20).lean(),
-      AuthUser.countDocuments(query),
-    ])
-
-    const data = users.map(u => ({
-      ...u,
-      _id: u._id.toString(),
-      globalRoles: u.globalRoles || [],
-      appRoles: mapToRecord(u.appRoles as unknown as Map<string, string[]> | undefined),
-    }))
-
-    sendSuccess(res, data, { total, limit: 20, offset: 0 })
-  })
+  )
 
   // GET /admin/users/:id — get single user
   app.get('/admin/users/:id', verifyTokenMiddleware, requireAdmin, async (req, res) => {
@@ -195,38 +190,48 @@ describe('Admin Routes', () => {
       expect(res.status).toBe(403)
     })
 
-    it('should filter non-superadmins for app-level admins', async () => {
+    it('app-level admin sees only users in apps they own (auto-scoped to myApps)', async () => {
       const appAdmin = await createAppAdmin('ezbill', {
         email: 'bill-admin@test.com',
         username: 'billadmin',
       })
       const token = generateAccessToken(appAdmin)
 
-      // Create a superadmin (should be hidden)
+      // The appAdmin owns the 'ezbill' Application.
+      const Application = await getApplicationModel()
+      await Application.create({
+        slug: 'ezbill',
+        name: 'EzBill',
+        ownerId: appAdmin._id!.toString(),
+        status: 'active',
+      })
+
+      // Superadmin not in ezbill — should be hidden by myApps scoping.
       await createAdminUser({ email: 'hidden@test.com', username: 'hiddenadmin' })
-      // Create a regular user in ezbill
+      // Regular user in ezbill — visible.
       await createUser({ email: 'bill-user@test.com', username: 'billuser', apps: ['ezbill'] })
+      // Regular user in another app — hidden.
+      await createUser({ email: 'other@test.com', username: 'other', apps: ['otherapp'] })
 
       const res = await request(app).get('/admin/users').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(200)
-      // App admin should NOT see superadmin users
       const emails = res.body.data.map((u: { email: string }) => u.email)
       expect(emails).not.toContain('hidden@test.com')
+      expect(emails).not.toContain('other@test.com')
       expect(emails).toContain('bill-user@test.com')
     })
 
-    describe('scope query param', () => {
-      it('scope=all: superadmin sees all users (including other superadmins)', async () => {
+    describe('auto-derived scope', () => {
+      it('superadmin sees all users with NO scope param (auto-derived to "all")', async () => {
         const admin = await createAdminUser()
         const token = generateAccessToken(admin)
 
         await createAdminUser({ email: 'other-super@test.com', username: 'othersuper' })
         await createUser({ email: 'regular@test.com', username: 'reg' })
 
-        const res = await request(app)
-          .get('/admin/users?scope=all')
-          .set('Authorization', `Bearer ${token}`)
+        // No ?scope= passed — server derives 'all' from the superadmin role.
+        const res = await request(app).get('/admin/users').set('Authorization', `Bearer ${token}`)
 
         expect(res.status).toBe(200)
         const emails = res.body.data.map((u: { email: string }) => u.email)
@@ -234,49 +239,7 @@ describe('Admin Routes', () => {
         expect(emails).toContain('regular@test.com')
       })
 
-      it('scope=all: non-superadmin is rejected with 403', async () => {
-        const appAdmin = await createAppAdmin('ezbill', {
-          email: 'app-admin@test.com',
-          username: 'appadmin',
-        })
-        const token = generateAccessToken(appAdmin)
-
-        const res = await request(app)
-          .get('/admin/users?scope=all')
-          .set('Authorization', `Bearer ${token}`)
-
-        expect(res.status).toBe(403)
-      })
-
-      it('scope=myApps: returns only users registered to apps I own', async () => {
-        const owner = await createAppAdmin('ezbill', {
-          email: 'owner@test.com',
-          username: 'owner',
-        })
-        const token = generateAccessToken(owner)
-
-        const Application = await getApplicationModel()
-        await Application.create({
-          slug: 'myapp-a',
-          name: 'My App A',
-          ownerId: owner._id!.toString(),
-          status: 'active',
-        })
-
-        await createUser({ email: 'in-a@test.com', username: 'ina', apps: ['myapp-a'] })
-        await createUser({ email: 'out@test.com', username: 'out', apps: ['otherapp'] })
-
-        const res = await request(app)
-          .get('/admin/users?scope=myApps')
-          .set('Authorization', `Bearer ${token}`)
-
-        expect(res.status).toBe(200)
-        const emails = res.body.data.map((u: { email: string }) => u.email)
-        expect(emails).toContain('in-a@test.com')
-        expect(emails).not.toContain('out@test.com')
-      })
-
-      it('scope=myApps: returns empty list when user owns no applications', async () => {
+      it('app-admin without owned apps gets empty result (auto-derived to "myApps")', async () => {
         const appAdmin = await createAppAdmin('ezbill', {
           email: 'noapps@test.com',
           username: 'noapps',
@@ -285,16 +248,14 @@ describe('Admin Routes', () => {
 
         await createUser({ email: 'x@test.com', username: 'x', apps: ['ezbill'] })
 
-        const res = await request(app)
-          .get('/admin/users?scope=myApps')
-          .set('Authorization', `Bearer ${token}`)
+        const res = await request(app).get('/admin/users').set('Authorization', `Bearer ${token}`)
 
         expect(res.status).toBe(200)
         expect(res.body.data).toEqual([])
         expect(res.body.meta.total).toBe(0)
       })
 
-      it('scope=mine: returns only the current user', async () => {
+      it('superadmin can override to "mine" via ?scope= (debugging hatch)', async () => {
         const admin = await createAdminUser()
         const token = generateAccessToken(admin)
 
@@ -307,6 +268,22 @@ describe('Admin Routes', () => {
         expect(res.status).toBe(200)
         expect(res.body.data).toHaveLength(1)
         expect(res.body.data[0].email).toBe(admin.email)
+      })
+
+      it('non-superadmin cannot escalate via ?scope=all (param ignored)', async () => {
+        const appAdmin = await createAppAdmin('ezbill', {
+          email: 'app-admin@test.com',
+          username: 'appadmin',
+        })
+        const token = generateAccessToken(appAdmin)
+
+        // No owned apps → empty result even when ?scope=all is sent.
+        const res = await request(app)
+          .get('/admin/users?scope=all')
+          .set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body.data).toEqual([])
       })
     })
   })

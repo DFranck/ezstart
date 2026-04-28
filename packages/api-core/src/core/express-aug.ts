@@ -8,6 +8,7 @@
 
 /// <reference types="express" />
 import 'express'
+import type { DerivedScope } from './middleware/derive-scope.js'
 import type { AuthenticatedUser } from './types.js'
 
 declare global {
@@ -24,6 +25,8 @@ declare global {
       validatedQuery?: unknown
       /** Populated by `validateParams(schema)`. */
       validatedParams?: unknown
+      /** Populated by `attachDerivedScope` — RBAC audience scope derived from `req.user`. */
+      derivedScope?: DerivedScope
     }
   }
 }
