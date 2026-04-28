@@ -113,30 +113,31 @@ export type { LoginButtonProps } from './components/LoginButton.js'
 export { RegisterButton } from './components/RegisterButton.js'
 export type { RegisterButtonProps } from './components/RegisterButton.js'
 
-// Self-contained auth Cards (Clerk-style drop-in `<SignIn />` / `<SignUp />`
+// Self-contained auth Modals (Clerk-style drop-in `<SignIn />` / `<SignUp />`
 // equivalents for `/login`, `/register`, `/forgot-password`, `/reset-password`,
-// `/verify-email`).
+// `/verify-email`). Embeddable anywhere via `isOpen`/`onClose` props or used
+// as standalone auth routes (always-open with onClose -> router.push('/')).
 export {
-  SignInCard,
-  SignUpCard,
-  ForgotPasswordCard,
-  ResetPasswordCard,
-  VerifyEmailCard,
-  AuthCardShell,
-} from './components/cards/index.js'
+  SignInModal,
+  SignUpModal,
+  ForgotPasswordModal,
+  ResetPasswordModal,
+  VerifyEmailModal,
+  AuthModalShell,
+} from './components/modals/index.js'
 export type {
-  SignInCardProps,
-  SignInCardTexts,
-  SignUpCardProps,
-  SignUpCardTexts,
-  ForgotPasswordCardProps,
-  ForgotPasswordCardTexts,
-  ResetPasswordCardProps,
-  ResetPasswordCardTexts,
-  VerifyEmailCardProps,
-  VerifyEmailCardTexts,
-  AuthCardShellProps,
-} from './components/cards/index.js'
+  SignInModalProps,
+  SignInModalTexts,
+  SignUpModalProps,
+  SignUpModalTexts,
+  ForgotPasswordModalProps,
+  ForgotPasswordModalTexts,
+  ResetPasswordModalProps,
+  ResetPasswordModalTexts,
+  VerifyEmailModalProps,
+  VerifyEmailModalTexts,
+  AuthModalShellProps,
+} from './components/modals/index.js'
 
 // Auth form components
 export { SignInForm } from './components/SignInForm.js'

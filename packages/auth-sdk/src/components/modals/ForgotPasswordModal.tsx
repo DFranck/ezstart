@@ -10,46 +10,52 @@ import {
   type ForgotPasswordFormProps,
   type ForgotPasswordFormTexts,
 } from '../ForgotPasswordForm.js'
-import { AuthCardShell, type AuthCardShellProps } from './auth-card-shell.js'
+import { AuthModalShell, type AuthModalShellProps } from './auth-modal-shell.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export interface ForgotPasswordCardTexts extends Partial<ForgotPasswordFormTexts> {
+export interface ForgotPasswordModalTexts extends Partial<ForgotPasswordFormTexts> {
   cardTitle?: string
   cardSubtitle?: string
 }
 
-export interface ForgotPasswordCardProps extends Omit<
+export interface ForgotPasswordModalProps extends Omit<
   ForgotPasswordFormProps,
   'appName' | 'keyStatus' | 'urlKey'
 > {
+  /** Whether the modal is open. */
+  isOpen: boolean
+  /** Callback fired when the modal should close (X icon, Esc, overlay click). */
+  onClose?: () => void
   /** Pre-resolved app name (SSR fallback). */
   ssrAppName?: string | null
   /** Brand logo shown above the title. */
   logo?: ReactNode
   /** Override the default chrome props. */
-  cardShellProps?: Partial<AuthCardShellProps>
+  modalShellProps?: Partial<AuthModalShellProps>
   /** Override texts (merged on top of localized defaults). */
-  texts?: ForgotPasswordCardTexts
+  texts?: ForgotPasswordModalTexts
 }
 
 // ─── Inner content ─────────────────────────────────────────────────────────
 
-function ForgotPasswordCardInner({
+function ForgotPasswordModalInner({
+  isOpen,
+  onClose,
   ssrAppName = null,
   logo,
-  cardShellProps,
+  modalShellProps,
   texts,
   locale: propLocale,
   ...formProps
-}: ForgotPasswordCardProps) {
+}: ForgotPasswordModalProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
   const formDefaults = getAuthTexts(locale, 'forgotPassword') as Record<string, string>
   const t = {
     ...formDefaults,
     ...(texts as Record<string, string> | undefined),
-  } as Required<ForgotPasswordCardTexts>
+  } as Required<ForgotPasswordModalTexts>
   const formTexts = t as Partial<ForgotPasswordFormTexts>
 
   const keyConfig = useKeyConfig(navigation.publishableKey)
@@ -63,12 +69,13 @@ function ForgotPasswordCardInner({
     : undefined
 
   return (
-    <AuthCardShell
+    <AuthModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       title={t.cardTitle}
       subtitle={t.cardSubtitle}
-      showBackButton
       logo={logo}
-      {...cardShellProps}
+      {...modalShellProps}
     >
       <ForgotPasswordForm
         appName={app}
@@ -78,40 +85,46 @@ function ForgotPasswordCardInner({
         texts={formTexts}
         {...formProps}
       />
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }
 
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Forgot-Password card — drop-in for any `/forgot-password` page.
+ * Self-contained Forgot-Password modal — embeddable anywhere.
  *
- * Wraps `<ForgotPasswordForm>` inside `<AuthCardShell>` with title + subtitle,
- * back-button, and theme switcher. The "Back to login" CTA is rendered by the
- * inner form itself.
+ * Wraps `<ForgotPasswordForm>` inside `<AuthModalShell>` with title + subtitle
+ * and theme switcher. The "Back to login" CTA is rendered by the inner form
+ * itself.
  *
  * @example
- *   // app/[locale]/forgot-password/page.tsx
- *   import { ForgotPasswordCard } from '@ezstart/auth-sdk/components'
+ *   // Standalone /forgot-password page
+ *   import { ForgotPasswordModal } from '@ezstart/auth-sdk/components'
+ *   import { useRouter } from '@/i18n/navigation'
  *   export default function ForgotPasswordPage() {
- *     return <ForgotPasswordCard />
+ *     const router = useRouter()
+ *     return <ForgotPasswordModal isOpen onClose={() => router.push('/')} />
  *   }
  */
-export function ForgotPasswordCard(props: ForgotPasswordCardProps) {
+export function ForgotPasswordModal(props: ForgotPasswordModalProps) {
   return (
-    <Suspense fallback={<ForgotPasswordCardFallback />}>
-      <ForgotPasswordCardInner {...props} />
+    <Suspense fallback={props.isOpen ? <ForgotPasswordModalFallback {...props} /> : null}>
+      <ForgotPasswordModalInner {...props} />
     </Suspense>
   )
 }
 
-function ForgotPasswordCardFallback() {
+function ForgotPasswordModalFallback({
+  isOpen,
+  onClose,
+  modalShellProps,
+}: ForgotPasswordModalProps) {
   return (
-    <AuthCardShell>
+    <AuthModalShell isOpen={isOpen} onClose={onClose} {...modalShellProps}>
       <Div className="flex items-center justify-center min-h-[200px]">
         <Spinner variant="primary" size="lg" />
       </Div>
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }

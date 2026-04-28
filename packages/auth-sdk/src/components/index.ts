@@ -28,30 +28,32 @@ export type {
 export { RequireAuthLoader } from './RequireAuthLoader.js'
 export type { RequireAuthLoaderProps } from './RequireAuthLoader.js'
 
-// Self-contained auth Cards (Clerk-style drop-in for `/login`, `/register`,
+// Self-contained auth Modals (Clerk-style drop-in for `/login`, `/register`,
 // `/forgot-password`, `/reset-password`, `/verify-email` — wrap the matching
-// `<SignInForm>` etc. inside `<AuthCardShell>` with brand/footer cross-link).
+// `<SignInForm>` etc. inside `<AuthModalShell>` with brand/footer cross-link).
+// Embeddable from any consumer page (button trigger) or used as standalone
+// auth routes (always-open with onClose -> router.push('/')).
 export {
-  SignInCard,
-  SignUpCard,
-  ForgotPasswordCard,
-  ResetPasswordCard,
-  VerifyEmailCard,
-  AuthCardShell,
-} from './cards/index.js'
+  SignInModal,
+  SignUpModal,
+  ForgotPasswordModal,
+  ResetPasswordModal,
+  VerifyEmailModal,
+  AuthModalShell,
+} from './modals/index.js'
 export type {
-  SignInCardProps,
-  SignInCardTexts,
-  SignUpCardProps,
-  SignUpCardTexts,
-  ForgotPasswordCardProps,
-  ForgotPasswordCardTexts,
-  ResetPasswordCardProps,
-  ResetPasswordCardTexts,
-  VerifyEmailCardProps,
-  VerifyEmailCardTexts,
-  AuthCardShellProps,
-} from './cards/index.js'
+  SignInModalProps,
+  SignInModalTexts,
+  SignUpModalProps,
+  SignUpModalTexts,
+  ForgotPasswordModalProps,
+  ForgotPasswordModalTexts,
+  ResetPasswordModalProps,
+  ResetPasswordModalTexts,
+  VerifyEmailModalProps,
+  VerifyEmailModalTexts,
+  AuthModalShellProps,
+} from './modals/index.js'
 
 // Auth forms
 export { SignInForm } from './SignInForm.js'

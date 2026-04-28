@@ -10,18 +10,22 @@ import {
   type VerifyEmailFlowProps,
   type VerifyEmailFlowTexts,
 } from '../VerifyEmailFlow.js'
-import { AuthCardShell, type AuthCardShellProps } from './auth-card-shell.js'
+import { AuthModalShell, type AuthModalShellProps } from './auth-modal-shell.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export interface VerifyEmailCardTexts extends Partial<VerifyEmailFlowTexts> {
+export interface VerifyEmailModalTexts extends Partial<VerifyEmailFlowTexts> {
   cardTitle?: string
   cardSubtitle?: string
 }
 
-export interface VerifyEmailCardProps extends Omit<VerifyEmailFlowProps, 'token'> {
+export interface VerifyEmailModalProps extends Omit<VerifyEmailFlowProps, 'token'> {
+  /** Whether the modal is open. */
+  isOpen: boolean
+  /** Callback fired when the modal should close (X icon, Esc, overlay click). */
+  onClose?: () => void
   /**
-   * Optional explicit verification token. When omitted, the card reads
+   * Optional explicit verification token. When omitted, the modal reads
    * `?token=` from the URL via `useSearchParams()`.
    */
   token?: string | null
@@ -30,21 +34,23 @@ export interface VerifyEmailCardProps extends Omit<VerifyEmailFlowProps, 'token'
   /** Active locale (e.g. `'en'`, `'fr'`). Defaults to the URL pathname locale. */
   locale?: string
   /** Override the default chrome props. */
-  cardShellProps?: Partial<AuthCardShellProps>
+  modalShellProps?: Partial<AuthModalShellProps>
   /** Override texts (merged on top of localized defaults). */
-  texts?: VerifyEmailCardTexts
+  texts?: VerifyEmailModalTexts
 }
 
 // ─── Inner content ─────────────────────────────────────────────────────────
 
-function VerifyEmailCardInner({
+function VerifyEmailModalInner({
+  isOpen,
+  onClose,
   token: explicitToken,
   logo,
-  cardShellProps,
+  modalShellProps,
   texts,
   locale: propLocale,
   ...flowProps
-}: VerifyEmailCardProps) {
+}: VerifyEmailModalProps) {
   const navigation = useAuthNavigation()
   const searchParams = useSearchParams()
   const locale = propLocale ?? navigation.locale
@@ -52,55 +58,57 @@ function VerifyEmailCardInner({
   const t = {
     ...formDefaults,
     ...(texts as Record<string, string> | undefined),
-  } as Required<VerifyEmailCardTexts>
+  } as Required<VerifyEmailModalTexts>
   const flowTexts = t as Partial<VerifyEmailFlowTexts>
 
   const token = explicitToken ?? searchParams?.get('token') ?? null
 
   return (
-    <AuthCardShell
+    <AuthModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       title={t.cardTitle}
       subtitle={t.cardSubtitle}
-      showBackButton
       logo={logo}
-      {...cardShellProps}
+      {...modalShellProps}
     >
       <VerifyEmailFlow token={token} texts={flowTexts} {...flowProps} />
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }
 
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Verify-Email card — drop-in for `/verify-email?token=...`.
+ * Self-contained Verify-Email modal — embeddable anywhere.
  *
  * Reads the `?token=` URL param automatically and runs the verification flow
- * via `<VerifyEmailFlow>`. Renders consistent chrome (Card + theme switcher
- * + back button + title) across success / already-verified / invalid / error
- * states.
+ * via `<VerifyEmailFlow>`. Renders consistent chrome (Modal + theme switcher
+ * + title) across success / already-verified / invalid / error states.
  *
  * @example
- *   // app/[locale]/verify-email/page.tsx
- *   import { VerifyEmailCard } from '@ezstart/auth-sdk/components'
+ *   // Standalone /verify-email page
+ *   import { VerifyEmailModal } from '@ezstart/auth-sdk/components'
+ *   import { useRouter } from '@/i18n/navigation'
  *   export default function VerifyEmailPage() {
- *     return <VerifyEmailCard />
+ *     const router = useRouter()
+ *     return <VerifyEmailModal isOpen onClose={() => router.push('/')} />
  *   }
  */
-export function VerifyEmailCard(props: VerifyEmailCardProps) {
+export function VerifyEmailModal(props: VerifyEmailModalProps) {
   return (
-    <Suspense fallback={<VerifyEmailCardFallback />}>
-      <VerifyEmailCardInner {...props} />
+    <Suspense fallback={props.isOpen ? <VerifyEmailModalFallback {...props} /> : null}>
+      <VerifyEmailModalInner {...props} />
     </Suspense>
   )
 }
 
-function VerifyEmailCardFallback() {
+function VerifyEmailModalFallback({ isOpen, onClose, modalShellProps }: VerifyEmailModalProps) {
   return (
-    <AuthCardShell>
+    <AuthModalShell isOpen={isOpen} onClose={onClose} {...modalShellProps}>
       <Div className="flex items-center justify-center min-h-[200px]">
         <Spinner variant="primary" size="lg" />
       </Div>
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }

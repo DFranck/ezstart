@@ -11,28 +11,32 @@ import {
   type ResetPasswordFormTexts,
 } from '../ResetPasswordForm.js'
 import { useAuthNavigation } from '../../react/useAuthNavigation.js'
-import { AuthCardShell, type AuthCardShellProps } from './auth-card-shell.js'
+import { AuthModalShell, type AuthModalShellProps } from './auth-modal-shell.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export interface ResetPasswordCardTexts extends Partial<ResetPasswordFormTexts> {
+export interface ResetPasswordModalTexts extends Partial<ResetPasswordFormTexts> {
   cardTitle?: string
   cardSubtitle?: string
   loading?: string
 }
 
-export interface ResetPasswordCardProps extends Omit<ResetPasswordFormProps, 'token'> {
+export interface ResetPasswordModalProps extends Omit<ResetPasswordFormProps, 'token'> {
+  /** Whether the modal is open. */
+  isOpen: boolean
+  /** Callback fired when the modal should close (X icon, Esc, overlay click). */
+  onClose?: () => void
   /**
-   * Optional explicit token. When omitted, the card reads `?token=` from
+   * Optional explicit token. When omitted, the modal reads `?token=` from
    * the URL via `useSearchParams()` (matches the historical ezauth flow).
    */
   token?: string | null
   /** Brand logo shown above the title. */
   logo?: ReactNode
   /** Override the default chrome props. */
-  cardShellProps?: Partial<AuthCardShellProps>
+  modalShellProps?: Partial<AuthModalShellProps>
   /** Override texts (merged on top of localized defaults). */
-  texts?: ResetPasswordCardTexts
+  texts?: ResetPasswordModalTexts
 }
 
 // ─── Default token validator ──────────────────────────────────────────────
@@ -58,15 +62,17 @@ async function defaultValidateResetToken(
 
 // ─── Inner content ─────────────────────────────────────────────────────────
 
-function ResetPasswordCardInner({
+function ResetPasswordModalInner({
+  isOpen,
+  onClose,
   token: explicitToken,
   logo,
-  cardShellProps,
+  modalShellProps,
   texts,
   locale: propLocale,
   onValidateToken,
   ...formProps
-}: ResetPasswordCardProps) {
+}: ResetPasswordModalProps) {
   const navigation = useAuthNavigation()
   const searchParams = useSearchParams()
   const locale = propLocale ?? navigation.locale
@@ -74,7 +80,7 @@ function ResetPasswordCardInner({
   const t = {
     ...formDefaults,
     ...(texts as Record<string, string> | undefined),
-  } as Required<ResetPasswordCardTexts>
+  } as Required<ResetPasswordModalTexts>
   const formTexts = t as Partial<ResetPasswordFormTexts>
 
   const token = explicitToken ?? searchParams?.get('token') ?? null
@@ -85,12 +91,13 @@ function ResetPasswordCardInner({
   )
 
   return (
-    <AuthCardShell
+    <AuthModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       title={t.cardTitle}
       subtitle={t.cardSubtitle}
-      showBackButton
       logo={logo}
-      {...cardShellProps}
+      {...modalShellProps}
     >
       <ResetPasswordForm
         token={token}
@@ -100,40 +107,42 @@ function ResetPasswordCardInner({
         texts={formTexts}
         {...formProps}
       />
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }
 
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Reset-Password card — drop-in for `/reset-password?token=...`.
+ * Self-contained Reset-Password modal — embeddable anywhere.
  *
  * Reads the `?token=` URL param automatically (override via `token` prop) and
  * pre-validates it via `POST /auth/validate-reset-token` so the user sees a
  * dedicated "expired link" view instead of submitting the form blindly.
  *
  * @example
- *   // app/[locale]/reset-password/page.tsx
- *   import { ResetPasswordCard } from '@ezstart/auth-sdk/components'
+ *   // Standalone /reset-password page
+ *   import { ResetPasswordModal } from '@ezstart/auth-sdk/components'
+ *   import { useRouter } from '@/i18n/navigation'
  *   export default function ResetPasswordPage() {
- *     return <ResetPasswordCard />
+ *     const router = useRouter()
+ *     return <ResetPasswordModal isOpen onClose={() => router.push('/')} />
  *   }
  */
-export function ResetPasswordCard(props: ResetPasswordCardProps) {
+export function ResetPasswordModal(props: ResetPasswordModalProps) {
   return (
-    <Suspense fallback={<ResetPasswordCardFallback />}>
-      <ResetPasswordCardInner {...props} />
+    <Suspense fallback={props.isOpen ? <ResetPasswordModalFallback {...props} /> : null}>
+      <ResetPasswordModalInner {...props} />
     </Suspense>
   )
 }
 
-function ResetPasswordCardFallback() {
+function ResetPasswordModalFallback({ isOpen, onClose, modalShellProps }: ResetPasswordModalProps) {
   return (
-    <AuthCardShell>
+    <AuthModalShell isOpen={isOpen} onClose={onClose} {...modalShellProps}>
       <Div className="flex items-center justify-center min-h-[200px]">
         <Spinner variant="primary" size="lg" />
       </Div>
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }

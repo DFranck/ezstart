@@ -12,19 +12,19 @@ import {
 } from '../../react/useKeyConfig.js'
 import { getAuthTexts } from '../../i18n/index.js'
 import { SignInForm, type SignInFormProps, type SignInFormTexts } from '../SignInForm.js'
-import { AuthCardShell, type AuthCardShellProps } from './auth-card-shell.js'
+import { AuthModalShell, type AuthModalShellProps } from './auth-modal-shell.js'
 
 /** Max retry delay when the server did not provide `Retry-After` or returned an unreasonably large value. */
 const MAX_RATE_LIMIT_RETRY_SECONDS = 10
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export interface SignInCardTexts extends Partial<SignInFormTexts> {
-  /** Card title (default: localized "Sign in to your account"). */
+export interface SignInModalTexts extends Partial<SignInFormTexts> {
+  /** Modal title (default: localized "Sign in to your account"). */
   cardTitle?: string
-  /** Card subtitle WITH brand interpolation (default: localized "Sign in to access {app}"). */
+  /** Modal subtitle WITH brand interpolation (default: localized "Sign in to access {app}"). */
   cardSubtitleWithApp?: string
-  /** Card subtitle without brand (default: localized "Welcome back"). Used when no brand resolves. */
+  /** Modal subtitle without brand (default: localized "Welcome back"). Used when no brand resolves. */
   cardSubtitle?: string
   /** "Don't have an account?" prefix in the footer. */
   noAccount?: string
@@ -40,12 +40,16 @@ export interface SignInCardTexts extends Partial<SignInFormTexts> {
   loading?: string
 }
 
-export interface SignInCardProps extends Omit<
+export interface SignInModalProps extends Omit<
   SignInFormProps,
   'appName' | 'redirectUri' | 'disabled' | 'keyStatus' | 'urlKey'
 > {
+  /** Whether the modal is open. */
+  isOpen: boolean
+  /** Callback fired when the modal should close (X icon, Esc, overlay click). */
+  onClose?: () => void
   /**
-   * Optional override for the resolved app name. Normally the card auto-resolves
+   * Optional override for the resolved app name. Normally the modal auto-resolves
    * from `?key=` URL param via `useKeyConfig`, falling back to `?app=` and
    * finally `'ezauth'`. Pass this only when SSR resolved an app name on the
    * server side and you want to avoid the first-render flash.
@@ -53,35 +57,37 @@ export interface SignInCardProps extends Omit<
   ssrAppName?: string | null
   /**
    * Optional override for the resolved Application display name (used for
-   * rendering the brand pill in the subtitle). When omitted, the card derives
+   * rendering the brand pill in the subtitle). When omitted, the modal derives
    * it from `useKeyConfig().appDisplayName` then `prettifySlug(appName)`.
    */
   ssrAppDisplayName?: string | null
   /** Brand logo shown above the title. */
   logo?: ReactNode
-  /** Override the default chrome props (back button, theme switcher, size, etc.). */
-  cardShellProps?: Partial<AuthCardShellProps>
+  /** Override the default chrome props (theme switcher, size, etc.). */
+  modalShellProps?: Partial<AuthModalShellProps>
   /** Override texts (merged on top of the localized defaults). */
-  texts?: SignInCardTexts
+  texts?: SignInModalTexts
 }
 
 // ─── Inner content (uses Suspense-bound hooks) ─────────────────────────────
 
-function SignInCardInner({
+function SignInModalInner({
+  isOpen,
+  onClose,
   ssrAppName = null,
   ssrAppDisplayName = null,
   logo,
-  cardShellProps,
+  modalShellProps,
   texts,
   locale: propLocale,
   showOAuth = true,
   oauthProviders = ['google'],
   ...formProps
-}: SignInCardProps) {
+}: SignInModalProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
-  // `getAuthTexts(locale, 'signIn')` returns the localized dict which now
-  // includes both the form keys AND the card-specific keys (cardTitle,
+  // `getAuthTexts(locale, 'signIn')` returns the localized dict which includes
+  // both the form keys AND the modal-specific keys (cardTitle,
   // cardSubtitleWithApp, noAccount, registerLink, keyInvalid,
   // keyRateLimited, keyUnavailable, loading). The dict is typed through
   // `AuthDict['signIn']` — we narrow to a Record<string, string> view to
@@ -90,7 +96,7 @@ function SignInCardInner({
   const t = {
     ...formDefaults,
     ...(texts as Record<string, string> | undefined),
-  } as Required<SignInCardTexts>
+  } as Required<SignInModalTexts>
   const formTexts = t as Partial<SignInFormTexts>
 
   // `retryTick` is a nonce used to force `useKeyConfig` to re-probe after a
@@ -188,12 +194,14 @@ function SignInCardInner({
   )
 
   return (
-    <AuthCardShell
+    <AuthModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t.cardTitle}
       subtitle={subtitle}
       footer={footer}
-      showBackButton
       logo={logo}
-      {...cardShellProps}
+      {...modalShellProps}
     >
       <SignInForm
         appName={app}
@@ -206,48 +214,56 @@ function SignInCardInner({
         texts={formTexts}
         {...formProps}
       />
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }
 
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Sign-In card — drop-in for any `/login` page.
+ * Self-contained Sign-In modal — embeddable anywhere.
  *
- * Wraps `<SignInForm>` inside `<AuthCardShell>` (Card + header + theme
- * switcher + back button + brand subtitle + cross-link footer). Auto-resolves
- * the consumer brand from the `?key=` URL param via {@link useKeyConfig} and
- * renders the matching display name in the subtitle.
+ * Wraps `<SignInForm>` inside `<AuthModalShell>` (Modal + theme switcher +
+ * brand subtitle + cross-link footer). Auto-resolves the consumer brand from
+ * the `?key=` URL param via {@link useKeyConfig} and renders the matching
+ * display name in the subtitle.
  *
- * Equivalent to Clerk's `<SignIn />`. Consumer apps reduce their `/login`
- * page to a single line:
+ * Equivalent to Clerk's `<SignIn />`. Works as both a standalone auth route
+ * (always-open) and as an embeddable modal triggered from any consumer page.
  *
  * @example
- *   // app/[locale]/login/page.tsx
- *   import { SignInCard } from '@ezstart/auth-sdk/components'
+ *   // Standalone /login page
+ *   import { SignInModal } from '@ezstart/auth-sdk/components'
+ *   import { useRouter } from '@/i18n/navigation'
  *   export default function LoginPage() {
- *     return <SignInCard />
+ *     const router = useRouter()
+ *     return <SignInModal isOpen onClose={() => router.push('/')} />
  *   }
  *
  * @example
- *   // With SSR-pre-resolved brand for zero flash
- *   <SignInCard ssrAppName="ezpay" ssrAppDisplayName="EZPay" />
+ *   // Embedded modal triggered from a button
+ *   const [open, setOpen] = useState(false)
+ *   return (
+ *     <>
+ *       <Button onClick={() => setOpen(true)}>Sign in</Button>
+ *       <SignInModal isOpen={open} onClose={() => setOpen(false)} />
+ *     </>
+ *   )
  */
-export function SignInCard(props: SignInCardProps) {
+export function SignInModal(props: SignInModalProps) {
   return (
-    <Suspense fallback={<SignInCardFallback />}>
-      <SignInCardInner {...props} />
+    <Suspense fallback={props.isOpen ? <SignInModalFallback {...props} /> : null}>
+      <SignInModalInner {...props} />
     </Suspense>
   )
 }
 
-function SignInCardFallback() {
+function SignInModalFallback({ isOpen, onClose, modalShellProps }: SignInModalProps) {
   return (
-    <AuthCardShell>
+    <AuthModalShell isOpen={isOpen} onClose={onClose} {...modalShellProps}>
       <Div className="flex items-center justify-center min-h-[200px]">
         <Spinner variant="primary" size="lg" />
       </Div>
-    </AuthCardShell>
+    </AuthModalShell>
   )
 }
