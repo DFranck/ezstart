@@ -90,6 +90,8 @@ export { getEzauthUrl } from './react/sso.js'
 
 // Hooks
 export { useAuthNavigation } from './react/useAuthNavigation.js'
+export { useKeyConfig, prettifySlug, deriveAppHintFromRedirectUri } from './react/useKeyConfig.js'
+export type { KeyConfigState } from './react/useKeyConfig.js'
 
 // ── Middleware (Next.js) ─────────────────────────────────────────────────────
 
@@ -110,6 +112,31 @@ export { LoginButton } from './components/LoginButton.js'
 export type { LoginButtonProps } from './components/LoginButton.js'
 export { RegisterButton } from './components/RegisterButton.js'
 export type { RegisterButtonProps } from './components/RegisterButton.js'
+
+// Self-contained auth Cards (Clerk-style drop-in `<SignIn />` / `<SignUp />`
+// equivalents for `/login`, `/register`, `/forgot-password`, `/reset-password`,
+// `/verify-email`).
+export {
+  SignInCard,
+  SignUpCard,
+  ForgotPasswordCard,
+  ResetPasswordCard,
+  VerifyEmailCard,
+  AuthCardShell,
+} from './components/cards/index.js'
+export type {
+  SignInCardProps,
+  SignInCardTexts,
+  SignUpCardProps,
+  SignUpCardTexts,
+  ForgotPasswordCardProps,
+  ForgotPasswordCardTexts,
+  ResetPasswordCardProps,
+  ResetPasswordCardTexts,
+  VerifyEmailCardProps,
+  VerifyEmailCardTexts,
+  AuthCardShellProps,
+} from './components/cards/index.js'
 
 // Auth form components
 export { SignInForm } from './components/SignInForm.js'

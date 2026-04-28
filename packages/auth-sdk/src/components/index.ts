@@ -28,6 +28,31 @@ export type {
 export { RequireAuthLoader } from './RequireAuthLoader.js'
 export type { RequireAuthLoaderProps } from './RequireAuthLoader.js'
 
+// Self-contained auth Cards (Clerk-style drop-in for `/login`, `/register`,
+// `/forgot-password`, `/reset-password`, `/verify-email` — wrap the matching
+// `<SignInForm>` etc. inside `<AuthCardShell>` with brand/footer cross-link).
+export {
+  SignInCard,
+  SignUpCard,
+  ForgotPasswordCard,
+  ResetPasswordCard,
+  VerifyEmailCard,
+  AuthCardShell,
+} from './cards/index.js'
+export type {
+  SignInCardProps,
+  SignInCardTexts,
+  SignUpCardProps,
+  SignUpCardTexts,
+  ForgotPasswordCardProps,
+  ForgotPasswordCardTexts,
+  ResetPasswordCardProps,
+  ResetPasswordCardTexts,
+  VerifyEmailCardProps,
+  VerifyEmailCardTexts,
+  AuthCardShellProps,
+} from './cards/index.js'
+
 // Auth forms
 export { SignInForm } from './SignInForm.js'
 export type { SignInFormProps, SignInFormTexts } from './SignInForm.js'

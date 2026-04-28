@@ -4,6 +4,11 @@
 
 export const en = {
   signUp: {
+    cardTitle: 'Create your account',
+    cardSubtitleWithApp: 'Create an account to access {app}',
+    cardSubtitle: 'Sign up to get started',
+    haveAccount: 'Already have an account?',
+    loginLink: 'Sign in',
     email: 'Email',
     emailPlaceholder: 'Enter your email',
     emailTaken: 'This email is already taken',
@@ -44,6 +49,16 @@ export const en = {
     hidePassword: 'Hide password',
   },
   signIn: {
+    cardTitle: 'Sign in to your account',
+    cardSubtitleWithApp: 'Sign in to access {app}',
+    cardSubtitle: 'Welcome back',
+    noAccount: "Don't have an account?",
+    registerLink: 'Sign up',
+    keyInvalid:
+      'The publishable key in this URL is invalid. Please check the link or contact support.',
+    keyRateLimited: 'Too many attempts. Retrying in {seconds} seconds...',
+    keyUnavailable: 'Authentication service is temporarily unavailable. Please try again shortly.',
+    loading: 'Loading...',
     emailOrUsername: 'Email or Username',
     emailOrUsernamePlaceholder: 'Enter your email or username',
     password: 'Password',
@@ -66,6 +81,9 @@ export const en = {
     hidePassword: 'Hide password',
   },
   forgotPassword: {
+    cardTitle: 'Forgot your password?',
+    cardSubtitle: 'Enter your email and we will send you a reset link.',
+    link: 'Forgot password?',
     email: 'Email',
     emailPlaceholder: 'Enter your email address',
     submit: 'Send Reset Link',
@@ -77,6 +95,9 @@ export const en = {
     fallbackError: 'An error occurred. Please try again.',
   },
   resetPassword: {
+    cardTitle: 'Reset your password',
+    cardSubtitle: 'Choose a new password for your account.',
+    loading: 'Loading...',
     newPassword: 'New password',
     newPasswordPlaceholder: 'Enter your new password',
     confirmPassword: 'Confirm password',
@@ -101,6 +122,23 @@ export const en = {
     errorInvalidToken: 'This reset link is invalid or expired.',
     showPassword: 'Show password',
     hidePassword: 'Hide password',
+  },
+  verifyEmail: {
+    cardTitle: 'Verify your email',
+    cardSubtitle: 'Confirming your email address...',
+    verifying: 'Verifying your email...',
+    verifyingDescription: 'Please wait while we verify your email address.',
+    success: 'Email verified successfully!',
+    successDescription: 'You can now sign in to your account.',
+    alreadyVerified: 'Email already verified',
+    alreadyVerifiedDescription: 'Your email is already verified. You can sign in.',
+    invalid: 'Invalid or expired link',
+    invalidDescription:
+      'This verification link is invalid or has expired. Please request a new one.',
+    error: 'Verification failed',
+    errorDescription: 'An error occurred while verifying your email. Please try again.',
+    backToLogin: 'Back to login',
+    tryAgain: 'Request a new link',
   },
   quickSignup: {
     username: 'Username',

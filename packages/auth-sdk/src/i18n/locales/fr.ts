@@ -3,6 +3,11 @@ import type { AuthDict } from '../index.js'
 // French dictionary. Must mirror the EN shape exactly (enforced by type).
 export const fr: AuthDict = {
   signUp: {
+    cardTitle: 'Créez votre compte',
+    cardSubtitleWithApp: 'Créez un compte pour accéder à {app}',
+    cardSubtitle: 'Inscrivez-vous pour commencer',
+    haveAccount: 'Vous avez déjà un compte ?',
+    loginLink: 'Se connecter',
     email: 'Email',
     emailPlaceholder: 'Entrez votre email',
     emailTaken: 'Cet email est déjà utilisé',
@@ -43,6 +48,17 @@ export const fr: AuthDict = {
     hidePassword: 'Masquer le mot de passe',
   },
   signIn: {
+    cardTitle: 'Connectez-vous à votre compte',
+    cardSubtitleWithApp: 'Connectez-vous pour accéder à {app}',
+    cardSubtitle: 'Bon retour',
+    noAccount: "Vous n'avez pas de compte ?",
+    registerLink: "S'inscrire",
+    keyInvalid:
+      'La clé publique de cette URL est invalide. Vérifiez le lien ou contactez le support.',
+    keyRateLimited: 'Trop de tentatives. Nouvel essai dans {seconds} secondes...',
+    keyUnavailable:
+      "Le service d'authentification est temporairement indisponible. Veuillez réessayer.",
+    loading: 'Chargement...',
     emailOrUsername: "Email ou nom d'utilisateur",
     emailOrUsernamePlaceholder: "Entrez votre email ou nom d'utilisateur",
     password: 'Mot de passe',
@@ -65,6 +81,9 @@ export const fr: AuthDict = {
     hidePassword: 'Masquer le mot de passe',
   },
   forgotPassword: {
+    cardTitle: 'Mot de passe oublié ?',
+    cardSubtitle: 'Saisissez votre email et nous vous enverrons un lien de réinitialisation.',
+    link: 'Mot de passe oublié ?',
     email: 'Email',
     emailPlaceholder: 'Entrez votre adresse email',
     submit: 'Envoyer le lien',
@@ -76,6 +95,9 @@ export const fr: AuthDict = {
     fallbackError: 'Une erreur est survenue. Veuillez réessayer.',
   },
   resetPassword: {
+    cardTitle: 'Réinitialisez votre mot de passe',
+    cardSubtitle: 'Choisissez un nouveau mot de passe pour votre compte.',
+    loading: 'Chargement...',
     newPassword: 'Nouveau mot de passe',
     newPasswordPlaceholder: 'Entrez votre nouveau mot de passe',
     confirmPassword: 'Confirmer le mot de passe',
@@ -101,6 +123,24 @@ export const fr: AuthDict = {
     tokenExpired: "Ce lien de réinitialisation a expiré ou n'est plus valide.",
     requestNewLink: 'Demander un nouveau lien',
     errorInvalidToken: 'Ce lien de réinitialisation est invalide ou expiré.',
+  },
+  verifyEmail: {
+    cardTitle: 'Vérification de votre email',
+    cardSubtitle: 'Confirmation de votre adresse email...',
+    verifying: 'Vérification de votre email...',
+    verifyingDescription: 'Veuillez patienter pendant que nous vérifions votre adresse email.',
+    success: 'Email vérifié avec succès !',
+    successDescription: 'Vous pouvez maintenant vous connecter à votre compte.',
+    alreadyVerified: 'Email déjà vérifié',
+    alreadyVerifiedDescription: 'Votre email est déjà vérifié. Vous pouvez vous connecter.',
+    invalid: 'Lien invalide ou expiré',
+    invalidDescription:
+      'Ce lien de vérification est invalide ou a expiré. Veuillez en demander un nouveau.',
+    error: 'Échec de la vérification',
+    errorDescription:
+      "Une erreur s'est produite lors de la vérification de votre email. Veuillez réessayer.",
+    backToLogin: 'Retour à la connexion',
+    tryAgain: 'Demander un nouveau lien',
   },
   quickSignup: {
     username: "Nom d'utilisateur",

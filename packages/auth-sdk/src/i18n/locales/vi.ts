@@ -3,6 +3,11 @@ import type { AuthDict } from '../index.js'
 // Vietnamese dictionary. Must mirror the EN shape exactly (enforced by type).
 export const vi: AuthDict = {
   signUp: {
+    cardTitle: 'Tạo tài khoản của bạn',
+    cardSubtitleWithApp: 'Tạo tài khoản để truy cập {app}',
+    cardSubtitle: 'Đăng ký để bắt đầu',
+    haveAccount: 'Đã có tài khoản?',
+    loginLink: 'Đăng nhập',
     email: 'Email',
     emailPlaceholder: 'Nhập email của bạn',
     emailTaken: 'Email này đã được sử dụng',
@@ -43,6 +48,16 @@ export const vi: AuthDict = {
     hidePassword: 'Ẩn mật khẩu',
   },
   signIn: {
+    cardTitle: 'Đăng nhập vào tài khoản của bạn',
+    cardSubtitleWithApp: 'Đăng nhập để truy cập {app}',
+    cardSubtitle: 'Chào mừng trở lại',
+    noAccount: 'Chưa có tài khoản?',
+    registerLink: 'Đăng ký',
+    keyInvalid:
+      'Khóa công khai trong URL này không hợp lệ. Vui lòng kiểm tra liên kết hoặc liên hệ hỗ trợ.',
+    keyRateLimited: 'Quá nhiều lần thử. Sẽ thử lại sau {seconds} giây...',
+    keyUnavailable: 'Dịch vụ xác thực tạm thời không khả dụng. Vui lòng thử lại trong giây lát.',
+    loading: 'Đang tải...',
     emailOrUsername: 'Email hoặc tên đăng nhập',
     emailOrUsernamePlaceholder: 'Nhập email hoặc tên đăng nhập',
     password: 'Mật khẩu',
@@ -65,6 +80,9 @@ export const vi: AuthDict = {
     hidePassword: 'Ẩn mật khẩu',
   },
   forgotPassword: {
+    cardTitle: 'Quên mật khẩu?',
+    cardSubtitle: 'Nhập email của bạn và chúng tôi sẽ gửi liên kết đặt lại.',
+    link: 'Quên mật khẩu?',
     email: 'Email',
     emailPlaceholder: 'Nhập địa chỉ email của bạn',
     submit: 'Gửi liên kết đặt lại',
@@ -76,6 +94,9 @@ export const vi: AuthDict = {
     fallbackError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
   },
   resetPassword: {
+    cardTitle: 'Đặt lại mật khẩu của bạn',
+    cardSubtitle: 'Chọn mật khẩu mới cho tài khoản của bạn.',
+    loading: 'Đang tải...',
     newPassword: 'Mật khẩu mới',
     newPasswordPlaceholder: 'Nhập mật khẩu mới của bạn',
     confirmPassword: 'Xác nhận mật khẩu',
@@ -100,6 +121,23 @@ export const vi: AuthDict = {
     tokenExpired: 'Liên kết đặt lại này đã hết hạn hoặc không hợp lệ.',
     requestNewLink: 'Yêu cầu liên kết mới',
     errorInvalidToken: 'Liên kết đặt lại này không hợp lệ hoặc đã hết hạn.',
+  },
+  verifyEmail: {
+    cardTitle: 'Xác minh email của bạn',
+    cardSubtitle: 'Đang xác nhận địa chỉ email của bạn...',
+    verifying: 'Đang xác minh email của bạn...',
+    verifyingDescription: 'Vui lòng chờ trong khi chúng tôi xác minh địa chỉ email của bạn.',
+    success: 'Xác minh email thành công!',
+    successDescription: 'Bây giờ bạn có thể đăng nhập vào tài khoản của mình.',
+    alreadyVerified: 'Email đã được xác minh',
+    alreadyVerifiedDescription: 'Email của bạn đã được xác minh. Bạn có thể đăng nhập.',
+    invalid: 'Liên kết không hợp lệ hoặc đã hết hạn',
+    invalidDescription:
+      'Liên kết xác minh này không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu liên kết mới.',
+    error: 'Xác minh thất bại',
+    errorDescription: 'Đã xảy ra lỗi khi xác minh email của bạn. Vui lòng thử lại.',
+    backToLogin: 'Quay lại đăng nhập',
+    tryAgain: 'Yêu cầu liên kết mới',
   },
   quickSignup: {
     username: 'Tên đăng nhập',
