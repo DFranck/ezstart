@@ -39,17 +39,10 @@ const THEME_COOKIE_NAME = 'theme'
 // backdrop — Vercel / Linear "intercepted modal" pattern. Closing the
 // modal navigates back to home with chrome already in place (no flash).
 //
-// `/components` is bare even though it lives in the `(public)` route group:
-// the showcase ships its own `<DashboardLayout>` (sidebar + content) chrome
-// and we don't want it double-framed by the public AppShell header/footer.
-const BARE_ROUTE_PREFIXES = [
-  '/auth/',
-  '/dashboard',
-  '/admin',
-  '/developer',
-  '/account',
-  '/components',
-]
+// `/docs` is bare (covers /docs, /docs/components, /docs/api, /docs/guides,
+// etc. as we expand): the docs umbrella ships its own DocsTopBar + sidebar
+// chrome and we don't want it double-framed by the public AppShell.
+const BARE_ROUTE_PREFIXES = ['/auth/', '/dashboard', '/admin', '/developer', '/account', '/docs']
 
 function isBareRoutePathname(pathname: string): boolean {
   return BARE_ROUTE_PREFIXES.some(prefix => pathname.includes(prefix))

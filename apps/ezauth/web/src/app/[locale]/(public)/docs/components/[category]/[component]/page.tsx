@@ -25,14 +25,14 @@ export default async function ComponentDetailPage({ params }: Props) {
     <Div className="mx-auto max-w-5xl space-y-6">
       <Div className="flex flex-wrap items-center gap-2 text-sm">
         <Link
-          href="/components"
+          href="/docs/components"
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
           {t('detailBreadcrumbRoot')}
         </Link>
         <Span className="text-muted-foreground">/</Span>
         <Link
-          href={`/components/${categorySlug}`}
+          href={`/docs/components/${categorySlug}`}
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
           {category.name}

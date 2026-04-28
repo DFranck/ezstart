@@ -22,18 +22,11 @@ const USER_SCOPE_PREFIXES = ['/dashboard', '/account', '/developer']
 // Mirror of `BARE_ROUTE_PREFIXES` in `middleware.ts` — kept in sync because
 // Next.js shared layouts (`[locale]/layout.tsx`) are NOT re-rendered on
 // soft client navigation between sibling pages, so the SSR-resolved
-// `routeMode` prop becomes stale on cross-route nav (e.g. /fr -> /fr/components).
+// `routeMode` prop becomes stale on cross-route nav (e.g. /fr -> /fr/docs).
 // We re-evaluate from `usePathname()` client-side so the AppShell short-
 // circuit decision matches the current URL even when the layout cache
 // holds the value from the initial page load.
-const BARE_ROUTE_PREFIXES = [
-  '/auth/',
-  '/dashboard',
-  '/admin',
-  '/developer',
-  '/account',
-  '/components',
-]
+const BARE_ROUTE_PREFIXES = ['/auth/', '/dashboard', '/admin', '/developer', '/account', '/docs']
 
 function isBareRoutePathname(pathname: string): boolean {
   return BARE_ROUTE_PREFIXES.some(prefix => pathname.includes(prefix))
@@ -232,7 +225,6 @@ export function AppShell({ children, routeMode = 'full' }: AppShellProps) {
       navLinks={[
         { href: '#features', label: t('navFeatures') },
         { href: '#pricing', label: t('navPricing') },
-        { href: '/components', label: t('navComponents') },
         { href: '/docs', label: t('navDocs') },
       ]}
       footerColumns={[

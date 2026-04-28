@@ -21,7 +21,7 @@ import { Link } from '@/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 
 /**
- * Showcase landing — `/{locale}/components`. Renders a grid of category
+ * Showcase landing — `/{locale}/docs/components`. Renders a grid of category
  * cards with component count + 3-up preview chips. Click → category
  * overview. Server component (zero JS payload, fast first paint).
  */
@@ -56,7 +56,7 @@ export default async function ComponentsLandingPage() {
             const slug = categoryToSlug(cat.name)
             const previewNames = cat.components.slice(0, 3)
             return (
-              <Link key={cat.name} href={`/components/${slug}`} className="block group">
+              <Link key={cat.name} href={`/docs/components/${slug}`} className="block group">
                 <Card
                   variant="default"
                   className="cursor-pointer transition-all hover:border-primary/50 hover:shadow-md h-full"

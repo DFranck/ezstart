@@ -64,7 +64,7 @@ export function ComponentSidebar() {
         <Div className="shrink-0 border-b px-4 py-3 space-y-2">
           <Div className="flex items-center justify-between">
             <Link
-              href="/components"
+              href="/docs/components"
               className="text-sm font-semibold tracking-tight hover:text-primary transition-colors"
               onClick={() => setOpen(false)}
             >
@@ -99,7 +99,7 @@ export function ComponentSidebar() {
                   <li key={cat.name}>
                     <Div className="mb-1 flex items-center justify-between px-2">
                       <Link
-                        href={`/components/${catSlug}`}
+                        href={`/docs/components/${catSlug}`}
                         className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                         onClick={() => setOpen(false)}
                       >
@@ -112,8 +112,8 @@ export function ComponentSidebar() {
                     <ul className="space-y-0.5">
                       {cat.components.map(name => {
                         const slug = componentToSlug(name)
-                        const href = `/components/${catSlug}/${slug}`
-                        const active = pathname.endsWith(`/components/${catSlug}/${slug}`)
+                        const href = `/docs/components/${catSlug}/${slug}`
+                        const active = pathname.endsWith(`/docs/components/${catSlug}/${slug}`)
                         return (
                           <li key={name}>
                             <Link

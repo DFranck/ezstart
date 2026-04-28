@@ -48,7 +48,7 @@ export default async function CategoryPage({ params }: Props) {
     <Div className="mx-auto max-w-5xl space-y-8">
       <Div className="space-y-3">
         <Link
-          href="/components"
+          href="/docs/components"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           ← {t('categoryBackToOverview')}
@@ -62,7 +62,7 @@ export default async function CategoryPage({ params }: Props) {
       <Section>
         <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {entries.map(entry => {
-            const href = `/components/${categorySlug}/${componentToSlug(entry.name)}`
+            const href = `/docs/components/${categorySlug}/${componentToSlug(entry.name)}`
             return (
               <Link key={entry.name} href={href} className="block">
                 <Card

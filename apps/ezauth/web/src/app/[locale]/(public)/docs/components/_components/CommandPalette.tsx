@@ -55,7 +55,7 @@ export function CommandPalette() {
   const categoryNames = Object.keys(grouped).sort()
 
   function go(catName: string, componentName: string) {
-    const href = `/${locale}/components/${categoryToSlug(catName)}/${componentToSlug(componentName)}`
+    const href = `/${locale}/docs/components/${categoryToSlug(catName)}/${componentToSlug(componentName)}`
     setOpen(false)
     router.push(href)
   }

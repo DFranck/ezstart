@@ -7,11 +7,13 @@ import {
   CardContent,
   Div,
   H1,
+  Icon,
   Main,
   MarkdownContent,
   P,
 } from '@ezstart/ui/components'
 import { getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 
 export const dynamic = 'force-static'
 
@@ -38,7 +40,13 @@ export default async function DocsPage() {
         <H1 size="h1">{t('title')}</H1>
         <P className="text-muted-foreground">{t('subtitle')}</P>
         <Div className="flex flex-wrap justify-center gap-3">
-          <Button asChild variant="default">
+          <Button asChild variant="default" className="gap-2">
+            <Link href="/docs/components">
+              <Icon name="lucide:LayoutGrid" className="h-4 w-4" />
+              <span>Browse components (48)</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
             <a href={apiDocsUrl} target="_blank" rel="noopener noreferrer">
               {t('apiReferenceButton')}
             </a>

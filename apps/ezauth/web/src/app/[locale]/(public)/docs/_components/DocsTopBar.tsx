@@ -9,8 +9,8 @@ const LOCALES = ['en', 'fr', 'vi']
 
 // Inline locale map for the back-link label. Bypasses next-intl on this one
 // string because Turbopack caches the messages chunk on first compile and
-// new keys added to `components.json` aren't picked up until a full dev
-// server restart — annoying when the only consumer is a static top bar.
+// new keys added to JSON are not picked up until a full dev server restart —
+// annoying when the only consumer is a static top bar.
 const BACK_LABEL: Record<string, string> = {
   en: 'Back to EZAuth',
   fr: 'Retour à EZAuth',
@@ -18,15 +18,14 @@ const BACK_LABEL: Record<string, string> = {
 }
 
 /**
- * Top bar for the `/components` showcase — replaces the public AppShell
- * header on this bare route. Provides back-to-home link + locale + theme.
+ * Top bar for the `/docs/*` surface — replaces the public AppShell header
+ * on this bare route group. Provides back-to-home link + locale + theme.
  *
- * Auth state is intentionally NOT exposed here — the showcase is a
- * developer docs surface that renders identical content whether the
- * visitor is logged in or not. Adding a LoginButton would be visual
- * noise; users who need their dashboard go via "Retour à EZAuth".
+ * Auth state is intentionally NOT exposed here — docs is a developer-facing
+ * surface that renders identical content whether the visitor is logged in
+ * or not. Users who need their dashboard navigate via "Retour à EZAuth".
  */
-export function ShowcaseTopBar() {
+export function DocsTopBar() {
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
