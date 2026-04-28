@@ -1,17 +1,42 @@
 'use client'
 
-import { AuthProvider, useAuthStore } from '@ezstart/auth-sdk'
+import { AuthProvider, useAuthStoreApi, useAuthStoreGetSnapshot } from '@ezstart/auth-sdk'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ThemeProvider } from '@ezstart/ui/theme'
 import { useLocale } from 'next-intl'
+import { ReactNode, useCallback } from 'react'
 import { QueryProvider } from '../../providers/query-provider'
-import { ReactNode } from 'react'
 
-function handleAuthFailure() {
-  useAuthStore.getState().logout()
-  if (typeof window !== 'undefined') {
-    window.location.href = '/'
-  }
+/**
+ * Bridge component: lives INSIDE `<AuthProvider>` so it can read the
+ * Context-bound auth store and forward `getToken`/`onAuthFailure` to
+ * `<PayProvider>`. Splitting the bridge out keeps the wiring close to the
+ * SDK plumbing it depends on (no module-level `useAuthStore.getState()`
+ * — that pattern is incompatible with the per-Provider store created by
+ * the Clerk-style SSR setup).
+ */
+function PayBridge({ locale, children }: { locale: string; children: ReactNode }) {
+  const getSnapshot = useAuthStoreGetSnapshot()
+  const storeApi = useAuthStoreApi()
+  const onAuthFailure = useCallback(() => {
+    storeApi.getState().logout()
+    if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
+  }, [storeApi])
+
+  return (
+    <PayProvider
+      appName="ezpay"
+      config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
+      publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
+      locale={locale}
+      getToken={() => getSnapshot().accessToken}
+      onAuthFailure={onAuthFailure}
+    >
+      {children}
+    </PayProvider>
+  )
 }
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -25,16 +50,7 @@ export function Providers({ children }: { children: ReactNode }) {
           webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
           publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
         >
-          <PayProvider
-            appName="ezpay"
-            config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
-            publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
-            locale={locale}
-            getToken={() => useAuthStore.getState().accessToken}
-            onAuthFailure={handleAuthFailure}
-          >
-            {children}
-          </PayProvider>
+          <PayBridge locale={locale}>{children}</PayBridge>
         </AuthProvider>
       </ThemeProvider>
     </QueryProvider>

@@ -33,7 +33,14 @@ export default function AdminPaymentsPage() {
         locale={locale}
         getToken={() => accessToken}
       >
-        <PayAdminDashboard applicationId={applicationId} />
+        {/*
+          PayAdminDashboard is auto-scoped server-side via the JWT on each
+          API call (superadmin → all, app-admin → owned apps, user → mine).
+          The `applicationId` from <PayProvider> is still used by hooks that
+          need a tenant context (e.g. for BillingDashboard) — but the admin
+          dashboard itself drops the prop since the API now derives scope.
+        */}
+        <PayAdminDashboard />
       </PayProvider>
     </>
   )

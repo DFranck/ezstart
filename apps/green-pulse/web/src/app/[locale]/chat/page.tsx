@@ -1,7 +1,7 @@
 'use client'
 
 import { AILayout } from '@ezstart/ai-sdk/client'
-import { UserMenu, useAuthStore } from '@ezstart/auth-sdk'
+import { UserMenu, useAuthStore, useAuthStoreGetSnapshot } from '@ezstart/auth-sdk'
 import { useRBAC } from '@ezstart/auth-sdk'
 import { PayProvider, usePlans } from '@ezstart/pay-sdk'
 import { Button, Div, Icon, Main, Nav, Span } from '@ezstart/ui/components'
@@ -71,6 +71,7 @@ export default function LiaPage() {
   const router = useRouter()
   const theme = useTheme()
   const { user } = useAuthStore()
+  const getAuthSnapshot = useAuthStoreGetSnapshot()
   const rbac = useRBAC(user, 'green-pulse')
   const isAdmin = rbac.hasAnyRole(['admin', 'superadmin'])
 
@@ -128,7 +129,7 @@ export default function LiaPage() {
               applicationId={GREEN_PULSE_APPLICATION_ID}
               config={{ apiUrl: EZPAY_API_URL }}
               locale={locale}
-              getToken={() => useAuthStore.getState().accessToken}
+              getToken={() => getAuthSnapshot().accessToken}
             >
               <CurrentPlanLabel />
             </PayProvider>
@@ -201,7 +202,7 @@ export default function LiaPage() {
         locale={locale}
         height="viewport"
         adminHref={`/${locale}/admin`}
-        getToken={() => useAuthStore.getState().accessToken}
+        getToken={() => getAuthSnapshot().accessToken}
         extraPayload={{ extract_esg: false }}
         texts={{
           welcomeTitle: t('welcomeTitle'),

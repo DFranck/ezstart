@@ -18,7 +18,7 @@
 
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { getPort, type AppName } from '@ezstart/config/urls'
-import { logger as monorepoLogger } from '@ezstart/logger/server'
+import { logger as monorepoLogger, type Logger } from '@ezstart/logger/server'
 import jwt from 'jsonwebtoken'
 import { createApiServer } from './core/create-server.js'
 import { createAuthMiddleware } from './core/middleware/auth.js'
@@ -86,14 +86,19 @@ export type EzstartServerOptions = {
   cookieAuthAllowlist?: readonly CookieAuthAllowlistEntry[]
 }
 
-type LoggerLike = {
-  info: (msgOrObj: string | object, dataOrMsg?: unknown) => void
-  warn: (msgOrObj: string | object, dataOrMsg?: unknown) => void
-  error: (msgOrObj: string | object, dataOrMsg?: unknown) => void
-  debug: (msgOrObj: string | object, dataOrMsg?: unknown) => void
-}
-
-function adaptLogger(source: LoggerLike): ServerLogger {
+/**
+ * Adapt the canonical {@link Logger} interface (from `@ezstart/logger`) to
+ * the agnostic `ServerLogger` shape consumed by the api-core framework.
+ *
+ * Both interfaces are structurally compatible — `Logger` is a strict
+ * superset (accepts `string | object` for the first arg) — so the wrapping
+ * is just a thin "drop the second arg when undefined" passthrough that
+ * keeps the on-the-wire log call identical to a hand-rolled
+ * `pino.info(msg, data)` invocation.
+ *
+ * @internal
+ */
+function adaptLogger(source: Logger): ServerLogger {
   return {
     info: (msg, data) => (data !== undefined ? source.info(msg, data) : source.info(msg)),
     warn: (msg, data) => (data !== undefined ? source.warn(msg, data) : source.warn(msg)),

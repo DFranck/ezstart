@@ -313,7 +313,7 @@ describe('Payment Routes Business Logic', () => {
         expect(payments[0]!.paymentId).toBe('cs_empty_own')
       })
 
-      it('scope=all should return all payments (superadmin view)', async () => {
+      it('superadmin scope (auto-derived "all") returns all payments', async () => {
         await Payment.create({
           projectId: 'ezbill',
           projectName: 'EZBill',
@@ -331,21 +331,26 @@ describe('Payment Routes Business Logic', () => {
           userId: 'u2',
         })
 
-        // scope='all' -> filter {} (no scope)
+        // Auto-derived scope='all' for superadmin → filter {} (no scope).
         const payments = await Payment.find({})
         expect(payments).toHaveLength(2)
       })
 
-      it('scope=all for non-superadmin should be rejected (403)', () => {
-        // This is enforced at the route-handler level: buildScopeFilter returns
-        // { filter: null, status: 403 } when the caller is not superadmin. The
-        // handler then calls sendError(res, ..., 403) and the query is never
-        // executed. We assert the gating contract here rather than re-running
-        // the handler (which requires the full Express stack).
+      it('non-superadmin cannot escalate via ?scope=all (param ignored, scope stays "mine")', () => {
+        // Contract: `attachDerivedScope` ignores `?scope=all` for non-superadmins.
+        // The derived scope stays at the caller's natural level ('mine' for a
+        // regular user), so the query filter remains scoped to their own userId.
+        // This test asserts the contract — no privilege escalation.
+        const me = 'me_no_escalation'
         const isSuperadmin = false
-        const scope: 'mine' | 'myApps' | 'all' = 'all'
-        const forbidden = scope === 'all' && !isSuperadmin
-        expect(forbidden).toBe(true)
+        const requestedScope: 'mine' | 'myApps' | 'all' = 'all'
+        // Middleware: superadmin override is honored ONLY if base scope is 'all'.
+        const baseScope: 'mine' | 'myApps' | 'all' = isSuperadmin ? 'all' : 'mine'
+        const effectiveScope = baseScope === 'all' ? requestedScope : baseScope
+        expect(effectiveScope).toBe('mine')
+        // The handler thus filters by userId only — no widening occurs.
+        const filter = effectiveScope === 'mine' ? { userId: me } : {}
+        expect(filter).toEqual({ userId: me })
       })
     })
   })

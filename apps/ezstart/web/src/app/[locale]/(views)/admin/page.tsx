@@ -3,13 +3,13 @@
 import { useMemo } from 'react'
 import {
   AccessDenied,
-  AdminAnalyticsSection,
   AuthAdminDashboard,
+  type AuthAdminDashboardTexts,
   LoginButton,
   RequireAuth,
 } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
-import { PayAdminDashboard } from '@ezstart/pay-sdk'
+import { PayAdminDashboard, type PayAdminDashboardTexts } from '@ezstart/pay-sdk'
 import { AIAdminDashboard, AIProvider } from '@ezstart/ai-sdk/client'
 import {
   Card,
@@ -24,6 +24,21 @@ import { useTranslations } from 'next-intl'
 import { MonitoringTab } from './components/monitoring-tab'
 import { ServicesTab } from './components/services-tab'
 
+/**
+ * EZStart `/admin` — Tier 3 platform hub federated admin (per
+ * `standard-architecture.md` §1).
+ *
+ * Aggregates each Tier 1 SaaS' canonical admin dashboard via SDK components:
+ * - `<AuthAdminDashboard>` (auth-sdk) — same component dropped into ezauth/admin
+ * - `<PayAdminDashboard>` (pay-sdk) — same component dropped into ezpay/dashboard
+ * - `<AIAdminDashboard>` (ai-sdk) — out-of-scope for the auto-scoping refactor
+ *
+ * Auto-scoping: the auth/pay SDK dashboards no longer accept `appName`/`scope`
+ * /`applicationId`/`showAppFilter` props — the API derives the scope from the
+ * superadmin JWT (sees all tenants). The dropped `analytics` tab from the
+ * previous design is now embedded as the Overview tab inside each SDK
+ * dashboard, removing the inconsistency between this hub and the SaaS apps.
+ */
 function AdminPanelContent() {
   const t = useTranslations()
   const tu = useTranslations('admin.users')
@@ -33,84 +48,106 @@ function AdminPanelContent() {
   const tp = useTranslations('admin.ezpay')
   const ta = useTranslations('admin.ai')
 
-  const authTexts = useMemo(
+  // Nested texts shape for `<AuthAdminDashboard>` (Overview / Users /
+  // Applications / Settings tabs). Only the Users sub-object is fully
+  // localized in this hub — the other tabs fall back to SDK English defaults
+  // (sufficient for superadmin-only consumption; the per-app ezauth admin
+  // page localizes them all).
+  const authTexts = useMemo<Partial<AuthAdminDashboardTexts>>(
     () => ({
-      totalUsers: tu('stats.totalUsers'),
-      online: tu('stats.online'),
-      superadmins: tu('stats.superadmins'),
-      admins: tu('stats.admins'),
-      withAppRoles: tu('stats.withAppRoles'),
-      searchPlaceholder: tu('searchPlaceholder'),
-      columnEmail: tu('columns.email'),
-      columnUsername: tu('columns.username'),
-      columnRoles: tu('columns.roles'),
-      columnLastActive: tu('columns.lastActive'),
-      columnCreatedAt: tu('columns.createdAt'),
-      columnActions: tu('columns.actions'),
-      edit: tu('edit'),
-      delete: tu('delete'),
-      noUsers: tu('noUsers'),
-      onlineLabel: tu('online'),
-      minutesAgo: tu.raw('minutesAgo'),
-      hoursAgo: tu.raw('hoursAgo'),
-      daysAgo: tu.raw('daysAgo'),
-      confirmDeleteTitle: tu('confirmDeleteTitle'),
-      confirmDeleteDescription: tu('confirmDeleteDescription'),
-      cancel: td('cancel'),
-      confirm: td('confirm'),
-      deleteError: tu('deleteError'),
-      editRolesTitle: te('title'),
-      editRolesSubtitle: te.raw('subtitle'),
-      globalRolesLabel: te('globalRoles'),
-      appRolesLabel: te.raw('appRoles'),
-      noAppRoles: te('noAppRoles'),
-      save: te('save'),
-      editError: te('editError'),
-      roleSuperadmin: tr('superadmin'),
-      roleAdmin: tr('admin'),
-      roleManager: tr('manager'),
-      roleBetaTester: tr('beta-tester'),
-      roleClient: tr('client'),
+      tabUsers: t('admin.tabs.users'),
+      users: {
+        totalUsers: tu('stats.totalUsers'),
+        online: tu('stats.online'),
+        superadmins: tu('stats.superadmins'),
+        admins: tu('stats.admins'),
+        withAppRoles: tu('stats.withAppRoles'),
+        searchPlaceholder: tu('searchPlaceholder'),
+        columnEmail: tu('columns.email'),
+        columnUsername: tu('columns.username'),
+        columnRoles: tu('columns.roles'),
+        columnLastActive: tu('columns.lastActive'),
+        columnCreatedAt: tu('columns.createdAt'),
+        columnActions: tu('columns.actions'),
+        edit: tu('edit'),
+        delete: tu('delete'),
+        noUsers: tu('noUsers'),
+        onlineLabel: tu('online'),
+        minutesAgo: tu.raw('minutesAgo') as string,
+        hoursAgo: tu.raw('hoursAgo') as string,
+        daysAgo: tu.raw('daysAgo') as string,
+        confirmDeleteTitle: tu('confirmDeleteTitle'),
+        confirmDeleteDescription: tu('confirmDeleteDescription'),
+        cancel: td('cancel'),
+        confirm: td('confirm'),
+        deleteError: tu('deleteError'),
+        editRolesTitle: te('title'),
+        editRolesSubtitle: te.raw('subtitle') as string,
+        globalRolesLabel: te('globalRoles'),
+        appRolesLabel: te.raw('appRoles') as string,
+        noAppRoles: te('noAppRoles'),
+        save: te('save'),
+        editError: te('editError'),
+        roleSuperadmin: tr('superadmin'),
+        roleAdmin: tr('admin'),
+        roleManager: tr('manager'),
+        roleBetaTester: tr('beta-tester'),
+        roleClient: tr('client'),
+        previous: td('previous'),
+        next: td('next'),
+      },
     }),
-    [tu, tr, td, te]
+    [t, tu, tr, td, te]
   )
 
-  const payTexts = useMemo(
+  // Nested texts shape for `<PayAdminDashboard>` (Overview / Payments /
+  // Subscriptions / Plans / Promos tabs). Payments tab is fully localized
+  // here; other tabs fall back to SDK English defaults.
+  const payTexts = useMemo<Partial<PayAdminDashboardTexts>>(
     () => ({
-      totalRevenue: tp('stats.totalRevenue'),
-      totalPayments: tp('stats.totalPayments'),
-      searchPlaceholder: tp('filters.searchEmail'),
-      allTypes: tp('filters.allTypes'),
-      allStatuses: tp('filters.allStatuses'),
-      dateHeader: tp('table.date'),
-      typeHeader: tp('table.type'),
-      userHeader: tp('table.client'),
-      amountHeader: tp('table.amount'),
-      statusHeader: tp('table.status'),
-      actionsHeader: tp('table.actions'),
-      donation: tp('filters.donation'),
-      purchase: tp('filters.purchase'),
-      subscription: tp('filters.subscription'),
-      invoice: tp('filters.invoice'),
-      completed: tp('filters.completed'),
-      pending: tp('filters.pending'),
-      failed: tp('filters.failed'),
-      refunded: tp('filters.refunded'),
-      cancelled: tp('filters.cancelled'),
-      refund: tp('table.refund'),
-      refundDescription: tp('table.refundConfirm'),
-      refundSuccess: tp('table.refundSuccess'),
-      refundError: tp('table.refundError'),
-      cancelSubscription: tp('table.cancelSubscription'),
-      cancelSubscriptionDescription: tp('table.cancelConfirm'),
-      cancelSubscriptionSuccess: tp('table.cancelSuccess'),
-      cancelSubscriptionError: tp('table.cancelError'),
-      noPayments: tp('table.noPayments'),
-      confirm: td('confirm'),
-      cancel: td('cancel'),
-      loading: td('loading'),
-      close: td('close'),
-      retry: td('retry'),
+      payments: {
+        totalRevenue: tp('stats.totalRevenue'),
+        totalPayments: tp('stats.totalPayments'),
+        searchPlaceholder: tp('filters.searchEmail'),
+        allTypes: tp('filters.allTypes'),
+        allStatuses: tp('filters.allStatuses'),
+        dateHeader: tp('table.date'),
+        typeHeader: tp('table.type'),
+        userHeader: tp('table.client'),
+        amountHeader: tp('table.amount'),
+        statusHeader: tp('table.status'),
+        actionsHeader: tp('table.actions'),
+        donation: tp('filters.donation'),
+        purchase: tp('filters.purchase'),
+        subscription: tp('filters.subscription'),
+        invoice: tp('filters.invoice'),
+        completed: tp('filters.completed'),
+        pending: tp('filters.pending'),
+        failed: tp('filters.failed'),
+        refunded: tp('filters.refunded'),
+        cancelled: tp('filters.cancelled'),
+        refund: tp('table.refund'),
+        refundDescription: tp('table.refundConfirm'),
+        refundSuccess: tp('table.refundSuccess'),
+        refundError: tp('table.refundError'),
+        noPayments: tp('table.noPayments'),
+        confirm: td('confirm'),
+        cancel: td('cancel'),
+        loading: td('loading'),
+        close: td('close'),
+        retry: td('retry'),
+      },
+      subscriptions: {
+        cancelSubscription: tp('table.cancelSubscription'),
+        cancelSubscriptionDescription: tp('table.cancelConfirm'),
+        cancelSubscriptionSuccess: tp('table.cancelSuccess'),
+        cancelSubscriptionError: tp('table.cancelError'),
+        confirm: td('confirm'),
+        cancel: td('cancel'),
+        loading: td('loading'),
+        close: td('close'),
+        retry: td('retry'),
+      },
     }),
     [tp, td]
   )
@@ -200,49 +237,16 @@ function AdminPanelContent() {
     [ta, td]
   )
 
-  const analyticsTexts = useMemo(
-    () => ({
-      title: t('admin.analytics.title'),
-      subtitle: t('admin.analytics.subtitle'),
-      totalUsers: t('admin.analytics.totalUsers'),
-      newUsersThisMonth: t('admin.analytics.newUsersThisMonth'),
-      activeUsersLast30Days: t('admin.analytics.activeUsersLast30Days'),
-      activeUsersHint: t('admin.analytics.activeUsersHint'),
-      verifiedUsers: t('admin.analytics.verifiedUsers'),
-      twoFactorEnabled: t('admin.analytics.twoFactorEnabled'),
-      totalApplications: t('admin.analytics.totalApplications'),
-      totalApiKeys: t('admin.analytics.totalApiKeys'),
-      signupTrendTitle: t('admin.analytics.signupTrendTitle'),
-      signupTrendDescription: t('admin.analytics.signupTrendDescription'),
-      signupTrendEmpty: t('admin.analytics.signupTrendEmpty'),
-      signupSeriesLabel: t('admin.analytics.signupSeriesLabel'),
-      signupAxisLabel: t('admin.analytics.signupAxisLabel'),
-      topAppsTitle: t('admin.analytics.topAppsTitle'),
-      topAppsDescription: t('admin.analytics.topAppsDescription'),
-      topAppsEmpty: t('admin.analytics.topAppsEmpty'),
-      topAppsAppColumn: t('admin.analytics.topAppsAppColumn'),
-      topAppsUsersColumn: t('admin.analytics.topAppsUsersColumn'),
-      loadError: t('admin.analytics.loadError'),
-      retry: td('retry'),
-    }),
-    [t, td]
-  )
-
   return (
     <Div className="w-full max-w-7xl mx-auto px-4 my-10">
-      <Tabs defaultValue="analytics" className="w-full">
+      <Tabs defaultValue="ezauth" className="w-full">
         <TabsList>
-          <TabsTrigger value="analytics">{t('admin.tabs.analytics')}</TabsTrigger>
           <TabsTrigger value="ezauth">{t('admin.tabs.ezauth')}</TabsTrigger>
           <TabsTrigger value="ezpay">{t('admin.tabs.ezpay')}</TabsTrigger>
+          <TabsTrigger value="ai">{t('admin.tabs.ai')}</TabsTrigger>
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
           <TabsTrigger value="services">{t('admin.tabs.services')}</TabsTrigger>
-          <TabsTrigger value="ai">{t('admin.tabs.ai')}</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="analytics" className="w-full">
-          <AdminAnalyticsSection texts={analyticsTexts} />
-        </TabsContent>
 
         <TabsContent value="ezauth" className="w-full">
           <AuthAdminDashboard texts={authTexts} />
@@ -252,18 +256,18 @@ function AdminPanelContent() {
           <PayAdminDashboard texts={payTexts} />
         </TabsContent>
 
+        <TabsContent value="ai" className="w-full">
+          <AIProvider appName="ezstart">
+            <AIAdminDashboard showAppFilter texts={aiTexts} />
+          </AIProvider>
+        </TabsContent>
+
         <TabsContent value="monitoring" className="w-full">
           <MonitoringTab />
         </TabsContent>
 
         <TabsContent value="services" className="w-full">
           <ServicesTab />
-        </TabsContent>
-
-        <TabsContent value="ai" className="w-full">
-          <AIProvider appName="ezstart">
-            <AIAdminDashboard showAppFilter texts={aiTexts} />
-          </AIProvider>
         </TabsContent>
       </Tabs>
     </Div>

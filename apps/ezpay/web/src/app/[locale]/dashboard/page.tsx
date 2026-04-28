@@ -33,7 +33,9 @@ import { PlansSection } from '../developer/components/plans-section'
  *
  * Billing slot surfaces:
  *   - user's own EZPay subscription (`BillingDashboard`)
- *   - aggregated `my apps revenue` for owners (PayAdminDashboard scope=myApps)
+ *   - aggregated owned-apps / platform revenue via `<PayAdminDashboard>`
+ *     (single mount, auto-scoped server-side via JWT — superadmin sees all
+ *     tenants, owner sees their owned apps).
  */
 export default function EZPayDashboardPage() {
   const t = useTranslations('dashboard')
@@ -168,25 +170,25 @@ export default function EZPayDashboardPage() {
         <ManageSubscriptionButton />
       </Div>
 
-      {/* Section 2 — My apps revenue */}
-      {hasOwnedApps && (
+      {/*
+        Section 2 — Aggregated revenue (auto-scoped server-side via JWT).
+        - superadmin sees ALL tenants ("Platform overview" framing)
+        - app-owner sees their owned apps ("My apps revenue" framing)
+        - regular user sees nothing meaningful → mount skipped via gate below
+        Mount is gated to avoid an empty admin dashboard for end-users with
+        no apps and no superadmin role.
+      */}
+      {(isSuperadmin || hasOwnedApps) && (
         <Div className="space-y-4">
           <Div className="space-y-1">
-            <H2 className="text-xl font-semibold">{tBilling('myAppsRevenue.title')}</H2>
-            <P className="text-sm text-muted-foreground">{tBilling('myAppsRevenue.subtitle')}</P>
+            <H2 className="text-xl font-semibold">
+              {isSuperadmin ? tBilling('platform.title') : tBilling('myAppsRevenue.title')}
+            </H2>
+            <P className="text-sm text-muted-foreground">
+              {isSuperadmin ? tBilling('platform.subtitle') : tBilling('myAppsRevenue.subtitle')}
+            </P>
           </Div>
-          <PayAdminDashboard scope="myApps" showAppFilter />
-        </Div>
-      )}
-
-      {/* Section 3 — Platform overview (superadmin) */}
-      {isSuperadmin && (
-        <Div className="space-y-4">
-          <Div className="space-y-1">
-            <H2 className="text-xl font-semibold">{tBilling('platform.title')}</H2>
-            <P className="text-sm text-muted-foreground">{tBilling('platform.subtitle')}</P>
-          </Div>
-          <PayAdminDashboard scope="all" showAppFilter />
+          <PayAdminDashboard />
         </Div>
       )}
     </Div>

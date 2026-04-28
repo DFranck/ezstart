@@ -1828,6 +1828,9 @@ importers:
         specifier: ^11.3.0
         version: 11.3.0
     devDependencies:
+      '@ezstart/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -1933,9 +1936,15 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui
+      recharts:
+        specifier: 2.15.4
+        version: 2.15.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       sonner:
         specifier: ^2.0.3
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

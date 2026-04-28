@@ -188,7 +188,7 @@ describe('GET /api/payments — applicationId × scope filter', () => {
     expect(res.body.data?.[0]?.userId).toBe('user-1')
   })
 
-  it('keeps superadmin scoped to the requested applicationId (scope=all does NOT widen past app)', async () => {
+  it('keeps superadmin scoped to the requested applicationId (auto-derived scope=all does NOT widen past app)', async () => {
     await seedCrossAppPayments()
     currentGlobalRoles = ['superadmin']
     mockGetApplication.mockResolvedValueOnce({
@@ -201,10 +201,11 @@ describe('GET /api/payments — applicationId × scope filter', () => {
       updatedAt: '2026-01-01T00:00:00Z',
     })
 
-    const res = await getList(app, { applicationId: 'app_ezauth', scope: 'all' })
+    // No ?scope= passed — server auto-derives 'all' from superadmin role.
+    const res = await getList(app, { applicationId: 'app_ezauth' })
 
     expect(res.status).toBe(200)
-    // superadmin + scope=all → all payments, but filtered to projectId=ezauth
+    // superadmin (auto-scoped to all) + applicationId filter → projectId=ezauth only
     expect(res.body.data).toHaveLength(2)
     expect(res.body.data?.every(p => p.projectId === 'ezauth')).toBe(true)
   })
