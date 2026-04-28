@@ -203,6 +203,7 @@ export function AppShell({ children, routeMode = 'full' }: AppShellProps) {
       navLinks={[
         { href: '#features', label: t('navFeatures') },
         { href: '#pricing', label: t('navPricing') },
+        { href: '/components', label: t('navComponents') },
         { href: '/docs', label: t('navDocs') },
       ]}
       footerColumns={[
