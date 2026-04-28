@@ -48,18 +48,21 @@ function DialogContent({
   children,
   showCloseButton = true,
   radius: radiusProp,
+  overlayClassName,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
   /** Border radius (inherits from context, defaults to 'lg') */
   radius?: DialogRadius
+  /** Custom className for the backdrop overlay (e.g. for opaque + blur "modal-as-page" variants). */
+  overlayClassName?: string
 }) {
   const inherited = useDesignTokens()
   const resolvedRadius = (radiusProp ?? inherited.radius ?? 'lg') as DialogRadius
 
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(

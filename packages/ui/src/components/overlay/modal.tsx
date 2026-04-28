@@ -62,6 +62,17 @@ export type ModalSize =
   | 'full'
   | /** @deprecated Use 'default' instead */ 'md'
 export type ModalScrollBehavior = 'inside' | 'outside'
+/**
+ * Backdrop variants — control the overlay opacity behind the modal panel.
+ * - `'default'`: semi-transparent black (`bg-black/50`) — standard overlay,
+ *   the page chrome is visible behind. Use when the modal is embedded and
+ *   the user should perceive what was interrupted.
+ * - `'opaque'`: solid background + blur (`bg-background/95 backdrop-blur-xl`)
+ *   — visually hides everything behind the modal. Use when the modal IS the
+ *   page (auth route, full-screen onboarding) so the user perceives the
+ *   modal as the primary surface.
+ */
+export type ModalBackdrop = 'default' | 'opaque'
 
 export interface ModalProps {
   /** Whether the modal is open */
@@ -88,6 +99,12 @@ export interface ModalProps {
   size?: ModalSize
   /** Where scrolling happens: inside content or whole modal */
   scrollBehavior?: ModalScrollBehavior
+  /**
+   * Backdrop variant — `'default'` (semi-transparent, chrome visible behind)
+   * or `'opaque'` (solid background + blur, modal-as-page). Defaults to
+   * `'default'`.
+   */
+  backdrop?: ModalBackdrop
 }
 
 const SIZE_CLASSES = dialogVariantConfig.size
@@ -105,6 +122,7 @@ export const Modal = ({
   footer: propFooter,
   size: sizeProp,
   scrollBehavior = 'inside',
+  backdrop = 'default',
 }: ModalProps) => {
   const inherited = useDesignTokens()
   const size = (sizeProp ?? inherited.size ?? 'lg') as ModalSize
@@ -143,6 +161,11 @@ export const Modal = ({
           scrollBehavior === 'outside' && 'overflow-y-auto',
           className
         )}
+        // `backdrop='opaque'` paints a solid background + blur over the
+        // page chrome — used when the modal IS the page (auth routes,
+        // full-screen onboarding). Default `'default'` keeps the standard
+        // semi-transparent black overlay (chrome visible behind).
+        overlayClassName={backdrop === 'opaque' ? 'bg-background/95 backdrop-blur-xl' : undefined}
         showCloseButton={!noCross}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
