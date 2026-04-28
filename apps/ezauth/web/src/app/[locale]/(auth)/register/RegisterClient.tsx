@@ -2,6 +2,7 @@
 
 import { SignUpModal } from '@ezstart/auth-sdk/components'
 import { useRouter } from '@/i18n/navigation'
+import { MODAL_AS_PAGE } from '@/config/auth-modal'
 
 interface RegisterClientProps {
   ssrAppName: string | null
@@ -21,6 +22,7 @@ export default function RegisterClient({ ssrAppName, ssrAppDisplayName }: Regist
       onClose={() => router.push('/')}
       ssrAppName={ssrAppName}
       ssrAppDisplayName={ssrAppDisplayName}
+      modalShellProps={MODAL_AS_PAGE}
     />
   )
 }

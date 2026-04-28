@@ -2,6 +2,7 @@
 
 import { SignInModal } from '@ezstart/auth-sdk/components'
 import { useRouter } from '@/i18n/navigation'
+import { MODAL_AS_PAGE } from '@/config/auth-modal'
 
 interface LoginClientProps {
   /**
@@ -34,6 +35,7 @@ export default function LoginClient({ ssrAppName, ssrAppDisplayName }: LoginClie
       onClose={() => router.push('/')}
       ssrAppName={ssrAppName}
       ssrAppDisplayName={ssrAppDisplayName}
+      modalShellProps={MODAL_AS_PAGE}
     />
   )
 }

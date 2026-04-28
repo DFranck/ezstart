@@ -33,18 +33,12 @@ const THEME_COOKIE_NAME = 'theme'
  * injects `x-route-mode: bare | full` based on this list so the layout can
  * decide chrome rendering SSR-correctly (no client `usePathname()` swap).
  */
-const BARE_ROUTE_PREFIXES = [
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/verify-email',
-  '/auth/',
-  '/dashboard',
-  '/admin',
-  '/developer',
-  '/account',
-]
+// Auth routes (`/login`, `/register`, etc.) are intentionally NOT bare:
+// they render an empty page + a `<SignInModal>` (etc.) portal, so we want
+// the public landing chrome (header + footer) visible BEHIND the modal
+// backdrop — Vercel / Linear "intercepted modal" pattern. Closing the
+// modal navigates back to home with chrome already in place (no flash).
+const BARE_ROUTE_PREFIXES = ['/auth/', '/dashboard', '/admin', '/developer', '/account']
 
 function isBareRoutePathname(pathname: string): boolean {
   return BARE_ROUTE_PREFIXES.some(prefix => pathname.includes(prefix))
