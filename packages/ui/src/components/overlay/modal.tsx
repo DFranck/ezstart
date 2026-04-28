@@ -136,14 +136,29 @@ export const Modal = ({
       })
     }
   }, [sizeProp])
+  // Always forward close events from Radix (X button, programmatic close,
+  // overlay click that wasn't intercepted, Esc that wasn't intercepted) to
+  // `onClose`. The `disableOverlayClick` and `disableEscapeKey` flags work
+  // by intercepting the SOURCE events (`onPointerDownOutside`,
+  // `onEscapeKeyDown`) on `DialogContent` — not by gating `onOpenChange` —
+  // so the close X button (which fires `onOpenChange(false)` directly via
+  // Radix's `<DialogClose>`) keeps working even when the overlay/Esc are
+  // disabled. This was a real bug: the previous gating logic broke the X
+  // button on modals that opted into "modal-as-page" dismiss mode.
   const handleOpenChange = (open: boolean) => {
-    if (!open && !disableOverlayClick && onClose) {
+    if (!open && onClose) {
       onClose()
     }
   }
 
   const handleEscapeKeyDown = (e: KeyboardEvent) => {
     if (disableEscapeKey) {
+      e.preventDefault()
+    }
+  }
+
+  const handlePointerDownOutside = (e: { preventDefault: () => void }) => {
+    if (disableOverlayClick) {
       e.preventDefault()
     }
   }
@@ -168,6 +183,7 @@ export const Modal = ({
         overlayClassName={backdrop === 'opaque' ? 'bg-background/95 backdrop-blur-xl' : undefined}
         showCloseButton={!noCross}
         onEscapeKeyDown={handleEscapeKeyDown}
+        onPointerDownOutside={handlePointerDownOutside}
       >
         {/* Header */}
         {propTitle || propDescription ? (
