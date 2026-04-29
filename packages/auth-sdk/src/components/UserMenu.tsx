@@ -2,7 +2,6 @@
 
 import { Button, Div, Dropdown, type DropdownItem, Icon, Span } from '@ezstart/ui/components'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
@@ -167,32 +166,19 @@ export function UserMenu({
   const texts: UserMenuTexts = { ...getDefaultTexts(locale), ...textOverrides }
   const [showAccount, setShowAccount] = useState(false)
 
-  // Pro logout flow:
-  //   1. POST /api/auth/logout (server revokes refresh token, clears cookies,
-  //      writes audit log entry) — already handled by `useAuth().logout()`
-  //   2. Local store reset + cross-tab BroadcastChannel notification — idem
-  //   3. Run consumer `onLogout` hook (clear React Query cache, etc.)
-  //   4. Toast + hard navigation to `redirectAfterLogout` so the next page
-  //      paints in the unauthenticated SSR state instead of bouncing through
-  //      a `<RequireAuth>` redirect on the current route.
-  const handleLogout = async () => {
-    try {
-      await logout()
-      onLogout?.()
-      toast.success(texts.signOutSuccess)
-      if (redirectAfterLogout !== false && typeof window !== 'undefined') {
-        window.location.href = redirectAfterLogout
-      }
-    } catch (err) {
-      toast.error(texts.signOutError)
-      // The store has been reset locally even on API failure (cf
-      // `useAuth().logout()`), so we still navigate so the user lands on a
-      // page that matches the (now logged-out) state.
-      if (redirectAfterLogout !== false && typeof window !== 'undefined') {
-        window.location.href = redirectAfterLogout
-      }
-      throw err
-    }
+  // Logout flow — delegated to `useAuth().logout()` which runs the full
+  // 8-step orchestration (cf. standard-sdk-dx.md §11ter). The component
+  // forwards its per-instance overrides (redirect target + onLogout hook
+  // + localized toast text) so the SDK pipeline does the heavy lifting.
+  const handleLogout = () => {
+    void logout({
+      redirectAfterLogout,
+      onLogout,
+      texts: {
+        signOutSuccess: texts.signOutSuccess,
+        signOutError: texts.signOutError,
+      },
+    })
   }
 
   // ── Not authenticated: render the SAME visual trigger shape as the

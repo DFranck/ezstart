@@ -70,6 +70,14 @@ export function TestAuthProvider({
           scope,
           publishableKey,
           keyConfig,
+          logoutDefaults: {
+            redirectAfterLogout: false,
+            storageKey: storeOptions?.storageKey ?? 'ezauth-storage',
+            texts: {
+              signOutSuccess: 'You have been signed out',
+              signOutError: 'Failed to sign out — please try again',
+            },
+          },
         }}
       >
         {children}

@@ -151,11 +151,64 @@ export interface AuthProviderProps {
   /** Override the localStorage key used by the persist middleware. */
   storageKey?: string
 
+  // ── Logout flow defaults (cf. standard-sdk-dx.md §11ter) ───────────────
+  //
+  // These default values feed every `useAuth().logout()` call and any SDK
+  // component that drives the logout (UserMenu, UserMenuV2, DeleteAccountSection).
+  // Per-call overrides remain possible — pass an options bag to `logout()`
+  // or to the component's own `onLogout` / `redirectAfterLogout` props.
+
+  /**
+   * Where to navigate after a successful logout. Defaults to `'/'`.
+   * Pass `false` to disable the hard-redirect entirely (the consumer takes
+   * over navigation, e.g. router.push to a localized landing).
+   *
+   * The redirect uses `window.location.assign()` (a hard navigation) so
+   * every in-memory React state is dropped along with the now-revoked
+   * session — `router.push()` would keep React state mounted and risk
+   * surfacing stale "logged-in" UI for one render cycle.
+   */
+  redirectAfterLogout?: string | false
+
+  /**
+   * Consumer hook fired between the local store reset (step 4) and the
+   * toast / redirect (steps 6-7). Use it to drop React Query cache, close
+   * WebSockets, IndexedDB cleanup, etc.
+   *
+   * The promise is awaited so async cleanup completes before the redirect.
+   * Throws are swallowed — consumer cleanup must never block the logout
+   * orchestration.
+   *
+   * @example
+   * ```tsx
+   * <AuthProvider onLogout={() => queryClient.clear()}>
+   * ```
+   */
+  onLogout?: () => void | Promise<void>
+
+  /**
+   * Default texts for the success / error toasts emitted at step 6 of the
+   * logout flow. The hook's `logout({ texts })` option overrides per-call.
+   * Defaults to English. For locale-aware defaults pass
+   * `getAuthTexts(locale, 'userMenu')`.
+   */
+  logoutTexts?: Partial<{
+    /** Toast shown after a successful logout. */
+    signOutSuccess: string
+    /** Toast shown when local cleanup fails. Server errors are silent. */
+    signOutError: string
+  }>
+
   // ── Deprecated props (backward compat) ────────────────────────────────
 
   /** @deprecated Use `authMode` instead. */
   useHttpOnlyCookies?: boolean
 }
+
+const DEFAULT_LOGOUT_TEXTS = {
+  signOutSuccess: 'You have been signed out',
+  signOutError: 'Failed to sign out — please try again',
+} as const
 
 export function AuthProvider({
   children,
@@ -171,6 +224,9 @@ export function AuthProvider({
   useHttpOnlyCookies,
   initialUser,
   storageKey,
+  redirectAfterLogout = '/',
+  onLogout,
+  logoutTexts,
 }: AuthProviderProps) {
   // ── Per-Provider Zustand store (Clerk-style SSR setup) ──────────────────
   //
@@ -180,10 +236,17 @@ export function AuthProvider({
   // reflects the SSR user, so subscribers never observe a transient
   // `{ user: null, isAuthenticated: false }` between mount and the legacy
   // post-mount hydration. This is the canonical Next.js + Zustand setup.
+  // Resolve the storage key once so both the store factory and the
+  // `logoutDefaults.storageKey` context value see the same value. The
+  // logout flow's step 3 (`localStorage.removeItem(storageKey)`) MUST
+  // target the exact key the persist middleware writes to — drift here
+  // would silently leak the previous session's `user` blob across reloads.
+  const resolvedStorageKey = storageKey ?? getLegacyStorageKey() ?? 'ezauth-storage'
+
   const [store] = useState(() =>
     createAuthStore({
       initialUser,
-      storageKey: storageKey ?? getLegacyStorageKey(),
+      storageKey: resolvedStorageKey,
     })
   )
 
@@ -503,6 +566,27 @@ export function AuthProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeState.accessToken, storeState.refreshToken, client, logger, store])
 
+  // Resolve the logout texts ONCE per provider — the hook merges any
+  // per-call override on top, so the context value can be a stable
+  // reference (no per-render allocation cascade).
+  const resolvedLogoutTexts = useMemo(
+    () => ({
+      signOutSuccess: logoutTexts?.signOutSuccess ?? DEFAULT_LOGOUT_TEXTS.signOutSuccess,
+      signOutError: logoutTexts?.signOutError ?? DEFAULT_LOGOUT_TEXTS.signOutError,
+    }),
+    [logoutTexts?.signOutSuccess, logoutTexts?.signOutError]
+  )
+
+  const logoutDefaults = useMemo(
+    () => ({
+      redirectAfterLogout,
+      onLogout,
+      storageKey: resolvedStorageKey,
+      texts: resolvedLogoutTexts,
+    }),
+    [redirectAfterLogout, onLogout, resolvedStorageKey, resolvedLogoutTexts]
+  )
+
   const contextValue = useMemo(
     () => ({
       client,
@@ -511,8 +595,16 @@ export function AuthProvider({
       keyConfig: keyConfigRef.current,
       scope: resolvedScope,
       publishableKey: sdkConfig.publishableKey,
+      logoutDefaults,
     }),
-    [client, resolvedAppName, resolvedWebUrl, resolvedScope, sdkConfig.publishableKey]
+    [
+      client,
+      resolvedAppName,
+      resolvedWebUrl,
+      resolvedScope,
+      sdkConfig.publishableKey,
+      logoutDefaults,
+    ]
   )
 
   return (

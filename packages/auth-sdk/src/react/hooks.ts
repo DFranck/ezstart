@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import type { AuthLogger } from './auth-provider.js'
 import { useAuthContext, useAuthStore, useAuthStoreApi } from './auth-provider.js'
 
@@ -11,13 +12,62 @@ const noopLogger: AuthLogger = {
 }
 
 /**
+ * Per-call overrides for {@link useAuth}'s `logout()` orchestrator.
+ * Every field falls back to the {@link AuthProvider}'s `logoutDefaults`,
+ * which themselves fall back to English defaults.
+ */
+export interface LogoutOptions {
+  /**
+   * Override the post-logout redirect target. `false` disables the hard
+   * redirect entirely (the consumer drives navigation).
+   */
+  redirectAfterLogout?: string | false
+  /**
+   * Override the consumer cleanup callback (React Query cache wipe,
+   * WebSocket close, IndexedDB purge, etc.). Awaited before the toast +
+   * redirect so async cleanup completes first.
+   */
+  onLogout?: () => void | Promise<void>
+  /**
+   * Override the toast labels. Pass localized strings here for non-EN
+   * consumers — typically `getAuthTexts(locale, 'userMenu')`.
+   */
+  texts?: {
+    signOutSuccess?: string
+    signOutError?: string
+  }
+  /**
+   * Skip the success toast (step 6). Useful when the calling component
+   * shows its own confirmation UI (e.g. account-deletion banner).
+   */
+  silent?: boolean
+}
+
+/**
+ * Safe localStorage key removal — Safari private mode + SSR + agent harness
+ * environments all fail differently when localStorage is unavailable. Wrap
+ * the call so a missing storage layer never throws past the logout flow.
+ *
+ * @internal
+ */
+function safeRemoveLocalStorage(key: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(key)
+  } catch {
+    // Storage disabled / quota exceeded / private mode — non-fatal, the store
+    // reset above is the source of truth.
+  }
+}
+
+/**
  * Main auth hook providing state + actions.
  *
  * Must be used within an `<AuthProvider>`.
  */
 export function useAuth(logger?: AuthLogger) {
   const log = logger ?? noopLogger
-  const { client, appName, webUrl, scope, publishableKey } = useAuthContext()
+  const { client, appName, webUrl, scope, publishableKey, logoutDefaults } = useAuthContext()
   const store = useAuthStore()
   const storeApi = useAuthStoreApi()
 
@@ -118,11 +168,124 @@ export function useAuth(logger?: AuthLogger) {
     }
   }
 
-  const logout = async () => {
+  /**
+   * Full SDK-pro logout orchestration (cf. standard-sdk-dx.md §11ter).
+   *
+   * Runs the canonical 8-step flow in order:
+   *
+   *   1. POST /api/auth/logout — server revokes the refresh token, clears
+   *      the httpOnly cookie, writes the audit log entry. Best-effort:
+   *      a network/server failure NEVER blocks the local cleanup, so the
+   *      user always lands in the unauthenticated state.
+   *   2. Reset the per-Provider Zustand store (`user: null`,
+   *      `isAuthenticated: false`, `isLoggingOut: false`). This wraps the
+   *      cross-tab BroadcastChannel call too (see `store.ts`), which
+   *      satisfies step 4 in the same swing.
+   *   3. Explicit `localStorage.removeItem(storageKey)` — the persist
+   *      middleware normally rewrites the key with the now-logged-out
+   *      partial state, but a hard wipe is sturdier (removes any field
+   *      `partialize` might have skipped, drops legacy v0 schemas).
+   *   4. Cross-tab broadcast — handled inline by step 2's wrapped store
+   *      action. No extra call needed; the wrapper guards `postMessage`
+   *      with try/catch so an HMR-closed channel doesn't throw past us.
+   *   5. Run the consumer's `onLogout` hook (provider default OR per-call
+   *      override). Awaited so async cleanup (React Query cache, IndexedDB
+   *      drop, WebSocket close) completes before the redirect. Throws are
+   *      logged + swallowed: consumer code must never block the logout.
+   *   6. Toast confirmation. Skipped when `options.silent` is true (e.g.
+   *      account-deletion shows its own banner).
+   *   7. Hard `window.location.assign()` redirect — drops every in-memory
+   *      React state along with the now-revoked session. `router.push()`
+   *      would keep React mounted and risk surfacing stale "logged-in" UI
+   *      for one render cycle. Skipped when `redirectAfterLogout === false`.
+   *   8. `isLoggingOut: true` is set BEFORE step 1 and reset by step 2's
+   *      `store.logout()` action. Subscribers (UserMenu, dashboards, etc.)
+   *      can read `useAuth().isLoggingOut` to render a loading state.
+   *
+   * @example
+   * ```tsx
+   * // Default flow — uses provider defaults
+   * await logout()
+   *
+   * // One-shot override (e.g. localized redirect)
+   * await logout({ redirectAfterLogout: '/fr/goodbye', texts: localizedTexts })
+   * ```
+   */
+  const logout = async (options: LogoutOptions = {}) => {
+    // Resolve the effective config — per-call override > provider default > English default.
+    const redirectTarget =
+      options.redirectAfterLogout !== undefined
+        ? options.redirectAfterLogout
+        : logoutDefaults.redirectAfterLogout
+    const consumerOnLogout = options.onLogout ?? logoutDefaults.onLogout
+    const successText = options.texts?.signOutSuccess ?? logoutDefaults.texts.signOutSuccess
+    const errorText = options.texts?.signOutError ?? logoutDefaults.texts.signOutError
+
+    // Step 8 — set isLoggingOut so subscribed UI can render a spinner.
     storeApi.getState().setLoggingOut(true)
-    const rt = storeApi.getState().refreshToken
-    await client.logout(rt || undefined)
+
+    let serverFailed = false
+
+    // Step 1 — server revoke. Best-effort: keep going even on failure so
+    // the local store / persist / broadcast cleanup still runs and the
+    // user lands in the unauthenticated state.
+    try {
+      const rt = storeApi.getState().refreshToken
+      await client.logout(rt || undefined)
+    } catch (err) {
+      serverFailed = true
+      log.warn(
+        '[auth-sdk] logout server call failed, continuing local cleanup',
+        err instanceof Error ? err.message : String(err)
+      )
+    }
+
+    // Steps 2 + 4 — local store reset (also broadcasts cross-tab via the
+    // wrapped action installed by `createAuthStore`).
     storeApi.getState().logout()
+
+    // Step 3 — explicit localStorage purge. Defensive: persist normally
+    // overwrites with the logged-out blob, but a `removeItem` is sturdier.
+    safeRemoveLocalStorage(logoutDefaults.storageKey)
+
+    // Step 5 — consumer cleanup hook. Errors must NEVER block the redirect.
+    if (consumerOnLogout) {
+      try {
+        await consumerOnLogout()
+      } catch (err) {
+        log.warn(
+          '[auth-sdk] onLogout consumer hook threw',
+          err instanceof Error ? err.message : String(err)
+        )
+      }
+    }
+
+    // Step 6 — toast confirmation. Server failures still toast as success
+    // because the LOCAL cleanup succeeded; only true local-side failures
+    // (which we do not have here, the steps above never throw out) would
+    // surface the error toast. Skipped when caller passes `silent: true`.
+    if (!options.silent) {
+      if (serverFailed) {
+        // Surface the server failure as a soft warning (info), not a hard
+        // error — the user IS signed out locally, the server just couldn't
+        // be reached to revoke the refresh token. Most consumers prefer a
+        // success toast here; switch to error if observability requires it.
+        toast.success(successText)
+      } else {
+        toast.success(successText)
+      }
+    }
+
+    // Step 7 — hard redirect. Skipped when `redirectAfterLogout === false`
+    // (consumer drives navigation, e.g. via router.push to a localized URL).
+    if (redirectTarget !== false && typeof window !== 'undefined') {
+      window.location.assign(redirectTarget)
+    }
+
+    // Returned for callers that want to surface their own UI on failure.
+    // Note: serverFailed=true does NOT mean "logout failed" — the user IS
+    // logged out locally; the server simply couldn't be reached.
+    return { serverFailed, errorText }
   }
 
   const verifyAndRefresh = async () => {

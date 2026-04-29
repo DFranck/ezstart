@@ -124,26 +124,18 @@ export function UserMenuV2({
   const [signingOutAll, setSigningOutAll] = useState(false)
 
   // ── Sign-out flow (current device, default) ──
-  const performLogout = async (): Promise<void> => {
-    try {
-      await logout()
-      onLogout?.()
-      toast.success(texts.signOutSuccess)
-    } catch (err) {
-      toast.error(texts.signOutError)
-      // Local store has been reset even on API failure (handled by useAuth())
-      // so we still navigate to land on a page matching the logged-out state.
-      throw err
-    } finally {
-      if (redirectAfterLogout !== false && typeof window !== 'undefined') {
-        window.location.href = redirectAfterLogout
-      }
-    }
-  }
-
+  // Delegate the full 8-step orchestration to `useAuth().logout()`
+  // (cf. standard-sdk-dx.md §11ter). The component just forwards its
+  // per-instance overrides — redirect target, consumer cleanup hook,
+  // localized toast labels.
   const handleLogout = () => {
-    void performLogout().catch(() => {
-      /* error already toasted, store reset, redirect handled in finally */
+    void logout({
+      redirectAfterLogout,
+      onLogout,
+      texts: {
+        signOutSuccess: texts.signOutSuccess,
+        signOutError: texts.signOutError,
+      },
     })
   }
 
@@ -153,20 +145,24 @@ export function UserMenuV2({
   // so we route through the same `useAuth().logout()` path which already
   // omits the refreshToken when called without arguments. Equivalent to
   // hitting the dedicated `DELETE /api/sessions` endpoint server-side.
+  // We tag the call with `silent` and emit our own "signed out from all
+  // devices" toast so the message reflects the multi-session intent.
   const handleSignOutAll = async () => {
     if (signingOutAll) return
     setSigningOutAll(true)
     try {
-      await logout()
-      onLogout?.()
+      await logout({
+        redirectAfterLogout,
+        onLogout,
+        silent: true, // we surface our own multi-device toast below
+      })
+      // Reached only when redirectAfterLogout === false (the redirect
+      // happens INSIDE logout() otherwise and unmounts this component).
       toast.success(texts.signOutAllSuccess)
     } catch {
       toast.error(texts.signOutAllError)
     } finally {
       setSigningOutAll(false)
-      if (redirectAfterLogout !== false && typeof window !== 'undefined') {
-        window.location.href = redirectAfterLogout
-      }
     }
   }
 
