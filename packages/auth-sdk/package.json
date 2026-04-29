@@ -92,7 +92,6 @@
   "dependencies": {
     "@ezstart/api-contracts": "workspace:*",
     "@ezstart/api-sdk": "workspace:*",
-    "@ezstart/capture-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",
@@ -121,12 +120,16 @@
     "vitest": "^4.1.4"
   },
   "peerDependencies": {
+    "@ezstart/capture-sdk": "workspace:*",
     "@tanstack/react-query": "^5",
     "next": "^15",
     "react": "^18",
     "sonner": "^1 || ^2"
   },
   "peerDependenciesMeta": {
+    "@ezstart/capture-sdk": {
+      "optional": true
+    },
     "@tanstack/react-query": {
       "optional": true
     }

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `<AuthCardShell>` simplified — title row dropped, theme switcher hidden on mobile (visible `md+`).
+- **BREAKING** — `@ezstart/capture-sdk` moved from `dependencies` to optional `peerDependencies`. The package was only consumed by `<AccountModal>` / `<AccountModalV2>` (avatar crop UI) — never by the `core/` or `server/` layers. Per `.claude/rules/standard.md` §0bis (SDK 3-layer split), components-only deps belong in `peerDependencies` so consumers who import only `@ezstart/auth-sdk/core` or `@ezstart/auth-sdk/server` aren't forced to install a UI-only crop sdk. **npm consumers using `<AccountModal>` must now install `@ezstart/capture-sdk` explicitly.** Workspace consumers (apps inside the monorepo) are unaffected — pnpm resolves workspace peers automatically.
 
 ## [1.0.0] - 2026-04-29
 

@@ -1,0 +1,4 @@
+Contact: mailto:security@ezstart.dev
+Expires: 2027-04-29T00:00:00.000Z
+Preferred-Languages: en, fr
+Canonical: https://ezauth.ezstart.xyz/.well-known/security.txt

@@ -23,6 +23,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     subscribeEn,
     legalEn,
     componentsEn,
+    securityEn,
     common,
     auth,
     admin,
@@ -32,6 +33,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     subscribe,
     legal,
     components,
+    security,
   ] = await Promise.all([
     import(`../messages/en/common.json`),
     import(`../messages/en/auth.json`),
@@ -42,6 +44,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/en/subscribe.json`),
     import(`../messages/en/legal.json`),
     import(`../messages/en/components.json`),
+    import(`../messages/en/security.json`),
     import(`../messages/${locale}/common.json`),
     import(`../messages/${locale}/auth.json`),
     import(`../messages/${locale}/admin.json`),
@@ -51,6 +54,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/subscribe.json`),
     import(`../messages/${locale}/legal.json`),
     import(`../messages/${locale}/components.json`),
+    import(`../messages/${locale}/security.json`),
   ])
 
   return {
@@ -65,6 +69,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       subscribeEn.default,
       legalEn.default,
       componentsEn.default,
+      securityEn.default,
       common.default,
       auth.default,
       admin.default,
@@ -74,6 +79,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       subscribe.default,
       legal.default,
       components.default,
+      security.default,
     ]),
   }
 })

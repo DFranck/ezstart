@@ -1,0 +1,13 @@
+{
+  "security": {
+    "title": "Sécurité",
+    "lead": "Nous prenons très au sérieux la sécurité d'EZAuth et des données que nous gérons pour nos utilisateurs. Cette page explique comment signaler une vulnérabilité, ce qui est dans le périmètre, et comment nous coordonnons la divulgation.",
+    "contactHeading": "Signaler une vulnérabilité",
+    "contactBody": "Merci d'écrire à security@ezstart.dev avec une description claire du problème, les étapes pour le reproduire, et tout matériel de preuve de concept. Nous accusons réception sous deux jours ouvrés. Une clé PGP pour les rapports chiffrés sera publiée ici une fois finalisée.",
+    "scopeHeading": "Périmètre",
+    "scopeBody": "Tous les domaines de production EZAuth sont dans le périmètre, notamment ezauth.ezstart.xyz et l'API api.ezauth.ezstart.xyz. Hors périmètre : déni de service, ingénierie sociale, attaques physiques, et découvertes nécessitant des identifiants déjà compromis.",
+    "disclosureHeading": "Divulgation coordonnée",
+    "disclosureBody": "Nous suivons un modèle de divulgation coordonnée : merci de nous laisser un délai raisonnable pour enquêter et publier un correctif avant toute publication. Nous serons heureux de créditer les chercheurs dans notre changelog lorsqu'un correctif est publié, sauf si vous préférez rester anonyme.",
+    "txtLinkLabel": "Voir security.txt (RFC 9116)"
+  }
+}
