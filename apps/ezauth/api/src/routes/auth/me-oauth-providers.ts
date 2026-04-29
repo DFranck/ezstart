@@ -13,6 +13,7 @@ import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
 import { getOAuthAccountModel } from '../../models/oauth-account.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
 
 export const meOAuthProvidersRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -106,6 +107,12 @@ const disconnectProviderController = async (req: Request, res: Response) => {
     }
 
     await OAuthAccount.deleteOne({ _id: account._id })
+
+    void AuditLogService.createFromRequest(req, {
+      userId: req.userId!,
+      action: 'oauth_unlink',
+      metadata: { provider, providerEmail: account.email },
+    })
 
     sendSuccess(res, { message: `${provider} account disconnected` })
   } catch (error) {

@@ -23,11 +23,19 @@ export const OAUTH_STATE_COOKIE = 'oauth_state'
  * Shape of the signed OAuth state token.
  * - `nonce` is mirrored in an httpOnly cookie for CSRF double-submit validation
  * - `app` / `redirectUri` are the legitimate data previously carried in raw JSON
+ * - `intent` is `'signin'` (default OAuth login/signup) or `'link'` (link the
+ *   provider to an existing authenticated user — `linkUserId` MUST be set)
+ * - `linkUserId` is the user ID captured server-side from the active session
+ *   when the authorize route saw `intent=link`. Trusting this client-side
+ *   would be unsafe; we sign it into the state JWT precisely so the callback
+ *   can use it without re-reading any cookie.
  */
 export interface OAuthStateClaims {
   nonce: string
   app: string
   redirectUri?: string
+  intent?: 'signin' | 'link'
+  linkUserId?: string
 }
 
 /** Verify and decode a signed OAuth state token. Throws on tampering/expiry. */
@@ -36,14 +44,17 @@ export function verifyOAuthStateToken(token: string): OAuthStateClaims {
   if (typeof payload !== 'object' || payload === null) {
     throw new Error('Malformed OAuth state token')
   }
-  const { nonce, app, redirectUri } = payload as Record<string, unknown>
+  const { nonce, app, redirectUri, intent, linkUserId } = payload as Record<string, unknown>
   if (typeof nonce !== 'string' || typeof app !== 'string') {
     throw new Error('Malformed OAuth state token')
   }
+  const resolvedIntent = intent === 'link' || intent === 'signin' ? intent : undefined
   return {
     nonce,
     app,
     redirectUri: typeof redirectUri === 'string' ? redirectUri : undefined,
+    intent: resolvedIntent,
+    linkUserId: typeof linkUserId === 'string' ? linkUserId : undefined,
   }
 }
 
@@ -78,7 +89,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
             return done(new Error('Invalid OAuth state'))
           }
 
-          const { app, redirectUri } = claims
+          const { app, redirectUri, intent, linkUserId } = claims
 
           // Verify Google itself confirms the email — prevents account takeover
           // via an unverified Google email matching a local account.
@@ -105,7 +116,8 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
           const authCodeResponse = await OAuthService.handleOAuthCallback(
             oauthProfile,
             app,
-            redirectUri
+            redirectUri,
+            { intent: intent ?? 'signin', linkUserId }
           )
 
           done(null, {
