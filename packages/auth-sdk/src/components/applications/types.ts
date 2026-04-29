@@ -73,6 +73,13 @@ export interface ApplicationDetailViewTexts {
   settingsSaving: string
   settingsSaveSuccess: string
   settingsSaveFailed: string
+  /**
+   * Label for the "Require email verification" toggle in the Settings tab.
+   * Backs the composable email-verification gate (Clerk / Vercel pattern).
+   */
+  settingsRequireEmailVerificationLabel: string
+  /** Help text under the "Require email verification" toggle. */
+  settingsRequireEmailVerificationHelp: string
   archiveSectionTitle: string
   archiveSectionDescription: string
   archiveButton: string
@@ -185,6 +192,9 @@ export const defaultApplicationsFlowTexts: ApplicationsFlowTexts = {
     settingsSaving: 'Saving...',
     settingsSaveSuccess: 'Application updated',
     settingsSaveFailed: 'Failed to update application',
+    settingsRequireEmailVerificationLabel: 'Require email verification',
+    settingsRequireEmailVerificationHelp:
+      'Signal to consumer apps that critical features should require a verified email. Login itself is never blocked. Defaults to off.',
     archiveSectionTitle: 'Archive application',
     archiveSectionDescription: 'Archived applications are hidden. Their API keys are revoked.',
     archiveButton: 'Archive Application',

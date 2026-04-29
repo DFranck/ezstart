@@ -23,6 +23,7 @@ import {
   P,
   Skeleton,
   Span,
+  Switch,
   Tabs,
   TabsContent,
   TabsList,
@@ -112,12 +113,14 @@ export function ApplicationDetailView({
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [requireEmailVerification, setRequireEmailVerification] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (application) {
       setName(application.name)
       setDescription(application.description ?? '')
+      setRequireEmailVerification(application.requireEmailVerification ?? false)
     }
   }, [application])
 
@@ -148,6 +151,7 @@ export function ApplicationDetailView({
       data: {
         name: name.trim(),
         description: description.trim() || undefined,
+        requireEmailVerification,
       },
     })
   }
@@ -156,7 +160,8 @@ export function ApplicationDetailView({
   const isDirty =
     application &&
     (name.trim() !== application.name ||
-      (description.trim() || '') !== (application.description ?? ''))
+      (description.trim() || '') !== (application.description ?? '') ||
+      requireEmailVerification !== (application.requireEmailVerification ?? false))
 
   if (isLoading) {
     return (
@@ -275,6 +280,24 @@ export function ApplicationDetailView({
                   onChange={e => setDescription(e.target.value)}
                   maxLength={500}
                   rows={3}
+                />
+              </Div>
+              <Div className="flex items-start justify-between gap-4 rounded-md border border-border bg-muted/30 p-3">
+                <Div className="space-y-1">
+                  <Label
+                    htmlFor="detail-require-email-verification"
+                    className="cursor-pointer text-sm font-medium"
+                  >
+                    {texts.settingsRequireEmailVerificationLabel}
+                  </Label>
+                  <P className="text-xs text-muted-foreground">
+                    {texts.settingsRequireEmailVerificationHelp}
+                  </P>
+                </Div>
+                <Switch
+                  id="detail-require-email-verification"
+                  checked={requireEmailVerification}
+                  onCheckedChange={setRequireEmailVerification}
                 />
               </Div>
               <Div className="flex justify-end">
