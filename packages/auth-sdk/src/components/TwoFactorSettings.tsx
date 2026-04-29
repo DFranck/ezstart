@@ -35,6 +35,9 @@ export interface TwoFactorSettingsTexts {
   // Disable flow
   disableTitle: string
   disableConfirm: string
+  disablePasswordLabel: string
+  disablePasswordPlaceholder: string
+  disablePasswordHint: string
   // Errors
   fallbackError: string
   invalidCode: string
@@ -74,6 +77,9 @@ const DEFAULT_TEXTS: TwoFactorSettingsTexts = {
   done: 'Done',
   disableTitle: 'Disable two-factor authentication',
   disableConfirm: 'Enter your current 2FA code to disable two-factor authentication',
+  disablePasswordLabel: 'Password',
+  disablePasswordPlaceholder: 'Enter your password',
+  disablePasswordHint: 'Confirm with your account password (defense in depth)',
   fallbackError: 'An error occurred. Please try again.',
   invalidCode: 'Invalid code. Please try again.',
 }
@@ -88,6 +94,7 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
   const [qrCode, setQrCode] = useState('')
   const [secret, setSecret] = useState('')
   const [code, setCode] = useState('')
+  const [disablePassword, setDisablePassword] = useState('')
   const [backupCodes, setBackupCodes] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -153,14 +160,24 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
     setLoading(true)
     setError('')
     try {
+      // Defense in depth: send the password when the user has typed
+      // one. The API treats it as optional during the deprecation
+      // window but verifies it when present.
+      const body: { code: string; password?: string } = { code }
+      const trimmedPassword = disablePassword.trim()
+      if (trimmedPassword.length > 0) {
+        body.password = trimmedPassword
+      }
+
       await apiCall('/auth/2fa/disable', {
         appName: 'ezauth',
         method: 'POST',
-        body: { code },
+        body,
       })
       setIs2FAEnabled(false)
       setPhase('idle')
       setCode('')
+      setDisablePassword('')
       onStatusChange?.(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : t.fallbackError)
@@ -359,6 +376,18 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
             className="text-center text-lg tracking-widest"
             autoFocus
           />
+          <Div className="space-y-1">
+            <P size="xs" className="text-muted-foreground">
+              {t.disablePasswordHint}
+            </P>
+            <Input
+              type="password"
+              autoComplete="current-password"
+              placeholder={t.disablePasswordPlaceholder}
+              value={disablePassword}
+              onChange={e => setDisablePassword(e.target.value)}
+            />
+          </Div>
           <Button
             onClick={handleDisable}
             disabled={loading || code.length !== 6}
@@ -371,6 +400,7 @@ export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsPr
             onClick={() => {
               setPhase('idle')
               setCode('')
+              setDisablePassword('')
               setError('')
             }}
             variant="ghost"

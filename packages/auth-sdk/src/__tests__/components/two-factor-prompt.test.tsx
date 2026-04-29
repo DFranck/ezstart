@@ -13,9 +13,7 @@ describe('TwoFactorPrompt', () => {
 
   it('renders prompt text and code input', () => {
     render(<TwoFactorPrompt tempToken="temp-tok-123" />)
-    expect(
-      screen.getByText('Enter the code from your authenticator app')
-    ).toBeInTheDocument()
+    expect(screen.getByText('Enter the code from your authenticator app')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('000000')).toBeInTheDocument()
   })
 
@@ -25,29 +23,62 @@ describe('TwoFactorPrompt', () => {
     expect(btn).toBeDisabled()
   })
 
-  it('enables verify button when code is 6+ chars', () => {
-    render(<TwoFactorPrompt tempToken="temp-tok-123" />)
+  it('auto-submits when a 6-digit TOTP code is entered (no manual click)', async () => {
+    mockApiCall.mockResolvedValueOnce({ code: 'auth-code-auto' })
+    const onSuccess = vi.fn()
+
+    render(<TwoFactorPrompt tempToken="temp-tok-auto" onSuccess={onSuccess} />)
     const input = screen.getByPlaceholderText('000000')
     fireEvent.change(input, { target: { value: '123456' } })
+
+    // No fireEvent.submit() — auto-submit must fire on its own
+    await waitFor(() => {
+      expect(mockApiCall).toHaveBeenCalledWith('/auth/2fa/validate', {
+        appName: 'ezauth',
+        method: 'POST',
+        body: { tempToken: 'temp-tok-auto', code: '123456' },
+      })
+    })
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledWith({ code: 'auth-code-auto' })
+    })
+  })
+
+  it('does NOT auto-submit for backup codes (8 hex chars require explicit click)', async () => {
+    mockApiCall.mockResolvedValueOnce({ code: 'auth-code-backup' })
+
+    render(<TwoFactorPrompt tempToken="temp-tok-backup" />)
+    const input = screen.getByPlaceholderText('000000')
+    // Backup code = 8 hex chars
+    fireEvent.change(input, { target: { value: 'a1b2c3d4' } })
+
+    // Wait a tick to confirm no auto-submit fired
+    await new Promise(r => setTimeout(r, 50))
+    expect(mockApiCall).not.toHaveBeenCalled()
+
+    // Now click Verify explicitly
     const btn = screen.getByText('Verify')
     expect(btn).not.toBeDisabled()
+    fireEvent.click(btn)
+
+    await waitFor(() => {
+      expect(mockApiCall).toHaveBeenCalledWith('/auth/2fa/validate', {
+        appName: 'ezauth',
+        method: 'POST',
+        body: { tempToken: 'temp-tok-backup', code: 'a1b2c3d4' },
+      })
+    })
   })
 
   it('calls apiCall on submit and redirects when redirectUri is set', async () => {
     mockApiCall.mockResolvedValueOnce({ code: 'auth-code-xyz' })
 
     render(
-      <TwoFactorPrompt
-        tempToken="temp-tok-123"
-        redirectUri="https://app.example.com/callback"
-      />
+      <TwoFactorPrompt tempToken="temp-tok-123" redirectUri="https://app.example.com/callback" />
     )
 
     const input = screen.getByPlaceholderText('000000')
     fireEvent.change(input, { target: { value: '123456' } })
-
-    const form = input.closest('form')!
-    fireEvent.submit(form)
 
     await waitFor(() => {
       expect(mockApiCall).toHaveBeenCalledWith('/auth/2fa/validate', {
@@ -62,15 +93,10 @@ describe('TwoFactorPrompt', () => {
     const onSuccess = vi.fn()
     mockApiCall.mockResolvedValueOnce({ code: 'xyz' })
 
-    render(
-      <TwoFactorPrompt tempToken="temp-tok" onSuccess={onSuccess} />
-    )
+    render(<TwoFactorPrompt tempToken="temp-tok" onSuccess={onSuccess} />)
 
     const input = screen.getByPlaceholderText('000000')
     fireEvent.change(input, { target: { value: '654321' } })
-
-    const form = input.closest('form')!
-    fireEvent.submit(form)
 
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledWith({ code: 'xyz' })
@@ -84,9 +110,6 @@ describe('TwoFactorPrompt', () => {
 
     const input = screen.getByPlaceholderText('000000')
     fireEvent.change(input, { target: { value: '000000' } })
-
-    const form = input.closest('form')!
-    fireEvent.submit(form)
 
     await waitFor(() => {
       expect(screen.getByText('Invalid code')).toBeInTheDocument()
