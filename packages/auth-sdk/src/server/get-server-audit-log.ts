@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Server-side audit log bootstrap helper — companion to {@link getServerAuth}.
  *

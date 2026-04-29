@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Server-side feature gate — answers "is this feature available in the
  * current (app, user) context?"

@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * `@ezstart/auth-sdk/server` — server-only exports.
  *
