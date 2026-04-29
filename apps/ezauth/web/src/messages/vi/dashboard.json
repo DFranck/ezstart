@@ -260,7 +260,12 @@
         "session_revoked": "Đã thu hồi phiên",
         "api_key_created": "Đã tạo khóa API",
         "api_key_revoked": "Đã thu hồi khóa API",
-        "profile_updated": "Đã cập nhật hồ sơ"
+        "profile_updated": "Đã cập nhật hồ sơ",
+        "2fa_login_success": "Đăng nhập 2FA thành công",
+        "2fa_login_failed": "Đăng nhập 2FA thất bại",
+        "backup_code_used": "Đã sử dụng mã dự phòng",
+        "account_locked_brute_force": "Tài khoản bị khóa (bảo vệ chống brute force)",
+        "two_factor_locked_brute_force": "2FA bị khóa (bảo vệ chống brute force)"
       },
       "paginationPrevious": "Trước",
       "paginationNext": "Sau",

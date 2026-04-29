@@ -260,7 +260,12 @@
         "session_revoked": "Session révoquée",
         "api_key_created": "Clé API créée",
         "api_key_revoked": "Clé API révoquée",
-        "profile_updated": "Profil mis à jour"
+        "profile_updated": "Profil mis à jour",
+        "2fa_login_success": "Connexion 2FA réussie",
+        "2fa_login_failed": "Échec de la connexion 2FA",
+        "backup_code_used": "Code de secours utilisé",
+        "account_locked_brute_force": "Compte verrouillé (protection brute force)",
+        "two_factor_locked_brute_force": "2FA verrouillée (protection brute force)"
       },
       "paginationPrevious": "Précédent",
       "paginationNext": "Suivant",

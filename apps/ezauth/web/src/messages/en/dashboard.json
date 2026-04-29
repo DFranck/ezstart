@@ -260,7 +260,12 @@
         "session_revoked": "Session revoked",
         "api_key_created": "API key created",
         "api_key_revoked": "API key revoked",
-        "profile_updated": "Profile updated"
+        "profile_updated": "Profile updated",
+        "2fa_login_success": "2FA login successful",
+        "2fa_login_failed": "2FA login failed",
+        "backup_code_used": "Backup code used",
+        "account_locked_brute_force": "Account locked (brute force protection)",
+        "two_factor_locked_brute_force": "2FA locked (brute force protection)"
       },
       "paginationPrevious": "Previous",
       "paginationNext": "Next",
