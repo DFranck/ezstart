@@ -47,6 +47,7 @@ export default function ChangelogPage() {
             </CardHeader>
             <CardContent>
               <Button asChild variant="outline">
+                {/* eslint-disable-next-line @ezstart/ezstart/no-raw-html -- external URL: next/link is for internal routes only */}
                 <a href={GITHUB_RELEASES_URL} target="_blank" rel="noopener noreferrer">
                   {t('githubCta')}
                 </a>

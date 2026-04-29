@@ -103,6 +103,14 @@ export async function fetchKeyConfigCached(
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
   try {
+    // Edge runtime hot-path call — keep raw fetch here:
+    // 1. `fetchExternal()` from @ezstart/api-sdk throws on non-2xx, but this
+    //    cache must SILENTLY return null on 4xx/5xx (invalid keys, rate
+    //    limits) so the worst case is "no theme override" not a 500 page.
+    // 2. We need explicit AbortSignal+timeout, custom validation, and
+    //    write-through cache semantics that don't fit the apiCall envelope.
+    // 3. `apiCall()` injects auth + assumes the standardized envelope shape.
+    // eslint-disable-next-line @ezstart/ezstart/no-raw-fetch
     const response = await fetch(url, {
       method: 'GET',
       signal: controller.signal,

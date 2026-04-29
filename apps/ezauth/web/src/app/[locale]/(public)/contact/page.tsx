@@ -40,6 +40,7 @@ export default function ContactPage() {
             <CardContent className="space-y-4">
               <P className="text-muted-foreground">{SUPPORT_EMAIL}</P>
               <Button asChild variant="default">
+                {/* eslint-disable-next-line @ezstart/ezstart/no-raw-html -- mailto: external URL */}
                 <a href={`mailto:${SUPPORT_EMAIL}`}>{t('emailCta')}</a>
               </Button>
             </CardContent>
@@ -54,6 +55,7 @@ export default function ContactPage() {
             <CardContent className="space-y-4">
               <P className="text-muted-foreground">github.com/DFranck/ezstart</P>
               <Button asChild variant="outline">
+                {/* eslint-disable-next-line @ezstart/ezstart/no-raw-html -- external URL: next/link is for internal routes only */}
                 <a href={GITHUB_ISSUES_URL} target="_blank" rel="noopener noreferrer">
                   {t('githubCta')}
                 </a>

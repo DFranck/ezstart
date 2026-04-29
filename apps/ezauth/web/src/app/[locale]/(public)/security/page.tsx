@@ -41,6 +41,7 @@ export default function SecurityPage() {
               <P className="text-muted-foreground">{t('contactBody')}</P>
               <P className="font-mono text-sm text-foreground">{SECURITY_EMAIL}</P>
               <Button asChild variant="default">
+                {/* eslint-disable-next-line @ezstart/ezstart/no-raw-html -- mailto: external URL */}
                 <a href={`mailto:${SECURITY_EMAIL}`}>{SECURITY_EMAIL}</a>
               </Button>
             </CardContent>
@@ -62,6 +63,7 @@ export default function SecurityPage() {
             <CardContent className="space-y-4">
               <P className="text-muted-foreground">{t('disclosureBody')}</P>
               <Button asChild variant="outline">
+                {/* eslint-disable-next-line @ezstart/ezstart/no-raw-html -- external static path: next/link is for internal routes only */}
                 <a href={SECURITY_TXT_PATH} target="_blank" rel="noopener noreferrer">
                   {t('txtLinkLabel')}
                 </a>
