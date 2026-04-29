@@ -3,11 +3,44 @@ import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { getTotpSecretModel, type TotpSecretDocument } from '../models/totp-secret.js'
 import { getAuthUserModel } from '../models/auth-user.js'
+import {
+  MAX_FAILED_TWO_FACTOR_ATTEMPTS,
+  SLIDING_WINDOW_MS,
+  TWO_FACTOR_LOCKOUT_DURATION_MS,
+} from '../config/lockout.js'
+import { AuditLogService } from './audit-log.service.js'
 
 const TOTP_ISSUER = 'EZAuth'
 const TOTP_PERIOD_SECONDS = 30
 const TOTP_WINDOW_STEPS = 1 // ±1 step (30s before/after) for clock drift
 const BACKUP_CODE_COUNT = 8
+
+/**
+ * Thrown when a user is currently locked out of `/auth/2fa/validate` due to
+ * too many wrong code attempts. Mirrors `AccountLockedError` (login lockout)
+ * — routes catch this specifically to return HTTP 423 Locked with a
+ * machine-readable `code: 'TWO_FACTOR_LOCKED'`, the `lockedUntil` deadline,
+ * and a `retryAfterSeconds` value so the client can render an accurate
+ * countdown.
+ *
+ * cf. `config/lockout.ts` for the policy + `standard-saas-security.md` §2.
+ */
+export class TwoFactorLockedError extends Error {
+  readonly code = 'TWO_FACTOR_LOCKED' as const
+  readonly lockedUntil: Date
+  readonly retryAfterSeconds: number
+
+  constructor(lockedUntil: Date) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((lockedUntil.getTime() - Date.now()) / 1000))
+    const minutes = Math.ceil(retryAfterSeconds / 60)
+    super(
+      `Two-factor authentication temporarily locked due to too many failed attempts. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`
+    )
+    this.name = 'TwoFactorLockedError'
+    this.lockedUntil = lockedUntil
+    this.retryAfterSeconds = retryAfterSeconds
+  }
+}
 
 /**
  * Result of validating a TOTP code or backup code during login.
@@ -153,9 +186,26 @@ export class TotpService {
    *
    * Returns `{ valid: true, method: 'totp' | 'backup' }` on success so
    * callers can audit-log accurately.
+   *
+   * Enforces account-level brute force lockout on the 2FA challenge: after
+   * {@link MAX_FAILED_TWO_FACTOR_ATTEMPTS} consecutive wrong codes (within a
+   * {@link SLIDING_WINDOW_MS} sliding window), the user is locked out of
+   * `/2fa/validate` for {@link TWO_FACTOR_LOCKOUT_DURATION_MS}. Locked users
+   * throw {@link TwoFactorLockedError} which the route layer maps to HTTP
+   * 423 Locked. Without this an attacker who knows the password can brute
+   * force the 6-digit TOTP (10⁶ combinations is fast enough to crack in
+   * minutes given only a per-IP rate-limit).
+   *
+   * Optional `meta` (ip, userAgent) is forwarded to the audit log entry
+   * written when the 2FA lockout fires.
    */
-  static async validateLogin(userId: string, code: string): Promise<ValidateLoginResult> {
+  static async validateLogin(
+    userId: string,
+    code: string,
+    meta?: { ip?: string | null; userAgent?: string | null }
+  ): Promise<ValidateLoginResult> {
     const TotpSecretModel = await getTotpSecretModel()
+    const AuthUserModel = await getAuthUserModel()
 
     const totpDoc = await TotpSecretModel.findOne({ userId })
     if (!totpDoc || !totpDoc.isEnabled) {
@@ -164,7 +214,80 @@ export class TotpService {
       return { valid: false, method: null }
     }
 
-    return this.consumeAnyCode(totpDoc, code)
+    // Load the user to enforce / update the 2FA lockout counter.
+    const user = await AuthUserModel.findById(userId)
+    if (!user) {
+      // User was deleted between login challenge issuance and validate.
+      return { valid: false, method: null }
+    }
+
+    const now = new Date()
+
+    // Already locked? Reject before attempting the (relatively cheap) code
+    // check so a known-locked attacker can't drain bcrypt cycles on backup
+    // code attempts.
+    if (user.twoFactorLockedUntil && user.twoFactorLockedUntil.getTime() > now.getTime()) {
+      throw new TwoFactorLockedError(user.twoFactorLockedUntil)
+    }
+
+    const result = await this.consumeAnyCode(totpDoc, code)
+
+    if (!result.valid) {
+      // Sliding window: a stale failure (older than the window) resets the
+      // counter to 1 instead of stacking forever.
+      const last = user.lastFailedTwoFactorAt
+      const withinWindow =
+        last instanceof Date && now.getTime() - last.getTime() < SLIDING_WINDOW_MS
+      const previousAttempts = withinWindow ? (user.failedTwoFactorAttempts ?? 0) : 0
+      const newAttempts = previousAttempts + 1
+
+      user.lastFailedTwoFactorAt = now
+
+      if (newAttempts >= MAX_FAILED_TWO_FACTOR_ATTEMPTS) {
+        // Lock the 2FA challenge. Reset the counter so the next window
+        // starts fresh once the lockout expires (otherwise a single
+        // failure right after unlock would re-trigger the lock).
+        const lockedUntil = new Date(now.getTime() + TWO_FACTOR_LOCKOUT_DURATION_MS)
+        user.twoFactorLockedUntil = lockedUntil
+        user.failedTwoFactorAttempts = 0
+        await user.save()
+
+        // Fire-and-forget audit log entry. Failure must NEVER block the
+        // response (the route already returns 423).
+        void AuditLogService.create({
+          userId,
+          action: 'two_factor_locked_brute_force',
+          metadata: {
+            email: user.email,
+            ip: meta?.ip ?? null,
+            userAgent: meta?.userAgent ?? null,
+            lockedUntil: lockedUntil.toISOString(),
+            failedAttempts: MAX_FAILED_TWO_FACTOR_ATTEMPTS,
+          },
+        })
+
+        throw new TwoFactorLockedError(lockedUntil)
+      }
+
+      user.failedTwoFactorAttempts = newAttempts
+      await user.save()
+      return result
+    }
+
+    // Successful 2FA — reset the lockout counter and clear any expired
+    // lock so the next failure starts fresh.
+    if (
+      (user.failedTwoFactorAttempts ?? 0) > 0 ||
+      user.twoFactorLockedUntil != null ||
+      user.lastFailedTwoFactorAt != null
+    ) {
+      user.failedTwoFactorAttempts = 0
+      user.twoFactorLockedUntil = null
+      user.lastFailedTwoFactorAt = null
+      await user.save()
+    }
+
+    return result
   }
 
   /**

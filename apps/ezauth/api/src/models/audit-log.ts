@@ -24,6 +24,7 @@ export type AuditLogAction =
   | 'api_key_revoked'
   | 'profile_updated'
   | 'account_locked_brute_force'
+  | 'two_factor_locked_brute_force'
 
 /**
  * Tuple form for runtime validation (Zod / Mongoose enum). Keep in
@@ -46,6 +47,7 @@ export const AUDIT_LOG_ACTIONS = [
   'api_key_revoked',
   'profile_updated',
   'account_locked_brute_force',
+  'two_factor_locked_brute_force',
 ] as const
 
 /**

@@ -8,7 +8,7 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
-import { TotpService } from '../../../services/totp.service.js'
+import { TotpService, TwoFactorLockedError } from '../../../services/totp.service.js'
 import { AuthService, issueSession } from '../../../services/auth.service.js'
 import { AuditLogService } from '../../../services/audit-log.service.js'
 import { getAuthUserModel } from '../../../models/auth-user.js'
@@ -16,6 +16,7 @@ import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../../../config/env.js'
+import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import {
   ACCESS_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
@@ -71,8 +72,13 @@ const validateController = async (req: Request, res: Response) => {
       return sendError(res, 'Invalid token type', 401)
     }
 
-    // Validate the TOTP / backup code
-    const result = await TotpService.validateLogin(payload.userId, code)
+    // Validate the TOTP / backup code. Forward request metadata so the
+    // 2FA lockout audit log captures ip + UA when the lock fires.
+    const ua = req.headers['user-agent']
+    const result = await TotpService.validateLogin(payload.userId, code, {
+      ip: req.ip ?? null,
+      userAgent: typeof ua === 'string' ? ua : null,
+    })
     if (!result.valid) {
       // Audit log the failure (fire-and-forget). Useful for forensics +
       // future per-user 2FA brute-force lockout.
@@ -145,6 +151,18 @@ const validateController = async (req: Request, res: Response) => {
       message: 'Login successful',
     })
   } catch (error) {
+    if (error instanceof TwoFactorLockedError) {
+      // 423 Locked — convey the deadline + retry-after so the client can
+      // render an accurate countdown (cf. config/lockout.ts).
+      res.setHeader('Retry-After', String(error.retryAfterSeconds))
+      return sendError(res, error.message, 423, {
+        code: error.code,
+        details: {
+          lockedUntil: error.lockedUntil.toISOString(),
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+      })
+    }
     logger.error('2FA validate error:', error)
     sendError(res, error instanceof Error ? error.message : '2FA validation failed', 401)
   }
@@ -154,6 +172,14 @@ docRouter.post('/2fa/validate', validateRateLimiter, validateController, {
   summary: 'Validate 2FA code during login',
   tags: ['Two-Factor Authentication'],
   bodySchema: validateSchema,
+  extraResponses: {
+    401: { description: '2FA validation failed', schema: errorResponseSchema },
+    423: {
+      description: '2FA temporarily locked due to too many failed attempts',
+      schema: errorResponseSchema,
+    },
+    429: { description: 'Too many 2FA attempts', schema: errorResponseSchema },
+  },
 })
 
 export default router

@@ -51,6 +51,19 @@ export interface AuthUserDocument extends Document {
   lockedUntil?: Date | null
   lastFailedLoginAt?: Date | null
 
+  // 2FA brute force lockout (cf. config/lockout.ts). Mirrors the login-level
+  // counter but scoped to TOTP / backup-code validation. Without it an
+  // attacker who already knows the password can brute force the 6-digit TOTP
+  // (10⁶ combinations is fast enough to crack in minutes given the strict
+  // rate-limit's per-IP cap). `failedTwoFactorAttempts` increments on each
+  // wrong code, resets to 0 on success. `twoFactorLockedUntil > now` blocks
+  // ALL further attempts (including correct codes) until expiry.
+  // `lastFailedTwoFactorAt` anchors the sliding window so stale failures
+  // don't stack across hours of inactivity.
+  failedTwoFactorAttempts?: number
+  twoFactorLockedUntil?: Date | null
+  lastFailedTwoFactorAt?: Date | null
+
   createdAt: Date
   updatedAt: Date
 
@@ -185,6 +198,20 @@ const authUserSchema = new Schema<AuthUserDocument>(
       default: null,
     },
     lastFailedLoginAt: {
+      type: Date,
+      default: null,
+    },
+    // 2FA brute force lockout state (cf. config/lockout.ts).
+    failedTwoFactorAttempts: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    twoFactorLockedUntil: {
+      type: Date,
+      default: null,
+    },
+    lastFailedTwoFactorAt: {
       type: Date,
       default: null,
     },

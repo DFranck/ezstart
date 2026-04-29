@@ -31,3 +31,20 @@ export const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
  * (instead of incrementing the stale total).
  */
 export const SLIDING_WINDOW_MS = 60 * 60 * 1000 // 1 hour
+
+/**
+ * 2FA-specific brute force lockout — applies to `/auth/2fa/validate`.
+ *
+ * Login lockout (above) protects the password, but a TOTP code is only
+ * 10⁶ combinations. Without a per-account counter on the 2FA challenge an
+ * attacker who already has the password can keep guessing codes — the IP
+ * rate-limit alone is too coarse (an attacker rotating IPs would clear it).
+ *
+ * Same algorithm + sliding window as the login counter, scoped to the
+ * `failedTwoFactorAttempts` / `twoFactorLockedUntil` / `lastFailedTwoFactorAt`
+ * fields on the user. Constants are separate so the two policies can be
+ * tuned independently if needed.
+ */
+export const MAX_FAILED_TWO_FACTOR_ATTEMPTS = 5
+
+export const TWO_FACTOR_LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
