@@ -2,7 +2,7 @@ import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { getApiUrl } from '@ezstart/config/urls'
 import jwt from 'jsonwebtoken'
-import { OAuthProfile, OAuthService } from '../services/oauth.service.js'
+import { OAuthLinkingRefusedError, OAuthProfile, OAuthService } from '../services/oauth.service.js'
 import { logger } from '@ezstart/logger/server'
 import { OAUTH_STATE_SECRET, env } from './env.js'
 
@@ -10,6 +10,14 @@ const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID || ''
 const GOOGLE_CLIENT_SECRET = env.GOOGLE_CLIENT_SECRET || ''
 const GOOGLE_CALLBACK_URL =
   env.GOOGLE_CALLBACK_URL || `${getApiUrl('ezauth')}/api/auth/google/callback`
+
+/**
+ * Single source of truth for the OAuth state cookie name. Both the
+ * authorize route (which sets it) and the callback route (which validates
+ * and clears it) MUST import this constant — duplicating the literal
+ * string in two places risks a silent CSRF bypass if one drifts.
+ */
+export const OAUTH_STATE_COOKIE = 'oauth_state'
 
 /**
  * Shape of the signed OAuth state token.
@@ -105,6 +113,14 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
             redirect_uri: redirectUri,
           } as unknown as Express.User)
         } catch (error) {
+          // Surface OAuthLinkingRefusedError with a stable error code so the
+          // callback handler can map it to a friendly query param on the
+          // user-facing error page, instead of the generic `oauth_failed`.
+          if (error instanceof OAuthLinkingRefusedError) {
+            const tagged = new Error(error.message) as Error & { code?: string }
+            tagged.code = error.code
+            return done(tagged)
+          }
           done(error as Error)
         }
       }

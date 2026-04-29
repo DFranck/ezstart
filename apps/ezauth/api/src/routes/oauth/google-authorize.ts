@@ -8,7 +8,7 @@ import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import crypto from 'crypto'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
-import passport, { signOAuthStateToken } from '../../config/passport.js'
+import passport, { OAUTH_STATE_COOKIE, signOAuthStateToken } from '../../config/passport.js'
 
 export const googleAuthorizeRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -17,18 +17,14 @@ const docRouter = createRouterWithDoc(googleAuthorizeRegistry, router)
 const googleAuthorizeQuerySchema = z.object({
   app: z
     .string()
-    .min(1)
-    .default('ezstart')
-    .openapi({ description: 'Application name requesting OAuth' }),
+    .min(1, 'app query parameter is required')
+    .openapi({ description: 'Application name requesting OAuth (required)' }),
   redirect_uri: z
     .string()
     .url()
     .optional()
     .openapi({ description: 'URL to redirect after OAuth completion' }),
 })
-
-/** Cookie that mirrors the nonce in the signed state JWT (CSRF double-submit). */
-const OAUTH_STATE_COOKIE = 'oauth_state'
 
 /**
  * GET /auth/google
