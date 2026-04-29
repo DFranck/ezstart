@@ -59,9 +59,9 @@ Chaque route d'API @ezstart tombe dans **exactement une** des 3 classes :
 ### 3.1 API ciblée
 
 ```ts
-import { createEzstartServer } from '@ezstart/api-core'
+import { createApiServer } from '@ezstart/api-core'
 
-createEzstartServer('ezauth', {
+createApiServer('ezauth', {
   // Tier 3 seulement — strict allowlist pour les routes cookies
   cookieAuthAllowlist: [
     'https://ezauth.ezstart.xyz',
@@ -160,9 +160,9 @@ Les APIs existantes (ezauth, ezpay, etc.) utilisent actuellement une allowlist C
 
 **Étapes migration** :
 
-1. Refactor `createEzstartServer` dans `@ezstart/api-core` selon §3
+1. Refactor `createApiServer` dans `@ezstart/api-core` selon §3
 2. Identifier les routes cookie-auth de chaque API (chercher `Set-Cookie` dans le code)
-3. Remplacer le middleware CORS global par l'appel `createEzstartServer({ cookieAuthAllowlist, cookieAuthRoutes })`
+3. Remplacer le middleware CORS global par l'appel `createApiServer({ cookieAuthAllowlist, cookieAuthRoutes })`
 4. Supprimer / vider les env vars `CORS_ORIGINS` pour les consumers externes sur Railway (garder juste les domaines first-party pour les cookie routes)
 5. Redémarrer les APIs
 6. Smoke test : curl d'une origine externe sur les 3 tiers → observe les headers

@@ -28,7 +28,7 @@ Pour les domaines transverses détaillés, voir aussi :
 
 ### 1.1 Boot & Health
 
-- [ ] `createEzstartServer(appName)` utilisé (pas `createApp` ni `express()` direct)
+- [ ] `createApiServer(appName)` utilisé (pas `createApp` ni `express()` direct)
 - [ ] `/health` + `/api/health` répondent `{ status: 'ok' }` (via api-core, automatique)
 - [ ] `connectToMongo(dbName)` au boot (factory pattern, cf. `mongodb.md`)
 - [ ] Graceful shutdown (automatique via `startServer`)
@@ -37,7 +37,7 @@ Pour les domaines transverses détaillés, voir aussi :
 
 - [ ] Auth middleware sur toutes les routes protégées (`authMiddleware` ou `verifyTokenMiddleware`)
 - [ ] Rate limiting global (preset `standard` minimum, `strict` sur auth routes)
-- [ ] **CORS** via `createEzstartServer` avec politique 3-tier (public/Bearer → `*`, cookie-auth → allowlist strict) — cf. [`standard-saas-cors.md`](./standard-saas-cors.md). **Jamais** de `CORS_ORIGINS` env var pour les consumers externes.
+- [ ] **CORS** via `createApiServer` avec politique 3-tier (public/Bearer → `*`, cookie-auth → allowlist strict) — cf. [`standard-saas-cors.md`](./standard-saas-cors.md). **Jamais** de `CORS_ORIGINS` env var pour les consumers externes.
 - [ ] Input validation Zod sur TOUT body/params/query (jamais `req.body` brut)
 - [ ] `sendError()` / `sendSuccess()` / `sendValidationError()` — jamais `res.json()` direct
 - [ ] Pas de secrets dans le code (cf. `data-protection.md`)

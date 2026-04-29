@@ -69,6 +69,11 @@ function setTokens(tokens: { accessToken: string; refreshToken: string }): void 
 
 /**
  * The pre-configured @ezstart API client.
+ *
+ * @deprecated The `ezstartClient` instance name is preserved for backwards
+ * compatibility — but new code should call `createApiClient(...)` directly
+ * from `@ezstart/api-sdk/core` and pass an explicit `baseUrl`. The brand-named
+ * singleton will be removed in v1.0.0 in favour of consumer-controlled clients.
  */
 export const ezstartClient = createApiClient({
   baseUrl: appName => getApiUrl((appName ?? 'ezstart') as AppName),

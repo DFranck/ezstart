@@ -58,7 +58,7 @@ function detectLayer(dir) {
     try {
       const content = fs.readFileSync(indexTs, 'utf8')
       if (
-        /express|createEzstartServer|startServer|listen\s*\(/i.test(content) ||
+        /express|createApiServer|createEzstartServer|startServer|listen\s*\(/i.test(content) ||
         /from\s+['"]@ezstart\/(api-core|express-core)['"]/.test(content)
       ) {
         return 'api'

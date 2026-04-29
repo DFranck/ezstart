@@ -62,7 +62,7 @@ test('detectLayer: detects api via src/index.ts with express import', () => {
   const dir = makeTmpDir()
   writeFile(
     path.join(dir, 'src', 'index.ts'),
-    `import { createEzstartServer } from '@ezstart/api-core'\nconst app = createEzstartServer('foo')\napp.listen(3000)\n`
+    `import { createApiServer } from '@ezstart/api-core'\nconst app = createApiServer('foo')\napp.listen(3000)\n`
   )
   assert.equal(detectLayer(dir), 'api')
 })

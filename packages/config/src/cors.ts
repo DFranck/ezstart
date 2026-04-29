@@ -93,7 +93,7 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
  * Express CORS middleware configuration
  *
  * @deprecated Use the 3-tier policy from `@ezstart/api-core`:
- * `createEzstartServer(appName, { cookieAuthRoutes, cookieAuthAllowlist })`
+ * `createApiServer(appName, { cookieAuthRoutes, cookieAuthAllowlist })`
  * applies permissive CORS globally and strict CORS only on cookie-auth
  * prefixes. See `.claude/rules/standard-saas-cors.md`.
  *

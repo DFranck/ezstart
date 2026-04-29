@@ -19,9 +19,9 @@ The package ships a pre-configured wrapper wired to `@ezstart/config` (port + CO
 ```ts
 import { Router } from 'express'
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
-import { createEzstartServer, createDocRouter, sendSuccess, startServer } from '@ezstart/api-core'
+import { createApiServer, createDocRouter, sendSuccess, startServer } from '@ezstart/api-core'
 
-const { app, config, logger } = createEzstartServer('myapp')
+const { app, config, logger } = createApiServer('myapp')
 
 const registry = new OpenAPIRegistry()
 const router = Router()
@@ -40,12 +40,12 @@ await startServer(app, {
 
 ## Quickstart (external / standalone)
 
-Build a fully agnostic server via the factory — no `@ezstart/*` imports required.
+Build a fully agnostic server via the low-level `createBaseApiServer` factory — no `@ezstart/*` imports required.
 
 ```ts
 import { Router } from 'express'
 import {
-  createApiServer,
+  createBaseApiServer,
   createAuthMiddleware,
   sendError,
   sendSuccess,
@@ -54,7 +54,7 @@ import {
 } from '@ezstart/api-core'
 import { z } from 'zod'
 
-const { app, logger } = createApiServer({
+const { app, logger } = createBaseApiServer({
   port: 3000,
   serviceName: 'myapp',
   cors: { origins: ['https://myapp.example.com'] },
@@ -75,9 +75,15 @@ await startServer(app, { routes: router, port: 3000, logger })
 
 ## API
 
-### `createApiServer(config): ApiServer`
+### `createApiServer(appName, opts?): ApiServer`
 
-Factory that returns `{ app, config, logger }`. Wires trust-proxy, CORS, JSON parser, health + root endpoints, and optional global rate limiting.
+Monorepo wrapper. Uses `@ezstart/config` (`getPort(appName, 'api')`, `getAllowedOrigins(appName)`) and `@ezstart/logger` by default. Supports the same overrides as `createBaseApiServer`.
+
+This is the recommended entry point for any consumer that already depends on the `@ezstart` toolchain.
+
+### `createBaseApiServer(config): ApiServer`
+
+Low-level agnostic factory that returns `{ app, config, logger }`. Wires trust-proxy, CORS, JSON parser, health + root endpoints, and optional global rate limiting. Zero `@ezstart/*` coupling — publishable on npm as-is.
 
 Key config: `port`, `serviceName`, `cookieAuthRoutes` (path prefixes for cookie-authenticated endpoints) + `cookieAuthAllowlist` (first-party origins for strict CORS), `rateLimit` (preset + options), `rawBodyRoutes`, `db`, `logger`. The legacy `cors` option is still honored for backcompat but is deprecated — see the "CORS policy" section below.
 
@@ -96,15 +102,16 @@ Emit the envelope shapes defined by `@ezstart/api-contracts`:
 ### Middlewares
 
 - `createRateLimiter(opts)` (plus `createStrictRateLimiter`, `createVeryStrictRateLimiter`, `createModerateRateLimiter`)
-- `createPermissiveCorsMiddleware(opts?)` — Tier 1/2 CORS (`ACAO: *`, `credentials: false`). Applied globally by `createApiServer` unless the legacy `cors` option is passed.
+- `createPermissiveCorsMiddleware(opts?)` — Tier 1/2 CORS (`ACAO: *`, `credentials: false`). Applied globally by `createBaseApiServer` unless the legacy `cors` option is passed.
 - `createStrictCorsMiddleware({ allowlist, ... })` — Tier 3 CORS for cookie-authenticated routes. Reflects the origin only when it matches the allowlist (exact string or regex) and sets `credentials: true`.
 - `createCorsMiddleware(config)` — **deprecated** wrapper around the `cors` package. Use the permissive/strict factories instead.
 - `createAuthMiddleware({ verifyToken, cookieName? })` — returns `{ requireAuth, optionalAuth }`. The verifier is fully injected (JWT, PASETO, opaque session — all equivalent). Hydrates `req.userId` and `req.user`.
+- `createApiAuth(jwtSecret?)` — monorepo convenience: HS256 JWT verifier wired to `JWT_SECRET` from the environment, returns `{ authMiddleware, optionalAuthMiddleware }`.
 - `validateBody(schema)` / `validateQuery(schema)` / `validateParams(schema)` — Zod validators that populate `req.validatedBody` / `req.validatedQuery` / `req.validatedParams`.
 
 ### CORS policy (3-tier)
 
-`createApiServer` (and `createEzstartServer`) implement a 3-tier CORS model aligned with Stripe / Clerk / Supabase. See `.claude/rules/standard-saas-cors.md` for the full rationale.
+`createApiServer` (and the low-level `createBaseApiServer`) implement a 3-tier CORS model aligned with Stripe / Clerk / Supabase. See `.claude/rules/standard-saas-cors.md` for the full rationale.
 
 | Tier         | Auth mode                                           | Example endpoints                                       | CORS                                                              |
 | ------------ | --------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------- |
@@ -115,7 +122,7 @@ Emit the envelope shapes defined by `@ezstart/api-contracts`:
 Opt-in strict CORS per route prefix via `cookieAuthRoutes` + `cookieAuthAllowlist`:
 
 ```ts
-createEzstartServer('ezauth', {
+createApiServer('ezauth', {
   cookieAuthRoutes: ['/api/auth/login', '/api/auth/refresh', '/api/auth/logout'],
   cookieAuthAllowlist: [
     'https://ezauth.ezstart.xyz',
@@ -158,15 +165,11 @@ Inject your own implementation (MongoDB, Postgres, Redis, ...). `startServer` aw
 
 Optional Socket.IO helper. The `socket.io` package is loaded via dynamic `import()` so consumers who don't use realtime never pay the bundle cost.
 
-### `createEzstartServer(appName, opts?): ApiServer`
-
-Monorepo wrapper. Uses `@ezstart/config` (`getPort(appName, 'api')`, `getAllowedOrigins(appName)`) and `@ezstart/logger` by default. Supports the same overrides as `createApiServer`.
-
 ## Migration from `@ezstart/express-core`
 
 | Before (`@ezstart/express-core`)                    | After (`@ezstart/api-core`)                                                |
 | --------------------------------------------------- | -------------------------------------------------------------------------- |
-| `createApp({ apiApp: 'myapp' })`                    | `createEzstartServer('myapp').app`                                         |
+| `createApp({ apiApp: 'myapp' })`                    | `createApiServer('myapp').app`                                             |
 | `createRateLimiter()` (+ `createStrictRateLimiter`) | Same names, re-exported                                                    |
 | `createAuthMiddleware(jwtSecret)`                   | `createAuthMiddleware({ verifyToken })` — inject any verifier              |
 | `createRouterWithDoc(registry, router, basePath)`   | `createDocRouter(registry, router, basePath)`                              |
@@ -175,6 +178,17 @@ Monorepo wrapper. Uses `@ezstart/config` (`getPort(appName, 'api')`, `getAllowed
 | `connectToMongo('db')`                              | Inject your own `DbConnector` — core stays agnostic                        |
 
 See `apps/*/api/src/index.ts` during the migration window for per-app patches.
+
+## Migration from pre-rename names (deprecated, removed in v1.0.0)
+
+| Before                          | After                                              |
+| ------------------------------- | -------------------------------------------------- |
+| `createEzstartServer(name, …)`  | `createApiServer(name, …)` — monorepo wrapper      |
+| `createApiServer(config)` (old) | `createBaseApiServer(config)` — agnostic primitive |
+| `createEzstartAuth(secret?)`    | `createApiAuth(secret?)`                           |
+| `EzstartServerOptions`          | `ApiServerOptions`                                 |
+
+Old names remain exported as deprecated aliases for one release cycle. The agnostic `createApiServer(config)` had a different signature than the new `createApiServer(appName, options)` — direct consumers of the agnostic factory must rename their import to `createBaseApiServer`.
 
 ## Rules
 
@@ -191,7 +205,7 @@ requests carrying an `Origin` header, check:
 
 1. **Custom error middleware** — ensure `createErrorHandler` is registered as
    the LAST middleware (after all routers). `startServer` does this
-   automatically. If you build your server manually with `createApiServer` and
+   automatically. If you build your server manually with `createBaseApiServer` and
    skip `startServer`, you MUST add `app.use(createErrorHandler({ logger }))`
    yourself, AFTER every router. Otherwise unhandled exceptions land in
    Express's default error path: HTML 500 + zero CORS headers + stack trace
@@ -206,7 +220,7 @@ requests carrying an `Origin` header, check:
    `@sentry/node-core` (no OTEL bundled).
 
 3. **Helmet `crossOriginResourcePolicy`** — Helmet's default `same-origin`
-   blocks cross-origin responses. `createApiServer` ships `cross-origin`
+   blocks cross-origin responses. `createBaseApiServer` ships `cross-origin`
    when `config.security` is enabled (default). If you mount your own
    helmet config, do the same:
 
@@ -220,7 +234,7 @@ Tier 3 (cookie-auth) routes use a strict allowlist. If a legitimate caller
 gets blocked, add their origin to `cookieAuthAllowlist` (string or regex):
 
 ```ts
-createApiServer({
+createBaseApiServer({
   port,
   cookieAuthRoutes: ['/api/auth/login', '/api/auth/refresh'],
   cookieAuthAllowlist: ['https://app.example.com', /^https:\/\/preview-[a-z0-9]+\.example\.com$/],
