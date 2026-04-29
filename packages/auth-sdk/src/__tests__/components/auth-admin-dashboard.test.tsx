@@ -91,13 +91,6 @@ describe('AuthAdminDashboard', () => {
     expect(screen.getByText('Parametres')).toBeTruthy()
   })
 
-  it('forwards apiUrl + authToken without crashing', () => {
-    const { container } = renderWithProvider(
-      <AuthAdminDashboard apiUrl="https://auth.example.com" authToken={() => 'super-jwt'} />
-    )
-    expect(container.querySelector('[data-testid="Tabs"]')).toBeTruthy()
-  })
-
   it('accepts a defaultTab override', () => {
     renderWithProvider(<AuthAdminDashboard defaultTab="users" />)
     expect(screen.getByText('Users')).toBeTruthy()

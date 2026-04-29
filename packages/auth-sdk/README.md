@@ -502,21 +502,26 @@ specific language without touching `texts`.
 
 ## Federated admin (cross-origin embedding)
 
-`<AuthAdminDashboard>` accepts `apiUrl` and `authToken` overrides so a
-platform hub (Tier 3 — e.g. `apps/ezstart/web/admin`) can embed the full
-admin console cross-origin while forwarding a platform-wide superadmin
-JWT instead of the local session token.
+`<AuthAdminDashboard>` ships with **zero scope or federation props** —
+the dashboard reads its configuration entirely from the surrounding
+`<AuthProvider>`. To embed the console in a platform hub (Tier 3 — e.g.
+`apps/ezstart/web/admin`) cross-origin, configure a single `<AuthProvider>`
+in the hub layout pointing at the remote EZAuth deployment; the user's
+own JWT (carrying their roles) is forwarded automatically.
 
 ```tsx
+import { AuthProvider } from '@ezstart/auth-sdk'
 import { AuthAdminDashboard } from '@ezstart/auth-sdk/components'
-;<AuthAdminDashboard apiUrl="https://auth.example.com" authToken={() => mySuperadminJwt} />
+
+// In the hub layout
+;<AuthProvider apiUrl="https://auth.example.com" appName="ezstart">
+  <AuthAdminDashboard />
+</AuthProvider>
 ```
 
-When `apiUrl` and `authToken` are omitted, the component falls back to the
-surrounding `<AuthProvider>` configuration (single-app standalone mode).
-
 The dashboard is **auto-scoped server-side** via the JWT — no `appName` /
-`scope` props are required. The backend derives scope from `req.user`:
+`scope` / `applicationId` props are required. The backend derives scope
+from `req.user`:
 
 - `globalRoles: ['superadmin']` -> all tenants
 - App-level `admin` role -> owned Applications only
