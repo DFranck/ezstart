@@ -41,6 +41,16 @@ export interface AuthUserDocument extends Document {
   deletedAt?: Date | null
   scheduledHardDeleteAt?: Date | null
 
+  // Account-level brute force lockout (cf. config/lockout.ts).
+  // `failedLoginAttempts` increments on each wrong-password attempt, resets to
+  // 0 on successful login. `lockedUntil` is set once the threshold is reached;
+  // the account is locked while `lockedUntil > now`. `lastFailedLoginAt`
+  // anchors the sliding window — failures older than the window reset the
+  // counter to 1 instead of stacking forever.
+  failedLoginAttempts?: number
+  lockedUntil?: Date | null
+  lastFailedLoginAt?: Date | null
+
   createdAt: Date
   updatedAt: Date
 
@@ -161,6 +171,20 @@ const authUserSchema = new Schema<AuthUserDocument>(
       default: null,
     },
     scheduledHardDeleteAt: {
+      type: Date,
+      default: null,
+    },
+    // Account-level brute force lockout state (cf. config/lockout.ts).
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    lockedUntil: {
+      type: Date,
+      default: null,
+    },
+    lastFailedLoginAt: {
       type: Date,
       default: null,
     },

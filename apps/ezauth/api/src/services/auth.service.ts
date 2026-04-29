@@ -19,9 +19,38 @@ import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
 import { JWT_SECRET, env } from '../config/env.js'
 import { ACCESS_TOKEN_EXPIRES_SECONDS } from '../config/cookie.js'
+import {
+  LOCKOUT_DURATION_MS,
+  MAX_FAILED_LOGIN_ATTEMPTS,
+  SLIDING_WINDOW_MS,
+} from '../config/lockout.js'
+import { AuditLogService } from './audit-log.service.js'
 
 const ACCESS_TOKEN_EXPIRES_IN = env.ACCESS_TOKEN_EXPIRES_IN as `${number}m`
 const REFRESH_TOKEN_DAYS = 30
+
+/**
+ * Thrown when an account is currently locked due to too many failed login
+ * attempts. Routes catch this specifically to return HTTP 423 Locked with a
+ * machine-readable `code: 'ACCOUNT_LOCKED'` and the `lockedUntil` deadline so
+ * clients can render an accurate countdown.
+ */
+export class AccountLockedError extends Error {
+  readonly code = 'ACCOUNT_LOCKED' as const
+  readonly lockedUntil: Date
+  readonly retryAfterSeconds: number
+
+  constructor(lockedUntil: Date) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((lockedUntil.getTime() - Date.now()) / 1000))
+    const minutes = Math.ceil(retryAfterSeconds / 60)
+    super(
+      `Account temporarily locked due to too many failed login attempts. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`
+    )
+    this.name = 'AccountLockedError'
+    this.lockedUntil = lockedUntil
+    this.retryAfterSeconds = retryAfterSeconds
+  }
+}
 
 /** Build the JWT payload for an authenticated user. Shared by login + SSO exchange. */
 export function buildJwtPayload(user: AuthUserDocument): JWTPayload {
@@ -118,8 +147,21 @@ export class AuthService {
    * Validate user credentials without generating an auth code.
    * Used by the login route to check credentials before 2FA.
    * Returns the user ID on success.
+   *
+   * Enforces account-level brute force lockout: after
+   * {@link MAX_FAILED_LOGIN_ATTEMPTS} consecutive wrong-password attempts on
+   * the same account, the account is locked for {@link LOCKOUT_DURATION_MS}.
+   * Locked accounts throw {@link AccountLockedError} which the route layer
+   * maps to HTTP 423. Non-existent identifiers are NOT counted toward any
+   * lockout — that would help attackers enumerate accounts.
+   *
+   * Optional `meta` (ip, userAgent) is forwarded to the audit log entry
+   * written when the account locks.
    */
-  static async validateCredentials(data: LoginRequest): Promise<string> {
+  static async validateCredentials(
+    data: LoginRequest,
+    meta?: { ip?: string | null; userAgent?: string | null }
+  ): Promise<string> {
     const AuthUserModel = await getAuthUserModel()
     // `email` field accepts either an email or a username (both are normalized
     // to lowercase + trimmed at creation time).
@@ -128,11 +170,59 @@ export class AuthService {
       $or: [{ email: identifier }, { username: identifier }],
     })
     if (!user) {
+      // Do NOT count toward any account counter — would leak existence.
       throw new Error('Invalid credentials')
+    }
+
+    const now = new Date()
+
+    // Already locked? Reject before doing the bcrypt compare so we don't
+    // burn CPU on a known-locked account.
+    if (user.lockedUntil && user.lockedUntil.getTime() > now.getTime()) {
+      throw new AccountLockedError(user.lockedUntil)
     }
 
     const isValidPassword = await user.comparePassword(data.password)
     if (!isValidPassword) {
+      // Sliding window: a stale failure (older than the window) resets the
+      // counter to 1 instead of stacking forever.
+      const last = user.lastFailedLoginAt
+      const withinWindow =
+        last instanceof Date && now.getTime() - last.getTime() < SLIDING_WINDOW_MS
+      const previousAttempts = withinWindow ? (user.failedLoginAttempts ?? 0) : 0
+      const newAttempts = previousAttempts + 1
+
+      user.lastFailedLoginAt = now
+
+      if (newAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+        // Lock the account. Reset the counter so the next window starts
+        // fresh once the lockout expires (otherwise a single failure after
+        // unlock would re-trigger the lock immediately).
+        const lockedUntil = new Date(now.getTime() + LOCKOUT_DURATION_MS)
+        user.lockedUntil = lockedUntil
+        user.failedLoginAttempts = 0
+        await user.save()
+
+        // Fire-and-forget audit log entry. Failure must NEVER block the
+        // response (the user already gets 423 from the throw below).
+        void AuditLogService.create({
+          userId: user._id!.toString(),
+          action: 'account_locked_brute_force',
+          metadata: {
+            email: user.email,
+            ip: meta?.ip ?? null,
+            userAgent: meta?.userAgent ?? null,
+            lockedUntil: lockedUntil.toISOString(),
+            failedAttempts: MAX_FAILED_LOGIN_ATTEMPTS,
+          },
+        })
+
+        throw new AccountLockedError(lockedUntil)
+      }
+
+      user.failedLoginAttempts = newAttempts
+      await user.save()
+
       // Provide a more helpful message for quick-signup users who never set a password
       if (!user.hasSetOwnPassword) {
         throw new Error(
@@ -142,9 +232,24 @@ export class AuthService {
       throw new Error('Invalid credentials')
     }
 
+    // Successful login — reset the lockout counter and clear any expired
+    // lock so the next failure starts fresh.
+    if (
+      (user.failedLoginAttempts ?? 0) > 0 ||
+      user.lockedUntil != null ||
+      user.lastFailedLoginAt != null
+    ) {
+      user.failedLoginAttempts = 0
+      user.lockedUntil = null
+      user.lastFailedLoginAt = null
+    }
+
     // Grant access to new app automatically in v1
     if (!user.apps.includes(data.app)) {
       user.apps.push(data.app)
+    }
+
+    if (user.isModified()) {
       await user.save()
     }
 
