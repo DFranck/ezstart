@@ -103,6 +103,7 @@ export function AccountModal({
   const [showCropper, setShowCropper] = useState(false)
   const [savingAvatar, setSavingAvatar] = useState(false)
   const navigation = useAuthNavigation()
+  const modalContainerRef = useRef<HTMLDivElement>(null)
 
   if (!user) return null
 
@@ -148,8 +149,6 @@ export function AccountModal({
     { id: 'profile', label: texts.profileTab, icon: 'lucide:User' },
     { id: 'settings', label: texts.settingsTab, icon: 'lucide:Settings' },
   ]
-
-  const modalContainerRef = useRef<HTMLDivElement>(null)
 
   return (
     <Modal isOpen={open} onClose={onClose} size="xl" scrollBehavior="inside" className={className}>

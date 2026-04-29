@@ -68,7 +68,11 @@ vi.mock('@ezstart/ui/components', () => {
 
   const passthrough = (displayName: string, tag = 'div') => {
     const Comp = React.forwardRef((props: Record<string, unknown>, ref: unknown) => {
-      const { children, asChild, ...rest } = props as Record<string, unknown> & {
+      const {
+        children,
+        asChild: _asChild,
+        ...rest
+      } = props as Record<string, unknown> & {
         children?: React.ReactNode
         asChild?: boolean
       }
@@ -113,7 +117,7 @@ vi.mock('@ezstart/ui/components', () => {
 
   const Button = React.forwardRef(
     (props: Record<string, unknown> & { children?: React.ReactNode }, ref: unknown) => {
-      const { variant, size, asChild, children, ...rest } = props
+      const { variant, size: _size, asChild: _asChild, children, ...rest } = props
       return React.createElement('button', { ...rest, ref, 'data-variant': variant }, children)
     }
   )
@@ -122,13 +126,18 @@ vi.mock('@ezstart/ui/components', () => {
   // Form components — use react-hook-form compatible shims
   const Form = ({
     children,
-    ...props
+    ..._props
   }: Record<string, unknown> & { children?: React.ReactNode }) => {
     return React.createElement('div', { 'data-testid': 'Form' }, children)
   }
 
   const FormField = (props: Record<string, unknown>) => {
-    const { render, control, name, rules } = props as {
+    const {
+      render,
+      control: _control,
+      name,
+      rules: _rules,
+    } = props as {
       render: (arg: { field: Record<string, unknown> }) => React.ReactNode
       control?: unknown
       name?: string
@@ -204,9 +213,9 @@ vi.mock('@ezstart/ui/components', () => {
     SheetTitle: passthrough('SheetTitle'),
     Dropdown: ({
       trigger,
-      items,
+      items: _items,
       children,
-      ...rest
+      ..._rest
     }: {
       trigger?: React.ReactNode
       items?: unknown[]

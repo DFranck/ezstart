@@ -12,15 +12,8 @@ import {
   H3,
   Icon,
   P,
-  Skeleton,
   Span,
   Spinner,
-  DashboardLayout,
-  DashboardSidebar,
-  DashboardMain,
-  DashboardHeader,
-  DashboardContent,
-  SidebarHeader,
 } from '@ezstart/ui/components'
 import type { EZAuthDashboardTexts } from './types.js'
 

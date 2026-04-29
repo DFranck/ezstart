@@ -44,7 +44,7 @@ vi.mock('@ezstart/ui/components', () => {
 
   const Button = React.forwardRef(
     (props: Record<string, unknown> & { children?: React.ReactNode }, ref: unknown) => {
-      const { variant, size, asChild: _asChild, children, ...rest } = props
+      const { variant, size: _size, asChild: _asChild, children, ...rest } = props
       return React.createElement('button', { ...rest, ref, 'data-variant': variant }, children)
     }
   )

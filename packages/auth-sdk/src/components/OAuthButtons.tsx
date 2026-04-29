@@ -87,9 +87,11 @@ export function OAuthButtons({
 
   // ALWAYS call the hook (rules of hooks). The provider is optional, so we
   // wrap in try/catch to fall back to window.origin when no provider is in
-  // the tree. This keeps the hook order stable across renders.
+  // the tree. This keeps the hook order stable across renders — the hook
+  // itself is invoked unconditionally, only its consumption is guarded.
   let providerApiUrl: string | undefined
   try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     providerApiUrl = useAuthContext().client.getApiUrl()
   } catch {
     providerApiUrl = undefined

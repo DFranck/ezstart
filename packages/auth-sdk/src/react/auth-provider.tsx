@@ -294,7 +294,6 @@ export function AuthProvider({
   // Create the client (stable reference)
   const client = useMemo(
     () => new CoreAuthClient(resolved.clientConfig),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [resolved.clientConfig.apiUrl, resolved.clientConfig.appName]
   )
 
@@ -399,7 +398,6 @@ export function AuthProvider({
     // preserve the consumer's explicit appName (cross-tenant guard). Including
     // it would re-run the effect when the parent re-renders with a new
     // `sdkConfig` memo identity, defeating the REG-1 guard.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolved.keyFetch, client, logger])
 
   // Auto-detect and set mode on mount
@@ -510,7 +508,6 @@ export function AuthProvider({
     return () => {
       clearInterval(intervalId)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeState.accessToken, storeState.refreshToken, client, logger, store])
 
   // Proactive token refresh: schedule refresh 1 minute before JWT expiry
@@ -563,7 +560,6 @@ export function AuthProvider({
         proactiveTimerRef.current = null
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeState.accessToken, storeState.refreshToken, client, logger, store])
 
   // Resolve the logout texts ONCE per provider — the hook merges any

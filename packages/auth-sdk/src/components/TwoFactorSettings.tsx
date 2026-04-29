@@ -313,7 +313,6 @@ export function TwoFactorSettings({
 
           {qrCode && (
             <Div className="flex justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrCode} alt="2FA QR Code" className="w-48 h-48 rounded-lg" />
             </Div>
           )}

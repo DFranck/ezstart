@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Div, Input, P } from '@ezstart/ui/components'
-import { apiCall, ApiError } from '@ezstart/api-sdk'
+import { apiCall } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useEffect, useRef, useState } from 'react'
 import { detectCurrentThemePreference } from './themePreference.js'
@@ -171,7 +171,6 @@ export function TwoFactorPrompt({
       autoSubmittedRef.current = true
       void submit(code)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, loading])
 
   return (

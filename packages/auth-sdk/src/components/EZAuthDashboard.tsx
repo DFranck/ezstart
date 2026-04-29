@@ -187,7 +187,6 @@ export function EZAuthDashboard({
       setActiveSection(querySection)
     }
     // Intentionally not re-running on allKnownIds change (we hash via join).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [querySection])
 
   // No `mounted` guard — the Zustand store is hydrated synchronously with
