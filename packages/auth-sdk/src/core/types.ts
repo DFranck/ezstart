@@ -379,6 +379,18 @@ export interface Application {
    * seed script or a future superadmin-only API route.
    */
   isPlatformOwned?: boolean
+  /**
+   * Composable email-verification gate (Clerk / Vercel pattern). When `true`,
+   * the consumer signals that downstream features should require a verified
+   * email. Login itself is never blocked.
+   *
+   * Use the matching `<RequireEmailVerified>` guard component or the
+   * `requireEmailVerified` Express middleware to enforce the gate at the
+   * point of use.
+   *
+   * @default false
+   */
+  requireEmailVerification?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -396,6 +408,12 @@ export interface UpdateApplicationRequest {
   name?: string
   description?: string
   metadata?: Record<string, unknown>
+  /**
+   * Toggle the composable email-verification gate (Clerk / Vercel pattern).
+   * When `true`, the consumer signals that downstream features should
+   * require a verified email. Login itself is never blocked.
+   */
+  requireEmailVerification?: boolean
 }
 
 /**

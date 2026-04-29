@@ -14,6 +14,10 @@ import 'server-only'
  * ```ts
  * import { hasFeature, getServerAuth } from '@ezstart/auth-sdk/server'
  * ```
+ *
+ * The `import 'server-only'` guard at the top throws at build time if a
+ * client component accidentally imports from this entry point, preventing
+ * cookie / token leaks to the browser bundle.
  */
 
 // ---------------------------------------------------------------------------
@@ -106,6 +110,12 @@ export {
   requireFeature,
   canManageUser as rbacCanManageUser,
 } from '../rbac/server.js'
+
+// ---------------------------------------------------------------------------
+// Composable email-verification gate (Clerk / Vercel pattern)
+// ---------------------------------------------------------------------------
+
+export { requireEmailVerified, EMAIL_VERIFICATION_REQUIRED_CODE } from './require-email-verified.js'
 
 // RBAC types and helpers re-exported for server use
 export * from '../rbac/types.js'

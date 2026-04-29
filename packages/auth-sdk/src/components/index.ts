@@ -104,6 +104,25 @@ export type {
   EmailVerificationStatusTexts,
 } from './EmailVerificationStatus.js'
 
+// Composable email-verification gate (Clerk / Vercel pattern)
+export {
+  RequireEmailVerified,
+  DEFAULT_REQUIRE_EMAIL_VERIFIED_TEXTS,
+} from './RequireEmailVerified.js'
+export type {
+  RequireEmailVerifiedProps,
+  RequireEmailVerifiedTexts,
+} from './RequireEmailVerified.js'
+
+export {
+  EmailVerificationBanner,
+  DEFAULT_EMAIL_VERIFICATION_BANNER_TEXTS,
+} from './EmailVerificationBanner.js'
+export type {
+  EmailVerificationBannerProps,
+  EmailVerificationBannerTexts,
+} from './EmailVerificationBanner.js'
+
 // Sessions
 export { SessionsManager } from './SessionsManager.js'
 export type { SessionsManagerProps, SessionsManagerTexts } from './SessionsManager.js'
