@@ -1,5 +1,5 @@
 import { connectToMongo } from '@ezstart/api-core'
-import { Schema, type Document, type Model } from 'mongoose'
+import { Schema, type Document, type Model, type Query } from 'mongoose'
 
 /**
  * Application lifecycle status.
@@ -220,6 +220,73 @@ const applicationSchema = new Schema<ApplicationDocument>(
 
 // Slug is already unique via schema; explicit index keeps intent obvious.
 applicationSchema.index({ slug: 1 }, { unique: true })
+
+/**
+ * Archive query guard — auto-injects `{ status: { $ne: 'archived' } }` into
+ * every read/update query so archived (soft-deleted) Applications never leak
+ * into normal flows.
+ *
+ * Opt-out: pass `{ includeArchived: true }` as the query option to bypass the
+ * filter. Examples of legitimate opt-outs:
+ *   - Slug uniqueness check on create — must see archived to surface a clean
+ *     409 instead of a raw Mongoose duplicate-key error.
+ *   - Archive / restore endpoint — must see archived to operate on them.
+ *   - Admin "include archived" toggle on the Applications list page.
+ *
+ * Mongoose 8 — the hook reads `this.getOptions()` to inspect the per-query
+ * options bag. Caller-provided `status` filters are honored verbatim
+ * (caller knows best); we only inject when the field is absent from the
+ * filter AND `includeArchived` is not set.
+ *
+ * Standard ref: `.claude/rules/standard-saas-data.md` §5 (soft delete).
+ *
+ * @internal
+ */
+function filterMentionsStatus(filter: Record<string, unknown>): boolean {
+  if (Object.prototype.hasOwnProperty.call(filter, 'status')) return true
+  for (const op of ['$or', '$and', '$nor'] as const) {
+    const arr = filter[op]
+    if (Array.isArray(arr)) {
+      for (const clause of arr) {
+        if (
+          clause &&
+          typeof clause === 'object' &&
+          filterMentionsStatus(clause as Record<string, unknown>)
+        ) {
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
+
+function injectArchiveFilter(
+  this: Query<unknown, ApplicationDocument>,
+  next: (err?: Error) => void
+): void {
+  const opts = this.getOptions() as { includeArchived?: boolean }
+  if (opts.includeArchived === true) return next()
+
+  const filter = this.getFilter() as Record<string, unknown>
+  // Caller is being explicit about status anywhere in the filter (top level
+  // OR nested inside $or/$and/$nor) — respect that intent and skip the
+  // auto-injection to avoid double constraints / redundant clauses.
+  if (filterMentionsStatus(filter)) return next()
+
+  this.where({ status: { $ne: 'archived' } })
+  next()
+}
+
+applicationSchema.pre('find', injectArchiveFilter)
+applicationSchema.pre('findOne', injectArchiveFilter)
+applicationSchema.pre('findOneAndUpdate', injectArchiveFilter)
+applicationSchema.pre('findOneAndDelete', injectArchiveFilter)
+applicationSchema.pre('findOneAndReplace', injectArchiveFilter)
+applicationSchema.pre('countDocuments', injectArchiveFilter)
+applicationSchema.pre('updateOne', injectArchiveFilter)
+applicationSchema.pre('updateMany', injectArchiveFilter)
+applicationSchema.pre('distinct', injectArchiveFilter)
 
 /**
  * Factory function to get the Application model attached to the shared

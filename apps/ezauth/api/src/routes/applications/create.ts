@@ -102,8 +102,11 @@ const createApplicationController = async (req: Request, res: Response) => {
     const Application = await getApplicationModel()
 
     // Explicit uniqueness check to return a clean 409 rather than a raw
-    // Mongoose duplicate-key error.
-    const existing = await Application.findOne({ slug }).lean()
+    // Mongoose duplicate-key error. `includeArchived: true` opts out of the
+    // archive pre-find guard — slug uniqueness is enforced globally by the
+    // unique index, so an archived Application still occupies its slug and
+    // creating a new one with the same slug would crash with E11000.
+    const existing = await Application.findOne({ slug }, null, { includeArchived: true }).lean()
     if (existing) {
       return sendError(res, `Application with slug "${slug}" already exists`, 409)
     }

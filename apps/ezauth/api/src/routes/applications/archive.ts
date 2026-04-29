@@ -54,7 +54,10 @@ const archiveApplicationController = async (req: Request, res: Response) => {
     }
 
     const Application = await getApplicationModel()
-    const app = await Application.findById(id)
+    // `includeArchived: true` opts out of the archive pre-find guard so we
+    // can detect an already-archived Application and return a clean 400
+    // ("already archived") instead of collapsing both branches to 404.
+    const app = await Application.findOne({ _id: id }, null, { includeArchived: true })
     if (!app) {
       return sendError(res, 'Application not found', 404)
     }

@@ -1,5 +1,5 @@
 import { connectToMongo } from '@ezstart/api-core'
-import { Schema, Document, Model } from 'mongoose'
+import { Schema, Document, Model, type Query } from 'mongoose'
 import bcrypt from 'bcryptjs'
 import { AuthUser } from '@ezstart/auth-sdk/server'
 import { mapToRecord } from '../utils/map-to-record.js'
@@ -204,6 +204,76 @@ authUserSchema.pre('save', async function (next) {
   this.passwordHash = await bcrypt.hash(this.passwordHash, salt)
   next()
 })
+
+/**
+ * Soft-delete query guard — auto-injects `{ deletedAt: null }` into every
+ * read/update query so soft-deleted users never leak into normal flows.
+ *
+ * Opt-out: pass `{ includeDeleted: true }` as the query option to bypass the
+ * filter. This is the explicit (and audit-loggable) way for an admin endpoint
+ * or a self-service deletion handler to see soft-deleted records.
+ *
+ * Mongoose 8 — the hook reads `this.getOptions()` to inspect the per-query
+ * options bag. Caller-provided `deletedAt` filters are honored verbatim
+ * (caller knows best); we only inject when the field is absent from the
+ * filter AND `includeDeleted` is not set.
+ *
+ * Hooks are registered for every read/update operation that goes through a
+ * Query. `aggregate` pipelines bypass Query hooks entirely — analytics
+ * endpoints already filter explicitly, see `routes/admin/analytics-overview.ts`.
+ *
+ * Standard ref: `.claude/rules/standard-saas-data.md` §5 (soft delete).
+ *
+ * @internal
+ */
+function filterMentionsDeletedAt(filter: Record<string, unknown>): boolean {
+  if (Object.prototype.hasOwnProperty.call(filter, 'deletedAt')) return true
+  for (const op of ['$or', '$and', '$nor'] as const) {
+    const arr = filter[op]
+    if (Array.isArray(arr)) {
+      for (const clause of arr) {
+        if (
+          clause &&
+          typeof clause === 'object' &&
+          filterMentionsDeletedAt(clause as Record<string, unknown>)
+        ) {
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
+
+function injectSoftDeleteFilter(
+  this: Query<unknown, AuthUserDocument>,
+  next: (err?: Error) => void
+): void {
+  const opts = this.getOptions() as { includeDeleted?: boolean }
+  if (opts.includeDeleted === true) return next()
+
+  const filter = this.getFilter() as Record<string, unknown>
+  // Caller is being explicit about deletedAt anywhere in the filter (top
+  // level OR nested inside $or/$and/$nor) — respect that intent and skip
+  // the auto-injection to avoid double constraints / redundant clauses.
+  if (filterMentionsDeletedAt(filter)) return next()
+
+  this.where({ deletedAt: null })
+  next()
+}
+
+// Apply to every Query operation that returns documents. Update operations
+// (updateOne/updateMany/findOneAndUpdate) are also gated so a soft-deleted
+// user cannot be silently mutated by a route that forgot the filter.
+authUserSchema.pre('find', injectSoftDeleteFilter)
+authUserSchema.pre('findOne', injectSoftDeleteFilter)
+authUserSchema.pre('findOneAndUpdate', injectSoftDeleteFilter)
+authUserSchema.pre('findOneAndDelete', injectSoftDeleteFilter)
+authUserSchema.pre('findOneAndReplace', injectSoftDeleteFilter)
+authUserSchema.pre('countDocuments', injectSoftDeleteFilter)
+authUserSchema.pre('updateOne', injectSoftDeleteFilter)
+authUserSchema.pre('updateMany', injectSoftDeleteFilter)
+authUserSchema.pre('distinct', injectSoftDeleteFilter)
 
 // Compare password method
 authUserSchema.methods.comparePassword = async function (password: string): Promise<boolean> {

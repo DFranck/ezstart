@@ -42,8 +42,17 @@ const verifyController = async (req: Request, res: Response) => {
     // Without this lookup the JWT signature alone keeps the session usable
     // until natural expiry, even after the cookies are cleared and the
     // refresh tokens revoked. (P0 — see standard-saas-security.md §3.)
+    //
+    // `includeDeleted: true` opts out of the AuthUser pre-find guard so we
+    // can distinguish "user never existed" from "account is soft-deleted"
+    // and return a more precise error message. The model-level guard would
+    // collapse both branches to a generic 'User not found' response.
     const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(payload.userId).select('deletedAt').lean()
+    const user = await AuthUser.findOne(
+      { _id: payload.userId },
+      { deletedAt: 1 },
+      { includeDeleted: true }
+    ).lean()
     if (!user) {
       return sendError(res, 'User not found', 401)
     }

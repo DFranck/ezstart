@@ -109,7 +109,13 @@ const createApiKeyController = async (req: Request, res: Response) => {
       if (!Types.ObjectId.isValid(applicationId)) {
         return sendError(res, 'Invalid applicationId', 400)
       }
-      const app = await Application.findById(applicationId).lean()
+      // `includeArchived: true` opts out of the Application archive guard so
+      // we can return a precise "Application is archived" 400 below instead
+      // of collapsing the branch into a generic 404 when the app exists but
+      // has been soft-deleted.
+      const app = await Application.findOne({ _id: applicationId }, null, {
+        includeArchived: true,
+      }).lean()
       if (!app) {
         return sendError(res, 'Application not found', 404)
       }
