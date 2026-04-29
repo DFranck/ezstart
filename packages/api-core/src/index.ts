@@ -48,6 +48,14 @@ export {
   type StrictCorsOptions,
 } from './core/middleware/cors.js'
 export {
+  createIdempotencyMiddleware,
+  createInMemoryIdempotencyStore,
+  type IdempotencyMiddlewareConfig,
+  type IdempotencyRecord,
+  type IdempotencyStore,
+  type InMemoryStoreConfig,
+} from './core/middleware/idempotency.js'
+export {
   createModerateRateLimiter,
   createRateLimiter,
   createStrictRateLimiter,
