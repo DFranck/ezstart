@@ -76,10 +76,16 @@ const listApplicationsController = async (req: Request, res: Response) => {
       return sendError(res, '`?all=true` requires superadmin', 403)
     }
 
+    // Opt-in to seeing archived (soft-deleted) Applications. By default the
+    // model-level pre-find guard hides them from every query; passing
+    // `?includeArchived=true` flips the flag for this request only.
+    const includeArchived = req.query.includeArchived === 'true'
+
     const query: Record<string, unknown> = derivedScope === 'all' ? {} : { ownerId: userId }
 
     const Application = await getApplicationModel()
-    const apps = await Application.find(query).sort({ createdAt: -1 }).lean()
+    const findOpts: { includeArchived?: boolean } = includeArchived ? { includeArchived: true } : {}
+    const apps = await Application.find(query, null, findOpts).sort({ createdAt: -1 }).lean()
 
     const data = apps.map(a => serializeApplication(a))
 

@@ -61,6 +61,15 @@ const listUsersQuerySchema = z.object({
     description:
       'Optional debugging override (superadmin only). The scope is auto-derived from the JWT roles by `attachDerivedScope`; non-superadmins cannot escalate via this param.',
   }),
+  includeDeleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .default('false')
+    .transform(v => v === 'true')
+    .openapi({
+      description:
+        'Include soft-deleted users in the listing (default false). Superadmin-only when scope=all; for narrower scopes the flag still gates the model-level pre-find guard but the audience filter applies first.',
+    }),
 })
 
 /** Escape user input before embedding in a Mongo `$regex`. */
@@ -79,8 +88,17 @@ const listUsersController = async (req: Request, res: Response) => {
     }
 
     const AuthUser = await getAuthUserModel()
-    const { limit, offset, search, role, app } = parsedQuery.data
+    const { limit, offset, search, role, app, includeDeleted } = parsedQuery.data
     const query: Record<string, unknown> = {}
+
+    // `includeDeleted=true` is gated to superadmin platform-wide views — an
+    // app-admin auto-scoped to `myApps` can theoretically still toggle it,
+    // but the audience filter (apps ⊂ ownedSlugs) constrains the result set
+    // to records they're already entitled to see; the flag just lets them
+    // see soft-deleted users WITHIN that scope. Non-superadmins on the
+    // 'mine' scope are limited to a single record (their own user) so the
+    // flag is moot — kept consistent for predictability.
+    const findOpts: { includeDeleted?: boolean } = includeDeleted ? { includeDeleted: true } : {}
 
     // API key scope-based filtering — used as a secondary constraint when the
     // caller authenticated with a single-app API key (legacy contract).
@@ -139,13 +157,13 @@ const listUsersController = async (req: Request, res: Response) => {
     }
 
     const [users, total] = await Promise.all([
-      AuthUser.find(query)
+      AuthUser.find(query, null, findOpts)
         .select('-passwordHash')
         .sort({ createdAt: -1 })
         .skip(offset)
         .limit(limit)
         .lean(),
-      AuthUser.countDocuments(query),
+      AuthUser.countDocuments(query, findOpts),
     ])
 
     const data = users.map(u => ({
