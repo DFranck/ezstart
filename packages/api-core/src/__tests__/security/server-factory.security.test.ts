@@ -10,27 +10,27 @@
 import express from 'express'
 import request from 'supertest'
 import { describe, expect, it } from 'vitest'
-import { createApiServer } from '../../core/create-server.js'
+import { createBaseApiServer } from '../../core/create-server.js'
 
 describe('Server factory — security', () => {
   // ─── Attack vector 18: Health endpoint behavior ───
   describe('Health endpoint', () => {
     it('health endpoint is always mounted by default', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       const res = await request(app).get('/health')
       expect(res.status).toBe(200)
       expect(res.body.status).toBe('ok')
     })
 
     it('legacy /api/health also responds', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       const res = await request(app).get('/api/health')
       expect(res.status).toBe(200)
       expect(res.body.status).toBe('ok')
     })
 
     it('custom healthPath disables legacy /api/health', async () => {
-      const { app } = createApiServer({ port: 0, healthPath: '/custom-health' })
+      const { app } = createBaseApiServer({ port: 0, healthPath: '/custom-health' })
       const res = await request(app).get('/custom-health')
       expect(res.status).toBe(200)
 
@@ -40,7 +40,7 @@ describe('Server factory — security', () => {
     })
 
     it('health does not leak environment or version info', async () => {
-      const { app } = createApiServer({ port: 0, serviceName: 'test-api' })
+      const { app } = createBaseApiServer({ port: 0, serviceName: 'test-api' })
       const res = await request(app).get('/health')
       expect(res.status).toBe(200)
       // Only status, service, timestamp — no env, version, uptime, memory, etc.
@@ -52,7 +52,7 @@ describe('Server factory — security', () => {
   // ─── Attack vector 19: Double-mount behavior ───
   describe('Double-mount router', () => {
     it('mounting two routers with same path does not crash', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       const router1 = express.Router()
       router1.get('/items', (_req, res) => res.json({ source: 'router1' }))
       const router2 = express.Router()
@@ -71,7 +71,7 @@ describe('Server factory — security', () => {
   // ─── Attack vector 20: Body size limits ───
   describe('Request body size limits', () => {
     it('FINDING: express.json() default limit is 100kb — rejects large payloads', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       app.post('/api/test', (req, res) => {
         res.json({ size: JSON.stringify(req.body).length })
       })
@@ -84,7 +84,7 @@ describe('Server factory — security', () => {
     })
 
     it('accepts payloads within the default 100kb limit', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       app.post('/api/test', (req, res) => {
         res.json({ received: true })
       })
@@ -96,10 +96,10 @@ describe('Server factory — security', () => {
     })
 
     it('explicit 100kb body size limit is configured (FIXED)', async () => {
-      // After fix: createApiServer explicitly passes { limit: '100kb' }
+      // After fix: createBaseApiServer explicitly passes { limit: '100kb' }
       // to express.json() and express.urlencoded() instead of relying
       // on Express defaults.
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       app.post('/api/test', (req, res) => {
         res.json({ size: JSON.stringify(req.body).length })
       })
@@ -114,12 +114,12 @@ describe('Server factory — security', () => {
   // ─── Trust proxy configuration ───
   describe('Trust proxy', () => {
     it('trust proxy is set to true (required for Railway/Vercel)', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       expect(app.get('trust proxy')).toBe(true)
     })
 
     it('X-Forwarded-For is used for req.ip when trust proxy is on', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       let capturedIp = ''
       app.get('/ip', (req, res) => {
         capturedIp = req.ip ?? ''
@@ -136,7 +136,7 @@ describe('Server factory — security', () => {
   // ─── Default CORS is open ───
   describe('Default CORS policy', () => {
     it('FINDING: default CORS is permissive (reflects origin) when no cors config provided', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       app.get('/test', (_req, res) => res.json({ ok: true }))
 
       const res = await request(app).get('/test').set('Origin', 'https://evil.com')
@@ -152,7 +152,7 @@ describe('Server factory — security', () => {
   // ─── Raw body routes order ───
   describe('Raw body routes', () => {
     it('raw body route is registered before JSON parser', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         rawBodyRoutes: ['/webhooks/stripe'],
       })

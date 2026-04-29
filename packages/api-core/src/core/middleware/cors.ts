@@ -152,7 +152,7 @@ export function createPermissiveCorsMiddleware(
       next()
     } catch (err) {
       // Forward to the global error handler (registered last in
-      // `createApiServer`). The handler re-applies CORS headers and emits a
+      // `createBaseApiServer`). The handler re-applies CORS headers and emits a
       // structured `sendError`-style response so browsers can read the body
       // even when something deeper in the stack throws synchronously.
       next(err)

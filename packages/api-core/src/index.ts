@@ -4,7 +4,7 @@
  * Unified Express-based API server framework.
  *
  * Agnostic primitives live under `./core/*` — zero `@ezstart/*` coupling,
- * publishable on npm as-is. The monorepo wrapper (`createEzstartServer`) is
+ * publishable on npm as-is. The monorepo wrapper (`createApiServer`) is
  * a thin convenience layer that wires `@ezstart/config` + `@ezstart/logger`.
  */
 
@@ -14,7 +14,17 @@ import './core/express-aug.js'
 // ---------------------------------------------------------------------------
 // Agnostic core — factories
 // ---------------------------------------------------------------------------
-export { createApiServer } from './core/create-server.js'
+//
+// `createBaseApiServer` is the low-level agnostic primitive (publishable as-is,
+// zero `@ezstart/*` coupling). Most monorepo consumers should use the
+// higher-level `createApiServer(appName, options)` wrapper exported below
+// from `./create-api-server.js`, which pre-wires `@ezstart/config` and
+// `@ezstart/logger`.
+//
+// NOTE: prior to v0.x.0 the wrapper was named `createEzstartServer` and the
+// agnostic primitive was named `createApiServer`. Both old names are still
+// re-exported below as deprecated aliases. See CHANGELOG for migration.
+export { createBaseApiServer } from './core/create-server.js'
 export { startServer, type StartServerOptions } from './core/server.js'
 
 // Response helpers
@@ -126,9 +136,17 @@ export { createSocketServer, type SocketServerConfig } from './core/sockets.js'
 // ---------------------------------------------------------------------------
 // @ezstart monorepo wrapper (optional — requires @ezstart/config + @ezstart/logger)
 // ---------------------------------------------------------------------------
+//
+// `createApiServer(appName, options)` is the recommended factory for any
+// monorepo consumer. It wires `@ezstart/config` (port + first-party CORS
+// origins) and `@ezstart/logger` automatically. For agnostic usage outside
+// the monorepo, drop down to `createBaseApiServer(config)` exported above.
 export {
+  createApiAuth,
+  createApiServer,
   createEzstartAuth,
   createEzstartServer,
+  type ApiServerOptions,
   type EzstartServerOptions,
-} from './ezstart-server.js'
+} from './create-api-server.js'
 export { connectToMongo } from './connect-to-mongo.js'

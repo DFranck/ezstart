@@ -90,9 +90,9 @@ function mountOpenApi(
  * ```ts
  * import { Router } from 'express'
  * import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
- * import { createApiServer, startServer } from '@ezstart/api-core'
+ * import { createBaseApiServer, startServer } from '@ezstart/api-core'
  *
- * const { app } = createApiServer({ port: 3000 })
+ * const { app } = createBaseApiServer({ port: 3000 })
  * const registry = new OpenAPIRegistry()
  * const routes = Router()
  *

@@ -2,14 +2,14 @@
  * Tests for `/health/deep` deep readiness probe.
  *
  * Covers the agnostic core handler (`createDeepHealthHandler`), the
- * auto-mount in `createApiServer`, the DB connector auto-derivation, and
+ * auto-mount in `createBaseApiServer`, the DB connector auto-derivation, and
  * the timeout / error handling.
  */
 
 import express from 'express'
 import request from 'supertest'
 import { describe, expect, it } from 'vitest'
-import { createApiServer } from '../core/create-server.js'
+import { createBaseApiServer } from '../core/create-server.js'
 import {
   aggregateStatus,
   createDbHealthCheck,
@@ -165,9 +165,9 @@ describe('createDeepHealthHandler', () => {
   })
 })
 
-describe('createApiServer auto-mount', () => {
+describe('createBaseApiServer auto-mount', () => {
   it('mounts /health/deep automatically with a degraded-or-better default', async () => {
-    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
 
     const shallow = await request(app).get('/health')
     expect(shallow.status).toBe(200)
@@ -181,7 +181,7 @@ describe('createApiServer auto-mount', () => {
   })
 
   it('mounts the auto db check when a DbConnector is provided', async () => {
-    const { app } = createApiServer({
+    const { app } = createBaseApiServer({
       port: 0,
       serviceName: 'myapp',
       db: fakeDb(true),
@@ -193,7 +193,7 @@ describe('createApiServer auto-mount', () => {
   })
 
   it('reports 503 when the DB connector is down', async () => {
-    const { app } = createApiServer({
+    const { app } = createBaseApiServer({
       port: 0,
       serviceName: 'myapp',
       db: fakeDb(false),
@@ -205,7 +205,7 @@ describe('createApiServer auto-mount', () => {
   })
 
   it('honors a custom deepHealthPath when provided', async () => {
-    const { app } = createApiServer({
+    const { app } = createBaseApiServer({
       port: 0,
       serviceName: 'myapp',
       deepHealthPath: '/healthz/ready',
@@ -220,7 +220,7 @@ describe('createApiServer auto-mount', () => {
   })
 
   it('runs caller-supplied deepHealthChecks alongside the auto db check', async () => {
-    const { app } = createApiServer({
+    const { app } = createBaseApiServer({
       port: 0,
       serviceName: 'myapp',
       db: fakeDb(true),

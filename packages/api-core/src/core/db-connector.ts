@@ -3,7 +3,7 @@
  *
  * The core has zero knowledge of MongoDB, Postgres, Redis, etc. Consumers
  * that need a database inject an implementation that conforms to this shape.
- * `createApiServer` will `await connector.connect()` on boot when provided
+ * `createBaseApiServer` will `await connector.connect()` on boot when provided
  * and close it on graceful shutdown via `connector.disconnect()`.
  *
  * @example

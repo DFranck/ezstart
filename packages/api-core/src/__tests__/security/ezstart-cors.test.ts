@@ -1,6 +1,6 @@
 /**
- * Integration tests for the 3-tier CORS policy wired by `createApiServer`
- * (and transitively by `createEzstartServer`).
+ * Integration tests for the 3-tier CORS policy wired by `createBaseApiServer`
+ * (and transitively by `createApiServer`).
  *
  * Verifies the full behaviour:
  * - Permissive CORS (`*`, no credentials) applied globally.
@@ -12,12 +12,12 @@
 
 import request from 'supertest'
 import { describe, expect, it } from 'vitest'
-import { createApiServer } from '../../core/create-server.js'
+import { createBaseApiServer } from '../../core/create-server.js'
 
-describe('createApiServer — 3-tier CORS integration', () => {
+describe('createBaseApiServer — 3-tier CORS integration', () => {
   describe('Tier 1/2 — permissive CORS applied globally by default', () => {
     it('GET /api/keys/config from random origin → ACAO: *', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       app.get('/api/keys/config', (_req, res) => res.json({ ok: true }))
 
       const res = await request(app)
@@ -29,7 +29,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('Bearer-auth route from any origin → reflected ACAO + credentials true', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
       app.post('/api/donations', (_req, res) => res.json({ ok: true }))
 
       const res = await request(app)
@@ -41,7 +41,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('OPTIONS preflight on any path → 204 + reflected ACAO', async () => {
-      const { app } = createApiServer({ port: 0 })
+      const { app } = createBaseApiServer({ port: 0 })
 
       const res = await request(app)
         .options('/api/anything')
@@ -54,7 +54,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
 
   describe('Tier 3 — strict CORS on cookieAuthRoutes prefixes', () => {
     it('cookie-auth path from allowlisted origin → ACAO: <origin> + credentials', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cookieAuthRoutes: ['/api/auth/login'],
         cookieAuthAllowlist: ['https://ezauth.ezstart.xyz'],
@@ -69,7 +69,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('cookie-auth path from random origin → no ACAO header', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cookieAuthRoutes: ['/api/auth/login'],
         cookieAuthAllowlist: ['https://ezauth.ezstart.xyz'],
@@ -81,7 +81,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('OPTIONS preflight on cookie path from random origin → rejected', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cookieAuthRoutes: ['/api/auth/login'],
         cookieAuthAllowlist: ['https://ezauth.ezstart.xyz'],
@@ -95,7 +95,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('OPTIONS preflight on cookie path from allowlisted origin → 204 + credentials', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cookieAuthRoutes: ['/api/auth/login'],
         cookieAuthAllowlist: ['https://ezauth.ezstart.xyz'],
@@ -111,7 +111,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('regex allowlist entry matches Vercel preview deploys', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cookieAuthRoutes: ['/api/auth/login'],
         cookieAuthAllowlist: [/^https:\/\/ezauth-[a-z0-9]+-ezstart\.vercel\.app$/],
@@ -128,7 +128,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('non-cookie path still gets permissive CORS even with cookieAuthRoutes set', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cookieAuthRoutes: ['/api/auth/login'],
         cookieAuthAllowlist: ['https://ezauth.ezstart.xyz'],
@@ -144,7 +144,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('multiple cookieAuthRoutes prefixes are all strict', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cookieAuthRoutes: ['/api/auth/login', '/api/auth/refresh'],
         cookieAuthAllowlist: ['https://ezauth.ezstart.xyz'],
@@ -164,7 +164,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
 
   describe('Legacy cors option (backcompat)', () => {
     it('when `cors` is set, it wins over the 3-tier defaults', async () => {
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         cors: { origins: ['https://legacy.example.com'] },
       })
@@ -183,7 +183,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
     })
 
     it('legacy cors: "*" still works', async () => {
-      const { app } = createApiServer({ port: 0, cors: '*' })
+      const { app } = createBaseApiServer({ port: 0, cors: '*' })
       app.get('/anywhere', (_req, res) => res.json({ ok: true }))
 
       const res = await request(app).get('/anywhere').set('Origin', 'https://random.com')
@@ -209,7 +209,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
           /* noop */
         },
       }
-      createApiServer({
+      createBaseApiServer({
         port: 0,
         logger,
         cookieAuthRoutes: ['/api/auth/login'],
@@ -234,7 +234,7 @@ describe('createApiServer — 3-tier CORS integration', () => {
           /* noop */
         },
       }
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         logger: silentLogger,
         cookieAuthRoutes: ['/api/auth/login'],

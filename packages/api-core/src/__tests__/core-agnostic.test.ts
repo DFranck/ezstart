@@ -1,7 +1,7 @@
 /**
  * Agnostic core tests.
  *
- * Proves that `createApiServer` works WITHOUT any reference to the @ezstart
+ * Proves that `createBaseApiServer` works WITHOUT any reference to the @ezstart
  * monorepo (no `getApiUrl`, no `getAllowedOrigins`, no shared logger). These
  * tests guard against regressions where monorepo coupling leaks back into
  * the agnostic core.
@@ -9,13 +9,13 @@
 
 import request from 'supertest'
 import { describe, expect, it, vi } from 'vitest'
-import { createApiServer } from '../core/create-server.js'
+import { createBaseApiServer } from '../core/create-server.js'
 import { createAuthMiddleware } from '../core/middleware/auth.js'
 import { sendSuccess } from '../core/responses.js'
 
-describe('createApiServer (agnostic)', () => {
+describe('createBaseApiServer (agnostic)', () => {
   it('builds an Express app exposing health + root endpoints', async () => {
-    const { app, config, logger } = createApiServer({ port: 0, serviceName: 'myapp' })
+    const { app, config, logger } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
 
     expect(typeof app.use).toBe('function')
     expect(typeof app.get).toBe('function')
@@ -36,7 +36,7 @@ describe('createApiServer (agnostic)', () => {
   })
 
   it('allows wiring custom routes on the returned app', async () => {
-    const { app } = createApiServer({ port: 0, serviceName: 'myapp', cors: '*' })
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp', cors: '*' })
     app.get('/api/hello', (_req, res) => sendSuccess(res, { msg: 'hi' }))
 
     const res = await request(app).get('/api/hello')
@@ -45,7 +45,7 @@ describe('createApiServer (agnostic)', () => {
   })
 
   it('honors CORS origins array', async () => {
-    const { app } = createApiServer({
+    const { app } = createBaseApiServer({
       port: 0,
       serviceName: 'myapp',
       cors: { origins: ['https://myapp.example.com'] },
@@ -58,7 +58,7 @@ describe('createApiServer (agnostic)', () => {
   })
 
   it('applies a global rate limiter when rateLimit is configured', async () => {
-    const { app } = createApiServer({
+    const { app } = createBaseApiServer({
       port: 0,
       serviceName: 'myapp',
       rateLimit: { preset: 'standard', options: { max: 2, windowMs: 60_000, skipPaths: [] } },
@@ -79,7 +79,7 @@ describe('createApiServer (agnostic)', () => {
 
     const { requireAuth } = createAuthMiddleware({ verifyToken })
 
-    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
     app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
 
     const unauth = await request(app).get('/api/me')
@@ -106,7 +106,7 @@ describe('createApiServer (agnostic)', () => {
       cookieName: 'access_token',
     })
 
-    const { app } = createApiServer({ port: 0 })
+    const { app } = createBaseApiServer({ port: 0 })
     app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
 
     const ok = await request(app).get('/api/me').set('Cookie', 'access_token=cookie-tok')
@@ -121,7 +121,7 @@ describe('createApiServer (agnostic)', () => {
 
     const { requireAuth } = createAuthMiddleware({ verifyToken })
 
-    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
     app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
 
     const res = await request(app).get('/api/me').set('Authorization', 'Bearer invalid-jwt')
@@ -136,7 +136,7 @@ describe('createApiServer (agnostic)', () => {
 
     const { requireAuth } = createAuthMiddleware({ verifyToken })
 
-    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
     app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
 
     const res = await request(app).get('/api/me').set('Authorization', 'Bearer ')
@@ -151,7 +151,7 @@ describe('createApiServer (agnostic)', () => {
 
     const { requireAuth } = createAuthMiddleware({ verifyToken, cookieName: 'access_token' })
 
-    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
     app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
 
     const res = await request(app).get('/api/me')
@@ -166,7 +166,7 @@ describe('createApiServer (agnostic)', () => {
 
     const { requireAuth } = createAuthMiddleware({ verifyToken, cookieName: null })
 
-    const { app } = createApiServer({ port: 0, serviceName: 'myapp' })
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
     app.get('/api/me', requireAuth, (req, res) => res.json({ userId: req.userId }))
 
     const res = await request(app).get('/api/me').set('Cookie', 'access_token=tok')
@@ -179,6 +179,6 @@ describe('createApiServer (agnostic)', () => {
     // import, this test would still pass (vitest doesn't track every import),
     // but the dedicated grep in the self-audit covers that angle.
     const core = await import('../core/create-server.js')
-    expect(typeof core.createApiServer).toBe('function')
+    expect(typeof core.createBaseApiServer).toBe('function')
   })
 })

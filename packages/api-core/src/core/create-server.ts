@@ -1,10 +1,17 @@
 /**
- * `createApiServer` — factory that wires an Express app with the defaults
- * expected from an `@ezstart`-compatible API (CORS, JSON parser, trust proxy,
- * health/root endpoints, optional global rate limiting).
+ * `createBaseApiServer` — low-level agnostic factory that wires an Express
+ * app with the defaults expected from a production-grade SaaS API (CORS,
+ * JSON parser, trust proxy, health/root endpoints, optional global rate
+ * limiting).
+ *
+ * Zero coupling to the `@ezstart` monorepo — publishable on npm as-is.
  *
  * The returned object exposes the raw `app` so callers can attach their own
  * routers/middlewares before handing it off to `startServer`.
+ *
+ * Most monorepo consumers should use the higher-level `createApiServer`
+ * (in `../create-api-server.ts`) which pre-wires `@ezstart/config` and
+ * `@ezstart/logger`.
  */
 
 import express, { type Express } from 'express'
@@ -46,13 +53,13 @@ function resolveRateLimiter(preset: RateLimitPreset | undefined) {
 }
 
 /**
- * Build a fully-wired Express app.
+ * Build a fully-wired Express app from an explicit `ServerConfig`.
  *
  * @example
  * ```ts
- * import { createApiServer, startServer } from '@ezstart/api-core'
+ * import { createBaseApiServer, startServer } from '@ezstart/api-core'
  *
- * const { app, logger } = createApiServer({
+ * const { app, logger } = createBaseApiServer({
  *   port: 3000,
  *   serviceName: 'myapp',
  *   cors: { origins: ['https://myapp.example.com'] },
@@ -62,7 +69,7 @@ function resolveRateLimiter(preset: RateLimitPreset | undefined) {
  * app.get('/api/hello', (_req, res) => res.json({ ok: true }))
  * ```
  */
-export function createApiServer(config: ServerConfig): ApiServer {
+export function createBaseApiServer(config: ServerConfig): ApiServer {
   const logger: ServerLogger = config.logger ?? silentLogger
   const serviceName = config.serviceName ?? 'API'
 

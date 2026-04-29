@@ -1,7 +1,7 @@
 /**
  * Global error handler middleware.
  *
- * Registered as the LAST middleware in `createApiServer` (after every
+ * Registered as the LAST middleware in `createBaseApiServer` (after every
  * router and middleware). Handles all unhandled exceptions thrown by
  * upstream handlers/middlewares.
  *
@@ -49,9 +49,9 @@ export type ErrorHandlerConfig = {
  *
  * @example
  * ```ts
- * import { createApiServer, createErrorHandler } from '@ezstart/api-core'
+ * import { createBaseApiServer, createErrorHandler } from '@ezstart/api-core'
  *
- * const { app, logger } = createApiServer({ port: 3000 })
+ * const { app, logger } = createBaseApiServer({ port: 3000 })
  * app.use('/api/items', itemsRouter)
  * app.use(createErrorHandler({ logger }))
  * ```

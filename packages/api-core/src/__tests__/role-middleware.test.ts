@@ -4,11 +4,11 @@
 
 import request from 'supertest'
 import { describe, expect, it } from 'vitest'
-import { createApiServer } from '../core/create-server.js'
+import { createBaseApiServer } from '../core/create-server.js'
 import { createRoleMiddleware } from '../core/middleware/auth.js'
 
 function buildApp(user?: Record<string, unknown>) {
-  const { app } = createApiServer({ port: 0, serviceName: 'roletest' })
+  const { app } = createBaseApiServer({ port: 0, serviceName: 'roletest' })
   const { requireAdmin, requireRole } = createRoleMiddleware()
 
   // Simulate auth middleware by attaching user to req

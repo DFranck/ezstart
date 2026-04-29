@@ -3,7 +3,7 @@
  *
  * No coupling to `@ezstart/config`, `@ezstart/logger`, `mongoose`, `socket.io`
  * or any monorepo-specific concept. Consumers configure the server via
- * `createApiServer(config)`.
+ * `createBaseApiServer(config)`.
  *
  * Wire-level primitives (`ApiMeta`, `ErrorPayload`, `SuccessResponse`, ...)
  * live in `@ezstart/api-contracts` — the single source of truth shared with
@@ -102,7 +102,7 @@ export type CookieAuthAllowlistEntry = string | RegExp
 export type RateLimitPreset = 'standard' | 'strict' | 'very-strict' | 'moderate'
 
 /**
- * Configuration accepted by `createApiServer`.
+ * Configuration accepted by `createBaseApiServer`.
  */
 export type ServerConfig = {
   /** Port to bind when `startServer()` is invoked. Required. */
@@ -149,7 +149,7 @@ export type ServerConfig = {
    */
   cookieAuthAllowlist?: readonly CookieAuthAllowlistEntry[]
   /**
-   * When set, `createApiServer` returns an app with `createRateLimiter()`
+   * When set, `createBaseApiServer` returns an app with `createRateLimiter()`
    * already applied globally. Omit to apply rate limiting manually.
    */
   rateLimit?: {
@@ -205,7 +205,7 @@ export type ServerConfig = {
 }
 
 /**
- * Public surface of a server built with `createApiServer`.
+ * Public surface of a server built with `createBaseApiServer`.
  */
 export type ApiServer = {
   /** The underlying Express app — escape hatch when advanced wiring is needed. */

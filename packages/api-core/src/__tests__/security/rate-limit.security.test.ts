@@ -11,18 +11,18 @@ import express from 'express'
 import request from 'supertest'
 import { describe, expect, it } from 'vitest'
 import { createRateLimiter } from '../../core/middleware/rate-limit.js'
-import { createApiServer } from '../../core/create-server.js'
+import { createBaseApiServer } from '../../core/create-server.js'
 
 describe('Rate limiting — security', () => {
   // ─── Attack vector 10: X-Forwarded-For spoofing ───
   describe('X-Forwarded-For spoofing', () => {
     it('FINDING: trust proxy true + express-rate-limit validate.trustProxy=false allows XFF spoofing', async () => {
-      // createApiServer sets app.set('trust proxy', true)
+      // createBaseApiServer sets app.set('trust proxy', true)
       // The rate limiter has validate: { trustProxy: false } — this DISABLES
       // the express-rate-limit warning about trust proxy, but does NOT fix
       // the underlying issue. With trust proxy = true, Express trusts
       // X-Forwarded-For, so a client can rotate IPs to bypass rate limits.
-      const { app } = createApiServer({
+      const { app } = createBaseApiServer({
         port: 0,
         rateLimit: { preset: 'standard', options: { max: 2, windowMs: 60_000, skipPaths: [] } },
       })
