@@ -1936,9 +1936,6 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../auth-sdk
-      '@ezstart/config':
-        specifier: workspace:*
-        version: link:../config
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../logger
