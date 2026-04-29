@@ -162,4 +162,39 @@ export const vi: AuthDict = {
     promoCodeRateLimited: 'Vui lòng đợi một lát rồi thử lại',
     promoCodeChecking: 'Đang kiểm tra...',
   },
+  userMenu: {
+    // Sign-in / sign-out
+    signIn: 'Đăng nhập',
+    signOut: 'Đăng xuất',
+    signingOut: 'Đang đăng xuất…',
+    signOutSuccess: 'Bạn đã đăng xuất',
+    signOutError: 'Đăng xuất thất bại — vui lòng thử lại',
+    signOutAllDevices: 'Đăng xuất khỏi tất cả thiết bị',
+    signOutAllSuccess: 'Đã đăng xuất khỏi tất cả thiết bị',
+    signOutAllError: 'Đăng xuất khỏi tất cả thiết bị thất bại',
+    // Account / management
+    manageAccount: 'Quản lý tài khoản',
+    managePlan: 'Quản lý gói',
+    // Identity card badges (V2)
+    emailVerified: 'Đã xác minh',
+    emailUnverified: 'Chưa xác minh',
+    resendVerification: 'Gửi lại email xác minh',
+    verificationSent: 'Đã gửi email xác minh. Kiểm tra hộp thư của bạn.',
+    verifyError: 'Gửi email xác minh thất bại',
+    // Theme switcher
+    themeLabel: 'Giao diện',
+    themeLight: 'Sáng',
+    themeDark: 'Tối',
+    themeSystem: 'Hệ thống',
+    // Notifications (V2)
+    notifications: 'Thông báo',
+    notificationsBadgeLabel: 'thông báo chưa đọc',
+    // Help & resources (V2)
+    helpAndResources: 'Trợ giúp & tài nguyên',
+    helpCenter: 'Trung tâm trợ giúp',
+    keyboardShortcuts: 'Phím tắt',
+    keyboardShortcutsHint: '⌘K',
+    status: 'Trạng thái',
+    changelog: 'Có gì mới',
+  },
 }

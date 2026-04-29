@@ -165,4 +165,39 @@ export const fr: AuthDict = {
     promoCodeRateLimited: 'Veuillez patienter un instant et réessayer',
     promoCodeChecking: 'Vérification...',
   },
+  userMenu: {
+    // Sign-in / sign-out
+    signIn: 'Se connecter',
+    signOut: 'Se déconnecter',
+    signingOut: 'Déconnexion…',
+    signOutSuccess: 'Vous avez été déconnecté',
+    signOutError: 'Échec de la déconnexion — veuillez réessayer',
+    signOutAllDevices: 'Se déconnecter de tous les appareils',
+    signOutAllSuccess: 'Déconnecté de tous les appareils',
+    signOutAllError: 'Échec de la déconnexion de tous les appareils',
+    // Account / management
+    manageAccount: 'Gérer le compte',
+    managePlan: 'Gérer le plan',
+    // Identity card badges (V2)
+    emailVerified: 'Vérifié',
+    emailUnverified: 'Non vérifié',
+    resendVerification: "Renvoyer l'email de vérification",
+    verificationSent: 'Email de vérification envoyé. Vérifiez votre boîte de réception.',
+    verifyError: "Échec de l'envoi de l'email de vérification",
+    // Theme switcher
+    themeLabel: 'Thème',
+    themeLight: 'Clair',
+    themeDark: 'Sombre',
+    themeSystem: 'Système',
+    // Notifications (V2)
+    notifications: 'Notifications',
+    notificationsBadgeLabel: 'notifications non lues',
+    // Help & resources (V2)
+    helpAndResources: 'Aide et ressources',
+    helpCenter: "Centre d'aide",
+    keyboardShortcuts: 'Raccourcis clavier',
+    keyboardShortcutsHint: '⌘K',
+    status: 'Statut',
+    changelog: 'Nouveautés',
+  },
 }

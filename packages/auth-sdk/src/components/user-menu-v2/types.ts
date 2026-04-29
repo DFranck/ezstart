@@ -163,6 +163,15 @@ export interface UserMenuV2Props {
 
   /** Show the destructive "Sign out from all devices" row (default: false). */
   showSignOutAll?: boolean
+
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/dashboard` → `'fr'`).
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   * Mirrors the auto-i18n pattern used by `<SignInForm>` so consumers don't
+   * have to wire `texts` per app.
+   */
+  locale?: string
 }
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────

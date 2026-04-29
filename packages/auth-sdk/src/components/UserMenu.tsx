@@ -3,7 +3,9 @@
 import { Button, Div, Dropdown, type DropdownItem, Icon, Span } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 import { useAuth } from '../react/hooks.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { AccountModal } from './AccountModal.js'
 import { LoginButton, type LoginButtonProps } from './LoginButton.js'
 import { UserAvatar } from './UserAvatar.js'
@@ -101,21 +103,39 @@ export interface UserMenuProps {
    * (`'icon'` -> ghost icon button, `'extended'` -> default with text).
    */
   signInProps?: Partial<LoginButtonProps>
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/dashboard` → `'fr'`).
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   * Mirrors the auto-i18n pattern used by `<SignInForm>` so consumers don't
+   * have to wire `texts` per app.
+   */
+  locale?: AuthLocale | string
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
 
-const DEFAULT_TEXTS: UserMenuTexts = {
-  signIn: 'Sign in',
-  signOut: 'Sign out',
-  signingOut: 'Signing out…',
-  signOutSuccess: 'You have been signed out',
-  signOutError: 'Failed to sign out — please try again',
-  manageAccount: 'Manage account',
-  themeLabel: 'Theme',
-  themeLight: 'Light',
-  themeDark: 'Dark',
-  themeSystem: 'System',
+/**
+ * Build the localized default texts for `<UserMenu>` from the auth-sdk
+ * embedded dictionaries. Falls back to English when the locale is missing
+ * or not supported.
+ *
+ * @internal
+ */
+function getDefaultTexts(locale: AuthLocale | string | undefined): UserMenuTexts {
+  const dict = getAuthTexts(locale, 'userMenu')
+  return {
+    signIn: dict.signIn,
+    signOut: dict.signOut,
+    signingOut: dict.signingOut,
+    signOutSuccess: dict.signOutSuccess,
+    signOutError: dict.signOutError,
+    manageAccount: dict.manageAccount,
+    themeLabel: dict.themeLabel,
+    themeLight: dict.themeLight,
+    themeDark: dict.themeDark,
+    themeSystem: dict.themeSystem,
+  }
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -138,10 +158,13 @@ export function UserMenu({
   onLogout,
   hideSignIn = false,
   signInProps,
+  locale: propLocale,
 }: UserMenuProps) {
   const { user, isAuthenticated, login, logout, isLoggingIn, setLoggingIn, isLoggingOut } =
     useAuth()
-  const texts = { ...DEFAULT_TEXTS, ...textOverrides }
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
+  const texts: UserMenuTexts = { ...getDefaultTexts(locale), ...textOverrides }
   const [showAccount, setShowAccount] = useState(false)
 
   // Pro logout flow:

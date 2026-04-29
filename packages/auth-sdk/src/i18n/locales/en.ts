@@ -163,4 +163,39 @@ export const en = {
     promoCodeRateLimited: 'Please wait a moment and try again',
     promoCodeChecking: 'Checking...',
   },
+  userMenu: {
+    // Sign-in / sign-out
+    signIn: 'Sign in',
+    signOut: 'Sign out',
+    signingOut: 'Signing out…',
+    signOutSuccess: 'You have been signed out',
+    signOutError: 'Failed to sign out — please try again',
+    signOutAllDevices: 'Sign out from all devices',
+    signOutAllSuccess: 'Signed out from all devices',
+    signOutAllError: 'Failed to sign out from all devices',
+    // Account / management
+    manageAccount: 'Manage account',
+    managePlan: 'Manage plan',
+    // Identity card badges (V2)
+    emailVerified: 'Verified',
+    emailUnverified: 'Unverified',
+    resendVerification: 'Resend verification email',
+    verificationSent: 'Verification email sent. Check your inbox.',
+    verifyError: 'Failed to send verification email',
+    // Theme switcher
+    themeLabel: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSystem: 'System',
+    // Notifications (V2)
+    notifications: 'Notifications',
+    notificationsBadgeLabel: 'unread notifications',
+    // Help & resources (V2)
+    helpAndResources: 'Help & resources',
+    helpCenter: 'Help center',
+    keyboardShortcuts: 'Keyboard shortcuts',
+    keyboardShortcutsHint: '⌘K',
+    status: 'Status',
+    changelog: "What's new",
+  },
 } as const

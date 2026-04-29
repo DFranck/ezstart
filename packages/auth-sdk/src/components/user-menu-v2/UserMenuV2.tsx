@@ -3,12 +3,56 @@
 import { Badge, Div, Dropdown, type DropdownItem, Icon, Span } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { getAuthTexts, type AuthLocale } from '../../i18n/index.js'
 import { useAuth } from '../../react/hooks.js'
+import { useAuthNavigation } from '../../react/useAuthNavigation.js'
 import { LoginButton } from '../LoginButton.js'
 import { UserAvatar } from '../UserAvatar.js'
 import { AccountModalV2 } from './AccountModalV2.js'
-import { DEFAULT_USER_MENU_V2_TEXTS, type UserMenuV2Props } from './types.js'
+import { DEFAULT_USER_MENU_V2_TEXTS, type UserMenuV2Props, type UserMenuV2Texts } from './types.js'
 import { UserMenuV2Trigger } from './UserMenuV2Trigger.js'
+
+/**
+ * Build the localized default texts for `<UserMenuV2>` from the auth-sdk
+ * embedded dictionaries. Falls back to English when the locale is missing
+ * or not supported. Keys not exposed in the dictionary (e.g. `helpAndResources`,
+ * `managePlan`) keep their EN defaults from `DEFAULT_USER_MENU_V2_TEXTS`.
+ *
+ * @internal
+ */
+function getDefaultTextsV2(locale: AuthLocale | string | undefined): UserMenuV2Texts {
+  const dict = getAuthTexts(locale, 'userMenu')
+  return {
+    ...DEFAULT_USER_MENU_V2_TEXTS,
+    signIn: dict.signIn,
+    manageAccount: dict.manageAccount,
+    signOut: dict.signOut,
+    signingOut: dict.signingOut,
+    signOutSuccess: dict.signOutSuccess,
+    signOutError: dict.signOutError,
+    signOutAllDevices: dict.signOutAllDevices,
+    signOutAllSuccess: dict.signOutAllSuccess,
+    signOutAllError: dict.signOutAllError,
+    emailVerified: dict.emailVerified,
+    emailUnverified: dict.emailUnverified,
+    resendVerification: dict.resendVerification,
+    verificationSent: dict.verificationSent,
+    verifyError: dict.verifyError,
+    themeLabel: dict.themeLabel,
+    themeLight: dict.themeLight,
+    themeDark: dict.themeDark,
+    themeSystem: dict.themeSystem,
+    notifications: dict.notifications,
+    notificationsBadgeLabel: dict.notificationsBadgeLabel,
+    helpAndResources: dict.helpAndResources,
+    helpCenter: dict.helpCenter,
+    keyboardShortcuts: dict.keyboardShortcuts,
+    keyboardShortcutsHint: dict.keyboardShortcutsHint,
+    status: dict.status,
+    changelog: dict.changelog,
+    managePlan: dict.managePlan,
+  }
+}
 
 /**
  * V2 — SaaS-pro user dropdown (Stripe / Clerk / Vercel parity).
@@ -69,10 +113,13 @@ export function UserMenuV2({
   statusHref,
   changelogHref,
   showSignOutAll = false,
+  locale: propLocale,
 }: UserMenuV2Props) {
   const { user, isAuthenticated, login, logout, isLoggingIn, setLoggingIn, isLoggingOut } =
     useAuth()
-  const texts = { ...DEFAULT_USER_MENU_V2_TEXTS, ...textOverrides }
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? currentLocale ?? navigation.locale
+  const texts: UserMenuV2Texts = { ...getDefaultTextsV2(locale), ...textOverrides }
   const [showAccount, setShowAccount] = useState(false)
   const [signingOutAll, setSigningOutAll] = useState(false)
 
