@@ -152,8 +152,6 @@
       "next": "Suivant",
       "rows": "{count} ligne(s)",
       "pageOf": "Page {current} sur {total}",
-      "allApps": "Toutes les apps",
-      "filterByApp": "Filtrer par app",
       "save": "Enregistrer"
     },
     "users": {

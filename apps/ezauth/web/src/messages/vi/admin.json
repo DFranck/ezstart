@@ -152,8 +152,6 @@
       "next": "Tiếp",
       "rows": "{count} dòng",
       "pageOf": "Trang {current} / {total}",
-      "allApps": "Tất cả ứng dụng",
-      "filterByApp": "Lọc theo ứng dụng",
       "save": "Lưu"
     },
     "users": {
