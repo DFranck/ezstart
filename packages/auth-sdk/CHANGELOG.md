@@ -1,0 +1,31 @@
+# Changelog
+
+All notable changes to `@ezstart/auth-sdk` are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- Cards UI surface restored: `<SignInCard>`, `<SignUpCard>`, `<ForgotPasswordCard>`, `<ResetPasswordCard>`, `<VerifyEmailCard>` — embeddable Modal-shell variants with sticky header/footer and scrollable body, mobile-first.
+- `'server-only'` guard at the top of every file in `src/server/` (`index.ts`, `features.ts`, `get-server-auth.ts`, `get-server-api-keys.ts`, `get-server-application.ts`, `get-server-applications.ts`, `get-server-audit-log.ts`). Throws at build time if a client component accidentally imports a server helper, preventing cookie / token leaks to the browser bundle.
+- `server-only@^0.0.1` added to `dependencies` so the guard resolves cleanly for standalone publish + monorepo consumers.
+
+### Changed
+
+- `<AuthCardShell>` simplified — title row dropped, theme switcher hidden on mobile (visible `md+`).
+
+## [1.0.0] - 2026-04-29
+
+Initial public release. See git history for the full list of features and fixes
+that landed in 1.0 (registry generator, SSR backdrop placeholder, Cards →
+Modals refactor, self-contained Card components, SaaS-pro consolidation —
+SSR + Zustand factory + V2 menus + server helpers, dogfood pattern, white-label
+theme, dual-mode httpOnly cookies migration, RBAC server middleware,
+`<DevModeBanner>`, `<EZAuthDashboard>` with key scopes, OAuth callback
+hardening, and more).
+
+[Unreleased]: https://github.com/DFranck/ezstart/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/DFranck/ezstart/releases/tag/v1.0.0
