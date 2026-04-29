@@ -47,9 +47,7 @@ describe('Auth middleware — security', () => {
   describe('Bearer token edge cases', () => {
     it('rejects Bearer header with only spaces after "Bearer "', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', 'Bearer    ')
+      const res = await request(app).get('/protected').set('Authorization', 'Bearer    ')
       expect(res.status).toBe(401)
     })
 
@@ -64,9 +62,7 @@ describe('Auth middleware — security', () => {
 
     it('rejects "bearer" lowercase (case-sensitive prefix)', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', `bearer ${VALID_TOKEN}`)
+      const res = await request(app).get('/protected').set('Authorization', `bearer ${VALID_TOKEN}`)
       expect(res.status).toBe(401)
     })
 
@@ -85,33 +81,25 @@ describe('Auth middleware — security', () => {
 
     it('rejects "BearerX" prefix without space', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', `BearerX${VALID_TOKEN}`)
+      const res = await request(app).get('/protected').set('Authorization', `BearerX${VALID_TOKEN}`)
       expect(res.status).toBe(401)
     })
 
     it('rejects empty Authorization header', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', '')
+      const res = await request(app).get('/protected').set('Authorization', '')
       expect(res.status).toBe(401)
     })
 
     it('rejects Authorization header with just "Bearer"', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', 'Bearer')
+      const res = await request(app).get('/protected').set('Authorization', 'Bearer')
       expect(res.status).toBe(401)
     })
 
     it('rejects Authorization header "Bearer " (trailing space only)', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', 'Bearer ')
+      const res = await request(app).get('/protected').set('Authorization', 'Bearer ')
       expect(res.status).toBe(401)
     })
   })
@@ -120,9 +108,7 @@ describe('Auth middleware — security', () => {
   describe('Cookie extraction security', () => {
     it('rejects cookie with empty value', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Cookie', 'access_token=')
+      const res = await request(app).get('/protected').set('Cookie', 'access_token=')
       expect(res.status).toBe(401)
     })
 
@@ -137,9 +123,7 @@ describe('Auth middleware — security', () => {
 
     it('rejects cookie with SQL injection attempt', async () => {
       const app = buildApp()
-      const res = await request(app)
-        .get('/protected')
-        .set('Cookie', "access_token=' OR 1=1 --")
+      const res = await request(app).get('/protected').set('Cookie', "access_token=' OR 1=1 --")
       expect(res.status).toBe(401)
     })
 
@@ -173,7 +157,7 @@ describe('Auth middleware — security', () => {
   describe('Token verification (alg:none / wrong secret)', () => {
     it('delegates to verifier — alg:none tokens rejected by proper verifier', async () => {
       // The auth middleware delegates to the injected verifier.
-      // A proper verifier (like createEzstartAuth) pins algorithms.
+      // A proper verifier (like createApiAuth) pins algorithms.
       // We test that the middleware correctly propagates verifier rejection.
       const strictVerifier: TokenVerifier = () => null
       const app = buildApp(strictVerifier)
@@ -188,9 +172,7 @@ describe('Auth middleware — security', () => {
         throw new Error('JWT malformed')
       }
       const app = buildApp(throwingVerifier)
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', `Bearer ${VALID_TOKEN}`)
+      const res = await request(app).get('/protected').set('Authorization', `Bearer ${VALID_TOKEN}`)
       expect(res.status).toBe(401)
       expect(res.body.error.code).toBe('INVALID_TOKEN')
     })
@@ -200,9 +182,7 @@ describe('Auth middleware — security', () => {
         throw new Error('Internal crypto failure at /path/to/secret.key')
       }
       const app = buildApp(throwingVerifier)
-      const res = await request(app)
-        .get('/protected')
-        .set('Authorization', `Bearer ${VALID_TOKEN}`)
+      const res = await request(app).get('/protected').set('Authorization', `Bearer ${VALID_TOKEN}`)
       expect(res.status).toBe(401)
       // After fix: details field is omitted, no internal error message leaked
       const body = JSON.stringify(res.body)
@@ -236,9 +216,7 @@ describe('Auth middleware — security', () => {
         throw new Error('Boom')
       }
       const app = buildApp(throwingVerifier)
-      const res = await request(app)
-        .get('/optional')
-        .set('Authorization', `Bearer ${VALID_TOKEN}`)
+      const res = await request(app).get('/optional').set('Authorization', `Bearer ${VALID_TOKEN}`)
       expect(res.status).toBe(200)
       expect(res.body.userId).toBeNull()
     })
@@ -258,9 +236,7 @@ describe('Auth middleware — security', () => {
         res.json({ ok: true })
       })
 
-      const res = await request(app)
-        .get('/test')
-        .set('Authorization', `Bearer ${VALID_TOKEN}`)
+      const res = await request(app).get('/test').set('Authorization', `Bearer ${VALID_TOKEN}`)
       expect(res.status).toBe(200) // VALID_USER has globalRoles: ['admin']
     })
 
@@ -279,9 +255,7 @@ describe('Auth middleware — security', () => {
         res.json({ ok: true })
       })
 
-      const res = await request(app)
-        .get('/admin')
-        .set('Authorization', `Bearer ${VALID_TOKEN}`)
+      const res = await request(app).get('/admin').set('Authorization', `Bearer ${VALID_TOKEN}`)
       // appRoles check: Object.values(appRoles).flat().includes('admin') => true
       expect(res.status).toBe(200)
     })
@@ -299,9 +273,7 @@ describe('Auth middleware — security', () => {
         res.json({ ok: true })
       })
 
-      const res = await request(app)
-        .get('/admin')
-        .set('Authorization', `Bearer ${VALID_TOKEN}`)
+      const res = await request(app).get('/admin').set('Authorization', `Bearer ${VALID_TOKEN}`)
       expect(res.status).toBe(403)
     })
   })

@@ -1,5 +1,5 @@
 /**
- * Security tests for createEzstartAuth (monorepo JWT verification).
+ * Security tests for createApiAuth (monorepo JWT verification).
  *
  * Tests JWT-specific attacks:
  * - alg:none attack
@@ -14,7 +14,7 @@ import express, { type Request, type Response } from 'express'
 import request from 'supertest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// We need to set JWT_SECRET before importing createEzstartAuth
+// We need to set JWT_SECRET before importing createApiAuth
 const TEST_SECRET = 'test-secret-for-security-audit-32chars!'
 
 vi.mock('@ezstart/config/urls', () => ({
@@ -32,7 +32,7 @@ vi.mock('@ezstart/logger/server', () => ({
   },
 }))
 
-describe('createEzstartAuth — JWT security', () => {
+describe('createApiAuth — JWT security', () => {
   beforeEach(() => {
     process.env.JWT_SECRET = TEST_SECRET
   })
@@ -42,8 +42,8 @@ describe('createEzstartAuth — JWT security', () => {
   })
 
   async function buildApp() {
-    const { createEzstartAuth } = await import('../../ezstart-server.js')
-    const { authMiddleware } = createEzstartAuth(TEST_SECRET)
+    const { createApiAuth } = await import('../../create-api-server.js')
+    const { authMiddleware } = createApiAuth(TEST_SECRET)
     const app = express()
     app.get('/protected', authMiddleware, (req: Request, res: Response) => {
       res.json({ userId: req.userId, user: req.user })
@@ -58,36 +58,27 @@ describe('createEzstartAuth — JWT security', () => {
       { algorithm: 'HS256' }
     )
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     expect(res.status).toBe(200)
     expect(res.body.userId).toBe('507f1f77bcf86cd799439011')
   })
 
   it('rejects token signed with wrong secret', async () => {
-    const token = jwt.sign(
-      { userId: '507f1f77bcf86cd799439011' },
-      'wrong-secret',
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, 'wrong-secret', {
+      algorithm: 'HS256',
+    })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     expect(res.status).toBe(401)
   })
 
   it('rejects expired token', async () => {
-    const token = jwt.sign(
-      { userId: '507f1f77bcf86cd799439011' },
-      TEST_SECRET,
-      { algorithm: 'HS256', expiresIn: '-1s' }
-    )
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      expiresIn: '-1s',
+    })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     expect(res.status).toBe(401)
   })
 
@@ -100,115 +91,77 @@ describe('createEzstartAuth — JWT security', () => {
     const fakeToken = `${header}.${payload}.`
 
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${fakeToken}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${fakeToken}`)
     // jwt.verify with algorithms: ['HS256'] rejects alg:none
     expect(res.status).toBe(401)
   })
 
   it('rejects token with non-ObjectId userId', async () => {
-    const token = jwt.sign(
-      { userId: 'not-an-objectid' },
-      TEST_SECRET,
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ userId: 'not-an-objectid' }, TEST_SECRET, { algorithm: 'HS256' })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     // buildUserFromDecoded checks OBJECT_ID_REGEX — returns null for non-ObjectId
     expect(res.status).toBe(401)
   })
 
   it('rejects token with empty userId', async () => {
-    const token = jwt.sign(
-      { userId: '' },
-      TEST_SECRET,
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ userId: '' }, TEST_SECRET, { algorithm: 'HS256' })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     expect(res.status).toBe(401)
   })
 
   it('rejects token without userId/sub/id claim at all', async () => {
-    const token = jwt.sign(
-      { email: 'test@example.com', role: 'admin' },
-      TEST_SECRET,
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ email: 'test@example.com', role: 'admin' }, TEST_SECRET, {
+      algorithm: 'HS256',
+    })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     expect(res.status).toBe(401)
   })
 
   it('accepts token with "sub" claim as userId fallback', async () => {
-    const token = jwt.sign(
-      { sub: '507f1f77bcf86cd799439011' },
-      TEST_SECRET,
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ sub: '507f1f77bcf86cd799439011' }, TEST_SECRET, { algorithm: 'HS256' })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     expect(res.status).toBe(200)
     expect(res.body.userId).toBe('507f1f77bcf86cd799439011')
   })
 
   it('accepts token with "id" claim as userId fallback', async () => {
-    const token = jwt.sign(
-      { id: '507f1f77bcf86cd799439011' },
-      TEST_SECRET,
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ id: '507f1f77bcf86cd799439011' }, TEST_SECRET, { algorithm: 'HS256' })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${token}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
     expect(res.status).toBe(200)
     expect(res.body.userId).toBe('507f1f77bcf86cd799439011')
   })
 
   it('throws if JWT_SECRET is not set', async () => {
     delete process.env.JWT_SECRET
-    const { createEzstartAuth } = await import('../../ezstart-server.js')
-    expect(() => createEzstartAuth()).toThrow('JWT_SECRET environment variable is required')
+    const { createApiAuth } = await import('../../create-api-server.js')
+    expect(() => createApiAuth()).toThrow('JWT_SECRET environment variable is required')
   })
 
   it('extracts token from ezauth_token cookie', async () => {
-    const token = jwt.sign(
-      { userId: '507f1f77bcf86cd799439011' },
-      TEST_SECRET,
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+    })
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Cookie', `ezauth_token=${token}`)
+    const res = await request(app).get('/protected').set('Cookie', `ezauth_token=${token}`)
     expect(res.status).toBe(200)
     expect(res.body.userId).toBe('507f1f77bcf86cd799439011')
   })
 
   it('rejects malformed JWT (random string)', async () => {
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', 'Bearer thisisnotajwt')
+    const res = await request(app).get('/protected').set('Authorization', 'Bearer thisisnotajwt')
     expect(res.status).toBe(401)
   })
 
   it('rejects JWT with tampered payload', async () => {
-    const token = jwt.sign(
-      { userId: '507f1f77bcf86cd799439011' },
-      TEST_SECRET,
-      { algorithm: 'HS256' }
-    )
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+    })
     // Tamper with the payload
     const parts = token.split('.')
     const tamperedPayload = Buffer.from(
@@ -217,9 +170,7 @@ describe('createEzstartAuth — JWT security', () => {
     const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`
 
     const app = await buildApp()
-    const res = await request(app)
-      .get('/protected')
-      .set('Authorization', `Bearer ${tamperedToken}`)
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${tamperedToken}`)
     expect(res.status).toBe(401)
   })
 })

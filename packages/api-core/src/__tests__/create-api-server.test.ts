@@ -27,7 +27,7 @@ vi.mock('@ezstart/logger/server', () => ({
   logger: monorepoLoggerMock,
 }))
 
-describe('createEzstartServer (pre-configured wrapper)', () => {
+describe('createApiServer (pre-configured wrapper)', () => {
   beforeEach(() => {
     Object.values(monorepoLoggerMock).forEach(fn => fn.mockReset())
   })
@@ -37,32 +37,32 @@ describe('createEzstartServer (pre-configured wrapper)', () => {
   })
 
   it('resolves port from @ezstart/config and serviceName from the appName', async () => {
-    const { createEzstartServer } = await import('../ezstart-server.js')
+    const { createApiServer } = await import('../create-api-server.js')
 
-    const { config } = createEzstartServer('ezstart')
+    const { config } = createApiServer('ezstart')
     expect(config.port).toBe(9876)
     expect(config.serviceName).toBe('ezstart')
   })
 
   it('allows overriding the port explicitly', async () => {
-    const { createEzstartServer } = await import('../ezstart-server.js')
+    const { createApiServer } = await import('../create-api-server.js')
 
-    const { config } = createEzstartServer('ezstart', { port: 4321 })
+    const { config } = createApiServer('ezstart', { port: 4321 })
     expect(config.port).toBe(4321)
   })
 
   it('respects process.env.PORT when no explicit port is passed', async () => {
     process.env.PORT = '5555'
-    const { createEzstartServer } = await import('../ezstart-server.js')
+    const { createApiServer } = await import('../create-api-server.js')
 
-    const { config } = createEzstartServer('ezstart')
+    const { config } = createApiServer('ezstart')
     expect(config.port).toBe(5555)
   })
 
   it('wires CORS from getAllowedOrigins and serves health', async () => {
-    const { createEzstartServer } = await import('../ezstart-server.js')
+    const { createApiServer } = await import('../create-api-server.js')
 
-    const { app } = createEzstartServer('ezstart')
+    const { app } = createApiServer('ezstart')
     const res = await request(app).get('/health')
     expect(res.status).toBe(200)
     expect(res.body).toMatchObject({ status: 'ok', service: 'ezstart' })
