@@ -171,8 +171,6 @@ export default function AdminPage() {
         next: tDash('next'),
         rows: tDash.raw('rows') as string,
         pageOf: tDash.raw('pageOf') as string,
-        allApps: tDash('allApps'),
-        filterByApp: tDash('filterByApp'),
       },
       applications: {
         title: tApps('title'),
@@ -436,7 +434,6 @@ export default function AdminPage() {
                   key={activeSection}
                   defaultTab={activeSection}
                   texts={adminTexts}
-                  locale={locale}
                 />
               </Div>
             </DashboardContent>
