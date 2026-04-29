@@ -216,9 +216,11 @@ describe('DELETE /api/auth/account', () => {
     expect(res.body.data.scheduledDeletionAt).toBeTruthy()
     expect(res.body.data.gracePeriodDays).toBe(DELETION_GRACE_PERIOD_DAYS)
 
-    // Verify soft-delete marks set
+    // Verify soft-delete marks set. The model now auto-filters soft-deleted
+    // records by default — opt back in via `includeDeleted: true` to inspect
+    // the just-deleted user (cf. `models/auth-user.ts` injectSoftDeleteFilter).
     const AuthUser = await getAuthUserModel()
-    const updated = await AuthUser.findById(userId)
+    const updated = await AuthUser.findById(userId, null, { includeDeleted: true })
     expect(updated?.deletedAt).toBeInstanceOf(Date)
     expect(updated?.scheduledHardDeleteAt).toBeInstanceOf(Date)
     const delta =

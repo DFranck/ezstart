@@ -247,6 +247,60 @@ describe('Applications Routes', () => {
       const res = await request(app).get('/api/applications')
       expect(res.status).toBe(401)
     })
+
+    it('hides archived applications from the default listing (auto-filter)', async () => {
+      const user = await createUser({ email: 'arch@test.com', username: 'archuser' })
+      const token = generateAccessToken(user)
+
+      const Application = await getApplicationModel()
+      await Application.create({
+        slug: 'live-app',
+        name: 'Live',
+        ownerId: user._id!.toString(),
+      })
+      await Application.create({
+        slug: 'dead-app',
+        name: 'Dead',
+        ownerId: user._id!.toString(),
+        status: 'archived',
+      })
+
+      const res = await request(app)
+        .get('/api/applications')
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(200)
+      const slugs = res.body.data.map((a: { slug: string }) => a.slug)
+      expect(slugs).toContain('live-app')
+      expect(slugs).not.toContain('dead-app')
+    })
+
+    it('returns archived applications when ?includeArchived=true is passed', async () => {
+      const user = await createUser({ email: 'arch2@test.com', username: 'archuser2' })
+      const token = generateAccessToken(user)
+
+      const Application = await getApplicationModel()
+      await Application.create({
+        slug: 'live-app',
+        name: 'Live',
+        ownerId: user._id!.toString(),
+      })
+      await Application.create({
+        slug: 'dead-app',
+        name: 'Dead',
+        ownerId: user._id!.toString(),
+        status: 'archived',
+      })
+
+      const res = await request(app)
+        .get('/api/applications?includeArchived=true')
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(200)
+      const slugs = res.body.data.map((a: { slug: string }) => a.slug)
+      expect(slugs).toContain('live-app')
+      expect(slugs).toContain('dead-app')
+    })
   })
 
   describe('GET /api/applications/:id — fetch', () => {
@@ -437,7 +491,12 @@ describe('Applications Routes', () => {
       expect(res.body.data.message).toBe('Application archived')
       expect(res.body.data.revokedKeys).toBe(0)
 
-      const reloaded = await Application.findById(app1._id).lean()
+      // Archived docs are hidden by the model-level pre-find guard; opt
+      // back in via `includeArchived: true` so the assertion can verify
+      // the soft-delete actually flipped the status.
+      const reloaded = await Application.findOne({ _id: app1._id }, null, {
+        includeArchived: true,
+      }).lean()
       expect(reloaded?.status).toBe('archived')
     })
 

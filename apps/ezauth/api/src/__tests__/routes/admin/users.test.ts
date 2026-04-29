@@ -58,9 +58,18 @@ function createAdminTestApp() {
         query._id = currentUser._id
       }
 
+      // Mirror list-users.ts — `?includeDeleted=true` opts out of the
+      // model-level soft-delete pre-find guard.
+      const includeDeleted = req.query.includeDeleted === 'true'
+      const findOpts = includeDeleted ? { includeDeleted: true } : {}
+
       const [users, total] = await Promise.all([
-        AuthUser.find(query).select('-passwordHash').sort({ createdAt: -1 }).limit(20).lean(),
-        AuthUser.countDocuments(query),
+        AuthUser.find(query, null, findOpts)
+          .select('-passwordHash')
+          .sort({ createdAt: -1 })
+          .limit(20)
+          .lean(),
+        AuthUser.countDocuments(query, findOpts),
       ])
 
       const data = users.map(u => ({
@@ -284,6 +293,62 @@ describe('Admin Routes', () => {
 
         expect(res.status).toBe(200)
         expect(res.body.data).toEqual([])
+      })
+    })
+
+    describe('soft-delete filter (auto-injected by AuthUser pre-find guard)', () => {
+      it('hides soft-deleted users from the default listing', async () => {
+        const admin = await createAdminUser()
+        const token = generateAccessToken(admin)
+
+        const live = await createUser({ email: 'live@test.com', username: 'liveuser' })
+        const dead = await createUser({ email: 'dead@test.com', username: 'deaduser' })
+
+        // Soft-delete `dead` directly via update (skip the route to keep this
+        // focused on the model-level filter behavior).
+        const AuthUser = await getAuthUserModel()
+        await AuthUser.updateOne(
+          { _id: dead._id },
+          { $set: { deletedAt: new Date() } },
+          // No `includeDeleted: true` needed — at this point the user is not
+          // yet soft-deleted, so the auto-injected `{ deletedAt: null }`
+          // filter matches and the $set goes through to flip the field.
+          { timestamps: false }
+        )
+        void live
+
+        const res = await request(app).get('/admin/users').set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(200)
+        const emails = res.body.data.map((u: { email: string }) => u.email)
+        expect(emails).toContain('live@test.com')
+        expect(emails).not.toContain('dead@test.com')
+        // admin + live (NOT dead)
+        expect(res.body.meta.total).toBe(2)
+      })
+
+      it('returns soft-deleted users when ?includeDeleted=true is passed', async () => {
+        const admin = await createAdminUser()
+        const token = generateAccessToken(admin)
+
+        const dead = await createUser({ email: 'ghost@test.com', username: 'ghostuser' })
+        const AuthUser = await getAuthUserModel()
+        await AuthUser.updateOne(
+          { _id: dead._id },
+          { $set: { deletedAt: new Date() } },
+          // No `includeDeleted: true` needed — at this point the user is not
+          // yet soft-deleted, so the auto-injected `{ deletedAt: null }`
+          // filter matches and the $set goes through to flip the field.
+          { timestamps: false }
+        )
+
+        const res = await request(app)
+          .get('/admin/users?includeDeleted=true')
+          .set('Authorization', `Bearer ${token}`)
+
+        expect(res.status).toBe(200)
+        const emails = res.body.data.map((u: { email: string }) => u.email)
+        expect(emails).toContain('ghost@test.com')
       })
     })
   })
