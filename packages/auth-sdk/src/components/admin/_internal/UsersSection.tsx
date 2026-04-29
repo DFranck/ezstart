@@ -14,11 +14,6 @@ import {
   Div,
   Input,
   P,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Spinner,
 } from '@ezstart/ui/components'
 import { apiCall, type ApiMeta } from '@ezstart/api-sdk'
@@ -39,27 +34,6 @@ import {
 export interface AuthUsersSectionProps {
   className?: string
   texts?: Partial<AuthUsersSectionTexts>
-  /**
-   * Override the EZAuth API base URL used for `/admin/users` calls.
-   *
-   * Required for **federated admin** scenarios where the section is
-   * embedded in a hub app (e.g. `apps/ezstart/web/admin`) that consumes
-   * EZAuth cross-origin. When omitted, the API URL falls back to the
-   * surrounding `<AuthProvider>` configuration.
-   *
-   * @example 'https://auth.example.com'
-   */
-  apiUrl?: string
-  /**
-   * Override the bearer token used for admin API calls. Accepts a static
-   * string or a thunk returning a string (or Promise). When provided, this
-   * value is used instead of the `accessToken` from the local auth store —
-   * required for federated admin embeds where the hub app holds the
-   * platform-wide superadmin JWT and forwards it to each SDK dashboard.
-   */
-  authToken?: string | (() => string | Promise<string>)
-  /** BCP47 locale for date / time formatting (defaults to browser locale). */
-  locale?: string
 }
 
 /**
@@ -70,40 +44,19 @@ export interface AuthUsersSectionProps {
  * - app admin   -> users of owned Applications
  * - user        -> own account only
  *
+ * No client-side scope props — the API derives scope from the JWT carried
+ * by the surrounding `<AuthProvider>`. Federated admin is configured at
+ * the Provider level (apiUrl), not per-component.
+ *
  * @internal
  */
-export function AuthUsersSection({
-  className,
-  texts,
-  apiUrl: apiUrlOverride,
-  authToken: authTokenOverride,
-  locale,
-}: AuthUsersSectionProps) {
+export function AuthUsersSection({ className, texts }: AuthUsersSectionProps) {
   const t: Required<AuthUsersSectionTexts> = { ...DEFAULT_USERS_TEXTS, ...texts }
   const storeAccessToken = useAuthStore(state => state.accessToken)
 
-  /**
-   * Resolve the bearer token used for admin API calls.
-   *
-   * Federated admin (Tier 3 hub embedding multiple SDK dashboards) MUST
-   * pass an `authToken` override carrying the platform-wide superadmin
-   * JWT — the local `useAuthStore` only knows the hub's own session
-   * token, which is unrelated to the EZAuth admin endpoints.
-   */
   const getToken = useCallback(async (): Promise<string | null> => {
-    if (authTokenOverride !== undefined) {
-      const value =
-        typeof authTokenOverride === 'function' ? await authTokenOverride() : authTokenOverride
-      return value || null
-    }
     return storeAccessToken
-  }, [authTokenOverride, storeAccessToken])
-
-  // App filter — populated from the response set so the user can narrow
-  // down by app within the auto-derived scope (superadmin sees all apps,
-  // an app admin sees only the apps they own, etc.).
-  const [appFilter, setAppFilter] = useState<string>('')
-  const [availableApps, setAvailableApps] = useState<string[]>([])
+  }, [storeAccessToken])
 
   // Data state
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -148,7 +101,6 @@ export function AuthUsersSection({
         limit: String(ADMIN_PAGE_SIZE),
         offset: String(offset),
       }
-      if (appFilter) query.app = appFilter
       if (searchQuery) query.search = searchQuery
 
       const envelope = await apiCall<{ data: AdminUser[]; meta?: ApiMeta }>('/admin/users', {
@@ -157,29 +109,17 @@ export function AuthUsersSection({
         query,
         getToken,
         preserveEnvelope: true,
-        ...(apiUrlOverride ? { baseUrl: apiUrlOverride } : {}),
       })
       const fetchedUsers = envelope.data ?? []
       setUsers(fetchedUsers)
       const meta = envelope.meta as UsersApiMeta | undefined
       setTotal(meta?.total ?? 0)
-
-      const apps = new Set<string>()
-      for (const u of fetchedUsers) {
-        if (u.apps) {
-          for (const a of u.apps) apps.add(a)
-        }
-      }
-      setAvailableApps(prev => {
-        const merged = new Set([...prev, ...apps])
-        return [...merged].sort()
-      })
     } catch {
       // Error already logged by apiCall
     } finally {
       setLoading(false)
     }
-  }, [offset, searchQuery, appFilter, getToken, apiUrlOverride])
+  }, [offset, searchQuery, getToken])
 
   useEffect(() => {
     fetchUsers()
@@ -198,7 +138,6 @@ export function AuthUsersSection({
         appName: 'ezauth',
         method: 'DELETE',
         getToken,
-        ...(apiUrlOverride ? { baseUrl: apiUrlOverride } : {}),
       })
       toast.success(t.deleteSuccess)
       setDeleteDialog({ open: false, userId: null })
@@ -210,7 +149,7 @@ export function AuthUsersSection({
     } finally {
       setDeleting(false)
     }
-  }, [deleteDialog.userId, fetchUsers, t, getToken, apiUrlOverride])
+  }, [deleteDialog.userId, fetchUsers, t, getToken])
 
   const handleEditClick = useCallback((user: AdminUser) => {
     setEditUser(user)
@@ -235,7 +174,7 @@ export function AuthUsersSection({
           t={t}
         />
 
-        {/* Search + App filter */}
+        {/* Search */}
         <Div className="flex flex-col sm:flex-row gap-3">
           <Input
             placeholder={t.searchPlaceholder}
@@ -243,27 +182,6 @@ export function AuthUsersSection({
             onChange={e => handleSearchChange(e.target.value)}
             className="w-full sm:w-80"
           />
-          {availableApps.length > 0 && (
-            <Select
-              value={appFilter}
-              onValueChange={(val: string) => {
-                setAppFilter(val === '__all__' ? '' : val)
-                setOffset(0)
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder={t.filterByApp} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">{t.allApps}</SelectItem>
-                {availableApps.map(app => (
-                  <SelectItem key={app} value={app}>
-                    {app}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
         </Div>
 
         {/* Table */}
@@ -275,7 +193,6 @@ export function AuthUsersSection({
           t={t}
           onEdit={handleEditClick}
           onDelete={userId => setDeleteDialog({ open: true, userId })}
-          locale={locale}
         />
 
         {/* Server-side pagination */}
@@ -312,7 +229,6 @@ export function AuthUsersSection({
           onSaved={fetchUsers}
           t={t}
           getToken={getToken}
-          apiUrl={apiUrlOverride}
         />
 
         <AlertDialog

@@ -24,8 +24,6 @@ export interface EditRolesModalProps {
    * server will reject with 401.
    */
   getToken: () => string | Promise<string | null> | null
-  /** Optional base URL override forwarded to `apiCall` for federated admin embeds. */
-  apiUrl?: string
 }
 
 /**
@@ -41,7 +39,6 @@ export function EditRolesModal({
   onSaved,
   t,
   getToken,
-  apiUrl,
 }: EditRolesModalProps) {
   const [globalRoles, setGlobalRoles] = useState<string[]>([])
   const [appRoles, setAppRoles] = useState<Record<string, string[]>>({})
@@ -81,7 +78,6 @@ export function EditRolesModal({
         method: 'PATCH',
         body: { globalRoles, appRoles },
         getToken,
-        ...(apiUrl ? { baseUrl: apiUrl } : {}),
       })
       toast.success(t.editSuccess)
       onSaved()
@@ -93,7 +89,7 @@ export function EditRolesModal({
     } finally {
       setSaving(false)
     }
-  }, [user, globalRoles, appRoles, onSaved, onOpenChange, t, getToken, apiUrl])
+  }, [user, globalRoles, appRoles, onSaved, onOpenChange, t, getToken])
 
   if (!user) return null
 

@@ -96,10 +96,6 @@ export interface AuthUsersSectionTexts {
   /** "Page {current} of {total}" template. */
   pageOf?: string
 
-  // App filter (platform/first-party scope)
-  allApps?: string
-  filterByApp?: string
-
   // Soft-deletion (account lifecycle)
   /** Badge label shown on soft-deleted users. `{date}` placeholder = scheduled hard-delete date (locale-formatted). */
   softDeletedBadge?: string
@@ -162,8 +158,6 @@ export const DEFAULT_USERS_TEXTS: Required<AuthUsersSectionTexts> = {
   next: 'Next',
   rows: '{count} row(s)',
   pageOf: 'Page {current} of {total}',
-  allApps: 'All apps',
-  filterByApp: 'Filter by app',
   softDeletedBadge: 'Scheduled deletion: {date}',
   softDeletedTooltip:
     'This account is soft-deleted and will be permanently removed on the scheduled date.',

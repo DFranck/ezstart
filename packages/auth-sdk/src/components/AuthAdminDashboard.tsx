@@ -49,35 +49,11 @@ export interface AuthAdminDashboardProps {
    * Override default English labels. The object groups per-tab text overrides
    * (`overview`, `users`, `applications`, `settings`) plus tab labels.
    */
-  texts?: AuthAdminDashboardTexts
-  /**
-   * Override the EZAuth API base URL used for all admin calls.
-   *
-   * Required for **federated admin** scenarios where the dashboard is
-   * embedded in a hub app (e.g. `apps/ezstart/web/admin`) that consumes
-   * EZAuth cross-origin. When omitted, the API URL falls back to the
-   * surrounding `<AuthProvider>` configuration.
-   *
-   * @example 'https://auth.example.com'
-   */
-  apiUrl?: string
-  /**
-   * Override the bearer token used for admin API calls. Accepts a static
-   * string or a thunk returning a string (or Promise). When provided, this
-   * value is used instead of the `accessToken` from the local auth store —
-   * required for federated admin embeds where the hub app holds the
-   * platform-wide superadmin JWT and forwards it to each SDK dashboard.
-   */
-  authToken?: string | (() => string | Promise<string>)
+  texts?: Partial<AuthAdminDashboardTexts>
   /**
    * Initial active tab. Defaults to `'overview'`.
    */
   defaultTab?: 'overview' | 'users' | 'applications' | 'settings'
-  /**
-   * BCP47 locale used for date/time formatting in tables (created at,
-   * relative time, audit log, etc.). Defaults to the browser's locale.
-   */
-  locale?: string
 }
 
 const DEFAULT_TAB_TEXTS = {
@@ -86,6 +62,21 @@ const DEFAULT_TAB_TEXTS = {
   tabApplications: 'Applications',
   tabSettings: 'Settings',
 } as const
+
+export const defaultAuthAdminDashboardTexts: Required<
+  Pick<AuthAdminDashboardTexts, 'tabOverview' | 'tabUsers' | 'tabApplications' | 'tabSettings'>
+> & {
+  overview: Required<AuthOverviewSectionTexts>
+  users: Required<AuthUsersSectionTexts>
+  applications: Required<AuthApplicationsSectionTexts>
+  settings: AuthSettingsSectionTexts
+} = {
+  ...DEFAULT_TAB_TEXTS,
+  overview: DEFAULT_OVERVIEW_TEXTS,
+  users: DEFAULT_USERS_TEXTS,
+  applications: DEFAULT_APPLICATIONS_TEXTS,
+  settings: {},
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -104,17 +95,13 @@ const DEFAULT_TAB_TEXTS = {
  * Drop-in component for both the EZAuth web app's own `/admin` page and
  * the EZStart hub's federated admin (Tier 3 embedding cross-origin).
  *
+ * For federated admin (Tier 3 hub embeds the SDK against a remote EZAuth
+ * deployment), configure the surrounding `<AuthProvider>` with the target
+ * `apiUrl` — the dashboard reads it from context, no per-component prop.
+ *
  * @example Standalone (uses surrounding AuthProvider)
  * ```tsx
  * <AuthAdminDashboard />
- * ```
- *
- * @example Federated admin (Tier 3 hub embedding cross-origin)
- * ```tsx
- * <AuthAdminDashboard
- *   apiUrl="https://auth.example.com"
- *   authToken={() => superadminJwt}
- * />
  * ```
  *
  * @example With localized texts
@@ -131,10 +118,7 @@ const DEFAULT_TAB_TEXTS = {
 export function AuthAdminDashboard({
   className,
   texts,
-  apiUrl,
-  authToken,
   defaultTab = 'overview',
-  locale,
 }: AuthAdminDashboardProps) {
   const tabLabels = { ...DEFAULT_TAB_TEXTS, ...texts }
 
@@ -166,21 +150,16 @@ export function AuthAdminDashboard({
           <TabsTrigger value="settings">{tabLabels.tabSettings}</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="mt-4">
-          <AuthOverviewSection texts={overviewTexts} apiUrl={apiUrl} authToken={authToken} />
+          <AuthOverviewSection texts={overviewTexts} />
         </TabsContent>
         <TabsContent value="users" className="mt-4">
-          <AuthUsersSection
-            texts={usersTexts}
-            apiUrl={apiUrl}
-            authToken={authToken}
-            locale={locale}
-          />
+          <AuthUsersSection texts={usersTexts} />
         </TabsContent>
         <TabsContent value="applications" className="mt-4">
-          <AuthApplicationsSection texts={applicationsTexts} locale={locale} />
+          <AuthApplicationsSection texts={applicationsTexts} />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
-          <AuthSettingsSection texts={settingsTexts} apiUrl={apiUrl} authToken={authToken} />
+          <AuthSettingsSection texts={settingsTexts} />
         </TabsContent>
       </Tabs>
     </Div>

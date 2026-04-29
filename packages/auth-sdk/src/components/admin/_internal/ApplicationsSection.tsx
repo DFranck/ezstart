@@ -25,7 +25,6 @@ import { toast } from '@ezstart/ui/utils'
 import { useMyApplications, useRevokeApplication } from '../../../react/applications.js'
 import { CreateApplicationModal } from '../../applications/CreateApplicationModal.js'
 import { defaultApplicationsFlowTexts } from '../../applications/types.js'
-import type { CreateApplicationModalTexts } from '../../applications/types.js'
 import { AdminApplicationsStatsCards } from '../AdminApplicationsStatsCards.js'
 import { AdminApplicationsTable } from '../AdminApplicationsTable.js'
 import { EditApplicationModal } from '../EditApplicationModal.js'
@@ -42,13 +41,6 @@ export interface AuthApplicationsSectionProps {
   className?: string
   /** Partial texts override — falls back to English defaults. */
   texts?: Partial<AuthApplicationsSectionTexts>
-  /**
-   * Partial texts override for the create-application modal — falls back to
-   * the SDK English defaults exposed by `defaultApplicationsFlowTexts.create`.
-   */
-  createTexts?: Partial<CreateApplicationModalTexts>
-  /** BCP47 locale for date/time formatting. */
-  locale?: string
 }
 
 /**
@@ -61,12 +53,7 @@ export interface AuthApplicationsSectionProps {
  *
  * @internal
  */
-export function AuthApplicationsSection({
-  className,
-  texts,
-  createTexts,
-  locale,
-}: AuthApplicationsSectionProps) {
+export function AuthApplicationsSection({ className, texts }: AuthApplicationsSectionProps) {
   const t: Required<AuthApplicationsSectionTexts> = { ...DEFAULT_APPLICATIONS_TEXTS, ...texts }
 
   // Server query — always cross-tenant for the admin dashboard
@@ -220,7 +207,6 @@ export function AuthApplicationsSection({
             setEditOpen(true)
           }}
           onArchive={app => setArchiveDialog({ open: true, app })}
-          locale={locale}
         />
 
         {/* Pagination */}
@@ -259,7 +245,7 @@ export function AuthApplicationsSection({
             setCreateOpen(false)
             refetch()
           }}
-          texts={{ ...defaultApplicationsFlowTexts.create, ...createTexts }}
+          texts={defaultApplicationsFlowTexts.create}
         />
 
         <EditApplicationModal

@@ -87,18 +87,6 @@ export const DEFAULT_OVERVIEW_TEXTS: Required<AuthOverviewSectionTexts> = {
 export interface AuthOverviewSectionProps {
   className?: string
   texts?: Partial<AuthOverviewSectionTexts>
-  /**
-   * Override the EZAuth API base URL. Required for federated admin
-   * (Tier 3 hub embedding the SDK cross-origin).
-   */
-  apiUrl?: string
-  /**
-   * Bearer token override. Required when the local store token is not the
-   * platform-wide superadmin JWT.
-   */
-  authToken?: string | (() => string | Promise<string>)
-  /** Auto-refresh interval (ms). `0` = no polling (default). */
-  refetchIntervalMs?: number
 }
 
 // ---------------------------------------------------------------------------
@@ -138,19 +126,9 @@ function pctTrendVariant(value: number, threshold = 0): 'success' | 'default' {
  *
  * @internal
  */
-export function AuthOverviewSection({
-  className,
-  texts,
-  apiUrl,
-  authToken,
-  refetchIntervalMs = 0,
-}: AuthOverviewSectionProps) {
+export function AuthOverviewSection({ className, texts }: AuthOverviewSectionProps) {
   const t: Required<AuthOverviewSectionTexts> = { ...DEFAULT_OVERVIEW_TEXTS, ...texts }
-  const { data, isLoading, isError, refetch } = useAdminAnalyticsOverview({
-    apiUrl,
-    authToken,
-    refetchIntervalMs,
-  })
+  const { data, isLoading, isError, refetch } = useAdminAnalyticsOverview()
 
   return (
     <Div className={className}>

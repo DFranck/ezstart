@@ -92,10 +92,6 @@ export interface AuthSettingsSectionTexts {
 }
 
 export interface AuthSettingsSectionProps {
-  /** Override the EZAuth API base URL (federated admin embeds). */
-  apiUrl?: string
-  /** Bearer token (federated embeds where the hub holds the platform-wide JWT). */
-  authToken?: string | (() => string | Promise<string>)
   /** Override default English labels. */
   texts?: AuthSettingsSectionTexts
   className?: string
@@ -180,17 +176,12 @@ function fromDatetimeLocal(value: string): string | null {
  *
  * @internal
  */
-export function AuthSettingsSection({
-  apiUrl,
-  authToken,
-  texts,
-  className,
-}: AuthSettingsSectionProps) {
+export function AuthSettingsSection({ texts, className }: AuthSettingsSectionProps) {
   return (
     <Div className={className}>
       <Div className="space-y-6">
-        <MaintenanceCard apiUrl={apiUrl} authToken={authToken} texts={texts?.maintenance} />
-        <FeatureFlagsCard apiUrl={apiUrl} authToken={authToken} texts={texts?.featureFlags} />
+        <MaintenanceCard texts={texts?.maintenance} />
+        <FeatureFlagsCard texts={texts?.featureFlags} />
       </Div>
     </Div>
   )
@@ -201,17 +192,13 @@ export function AuthSettingsSection({
 // ---------------------------------------------------------------------------
 
 interface FeatureFlagsCardProps {
-  apiUrl?: string
-  authToken?: string | (() => string | Promise<string>)
   texts?: Partial<AuthSettingsSectionFeatureFlagsTexts>
 }
 
-function FeatureFlagsCard({ apiUrl, authToken, texts }: FeatureFlagsCardProps) {
+function FeatureFlagsCard({ texts }: FeatureFlagsCardProps) {
   const t: AuthSettingsSectionFeatureFlagsTexts = { ...DEFAULT_FEATURE_FLAGS_TEXTS, ...texts }
-  const flagsQuery = useFeatureFlags({ apiUrl, authToken })
+  const flagsQuery = useFeatureFlags()
   const updateMutation = useUpdateFeatureFlag({
-    apiUrl,
-    authToken,
     onSuccess: () => toast.success(t.toggleSuccess),
     onError: () => toast.error(t.toggleError),
   })
@@ -348,17 +335,13 @@ function FeatureFlagsCard({ apiUrl, authToken, texts }: FeatureFlagsCardProps) {
 // ---------------------------------------------------------------------------
 
 interface MaintenanceCardProps {
-  apiUrl?: string
-  authToken?: string | (() => string | Promise<string>)
   texts?: Partial<AuthSettingsSectionMaintenanceTexts>
 }
 
-function MaintenanceCard({ apiUrl, authToken, texts }: MaintenanceCardProps) {
+function MaintenanceCard({ texts }: MaintenanceCardProps) {
   const t: AuthSettingsSectionMaintenanceTexts = { ...DEFAULT_MAINTENANCE_TEXTS, ...texts }
-  const query = useMaintenanceMode({ apiUrl, authToken })
+  const query = useMaintenanceMode()
   const mutation = useUpdateMaintenanceMode({
-    apiUrl,
-    authToken,
     onSuccess: () => toast.success(t.saveSuccess),
     onError: () => toast.error(t.saveError),
   })
