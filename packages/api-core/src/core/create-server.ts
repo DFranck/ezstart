@@ -10,6 +10,7 @@
 import express, { type Express } from 'express'
 import helmet from 'helmet'
 import './express-aug.js'
+import { createDeepHealthHandler } from './health.js'
 import {
   createCorsMiddleware,
   createPermissiveCorsMiddleware,
@@ -27,6 +28,7 @@ import type { ApiServer, RateLimitPreset, ServerConfig, ServerLogger } from './t
 
 const HEALTH_PATH_DEFAULT = '/health'
 const HEALTH_PATH_LEGACY = '/api/health'
+const HEALTH_DEEP_PATH_DEFAULT = '/health/deep'
 const ROOT_PATH_DEFAULT = '/'
 
 function resolveRateLimiter(preset: RateLimitPreset | undefined) {
@@ -165,6 +167,21 @@ export function createApiServer(config: ServerConfig): ApiServer {
   if (!config.healthPath && healthPath !== HEALTH_PATH_LEGACY) {
     app.get(HEALTH_PATH_LEGACY, healthHandler)
   }
+
+  // Deep health (readiness probe) — pings the DB connector + every
+  // caller-supplied check in parallel. 200 on `ok | degraded`, 503 on `down`.
+  // Mounted unconditionally: when no DB and no checks are configured, the
+  // endpoint just returns the uptime / version snapshot — still useful for
+  // status-page polling. See `.claude/rules/standard-saas-observability.md` §4.
+  const deepHealthPath = config.deepHealthPath ?? HEALTH_DEEP_PATH_DEFAULT
+  app.get(
+    deepHealthPath,
+    createDeepHealthHandler({
+      serviceName,
+      db: config.db,
+      checks: config.deepHealthChecks,
+    })
+  )
 
   app.get(rootPath, (_req, res) => {
     res.status(200).json({

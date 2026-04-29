@@ -167,6 +167,31 @@ export type ServerConfig = {
   rawBodyRoutes?: string[]
   /** Path for the health endpoint. Default `/health` (also mounts `/api/health` for compat). */
   healthPath?: string
+  /** Path for the deep health endpoint. Default `/health/deep`. */
+  deepHealthPath?: string
+  /**
+   * Custom checks executed when `/health/deep` is hit (in addition to the
+   * built-in DB ping derived from {@link ServerConfig.db}, when present).
+   *
+   * Each check is invoked in parallel with a 5s timeout. A check that
+   * throws or returns `{ status: 'down' }` flips the overall response to
+   * 503; a check that returns `{ status: 'degraded' }` flips it to 200
+   * with `status: 'degraded'`.
+   *
+   * @example
+   * ```ts
+   * deepHealthChecks: [
+   *   {
+   *     name: 'stripe',
+   *     async check() {
+   *       await fetch('https://api.stripe.com/v1/balance', { ... })
+   *       return { status: 'ok' }
+   *     },
+   *   },
+   * ]
+   * ```
+   */
+  deepHealthChecks?: import('./health.js').HealthCheck[]
   /** Path for the root status endpoint. Default `/`. */
   rootPath?: string
   /** Logger override. Default is silent (no-op). */

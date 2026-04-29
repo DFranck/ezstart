@@ -25,6 +25,19 @@ export {
   type SendErrorOptions,
 } from './core/responses.js'
 
+// Health checks (`/health/deep` readiness probe)
+export {
+  aggregateStatus,
+  createDbHealthCheck,
+  createDeepHealthHandler,
+  runHealthCheck,
+  type DeepHealthHandlerConfig,
+  type DeepHealthSnapshot,
+  type HealthCheck,
+  type HealthCheckResult,
+  type HealthCheckStatus,
+} from './core/health.js'
+
 // Middlewares
 export {
   createCorsMiddleware,
