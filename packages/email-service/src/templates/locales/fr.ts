@@ -25,6 +25,18 @@ export const fr: LocaleDict = {
       'Vous pouvez aussi vous connecter sans mot de passe pour l’instant, mais nous vous recommandons d’en définir un. Ce lien expire dans 24 heures.',
     promoMessage: '🎁 Le code promo {promoCode} a été appliqué à votre compte !',
   },
+  accountDeletion: {
+    subject: 'Votre compte {appName} est planifié pour suppression',
+    heading: 'Suppression de compte planifiée',
+    intro:
+      'Bonjour {username}, nous avons reçu une demande de suppression de votre compte {appName} ({email}).',
+    schedule: 'Votre compte sera définitivement supprimé le {date} (dans {gracePeriodDays} jours).',
+    grace:
+      'Si vous changez d’avis durant cette période, il suffit de vous reconnecter et votre compte sera restauré.',
+    ifNotYou:
+      'Si vous n’êtes pas à l’origine de cette demande, contactez immédiatement notre support.',
+    signature: '— L’équipe {appName}',
+  },
   common: {
     footerRights: '© {year} {appName}. Tous droits réservés.',
     footerNoreply: 'Ceci est un message automatique — merci de ne pas y répondre.',

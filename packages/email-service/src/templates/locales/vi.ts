@@ -25,6 +25,18 @@ export const vi: LocaleDict = {
       'Bạn cũng có thể đăng nhập mà không cần mật khẩu ngay bây giờ, nhưng chúng tôi khuyên bạn nên đặt một mật khẩu. Liên kết này sẽ hết hạn sau 24 giờ.',
     promoMessage: '🎁 Mã ưu đãi {promoCode} đã được áp dụng vào tài khoản của bạn!',
   },
+  accountDeletion: {
+    subject: 'Tài khoản {appName} của bạn được lên lịch xóa',
+    heading: 'Đã lên lịch xóa tài khoản',
+    intro:
+      'Chào {username}, chúng tôi đã nhận được yêu cầu xóa tài khoản {appName} ({email}) của bạn.',
+    schedule: 'Tài khoản của bạn sẽ bị xóa vĩnh viễn vào {date} (sau {gracePeriodDays} ngày).',
+    grace:
+      'Nếu bạn đổi ý trong khoảng thời gian này, chỉ cần đăng nhập lại và tài khoản của bạn sẽ được khôi phục.',
+    ifNotYou:
+      'Nếu bạn không yêu cầu điều này, vui lòng liên hệ ngay với bộ phận hỗ trợ của chúng tôi.',
+    signature: '— Đội ngũ {appName}',
+  },
   common: {
     footerRights: '© {year} {appName}. Bảo lưu mọi quyền.',
     footerNoreply: 'Đây là email tự động — vui lòng không trả lời.',

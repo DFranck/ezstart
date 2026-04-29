@@ -21,6 +21,15 @@ export interface LocaleDict {
     outro: string
     promoMessage: string
   }
+  accountDeletion: {
+    subject: string
+    heading: string
+    intro: string
+    schedule: string
+    grace: string
+    ifNotYou: string
+    signature: string
+  }
   common: {
     footerRights: string
     footerNoreply: string
@@ -51,6 +60,17 @@ export const en: LocaleDict = {
     outro:
       'You can also log in without a password for now, but we recommend setting one. This link expires in 24 hours.',
     promoMessage: '🎁 Promo code {promoCode} has been applied to your account!',
+  },
+  accountDeletion: {
+    subject: 'Your {appName} account is scheduled for deletion',
+    heading: 'Account deletion scheduled',
+    intro: 'Hi {username}, we received a request to delete your {appName} account ({email}).',
+    schedule:
+      'Your account is now scheduled for permanent deletion on {date} ({gracePeriodDays} days from now).',
+    grace:
+      'If you change your mind during this period, simply sign in again and your account will be restored.',
+    ifNotYou: "If you didn't request this, please contact our support team immediately.",
+    signature: '— The {appName} team',
   },
   common: {
     footerRights: '© {year} {appName}. All rights reserved.',
