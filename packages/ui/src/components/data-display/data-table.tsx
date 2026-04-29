@@ -148,6 +148,20 @@ interface DataTableProps<TData, TValue> {
   maxHeight?: string
   /** Make the header sticky when scrolling (requires maxHeight) */
   stickyHeader?: boolean
+  /**
+   * Sticky-column responsive strategy. When enabled, the first and last
+   * columns stay pinned while the middle columns scroll horizontally.
+   * Combined with the existing `overflow-x-auto` wrapper this keeps the
+   * primary identifier (email/name/slug) and the row actions always
+   * visible on narrow viewports — admin DataTables otherwise clip the
+   * Email + Actions columns under `lg` (1024px) breakpoints.
+   *
+   * - `'none'` (default) — no sticky columns, identical to legacy behaviour.
+   * - `'lg-down'` — sticky below `lg` breakpoint only (recommended for
+   *   admin tables that already fit fine on desktop).
+   * - `'always'` — sticky on every viewport (data-dense tables).
+   */
+  stickyColumns?: 'none' | 'lg-down' | 'always'
   /** Translatable strings for pagination + empty state. Defaults are English. */
   texts?: DataTablePaginationTexts & { empty?: string }
 }
@@ -165,6 +179,7 @@ function DataTable<TData, TValue>({
   density,
   maxHeight,
   stickyHeader,
+  stickyColumns = 'none',
   texts,
 }: DataTableProps<TData, TValue>) {
   const inherited = useDesignTokens()
@@ -183,6 +198,29 @@ function DataTable<TData, TValue>({
 
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? [])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  // ─── Sticky-column helpers ───────────────────────────────────────────────
+  // Strategy: position: sticky on the first and last column. Each sticky
+  // cell needs its own opaque background (row background doesn't propagate
+  // to sticky cells), plus a subtle shadow that indicates the column floats
+  // above the horizontally-scrolling middle content. Body cells default to
+  // `bg-card`; header cells inherit `bg-muted` to match `<TableHeader>`.
+  // The `lg-down` variant only activates the sticky behaviour below the lg
+  // breakpoint (1024px) — desktop layouts keep the legacy flat table.
+  const stickyEnabled = stickyColumns !== 'none'
+  const stickyPrefix = stickyColumns === 'lg-down' ? 'lg:static lg:shadow-none ' : ''
+  const stickyLeftClass = stickyEnabled
+    ? `${stickyPrefix}sticky left-0 z-10 bg-card shadow-[1px_0_0_0_var(--border)]`
+    : ''
+  const stickyRightClass = stickyEnabled
+    ? `${stickyPrefix}sticky right-0 z-10 bg-card shadow-[-1px_0_0_0_var(--border)]`
+    : ''
+  const stickyHeadLeftClass = stickyEnabled
+    ? `${stickyPrefix}sticky left-0 z-20 bg-muted shadow-[1px_0_0_0_var(--border)]`
+    : ''
+  const stickyHeadRightClass = stickyEnabled
+    ? `${stickyPrefix}sticky right-0 z-20 bg-muted shadow-[-1px_0_0_0_var(--border)]`
+    : ''
 
   const table = useReactTable({
     data,
@@ -222,35 +260,54 @@ function DataTable<TData, TValue>({
         >
           <Table size={mappedDensity as 'compact' | 'default' | 'comfortable'}>
             <TableHeader className={stickyHeader ? 'sticky top-0 z-10 bg-background' : undefined}>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : header.column.getCanSort() &&
-                        typeof header.column.columnDef.header === 'string' ? (
-                        <DataTableColumnHeader
-                          header={header}
-                          title={header.column.columnDef.header}
-                        />
-                      ) : (
-                        flexRender(header.column.columnDef.header, header.getContext())
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
+              {table.getHeaderGroups().map(headerGroup => {
+                const lastIdx = headerGroup.headers.length - 1
+                return (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header, idx) => {
+                      const stickyClass =
+                        idx === 0
+                          ? stickyHeadLeftClass
+                          : idx === lastIdx
+                            ? stickyHeadRightClass
+                            : ''
+                      return (
+                        <TableHead key={header.id} className={stickyClass || undefined}>
+                          {header.isPlaceholder ? null : header.column.getCanSort() &&
+                            typeof header.column.columnDef.header === 'string' ? (
+                            <DataTableColumnHeader
+                              header={header}
+                              title={header.column.columnDef.header}
+                            />
+                          ) : (
+                            flexRender(header.column.columnDef.header, header.getContext())
+                          )}
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                )
+              })}
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map(row => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                table.getRowModel().rows.map(row => {
+                  const cells = row.getVisibleCells()
+                  const lastIdx = cells.length - 1
+                  return (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                      {cells.map((cell, idx) => {
+                        const stickyClass =
+                          idx === 0 ? stickyLeftClass : idx === lastIdx ? stickyRightClass : ''
+                        return (
+                          <TableCell key={cell.id} className={stickyClass || undefined}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        )
+                      })}
+                    </TableRow>
+                  )
+                })
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">

@@ -234,6 +234,7 @@ export function AdminUsersTable({
         columns={columns}
         data={users}
         pageSize={ADMIN_PAGE_SIZE}
+        stickyColumns="lg-down"
         texts={{
           previous: t.previous,
           next: t.next,

@@ -130,6 +130,7 @@ export function ApiKeysTable({
       data={keys}
       pageSize={10}
       density="compact"
+      stickyColumns="lg-down"
       texts={{
         previous: texts.paginationPrevious,
         next: texts.paginationNext,

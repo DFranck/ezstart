@@ -175,6 +175,7 @@ export function AdminApplicationsTable({
         columns={columns}
         data={applications}
         pageSize={ADMIN_APPLICATIONS_PAGE_SIZE}
+        stickyColumns="lg-down"
         texts={{
           previous: t.previous,
           next: t.next,
