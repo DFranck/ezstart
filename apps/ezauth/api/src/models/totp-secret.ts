@@ -6,6 +6,14 @@ export interface TotpSecretDocument extends Document {
   secret: string // Encrypted TOTP secret
   isEnabled: boolean
   backupCodes: string[] // Hashed backup codes
+  /**
+   * Last successfully consumed TOTP timestep (Unix seconds / period).
+   * Stored to enforce RFC 6238 §5.2 — a TOTP code MUST NOT be accepted
+   * twice. We reject any new attempt whose computed step is `<=` this
+   * value. `null` means no TOTP code has been validated yet (fresh
+   * setup).
+   */
+  lastUsedTotpStep: number | null
   createdAt: Date
   updatedAt: Date
 }
@@ -31,6 +39,10 @@ const totpSecretSchema = new Schema<TotpSecretDocument>(
         type: String,
       },
     ],
+    lastUsedTotpStep: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true,

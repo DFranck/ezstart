@@ -9,11 +9,19 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { TotpService } from '../../../services/totp.service.js'
-import { AuthService } from '../../../services/auth.service.js'
+import { AuthService, issueSession } from '../../../services/auth.service.js'
+import { AuditLogService } from '../../../services/audit-log.service.js'
+import { getAuthUserModel } from '../../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../../../config/env.js'
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  buildAuthCookieOptions,
+  buildRefreshCookieOptions,
+} from '../../../config/cookie.js'
 
 export const twoFactorValidateRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -29,7 +37,17 @@ const validateSchema = z.object({
   code: z.string().min(6, 'Code must be at least 6 characters').describe('TOTP verification code'),
 })
 
-// POST /auth/2fa/validate — accepts tempToken + TOTP code, returns real auth code
+interface TwoFactorPendingPayload {
+  userId: string
+  app: string
+  redirect_uri?: string
+  type: string
+  mode?: string
+}
+
+// POST /auth/2fa/validate — accepts tempToken + TOTP code (or backup code)
+// Returns either an auth code (default mode) OR sets httpOnly cookies
+// (`mode: 'cookie'` — flow originated from /login-cookie).
 const validateController = async (req: Request, res: Response) => {
   try {
     const parsed = validateSchema.safeParse(req.body)
@@ -40,9 +58,11 @@ const validateController = async (req: Request, res: Response) => {
     const { tempToken, code } = parsed.data
 
     // Verify the temp token
-    let payload: { userId: string; app: string; redirect_uri?: string; type: string; mode?: string }
+    let payload: TwoFactorPendingPayload
     try {
-      payload = jwt.verify(tempToken, JWT_SECRET, { algorithms: ['HS256'] }) as typeof payload
+      payload = jwt.verify(tempToken, JWT_SECRET, {
+        algorithms: ['HS256'],
+      }) as TwoFactorPendingPayload
     } catch {
       return sendError(res, 'Invalid or expired temporary token', 401)
     }
@@ -51,18 +71,68 @@ const validateController = async (req: Request, res: Response) => {
       return sendError(res, 'Invalid token type', 401)
     }
 
-    // Reject cookie-mode tokens on this endpoint (they must use /login-cookie/2fa)
-    if (payload.mode === 'cookie') {
-      return sendError(res, 'This token must be validated via the cookie login flow', 400)
-    }
-
-    // Validate the TOTP code
-    const isValid = await TotpService.validateLogin(payload.userId, code)
-    if (!isValid) {
+    // Validate the TOTP / backup code
+    const result = await TotpService.validateLogin(payload.userId, code)
+    if (!result.valid) {
+      // Audit log the failure (fire-and-forget). Useful for forensics +
+      // future per-user 2FA brute-force lockout.
+      void AuditLogService.createFromRequest(req, {
+        userId: payload.userId,
+        action: '2fa_login_failed',
+        appName: payload.app,
+      })
       return sendError(res, 'Invalid 2FA code', 401)
     }
 
-    // Generate the real auth code (same as normal login)
+    // Audit log success — distinguish TOTP from backup code consumption
+    // so admins can see when users fall back to recovery codes.
+    void AuditLogService.createFromRequest(req, {
+      userId: payload.userId,
+      action: '2fa_login_success',
+      appName: payload.app,
+      metadata: { method: result.method },
+    })
+    if (result.method === 'backup') {
+      void AuditLogService.createFromRequest(req, {
+        userId: payload.userId,
+        action: 'backup_code_used',
+        appName: payload.app,
+      })
+    }
+
+    // Cookie-mode flow — finalize the session inline (set httpOnly
+    // cookies) instead of returning an auth code. The cookie login
+    // route does not exchange auth codes, so we must produce the same
+    // response shape it would have on a no-2FA login.
+    if (payload.mode === 'cookie') {
+      const AuthUserModel = await getAuthUserModel()
+      const user = await AuthUserModel.findById(payload.userId)
+      if (!user) {
+        return sendError(res, 'User not found', 404)
+      }
+
+      // Grant access to the requesting app (parity with non-2FA cookie login)
+      if (!user.apps.includes(payload.app)) {
+        user.apps.push(payload.app)
+        await user.save()
+      }
+
+      const session = await issueSession(user, {
+        userAgent: req.headers['user-agent'],
+        ip: req.ip,
+      })
+
+      res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions())
+      res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions())
+
+      return sendSuccess(res, {
+        user: session.user,
+        refreshToken: session.refreshToken,
+        message: 'Login successful',
+      })
+    }
+
+    // Auth-code mode — return the same shape /login does
     const authCode = await AuthService.generateAuthCodePublic(
       payload.userId,
       payload.app,

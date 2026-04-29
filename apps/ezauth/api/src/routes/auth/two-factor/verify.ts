@@ -3,6 +3,7 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  createStrictRateLimiter,
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
@@ -16,6 +17,10 @@ import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/aut
 export const twoFactorVerifyRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(twoFactorVerifyRegistry, router)
+
+// Rate-limit verify to prevent brute-forcing the TOTP setup code
+// against an authenticated session (auth middleware gates access).
+const verifyRateLimiter = createStrictRateLimiter()
 
 const verifyCodeSchema = z.object({
   code: z.string().length(6, 'Code must be 6 digits').describe('TOTP verification code'),
@@ -47,7 +52,7 @@ const verifyController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/2fa/verify', authMiddleware, verifyController, {
+docRouter.post('/2fa/verify', verifyRateLimiter, authMiddleware, verifyController, {
   summary: 'Verify TOTP code to complete 2FA setup',
   tags: ['Two-Factor Authentication'],
   bodySchema: verifyCodeSchema,

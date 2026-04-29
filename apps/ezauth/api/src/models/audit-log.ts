@@ -16,10 +16,14 @@ export type AuditLogAction =
   | 'oauth_unlink'
   | '2fa_enabled'
   | '2fa_disabled'
+  | '2fa_login_success'
+  | '2fa_login_failed'
+  | 'backup_code_used'
   | 'session_revoked'
   | 'api_key_created'
   | 'api_key_revoked'
   | 'profile_updated'
+  | 'account_locked_brute_force'
 
 /**
  * Tuple form for runtime validation (Zod / Mongoose enum). Keep in
@@ -34,10 +38,14 @@ export const AUDIT_LOG_ACTIONS = [
   'oauth_unlink',
   '2fa_enabled',
   '2fa_disabled',
+  '2fa_login_success',
+  '2fa_login_failed',
+  'backup_code_used',
   'session_revoked',
   'api_key_created',
   'api_key_revoked',
   'profile_updated',
+  'account_locked_brute_force',
 ] as const
 
 /**

@@ -3,6 +3,7 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  createStrictRateLimiter,
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
@@ -17,24 +18,41 @@ export const twoFactorDisableRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(twoFactorDisableRegistry, router)
 
+// Rate-limit disable to deter session-hijack attackers from brute
+// forcing the TOTP code.
+const disableRateLimiter = createStrictRateLimiter()
+
+// `password` is optional during the deprecation window so existing
+// SDK consumers keep working. Future major release: make it mandatory
+// for defense-in-depth (a stolen session alone must not be able to
+// disable 2FA).
 const disableSchema = z.object({
-  code: z.string().length(6, 'Code must be 6 digits').describe('TOTP verification code'),
+  code: z
+    .string()
+    .min(6, 'Code must be at least 6 characters')
+    .describe('TOTP verification code or backup code'),
+  password: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Account password (recommended — defense in depth)'),
 })
 
-// POST /auth/2fa/disable — disables 2FA (requires current code)
+// POST /auth/2fa/disable — disables 2FA (requires current code, optionally password)
 const disableController = async (req: Request, res: Response) => {
   try {
     const parsed = disableSchema.safeParse(req.body)
     if (!parsed.success) {
-      return sendError(res, 'Invalid code format. Must be 6 digits.', 400)
+      return sendError(res, 'Invalid request', 400)
     }
 
     const userId = req.userId!
-    await TotpService.disable(userId, parsed.data.code)
+    await TotpService.disable(userId, parsed.data.code, parsed.data.password)
 
     void AuditLogService.createFromRequest(req, {
       userId,
       action: '2fa_disabled',
+      metadata: { passwordVerified: typeof parsed.data.password === 'string' },
     })
 
     sendSuccess(res, { message: '2FA disabled successfully' })
@@ -44,8 +62,8 @@ const disableController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/2fa/disable', authMiddleware, disableController, {
-  summary: 'Disable 2FA (requires current TOTP code)',
+docRouter.post('/2fa/disable', disableRateLimiter, authMiddleware, disableController, {
+  summary: 'Disable 2FA (requires current TOTP code or backup code)',
   tags: ['Two-Factor Authentication'],
   bodySchema: disableSchema,
 })

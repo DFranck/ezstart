@@ -1,10 +1,24 @@
 import * as OTPAuth from 'otpauth'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
-import { getTotpSecretModel } from '../models/totp-secret.js'
+import { getTotpSecretModel, type TotpSecretDocument } from '../models/totp-secret.js'
+import { getAuthUserModel } from '../models/auth-user.js'
 
 const TOTP_ISSUER = 'EZAuth'
+const TOTP_PERIOD_SECONDS = 30
+const TOTP_WINDOW_STEPS = 1 // ±1 step (30s before/after) for clock drift
 const BACKUP_CODE_COUNT = 8
+
+/**
+ * Result of validating a TOTP code or backup code during login.
+ * Discriminated so callers can audit-log accurately (TOTP success vs.
+ * backup code consumption — different security posture).
+ */
+export interface ValidateLoginResult {
+  valid: boolean
+  /** `'totp'` when a TOTP code matched, `'backup'` for backup code. `null` on failure. */
+  method: 'totp' | 'backup' | null
+}
 
 export class TotpService {
   /**
@@ -29,16 +43,17 @@ export class TotpService {
       label: userEmail,
       algorithm: 'SHA1',
       digits: 6,
-      period: 30,
+      period: TOTP_PERIOD_SECONDS,
     })
 
     const secret = totp.secret.base32
     const uri = totp.toString()
 
-    // Save or update the secret (not yet enabled)
+    // Save or update the secret (not yet enabled). Reset the replay
+    // tracker — a fresh secret gets a fresh window.
     await TotpSecretModel.findOneAndUpdate(
       { userId },
-      { userId, secret, isEnabled: false, backupCodes: [] },
+      { userId, secret, isEnabled: false, backupCodes: [], lastUsedTotpStep: null },
       { upsert: true, new: true }
     )
 
@@ -61,9 +76,9 @@ export class TotpService {
       throw new Error('2FA is already enabled.')
     }
 
-    // Verify the code
-    const isValid = this.validateCode(totpDoc.secret, code)
-    if (!isValid) {
+    // Verify the code (and consume the step to prevent replay)
+    const matchedStep = this.consumeTotpCode(totpDoc, code)
+    if (matchedStep === null) {
       throw new Error('Invalid verification code. Please try again.')
     }
 
@@ -78,18 +93,24 @@ export class TotpService {
       hashedBackupCodes.push(hashed)
     }
 
-    // Enable 2FA and store hashed backup codes
+    // Enable 2FA, store hashed backup codes, and persist the consumed step
     totpDoc.isEnabled = true
     totpDoc.backupCodes = hashedBackupCodes
+    totpDoc.lastUsedTotpStep = matchedStep
     await totpDoc.save()
 
     return { backupCodes: plainBackupCodes }
   }
 
   /**
-   * Disable 2FA (requires a valid TOTP code)
+   * Disable 2FA. Requires a valid TOTP code (or backup code) AND, when
+   * supplied, the account password — defense-in-depth so a stolen
+   * session alone cannot disable 2FA.
+   *
+   * `password` is optional during the deprecation window — callers
+   * SHOULD pass it. A future major release will make it mandatory.
    */
-  static async disable(userId: string, code: string): Promise<void> {
+  static async disable(userId: string, code: string, password?: string): Promise<void> {
     const TotpSecretModel = await getTotpSecretModel()
 
     const totpDoc = await TotpSecretModel.findOne({ userId })
@@ -97,9 +118,22 @@ export class TotpService {
       throw new Error('2FA is not enabled.')
     }
 
-    // Verify the code
-    const isValid = this.validateCode(totpDoc.secret, code)
-    if (!isValid) {
+    // When password supplied, verify it first (defense in depth)
+    if (typeof password === 'string' && password.length > 0) {
+      const AuthUserModel = await getAuthUserModel()
+      const user = await AuthUserModel.findById(userId)
+      if (!user) {
+        throw new Error('User not found.')
+      }
+      const isValidPassword = await user.comparePassword(password)
+      if (!isValidPassword) {
+        throw new Error('Invalid password.')
+      }
+    }
+
+    // Verify the code — accept TOTP (with replay protection) or backup code
+    const result = await this.consumeAnyCode(totpDoc, code)
+    if (!result.valid) {
       throw new Error('Invalid verification code.')
     }
 
@@ -108,20 +142,50 @@ export class TotpService {
   }
 
   /**
-   * Validate a TOTP code during login
-   * Also checks backup codes
+   * Validate a TOTP code (or backup code) during login.
+   *
+   * Returns `{ valid: false, method: null }` when:
+   *   - 2FA is not enabled for the user (defense in depth — `validate`
+   *     callers MUST NOT bypass 2FA based on a stale "no 2FA" state),
+   *   - the code is malformed / invalid,
+   *   - the TOTP code was already used in this window (RFC 6238 §5.2
+   *     replay protection).
+   *
+   * Returns `{ valid: true, method: 'totp' | 'backup' }` on success so
+   * callers can audit-log accurately.
    */
-  static async validateLogin(userId: string, code: string): Promise<boolean> {
+  static async validateLogin(userId: string, code: string): Promise<ValidateLoginResult> {
     const TotpSecretModel = await getTotpSecretModel()
 
     const totpDoc = await TotpSecretModel.findOne({ userId })
     if (!totpDoc || !totpDoc.isEnabled) {
-      return true // 2FA not enabled, skip
+      // 2FA was disabled between login challenge issuance and validate
+      // call. We refuse — callers must restart the login flow.
+      return { valid: false, method: null }
     }
 
-    // Try TOTP code first
-    if (this.validateCode(totpDoc.secret, code)) {
-      return true
+    return this.consumeAnyCode(totpDoc, code)
+  }
+
+  /**
+   * Try a TOTP code first (with replay protection), then fall back to
+   * backup codes. Persists state changes (`lastUsedTotpStep` for TOTP,
+   * splice of consumed backup code) on success.
+   */
+  private static async consumeAnyCode(
+    totpDoc: TotpSecretDocument,
+    code: string
+  ): Promise<ValidateLoginResult> {
+    // Try TOTP code first (only if it looks like 6 digits — backup codes
+    // are 8 hex chars, so we don't waste a TOTP attempt on them)
+    const looksLikeTotp = /^\d{6}$/.test(code)
+    if (looksLikeTotp) {
+      const matchedStep = this.consumeTotpCode(totpDoc, code)
+      if (matchedStep !== null) {
+        totpDoc.lastUsedTotpStep = matchedStep
+        await totpDoc.save()
+        return { valid: true, method: 'totp' }
+      }
     }
 
     // Try backup codes
@@ -130,14 +194,14 @@ export class TotpService {
       if (!hashedCode) continue
       const isMatch = await bcrypt.compare(code, hashedCode)
       if (isMatch) {
-        // Remove used backup code
+        // Remove used backup code (one-shot)
         totpDoc.backupCodes.splice(i, 1)
         await totpDoc.save()
-        return true
+        return { valid: true, method: 'backup' }
       }
     }
 
-    return false
+    return { valid: false, method: null }
   }
 
   /**
@@ -150,19 +214,35 @@ export class TotpService {
   }
 
   /**
-   * Validate a TOTP code against a secret
+   * Validate a TOTP code against a stored secret WITH replay protection.
+   * Returns the consumed step on success (caller persists it via
+   * `lastUsedTotpStep`), or `null` on failure (invalid OR replayed).
+   *
+   * Per RFC 6238 §5.2, a TOTP code MUST NOT be accepted twice in the
+   * same step window. We reject any attempt whose computed step is
+   * `<= totpDoc.lastUsedTotpStep`.
    */
-  private static validateCode(secret: string, code: string): boolean {
+  private static consumeTotpCode(totpDoc: TotpSecretDocument, code: string): number | null {
     const totp = new OTPAuth.TOTP({
       issuer: TOTP_ISSUER,
       algorithm: 'SHA1',
       digits: 6,
-      period: 30,
-      secret: OTPAuth.Secret.fromBase32(secret),
+      period: TOTP_PERIOD_SECONDS,
+      secret: OTPAuth.Secret.fromBase32(totpDoc.secret),
     })
 
-    // Allow 1 step window (30 seconds before/after)
-    const delta = totp.validate({ token: code, window: 1 })
-    return delta !== null
+    // Allow ±1 step window (30 seconds before/after) for clock drift.
+    const delta = totp.validate({ token: code, window: TOTP_WINDOW_STEPS })
+    if (delta === null) return null
+
+    const currentStep = Math.floor(Date.now() / 1000 / TOTP_PERIOD_SECONDS)
+    const matchedStep = currentStep + delta
+
+    // Replay protection: reject if this step was already consumed.
+    if (typeof totpDoc.lastUsedTotpStep === 'number' && matchedStep <= totpDoc.lastUsedTotpStep) {
+      return null
+    }
+
+    return matchedStep
   }
 }

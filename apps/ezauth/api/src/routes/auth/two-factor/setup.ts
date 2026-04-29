@@ -3,6 +3,7 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  createStrictRateLimiter,
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
@@ -16,6 +17,11 @@ import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/aut
 export const twoFactorSetupRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(twoFactorSetupRegistry, router)
+
+// Rate-limit the setup endpoint to deter automated secret regeneration
+// against an authenticated session (defense in depth — the auth
+// middleware already gates access).
+const setupRateLimiter = createStrictRateLimiter()
 
 // POST /auth/2fa/setup — generates TOTP secret, returns QR code data URL
 const setupController = async (req: Request, res: Response) => {
@@ -39,7 +45,7 @@ const setupController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/2fa/setup', authMiddleware, setupController, {
+docRouter.post('/2fa/setup', setupRateLimiter, authMiddleware, setupController, {
   summary: 'Generate TOTP secret for 2FA setup',
   tags: ['Two-Factor Authentication'],
 })
