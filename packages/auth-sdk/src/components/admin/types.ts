@@ -13,6 +13,17 @@ export interface AdminUser {
   apps?: string[]
   lastActiveAt?: string | null
   createdAt: string
+  /**
+   * Soft-deletion timestamp ISO string. When set, the account is locked and
+   * pending hard-delete (purge). Surfaced in the admin table via a
+   * `<Badge variant="warning">` indicating the scheduled deletion date.
+   */
+  deletedAt?: string | null
+  /**
+   * Scheduled hard-delete (purge) timestamp ISO string. The cron worker that
+   * permanently removes soft-deleted records reads this field.
+   */
+  scheduledHardDeleteAt?: string | null
 }
 
 export interface UsersApiMeta {
@@ -88,6 +99,16 @@ export interface AuthUsersSectionTexts {
   // App filter (platform/first-party scope)
   allApps?: string
   filterByApp?: string
+
+  // Soft-deletion (account lifecycle)
+  /** Badge label shown on soft-deleted users. `{date}` placeholder = scheduled hard-delete date (locale-formatted). */
+  softDeletedBadge?: string
+  /** Tooltip displayed on hover of the soft-deletion badge — explains the grace period. */
+  softDeletedTooltip?: string
+  /** Restore action button label (currently disabled — backend endpoint pending). */
+  restoreAction?: string
+  /** Tooltip on the disabled restore button — informs the user the feature is upcoming. */
+  restoreComingSoon?: string
 }
 
 export const ADMIN_PAGE_SIZE = 20
@@ -143,12 +164,30 @@ export const DEFAULT_USERS_TEXTS: Required<AuthUsersSectionTexts> = {
   pageOf: 'Page {current} of {total}',
   allApps: 'All apps',
   filterByApp: 'Filter by app',
+  softDeletedBadge: 'Scheduled deletion: {date}',
+  softDeletedTooltip:
+    'This account is soft-deleted and will be permanently removed on the scheduled date.',
+  restoreAction: 'Restore',
+  restoreComingSoon: 'Coming soon — restore endpoint not available yet.',
 }
 
 export function formatAdminDate(dateStr: string, locale?: string): string {
   return new Intl.DateTimeFormat(locale ?? undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
+  }).format(new Date(dateStr))
+}
+
+/**
+ * Short locale-aware date formatter (no time, no year) used in the
+ * soft-delete badge — keeps the badge compact ("Suppression prévue le 12/05",
+ * "Scheduled deletion: May 12"). Falls back to a sensible default when no
+ * locale is provided.
+ */
+export function formatAdminShortDate(dateStr: string, locale?: string): string {
+  return new Intl.DateTimeFormat(locale ?? undefined, {
+    day: '2-digit',
+    month: '2-digit',
   }).format(new Date(dateStr))
 }
 

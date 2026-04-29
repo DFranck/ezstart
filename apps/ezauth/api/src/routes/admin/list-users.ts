@@ -177,6 +177,11 @@ const listUsersController = async (req: Request, res: Response) => {
       updatedAt: u.updatedAt instanceof Date ? u.updatedAt.toISOString() : String(u.updatedAt),
       lastActiveAt:
         u.lastActiveAt instanceof Date ? u.lastActiveAt.toISOString() : (u.lastActiveAt ?? null),
+      deletedAt: u.deletedAt instanceof Date ? u.deletedAt.toISOString() : (u.deletedAt ?? null),
+      scheduledHardDeleteAt:
+        u.scheduledHardDeleteAt instanceof Date
+          ? u.scheduledHardDeleteAt.toISOString()
+          : (u.scheduledHardDeleteAt ?? null),
     }))
 
     sendSuccess(res, data, { total, limit, offset })

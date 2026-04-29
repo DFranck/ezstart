@@ -10,6 +10,9 @@ import {
   P,
   Skeleton,
   Span,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
   type ColumnDef,
 } from '@ezstart/ui/components'
 import {
@@ -17,6 +20,7 @@ import {
   type AdminUser,
   type AuthUsersSectionTexts,
   formatAdminDate,
+  formatAdminShortDate,
   getAdminRelativeTime,
   getAdminRoleLabel,
   isAdminUserOnline,
@@ -56,7 +60,31 @@ export function AdminUsersTable({
     {
       accessorKey: 'email',
       header: ({ header }) => <DataTableColumnHeader header={header} title={t.columnEmail} />,
-      cell: ({ row }) => <Span className="text-sm font-medium">{row.original.email}</Span>,
+      cell: ({ row }) => {
+        const { email, deletedAt, scheduledHardDeleteAt } = row.original
+        if (!deletedAt) {
+          return <Span className="text-sm font-medium">{email}</Span>
+        }
+        // Soft-deleted: render dimmed email + warning badge with scheduled
+        // hard-delete date. Badge uses `warning` variant so it's visually
+        // distinct from the role/status badges.
+        const dateForBadge = scheduledHardDeleteAt ?? deletedAt
+        const shortDate = formatAdminShortDate(dateForBadge, locale)
+        const badgeLabel = t.softDeletedBadge.replace('{date}', shortDate)
+        return (
+          <Div className="flex flex-wrap items-center gap-2">
+            <Span className="text-sm font-medium text-muted-foreground line-through">{email}</Span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="warning" size="sm">
+                  {badgeLabel}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent variant="warning">{t.softDeletedTooltip}</TooltipContent>
+            </Tooltip>
+          </Div>
+        )
+      },
     },
     {
       accessorKey: 'username',
@@ -144,16 +172,39 @@ export function AdminUsersTable({
     {
       id: 'actions',
       header: t.columnActions,
-      cell: ({ row }) => (
-        <Div className="flex gap-1">
-          <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
-            {t.edit}
-          </Button>
-          <Button variant="destructive" size="sm" onClick={() => onDelete(row.original._id)}>
-            {t.delete}
-          </Button>
-        </Div>
-      ),
+      cell: ({ row }) => {
+        const isSoftDeleted = !!row.original.deletedAt
+        if (isSoftDeleted) {
+          // Restore stub — backend endpoint pending. Button is disabled and
+          // surfaces a "Coming soon" tooltip so admins know the action is on
+          // the roadmap. Wire onClick to a real `POST /admin/users/:id/restore`
+          // call once the endpoint ships.
+          return (
+            <Div className="flex gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Span tabIndex={0} className="inline-flex">
+                    <Button variant="outline" size="sm" disabled aria-disabled="true">
+                      {t.restoreAction}
+                    </Button>
+                  </Span>
+                </TooltipTrigger>
+                <TooltipContent variant="info">{t.restoreComingSoon}</TooltipContent>
+              </Tooltip>
+            </Div>
+          )
+        }
+        return (
+          <Div className="flex gap-1">
+            <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
+              {t.edit}
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => onDelete(row.original._id)}>
+              {t.delete}
+            </Button>
+          </Div>
+        )
+      },
     },
   ]
 

@@ -30,6 +30,16 @@ export const adminUserSchema = z.object({
   lastActiveAt: z.string().nullable().optional().describe('Last activity date ISO string'),
   createdAt: z.string().describe('Creation date ISO string'),
   updatedAt: z.string().describe('Last update date ISO string'),
+  deletedAt: z
+    .string()
+    .nullable()
+    .optional()
+    .describe('Soft-deletion timestamp ISO string (null when account is active)'),
+  scheduledHardDeleteAt: z
+    .string()
+    .nullable()
+    .optional()
+    .describe('Scheduled hard-delete (purge) timestamp ISO string'),
 })
 
 export type AdminUser = z.infer<typeof adminUserSchema>
