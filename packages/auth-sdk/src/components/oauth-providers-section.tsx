@@ -219,6 +219,7 @@ export function OAuthProvidersSection({
   const [pendingDisconnect, setPendingDisconnect] = useState<OAuthProvidersSectionProvider | null>(
     null
   )
+  const [redirectingProviderId, setRedirectingProviderId] = useState<string | null>(null)
 
   // Surrounding AuthProvider is optional — the OAuthButtons pattern: try the
   // hook, fall back to nothing and resolve via window.origin at click time.
@@ -262,13 +263,16 @@ export function OAuthProvidersSection({
   }, [providers])
 
   const handleConnect = (provider: OAuthProvidersSectionProvider): void => {
-    if (!resolvedApiUrl) return
+    if (!resolvedApiUrl || redirectingProviderId) return
+    setRedirectingProviderId(provider.id)
     const base = normalizeOAuthBase(resolvedApiUrl)
     const params = new URLSearchParams({
       app: resolvedAppName,
       intent: 'link',
       ...(redirectUri ? { redirect_uri: redirectUri } : {}),
     })
+    // Full page redirect — leave the loading state set; the next render after
+    // the OAuth round-trip will be a fresh component instance.
     window.location.href = `${base}/api/auth/${encodeURIComponent(
       provider.id
     )}?${params.toString()}`
@@ -365,9 +369,15 @@ export function OAuthProvidersSection({
                       variant="default"
                       size="sm"
                       className="cursor-pointer"
+                      disabled={redirectingProviderId === provider.id}
+                      aria-busy={redirectingProviderId === provider.id}
                       onClick={() => handleConnect(provider)}
                     >
-                      {texts.connect}
+                      {redirectingProviderId === provider.id ? (
+                        <Spinner size="sm" />
+                      ) : (
+                        texts.connect
+                      )}
                     </Button>
                   )}
                 </Div>

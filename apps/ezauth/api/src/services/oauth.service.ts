@@ -156,6 +156,13 @@ export class OAuthService {
         await user.save()
       }
 
+      void AuditLogService.create({
+        userId: user._id!.toString(),
+        action: 'login',
+        appName: app,
+        metadata: { provider: profile.provider, method: 'oauth' },
+      })
+
       return AuthService.generateAuthCodePublic(user._id!.toString(), app, redirectUri)
     }
 
