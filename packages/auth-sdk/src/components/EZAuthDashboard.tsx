@@ -289,7 +289,13 @@ export function EZAuthDashboard({
 
         <SidebarFooter>
           {sidebarFooterExtra}
-          <UserMenu variant="extended" side="top" avatarSize="sm" />
+          {/* Desktop only — on mobile/tablet the sidebar is a left-overlay
+              drawer (translate-x: -100% when closed), so the UserMenu mounted
+              here is off-screen and unreachable. We render an icon-variant
+              copy in the topbar (below) for those breakpoints. */}
+          <div className="hidden lg:block">
+            <UserMenu variant="extended" side="top" avatarSize="sm" />
+          </div>
         </SidebarFooter>
       </DashboardSidebar>
 
@@ -302,6 +308,13 @@ export function EZAuthDashboard({
           {topBarExtra ? (
             <Span className="ml-auto inline-flex items-center gap-2">{topBarExtra}</Span>
           ) : null}
+          {/* Mobile/tablet only — twin of the sidebar UserMenu. The desktop
+              sidebar instance owns the extended trigger; here we use the
+              compact icon variant to keep the topbar tight. Pushed to the
+              far right via ml-auto when no `topBarExtra` was provided. */}
+          <div className={`lg:hidden ${topBarExtra ? '' : 'ml-auto'}`}>
+            <UserMenu variant="icon" side="bottom" avatarSize="sm" />
+          </div>
         </DashboardHeader>
 
         <DashboardContent>
