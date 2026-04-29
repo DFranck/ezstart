@@ -5,7 +5,7 @@ import { logger } from '@ezstart/logger/server'
 import {
   addVersionHeader,
   connectToMongo,
-  createEzstartServer,
+  createApiServer,
   createVersionedRouter,
   startServer,
 } from '@ezstart/api-core'
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.EZPAY_SERVER_EZAUTH_KE
 // consumes EZAuth JWTs but never sets its own cookies. Tier 1/2 permissive
 // CORS (ACAO: *) applies to every endpoint.
 // See .claude/rules/standard-saas-cors.md.
-const server = createEzstartServer('ezpay', {
+const server = createApiServer('ezpay', {
   rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
   cookieAuthRoutes: [],
 })

@@ -4,7 +4,7 @@ import { logger } from '@ezstart/logger/server'
 import {
   addVersionHeader,
   connectToMongo,
-  createEzstartServer,
+  createApiServer,
   createVersionedRouter,
   startServer,
 } from '@ezstart/api-core'
@@ -12,7 +12,7 @@ import routes, { globalRegistry } from './routes/index.js'
 
 // No cookie-auth routes: green-pulse consumes EZAuth for identity, no own cookies.
 // Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
-const server = createEzstartServer('green-pulse', { cookieAuthRoutes: [] })
+const server = createApiServer('green-pulse', { cookieAuthRoutes: [] })
 const { app } = server
 
 // API version headers on every response

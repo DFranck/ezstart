@@ -2,7 +2,7 @@
  * Express Request augmentation for EZPay API.
  *
  * The base `Request.userId` / `Request.user` augmentation is provided by
- * `@ezstart/api-core` (and its shared `createEzstartAuth` middleware).
+ * `@ezstart/api-core` (and its shared `createApiAuth` middleware).
  * This file adds EZPay-specific fields populated by the api-key middleware
  * when a request is authenticated via `X-API-Key` / `Authorization: ApiKey`.
  *

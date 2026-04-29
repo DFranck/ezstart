@@ -2,26 +2,26 @@
  * Tests for auth middleware functions.
  * Tests populateUserFromToken and isAdminUser logic.
  *
- * The auth module calls createEzstartAuth() at import time, which requires
+ * The auth module calls createApiAuth() at import time, which requires
  * JWT_SECRET. We mock the api-core dependency to avoid that requirement,
  * then import our actual middleware functions.
  */
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import type { Request } from 'express'
 
-// Mock @ezstart/api-core's createEzstartAuth to avoid JWT_SECRET requirement
-vi.mock('@ezstart/api-core', async (importOriginal) => {
+// Mock @ezstart/api-core's createApiAuth to avoid JWT_SECRET requirement
+vi.mock('@ezstart/api-core', async importOriginal => {
   const actual = await importOriginal<Record<string, unknown>>()
   return {
     ...actual,
-    createEzstartAuth: () => ({
+    createApiAuth: () => ({
       authMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
       optionalAuthMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
     }),
   }
 })
 
-// Now safe to import — createEzstartAuth is mocked
+// Now safe to import — createApiAuth is mocked
 const { isAdminUser, populateUserFromToken } = await import('../../middleware/auth.js')
 
 // ========================================

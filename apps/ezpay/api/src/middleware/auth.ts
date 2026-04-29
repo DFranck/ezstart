@@ -1,8 +1,8 @@
-import { createEzstartAuth, type RequestHandler } from '@ezstart/api-core'
+import { createApiAuth, type RequestHandler } from '@ezstart/api-core'
 import { hasAnyRole } from '@ezstart/auth-sdk/rbac/client'
 import type { Request, Response, NextFunction } from 'express'
 
-const auth = createEzstartAuth()
+const auth = createApiAuth()
 export const authMiddleware: RequestHandler = auth.authMiddleware
 export const optionalAuthMiddleware: RequestHandler = auth.optionalAuthMiddleware
 

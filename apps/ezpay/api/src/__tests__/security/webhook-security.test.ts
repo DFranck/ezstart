@@ -57,7 +57,7 @@ describe('Webhook Security', () => {
   describe('Raw body for webhook verification', () => {
     it('server is configured with rawBodyRoutes for webhook paths', () => {
       // In index.ts line 16-18:
-      // createEzstartServer('ezpay', {
+      // createApiServer('ezpay', {
       //   rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
       // })
       // PASS: Raw body is preserved for signature verification

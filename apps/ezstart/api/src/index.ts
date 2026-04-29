@@ -5,7 +5,7 @@ import { logger } from '@ezstart/logger/server'
 import {
   addVersionHeader,
   connectToMongo,
-  createEzstartServer,
+  createApiServer,
   createSocketServer,
   createVersionedRouter,
   startServer,
@@ -21,7 +21,7 @@ import type { Server as IOServer } from 'socket.io'
 // Create pre-configured Express app.
 // No cookie-auth routes: EZStart hub consumes EZAuth for identity, no own cookies.
 // Tier 1/2 permissive CORS applies globally (see .claude/rules/standard-saas-cors.md).
-const server = createEzstartServer('ezstart', { cookieAuthRoutes: [] })
+const server = createApiServer('ezstart', { cookieAuthRoutes: [] })
 const { app } = server
 
 // API version headers on every response
@@ -40,7 +40,7 @@ const healthCheckScheduler = new HealthCheckScheduler()
 setScheduler(healthCheckScheduler)
 
 // Health check endpoint (non-versioned, returns scheduler status too)
-// Note: createEzstartServer already mounts GET /api/health with the basic
+// Note: createApiServer already mounts GET /api/health with the basic
 // payload — this one overrides it with the scheduler snapshot, mounted BEFORE
 // versioned routes so it wins in the middleware chain.
 app.get('/api/health', (_, res) => {

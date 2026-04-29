@@ -41,7 +41,7 @@ const DEFAULT_STATUS = {
  * `PUT /api/admin/maintenance-mode` endpoint.
  *
  * Tier 1 endpoint (per `standard-saas-cors.md`) — `Access-Control-Allow-Origin: *`
- * is applied globally by `createEzstartServer`.
+ * is applied globally by `createApiServer`.
  */
 const maintenanceStatusController = async (_req: Request, res: Response) => {
   try {

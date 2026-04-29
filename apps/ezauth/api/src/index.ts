@@ -3,7 +3,7 @@ import './instrument.mjs'
 import {
   addVersionHeader,
   connectToMongo,
-  createEzstartServer,
+  createApiServer,
   createVersionedRouter,
   startServer,
 } from '@ezstart/api-core'
@@ -33,7 +33,7 @@ import { logger } from '@ezstart/logger/server'
 
 // 3-tier CORS policy (see .claude/rules/standard-saas-cors.md):
 // - Tier 1/2 (public, publishable-key, Bearer): `Access-Control-Allow-Origin: *`
-//   applied globally by createEzstartServer.
+//   applied globally by createApiServer.
 // - Tier 3 (cookie-auth): strict allowlist with credentials: true, applied
 //   only on the cookie-issuing prefixes below.
 //
@@ -64,7 +64,7 @@ const COOKIE_AUTH_ALLOWLIST = [
   /^https:\/\/ezauth-git-[a-z0-9-]+-ezstart\.vercel\.app$/,
 ]
 
-const server = createEzstartServer('ezauth', {
+const server = createApiServer('ezauth', {
   cookieAuthRoutes: COOKIE_AUTH_ROUTES,
   cookieAuthAllowlist: COOKIE_AUTH_ALLOWLIST,
 })
