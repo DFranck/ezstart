@@ -1,5 +1,3 @@
-import 'server-only'
-
 /**
  * Server-side auth bootstrap helper — Clerk-style SSR pattern.
  *

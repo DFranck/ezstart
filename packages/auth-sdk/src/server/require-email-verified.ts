@@ -1,5 +1,3 @@
-import 'server-only'
-
 /**
  * Express middleware enforcing that the authenticated user has verified
  * their email address before accessing the protected route.

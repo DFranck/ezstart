@@ -1,5 +1,3 @@
-import 'server-only'
-
 /**
  * Server-side applications bootstrap helper — companion to {@link getServerAuth}.
  *

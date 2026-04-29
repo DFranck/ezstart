@@ -1,5 +1,3 @@
-import 'server-only'
-
 /**
  * Server-side single application bootstrap helper — companion to
  * {@link getServerApplications}.

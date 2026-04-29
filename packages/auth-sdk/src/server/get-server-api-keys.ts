@@ -1,5 +1,3 @@
-import 'server-only'
-
 /**
  * Server-side API keys bootstrap helper — companion to {@link getServerAuth}.
  *
