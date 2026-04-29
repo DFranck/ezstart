@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
 import { AuthService, issueSession, buildJwtPayload } from '../../services/auth.service.js'
-import { createUser, createQuickSignupUser, createAuthCode, cleanAllCollections } from '../helpers/setup.js'
+import { createUser, createAuthCode, cleanAllCollections } from '../helpers/setup.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { getRefreshTokenModel, hashRefreshToken } from '../../models/refresh-token.js'
 import jwt from 'jsonwebtoken'
@@ -225,7 +225,12 @@ describe('AuthService', () => {
     it('should verify a valid JWT', async () => {
       const user = await createUser({ email: 'jwt@example.com', username: 'jwtuser' })
       const token = jwt.sign(
-        { userId: user._id!.toString(), email: user.email, username: user.username, apps: user.apps },
+        {
+          userId: user._id!.toString(),
+          email: user.email,
+          username: user.username,
+          apps: user.apps,
+        },
         JWT_SECRET,
         { expiresIn: '15m', algorithm: 'HS256' }
       )
@@ -260,7 +265,9 @@ describe('AuthService', () => {
     })
 
     it('should throw for non-existent user', async () => {
-      await expect(AuthService.getUserById('507f1f77bcf86cd799439011')).rejects.toThrow('User not found')
+      await expect(AuthService.getUserById('507f1f77bcf86cd799439011')).rejects.toThrow(
+        'User not found'
+      )
     })
   })
 

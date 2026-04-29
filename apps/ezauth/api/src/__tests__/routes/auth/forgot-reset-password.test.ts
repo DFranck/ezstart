@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
 import {
   createUser,

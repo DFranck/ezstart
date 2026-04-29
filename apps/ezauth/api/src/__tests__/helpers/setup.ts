@@ -19,7 +19,6 @@ import { getApiKeyUsageModel } from '../../models/api-key-usage.js'
 import { hashApiKey, generateRawApiKey, extractKeyPrefix } from '../../utils/api-key.js'
 import type { ApiKeyType, ApiKeyEnv } from '../../utils/api-key.js'
 import type { ApiKeyScope } from '../../models/api-key.js'
-import type { Model } from 'mongoose'
 
 // JWT_SECRET mirrors config/env.ts test fallback
 const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-do-not-use-in-prod'

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
 import { AuthService } from '../../../services/auth.service.js'
-import { createUser, createQuickSignupUser, cleanAllCollections } from '../../helpers/setup.js'
+import { createUser, cleanAllCollections } from '../../helpers/setup.js'
 
 describe('Login Route Logic', () => {
   beforeAll(async () => {

@@ -43,7 +43,7 @@ export interface FeatureFlagDocument extends Document {
 }
 
 /** Validation: feature-flag keys are lowercase letters, digits, dot, dash. */
-export const FEATURE_FLAG_KEY_REGEX: RegExp = /^[a-z0-9][a-z0-9.\-]{1,63}$/
+export const FEATURE_FLAG_KEY_REGEX: RegExp = /^[a-z0-9][a-z0-9.-]{1,63}$/
 
 const featureFlagSchema = new Schema<FeatureFlagDocument>(
   {
