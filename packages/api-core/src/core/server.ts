@@ -137,7 +137,14 @@ export async function startServer(app: Express, opts: StartServerOptions): Promi
 
   await new Promise<void>((resolve, reject) => {
     server.once('error', reject)
-    server.listen(port, () => {
+    // Bind on `::` (IPv6 dual-stack) so `localhost` resolves via either
+    // ::1 (IPv6) or 127.0.0.1 (IPv4). Required since Node 18+ resolves
+    // `localhost` to ::1 first by default — if the API binds IPv4-only
+    // (the legacy `app.listen(port)` default), Node-side fetch calls
+    // (e.g. SSR getServerAuth in Next.js 15) fail with AggregateError /
+    // "fetch failed" until they fall back to IPv4. Dual-stack listening
+    // accepts both and matches the browser's happy-eyeballs behaviour.
+    server.listen(port, '::', () => {
       server.off('error', reject)
       const url = `http://localhost:${port}`
       logger.info(`[${serviceName}] Server started`, { url })
