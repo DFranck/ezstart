@@ -55,6 +55,31 @@ export type {
   AuthModalShellProps,
 } from './modals/index.js'
 
+// Self-contained auth Cards — same content as the Modals but rendered inline
+// (no Dialog portal, no backdrop). Use Cards as the standalone (auth)/* page
+// surface; use Modals when you need an overlay over an existing page.
+export {
+  SignInCard,
+  SignUpCard,
+  ForgotPasswordCard,
+  ResetPasswordCard,
+  VerifyEmailCard,
+  AuthCardShell,
+} from './cards/index.js'
+export type {
+  SignInCardProps,
+  SignInCardTexts,
+  SignUpCardProps,
+  SignUpCardTexts,
+  ForgotPasswordCardProps,
+  ForgotPasswordCardTexts,
+  ResetPasswordCardProps,
+  ResetPasswordCardTexts,
+  VerifyEmailCardProps,
+  VerifyEmailCardTexts,
+  AuthCardShellProps,
+} from './cards/index.js'
+
 // Auth forms
 export { SignInForm } from './SignInForm.js'
 export type { SignInFormProps, SignInFormTexts } from './SignInForm.js'
