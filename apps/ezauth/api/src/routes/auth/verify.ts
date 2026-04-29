@@ -11,6 +11,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { updatePresenceByUserId } from '../../services/presence.service.js'
+import { getAuthUserModel } from '../../models/auth-user.js'
 import {
   verifyRequestSchema,
   verifyResponseSchema,
@@ -35,6 +36,20 @@ const verifyController = async (req: Request, res: Response) => {
 
     const { token, app } = parsed.data
     const payload = await AuthService.verifyToken(token)
+
+    // Soft-delete gate — a still-unexpired access token (15 min TTL) MUST
+    // not validate against an account that was scheduled for deletion.
+    // Without this lookup the JWT signature alone keeps the session usable
+    // until natural expiry, even after the cookies are cleared and the
+    // refresh tokens revoked. (P0 — see standard-saas-security.md §3.)
+    const AuthUser = await getAuthUserModel()
+    const user = await AuthUser.findById(payload.userId).select('deletedAt').lean()
+    if (!user) {
+      return sendError(res, 'User not found', 401)
+    }
+    if (user.deletedAt) {
+      return sendError(res, 'Account has been deleted', 401)
+    }
 
     // Check app access if specified
     if (app) {

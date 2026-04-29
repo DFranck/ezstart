@@ -18,6 +18,13 @@ import { getAuthCodeModel } from '../../models/auth-code.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
 import { emailService } from '../../services/email.service.js'
+import { AuditLogService } from '../../services/audit-log.service.js'
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  buildAuthCookieClearOptions,
+  buildRefreshCookieClearOptions,
+} from '../../config/cookie.js'
 
 export const deleteAccountRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -62,13 +69,31 @@ const deleteAccountResponseSchema = z.object({
 })
 
 /**
+ * Helper that wipes the auth cookies the browser is holding for this
+ * session. MUST mirror the options used at cookie creation (path, domain,
+ * sameSite, secure) — otherwise the browser silently ignores the clear.
+ *
+ * Called both on successful soft-delete (so the now-revoked session can
+ * no longer ride a stale cookie) and on the idempotent "already-deleted"
+ * branch (in case the user retries from a tab that still has the cookie).
+ */
+function clearAuthCookies(res: Response): void {
+  res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions())
+  res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions())
+}
+
+/**
  * Soft-delete the authenticated user's account.
  *
  * - Verifies the email confirmation matches the user's email.
  * - Verifies the password when the user has set their own password.
  * - Marks the user as `deletedAt = now`, `scheduledHardDeleteAt = +30d`.
  * - Revokes all refresh tokens (forces logout across devices).
+ * - Clears the access + refresh httpOnly cookies on the response so the
+ *   current browser cannot keep replaying the (still unexpired) JWT.
  * - Marks any pending auth/verification codes as used.
+ * - Writes a `session_revoked` audit log entry tagged with the deletion
+ *   metadata (sessionRevoked + cookieCleared).
  * - Sends a goodbye email (fire-and-forget).
  */
 const deleteAccountController = async (req: Request, res: Response) => {
@@ -89,7 +114,10 @@ const deleteAccountController = async (req: Request, res: Response) => {
     }
 
     // Already pending deletion — idempotent response with the existing schedule.
+    // Still clear cookies in case the caller retried from a tab that kept the
+    // pre-deletion session alive.
     if (user.deletedAt && user.scheduledHardDeleteAt) {
+      clearAuthCookies(res)
       return sendSuccess(res, {
         message: 'Account already scheduled for deletion',
         scheduledDeletionAt: user.scheduledHardDeleteAt.toISOString(),
@@ -127,12 +155,14 @@ const deleteAccountController = async (req: Request, res: Response) => {
     await user.save()
 
     // 4. Revoke all refresh tokens (forces logout across all devices).
+    let revokedTokenCount = 0
     try {
       const RefreshToken = await getRefreshTokenModel()
-      await RefreshToken.updateMany(
+      const result = await RefreshToken.updateMany(
         { userId: user._id, isRevoked: false },
         { $set: { isRevoked: true } }
       )
+      revokedTokenCount = result.modifiedCount ?? 0
     } catch (err) {
       logger.warn('Failed to revoke refresh tokens during account deletion:', err)
     }
@@ -148,7 +178,27 @@ const deleteAccountController = async (req: Request, res: Response) => {
       logger.warn('Failed to invalidate auth codes during account deletion:', err)
     }
 
-    // 6. Send goodbye email — fire-and-forget, non-blocking.
+    // 6. Clear access + refresh httpOnly cookies on this response so the
+    //    browser drops the still-unexpired JWT (15 min TTL would otherwise
+    //    keep `/api/auth/verify` returning 200 until natural expiry).
+    clearAuthCookies(res)
+
+    // 7. Audit log — record the session-revocation event with both the
+    //    refresh-token revocation count and the cookie-clear flag so an
+    //    operator can later prove the session was killed at delete-time.
+    void AuditLogService.createFromRequest(req, {
+      userId: user._id.toString(),
+      action: 'session_revoked',
+      metadata: {
+        reason: 'account_deletion',
+        sessionRevoked: true,
+        cookieCleared: true,
+        revokedTokenCount,
+        scheduledHardDeleteAt: scheduledHardDeleteAt.toISOString(),
+      },
+    })
+
+    // 8. Send goodbye email — fire-and-forget, non-blocking.
     void emailService
       .send({
         to: user.email,

@@ -33,6 +33,12 @@ async function attachUserToRequest(req: Request, userId: string): Promise<boolea
   const user = await AuthUser.findById(userId).select('-passwordHash').lean()
   if (!user) return false
 
+  // Soft-delete gate — a still-unexpired access token (15 min TTL) MUST
+  // not authenticate an account that was scheduled for deletion. Without
+  // this check the JWT signature alone keeps every protected route usable
+  // until natural expiry. (P0 — see standard-saas-security.md §3.)
+  if (user.deletedAt) return false
+
   const resolvedUserId = user._id.toString()
   req.userId = resolvedUserId
   req.user = {
