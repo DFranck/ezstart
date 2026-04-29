@@ -19,6 +19,7 @@ import type { EmailContext } from '@ezstart/email-service'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { resolveUserLocale } from '../../utils/locale.js'
 import {
   registerRequestSchema,
   authCodeResponseSchema,
@@ -71,10 +72,14 @@ const registerController = async (req: Request, res: Response) => {
         const params = buildAuthEmailParams(token, parsed.data.app, parsed.data.redirect_uri)
         const verifyUrl = `${getWebUrl('ezauth')}/verify-email?${params}`
 
+        // Body-locale wins (form-provided); otherwise infer from
+        // Accept-Language so the verification email matches the browser the
+        // user just registered from.
+        const locale = resolveUserLocale(req, parsed.data.locale)
         const ctx: EmailContext = {
           appName: appDisplayName,
           appKey: parsed.data.app,
-          locale: parsed.data.locale,
+          locale,
           overrides: parsed.data.emailOverride,
         }
         const rendered = emailVerificationTemplate({ verifyUrl }, ctx)
@@ -89,7 +94,7 @@ const registerController = async (req: Request, res: Response) => {
         })
 
         logger.info(
-          { email: user.email, locale: parsed.data.locale, appKey: parsed.data.app },
+          { email: user.email, locale, appKey: parsed.data.app },
           'Verification email sent after registration'
         )
       }

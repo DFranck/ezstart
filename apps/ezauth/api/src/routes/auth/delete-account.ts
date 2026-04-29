@@ -18,7 +18,11 @@ import { getAuthCodeModel } from '../../models/auth-code.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
 import { emailService } from '../../services/email.service.js'
+import { accountDeletionTemplate } from '@ezstart/email-service'
+import type { EmailContext } from '@ezstart/email-service'
 import { AuditLogService } from '../../services/audit-log.service.js'
+import { resolveUserLocale } from '../../utils/locale.js'
+import { getAppDisplayName } from '../../utils/app-display.js'
 import {
   ACCESS_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
@@ -108,7 +112,11 @@ const deleteAccountController = async (req: Request, res: Response) => {
 
   try {
     const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(userId)
+    // `includeDeleted: true` opt-out of the soft-delete pre-find guard so
+    // we can detect and short-circuit the idempotent re-delete branch
+    // below (a caller retrying the request after a successful soft-delete
+    // must not get a 404).
+    const user = await AuthUser.findById(userId, null, { includeDeleted: true })
     if (!user) {
       return sendError(res, 'User not found', 404)
     }
@@ -199,16 +207,35 @@ const deleteAccountController = async (req: Request, res: Response) => {
     })
 
     // 8. Send goodbye email — fire-and-forget, non-blocking.
+    //    Locale resolved from `Accept-Language` (no `locale` field on AuthUser
+    //    yet — see BACKLOG). The first user-app is used as the brand context;
+    //    falls back to the EZAuth display name when the user has no app.
+    const locale = resolveUserLocale(req)
+    const primaryAppKey = user.apps?.[0] ?? 'ezauth'
+    const appDisplayName = getAppDisplayName(primaryAppKey)
+    const ctx: EmailContext = {
+      appName: appDisplayName,
+      appKey: primaryAppKey,
+      locale,
+    }
+    const rendered = accountDeletionTemplate(
+      {
+        username: user.username,
+        email: user.email,
+        scheduledHardDeleteAt,
+        gracePeriodDays: DELETION_GRACE_PERIOD_DAYS,
+      },
+      ctx
+    )
+
     void emailService
       .send({
         to: user.email,
-        subject: 'Your EZAuth account is scheduled for deletion',
-        html: buildGoodbyeEmailHtml({
-          username: user.username,
-          email: user.email,
-          scheduledHardDeleteAt,
-          gracePeriodDays: DELETION_GRACE_PERIOD_DAYS,
-        }),
+        from: rendered.from ?? `${appDisplayName} <noreply@ezstart.xyz>`,
+        ...(rendered.replyTo ? { replyTo: rendered.replyTo } : {}),
+        subject: rendered.subject,
+        html: rendered.html,
+        ...(rendered.text ? { text: rendered.text } : {}),
       })
       .catch(err => {
         logger.warn('Failed to send goodbye email:', err)
@@ -227,45 +254,6 @@ const deleteAccountController = async (req: Request, res: Response) => {
     logger.error('Delete account error:', error)
     return sendError(res, error instanceof Error ? error.message : 'Failed to delete account', 500)
   }
-}
-
-/**
- * Render the goodbye email body.
- *
- * @internal
- */
-function buildGoodbyeEmailHtml(opts: {
-  username: string
-  email: string
-  scheduledHardDeleteAt: Date
-  gracePeriodDays: number
-}): string {
-  const formattedDate = opts.scheduledHardDeleteAt.toUTCString()
-  return [
-    `<p>Hi ${escapeHtml(opts.username)},</p>`,
-    `<p>We received a request to delete your EZAuth account (<strong>${escapeHtml(
-      opts.email
-    )}</strong>).</p>`,
-    `<p>Your account is now scheduled for permanent deletion on <strong>${formattedDate}</strong> (${opts.gracePeriodDays} days from now).</p>`,
-    `<p>If you change your mind during this period, simply sign in again and your account will be restored.</p>`,
-    `<p>If you didn't request this, please contact our support team immediately.</p>`,
-    `<p>— The EZAuth team</p>`,
-  ].join('\n')
-}
-
-/**
- * Minimal HTML escape for the email template — no DOM helpers in Node, and
- * we never want to reintroduce a stored-XSS vector via a username field.
- *
- * @internal
- */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
 }
 
 docRouter.delete(

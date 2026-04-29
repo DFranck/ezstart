@@ -20,6 +20,7 @@ import { quickSignupRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { resolveUserLocale } from '../../utils/locale.js'
 import { issueSession } from '../../services/auth.service.js'
 
 export const quickSignupRegistry = new OpenAPIRegistry()
@@ -47,9 +48,20 @@ const quickSignupController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid quick-signup request', parsed.error.issues)
     }
 
-    const { username, email, app, promoCode, utmSource, locale, emailOverride } = parsed.data
+    const {
+      username,
+      email,
+      app,
+      promoCode,
+      utmSource,
+      locale: bodyLocale,
+      emailOverride,
+    } = parsed.data
     const normalizedUsername = username.trim().toLowerCase()
     const normalizedEmail = email.trim().toLowerCase()
+    // Body-locale wins (form-provided); otherwise infer from Accept-Language
+    // so the welcome email matches the browser the user just signed up from.
+    const locale = resolveUserLocale(req, bodyLocale)
 
     const AuthUserModel = await getAuthUserModel()
 

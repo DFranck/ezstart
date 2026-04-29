@@ -19,6 +19,7 @@ import { forgotPasswordRequestSchema } from '@ezstart/auth-sdk/server'
 import { getWebUrl } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger/server'
 import { getAppDisplayName, buildAuthEmailParams } from '../../utils/app-display.js'
+import { resolveUserLocale } from '../../utils/locale.js'
 
 export const forgotPasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -45,8 +46,11 @@ const forgotPasswordController = async (req: Request, res: Response) => {
       return sendValidationError(res, 'Invalid email address', parsed.error.issues)
     }
 
-    const { email, app, redirect_uri, locale, emailOverride } = parsed.data
+    const { email, app, redirect_uri, locale: bodyLocale, emailOverride } = parsed.data
     const appKey = app || 'ezstart'
+    // Body-locale wins; otherwise fall back to Accept-Language (pre-auth flow,
+    // no persisted user preference yet).
+    const locale = resolveUserLocale(req, bodyLocale)
     const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findOne({ email: email.toLowerCase() })
 
