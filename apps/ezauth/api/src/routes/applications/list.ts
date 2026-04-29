@@ -44,6 +44,7 @@ const applicationItemSchema = z.object({
   theme: themeTokenSchema.nullable().optional(),
   themeEnabled: z.boolean(),
   isPlatformOwned: z.boolean(),
+  requireEmailVerification: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })

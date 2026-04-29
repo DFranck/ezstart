@@ -86,6 +86,21 @@ export interface ApplicationDocument extends Document {
    * future services) can read it without a secondary lookup.
    */
   isPlatformOwned: boolean
+  /**
+   * Composable email-verification gate (Clerk / Vercel pattern).
+   *
+   * `false` (default) → login stays open, consumers selectively gate critical
+   * features client-side via `<RequireEmailVerified>` or server-side via the
+   * `requireEmailVerified` Express middleware. Recommended for most apps.
+   *
+   * `true` → consumer opts-in to a global gate. Reserved for tenant-level
+   * enforcement; does not block login itself, but signals to consumers that
+   * the tenant requires verified emails for any meaningful API call.
+   *
+   * Persisted on the Application so cross-service code (EZPay, future
+   * services) can read it without a secondary lookup.
+   */
+  requireEmailVerification: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -189,6 +204,11 @@ const applicationSchema = new Schema<ApplicationDocument>(
       required: true,
       default: false,
       index: true,
+    },
+    requireEmailVerification: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
   },
   {

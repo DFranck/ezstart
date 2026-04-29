@@ -31,6 +31,12 @@ export interface SerializedApplication {
    * responses: it is a trust signal, not a secret.
    */
   isPlatformOwned: boolean
+  /**
+   * Composable email-verification gate (Clerk / Vercel pattern). When `true`
+   * the consumer opts-in to a tenant-level signal that downstream features
+   * should require a verified email. Login itself is never blocked.
+   */
+  requireEmailVerification: boolean
   createdAt: string
   updatedAt: string
 }
@@ -60,6 +66,7 @@ export function serializeApplication(
         }
         themeEnabled?: boolean
         isPlatformOwned?: boolean
+        requireEmailVerification?: boolean
         createdAt: Date
         updatedAt: Date
       }
@@ -85,6 +92,7 @@ export function serializeApplication(
     theme: hasTheme ? theme : null,
     themeEnabled: app.themeEnabled ?? false,
     isPlatformOwned: app.isPlatformOwned ?? false,
+    requireEmailVerification: app.requireEmailVerification ?? false,
     createdAt: app.createdAt.toISOString(),
     updatedAt: app.updatedAt.toISOString(),
   }

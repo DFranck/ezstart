@@ -31,6 +31,12 @@ const updateApplicationBodySchema = z.object({
   name: z.string().min(1).max(100).trim().optional(),
   description: z.string().max(500).trim().nullable().optional(),
   metadata: z.record(z.unknown()).nullable().optional(),
+  /**
+   * Composable email-verification gate (Clerk / Vercel pattern). When `true`,
+   * the consumer signals that downstream features should require a verified
+   * email. Login itself is never blocked. Default `false`.
+   */
+  requireEmailVerification: z.boolean().optional(),
 })
 
 const themeTokenSchema = z.object({
@@ -54,6 +60,7 @@ const applicationResponseSchema = z.object({
     theme: themeTokenSchema.nullable().optional(),
     themeEnabled: z.boolean(),
     isPlatformOwned: z.boolean(),
+    requireEmailVerification: z.boolean(),
     createdAt: z.string(),
     updatedAt: z.string(),
   }),
@@ -93,13 +100,16 @@ const updateApplicationController = async (req: Request, res: Response) => {
       }
     }
 
-    const { name, description, metadata } = parsed.data
+    const { name, description, metadata, requireEmailVerification } = parsed.data
     if (name !== undefined) app.name = name
     if (description !== undefined) {
       app.description = description ?? undefined
     }
     if (metadata !== undefined) {
       app.metadata = metadata ?? undefined
+    }
+    if (requireEmailVerification !== undefined) {
+      app.requireEmailVerification = requireEmailVerification
     }
 
     await app.save()
