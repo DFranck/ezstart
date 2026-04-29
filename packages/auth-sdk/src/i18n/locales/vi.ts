@@ -162,6 +162,48 @@ export const vi: AuthDict = {
     promoCodeRateLimited: 'Vui lòng đợi một lát rồi thử lại',
     promoCodeChecking: 'Đang kiểm tra...',
   },
+  // ─── Xác thực hai yếu tố ──────────────────────────────────────────────
+  twoFactor: {
+    // Lời nhắc (bước thử thách đăng nhập)
+    prompt: 'Nhập mã từ ứng dụng xác thực của bạn',
+    codePlaceholder: '000000',
+    backupCodeHint: 'Hoặc nhập mã khôi phục 8 ký tự',
+    verify: 'Xác minh',
+    verifying: 'Đang xác minh...',
+    back: 'Quay lại đăng nhập',
+    // Cài đặt — trạng thái
+    enabled: 'Đã bật',
+    disabled: 'Đã tắt',
+    enableDescription: 'Bảo vệ tài khoản của bạn bằng xác thực hai yếu tố.',
+    disableDescription: 'Xác thực hai yếu tố hiện đang hoạt động.',
+    enableButton: 'Bật 2FA',
+    disableButton: 'Tắt 2FA',
+    // Cài đặt — luồng thiết lập
+    setupTitle: 'Thiết lập xác thực hai yếu tố',
+    setupDescription: 'Quét mã QR bằng ứng dụng xác thực của bạn.',
+    scanQR: 'Quét mã QR này bằng ứng dụng xác thực (Google Authenticator, Authy, v.v.)',
+    manualEntry: 'Hoặc nhập mã này thủ công:',
+    enterCode: 'Nhập mã 6 chữ số từ ứng dụng xác thực của bạn',
+    settingsVerify: 'Xác minh và bật',
+    cancel: 'Hủy',
+    // Cài đặt — mã khôi phục
+    backupTitle: 'Mã khôi phục',
+    backupDescription: 'Lưu các mã khôi phục này ở nơi an toàn. Mỗi mã chỉ có thể sử dụng một lần.',
+    copyBackup: 'Sao chép mã',
+    downloadBackup: 'Tải xuống mã',
+    confirmBackup: 'Tôi đã lưu các mã khôi phục',
+    done: 'Hoàn tất',
+    // Cài đặt — luồng tắt
+    disableTitle: 'Tắt xác thực hai yếu tố',
+    disableConfirm: 'Nhập mã 2FA hiện tại của bạn để tắt xác thực hai yếu tố',
+    disablePasswordLabel: 'Mật khẩu',
+    disablePasswordPlaceholder: 'Nhập mật khẩu của bạn',
+    disablePasswordHint: 'Xác nhận bằng mật khẩu tài khoản (phòng vệ theo chiều sâu)',
+    // Lỗi
+    fallbackError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    invalidCode: 'Mã không hợp lệ. Vui lòng thử lại.',
+    lockedError: 'Quá nhiều lần xác minh thất bại. Vui lòng thử lại sau {minutes} phút.',
+  },
   userMenu: {
     // Sign-in / sign-out
     signIn: 'Đăng nhập',

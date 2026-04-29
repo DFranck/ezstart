@@ -4,6 +4,8 @@ import { Button, Div, Input, P, Spinner } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useCallback, useEffect, useState } from 'react'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -44,6 +46,13 @@ export interface TwoFactorSettingsTexts {
 }
 
 export interface TwoFactorSettingsProps {
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/settings` → `'fr'`).
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   */
+  locale?: AuthLocale | string
+  /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<TwoFactorSettingsTexts>
   /** Called when 2FA is enabled or disabled */
   onStatusChange?: (enabled: boolean) => void
@@ -86,8 +95,50 @@ const DEFAULT_TEXTS: TwoFactorSettingsTexts = {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export function TwoFactorSettings({ texts, onStatusChange }: TwoFactorSettingsProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
+export function TwoFactorSettings({
+  locale: propLocale,
+  texts,
+  onStatusChange,
+}: TwoFactorSettingsProps) {
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
+  // The shared `twoFactor` namespace covers both prompt + settings keys.
+  // For `<TwoFactorSettings>` the canonical "Verify & Enable" copy lives
+  // under `settingsVerify` (the bare `verify` key is the shorter "Verify"
+  // label rendered by `<TwoFactorPrompt>`). Map back into the local shape.
+  const dict = getAuthTexts(locale, 'twoFactor') as Record<string, string>
+  const t: TwoFactorSettingsTexts = {
+    enabled: dict.enabled ?? DEFAULT_TEXTS.enabled,
+    disabled: dict.disabled ?? DEFAULT_TEXTS.disabled,
+    enableDescription: dict.enableDescription ?? DEFAULT_TEXTS.enableDescription,
+    disableDescription: dict.disableDescription ?? DEFAULT_TEXTS.disableDescription,
+    enableButton: dict.enableButton ?? DEFAULT_TEXTS.enableButton,
+    disableButton: dict.disableButton ?? DEFAULT_TEXTS.disableButton,
+    setupTitle: dict.setupTitle ?? DEFAULT_TEXTS.setupTitle,
+    setupDescription: dict.setupDescription ?? DEFAULT_TEXTS.setupDescription,
+    scanQR: dict.scanQR ?? DEFAULT_TEXTS.scanQR,
+    manualEntry: dict.manualEntry ?? DEFAULT_TEXTS.manualEntry,
+    enterCode: dict.enterCode ?? DEFAULT_TEXTS.enterCode,
+    codePlaceholder: dict.codePlaceholder ?? DEFAULT_TEXTS.codePlaceholder,
+    verify: dict.settingsVerify ?? DEFAULT_TEXTS.verify,
+    verifying: dict.verifying ?? DEFAULT_TEXTS.verifying,
+    cancel: dict.cancel ?? DEFAULT_TEXTS.cancel,
+    backupTitle: dict.backupTitle ?? DEFAULT_TEXTS.backupTitle,
+    backupDescription: dict.backupDescription ?? DEFAULT_TEXTS.backupDescription,
+    copyBackup: dict.copyBackup ?? DEFAULT_TEXTS.copyBackup,
+    downloadBackup: dict.downloadBackup ?? DEFAULT_TEXTS.downloadBackup,
+    confirmBackup: dict.confirmBackup ?? DEFAULT_TEXTS.confirmBackup,
+    done: dict.done ?? DEFAULT_TEXTS.done,
+    disableTitle: dict.disableTitle ?? DEFAULT_TEXTS.disableTitle,
+    disableConfirm: dict.disableConfirm ?? DEFAULT_TEXTS.disableConfirm,
+    disablePasswordLabel: dict.disablePasswordLabel ?? DEFAULT_TEXTS.disablePasswordLabel,
+    disablePasswordPlaceholder:
+      dict.disablePasswordPlaceholder ?? DEFAULT_TEXTS.disablePasswordPlaceholder,
+    disablePasswordHint: dict.disablePasswordHint ?? DEFAULT_TEXTS.disablePasswordHint,
+    fallbackError: dict.fallbackError ?? DEFAULT_TEXTS.fallbackError,
+    invalidCode: dict.invalidCode ?? DEFAULT_TEXTS.invalidCode,
+    ...texts,
+  }
 
   const [is2FAEnabled, setIs2FAEnabled] = useState<boolean | null>(null)
   const [phase, setPhase] = useState<Phase>('idle')

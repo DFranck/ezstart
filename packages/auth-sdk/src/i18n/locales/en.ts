@@ -163,6 +163,57 @@ export const en = {
     promoCodeRateLimited: 'Please wait a moment and try again',
     promoCodeChecking: 'Checking...',
   },
+  // ─── Two-factor authentication ────────────────────────────────────────
+  // Combines the keys consumed by `<TwoFactorPrompt>` (login challenge step)
+  // and `<TwoFactorSettings>` (setup / disable flow). Both components fall
+  // back to `getAuthTexts(locale, 'twoFactor')` and merge a partial
+  // `texts` prop on top, so partial overrides keep working unchanged.
+  twoFactor: {
+    // Prompt (login challenge)
+    prompt: 'Enter the code from your authenticator app',
+    codePlaceholder: '000000',
+    backupCodeHint: 'Or enter an 8-character backup code',
+    verify: 'Verify',
+    verifying: 'Verifying...',
+    back: 'Back to login',
+    // Settings — status
+    enabled: 'Enabled',
+    disabled: 'Disabled',
+    enableDescription: 'Protect your account with two-factor authentication.',
+    disableDescription: 'Two-factor authentication is currently active.',
+    enableButton: 'Enable 2FA',
+    disableButton: 'Disable 2FA',
+    // Settings — setup flow
+    setupTitle: 'Set up two-factor authentication',
+    setupDescription: 'Scan the QR code with your authenticator app.',
+    scanQR: 'Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)',
+    manualEntry: 'Or enter this code manually:',
+    enterCode: 'Enter the 6-digit code from your authenticator app',
+    settingsVerify: 'Verify & Enable',
+    cancel: 'Cancel',
+    // Settings — backup codes
+    backupTitle: 'Backup Codes',
+    backupDescription: 'Save these backup codes in a safe place. Each code can only be used once.',
+    copyBackup: 'Copy codes',
+    downloadBackup: 'Download codes',
+    confirmBackup: "I've saved my backup codes",
+    done: 'Done',
+    // Settings — disable flow
+    disableTitle: 'Disable two-factor authentication',
+    disableConfirm: 'Enter your current 2FA code to disable two-factor authentication',
+    disablePasswordLabel: 'Password',
+    disablePasswordPlaceholder: 'Enter your password',
+    disablePasswordHint: 'Confirm with your account password (defense in depth)',
+    // Errors
+    fallbackError: 'An error occurred. Please try again.',
+    invalidCode: 'Invalid code. Please try again.',
+    /**
+     * Shown when the API returns HTTP 423 with `code: 'TWO_FACTOR_LOCKED'`
+     * after too many wrong code attempts. `{minutes}` is interpolated client-
+     * side from the `retryAfterSeconds` field of the structured response.
+     */
+    lockedError: 'Too many failed verification attempts. Try again in {minutes} minute(s).',
+  },
   userMenu: {
     // Sign-in / sign-out
     signIn: 'Sign in',

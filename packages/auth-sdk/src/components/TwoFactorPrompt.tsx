@@ -1,11 +1,13 @@
 'use client'
 
 import { Button, Div, Input, P } from '@ezstart/ui/components'
-import { apiCall } from '@ezstart/api-sdk'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useEffect, useRef, useState } from 'react'
 import { detectCurrentThemePreference } from './themePreference.js'
 import { buildPostLoginRedirect } from './postLoginRedirect.js'
+import { useAuthNavigation } from '../react/useAuthNavigation.js'
+import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -17,6 +19,12 @@ export interface TwoFactorPromptTexts {
   verifying: string
   back: string
   fallbackError: string
+  /**
+   * Shown when the API returns HTTP 423 with `code: 'TWO_FACTOR_LOCKED'`
+   * after too many failed verification attempts. `{minutes}` is interpolated
+   * client-side from the structured response's `retryAfterSeconds` field.
+   */
+  lockedError?: string
 }
 
 export interface TwoFactorPromptProps {
@@ -28,7 +36,13 @@ export interface TwoFactorPromptProps {
   onBack?: () => void
   /** Called after successful 2FA (if not using redirect) */
   onSuccess?: (result: { code?: string }) => void
-  /** Override texts */
+  /**
+   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
+   * locale detected from the URL pathname (e.g. `/fr/login` → `'fr'`).
+   * Any keys provided in `texts` take precedence over the localized defaults.
+   */
+  locale?: AuthLocale | string
+  /** Override texts (merged on top of the localized defaults). */
   texts?: Partial<TwoFactorPromptTexts>
 }
 
@@ -61,9 +75,27 @@ export function TwoFactorPrompt({
   redirectUri,
   onBack,
   onSuccess,
+  locale: propLocale,
   texts,
 }: TwoFactorPromptProps) {
-  const t = { ...DEFAULT_TEXTS, ...texts }
+  const navigation = useAuthNavigation()
+  const locale = propLocale ?? navigation.locale
+  // The `twoFactor` namespace covers both prompt + settings keys; the
+  // shared keys consumed by this component (prompt, codePlaceholder,
+  // backupCodeHint, verify, verifying, back, fallbackError, lockedError)
+  // align with the `TwoFactorPromptTexts` shape.
+  const dict = getAuthTexts(locale, 'twoFactor') as Record<string, string>
+  const t: TwoFactorPromptTexts = {
+    prompt: dict.prompt ?? DEFAULT_TEXTS.prompt,
+    codePlaceholder: dict.codePlaceholder ?? DEFAULT_TEXTS.codePlaceholder,
+    backupCodeHint: dict.backupCodeHint ?? DEFAULT_TEXTS.backupCodeHint,
+    verify: dict.verify ?? DEFAULT_TEXTS.verify,
+    verifying: dict.verifying ?? DEFAULT_TEXTS.verifying,
+    back: dict.back ?? DEFAULT_TEXTS.back,
+    fallbackError: dict.fallbackError ?? DEFAULT_TEXTS.fallbackError,
+    lockedError: dict.lockedError,
+    ...texts,
+  }
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

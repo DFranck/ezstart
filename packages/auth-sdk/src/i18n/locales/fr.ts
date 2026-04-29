@@ -165,6 +165,51 @@ export const fr: AuthDict = {
     promoCodeRateLimited: 'Veuillez patienter un instant et réessayer',
     promoCodeChecking: 'Vérification...',
   },
+  // ─── Authentification à deux facteurs ─────────────────────────────────
+  twoFactor: {
+    // Prompt (étape de connexion)
+    prompt: "Entrez le code de votre application d'authentification",
+    codePlaceholder: '000000',
+    backupCodeHint: 'Ou entrez un code de secours de 8 caractères',
+    verify: 'Vérifier',
+    verifying: 'Vérification...',
+    back: 'Retour à la connexion',
+    // Réglages — statut
+    enabled: 'Activé',
+    disabled: 'Désactivé',
+    enableDescription: "Protégez votre compte avec l'authentification à deux facteurs.",
+    disableDescription: "L'authentification à deux facteurs est actuellement active.",
+    enableButton: 'Activer la 2FA',
+    disableButton: 'Désactiver la 2FA',
+    // Réglages — flux de configuration
+    setupTitle: "Configurer l'authentification à deux facteurs",
+    setupDescription: "Scannez le QR code avec votre application d'authentification.",
+    scanQR:
+      "Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, etc.)",
+    manualEntry: 'Ou saisissez ce code manuellement :',
+    enterCode: "Entrez le code à 6 chiffres de votre application d'authentification",
+    settingsVerify: 'Vérifier et activer',
+    cancel: 'Annuler',
+    // Réglages — codes de secours
+    backupTitle: 'Codes de secours',
+    backupDescription:
+      'Conservez ces codes de secours en lieu sûr. Chaque code ne peut être utilisé qu’une seule fois.',
+    copyBackup: 'Copier les codes',
+    downloadBackup: 'Télécharger les codes',
+    confirmBackup: "J'ai sauvegardé mes codes de secours",
+    done: 'Terminé',
+    // Réglages — flux de désactivation
+    disableTitle: "Désactiver l'authentification à deux facteurs",
+    disableConfirm:
+      "Entrez votre code 2FA actuel pour désactiver l'authentification à deux facteurs",
+    disablePasswordLabel: 'Mot de passe',
+    disablePasswordPlaceholder: 'Entrez votre mot de passe',
+    disablePasswordHint: 'Confirmez avec votre mot de passe (défense en profondeur)',
+    // Erreurs
+    fallbackError: 'Une erreur est survenue. Veuillez réessayer.',
+    invalidCode: 'Code invalide. Veuillez réessayer.',
+    lockedError: 'Trop de tentatives échouées. Réessayez dans {minutes} minute(s).',
+  },
   userMenu: {
     // Sign-in / sign-out
     signIn: 'Se connecter',
