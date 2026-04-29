@@ -12,6 +12,27 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 ---
 
+## Auth standalone V1 — Path to Clerk-level Pro (post-MVP)
+
+**Status MVP** : ezauth standalone est production-ready à 95%+ après le sprint 2026-04-29 (60+ commits, 4 P0 sécurité fix, ~15 P1/P2 hardening). Tu peux vendre ezauth aujourd'hui à un client B2B.
+
+**Reste pour franchir le palier "vraiment Clerk Pro" (V1, ~2-4 semaines)** :
+
+- [ ] **AUTH-V1-TESTMODE** 🔴 P0 — Test mode isolation API (Stripe-pattern). Live key vs test data totalement isolés via middleware api-key extract `req.mode` from prefix + auto-scope queries by `{ isTestMode }`. Doc déjà écrite dans `.claude/rules/standard-saas-data.md` §4 + `standard-saas-keys.md` §7 — implementation pending. **Design call requise** avant de lancer (DB schema + migration des entries existantes).
+- [ ] **AUTH-V1-ERRORTRACKER** 🔴 P0 — Error tracker post-Sentry decision. Sentry retiré 2026-04-25 (incident OTEL/Express CORS Railway). Choices : (a) re-add `@sentry/node-core` sans OTEL auto-instrumentation, (b) Better Stack / Logtail HTTP transport via Pino, (c) Highlight.io. Frontend errors aussi (window.onerror + ErrorBoundary). Doc dans `.claude/rules/standard-saas-observability.md` §1.
+- [ ] **AUTH-V1-CAPTCHA** 🟠 P1 — Cloudflare Turnstile (or hCaptcha) sur signup + forgot-password + login après N fails. Anti-bot + anti-credential stuffing. EU GDPR compliance.
+- [ ] **AUTH-V1-EMAILCHANGE** 🟠 P1 — Email change flow. New route `POST /api/auth/change-email` → send verify to NEW email + cooldown on OLD email until confirmed. UI via `<EmailChangeForm>` in account settings.
+- [ ] **AUTH-V1-IDLETIMEOUT** 🟠 P1 — Session idle timeout (auto-logout après X min inactivité, configurable per Application). Activity tracker côté SDK + warning toast 1 min avant logout.
+- [ ] **AUTH-V1-MAGICLINK** 🟡 P2 — Magic link login (passwordless email). New route + `<MagicLinkButton>` + email template. Alternative à password pour users qui le préfèrent.
+- [ ] **AUTH-V1-PASSKEY** 🟡 P2 — WebAuthn / Passkey support. Apple/Google ecosystem natif. Skip password entirely sur devices trusted.
+- [ ] **AUTH-V1-CSP** 🟠 P1 — CSP per-app tuning. TODOs présents dans tous les `apps/*/web/vercel.json` post-sprint Wave 4. Need soak phase (script-src 'self' nonces + connect-src API+Stripe+analytics + frame-ancestors). Risk false positives en dev/preview.
+
+**Bugs identifiés non bloquants** : aucun pending P0/P1/P2 — tous traités cette session.
+
+**Audit complet** : voir le rapport `Audit consolidé — ezauth scope` produit en début de session 2026-04-29 (4 agents Explore parallèles : ezauth/api + ezauth/web + auth-sdk + shared deps).
+
+---
+
 ## Reste avant P10 (post P9)
 
 - [x] **STD-REFACTOR-001** — Standards SaaS-pro priority system + 7 new rule files (2026-04-27) _Refactor complet de `.claude/rules/*.md` pour ajouter le système de priorités 🔴 P0 / 🟠 P1 / 🟡 P2 / 🟢 P3 + ⚡ Quick Win. 7 nouveaux fichiers : `standard-saas-perf.md`, `standard-saas-security.md`, `standard-saas-a11y.md`, `standard-saas-observability.md`, `standard-saas-data.md`, `standard-saas-billing.md`, `standard-sdk-dx.md`. `standard.md` + `standard-saas.md` + `standard-ui.md` + `nextjs.md` + `data-protection.md` + `git.md` + `env.md` + `mongodb.md` mis à jour avec en-tête priorités. UX states section ajoutée à `standard-ui.md` (loading/empty/error/optimistic). i18n complet ajouté à `nextjs.md` (Intl API, hreflang, RTL). CLAUDE.md root index étendu avec la nouvelle hiérarchie de docs. **Use case** : (1) lancer un nouveau SaaS = focus P0 only, (2) auditer un SaaS existant = identifier les gaps par priorité. Ready for ezauth re-audit against new standards._
