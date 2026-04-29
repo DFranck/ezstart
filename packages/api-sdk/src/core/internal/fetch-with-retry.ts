@@ -46,7 +46,72 @@ export async function fetchWithRetry(opts: FetchWithRetryOptions): Promise<Respo
 /**
  * @internal
  *
+ * Default user-facing message returned when the network is unreachable
+ * (server crashed, DNS failed, offline, CORS preflight blocked, etc.).
+ *
+ * Replaces the unhelpful raw browser strings such as `"Failed to fetch"`
+ * (Chromium / Safari) or `"NetworkError when attempting to fetch resource"`
+ * (Firefox) which surface verbatim into form `setError` calls otherwise.
+ */
+const NETWORK_UNAVAILABLE_MESSAGE =
+  'Service unavailable. Please check your connection and try again.'
+
+/**
+ * @internal
+ *
+ * Detect the browser-native "fetch could not reach the server" error.
+ *
+ * Cross-engine signals:
+ * - Chromium / Safari : `TypeError` with message `"Failed to fetch"`.
+ * - Firefox           : `TypeError` with message `"NetworkError when ..."`.
+ * - Node 18+ undici   : `TypeError` with `cause.code` in
+ *   `{ 'ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN', 'ECONNRESET',
+ *     'UND_ERR_SOCKET', 'UND_ERR_CONNECT_TIMEOUT' }`.
+ */
+function isNetworkUnavailable(err: unknown): boolean {
+  if (!(err instanceof TypeError)) return false
+
+  const message = err.message
+  if (
+    message === 'Failed to fetch' ||
+    message === 'Load failed' ||
+    message.startsWith('NetworkError') ||
+    message.includes('fetch failed')
+  ) {
+    return true
+  }
+
+  const cause = (err as { cause?: { code?: unknown } }).cause
+  const code = cause && typeof cause === 'object' ? cause.code : undefined
+  if (typeof code === 'string') {
+    return (
+      code === 'ECONNREFUSED' ||
+      code === 'ENOTFOUND' ||
+      code === 'EAI_AGAIN' ||
+      code === 'ECONNRESET' ||
+      code === 'UND_ERR_SOCKET' ||
+      code === 'UND_ERR_CONNECT_TIMEOUT' ||
+      code === 'NETWORK_ERROR'
+    )
+  }
+
+  return false
+}
+
+/**
+ * @internal
+ *
  * Wrap `fetch` with a network-error catch that throws a typed `ApiError`.
+ *
+ * Two error codes are emitted depending on the failure shape:
+ * - `NETWORK_UNAVAILABLE` — the server could not be reached at all
+ *   (offline, DNS down, CORS preflight blocked, server crashed). Carries
+ *   a stable, user-facing English message so consumers can switch on
+ *   `err.code` to translate, while non-i18n callers still display
+ *   something actionable instead of `"Failed to fetch"`.
+ * - `NETWORK_ERROR` — every other fetch-time exception (typically
+ *   `AbortError` from a cancelled `AbortSignal`). The original
+ *   `err.message` is preserved.
  */
 async function safeFetch(
   url: string,
@@ -58,6 +123,19 @@ async function safeFetch(
   try {
     return await fetch(url, init)
   } catch (err) {
+    if (isNetworkUnavailable(err)) {
+      const rawMessage = err instanceof Error ? err.message : 'Failed to fetch'
+      resolved.logger.warn(`[${tag}] Service unreachable`, {
+        url,
+        method,
+        error: rawMessage,
+      })
+      throw new ApiError(NETWORK_UNAVAILABLE_MESSAGE, {
+        status: 0,
+        code: 'NETWORK_UNAVAILABLE',
+      })
+    }
+
     const message = err instanceof Error ? err.message : 'Network request failed'
     resolved.logger.warn(`[${tag}] Network error`, { url, method, error: message })
     throw new ApiError(message, { status: 0, code: 'NETWORK_ERROR' })

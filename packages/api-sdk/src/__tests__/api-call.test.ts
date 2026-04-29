@@ -217,14 +217,43 @@ describe('apiCall', () => {
     expect((caught as ApiError).message).not.toContain('[object Object]')
   })
 
-  it('throws network ApiError with status 0 on fetch failure', async () => {
+  it('throws NETWORK_UNAVAILABLE ApiError with friendly message when fetch TypeError "Failed to fetch"', async () => {
     fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch'))
 
     await expect(
       apiCall('/anywhere', { appName: 'ezauth', baseUrl: TEST_BASE, skipAuth: true })
     ).rejects.toMatchObject({
       status: 0,
-      code: 'NETWORK_ERROR',
+      code: 'NETWORK_UNAVAILABLE',
+      message: 'Service unavailable. Please check your connection and try again.',
+    })
+  })
+
+  it('throws NETWORK_UNAVAILABLE on Firefox-style "NetworkError" TypeError', async () => {
+    fetchMock.mockRejectedValueOnce(
+      new TypeError('NetworkError when attempting to fetch resource.')
+    )
+
+    await expect(
+      apiCall('/anywhere', { appName: 'ezauth', baseUrl: TEST_BASE, skipAuth: true })
+    ).rejects.toMatchObject({
+      status: 0,
+      code: 'NETWORK_UNAVAILABLE',
+      message: 'Service unavailable. Please check your connection and try again.',
+    })
+  })
+
+  it('throws NETWORK_UNAVAILABLE on Node undici "fetch failed" with cause.code=ECONNREFUSED', async () => {
+    const err = new TypeError('fetch failed')
+    Object.assign(err, { cause: { code: 'ECONNREFUSED' } })
+    fetchMock.mockRejectedValueOnce(err)
+
+    await expect(
+      apiCall('/anywhere', { appName: 'ezauth', baseUrl: TEST_BASE, skipAuth: true })
+    ).rejects.toMatchObject({
+      status: 0,
+      code: 'NETWORK_UNAVAILABLE',
+      message: 'Service unavailable. Please check your connection and try again.',
     })
   })
 
