@@ -13,7 +13,7 @@ import {
   Input,
   PasswordInput,
 } from '@ezstart/ui/components'
-import { apiCall } from '@ezstart/api-sdk'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -40,6 +40,12 @@ export interface SignInFormTexts {
   minLength: string
   noRedirectUri: string
   fallbackError: string
+  /**
+   * Shown when `apiCall` throws an `ApiError` with `code === 'NETWORK_UNAVAILABLE'`
+   * (server unreachable: offline, DNS down, server crashed). Replaces the
+   * raw browser `"Failed to fetch"` message which is non-actionable.
+   */
+  networkError: string
   // PasswordInput visibility toggle (sr-only)
   showPassword?: string
   hidePassword?: string
@@ -271,7 +277,14 @@ export function SignInForm({
       logger.error('No redirect_uri or onSuccess provided!')
       throw new Error(t.noRedirectUri)
     } catch (err) {
-      const message = err instanceof Error ? err.message : t.fallbackError
+      // Server unreachable (offline / DNS / crashed) — show actionable
+      // i18n message instead of raw browser "Failed to fetch".
+      const message =
+        ApiError.isApiError(err) && err.code === 'NETWORK_UNAVAILABLE'
+          ? t.networkError
+          : err instanceof Error
+            ? err.message
+            : t.fallbackError
       setError(message)
       setLoading(false)
     }

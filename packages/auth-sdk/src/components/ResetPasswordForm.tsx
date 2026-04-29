@@ -40,6 +40,12 @@ export interface ResetPasswordFormTexts {
   tryAgain: string
   backToLogin: string
   fallbackError: string
+  /**
+   * Shown when `apiCall` throws an `ApiError` with `code === 'NETWORK_UNAVAILABLE'`
+   * (server unreachable: offline, DNS down, server crashed). Replaces the
+   * raw browser `"Failed to fetch"` message which is non-actionable.
+   */
+  networkError: string
   // Password strength
   passwordWeak: string
   passwordFair: string
@@ -252,7 +258,13 @@ export function ResetPasswordForm({
         setLoading(false)
         return
       }
-      setError(err instanceof Error ? err.message : t.fallbackError)
+      // Server unreachable (offline / DNS / crashed) — show actionable
+      // i18n message instead of raw browser "Failed to fetch".
+      if (ApiError.isApiError(err) && err.code === 'NETWORK_UNAVAILABLE') {
+        setError(t.networkError)
+      } else {
+        setError(err instanceof Error ? err.message : t.fallbackError)
+      }
     } finally {
       setLoading(false)
     }

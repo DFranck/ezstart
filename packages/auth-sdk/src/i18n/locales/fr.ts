@@ -27,6 +27,7 @@ export const fr: AuthDict = {
     submit: 'Créer un compte',
     submitting: 'Création du compte...',
     fallbackError: 'Une erreur est survenue. Veuillez réessayer.',
+    networkError: 'Service indisponible. Vérifiez votre connexion et réessayez.',
     checkEmail: 'Vérifiez votre email',
     checkEmailDescription:
       'Nous vous avons envoyé un email de vérification. Veuillez cliquer sur le lien dans cet email pour vérifier votre compte.',
@@ -70,6 +71,7 @@ export const fr: AuthDict = {
     minLength: 'Minimum {min} caractères',
     noRedirectUri: 'Aucune URL de redirection configurée',
     fallbackError: 'Une erreur est survenue. Veuillez réessayer.',
+    networkError: 'Service indisponible. Vérifiez votre connexion et réessayez.',
     twoFactorPrompt: 'Entrez le code à 6 chiffres de votre application d’authentification',
     twoFactorCodePlaceholder: '000000',
     twoFactorVerify: 'Vérifier',
@@ -93,6 +95,7 @@ export const fr: AuthDict = {
     success: 'Si un compte existe avec cet email, nous avons envoyé un lien de réinitialisation.',
     backToLogin: 'Retour à la connexion',
     fallbackError: 'Une erreur est survenue. Veuillez réessayer.',
+    networkError: 'Service indisponible. Vérifiez votre connexion et réessayez.',
   },
   resetPassword: {
     cardTitle: 'Réinitialisez votre mot de passe',
@@ -113,6 +116,7 @@ export const fr: AuthDict = {
     tryAgain: 'Réessayer',
     backToLogin: 'Retour à la connexion',
     fallbackError: 'Une erreur est survenue. Veuillez réessayer.',
+    networkError: 'Service indisponible. Vérifiez votre connexion et réessayez.',
     passwordWeak: 'Faible',
     passwordFair: 'Moyen',
     passwordGood: 'Bon',

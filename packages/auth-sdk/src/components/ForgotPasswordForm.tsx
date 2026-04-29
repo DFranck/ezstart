@@ -12,7 +12,7 @@ import {
   FormMessage,
   Input,
 } from '@ezstart/ui/components'
-import { apiCall } from '@ezstart/api-sdk'
+import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -32,6 +32,12 @@ export interface ForgotPasswordFormTexts {
   success: string
   backToLogin: string
   fallbackError: string
+  /**
+   * Shown when `apiCall` throws an `ApiError` with `code === 'NETWORK_UNAVAILABLE'`
+   * (server unreachable: offline, DNS down, server crashed). Replaces the
+   * raw browser `"Failed to fetch"` message which is non-actionable.
+   */
+  networkError: string
 }
 
 export interface ForgotPasswordFormProps {
@@ -152,7 +158,14 @@ export function ForgotPasswordForm({
       logger.info('Password reset email requested')
       onSuccess?.()
     } catch (err) {
-      const message = err instanceof Error ? err.message : t.fallbackError
+      // Server unreachable (offline / DNS / crashed) — show actionable
+      // i18n message instead of raw browser "Failed to fetch".
+      const message =
+        ApiError.isApiError(err) && err.code === 'NETWORK_UNAVAILABLE'
+          ? t.networkError
+          : err instanceof Error
+            ? err.message
+            : t.fallbackError
       setError(message)
     } finally {
       setLoading(false)

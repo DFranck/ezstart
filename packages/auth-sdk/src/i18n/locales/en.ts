@@ -28,6 +28,7 @@ export const en = {
     submit: 'Sign Up',
     submitting: 'Creating account...',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
     checkEmail: 'Check your email',
     checkEmailDescription:
       'We sent you a verification email. Please click the link in the email to verify your account.',
@@ -70,6 +71,7 @@ export const en = {
     minLength: 'Minimum {min} characters',
     noRedirectUri: 'No redirect URI configured',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
     twoFactorPrompt: 'Enter the 6-digit code from your authenticator app',
     twoFactorCodePlaceholder: '000000',
     twoFactorVerify: 'Verify',
@@ -93,6 +95,7 @@ export const en = {
     success: 'If an account with that email exists, we sent a password reset link.',
     backToLogin: 'Back to login',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
   },
   resetPassword: {
     cardTitle: 'Reset your password',
@@ -112,6 +115,7 @@ export const en = {
     tryAgain: 'Try again',
     backToLogin: 'Back to login',
     fallbackError: 'An error occurred. Please try again.',
+    networkError: 'Service unavailable. Please check your connection and try again.',
     passwordWeak: 'Weak',
     passwordFair: 'Fair',
     passwordGood: 'Good',

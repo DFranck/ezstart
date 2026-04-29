@@ -49,6 +49,12 @@ export interface SignUpFormTexts {
   submit: string
   submitting: string
   fallbackError: string
+  /**
+   * Shown when `apiCall` throws an `ApiError` with `code === 'NETWORK_UNAVAILABLE'`
+   * (server unreachable: offline, DNS down, server crashed). Replaces the
+   * raw browser `"Failed to fetch"` message which is non-actionable.
+   */
+  networkError: string
   // Success state
   checkEmail: string
   checkEmailDescription: string
@@ -296,8 +302,14 @@ export function SignUpForm({
       logger.info('Registration successful, verification email sent')
       onSuccess?.()
     } catch (err) {
+      // Server unreachable (offline / DNS / crashed) — show actionable
+      // i18n message instead of raw browser "Failed to fetch".
       const message =
-        ApiError.isApiError(err) || err instanceof Error ? err.message : t.fallbackError
+        ApiError.isApiError(err) && err.code === 'NETWORK_UNAVAILABLE'
+          ? t.networkError
+          : ApiError.isApiError(err) || err instanceof Error
+            ? err.message
+            : t.fallbackError
       setError(message)
     } finally {
       setLoading(false)

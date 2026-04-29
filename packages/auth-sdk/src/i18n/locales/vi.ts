@@ -27,6 +27,7 @@ export const vi: AuthDict = {
     submit: 'Đăng ký',
     submitting: 'Đang tạo tài khoản...',
     fallbackError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    networkError: 'Dịch vụ không khả dụng. Vui lòng kiểm tra kết nối và thử lại.',
     checkEmail: 'Kiểm tra email của bạn',
     checkEmailDescription:
       'Chúng tôi đã gửi email xác minh cho bạn. Vui lòng nhấp vào liên kết trong email để xác minh tài khoản.',
@@ -69,6 +70,7 @@ export const vi: AuthDict = {
     minLength: 'Tối thiểu {min} ký tự',
     noRedirectUri: 'Chưa cấu hình URL chuyển hướng',
     fallbackError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    networkError: 'Dịch vụ không khả dụng. Vui lòng kiểm tra kết nối và thử lại.',
     twoFactorPrompt: 'Nhập mã 6 chữ số từ ứng dụng xác thực của bạn',
     twoFactorCodePlaceholder: '000000',
     twoFactorVerify: 'Xác minh',
@@ -92,6 +94,7 @@ export const vi: AuthDict = {
     success: 'Nếu tồn tại tài khoản với email này, chúng tôi đã gửi liên kết đặt lại mật khẩu.',
     backToLogin: 'Quay lại đăng nhập',
     fallbackError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    networkError: 'Dịch vụ không khả dụng. Vui lòng kiểm tra kết nối và thử lại.',
   },
   resetPassword: {
     cardTitle: 'Đặt lại mật khẩu của bạn',
@@ -111,6 +114,7 @@ export const vi: AuthDict = {
     tryAgain: 'Thử lại',
     backToLogin: 'Quay lại đăng nhập',
     fallbackError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    networkError: 'Dịch vụ không khả dụng. Vui lòng kiểm tra kết nối và thử lại.',
     passwordWeak: 'Yếu',
     passwordFair: 'Trung bình',
     passwordGood: 'Khá',
