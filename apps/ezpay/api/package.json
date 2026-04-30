@@ -26,6 +26,7 @@
     "@ezstart/api-core": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
+    "@ezstart/email-service": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/pay-sdk": "workspace:*",
     "cors": "^2.8.5",

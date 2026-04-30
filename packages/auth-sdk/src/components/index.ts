@@ -80,6 +80,13 @@ export type {
   AuthCardShellProps,
 } from './cards/index.js'
 
+// Cloudflare Turnstile captcha widget — no-op when `siteKey` empty so the
+// SDK ships with captcha disabled by default. Enable by passing
+// `turnstileSiteKey` to `<SignInForm>`, `<SignUpForm>`, `<ForgotPasswordForm>`
+// or by rendering the widget directly in a custom form.
+export { TurnstileWidget } from './TurnstileWidget.js'
+export type { TurnstileWidgetProps } from './TurnstileWidget.js'
+
 // Auth forms
 export { SignInForm } from './SignInForm.js'
 export type { SignInFormProps, SignInFormTexts } from './SignInForm.js'

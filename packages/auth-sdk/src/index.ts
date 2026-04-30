@@ -153,6 +153,11 @@ export type {
   AuthModalShellProps,
 } from './components/modals/index.js'
 
+// Cloudflare Turnstile captcha widget — no-op when `siteKey` empty so the
+// SDK ships with captcha disabled by default.
+export { TurnstileWidget } from './components/TurnstileWidget.js'
+export type { TurnstileWidgetProps } from './components/TurnstileWidget.js'
+
 // Auth form components
 export { SignInForm } from './components/SignInForm.js'
 export type { SignInFormProps, SignInFormTexts } from './components/SignInForm.js'

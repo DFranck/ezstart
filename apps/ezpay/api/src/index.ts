@@ -10,6 +10,7 @@ import {
   startServer,
 } from '@ezstart/api-core'
 import routes, { registries } from './routes/index.js'
+import { startConnectCleanupScheduler } from './services/connect-cleanup.js'
 
 // Fail-fast in production if the S2S key for ezauth cross-service validation
 // is missing — without it `POST /api/keys` can't validate Applications against
@@ -51,6 +52,15 @@ connectToMongo('ezpay')
       logger: server.logger,
     })
   )
+  .then(() => {
+    // Background job — auto-clean pending Connect rows > 7d + send J-6
+    // expiry warning emails. Cf. `services/connect-cleanup.ts` for the
+    // 6d/7d two-step lifecycle. Skipped under NODE_ENV=test so unit tests
+    // don't race the scheduler.
+    if (process.env.NODE_ENV !== 'test') {
+      startConnectCleanupScheduler()
+    }
+  })
   .catch(err => {
     logger.error('Failed to start EZPay API', err)
     process.exit(1)
