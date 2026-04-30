@@ -3,7 +3,7 @@
     "title": "Security",
     "lead": "We take the security of EZAuth and the data we hold for our users very seriously. This page describes how to report a vulnerability, what is in scope, and how we coordinate disclosure.",
     "contactHeading": "Reporting a vulnerability",
-    "contactBody": "Please email security@ezstart.dev with a clear description of the issue, the steps required to reproduce it, and any proof-of-concept material. We acknowledge new reports within two business days. A PGP key for encrypted reports will be published here once finalized.",
+    "contactBody": "Please email security@ezstart.xyz with a clear description of the issue, the steps required to reproduce it, and any proof-of-concept material. We acknowledge new reports within two business days. A PGP key for encrypted reports will be published here once finalized.",
     "scopeHeading": "Scope",
     "scopeBody": "All production EZAuth domains are in scope, including ezauth.ezstart.xyz and the api.ezauth.ezstart.xyz API. Out of scope: denial-of-service, social engineering, physical attacks, and findings that require already-compromised credentials.",
     "disclosureHeading": "Coordinated disclosure",

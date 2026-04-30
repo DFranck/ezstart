@@ -13,7 +13,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
-const SECURITY_EMAIL = 'security@ezstart.dev'
+const SECURITY_EMAIL = 'security@ezstart.xyz'
 const SECURITY_TXT_PATH = '/.well-known/security.txt'
 
 export default function SecurityPage() {
