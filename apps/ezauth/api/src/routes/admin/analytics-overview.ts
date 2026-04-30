@@ -14,7 +14,7 @@ import { getAuthUserModel } from '../../models/auth-user.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getTotpSecretModel } from '../../models/totp-secret.js'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { requireAdmin } from './require-admin.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
 
@@ -300,7 +300,7 @@ const analyticsOverviewController = async (req: Request, res: Response) => {
 
 docRouter.get(
   '/analytics/overview',
-  verifyTokenMiddleware,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
   attachDerivedScope,
   analyticsOverviewController,

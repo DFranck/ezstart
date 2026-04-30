@@ -11,7 +11,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getApplicationModel } from '../../models/application.js'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { requireAdmin } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
@@ -193,7 +193,7 @@ const listUsersController = async (req: Request, res: Response) => {
 
 docRouter.get(
   '/users',
-  verifyTokenMiddleware,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
   attachDerivedScope,
   listUsersController,
