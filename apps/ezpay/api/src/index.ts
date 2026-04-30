@@ -4,10 +4,12 @@ import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import {
   addVersionHeader,
+  attachDerivedMode,
   connectToMongo,
   createApiServer,
   createVersionedRouter,
   startServer,
+  withRequestContextMiddleware,
 } from '@ezstart/api-core'
 import routes, { registries } from './routes/index.js'
 import { startConnectCleanupScheduler } from './services/connect-cleanup.js'
@@ -37,6 +39,18 @@ const { app } = server
 
 // API version headers on every response
 app.use(addVersionHeader('v1'))
+
+// Stripe-pattern test/live mode partition (`standard-saas-data.md` §4):
+// `attachDerivedMode` parses the API key prefix on every request and stamps
+// `req.derivedMode`. `withRequestContextMiddleware` wraps the rest of the
+// request in an AsyncLocalStorage frame so the `testModeScopePlugin` Mongoose
+// hook can scope every find/count/update query without an explicit `req` ref.
+//
+// Placed BEFORE routes — the per-route auth middlewares populate
+// `req.apiKeyEnv` upstream so the resolution chain picks the most reliable
+// signal first.
+app.use(attachDerivedMode)
+app.use(withRequestContextMiddleware)
 
 // Routes available at /api/* and /api/v1/*
 app.use(createVersionedRouter('/api', routes))
