@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Model, Document } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 export interface PromoDocument extends Document {
   code: string
@@ -18,6 +19,12 @@ export interface PromoDocument extends Document {
   campaign?: string
   targetPlanId?: string
   targetUserId?: string
+  /**
+   * Stripe-pattern test/live partition. Promo codes created via the test
+   * mode dashboard cannot be redeemed against live subscriptions and
+   * vice-versa.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -48,6 +55,7 @@ const promoSchema = new Schema<PromoDocument>(
     campaign: { type: String, index: true },
     targetPlanId: { type: String },
     targetUserId: { type: String },
+    isTestMode: { type: Boolean, required: true, default: false, index: true },
   },
   {
     timestamps: true,
@@ -59,6 +67,9 @@ const promoSchema = new Schema<PromoDocument>(
 promoSchema.index({ code: 1, appName: 1 }, { unique: true })
 // Fast lookup for active promos per app
 promoSchema.index({ appName: 1, active: 1 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+promoSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get Promo model attached to shared connection

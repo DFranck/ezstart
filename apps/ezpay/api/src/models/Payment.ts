@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Model, Document } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 export interface DonationMetadata {
   message?: string
@@ -73,6 +74,17 @@ export interface PaymentDocument extends Document {
 
   // Environment
   liveMode: boolean
+
+  /**
+   * Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+   * Mirror of `!liveMode` for the cross-app `testModeScopePlugin` —
+   * `liveMode: true` ↔ `isTestMode: false`, `liveMode: false` ↔
+   * `isTestMode: true`. Both are kept in sync at write time
+   * (see routes/donations/create.ts, purchases/create.ts, ...).
+   *
+   * Migration `migrate-add-is-test-mode.ts` backfills existing docs.
+   */
+  isTestMode: boolean
 
   // Dates
   createdAt: Date
@@ -155,6 +167,10 @@ const paymentSchema = new Schema<PaymentDocument>(
     // Environment — separates test data from production data
     liveMode: { type: Boolean, default: false, index: true },
 
+    // Stripe-pattern test/live partition mirror of `!liveMode`.
+    // Default true to match `liveMode: false` default (un-set → test mode).
+    isTestMode: { type: Boolean, default: true, index: true },
+
     // Dates
     completedAt: { type: Date },
   },
@@ -168,6 +184,10 @@ const paymentSchema = new Schema<PaymentDocument>(
 paymentSchema.index({ projectId: 1, createdAt: -1 })
 paymentSchema.index({ userId: 1, createdAt: -1 })
 paymentSchema.index({ type: 1, status: 1 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4) — auto-scope
+// every read by `req.derivedMode` propagated via AsyncLocalStorage.
+paymentSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get Payment model attached to shared connection

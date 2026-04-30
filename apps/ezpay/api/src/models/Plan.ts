@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Model, Document } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 /**
  * Subscription plan metadata — structured extras attached to a Plan.
@@ -68,6 +69,15 @@ export interface PlanDocument extends Document {
    */
   trialDays?: number
   metadata?: PlanMetadata
+  /**
+   * Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+   * `false` (default) → live plan, returned to live publishable keys.
+   * `true` → test plan, returned to test publishable keys only.
+   *
+   * Plans created via the test mode dashboard / Stripe test secret key
+   * MUST set this `true` so they don't pollute the live pricing page.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -105,6 +115,7 @@ const planSchema = new Schema<PlanDocument>(
     stripePriceId: { type: String },
     trialDays: { type: Number, min: 0, max: 90 },
     metadata: { type: planMetadataSchema, default: undefined },
+    isTestMode: { type: Boolean, required: true, default: false, index: true },
   },
   {
     timestamps: true,
@@ -116,6 +127,9 @@ const planSchema = new Schema<PlanDocument>(
 planSchema.index({ applicationId: 1, active: 1 })
 // Display ordering per application
 planSchema.index({ applicationId: 1, sortOrder: 1 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+planSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get Plan model attached to shared connection.

@@ -56,6 +56,15 @@ export interface ApiKeyDocument extends Document {
    * (e.g. `'system-seed'` for Phase G bootstrap).
    */
   createdBy?: string
+  /**
+   * Stripe-pattern test/live partition. Mirror of `env` —
+   * `env: 'test'` ↔ `isTestMode: true`, `env: 'live'` ↔ `isTestMode: false`.
+   *
+   * Kept as a denormalised flag for analytics / cross-model joins. The auth
+   * middleware itself does NOT scope key lookups by `isTestMode` (chicken-
+   * and-egg: the lookup is what discovers the mode).
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }

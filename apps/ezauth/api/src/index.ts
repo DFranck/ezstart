@@ -5,8 +5,15 @@ import {
   connectToMongo,
   createApiServer,
   createVersionedRouter,
+  initSentry,
   startServer,
 } from '@ezstart/api-core'
+
+// Initialize Sentry BEFORE createApiServer so the error-handler middleware
+// can safely capture exceptions. No-op when SENTRY_DSN is unset (caller can
+// always invoke this regardless of env config). Uses `@sentry/node-core` with
+// ZERO auto-integrations to avoid the 2026-04-25 OTEL/CORS incident on Railway.
+initSentry({ serviceName: 'ezauth' })
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import routes, {
   allRegistries,
