@@ -8,7 +8,7 @@ import type { Express, Router } from 'express'
 import { createServer, type Server as HttpServer } from 'http'
 import * as swaggerUi from 'swagger-ui-express'
 import { silentLogger } from './internal/logger.js'
-import { createErrorHandler } from './middleware/error-handler.js'
+import { createErrorHandler, type ErrorPersistCallback } from './middleware/error-handler.js'
 import { scanRegistriesForMissingDescriptions } from './openapi/check-missing-descriptions.js'
 import type { DbConnector } from './db-connector.js'
 import type { ServerLogger } from './types.js'
@@ -37,6 +37,16 @@ export type StartServerOptions = {
   onShutdown?: () => Promise<void> | void
   /** Logger override. Default is silent (no-op). */
   logger?: ServerLogger
+  /**
+   * Optional fire-and-forget callback invoked on every unhandled error,
+   * BEFORE the response is sent. Used by app-level error persistence (e.g.
+   * write to a local Mongo `ErrorLog` collection so the admin dashboard
+   * can browse them without a third-party tracker).
+   *
+   * See `ErrorPersistCallback` in `./middleware/error-handler.js` for the
+   * contract (must never throw).
+   */
+  persistError?: ErrorPersistCallback
 }
 
 function mountOpenApi(
@@ -116,6 +126,7 @@ export async function startServer(app: Express, opts: StartServerOptions): Promi
     onReady,
     onShutdown,
     logger = silentLogger,
+    persistError,
   } = opts
 
   if (db) {
@@ -130,7 +141,11 @@ export async function startServer(app: Express, opts: StartServerOptions): Promi
   // behaviour: re-applies CORS headers on errors so browsers can read the
   // structured `sendError`-shaped response, and never leaks stack traces
   // in production.
-  app.use(createErrorHandler({ logger }))
+  //
+  // The optional `persistError` callback (e.g. write to a local Mongo
+  // `ErrorLog` collection) lets app-level code participate in the error
+  // pipeline without forcing a third-party tracker dependency.
+  app.use(createErrorHandler({ logger, ...(persistError ? { persistError } : {}) }))
 
   const server = createServer(app)
   onHttpServerReady?.(server)

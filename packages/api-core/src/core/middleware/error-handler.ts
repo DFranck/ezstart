@@ -23,6 +23,24 @@ import { captureException } from '../../observability/index.js'
 import type { ServerLogger } from '../types.js'
 
 /**
+ * Optional callback invoked on every unhandled error BEFORE the response is
+ * sent. Designed for app-level persistence (e.g. write the error to a local
+ * `ErrorLog` Mongo collection so the admin dashboard can browse them
+ * without depending on a third-party error tracker).
+ *
+ * Contract:
+ * - Fire-and-forget — the handler does NOT await the returned promise.
+ *   Implementations MUST swallow their own errors (never throw, never
+ *   reject) so the error pipeline cannot cascade.
+ * - Called with the original `err` + the `req` so the implementation can
+ *   capture user context, route, IP, etc.
+ *
+ * See `apps/ezauth/api/src/services/error-log.service.ts` for a reference
+ * implementation.
+ */
+export type ErrorPersistCallback = (err: unknown, req: Request) => void | Promise<void>
+
+/**
  * Configuration accepted by `createErrorHandler`.
  */
 export type ErrorHandlerConfig = {
@@ -41,6 +59,19 @@ export type ErrorHandlerConfig = {
    * have a specific reason to suppress CORS on errors.
    */
   preserveCors?: boolean
+  /**
+   * Optional pluggable persistence callback for app-level error storage.
+   * Invoked BEFORE the response is sent + BEFORE Sentry capture. Always
+   * fire-and-forget — see {@link ErrorPersistCallback} for the contract.
+   *
+   * @example
+   * ```ts
+   * createErrorHandler({
+   *   persistError: (err, req) => logErrorToDb({ err, req }),
+   * })
+   * ```
+   */
+  persistError?: ErrorPersistCallback
 }
 
 /**
@@ -58,7 +89,12 @@ export type ErrorHandlerConfig = {
  * ```
  */
 export function createErrorHandler(config: ErrorHandlerConfig = {}): ErrorRequestHandler {
-  const { logger, isProd = process.env.NODE_ENV === 'production', preserveCors = true } = config
+  const {
+    logger,
+    isProd = process.env.NODE_ENV === 'production',
+    preserveCors = true,
+    persistError,
+  } = config
 
   return function errorHandler(
     err: unknown,
@@ -87,6 +123,31 @@ export function createErrorHandler(config: ErrorHandlerConfig = {}): ErrorReques
         path: req.path,
         method: req.method,
       })
+    }
+
+    // App-level persistence callback (fire-and-forget). Runs BEFORE Sentry
+    // capture so that — if the dev only wires the local stopgap — at least
+    // the error reaches MongoDB even if Sentry is misconfigured. The callback
+    // contract guarantees it never throws (see ErrorPersistCallback docs).
+    if (persistError) {
+      try {
+        const result = persistError(err, req)
+        if (result && typeof (result as Promise<void>).then === 'function') {
+          ;(result as Promise<void>).catch(persistErr => {
+            // The contract says persistError must swallow its own errors —
+            // if it didn't, log here so the error pipeline doesn't cascade.
+            if (logger?.warn) {
+              logger.warn('persistError callback rejected (contract violation)', {
+                err: persistErr,
+              })
+            }
+          })
+        }
+      } catch (persistErr) {
+        if (logger?.warn) {
+          logger.warn('persistError callback threw (contract violation)', { err: persistErr })
+        }
+      }
     }
 
     // Capture to Sentry (no-op when SENTRY_DSN not set — initSentry returns

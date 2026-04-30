@@ -178,6 +178,92 @@ describe('createErrorHandler — logger integration', () => {
   })
 })
 
+describe('createErrorHandler — persistError callback', () => {
+  it('invokes persistError with err + req before sending the response', async () => {
+    const persistError = vi.fn()
+    const app = express()
+    app.get('/boom', () => {
+      throw new Error('persisted boom')
+    })
+    app.use(createErrorHandler({ persistError }))
+
+    const response = await request(app).get('/boom')
+
+    expect(response.status).toBe(500)
+    expect(persistError).toHaveBeenCalledTimes(1)
+    const [err, req] = persistError.mock.calls[0] ?? []
+    expect(err).toBeInstanceOf(Error)
+    expect((err as Error).message).toBe('persisted boom')
+    expect(req).toMatchObject({ method: 'GET' })
+  })
+
+  it('does not block the response when persistError returns a slow promise', async () => {
+    let resolveSlow: (() => void) | null = null
+    const slowPromise = new Promise<void>(resolve => {
+      resolveSlow = resolve
+    })
+    const persistError = vi.fn(() => slowPromise)
+
+    const app = express()
+    app.get('/boom', () => {
+      throw new Error('async persist')
+    })
+    app.use(createErrorHandler({ persistError }))
+
+    const response = await request(app).get('/boom')
+
+    // The response was sent BEFORE the slow promise resolved — fire-and-forget.
+    expect(response.status).toBe(500)
+    expect(persistError).toHaveBeenCalledTimes(1)
+    // Resolve the slow promise to avoid Vitest hanging on unresolved promises.
+    resolveSlow?.()
+  })
+
+  it('survives a synchronous throw inside persistError (contract violation)', async () => {
+    const warnSpy = vi.fn()
+    const logger = { info: vi.fn(), warn: warnSpy, error: vi.fn(), debug: vi.fn() }
+    const persistError = vi.fn(() => {
+      throw new Error('persist contract violation')
+    })
+
+    const app = express()
+    app.get('/boom', () => {
+      throw new Error('downstream')
+    })
+    app.use(createErrorHandler({ persistError, logger }))
+
+    const response = await request(app).get('/boom')
+
+    expect(response.status).toBe(500)
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('persistError callback threw'),
+      expect.objectContaining({ err: expect.any(Error) })
+    )
+  })
+
+  it('survives a rejected promise from persistError (contract violation)', async () => {
+    const warnSpy = vi.fn()
+    const logger = { info: vi.fn(), warn: warnSpy, error: vi.fn(), debug: vi.fn() }
+    const persistError = vi.fn(() => Promise.reject(new Error('async contract violation')))
+
+    const app = express()
+    app.get('/boom', () => {
+      throw new Error('downstream')
+    })
+    app.use(createErrorHandler({ persistError, logger }))
+
+    const response = await request(app).get('/boom')
+
+    expect(response.status).toBe(500)
+    // Wait one microtask tick for the rejection handler to run.
+    await new Promise(r => setTimeout(r, 10))
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('persistError callback rejected'),
+      expect.objectContaining({ err: expect.any(Error) })
+    )
+  })
+})
+
 describe('createErrorHandler — already-sent responses', () => {
   it('does not throw when res.headersSent is true (streaming case)', async () => {
     // Direct unit test: invoke the handler with a mock res where headersSent

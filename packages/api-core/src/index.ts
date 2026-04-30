@@ -85,7 +85,11 @@ export {
   withRequestContextMiddleware,
 } from './core/middleware/derive-mode.js'
 export { attachDerivedScope, type DerivedScope } from './core/middleware/derive-scope.js'
-export { createErrorHandler, type ErrorHandlerConfig } from './core/middleware/error-handler.js'
+export {
+  createErrorHandler,
+  type ErrorHandlerConfig,
+  type ErrorPersistCallback,
+} from './core/middleware/error-handler.js'
 export { validateBody, validateParams, validateQuery } from './core/middleware/validate.js'
 
 // Request-scoped context (AsyncLocalStorage)
