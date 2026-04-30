@@ -78,6 +78,13 @@ export {
   type AuthMiddlewareConfig,
   type AuthMiddlewares,
 } from './core/middleware/auth.js'
+export {
+  createUnifiedAuthMiddleware,
+  type UnifiedApiKeyResult,
+  type UnifiedAuthConfig,
+  type UnifiedAuthScope,
+  type UnifiedJwtResult,
+} from './core/middleware/unified-auth.js'
 export { createCsrfMiddleware } from './core/middleware/csrf.js'
 export {
   attachDerivedMode,
