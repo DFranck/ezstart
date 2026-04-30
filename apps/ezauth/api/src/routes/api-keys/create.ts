@@ -10,7 +10,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApplicationModel, APPLICATION_SLUG_REGEX } from '../../models/application.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
@@ -179,6 +179,18 @@ const createApiKeyController = async (req: Request, res: Response) => {
       resolvedAppName = '*'
     }
 
+    // Multi-tenancy: when authenticated via an API key bound to a single
+    // Application slug, deny creation of a key for any other slug — even
+    // when the underlying user is a superadmin. Prevents an admin-scoped
+    // key for 'acme' from being used to mint keys for other tenants.
+    if (req.apiKeyAppName && req.apiKeyAppName !== '*' && resolvedAppName !== req.apiKeyAppName) {
+      return sendError(
+        res,
+        `API key restricted to '${req.apiKeyAppName}' cannot create keys for another Application`,
+        403
+      )
+    }
+
     const ApiKey = await getApiKeyModel()
 
     // Enforce per-user limit
@@ -238,7 +250,7 @@ const createApiKeyController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/keys', verifyTokenMiddleware, createApiKeyController, {
+docRouter.post('/keys', authJwtOrKey({ requireKeyScope: 'admin' }), createApiKeyController, {
   summary: 'Create a new API key',
   tags: ['API Keys'],
   bodySchema: createApiKeyBodySchema,

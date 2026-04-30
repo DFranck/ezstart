@@ -8,7 +8,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
@@ -38,6 +38,13 @@ const revokeApiKeyController = async (req: Request, res: Response) => {
       return sendError(res, 'API key not found', 404)
     }
 
+    // Multi-tenancy: an admin-scoped API key bound to one Application slug
+    // cannot revoke keys belonging to other Applications, even when the
+    // owning user is the same. 404 to avoid existence leaks.
+    if (req.apiKeyAppName && req.apiKeyAppName !== '*' && apiKey.appName !== req.apiKeyAppName) {
+      return sendError(res, 'API key not found', 404)
+    }
+
     if (apiKey.status === 'revoked') {
       return sendError(res, 'API key is already revoked', 400)
     }
@@ -63,7 +70,7 @@ const revokeApiKeyController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.delete('/keys/:id', verifyTokenMiddleware, revokeApiKeyController, {
+docRouter.delete('/keys/:id', authJwtOrKey({ requireKeyScope: 'admin' }), revokeApiKeyController, {
   summary: 'Revoke an API key (soft delete)',
   tags: ['API Keys'],
   responseSchema: revokeApiKeyResponseSchema,

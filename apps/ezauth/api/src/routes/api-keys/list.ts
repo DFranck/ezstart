@@ -8,7 +8,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApiKeyUsageModel } from '../../models/api-key-usage.js'
 import { logger } from '@ezstart/logger/server'
@@ -51,7 +51,17 @@ const listApiKeysController = async (req: Request, res: Response) => {
     const ApiKey = await getApiKeyModel()
     const ApiKeyUsage = await getApiKeyUsageModel()
 
-    const keys = await ApiKey.find({ userId }).select('-key').sort({ createdAt: -1 }).lean()
+    // Multi-tenancy: when authenticated via an API key restricted to a single
+    // Application (`appName !== '*'`), narrow the listing so an admin key for
+    // 'acme' cannot enumerate keys belonging to the same user but bound to
+    // other Applications. JWT auth leaves `req.apiKeyAppName` undefined so
+    // the dashboard view is unaffected.
+    const baseQuery: Record<string, unknown> = { userId }
+    if (req.apiKeyAppName && req.apiKeyAppName !== '*') {
+      baseQuery.appName = req.apiKeyAppName
+    }
+
+    const keys = await ApiKey.find(baseQuery).select('-key').sort({ createdAt: -1 }).lean()
 
     // Get current month usage per key
     const monthPrefix = new Date().toISOString().slice(0, 7)
@@ -95,7 +105,7 @@ const listApiKeysController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/keys', verifyTokenMiddleware, listApiKeysController, {
+docRouter.get('/keys', authJwtOrKey({ requireKeyScope: 'admin' }), listApiKeysController, {
   summary: 'List API keys for current user',
   tags: ['API Keys'],
   responseSchema: listApiKeysResponseSchema,
