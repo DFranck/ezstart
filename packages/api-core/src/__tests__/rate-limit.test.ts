@@ -1,12 +1,26 @@
 import express from 'express'
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   createModerateRateLimiter,
   createRateLimiter,
   createStrictRateLimiter,
   createVeryStrictRateLimiter,
 } from '../core/middleware/rate-limit.js'
+
+// The shared `createRateLimiter` is auto-disabled in `NODE_ENV=test` so other
+// suites' supertest fixtures don't share-IP-throttle each other. This file is
+// one of the places we deliberately exercise the limiter, so we opt back in
+// for the duration of the suite via the documented escape hatch.
+let originalForce: string | undefined
+beforeAll(() => {
+  originalForce = process.env.RATE_LIMIT_FORCE
+  process.env.RATE_LIMIT_FORCE = '1'
+})
+afterAll(() => {
+  if (originalForce === undefined) delete process.env.RATE_LIMIT_FORCE
+  else process.env.RATE_LIMIT_FORCE = originalForce
+})
 
 describe('createRateLimiter', () => {
   it('allows requests below the limit and exposes standard rate-limit headers', async () => {

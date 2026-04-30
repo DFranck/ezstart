@@ -58,18 +58,27 @@ describe('createBaseApiServer (agnostic)', () => {
   })
 
   it('applies a global rate limiter when rateLimit is configured', async () => {
-    const { app } = createBaseApiServer({
-      port: 0,
-      serviceName: 'myapp',
-      rateLimit: { preset: 'standard', options: { max: 2, windowMs: 60_000, skipPaths: [] } },
-    })
-    app.get('/api/ping', (_req, res) => res.json({ ok: true }))
+    // Opt back into the limiter — `NODE_ENV=test` auto-skip would otherwise
+    // let every request through and the 429 assertion would fail.
+    const previous = process.env.RATE_LIMIT_FORCE
+    process.env.RATE_LIMIT_FORCE = '1'
+    try {
+      const { app } = createBaseApiServer({
+        port: 0,
+        serviceName: 'myapp',
+        rateLimit: { preset: 'standard', options: { max: 2, windowMs: 60_000, skipPaths: [] } },
+      })
+      app.get('/api/ping', (_req, res) => res.json({ ok: true }))
 
-    await request(app).get('/api/ping')
-    await request(app).get('/api/ping')
-    const blocked = await request(app).get('/api/ping')
-    expect(blocked.status).toBe(429)
-    expect(blocked.body.error.code).toBe('RATE_LIMIT_EXCEEDED')
+      await request(app).get('/api/ping')
+      await request(app).get('/api/ping')
+      const blocked = await request(app).get('/api/ping')
+      expect(blocked.status).toBe(429)
+      expect(blocked.body.error.code).toBe('RATE_LIMIT_EXCEEDED')
+    } finally {
+      if (previous === undefined) delete process.env.RATE_LIMIT_FORCE
+      else process.env.RATE_LIMIT_FORCE = previous
+    }
   })
 
   it('auth middleware accepts a fully custom TokenVerifier (no JWT coupling)', async () => {

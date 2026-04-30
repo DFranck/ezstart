@@ -9,9 +9,21 @@
 
 import express from 'express'
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createRateLimiter } from '../../core/middleware/rate-limit.js'
 import { createBaseApiServer } from '../../core/create-server.js'
+
+// Opt back into the shared rate limiter — the global `NODE_ENV=test`
+// auto-skip would defeat the security assertions here.
+let originalForce: string | undefined
+beforeAll(() => {
+  originalForce = process.env.RATE_LIMIT_FORCE
+  process.env.RATE_LIMIT_FORCE = '1'
+})
+afterAll(() => {
+  if (originalForce === undefined) delete process.env.RATE_LIMIT_FORCE
+  else process.env.RATE_LIMIT_FORCE = originalForce
+})
 
 describe('Rate limiting — security', () => {
   // ─── Attack vector 10: X-Forwarded-For spoofing ───

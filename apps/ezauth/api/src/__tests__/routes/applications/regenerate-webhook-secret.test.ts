@@ -105,14 +105,20 @@ describe('POST /api/applications/:id/regenerate-webhook-secret', () => {
 
       expect(res.status).toBe(200)
 
-      // Audit log is fire-and-forget — give the microtask a tick to flush.
-      await new Promise(resolve => setTimeout(resolve, 50))
-
+      // Audit log is fire-and-forget — poll up to ~2s for the row to land
+      // instead of relying on a single fixed sleep. Avoids flakes when the
+      // mongo write takes longer than the original 50 ms timeout under
+      // parallel test load.
       const AuditLog = await getAuditLogModel()
-      const entries = await AuditLog.find({
-        userId: user._id!.toString(),
-        action: 'webhook_secret_regenerated',
-      }).lean()
+      let entries: Array<{ metadata?: unknown }> = []
+      for (let i = 0; i < 40; i++) {
+        entries = await AuditLog.find({
+          userId: user._id!.toString(),
+          action: 'webhook_secret_regenerated',
+        }).lean()
+        if (entries.length > 0) break
+        await new Promise(resolve => setTimeout(resolve, 50))
+      }
 
       expect(entries).toHaveLength(1)
       expect(entries[0]?.metadata).toMatchObject({
