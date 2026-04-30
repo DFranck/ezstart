@@ -251,6 +251,49 @@ export function useUpdateApplicationTheme(callbacks?: MutationCallbacks<Applicat
 }
 
 /**
+ * Mutation to rotate the per-Application HMAC webhook secret (Stripe
+ * `whsec_*` pattern). The fresh secret is returned in the response body
+ * exactly once — the caller MUST surface it to the user immediately
+ * (reveal-once UX) because no other endpoint exposes the value.
+ *
+ * Server-side requires `{ confirm: true }` in the body as defense-in-depth
+ * against accidental clicks; the dashboard wraps the mutation with an
+ * `<AlertDialog>` confirmation modal as the primary guard.
+ *
+ * On success the cache for `applicationKey(id)` is invalidated so any
+ * downstream `useApplication(id)` consumer refetches the (now-refreshed)
+ * Application document. Note: the cached document does NOT carry the
+ * webhook secret — only this mutation's response does.
+ *
+ * @example
+ * ```tsx
+ * const rotate = useRegenerateWebhookSecret({
+ *   onSuccess: app => setRevealedSecret(app.webhookSecret ?? null),
+ *   onError: () => toast.error('Failed to rotate webhook secret'),
+ * })
+ * rotate.mutate(applicationId)
+ * ```
+ */
+export function useRegenerateWebhookSecret(callbacks?: MutationCallbacks<Application>) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiCall<Application>(`/applications/${id}/regenerate-webhook-secret`, {
+        appName: 'ezauth',
+        method: 'POST',
+        body: { confirm: true },
+      }),
+    onSuccess: (data, id) => {
+      queryClient.invalidateQueries({ queryKey: applicationKey(id) })
+      callbacks?.onSuccess?.(data)
+    },
+    onError: (error: Error) => {
+      callbacks?.onError?.(error)
+    },
+  })
+}
+
+/**
  * Mutation to archive (soft-delete) an Application.
  * Blocks if the app still has active keys unless `cascade=true` is passed.
  *

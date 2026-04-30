@@ -43,6 +43,7 @@ import type { DeveloperPortalTexts } from '../developer/types.js'
 import type { ApplicationDetailViewTexts } from './types.js'
 import { defaultApplicationsFlowTexts } from './types.js'
 import { ApplicationThemeEditor } from './ApplicationThemeEditor.js'
+import { WebhookSecretSection } from './WebhookSecretSection.js'
 
 export interface ApplicationDetailViewProps {
   applicationId: string
@@ -227,6 +228,7 @@ export function ApplicationDetailView({
           <TabsTrigger value="keys">{texts.tabKeys}</TabsTrigger>
           <TabsTrigger value="settings">{texts.tabSettings}</TabsTrigger>
           <TabsTrigger value="theme">{texts.tabTheme}</TabsTrigger>
+          <TabsTrigger value="webhooks">{texts.tabWebhooks}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="keys">
@@ -245,6 +247,10 @@ export function ApplicationDetailView({
             canEnableTheme={canEnableTheme}
             texts={texts}
           />
+        </TabsContent>
+
+        <TabsContent value="webhooks">
+          <WebhookSecretSection application={application} texts={texts} />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">

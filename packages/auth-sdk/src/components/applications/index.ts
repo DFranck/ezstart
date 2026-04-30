@@ -19,6 +19,9 @@ export type { ApplicationDetailViewProps } from './ApplicationDetailView.js'
 export { ApplicationThemeEditor } from './ApplicationThemeEditor.js'
 export type { ApplicationThemeEditorProps } from './ApplicationThemeEditor.js'
 
+export { WebhookSecretSection } from './WebhookSecretSection.js'
+export type { WebhookSecretSectionProps } from './WebhookSecretSection.js'
+
 // Texts types & defaults
 export type {
   ApplicationsListTexts,

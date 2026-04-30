@@ -65,6 +65,7 @@ vi.mock('@ezstart/ui/components', () => {
     H1: passthrough('H1', 'h1'),
     H2: passthrough('H2', 'h2'),
     H3: passthrough('H3', 'h3'),
+    H4: passthrough('H4', 'h4'),
     Label: passthrough('Label', 'label'),
     Card: passthrough('Card'),
     CardHeader: passthrough('CardHeader'),
@@ -140,6 +141,16 @@ vi.mock('../../../react/applications.js', () => ({
   useUpdateApplication: (...args: unknown[]) => mockUseUpdateApplication(...args),
   useUpdateApplicationTheme: (...args: unknown[]) => mockUseUpdateApplicationTheme(...args),
   useRevokeApplication: (...args: unknown[]) => mockUseRevokeApplication(...args),
+  // The WebhookSecretSection mounted by the new "Webhooks" tab consumes this
+  // mutation hook. The detail-view tests render the full Tabs container so
+  // the section is mounted on first paint — provide a no-op stub.
+  useRegenerateWebhookSecret: () => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+    isSuccess: false,
+    isError: false,
+  }),
 }))
 
 const { ApplicationDetailView } =
@@ -294,13 +305,15 @@ describe('ApplicationDetailView', () => {
     })
     const { container } = render(<ApplicationDetailView applicationId="app_1" />)
 
-    // The AlertDialogAction is the button inside AlertDialogFooter — click it
-    // directly (no need to open the dialog since our mock renders everything).
-    const alertDialogAction = container.querySelector(
-      '[data-testid="AlertDialogAction"]'
-    ) as HTMLButtonElement | null
-    expect(alertDialogAction).toBeTruthy()
-    fireEvent.click(alertDialogAction!)
+    // Multiple `AlertDialog*` testids exist in the tree now (archive +
+    // webhook secret rotation). Find the archive-confirmation action by
+    // its localized button text instead of relying on the testid alone.
+    const archiveActions = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[data-testid="AlertDialogAction"]')
+    )
+    const archiveButton = archiveActions.find(b => /archive/i.test(b.textContent ?? ''))
+    expect(archiveButton).toBeTruthy()
+    fireEvent.click(archiveButton!)
 
     expect(mutate).toHaveBeenCalledWith({ id: 'app_1', cascade: true })
   })

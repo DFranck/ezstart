@@ -59,6 +59,8 @@ export interface ApplicationDetailViewTexts {
   tabKeys: string
   tabSettings: string
   tabTheme: string
+  /** Label for the new "Webhooks" tab housing the per-Application secret + endpoint UI. */
+  tabWebhooks: string
   loading: string
   errorTitle: string
   errorDescription: string
@@ -115,6 +117,47 @@ export interface ApplicationDetailViewTexts {
   themePreviewTitle: string
   themePreviewSubtitle: string
   themePreviewSignInCta: string
+  // Webhook secret tab — Stripe-pattern reveal-once + rotate flow
+  /** Card title for the webhook section. */
+  webhookTitle: string
+  /** Help text describing the per-Application HMAC secret + how it's used. */
+  webhookDescription: string
+  /** Label for the masked secret display. */
+  webhookSecretLabel: string
+  /** Help text under the masked secret (explains why the value is hidden). */
+  webhookSecretMaskedHelp: string
+  /** Banner title shown right after a successful regenerate (reveal-once). */
+  webhookRevealTitle: string
+  /** Banner body explaining the value will not be shown again. */
+  webhookRevealHelp: string
+  /** Copy button label inside the reveal banner. */
+  webhookCopy: string
+  /** Toast confirmation when the secret has been copied to the clipboard. */
+  webhookCopySuccess: string
+  /** "Hide" button label after the user has copied the secret. */
+  webhookHide: string
+  /** Button label that triggers the regenerate confirmation modal. */
+  webhookRegenerate: string
+  /** Spinner-state label while the rotation is in flight. */
+  webhookRegenerating: string
+  /** Toast confirmation after a successful rotation. */
+  webhookRegenerateSuccess: string
+  /** Toast error when the rotation fails. */
+  webhookRegenerateFailed: string
+  /** AlertDialog title — confirmation step before rotation. */
+  webhookConfirmTitle: string
+  /** AlertDialog body — explains the rotation is destructive. */
+  webhookConfirmDescription: string
+  /** AlertDialog cancel button. */
+  webhookConfirmCancel: string
+  /** AlertDialog confirm button — proceeds with the rotation. */
+  webhookConfirmSubmit: string
+  /** Label for the optional webhook endpoint URL field (read-only display). */
+  webhookEndpointLabel: string
+  /** Placeholder when no custom endpoint is configured. */
+  webhookEndpointEmpty: string
+  /** Help text under the endpoint URL field. */
+  webhookEndpointHelp: string
 }
 
 export interface ApplicationsFlowTexts {
@@ -178,6 +221,7 @@ export const defaultApplicationsFlowTexts: ApplicationsFlowTexts = {
     tabKeys: 'API Keys',
     tabSettings: 'Settings',
     tabTheme: 'Theme',
+    tabWebhooks: 'Webhooks',
     loading: 'Loading application...',
     errorTitle: 'Failed to load application',
     errorDescription: 'Something went wrong. Please try again.',
@@ -224,5 +268,30 @@ export const defaultApplicationsFlowTexts: ApplicationsFlowTexts = {
     themePreviewTitle: 'Welcome back',
     themePreviewSubtitle: 'Sign in to continue',
     themePreviewSignInCta: 'Sign in',
+    webhookTitle: 'Webhook secret',
+    webhookDescription:
+      'Outbound webhooks (subscription lifecycle events, etc.) are signed with this per-Application HMAC secret. Verify the signature on your receiver before trusting the payload.',
+    webhookSecretLabel: 'Secret',
+    webhookSecretMaskedHelp:
+      'For security, the full value is only shown once — right after creation or rotation. Regenerate to obtain a new value if you have lost the original.',
+    webhookRevealTitle: 'Copy this secret now',
+    webhookRevealHelp:
+      'This is the only time the full value will be displayed. Store it in your receiver as an environment variable, then click Hide.',
+    webhookCopy: 'Copy',
+    webhookCopySuccess: 'Webhook secret copied to clipboard',
+    webhookHide: 'Hide',
+    webhookRegenerate: 'Regenerate secret',
+    webhookRegenerating: 'Regenerating…',
+    webhookRegenerateSuccess: 'Webhook secret rotated',
+    webhookRegenerateFailed: 'Failed to rotate webhook secret',
+    webhookConfirmTitle: 'Rotate webhook secret?',
+    webhookConfirmDescription:
+      'The current secret will stop working immediately. Make sure you can update your receiver before continuing.',
+    webhookConfirmCancel: 'Cancel',
+    webhookConfirmSubmit: 'Rotate secret',
+    webhookEndpointLabel: 'Endpoint URL',
+    webhookEndpointEmpty: 'Default endpoint (use the canonical EZAuth subscriptions URL)',
+    webhookEndpointHelp:
+      'Reserved for external consumers that host their own receiver. Leave empty to use the default.',
   },
 }
