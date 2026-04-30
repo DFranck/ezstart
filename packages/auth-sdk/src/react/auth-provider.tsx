@@ -18,6 +18,8 @@ import type {
   PublishableKeyConfig,
 } from '../core/types.js'
 import { AuthContext, AuthStoreContext } from './__contexts.js'
+import { IdleTimeoutManager } from './idle-timeout-manager.js'
+import { defaultIdleWarningTexts, type IdleWarningTexts } from './idle-warning-toast.js'
 import { type AuthState, type AuthStoreApi, createAuthStore, getLegacyStorageKey } from './store.js'
 
 /**
@@ -199,6 +201,41 @@ export interface AuthProviderProps {
     signOutError: string
   }>
 
+  // ── Idle timeout (auto-logout on inactivity) ───────────────────────────
+  //
+  // Opt-in. When `idleTimeoutMs` is a positive number, the provider mounts
+  // an `<IdleTimeoutManager>` child that watches DOM activity events and
+  // auto-fires `useAuth().logout()` after the configured period. A warning
+  // toast surfaces `idleWarningMs` before the auto-logout (default 60s)
+  // with a "Stay signed in" CTA that resets the timer.
+  //
+  // Set to `null` / `undefined` (default) to disable.
+  //
+  // Recommended consumer values:
+  // - `15 * 60 * 1000` (15 minutes — security-focused dashboards)
+  // - `30 * 60 * 1000` (30 minutes — lax / consumer apps)
+
+  /**
+   * Auto-logout window in milliseconds. Pass `null` to disable (default).
+   * Only fires while the user is authenticated.
+   */
+  idleTimeoutMs?: number | null
+  /**
+   * How long before the auto-logout the warning toast surfaces.
+   * Defaults to `60_000` (60 seconds).
+   */
+  idleWarningMs?: number
+  /**
+   * Override the watched DOM activity events. Defaults to mouse, keyboard,
+   * touch, scroll and focus.
+   */
+  idleEvents?: readonly string[]
+  /**
+   * Localized labels for the idle warning + signed-out toast. Falls back
+   * to {@link defaultIdleWarningTexts} (English).
+   */
+  idleWarningTexts?: IdleWarningTexts
+
   // ── Deprecated props (backward compat) ────────────────────────────────
 
   /** @deprecated Use `authMode` instead. */
@@ -227,6 +264,10 @@ export function AuthProvider({
   redirectAfterLogout = '/',
   onLogout,
   logoutTexts,
+  idleTimeoutMs,
+  idleWarningMs,
+  idleEvents,
+  idleWarningTexts,
 }: AuthProviderProps) {
   // ── Per-Provider Zustand store (Clerk-style SSR setup) ──────────────────
   //
@@ -603,9 +644,39 @@ export function AuthProvider({
     ]
   )
 
+  // Resolve idle-warning labels once — the manager merges English defaults
+  // when the consumer doesn't pass a localized bundle.
+  const resolvedIdleTexts = useMemo<IdleWarningTexts>(
+    () => ({
+      title: idleWarningTexts?.title ?? defaultIdleWarningTexts.title,
+      description: idleWarningTexts?.description ?? defaultIdleWarningTexts.description,
+      stayButton: idleWarningTexts?.stayButton ?? defaultIdleWarningTexts.stayButton,
+      signedOutMessage:
+        idleWarningTexts?.signedOutMessage ?? defaultIdleWarningTexts.signedOutMessage,
+    }),
+    [
+      idleWarningTexts?.title,
+      idleWarningTexts?.description,
+      idleWarningTexts?.stayButton,
+      idleWarningTexts?.signedOutMessage,
+    ]
+  )
+
+  // The manager is rendered as a child of `<AuthContext.Provider>` so it
+  // can call `useAuth().logout()` inside the same Context tree. Mounted
+  // unconditionally — the hook itself is a no-op when `idleTimeoutMs` is
+  // falsy or the user is unauthenticated, so no extra gate is needed here.
   return (
     <AuthStoreContext.Provider value={store}>
-      <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+      <AuthContext.Provider value={contextValue}>
+        <IdleTimeoutManager
+          idleMs={idleTimeoutMs}
+          warningMs={idleWarningMs}
+          events={idleEvents}
+          texts={resolvedIdleTexts}
+        />
+        {children}
+      </AuthContext.Provider>
     </AuthStoreContext.Provider>
   )
 }
