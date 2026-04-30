@@ -214,24 +214,28 @@ function StatsGrid({ loading, data, t }: SubProps) {
 
   const revenueDisplay = formatRevenueByCurrency(data.revenueByCurrency)
   const mrrDisplay = formatRevenueByCurrency(data.mrrByCurrency)
+  const totalPayments = safeCount(data.totalPayments)
+  const completedPayments = safeCount(data.completedPayments)
+  const failedPayments = safeCount(data.failedPayments)
+  const activeSubscriptions = safeCount(data.activeSubscriptions)
 
   return (
     <Div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       <SimpleStatCard label={t.totalRevenue} value={revenueDisplay} />
-      <SimpleStatCard label={t.totalPayments} value={data.totalPayments} />
+      <SimpleStatCard label={t.totalPayments} value={totalPayments} />
       <SimpleStatCard
         label={t.completedPayments}
-        value={data.completedPayments}
+        value={completedPayments}
         trendBadge={
-          data.completedPayments > 0 ? (
+          completedPayments > 0 ? (
             <Badge variant="success" size="xs">
-              {data.completedPayments}
+              {completedPayments}
             </Badge>
           ) : undefined
         }
       />
-      <SimpleStatCard label={t.failedPayments} value={data.failedPayments} />
-      <SimpleStatCard label={t.activeSubscriptions} value={data.activeSubscriptions} />
+      <SimpleStatCard label={t.failedPayments} value={failedPayments} />
+      <SimpleStatCard label={t.activeSubscriptions} value={activeSubscriptions} />
       <SimpleStatCard label={t.mrr} value={mrrDisplay} />
     </Div>
   )
@@ -266,7 +270,7 @@ function RevenueTrendChart({ loading, data, t }: SubProps) {
     )
   }
 
-  const total = data.revenueTrend.reduce((sum, p) => sum + p.total, 0)
+  const total = data.revenueTrend.reduce((sum, p) => sum + safeAmount(p.total), 0)
   if (total === 0) {
     return (
       <Div className="flex items-center justify-center h-[260px]">
@@ -278,7 +282,7 @@ function RevenueTrendChart({ loading, data, t }: SubProps) {
   const chartData = data.revenueTrend.map(p => ({
     date: p.date,
     label: shortDateLabel(p.date),
-    revenue: p.total,
+    revenue: safeAmount(p.total),
   }))
 
   const chartConfig = {
@@ -347,7 +351,15 @@ function TopAppsTable({ loading, data, t }: SubProps) {
     )
   }
 
-  const max = Math.max(...data.topAppsByRevenue.map(a => a.total), 1)
+  // Defensive: coerce per-row amounts so the formatter never receives NaN /
+  // undefined / null. Backend should always send a number, but a stale
+  // deployment / mismatched API contract would otherwise render `NaN €` cells.
+  const safeRows = data.topAppsByRevenue.map(app => ({
+    ...app,
+    total: safeAmount(app.total),
+    currency: app.currency || 'EUR',
+  }))
+  const max = Math.max(...safeRows.map(a => a.total), 1)
 
   return (
     <Div className="space-y-2">
@@ -355,7 +367,7 @@ function TopAppsTable({ loading, data, t }: SubProps) {
         <P className="text-xs text-muted-foreground">{t.topAppsAppColumn}</P>
         <P className="text-xs text-muted-foreground">{t.topAppsRevenueColumn}</P>
       </Div>
-      {data.topAppsByRevenue.map(app => {
+      {safeRows.map(app => {
         const widthPct = Math.max(4, Math.round((app.total / max) * 100))
         return (
           <Div key={app.appName} className="space-y-1">
@@ -415,9 +427,34 @@ function ComingSoonState({ t }: { t: Required<PayOverviewSectionTexts> }) {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Coerce any value to a finite non-negative integer count. Returns 0 for
+ * undefined / null / NaN / negative inputs. Defends rendering against API
+ * shape drift or in-flight schema migrations.
+ *
+ * @internal
+ */
+export function safeCount(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return 0
+  return Math.trunc(value)
+}
+
+/**
+ * Coerce any value to a finite number suitable for `formatCurrency()`.
+ * Returns 0 for undefined / null / NaN / non-numeric inputs. The formatter
+ * uses `Intl.NumberFormat` which renders `NaN` as `"NaN €"` — exactly the
+ * bug PAY-OVERVIEW-001 surfaced.
+ *
+ * @internal
+ */
+export function safeAmount(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0
+  return value
+}
+
 function formatRevenueByCurrency(entries: { currency: string; total: number }[]): string {
   if (!entries || entries.length === 0) return formatCurrency(0)
-  return entries.map(e => formatCurrency(e.total, e.currency)).join(' | ')
+  return entries.map(e => formatCurrency(safeAmount(e.total), e.currency || 'EUR')).join(' | ')
 }
 
 /**
