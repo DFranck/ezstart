@@ -225,3 +225,138 @@ describe('testModeScopePlugin (ezauth) — Application auto-scoping', () => {
     })
   })
 })
+
+describe('testModeScopePlugin (ezauth) — backward compat with pre-V2 docs (no isTestMode field)', () => {
+  beforeAll(async () => {
+    await setupTestDatabase()
+  })
+
+  afterAll(async () => {
+    await teardownTestDatabase()
+  })
+
+  beforeEach(async () => {
+    // Reset Application collection and seed a mix of:
+    //  - 1 live doc (isTestMode: false — explicit, post-V2)
+    //  - 1 test doc (isTestMode: true)
+    //  - 1 legacy doc (isTestMode missing entirely — pre-V2, before backfill)
+    //
+    // The legacy doc is inserted via the raw driver to bypass the Mongoose
+    // schema default (which would silently fill `isTestMode: false`).
+    const { getApplicationModel } = await import('../../models/application.js')
+    const Application = await getApplicationModel()
+    await Application.deleteMany({})
+
+    await Application.create([
+      {
+        slug: 'post-v2-live',
+        name: 'Post V2 Live',
+        ownerId: 'owner-1',
+        themeEnabled: false,
+        isPlatformOwned: false,
+        requireEmailVerification: false,
+        isTestMode: false,
+      },
+      {
+        slug: 'post-v2-test',
+        name: 'Post V2 Test',
+        ownerId: 'owner-1',
+        themeEnabled: false,
+        isPlatformOwned: false,
+        requireEmailVerification: false,
+        isTestMode: true,
+      },
+    ])
+
+    // Raw driver insert — Mongoose schema defaults are NOT applied, so the
+    // resulting doc literally has no `isTestMode` field. Mirrors the state
+    // of any prod doc that predates the V2 migration.
+    const collection = Application.collection
+    await collection.insertOne({
+      slug: 'pre-v2-legacy',
+      name: 'Pre V2 Legacy',
+      ownerId: 'owner-1',
+      themeEnabled: false,
+      isPlatformOwned: false,
+      requireEmailVerification: false,
+      // Required by the schema but irrelevant to the mode test — give them
+      // sane defaults so the doc is otherwise queryable.
+      status: 'active',
+      webhookSecret: 'whsec_legacy_' + 'a'.repeat(56),
+      webhookEndpointUrl: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      // Intentionally NO `isTestMode` field — that's the whole point.
+    })
+  })
+
+  it('live mode includes docs with isTestMode=undefined (backward compat for pre-V2 data)', async () => {
+    const { getApplicationModel } = await import('../../models/application.js')
+    const Application = await getApplicationModel()
+
+    await withRequestContext({ derivedMode: 'live' }, async () => {
+      const apps = await Application.find({}).lean()
+      const slugs = apps.map(a => a.slug).sort()
+      // Both `post-v2-live` (isTestMode=false) AND `pre-v2-legacy` (no field)
+      // must surface — the legacy doc would otherwise vanish in dev/prod
+      // until the migration runs.
+      expect(slugs).toEqual(['post-v2-live', 'pre-v2-legacy'])
+    })
+  })
+
+  it('live mode still includes docs with isTestMode=false (existing behavior unchanged)', async () => {
+    const { getApplicationModel } = await import('../../models/application.js')
+    const Application = await getApplicationModel()
+
+    await withRequestContext({ derivedMode: 'live' }, async () => {
+      const liveDoc = await Application.findOne({ slug: 'post-v2-live' }).lean()
+      expect(liveDoc).not.toBeNull()
+      expect(liveDoc?.isTestMode).toBe(false)
+    })
+  })
+
+  it('live mode excludes docs with isTestMode=true (existing behavior unchanged)', async () => {
+    const { getApplicationModel } = await import('../../models/application.js')
+    const Application = await getApplicationModel()
+
+    await withRequestContext({ derivedMode: 'live' }, async () => {
+      const testDoc = await Application.findOne({ slug: 'post-v2-test' }).lean()
+      // Test doc invisible from live ctx — strict.
+      expect(testDoc).toBeNull()
+    })
+  })
+
+  it('test mode includes docs with isTestMode=true ONLY (excludes undefined and false — strict opt-in)', async () => {
+    const { getApplicationModel } = await import('../../models/application.js')
+    const Application = await getApplicationModel()
+
+    await withRequestContext({ derivedMode: 'test' }, async () => {
+      const apps = await Application.find({}).lean()
+      // Only the explicit `isTestMode: true` doc — legacy (undefined) does
+      // NOT coalesce as test (test data is opt-in, never accidental).
+      expect(apps).toHaveLength(1)
+      expect(apps[0]?.slug).toBe('post-v2-test')
+      expect(apps[0]?.isTestMode).toBe(true)
+    })
+  })
+
+  it('test mode countDocuments excludes undefined-isTestMode legacy docs', async () => {
+    const { getApplicationModel } = await import('../../models/application.js')
+    const Application = await getApplicationModel()
+
+    await withRequestContext({ derivedMode: 'test' }, async () => {
+      // 1 = `post-v2-test` only. Legacy (`pre-v2-legacy`) MUST NOT count.
+      expect(await Application.countDocuments({})).toBe(1)
+    })
+  })
+
+  it('live mode countDocuments includes legacy docs (backward compat)', async () => {
+    const { getApplicationModel } = await import('../../models/application.js')
+    const Application = await getApplicationModel()
+
+    await withRequestContext({ derivedMode: 'live' }, async () => {
+      // 2 = `post-v2-live` (false) + `pre-v2-legacy` (undefined).
+      expect(await Application.countDocuments({})).toBe(2)
+    })
+  })
+})
