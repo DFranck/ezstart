@@ -17,7 +17,7 @@
 
 import express from 'express'
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import registerRouter from '../../../routes/auth/register.js'
 import forgotPasswordRouter from '../../../routes/auth/forgot-password.js'
@@ -97,6 +97,19 @@ function buildApp(router: express.Router): express.Express {
 }
 
 describe('Auth routes — strict rate limit wiring', () => {
+  // The shared `createRateLimiter` is auto-disabled in `NODE_ENV=test` so other
+  // suites' supertest fixtures don't share-IP-throttle each other. This file
+  // is the ONE place we deliberately exercise the limiter, so we opt back in.
+  let originalForce: string | undefined
+  beforeAll(() => {
+    originalForce = process.env.RATE_LIMIT_FORCE
+    process.env.RATE_LIMIT_FORCE = '1'
+  })
+  afterAll(() => {
+    if (originalForce === undefined) delete process.env.RATE_LIMIT_FORCE
+    else process.env.RATE_LIMIT_FORCE = originalForce
+  })
+
   it.each(CASES)(
     '$label: $max requests pass, the next returns 429 with RATE_LIMIT_EXCEEDED + Retry-After',
     async ({ router, method, path, body, max }) => {

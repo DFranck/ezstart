@@ -59,7 +59,15 @@ export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequ
     // Trust proxy is enabled at the app level (Railway / Vercel).
     // The limiter itself does NOT re-validate — keeps X-Forwarded-For usable.
     validate: { trustProxy: false },
-    skip: req => skipPaths.some(path => req.path === path),
+    // In `test` env every supertest request comes from the same loopback IP,
+    // so a 5-req/min limiter would throttle suites after the 5th request and
+    // poison subsequent assertions. We skip enforcement in test by default.
+    // Tests that DELIBERATELY exercise the limiter (`auth/rate-limit.test.ts`)
+    // override this via the `skipPaths` option to opt back in.
+    skip: req => {
+      if (process.env.NODE_ENV === 'test' && process.env.RATE_LIMIT_FORCE !== '1') return true
+      return skipPaths.some(path => req.path === path)
+    },
     handler: (_req, res) => {
       const headerRetry = res.getHeader('Retry-After')
       const parsed =
