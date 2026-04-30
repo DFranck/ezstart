@@ -4,9 +4,11 @@ import { useAuth, useMyApplications } from '@ezstart/auth-sdk'
 import {
   ApplicationsList,
   DeleteAccountSection,
+  EmailChangeForm,
   EZAuthDashboard,
   type ApplicationsFlowTexts,
   type DeleteAccountSectionTexts,
+  type EmailChangeFormTexts,
   type EZAuthDashboardExtraSection,
   type EZAuthDashboardTexts,
 } from '@ezstart/auth-sdk/components'
@@ -16,7 +18,7 @@ import {
   ManageSubscriptionButton,
   type InvoiceHistorySectionTexts,
 } from '@ezstart/pay-sdk/components'
-import { Button, Card, CardContent, Div, Icon, P, Span, Spinner } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Div, H3, Icon, P, Span, Spinner } from '@ezstart/ui/components'
 import type { ApiKeyItem, Application, AuditLogEntry } from '@ezstart/auth-sdk'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -68,6 +70,7 @@ export function DashboardClient({
   const tOAuth = useTranslations('dashboard.oauthProviders')
   const tInvoices = useTranslations('dashboard.invoices')
   const tDeleteAccount = useTranslations('account.deleteAccount')
+  const tEmailChange = useTranslations('emailChange')
   const tAuditLog = useTranslations('dashboard.auditLog')
   const tAuditLogActions = useTranslations('dashboard.auditLog.actions')
   const tUserSettings = useTranslations('dashboard.userSettings')
@@ -343,6 +346,10 @@ export function DashboardClient({
         logout: tAuditLogActions('logout'),
         password_change: tAuditLogActions('password_change'),
         email_change: tAuditLogActions('email_change'),
+        email_change_requested: tAuditLogActions('email_change_requested'),
+        email_change_completed: tAuditLogActions('email_change_completed'),
+        magic_link_requested: tAuditLogActions('magic_link_requested'),
+        magic_link_login: tAuditLogActions('magic_link_login'),
         oauth_link: tAuditLogActions('oauth_link'),
         oauth_unlink: tAuditLogActions('oauth_unlink'),
         '2fa_enabled': tAuditLogActions('2fa_enabled'),
@@ -612,6 +619,50 @@ export function DashboardClient({
     ),
   }
 
+  // Email change extra section — sits next to Account/Settings in the
+  // sidebar. Sends a verification link to the new address; clicking the
+  // link consumes the request and updates the user record.
+  const emailChangeTexts: Partial<EmailChangeFormTexts> = {
+    title: tEmailChange('title'),
+    description: tEmailChange('description'),
+    currentEmailLabel: tEmailChange('currentEmailLabel'),
+    newEmailLabel: tEmailChange('newEmailLabel'),
+    newEmailPlaceholder: tEmailChange('newEmailPlaceholder'),
+    currentPasswordLabel: tEmailChange('currentPasswordLabel'),
+    currentPasswordPlaceholder: tEmailChange('currentPasswordPlaceholder'),
+    currentPasswordHelp: tEmailChange('currentPasswordHelp'),
+    submitButton: tEmailChange('submitButton'),
+    submittingButton: tEmailChange('submittingButton'),
+    required: tEmailChange('required'),
+    invalidEmail: tEmailChange('invalidEmail'),
+    successTitle: tEmailChange('successTitle'),
+    successMessage: tEmailChange('successMessage'),
+    resetButton: tEmailChange('resetButton'),
+    errorGeneric: tEmailChange('errorGeneric'),
+    errorSameEmail: tEmailChange('errorSameEmail'),
+    errorTaken: tEmailChange('errorTaken'),
+    errorInvalidPassword: tEmailChange('errorInvalidPassword'),
+    networkError: tEmailChange('networkError'),
+  }
+
+  const emailChangeSection: EZAuthDashboardExtraSection = {
+    id: 'email-change',
+    label: tEmailChange('title'),
+    icon: 'lucide:Mail',
+    visibility: 'always',
+    content: (
+      <Div className="space-y-6 w-full max-w-2xl mx-auto">
+        <Card>
+          <CardContent className="p-6">
+            <H3 className="text-sm font-medium text-foreground mb-1">{tEmailChange('title')}</H3>
+            <P className="text-sm text-muted-foreground mb-4">{tEmailChange('description')}</P>
+            <EmailChangeForm texts={emailChangeTexts} appName="ezauth" locale={locale} />
+          </CardContent>
+        </Card>
+      </Div>
+    ),
+  }
+
   return (
     <EZAuthDashboard
       appName="ezauth"
@@ -624,7 +675,7 @@ export function DashboardClient({
         applications: applicationsSlot,
         billing: billingSlot,
       }}
-      extraSections={[dangerZoneSection]}
+      extraSections={[emailChangeSection, dangerZoneSection]}
       sidebarFooterExtra={platformAdminCta}
       topBarExtra={<EzauthScopeIndicator scope="user" />}
       initialKeys={initialKeys}
