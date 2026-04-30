@@ -274,7 +274,7 @@ describe('DELETE /api/auth/account', () => {
     expect(res.body.data.scheduledDeletionAt).toBeTruthy()
   })
 
-  it('is idempotent — second call returns same scheduled date', async () => {
+  it('is idempotent — second call rejected with 401 (session invalidated after soft-delete)', async () => {
     const user = await createUser({
       email: 'idem@example.com',
       username: 'idemuser',
@@ -287,15 +287,16 @@ describe('DELETE /api/auth/account', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ confirmation: 'idem@example.com', password: 'StrongPass1!' })
     expect(first.status).toBe(200)
-    const firstSchedule = first.body.data.scheduledDeletionAt
+    expect(first.body.data.scheduledDeletionAt).toBeTruthy()
 
+    // After soft-delete, the JWT is invalidated by verifyTokenMiddleware
+    // (Stripe/Clerk/Auth0 pattern: deletion = immediate session invalidation).
+    // Idempotency = the second call does NOT crash and the JWT is properly rejected.
     const second = await request(app)
       .delete('/api/auth/account')
       .set('Authorization', `Bearer ${token}`)
       .send({ confirmation: 'idem@example.com', password: 'StrongPass1!' })
-    expect(second.status).toBe(200)
-    expect(second.body.data.scheduledDeletionAt).toBe(firstSchedule)
-    expect(second.body.data.message).toContain('already scheduled')
+    expect(second.status).toBe(401)
   })
 
   it('rejects validation error on empty confirmation', async () => {
