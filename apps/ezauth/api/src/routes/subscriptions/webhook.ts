@@ -5,8 +5,17 @@
  * Auth (two layers):
  *   1. `X-API-Key` — must be an active EZAuth API key with `scope: 'admin'`.
  *   2. `X-EZStart-Signature` — HMAC-SHA256 over `"{timestamp}.{body}"` using
- *      the shared `EZAUTH_WEBHOOK_SECRET`. Protects against key leak AND
- *      against downstream tampering once the payload leaves EZPay.
+ *      the **per-Application** `webhookSecret` stored on the target
+ *      `Application` document (Stripe `whsec_*` pattern). Protects against
+ *      key leak AND against downstream tampering once the payload leaves
+ *      EZPay.
+ *
+ * Two-pass body parsing: the controller parses `req.body` first to extract
+ * `applicationId`, then loads the Application's `webhookSecret` (with
+ * `.select('+webhookSecret')`) and verifies the signature. This means a
+ * caller MUST send a parseable JSON body that includes `applicationId`
+ * before the signature can be checked — the schema parse short-circuits
+ * with a 400 if not.
  *
  * Replay protection:
  *   - Timestamp (in the signed payload) must be within +/- 5 minutes.
@@ -163,15 +172,7 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
       return sendError(res, 'Admin scope required', 403, { code: 'FORBIDDEN' })
     }
 
-    // ---- 2. HMAC signature --------------------------------------------
-    const secret = process.env.EZAUTH_WEBHOOK_SECRET
-    if (!secret) {
-      logger.error(
-        '[subscriptions/webhook] EZAUTH_WEBHOOK_SECRET not configured — rejecting request'
-      )
-      return sendError(res, 'Webhook not configured', 503, { code: 'WEBHOOK_NOT_CONFIGURED' })
-    }
-
+    // ---- 2. Parse signature header -----------------------------------
     const parsedSig = parseSignatureHeader(req.headers['x-ezstart-signature'] as string | undefined)
     if (!parsedSig) {
       logger.warn('[subscriptions/webhook] rejected — missing/malformed signature header', {
@@ -183,11 +184,43 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     }
 
     // ---- 3. Body schema ------------------------------------------------
+    // Parse the body BEFORE the HMAC check — we need `applicationId` to
+    // look up the per-Application webhook secret. A caller cannot escape
+    // signature verification by sending unparseable garbage: the schema
+    // parse fails fast with a 400 and never reaches the HMAC step.
     const parsed = subscriptionWebhookBodySchema.safeParse(req.body)
     if (!parsed.success) {
       return sendValidationError(res, parsed.error, 400, 'Invalid webhook body')
     }
     const body: SubscriptionWebhookBody = parsed.data
+
+    // ---- 4. Resolve per-Application webhookSecret + verify HMAC -------
+    // The Application's `webhookSecret` is a credential — `select: false`
+    // on the schema means we MUST opt-in via `.select('+webhookSecret')`.
+    const Application = await getApplicationModel()
+    const application = await Application.findById(body.applicationId)
+      .select('+webhookSecret')
+      .lean()
+    if (!application) {
+      logger.warn('[subscriptions/webhook] rejected — Application not found', {
+        applicationId: body.applicationId,
+        stripeEventId: body.stripeEventId,
+      })
+      return sendError(res, 'Application not found', 404, { code: 'APPLICATION_NOT_FOUND' })
+    }
+    if (!application.webhookSecret) {
+      // Should be impossible — `webhookSecret` is required + auto-defaulted
+      // on creation. If we reach here, the document predates the field and
+      // was not picked up by the backfill script.
+      logger.error('[subscriptions/webhook] Application missing webhookSecret', {
+        applicationId: body.applicationId,
+        slug: application.slug,
+      })
+      return sendError(res, 'Webhook not configured for this Application', 503, {
+        code: 'WEBHOOK_NOT_CONFIGURED',
+      })
+    }
+    const secret = application.webhookSecret
 
     // Signed payload must match `{timestamp}.{raw body}` as produced by the
     // sender. We re-serialize deterministically — the sender signs a JSON
@@ -203,6 +236,7 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
         rawBodyLen: rawBody.length,
         expectedPrefix: expectedSig.slice(0, 12),
         providedPrefix: parsedSig.signature.slice(0, 12),
+        applicationId: body.applicationId,
       })
       return sendError(res, 'Invalid signature', 401, { code: 'INVALID_SIGNATURE' })
     }
@@ -219,7 +253,7 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
       })
     }
 
-    // ---- 4. Replay window ---------------------------------------------
+    // ---- 5. Replay window ---------------------------------------------
     const signedAtSec = Number(parsedSig.timestamp)
     const nowSec = Math.floor(Date.now() / 1000)
     if (!Number.isFinite(signedAtSec) || Math.abs(nowSec - signedAtSec) > REPLAY_WINDOW_SECONDS) {
@@ -233,24 +267,16 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
       })
     }
 
-    // ---- 5. Idempotency ------------------------------------------------
+    // ---- 6. Idempotency ------------------------------------------------
     const SubscriptionEvent = await getSubscriptionEventModel()
     const existing = await SubscriptionEvent.findOne({ stripeEventId: body.stripeEventId }).lean()
     if (existing) {
       return sendSuccess(res, { applied: false, alreadyApplied: true })
     }
 
-    // ---- 6. Resolve Application + AuthUser ----------------------------
-    const Application = await getApplicationModel()
-    const application = await Application.findById(body.applicationId).lean()
-    if (!application) {
-      logger.warn('[subscriptions/webhook] rejected — Application not found', {
-        applicationId: body.applicationId,
-        stripeEventId: body.stripeEventId,
-      })
-      return sendError(res, 'Application not found', 404, { code: 'APPLICATION_NOT_FOUND' })
-    }
-
+    // ---- 7. Resolve AuthUser ------------------------------------------
+    // Application was already loaded in step 4 to read the per-Application
+    // webhook secret — reuse it here for the slug + role grant logic.
     const AuthUser = await getAuthUserModel()
     const user = await AuthUser.findById(body.userId)
     if (!user) {
@@ -261,7 +287,7 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
       return sendError(res, 'User not found', 404, { code: 'USER_NOT_FOUND' })
     }
 
-    // ---- 7. Apply grants ----------------------------------------------
+    // ---- 8. Apply grants ----------------------------------------------
     const slug = application.slug
     const rolesToApply = body.grantsRoles ?? []
     const featuresToApply = body.grantsFeatures ?? []
@@ -294,7 +320,7 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
 
     await user.save()
 
-    // ---- 8. Record SubscriptionEvent ---------------------------------
+    // ---- 9. Record SubscriptionEvent ---------------------------------
     try {
       await SubscriptionEvent.create({
         stripeEventId: body.stripeEventId,
@@ -344,7 +370,10 @@ docRouter.post('/subscriptions/webhook', subscriptionWebhookController, {
     401: { description: 'Invalid API key or signature', schema: errorResponseSchema },
     403: { description: 'API key lacks admin scope', schema: errorResponseSchema },
     404: { description: 'Application or user not found', schema: errorResponseSchema },
-    503: { description: 'Webhook secret not configured', schema: errorResponseSchema },
+    503: {
+      description: 'Application is missing its webhookSecret (run seed:webhook-secrets)',
+      schema: errorResponseSchema,
+    },
   },
 })
 
