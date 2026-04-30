@@ -37,6 +37,8 @@ import { getApplicationModel } from './models/application.js'
 import { getSubscriptionEventModel } from './models/subscription-event.js'
 import { getFeatureFlagModel } from './models/feature-flag.js'
 import { getMaintenanceModeModel } from './models/maintenance-mode.js'
+import { getErrorLogModel } from './models/error-log.js'
+import { logErrorToDb } from './services/error-log.service.js'
 import cookieParser from 'cookie-parser'
 import { logger } from '@ezstart/logger/server'
 
@@ -127,8 +129,9 @@ connectToMongo('ezauth')
     await getSubscriptionEventModel()
     await getFeatureFlagModel()
     await getMaintenanceModeModel()
+    await getErrorLogModel()
     logger.info(
-      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent, FeatureFlag, MaintenanceMode'
+      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent, FeatureFlag, MaintenanceMode, ErrorLog'
     )
 
     return startServer(app, {
@@ -137,6 +140,10 @@ connectToMongo('ezauth')
       serviceName: 'EZAuth',
       port: server.config.port,
       logger: server.logger,
+      // Sentry-free stopgap — persist every unhandled error to the local
+      // `error_logs` collection so the admin dashboard can browse them.
+      // Fire-and-forget; the service is defensive and never throws.
+      persistError: (err, req) => logErrorToDb({ err, req }),
     })
   })
   .catch((err: unknown) => {
