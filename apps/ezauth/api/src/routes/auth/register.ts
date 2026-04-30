@@ -11,6 +11,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import crypto from 'crypto'
 import { AuthService } from '../../services/auth.service.js'
+import { requireTurnstile } from '../../middleware/turnstile-required.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
@@ -114,7 +115,7 @@ const registerController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/register', registerRateLimiter, registerController, {
+docRouter.post('/register', registerRateLimiter, requireTurnstile(), registerController, {
   summary: 'Register new user',
   tags: ['Authentication'],
   bodySchema: registerRequestSchema,

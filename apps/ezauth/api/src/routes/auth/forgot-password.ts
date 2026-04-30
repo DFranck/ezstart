@@ -10,6 +10,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import crypto from 'crypto'
+import { requireTurnstile } from '../../middleware/turnstile-required.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
@@ -103,20 +104,26 @@ const forgotPasswordController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/forgot-password', forgotPasswordRateLimiter, forgotPasswordController, {
-  summary: 'Request password reset email',
-  tags: ['Authentication'],
-  bodySchema: forgotPasswordRequestSchema,
-  responseSchema: forgotPasswordResponseSchema,
-  extraResponses: {
-    429: {
-      description: 'Too many attempts',
-      schema: z.object({
-        success: z.literal(false).describe('Whether the operation succeeded'),
-        error: z.string().describe('Error message if operation failed'),
-      }),
+docRouter.post(
+  '/forgot-password',
+  forgotPasswordRateLimiter,
+  requireTurnstile(),
+  forgotPasswordController,
+  {
+    summary: 'Request password reset email',
+    tags: ['Authentication'],
+    bodySchema: forgotPasswordRequestSchema,
+    responseSchema: forgotPasswordResponseSchema,
+    extraResponses: {
+      429: {
+        description: 'Too many attempts',
+        schema: z.object({
+          success: z.literal(false).describe('Whether the operation succeeded'),
+          error: z.string().describe('Error message if operation failed'),
+        }),
+      },
     },
-  },
-})
+  }
+)
 
 export default router

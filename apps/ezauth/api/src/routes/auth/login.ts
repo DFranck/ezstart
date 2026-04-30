@@ -12,6 +12,7 @@ import { Router as ExpressRouter } from 'express'
 import { AuthService, AccountLockedError } from '../../services/auth.service.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
 import { TotpService } from '../../services/totp.service.js'
+import { verifyTurnstileToken } from '../../services/turnstile.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
   loginRequestSchema,
@@ -34,6 +35,27 @@ const loginController = async (req: Request, res: Response) => {
     const parsed = loginRequestSchema.safeParse(req.body)
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid login request', parsed.error.issues)
+    }
+
+    // Optional Turnstile gate — when the SDK frontend has decided to surface
+    // the captcha (after N consecutive fails) it sends `turnstileToken` in
+    // the body. Verify it server-side. The verifier is a no-op when
+    // `TURNSTILE_SECRET_KEY` is unset, so this is safe to mount today and
+    // enable later by setting the env.
+    const turnstileToken =
+      typeof (req.body as { turnstileToken?: unknown })?.turnstileToken === 'string'
+        ? (req.body as { turnstileToken: string }).turnstileToken
+        : undefined
+    if (turnstileToken) {
+      const turnstileResult = await verifyTurnstileToken(turnstileToken, req.ip)
+      if (!turnstileResult.success) {
+        return sendValidationError(
+          res,
+          'Captcha verification failed',
+          turnstileResult.errorCodes ?? [],
+          400
+        )
+      }
     }
 
     // First validate credentials (without generating auth code yet).
