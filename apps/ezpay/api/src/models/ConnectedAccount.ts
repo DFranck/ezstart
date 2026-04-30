@@ -110,6 +110,7 @@ const connectedAccountSchema = new Schema<ConnectedAccountDocument>(
     lastResumedAt: { type: Date, default: null },
     expiryWarningEmailSent: { type: Boolean, default: false, index: true },
     metadata: { type: transitionMetadataSchema, default: undefined },
+    isTestMode: { type: Boolean, required: true, default: false, index: true },
   },
   {
     timestamps: true,
@@ -134,6 +135,9 @@ connectedAccountSchema.index(
     name: 'stripeAccountId_external_unique',
   }
 )
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+connectedAccountSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get ConnectedAccount model attached to shared connection.
