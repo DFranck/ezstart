@@ -27,7 +27,8 @@ describe('UserMenu', () => {
         <UserMenu />
       </Wrapper>
     )
-    expect(screen.getByText('Sign in')).toBeInTheDocument()
+    // UserMenu sign-in trigger is icon-only; the text lives in `aria-label`.
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
   })
 
   it('uses custom sign-in text', () => {
@@ -39,7 +40,7 @@ describe('UserMenu', () => {
         />
       </Wrapper>
     )
-    expect(screen.getByText('Se connecter')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Se connecter' })).toBeInTheDocument()
   })
 
   it('renders dropdown trigger when authenticated', () => {
