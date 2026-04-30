@@ -247,11 +247,15 @@ describe('ApplicationDetailView', () => {
 
     fireEvent.click(screen.getByText('Save'))
 
+    // Component now also includes the `requireEmailVerification` flag in the
+    // mutation payload (toggled in the Settings card). For an unmutated toggle
+    // the value defaults to `false` (matches `application.requireEmailVerification ?? false`).
     expect(mutate).toHaveBeenCalledWith({
       id: 'app_1',
       data: {
         name: 'Renamed Corp',
         description: 'Acme description',
+        requireEmailVerification: false,
       },
     })
   })
@@ -277,6 +281,7 @@ describe('ApplicationDetailView', () => {
       data: {
         name: 'Acme Corp',
         description: 'Updated description',
+        requireEmailVerification: false,
       },
     })
   })
