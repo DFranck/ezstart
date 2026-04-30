@@ -368,6 +368,7 @@ export function ResetPasswordForm({
               <FormControl>
                 <PasswordInput
                   minLength={MIN_PASSWORD_LENGTH}
+                  autoComplete="new-password"
                   placeholder={t.newPasswordPlaceholder}
                   texts={{
                     showPassword: t.showPassword,
@@ -403,6 +404,7 @@ export function ResetPasswordForm({
               <FormControl>
                 <PasswordInput
                   minLength={MIN_PASSWORD_LENGTH}
+                  autoComplete="new-password"
                   placeholder={t.confirmPasswordPlaceholder}
                   texts={{
                     showPassword: t.showPassword,

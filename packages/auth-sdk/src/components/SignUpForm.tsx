@@ -374,7 +374,13 @@ export function SignUpForm({
               <FormItem>
                 <FormLabel>{t.email}</FormLabel>
                 <FormControl>
-                  <Input type="email" required placeholder={t.emailPlaceholder} {...field} />
+                  <Input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    placeholder={t.emailPlaceholder}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
                 {emailAvailable === false && (
@@ -393,7 +399,13 @@ export function SignUpForm({
               <FormItem>
                 <FormLabel>{t.username}</FormLabel>
                 <FormControl>
-                  <Input type="text" required placeholder={t.usernamePlaceholder} {...field} />
+                  <Input
+                    type="text"
+                    required
+                    autoComplete="username"
+                    placeholder={t.usernamePlaceholder}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
                 {usernameAvailable === false && (
@@ -413,7 +425,12 @@ export function SignUpForm({
                 <FormItem>
                   <FormLabel className="text-xs md:text-sm">{t.firstName}</FormLabel>
                   <FormControl>
-                    <Input type="text" placeholder={t.firstNamePlaceholder} {...field} />
+                    <Input
+                      type="text"
+                      autoComplete="given-name"
+                      placeholder={t.firstNamePlaceholder}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -426,7 +443,12 @@ export function SignUpForm({
                 <FormItem>
                   <FormLabel className="text-xs md:text-sm">{t.lastName}</FormLabel>
                   <FormControl>
-                    <Input type="text" placeholder={t.lastNamePlaceholder} {...field} />
+                    <Input
+                      type="text"
+                      autoComplete="family-name"
+                      placeholder={t.lastNamePlaceholder}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -444,6 +466,7 @@ export function SignUpForm({
                   <PasswordInput
                     required
                     minLength={MIN_PASSWORD_LENGTH}
+                    autoComplete="new-password"
                     placeholder={t.passwordPlaceholder}
                     texts={{
                       showPassword: t.showPassword,
@@ -481,6 +504,7 @@ export function SignUpForm({
                   <PasswordInput
                     required
                     minLength={MIN_PASSWORD_LENGTH}
+                    autoComplete="new-password"
                     placeholder={t.confirmPasswordPlaceholder}
                     texts={{
                       showPassword: t.showPassword,

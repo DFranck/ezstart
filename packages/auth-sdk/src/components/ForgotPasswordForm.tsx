@@ -222,7 +222,12 @@ export function ForgotPasswordForm({
             <FormItem>
               <FormLabel>{t.email}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder={t.emailPlaceholder} {...field} />
+                <Input
+                  type="email"
+                  autoComplete="email"
+                  placeholder={t.emailPlaceholder}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

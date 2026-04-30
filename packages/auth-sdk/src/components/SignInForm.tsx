@@ -345,6 +345,7 @@ export function SignInForm({
                   <Input
                     type="text"
                     placeholder={t.emailOrUsernamePlaceholder}
+                    autoComplete="username"
                     disabled={disabled}
                     {...field}
                   />
@@ -367,6 +368,7 @@ export function SignInForm({
                 <FormControl>
                   <PasswordInput
                     placeholder={t.passwordPlaceholder}
+                    autoComplete="current-password"
                     disabled={disabled}
                     texts={{
                       showPassword: t.showPassword,
