@@ -13,6 +13,11 @@ import {
   AuthSettingsSection,
   type AuthSettingsSectionTexts,
 } from './admin/_internal/SettingsSection.js'
+import {
+  AuthErrorLogsSection,
+  DEFAULT_ERROR_LOGS_TEXTS,
+  type AuthErrorLogsSectionTexts,
+} from './admin/_internal/AuthErrorLogsSection.js'
 import { type AuthUsersSectionTexts, DEFAULT_USERS_TEXTS } from './admin/types.js'
 import {
   type AuthApplicationsSectionTexts,
@@ -32,6 +37,8 @@ export interface AuthAdminDashboardTexts {
   tabApplications?: string
   /** Tab label: Settings */
   tabSettings?: string
+  /** Tab label: Error logs */
+  tabErrorLogs?: string
 
   /** Overview section texts (analytics + stats + signup trend + top apps). */
   overview?: Partial<AuthOverviewSectionTexts>
@@ -41,19 +48,22 @@ export interface AuthAdminDashboardTexts {
   applications?: Partial<AuthApplicationsSectionTexts>
   /** Settings section texts (feature flags + maintenance mode). */
   settings?: AuthSettingsSectionTexts
+  /** Error logs section texts (Sentry-free stopgap browser). */
+  errorLogs?: Partial<AuthErrorLogsSectionTexts>
 }
 
 export interface AuthAdminDashboardProps {
   className?: string
   /**
    * Override default English labels. The object groups per-tab text overrides
-   * (`overview`, `users`, `applications`, `settings`) plus tab labels.
+   * (`overview`, `users`, `applications`, `settings`, `errorLogs`) plus tab
+   * labels.
    */
   texts?: Partial<AuthAdminDashboardTexts>
   /**
    * Initial active tab. Defaults to `'overview'`.
    */
-  defaultTab?: 'overview' | 'users' | 'applications' | 'settings'
+  defaultTab?: 'overview' | 'users' | 'applications' | 'settings' | 'errorLogs'
 }
 
 const DEFAULT_TAB_TEXTS = {
@@ -61,21 +71,27 @@ const DEFAULT_TAB_TEXTS = {
   tabUsers: 'Users',
   tabApplications: 'Applications',
   tabSettings: 'Settings',
+  tabErrorLogs: 'Error logs',
 } as const
 
 export const defaultAuthAdminDashboardTexts: Required<
-  Pick<AuthAdminDashboardTexts, 'tabOverview' | 'tabUsers' | 'tabApplications' | 'tabSettings'>
+  Pick<
+    AuthAdminDashboardTexts,
+    'tabOverview' | 'tabUsers' | 'tabApplications' | 'tabSettings' | 'tabErrorLogs'
+  >
 > & {
   overview: Required<AuthOverviewSectionTexts>
   users: Required<AuthUsersSectionTexts>
   applications: Required<AuthApplicationsSectionTexts>
   settings: AuthSettingsSectionTexts
+  errorLogs: Required<AuthErrorLogsSectionTexts>
 } = {
   ...DEFAULT_TAB_TEXTS,
   overview: DEFAULT_OVERVIEW_TEXTS,
   users: DEFAULT_USERS_TEXTS,
   applications: DEFAULT_APPLICATIONS_TEXTS,
   settings: {},
+  errorLogs: DEFAULT_ERROR_LOGS_TEXTS,
 }
 
 // ---------------------------------------------------------------------------
@@ -139,6 +155,10 @@ export function AuthAdminDashboard({
   // Settings has nested sub-objects (featureFlags + maintenance) — forward
   // the partial as-is; the section does its own merge.
   const settingsTexts = texts?.settings
+  const errorLogsTexts: Required<AuthErrorLogsSectionTexts> = {
+    ...DEFAULT_ERROR_LOGS_TEXTS,
+    ...texts?.errorLogs,
+  }
 
   return (
     <Div className={cn('w-full', className)}>
@@ -148,6 +168,7 @@ export function AuthAdminDashboard({
           <TabsTrigger value="users">{tabLabels.tabUsers}</TabsTrigger>
           <TabsTrigger value="applications">{tabLabels.tabApplications}</TabsTrigger>
           <TabsTrigger value="settings">{tabLabels.tabSettings}</TabsTrigger>
+          <TabsTrigger value="errorLogs">{tabLabels.tabErrorLogs}</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="mt-4">
           <AuthOverviewSection texts={overviewTexts} />
@@ -160,6 +181,9 @@ export function AuthAdminDashboard({
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
           <AuthSettingsSection texts={settingsTexts} />
+        </TabsContent>
+        <TabsContent value="errorLogs" className="mt-4">
+          <AuthErrorLogsSection texts={errorLogsTexts} />
         </TabsContent>
       </Tabs>
     </Div>

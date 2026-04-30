@@ -37,6 +37,21 @@ vi.mock('../../react/maintenance-mode.js', () => ({
   useUpdateMaintenanceMode: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
+vi.mock('../../react/admin-error-logs.js', () => ({
+  useAdminErrorLogs: () => ({
+    data: { items: [], total: 0, limit: 50, offset: 0 },
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+    refetch: vi.fn(),
+  }),
+  useAdminErrorLogDetail: () => ({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+  }),
+}))
+
 // Note: useAuthStore is now provided via Context (per-Provider). We wrap the
 // dashboard in TestAuthProvider with a pre-seeded store carrying a fake
 // access token so the admin sections can read it via the Provider tree.
@@ -60,12 +75,15 @@ describe('AuthAdminDashboard', () => {
     vi.clearAllMocks()
   })
 
-  it('renders the four default tab labels', () => {
+  it('renders the five default tab labels', () => {
     renderWithProvider(<AuthAdminDashboard />)
     expect(screen.getByText('Overview')).toBeTruthy()
     expect(screen.getByText('Users')).toBeTruthy()
     expect(screen.getByText('Applications')).toBeTruthy()
     expect(screen.getByText('Settings')).toBeTruthy()
+    // 'Error logs' may match the tab trigger AND the section title in the
+    // active panel — getAllByText to acknowledge both.
+    expect(screen.getAllByText('Error logs').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders the Tabs container', () => {
@@ -82,6 +100,7 @@ describe('AuthAdminDashboard', () => {
           tabUsers: 'Utilisateurs',
           tabApplications: 'Apps',
           tabSettings: 'Parametres',
+          tabErrorLogs: 'Erreurs',
         }}
       />
     )
@@ -89,6 +108,7 @@ describe('AuthAdminDashboard', () => {
     expect(screen.getByText('Utilisateurs')).toBeTruthy()
     expect(screen.getByText('Apps')).toBeTruthy()
     expect(screen.getByText('Parametres')).toBeTruthy()
+    expect(screen.getAllByText('Erreurs').length).toBeGreaterThanOrEqual(1)
   })
 
   it('accepts a defaultTab override', () => {

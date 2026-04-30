@@ -81,3 +81,14 @@ export { useRequestMagicLink, useVerifyMagicLink } from './use-magic-link.js'
 
 // Admin analytics hook (superadmin platform overview)
 export { useAdminAnalyticsOverview } from './admin-analytics.js'
+
+// Admin error logs hooks (Sentry-free stopgap browser)
+export { useAdminErrorLogs, useAdminErrorLogDetail } from './admin-error-logs.js'
+export type {
+  ErrorLogLevel,
+  ErrorLogStatusRange,
+  ErrorLogListEntry,
+  ErrorLogDetailEntry,
+  ErrorLogListResponse,
+  ErrorLogListFilters,
+} from './admin-error-logs.js'
