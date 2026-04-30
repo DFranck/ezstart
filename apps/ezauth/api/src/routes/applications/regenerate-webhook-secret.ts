@@ -41,7 +41,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { generateWebhookSecret, getApplicationModel } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
@@ -121,6 +121,13 @@ const regenerateWebhookSecretController = async (req: Request, res: Response) =>
       return sendError(res, 'Application not found', 404)
     }
 
+    // Multi-tenancy: an API key restricted to one slug must not be able to
+    // rotate the secret of any other Application — even if the underlying
+    // user is a superadmin. 404 keeps tenant existence opaque.
+    if (req.apiKeyAppName && req.apiKeyAppName !== '*' && app.slug !== req.apiKeyAppName) {
+      return sendError(res, 'Application not found', 404)
+    }
+
     if (app.ownerId !== userId) {
       const AuthUser = await getAuthUserModel()
       const user = await AuthUser.findById(userId).lean()
@@ -163,7 +170,7 @@ const regenerateWebhookSecretController = async (req: Request, res: Response) =>
 docRouter.post(
   '/applications/:id/regenerate-webhook-secret',
   createStrictRateLimiter(),
-  verifyTokenMiddleware,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   regenerateWebhookSecretController,
   {
     summary: 'Rotate the per-Application HMAC webhook secret (Stripe whsec pattern)',

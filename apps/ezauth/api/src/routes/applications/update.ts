@@ -17,7 +17,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { serializeApplication } from './serialize.js'
@@ -92,6 +92,13 @@ const updateApplicationController = async (req: Request, res: Response) => {
       return sendError(res, 'Application not found', 404)
     }
 
+    // Multi-tenancy: see the same comment in routes/applications/get.ts —
+    // an API key bound to slug 'acme' must not be able to mutate any other
+    // Application even when the underlying user is a superadmin.
+    if (req.apiKeyAppName && req.apiKeyAppName !== '*' && app.slug !== req.apiKeyAppName) {
+      return sendError(res, 'Application not found', 404)
+    }
+
     if (app.ownerId !== userId) {
       const AuthUser = await getAuthUserModel()
       const user = await AuthUser.findById(userId).lean()
@@ -122,16 +129,21 @@ const updateApplicationController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.patch('/applications/:id', verifyTokenMiddleware, updateApplicationController, {
-  summary: 'Update Application name / description / metadata (slug is immutable)',
-  tags: ['Applications'],
-  bodySchema: updateApplicationBodySchema,
-  responseSchema: applicationResponseSchema,
-  extraResponses: {
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    404: { description: 'Application not found', schema: errorResponseSchema },
-    422: { description: 'Validation error', schema: errorResponseSchema },
-  },
-})
+docRouter.patch(
+  '/applications/:id',
+  authJwtOrKey({ requireKeyScope: 'admin' }),
+  updateApplicationController,
+  {
+    summary: 'Update Application name / description / metadata (slug is immutable)',
+    tags: ['Applications'],
+    bodySchema: updateApplicationBodySchema,
+    responseSchema: applicationResponseSchema,
+    extraResponses: {
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      404: { description: 'Application not found', schema: errorResponseSchema },
+      422: { description: 'Validation error', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

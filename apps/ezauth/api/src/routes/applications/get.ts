@@ -24,7 +24,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { serializeApplication, serializeApplicationWithSecret } from './serialize.js'
@@ -107,6 +107,14 @@ const getApplicationController = async (req: Request, res: Response) => {
       return sendError(res, 'Application not found', 404)
     }
 
+    // Multi-tenancy: an admin-scoped API key restricted to one slug
+    // ('appName' !== '*') can ONLY read its own Application — even if the
+    // owning user is a superadmin who could otherwise see everything. We
+    // collapse to 404 to match the cross-tenant existence-leak convention.
+    if (req.apiKeyAppName && req.apiKeyAppName !== '*' && app.slug !== req.apiKeyAppName) {
+      return sendError(res, 'Application not found', 404)
+    }
+
     if (app.ownerId !== userId) {
       const AuthUser = await getAuthUserModel()
       const user = await AuthUser.findById(userId).lean()
@@ -127,14 +135,19 @@ const getApplicationController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/applications/:id', verifyTokenMiddleware, getApplicationController, {
-  summary: 'Fetch a single Application',
-  tags: ['Applications'],
-  responseSchema: applicationResponseSchema,
-  extraResponses: {
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    404: { description: 'Application not found', schema: errorResponseSchema },
-  },
-})
+docRouter.get(
+  '/applications/:id',
+  authJwtOrKey({ requireKeyScope: 'admin' }),
+  getApplicationController,
+  {
+    summary: 'Fetch a single Application',
+    tags: ['Applications'],
+    responseSchema: applicationResponseSchema,
+    extraResponses: {
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      404: { description: 'Application not found', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

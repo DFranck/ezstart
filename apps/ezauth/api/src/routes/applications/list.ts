@@ -16,7 +16,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
-import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplicationModel } from '../../models/application.js'
 import { serializeApplication } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
@@ -84,6 +84,15 @@ const listApplicationsController = async (req: Request, res: Response) => {
 
     const query: Record<string, unknown> = derivedScope === 'all' ? {} : { ownerId: userId }
 
+    // Multi-tenancy: when authenticated via API key restricted to a single
+    // Application (`appName !== '*'`), narrow the result set even if the
+    // underlying user is a superadmin. Prevents an admin-scoped key for app
+    // "acme" from seeing other tenants' Applications. JWT auth leaves
+    // `req.apiKeyAppName` undefined → no extra filter applied.
+    if (req.apiKeyAppName && req.apiKeyAppName !== '*') {
+      query.slug = req.apiKeyAppName
+    }
+
     const Application = await getApplicationModel()
     const findOpts: { includeArchived?: boolean } = includeArchived ? { includeArchived: true } : {}
     const apps = await Application.find(query, null, findOpts).sort({ createdAt: -1 }).lean()
@@ -99,7 +108,7 @@ const listApplicationsController = async (req: Request, res: Response) => {
 
 docRouter.get(
   '/applications',
-  verifyTokenMiddleware,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   attachDerivedScope,
   listApplicationsController,
   {
