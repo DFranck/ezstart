@@ -44,7 +44,7 @@ async function resolveSsrThemeClass(): Promise<'dark' | undefined> {
 
 const DOMAIN = getWebUrl('ezauth', 'production')
 
-export const metadata = createMetadata({
+const baseMetadata = createMetadata({
   appName: 'EZAuth',
   description:
     'EZStart centralized authentication service - Secure SSO for all EZStart applications',
@@ -53,6 +53,33 @@ export const metadata = createMetadata({
   themeColor: '#00D9F7',
   ogImage: `${DOMAIN}/og-image.svg`,
 })
+
+/**
+ * Per-locale root metadata. Extends the shared `createMetadata()` output with
+ * `alternates.canonical` + `alternates.languages` (hreflang tags) so search
+ * engines know which locale variant to surface for each user.
+ *
+ * Pattern: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#alternates
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<typeof baseMetadata> {
+  const { locale } = await params
+  return {
+    ...baseMetadata,
+    alternates: {
+      canonical: `${DOMAIN}/${locale}`,
+      languages: {
+        en: `${DOMAIN}/en`,
+        fr: `${DOMAIN}/fr`,
+        vi: `${DOMAIN}/vi`,
+        'x-default': `${DOMAIN}/en`,
+      },
+    },
+  }
+}
 
 export const viewport = createViewport('#00D9F7')
 
