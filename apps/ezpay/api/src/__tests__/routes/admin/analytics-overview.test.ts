@@ -66,12 +66,15 @@ interface OverviewResponse {
   body: {
     success: boolean
     data?: {
-      totalRevenueByCurrency: { currency: string; amount: number }[]
       totalPayments: number
+      completedPayments: number
+      failedPayments: number
+      refundedPayments: number
       activeSubscriptions: number
-      mrrProxy: number
-      revenueTrend: { date: string; amount: number; count: number }[]
-      topAppsByRevenue: { projectId: string; amount: number; count: number }[]
+      revenueByCurrency: { currency: string; total: number }[]
+      mrrByCurrency: { currency: string; total: number }[]
+      revenueTrend: { date: string; total: number; currency: string }[]
+      topAppsByRevenue: { appName: string; total: number; currency: string }[]
     }
     error?: string
   }
@@ -219,21 +222,25 @@ describe('GET /api/admin/analytics/overview — pay analytics auto-scoping', () 
     expect(res.body.success).toBe(true)
     const data = res.body.data!
 
-    // 4 completed payments total (1 pending excluded).
-    expect(data.totalPayments).toBe(4)
+    // 5 total payments (4 completed + 1 pending) ; 4 completed.
+    expect(data.totalPayments).toBe(5)
+    expect(data.completedPayments).toBe(4)
+    expect(data.failedPayments).toBe(0)
+    expect(data.refundedPayments).toBe(0)
     // EUR: 10+10+20=40 ; USD: 50.
-    const eur = data.totalRevenueByCurrency.find(c => c.currency === 'EUR')
-    const usd = data.totalRevenueByCurrency.find(c => c.currency === 'USD')
-    expect(eur?.amount).toBe(40)
-    expect(usd?.amount).toBe(50)
+    const eur = data.revenueByCurrency.find(c => c.currency === 'EUR')
+    const usd = data.revenueByCurrency.find(c => c.currency === 'USD')
+    expect(eur?.total).toBe(40)
+    expect(usd?.total).toBe(50)
     // 2 active subscriptions (ezauth + ezpay).
     expect(data.activeSubscriptions).toBe(2)
-    // MRR proxy: 10 + 20 = 30.
-    expect(data.mrrProxy).toBe(30)
+    // MRR by currency: EUR 10 + 20 = 30 (both monthly subs are EUR).
+    const mrrEur = data.mrrByCurrency.find(c => c.currency === 'EUR')
+    expect(mrrEur?.total).toBe(30)
     // Trend: 30 contiguous days.
     expect(data.revenueTrend).toHaveLength(30)
     // Top apps: 3 apps with revenue.
-    const slugs = data.topAppsByRevenue.map(a => a.projectId)
+    const slugs = data.topAppsByRevenue.map(a => a.appName)
     expect(slugs).toContain('ezauth')
     expect(slugs).toContain('ezpay')
     expect(slugs).toContain('green-pulse')
@@ -250,17 +257,19 @@ describe('GET /api/admin/analytics/overview — pay analytics auto-scoping', () 
     expect(res.status).toBe(200)
     const data = res.body.data!
 
-    // Only ezauth payments (2 completed) — ezpay/green-pulse hidden.
+    // Only ezauth payments (2 total, 2 completed) — ezpay/green-pulse hidden.
     expect(data.totalPayments).toBe(2)
+    expect(data.completedPayments).toBe(2)
     // EUR: 10+10=20 only ; no USD.
-    const eur = data.totalRevenueByCurrency.find(c => c.currency === 'EUR')
-    expect(eur?.amount).toBe(20)
-    expect(data.totalRevenueByCurrency.find(c => c.currency === 'USD')).toBeUndefined()
+    const eur = data.revenueByCurrency.find(c => c.currency === 'EUR')
+    expect(eur?.total).toBe(20)
+    expect(data.revenueByCurrency.find(c => c.currency === 'USD')).toBeUndefined()
     // 1 active sub (ezauth only).
     expect(data.activeSubscriptions).toBe(1)
-    expect(data.mrrProxy).toBe(10)
+    const mrrEur = data.mrrByCurrency.find(c => c.currency === 'EUR')
+    expect(mrrEur?.total).toBe(10)
     // topAppsByRevenue restricted to ezauth.
-    expect(data.topAppsByRevenue.map(a => a.projectId)).toEqual(['ezauth'])
+    expect(data.topAppsByRevenue.map(a => a.appName)).toEqual(['ezauth'])
   })
 
   it('app-admin without owned apps returns zero snapshot', async () => {
@@ -273,9 +282,12 @@ describe('GET /api/admin/analytics/overview — pay analytics auto-scoping', () 
     const data = res.body.data!
 
     expect(data.totalPayments).toBe(0)
-    expect(data.totalRevenueByCurrency).toEqual([])
+    expect(data.completedPayments).toBe(0)
+    expect(data.failedPayments).toBe(0)
+    expect(data.refundedPayments).toBe(0)
+    expect(data.revenueByCurrency).toEqual([])
+    expect(data.mrrByCurrency).toEqual([])
     expect(data.activeSubscriptions).toBe(0)
-    expect(data.mrrProxy).toBe(0)
     expect(data.revenueTrend).toHaveLength(30)
     expect(data.topAppsByRevenue).toEqual([])
   })
