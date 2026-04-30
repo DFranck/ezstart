@@ -148,6 +148,12 @@ const apiKeySchema = new Schema<ApiKeyDocument>(
       required: false,
       index: true,
     },
+    isTestMode: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
