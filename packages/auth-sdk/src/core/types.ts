@@ -391,6 +391,25 @@ export interface Application {
    * @default false
    */
   requireEmailVerification?: boolean
+  /**
+   * Optional override for the URL where outbound webhooks (currently
+   * EZPay → EZAuth subscription notifications) are delivered. `null` means
+   * "use the service-specific default" (canonical ezauth subscriptions
+   * webhook endpoint). Reserved for future external consumers — most
+   * Applications leave this `null`.
+   */
+  webhookEndpointUrl?: string | null
+  /**
+   * Per-Application HMAC-SHA256 webhook secret in Stripe `whsec_<hex>`
+   * format. **Treat as a credential** — only emitted by the API immediately
+   * after `regenerate-webhook-secret` and via the S2S admin
+   * `?include=webhookSecret` lookup. All other endpoints omit the field
+   * entirely.
+   *
+   * Consumer code should never persist this value beyond the single render
+   * that displays it once to the user.
+   */
+  webhookSecret?: string
   createdAt: string
   updatedAt: string
 }

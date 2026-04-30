@@ -48,6 +48,13 @@ const applicationResponseSchema = z.object({
     themeEnabled: z.boolean(),
     isPlatformOwned: z.boolean(),
     requireEmailVerification: z.boolean(),
+    webhookEndpointUrl: z.string().nullable(),
+    /**
+     * Webhook secret. Only present when the caller passes
+     * `?include=webhookSecret` AND is a superadmin or owner. All other
+     * callers see this field omitted from the response entirely.
+     */
+    webhookSecret: z.string().optional(),
     createdAt: z.string(),
     updatedAt: z.string(),
   }),

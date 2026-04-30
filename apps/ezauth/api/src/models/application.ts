@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, type Document, type Model, type Query } from 'mongoose'
 import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
@@ -117,8 +118,54 @@ export interface ApplicationDocument extends Document {
    * `{ applicationId, isTestMode }` lookups.
    */
   isTestMode: boolean
+  /**
+   * Per-Application HMAC-SHA256 webhook secret (Stripe `whsec_*` pattern).
+   *
+   * Auto-generated on document creation as `whsec_<64-hex>` and used by
+   * cross-service senders (currently EZPay → EZAuth subscription webhook) to
+   * sign payloads. The signature is verified server-side by the webhook
+   * receiver — see `routes/subscriptions/webhook.ts`.
+   *
+   * `select: false` — Mongoose excludes the field from default `find()` /
+   * `findById()` projections. Routes that need the value MUST opt-in with
+   * `.select('+webhookSecret')`. This treat-as-secret default keeps the value
+   * out of any API response that simply forwards the document shape.
+   *
+   * Rotation: a new secret can be generated via the dashboard
+   * (`POST /api/applications/:id/regenerate-webhook-secret`). The old value
+   * is overwritten in-place — there is no grace period. Consumers MUST
+   * update their signing key immediately after rotation.
+   *
+   * Backfill: existing Applications created before this field was introduced
+   * receive a secret via `pnpm --filter api-ezauth seed:webhook-secrets`.
+   */
+  webhookSecret: string
+  /**
+   * Optional override for the URL where outbound webhooks are delivered.
+   *
+   * When `null` (default) the sender uses a service-specific default — for
+   * example `notifyEzauthSubscription()` falls back to
+   * `${getApiUrl('ezauth')}/api/subscriptions/webhook`. Setting an explicit
+   * URL allows the consumer to host their own receiver and route ezpay
+   * notifications there instead of the canonical ezauth endpoint. Reserved
+   * for future external consumers.
+   */
+  webhookEndpointUrl: string | null
   createdAt: Date
   updatedAt: Date
+}
+
+/**
+ * Generate a fresh webhook secret in Stripe `whsec_<hex>` format.
+ *
+ * 32 random bytes → 64 hex chars → 256 bits of entropy. Matches the entropy
+ * of Stripe's own webhook secret format and is plenty for HMAC-SHA256.
+ *
+ * Exported so the regenerate route + the seed script can reuse it without
+ * pulling in `crypto` everywhere.
+ */
+export function generateWebhookSecret(): string {
+  return 'whsec_' + randomBytes(32).toString('hex')
 }
 
 /**
@@ -231,6 +278,23 @@ const applicationSchema = new Schema<ApplicationDocument>(
       required: true,
       default: false,
       index: true,
+    },
+    webhookSecret: {
+      type: String,
+      required: true,
+      // `select: false` — never returned by default `find*` projections; routes
+      // that need it MUST opt-in via `.select('+webhookSecret')`. This is the
+      // same pattern Mongoose recommends for password hashes — defensive against
+      // accidental leak through a generic serializer.
+      select: false,
+      default: generateWebhookSecret,
+    },
+    webhookEndpointUrl: {
+      type: String,
+      required: false,
+      default: null,
+      trim: true,
+      maxlength: 2048,
     },
   },
   {

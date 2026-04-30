@@ -61,6 +61,7 @@ const applicationResponseSchema = z.object({
     themeEnabled: z.boolean(),
     isPlatformOwned: z.boolean(),
     requireEmailVerification: z.boolean(),
+    webhookEndpointUrl: z.string().nullable(),
     createdAt: z.string(),
     updatedAt: z.string(),
   }),

@@ -37,40 +37,73 @@ export interface SerializedApplication {
    * should require a verified email. Login itself is never blocked.
    */
   requireEmailVerification: boolean
+  /**
+   * Optional override for the URL where outbound webhooks (currently
+   * EZPay → EZAuth subscription notifications) are delivered. `null` means
+   * "use the service-specific default" (canonical ezauth subscriptions
+   * webhook endpoint). Reserved for future external consumers.
+   *
+   * Safe to expose: this is a public configuration field, not a secret.
+   */
+  webhookEndpointUrl: string | null
+  /**
+   * Webhook secret in Stripe `whsec_<hex>` format.
+   *
+   * **NEVER** populated by the default serializer — only the dedicated
+   * regenerate endpoint (which has just generated a fresh value) and the
+   * S2S `?include=webhookSecret` view (admin scope only) include the actual
+   * value. All other endpoints set this to `undefined` so it is omitted
+   * from the JSON response entirely.
+   *
+   * Set the field via {@link serializeApplicationWithSecret} if you need to
+   * surface it explicitly.
+   */
+  webhookSecret?: string
   createdAt: string
   updatedAt: string
 }
 
 /**
+ * Lean shape accepted by {@link serializeApplication}. Keeps the input loose
+ * (both `.lean()` POJOs and hydrated docs) while still typed enough to catch
+ * obvious shape regressions.
+ */
+type SerializableApplication =
+  | ApplicationDocument
+  | {
+      _id: unknown
+      slug: string
+      name: string
+      description?: string
+      ownerId: string
+      metadata?: Record<string, unknown>
+      status: 'active' | 'archived'
+      theme?: {
+        primary?: string
+        background?: string
+        foreground?: string
+        accent?: string
+        logo?: string
+      }
+      themeEnabled?: boolean
+      isPlatformOwned?: boolean
+      requireEmailVerification?: boolean
+      webhookEndpointUrl?: string | null
+      webhookSecret?: string
+      createdAt: Date
+      updatedAt: Date
+    }
+
+/**
  * Convert a hydrated OR lean Application document to the wire shape.
  * Accepts both because `findById(...).lean()` returns a POJO and `.save()`
  * returns a hydrated doc.
+ *
+ * **Excludes the `webhookSecret`** — see
+ * {@link serializeApplicationWithSecret} when you actually want to surface
+ * the value (only after a regenerate, or for an S2S admin lookup).
  */
-export function serializeApplication(
-  app:
-    | ApplicationDocument
-    | {
-        _id: unknown
-        slug: string
-        name: string
-        description?: string
-        ownerId: string
-        metadata?: Record<string, unknown>
-        status: 'active' | 'archived'
-        theme?: {
-          primary?: string
-          background?: string
-          foreground?: string
-          accent?: string
-          logo?: string
-        }
-        themeEnabled?: boolean
-        isPlatformOwned?: boolean
-        requireEmailVerification?: boolean
-        createdAt: Date
-        updatedAt: Date
-      }
-): SerializedApplication {
+export function serializeApplication(app: SerializableApplication): SerializedApplication {
   const theme = app.theme
     ? {
         ...(app.theme.primary ? { primary: app.theme.primary } : {}),
@@ -93,7 +126,29 @@ export function serializeApplication(
     themeEnabled: app.themeEnabled ?? false,
     isPlatformOwned: app.isPlatformOwned ?? false,
     requireEmailVerification: app.requireEmailVerification ?? false,
+    webhookEndpointUrl: app.webhookEndpointUrl ?? null,
     createdAt: app.createdAt.toISOString(),
     updatedAt: app.updatedAt.toISOString(),
   }
+}
+
+/**
+ * Serialize an Application with its webhook secret included.
+ *
+ * Caller MUST have explicitly loaded the secret via `.select('+webhookSecret')`
+ * — otherwise `app.webhookSecret` is `undefined` and the wire shape will omit
+ * the field entirely (which would defeat the purpose of calling this helper).
+ *
+ * Reserved for the regenerate endpoint and for the S2S admin `?include=webhookSecret`
+ * lookup. Both audit-log the access; no other code path should consume this
+ * helper.
+ */
+export function serializeApplicationWithSecret(
+  app: SerializableApplication
+): SerializedApplication {
+  const base = serializeApplication(app)
+  if (app.webhookSecret) {
+    base.webhookSecret = app.webhookSecret
+  }
+  return base
 }
