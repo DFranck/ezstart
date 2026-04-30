@@ -45,6 +45,7 @@ export interface AuthApplicationsSectionTexts {
   badgeThemeDisabled?: string
 
   // Actions
+  viewDetails?: string
   edit?: string
   archive?: string
   unarchive?: string
@@ -110,6 +111,7 @@ export const DEFAULT_APPLICATIONS_TEXTS: Required<AuthApplicationsSectionTexts> 
   badgePlatform: 'Platform',
   badgeThemed: 'Themed',
   badgeThemeDisabled: 'Off',
+  viewDetails: 'View details',
   edit: 'Edit',
   archive: 'Archive',
   unarchive: 'Unarchive',

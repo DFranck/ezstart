@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import type { Application } from '../../core/types.js'
+import type { ColumnDef, Row } from '@tanstack/react-table'
 
 // Mock the applications hooks before importing the component
 const mockUseMyApplications = vi.fn()
@@ -20,6 +21,10 @@ vi.mock('../../react/applications.js', () => ({
 
 const { AuthApplicationsSection } =
   await import('../../components/admin/_internal/ApplicationsSection.js')
+const { buildAdminApplicationsColumns } =
+  await import('../../components/admin/AdminApplicationsTable.js')
+const { DEFAULT_APPLICATIONS_TEXTS } =
+  await import('../../components/admin/AdminApplications.types.js')
 
 const fakeApp = (overrides: Partial<Application> = {}): Application => ({
   id: 'app_1',
@@ -160,5 +165,101 @@ describe('AuthApplicationsSection', () => {
     expect(screen.getByText('All statuses')).toBeTruthy()
     expect(screen.getByText('Active only')).toBeTruthy()
     expect(screen.getByText('Archived only')).toBeTruthy()
+  })
+
+  it('accepts the onApplicationOpen prop without breaking the section render', () => {
+    // Detailed cell-level behavior (button visible / hidden + click invocation)
+    // is exercised in the dedicated `buildAdminApplicationsColumns` block
+    // below. This test only proves the section accepts the new prop without
+    // exploding and still mounts the table.
+    setup({ data: [fakeApp()] })
+    const handler = vi.fn()
+    expect(() => render(<AuthApplicationsSection onApplicationOpen={handler} />)).not.toThrow()
+    expect(screen.getByTestId('DataTable')).toBeTruthy()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Cell-level coverage for the actions column built by
+// `buildAdminApplicationsColumns()`.
+//
+// The shared @ezstart/ui mock renders `<DataTable>` as a passthrough Div,
+// so cell renderers from the columns array are NOT invoked during a normal
+// `render(<AdminApplicationsTable .../>)`. We exercise the columns helper
+// directly — extracting the actions cell renderer and invoking it by hand.
+// This guarantees:
+//   - graceful default: View button is absent when `onView` is omitted
+//   - wired behavior:   View button is rendered + click invokes the handler
+//                       with the correct Application
+// ---------------------------------------------------------------------------
+
+describe('buildAdminApplicationsColumns — actions column', () => {
+  const sampleApp: Application = {
+    id: 'app_42',
+    slug: 'acme',
+    name: 'Acme Corp',
+    description: undefined,
+    ownerId: 'user_42',
+    status: 'active',
+    themeEnabled: false,
+    isPlatformOwned: false,
+    createdAt: '2026-04-01T00:00:00Z',
+    updatedAt: '2026-04-01T00:00:00Z',
+  }
+
+  function getActionsColumn(opts: {
+    onView?: (app: Application) => void
+    onEdit?: (app: Application) => void
+    onArchive?: (app: Application) => void
+  }): ColumnDef<Application> | undefined {
+    const columns = buildAdminApplicationsColumns({
+      t: DEFAULT_APPLICATIONS_TEXTS,
+      onEdit: opts.onEdit ?? vi.fn(),
+      onArchive: opts.onArchive ?? vi.fn(),
+      onView: opts.onView,
+    })
+    return columns.find((c: ColumnDef<Application>) => 'id' in c && c.id === 'actions')
+  }
+
+  function renderCell(
+    column: ColumnDef<Application> | undefined,
+    row: Application
+  ): ReturnType<typeof render> | null {
+    if (!column || typeof column.cell !== 'function') return null
+    const cellFn = column.cell as (ctx: { row: Row<Application> }) => React.ReactNode
+    const node = cellFn({ row: { original: row } as Row<Application> })
+    return render(<>{node}</>)
+  }
+
+  it('omits the View action button when onView is undefined (graceful default)', () => {
+    const actionsColumn = getActionsColumn({})
+    const rendered = renderCell(actionsColumn, sampleApp)
+    expect(rendered).not.toBeNull()
+    if (!rendered) return
+    expect(rendered.queryByText(DEFAULT_APPLICATIONS_TEXTS.viewDetails)).toBeNull()
+    // Edit + Archive (active row) still rendered
+    expect(rendered.getByText(DEFAULT_APPLICATIONS_TEXTS.edit)).toBeTruthy()
+    expect(rendered.getByText(DEFAULT_APPLICATIONS_TEXTS.archive)).toBeTruthy()
+  })
+
+  it('renders the View action button when onView is provided', () => {
+    const onView = vi.fn()
+    const actionsColumn = getActionsColumn({ onView })
+    const rendered = renderCell(actionsColumn, sampleApp)
+    expect(rendered).not.toBeNull()
+    if (!rendered) return
+    expect(rendered.getByText(DEFAULT_APPLICATIONS_TEXTS.viewDetails)).toBeTruthy()
+  })
+
+  it('invokes onView with the row Application when the View button is clicked', () => {
+    const onView = vi.fn()
+    const actionsColumn = getActionsColumn({ onView })
+    const rendered = renderCell(actionsColumn, sampleApp)
+    if (!rendered) {
+      throw new Error('actions column did not render')
+    }
+    fireEvent.click(rendered.getByText(DEFAULT_APPLICATIONS_TEXTS.viewDetails))
+    expect(onView).toHaveBeenCalledTimes(1)
+    expect(onView).toHaveBeenCalledWith(sampleApp)
   })
 })

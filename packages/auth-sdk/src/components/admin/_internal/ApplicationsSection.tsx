@@ -41,6 +41,13 @@ export interface AuthApplicationsSectionProps {
   className?: string
   /** Partial texts override — falls back to English defaults. */
   texts?: Partial<AuthApplicationsSectionTexts>
+  /**
+   * Optional callback invoked when the superadmin clicks the "View details"
+   * action on a row. Stays i18n-agnostic: the consumer wires this to its own
+   * router (e.g. `router.push(\`/developer/\${app.id}\`)`). When `undefined`,
+   * the action button is omitted (graceful default).
+   */
+  onApplicationOpen?: (app: AdminApplicationRow) => void
 }
 
 /**
@@ -53,7 +60,11 @@ export interface AuthApplicationsSectionProps {
  *
  * @internal
  */
-export function AuthApplicationsSection({ className, texts }: AuthApplicationsSectionProps) {
+export function AuthApplicationsSection({
+  className,
+  texts,
+  onApplicationOpen,
+}: AuthApplicationsSectionProps) {
   const t: Required<AuthApplicationsSectionTexts> = { ...DEFAULT_APPLICATIONS_TEXTS, ...texts }
 
   // Server query — always cross-tenant for the admin dashboard
@@ -202,6 +213,7 @@ export function AuthApplicationsSection({ className, texts }: AuthApplicationsSe
           loading={isLoading}
           total={total}
           t={t}
+          onView={onApplicationOpen}
           onEdit={app => {
             setEditApp(app)
             setEditOpen(true)

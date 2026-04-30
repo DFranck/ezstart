@@ -20,6 +20,7 @@ import {
 } from './admin/_internal/AuthErrorLogsSection.js'
 import { type AuthUsersSectionTexts, DEFAULT_USERS_TEXTS } from './admin/types.js'
 import {
+  type AdminApplicationRow,
   type AuthApplicationsSectionTexts,
   DEFAULT_APPLICATIONS_TEXTS,
 } from './admin/AdminApplications.types.js'
@@ -64,6 +65,13 @@ export interface AuthAdminDashboardProps {
    * Initial active tab. Defaults to `'overview'`.
    */
   defaultTab?: 'overview' | 'users' | 'applications' | 'settings' | 'errorLogs'
+  /**
+   * Optional callback invoked when the superadmin clicks the "View details"
+   * action on an Application row. The SDK stays i18n-agnostic: the consumer
+   * wires this to its own router (e.g. `router.push(\`/developer/\${app.id}\`)`).
+   * When `undefined`, the action button is omitted from the table rows.
+   */
+  onApplicationOpen?: (app: AdminApplicationRow) => void
 }
 
 const DEFAULT_TAB_TEXTS = {
@@ -135,6 +143,7 @@ export function AuthAdminDashboard({
   className,
   texts,
   defaultTab = 'overview',
+  onApplicationOpen,
 }: AuthAdminDashboardProps) {
   const tabLabels = { ...DEFAULT_TAB_TEXTS, ...texts }
 
@@ -177,7 +186,10 @@ export function AuthAdminDashboard({
           <AuthUsersSection texts={usersTexts} />
         </TabsContent>
         <TabsContent value="applications" className="mt-4">
-          <AuthApplicationsSection texts={applicationsTexts} />
+          <AuthApplicationsSection
+            texts={applicationsTexts}
+            onApplicationOpen={onApplicationOpen}
+          />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
           <AuthSettingsSection texts={settingsTexts} />

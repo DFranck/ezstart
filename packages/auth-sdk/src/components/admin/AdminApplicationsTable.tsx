@@ -26,26 +26,36 @@ export interface AdminApplicationsTableProps {
   t: Required<AuthApplicationsSectionTexts>
   onEdit: (app: AdminApplicationRow) => void
   onArchive: (app: AdminApplicationRow) => void
+  /**
+   * Optional handler invoked when the superadmin clicks the "View details"
+   * action on a row. When provided, the action button is rendered as the
+   * first action; when `undefined`, the button is omitted (graceful default
+   * for consumers that don't wire detail navigation).
+   */
+  onView?: (app: AdminApplicationRow) => void
   /** BCP47 locale for date formatting. */
   locale?: string
 }
 
 /**
- * Renders the Applications table (DataTable) used by `<AuthAdminDashboard>`.
- * Internal sub-component — extracted to keep each file under the 400-line policy ceiling.
+ * Builds the column definitions for the admin Applications DataTable.
+ *
+ * Extracted from the component body so the per-row action buttons (view,
+ * edit, archive) can be unit-tested directly — the @ezstart/ui DataTable
+ * mock used in tests is a passthrough that drops the columns prop, making
+ * cell-renderer assertions impossible without this helper.
  *
  * @internal
  */
-export function AdminApplicationsTable({
-  applications,
-  loading,
-  total,
-  t,
-  onEdit,
-  onArchive,
-  locale,
-}: AdminApplicationsTableProps) {
-  const columns: ColumnDef<AdminApplicationRow>[] = [
+export function buildAdminApplicationsColumns(opts: {
+  t: Required<AuthApplicationsSectionTexts>
+  onEdit: (app: AdminApplicationRow) => void
+  onArchive: (app: AdminApplicationRow) => void
+  onView?: (app: AdminApplicationRow) => void
+  locale?: string
+}): ColumnDef<AdminApplicationRow>[] {
+  const { t, onEdit, onArchive, onView, locale } = opts
+  return [
     {
       accessorKey: 'slug',
       header: ({ header }) => <DataTableColumnHeader header={header} title={t.columnSlug} />,
@@ -136,6 +146,11 @@ export function AdminApplicationsTable({
       header: t.columnActions,
       cell: ({ row }) => (
         <Div className="flex gap-1">
+          {onView ? (
+            <Button variant="outline" size="sm" onClick={() => onView(row.original)}>
+              {t.viewDetails}
+            </Button>
+          ) : null}
           <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
             {t.edit}
           </Button>
@@ -148,6 +163,25 @@ export function AdminApplicationsTable({
       ),
     },
   ]
+}
+
+/**
+ * Renders the Applications table (DataTable) used by `<AuthAdminDashboard>`.
+ * Internal sub-component — extracted to keep each file under the 400-line policy ceiling.
+ *
+ * @internal
+ */
+export function AdminApplicationsTable({
+  applications,
+  loading,
+  total,
+  t,
+  onEdit,
+  onArchive,
+  onView,
+  locale,
+}: AdminApplicationsTableProps) {
+  const columns = buildAdminApplicationsColumns({ t, onEdit, onArchive, onView, locale })
 
   if (loading) {
     return (
