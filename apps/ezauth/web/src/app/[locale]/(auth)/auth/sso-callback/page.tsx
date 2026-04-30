@@ -39,8 +39,8 @@ function SsoCallbackContent() {
     if (processedRef.current) return
     processedRef.current = true
 
-    const code = searchParams.get('code')
-    const next = searchParams.get('next') || '/'
+    const code = searchParams?.get('code') ?? null
+    const next = searchParams?.get('next') ?? '/'
 
     if (!code) {
       setStatus('error')
