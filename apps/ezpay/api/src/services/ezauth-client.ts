@@ -29,6 +29,20 @@ export interface EzauthApplication {
   ownerId: string
   metadata?: Record<string, unknown> | null
   status: 'active' | 'archived'
+  /**
+   * Optional override for the URL where outbound webhooks are delivered.
+   * `null` means the sender uses its service-specific default (canonical
+   * ezauth subscriptions endpoint for `notifyEzauthSubscription`).
+   */
+  webhookEndpointUrl?: string | null
+  /**
+   * Per-Application HMAC `whsec_<hex>` secret. **Only populated** when the
+   * caller opted-in via `getApplication(id, { includeWebhookSecret: true })`
+   * AND the auth context (Bearer JWT or admin S2S API key) is allowed to
+   * see the secret. All other calls have this `undefined` (Mongoose
+   * select:false elision on the receiving end).
+   */
+  webhookSecret?: string
   createdAt: string
   updatedAt: string
 }
@@ -172,6 +186,18 @@ function buildHeaders(opts: EzauthClientOptions): Record<string, string> {
   return headers
 }
 
+/** Options for {@link getApplication} beyond the shared `EzauthClientOptions`. */
+export interface GetApplicationOptions extends EzauthClientOptions {
+  /**
+   * When `true`, append `?include=webhookSecret` to the request so the
+   * response includes the per-Application HMAC secret. Requires an auth
+   * context (Bearer JWT or `EZPAY_SERVER_EZAUTH_KEY` superadmin key)
+   * allowed to read the credential — strangers receive 404 and we return
+   * `null` like any other miss.
+   */
+  includeWebhookSecret?: boolean
+}
+
 /**
  * GET `/api/applications/:id` — owner-scoped. Requires a Bearer JWT OR a
  * superadmin S2S API key in `EZPAY_SERVER_EZAUTH_KEY`. Returns `null` on
@@ -181,10 +207,16 @@ function buildHeaders(opts: EzauthClientOptions): Record<string, string> {
  * @example
  * const app = await getApplication('507f1f77bcf86cd799439011', { bearerToken })
  * if (!app) throw new Error('Application not found')
+ *
+ * @example
+ * // Load the webhook secret along with the rest of the document so the
+ * // S2S sender can sign outbound webhooks with the per-Application HMAC.
+ * const app = await getApplication(id, { includeWebhookSecret: true })
+ * const sig = createHmac('sha256', app!.webhookSecret!).update(body).digest('hex')
  */
 export async function getApplication(
   id: string,
-  opts: EzauthClientOptions = {}
+  opts: GetApplicationOptions = {}
 ): Promise<EzauthApplication | null> {
   if (isCircuitOpen()) {
     logger.warn('ezauth-client skipping call — circuit open', { op: 'getApplication' })
@@ -192,7 +224,8 @@ export async function getApplication(
   }
 
   const apiUrl = opts.apiUrl ?? getApiUrl('ezauth')
-  const url = `${apiUrl}/api/applications/${encodeURIComponent(id)}`
+  const search = opts.includeWebhookSecret ? '?include=webhookSecret' : ''
+  const url = `${apiUrl}/api/applications/${encodeURIComponent(id)}${search}`
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS
 
   try {

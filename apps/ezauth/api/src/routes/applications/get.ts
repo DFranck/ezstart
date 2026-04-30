@@ -3,6 +3,14 @@
  *
  * Auth: Bearer. Owner OR superadmin. Any other caller receives 404 (not 403)
  * to avoid leaking existence of Applications across tenants.
+ *
+ * Query params:
+ *   - `?include=webhookSecret` — opt-in to receive the per-Application
+ *     `whsec_*` HMAC secret in the response. Owner OR superadmin only;
+ *     stranger callers still get 404. The S2S sender (ezpay) uses this
+ *     view to load the secret before signing outbound webhooks. The
+ *     dashboard reveal-once UI uses the dedicated regenerate endpoint
+ *     instead, since it always returns a freshly rotated value.
  */
 
 import type { Request, Response } from 'express'
@@ -19,7 +27,7 @@ import { Types } from 'mongoose'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
-import { serializeApplication } from './serialize.js'
+import { serializeApplication, serializeApplicationWithSecret } from './serialize.js'
 import { logger } from '@ezstart/logger/server'
 
 export const getApplicationRegistry = new OpenAPIRegistry()
@@ -74,8 +82,27 @@ const getApplicationController = async (req: Request, res: Response) => {
       return sendError(res, 'Application not found', 404)
     }
 
+    // Parse `?include` — comma-separated list. The only currently supported
+    // value is `webhookSecret`. Unknown tokens are silently ignored.
+    const includeRaw = req.query.include
+    const includeTokens =
+      typeof includeRaw === 'string'
+        ? includeRaw
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+        : []
+    const includeWebhookSecret = includeTokens.includes('webhookSecret')
+
     const Application = await getApplicationModel()
-    const app = await Application.findById(id).lean()
+    // Conditionally opt-in to the schema's `select: false` `webhookSecret`
+    // field. Other reads keep the field hidden by default — the dashboard's
+    // generic "fetch this app" call MUST NOT leak the credential.
+    const query = Application.findById(id)
+    if (includeWebhookSecret) {
+      query.select('+webhookSecret')
+    }
+    const app = await query.lean()
     if (!app) {
       return sendError(res, 'Application not found', 404)
     }
@@ -90,6 +117,9 @@ const getApplicationController = async (req: Request, res: Response) => {
       }
     }
 
+    if (includeWebhookSecret) {
+      return sendSuccess(res, serializeApplicationWithSecret(app))
+    }
     return sendSuccess(res, serializeApplication(app))
   } catch (error: unknown) {
     logger.error('Get application error:', error)

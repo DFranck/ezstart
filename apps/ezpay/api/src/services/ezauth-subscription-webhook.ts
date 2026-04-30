@@ -6,11 +6,18 @@
  * `customer.subscription.deleted`). Notifies EZAuth so it can grant/revoke the
  * subscribed user's roles and features on the target Application.
  *
- * Design:
+ * Design (V2 — per-Application secret, 2026-05-01):
  * - Authenticated via superadmin S2S API key (`EZPAY_SERVER_EZAUTH_KEY`).
  * - Authenticity is further proven via HMAC-SHA256 signature over
- *   `"{timestamp}.{body}"` using a shared secret (`EZAUTH_WEBHOOK_SECRET`).
+ *   `"{timestamp}.{body}"` using the **per-Application** `webhookSecret`
+ *   loaded from ezauth via `getApplication(id, { includeWebhookSecret: true })`.
+ *   Replaces the legacy `EZAUTH_WEBHOOK_SECRET` shared env var (MVP shortcut
+ *   that did not scale to multiple consumers).
  * - Header format: `X-EZStart-Signature: t=<unix>,v1=<hex>`.
+ * - Destination URL: `Application.webhookEndpointUrl` when set, else the
+ *   canonical `${getApiUrl('ezauth')}/api/subscriptions/webhook` default.
+ *   This lets future external consumers route ezpay events to their own
+ *   receivers without code changes here.
  * - Timeout 5s per request; no retry here — the Stripe webhook is the source
  *   of truth and EZAuth deduplicates by `stripeEventId` so Stripe's native
  *   retries are the safety net.
@@ -22,6 +29,7 @@
 import { createHmac } from 'crypto'
 import { logger } from '@ezstart/logger/server'
 import { getApiUrl } from '@ezstart/config'
+import { getApplication } from './ezauth-client.js'
 
 /**
  * Payload sent to `POST {ezauth}/api/subscriptions/webhook`.
@@ -78,7 +86,8 @@ function redactSecret(value: string | undefined): string {
 
 /**
  * Notify EZAuth of a subscription lifecycle event. Fire-and-forget — NEVER
- * throws. If required env vars are missing, logs a warning and returns.
+ * throws. If required env vars are missing OR the target Application cannot
+ * be loaded with its webhook secret, logs a warning and returns.
  *
  * @example
  * await notifyEzauthSubscription({
@@ -92,23 +101,8 @@ function redactSecret(value: string | undefined): string {
  * })
  */
 export async function notifyEzauthSubscription(payload: SubscriptionWebhookPayload): Promise<void> {
-  const secret = process.env.EZAUTH_WEBHOOK_SECRET
   const apiKey = process.env.EZPAY_SERVER_EZAUTH_KEY
 
-  if (!secret) {
-    logger.warn(
-      '[ezauth-webhook] EZAUTH_WEBHOOK_SECRET not set — skipping cross-service grant. ' +
-        'Add EZAUTH_WEBHOOK_SECRET to apps/ezpay/api/.env.local (and match it in ' +
-        'apps/ezauth/api/.env.local) to enable subscription role grants.',
-      {
-        subscriptionId: payload.subscriptionId,
-        stripeEventId: payload.stripeEventId,
-        applicationId: payload.applicationId,
-        userId: payload.userId,
-      }
-    )
-    return
-  }
   if (!apiKey) {
     logger.warn(
       '[ezauth-webhook] EZPAY_SERVER_EZAUTH_KEY not set — skipping cross-service grant. ' +
@@ -125,17 +119,56 @@ export async function notifyEzauthSubscription(payload: SubscriptionWebhookPaylo
     return
   }
 
-  const ezauthApiUrl = getApiUrl('ezauth')
+  // Load the target Application + its per-Application webhook secret in a
+  // single S2S call. Returns `null` on 404 / circuit-open / network error;
+  // we treat those identically — log and bail. The Stripe webhook stays
+  // 2xx because grants are a side-effect, not the source of truth.
+  const application = await getApplication(payload.applicationId, {
+    includeWebhookSecret: true,
+  })
+  if (!application) {
+    logger.warn(
+      '[ezauth-webhook] could not load Application — skipping cross-service grant. ' +
+        'The receiving Application may have been archived or the S2S key may lack admin scope.',
+      {
+        subscriptionId: payload.subscriptionId,
+        stripeEventId: payload.stripeEventId,
+        applicationId: payload.applicationId,
+        userId: payload.userId,
+      }
+    )
+    return
+  }
+  if (!application.webhookSecret) {
+    logger.warn(
+      '[ezauth-webhook] Application loaded but webhookSecret is absent — ' +
+        'run `pnpm --filter api-ezauth seed:webhook-secrets` to backfill.',
+      {
+        subscriptionId: payload.subscriptionId,
+        stripeEventId: payload.stripeEventId,
+        applicationId: payload.applicationId,
+        slug: application.slug,
+      }
+    )
+    return
+  }
+  const secret = application.webhookSecret
+
+  // Destination URL — explicit Application override wins, otherwise fall
+  // back to the canonical ezauth subscriptions endpoint. The override is
+  // reserved for future external consumers that host their own receivers.
+  const url = application.webhookEndpointUrl ?? `${getApiUrl('ezauth')}/api/subscriptions/webhook`
+
   const timestamp = Math.floor(Date.now() / 1000).toString()
   const body = JSON.stringify({ ...payload, timestamp })
   const signatureHeader = buildSignatureHeader(secret, timestamp, body)
-  const url = `${ezauthApiUrl}/api/subscriptions/webhook`
 
   logger.info('[ezauth-webhook] notify sending', {
     url,
     subscriptionId: payload.subscriptionId,
     stripeEventId: payload.stripeEventId,
     applicationId: payload.applicationId,
+    slug: application.slug,
     userId: payload.userId,
     status: payload.status,
     grantsRoles: payload.grantsRoles,
