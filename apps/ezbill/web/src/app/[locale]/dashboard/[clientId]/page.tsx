@@ -83,8 +83,8 @@ type ShareState = {
 }
 
 const ClientDashboardPage = () => {
-  const params = useParams()
-  const clientId = params.clientId as string
+  const params = useParams<{ clientId: string }>()
+  const clientId = params?.clientId ?? ''
 
   const { user, isAuthenticated } = useAuth()
   const { clients, invoices, quotes, receipts, companies, refetchAll, paymentMethods, loading } =
