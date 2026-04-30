@@ -9,6 +9,7 @@ import getMaintenanceModeRouter, { getMaintenanceModeRegistry } from './get-main
 import updateMaintenanceModeRouter, {
   updateMaintenanceModeRegistry,
 } from './update-maintenance-mode.js'
+import errorLogsRouter, { errorLogsRegistry } from './error-logs.js'
 
 export const adminRegistries = [
   listUsersRegistry,
@@ -20,6 +21,7 @@ export const adminRegistries = [
   updateFeatureFlagRegistry,
   getMaintenanceModeRegistry,
   updateMaintenanceModeRegistry,
+  errorLogsRegistry,
 ]
 
 export const adminRouters = [
@@ -32,4 +34,5 @@ export const adminRouters = [
   updateFeatureFlagRouter,
   getMaintenanceModeRouter,
   updateMaintenanceModeRouter,
+  errorLogsRouter,
 ]
