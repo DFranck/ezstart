@@ -20,12 +20,14 @@ import {
   router as dashboardLinkRouter,
 } from './dashboard-link.js'
 import { registry as convertRegistry, router as convertRouter } from './convert.js'
+import { registry as resumeRegistry, router as resumeRouter } from './resume.js'
 
 export const connectRegistries = [
   onboardRegistry,
   statusRegistry,
   dashboardLinkRegistry,
   convertRegistry,
+  resumeRegistry,
 ]
 
 export const connectRouters = [
@@ -34,4 +36,5 @@ export const connectRouters = [
   statusRouter,
   dashboardLinkRouter,
   convertRouter,
+  resumeRouter,
 ]

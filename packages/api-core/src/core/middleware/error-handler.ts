@@ -19,6 +19,7 @@
  */
 
 import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express'
+import { captureException } from '../../observability/index.js'
 import type { ServerLogger } from '../types.js'
 
 /**
@@ -87,6 +88,15 @@ export function createErrorHandler(config: ErrorHandlerConfig = {}): ErrorReques
         method: req.method,
       })
     }
+
+    // Capture to Sentry (no-op when SENTRY_DSN not set — initSentry returns
+    // early). This is the ONE place we capture from — no auto-instrumentation
+    // (cf. observability/sentry-init.ts and the 2026-04-25 incident note).
+    captureException(err, {
+      path: req.path,
+      method: req.method,
+      userId: req.userId,
+    })
 
     // Respect already-sent responses (e.g. an error fired after streaming
     // started — there is nothing we can do, just bail).

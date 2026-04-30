@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, type Model, type Document } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 /**
  * Metadata stored when a ConnectedAccount is converted from one Stripe
@@ -43,8 +44,32 @@ export interface ConnectedAccountDocument extends Document {
   payoutsEnabled: boolean
   defaultFeePercent: number
   onboardedAt: Date | null
+  /**
+   * Last time the user triggered "Resume Stripe onboarding" from the dashboard
+   * (cf. `POST /api/connect/onboarding/resume`). Used to surface to the user
+   * how many resume attempts they have left before the row is auto-cleaned.
+   * `null` when they have not resumed yet.
+   */
+  lastResumedAt: Date | null
+  /**
+   * Idempotency guard for the J-6 expiration warning email. Set to `true`
+   * once the cleanup scheduler has dispatched the "your onboarding expires
+   * in 24h" email to the user. Prevents duplicate sends if the cron fires
+   * twice or the API restarts mid-cycle.
+   */
+  expiryWarningEmailSent: boolean
   /** Audit metadata for conversions (platform ↔ external). */
   metadata?: ConnectedAccountTransitionMetadata
+  /**
+   * Stripe-pattern test/live partition. Connect accounts onboarded via the
+   * Stripe TEST environment (`acct_*` from sk_test_) MUST be flagged
+   * `isTestMode: true` so live charges never accidentally route through them.
+   *
+   * Note: Stripe itself uses different account ids for test vs live mode —
+   * the partition is mostly defensive; the per-route Stripe SDK init already
+   * picks the correct secret key based on `req.derivedMode`.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -82,6 +107,8 @@ const connectedAccountSchema = new Schema<ConnectedAccountDocument>(
     payoutsEnabled: { type: Boolean, default: false },
     defaultFeePercent: { type: Number, default: 3, min: 0, max: 100 },
     onboardedAt: { type: Date, default: null },
+    lastResumedAt: { type: Date, default: null },
+    expiryWarningEmailSent: { type: Boolean, default: false, index: true },
     metadata: { type: transitionMetadataSchema, default: undefined },
   },
   {
