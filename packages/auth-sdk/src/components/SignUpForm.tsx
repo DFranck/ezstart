@@ -25,6 +25,7 @@ import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
 import { readUtmSource } from './utmSource.js'
 import { DevModeBanner } from './DevModeBanner.js'
+import { TurnstileWidget } from './TurnstileWidget.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
@@ -148,6 +149,13 @@ export interface SignUpFormProps {
    * + disabled state without owning the submission logic.
    */
   onSubmittingChange?: (isSubmitting: boolean) => void
+  /**
+   * Cloudflare Turnstile site key — when provided, renders a captcha widget
+   * above the submit button and blocks submission until a token is obtained.
+   * The token is sent as `body.turnstileToken` to the backend. When omitted
+   * the widget is not rendered (no-op) and submission is unrestricted.
+   */
+  turnstileSiteKey?: string
 }
 
 const DEFAULT_FORM_ID = 'ezstart-signup-form'
@@ -186,6 +194,7 @@ export function SignUpForm({
   formId = DEFAULT_FORM_ID,
   hideSubmitButton = false,
   onSubmittingChange,
+  turnstileSiteKey,
 }: SignUpFormProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
@@ -196,6 +205,7 @@ export function SignUpForm({
   const [registered, setRegistered] = useState(false)
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null)
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const {
@@ -276,6 +286,12 @@ export function SignUpForm({
   }, [watchUsername, checkAvailability])
 
   const onSubmit = async (formData: FormData) => {
+    // Block submission when the captcha widget is showing but the user
+    // hasn't completed the challenge yet. Defensive guard for cases where
+    // the submit button lives outside the form (e.g. `<SignUpModal>` footer)
+    // and the caller hasn't wired the disabled state.
+    if (turnstileSiteKey && !turnstileToken) return
+
     setLoading(true)
     setError('')
 
@@ -296,6 +312,7 @@ export function SignUpForm({
           locale,
           ...(finalPromo ? { promoCode: finalPromo } : {}),
           ...(utmSource ? { utmSource } : {}),
+          ...(turnstileToken ? { turnstileToken } : {}),
         },
       })
 
@@ -598,10 +615,19 @@ export function SignUpForm({
             />
           )}
 
+          {turnstileSiteKey && (
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              onSuccess={setTurnstileToken}
+              onExpired={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+            />
+          )}
+
           {!hideSubmitButton && (
             <Button
               type="submit"
-              disabled={disabled || loading}
+              disabled={disabled || loading || (Boolean(turnstileSiteKey) && !turnstileToken)}
               className="w-full cursor-pointer"
               variant="default"
             >

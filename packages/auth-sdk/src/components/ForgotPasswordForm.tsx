@@ -18,6 +18,7 @@ import { logger } from './internal-logger.js'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { DevModeBanner } from './DevModeBanner.js'
+import { TurnstileWidget } from './TurnstileWidget.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
@@ -89,6 +90,13 @@ export interface ForgotPasswordFormProps {
    * spinner + disabled state without owning the submission logic.
    */
   onSubmittingChange?: (isSubmitting: boolean) => void
+  /**
+   * Cloudflare Turnstile site key — when provided, renders a captcha widget
+   * above the submit button and blocks submission until a token is obtained.
+   * The token is sent as `body.turnstileToken` to the backend. When omitted
+   * the widget is not rendered (no-op) and submission is unrestricted.
+   */
+  turnstileSiteKey?: string
 }
 
 const DEFAULT_FORM_ID = 'ezstart-forgot-password-form'
@@ -111,6 +119,7 @@ export function ForgotPasswordForm({
   formId = DEFAULT_FORM_ID,
   hideSubmitButton = false,
   onSubmittingChange,
+  turnstileSiteKey,
 }: ForgotPasswordFormProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
@@ -122,6 +131,7 @@ export function ForgotPasswordForm({
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
   const form = useForm<FormData>({
     defaultValues: { email: '' },
@@ -136,6 +146,11 @@ export function ForgotPasswordForm({
 
   const onSubmit = async (formData: FormData) => {
     if (loading) return
+    // Block submission when the captcha widget is showing but the user
+    // hasn't completed the challenge yet. Defensive guard for cases where
+    // the submit button lives outside the form (e.g. `<ForgotPasswordModal>`
+    // footer) and the caller hasn't wired the disabled state.
+    if (turnstileSiteKey && !turnstileToken) return
 
     setLoading(true)
     setError('')
@@ -152,6 +167,7 @@ export function ForgotPasswordForm({
           locale,
           app: resolvedApp,
           ...(redirectUri && { redirect_uri: redirectUri }),
+          ...(turnstileToken ? { turnstileToken } : {}),
         },
       })
 
@@ -242,10 +258,21 @@ export function ForgotPasswordForm({
           )}
         />
 
+        {turnstileSiteKey && (
+          <TurnstileWidget
+            siteKey={turnstileSiteKey}
+            onSuccess={setTurnstileToken}
+            onExpired={() => setTurnstileToken(null)}
+            onError={() => setTurnstileToken(null)}
+          />
+        )}
+
         {!hideSubmitButton && (
           <Button
             type="submit"
-            disabled={loading || !form.formState.isValid}
+            disabled={
+              loading || !form.formState.isValid || (Boolean(turnstileSiteKey) && !turnstileToken)
+            }
             className="w-full cursor-pointer"
             variant="default"
           >

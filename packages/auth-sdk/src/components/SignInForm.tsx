@@ -21,6 +21,7 @@ import { useForm } from 'react-hook-form'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
 import { DevModeBanner } from './DevModeBanner.js'
+import { TurnstileWidget } from './TurnstileWidget.js'
 import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
@@ -119,6 +120,21 @@ export interface SignInFormProps {
    * + disabled state without owning the submission logic.
    */
   onSubmittingChange?: (isSubmitting: boolean) => void
+  /**
+   * Cloudflare Turnstile site key — when provided, the form starts tracking
+   * failed login attempts and renders a captcha widget once the user has
+   * failed `turnstileShowAfterFails` times in a row (default 3). The token
+   * is sent as `body.turnstileToken` to the backend on subsequent attempts.
+   * When the key is empty, the widget is never shown (no-op).
+   */
+  turnstileSiteKey?: string
+  /**
+   * Number of consecutive failed login attempts before the captcha widget
+   * is rendered. Only meaningful when `turnstileSiteKey` is provided.
+   * Defaults to `3` — kept low to balance bot deterrence with user
+   * friction on legitimate typos.
+   */
+  turnstileShowAfterFails?: number
 }
 
 const DEFAULT_FORM_ID = 'ezstart-signin-form'
@@ -146,6 +162,8 @@ export function SignInForm({
   formId = DEFAULT_FORM_ID,
   hideSubmitButton = false,
   onSubmittingChange,
+  turnstileSiteKey,
+  turnstileShowAfterFails = 3,
 }: SignInFormProps) {
   const navigation = useAuthNavigation()
   const { handleCallback } = useAuth()
@@ -171,6 +189,11 @@ export function SignInForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
+  // Anti-friction Turnstile: only show after the user has failed
+  // `turnstileShowAfterFails` consecutive logins. Reset on success.
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const showTurnstile = Boolean(turnstileSiteKey) && failedAttempts >= turnstileShowAfterFails
 
   // Lift `loading` out so a parent (e.g. `<SignInModal>` rendering an
   // external submit button in the Modal footer) can mirror the spinner /
@@ -188,6 +211,11 @@ export function SignInForm({
 
   const onSubmit = async (formData: FormData) => {
     if (loading) return
+    // Block submission when the captcha widget is showing but the user
+    // hasn't completed the challenge yet. Defensive guard for cases where
+    // the submit button lives outside the form (e.g. `<SignInModal>` footer)
+    // and the caller hasn't wired the disabled state.
+    if (showTurnstile && !turnstileToken) return
 
     setLoading(true)
     setError('')
@@ -205,8 +233,14 @@ export function SignInForm({
           password: formData.password,
           app: appName,
           redirect_uri: resolvedRedirectUri || undefined,
+          ...(turnstileToken ? { turnstileToken } : {}),
         },
       })
+
+      // Successful credential check — reset failure counter so the captcha
+      // hides again next time the user types something valid.
+      setFailedAttempts(0)
+      setTurnstileToken(null)
 
       // Handle 2FA requirement
       if (result.requires2FA && result.tempToken) {
@@ -287,6 +321,11 @@ export function SignInForm({
             ? err.message
             : t.fallbackError
       setError(message)
+      // Track failed attempts so the captcha widget surfaces after
+      // `turnstileShowAfterFails` consecutive errors. The token (if any)
+      // is single-use server-side, so clear it for the next attempt.
+      setFailedAttempts(prev => prev + 1)
+      setTurnstileToken(null)
       setLoading(false)
     }
   }
@@ -420,10 +459,21 @@ export function SignInForm({
             </P>
           </Div>
 
+          {showTurnstile && (
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              onSuccess={setTurnstileToken}
+              onExpired={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+            />
+          )}
+
           {!hideSubmitButton && (
             <Button
               type="submit"
-              disabled={disabled || loading || !form.formState.isValid}
+              disabled={
+                disabled || loading || !form.formState.isValid || (showTurnstile && !turnstileToken)
+              }
               className="w-full cursor-pointer"
               variant="default"
             >
