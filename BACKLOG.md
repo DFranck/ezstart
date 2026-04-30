@@ -14,9 +14,15 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 ## Auth standalone V1 — Path to Clerk-level Pro (post-MVP)
 
-**Status MVP** : ezauth standalone est production-ready à ~99.5%+ (Wave 2 sprint 2026-04-30 : 5 V1 features shippées + 2 scaffolds prêts à activer + 3 minor cleanups). Tu peux vendre ezauth aujourd'hui à un client B2B sans réserve.
+**Status MVP** : ezauth standalone est production-ready à **~99.9%** (Night 2026-04-30→05-01 : +3 night agents fix V2 gaps : TESTMODE coalesce + admin View details link + unified JWT/API key auth S2S). Tu peux vendre ezauth aujourd'hui à un client B2B externe — secret keys S2S server-to-server fonctionnent end-to-end avec multi-tenancy enforced.
 
-Historique : 5 P1 quick wins 2026-04-30 (security.txt + /security page + hreflang + autoComplete + aria-required) + 60+ commits sprint 2026-04-29 + 4 P0 sécurité fix + ~15 P1/P2 hardening + 5 QW disclosure/SEO/a11y.
+Historique : Night 2026-05-01 (X1+X2+X3 = 12 commits, +44 tests). Sprint 2026-04-30 : 5 P1 quick wins + Wave 2 (5 V1 features shippées + 2 scaffolds prêts à activer + 3 minor cleanups). Sprint 2026-04-29 : 60+ commits + 4 P0 sécurité fix + ~15 P1/P2 hardening + 5 QW disclosure/SEO/a11y.
+
+**Night fixes 2026-05-01 (3 agents background pendant que user dort)** :
+
+- [x] **TESTMODE-COALESCE** 🟡 P2 — testModeScopePlugin live mode coalesces `isTestMode: undefined` (backward compat pre-V2 docs). Plus besoin de run la migration manuellement pour la visibilité — le plugin fait `$or: [{isTestMode:false}, {isTestMode:{$exists:false}}]` automatiquement. Strict opt-in en test mode (jamais accidental surface). Commits `5aab6f55`/`d964ede4`/`b046d7b7` (X1) — +12 tests.
+- [x] **ADMIN-APP-DETAIL-LINK** 🟢 UX — Bouton "View details" sur chaque row de /admin/applications → navigate `/{locale}/developer/<id>` via next-intl router. SDK i18n-agnostic (`onApplicationOpen` callback prop, default omits button). Commits `65ab5bff`/`3ba37312` (X2) — +4 tests.
+- [x] **UNIFIED-AUTH-S2S** 🔴 P0 — `unifiedAuthMiddleware` dans api-core accepte JWT cookie OU API key header (`Authorization: ApiKey ez_sk_*` ou `X-API-Key`). Wired sur 9 routes admin (applications/_ + api-keys/_ + admin/list-users + admin/analytics-overview). Multi-tenancy enforced : admin key bound to slug "acme" voit ONLY acme data même si underlying user est superadmin (security boundary testé). pk\_\* rejetés sur routes admin (insufficient scope 403). Customers peuvent maintenant call l'API server-to-server avec leur sk_live sans passer par SDK ou superadmin JWT. Commits `14bb748e`/`46c1cf3c`/`b9a66623`/`9c30dd36`/`d27e166d`/`d866e021` (X3) — +18 tests + +14 tests api-core.
 
 **Quick wins ajoutés au MVP (2026-04-30)** :
 
