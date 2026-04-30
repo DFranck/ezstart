@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   DashboardContent,
   DashboardHeader,
@@ -163,6 +163,31 @@ export function EZAuthDashboard({
   const { user, isAuthenticated } = useAuth()
   const texts: EZAuthDashboardTexts = { ...DEFAULT_DASHBOARD_TEXTS, ...textOverrides }
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Build a SidebarLink href that preserves the current path AND query string,
+  // only replacing the `section` query param. Lets users middle-click /
+  // copy-link / bookmark a specific section, and lets the browser back/forward
+  // navigate between sections (Stripe / Vercel pattern).
+  const buildSectionHref = useCallback(
+    (sectionId: string): string => {
+      const next = new URLSearchParams(searchParams?.toString() ?? '')
+      next.set('section', sectionId)
+      return `${pathname ?? ''}?${next.toString()}`
+    },
+    [pathname, searchParams]
+  )
+
+  // Sync the URL when the user clicks a sidebar link. `router.replace` (not
+  // push) so the browser back button doesn't get polluted with one entry per
+  // tab click — only intentional navigations create history entries.
+  const navigateToSection = useCallback(
+    (sectionId: string) => {
+      router.replace(buildSectionHref(sectionId), { scroll: false })
+    },
+    [router, buildSectionHref]
+  )
 
   const extras = extraSections ?? []
   const extraIds = extras.map(e => e.id)
@@ -273,12 +298,19 @@ export function EZAuthDashboard({
           {navItems.map(item => (
             <SidebarLink
               key={item.id}
-              href="#"
+              href={buildSectionHref(item.id)}
               active={effectiveSection === item.id}
               icon={<Icon name={item.icon as 'lucide:Key'} className="h-4 w-4" />}
               onClick={e => {
+                // Plain left-click → switch section in-place without a full
+                // navigation. Cmd/Ctrl/Shift/middle-click fall through so the
+                // browser opens the section in a new tab using the real href.
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                  return
+                }
                 e.preventDefault()
                 setActiveSection(item.id)
+                navigateToSection(item.id)
               }}
             >
               {item.label}
