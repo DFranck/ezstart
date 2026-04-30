@@ -12,6 +12,10 @@ export type AuditLogAction =
   | 'logout'
   | 'password_change'
   | 'email_change'
+  | 'email_change_requested'
+  | 'email_change_completed'
+  | 'magic_link_requested'
+  | 'magic_link_login'
   | 'oauth_link'
   | 'oauth_unlink'
   | '2fa_enabled'
@@ -35,6 +39,10 @@ export const AUDIT_LOG_ACTIONS = [
   'logout',
   'password_change',
   'email_change',
+  'email_change_requested',
+  'email_change_completed',
+  'magic_link_requested',
+  'magic_link_login',
   'oauth_link',
   'oauth_unlink',
   '2fa_enabled',

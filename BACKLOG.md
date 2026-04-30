@@ -33,7 +33,9 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 - [ ] **AUTH-V1-IDLETIMEOUT** 🟠 P1 — Session idle timeout (auto-logout après X min inactivité, configurable per Application). Activity tracker côté SDK + warning toast 1 min avant logout.
 - [ ] **AUTH-V1-MAGICLINK** 🟡 P2 — Magic link login (passwordless email). New route + `<MagicLinkButton>` + email template. Alternative à password pour users qui le préfèrent.
 - [ ] **AUTH-V1-PASSKEY** 🟡 P2 — WebAuthn / Passkey support. Apple/Google ecosystem natif. Skip password entirely sur devices trusted.
-- [ ] **AUTH-V1-CSP** 🟠 P1 — CSP per-app tuning. TODOs présents dans tous les `apps/*/web/vercel.json` post-sprint Wave 4. Need soak phase (script-src 'self' nonces + connect-src API+Stripe+analytics + frame-ancestors). Risk false positives en dev/preview.
+- [x] **AUTH-V1-CSP** 🟠 P1 — CSP baseline Report-Only shipped sur `apps/ezauth/web/vercel.json` (2026-04-29). Soak phase 2 semaines (deadline 2026-05-13) avant enforce. Doc complète : `apps/ezauth/web/README.md` §CSP. Splits in two follow-ups :
+  - [ ] **AUTH-V1-CSP-ENFORCE** 🟠 P1 (~1j post-soak) — Switch `Content-Security-Policy-Report-Only` → `Content-Security-Policy` (enforce) après review violations + ajout sources légitimes. Backport sur autres apps `*/web/vercel.json` (ezpay, ezstart, ezbill, etc.).
+  - [ ] **AUTH-V1-CSP-NONCES** 🟡 P2 (~3j) — Hardening nonce-based : middleware injecte nonce per-request, drop `'unsafe-inline'` + `'unsafe-eval'` du `script-src`. Pattern Next.js `<Script nonce={...} />`. Refactor middleware requis.
 
 **Bugs identifiés non bloquants** : aucun pending P0/P1/P2 — tous traités cette session.
 
