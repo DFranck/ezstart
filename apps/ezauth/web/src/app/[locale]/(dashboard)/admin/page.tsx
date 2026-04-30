@@ -219,6 +219,7 @@ export default function AdminPage() {
         confirm: t('dialog.confirm'),
         archiveError: tApps('archiveError'),
         archiveSuccess: tApps('archiveSuccess'),
+        viewDetails: tApps('viewDetails'),
         previous: tDash('previous'),
         next: tDash('next'),
         rows: tDash.raw('rows') as string,
@@ -434,6 +435,7 @@ export default function AdminPage() {
                   key={activeSection}
                   defaultTab={activeSection}
                   texts={adminTexts}
+                  onApplicationOpen={app => router.push(`/developer/${app.id}`)}
                 />
               </Div>
             </DashboardContent>
