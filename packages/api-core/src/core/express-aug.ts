@@ -8,6 +8,7 @@
 
 /// <reference types="express" />
 import 'express'
+import type { DerivedMode } from './context/request-context.js'
 import type { DerivedScope } from './middleware/derive-scope.js'
 import type { AuthenticatedUser } from './types.js'
 
@@ -27,6 +28,12 @@ declare global {
       validatedParams?: unknown
       /** Populated by `attachDerivedScope` — RBAC audience scope derived from `req.user`. */
       derivedScope?: DerivedScope
+      /**
+       * Populated by `attachDerivedMode` — Stripe-pattern test/live mode
+       * derived from the API key prefix (`ez_pk_test_*` → `'test'`, etc.).
+       * Defaults to `'live'` for cookie-auth dashboard requests.
+       */
+      derivedMode?: DerivedMode
     }
   }
 }

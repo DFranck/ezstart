@@ -79,9 +79,22 @@ export {
   type AuthMiddlewares,
 } from './core/middleware/auth.js'
 export { createCsrfMiddleware } from './core/middleware/csrf.js'
+export {
+  attachDerivedMode,
+  resolveDerivedMode,
+  withRequestContextMiddleware,
+} from './core/middleware/derive-mode.js'
 export { attachDerivedScope, type DerivedScope } from './core/middleware/derive-scope.js'
 export { createErrorHandler, type ErrorHandlerConfig } from './core/middleware/error-handler.js'
 export { validateBody, validateParams, validateQuery } from './core/middleware/validate.js'
+
+// Request-scoped context (AsyncLocalStorage)
+export {
+  getRequestContext,
+  withRequestContext,
+  type DerivedMode,
+  type RequestContext,
+} from './core/context/request-context.js'
 
 // OpenAPI-aware router
 export {
@@ -150,3 +163,13 @@ export {
   type EzstartServerOptions,
 } from './create-api-server.js'
 export { connectToMongo } from './connect-to-mongo.js'
+
+// ---------------------------------------------------------------------------
+// Observability — Sentry init + manual capture (no-op when DSN empty)
+// ---------------------------------------------------------------------------
+//
+// Uses `@sentry/node-core` with ZERO auto-integrations to avoid the
+// 2026-04-25 incident (OTEL HTTP/Express auto-instrumentation broke CORS on
+// Railway). We capture manually from `createErrorHandler` — see
+// `core/middleware/error-handler.ts`.
+export { captureException, initSentry, type InitSentryOptions } from './observability/index.js'
