@@ -2,11 +2,13 @@
 import './instrument.mjs'
 import {
   addVersionHeader,
+  attachDerivedMode,
   connectToMongo,
   createApiServer,
   createVersionedRouter,
   initSentry,
   startServer,
+  withRequestContextMiddleware,
 } from '@ezstart/api-core'
 
 // Initialize Sentry BEFORE createApiServer so the error-handler middleware
@@ -85,6 +87,22 @@ app.use(passport.initialize())
 
 // API version headers on every response
 app.use(addVersionHeader('v1'))
+
+// Stripe-pattern test/live mode partition (`standard-saas-data.md` §4):
+// 1. `attachDerivedMode` parses the API key prefix on the request and stamps
+//    `req.derivedMode` ('test' | 'live'). Defaults to 'live' for cookie-auth
+//    dashboard requests; superadmin can override via `?mode=` query param.
+// 2. `withRequestContextMiddleware` wraps the rest of the request lifecycle
+//    in an AsyncLocalStorage frame so the per-app `testModeScopePlugin`
+//    Mongoose hook can read the mode without an explicit `req` reference.
+//
+// Placement matters: AFTER auth/api-key middleware (which sets `req.user` and
+// `req.apiKeyEnv` if applicable), BEFORE routes. Routes themselves don't need
+// to mount auth at the app level — most ezauth routes use per-route auth
+// guards. The mode resolution still works because both attachDerivedMode and
+// the per-route auth read from the same headers/cookies.
+app.use(attachDerivedMode)
+app.use(withRequestContextMiddleware)
 
 // Routes
 // /api/auth/*  — credentials + OAuth
