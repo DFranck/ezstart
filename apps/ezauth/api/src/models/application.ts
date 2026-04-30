@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, type Document, type Model, type Query } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 /**
  * Application lifecycle status.
@@ -101,6 +102,21 @@ export interface ApplicationDocument extends Document {
    * services) can read it without a secondary lookup.
    */
   requireEmailVerification: boolean
+  /**
+   * Stripe-pattern test/live partition (see `standard-saas-data.md` §4).
+   *
+   * `false` (default) → live record, visible to live API keys (`ez_pk_live_*`,
+   * `ez_sk_live_*`) and to cookie-auth dashboard requests.
+   * `true` → test record, visible only to test API keys
+   * (`ez_pk_test_*`, `ez_sk_test_*`).
+   *
+   * Auto-injected on read by the per-app `testModeScopePlugin` Mongoose hook,
+   * which inspects `req.derivedMode` (propagated via `AsyncLocalStorage`).
+   * Writes MUST set this field explicitly — handlers read `req.derivedMode`
+   * and assign accordingly. The field is indexed for the inevitable
+   * `{ applicationId, isTestMode }` lookups.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -210,6 +226,12 @@ const applicationSchema = new Schema<ApplicationDocument>(
       required: true,
       default: false,
     },
+    isTestMode: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -287,6 +309,10 @@ applicationSchema.pre('countDocuments', injectArchiveFilter)
 applicationSchema.pre('updateOne', injectArchiveFilter)
 applicationSchema.pre('updateMany', injectArchiveFilter)
 applicationSchema.pre('distinct', injectArchiveFilter)
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4) — auto-scope
+// every read by `req.derivedMode` propagated via AsyncLocalStorage.
+applicationSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get the Application model attached to the shared

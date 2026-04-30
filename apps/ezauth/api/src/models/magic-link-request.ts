@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 /**
  * Magic link request — passwordless login flow. The user enters their
@@ -36,6 +37,11 @@ export interface MagicLinkRequestDocument extends Document {
   issuedFromIp?: string
   /** User-Agent of the request (audit). */
   issuedUa?: string
+  /**
+   * Stripe-pattern test/live partition. Inherited from `req.derivedMode` at
+   * issue time so test mode magic links cannot consume live sessions.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -85,6 +91,12 @@ const magicLinkRequestSchema = new Schema<MagicLinkRequestDocument>(
     issuedUa: {
       type: String,
     },
+    isTestMode: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -95,6 +107,9 @@ const magicLinkRequestSchema = new Schema<MagicLinkRequestDocument>(
 
 // Auto-expire requests via Mongo TTL index.
 magicLinkRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+magicLinkRequestSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get the MagicLinkRequest model attached to the

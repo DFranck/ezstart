@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, type Document, type Model } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 /**
  * Audit log action — finite enum covering every loggable user action
@@ -89,6 +90,12 @@ export interface AuditLogDocument extends Document {
   metadata: AuditLogMetadata
   createdAt: Date
   expiresAt: Date
+  /**
+   * Stripe-pattern test/live partition. Inherited from `req.derivedMode`
+   * at write time so test mode actions stay isolated from live audit logs
+   * (avoids spamming the live log with every test-key probe).
+   */
+  isTestMode: boolean
 }
 
 const auditLogSchema = new Schema<AuditLogDocument>(
@@ -121,6 +128,12 @@ const auditLogSchema = new Schema<AuditLogDocument>(
       type: Date,
       required: true,
     },
+    isTestMode: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
   },
   {
     // We manage `createdAt` manually so the TTL window can be aligned with
@@ -141,6 +154,10 @@ auditLogSchema.index({ userId: 1, action: 1, createdAt: -1 })
 // `expiresAt`. `expireAfterSeconds: 0` tells Mongo to use the date in the
 // field as the absolute deletion time.
 auditLogSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4) — auto-scope
+// every read by `req.derivedMode` propagated via AsyncLocalStorage.
+auditLogSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get the `AuditLog` model attached to the shared

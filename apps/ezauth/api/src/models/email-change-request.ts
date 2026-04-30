@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 /**
  * Email change request — issued when an authenticated user requests to
@@ -33,6 +34,11 @@ export interface EmailChangeRequestDocument extends Document {
   issuedFromIp?: string
   /** User-Agent of the change request (audit). */
   issuedUa?: string
+  /**
+   * Stripe-pattern test/live partition. Inherited from `req.derivedMode` at
+   * issue time so test mode requests cannot be consumed by live flows.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -81,6 +87,12 @@ const emailChangeRequestSchema = new Schema<EmailChangeRequestDocument>(
     issuedUa: {
       type: String,
     },
+    isTestMode: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -92,6 +104,9 @@ const emailChangeRequestSchema = new Schema<EmailChangeRequestDocument>(
 // Auto-expire requests via Mongo TTL index — reclaims storage and
 // prevents stale tokens from accumulating.
 emailChangeRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+emailChangeRequestSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get the EmailChangeRequest model attached to the

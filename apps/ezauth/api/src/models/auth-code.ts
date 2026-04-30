@@ -1,5 +1,6 @@
 import { connectToMongo } from '@ezstart/api-core'
 import { Schema, Document, Model } from 'mongoose'
+import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 export interface AuthCodeDocument extends Document {
   code: string
@@ -12,6 +13,11 @@ export interface AuthCodeDocument extends Document {
   consumedAt?: Date
   issuedFromIp?: string
   issuedUa?: string
+  /**
+   * Stripe-pattern test/live partition. SSO handoff codes issued via a test
+   * key cannot be redeemed for a live session and vice-versa.
+   */
+  isTestMode: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -68,6 +74,12 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
     issuedUa: {
       type: String,
     },
+    isTestMode: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -78,6 +90,9 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
 
 // Auto-expire codes
 authCodeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4).
+authCodeSchema.plugin(testModeScopePlugin)
 
 /**
  * Factory function to get AuthCode model attached to shared connection
