@@ -11,6 +11,7 @@ import {
   FormMessage,
   P,
   PasswordInput,
+  Span,
   Spinner,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
@@ -364,9 +365,16 @@ export function ResetPasswordForm({
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t.newPassword}</FormLabel>
+              <FormLabel>
+                {t.newPassword}
+                <Span aria-hidden="true" className="text-destructive ml-0.5">
+                  *
+                </Span>
+              </FormLabel>
               <FormControl>
                 <PasswordInput
+                  required
+                  aria-required="true"
                   minLength={MIN_PASSWORD_LENGTH}
                   autoComplete="new-password"
                   placeholder={t.newPasswordPlaceholder}
@@ -400,9 +408,16 @@ export function ResetPasswordForm({
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t.confirmPassword}</FormLabel>
+              <FormLabel>
+                {t.confirmPassword}
+                <Span aria-hidden="true" className="text-destructive ml-0.5">
+                  *
+                </Span>
+              </FormLabel>
               <FormControl>
                 <PasswordInput
+                  required
+                  aria-required="true"
                   minLength={MIN_PASSWORD_LENGTH}
                   autoComplete="new-password"
                   placeholder={t.confirmPasswordPlaceholder}

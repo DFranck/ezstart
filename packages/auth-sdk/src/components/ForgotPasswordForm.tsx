@@ -11,6 +11,7 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  Span,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
@@ -220,10 +221,17 @@ export function ForgotPasswordForm({
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t.email}</FormLabel>
+              <FormLabel>
+                {t.email}
+                <Span aria-hidden="true" className="text-destructive ml-0.5">
+                  *
+                </Span>
+              </FormLabel>
               <FormControl>
                 <Input
                   type="email"
+                  required
+                  aria-required="true"
                   autoComplete="email"
                   placeholder={t.emailPlaceholder}
                   {...field}

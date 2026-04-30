@@ -12,6 +12,7 @@ import {
   FormMessage,
   Input,
   PasswordInput,
+  Span,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
@@ -340,10 +341,17 @@ export function SignInForm({
             }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t.emailOrUsername}</FormLabel>
+                <FormLabel>
+                  {t.emailOrUsername}
+                  <Span aria-hidden="true" className="text-destructive ml-0.5">
+                    *
+                  </Span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="text"
+                    required
+                    aria-required="true"
                     placeholder={t.emailOrUsernamePlaceholder}
                     autoComplete="username"
                     disabled={disabled}
@@ -364,9 +372,16 @@ export function SignInForm({
             }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t.password}</FormLabel>
+                <FormLabel>
+                  {t.password}
+                  <Span aria-hidden="true" className="text-destructive ml-0.5">
+                    *
+                  </Span>
+                </FormLabel>
                 <FormControl>
                   <PasswordInput
+                    required
+                    aria-required="true"
                     placeholder={t.passwordPlaceholder}
                     autoComplete="current-password"
                     disabled={disabled}

@@ -186,6 +186,9 @@ export function TwoFactorPrompt({
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           type="text"
+          required
+          aria-required="true"
+          aria-label={t.prompt}
           inputMode="numeric"
           // Permit digits (TOTP) OR hex (backup codes). The visual
           // placeholder `000000` plus the `backupCodeHint` below tells

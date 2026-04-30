@@ -332,6 +332,10 @@ export function TwoFactorSettings({
             </P>
             <Input
               type="text"
+              required
+              aria-required="true"
+              aria-label={t.enterCode}
+              autoComplete="one-time-code"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={6}
@@ -417,6 +421,10 @@ export function TwoFactorSettings({
           </P>
           <Input
             type="text"
+            required
+            aria-required="true"
+            aria-label={t.disableConfirm}
+            autoComplete="one-time-code"
             inputMode="numeric"
             pattern="[0-9]*"
             maxLength={6}
@@ -432,6 +440,9 @@ export function TwoFactorSettings({
             </P>
             <Input
               type="password"
+              required
+              aria-required="true"
+              aria-label={t.disablePasswordHint}
               autoComplete="current-password"
               placeholder={t.disablePasswordPlaceholder}
               value={disablePassword}

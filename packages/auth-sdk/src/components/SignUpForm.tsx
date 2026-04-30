@@ -13,6 +13,7 @@ import {
   FormMessage,
   Input,
   PasswordInput,
+  Span,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
@@ -372,11 +373,17 @@ export function SignUpForm({
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t.email}</FormLabel>
+                <FormLabel>
+                  {t.email}
+                  <Span aria-hidden="true" className="text-destructive ml-0.5">
+                    *
+                  </Span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="email"
                     required
+                    aria-required="true"
                     autoComplete="email"
                     placeholder={t.emailPlaceholder}
                     {...field}
@@ -397,11 +404,17 @@ export function SignUpForm({
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t.username}</FormLabel>
+                <FormLabel>
+                  {t.username}
+                  <Span aria-hidden="true" className="text-destructive ml-0.5">
+                    *
+                  </Span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="text"
                     required
+                    aria-required="true"
                     autoComplete="username"
                     placeholder={t.usernamePlaceholder}
                     {...field}
@@ -461,10 +474,16 @@ export function SignUpForm({
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t.password}</FormLabel>
+                <FormLabel>
+                  {t.password}
+                  <Span aria-hidden="true" className="text-destructive ml-0.5">
+                    *
+                  </Span>
+                </FormLabel>
                 <FormControl>
                   <PasswordInput
                     required
+                    aria-required="true"
                     minLength={MIN_PASSWORD_LENGTH}
                     autoComplete="new-password"
                     placeholder={t.passwordPlaceholder}
@@ -499,10 +518,16 @@ export function SignUpForm({
             }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t.confirmPassword}</FormLabel>
+                <FormLabel>
+                  {t.confirmPassword}
+                  <Span aria-hidden="true" className="text-destructive ml-0.5">
+                    *
+                  </Span>
+                </FormLabel>
                 <FormControl>
                   <PasswordInput
                     required
+                    aria-required="true"
                     minLength={MIN_PASSWORD_LENGTH}
                     autoComplete="new-password"
                     placeholder={t.confirmPasswordPlaceholder}
