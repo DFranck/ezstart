@@ -11,10 +11,18 @@ import {
   Main,
   P,
 } from '@ezstart/ui/components'
+import type { Metadata } from 'next'
 import { useTranslations } from 'next-intl'
 
 const SECURITY_EMAIL = 'security@ezstart.xyz'
 const SECURITY_TXT_PATH = '/.well-known/security.txt'
+
+export const metadata: Metadata = {
+  title: 'Security policy',
+  description:
+    'EZAuth security policy: vulnerability reporting, supported versions, scope, and coordinated disclosure process.',
+  robots: { index: true, follow: true },
+}
 
 export default function SecurityPage() {
   const t = useTranslations('security')
