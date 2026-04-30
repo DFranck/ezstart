@@ -52,6 +52,8 @@ export type {
   ConnectConvertRequest,
   ConnectOnboardResponse,
   ConnectDashboardLinkResponse,
+  ConnectResumeRequest,
+  ConnectResumeResponse,
 } from './connect.js'
 
 export type { BillingPortalResponse, BillingPortalRequest } from './billing.js'

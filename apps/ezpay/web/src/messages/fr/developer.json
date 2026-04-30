@@ -211,6 +211,11 @@
       "dashboard": {
         "button": "Ouvrir le tableau de bord Stripe",
         "loading": "Chargement..."
+      },
+      "resume": {
+        "button": "Reprendre l'intégration Stripe",
+        "loading": "Reprise en cours…",
+        "error": "Échec de la reprise. Veuillez réessayer ou démarrer une nouvelle intégration."
       }
     },
     "fees": {

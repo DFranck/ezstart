@@ -15,6 +15,7 @@ import {
 } from '@ezstart/ui/components'
 import { useConnectStatus } from '../react/hooks/useConnectStatus.js'
 import { useConnectOnboard } from '../react/hooks/useConnectOnboard.js'
+import { useConnectResume } from '../react/hooks/useConnectResume.js'
 import { useConnectDashboardLink } from '../react/hooks/useConnectDashboardLink.js'
 import { useConnectDisconnect } from '../react/hooks/useConnectDisconnect.js'
 import { useApplicationContext } from '../react/pay-provider.js'
@@ -82,6 +83,7 @@ export function DeveloperConnectDashboard({
     applicationId: applicationId || undefined,
   })
   const { onboard, isPending: isOnboarding } = useConnectOnboard()
+  const { resume, isPending: isResuming } = useConnectResume()
   const { openDashboard, isLoading: isDashboardLoading } = useConnectDashboardLink()
   const { disconnect } = useConnectDisconnect()
   const [disconnectOpen, setDisconnectOpen] = useState(false)
@@ -105,6 +107,28 @@ export function DeveloperConnectDashboard({
   }) {
     try {
       const result = await onboard({ ...data, locale: resolvedLocale })
+      if (result.accountLinkUrl) {
+        if (onOnboardRedirect) {
+          onOnboardRedirect(result.accountLinkUrl)
+        } else {
+          window.location.href = result.accountLinkUrl
+        }
+      }
+    } catch {
+      onError?.(t.error)
+    }
+  }
+
+  async function handleResume() {
+    // We need the row id to address the resume endpoint. The status endpoint
+    // returns it via `.lean()` so it's always present at runtime, but the
+    // optional shape on `ConnectedAccount._id` lets older callers compile.
+    if (!account?._id) {
+      onError?.(t.error)
+      return
+    }
+    try {
+      const result = await resume({ connectedAccountId: account._id, locale: resolvedLocale })
       if (result.accountLinkUrl) {
         if (onOnboardRedirect) {
           onOnboardRedirect(result.accountLinkUrl)
@@ -162,6 +186,8 @@ export function DeveloperConnectDashboard({
               onOpenDashboard={handleOpenDashboard}
               onDisconnect={() => setDisconnectOpen(true)}
               isDashboardLoading={isDashboardLoading}
+              onResume={handleResume}
+              isResumeLoading={isResuming}
               texts={texts?.connectStatus}
             />
 

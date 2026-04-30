@@ -86,6 +86,8 @@ export default function ApplicationConnectPage() {
       dashboardButton: t('dashboard.button'),
       dashboardLoading: t('dashboard.loading'),
       disconnectButton: t('disconnect.button'),
+      resumeButton: t('resume.button'),
+      resumeLoading: t('resume.loading'),
     },
     onboardForm: {
       title: t('notConnected'),

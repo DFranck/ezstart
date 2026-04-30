@@ -24,6 +24,7 @@ export { usePlans } from './hooks/usePlans.js'
 // Connect hooks
 export { useConnectStatus } from './hooks/useConnectStatus.js'
 export { useConnectOnboard } from './hooks/useConnectOnboard.js'
+export { useConnectResume } from './hooks/useConnectResume.js'
 export { useConnectDashboardLink } from './hooks/useConnectDashboardLink.js'
 export { useConnectDisconnect } from './hooks/useConnectDisconnect.js'
 

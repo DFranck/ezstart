@@ -4,6 +4,12 @@ export type ConnectAccountType = 'standard' | 'express'
 export type ConnectAccountStatus = 'pending' | 'active' | 'restricted' | 'disabled'
 
 export interface ConnectedAccount {
+  /**
+   * Mongo `_id` string — exposed by the API layer when the row is serialized
+   * via `.lean()`. Used by callers (e.g. `<ConnectStatusCard>` Resume button)
+   * to address the row in `POST /api/connect/onboarding/resume`.
+   */
+  _id?: string
   /** Ezauth Application id this account belongs to (one account per app). */
   applicationId: string
   /**
@@ -21,7 +27,29 @@ export interface ConnectedAccount {
   payoutsEnabled: boolean
   defaultFeePercent: number
   onboardedAt: string | null
+  /**
+   * Last time the user clicked "Resume Stripe onboarding" (cf.
+   * `POST /api/connect/onboarding/resume`). `null` when never resumed.
+   */
+  lastResumedAt?: string | null
   createdAt: string
+}
+
+/** Body of `POST /api/connect/onboarding/resume`. */
+export interface ConnectResumeRequest {
+  connectedAccountId: string
+  /**
+   * Optional — user locale (e.g. `'en'`, `'fr'`) propagated to the
+   * post-onboarding callback so the API redirects the user back to the
+   * correct locale route in the EZPay web UI. Defaults to `'en'` server-side.
+   */
+  locale?: string
+}
+
+export interface ConnectResumeResponse {
+  accountLinkUrl: string
+  /** Milliseconds remaining before the pending row is auto-cleaned. */
+  expiresInMs: number
 }
 
 export interface ConnectStatusResponse {

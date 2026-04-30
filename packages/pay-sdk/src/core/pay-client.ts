@@ -31,6 +31,8 @@ import type {
   ConnectOnboardRequest,
   ConnectOnboardResponse,
   ConnectDashboardLinkResponse,
+  ConnectResumeRequest,
+  ConnectResumeResponse,
   BillingPortalRequest,
   BillingPortalResponse,
 } from './types/index.js'
@@ -81,6 +83,7 @@ import {
 } from './methods/plans.js'
 import {
   connectOnboard as connectOnboardImpl,
+  connectResume as connectResumeImpl,
   disconnectAccount as disconnectAccountImpl,
   getConnectDashboardLink as getConnectDashboardLinkImpl,
   getConnectStatus as getConnectStatusImpl,
@@ -295,6 +298,10 @@ export class PayClient implements PayClientInternal {
 
   connectOnboard(data: ConnectOnboardRequest): Promise<ConnectOnboardResponse> {
     return connectOnboardImpl(this, data)
+  }
+
+  connectResume(data: ConnectResumeRequest): Promise<ConnectResumeResponse> {
+    return connectResumeImpl(this, data)
   }
 
   getConnectDashboardLink(): Promise<ConnectDashboardLinkResponse> {

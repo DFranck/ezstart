@@ -211,6 +211,11 @@
       "dashboard": {
         "button": "Open Stripe Dashboard",
         "loading": "Loading..."
+      },
+      "resume": {
+        "button": "Resume Stripe onboarding",
+        "loading": "Resuming…",
+        "error": "Failed to resume onboarding. Please try again or start a new one."
       }
     },
     "fees": {
