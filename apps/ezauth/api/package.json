@@ -18,7 +18,8 @@
     "seed:consumer-app-keys": "tsx src/scripts/seed-consumer-app-keys.ts",
     "seed:platform-owned": "tsx src/scripts/seed-platform-owned-flag.ts",
     "migrate:keys-to-apps": "tsx src/scripts/migrate-keys-to-applications.ts",
-    "migrate:owner-admin-role": "tsx src/scripts/backfill-app-owner-admin-role.ts"
+    "migrate:owner-admin-role": "tsx src/scripts/backfill-app-owner-admin-role.ts",
+    "migrate:add-is-test-mode": "tsx src/scripts/migrate-add-is-test-mode.ts"
   },
   "dependencies": {
     "@ezstart/api-core": "workspace:*",

@@ -20,7 +20,8 @@
     "seed:green-pulse-plans": "tsx src/scripts/seed-green-pulse-plans.ts",
     "configure:portal": "tsx src/scripts/configure-stripe-portal.ts",
     "migrate:connected-accounts-to-apps": "tsx src/scripts/migrate-connected-accounts-to-applications.ts",
-    "migrate:plans-to-apps": "tsx src/scripts/migrate-plans-to-applications.ts"
+    "migrate:plans-to-apps": "tsx src/scripts/migrate-plans-to-applications.ts",
+    "migrate:add-is-test-mode": "tsx src/scripts/migrate-add-is-test-mode.ts"
   },
   "dependencies": {
     "@ezstart/api-core": "workspace:*",
