@@ -96,6 +96,16 @@ export type { ForgotPasswordFormProps, ForgotPasswordFormTexts } from './ForgotP
 export { ResetPasswordForm } from './ResetPasswordForm.js'
 export type { ResetPasswordFormProps, ResetPasswordFormTexts } from './ResetPasswordForm.js'
 
+// Email change (user settings)
+export { EmailChangeForm } from './EmailChangeForm.js'
+export type { EmailChangeFormProps, EmailChangeFormTexts } from './EmailChangeForm.js'
+
+// Magic link (passwordless sign-in)
+export { MagicLinkForm } from './MagicLinkForm.js'
+export type { MagicLinkFormProps, MagicLinkFormTexts } from './MagicLinkForm.js'
+export { MagicLinkButton } from './MagicLinkButton.js'
+export type { MagicLinkButtonProps, MagicLinkButtonTexts } from './MagicLinkButton.js'
+
 // OAuth
 export { OAuthButtons } from './OAuthButtons.js'
 export type { OAuthButtonsProps, OAuthButtonsTexts, OAuthProvider } from './OAuthButtons.js'

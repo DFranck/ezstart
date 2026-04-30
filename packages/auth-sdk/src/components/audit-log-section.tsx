@@ -112,6 +112,10 @@ const DEFAULT_TEXTS: AuditLogSectionTexts = {
     logout: 'Logged out',
     password_change: 'Password changed',
     email_change: 'Email changed',
+    email_change_requested: 'Email change requested',
+    email_change_completed: 'Email change completed',
+    magic_link_requested: 'Magic link requested',
+    magic_link_login: 'Signed in via magic link',
     oauth_link: 'OAuth account linked',
     oauth_unlink: 'OAuth account unlinked',
     '2fa_enabled': '2FA enabled',
@@ -135,10 +139,17 @@ const DEFAULT_TEXTS: AuditLogSectionTexts = {
 // Filter group → set of action types it expands to.
 const FILTER_GROUPS: Record<string, AuditLogAction[]> = {
   all: [],
-  login: ['login', 'logout'],
+  login: ['login', 'logout', 'magic_link_login', 'magic_link_requested'],
   security: ['password_change', '2fa_enabled', '2fa_disabled', 'session_revoked'],
   apiKeys: ['api_key_created', 'api_key_revoked'],
-  profile: ['profile_updated', 'email_change', 'oauth_link', 'oauth_unlink'],
+  profile: [
+    'profile_updated',
+    'email_change',
+    'email_change_requested',
+    'email_change_completed',
+    'oauth_link',
+    'oauth_unlink',
+  ],
 }
 
 type FilterGroup = keyof typeof FILTER_GROUPS

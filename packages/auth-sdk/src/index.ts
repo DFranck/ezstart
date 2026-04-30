@@ -43,6 +43,20 @@ export type { AuthProviderProps, AuthLogger } from './react/auth-provider.js'
 // THE hook
 export { useAuth } from './react/hooks.js'
 
+// Idle timeout (auto-logout on inactivity)
+export { useIdleTimeout, DEFAULT_IDLE_EVENTS } from './react/use-idle-timeout.js'
+export type { UseIdleTimeoutOptions, UseIdleTimeoutReturn } from './react/use-idle-timeout.js'
+export {
+  showIdleWarning,
+  dismissIdleWarning,
+  showIdleSignedOutToast,
+  defaultIdleWarningTexts,
+  formatIdleDescription,
+} from './react/idle-warning-toast.js'
+export type { IdleWarningTexts, ShowIdleWarningOptions } from './react/idle-warning-toast.js'
+export { IdleTimeoutManager } from './react/idle-timeout-manager.js'
+export type { IdleTimeoutManagerProps } from './react/idle-timeout-manager.js'
+
 // Store factory (advanced — usually consumed via `<AuthProvider>`)
 export { createAuthStore, configureAuthStorage } from './react/store.js'
 export type { AuthState, AuthStoreApi, CreateAuthStoreOptions } from './react/store.js'
@@ -173,6 +187,18 @@ export type {
   TwoFactorSettingsProps,
   TwoFactorSettingsTexts,
 } from './components/TwoFactorSettings.js'
+
+// Email change (user settings)
+export { EmailChangeForm } from './components/EmailChangeForm.js'
+export type { EmailChangeFormProps, EmailChangeFormTexts } from './components/EmailChangeForm.js'
+export { useRequestEmailChange, useVerifyEmailChange } from './react/use-email-change.js'
+
+// Magic link (passwordless sign-in)
+export { MagicLinkForm } from './components/MagicLinkForm.js'
+export type { MagicLinkFormProps, MagicLinkFormTexts } from './components/MagicLinkForm.js'
+export { MagicLinkButton } from './components/MagicLinkButton.js'
+export type { MagicLinkButtonProps, MagicLinkButtonTexts } from './components/MagicLinkButton.js'
+export { useRequestMagicLink, useVerifyMagicLink } from './react/use-magic-link.js'
 
 // Audit log (user activity)
 export { AuditLogSection } from './components/audit-log-section.js'
