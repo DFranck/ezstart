@@ -64,7 +64,19 @@ function injectTestModeFilter(this: Query<unknown, unknown>, next: (err?: Error)
   const filter = this.getFilter() as Record<string, unknown>
   if (filterMentionsTestMode(filter)) return next()
 
-  this.where({ isTestMode: ctx.derivedMode === 'test' })
+  // Live mode coalesces `undefined` as live (backward compat for pre-V2 docs
+  // that predate the `isTestMode` column). New docs default to `false` via
+  // the schema, but legacy data may still lack the field entirely until the
+  // backfill migration has run on every environment. Treating undefined as
+  // live keeps the API behaviour invariant across the migration window.
+  //
+  // Test mode is strict — `isTestMode: true` ONLY. Test data is an explicit
+  // opt-in (created against test keys / seeded by tests), never undefined.
+  if (ctx.derivedMode === 'test') {
+    this.where({ isTestMode: true })
+  } else {
+    this.where({ $or: [{ isTestMode: false }, { isTestMode: { $exists: false } }] })
+  }
   next()
 }
 
