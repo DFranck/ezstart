@@ -40,41 +40,53 @@ const { requireAdmin } = createRoleMiddleware()
 
 const revenueByCurrencySchema = z.object({
   currency: z.string().describe('ISO 4217 currency code (uppercase).'),
-  amount: z.number().describe('Sum of completed payment amounts in this currency.'),
+  total: z.number().describe('Sum of completed payment amounts in this currency.'),
 })
 
 const revenueTrendPointSchema = z.object({
   date: z.string().describe('ISO date (YYYY-MM-DD) bucketing the day.'),
-  amount: z.number().describe('Total revenue (all currencies summed) for that day.'),
-  count: z.number().int().nonnegative().describe('Number of completed payments that day.'),
+  total: z.number().describe('Total revenue (primary currency) for that day.'),
+  currency: z.string().describe('Currency code for the trend (primary currency).'),
 })
 
 const topAppByRevenueSchema = z.object({
-  projectId: z.string().describe('Application slug (Payment.projectId).'),
-  amount: z.number().describe('Total completed revenue from this app.'),
-  count: z.number().int().nonnegative().describe('Number of completed payments from this app.'),
+  appName: z.string().describe('Application slug (Payment.projectId).'),
+  total: z.number().describe('Total completed revenue from this app.'),
+  currency: z.string().describe('Currency code for the revenue total.'),
 })
 
 const payAnalyticsOverviewSchema = z.object({
-  totalRevenueByCurrency: z
-    .array(revenueByCurrencySchema)
-    .describe('Total completed revenue grouped by currency.'),
   totalPayments: z
     .number()
     .int()
     .nonnegative()
-    .describe('Total payments with status="completed" in the scope.'),
+    .describe('Total payments in the scope (all statuses).'),
+  completedPayments: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe('Number of payments with status="completed" in the scope.'),
+  failedPayments: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe('Number of payments with status="failed" in the scope.'),
+  refundedPayments: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe('Number of payments with status="refunded" in the scope.'),
   activeSubscriptions: z
     .number()
     .int()
     .nonnegative()
     .describe('Active recurring subscriptions in the scope (subscription type, completed).'),
-  mrrProxy: z
-    .number()
-    .nonnegative()
-    .describe(
-      'Monthly recurring revenue proxy: sum of active subscription amounts (single currency).'
-    ),
+  revenueByCurrency: z
+    .array(revenueByCurrencySchema)
+    .describe('Total completed revenue grouped by currency.'),
+  mrrByCurrency: z
+    .array(revenueByCurrencySchema)
+    .describe('Monthly recurring revenue grouped by currency (active monthly subs).'),
   revenueTrend: z
     .array(revenueTrendPointSchema)
     .describe('Daily revenue series for the last 30 days, ordered ascending by date.'),
@@ -110,8 +122,9 @@ function toISODate(d: Date): string {
 }
 
 function fillRevenueTrend(
-  buckets: { date: string; amount: number; count: number }[],
-  days: number
+  buckets: { date: string; total: number }[],
+  days: number,
+  currency: string
 ): PayRevenueTrendPoint[] {
   const map = new Map(buckets.map(b => [b.date, b]))
   const series: PayRevenueTrendPoint[] = []
@@ -125,8 +138,8 @@ function fillRevenueTrend(
     const found = map.get(key)
     series.push({
       date: key,
-      amount: found?.amount ?? 0,
-      count: found?.count ?? 0,
+      total: Number.isFinite(found?.total) ? (found?.total ?? 0) : 0,
+      currency,
     })
   }
   return series
@@ -171,11 +184,14 @@ const payAnalyticsOverviewController = async (req: Request, res: Response) => {
     // Short-circuit empty scopes — return a fully-zeroed snapshot.
     if (scopedSlugs && scopedSlugs.length === 0) {
       const empty: PayAnalyticsOverview = {
-        totalRevenueByCurrency: [],
         totalPayments: 0,
+        completedPayments: 0,
+        failedPayments: 0,
+        refundedPayments: 0,
         activeSubscriptions: 0,
-        mrrProxy: 0,
-        revenueTrend: fillRevenueTrend([], TREND_DAYS),
+        revenueByCurrency: [],
+        mrrByCurrency: [],
+        revenueTrend: fillRevenueTrend([], TREND_DAYS, 'EUR'),
         topAppsByRevenue: [],
       }
       return sendSuccess(res, empty)
@@ -192,6 +208,8 @@ const payAnalyticsOverviewController = async (req: Request, res: Response) => {
       : {}
 
     const completedFilter: Record<string, unknown> = { ...baseScope, status: 'completed' }
+    const failedFilter: Record<string, unknown> = { ...baseScope, status: 'failed' }
+    const refundedFilter: Record<string, unknown> = { ...baseScope, status: 'refunded' }
     const activeSubsFilter: Record<string, unknown> = {
       ...baseScope,
       type: 'subscription',
@@ -200,28 +218,34 @@ const payAnalyticsOverviewController = async (req: Request, res: Response) => {
     }
 
     const [
-      revenueByCurrency,
+      revenueByCurrencyRaw,
       totalPayments,
+      completedPayments,
+      failedPayments,
+      refundedPayments,
       activeSubscriptions,
-      mrrAggregation,
+      mrrByCurrencyRaw,
       revenueTrendBuckets,
       topAppsAggregation,
     ] = await Promise.all([
-      Payment.aggregate<{ currency: string; amount: number }>([
+      Payment.aggregate<{ currency: string; total: number }>([
         { $match: completedFilter },
         {
           $group: {
             _id: { $toUpper: '$currency' },
-            amount: { $sum: '$amount' },
+            total: { $sum: '$amount' },
           },
         },
-        { $project: { _id: 0, currency: '$_id', amount: 1 } },
-        { $sort: { amount: -1 } },
+        { $project: { _id: 0, currency: '$_id', total: 1 } },
+        { $sort: { total: -1 } },
       ]),
+      Payment.countDocuments(baseScope),
       Payment.countDocuments(completedFilter),
+      Payment.countDocuments(failedFilter),
+      Payment.countDocuments(refundedFilter),
       Payment.countDocuments(activeSubsFilter),
-      // MRR proxy: sum of active monthly subscription amounts.
-      Payment.aggregate<{ amount: number }>([
+      // MRR by currency: sum of active monthly subscription amounts grouped by currency.
+      Payment.aggregate<{ currency: string; total: number }>([
         {
           $match: {
             ...activeSubsFilter,
@@ -230,14 +254,15 @@ const payAnalyticsOverviewController = async (req: Request, res: Response) => {
         },
         {
           $group: {
-            _id: null,
-            amount: { $sum: '$amount' },
+            _id: { $toUpper: '$currency' },
+            total: { $sum: '$amount' },
           },
         },
-        { $project: { _id: 0, amount: 1 } },
+        { $project: { _id: 0, currency: '$_id', total: 1 } },
+        { $sort: { total: -1 } },
       ]),
       // Revenue trend (last 30 days, daily buckets, UTC).
-      Payment.aggregate<{ date: string; amount: number; count: number }>([
+      Payment.aggregate<{ date: string; total: number }>([
         {
           $match: {
             ...completedFilter,
@@ -249,36 +274,63 @@ const payAnalyticsOverviewController = async (req: Request, res: Response) => {
             _id: {
               $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'UTC' },
             },
-            amount: { $sum: '$amount' },
-            count: { $sum: 1 },
+            total: { $sum: '$amount' },
           },
         },
-        { $project: { _id: 0, date: '$_id', amount: 1, count: 1 } },
+        { $project: { _id: 0, date: '$_id', total: 1 } },
         { $sort: { date: 1 } },
       ]),
       // Top apps by completed revenue.
-      Payment.aggregate<{ projectId: string; amount: number; count: number }>([
+      Payment.aggregate<{ appName: string; total: number; currency: string }>([
         { $match: completedFilter },
         {
           $group: {
-            _id: '$projectId',
-            amount: { $sum: '$amount' },
-            count: { $sum: 1 },
+            _id: { projectId: '$projectId', currency: { $toUpper: '$currency' } },
+            total: { $sum: '$amount' },
           },
         },
-        { $project: { _id: 0, projectId: '$_id', amount: 1, count: 1 } },
-        { $sort: { amount: -1 } },
+        {
+          $project: {
+            _id: 0,
+            appName: '$_id.projectId',
+            currency: '$_id.currency',
+            total: 1,
+          },
+        },
+        { $sort: { total: -1 } },
         { $limit: TOP_APPS_LIMIT },
       ]),
     ])
 
+    // Defensive: ensure every numeric field is a finite number (never NaN/null/undefined).
+    // Coerce per-row totals so the SDK formatter never receives garbage.
+    const revenueByCurrency = revenueByCurrencyRaw.map(r => ({
+      currency: r.currency,
+      total: Number.isFinite(r.total) ? r.total : 0,
+    }))
+    const mrrByCurrency = mrrByCurrencyRaw.map(r => ({
+      currency: r.currency,
+      total: Number.isFinite(r.total) ? r.total : 0,
+    }))
+    const topAppsByRevenue = topAppsAggregation.map(a => ({
+      appName: a.appName,
+      currency: a.currency,
+      total: Number.isFinite(a.total) ? a.total : 0,
+    }))
+
+    // Primary currency for the trend = highest-revenue currency, fallback EUR.
+    const primaryCurrency = revenueByCurrency[0]?.currency ?? 'EUR'
+
     const overview: PayAnalyticsOverview = {
-      totalRevenueByCurrency: revenueByCurrency,
       totalPayments,
+      completedPayments,
+      failedPayments,
+      refundedPayments,
       activeSubscriptions,
-      mrrProxy: mrrAggregation[0]?.amount ?? 0,
-      revenueTrend: fillRevenueTrend(revenueTrendBuckets, TREND_DAYS),
-      topAppsByRevenue: topAppsAggregation,
+      revenueByCurrency,
+      mrrByCurrency,
+      revenueTrend: fillRevenueTrend(revenueTrendBuckets, TREND_DAYS, primaryCurrency),
+      topAppsByRevenue,
     }
 
     sendSuccess(res, overview)
