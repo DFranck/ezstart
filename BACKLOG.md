@@ -325,9 +325,16 @@ Payment SaaS (Stripe clone) avec SDK publishable + SaaS dashboard. **Status:** a
   - Login superadmin sur ezauth dashboard (staging URL puis prod)
   - Create key `ez_sk_live_*` scoped Application "ezpay", scope: admin, type: secret
   - Set dans Railway api-ezpay env vars `EZPAY_SERVER_EZAUTH_KEY=ez_sk_live_*`
-- [ ] **EZP-PROD-003: Generate `EZAUTH_WEBHOOK_SECRET`** identical des 2 côtés (staging + prod)
-  - `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` → hex 64 chars
-  - Set dans Railway api-ezpay AND api-ezauth env vars
+- [x] **EZP-PROD-003: V2 per-Application webhook secret** (DONE 2026-05-01)
+  - ✅ Stripe-pattern per-Application secret stored on `Application.webhookSecret` in MongoDB
+  - ✅ Removed shared `EZAUTH_WEBHOOK_SECRET` env var on both ezauth + ezpay sides
+  - ✅ `POST /api/applications/:id/regenerate-webhook-secret` route + reveal-once UX in auth-sdk
+  - ✅ `pnpm --filter api-ezauth seed:webhook-secrets` backfill script
+  - ✅ ezpay sender fetches secret via `getApplication(id, { includeWebhookSecret: true })`
+  - **Post-deploy migration**:
+    1. Deploy this version to ezauth + ezpay (staging then prod)
+    2. Run `railway run --service ezauth-api --environment <env> -- pnpm --filter api-ezauth seed:webhook-secrets --force` to backfill
+    3. **REMOVE** the legacy `EZAUTH_WEBHOOK_SECRET` env var from BOTH `ezauth-api` and `ezpay-api` Railway services (no longer used; harmless if left, but clean it up)
 - [ ] **EZP-PROD-004: Run all migrations en staging + prod**
   - `pnpm --filter api-ezauth migrate:keys-to-apps` (P6-A backfill)
   - `pnpm --filter api-ezpay migrate:plans-to-apps` (P7-A backfill)
