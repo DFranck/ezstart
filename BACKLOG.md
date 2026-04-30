@@ -14,7 +14,15 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 ## Auth standalone V1 — Path to Clerk-level Pro (post-MVP)
 
-**Status MVP** : ezauth standalone est production-ready à 95%+ après le sprint 2026-04-29 (60+ commits, 4 P0 sécurité fix, ~15 P1/P2 hardening). Tu peux vendre ezauth aujourd'hui à un client B2B.
+**Status MVP** : ezauth standalone est production-ready à ~98%+ (5 P1 quick wins ajoutés 2026-04-30 : security.txt + /security page + hreflang + autoComplete + aria-required). 60+ commits sprint 2026-04-29 + 4 P0 sécurité fix + ~15 P1/P2 hardening + 5 QW disclosure/SEO/a11y. Tu peux vendre ezauth aujourd'hui à un client B2B.
+
+**Quick wins ajoutés au MVP (2026-04-30)** :
+
+- [x] security.txt RFC 9116 (Contact security@ezstart.xyz + Policy link to /security + Expires 2027-04-30)
+- [x] /security disclosure page publique (metadata indexable + sitemap entry, email aligné canonical .xyz partout)
+- [x] hreflang SEO tags multi-langue (`generateMetadata` per-locale + alternates.languages en/fr/vi + x-default)
+- [x] autoComplete browser UX sur tous les auth forms (SignIn/SignUp/ForgotPassword/ResetPassword + 2FA — username/email/current-password/new-password/given-name/family-name/one-time-code)
+- [x] aria-required + visual `*` markers WCAG (SignIn/SignUp/ForgotPassword/ResetPassword/2FA — `<Span aria-hidden="true" className="text-destructive ml-0.5">*</Span>` + `aria-required="true"` + `required` sur tous les Inputs requis)
 
 **Reste pour franchir le palier "vraiment Clerk Pro" (V1, ~2-4 semaines)** :
 
