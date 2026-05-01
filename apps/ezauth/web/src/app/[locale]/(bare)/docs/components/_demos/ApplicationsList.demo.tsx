@@ -1,13 +1,15 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { ApplicationsList } from '@ezstart/auth-sdk/components'
+import { Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
   return (
-    <Placeholder
-      name="ApplicationsList"
-      reason="Lists all applications owned by the authenticated user. Visit /dashboard/applications when signed in to see live data."
-      cta={{ label: 'Open /dashboard', href: '/dashboard' }}
-    />
+    <DemoSandbox componentName="ApplicationsList">
+      <Div className="w-full">
+        <ApplicationsList />
+      </Div>
+    </DemoSandbox>
   )
 }

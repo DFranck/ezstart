@@ -1,13 +1,15 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { EZAuthDashboard } from '@ezstart/auth-sdk/components'
+import { Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
   return (
-    <Placeholder
-      name="EZAuthDashboard"
-      reason="Full developer dashboard with sidebar + tabs. Requires an authenticated session — visit /dashboard when signed in."
-      cta={{ label: 'Open /dashboard', href: '/dashboard' }}
-    />
+    <DemoSandbox componentName="EZAuthDashboard">
+      <Div className="w-full">
+        <EZAuthDashboard appName="_docs-demo" />
+      </Div>
+    </DemoSandbox>
   )
 }

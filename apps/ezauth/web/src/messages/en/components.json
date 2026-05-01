@@ -49,6 +49,10 @@
     "tabAnatomy": "Anatomy",
     "previewMissing": "No live demo for this component yet — see the source link or the Code tab for a snippet.",
     "previewMissingTitle": "Demo unavailable",
+    "demoModeBanner": {
+      "title": "DEMO MODE",
+      "description": "Actions in this preview are real but isolated to a sandbox Application. Data resets every 24h."
+    },
     "codeFallbackTitle": "Quick start",
     "codeFallbackDescription": "No example was attached to this component's TSDoc — here's a generated snippet based on its props.",
     "codeExampleTitle": "Example {index}",

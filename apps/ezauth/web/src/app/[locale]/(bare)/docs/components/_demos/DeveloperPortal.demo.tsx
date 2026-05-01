@@ -1,13 +1,15 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { DeveloperPortal } from '@ezstart/auth-sdk/components'
+import { Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
   return (
-    <Placeholder
-      name="DeveloperPortal"
-      reason="Full API-keys management portal. Requires an authenticated session — visit /developer when signed in to see live keys + usage."
-      cta={{ label: 'Open /developer', href: '/developer' }}
-    />
+    <DemoSandbox componentName="DeveloperPortal">
+      <Div className="w-full">
+        <DeveloperPortal />
+      </Div>
+    </DemoSandbox>
   )
 }

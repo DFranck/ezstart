@@ -1,13 +1,15 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { EmailVerificationStatus } from '@ezstart/auth-sdk/components'
+import { Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
   return (
-    <Placeholder
-      name="EmailVerificationStatus"
-      reason="Requires an authenticated session to read the email verification state. Sign in and visit /account."
-      cta={{ label: 'Open /account', href: '/account' }}
-    />
+    <DemoSandbox componentName="EmailVerificationStatus">
+      <Div className="w-full max-w-md">
+        <EmailVerificationStatus />
+      </Div>
+    </DemoSandbox>
   )
 }

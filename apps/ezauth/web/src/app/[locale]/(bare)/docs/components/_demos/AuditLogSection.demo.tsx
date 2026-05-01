@@ -1,13 +1,15 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { AuditLogSection } from '@ezstart/auth-sdk/components'
+import { Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
   return (
-    <Placeholder
-      name="AuditLogSection"
-      reason="Lists audit events for the authenticated user. Visit /account/security when signed in to see real data."
-      cta={{ label: 'Open /account', href: '/account' }}
-    />
+    <DemoSandbox componentName="AuditLogSection">
+      <Div className="w-full max-w-2xl">
+        <AuditLogSection />
+      </Div>
+    </DemoSandbox>
   )
 }

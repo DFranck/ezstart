@@ -5,17 +5,20 @@ import { Card, CardContent, Div, P, Span } from '@ezstart/ui/components'
 export interface PlaceholderProps {
   /** Component name (rendered as a label) */
   name: string
-  /** Reason the component can't be live-previewed */
+  /** Reason the component can't be live-previewed. Keep it factual — describe
+   *  what the component does, not why the visitor should leave. */
   reason: string
-  /** Optional CTA label that points users to a live page */
+  /** Optional CTA label that points users to a related page. */
   cta?: { label: string; href?: string }
 }
 
 /**
- * Visual placeholder rendered when a component cannot be live-previewed
- * in the showcase (requires authenticated session, API access, real OAuth
- * provider, etc.). Devs see a clear "what to do next" message instead of
- * a broken or fake demo.
+ * Visual placeholder rendered when a component genuinely cannot be
+ * live-previewed in the showcase (e.g. triggers a real OAuth redirect to a
+ * third-party provider, or is mounted by a Next.js route on a specific URL).
+ *
+ * Devs see a factual "what this component does" message instead of a fake
+ * demo or a "sign in to see it live" tease.
  */
 export function Placeholder({ name, reason, cta }: PlaceholderProps) {
   return (

@@ -1,13 +1,15 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { OAuthProvidersSection } from '@ezstart/auth-sdk/components'
+import { Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
   return (
-    <Placeholder
-      name="OAuthProvidersSection"
-      reason="Manages connected OAuth providers (Google, etc.) for the authenticated user. Visit /account when signed in."
-      cta={{ label: 'Open /account', href: '/account' }}
-    />
+    <DemoSandbox componentName="OAuthProvidersSection">
+      <Div className="w-full max-w-2xl">
+        <OAuthProvidersSection />
+      </Div>
+    </DemoSandbox>
   )
 }

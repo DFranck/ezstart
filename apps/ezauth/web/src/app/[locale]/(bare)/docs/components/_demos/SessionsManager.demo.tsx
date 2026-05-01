@@ -1,13 +1,15 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { SessionsManager } from '@ezstart/auth-sdk/components'
+import { Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
   return (
-    <Placeholder
-      name="SessionsManager"
-      reason="Renders the user's active sessions across devices. Requires an authenticated session — visit /account/sessions when signed in."
-      cta={{ label: 'Open /account', href: '/account' }}
-    />
+    <DemoSandbox componentName="SessionsManager">
+      <Div className="w-full max-w-2xl">
+        <SessionsManager />
+      </Div>
+    </DemoSandbox>
   )
 }

@@ -1,13 +1,24 @@
 'use client'
 
-import { Placeholder } from './Placeholder'
+import { useState } from 'react'
+import { CreateKeyModal, defaultDeveloperPortalTexts } from '@ezstart/auth-sdk/components'
+import { Button, Div } from '@ezstart/ui/components'
+import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
+  const [open, setOpen] = useState(false)
   return (
-    <Placeholder
-      name="CreateKeyModal"
-      reason="Internal modal used by <DeveloperPortal>. Composes a complex form (name, scope, key type, application, quota) with full i18n texts. Open /developer when signed in to see it live in context."
-      cta={{ label: 'Open /developer', href: '/developer' }}
-    />
+    <DemoSandbox componentName="CreateKeyModal">
+      <Div className="flex flex-col items-center gap-3">
+        <Button onClick={() => setOpen(true)}>Open CreateKeyModal</Button>
+        <CreateKeyModal
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          onSubmit={() => setOpen(false)}
+          isSubmitting={false}
+          texts={defaultDeveloperPortalTexts.create}
+        />
+      </Div>
+    </DemoSandbox>
   )
 }
