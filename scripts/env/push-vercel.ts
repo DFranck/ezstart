@@ -45,7 +45,7 @@
  * Requires: Vercel CLI installed (https://vercel.com/docs/cli).
  */
 
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import * as dotenv from 'dotenv'
@@ -78,6 +78,66 @@ function checkVercelCli(): void {
   if (result.status !== 0) {
     fail('Vercel CLI not found. Install via:\n  npm i -g vercel')
   }
+}
+
+/**
+ * Async wrapper over `spawn()` for the `vercel` CLI. Returns the child's exit
+ * status without throwing. Stdio is fully captured (returned as string) so
+ * parallel calls don't interleave their output on the terminal.
+ *
+ * Why not spawnSync: parallelizing N rm+add pairs requires async I/O. spawnSync
+ * blocks the event loop, defeating Promise.all.
+ *
+ * `shell: true` is kept for Windows compat (vercel is a .cmd shim under npm
+ * global). Vercel env values are passed via dedicated CLI flags (`--value`),
+ * not concatenated into a shell string, so shell metacharacters in values are
+ * not a concern here (unlike Railway's batch which we route through cmd /c).
+ */
+function vercelSpawn(args: string[], cwd: string): Promise<{ status: number; stderr: string }> {
+  return new Promise(resolve => {
+    const child = spawn('vercel', args, {
+      cwd,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: true,
+    })
+    let stderr = ''
+    child.stderr?.on('data', (chunk: Buffer) => {
+      stderr += chunk.toString('utf-8')
+    })
+    child.stdout?.on('data', () => {
+      // discard stdout — vercel logs verbosely; we only care about exit status
+    })
+    child.on('close', code => {
+      resolve({ status: code ?? 1, stderr })
+    })
+    child.on('error', err => {
+      resolve({ status: 1, stderr: err.message })
+    })
+  })
+}
+
+/**
+ * Run an array of async tasks with bounded concurrency. Resolves when all
+ * tasks complete (failures included — each task is responsible for capturing
+ * its own error). Order of `tasks[i]` is preserved in `results[i]`.
+ *
+ * Why not p-limit / async pool libs: zero-dep, this script is small.
+ */
+async function runWithConcurrency<T>(
+  tasks: Array<() => Promise<T>>,
+  concurrency: number
+): Promise<T[]> {
+  const results: T[] = new Array(tasks.length)
+  let nextIndex = 0
+  const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, async () => {
+    while (true) {
+      const i = nextIndex++
+      if (i >= tasks.length) return
+      results[i] = await tasks[i]()
+    }
+  })
+  await Promise.all(workers)
+  return results
 }
 
 function parseEnvFile(absPath: string): Record<string, string> | null {
@@ -232,7 +292,7 @@ const isDirectRun = (() => {
   }
 })()
 
-if (isDirectRun) {
+async function main(): Promise<void> {
   const [, , app, env, ...rest] = process.argv
   if (!app || !env) {
     fail(
@@ -307,53 +367,75 @@ if (isDirectRun) {
   }
 
   const gitBranch = vercelGitBranch(env)
-  let pushed = 0
-  let failed = 0
   const skipped: string[] = []
-  for (const [k, v] of Object.entries(merged)) {
-    // Skip empty vars — Vercel `env add` requires a non-empty value.
-    // Empty represents "intentionally absent" in source files.
+  // Filter empty values upfront — Vercel `env add` rejects them, and an empty
+  // value in a source file means "intentionally absent" (matches local behavior).
+  const entries = Object.entries(merged).filter(([k, v]) => {
     if (v === '') {
       skipped.push(k)
-      continue
+      return false
     }
+    return true
+  })
+
+  // Log what we're about to push (with masking) — done synchronously BEFORE
+  // kicking off parallel tasks so the output is readable.
+  for (const [k, v] of entries) {
     const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
     console.info(`  ${k}=${mask(v)}${marker}`)
-    // Remove args — scope to the same branch the push targets (if any) so we
-    // don't nuke vars on other preview branches.
+  }
+
+  // Build per-var rm+add tasks and run with bounded concurrency. Each task
+  // does a sequential rm-then-add for that key (order matters: vercel env rm
+  // followed by env add). Different keys are independent → parallel-safe.
+  // Concurrency cap of 8 balances throughput vs Vercel API rate limits and
+  // local CPU; 12 vars × 2 calls in parallel finishes in ~3-4s instead of
+  // ~24s sequential.
+  const tasks = entries.map(([k, v]) => async () => {
     const rmArgs = ['env', 'rm', k, vercelTarget]
     if (gitBranch) rmArgs.push(gitBranch)
     rmArgs.push('--yes')
 
-    // Add args — scope to the same branch for preview pushes, pass value +
-    // --yes for non-interactive operation.
     const addArgs = ['env', 'add', k, vercelTarget]
     if (gitBranch) addArgs.push(gitBranch)
     addArgs.push('--value', v, '--yes')
 
-    // `shell: true` for Windows compat (vercel is a .cmd shim under npm global).
-    spawnSync('vercel', rmArgs, {
-      cwd: webDir,
-      stdio: 'ignore',
-      shell: true,
-    })
-    const result = spawnSync('vercel', addArgs, {
-      cwd: webDir,
-      stdio: ['ignore', 'inherit', 'inherit'],
-      shell: true,
-    })
-    if (result.status === 0) pushed++
-    else {
+    // rm first (best-effort — ignore failures, the var may not exist yet).
+    await vercelSpawn(rmArgs, webDir)
+    const addResult = await vercelSpawn(addArgs, webDir)
+    return { key: k, status: addResult.status, stderr: addResult.stderr }
+  })
+
+  const VERCEL_CONCURRENCY = 8
+  const results = await runWithConcurrency(tasks, VERCEL_CONCURRENCY)
+
+  let pushed = 0
+  let failed = 0
+  for (const r of results) {
+    if (r.status === 0) {
+      pushed++
+    } else {
       failed++
-      console.error(`     ↳ failed (status ${result.status})`)
+      console.error(`     ↳ ${r.key} failed (status ${r.status}): ${r.stderr.trim().slice(0, 200)}`)
     }
   }
+
   if (skipped.length > 0) {
     console.info(`\n⏭  Skipped ${skipped.length} empty vars: ${skipped.join(', ')}`)
   }
 
   console.info(
-    `\n${failed === 0 ? '✅' : '⚠️ '} Pushed ${pushed}/${Object.keys(merged).length} vars to Vercel project "${app}"`
+    `\n${failed === 0 ? '✅' : '⚠️ '} Pushed ${pushed}/${entries.length} vars to Vercel project "${app}" (parallel concurrency=${VERCEL_CONCURRENCY})`
   )
   if (failed > 0) process.exit(1)
+}
+
+if (isDirectRun) {
+  // Run main() and surface any uncaught error as a clean exit instead of an
+  // unhandled promise rejection. tsx (esbuild CJS output) does not support
+  // top-level await, so we use a .then/.catch chain.
+  main().catch(err => {
+    console.error('❌ Uncaught error in push-vercel:', err)
+    process.exit(1)
+  })
 }
