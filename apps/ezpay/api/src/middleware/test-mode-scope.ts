@@ -1,102 +1,16 @@
 /**
- * Mongoose plugin that auto-scopes every read query by `isTestMode` based on
- * the current request's `derivedMode` (Stripe-pattern test/live partitioning).
+ * Re-export of the agnostic `testModeScopePlugin` from `@ezstart/api-core`.
  *
- * Identical behaviour to the EZAuth twin (`apps/ezauth/api/src/middleware/
- * test-mode-scope.ts`). The two files are intentionally duplicated rather
- * than promoted to a shared package because the plugin must hold a stable
- * reference to the per-app `getRequestContext` symbol from `@ezstart/api-core`
- * — co-locating it with the app keeps imports trivial and avoids creating a
- * new package boundary for ~80 lines.
+ * The plugin body lived here historically as a duplicated copy of the
+ * EZAuth twin. Both copies were byte-identical (modulo docstrings) and pure
+ * plumbing — they have been promoted to `@ezstart/api-core` (which already
+ * owns `getRequestContext` and the rest of the test/live partition stack).
  *
- * See the EZAuth file for the full module docstring (opt-out, schema
- * requirement, aggregation caveats).
+ * This shim is kept in place so existing imports (`../middleware/test-mode-
+ * scope.js` from each model factory) keep working without a sweeping
+ * refactor. New code SHOULD import directly from `@ezstart/api-core`.
  *
  * @module apps/ezpay/api/src/middleware/test-mode-scope
  */
 
-import { getRequestContext } from '@ezstart/api-core'
-import type { Query, Schema } from 'mongoose'
-
-/** Custom query options recognised by the plugin. */
-export interface TestModeScopeOptions {
-  /** Bypass the auto-injection — caller is fully responsible for the filter. */
-  skipTestModeScope?: boolean
-}
-
-/**
- * True iff any clause of the filter (top-level, `$or`, `$and`, `$nor`)
- * mentions `isTestMode` — caller is being explicit, leave them alone.
- *
- * @internal
- */
-function filterMentionsTestMode(filter: Record<string, unknown>): boolean {
-  if (Object.prototype.hasOwnProperty.call(filter, 'isTestMode')) return true
-  for (const op of ['$or', '$and', '$nor'] as const) {
-    const arr = filter[op]
-    if (Array.isArray(arr)) {
-      for (const clause of arr) {
-        if (
-          clause &&
-          typeof clause === 'object' &&
-          filterMentionsTestMode(clause as Record<string, unknown>)
-        ) {
-          return true
-        }
-      }
-    }
-  }
-  return false
-}
-
-/**
- * Build the `pre` hook closure shared by every Mongoose method we patch.
- *
- * @internal
- */
-function injectTestModeFilter(this: Query<unknown, unknown>, next: (err?: Error) => void): void {
-  const opts = this.getOptions() as TestModeScopeOptions
-  if (opts.skipTestModeScope === true) return next()
-
-  const ctx = getRequestContext()
-  if (!ctx?.derivedMode) return next()
-
-  const filter = this.getFilter() as Record<string, unknown>
-  if (filterMentionsTestMode(filter)) return next()
-
-  // Live mode coalesces `undefined` as live (backward compat for pre-V2 docs
-  // that predate the `isTestMode` column). New docs default to `false` via
-  // the schema, but legacy data may still lack the field entirely until the
-  // backfill migration has run on every environment. Treating undefined as
-  // live keeps the API behaviour invariant across the migration window.
-  //
-  // Test mode is strict — `isTestMode: true` ONLY. Test data is an explicit
-  // opt-in (created against test keys / seeded by tests), never undefined.
-  if (ctx.derivedMode === 'test') {
-    this.where({ isTestMode: true })
-  } else {
-    this.where({ $or: [{ isTestMode: false }, { isTestMode: { $exists: false } }] })
-  }
-  next()
-}
-
-/**
- * Mongoose plugin function. Apply with `schema.plugin(testModeScopePlugin)`
- * inside each model factory, BEFORE the `mongoose.model(...)` call.
- *
- * No-op for schemas that do not declare an `isTestMode` path — safe to apply
- * unconditionally.
- */
-export function testModeScopePlugin(schema: Schema): void {
-  if (!schema.path('isTestMode')) return
-
-  schema.pre('find', injectTestModeFilter)
-  schema.pre('findOne', injectTestModeFilter)
-  schema.pre('findOneAndUpdate', injectTestModeFilter)
-  schema.pre('findOneAndDelete', injectTestModeFilter)
-  schema.pre('findOneAndReplace', injectTestModeFilter)
-  schema.pre('countDocuments', injectTestModeFilter)
-  schema.pre('distinct', injectTestModeFilter)
-  schema.pre('updateOne', injectTestModeFilter)
-  schema.pre('updateMany', injectTestModeFilter)
-}
+export { testModeScopePlugin, type TestModeScopeOptions } from '@ezstart/api-core'
