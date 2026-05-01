@@ -84,6 +84,7 @@ export default function AdminPage() {
   const tMaint = useTranslations('admin.maintenanceMode')
   const tOverview = useTranslations('admin.overview')
   const tLayout = useTranslations('layout')
+  const tEditUser = useTranslations('admin.editUser')
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
@@ -225,6 +226,26 @@ export default function AdminPage() {
         next: tDash('next'),
         rows: tDash.raw('rows') as string,
         pageOf: tDash.raw('pageOf') as string,
+        // Edit user modal — Profile / Roles / Status sections (extends the
+        // legacy editRoles modal). Backend expects `email` change to trigger
+        // a fresh verification email; the SDK toasts `emailChangeVerificationSent`
+        // when the response payload sets `verificationEmailSent: true`.
+        profileSectionTitle: tEditUser('profileSectionTitle'),
+        firstNameLabel: tEditUser('firstNameLabel'),
+        lastNameLabel: tEditUser('lastNameLabel'),
+        emailLabel: tEditUser('emailLabel'),
+        emailChangeHint: tEditUser('emailChangeHint'),
+        emailChangeVerificationSent: tEditUser('emailChangeVerificationSent'),
+        avatarLabel: tEditUser('avatarLabel'),
+        avatarHelp: tEditUser('avatarHelp'),
+        rolesSectionTitle: tEditUser('rolesSectionTitle'),
+        statusSectionTitle: tEditUser('statusSectionTitle'),
+        isVerifiedLabel: tEditUser('isVerifiedLabel'),
+        isVerifiedHelp: tEditUser('isVerifiedHelp'),
+        isActiveLabel: tEditUser('isActiveLabel'),
+        isActiveHelp: tEditUser('isActiveHelp'),
+        mustChangePasswordLabel: tEditUser('mustChangePasswordLabel'),
+        mustChangePasswordHelp: tEditUser('mustChangePasswordHelp'),
       },
       applications: {
         title: tApps('title'),
@@ -322,7 +343,7 @@ export default function AdminPage() {
         },
       },
     }),
-    [t, tDash, tApps, tFlags, tMaint, tOverview]
+    [t, tDash, tApps, tFlags, tMaint, tOverview, tEditUser]
   )
 
   const handleLocaleChange = (newLocale: string) => {

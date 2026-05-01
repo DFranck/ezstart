@@ -176,16 +176,34 @@
       "fetchError": "Không thể tải danh sách người dùng."
     },
     "editRoles": {
-      "title": "Chỉnh sửa vai trò",
-      "subtitle": "Cập nhật vai trò cho {email}",
+      "title": "Chỉnh sửa người dùng",
+      "subtitle": "Chỉnh sửa thông tin của {email}",
       "globalRoles": "Vai trò toàn cục",
       "appRoles": "Vai trò theo ứng dụng ({app})",
       "save": "Lưu thay đổi",
       "cancel": "Hủy",
       "saving": "Đang lưu...",
-      "editSuccess": "Đã cập nhật vai trò thành công.",
-      "editError": "Không thể cập nhật vai trò.",
+      "editSuccess": "Đã cập nhật người dùng thành công.",
+      "editError": "Không thể cập nhật người dùng.",
       "noAppRoles": "Chưa có vai trò ứng dụng nào được gán."
+    },
+    "editUser": {
+      "profileSectionTitle": "Hồ sơ",
+      "firstNameLabel": "Tên",
+      "lastNameLabel": "Họ",
+      "emailLabel": "Email",
+      "emailChangeHint": "Nếu bạn thay đổi email, người dùng sẽ nhận được liên kết xác minh tại địa chỉ mới.",
+      "emailChangeVerificationSent": "Đã gửi email xác minh đến địa chỉ mới.",
+      "avatarLabel": "Ảnh đại diện",
+      "avatarHelp": "Người dùng có thể cập nhật ảnh đại diện của họ từ /dashboard?section=account. Quản trị viên không thể tải ảnh đại diện thay cho người dùng.",
+      "rolesSectionTitle": "Vai trò",
+      "statusSectionTitle": "Trạng thái",
+      "isVerifiedLabel": "Email đã xác minh",
+      "isVerifiedHelp": "Buộc xác minh email mà không yêu cầu người dùng nhấp vào liên kết.",
+      "isActiveLabel": "Tài khoản đang hoạt động",
+      "isActiveHelp": "Tắt để soft-xóa tài khoản. Người dùng có thể được khôi phục trong 30 ngày; sau đó bản ghi sẽ bị xóa vĩnh viễn.",
+      "mustChangePasswordLabel": "Phải đổi mật khẩu",
+      "mustChangePasswordHelp": "Buộc người dùng đặt lại mật khẩu ở lần đăng nhập tiếp theo (nghi ngờ rò rỉ / cấp phát thủ công)."
     },
     "roles": {
       "superadmin": "Quản trị tối cao",

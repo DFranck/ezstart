@@ -8,6 +8,26 @@ export interface AdminUser {
   _id: string
   email: string
   username: string
+  /** Optional profile fields — editable via `<EditUserModal>`. */
+  firstName?: string
+  lastName?: string
+  /**
+   * Avatar URL (read-only in admin context — users update their own avatar
+   * from the dashboard account section).
+   */
+  avatar?: string
+  /**
+   * Email verification status. Editable by superadmin via the status section
+   * of `<EditUserModal>` (force-verify override). Reset to false whenever
+   * the email is changed via the same modal.
+   */
+  isVerified?: boolean
+  /**
+   * When true, the user MUST reset their password at the next login. Set by
+   * an admin (e.g. after a suspected leak). Surface in the admin table /
+   * modal as a status badge.
+   */
+  mustChangePassword?: boolean
   globalRoles: string[]
   appRoles: Record<string, string[]>
   apps?: string[]
@@ -17,6 +37,9 @@ export interface AdminUser {
    * Soft-deletion timestamp ISO string. When set, the account is locked and
    * pending hard-delete (purge). Surfaced in the admin table via a
    * `<Badge variant="warning">` indicating the scheduled deletion date.
+   *
+   * Acts as the inverse of `isActive` in the admin UI: deletedAt=null →
+   * account is active; deletedAt set → account is deactivated (soft-deleted).
    */
   deletedAt?: string | null
   /**
@@ -81,6 +104,50 @@ export interface AuthUsersSectionTexts {
   editError?: string
   editSuccess?: string
 
+  // Edit user modal — Profile section
+  /** Section header above firstName / lastName / email / avatar fields. */
+  profileSectionTitle?: string
+  /** Label for the firstName input. */
+  firstNameLabel?: string
+  /** Label for the lastName input. */
+  lastNameLabel?: string
+  /** Label for the email input. */
+  emailLabel?: string
+  /**
+   * Inline help / warning shown beneath the email input. Should explain
+   * that changing the email triggers a fresh verification link.
+   */
+  emailChangeHint?: string
+  /** Toast / status message shown when email change triggers a verification email. */
+  emailChangeVerificationSent?: string
+  /** Section label above the read-only avatar display. */
+  avatarLabel?: string
+  /**
+   * Help text displayed under the read-only avatar — should explain that
+   * the user updates their own avatar from `/dashboard?section=account`.
+   */
+  avatarHelp?: string
+
+  // Edit user modal — Roles section
+  /** Section header above the global + per-app role checkboxes. */
+  rolesSectionTitle?: string
+
+  // Edit user modal — Status section
+  /** Section header above the status toggles. */
+  statusSectionTitle?: string
+  /** Toggle label for the isVerified field. */
+  isVerifiedLabel?: string
+  /** Help text explaining the isVerified toggle (admin force-verify). */
+  isVerifiedHelp?: string
+  /** Toggle label for the isActive field (soft-delete inverse). */
+  isActiveLabel?: string
+  /** Help text explaining the isActive toggle (soft-delete grace period). */
+  isActiveHelp?: string
+  /** Toggle label for the mustChangePassword field. */
+  mustChangePasswordLabel?: string
+  /** Help text explaining the mustChangePassword toggle (next-login forced reset). */
+  mustChangePasswordHelp?: string
+
   // Role labels
   roleSuperadmin?: string
   roleAdmin?: string
@@ -141,14 +208,37 @@ export const DEFAULT_USERS_TEXTS: Required<AuthUsersSectionTexts> = {
   confirm: 'Confirm',
   deleteError: 'Failed to delete user.',
   deleteSuccess: 'User deleted successfully.',
-  editRolesTitle: 'Edit roles',
-  editRolesSubtitle: 'Edit roles for {email}',
+  editRolesTitle: 'Edit user',
+  editRolesSubtitle: 'Edit details for {email}',
   globalRolesLabel: 'Global roles',
   appRolesLabel: '{app} roles',
   noAppRoles: 'No app-specific roles assigned.',
   save: 'Save',
-  editError: 'Failed to update roles.',
-  editSuccess: 'Roles updated successfully.',
+  editError: 'Failed to update user.',
+  editSuccess: 'User updated successfully.',
+  // Edit user modal — Profile section
+  profileSectionTitle: 'Profile',
+  firstNameLabel: 'First name',
+  lastNameLabel: 'Last name',
+  emailLabel: 'Email',
+  emailChangeHint:
+    'If you change the email, the user will receive a verification link at the new address.',
+  emailChangeVerificationSent: 'Verification email sent to the new address.',
+  avatarLabel: 'Avatar',
+  avatarHelp:
+    "The user can update their own avatar from /dashboard?section=account. Admins can't upload avatars on a user's behalf.",
+  // Edit user modal — Roles section
+  rolesSectionTitle: 'Roles',
+  // Edit user modal — Status section
+  statusSectionTitle: 'Status',
+  isVerifiedLabel: 'Email verified',
+  isVerifiedHelp: 'Force-verify the email without making the user click a link.',
+  isActiveLabel: 'Account active',
+  isActiveHelp:
+    'Disable to soft-delete the account. The user can be restored within 30 days; after that the record is permanently purged.',
+  mustChangePasswordLabel: 'Must change password',
+  mustChangePasswordHelp:
+    'Force the user to reset their password at the next login (suspected leak / manual provisioning).',
   roleSuperadmin: 'Superadmin',
   roleAdmin: 'Admin',
   roleManager: 'Manager',

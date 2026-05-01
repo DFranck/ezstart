@@ -176,16 +176,34 @@
       "fetchError": "Failed to load users."
     },
     "editRoles": {
-      "title": "Edit Roles",
-      "subtitle": "Update roles for {email}",
+      "title": "Edit User",
+      "subtitle": "Edit details for {email}",
       "globalRoles": "Global Roles",
       "appRoles": "App Roles ({app})",
       "save": "Save Changes",
       "cancel": "Cancel",
       "saving": "Saving...",
-      "editSuccess": "Roles updated successfully.",
-      "editError": "Failed to update roles.",
+      "editSuccess": "User updated successfully.",
+      "editError": "Failed to update user.",
       "noAppRoles": "No app roles assigned."
+    },
+    "editUser": {
+      "profileSectionTitle": "Profile",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "emailLabel": "Email",
+      "emailChangeHint": "If you change the email, the user will receive a verification link at the new address.",
+      "emailChangeVerificationSent": "Verification email sent to the new address.",
+      "avatarLabel": "Avatar",
+      "avatarHelp": "The user can update their own avatar from /dashboard?section=account. Admins can't upload avatars on a user's behalf.",
+      "rolesSectionTitle": "Roles",
+      "statusSectionTitle": "Status",
+      "isVerifiedLabel": "Email verified",
+      "isVerifiedHelp": "Force-verify the email without making the user click a link.",
+      "isActiveLabel": "Account active",
+      "isActiveHelp": "Disable to soft-delete the account. The user can be restored within 30 days; after that the record is permanently purged.",
+      "mustChangePasswordLabel": "Must change password",
+      "mustChangePasswordHelp": "Force the user to reset their password at the next login (suspected leak / manual provisioning)."
     },
     "roles": {
       "superadmin": "Super Admin",

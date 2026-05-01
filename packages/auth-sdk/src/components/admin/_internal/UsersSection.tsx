@@ -21,7 +21,7 @@ import { toast } from '@ezstart/ui/utils'
 import { useAuthStore } from '../../../react/auth-provider.js'
 import { AdminStatsCards } from '../AdminStatsCards.js'
 import { AdminUsersTable } from '../AdminUsersTable.js'
-import { EditRolesModal } from '../EditRolesModal.js'
+import { EditUserModal } from '../EditUserModal.js'
 import {
   ADMIN_PAGE_SIZE,
   type AdminUser,
@@ -222,7 +222,7 @@ export function AuthUsersSection({ className, texts }: AuthUsersSectionProps) {
           </Div>
         )}
 
-        <EditRolesModal
+        <EditUserModal
           user={editUser}
           open={editOpen}
           onOpenChange={setEditOpen}

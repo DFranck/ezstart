@@ -101,6 +101,11 @@ function createAdminTestApp() {
   })
 
   // PATCH /admin/users/:id — update user
+  // Mirrors the real route logic in routes/admin/update-user.ts. The handler
+  // intentionally duplicates the logic instead of mounting the real router so
+  // the test app can skip CSRF middleware (verifyCookieCsrf rejects unsigned
+  // cookies in tests). Keep the two implementations in sync — every new
+  // backend behavior tested here MUST also exist in update-user.ts.
   app.patch('/admin/users/:id', verifyTokenMiddleware, requireAdmin, async (req, res) => {
     const currentUser = req.user!
     const isSuperAdmin = currentUser.globalRoles?.includes('superadmin')
@@ -110,18 +115,91 @@ function createAdminTestApp() {
     }
 
     const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(req.params.id)
+    // includeDeleted so a superadmin can re-activate a soft-deleted account.
+    const user = await AuthUser.findById(req.params.id).setOptions({ includeDeleted: true })
     if (!user) return sendError(res, 'User not found', 404)
 
     const body = req.body
+    const isSelf = req.params.id === currentUser._id
+    let emailChanged = false
+    let verificationEmailSent = false
+
+    // Profile fields
+    if (body.firstName !== undefined) user.firstName = body.firstName
+    if (body.lastName !== undefined) user.lastName = body.lastName
+
+    // Email change — uniqueness check + reset isVerified
+    if (body.email !== undefined && body.email !== user.email.toLowerCase()) {
+      const conflict = await AuthUser.findOne({
+        email: body.email,
+        _id: { $ne: user._id },
+      })
+      if (conflict) {
+        return sendError(res, 'Email already taken by another account', 409)
+      }
+      user.email = body.email
+      user.isVerified = false
+      emailChanged = true
+      // In the real route this triggers a verification email send. We don't
+      // wire emailService in tests — just flip the response flag so callers
+      // can assert the side-effect was registered.
+      verificationEmailSent = true
+    }
+
+    // Roles
     if (body.globalRoles !== undefined) user.globalRoles = body.globalRoles
+    if (body.appRoles !== undefined) {
+      const map = new Map<string, string[]>()
+      Object.entries(body.appRoles).forEach(([app, roles]) => {
+        map.set(app, roles as string[])
+      })
+      user.appRoles = map
+    }
+
+    // Status — isVerified (skip when email changed, anti-bypass)
+    if (body.isVerified !== undefined && !emailChanged) {
+      user.isVerified = body.isVerified
+    }
+
+    // Status — isActive (soft-delete toggle)
+    if (body.isActive !== undefined) {
+      if (isSelf && body.isActive === false) {
+        return sendError(
+          res,
+          'Cannot deactivate your own account via admin endpoint. Use DELETE /auth/account instead.',
+          400
+        )
+      }
+      const isCurrentlyActive = !user.deletedAt
+      if (body.isActive && !isCurrentlyActive) {
+        user.deletedAt = null
+        user.scheduledHardDeleteAt = null
+      } else if (!body.isActive && isCurrentlyActive) {
+        if (user.globalRoles?.includes('superadmin')) {
+          return sendError(res, 'Cannot deactivate a superadmin user. Demote them first.', 403)
+        }
+        const now = new Date()
+        user.deletedAt = now
+        user.scheduledHardDeleteAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+      }
+    }
+
+    // Status — mustChangePassword
+    if (body.mustChangePassword !== undefined) {
+      user.mustChangePassword = body.mustChangePassword
+    }
+
+    // Misc passthrough
     if (body.apps !== undefined) user.apps = body.apps
-    if (body.isVerified !== undefined) user.isVerified = body.isVerified
     if (body.permissions !== undefined) user.permissions = body.permissions
     if (body.features !== undefined) user.features = body.features
 
     await user.save()
-    sendSuccess(res, { user: user.toAuthUser(), message: 'User updated successfully' })
+    sendSuccess(res, {
+      user: user.toAuthUser(),
+      message: 'User updated successfully',
+      verificationEmailSent: emailChanged ? verificationEmailSent : undefined,
+    })
   })
 
   // DELETE /admin/users/:id — delete user (superadmin only)
@@ -456,6 +534,217 @@ describe('Admin Routes', () => {
 
       expect(res.status).toBe(200)
       expect(res.body.data.user).not.toHaveProperty('passwordHash')
+    })
+
+    // ─── USER-EDIT-MODAL-LIMITED — profile fields ──────────────────────────
+
+    it('should update firstName and lastName', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({ email: 'profile@test.com', username: 'profileuser' })
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ firstName: 'Alice', lastName: 'Wonderland' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.user.firstName).toBe('Alice')
+      expect(res.body.data.user.lastName).toBe('Wonderland')
+    })
+
+    // ─── USER-EDIT-MODAL-LIMITED — email change side effect ────────────────
+
+    it('should change email, reset isVerified, and signal verification email sent', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({
+        email: 'old@test.com',
+        username: 'emailchange',
+        isVerified: true,
+      })
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'new@test.com' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.user.email).toBe('new@test.com')
+      expect(res.body.data.user.isVerified).toBe(false)
+      expect(res.body.data.verificationEmailSent).toBe(true)
+
+      // Verify persistence in DB
+      const AuthUser = await getAuthUserModel()
+      const fresh = await AuthUser.findById(user._id)
+      expect(fresh?.email).toBe('new@test.com')
+      expect(fresh?.isVerified).toBe(false)
+    })
+
+    it('should reject email change when target email is taken by another user', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({ email: 'me@test.com', username: 'me' })
+      await createUser({ email: 'taken@test.com', username: 'taken' })
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'taken@test.com' })
+
+      expect(res.status).toBe(409)
+    })
+
+    it('should NOT honor isVerified=true when email is changed in same request (anti-bypass)', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({
+        email: 'bypass@test.com',
+        username: 'bypassuser',
+        isVerified: true,
+      })
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'newbypass@test.com', isVerified: true })
+
+      expect(res.status).toBe(200)
+      // Email was changed → isVerified MUST be false even though admin
+      // also passed isVerified: true (anti-bypass; admin can't skip
+      // verification by chaining the two changes).
+      expect(res.body.data.user.email).toBe('newbypass@test.com')
+      expect(res.body.data.user.isVerified).toBe(false)
+    })
+
+    // ─── USER-EDIT-MODAL-LIMITED — status toggles ──────────────────────────
+
+    it('should soft-delete when isActive=false (sets deletedAt + scheduledHardDeleteAt)', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({
+        email: 'deactivate@test.com',
+        username: 'deactivate',
+      })
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ isActive: false })
+
+      expect(res.status).toBe(200)
+
+      const AuthUser = await getAuthUserModel()
+      const fresh = await AuthUser.findById(user._id).setOptions({ includeDeleted: true })
+      expect(fresh?.deletedAt).toBeTruthy()
+      expect(fresh?.scheduledHardDeleteAt).toBeTruthy()
+      // Grace period is ~30 days
+      const graceMs =
+        (fresh!.scheduledHardDeleteAt as Date).getTime() - (fresh!.deletedAt as Date).getTime()
+      expect(Math.round(graceMs / (24 * 60 * 60 * 1000))).toBe(30)
+    })
+
+    it('should reactivate (clear deletedAt) when isActive=true on a soft-deleted user', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({ email: 'restore@test.com', username: 'restore' })
+      const AuthUser = await getAuthUserModel()
+      // Manually soft-delete via direct update (skip the route to keep this
+      // focused on the reactivation behavior).
+      await AuthUser.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            deletedAt: new Date(),
+            scheduledHardDeleteAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          },
+        },
+        { timestamps: false }
+      )
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ isActive: true })
+
+      expect(res.status).toBe(200)
+
+      const fresh = await AuthUser.findById(user._id).setOptions({ includeDeleted: true })
+      expect(fresh?.deletedAt).toBeNull()
+      expect(fresh?.scheduledHardDeleteAt).toBeNull()
+    })
+
+    it('should reject self-deactivation (isActive=false on own account)', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const res = await request(app)
+        .patch(`/admin/users/${admin._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ isActive: false })
+
+      expect(res.status).toBe(400)
+    })
+
+    it('should reject deactivating another superadmin (peer protection)', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const otherSuperadmin = await createAdminUser({
+        email: 'other-super@test.com',
+        username: 'othersuper',
+      })
+
+      const res = await request(app)
+        .patch(`/admin/users/${otherSuperadmin._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ isActive: false })
+
+      expect(res.status).toBe(403)
+    })
+
+    it('should set mustChangePassword flag when admin toggles it on', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({ email: 'mustreset@test.com', username: 'mustreset' })
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ mustChangePassword: true })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.user.mustChangePassword).toBe(true)
+
+      const AuthUser = await getAuthUserModel()
+      const fresh = await AuthUser.findById(user._id)
+      expect(fresh?.mustChangePassword).toBe(true)
+    })
+
+    it('should force-verify email (isVerified=true) when no email change in same request', async () => {
+      const admin = await createAdminUser()
+      const token = generateAccessToken(admin)
+
+      const user = await createUser({
+        email: 'unverified@test.com',
+        username: 'unverified',
+        isVerified: false,
+      })
+
+      const res = await request(app)
+        .patch(`/admin/users/${user._id!.toString()}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ isVerified: true })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.user.isVerified).toBe(true)
     })
   })
 

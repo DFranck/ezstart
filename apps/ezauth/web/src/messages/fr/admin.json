@@ -176,16 +176,34 @@
       "fetchError": "Impossible de charger les utilisateurs."
     },
     "editRoles": {
-      "title": "Modifier les rôles",
-      "subtitle": "Modifier les rôles pour {email}",
+      "title": "Modifier l'utilisateur",
+      "subtitle": "Modifier les détails de {email}",
       "globalRoles": "Rôles globaux",
       "appRoles": "Rôles par app ({app})",
       "save": "Enregistrer",
       "cancel": "Annuler",
       "saving": "Enregistrement...",
-      "editSuccess": "Rôles mis à jour avec succès.",
-      "editError": "Échec de la mise à jour des rôles.",
+      "editSuccess": "Utilisateur mis à jour avec succès.",
+      "editError": "Échec de la mise à jour de l'utilisateur.",
       "noAppRoles": "Aucun rôle d'application assigné."
+    },
+    "editUser": {
+      "profileSectionTitle": "Profil",
+      "firstNameLabel": "Prénom",
+      "lastNameLabel": "Nom",
+      "emailLabel": "Email",
+      "emailChangeHint": "Si vous changez l'email, l'utilisateur recevra un lien de vérification à la nouvelle adresse.",
+      "emailChangeVerificationSent": "Email de vérification envoyé à la nouvelle adresse.",
+      "avatarLabel": "Avatar",
+      "avatarHelp": "L'utilisateur peut modifier son avatar depuis /dashboard?section=account. Les admins ne peuvent pas téléverser un avatar à sa place.",
+      "rolesSectionTitle": "Rôles",
+      "statusSectionTitle": "Statut",
+      "isVerifiedLabel": "Email vérifié",
+      "isVerifiedHelp": "Forcer la vérification de l'email sans demander à l'utilisateur de cliquer sur un lien.",
+      "isActiveLabel": "Compte actif",
+      "isActiveHelp": "Désactiver pour soft-supprimer le compte. L'utilisateur peut être restauré sous 30 jours ; passé ce délai, l'enregistrement est définitivement purgé.",
+      "mustChangePasswordLabel": "Doit changer son mot de passe",
+      "mustChangePasswordHelp": "Forcer l'utilisateur à réinitialiser son mot de passe à la prochaine connexion (fuite suspectée / provisionnement manuel)."
     },
     "roles": {
       "superadmin": "Super Admin",

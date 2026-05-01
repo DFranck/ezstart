@@ -147,6 +147,14 @@ export interface AuthUser {
   promoCode?: string
   // Password state
   hasSetOwnPassword?: boolean
+  /**
+   * When true, the user MUST reset their password on the next login. Set by an
+   * admin (e.g. after a suspected leak) or after a force-rotation event. The
+   * server-side login flow short-circuits the session in favor of a forced
+   * password-reset prompt; the client uses this flag to surface a banner /
+   * route guard until cleared.
+   */
+  mustChangePassword?: boolean
   // Presence
   lastActiveAt?: string | null
 }

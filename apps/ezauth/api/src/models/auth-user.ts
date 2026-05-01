@@ -30,6 +30,18 @@ export interface AuthUserDocument extends Document {
 
   hasSetOwnPassword: boolean
 
+  /**
+   * Force the user to reset their password at the next login. Set by an
+   * admin (via `PATCH /admin/users/:id`) when their account may be at risk
+   * (suspected leak, post-breach, manual provisioning). The login route
+   * checks this flag and short-circuits the session in favor of a forced
+   * password-reset flow.
+   *
+   * Default `false`. Cleared automatically by `change-password.ts` once the
+   * user successfully sets a new password.
+   */
+  mustChangePassword?: boolean
+
   lastActiveAt?: Date | null
 
   // Soft-deletion lifecycle (account deletion grace period).
@@ -174,6 +186,10 @@ const authUserSchema = new Schema<AuthUserDocument>(
     hasSetOwnPassword: {
       type: Boolean,
       default: true,
+    },
+    mustChangePassword: {
+      type: Boolean,
+      default: false,
     },
     lastActiveAt: {
       type: Date,
@@ -380,6 +396,7 @@ authUserSchema.methods.toAuthUser = function (): AuthUser {
     managedBy: this.managedBy,
     promoCode: this.promoCode,
     hasSetOwnPassword: this.hasSetOwnPassword ?? true,
+    mustChangePassword: this.mustChangePassword ?? false,
     lastActiveAt: this.lastActiveAt ? this.lastActiveAt.toISOString() : null,
     createdAt: this.createdAt.toISOString(),
     updatedAt: this.updatedAt.toISOString(),

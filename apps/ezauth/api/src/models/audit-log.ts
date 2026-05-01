@@ -45,6 +45,14 @@ export type AuditLogAction =
   | 'account_locked_brute_force'
   | 'two_factor_locked_brute_force'
   | 'webhook_secret_regenerated'
+  // Admin-triggered mutations on a target user (audit trail for support /
+  // compliance — every superadmin action against another user is logged).
+  | 'admin_user_updated'
+  | 'admin_email_changed'
+  | 'admin_account_deactivated'
+  | 'admin_account_reactivated'
+  | 'admin_must_change_password_set'
+  | 'admin_force_verified'
 
 /**
  * Tuple form for runtime validation (Zod / Mongoose enum). Keep in lockstep
@@ -73,6 +81,12 @@ export const AUDIT_LOG_ACTIONS = [
   'account_locked_brute_force',
   'two_factor_locked_brute_force',
   'webhook_secret_regenerated',
+  'admin_user_updated',
+  'admin_email_changed',
+  'admin_account_deactivated',
+  'admin_account_reactivated',
+  'admin_must_change_password_set',
+  'admin_force_verified',
 ] as const
 
 /**
