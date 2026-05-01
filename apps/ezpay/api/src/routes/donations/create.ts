@@ -12,7 +12,7 @@ import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
-import { optionalAuthMiddleware } from '../../middleware/auth.js'
+import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -210,7 +210,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/donate', optionalAuthMiddleware, createDonationHandler, {
+docRouter.post('/donate', authOptionalJwtOrKey(), createDonationHandler, {
   summary: 'Create a donation checkout session',
   tags: ['Donations'],
   bodySchema: createDonationSchema,

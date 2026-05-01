@@ -7,7 +7,9 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -64,6 +66,15 @@ const cleanupPaymentsHandler = async (req: Request, res: Response) => {
       `🗑️ Cleanup: ${result.deletedCount} test payments deleted${appName ? ` for ${appName}` : ''}`
     )
 
+    void auditLogService.createFromRequest(req, {
+      action: 'payments.cleanup',
+      userId: req.userId,
+      metadata: {
+        deletedCount: result.deletedCount,
+        appName: appName ?? null,
+      },
+    })
+
     sendSuccess(res, { deletedCount: result.deletedCount })
   } catch (error) {
     logger.error('Cleanup payments error:', error instanceof Error ? error : String(error))
@@ -77,8 +88,7 @@ const cleanupPaymentsHandler = async (req: Request, res: Response) => {
 
 docRouter.delete(
   '/payments/cleanup',
-  authMiddleware,
-  populateUserFromToken,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   cleanupPaymentsHandler,
   {
     summary: 'Delete all payment records (admin only)',

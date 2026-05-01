@@ -9,7 +9,9 @@ import {
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -75,6 +77,21 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
 
     logger.info(`↩️ Payment refunded: ${payment.paymentId}`)
 
+    // Audit-log refund — sensitive admin action with money side-effects.
+    // Best-effort, never blocks the response.
+    void auditLogService.createFromRequest(req, {
+      action: 'payment.refunded',
+      userId: req.userId,
+      metadata: {
+        paymentId: payment.paymentId,
+        documentId: String(payment._id),
+        stripePaymentIntentId: payment.stripePaymentIntentId,
+        amount: payment.amount,
+        currency: payment.currency,
+        projectId: payment.projectId,
+      },
+    })
+
     sendSuccess(res, payment)
   } catch (error) {
     logger.error('Refund payment error:', error instanceof Error ? error : String(error))
@@ -88,8 +105,7 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
 
 docRouter.post(
   '/payments/:paymentId/refund',
-  authMiddleware,
-  populateUserFromToken,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   refundPaymentHandler,
   {
     summary: 'Refund a payment (admin only)',

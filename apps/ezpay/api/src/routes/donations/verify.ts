@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { optionalAuthMiddleware } from '../../middleware/auth.js'
+import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -83,7 +83,7 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/verify-payment/:sessionId', optionalAuthMiddleware, verifyPaymentHandler, {
+docRouter.post('/verify-payment/:sessionId', authOptionalJwtOrKey(), verifyPaymentHandler, {
   summary: 'Verify and complete payment after Stripe checkout',
   tags: ['Donations'],
   paramsSchema: verifyPaymentParamsSchema,

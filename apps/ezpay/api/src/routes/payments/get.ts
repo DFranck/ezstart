@@ -7,7 +7,8 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -60,7 +61,7 @@ const getPaymentHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/payments/:paymentId', authMiddleware, populateUserFromToken, getPaymentHandler, {
+docRouter.get('/payments/:paymentId', authJwtOrKey(), getPaymentHandler, {
   summary: 'Get a payment by ID',
   tags: ['Payments'],
   responseSchema: paymentResponseSchema,

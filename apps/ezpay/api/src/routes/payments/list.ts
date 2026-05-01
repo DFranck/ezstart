@@ -9,7 +9,7 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplication, listApplicationsByOwner } from '../../services/ezauth-client.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -200,19 +200,12 @@ const listPaymentsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get(
-  '/payments',
-  authMiddleware,
-  populateUserFromToken,
-  attachDerivedScope,
-  listPaymentsHandler,
-  {
-    summary: 'List payments (auto-scoped: superadmin = all, admin = owned apps, user = own)',
-    tags: ['Payments'],
-    querySchema: paymentsQuerySchema,
-    responseSchema: paymentsListResponseSchema,
-  }
-)
+docRouter.get('/payments', authJwtOrKey(), attachDerivedScope, listPaymentsHandler, {
+  summary: 'List payments (auto-scoped: superadmin = all, admin = owned apps, user = own)',
+  tags: ['Payments'],
+  querySchema: paymentsQuerySchema,
+  responseSchema: paymentsListResponseSchema,
+})
 
 export { listPaymentsRegistry as registry, router }
 export default router
