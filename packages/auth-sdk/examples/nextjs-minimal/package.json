@@ -1,0 +1,25 @@
+{
+  "name": "auth-sdk-nextjs-minimal-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Minimal Next.js 15 starter using @ezstart/auth-sdk drop-in components with SSR bootstrap.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@ezstart/auth-sdk": "^1.0.0",
+    "@ezstart/ui": "^0.1.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sonner": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

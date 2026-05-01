@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- README rewritten following `standard.md` §6 format: 3-level quickstart
+  (components > hooks > core) with generic `myapp` + `https://api.example.com`
+  examples (no monorepo-specific names). API reference reorganized by entry
+  point (core / react / components / server / middleware / rbac).
+- New `examples/` directory with two complete working starters:
+  `examples/nextjs-minimal/` (Next.js 15 App Router with SSR bootstrap via
+  `getServerAuth`) and `examples/vanilla-standalone/` (browser TS + Vite
+  using `createCoreAuthClient` directly, zero React).
+
 ### Added
 
 - Cards UI surface restored: `<SignInCard>`, `<SignUpCard>`, `<ForgotPasswordCard>`, `<ResetPasswordCard>`, `<VerifyEmailCard>` — embeddable Modal-shell variants with sticky header/footer and scrollable body, mobile-first.

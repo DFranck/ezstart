@@ -2,3 +2,8 @@ packages:
   - apps/*
   - apps/*/*
   - packages/*
+  # Examples directories are NOT workspace members — they are standalone
+  # starters meant to be copied/run by external developers via `npm install`.
+  # Excluding them prevents pnpm from installing their deps in the monorepo
+  # and from linking workspace packages into them.
+  - '!packages/*/examples/**'

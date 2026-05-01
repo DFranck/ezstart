@@ -1,745 +1,280 @@
 # @ezstart/auth-sdk
 
-Authentication SDK with 3-layer architecture: core (agnostic), React bindings, and pre-built UI components.
+Drop-in authentication SDK for React + Express apps with email/password, OAuth, 2FA, sessions, RBAC, and API key management.
 
 ## Install
 
 ```bash
-pnpm add @ezstart/auth-sdk
+npm install @ezstart/auth-sdk
+# Peer deps for the components entry: react, react-dom, sonner, @ezstart/ui
 ```
 
-## Architecture
+## Quickstart — React with components
 
-```
-auth-sdk/src/
-├── core/                 # Agnostic (zero React, zero @ezstart/*)
-│   ├── auth-client.ts    # createCoreAuthClient({ apiUrl, appName })
-│   ├── token-manager.ts  # Token storage abstraction
-│   ├── types.ts          # AuthUser, AuthToken, LoginRequest, etc.
-│   ├── errors.ts         # AuthError, isAuthError()
-│   ├── schemas.ts        # Zod response schemas
-│   └── index.ts          # Barrel: core-only exports
-│
-├── react/                # React bindings (peer dep: react)
-│   ├── auth-provider.tsx # <AuthProvider> with auto-refresh
-│   ├── hooks.ts          # useAuth()
-│   ├── guards.tsx        # <RequireAuth>, <SignedIn>, <SignedOut>, <AccessDenied>
-│   ├── store.ts          # Zustand auth store
-│   └── index.ts          # Barrel: react exports
-│
-├── components/           # Pre-built UI (peer dep: react + @ezstart/ui)
-│   ├── SignInForm.tsx
-│   ├── SignUpForm.tsx
-│   ├── QuickSignUpForm.tsx
-│   ├── ForgotPasswordForm.tsx
-│   ├── ResetPasswordForm.tsx
-│   ├── AccountModal.tsx        # orchestrator — sub-sections in account/
-│   ├── account/                # AccountProfileSection, AccountSettingsSection, sso-handoff
-│   ├── TwoFactorPrompt.tsx
-│   ├── TwoFactorSettings.tsx
-│   ├── VerifyEmailFlow.tsx
-│   ├── AuthAdminDashboard.tsx  # all-in-one console (Tabs orchestrator)
-│   ├── admin/
-│   │   ├── _internal/          # OverviewSection, UsersSection, ApplicationsSection, SettingsSection
-│   │   ├── AdminUsersTable.tsx
-│   │   ├── AdminStatsCards.tsx
-│   │   ├── AdminApplicationsTable.tsx
-│   │   ├── EditRolesModal.tsx
-│   │   ├── EditApplicationModal.tsx
-│   │   └── MaintenanceBanner.tsx  # public, used outside admin
-│   ├── EZAuthDashboard.tsx     # orchestrator — sub-components in dashboard/
-│   ├── dashboard/              # SectionRenderer, OverviewSection, BillingSection, ...
-│   ├── UserDashboard.tsx
-│   ├── UserSettings.tsx
-│   ├── UserMenu.tsx
-│   ├── UserAvatar.tsx
-│   ├── internal-logger.ts      # silent no-op logger (no @ezstart/logger dep)
-│   ├── developer/              # API keys management UI
-│   └── index.ts
-│
-├── middleware/            # Next.js auth middleware
-├── rbac/                 # Role-Based Access Control
-├── i18n/                 # Built-in translations (en, fr, vi)
-├── server/                # Server-only barrel: getServerAuth, hasFeature,
-│                          # schemas + types — zero React, zero browser
-└── index.ts              # Main barrel: re-exports everything
-```
-
-## Quickstart — React with components (full UI)
-
-Drop-in pre-built UI. Requires `@ezstart/ui` as peer dep.
+The fastest path: wrap your app in `<AuthProvider>` and drop in pre-built UI.
 
 ```tsx
-import { AuthProvider, SignInForm, useAuth } from '@ezstart/auth-sdk'
-;<AuthProvider apiUrl="https://auth.example.com/api/auth" appName="myapp" authMode="httpOnly">
-  <App />
-</AuthProvider>
+'use client'
+import { AuthProvider } from '@ezstart/auth-sdk'
+import { LoginButton, UserMenu } from '@ezstart/auth-sdk/components'
 
-// In your app
-function Page() {
-  const { user, login, logout, isAuthenticated } = useAuth()
-  return isAuthenticated ? <Dashboard /> : <SignInForm />
+export default function App({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider apiUrl="https://api.example.com" appName="myapp" authMode="httpOnly">
+      <header>
+        <UserMenu fallback={<LoginButton>Sign in</LoginButton>} />
+      </header>
+      {children}
+    </AuthProvider>
+  )
 }
 ```
 
-## Quickstart — React hooks only (no UI)
-
-Build your own UI. Only `react` as peer dep.
+For a Next.js App Router setup with **zero login flash on first paint**, resolve
+the user server-side via `getServerAuth()` and pass it as `initialUser`:
 
 ```tsx
-import { AuthProvider, useAuth } from '@ezstart/auth-sdk/react'
-import { createCoreAuthClient } from '@ezstart/auth-sdk/core'
+// app/[locale]/layout.tsx — Server Component
+import { headers } from 'next/headers'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
+import { Providers } from '@/components/providers'
 
-const client = createCoreAuthClient({
-  apiUrl: 'https://auth.example.com/api/auth',
-  appName: 'myapp',
-})
-
-<AuthProvider client={client} appName="myapp">
-  <App />
-</AuthProvider>
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieHeader = (await headers()).get('cookie') ?? undefined
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_AUTH_API_URL!,
+    cookieHeader,
+  })
+  return <Providers initialUser={initialUser}>{children}</Providers>
+}
 ```
 
-## Quickstart — Core only (any JS, no React)
+```tsx
+// components/providers.tsx — Client Component
+'use client'
+import { AuthProvider, type AuthUser } from '@ezstart/auth-sdk'
 
-Use from Vue, Svelte, vanilla JS, Node, React Native. Zero framework deps.
+export function Providers({
+  children,
+  initialUser,
+}: {
+  children: React.ReactNode
+  initialUser: AuthUser | null
+}) {
+  return (
+    <AuthProvider
+      apiUrl={process.env.NEXT_PUBLIC_AUTH_API_URL!}
+      appName="myapp"
+      authMode="httpOnly"
+      initialUser={initialUser}
+    >
+      {children}
+    </AuthProvider>
+  )
+}
+```
+
+See [`examples/nextjs-minimal`](./examples/nextjs-minimal) for a complete starter.
+
+## Quickstart — React hooks only
+
+If you want full UI control with the auth state hook (no `@ezstart/ui` peer dep):
+
+```tsx
+'use client'
+import { AuthProvider, useAuth } from '@ezstart/auth-sdk/react'
+
+function Header() {
+  const { user, isAuthenticated, login, logout } = useAuth()
+  if (!isAuthenticated) {
+    return <button onClick={() => login({ email, password })}>Sign in</button>
+  }
+  return (
+    <>
+      <span>Hello, {user.username}</span>
+      <button onClick={logout}>Sign out</button>
+    </>
+  )
+}
+
+export default function App({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider apiUrl="https://api.example.com" appName="myapp" authMode="httpOnly">
+      <Header />
+      {children}
+    </AuthProvider>
+  )
+}
+```
+
+## Quickstart — Core only
+
+For Vue, Svelte, vanilla JS, Node, or React Native — zero framework deps:
 
 ```ts
 import { createCoreAuthClient } from '@ezstart/auth-sdk/core'
 
 const client = createCoreAuthClient({
-  apiUrl: 'https://auth.example.com/api/auth',
+  apiUrl: 'https://api.example.com',
   appName: 'myapp',
 })
 
 const user = await client.loginWithCookie('user@example.com', 'password')
 const me = await client.getCurrentUser()
+await client.logout()
 ```
 
-## Quickstart — SSR auth (Next.js App Router)
-
-Eliminate the **`<LoginButton>` flash** that occurs on the first paint when
-running in `httpOnly` cookie mode. The session cookie isn't readable from
-JavaScript, so the client `<AuthProvider>` defaults to
-`isAuthenticated: false` until its async `/me` call resolves — for ~50–200ms
-the chrome shows the wrong UI (LoginButton instead of UserMenu). The fix is
-the **Clerk-style pattern**: resolve the user server-side and seed the
-provider synchronously via `initialUser`.
-
-```tsx
-// app/[locale]/layout.tsx (Server Component)
-import { getServerAuth } from '@ezstart/auth-sdk/server'
-import { headers } from 'next/headers'
-import { Providers } from '@/components/providers'
-
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const headersList = await headers()
-  const initialUser = await getServerAuth({
-    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL!,
-    cookieHeader: headersList.get('cookie'),
-  })
-
-  return (
-    <html>
-      <body>
-        <Providers initialUser={initialUser}>{children}</Providers>
-      </body>
-    </html>
-  )
-}
-```
-
-```tsx
-// components/providers.tsx
-'use client'
-import { AuthProvider, type AuthUser } from '@ezstart/auth-sdk'
-
-export function Providers({
-  children,
-  initialUser,
-}: {
-  children: React.ReactNode
-  initialUser?: AuthUser | null
-}) {
-  return (
-    <AuthProvider
-      appName="myapp"
-      authMode="httpOnly"
-      apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL!}
-      initialUser={initialUser}
-    >
-      {children}
-    </AuthProvider>
-  )
-}
-```
-
-That's it — `<UserMenu>`, `<LoginButton>`, `<RequireAuth>`, `<SignedIn>`,
-`<SignedOut>` and any `useAuth()` consumer all render the right state on
-the very first frame. No flash on initial load, no flash on cross-group
-navigations (e.g. `/dashboard` → `/`) when the chrome remounts.
-
-`getServerAuth()` is server-only — import from `@ezstart/auth-sdk/server`.
-It returns `null` for anonymous requests (no cookie, expired session,
-network error), in which case the legacy client-side bootstrap takes over
-seamlessly. Safe to call from any Server Component or Route Handler.
-
-## Server middleware (Express) — JWT cookie + API key in one step
-
-For any Express-based API that wants to accept BOTH dashboard sessions
-(JWT cookie / Bearer) AND server-to-server API keys (`X-API-Key` /
-`Authorization: ApiKey ...`) on the same routes, use the
-`createAuthMiddleware` factory. It bundles JWT verification, API-key
-lookup, monthly quota cache, scope policy, presence hook and Stripe-style
-legacy field stamping (`req.apiKeyId`, `req.apiKeyAppName`, etc.) behind
-a single config object — five lines of wiring per service.
-
-```ts
-// apps/<app>/api/src/middleware/unified-auth.ts
-import { createAuthMiddleware } from '@ezstart/auth-sdk/server'
-import { logger } from '@ezstart/logger/server'
-import { JWT_SECRET } from '../config/env.js'
-import { ACCESS_COOKIE_NAME } from '../config/cookie.js'
-import { getApiKeyModel } from '../models/api-key.js'
-import { getApiKeyUsageModel } from '../models/api-key-usage.js'
-import { getAuthUserModel } from '../models/auth-user.js'
-import { updatePresenceByUserId } from '../services/presence.service.js'
-
-const authJwtOrKeyFactory = createAuthMiddleware({
-  appName: 'myapp',
-  jwtSecret: JWT_SECRET,
-  cookieName: ACCESS_COOKIE_NAME,
-  getApiKeyModel,
-  getApiKeyUsageModel,
-  getAuthUserModel,
-  onUserAttached: updatePresenceByUserId, // optional presence tracking
-  logger, // optional structured logger (defaults to silent no-op)
-})
-
-export const authJwtOrKey = (opts = {}) => authJwtOrKeyFactory(opts)
-```
-
-Then on each route:
-
-```ts
-// JWT users always pass; API keys must have scope 'admin' on this route.
-router.get('/applications', authJwtOrKey({ requireKeyScope: 'admin' }), controller)
-
-// Default scope is 'user' — accepts publishable + secret keys + admin keys.
-router.get('/me', authJwtOrKey(), controller)
-```
-
-Behaviour:
-
-- **JWT first** — if a valid cookie / Bearer is present, the API key is
-  ignored. JWT verifier always wins so revoking a key never locks out a
-  signed-in user with a still-valid session.
-- **API key fallback** — if no JWT, the verifier looks up the
-  `X-API-Key` (or `Authorization: ApiKey ...`) header, checks status /
-  expiry / monthly quota, and stamps `req.apiKeyId`, `req.apiKeyUserId`,
-  `req.apiKeyScope`, `req.apiKeyAppName` for downstream consumers.
-- **Scope policy** — `requireKeyScope` (`'admin' | 'user' | 'readonly'`)
-  is enforced ONLY on the API key path; JWT users are not scope-checked
-  here (chain a `requireRole` / `requireAdmin` after if needed). Legacy
-  `'live'` / `'test'` scope values are demoted to `'user'` so a
-  publishable key never satisfies `'admin'`.
-- **Quota** — when `apiKey.quotaMonthly` is set, the verifier counts
-  this month's requests via the usage model and returns `429 QUOTA_EXCEEDED`
-  with `retryAfter` once exceeded. Monthly aggregates are cached in-memory
-  for 5 minutes per process.
-- **Best-effort tracking** — `lastUsedAt` and per-day usage counters are
-  updated fire-and-forget (errors are swallowed, request always returns).
-
-Returned envelopes follow the same `{ success: false, error: { code, … } }`
-shape as `@ezstart/api-core` `sendError` so existing client error handlers
-keep working.
-
-## Choosing your auth UX — Hosted vs Embedded
-
-EZAuth supports **two patterns** for authentication UX. Pick the one that fits your product:
-
-### Pattern A — Hosted login (redirect to ezauth)
-
-User clicks "Sign in" → redirected to a hosted EZAuth login page → after auth, redirected back to your app with a session.
-
-```tsx
-// 1. In your app shell
-import { LoginButton, AuthProvider } from '@ezstart/auth-sdk'
-;<AuthProvider config={{ apiUrl: 'https://api.example.com', appName: 'myapp' }}>
-  <LoginButton /> {/* That's it — handles redirect, callback, session */}
-</AuthProvider>
-
-// 2. Add the callback page
-// src/app/auth/callback/page.tsx
-import { AuthCallbackPage } from '@ezstart/auth-sdk/components'
-export default () => <AuthCallbackPage />
-```
-
-✅ **Pros**: zero auth UI code, central security, cross-app SSO trivial, white-label theme automatic.
-⚠️ **Cons**: redirect can disrupt UX, "powered by EZAuth" visible.
-
-**Best for**: MVP / startup pressed, B2B multi-tenant, Enterprise SaaS, marketplaces with cross-app SSO.
-
----
-
-### Pattern B — Embedded forms (in your app)
-
-User stays on YOUR domain. You build your own `/login`, `/register`, etc. pages and drop in EZAuth form components.
-
-```tsx
-// src/app/login/page.tsx
-'use client'
-import { SignInForm } from '@ezstart/auth-sdk/components'
-import { useRouter } from 'next/navigation'
-
-export default function LoginPage() {
-  const router = useRouter()
-  return (
-    <SignInForm
-      appName="myapp"
-      onSuccess={() => router.push('/dashboard')}
-      texts={{ submit: 'Continue' /* ...customize */ }}
-    />
-  )
-}
-
-// Similarly for /register, /forgot-password, /reset-password, /verify-email
-```
-
-✅ **Pros**: 100% your branding, seamless UX (no redirect), better mobile/PWA, control everything.
-⚠️ **Cons**: more pages to build (5+ pages), security spread across your domains, you maintain UI updates.
-
-**Best for**: B2C consumer SaaS, indie products, mobile-first apps, brand-conscious products.
-
----
-
-### Pattern C — Both (dev choice)
-
-You can mix: hosted login button on landing + embedded forms in dashboard, or vice versa. EZAuth supports both natively.
-
-### Choose by use case
-
-| Your product                    | Recommended pattern         |
-| ------------------------------- | --------------------------- |
-| MVP / pressed startup           | A (Hosted) — zero work      |
-| B2C consumer SaaS (Notion-like) | B (Embedded) — branding     |
-| B2B multi-tenant                | A (Hosted) — cross-app SSO  |
-| Marketplace                     | A + B mix                   |
-| Mobile-first / PWA              | B (Embedded) — no redirect  |
-| Enterprise SaaS                 | A (Hosted) — security audit |
-| Indie product                   | B (Embedded) — conversion   |
-
-### Components matrix
-
-| Component                | Pattern | Drop-in location              |
-| ------------------------ | ------- | ----------------------------- |
-| `<LoginButton />`        | A       | App header / CTA              |
-| `<RegisterButton />`     | A       | App header / CTA              |
-| `<AuthCallbackPage />`   | A       | `/auth/callback` route        |
-| `<SignInForm />`         | B       | Your `/login` page            |
-| `<SignUpForm />`         | B       | Your `/register` page         |
-| `<ForgotPasswordForm />` | B       | Your `/forgot-password` page  |
-| `<ResetPasswordForm />`  | B       | Your `/reset-password` page   |
-| `<VerifyEmailFlow />`    | B       | Your `/verify-email` page     |
-| `<TwoFactorPrompt />`    | B       | Inside SignInForm flow (auto) |
-| `<UserMenu />`           | A or B  | Header (works with both)      |
-| `<EZAuthDashboard />`    | A or B  | Your `/dashboard` route       |
-
-All form components accept:
-
-- `texts?: Partial<XTexts>` — i18n override (English defaults)
-- `onSuccess?: () => void` — callback
-- `onError?: (err: Error) => void` — callback
-- Standard `className` for style overrides
+See [`examples/vanilla-standalone`](./examples/vanilla-standalone) for a complete browser starter.
 
 ## API
 
 ### Core (`@ezstart/auth-sdk/core`)
 
-- `createCoreAuthClient(config)` — Framework-agnostic auth client using raw `fetch()`
-- `CoreAuthClient` — Class with login, logout, refresh, token exchange, profile update
-- `AuthError` — Error class with HTTP status code
-- `TokenManager` — Token persistence abstraction
-- `createLocalStorage()` / `createMemoryStorage()` — Built-in storage backends
+- `createCoreAuthClient(config)` — Factory for the framework-agnostic client. Returns `login`, `logout`, `refresh`, `getCurrentUser`, `updateProfile`, etc.
+- `AuthError` — Typed error class with `code` and `statusCode`.
+- `TokenManager` — Pluggable token persistence interface.
+- `createLocalStorage()` / `createMemoryStorage()` — Built-in storage backends.
 
 ### React (`@ezstart/auth-sdk/react`)
 
-- `<AuthProvider>` — Context provider with auto-refresh, **owns the per-tree
-  Zustand store** (Clerk-style SSR setup — see _SSR + initialUser_ below)
-- `useAuth()` — Main hook (user, login, logout, isAuthenticated)
-- `useAuthStore()` — Bound hook reading the per-Provider store via Context.
-  Throws when called outside `<AuthProvider>`. Accepts an optional selector.
-- `useAuthStoreApi()` — Returns the store instance (for imperative
-  `getState()`/`setState()`/`subscribe()` access from inside the React tree)
-- `useAuthStoreGetSnapshot()` — Returns a stable `() => state` reader for
-  closures passed to non-React APIs (e.g. `getToken={() => snap().accessToken}`)
-- `createAuthStore(options)` — Low-level factory exposed for tests / advanced
-  setups. **Always** wrap usage in `useState(() => createAuthStore(...))` —
-  module-level instantiation breaks Next.js SSR.
-- `<RequireAuth>` — Route protection wrapper (auto-redirects to login by default — see below)
-- `<SignedIn>` / `<SignedOut>` — Conditional rendering for partial UI (no redirect)
-- `<AccessDenied>` — Fallback component
-
-#### SSR + `initialUser` (no LoginButton flash)
-
-The Provider **owns** the Zustand store and creates it via
-`useState(() => createAuthStore({ initialUser }))`. This guarantees one
-store per React tree AND that `initialUser` is part of the very first
-state snapshot React observes. Result: subscribers reading `useAuth()`
-see the SSR-correct `isAuthenticated` value on the FIRST render — no
-flash from `<LoginButton>` to `<UserMenu>` while the async `/me` resolves.
-
-```tsx
-// app/[locale]/layout.tsx — Server Component
-import { getServerAuth } from '@ezstart/auth-sdk/server'
-import { Providers } from '@/components/providers'
-
-export default async function LocaleLayout({ children }) {
-  const initialUser = await getServerAuth()
-  return <Providers initialUser={initialUser}>{children}</Providers>
-}
-
-// components/providers.tsx — Client Component
-;('use client')
-import { AuthProvider, type AuthUser } from '@ezstart/auth-sdk'
-
-export function Providers({
-  initialUser,
-  children,
-}: {
-  initialUser: AuthUser | null
-  children: React.ReactNode
-}) {
-  return (
-    <AuthProvider
-      appName="myapp"
-      publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
-      authMode="httpOnly"
-      initialUser={initialUser}
-    >
-      {children}
-    </AuthProvider>
-  )
-}
-```
-
-> **Breaking change vs ≤ 1.0.0** — `useAuthStore` is no longer a
-> module-level Zustand singleton. `useAuthStore.getState()` /
-> `useAuthStore.setState()` no longer exist. Use `useAuthStoreApi()` (or
-> `useAuthStoreGetSnapshot()` for closures) inside the React tree.
-> `configureAuthStorage()` is deprecated — pass `storageKey` to
-> `<AuthProvider>` instead.
-
-#### `<RequireAuth>` unauthenticated behavior
-
-When the user is not authenticated, `<RequireAuth>` picks ONE behavior in
-this priority order:
-
-1. If `redirectTo` is set → `window.location.href = redirectTo`.
-2. If `fallbackComponent` is set (even as `null`) → renders it.
-3. **Default** → auto-redirects to `{locale}{loginPath}?redirect_uri={current path}`
-   so the user is brought back here after sign-in.
-
-```tsx
-// 1. Default — auto-redirect to /{locale}/login?redirect_uri=...
-<RequireAuth>
-  <Dashboard />
-</RequireAuth>
-
-// 2. Custom login path (still auto-builds the locale prefix and redirect_uri)
-<RequireAuth loginPath="/auth/signin">
-  <Dashboard />
-</RequireAuth>
-
-// 3. Custom fallback UI (no redirect)
-<RequireAuth fallbackComponent={<AccessDenied />}>
-  <Dashboard />
-</RequireAuth>
-
-// 4. Silent opt-out (no redirect, render nothing) — use for conditional
-//    UI elements like an install prompt that should only appear when
-//    signed in. Prefer `<SignedIn>` for this case when possible.
-<RequireAuth fallbackComponent={null}>
-  <PWAInstallPrompt />
-</RequireAuth>
-
-// 5. Custom redirect destination (full URL or path)
-<RequireAuth redirectTo="https://auth.example.com/sso">
-  <Dashboard />
-</RequireAuth>
-```
-
-`loginPath` defaults to `'/login'`. The locale prefix is detected from the
-current `window.location.pathname` (matches `^/[a-z]{2,3}/`) and is omitted
-when no locale segment is present.
+- `<AuthProvider>` — Context provider with auto-refresh. Owns the per-tree Zustand store. Accepts `initialUser` for SSR bootstrap (no login flash).
+- `useAuth()` — Main hook returning `{ user, isAuthenticated, login, logout, ... }`.
+- `useAuthStore(selector?)` — Bound hook reading the per-Provider Zustand store.
+- `useAuthStoreApi()` — Returns the store instance for imperative `getState()` / `setState()` access inside the React tree.
+- `useAuthStoreGetSnapshot()` — Stable `() => state` reader for closures passed to non-React APIs.
+- `<RequireAuth>` — Route protection wrapper. Auto-redirects to `/{locale}/login?redirect_uri=...` by default; accepts `loginPath`, `redirectTo`, or `fallbackComponent`.
+- `<SignedIn>` / `<SignedOut>` — Conditional rendering for partial UI (no redirect).
+- `<AccessDenied>` — Default fallback component for unauthorized access.
 
 ### Components (`@ezstart/auth-sdk/components`)
 
 **Auth flows**
 
-- `<SignInForm>` — Login form with OAuth and 2FA support
-- `<SignUpForm>` — Registration form with password strength and promo codes
-- `<QuickSignUpForm>` — Passwordless signup (username + email only)
-- `<ForgotPasswordForm>` / `<ResetPasswordForm>` — Password recovery
-- `<TwoFactorPrompt>` / `<TwoFactorSettings>` — 2FA UI
-- `<VerifyEmailFlow>` / `<EmailVerificationStatus>` — Email verification flow + inline status
-- `<OAuthButtons>` / `<OAuthProvidersSection>` — OAuth sign-in buttons + connected providers manager
-- `<LoginButton>` / `<RegisterButton>` — Header CTAs with theme propagation
-- `<AuthCallbackPage>` — OAuth/SSO callback handler page
+- `<SignInForm>`, `<SignUpForm>`, `<QuickSignUpForm>` — Login and registration forms with OAuth + 2FA support.
+- `<ForgotPasswordForm>`, `<ResetPasswordForm>` — Password recovery.
+- `<TwoFactorPrompt>`, `<TwoFactorSettings>` — TOTP enrollment and challenge.
+- `<VerifyEmailFlow>`, `<EmailVerificationStatus>` — Email verification flow + inline status.
+- `<MagicLinkButton>` — Passwordless email login.
+- `<EmailChangeForm>` — Change email with verification + cooldown.
+- `<OAuthButtons>`, `<OAuthProvidersSection>` — OAuth sign-in buttons + connected providers manager.
+- `<LoginButton>`, `<RegisterButton>` — Header CTAs with theme handoff (`?theme=` propagation).
+- `<AuthCallbackPage>` — OAuth/SSO callback handler page.
 
 **User account**
 
-- `<AccountModal>` — Clerk-like account management modal
-- `<UserMenu>` — Dropdown user menu with avatar
-- `<UserAvatar>` — Avatar with initials fallback
-- `<UserSettings>` — Settings display page
-- `<UserDashboard>` — Compound user dashboard
-- `<SessionsManager>` — Active sessions list with revoke
-- `<DeleteAccountSection>` — Soft-delete with confirmation + grace period
-- `<AuditLogSection>` — User activity log
+- `<AccountModal>` — Clerk-like account management modal.
+- `<UserMenu>`, `<UserAvatar>` — Header dropdown + avatar with initials fallback.
+- `<UserSettings>`, `<UserDashboard>` — Settings and dashboard pages.
+- `<SessionsManager>` — Active sessions list with revoke.
+- `<DeleteAccountSection>` — Soft-delete with confirmation + grace period.
+- `<AuditLogSection>` — User activity log.
 
 **Admin**
 
-- `<AuthAdminDashboard>` — All-in-one admin console with internal tabs
-  (Overview / Users / Applications / Settings). Auto-scoped server-side via
-  JWT (`req.derivedScope`): superadmin sees all tenants, app admin sees
-  owned Applications, regular user sees own account. Drop-in for both
-  EZAuth's own `/admin` page and the EZStart hub's federated admin.
-- `<MaintenanceBanner>` — Maintenance window status banner (public, used
-  outside the admin console in app shells)
+- `<AuthAdminDashboard>` — All-in-one admin console (Overview / Users / Applications / Settings tabs). Auto-scoped server-side via JWT (`req.derivedScope`): superadmin sees all tenants, app admin sees owned Applications, regular user sees own account.
+- `<MaintenanceBanner>` — Maintenance window status banner.
 
 **Developer (API keys)**
 
-- `<DeveloperPortal>` — Full developer dashboard (keys CRUD + usage)
-- `<ApiKeysTable>` — Standalone keys table
-- `<CreateKeyModal>` / `<KeyCreatedModal>` — Key creation flow
-- `<UsageDetailsModal>` / `<UsageBadge>` — Per-key usage drill-down
+- `<DeveloperPortal>` — Full developer dashboard (keys CRUD + usage).
+- `<ApiKeysTable>`, `<CreateKeyModal>`, `<KeyCreatedModal>` — Key management primitives.
+- `<UsageDetailsModal>`, `<UsageBadge>` — Per-key usage drill-down.
 
-**Applications (P6 — multi-tenant)**
+**Applications (multi-tenant)**
 
-- `<ApplicationsList>` / `<ApplicationCard>` — Owner's Applications list
-- `<CreateApplicationModal>` — New Application wizard
-- `<ApplicationDetailView>` — Application settings + theme + keys
+- `<ApplicationsList>`, `<ApplicationCard>` — Owner's Applications list.
+- `<CreateApplicationModal>` — New Application wizard.
+- `<ApplicationDetailView>` — Application settings + theme + keys.
 
-**Feedback / utility**
+### Server (`@ezstart/auth-sdk/server`)
 
-- `<DevModeBanner>` — Dev environment indicator
-- `<AuthErrorBanner>` — Inline destructive feedback
-- `<RequireAuthLoader>` — Styled wrapper around `<RequireAuth>`
+Server-only helpers (`import 'server-only'` guards). Safe to call from any Server Component or Route Handler.
 
-### Middleware
+- `getServerAuth({ apiUrl, cookieHeader })` — Resolve current user from the session cookie. Returns `null` for anonymous requests.
+- `getServerApiKeys({ apiUrl, cookieHeader })` — List API keys for the current user.
+- `getServerApplication({ apiUrl, cookieHeader, id })` — Fetch a single Application.
+- `getServerApplications({ apiUrl, cookieHeader })` — List Applications owned by the current user.
+- `getServerAuditLog({ apiUrl, cookieHeader })` — Fetch audit log entries.
+- `hasFeature(user, flag)` — Server-side feature flag check.
 
-- `createAuthMiddleware(config)` — Next.js middleware for protected routes
-- `createProtectedMiddleware(config)` — SSR middleware with JWT decode
+### Middleware (`@ezstart/auth-sdk/middleware`)
 
-### Server
+- `createAuthMiddleware(config)` — Express middleware that accepts JWT cookie + Bearer + `X-API-Key` on the same routes. Bundles JWT verification, API-key lookup, monthly quota cache, scope policy, and best-effort tracking.
 
-- Schemas for API validation (login, register, token, verify)
-- Type exports for server-side code
+```ts
+import { createAuthMiddleware } from '@ezstart/auth-sdk/server'
 
-## i18n — `texts` prop pattern (no i18n library required)
+const authJwtOrKey = createAuthMiddleware({
+  appName: 'myapp',
+  jwtSecret: process.env.JWT_SECRET!,
+  cookieName: 'access_token',
+  getApiKeyModel,
+  getApiKeyUsageModel,
+  getAuthUserModel,
+})
 
-The components layer is **agnostic of any i18n library** — it does not import
-`next-intl`, `react-intl`, or anything similar. All user-facing strings are
-accepted via a `texts?: Partial<...Texts>` prop with English defaults baked in,
-and the active locale is auto-detected from the URL pathname (e.g.
-`/fr/login` → `'fr'`) so the bundled `en | fr | vi` dictionaries pick the
-right language out of the box.
+router.get('/me', authJwtOrKey(), controller)
+router.get('/admin/users', authJwtOrKey({ requireKeyScope: 'admin' }), controller)
+```
+
+### RBAC (`@ezstart/auth-sdk/rbac`)
+
+- `hasRole(user, role)` / `hasGlobalRole(user, role)` — Role checks.
+- `requireRole(role)`, `requireAdmin()`, `requireSuperadmin()` — Express middleware factories.
+- `<RequireRole>` — React guard component.
+
+### i18n — `texts` prop pattern
+
+The components layer is **agnostic of any i18n library**. All user-facing strings are accepted via a `texts?: Partial<...Texts>` prop with English defaults baked in. Locale is auto-detected from the URL pathname (`/fr/login` → `'fr'`).
 
 ```tsx
-import { useTranslations } from 'next-intl' // your i18n lib (or any other)
 import { SignInForm } from '@ezstart/auth-sdk/components'
 
-function LoginPage() {
-  const t = useTranslations('auth.signIn')
-  return (
-    <SignInForm
-      appName="myapp"
-      texts={{
-        emailOrUsername: t('emailLabel'),
-        password: t('passwordLabel'),
-        submit: t('submit'),
-        // ... only override what you need; rest falls back to EN/FR/VI defaults
-      }}
-    />
-  )
-}
-```
-
-If you do not pass `texts`, the form renders with the bundled localized
-defaults — pass `locale="fr"` (or any other supported tag) to force a
-specific language without touching `texts`.
-
-## Federated admin (cross-origin embedding)
-
-`<AuthAdminDashboard>` ships with **zero scope or federation props** —
-the dashboard reads its configuration entirely from the surrounding
-`<AuthProvider>`. To embed the console in a platform hub (Tier 3 — e.g.
-`apps/ezstart/web/admin`) cross-origin, configure a single `<AuthProvider>`
-in the hub layout pointing at the remote EZAuth deployment; the user's
-own JWT (carrying their roles) is forwarded automatically.
-
-```tsx
-import { AuthProvider } from '@ezstart/auth-sdk'
-import { AuthAdminDashboard } from '@ezstart/auth-sdk/components'
-
-// In the hub layout
-;<AuthProvider apiUrl="https://auth.example.com" appName="ezstart">
-  <AuthAdminDashboard />
-</AuthProvider>
-```
-
-The dashboard is **auto-scoped server-side** via the JWT — no `appName` /
-`scope` / `applicationId` props are required. The backend derives scope
-from `req.user`:
-
-- `globalRoles: ['superadmin']` -> all tenants
-- App-level `admin` role -> owned Applications only
-- Regular user -> own account
-
-Localize labels via the `texts` prop (per-tab nested objects):
-
-```tsx
-<AuthAdminDashboard
+;<SignInForm
+  appName="myapp"
   texts={{
-    tabOverview: "Vue d'ensemble",
-    tabUsers: 'Utilisateurs',
-    overview: { title: 'Statistiques plateforme' },
-    users: { searchPlaceholder: 'Rechercher...' },
-    applications: { createApplication: 'Nouvelle App' },
-    settings: {
-      featureFlags: { title: 'Drapeaux de fonctionnalite' },
-      maintenance: { title: 'Mode maintenance' },
-    },
+    emailOrUsername: 'Email or username',
+    password: 'Password',
+    submit: 'Continue',
   }}
 />
 ```
 
-### Migration from pre-Wave 1B (Apr 2026)
+Bundled defaults: `en`, `fr`, `vi`. Pass `locale="fr"` to force a specific language without overriding `texts`.
 
-The previous shape exposed five separate components — `<AuthAdminDashboard>`
-(users only), `<AdminApplicationsDashboard>`, `<AdminAnalyticsSection>`,
-`<AdminFeatureFlagsSection>`, `<AdminMaintenanceModeSection>`. They are
-**replaced** by the single `<AuthAdminDashboard>` console with internal tabs.
-Consumer apps (ezauth/web, ezstart/web) must drop the props
-`appName` / `scope` / `applicationId` and assemble the per-tab text overrides
-into a single `texts` object as shown above. `<MaintenanceBanner>` remains
-a separate top-level export for use in app shells.
+### Hosted vs Embedded auth UX
 
-## Theme handoff (`?theme=`)
+Two patterns supported:
 
-`<LoginButton>` and `<RegisterButton>` propagate the consumer's current
-light/dark scheme to the EZAuth web app via `?theme=<light|dark|system>` so
-the auth pages render in the same scheme — zero flash on redirect. The
-matching `<AuthCallbackPage>` reads the param on the way back and writes
-the `theme` cookie that `next-themes` picks up, so a user who switched
-scheme on the auth pages keeps the new preference on the consumer.
+**Pattern A — Hosted login** (redirect to a hosted EZAuth-style page): drop `<LoginButton>` + `<AuthCallbackPage>`. Zero auth UI code, central security, cross-app SSO trivial.
 
-Override the auto-detected value with the optional `theme` prop:
+**Pattern B — Embedded forms** (stay on your domain): build your own `/login`, `/register`, etc. pages and drop in `<SignInForm>`, `<SignUpForm>`, etc. 100% your branding, no redirect.
 
-```tsx
-<LoginButton theme="dark">Sign in</LoginButton>
-```
+You can mix both in the same app.
 
 ## Configuration safety
 
-`resolveSDKConfig` (used internally by `<AuthProvider>`) **fails fast** with
-`AuthError({ code: 'CONFIG_ERROR' })` instead of silently falling back to
-localhost or a hardcoded vendor host when run off-localhost. This prevents
-broken production flows that only surface at login time.
+`<AuthProvider>` fails fast with `AuthError({ code: 'CONFIG_ERROR' })` instead of silently falling back to localhost when run off-localhost. Throws when:
 
-Throws when:
+1. No URL signals (off-localhost, no `apiUrl`, no `publishableKey`, no `firstParty: true`).
+2. `publishableKey` without `apiUrl` off-localhost.
+3. `firstParty: true` without an explicit `appName` off-localhost.
+4. `webUrl` resolves to `localhost` off-localhost (usually means `NEXT_PUBLIC_AUTH_WEB_URL` env is missing).
 
-1. **No URL signals** — off-localhost with no `apiUrl`, no `publishableKey`,
-   and no `firstParty: true`. Fix: pass an explicit `apiUrl` (or use a
-   `publishableKey`).
-2. **`publishableKey` without `apiUrl` off-localhost** — the SDK can't know
-   where to call `/api/keys/config`. Fix: pass `apiUrl` alongside the key.
-3. **`firstParty: true` without an explicit `appName` off-localhost** —
-   defaulting to `'ezauth'` would cause cross-tenant request leaks (every
-   auth call carries `app=ezauth`). Fix: always set `appName` explicitly
-   when enabling first-party mode in staging/prod.
-4. **`webUrl` resolves to `localhost` off-localhost** — usually means the
-   `NEXT_PUBLIC_EZAUTH_WEB_URL` env var is missing or empty in the target
-   environment. Without this guard the user would be redirected to
-   `http://localhost:6111` at login/register time. Fix: set the env var or
-   pass `webUrl` explicitly to your provider.
+Localhost (`localhost`, `*.localhost`, `127.0.0.1`, `0.0.0.0`, `::1`) keeps permissive defaults so zero-config dev still works.
 
-Localhost (`localhost`, `*.localhost`, `127.0.0.1`, `0.0.0.0`, `::1`) keeps
-permissive defaults so zero-config dev still works.
+## Roadmap
 
-### SSR / Next.js note
+`@ezstart/auth-sdk` ships a complete MVP for email/password + OAuth Google + 2FA + sessions + RBAC + API keys management.
 
-`isLocalhost()` returns `false` when `window` is `undefined` (server side),
-so any of the cases above will throw during SSR/RSC if the corresponding
-signal is missing. Two safe patterns:
-
-- **Explicit apiUrl**: pass `apiUrl` (and `webUrl` when non-defaults are in
-  play) as literal strings to the provider — it resolves identically on
-  server and client.
-- **Client-only provider**: render `<AuthProvider>` behind a `'use client'`
-  boundary so the hostname check happens in the browser.
-
-## Migration from flat structure
-
-No migration needed. All existing imports from `@ezstart/auth-sdk` continue to work:
-
-```ts
-// These all still work unchanged:
-import { AuthProvider, useAuth, useAuthStore } from '@ezstart/auth-sdk'
-import { AuthClient, createAuthClient } from '@ezstart/auth-sdk'
-import { SignInForm, SignUpForm } from '@ezstart/auth-sdk'
-import { createAuthMiddleware } from '@ezstart/auth-sdk'
-import type { AuthUser, JWTPayload } from '@ezstart/auth-sdk/server'
-```
-
-New entry points for targeted imports:
-
-```ts
-import { createCoreAuthClient } from '@ezstart/auth-sdk/core' // No React needed
-import { AuthProvider, useAuth } from '@ezstart/auth-sdk/react' // No @ezstart/ui needed
-import { SignInForm } from '@ezstart/auth-sdk/components' // Full UI
-```
-
-## Roadmap & Known Limitations
-
-`@ezstart/auth-sdk` ships a complete MVP for email/password + OAuth Google + 2FA + sessions + RBAC + API keys management. It covers 80% of standard SaaS authentication needs out-of-the-box.
-
-The following features are on the roadmap for future releases:
-
-### Authentication methods
-
-- 🔄 **Magic Link** (passwordless email login)
-- 🔄 **Passkey / WebAuthn** (biometric / hardware key auth)
-- 🔄 **Additional OAuth providers**: GitHub, Discord, Microsoft, Apple
-
-### User account management
-
-- 🔄 **Account deletion flow** with confirmation + grace period
-- 🔄 **Email change flow** with new email verification
-- 🔄 **GDPR data export** (download user data as JSON/ZIP)
-
-### Compliance
-
-- 🔄 **Consent banner / Cookie management** (GDPR/CCPA compliance widget)
-
-If you need any of these features now, you can:
-
-- Implement them on top of the SDK using the exposed `core/` client primitives
-- Open an issue or PR on [GitHub](https://github.com/DFranck/ezstart/issues)
-- Use the `auth-sdk/core` package standalone if you need a non-React integration
-
-The SDK currently powers EZAuth.dev as its reference implementation. We dogfood every feature before it ships.
+- Magic Link (passwordless email login) — shipped.
+- Passkey / WebAuthn — planned.
+- Additional OAuth providers (GitHub, Discord, Microsoft, Apple) — planned.
+- GDPR data export — planned.
 
 ## Related
 
-- [EZAuth API](../../apps/ezauth/api) — Reference auth service this SDK is built against
-- [EZAuth web](../../apps/ezauth/web) — Reference dashboard / hosted login pages
-- [@ezstart/pay-sdk](../pay-sdk) — Companion payments SDK (same 3-layer architecture)
-- [@ezstart/api-contracts](../api-contracts) — Wire-level request/response schemas
-- [@ezstart/api-sdk](../api-sdk) — HTTP client primitives (`apiCall`, `apiQuery`)
-- [@ezstart/ui](../ui) — UI primitives consumed by the `components/` layer
-
-## Used By
-
-All web apps (ezstart, ezbill, green-pulse, gacha-analyzer, fengshui, asc-tcd, ezauth).
+- [`@ezstart/api-sdk`](../api-sdk) — HTTP client primitives consumed internally.
+- [`@ezstart/api-contracts`](../api-contracts) — wire-level request/response schemas.
+- [`@ezstart/ui`](../ui) — UI primitives consumed by the `components/` entry.
+- [`@ezstart/pay-sdk`](../pay-sdk) — Companion payments SDK with the same 3-layer architecture.
