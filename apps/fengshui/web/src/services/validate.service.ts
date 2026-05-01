@@ -1,4 +1,4 @@
-import { GeminiProvider } from '@ezstart/ai-sdk'
+import { GeminiProvider } from '@ezstart/ai-sdk/server'
 import { logger } from '@ezstart/logger'
 
 export interface BoundingBox {

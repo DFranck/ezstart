@@ -6,7 +6,7 @@
 import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/api-core'
 import { z } from 'zod'
-import { UnifiedChat } from '@ezstart/ai-sdk'
+import { UnifiedChat } from '@ezstart/ai-sdk/server'
 import { AIConversation } from '../../../models/AIConversation.js'
 import { getSystemPrompt, getSystemPromptDoc } from '../../../services/ai-prompt.service.js'
 import { getAppProviders } from '../../../services/app-provider.service.js'

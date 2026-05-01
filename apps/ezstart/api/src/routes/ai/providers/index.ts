@@ -16,7 +16,7 @@ import {
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
-import { providerRegistry } from '@ezstart/ai-sdk'
+import { providerRegistry } from '@ezstart/ai-sdk/server'
 
 export const providersRegistry = new OpenAPIRegistry()
 const router: import('express').Router = Router()

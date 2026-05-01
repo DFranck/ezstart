@@ -16,20 +16,16 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
-import { providerRegistry, enrichedAppProviderSchema } from '@ezstart/ai-sdk'
-import type { AIProviderInfo, ProviderCapabilities } from '@ezstart/ai-sdk'
+import { enrichedAppProviderSchema } from '@ezstart/ai-sdk'
+import { providerRegistry } from '@ezstart/ai-sdk/server'
+import type { AIProviderInfo, ProviderCapabilities } from '@ezstart/ai-sdk/server'
 import { z } from 'zod'
 import { AppProvider, normalizeLegacyAppProvider } from '../../../models/AppProvider.js'
 
 const listQuerySchema = z.object({
-  app: z
-    .string()
-    .min(1)
-    .optional()
-    .openapi({
-      description:
-        'Filter by app name — matches providers scoped to this app or "*" (omit for all)',
-    }),
+  app: z.string().min(1).optional().openapi({
+    description: 'Filter by app name — matches providers scoped to this app or "*" (omit for all)',
+  }),
   // Kept for backward-compat with the old `appName` query param.
   appName: z.string().min(1).optional().openapi({ description: '[Deprecated] Use `app` instead.' }),
   enabled: z

@@ -5,7 +5,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { providerRegistry } from '@ezstart/ai-sdk'
+import { providerRegistry } from '@ezstart/ai-sdk/server'
 
 /** Default scheduler interval when no override is set — 5 minutes. */
 const DEFAULT_HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000
