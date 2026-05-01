@@ -28,6 +28,7 @@
  */
 import { buildEzstartSignatureHeader } from '@ezstart/api-core'
 import { logger } from '@ezstart/logger/server'
+import { signWebhook } from '@ezstart/pay-sdk/server'
 import { getApiUrl } from '@ezstart/config'
 import { getApplication } from './ezauth-client.js'
 
@@ -165,7 +166,10 @@ export async function notifyEzauthSubscription(payload: SubscriptionWebhookPaylo
 
   const timestamp = Math.floor(Date.now() / 1000).toString()
   const body = JSON.stringify({ ...payload, timestamp })
-  const signatureHeader = buildEzstartSignatureHeader({ secret, timestamp, body })
+  // Use the pay-sdk wrapper so any future cross-service payment webhook
+  // shares the same signing primitive (returns a ready-to-spread headers
+  // object). Underlying impl still routes through @ezstart/api-core.
+  const signatureHeaders = signWebhook({ secret, body, timestamp })
 
   logger.info('[ezauth-webhook] notify sending', {
     url,
@@ -191,7 +195,7 @@ export async function notifyEzauthSubscription(payload: SubscriptionWebhookPaylo
       headers: {
         'Content-Type': 'application/json',
         'X-API-Key': apiKey,
-        'X-EZStart-Signature': signatureHeader,
+        ...signatureHeaders,
       },
       body,
       signal: controller.signal,

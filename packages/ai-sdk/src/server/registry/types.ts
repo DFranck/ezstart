@@ -2,6 +2,8 @@
  * Registry types for AI Provider management
  */
 
+import 'server-only'
+
 export type AIProviderType = 'openai' | 'gemini' | 'anthropic' | 'custom'
 
 export interface ProviderCapabilities {

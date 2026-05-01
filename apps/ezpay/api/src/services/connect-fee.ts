@@ -1,8 +1,9 @@
 /**
- * Connect Fee Service
+ * Connect Fee Service — ezpay-specific glue.
  *
  * Resolves whether a checkout for a given Application should route through
- * Stripe Connect and, if so, computes the platform fee charged by EZPay.
+ * Stripe Connect and, if so, delegates the pure fee math to
+ * `computeConnectFee` from `@ezstart/pay-sdk/server`.
  *
  * Flow (per request):
  *   1. Look up the ConnectedAccount for the caller's Application id.
@@ -16,16 +17,18 @@
  *   2. Resolve the Application owner's ACTIVE EZPay self-subscription
  *      via `resolveActiveEzpayPlan(ownerId)` to get the current fee
  *      percentage (Starter 5% fallback, Growth 3%, Enterprise 1.5% etc.).
- *   3. Return both a cents-based `applicationFeeAmount` (for one-shot
- *      donations/purchases) and the raw `applicationFeePercent`
- *      (preferred for Stripe subscriptions via `application_fee_percent`).
+ *   3. Forward `(baseAmountCents, feePercent)` to `computeConnectFee` and
+ *      return both `applicationFeeAmount` (for one-shot donations/purchases)
+ *      and `applicationFeePercent` (for Stripe subscriptions).
  *
- * The caller chooses which field to forward to the provider based on
- * whether it's creating a one-shot checkout or a subscription.
+ * The DB lookups stay here because they're ezpay-specific (`ConnectedAccount`
+ * + `EzpayPlan` models live in this app). The pure math lives in pay-sdk so
+ * future payment services share the exact same fee model.
  *
  * @module apps/ezpay/api/src/services/connect-fee
  */
 import { logger } from '@ezstart/logger/server'
+import { computeConnectFee } from '@ezstart/pay-sdk/server'
 import { getConnectedAccountModel } from '../models/ConnectedAccount.js'
 import { resolveActiveEzpayPlan } from './ezpay-plan-resolver.js'
 
@@ -85,30 +88,31 @@ export async function resolveConnectFee(
     return { isConnect: false }
   }
 
-  // Guard against negative amounts
-  const safeAmount = Math.max(0, amountInCents)
-
   // Resolve the active EZPay plan for the Application OWNER (not the
   // end-customer paying the checkout). The owner is the one who signed up
   // to EZPay and whose plan dictates how much fee we take.
   const plan = await resolveActiveEzpayPlan(account.userId)
-  const feePercent = plan.feePercent
 
-  const applicationFeeAmount = Math.round((safeAmount * feePercent) / 100)
+  // Pure fee math — defensive clamps on negative amounts / out-of-range
+  // percentages live in `computeConnectFee`.
+  const fees = computeConnectFee({
+    baseAmountCents: amountInCents,
+    feePercent: plan.feePercent,
+  })
 
   logger.debug('connect-fee resolved', {
     applicationId,
     ownerId: account.userId,
     planName: plan.planName,
-    feePercent,
-    amountInCents: safeAmount,
-    applicationFeeAmount,
+    feePercent: fees.applicationFeePercent,
+    amountInCents: Math.max(0, amountInCents),
+    applicationFeeAmount: fees.applicationFeeAmount,
   })
 
   return {
     isConnect: true,
     stripeAccountId: account.stripeAccountId,
-    applicationFeeAmount,
-    applicationFeePercent: feePercent,
+    applicationFeeAmount: fees.applicationFeeAmount,
+    applicationFeePercent: fees.applicationFeePercent,
   }
 }

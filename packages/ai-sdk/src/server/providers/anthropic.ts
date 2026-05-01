@@ -17,6 +17,8 @@
  * - `APIConnectionError` — network failures
  */
 
+import 'server-only'
+
 import Anthropic from '@anthropic-ai/sdk'
 import {
   assertValidModelName,
