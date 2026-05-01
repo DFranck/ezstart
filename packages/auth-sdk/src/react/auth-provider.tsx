@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { useStore } from 'zustand'
 import { CoreAuthClient, fetchKeyConfig, resolveSDKConfig } from '../core/auth-client.js'
+import { resolveEffectiveAuthMode } from '../core/cross-origin.js'
 import type {
   AuthMode,
   AuthScope,
@@ -60,39 +61,22 @@ const noopLogger: AuthLogger = {
 // ---------------------------------------------------------------------------
 
 /**
- * Auto-detect the auth mode based on the current environment.
- * - localhost → localStorage (httpOnly cookies don't work cross-port)
- * - same root domain as API → httpOnly
- * - different domain → localStorage
+ * `true` when the current browser is running on a localhost-equivalent host
+ * (`localhost`, `127.0.0.1`, `0.0.0.0`, `[::1]`, `*.localhost`). The dev
+ * stack always uses localStorage because the API and the web app run on
+ * different ports of the same host, and host-only cookies can't span ports.
  */
-function detectAuthMode(apiUrl: string): AuthMode {
-  if (typeof window === 'undefined') return 'httpOnly'
-
-  const currentHost = window.location.hostname
-
-  if (currentHost === 'localhost' || currentHost.startsWith('127.0.0.1')) {
-    return 'localStorage'
-  }
-
-  try {
-    const apiHost = new URL(apiUrl).hostname
-    const getRootDomain = (hostname: string) => {
-      const parts = hostname.split('.')
-      if (parts.length <= 2) return hostname
-      return parts.slice(-2).join('.')
-    }
-
-    const currentRootDomain = getRootDomain(currentHost)
-    const apiRootDomain = getRootDomain(apiHost)
-
-    if (currentRootDomain === apiRootDomain) {
-      return 'httpOnly'
-    }
-  } catch {
-    // URL parsing failed, fallback to localStorage
-  }
-
-  return 'localStorage'
+function isLocalhostBrowser(): boolean {
+  if (typeof window === 'undefined') return false
+  const host = window.location.hostname
+  return (
+    host === 'localhost' ||
+    host.endsWith('.localhost') ||
+    host === '127.0.0.1' ||
+    host === '0.0.0.0' ||
+    host === '[::1]' ||
+    host === '::1'
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -341,15 +325,21 @@ export function AuthProvider({
   const resolvedWebUrl = resolved.webUrl
   const resolvedAppName = resolved.clientConfig.appName
 
-  // Resolve auth mode — localhost ALWAYS uses localStorage because
-  // httpOnly cookies don't work cross-port (API :6110, Web :6111).
-  const effectiveMode = useMemo(() => {
-    const detected = detectAuthMode(resolved.clientConfig.apiUrl)
-    // On localhost, always force localStorage regardless of authMode prop
-    if (detected === 'localStorage') return 'localStorage'
-    if (authMode) return authMode
-    return detected
-  }, [authMode, resolved.clientConfig.apiUrl])
+  // Resolve auth mode — see `core/cross-origin.ts` for the full decision tree.
+  // Summary:
+  //   - localhost (any browser host)   → forced 'localStorage' (cross-port)
+  //   - SSR (no window)                → respects the configured authMode
+  //   - same eTLD+1 (api ↔ web)        → respects the configured authMode
+  //                                      (defaults to 'httpOnly' when unset)
+  //   - cross-origin + 'httpOnly' set  → falls back to 'localStorage' with
+  //                                      a one-time console.warn (see helper)
+  const effectiveMode = useMemo<AuthMode>(() => {
+    if (isLocalhostBrowser()) return 'localStorage'
+    const configured: AuthMode = authMode ?? 'httpOnly'
+    return resolveEffectiveAuthMode(configured, resolved.clientConfig.apiUrl, undefined, {
+      warn: (message: string, ...args: unknown[]) => logger.warn(message, ...args),
+    })
+  }, [authMode, resolved.clientConfig.apiUrl, logger])
 
   // Warn in production if no key and not first-party.
   // Routed through the injected logger (defaults to silent no-op per the

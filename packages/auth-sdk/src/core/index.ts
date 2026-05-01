@@ -18,6 +18,14 @@ export { TokenManager, createMemoryStorage, createLocalStorage } from './token-m
 // Errors
 export { AuthError } from './errors.js'
 
+// Cross-origin detection (used by AuthProvider to auto-fallback authMode)
+export {
+  isSameRegistrableDomain,
+  resolveEffectiveAuthMode,
+  __resetCrossOriginWarnCache,
+} from './cross-origin.js'
+export type { CrossOriginLogger } from './cross-origin.js'
+
 // Types
 export type {
   AuthClientConfig,
