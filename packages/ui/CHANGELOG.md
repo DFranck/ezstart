@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `useDeprecationWarning()` (`@ezstart/ui/hooks`) now surfaces deprecated
+  usage via `console.warn` in **every environment, including production**
+  (toast remains dev-only). Inherits the new contract from
+  `@ezstart/logger`'s `warnDeprecation()`. Allows error trackers (Sentry,
+  Better Stack, ...) to capture deprecated component usage in prod without
+  shipping a behavior change. No public API surface change — components
+  using the hook don't need to update.
+
 ### Changed (BREAKING)
 
 - `@ezstart/config` and `@ezstart/logger` moved from `dependencies` to

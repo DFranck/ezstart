@@ -354,12 +354,15 @@ Avant chaque commit touchant `packages/ui/` ou un SDK `components/` :
 
 ## 10. Deprecation convention — `@deprecated` JSDoc DOIT avoir un runtime warning matching
 
-**Regle dure** : un marqueur `@deprecated` JSDoc seul ne suffit pas. L'IDE le surface mais le dev qui utilise l'API ne le voit pas a runtime. Chaque API deprecated DOIT egalement emettre un warning au moment ou elle est consommee (mount component, prop usage), de-duplique par session, visible en dev (toast + console), no-op en production.
+**Regle dure** : un marqueur `@deprecated` JSDoc seul ne suffit pas. L'IDE le surface mais le dev qui utilise l'API ne le voit pas a runtime. Chaque API deprecated DOIT egalement emettre un warning au moment ou elle est consommee (mount component, prop usage), de-duplique par session, **visible en console dans tous les envs (dev + staging + prod)** + **toast en dev/staging seulement** (jamais de toast en prod, c'est UX noise pour l'utilisateur final).
+
+**Pourquoi le warn console reste actif en prod** : une fois un error tracker branche (Sentry, Better Stack, Datadog, ...), ce hook capture les `console.warn` et surface les usages deprecated en prod sans qu'on ait a deployer un changement de comportement. Un no-op en prod = silence radio = on perd le signal dans l'environnement qui compte le plus.
 
 ### 10.1 Helpers fournis
 
-- `warnDeprecation(name, replacement?, { toast? })` — exporte par `@ezstart/logger` (browser entry). De-duplique par `name` via un `Set` module-scoped. No-op si `NODE_ENV === 'production'`. Le caller wires son toast (ex: `sonner`).
-- `useDeprecationWarning(name, replacement?)` — hook React (`@ezstart/ui/hooks`). Wraps `warnDeprecation` avec un `useEffect` au mount, pre-cable sonner (`toast.warning` avec id stable + description + duration 8s). Necessite `'use client'`.
+- `warnDeprecation(name, replacement?, { toast? })` — exporte par `@ezstart/logger` (browser entry). De-duplique par `name` via un `Set` module-scoped. **`console.warn` toujours emis** (dev + staging + prod) avec prefix `[DEPRECATED]`. **`options.toast` invoque uniquement si `NODE_ENV !== 'production'`** (= dev + staging) pour eviter d'afficher un toast actionnable-par-l-operateur a un end user en prod. Le caller wires son toast (ex: `sonner`) — c'est safe de toujours le wirer, le helper gate l'invocation interne.
+- `useDeprecationWarning(name, replacement?)` — hook React (`@ezstart/ui/hooks`). Wraps `warnDeprecation` avec un `useEffect` au mount, pre-cable sonner (`toast.warning` avec id stable + description + duration 8s). Necessite `'use client'`. Meme contrat de gating que le helper bas-niveau (warn console toujours, toast dev/staging only).
+- `warnDeprecation(name, replacement?)` — version server (`@ezstart/logger/server`). Memes regles : warn Pino toujours emis (incl. prod) pour visibilite log sink / Sentry. Pas de notion de toast.
 
 ### 10.2 Pattern : composant entier deprecated (component-level)
 

@@ -155,18 +155,24 @@ const warnedDeprecations = new Set<string>()
 /**
  * Surface a deprecation notice ONCE per session.
  *
- * In dev :
- * - Emits a `console.warn` with `[DEPRECATED]` prefix
- * - If `options.toast` is provided, calls it (consumer wires `toast.warning`
- *   from `sonner` so the dev sees a visible toast on navigation)
+ * **Always** emits a `console.warn` with `[DEPRECATED]` prefix — including in
+ * production. Production warns are intentional: once an error tracker (Sentry,
+ * Better Stack, etc.) is wired, deprecated API usage becomes visible without
+ * shipping a behavior change. A silent no-op would mean we lose the signal in
+ * the environment that matters most.
  *
- * In production : silent no-op (zero runtime cost — the early NODE_ENV check
- * is statically dead-code-eliminated by modern bundlers).
+ * Toasts are gated to **dev only** (`NODE_ENV !== 'production'`) — a prod
+ * toast would be UX noise for end users who can't act on it. The console
+ * warn is enough for the operator.
+ *
+ * Dedup is per session: each unique `name` warns once, then short-circuits
+ * on subsequent calls (re-renders, repeated mounts, etc.).
  *
  * @param name        Component / API path being deprecated (e.g. `'ClientLayout'`)
  * @param replacement Optional. The replacement to point at (e.g. `'AppShell from @ezstart/ui'`)
  * @param options     `{ toast }` lets the caller route the message through any
  *                    user-facing toast library without coupling the logger to it.
+ *                    Only invoked in dev — safe to always wire it up.
  *
  * @example In a deprecated component
  * ```ts
@@ -190,7 +196,6 @@ export function warnDeprecation(
   replacement?: string,
   options?: { toast?: (message: string) => void }
 ): void {
-  if (!isDev) return
   if (warnedDeprecations.has(name)) return
   warnedDeprecations.add(name)
 
@@ -198,11 +203,19 @@ export function warnDeprecation(
     ? `[${name}] is deprecated. Use \`${replacement}\` instead.`
     : `[${name}] is deprecated.`
 
-  // Direct console.warn (not logger.warn) so the prefix is `[DEPRECATED]`
+  // ALWAYS warn — including in production. This is intentional: an error
+  // tracker (Sentry / Better Stack / etc.) hooked into console.warn picks
+  // up deprecated API usage without us shipping a behavior change. Silent
+  // no-op in prod would mean losing the signal where it matters most.
+  // Direct `console.warn` (not logger.warn) so the prefix is `[DEPRECATED]`
   // instead of `[WARN]` — easier to filter in DevTools.
   if (typeof console.warn === 'function') {
     console.warn(`[DEPRECATED] ${message}`)
   }
 
-  options?.toast?.(message)
+  // Toasts are dev-only — a prod toast would be UX noise for end users
+  // who can't act on it. The console warn is the prod-visible signal.
+  if (isDev) {
+    options?.toast?.(message)
+  }
 }

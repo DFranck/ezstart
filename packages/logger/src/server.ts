@@ -181,7 +181,15 @@ const warnedDeprecations = new Set<string>()
 /**
  * Server-side mirror of the browser `warnDeprecation` helper. Surfaces
  * deprecation notices ONCE per process (for SSR contexts and Node scripts).
- * In production: silent no-op.
+ *
+ * **Always** emits via Pino — including in production. Production warns are
+ * intentional: once an error tracker / log sink consumes Pino output (Sentry,
+ * Better Stack, Datadog, etc.), deprecated API usage becomes visible without
+ * shipping a behavior change. A silent no-op would mean losing the signal in
+ * the environment that matters most.
+ *
+ * Note that server-side has no toast notion — operators rely on the log line
+ * being indexed and queryable.
  *
  * Use the browser variant (`@ezstart/logger`, no `/server` suffix) inside
  * `'use client'` components — it accepts an optional `toast` callback so the
@@ -200,7 +208,6 @@ const warnedDeprecations = new Set<string>()
  * ```
  */
 export function warnDeprecation(name: string, replacement?: string): void {
-  if (process.env.NODE_ENV === 'production') return
   if (warnedDeprecations.has(name)) return
   warnedDeprecations.add(name)
 
@@ -208,5 +215,9 @@ export function warnDeprecation(name: string, replacement?: string): void {
     ? `[${name}] is deprecated. Use \`${replacement}\` instead.`
     : `[${name}] is deprecated.`
 
+  // ALWAYS warn — including in production. This is intentional: an error
+  // tracker / log sink hooked into Pino picks up deprecated API usage
+  // without us shipping a behavior change. Silent no-op in prod would mean
+  // losing the signal where it matters most.
   pinoLogger.warn({ deprecated: name, replacement }, `[DEPRECATED] ${message}`)
 }

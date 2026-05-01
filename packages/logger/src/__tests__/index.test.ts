@@ -165,4 +165,80 @@ describe('@ezstart/logger (browser variant)', () => {
       }
     })
   })
+
+  describe('warnDeprecation', () => {
+    /**
+     * The dedup `Set` is module-scoped, so each test must reload the module
+     * with a fresh `vi.resetModules()` to start from an empty set.
+     */
+    async function loadWarnDeprecationWith(nodeEnv: string) {
+      vi.resetModules()
+      vi.stubEnv('NODE_ENV', nodeEnv)
+      const mod = await import('../index.js')
+      return mod.warnDeprecation
+    }
+
+    it('emits a console.warn in development', async () => {
+      const warnDeprecation = await loadWarnDeprecationWith('development')
+      warnDeprecation('FooComponent', 'BarComponent')
+      expect(warnSpy).toHaveBeenCalledOnce()
+      expect(warnSpy.mock.calls[0]?.[0]).toBe(
+        '[DEPRECATED] [FooComponent] is deprecated. Use `BarComponent` instead.'
+      )
+    })
+
+    it('STILL emits a console.warn in production (Sentry visibility)', async () => {
+      // Regression guard: previously this was a silent no-op in prod which
+      // hid deprecated usage from error trackers. We always warn now.
+      const warnDeprecation = await loadWarnDeprecationWith('production')
+      warnDeprecation('LegacyApi', 'NewApi')
+      expect(warnSpy).toHaveBeenCalledOnce()
+      expect(warnSpy.mock.calls[0]?.[0]).toBe(
+        '[DEPRECATED] [LegacyApi] is deprecated. Use `NewApi` instead.'
+      )
+    })
+
+    it('emits a warn without "Use X instead" when no replacement is given', async () => {
+      const warnDeprecation = await loadWarnDeprecationWith('development')
+      warnDeprecation('OrphanedAPI')
+      expect(warnSpy).toHaveBeenCalledOnce()
+      expect(warnSpy.mock.calls[0]?.[0]).toBe('[DEPRECATED] [OrphanedAPI] is deprecated.')
+    })
+
+    it('invokes the toast callback in development', async () => {
+      const warnDeprecation = await loadWarnDeprecationWith('development')
+      const toast = vi.fn()
+      warnDeprecation('ModalDefaultExport', 'named export', { toast })
+      expect(toast).toHaveBeenCalledOnce()
+      expect(toast.mock.calls[0]?.[0]).toBe(
+        '[ModalDefaultExport] is deprecated. Use `named export` instead.'
+      )
+    })
+
+    it('does NOT invoke the toast callback in production (UX noise gating)', async () => {
+      // The console warn fires (Sentry visibility) but the toast does NOT
+      // fire — it would be UX noise for an end user who can't act on it.
+      const warnDeprecation = await loadWarnDeprecationWith('production')
+      const toast = vi.fn()
+      warnDeprecation('ModalDefaultExport', 'named export', { toast })
+      expect(warnSpy).toHaveBeenCalledOnce()
+      expect(toast).not.toHaveBeenCalled()
+    })
+
+    it('dedupes per session — same name only warns once across multiple calls', async () => {
+      const warnDeprecation = await loadWarnDeprecationWith('development')
+      warnDeprecation('Spammy', 'Replacement')
+      warnDeprecation('Spammy', 'Replacement')
+      warnDeprecation('Spammy', 'Replacement')
+      expect(warnSpy).toHaveBeenCalledOnce()
+    })
+
+    it('dedupes per name — different names each warn independently', async () => {
+      const warnDeprecation = await loadWarnDeprecationWith('development')
+      warnDeprecation('Alpha')
+      warnDeprecation('Beta')
+      warnDeprecation('Gamma')
+      expect(warnSpy).toHaveBeenCalledTimes(3)
+    })
+  })
 })

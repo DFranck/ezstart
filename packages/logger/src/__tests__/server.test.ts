@@ -148,4 +148,68 @@ describe('@ezstart/logger/server', () => {
       expect(mod.pinoLogger.level).toBe('error')
     })
   })
+
+  describe('warnDeprecation (server)', () => {
+    let originalEnv: NodeJS.ProcessEnv
+
+    beforeEach(() => {
+      originalEnv = { ...process.env }
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+      vi.resetModules()
+    })
+
+    /**
+     * Reload `server.ts` after stubbing NODE_ENV + setting LOG_LEVEL=warn so
+     * the default Pino instance lets `warn` through. We then spy on the
+     * exported `pinoLogger.warn` directly to assert calls — robust to Pino
+     * internals.
+     */
+    async function loadServerWith(nodeEnv: string) {
+      vi.resetModules()
+      process.env.NODE_ENV = nodeEnv
+      process.env.LOG_LEVEL = 'warn'
+      const mod = await import('../server.js')
+      return mod
+    }
+
+    it('emits a pinoLogger.warn in development', async () => {
+      const mod = await loadServerWith('development')
+      const warnSpy = vi.spyOn(mod.pinoLogger, 'warn').mockImplementation(() => {})
+      mod.warnDeprecation('LegacyApi', 'NewApi')
+      expect(warnSpy).toHaveBeenCalledOnce()
+      expect(warnSpy.mock.calls[0]?.[0]).toEqual({
+        deprecated: 'LegacyApi',
+        replacement: 'NewApi',
+      })
+      expect(String(warnSpy.mock.calls[0]?.[1])).toContain('[DEPRECATED]')
+      warnSpy.mockRestore()
+    })
+
+    it('STILL emits a pinoLogger.warn in production (log-sink visibility)', async () => {
+      // Regression guard: previously this was a silent no-op in prod which
+      // hid deprecated usage from log sinks / error trackers.
+      const mod = await loadServerWith('production')
+      const warnSpy = vi.spyOn(mod.pinoLogger, 'warn').mockImplementation(() => {})
+      mod.warnDeprecation('LegacyServerApi', 'NewServerApi')
+      expect(warnSpy).toHaveBeenCalledOnce()
+      expect(warnSpy.mock.calls[0]?.[0]).toEqual({
+        deprecated: 'LegacyServerApi',
+        replacement: 'NewServerApi',
+      })
+      warnSpy.mockRestore()
+    })
+
+    it('dedupes per name — same name only warns once', async () => {
+      const mod = await loadServerWith('development')
+      const warnSpy = vi.spyOn(mod.pinoLogger, 'warn').mockImplementation(() => {})
+      mod.warnDeprecation('Spammy')
+      mod.warnDeprecation('Spammy')
+      mod.warnDeprecation('Spammy')
+      expect(warnSpy).toHaveBeenCalledOnce()
+      warnSpy.mockRestore()
+    })
+  })
 })
