@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `detectErrorTracker()` — pure provider detection helper that returns `'sentry' | 'logtail' | null` based on env vars (`NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_DSN` / `NEXT_PUBLIC_LOGTAIL_SOURCE_TOKEN` / `LOGTAIL_SOURCE_TOKEN`). Used by Next.js apps + Express APIs to know which error sink (if any) is wired without coupling to the underlying SDK. Sentry takes precedence over Logtail when both are set. Browser-safe (no Node-only APIs). Re-exported from both `@ezstart/logger` (browser entry) and `@ezstart/logger/server`.
+- 9 vitest cases covering the full priority matrix (none / sentry / logtail / both).
 - Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers). Previously pinned to `20.18.x` (dev pin), now broadened to `>=18.0.0` so external npm consumers on Node 18 LTS can install without warning.
 
 ### Changed

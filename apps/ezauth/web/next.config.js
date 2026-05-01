@@ -20,8 +20,8 @@ const nextConfig = createNextConfig({
 // Wrap with Sentry — handles source maps upload at build time when
 // `SENTRY_AUTH_TOKEN` is set. **Safe when no token / no DSN** — source map
 // upload is skipped (see `disableSourceMapUpload` below) and the runtime
-// configs (sentry.{client,server,edge}.config.ts) are no-ops without
-// `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_DSN`.
+// configs (instrumentation-client.ts + sentry.{server,edge}.config.ts) are
+// no-ops without `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_DSN`.
 //
 // Update `org` + `project` placeholders below with the real Sentry org/project
 // slugs after creating them in https://sentry.io.
