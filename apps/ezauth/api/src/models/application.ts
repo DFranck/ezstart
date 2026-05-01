@@ -151,6 +151,32 @@ export interface ApplicationDocument extends Document {
    * for future external consumers.
    */
   webhookEndpointUrl: string | null
+  /**
+   * Marks an Application as a platform-internal reserved slug (e.g. the
+   * `_docs-demo` sandbox). Toggled ON by seed scripts; the
+   * route layer additionally enforces that only superadmins can create
+   * `_*` slugs (see `routes/applications/create.ts`). Reserved Apps are
+   * exempt from billing flows and may carry hard usage quotas (see
+   * {@link ApplicationDocument.quotas}).
+   *
+   * `false` (default) → regular tenant Application.
+   */
+  reservedSlug?: boolean
+  /**
+   * Optional hard quotas used by sandbox Applications (typically the
+   * `_docs-demo` sandbox powering /docs/components live previews). When set,
+   * the demo-quotas middleware enforces `maxUsers` (signup gate) and
+   * `maxEventsPerDay` (auth event gate) and returns 429 when exceeded.
+   *
+   * Regular tenant Applications leave this `null` (or undefined) — quota
+   * enforcement is plan-driven for them, not per-Application.
+   */
+  quotas?: {
+    /** Hard cap on `apps: ['<slug>']` AuthUser count. 0 = unlimited. */
+    maxUsers?: number
+    /** Hard cap on audit log entries scoped to this app over a 24h window. */
+    maxEventsPerDay?: number
+  } | null
   createdAt: Date
   updatedAt: Date
 }
@@ -170,9 +196,16 @@ export function generateWebhookSecret(): string {
 
 /**
  * Slug validation regex — lowercase letters, digits, hyphens. 2–32 chars.
+ * An OPTIONAL leading underscore is allowed for platform-reserved slugs
+ * (e.g. `_docs-demo`). The API route layer enforces that only superadmins
+ * may create slugs starting with `_` — see
+ * `routes/applications/create.ts` `RESERVED_SLUG_PREFIX`. Persisting the
+ * permission via storage-level whitelist alone would be insufficient: the
+ * route layer is the one that knows the caller's role.
+ *
  * Exported for reuse in route validation (Zod `.regex()`).
  */
-export const APPLICATION_SLUG_REGEX: RegExp = /^[a-z0-9-]{2,32}$/
+export const APPLICATION_SLUG_REGEX: RegExp = /^(?:_[a-z0-9-]{1,31}|[a-z0-9-]{2,32})$/
 
 /**
  * Max length for any inline theme token value (CSS color string). Used as a
@@ -295,6 +328,23 @@ const applicationSchema = new Schema<ApplicationDocument>(
       default: null,
       trim: true,
       maxlength: 2048,
+    },
+    reservedSlug: {
+      type: Boolean,
+      required: false,
+      default: false,
+      index: true,
+    },
+    quotas: {
+      type: new Schema(
+        {
+          maxUsers: { type: Number, required: false, min: 0 },
+          maxEventsPerDay: { type: Number, required: false, min: 0 },
+        },
+        { _id: false }
+      ),
+      required: false,
+      default: null,
     },
   },
   {

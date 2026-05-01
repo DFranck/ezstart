@@ -12,6 +12,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { AuthService, AccountLockedError } from '../../services/auth.service.js'
 import { TotpService } from '../../services/totp.service.js'
+import { checkDemoQuotas } from '../../middleware/check-demo-quotas.js'
 import { logger } from '@ezstart/logger/server'
 import {
   loginRequestSchema,
@@ -118,15 +119,25 @@ docRouter.get('/login-cookie/csrf', csrf.generateToken, csrfTokenHandler, {
   tags: ['Authentication'],
 })
 
-docRouter.post('/login-cookie', loginCookieRateLimiter, csrf.verifyToken, loginCookieController, {
-  summary: 'Login with httpOnly cookie (dual-mode)',
-  tags: ['Authentication'],
-  bodySchema: loginRequestSchema,
-  responseSchema: userResponseSchema,
-  extraResponses: {
-    401: { description: 'Login failed', schema: errorResponseSchema },
-    429: { description: 'Too many login attempts', schema: errorResponseSchema },
-  },
-})
+// `checkDemoQuotas` is a strict no-op for non-`_docs-demo` traffic — it
+// short-circuits via `req.body.app !== '_docs-demo'` before any Mongo
+// lookup. For docs-demo requests it gates the daily audit-event quota.
+docRouter.post(
+  '/login-cookie',
+  loginCookieRateLimiter,
+  csrf.verifyToken,
+  checkDemoQuotas,
+  loginCookieController,
+  {
+    summary: 'Login with httpOnly cookie (dual-mode)',
+    tags: ['Authentication'],
+    bodySchema: loginRequestSchema,
+    responseSchema: userResponseSchema,
+    extraResponses: {
+      401: { description: 'Login failed', schema: errorResponseSchema },
+      429: { description: 'Too many login attempts', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

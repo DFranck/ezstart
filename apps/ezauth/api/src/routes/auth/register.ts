@@ -12,6 +12,7 @@ import { Router as ExpressRouter } from 'express'
 import crypto from 'crypto'
 import { AuthService } from '../../services/auth.service.js'
 import { requireTurnstile } from '../../middleware/turnstile-required.js'
+import { checkDemoQuotas } from '../../middleware/check-demo-quotas.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { emailService } from '../../services/email.service.js'
@@ -115,16 +116,27 @@ const registerController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/register', registerRateLimiter, requireTurnstile(), registerController, {
-  summary: 'Register new user',
-  tags: ['Authentication'],
-  bodySchema: registerRequestSchema,
-  responseSchema: authCodeResponseSchema,
-  status: 201,
-  extraResponses: {
-    400: { description: 'Registration failed', schema: errorResponseSchema },
-    429: { description: 'Too many registration attempts', schema: errorResponseSchema },
-  },
-})
+// `checkDemoQuotas` is mounted between the rate limiter and the turnstile
+// captcha so demo-targeted requests trip the sandbox quota gate FIRST.
+// Non-demo (`req.body.app !== '_docs-demo'`) traffic short-circuits the
+// middleware (no Mongo lookup) and falls through to the regular flow.
+docRouter.post(
+  '/register',
+  registerRateLimiter,
+  checkDemoQuotas,
+  requireTurnstile(),
+  registerController,
+  {
+    summary: 'Register new user',
+    tags: ['Authentication'],
+    bodySchema: registerRequestSchema,
+    responseSchema: authCodeResponseSchema,
+    status: 201,
+    extraResponses: {
+      400: { description: 'Registration failed', schema: errorResponseSchema },
+      429: { description: 'Too many registration attempts', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

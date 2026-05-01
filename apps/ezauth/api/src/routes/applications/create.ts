@@ -29,6 +29,21 @@ export const createApplicationRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(createApplicationRegistry, router)
 
+/**
+ * Reserved slug prefix — only superadmins may create Applications whose slug
+ * starts with `_`. This namespace is used for platform-internal apps such as
+ * `_docs-demo` (sandbox Application powering /docs/components live previews,
+ * see DOCS_DEMO_SANDBOX_BACKEND-001). Tenants must not be able to squat on
+ * these names since they would collide with platform-controlled features.
+ *
+ * Note: the slug regex `^[a-z0-9-]{2,32}$` does NOT allow `_` — only
+ * superadmin-created Apps go through a parallel path (seed scripts) that
+ * bypass the API route. We still belt-and-suspenders the check here so a
+ * future regex relaxation can't accidentally let through tenant-owned
+ * `_*` slugs.
+ */
+const RESERVED_SLUG_PREFIX = '_'
+
 const createApplicationBodySchema = z.object({
   slug: z
     .string()
@@ -100,6 +115,21 @@ const createApplicationController = async (req: Request, res: Response) => {
     const userId = req.userId!
     const { slug, name, description, metadata } = parsed.data
 
+    // Reserved namespace — `_*` slugs are platform-internal (e.g. `_docs-demo`
+    // sandbox Application). Only superadmins may create them via this route;
+    // regular tenants are blocked even if they somehow guess the slug. This
+    // prevents tenant squatting on platform-controlled feature names.
+    if (slug.startsWith(RESERVED_SLUG_PREFIX)) {
+      const isSuperadmin = req.user?.globalRoles?.includes('superadmin') === true
+      if (!isSuperadmin) {
+        return sendError(
+          res,
+          'Slugs starting with underscore are reserved for platform internal apps',
+          403
+        )
+      }
+    }
+
     const Application = await getApplicationModel()
 
     // Explicit uniqueness check to return a clean 409 rather than a raw
@@ -152,6 +182,10 @@ docRouter.post('/applications', verifyTokenMiddleware, createApplicationControll
   responseSchema: applicationResponseSchema,
   extraResponses: {
     401: { description: 'Authentication required', schema: errorResponseSchema },
+    403: {
+      description: 'Reserved slug prefix (only superadmins may create _-prefixed slugs)',
+      schema: errorResponseSchema,
+    },
     409: { description: 'Slug already in use', schema: errorResponseSchema },
     422: { description: 'Validation error', schema: errorResponseSchema },
   },

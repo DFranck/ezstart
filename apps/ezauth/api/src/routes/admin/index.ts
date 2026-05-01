@@ -10,6 +10,7 @@ import updateMaintenanceModeRouter, {
   updateMaintenanceModeRegistry,
 } from './update-maintenance-mode.js'
 import errorLogsRouter, { errorLogsRegistry } from './error-logs.js'
+import docsDemoResetRouter, { docsDemoResetRegistry } from './docs-demo-reset.js'
 
 export const adminRegistries = [
   listUsersRegistry,
@@ -22,6 +23,7 @@ export const adminRegistries = [
   getMaintenanceModeRegistry,
   updateMaintenanceModeRegistry,
   errorLogsRegistry,
+  docsDemoResetRegistry,
 ]
 
 export const adminRouters = [
@@ -35,4 +37,5 @@ export const adminRouters = [
   getMaintenanceModeRouter,
   updateMaintenanceModeRouter,
   errorLogsRouter,
+  docsDemoResetRouter,
 ]

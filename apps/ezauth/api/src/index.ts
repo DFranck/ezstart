@@ -31,6 +31,7 @@ import { getFeatureFlagModel } from './models/feature-flag.js'
 import { getMaintenanceModeModel } from './models/maintenance-mode.js'
 import { getErrorLogModel } from './models/error-log.js'
 import { logErrorToDb } from './services/error-log.service.js'
+import { startDocsDemoResetScheduler } from './services/docs-demo-reset.service.js'
 import cookieParser from 'cookie-parser'
 import { logger } from '@ezstart/logger/server'
 
@@ -123,6 +124,15 @@ try {
       logger.info(
         '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent, FeatureFlag, MaintenanceMode, ErrorLog'
       )
+
+      // Start the docs-demo sandbox reset scheduler (DOCS_DEMO_SANDBOX_BACKEND-001).
+      // Idempotent — safe to call once after models are warm. The scheduler
+      // ticks every 24h (cf. `services/docs-demo-reset.service.ts`) and
+      // wipes `_docs-demo` users + 24h-old audit logs. Skipped in test
+      // env to avoid leaking timers across vitest workers.
+      if (process.env.NODE_ENV !== 'test') {
+        startDocsDemoResetScheduler()
+      }
     },
     serverConfig: {
       routes,

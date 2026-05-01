@@ -11,6 +11,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { AuthService, AccountLockedError } from '../../services/auth.service.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
+import { checkDemoQuotas } from '../../middleware/check-demo-quotas.js'
 import { TotpService } from '../../services/totp.service.js'
 import { verifyTurnstileToken } from '../../services/turnstile.service.js'
 import { logger } from '@ezstart/logger/server'
@@ -122,7 +123,10 @@ const loginController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/login', loginRateLimiter, loginController, {
+// `checkDemoQuotas` is a strict no-op for non-`_docs-demo` traffic. For
+// docs-demo requests it gates the daily audit-event quota (login + signup
+// counted together).
+docRouter.post('/login', loginRateLimiter, checkDemoQuotas, loginController, {
   summary: 'Login user',
   tags: ['Authentication'],
   bodySchema: loginRequestSchema,
