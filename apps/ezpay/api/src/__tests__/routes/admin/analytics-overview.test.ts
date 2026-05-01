@@ -45,6 +45,36 @@ vi.mock('../../../middleware/auth.js', () => ({
   },
 }))
 
+// Routes now use authJwtOrKey from unified-auth.js. Stub it to honour the
+// same `currentUserId` test state without needing a real JWT in the request.
+vi.mock('../../../middleware/unified-auth.js', () => ({
+  authJwtOrKey: () => (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!currentUserId) {
+      res.status(401).json({ success: false, error: 'Authentication required' })
+      return
+    }
+    req.userId = currentUserId
+    ;(req as unknown as { user: Record<string, unknown> }).user = {
+      userId: currentUserId,
+      globalRoles: currentGlobalRoles,
+      appRoles: currentAppRoles,
+    }
+    next()
+  },
+  authOptionalJwtOrKey:
+    () => (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      if (currentUserId) {
+        req.userId = currentUserId
+        ;(req as unknown as { user: Record<string, unknown> }).user = {
+          userId: currentUserId,
+          globalRoles: currentGlobalRoles,
+          appRoles: currentAppRoles,
+        }
+      }
+      next()
+    },
+}))
+
 const mockListApplicationsByOwner = vi.fn()
 vi.mock('../../../services/ezauth-client.js', () => ({
   getApplication: vi.fn(),
