@@ -1,12 +1,26 @@
-import { connectToMongo } from '@ezstart/api-core'
-import { Schema, type Document, type Model } from 'mongoose'
-import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
+/**
+ * EZAuth audit log model — thin wrapper around the agnostic factory exported
+ * by `@ezstart/api-core`. Defines the per-service action enum + retention
+ * policy, then delegates schema construction to `createAuditLogSchema`.
+ *
+ * The wire shape (collection name `audit_logs`, indexes, TTL on `expiresAt`,
+ * `testModeScopePlugin`) is identical to the pre-extraction implementation —
+ * existing prod data continues to work without migration.
+ *
+ * @module apps/ezauth/api/src/models/audit-log
+ */
+
+import {
+  connectToMongo,
+  createAuditLogSchema,
+  type AuditLogMetadata as BaseAuditLogMetadata,
+} from '@ezstart/api-core'
+import type { Document, Model } from 'mongoose'
 
 /**
- * Audit log action — finite enum covering every loggable user action
- * across ezauth. New action types MUST be added here AND to the
- * `AUDIT_LOG_ACTIONS` const tuple kept in sync with `auditLogActionEnum`
- * exposed by the route schema.
+ * Audit log action — finite enum covering every loggable user action across
+ * ezauth. New action types MUST be added here AND to {@link AUDIT_LOG_ACTIONS}
+ * (kept in lockstep for runtime validation).
  */
 export type AuditLogAction =
   | 'login'
@@ -33,8 +47,8 @@ export type AuditLogAction =
   | 'webhook_secret_regenerated'
 
 /**
- * Tuple form for runtime validation (Zod / Mongoose enum). Keep in
- * lockstep with `AuditLogAction`.
+ * Tuple form for runtime validation (Zod / Mongoose enum). Keep in lockstep
+ * with {@link AuditLogAction}.
  */
 export const AUDIT_LOG_ACTIONS = [
   'login',
@@ -62,10 +76,9 @@ export const AUDIT_LOG_ACTIONS = [
 ] as const
 
 /**
- * Default retention window per plan (days). Free tier keeps 30 days,
- * Pro tier keeps 365 days. The TTL is enforced via a MongoDB TTL index
- * on `expiresAt`, so the document is deleted automatically when it
- * passes the per-plan window.
+ * Default retention window per plan (days). Free tier keeps 30 days, Pro tier
+ * keeps 365 days. The TTL is enforced via a MongoDB TTL index on `expiresAt`,
+ * so the document is deleted automatically when it passes the per-plan window.
  */
 export const AUDIT_LOG_RETENTION_DAYS = {
   free: 30,
@@ -74,17 +87,10 @@ export const AUDIT_LOG_RETENTION_DAYS = {
 
 export type AuditLogPlanRetention = keyof typeof AUDIT_LOG_RETENTION_DAYS
 
-export interface AuditLogMetadata {
-  /** Source IP address of the request (best-effort). */
-  ip?: string | null
-  /** Raw User-Agent header. */
-  userAgent?: string | null
-  /** Optional resolved geo location (e.g. `'Paris, FR'`). */
-  location?: string | null
-  /** Free-form action-specific details (key id revoked, session id, ...). */
-  [key: string]: unknown
-}
+/** Re-export the metadata bag so callers don't need to dual-import. */
+export type AuditLogMetadata = BaseAuditLogMetadata
 
+/** Document interface narrowed to the ezauth action union. */
 export interface AuditLogDocument extends Document {
   userId: string
   appName: string
@@ -100,80 +106,24 @@ export interface AuditLogDocument extends Document {
   isTestMode: boolean
 }
 
-const auditLogSchema = new Schema<AuditLogDocument>(
-  {
-    userId: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    appName: {
-      type: String,
-      required: true,
-      default: 'ezauth',
-    },
-    action: {
-      type: String,
-      enum: AUDIT_LOG_ACTIONS,
-      required: true,
-    },
-    metadata: {
-      type: Schema.Types.Mixed,
-      default: {},
-    },
-    createdAt: {
-      type: Date,
-      default: () => new Date(),
-      index: true,
-    },
-    expiresAt: {
-      type: Date,
-      required: true,
-    },
-    isTestMode: {
-      type: Boolean,
-      required: true,
-      default: false,
-      index: true,
-    },
-  },
-  {
-    // We manage `createdAt` manually so the TTL window can be aligned with
-    // it; opting out of mongoose's auto timestamps avoids a duplicate
-    // `updatedAt` field we never read.
-    timestamps: false,
-    collection: 'audit_logs',
-    bufferCommands: false,
-  }
-)
-
-// Compound index for the most frequent listing query: a user's recent
-// activity, optionally filtered by action.
-auditLogSchema.index({ userId: 1, createdAt: -1 })
-auditLogSchema.index({ userId: 1, action: 1, createdAt: -1 })
-
-// MongoDB TTL index — auto-cleanup once the document passes its
-// `expiresAt`. `expireAfterSeconds: 0` tells Mongo to use the date in the
-// field as the absolute deletion time.
-auditLogSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
-
-// Stripe-pattern test/live partition (`standard-saas-data.md` §4) — auto-scope
-// every read by `req.derivedMode` propagated via AsyncLocalStorage.
-auditLogSchema.plugin(testModeScopePlugin)
+const auditLogSchema = createAuditLogSchema<AuditLogDocument>({ actions: AUDIT_LOG_ACTIONS })
 
 /**
- * Factory function to get the `AuditLog` model attached to the shared
- * Mongo connection. MUST be called after `connectToMongo()` has been
- * initialized (the helper itself calls it for safety).
+ * Factory function to get the `AuditLog` model attached to the shared Mongo
+ * connection. MUST be called after `connectToMongo()` has been initialized
+ * (the helper itself calls it for safety).
  */
 export async function getAuditLogModel(): Promise<Model<AuditLogDocument>> {
   const mongoose = await connectToMongo('ezauth')
-  return mongoose.models.AuditLog || mongoose.model<AuditLogDocument>('AuditLog', auditLogSchema)
+  return (
+    (mongoose.models.AuditLog as Model<AuditLogDocument> | undefined) ??
+    mongoose.model<AuditLogDocument>('AuditLog', auditLogSchema)
+  )
 }
 
 /**
- * Compute the `expiresAt` deadline for a new audit log entry given a
- * retention plan (defaults to free / 30 days).
+ * Compute the `expiresAt` deadline for a new audit log entry given a retention
+ * plan (defaults to free / 30 days).
  */
 export function computeAuditLogExpiry(
   plan: AuditLogPlanRetention = 'free',
