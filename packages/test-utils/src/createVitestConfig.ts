@@ -17,7 +17,11 @@
 
 import { defineConfig, type UserConfig } from 'vitest/config'
 import { config } from 'dotenv'
-import { resolve } from 'path'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export interface VitestConfigOptions {
   /**
@@ -73,6 +77,15 @@ export function createVitestConfig(options: VitestConfigOptions) {
 
       // Merge with custom options
       ...extend,
+    },
+    resolve: {
+      // 🔒 Stub Next.js `server-only` package — its real implementation
+      // throws at import time when not running inside an RSC context. We
+      // ship a no-op stub so server-side modules (e.g.
+      // `@ezstart/auth-sdk/server`) can be imported by API tests.
+      alias: {
+        'server-only': resolve(__dirname, './server-only-stub.js'),
+      },
     },
   })
 }
