@@ -39,13 +39,13 @@ const router: import('express').Router = Router()
 router.use(
   '/chat/stream',
   optionalAuthMiddleware,
-  createRateLimiter({ windowMs: 60 * 1000, max: 30 }),
+  createRateLimiter({ windowMs: 60 * 1000, max: 100 }),
   streamRouter
 )
 router.use(
   '/chat',
   optionalAuthMiddleware,
-  createRateLimiter({ windowMs: 60 * 1000, max: 30 }),
+  createRateLimiter({ windowMs: 60 * 1000, max: 100 }),
   chatRouter
 )
 router.use('/conversations', conversationsRouter)

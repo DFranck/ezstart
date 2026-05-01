@@ -75,10 +75,11 @@ export function createApp(options?: CreateAppOptions): Express {
 
   const app = express()
 
-  // Trust proxy - Required when behind reverse proxy (Railway, Vercel)
-  // Allows Express to read X-Forwarded-* headers for real client IP
-  // Critical for rate limiting to work correctly
-  app.set('trust proxy', true)
+  // Trust 2 proxy hops: Railway edge → Fastly CDN. With this Express picks the
+  // real client IP from X-Forwarded-For (last 2 IPs are stripped as trusted),
+  // not the LB IP. CRITICAL for accurate per-IP rate limiting on anonymous routes.
+  // Setting `true` would trust ALL hops including potentially-forged headers.
+  app.set('trust proxy', 2)
 
   // Configure CORS
   let corsOptions: cors.CorsOptions
