@@ -33,6 +33,7 @@ import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
 import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
 import { generateConnectState } from '../../utils/connect-state.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -150,11 +151,23 @@ const resumeHandler = async (req: Request, res: Response) => {
     account.lastResumedAt = new Date()
     await account.save()
 
-    // Audit log — we do not yet have a dedicated AuditLog collection in
-    // ezpay (cf. `convert.ts` pattern), so structured logger.info is the
-    // canonical sink.
+    // Persist a structured audit-log entry in the ezpay `audit_logs`
+    // collection (cf. `services/audit-log.service.ts`). Fire-and-forget — the
+    // service swallows write errors via the shared logger so the resume
+    // response is never blocked. We also keep the structured `logger.info`
+    // line for Railway log searchability.
+    void auditLogService.createFromRequest(req, {
+      action: 'connect.onboard.resumed',
+      userId,
+      metadata: {
+        connectedAccountId: account.id as string,
+        stripeAccountId: account.stripeAccountId,
+        applicationId: account.applicationId,
+        ageMs,
+      },
+    })
     logger.info('Connect onboarding resumed', {
-      action: 'connect_resumed',
+      action: 'connect.onboard.resumed',
       userId,
       connectedAccountId: account.id as string,
       stripeAccountId: account.stripeAccountId,

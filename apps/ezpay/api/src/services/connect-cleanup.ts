@@ -17,13 +17,15 @@
  *        clean up our DB row.
  *
  * Why hard delete (and not soft delete):
- * - The convert.ts pattern (the only existing audit trail in ezpay) uses
- *   metadata fields, not soft-delete. Adding a `deletedAt` column for this
- *   one cleanup flow would be inconsistent with the rest of the model.
+ * - The convert.ts pattern uses metadata fields, not soft-delete. Adding a
+ *   `deletedAt` column for this one cleanup flow would be inconsistent with
+ *   the rest of the model.
  * - The user can always re-start a fresh onboarding by hitting
  *   `POST /api/connect/onboard` again — the flow is idempotent at the
  *   application level.
- * - Audit log via `logger.info` keeps a forensic trail of every deletion.
+ * - Each deletion is persisted to the ezpay `audit_logs` collection via
+ *   `auditLogService` (see `services/audit-log.service.ts`) — the structured
+ *   `logger.info` line is kept on top for Railway log searchability.
  *
  * @module apps/ezpay/api/src/services/connect-cleanup
  */
@@ -32,6 +34,7 @@ import { logger } from '@ezstart/logger/server'
 import { getWebUrl } from '@ezstart/config'
 import { getConnectedAccountModel } from '../models/ConnectedAccount.js'
 import { emailService } from './email.service.js'
+import { auditLogService } from './audit-log.service.js'
 import { connectOnboardingExpiresTemplate } from '../email/templates/connect-onboarding-expires.js'
 
 const SIX_DAYS_MS = 6 * 24 * 60 * 60 * 1000
@@ -99,8 +102,22 @@ export async function cleanupExpiredPendingConnects(
       const result = await ConnectedAccount.deleteOne({ _id: acc._id })
       if (result.deletedCount === 1) {
         deleted += 1
+        // Persist to the ezpay `audit_logs` collection so the deletion is
+        // visible from the dashboard / future audit-log UI. Background job —
+        // no Express request, so we call `create()` directly.
+        void auditLogService.create({
+          action: 'connect.onboard.expired_deleted',
+          userId: acc.userId,
+          metadata: {
+            connectedAccountId: String(acc._id),
+            stripeAccountId: acc.stripeAccountId,
+            applicationId: acc.applicationId,
+            createdAt: acc.createdAt,
+            ageMs: now - acc.createdAt.getTime(),
+          },
+        })
         logger.info('Connect pending account auto-cleaned (>7d expired)', {
-          action: 'connect_pending_auto_cleaned',
+          action: 'connect.onboard.expired_deleted',
           connectedAccountId: String(acc._id),
           stripeAccountId: acc.stripeAccountId,
           applicationId: acc.applicationId,
@@ -165,8 +182,20 @@ export async function cleanupExpiredPendingConnects(
       await acc.save()
       warned += 1
 
+      // Audit-log the warning so the dashboard can surface "X users got the
+      // J-6 email this week".
+      void auditLogService.create({
+        action: 'connect.onboard.expired_warned',
+        userId: acc.userId,
+        metadata: {
+          connectedAccountId: String(acc._id),
+          stripeAccountId: acc.stripeAccountId,
+          applicationId: acc.applicationId,
+          to: acc.email,
+        },
+      })
       logger.info('Connect onboarding expiry warning sent', {
-        action: 'connect_expiry_warning_sent',
+        action: 'connect.onboard.expired_warned',
         connectedAccountId: String(acc._id),
         stripeAccountId: acc.stripeAccountId,
         applicationId: acc.applicationId,
