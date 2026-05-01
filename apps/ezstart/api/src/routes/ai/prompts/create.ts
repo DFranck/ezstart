@@ -33,7 +33,7 @@ const CreatePromptBodySchema = z.object({
     .describe('List of target providers. Use ["all"] to apply to every provider.'),
   name: z.string().min(1).max(100).describe('Prompt display name'),
   description: z.string().max(500).optional().describe('Prompt description'),
-  content: z.string().min(1).max(10000).describe('Prompt content template'),
+  content: z.string().min(1).max(50000).describe('Prompt content template'),
   type: z
     .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
     .default('general')

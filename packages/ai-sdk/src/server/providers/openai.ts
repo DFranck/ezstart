@@ -10,6 +10,21 @@ export interface OpenAIProviderConfig {
   model?: string
 }
 
+/**
+ * Sensible defaults applied when the caller (prompt config, AppProvider config,
+ * or direct `options`) does NOT provide an explicit value. These mirror
+ * {@link AnthropicProvider} / {@link GeminiProvider} so every provider behaves
+ * consistently.
+ *
+ * - `DEFAULT_MAX_TOKENS = 4096` keeps conversational answers substantive;
+ *   without it, a missing `max_tokens` can fall back to very low OpenAI
+ *   defaults and produce truncated, shallow replies.
+ * - `DEFAULT_TEMPERATURE = 0.7` matches Anthropic/Gemini and is the
+ *   industry-standard value for conversational agents.
+ */
+export const DEFAULT_MAX_TOKENS = 4096
+export const DEFAULT_TEMPERATURE = 0.7
+
 export class OpenAIProvider implements IAIProvider {
   private client: OpenAI
   private model: string
@@ -77,8 +92,10 @@ export class OpenAIProvider implements IAIProvider {
     const response = await this.client.chat.completions.create({
       model: this.model,
       messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens,
+      temperature: options.temperature ?? DEFAULT_TEMPERATURE,
+      // Fall back to DEFAULT_MAX_TOKENS so a missing caller value never
+      // bottoms out on an undocumented API default that truncates replies.
+      max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
       response_format: responseFormat,
     })
 
@@ -126,8 +143,8 @@ export class OpenAIProvider implements IAIProvider {
     const stream = await this.client.chat.completions.create({
       model: this.model,
       messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens,
+      temperature: options.temperature ?? DEFAULT_TEMPERATURE,
+      max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
       stream: true,
     })
 

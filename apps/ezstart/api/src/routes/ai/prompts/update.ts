@@ -34,7 +34,7 @@ const UpdatePromptBodySchema = z.object({
     .describe('New providers targeting list'),
   name: z.string().min(1).max(100).optional().describe('Prompt display name'),
   description: z.string().max(500).optional().describe('Prompt description'),
-  content: z.string().min(1).max(10000).optional().describe('Prompt content template'),
+  content: z.string().min(1).max(50000).optional().describe('Prompt content template'),
   type: z
     .enum(['general', 'extraction', 'validation', 'vision', 'custom'])
     .optional()

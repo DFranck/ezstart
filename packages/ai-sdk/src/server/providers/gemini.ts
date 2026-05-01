@@ -11,6 +11,20 @@ export interface GeminiProviderConfig {
   model?: string
 }
 
+/**
+ * Sensible defaults applied when the caller (prompt config, AppProvider config,
+ * or direct `options`) does NOT provide an explicit value. These mirror
+ * {@link AnthropicProvider} so every provider behaves consistently.
+ *
+ * - `DEFAULT_MAX_TOKENS = 4096` keeps conversational answers substantive;
+ *   without it, a missing `maxOutputTokens` relies on the Gemini SDK default
+ *   (historically low for some models), producing truncated, shallow replies.
+ * - `DEFAULT_TEMPERATURE = 0.7` matches Anthropic/OpenAI defaults and is the
+ *   industry-standard value for conversational agents.
+ */
+export const DEFAULT_MAX_TOKENS = 4096
+export const DEFAULT_TEMPERATURE = 0.7
+
 export class GeminiProvider implements IAIProvider {
   private genAI: GoogleGenerativeAI
   private model: string
@@ -53,8 +67,11 @@ export class GeminiProvider implements IAIProvider {
       model: this.model,
       systemInstruction: options.systemPrompt,
       generationConfig: {
-        temperature: options.temperature ?? 0.7,
-        maxOutputTokens: options.maxTokens,
+        temperature: options.temperature ?? DEFAULT_TEMPERATURE,
+        // Fall back to DEFAULT_MAX_TOKENS so a missing caller value never
+        // bottoms out on an undocumented SDK default that can truncate
+        // conversational replies.
+        maxOutputTokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
         responseMimeType: options.extractJson ? 'application/json' : 'text/plain',
       },
     })

@@ -118,7 +118,11 @@ const aiSystemPromptSchema = new Schema<IAISystemPrompt>(
     content: {
       type: String,
       required: true,
-      maxlength: 10000,
+      // 50k chars — large enough for a rich system prompt (persona + rules +
+      // examples + constraints) without silently truncating conversational
+      // agents like GP.A. 10k was too tight and caused shallow replies when
+      // admins saved long prompts.
+      maxlength: 50000,
     },
     config: {
       type: Schema.Types.Mixed,
