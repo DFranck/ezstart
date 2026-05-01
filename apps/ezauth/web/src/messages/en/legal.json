@@ -55,22 +55,6 @@
       "v01Body": "First public preview of EZAuth. Includes email and OAuth sign-in, API key management, role-based access control, multi-tenant Applications, and white-label theming."
     }
   },
-  "status": {
-    "title": "Status",
-    "summaryBadge": "All systems operational",
-    "summaryBody": "EZAuth is currently operating normally. A live status dashboard with uptime metrics and incident history is in development.",
-    "componentsHeading": "Service components",
-    "components": {
-      "apiName": "Authentication API",
-      "apiStatus": "Operational",
-      "dashboardName": "Web dashboard",
-      "dashboardStatus": "Operational",
-      "oauthName": "OAuth providers",
-      "oauthStatus": "Operational"
-    },
-    "incidentsHeading": "Incidents",
-    "incidentsBody": "No active incidents reported."
-  },
   "contact": {
     "title": "Contact us",
     "leadBody": "Need help integrating EZAuth, reporting an issue, or discussing your use case? We typically reply within one business day.",

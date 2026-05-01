@@ -55,22 +55,6 @@
       "v01Body": "Première preview publique d'EZAuth. Inclut la connexion par e-mail et OAuth, la gestion des clés API, le contrôle d'accès par rôles, les Applications multi-tenant et le theming en marque blanche."
     }
   },
-  "status": {
-    "title": "Statut",
-    "summaryBadge": "Tous les systèmes opérationnels",
-    "summaryBody": "EZAuth fonctionne actuellement normalement. Un tableau de bord en direct avec des métriques d'uptime et un historique des incidents est en développement.",
-    "componentsHeading": "Composants du service",
-    "components": {
-      "apiName": "API d'authentification",
-      "apiStatus": "Opérationnel",
-      "dashboardName": "Tableau de bord web",
-      "dashboardStatus": "Opérationnel",
-      "oauthName": "Fournisseurs OAuth",
-      "oauthStatus": "Opérationnel"
-    },
-    "incidentsHeading": "Incidents",
-    "incidentsBody": "Aucun incident actif signalé."
-  },
   "contact": {
     "title": "Nous contacter",
     "leadBody": "Besoin d'aide pour intégrer EZAuth, signaler un problème ou discuter de votre cas d'usage ? Nous répondons généralement sous un jour ouvré.",

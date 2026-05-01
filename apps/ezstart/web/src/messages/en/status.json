@@ -1,0 +1,33 @@
+{
+  "status": {
+    "title": "Status",
+    "intro": "Real-time health of all EZStart platform services. Auto-refreshed every 30s.",
+    "componentsHeading": "Service components",
+    "incidentsHeading": "Incidents",
+    "incidentsBody": "No active incidents reported.",
+    "lastCheckedLabel": "Last checked",
+    "responseTimeLabel": "Response time",
+    "refreshHint": "Auto-refreshes every {{seconds}}s",
+    "refreshButton": "Refresh now",
+    "summary": {
+      "operational": "All systems operational",
+      "degraded": "Partial service disruption",
+      "down": "Major outage",
+      "checking": "Checking services"
+    },
+    "state": {
+      "operational": "Operational",
+      "degraded": "Degraded",
+      "down": "Down",
+      "checking": "Checking"
+    },
+    "services": {
+      "ezstartApi": "EZStart API",
+      "ezstartApiDescription": "Platform hub, monitoring, status aggregation",
+      "ezauthApi": "EZAuth API",
+      "ezauthApiDescription": "Authentication, sessions, OAuth, API keys",
+      "ezpayApi": "EZPay API",
+      "ezpayApiDescription": "Plans, subscriptions, payments, Stripe Connect"
+    }
+  }
+}

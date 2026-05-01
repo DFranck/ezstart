@@ -1,0 +1,33 @@
+{
+  "status": {
+    "title": "Statut",
+    "intro": "État en temps réel des services de la plateforme EZStart. Actualisé automatiquement toutes les 30 s.",
+    "componentsHeading": "Composants du service",
+    "incidentsHeading": "Incidents",
+    "incidentsBody": "Aucun incident actif signalé.",
+    "lastCheckedLabel": "Dernière vérification",
+    "responseTimeLabel": "Temps de réponse",
+    "refreshHint": "Actualisation automatique toutes les {{seconds}} s",
+    "refreshButton": "Actualiser",
+    "summary": {
+      "operational": "Tous les systèmes sont opérationnels",
+      "degraded": "Interruption partielle de service",
+      "down": "Panne majeure",
+      "checking": "Vérification en cours"
+    },
+    "state": {
+      "operational": "Opérationnel",
+      "degraded": "Dégradé",
+      "down": "Hors ligne",
+      "checking": "Vérification"
+    },
+    "services": {
+      "ezstartApi": "API EZStart",
+      "ezstartApiDescription": "Hub plateforme, monitoring, agrégation des statuts",
+      "ezauthApi": "API EZAuth",
+      "ezauthApiDescription": "Authentification, sessions, OAuth, clés API",
+      "ezpayApi": "API EZPay",
+      "ezpayApiDescription": "Plans, abonnements, paiements, Stripe Connect"
+    }
+  }
+}

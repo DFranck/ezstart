@@ -1,19 +1,53 @@
-import { Badge, Card, CardContent, CardHeader, H1, P, Main } from '@ezstart/ui/components'
+import { StatusPage } from '@ezstart/ui/components'
+import { useLocale, useTranslations } from 'next-intl'
 
-export default function StatusPage() {
+const EZAUTH_API_URL = process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'
+const EZPAY_API_URL = process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130'
+const EZSTART_API_URL = process.env.NEXT_PUBLIC_EZSTART_API_URL ?? 'http://localhost:6100'
+
+export default function StatusRoute() {
+  const t = useTranslations('status')
+  const locale = useLocale()
+
   return (
-    <Main className="flex flex-1 items-center justify-center p-6">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <H1 size="h2">Status</H1>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Badge variant="success" size="lg">All systems operational</Badge>
-          <P className="text-muted-foreground">
-            Service status monitoring coming soon.
-          </P>
-        </CardContent>
-      </Card>
-    </Main>
+    <StatusPage
+      locale={locale}
+      services={[
+        {
+          name: t('services.ezpayApi'),
+          url: `${EZPAY_API_URL}/health`,
+          description: t('services.ezpayApiDescription'),
+        },
+        {
+          name: t('services.ezauthApi'),
+          url: `${EZAUTH_API_URL}/health`,
+          description: t('services.ezauthApiDescription'),
+        },
+        {
+          name: t('services.ezstartApi'),
+          url: `${EZSTART_API_URL}/health`,
+          description: t('services.ezstartApiDescription'),
+        },
+      ]}
+      texts={{
+        title: t('title'),
+        intro: t('intro'),
+        componentsHeading: t('componentsHeading'),
+        incidentsHeading: t('incidentsHeading'),
+        incidentsBody: t('incidentsBody'),
+        summaryOperational: t('summary.operational'),
+        summaryDegraded: t('summary.degraded'),
+        summaryDown: t('summary.down'),
+        summaryChecking: t('summary.checking'),
+        stateOperational: t('state.operational'),
+        stateDegraded: t('state.degraded'),
+        stateDown: t('state.down'),
+        stateChecking: t('state.checking'),
+        lastCheckedLabel: t('lastCheckedLabel'),
+        responseTimeLabel: t('responseTimeLabel'),
+        refreshHint: t('refreshHint'),
+        refreshButton: t('refreshButton'),
+      }}
+    />
   )
 }

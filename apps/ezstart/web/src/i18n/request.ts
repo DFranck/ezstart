@@ -31,6 +31,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     admin,
     donate,
     saasPreview,
+    status,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -60,6 +61,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/donate.json`),
     // saas-preview (draft landing)
     import(`../messages/${locale}/saas-preview.json`),
+    // status (public)
+    import(`../messages/${locale}/status.json`),
   ])
 
   return {
@@ -84,6 +87,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       admin.default,
       donate.default,
       saasPreview.default,
+      status.default,
     ]),
   }
 })

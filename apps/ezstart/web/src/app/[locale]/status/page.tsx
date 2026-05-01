@@ -1,9 +1,9 @@
 import { StatusPage } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 
+const EZSTART_API_URL = process.env.NEXT_PUBLIC_EZSTART_API_URL ?? 'http://localhost:6100'
 const EZAUTH_API_URL = process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'
 const EZPAY_API_URL = process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130'
-const EZSTART_API_URL = process.env.NEXT_PUBLIC_EZSTART_API_URL ?? 'http://localhost:6100'
 
 export default function StatusRoute() {
   const t = useTranslations('status')
@@ -14,6 +14,11 @@ export default function StatusRoute() {
       locale={locale}
       services={[
         {
+          name: t('services.ezstartApi'),
+          url: `${EZSTART_API_URL}/health`,
+          description: t('services.ezstartApiDescription'),
+        },
+        {
           name: t('services.ezauthApi'),
           url: `${EZAUTH_API_URL}/health`,
           description: t('services.ezauthApiDescription'),
@@ -22,11 +27,6 @@ export default function StatusRoute() {
           name: t('services.ezpayApi'),
           url: `${EZPAY_API_URL}/health`,
           description: t('services.ezpayApiDescription'),
-        },
-        {
-          name: t('services.ezstartApi'),
-          url: `${EZSTART_API_URL}/health`,
-          description: t('services.ezstartApiDescription'),
         },
       ]}
       texts={{

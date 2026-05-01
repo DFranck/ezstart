@@ -55,22 +55,6 @@
       "v01Body": "Ban xem truoc cong khai dau tien cua EZAuth. Bao gom dang nhap qua e-mail va OAuth, quan ly khoa API, kiem soat truy cap theo vai tro, Application da tenant va theming nhan trang."
     }
   },
-  "status": {
-    "title": "Trang thai",
-    "summaryBadge": "Tat ca he thong dang hoat dong",
-    "summaryBody": "EZAuth hien dang hoat dong binh thuong. Bang dieu khien trang thai truc tiep voi cac chi so uptime va lich su su co dang duoc phat trien.",
-    "componentsHeading": "Thanh phan dich vu",
-    "components": {
-      "apiName": "API xac thuc",
-      "apiStatus": "Hoat dong",
-      "dashboardName": "Bang dieu khien web",
-      "dashboardStatus": "Hoat dong",
-      "oauthName": "Nha cung cap OAuth",
-      "oauthStatus": "Hoat dong"
-    },
-    "incidentsHeading": "Su co",
-    "incidentsBody": "Khong co su co nao dang hoat dong."
-  },
   "contact": {
     "title": "Lien he chung toi",
     "leadBody": "Can ho tro tich hop EZAuth, bao loi hay thao luan ve truong hop su dung cua ban ? Chung toi thuong phan hoi trong vong mot ngay lam viec.",

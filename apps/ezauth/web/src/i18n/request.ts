@@ -24,6 +24,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     legalEn,
     componentsEn,
     securityEn,
+    statusEn,
     common,
     auth,
     admin,
@@ -34,6 +35,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     legal,
     components,
     security,
+    status,
   ] = await Promise.all([
     import(`../messages/en/common.json`),
     import(`../messages/en/auth.json`),
@@ -45,6 +47,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/en/legal.json`),
     import(`../messages/en/components.json`),
     import(`../messages/en/security.json`),
+    import(`../messages/en/status.json`),
     import(`../messages/${locale}/common.json`),
     import(`../messages/${locale}/auth.json`),
     import(`../messages/${locale}/admin.json`),
@@ -55,6 +58,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/legal.json`),
     import(`../messages/${locale}/components.json`),
     import(`../messages/${locale}/security.json`),
+    import(`../messages/${locale}/status.json`),
   ])
 
   return {
@@ -70,6 +74,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       legalEn.default,
       componentsEn.default,
       securityEn.default,
+      statusEn.default,
       common.default,
       auth.default,
       admin.default,
@@ -80,6 +85,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       legal.default,
       components.default,
       security.default,
+      status.default,
     ]),
   }
 })
