@@ -14,7 +14,7 @@
     "palettePlaceholder": "Chercher un composant…",
     "paletteEmpty": "Aucun composant trouvé.",
     "landingTitle": "Composants Auth SDK",
-    "landingSubtitle": "Composants React prêts pour la production pour l'authentification, la gestion de compte, le billing et les dashboards admin. À glisser-déposer dans n'importe quelle app Next.js — zéro CSS à écrire.",
+    "landingSubtitle": "Composants React pour l'authentification, la gestion de compte et les tableaux de bord admin dans les applications Next.js.",
     "landingTotalComponents": "{count} composants",
     "landingTotalCategories": "{count} catégories",
     "landingTotalEntries": "{count} entrées",

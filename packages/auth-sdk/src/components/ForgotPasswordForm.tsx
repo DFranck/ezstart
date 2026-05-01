@@ -108,6 +108,16 @@ type FormData = {
   email: string
 }
 
+/**
+ * Forgot-password form that sends a password reset link to the user's
+ * email. The response is intentionally generic (anti-enumeration: the
+ * user is told the same thing whether or not the account exists).
+ *
+ * @example
+ * ```tsx
+ * <ForgotPasswordForm appName="myapp" onSuccess={() => router.push('/login')} />
+ * ```
+ */
 export function ForgotPasswordForm({
   appName,
   onSuccess,

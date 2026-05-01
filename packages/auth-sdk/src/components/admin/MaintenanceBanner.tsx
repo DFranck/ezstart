@@ -64,6 +64,9 @@ export interface MaintenanceBannerProps {
 // ─── Component ──────────────────────────────────────────────────────────────
 
 /**
+ * Banner that fetches the platform maintenance status and renders it when
+ * a scheduled or in-progress maintenance window is active.
+ *
  * @deprecated Use `useMaintenanceStatus` (`@ezstart/api-sdk/react`) +
  * `MaintenanceBanner` (`@ezstart/ui/components`) instead. Will be removed
  * 2026-08-01. See module-level JSDoc for the migration snippet.

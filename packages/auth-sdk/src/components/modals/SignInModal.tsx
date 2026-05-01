@@ -255,8 +255,8 @@ function SignInModalInner({
  * the `?key=` URL param via {@link useKeyConfig} and renders the matching
  * display name in the subtitle.
  *
- * Equivalent to Clerk's `<SignIn />`. Works as both a standalone auth route
- * (always-open) and as an embeddable modal triggered from any consumer page.
+ * Works as both a standalone auth route (always-open) and as an embeddable
+ * modal triggered from any consumer page.
  *
  * @example
  *   // Standalone /login page

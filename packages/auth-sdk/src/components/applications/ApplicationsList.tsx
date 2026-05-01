@@ -63,6 +63,17 @@ function mergeTexts(partial?: Partial<ApplicationsFlowTexts>): ApplicationsFlowT
   }
 }
 
+/**
+ * Sortable list of Applications scoped to the current user (or to the
+ * full platform when `showSuperadminAllToggle` is enabled and the user
+ * is a superadmin). Includes an "include archived" toggle and a
+ * "Create" CTA.
+ *
+ * @example
+ * ```tsx
+ * <ApplicationsList onSelectApplication={(a) => router.push(`/apps/${a.id}`)} />
+ * ```
+ */
 export function ApplicationsList({
   locale = 'en',
   texts: partialTexts,

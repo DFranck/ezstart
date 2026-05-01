@@ -67,7 +67,7 @@ function VerifyEmailCardInner({
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Verify-Email card — drop-in for `/verify-email?token=...`.
+ * Self-contained Verify-Email card for `/verify-email?token=...`.
  *
  * Reads the `?token=` URL param automatically and runs the verification flow
  * via `<VerifyEmailFlow>`. Renders consistent chrome (Card + theme switcher

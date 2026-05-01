@@ -35,6 +35,15 @@ function mergeTexts(partial?: Partial<CreateApplicationModalTexts>): CreateAppli
   return { ...defaultApplicationsFlowTexts.create, ...partial }
 }
 
+/**
+ * Modal form for creating a new Application with name, slug (auto-derived
+ * from name), and optional description.
+ *
+ * @example
+ * ```tsx
+ * <CreateApplicationModal isOpen={open} onClose={close} onCreated={(app) => router.push(`/apps/${app.id}`)} />
+ * ```
+ */
 export function CreateApplicationModal({
   isOpen,
   onClose,

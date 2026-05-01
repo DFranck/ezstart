@@ -39,6 +39,15 @@ function interpolate(template: string, values: Record<string, string | number>):
   return result
 }
 
+/**
+ * Modal showing per-key usage breakdown (request count over time, by
+ * endpoint) for a specific API key.
+ *
+ * @example
+ * ```tsx
+ * <UsageDetailsModal isOpen={open} onClose={close} keyId={selectedKey.id} keyName={selectedKey.name} texts={texts} />
+ * ```
+ */
 export function UsageDetailsModal({
   isOpen,
   onClose,
@@ -67,9 +76,7 @@ export function UsageDetailsModal({
         </Div>
       )}
 
-      {isError && (
-        <P className="text-destructive text-center py-4">{texts.fetchError}</P>
-      )}
+      {isError && <P className="text-destructive text-center py-4">{texts.fetchError}</P>}
 
       {data && (
         <Div className="space-y-6">
@@ -122,7 +129,7 @@ export function UsageDetailsModal({
                 {texts.topEndpoints}
               </H3>
               <Div className="space-y-1">
-                {data.currentMonth.topEndpoints.map((ep) => (
+                {data.currentMonth.topEndpoints.map(ep => (
                   <Div
                     key={ep.endpoint}
                     className="flex items-center justify-between py-1.5 px-2 rounded bg-muted/50"
@@ -146,8 +153,8 @@ export function UsageDetailsModal({
                 {texts.dailyBreakdown}
               </H3>
               <Div className="space-y-0.5">
-                {data.daily.slice(-14).map((day) => {
-                  const maxCount = Math.max(...data.daily.map((d) => d.requestCount), 1)
+                {data.daily.slice(-14).map(day => {
+                  const maxCount = Math.max(...data.daily.map(d => d.requestCount), 1)
                   const widthPct = Math.max(2, Math.round((day.requestCount / maxCount) * 100))
                   return (
                     <Div key={day.date} className="flex items-center gap-2">

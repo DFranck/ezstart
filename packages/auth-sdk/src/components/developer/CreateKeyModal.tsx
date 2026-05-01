@@ -56,6 +56,15 @@ function computeExpiryDate(option: string): string | null {
   return now.toISOString()
 }
 
+/**
+ * Modal form for creating a new API key with type (publishable / secret),
+ * scope, and optional expiration.
+ *
+ * @example
+ * ```tsx
+ * <CreateKeyModal isOpen={open} onClose={close} onSubmit={...} />
+ * ```
+ */
 export function CreateKeyModal({
   isOpen,
   onClose,

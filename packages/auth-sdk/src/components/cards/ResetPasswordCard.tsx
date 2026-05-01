@@ -101,7 +101,7 @@ function ResetPasswordCardInner({
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Reset-Password card — drop-in for `/reset-password?token=...`.
+ * Self-contained Reset-Password card for `/reset-password?token=...`.
  *
  * Reads the `?token=` URL param automatically (override via `token` prop) and
  * pre-validates it via `POST /auth/validate-reset-token` so the user sees a

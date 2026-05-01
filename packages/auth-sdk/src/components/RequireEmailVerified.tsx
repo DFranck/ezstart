@@ -159,6 +159,18 @@ function DefaultFallback({ texts }: DefaultFallbackProps) {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Guard component that blocks rendering its children until the
+ * authenticated user verifies their email. Renders a fallback (or a
+ * default verification prompt) otherwise.
+ *
+ * @example
+ * ```tsx
+ * <RequireEmailVerified>
+ *   <ProtectedContent />
+ * </RequireEmailVerified>
+ * ```
+ */
 export function RequireEmailVerified({ children, fallback, texts }: RequireEmailVerifiedProps) {
   const { user } = useAuth()
   const t: RequireEmailVerifiedTexts = { ...DEFAULT_REQUIRE_EMAIL_VERIFIED_TEXTS, ...texts }

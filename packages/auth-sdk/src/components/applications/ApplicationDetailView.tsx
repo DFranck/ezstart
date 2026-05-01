@@ -87,6 +87,15 @@ function mergeTexts(partial?: Partial<ApplicationDetailViewTexts>): ApplicationD
   return { ...defaultApplicationsFlowTexts.detail, ...partial }
 }
 
+/**
+ * Tabbed Application detail view: Keys, Settings, Theme, Webhooks. Owns
+ * the full lifecycle of one Application from a single page.
+ *
+ * @example
+ * ```tsx
+ * <ApplicationDetailView applicationId={params.id} onBack={() => router.back()} />
+ * ```
+ */
 export function ApplicationDetailView({
   applicationId,
   locale = 'en',

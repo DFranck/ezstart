@@ -1,7 +1,8 @@
 'use client'
 
 /**
- * EmailChangeForm — drop-in form for the user-settings page.
+ * EmailChangeForm — form for changing the authenticated user's email
+ * address with verification.
  *
  * Sends a verification link to the new email address; the user must
  * click the link to commit the change. The component handles the
@@ -111,6 +112,18 @@ interface FormData {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Form for changing the authenticated user's email address with verification.
+ *
+ * Sends a verification link to the new address — the change is only
+ * committed once the user clicks the link. Shows a "check your inbox"
+ * success state on submit and surfaces validation/network errors inline.
+ *
+ * @example
+ * ```tsx
+ * <EmailChangeForm appName="myapp" />
+ * ```
+ */
 export function EmailChangeForm({
   texts,
   className,

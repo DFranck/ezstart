@@ -1,5 +1,5 @@
 /**
- * Shared types for UserMenuV2 — SaaS-pro user dropdown + AccountModalV2 shell.
+ * Shared types for UserMenuV2 — user dropdown menu + AccountModalV2 shell.
  *
  * @internal
  */

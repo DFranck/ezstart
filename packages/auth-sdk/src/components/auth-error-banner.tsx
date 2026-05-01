@@ -21,6 +21,8 @@ export type AuthErrorBannerProps = _ErrorAlertProps
 export type AuthErrorBannerTexts = _ErrorAlertTexts
 
 /**
+ * Destructive alert wrapper for auth-related error messages.
+ *
  * @deprecated Moved to `@ezstart/ui` as `ErrorAlert`. Will be removed in 2026-08-01.
  * Import `ErrorAlert` from `@ezstart/ui/components` instead.
  *

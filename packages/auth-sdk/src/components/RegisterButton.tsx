@@ -29,7 +29,7 @@ export interface RegisterButtonProps {
 /**
  * Register CTA that redirects the user to the EZAuth register page.
  *
- * Drop-in replacement for `<Link href="/register">` in consumer apps — unlike
+ * Replacement for `<Link href="/register">` in consumer apps — unlike
  * a local link, it builds the proper cross-origin URL to the EZAuth web app
  * (using the configured `publishableKey` or `appName`) and a matching
  * `redirect_uri` back to the current app's `/auth/callback`.

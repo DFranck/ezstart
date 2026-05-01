@@ -56,6 +56,15 @@ const DEFAULT_TEXTS: VerifyEmailFlowTexts = {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Email verification flow that consumes a token from `/verify-email?token=...`
+ * and renders success / already-verified / invalid / error states.
+ *
+ * @example
+ * ```tsx
+ * <VerifyEmailFlow token={searchParams.token} backHref="/login" />
+ * ```
+ */
 export function VerifyEmailFlow({
   token,
   backHref,

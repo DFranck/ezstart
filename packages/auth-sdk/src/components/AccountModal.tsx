@@ -49,7 +49,7 @@ export interface AccountModalProps {
 }
 
 /**
- * Drop-in account management modal. Splits into two tabs:
+ * Account management modal split into two tabs:
  * - **Profile** — avatar, name, email + verification, connected accounts
  * - **Settings** — password, advanced security (SSO handoff to EZAuth web),
  *   theme switcher, language switcher

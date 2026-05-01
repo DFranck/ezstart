@@ -240,15 +240,14 @@ function SignInCardInner({
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Sign-In card — drop-in for any `/login` page.
+ * Self-contained Sign-In card for any `/login` page.
  *
  * Wraps `<SignInForm>` inside `<AuthCardShell>` (Card + header + theme
  * switcher + back button + brand subtitle + cross-link footer). Auto-resolves
  * the consumer brand from the `?key=` URL param via {@link useKeyConfig} and
  * renders the matching display name in the subtitle.
  *
- * Equivalent to Clerk's `<SignIn />`. Consumer apps reduce their `/login`
- * page to a single line:
+ * Consumer apps reduce their `/login` page to a single line:
  *
  * @example
  *   // app/[locale]/login/page.tsx

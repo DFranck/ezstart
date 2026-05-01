@@ -14,7 +14,7 @@
     "palettePlaceholder": "Tìm thành phần…",
     "paletteEmpty": "Không tìm thấy thành phần nào.",
     "landingTitle": "Thành phần Auth SDK",
-    "landingSubtitle": "Các thành phần React sẵn sàng cho production cho xác thực, quản lý tài khoản, thanh toán và bảng admin. Thả vào bất kỳ ứng dụng Next.js nào — không cần viết CSS.",
+    "landingSubtitle": "Các thành phần React cho xác thực, quản lý tài khoản và bảng quản trị trong các ứng dụng Next.js.",
     "landingTotalComponents": "{count} thành phần",
     "landingTotalCategories": "{count} danh mục",
     "landingTotalEntries": "{count} mục",

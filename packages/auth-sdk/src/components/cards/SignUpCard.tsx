@@ -148,11 +148,10 @@ function SignUpCardInner({
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Sign-Up card — drop-in for any `/register` page.
+ * Self-contained Sign-Up card for any `/register` page.
  *
- * Equivalent to Clerk's `<SignUp />`. Wraps `<SignUpForm>` inside
- * `<AuthCardShell>` with the consumer brand auto-resolved from the `?key=`
- * URL param. Reduces a `/register` page to a single line.
+ * Wraps `<SignUpForm>` inside `<AuthCardShell>` with the consumer brand
+ * auto-resolved from the `?key=` URL param.
  *
  * @example
  *   // app/[locale]/register/page.tsx

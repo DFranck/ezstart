@@ -1,6 +1,6 @@
 /**
- * Self-contained auth Cards — Clerk-style drop-in components for `/login`,
- * `/register`, `/forgot-password`, `/reset-password`, `/verify-email`.
+ * Self-contained auth Cards for `/login`, `/register`, `/forgot-password`,
+ * `/reset-password`, `/verify-email` pages.
  *
  * Each Card embeds:
  * - `<AuthCardShell>` chrome (Card container, theme switcher, back button,

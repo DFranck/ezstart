@@ -12,6 +12,16 @@ export interface KeyCreatedModalProps {
   texts: KeyCreatedModalTexts
 }
 
+/**
+ * One-time display modal showing a freshly created API key with a
+ * copy-to-clipboard action. The raw key is only available immediately
+ * after creation — once the modal closes, the key cannot be recovered.
+ *
+ * @example
+ * ```tsx
+ * <KeyCreatedModal isOpen={!!rawKey} onClose={() => setRawKey(null)} rawKey={rawKey} texts={texts} />
+ * ```
+ */
 export function KeyCreatedModal({ isOpen, onClose, rawKey, texts }: KeyCreatedModalProps) {
   const handleCopy = useCallback(async () => {
     if (!rawKey) return
@@ -39,11 +49,7 @@ export function KeyCreatedModal({ isOpen, onClose, rawKey, texts }: KeyCreatedMo
         <P className="text-destructive font-medium">{texts.warning}</P>
 
         <Div className="flex items-center gap-2">
-          <Input
-            readOnly
-            value={rawKey ?? ''}
-            className="font-mono text-sm"
-          />
+          <Input readOnly value={rawKey ?? ''} className="font-mono text-sm" />
           <Button variant="outline" size="sm" onClick={handleCopy}>
             {texts.copyKey}
           </Button>

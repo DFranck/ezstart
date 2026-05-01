@@ -177,6 +177,15 @@ interface FormData {
   promoCode: string
 }
 
+/**
+ * Account creation form with email + password, optional first/last name,
+ * username, and promo code fields.
+ *
+ * @example
+ * ```tsx
+ * <SignUpForm appName="myapp" redirectUri="/welcome" />
+ * ```
+ */
 export function SignUpForm({
   appName,
   promoCode,

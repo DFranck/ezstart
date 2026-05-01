@@ -162,10 +162,10 @@ function SignUpModalInner({
 /**
  * Self-contained Sign-Up modal — embeddable anywhere.
  *
- * Equivalent to Clerk's `<SignUp />`. Wraps `<SignUpForm>` inside
- * `<AuthModalShell>` with the consumer brand auto-resolved from the `?key=`
- * URL param. Works as both a standalone auth route (always-open) and as an
- * embeddable modal triggered from any consumer page.
+ * Wraps `<SignUpForm>` inside `<AuthModalShell>` with the consumer brand
+ * auto-resolved from the `?key=` URL param. Works as both a standalone
+ * auth route (always-open) and as an embeddable modal triggered from any
+ * consumer page.
  *
  * @example
  *   // Standalone /register page

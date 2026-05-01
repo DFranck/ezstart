@@ -28,7 +28,7 @@ export type {
 export { RequireAuthLoader } from './RequireAuthLoader.js'
 export type { RequireAuthLoaderProps } from './RequireAuthLoader.js'
 
-// Self-contained auth Modals (Clerk-style drop-in for `/login`, `/register`,
+// Self-contained auth Modals for `/login`, `/register`,
 // `/forgot-password`, `/reset-password`, `/verify-email` — wrap the matching
 // `<SignInForm>` etc. inside `<AuthModalShell>` with brand/footer cross-link).
 // Embeddable from any consumer page (button trigger) or used as standalone
@@ -180,8 +180,8 @@ export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './UserMenu.js'
 export { AccountModal } from './AccountModal.js'
 export type { AccountModalProps, AccountModalTexts } from './AccountModal.js'
 
-// V2 — SaaS-pro user dropdown (Stripe / Clerk parity). Mounts side-by-side
-// with `<UserMenu>` (V1) for A/B comparison before retiring V1.
+// V2 — User dropdown menu with avatar, profile sections, and account actions.
+// Mounts side-by-side with `<UserMenu>` (V1) for A/B comparison before retiring V1.
 export { UserMenuV2 } from './user-menu-v2/UserMenuV2.js'
 export type { UserMenuV2Props, UserMenuV2Item, UserMenuV2Texts } from './user-menu-v2/types.js'
 export { AccountModalV2 } from './user-menu-v2/AccountModalV2.js'
@@ -211,7 +211,7 @@ export type { UserDashboardProps, UserDashboardTexts } from './UserDashboard.js'
 // - app admin   -> owned Applications
 // - user        -> own account
 //
-// Drop-in component for both the EZAuth web app's own `/admin` page and
+// Used by both the EZAuth web app's own `/admin` page and
 // the EZStart hub's federated admin (Tier 3 embedding cross-origin).
 export { AuthAdminDashboard } from './AuthAdminDashboard.js'
 export type { AuthAdminDashboardProps, AuthAdminDashboardTexts } from './AuthAdminDashboard.js'

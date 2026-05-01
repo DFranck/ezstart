@@ -18,6 +18,15 @@ export interface ApiKeysTableProps {
   locale?: string
 }
 
+/**
+ * Data table of API keys with rotate, revoke, and view-usage actions per
+ * row.
+ *
+ * @example
+ * ```tsx
+ * <ApiKeysTable keys={keys} onRevoke={...} onRotate={...} onViewUsage={...} />
+ * ```
+ */
 export function ApiKeysTable({
   keys,
   onRevoke,

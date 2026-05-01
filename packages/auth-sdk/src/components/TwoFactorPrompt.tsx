@@ -70,6 +70,16 @@ const TOTP_PATTERN = /^\d{6}$/
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Modal prompt for entering a 2FA TOTP code (or backup code) during
+ * sign-in. Auto-submits on a 6-digit TOTP input; backup codes require an
+ * explicit confirm.
+ *
+ * @example
+ * ```tsx
+ * <TwoFactorPrompt tempToken={token} onSuccess={() => router.push('/dashboard')} />
+ * ```
+ */
 export function TwoFactorPrompt({
   tempToken,
   redirectUri,

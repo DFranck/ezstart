@@ -137,6 +137,16 @@ type FormData = {
   confirmPassword: string
 }
 
+/**
+ * Reset-password form that consumes a token from
+ * `/reset-password?token=...`, pre-validates it server-side, and submits
+ * the new password.
+ *
+ * @example
+ * ```tsx
+ * <ResetPasswordForm token={searchParams.token} backHref="/login" />
+ * ```
+ */
 export function ResetPasswordForm({
   token,
   backHref,

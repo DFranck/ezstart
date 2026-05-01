@@ -95,6 +95,15 @@ const DEFAULT_TEXTS: TwoFactorSettingsTexts = {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Settings panel for enrolling in 2FA, viewing recovery codes, and
+ * disabling 2FA on the authenticated user's account.
+ *
+ * @example
+ * ```tsx
+ * <TwoFactorSettings />
+ * ```
+ */
 export function TwoFactorSettings({
   locale: propLocale,
   texts,

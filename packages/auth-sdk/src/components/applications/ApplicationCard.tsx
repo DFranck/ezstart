@@ -61,6 +61,15 @@ function formatDate(isoDate: string, locale: string): string {
   }
 }
 
+/**
+ * Card preview of a single Application showing name, slug, key count,
+ * and quick actions (manage, archive).
+ *
+ * @example
+ * ```tsx
+ * <ApplicationCard application={app} onSelect={(a) => router.push(`/apps/${a.id}`)} />
+ * ```
+ */
 export function ApplicationCard({
   application,
   keyCount,

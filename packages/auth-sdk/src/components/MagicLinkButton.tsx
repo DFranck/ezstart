@@ -1,14 +1,5 @@
 'use client'
 
-/**
- * MagicLinkButton — drop-in CTA that opens a Modal containing the
- * `<MagicLinkForm>`. Use it as an alternative entry next to the standard
- * password sign-in form (e.g. "or use a magic link" link below the
- * SignIn card).
- *
- * i18n-agnostic: all texts come from the `texts` prop (English defaults).
- */
-
 import { Button, Icon, Modal, P } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { MagicLinkForm, type MagicLinkFormProps, type MagicLinkFormTexts } from './MagicLinkForm.js'
@@ -53,6 +44,18 @@ export interface MagicLinkButtonProps extends Omit<
 
 const FORM_ID = 'ezstart-magic-link-button-form'
 
+/**
+ * Magic link CTA that opens a modal with the passwordless sign-in form.
+ *
+ * Use it as an alternative entry next to the standard password sign-in form
+ * (e.g. "or use a magic link" link below the SignIn card). i18n-agnostic:
+ * all texts come from the `texts` prop (English defaults).
+ *
+ * @example
+ * ```tsx
+ * <MagicLinkButton appName="myapp" />
+ * ```
+ */
 export function MagicLinkButton({
   texts,
   variant = 'outline',

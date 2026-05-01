@@ -115,9 +115,9 @@ export interface EZAuthDashboardProps {
 }
 
 /**
- * Federated dashboard shell that aggregates the user account, applications,
- * API keys, billing, usage, settings, and admin sections behind a single
- * Stripe/Clerk-style sidebar with progressive RBAC disclosure.
+ * Federated dashboard shell that aggregates user account, applications,
+ * API keys, billing, usage, settings, and admin sections in a sidebar
+ * with role-based progressive disclosure.
  *
  * Section bodies live in `./dashboard/section-renderer.tsx` and the
  * placeholder cards in `./dashboard/sections.tsx` to keep this file under

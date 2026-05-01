@@ -117,9 +117,10 @@ function getDefaultTextsV2(locale: AuthLocale | string | undefined): UserMenuV2T
 }
 
 /**
- * V2 — SaaS-pro user dropdown (Stripe / Clerk / Vercel parity).
+ * User dropdown menu with avatar, profile sections, and account actions —
+ * opens a panel rather than a list.
  *
- * Drop-in upgrade for `<UserMenu>`. Adds:
+ * V2 over `<UserMenu>` adds:
  * - Identity card with email-verified badge + plan badge
  * - Optional notifications row (with unread counter on the trigger)
  * - Help / shortcuts / status / changelog rows (each gated by a prop)

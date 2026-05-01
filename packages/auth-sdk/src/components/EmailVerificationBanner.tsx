@@ -77,6 +77,15 @@ export const DEFAULT_EMAIL_VERIFICATION_BANNER_TEXTS: EmailVerificationBannerTex
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Banner shown to authenticated users with an unverified email, with a
+ * resend CTA. Hides automatically once the user verifies.
+ *
+ * @example
+ * ```tsx
+ * <EmailVerificationBanner sticky />
+ * ```
+ */
 export function EmailVerificationBanner({
   sticky = false,
   className,

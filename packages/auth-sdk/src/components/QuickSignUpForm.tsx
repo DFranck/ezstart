@@ -90,6 +90,16 @@ type FormData = {
   promoCode: string
 }
 
+/**
+ * Single-step sign-up form (username + email) without a separate password
+ * step. The user receives a sign-in link by email to complete account
+ * creation.
+ *
+ * @example
+ * ```tsx
+ * <QuickSignUpForm appName="myapp" />
+ * ```
+ */
 export function QuickSignUpForm({
   appName,
   description,

@@ -37,6 +37,15 @@ function getInitials(user: {
   return user.email.slice(0, 2).toUpperCase()
 }
 
+/**
+ * Renders the authenticated user's avatar — image when available, falls
+ * back to initials derived from the user's name or email.
+ *
+ * @example
+ * ```tsx
+ * <UserAvatar size="md" />
+ * ```
+ */
 export function UserAvatar({ size = 'md', className, user: externalUser }: UserAvatarProps) {
   const auth = useAuth()
   const user = externalUser || auth.user

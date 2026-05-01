@@ -40,6 +40,15 @@ const DEFAULT_TEXTS: EmailVerificationStatusTexts = {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Status card showing the authenticated user's email verification state
+ * with a resend action when the email is unverified.
+ *
+ * @example
+ * ```tsx
+ * <EmailVerificationStatus />
+ * ```
+ */
 export function EmailVerificationStatus({ texts }: EmailVerificationStatusProps) {
   const t = { ...DEFAULT_TEXTS, ...texts }
   const { user } = useAuth()

@@ -116,8 +116,8 @@ export const defaultAuthAdminDashboardTexts: Required<
  * - app admin   → owned Applications
  * - user        → own account
  *
- * Drop-in component for both the EZAuth web app's own `/admin` page and
- * the EZStart hub's federated admin (Tier 3 embedding cross-origin).
+ * Used by both the EZAuth web app's own `/admin` page and the EZStart
+ * hub's federated admin (Tier 3 embedding cross-origin).
  *
  * For federated admin (Tier 3 hub embeds the SDK against a remote EZAuth
  * deployment), configure the surrounding `<AuthProvider>` with the target

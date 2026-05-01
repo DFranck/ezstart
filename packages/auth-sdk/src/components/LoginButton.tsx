@@ -32,6 +32,20 @@ export interface LoginButtonProps {
   theme?: 'light' | 'dark' | 'system'
 }
 
+/**
+ * Login CTA that redirects the user to the EZAuth login page with optional
+ * return URL.
+ *
+ * Renders a "Login" or "Logout" button depending on the current auth state.
+ * On click, it builds a cross-origin URL to the EZAuth web app (using the
+ * configured `publishableKey` or `appName`) and a matching `redirect_uri`
+ * back to the consumer's `/auth/callback`.
+ *
+ * @example
+ * ```tsx
+ * <LoginButton size="lg">Sign in</LoginButton>
+ * ```
+ */
 export function LoginButton({
   children,
   className,

@@ -17,6 +17,8 @@ export type PasswordStrengthProps = _PasswordStrengthProps
 export type PasswordStrengthTexts = _PasswordStrengthTexts
 
 /**
+ * Visual strength indicator (color-graded bar + label) for a password input.
+ *
  * @deprecated Moved to `@ezstart/ui`. Will be removed in 2026-08-01.
  * Import `PasswordStrength` from `@ezstart/ui/components` instead.
  *

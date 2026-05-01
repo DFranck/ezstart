@@ -146,6 +146,15 @@ type FormData = {
   password: string
 }
 
+/**
+ * Email + password sign-in form with optional 2FA prompt and OAuth
+ * provider buttons.
+ *
+ * @example
+ * ```tsx
+ * <SignInForm appName="myapp" redirectUri="/dashboard" />
+ * ```
+ */
 export function SignInForm({
   appName,
   redirectUri,

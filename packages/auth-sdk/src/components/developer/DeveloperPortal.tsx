@@ -86,6 +86,16 @@ function mergeTexts(partial?: Partial<DeveloperPortalTexts>): DeveloperPortalTex
   }
 }
 
+/**
+ * Developer portal aggregating the API keys table, create-key modal,
+ * created-key modal, and usage-details modal for the authenticated user
+ * or scoped Application.
+ *
+ * @example
+ * ```tsx
+ * <DeveloperPortal />
+ * ```
+ */
 export function DeveloperPortal({
   enabled = true,
   locale = 'en',

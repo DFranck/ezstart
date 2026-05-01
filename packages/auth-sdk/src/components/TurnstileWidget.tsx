@@ -11,6 +11,9 @@ import { logger } from './internal-logger.js'
 export type TurnstileWidgetProps = _TurnstileWidgetProps
 
 /**
+ * Cloudflare Turnstile captcha widget that mounts the challenge iframe and
+ * forwards the resulting token to the consumer via `onVerify`.
+ *
  * @deprecated Moved to `@ezstart/api-sdk/integrations`. Will be removed in 2026-08-01.
  * Cloudflare Turnstile is a generic captcha integration — not auth-specific —
  * so it now lives in `@ezstart/api-sdk` next to the other third-party

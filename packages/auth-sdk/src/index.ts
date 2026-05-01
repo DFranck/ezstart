@@ -127,10 +127,10 @@ export type { LoginButtonProps } from './components/LoginButton.js'
 export { RegisterButton } from './components/RegisterButton.js'
 export type { RegisterButtonProps } from './components/RegisterButton.js'
 
-// Self-contained auth Modals (Clerk-style drop-in `<SignIn />` / `<SignUp />`
-// equivalents for `/login`, `/register`, `/forgot-password`, `/reset-password`,
-// `/verify-email`). Embeddable anywhere via `isOpen`/`onClose` props or used
-// as standalone auth routes (always-open with onClose -> router.push('/')).
+// Self-contained auth Modals for `/login`, `/register`, `/forgot-password`,
+// `/reset-password`, `/verify-email`. Embeddable anywhere via `isOpen`/
+// `onClose` props or used as standalone auth routes (always-open with
+// onClose -> router.push('/')).
 export {
   SignInModal,
   SignUpModal,
@@ -219,7 +219,7 @@ export type {
 
 // Admin — all-in-one console with internal tabs
 // (Overview, Users, Applications, Settings). Auto-scoped server-side via
-// JWT (`req.derivedScope`). Drop-in for both EZAuth's own `/admin` page
+// JWT (`req.derivedScope`). Used by both EZAuth's own `/admin` page
 // and the EZStart hub federated admin (Tier 3 cross-origin).
 export { AuthAdminDashboard } from './components/AuthAdminDashboard.js'
 export type {

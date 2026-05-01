@@ -86,7 +86,7 @@ export interface UserMenuProps {
   /**
    * Hide the embedded sign-in button rendered when the user is not
    * authenticated. Defaults to `false` — `<UserMenu>` is the canonical
-   * single drop-in for both states (logged-in dropdown + logged-out CTA),
+   * single component for both states (logged-in dropdown + logged-out CTA),
    * so consumers don't have to maintain a `{isAuthenticated ? <UserMenu /> :
    * <LoginButton />}` ternary that triggers an unmount/remount cycle on
    * auth state changes.
@@ -139,6 +139,18 @@ function getDefaultTexts(locale: AuthLocale | string | undefined): UserMenuTexts
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+/**
+ * V1 user dropdown menu showing avatar, account info, theme switcher,
+ * language switcher, and sign-out action. Renders a sign-in CTA when the
+ * user is not authenticated.
+ *
+ * @example
+ * ```tsx
+ * <UserMenu
+ *   languages={[{ code: 'en', label: 'EN' }, { code: 'fr', label: 'FR' }]}
+ * />
+ * ```
+ */
 export function UserMenu({
   languages,
   currentLocale,

@@ -125,6 +125,15 @@ function formatRelativeDate(dateStr: string, t: SessionsManagerTexts): string {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * List of the authenticated user's active sessions with a per-device
+ * sign-out action.
+ *
+ * @example
+ * ```tsx
+ * <SessionsManager onSessionRevoked={(id) => console.log('revoked', id)} />
+ * ```
+ */
 export function SessionsManager({ texts, onSessionRevoked }: SessionsManagerProps) {
   const t = { ...DEFAULT_TEXTS, ...texts }
 

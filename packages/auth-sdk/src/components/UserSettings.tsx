@@ -136,6 +136,15 @@ function getFullName(user: AuthUser): string {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+/**
+ * Account settings panel with avatar, email + verification, connected
+ * accounts (OAuth), and password change actions.
+ *
+ * @example
+ * ```tsx
+ * <UserSettings editable />
+ * ```
+ */
 export function UserSettings({
   showAvatar = true,
   showEmail = true,

@@ -22,6 +22,9 @@ export type ScopeContextIndicatorTexts = _ScopeContextSwitcherTexts
 export type ScopeContextIndicatorLinkProps = _ScopeContextSwitcherLinkProps
 
 /**
+ * Header badge that surfaces the current scope (Personal / Admin) with an
+ * optional toggle to switch contexts.
+ *
  * @deprecated Moved to `@ezstart/ui` as `ScopeContextSwitcher`. Will be removed in 2026-08-01.
  * Import `ScopeContextSwitcher` from `@ezstart/ui/components` instead.
  *

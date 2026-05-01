@@ -181,6 +181,16 @@ function formatDetails(entry: AuditLogEntry): string {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+/**
+ * Audit log table for the authenticated user's security-sensitive
+ * actions (login, password change, 2FA enroll, key creation, etc.).
+ * Paginated and filterable.
+ *
+ * @example
+ * ```tsx
+ * <AuditLogSection pageSize={20} />
+ * ```
+ */
 export function AuditLogSection({
   pageSize = 20,
   locale = 'en',

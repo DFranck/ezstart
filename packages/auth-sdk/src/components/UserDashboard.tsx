@@ -135,6 +135,16 @@ function getUserRoleCount(
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+/**
+ * End-user dashboard with tabs for Overview, API Keys, Settings, and
+ * Usage. Lighter alternative to `<EZAuthDashboard>` when the consumer
+ * does not need the federated admin sections.
+ *
+ * @example
+ * ```tsx
+ * <UserDashboard appName="myapp" />
+ * ```
+ */
 export function UserDashboard({
   defaultTab = 'overview',
   hideTabs = [],

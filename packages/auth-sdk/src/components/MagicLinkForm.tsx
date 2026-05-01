@@ -1,16 +1,5 @@
 'use client'
 
-/**
- * MagicLinkForm — passwordless sign-in form.
- *
- * Renders a single email input + submit button. On success, displays the
- * "check your inbox" confirmation; the response is intentionally generic
- * (anti-enumeration: the user is told the same thing whether or not the
- * account exists).
- *
- * i18n-agnostic: all texts come from the `texts` prop (English defaults).
- */
-
 import {
   Button,
   Div,
@@ -102,6 +91,20 @@ const DEFAULT_FORM_ID = 'ezstart-magic-link-form'
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+/**
+ * Email input form that triggers a passwordless sign-in link.
+ *
+ * Renders a single email input + submit button. On success, displays the
+ * "check your inbox" confirmation; the response is intentionally generic
+ * (anti-enumeration: the user is told the same thing whether or not the
+ * account exists). i18n-agnostic: all texts come from the `texts` prop
+ * (English defaults).
+ *
+ * @example
+ * ```tsx
+ * <MagicLinkForm appName="myapp" onSuccess={(email) => console.log(email)} />
+ * ```
+ */
 export function MagicLinkForm({
   texts,
   className,

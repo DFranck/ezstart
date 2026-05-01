@@ -1,8 +1,8 @@
 /**
- * Self-contained auth Modals — Clerk-style drop-in components for `/login`,
- * `/register`, `/forgot-password`, `/reset-password`, `/verify-email`. Each
- * Modal is also fully embeddable from any consumer page (e.g. a "Sign in"
- * button that opens the auth flow inline without navigating).
+ * Self-contained auth Modals for `/login`, `/register`, `/forgot-password`,
+ * `/reset-password`, `/verify-email`. Each Modal is also fully embeddable
+ * from any consumer page (e.g. a "Sign in" button that opens the auth flow
+ * inline without navigating).
  *
  * Each Modal embeds:
  * - `<AuthModalShell>` chrome (`<Modal>` container, theme switcher, brand

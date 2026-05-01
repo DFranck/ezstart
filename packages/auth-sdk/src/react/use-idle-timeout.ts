@@ -3,7 +3,7 @@
 /**
  * Auto-logout after a configurable period of user inactivity.
  *
- * Pattern (Stripe / Clerk parity):
+ * Pattern:
  * - Watch a small set of DOM events (mouse, keyboard, touch, scroll, focus)
  *   to detect activity. Each activity event reschedules both timers.
  * - A `setTimeout` is scheduled `idleMs - warningMs` after the last activity

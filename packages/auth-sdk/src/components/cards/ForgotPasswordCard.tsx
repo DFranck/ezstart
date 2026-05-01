@@ -79,7 +79,7 @@ function ForgotPasswordCardInner({
 // ─── Public ────────────────────────────────────────────────────────────────
 
 /**
- * Self-contained Forgot-Password card — drop-in for any `/forgot-password` page.
+ * Self-contained Forgot-Password card for any `/forgot-password` page.
  *
  * Wraps `<ForgotPasswordForm>` inside `<AuthCardShell>` with title + subtitle,
  * back-button, and theme switcher. The "Back to login" CTA is rendered by the
