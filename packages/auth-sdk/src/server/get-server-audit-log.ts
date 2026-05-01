@@ -12,7 +12,7 @@
  * intentionally has zero React or browser dependencies.
  */
 
-import 'server-only'
+import './_internal/server-only.js'
 
 import type { AuditLogAction, AuditLogEntry } from '../core/types.js'
 

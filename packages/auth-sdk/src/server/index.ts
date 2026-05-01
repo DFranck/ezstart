@@ -13,12 +13,14 @@
  * import { hasFeature, getServerAuth } from '@ezstart/auth-sdk/server'
  * ```
  *
- * The `import 'server-only'` guard at the top throws at build time if a
- * client component accidentally imports from this entry point, preventing
- * cookie / token leaks to the browser bundle.
+ * The server-only guard at the top throws at build/runtime if a client
+ * component (browser bundle) accidentally imports from this entry point,
+ * preventing cookie / token leaks. The guard uses a runtime `window` check
+ * instead of the `server-only` npm package, which crashes raw-Node API
+ * services at boot.
  */
 
-import 'server-only'
+import './_internal/server-only.js'
 
 // ---------------------------------------------------------------------------
 // SSR auth bootstrap (Clerk-style)

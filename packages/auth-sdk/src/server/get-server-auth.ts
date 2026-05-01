@@ -17,7 +17,7 @@
  * intentionally has zero React or browser dependencies.
  */
 
-import 'server-only'
+import './_internal/server-only.js'
 
 import type { AuthUser } from '../core/types.js'
 

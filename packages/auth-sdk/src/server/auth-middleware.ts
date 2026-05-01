@@ -46,7 +46,7 @@
  * @module @ezstart/auth-sdk/server/auth-middleware
  */
 
-import 'server-only'
+import './_internal/server-only.js'
 
 import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import jwt from 'jsonwebtoken'

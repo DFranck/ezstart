@@ -30,7 +30,7 @@
  *   `<RequireEmailVerified>` UI affordances.
  */
 
-import 'server-only'
+import './_internal/server-only.js'
 
 import type { Request, Response, NextFunction } from 'express'
 

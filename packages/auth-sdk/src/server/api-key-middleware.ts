@@ -55,7 +55,7 @@
  * @module @ezstart/auth-sdk/server/api-key-middleware
  */
 
-import 'server-only'
+import './_internal/server-only.js'
 
 import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import {
