@@ -16,8 +16,13 @@
     "landingSubtitle": "Composants React prêts pour la production pour l'authentification, la gestion de compte, le billing et les dashboards admin. À glisser-déposer dans n'importe quelle app Next.js — zéro CSS à écrire.",
     "landingTotalComponents": "{count} composants",
     "landingTotalCategories": "{count} catégories",
+    "landingTotalEntries": "{count} entrées",
+    "landingTotalDomains": "{count} domaines",
+    "landingComponentsInDomain": "{count, plural, one {# composant} other {# composants}}",
     "landingShortcutHint": "⌘K pour chercher",
     "landingCategoriesHeading": "Parcourir par catégorie",
+    "landingFeatureBadge": "Variantes",
+    "landingFeatureDescription": "{count, plural, one {# variante — Form, Card ou Modal} other {# variantes — Form, Card ou Modal}}",
     "landingFooterTitle": "Démarrer",
     "landingFooterDescription": "Installez le package, configurez le provider, et déposez les composants dans votre app. Chaque composant arrive avec ses types TypeScript, ses textes anglais par défaut, et une prop `texts` pour l'i18n.",
     "categoryBackToOverview": "Retour à l'aperçu",
@@ -51,6 +56,40 @@
     "anatomySingleDescription": "Composant unique — pas de sous-parties à composer.",
     "anatomyCompoundDescription": "Ce fichier exporte des éléments supplémentaires que vous pouvez rendre ou étendre.",
     "anatomyExportsHeading": "Sous-exports",
-    "anatomyImportHeading": "Import"
+    "anatomyImportHeading": "Import",
+    "domain": {
+      "authForms": {
+        "title": "Formulaires d'authentification",
+        "description": "Connexion, inscription, reset password et vérification d'email — chaque flow existe en Form, Card ou Modal pour s'adapter à n'importe quel layout."
+      },
+      "authButtons": {
+        "title": "Boutons d'authentification",
+        "description": "CTAs prêts à l'emploi qui routent vers le flow d'auth hébergé — login, register, OAuth, magic link."
+      },
+      "userProfile": {
+        "title": "Profil utilisateur",
+        "description": "User menu, avatar, modal compte, settings, sessions et gestion des providers OAuth — tout ce qui vit derrière le dropdown utilisateur."
+      },
+      "dashboards": {
+        "title": "Dashboards",
+        "description": "Dashboards pré-composés : utilisateur final, admin, et le shell EZAuth fédéré qui propulse le hub @ezstart."
+      },
+      "applicationsKeys": {
+        "title": "Applications & clés",
+        "description": "CRUD applications, Developer Portal, tableaux de clés API, badges d'usage et modals de création."
+      },
+      "guardsBanners": {
+        "title": "Guards & bannières",
+        "description": "Guards d'auth, loaders, et bannières système (maintenance, dev mode, scope context, error)."
+      },
+      "security": {
+        "title": "Sécurité",
+        "description": "Indicateur de force du mot de passe, widget Turnstile, et les composants 2FA (settings + prompt)."
+      },
+      "audit": {
+        "title": "Audit",
+        "description": "Section audit log — surface drop-in pour les événements de sécurité d'un compte utilisateur."
+      }
+    }
   }
 }

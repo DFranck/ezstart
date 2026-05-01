@@ -16,8 +16,13 @@
     "landingSubtitle": "Các thành phần React sẵn sàng cho production cho xác thực, quản lý tài khoản, thanh toán và bảng admin. Thả vào bất kỳ ứng dụng Next.js nào — không cần viết CSS.",
     "landingTotalComponents": "{count} thành phần",
     "landingTotalCategories": "{count} danh mục",
+    "landingTotalEntries": "{count} mục",
+    "landingTotalDomains": "{count} miền",
+    "landingComponentsInDomain": "{count} thành phần",
     "landingShortcutHint": "⌘K để tìm kiếm",
     "landingCategoriesHeading": "Duyệt theo danh mục",
+    "landingFeatureBadge": "Biến thể",
+    "landingFeatureDescription": "{count} biến thể — Form, Card hoặc Modal",
     "landingFooterTitle": "Bắt đầu",
     "landingFooterDescription": "Cài đặt package, cấu hình provider và thả các thành phần vào ứng dụng của bạn. Mỗi thành phần đi kèm với các kiểu TypeScript, mặc định tiếng Anh và prop `texts` cho i18n.",
     "categoryBackToOverview": "Quay lại tổng quan",
@@ -51,6 +56,40 @@
     "anatomySingleDescription": "Thành phần đơn — không có phần phụ để kết hợp.",
     "anatomyCompoundDescription": "Tệp thành phần này xuất các phần bổ sung mà bạn có thể render hoặc mở rộng.",
     "anatomyExportsHeading": "Xuất phụ",
-    "anatomyImportHeading": "Import"
+    "anatomyImportHeading": "Import",
+    "domain": {
+      "authForms": {
+        "title": "Biểu mẫu xác thực",
+        "description": "Đăng nhập, đăng ký, đặt lại mật khẩu và xác minh email — mỗi luồng đi kèm dưới dạng Form, Card hoặc Modal."
+      },
+      "authButtons": {
+        "title": "Nút xác thực",
+        "description": "CTA sẵn sàng cho luồng xác thực được lưu trữ — login, register, OAuth, magic link."
+      },
+      "userProfile": {
+        "title": "Hồ sơ người dùng",
+        "description": "Menu người dùng, ảnh đại diện, modal tài khoản, cài đặt, phiên và quản lý nhà cung cấp OAuth."
+      },
+      "dashboards": {
+        "title": "Bảng điều khiển",
+        "description": "Bảng điều khiển dựng sẵn: người dùng cuối, admin, và shell EZAuth liên kết hub @ezstart."
+      },
+      "applicationsKeys": {
+        "title": "Ứng dụng & khóa",
+        "description": "CRUD ứng dụng, Developer Portal, bảng khóa API, huy hiệu sử dụng, và các modal tạo / đã tạo."
+      },
+      "guardsBanners": {
+        "title": "Guard & banner",
+        "description": "Auth guards, loaders, và banner hệ thống (bảo trì, chế độ dev, scope context, lỗi)."
+      },
+      "security": {
+        "title": "Bảo mật",
+        "description": "Chỉ báo độ mạnh mật khẩu, widget Turnstile, và các thành phần 2FA (settings + prompt)."
+      },
+      "audit": {
+        "title": "Audit",
+        "description": "Phần audit log — bề mặt drop-in cho các sự kiện liên quan đến bảo mật của tài khoản."
+      }
+    }
   }
 }

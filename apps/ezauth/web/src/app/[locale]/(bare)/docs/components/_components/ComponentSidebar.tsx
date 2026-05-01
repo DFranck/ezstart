@@ -1,17 +1,23 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { categories, categoryToSlug, componentToSlug } from '@ezstart/auth-sdk/components/registry'
+import {
+  categoryToSlug,
+  componentRegistry,
+  componentToSlug,
+} from '@ezstart/auth-sdk/components/registry'
 import { Aside, Badge, Button, Div, Icon, Input, P, Span } from '@ezstart/ui/components'
 import { Link, usePathname } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
+import { buildShowcaseTree, featureFallbackComponentName } from '../_lib/grouping'
 
 /**
- * Tree-style sidebar for the `/components` showcase. Categories are
- * collapsible; each category renders its components as nested links.
- * The active route (matched via `usePathname`) is highlighted. Mobile =
- * the sidebar collapses to a slide-in drawer toggled by the burger
- * button at the top.
+ * Tree-style sidebar for the `/docs/components` showcase. Domains
+ * (Auth Forms / Auth Buttons / User Profile / ...) act as collapsible
+ * headings; their entries render as nested links — feature groups
+ * (SignIn, SignUp, ...) collapse their variants under a single link
+ * pointing to the "primary" variant (the form). Active route is
+ * highlighted via `usePathname`. Mobile = slide-in drawer.
  */
 export function ComponentSidebar() {
   const pathname = usePathname()
@@ -19,16 +25,28 @@ export function ComponentSidebar() {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const filteredCategories = useMemo(() => {
-    if (!search.trim()) return categories
+  const sections = useMemo(() => buildShowcaseTree(componentRegistry), [])
+
+  const filteredSections = useMemo(() => {
+    if (!search.trim()) return sections
     const lower = search.toLowerCase()
-    return categories
-      .map(cat => ({
-        ...cat,
-        components: cat.components.filter(c => c.toLowerCase().includes(lower)),
+    return sections
+      .map(section => ({
+        ...section,
+        entries: section.entries.filter(entry => {
+          if (entry.kind === 'feature') {
+            return (
+              entry.group.name.toLowerCase().includes(lower) ||
+              entry.group.variants.some(v =>
+                `${v.entry.name} ${v.label}`.toLowerCase().includes(lower)
+              )
+            )
+          }
+          return entry.entry.name.toLowerCase().includes(lower)
+        }),
       }))
-      .filter(cat => cat.components.length > 0 || cat.name.toLowerCase().includes(lower))
-  }, [search])
+      .filter(section => section.entries.length > 0)
+  }, [sections, search])
 
   return (
     <>
@@ -93,50 +111,80 @@ export function ComponentSidebar() {
         <Div className="flex-1 overflow-y-auto px-2 py-3">
           <nav aria-label={t('sidebarNavLabel')}>
             <ul className="space-y-3">
-              {filteredCategories.map(cat => {
-                const catSlug = categoryToSlug(cat.name)
-                return (
-                  <li key={cat.name}>
-                    <Div className="mb-1 flex items-center justify-between px-2">
-                      <Link
-                        href={`/docs/components/${catSlug}`}
-                        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => setOpen(false)}
-                      >
-                        {cat.name}
-                      </Link>
-                      <Badge variant="outline" size="xs" className="font-mono">
-                        {cat.components.length}
-                      </Badge>
-                    </Div>
-                    <ul className="space-y-0.5">
-                      {cat.components.map(name => {
-                        const slug = componentToSlug(name)
-                        const href = `/docs/components/${catSlug}/${slug}`
-                        const active = pathname.endsWith(`/docs/components/${catSlug}/${slug}`)
+              {filteredSections.map(section => (
+                <li key={section.key}>
+                  <Div className="mb-1 flex items-center justify-between px-2">
+                    <Span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {t(`domain.${section.key}.title`)}
+                    </Span>
+                    <Badge variant="outline" size="xs" className="font-mono">
+                      {section.componentCount}
+                    </Badge>
+                  </Div>
+                  <ul className="space-y-0.5">
+                    {section.entries.map(entry => {
+                      if (entry.kind === 'feature') {
+                        const fallbackName = featureFallbackComponentName(entry.group)
+                        const fallbackEntry = componentRegistry.find(c => c.name === fallbackName)
+                        if (!fallbackEntry) return null
+                        const catSlug = categoryToSlug(fallbackEntry.category)
+                        const compSlug = componentToSlug(fallbackName)
+                        const href = `/docs/components/${catSlug}/${compSlug}`
+                        // Feature link is "active" if any of its variant pages
+                        // is currently rendered.
+                        const active = entry.group.variants.some(v => {
+                          const vCatSlug = categoryToSlug(v.entry.category)
+                          const vCompSlug = componentToSlug(v.entry.name)
+                          return pathname.endsWith(`/docs/components/${vCatSlug}/${vCompSlug}`)
+                        })
                         return (
-                          <li key={name}>
+                          <li key={`feat-${entry.group.slug}`}>
                             <Link
                               href={href}
                               onClick={() => setOpen(false)}
                               className={[
-                                'block rounded-md px-3 py-1.5 text-sm transition-colors',
+                                'flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors',
                                 active
                                   ? 'bg-accent text-accent-foreground font-medium'
                                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                               ].join(' ')}
                               aria-current={active ? 'page' : undefined}
                             >
-                              {name}
+                              <Span>{entry.group.name}</Span>
+                              <Span className="ml-2 inline-flex items-center gap-1 text-[10px] font-mono opacity-70">
+                                {entry.group.variants.map(v => v.label[0]).join('/')}
+                              </Span>
                             </Link>
                           </li>
                         )
-                      })}
-                    </ul>
-                  </li>
-                )
-              })}
-              {filteredCategories.length === 0 && (
+                      }
+                      const single = entry.entry
+                      const catSlug = categoryToSlug(single.category)
+                      const compSlug = componentToSlug(single.name)
+                      const href = `/docs/components/${catSlug}/${compSlug}`
+                      const active = pathname.endsWith(`/docs/components/${catSlug}/${compSlug}`)
+                      return (
+                        <li key={single.name}>
+                          <Link
+                            href={href}
+                            onClick={() => setOpen(false)}
+                            className={[
+                              'block rounded-md px-3 py-1.5 text-sm transition-colors',
+                              active
+                                ? 'bg-accent text-accent-foreground font-medium'
+                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                            ].join(' ')}
+                            aria-current={active ? 'page' : undefined}
+                          >
+                            {single.name}
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </li>
+              ))}
+              {filteredSections.length === 0 && (
                 <li className="px-3 py-6 text-center text-sm text-muted-foreground">
                   {t('sidebarEmpty')}
                 </li>

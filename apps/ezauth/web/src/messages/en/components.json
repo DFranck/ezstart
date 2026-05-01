@@ -16,8 +16,13 @@
     "landingSubtitle": "Production-grade React components for authentication, account management, billing, and admin dashboards. Drop them into any Next.js app — zero CSS to write.",
     "landingTotalComponents": "{count} components",
     "landingTotalCategories": "{count} categories",
+    "landingTotalEntries": "{count} entries",
+    "landingTotalDomains": "{count} domains",
+    "landingComponentsInDomain": "{count, plural, one {# component} other {# components}}",
     "landingShortcutHint": "⌘K to search",
     "landingCategoriesHeading": "Browse by category",
+    "landingFeatureBadge": "Variants",
+    "landingFeatureDescription": "{count, plural, one {# variant — Form, Card, or Modal} other {# variants — Form, Card, or Modal}}",
     "landingFooterTitle": "Get started",
     "landingFooterDescription": "Install the package, configure the provider, and start dropping components into your app. Every component ships with TypeScript types, English defaults, and a `texts` prop for i18n.",
     "categoryBackToOverview": "Back to overview",
@@ -51,6 +56,40 @@
     "anatomySingleDescription": "Single component — no sub-parts to compose.",
     "anatomyCompoundDescription": "This component file exports additional pieces you can render or extend.",
     "anatomyExportsHeading": "Sub-exports",
-    "anatomyImportHeading": "Import"
+    "anatomyImportHeading": "Import",
+    "domain": {
+      "authForms": {
+        "title": "Auth Forms",
+        "description": "Sign in, sign up, password reset, and email verification — every flow ships as Form, Card, or Modal so you can drop the right primitive in any layout."
+      },
+      "authButtons": {
+        "title": "Auth Buttons",
+        "description": "Drop-in CTAs that route to the hosted auth flow — login, register, OAuth, magic link."
+      },
+      "userProfile": {
+        "title": "User Profile",
+        "description": "User menu, avatar, account modal, settings, sessions, and OAuth-providers management — everything that lives behind the user dropdown."
+      },
+      "dashboards": {
+        "title": "Dashboards",
+        "description": "Pre-composed dashboards: end-user, admin, and the federated EZAuth shell that powers the @ezstart hub."
+      },
+      "applicationsKeys": {
+        "title": "Applications & Keys",
+        "description": "Application CRUD, the Developer Portal, API key tables, usage badges, and the create / created modals."
+      },
+      "guardsBanners": {
+        "title": "Guards & Banners",
+        "description": "Auth guards, loaders, and the system-wide banners (maintenance, dev mode, scope context, error)."
+      },
+      "security": {
+        "title": "Security",
+        "description": "Password strength meter, Turnstile widget, and the two-factor settings + prompt."
+      },
+      "audit": {
+        "title": "Audit",
+        "description": "Audit log section — drop-in surface for security-relevant events on a user account."
+      }
+    }
   }
 }
