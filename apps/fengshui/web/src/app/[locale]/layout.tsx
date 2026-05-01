@@ -1,4 +1,5 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
 import { ThemeProvider } from '@ezstart/ui/theme'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
@@ -10,6 +11,7 @@ import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Inter } from 'next/font/google'
+import { headers } from 'next/headers'
 import Script from 'next/script'
 import ClientLayout from './client-layout'
 
@@ -68,6 +70,18 @@ export default async function RootLayout({
   const { locale } = await params
   const messages = await getMessages()
 
+  // SSR auth bootstrap (Clerk-style) — kills the LoginButton flash in
+  // httpOnly mode. Reads the session cookie from the inbound request,
+  // resolves the user via `/api/auth/me` server-side, and seeds the
+  // Zustand store synchronously when `<AuthProvider>` mounts (via
+  // `initialUser`). Anonymous requests still work: returns `null`.
+  const headersList = await headers()
+  const cookieHeader = headersList.get('cookie')
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
+    cookieHeader,
+  })
+
   return (
     <html lang={locale} suppressHydrationWarning data-app="fengshui">
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
@@ -86,6 +100,7 @@ export default async function RootLayout({
                   apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
                   webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
                   publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
+                  initialUser={initialUser}
                 >
                   <PayProvider
                     appName="fengshui"

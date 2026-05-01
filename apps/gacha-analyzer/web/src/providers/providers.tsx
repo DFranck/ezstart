@@ -1,6 +1,6 @@
 'use client'
 
-import { AuthProvider } from '@ezstart/auth-sdk'
+import { AuthProvider, type AuthUser } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/ui/theme'
 import { globalThemeCss } from '@ezstart/ui/styles'
 import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
@@ -13,12 +13,22 @@ export function Providers({
   locale,
   timeZone,
   enableThemeSelector = false,
+  initialUser,
 }: {
   children: React.ReactNode
   messages: AbstractIntlMessages
   locale: Locale
   timeZone: string
   enableThemeSelector?: boolean
+  /**
+   * SSR-resolved user — passed down from the locale-root layout, which
+   * calls `getServerAuth()` from `@ezstart/auth-sdk/server` against the
+   * request cookie. Hydrates the auth store synchronously on first
+   * render so the chrome (UserMenu vs LoginButton) renders correctly on
+   * the very first paint — no flash on initial load or cross-group
+   * navigations.
+   */
+  initialUser?: AuthUser | null
 }) {
   return (
     <QueryProvider>
@@ -29,6 +39,7 @@ export function Providers({
         webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
         publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
         jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}
+        initialUser={initialUser}
       >
         <ThemeProvider
           attribute="class"
