@@ -30,7 +30,8 @@ export interface RateLimitOptions {
 
   /**
    * Maximum requests per window per bucket (see keyGenerator)
-   * @default 500 in prod, 1000 in dev
+   * @default 2000 in prod, 5000 in dev — V1 pro-ready scaling, ~133 req/min
+   * average per authenticated user (Clerk-niveau headroom).
    */
   max?: number
 
@@ -85,10 +86,16 @@ function defaultKeyGenerator(req: Request): string {
 }
 
 /**
- * Standard rate limiter (500 req/15min per user, 1000 in dev)
+ * Standard rate limiter (2000 req/15min per user, 5000 in dev) — V1 pro-ready
  *
  * Buckets requests per authenticated user (or per API key, or per IP for
  * anonymous traffic) — see {@link defaultKeyGenerator}.
+ *
+ * Caps tuned for Clerk-niveau scaling: ~133 req/min average per authenticated
+ * user covers active power users, admins, and testers without disturbing real
+ * usage (long sessions, multi-tab, dashboard polling). When usage-based billing
+ * tiers go live (V2), bump per-tier (e.g., Free 500/15min, Pro 5000/15min,
+ * Enterprise unlimited).
  *
  * @example
  * ```typescript
@@ -102,7 +109,7 @@ export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequ
 
   const {
     windowMs = 15 * 60 * 1000, // 15 minutes
-    max = isDev ? 1000 : 500, // Per-bucket limit (per-user, per-key, or per-IP for anon)
+    max = isDev ? 5000 : 2000, // Per-bucket limit (per-user, per-key, or per-IP for anon) — V1 pro-ready
     message = 'Too many requests, please try again later.',
     skipPaths = ['/api/health'],
     keyGenerator = defaultKeyGenerator,

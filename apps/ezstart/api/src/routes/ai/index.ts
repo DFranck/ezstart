@@ -36,16 +36,20 @@ const router: import('express').Router = Router()
 
 // Chat — optional auth (anonymous users can chat, logged-in users get conversations saved)
 // Stream route BEFORE chat to avoid /chat catching /chat/stream
+//
+// V1 pro-ready: 200 req/min per user covers chat (active typing + SSE streaming +
+// multi-tab + admin panel) without disturbing real users. Bump higher (500+) when
+// usage-based billing tiers go live.
 router.use(
   '/chat/stream',
   optionalAuthMiddleware,
-  createRateLimiter({ windowMs: 60 * 1000, max: 100 }),
+  createRateLimiter({ windowMs: 60 * 1000, max: 200 }),
   streamRouter
 )
 router.use(
   '/chat',
   optionalAuthMiddleware,
-  createRateLimiter({ windowMs: 60 * 1000, max: 100 }),
+  createRateLimiter({ windowMs: 60 * 1000, max: 200 }),
   chatRouter
 )
 router.use('/conversations', conversationsRouter)
