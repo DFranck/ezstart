@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, Div, Dropdown, type DropdownItem, Icon, Span } from '@ezstart/ui/components'
+import { useDeprecationWarning } from '@ezstart/ui/hooks'
 import { useState } from 'react'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 import { useAuth } from '../react/hooks.js'
@@ -140,9 +141,13 @@ function getDefaultTexts(locale: AuthLocale | string | undefined): UserMenuTexts
 // ─── Component ───────────────────────────────────────────────────────────────
 
 /**
- * V1 user dropdown menu showing avatar, account info, theme switcher,
- * language switcher, and sign-out action. Renders a sign-in CTA when the
- * user is not authenticated.
+ * V1 user dropdown menu (compact list pattern) showing avatar, account info,
+ * theme switcher, language switcher, and sign-out action. Renders a sign-in
+ * CTA when the user is not authenticated.
+ *
+ * @deprecated Use `UserMenuV2` for the modern dropdown panel pattern (avatar
+ * + identity card + email-verified badge + plan badge + notifications +
+ * sign-out-all). `UserMenu` will be removed 2026-08-01. See migration guide.
  *
  * @example
  * ```tsx
@@ -171,6 +176,10 @@ export function UserMenu({
   signInProps,
   locale: propLocale,
 }: UserMenuProps) {
+  useDeprecationWarning(
+    'UserMenu (V1) from @ezstart/auth-sdk',
+    'UserMenuV2 from @ezstart/auth-sdk/components'
+  )
   const { user, isAuthenticated, login, logout, isLoggingIn, setLoggingIn, isLoggingOut } =
     useAuth()
   const navigation = useAuthNavigation()

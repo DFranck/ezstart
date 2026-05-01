@@ -11,6 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@ezstart/ui/components'
+import { useDeprecationWarning } from '@ezstart/ui/hooks'
 import { ImageCropper } from '@ezstart/capture-sdk'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -49,7 +50,7 @@ export interface AccountModalProps {
 }
 
 /**
- * Account management modal split into two tabs:
+ * V1 account management modal (simple tab modal pattern) split into two tabs:
  * - **Profile** — avatar, name, email + verification, connected accounts
  * - **Settings** — password, advanced security (SSO handoff to EZAuth web),
  *   theme switcher, language switcher
@@ -60,6 +61,10 @@ export interface AccountModalProps {
  * `./account/AccountProfileSection.tsx` and
  * `./account/AccountSettingsSection.tsx` to keep each file under the
  * 400-line policy ceiling.
+ *
+ * @deprecated Use `AccountModalV2` for the modern modal with sidebar nav
+ * (collapses to Sheet on mobile, sidebar on tablet/desktop). Matches modern
+ * account management UX. `AccountModal` will be removed 2026-08-01.
  *
  * @example
  * ```tsx
@@ -87,6 +92,10 @@ export function AccountModal({
   googleOAuthUrl,
   ezauthWebUrl,
 }: AccountModalProps) {
+  useDeprecationWarning(
+    'AccountModal (V1) from @ezstart/auth-sdk',
+    'AccountModalV2 from @ezstart/auth-sdk/components'
+  )
   const { user, accessToken } = useAuth()
   const { client, appName, webUrl: contextWebUrl } = useAuthContext()
   const storeApi = useAuthStoreApi()

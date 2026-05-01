@@ -59,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+- `UserMenu` (V1) — use `UserMenuV2` for the modern dropdown panel pattern (avatar + identity card + email-verified badge + plan badge + notifications + sign-out-all). Backward-compat preserved: V1 continues to function, just emits a `useDeprecationWarning` at mount. Removal planned 2026-08-01. Migration: `import { UserMenuV2 } from '@ezstart/auth-sdk/components'`.
+- `AccountModal` (V1) — use `AccountModalV2` for the modern modal with sidebar nav (Sheet on mobile, sidebar on tablet/desktop). Backward-compat preserved: V1 continues to function, just emits a `useDeprecationWarning` at mount. Removal planned 2026-08-01. Migration: `import { AccountModalV2 } from '@ezstart/auth-sdk/components'`.
 - `AuthErrorBanner` — moved to `@ezstart/ui` as `ErrorAlert`. Re-exported with deprecation warning. Removal planned 2026-08-01. Migration: `import { ErrorAlert } from '@ezstart/ui/components'`.
 - `ScopeContextIndicator` — moved to `@ezstart/ui` as `ScopeContextSwitcher`. Re-exported with deprecation warning. Removal planned 2026-08-01. Migration: `import { ScopeContextSwitcher } from '@ezstart/ui/components'`.
 - `PasswordStrength` — moved to `@ezstart/ui`. Re-exported with deprecation warning. Removal planned 2026-08-01. Migration: `import { PasswordStrength } from '@ezstart/ui/components'`.
