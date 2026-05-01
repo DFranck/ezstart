@@ -8,7 +8,9 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getPromoModel } from '../../models/Promo.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -34,7 +36,11 @@ const updatePromoSchema = z.object({
     .positive()
     .optional()
     .describe('Discount value (e.g. 20 for 20% or 500 for $5.00)'),
-  currency: z.string().regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code').optional().describe('ISO 4217 currency code (required for fixed discounts)'),
+  currency: z
+    .string()
+    .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
+    .optional()
+    .describe('ISO 4217 currency code (required for fixed discounts)'),
   duration: z
     .enum(['once', 'repeating', 'forever'])
     .optional()
@@ -120,6 +126,17 @@ const updatePromoHandler = async (req: Request, res: Response) => {
 
     logger.info(`Promo updated: ${promo.code} for ${promo.appName}`)
 
+    void auditLogService.createFromRequest(req, {
+      action: 'promo.updated',
+      userId: req.userId,
+      metadata: {
+        promoId: String(promo._id),
+        code: promo.code,
+        appName: promo.appName,
+        updatedFields: Object.keys(updates),
+      },
+    })
+
     sendSuccess(res, { promo })
   } catch (error) {
     logger.error('Update promo error:', error instanceof Error ? error : String(error))
@@ -131,7 +148,7 @@ const updatePromoHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.patch('/promos/:id', authMiddleware, populateUserFromToken, updatePromoHandler, {
+docRouter.patch('/promos/:id', authJwtOrKey({ requireKeyScope: 'admin' }), updatePromoHandler, {
   summary: 'Update a promo code (admin only)',
   tags: ['Promos'],
   bodySchema: updatePromoSchema,

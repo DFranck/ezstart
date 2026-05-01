@@ -8,7 +8,9 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getPromoModel } from '../../models/Promo.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -83,6 +85,18 @@ const createPromoHandler = async (req: Request, res: Response) => {
 
     logger.info(`Promo created: ${promo.code} for ${promo.appName}`)
 
+    void auditLogService.createFromRequest(req, {
+      action: 'promo.created',
+      userId: req.userId,
+      metadata: {
+        promoId: String(promo._id),
+        code: promo.code,
+        appName: promo.appName,
+        discountType: promo.discountType,
+        discountValue: promo.discountValue,
+      },
+    })
+
     res.status(201)
     sendSuccess(res, { promo })
   } catch (error) {
@@ -99,7 +113,7 @@ const createPromoHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/promos', authMiddleware, populateUserFromToken, createPromoHandler, {
+docRouter.post('/promos', authJwtOrKey({ requireKeyScope: 'admin' }), createPromoHandler, {
   summary: 'Create a promo code (admin only)',
   tags: ['Promos'],
   bodySchema: createPromoSchema,

@@ -29,7 +29,8 @@ import {
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getPlanModel } from '../../models/Plan.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
@@ -179,24 +180,18 @@ const changePlanHandler = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post(
-  '/subscriptions/:subscriptionId/change-plan',
-  authMiddleware,
-  populateUserFromToken,
-  changePlanHandler,
-  {
-    summary: 'Change the plan on an active subscription (upgrade / downgrade)',
-    tags: ['Subscriptions'],
-    bodySchema: changePlanBodySchema,
-    responseSchema: changePlanResponseSchema,
-    extraResponses: {
-      400: { description: 'Validation error', schema: errorResponseSchema },
-      401: { description: 'Authentication required', schema: errorResponseSchema },
-      403: { description: 'Not the subscription owner', schema: errorResponseSchema },
-      404: { description: 'Subscription or plan not found', schema: errorResponseSchema },
-    },
-  }
-)
+docRouter.post('/subscriptions/:subscriptionId/change-plan', authJwtOrKey(), changePlanHandler, {
+  summary: 'Change the plan on an active subscription (upgrade / downgrade)',
+  tags: ['Subscriptions'],
+  bodySchema: changePlanBodySchema,
+  responseSchema: changePlanResponseSchema,
+  extraResponses: {
+    400: { description: 'Validation error', schema: errorResponseSchema },
+    401: { description: 'Authentication required', schema: errorResponseSchema },
+    403: { description: 'Not the subscription owner', schema: errorResponseSchema },
+    404: { description: 'Subscription or plan not found', schema: errorResponseSchema },
+  },
+})
 
 export { changePlanRegistry as registry, router }
 export default router

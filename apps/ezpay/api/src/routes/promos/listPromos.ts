@@ -8,7 +8,8 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getPromoModel } from '../../models/Promo.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -89,7 +90,7 @@ const listPromosHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/promos', authMiddleware, populateUserFromToken, listPromosHandler, {
+docRouter.get('/promos', authJwtOrKey({ requireKeyScope: 'admin' }), listPromosHandler, {
   summary: 'List promo codes (admin only)',
   tags: ['Promos'],
   querySchema: listPromosQuerySchema,

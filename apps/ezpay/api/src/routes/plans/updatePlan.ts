@@ -10,10 +10,12 @@ import {
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getPlanModel } from '../../models/Plan.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplication } from '../../services/ezauth-client.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
 import { repriceStripePlan, type PlanPriceSnapshot } from '../../services/stripe-plan-sync.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 
 export const updatePlanRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -192,6 +194,19 @@ const updatePlanHandler = async (req: Request, res: Response) => {
 
     logger.info(`Plan updated: ${plan.name} for applicationId=${plan.applicationId}`)
 
+    void auditLogService.createFromRequest(req, {
+      action: 'plan.updated',
+      userId,
+      metadata: {
+        planId: String(plan._id),
+        applicationId: plan.applicationId,
+        appSlug: application.slug,
+        priceChanged,
+        productMetaChanged,
+        updatedFields: Object.keys(updates),
+      },
+    })
+
     sendSuccess(res, { plan })
   } catch (error) {
     logger.error('Update plan error:', error instanceof Error ? error : String(error))
@@ -203,7 +218,7 @@ const updatePlanHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.patch('/plans/:id', authMiddleware, populateUserFromToken, updatePlanHandler, {
+docRouter.patch('/plans/:id', authJwtOrKey({ requireKeyScope: 'admin' }), updatePlanHandler, {
   summary: 'Update a subscription plan (owner or superadmin)',
   tags: ['Plans'],
   bodySchema: updatePlanSchema,

@@ -10,9 +10,11 @@ import {
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getPlanModel } from '../../models/Plan.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplication } from '../../services/ezauth-client.js'
 import { syncPlanToStripe } from '../../services/stripe-plan-sync.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 
 export const createPlanRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -140,6 +142,19 @@ const createPlanHandler = async (req: Request, res: Response) => {
 
     logger.info(`Plan created: ${plan.name} for applicationId=${plan.applicationId}`)
 
+    void auditLogService.createFromRequest(req, {
+      action: 'plan.created',
+      userId,
+      metadata: {
+        planId: String(plan._id),
+        applicationId: plan.applicationId,
+        appSlug: application.slug,
+        amount: plan.amount,
+        currency: plan.currency,
+        interval: plan.interval,
+      },
+    })
+
     res.status(201)
     sendSuccess(res, { plan })
   } catch (error) {
@@ -152,7 +167,7 @@ const createPlanHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/plans', authMiddleware, populateUserFromToken, createPlanHandler, {
+docRouter.post('/plans', authJwtOrKey({ requireKeyScope: 'admin' }), createPlanHandler, {
   summary: 'Create a subscription plan (owner or superadmin)',
   tags: ['Plans'],
   bodySchema: createPlanSchema,

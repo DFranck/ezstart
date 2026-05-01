@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { getPlanModel } from '../../models/Plan.js'
 import { lookupApplicationBySlug } from '../../services/ezauth-client.js'
 import { isAdminUser } from '../../middleware/auth.js'
+import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 
 export const listPlansRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -128,8 +129,10 @@ const listPlansHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-// PUBLIC — no auth middleware (users need to see plans on pricing pages)
-docRouter.get('/plans', listPlansHandler, {
+// PUBLIC — anonymous OK (users need to see plans on pricing pages). When the
+// caller IS authenticated (JWT cookie OR admin API key), `req.user` is
+// populated so `isAdminUser` can honour `?includeInactive=true`.
+docRouter.get('/plans', authOptionalJwtOrKey(), listPlansHandler, {
   summary: 'List subscription plans (public)',
   tags: ['Plans'],
   querySchema: listPlansQuerySchema,

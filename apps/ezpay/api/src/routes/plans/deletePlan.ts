@@ -10,9 +10,11 @@ import {
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getPlanModel } from '../../models/Plan.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplication } from '../../services/ezauth-client.js'
 import { archivePlanInStripe } from '../../services/stripe-plan-sync.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 
 export const deletePlanRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -106,6 +108,17 @@ const deletePlanHandler = async (req: Request, res: Response) => {
 
     logger.info(`Plan soft-deleted: ${plan.name} for applicationId=${plan.applicationId}`)
 
+    void auditLogService.createFromRequest(req, {
+      action: 'plan.deleted',
+      userId,
+      metadata: {
+        planId: String(plan._id),
+        applicationId: plan.applicationId,
+        appSlug: application.slug,
+        name: plan.name,
+      },
+    })
+
     sendSuccess(res, plan)
   } catch (error) {
     logger.error('Delete plan error:', error instanceof Error ? error : String(error))
@@ -117,7 +130,7 @@ const deletePlanHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.delete('/plans/:id', authMiddleware, populateUserFromToken, deletePlanHandler, {
+docRouter.delete('/plans/:id', authJwtOrKey({ requireKeyScope: 'admin' }), deletePlanHandler, {
   summary: 'Delete a subscription plan (owner or superadmin)',
   tags: ['Plans'],
   responseSchema: deletePlanResponseSchema,

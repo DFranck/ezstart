@@ -9,7 +9,7 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { listApplicationsByOwner } from '../../services/ezauth-client.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -146,19 +146,12 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get(
-  '/subscriptions',
-  authMiddleware,
-  populateUserFromToken,
-  attachDerivedScope,
-  getSubscriptionsHandler,
-  {
-    summary: 'List subscriptions (auto-scoped: superadmin = all, admin = owned apps, user = own)',
-    tags: ['Subscriptions'],
-    querySchema: subscriptionsQuerySchema,
-    responseSchema: subscriptionsListResponseSchema,
-  }
-)
+docRouter.get('/subscriptions', authJwtOrKey(), attachDerivedScope, getSubscriptionsHandler, {
+  summary: 'List subscriptions (auto-scoped: superadmin = all, admin = owned apps, user = own)',
+  tags: ['Subscriptions'],
+  querySchema: subscriptionsQuerySchema,
+  responseSchema: subscriptionsListResponseSchema,
+})
 
 export { listSubscriptionsRegistry as registry, router }
 export default router
