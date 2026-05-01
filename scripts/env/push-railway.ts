@@ -10,6 +10,15 @@
  *   pnpm env:push:railway ezpay production
  *   pnpm env:push:railway ezpay staging --override STRIPE_WEBHOOK_SECRET=whsec_xxx --dry-run
  *
+ * Multi-project Railway support:
+ *   Different apps in the monorepo live in different Railway projects (e.g.
+ *   green-pulse-api in `TeamProjects`, ezauth/ezpay/ezstart/ezbill in
+ *   `ezstart-apis`). The mapping app → { project, service } is declared in
+ *   `scripts/env/railway-projects.ts`. Before pushing, the script automatically
+ *   runs `railway link -p <project> -s <service> -e <env>` so each push targets
+ *   the correct project regardless of what was previously linked locally.
+ *   Adding a new app = 1 line in `RAILWAY_APP_PROJECTS`.
+ *
  * Cascade (PER-APP ONLY — no root layer, lowest → highest precedence):
  *   local       → apps/<app>/api/.env.local
  *   staging     → apps/<app>/api/.env.local  ←  apps/<app>/api/.env.staging
@@ -41,6 +50,7 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import * as dotenv from 'dotenv'
+import { getRailwayAppConfig, type RailwayAppConfig } from './railway-projects.js'
 
 type TargetEnv = 'local' | 'staging' | 'production'
 
@@ -69,6 +79,49 @@ function checkRailwayCli(): void {
   const result = spawnSync('railway', ['--version'], { encoding: 'utf-8', shell: true })
   if (result.status !== 0) {
     fail('Railway CLI not found. Install via:\n  npm i -g @railway/cli\n  OR  brew install railway')
+  }
+}
+
+/**
+ * Switch the local Railway link to the target project + service + environment.
+ *
+ * Railway CLI 4.x does NOT expose `--project` on `variable set`, so the only
+ * way to push variables to a service in a project that isn't currently linked
+ * is to call `railway link -p <project> -s <service> -e <env>` first. This
+ * function does that idempotently.
+ *
+ * If the link command fails (project not found, service not found, missing
+ * workspace permission), the function exits with a clear error message that
+ * includes the project + service we tried to link to — much more actionable
+ * than the generic "Service not found" the CLI emits when the linked project
+ * doesn't contain the target service.
+ */
+function linkRailwayProject(config: RailwayAppConfig, env: TargetEnv): void {
+  const args = [
+    'link',
+    '--project',
+    config.project,
+    '--service',
+    config.serviceName,
+    '--environment',
+    env,
+  ]
+  if (config.workspace) {
+    args.push('--workspace', config.workspace)
+  }
+  const result = spawnSync('railway', args, {
+    encoding: 'utf-8',
+    shell: true,
+  })
+  if (result.status !== 0) {
+    const stderr = result.stderr ?? ''
+    fail(
+      `Failed to link Railway project=${config.project} service=${config.serviceName} env=${env}\n` +
+        `  Railway CLI exit code: ${result.status}\n` +
+        `  stderr: ${stderr.trim() || '(empty)'}\n` +
+        `  Hint: verify the project + service exist via \`railway list\` and ` +
+        `that you are logged in via \`railway whoami\`.`
+    )
   }
 }
 
@@ -279,6 +332,19 @@ if (isDirectRun) {
     )
   }
 
+  // Look up which Railway project + service this app maps to. Fail loudly if
+  // the app isn't in the map — silently defaulting to `<app>-api` would mask
+  // typos and route to the wrong project.
+  const railwayConfig = getRailwayAppConfig(app)
+  if (!railwayConfig) {
+    fail(
+      `No Railway project mapping for app="${app}".\n` +
+        `  Add it to scripts/env/railway-projects.ts:\n` +
+        `    ${app}: { project: '<railway-project-name>', serviceName: '${app}-api' },\n` +
+        `  See \`railway list\` for available projects.`
+    )
+  }
+
   if (!flags.dryRun) checkRailwayCli()
 
   // Production blocklist — filter TEST_*, DEBUG_*, _LOCAL_*, DEV_* unless --include-blocked.
@@ -308,10 +374,15 @@ if (isDirectRun) {
   }
 
   // ── Push ────────────────────────────────────────────────────
-  // Railway service names = `<app>-api` convention (ezauth-api, ezpay-api, etc.)
-  const service = `${app}-api`
+  // Service name + Railway project come from RAILWAY_APP_PROJECTS (see
+  // scripts/env/railway-projects.ts). Different apps live in different
+  // Railway projects; the convention is usually <app>-api but the map is the
+  // source of truth.
+  const service = railwayConfig.serviceName
   const action = flags.dryRun ? 'Would push' : 'Pushing'
-  console.info(`${action} ${Object.keys(merged).length} vars to Railway service "${service}"...\n`)
+  console.info(
+    `${action} ${Object.keys(merged).length} vars to Railway project="${railwayConfig.project}" service="${service}" env="${env}"...\n`
+  )
 
   // Log (with masking) what we will push before any actual CLI call.
   for (const [k, v] of Object.entries(merged)) {
@@ -321,10 +392,19 @@ if (isDirectRun) {
 
   if (flags.dryRun) {
     console.info(
-      `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to "${service}"`
+      `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to ` +
+        `project="${railwayConfig.project}" service="${service}" env="${env}"`
     )
     process.exit(0)
   }
+
+  // Switch the local Railway link to the target project + service + env BEFORE
+  // pushing. The CLI 4.x doesn't expose `--project` on `variable set`, so this
+  // is the only way to route a push to a service that lives in a project other
+  // than the one currently linked. Idempotent — re-linking to the already
+  // linked project is a no-op.
+  console.info(`🔗 Linking Railway: project=${railwayConfig.project} service=${service} env=${env}`)
+  linkRailwayProject(railwayConfig, targetEnv)
 
   // Use `railway variable set KEY --stdin` to pass the value via stdin instead
   // of via argv. Rationale:
@@ -338,6 +418,9 @@ if (isDirectRun) {
   //   - Empty values are skipped: Railway rejects them via stdin. Empty env
   //     vars in source files represent "intentionally absent" — Railway will
   //     simply not have that var, matching local behavior.
+  //   - `--service` + `--environment` are passed defensively even though the
+  //     link above sets them as the active link; this guards against any
+  //     future code path that switches the link mid-loop.
   const allEntries = Object.entries(merged)
   const skipped: string[] = []
   const entries = allEntries.filter(([k, v]) => {
@@ -354,7 +437,7 @@ if (isDirectRun) {
   for (let i = 0; i < entries.length; i++) {
     const [k, v] = entries[i]
     const isLast = i === entries.length - 1
-    const args = ['variable', 'set', '--service', service, k, '--stdin']
+    const args = ['variable', 'set', '--service', service, '--environment', env, k, '--stdin']
     if (!isLast) args.push('--skip-deploys')
     const result = spawnSync('railway', args, {
       input: v,
@@ -367,5 +450,7 @@ if (isDirectRun) {
     pushed++
   }
 
-  console.info(`\n✅ Pushed ${pushed} vars to Railway service "${service}"`)
+  console.info(
+    `\n✅ Pushed ${pushed} vars to Railway project="${railwayConfig.project}" service="${service}" env="${env}"`
+  )
 }

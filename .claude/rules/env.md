@@ -75,6 +75,8 @@ pnpm env:push:all production --only-web       # Web only
 pnpm env:push:all production --continue-on-error  # don't fail-fast
 ```
 
+**Multi-project Railway routing :** chaque app a un mapping explicite `app → { project, serviceName }` dans [`scripts/env/railway-projects.ts`](../../scripts/env/railway-projects.ts). Avant chaque push, `push-railway.ts` exécute automatiquement `railway link -p <project> -s <service> -e <env>` pour cibler la bonne project Railway, indépendamment du link local courant. Ex: `green-pulse-api` vit dans `TeamProjects`, les autres apps dans `ezstart-apis`. Ajouter une nouvelle app = une ligne dans `RAILWAY_APP_PROJECTS`. Si l'app n'est pas dans le map, le push échoue immédiatement avec une erreur claire (zéro silent fallback).
+
 ### 5. Helpers env (`@ezstart/config/env-resolvers`)
 
 - `getMongoUrl(app)` — résout `{app}` dans MONGO_URL template
