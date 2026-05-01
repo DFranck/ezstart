@@ -43,8 +43,8 @@
       "import": "./dist/components/index.js"
     },
     "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.js"
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
     },
     "./providers": {
       "types": "./dist/core/providers/index.d.ts",
@@ -61,10 +61,12 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@ezstart/api-core": "workspace:*",
     "@ezstart/api-sdk": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "recharts": "2.15.4",
+    "server-only": "^0.0.1",
     "sonner": "^2.0.3",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
@@ -81,6 +83,7 @@
     "jsdom": "^29.0.2",
     "next": "^15.5.9",
     "react": "^19.1.1",
+    "stripe": "^22.0.0",
     "typescript": "^5.7.3",
     "vitest": "^4.1.4"
   },
@@ -88,13 +91,17 @@
     "@ezstart/logger": "workspace:*",
     "@tanstack/react-query": "^5",
     "next": "^15",
-    "react": "^18"
+    "react": "^18",
+    "stripe": "^22"
   },
   "peerDependenciesMeta": {
     "@ezstart/logger": {
       "optional": true
     },
     "@tanstack/react-query": {
+      "optional": true
+    },
+    "stripe": {
       "optional": true
     }
   }
