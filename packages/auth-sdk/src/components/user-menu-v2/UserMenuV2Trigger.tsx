@@ -31,6 +31,15 @@ export interface UserMenuV2TriggerProps {
  *
  * Touch target ≥ 44×44px on mobile (size=icon Button is 44×44 by default).
  *
+ * Accessibility — `aria-haspopup` semantics differ by auth state:
+ * - Authenticated: rendered INSIDE `<Dropdown>` whose wrapping `<div role="button">`
+ *   already announces `aria-haspopup="menu"`. Adding it on the inner button
+ *   creates a redundant double-announcement, so we omit it here.
+ * - Not authenticated: the trigger fires `login()` which performs a hard
+ *   `window.location.href` redirect to the EZAuth sign-in page — a page
+ *   navigation, NOT a popup. Setting `aria-haspopup` would mislead screen
+ *   readers into expecting a menu / dialog that never appears.
+ *
  * @internal
  */
 export function UserMenuV2Trigger({
@@ -63,7 +72,6 @@ export function UserMenuV2Trigger({
         size="icon"
         className={`relative rounded-full cursor-pointer ${className ?? ''}`.trim()}
         aria-label={ariaLabel}
-        aria-haspopup="menu"
         onClick={onClick}
         disabled={isLoggingIn}
       >
@@ -99,7 +107,6 @@ export function UserMenuV2Trigger({
         className ?? ''
       }`.trim()}
       aria-label={ariaLabel}
-      aria-haspopup="menu"
       onClick={onClick}
       disabled={isLoggingIn}
     >
