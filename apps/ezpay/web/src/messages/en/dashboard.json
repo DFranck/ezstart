@@ -4,8 +4,7 @@
     "nav": {
       "overview": "Overview",
       "account": "Account",
-      "applications": "Applications",
-      "apiKeys": "API Keys",
+      "applications": "Developer",
       "billing": "Billing",
       "usage": "Usage",
       "settings": "Settings"
