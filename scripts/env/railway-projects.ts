@@ -4,7 +4,7 @@
  * Different apps in the @ezstart monorepo live in different Railway projects:
  *   - ezstart-apis project   → ezauth-api, ezpay-api, ezstart-api, ezbill-api,
  *                              gacha-analyzer-api
- *   - TeamProjects project   → green-pulse-api
+ *   - TeamProjects project   → greenpulse-api
  *
  * Without this map, `pnpm env:push:railway <app>` would have to rely on whatever
  * project is currently `railway link`ed locally, and pushing to an app in a
@@ -35,7 +35,7 @@ export const RAILWAY_APP_PROJECTS: Record<string, RailwayAppConfig> = {
   ezstart: { project: 'ezstart-apis', serviceName: 'ezstart-api' },
   ezbill: { project: 'ezstart-apis', serviceName: 'ezbill-api' },
   'gacha-analyzer': { project: 'ezstart-apis', serviceName: 'gacha-analyzer-api' },
-  'green-pulse': { project: 'TeamProjects', serviceName: 'green-pulse-api' },
+  'green-pulse': { project: 'TeamProjects', serviceName: 'greenpulse-api' },
   // asc-tcd: no API layer (web-only)
   // fengshui: no API layer (web-only)
 }
