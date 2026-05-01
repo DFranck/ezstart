@@ -280,6 +280,34 @@ function extractCategoryTag(content, componentName) {
 }
 
 /**
+ * Detect if a component declaration is marked `@internal` in its
+ * immediately-preceding TSDoc block. Defensive filter — even if an
+ * @internal-tagged component leaks into the components index, it should
+ * not be surfaced in the public registry / docs.
+ *
+ * Returns true ONLY when the `@internal` tag is found inside the comment
+ * block directly attached to the named declaration. Comments that appear
+ * earlier in the file are ignored.
+ */
+function isInternalComponent(content, componentName) {
+  const declRegex = new RegExp(
+    `(?:export\\s+)?(?:function|const)\\s+${componentName}\\b`
+  )
+  const declMatch = declRegex.exec(content)
+  if (!declMatch) return false
+  const before = content.slice(0, declMatch.index)
+  const lastClose = before.lastIndexOf('*/')
+  if (lastClose === -1) return false
+  // Comment must be directly attached (only whitespace between */ and decl)
+  const tail = before.slice(lastClose + 2)
+  if (tail.trim() !== '') return false
+  const lastOpen = before.lastIndexOf('/**', lastClose)
+  if (lastOpen === -1) return false
+  const raw = before.slice(lastOpen + 3, lastClose)
+  return /@internal\b/.test(raw)
+}
+
+/**
  * Extract content between matching braces, starting after the opening
  * brace.
  */
@@ -498,6 +526,10 @@ function main() {
     const content = readFile(sourcePath)
     if (!content) continue
 
+    // Skip components explicitly marked @internal in their TSDoc — they are
+    // implementation details not meant for the public docs surface.
+    if (isInternalComponent(content, name)) continue
+
     const { summary, description, examples } = extractDocAndExamples(content, name)
     const category = resolveCategory(name, sourcePath)
     const props = extractProps(sourcePath, name)
@@ -607,7 +639,12 @@ function main() {
     '',
   ].join('\n')
 
-  fs.writeFileSync(OUTPUT, output)
+  // Atomic write: write to a temp file first, then rename. Eliminates any
+  // window where the registry file exists in a half-written state on disk
+  // (HMR / concurrent reader / crashed run).
+  const tmpPath = OUTPUT + '.tmp'
+  fs.writeFileSync(tmpPath, output)
+  fs.renameSync(tmpPath, OUTPUT)
   console.log(
     `[auth-sdk:generate] Wrote ${entries.length} components in ${categories.length} categories → ${path.relative(ROOT, OUTPUT)}`
   )

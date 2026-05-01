@@ -254,6 +254,35 @@ function resolveSourceFile(fromDir, importPath) {
 }
 
 /**
+ * Detect if a component declaration is marked `@internal` in its
+ * immediately-preceding TSDoc block. Defensive filter — even if an
+ * @internal-tagged component leaks into the components index, it should
+ * not be surfaced in the public registry / inspector.
+ *
+ * Returns true ONLY when the `@internal` tag is found inside the comment
+ * block directly attached to the named declaration. Comments that appear
+ * earlier in the file are ignored.
+ */
+function isInternalComponent(content, componentName) {
+  if (!content) return false
+  const declRegex = new RegExp(
+    `(?:export\\s+)?(?:function|const)\\s+${componentName}\\b`
+  )
+  const declMatch = declRegex.exec(content)
+  if (!declMatch) return false
+  const before = content.slice(0, declMatch.index)
+  const lastClose = before.lastIndexOf('*/')
+  if (lastClose === -1) return false
+  // Comment must be directly attached (only whitespace between */ and decl)
+  const tail = before.slice(lastClose + 2)
+  if (tail.trim() !== '') return false
+  const lastOpen = before.lastIndexOf('/**', lastClose)
+  if (lastOpen === -1) return false
+  const raw = before.slice(lastOpen + 3, lastClose)
+  return /@internal\b/.test(raw)
+}
+
+/**
  * Check if a name looks like a React component (PascalCase, not a type/hook)
  */
 function isComponentName(name) {
@@ -1636,6 +1665,14 @@ function main() {
 
   for (const [name, sourcePath] of mainEntries) {
     try {
+      // Skip components explicitly marked @internal in their TSDoc — they
+      // are implementation details not meant for the public inspector.
+      const sourceContent = readFile(sourcePath)
+      if (sourceContent && isInternalComponent(sourceContent, name)) {
+        skipped++
+        continue
+      }
+
       // Extract props
       const props = extractProps(sourcePath, name)
 
@@ -1875,7 +1912,12 @@ function main() {
     fs.mkdirSync(outputDir, { recursive: true })
   }
 
-  fs.writeFileSync(OUTPUT, output, 'utf-8')
+  // Atomic write: write to a temp file first, then rename. Eliminates any
+  // window where the registry file exists in a half-written state on disk
+  // (concurrent reader / HMR / crashed run / stale partial buffer).
+  const tmpPath = OUTPUT + '.tmp'
+  fs.writeFileSync(tmpPath, output, 'utf-8')
+  fs.renameSync(tmpPath, OUTPUT)
   console.log(`\nRegistry written to: ${toRelativePath(OUTPUT)}`)
   console.log(`  ${Object.keys(registry).length} components registered`)
   console.log(`  ${popularChains.length} popular chains`)
