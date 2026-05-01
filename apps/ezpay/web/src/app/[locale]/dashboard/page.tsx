@@ -215,7 +215,6 @@ export default function EZPayDashboardPage() {
     <EZAuthDashboard
       appName="ezpay"
       locale={locale}
-      apiKeysEnabled
       hasOwnedApps={hasOwnedApps}
       homeHref={`/${locale}`}
       texts={dashboardTexts}
