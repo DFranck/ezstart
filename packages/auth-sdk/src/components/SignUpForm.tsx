@@ -13,6 +13,7 @@ import {
   FormMessage,
   Input,
   PasswordInput,
+  PasswordStrength,
   Span,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
@@ -20,12 +21,11 @@ import { logger } from './internal-logger.js'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { PasswordStrength } from './PasswordStrength.js'
 import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
 import { readUtmSource } from './utmSource.js'
 import { DevModeBanner } from './DevModeBanner.js'
-import { TurnstileWidget } from './TurnstileWidget.js'
+import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
 import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'

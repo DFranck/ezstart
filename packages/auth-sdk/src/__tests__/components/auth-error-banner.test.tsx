@@ -1,9 +1,14 @@
 /**
- * AuthErrorBanner — public surface tests.
+ * AuthErrorBanner — deprecated re-export contract test.
  *
- * Pin the contract for the SDK component extracted from
- * `apps/ezauth/web/src/components/AuthErrorBanner.tsx` so consumers can rely
- * on it as a stable primitive across all consumer apps.
+ * The component was moved to `@ezstart/ui` as `ErrorAlert` (2026-05-01).
+ * The auth-sdk surface is preserved for 90 days as a deprecated re-export
+ * (planned removal 2026-08-01). This test pins the contract that the
+ * re-export keeps producing the same accessible alert markup so consumers
+ * can migrate at their own pace.
+ *
+ * The exhaustive behaviour suite lives in
+ * `@ezstart/ui/__tests__/components/feedback/error-alert.test.tsx`.
  */
 import React from 'react'
 import { describe, it, expect } from 'vitest'
@@ -11,37 +16,15 @@ import { render, screen } from '@testing-library/react'
 
 const { AuthErrorBanner } = await import('../../components/auth-error-banner.js')
 
-describe('AuthErrorBanner', () => {
-  it('renders the error message passed via children', () => {
+describe('AuthErrorBanner (deprecated re-export)', () => {
+  it('renders the error message via children (backward-compat surface)', () => {
     render(<AuthErrorBanner>Invalid credentials</AuthErrorBanner>)
     const alert = screen.getByRole('alert')
     expect(alert).toBeInTheDocument()
     expect(alert).toHaveTextContent('Invalid credentials')
   })
 
-  it('renders complex ReactNode children (rich content, links, etc.)', () => {
-    render(
-      <AuthErrorBanner>
-        <span data-testid="rich-child">Reset your password</span>
-      </AuthErrorBanner>
-    )
-    expect(screen.getByTestId('rich-child')).toBeInTheDocument()
-  })
-
-  it('still renders the alert wrapper when children is null/false (consumer guard up to caller)', () => {
-    // The component itself does not short-circuit on falsy children — the
-    // caller is responsible for the conditional render. We simply assert the
-    // alert wrapper is present so styling/role contract holds either way.
-    render(<AuthErrorBanner>{null}</AuthErrorBanner>)
-    expect(screen.getByRole('alert')).toBeInTheDocument()
-  })
-
-  it('uses the default English aria-label when no texts override is provided', () => {
-    render(<AuthErrorBanner>Boom</AuthErrorBanner>)
-    expect(screen.getByRole('alert')).toHaveAttribute('aria-label', 'Authentication error')
-  })
-
-  it('honours the texts prop override (i18n hook-in point)', () => {
+  it('honours the texts prop override (i18n hook-in stays compatible)', () => {
     render(
       <AuthErrorBanner texts={{ ariaLabel: 'Erreur d’authentification' }}>
         Identifiants invalides
@@ -57,7 +40,6 @@ describe('AuthErrorBanner', () => {
     const alert = screen.getByRole('alert')
     expect(alert.className).toContain('mt-4')
     expect(alert.className).toContain('custom-x')
-    // Default destructive styling is preserved
     expect(alert.className).toContain('bg-destructive/15')
   })
 })

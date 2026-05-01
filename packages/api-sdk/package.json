@@ -45,6 +45,10 @@
     "./react": {
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.js"
+    },
+    "./integrations": {
+      "types": "./dist/integrations/index.d.ts",
+      "import": "./dist/integrations/index.js"
     }
   },
   "scripts": {
@@ -74,8 +78,14 @@
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
     "@tanstack/react-query": "^5.0.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.1.9",
+    "jsdom": "^29.0.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "typescript": "^5.7.3",
     "vitest": "^3.0.0"
   }

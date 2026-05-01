@@ -1,9 +1,21 @@
+/**
+ * PasswordStrength — deprecated re-export contract test.
+ *
+ * The component was moved to `@ezstart/ui` (2026-05-01). The auth-sdk
+ * surface is preserved for 90 days as a deprecated re-export (planned
+ * removal 2026-08-01). This test pins the contract that the re-export
+ * keeps producing the same label so consumers can migrate at their own
+ * pace.
+ *
+ * The exhaustive behaviour suite lives in
+ * `@ezstart/ui/__tests__/components/forms/password-strength.test.tsx`.
+ */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 import { PasswordStrength } from '../../components/PasswordStrength.js'
 
-describe('PasswordStrength', () => {
+describe('PasswordStrength (deprecated re-export)', () => {
   it('renders nothing when password is empty', () => {
     const { container } = render(<PasswordStrength password="" />)
     expect(container.innerHTML).toBe('')
@@ -12,17 +24,6 @@ describe('PasswordStrength', () => {
   it('shows "Weak" for short simple password', () => {
     render(<PasswordStrength password="abc" />)
     expect(screen.getByText('Weak')).toBeInTheDocument()
-  })
-
-  it('shows "Fair" for medium-complexity password', () => {
-    render(<PasswordStrength password="abc123" />)
-    expect(screen.getByText('Fair')).toBeInTheDocument()
-  })
-
-  it('shows "Good" for good password', () => {
-    // score: >=6(1) + >=10(1) + lower(1) + upper(1) + digit(1) = 5 → good
-    render(<PasswordStrength password="Abc1234567" />)
-    expect(screen.getByText('Good')).toBeInTheDocument()
   })
 
   it('shows "Strong" for complex password', () => {
@@ -38,13 +39,5 @@ describe('PasswordStrength', () => {
       />
     )
     expect(screen.getByText('Faible')).toBeInTheDocument()
-  })
-
-  it('renders 4 strength bars', () => {
-    const { container } = render(<PasswordStrength password="abc" />)
-    // 4 bars rendered as Div elements
-    const bars = container.querySelectorAll('[data-testid="Div"] > [data-testid="Div"]')
-    // The structure has a flex container with 4 child divs
-    expect(bars.length).toBeGreaterThanOrEqual(0) // verify no crash
   })
 })

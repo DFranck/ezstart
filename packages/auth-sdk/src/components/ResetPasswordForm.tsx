@@ -11,6 +11,7 @@ import {
   FormMessage,
   P,
   PasswordInput,
+  PasswordStrength,
   Span,
   Spinner,
 } from '@ezstart/ui/components'
@@ -19,7 +20,6 @@ import { logger } from './internal-logger.js'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { PasswordStrength } from './PasswordStrength.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 

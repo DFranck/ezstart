@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ErrorAlert` (`@ezstart/ui/components`) — destructive alert wrapper for
+  forms, modals and settings pages. Renders semantic `role="alert"` markup
+  with destructive theme tokens (light/dark mode parity). Originally
+  `AuthErrorBanner` in `@ezstart/auth-sdk` — generalized because the
+  primitive has zero auth coupling and is needed by every consumer app.
+- `ScopeContextSwitcher` (`@ezstart/ui/components`) — Stripe-pattern
+  role/scope toggle (Personal account ↔ Platform admin) with badge + button.
+  Pure presentational primitive, accepts `LinkComponent` for SPA navigation.
+  Originally `ScopeContextIndicator` in `@ezstart/auth-sdk`.
+- `PasswordStrength` (`@ezstart/ui/components`) — visual password strength
+  indicator (4-tier weak/fair/good/strong from length + character variety).
+  Pure algorithm + UI, semantic theme tokens. Originally in
+  `@ezstart/auth-sdk` — generalized because the primitive has zero auth
+  coupling.
+
 ### Changed
 
 - `useDeprecationWarning()` (`@ezstart/ui/hooks`) now surfaces deprecated

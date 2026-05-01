@@ -286,6 +286,142 @@ vi.mock('@ezstart/ui/components', () => {
     ChartContainer: passthrough('ChartContainer'),
     ChartTooltip: passthrough('ChartTooltip'),
     ChartTooltipContent: passthrough('ChartTooltipContent'),
+    // ── Migrated UI primitives (formerly in @ezstart/auth-sdk) ──────────────
+    // Each renders the underlying semantic markup the deprecated re-export
+    // wrappers expect (role="alert", data-scope, etc.).
+    PasswordStrength: ({
+      password,
+      texts,
+    }: {
+      password: string
+      texts?: { weak?: string; fair?: string; good?: string; strong?: string }
+    }) => {
+      if (!password) return null
+      // Mirror the score logic from the real implementation so consumers can
+      // assert the rendered label.
+      let score = 0
+      if (password.length >= 6) score++
+      if (password.length >= 10) score++
+      if (password.length >= 14) score++
+      if (/[a-z]/.test(password)) score++
+      if (/[A-Z]/.test(password)) score++
+      if (/[0-9]/.test(password)) score++
+      if (/[^a-zA-Z0-9]/.test(password)) score++
+      let label: 'weak' | 'fair' | 'good' | 'strong'
+      if (score <= 2) label = 'weak'
+      else if (score <= 4) label = 'fair'
+      else if (score <= 5) label = 'good'
+      else label = 'strong'
+      const dict: Record<typeof label, string> = {
+        weak: texts?.weak ?? 'Weak',
+        fair: texts?.fair ?? 'Fair',
+        good: texts?.good ?? 'Good',
+        strong: texts?.strong ?? 'Strong',
+      }
+      return React.createElement('p', { 'data-testid': 'PasswordStrength' }, dict[label])
+    },
+    ErrorAlert: ({
+      children,
+      className,
+      texts,
+    }: {
+      children?: React.ReactNode
+      className?: string
+      texts?: { ariaLabel?: string }
+    }) =>
+      React.createElement(
+        'div',
+        {
+          role: 'alert',
+          'aria-label': texts?.ariaLabel ?? 'Error',
+          className: ['bg-destructive/15', className].filter(Boolean).join(' '),
+        },
+        children
+      ),
+    ScopeContextSwitcher: ({
+      scope,
+      canSwitchToAdmin,
+      switchPath,
+      LinkComponent,
+      texts,
+      className,
+    }: {
+      scope: 'user' | 'admin'
+      canSwitchToAdmin: boolean
+      switchPath: string
+      LinkComponent?: React.ComponentType<{
+        href: string
+        children: React.ReactNode
+        className?: string
+      }>
+      texts?: {
+        userMode?: string
+        adminMode?: string
+        switchToAdmin?: string
+        switchToUser?: string
+      }
+      className?: string
+    }) => {
+      const isAdmin = scope === 'admin'
+      const badgeLabel = isAdmin
+        ? (texts?.adminMode ?? 'Platform admin')
+        : (texts?.userMode ?? 'Personal account')
+      const toggleLabel = isAdmin
+        ? (texts?.switchToUser ?? 'Switch to personal')
+        : (texts?.switchToAdmin ?? 'Switch to admin')
+      const ResolvedLink =
+        LinkComponent ??
+        (({ href, children: c }: { href: string; children: React.ReactNode }) =>
+          React.createElement('a', { href }, c))
+      return React.createElement(
+        'span',
+        { 'data-scope': scope, className },
+        React.createElement('span', { 'aria-label': badgeLabel }, badgeLabel),
+        canSwitchToAdmin
+          ? React.createElement(ResolvedLink, { href: switchPath }, toggleLabel)
+          : null
+      )
+    },
+  }
+})
+
+// ---------------------------------------------------------------------------
+// Mock @ezstart/ui/hooks
+// ---------------------------------------------------------------------------
+vi.mock('@ezstart/ui/hooks', () => ({
+  useDeprecationWarning: vi.fn(),
+  useClickOutside: vi.fn(),
+  useDevice: vi.fn(),
+  useInView: vi.fn(),
+  useOnScroll: vi.fn(),
+}))
+
+// ---------------------------------------------------------------------------
+// Mock @ezstart/api-sdk/integrations (TurnstileWidget moved here 2026-05-01)
+// ---------------------------------------------------------------------------
+vi.mock('@ezstart/api-sdk/integrations', () => {
+  const React = require('react')
+  return {
+    TurnstileWidget: ({
+      siteKey,
+      className,
+    }: {
+      siteKey?: string
+      onSuccess?: (token: string) => void
+      onError?: (err: unknown) => void
+      onExpired?: () => void
+      theme?: 'light' | 'dark' | 'auto'
+      appearance?: 'always' | 'execute' | 'interaction-only'
+      className?: string
+      logger?: { warn: (msg: string, data?: unknown) => void }
+    }) => {
+      if (!siteKey) return null
+      return React.createElement('div', {
+        'data-testid': 'TurnstileWidget',
+        'data-sitekey': siteKey,
+        className,
+      })
+    },
   }
 })
 
