@@ -220,3 +220,29 @@ export {
 // Railway). We capture manually from `createErrorHandler` — see
 // `core/middleware/error-handler.ts`.
 export { captureException, initSentry, type InitSentryOptions } from './observability/index.js'
+
+// ---------------------------------------------------------------------------
+// Audit log — schema factory + writer service (per-service `audit_logs` coll.)
+// ---------------------------------------------------------------------------
+//
+// Each SaaS service builds its own model + service via the factories below,
+// passing a per-service `actions` enum. Single source of truth for the
+// schema (collection name, indexes, TTL, test/live partition) so ezauth /
+// ezpay / future services never drift on the audit log shape.
+//
+// See `standard-saas-security.md` §3 (audit logs P1-mandatory) and
+// `standard-saas-data.md` §4 (test/live partition).
+export {
+  computeAuditLogExpiry,
+  createAuditLogSchema,
+  createAuditLogService,
+  DEFAULT_AUDIT_LOG_RETENTION_DAYS,
+  type AuditLogDocument,
+  type AuditLogLogger,
+  type AuditLogMetadata,
+  type AuditLogModelLike,
+  type AuditLogService,
+  type CreateAuditLogInput,
+  type CreateAuditLogSchemaOptions,
+  type CreateAuditLogServiceOptions,
+} from './core/audit-log/index.js'
