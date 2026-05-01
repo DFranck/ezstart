@@ -18,6 +18,8 @@
  * cookie / token leaks to the browser bundle.
  */
 
+import 'server-only'
+
 // ---------------------------------------------------------------------------
 // SSR auth bootstrap (Clerk-style)
 // ---------------------------------------------------------------------------
@@ -139,6 +141,20 @@ export { createApiKeySchema } from './api-key-schema.js'
 export type { CreateApiKeySchemaOptions } from './api-key-schema.js'
 
 export { createApiKeyUsageSchema } from './api-key-usage-schema.js'
+
+// ---------------------------------------------------------------------------
+// API-key-only middleware factory (Express) — when JWT path is not desired
+// ---------------------------------------------------------------------------
+
+export { createApiKeyMiddleware } from './api-key-middleware.js'
+export type {
+  ApiKeyMiddleware,
+  ApiKeyMiddlewareConfig,
+  ApiKeyMiddlewareLogger,
+  ApiKeyModelLike,
+  ApiKeyUsageModelLike,
+  ApiKeyShape,
+} from './api-key-middleware.js'
 
 // RBAC types and helpers re-exported for server use
 export * from '../rbac/types.js'
