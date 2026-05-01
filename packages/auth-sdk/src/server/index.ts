@@ -131,6 +131,15 @@ export type {
   ApiKeyDoc,
 } from './auth-middleware.js'
 
+// ---------------------------------------------------------------------------
+// Mongoose schema factories (ApiKey + ApiKeyUsage)
+// ---------------------------------------------------------------------------
+
+export { createApiKeySchema } from './api-key-schema.js'
+export type { CreateApiKeySchemaOptions } from './api-key-schema.js'
+
+export { createApiKeyUsageSchema } from './api-key-usage-schema.js'
+
 // RBAC types and helpers re-exported for server use
 export * from '../rbac/types.js'
 export * from '../rbac/helpers.js'

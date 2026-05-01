@@ -1,12 +1,14 @@
-// force-dynamic required: layout mounts AuthProvider/PayProvider which
-// hydrate runtime auth state via httpOnly cookie at request time. SSG
-// prerender crashed without this (regression caught in commit 6b56cb95
-// "fix(staging): resolve 4 build failures"). Re-evaluate once SSR
-// auth bootstrap (initialUser via getServerAuth) lands in this layout.
+// force-dynamic required: layout calls getServerAuth() which reads the
+// session cookie from the inbound request — inherently per-request, cannot
+// be statically prerendered. SSR auth bootstrap (initialUser via
+// getServerAuth) is wired below; this kills the LoginButton flash on
+// httpOnly cookie auth (cf. nextjs.md §1, standard-saas.md §2.1).
 export const dynamic = 'force-dynamic'
 
 import { Providers } from '@/components/providers'
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
+import { logger } from '@ezstart/logger/server'
 import { generateOrganizationSchema } from '@ezstart/seo-config'
 import {
   createEnhancedMetadata,
@@ -18,6 +20,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import ClientLayout from './client-layout'
@@ -68,6 +71,22 @@ export default async function LocaleLayout(props: {
   const messages = await getMessages()
   const timeZone = getTimeZoneFromLocale(locale)
 
+  // SSR auth bootstrap (Clerk-style) — kills the LoginButton flash in
+  // httpOnly mode. Reads the session cookie from the inbound request,
+  // resolves the user via `/api/auth/me` server-side, and seeds the
+  // Zustand store synchronously when `<AuthProvider>` mounts (via
+  // `initialUser`). The first paint of `<UserMenu>` / `<LoginButton>` /
+  // `<RequireAuth>` then reflects the right state — no async client-side
+  // gap during which the store defaults to `isAuthenticated: false`.
+  // Anonymous requests still work: `getServerAuth()` returns `null`.
+  const headersList = await headers()
+  const cookieHeader = headersList.get('cookie')
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
+    cookieHeader,
+    logger,
+  })
+
   return (
     <html lang={locale} suppressHydrationWarning data-app="ezstart">
       <head>
@@ -104,7 +123,12 @@ export default async function LocaleLayout(props: {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ErrorBoundary title="Something went wrong in EZStart">
-          <Providers messages={messages} locale={locale} timeZone={timeZone}>
+          <Providers
+            messages={messages}
+            locale={locale}
+            timeZone={timeZone}
+            initialUser={initialUser}
+          >
             <ClientLayout>{children}</ClientLayout>
           </Providers>
         </ErrorBoundary>

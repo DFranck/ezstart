@@ -1,9 +1,12 @@
 import { connectToMongo } from '@ezstart/api-core'
-import { Schema, Types, type Document, type Model } from 'mongoose'
+import { createApiKeySchema } from '@ezstart/auth-sdk/server'
+import type { Document, Model, Types } from 'mongoose'
 
 // NOTE: this model intentionally does NOT use `testModeScopePlugin` even
-// though it carries `isTestMode` — see the comment near the schema indexes
-// for the chicken-and-egg rationale.
+// though it carries `isTestMode` — the schema factory documents the
+// chicken-and-egg rationale (the auth middleware looks up keys to discover
+// the request mode, so scoping queries by mode before the lookup is
+// impossible).
 
 /**
  * Key type — derived from modern prefix (`ez_pk_*` vs `ez_sk_*`).
@@ -71,114 +74,18 @@ export interface ApiKeyDocument extends Document {
   isTestMode: boolean
 }
 
-const apiKeySchema = new Schema<ApiKeyDocument>(
-  {
-    key: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
-    keyPrefix: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 100,
-    },
-    userId: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    appName: {
-      type: String,
-      default: '*',
-    },
-    applicationId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Application',
-      required: false,
-      index: true,
-    },
-    type: {
-      type: String,
-      enum: ['publishable', 'secret'],
-      required: false,
-    },
-    env: {
-      type: String,
-      enum: ['live', 'test'],
-      required: false,
-    },
-    scope: {
-      // Modern values first; legacy 'test' / 'live' retained for read-compat with existing docs.
-      type: String,
-      enum: ['admin', 'user', 'readonly', 'test', 'live'],
-      default: 'user',
-    },
-    permissions: {
-      type: [String],
-      default: ['*'],
-    },
-    status: {
-      type: String,
-      enum: ['active', 'revoked'],
-      default: 'active',
-    },
-    lastUsedAt: {
-      type: Date,
-      default: null,
-    },
-    expiresAt: {
-      type: Date,
-      default: null,
-    },
-    revokedAt: {
-      type: Date,
-      default: null,
-    },
-    quotaMonthly: {
-      type: Number,
-      default: 1000,
-    },
-    createdBy: {
-      type: String,
-      required: false,
-      index: true,
-    },
-    isTestMode: {
-      type: Boolean,
-      required: true,
-      default: false,
-      index: true,
-    },
-  },
-  {
-    timestamps: true,
-    collection: 'api_keys',
-    bufferCommands: false,
-  }
-)
-
-// Compound index for user lookups
-apiKeySchema.index({ userId: 1, status: 1 })
-// Compound index for Application scope lookups (list active keys of an app)
-apiKeySchema.index({ applicationId: 1, status: 1 })
-
-// IMPORTANT: API keys are intentionally NOT auto-scoped by `isTestMode`.
-// The auth middleware (`validateApiKey`) MUST be able to look up a key by its
-// hash regardless of the current request's mode — the very purpose of the
-// lookup is to discover the mode. Auto-scoping here would create a chicken-
-// and-egg problem (no `req.derivedMode` until the key is found, but no key
-// can be found without `req.derivedMode`). Mode scoping happens downstream
-// on the data tables (Application, AuditLog, ...).
-//
-// We still keep the `isTestMode` field for forward-compat (analytics by mode,
-// admin dashboards) but skip the plugin attachment.
+// Build the schema via the @ezstart/auth-sdk/server factory. Ezauth keeps the
+// legacy scope values for read-compat and stores `applicationId` as an
+// ObjectId (same DB as `Application`).
+const apiKeySchema = createApiKeySchema({
+  scopeEnum: ['admin', 'user', 'readonly', 'test', 'live'],
+  applicationIdType: 'objectId',
+  requireApplicationId: false,
+  requireType: false,
+  requireEnv: false,
+  includeAppName: true,
+  appNameDefault: '*',
+})
 
 /**
  * Factory function to get ApiKey model attached to shared connection.

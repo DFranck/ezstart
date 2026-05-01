@@ -7,11 +7,17 @@
  * time via the ezauth-client S2S service. `appSlug` is a denormalised cache of
  * `application.slug` for logs, audits, and fast filtering without a lookup.
  *
+ * The actual schema shape is built via `createApiKeySchema` from
+ * `@ezstart/auth-sdk/server` — this module only declares the typed Document
+ * interface and the per-app `getApiKeyModel()` factory wired to the
+ * `connectToMongo('ezpay')` singleton.
+ *
  * @module apps/ezpay/api/src/models/api-key
  */
 
 import { connectToMongo } from '@ezstart/api-core'
-import { Schema, type Document, type Model } from 'mongoose'
+import { createApiKeySchema } from '@ezstart/auth-sdk/server'
+import type { Document, Model } from 'mongoose'
 
 /**
  * Key type — derived from modern prefix (`ez_pk_*` vs `ez_sk_*`).
@@ -69,103 +75,26 @@ export interface ApiKeyDocument extends Document {
   updatedAt: Date
 }
 
-const apiKeySchema = new Schema<ApiKeyDocument>(
-  {
-    key: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
-    keyPrefix: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 100,
-    },
-    userId: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    applicationId: {
-      type: String,
-      required: true,
-      index: true,
-    },
+// Build the schema via the @ezstart/auth-sdk/server factory. Ezpay enforces
+// the strict modern scope set, requires `applicationId` (cross-DB string ref),
+// requires `type` + `env`, and adds the `appSlug` denormalised cache. It does
+// NOT carry the `appName` field (replaced by `appSlug`).
+const apiKeySchema = createApiKeySchema({
+  scopeEnum: ['admin', 'user', 'readonly'],
+  applicationIdType: 'string',
+  requireApplicationId: true,
+  requireType: true,
+  requireEnv: true,
+  includeAppName: false,
+  extraFields: {
     appSlug: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
     },
-    type: {
-      type: String,
-      enum: ['publishable', 'secret'],
-      required: true,
-    },
-    env: {
-      type: String,
-      enum: ['live', 'test'],
-      required: true,
-    },
-    scope: {
-      type: String,
-      enum: ['admin', 'user', 'readonly'],
-      default: 'user',
-    },
-    permissions: {
-      type: [String],
-      default: ['*'],
-    },
-    status: {
-      type: String,
-      enum: ['active', 'revoked'],
-      default: 'active',
-    },
-    lastUsedAt: {
-      type: Date,
-      default: null,
-    },
-    expiresAt: {
-      type: Date,
-      default: null,
-    },
-    revokedAt: {
-      type: Date,
-      default: null,
-    },
-    quotaMonthly: {
-      type: Number,
-      default: 1000,
-    },
-    createdBy: {
-      type: String,
-      required: false,
-      index: true,
-    },
-    isTestMode: {
-      type: Boolean,
-      required: true,
-      default: false,
-      index: true,
-    },
   },
-  {
-    timestamps: true,
-    collection: 'api_keys',
-    bufferCommands: false,
-  }
-)
-
-// Compound index for user-scoped lookups (list active keys per user).
-apiKeySchema.index({ userId: 1, status: 1 })
-// Compound index for Application-scoped lookups (list active keys per tenant).
-apiKeySchema.index({ applicationId: 1, status: 1 })
+})
 
 /**
  * Factory function to get the EZPay ApiKey model attached to the shared
