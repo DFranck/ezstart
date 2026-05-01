@@ -1,6 +1,16 @@
 'use client'
 
-import { Card, CardContent, Div, Icon, P, Span, Spinner } from '@ezstart/ui/components'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Div,
+  Icon,
+  P,
+  Spinner,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { type ReactNode } from 'react'
 
@@ -17,6 +27,11 @@ interface PreviewFrameProps {
  * Wraps a live component demo in a card with a checkered background. Shows
  * a spinner while the demo is dynamically importing, and a friendly
  * fallback when the demo doesn't exist.
+ *
+ * The "DEMO MODE" callout uses the `<Card intent="warning">` semantic-color
+ * pattern (no absolute-overlay hack). The header is structurally part of
+ * the preview card — `CardHeader` for the banner + `CardContent` for the
+ * sandbox visual.
  */
 export function PreviewFrame({ demo, demoError, fallbackText }: PreviewFrameProps) {
   const t = useTranslations('components')
@@ -47,21 +62,18 @@ export function PreviewFrame({ demo, demoError, fallbackText }: PreviewFrameProp
   }
 
   return (
-    <Card variant="default" className="overflow-hidden relative">
-      <CardContent className="relative bg-[linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted)),_linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted))] bg-[length:20px_20px] bg-[position:0_0,_10px_10px] p-6 md:p-10">
-        <Div
-          className="absolute top-3 left-3 z-10 max-w-[280px] space-y-0.5 rounded-md border border-warning/40 bg-warning/15 px-3 py-2 text-warning-foreground backdrop-blur-sm"
-          role="note"
-        >
-          <Div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-            <Icon name="lucide:FlaskConical" className="h-3.5 w-3.5" />
-            <Span>{t('demoModeBanner.title')}</Span>
-          </Div>
-          <P className="text-[11px] leading-snug text-warning-foreground/80">
-            {t('demoModeBanner.description')}
-          </P>
-        </Div>
-        <Div className="flex items-center justify-center min-h-[240px] pt-12">{demo}</Div>
+    <Card variant="default" intent="warning" className="overflow-hidden py-0 sm:py-0">
+      <CardHeader className="bg-warning/10 border-b border-warning/30 py-3">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wide">
+          <Icon name="lucide:FlaskConical" className="h-4 w-4" />
+          {t('demoModeBanner.title')}
+        </CardTitle>
+        <CardDescription className="text-xs text-warning-foreground/80">
+          {t('demoModeBanner.description')}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="bg-[linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted)),_linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted))] bg-[length:20px_20px] bg-[position:0_0,_10px_10px] p-6 md:p-10">
+        <Div className="flex items-center justify-center min-h-[200px]">{demo}</Div>
       </CardContent>
     </Card>
   )

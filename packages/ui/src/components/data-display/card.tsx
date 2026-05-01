@@ -31,6 +31,19 @@ import {
  * <Card interactive hover="lift" onClick={() => {}}>
  *   <CardContent>Click me!</CardContent>
  * </Card>
+ *
+ * @example
+ * // Semantic-color callout card (Mantine `color` / Chakra `colorScheme`
+ * // pattern) — adds a tinted border + soft tinted background that
+ * // composes on top of the `variant` base styling. Default `intent="none"`
+ * // means zero break for existing usages.
+ * <Card intent="warning">
+ *   <CardHeader>
+ *     <CardTitle>Demo mode</CardTitle>
+ *     <CardDescription>This sandbox resets every 24h.</CardDescription>
+ *   </CardHeader>
+ *   <CardContent>Content goes here…</CardContent>
+ * </Card>
  */
 
 type DensityValue = 'compact' | 'default' | 'relaxed'
@@ -50,6 +63,7 @@ function Card({
   size,
   interactive,
   hover,
+  intent,
   density,
   radius,
   ...props
@@ -60,7 +74,7 @@ function Card({
       <div
         data-slot="card"
         className={cn(
-          cardVariants({ variant, size, interactive, hover }),
+          cardVariants({ variant, size, interactive, hover, intent }),
           densityContainer[resolvedDensity],
           className
         )}

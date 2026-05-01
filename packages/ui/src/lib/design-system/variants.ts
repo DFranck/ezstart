@@ -140,6 +140,22 @@ export const cardVariantConfig = {
     border: 'hover:border-primary',
     scale: 'hover:scale-[1.02]',
   },
+  /**
+   * Semantic-color accent for callout / notification cards (Mantine `color` /
+   * Chakra `colorScheme` pattern). Adds a tinted border + soft tinted
+   * background that composes ON TOP of the `variant` base styling.
+   *
+   * `none` (default) = zero classes added → backward-compat for every
+   * existing Card usage.
+   */
+  intent: {
+    none: '',
+    warning: 'border-warning/40 bg-warning/5',
+    success: 'border-success/40 bg-success/5',
+    info: 'border-info/40 bg-info/5',
+    destructive: 'border-destructive/40 bg-destructive/5',
+    primary: 'border-primary/40 bg-primary/5',
+  },
 } as const
 
 /**
@@ -154,6 +170,7 @@ export const cardVariants = cva(
       size: 'default',
       interactive: false,
       hover: 'none',
+      intent: 'none',
     },
   }
 )

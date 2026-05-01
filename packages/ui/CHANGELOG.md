@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `<Card>` accepts an `intent` prop (`none` | `warning` | `success` | `info`
+  | `destructive` | `primary`) — adds a semantic-color border and tinted
+  background. Default `none` for zero-break backward compat. Pattern matches
+  Mantine `color` / Chakra `colorScheme` for callout cards (notifications,
+  demo mode, past-due billing, etc.). Composes with the existing `variant`
+  prop (variant handles shadow / padding / elevation, intent handles the
+  semantic accent color).
+
 ### Documentation
 
 - README rewritten following `standard.md` §6 format: Install + Quickstart
