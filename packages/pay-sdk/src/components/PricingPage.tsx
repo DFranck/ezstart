@@ -76,6 +76,37 @@ export interface PricingPageProps {
    * (default `'en'`).
    */
   locale?: string
+  /**
+   * Optional client-side plans prepended to the fetched plans. Useful to
+   * surface a Free tier that isn't stored in the EZPay DB (no Stripe price,
+   * `amount: 0`) without falling back to hardcoded pricing cards in the
+   * consumer app. Each entry MUST set `amount: 0` for free tiers — paid
+   * plans should always come from the DB so Stripe checkout can resolve a
+   * `priceId`.
+   *
+   * @example
+   * ```tsx
+   * <PricingPage
+   *   applicationId={appId}
+   *   additionalPlans={[{
+   *     id: 'free',
+   *     name: 'Free',
+   *     amount: 0,
+   *     currency: 'EUR',
+   *     interval: 'month',
+   *     intervalCount: 1,
+   *     features: ['1 application', '1k auths/month'],
+   *     description: 'Perfect for trying out',
+   *     active: true,
+   *     sortOrder: 0,
+   *     appName: 'ezauth',
+   *     createdAt: new Date().toISOString(),
+   *     updatedAt: new Date().toISOString(),
+   *   }]}
+   * />
+   * ```
+   */
+  additionalPlans?: Plan[]
   /** Additional CSS class */
   className?: string
 }
@@ -92,6 +123,7 @@ export function PricingPage({
   defaultBillingCycle = 'month',
   notConfiguredTexts,
   locale,
+  additionalPlans,
   className,
 }: PricingPageProps) {
   const t = { ...DEFAULT_PRICING_TEXTS, ...textsProp }
@@ -115,7 +147,16 @@ export function PricingPage({
   const resolvedLocale = locale ?? contextLocale
   const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined
 
-  const { plans, isLoading, error, reload } = usePlans({ applicationId, appName, active: true })
+  const {
+    plans: fetchedPlans,
+    isLoading,
+    error,
+    reload,
+  } = usePlans({
+    applicationId,
+    appName,
+    active: true,
+  })
   const subStatus = useSubscriptionStatus({
     userId: userId || '',
     applicationId,
@@ -123,6 +164,15 @@ export function PricingPage({
   })
 
   const currentPlanName = subStatus.plan
+
+  // Merge consumer-supplied plans (e.g. a synthetic Free tier) with plans
+  // fetched from the DB. Additional plans are prepended so they sit first
+  // in the grid by default — `sortOrder` still wins via the visible-plans
+  // sort below.
+  const plans = useMemo<Plan[]>(() => {
+    if (!additionalPlans || additionalPlans.length === 0) return fetchedPlans
+    return [...additionalPlans, ...fetchedPlans]
+  }, [fetchedPlans, additionalPlans])
 
   // Group Monthly/Yearly variants (P9-B) so the toggle can swap between them.
   const { groups, hasYearly, maxYearlyDiscount } = useMemo(
@@ -148,9 +198,20 @@ export function PricingPage({
     })
   }, [groups, billingCycle])
 
-  // Determine which plan index to feature (middle by default)
+  // Determine which plan index to feature (middle by default).
+  //
+  // When there is only ONE plan visible total (e.g. just Pro, no Free),
+  // a "Most popular" badge becomes a paradox — there's nothing to compare
+  // against. We only auto-feature when there are at least 2 plans visible,
+  // or when the consumer explicitly opts in via `featuredIndex`. The
+  // existing `!isFree` guard at the render site still ensures the badge
+  // never lands on a free tier.
   const resolvedFeaturedIndex =
-    featuredIndex !== undefined ? featuredIndex : Math.floor(visiblePlans.length / 2)
+    featuredIndex !== undefined
+      ? featuredIndex
+      : visiblePlans.length >= 2
+        ? Math.floor(visiblePlans.length / 2)
+        : -1
 
   if (isLoading) {
     return (
@@ -237,7 +298,13 @@ export function PricingPage({
           const isFree = plan.amount === 0
           const isCurrent = currentPlanName === plan.name
           const isFeatured = index === resolvedFeaturedIndex && !isFree
-          const price = isFree ? t.free : formatCurrency(plan.amount / 100, plan.currency)
+          // Pass the resolved locale so EUR formats as "€19.00" on EN pages
+          // and "19,00 €" on FR pages — without it, EUR falls back to the
+          // deterministic per-currency default ("fr-FR") and produces a
+          // comma-decimal on every locale.
+          const price = isFree
+            ? t.free
+            : formatCurrency(plan.amount / 100, plan.currency, resolvedLocale)
           const intervalLabel = plan.interval === 'year' ? t.perYear : t.perMonth
 
           return (

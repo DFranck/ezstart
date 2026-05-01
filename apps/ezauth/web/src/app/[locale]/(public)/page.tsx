@@ -2,6 +2,7 @@
 
 import { Link } from '@/i18n/navigation'
 import { RegisterButton, useAuth } from '@ezstart/auth-sdk'
+import type { Plan } from '@ezstart/pay-sdk'
 import { PricingPage } from '@ezstart/pay-sdk/components'
 import type { KnownIconName } from '@ezstart/ui/components'
 import {
@@ -19,6 +20,7 @@ import {
   P,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
+import { useMemo } from 'react'
 
 const EZAUTH_APP_ID = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
 
@@ -70,6 +72,37 @@ function Dashboard() {
 export default function HomePage() {
   const t = useTranslations('home')
   const { isAuthenticated } = useAuth()
+
+  // Synthetic Free tier rendered alongside the DB-fetched paid plans. EZPay
+  // doesn't store a Free plan (no Stripe price needed for $0/month) but the
+  // landing page MUST advertise it because the hero CTA promises "Free
+  // forever for small projects". Without this card, prospects see only the
+  // Pro tier and the "Most popular" badge becomes a paradox on a single
+  // plan. Translation keys are pre-existing (`home.pricingFreeTitle`, etc.)
+  // and live in `apps/ezauth/web/src/messages/<locale>/auth.json`.
+  const freeTierPlan: Plan = useMemo(
+    () => ({
+      id: 'free-tier-synthetic',
+      name: t('pricingFreeTitle'),
+      appName: 'ezauth',
+      description: t('heroSubtitle'),
+      amount: 0,
+      currency: 'EUR',
+      interval: 'month',
+      intervalCount: 1,
+      features: [
+        t('pricingFreeFeature1'),
+        t('pricingFreeFeature2'),
+        t('pricingFreeFeature3'),
+        t('pricingFreeFeature4'),
+      ],
+      active: true,
+      sortOrder: 0,
+      createdAt: new Date(0).toISOString(),
+      updatedAt: new Date(0).toISOString(),
+    }),
+    [t]
+  )
 
   const features = FEATURE_KEYS.map(key => ({
     icon: <Icon name={FEATURE_ICONS[key]} className="h-6 w-6 text-primary" />,
@@ -153,6 +186,7 @@ export default function HomePage() {
         {EZAUTH_APP_ID ? (
           <PricingPage
             applicationId={EZAUTH_APP_ID}
+            additionalPlans={[freeTierPlan]}
             texts={{
               title: t('pricingSectionTitle'),
               subtitle: t('pricingSectionSubtitle'),
