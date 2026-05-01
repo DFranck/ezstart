@@ -26,7 +26,7 @@
  *
  * @module apps/ezpay/api/src/services/ezauth-subscription-webhook
  */
-import { createHmac } from 'crypto'
+import { buildEzstartSignatureHeader } from '@ezstart/api-core'
 import { logger } from '@ezstart/logger/server'
 import { getApiUrl } from '@ezstart/config'
 import { getApplication } from './ezauth-client.js'
@@ -65,13 +65,17 @@ export interface SubscriptionWebhookPayload {
 const DEFAULT_TIMEOUT_MS = 5_000
 
 /**
- * @internal Exposed for tests. Builds the HMAC-SHA256 signature header value
- * in Stripe-like format (`t=<unix>,v1=<hex>`).
+ * @internal Exposed for tests. Thin positional-args wrapper around
+ * `buildEzstartSignatureHeader` from `@ezstart/api-core`. Kept so the
+ * existing ezpay test suite (which calls `buildSignatureHeader(secret, ts,
+ * body)`) does not need to change. New callsites should use the api-core
+ * primitive directly.
+ *
+ * @deprecated Use `buildEzstartSignatureHeader` from `@ezstart/api-core` —
+ * this re-export only exists to preserve the ezpay test API.
  */
 export function buildSignatureHeader(secret: string, timestamp: string, body: string): string {
-  const signedPayload = `${timestamp}.${body}`
-  const signature = createHmac('sha256', secret).update(signedPayload).digest('hex')
-  return `t=${timestamp},v1=${signature}`
+  return buildEzstartSignatureHeader({ secret, timestamp, body })
 }
 
 /**
@@ -161,7 +165,7 @@ export async function notifyEzauthSubscription(payload: SubscriptionWebhookPaylo
 
   const timestamp = Math.floor(Date.now() / 1000).toString()
   const body = JSON.stringify({ ...payload, timestamp })
-  const signatureHeader = buildSignatureHeader(secret, timestamp, body)
+  const signatureHeader = buildEzstartSignatureHeader({ secret, timestamp, body })
 
   logger.info('[ezauth-webhook] notify sending', {
     url,

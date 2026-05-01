@@ -19,7 +19,8 @@
  *
  * @module apps/ezpay/api/src/utils/connect-state
  */
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
+import { randomBytes, timingSafeEqual } from 'node:crypto'
+import { base64urlDecode, base64urlEncode, hmacSign } from '@ezstart/api-core'
 import { getJwtSecret } from '@ezstart/config'
 
 /**
@@ -45,24 +46,14 @@ export class ConnectStateError extends Error {
   }
 }
 
-/** base64url encode a Buffer (no padding, URL-safe). */
-function base64urlEncode(buf: Buffer): string {
-  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
-
-/** base64url decode to a Buffer. Throws on malformed input via Buffer.from. */
-function base64urlDecode(str: string): Buffer {
-  // Restore padding for Buffer.from. Characters outside the base64url alphabet
-  // will round-trip to garbage rather than throw, so callers must validate
-  // the decoded payload shape afterwards.
-  const padLen = (4 - (str.length % 4)) % 4
-  const normalized = str.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat(padLen)
-  return Buffer.from(normalized, 'base64')
-}
+// base64url + HMAC primitives are imported from `@ezstart/api-core` to keep a
+// single source of truth across the platform. The local `sign()` wrapper is
+// kept (one-line) so the verify path stays a literal mirror of the generate
+// path, which makes the timing-safe compare below trivially auditable.
 
 /** Compute the HMAC-SHA256 signature of a payload string, base64url-encoded. */
 function sign(payload: string, secret: string): string {
-  return base64urlEncode(createHmac('sha256', secret).update(payload).digest())
+  return hmacSign(payload, secret, 'base64url')
 }
 
 /**

@@ -32,7 +32,6 @@
  *
  * @module apps/ezauth/api/src/routes/subscriptions/webhook
  */
-import { createHmac, timingSafeEqual } from 'crypto'
 import type { Request, Response } from 'express'
 import {
   createRouterWithDoc,
@@ -41,6 +40,9 @@ import {
   sendSuccess,
   sendError,
   sendValidationError,
+  parseEzstartSignatureHeader,
+  verifyEzstartSignature,
+  EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS,
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -55,8 +57,13 @@ export const subscriptionWebhookRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(subscriptionWebhookRegistry, router)
 
-/** Max age of a signed request (seconds). */
-const REPLAY_WINDOW_SECONDS = 5 * 60
+/**
+ * Max age of a signed request (seconds). Re-exported from
+ * `@ezstart/api-core/crypto` to keep this controller's behaviour pinned to
+ * the canonical default — bumping the protocol-wide value updates this route
+ * automatically.
+ */
+const REPLAY_WINDOW_SECONDS = EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS
 
 const subscriptionWebhookBodySchema = z.object({
   applicationId: z.string().min(1).openapi({ description: 'Target ezauth Application id' }),
@@ -97,41 +104,10 @@ const errorResponseSchema = z.object({
   }),
 })
 
-interface ParsedSignatureHeader {
-  timestamp: string
-  signature: string
-}
-
-/**
- * Parse `X-EZStart-Signature: t=<unix>,v1=<hex>` into its components.
- * Returns `null` if the header is absent or malformed.
- */
-function parseSignatureHeader(header: string | undefined): ParsedSignatureHeader | null {
-  if (!header) return null
-  const parts = header.split(',').map(s => s.trim())
-  let timestamp: string | null = null
-  let signature: string | null = null
-  for (const part of parts) {
-    const eq = part.indexOf('=')
-    if (eq === -1) continue
-    const key = part.slice(0, eq)
-    const value = part.slice(eq + 1)
-    if (key === 't') timestamp = value
-    else if (key === 'v1') signature = value
-  }
-  if (!timestamp || !signature) return null
-  return { timestamp, signature }
-}
-
-/** Constant-time comparison of two hex-encoded HMAC signatures. */
-function signaturesMatch(expected: string, provided: string): boolean {
-  if (expected.length !== provided.length) return false
-  try {
-    return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(provided, 'hex'))
-  } catch {
-    return false
-  }
-}
+// Note: signature parsing, HMAC verification, replay-window enforcement and
+// constant-time compare all live in `@ezstart/api-core/crypto`. This file
+// orchestrates the per-Application secret lookup that ezstart routes need on
+// top of the protocol primitives.
 
 const subscriptionWebhookController = async (req: Request, res: Response) => {
   try {
@@ -173,7 +149,13 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     }
 
     // ---- 2. Parse signature header -----------------------------------
-    const parsedSig = parseSignatureHeader(req.headers['x-ezstart-signature'] as string | undefined)
+    // We only PARSE here to extract the `t=` value for the body-timestamp
+    // cross-check (step 4); the actual HMAC verification + replay-window
+    // check is delegated to `verifyEzstartSignature` once we have loaded the
+    // per-Application webhook secret in step 4.
+    const parsedSig = parseEzstartSignatureHeader(
+      req.headers['x-ezstart-signature'] as string | undefined
+    )
     if (!parsedSig) {
       logger.warn('[subscriptions/webhook] rejected — missing/malformed signature header', {
         headerPresent: !!req.headers['x-ezstart-signature'],
@@ -222,27 +204,47 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     }
     const secret = application.webhookSecret
 
-    // Signed payload must match `{timestamp}.{raw body}` as produced by the
-    // sender. We re-serialize deterministically — the sender signs a JSON
-    // blob that includes its own `timestamp` field identical to the
-    // X-EZStart-Signature timestamp, so we sign `req.body` directly.
+    // Signed payload is `{timestamp}.{raw body}`. We re-serialize the body
+    // deterministically — the sender includes its own `timestamp` field
+    // (verified to match the header `t=` immediately below) so signing
+    // `req.body` here reproduces the exact bytes the sender HMAC'd.
     const rawBody = JSON.stringify(req.body)
-    const signedPayload = `${parsedSig.timestamp}.${rawBody}`
-    const expectedSig = createHmac('sha256', secret).update(signedPayload).digest('hex')
-
-    if (!signaturesMatch(expectedSig, parsedSig.signature)) {
+    const verifyResult = verifyEzstartSignature({
+      header: req.headers['x-ezstart-signature'] as string | undefined,
+      secret,
+      rawBody,
+      replayWindowSec: REPLAY_WINDOW_SECONDS,
+    })
+    if (!verifyResult.ok) {
+      if (verifyResult.reason === 'replay') {
+        const signedAtSec = Number(parsedSig.timestamp)
+        const nowSec = Math.floor(Date.now() / 1000)
+        logger.warn('[subscriptions/webhook] rejected — timestamp outside replay window', {
+          signedAtSec,
+          nowSec,
+          deltaSec: nowSec - signedAtSec,
+        })
+        return sendError(res, 'Signature timestamp outside replay window', 401, {
+          code: 'TIMESTAMP_EXPIRED',
+        })
+      }
+      // 'malformed' should not happen here — we already parsed the header in
+      // step 2 — but treat it the same as a signature mismatch for safety.
       logger.warn('[subscriptions/webhook] rejected — signature mismatch', {
+        reason: verifyResult.reason,
         timestamp: parsedSig.timestamp,
         rawBodyLen: rawBody.length,
-        expectedPrefix: expectedSig.slice(0, 12),
         providedPrefix: parsedSig.signature.slice(0, 12),
         applicationId: body.applicationId,
       })
       return sendError(res, 'Invalid signature', 401, { code: 'INVALID_SIGNATURE' })
     }
 
-    // The body's own `timestamp` must match the header `t=` to prevent
-    // a signer from mixing two different timestamps.
+    // The body's own `timestamp` must match the header `t=` to prevent a
+    // signer from mixing two different timestamps (header timestamp inside
+    // replay window, body timestamp 6 months old, etc.). This cross-check is
+    // unique to this route because the body schema enshrines `timestamp` as
+    // a first-class signed field.
     if (body.timestamp !== parsedSig.timestamp) {
       logger.warn('[subscriptions/webhook] rejected — body/header timestamp mismatch', {
         headerTimestamp: parsedSig.timestamp,
@@ -250,20 +252,6 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
       })
       return sendError(res, 'Timestamp mismatch between header and body', 401, {
         code: 'INVALID_SIGNATURE',
-      })
-    }
-
-    // ---- 5. Replay window ---------------------------------------------
-    const signedAtSec = Number(parsedSig.timestamp)
-    const nowSec = Math.floor(Date.now() / 1000)
-    if (!Number.isFinite(signedAtSec) || Math.abs(nowSec - signedAtSec) > REPLAY_WINDOW_SECONDS) {
-      logger.warn('[subscriptions/webhook] rejected — timestamp outside replay window', {
-        signedAtSec,
-        nowSec,
-        deltaSec: nowSec - signedAtSec,
-      })
-      return sendError(res, 'Signature timestamp outside replay window', 401, {
-        code: 'TIMESTAMP_EXPIRED',
       })
     }
 
