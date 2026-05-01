@@ -38,6 +38,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./crypto": {
+      "types": "./dist/core/crypto.d.ts",
+      "import": "./dist/core/crypto.js"
     }
   },
   "scripts": {

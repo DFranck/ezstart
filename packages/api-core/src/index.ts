@@ -140,6 +140,23 @@ export {
   extractVersionFromPath,
 } from './core/versioning.js'
 
+// Cryptographic primitives — base64url + HMAC + EZStart-Signature protocol.
+// See `./core/crypto.ts` for the full rationale (single source of truth for
+// the S2S webhook header `X-EZStart-Signature: t=<unix>,v1=<hex>`).
+export {
+  base64urlDecode,
+  base64urlEncode,
+  buildEzstartSignatureHeader,
+  EZSTART_SIGNATURE_REPLAY_WINDOW_SECONDS,
+  hmacSign,
+  hmacVerify,
+  parseEzstartSignatureHeader,
+  verifyEzstartSignature,
+  type EzstartSignatureHeader,
+  type EzstartSignatureVerifyResult,
+  type HmacEncoding,
+} from './core/crypto.js'
+
 // Re-exports from transitive deps — the monorepo centralizes on these
 // symbols so consumers don't need direct dependencies on `express` or
 // `@asteasolutions/zod-to-openapi`.
@@ -183,6 +200,16 @@ export {
   type EzstartServerOptions,
 } from './create-api-server.js'
 export { connectToMongo } from './connect-to-mongo.js'
+
+// Unified API boot ceremony — shrinks app `index.ts` files to a thin
+// descriptor (slug + routes + per-app warmup). Optional opt-in.
+export {
+  bootApi,
+  type BootApiOptions,
+  type BootApiResult,
+  type BootServerConfig,
+  type OnReadyHook,
+} from './boot-api.js'
 
 // ---------------------------------------------------------------------------
 // Observability — Sentry init + manual capture (no-op when DSN empty)
