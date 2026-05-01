@@ -1,18 +1,23 @@
 #!/usr/bin/env tsx
 /**
- * env:validate — verify the hybrid root + per-app env layout.
+ * env:validate — verify the per-app env layout (PER-APP ONLY, no root layer).
+ *
+ * Cascade (per-app, lowest → highest precedence):
+ *   local       → apps/<app>/<layer>/.env.local
+ *   staging     → apps/<app>/<layer>/.env.local  ←  apps/<app>/<layer>/.env.staging
+ *   production  → apps/<app>/<layer>/.env.local  ←  apps/<app>/<layer>/.env.staging  ←  apps/<app>/<layer>/.env.production
  *
  * Checks:
- *   1. Required SHARED vars exist in root .env.{env} (JWT_SECRET, MONGO_URL, DEPLOY_ENV)
- *   2. For each shared var, if a per-app .env.{env} also defines it, verify
- *      the value MATCHES root (drift detection)
- *   3. For each app, every key declared in `.env.example` is present in `.env.local`
+ *   1. For each app/layer, every key declared in `.env.example` with an EMPTY value
+ *      (a placeholder requiring the user to set it) is present in the merged cascade
+ *      for the target env.
+ *   2. No `<TO_SET|<TO_GENERATE|<REPLACE_ME` literal values present in the merged
+ *      cascade (these would be pushed as-is, polluting cloud env).
  *
  * Exit code:
  *   - 0 on success
- *   - 1 on any drift / missing var
+ *   - 1 on any missing required var or remaining placeholder literal
  */
-
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import * as dotenv from 'dotenv'
@@ -36,16 +41,33 @@ const ROOT = findMonorepoRoot()
 const APPS_DIR = path.join(ROOT, 'apps')
 
 // ── Args ────────────────────────────────────────────────────
+type TargetEnv = 'local' | 'staging' | 'production'
+
 const argv = process.argv.slice(2)
 const envFlag =
-  argv.find(a => a.startsWith('--env='))?.split('=')[1] ?? process.env.DEPLOY_ENV ?? 'local'
-const envFile = `.env.${envFlag}`
+  (argv.find(a => a.startsWith('--env='))?.split('=')[1] as TargetEnv | undefined) ??
+  (process.env.DEPLOY_ENV as TargetEnv | undefined) ??
+  'local'
 
-// ── Shared vars (must be identical across every layer that defines them) ──
-const SHARED_VARS = ['JWT_SECRET', 'MONGO_URL', 'DEPLOY_ENV']
+if (!['local', 'staging', 'production'].includes(envFlag)) {
+  console.error(`❌ Invalid --env="${envFlag}" — must be one of: local | staging | production`)
+  process.exit(1)
+}
 
-// ── Required at root ────────────────────────────────────────
-const REQUIRED_AT_ROOT = ['JWT_SECRET', 'MONGO_URL']
+// ── Cascade ─────────────────────────────────────────────────
+function cascadeLayers(env: TargetEnv): TargetEnv[] {
+  if (env === 'local') return ['local']
+  if (env === 'staging') return ['local', 'staging']
+  return ['local', 'staging', 'production']
+}
+
+// ── Placeholder detection ───────────────────────────────────
+const PLACEHOLDER_RE =
+  /<TO_(SET|GENERATE|FILL)|<REPLACE_ME|<USER>|<PASSWORD>|<CLUSTER>|<GENERATE_SECURE/i
+
+function isPlaceholderValue(value: string): boolean {
+  return PLACEHOLDER_RE.test(value)
+}
 
 // ── Helpers ─────────────────────────────────────────────────
 function mask(value: string | undefined): string {
@@ -57,6 +79,21 @@ function mask(value: string | undefined): string {
 function parseEnvFile(absPath: string): Record<string, string> {
   if (!existsSync(absPath)) return {}
   return dotenv.parse(readFileSync(absPath))
+}
+
+function loadMergedCascade(
+  layerDir: string,
+  targetEnv: TargetEnv
+): { merged: Record<string, string>; sources: Array<{ level: TargetEnv; exists: boolean }> } {
+  const merged: Record<string, string> = {}
+  const sources: Array<{ level: TargetEnv; exists: boolean }> = []
+  for (const level of cascadeLayers(targetEnv)) {
+    const file = path.join(layerDir, `.env.${level}`)
+    const parsed = parseEnvFile(file)
+    sources.push({ level, exists: Object.keys(parsed).length > 0 })
+    for (const [k, v] of Object.entries(parsed)) merged[k] = v
+  }
+  return { merged, sources }
 }
 
 function listAppLayers(): Array<{ app: string; layer: 'api' | 'web'; dir: string }> {
@@ -78,63 +115,40 @@ function listAppLayers(): Array<{ app: string; layer: 'api' | 'web'; dir: string
 }
 
 // ── Run validation ──────────────────────────────────────────
-type Issue = { kind: 'missing' | 'drift' | 'missing-from-local'; message: string }
+type Issue = { kind: 'missing' | 'placeholder'; message: string }
 const issues: Issue[] = []
 
-console.log(`🔍 env:validate — checking ${envFile} (root + per-app)\n`)
+console.log(`🔍 env:validate — checking per-app cascade for ${envFlag}\n`)
 
-// 1. Root file
-const rootEnvPath = path.join(ROOT, envFile)
-const rootVars = parseEnvFile(rootEnvPath)
-if (!Object.keys(rootVars).length) {
-  console.log(`⚠️  Root ${envFile} not found at ${rootEnvPath}`)
-} else {
-  console.log(`✓ Root ${envFile}: ${Object.keys(rootVars).length} vars`)
-}
-
-for (const v of REQUIRED_AT_ROOT) {
-  if (!rootVars[v]) {
-    issues.push({
-      kind: 'missing',
-      message: `Required SHARED var ${v} missing from root ${envFile}`,
-    })
-  }
-}
-
-// 2. Per-app layers
 const layers = listAppLayers()
-console.log(`\nScanning ${layers.length} app layers:`)
+console.log(`Scanning ${layers.length} app layers:`)
 for (const { app, layer, dir } of layers) {
-  const localPath = path.join(dir, envFile)
   const examplePath = path.join(dir, '.env.example')
-  const localVars = parseEnvFile(localPath)
   const exampleVars = parseEnvFile(examplePath)
+  const { merged, sources } = loadMergedCascade(dir, envFlag)
 
-  const localCount = Object.keys(localVars).length
-  const exampleCount = Object.keys(exampleVars).length
-  console.log(`  - ${app}/${layer}: ${envFile}=${localCount}, .env.example=${exampleCount}`)
+  const cascadeSummary = sources.map(s => `${s.exists ? '✓' : '·'}${s.level}`).join('+')
+  console.log(
+    `  - ${app}/${layer}: cascade [${cascadeSummary}] = ${Object.keys(merged).length} vars, .env.example=${Object.keys(exampleVars).length}`
+  )
 
-  // 2a. Drift: shared vars defined in per-app must match root
-  for (const v of SHARED_VARS) {
-    if (localVars[v] !== undefined && rootVars[v] !== undefined && localVars[v] !== rootVars[v]) {
+  // Check 1: example empty placeholders MUST be present in merged cascade
+  for (const [key, exampleValue] of Object.entries(exampleVars)) {
+    if (exampleValue && exampleValue.trim() !== '') continue // optional with default
+    if (merged[key] === undefined || merged[key] === '') {
       issues.push({
-        kind: 'drift',
-        message: `${app}/${layer} has ${v}=${mask(localVars[v])} but root has ${mask(rootVars[v])}`,
+        kind: 'missing',
+        message: `${app}/${layer} cascade missing required var ${key} (declared empty in .env.example)`,
       })
     }
   }
 
-  // 2b. Per-app .env.example keys present in .env.local
-  // Skip shared vars (come from root) and vars with a non-empty default value
-  // in .env.example (treated as optional with a working default).
-  for (const [key, exampleValue] of Object.entries(exampleVars)) {
-    if (SHARED_VARS.includes(key)) continue
-    // If example has a non-empty default value, treat as OPTIONAL.
-    if (exampleValue && exampleValue.trim() !== '') continue
-    if (localVars[key] === undefined && rootVars[key] === undefined) {
+  // Check 2: no remaining <TO_SET|<TO_GENERATE> literals in merged cascade
+  for (const [key, value] of Object.entries(merged)) {
+    if (isPlaceholderValue(value)) {
       issues.push({
-        kind: 'missing-from-local',
-        message: `${app}/${layer} .env.example requires ${key} (empty placeholder) but .env.local has no value`,
+        kind: 'placeholder',
+        message: `${app}/${layer} cascade has unresolved placeholder ${key}=${mask(value)}`,
       })
     }
   }
@@ -143,13 +157,13 @@ for (const { app, layer, dir } of layers) {
 // ── Report ──────────────────────────────────────────────────
 console.log('')
 if (issues.length === 0) {
-  console.log('✅ All checks passed — no drift, no missing required vars.')
+  console.log('✅ All checks passed — no missing required vars, no unresolved placeholders.')
   process.exit(0)
 }
 
 console.log(`❌ ${issues.length} issue(s) found:\n`)
 for (const i of issues) {
-  const icon = i.kind === 'drift' ? '⚠️' : '✗'
+  const icon = i.kind === 'placeholder' ? '⚠️' : '✗'
   console.log(`  ${icon} [${i.kind}] ${i.message}`)
 }
 console.log('')
