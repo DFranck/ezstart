@@ -18,7 +18,7 @@ import {
 } from '@ezstart/ui/components'
 import { useRouter } from '@/i18n/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { buildShowcaseTree } from '../_lib/grouping'
+import { buildShowcaseTree, variantLabelToSlug } from '../_lib/grouping'
 import { useInternalToggle } from './InternalToggleContext'
 
 /**
@@ -52,10 +52,11 @@ export function CommandPalette() {
     [showInternal]
   )
 
-  function go(componentName: string) {
+  function go(componentName: string, variantLabel?: string) {
     const entry = componentRegistry.find(c => c.name === componentName)
     if (!entry) return
-    const href = `/${locale}/docs/components/${categoryToSlug(entry.category)}/${componentToSlug(entry.name)}`
+    const base = `/${locale}/docs/components/${categoryToSlug(entry.category)}/${componentToSlug(entry.name)}`
+    const href = variantLabel ? `${base}?variant=${variantLabelToSlug(variantLabel)}` : base
     setOpen(false)
     router.push(href)
   }
@@ -78,7 +79,7 @@ export function CommandPalette() {
                   <CommandItem
                     key={`${entry.group.slug}-${v.label}`}
                     value={`${entry.group.name} ${v.entry.name} ${v.label}`}
-                    onSelect={() => go(v.entry.name)}
+                    onSelect={() => go(v.entry.name, v.label)}
                   >
                     <Span className="font-medium">{entry.group.name}</Span>
                     <Span className="ml-2 text-xs text-muted-foreground font-mono">{v.label}</Span>

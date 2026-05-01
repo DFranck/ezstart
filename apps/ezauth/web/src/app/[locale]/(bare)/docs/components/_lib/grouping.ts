@@ -383,3 +383,44 @@ function isInternalEntry(entry: ComponentEntry): boolean {
 export function featureFallbackComponentName(group: FeatureGroup): string {
   return group.variants[0]?.entry.name ?? ''
 }
+
+/**
+ * Reverse lookup: given a component name, return the feature group it
+ * belongs to (if any). Used by the detail page to detect when a component
+ * is part of a Form/Card/Modal triplet so it can render variant tabs at
+ * the top of the page (`SignInForm` → group `sign-in` with siblings
+ * `SignInCard` + `SignInModal`).
+ */
+export function findFeatureGroupForComponent(
+  componentName: string,
+  registry: readonly ComponentEntry[]
+): FeatureGroup | null {
+  // Index registry once for variant lookup.
+  const byName = new Map<string, ComponentEntry>()
+  for (const entry of registry) byName.set(entry.name, entry)
+
+  for (const def of FEATURE_DEFINITIONS) {
+    const isMember = def.variants.some(v => v.component === componentName)
+    if (!isMember) continue
+
+    // Hydrate the full FeatureGroup with resolved entries (matches the
+    // shape `buildShowcaseTree` produces).
+    const variants: FeatureGroup['variants'] = []
+    for (const v of def.variants) {
+      const entry = byName.get(v.component)
+      if (entry) variants.push({ label: v.label, entry })
+    }
+    if (variants.length === 0) return null
+    return { slug: def.slug, name: def.name, variants }
+  }
+  return null
+}
+
+/**
+ * Lowercase a variant label so it can be used as a URL param value.
+ * `'Form'` → `'form'`, `'Modal'` → `'modal'`, etc. The reverse lookup
+ * is case-insensitive on the variant tabs.
+ */
+export function variantLabelToSlug(label: string): string {
+  return label.toLowerCase()
+}

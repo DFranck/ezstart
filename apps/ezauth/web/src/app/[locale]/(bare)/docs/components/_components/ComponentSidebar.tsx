@@ -8,6 +8,7 @@ import {
 } from '@ezstart/auth-sdk/components/registry'
 import { Aside, Badge, Button, Div, Icon, Input, P, Span } from '@ezstart/ui/components'
 import { Link, usePathname } from '@/i18n/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { buildShowcaseTree, featureFallbackComponentName } from '../_lib/grouping'
 import { InternalBadge } from './AdminInternalToggle'
@@ -18,11 +19,22 @@ import { useInternalToggle } from './InternalToggleContext'
  * (Auth Forms / Auth Buttons / User Profile / ...) act as collapsible
  * headings; their entries render as nested links — feature groups
  * (SignIn, SignUp, ...) collapse their variants under a single link
- * pointing to the "primary" variant (the form). Active route is
- * highlighted via `usePathname`. Mobile = slide-in drawer.
+ * pointing to the "primary" variant (the form).
+ *
+ * Two click affordances on the headers:
+ * - **Header label** → routes to `/docs/components?category=<key>` so the
+ *   landing page can scroll-and-filter to that domain (deeplink-able).
+ *   Only available on the landing page (where the filter has UI). On
+ *   detail pages, the header still navigates to `/docs/components?category=<key>`.
+ * - **Components** (children) → route to the existing detail pages.
+ *
+ * Active route is highlighted via `usePathname` for entries and via
+ * `useSearchParams()` for the category header (when on the landing page).
+ * Mobile = slide-in drawer.
  */
 export function ComponentSidebar() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const t = useTranslations('components')
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -53,6 +65,13 @@ export function ComponentSidebar() {
       }))
       .filter(section => section.entries.length > 0)
   }, [sections, search])
+
+  // Normalize the landing-page pathname (the next-intl `usePathname` strips
+  // the locale prefix). Active state for the "All" entry + header buttons
+  // is keyed off this.
+  const isLandingPage = pathname === '/docs/components' || pathname.endsWith('/docs/components')
+  const activeCategoryParam = searchParams.get('category')
+  const isAllActive = isLandingPage && (!activeCategoryParam || activeCategoryParam === 'all')
 
   return (
     <>
@@ -116,85 +135,124 @@ export function ComponentSidebar() {
 
         <Div className="flex-1 overflow-y-auto px-2 py-3">
           <nav aria-label={t('sidebarNavLabel')}>
-            <ul className="space-y-3">
-              {filteredSections.map(section => (
-                <li key={section.key}>
-                  <Div className="mb-1 flex items-center justify-between px-2">
-                    <Span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      {t(`domain.${section.key}.title`)}
-                    </Span>
-                    <Badge variant="outline" size="xs" className="font-mono">
-                      {section.componentCount}
-                    </Badge>
-                  </Div>
-                  <ul className="space-y-0.5">
-                    {section.entries.map(entry => {
-                      if (entry.kind === 'feature') {
-                        const fallbackName = featureFallbackComponentName(entry.group)
-                        const fallbackEntry = componentRegistry.find(c => c.name === fallbackName)
-                        if (!fallbackEntry) return null
-                        const catSlug = categoryToSlug(fallbackEntry.category)
-                        const compSlug = componentToSlug(fallbackName)
+            <ul className="space-y-1">
+              {/* "All" entry — clears the category filter and lands on the
+                  full landing page. Distinct from the title link because
+                  it surfaces an active state when no `?category=` is set. */}
+              <li>
+                <Link
+                  href="/docs/components"
+                  onClick={() => setOpen(false)}
+                  className={[
+                    'flex items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors mb-2',
+                    isAllActive
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-foreground hover:bg-accent hover:text-accent-foreground',
+                  ].join(' ')}
+                  aria-current={isAllActive ? 'page' : undefined}
+                >
+                  <Span className="inline-flex items-center gap-2">
+                    <Icon name="lucide:LayoutGrid" className="h-3.5 w-3.5" />
+                    {t('sidebarAllEntry')}
+                  </Span>
+                </Link>
+              </li>
+
+              {filteredSections.map(section => {
+                const isCategoryActive = isLandingPage && activeCategoryParam === section.key
+                const headerHref = `/docs/components?category=${section.key}`
+                return (
+                  <li key={section.key} className="space-y-0.5">
+                    {/* Category header — clickable, filters the landing
+                        page via `?category=`. Active state surfaces only
+                        when on the landing page with the matching param. */}
+                    <Link
+                      href={headerHref}
+                      onClick={() => setOpen(false)}
+                      className={[
+                        'flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors',
+                        isCategoryActive
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-foreground hover:bg-accent hover:text-accent-foreground',
+                      ].join(' ')}
+                      aria-current={isCategoryActive ? 'page' : undefined}
+                    >
+                      <Span className="text-xs font-semibold uppercase tracking-wider">
+                        {t(`domain.${section.key}.title`)}
+                      </Span>
+                      <Badge variant="outline" size="xs" className="font-mono">
+                        {section.componentCount}
+                      </Badge>
+                    </Link>
+                    <ul className="space-y-0.5">
+                      {section.entries.map(entry => {
+                        if (entry.kind === 'feature') {
+                          const fallbackName = featureFallbackComponentName(entry.group)
+                          const fallbackEntry = componentRegistry.find(c => c.name === fallbackName)
+                          if (!fallbackEntry) return null
+                          const catSlug = categoryToSlug(fallbackEntry.category)
+                          const compSlug = componentToSlug(fallbackName)
+                          const href = `/docs/components/${catSlug}/${compSlug}`
+                          // Feature link is "active" if any of its variant pages
+                          // is currently rendered.
+                          const active = entry.group.variants.some(v => {
+                            const vCatSlug = categoryToSlug(v.entry.category)
+                            const vCompSlug = componentToSlug(v.entry.name)
+                            return pathname.endsWith(`/docs/components/${vCatSlug}/${vCompSlug}`)
+                          })
+                          return (
+                            <li key={`feat-${entry.group.slug}`}>
+                              <Link
+                                href={href}
+                                onClick={() => setOpen(false)}
+                                className={[
+                                  'flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors',
+                                  active
+                                    ? 'bg-accent text-accent-foreground font-medium'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                                ].join(' ')}
+                                aria-current={active ? 'page' : undefined}
+                              >
+                                <Span>{entry.group.name}</Span>
+                                <Span className="ml-2 inline-flex items-center gap-1 text-[10px] font-mono opacity-70">
+                                  {entry.group.variants.map(v => v.label[0]).join('/')}
+                                </Span>
+                              </Link>
+                            </li>
+                          )
+                        }
+                        const single = entry.entry
+                        const catSlug = categoryToSlug(single.category)
+                        const compSlug = componentToSlug(single.name)
                         const href = `/docs/components/${catSlug}/${compSlug}`
-                        // Feature link is "active" if any of its variant pages
-                        // is currently rendered.
-                        const active = entry.group.variants.some(v => {
-                          const vCatSlug = categoryToSlug(v.entry.category)
-                          const vCompSlug = componentToSlug(v.entry.name)
-                          return pathname.endsWith(`/docs/components/${vCatSlug}/${vCompSlug}`)
-                        })
+                        const active = pathname.endsWith(`/docs/components/${catSlug}/${compSlug}`)
+                        const isInternal = single.isInternal === true
                         return (
-                          <li key={`feat-${entry.group.slug}`}>
+                          <li key={single.name}>
                             <Link
                               href={href}
                               onClick={() => setOpen(false)}
                               className={[
-                                'flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors',
+                                'flex items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
                                 active
                                   ? 'bg-accent text-accent-foreground font-medium'
                                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                              ].join(' ')}
+                                isInternal ? 'border border-dashed border-warning/40' : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
                               aria-current={active ? 'page' : undefined}
                             >
-                              <Span>{entry.group.name}</Span>
-                              <Span className="ml-2 inline-flex items-center gap-1 text-[10px] font-mono opacity-70">
-                                {entry.group.variants.map(v => v.label[0]).join('/')}
-                              </Span>
+                              <Span className="truncate">{single.name}</Span>
+                              {isInternal && <InternalBadge />}
                             </Link>
                           </li>
                         )
-                      }
-                      const single = entry.entry
-                      const catSlug = categoryToSlug(single.category)
-                      const compSlug = componentToSlug(single.name)
-                      const href = `/docs/components/${catSlug}/${compSlug}`
-                      const active = pathname.endsWith(`/docs/components/${catSlug}/${compSlug}`)
-                      const isInternal = single.isInternal === true
-                      return (
-                        <li key={single.name}>
-                          <Link
-                            href={href}
-                            onClick={() => setOpen(false)}
-                            className={[
-                              'flex items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
-                              active
-                                ? 'bg-accent text-accent-foreground font-medium'
-                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                              isInternal ? 'border border-dashed border-warning/40' : '',
-                            ]
-                              .filter(Boolean)
-                              .join(' ')}
-                            aria-current={active ? 'page' : undefined}
-                          >
-                            <Span className="truncate">{single.name}</Span>
-                            {isInternal && <InternalBadge />}
-                          </Link>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </li>
-              ))}
+                      })}
+                    </ul>
+                  </li>
+                )
+              })}
               {filteredSections.length === 0 && (
                 <li className="px-3 py-6 text-center text-sm text-muted-foreground">
                   {t('sidebarEmpty')}

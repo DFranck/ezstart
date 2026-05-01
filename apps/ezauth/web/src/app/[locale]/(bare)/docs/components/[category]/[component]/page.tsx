@@ -1,9 +1,9 @@
-import { notFound } from 'next/navigation'
+import { Link } from '@/i18n/navigation'
 import { getCategoryBySlug, getComponentBySlug } from '@ezstart/auth-sdk/components/registry'
 import { Badge, Button, Div, H1, P, Span } from '@ezstart/ui/components'
-import { Link } from '@/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
-import { ComponentShowcase } from '../../_components/ComponentShowcase'
+import { notFound } from 'next/navigation'
+import { FeatureVariantSwitcher } from '../../_components/FeatureVariantSwitcher'
 
 type Props = { params: Promise<{ category: string; component: string; locale: string }> }
 
@@ -22,7 +22,7 @@ export default async function ComponentDetailPage({ params }: Props) {
   const t = await getTranslations('components')
 
   return (
-    <Div className="mx-auto max-w-5xl space-y-6">
+    <>
       <Div className="flex flex-wrap items-center gap-2 text-sm">
         <Link
           href="/docs/components"
@@ -70,7 +70,7 @@ export default async function ComponentDetailPage({ params }: Props) {
         {entry.summary && <P className="text-base text-muted-foreground">{entry.summary}</P>}
       </Div>
 
-      <ComponentShowcase entry={entry} />
-    </Div>
+      <FeatureVariantSwitcher initialComponentName={entry.name} />
+    </>
   )
 }
