@@ -184,6 +184,76 @@ It returns `null` for anonymous requests (no cookie, expired session,
 network error), in which case the legacy client-side bootstrap takes over
 seamlessly. Safe to call from any Server Component or Route Handler.
 
+## Server middleware (Express) — JWT cookie + API key in one step
+
+For any Express-based API that wants to accept BOTH dashboard sessions
+(JWT cookie / Bearer) AND server-to-server API keys (`X-API-Key` /
+`Authorization: ApiKey ...`) on the same routes, use the
+`createAuthMiddleware` factory. It bundles JWT verification, API-key
+lookup, monthly quota cache, scope policy, presence hook and Stripe-style
+legacy field stamping (`req.apiKeyId`, `req.apiKeyAppName`, etc.) behind
+a single config object — five lines of wiring per service.
+
+```ts
+// apps/<app>/api/src/middleware/unified-auth.ts
+import { createAuthMiddleware } from '@ezstart/auth-sdk/server'
+import { logger } from '@ezstart/logger/server'
+import { JWT_SECRET } from '../config/env.js'
+import { ACCESS_COOKIE_NAME } from '../config/cookie.js'
+import { getApiKeyModel } from '../models/api-key.js'
+import { getApiKeyUsageModel } from '../models/api-key-usage.js'
+import { getAuthUserModel } from '../models/auth-user.js'
+import { updatePresenceByUserId } from '../services/presence.service.js'
+
+const authJwtOrKeyFactory = createAuthMiddleware({
+  appName: 'myapp',
+  jwtSecret: JWT_SECRET,
+  cookieName: ACCESS_COOKIE_NAME,
+  getApiKeyModel,
+  getApiKeyUsageModel,
+  getAuthUserModel,
+  onUserAttached: updatePresenceByUserId, // optional presence tracking
+  logger, // optional structured logger (defaults to silent no-op)
+})
+
+export const authJwtOrKey = (opts = {}) => authJwtOrKeyFactory(opts)
+```
+
+Then on each route:
+
+```ts
+// JWT users always pass; API keys must have scope 'admin' on this route.
+router.get('/applications', authJwtOrKey({ requireKeyScope: 'admin' }), controller)
+
+// Default scope is 'user' — accepts publishable + secret keys + admin keys.
+router.get('/me', authJwtOrKey(), controller)
+```
+
+Behaviour:
+
+- **JWT first** — if a valid cookie / Bearer is present, the API key is
+  ignored. JWT verifier always wins so revoking a key never locks out a
+  signed-in user with a still-valid session.
+- **API key fallback** — if no JWT, the verifier looks up the
+  `X-API-Key` (or `Authorization: ApiKey ...`) header, checks status /
+  expiry / monthly quota, and stamps `req.apiKeyId`, `req.apiKeyUserId`,
+  `req.apiKeyScope`, `req.apiKeyAppName` for downstream consumers.
+- **Scope policy** — `requireKeyScope` (`'admin' | 'user' | 'readonly'`)
+  is enforced ONLY on the API key path; JWT users are not scope-checked
+  here (chain a `requireRole` / `requireAdmin` after if needed). Legacy
+  `'live'` / `'test'` scope values are demoted to `'user'` so a
+  publishable key never satisfies `'admin'`.
+- **Quota** — when `apiKey.quotaMonthly` is set, the verifier counts
+  this month's requests via the usage model and returns `429 QUOTA_EXCEEDED`
+  with `retryAfter` once exceeded. Monthly aggregates are cached in-memory
+  for 5 minutes per process.
+- **Best-effort tracking** — `lastUsedAt` and per-day usage counters are
+  updated fire-and-forget (errors are swallowed, request always returns).
+
+Returned envelopes follow the same `{ success: false, error: { code, … } }`
+shape as `@ezstart/api-core` `sendError` so existing client error handlers
+keep working.
+
 ## Choosing your auth UX — Hosted vs Embedded
 
 EZAuth supports **two patterns** for authentication UX. Pick the one that fits your product:
