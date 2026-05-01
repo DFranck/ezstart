@@ -8,7 +8,7 @@ import {
 import { BackButton, Div, Spinner } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
 /**
@@ -30,17 +30,14 @@ export default function ApplicationConnectPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { isAuthenticated, login } = useAuth()
-
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const { isAuthenticated, isAuthReady, login } = useAuth()
 
   useEffect(() => {
-    if (mounted && !isAuthenticated) {
+    if (isAuthReady && !isAuthenticated) {
       // Redirect to EZAuth login (ezpay has no local /login route — auth lives on ezauth)
       login()
     }
-  }, [mounted, isAuthenticated, login])
+  }, [isAuthReady, isAuthenticated, login])
 
   const applicationId = typeof params?.id === 'string' ? params.id : ''
 
@@ -49,7 +46,7 @@ export default function ApplicationConnectPage() {
   const status = searchParams.get('status')
   const toastedRef = useRef(false)
   useEffect(() => {
-    if (!mounted || toastedRef.current) return
+    if (!isAuthReady || toastedRef.current) return
     if (status === 'complete') {
       toastedRef.current = true
       toast.success(t('callback.complete'))
@@ -57,9 +54,9 @@ export default function ApplicationConnectPage() {
       toastedRef.current = true
       toast.message(t('callback.refresh'))
     }
-  }, [mounted, status, t])
+  }, [isAuthReady, status, t])
 
-  if (!mounted || !isAuthenticated) {
+  if (!isAuthReady || !isAuthenticated) {
     return (
       <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />

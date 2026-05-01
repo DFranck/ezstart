@@ -19,7 +19,7 @@ import {
 import { Link } from '@/i18n/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 /**
  * Per-application detail page inside the EZPay developer portal.
@@ -37,19 +37,16 @@ export default function ApplicationDetailPage() {
   const locale = useLocale()
   const params = useParams()
   const router = useRouter()
-  const { user, isAuthenticated, login } = useAuth()
-
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const { user, isAuthenticated, isAuthReady, login } = useAuth()
 
   useEffect(() => {
-    if (mounted && !isAuthenticated) {
+    if (isAuthReady && !isAuthenticated) {
       // Redirect to EZAuth login (ezpay has no local /login route — auth lives on ezauth)
       login()
     }
-  }, [mounted, isAuthenticated, login])
+  }, [isAuthReady, isAuthenticated, login])
 
-  if (!mounted || !isAuthenticated || !user) {
+  if (!isAuthReady || !isAuthenticated || !user) {
     return (
       <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />

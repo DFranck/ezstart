@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useAuth, useMyApplications } from '@ezstart/auth-sdk'
@@ -44,21 +44,18 @@ export default function EZPayDashboardPage() {
   const tApps = useTranslations('developer.applications')
   const locale = useLocale()
   const router = useRouter()
-  const { user, isAuthenticated, login } = useAuth()
+  const { user, isAuthenticated, isAuthReady, login } = useAuth()
 
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
-  const { data: myApps } = useMyApplications(mounted && isAuthenticated)
+  const { data: myApps } = useMyApplications(isAuthReady && isAuthenticated)
 
   useEffect(() => {
-    if (mounted && !isAuthenticated) {
+    if (isAuthReady && !isAuthenticated) {
       // Redirect to EZAuth login (ezpay has no local /login route — auth lives on ezauth)
       login()
     }
-  }, [mounted, isAuthenticated, login])
+  }, [isAuthReady, isAuthenticated, login])
 
-  if (!mounted || !isAuthenticated || !user) {
+  if (!isAuthReady || !isAuthenticated || !user) {
     return (
       <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
