@@ -1,11 +1,26 @@
+/**
+ * EZPay Stripe registry — wires the singleton `PaymentProviderRegistry` for
+ * this API process from environment variables.
+ *
+ * The Stripe SDK construction + safety guards live in
+ * `@ezstart/pay-sdk/server` (`createStripeClient`). This file is the
+ * ezpay-specific glue:
+ *   - reads `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` + `PAYMENT_PROVIDER`
+ *   - falls back to `ConsoleProvider` when the key is absent or the operator
+ *     opted into console mode
+ *   - registers the result on the singleton registry
+ *
+ * Future payment services (ezbill billing events, etc.) repeat the same
+ * pattern — they consume `createStripeClient` from pay-sdk/server.
+ */
 import { logger } from '@ezstart/logger/server'
+import { createStripeClient } from '@ezstart/pay-sdk/server'
 import {
   PaymentProviderRegistry,
   StripeProvider,
   ConsoleProvider,
 } from '@ezstart/pay-sdk/providers'
-import type { IPaymentProvider } from '@ezstart/pay-sdk/providers'
-import Stripe from 'stripe'
+import type { IPaymentProvider, StripeInstance } from '@ezstart/pay-sdk/providers'
 
 // ========================================
 // Provider Registry (singleton)
@@ -22,20 +37,16 @@ if (useConsole) {
   )
   registry.register(new ConsoleProvider())
 } else {
-  // Safety: prevent live keys in local development
-  const isLocalDev = process.env.NODE_ENV !== 'production' && !process.env.RAILWAY_ENVIRONMENT
-  if (isLocalDev && stripeKey.startsWith('sk_live_')) {
-    throw new Error('DANGER: Live Stripe key detected in local development! Use sk_test_ keys.')
-  }
-  if (process.env.NODE_ENV === 'production' && stripeKey.startsWith('sk_test_')) {
-    logger.warn('WARNING: Test Stripe key in production — payments will not be processed')
-  }
-
-  const stripe = new Stripe(stripeKey)
+  // Safety guards (live-key-in-dev throw, test-key-in-prod warn) are enforced
+  // inside `createStripeClient` — see @ezstart/pay-sdk/server.
+  const stripe = createStripeClient({
+    secretKey: stripeKey,
+    logger,
+  })
 
   registry.register(
     new StripeProvider({
-      stripe: stripe as unknown as import('@ezstart/pay-sdk/providers').StripeInstance,
+      stripe: stripe as unknown as StripeInstance,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     })
   )
