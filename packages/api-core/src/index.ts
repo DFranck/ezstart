@@ -73,6 +73,11 @@ export {
   type RateLimitOptions,
 } from './core/middleware/rate-limit.js'
 export {
+  createKeyHashRateLimiter,
+  type KeyHashRateLimiter,
+  type KeyHashRateLimiterOptions,
+} from './core/middleware/key-hash-rate-limit.js'
+export {
   createAuthMiddleware,
   createRoleMiddleware,
   type AuthMiddlewareConfig,
