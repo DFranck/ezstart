@@ -106,6 +106,11 @@ export {
   type ErrorHandlerConfig,
   type ErrorPersistCallback,
 } from './core/middleware/error-handler.js'
+export {
+  deprecatedRoute,
+  type DeprecatedRouteLogEntry,
+  type DeprecatedRouteOptions,
+} from './core/middleware/deprecated-route.js'
 export { validateBody, validateParams, validateQuery } from './core/middleware/validate.js'
 
 // Request-scoped context (AsyncLocalStorage)

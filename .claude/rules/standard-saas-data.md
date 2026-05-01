@@ -25,7 +25,7 @@ Source de vérité data layer pour toute app SaaS @ezstart. Aligné sur Stripe A
 ## 2. API versioning
 
 - [ ] 🟠 P1 : Toutes les routes prefixées `/api/v1/` — pas de bare `/api/users` (1 jour refactor + redirect alias)
-- [ ] 🟠 P1 : Deprecation policy 90 jours documentée — `Sunset:` header + warning logs (4h policy doc)
+- [ ] 🟠 P1 : Deprecation policy 90 jours documentée — utiliser `deprecatedRoute()` middleware de `@ezstart/api-core` qui pose `Sunset:` + `Warning:` + `Deprecation:` headers (RFC 8594) + log Pino structuré. Cf. `standard-ui.md` §10.8 pour le pattern complet.
 - [ ] 🟠 P1 : Changelog public des breaking changes API (1 jour init)
 - [ ] 🟡 P2 : `Stripe-Version`-style header — client envoie `Ezstart-API-Version: 2026-04-01`, backend route vers la version (1 semaine)
 - [ ] 🟡 P2 : Auto-generated migration guide via OpenAPI diff (3 jours)

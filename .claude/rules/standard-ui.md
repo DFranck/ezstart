@@ -473,3 +473,48 @@ grep -rn "@deprecated" packages/ui/src/components/ packages/auth-sdk/src/compone
 ```
 
 > **Future enforcement** : ESLint rule custom `@ezstart/ezstart/deprecation-runtime-warning` — flagger les `@deprecated` JSDoc sans `useDeprecationWarning` / `warnDeprecation` matching dans le meme fichier (cf. `BACKLOG.md` STD-DEPRECATION-001).
+
+### 10.8 Server-side deprecation (API routes)
+
+Le pattern de runtime warning côté browser (cf. §10.3 prop-level / §10.4 component-level) ne couvre pas les routes API deprecated. Pour les endpoints HTTP, utiliser le middleware `deprecatedRoute()` de `@ezstart/api-core` :
+
+```ts
+import { deprecatedRoute } from '@ezstart/api-core'
+import { logger } from '@ezstart/logger/server'
+
+router.get(
+  '/v1/users',
+  deprecatedRoute({
+    replacement: 'GET /api/v2/users',
+    sunset: '2026-12-01',
+    link: 'https://docs.ezstart.xyz/migration/v2',
+    logger,
+  }),
+  listUsersV1
+)
+```
+
+Le middleware :
+
+- Set HTTP headers RFC 8594 (`Sunset`, `Deprecation: true`, `Warning: 299`, `Link: rel=sunset`)
+- Log structured warn (`{ deprecated, replacement, sunset, ip, userAgent }`) via le `logger` injecté — Pino par défaut quand on passe `@ezstart/logger/server`, no-op silent quand aucun logger n'est fourni (api-core core reste agnostique)
+- Visible dans error tracking (Sentry/Better Stack) une fois activé
+- Le client SDK pourra (à terme) consommer automatiquement les headers `Deprecation`/`Warning` de la response et surfacer un toast (suivi `API-SDK-DEPRECATION-WARNING-001` dans BACKLOG)
+
+**Checklist quand on deprecate une route API** :
+
+- [ ] (1) `@deprecated` JSDoc sur le handler avec migration path
+- [ ] (2) `deprecatedRoute({ replacement, sunset, link, logger })` middleware appliqué
+- [ ] (3) Documenté dans le CHANGELOG du service (avec sunset date)
+- [ ] (4) Migration guide en place avant la sunset date
+- [ ] (5) Sunset = minimum 90 jours dans le futur (cf. `standard-saas-data.md` §2 deprecation policy)
+
+**Audit grep** :
+
+```bash
+# Routes deprecated tracked via middleware
+grep -rn "deprecatedRoute(" apps/*/api/src/routes/ packages/api-core/src/
+
+# JSDoc @deprecated sur des handlers sans middleware matching
+grep -rn "@deprecated" apps/*/api/src/routes/ --include="*.ts" | grep -v "deprecatedRoute"
+```
