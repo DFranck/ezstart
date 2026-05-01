@@ -2,7 +2,7 @@
  * Google Gemini Provider
  */
 
-import 'server-only'
+import '../_internal/server-only.js'
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Content, Part } from '@google/generative-ai'

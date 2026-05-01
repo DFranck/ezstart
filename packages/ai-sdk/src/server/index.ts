@@ -13,12 +13,14 @@
  * import { providerRegistry, UnifiedChat } from '@ezstart/ai-sdk/server'
  * ```
  *
- * The `import 'server-only'` guard at the top of every file in this entry
- * throws at build time if a client component accidentally imports from
- * here, preventing API-key / token leaks to the browser bundle.
+ * The server-only guard at the top of every file in this entry throws at
+ * build/runtime if a client component (browser bundle) accidentally imports
+ * from here, preventing API-key / token leaks. The guard uses a runtime
+ * `window` check instead of the `server-only` npm package, which crashes
+ * raw-Node API services at boot.
  */
 
-import 'server-only'
+import './_internal/server-only.js'
 
 // ---------------------------------------------------------------------------
 // Registry

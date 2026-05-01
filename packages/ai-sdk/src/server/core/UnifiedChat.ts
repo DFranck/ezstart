@@ -3,7 +3,7 @@
  * Single interface to chat with any AI provider
  */
 
-import 'server-only'
+import '../_internal/server-only.js'
 
 import { logger } from '@ezstart/logger'
 import { providerRegistry } from '../registry/ProviderRegistry.js'

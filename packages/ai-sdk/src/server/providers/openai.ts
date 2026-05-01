@@ -2,7 +2,7 @@
  * OpenAI Provider
  */
 
-import 'server-only'
+import '../_internal/server-only.js'
 
 import OpenAI from 'openai'
 import {

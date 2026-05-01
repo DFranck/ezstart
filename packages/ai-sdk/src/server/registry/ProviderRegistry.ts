@@ -3,7 +3,7 @@
  * Manages multiple AI providers dynamically
  */
 
-import 'server-only'
+import '../_internal/server-only.js'
 
 import { EventEmitter } from 'node:events'
 import { logger } from '@ezstart/logger'

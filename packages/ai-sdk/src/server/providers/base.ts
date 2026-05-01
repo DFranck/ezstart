@@ -2,7 +2,7 @@
  * Base AI Provider Interface
  */
 
-import 'server-only'
+import '../_internal/server-only.js'
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'

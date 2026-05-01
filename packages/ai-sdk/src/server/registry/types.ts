@@ -2,7 +2,7 @@
  * Registry types for AI Provider management
  */
 
-import 'server-only'
+import '../_internal/server-only.js'
 
 export type AIProviderType = 'openai' | 'gemini' | 'anthropic' | 'custom'
 

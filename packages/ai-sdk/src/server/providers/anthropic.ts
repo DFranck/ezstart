@@ -17,7 +17,7 @@
  * - `APIConnectionError` — network failures
  */
 
-import 'server-only'
+import '../_internal/server-only.js'
 
 import Anthropic from '@anthropic-ai/sdk'
 import {
