@@ -1,11 +1,13 @@
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
 import { AppShell } from '@/components/app-shell'
 import { Providers } from './providers'
 import '@ezstart/ui/globals.css'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import { headers } from 'next/headers'
 import Script from 'next/script'
 import { ReactNode } from 'react'
 
@@ -35,6 +37,21 @@ export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params
   const messages = await getMessages()
 
+  // SSR auth bootstrap (Clerk-style) — kills the LoginButton flash in
+  // httpOnly mode. Reads the session cookie from the inbound request,
+  // resolves the user via `/api/auth/me` server-side, and seeds the
+  // Zustand store synchronously when `<AuthProvider>` mounts (via
+  // `initialUser`). The first paint of `<UserMenu>` / `<LoginButton>` /
+  // `<RequireAuth>` then reflects the right state — no async client-side
+  // gap during which the store defaults to `isAuthenticated: false`.
+  // Anonymous requests still work: `getServerAuth()` returns `null`.
+  const headersList = await headers()
+  const cookieHeader = headersList.get('cookie')
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
+    cookieHeader,
+  })
+
   return (
     <html lang={locale} suppressHydrationWarning data-app="ezpay">
       <body className="min-h-screen">
@@ -45,7 +62,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         <NextIntlClientProvider messages={messages}>
           <ErrorBoundary title="Something went wrong in EZPay">
-            <Providers>
+            <Providers initialUser={initialUser}>
               <AppShell>{children}</AppShell>
             </Providers>
           </ErrorBoundary>

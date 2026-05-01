@@ -1,3 +1,8 @@
+// force-dynamic required: layout mounts AuthProvider/PayProvider which
+// hydrate runtime auth state via httpOnly cookie at request time. SSG
+// prerender crashed without this (regression caught in commit 6b56cb95
+// "fix(staging): resolve 4 build failures"). Re-evaluate once SSR
+// auth bootstrap (initialUser via getServerAuth) lands in this layout.
 export const dynamic = 'force-dynamic'
 
 import { Providers } from '@/components/providers'

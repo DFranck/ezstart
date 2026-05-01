@@ -1,6 +1,11 @@
 'use client'
 
-import { AuthProvider, useAuthStoreApi, useAuthStoreGetSnapshot } from '@ezstart/auth-sdk'
+import {
+  AuthProvider,
+  useAuthStoreApi,
+  useAuthStoreGetSnapshot,
+  type AuthUser,
+} from '@ezstart/auth-sdk'
 import { PayProvider } from '@ezstart/pay-sdk'
 import { ThemeProvider } from '@ezstart/ui/theme'
 import { useLocale } from 'next-intl'
@@ -39,7 +44,20 @@ function PayBridge({ locale, children }: { locale: string; children: ReactNode }
   )
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  initialUser,
+}: {
+  children: ReactNode
+  /**
+   * SSR-resolved user — passed down from the locale-root layout, which calls
+   * `getServerAuth()` from `@ezstart/auth-sdk/server` against the request
+   * cookie. Hydrates the auth store synchronously on first render so the
+   * AppShell renders the right chrome (UserMenu vs LoginButton) on the very
+   * first paint — no flash on initial load or cross-group navigations.
+   */
+  initialUser?: AuthUser | null
+}) {
   const locale = useLocale()
   return (
     <QueryProvider>
@@ -49,6 +67,7 @@ export function Providers({ children }: { children: ReactNode }) {
           apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
           webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
           publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
+          initialUser={initialUser}
         >
           <PayBridge locale={locale}>{children}</PayBridge>
         </AuthProvider>
