@@ -55,29 +55,36 @@ Variables `NEXT_PUBLIC_*` configurées dans Vercel Dashboard → Environment Var
 ## Tooling
 
 ```bash
-pnpm setup:env         # Génère/met à jour root .env.local + per-app overrides (idempotent)
-pnpm validate-env      # Valide root + per-app .env contre les templates, détecte redondances
-pnpm rotate-secrets    # Rotate JWT_SECRET (+ OAUTH_KEY ezauth), push Railway + Vercel via CLI
-pnpm secrets:sync      # Push root .env.production → Vercel + Railway (shared vars uniquement)
-pnpm secret:gen        # Génère un secret crypto random (utilitaire ad-hoc)
+pnpm env:validate                   # Valide la cascade per-app (.env.local → .env.staging → .env.production)
+pnpm env:push:railway <app> <env>   # Push merged cascade vers Railway pour 1 app+env
+pnpm env:push:vercel <app> <env>    # Push merged cascade vers Vercel pour 1 app+env
+pnpm env:push:all <env>             # Push toutes les apps en une seule commande
+pnpm env:push:all <env> --dry-run   # Preview sans cloud call
+pnpm secret:gen                     # Génère un secret crypto random (utilitaire ad-hoc)
+
+# DEPRECATED (legacy hybrid layout — root .env.* dropped 2026-05-01)
+# pnpm setup:env, pnpm validate-env, pnpm rotate-secrets, pnpm secrets:sync
 ```
 
-Voir [SECRETS.md](./SECRETS.md) pour le détail des flags (`--dry-run`, `--prod`, `--vars`, etc.).
+Voir [SECRETS.md](./SECRETS.md) pour le détail des flags (`--dry-run`, `--from`, `--override`, `--apps`, `--continue-on-error`, etc.).
 
 ---
 
-## Structure .env
+## Structure .env (per-app ONLY — pas de fichier root)
 
 ```
-apps/{name}/api/
-├── .env.example       ← Template (committé)
-├── .env.local         ← Dev local (gitignored)
-└── .env.production    ← Production (gitignored)
+apps/{name}/{api|web}/
+├── .env.example       ← Template (committé, sans secrets)
+├── .env.local         ← Dev local complet (gitignored — TOUS les vars y vivent)
+├── .env.staging       ← Staging overrides (gitignored — diffs vs local)
+└── .env.production    ← Production overrides (gitignored — diffs vs local+staging)
 ```
 
-- `.env.example` : toujours à jour, contient placeholders
-- `.env.local` : valeurs réelles de dev, chargé par api-core
-- `.env.production` : référence pour les variables Railway
+- `.env.example` : à jour, contient placeholders + commentaires
+- `.env.local` : valeurs réelles de dev, chargé par api-core / next-config
+- `.env.staging` : DIFFS vs `.env.local` uniquement (ex: cluster URL staging)
+- `.env.production` : DIFFS vs `.env.local + .env.staging` uniquement
+- Pas de fichier `.env*` à la racine du monorepo (per-app cascade canonique)
 
 ---
 

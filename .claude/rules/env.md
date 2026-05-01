@@ -1,45 +1,44 @@
-## 🔐 Environnements et Secrets — Hybrid root + per-app (post ENV-2)
+## 🔐 Environnements et Secrets — Per-app ONLY (post ENV-3, 2026-05-01)
 
 **Toutes les règles de ce fichier sont 🔴 P0** (architecture .env non-négociable). Voir `standard.md` pour le système de priorisation global et `standard-saas-security.md` §5 pour les aspects security secrets management (rotation, vault).
 
-### 1. Architecture .env Standardisée
+### 1. Architecture .env Standardisée — PER-APP ONLY
 
-**Hybrid root + per-app — 3 ou 4 fichiers par layer :**
+**Plus de fichier `.env*` à la racine.** Chaque app+layer est self-contained — la cascade de chargement vit entièrement sous `apps/<app>/<layer>/`. Cela permet à chaque app d'être déployable, auditable, et publiable indépendamment, sans dépendre d'un état partagé hors du dossier de l'app.
 
 ```
-@ezstart/
-├── .env.example       # ✅ Template root SHARED (committé)
-├── .env.local         # ✅ SHARED dev secrets (gitignored)
-├── .env.staging       # ✅ SHARED staging (gitignored)
-└── .env.production    # ✅ SHARED prod ref (gitignored)
-
 apps/<app>/<api|web>/
-├── .env.example       # ✅ Template per-app (committé)
-├── .env.local         # ✅ Per-app dev (gitignored)
-├── .env.staging       # ✅ Per-app staging (gitignored)
-└── .env.production    # ✅ Per-app prod ref (gitignored)
+├── .env.example       # ✅ Template per-app (committé, sans secrets)
+├── .env.local         # ✅ Per-app dev complet (gitignored — TOUS les vars y vivent)
+├── .env.staging       # ✅ Staging overrides ONLY (gitignored — diffs vs local)
+└── .env.production    # ✅ Production overrides ONLY (gitignored — diffs vs local+staging)
 ```
 
-**Load order :**
+**Cascade de chargement (lowest → highest precedence) :**
 
-1. Root `.env.<env>` chargé EN PREMIER (vars partagées : JWT_SECRET, MONGO_URL, DEPLOY_ENV)
-2. `apps/<app>/<layer>/.env.<env>` chargé ensuite — **override** si même clé
+```
+local       → .env.local
+staging     → .env.local  ←  .env.staging
+production  → .env.local  ←  .env.staging  ←  .env.production
+```
+
+`.env.staging` et `.env.production` ne contiennent QUE les vars qui DIFFÈRENT de `.env.local` (cluster URLs, NODE*ENV=production, sk_live*\* keys, prod webhooks). Les vars stables (LOG_LEVEL, JWT_SECRET partagé, OAUTH_STATE_SECRET, etc.) sont dans `.env.local` et cascadent vers staging+prod automatiquement.
 
 **Workflow :**
 
-1. **Développement** : Copier chaque `.env.example` → `.env.local` (root + per-app concernés) et remplir
-2. **Production** : Copier variables dans Railway (per-app API) / Vercel (per-app web), shared vars synchronisées
-3. **Validation** : `pnpm env:validate` (vérifie shared sync + missing required)
+1. **Développement** : Copier `.env.example` → `.env.local` (par app+layer concernés) et remplir
+2. **Production** : `pnpm env:push:all production` lit la cascade complète et pousse vers Railway/Vercel en une commande
+3. **Validation** : `pnpm env:validate --env={local|staging|production}` (vérifie que la cascade complète est non-bloquante)
 
 ### 2. Règles Critiques
 
-- ✅ **Shared vars** (JWT_SECRET, MONGO_URL, DEPLOY_ENV) → root `.env.<env>` UNIQUEMENT
-- ✅ **Per-app vars** (Stripe keys, OAuth secrets, GEMINI_API_KEY, NEXT_PUBLIC_EZAUTH_KEY, etc.) → `apps/<app>/<layer>/.env.<env>`
+- ✅ **PAS de fichier `.env*` à la racine du monorepo.** Chaque app est self-contained.
+- ✅ **JWT_SECRET, MONGO_URL, DEPLOY_ENV doivent être dupliqués** dans CHAQUE `.env.local` per-app (le coût de la duplication est largement compensé par l'autonomie de l'app)
 - ✅ `.env.example` → Template SANS secrets (committé) à TOUS les niveaux
 - ✅ `.env.local` / `.env.staging` / `.env.production` → gitignored, JAMAIS committés
-- ❌ `.env` → NE PLUS UTILISER (confusion)
-- ✅ `loadSharedEnv({ app, layer })` charge root + per-app automatiquement
-- ❌ **JAMAIS** redonner un shared var dans per-app sauf si override volontaire pour cette app spécifiquement
+- ✅ Les valeurs identiques entre apps (ex: JWT_SECRET production) DOIVENT être copiées à l'identique dans chaque app — la cohérence est garantie par les push scripts qui utilisent les mêmes valeurs
+- ❌ `.env` (sans suffix) → INTERDIT (confusion + load order indéfini)
+- ❌ JAMAIS de fichier `.env*` à la racine — l'agent ENV_COMPLETE_FIX 2026-05-01 a supprimé `.env.example`, `.env.local`, `.env.staging`, `.env.production` à la racine. Si un fichier réapparaît c'est un bug.
 
 ### 3. Variables PORT Obsolètes
 
@@ -58,18 +57,28 @@ const PORT = getApiPort('ezauth') // 6110
 ### 4. Validator + Push scripts
 
 ```bash
-# Vérifier qu'aucun shared var ne drift entre root et per-app
-pnpm env:validate
+# Vérifier que la cascade per-app est complète et non-bloquante
+pnpm env:validate --env=local       # défaut
+pnpm env:validate --env=staging
+pnpm env:validate --env=production
 
-# Push des vars (root + per-app merge) vers Railway/Vercel
+# Push une app+layer à la fois
 pnpm env:push:railway <app> <env>     # ex: pnpm env:push:railway ezauth staging
 pnpm env:push:vercel <app> <env>      # ex: pnpm env:push:vercel ezpay production
+
+# Push TOUTES les apps en une seule commande (8 apps × 2 layers ≈ 14 pushes)
+pnpm env:push:all <env>               # production | staging | local
+pnpm env:push:all production --dry-run        # preview sans cloud call
+pnpm env:push:all staging --apps ezauth,ezpay # subset
+pnpm env:push:all production --only-api       # API only
+pnpm env:push:all production --only-web       # Web only
+pnpm env:push:all production --continue-on-error  # don't fail-fast
 ```
 
 ### 5. Helpers env (`@ezstart/config/env-resolvers`)
 
 - `getMongoUrl(app)` — résout `{app}` dans MONGO_URL template
-- `getJwtSecret()` — lit JWT_SECRET (root)
+- `getJwtSecret()` — lit JWT_SECRET (depuis l'env du process)
 
 ### 6. Backups
 
@@ -110,6 +119,14 @@ ls apps/*/api/src/config/cookie.ts 2>/dev/null
 grep -rn "getCookieDomain\|cookie.*domain" apps/*/api/src/ --include="*.ts"
 ```
 
-### 8. Documentation complète
+### 8. Audit grep — racine
 
-Voir [SECRETS.md](../../SECRETS.md) pour la doc canonique.
+```bash
+# Vérifier qu'aucun fichier .env* ne réapparait à la racine
+ls -la .env* 2>&1 | grep -v "no such" | head -5
+# Attendu : pas de match (sauf si vous êtes dans une feature branch en cours de migration)
+```
+
+### 9. Documentation complète
+
+Voir [SECRETS.md](../../SECRETS.md) pour la doc canonique (à jour avec doctrine per-app-only).

@@ -1,18 +1,23 @@
 /**
- * Monorepo-level env vars loader — HYBRID (root + per-app).
+ * Monorepo-level env vars loader — PER-APP ONLY (post 2026-05-01).
  *
- * Two-layer load:
- *   1. ROOT shared vars   → `<repo>/.env.{env}`           (must-be-identical: JWT_SECRET, MONGO_URL, DEPLOY_ENV)
- *   2. Per-app overrides  → `apps/<app>/<layer>/.env.{env}` (app-specific vars; values override root if duplicate)
+ * Single-layer load:
+ *   1. Per-app  → `apps/<app>/<layer>/.env.{env}` — full env per app+layer
+ *
+ * The cascade local → staging → production is handled by the push scripts
+ * (`scripts/env/push-railway.ts`, `push-vercel.ts`). At runtime each
+ * Railway/Vercel deployment receives the merged result as a single dotenv
+ * file, so this loader only reads ONE file per process.
  *
  * Files per environment:
  *   - `.env.local`      → local dev  (DEPLOY_ENV=local or unset)
  *   - `.env.staging`    → staging    (DEPLOY_ENV=staging)
  *   - `.env.production` → production (DEPLOY_ENV=production or NODE_ENV=production)
  *
- * Per-app file is consulted only when both `app` and `layer` are passed
- * (typically by `instrument.mts` for APIs). Web apps are loaded by
- * `@ezstart/next-config/withSharedEnv` which passes the same shape.
+ * The root `.env.*` files were dropped 2026-05-01 (per-app is canonical).
+ * Backwards-compat: this loader still tries the root file silently — if a
+ * legacy root file exists in a developer's worktree it will still load, but
+ * the standard path is per-app only.
  *
  * @see SECRETS.md — canonical documentation
  * @see env-resolvers.ts — helpers (`getMongoUrl`, `getJwtSecret`)
@@ -119,9 +124,11 @@ function loadDotenvFile(absPath: string, override: boolean): number {
 }
 
 /**
- * Load env vars in two layers:
- *   1. Root `<repo>/.env.{env}` — shared vars, never overrides existing process.env (shell wins)
- *   2. Per-app `apps/<app>/<layer>/.env.{env}` — overrides root value if same key
+ * Load env vars from the per-app file `apps/<app>/<layer>/.env.{env}`.
+ *
+ * The root `.env.*` is read first as a backwards-compat fallback (no override
+ * of shell vars) — if it exists, it's a legacy artifact in a developer
+ * worktree. Per-app file is the canonical source.
  *
  * @example
  * ```ts
@@ -136,12 +143,13 @@ export function loadSharedEnv(opts: LoadEnvOptions = {}): void {
   const envFile = pickEnvFileBasename()
   const root = findMonorepoRoot()
 
-  // 1. Root shared vars (no override of shell-set vars)
+  // 1. Legacy root layer (fallback only — root .env.* dropped 2026-05-01).
+  // Silent no-op when the file is absent (which is the canonical state).
   const rootEnv = path.join(root, envFile)
   const rootCount = loadDotenvFile(rootEnv, false)
 
-  // 2. Per-app overrides (override root if duplicate; still respects shell vars
-  //    that were set BEFORE this call — they are already in process.env).
+  // 2. Per-app file (canonical source — override root if duplicate; still
+  //    respects shell vars that were set BEFORE this call).
   let appCount = 0
   let appEnvPath: string | undefined
   if (opts.app && opts.layer) {
@@ -151,10 +159,9 @@ export function loadSharedEnv(opts: LoadEnvOptions = {}): void {
 
   if (!opts.silent) {
     const appLabel = opts.app ? ` for ${opts.app}/${opts.layer ?? '?'}` : ''
+    const rootHint = rootCount > 0 ? ` (legacy root .env still present: ${rootCount} vars)` : ''
     // eslint-disable-next-line no-console
-    console.info(
-      `🔐 [env] Loaded ${envFile}${appLabel}: root ${rootCount} vars, per-app ${appCount} vars`
-    )
+    console.info(`🔐 [env] Loaded ${envFile}${appLabel}: per-app ${appCount} vars${rootHint}`)
   }
 
   // Validate required vars (after both layers are loaded).
@@ -163,8 +170,8 @@ export function loadSharedEnv(opts: LoadEnvOptions = {}): void {
     if (missing.length > 0) {
       const hints = missing.map(k => `   - ${k}`).join('\n')
       const sources = appEnvPath
-        ? `\n\nSet them in ${rootEnv} (shared) or ${appEnvPath} (per-app).`
-        : `\n\nSet them in ${rootEnv}.`
+        ? `\n\nSet them in ${appEnvPath} (per-app cascade is canonical — no root .env layer).`
+        : `\n\nNo per-app target available — pass {app, layer} options to loadSharedEnv.`
       throw new Error(
         `❌ Missing required env vars${opts.app ? ` for ${opts.app}/${opts.layer ?? 'api'}` : ''}:\n` +
           hints +

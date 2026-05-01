@@ -60,8 +60,8 @@ export function getMongoUrl(app: AppName): string {
   if (!tpl) {
     throw new Error(
       'MONGO_URL environment variable is required. ' +
-        'Set it in the root .env.local / .env.staging / .env.production with ' +
-        '{app} / {env} placeholders.'
+        'Set it in apps/<app>/<api|web>/.env.{local,staging,production} with ' +
+        '{app} / {env} placeholders. Per-app cascade is canonical (no root .env layer).'
     )
   }
   const suffix = dbEnvSuffix()
@@ -85,7 +85,9 @@ export function getJwtSecret(): string {
   if (!secret) {
     throw new Error(
       'JWT_SECRET environment variable is required. ' +
-        'Set it in the root .env.local / .env.staging / .env.production.'
+        'Set it in apps/<app>/<api|web>/.env.{local,staging,production}. ' +
+        'Per-app cascade is canonical (no root .env layer); the value MUST be ' +
+        'identical across every app for SSO interop.'
     )
   }
   return secret
