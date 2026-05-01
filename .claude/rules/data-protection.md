@@ -71,6 +71,17 @@ Pour les aspects étendus (backups testés, restore drill, point-in-time recover
    - M0 = Pas de backups automatiques
    - M2+ = Snapshots automatiques + point-in-time recovery
 
+### 🛟 Stratégie backup obligatoire
+
+Voir [`MONGODB_BACKUP.md`](../../MONGODB_BACKUP.md) pour la stratégie complète. TL;DR :
+
+- Atlas M0 = pas de backup. **INTERDIT en prod.**
+- Choisir UNE option :
+  1. Atlas M2+ ($9/mo) — automatique, recommandé
+  2. Cron weekly via [`scripts/backup-mongodb.sh`](../../scripts/backup-mongodb.sh) (S3-compatible storage)
+  3. GitHub Actions scheduled workflow ([`.github/workflows/mongo-backup.yml`](../../.github/workflows/mongo-backup.yml))
+- **Restore drill obligatoire chaque trimestre** — un backup non testé = pas de backup.
+
 ### 📋 Checklist Avant Chaque Test
 
 - [ ] `.env.test` existe et pointe vers localhost

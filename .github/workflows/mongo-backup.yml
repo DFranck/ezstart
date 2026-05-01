@@ -1,0 +1,39 @@
+name: MongoDB weekly backup
+
+on:
+  schedule:
+    - cron: '0 3 * * 0' # Sunday 3am UTC
+  workflow_dispatch: {} # manual trigger from Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install MongoDB Database Tools (mongodump)
+        run: |
+          set -euo pipefail
+          MONGOTOOLS_VERSION=100.10.0
+          MONGOTOOLS_PKG=mongodb-database-tools-ubuntu2204-x86_64-${MONGOTOOLS_VERSION}.tgz
+          wget -q "https://fastdl.mongodb.org/tools/db/${MONGOTOOLS_PKG}"
+          tar -xzf "${MONGOTOOLS_PKG}"
+          sudo mv mongodb-database-tools-*/bin/* /usr/local/bin/
+          mongodump --version
+
+      - name: Verify AWS CLI is available
+        run: aws --version
+
+      - name: Run backup script
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL_PROD }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+        run: |
+          chmod +x ./scripts/backup-mongodb.sh
+          ./scripts/backup-mongodb.sh
