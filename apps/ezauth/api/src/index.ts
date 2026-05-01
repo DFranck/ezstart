@@ -1,21 +1,13 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
-import {
-  addVersionHeader,
-  attachDerivedMode,
-  connectToMongo,
-  createApiServer,
-  createVersionedRouter,
-  initSentry,
-  startServer,
-  withRequestContextMiddleware,
-} from '@ezstart/api-core'
+import { bootApi, createVersionedRouter, initSentry } from '@ezstart/api-core'
 
 // Initialize Sentry BEFORE createApiServer so the error-handler middleware
 // can safely capture exceptions. No-op when SENTRY_DSN is unset (caller can
 // always invoke this regardless of env config). Uses `@sentry/node-core` with
 // ZERO auto-integrations to avoid the 2026-04-25 OTEL/CORS incident on Railway.
 initSentry({ serviceName: 'ezauth' })
+
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import routes, {
   allRegistries,
@@ -75,80 +67,67 @@ const COOKIE_AUTH_ALLOWLIST = [
   /^https:\/\/ezauth-git-[a-z0-9-]+-ezstart\.vercel\.app$/,
 ]
 
-const server = createApiServer('ezauth', {
-  cookieAuthRoutes: COOKIE_AUTH_ROUTES,
-  cookieAuthAllowlist: COOKIE_AUTH_ALLOWLIST,
-})
-const { app } = server
+// `useDerivedMode: true` enables the Stripe-pattern test/live partition for
+// the API-key endpoints (`/api/keys/*`, `/api/applications/*`, etc.). Cookie-
+// auth dashboard requests fall back to `'live'` by default — superadmin can
+// override via `?mode=` query param. See `.claude/rules/standard-saas-data.md`
+// §4 for the full contract.
+let app: import('@ezstart/api-core').Express
+try {
+  ;({ app } = await bootApi('ezauth', {
+    mongoDbName: 'ezauth',
+    cookieAuthRoutes: COOKIE_AUTH_ROUTES,
+    cookieAuthAllowlist: COOKIE_AUTH_ALLOWLIST,
+    useDerivedMode: true,
+    onReady: async ({ app }) => {
+      // Cookie parser + Passport must be mounted on the app BEFORE the routes
+      // that read cookies (login/refresh/logout) and BEFORE the OAuth routes
+      // that call `passport.authenticate(...)`. Mounted in `onReady` so they
+      // sit between the api-core stack and the route handlers.
+      app.use(cookieParser())
+      app.use(passport.initialize())
 
-// Cookie parser middleware (required for httpOnly cookie support)
-app.use(cookieParser())
+      // Routes
+      // /api/auth/*  — credentials + OAuth
+      // /api/admin/* — authorization / user admin
+      app.use(createVersionedRouter('/api/auth', authRouter))
+      app.use(createVersionedRouter('/api/auth', oauthRouter))
+      app.use(createVersionedRouter('/api/admin', adminRouter))
+      app.use(createVersionedRouter('/api', apiKeysRouter))
+      app.use(createVersionedRouter('/api', applicationsRouter))
+      app.use(createVersionedRouter('/api', subscriptionsRouter))
+      app.use(createVersionedRouter('/api', publicRouter))
 
-// Passport init (OAuth strategies registered elsewhere)
-app.use(passport.initialize())
-
-// API version headers on every response
-app.use(addVersionHeader('v1'))
-
-// Stripe-pattern test/live mode partition (`standard-saas-data.md` §4):
-// 1. `attachDerivedMode` parses the API key prefix on the request and stamps
-//    `req.derivedMode` ('test' | 'live'). Defaults to 'live' for cookie-auth
-//    dashboard requests; superadmin can override via `?mode=` query param.
-// 2. `withRequestContextMiddleware` wraps the rest of the request lifecycle
-//    in an AsyncLocalStorage frame so the per-app `testModeScopePlugin`
-//    Mongoose hook can read the mode without an explicit `req` reference.
-//
-// Placement matters: AFTER auth/api-key middleware (which sets `req.user` and
-// `req.apiKeyEnv` if applicable), BEFORE routes. Routes themselves don't need
-// to mount auth at the app level — most ezauth routes use per-route auth
-// guards. The mode resolution still works because both attachDerivedMode and
-// the per-route auth read from the same headers/cookies.
-app.use(attachDerivedMode)
-app.use(withRequestContextMiddleware)
-
-// Routes
-// /api/auth/*  — credentials + OAuth
-// /api/admin/* — authorization / user admin
-app.use(createVersionedRouter('/api/auth', authRouter))
-app.use(createVersionedRouter('/api/auth', oauthRouter))
-app.use(createVersionedRouter('/api/admin', adminRouter))
-app.use(createVersionedRouter('/api', apiKeysRouter))
-app.use(createVersionedRouter('/api', applicationsRouter))
-app.use(createVersionedRouter('/api', subscriptionsRouter))
-app.use(createVersionedRouter('/api', publicRouter))
-
-// Connect to MongoDB, warm models, then start listening
-connectToMongo('ezauth')
-  .then(async () => {
-    await getAuthUserModel()
-    await getAuthCodeModel()
-    await getOAuthAccountModel()
-    await getTotpSecretModel()
-    await getApiKeyModel()
-    await getApplicationModel()
-    await getSubscriptionEventModel()
-    await getFeatureFlagModel()
-    await getMaintenanceModeModel()
-    await getErrorLogModel()
-    logger.info(
-      '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent, FeatureFlag, MaintenanceMode, ErrorLog'
-    )
-
-    return startServer(app, {
+      // Warm Mongoose models so the first request does not pay the
+      // schema-compilation cost. Awaited sequentially — Mongoose's model
+      // registry is in-memory so the cost is negligible.
+      await getAuthUserModel()
+      await getAuthCodeModel()
+      await getOAuthAccountModel()
+      await getTotpSecretModel()
+      await getApiKeyModel()
+      await getApplicationModel()
+      await getSubscriptionEventModel()
+      await getFeatureFlagModel()
+      await getMaintenanceModeModel()
+      await getErrorLogModel()
+      logger.info(
+        '[Models] Initialized: AuthUser, AuthCode, OAuthAccount, TotpSecret, ApiKey, Application, SubscriptionEvent, FeatureFlag, MaintenanceMode, ErrorLog'
+      )
+    },
+    serverConfig: {
       routes,
       registries: allRegistries,
       serviceName: 'EZAuth',
-      port: server.config.port,
-      logger: server.logger,
       // Sentry-free stopgap — persist every unhandled error to the local
       // `error_logs` collection so the admin dashboard can browse them.
       // Fire-and-forget; the service is defensive and never throws.
       persistError: (err, req) => logErrorToDb({ err, req }),
-    })
-  })
-  .catch((err: unknown) => {
-    logger.error('Failed to start EZAuth API', err)
-    process.exit(1)
-  })
+    },
+  }))
+} catch (err) {
+  logger.error('Failed to start EZAuth API', err)
+  process.exit(1)
+}
 
 export { app }

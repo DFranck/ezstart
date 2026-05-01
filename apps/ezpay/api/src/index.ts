@@ -2,15 +2,7 @@
 // Load env BEFORE anything else (instrument.mts populates MONGO_URL etc.)
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
-import {
-  addVersionHeader,
-  attachDerivedMode,
-  connectToMongo,
-  createApiServer,
-  createVersionedRouter,
-  startServer,
-  withRequestContextMiddleware,
-} from '@ezstart/api-core'
+import { bootApi, createVersionedRouter } from '@ezstart/api-core'
 import routes, { registries } from './routes/index.js'
 import { startConnectCleanupScheduler } from './services/connect-cleanup.js'
 
@@ -26,58 +18,42 @@ if (process.env.NODE_ENV === 'production' && !process.env.EZPAY_SERVER_EZAUTH_KE
   )
 }
 
-// Create pre-configured server with Stripe webhook raw-body routes.
-// No cookie-auth routes: EZPay is a pure Bearer/publishable-key API — it
-// consumes EZAuth JWTs but never sets its own cookies. Tier 1/2 permissive
-// CORS (ACAO: *) applies to every endpoint.
-// See .claude/rules/standard-saas-cors.md.
-const server = createApiServer('ezpay', {
-  rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
-  cookieAuthRoutes: [],
-})
-const { app } = server
-
-// API version headers on every response
-app.use(addVersionHeader('v1'))
-
-// Stripe-pattern test/live mode partition (`standard-saas-data.md` §4):
-// `attachDerivedMode` parses the API key prefix on every request and stamps
-// `req.derivedMode`. `withRequestContextMiddleware` wraps the rest of the
-// request in an AsyncLocalStorage frame so the `testModeScopePlugin` Mongoose
-// hook can scope every find/count/update query without an explicit `req` ref.
+// EZPay is a pure Bearer/publishable-key API — it consumes EZAuth JWTs but
+// never sets its own cookies. Tier 1/2 permissive CORS (ACAO: *) applies to
+// every endpoint. See .claude/rules/standard-saas-cors.md.
 //
-// Placed BEFORE routes — the per-route auth middlewares populate
-// `req.apiKeyEnv` upstream so the resolution chain picks the most reliable
-// signal first.
-app.use(attachDerivedMode)
-app.use(withRequestContextMiddleware)
-
-// Routes available at /api/* and /api/v1/*
-app.use(createVersionedRouter('/api', routes))
-
-// Start server
-connectToMongo('ezpay')
-  .then(() =>
-    startServer(app, {
+// `useDerivedMode: true` enables the Stripe-pattern test/live partition —
+// `attachDerivedMode` parses the API key prefix on every request and
+// `withRequestContextMiddleware` propagates the resolved mode through the
+// AsyncLocalStorage frame consumed by `testModeScopePlugin`.
+let app: import('@ezstart/api-core').Express
+try {
+  ;({ app } = await bootApi('ezpay', {
+    mongoDbName: 'ezpay',
+    rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
+    cookieAuthRoutes: [],
+    useDerivedMode: true,
+    onReady: ({ app }) => {
+      // Routes available at /api/* and /api/v1/*
+      app.use(createVersionedRouter('/api', routes))
+    },
+    serverConfig: {
       routes,
       registries,
       serviceName: 'EZPay',
-      port: server.config.port,
-      logger: server.logger,
-    })
-  )
-  .then(() => {
-    // Background job — auto-clean pending Connect rows > 7d + send J-6
-    // expiry warning emails. Cf. `services/connect-cleanup.ts` for the
-    // 6d/7d two-step lifecycle. Skipped under NODE_ENV=test so unit tests
-    // don't race the scheduler.
-    if (process.env.NODE_ENV !== 'test') {
-      startConnectCleanupScheduler()
-    }
-  })
-  .catch(err => {
-    logger.error('Failed to start EZPay API', err)
-    process.exit(1)
-  })
+    },
+  }))
+} catch (err) {
+  logger.error('Failed to start EZPay API', err)
+  process.exit(1)
+}
+
+// Background job — auto-clean pending Connect rows > 7d + send J-6
+// expiry warning emails. Cf. `services/connect-cleanup.ts` for the
+// 6d/7d two-step lifecycle. Skipped under NODE_ENV=test so unit tests
+// don't race the scheduler.
+if (process.env.NODE_ENV !== 'test') {
+  startConnectCleanupScheduler()
+}
 
 export { app }
