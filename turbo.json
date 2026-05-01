@@ -1,6 +1,24 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": ["NODE_ENV", "DEPLOY_ENV", "CI", "VERCEL_ENV", "RAILWAY_ENVIRONMENT"],
+  "globalPassThroughEnv": [
+    "GIT_COMMIT_SHA",
+    "GITHUB_TOKEN",
+    "GITHUB_USERNAME",
+    "MONGODB_ATLAS_PRIVATE_KEY",
+    "MONGODB_ATLAS_PROJECT_ID",
+    "MONGODB_ATLAS_PUBLIC_KEY",
+    "RAILWAY_GIT_COMMIT_SHA",
+    "RAILWAY_TOKEN",
+    "SENTRY_AUTH_TOKEN",
+    "TURBO_TEAM",
+    "TURBO_TOKEN",
+    "VERCEL_GIT_COMMIT_REF",
+    "VERCEL_GIT_COMMIT_SHA",
+    "VERCEL_TEAM_ID",
+    "VERCEL_TOKEN"
+  ],
   "tasks": {
     "generate": {
       "inputs": [
@@ -31,13 +49,62 @@
     "build": {
       "dependsOn": ["^build", "generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "**/dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "**/dist/**"],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "ACCESS_TOKEN_EXPIRES_IN",
+        "AI_HEALTH_CHECK_INTERVAL_MS",
+        "ALERT_*",
+        "ALLOW_PROD_MIGRATION",
+        "ANTHROPIC_API_KEY",
+        "COOKIE_DOMAIN",
+        "EMAIL_FROM",
+        "ERROR_LOG_TTL_DAYS",
+        "ESG_*",
+        "EXCHANGE_RATE_API_KEY",
+        "EZPAY_*",
+        "GEMINI_API_KEY",
+        "GOOGLE_CALLBACK_URL",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "HEALTH_CHECK_RETRIES",
+        "HEALTH_CHECK_TIMEOUT",
+        "JWT_SECRET",
+        "LOG_LEVEL",
+        "MONGO_URL",
+        "OAUTH_*",
+        "OPENAI_API_KEY",
+        "PAYMENT_PROVIDER",
+        "PORT",
+        "RATE_LIMIT_FORCE",
+        "REQUIRE_VERIFIED_EMAIL_FOR_SSO",
+        "RESEND_*",
+        "RUN_EXCHANGE_RATES_ON_START",
+        "SENTRY_DSN",
+        "SSO_ALLOWED_REDIRECTS",
+        "STRIPE_*",
+        "TURNSTILE_SECRET_KEY",
+        "WEBHOOK_SIGNING_SECRET"
+      ],
+      "passThroughEnv": ["VERCEL_*", "RAILWAY_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck", "generate"]
+    },
+    "test": {
+      "dependsOn": ["^build", "generate"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*", ".env.test"],
+      "env": [
+        "ANTHROPIC_API_KEY",
+        "GEMINI_API_KEY",
+        "JWT_SECRET",
+        "MONGO_URL",
+        "OPENAI_API_KEY",
+        "STRIPE_*"
+      ]
     },
     "dev": {
       "cache": false,
