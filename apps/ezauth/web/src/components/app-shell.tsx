@@ -189,8 +189,8 @@ export function AppShell({ children }: AppShellProps) {
     <BaseAppShell
       brand={{ name: 'EZAuth', logoSrc: '/logo.svg' }}
       navLinks={[
-        { href: '#features', label: t('navFeatures') },
-        { href: '#pricing', label: t('navPricing') },
+        { href: '/#features', label: t('navFeatures') },
+        { href: '/#pricing', label: t('navPricing') },
         { href: '/docs', label: t('navDocs') },
       ]}
       footerColumns={[
@@ -198,7 +198,7 @@ export function AppShell({ children }: AppShellProps) {
           title: t('footerProduct'),
           links: [
             { href: '/docs', label: t('footerDocs') },
-            { href: '#pricing', label: t('footerPricing') },
+            { href: '/#pricing', label: t('footerPricing') },
             { href: '/changelog', label: t('footerChangelog') },
             { href: '/status', label: t('footerStatus') },
           ],

@@ -25,8 +25,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   const navLinks = [
-    { href: '#features', label: nav('features') },
-    { href: '#pricing', label: nav('pricing') },
+    { href: '/#features', label: nav('features') },
+    { href: '/#pricing', label: nav('pricing') },
     { href: '/docs', label: nav('docs') },
     ...(isAuthenticated ? [{ href: '/dashboard', label: nav('dashboard') }] : []),
   ]
@@ -56,7 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           title: footer('product'),
           links: [
             { href: '/docs', label: footer('docs') },
-            { href: '#pricing', label: footer('pricing') },
+            { href: '/#pricing', label: footer('pricing') },
             { href: '/changelog', label: footer('changelog') },
             { href: '/status', label: footer('status') },
           ],

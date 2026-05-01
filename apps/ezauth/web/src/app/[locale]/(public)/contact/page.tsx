@@ -13,7 +13,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
-const SUPPORT_EMAIL = 'franckdufournet@hotmail.fr'
+const SUPPORT_EMAIL = 'support@ezstart.xyz'
 const GITHUB_ISSUES_URL = 'https://github.com/DFranck/ezstart/issues'
 
 export default function ContactPage() {

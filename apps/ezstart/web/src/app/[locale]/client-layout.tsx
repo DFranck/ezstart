@@ -162,11 +162,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
             >
               <Icon name="fa:FaGithub" size={16} />
             </Link>
-            <Link
-              href="mailto:franckdufournet@hotmail.fr"
-              className="hover:opacity-80"
-              aria-label="Email"
-            >
+            <Link href="mailto:support@ezstart.xyz" className="hover:opacity-80" aria-label="Email">
               <Icon name="fa:FaEnvelope" size={16} />
             </Link>
           </Div>

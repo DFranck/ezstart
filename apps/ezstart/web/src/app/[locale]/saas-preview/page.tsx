@@ -325,7 +325,7 @@ export default function SaasPreviewPage(): React.JSX.Element {
           </P>
           <Div layout="row" className="gap-3 flex-wrap justify-center mt-6">
             <Button asChild size="lg">
-              <Link href="mailto:franckdufournet@hotmail.fr">
+              <Link href="mailto:support@ezstart.xyz">
                 <Icon name="fa:FaEnvelope" size={16} />
                 <Span className="ml-2">{t('contact.emailCta')}</Span>
               </Link>
@@ -370,11 +370,7 @@ export default function SaasPreviewPage(): React.JSX.Element {
             >
               <Icon name="fa:FaLinkedin" size={20} />
             </Link>
-            <Link
-              href="mailto:franckdufournet@hotmail.fr"
-              aria-label="Email"
-              className="hover:opacity-80"
-            >
+            <Link href="mailto:support@ezstart.xyz" aria-label="Email" className="hover:opacity-80">
               <Icon name="fa:FaEnvelope" size={20} />
             </Link>
           </Div>
