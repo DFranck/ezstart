@@ -1,44 +1,39 @@
 # @ezstart/api-sdk
 
-Unified HTTP client — typed errors, envelope unwrap, token refresh, React Query + SSE helpers. Publishable on npm; works standalone in any project.
+Unified HTTP client with typed errors, envelope unwrap, token refresh, React Query hooks, and SSE streaming. Publishable on npm; works standalone in any project.
 
 ## Install
 
 ```bash
-pnpm add @ezstart/api-sdk
-# optional peer dependencies (only for `apiQuery`)
-pnpm add react @tanstack/react-query
+npm install @ezstart/api-sdk
+# Optional peer deps for the React Query hooks:
+npm install react @tanstack/react-query
 ```
 
-## Quickstart (monorepo)
+## Quickstart — apiCall in vanilla TS
 
-The package ships pre-configured bindings for the `@ezstart` monorepo (`getApiUrl` base URL resolver, `ezauth-storage` token store, EZAuth refresh endpoint, `@ezstart/logger`).
+The framework-agnostic core. Throws `ApiError` on any non-2xx response, returns the unwrapped `data` field on success.
 
 ```ts
-import { apiCall, apiQuery, ApiError } from '@ezstart/api-sdk'
+import { apiCall, ApiError } from '@ezstart/api-sdk/core'
 
-// Imperative — throws ApiError on failure, returns unwrapped data on success
-const user = await apiCall<User>('/users/me', { appName: 'myapp' })
-
-// React Query helpers (uses @tanstack/react-query peer dep)
-const api = apiQuery('myapp')
-const { data } = api.useQuery<Invoice[]>('/invoices', { query: { page: 1 } })
+try {
+  const user = await apiCall<User>('/users/me', {
+    appName: 'myapp',
+    baseUrl: 'https://api.example.com',
+  })
+  console.log(user)
+} catch (err) {
+  if (ApiError.isApiError(err)) {
+    console.error(err.code, err.message, err.status)
+  }
+}
 ```
 
-## Quickstart (standalone any JS)
-
-Import only the framework-agnostic core — zero React dependency:
+For full agnostic control, build your own client via `createApiClient`:
 
 ```ts
-import { apiCall, createApiClient, ApiError } from '@ezstart/api-sdk/core'
-```
-
-## Quickstart (external / standalone)
-
-Build your own agnostic client via the factory — no `@ezstart/*` imports required.
-
-```ts
-import { createApiClient } from '@ezstart/api-sdk'
+import { createApiClient } from '@ezstart/api-sdk/core'
 
 const client = createApiClient({
   baseUrl: 'https://api.example.com',
@@ -58,15 +53,79 @@ const client = createApiClient({
 const user = await client.apiCall<User>('/users/me')
 ```
 
+## Quickstart — apiQuery in React
+
+React Query bindings with stable cache keys + auto auth header injection.
+
+```tsx
+'use client'
+import { apiQuery } from '@ezstart/api-sdk/react'
+
+const api = apiQuery('myapp')
+
+function InvoicesList() {
+  const { data, isLoading } = api.useQuery<Invoice[]>('/invoices', {
+    query: { page: 1 },
+    staleTime: 60_000,
+  })
+
+  const create = api.useMutation<Invoice, CreateInput>('/invoices', {
+    method: 'POST',
+    invalidates: [api.queryKey('/invoices')],
+  })
+
+  if (isLoading) return <p>Loading…</p>
+  return (
+    <ul>
+      {data.map(inv => (
+        <li key={inv.id}>{inv.number}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+For paginated lists:
+
+```tsx
+const { data, fetchNextPage } = api.useInfiniteQuery<Item>('/items', { limit: 20 })
+```
+
+Query keys are built as `[appName, endpoint]` or `[appName, endpoint, query]` for stable cache hits across re-renders.
+
+## Quickstart — Integrations
+
+Drop-in third-party service wrappers from `@ezstart/api-sdk/integrations`.
+
+```tsx
+'use client'
+import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
+
+;<TurnstileWidget
+  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''}
+  onVerify={token => console.log('verified', token)}
+  onError={err => console.error(err)}
+/>
+```
+
+`TurnstileWidget` renders nothing when `siteKey` is empty so you can ship without captcha and enable it later via env var. Lazy-injects the Cloudflare script (idempotent), supports HMR / StrictMode unmount, and accepts a silent-by-default `logger` prop.
+
 ## API
 
 ### `apiCall<T>(endpoint, options): Promise<T>`
 
-JSON-first HTTP call. Throws `ApiError` on any non-2xx or network failure. Unwraps `{ success, data, meta }` envelope so callers get `data` directly.
+JSON-first HTTP call. Throws `ApiError` on any non-2xx or network failure. Unwraps the `{ success, data, meta }` envelope so callers receive `data` directly.
 
 Key options: `appName`, `method`, `body` (JSON / FormData / URLSearchParams / string), `query`, `headers`, `signal`, `skipAuth`, `skipRefresh`, `credentials`, `responseType` (`'json' | 'text' | 'blob' | 'arrayBuffer' | 'raw'`), `preserveEnvelope`, `baseUrl`, `getToken`.
 
-### `apiStream(endpoint, opts): Promise<void>`
+```ts
+const blob = await apiCall<Blob>('/files/123', {
+  appName: 'myapp',
+  responseType: 'blob',
+})
+```
+
+### `apiStream(endpoint, options): Promise<void>`
 
 Server-Sent Events. Parses `data:` events (multi-line + `[DONE]` sentinel + `event: error`), invokes `onChunk` / `onError` / `onDone`, retries once on 401 after refresh.
 
@@ -75,33 +134,25 @@ await apiStream('/chat/stream', {
   appName: 'myapp',
   method: 'POST',
   body: { prompt: 'Hello' },
-  onChunk: chunk => {
-    /* append to UI */
-  },
-  onDone: () => {
-    /* finalize */
-  },
+  onChunk: chunk => append(chunk),
+  onDone: () => finalize(),
 })
 ```
 
-### `apiQuery(appName)` — React Query
+### `apiQuery(appName)` — React Query hooks
 
 ```tsx
 const api = apiQuery('myapp')
 
-api.useQuery<Item[]>('/items', { query: { page: 1 }, staleTime: 60_000 })
-api.useMutation<Item, CreateInput>('/items', {
-  method: 'POST',
-  invalidates: [api.queryKey('/items')],
-})
-api.useInfiniteQuery<Item>('/items', { limit: 20 }) // auto offset/limit pagination
+api.useQuery<Item[]>('/items', { query: { page: 1 } })
+api.useMutation<Item, CreateInput>('/items', { method: 'POST' })
+api.useInfiniteQuery<Item>('/items', { limit: 20 }) // auto offset/limit
+api.queryKey('/items', { page: 1 }) // for invalidation
 ```
-
-Query keys are built as `[appName, endpoint]` or `[appName, endpoint, query]` for stable cache hits.
 
 ### `fetchExternal<T>(url, init?): Promise<T>`
 
-Explicit escape hatch for 3rd-party APIs (GitHub, npm, etc.). No auth injection, no URL resolution, no envelope unwrap — just `fetch` + JSON parse + `ApiError` on non-2xx.
+Explicit escape hatch for 3rd-party APIs. No auth injection, no URL resolution, no envelope unwrap — just `fetch` + JSON parse + `ApiError` on non-2xx.
 
 ```ts
 const repo = await fetchExternal<Repo>('https://api.github.com/repos/vercel/next.js')
@@ -123,9 +174,18 @@ class ApiError extends Error {
 }
 ```
 
-### `parseApiError(body) / parseApiErrorCode(body) / parseRetryAfter(body)`
+### `parseApiError(body)` / `parseApiErrorCode(body)` / `parseRetryAfter(body)`
 
 Utilities for extracting a readable message, machine code, or retry hint from any wire error payload (Zod details → nested `error.message` → flat string → fallback).
+
+### Entry points
+
+| Entry point                     | Content                              | React required |
+| ------------------------------- | ------------------------------------ | -------------- |
+| `@ezstart/api-sdk`              | Everything (core + react)            | Yes (peer)     |
+| `@ezstart/api-sdk/core`         | Agnostic primitives only             | No             |
+| `@ezstart/api-sdk/react`        | React Query hooks + types            | Yes            |
+| `@ezstart/api-sdk/integrations` | Third-party React wrappers (captcha) | Yes            |
 
 ## Migration from `@ezstart/fetch-client`
 
@@ -138,30 +198,13 @@ Utilities for extracting a readable message, machine code, or retry hint from an
 | `createCallApi(appName)` + manual React Query wiring   | `apiQuery(appName).useQuery / useMutation`               |
 | `fetch('https://api.github.com/...')`                  | `fetchExternal('https://api.github.com/...')`            |
 
-## Architecture (3-layer)
-
-```
-src/
-├── core/           # Framework-agnostic: apiCall, apiStream, ApiError, createApiClient
-│   └── internal/   # Private helpers (config, refresh, request, url, fetch-with-retry)
-├── react/          # React Query hooks: createApiQuery, useQuery/useMutation/useInfiniteQuery
-├── ezstart-client.ts  # Monorepo-specific wiring (@ezstart/config, ezauth token store)
-└── index.ts        # Re-exports everything (backward-compatible "." entry point)
-```
-
-| Entry point              | Content                   | React required? |
-| ------------------------ | ------------------------- | --------------- |
-| `@ezstart/api-sdk`       | Everything (core + react) | Yes (peer)      |
-| `@ezstart/api-sdk/core`  | Agnostic primitives only  | No              |
-| `@ezstart/api-sdk/react` | React Query hooks + types | Yes             |
-
 ## Rules
 
-- Never use raw `fetch()` inside apps — use `apiCall` (internal APIs) or `fetchExternal` (3rd-party APIs). A future lint rule will enforce this.
+- Never use raw `fetch()` inside apps — use `apiCall` (internal APIs) or `fetchExternal` (3rd-party APIs).
 - Never swallow `ApiError` silently — surface `err.message` via toast.
 - Always pass `appName` to `apiCall` in monorepo apps; it drives URL resolution and React Query keys.
 
 ## Related
 
-- [.claude/rules/standard.md](../../.claude/rules/standard.md) — the standard this package follows
-- [@ezstart/api-contracts](../api-contracts/README.md) — wire shapes (envelope, errors, pagination, auth) consumed by this SDK
+- [`@ezstart/api-contracts`](../api-contracts) — wire shapes (envelope, errors, pagination, auth) consumed by this SDK.
+- [`@ezstart/auth-sdk`](../auth-sdk) — Authentication SDK built on top of this client.

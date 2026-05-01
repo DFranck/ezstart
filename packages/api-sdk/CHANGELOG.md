@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- README rewritten following `standard.md` §6 format: quickstarts split by
+  integration level (vanilla TS via `apiCall` / `createApiClient`, React via
+  `apiQuery`, third-party via `/integrations`). Examples use generic
+  `myapp` + `https://api.example.com` (no monorepo-specific names).
+
 ### Added
 
 - New `./integrations` entry point exposing third-party service wrappers
