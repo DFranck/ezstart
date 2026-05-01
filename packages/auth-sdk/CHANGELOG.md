@@ -36,6 +36,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ScopeContextIndicator` — moved to `@ezstart/ui` as `ScopeContextSwitcher`. Re-exported with deprecation warning. Removal planned 2026-08-01. Migration: `import { ScopeContextSwitcher } from '@ezstart/ui/components'`.
 - `PasswordStrength` — moved to `@ezstart/ui`. Re-exported with deprecation warning. Removal planned 2026-08-01. Migration: `import { PasswordStrength } from '@ezstart/ui/components'`.
 - `TurnstileWidget` — moved to `@ezstart/api-sdk` as a generic Cloudflare integration (`@ezstart/api-sdk/integrations`). Cloudflare Turnstile is captcha, not auth-specific, so it now lives next to the other third-party integrations the SDK exposes. Re-exported with deprecation warning. Removal planned 2026-08-01. Migration: `import { TurnstileWidget } from '@ezstart/api-sdk/integrations'`.
+- `MaintenanceBanner` — split into `useMaintenanceStatus` (`@ezstart/api-sdk/react`, data layer) + `MaintenanceBanner` (`@ezstart/ui/components`, presentation). Re-exported as a single deprecated wrapper that internally composes both for backward-compat. Surfaces a deprecation warning on mount. Removal planned 2026-08-01. Migration: `const { data } = useMaintenanceStatus({ apiUrl: 'https://api.example.com' })` + `<MaintenanceBanner status={data ?? null} />`.
+- `useMaintenanceStatus` — moved to `@ezstart/api-sdk/react`. The auth-sdk export is now a backward-compat shim that forwards to the api-sdk hook (preserves the legacy `apiUrl?` optional → `NEXT_PUBLIC_EZAUTH_API_URL` fallback ergonomic). Removal planned 2026-08-01. Migration: `import { useMaintenanceStatus } from '@ezstart/api-sdk/react'` and pass an explicit `apiUrl`.
+
+### Decided (no change)
+
+- `DevModeBanner` — kept in `@ezstart/auth-sdk` after the `AMBIGUOUS-NEEDS-REVIEW` evaluation in audit `tmp/audit-full-registry-matrix.md`. Reasoning: it consumes `useAuth()` + `useAuthContext()` to display the active auth scope (test/live/admin) + the configured publishable key, which is auth-domain specific. The component returns `null` in production builds (Next.js statically substitutes `process.env.NODE_ENV === 'production'`) so it has zero footprint in shipped bundles. Migrating to `@ezstart/ui` would require pulling auth context into a generic UI primitive — net negative. No migration justified.
+
+### Refactored (internal, no public API change)
+
+- `<UsageBadge>` — internal refactor to use the new `<ProgressBadge>` from `@ezstart/ui/components`. Public API and visual contract are unchanged (same `>= 50%` warning + `>= 80%` destructive thresholds). The data side (`useApiKeyUsage()`) stays in auth-sdk because API keys belong to the auth surface.
 
 ## [1.0.0] - 2026-04-29
 

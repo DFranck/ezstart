@@ -1,49 +1,48 @@
 'use client'
 
-import { Badge, Div } from '@ezstart/ui/components'
+/**
+ * Auth-sdk UsageBadge — thin wrapper around `<ProgressBadge>` from
+ * `@ezstart/ui` for API-key quota indicators.
+ *
+ * The data side of the badge (`useApiKeyUsage()`) stays in `@ezstart/auth-sdk`
+ * because it's auth-domain specific (API keys belong to the auth surface).
+ * The visual side is now provided by `<ProgressBadge>` so any quota surface
+ * across the platform shares the exact same look + thresholds.
+ *
+ * Public API is unchanged — this is an internal refactor only.
+ */
+
+import { ProgressBadge } from '@ezstart/ui/components'
 import type { UsageBadgeTexts } from './types.js'
 
 export interface UsageBadgeProps {
+  /** Number of API requests consumed this period. */
   used: number
+  /** Monthly quota for this key. Pass `null` for unlimited keys. */
   quota: number | null
+  /** Override default English texts (e.g. for i18n consumers). */
   texts?: UsageBadgeTexts
 }
 
-function getUsageVariant(percentage: number): 'success' | 'warning' | 'destructive' {
-  if (percentage >= 80) return 'destructive'
-  if (percentage >= 50) return 'warning'
-  return 'success'
-}
-
-function getBarColorClass(variant: 'success' | 'warning' | 'destructive'): string {
-  if (variant === 'destructive') return 'bg-destructive'
-  if (variant === 'warning') return 'bg-warning'
-  return 'bg-success'
-}
-
+/**
+ * Renders an API-key usage indicator: a tiny progress bar + percentage
+ * badge whose color escalates through `success → warning → destructive`
+ * as the consumer approaches the monthly quota.
+ *
+ * Uses the same color thresholds as before this component was refactored
+ * (`>= 50%` warning, `>= 80%` destructive) so visual contracts stay stable.
+ *
+ * @example
+ * ```tsx
+ * <UsageBadge used={320} quota={1000} />
+ * <UsageBadge used={0} quota={null} texts={{ unlimited: 'Illimité' }} />
+ * ```
+ */
 export function UsageBadge({ used, quota, texts }: UsageBadgeProps) {
-  if (quota === null) {
-    return (
-      <Badge variant="outline" size="sm">
-        {texts?.unlimited ?? 'Unlimited'}
-      </Badge>
-    )
-  }
-
-  const percentage = quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0
-  const variant = getUsageVariant(percentage)
-
   return (
-    <Div className="flex items-center gap-2">
-      <Div className="w-16 h-2 rounded-full bg-muted overflow-hidden">
-        <Div
-          className={`h-full rounded-full transition-all ${getBarColorClass(variant)}`}
-          style={{ width: `${String(percentage)}%` }}
-        />
-      </Div>
-      <Badge variant={variant} size="xs">
-        {String(percentage)}%
-      </Badge>
-    </Div>
+    <ProgressBadge
+      usage={{ used, limit: quota }}
+      texts={texts ? { unlimited: texts.unlimited } : undefined}
+    />
   )
 }

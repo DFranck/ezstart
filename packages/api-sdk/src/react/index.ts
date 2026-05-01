@@ -13,3 +13,6 @@ export type {
   UseApiMutationOptions,
   UseApiQueryOptions,
 } from './react-query.js'
+
+export { useMaintenanceStatus } from './use-maintenance-status.js'
+export type { MaintenanceStatus, UseMaintenanceStatusOptions } from './use-maintenance-status.js'

@@ -338,6 +338,87 @@ vi.mock('@ezstart/ui/components', () => {
         },
         children
       ),
+    ProgressBadge: ({
+      usage,
+      variant,
+      texts,
+      label,
+      className,
+      ariaLabel,
+    }: {
+      usage: { used: number; limit: number | null }
+      variant?: 'default' | 'compact'
+      threshold?: { warning: number; danger: number }
+      texts?: { unlimited?: string }
+      label?: React.ReactNode
+      className?: string
+      ariaLabel?: string
+    }) => {
+      if (usage.limit === null) {
+        return React.createElement(
+          'span',
+          { 'data-testid': 'ProgressBadge', className },
+          texts?.unlimited ?? 'Unlimited'
+        )
+      }
+      const percentage =
+        usage.limit > 0
+          ? Math.min(100, Math.max(0, Math.round((usage.used / usage.limit) * 100)))
+          : 0
+      const labelNode = label ?? `${String(percentage)}%`
+      if (variant === 'compact') {
+        return React.createElement(
+          'span',
+          {
+            'data-testid': 'ProgressBadge',
+            className,
+            'aria-label': ariaLabel ?? `${String(percentage)}%`,
+          },
+          labelNode
+        )
+      }
+      return React.createElement(
+        'div',
+        { 'data-testid': 'ProgressBadge', className },
+        React.createElement('div', {
+          role: 'progressbar',
+          'aria-valuemin': 0,
+          'aria-valuemax': 100,
+          'aria-valuenow': percentage,
+          'aria-label': ariaLabel ?? `${String(percentage)}%`,
+        }),
+        React.createElement('span', null, labelNode)
+      )
+    },
+    MaintenanceBanner: ({
+      status,
+      texts,
+      className,
+      sticky,
+    }: {
+      status?: {
+        enabled?: boolean
+        message?: string
+        startedAt?: string | null
+        scheduledEnd?: string | null
+      } | null
+      texts?: { heading?: string; scheduledEndLabel?: string }
+      className?: string
+      sticky?: boolean
+    }) => {
+      if (!status?.enabled) return null
+      return React.createElement(
+        'div',
+        {
+          role: 'alert',
+          'data-testid': 'MaintenanceBanner',
+          'data-sticky': sticky ? 'true' : 'false',
+          className,
+        },
+        React.createElement('p', null, texts?.heading ?? 'Scheduled maintenance in progress'),
+        status.message ? React.createElement('p', null, status.message) : null
+      )
+    },
     ScopeContextSwitcher: ({
       scope,
       canSwitchToAdmin,
@@ -424,6 +505,18 @@ vi.mock('@ezstart/api-sdk/integrations', () => {
     },
   }
 })
+
+// ---------------------------------------------------------------------------
+// Mock @ezstart/api-sdk/react (useMaintenanceStatus moved here 2026-05-01)
+// ---------------------------------------------------------------------------
+vi.mock('@ezstart/api-sdk/react', () => ({
+  useMaintenanceStatus: vi.fn(() => ({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+  })),
+  createApiQuery: vi.fn(),
+}))
 
 // ---------------------------------------------------------------------------
 // Mock @ezstart/ui/lib

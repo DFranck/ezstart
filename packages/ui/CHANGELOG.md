@@ -31,6 +31,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Pure algorithm + UI, semantic theme tokens. Originally in
   `@ezstart/auth-sdk` — generalized because the primitive has zero auth
   coupling.
+- `MaintenanceBanner` (`@ezstart/ui/components`) — props-driven platform
+  maintenance banner. Accepts a resolved `status` payload (`{ enabled,
+message, startedAt, scheduledEnd }`) and renders a sticky warning
+  surface when active. Zero data fetching: pair it with
+  `useMaintenanceStatus()` from `@ezstart/api-sdk/react` (or any other
+  status source). Originally lived in `@ezstart/auth-sdk` as a
+  hook-coupled component — split into data layer + presentation so the
+  primitive stays reusable across status sources (custom backend, env
+  flag, feature-flag service, ...).
+- `ProgressBadge` (`@ezstart/ui/components`) — generic usage / quota
+  progress badge with semantic color thresholds (`success → warning →
+destructive`). Renders a tiny progress bar + percentage badge for any
+  "X / Y" usage metric (API calls, storage, seats, AI tokens, ...).
+  Supports `compact` variant (badge-only), custom `threshold`, custom
+  `label`, and accessible `aria-*` props. Originally inlined inside
+  `@ezstart/auth-sdk`'s `<UsageBadge>` — extracted so any consumer app
+  can reuse it for any quota surface; `<UsageBadge>` is now a thin
+  wrapper around `<ProgressBadge>` to preserve its public API.
 
 ### Changed
 

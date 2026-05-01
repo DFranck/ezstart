@@ -1,28 +1,48 @@
 'use client'
 
 /**
- * Platform-wide maintenance banner.
+ * @deprecated MaintenanceBanner moved to a split architecture (2026-05-01):
+ * - Hook: `useMaintenanceStatus` from `@ezstart/api-sdk/react` (data layer)
+ * - UI:   `MaintenanceBanner` from `@ezstart/ui/components` (presentation)
  *
- * Renders a sticky warning banner at the top of any consumer app when
- * platform-level maintenance is active. Fetches `/api/maintenance-status`
- * via `useMaintenanceStatus` (public, no auth required) and refreshes
- * every minute.
+ * This re-export keeps the old single-component API working for 90 days
+ * (planned removal 2026-08-01). Migration:
+ *
+ * ```tsx
+ * // before
+ * import { MaintenanceBanner } from '@ezstart/auth-sdk/components'
+ * <MaintenanceBanner apiUrl="https://api.example.com" sticky />
+ *
+ * // after
+ * import { useMaintenanceStatus } from '@ezstart/api-sdk/react'
+ * import { MaintenanceBanner } from '@ezstart/ui/components'
+ *
+ * function PlatformShell({ children }) {
+ *   const { data } = useMaintenanceStatus({ apiUrl: 'https://api.example.com' })
+ *   return (
+ *     <>
+ *       <MaintenanceBanner status={data ?? null} sticky />
+ *       {children}
+ *     </>
+ *   )
+ * }
+ * ```
  */
 
-import { useMemo } from 'react'
-import { Div, Icon, P, Span } from '@ezstart/ui/components'
-import { useMaintenanceStatus } from '../../react/maintenance-mode.js'
+import {
+  MaintenanceBanner as UIMaintenanceBanner,
+  type MaintenanceBannerTexts as UIMaintenanceBannerTexts,
+} from '@ezstart/ui/components'
+import { useDeprecationWarning } from '@ezstart/ui/hooks'
+import { useMaintenanceStatus } from '@ezstart/api-sdk/react'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// ─── Types (backward-compat surface) ────────────────────────────────────────
 
-export interface MaintenanceBannerTexts {
-  /** Default banner heading prepended to the server-provided message. */
-  heading: string
-  /** Label for the "scheduled end" line, e.g. "Service resumes at". */
-  scheduledEndLabel: string
-  /** Tooltip / aria-label for the dismiss button (when `dismissible`). */
-  dismissAriaLabel: string
-}
+/**
+ * @deprecated Re-export of `MaintenanceBannerTexts` from `@ezstart/ui/components`.
+ * Kept so existing consumer imports keep compiling.
+ */
+export type MaintenanceBannerTexts = UIMaintenanceBannerTexts
 
 export interface MaintenanceBannerProps {
   /** Override the EZAuth API base URL. Required for cross-origin consumers. */
@@ -41,25 +61,12 @@ export interface MaintenanceBannerProps {
   sticky?: boolean
 }
 
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: MaintenanceBannerTexts = {
-  heading: 'Scheduled maintenance in progress',
-  scheduledEndLabel: 'Service expected to resume at',
-  dismissAriaLabel: 'Dismiss banner',
-}
-
 // ─── Component ──────────────────────────────────────────────────────────────
 
 /**
- * Renders the platform-wide maintenance banner when active.
- * Returns `null` when maintenance is disabled or status is loading.
- *
- * @example
- * ```tsx
- * // In a consumer app's root layout
- * <MaintenanceBanner apiUrl="https://auth.example.com" sticky />
- * ```
+ * @deprecated Use `useMaintenanceStatus` (`@ezstart/api-sdk/react`) +
+ * `MaintenanceBanner` (`@ezstart/ui/components`) instead. Will be removed
+ * 2026-08-01. See module-level JSDoc for the migration snippet.
  */
 export function MaintenanceBanner({
   apiUrl,
@@ -68,48 +75,35 @@ export function MaintenanceBanner({
   className,
   sticky = false,
 }: MaintenanceBannerProps) {
-  const t: MaintenanceBannerTexts = { ...DEFAULT_TEXTS, ...texts }
-  const { data, isLoading } = useMaintenanceStatus({
-    apiUrl,
-    refetchIntervalMs,
+  useDeprecationWarning(
+    'MaintenanceBanner from @ezstart/auth-sdk',
+    'compose useMaintenanceStatus (@ezstart/api-sdk/react) + MaintenanceBanner (@ezstart/ui/components)'
+  )
+
+  // The hook in api-sdk REQUIRES an explicit apiUrl (no monorepo-magic
+  // resolution). The legacy auth-sdk component allowed `apiUrl` to be
+  // optional, defaulting to whatever the bound `@ezstart/api-sdk` client
+  // resolved for `appName: 'ezauth'`. We preserve that ergonomic by
+  // falling back to the public env var when the consumer omits the prop.
+  const resolvedApiUrl =
+    apiUrl ??
+    (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_EZAUTH_API_URL : undefined) ??
+    ''
+
+  const { data } = useMaintenanceStatus({
+    apiUrl: resolvedApiUrl,
+    ...(refetchIntervalMs !== undefined ? { refetchIntervalMs } : {}),
+    enabled: resolvedApiUrl.length > 0,
   })
 
-  const formattedEnd = useMemo(() => {
-    if (!data?.scheduledEnd) return null
-    try {
-      return new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      }).format(new Date(data.scheduledEnd))
-    } catch {
-      return null
-    }
-  }, [data?.scheduledEnd])
-
-  if (isLoading || !data?.enabled) return null
-
-  const classNames = [
-    'w-full border-b border-warning/40 bg-warning/15 text-warning-foreground px-4 py-3 text-sm',
-    sticky ? 'sticky top-0 z-50' : '',
-    className ?? '',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
-    <Div role="alert" aria-live="polite" className={classNames}>
-      <Div className="mx-auto flex max-w-7xl items-start gap-3">
-        <Icon name="lucide:AlertTriangle" className="mt-0.5 h-5 w-5 shrink-0" ariaHidden />
-        <Div className="flex-1 space-y-1">
-          <P className="font-medium">{t.heading}</P>
-          {data.message ? <P className="text-sm opacity-90">{data.message}</P> : null}
-          {formattedEnd ? (
-            <P className="text-xs opacity-80">
-              {t.scheduledEndLabel}: <Span className="font-mono">{formattedEnd}</Span>
-            </P>
-          ) : null}
-        </Div>
-      </Div>
-    </Div>
+    <UIMaintenanceBanner
+      status={data ?? null}
+      {...(texts !== undefined ? { texts } : {})}
+      {...(className !== undefined ? { className } : {})}
+      sticky={sticky}
+    />
   )
 }
+
+MaintenanceBanner.displayName = 'MaintenanceBanner'

@@ -7,6 +7,7 @@
  */
 
 import { apiCall } from '@ezstart/api-sdk'
+import { useMaintenanceStatus as useApiSdkMaintenanceStatus } from '@ezstart/api-sdk/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { MaintenanceMode, UpdateMaintenanceModeRequest } from '../core/types.js'
 
@@ -97,48 +98,35 @@ export function useUpdateMaintenanceMode(
 }
 
 /**
- * Fetch the public maintenance status (no auth required).
+ * @deprecated Moved to `@ezstart/api-sdk/react` as `useMaintenanceStatus`.
+ * Will be removed 2026-08-01. The public maintenance status is platform-wide
+ * (not auth-specific) so it now lives next to other generic API hooks.
  *
- * Used by consumer apps to render `<MaintenanceBanner>` platform-wide.
+ * Migration:
  *
- * Resilient by design: if the API is unreachable or returns an error,
- * the hook silently degrades (no thrown error visible to consumers, no
- * retry storm) so the banner stays hidden and the app keeps functioning.
- *
- * @example
  * ```tsx
- * const { data } = useMaintenanceStatus({ apiUrl: 'https://auth.example.com' })
- * if (data?.enabled) return <MaintenanceBanner status={data} />
+ * // before
+ * import { useMaintenanceStatus } from '@ezstart/auth-sdk'
+ *
+ * // after
+ * import { useMaintenanceStatus } from '@ezstart/api-sdk/react'
  * ```
+ *
+ * Backward-compat shim: forwards to the new api-sdk hook and preserves the
+ * legacy default behaviour (apiUrl optional → falls back to
+ * `NEXT_PUBLIC_EZAUTH_API_URL` when the consumer omits it).
  */
 export function useMaintenanceStatus(
   options: { apiUrl?: string; enabled?: boolean; refetchIntervalMs?: number } = {}
 ) {
-  const { apiUrl, enabled = true, refetchIntervalMs = 60_000 } = options
-  return useQuery({
-    queryKey: MAINTENANCE_STATUS_KEY,
-    queryFn: async () => {
-      try {
-        return await apiCall<MaintenanceMode>('/maintenance-status', {
-          appName: 'ezauth',
-          method: 'GET',
-          ...(apiUrl ? { baseUrl: apiUrl } : {}),
-        })
-      } catch {
-        // Public banner must never break the consumer app — fall back to
-        // "no maintenance" when the upstream lookup fails for any reason.
-        return {
-          enabled: false,
-          message: '',
-          startedAt: null,
-          scheduledEnd: null,
-        } as MaintenanceMode
-      }
-    },
-    enabled,
-    refetchInterval: refetchIntervalMs,
-    refetchOnWindowFocus: true,
-    retry: 1,
-    staleTime: 30_000,
+  const fallbackApiUrl =
+    typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_EZAUTH_API_URL : undefined
+  const resolvedApiUrl = options.apiUrl ?? fallbackApiUrl ?? ''
+  return useApiSdkMaintenanceStatus({
+    apiUrl: resolvedApiUrl,
+    enabled: (options.enabled ?? true) && resolvedApiUrl.length > 0,
+    ...(options.refetchIntervalMs !== undefined
+      ? { refetchIntervalMs: options.refetchIntervalMs }
+      : {}),
   })
 }

@@ -72,6 +72,14 @@ export type {
   UseApiQueryOptions,
 } from './react/react-query.js'
 
+// Public maintenance status hook (platform-wide, no auth required).
+// Pairs with `<MaintenanceBanner>` from `@ezstart/ui/components`.
+export { useMaintenanceStatus } from './react/use-maintenance-status.js'
+export type {
+  MaintenanceStatus,
+  UseMaintenanceStatusOptions,
+} from './react/use-maintenance-status.js'
+
 // ---------------------------------------------------------------------------
 // Pre-configured @ezstart client (main consumption path for monorepo)
 // ---------------------------------------------------------------------------
