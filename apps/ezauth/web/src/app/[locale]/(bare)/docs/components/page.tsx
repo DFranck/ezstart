@@ -1,3 +1,5 @@
+'use client'
+
 import {
   categoryToSlug,
   componentRegistry,
@@ -19,8 +21,11 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { Link } from '@/i18n/navigation'
-import { getTranslations } from 'next-intl/server'
+import { useTranslations } from 'next-intl'
+import { useMemo } from 'react'
 import { buildShowcaseTree, featureFallbackComponentName } from './_lib/grouping'
+import { AdminInternalToggle, InternalBadge } from './_components/AdminInternalToggle'
+import { useInternalToggle } from './_components/InternalToggleContext'
 
 /**
  * Showcase landing — `/{locale}/docs/components`. Renders the auth-sdk
@@ -29,20 +34,31 @@ import { buildShowcaseTree, featureFallbackComponentName } from './_lib/grouping
  * Security, Audit). Variants of the same primitive (`SignInForm` /
  * `SignInCard` / `SignInModal`) collapse under one feature card.
  *
- * Server Component — zero client JS payload, fast first paint.
+ * Client component because it consumes the superadmin "Show internal"
+ * toggle from `DocsInternalToggleProvider` to optionally surface
+ * `@internal`-tagged shells (`AuthCardShell`, `AuthModalShell`) for
+ * platform admins curating the public surface.
  */
-export default async function ComponentsLandingPage() {
-  const t = await getTranslations('components')
-  const sections = buildShowcaseTree(componentRegistry)
+export default function ComponentsLandingPage() {
+  const t = useTranslations('components')
+  const { showInternal } = useInternalToggle()
+
+  const sections = useMemo(
+    () => buildShowcaseTree(componentRegistry, { showInternal }),
+    [showInternal]
+  )
   const totalFeaturedEntries = sections.reduce((acc, s) => acc + s.entries.length, 0)
   const totalComponents = sections.reduce((acc, s) => acc + s.componentCount, 0)
 
   return (
     <Div className="mx-auto max-w-6xl space-y-10">
       <Div className="space-y-3">
-        <Badge variant="primary" size="sm" className="font-mono">
-          @ezstart/auth-sdk
-        </Badge>
+        <Div className="flex flex-wrap items-start justify-between gap-3">
+          <Badge variant="primary" size="sm" className="font-mono">
+            @ezstart/auth-sdk
+          </Badge>
+          <AdminInternalToggle />
+        </Div>
         <H1 size="h1">{t('landingTitle')}</H1>
         <P className="text-lg text-muted-foreground">{t('landingSubtitle')}</P>
         <Div className="flex flex-wrap gap-2 pt-2">
@@ -122,11 +138,17 @@ export default async function ComponentsLandingPage() {
               const categorySlug = categoryToSlug(single.category)
               const componentSlug = componentToSlug(single.name)
               const href = `/docs/components/${categorySlug}/${componentSlug}`
+              const isInternal = single.isInternal === true
               return (
                 <Card
                   key={single.name}
                   variant="default"
-                  className="transition-all hover:border-primary/50 hover:shadow-md h-full flex flex-col"
+                  className={[
+                    'transition-all hover:border-primary/50 hover:shadow-md h-full flex flex-col',
+                    isInternal ? 'border-dashed border-warning/40 bg-warning/5' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                 >
                   <CardHeader className="pb-2">
                     <Div className="flex items-start justify-between gap-2">
@@ -135,18 +157,21 @@ export default async function ComponentsLandingPage() {
                           {single.name}
                         </CardTitle>
                       </Link>
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className="shrink-0 h-7 w-7 p-0"
-                        aria-label={t('detailViewSource')}
-                        title={t('detailViewSource')}
-                      >
-                        <a href={single.sourceUrl} target="_blank" rel="noopener noreferrer">
-                          <Icon name="lucide:Github" className="h-3.5 w-3.5" />
-                        </a>
-                      </Button>
+                      <Div className="flex items-center gap-1 shrink-0">
+                        {isInternal && <InternalBadge />}
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          aria-label={t('detailViewSource')}
+                          title={t('detailViewSource')}
+                        >
+                          <a href={single.sourceUrl} target="_blank" rel="noopener noreferrer">
+                            <Icon name="lucide:Github" className="h-3.5 w-3.5" />
+                          </a>
+                        </Button>
+                      </Div>
                     </Div>
                   </CardHeader>
                   <CardContent className="flex-1 flex flex-col justify-between gap-3">

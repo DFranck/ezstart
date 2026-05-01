@@ -10,6 +10,8 @@ import { Aside, Badge, Button, Div, Icon, Input, P, Span } from '@ezstart/ui/com
 import { Link, usePathname } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { buildShowcaseTree, featureFallbackComponentName } from '../_lib/grouping'
+import { InternalBadge } from './AdminInternalToggle'
+import { useInternalToggle } from './InternalToggleContext'
 
 /**
  * Tree-style sidebar for the `/docs/components` showcase. Domains
@@ -24,8 +26,12 @@ export function ComponentSidebar() {
   const t = useTranslations('components')
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const { showInternal } = useInternalToggle()
 
-  const sections = useMemo(() => buildShowcaseTree(componentRegistry), [])
+  const sections = useMemo(
+    () => buildShowcaseTree(componentRegistry, { showInternal }),
+    [showInternal]
+  )
 
   const filteredSections = useMemo(() => {
     if (!search.trim()) return sections
@@ -163,20 +169,25 @@ export function ComponentSidebar() {
                       const compSlug = componentToSlug(single.name)
                       const href = `/docs/components/${catSlug}/${compSlug}`
                       const active = pathname.endsWith(`/docs/components/${catSlug}/${compSlug}`)
+                      const isInternal = single.isInternal === true
                       return (
                         <li key={single.name}>
                           <Link
                             href={href}
                             onClick={() => setOpen(false)}
                             className={[
-                              'block rounded-md px-3 py-1.5 text-sm transition-colors',
+                              'flex items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
                               active
                                 ? 'bg-accent text-accent-foreground font-medium'
                                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                            ].join(' ')}
+                              isInternal ? 'border border-dashed border-warning/40' : '',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
                             aria-current={active ? 'page' : undefined}
                           >
-                            {single.name}
+                            <Span className="truncate">{single.name}</Span>
+                            {isInternal && <InternalBadge />}
                           </Link>
                         </li>
                       )

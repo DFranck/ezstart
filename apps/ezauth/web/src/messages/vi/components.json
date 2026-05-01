@@ -57,6 +57,11 @@
     "anatomyCompoundDescription": "Tệp thành phần này xuất các phần bổ sung mà bạn có thể render hoặc mở rộng.",
     "anatomyExportsHeading": "Xuất phụ",
     "anatomyImportHeading": "Import",
+    "adminToggleShowInternal": "Hiển thị thành phần nội bộ",
+    "adminToggleAriaLabel": "Bật/tắt hiển thị các thành phần nội bộ",
+    "adminToggleAdminView": "CHẾ ĐỘ ADMIN",
+    "adminToggleInternalBadge": "nội bộ",
+    "adminToggleInternalTooltip": "Thành phần nội bộ — ẩn khỏi tài liệu công khai.",
     "domain": {
       "authForms": {
         "title": "Biểu mẫu xác thực",

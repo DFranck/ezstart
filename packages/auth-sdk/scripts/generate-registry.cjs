@@ -281,9 +281,9 @@ function extractCategoryTag(content, componentName) {
 
 /**
  * Detect if a component declaration is marked `@internal` in its
- * immediately-preceding TSDoc block. Defensive filter — even if an
- * @internal-tagged component leaks into the components index, it should
- * not be surfaced in the public registry / docs.
+ * immediately-preceding TSDoc block. Surfaced as the `isInternal` flag on
+ * the registry entry so consumers (typically the docs UI) can hide them
+ * from the public surface and reveal them via an admin-only toggle.
  *
  * Returns true ONLY when the `@internal` tag is found inside the comment
  * block directly attached to the named declaration. Comments that appear
@@ -526,9 +526,12 @@ function main() {
     const content = readFile(sourcePath)
     if (!content) continue
 
-    // Skip components explicitly marked @internal in their TSDoc — they are
-    // implementation details not meant for the public docs surface.
-    if (isInternalComponent(content, name)) continue
+    // Components marked `@internal` in their TSDoc are kept in the registry
+    // but flagged so the docs UI can hide them by default and expose them via
+    // an admin-only "Show internal" toggle. Filtering at generation time
+    // would drop them entirely — preventing curation. See
+    // DOCS-COMPONENTS-ADMIN-INTERNAL-TOGGLE-001.
+    const isInternal = isInternalComponent(content, name)
 
     const { summary, description, examples } = extractDocAndExamples(content, name)
     const category = resolveCategory(name, sourcePath)
@@ -548,6 +551,7 @@ function main() {
       sourceUrl,
       isCompound: compound.isCompound,
       compoundParts: compound.compoundParts,
+      isInternal,
     })
   }
 
@@ -602,6 +606,13 @@ function main() {
     '  isCompound: boolean',
     '  /** Names of the additional exports detected in the source file */',
     '  compoundParts: string[]',
+    '  /**',
+    '   * True when the component declaration is preceded by an `@internal`',
+    '   * TSDoc tag. Internal components are kept in the registry but hidden',
+    '   * from the public docs surface by default — superadmins can reveal',
+    '   * them via the "Show internal components" toggle on /docs/components.',
+    '   */',
+    '  isInternal: boolean',
     '}',
     '',
     'export interface CategoryEntry {',

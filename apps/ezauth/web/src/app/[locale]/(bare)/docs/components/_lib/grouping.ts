@@ -134,20 +134,25 @@ const COMPONENT_TO_DOMAIN: Record<string, DomainKey> = {
 
   // Audit
   AuditLogSection: 'audit',
+
+  // Internal shells — `@internal` tagged, hidden by default. Surfaced
+  // alongside the variant components when the admin "Show internal" toggle
+  // is enabled (DOCS-COMPONENTS-ADMIN-INTERNAL-TOGGLE-001).
+  AuthCardShell: 'authForms',
+  AuthModalShell: 'authForms',
 }
 
 /**
- * Components explicitly hidden from the showcase. These are internal
- * shells / building blocks composed by the variant components. They
- * exist as exports for advanced consumers but are not first-class
- * components in the documentation surface.
+ * Components explicitly hidden from the showcase, regardless of the
+ * "Show internal" admin toggle. Use sparingly — this is for components
+ * that have no UI surface (utility wrappers, render-prop guards) and
+ * should not appear in the docs even for superadmins.
+ *
+ * The `@internal` shells (`AuthCardShell`, `AuthModalShell`) are NOT
+ * listed here — they are gated by the per-entry `isInternal` flag from
+ * the registry generator and revealed via the admin toggle.
  */
-const HIDDEN_COMPONENTS = new Set<string>([
-  'AuthCardShell',
-  'AuthModalShell',
-  'SignedIn',
-  'SignedOut',
-])
+const HIDDEN_COMPONENTS = new Set<string>(['SignedIn', 'SignedOut'])
 
 /**
  * Folder-bucket category names from the registry that should NEVER be
@@ -354,14 +359,14 @@ export function buildShowcaseTree(
 }
 
 /**
- * Detect `@internal` markers in a registry entry. The registry generator
- * does NOT yet expose an explicit boolean (#153 may add it). Until then
- * we do a defensive check on the description / summary text.
+ * Detect `@internal` markers in a registry entry. Authoritative source is
+ * the `isInternal` boolean produced by the registry generator (set when
+ * the component declaration is preceded by an `@internal` TSDoc tag — see
+ * `packages/auth-sdk/scripts/generate-registry.cjs`). The text fallback is
+ * a defensive guard for older generated registries that predate the flag.
  */
 function isInternalEntry(entry: ComponentEntry): boolean {
-  // Defensive: support a future `isInternal` boolean if added by #153.
-  const maybeFlag = (entry as ComponentEntry & { isInternal?: boolean }).isInternal
-  if (maybeFlag === true) return true
+  if (entry.isInternal === true) return true
   const haystack = `${entry.summary} ${entry.description}`.toLowerCase()
   return haystack.includes('@internal')
 }

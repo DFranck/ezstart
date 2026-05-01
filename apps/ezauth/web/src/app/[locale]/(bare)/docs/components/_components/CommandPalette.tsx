@@ -7,6 +7,7 @@ import {
   componentToSlug,
 } from '@ezstart/auth-sdk/components/registry'
 import {
+  Badge,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -18,6 +19,7 @@ import {
 import { useRouter } from '@/i18n/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { buildShowcaseTree } from '../_lib/grouping'
+import { useInternalToggle } from './InternalToggleContext'
 
 /**
  * Cmd+K command palette — fuzzy-search across the auth-sdk component
@@ -32,6 +34,7 @@ export function CommandPalette() {
   const router = useRouter()
   const locale = useLocale()
   const t = useTranslations('components')
+  const { showInternal } = useInternalToggle()
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -44,7 +47,10 @@ export function CommandPalette() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const sections = useMemo(() => buildShowcaseTree(componentRegistry), [])
+  const sections = useMemo(
+    () => buildShowcaseTree(componentRegistry, { showInternal }),
+    [showInternal]
+  )
 
   function go(componentName: string) {
     const entry = componentRegistry.find(c => c.name === componentName)
@@ -85,13 +91,19 @@ export function CommandPalette() {
                 ))
               }
               const single = entry.entry
+              const isInternal = single.isInternal === true
               return [
                 <CommandItem
                   key={single.name}
-                  value={`${section.key} ${single.name}`}
+                  value={`${section.key} ${single.name}${isInternal ? ' internal' : ''}`}
                   onSelect={() => go(single.name)}
                 >
                   <Span className="font-medium">{single.name}</Span>
+                  {isInternal && (
+                    <Badge variant="warning" size="xs" className="ml-2 font-mono">
+                      {t('adminToggleInternalBadge')}
+                    </Badge>
+                  )}
                   {single.summary && (
                     <Span className="ml-2 truncate text-xs text-muted-foreground">
                       {single.summary}

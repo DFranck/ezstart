@@ -57,6 +57,11 @@
     "anatomyCompoundDescription": "This component file exports additional pieces you can render or extend.",
     "anatomyExportsHeading": "Sub-exports",
     "anatomyImportHeading": "Import",
+    "adminToggleShowInternal": "Show internal components",
+    "adminToggleAriaLabel": "Toggle internal components visibility",
+    "adminToggleAdminView": "ADMIN VIEW",
+    "adminToggleInternalBadge": "internal",
+    "adminToggleInternalTooltip": "Internal component — hidden from the public docs surface.",
     "domain": {
       "authForms": {
         "title": "Auth Forms",

@@ -57,6 +57,11 @@
     "anatomyCompoundDescription": "Ce fichier exporte des éléments supplémentaires que vous pouvez rendre ou étendre.",
     "anatomyExportsHeading": "Sous-exports",
     "anatomyImportHeading": "Import",
+    "adminToggleShowInternal": "Afficher les composants internes",
+    "adminToggleAriaLabel": "Basculer la visibilité des composants internes",
+    "adminToggleAdminView": "VUE ADMIN",
+    "adminToggleInternalBadge": "interne",
+    "adminToggleInternalTooltip": "Composant interne — masqué de la documentation publique.",
     "domain": {
       "authForms": {
         "title": "Formulaires d'authentification",
