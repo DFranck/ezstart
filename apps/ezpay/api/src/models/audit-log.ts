@@ -44,6 +44,15 @@ export type AuditLogAction =
   | 'subscription.created'
   | 'subscription.updated'
   | 'subscription.canceled'
+  // Promos lifecycle
+  | 'promo.created'
+  | 'promo.updated'
+  | 'promo.deleted'
+  // Payments
+  | 'payment.refunded'
+  | 'payments.cleanup'
+  // Connect (additional admin operation)
+  | 'connect.converted'
   // Webhooks
   | 'webhook.received'
   | 'webhook.replay_rejected'
@@ -69,6 +78,12 @@ export const AUDIT_LOG_ACTIONS = [
   'subscription.created',
   'subscription.updated',
   'subscription.canceled',
+  'promo.created',
+  'promo.updated',
+  'promo.deleted',
+  'payment.refunded',
+  'payments.cleanup',
+  'connect.converted',
   'webhook.received',
   'webhook.replay_rejected',
 ] as const
