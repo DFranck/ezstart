@@ -228,6 +228,8 @@ export const en = {
     manageAccount: 'Manage account',
     managePlan: 'Manage plan',
     // Identity card badges (V2)
+    platformBadge: 'Platform',
+    adminBadge: 'Admin',
     emailVerified: 'Verified',
     emailUnverified: 'Unverified',
     resendVerification: 'Resend verification email',

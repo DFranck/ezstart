@@ -224,6 +224,8 @@ export const fr: AuthDict = {
     manageAccount: 'Gérer le compte',
     managePlan: 'Gérer le plan',
     // Identity card badges (V2)
+    platformBadge: 'Plateforme',
+    adminBadge: 'Admin',
     emailVerified: 'Vérifié',
     emailUnverified: 'Non vérifié',
     resendVerification: "Renvoyer l'email de vérification",

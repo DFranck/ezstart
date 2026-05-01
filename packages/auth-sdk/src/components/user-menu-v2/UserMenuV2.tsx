@@ -3,6 +3,7 @@
 import { Badge, Div, Dropdown, type DropdownItem, Icon, Span } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import type { AuthUser } from '../../core/types.js'
 import { getAuthTexts, type AuthLocale } from '../../i18n/index.js'
 import { useAuth } from '../../react/hooks.js'
 import { useAuthNavigation } from '../../react/useAuthNavigation.js'
@@ -11,6 +12,65 @@ import { UserAvatar } from '../UserAvatar.js'
 import { AccountModalV2 } from './AccountModalV2.js'
 import { DEFAULT_USER_MENU_V2_TEXTS, type UserMenuV2Props, type UserMenuV2Texts } from './types.js'
 import { UserMenuV2Trigger } from './UserMenuV2Trigger.js'
+
+/**
+ * Identity-card plan badge descriptor — derived from the user's role surface
+ * with a fallback to the consumer-provided `planLabel`.
+ *
+ * @internal
+ */
+export type PlanBadgeDescriptor = {
+  label: string
+  variant: 'secondary' | 'primary' | 'purple' | 'info'
+  icon?: 'lucide:Crown' | 'lucide:ShieldCheck'
+}
+
+/**
+ * Resolve the identity-card plan badge from a user's roles + the
+ * consumer-provided `planLabel`. Exported for unit testing — the JSX
+ * consumer is `<UserMenuV2>` itself.
+ *
+ * Resolution priority (first match wins):
+ *   1. `globalRoles` includes `'superadmin'` → "Platform" (purple, Crown)
+ *   2. any `appRoles[*]` includes `'admin'` → "Admin" (info, ShieldCheck)
+ *   3. consumer-provided `planLabel` → subscription tier (variant per tier)
+ *   4. nothing → no badge rendered
+ *
+ * Elevated roles (1 + 2) override the consumer-provided `planLabel` because
+ * a superadmin / app admin is NOT on a billing plan in the conventional sense
+ * — surfacing "Free" next to their name is misleading and was the original
+ * bug (USER-MENU-PLAN-BADGE-SUPERADMIN).
+ *
+ * @internal
+ */
+export function resolvePlanBadge(
+  user: AuthUser,
+  planLabel: string | undefined,
+  texts: Pick<UserMenuV2Texts, 'platformBadge' | 'adminBadge'>
+): PlanBadgeDescriptor | null {
+  // 1. Platform-level operator — bypasses billing entirely.
+  if (user.globalRoles?.includes('superadmin')) {
+    return { label: texts.platformBadge, variant: 'purple', icon: 'lucide:Crown' }
+  }
+
+  // 2. App-level admin (any owned app). Iterate `appRoles` values and look
+  //    for the literal `'admin'` role.
+  const appRoles = user.appRoles ?? {}
+  const isAppAdmin = Object.values(appRoles).some(roles => roles.includes('admin'))
+  if (isAppAdmin) {
+    return { label: texts.adminBadge, variant: 'info', icon: 'lucide:ShieldCheck' }
+  }
+
+  // 3. Subscription plan name from the consumer (e.g. "Free", "Pro", "Enterprise").
+  if (planLabel) {
+    const variant: PlanBadgeDescriptor['variant'] =
+      planLabel === 'Enterprise' ? 'purple' : planLabel === 'Free' ? 'secondary' : 'primary'
+    return { label: planLabel, variant }
+  }
+
+  // 4. Nothing to render.
+  return null
+}
 
 /**
  * Build the localized default texts for `<UserMenuV2>` from the auth-sdk
@@ -51,6 +111,8 @@ function getDefaultTextsV2(locale: AuthLocale | string | undefined): UserMenuV2T
     status: dict.status,
     changelog: dict.changelog,
     managePlan: dict.managePlan,
+    platformBadge: dict.platformBadge,
+    adminBadge: dict.adminBadge,
   }
 }
 
@@ -205,6 +267,7 @@ export function UserMenuV2({
   const fullName = user.firstName
     ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
     : user.username
+  const planBadge = resolvePlanBadge(user, planLabel, texts)
 
   // ── Build dropdown items ──
   const items: DropdownItem[] = []
@@ -240,9 +303,10 @@ export function UserMenuV2({
               {texts.emailUnverified}
             </Badge>
           )}
-          {planLabel && (
-            <Badge variant="secondary" size="xs">
-              {planLabel}
+          {planBadge && (
+            <Badge variant={planBadge.variant} size="xs">
+              {planBadge.icon && <Icon name={planBadge.icon} size={10} className="mr-1" />}
+              {planBadge.label}
             </Badge>
           )}
         </Div>

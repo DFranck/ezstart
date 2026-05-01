@@ -77,6 +77,19 @@ export interface UserMenuV2Texts {
 
   /** "Pricing & plans" item — gated by `onPlanClick`. */
   managePlan: string
+
+  /**
+   * Identity card badge label for users with `globalRoles.includes('superadmin')`.
+   * Renders instead of the consumer-provided `planLabel` because a platform-level
+   * operator is not on a billing plan — they have full cross-tenant access.
+   */
+  platformBadge: string
+  /**
+   * Identity card badge label for users with at least one `appRoles[*]` containing
+   * `'admin'` (and not superadmin). Renders instead of `planLabel` to surface the
+   * elevated app-level role rather than a misleading subscription tier.
+   */
+  adminBadge: string
 }
 
 // ─── Props for the trigger + dropdown root ────────────────────────────────────
@@ -209,4 +222,7 @@ export const DEFAULT_USER_MENU_V2_TEXTS: UserMenuV2Texts = {
   changelog: "What's new",
 
   managePlan: 'Manage plan',
+
+  platformBadge: 'Platform',
+  adminBadge: 'Admin',
 }

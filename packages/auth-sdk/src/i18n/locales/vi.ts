@@ -218,6 +218,8 @@ export const vi: AuthDict = {
     manageAccount: 'Quản lý tài khoản',
     managePlan: 'Quản lý gói',
     // Identity card badges (V2)
+    platformBadge: 'Nền tảng',
+    adminBadge: 'Quản trị',
     emailVerified: 'Đã xác minh',
     emailUnverified: 'Chưa xác minh',
     resendVerification: 'Gửi lại email xác minh',
