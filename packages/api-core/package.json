@@ -82,6 +82,7 @@
   "devDependencies": {
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",
+    "@ezstart/test-utils": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.23",

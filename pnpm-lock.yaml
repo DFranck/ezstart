@@ -1545,6 +1545,9 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../logger
+      '@ezstart/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
