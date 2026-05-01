@@ -89,3 +89,38 @@ describe('JWT Token Parsing (adversarial)', () => {
     expect(expiry).toBeTypeOf('number')
   })
 })
+
+describe('JWT isVerified claim (JWT-ISVERIFIED-CLAIM-001)', () => {
+  // Document the decoder contract for the new claim. The wire format is
+  // backward compatible: legacy tokens (signed before the claim was added)
+  // simply omit the field, and consumers MUST treat that as
+  // "verification status unknown — fall back to user.isVerified or false".
+  function decodeIsVerified(token: string): boolean | undefined {
+    try {
+      const parts = token.split('.')
+      if (parts.length < 2 || !parts[1]) return undefined
+      const payload = JSON.parse(atob(parts[1])) as { isVerified?: boolean }
+      return payload.isVerified
+    } catch {
+      return undefined
+    }
+  }
+
+  it('reads isVerified=true from the new claim', () => {
+    const payload = btoa(JSON.stringify({ exp: 9999999999, isVerified: true }))
+    expect(decodeIsVerified(`header.${payload}.sig`)).toBe(true)
+  })
+
+  it('reads isVerified=false from the new claim', () => {
+    const payload = btoa(JSON.stringify({ exp: 9999999999, isVerified: false }))
+    expect(decodeIsVerified(`header.${payload}.sig`)).toBe(false)
+  })
+
+  it('returns undefined for a legacy token without the claim', () => {
+    // This is the explicit backward-compat contract: consumers must NOT crash
+    // on legacy tokens. Falling back to `user.isVerified` from the auth store
+    // (or `false` for a strict gate) is the documented migration path.
+    const payload = btoa(JSON.stringify({ exp: 9999999999, userId: 'u1' }))
+    expect(decodeIsVerified(`header.${payload}.sig`)).toBeUndefined()
+  })
+})

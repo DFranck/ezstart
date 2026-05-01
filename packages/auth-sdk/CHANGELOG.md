@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **JWT-ISVERIFIED-CLAIM-001** — JWT payload now carries the user's
+  `isVerified` claim alongside `userId` / `email` / `globalRoles` / etc.
+  Consumer apps can gate verified-only features straight from the decoded
+  token without an extra `/me` round trip. Backward compatible: the claim is
+  optional on `JWTPayload` — legacy tokens signed before this change simply
+  omit it, and the SDK decoder returns `undefined` (consumers should fall
+  back to `user.isVerified` from the auth store, or coerce to `false` for a
+  strict gate). All ezauth issuance routes (login, refresh rotation, OAuth
+  authCode exchange, magic-link, 2FA validate, SSO exchange, quick-signup)
+  pick up the new claim automatically since they all funnel through
+  `buildJwtPayload()`. Once the longest refresh token has rotated (~30
+  days), the field can stop being optional.
+
 ### Documentation
 
 - README rewritten following `standard.md` §6 format: 3-level quickstart

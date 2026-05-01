@@ -360,6 +360,35 @@ describe('AuthService', () => {
       expect(session.token_type).toBe('Bearer')
       expect(session.user.email).toBe('session@example.com')
     })
+
+    it('should embed isVerified=true claim in the signed access token (verified user)', async () => {
+      // JWT-ISVERIFIED-CLAIM-001 — consumer apps gate verified-only features
+      // straight from the token, no /me round trip.
+      const user = await createUser({
+        email: 'verified-session@example.com',
+        username: 'verifiedsession',
+        isVerified: true,
+      })
+
+      const session = await issueSession(user)
+      const decoded = jwt.verify(session.access_token, JWT_SECRET) as Record<string, unknown>
+      expect(decoded.isVerified).toBe(true)
+    })
+
+    it('should embed isVerified=false claim for an unverified user', async () => {
+      // JWT-ISVERIFIED-CLAIM-001 — quick-signup ghost users / freshly-registered
+      // users carry the false claim so feature gates can react before the user
+      // confirms their email (without an extra fetch).
+      const user = await createUser({
+        email: 'unverified-session@example.com',
+        username: 'unverifiedsession',
+        isVerified: false,
+      })
+
+      const session = await issueSession(user)
+      const decoded = jwt.verify(session.access_token, JWT_SECRET) as Record<string, unknown>
+      expect(decoded.isVerified).toBe(false)
+    })
   })
 
   describe('buildJwtPayload', () => {
@@ -376,6 +405,38 @@ describe('AuthService', () => {
       expect(payload.email).toBe('payload@example.com')
       expect(payload.apps).toEqual(['ezstart', 'ezbill'])
       expect(payload.globalRoles).toEqual(['superadmin'])
+    })
+
+    it('should include isVerified=true when the user is verified', async () => {
+      // JWT-ISVERIFIED-CLAIM-001 — backward-compat: legacy tokens without this
+      // claim are still accepted by the SDK (optional field). Newly issued
+      // tokens always carry it so consumers can stop rendering "Verify your
+      // email" banners as soon as the next refresh fires.
+      const user = await createUser({
+        email: 'payload-verified@example.com',
+        username: 'payloadverified',
+        isVerified: true,
+      })
+
+      const payload = buildJwtPayload(user)
+      expect(payload.isVerified).toBe(true)
+    })
+
+    it('should include isVerified=false when the user is not verified', async () => {
+      // Defensive: the field MUST always be present on freshly minted tokens
+      // (true or false), never undefined. Undefined is reserved for legacy
+      // tokens signed before JWT-ISVERIFIED-CLAIM-001.
+      const user = await createUser({
+        email: 'payload-unverified@example.com',
+        username: 'payloadunverified',
+        isVerified: false,
+      })
+
+      const payload = buildJwtPayload(user)
+      expect(payload.isVerified).toBe(false)
+      // Make the always-present invariant explicit so a future regression
+      // (e.g. someone wrapping the field in a conditional) is caught.
+      expect(typeof payload.isVerified).toBe('boolean')
     })
   })
 })

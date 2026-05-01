@@ -118,6 +118,9 @@ export async function createAppAdmin(
 
 /**
  * Generate a valid JWT access token for the given user.
+ *
+ * Mirrors the shape returned by `buildJwtPayload()` in `auth.service.ts`,
+ * including the `isVerified` claim added by JWT-ISVERIFIED-CLAIM-001.
  */
 export function generateAccessToken(
   user: AuthUserDocument,
@@ -133,6 +136,7 @@ export function generateAccessToken(
       appRoles: {},
       permissions: user.permissions || [],
       features: user.features || [],
+      isVerified: user.isVerified === true,
     },
     JWT_SECRET,
     { expiresIn, algorithm: 'HS256' }
@@ -153,6 +157,7 @@ export function generateExpiredToken(user: AuthUserDocument): string {
       appRoles: {},
       permissions: [],
       features: [],
+      isVerified: user.isVerified === true,
     },
     JWT_SECRET,
     { expiresIn: 0, algorithm: 'HS256' }

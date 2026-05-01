@@ -63,6 +63,11 @@ export function buildJwtPayload(user: AuthUserDocument): JWTPayload {
     appRoles: mapToRecord(user.appRoles),
     permissions: user.permissions || [],
     features: user.features || [],
+    // JWT-ISVERIFIED-CLAIM-001 (2026-05-01) — embed verification status in the
+    // token so consumer apps can gate verified-only features without a round
+    // trip to /me. Optional on the SDK side for backward compat with legacy
+    // tokens (default false on the consumer when absent).
+    isVerified: user.isVerified === true,
   }
 }
 
