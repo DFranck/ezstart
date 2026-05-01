@@ -26,9 +26,16 @@ const mockApiCall = vi.mocked(apiCall)
 
 const handleCallbackMock = vi.fn()
 
+const useAuthState = {
+  isAuthenticated: false,
+  isAuthReady: false,
+}
+
 vi.mock('../../react/hooks.js', () => ({
   useAuth: () => ({
     handleCallback: handleCallbackMock,
+    isAuthenticated: useAuthState.isAuthenticated,
+    isAuthReady: useAuthState.isAuthReady,
   }),
 }))
 
@@ -120,6 +127,8 @@ describe('SignInForm — same-origin code exchange (Bug 18 regression)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     handleCallbackMock.mockReset()
+    useAuthState.isAuthenticated = false
+    useAuthState.isAuthReady = false
   })
 
   afterEach(() => {
@@ -187,6 +196,102 @@ describe('SignInForm — same-origin code exchange (Bug 18 regression)', () => {
     // Error message rendered.
     await waitFor(() => {
       expect(screen.getByText('Token exchange failed')).toBeInTheDocument()
+    })
+  })
+})
+
+/**
+ * SignInForm — auto-redirect when already authenticated.
+ *
+ * Regression for LOGIN-PAGE-NO-REDIRECT-IF-AUTHED (#133): in cross-origin
+ * setups the user can land on `/login` while their httpOnly cookie was not
+ * visible to SSR (so `getServerAuth()` returned null) but their
+ * localStorage carries a valid session from a previous visit. The store
+ * rehydrates client-side with `isAuthenticated: true`. The form must
+ * detect that and `window.location.replace()` to the dashboard instead of
+ * sitting there with empty inputs.
+ */
+describe('SignInForm — auto-redirect when already authenticated', () => {
+  let replaceMock: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    handleCallbackMock.mockReset()
+    useAuthState.isAuthenticated = false
+    useAuthState.isAuthReady = false
+    replaceMock = vi.fn()
+  })
+
+  afterEach(() => {
+    restoreLocation()
+  })
+
+  function setupLocationWithReplace(origin: string): void {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: {
+        href: `${origin}/en/login`,
+        origin,
+        pathname: '/en/login',
+        search: '',
+        hash: '',
+        hostname: new URL(origin).hostname,
+        protocol: new URL(origin).protocol,
+        host: new URL(origin).host,
+        port: new URL(origin).port,
+        replace: replaceMock,
+        assign: vi.fn(),
+      },
+    })
+  }
+
+  it('does NOT redirect while auth state is still hydrating (isAuthReady=false)', async () => {
+    setupLocationWithReplace('http://localhost:6111')
+    useAuthState.isAuthenticated = true
+    useAuthState.isAuthReady = false
+
+    render(<SignInForm appName="ezauth" />)
+
+    // Effect runs but bails early: replace must not be called.
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(replaceMock).not.toHaveBeenCalled()
+  })
+
+  it('does NOT redirect when the user is unauthenticated', async () => {
+    setupLocationWithReplace('http://localhost:6111')
+    useAuthState.isAuthenticated = false
+    useAuthState.isAuthReady = true
+
+    render(<SignInForm appName="ezauth" />)
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(replaceMock).not.toHaveBeenCalled()
+    // The form is still rendered for the user to type credentials.
+    expect(document.querySelector('form')).not.toBeNull()
+  })
+
+  it('redirects to the same-origin /{locale}/dashboard default when authenticated', async () => {
+    setupLocationWithReplace('http://localhost:6111')
+    useAuthState.isAuthenticated = true
+    useAuthState.isAuthReady = true
+
+    render(<SignInForm appName="ezauth" />)
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith('http://localhost:6111/en/dashboard')
+    })
+  })
+
+  it('honours an explicit `redirectUri` prop', async () => {
+    setupLocationWithReplace('http://localhost:6111')
+    useAuthState.isAuthenticated = true
+    useAuthState.isAuthReady = true
+
+    render(<SignInForm appName="ezauth" redirectUri="https://app.example.com/admin" />)
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith('https://app.example.com/admin')
     })
   })
 })

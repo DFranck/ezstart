@@ -26,6 +26,7 @@ import { usePromoCode } from './usePromoCode.js'
 import { readUtmSource } from './utmSource.js'
 import { DevModeBanner } from './DevModeBanner.js'
 import { TurnstileWidget } from './TurnstileWidget.js'
+import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
@@ -197,9 +198,31 @@ export function SignUpForm({
   turnstileSiteKey,
 }: SignUpFormProps) {
   const navigation = useAuthNavigation()
+  const { isAuthenticated, isAuthReady } = useAuth()
   const locale = propLocale ?? navigation.locale
   const t: SignUpFormTexts = { ...getAuthTexts(locale, 'signUp'), ...texts }
   const resolvedBackToLoginHref = backToLoginHref ?? navigation.loginHref
+
+  // ── Auto-redirect when already authenticated ─────────────────────────────
+  //
+  // Same rationale as `SignInForm` — if the user already has a valid session
+  // in localStorage / cookie, do not show the signup form. Send them to the
+  // dashboard (or to the explicit `redirectUri` / `?redirect_uri=`).
+  // Cf. SignInForm for the full reasoning (LOGIN-PAGE-NO-REDIRECT-IF-AUTHED).
+  const resolvedRedirectUri =
+    redirectUri ??
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
+      : undefined)
+  useEffect(() => {
+    if (!isAuthReady) return
+    if (!isAuthenticated) return
+    if (typeof window === 'undefined') return
+    if (!resolvedRedirectUri) return
+    window.location.replace(resolvedRedirectUri)
+  }, [isAuthReady, isAuthenticated, resolvedRedirectUri])
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [registered, setRegistered] = useState(false)

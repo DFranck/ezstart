@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { DevModeBanner } from './DevModeBanner.js'
 import { TurnstileWidget } from './TurnstileWidget.js'
+import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
@@ -122,12 +123,34 @@ export function ForgotPasswordForm({
   turnstileSiteKey,
 }: ForgotPasswordFormProps) {
   const navigation = useAuthNavigation()
+  const { isAuthenticated, isAuthReady } = useAuth()
   const locale = propLocale ?? navigation.locale
   const t: ForgotPasswordFormTexts = {
     ...getAuthTexts(locale, 'forgotPassword'),
     ...texts,
   }
   const resolvedBackHref = backHref ?? navigation.loginHref
+
+  // ── Auto-redirect when already authenticated ─────────────────────────────
+  //
+  // Same rationale as `SignInForm` — a logged-in user landing on
+  // `/forgot-password` likely typed the URL by mistake or clicked a stale
+  // link. Send them to the dashboard rather than letting them request a
+  // reset for an account they are already signed into.
+  // Cf. SignInForm for the full reasoning (LOGIN-PAGE-NO-REDIRECT-IF-AUTHED).
+  const resolvedRedirectUri =
+    navigation.redirectUri ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
+      : undefined)
+  useEffect(() => {
+    if (!isAuthReady) return
+    if (!isAuthenticated) return
+    if (typeof window === 'undefined') return
+    if (!resolvedRedirectUri) return
+    window.location.replace(resolvedRedirectUri)
+  }, [isAuthReady, isAuthenticated, resolvedRedirectUri])
+
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')

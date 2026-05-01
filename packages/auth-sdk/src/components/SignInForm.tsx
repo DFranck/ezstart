@@ -166,7 +166,7 @@ export function SignInForm({
   turnstileShowAfterFails = 3,
 }: SignInFormProps) {
   const navigation = useAuthNavigation()
-  const { handleCallback } = useAuth()
+  const { handleCallback, isAuthenticated, isAuthReady } = useAuth()
   const locale = propLocale ?? navigation.locale
   const t: SignInFormTexts = { ...getAuthTexts(locale, 'signIn'), ...texts }
   const resolvedForgotPasswordHref = forgotPasswordHref ?? navigation.forgotPasswordHref
@@ -186,6 +186,32 @@ export function SignInForm({
     (typeof window !== 'undefined'
       ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
       : undefined)
+
+  // ── Auto-redirect when already authenticated ─────────────────────────────
+  //
+  // P1 UX bug (LOGIN-PAGE-NO-REDIRECT-IF-AUTHED): in cross-origin scenarios
+  // (e.g. `ezauth-git-staging-ezstart.vercel.app`) the user can land on
+  // `/login` while their httpOnly cookie was not visible to SSR
+  // (`getServerAuth()` returned null) but their localStorage carries a valid
+  // user state from a previous session on the same domain. The store
+  // rehydrates client-side with `isAuthenticated: true`, but without this
+  // guard the form sat there waiting for the user to type credentials they
+  // already have. Redirect them straight to the dashboard.
+  //
+  // - Wait for `isAuthReady` so we don't race the persist rehydration on
+  //   the very first render (would briefly think the user is signed out).
+  // - `window.location.replace()` (not `router.push`) so:
+  //     · the SDK stays free of a `next/router` peer dep
+  //     · `/login` does not stay in browser history (back-button safe)
+  //     · the destination boots with a fresh React tree (no stale state)
+  useEffect(() => {
+    if (!isAuthReady) return
+    if (!isAuthenticated) return
+    if (typeof window === 'undefined') return
+    if (!resolvedRedirectUri) return
+    window.location.replace(resolvedRedirectUri)
+  }, [isAuthReady, isAuthenticated, resolvedRedirectUri])
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [twoFactorState, setTwoFactorState] = useState<{ tempToken: string } | null>(null)
