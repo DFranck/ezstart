@@ -28,6 +28,8 @@
  * deliberately does NOT reach into the DB to keep the contract obvious.
  */
 
+import 'server-only'
+
 // ---------------------------------------------------------------------------
 // Input contracts
 // ---------------------------------------------------------------------------

@@ -10,6 +10,8 @@
  * intentionally has zero React or browser dependencies.
  */
 
+import 'server-only'
+
 import type { ApiKeyItem } from '../core/types.js'
 
 /** Minimal logger surface — opt-in, avoids hard dep on `@ezstart/logger`. */
