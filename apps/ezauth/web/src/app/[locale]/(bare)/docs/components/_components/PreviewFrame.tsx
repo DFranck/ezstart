@@ -1,8 +1,8 @@
 'use client'
 
-import { type ReactNode } from 'react'
-import { Card, CardContent, Div, P, Spinner } from '@ezstart/ui/components'
+import { Card, CardContent, Div, Icon, P, Span, Spinner } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
+import { type ReactNode } from 'react'
 
 interface PreviewFrameProps {
   /** The mounted demo node, or `null` if still loading. */
@@ -47,9 +47,21 @@ export function PreviewFrame({ demo, demoError, fallbackText }: PreviewFrameProp
   }
 
   return (
-    <Card variant="default" className="overflow-hidden">
-      <CardContent className="bg-[linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted)),_linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted))] bg-[length:20px_20px] bg-[position:0_0,_10px_10px] p-6 md:p-10">
-        <Div className="flex items-center justify-center min-h-[200px]">{demo}</Div>
+    <Card variant="default" className="overflow-hidden relative">
+      <CardContent className="relative bg-[linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted)),_linear-gradient(45deg,_var(--muted)_25%,_transparent_25%,_transparent_75%,_var(--muted)_75%,_var(--muted))] bg-[length:20px_20px] bg-[position:0_0,_10px_10px] p-6 md:p-10">
+        <Div
+          className="absolute top-3 left-3 z-10 max-w-[280px] space-y-0.5 rounded-md border border-warning/40 bg-warning/15 px-3 py-2 text-warning-foreground backdrop-blur-sm"
+          role="note"
+        >
+          <Div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+            <Icon name="lucide:FlaskConical" className="h-3.5 w-3.5" />
+            <Span>{t('demoModeBanner.title')}</Span>
+          </Div>
+          <P className="text-[11px] leading-snug text-warning-foreground/80">
+            {t('demoModeBanner.description')}
+          </P>
+        </Div>
+        <Div className="flex items-center justify-center min-h-[240px] pt-12">{demo}</Div>
       </CardContent>
     </Card>
   )

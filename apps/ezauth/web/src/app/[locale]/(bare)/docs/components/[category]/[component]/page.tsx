@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/navigation'
 import { getCategoryBySlug, getComponentBySlug } from '@ezstart/auth-sdk/components/registry'
-import { Badge, Button, Div, H1, Icon, P, Span } from '@ezstart/ui/components'
+import { Badge, Button, Div, H1, P, Span } from '@ezstart/ui/components'
 import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { FeatureVariantSwitcher } from '../../_components/FeatureVariantSwitcher'
@@ -68,17 +68,6 @@ export default async function ComponentDetailPage({ params }: Props) {
           </Button>
         </Div>
         {entry.summary && <P className="text-base text-muted-foreground">{entry.summary}</P>}
-      </Div>
-
-      <Div
-        className="rounded-md border border-warning/30 bg-warning/10 px-4 py-3 text-sm space-y-1"
-        role="note"
-      >
-        <Div className="flex items-center gap-2 font-semibold text-warning-foreground">
-          <Icon name="lucide:FlaskConical" className="h-4 w-4" />
-          <Span>{t('demoModeBanner.title')}</Span>
-        </Div>
-        <P className="text-xs text-muted-foreground">{t('demoModeBanner.description')}</P>
       </Div>
 
       <FeatureVariantSwitcher initialComponentName={entry.name} />
