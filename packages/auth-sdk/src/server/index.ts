@@ -115,6 +115,22 @@ export {
 
 export { requireEmailVerified, EMAIL_VERIFICATION_REQUIRED_CODE } from './require-email-verified.js'
 
+// ---------------------------------------------------------------------------
+// Unified JWT + API-key auth middleware factory (Express)
+// ---------------------------------------------------------------------------
+
+export { createAuthMiddleware } from './auth-middleware.js'
+export type {
+  AuthMiddleware,
+  AuthMiddlewareConfig,
+  AuthMiddlewareLogger,
+  AuthMiddlewareModel,
+  AuthMiddlewareOptions,
+  AuthMiddlewareScope,
+  AuthUserDoc,
+  ApiKeyDoc,
+} from './auth-middleware.js'
+
 // RBAC types and helpers re-exported for server use
 export * from '../rbac/types.js'
 export * from '../rbac/helpers.js'

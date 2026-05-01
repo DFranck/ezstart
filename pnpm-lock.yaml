@@ -1636,6 +1636,9 @@ importers:
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui
+      jsonwebtoken:
+        specifier: ^9.0.3
+        version: 9.0.3
       react-hook-form:
         specifier: ^7.68.0
         version: 7.68.0(react@19.2.3)
@@ -1673,6 +1676,9 @@ importers:
       '@types/express':
         specifier: ^4.17.17
         version: 4.17.25
+      '@types/jsonwebtoken':
+        specifier: ^9.0.3
+        version: 9.0.10
       '@types/node':
         specifier: ^20
         version: 20.19.26
