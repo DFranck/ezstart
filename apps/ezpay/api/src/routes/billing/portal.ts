@@ -24,7 +24,7 @@ import {
 } from '@ezstart/api-core'
 import Stripe from 'stripe'
 
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
 
@@ -146,7 +146,7 @@ const billingPortalController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/portal', authMiddleware, populateUserFromToken, billingPortalController, {
+docRouter.post('/portal', authJwtOrKey(), billingPortalController, {
   summary: 'Create a Stripe Customer Portal session for the authenticated user',
   tags: ['Billing'],
   bodySchema: billingPortalBodySchema,

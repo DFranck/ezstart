@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -68,7 +68,7 @@ const statusHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/connect/status', authMiddleware, populateUserFromToken, statusHandler, {
+docRouter.get('/connect/status', authJwtOrKey(), statusHandler, {
   summary:
     "Get connected accounts for the current user — scoped by ?applicationId= or list all the user's accounts",
   tags: ['Connect'],

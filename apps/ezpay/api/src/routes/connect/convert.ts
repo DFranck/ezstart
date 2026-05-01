@@ -25,7 +25,8 @@ import {
 } from '@ezstart/api-core'
 import { hasRole } from '@ezstart/auth-sdk/rbac/client'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -126,6 +127,17 @@ const convertHandler = async (req: Request, res: Response) => {
       by: transitionedBy,
     })
 
+    void auditLogService.createFromRequest(req, {
+      action: isPlatformAccount ? 'connect.converted_to_platform' : 'connect.converted_to_external',
+      userId: transitionedBy,
+      metadata: {
+        applicationId,
+        from: previousStripeAccountId,
+        to: stripeAccountId,
+        isPlatformAccount,
+      },
+    })
+
     sendSuccess(res, { connectedAccount: existing.toObject() })
   } catch (error) {
     logger.error('Connect convert error:', error instanceof Error ? error : String(error))
@@ -139,8 +151,7 @@ const convertHandler = async (req: Request, res: Response) => {
 
 docRouter.patch(
   '/connect/accounts/:applicationId',
-  authMiddleware,
-  populateUserFromToken,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   convertHandler,
   {
     summary:

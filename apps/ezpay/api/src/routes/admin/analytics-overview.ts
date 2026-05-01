@@ -25,7 +25,7 @@ import {
 } from '@ezstart/api-core'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getPaymentModel } from '../../models/Payment.js'
 import { listApplicationsByOwner } from '../../services/ezauth-client.js'
 
@@ -342,8 +342,7 @@ const payAnalyticsOverviewController = async (req: Request, res: Response) => {
 
 docRouter.get(
   '/admin/analytics/overview',
-  authMiddleware,
-  populateUserFromToken,
+  authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
   attachDerivedScope,
   payAnalyticsOverviewController,

@@ -11,7 +11,8 @@ import { getApiUrl } from '@ezstart/config'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
 import { getApplication } from '../../services/ezauth-client.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { generateConnectState } from '../../utils/connect-state.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import type Stripe from 'stripe'
@@ -186,7 +187,7 @@ const onboardHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/connect/onboard', authMiddleware, populateUserFromToken, onboardHandler, {
+docRouter.post('/connect/onboard', authJwtOrKey(), onboardHandler, {
   summary: 'Create a Stripe Connect account scoped to an Application and start onboarding',
   tags: ['Connect'],
   bodySchema: onboardBodySchema,

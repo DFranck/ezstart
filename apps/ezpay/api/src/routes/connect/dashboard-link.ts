@@ -9,7 +9,7 @@ import {
 } from '@ezstart/api-core'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
-import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -82,18 +82,12 @@ const dashboardLinkHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get(
-  '/connect/dashboard-link',
-  authMiddleware,
-  populateUserFromToken,
-  dashboardLinkHandler,
-  {
-    summary: 'Get Stripe Express Dashboard login link for a specific Application Connect account',
-    tags: ['Connect'],
-    querySchema: dashboardLinkQuerySchema,
-    responseSchema: dashboardLinkResponseSchema,
-  }
-)
+docRouter.get('/connect/dashboard-link', authJwtOrKey(), dashboardLinkHandler, {
+  summary: 'Get Stripe Express Dashboard login link for a specific Application Connect account',
+  tags: ['Connect'],
+  querySchema: dashboardLinkQuerySchema,
+  responseSchema: dashboardLinkResponseSchema,
+})
 
 export { dashboardLinkRegistry as registry, router }
 export default router

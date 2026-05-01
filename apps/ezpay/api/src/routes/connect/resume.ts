@@ -31,7 +31,8 @@ import {
 import { getApiUrl } from '@ezstart/config'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
-import { authMiddleware, populateUserFromToken, isAdminUser } from '../../middleware/auth.js'
+import { isAdminUser } from '../../middleware/auth.js'
+import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { generateConnectState } from '../../utils/connect-state.js'
 import { auditLogService } from '../../services/audit-log.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -189,7 +190,7 @@ const resumeHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/connect/onboarding/resume', authMiddleware, populateUserFromToken, resumeHandler, {
+docRouter.post('/connect/onboarding/resume', authJwtOrKey(), resumeHandler, {
   summary: 'Resume an in-progress Stripe Connect onboarding (status=pending and < 7 days old)',
   tags: ['Connect'],
   bodySchema: resumeBodySchema,
