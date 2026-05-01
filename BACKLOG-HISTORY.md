@@ -7,9 +7,43 @@ Quand la date exacte est inconnue, l'item est placé dans le mois/section où il
 
 ---
 
-## 2026-04
+## 2026-05
 
-### Packages — auth-sdk + EZAuth white-label theme primary-only (2026-04-24)
+### Cross-cutting — Wave 1+2+3 + P0 SSR/UX fix session (2026-05-01)
+
+Massive refactor session aligning ezauth/ezpay/ezstart with `standard-architecture.md` Tier 1 SaaS service pattern. ~38 commits, ~1500-1800 LOC of duplicated code extracted into shared packages, ~700-1000 LOC net reduction. Tier 1 services now consume `auth-sdk/server`, `pay-sdk/server`, `ai-sdk/server`, `api-core/crypto`, `api-core/audit-log` etc. Validation reports : `tmp/agent-full-audit-2026-05-01.md`, `tmp/agent-audit-duplications-2026-05-01.md`, `tmp/audit-pre-push-2026-05-01.md`, `tmp/hack-pre-push-2026-05-01.md`.
+
+**Wave 1 — Generic plumbing extracted to packages**
+
+- [x] **V1 — `instrumentApi` factory** in `@ezstart/config/server` (commits `9bb9b2e3` / `854546cd`). Shared boot-env loader. 60 LOC duplicated → 18, -70% per consumer.
+- [x] **V2 — `testModeScopePlugin`** Mongoose pre-find hook to `@ezstart/api-core` (commits `e810289e` / `189f0d6f` / `91bf6658`). ~170 LOC saved across consumers, +12 tests for live coalesce + opt-in modes.
+- [x] **V3 — `createKeyHashRateLimiter`** middleware factory to `@ezstart/api-core` (commits `c13ec179` / `8fc01c1a` / `2902b139`). ~68 LOC saved, structured `429` envelope.
+- [x] **V4 — `crypto` module** (`base64url` + HMAC + `EZStart-Signature` protocol with round-trip lock test) to `@ezstart/api-core/crypto` (commits `0c99eb05` / `91748052` / `b1e632e1`).
+- [x] **V5 — `bootApi()` ceremony helper** to `@ezstart/api-core` (commits `3a02a070` / `52302e07` / `b11f6990`). 6 apps refactored : 489 → 389 LOC.
+
+**Wave 2 — auth-sdk/server + audit-log extraction + P0 SSR/UX fixes**
+
+- [x] **V6 — `createApiKeyMiddleware` + `requireEmailVerified`** factories to `auth-sdk/server` (commits `8c85b4e5` / `915e4f47` / `82d4e9ec`). ~380 LOC saved across ezauth/ezpay wrappers.
+- [x] **V7 — `createApiKeySchema` + `createApiKeyUsageSchema`** factories to `auth-sdk/server`. ~280 LOC saved.
+- [x] **V8 — `createAuditLogSchema` + `createAuditLogService`** factories to `@ezstart/api-core` (commits `b8710817` / `cf1bdab6` / `d8328e52` / `bc16224c`). Resolved 4 ezpay TODOs (`apps/ezpay/api/src/routes/connect/resume.ts:153` + 3 in `services/connect-cleanup.ts`).
+- [x] **V_SSR — `<AuthProvider>` SSR-bootstrap fix** in ezpay-web + ezstart-web (commit `6588a11d`). P0 — kills flash LoginButton → UserMenu on cold load.
+- [x] **V_MOUNTED — kill banned `mounted` guard pattern** in 5 files (4 in `apps/ezpay/web/` + ai-sdk `AILayout`, commits `cc998f1b` / `24711193`). P0 SSR violation — pattern explicitly forbidden by `nextjs.md` §1.1.
+- [x] **V_CSP — `Content-Security-Policy-Report-Only` + security headers** deployed on ezpay-web + ezstart-web (extends AUTH-V1-CSP from ezauth-only). Soak phase 2 weeks before enforce.
+- [x] **V_P1_UI — 4 P1 fixes** (commits `72a138db` / `0162dee6`) :
+  - 23 hardcoded colors → semantic tokens in `packages/ui`
+  - native `<img>` → `next/image` in ezstart
+  - `force-dynamic` justified on ezstart locale layout
+  - DOMPurify on green-pulse careers description
+- [x] **FINISHER pass** — cleaned up V6 wrapper + verified V_CSP shipped.
+
+**Wave 3 — pay-sdk/server + ai-sdk/server bootstraps**
+
+- [x] **V9 — `@ezstart/pay-sdk/server`** bootstrap (commits `252feb34` / `48d4e82f` / `9cca91f7` / `31824a99`). Factories : `createStripeClient` + `computeConnectFee` + `signWebhook` + verify. ezpay/api consumes them.
+- [x] **V11 — `@ezstart/ai-sdk/server`** bootstrap (commit `d239f0f7`). `./server` entry-point exported, `import 'server-only'` markers on all 7 server files.
+
+**P0 boot crash fix — `server-only` runtime guard**
+
+- [x] **V_SERVERONLY_FIX** (commits `38d454df` / `6bd74d80` / `79297597` / `7a413ab2`) — replaced bare `import 'server-only'` (crashes raw Node when SDK runs server-side outside Next.js) with custom `process.versions.node` runtime guard in `_internal/server-only.ts` per SDK. 22 files migrated. APIs boot OK (verified via curl `/health` smoke tests).
 
 - [x] 2026-04-24 — **White-label theme: primary-only + light/dark auto-sync + kill hardcoded app-themes.ts** — Simplification SaaS-pro du white-label theme EZAuth aligné Stripe/Clerk. (1) **UI editor primary-only** : `ApplicationThemeEditor` retire les 3 champs `background`/`foreground`/`accent` — ne garde que `primary` + `logo` + toggle `themeEnabled`. Preview card utilise `var(--preview-primary, var(--primary))` sur le bouton mock, sans override des tokens background/foreground. (2) **Backend backcompat** : Zod `applicationThemeSchema` conserve les 4 champs (ancienne data préservée en DB, jamais rendue en CSS). `GET /api/keys/config` expose désormais `appDisplayName` (depuis `Application.name`) pour le rendu "Sign in to access \<brand\>". (3) **SSR renderer simplifié** : `renderThemeStyle` émet uniquement `:root{--primary:<value>;}` — plus de scoping `data-app` ni de règle `.dark` dupliquée. Ezauth layout fixe `data-app="ezauth"` (au lieu de `ssrAppName`), ce qui rend obsolète la cascade via `packages/ui/src/styles/themes/<slug>/<slug>.css`. (4) **Light/dark auto-sync consumer ↔ ezauth** : `<LoginButton>` / `<RegisterButton>` auto-détectent la préférence via `detectCurrentThemePreference()` (cookie `theme` next-themes, `data-theme` attribut, classe `.dark`/`.light` sur `<html>`) et l'envoient à ezauth via `?theme=light|dark|system`. Middleware ezauth valide la valeur (whitelist) et écrit le cookie `theme` sur la réponse → next-themes pick up au prochain render. `SignInForm` renvoie la préférence actuelle d'ezauth via `?theme=` à l'URL callback consumer. `AuthCallbackPage` lit `?theme=` et applique (cookie + classe DOM) pour un switch complet à la fermeture de boucle. (5) **Kill hardcoded config** : `apps/ezauth/web/src/config/app-themes.ts` supprimé, hook `useDynamicAppTheme` supprimé (dead code après la refonte), 3 pages clients (login/register/forgot-password) utilisent désormais `ssrAppDisplayName` + `keyConfig.appDisplayName` + fallback `prettifySlug(slug)`. (6) **Tests** : 20 nouveaux tests (`ApplicationThemeEditor.test.tsx` 10 + `theme-preference.test.ts` 10), `theme-ssr.test.ts` réécrit pour le nouveau contrat (primary-only, bare `:root` selector), `register-button.test.tsx` +3 tests pour la propagation `?theme=`, `theme.test.ts` (api-ezauth) +2 tests pour `appDisplayName`. **Validation** : `pnpm --filter @ezstart/auth-sdk typecheck && test` PASS (296 tests, 32 files). `pnpm --filter api-ezauth typecheck && test` PASS (375 tests). `pnpm --filter web-ezauth typecheck && test` PASS (29 tests). `pnpm -r typecheck` PASS (tous packages). Audit greps PASS (zero `getAppTheme`, zero `:root[data-app` dans ezauth/web/src). Cf. `.claude/rules/standard-saas.md` §5.2 + JSDoc dans `ApplicationThemeEditor`.
 
