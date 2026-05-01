@@ -20,6 +20,12 @@ export const authUserSchema = z
     lastName: z.string().optional().describe('Last name'),
     avatar: z.string().optional().describe('Avatar URL'),
     isVerified: z.boolean().describe('Email verification status'),
+    twoFactorEnabled: z
+      .boolean()
+      .optional()
+      .describe(
+        '2FA enrollment status (TOTP enabled). Optional for backward compatibility — pre-2FA_MANDATORY_ADMIN-001 (2026-05-01) responses omit the field.'
+      ),
     apps: z.array(z.string()).describe('Accessible applications'),
     roles: z.array(z.string()).optional().describe('User roles'),
     permissions: z.array(z.string()).optional().describe('User permissions'),

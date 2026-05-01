@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **2FA_MANDATORY_ADMIN-001** — `<RequireTwoFactor>` guard component
+  blocks elevated-role users (admin / superadmin, global or per-app)
+  from rendering admin UI until they enroll 2FA. Exported from
+  `@ezstart/auth-sdk/components` along with `DEFAULT_REQUIRE_TWO_FACTOR_TEXTS`
+  for partial overrides. Defense-in-depth pattern (Stripe / Clerk /
+  Auth0): the backend `requireTwoFactor()` Express middleware on every
+  `/api/admin/*` route is the actual security source of truth — the SDK
+  guard just stops the UI from mounting so the user sees a friendly
+  banner with a CTA to `/settings?tab=2fa` instead of every list /
+  mutation 403'ing. JWT payload now carries the optional
+  `twoFactorEnabled` claim, and `AuthUser.twoFactorEnabled` is surfaced
+  by `getMe()` so consumers can gate without an extra round trip.
+  Backward compatible: claim and field are both optional, legacy tokens
+  / older payloads coerce to `false` (default-deny on unknown
+  enrollment).
+
 - **DOCS_DEMO_SANDBOX_BACKEND-001** — Documentation showcase support: the
   components rendered in `/docs/components/*` can now be wired to a sandbox
   demo Application. Visitors interact with the REAL `<SignInForm>`,

@@ -11,7 +11,7 @@ import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { getFeatureFlagModel } from '../../models/feature-flag.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const listFeatureFlagsRegistry = new OpenAPIRegistry()
@@ -61,15 +61,22 @@ const listFeatureFlagsController = async (_req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/feature-flags', verifyTokenMiddleware, requireAdmin, listFeatureFlagsController, {
-  summary: 'List all feature flags (admin)',
-  tags: ['Admin'],
-  responseSchema: listFeatureFlagsResponseSchema,
-  extraResponses: {
-    401: { description: 'Unauthorized', schema: adminErrorSchema },
-    403: { description: 'Forbidden', schema: adminErrorSchema },
-    500: { description: 'Server error', schema: adminErrorSchema },
-  },
-})
+docRouter.get(
+  '/feature-flags',
+  verifyTokenMiddleware,
+  requireAdmin,
+  enforceAdminTwoFactor,
+  listFeatureFlagsController,
+  {
+    summary: 'List all feature flags (admin)',
+    tags: ['Admin'],
+    responseSchema: listFeatureFlagsResponseSchema,
+    extraResponses: {
+      401: { description: 'Unauthorized', schema: adminErrorSchema },
+      403: { description: 'Forbidden', schema: adminErrorSchema },
+      500: { description: 'Server error', schema: adminErrorSchema },
+    },
+  }
+)
 
 export default router

@@ -16,6 +16,7 @@ import {
 } from '../../models/refresh-token.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApiKeyUsageModel } from '../../models/api-key-usage.js'
+import { getTotpSecretModel } from '../../models/totp-secret.js'
 import { hashApiKey, generateRawApiKey, extractKeyPrefix } from '../../utils/api-key.js'
 import type { ApiKeyType, ApiKeyEnv } from '../../utils/api-key.js'
 import type { ApiKeyScope } from '../../models/api-key.js'
@@ -87,44 +88,90 @@ export async function createQuickSignupUser(
 }
 
 /**
- * Create an admin user (superadmin).
+ * Force-enable 2FA on a user. Used by test helpers to satisfy the new
+ * `requireTwoFactor()` middleware applied to every `/api/admin/*` route
+ * (cf. 2FA_MANDATORY_ADMIN-001, 2026-05-01).
+ *
+ * Tests that need to assert the un-enrolled-admin code path can pass
+ * `withTwoFactor: false` to `createAdminUser` / `createAppAdmin` to skip
+ * this step.
+ */
+export async function enableTwoFactorForUser(userId: string): Promise<void> {
+  const TotpSecretModel = await getTotpSecretModel()
+  await TotpSecretModel.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        userId,
+        secret: 'TEST-SECRET-DO-NOT-USE-IN-PROD',
+        isEnabled: true,
+        backupCodes: [],
+        lastUsedTotpStep: null,
+      },
+    },
+    { upsert: true, new: true }
+  )
+}
+
+/**
+ * Create an admin user (superadmin). Auto-enrolls 2FA so the new
+ * `requireTwoFactor()` middleware on `/api/admin/*` routes does not block
+ * the user. Pass `withTwoFactor: false` to skip enrollment when testing
+ * the un-enrolled code path.
  */
 export async function createAdminUser(
-  opts: Partial<CreateUserOptions> = {}
+  opts: Partial<CreateUserOptions> & { withTwoFactor?: boolean } = {}
 ): Promise<AuthUserDocument> {
-  return createUser({
-    email: opts.email ?? 'admin@example.com',
-    username: opts.username ?? 'adminuser',
+  const { withTwoFactor = true, ...createOpts } = opts
+  const user = await createUser({
+    email: createOpts.email ?? 'admin@example.com',
+    username: createOpts.username ?? 'adminuser',
     globalRoles: ['superadmin'],
-    ...opts,
+    ...createOpts,
   })
+  if (withTwoFactor) {
+    await enableTwoFactorForUser(user._id!.toString())
+  }
+  return user
 }
 
 /**
  * Create an app-level admin (e.g., admin for green-pulse but not superadmin).
+ * Auto-enrolls 2FA — see `createAdminUser` for the rationale.
  */
 export async function createAppAdmin(
   app: string,
-  opts: Partial<CreateUserOptions> = {}
+  opts: Partial<CreateUserOptions> & { withTwoFactor?: boolean } = {}
 ): Promise<AuthUserDocument> {
-  return createUser({
-    email: opts.email ?? 'appadmin@example.com',
-    username: opts.username ?? 'appadmin',
+  const { withTwoFactor = true, ...createOpts } = opts
+  const user = await createUser({
+    email: createOpts.email ?? 'appadmin@example.com',
+    username: createOpts.username ?? 'appadmin',
     appRoles: { [app]: ['admin'] },
     apps: [app],
-    ...opts,
+    ...createOpts,
   })
+  if (withTwoFactor) {
+    await enableTwoFactorForUser(user._id!.toString())
+  }
+  return user
 }
 
 /**
  * Generate a valid JWT access token for the given user.
  *
  * Mirrors the shape returned by `buildJwtPayload()` in `auth.service.ts`,
- * including the `isVerified` claim added by JWT-ISVERIFIED-CLAIM-001.
+ * including the `isVerified` claim (JWT-ISVERIFIED-CLAIM-001) and the
+ * `twoFactorEnabled` claim (2FA_MANDATORY_ADMIN-001).
+ *
+ * Pass `twoFactorEnabled: true` when minting tokens for admin users in
+ * tests that exercise the new 2FA gate — defaults to `false` so non-admin
+ * paths keep working as before.
  */
 export function generateAccessToken(
   user: AuthUserDocument,
-  expiresIn: `${number}${'s' | 'm' | 'h' | 'd'}` = '15m'
+  expiresIn: `${number}${'s' | 'm' | 'h' | 'd'}` = '15m',
+  opts: { twoFactorEnabled?: boolean } = {}
 ): string {
   return jwt.sign(
     {
@@ -137,6 +184,7 @@ export function generateAccessToken(
       permissions: user.permissions || [],
       features: user.features || [],
       isVerified: user.isVerified === true,
+      twoFactorEnabled: opts.twoFactorEnabled === true,
     },
     JWT_SECRET,
     { expiresIn, algorithm: 'HS256' }
@@ -158,6 +206,7 @@ export function generateExpiredToken(user: AuthUserDocument): string {
       permissions: [],
       features: [],
       isVerified: user.isVerified === true,
+      twoFactorEnabled: false,
     },
     JWT_SECRET,
     { expiresIn: 0, algorithm: 'HS256' }

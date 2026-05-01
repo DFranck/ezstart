@@ -235,8 +235,11 @@ describe('GET /admin/analytics/overview', () => {
     expect(data.activeUsersLast30Days).toBeLessThanOrEqual(3)
     // 3 verified out of 4 = 75%
     expect(data.verifiedUsersPct).toBe(75)
-    // 1 enabled TOTP / 4 users = 25%
-    expect(data.twoFactorEnabledPct).toBe(25)
+    // 2 enabled TOTP / 4 users = 50% (admin is auto-enrolled by
+    // createAdminUser since 2FA_MANDATORY_ADMIN-001 — required to pass
+    // the new requireTwoFactor() middleware on /api/admin/* routes — plus
+    // u1's manually-seeded TotpSecret below).
+    expect(data.twoFactorEnabledPct).toBe(50)
     // 2 active applications (1 archived excluded)
     expect(data.totalApplications).toBe(2)
     // 2 active keys (1 revoked excluded)

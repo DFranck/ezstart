@@ -12,7 +12,7 @@ import crypto from 'crypto'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
@@ -459,6 +459,7 @@ docRouter.patch(
   verifyCookieCsrf,
   verifyTokenMiddleware,
   requireAdmin,
+  enforceAdminTwoFactor,
   updateUserController,
   {
     summary: 'Update user (admin)',

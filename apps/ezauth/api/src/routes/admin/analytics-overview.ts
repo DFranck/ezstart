@@ -15,7 +15,7 @@ import { getApplicationModel } from '../../models/application.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getTotpSecretModel } from '../../models/totp-secret.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const analyticsOverviewRegistry = new OpenAPIRegistry()
@@ -302,6 +302,7 @@ docRouter.get(
   '/analytics/overview',
   authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
+  enforceAdminTwoFactor,
   attachDerivedScope,
   analyticsOverviewController,
   {

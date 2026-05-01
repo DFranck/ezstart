@@ -16,7 +16,7 @@ import {
 } from '../../models/maintenance-mode.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const updateMaintenanceModeRegistry = new OpenAPIRegistry()
@@ -110,6 +110,7 @@ docRouter.put(
   verifyCookieCsrf,
   verifyTokenMiddleware,
   requireAdmin,
+  enforceAdminTwoFactor,
   updateMaintenanceModeController,
   {
     summary: 'Update the maintenance-mode singleton (admin)',

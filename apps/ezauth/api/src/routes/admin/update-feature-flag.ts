@@ -13,7 +13,7 @@ import { logger } from '@ezstart/logger/server'
 import { FEATURE_FLAG_KEY_REGEX, getFeatureFlagModel } from '../../models/feature-flag.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const updateFeatureFlagRegistry = new OpenAPIRegistry()
@@ -123,6 +123,7 @@ docRouter.patch(
   verifyCookieCsrf,
   verifyTokenMiddleware,
   requireAdmin,
+  enforceAdminTwoFactor,
   updateFeatureFlagController,
   {
     summary: 'Update / upsert a feature flag (admin)',

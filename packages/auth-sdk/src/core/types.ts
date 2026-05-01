@@ -155,6 +155,20 @@ export interface AuthUser {
    * route guard until cleared.
    */
   mustChangePassword?: boolean
+  /**
+   * 2FA enrollment flag — `true` when the user has an enabled TOTP secret.
+   * Optional + backward-compatible : pre-`2FA_MANDATORY_ADMIN-001` (2026-05-01)
+   * payloads omit the field, consumers MUST treat `undefined` as "unknown"
+   * and either coerce to `false` for a strict gate or fall back to a fresh
+   * `/me` round trip.
+   *
+   * Used by `<RequireTwoFactor>` to block elevated-role users (admin /
+   * superadmin) from rendering admin UI until they enroll 2FA. The backend
+   * enforces the same gate authoritatively via the `requireTwoFactor()`
+   * middleware on every `/api/admin/*` route — this client-side flag is
+   * defense-in-depth, not the source of truth.
+   */
+  twoFactorEnabled?: boolean
   // Presence
   lastActiveAt?: string | null
 }
@@ -271,6 +285,18 @@ export interface JWTPayload {
    * lifetime — currently 30 days), this can stop being optional.
    */
   isVerified?: boolean
+  /**
+   * 2FA enrollment status of the user at the moment the token was issued.
+   *
+   * Optional for backward compatibility — JWTs signed before
+   * `2FA_MANDATORY_ADMIN-001` (2026-05-01) do not carry this claim.
+   * Consumers should treat `undefined` as "unknown" and fall back to
+   * `user.twoFactorEnabled` from `getMe()` / the auth store, or coerce to
+   * `false` for a strict 2FA gate. Once the new claim has propagated
+   * through the longest refresh token lifetime (30 days), this can stop
+   * being optional.
+   */
+  twoFactorEnabled?: boolean
   iat?: number
   exp?: number
 }

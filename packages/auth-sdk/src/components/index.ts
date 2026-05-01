@@ -136,6 +136,10 @@ export type { TwoFactorPromptProps, TwoFactorPromptTexts } from './TwoFactorProm
 export { TwoFactorSettings } from './TwoFactorSettings.js'
 export type { TwoFactorSettingsProps, TwoFactorSettingsTexts } from './TwoFactorSettings.js'
 
+// Composable 2FA enforcement gate (mandatory for admin / superadmin users)
+export { RequireTwoFactor, DEFAULT_REQUIRE_TWO_FACTOR_TEXTS } from './RequireTwoFactor.js'
+export type { RequireTwoFactorProps, RequireTwoFactorTexts } from './RequireTwoFactor.js'
+
 // Email verification
 export { VerifyEmailFlow } from './VerifyEmailFlow.js'
 export type { VerifyEmailFlowProps, VerifyEmailFlowTexts } from './VerifyEmailFlow.js'

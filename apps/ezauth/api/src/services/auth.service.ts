@@ -25,6 +25,7 @@ import {
   SLIDING_WINDOW_MS,
 } from '../config/lockout.js'
 import { AuditLogService } from './audit-log.service.js'
+import { TotpService } from './totp.service.js'
 
 const ACCESS_TOKEN_EXPIRES_IN = env.ACCESS_TOKEN_EXPIRES_IN as `${number}m`
 const REFRESH_TOKEN_DAYS = 30
@@ -52,10 +53,32 @@ export class AccountLockedError extends Error {
   }
 }
 
-/** Build the JWT payload for an authenticated user. Shared by login + SSO exchange. */
-export function buildJwtPayload(user: AuthUserDocument): JWTPayload {
+/**
+ * Build the JWT payload for an authenticated user. Shared by login + SSO
+ * exchange + refresh rotation + magic-link + OAuth + 2FA validate.
+ *
+ * `twoFactorEnabled` is sourced from the (separate) `TotpSecret` document
+ * because the user collection itself does not carry the flag. Failure to
+ * read the TOTP doc is treated as `false` (defensive default — a network
+ * blip should not cause the consumer to over-grant elevated UI access).
+ */
+export async function buildJwtPayload(user: AuthUserDocument): Promise<JWTPayload> {
+  const userId = user._id!.toString()
+  let twoFactorEnabled = false
+  try {
+    twoFactorEnabled = await TotpService.isEnabled(userId)
+  } catch (error: unknown) {
+    // Defensive — log but never block JWT issuance on a TOTP read hiccup.
+    // The middleware-side `requireTwoFactor()` is the security source of
+    // truth; this claim is informational for SDK consumers (e.g. the
+    // `<RequireTwoFactor>` guard) and falls back to `false` on read error.
+    logger.warn(
+      { err: error, userId },
+      'buildJwtPayload: TOTP isEnabled lookup failed — defaulting to false'
+    )
+  }
   return {
-    userId: user._id!.toString(),
+    userId,
     email: user.email,
     username: user.username,
     apps: user.apps,
@@ -68,6 +91,11 @@ export function buildJwtPayload(user: AuthUserDocument): JWTPayload {
     // trip to /me. Optional on the SDK side for backward compat with legacy
     // tokens (default false on the consumer when absent).
     isVerified: user.isVerified === true,
+    // 2FA_MANDATORY_ADMIN-001 (2026-05-01) — embed 2FA enrollment so
+    // consumer apps (and the `<RequireTwoFactor>` SDK guard) can gate
+    // elevated UI without an extra `/me` round trip. Optional on the SDK
+    // side for backward compat (default false on the consumer when absent).
+    twoFactorEnabled,
   }
 }
 
@@ -79,7 +107,7 @@ export async function issueSession(
   user: AuthUserDocument,
   meta?: { userAgent?: string; ip?: string }
 ): Promise<AuthToken & { refreshToken: string }> {
-  const payload = buildJwtPayload(user)
+  const payload = await buildJwtPayload(user)
   const accessToken = jwt.sign({ ...payload }, JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     algorithm: 'HS256',
@@ -356,7 +384,21 @@ export class AuthService {
     if (!user) {
       throw new Error('User not found')
     }
-    return user.toAuthUser()
+    const base = user.toAuthUser()
+    // 2FA_MANDATORY_ADMIN-001 — surface enrollment status on the AuthUser
+    // payload so the SDK guard `<RequireTwoFactor>` can read it without a
+    // dedicated round trip. Defensive default `false` on lookup error so
+    // the consumer always gates instead of accidentally rendering admin UI.
+    let twoFactorEnabled = false
+    try {
+      twoFactorEnabled = await TotpService.isEnabled(userId)
+    } catch (error: unknown) {
+      logger.warn(
+        { err: error, userId },
+        'getUserById: TOTP isEnabled lookup failed — defaulting to false'
+      )
+    }
+    return { ...base, twoFactorEnabled }
   }
 
   /**

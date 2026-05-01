@@ -22,7 +22,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { resetDocsDemoData } from '../../services/docs-demo-reset.service.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
@@ -86,6 +86,7 @@ docRouter.post(
   '/docs-demo/reset',
   authJwtOrKey({ requireKeyScope: 'admin' }),
   requireAdmin,
+  enforceAdminTwoFactor,
   docsDemoResetController,
   {
     summary: 'Manually reset the docs-demo sandbox dataset (superadmin only)',

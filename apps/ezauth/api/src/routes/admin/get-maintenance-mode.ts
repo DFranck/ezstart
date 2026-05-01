@@ -11,7 +11,7 @@ import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { getOrCreateMaintenanceMode } from '../../models/maintenance-mode.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { adminErrorSchema } from '../../types/admin-schemas.js'
 
 export const getMaintenanceModeRegistry = new OpenAPIRegistry()
@@ -49,6 +49,7 @@ docRouter.get(
   '/maintenance-mode',
   verifyTokenMiddleware,
   requireAdmin,
+  enforceAdminTwoFactor,
   getMaintenanceModeController,
   {
     summary: 'Get the maintenance-mode singleton (admin)',

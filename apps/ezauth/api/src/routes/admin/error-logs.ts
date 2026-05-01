@@ -23,7 +23,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import {
   ERROR_LOG_LEVELS,
   getErrorLogModel,
@@ -227,28 +227,42 @@ const getErrorLogController = async (req: Request, res: Response): Promise<void>
 // Routes
 // ---------------------------------------------------------------------------
 
-docRouter.get('/error-logs', verifyTokenMiddleware, requireAdmin, listErrorLogsController, {
-  summary: 'List recent error logs (superadmin)',
-  tags: ['Admin'],
-  querySchema: listErrorLogsQuerySchema,
-  responseSchema: listErrorLogsResponseSchema,
-  extraResponses: {
-    401: { description: 'Unauthorized', schema: adminErrorSchema },
-    403: { description: 'Superadmin role required', schema: adminErrorSchema },
-    500: { description: 'Server error', schema: adminErrorSchema },
-  },
-})
+docRouter.get(
+  '/error-logs',
+  verifyTokenMiddleware,
+  requireAdmin,
+  enforceAdminTwoFactor,
+  listErrorLogsController,
+  {
+    summary: 'List recent error logs (superadmin)',
+    tags: ['Admin'],
+    querySchema: listErrorLogsQuerySchema,
+    responseSchema: listErrorLogsResponseSchema,
+    extraResponses: {
+      401: { description: 'Unauthorized', schema: adminErrorSchema },
+      403: { description: 'Superadmin role required', schema: adminErrorSchema },
+      500: { description: 'Server error', schema: adminErrorSchema },
+    },
+  }
+)
 
-docRouter.get('/error-logs/:id', verifyTokenMiddleware, requireAdmin, getErrorLogController, {
-  summary: 'Get single error log entry (superadmin)',
-  tags: ['Admin'],
-  responseSchema: getErrorLogResponseSchema,
-  extraResponses: {
-    401: { description: 'Unauthorized', schema: adminErrorSchema },
-    403: { description: 'Superadmin role required', schema: adminErrorSchema },
-    404: { description: 'Error log entry not found', schema: adminErrorSchema },
-    500: { description: 'Server error', schema: adminErrorSchema },
-  },
-})
+docRouter.get(
+  '/error-logs/:id',
+  verifyTokenMiddleware,
+  requireAdmin,
+  enforceAdminTwoFactor,
+  getErrorLogController,
+  {
+    summary: 'Get single error log entry (superadmin)',
+    tags: ['Admin'],
+    responseSchema: getErrorLogResponseSchema,
+    extraResponses: {
+      401: { description: 'Unauthorized', schema: adminErrorSchema },
+      403: { description: 'Superadmin role required', schema: adminErrorSchema },
+      404: { description: 'Error log entry not found', schema: adminErrorSchema },
+      500: { description: 'Server error', schema: adminErrorSchema },
+    },
+  }
+)
 
 export default router

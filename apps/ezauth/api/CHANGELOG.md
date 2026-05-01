@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **2FA_MANDATORY_ADMIN-001** — `requireTwoFactor()` Express middleware
+  applied to every `/api/admin/*` route. Returns 403 +
+  `code: 'TWO_FACTOR_REQUIRED'` + `details: { redirectTo: '/settings?tab=2fa' }`
+  whenever the authenticated user has any elevated role
+  (`globalRoles` includes `admin` / `superadmin`, OR any `appRoles[*]`
+  includes one of them) but no enrolled TOTP. Also extends
+  `buildJwtPayload()` with the optional `twoFactorEnabled` claim and
+  surfaces the same flag on the `AuthUser` payload returned by
+  `getMe()`. Skipped automatically when the request authenticates via
+  an admin API key (`req.apiKeyId` set — Stripe pattern: `sk_live_*`
+  keys are the second factor and cannot be prompted for a TOTP code).
+  Backward compatible: claim is optional on the SDK side, defaults to
+  `false` for legacy tokens.
+
+### Security
+
+- **2FA_MANDATORY_ADMIN-001** — 2FA is now MANDATORY for all admin /
+  superadmin users. Without 2FA, an admin token compromise = full
+  platform breach. Industry pattern (Stripe / Clerk / Auth0 all enforce
+  admin 2FA). Defense-in-depth: also enforced client-side via the
+  `<RequireTwoFactor>` SDK guard component. Users with elevated roles
+  must enroll 2FA at `/settings?tab=2fa` before accessing any admin
+  surface. Live check (queries `TotpService.isEnabled` per request)
+  rather than relying on the JWT claim — a superadmin who disables 2FA
+  is locked out on the next request.
+
 - **DOCS_DEMO_SANDBOX_BACKEND-001** — Reserved Application slug `_docs-demo`
   for the documentation live previews on `/docs/components/*`. Visitors of
   the docs can sign up / sign in with REAL components, but every byte of

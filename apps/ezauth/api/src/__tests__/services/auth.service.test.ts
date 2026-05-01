@@ -400,7 +400,7 @@ describe('AuthService', () => {
         globalRoles: ['superadmin'],
       })
 
-      const payload = buildJwtPayload(user)
+      const payload = await buildJwtPayload(user)
       expect(payload.userId).toBe(user._id!.toString())
       expect(payload.email).toBe('payload@example.com')
       expect(payload.apps).toEqual(['ezstart', 'ezbill'])
@@ -418,7 +418,7 @@ describe('AuthService', () => {
         isVerified: true,
       })
 
-      const payload = buildJwtPayload(user)
+      const payload = await buildJwtPayload(user)
       expect(payload.isVerified).toBe(true)
     })
 
@@ -432,11 +432,39 @@ describe('AuthService', () => {
         isVerified: false,
       })
 
-      const payload = buildJwtPayload(user)
+      const payload = await buildJwtPayload(user)
       expect(payload.isVerified).toBe(false)
       // Make the always-present invariant explicit so a future regression
       // (e.g. someone wrapping the field in a conditional) is caught.
       expect(typeof payload.isVerified).toBe('boolean')
+    })
+
+    it('should include twoFactorEnabled=false when 2FA is not enrolled', async () => {
+      // 2FA_MANDATORY_ADMIN-001 — claim must always be present on freshly
+      // minted tokens so SDK consumers can rely on it without a /me round
+      // trip. Undefined is reserved for legacy tokens.
+      const user = await createUser({
+        email: 'payload-no2fa@example.com',
+        username: 'payloadno2fa',
+      })
+
+      const payload = await buildJwtPayload(user)
+      expect(payload.twoFactorEnabled).toBe(false)
+      expect(typeof payload.twoFactorEnabled).toBe('boolean')
+    })
+
+    it('should include twoFactorEnabled=true when 2FA is enrolled', async () => {
+      const user = await createUser({
+        email: 'payload-2fa@example.com',
+        username: 'payload2fa',
+      })
+      // Enroll 2FA via the helper (writes a TotpSecret doc with
+      // isEnabled: true).
+      const { enableTwoFactorForUser } = await import('../helpers/setup.js')
+      await enableTwoFactorForUser(user._id!.toString())
+
+      const payload = await buildJwtPayload(user)
+      expect(payload.twoFactorEnabled).toBe(true)
     })
   })
 })

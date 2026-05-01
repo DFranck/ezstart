@@ -5,6 +5,7 @@ import {
   AuthAdminDashboard,
   type AuthAdminDashboardTexts,
   RequireAuthLoader,
+  RequireTwoFactor,
   UserMenuV2,
 } from '@ezstart/auth-sdk/components'
 import {
@@ -368,161 +369,171 @@ export default function AdminPage() {
           </Div>
         }
       >
-        <DashboardLayout>
-          <DashboardSidebar>
-            <SidebarHeader>
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-              >
-                <Icon name="lucide:Shield" className="h-5 w-5 text-primary shrink-0" />
-                <Span className="font-semibold">{t('title')}</Span>
-              </Link>
-            </SidebarHeader>
-
-            <SidebarNav>
-              {ADMIN_SECTIONS.map(section => (
-                <SidebarLink
-                  key={section}
-                  href={buildSectionHref(section)}
-                  active={activeSection === section}
-                  icon={
-                    <Icon name={SECTION_ICONS[section] as 'lucide:Users'} className="h-4 w-4" />
-                  }
-                  onClick={e => {
-                    // Plain left-click → switch section in-place without a full
-                    // navigation. Cmd/Ctrl/Shift/middle-click fall through so
-                    // the browser opens the section in a new tab using href.
-                    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
-                      return
-                    }
-                    e.preventDefault()
-                    setActiveSection(section)
-                    navigateToSection(section)
-                  }}
+        {/*
+         * 2FA mandatory for admin / superadmin (cf.
+         * `standard-saas-security.md` §2). Defense-in-depth :
+         * `requireTwoFactor()` middleware on every `/api/admin/*` route is
+         * the security source of truth — the SDK guard here only stops the
+         * UI from mounting so the user gets a friendly nudge instead of
+         * watching every list / mutation 403.
+         */}
+        <RequireTwoFactor fallbackPath={`/${locale}/settings?tab=2fa`}>
+          <DashboardLayout>
+            <DashboardSidebar>
+              <SidebarHeader>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
                 >
-                  {t(`tabs.${section}`)}
-                </SidebarLink>
-              ))}
-            </SidebarNav>
+                  <Icon name="lucide:Shield" className="h-5 w-5 text-primary shrink-0" />
+                  <Span className="font-semibold">{t('title')}</Span>
+                </Link>
+              </SidebarHeader>
 
-            <SidebarFooter>
-              <UserMenuV2
-                variant="extended"
-                side="top"
-                avatarSize="sm"
-                texts={{
-                  signIn: tLayout('navSignIn'),
-                  manageAccount: tMenu('manageAccount'),
-                  signOut: tMenu('signOut'),
-                  signingOut: tMenu('signingOut'),
-                  signOutSuccess: tMenu('signOutSuccess'),
-                  signOutError: tMenu('signOutError'),
-                  signOutAllDevices: tMenu('signOutAllDevices'),
-                  signOutAllSuccess: tMenu('signOutAllSuccess'),
-                  signOutAllError: tMenu('signOutAllError'),
-                  emailVerified: tMenu('emailVerified'),
-                  emailUnverified: tMenu('emailUnverified'),
-                  resendVerification: tMenu('resendVerification'),
-                  verificationSent: tMenu('verificationSent'),
-                  verifyError: tMenu('verifyError'),
-                  themeLabel: tMenu('themeLabel'),
-                  themeLight: tMenu('themeLight'),
-                  themeDark: tMenu('themeDark'),
-                  themeSystem: tMenu('themeSystem'),
-                  notifications: tMenu('notifications'),
-                  notificationsBadgeLabel: tMenu('notificationsBadgeLabel'),
-                  helpAndResources: tMenu('helpAndResources'),
-                  helpCenter: tMenu('helpCenter'),
-                  keyboardShortcuts: tMenu('keyboardShortcuts'),
-                  keyboardShortcutsHint: tMenu('keyboardShortcutsHint'),
-                  status: tMenu('status'),
-                  changelog: tMenu('changelog'),
-                  managePlan: tMenu('managePlan'),
-                }}
-                accountModalTexts={{
-                  title: tAccount('title'),
-                  needHelp: tAccount('needHelp'),
-                  toggleNavigation: tAccount('toggleNavigation'),
-                  profileTab: tAccount('profileTab'),
-                  settingsTab: tAccount('settingsTab'),
-                  updateProfile: tAccount('updateProfile'),
-                  emailSection: tAccount('emailSection'),
-                  primary: tAccount('primary'),
-                  connectedAccounts: tAccount('connectedAccounts'),
-                  connectAccount: tAccount('connectAccount'),
-                  themeSection: tAccount('themeSection'),
-                  themeLight: tAccount('themeLight'),
-                  themeDark: tAccount('themeDark'),
-                  themeSystem: tAccount('themeSystem'),
-                  languageSection: tAccount('languageSection'),
-                  memberSince: tAccount('memberSince'),
-                  firstName: tAccount('firstName'),
-                  lastName: tAccount('lastName'),
-                  save: tAccount('save'),
-                  cancel: tAccount('cancel'),
-                  profileUpdated: tAccount('profileUpdated'),
-                  changeAvatar: tAccount('changeAvatar'),
-                  cropAvatar: tAccount('cropAvatar'),
-                  passwordSection: tAccount('passwordSection'),
-                  currentPassword: tAccount('currentPassword'),
-                  newPassword: tAccount('newPassword'),
-                  changePassword: tAccount('changePassword'),
-                  createPassword: tAccount('createPassword'),
-                  passwordChanged: tAccount('passwordChanged'),
-                  securitySection: tAccount('securitySection'),
-                  manageSecurity: tAccount('manageSecurity'),
-                  emailVerified: tAccount('emailVerified'),
-                  emailUnverified: tAccount('emailUnverified'),
-                  resendVerification: tAccount('resendVerification'),
-                  verificationSent: tAccount('verificationSent'),
-                  verifyError: tAccount('verifyError'),
-                  dateLocale: locale,
-                }}
-                theme={theme ? { theme, setTheme } : undefined}
-                languages={LANGUAGES}
-                currentLocale={locale}
-                onLocaleChange={handleLocaleChange}
-                planLabel="Free"
-                helpHref={`/${locale}/docs`}
-                statusHref={`/${locale}/status`}
-                changelogHref={`/${locale}/changelog`}
-              />
-            </SidebarFooter>
-          </DashboardSidebar>
+              <SidebarNav>
+                {ADMIN_SECTIONS.map(section => (
+                  <SidebarLink
+                    key={section}
+                    href={buildSectionHref(section)}
+                    active={activeSection === section}
+                    icon={
+                      <Icon name={SECTION_ICONS[section] as 'lucide:Users'} className="h-4 w-4" />
+                    }
+                    onClick={e => {
+                      // Plain left-click → switch section in-place without a full
+                      // navigation. Cmd/Ctrl/Shift/middle-click fall through so
+                      // the browser opens the section in a new tab using href.
+                      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                        return
+                      }
+                      e.preventDefault()
+                      setActiveSection(section)
+                      navigateToSection(section)
+                    }}
+                  >
+                    {t(`tabs.${section}`)}
+                  </SidebarLink>
+                ))}
+              </SidebarNav>
 
-          <DashboardMain>
-            <DashboardHeader>
-              <SidebarToggle mode="mobile" />
-              <H2 className="text-lg font-semibold text-foreground">
-                {t(`tabs.${activeSection}`)}
-              </H2>
-              <Span className="ml-auto inline-flex items-center gap-2">
-                <EzauthScopeIndicator scope="admin" />
-              </Span>
-            </DashboardHeader>
-
-            <DashboardContent>
-              {/*
-               * `<AuthAdminDashboard>` is the consolidated SDK component with
-               * 4 internal tabs. The sidebar nav drives `activeSection`; we
-               * remount the component via `key` and pass `defaultTab` so the
-               * right tab opens. The internal `<TabsList>` is hidden via the
-               * `[&_[data-slot=tabs-list]]:hidden` arbitrary selector — only
-               * the sidebar nav surfaces section navigation (single source
-               * of truth, Stripe / Clerk pattern).
-               */}
-              <Div className="[&_[data-slot=tabs-list]]:hidden">
-                <AuthAdminDashboard
-                  key={activeSection}
-                  defaultTab={activeSection}
-                  texts={adminTexts}
-                  onApplicationOpen={app => router.push(`/developer/${app.id}`)}
+              <SidebarFooter>
+                <UserMenuV2
+                  variant="extended"
+                  side="top"
+                  avatarSize="sm"
+                  texts={{
+                    signIn: tLayout('navSignIn'),
+                    manageAccount: tMenu('manageAccount'),
+                    signOut: tMenu('signOut'),
+                    signingOut: tMenu('signingOut'),
+                    signOutSuccess: tMenu('signOutSuccess'),
+                    signOutError: tMenu('signOutError'),
+                    signOutAllDevices: tMenu('signOutAllDevices'),
+                    signOutAllSuccess: tMenu('signOutAllSuccess'),
+                    signOutAllError: tMenu('signOutAllError'),
+                    emailVerified: tMenu('emailVerified'),
+                    emailUnverified: tMenu('emailUnverified'),
+                    resendVerification: tMenu('resendVerification'),
+                    verificationSent: tMenu('verificationSent'),
+                    verifyError: tMenu('verifyError'),
+                    themeLabel: tMenu('themeLabel'),
+                    themeLight: tMenu('themeLight'),
+                    themeDark: tMenu('themeDark'),
+                    themeSystem: tMenu('themeSystem'),
+                    notifications: tMenu('notifications'),
+                    notificationsBadgeLabel: tMenu('notificationsBadgeLabel'),
+                    helpAndResources: tMenu('helpAndResources'),
+                    helpCenter: tMenu('helpCenter'),
+                    keyboardShortcuts: tMenu('keyboardShortcuts'),
+                    keyboardShortcutsHint: tMenu('keyboardShortcutsHint'),
+                    status: tMenu('status'),
+                    changelog: tMenu('changelog'),
+                    managePlan: tMenu('managePlan'),
+                  }}
+                  accountModalTexts={{
+                    title: tAccount('title'),
+                    needHelp: tAccount('needHelp'),
+                    toggleNavigation: tAccount('toggleNavigation'),
+                    profileTab: tAccount('profileTab'),
+                    settingsTab: tAccount('settingsTab'),
+                    updateProfile: tAccount('updateProfile'),
+                    emailSection: tAccount('emailSection'),
+                    primary: tAccount('primary'),
+                    connectedAccounts: tAccount('connectedAccounts'),
+                    connectAccount: tAccount('connectAccount'),
+                    themeSection: tAccount('themeSection'),
+                    themeLight: tAccount('themeLight'),
+                    themeDark: tAccount('themeDark'),
+                    themeSystem: tAccount('themeSystem'),
+                    languageSection: tAccount('languageSection'),
+                    memberSince: tAccount('memberSince'),
+                    firstName: tAccount('firstName'),
+                    lastName: tAccount('lastName'),
+                    save: tAccount('save'),
+                    cancel: tAccount('cancel'),
+                    profileUpdated: tAccount('profileUpdated'),
+                    changeAvatar: tAccount('changeAvatar'),
+                    cropAvatar: tAccount('cropAvatar'),
+                    passwordSection: tAccount('passwordSection'),
+                    currentPassword: tAccount('currentPassword'),
+                    newPassword: tAccount('newPassword'),
+                    changePassword: tAccount('changePassword'),
+                    createPassword: tAccount('createPassword'),
+                    passwordChanged: tAccount('passwordChanged'),
+                    securitySection: tAccount('securitySection'),
+                    manageSecurity: tAccount('manageSecurity'),
+                    emailVerified: tAccount('emailVerified'),
+                    emailUnverified: tAccount('emailUnverified'),
+                    resendVerification: tAccount('resendVerification'),
+                    verificationSent: tAccount('verificationSent'),
+                    verifyError: tAccount('verifyError'),
+                    dateLocale: locale,
+                  }}
+                  theme={theme ? { theme, setTheme } : undefined}
+                  languages={LANGUAGES}
+                  currentLocale={locale}
+                  onLocaleChange={handleLocaleChange}
+                  planLabel="Free"
+                  helpHref={`/${locale}/docs`}
+                  statusHref={`/${locale}/status`}
+                  changelogHref={`/${locale}/changelog`}
                 />
-              </Div>
-            </DashboardContent>
-          </DashboardMain>
-        </DashboardLayout>
+              </SidebarFooter>
+            </DashboardSidebar>
+
+            <DashboardMain>
+              <DashboardHeader>
+                <SidebarToggle mode="mobile" />
+                <H2 className="text-lg font-semibold text-foreground">
+                  {t(`tabs.${activeSection}`)}
+                </H2>
+                <Span className="ml-auto inline-flex items-center gap-2">
+                  <EzauthScopeIndicator scope="admin" />
+                </Span>
+              </DashboardHeader>
+
+              <DashboardContent>
+                {/*
+                 * `<AuthAdminDashboard>` is the consolidated SDK component with
+                 * 4 internal tabs. The sidebar nav drives `activeSection`; we
+                 * remount the component via `key` and pass `defaultTab` so the
+                 * right tab opens. The internal `<TabsList>` is hidden via the
+                 * `[&_[data-slot=tabs-list]]:hidden` arbitrary selector — only
+                 * the sidebar nav surfaces section navigation (single source
+                 * of truth, Stripe / Clerk pattern).
+                 */}
+                <Div className="[&_[data-slot=tabs-list]]:hidden">
+                  <AuthAdminDashboard
+                    key={activeSection}
+                    defaultTab={activeSection}
+                    texts={adminTexts}
+                    onApplicationOpen={app => router.push(`/developer/${app.id}`)}
+                  />
+                </Div>
+              </DashboardContent>
+            </DashboardMain>
+          </DashboardLayout>
+        </RequireTwoFactor>
       </RequireRole>
     </RequireAuth>
   )

@@ -11,7 +11,7 @@ import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getOAuthAccountModel } from '../../models/oauth-account.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
@@ -95,6 +95,7 @@ docRouter.delete(
   verifyCookieCsrf,
   verifyTokenMiddleware,
   requireAdmin,
+  enforceAdminTwoFactor,
   deleteUserController,
   {
     summary: 'Delete user (admin)',

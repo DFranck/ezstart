@@ -10,7 +10,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
-import { requireAdmin } from './require-admin.js'
+import { requireAdmin, enforceAdminTwoFactor } from './require-admin.js'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../../utils/map-to-record.js'
@@ -78,16 +78,23 @@ const getUserController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/users/:id', verifyTokenMiddleware, requireAdmin, getUserController, {
-  summary: 'Get user by ID (admin)',
-  tags: ['Admin'],
-  responseSchema: getUserResponseSchema,
-  extraResponses: {
-    401: { description: 'Unauthorized', schema: adminErrorSchema },
-    403: { description: 'Forbidden', schema: adminErrorSchema },
-    404: { description: 'User not found', schema: adminErrorSchema },
-    500: { description: 'Server error', schema: adminErrorSchema },
-  },
-})
+docRouter.get(
+  '/users/:id',
+  verifyTokenMiddleware,
+  requireAdmin,
+  enforceAdminTwoFactor,
+  getUserController,
+  {
+    summary: 'Get user by ID (admin)',
+    tags: ['Admin'],
+    responseSchema: getUserResponseSchema,
+    extraResponses: {
+      401: { description: 'Unauthorized', schema: adminErrorSchema },
+      403: { description: 'Forbidden', schema: adminErrorSchema },
+      404: { description: 'User not found', schema: adminErrorSchema },
+      500: { description: 'Server error', schema: adminErrorSchema },
+    },
+  }
+)
 
 export default router
