@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- README rewritten following `standard.md` §6 format: Install + Quickstart
+  (Theme + first component) + Components overview by atomic level (base /
+  composed / complex) + API entry points + Customization. Examples use
+  generic `myapp` (no monorepo-specific app names).
+
 ### Added
 
 - `ErrorAlert` (`@ezstart/ui/components`) — destructive alert wrapper for
