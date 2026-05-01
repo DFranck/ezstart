@@ -18,7 +18,7 @@
  *
  * @module @ezstart/pay-sdk/server/connect-fee
  */
-import 'server-only'
+import './_internal/server-only.js'
 
 /** Result of `computeConnectFee` — both cents- and percent-based fees. */
 export interface ConnectFeeAmounts {

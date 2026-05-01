@@ -34,7 +34,7 @@
  *
  * @module @ezstart/pay-sdk/server/stripe-client
  */
-import 'server-only'
+import './_internal/server-only.js'
 import Stripe from 'stripe'
 
 /** Minimal logger surface — silent no-op default. */

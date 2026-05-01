@@ -66,7 +66,6 @@
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "recharts": "2.15.4",
-    "server-only": "^0.0.1",
     "sonner": "^2.0.3",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"

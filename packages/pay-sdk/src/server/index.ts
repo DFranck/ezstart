@@ -16,13 +16,15 @@
  * } from '@ezstart/pay-sdk/server'
  * ```
  *
- * The `import 'server-only'` guard at the top of each underlying file throws
- * at build time if a client component accidentally imports from this entry
- * point, preventing secret-key leaks to the browser bundle.
+ * The server-only guard at the top of each underlying file throws at
+ * build/runtime if a client component (browser bundle) accidentally imports
+ * from this entry point, preventing secret-key leaks. The guard uses a
+ * runtime `window` check instead of the `server-only` npm package, which
+ * crashes raw-Node API services at boot.
  *
  * @module @ezstart/pay-sdk/server
  */
-import 'server-only'
+import './_internal/server-only.js'
 
 // ---------------------------------------------------------------------------
 // Server primitives — Stripe client + Connect fee math + webhook signer

@@ -15,7 +15,7 @@
  *
  * @module @ezstart/pay-sdk/server/webhook-signer
  */
-import 'server-only'
+import './_internal/server-only.js'
 import { buildEzstartSignatureHeader } from '@ezstart/api-core'
 
 /** Options for `signWebhook`. */
