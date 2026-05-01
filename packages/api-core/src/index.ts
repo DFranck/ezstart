@@ -98,6 +98,10 @@ export {
 } from './core/middleware/derive-mode.js'
 export { attachDerivedScope, type DerivedScope } from './core/middleware/derive-scope.js'
 export {
+  testModeScopePlugin,
+  type TestModeScopeOptions,
+} from './core/middleware/test-mode-scope.js'
+export {
   createErrorHandler,
   type ErrorHandlerConfig,
   type ErrorPersistCallback,

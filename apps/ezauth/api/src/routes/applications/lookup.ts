@@ -9,6 +9,7 @@
 
 import type { Request, Response } from 'express'
 import {
+  createKeyHashRateLimiter,
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
@@ -38,23 +39,17 @@ const errorResponseSchema = z.object({
   error: z.string(),
 })
 
-// Simple in-memory rate limiter per slug (same pattern as /keys/config).
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT_WINDOW_MS = 60_000
-const RATE_LIMIT_MAX = 30
-
-function isRateLimited(slug: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(slug)
-
-  if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(slug, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
-    return false
-  }
-
-  entry.count += 1
-  return entry.count > RATE_LIMIT_MAX
-}
+// Per-slug in-memory rate limiter (30 req / 60 s) shared from
+// `@ezstart/api-core`. Mounted as middleware on the route so the limit
+// applies BEFORE slug validation — keeps an attacker from probing the
+// 400-vs-404 boundary via malformed slugs at higher RPS.
+const rateLimiter = createKeyHashRateLimiter({
+  extractKey: req => {
+    const raw = req.query.slug
+    if (typeof raw !== 'string' || raw.length === 0) return null
+    return raw.toLowerCase().trim()
+  },
+})
 
 const lookupApplicationController = async (req: Request, res: Response) => {
   try {
@@ -67,10 +62,6 @@ const lookupApplicationController = async (req: Request, res: Response) => {
 
     if (!APPLICATION_SLUG_REGEX.test(slug)) {
       return sendError(res, 'Invalid slug format', 400)
-    }
-
-    if (isRateLimited(slug)) {
-      return sendError(res, 'Rate limited', 429)
     }
 
     const Application = await getApplicationModel()
@@ -91,7 +82,7 @@ const lookupApplicationController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/applications/lookup', lookupApplicationController, {
+docRouter.get('/applications/lookup', rateLimiter, lookupApplicationController, {
   summary: 'Public lookup of an Application by slug (rate-limited)',
   tags: ['Applications'],
   responseSchema: lookupResponseSchema,

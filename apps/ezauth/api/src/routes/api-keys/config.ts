@@ -10,6 +10,7 @@
 
 import type { Request, Response } from 'express'
 import {
+  createKeyHashRateLimiter,
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
@@ -71,23 +72,16 @@ const errorResponseSchema = z.object({
   error: z.string(),
 })
 
-// Simple in-memory rate limiter per key hash
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT_WINDOW_MS = 60_000 // 1 minute
-const RATE_LIMIT_MAX = 30 // 30 requests per minute per key
-
-function isRateLimited(keyHash: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(keyHash)
-
-  if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(keyHash, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
-    return false
-  }
-
-  entry.count += 1
-  return entry.count > RATE_LIMIT_MAX
-}
+// Per-key in-memory rate limiter (30 req / 60 s per hashed publishable key) —
+// shared factory from `@ezstart/api-core`. The middleware is mounted via the
+// imperative `rateLimiter(req, res, next)` call below so the existing
+// docRouter signature stays unchanged.
+const rateLimiter = createKeyHashRateLimiter({
+  extractKey: req => {
+    const raw = req.query.key
+    return typeof raw === 'string' && raw.length > 0 ? hashApiKey(raw) : null
+  },
+})
 
 /**
  * Cached config response payload (identical to the `data` field returned on
@@ -175,11 +169,6 @@ const configController = async (req: Request, res: Response) => {
     }
 
     const hashedKey = hashApiKey(rawKey)
-
-    // Rate limit
-    if (isRateLimited(hashedKey)) {
-      return sendError(res, 'Rate limited', 429)
-    }
 
     // Short-TTL positive cache — avoids hitting Mongo on every middleware
     // call while SSR renders the auth pages.
@@ -273,7 +262,7 @@ const configController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/keys/config', configController, {
+docRouter.get('/keys/config', rateLimiter, configController, {
   summary: 'Get app configuration for a publishable key',
   tags: ['API Keys'],
   responseSchema: configResponseSchema,

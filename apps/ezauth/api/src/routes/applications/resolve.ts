@@ -10,6 +10,7 @@
 
 import type { Request, Response } from 'express'
 import {
+  createKeyHashRateLimiter,
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
@@ -44,22 +45,14 @@ const errorResponseSchema = z.object({
   error: z.string(),
 })
 
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT_WINDOW_MS = 60_000
-const RATE_LIMIT_MAX = 30
-
-function isRateLimited(keyHash: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(keyHash)
-
-  if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(keyHash, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
-    return false
-  }
-
-  entry.count += 1
-  return entry.count > RATE_LIMIT_MAX
-}
+// Per-key in-memory rate limiter (30 req / 60 s per hashed publishable key) —
+// shared factory from `@ezstart/api-core`, mirrors `/keys/config`.
+const rateLimiter = createKeyHashRateLimiter({
+  extractKey: req => {
+    const raw = req.query.key
+    return typeof raw === 'string' && raw.length > 0 ? hashApiKey(raw) : null
+  },
+})
 
 const resolveApplicationController = async (req: Request, res: Response) => {
   try {
@@ -76,10 +69,6 @@ const resolveApplicationController = async (req: Request, res: Response) => {
     }
 
     const hashedKey = hashApiKey(rawKey)
-
-    if (isRateLimited(hashedKey)) {
-      return sendError(res, 'Rate limited', 429)
-    }
 
     const ApiKey = await getApiKeyModel()
     const apiKey = await ApiKey.findOne({ key: hashedKey }).lean()
@@ -130,7 +119,7 @@ const resolveApplicationController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/applications/resolve', resolveApplicationController, {
+docRouter.get('/applications/resolve', rateLimiter, resolveApplicationController, {
   summary: 'Resolve an Application from a raw API key (public, rate-limited)',
   tags: ['Applications'],
   responseSchema: resolveResponseSchema,

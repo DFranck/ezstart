@@ -12,6 +12,7 @@
 import type { Request, Response } from 'express'
 import { Router as ExpressRouter } from 'express'
 import {
+  createKeyHashRateLimiter,
   Router,
   OpenAPIRegistry,
   createRouterWithDoc,
@@ -47,30 +48,27 @@ const errorResponseSchema = z.object({
   error: z.string(),
 })
 
-// In-memory rate limiter — same pattern as ezauth's /keys/config.
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT_WINDOW_MS = 60_000
+// Per-key in-memory rate limiter (30 req / 60 s) — shared factory from
+// `@ezstart/api-core`, mirrors ezauth's `/keys/config`. The 30-req/min cap
+// is documented in `_RATE_LIMIT_MAX` for the existing test suite.
 const RATE_LIMIT_MAX = 30
-
-function isRateLimited(keyHash: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(keyHash)
-  if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(keyHash, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
-    return false
-  }
-  entry.count += 1
-  return entry.count > RATE_LIMIT_MAX
-}
+const rateLimiter = createKeyHashRateLimiter({
+  max: RATE_LIMIT_MAX,
+  extractKey: req => {
+    const raw = req.query.key
+    return typeof raw === 'string' && raw.length > 0 ? hashApiKey(raw) : null
+  },
+})
 
 /**
  * Test-only helper — clears the in-memory rate-limit window so suites that
- * exercise the 429 path don't bleed counters into each other.
+ * exercise the 429 path don't bleed counters into each other. Forwards to
+ * the `.reset()` method exposed by `createKeyHashRateLimiter`.
  *
  * @internal
  */
 export function _resetRateLimitForTests(): void {
-  rateLimitMap.clear()
+  rateLimiter.reset()
 }
 
 /** @internal — exposed for tests that assert the 429 threshold. */
@@ -91,10 +89,6 @@ const configController = async (req: Request, res: Response) => {
     }
 
     const hashedKey = hashApiKey(rawKey)
-
-    if (isRateLimited(hashedKey)) {
-      return sendError(res, 'Rate limited', 429)
-    }
 
     const ApiKey = await getApiKeyModel()
     const apiKey = await ApiKey.findOne({ key: hashedKey }).lean()
@@ -130,7 +124,7 @@ const configController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.get('/keys/config', configController, {
+docRouter.get('/keys/config', rateLimiter, configController, {
   summary: 'Get EZPay app configuration for a publishable key',
   tags: ['API Keys'],
   responseSchema: configResponseSchema,
