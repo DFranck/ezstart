@@ -125,7 +125,17 @@ export class StripeProvider implements IPaymentProvider {
       cancel_url: options.cancelUrl,
       metadata: options.metadata,
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
-      ...(options.automaticTax ? { automatic_tax: { enabled: true } } : {}),
+      ...(options.automaticTax
+        ? {
+            automatic_tax: { enabled: true },
+            // Collect VAT IDs for B2B reverse-charge exemption (validated via VIES).
+            tax_id_collection: { enabled: true },
+            // Stripe requires `customer_update` whenever `automatic_tax` is on
+            // and a Customer already exists — `auto` lets Stripe sync the address
+            // collected at checkout back to the Customer for tax recomputation.
+            customer_update: { shipping: 'auto', address: 'auto' },
+          }
+        : {}),
       ...(Object.keys(paymentIntentData).length > 0
         ? { payment_intent_data: paymentIntentData }
         : {}),
@@ -179,7 +189,17 @@ export class StripeProvider implements IPaymentProvider {
       metadata: options.metadata,
       ...(discountsParam ? { discounts: discountsParam } : {}),
       ...(options.customerEmail ? { customer_email: options.customerEmail } : {}),
-      ...(options.automaticTax ? { automatic_tax: { enabled: true } } : {}),
+      ...(options.automaticTax
+        ? {
+            automatic_tax: { enabled: true },
+            // Collect VAT IDs for B2B reverse-charge exemption (validated via VIES).
+            tax_id_collection: { enabled: true },
+            // Stripe requires `customer_update` whenever `automatic_tax` is on
+            // and a Customer already exists — `auto` lets Stripe sync the address
+            // collected at checkout back to the Customer for tax recomputation.
+            customer_update: { shipping: 'auto', address: 'auto' },
+          }
+        : {}),
       ...(Object.keys(subscriptionData).length > 0 ? { subscription_data: subscriptionData } : {}),
     })
 

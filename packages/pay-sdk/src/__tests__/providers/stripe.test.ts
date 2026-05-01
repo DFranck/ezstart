@@ -383,4 +383,60 @@ describe('StripeProvider — automatic tax', () => {
     const call2 = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
     expect(call2.automatic_tax).toBeUndefined()
   })
+
+  // ----- STRIPE_TAX_SETUP_EU (#172) — VAT ID collection + customer_update -----
+
+  it('enables tax_id_collection on subscription when automaticTax is true (B2B VAT exemption)', async () => {
+    await provider.createSubscriptionCheckout(baseSubOptions({ automaticTax: true }))
+
+    const call = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call.tax_id_collection).toEqual({ enabled: true })
+  })
+
+  it('enables tax_id_collection on one-shot when automaticTax is true (B2B VAT exemption)', async () => {
+    await provider.createCheckoutSession(baseOneShotOptions({ automaticTax: true }))
+
+    const call = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call.tax_id_collection).toEqual({ enabled: true })
+  })
+
+  it('sets customer_update with shipping+address auto on subscription when automaticTax is true', async () => {
+    await provider.createSubscriptionCheckout(baseSubOptions({ automaticTax: true }))
+
+    const call = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call.customer_update).toEqual({ shipping: 'auto', address: 'auto' })
+  })
+
+  it('sets customer_update with shipping+address auto on one-shot when automaticTax is true', async () => {
+    await provider.createCheckoutSession(baseOneShotOptions({ automaticTax: true }))
+
+    const call = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call.customer_update).toEqual({ shipping: 'auto', address: 'auto' })
+  })
+
+  it('omits tax_id_collection + customer_update when automaticTax is false', async () => {
+    await provider.createSubscriptionCheckout(baseSubOptions({ automaticTax: false }))
+    const call1 = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call1.tax_id_collection).toBeUndefined()
+    expect(call1.customer_update).toBeUndefined()
+
+    fake.calls.sessionCreate.mockClear()
+    await provider.createCheckoutSession(baseOneShotOptions({ automaticTax: false }))
+    const call2 = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call2.tax_id_collection).toBeUndefined()
+    expect(call2.customer_update).toBeUndefined()
+  })
+
+  it('omits tax_id_collection + customer_update when automaticTax is undefined (default off)', async () => {
+    await provider.createSubscriptionCheckout(baseSubOptions())
+    const call1 = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call1.tax_id_collection).toBeUndefined()
+    expect(call1.customer_update).toBeUndefined()
+
+    fake.calls.sessionCreate.mockClear()
+    await provider.createCheckoutSession(baseOneShotOptions())
+    const call2 = fake.calls.sessionCreate.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call2.tax_id_collection).toBeUndefined()
+    expect(call2.customer_update).toBeUndefined()
+  })
 })

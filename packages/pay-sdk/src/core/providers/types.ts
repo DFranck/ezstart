@@ -91,8 +91,20 @@ export interface CheckoutOptions {
   /**
    * Enable Stripe automatic tax calculation on the Checkout Session.
    *
+   * When `true`, the provider sets:
+   *   - `automatic_tax: { enabled: true }` — Stripe Tax computes VAT/sales tax based
+   *     on the customer's billing/shipping address.
+   *   - `tax_id_collection: { enabled: true }` — Stripe Checkout collects + validates
+   *     the customer's VAT ID via VIES (B2B reverse-charge exemption in EU).
+   *   - `customer_update: { shipping: 'auto', address: 'auto' }` — required by
+   *     Stripe whenever `automatic_tax` is on and a `Customer` already exists, so
+   *     Stripe can sync the collected address back to the Customer for accurate
+   *     tax recomputation on subsequent invoices.
+   *
    * Requires Stripe Tax to be configured in the Stripe Dashboard
    * (Settings → Tax) — otherwise Stripe rejects the request at checkout time.
+   * See `apps/ezpay/STRIPE_TAX_SETUP.md` for the one-time setup walkthrough.
+   *
    * Defaults to `false` when omitted to preserve backwards compatibility.
    */
   automaticTax?: boolean
