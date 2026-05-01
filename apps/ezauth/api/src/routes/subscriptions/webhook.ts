@@ -165,12 +165,47 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
       })
     }
 
-    // ---- 3. Body schema ------------------------------------------------
+    // ---- 3. Capture raw bytes + parse body -----------------------------
+    // The route is registered in `rawBodyRoutes` (see `apps/ezauth/api/src/
+    // index.ts`) so `req.body` is a `Buffer` containing the EXACT bytes the
+    // sender HMAC'd. We parse the JSON ourselves here — a re-serialization
+    // via `JSON.stringify(req.body)` would be a future engine upgrade time-
+    // bomb (any spec drift in V8/Bun/Deno key ordering would silently break
+    // every signature verify against ezpay). Storing the raw bytes also lets
+    // us pass them directly to `verifyEzstartSignature` in step 4.
+    //
+    // For backwards compatibility (e.g. tests that mount the router under
+    // an `express.json()` parser) we accept a parsed object and re-derive
+    // the bytes via JSON.stringify — but the production path always reaches
+    // here with a Buffer thanks to `rawBodyRoutes`.
+    let rawBody: string
+    let parsedJson: unknown
+    if (Buffer.isBuffer(req.body)) {
+      rawBody = req.body.toString('utf8')
+      try {
+        parsedJson = JSON.parse(rawBody)
+      } catch {
+        return sendError(res, 'Invalid JSON body', 400, { code: 'INVALID_BODY' })
+      }
+    } else if (typeof req.body === 'string') {
+      rawBody = req.body
+      try {
+        parsedJson = JSON.parse(rawBody)
+      } catch {
+        return sendError(res, 'Invalid JSON body', 400, { code: 'INVALID_BODY' })
+      }
+    } else {
+      // Backwards-compat path (used by some tests that mount the router
+      // behind `express.json()`). Production always uses raw body capture.
+      parsedJson = req.body
+      rawBody = JSON.stringify(req.body)
+    }
+
     // Parse the body BEFORE the HMAC check — we need `applicationId` to
     // look up the per-Application webhook secret. A caller cannot escape
     // signature verification by sending unparseable garbage: the schema
     // parse fails fast with a 400 and never reaches the HMAC step.
-    const parsed = subscriptionWebhookBodySchema.safeParse(req.body)
+    const parsed = subscriptionWebhookBodySchema.safeParse(parsedJson)
     if (!parsed.success) {
       return sendValidationError(res, parsed.error, 400, 'Invalid webhook body')
     }
@@ -204,11 +239,10 @@ const subscriptionWebhookController = async (req: Request, res: Response) => {
     }
     const secret = application.webhookSecret
 
-    // Signed payload is `{timestamp}.{raw body}`. We re-serialize the body
-    // deterministically — the sender includes its own `timestamp` field
-    // (verified to match the header `t=` immediately below) so signing
-    // `req.body` here reproduces the exact bytes the sender HMAC'd.
-    const rawBody = JSON.stringify(req.body)
+    // Signed payload is `{timestamp}.{raw body}`. `rawBody` was captured
+    // from the raw `Buffer` request body in step 3 — it is the exact byte
+    // sequence the sender HMAC'd, so verification is engine-agnostic and
+    // immune to any future JSON.stringify key-ordering drift.
     const verifyResult = verifyEzstartSignature({
       header: req.headers['x-ezstart-signature'] as string | undefined,
       secret,

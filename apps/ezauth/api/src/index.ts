@@ -78,6 +78,15 @@ try {
     mongoDbName: 'ezauth',
     cookieAuthRoutes: COOKIE_AUTH_ROUTES,
     cookieAuthAllowlist: COOKIE_AUTH_ALLOWLIST,
+    // Raw body capture for the cross-service subscription webhook receiver.
+    // The HMAC signature from EZPay is computed over the EXACT bytes sent on
+    // the wire — re-serializing via `JSON.stringify(req.body)` is a future
+    // engine upgrade time-bomb (Bun/Deno/V8 spec drift could change key
+    // ordering and silently break every webhook). Both the unversioned and
+    // `/v1/` mount points must be listed because `createVersionedRouter`
+    // exposes the router at `/api/subscriptions/webhook` AND
+    // `/api/v1/subscriptions/webhook`.
+    rawBodyRoutes: ['/api/subscriptions/webhook', '/api/v1/subscriptions/webhook'],
     useDerivedMode: true,
     onReady: async ({ app }) => {
       // Cookie parser + Passport must be mounted on the app BEFORE the routes

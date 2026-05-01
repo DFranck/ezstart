@@ -27,7 +27,31 @@ import { createUser, createApiKey, cleanAllCollections } from '../../helpers/set
  */
 const SECRET = 'whsec_test_per_application_webhook_secret_v2_refactor_fixture_value'
 
+/**
+ * Build the test app with the SAME middleware stack production uses —
+ * `express.raw({ type: 'application/json' })` mounted on the webhook
+ * path BEFORE the router, so `req.body` is a `Buffer` containing the
+ * exact bytes the sender HMAC'd. This guards against `JSON.stringify`
+ * key-ordering drift across future engine upgrades.
+ */
 function createTestApp() {
+  const app = express()
+  app.use('/api/subscriptions/webhook', express.raw({ type: 'application/json' }))
+  // Body parser for any other route (none in this test, but kept for parity
+  // with production where `express.json` is mounted globally AFTER the raw
+  // body middleware).
+  app.use(express.json())
+  app.use('/api', webhookRouter)
+  return app
+}
+
+/**
+ * Fallback test app that reproduces the legacy stack — `express.json()`
+ * only, no raw body capture. Used by ONE test below to prove the
+ * backwards-compat code path still works (some external integrators may
+ * mount the router behind their own JSON parser).
+ */
+function createTestAppWithoutRawBody() {
   const app = express()
   app.use(express.json())
   app.use('/api', webhookRouter)
@@ -588,6 +612,111 @@ describe('POST /api/subscriptions/webhook', () => {
 
       expect(res.status).toBe(404)
       expect(res.body.error.code).toBe('USER_NOT_FOUND')
+    })
+  })
+
+  describe('raw body capture (engine-upgrade safety)', () => {
+    it('verifies HMAC against the EXACT bytes sent on the wire (not re-serialized JSON)', async () => {
+      // This test guards against `JSON.stringify` key-ordering drift across
+      // engine upgrades. We craft a body string with a deliberately UNUSUAL
+      // key order (the schema doesn't care about order, but HMAC does).
+      // If the receiver re-serialized via `JSON.stringify(req.body)`, the
+      // resulting bytes would differ from `body` and the signature would
+      // fail. With raw-body capture, the exact bytes are passed to
+      // `verifyEzstartSignature` and the test passes.
+      const user = await createUser({ email: 'raw@test.com', username: 'rawuser' })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const appDoc = await createTestApplication({
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      // NOTE: keys are intentionally in non-alphabetical order. Some engine
+      // versions might iterate keys differently when `JSON.stringify` is
+      // called on the parsed object — but raw body capture short-circuits
+      // any parsing/re-serialization round-trip.
+      const body = JSON.stringify({
+        timestamp: ts,
+        status: 'active',
+        stripeEventId: 'evt_raw_bytes',
+        planId: 'plan-1',
+        subscriptionId: 'sub_raw',
+        userId: user._id!.toString(),
+        applicationId: appDoc._id.toString(),
+        grantsRoles: ['raw-role'],
+      })
+      const sig = buildSigHeader(ts, body)
+
+      const res = await request(app)
+        .post('/api/subscriptions/webhook')
+        .set('X-API-Key', rawKey)
+        .set('X-EZStart-Signature', sig)
+        .set('Content-Type', 'application/json')
+        .send(body)
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.applied).toBe(true)
+    })
+
+    it('still validates correctly when router sits behind express.json (backwards compat)', async () => {
+      // Some external integrators may mount the router behind their own
+      // `express.json()` parser without using `rawBodyRoutes`. The receiver
+      // falls back to `JSON.stringify(req.body)` in that case — works today
+      // but is exactly the engine-drift risk we want to surface. Test
+      // documents that the fallback path remains functional.
+      const legacyApp = createTestAppWithoutRawBody()
+
+      const user = await createUser({
+        email: 'legacy@test.com',
+        username: 'legacyuser',
+      })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+      const appDoc = await createTestApplication({
+        ownerId: user._id!.toString(),
+      })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const payload = {
+        applicationId: appDoc._id.toString(),
+        userId: user._id!.toString(),
+        subscriptionId: 'sub_legacy',
+        planId: 'plan-1',
+        stripeEventId: 'evt_legacy',
+        status: 'active',
+        grantsRoles: ['legacy-role'],
+        timestamp: ts,
+      }
+      const body = JSON.stringify(payload)
+      const sig = buildSigHeader(ts, body)
+
+      const res = await request(legacyApp)
+        .post('/api/subscriptions/webhook')
+        .set('X-API-Key', rawKey)
+        .set('X-EZStart-Signature', sig)
+        .set('Content-Type', 'application/json')
+        .send(body)
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.applied).toBe(true)
+    })
+
+    it('400 INVALID_BODY when raw body is not valid JSON', async () => {
+      const user = await createUser({ email: 'badjson@test.com', username: 'badjsonuser' })
+      const { rawKey } = await createApiKey(user._id!.toString(), { scope: 'admin' })
+
+      const ts = Math.floor(Date.now() / 1000).toString()
+      const garbage = '{"not_closed":'
+      const sig = buildSigHeader(ts, garbage)
+
+      const res = await request(app)
+        .post('/api/subscriptions/webhook')
+        .set('X-API-Key', rawKey)
+        .set('X-EZStart-Signature', sig)
+        .set('Content-Type', 'application/json')
+        .send(garbage)
+
+      expect(res.status).toBe(400)
+      expect(res.body.error.code).toBe('INVALID_BODY')
     })
   })
 
