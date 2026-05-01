@@ -29,6 +29,7 @@ export * from './feedback/progress'
 export * from './feedback/skeleton'
 export * from './feedback/sonner'
 export * from './feedback/spinner'
+export * from './feedback/status-page'
 export * from './feedback/tooltip'
 
 // Forms
