@@ -75,9 +75,11 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
 
   const app: Express = express()
 
-  // Required behind reverse proxies (Railway / Vercel) so the real client IP
-  // is exposed via X-Forwarded-For — critical for rate limiting.
-  app.set('trust proxy', true)
+  // Trust 2 proxy hops: Railway edge → Fastly CDN. With this Express picks the
+  // real client IP from X-Forwarded-For (last 2 IPs are stripped as trusted),
+  // not the LB IP. CRITICAL for accurate per-IP rate limiting on anonymous routes.
+  // Setting `true` would trust ALL hops including potentially-forged headers.
+  app.set('trust proxy', 2)
 
   // Security headers (Helmet). Opt-out via `config.security: false` for
   // services that need to set their own helmet config (rare). Defaults are

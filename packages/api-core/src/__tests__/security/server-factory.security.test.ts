@@ -113,9 +113,12 @@ describe('Server factory — security', () => {
 
   // ─── Trust proxy configuration ───
   describe('Trust proxy', () => {
-    it('trust proxy is set to true (required for Railway/Vercel)', async () => {
+    it('trust proxy is set to 2 hops (Fastly → Railway, required for Railway/Vercel)', async () => {
       const { app } = createBaseApiServer({ port: 0 })
-      expect(app.get('trust proxy')).toBe(true)
+      // 2 = trust 2 proxy hops (Railway edge + Fastly CDN). Stricter than the
+      // previous `true` (which trusted ALL hops, including potentially-forged
+      // headers). See packages/api-core/src/core/create-server.ts.
+      expect(app.get('trust proxy')).toBe(2)
     })
 
     it('X-Forwarded-For is used for req.ip when trust proxy is on', async () => {
