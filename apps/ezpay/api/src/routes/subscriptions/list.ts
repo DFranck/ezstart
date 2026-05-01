@@ -75,6 +75,16 @@ function extractBearerToken(req: Request): string | undefined {
     ?.split('=')[1]
 }
 
+/**
+ * Build the Mongo query filter for the derived RBAC scope. Mirrors the helper
+ * in `payments/list.ts` — see the long-form rationale there.
+ *
+ * **P0 multi-tenancy fix (2026-05-01)** — when the caller authenticated via
+ * an API key bound to a specific slug (`req.apiKeyAppSlug` is set and not
+ * `'*'`), short-circuit BEFORE calling `listApplicationsByOwner`. Without
+ * the short-circuit, the helper falls back to `EZPAY_SERVER_EZAUTH_KEY`
+ * (platform superadmin) and leaks slugs the key has no business reading.
+ */
 async function buildScopeFilter(
   req: Request,
   scope: 'mine' | 'myApps' | 'all'
@@ -84,6 +94,13 @@ async function buildScopeFilter(
     return {}
   }
   if (scope === 'myApps') {
+    // P0 multi-tenancy short-circuit: API-key auth with bound slug.
+    const apiKeyAppSlug = req.apiKeyAppSlug
+    if (apiKeyAppSlug && apiKeyAppSlug !== '*') {
+      return {
+        $or: [{ userId }, { projectId: apiKeyAppSlug }],
+      }
+    }
     const bearerToken = extractBearerToken(req)
     const apps = await listApplicationsByOwner({ bearerToken })
     const ownedSlugs = apps.map(a => a.slug)

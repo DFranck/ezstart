@@ -170,11 +170,27 @@ const payAnalyticsOverviewController = async (req: Request, res: Response) => {
     //   undefined → no filter (superadmin platform-wide)
     //   []        → empty result set (admin without owned apps OR regular user)
     //   [...]     → restrict aggregations to these slugs
+    //
+    // **P0 multi-tenancy fix (2026-05-01)** — when the caller authenticated
+    // via an API key bound to a specific slug (`req.apiKeyAppSlug` set and
+    // not `'*'`), short-circuit BEFORE calling `listApplicationsByOwner`.
+    // The helper forwards a Bearer token to ezauth's owner-scoped
+    // `/api/applications` endpoint, but on the API-key path no Bearer
+    // exists, so the helper falls back to `EZPAY_SERVER_EZAUTH_KEY`
+    // (platform superadmin S2S key) which resolves to the slugs OWNED BY
+    // the platform server, not by the actual key owner. Result: cross-
+    // tenant aggregation leak. Locking `scopedSlugs` to the bound slug
+    // closes the leak. JWT cookie path is unchanged.
     let scopedSlugs: string[] | undefined
     if (derivedScope === 'myApps') {
-      const bearerToken = extractBearerToken(req)
-      const ownedApps = await listApplicationsByOwner({ bearerToken })
-      scopedSlugs = ownedApps.map(a => a.slug)
+      const apiKeyAppSlug = req.apiKeyAppSlug
+      if (apiKeyAppSlug && apiKeyAppSlug !== '*') {
+        scopedSlugs = [apiKeyAppSlug]
+      } else {
+        const bearerToken = extractBearerToken(req)
+        const ownedApps = await listApplicationsByOwner({ bearerToken })
+        scopedSlugs = ownedApps.map(a => a.slug)
+      }
     } else if (derivedScope === 'mine') {
       // Singleton view — keeps the response shape stable for non-admin users
       // who somehow reach the endpoint (e.g., role demotion mid-session).

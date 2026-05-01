@@ -97,6 +97,17 @@ function extractBearerToken(req: Request): string | undefined {
  *              UNION their own payments (so the caller sees revenue from owned apps +
  *              personal subscriptions).
  * - `all`    — no scope filter (superadmin platform-wide view).
+ *
+ * **P0 multi-tenancy fix (2026-05-01)** — when the caller authenticated via
+ * an API key bound to a specific slug (`req.apiKeyAppSlug` is set and not
+ * `'*'`), short-circuit BEFORE calling `listApplicationsByOwner`. That helper
+ * forwards the request's Bearer token to ezauth's owner-scoped
+ * `/api/applications` — but on the API-key path there is no Bearer token, so
+ * the helper falls back to `EZPAY_SERVER_EZAUTH_KEY` (platform superadmin
+ * S2S key) which resolves to the slugs OWNED BY the platform server, not by
+ * the actual key owner. Result: cross-tenant leak. The short-circuit forces
+ * the scope filter to use ONLY the key's bound slug, never the cross-service
+ * lookup. JWT cookie path is unchanged (legitimate owner-scoped lookup).
  */
 async function buildScopeFilter(
   req: Request,
@@ -107,6 +118,13 @@ async function buildScopeFilter(
     return {}
   }
   if (scope === 'myApps') {
+    // P0 multi-tenancy short-circuit: API-key auth with bound slug.
+    const apiKeyAppSlug = req.apiKeyAppSlug
+    if (apiKeyAppSlug && apiKeyAppSlug !== '*') {
+      return {
+        $or: [{ userId }, { projectId: apiKeyAppSlug }],
+      }
+    }
     const bearerToken = extractBearerToken(req)
     const apps = await listApplicationsByOwner({ bearerToken })
     const ownedSlugs = apps.map(a => a.slug)
