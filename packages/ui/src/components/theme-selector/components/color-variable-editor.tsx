@@ -115,7 +115,7 @@ export function ColorVariableEditor({
           {/* Changed indicator */}
           {hasChanged && (
             <span
-              className="text-xs text-amber-500"
+              className="text-xs text-warning"
               aria-label="Modified"
               title="This value has been modified"
             >

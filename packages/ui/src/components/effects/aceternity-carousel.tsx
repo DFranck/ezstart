@@ -131,12 +131,12 @@ const CarouselControl = ({ type, title, handleClick }: CarouselControlProps) => 
 
   return (
     <button
-      className="w-10 h-10 flex items-center mx-2 justify-center bg-neutral-200 dark:bg-neutral-800 border-3 border-transparent rounded-full focus:border-[#6D64F7] focus:outline-none hover:-translate-y-0.5 active:translate-y-0.5 transition duration-200"
+      className="w-10 h-10 flex items-center mx-2 justify-center bg-muted border-3 border-transparent rounded-full focus:border-ring focus:outline-none hover:-translate-y-0.5 active:translate-y-0.5 transition duration-200"
       title={title}
       aria-label={title}
       onClick={handleClick}
     >
-      <Icon name={iconName} className="text-neutral-600 dark:text-neutral-200" />
+      <Icon name={iconName} className="text-muted-foreground" />
     </button>
   )
 }

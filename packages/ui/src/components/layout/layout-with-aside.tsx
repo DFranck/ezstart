@@ -1,12 +1,15 @@
-'use client';
-import { useState } from 'react';
-import { cn } from '../../lib/utils';
-import { useDevice } from '../../hooks';
-import { Burger } from '../burger';
-import { Header } from './header';
-import { Aside, Div, Main } from '../tag';
+'use client'
+// allowed: hardcoded `bg-{color}-500/30` below are dev-only region overlays
+// (gated by `debug && ...`), used by designers to visualize layout boundaries.
+// Not theme-controlled because they are never rendered when `debug = false`.
+import { useState } from 'react'
+import { cn } from '../../lib/utils'
+import { useDevice } from '../../hooks'
+import { Burger } from '../burger'
+import { Header } from './header'
+import { Aside, Div, Main } from '../tag'
 
-const debug = false;
+const debug = false
 
 export const LayoutWithAside = ({
   children,
@@ -22,26 +25,25 @@ export const LayoutWithAside = ({
   disableMainHeaderBurger = false,
   asideAbsoluteOnMobile = false,
 }: {
-  withHeaderOffset?: boolean;
-  children: React.ReactNode;
-  asideContent: React.ReactNode;
-  topHeaderLeftContent?: React.ReactNode;
-  topHeaderCenterContent?: React.ReactNode;
-  topHeaderRightContent?: React.ReactNode;
-  mainHeaderLeftContent?: React.ReactNode;
-  mainHeaderCenterContent?: React.ReactNode;
-  mainHeaderRightContent?: React.ReactNode;
-  disableTopHeaderBurger?: boolean;
-  disableMainHeaderBurger?: boolean;
-  asideAbsoluteOnMobile?: boolean;
+  withHeaderOffset?: boolean
+  children: React.ReactNode
+  asideContent: React.ReactNode
+  topHeaderLeftContent?: React.ReactNode
+  topHeaderCenterContent?: React.ReactNode
+  topHeaderRightContent?: React.ReactNode
+  mainHeaderLeftContent?: React.ReactNode
+  mainHeaderCenterContent?: React.ReactNode
+  mainHeaderRightContent?: React.ReactNode
+  disableTopHeaderBurger?: boolean
+  disableMainHeaderBurger?: boolean
+  asideAbsoluteOnMobile?: boolean
 }) => {
-  const { isMobile } = useDevice();
-  const [isAsideOpen, setIsAsideOpen] = useState(false);
-  const toggleAside = () => setIsAsideOpen((prev) => !prev);
-  const isTopHeaderVisible =
-    topHeaderLeftContent || topHeaderCenterContent || topHeaderRightContent;
+  const { isMobile } = useDevice()
+  const [isAsideOpen, setIsAsideOpen] = useState(false)
+  const toggleAside = () => setIsAsideOpen(prev => !prev)
+  const isTopHeaderVisible = topHeaderLeftContent || topHeaderCenterContent || topHeaderRightContent
   const isMainHeaderVisible =
-    mainHeaderLeftContent || mainHeaderCenterContent || mainHeaderRightContent;
+    mainHeaderLeftContent || mainHeaderCenterContent || mainHeaderRightContent
 
   return (
     <Div
@@ -51,10 +53,7 @@ export const LayoutWithAside = ({
     >
       {isTopHeaderVisible && (
         <Header
-          className={cn(
-            'h-14 bg-muted border-y sticky top-0',
-            debug && 'bg-blue-500/30'
-          )}
+          className={cn('h-14 bg-muted border-y sticky top-0', debug && 'bg-blue-500/30')}
           leftContent={
             <>
               {!disableTopHeaderBurger && isMobile && (
@@ -67,7 +66,7 @@ export const LayoutWithAside = ({
           rightContent={topHeaderRightContent}
         />
       )}
-      <Div size={'full'} layout={'aside'} className='relative flex-1 bg-muted'>
+      <Div size={'full'} layout={'aside'} className="relative flex-1 bg-muted">
         <Aside
           size={'xs'}
           layout={'col'}
@@ -103,12 +102,12 @@ export const LayoutWithAside = ({
               }
               centerContent={mainHeaderCenterContent}
               rightContent={mainHeaderRightContent}
-              position='absolute'
+              position="absolute"
             />
           )}
           {children}
         </Main>
       </Div>
     </Div>
-  );
-};
+  )
+}

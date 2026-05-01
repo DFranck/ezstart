@@ -112,11 +112,11 @@ function calculateStrength(
   if (percentage < 50) {
     return { score: percentage, bucket: 'weak', color: 'bg-destructive' }
   } else if (percentage < 75) {
-    return { score: percentage, bucket: 'fair', color: 'bg-yellow-500' }
+    return { score: percentage, bucket: 'fair', color: 'bg-warning' }
   } else if (percentage < 100) {
-    return { score: percentage, bucket: 'good', color: 'bg-blue-500' }
+    return { score: percentage, bucket: 'good', color: 'bg-info' }
   } else {
-    return { score: percentage, bucket: 'strong', color: 'bg-green-500' }
+    return { score: percentage, bucket: 'strong', color: 'bg-success' }
   }
 }
 
@@ -199,9 +199,9 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               <span
                 className={cn('font-medium', {
                   'text-destructive': strength.bucket === 'weak',
-                  'text-yellow-600 dark:text-yellow-500': strength.bucket === 'fair',
-                  'text-blue-600 dark:text-blue-500': strength.bucket === 'good',
-                  'text-green-600 dark:text-green-500': strength.bucket === 'strong',
+                  'text-warning': strength.bucket === 'fair',
+                  'text-info': strength.bucket === 'good',
+                  'text-success': strength.bucket === 'strong',
                 })}
               >
                 {strengthLabels[strength.bucket]}
@@ -225,7 +225,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                 <li
                   key={index}
                   className={cn('flex items-center gap-2', {
-                    'text-green-600 dark:text-green-500': passed,
+                    'text-success': passed,
                     'text-muted-foreground': !passed,
                   })}
                 >

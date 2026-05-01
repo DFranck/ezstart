@@ -5,7 +5,6 @@
  */
 'use client'
 
-import { useState, useEffect } from 'react'
 import {
   Button,
   Div,
@@ -46,18 +45,9 @@ import type { AILayoutProps } from './ai-layout-types.js'
 export function AILayout({ appName, getToken, ...props }: AILayoutProps) {
   return (
     <AIProvider appName={appName} getToken={getToken}>
-      <AILayoutInner appName={appName} {...props} />
+      <AILayoutContent appName={appName} {...props} />
     </AIProvider>
   )
-}
-
-function AILayoutInner({ getToken: _getToken, ...props }: AILayoutProps) {
-  // Prevent SSR hydration mismatch — hooks read localStorage (auth token, providers)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  if (!mounted) return null
-
-  return <AILayoutContent {...props} />
 }
 
 function AILayoutContent({ ...props }: Omit<AILayoutProps, 'getToken'>) {

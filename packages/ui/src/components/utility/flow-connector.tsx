@@ -21,7 +21,7 @@ import { cn } from '../../lib/utils'
  *   toSide="top"
  *   style="angular"
  *   rounded
- *   className="text-emerald-500"
+ *   className="text-success"
  * />
  */
 
@@ -152,10 +152,7 @@ function getAngularPath(
   let cornerY = midY
 
   // Vertical then horizontal
-  if (
-    (fromSide === 'bottom' && toSide === 'left') ||
-    (fromSide === 'top' && toSide === 'right')
-  ) {
+  if ((fromSide === 'bottom' && toSide === 'left') || (fromSide === 'top' && toSide === 'right')) {
     cornerX = to.x
     cornerY = from.y
   }
@@ -225,11 +222,7 @@ export const FlowConnector = React.forwardRef<HTMLDivElement, FlowConnectorProps
         : getAngularPath(fromSide, toSide, rounded, cornerRadius)
 
     return (
-      <div
-        ref={ref}
-        className={cn('absolute inset-0 pointer-events-none', className)}
-        {...props}
-      >
+      <div ref={ref} className={cn('absolute inset-0 pointer-events-none', className)} {...props}>
         <svg
           viewBox="0 0 100 100"
           className="w-full h-full"

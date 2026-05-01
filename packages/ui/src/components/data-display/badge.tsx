@@ -47,6 +47,8 @@ const dotVariantClasses: Record<string, string> = {
   success: 'bg-success',
   warning: 'bg-warning',
   info: 'bg-info',
+  // allowed: explicit color-named badge variants are public API surface
+  // (consumer opts in by picking variant="purple" etc., not theme-controlled)
   purple: 'bg-purple-600 dark:bg-purple-400',
   cyan: 'bg-cyan-600 dark:bg-cyan-400',
   indigo: 'bg-indigo-600 dark:bg-indigo-400',

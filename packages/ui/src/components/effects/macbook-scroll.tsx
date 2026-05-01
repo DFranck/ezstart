@@ -1,4 +1,9 @@
 'use client'
+// allowed: hardcoded colors below are decorative — Macbook 3D mockup port (Aceternity).
+// - `bg-{color}-500/50` inside `debug && ...` are dev-only region overlays
+// - `bg-gray-200 dark:bg-[#272729]` is the macbook chassis color (hardware look)
+// - `text-neutral-800` / `text-neutral-200` are keyboard label colors designed to contrast with the dark chassis
+// All colors here are NOT theme-controlled — they represent physical hardware.
 import { Icon } from '../icon'
 import { useDevice } from '../../hooks/use-device'
 import { cn } from '../../lib/utils'
