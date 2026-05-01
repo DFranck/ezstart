@@ -25,7 +25,6 @@
       ]
     }
   ],
-  "// TODO": "Add Content-Security-Policy after per-app tuning (P1, requires soak phase)",
   "headers": [
     {
       "source": "/(.*)",
