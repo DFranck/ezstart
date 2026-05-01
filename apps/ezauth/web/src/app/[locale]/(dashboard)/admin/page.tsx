@@ -29,7 +29,8 @@ import {
 } from '@ezstart/ui/components'
 import { useTheme } from '@ezstart/ui/theme'
 import { useLocale, useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { usePathname as useNextPathname, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useRouter, usePathname } from '@/i18n/navigation'
 import { EzauthScopeIndicator } from '@/components/ezauth-scope-indicator'
 
@@ -86,9 +87,62 @@ export default function AdminPage() {
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
+  // `usePathname` from @/i18n/navigation strips the locale ("/admin"). The
+  // anchor's `href` attribute (used for middle-click / Cmd-click new-tab) must
+  // include the locale so the browser doesn't trigger a 307 redirect — read
+  // the raw path here ("/en/admin").
+  const rawPathname = useNextPathname()
+  const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
 
-  const [activeSection, setActiveSection] = useState<AdminSection>('overview')
+  // Read `?section=` from URL on mount so deep-links / bookmarks / browser
+  // back-forward navigate to the right section. Falls back to 'overview'.
+  const sectionFromUrl = searchParams?.get('section') ?? null
+  const initialSection: AdminSection =
+    sectionFromUrl && (ADMIN_SECTIONS as readonly string[]).includes(sectionFromUrl)
+      ? (sectionFromUrl as AdminSection)
+      : 'overview'
+
+  const [activeSection, setActiveSection] = useState<AdminSection>(initialSection)
+
+  // Keep state in sync with URL changes (e.g. browser back / forward).
+  useEffect(() => {
+    if (
+      sectionFromUrl &&
+      (ADMIN_SECTIONS as readonly string[]).includes(sectionFromUrl) &&
+      sectionFromUrl !== activeSection
+    ) {
+      setActiveSection(sectionFromUrl as AdminSection)
+    }
+  }, [sectionFromUrl, activeSection])
+
+  // Build a SidebarLink href that preserves the current path AND query string,
+  // only replacing the `section` query param. Lets users middle-click /
+  // copy-link / bookmark a specific section, and lets the browser back/forward
+  // navigate between sections (Stripe / Vercel pattern, mirrors EZAuthDashboard).
+  // Uses `rawPathname` (locale included) for the <a href> so modifier-clicks
+  // open the section directly without triggering a locale-redirect.
+  const buildSectionHref = useCallback(
+    (sectionId: AdminSection): string => {
+      const next = new URLSearchParams(searchParams?.toString() ?? '')
+      next.set('section', sectionId)
+      return `${rawPathname ?? ''}?${next.toString()}`
+    },
+    [rawPathname, searchParams]
+  )
+
+  // Sync the URL when the user clicks a sidebar link. `router.replace` (not
+  // push) so the browser back button doesn't get polluted with one entry per
+  // tab click — only intentional navigations create history entries. The
+  // next-intl router accepts the locale-stripped path and re-adds the locale.
+  const navigateToSection = useCallback(
+    (sectionId: AdminSection) => {
+      const next = new URLSearchParams(searchParams?.toString() ?? '')
+      next.set('section', sectionId)
+      router.replace(`${pathname ?? ''}?${next.toString()}`, { scroll: false })
+    },
+    [router, pathname, searchParams]
+  )
 
   // Single nested texts object matching the SDK's `AuthAdminDashboardTexts`
   // shape. Keys grouped per-tab — the SDK does its own merge with English
@@ -309,14 +363,21 @@ export default function AdminPage() {
               {ADMIN_SECTIONS.map(section => (
                 <SidebarLink
                   key={section}
-                  href="#"
+                  href={buildSectionHref(section)}
                   active={activeSection === section}
                   icon={
                     <Icon name={SECTION_ICONS[section] as 'lucide:Users'} className="h-4 w-4" />
                   }
                   onClick={e => {
+                    // Plain left-click → switch section in-place without a full
+                    // navigation. Cmd/Ctrl/Shift/middle-click fall through so
+                    // the browser opens the section in a new tab using href.
+                    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                      return
+                    }
                     e.preventDefault()
                     setActiveSection(section)
+                    navigateToSection(section)
                   }}
                 >
                   {t(`tabs.${section}`)}
