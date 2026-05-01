@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers).
 - New `./integrations` entry point exposing third-party service wrappers
   designed to be drop-in across any consumer app or SDK.
 - `TurnstileWidget` (`@ezstart/api-sdk/integrations`) — Cloudflare Turnstile

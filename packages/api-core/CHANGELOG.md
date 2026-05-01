@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers).
 - `deprecatedRoute()` middleware for marking API endpoints as deprecated.
   Sets RFC 8594 HTTP headers (`Sunset`, `Deprecation`, `Warning`, `Link`)
   and emits a structured warn entry through the injected logger (silent

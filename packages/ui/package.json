@@ -153,5 +153,8 @@
     "@ezstart/logger": {
       "optional": true
     }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

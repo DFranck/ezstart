@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers).
 - `ErrorAlert` (`@ezstart/ui/components`) — destructive alert wrapper for
   forms, modals and settings pages. Renders semantic `role="alert"` markup
   with destructive theme tokens (light/dark mode parity). Originally

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers).
 - Cards UI surface restored: `<SignInCard>`, `<SignUpCard>`, `<ForgotPasswordCard>`, `<ResetPasswordCard>`, `<VerifyEmailCard>` — embeddable Modal-shell variants with sticky header/footer and scrollable body, mobile-first.
 - `'server-only'` guard at the top of every file in `src/server/` (`index.ts`, `features.ts`, `get-server-auth.ts`, `get-server-api-keys.ts`, `get-server-application.ts`, `get-server-applications.ts`, `get-server-audit-log.ts`). Throws at build time if a client component accidentally imports a server helper, preventing cookie / token leaks to the browser bundle.
 - `server-only@^0.0.1` added to `dependencies` so the guard resolves cleanly for standalone publish + monorepo consumers.

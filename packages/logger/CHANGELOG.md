@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers). Previously pinned to `20.18.x` (dev pin), now broadened to `>=18.0.0` so external npm consumers on Node 18 LTS can install without warning.
+
 ### Changed
 
 - `warnDeprecation()` (browser + server entries) now emits a `console.warn` /

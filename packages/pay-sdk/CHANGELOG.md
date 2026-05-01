@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers).
+
 ### Removed (BREAKING)
 
 - `@ezstart/config` removed from `dependencies`. The package was unused at
