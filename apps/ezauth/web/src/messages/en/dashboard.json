@@ -4,8 +4,7 @@
     "nav": {
       "overview": "Overview",
       "account": "Account",
-      "applications": "Applications",
-      "apiKeys": "API Keys",
+      "developer": "Developer",
       "billing": "Billing",
       "usage": "Usage",
       "activity": "Activity",
@@ -122,6 +121,27 @@
       "twoFactor": "Two-Factor Authentication",
       "sessions": "Active Sessions",
       "connectedAccounts": "Connected accounts"
+    },
+    "profile": {
+      "sectionTitle": "Profile",
+      "editButton": "Edit profile",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "saveButton": "Save",
+      "cancelButton": "Cancel",
+      "saveSuccess": "Profile updated successfully",
+      "saveError": "Failed to update profile",
+      "emailSection": "Email address",
+      "emailPrimary": "Primary",
+      "emailVerified": "Verified",
+      "emailUnverified": "Unverified",
+      "resendVerification": "Resend verification email",
+      "verificationSent": "Verification email sent. Check your inbox.",
+      "verificationError": "Failed to send verification email",
+      "connectedAccountsSection": "Connected accounts",
+      "connectedGoogle": "Google",
+      "connectedNone": "Not connected",
+      "memberSinceLabel": "Member since"
     },
     "userSettings": {
       "personalInfo": "Personal Information",

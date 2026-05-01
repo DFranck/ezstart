@@ -70,7 +70,6 @@ export default function EZPayDashboardPage() {
     navOverview: t('nav.overview'),
     navAccount: t('nav.account'),
     navApplications: t('nav.applications'),
-    navApiKeys: t('nav.apiKeys'),
     navBilling: t('nav.billing'),
     navUsage: t('nav.usage'),
     navSettings: t('nav.settings'),

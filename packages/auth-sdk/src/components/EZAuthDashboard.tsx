@@ -17,7 +17,7 @@ import {
   SidebarToggle,
   Span,
 } from '@ezstart/ui/components'
-import type { ApiKeyItem, Application, AuditLogEntry } from '../core/types.js'
+import type { Application, AuditLogEntry } from '../core/types.js'
 import { useAuth } from '../react/hooks.js'
 import { UserMenu } from './UserMenu.js'
 import { DashboardSkeleton } from './dashboard/sections.js'
@@ -52,8 +52,6 @@ export interface EZAuthDashboardProps {
   defaultSection?: EZAuthDashboardSection
   /** App name for role display and API key scoping. */
   appName?: string
-  /** Whether DeveloperPortal should fetch data (when using the default slot). */
-  apiKeysEnabled?: boolean
   /** Whether the current user owns at least one Application (gates sections). */
   hasOwnedApps?: boolean
   /** Locale for date formatting. */
@@ -99,13 +97,6 @@ export interface EZAuthDashboardProps {
    */
   topBarExtra?: ReactNode
   /**
-   * Server-side pre-fetched API keys (via `getServerApiKeys()` from
-   * `@ezstart/auth-sdk/server`). Forwarded to the default `<DeveloperPortal>`
-   * slot so the keys table renders on the very first paint — no client
-   * `<Spinner>` flash on dashboard / api-keys section loads.
-   */
-  initialKeys?: ApiKeyItem[]
-  /**
    * Server-side pre-fetched audit log entries (via `getServerAuditLog()`).
    * Forwarded to the default `<AuditLogSection>` slot so the activity table
    * renders on the very first paint when the user lands on the activity
@@ -144,7 +135,6 @@ export interface EZAuthDashboardProps {
 export function EZAuthDashboard({
   defaultSection = 'overview',
   appName,
-  apiKeysEnabled = true,
   hasOwnedApps = false,
   locale = 'en',
   texts: textOverrides,
@@ -156,7 +146,6 @@ export function EZAuthDashboard({
   onHomeClick,
   sidebarFooterExtra,
   topBarExtra,
-  initialKeys,
   initialAuditEntries,
   initialApplications,
 }: EZAuthDashboardProps) {
@@ -356,13 +345,10 @@ export function EZAuthDashboard({
               section={effectiveSection as EZAuthDashboardSection}
               user={user}
               appName={appName}
-              apiKeysEnabled={apiKeysEnabled}
               locale={locale}
               texts={texts}
               slots={slots}
               isAdmin={isAdmin}
-              isSuper={isSuper}
-              initialKeys={initialKeys}
               initialAuditEntries={initialAuditEntries}
               initialApplications={initialApplications}
             />

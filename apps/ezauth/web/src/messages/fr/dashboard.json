@@ -4,8 +4,7 @@
     "nav": {
       "overview": "Vue d'ensemble",
       "account": "Compte",
-      "applications": "Applications",
-      "apiKeys": "Clés d'API",
+      "developer": "Développeur",
       "billing": "Facturation",
       "usage": "Utilisation",
       "activity": "Activité",
@@ -122,6 +121,27 @@
       "twoFactor": "Authentification à deux facteurs",
       "sessions": "Sessions actives",
       "connectedAccounts": "Comptes connectés"
+    },
+    "profile": {
+      "sectionTitle": "Profil",
+      "editButton": "Modifier le profil",
+      "firstNameLabel": "Prénom",
+      "lastNameLabel": "Nom",
+      "saveButton": "Enregistrer",
+      "cancelButton": "Annuler",
+      "saveSuccess": "Profil mis à jour avec succès",
+      "saveError": "Échec de la mise à jour du profil",
+      "emailSection": "Adresse email",
+      "emailPrimary": "Principale",
+      "emailVerified": "Vérifiée",
+      "emailUnverified": "Non vérifiée",
+      "resendVerification": "Renvoyer l'email de vérification",
+      "verificationSent": "Email de vérification envoyé. Vérifiez votre boîte de réception.",
+      "verificationError": "Échec de l'envoi de l'email de vérification",
+      "connectedAccountsSection": "Comptes connectés",
+      "connectedGoogle": "Google",
+      "connectedNone": "Non connecté",
+      "memberSinceLabel": "Membre depuis"
     },
     "userSettings": {
       "personalInfo": "Informations personnelles",

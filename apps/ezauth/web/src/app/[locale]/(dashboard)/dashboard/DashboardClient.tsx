@@ -112,8 +112,7 @@ export function DashboardClient({
   const dashboardTexts: Partial<EZAuthDashboardTexts> = {
     navOverview: t('nav.overview'),
     navAccount: t('nav.account'),
-    navApplications: t('nav.applications'),
-    navApiKeys: t('nav.apiKeys'),
+    navApplications: t('nav.developer'),
     navBilling: t('nav.billing'),
     navUsage: t('nav.usage'),
     navActivity: t('nav.activity'),
@@ -138,6 +137,42 @@ export function DashboardClient({
     settingsTwoFactor: t('settings.twoFactor'),
     settingsSessions: t('settings.sessions'),
     settingsConnectedAccounts: t('settings.connectedAccounts'),
+    // Account (Profile) section — renders ProfileBlock (avatar / name /
+    // email + verification / connected accounts / member-since / delete)
+    profileSectionTitle: t('profile.sectionTitle'),
+    profileEditButton: t('profile.editButton'),
+    profileFirstNameLabel: t('profile.firstNameLabel'),
+    profileLastNameLabel: t('profile.lastNameLabel'),
+    profileSaveButton: t('profile.saveButton'),
+    profileCancelButton: t('profile.cancelButton'),
+    profileSaveSuccess: t('profile.saveSuccess'),
+    profileSaveError: t('profile.saveError'),
+    profileEmailSection: t('profile.emailSection'),
+    profileEmailPrimary: t('profile.emailPrimary'),
+    profileEmailVerified: t('profile.emailVerified'),
+    profileEmailUnverified: t('profile.emailUnverified'),
+    profileResendVerification: t('profile.resendVerification'),
+    profileVerificationSent: t('profile.verificationSent'),
+    profileVerificationError: t('profile.verificationError'),
+    profileConnectedAccountsSection: t('profile.connectedAccountsSection'),
+    profileConnectedGoogle: t('profile.connectedGoogle'),
+    profileConnectedNone: t('profile.connectedNone'),
+    profileMemberSinceLabel: t('profile.memberSinceLabel'),
+    deleteAccount: {
+      title: tDeleteAccount('title'),
+      description: tDeleteAccount('description'),
+      triggerLabel: tDeleteAccount('triggerLabel'),
+      confirmTitle: tDeleteAccount('confirmTitle'),
+      confirmDescription: tDeleteAccount('confirmDescription'),
+      emailLabel: tDeleteAccount('emailLabel'),
+      emailPlaceholder: tDeleteAccount('emailPlaceholder'),
+      passwordLabel: tDeleteAccount('passwordLabel'),
+      passwordPlaceholder: tDeleteAccount('passwordPlaceholder'),
+      cancel: tDeleteAccount('cancel'),
+      confirm: tDeleteAccount('confirm'),
+      successMessage: tDeleteAccount('successMessage'),
+      errorMessage: tDeleteAccount('errorMessage'),
+    },
     settings: {
       personalInfo: tUserSettings('personalInfo'),
       email: tUserSettings('email'),
@@ -422,7 +457,21 @@ export function DashboardClient({
     },
   }
 
+  // Derive `keyCount` per Application from the SSR-prefetched API keys so each
+  // app card shows a "N keys" badge without an extra round-trip. Only counts
+  // keys whose `applicationId` matches an Application owned by the user.
+  const keyCounts: Record<string, number> = {}
+  if (initialKeys) {
+    for (const key of initialKeys) {
+      if (key.applicationId) {
+        keyCounts[key.applicationId] = (keyCounts[key.applicationId] ?? 0) + 1
+      }
+    }
+  }
+
   // Slot: the Applications list needs our router to push to the detail view.
+  // The list also gets the SSR-prefetched apps + per-app key counts so the
+  // first paint already shows the cards with their key tally.
   const applicationsSlot = (
     <Div className="space-y-6">
       <ApplicationsList
@@ -430,6 +479,8 @@ export function DashboardClient({
         texts={applicationsTexts}
         showSuperadminAllToggle={isSuperadmin}
         onSelectApplication={app => router.push(`/${locale}/developer/${app.id}`)}
+        initialApplications={initialApplications}
+        keyCounts={keyCounts}
       />
     </Div>
   )
@@ -667,7 +718,6 @@ export function DashboardClient({
     <EZAuthDashboard
       appName="ezauth"
       locale={locale}
-      apiKeysEnabled
       hasOwnedApps={hasOwnedApps}
       homeHref={`/${locale}`}
       texts={dashboardTexts}
@@ -678,7 +728,6 @@ export function DashboardClient({
       extraSections={[emailChangeSection, dangerZoneSection]}
       sidebarFooterExtra={platformAdminCta}
       topBarExtra={<EzauthScopeIndicator scope="user" />}
-      initialKeys={initialKeys}
       initialAuditEntries={initialAuditEntries}
       initialApplications={initialApplications}
     />

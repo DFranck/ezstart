@@ -6,6 +6,7 @@ import type { SessionsManagerTexts } from '../SessionsManager.js'
 import type { DeveloperPortalTexts } from '../developer/types.js'
 import type { OAuthProvidersSectionTexts } from '../oauth-providers-section.js'
 import type { AuditLogSectionTexts } from '../audit-log-section.js'
+import type { DeleteAccountSectionTexts } from '../DeleteAccountSection.js'
 
 /**
  * Canonical section identifiers for the unified `/dashboard`. Mirrors the
@@ -16,12 +17,17 @@ import type { AuditLogSectionTexts } from '../audit-log-section.js'
  *
  * Consumer apps that need to expose admin entry points should render an
  * "Admin Platform" CTA via `sidebarFooterExtra` (or a dedicated route).
+ *
+ * Removed `'api-keys'` (2026-05-01, DASHBOARD-DROP-API-KEYS-001) — the
+ * cross-app `<DeveloperPortal>` view is redundant with the per-Application
+ * Keys tab in `/developer/<id>` (Stripe/Clerk/Auth0/Supabase pattern).
+ * Consumers who still want a global keys view can mount `<DeveloperPortal>`
+ * via the `extraSections` prop.
  */
 export type EZAuthDashboardSection =
   | 'overview'
   | 'account'
   | 'applications'
-  | 'api-keys'
   | 'billing'
   | 'usage'
   | 'activity'
@@ -37,11 +43,12 @@ export type EZAuthDashboardSection =
 export type SectionVisibility = 'always' | 'ownsApps' | 'admin' | 'superadmin'
 
 export interface EZAuthDashboardTexts {
-  /** Sidebar nav labels (keys mirror the section ids) */
+  /** Sidebar nav labels (keys mirror the section ids — `applications` slug
+   * label is `navApplications`; consumers typically translate it as
+   * "Developer" since it now hosts apps + their keys + themes + webhooks. */
   navOverview: string
   navAccount: string
   navApplications: string
-  navApiKeys: string
   navBilling: string
   navUsage: string
   navActivity: string
@@ -74,6 +81,26 @@ export interface EZAuthDashboardTexts {
   settingsTwoFactor: string
   settingsSessions: string
   settingsConnectedAccounts: string
+  /** Account (Profile) section labels */
+  profileSectionTitle: string
+  profileEditButton: string
+  profileFirstNameLabel: string
+  profileLastNameLabel: string
+  profileSaveButton: string
+  profileCancelButton: string
+  profileSaveSuccess: string
+  profileSaveError: string
+  profileEmailSection: string
+  profileEmailPrimary: string
+  profileEmailVerified: string
+  profileEmailUnverified: string
+  profileResendVerification: string
+  profileVerificationSent: string
+  profileVerificationError: string
+  profileConnectedAccountsSection: string
+  profileConnectedGoogle: string
+  profileConnectedNone: string
+  profileMemberSinceLabel: string
   /** Nested component overrides */
   settings: Partial<UserSettingsTexts>
   emailVerification: Partial<EmailVerificationStatusTexts>
@@ -82,17 +109,23 @@ export interface EZAuthDashboardTexts {
   developerPortal: Partial<DeveloperPortalTexts>
   oauthProviders: Partial<OAuthProvidersSectionTexts>
   auditLog: Partial<AuditLogSectionTexts>
+  /** Delete account (danger zone) section overrides — renders inside Account (Profile). */
+  deleteAccount: Partial<DeleteAccountSectionTexts>
 }
 
 /**
  * Slot overrides. Consumer apps can inject app-specific content for sections
  * that need routing / app-scoped SDK components.
+ *
+ * Removed `apiKeys` (2026-05-01, DASHBOARD-DROP-API-KEYS-001) — the
+ * `'api-keys'` section was dropped from the canonical sidebar. Consumers
+ * who still want a global keys view can mount `<DeveloperPortal>` via
+ * `extraSections`.
  */
 export interface EZAuthDashboardSlots {
   overview?: ReactNode
   account?: ReactNode
   applications?: ReactNode
-  apiKeys?: ReactNode
   billing?: ReactNode
   usage?: ReactNode
   activity?: ReactNode
@@ -119,8 +152,7 @@ export interface EZAuthDashboardExtraSection {
 export const DEFAULT_DASHBOARD_TEXTS: EZAuthDashboardTexts = {
   navOverview: 'Overview',
   navAccount: 'Account',
-  navApplications: 'Applications',
-  navApiKeys: 'API Keys',
+  navApplications: 'Developer',
   navBilling: 'Billing',
   navUsage: 'Usage',
   navActivity: 'Activity',
@@ -146,6 +178,25 @@ export const DEFAULT_DASHBOARD_TEXTS: EZAuthDashboardTexts = {
   settingsTwoFactor: 'Two-Factor Authentication',
   settingsSessions: 'Active Sessions',
   settingsConnectedAccounts: 'Connected accounts',
+  profileSectionTitle: 'Profile',
+  profileEditButton: 'Edit profile',
+  profileFirstNameLabel: 'First name',
+  profileLastNameLabel: 'Last name',
+  profileSaveButton: 'Save',
+  profileCancelButton: 'Cancel',
+  profileSaveSuccess: 'Profile updated successfully',
+  profileSaveError: 'Failed to update profile',
+  profileEmailSection: 'Email address',
+  profileEmailPrimary: 'Primary',
+  profileEmailVerified: 'Verified',
+  profileEmailUnverified: 'Unverified',
+  profileResendVerification: 'Resend verification email',
+  profileVerificationSent: 'Verification email sent. Check your inbox.',
+  profileVerificationError: 'Failed to send verification email',
+  profileConnectedAccountsSection: 'Connected accounts',
+  profileConnectedGoogle: 'Google',
+  profileConnectedNone: 'Not connected',
+  profileMemberSinceLabel: 'Member since',
   settings: {},
   emailVerification: {},
   twoFactor: {},
@@ -153,6 +204,7 @@ export const DEFAULT_DASHBOARD_TEXTS: EZAuthDashboardTexts = {
   developerPortal: {},
   oauthProviders: {},
   auditLog: {},
+  deleteAccount: {},
 }
 
 /**
@@ -166,7 +218,6 @@ export const DEFAULT_SECTION_ORDER: EZAuthDashboardSection[] = [
   'overview',
   'account',
   'applications',
-  'api-keys',
   'billing',
   'usage',
   'activity',
@@ -177,7 +228,6 @@ export const SECTION_VISIBILITY: Record<EZAuthDashboardSection, SectionVisibilit
   overview: 'always',
   account: 'always',
   applications: 'always',
-  'api-keys': 'always',
   billing: 'always',
   usage: 'always',
   activity: 'always',
@@ -187,8 +237,7 @@ export const SECTION_VISIBILITY: Record<EZAuthDashboardSection, SectionVisibilit
 export const SECTION_ICONS: Record<EZAuthDashboardSection, string> = {
   overview: 'lucide:LayoutDashboard',
   account: 'lucide:User',
-  applications: 'lucide:AppWindow',
-  'api-keys': 'lucide:Key',
+  applications: 'lucide:Code',
   billing: 'lucide:CreditCard',
   usage: 'lucide:BarChart3',
   activity: 'lucide:History',
@@ -203,8 +252,6 @@ export function navLabelFor(section: EZAuthDashboardSection, texts: EZAuthDashbo
       return texts.navAccount
     case 'applications':
       return texts.navApplications
-    case 'api-keys':
-      return texts.navApiKeys
     case 'billing':
       return texts.navBilling
     case 'usage':
