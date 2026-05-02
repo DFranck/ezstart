@@ -77,7 +77,7 @@ describe('useConnectStatus', () => {
       wrapper: Wrapper,
     })
 
-    await new Promise((r) => setTimeout(r, 50))
+    await new Promise(r => setTimeout(r, 50))
 
     expect(fetchMock).not.toHaveBeenCalled()
     expect(result.current.account).toBeNull()
@@ -308,5 +308,54 @@ describe('useConnectDisconnect', () => {
 
     expect(success).toBe(false)
     expect(result.current.error).toBeTruthy()
+  })
+
+  it('forwards applicationId as a query string when provided', async () => {
+    const fetchMock = setupFetchMock([
+      {
+        url: '/connect/disconnect?applicationId=app_123',
+        method: 'DELETE',
+        response: { success: true },
+      },
+    ])
+
+    const { result } = renderHook(() => useConnectDisconnect(), { wrapper: Wrapper })
+
+    let success = false
+    await act(async () => {
+      success = await result.current.disconnect({ applicationId: 'app_123' })
+    })
+
+    expect(success).toBe(true)
+    // Verify fetch was called with the scoped URL — `setupFetchMock` matches
+    // with `String.includes`, so this asserts the query string actually made
+    // it through the SDK layer.
+    const calledUrls = fetchMock.mock.calls.map(call => {
+      const input = call[0] as string | URL | Request
+      return typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+    })
+    expect(calledUrls.some(u => u.includes('applicationId=app_123'))).toBe(true)
+  })
+
+  it('omits the query string when no applicationId is provided', async () => {
+    const fetchMock = setupFetchMock([
+      {
+        url: '/connect/disconnect',
+        method: 'DELETE',
+        response: { success: true },
+      },
+    ])
+
+    const { result } = renderHook(() => useConnectDisconnect(), { wrapper: Wrapper })
+
+    await act(async () => {
+      await result.current.disconnect()
+    })
+
+    const calledUrls = fetchMock.mock.calls.map(call => {
+      const input = call[0] as string | URL | Request
+      return typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+    })
+    expect(calledUrls.some(u => u.endsWith('/connect/disconnect'))).toBe(true)
   })
 })

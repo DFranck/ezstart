@@ -308,8 +308,8 @@ export class PayClient implements PayClientInternal {
     return getConnectDashboardLinkImpl(this)
   }
 
-  disconnectAccount(): Promise<{ success: boolean }> {
-    return disconnectAccountImpl(this)
+  disconnectAccount(params?: { applicationId?: string }): Promise<{ success: boolean }> {
+    return disconnectAccountImpl(this, params)
   }
 
   // ===== APPLICATION CONFIG =====

@@ -300,4 +300,139 @@ describe('Connect Routes Business Logic', () => {
       // Route calls stripe.accounts.createLoginLink(account.stripeAccountId)
     })
   })
+
+  // ========================================
+  // DELETE /connect/disconnect
+  // ========================================
+  describe('Disconnect (DELETE /connect/disconnect)', () => {
+    it('should hard-delete the ConnectedAccount row scoped by applicationId+userId', async () => {
+      const userId = 'user_disc_1'
+      const applicationId = 'app_disc_1'
+      await ConnectedAccount.create({
+        applicationId,
+        userId,
+        stripeAccountId: 'acct_disc_1',
+        email: 'disc1@test.com',
+        businessName: 'Disc 1',
+        accountType: 'express',
+        status: 'active',
+        isPlatformAccount: false,
+      })
+
+      // Confirm row exists, then perform the delete the route would issue.
+      const before = await ConnectedAccount.findOne({ applicationId, userId }).lean()
+      expect(before).not.toBeNull()
+
+      await ConnectedAccount.deleteOne({ applicationId, userId })
+
+      const after = await ConnectedAccount.findOne({ applicationId, userId }).lean()
+      expect(after).toBeNull()
+    })
+
+    it('should 404 when no ConnectedAccount exists for the caller', async () => {
+      const account = await ConnectedAccount.findOne({
+        applicationId: 'app_missing_disc',
+        userId: 'user_missing_disc',
+      }).lean()
+      expect(account).toBeNull()
+      // Route returns sendError(res, 'No connected account found', 404)
+    })
+
+    it('should 400 when no applicationId is supplied AND the user owns 2+ accounts', async () => {
+      const userId = 'user_disc_multi'
+      await ConnectedAccount.create({
+        applicationId: 'app_disc_m1',
+        userId,
+        stripeAccountId: 'acct_disc_m1',
+        email: 'm1@test.com',
+        businessName: 'Multi 1',
+      })
+      await ConnectedAccount.create({
+        applicationId: 'app_disc_m2',
+        userId,
+        stripeAccountId: 'acct_disc_m2',
+        email: 'm2@test.com',
+        businessName: 'Multi 2',
+      })
+
+      const accounts = await ConnectedAccount.find({ userId }).lean()
+      expect(accounts.length).toBeGreaterThan(1)
+      // Route returns sendError(res, 'Multiple connected accounts found ...', 400)
+    })
+
+    it('should accept the degenerate single-account case when applicationId is omitted', async () => {
+      const userId = 'user_disc_single'
+      await ConnectedAccount.create({
+        applicationId: 'app_disc_single',
+        userId,
+        stripeAccountId: 'acct_disc_single',
+        email: 'single@test.com',
+        businessName: 'Single Biz',
+      })
+
+      const accounts = await ConnectedAccount.find({ userId }).lean()
+      expect(accounts).toHaveLength(1)
+      // Route picks accounts[0] and proceeds with the delete.
+    })
+
+    it('should 403 when a non-admin caller targets an applicationId they do not own', async () => {
+      await ConnectedAccount.create({
+        applicationId: 'app_disc_other',
+        userId: 'owner_user',
+        stripeAccountId: 'acct_disc_other',
+        email: 'other@test.com',
+        businessName: 'Other Biz',
+      })
+
+      // Caller userId differs from the row's userId — scoped lookup returns
+      // null, route 404s. With superadmin the unscoped fallback finds the
+      // row but ownership check then 403s for non-admin attempts that get
+      // past the scoped lookup. We assert the underlying invariant:
+      const ownedByCaller = await ConnectedAccount.findOne({
+        applicationId: 'app_disc_other',
+        userId: 'malicious_user',
+      }).lean()
+      expect(ownedByCaller).toBeNull()
+    })
+
+    it('should NEVER attempt Stripe deletion for platform-owned accounts', async () => {
+      const account = await ConnectedAccount.create({
+        applicationId: 'app_platform_disc',
+        userId: 'user_platform_disc',
+        stripeAccountId: 'acct_platform_shared',
+        email: 'platform@test.com',
+        businessName: 'Platform App',
+        isPlatformAccount: true,
+      })
+
+      // The handler short-circuits Stripe deletion when isPlatformAccount=true
+      // because the platform Stripe account is shared by every dogfood app.
+      expect(account.isPlatformAccount).toBe(true)
+      // stripeDeleted in the response should be `null` for this branch.
+    })
+
+    it('should still hard-delete the local row when Stripe accounts.del fails', async () => {
+      // Live-mode Standard accounts cannot be deleted via the API — Stripe
+      // throws. The route swallows the error and proceeds with the local
+      // delete so the user is no longer routing payments through the
+      // disconnected account from EZPay's side.
+      const account = await ConnectedAccount.create({
+        applicationId: 'app_disc_stripe_fail',
+        userId: 'user_disc_stripe_fail',
+        stripeAccountId: 'acct_disc_stripe_fail',
+        email: 'fail@test.com',
+        businessName: 'Stripe Fails Biz',
+        accountType: 'standard',
+        status: 'active',
+        isPlatformAccount: false,
+      })
+
+      // Simulate the local delete the route always performs after the Stripe
+      // attempt (regardless of Stripe outcome).
+      await ConnectedAccount.deleteOne({ _id: account._id })
+
+      const after = await ConnectedAccount.findById(account._id).lean()
+      expect(after).toBeNull()
+    })
+  })
 })

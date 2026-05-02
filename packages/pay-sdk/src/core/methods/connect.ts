@@ -89,11 +89,32 @@ export async function connectResume(
   return result.data ?? result
 }
 
-export async function disconnectAccount(client: PayClientInternal): Promise<{ success: boolean }> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/connect/disconnect`, {
-    method: 'DELETE',
-    headers: client.getHeaders(),
-  })
+/**
+ * Disconnect (unlink) the Stripe Connect account associated with an
+ * Application. Hard-deletes the local row server-side and (for external
+ * accounts) attempts `stripe.accounts.del()`. Throws if the caller doesn't
+ * own the account.
+ *
+ * Scoping:
+ * - Pass `{ applicationId }` to target a specific Application (the common
+ *   path used by `<DeveloperConnectDashboard>`).
+ * - Omit `applicationId` to disconnect the caller's only ConnectedAccount —
+ *   yields a 400 server-side if the caller owns multiple accounts.
+ */
+export async function disconnectAccount(
+  client: PayClientInternal,
+  params?: { applicationId?: string }
+): Promise<{ success: boolean }> {
+  const query = params?.applicationId
+    ? `?applicationId=${encodeURIComponent(params.applicationId)}`
+    : ''
+  const response = await client.fetchWithAuth(
+    `${client.config.apiUrl}/connect/disconnect${query}`,
+    {
+      method: 'DELETE',
+      headers: client.getHeaders(),
+    }
+  )
 
   const result = await response.json()
 

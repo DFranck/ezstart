@@ -155,7 +155,10 @@ export function DeveloperConnectDashboard({
   }
 
   async function handleConfirmDisconnect() {
-    const success = await disconnect()
+    // Always scope by applicationId — DeveloperConnectDashboard is mounted
+    // per-Application, so the API never has to disambiguate which account to
+    // unlink (and would 400 if the user owned more than one).
+    const success = await disconnect({ applicationId })
     if (success) {
       setDisconnectOpen(false)
       onDisconnectCallback?.()
