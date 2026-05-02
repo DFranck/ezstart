@@ -20,6 +20,19 @@ export interface SubscriptionMetadata {
   interval?: 'month'
   intervalCount?: number
   features?: string[]
+  /**
+   * Raw Stripe subscription status snapshot (e.g. `'active'`, `'past_due'`,
+   * `'trialing'`, `'unpaid'`). Persisted on every `customer.subscription.*`
+   * webhook so consumers (and the dunning service) can detect transitions
+   * without re-querying Stripe.
+   */
+  subscriptionStatus?: string
+  /** Stripe billing reason snapshot (`'subscription_create'`, `'subscription_cycle'`, …). */
+  billingReason?: string
+  /** Period end snapshot (ISO string from the latest invoice). */
+  periodEnd?: string
+  /** Renewal lineage — id of the original subscription Payment row. */
+  renewalOf?: string
 }
 
 export interface InvoiceMetadata {

@@ -147,3 +147,7 @@ export type {
   KeyCreatedModalTexts as PayKeyCreatedModalTexts,
 } from './developer/types.js'
 export { defaultPayDeveloperPortalTexts } from './developer/types.js'
+
+// Dunning UX (past_due banner — see services/dunning.service.ts on the API side)
+export { PastDueBanner } from './PastDueBanner.js'
+export type { PastDueBannerProps, PastDueBannerTexts } from './PastDueBanner.js'

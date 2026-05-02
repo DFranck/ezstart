@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Connect flow now end-to-end functional** (PAY_CONNECT_RESUME #84/#86
+  follow-up). `client.disconnectAccount()` accepts an optional
+  `{ applicationId }` parameter so the new `DELETE /api/connect/disconnect`
+  endpoint (api-ezpay) can be scoped explicitly when the user owns multiple
+  Connect accounts (the API returns 400 otherwise). `useConnectDisconnect()`
+  mirrors the same signature: `disconnect({ applicationId })`. The
+  `<DeveloperConnectDashboard>` component always passes its `applicationId`
+  prop down so the per-Application disconnect button unambiguously targets
+  the right account. 4 new vitest tests (376/376 PASS) cover the SDK-level
+  forwarding (`disconnectAccount` URL query, `useConnectDisconnect` hook
+  with/without `applicationId`). Backward-compatible — existing callers
+  that omit `applicationId` keep working in the degenerate single-account
+  case.
 - Declared Node.js >=18.0.0 engine requirement (supply chain compat signal for npm consumers).
 - **Stripe Tax — full B2B EU compliance wiring** (STRIPE_TAX_SETUP_EU #172).
   When a consumer passes `automaticTax: true` on `createCheckoutSession` or

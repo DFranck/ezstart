@@ -44,6 +44,9 @@ export type AuditLogAction =
   | 'subscription.created'
   | 'subscription.updated'
   | 'subscription.canceled'
+  | 'subscription.past_due'
+  | 'subscription.recovered'
+  | 'invoice.payment_failed'
   // Promos lifecycle
   | 'promo.created'
   | 'promo.updated'
@@ -78,6 +81,9 @@ export const AUDIT_LOG_ACTIONS = [
   'subscription.created',
   'subscription.updated',
   'subscription.canceled',
+  'subscription.past_due',
+  'subscription.recovered',
+  'invoice.payment_failed',
   'promo.created',
   'promo.updated',
   'promo.deleted',

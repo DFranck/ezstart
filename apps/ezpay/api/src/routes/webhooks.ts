@@ -8,6 +8,11 @@ import {
   notifyEzauthSubscription,
   type SubscriptionWebhookPayload,
 } from '../services/ezauth-subscription-webhook.js'
+import {
+  handlePastDue,
+  handleRecovered,
+  handleFinalCancellation,
+} from '../services/dunning.service.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import type {
   WebhookCheckoutData,
@@ -230,6 +235,33 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           `Subscription updated: ${data.subscriptionId} -> ${mappedStatus}${data.cancelAtPeriodEnd ? ' (canceling at period end)' : ''}`
         )
 
+        // Dunning: if THIS update is the transition into past_due (i.e. the
+        // previous metadata.subscriptionStatus was NOT past_due), fire the
+        // dunning email + persistent banner. Idempotent — re-firing the same
+        // Stripe event re-creates the notification but we always upsert the
+        // banner via the SDK component anyway.
+        try {
+          const prevStatus = existingPayment?.metadata?.subscriptionStatus
+          if (data.status === 'past_due' && prevStatus !== 'past_due' && existingPayment) {
+            await handlePastDue({
+              userId: existingPayment.userId ?? '',
+              projectId: existingPayment.projectId,
+              customerEmail: existingPayment.customerEmail,
+              customerName: existingPayment.customerName,
+              planName: (existingPayment.metadata?.planName as string | undefined) ?? undefined,
+              subscriptionId: data.subscriptionId,
+              isTestMode: !eventLiveMode,
+              amount: existingPayment.amount,
+              currency: existingPayment.currency,
+            })
+          }
+        } catch (dunErr) {
+          logger.warn(
+            '[Dunning] handlePastDue on subscription.updated failed (non-fatal)',
+            dunErr instanceof Error ? dunErr : String(dunErr)
+          )
+        }
+
         // Cross-service: notify ezauth ONLY when the status actually changed.
         // Stripe emits `customer.subscription.updated` on many minor fields
         // (payment method swap, etc.) and we don't want to spam grants.
@@ -289,6 +321,33 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           { status: 'cancelled' }
         )
         logger.info(`Subscription cancelled: ${data.subscriptionId}`)
+
+        // Dunning: distinguish a "clean cancellation" (user clicked cancel,
+        // sub was active) from a "Stripe gave up after dunning" cancellation.
+        // The latter happens when the sub was in past_due / failed before
+        // being terminated by Smart Retries — that's the case worth a
+        // final-cancellation email. Clean cancellations are out of scope
+        // here (the consumer app sends its own goodbye, if any).
+        try {
+          const prevStatus = existingPayment?.metadata?.subscriptionStatus
+          const wasDunning = prevStatus === 'past_due' || prevStatus === 'unpaid'
+          if (wasDunning && existingPayment) {
+            await handleFinalCancellation({
+              userId: existingPayment.userId ?? '',
+              projectId: existingPayment.projectId,
+              customerEmail: existingPayment.customerEmail,
+              customerName: existingPayment.customerName,
+              planName: (existingPayment.metadata?.planName as string | undefined) ?? undefined,
+              subscriptionId: data.subscriptionId,
+              isTestMode: !eventLiveMode,
+            })
+          }
+        } catch (dunErr) {
+          logger.warn(
+            '[Dunning] handleFinalCancellation on subscription.deleted failed (non-fatal)',
+            dunErr instanceof Error ? dunErr : String(dunErr)
+          )
+        }
 
         // Cross-service: revoke roles/features on ezauth.
         try {
@@ -366,6 +425,33 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           break
         }
 
+        // Dunning recovery detection: if the sub was previously past_due
+        // (or its mapped 'pending' / 'failed' status) and this invoice
+        // succeeded, fire the recovery flow BEFORE we overwrite the
+        // status to 'completed' below.
+        const prevSubStatus = subPayment.metadata?.subscriptionStatus
+        const wasInDunning = prevSubStatus === 'past_due' || prevSubStatus === 'unpaid'
+        if (wasInDunning) {
+          try {
+            await handleRecovered({
+              userId: subPayment.userId ?? '',
+              projectId: subPayment.projectId,
+              customerEmail: data.customerEmail ?? subPayment.customerEmail,
+              customerName: data.customerName ?? subPayment.customerName,
+              planName: (subPayment.metadata?.planName as string | undefined) ?? undefined,
+              subscriptionId: data.subscriptionId,
+              isTestMode: !eventLiveMode,
+              amount: (data.amount ?? 0) / 100,
+              currency: data.currency ?? subPayment.currency,
+            })
+          } catch (dunErr) {
+            logger.warn(
+              '[Dunning] handleRecovered on invoice.payment_succeeded failed (non-fatal)',
+              dunErr instanceof Error ? dunErr : String(dunErr)
+            )
+          }
+        }
+
         // Update the subscription's period end
         await Payment.updateOne(
           { _id: subPayment._id },
@@ -374,6 +460,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
               status: 'completed',
               currentPeriodEnd: data.periodEnd,
               cancelAtPeriodEnd: false,
+              // Clear the past_due flag so a future recovery cycle is detected
+              // correctly (only the next past_due → succeeded transition will
+              // re-fire this branch).
+              'metadata.subscriptionStatus': 'active',
             },
           }
         )
