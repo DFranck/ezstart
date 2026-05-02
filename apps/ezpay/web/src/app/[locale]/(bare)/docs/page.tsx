@@ -7,11 +7,14 @@ import {
   CardContent,
   Div,
   H1,
+  Icon,
   Main,
   MarkdownContent,
   P,
 } from '@ezstart/ui/components'
+import { componentRegistry } from '@ezstart/pay-sdk/components/registry'
 import { getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 
 export const dynamic = 'force-static'
 
@@ -31,6 +34,7 @@ export default async function DocsPage() {
   const readme = await loadReadme()
   const apiDocsUrl = `${getApiUrl('ezpay')}/docs`
   const githubUrl = 'https://github.com/DFranck/ezstart/tree/master/packages/pay-sdk'
+  const componentCount = componentRegistry.length
 
   return (
     <Main className="container mx-auto max-w-4xl py-8 px-4 space-y-8">
@@ -38,7 +42,13 @@ export default async function DocsPage() {
         <H1 size="h1">{t('title')}</H1>
         <P className="text-muted-foreground">{t('subtitle')}</P>
         <Div className="flex flex-wrap justify-center gap-3">
-          <Button asChild variant="default">
+          <Button asChild variant="default" className="gap-2">
+            <Link href="/docs/components">
+              <Icon name="lucide:LayoutGrid" className="h-4 w-4" />
+              <span>{`Browse components (${componentCount})`}</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
             <a href={apiDocsUrl} target="_blank" rel="noopener noreferrer">
               {t('apiReferenceButton')}
             </a>
@@ -51,8 +61,8 @@ export default async function DocsPage() {
         </Div>
       </Div>
 
-      <Card>
-        <CardContent className="p-6 md:p-8">
+      <Card className="w-full min-w-0 overflow-hidden">
+        <CardContent className="p-6 md:p-8 min-w-0">
           <MarkdownContent content={readme} />
         </CardContent>
       </Card>

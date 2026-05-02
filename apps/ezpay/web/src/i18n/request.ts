@@ -11,19 +11,31 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
-  const [common, payment, layout, admin, test, developer, home, billing, dashboard, status] =
-    await Promise.all([
-      import(`../messages/${locale}/common.json`),
-      import(`../messages/${locale}/payment.json`),
-      import(`../messages/${locale}/layout.json`),
-      import(`../messages/${locale}/admin.json`),
-      import(`../messages/${locale}/test.json`),
-      import(`../messages/${locale}/developer.json`),
-      import(`../messages/${locale}/home.json`),
-      import(`../messages/${locale}/billing.json`),
-      import(`../messages/${locale}/dashboard.json`),
-      import(`../messages/${locale}/status.json`),
-    ])
+  const [
+    common,
+    payment,
+    layout,
+    admin,
+    test,
+    developer,
+    home,
+    billing,
+    dashboard,
+    status,
+    components,
+  ] = await Promise.all([
+    import(`../messages/${locale}/common.json`),
+    import(`../messages/${locale}/payment.json`),
+    import(`../messages/${locale}/layout.json`),
+    import(`../messages/${locale}/admin.json`),
+    import(`../messages/${locale}/test.json`),
+    import(`../messages/${locale}/developer.json`),
+    import(`../messages/${locale}/home.json`),
+    import(`../messages/${locale}/billing.json`),
+    import(`../messages/${locale}/dashboard.json`),
+    import(`../messages/${locale}/status.json`),
+    import(`../messages/${locale}/components.json`),
+  ])
 
   return {
     locale,
@@ -38,6 +50,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       billing.default,
       dashboard.default,
       status.default,
+      components.default,
     ]),
   }
 })

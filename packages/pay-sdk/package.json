@@ -42,6 +42,10 @@
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
     },
+    "./components/registry": {
+      "types": "./dist/components/pay-sdk-registry.generated.d.ts",
+      "import": "./dist/components/pay-sdk-registry.generated.js"
+    },
     "./server": {
       "types": "./dist/server/index.d.ts",
       "import": "./dist/server/index.js"
@@ -55,6 +59,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",
+    "generate": "node scripts/generate-registry.cjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

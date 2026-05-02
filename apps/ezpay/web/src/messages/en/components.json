@@ -1,0 +1,113 @@
+{
+  "components": {
+    "sidebarTitle": "Pay SDK",
+    "sidebarOpen": "Open component navigation",
+    "sidebarClose": "Close component navigation",
+    "sidebarNavLabel": "Pay SDK component navigation",
+    "sidebarSearchPlaceholder": "Filter components…",
+    "sidebarEmpty": "No components match your search.",
+    "sidebarShortcutHint": "Press the shortcut to open the command palette.",
+    "sidebarAllEntry": "All categories",
+    "backToHome": "Back to EZPay",
+    "paletteTitle": "Pay SDK component palette",
+    "paletteDescription": "Search across every @ezstart/pay-sdk component.",
+    "palettePlaceholder": "Search components…",
+    "paletteEmpty": "No components found.",
+    "landingTitle": "Pay SDK Components",
+    "landingSubtitle": "React components for donations, subscriptions, billing, and Connect onboarding in Next.js applications.",
+    "landingTotalComponents": "{count} components",
+    "landingTotalCategories": "{count} categories",
+    "landingTotalEntries": "{count} entries",
+    "landingTotalDomains": "{count} domains",
+    "landingComponentsInDomain": "{count, plural, one {# component} other {# components}}",
+    "landingShortcutHint": "⌘K to search",
+    "landingCategoriesHeading": "Browse by category",
+    "landingFeatureBadge": "Variants",
+    "landingFeatureDescription": "{count, plural, one {# variant — Form, Card, or Modal} other {# variants — Form, Card, or Modal}}",
+    "landingFeatureSwitchLabel": "Switch variant",
+    "landingFeatureDetailLink": "Open detail",
+    "landingFilterActive": "Filtering: {name}",
+    "landingClearFilter": "Clear filter",
+    "landingFooterTitle": "Get started",
+    "landingFooterDescription": "Install the package, configure the provider, and start dropping components into your app. Every component ships with TypeScript types, English defaults, and a `texts` prop for i18n.",
+    "categoryBackToOverview": "Back to overview",
+    "categoryComponentCount": "{count, plural, one {# component} other {# components}}",
+    "categoryCompoundBadge": "Compound",
+    "categoryNoSummary": "No summary available.",
+    "categoryPropsCount": "{count, plural, one {# prop} other {# props}}",
+    "categoryExamplesCount": "{count, plural, one {# example} other {# examples}}",
+    "detailBreadcrumbRoot": "Components",
+    "detailCompoundBadge": "Compound",
+    "detailViewSource": "View source",
+    "detailFeatureGroupLabel": "Feature group",
+    "detailFeatureVariantsCount": "{count, plural, one {# variant} other {# variants}}",
+    "detailFeatureVariantsAriaLabel": "{name} variants",
+    "detailFeatureVariantsHelp": "Showing {name}. Switch tabs above to compare the same flow in a different layout.",
+    "tabPreview": "Preview",
+    "tabCode": "Code",
+    "tabProps": "Props",
+    "tabAnatomy": "Anatomy",
+    "previewMissing": "No live demo for this component yet — see the source link or the Code tab for a snippet.",
+    "previewMissingTitle": "Demo unavailable",
+    "demoModeBanner": {
+      "title": "DEMO MODE",
+      "description": "Actions in this preview are real but isolated to a sandbox Application. Data resets every 24h."
+    },
+    "codeFallbackTitle": "Quick start",
+    "codeFallbackDescription": "No example was attached to this component's TSDoc — here's a generated snippet based on its props.",
+    "codeExampleTitle": "Example {index}",
+    "codeDescriptionTitle": "Notes",
+    "propsEmpty": "This component has no public props.",
+    "propsHeaderName": "Name",
+    "propsHeaderType": "Type",
+    "propsHeaderRequired": "Required",
+    "propsHeaderDescription": "Description",
+    "propsRequired": "required",
+    "propsOptional": "optional",
+    "propsNoDescription": "—",
+    "anatomyTitle": "Anatomy",
+    "anatomySingleDescription": "Single component — no sub-parts to compose.",
+    "anatomyCompoundDescription": "This component file exports additional pieces you can render or extend.",
+    "anatomyExportsHeading": "Sub-exports",
+    "anatomyImportHeading": "Import",
+    "adminToggleShowInternal": "Show internal components",
+    "adminToggleAriaLabel": "Toggle internal components visibility",
+    "adminToggleAdminView": "ADMIN VIEW",
+    "adminToggleInternalBadge": "internal",
+    "adminToggleInternalTooltip": "Internal component — hidden from the public docs surface.",
+    "domain": {
+      "donations": {
+        "title": "Donations",
+        "description": "Buttons, modals, cards, and donation walls — drop-in primitives for one-time and recurring donations powered by Stripe Checkout."
+      },
+      "subscriptions": {
+        "title": "Subscriptions",
+        "description": "Subscribe buttons, plan cards, and the change-plan flow — every primitive needed to surface and manage recurring subscriptions."
+      },
+      "billingPricing": {
+        "title": "Billing & Pricing",
+        "description": "PricingPage, BillingDashboard, InvoiceHistorySection, the past-due banner, and Stripe Customer Portal launchers — full lifecycle billing UI."
+      },
+      "purchases": {
+        "title": "Purchases & Marketplace",
+        "description": "Single-purchase buttons and cards plus the marketplace primitives (ProductCard, ProductGrid, PaymentHistory) for one-shot product sales."
+      },
+      "callbackPages": {
+        "title": "Callback Pages",
+        "description": "Pre-built Stripe Checkout success and cancel landing pages — drop them onto `/subscribe/success`, `/donate/cancel`, etc. for instant flows."
+      },
+      "connect": {
+        "title": "Stripe Connect",
+        "description": "Onboarding form, status card, fee summary, and the developer Connect dashboard — everything for marketplace-style platforms with multi-vendor payouts."
+      },
+      "adminDeveloper": {
+        "title": "Admin & Developer",
+        "description": "Federated admin dashboard, plans manager, the developer portal, API key creation modal, and the user payment dashboard — power-user surfaces for platform owners."
+      },
+      "utilities": {
+        "title": "Utilities & Gates",
+        "description": "Feature gates, confirm dialogs, promo code input, refund button, and the not-configured fallback — orthogonal primitives reused across flows."
+      }
+    }
+  }
+}
