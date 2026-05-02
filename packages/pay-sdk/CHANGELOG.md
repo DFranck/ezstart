@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Pay docs sandbox** (PAY_DOCS_DEMO_SANDBOX-001 #178). pay-sdk now supports
+  `applicationId='_pay-docs-demo'` for `/docs/components` live previews on
+  the docs site. Sandbox-isolated subscriptions / payments / donations /
+  invoices that never touch a live Stripe account. 24h reset cron + baseline
+  re-seed (3 plans + 2 subs + 4 payments + 5 donations + 2 invoices). Hard
+  quotas: 50 active subs / 200 payments per day / 100 donations per day.
+  Backed by ezauth seed `seed:pay-docs-demo` (creates the Application + 2
+  reserved keys) + ezpay seed `seed:pay-docs-demo` (creates the sandbox
+  data). Manual reset endpoint `POST /api/admin/pay-docs-demo/reset`
+  (superadmin only).
 - **Connect flow now end-to-end functional** (PAY_CONNECT_RESUME #84/#86
   follow-up). `client.disconnectAccount()` accepts an optional
   `{ applicationId }` parameter so the new `DELETE /api/connect/disconnect`

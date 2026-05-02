@@ -15,6 +15,7 @@ import { validatePromo, calculateDiscount } from '../../services/promo.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { checkPayDemoQuotas } from '../../middleware/check-pay-demo-quotas.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -243,7 +244,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/subscribe', authJwtOrKey(), createSubscriptionHandler, {
+docRouter.post('/subscribe', authJwtOrKey(), checkPayDemoQuotas, createSubscriptionHandler, {
   summary: 'Create a subscription checkout session',
   tags: ['Subscriptions'],
   bodySchema: createSubscriptionSchema,

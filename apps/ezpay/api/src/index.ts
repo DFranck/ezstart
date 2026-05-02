@@ -5,6 +5,7 @@ import { logger } from '@ezstart/logger/server'
 import { bootApi, createVersionedRouter } from '@ezstart/api-core'
 import routes, { registries } from './routes/index.js'
 import { startConnectCleanupScheduler } from './services/connect-cleanup.js'
+import { startPayDocsDemoResetScheduler } from './services/pay-docs-demo-reset.service.js'
 
 // Fail-fast in production if the S2S key for ezauth cross-service validation
 // is missing — without it `POST /api/keys` can't validate Applications against
@@ -54,6 +55,11 @@ try {
 // don't race the scheduler.
 if (process.env.NODE_ENV !== 'test') {
   startConnectCleanupScheduler()
+  // Pay docs sandbox reset cron (PAY_DOCS_DEMO_SANDBOX-001) — first tick
+  // lands at the next 4am UTC, then every 24h. Wipes & re-seeds the
+  // `_pay-docs-demo` payments / subscriptions / donations / invoices
+  // baseline (plans persist across resets). Skipped under NODE_ENV=test.
+  startPayDocsDemoResetScheduler()
 }
 
 export { app }

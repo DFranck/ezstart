@@ -14,6 +14,7 @@ import { validatePromo, calculateDiscount } from '../../services/promo.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
 import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
+import { checkPayDemoQuotas } from '../../middleware/check-pay-demo-quotas.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -209,13 +210,20 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/purchase', authMiddleware, populateUserFromToken, createPurchaseHandler, {
-  summary: 'Create a purchase checkout session',
-  tags: ['Purchases'],
-  bodySchema: createPurchaseSchema,
-  responseSchema: paymentResponseSchema,
-  status: 201,
-})
+docRouter.post(
+  '/purchase',
+  authMiddleware,
+  populateUserFromToken,
+  checkPayDemoQuotas,
+  createPurchaseHandler,
+  {
+    summary: 'Create a purchase checkout session',
+    tags: ['Purchases'],
+    bodySchema: createPurchaseSchema,
+    responseSchema: paymentResponseSchema,
+    status: 201,
+  }
+)
 
 export { createPurchaseRegistry as registry, router }
 export default router
