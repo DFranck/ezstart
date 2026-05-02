@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- **PAY_SDK_PHASE_1_MIGRATE-001 (#179)** — 10 generic components moved to
+  `@ezstart/ui` and re-exported from `@ezstart/pay-sdk` for 90 days
+  (planned removal 2026-08-01). Each re-export emits a runtime
+  `useDeprecationWarning` so consumers see the migration path:
+  - `PaymentSuccessPage` → `PaymentSuccessTemplate` from `@ezstart/ui/components`.
+  - `SubscribeSuccessPage` → `SubscribeSuccessTemplate`.
+  - `DonateSuccessPage` → `DonateSuccessTemplate`.
+  - `PurchaseSuccessPage` → `PurchaseSuccessTemplate`.
+  - `SubscribeCancelPage` → `SubscribeCancelTemplate`.
+  - `DonateCancelPage` → `DonateCancelTemplate`.
+  - `PurchaseCancelPage` → `PurchaseCancelTemplate`.
+  - `ConfirmActionDialog` → `ConfirmActionDialog` from `@ezstart/ui/components`
+    (same name, same API).
+  - `ProductCard` → `ProductCard` from `@ezstart/ui/components`. The new
+    primitive is presentation-only: the action button is caller-provided
+    via the `actionSlot` prop. The pay-sdk wrapper preserves the legacy
+    payment-shaped props (`priceId`, `projectId`, `userId`, `userEmail`,
+    `userName`, `onBuy`, ...) by wiring `<PurchaseButton>` /
+    `<SubscribeButton>` from `@ezstart/pay-sdk/components` into the
+    actionSlot for backward-compat.
+  - `ProductGrid` → `ProductGrid` from `@ezstart/ui/components`. Same
+    wrapper strategy — pay-sdk version keeps the legacy product shape and
+    renders the deprecated pay-sdk `<ProductCard>` per item, while the
+    `@ezstart/ui` primitive expects each `products[i]` to include an
+    `actionSlot: ReactNode`.
+
+  The full behaviour suite (auto-redirect, session_id reference, dialog
+  state transitions, search / type filters, ...) is now in the
+  `@ezstart/ui` template tests. Pay-sdk keeps minimal contract tests on
+  the deprecated re-exports so the 90-day backward-compat window stays
+  covered. Internal pay-sdk consumers (`PayPaymentsSection`,
+  `PayPlansSection`, `PayPromosSection`, `PaySubscriptionsSection`,
+  `RefundButton`, `SubscriptionCard`) updated to import
+  `ConfirmActionDialog` from `@ezstart/ui/components` directly so they
+  don't trigger their own deprecation warnings.
+
 ### Added
 
 - **Pay docs sandbox** (PAY_DOCS_DEMO_SANDBOX-001 #178). pay-sdk now supports

@@ -196,6 +196,284 @@ export const uiComponentsMock = {
   H4: makePassthrough('H4', 'h4'),
   H5: makePassthrough('H5', 'h5'),
   H6: makePassthrough('H6', 'h6'),
+  // Templates / generics moved from pay-sdk to @ezstart/ui (PAY_SDK_PHASE_1_MIGRATE-001).
+  // The pay-sdk deprecated re-exports forward to these — passthrough shells so tests
+  // can render the deprecated wrappers without pulling the real ui implementation.
+  PaymentSuccessTemplate: PaymentSuccessTemplateMock,
+  SubscribeSuccessTemplate: makeCheckoutCallbackTemplateMock('SubscribeSuccessTemplate'),
+  SubscribeCancelTemplate: makeCheckoutCallbackTemplateMock('SubscribeCancelTemplate', true),
+  DonateSuccessTemplate: makeCheckoutCallbackTemplateMock('DonateSuccessTemplate'),
+  DonateCancelTemplate: makeCheckoutCallbackTemplateMock('DonateCancelTemplate', true),
+  PurchaseSuccessTemplate: makeCheckoutCallbackTemplateMock('PurchaseSuccessTemplate'),
+  PurchaseCancelTemplate: makeCheckoutCallbackTemplateMock('PurchaseCancelTemplate', true),
+  ConfirmActionDialog: ({
+    open,
+    onOpenChange,
+    title,
+    description,
+    onConfirm,
+    variant: _variant,
+    autoCloseDelay: _autoCloseDelay,
+    texts,
+  }: {
+    open?: boolean
+    onOpenChange?: (v: boolean) => void
+    title?: string
+    description?: string
+    onConfirm?: () => Promise<void>
+    variant?: 'destructive' | 'default'
+    autoCloseDelay?: number
+    texts?: Record<string, string>
+  }) => {
+    if (open === false) return null
+    const confirmLabel = texts?.confirmLabel ?? 'Confirm'
+    const cancelLabel = texts?.cancelLabel ?? 'Cancel'
+    return React.createElement(
+      'div',
+      { 'data-testid': 'ConfirmActionDialog', role: 'dialog' },
+      title ? React.createElement('h2', null, title) : null,
+      description ? React.createElement('p', null, description) : null,
+      React.createElement(
+        'button',
+        { type: 'button', onClick: () => onOpenChange?.(false) },
+        cancelLabel
+      ),
+      React.createElement(
+        'button',
+        {
+          type: 'button',
+          onClick: () => {
+            void onConfirm?.()
+          },
+        },
+        confirmLabel
+      )
+    )
+  },
+  ProductCard: ({
+    name,
+    description,
+    price,
+    currency,
+    badge,
+    type: _type,
+    intervalCount,
+    actionSlot,
+    formatCurrency: _fmt,
+    ...rest
+  }: Record<string, unknown>) =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'ProductCard', ...(rest as Record<string, unknown>) },
+      badge
+        ? React.createElement('span', { 'data-testid': 'ProductCard-badge' }, badge as string)
+        : null,
+      React.createElement('h3', null, name as string),
+      description ? React.createElement('p', null, description as string) : null,
+      React.createElement(
+        'p',
+        null,
+        `${price as number} ${(currency as string) ?? 'EUR'}${
+          (_type as string) === 'subscription'
+            ? ` / ${(intervalCount as number) === 12 ? 'yr' : (intervalCount as number) === 1 ? 'mo' : `${intervalCount as number}mo`}`
+            : ''
+        }`
+      ),
+      actionSlot as React.ReactNode
+    ),
+  ProductGrid: ({
+    products,
+    actionSlot: _,
+    ...rest
+  }: {
+    products?: Array<Record<string, unknown>>
+    actionSlot?: unknown
+  } & Record<string, unknown>) =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'ProductGrid', ...(rest as Record<string, unknown>) },
+      (products ?? []).map((p, i) =>
+        React.createElement('div', { key: i, 'data-testid': 'ProductGrid-item' }, p.name as string)
+      )
+    ),
+}
+
+/**
+ * Mock for `<PaymentSuccessTemplate>` (the new @ezstart/ui template that
+ * replaced pay-sdk's `PaymentSuccessPage`). Pure presentational — always
+ * renders the error-state markup since the pay-sdk re-export contract tests
+ * only assert that the underlying template surface is composed correctly
+ * (label / button forwarding). The full router/auto-redirect behaviour is
+ * covered exhaustively by the @ezstart/ui template suite.
+ */
+function PaymentSuccessTemplateMock(props: Record<string, unknown>) {
+  const { fallbackHref, errorMessage, errorButtonText, errorButtonClassName } = props as {
+    fallbackHref?: string
+    errorMessage?: string
+    errorButtonText?: string
+    errorButtonClassName?: string
+  }
+  return React.createElement(
+    'div',
+    { 'data-testid': 'PaymentSuccessTemplate-error', 'data-fallback-href': fallbackHref ?? '/' },
+    React.createElement('p', null, errorMessage ?? 'Payment verification failed'),
+    React.createElement(
+      'button',
+      {
+        type: 'button',
+        className: errorButtonClassName,
+        // No router.push call here — pay-sdk only verifies prop forwarding.
+        onClick: () => {},
+      },
+      errorButtonText ?? 'Go Back'
+    )
+  )
+}
+
+/**
+ * Helper — produce a stateless passthrough mock for a checkout callback
+ * template. Renders the consumer-provided title / description / CTA labels.
+ *
+ * Pure presentational — no `useRouter` / `useSearchParams` calls (those would
+ * collide with vitest's per-test `vi.mock('next/navigation', ...)` and pick up
+ * the REAL next module via require()). The full session_id / auto-redirect
+ * behaviour is now covered by the @ezstart/ui template suite directly.
+ */
+function makeCheckoutCallbackTemplateMock(testid: string, isCancel = false) {
+  return function CallbackTemplateMock(props: Record<string, unknown>) {
+    const { redirectTo, texts, backToPricingHref, backHomeHref, tryAgainHref } = props as {
+      redirectTo?: string
+      texts?: Record<string, string | string[]>
+      backToPricingHref?: string
+      backHomeHref?: string
+      tryAgainHref?: string
+    }
+    const t = (texts ?? {}) as Record<string, string | string[]>
+    const fallback: Record<string, string> = {
+      title: testid,
+      description: '',
+      ctaLabel: 'CTA',
+      stepsTitle: 'Steps',
+      primaryCtaLabel: 'Primary',
+      secondaryCtaLabel: 'Secondary',
+    }
+    const realDefaults = REAL_TEMPLATE_DEFAULTS[testid] ?? {}
+    const get = (k: string): string => {
+      const v = t[k]
+      if (typeof v === 'string') return v
+      return realDefaults[k] ?? fallback[k] ?? ''
+    }
+    const stepsArr: string[] = Array.isArray(t.steps)
+      ? (t.steps as string[])
+      : (REAL_TEMPLATE_STEPS[testid] ?? [])
+
+    const ctaHrefs: Array<{ href: string; label: string }> = []
+    if (isCancel) {
+      const primaryHref = backToPricingHref ?? tryAgainHref ?? '/'
+      const secondaryHref = backHomeHref ?? '/'
+      ctaHrefs.push(
+        { href: primaryHref, label: get('primaryCtaLabel') },
+        { href: secondaryHref, label: get('secondaryCtaLabel') }
+      )
+    } else {
+      ctaHrefs.push({ href: redirectTo ?? '/', label: get('ctaLabel') })
+    }
+
+    return React.createElement(
+      'div',
+      { 'data-testid': testid },
+      React.createElement('h1', null, get('title')),
+      React.createElement('p', null, get('description')),
+      ...ctaHrefs.map((cta, i) =>
+        React.createElement('a', { key: `cta-${i}`, href: cta.href }, cta.label)
+      ),
+      React.createElement('h3', null, get('stepsTitle')),
+      ...stepsArr.map((s, i) => React.createElement('p', { key: `step-${i}` }, s))
+    )
+  }
+}
+
+/**
+ * Mirror of the REAL `DEFAULT_TEXTS` in each
+ * packages/ui/src/components/checkout-templates/*.tsx — kept here so the mock
+ * surfaces the same English defaults when the consumer doesn't override `texts`.
+ * KEEP IN SYNC if the real defaults change (low churn — these are landing pages).
+ */
+const REAL_TEMPLATE_DEFAULTS: Record<string, Record<string, string>> = {
+  SubscribeSuccessTemplate: {
+    title: 'Subscription Successful!',
+    description: 'Your subscription is active and your account has been upgraded.',
+    ctaLabel: 'Go to dashboard',
+    stepsTitle: 'What happens next?',
+    redirectingLabel: 'Redirecting in {seconds}s…',
+    referenceLabel: 'Reference: {id}',
+  },
+  SubscribeCancelTemplate: {
+    title: 'Checkout Cancelled',
+    description: 'Your subscription was not started. No charges have been made.',
+    primaryCtaLabel: 'Back to pricing',
+    secondaryCtaLabel: 'Back to home',
+    stepsTitle: 'Need help?',
+  },
+  DonateSuccessTemplate: {
+    title: 'Thank You!',
+    description:
+      'Your donation has been received successfully. Your generosity makes a difference!',
+    ctaLabel: 'Back to home',
+    stepsTitle: 'What happens next?',
+    redirectingLabel: 'Redirecting in {seconds}s…',
+    referenceLabel: 'Reference: {id}',
+  },
+  DonateCancelTemplate: {
+    title: 'Payment Cancelled',
+    description: 'Your payment was cancelled. No charges have been made.',
+    primaryCtaLabel: 'Try Again',
+    secondaryCtaLabel: 'Back to Home',
+    stepsTitle: 'Need help?',
+  },
+  PurchaseSuccessTemplate: {
+    title: 'Purchase Complete!',
+    description: 'Your purchase has been processed successfully. Thank you for your order!',
+    ctaLabel: 'Back to home',
+    stepsTitle: 'What happens next?',
+    redirectingLabel: 'Redirecting in {seconds}s…',
+    referenceLabel: 'Reference: {id}',
+  },
+  PurchaseCancelTemplate: {
+    title: 'Payment Cancelled',
+    description: 'Your payment was cancelled. No charges have been made.',
+    primaryCtaLabel: 'Try Again',
+    secondaryCtaLabel: 'Back to Home',
+    stepsTitle: 'Need help?',
+  },
+}
+
+const REAL_TEMPLATE_STEPS: Record<string, string[]> = {
+  SubscribeSuccessTemplate: [
+    'A receipt has been emailed to you via Stripe.',
+    'Your new features and roles have been granted.',
+    'Manage your subscription anytime from your account page.',
+  ],
+  SubscribeCancelTemplate: [
+    "Don't worry — no amount has been charged to your account.",
+    'If you encountered an issue, please reach out to support.',
+  ],
+  DonateSuccessTemplate: [
+    'A receipt will be sent to your email via Stripe.',
+    'Your receipt is available in your Stripe email.',
+  ],
+  DonateCancelTemplate: [
+    "Don't worry, no amount has been charged to your account.",
+    'If you encountered an issue, please contact support.',
+  ],
+  PurchaseSuccessTemplate: [
+    'A receipt will be sent to your email via Stripe.',
+    'Your access has been granted immediately.',
+  ],
+  PurchaseCancelTemplate: [
+    "Don't worry, no amount has been charged to your account.",
+    'If you encountered an issue, please contact support.',
+  ],
 }
 
 // ---------------------------------------------------------------------------
@@ -209,6 +487,8 @@ export const loggerMock = {
     warn: vi.fn(),
     error: vi.fn(),
   },
+  // Used by `useDeprecationWarning` from @ezstart/ui/hooks (see PHASE_1_MIGRATE).
+  warnDeprecation: vi.fn(),
 }
 
 // ---------------------------------------------------------------------------

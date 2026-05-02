@@ -9,6 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **PAY_SDK_PHASE_1_MIGRATE-001 (#179)** — 10 generic components extracted
+  from `@ezstart/pay-sdk` (the originals are kept as deprecated re-exports
+  in pay-sdk for 90 days, removal 2026-08-01):
+  - `checkout-templates/` folder with 7 Stripe success / cancel landing
+    templates (was in `@ezstart/pay-sdk`):
+    `PaymentSuccessTemplate`, `SubscribeSuccessTemplate`,
+    `DonateSuccessTemplate`, `PurchaseSuccessTemplate`,
+    `SubscribeCancelTemplate`, `DonateCancelTemplate`,
+    `PurchaseCancelTemplate`. Pure presentational — read `?session_id=`
+    via `next/navigation` and render localised copy + CTAs. The 6
+    success/cancel templates share a private `_internal-callback-base.tsx`
+    helper (not exported from the package barrel). Originally part of
+    pay-sdk; generalised because the templates have zero payment coupling
+    (Stripe is just one possible source for the `session_id` query param).
+  - `ConfirmActionDialog` (`feedback/`) — generic confirm-action dialog
+    with built-in loading / success / error states + auto-close on success
+    - retry on error. Uses semantic theme tokens (`text-success` /
+      `text-destructive`) and `sonner` for toast feedback. Originally lived
+      in `@ezstart/pay-sdk`; primitive has zero payment coupling (it's a
+      thin wrapper around `<AlertDialog>` + a `Promise`-returning confirm
+      callback).
+  - `ProductCard` + `ProductGrid` (`data-display/`) — generic product
+    teaser card + responsive grid with optional search / type filter.
+    Originally lived in `@ezstart/pay-sdk`. The new primitives are
+    presentation-only: the action button (buy / subscribe / contact /
+    custom) is caller-provided via the `actionSlot: ReactNode` prop.
+    Pair with `<PurchaseButton>` / `<SubscribeButton>` from
+    `@ezstart/pay-sdk/components` for the standard Stripe flow, or wire
+    your own button for non-payment surfaces (catalog, marketplace
+    teaser, store front, ...). `@ezstart/ui` `ProductCard` accepts an
+    optional `formatCurrency` prop to inject an SSR-safe per-currency
+    locale resolver (the default uses the built-in
+    `@ezstart/ui/utils/format-currency`).
+  - `next` declared as optional peer dependency (^15) — required by the
+    new checkout templates (`useRouter` + `useSearchParams`) and the
+    `<ProductCard>` (`next/image`).
+
 - `<Card>` accepts an `intent` prop (`none` | `warning` | `success` | `info`
   | `destructive` | `primary`) — adds a semantic-color border and tinted
   background. Default `none` for zero-break backward compat. Pattern matches

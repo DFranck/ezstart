@@ -14,6 +14,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmActionDialog,
   DataTable,
   DataTableColumnHeader,
   Div,
@@ -36,7 +37,6 @@ import { toast } from '@ezstart/ui/utils'
 import type { Promo, PromoDiscountType, PromoDuration } from '../../../core/types.js'
 import { formatCurrency } from '../../../core/format-currency.js'
 import { usePayContext } from '../../../react/pay-provider.js'
-import { ConfirmActionDialog } from '../../ConfirmActionDialog.js'
 import type { PayPromosSectionTexts } from './types.js'
 import { PAGE_SIZE, formatDateShort } from './helpers.js'
 import { EmptyState, StatCard } from './primitives.js'

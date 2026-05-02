@@ -1,73 +1,50 @@
 /**
- * PurchaseSuccessPage — drop-in purchase success landing.
+ * PurchaseSuccessPage — deprecated re-export contract test.
+ *
+ * The component was moved to `@ezstart/ui` as `PurchaseSuccessTemplate`
+ * (2026-05-01). Pay-sdk surface preserved for 90 days. Removal 2026-08-01.
+ *
+ * Full behaviour suite:
+ *   `@ezstart/ui/__tests__/components/checkout-templates/purchase-success.test.tsx`
  */
 import React from 'react'
-import { render, screen, act } from '@testing-library/react'
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { uiComponentsMock, loggerMock, sonnerMock, uiUtilsMock } from './component-mocks.js'
-
-const pushMock = vi.fn()
-let searchParamsValue = new URLSearchParams()
 
 vi.mock('@ezstart/ui/components', () => uiComponentsMock)
 vi.mock('@ezstart/logger', () => loggerMock)
 vi.mock('sonner', () => sonnerMock)
 vi.mock('@ezstart/ui/utils', () => uiUtilsMock)
+vi.mock('@ezstart/ui/hooks', () => ({ useDeprecationWarning: vi.fn() }))
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: pushMock,
+    push: vi.fn(),
     replace: vi.fn(),
     back: vi.fn(),
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  useSearchParams: () => searchParamsValue,
+  useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/',
 }))
 
 const { PurchaseSuccessPage } = await import('../../components/PurchaseSuccessPage.js')
 
-describe('PurchaseSuccessPage', () => {
-  beforeEach(() => {
-    pushMock.mockClear()
-    searchParamsValue = new URLSearchParams()
-    vi.useFakeTimers()
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  it('renders English defaults', () => {
+describe('PurchaseSuccessPage (deprecated re-export)', () => {
+  it('renders the underlying PurchaseSuccessTemplate with English defaults', () => {
     render(<PurchaseSuccessPage />)
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Purchase Complete!')
-    expect(screen.getByText(/Your purchase has been processed/)).toBeInTheDocument()
+    expect(screen.getByText('Purchase Complete!')).toBeInTheDocument()
     expect(screen.getByText('Back to home')).toBeInTheDocument()
   })
 
-  it('does not auto-redirect by default', () => {
-    render(<PurchaseSuccessPage />)
-    act(() => {
-      vi.advanceTimersByTime(10000)
-    })
-    expect(pushMock).not.toHaveBeenCalled()
-  })
-
-  it('auto-redirects when redirectTo + delay set', async () => {
-    render(<PurchaseSuccessPage redirectTo="/account" redirectDelayMs={1500} />)
-    // 1500ms = 2 ticks (1000+500 rounded up to 2s, then redirect tick)
-    for (let i = 0; i < 3; i++) {
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(1000)
-      })
-    }
-    expect(pushMock).toHaveBeenCalledWith('/account')
-  })
-
-  it('renders session_id reference when present', () => {
-    searchParamsValue = new URLSearchParams('session_id=cs_buy_abcdef1234567890')
-    render(<PurchaseSuccessPage />)
-    expect(screen.getByText(/Reference:/)).toBeInTheDocument()
+  it('forwards texts overrides to the underlying template', () => {
+    render(
+      <PurchaseSuccessPage texts={{ title: 'Order OK', description: 'Done', ctaLabel: 'Home' }} />
+    )
+    expect(screen.getByText('Order OK')).toBeInTheDocument()
+    expect(screen.getByText('Done')).toBeInTheDocument()
+    expect(screen.getByText('Home')).toBeInTheDocument()
   })
 })

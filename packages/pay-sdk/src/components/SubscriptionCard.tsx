@@ -1,10 +1,17 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, Icon, P } from '@ezstart/ui/components'
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  ConfirmActionDialog,
+  Icon,
+  P,
+} from '@ezstart/ui/components'
 import { useCallback, useState } from 'react'
 import { usePayContext } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
-import { ConfirmActionDialog } from './ConfirmActionDialog.js'
 import type { PaymentStatus } from '../core/types.js'
 
 export interface SubscriptionCardTexts {

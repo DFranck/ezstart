@@ -1,72 +1,48 @@
 /**
- * DonateSuccessPage — drop-in donation success landing.
+ * DonateSuccessPage — deprecated re-export contract test.
+ *
+ * The component was moved to `@ezstart/ui` as `DonateSuccessTemplate`
+ * (2026-05-01). Pay-sdk surface preserved for 90 days. Removal 2026-08-01.
+ *
+ * Full behaviour suite:
+ *   `@ezstart/ui/__tests__/components/checkout-templates/donate-success.test.tsx`
  */
 import React from 'react'
-import { render, screen, act } from '@testing-library/react'
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { uiComponentsMock, loggerMock, sonnerMock, uiUtilsMock } from './component-mocks.js'
-
-const pushMock = vi.fn()
-let searchParamsValue = new URLSearchParams()
 
 vi.mock('@ezstart/ui/components', () => uiComponentsMock)
 vi.mock('@ezstart/logger', () => loggerMock)
 vi.mock('sonner', () => sonnerMock)
 vi.mock('@ezstart/ui/utils', () => uiUtilsMock)
+vi.mock('@ezstart/ui/hooks', () => ({ useDeprecationWarning: vi.fn() }))
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: pushMock,
+    push: vi.fn(),
     replace: vi.fn(),
     back: vi.fn(),
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  useSearchParams: () => searchParamsValue,
+  useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/',
 }))
 
 const { DonateSuccessPage } = await import('../../components/DonateSuccessPage.js')
 
-describe('DonateSuccessPage', () => {
-  beforeEach(() => {
-    pushMock.mockClear()
-    searchParamsValue = new URLSearchParams()
-    vi.useFakeTimers()
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  it('renders English defaults', () => {
+describe('DonateSuccessPage (deprecated re-export)', () => {
+  it('renders the underlying DonateSuccessTemplate with English defaults', () => {
     render(<DonateSuccessPage />)
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Thank You!')
-    expect(screen.getByText(/Your donation has been received/)).toBeInTheDocument()
+    expect(screen.getByText('Thank You!')).toBeInTheDocument()
     expect(screen.getByText('Back to home')).toBeInTheDocument()
   })
 
-  it('does not auto-redirect by default', () => {
-    render(<DonateSuccessPage />)
-    act(() => {
-      vi.advanceTimersByTime(10000)
-    })
-    expect(pushMock).not.toHaveBeenCalled()
-  })
-
-  it('auto-redirects when redirectTo + delay are provided', async () => {
-    render(<DonateSuccessPage redirectTo="/thanks" redirectDelayMs={2000} />)
-    for (let i = 0; i < 3; i++) {
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(1000)
-      })
-    }
-    expect(pushMock).toHaveBeenCalledWith('/thanks')
-  })
-
-  it('renders session_id reference when present', () => {
-    searchParamsValue = new URLSearchParams('session_id=cs_donate_abcdef1234567890')
-    render(<DonateSuccessPage />)
-    expect(screen.getByText(/Reference:/)).toBeInTheDocument()
+  it('forwards texts overrides to the underlying template', () => {
+    render(<DonateSuccessPage texts={{ title: 'Merci', description: 'OK', ctaLabel: 'Retour' }} />)
+    expect(screen.getByText('Merci')).toBeInTheDocument()
+    expect(screen.getByText('OK')).toBeInTheDocument()
+    expect(screen.getByText('Retour')).toBeInTheDocument()
   })
 })

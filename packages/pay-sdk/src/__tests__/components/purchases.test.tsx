@@ -19,6 +19,7 @@ vi.mock('@ezstart/ui/components', () => uiComponentsMock)
 vi.mock('@ezstart/logger', () => loggerMock)
 vi.mock('sonner', () => sonnerMock)
 vi.mock('@ezstart/ui/utils', () => uiUtilsMock)
+vi.mock('@ezstart/ui/hooks', () => ({ useDeprecationWarning: vi.fn() }))
 vi.mock('next/image', () => nextImageMock)
 vi.mock('next/navigation', () => nextNavigationMock)
 
@@ -78,12 +79,7 @@ describe('PurchaseButton', () => {
   it('opens modal on click', async () => {
     render(
       <Wrapper>
-        <PurchaseButton
-          projectId="proj1"
-          productId="prod1"
-          productName="Widget"
-          amount={10}
-        />
+        <PurchaseButton projectId="proj1" productId="prod1" productName="Widget" amount={10} />
       </Wrapper>
     )
 

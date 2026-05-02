@@ -3,6 +3,8 @@ export * from './data-display/accordion'
 export * from './data-display/badge'
 export * from './data-display/card'
 export * from './data-display/code-block'
+export * from './data-display/product-card'
+export * from './data-display/product-grid'
 
 // Landing
 export * from './landing'
@@ -25,6 +27,7 @@ export * from './effects/typewriter-effect'
 
 // Feedback
 export * from './feedback/alert-dialog'
+export * from './feedback/confirm-action-dialog'
 export * from './feedback/error-alert'
 export * from './feedback/maintenance-banner'
 export * from './feedback/progress'
@@ -34,6 +37,9 @@ export * from './feedback/sonner'
 export * from './feedback/spinner'
 export * from './feedback/status-page'
 export * from './feedback/tooltip'
+
+// Checkout templates (Stripe success/cancel landing pages)
+export * from './checkout-templates'
 
 // Forms
 export * from './forms/checkbox'

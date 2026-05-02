@@ -19,6 +19,7 @@ vi.mock('@ezstart/ui/components', () => uiComponentsMock)
 vi.mock('@ezstart/logger', () => loggerMock)
 vi.mock('sonner', () => sonnerMock)
 vi.mock('@ezstart/ui/utils', () => uiUtilsMock)
+vi.mock('@ezstart/ui/hooks', () => ({ useDeprecationWarning: vi.fn() }))
 vi.mock('next/image', () => nextImageMock)
 vi.mock('next/navigation', () => nextNavigationMock)
 
@@ -84,12 +85,7 @@ describe('SubscribeButton', () => {
   it('opens modal on click', async () => {
     render(
       <Wrapper>
-        <SubscribeButton
-          projectId="proj1"
-          priceId="price_1"
-          planName="Pro"
-          amount={29.99}
-        />
+        <SubscribeButton projectId="proj1" priceId="price_1" planName="Pro" amount={29.99} />
       </Wrapper>
     )
 
@@ -312,7 +308,9 @@ describe('SubscriptionCard', () => {
 
     // ConfirmActionDialog should open — verify the confirm description
     await waitFor(() => {
-      expect(screen.getByText('Are you sure you want to cancel this subscription?')).toBeInTheDocument()
+      expect(
+        screen.getByText('Are you sure you want to cancel this subscription?')
+      ).toBeInTheDocument()
     })
   })
 

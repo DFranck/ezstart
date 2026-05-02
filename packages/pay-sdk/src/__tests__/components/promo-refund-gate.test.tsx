@@ -19,6 +19,7 @@ vi.mock('@ezstart/ui/components', () => uiComponentsMock)
 vi.mock('@ezstart/logger', () => loggerMock)
 vi.mock('sonner', () => sonnerMock)
 vi.mock('@ezstart/ui/utils', () => uiUtilsMock)
+vi.mock('@ezstart/ui/hooks', () => ({ useDeprecationWarning: vi.fn() }))
 vi.mock('next/image', () => nextImageMock)
 vi.mock('next/navigation', () => nextNavigationMock)
 
@@ -434,51 +435,11 @@ describe('ConfirmActionDialog', () => {
     })
   })
 
-  it('shows success state after confirm resolves', async () => {
-    const onConfirm = vi.fn().mockResolvedValue(undefined)
-    render(
-      <ConfirmActionDialog
-        open={true}
-        onOpenChange={() => {}}
-        title="Action"
-        description="Do it?"
-        onConfirm={onConfirm}
-        texts={{ successMessage: 'Done!' }}
-      />
-    )
-
-    fireEvent.click(screen.getByText('Confirm'))
-
-    await waitFor(() => {
-      expect(screen.getByText('Done!')).toBeInTheDocument()
-    })
-  })
-
-  it('shows error state after confirm rejects', async () => {
-    const onConfirm = vi.fn().mockRejectedValue(new Error('Oops'))
-    render(
-      <ConfirmActionDialog
-        open={true}
-        onOpenChange={() => {}}
-        title="Action"
-        description="Do it?"
-        onConfirm={onConfirm}
-        texts={{ errorMessage: 'Failed' }}
-      />
-    )
-
-    fireEvent.click(screen.getByText('Confirm'))
-
-    await waitFor(() => {
-      expect(screen.getByText('Failed')).toBeInTheDocument()
-    })
-
-    // Error detail should show
-    expect(screen.getByText('Oops')).toBeInTheDocument()
-
-    // Retry button should be visible
-    expect(screen.getByText('Retry')).toBeInTheDocument()
-  })
+  // The stateful behaviour (success / error / loading state transitions, retry,
+  // toast feedback, error detail rendering) is now covered exhaustively by
+  // `@ezstart/ui/__tests__/components/feedback/confirm-action-dialog.test.tsx`
+  // since the component was promoted to `@ezstart/ui` (PAY_SDK_PHASE_1_MIGRATE-001,
+  // 2026-05-01). Pay-sdk re-export keeps a thin contract test below.
 
   it('calls onOpenChange(false) on cancel click', () => {
     const onOpenChange = vi.fn()

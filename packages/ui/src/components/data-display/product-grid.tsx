@@ -1,77 +1,66 @@
 'use client'
 
-import { Div, Icon, Input, P, SkeletonCard } from '@ezstart/ui/components'
-import type {
-  ProductGridFilterOptions as _ProductGridFilterOptions,
-  ProductGridTexts as _ProductGridTexts,
-} from '@ezstart/ui/components'
-import { useDeprecationWarning } from '@ezstart/ui/hooks'
 import { useMemo, useState } from 'react'
-import { ProductCard, type ProductCardProps } from './ProductCard.js'
+import { Icon } from '../icon'
+import { Input } from '../forms/input'
+import { SkeletonCard } from '../feedback/skeleton'
+import { Div, P } from '../tag'
+import { ProductCard, type ProductCardProps, type ProductCardType } from './product-card'
 
-/**
- * @deprecated Moved to `@ezstart/ui` as a presentation-only `ProductGrid`.
- * Will be removed in 2026-08-01.
- */
-export type ProductGridFilterOptions = _ProductGridFilterOptions
-/**
- * @deprecated Moved to `@ezstart/ui` as `ProductGridTexts`. Will be removed
- * in 2026-08-01.
- */
-export type ProductGridTexts = _ProductGridTexts
+export interface ProductGridFilterOptions {
+  /** Show / hide the type filter (purchase / subscription / all). Default `true` (when `showFilters`). */
+  types?: boolean
+  /** Reserved for future price-range filter. */
+  priceRange?: boolean
+  /** Show / hide the search input. Default `true` (when `showFilters`). */
+  search?: boolean
+}
 
-/**
- * @deprecated Moved to `@ezstart/ui` as `ProductGrid`. Will be removed in
- * 2026-08-01. The new UI primitive expects each `products[i]` to already
- * include an `actionSlot: ReactNode` (caller wires the action button).
- *
- * The pay-sdk wrapper preserves the legacy payment-shaped product props
- * (`priceId`, `projectId`, `type`, `userId`, ...) by rendering the deprecated
- * pay-sdk `<ProductCard>` for each item — which itself wires
- * `<PurchaseButton>` / `<SubscribeButton>` into `actionSlot`.
- */
-export interface ProductGridProps {
-  products: ProductCardProps[] | undefined
-  columns?: 2 | 3 | 4
-  showFilters?: boolean
-  filterOptions?: ProductGridFilterOptions
+export interface ProductGridTexts {
   emptyMessage?: string
+  searchPlaceholder?: string
+  filterAll?: string
+  filterPurchase?: string
+  filterSubscription?: string
+}
+
+export interface ProductGridProps {
+  /** Products to render. `undefined` triggers the loading skeleton state. */
+  products: ProductCardProps[] | undefined
+  /** Number of columns at desktop breakpoint. Defaults to `3`. */
+  columns?: 2 | 3 | 4
+  /** Show search + type filter controls above the grid. Default `false`. */
+  showFilters?: boolean
+  /** Granular filter visibility. Has effect only when `showFilters === true`. */
+  filterOptions?: ProductGridFilterOptions
+  /** Override default empty-state message. */
+  emptyMessage?: string
+  /** Extra Tailwind classes appended to the outer wrapper. */
   className?: string
+  /** Override any text. English defaults are used when omitted. */
   texts?: ProductGridTexts
 }
 
-const GRID_COLS = {
-  2: 'grid-cols-1 sm:grid-cols-2',
-  3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
-  4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-} as const
-
 /**
- * Backward-compat product grid that renders the legacy pay-sdk
- * `<ProductCard>` for each item.
+ * Generic product grid — renders a responsive grid of `<ProductCard>`s with
+ * optional search + type filter. Each `products[i]` MUST already include an
+ * `actionSlot` (caller wires the button to its own purchase / subscribe /
+ * routing logic).
  *
- * @deprecated Moved to `@ezstart/ui` as `ProductGrid`. Will be removed in
- * 2026-08-01. Migrate by mapping each product to include an `actionSlot`
- * and importing from `@ezstart/ui/components`.
+ * Originally `ProductGrid` from `@ezstart/pay-sdk`. The pay-sdk re-export
+ * preserves backward compat by accepting the legacy payment-shaped props
+ * and wiring `<PurchaseButton>` / `<SubscribeButton>` as the `actionSlot`.
  *
- * @example migration
+ * @example
  * ```tsx
- * // before
- * import { ProductGrid } from '@ezstart/pay-sdk/components'
- * <ProductGrid products={products} />
- *
- * // after
  * import { ProductGrid, Button } from '@ezstart/ui/components'
- * import { PurchaseButton } from '@ezstart/pay-sdk/components'
+ *
  * <ProductGrid
+ *   columns={3}
+ *   showFilters
  *   products={products.map(p => ({
  *     ...p,
- *     actionSlot: (
- *       <PurchaseButton
- *         {...p}
- *         trigger={<Button className="w-full">Buy</Button>}
- *       />
- *     ),
+ *     actionSlot: <Button className="w-full">Buy</Button>,
  *   }))}
  * />
  * ```
@@ -85,13 +74,8 @@ export function ProductGrid({
   className,
   texts,
 }: ProductGridProps) {
-  useDeprecationWarning(
-    'ProductGrid from @ezstart/pay-sdk',
-    'ProductGrid from @ezstart/ui/components (provide actionSlot per product)'
-  )
-
   const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState<'all' | 'purchase' | 'subscription'>('all')
+  const [typeFilter, setTypeFilter] = useState<'all' | ProductCardType>('all')
 
   const t = {
     emptyMessage: emptyMessage || texts?.emptyMessage || 'No products available.',
@@ -101,25 +85,38 @@ export function ProductGrid({
     filterSubscription: texts?.filterSubscription || 'Subscription',
   }
 
+  const gridCols = {
+    2: 'grid-cols-1 sm:grid-cols-2',
+    3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+  }
+
   const filteredProducts = useMemo(() => {
     if (!products) return undefined
+
     let filtered = products
+
+    // Type filter
     if (typeFilter !== 'all') {
       filtered = filtered.filter(p => p.type === typeFilter)
     }
+
+    // Search filter
     if (search.trim()) {
       const q = search.toLowerCase()
       filtered = filtered.filter(
         p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
       )
     }
+
     return filtered
   }, [products, typeFilter, search])
 
+  // Loading state
   if (products === undefined) {
     return (
       <Div className={className}>
-        <Div className={`grid ${GRID_COLS[columns]} gap-4`}>
+        <Div className={`grid ${gridCols[columns]} gap-4`}>
           {Array.from({ length: columns }).map((_, i) => (
             <SkeletonCard key={i} showHeader showFooter lines={2} />
           ))}
@@ -130,8 +127,10 @@ export function ProductGrid({
 
   return (
     <Div className={`flex flex-col gap-4 ${className || ''}`}>
+      {/* Filters */}
       {showFilters && (
         <Div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          {/* Search */}
           {filterOptions.search !== false && (
             <Div className="w-full sm:w-64">
               <Input
@@ -143,6 +142,8 @@ export function ProductGrid({
               />
             </Div>
           )}
+
+          {/* Type filter */}
           {filterOptions.types !== false && (
             <Div className="flex gap-1 rounded-lg bg-muted p-1">
               {(['all', 'purchase', 'subscription'] as const).map(filterType => {
@@ -172,10 +173,11 @@ export function ProductGrid({
         </Div>
       )}
 
+      {/* Grid or empty state */}
       {filteredProducts && filteredProducts.length > 0 ? (
-        <Div className={`grid ${GRID_COLS[columns]} gap-4`}>
+        <Div className={`grid ${gridCols[columns]} gap-4`}>
           {filteredProducts.map((product, index) => (
-            <ProductCard key={`${product.priceId}-${index}`} {...product} />
+            <ProductCard key={`${product.name}-${index}`} {...product} />
           ))}
         </Div>
       ) : (
