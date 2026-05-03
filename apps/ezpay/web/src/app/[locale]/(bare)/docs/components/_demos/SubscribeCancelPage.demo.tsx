@@ -15,7 +15,7 @@ export default function Demo() {
     <DemoSandbox componentName="SubscribeCancelPage">
       <Div className="flex flex-col items-center gap-3">
         <Div className="border rounded-lg overflow-hidden w-full max-w-2xl max-h-[480px] overflow-y-auto bg-background">
-          <SubscribeCancelPage tryAgainHref="/" backHomeHref="/" />
+          <SubscribeCancelPage backToPricingHref="/" backHomeHref="/" />
         </Div>
         <P className="text-xs text-muted-foreground text-center max-w-xs">
           Subscription cancel landing — explains nothing was charged, includes &quot;Choose another
