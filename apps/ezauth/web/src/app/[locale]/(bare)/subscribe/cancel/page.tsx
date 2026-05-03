@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocale, useTranslations } from 'next-intl'
-import { SubscribeCancelPage } from '@ezstart/pay-sdk/components'
+import { SubscribeCancelTemplate } from '@ezstart/ui/components'
 
 /**
  * Subscription checkout cancel landing page.
@@ -9,14 +9,16 @@ import { SubscribeCancelPage } from '@ezstart/pay-sdk/components'
  * Stripe Checkout redirects here when the user aborts a subscription checkout.
  * We confirm no charge was made and route the user back to pricing.
  *
- * Powered by `<SubscribeCancelPage>` from `@ezstart/pay-sdk/components`.
+ * Powered by `<SubscribeCancelTemplate>` from `@ezstart/ui/components` (the
+ * presentation primitive — the legacy `<SubscribeCancelPage>` wrapper from
+ * `@ezstart/pay-sdk/components` was deprecated 2026-04, removal 2026-08-01).
  */
 export default function Page() {
   const t = useTranslations('subscribe.cancel')
   const locale = useLocale()
 
   return (
-    <SubscribeCancelPage
+    <SubscribeCancelTemplate
       backToPricingHref={`/${locale}/#pricing`}
       backHomeHref={`/${locale}`}
       texts={{

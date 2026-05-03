@@ -73,6 +73,9 @@ const SEED: SeedDefinition[] = [
   adminTest('ezauth', 'settings', 'Admin platform settings'),
   adminTest('ezauth', '2fa-gate', '2FA mandatory gate for admins'),
 
+  // ───────── ezauth ─ quality ─────────
+  qualityDeprecationZero('ezauth', 'P0'),
+
   // ───────── ezpay ─ public ─────────
   publicTest('ezpay', 'landing', 'Landing page renders', '/en'),
   publicTest('ezpay', 'docs', 'Docs index renders', '/en/docs'),
@@ -137,6 +140,9 @@ const SEED: SeedDefinition[] = [
   adminTest('ezpay', 'plans', 'Admin plans CRUD'),
   adminTest('ezpay', 'promos', 'Admin promo codes CRUD', 'P1'),
 
+  // ───────── ezpay ─ quality ─────────
+  qualityDeprecationZero('ezpay', 'P0'),
+
   // ───────── ezstart ─ public ─────────
   publicTest('ezstart', 'landing', 'Landing page renders', '/en'),
   publicTest('ezstart', 'docs', 'Docs index renders', '/en/docs'),
@@ -156,6 +162,20 @@ const SEED: SeedDefinition[] = [
   adminTest('ezstart', 'services', 'External provider services dashboard'),
   adminTest('ezstart', 'federated-auth-tab', 'Federated EZAuth admin tab loads'),
   adminTest('ezstart', 'federated-pay-tab', 'Federated EZPay admin tab loads'),
+
+  // ───────── ezstart ─ quality ─────────
+  qualityDeprecationZero('ezstart', 'P0'),
+
+  // ───────── consumer apps ─ quality ─────────
+  // No functional matrix entries yet for these apps (see BACKLOG), but the
+  // deprecation-zero gate must already exist so any new SDK release that
+  // introduces a deprecation surfaces as a `fail` row in the matrix without
+  // waiting for the per-app coverage to land first.
+  qualityDeprecationZero('ezbill', 'P1'),
+  qualityDeprecationZero('green-pulse', 'P1'),
+  qualityDeprecationZero('fengshui', 'P2'),
+  qualityDeprecationZero('asc-tcd', 'P2'),
+  qualityDeprecationZero('gacha-analyzer', 'P2'),
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -302,6 +322,46 @@ function connectTest(
       `apps/${app}/api/src/routes/connect/**`,
       `apps/${app}/web/src/app/[locale]/(dashboard)/connect/**`,
       'packages/pay-sdk/src/**',
+    ],
+    cadence: 'when-feature-touched',
+    priority,
+  }
+}
+
+/**
+ * Deprecation-zero quality gate (DEPRECATION-ZERO-QUALITY-GATE-001).
+ *
+ * Each `[DEPRECATED]` console warn surfaced by the runtime warning system
+ * (`useDeprecationWarning` / `warnDeprecation` — cf. `standard-ui.md` §10) is
+ * an implicit "needs migration" backlog item. An app is "100% pass" only when
+ * ZERO deprecation warns appear across all its routes AND every functional
+ * test passes.
+ *
+ * Routes are intentionally `['/']` — the test logically exercises all routes
+ * of the app (not a single page). The agent navigates every route in the
+ * matrix, aggregates console messages, and records the run as `pass` only
+ * when the total count is zero.
+ *
+ * `filesExercised` covers the consuming app surface PLUS every SDK whose
+ * deprecations might surface in that app — bumping any SDK can introduce or
+ * fix a deprecation, so the gate must re-run on those changes too.
+ */
+function qualityDeprecationZero(
+  app: SeedDefinition['app'],
+  priority: SeedDefinition['priority'] = 'P0'
+): SeedDefinition {
+  return {
+    testId: `${app}.quality.deprecation-zero`,
+    app,
+    feature: 'deprecation-zero',
+    category: 'quality',
+    description: '0 [DEPRECATED] console warns across all app routes',
+    routesExercised: ['/'],
+    filesExercised: [
+      `apps/${app}/web/src/**`,
+      'packages/auth-sdk/src/**',
+      'packages/pay-sdk/src/**',
+      'packages/ui/src/**',
     ],
     cadence: 'when-feature-touched',
     priority,

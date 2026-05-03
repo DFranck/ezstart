@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocale, useTranslations } from 'next-intl'
-import { SubscribeSuccessPage } from '@ezstart/pay-sdk/components'
+import { SubscribeSuccessTemplate } from '@ezstart/ui/components'
 
 /**
  * Subscription checkout success landing page.
@@ -12,15 +12,17 @@ import { SubscribeSuccessPage } from '@ezstart/pay-sdk/components'
  * the dashboard with freshly-granted roles (applied server-side by the
  * EZPay -> EZAuth webhook).
  *
- * Powered by `<SubscribeSuccessPage>` from `@ezstart/pay-sdk/components` —
- * the page only wires translations + the locale-aware redirect target.
+ * Powered by `<SubscribeSuccessTemplate>` from `@ezstart/ui/components` (the
+ * presentation primitive — the legacy `<SubscribeSuccessPage>` wrapper from
+ * `@ezstart/pay-sdk/components` was deprecated 2026-04, removal 2026-08-01).
+ * The page only wires translations + the locale-aware redirect target.
  */
 export default function Page() {
   const t = useTranslations('subscribe.success')
   const locale = useLocale()
 
   return (
-    <SubscribeSuccessPage
+    <SubscribeSuccessTemplate
       redirectTo={`/${locale}/dashboard`}
       texts={{
         title: t('title'),

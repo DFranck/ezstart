@@ -37,6 +37,7 @@ export const E2E_CATEGORIES = [
   'docs',
   'connect',
   'flows',
+  'quality',
 ] as const
 
 export type E2ECategory = (typeof E2E_CATEGORIES)[number]

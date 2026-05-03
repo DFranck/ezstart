@@ -1,12 +1,12 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { ScopeContextIndicator } from '@ezstart/auth-sdk/components'
+import { ScopeContextSwitcher } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 
 /**
- * EZAuth-specific wrapper around the SDK's `<ScopeContextIndicator />`.
+ * EZAuth-specific wrapper around `<ScopeContextSwitcher />` from `@ezstart/ui`.
  *
  * Centralises the locale-aware switch path, the i18n texts, and the
  * `superadmin` capability check so consumer pages (`/dashboard`, `/admin`,
@@ -14,6 +14,10 @@ import { Link } from '@/i18n/navigation'
  *
  * Pure presentational — no fetch, no router push, just reads the auth store
  * and the active locale.
+ *
+ * Migrated from the deprecated `<ScopeContextIndicator>` re-export in
+ * `@ezstart/auth-sdk/components` (moved to `@ezstart/ui` 2026-04, removal
+ * 2026-08-01). Same prop surface — drop-in replacement.
  *
  * @example dashboard usage
  * ```tsx
@@ -50,7 +54,7 @@ export function EzauthScopeIndicator({
   const switchPath = scope === 'admin' ? '/dashboard' : '/admin'
 
   return (
-    <ScopeContextIndicator
+    <ScopeContextSwitcher
       scope={scope}
       canSwitchToAdmin={isSuperadmin}
       switchPath={switchPath}

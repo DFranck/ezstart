@@ -6,8 +6,9 @@ import {
   useAuthStoreApi,
   type AuthUser,
 } from '@ezstart/auth-sdk'
-import { MaintenanceBanner } from '@ezstart/auth-sdk/components'
+import { useMaintenanceStatus } from '@ezstart/api-sdk/react'
 import { PayProvider } from '@ezstart/pay-sdk'
+import { MaintenanceBanner } from '@ezstart/ui/components'
 import { ThemeProvider } from '@ezstart/ui/theme'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback } from 'react'
@@ -15,16 +16,24 @@ import { QueryProvider } from './providers/QueryProvider'
 
 /**
  * Inner shell that mounts the platform-wide `<MaintenanceBanner>` on top of
- * the page content. Lives below `<QueryProvider>` because the banner uses
- * React Query (polling `/api/maintenance-status`).
+ * the page content. Lives below `<QueryProvider>` because the banner data
+ * comes from React Query (polling `/api/maintenance-status` via
+ * `useMaintenanceStatus` from `@ezstart/api-sdk/react`).
+ *
+ * Composes the data hook + presentation primitive directly — the previous
+ * single-shot `<MaintenanceBanner>` from `@ezstart/auth-sdk/components` was
+ * deprecated on 2026-05-01 (split architecture, removal 2026-08-01).
  */
 function PlatformShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('admin.maintenanceMode.banner')
+  const { data } = useMaintenanceStatus({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
+  })
   return (
     <>
       <MaintenanceBanner
+        status={data ?? null}
         sticky
-        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
         texts={{
           heading: t('heading'),
           scheduledEndLabel: t('scheduledEndLabel'),
