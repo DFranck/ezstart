@@ -1,0 +1,96 @@
+{
+  "docs": {
+    "title": "Documentation",
+    "lead": "Tout ce dont vous avez besoin pour développer avec la plateforme @ezstart : démarrages rapides des SDK, références d'API et guides d'intégration.",
+    "ezauthHeading": "EZAuth",
+    "ezauthBody": "Authentification, sessions, OAuth, clés API et contrôle d'accès par rôles. La couche d'identité qui anime chaque application @ezstart.",
+    "ezauthCta": "Ouvrir la doc EZAuth",
+    "ezpayHeading": "EZPay",
+    "ezpayBody": "Système de paiement universel : dons, achats uniques, abonnements et Stripe Connect pour les marketplaces multi-vendeurs.",
+    "ezpayCta": "Ouvrir la doc EZPay",
+    "uiHeading": "@ezstart/ui",
+    "uiBody": "Bibliothèque de composants React headless : layouts, typographie, formulaires, affichage de données et feedback. Thèmes via tokens CSS, mode sombre inclus.",
+    "uiCta": "Ouvrir l'UI inspector",
+    "githubHeading": "GitHub",
+    "githubBody": "Tous les packages sont open source sous licence MIT. Lisez le code, ouvrez une issue ou contribuez sur GitHub.",
+    "githubCta": "Voir sur GitHub"
+  },
+  "about": {
+    "title": "À propos d'EZStart",
+    "leadHeading": "Le hub de plateforme qui alimente EZAuth, EZPay et un portfolio d'applications consommatrices",
+    "leadBody": "EZStart est un monorepo TypeScript et un hub de plateforme qui livre des services SaaS production-ready (authentification, paiements, gateway IA) ainsi que les applications consommatrices qui les dogfoodent. Tout est publié sous licence MIT pour qu'une équipe puisse adopter les mêmes primitives.",
+    "missionHeading": "Notre mission",
+    "missionBody": "Nous pensons que l'infrastructure SaaS moderne doit être ouverte, fortement typée et facilement composable. EZStart emballe les blocs de construction que nous aurions aimé avoir : SDK agnostiques, applications Next.js prêtes à l'emploi et un design system unique qui fonctionne sur chaque produit.",
+    "platformHeading": "Ce que nous livrons",
+    "platformBody": "EZAuth (identité), EZPay (paiements), @ezstart/ui (design system), @ezstart/ai-sdk (gateway IA) ainsi que des applications consommatrices comme EZBill, GreenPulse et FengShui — le tout dans un même monorepo qui dogfoode les mêmes services SaaS.",
+    "ctaHeading": "Démarrer",
+    "ctaBody": "Parcourez la documentation ou contactez-nous pour discuter de votre cas d'usage.",
+    "ctaDocs": "Lire la documentation",
+    "ctaContact": "Nous contacter"
+  },
+  "contact": {
+    "title": "Nous contacter",
+    "leadBody": "Besoin d'aide pour intégrer un SDK @ezstart, signaler un problème ou discuter de votre cas d'usage ? Nous répondons généralement sous un jour ouvré.",
+    "emailLabel": "E-mail",
+    "emailCta": "Nous envoyer un e-mail",
+    "githubLabel": "GitHub",
+    "githubCta": "Ouvrir une issue"
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "lastUpdatedLabel": "Dernière mise à jour",
+    "lastUpdatedValue": "3 mai 2026",
+    "summaryHeading": "Résumé",
+    "summaryBody": "EZStart respecte votre vie privée. En tant que hub de plateforme, nous collectons un minimum de données — principalement ce qui est nécessaire à l'authentification via EZAuth et à des analyses de trafic basiques. Le traitement détaillé des données pour les services payants est régi par les politiques de confidentialité d'EZAuth et d'EZPay.",
+    "scopeHeading": "Données collectées",
+    "scopeBody": "Analyses de trafic agrégées et anonymes via Vercel Analytics. Les données d'authentification sont collectées par EZAuth pour notre compte — voir la politique de confidentialité d'EZAuth pour les détails. Nous ne vendons jamais de données personnelles.",
+    "contactHeading": "Une question ?",
+    "contactBody": "Contactez-nous pour obtenir des détails sur le traitement de vos données.",
+    "contactCta": "Nous contacter"
+  },
+  "terms": {
+    "title": "Conditions d'utilisation",
+    "lastUpdatedLabel": "Dernière mise à jour",
+    "lastUpdatedValue": "3 mai 2026",
+    "summaryHeading": "Résumé",
+    "summaryBody": "EZStart est fourni en l'état le temps que nous finalisions nos conditions avec notre équipe juridique. Les conditions complètes seront publiées avant le lancement public.",
+    "useHeading": "Usage acceptable",
+    "useBody": "En utilisant EZStart vous vous engagez à respecter les lois en vigueur, à ne pas abuser de la plateforme ou de ses services hébergés, et à sécuriser vos identifiants. Nous nous réservons le droit de suspendre tout compte qui enfreint ces principes.",
+    "contactHeading": "Une question ?",
+    "contactBody": "Contactez-nous pour toute question sur ces conditions.",
+    "contactCta": "Nous contacter"
+  },
+  "login": {
+    "title": "Connexion à EZStart",
+    "redirecting": "Redirection vers la page d'authentification unique EZAuth…"
+  },
+  "pricing": {
+    "title": "Tarification de la plateforme",
+    "lead": "EZStart est lui-même le hub de la plateforme — gratuit et open source. Chaque service SaaS qu'il alimente a sa propre tarification.",
+    "ezauthHeading": "EZAuth",
+    "ezauthBody": "Authentification-as-a-service : offre gratuite pour les projets hobby, plans payants pour le trafic en production et les fonctionnalités avancées (2FA obligatoire, journaux d'audit, theming en marque blanche).",
+    "ezauthCta": "Voir les tarifs EZAuth",
+    "ezpayHeading": "EZPay",
+    "ezpayBody": "Paiements-as-a-service : tarification à l'usage en plus des frais Stripe, sans engagement mensuel minimum. Gratuit pendant la bêta publique.",
+    "ezpayCta": "Voir les tarifs EZPay",
+    "openSourceHeading": "Open source pour toujours",
+    "openSourceBody": "Chaque package du monorepo @ezstart est publié sous licence MIT. Hébergez vous-même n'importe quel service gratuitement, ou payez la version hébergée pour zéro maintenance."
+  },
+  "blog": {
+    "title": "Blog",
+    "leadHeading": "Notes d'ingénierie, nouveautés produit et annonces de plateforme",
+    "leadBody": "Notre blog arrive bientôt. Nous y partagerons des nouveautés produit, des analyses techniques approfondies et des retours d'expérience sur l'exploitation d'une plateforme SaaS TypeScript en production.",
+    "subscribeHeading": "Restez informé",
+    "subscribeBody": "Suivez le projet sur GitHub ou contactez-nous pour être prévenu de la mise en ligne du blog.",
+    "subscribeCta": "Voir sur GitHub"
+  },
+  "changelog": {
+    "title": "Journal des changements",
+    "subtitle": "Changements notables de la plateforme EZStart, du plus récent au plus ancien.",
+    "githubLabel": "Historique complet des sorties",
+    "githubCta": "Voir les releases sur GitHub",
+    "v01Title": "v0.1.0 — Première preview publique",
+    "v01Date": "3 mai 2026",
+    "v01Body": "Première preview publique du hub de plateforme EZStart. Agrège EZAuth, EZPay, le monitoring, le status et le portail de documentation dans une même application Next.js."
+  }
+}

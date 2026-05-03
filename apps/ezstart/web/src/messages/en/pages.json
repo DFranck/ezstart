@@ -1,0 +1,96 @@
+{
+  "docs": {
+    "title": "Documentation",
+    "lead": "Everything you need to build with the @ezstart platform: SDK quickstarts, API references, and integration guides.",
+    "ezauthHeading": "EZAuth",
+    "ezauthBody": "Authentication, sessions, OAuth, API keys, and role-based access control. The identity layer powering every @ezstart application.",
+    "ezauthCta": "Open EZAuth docs",
+    "ezpayHeading": "EZPay",
+    "ezpayBody": "Universal payment system: donations, one-time purchases, subscriptions, and Stripe Connect for multi-vendor marketplaces.",
+    "ezpayCta": "Open EZPay docs",
+    "uiHeading": "@ezstart/ui",
+    "uiBody": "Headless React component library: layouts, typography, forms, data display, and feedback. Themed via CSS tokens, dark mode included.",
+    "uiCta": "Open UI inspector",
+    "githubHeading": "GitHub",
+    "githubBody": "All packages are open source under the MIT license. Read the source, file an issue, or contribute on GitHub.",
+    "githubCta": "View on GitHub"
+  },
+  "about": {
+    "title": "About EZStart",
+    "leadHeading": "The platform hub powering EZAuth, EZPay, and a portfolio of consumer apps",
+    "leadBody": "EZStart is a TypeScript monorepo and platform hub that ships production-grade SaaS services (authentication, payments, AI gateway) and the consumer applications that dogfood them. Everything is published under the MIT license so any team can adopt the same primitives.",
+    "missionHeading": "Our mission",
+    "missionBody": "We believe modern SaaS infrastructure should be open, type-safe, and effortlessly composable. EZStart packages the building blocks we wished existed when we started: agnostic SDKs, batteries-included Next.js apps, and a single design system that works across every product.",
+    "platformHeading": "What we ship",
+    "platformBody": "EZAuth (identity), EZPay (payments), @ezstart/ui (design system), @ezstart/ai-sdk (AI gateway), plus consumer apps like EZBill, GreenPulse, and FengShui — all in one monorepo, all dogfooding the same SaaS services.",
+    "ctaHeading": "Get started",
+    "ctaBody": "Browse the documentation or contact us to discuss your use case.",
+    "ctaDocs": "Read the docs",
+    "ctaContact": "Contact us"
+  },
+  "contact": {
+    "title": "Contact us",
+    "leadBody": "Need help integrating an @ezstart SDK, reporting an issue, or discussing your use case? We typically reply within one business day.",
+    "emailLabel": "Email",
+    "emailCta": "Send us an email",
+    "githubLabel": "GitHub",
+    "githubCta": "Open an issue"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "May 3, 2026",
+    "summaryHeading": "Summary",
+    "summaryBody": "EZStart respects your privacy. As the platform hub, we collect minimal data — primarily what is required for authentication via EZAuth and basic site analytics. Detailed data handling for paid services is governed by the EZAuth and EZPay privacy policies.",
+    "scopeHeading": "What we collect",
+    "scopeBody": "Aggregated, anonymous traffic analytics via Vercel Analytics. Authentication data is collected by EZAuth on our behalf — see the EZAuth privacy policy for details. We never sell personal data.",
+    "contactHeading": "Questions?",
+    "contactBody": "Reach out to us if you need details about how your data is processed.",
+    "contactCta": "Contact us"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "May 3, 2026",
+    "summaryHeading": "Summary",
+    "summaryBody": "EZStart is provided on an as-is basis while we finalize our terms with our legal team. The full terms of service will be published before the public launch.",
+    "useHeading": "Acceptable use",
+    "useBody": "By using EZStart you agree to follow applicable laws, to not abuse the platform or its hosted services, and to keep your credentials secure. We reserve the right to suspend accounts that violate these principles.",
+    "contactHeading": "Questions?",
+    "contactBody": "Reach out to us with any question about these terms.",
+    "contactCta": "Contact us"
+  },
+  "login": {
+    "title": "Sign in to EZStart",
+    "redirecting": "Redirecting you to the EZAuth single sign-on page…"
+  },
+  "pricing": {
+    "title": "Platform pricing",
+    "lead": "EZStart itself is the platform hub — free and open source. The SaaS services it powers each have their own pricing.",
+    "ezauthHeading": "EZAuth",
+    "ezauthBody": "Authentication-as-a-service: free tier for hobby projects, paid plans for production traffic and advanced features (2FA mandatory, audit logs, white-label theming).",
+    "ezauthCta": "View EZAuth pricing",
+    "ezpayHeading": "EZPay",
+    "ezpayBody": "Payments-as-a-service: pay-as-you-go on top of Stripe fees, no monthly minimums. Free during the public beta period.",
+    "ezpayCta": "View EZPay pricing",
+    "openSourceHeading": "Open source forever",
+    "openSourceBody": "Every package in the @ezstart monorepo is published under the MIT license. Self-host any service for free, or pay for the hosted version when you want zero-ops."
+  },
+  "blog": {
+    "title": "Blog",
+    "leadHeading": "Engineering notes, product updates, and platform announcements",
+    "leadBody": "Our blog is launching soon. We will share product updates, technical deep-dives, and insights from running a TypeScript SaaS platform in production.",
+    "subscribeHeading": "Stay in the loop",
+    "subscribeBody": "Follow the project on GitHub or contact us to be notified when the blog goes live.",
+    "subscribeCta": "View on GitHub"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "subtitle": "Notable changes to the EZStart platform, in reverse chronological order.",
+    "githubLabel": "Full release history",
+    "githubCta": "View releases on GitHub",
+    "v01Title": "v0.1.0 — Initial public preview",
+    "v01Date": "May 3, 2026",
+    "v01Body": "First public preview of the EZStart platform hub. Aggregates EZAuth, EZPay, monitoring, status, and the docs portal in one Next.js application."
+  }
+}
