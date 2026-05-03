@@ -687,7 +687,10 @@ export function DashboardClient({
     required: tEmailChange('required'),
     invalidEmail: tEmailChange('invalidEmail'),
     successTitle: tEmailChange('successTitle'),
-    successMessage: tEmailChange('successMessage'),
+    // Pass `{email}` literal so next-intl substitutes our placeholder verbatim
+    // — the SDK component then runs its own .replace('{email}', submittedEmail).
+    // Without this, next-intl throws FORMATTING_ERROR on every render.
+    successMessage: tEmailChange('successMessage', { email: '{email}' }),
     resetButton: tEmailChange('resetButton'),
     errorGeneric: tEmailChange('errorGeneric'),
     errorSameEmail: tEmailChange('errorSameEmail'),

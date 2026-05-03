@@ -29,7 +29,10 @@ export default function LoginClient({ ssrAppName, ssrAppDisplayName }: LoginClie
     required: t('required'),
     invalidEmail: t('invalidEmail'),
     successTitle: t('successTitle'),
-    successMessage: t('successMessage'),
+    // Pass `{email}` literal so next-intl substitutes our placeholder verbatim
+    // — the SDK component then runs its own .replace('{email}', submittedEmail).
+    // Without this, next-intl throws FORMATTING_ERROR on every render.
+    successMessage: t('successMessage', { email: '{email}' }),
     resetButton: t('resetButton'),
     errorGeneric: t('errorGeneric'),
     networkError: t('networkError'),
