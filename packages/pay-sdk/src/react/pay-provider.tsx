@@ -218,18 +218,32 @@ export function PayProvider({
   const onAuthFailureRef = useRef(onAuthFailure ?? config?.onAuthFailure)
   onAuthFailureRef.current = onAuthFailure ?? config?.onAuthFailure
 
+  // Derive `apiKey` from `publishableKey` so every HTTP request the client
+  // makes carries the `X-API-Key` header (required by the ezpay API to scope
+  // writes/reads to the right Application without a logged-in session).
+  //
+  // Safety: ONLY accept publishable keys (`ez_pk_*` or legacy `epk_*`). Reject
+  // secret keys (`ez_sk_*` / `esk_*`) defensively — those should never reach a
+  // browser bundle, but if a consumer mis-configures the provider we refuse to
+  // smuggle the secret over the wire. `config.apiKey` (explicit) still wins.
+  const derivedApiKey =
+    publishableKey && (publishableKey.startsWith('ez_pk_') || publishableKey.startsWith('epk_'))
+      ? publishableKey
+      : undefined
+
   const client = useMemo(() => {
     return createPayClient({
       appName,
       applicationId: applicationIdProp ?? config?.applicationId,
       apiUrl: config?.apiUrl ?? '',
+      apiKey: derivedApiKey,
       ...config,
       getToken: () => getTokenRef.current?.() ?? null,
       onTokenRefresh: () => onTokenRefreshRef.current?.() ?? Promise.resolve(null),
       onAuthFailure: () => onAuthFailureRef.current?.(),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- callbacks are handled via refs
-  }, [appName, applicationIdProp, config])
+  }, [appName, applicationIdProp, config, derivedApiKey])
 
   // Determine initial state based on which props are provided.
   const explicitApplicationId = applicationIdProp ?? config?.applicationId ?? null
