@@ -82,8 +82,12 @@ export async function resetPayDocsDemoData(): Promise<PayDocsDemoResetResult> {
   )
   const paymentsDeleted = paymentResult.deletedCount ?? 0
 
-  // Re-seed the deterministic baseline (skip plans — they survived the wipe).
-  const reseed = await seedPayDocsDemoData({ skipPlans: true })
+  // Re-seed the deterministic baseline (skip plans — they survived the
+  // wipe). Skip the key mirror too: keys are bootstrap-only — they were
+  // mirrored once at the initial `pnpm seed:pay-docs-demo` and never
+  // change after that. Re-mirroring on every reset tick would needlessly
+  // round-trip to ezauth and pollute the logs.
+  const reseed = await seedPayDocsDemoData({ skipPlans: true, skipKeyMirror: true })
 
   const result: PayDocsDemoResetResult = {
     durationMs: Date.now() - before,

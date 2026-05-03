@@ -7,7 +7,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
-import { getWebUrl, type AppName } from '@ezstart/config'
+import { URLS, getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
@@ -16,6 +16,38 @@ import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 import { checkPayDemoQuotas } from '../../middleware/check-pay-demo-quotas.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+
+/**
+ * Resolve the base URL for Stripe Checkout success / cancel redirects.
+ *
+ * Priority:
+ *  1. Caller-provided `returnUrl` (explicit override — full URL, no
+ *     transformation)
+ *  2. `getWebUrl(projectId)` when `projectId` is a known platform `AppName`
+ *     (the standard case — EZBill, FengShui, GreenPulse, etc. use their
+ *     own slug as `projectId`)
+ *  3. Request `Origin` header — fallback for sandbox / docs demo /
+ *     external consumers whose `projectId` is not a platform AppName
+ *     (e.g. `_pay-docs-demo` for the live previews on /docs/components)
+ *
+ * @returns the resolved absolute URL, or `null` when no signal is
+ * available (caller should 422 with a clear message).
+ */
+function resolveDonationBaseUrl(
+  returnUrl: string | undefined,
+  projectId: string,
+  req: Request
+): string | null {
+  if (returnUrl) return returnUrl
+  if (Object.prototype.hasOwnProperty.call(URLS, projectId)) {
+    return getWebUrl(projectId as AppName)
+  }
+  const origin = req.headers.origin
+  if (typeof origin === 'string' && origin.length > 0) {
+    return origin
+  }
+  return null
+}
 
 export const createDonationRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -119,9 +151,20 @@ const createDonationHandler = async (req: Request, res: Response) => {
       })
     }
 
-    // Use custom returnUrl or fallback to project's web URL based on projectId
-    // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
-    const baseUrl = returnUrl || getWebUrl(projectId as AppName)
+    // Use custom returnUrl, fallback to project's web URL based on projectId,
+    // then to the request `Origin` header (sandbox / docs demo / external
+    // consumers whose `projectId` is not a known platform AppName).
+    const baseUrl = resolveDonationBaseUrl(returnUrl, projectId, req)
+    if (!baseUrl) {
+      return sendValidationError(res, 'Cannot resolve return URL', [
+        {
+          code: 'custom',
+          path: ['returnUrl'],
+          message:
+            'returnUrl is required when projectId is not a known platform app and the request carries no Origin header',
+        },
+      ])
+    }
 
     // Resolve the target Application id:
     //   1. API-key auth → middleware populates `req.apiKeyApplicationId`

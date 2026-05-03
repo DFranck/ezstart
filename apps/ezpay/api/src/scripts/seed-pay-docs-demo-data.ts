@@ -56,14 +56,48 @@ import { connectToMongo } from '@ezstart/api-core'
 import { loadSharedEnv } from '@ezstart/config/server'
 import { getMongoUrl } from '@ezstart/config/env-resolvers'
 import { logger } from '@ezstart/logger/server'
+import { getApiKeyModel } from '../models/api-key.js'
 import { getPlanModel, type PlanDocument } from '../models/Plan.js'
 import { getPaymentModel, type PaymentDocument } from '../models/Payment.js'
+import { detectKeyFormat, extractKeyPrefix, hashApiKey } from '../utils/api-key.js'
+import { lookupApplicationBySlug } from '../services/ezauth-client.js'
 
 /** Marker used to identify the pay-docs-demo seed entities for idempotence. */
 export const PAY_DOCS_DEMO_SEED_MARKER = 'system-seed-pay-docs-demo'
 
 /** Reserved slug for the pay documentation sandbox Application. */
 export const PAY_DOCS_DEMO_APP_SLUG = '_pay-docs-demo'
+
+/**
+ * API key replication descriptor — mirrors the keys minted by the ezauth
+ * companion seed (`seed-pay-docs-demo-app.ts`) into ezpay's local
+ * `apiKeys` collection. Without this mirror the ezpay middleware
+ * (`validateApiKey` / `/api/keys/config`) cannot recognise the keys
+ * because it never round-trips to ezauth on the hot path.
+ *
+ * @internal
+ */
+interface KeyMirrorSpec {
+  envVarName: string
+  type: 'publishable' | 'secret'
+  scope: 'admin' | 'user' | 'readonly'
+  label: 'pk_test' | 'sk_test'
+}
+
+const PAY_DOCS_DEMO_KEYS_TO_MIRROR: ReadonlyArray<KeyMirrorSpec> = [
+  {
+    envVarName: 'EZPAY_DOCS_DEMO_PUBLISHABLE_KEY',
+    type: 'publishable',
+    scope: 'user',
+    label: 'pk_test',
+  },
+  {
+    envVarName: 'EZPAY_DOCS_DEMO_SECRET_KEY',
+    type: 'secret',
+    scope: 'admin',
+    label: 'sk_test',
+  },
+] as const
 
 /**
  * Plan template — describes ONE of the 3 sandbox plans (Free / Pro /
@@ -117,6 +151,15 @@ const PAY_DOCS_DEMO_DONATIONS: ReadonlyArray<{ name: string; amount: number; mes
   { name: 'Eve', amount: 50, message: 'Worth every euro.' },
 ]
 
+/** Per-key mirror outcome. */
+export interface MirroredKeyOutcome {
+  label: KeyMirrorSpec['label']
+  type: KeyMirrorSpec['type']
+  scope: KeyMirrorSpec['scope']
+  status: 'created' | 'already-exists' | 'skipped-no-env'
+  keyPrefix?: string
+}
+
 /** Aggregate result returned by {@link seedPayDocsDemoData}. */
 export interface SeedPayDocsDemoDataResult {
   plansCreated: number
@@ -125,6 +168,17 @@ export interface SeedPayDocsDemoDataResult {
   paymentsCreated: number
   donationsCreated: number
   invoicesCreated: number
+  /** Per-key mirror outcomes (the keys mirrored from ezauth into ezpay's local DB). */
+  keysMirrored: MirroredKeyOutcome[]
+  /**
+   * Resolved ezauth Application id for the `_pay-docs-demo` Application.
+   * Required to populate `applicationId` on the mirrored API keys (which the
+   * ezpay test-mode scope plugin uses for partitioning). When the lookup
+   * fails (ezauth offline, sandbox not seeded yet), defaults to the slug
+   * itself so the mirror still proceeds — the donation / payment data uses
+   * the slug as `applicationId` anyway.
+   */
+  applicationId: string
 }
 
 /** Options for {@link seedPayDocsDemoData}. */
@@ -136,6 +190,14 @@ export interface SeedPayDocsDemoDataOptions {
    * gets wiped + re-seeded each cycle.
    */
   skipPlans?: boolean
+  /**
+   * When true, skip mirroring the API keys from ezauth into ezpay's local
+   * `apiKeys` collection. The 24h reset cron uses this to avoid re-doing
+   * the (idempotent but ezauth-dependent) work on every tick — the keys
+   * are mirrored once at bootstrap (`pnpm seed:pay-docs-demo`) and never
+   * change after that.
+   */
+  skipKeyMirror?: boolean
 }
 
 /**
@@ -157,6 +219,8 @@ export async function seedPayDocsDemoData(
     paymentsCreated: 0,
     donationsCreated: 0,
     invoicesCreated: 0,
+    keysMirrored: [],
+    applicationId: PAY_DOCS_DEMO_APP_SLUG,
   }
 
   // 1. Plans — idempotent upsert by (applicationId, name).
@@ -433,7 +497,138 @@ export async function seedPayDocsDemoData(
   await Payment.insertMany(invoicesToInsert)
   result.invoicesCreated = invoicesToInsert.length
 
+  // 7. Mirror the ezauth-side API keys into ezpay's LOCAL `apiKeys`
+  //    collection. The ezpay middleware (`validateApiKey` /
+  //    `/api/keys/config`) does NOT round-trip to ezauth on the hot path —
+  //    it looks up the SHA-256 hash directly in ezpay's DB. Without this
+  //    mirror, every request carrying the `_pay-docs-demo` publishable
+  //    key gets a 401 "Invalid API key" even though the key exists in
+  //    ezauth. Reads the raw keys from env vars (the ezauth seed prints
+  //    them ONCE at creation time and dumps them to a tmp file; the
+  //    operator copies the values into the matching env files).
+  //
+  //    Idempotent: skips a key if the same hash is already persisted with
+  //    `createdBy: PAY_DOCS_DEMO_SEED_MARKER`.
+  if (!options.skipKeyMirror) {
+    result.applicationId = await resolveSandboxApplicationId()
+    result.keysMirrored = await mirrorPayDocsDemoKeys(result.applicationId)
+  }
+
   return result
+}
+
+/**
+ * Resolve the `_pay-docs-demo` Application id from ezauth so the mirrored
+ * API keys carry the SAME `applicationId` as the ezauth-side records.
+ * Falls back to the slug when ezauth is unreachable / not yet seeded —
+ * the slug-as-id is consistent with how this seed already keys Plans /
+ * Payments (see line 176 above).
+ *
+ * @internal
+ */
+async function resolveSandboxApplicationId(): Promise<string> {
+  try {
+    const app = await lookupApplicationBySlug(PAY_DOCS_DEMO_APP_SLUG)
+    if (app?.id) return app.id
+  } catch (err) {
+    logger.warn(
+      {
+        err: err instanceof Error ? err.message : String(err),
+        slug: PAY_DOCS_DEMO_APP_SLUG,
+      },
+      'pay-docs-demo: ezauth lookup failed, falling back to slug as applicationId'
+    )
+  }
+  return PAY_DOCS_DEMO_APP_SLUG
+}
+
+/**
+ * Mirror the `_pay-docs-demo` API keys (publishable + secret) from ezauth
+ * into ezpay's local `apiKeys` collection. Reads raw keys from env vars
+ * documented in `apps/ezpay/api/.env.example`. Each key is hashed via the
+ * canonical helper and persisted with the SAME provenance marker as the
+ * ezauth-side seed for cross-DB traceability.
+ *
+ * @internal
+ */
+async function mirrorPayDocsDemoKeys(applicationId: string): Promise<MirroredKeyOutcome[]> {
+  const ApiKey = await getApiKeyModel()
+  const outcomes: MirroredKeyOutcome[] = []
+
+  for (const spec of PAY_DOCS_DEMO_KEYS_TO_MIRROR) {
+    const rawKey = process.env[spec.envVarName]
+    if (!rawKey) {
+      logger.warn(
+        { envVarName: spec.envVarName, label: spec.label },
+        'pay-docs-demo: env var missing — skipping key mirror'
+      )
+      outcomes.push({
+        label: spec.label,
+        type: spec.type,
+        scope: spec.scope,
+        status: 'skipped-no-env',
+      })
+      continue
+    }
+
+    // Defensive: validate the raw key matches the expected prefix shape so
+    // the operator can't accidentally paste a live key into a test env var.
+    const format = detectKeyFormat(rawKey)
+    if (!format || format.type !== spec.type || format.env !== 'test') {
+      throw new Error(
+        `pay-docs-demo: ${spec.envVarName} is not a valid ez_${spec.type === 'publishable' ? 'pk' : 'sk'}_test_* key. ` +
+          `Got prefix: ${rawKey.substring(0, 14)}...`
+      )
+    }
+
+    const hashedKey = hashApiKey(rawKey)
+    const keyPrefix = extractKeyPrefix(rawKey)
+
+    const existing = await ApiKey.findOne({
+      key: hashedKey,
+    }).lean()
+
+    if (existing) {
+      outcomes.push({
+        label: spec.label,
+        type: spec.type,
+        scope: spec.scope,
+        status: 'already-exists',
+        keyPrefix: existing.keyPrefix,
+      })
+      continue
+    }
+
+    await ApiKey.create({
+      key: hashedKey,
+      keyPrefix,
+      name: `Pay Docs Demo ${spec.label} (mirrored from ezauth seed)`,
+      userId: 'system',
+      applicationId,
+      appSlug: PAY_DOCS_DEMO_APP_SLUG,
+      type: spec.type,
+      env: 'test',
+      scope: spec.scope,
+      permissions: ['*'],
+      status: 'active',
+      createdBy: PAY_DOCS_DEMO_SEED_MARKER,
+      // Demo keys have no monthly quota — quotas live on the Application
+      // and are enforced by `middleware/check-pay-demo-quotas.ts`.
+      quotaMonthly: null,
+      // Stripe-pattern test/live partition — both keys are test by design.
+      isTestMode: true,
+    })
+
+    outcomes.push({
+      label: spec.label,
+      type: spec.type,
+      scope: spec.scope,
+      status: 'created',
+      keyPrefix,
+    })
+  }
+
+  return outcomes
 }
 
 /**
@@ -459,8 +654,31 @@ async function main(): Promise<void> {
   console.info(`- Donations: ${result.donationsCreated}`)
   console.info(`- Invoices: ${result.invoicesCreated}`)
   console.info('')
-  console.info(`ApplicationId: ${PAY_DOCS_DEMO_APP_SLUG}`)
+  console.info('Keys mirrored into ezpay DB:')
+  for (const k of result.keysMirrored) {
+    if (k.status === 'skipped-no-env') {
+      console.info(`- ${k.label.padEnd(8)} SKIP (env var missing — see .env.example)`)
+    } else {
+      const tag = k.status === 'created' ? 'NEW ' : 'SKIP'
+      console.info(`- ${k.label.padEnd(8)} ${tag} prefix=${k.keyPrefix}`)
+    }
+  }
   console.info('')
+  console.info(`ApplicationId (sandbox slug): ${PAY_DOCS_DEMO_APP_SLUG}`)
+  console.info(`ApplicationId (resolved): ${result.applicationId}`)
+  console.info('')
+
+  const missingEnvKeys = result.keysMirrored.filter(k => k.status === 'skipped-no-env')
+  if (missingEnvKeys.length > 0) {
+    console.info('!! Some keys were not mirrored. Set the env vars then re-run:')
+    for (const k of missingEnvKeys) {
+      const envVar =
+        k.label === 'pk_test' ? 'EZPAY_DOCS_DEMO_PUBLISHABLE_KEY' : 'EZPAY_DOCS_DEMO_SECRET_KEY'
+      console.info(`   ${envVar}=<value from \`pnpm --filter api-ezauth seed:pay-docs-demo\`>`)
+    }
+    console.info('')
+  }
+
   console.info('Next step: copy NEXT_PUBLIC_EZPAY_DOCS_DEMO_KEY into apps/ezpay/web/.env.local')
   console.info(
     '  (the publishable key was printed by `pnpm --filter api-ezauth seed:pay-docs-demo`).'
