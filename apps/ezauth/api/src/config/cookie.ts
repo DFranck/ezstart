@@ -22,8 +22,11 @@ export const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 export const REFRESH_COOKIE_PATH = '/api/auth/refresh'
 
 function getCookieDomain(): string | undefined {
-  if (env.NODE_ENV !== 'production') return undefined
-  return env.COOKIE_DOMAIN || '.ezstart.xyz'
+  if (env.NODE_ENV === 'production') return env.COOKIE_DOMAIN || '.ezstart.xyz'
+  // Dev cross-port (API:6110 + Web:6111) — Domain=localhost required so browser
+  // sends the cookie to all localhost ports. Otherwise it stays host-only on
+  // the API port and SSR auth never sees it. Cf. .claude/rules/env.md §7.
+  return 'localhost'
 }
 
 /**

@@ -123,7 +123,11 @@ export async function issueSession(
     access_token: accessToken,
     token_type: 'Bearer',
     expires_in: ACCESS_TOKEN_EXPIRES_SECONDS,
-    user: user.toAuthUser(),
+    // Surface `twoFactorEnabled` on the user object so SDK consumers see the
+    // gate state immediately after login/refresh — without a follow-up `/me`
+    // call. Mirrors `getUserById()` (cf. line ~401). The flag is already
+    // computed in `buildJwtPayload()` above so we forward it for free.
+    user: { ...user.toAuthUser(), twoFactorEnabled: payload.twoFactorEnabled === true },
     refreshToken,
   }
 }
