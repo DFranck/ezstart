@@ -73,14 +73,16 @@ export interface RequireTwoFactorProps {
   /**
    * Custom UI rendered when the authenticated user has an elevated role
    * (admin / superadmin) but no enrolled TOTP. Defaults to a polite Card
-   * with a CTA pointing at `/settings?tab=2fa`.
+   * with a CTA pointing at `/dashboard?section=settings` (the canonical
+   * EZAuth-style unified dashboard route — override via `fallbackPath`).
    */
   fallback?: ReactNode
   /**
    * Path the default CTA navigates to. Defaults to `/dashboard?section=settings`
    * (the canonical EZAuth-style unified dashboard route). Override when the
-   * consumer's settings UI lives at a different route (e.g. `/account/security`
-   * or `/settings?tab=2fa`).
+   * consumer's settings UI lives at a different route (e.g. `/account/security`).
+   * The destination page MUST exist on the consumer app — the SDK does no
+   * fallback discovery, it just `window.location.assign(fallbackPath)`s.
    */
   fallbackPath?: string
   /** Partial texts override — falls back to English defaults. */

@@ -5,10 +5,38 @@ import { apiCall } from '@ezstart/api-sdk'
 import { TwoFactorPrompt } from '../../components/TwoFactorPrompt.js'
 
 const mockApiCall = vi.mocked(apiCall)
+const handleCallbackMock = vi.fn()
+
+vi.mock('../../react/hooks.js', () => ({
+  useAuth: () => ({
+    handleCallback: handleCallbackMock,
+  }),
+}))
+
+// Capture the value passed to `window.location.href` so we can assert
+// redirect target without actually navigating.
+let lastHref = ''
+beforeEach(() => {
+  lastHref = ''
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: {
+      origin: 'http://localhost:6111',
+      get href() {
+        return lastHref
+      },
+      set href(v: string) {
+        lastHref = v
+      },
+    },
+  })
+})
 
 describe('TwoFactorPrompt', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    handleCallbackMock.mockReset()
+    handleCallbackMock.mockResolvedValue({ id: 'user-1', email: 'u@example.com' })
   })
 
   it('renders prompt text and code input', () => {
@@ -142,5 +170,83 @@ describe('TwoFactorPrompt', () => {
     )
     expect(screen.getByText('Entrez le code 2FA')).toBeInTheDocument()
     expect(screen.getByText('Valider')).toBeInTheDocument()
+  })
+
+  // ─── Bug 18 parity — same-origin code exchange before navigation ───────
+  // Mirror of `sign-in-form.test.tsx` "exchanges the code via handleCallback
+  // BEFORE navigating same-origin". Without this, the destination page
+  // (e.g. `/en/admin`) loads with an empty store, RequireAuth bounces back
+  // to /login, infinite redirect loop.
+  it('exchanges the code via handleCallback BEFORE same-origin navigation', async () => {
+    mockApiCall.mockResolvedValueOnce({ code: 'auth-code-same-origin' })
+
+    render(
+      <TwoFactorPrompt
+        tempToken="temp-tok-same"
+        // Same origin as the mocked window.location (http://localhost:6111)
+        redirectUri="http://localhost:6111/en/admin"
+      />
+    )
+    fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '123456' } })
+
+    await waitFor(() => {
+      expect(handleCallbackMock).toHaveBeenCalledWith('auth-code-same-origin')
+    })
+    await waitFor(() => {
+      expect(lastHref).toBe('http://localhost:6111/en/admin')
+    })
+  })
+
+  it('forwards code via SSO redirect for cross-origin redirectUri (no exchange)', async () => {
+    mockApiCall.mockResolvedValueOnce({ code: 'auth-code-cross' })
+
+    render(
+      <TwoFactorPrompt
+        tempToken="temp-tok-cross"
+        // Different origin (port mismatch = different origin per browser)
+        redirectUri="http://localhost:6131/en/auth/callback"
+      />
+    )
+    fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '654321' } })
+
+    await waitFor(() => {
+      // Cross-origin redirect must happen
+      expect(lastHref).toContain('http://localhost:6131/en/auth/callback')
+      expect(lastHref).toContain('code=auth-code-cross')
+    })
+    // Critical: handleCallback NEVER called for cross-origin (the consumer's
+    // /auth/callback page exchanges the code itself).
+    expect(handleCallbackMock).not.toHaveBeenCalled()
+  })
+
+  it('hard ref-guard prevents double-fire (StrictMode + auto+manual race)', async () => {
+    // Slow apiCall → simulate a real network round-trip so a second call
+    // attempt can fire before the first resolves.
+    let resolveApi: (v: unknown) => void = () => {}
+    mockApiCall.mockImplementation(
+      () =>
+        new Promise(resolve => {
+          resolveApi = resolve
+        })
+    )
+
+    render(<TwoFactorPrompt tempToken="temp-tok-race" />)
+    const input = screen.getByPlaceholderText('000000')
+
+    // Trigger auto-submit (effect fires synchronously after the state change)
+    fireEvent.change(input, { target: { value: '123456' } })
+
+    // Immediately try a manual submit too (form submit event). The hard
+    // submittingRef guard MUST short-circuit it before apiCall runs again.
+    const form = input.closest('form')!
+    fireEvent.submit(form)
+
+    // Resolve the in-flight call so we can flush effects deterministically.
+    resolveApi({ code: 'race-code' })
+
+    // EXACTLY 1 call should have made it through.
+    await waitFor(() => {
+      expect(mockApiCall).toHaveBeenCalledTimes(1)
+    })
   })
 })

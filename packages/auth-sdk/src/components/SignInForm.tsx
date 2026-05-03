@@ -218,8 +218,52 @@ export function SignInForm({
     if (!isAuthenticated) return
     if (typeof window === 'undefined') return
     if (!resolvedRedirectUri) return
-    window.location.replace(resolvedRedirectUri)
-  }, [isAuthReady, isAuthenticated, resolvedRedirectUri])
+
+    // Same-origin → direct redirect (consumer's own /dashboard route, store
+    // already populated via persist). Cross-origin → MUST do an SSO handoff
+    // first : POST /auth/sso/authorize to generate a one-shot auth code, then
+    // redirect with `?code=...` so the consumer's `/auth/callback` can exchange
+    // it. Without this step the consumer lands on its callback empty-handed and
+    // shows "No authorization code found" (cf. FIX-EZSTART-SSO-LOGIN-FLOW).
+    let cancelled = false
+    const targetUrl = (() => {
+      try {
+        return new URL(resolvedRedirectUri, window.location.origin)
+      } catch {
+        return null
+      }
+    })()
+    if (!targetUrl) return
+
+    const isSameOrigin = targetUrl.origin === window.location.origin
+    if (isSameOrigin) {
+      window.location.replace(resolvedRedirectUri)
+      return
+    }
+
+    void (async () => {
+      try {
+        const result = await apiCall<{ code: string; expiresIn: number }>('/auth/sso/authorize', {
+          appName: 'ezauth',
+          method: 'POST',
+          body: { app: appName, redirectUri: targetUrl.toString() },
+        })
+        if (cancelled) return
+        const target = new URL(targetUrl.toString())
+        target.searchParams.set('code', result.code)
+        window.location.replace(target.toString())
+      } catch (err) {
+        // Fall through to render the form so the user has a recovery path.
+        logger.warn(
+          'SSO auto-handoff failed, falling back to manual sign-in:',
+          err instanceof Error ? err.message : String(err)
+        )
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [isAuthReady, isAuthenticated, resolvedRedirectUri, appName])
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -377,7 +421,12 @@ export function SignInForm({
     return (
       <TwoFactorPrompt
         tempToken={twoFactorState.tempToken}
-        redirectUri={redirectUri}
+        // Use the RESOLVED redirect URI (prop ?? URL param ?? same-origin
+        // default) so the post-2FA redirect matches the resolution we did
+        // for the no-2FA path. Passing the raw `redirectUri` prop here meant
+        // the SDK only worked when the consumer explicitly passed one,
+        // breaking dogfood standalone (e.g. ezauth /login → /dashboard).
+        redirectUri={resolvedRedirectUri}
         onBack={() => setTwoFactorState(null)}
         texts={twoFactorTexts}
       />

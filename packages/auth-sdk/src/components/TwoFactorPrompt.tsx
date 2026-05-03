@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import { detectCurrentThemePreference } from './themePreference.js'
 import { buildPostLoginRedirect } from './postLoginRedirect.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
+import { useAuth } from '../react/hooks.js'
 import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -106,14 +107,22 @@ export function TwoFactorPrompt({
     lockedError: dict.lockedError,
     ...texts,
   }
+  const { handleCallback } = useAuth()
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   // Auto-submit guard so we don't fire twice if React re-renders mid-state
   const autoSubmittedRef = useRef(false)
+  // Hard sync guard — `setLoading(true)` is async (next render), so two
+  // call sites (auto-submit useEffect + manual click, or StrictMode dev
+  // double-mount) can both observe `loading === false` and dispatch the
+  // POST before either setState propagates. The ref is mutated synchronously
+  // and blocks the second invocation deterministically.
+  const submittingRef = useRef(false)
 
   const submit = async (codeToSubmit: string) => {
-    if (loading) return
+    if (submittingRef.current) return
+    submittingRef.current = true
     setLoading(true)
     setError('')
 
@@ -124,14 +133,30 @@ export function TwoFactorPrompt({
         body: { tempToken, code: codeToSubmit },
       })
 
-      // Redirect with authorization code.
-      //
-      // Same logic as `SignInForm` — see `buildPostLoginRedirect` for the
-      // full rationale. Cross-origin → SSO code flow (append `?code=` and
-      // `?theme=`). Same-origin → direct redirect (cookie already set by
-      // the API response, no callback handler on the destination page).
+      // Mirror SignInForm same-origin behaviour (cf. SignInForm.tsx
+      // `await handleCallback(...)` BEFORE `window.location.href = ...`).
+      // Same-origin → exchange the code locally so the destination page
+      // sees an authenticated store. Cross-origin → forward `?code=` so the
+      // consumer's callback exchanges it.
       if (redirectUri && result.code) {
         logger.info('2FA validated, redirecting')
+        const url = new URL(redirectUri, window.location.origin)
+        const isSameOrigin = url.origin === window.location.origin
+
+        if (isSameOrigin) {
+          try {
+            await handleCallback(result.code)
+          } catch (exchangeError) {
+            logger.error(
+              '2FA same-origin code exchange failed:',
+              exchangeError instanceof Error ? exchangeError.message : String(exchangeError)
+            )
+            throw exchangeError instanceof Error ? exchangeError : new Error(t.fallbackError)
+          }
+          window.location.href = url.toString()
+          return
+        }
+
         const themePref = detectCurrentThemePreference()
         const target = buildPostLoginRedirect(
           redirectUri,
@@ -146,10 +171,12 @@ export function TwoFactorPrompt({
       // No redirect — call onSuccess callback
       onSuccess?.(result)
       setLoading(false)
+      submittingRef.current = false
     } catch (err) {
       const message = err instanceof Error ? err.message : t.fallbackError
       setError(message)
       setLoading(false)
+      submittingRef.current = false
       // Allow another auto-submit attempt after a manual edit
       autoSubmittedRef.current = false
     }

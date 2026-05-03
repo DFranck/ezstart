@@ -283,15 +283,37 @@ describe('SignInForm — auto-redirect when already authenticated', () => {
     })
   })
 
-  it('honours an explicit `redirectUri` prop', async () => {
+  it('honours an explicit same-origin `redirectUri` prop (no SSO handoff needed)', async () => {
     setupLocationWithReplace('http://localhost:6111')
     useAuthState.isAuthenticated = true
     useAuthState.isAuthReady = true
 
+    render(<SignInForm appName="ezauth" redirectUri="http://localhost:6111/admin" />)
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith('http://localhost:6111/admin')
+    })
+  })
+
+  it('cross-origin redirectUri triggers SSO handoff (POST /auth/sso/authorize, redirects with ?code=)', async () => {
+    setupLocationWithReplace('http://localhost:6111')
+    useAuthState.isAuthenticated = true
+    useAuthState.isAuthReady = true
+    mockApiCall.mockResolvedValueOnce({ code: 'sso-code-xyz', expiresIn: 60 })
+
     render(<SignInForm appName="ezauth" redirectUri="https://app.example.com/admin" />)
 
     await waitFor(() => {
-      expect(replaceMock).toHaveBeenCalledWith('https://app.example.com/admin')
+      expect(mockApiCall).toHaveBeenCalledWith(
+        '/auth/sso/authorize',
+        expect.objectContaining({
+          method: 'POST',
+          body: { app: 'ezauth', redirectUri: 'https://app.example.com/admin' },
+        })
+      )
+    })
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith('https://app.example.com/admin?code=sso-code-xyz')
     })
   })
 })

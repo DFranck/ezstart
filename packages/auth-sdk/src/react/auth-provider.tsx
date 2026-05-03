@@ -328,12 +328,26 @@ export function AuthProvider({
     // and `process.env?` optional chaining disables the substitution.
     const key = publishableKey ?? process.env.NEXT_PUBLIC_EZAUTH_KEY
 
+    // Defensive fallback (dev-only): if webUrl wasn't provided AND apiUrl
+    // looks like the canonical localhost dev pattern (port 6110), derive the
+    // web URL by swapping to port 6111. This unblocks consumer apps that forgot
+    // to wire NEXT_PUBLIC_EZAUTH_WEB_URL — SSO would otherwise build
+    // `${undefined}/login` and dead-end on the consumer's own /auth/callback
+    // with "no authorization code". In production (custom domains), the
+    // consumer MUST provide webUrl explicitly — there's no universal
+    // `api.<host>` → `app.<host>` mapping we can safely guess.
+    const resolvedWebUrl =
+      webUrl ??
+      (apiUrl?.match(/^https?:\/\/localhost:6110(\/|$)/)
+        ? apiUrl.replace(/:6110(\/|$)/, ':6111$1')
+        : undefined)
+
     return {
       publishableKey: mode === 'first-party' ? undefined : (key ?? undefined),
       firstParty: mode === 'first-party',
       appName,
       apiUrl,
-      webUrl,
+      webUrl: resolvedWebUrl,
     }
   }, [publishableKey, mode, appName, apiUrl, webUrl])
 
