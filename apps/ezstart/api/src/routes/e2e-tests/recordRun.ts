@@ -51,6 +51,7 @@ recordRunRouter.post(
       const run = await Run.create({
         testId: data.testId,
         status: data.status,
+        env: data.env,
         runAt: data.runAt ?? new Date(),
         durationMs: data.durationMs ?? null,
         agent: data.agent,
@@ -65,6 +66,7 @@ recordRunRouter.post(
         id: run._id.toString(),
         testId: run.testId,
         status: run.status,
+        env: run.env,
         runAt: run.runAt,
         durationMs: run.durationMs ?? null,
         agent: run.agent,

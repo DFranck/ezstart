@@ -25,6 +25,7 @@ export const listTestsRouter = createRouterWithDoc(listTestsRegistry, router, '/
 
 interface LatestRunInfo {
   status: string
+  env: string
   runAt: Date
   agent: string
   durationMs?: number | null
@@ -40,7 +41,7 @@ listTestsRouter.get(
         return sendValidationError(res, 'Invalid query parameters', validation.error.errors)
       }
 
-      const { app, category, feature, priority, status, limit, offset } = validation.data
+      const { app, category, feature, priority, status, env, limit, offset } = validation.data
 
       const Definition = await getE2ETestDefinitionModel()
       const Run = await getE2ETestRunModel()
@@ -64,21 +65,28 @@ listTestsRouter.get(
       const testIds = definitions.map(d => d.testId as string)
 
       // Fetch latest run per test in one round-trip via aggregation.
+      // When `env !== 'all'`, the latest run is computed per-env so the matrix
+      // surfaces "latest run in <env>" rather than "latest run anywhere".
+      const runMatch: Record<string, unknown> = { testId: { $in: testIds } }
+      if (env !== 'all') runMatch.env = env
+
       const latestRuns = testIds.length
         ? await Run.aggregate<{
             _id: string
             status: string
+            env: string
             runAt: Date
             agent: string
             durationMs?: number | null
             errors?: string[]
           }>([
-            { $match: { testId: { $in: testIds } } },
+            { $match: runMatch },
             { $sort: { testId: 1, runAt: -1 } },
             {
               $group: {
                 _id: '$testId',
                 status: { $first: '$status' },
+                env: { $first: '$env' },
                 runAt: { $first: '$runAt' },
                 agent: { $first: '$agent' },
                 durationMs: { $first: '$durationMs' },
@@ -92,6 +100,7 @@ listTestsRouter.get(
       for (const r of latestRuns) {
         runByTest.set(r._id, {
           status: r.status,
+          env: r.env ?? 'local',
           runAt: r.runAt,
           agent: r.agent,
           durationMs: r.durationMs ?? null,
@@ -124,7 +133,7 @@ listTestsRouter.get(
           return item.lastStatus === status
         })
 
-      return sendSuccess(res, { tests: items }, { total, limit, offset })
+      return sendSuccess(res, { tests: items, env }, { total, limit, offset })
     } catch (error) {
       logger.error('[E2E Tests] List error:', error)
       return sendError(res, 'Failed to list E2E tests')

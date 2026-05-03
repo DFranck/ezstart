@@ -16,7 +16,7 @@ import {
 } from '@ezstart/api-core'
 import { z } from 'zod'
 import { getE2ETestDefinitionModel } from '../../models/E2ETestDefinition.js'
-import { getE2ETestRunModel } from '../../models/E2ETestRun.js'
+import { E2E_RUN_ENVS, getE2ETestRunModel, type E2ERunEnv } from '../../models/E2ETestRun.js'
 import { TestIdSchema } from './schemas.js'
 
 const ParamsSchema = z.object({ testId: TestIdSchema })
@@ -77,6 +77,90 @@ getTestRouter.get(
         },
       ])
 
+      // Per-env breakdown — drives the history-drawer tabs.
+      const perEnvAgg = await Run.aggregate<{
+        _id: string
+        total: number
+        pass: number
+        fail: number
+        skip: number
+        blocked: number
+        avgDurationMs: number | null
+        lastRunAt: Date | null
+      }>([
+        { $match: { testId } },
+        {
+          $group: {
+            _id: '$env',
+            total: { $sum: 1 },
+            pass: { $sum: { $cond: [{ $eq: ['$status', 'pass'] }, 1, 0] } },
+            fail: { $sum: { $cond: [{ $eq: ['$status', 'fail'] }, 1, 0] } },
+            skip: { $sum: { $cond: [{ $eq: ['$status', 'skip'] }, 1, 0] } },
+            blocked: { $sum: { $cond: [{ $eq: ['$status', 'blocked'] }, 1, 0] } },
+            avgDurationMs: { $avg: '$durationMs' },
+            lastRunAt: { $max: '$runAt' },
+          },
+        },
+      ])
+
+      type EnvStats = {
+        total: number
+        pass: number
+        fail: number
+        skip: number
+        blocked: number
+        passRate: number | null
+        avgDurationMs: number | null
+        lastRunAt: Date | null
+      }
+
+      const byEnv: Record<E2ERunEnv, EnvStats> = {
+        local: {
+          total: 0,
+          pass: 0,
+          fail: 0,
+          skip: 0,
+          blocked: 0,
+          passRate: null,
+          avgDurationMs: null,
+          lastRunAt: null,
+        },
+        staging: {
+          total: 0,
+          pass: 0,
+          fail: 0,
+          skip: 0,
+          blocked: 0,
+          passRate: null,
+          avgDurationMs: null,
+          lastRunAt: null,
+        },
+        production: {
+          total: 0,
+          pass: 0,
+          fail: 0,
+          skip: 0,
+          blocked: 0,
+          passRate: null,
+          avgDurationMs: null,
+          lastRunAt: null,
+        },
+      }
+      for (const row of perEnvAgg) {
+        const key = (row._id ?? 'local') as E2ERunEnv
+        if (!E2E_RUN_ENVS.includes(key)) continue
+        byEnv[key] = {
+          total: row.total,
+          pass: row.pass,
+          fail: row.fail,
+          skip: row.skip,
+          blocked: row.blocked,
+          passRate: row.total > 0 ? Math.round((row.pass / row.total) * 1000) / 10 : null,
+          avgDurationMs: row.avgDurationMs,
+          lastRunAt: row.lastRunAt,
+        }
+      }
+
       const s = statsAgg[0] ?? {
         total: 0,
         pass: 0,
@@ -105,6 +189,8 @@ getTestRouter.get(
         runs: recentRuns.map(r => ({
           id: String(r._id),
           status: r.status as string,
+          // Guard against undefined env from legacy docs (pre-migration safety net).
+          env: ((r.env as string | undefined) ?? 'local') as E2ERunEnv,
           runAt: r.runAt as Date,
           agent: r.agent as string,
           agentVersion: (r.agentVersion as string | null) ?? null,
@@ -123,6 +209,7 @@ getTestRouter.get(
           passRate,
           avgDurationMs: s.avgDurationMs,
           lastRunAt: s.lastRunAt,
+          byEnv,
         },
       })
     } catch (error) {

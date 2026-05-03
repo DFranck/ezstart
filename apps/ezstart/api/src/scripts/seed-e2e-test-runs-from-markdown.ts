@@ -34,7 +34,7 @@ import { connectToMongo } from '@ezstart/api-core'
 import { loadSharedEnv } from '@ezstart/config/server'
 import { getMongoUrl } from '@ezstart/config/env-resolvers'
 import { getE2ETestDefinitionModel } from '../models/E2ETestDefinition.js'
-import { getE2ETestRunModel, type E2ERunStatus } from '../models/E2ETestRun.js'
+import { getE2ETestRunModel, type E2ERunEnv, type E2ERunStatus } from '../models/E2ETestRun.js'
 
 interface ParsedRow {
   testId: string
@@ -47,6 +47,7 @@ interface ParsedRow {
 interface MappedRun {
   testId: string
   status: E2ERunStatus
+  env: E2ERunEnv
   runAt: Date
   agent: string
   notes: string | null
@@ -156,7 +157,8 @@ function buildRunAt(rawTime: string, sessionDate: string): Date {
  */
 function mapRows(
   rows: ParsedRow[],
-  sessionDate: string
+  sessionDate: string,
+  env: E2ERunEnv
 ): {
   mapped: MappedRun[]
   unknownStatus: ParsedRow[]
@@ -173,6 +175,7 @@ function mapRows(
     mapped.push({
       testId: row.testId,
       status,
+      env,
       runAt: buildRunAt(row.rawTime, sessionDate),
       agent:
         row.agent && row.agent !== '—' && row.agent !== '-' ? row.agent : 'session-bulk-import',
@@ -186,14 +189,19 @@ function mapRows(
 /**
  * Core seed function — connects, validates against definitions, inserts runs.
  * Exported for testability.
+ *
+ * `env` defaults to `'local'` because all historical session markdowns were
+ * captured against developer machines. Pass `'staging'` / `'production'`
+ * explicitly when importing a session run against a deployed environment.
  */
 export async function seedE2ETestRunsFromMarkdown(
   markdownPath: string,
-  sessionDate: string
+  sessionDate: string,
+  env: E2ERunEnv = 'local'
 ): Promise<SeedRunsResult> {
   const markdown = readFileSync(markdownPath, 'utf-8')
   const parsed = parseMarkdownRows(markdown)
-  const { mapped, unknownStatus } = mapRows(parsed, sessionDate)
+  const { mapped, unknownStatus } = mapRows(parsed, sessionDate, env)
 
   if (unknownStatus.length > 0) {
     console.warn(`⚠️  Skipped ${unknownStatus.length} rows with unknown status:`)
@@ -222,6 +230,7 @@ export async function seedE2ETestRunsFromMarkdown(
     await Run.create({
       testId: run.testId,
       status: run.status,
+      env: run.env,
       runAt: run.runAt,
       agent: run.agent,
       notes: run.notes,
@@ -266,12 +275,20 @@ async function main(): Promise<void> {
   // For the canonical session-2026-05-03.md, that's 2026-05-03.
   const sessionDate = process.env.SESSION_DATE ?? '2026-05-03'
 
+  // Env defaults to 'local' (all historical session markdowns captured against
+  // dev machines). Override via SESSION_ENV when importing a deployed-env run.
+  const rawEnv = (process.env.SESSION_ENV ?? 'local') as E2ERunEnv
+  if (!['local', 'staging', 'production'].includes(rawEnv)) {
+    throw new Error(`Invalid SESSION_ENV='${rawEnv}' — must be local | staging | production`)
+  }
+
   console.info('')
   console.info(`📥 Importing E2E runs from: ${markdownPath}`)
   console.info(`   Session date: ${sessionDate}`)
+  console.info(`   Env:          ${rawEnv}`)
   console.info('')
 
-  const result = await seedE2ETestRunsFromMarkdown(markdownPath, sessionDate)
+  const result = await seedE2ETestRunsFromMarkdown(markdownPath, sessionDate, rawEnv)
 
   console.info('')
   console.info(

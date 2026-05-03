@@ -191,16 +191,19 @@
     },
     "e2eTests": {
       "title": "E2E Test Matrix",
-      "subtitle": "Auto-recorded test runs across all apps. Filter by app, status, freshness.",
+      "subtitle": "Auto-recorded test runs across all apps. Filter by app, env, status, freshness.",
       "failedToLoad": "Failed to load E2E tests",
       "stats": {
         "totalLabel": "Total tests",
         "passRateLabel": "Pass rate",
         "failingLabel": "Failing",
-        "needsRerunLabel": "Needs re-run"
+        "needsRerunLabel": "Needs re-run",
+        "envPassLabel": "Passing",
+        "envBreakdown": "{fail} fail · {blocked} blocked · {never} never"
       },
       "filters": {
         "app": "App",
+        "env": "Env",
         "status": "Status",
         "freshness": "Freshness",
         "needsRerunOnly": "Needs re-run only",
@@ -213,11 +216,21 @@
         "stale30d": "Older than 30 days",
         "never": "Never run"
       },
+      "env": {
+        "all": "All envs",
+        "local": "Local",
+        "staging": "Staging",
+        "production": "Production",
+        "envBadge": {
+          "tooltip": "Environment in which the run was executed"
+        }
+      },
       "columns": {
         "testId": "Test ID",
         "app": "App",
         "feature": "Feature",
         "status": "Status",
+        "env": "Env",
         "lastRun": "Last run",
         "agent": "Agent",
         "actions": "Actions"

@@ -8,9 +8,14 @@
  *   pnpm e2e:record \
  *     --testId="ezauth.login.email-password" \
  *     --status=pass \
+ *     --env=local \
  *     --agent=mcp-chrome-devtools \
  *     --duration=2500 \
  *     --notes="Verified post #190 fix"
+ *
+ * `--env` is REQUIRED — pass `local`, `staging`, or `production`. Defaulting
+ * silently to one of those would poison the matrix (a `local` fix recorded as
+ * `production` would falsely turn the matrix green).
  *
  * Auth:
  *   Reads superadmin JWT from `EZSTART_SUPERADMIN_TOKEN` env var, or accepts
@@ -21,9 +26,13 @@
  *   var `EZSTART_API_URL`.
  */
 
+const VALID_ENVS = ['local', 'staging', 'production'] as const
+type RunEnv = (typeof VALID_ENVS)[number]
+
 interface CliArgs {
   testId: string
   status: 'pass' | 'fail' | 'skip' | 'blocked'
+  env: RunEnv
   agent: string
   agentVersion?: string
   durationMs?: number
@@ -50,12 +59,18 @@ function parseArgs(argv: string[]): CliArgs {
   const testId = map.get('testId')
   const status = map.get('status') as CliArgs['status'] | undefined
   const agent = map.get('agent')
+  const env = map.get('env') as RunEnv | undefined
 
   if (!testId) throw new Error('Missing --testId')
   if (!status || !['pass', 'fail', 'skip', 'blocked'].includes(status)) {
     throw new Error('Missing or invalid --status (must be pass | fail | skip | blocked)')
   }
   if (!agent) throw new Error('Missing --agent')
+  if (!env || !VALID_ENVS.includes(env)) {
+    throw new Error(
+      `Missing or invalid --env (must be ${VALID_ENVS.join(' | ')}) — required since E2E-MATRIX-ENV-DIMENSION-001`
+    )
+  }
 
   const durationRaw = map.get('duration') ?? map.get('durationMs')
   const durationMs = durationRaw !== undefined ? Number.parseInt(durationRaw, 10) : undefined
@@ -74,6 +89,7 @@ function parseArgs(argv: string[]): CliArgs {
   return {
     testId,
     status,
+    env,
     agent,
     agentVersion: map.get('agentVersion'),
     durationMs,
@@ -96,6 +112,7 @@ interface RecordedRun {
   id: string
   testId: string
   status: string
+  env: string
   runAt: string
   agent: string
 }
@@ -105,6 +122,7 @@ async function postRun(args: CliArgs): Promise<RecordedRun> {
   const body = {
     testId: args.testId,
     status: args.status,
+    env: args.env,
     agent: args.agent,
     agentVersion: args.agentVersion,
     durationMs: args.durationMs,
@@ -143,6 +161,7 @@ async function main(): Promise<void> {
   console.info(`   Run ID:  ${recorded.id}`)
   console.info(`   Test:    ${recorded.testId}`)
   console.info(`   Status:  ${recorded.status}`)
+  console.info(`   Env:     ${recorded.env}`)
   console.info(`   Agent:   ${recorded.agent}`)
   console.info(`   At:      ${recorded.runAt}`)
   console.info(`   View:    ${dashboardUrl}`)

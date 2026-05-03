@@ -191,16 +191,19 @@
     },
     "e2eTests": {
       "title": "Matrice de tests E2E",
-      "subtitle": "Executions de tests enregistrees automatiquement pour toutes les apps. Filtrer par app, statut, fraicheur.",
+      "subtitle": "Executions de tests enregistrees automatiquement pour toutes les apps. Filtrer par app, env, statut, fraicheur.",
       "failedToLoad": "Echec du chargement des tests E2E",
       "stats": {
         "totalLabel": "Total tests",
         "passRateLabel": "Taux de reussite",
         "failingLabel": "En echec",
-        "needsRerunLabel": "A relancer"
+        "needsRerunLabel": "A relancer",
+        "envPassLabel": "Reussis",
+        "envBreakdown": "{fail} echecs · {blocked} bloques · {never} jamais"
       },
       "filters": {
         "app": "App",
+        "env": "Env",
         "status": "Statut",
         "freshness": "Fraicheur",
         "needsRerunOnly": "A relancer uniquement",
@@ -213,11 +216,21 @@
         "stale30d": "Plus de 30 jours",
         "never": "Jamais execute"
       },
+      "env": {
+        "all": "Tous les envs",
+        "local": "Local",
+        "staging": "Staging",
+        "production": "Production",
+        "envBadge": {
+          "tooltip": "Environnement dans lequel l'execution s'est deroulee"
+        }
+      },
       "columns": {
         "testId": "ID test",
         "app": "App",
         "feature": "Feature",
         "status": "Statut",
+        "env": "Env",
         "lastRun": "Derniere execution",
         "agent": "Agent",
         "actions": "Actions"

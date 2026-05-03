@@ -25,17 +25,39 @@ describe('E2ETestRun Model', () => {
     const run = await RunModel.create({
       testId: 'ezauth.public.landing',
       status: 'pass',
+      env: 'local',
       agent: 'mcp-chrome-devtools',
     })
     expect(run.status).toBe('pass')
+    expect(run.env).toBe('local')
     expect(run.runAt).toBeInstanceOf(Date)
     expect(run.errors).toEqual([])
+  })
+
+  it('defaults env to "local" when omitted (backwards-compat)', async () => {
+    const run = await RunModel.create({
+      testId: 'ezauth.public.landing',
+      status: 'pass',
+      agent: 'curl',
+    })
+    expect(run.env).toBe('local')
+  })
+
+  it('rejects invalid env value', async () => {
+    const doc = new RunModel({
+      testId: 'ezauth.public.landing',
+      status: 'pass',
+      env: 'preview',
+      agent: 'curl',
+    })
+    await expect(doc.validate()).rejects.toThrow()
   })
 
   it('rejects invalid status', async () => {
     const doc = new RunModel({
       testId: 'ezauth.public.landing',
       status: 'maybe-pass',
+      env: 'local',
       agent: 'curl',
     })
     await expect(doc.validate()).rejects.toThrow()
@@ -45,18 +67,20 @@ describe('E2ETestRun Model', () => {
     const run = await RunModel.create({
       testId: 'ezauth.auth.login-email',
       status: 'fail',
+      env: 'production',
       agent: 'curl',
       errors: ['401 Unauthorized', 'Token missing in cookie'],
     })
     expect(run.errors).toHaveLength(2)
+    expect(run.env).toBe('production')
   })
 
   it('computes pass rate via aggregation', async () => {
     const testId = 'ezauth.public.landing'
-    await RunModel.create({ testId, status: 'pass', agent: 'curl' })
-    await RunModel.create({ testId, status: 'pass', agent: 'curl' })
-    await RunModel.create({ testId, status: 'pass', agent: 'curl' })
-    await RunModel.create({ testId, status: 'fail', agent: 'curl', errors: ['boom'] })
+    await RunModel.create({ testId, status: 'pass', env: 'local', agent: 'curl' })
+    await RunModel.create({ testId, status: 'pass', env: 'local', agent: 'curl' })
+    await RunModel.create({ testId, status: 'pass', env: 'local', agent: 'curl' })
+    await RunModel.create({ testId, status: 'fail', env: 'local', agent: 'curl', errors: ['boom'] })
 
     const stats = await RunModel.aggregate<{
       total: number
@@ -91,18 +115,21 @@ describe('E2ETestRun Model', () => {
     await RunModel.create({
       testId: a,
       status: 'pass',
+      env: 'local',
       agent: 'curl',
       runAt: new Date('2026-01-01T00:00:00Z'),
     })
     await RunModel.create({
       testId: a,
       status: 'fail',
+      env: 'local',
       agent: 'curl',
       runAt: new Date('2026-01-02T00:00:00Z'),
     })
     await RunModel.create({
       testId: b,
       status: 'pass',
+      env: 'local',
       agent: 'curl',
       runAt: new Date('2026-01-05T00:00:00Z'),
     })
@@ -114,5 +141,35 @@ describe('E2ETestRun Model', () => {
     const map = new Map(latest.map(r => [r._id, r]))
     expect(map.get(a)?.status).toBe('fail')
     expect(map.get(b)?.status).toBe('pass')
+  })
+
+  it('aggregates per-env: same test can pass in local and fail in production', async () => {
+    const testId = 'ezauth.auth.login-email'
+
+    // Local : 2 passes
+    await RunModel.create({ testId, status: 'pass', env: 'local', agent: 'curl' })
+    await RunModel.create({ testId, status: 'pass', env: 'local', agent: 'curl' })
+    // Staging : 1 pass
+    await RunModel.create({ testId, status: 'pass', env: 'staging', agent: 'curl' })
+    // Production : 2 fails
+    await RunModel.create({ testId, status: 'fail', env: 'production', agent: 'curl' })
+    await RunModel.create({ testId, status: 'fail', env: 'production', agent: 'curl' })
+
+    const byEnv = await RunModel.aggregate<{ _id: string; total: number; pass: number }>([
+      { $match: { testId } },
+      {
+        $group: {
+          _id: '$env',
+          total: { $sum: 1 },
+          pass: { $sum: { $cond: [{ $eq: ['$status', 'pass'] }, 1, 0] } },
+        },
+      },
+    ])
+
+    const map = new Map(byEnv.map(r => [r._id, r]))
+    expect(map.get('local')?.pass).toBe(2)
+    expect(map.get('staging')?.pass).toBe(1)
+    expect(map.get('production')?.pass).toBe(0)
+    expect(map.get('production')?.total).toBe(2)
   })
 })

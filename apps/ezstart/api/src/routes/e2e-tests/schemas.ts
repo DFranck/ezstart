@@ -12,7 +12,7 @@ import {
   E2E_CATEGORIES,
   E2E_PRIORITIES,
 } from '../../models/E2ETestDefinition.js'
-import { E2E_RUN_STATUSES } from '../../models/E2ETestRun.js'
+import { E2E_RUN_ENVS, E2E_RUN_STATUSES } from '../../models/E2ETestRun.js'
 
 /** A test slug — lowercase letters, numbers, dots, dashes. */
 export const TestIdSchema = z
@@ -29,6 +29,9 @@ export const E2ECategoryEnum = z.enum(E2E_CATEGORIES).describe('Functional categ
 export const E2ECadenceEnum = z.enum(E2E_CADENCES).describe('When the test should re-run')
 export const E2EPriorityEnum = z.enum(E2E_PRIORITIES).describe('Priority bucket (P0..P3)')
 export const E2ERunStatusEnum = z.enum(E2E_RUN_STATUSES).describe('Outcome of a run')
+export const E2ERunEnvEnum = z
+  .enum(E2E_RUN_ENVS)
+  .describe('Environment in which the run was executed (local | staging | production)')
 
 export const UpsertDefinitionSchema = z.object({
   testId: TestIdSchema,
@@ -47,6 +50,9 @@ export type UpsertDefinitionInput = z.infer<typeof UpsertDefinitionSchema>
 export const RecordRunSchema = z.object({
   testId: TestIdSchema,
   status: E2ERunStatusEnum,
+  env: E2ERunEnvEnum.describe(
+    'Environment in which the run was executed — required (local | staging | production)'
+  ),
   agent: z.string().min(1).max(100),
   agentVersion: z.string().max(100).optional(),
   durationMs: z
@@ -64,12 +70,23 @@ export const RecordRunSchema = z.object({
 
 export type RecordRunInput = z.infer<typeof RecordRunSchema>
 
+/**
+ * `env` filter for list/needs-rerun endpoints. Accepts the canonical envs or
+ * the literal string `'all'` to disable filtering. Defaults to `'all'` for
+ * backwards-compatibility with consumers that pre-date the env dimension.
+ */
+export const EnvFilterSchema = z
+  .union([E2ERunEnvEnum, z.literal('all')])
+  .default('all')
+  .describe('Filter runs by env — pass "all" (default) to include every env')
+
 export const ListDefinitionsQuerySchema = z.object({
   app: E2EAppEnum.optional(),
   category: E2ECategoryEnum.optional(),
   feature: z.string().max(100).optional(),
   priority: E2EPriorityEnum.optional(),
   status: E2ERunStatusEnum.optional().describe('Filter by latest run status'),
+  env: EnvFilterSchema,
   limit: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 })

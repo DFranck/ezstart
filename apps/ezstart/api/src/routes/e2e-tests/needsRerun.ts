@@ -28,6 +28,7 @@ import {
 } from '@ezstart/api-core'
 import { getE2ETestDefinitionModel } from '../../models/E2ETestDefinition.js'
 import { getE2ETestRunModel } from '../../models/E2ETestRun.js'
+import { EnvFilterSchema } from './schemas.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -98,19 +99,28 @@ function resolveMonorepoRoot(): string {
 
 needsRerunRouter.get(
   '/needs-rerun',
-  async (_req, res) => {
+  async (req, res) => {
     try {
+      // `env` is optional — defaults to 'all'. When set to a specific env, the
+      // staleness calc uses only passes recorded in that env so we surface "this
+      // test hasn't passed in production since the file was touched".
+      const envParse = EnvFilterSchema.safeParse(req.query.env ?? 'all')
+      const env = envParse.success ? envParse.data : 'all'
+
       const Definition = await getE2ETestDefinitionModel()
       const Run = await getE2ETestRunModel()
 
       const definitions = (await Definition.find({}).lean().exec()) as Record<string, unknown>[]
       if (definitions.length === 0) {
-        return sendSuccess(res, { tests: [], reason: 'no-definitions' })
+        return sendSuccess(res, { tests: [], reason: 'no-definitions', env })
       }
 
       // Latest pass run per testId (mirrors the listing aggregation).
+      const passMatch: Record<string, unknown> = { status: 'pass' }
+      if (env !== 'all') passMatch.env = env
+
       const latestPasses = await Run.aggregate<{ _id: string; runAt: Date }>([
-        { $match: { status: 'pass' } },
+        { $match: passMatch },
         { $sort: { testId: 1, runAt: -1 } },
         { $group: { _id: '$testId', runAt: { $first: '$runAt' } } },
       ])
@@ -185,6 +195,7 @@ needsRerunRouter.get(
 
       return sendSuccess(res, {
         tests: stale,
+        env,
         gitAvailable: gitOk,
         gitError,
         evaluatedAt: new Date(),

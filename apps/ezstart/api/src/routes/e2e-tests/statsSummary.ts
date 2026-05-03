@@ -14,7 +14,7 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getE2ETestDefinitionModel } from '../../models/E2ETestDefinition.js'
-import { getE2ETestRunModel } from '../../models/E2ETestRun.js'
+import { E2E_RUN_ENVS, getE2ETestRunModel, type E2ERunEnv } from '../../models/E2ETestRun.js'
 
 export const statsSummaryRegistry = new OpenAPIRegistry()
 const router: import('express').Router = Router()
@@ -90,6 +90,48 @@ statsSummaryRouter.get(
         statusCounts.pass + statusCounts.fail + statusCounts.skip + statusCounts.blocked
       const passRate = ranked > 0 ? Math.round((statusCounts.pass / ranked) * 1000) / 10 : null
 
+      // Per-env breakdown: latest run per (testId, env) combo, then bucket by status.
+      const latestPerEnv = await Run.aggregate<{
+        _id: { testId: string; env: string }
+        status: string
+      }>([
+        { $sort: { testId: 1, env: 1, runAt: -1 } },
+        {
+          $group: {
+            _id: { testId: '$testId', env: '$env' },
+            status: { $first: '$status' },
+          },
+        },
+      ])
+
+      type EnvCounts = { pass: number; fail: number; skip: number; blocked: number; never: number }
+      const byEnv: Record<E2ERunEnv, EnvCounts> = {
+        local: { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+        staging: { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+        production: { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+      }
+      const seenPerEnv: Record<E2ERunEnv, Set<string>> = {
+        local: new Set(),
+        staging: new Set(),
+        production: new Set(),
+      }
+      for (const row of latestPerEnv) {
+        const env = (row._id?.env ?? 'local') as E2ERunEnv
+        if (!E2E_RUN_ENVS.includes(env)) continue
+        seenPerEnv[env].add(row._id.testId)
+        if (row.status in byEnv[env]) {
+          byEnv[env][row.status as keyof EnvCounts]++
+        }
+      }
+      // "never" counts = definitions without any run in that specific env.
+      for (const env of E2E_RUN_ENVS) {
+        let neverCount = 0
+        for (const def of allDefIds) {
+          if (!seenPerEnv[env].has(def.testId)) neverCount++
+        }
+        byEnv[env].never = neverCount
+      }
+
       const lastRunDoc = await Run.findOne({}).sort({ runAt: -1 }).lean().exec()
 
       return sendSuccess(res, {
@@ -97,6 +139,7 @@ statsSummaryRouter.get(
         latestRunBreakdown: statusCounts,
         passRate,
         byApp,
+        byEnv,
         lastRunAt: lastRunDoc?.runAt ?? null,
         evaluatedAt: new Date(),
       })
