@@ -283,6 +283,29 @@ export function AuthProvider({
     }
   }, [store])
 
+  // Defense-in-depth: ensure `isAuthReady` is true after the provider mounts.
+  //
+  // The store factory normally relies on zustand persist's `onRehydrateStorage`
+  // postRehydration callback to flip `isAuthReady` from `false` (initial when
+  // SSR returns no user) to `true`. Empirically observed (chrome-devtools MCP
+  // 2026-05-03) that under Next 15 dev + React 19 + zustand 4.5.7, persist
+  // partially hydrates state (user, accessToken, isAuthenticated correctly
+  // restored from localStorage) but never marks `_hasHydrated2 = true`,
+  // meaning the postRehydration callback never fires and `isAuthReady` stays
+  // permanently `false`. Consumers gating on `isAuthReady && isAuthenticated`
+  // (e.g. `<EZPayDashboardPage>`) are then stuck in a loading state forever.
+  //
+  // This effect is the safety net: regardless of persist's behavior, once the
+  // provider has mounted client-side, auth resolution is over — either the
+  // user is rehydrated (isAuthenticated=true) or anonymous (isAuthenticated=false).
+  // Either way, the consumer can stop waiting.
+  useEffect(() => {
+    const current = store.getState()
+    if (!current.isAuthReady) {
+      store.setState({ isAuthReady: true })
+    }
+  }, [store])
+
   const storeState = useStore(store)
   const keyConfigRef = useRef<PublishableKeyConfig | null>(null)
 
