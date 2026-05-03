@@ -1,72 +1,37 @@
-'use client'
+import { getServerAuth } from '@ezstart/auth-sdk/server'
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import LoginClient from './LoginClient'
 
-import { useAuth } from '@ezstart/auth-sdk'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Div,
-  H1,
-  Main,
-  P,
-  Section,
-  Spinner,
-} from '@ezstart/ui/components'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-
-const EZAUTH_WEB_URL = process.env.NEXT_PUBLIC_EZAUTH_WEB_URL ?? 'http://localhost:6111'
-const EZAUTH_KEY = process.env.NEXT_PUBLIC_EZAUTH_KEY
+interface LoginPageProps {
+  params: Promise<{ locale: string }>
+}
 
 /**
- * `/login` route for EZStart hub.
+ * `/login` route for EZStart hub — Server Component shell.
  *
  * EZStart does not host its own login form — it delegates auth to EZAuth
  * (Tier 1 SaaS service, cf. `standard-architecture.md`). This page :
  *
- * 1. If the user is already authenticated, redirects them to `/`.
- * 2. Otherwise, redirects to the EZAuth hosted `/login` with the consumer
- *    `key` (publishable) and a `redirect_uri` back to `/auth/callback` of
- *    this app, so the SDK can exchange the code and seed the session.
+ * 1. SSR — if the user is already authenticated (cookie session valid),
+ *    redirect to `/{locale}` server-side. The user never sees the spinner /
+ *    "redirecting" UI in this case.
+ * 2. Otherwise, render `<LoginClient />` which bounces the browser to the
+ *    EZAuth hosted `/login` with `key` + `redirect_uri=/auth/callback`.
  */
-export default function LoginRoute() {
-  const t = useTranslations('login')
-  const { isAuthenticated, isAuthReady } = useAuth()
-  const router = useRouter()
-  const locale = useLocale()
+export default async function LoginPage({ params }: LoginPageProps) {
+  const { locale } = await params
+  const h = await headers()
+  const cookieHeader = h.get('cookie') ?? undefined
 
-  useEffect(() => {
-    if (!isAuthReady) return
+  const initialUser = await getServerAuth({
+    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
+    cookieHeader,
+  })
 
-    if (isAuthenticated) {
-      router.replace(`/${locale}`)
-      return
-    }
+  if (initialUser) {
+    redirect(`/${locale}`)
+  }
 
-    if (typeof window === 'undefined') return
-
-    const callbackUrl = `${window.location.origin}/${locale}/auth/callback`
-    const params = new URLSearchParams({ redirect_uri: callbackUrl })
-    if (EZAUTH_KEY) params.set('key', EZAUTH_KEY)
-    window.location.assign(`${EZAUTH_WEB_URL}/${locale}/login?${params.toString()}`)
-  }, [isAuthenticated, isAuthReady, locale, router])
-
-  return (
-    <Main withHeaderOffset>
-      <Section className="flex flex-1 items-center justify-center p-6">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <H1 size="h2">{t('title')}</H1>
-          </CardHeader>
-          <CardContent>
-            <Div className="flex flex-col items-center gap-4 py-6">
-              <Spinner variant="primary" size="lg" />
-              <P className="text-center text-muted-foreground">{t('redirecting')}</P>
-            </Div>
-          </CardContent>
-        </Card>
-      </Section>
-    </Main>
-  )
+  return <LoginClient locale={locale} />
 }
