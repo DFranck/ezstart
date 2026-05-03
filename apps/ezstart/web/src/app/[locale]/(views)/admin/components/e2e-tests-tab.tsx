@@ -26,8 +26,10 @@ import {
 } from '@ezstart/ui/components'
 import { E2ETestsHistoryDrawer } from './e2e-tests-history-drawer'
 import { EnvBadge } from './env-badge'
+import { TierBadge } from './tier-badge'
 import {
   RUN_ENVS,
+  RUN_TIERS,
   STATUS_VARIANT,
   formatRelativeTime,
   freshnessOf,
@@ -38,22 +40,32 @@ import {
   type SummaryStatsResponse,
   type TestDefinition,
   type TestsListResponse,
+  type TierFilter,
 } from './e2e-tests-types'
 
 // ─── Fetchers ────────────────────────────────────────────────────────────
 
-async function fetchTests(env: EnvFilter): Promise<TestsListResponse> {
-  const qs = env === 'all' ? '' : `?env=${encodeURIComponent(env)}`
-  return apiCall<TestsListResponse>(`/e2e-tests${qs}`, { appName: 'ezstart' })
+function buildMatrixQs(env: EnvFilter, tier: TierFilter): string {
+  const params: string[] = []
+  if (env !== 'all') params.push(`env=${encodeURIComponent(env)}`)
+  if (tier !== 'all') params.push(`tier=${encodeURIComponent(tier)}`)
+  return params.length === 0 ? '' : `?${params.join('&')}`
+}
+
+async function fetchTests(env: EnvFilter, tier: TierFilter): Promise<TestsListResponse> {
+  return apiCall<TestsListResponse>(`/e2e-tests${buildMatrixQs(env, tier)}`, {
+    appName: 'ezstart',
+  })
 }
 
 async function fetchSummary(): Promise<SummaryStatsResponse> {
   return apiCall<SummaryStatsResponse>('/e2e-tests/stats/summary', { appName: 'ezstart' })
 }
 
-async function fetchNeedsRerun(env: EnvFilter): Promise<NeedsRerunResponse> {
-  const qs = env === 'all' ? '' : `?env=${encodeURIComponent(env)}`
-  return apiCall<NeedsRerunResponse>(`/e2e-tests/needs-rerun${qs}`, { appName: 'ezstart' })
+async function fetchNeedsRerun(env: EnvFilter, tier: TierFilter): Promise<NeedsRerunResponse> {
+  return apiCall<NeedsRerunResponse>(`/e2e-tests/needs-rerun${buildMatrixQs(env, tier)}`, {
+    appName: 'ezstart',
+  })
 }
 
 // ─── Component ───────────────────────────────────────────────────────────
@@ -65,22 +77,24 @@ export function E2ETestsTab() {
   const [appFilter, setAppFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [envFilter, setEnvFilter] = useState<EnvFilter>('all')
+  const [tierFilter, setTierFilter] = useState<TierFilter>('all')
   const [freshnessFilter, setFreshnessFilter] = useState<FreshnessBucket>('all')
   const [needsRerunOnly, setNeedsRerunOnly] = useState(false)
 
   // Drawer
   const [selectedTestId, setSelectedTestId] = useState<string | null>(null)
 
-  // Queries — env filter is server-side so the matrix recomputes "latest run"
-  // per env (a test that passes locally but never ran in production should
-  // appear as 'never' when filtering on production).
+  // Queries — env + tier filters are server-side so the matrix recomputes
+  // "latest run" per (env, tier) combination (a test that passes locally
+  // browser-e2e but never ran as smoke in production should appear as
+  // 'never' when filtering on production+smoke).
   const {
     data: testsData,
     isLoading: testsLoading,
     error: testsError,
   } = useQuery({
-    queryKey: ['admin-e2e-tests', envFilter],
-    queryFn: () => fetchTests(envFilter),
+    queryKey: ['admin-e2e-tests', envFilter, tierFilter],
+    queryFn: () => fetchTests(envFilter, tierFilter),
     staleTime: 30 * 1000,
   })
 
@@ -91,8 +105,8 @@ export function E2ETestsTab() {
   })
 
   const { data: needsRerunData } = useQuery({
-    queryKey: ['admin-e2e-tests-needs-rerun', envFilter],
-    queryFn: () => fetchNeedsRerun(envFilter),
+    queryKey: ['admin-e2e-tests-needs-rerun', envFilter, tierFilter],
+    queryFn: () => fetchNeedsRerun(envFilter, tierFilter),
     staleTime: 30 * 1000,
   })
 
@@ -194,6 +208,29 @@ export function E2ETestsTab() {
       ),
     },
     {
+      id: 'tier',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.tier')} />,
+      cell: ({ row }) => (
+        <TierBadge
+          tier={row.original.lastRun?.tier}
+          tooltip={
+            row.original.lastRun?.tier
+              ? t(
+                  `tier.${row.original.lastRun.tier === 'browser-e2e' ? 'browserE2E' : row.original.lastRun.tier}`
+                )
+              : t('tier.tierBadge.tooltip')
+          }
+          label={
+            row.original.lastRun?.tier
+              ? t(
+                  `tier.${row.original.lastRun.tier === 'browser-e2e' ? 'browserE2E' : row.original.lastRun.tier}`
+                )
+              : undefined
+          }
+        />
+      ),
+    },
+    {
       id: 'lastRun',
       header: ({ header }) => (
         <DataTableColumnHeader header={header} title={t('columns.lastRun')} />
@@ -277,7 +314,7 @@ export function E2ETestsTab() {
         )}
       </Div>
 
-      {/* Per-env breakdown — surfaces the new dimension at a glance */}
+      {/* Per-env breakdown — surfaces the env dimension at a glance */}
       {summaryData?.byEnv && (
         <Div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {RUN_ENVS.map(env => {
@@ -295,6 +332,36 @@ export function E2ETestsTab() {
                 </P>
                 <P className="text-xs text-muted-foreground mt-1">
                   {t('stats.envBreakdown', {
+                    fail: bucket?.fail ?? 0,
+                    blocked: bucket?.blocked ?? 0,
+                    never: bucket?.never ?? 0,
+                  })}
+                </P>
+              </Card>
+            )
+          })}
+        </Div>
+      )}
+
+      {/* Per-tier breakdown — surfaces what was actually exercised */}
+      {summaryData?.byTier && (
+        <Div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {RUN_TIERS.map(tier => {
+            const bucket = summaryData.byTier?.[tier]
+            const passes = bucket?.pass ?? 0
+            const tierKey = tier === 'browser-e2e' ? 'browserE2E' : tier
+            return (
+              <Card key={tier} className="p-4">
+                <Div className="flex items-center gap-2">
+                  <TierBadge tier={tier} tooltip={t(`tier.${tierKey}`)} size="sm" />
+                  <P className="text-xs text-muted-foreground">{t('stats.tierPassLabel')}</P>
+                </Div>
+                <P className="text-2xl font-semibold mt-2 tabular-nums">
+                  {passes}
+                  <Span className="ml-1 text-sm font-normal text-muted-foreground">/ {total}</Span>
+                </P>
+                <P className="text-xs text-muted-foreground mt-1">
+                  {t('stats.tierBreakdown', {
                     fail: bucket?.fail ?? 0,
                     blocked: bucket?.blocked ?? 0,
                     never: bucket?.never ?? 0,
@@ -354,6 +421,23 @@ export function E2ETestsTab() {
                 {RUN_ENVS.map(env => (
                   <SelectItem key={env} value={env}>
                     {t(`env.${env}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Div>
+
+          <Div className="space-y-1.5">
+            <P className="text-xs font-medium text-muted-foreground">{t('filters.tier')}</P>
+            <Select value={tierFilter} onValueChange={v => setTierFilter(v as TierFilter)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('tier.all')}</SelectItem>
+                {RUN_TIERS.map(tier => (
+                  <SelectItem key={tier} value={tier}>
+                    {t(`tier.${tier === 'browser-e2e' ? 'browserE2E' : tier}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

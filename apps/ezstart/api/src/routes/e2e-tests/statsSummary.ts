@@ -14,7 +14,13 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getE2ETestDefinitionModel } from '../../models/E2ETestDefinition.js'
-import { E2E_RUN_ENVS, getE2ETestRunModel, type E2ERunEnv } from '../../models/E2ETestRun.js'
+import {
+  E2E_RUN_ENVS,
+  E2E_RUN_TIERS,
+  getE2ETestRunModel,
+  type E2ERunEnv,
+  type E2ERunTier,
+} from '../../models/E2ETestRun.js'
 
 export const statsSummaryRegistry = new OpenAPIRegistry()
 const router: import('express').Router = Router()
@@ -132,6 +138,54 @@ statsSummaryRouter.get(
         byEnv[env].never = neverCount
       }
 
+      // Per-tier breakdown: latest run per (testId, tier) combo, then bucket by status.
+      const latestPerTier = await Run.aggregate<{
+        _id: { testId: string; tier: string }
+        status: string
+      }>([
+        { $sort: { testId: 1, tier: 1, runAt: -1 } },
+        {
+          $group: {
+            _id: { testId: '$testId', tier: '$tier' },
+            status: { $first: '$status' },
+          },
+        },
+      ])
+
+      type TierCounts = {
+        pass: number
+        fail: number
+        skip: number
+        blocked: number
+        never: number
+      }
+      const byTier: Record<E2ERunTier, TierCounts> = {
+        smoke: { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+        'browser-e2e': { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+        unit: { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+      }
+      const seenPerTier: Record<E2ERunTier, Set<string>> = {
+        smoke: new Set(),
+        'browser-e2e': new Set(),
+        unit: new Set(),
+      }
+      for (const row of latestPerTier) {
+        const tier = (row._id?.tier ?? 'browser-e2e') as E2ERunTier
+        if (!E2E_RUN_TIERS.includes(tier)) continue
+        seenPerTier[tier].add(row._id.testId)
+        if (row.status in byTier[tier]) {
+          byTier[tier][row.status as keyof TierCounts]++
+        }
+      }
+      // "never" counts = definitions without any run in that specific tier.
+      for (const tier of E2E_RUN_TIERS) {
+        let neverCount = 0
+        for (const def of allDefIds) {
+          if (!seenPerTier[tier].has(def.testId)) neverCount++
+        }
+        byTier[tier].never = neverCount
+      }
+
       const lastRunDoc = await Run.findOne({}).sort({ runAt: -1 }).lean().exec()
 
       return sendSuccess(res, {
@@ -140,6 +194,7 @@ statsSummaryRouter.get(
         passRate,
         byApp,
         byEnv,
+        byTier,
         lastRunAt: lastRunDoc?.runAt ?? null,
         evaluatedAt: new Date(),
       })

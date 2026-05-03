@@ -26,10 +26,12 @@ describe('E2ETestRun Model', () => {
       testId: 'ezauth.public.landing',
       status: 'pass',
       env: 'local',
+      tier: 'browser-e2e',
       agent: 'mcp-chrome-devtools',
     })
     expect(run.status).toBe('pass')
     expect(run.env).toBe('local')
+    expect(run.tier).toBe('browser-e2e')
     expect(run.runAt).toBeInstanceOf(Date)
     expect(run.errors).toEqual([])
   })
@@ -43,11 +45,33 @@ describe('E2ETestRun Model', () => {
     expect(run.env).toBe('local')
   })
 
+  it('defaults tier to "browser-e2e" when omitted (backwards-compat)', async () => {
+    const run = await RunModel.create({
+      testId: 'ezauth.public.landing',
+      status: 'pass',
+      env: 'local',
+      agent: 'curl',
+    })
+    expect(run.tier).toBe('browser-e2e')
+  })
+
   it('rejects invalid env value', async () => {
     const doc = new RunModel({
       testId: 'ezauth.public.landing',
       status: 'pass',
       env: 'preview',
+      tier: 'browser-e2e',
+      agent: 'curl',
+    })
+    await expect(doc.validate()).rejects.toThrow()
+  })
+
+  it('rejects invalid tier value', async () => {
+    const doc = new RunModel({
+      testId: 'ezauth.public.landing',
+      status: 'pass',
+      env: 'local',
+      tier: 'integration',
       agent: 'curl',
     })
     await expect(doc.validate()).rejects.toThrow()

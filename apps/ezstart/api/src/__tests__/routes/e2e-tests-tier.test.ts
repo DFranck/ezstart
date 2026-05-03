@@ -1,12 +1,10 @@
 /**
- * Integration tests for the `env` dimension on the E2E Test Matrix routes.
+ * Integration tests for the `tier` dimension on the E2E Test Matrix routes.
  *
- * Spins up an Express app mounting only the routes under test and exercises
- * them via real HTTP. The auth middleware is bypassed because the routers
- * themselves don't gate read endpoints; the auth gate lives on the parent
- * router (cf. `routes/e2e-tests/index.ts`), so mounting the sub-routers
- * directly lets us focus on the handler logic without spinning up the
- * superadmin JWT fixture.
+ * Mirrors the env-dimension test structure (cf. e2e-tests-env.test.ts) but
+ * focuses on the smoke / browser-e2e / unit split. Spins up an Express app
+ * with the routers mounted directly so we exercise real HTTP without the
+ * superadmin JWT fixture (auth lives on the parent router).
  */
 
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest'
@@ -36,7 +34,6 @@ interface EnvelopeErr {
   error: {
     message: string
     code?: string
-    /** ZodIssue[] when emitted by `sendValidationError`. */
     details?: unknown
   }
 }
@@ -53,7 +50,7 @@ async function fetchJson<T>(
   return { status: res.status, body }
 }
 
-describe('E2E test routes — env dimension', () => {
+describe('E2E test routes — tier dimension', () => {
   let DefinitionModel: Model<IE2ETestDefinition>
   let RunModel: Model<IE2ETestRun>
   let app: Express
@@ -76,9 +73,6 @@ describe('E2E test routes — env dimension', () => {
 
     app = express()
     app.use(express.json())
-    // Each sub-router declares its own `/e2e-tests` basePath via
-    // `createRouterWithDoc(...)`, so we mount them at root to mirror
-    // production where they hang off `/api/<basePath>`.
     app.use('/api', listTestsRouter)
     app.use('/api', statsSummaryRouter)
     app.use('/api', getTestRouter)
@@ -98,8 +92,7 @@ describe('E2E test routes — env dimension', () => {
 
   // ─── POST /runs validation ────────────────────────────────────────────
 
-  it('rejects POST /runs without env (Zod validation)', async () => {
-    // Definition must exist for the testId or we'd hit the 422 branch first.
+  it('rejects POST /runs without tier (Zod validation)', async () => {
     await DefinitionModel.create({
       testId: 'ezauth.public.landing',
       app: 'ezauth',
@@ -114,21 +107,18 @@ describe('E2E test routes — env dimension', () => {
       body: JSON.stringify({
         testId: 'ezauth.public.landing',
         status: 'pass',
-        tier: 'smoke',
+        env: 'local',
         agent: 'curl',
-        // no env
+        // no tier
       }),
     })
 
-    // `sendValidationError` returns HTTP 422 (Unprocessable Entity) — the
-    // canonical Zod-failure code in api-core's response helpers.
     expect(status).toBe(422)
     expect(body.success).toBe(false)
-    // Validation issues are surfaced at `error.details` per api-core envelope.
-    expect(JSON.stringify(body.error.details ?? [])).toContain('env')
+    expect(JSON.stringify(body.error.details ?? [])).toContain('tier')
   })
 
-  it('rejects POST /runs with invalid env value', async () => {
+  it('rejects POST /runs with invalid tier value', async () => {
     await DefinitionModel.create({
       testId: 'ezauth.public.landing',
       app: 'ezauth',
@@ -143,8 +133,8 @@ describe('E2E test routes — env dimension', () => {
       body: JSON.stringify({
         testId: 'ezauth.public.landing',
         status: 'pass',
-        env: 'preview',
-        tier: 'smoke',
+        env: 'local',
+        tier: 'integration',
         agent: 'curl',
       }),
     })
@@ -153,7 +143,7 @@ describe('E2E test routes — env dimension', () => {
     expect(body.success).toBe(false)
   })
 
-  it('accepts POST /runs with explicit env=staging and persists it', async () => {
+  it('accepts POST /runs with explicit tier=smoke and persists it', async () => {
     await DefinitionModel.create({
       testId: 'ezauth.public.landing',
       app: 'ezauth',
@@ -162,7 +152,7 @@ describe('E2E test routes — env dimension', () => {
       description: 'Landing renders',
     })
 
-    const { status, body } = await fetchJson<EnvelopeOk<{ env: string; testId: string }>>(
+    const { status, body } = await fetchJson<EnvelopeOk<{ tier: string; testId: string }>>(
       `${baseUrl}/api/e2e-tests/runs`,
       {
         method: 'POST',
@@ -170,24 +160,25 @@ describe('E2E test routes — env dimension', () => {
         body: JSON.stringify({
           testId: 'ezauth.public.landing',
           status: 'pass',
-          env: 'staging',
-          tier: 'browser-e2e',
-          agent: 'mcp-chrome-devtools',
+          env: 'production',
+          tier: 'smoke',
+          agent: 'curl',
         }),
       }
     )
 
     expect(status).toBe(200)
     expect(body.success).toBe(true)
-    expect(body.data.env).toBe('staging')
+    expect(body.data.tier).toBe('smoke')
 
     const stored = await RunModel.findOne({ testId: 'ezauth.public.landing' }).lean().exec()
-    expect(stored?.env).toBe('staging')
+    expect(stored?.tier).toBe('smoke')
+    expect(stored?.env).toBe('production')
   })
 
-  // ─── GET / with env filter ────────────────────────────────────────────
+  // ─── GET / with tier filter ───────────────────────────────────────────
 
-  it('GET /api/e2e-tests?env=staging returns only the latest staging run per test', async () => {
+  it('GET /api/e2e-tests?tier=smoke returns only the latest smoke run per test', async () => {
     await DefinitionModel.create({
       testId: 'ezauth.public.landing',
       app: 'ezauth',
@@ -204,54 +195,64 @@ describe('E2E test routes — env dimension', () => {
     })
 
     const now = Date.now()
-    // Landing : pass in local + staging, no production
+    // Landing : pass smoke + pass browser-e2e
     await RunModel.create({
       testId: 'ezauth.public.landing',
       status: 'pass',
       env: 'local',
+      tier: 'smoke',
       agent: 'curl',
       runAt: new Date(now - 60_000),
     })
     await RunModel.create({
       testId: 'ezauth.public.landing',
       status: 'pass',
-      env: 'staging',
-      agent: 'curl',
+      env: 'local',
+      tier: 'browser-e2e',
+      agent: 'mcp-chrome-devtools',
       runAt: new Date(now),
     })
-    // Login : pass in local, fail in staging
-    await RunModel.create({
-      testId: 'ezauth.auth.login',
-      status: 'pass',
-      env: 'local',
-      agent: 'curl',
-      runAt: new Date(now - 60_000),
-    })
+    // Login : fail smoke, pass browser-e2e (filter on smoke should surface fail)
     await RunModel.create({
       testId: 'ezauth.auth.login',
       status: 'fail',
-      env: 'staging',
+      env: 'local',
+      tier: 'smoke',
       agent: 'curl',
+      runAt: new Date(now - 60_000),
+    })
+    await RunModel.create({
+      testId: 'ezauth.auth.login',
+      status: 'pass',
+      env: 'local',
+      tier: 'browser-e2e',
+      agent: 'mcp-chrome-devtools',
       runAt: new Date(now),
     })
 
     const { status, body } = await fetchJson<
       EnvelopeOk<{
-        tests: Array<{ testId: string; lastStatus: string; lastRun: { env: string } | null }>
+        tests: Array<{
+          testId: string
+          lastStatus: string
+          lastRun: { tier: string } | null
+        }>
+        tier: string
       }>
-    >(`${baseUrl}/api/e2e-tests?env=staging`)
+    >(`${baseUrl}/api/e2e-tests?tier=smoke`)
 
     expect(status).toBe(200)
     expect(body.success).toBe(true)
+    expect(body.data.tier).toBe('smoke')
 
     const byId = new Map(body.data.tests.map(t => [t.testId, t]))
     expect(byId.get('ezauth.public.landing')?.lastStatus).toBe('pass')
-    expect(byId.get('ezauth.public.landing')?.lastRun?.env).toBe('staging')
+    expect(byId.get('ezauth.public.landing')?.lastRun?.tier).toBe('smoke')
     expect(byId.get('ezauth.auth.login')?.lastStatus).toBe('fail')
-    expect(byId.get('ezauth.auth.login')?.lastRun?.env).toBe('staging')
+    expect(byId.get('ezauth.auth.login')?.lastRun?.tier).toBe('smoke')
   })
 
-  it('GET /api/e2e-tests?env=production returns "never-run" when test never ran in production', async () => {
+  it('GET /api/e2e-tests?tier=unit returns "never-run" when test never ran as unit', async () => {
     await DefinitionModel.create({
       testId: 'ezauth.public.landing',
       app: 'ezauth',
@@ -260,25 +261,25 @@ describe('E2E test routes — env dimension', () => {
       description: 'Landing renders',
     })
 
-    // Test only ran locally — production should appear as never-run.
     await RunModel.create({
       testId: 'ezauth.public.landing',
       status: 'pass',
       env: 'local',
-      agent: 'curl',
+      tier: 'browser-e2e',
+      agent: 'mcp-chrome-devtools',
     })
 
     const { body } = await fetchJson<
       EnvelopeOk<{ tests: Array<{ testId: string; lastStatus: string }> }>
-    >(`${baseUrl}/api/e2e-tests?env=production`)
+    >(`${baseUrl}/api/e2e-tests?tier=unit`)
 
     const test = body.data.tests.find(t => t.testId === 'ezauth.public.landing')
     expect(test?.lastStatus).toBe('never-run')
   })
 
-  // ─── GET /stats/summary byEnv ─────────────────────────────────────────
+  // ─── GET /stats/summary byTier ────────────────────────────────────────
 
-  it('GET /api/e2e-tests/stats/summary returns byEnv breakdown', async () => {
+  it('GET /api/e2e-tests/stats/summary returns byTier breakdown', async () => {
     await DefinitionModel.create({
       testId: 'ezauth.public.landing',
       app: 'ezauth',
@@ -294,30 +295,42 @@ describe('E2E test routes — env dimension', () => {
       description: 'Login flow',
     })
 
+    // Landing : passes smoke + browser-e2e
     await RunModel.create({
       testId: 'ezauth.public.landing',
       status: 'pass',
       env: 'local',
+      tier: 'smoke',
       agent: 'curl',
     })
+    await RunModel.create({
+      testId: 'ezauth.public.landing',
+      status: 'pass',
+      env: 'local',
+      tier: 'browser-e2e',
+      agent: 'mcp-chrome-devtools',
+    })
+    // Login : passes smoke, fails browser-e2e
     await RunModel.create({
       testId: 'ezauth.auth.login',
       status: 'pass',
       env: 'local',
+      tier: 'smoke',
       agent: 'curl',
     })
     await RunModel.create({
       testId: 'ezauth.auth.login',
       status: 'fail',
-      env: 'production',
-      agent: 'curl',
+      env: 'local',
+      tier: 'browser-e2e',
+      agent: 'mcp-chrome-devtools',
     })
 
     const { body } = await fetchJson<
       EnvelopeOk<{
         totalDefinitions: number
-        byEnv: Record<
-          'local' | 'staging' | 'production',
+        byTier: Record<
+          'smoke' | 'browser-e2e' | 'unit',
           { pass: number; fail: number; skip: number; blocked: number; never: number }
         >
       }>
@@ -326,19 +339,20 @@ describe('E2E test routes — env dimension', () => {
     expect(body.success).toBe(true)
     expect(body.data.totalDefinitions).toBe(2)
 
-    expect(body.data.byEnv.local.pass).toBe(2)
-    expect(body.data.byEnv.local.never).toBe(0)
+    expect(body.data.byTier.smoke.pass).toBe(2)
+    expect(body.data.byTier.smoke.never).toBe(0)
 
-    expect(body.data.byEnv.staging.pass).toBe(0)
-    expect(body.data.byEnv.staging.never).toBe(2)
+    expect(body.data.byTier['browser-e2e'].pass).toBe(1)
+    expect(body.data.byTier['browser-e2e'].fail).toBe(1)
+    expect(body.data.byTier['browser-e2e'].never).toBe(0)
 
-    expect(body.data.byEnv.production.fail).toBe(1)
-    expect(body.data.byEnv.production.never).toBe(1) // landing never ran in production
+    expect(body.data.byTier.unit.pass).toBe(0)
+    expect(body.data.byTier.unit.never).toBe(2) // neither test ever ran as unit
   })
 
-  // ─── GET /:testId byEnv stats ─────────────────────────────────────────
+  // ─── GET /:testId byTier stats ────────────────────────────────────────
 
-  it('GET /api/e2e-tests/:testId returns per-env stats and tags every run with env', async () => {
+  it('GET /api/e2e-tests/:testId returns per-tier stats and tags every run with tier', async () => {
     await DefinitionModel.create({
       testId: 'ezauth.public.landing',
       app: 'ezauth',
@@ -351,21 +365,23 @@ describe('E2E test routes — env dimension', () => {
       testId: 'ezauth.public.landing',
       status: 'pass',
       env: 'local',
+      tier: 'smoke',
       agent: 'curl',
     })
     await RunModel.create({
       testId: 'ezauth.public.landing',
       status: 'fail',
-      env: 'production',
-      agent: 'curl',
+      env: 'local',
+      tier: 'browser-e2e',
+      agent: 'mcp-chrome-devtools',
     })
 
     const { body } = await fetchJson<
       EnvelopeOk<{
-        runs: Array<{ env: string; status: string }>
+        runs: Array<{ tier: string; status: string }>
         stats: {
-          byEnv: Record<
-            'local' | 'staging' | 'production',
+          byTier: Record<
+            'smoke' | 'browser-e2e' | 'unit',
             { total: number; pass: number; fail: number }
           >
         }
@@ -373,9 +389,57 @@ describe('E2E test routes — env dimension', () => {
     >(`${baseUrl}/api/e2e-tests/ezauth.public.landing`)
 
     expect(body.success).toBe(true)
-    expect(body.data.runs.every(r => typeof r.env === 'string')).toBe(true)
-    expect(body.data.stats.byEnv.local.pass).toBe(1)
-    expect(body.data.stats.byEnv.production.fail).toBe(1)
-    expect(body.data.stats.byEnv.staging.total).toBe(0)
+    expect(body.data.runs.every(r => typeof r.tier === 'string')).toBe(true)
+    expect(body.data.stats.byTier.smoke.pass).toBe(1)
+    expect(body.data.stats.byTier['browser-e2e'].fail).toBe(1)
+    expect(body.data.stats.byTier.unit.total).toBe(0)
+  })
+
+  // ─── Combined env + tier filter ───────────────────────────────────────
+
+  it('GET /api/e2e-tests?env=production&tier=smoke filters on both dimensions', async () => {
+    await DefinitionModel.create({
+      testId: 'ezauth.public.landing',
+      app: 'ezauth',
+      feature: 'landing',
+      category: 'public',
+      description: 'Landing renders',
+    })
+
+    // Local smoke : pass — should NOT match the (production, smoke) filter
+    await RunModel.create({
+      testId: 'ezauth.public.landing',
+      status: 'pass',
+      env: 'local',
+      tier: 'smoke',
+      agent: 'curl',
+    })
+    // Production browser-e2e : pass — should NOT match either
+    await RunModel.create({
+      testId: 'ezauth.public.landing',
+      status: 'pass',
+      env: 'production',
+      tier: 'browser-e2e',
+      agent: 'mcp-chrome-devtools',
+    })
+    // Production smoke : fail — this is the one we want surfaced
+    await RunModel.create({
+      testId: 'ezauth.public.landing',
+      status: 'fail',
+      env: 'production',
+      tier: 'smoke',
+      agent: 'curl',
+    })
+
+    const { body } = await fetchJson<
+      EnvelopeOk<{
+        tests: Array<{ testId: string; lastStatus: string; lastRun: { env: string; tier: string } }>
+      }>
+    >(`${baseUrl}/api/e2e-tests?env=production&tier=smoke`)
+
+    const test = body.data.tests.find(t => t.testId === 'ezauth.public.landing')
+    expect(test?.lastStatus).toBe('fail')
+    expect(test?.lastRun.env).toBe('production')
+    expect(test?.lastRun.tier).toBe('smoke')
   })
 })

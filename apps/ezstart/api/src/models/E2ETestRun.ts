@@ -30,12 +30,34 @@ export const E2E_RUN_ENVS = ['local', 'staging', 'production'] as const
 
 export type E2ERunEnv = (typeof E2E_RUN_ENVS)[number]
 
+/**
+ * Tier of test execution — distinguishes WHAT was actually exercised.
+ *
+ * - `smoke`        → curl HTTP code check, no frontend (e.g. `curl -I /` → 200).
+ *                    Real backend hit, but UI flow isn't validated. Cheap, fast.
+ *                    Typical agent: `curl`, `http`.
+ * - `browser-e2e`  → full browser automation (form fill, click, redirect, console).
+ *                    Validates the user-facing flow end-to-end. Slow, expensive.
+ *                    Typical agent: `mcp-chrome-devtools`, `playwright`, `cypress`.
+ * - `unit`         → vitest/jest in-process — pure logic, no HTTP, no browser.
+ *                    Typical agent: `vitest`, `jest`, `ci-vitest`.
+ *
+ * Required since 2026-05-03 (E2E-MATRIX-TIER-DIMENSION-001) — "100% green smoke"
+ * is a meaningfully different signal than "100% green browser-e2e", so the matrix
+ * tracks them as separate dimensions rather than collapsing into one pass count.
+ */
+export const E2E_RUN_TIERS = ['smoke', 'browser-e2e', 'unit'] as const
+
+export type E2ERunTier = (typeof E2E_RUN_TIERS)[number]
+
 export interface IE2ETestRun {
   /** FK → E2ETestDefinition.testId. */
   testId: string
   status: E2ERunStatus
   /** Where the test was executed. Required — the same test can pass in `local` but fail in `production`. */
   env: E2ERunEnv
+  /** What the test actually exercised — smoke (curl HTTP), browser-e2e (full flow), or unit (in-process). */
+  tier: E2ERunTier
   runAt: Date
   /** Run duration in milliseconds. Optional — not always measured. */
   durationMs?: number | null
@@ -70,6 +92,12 @@ const e2eTestRunSchema = new Schema<IE2ETestRun>(
       required: true,
       enum: E2E_RUN_ENVS,
       default: 'local',
+    },
+    tier: {
+      type: String,
+      required: true,
+      enum: E2E_RUN_TIERS,
+      default: 'browser-e2e',
     },
     runAt: {
       type: Date,
@@ -126,8 +154,12 @@ const e2eTestRunSchema = new Schema<IE2ETestRun>(
 e2eTestRunSchema.index({ testId: 1, runAt: -1 })
 // "latest pass per env per test" — surface real-environment health.
 e2eTestRunSchema.index({ testId: 1, env: 1, runAt: -1 })
+// "latest pass per env per tier per test" — surface "smoke green / browser-e2e red" splits.
+e2eTestRunSchema.index({ testId: 1, env: 1, tier: 1, runAt: -1 })
 // Per-env aggregations across all tests (stats summary breakdown).
 e2eTestRunSchema.index({ env: 1, runAt: -1 })
+// Per-tier aggregations across all tests.
+e2eTestRunSchema.index({ tier: 1, runAt: -1 })
 // Time-range scans (e.g. "all runs last 24h") + status filters.
 e2eTestRunSchema.index({ runAt: -1 })
 e2eTestRunSchema.index({ status: 1, runAt: -1 })

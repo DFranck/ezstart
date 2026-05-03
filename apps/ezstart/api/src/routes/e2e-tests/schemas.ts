@@ -12,7 +12,7 @@ import {
   E2E_CATEGORIES,
   E2E_PRIORITIES,
 } from '../../models/E2ETestDefinition.js'
-import { E2E_RUN_ENVS, E2E_RUN_STATUSES } from '../../models/E2ETestRun.js'
+import { E2E_RUN_ENVS, E2E_RUN_STATUSES, E2E_RUN_TIERS } from '../../models/E2ETestRun.js'
 
 /** A test slug — lowercase letters, numbers, dots, dashes. */
 export const TestIdSchema = z
@@ -32,6 +32,9 @@ export const E2ERunStatusEnum = z.enum(E2E_RUN_STATUSES).describe('Outcome of a 
 export const E2ERunEnvEnum = z
   .enum(E2E_RUN_ENVS)
   .describe('Environment in which the run was executed (local | staging | production)')
+export const E2ERunTierEnum = z
+  .enum(E2E_RUN_TIERS)
+  .describe('Tier of the run — smoke (curl HTTP) | browser-e2e (full UI flow) | unit (vitest/jest)')
 
 export const UpsertDefinitionSchema = z.object({
   testId: TestIdSchema,
@@ -52,6 +55,9 @@ export const RecordRunSchema = z.object({
   status: E2ERunStatusEnum,
   env: E2ERunEnvEnum.describe(
     'Environment in which the run was executed — required (local | staging | production)'
+  ),
+  tier: E2ERunTierEnum.describe(
+    'Tier of the run — required (smoke | browser-e2e | unit). A "100% pass" only means something within a single tier.'
   ),
   agent: z.string().min(1).max(100),
   agentVersion: z.string().max(100).optional(),
@@ -80,6 +86,16 @@ export const EnvFilterSchema = z
   .default('all')
   .describe('Filter runs by env — pass "all" (default) to include every env')
 
+/**
+ * `tier` filter for list/needs-rerun endpoints. Accepts the canonical tiers or
+ * the literal string `'all'` to disable filtering. Defaults to `'all'` so an
+ * unfiltered call mirrors pre-tier behaviour.
+ */
+export const TierFilterSchema = z
+  .union([E2ERunTierEnum, z.literal('all')])
+  .default('all')
+  .describe('Filter runs by tier — pass "all" (default) to include every tier')
+
 export const ListDefinitionsQuerySchema = z.object({
   app: E2EAppEnum.optional(),
   category: E2ECategoryEnum.optional(),
@@ -87,6 +103,7 @@ export const ListDefinitionsQuerySchema = z.object({
   priority: E2EPriorityEnum.optional(),
   status: E2ERunStatusEnum.optional().describe('Filter by latest run status'),
   env: EnvFilterSchema,
+  tier: TierFilterSchema,
   limit: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 })

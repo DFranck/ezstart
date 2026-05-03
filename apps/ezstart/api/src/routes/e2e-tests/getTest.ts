@@ -16,7 +16,13 @@ import {
 } from '@ezstart/api-core'
 import { z } from 'zod'
 import { getE2ETestDefinitionModel } from '../../models/E2ETestDefinition.js'
-import { E2E_RUN_ENVS, getE2ETestRunModel, type E2ERunEnv } from '../../models/E2ETestRun.js'
+import {
+  E2E_RUN_ENVS,
+  E2E_RUN_TIERS,
+  getE2ETestRunModel,
+  type E2ERunEnv,
+  type E2ERunTier,
+} from '../../models/E2ETestRun.js'
 import { TestIdSchema } from './schemas.js'
 
 const ParamsSchema = z.object({ testId: TestIdSchema })
@@ -103,6 +109,32 @@ getTestRouter.get(
         },
       ])
 
+      // Per-tier breakdown — drives the history-drawer tier tabs.
+      const perTierAgg = await Run.aggregate<{
+        _id: string
+        total: number
+        pass: number
+        fail: number
+        skip: number
+        blocked: number
+        avgDurationMs: number | null
+        lastRunAt: Date | null
+      }>([
+        { $match: { testId } },
+        {
+          $group: {
+            _id: '$tier',
+            total: { $sum: 1 },
+            pass: { $sum: { $cond: [{ $eq: ['$status', 'pass'] }, 1, 0] } },
+            fail: { $sum: { $cond: [{ $eq: ['$status', 'fail'] }, 1, 0] } },
+            skip: { $sum: { $cond: [{ $eq: ['$status', 'skip'] }, 1, 0] } },
+            blocked: { $sum: { $cond: [{ $eq: ['$status', 'blocked'] }, 1, 0] } },
+            avgDurationMs: { $avg: '$durationMs' },
+            lastRunAt: { $max: '$runAt' },
+          },
+        },
+      ])
+
       type EnvStats = {
         total: number
         pass: number
@@ -113,43 +145,48 @@ getTestRouter.get(
         avgDurationMs: number | null
         lastRunAt: Date | null
       }
+      type TierStats = EnvStats
+
+      const emptyEnvStats = (): EnvStats => ({
+        total: 0,
+        pass: 0,
+        fail: 0,
+        skip: 0,
+        blocked: 0,
+        passRate: null,
+        avgDurationMs: null,
+        lastRunAt: null,
+      })
 
       const byEnv: Record<E2ERunEnv, EnvStats> = {
-        local: {
-          total: 0,
-          pass: 0,
-          fail: 0,
-          skip: 0,
-          blocked: 0,
-          passRate: null,
-          avgDurationMs: null,
-          lastRunAt: null,
-        },
-        staging: {
-          total: 0,
-          pass: 0,
-          fail: 0,
-          skip: 0,
-          blocked: 0,
-          passRate: null,
-          avgDurationMs: null,
-          lastRunAt: null,
-        },
-        production: {
-          total: 0,
-          pass: 0,
-          fail: 0,
-          skip: 0,
-          blocked: 0,
-          passRate: null,
-          avgDurationMs: null,
-          lastRunAt: null,
-        },
+        local: emptyEnvStats(),
+        staging: emptyEnvStats(),
+        production: emptyEnvStats(),
       }
       for (const row of perEnvAgg) {
         const key = (row._id ?? 'local') as E2ERunEnv
         if (!E2E_RUN_ENVS.includes(key)) continue
         byEnv[key] = {
+          total: row.total,
+          pass: row.pass,
+          fail: row.fail,
+          skip: row.skip,
+          blocked: row.blocked,
+          passRate: row.total > 0 ? Math.round((row.pass / row.total) * 1000) / 10 : null,
+          avgDurationMs: row.avgDurationMs,
+          lastRunAt: row.lastRunAt,
+        }
+      }
+
+      const byTier: Record<E2ERunTier, TierStats> = {
+        smoke: emptyEnvStats(),
+        'browser-e2e': emptyEnvStats(),
+        unit: emptyEnvStats(),
+      }
+      for (const row of perTierAgg) {
+        const key = (row._id ?? 'browser-e2e') as E2ERunTier
+        if (!E2E_RUN_TIERS.includes(key)) continue
+        byTier[key] = {
           total: row.total,
           pass: row.pass,
           fail: row.fail,
@@ -189,8 +226,9 @@ getTestRouter.get(
         runs: recentRuns.map(r => ({
           id: String(r._id),
           status: r.status as string,
-          // Guard against undefined env from legacy docs (pre-migration safety net).
+          // Guard against undefined env/tier from legacy docs (pre-migration safety net).
           env: ((r.env as string | undefined) ?? 'local') as E2ERunEnv,
+          tier: ((r.tier as string | undefined) ?? 'browser-e2e') as E2ERunTier,
           runAt: r.runAt as Date,
           agent: r.agent as string,
           agentVersion: (r.agentVersion as string | null) ?? null,
@@ -210,6 +248,7 @@ getTestRouter.get(
           avgDurationMs: s.avgDurationMs,
           lastRunAt: s.lastRunAt,
           byEnv,
+          byTier,
         },
       })
     } catch (error) {

@@ -199,11 +199,14 @@
         "failingLabel": "Failing",
         "needsRerunLabel": "Needs re-run",
         "envPassLabel": "Passing",
-        "envBreakdown": "{fail} fail · {blocked} blocked · {never} never"
+        "envBreakdown": "{fail} fail · {blocked} blocked · {never} never",
+        "tierPassLabel": "Passing",
+        "tierBreakdown": "{fail} fail · {blocked} blocked · {never} never"
       },
       "filters": {
         "app": "App",
         "env": "Env",
+        "tier": "Tier",
         "status": "Status",
         "freshness": "Freshness",
         "needsRerunOnly": "Needs re-run only",
@@ -225,12 +228,22 @@
           "tooltip": "Environment in which the run was executed"
         }
       },
+      "tier": {
+        "all": "All tiers",
+        "smoke": "Smoke",
+        "browserE2E": "Browser E2E",
+        "unit": "Unit",
+        "tierBadge": {
+          "tooltip": "Tier of the run — what the test actually exercised (smoke = curl HTTP, browser-e2e = full UI flow, unit = vitest/jest)"
+        }
+      },
       "columns": {
         "testId": "Test ID",
         "app": "App",
         "feature": "Feature",
         "status": "Status",
         "env": "Env",
+        "tier": "Tier",
         "lastRun": "Last run",
         "agent": "Agent",
         "actions": "Actions"
@@ -264,7 +277,9 @@
         "exercises": "Exercised files",
         "runs": "Recent runs",
         "agent": "Agent",
-        "failedToLoad": "Failed to load history"
+        "failedToLoad": "Failed to load history",
+        "envTabs": "Filter by env",
+        "tierTabs": "Filter by tier"
       },
       "table": {
         "rows": "{count} test(s)",

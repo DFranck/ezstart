@@ -34,7 +34,27 @@ import { connectToMongo } from '@ezstart/api-core'
 import { loadSharedEnv } from '@ezstart/config/server'
 import { getMongoUrl } from '@ezstart/config/env-resolvers'
 import { getE2ETestDefinitionModel } from '../models/E2ETestDefinition.js'
-import { getE2ETestRunModel, type E2ERunEnv, type E2ERunStatus } from '../models/E2ETestRun.js'
+import {
+  getE2ETestRunModel,
+  type E2ERunEnv,
+  type E2ERunStatus,
+  type E2ERunTier,
+} from '../models/E2ETestRun.js'
+
+/**
+ * Best-effort tier inference from the agent string. Mirrors the CLI helper
+ * (`scripts/e2e/record-test-run.ts`) — keep them in sync.
+ */
+export function deriveTierFromAgent(agent: string): E2ERunTier {
+  const a = agent.toLowerCase()
+  if (a === 'curl' || a === 'http') return 'smoke'
+  if (a === 'mcp-chrome-devtools' || a === 'playwright' || a === 'cypress') return 'browser-e2e'
+  if (a === 'vitest' || a === 'jest' || a === 'ci-vitest') return 'unit'
+  // Bulk-imported markdown rows mostly come from session-bulk-import or
+  // `manual` — they were captured during browser-driven sessions, so the
+  // safe default is browser-e2e.
+  return 'browser-e2e'
+}
 
 interface ParsedRow {
   testId: string
@@ -48,6 +68,7 @@ interface MappedRun {
   testId: string
   status: E2ERunStatus
   env: E2ERunEnv
+  tier: E2ERunTier
   runAt: Date
   agent: string
   notes: string | null
@@ -172,13 +193,15 @@ function mapRows(
       unknownStatus.push(row)
       continue
     }
+    const agent =
+      row.agent && row.agent !== '—' && row.agent !== '-' ? row.agent : 'session-bulk-import'
     mapped.push({
       testId: row.testId,
       status,
       env,
+      tier: deriveTierFromAgent(agent),
       runAt: buildRunAt(row.rawTime, sessionDate),
-      agent:
-        row.agent && row.agent !== '—' && row.agent !== '-' ? row.agent : 'session-bulk-import',
+      agent,
       notes: row.notes && row.notes !== '—' && row.notes !== '-' ? row.notes : null,
     })
   }
@@ -231,6 +254,7 @@ export async function seedE2ETestRunsFromMarkdown(
       testId: run.testId,
       status: run.status,
       env: run.env,
+      tier: run.tier,
       runAt: run.runAt,
       agent: run.agent,
       notes: run.notes,

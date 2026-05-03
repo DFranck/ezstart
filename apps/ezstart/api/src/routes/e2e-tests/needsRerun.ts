@@ -28,7 +28,7 @@ import {
 } from '@ezstart/api-core'
 import { getE2ETestDefinitionModel } from '../../models/E2ETestDefinition.js'
 import { getE2ETestRunModel } from '../../models/E2ETestRun.js'
-import { EnvFilterSchema } from './schemas.js'
+import { EnvFilterSchema, TierFilterSchema } from './schemas.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -101,23 +101,27 @@ needsRerunRouter.get(
   '/needs-rerun',
   async (req, res) => {
     try {
-      // `env` is optional — defaults to 'all'. When set to a specific env, the
-      // staleness calc uses only passes recorded in that env so we surface "this
-      // test hasn't passed in production since the file was touched".
+      // `env` and `tier` are optional — both default to 'all'. When set to a
+      // specific value, the staleness calc uses only passes recorded under that
+      // dimension so we surface "this test hasn't passed in production smoke
+      // since the file was touched".
       const envParse = EnvFilterSchema.safeParse(req.query.env ?? 'all')
       const env = envParse.success ? envParse.data : 'all'
+      const tierParse = TierFilterSchema.safeParse(req.query.tier ?? 'all')
+      const tier = tierParse.success ? tierParse.data : 'all'
 
       const Definition = await getE2ETestDefinitionModel()
       const Run = await getE2ETestRunModel()
 
       const definitions = (await Definition.find({}).lean().exec()) as Record<string, unknown>[]
       if (definitions.length === 0) {
-        return sendSuccess(res, { tests: [], reason: 'no-definitions', env })
+        return sendSuccess(res, { tests: [], reason: 'no-definitions', env, tier })
       }
 
       // Latest pass run per testId (mirrors the listing aggregation).
       const passMatch: Record<string, unknown> = { status: 'pass' }
       if (env !== 'all') passMatch.env = env
+      if (tier !== 'all') passMatch.tier = tier
 
       const latestPasses = await Run.aggregate<{ _id: string; runAt: Date }>([
         { $match: passMatch },
@@ -196,6 +200,7 @@ needsRerunRouter.get(
       return sendSuccess(res, {
         tests: stale,
         env,
+        tier,
         gitAvailable: gitOk,
         gitError,
         evaluatedAt: new Date(),

@@ -25,13 +25,17 @@ import {
   TabsTrigger,
 } from '@ezstart/ui/components'
 import { EnvBadge } from './env-badge'
+import { TierBadge } from './tier-badge'
 import {
   RUN_ENVS,
+  RUN_TIERS,
   STATUS_VARIANT,
   formatDuration,
   type EnvFilter,
   type RunEnv,
+  type RunTier,
   type TestHistoryResponse,
+  type TierFilter,
 } from './e2e-tests-types'
 
 async function fetchHistory(testId: string): Promise<TestHistoryResponse> {
@@ -49,6 +53,7 @@ interface HistoryDrawerProps {
 export function E2ETestsHistoryDrawer({ testId, open, onClose }: HistoryDrawerProps) {
   const t = useTranslations('admin.e2eTests')
   const [activeEnvTab, setActiveEnvTab] = useState<EnvFilter>('all')
+  const [activeTierTab, setActiveTierTab] = useState<TierFilter>('all')
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-e2e-tests-history', testId ?? ''],
@@ -56,14 +61,17 @@ export function E2ETestsHistoryDrawer({ testId, open, onClose }: HistoryDrawerPr
     enabled: open && !!testId,
   })
 
-  // Filter run history by the active env tab. 'all' shows every run mixed.
-  // Guards against legacy runs without env (treats them as 'local' since the
-  // migration backfill maps them all to 'local').
+  // Filter run history by both env + tier tabs. 'all' on either dimension
+  // disables that filter. Guards against legacy runs without env/tier
+  // (treats them as the schema defaults — local + browser-e2e).
   const visibleRuns = useMemo(() => {
     if (!data) return []
-    if (activeEnvTab === 'all') return data.runs
-    return data.runs.filter(run => (run.env ?? 'local') === activeEnvTab)
-  }, [data, activeEnvTab])
+    return data.runs.filter(run => {
+      if (activeEnvTab !== 'all' && (run.env ?? 'local') !== activeEnvTab) return false
+      if (activeTierTab !== 'all' && (run.tier ?? 'browser-e2e') !== activeTierTab) return false
+      return true
+    })
+  }, [data, activeEnvTab, activeTierTab])
 
   return (
     <Sheet open={open} onOpenChange={v => !v && onClose()}>
@@ -159,63 +167,113 @@ export function E2ETestsHistoryDrawer({ testId, open, onClose }: HistoryDrawerPr
                 </Div>
               )}
 
-              {/* Run history grouped by env via tabs */}
+              {/* Per-tier stats — surfaces what was actually exercised */}
+              {data.stats.byTier && (
+                <Div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {RUN_TIERS.map(tier => {
+                    const bucket = data.stats.byTier?.[tier]
+                    const tierKey = tier === 'browser-e2e' ? 'browserE2E' : tier
+                    return (
+                      <Card key={tier} className="p-3">
+                        <Div className="flex items-center gap-2">
+                          <TierBadge tier={tier} tooltip={t(`tier.${tierKey}`)} size="xs" />
+                          <P className="text-xs text-muted-foreground">
+                            {bucket?.total ?? 0} {t('history.runs')}
+                          </P>
+                        </Div>
+                        <P className="text-xl font-semibold mt-1 tabular-nums">
+                          {bucket?.passRate ?? 0}%
+                        </P>
+                        <P className="text-xs text-muted-foreground">{t('history.passRate')}</P>
+                      </Card>
+                    )
+                  })}
+                </Div>
+              )}
+
+              {/* Run history grouped by env + tier via tabs */}
               <Div className="space-y-3">
                 <H3 size="h5">{t('history.runs')}</H3>
-                <Tabs value={activeEnvTab} onValueChange={v => setActiveEnvTab(v as EnvFilter)}>
-                  <TabsList className="w-full">
-                    <TabsTrigger value="all">{t('env.all')}</TabsTrigger>
-                    {RUN_ENVS.map(env => (
-                      <TabsTrigger key={env} value={env}>
-                        {t(`env.${env}`)}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  <TabsContent value={activeEnvTab} className="space-y-3 mt-3">
-                    {visibleRuns.length === 0 && (
-                      <P className="text-sm text-muted-foreground italic">{t('history.noRuns')}</P>
-                    )}
-                    {visibleRuns.map((run, idx) => {
-                      const runEnv: RunEnv = (run.env ?? 'local') as RunEnv
-                      return (
-                        <Card key={`${run.runAt}-${idx}`} variant="floating">
-                          <CardContent className="py-3 space-y-2">
-                            <Div className="flex items-center justify-between gap-2">
-                              <Div className="flex items-center gap-2">
-                                <Badge variant={STATUS_VARIANT[run.status]} size="sm" dot>
-                                  {t(`status.${run.status}`)}
-                                </Badge>
-                                <EnvBadge env={runEnv} tooltip={t(`env.${runEnv}`)} />
-                              </Div>
-                              <Span className="text-xs text-muted-foreground tabular-nums">
-                                {new Date(run.runAt).toLocaleString()}
-                              </Span>
+                <Div className="space-y-2">
+                  <P className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    {t('history.envTabs')}
+                  </P>
+                  <Tabs value={activeEnvTab} onValueChange={v => setActiveEnvTab(v as EnvFilter)}>
+                    <TabsList className="w-full">
+                      <TabsTrigger value="all">{t('env.all')}</TabsTrigger>
+                      {RUN_ENVS.map(env => (
+                        <TabsTrigger key={env} value={env}>
+                          {t(`env.${env}`)}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                </Div>
+                <Div className="space-y-2">
+                  <P className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    {t('history.tierTabs')}
+                  </P>
+                  <Tabs
+                    value={activeTierTab}
+                    onValueChange={v => setActiveTierTab(v as TierFilter)}
+                  >
+                    <TabsList className="w-full">
+                      <TabsTrigger value="all">{t('tier.all')}</TabsTrigger>
+                      {RUN_TIERS.map(tier => (
+                        <TabsTrigger key={tier} value={tier}>
+                          {t(`tier.${tier === 'browser-e2e' ? 'browserE2E' : tier}`)}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                </Div>
+                <Div className="space-y-3 mt-3">
+                  {visibleRuns.length === 0 && (
+                    <P className="text-sm text-muted-foreground italic">{t('history.noRuns')}</P>
+                  )}
+                  {visibleRuns.map((run, idx) => {
+                    const runEnv: RunEnv = (run.env ?? 'local') as RunEnv
+                    const runTier: RunTier = (run.tier ?? 'browser-e2e') as RunTier
+                    const tierKey = runTier === 'browser-e2e' ? 'browserE2E' : runTier
+                    return (
+                      <Card key={`${run.runAt}-${idx}`} variant="floating">
+                        <CardContent className="py-3 space-y-2">
+                          <Div className="flex items-center justify-between gap-2">
+                            <Div className="flex items-center gap-2">
+                              <Badge variant={STATUS_VARIANT[run.status]} size="sm" dot>
+                                {t(`status.${run.status}`)}
+                              </Badge>
+                              <EnvBadge env={runEnv} tooltip={t(`env.${runEnv}`)} />
+                              <TierBadge tier={runTier} tooltip={t(`tier.${tierKey}`)} />
                             </Div>
-                            <Div className="flex items-center justify-between text-xs text-muted-foreground">
-                              <Span>
-                                {t('history.agent')}:{' '}
-                                <Span className="font-medium text-foreground">{run.agent}</Span>
-                              </Span>
-                              <Span>{formatDuration(run.durationMs)}</Span>
+                            <Span className="text-xs text-muted-foreground tabular-nums">
+                              {new Date(run.runAt).toLocaleString()}
+                            </Span>
+                          </Div>
+                          <Div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <Span>
+                              {t('history.agent')}:{' '}
+                              <Span className="font-medium text-foreground">{run.agent}</Span>
+                            </Span>
+                            <Span>{formatDuration(run.durationMs)}</Span>
+                          </Div>
+                          {run.errors && run.errors.length > 0 && (
+                            <Div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
+                              {run.errors.map((err, i) => (
+                                <P key={i} className="text-xs text-destructive break-words">
+                                  {err}
+                                </P>
+                              ))}
                             </Div>
-                            {run.errors && run.errors.length > 0 && (
-                              <Div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
-                                {run.errors.map((err, i) => (
-                                  <P key={i} className="text-xs text-destructive break-words">
-                                    {err}
-                                  </P>
-                                ))}
-                              </Div>
-                            )}
-                            {run.notes && (
-                              <P className="text-xs italic text-muted-foreground">{run.notes}</P>
-                            )}
-                          </CardContent>
-                        </Card>
-                      )
-                    })}
-                  </TabsContent>
-                </Tabs>
+                          )}
+                          {run.notes && (
+                            <P className="text-xs italic text-muted-foreground">{run.notes}</P>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </Div>
               </Div>
             </>
           )}
