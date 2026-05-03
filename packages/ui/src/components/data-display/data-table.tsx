@@ -85,7 +85,16 @@ const DEFAULT_PAGINATION_TEXTS: Required<DataTablePaginationTexts> = {
 }
 
 function DataTablePagination<TData>({ table, texts }: DataTablePaginationProps<TData>) {
-  const t = { ...DEFAULT_PAGINATION_TEXTS, ...texts }
+  // Per-key nullish-coalesce — guards against consumers that pass an explicit
+  // `texts` object with undefined keys (e.g. `texts={{ rows: t?.row }}`). A
+  // plain spread `{ ...DEFAULTS, ...texts }` would let `undefined` overwrite
+  // the defaults and crash `.replace()` at render time.
+  const t = {
+    rows: texts?.rows ?? DEFAULT_PAGINATION_TEXTS.rows,
+    previous: texts?.previous ?? DEFAULT_PAGINATION_TEXTS.previous,
+    next: texts?.next ?? DEFAULT_PAGINATION_TEXTS.next,
+    pageOf: texts?.pageOf ?? DEFAULT_PAGINATION_TEXTS.pageOf,
+  }
   const rowCount = table.getFilteredRowModel().rows.length
   const currentPage = table.getState().pagination.pageIndex + 1
   const totalPages = table.getPageCount()

@@ -247,10 +247,14 @@ export function PaymentHistory({
         pageSize={10}
         initialSorting={[{ id: 'createdAt', desc: true }]}
         texts={{
-          previous: texts?.paginationPrevious,
-          next: texts?.paginationNext,
-          rows: texts?.paginationRows,
-          pageOf: texts?.paginationPageOf,
+          // Only forward keys when the consumer actually supplied them — a
+          // plain `key: texts?.paginationRows` would emit `undefined` and
+          // historically overwrote `<DataTable>`'s defaults until the
+          // pagination component was hardened (FIX-DATATABLE-PAGINATION-UNDEFINED-001).
+          ...(texts?.paginationPrevious !== undefined && { previous: texts.paginationPrevious }),
+          ...(texts?.paginationNext !== undefined && { next: texts.paginationNext }),
+          ...(texts?.paginationRows !== undefined && { rows: texts.paginationRows }),
+          ...(texts?.paginationPageOf !== undefined && { pageOf: texts.paginationPageOf }),
         }}
       />
     </Div>
