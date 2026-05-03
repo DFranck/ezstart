@@ -39,7 +39,7 @@ function Wrapper({ children }: { children: React.ReactNode }) {
     <PayProvider
       appName="test-app"
       applicationId="app_test"
-      config={{ apiUrl: 'http://localhost:9999/api' }}
+      config={{ apiUrl: 'http://localhost:9999' }}
     >
       {children}
     </PayProvider>

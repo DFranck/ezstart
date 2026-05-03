@@ -15,9 +15,12 @@ export async function getConnectStatus(
   const query = params?.applicationId
     ? `?applicationId=${encodeURIComponent(params.applicationId)}`
     : ''
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/connect/status${query}`, {
-    headers: client.getHeaders(),
-  })
+  const response = await client.fetchWithAuth(
+    `${client.config.apiUrl}/api/connect/status${query}`,
+    {
+      headers: client.getHeaders(),
+    }
+  )
 
   const result = await response.json()
 
@@ -32,7 +35,7 @@ export async function connectOnboard(
   client: PayClientInternal,
   data: ConnectOnboardRequest
 ): Promise<ConnectOnboardResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/connect/onboard`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/connect/onboard`, {
     method: 'POST',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
@@ -50,9 +53,12 @@ export async function connectOnboard(
 export async function getConnectDashboardLink(
   client: PayClientInternal
 ): Promise<ConnectDashboardLinkResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/connect/dashboard-link`, {
-    headers: client.getHeaders(),
-  })
+  const response = await client.fetchWithAuth(
+    `${client.config.apiUrl}/api/connect/dashboard-link`,
+    {
+      headers: client.getHeaders(),
+    }
+  )
 
   const result = await response.json()
 
@@ -74,11 +80,14 @@ export async function connectResume(
   client: PayClientInternal,
   data: ConnectResumeRequest
 ): Promise<ConnectResumeResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/connect/onboarding/resume`, {
-    method: 'POST',
-    headers: client.getHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify(data),
-  })
+  const response = await client.fetchWithAuth(
+    `${client.config.apiUrl}/api/connect/onboarding/resume`,
+    {
+      method: 'POST',
+      headers: client.getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(data),
+    }
+  )
 
   const result = await response.json()
 
@@ -109,7 +118,7 @@ export async function disconnectAccount(
     ? `?applicationId=${encodeURIComponent(params.applicationId)}`
     : ''
   const response = await client.fetchWithAuth(
-    `${client.config.apiUrl}/connect/disconnect${query}`,
+    `${client.config.apiUrl}/api/connect/disconnect${query}`,
     {
       method: 'DELETE',
       headers: client.getHeaders(),

@@ -115,7 +115,7 @@ export async function fetchList(
     }
   }
 
-  const url = `${client.config.apiUrl}/${path}?${searchParams.toString()}`
+  const url = `${client.config.apiUrl}/api/${path}?${searchParams.toString()}`
   const response = await client.fetchWithAuth(url, {
     headers: client.getHeaders(),
     signal: options?.signal,

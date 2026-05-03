@@ -28,7 +28,7 @@ const { ConnectFeeSummary } = await import('../../components/ConnectFeeSummary.j
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999/api' }}>
+    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
       {children}
     </PayProvider>
   )
@@ -129,11 +129,7 @@ describe('ConnectStatusCard', () => {
 
     render(
       <Wrapper>
-        <ConnectStatusCard
-          account={account}
-          onOpenDashboard={vi.fn()}
-          onDisconnect={vi.fn()}
-        />
+        <ConnectStatusCard account={account} onOpenDashboard={vi.fn()} onDisconnect={vi.fn()} />
       </Wrapper>
     )
 
@@ -146,11 +142,7 @@ describe('ConnectStatusCard', () => {
 
     render(
       <Wrapper>
-        <ConnectStatusCard
-          account={account}
-          onOpenDashboard={vi.fn()}
-          onDisconnect={vi.fn()}
-        />
+        <ConnectStatusCard account={account} onOpenDashboard={vi.fn()} onDisconnect={vi.fn()} />
       </Wrapper>
     )
 
@@ -241,11 +233,7 @@ describe('ConnectFeeSummary', () => {
   it('renders fee data with default texts', () => {
     render(
       <Wrapper>
-        <ConnectFeeSummary
-          totalFees={150.5}
-          averageFeePercent={3.5}
-          transactionCount={42}
-        />
+        <ConnectFeeSummary totalFees={150.5} averageFeePercent={3.5} transactionCount={42} />
       </Wrapper>
     )
 
@@ -275,11 +263,7 @@ describe('ConnectFeeSummary', () => {
   it('formats zero values correctly', () => {
     render(
       <Wrapper>
-        <ConnectFeeSummary
-          totalFees={0}
-          averageFeePercent={0}
-          transactionCount={0}
-        />
+        <ConnectFeeSummary totalFees={0} averageFeePercent={0} transactionCount={0} />
       </Wrapper>
     )
 

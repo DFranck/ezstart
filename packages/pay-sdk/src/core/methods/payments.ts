@@ -42,7 +42,7 @@ export function getPayments(
 }
 
 export async function getPayment(client: PayClientInternal, paymentId: string): Promise<Payment> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/payments/${paymentId}`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/payments/${paymentId}`, {
     headers: client.getHeaders(),
   })
 
@@ -60,7 +60,7 @@ export async function refundPayment(
   paymentId: string
 ): Promise<{ success: boolean }> {
   const response = await client.fetchWithAuth(
-    `${client.config.apiUrl}/payments/${paymentId}/refund`,
+    `${client.config.apiUrl}/api/payments/${paymentId}/refund`,
     {
       method: 'POST',
       headers: client.getHeaders(),
@@ -88,7 +88,7 @@ export async function cleanupPayments(
   appName?: string
 ): Promise<{ deletedCount: number }> {
   const qs = appName ? `?appName=${appName}` : ''
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/payments/cleanup${qs}`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/payments/cleanup${qs}`, {
     method: 'DELETE',
     headers: client.getHeaders(),
   })

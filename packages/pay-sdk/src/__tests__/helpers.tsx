@@ -21,7 +21,7 @@ import type {
 export function createMockPayClient(overrides: Partial<PayClient> = {}): PayClient {
   const client = createPayClient({
     appName: 'test-app',
-    apiUrl: 'http://localhost:9999/api',
+    apiUrl: 'http://localhost:9999',
   })
 
   // Override all methods with vi.fn() returning defaults
@@ -194,7 +194,7 @@ export function createWrapper(options: WrapperOptions = {}) {
     return (
       <PayProvider
         appName={options.appName ?? 'test-app'}
-        config={{ apiUrl: 'http://localhost:9999/api' }}
+        config={{ apiUrl: 'http://localhost:9999' }}
       >
         {children}
       </PayProvider>
@@ -224,7 +224,7 @@ export function renderWithPay(
     return (
       <PayProvider
         appName={options.appName ?? 'test-app'}
-        config={{ apiUrl: 'http://localhost:9999/api' }}
+        config={{ apiUrl: 'http://localhost:9999' }}
       >
         {children}
       </PayProvider>

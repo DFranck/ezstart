@@ -10,7 +10,7 @@ export async function createPlan(
   client: PayClientInternal,
   data: CreatePlanRequest
 ): Promise<PlanResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/plans`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/plans`, {
     method: 'POST',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
@@ -46,7 +46,7 @@ export async function listPlans(
   }
 
   // Public endpoint — no auth needed, but include token if available
-  const url = `${client.config.apiUrl}/plans?${searchParams.toString()}`
+  const url = `${client.config.apiUrl}/api/plans?${searchParams.toString()}`
   const response = await fetch(url, { headers: client.getHeaders() })
 
   const result = await response.json()
@@ -70,7 +70,7 @@ export async function updatePlan(
   planId: string,
   data: UpdatePlanRequest
 ): Promise<PlanResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/plans/${planId}`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/plans/${planId}`, {
     method: 'PATCH',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
@@ -89,7 +89,7 @@ export async function deletePlan(
   client: PayClientInternal,
   planId: string
 ): Promise<{ success: boolean }> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/plans/${planId}`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/plans/${planId}`, {
     method: 'DELETE',
     headers: client.getHeaders(),
   })

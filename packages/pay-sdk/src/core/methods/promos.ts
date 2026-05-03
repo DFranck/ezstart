@@ -11,7 +11,7 @@ export async function createPromo(
   client: PayClientInternal,
   data: CreatePromoRequest
 ): Promise<PromoResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/promos`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/promos`, {
     method: 'POST',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
@@ -47,7 +47,7 @@ export async function listPromos(
   }
 
   const response = await client.fetchWithAuth(
-    `${client.config.apiUrl}/promos?${searchParams.toString()}`,
+    `${client.config.apiUrl}/api/promos?${searchParams.toString()}`,
     { headers: client.getHeaders() }
   )
 
@@ -76,7 +76,7 @@ export async function validatePromo(
 
   // Public validation endpoint — no auth needed, use raw fetch.
   const response = await fetch(
-    `${client.config.apiUrl}/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`,
+    `${client.config.apiUrl}/api/promos/validate/${encodeURIComponent(code)}?${searchParams.toString()}`,
     { headers: client.getHeaders() }
   )
 
@@ -94,7 +94,7 @@ export async function updatePromo(
   promoId: string,
   data: UpdatePromoRequest
 ): Promise<PromoResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/promos/${promoId}`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/promos/${promoId}`, {
     method: 'PATCH',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
@@ -113,7 +113,7 @@ export async function deletePromo(
   client: PayClientInternal,
   promoId: string
 ): Promise<{ success: boolean }> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/promos/${promoId}`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/promos/${promoId}`, {
     method: 'DELETE',
     headers: client.getHeaders(),
   })

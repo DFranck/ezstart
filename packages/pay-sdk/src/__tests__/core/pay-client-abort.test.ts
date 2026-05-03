@@ -25,7 +25,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
     })
     const controller = new AbortController()
 
@@ -46,7 +46,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
     })
 
     await client.getPayments({ userId: 'u_1' })
@@ -77,7 +77,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
     })
     const controller = new AbortController()
 
@@ -106,7 +106,7 @@ describe('PayClient.getPayments — AbortSignal propagation', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
       getToken: () => 'expired',
       onTokenRefresh: async () => 'fresh',
     })

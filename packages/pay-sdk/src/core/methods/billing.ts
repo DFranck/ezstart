@@ -49,7 +49,7 @@ export async function createBillingPortalSession(
   client: PayClientInternal,
   params?: BillingPortalRequest
 ): Promise<BillingPortalResponse> {
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/billing/portal`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/billing/portal`, {
     method: 'POST',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(params ?? {}),

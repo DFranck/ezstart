@@ -26,7 +26,7 @@ const { ManageSubscriptionButton } = await import('../../components/ManageSubscr
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999/api' }}>
+    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
       {children}
     </PayProvider>
   )

@@ -93,7 +93,7 @@ export function PayOverviewSection({
     }
 
     client
-      .fetchWithAuth(`${apiUrl}/admin/analytics/overview`, {
+      .fetchWithAuth(`${apiUrl}/api/admin/analytics/overview`, {
         method: 'GET',
         headers: client.getHeaders({ 'Content-Type': 'application/json' }),
         credentials: 'include',

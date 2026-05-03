@@ -13,7 +13,7 @@ export async function createSubscription(
 ): Promise<PaymentResponse> {
   const returnUrl = client.getReturnUrl()
 
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/subscribe`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/subscribe`, {
     method: 'POST',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ ...data, returnUrl }),
@@ -64,7 +64,7 @@ export async function cancelSubscription(
   subscriptionId: string
 ): Promise<{ success: boolean }> {
   const response = await client.fetchWithAuth(
-    `${client.config.apiUrl}/subscriptions/${subscriptionId}/cancel`,
+    `${client.config.apiUrl}/api/subscriptions/${subscriptionId}/cancel`,
     {
       method: 'POST',
       headers: client.getHeaders(),
@@ -92,7 +92,7 @@ export async function changeSubscriptionPlan(
   data: ChangePlanRequest
 ): Promise<ChangePlanResponse> {
   const response = await client.fetchWithAuth(
-    `${client.config.apiUrl}/subscriptions/${subscriptionId}/change-plan`,
+    `${client.config.apiUrl}/api/subscriptions/${subscriptionId}/change-plan`,
     {
       method: 'POST',
       headers: client.getHeaders({ 'Content-Type': 'application/json' }),

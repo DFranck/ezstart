@@ -22,7 +22,7 @@ import { setupFetchMock, makePayment } from '../helpers.js'
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999/api' }}>
+    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
       {children}
     </PayProvider>
   )
@@ -101,17 +101,28 @@ describe('useDonations', () => {
         url: '/donations',
         response: () => {
           callCount++
-          return { success: true, data: [makePayment({ type: 'donation', id: `d${callCount}` })], meta: { total: 1 } }
+          return {
+            success: true,
+            data: [makePayment({ type: 'donation', id: `d${callCount}` })],
+            meta: { total: 1 },
+          }
         },
       },
     ])
 
     // Use a simpler approach - just verify reload calls
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ success: true, data: [makePayment({ type: 'donation' })], meta: { total: 1 } }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: [makePayment({ type: 'donation' })],
+          meta: { total: 1 },
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
     )
     vi.stubGlobal('fetch', fetchMock)
 
@@ -459,7 +470,10 @@ describe('usePay', () => {
       {
         url: '/donate',
         method: 'POST',
-        response: { success: true, data: { payment, checkoutUrl: 'https://checkout.stripe.com/test' } },
+        response: {
+          success: true,
+          data: { payment, checkoutUrl: 'https://checkout.stripe.com/test' },
+        },
       },
     ])
 
@@ -510,13 +524,16 @@ describe('usePay', () => {
   it('createSubscription calls API correctly', async () => {
     const payment = makePayment({ type: 'subscription', id: 'sub1' })
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({
-        success: true,
-        data: { payment, checkoutUrl: 'https://checkout.stripe.com/sub' },
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: { payment, checkoutUrl: 'https://checkout.stripe.com/sub' },
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
     )
     vi.stubGlobal('fetch', fetchMock)
 

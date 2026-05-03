@@ -31,7 +31,7 @@ const { DonationWall } = await import('../../components/DonationWall.js')
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999/api' }}>
+    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
       {children}
     </PayProvider>
   )

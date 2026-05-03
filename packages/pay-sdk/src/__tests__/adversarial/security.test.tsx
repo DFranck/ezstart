@@ -36,7 +36,7 @@ vi.mock('next/navigation', () => nextNavigationMock)
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999/api' }}>
+    <PayProvider appName="test-app" config={{ apiUrl: 'http://localhost:9999' }}>
       {children}
     </PayProvider>
   )
@@ -66,7 +66,7 @@ describe('Price manipulation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999' })
     await client.createPurchase({
       projectId: 'proj1',
       productId: 'prod1',
@@ -98,7 +98,7 @@ describe('Price manipulation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999' })
     const result = await client.createPurchase({
       projectId: 'proj1',
       productId: 'prod1',
@@ -121,7 +121,7 @@ describe('Price manipulation', () => {
     )
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999' })
 
     await expect(
       client.createPurchase({
@@ -169,7 +169,7 @@ describe('Promo code replay', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999' })
 
     // First call succeeds
     const result = await client.createSubscription({
@@ -207,7 +207,7 @@ describe('Promo code replay', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999' })
 
     // Fire two validation requests simultaneously
     await Promise.all([
@@ -417,7 +417,7 @@ describe('Auth token security', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
       getToken: () => 'secret-jwt-token',
     })
 
@@ -440,7 +440,7 @@ describe('Auth token security', () => {
 
       const client = createPayClient({
         appName: 'test',
-        apiUrl: 'http://localhost:9999/api',
+        apiUrl: 'http://localhost:9999',
         getToken: () => 'token',
       })
 
@@ -464,7 +464,7 @@ describe('Auth token security', () => {
 
       const client = createPayClient({
         appName: 'test',
-        apiUrl: 'http://localhost:9999/api',
+        apiUrl: 'http://localhost:9999',
         getToken: () => 'token',
       })
 
@@ -496,7 +496,7 @@ describe('Auth token security', () => {
     const onAuthFailure = vi.fn()
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
       getToken: () => 'expired-token',
       onTokenRefresh: async () => 'new-token',
       onAuthFailure,
@@ -523,7 +523,7 @@ describe('Auth token security', () => {
     const onAuthFailure = vi.fn()
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
       getToken: () => 'expired-token',
       onTokenRefresh: async () => {
         throw new Error('Refresh failed')
@@ -552,7 +552,7 @@ describe('Auth token security', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
       apiKey: 'epk_test123',
     })
 
@@ -573,7 +573,7 @@ describe('Auth token security', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
       getToken: () => 'my-secret-token',
       apiKey: 'epk_secret',
     })
@@ -598,7 +598,7 @@ describe('Stripe key exposure', () => {
 
     const client = createPayClient({
       appName: 'test',
-      apiUrl: 'http://localhost:9999/api',
+      apiUrl: 'http://localhost:9999',
     })
 
     // Verify the client config does not have Stripe key fields
@@ -614,7 +614,7 @@ describe('Stripe key exposure', () => {
     // This means the Stripe secret key only lives on the server
 
     // Verify PayClient methods use fetch() to call the API, not Stripe.js
-    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999/api' })
+    const client = createPayClient({ appName: 'test', apiUrl: 'http://localhost:9999' })
 
     // All payment creation methods return a checkoutUrl from the server
     // There is no `stripe.redirectToCheckout()` or `stripe.createPaymentIntent()`

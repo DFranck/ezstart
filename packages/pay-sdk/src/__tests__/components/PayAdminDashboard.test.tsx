@@ -29,7 +29,7 @@ vi.mock('recharts', () => ({
 }))
 
 const mockClient = {
-  config: { apiUrl: 'https://pay.example.com/api' },
+  config: { apiUrl: 'https://pay.example.com' },
   fetchWithAuth: vi.fn(),
   getHeaders: vi.fn(() => ({ 'Content-Type': 'application/json' })),
   getPayments: vi.fn(async () => ({ payments: [], total: 0 })),

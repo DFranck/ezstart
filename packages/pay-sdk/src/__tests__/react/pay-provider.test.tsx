@@ -29,7 +29,7 @@ function Wrapper({
       publishableKey={publishableKey}
       applicationId={applicationId}
       appName={appName}
-      config={{ apiUrl: 'http://api.example.com/api' }}
+      config={{ apiUrl: 'http://api.example.com' }}
     >
       {children}
     </PayProvider>
@@ -473,10 +473,10 @@ describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
     })
     expect(plansCall).toBeDefined()
     const plansUrl = plansCall?.[0] as string
-    // Without apiUrl, the call starts with `/plans` — a relative URL that
+    // Without apiUrl, the call starts with `/api/plans` — a relative URL that
     // would hit the hosting origin (the REG-2 bug). The fix is at the
     // consumer side: pass `config.apiUrl` explicitly.
-    expect(plansUrl.startsWith('/plans')).toBe(true)
+    expect(plansUrl.startsWith('/api/plans')).toBe(true)
   })
 })
 
@@ -497,7 +497,7 @@ describe('PayProvider — payWebUrl propagation', () => {
         <PayProvider
           applicationId="app_123"
           payWebUrl="https://ezpay.example.com"
-          config={{ apiUrl: 'https://ezpay-api.example.com/api' }}
+          config={{ apiUrl: 'https://ezpay-api.example.com' }}
         >
           {children}
         </PayProvider>
@@ -571,7 +571,7 @@ describe('PayClient.resolveApplicationByKey', () => {
 
   it('throws when publishableKey is empty', async () => {
     const { createPayClient } = await import('../../core/pay-client.js')
-    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
+    const client = createPayClient({ apiUrl: 'http://api.example.com' })
     await expect(client.resolveApplicationByKey('')).rejects.toThrow('publishableKey is required')
   })
 
@@ -586,7 +586,7 @@ describe('PayClient.resolveApplicationByKey', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const { createPayClient } = await import('../../core/pay-client.js')
-    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
+    const client = createPayClient({ apiUrl: 'http://api.example.com' })
     await expect(client.resolveApplicationByKey('ez_pk_test_bad')).rejects.toThrow(
       'Invalid application config response'
     )
@@ -603,7 +603,7 @@ describe('PayClient.resolveApplicationByKey', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const { createPayClient } = await import('../../core/pay-client.js')
-    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
+    const client = createPayClient({ apiUrl: 'http://api.example.com' })
     await expect(client.resolveApplicationByKey('ez_pk_test_rl')).rejects.toThrow('Rate limited')
   })
 
@@ -629,7 +629,7 @@ describe('PayClient.resolveApplicationByKey', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const { createPayClient } = await import('../../core/pay-client.js')
-    const client = createPayClient({ apiUrl: 'http://api.example.com/api' })
+    const client = createPayClient({ apiUrl: 'http://api.example.com' })
     const cfg = await client.resolveApplicationByKey('ez_pk_live_ok')
 
     expect(cfg.applicationId).toBe('app_ok')

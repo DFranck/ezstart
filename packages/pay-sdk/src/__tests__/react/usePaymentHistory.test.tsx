@@ -19,7 +19,7 @@ function wrapper(opts: { applicationId?: string; appName?: string }) {
       <PayProvider
         applicationId={opts.applicationId}
         appName={opts.appName}
-        config={{ apiUrl: 'http://api.example.com/api' }}
+        config={{ apiUrl: 'http://api.example.com' }}
       >
         {children}
       </PayProvider>
@@ -354,7 +354,7 @@ describe('usePaymentHistory — VULN-1 refuse fetch on failed resolution', () =>
       return (
         <PayProvider
           publishableKey="ez_pk_test_broken"
-          config={{ apiUrl: 'http://api.example.com/api' }}
+          config={{ apiUrl: 'http://api.example.com' }}
         >
           {children}
         </PayProvider>
@@ -414,7 +414,7 @@ describe('usePaymentHistory — VULN-1 refuse fetch on failed resolution', () =>
       return (
         <PayProvider
           publishableKey="ez_pk_test_pending"
-          config={{ apiUrl: 'http://api.example.com/api' }}
+          config={{ apiUrl: 'http://api.example.com' }}
         >
           {children}
         </PayProvider>

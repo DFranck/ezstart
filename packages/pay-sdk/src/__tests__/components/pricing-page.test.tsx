@@ -68,7 +68,7 @@ function renderWithProvider(
       applicationId={providerProps.applicationId}
       appName={providerProps.appName}
       publishableKey={providerProps.publishableKey}
-      config={{ apiUrl: 'http://api.example.com/api' }}
+      config={{ apiUrl: 'http://api.example.com' }}
     >
       {ui}
     </PayProvider>

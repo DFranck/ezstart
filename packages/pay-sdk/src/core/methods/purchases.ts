@@ -11,7 +11,7 @@ export async function createPurchase(
 ): Promise<PaymentResponse> {
   const returnUrl = client.getReturnUrl()
 
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/purchase`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/purchase`, {
     method: 'POST',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ ...data, returnUrl }),

@@ -12,7 +12,7 @@ export async function createDonation(
 ): Promise<PaymentResponse> {
   const returnUrl = client.getReturnUrl()
 
-  const response = await client.fetchWithAuth(`${client.config.apiUrl}/donate`, {
+  const response = await client.fetchWithAuth(`${client.config.apiUrl}/api/donate`, {
     method: 'POST',
     headers: client.getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ ...data, returnUrl }),
@@ -43,7 +43,7 @@ export async function getDonationStats(
   if (projectId) searchParams.set('projectId', projectId)
 
   const response = await client.fetchWithAuth(
-    `${client.config.apiUrl}/donations/stats?${searchParams.toString()}`,
+    `${client.config.apiUrl}/api/donations/stats?${searchParams.toString()}`,
     { headers: client.getHeaders() }
   )
 
