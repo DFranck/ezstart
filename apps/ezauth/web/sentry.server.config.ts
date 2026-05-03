@@ -21,6 +21,7 @@ if (dsn) {
     dsn,
     environment: process.env.DEPLOY_ENV ?? 'development',
     release: process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.RAILWAY_GIT_COMMIT_SHA,
+    serverName: 'ezauth-web',
     tracesSampleRate: 0.1,
   })
 }

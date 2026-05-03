@@ -16,6 +16,7 @@ if (dsn) {
     dsn,
     environment: process.env.DEPLOY_ENV ?? 'development',
     release: process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.RAILWAY_GIT_COMMIT_SHA,
+    serverName: 'green-pulse-web-edge',
     tracesSampleRate: 0.1,
   })
 }
