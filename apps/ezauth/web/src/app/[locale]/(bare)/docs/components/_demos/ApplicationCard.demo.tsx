@@ -2,7 +2,7 @@
 
 import { ApplicationCard } from '@ezstart/auth-sdk/components'
 import type { Application } from '@ezstart/auth-sdk'
-import { Div } from '@ezstart/ui/components'
+import { Div, P } from '@ezstart/ui/components'
 
 const mockApp: Application = {
   id: 'demo-app-1',
@@ -25,9 +25,15 @@ const mockArchived: Application = {
 
 export default function Demo() {
   return (
-    <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-3xl">
-      <ApplicationCard application={mockApp} keyCount={4} onSelect={() => {}} />
-      <ApplicationCard application={mockArchived} keyCount={0} onSelect={() => {}} />
+    <Div className="flex flex-col items-center gap-4 w-full max-w-3xl">
+      <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <ApplicationCard application={mockApp} keyCount={4} onSelect={() => {}} />
+        <ApplicationCard application={mockArchived} keyCount={0} onSelect={() => {}} />
+      </Div>
+      <P className="text-xs text-muted-foreground text-center max-w-md">
+        Card summarising one Application — name, status badge, key count, and click target. Wire
+        `onSelect` to navigate to the Application detail view.
+      </P>
     </Div>
   )
 }

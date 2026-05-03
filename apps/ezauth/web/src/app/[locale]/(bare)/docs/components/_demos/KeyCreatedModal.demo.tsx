@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { KeyCreatedModal, defaultDeveloperPortalTexts } from '@ezstart/auth-sdk/components'
-import { Button, Div } from '@ezstart/ui/components'
+import { Button, Div, P } from '@ezstart/ui/components'
 
 export default function Demo() {
   const [open, setOpen] = useState(false)
@@ -15,6 +15,10 @@ export default function Demo() {
         rawKey="ez_pk_test_abcd1234example5678demo"
         texts={defaultDeveloperPortalTexts.created}
       />
+      <P className="text-xs text-muted-foreground text-center max-w-xs">
+        Shown once after a key is created — exposes the raw key value for copy. The visitor will not
+        be able to see the key again, so the modal forces an explicit dismissal.
+      </P>
     </Div>
   )
 }

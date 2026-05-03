@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CreateApplicationModal } from '@ezstart/auth-sdk/components'
-import { Button, Div } from '@ezstart/ui/components'
+import { Button, Div, P } from '@ezstart/ui/components'
 import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
@@ -16,6 +16,10 @@ export default function Demo() {
           onClose={() => setOpen(false)}
           onCreated={() => setOpen(false)}
         />
+        <P className="text-xs text-muted-foreground text-center max-w-xs">
+          Modal form to create a new Application (name, slug, description). On success, calls
+          `onCreated`. Requires an authenticated session inside the sandbox.
+        </P>
       </Div>
     </DemoSandbox>
   )

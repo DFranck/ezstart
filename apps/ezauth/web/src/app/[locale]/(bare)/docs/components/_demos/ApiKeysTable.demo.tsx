@@ -2,7 +2,7 @@
 
 import { ApiKeysTable } from '@ezstart/auth-sdk/components'
 import type { ApiKeyItem } from '@ezstart/auth-sdk'
-import { Div } from '@ezstart/ui/components'
+import { Div, P } from '@ezstart/ui/components'
 
 const mockKeys: ApiKeyItem[] = [
   {
@@ -70,7 +70,7 @@ const mockTexts = {
 
 export default function Demo() {
   return (
-    <Div className="w-full max-w-4xl">
+    <Div className="w-full max-w-4xl flex flex-col items-center gap-3">
       <ApiKeysTable
         keys={mockKeys}
         onRevoke={() => {}}
@@ -80,6 +80,10 @@ export default function Demo() {
         isRotating={false}
         texts={mockTexts}
       />
+      <P className="text-xs text-muted-foreground text-center max-w-xs">
+        DataTable rendering API keys with status, usage quota, and per-row actions (rotate / revoke
+        / view usage). Pass keys via props; the table is presentational only.
+      </P>
     </Div>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CreateKeyModal, defaultDeveloperPortalTexts } from '@ezstart/auth-sdk/components'
-import { Button, Div } from '@ezstart/ui/components'
+import { Button, Div, P } from '@ezstart/ui/components'
 import { DemoSandbox } from './_lib/DemoSandbox'
 
 export default function Demo() {
@@ -18,6 +18,10 @@ export default function Demo() {
           isSubmitting={false}
           texts={defaultDeveloperPortalTexts.create}
         />
+        <P className="text-xs text-muted-foreground text-center max-w-xs">
+          Modal form to create a new API key (name, scope, env). The parent owns submit handling and
+          `KeyCreatedModal` is shown next with the raw key.
+        </P>
       </Div>
     </DemoSandbox>
   )
