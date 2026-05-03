@@ -13,6 +13,7 @@ import {
   DataTableColumnHeader,
   Div,
   H2,
+  H3,
   P,
   Select,
   SelectContent,
@@ -21,7 +22,6 @@ import {
   SelectValue,
   Skeleton,
   Span,
-  Switch,
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { E2ETestsHistoryDrawer } from './e2e-tests-history-drawer'
@@ -32,28 +32,20 @@ import {
   RUN_TIERS,
   STATUS_VARIANT,
   formatRelativeTime,
-  freshnessOf,
   getRunStatus,
-  type EnvFilter,
-  type FreshnessBucket,
+  type EnvSummaryBucket,
   type NeedsRerunResponse,
+  type RunEnv,
+  type RunTier,
   type SummaryStatsResponse,
   type TestDefinition,
   type TestsListResponse,
-  type TierFilter,
 } from './e2e-tests-types'
 
 // ─── Fetchers ────────────────────────────────────────────────────────────
 
-function buildMatrixQs(env: EnvFilter, tier: TierFilter): string {
-  const params: string[] = []
-  if (env !== 'all') params.push(`env=${encodeURIComponent(env)}`)
-  if (tier !== 'all') params.push(`tier=${encodeURIComponent(tier)}`)
-  return params.length === 0 ? '' : `?${params.join('&')}`
-}
-
-async function fetchTests(env: EnvFilter, tier: TierFilter): Promise<TestsListResponse> {
-  return apiCall<TestsListResponse>(`/e2e-tests${buildMatrixQs(env, tier)}`, {
+async function fetchTestsForEnv(env: RunEnv): Promise<TestsListResponse> {
+  return apiCall<TestsListResponse>(`/e2e-tests?env=${encodeURIComponent(env)}&limit=200`, {
     appName: 'ezstart',
   })
 }
@@ -62,78 +54,100 @@ async function fetchSummary(): Promise<SummaryStatsResponse> {
   return apiCall<SummaryStatsResponse>('/e2e-tests/stats/summary', { appName: 'ezstart' })
 }
 
-async function fetchNeedsRerun(env: EnvFilter, tier: TierFilter): Promise<NeedsRerunResponse> {
-  return apiCall<NeedsRerunResponse>(`/e2e-tests/needs-rerun${buildMatrixQs(env, tier)}`, {
+async function fetchNeedsRerun(): Promise<NeedsRerunResponse> {
+  return apiCall<NeedsRerunResponse>('/e2e-tests/needs-rerun', {
     appName: 'ezstart',
   })
 }
 
-// ─── Component ───────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────
 
-export function E2ETestsTab() {
+/**
+ * Best-effort fallback when the API doesn't return an env-level bucket.
+ *
+ * NOTE — summing tier buckets can double-count tests that ran in multiple tiers
+ * within the same env (e.g. a test that ran both as smoke AND browser-e2e in
+ * `staging` would be counted twice). The authoritative source is
+ * `summaryData.byEnv[env]` which counts each (testId, env) latest-run exactly
+ * once. This helper is only used when `byEnv` is missing on legacy responses.
+ */
+function aggregateEnvBucket(
+  byTier: Record<RunTier, EnvSummaryBucket> | undefined
+): EnvSummaryBucket {
+  const sum: EnvSummaryBucket = { pass: 0, fail: 0, blocked: 0, skip: 0, never: 0 }
+  if (!byTier) return sum
+  for (const tier of RUN_TIERS) {
+    const bucket = byTier[tier]
+    if (!bucket) continue
+    sum.pass += bucket.pass
+    sum.fail += bucket.fail
+    sum.blocked += bucket.blocked
+    sum.skip += bucket.skip
+  }
+  return sum
+}
+
+// ─── Per-env panel ───────────────────────────────────────────────────────
+
+interface EnvPanelProps {
+  env: RunEnv
+  totalDefinitions: number
+  envBucket: EnvSummaryBucket | undefined
+  envTierBuckets: Record<RunTier, EnvSummaryBucket> | undefined
+  needsRerunIds: Set<string>
+  onSelectTest: (testId: string) => void
+}
+
+function EnvPanel({
+  env,
+  totalDefinitions,
+  envBucket,
+  envTierBuckets,
+  needsRerunIds,
+  onSelectTest,
+}: EnvPanelProps) {
   const t = useTranslations('admin.e2eTests')
 
-  // Filters
+  // Per-env filters (scoped per panel so each env table can be filtered independently)
   const [appFilter, setAppFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [envFilter, setEnvFilter] = useState<EnvFilter>('all')
-  const [tierFilter, setTierFilter] = useState<TierFilter>('all')
-  const [freshnessFilter, setFreshnessFilter] = useState<FreshnessBucket>('all')
-  const [needsRerunOnly, setNeedsRerunOnly] = useState(false)
+  const [tierFilter, setTierFilter] = useState<string>('all')
 
-  // Drawer
-  const [selectedTestId, setSelectedTestId] = useState<string | null>(null)
-
-  // Queries — env + tier filters are server-side so the matrix recomputes
-  // "latest run" per (env, tier) combination (a test that passes locally
-  // browser-e2e but never ran as smoke in production should appear as
-  // 'never' when filtering on production+smoke).
+  // Per-env data fetch — server-side env scoping ensures "latest run in <env>"
+  // (a test passing locally but never run in production correctly appears as
+  // 'never' in the production panel).
   const {
     data: testsData,
     isLoading: testsLoading,
     error: testsError,
   } = useQuery({
-    queryKey: ['admin-e2e-tests', envFilter, tierFilter],
-    queryFn: () => fetchTests(envFilter, tierFilter),
+    queryKey: ['admin-e2e-tests', env],
+    queryFn: () => fetchTestsForEnv(env),
     staleTime: 30 * 1000,
   })
 
-  const { data: summaryData, isLoading: summaryLoading } = useQuery({
-    queryKey: ['admin-e2e-tests-summary'],
-    queryFn: fetchSummary,
-    staleTime: 30 * 1000,
-  })
-
-  const { data: needsRerunData } = useQuery({
-    queryKey: ['admin-e2e-tests-needs-rerun', envFilter, tierFilter],
-    queryFn: () => fetchNeedsRerun(envFilter, tierFilter),
-    staleTime: 30 * 1000,
-  })
-
-  // Derived
   const allApps = useMemo(() => {
     const set = new Set<string>()
     testsData?.tests.forEach(test => set.add(test.app))
     return Array.from(set).sort()
   }, [testsData])
 
-  const needsRerunIds = useMemo(
-    () => new Set((needsRerunData?.tests ?? []).map(test => test.testId)),
-    [needsRerunData]
-  )
-
   const filteredTests = useMemo(() => {
     if (!testsData) return []
     return testsData.tests.filter(test => {
       if (appFilter !== 'all' && test.app !== appFilter) return false
       if (statusFilter !== 'all' && getRunStatus(test) !== statusFilter) return false
-      if (freshnessFilter !== 'all' && freshnessOf(test) !== freshnessFilter) return false
-      if (needsRerunOnly && !needsRerunIds.has(test.testId)) return false
+      if (tierFilter !== 'all') {
+        const runTier = test.lastRun?.tier
+        // Show 'never' rows under the unit tier filter only when the unit tier
+        // is explicitly selected — same logic for any tier (a test that never
+        // ran shouldn't appear under a specific tier filter).
+        if (runTier !== tierFilter) return false
+      }
       return true
     })
-  }, [testsData, appFilter, statusFilter, freshnessFilter, needsRerunOnly, needsRerunIds])
+  }, [testsData, appFilter, statusFilter, tierFilter])
 
-  // Relative time labels (built from i18n)
   const relativeLabels = {
     never: t('lastRun.never'),
     minutes: t('lastRun.minutesAgo'),
@@ -141,7 +155,6 @@ export function E2ETestsTab() {
     days: t('lastRun.daysAgo'),
   }
 
-  // Columns
   const columns: ColumnDef<TestDefinition>[] = [
     {
       accessorKey: 'testId',
@@ -160,6 +173,15 @@ export function E2ETestsTab() {
       ),
     },
     {
+      accessorKey: 'category',
+      header: ({ header }) => (
+        <DataTableColumnHeader header={header} title={t('columns.category')} />
+      ),
+      cell: ({ row }) => (
+        <Span className="text-xs text-muted-foreground">{row.original.category ?? '—'}</Span>
+      ),
+    },
+    {
       accessorKey: 'feature',
       header: ({ header }) => (
         <DataTableColumnHeader header={header} title={t('columns.feature')} />
@@ -171,40 +193,6 @@ export function E2ETestsTab() {
             <P className="text-xs text-muted-foreground line-clamp-1">{row.original.description}</P>
           )}
         </Div>
-      ),
-    },
-    {
-      id: 'status',
-      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.status')} />,
-      cell: ({ row }) => {
-        const status = getRunStatus(row.original)
-        const isStale = needsRerunIds.has(row.original.testId)
-        return (
-          <Div className="flex items-center gap-2">
-            <Badge variant={STATUS_VARIANT[status]} size="sm" dot>
-              {t(`status.${status}`)}
-            </Badge>
-            {isStale && (
-              <Badge variant="warning" size="xs" title={t('needsRerun.tooltip')}>
-                {t('needsRerun.badge')}
-              </Badge>
-            )}
-          </Div>
-        )
-      },
-    },
-    {
-      id: 'env',
-      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.env')} />,
-      cell: ({ row }) => (
-        <EnvBadge
-          env={row.original.lastRun?.env}
-          tooltip={
-            row.original.lastRun?.env
-              ? t(`env.${row.original.lastRun.env}`)
-              : t('env.envBadge.tooltip')
-          }
-        />
       ),
     },
     {
@@ -231,6 +219,41 @@ export function E2ETestsTab() {
       ),
     },
     {
+      id: 'status',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.status')} />,
+      cell: ({ row }) => {
+        const status = getRunStatus(row.original)
+        const isStale = needsRerunIds.has(row.original.testId)
+        return (
+          <Div className="flex items-center gap-2">
+            <Badge variant={STATUS_VARIANT[status]} size="sm" dot>
+              {t(`status.${status}`)}
+            </Badge>
+            {isStale && (
+              <Badge variant="warning" size="xs" title={t('needsRerun.tooltip')}>
+                {t('needsRerun.badge')}
+              </Badge>
+            )}
+          </Div>
+        )
+      },
+    },
+    {
+      id: 'note',
+      header: t('columns.note'),
+      cell: ({ row }) => {
+        const notes = row.original.lastRun?.notes
+        const errors = row.original.lastRun?.errors
+        const lastErr = errors && errors.length > 0 ? errors[0] : undefined
+        const text = notes ?? lastErr ?? '—'
+        return (
+          <Span className="text-xs text-muted-foreground line-clamp-2" title={text}>
+            {text}
+          </Span>
+        )
+      },
+    },
+    {
       id: 'lastRun',
       header: ({ header }) => (
         <DataTableColumnHeader header={header} title={t('columns.lastRun')} />
@@ -242,28 +265,201 @@ export function E2ETestsTab() {
       ),
     },
     {
-      id: 'agent',
-      header: t('columns.agent'),
-      cell: ({ row }) => (
-        <Span className="text-xs text-muted-foreground">{row.original.lastRun?.agent ?? '—'}</Span>
-      ),
-    },
-    {
       id: 'actions',
       header: t('columns.actions'),
       cell: ({ row }) => (
-        <Button variant="outline" size="sm" onClick={() => setSelectedTestId(row.original.testId)}>
+        <Button variant="outline" size="sm" onClick={() => onSelectTest(row.original.testId)}>
           {t('actions.viewHistory')}
         </Button>
       ),
     },
   ]
 
-  // Stats display values — the API returns the canonical
-  // `{ totalDefinitions, latestRunBreakdown: { pass, fail, ... }, passRate }`
-  // shape (FIX-EZSTART-ADMIN-UI-PASS-001). The previous flat reads
-  // (`summaryData.total`, `summaryData.pass`) silently produced 0 because the
-  // TS contract was wrong.
+  // Aggregate counts for this env — prefer authoritative `byEnv` bucket;
+  // fall back to summing the tier buckets if `byEnv` is absent.
+  const aggregate = envBucket ?? aggregateEnvBucket(envTierBuckets)
+  const passCount = aggregate.pass
+  const failCount = aggregate.fail
+  const blockedCount = aggregate.blocked
+  const neverCount = aggregate.never
+
+  return (
+    <Card variant="floating" className="overflow-hidden">
+      <CardContent className="p-0">
+        {/* Env header */}
+        <Div className="flex items-center justify-between gap-4 border-b border-border bg-muted/30 px-6 py-4">
+          <Div className="flex items-center gap-3">
+            <EnvBadge env={env} tooltip={t(`env.${env}`)} size="default" />
+            <H3 className="text-base font-semibold">{t(`env.${env}`)}</H3>
+          </Div>
+          <Div className="flex flex-wrap items-center gap-3 text-sm">
+            <Span className="tabular-nums">
+              <Span className="font-semibold text-success">{passCount}</Span>
+              <Span className="text-muted-foreground">/{totalDefinitions} </Span>
+              <Span className="text-muted-foreground">{t('panel.passing')}</Span>
+            </Span>
+            <Span className="text-muted-foreground">·</Span>
+            <Span className="tabular-nums text-destructive">
+              {failCount} {t('status.fail')}
+            </Span>
+            <Span className="text-muted-foreground">·</Span>
+            <Span className="tabular-nums text-warning">
+              {blockedCount} {t('status.blocked')}
+            </Span>
+            <Span className="text-muted-foreground">·</Span>
+            <Span className="tabular-nums text-muted-foreground">
+              {neverCount} {t('status.never')}
+            </Span>
+          </Div>
+        </Div>
+
+        {/* Tier breakdown */}
+        <Div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 py-4 border-b border-border">
+          {RUN_TIERS.map(tier => {
+            const bucket = envTierBuckets?.[tier]
+            const tierKey = tier === 'browser-e2e' ? 'browserE2E' : tier
+            const tierPass = bucket?.pass ?? 0
+            const tierTotal =
+              (bucket?.pass ?? 0) +
+              (bucket?.fail ?? 0) +
+              (bucket?.blocked ?? 0) +
+              (bucket?.skip ?? 0) +
+              (bucket?.never ?? 0)
+            return (
+              <Div key={tier} className="flex items-center justify-between gap-2">
+                <Div className="flex items-center gap-2">
+                  <TierBadge tier={tier} tooltip={t(`tier.${tierKey}`)} size="sm" />
+                </Div>
+                <P className="text-sm tabular-nums">
+                  <Span className="font-semibold">{tierPass}</Span>
+                  <Span className="text-muted-foreground">
+                    /{tierTotal} {t('panel.passing')}
+                  </Span>
+                </P>
+              </Div>
+            )
+          })}
+        </Div>
+
+        {/* Filters */}
+        <Div className="flex flex-wrap items-end gap-3 px-6 py-4 border-b border-border">
+          <Div className="space-y-1.5">
+            <P className="text-xs font-medium text-muted-foreground">{t('filters.app')}</P>
+            <Select value={appFilter} onValueChange={setAppFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('filters.allApps')}</SelectItem>
+                {allApps.map(app => (
+                  <SelectItem key={app} value={app}>
+                    {app}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Div>
+
+          <Div className="space-y-1.5">
+            <P className="text-xs font-medium text-muted-foreground">{t('filters.tier')}</P>
+            <Select value={tierFilter} onValueChange={setTierFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('tier.all')}</SelectItem>
+                {RUN_TIERS.map(tier => (
+                  <SelectItem key={tier} value={tier}>
+                    {t(`tier.${tier === 'browser-e2e' ? 'browserE2E' : tier}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Div>
+
+          <Div className="space-y-1.5">
+            <P className="text-xs font-medium text-muted-foreground">{t('filters.status')}</P>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('filters.allStatuses')}</SelectItem>
+                <SelectItem value="pass">{t('status.pass')}</SelectItem>
+                <SelectItem value="fail">{t('status.fail')}</SelectItem>
+                <SelectItem value="blocked">{t('status.blocked')}</SelectItem>
+                <SelectItem value="skip">{t('status.skip')}</SelectItem>
+                <SelectItem value="never">{t('status.never')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Div>
+        </Div>
+
+        {/* Table */}
+        <Div className="px-6 py-4">
+          {testsError && (
+            <Div className="py-6">
+              <P className="font-semibold text-destructive">{t('failedToLoad')}</P>
+              <P className="text-sm text-muted-foreground mt-1">
+                {testsError instanceof Error ? testsError.message : String(testsError)}
+              </P>
+            </Div>
+          )}
+
+          {testsLoading && !testsData && (
+            <Div className="space-y-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </Div>
+          )}
+
+          {testsData && (
+            <DataTable
+              columns={columns}
+              data={filteredTests}
+              pageSize={20}
+              texts={{
+                rows: t('table.rows'),
+                previous: t('table.previous'),
+                next: t('table.next'),
+                pageOf: t('table.pageOf'),
+                empty: t('table.empty'),
+              }}
+            />
+          )}
+        </Div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Component ───────────────────────────────────────────────────────────
+
+export function E2ETestsTab() {
+  const t = useTranslations('admin.e2eTests')
+
+  // Drawer
+  const [selectedTestId, setSelectedTestId] = useState<string | null>(null)
+
+  const { data: summaryData, isLoading: summaryLoading } = useQuery({
+    queryKey: ['admin-e2e-tests-summary'],
+    queryFn: fetchSummary,
+    staleTime: 30 * 1000,
+  })
+
+  const { data: needsRerunData } = useQuery({
+    queryKey: ['admin-e2e-tests-needs-rerun'],
+    queryFn: fetchNeedsRerun,
+    staleTime: 30 * 1000,
+  })
+
+  const needsRerunIds = useMemo(
+    () => new Set((needsRerunData?.tests ?? []).map(test => test.testId)),
+    [needsRerunData]
+  )
+
+  // Top-line stats (env-agnostic — kept for at-a-glance health)
   const total = summaryData?.totalDefinitions ?? 0
   const failCount = summaryData?.latestRunBreakdown?.fail ?? 0
   const passRate = summaryData?.passRate ?? 0
@@ -277,7 +473,7 @@ export function E2ETestsTab() {
         <P className="text-sm text-muted-foreground mt-1">{t('subtitle')}</P>
       </Div>
 
-      {/* Stats */}
+      {/* Top-line stats */}
       <Div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryLoading ? (
           <>
@@ -314,204 +510,20 @@ export function E2ETestsTab() {
         )}
       </Div>
 
-      {/* Per-env breakdown — surfaces the env dimension at a glance */}
-      {summaryData?.byEnv && (
-        <Div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {RUN_ENVS.map(env => {
-            const bucket = summaryData.byEnv?.[env]
-            const passes = bucket?.pass ?? 0
-            return (
-              <Card key={env} className="p-4">
-                <Div className="flex items-center gap-2">
-                  <EnvBadge env={env} tooltip={t(`env.${env}`)} size="sm" />
-                  <P className="text-xs text-muted-foreground">{t('stats.envPassLabel')}</P>
-                </Div>
-                <P className="text-2xl font-semibold mt-2 tabular-nums">
-                  {passes}
-                  <Span className="ml-1 text-sm font-normal text-muted-foreground">/ {total}</Span>
-                </P>
-                <P className="text-xs text-muted-foreground mt-1">
-                  {t('stats.envBreakdown', {
-                    fail: bucket?.fail ?? 0,
-                    blocked: bucket?.blocked ?? 0,
-                    never: bucket?.never ?? 0,
-                  })}
-                </P>
-              </Card>
-            )
-          })}
-        </Div>
-      )}
-
-      {/* Per-tier breakdown — surfaces what was actually exercised */}
-      {summaryData?.byTier && (
-        <Div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {RUN_TIERS.map(tier => {
-            const bucket = summaryData.byTier?.[tier]
-            const passes = bucket?.pass ?? 0
-            const tierKey = tier === 'browser-e2e' ? 'browserE2E' : tier
-            return (
-              <Card key={tier} className="p-4">
-                <Div className="flex items-center gap-2">
-                  <TierBadge tier={tier} tooltip={t(`tier.${tierKey}`)} size="sm" />
-                  <P className="text-xs text-muted-foreground">{t('stats.tierPassLabel')}</P>
-                </Div>
-                <P className="text-2xl font-semibold mt-2 tabular-nums">
-                  {passes}
-                  <Span className="ml-1 text-sm font-normal text-muted-foreground">/ {total}</Span>
-                </P>
-                <P className="text-xs text-muted-foreground mt-1">
-                  {t('stats.tierBreakdown', {
-                    fail: bucket?.fail ?? 0,
-                    blocked: bucket?.blocked ?? 0,
-                    never: bucket?.never ?? 0,
-                  })}
-                </P>
-              </Card>
-            )
-          })}
-        </Div>
-      )}
-
-      {/* Filters */}
-      <Card variant="floating">
-        <CardContent className="py-4 flex flex-wrap items-end gap-4">
-          <Div className="space-y-1.5">
-            <P className="text-xs font-medium text-muted-foreground">{t('filters.app')}</P>
-            <Select value={appFilter} onValueChange={setAppFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('filters.allApps')}</SelectItem>
-                {allApps.map(app => (
-                  <SelectItem key={app} value={app}>
-                    {app}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Div>
-
-          <Div className="space-y-1.5">
-            <P className="text-xs font-medium text-muted-foreground">{t('filters.status')}</P>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('filters.allStatuses')}</SelectItem>
-                <SelectItem value="pass">{t('status.pass')}</SelectItem>
-                <SelectItem value="fail">{t('status.fail')}</SelectItem>
-                <SelectItem value="blocked">{t('status.blocked')}</SelectItem>
-                <SelectItem value="skip">{t('status.skip')}</SelectItem>
-                <SelectItem value="never">{t('status.never')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </Div>
-
-          <Div className="space-y-1.5">
-            <P className="text-xs font-medium text-muted-foreground">{t('filters.env')}</P>
-            <Select value={envFilter} onValueChange={v => setEnvFilter(v as EnvFilter)}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('env.all')}</SelectItem>
-                {RUN_ENVS.map(env => (
-                  <SelectItem key={env} value={env}>
-                    {t(`env.${env}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Div>
-
-          <Div className="space-y-1.5">
-            <P className="text-xs font-medium text-muted-foreground">{t('filters.tier')}</P>
-            <Select value={tierFilter} onValueChange={v => setTierFilter(v as TierFilter)}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('tier.all')}</SelectItem>
-                {RUN_TIERS.map(tier => (
-                  <SelectItem key={tier} value={tier}>
-                    {t(`tier.${tier === 'browser-e2e' ? 'browserE2E' : tier}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Div>
-
-          <Div className="space-y-1.5">
-            <P className="text-xs font-medium text-muted-foreground">{t('filters.freshness')}</P>
-            <Select
-              value={freshnessFilter}
-              onValueChange={v => setFreshnessFilter(v as FreshnessBucket)}
-            >
-              <SelectTrigger className="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('filters.allFreshness')}</SelectItem>
-                <SelectItem value="fresh-24h">{t('filters.fresh24h')}</SelectItem>
-                <SelectItem value="fresh-7d">{t('filters.fresh7d')}</SelectItem>
-                <SelectItem value="fresh-30d">{t('filters.fresh30d')}</SelectItem>
-                <SelectItem value="stale-30d">{t('filters.stale30d')}</SelectItem>
-                <SelectItem value="never">{t('filters.never')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </Div>
-
-          <Div className="flex items-center gap-2 pb-2">
-            <Switch
-              id="needs-rerun-only"
-              checked={needsRerunOnly}
-              onCheckedChange={setNeedsRerunOnly}
-            />
-            <label htmlFor="needs-rerun-only" className="text-sm text-foreground">
-              {t('filters.needsRerunOnly')}
-            </label>
-          </Div>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      {testsError && (
-        <Card variant="floating">
-          <CardContent className="py-6">
-            <P className="font-semibold text-destructive">{t('failedToLoad')}</P>
-            <P className="text-sm text-muted-foreground mt-1">
-              {testsError instanceof Error ? testsError.message : String(testsError)}
-            </P>
-          </CardContent>
-        </Card>
-      )}
-
-      {testsLoading && !testsData && (
-        <Div className="space-y-2">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-        </Div>
-      )}
-
-      {testsData && (
-        <DataTable
-          columns={columns}
-          data={filteredTests}
-          pageSize={20}
-          texts={{
-            rows: t('table.rows'),
-            previous: t('table.previous'),
-            next: t('table.next'),
-            pageOf: t('table.pageOf'),
-            empty: t('table.empty'),
-          }}
-        />
-      )}
+      {/* Per-env stacked panels — env on top, tier nested as sub-breakdown */}
+      <Div className="space-y-6">
+        {RUN_ENVS.map(env => (
+          <EnvPanel
+            key={env}
+            env={env}
+            totalDefinitions={total}
+            envBucket={summaryData?.byEnv?.[env]}
+            envTierBuckets={summaryData?.byEnvTier?.[env]}
+            needsRerunIds={needsRerunIds}
+            onSelectTest={setSelectedTestId}
+          />
+        ))}
+      </Div>
 
       <E2ETestsHistoryDrawer
         testId={selectedTestId}

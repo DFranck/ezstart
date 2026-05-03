@@ -186,6 +186,60 @@ statsSummaryRouter.get(
         byTier[tier].never = neverCount
       }
 
+      // Per-env-per-tier breakdown — drives the env-grouped admin UI where
+      // each env panel shows a tier sub-breakdown (smoke / browser-e2e / unit
+      // pass counts within that specific env). Latest run per
+      // (testId, env, tier) tuple, bucketed by status.
+      const latestPerEnvTier = await Run.aggregate<{
+        _id: { testId: string; env: string; tier: string }
+        status: string
+      }>([
+        { $sort: { testId: 1, env: 1, tier: 1, runAt: -1 } },
+        {
+          $group: {
+            _id: { testId: '$testId', env: '$env', tier: '$tier' },
+            status: { $first: '$status' },
+          },
+        },
+      ])
+
+      const makeEmptyTierMap = (): Record<E2ERunTier, TierCounts> => ({
+        smoke: { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+        'browser-e2e': { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+        unit: { pass: 0, fail: 0, skip: 0, blocked: 0, never: 0 },
+      })
+
+      const byEnvTier: Record<E2ERunEnv, Record<E2ERunTier, TierCounts>> = {
+        local: makeEmptyTierMap(),
+        staging: makeEmptyTierMap(),
+        production: makeEmptyTierMap(),
+      }
+      const seenPerEnvTier: Record<E2ERunEnv, Record<E2ERunTier, Set<string>>> = {
+        local: { smoke: new Set(), 'browser-e2e': new Set(), unit: new Set() },
+        staging: { smoke: new Set(), 'browser-e2e': new Set(), unit: new Set() },
+        production: { smoke: new Set(), 'browser-e2e': new Set(), unit: new Set() },
+      }
+      for (const row of latestPerEnvTier) {
+        const env = (row._id?.env ?? 'local') as E2ERunEnv
+        const tier = (row._id?.tier ?? 'browser-e2e') as E2ERunTier
+        if (!E2E_RUN_ENVS.includes(env)) continue
+        if (!E2E_RUN_TIERS.includes(tier)) continue
+        seenPerEnvTier[env][tier].add(row._id.testId)
+        if (row.status in byEnvTier[env][tier]) {
+          byEnvTier[env][tier][row.status as keyof TierCounts]++
+        }
+      }
+      // "never" counts per (env, tier) — definitions that never ran in that combo.
+      for (const env of E2E_RUN_ENVS) {
+        for (const tier of E2E_RUN_TIERS) {
+          let neverCount = 0
+          for (const def of allDefIds) {
+            if (!seenPerEnvTier[env][tier].has(def.testId)) neverCount++
+          }
+          byEnvTier[env][tier].never = neverCount
+        }
+      }
+
       const lastRunDoc = await Run.findOne({}).sort({ runAt: -1 }).lean().exec()
 
       return sendSuccess(res, {
@@ -195,6 +249,7 @@ statsSummaryRouter.get(
         byApp,
         byEnv,
         byTier,
+        byEnvTier,
         lastRunAt: lastRunDoc?.runAt ?? null,
         evaluatedAt: new Date(),
       })

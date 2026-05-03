@@ -44,6 +44,8 @@ export interface TestDefinition {
   testId: string
   app: string
   feature: string
+  /** Functional category (auth | public | dashboard | api | …). */
+  category?: string
   description?: string
   exercises?: string[]
   lastRun?: TestRun
@@ -122,6 +124,12 @@ export interface SummaryStatsResponse {
   byEnv?: Record<RunEnv, EnvSummaryBucket>
   /** Per-tier latest-run breakdown. Optional for backwards-compat. */
   byTier?: Record<RunTier, EnvSummaryBucket>
+  /**
+   * Per-env-per-tier latest-run breakdown — drives the env-grouped admin UI
+   * where each env panel shows a tier sub-breakdown. Optional for
+   * backwards-compat with pre-2026-05-03 responses.
+   */
+  byEnvTier?: Record<RunEnv, Record<RunTier, EnvSummaryBucket>>
   lastRunAt?: string
   evaluatedAt?: string
 }
