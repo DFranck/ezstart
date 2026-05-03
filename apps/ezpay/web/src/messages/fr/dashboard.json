@@ -13,6 +13,8 @@
     "memberSince": "Membre depuis",
     "plan": "Plan",
     "planFree": "Gratuit",
+    "platformBadge": "Plateforme",
+    "adminBadge": "Admin",
     "billing": {
       "title": "Facturation & Plans",
       "description": "Gérez votre abonnement et vos limites d'utilisation",

@@ -60,7 +60,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
         appName="EZStart"
         headerOverlay={isOverlayPage}
         mobileLogoIcon="custom:Ezstart"
-        mobileLogoHref={`/${currentLocale}/`}
+        mobileLogoHref="/"
         creator={
           <Div className="flex items-center gap-2">
             <Span>
@@ -77,10 +77,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
         }
         currentPath={pathname}
         headerLeftContent={
-          <Link
-            href={`/${currentLocale}/`}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-          >
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Icon name="custom:Ezstart" size={24} />
             <H2 size={'h4'}>EZStart</H2>
           </Link>
@@ -146,7 +143,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
             <Span className="text-xs opacity-70 select-none">
               {t('footer.copyright', { year: new Date().getFullYear() })}
             </Span>
-            <Link href={`/${currentLocale}/legal-notices`} className="hover:underline text-xs">
+            <Link href="/legal-notices" className="hover:underline text-xs">
               {t('footer.legalNotices')}
             </Link>
           </Div>

@@ -16,6 +16,8 @@
     "labelUsername": "Username",
     "plan": "Plan",
     "planFree": "Free",
+    "platformBadge": "Platform",
+    "adminBadge": "Admin",
     "stats": {
       "apiKeys": "API Keys",
       "apps": "Apps",

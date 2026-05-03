@@ -396,7 +396,14 @@ function ProfileBlock({
 function SettingsBlock({ appName, texts }: { appName?: string; texts: EZAuthDashboardTexts }) {
   return (
     <Div className="space-y-6 w-full max-w-lg mx-auto">
-      <UserSettings appName={appName} texts={texts.settings} />
+      {/*
+        showConnectedAccounts={false} — `<OAuthProvidersSection>` below is the
+        canonical multi-provider connected accounts UI (Google, GitHub coming
+        soon, Discord coming soon, ...). UserSettings used to render its own
+        Google-only "Connected Accounts" card which duplicated the section
+        right above the OAuth one (cf. FIX-E2E-BATCH-001 BUG 6).
+      */}
+      <UserSettings appName={appName} texts={texts.settings} showConnectedAccounts={false} />
 
       <Card>
         <CardHeader>

@@ -78,6 +78,8 @@ export default function EZPayDashboardPage() {
     memberSince: t('memberSince'),
     plan: t('plan'),
     planFree: t('planFree'),
+    platformBadge: t('platformBadge'),
+    adminBadge: t('adminBadge'),
     billingTitle: t('billing.title'),
     billingDescription: t('billing.description'),
     comingSoon: t('billing.comingSoon'),

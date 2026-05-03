@@ -377,7 +377,14 @@ export default function AdminPage() {
          * UI from mounting so the user gets a friendly nudge instead of
          * watching every list / mutation 403.
          */}
-        <RequireTwoFactor fallbackPath={`/${locale}/settings?tab=2fa`}>
+        {/*
+         * 2FA settings live under the unified dashboard's settings section
+         * (`/dashboard?section=settings`), not at a standalone `/settings`
+         * route. The SDK default fallbackPath is `/settings?tab=2fa` for
+         * backwards-compat with consumers that mount their own settings
+         * route, so we override here to point at the canonical destination.
+         */}
+        <RequireTwoFactor fallbackPath={`/${locale}/dashboard?section=settings`}>
           <DashboardLayout>
             <DashboardSidebar>
               <SidebarHeader>

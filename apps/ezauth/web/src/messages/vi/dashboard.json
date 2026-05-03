@@ -16,6 +16,8 @@
     "labelUsername": "Tên người dùng",
     "plan": "Gói",
     "planFree": "Miễn phí",
+    "platformBadge": "Nền tảng",
+    "adminBadge": "Quản trị",
     "stats": {
       "apiKeys": "Khóa API",
       "apps": "Ứng dụng",

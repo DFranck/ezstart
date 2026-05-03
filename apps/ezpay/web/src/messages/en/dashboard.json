@@ -13,6 +13,8 @@
     "memberSince": "Member since",
     "plan": "Plan",
     "planFree": "Free",
+    "platformBadge": "Platform",
+    "adminBadge": "Admin",
     "billing": {
       "title": "Billing & Plans",
       "description": "Manage your subscription plan and usage limits",

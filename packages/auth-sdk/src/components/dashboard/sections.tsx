@@ -15,6 +15,8 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
+import type { AuthUser } from '../../core/types.js'
+import { resolvePlanBadge } from '../user-menu-v2/UserMenuV2.js'
 import type { EZAuthDashboardTexts } from './types.js'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -80,6 +82,16 @@ export function OverviewSection({ user, texts, locale }: OverviewSectionProps) {
   const globalRoles = user.globalRoles ?? []
   const appRoleEntries = Object.entries(user.appRoles ?? {})
 
+  // Identity-card plan badge — same role-aware resolution as `<UserMenuV2>`
+  // (cf. `resolvePlanBadge`). Surfaces "Platform" / "Admin" for elevated
+  // roles and falls back to the consumer-provided plan name (default "Free").
+  // This avoids the misleading "Plan: Free" label next to a superadmin's
+  // welcome message — the original bug fixed in FIX-E2E-BATCH-001.
+  const planBadge = resolvePlanBadge(user as AuthUser, texts.planFree, {
+    platformBadge: texts.platformBadge,
+    adminBadge: texts.adminBadge,
+  })
+
   return (
     <Div className="space-y-6">
       {/* Welcome header */}
@@ -92,9 +104,12 @@ export function OverviewSection({ user, texts, locale }: OverviewSectionProps) {
             {texts.memberSince} {formatDashboardDate(user.createdAt, locale)}
           </P>
         </Div>
-        <Badge variant="outline" size="sm">
-          {texts.plan}: {texts.planFree}
-        </Badge>
+        {planBadge && (
+          <Badge variant={planBadge.variant} size="sm">
+            {planBadge.icon && <Icon name={planBadge.icon} size={12} className="mr-1" />}
+            {texts.plan}: {planBadge.label}
+          </Badge>
+        )}
       </Div>
 
       {/* Apps */}

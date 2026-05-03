@@ -60,6 +60,15 @@ export interface EZAuthDashboardTexts {
   memberSince: string
   plan: string
   planFree: string
+  /**
+   * Identity-card plan badge labels — surfaced when the user has elevated
+   * roles instead of the consumer-provided plan name. Mirrors the
+   * `<UserMenuV2>` resolution priority (cf. `resolvePlanBadge`):
+   *   - `platformBadge` ← rendered when `globalRoles` includes `'superadmin'`
+   *   - `adminBadge`    ← rendered when any `appRoles[*]` includes `'admin'`
+   */
+  platformBadge: string
+  adminBadge: string
   statsApiKeys: string
   statsApps: string
   statsRoles: string
@@ -164,6 +173,8 @@ export const DEFAULT_DASHBOARD_TEXTS: EZAuthDashboardTexts = {
   labelUsername: 'Username',
   plan: 'Plan',
   planFree: 'Free',
+  platformBadge: 'Platform',
+  adminBadge: 'Admin',
   statsApiKeys: 'API Keys',
   statsApps: 'Apps',
   statsRoles: 'Roles',

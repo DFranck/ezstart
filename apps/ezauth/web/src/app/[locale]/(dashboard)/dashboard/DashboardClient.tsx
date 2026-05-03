@@ -124,6 +124,8 @@ export function DashboardClient({
     labelUsername: t('labelUsername'),
     plan: t('plan'),
     planFree: t('planFree'),
+    platformBadge: t('platformBadge'),
+    adminBadge: t('adminBadge'),
     statsApps: t('stats.apps'),
     statsRoles: t('stats.roles'),
     statsApiKeys: t('stats.apiKeys'),

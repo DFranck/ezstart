@@ -2,7 +2,7 @@
 
 import { useAuth } from '@ezstart/auth-sdk'
 import { ScopeContextIndicator } from '@ezstart/auth-sdk/components'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 
 /**
@@ -40,12 +40,14 @@ export function EzauthScopeIndicator({
 }) {
   const { user, isAuthenticated } = useAuth()
   const t = useTranslations('layout')
-  const locale = useLocale()
 
   if (!isAuthenticated || !user) return null
 
   const isSuperadmin = user.globalRoles?.includes('superadmin') ?? false
-  const switchPath = scope === 'admin' ? `/${locale}/dashboard` : `/${locale}/admin`
+  // `Link` is imported from `@/i18n/navigation` and auto-prepends the active
+  // locale, so the path here MUST be locale-less. Including `${locale}` would
+  // produce `/en/en/admin` (cf. FIX-E2E-BATCH-001 BUG 2).
+  const switchPath = scope === 'admin' ? '/dashboard' : '/admin'
 
   return (
     <ScopeContextIndicator

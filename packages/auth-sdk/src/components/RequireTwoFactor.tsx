@@ -77,9 +77,10 @@ export interface RequireTwoFactorProps {
    */
   fallback?: ReactNode
   /**
-   * Path the default CTA navigates to. Defaults to `/settings?tab=2fa`.
-   * Override when the consumer's settings UI lives at a different route
-   * (e.g. `/account/security`).
+   * Path the default CTA navigates to. Defaults to `/dashboard?section=settings`
+   * (the canonical EZAuth-style unified dashboard route). Override when the
+   * consumer's settings UI lives at a different route (e.g. `/account/security`
+   * or `/settings?tab=2fa`).
    */
   fallbackPath?: string
   /** Partial texts override — falls back to English defaults. */
@@ -160,7 +161,7 @@ function DefaultFallback({ texts, fallbackPath }: DefaultFallbackProps) {
 export function RequireTwoFactor({
   children,
   fallback,
-  fallbackPath = '/settings?tab=2fa',
+  fallbackPath = '/dashboard?section=settings',
   texts,
 }: RequireTwoFactorProps) {
   const { user } = useAuth()
