@@ -23,6 +23,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     dashboard,
     status,
     components,
+    legal,
   ] = await Promise.all([
     import(`../messages/${locale}/common.json`),
     import(`../messages/${locale}/payment.json`),
@@ -35,6 +36,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/dashboard.json`),
     import(`../messages/${locale}/status.json`),
     import(`../messages/${locale}/components.json`),
+    import(`../messages/${locale}/legal.json`),
   ])
 
   return {
@@ -51,6 +53,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       dashboard.default,
       status.default,
       components.default,
+      legal.default,
     ]),
   }
 })
