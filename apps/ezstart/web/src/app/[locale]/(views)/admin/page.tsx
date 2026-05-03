@@ -21,6 +21,7 @@ import {
   TabsTrigger,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
+import { E2ETestsTab } from './components/e2e-tests-tab'
 import { MonitoringTab } from './components/monitoring-tab'
 import { ServicesTab } from './components/services-tab'
 
@@ -246,6 +247,7 @@ function AdminPanelContent() {
           <TabsTrigger value="ai">{t('admin.tabs.ai')}</TabsTrigger>
           <TabsTrigger value="monitoring">{t('admin.tabs.monitoring')}</TabsTrigger>
           <TabsTrigger value="services">{t('admin.tabs.services')}</TabsTrigger>
+          <TabsTrigger value="e2e-tests">{t('admin.tabs.e2eTests')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ezauth" className="w-full">
@@ -268,6 +270,10 @@ function AdminPanelContent() {
 
         <TabsContent value="services" className="w-full">
           <ServicesTab />
+        </TabsContent>
+
+        <TabsContent value="e2e-tests" className="w-full">
+          <E2ETestsTab />
         </TabsContent>
       </Tabs>
     </Div>

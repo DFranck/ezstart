@@ -8,7 +8,8 @@
       "ezpay": "EZPay",
       "monitoring": "Monitoring",
       "services": "Services",
-      "ai": "IA"
+      "ai": "IA",
+      "e2eTests": "Tests E2E"
     },
     "services": {
       "title": "Services externes",
@@ -187,6 +188,78 @@
       "save": "Enregistrer",
       "active": "Actif",
       "inactive": "Inactif"
+    },
+    "e2eTests": {
+      "title": "Matrice de tests E2E",
+      "subtitle": "Executions de tests enregistrees automatiquement pour toutes les apps. Filtrer par app, statut, fraicheur.",
+      "failedToLoad": "Echec du chargement des tests E2E",
+      "stats": {
+        "totalLabel": "Total tests",
+        "passRateLabel": "Taux de reussite",
+        "failingLabel": "En echec",
+        "needsRerunLabel": "A relancer"
+      },
+      "filters": {
+        "app": "App",
+        "status": "Statut",
+        "freshness": "Fraicheur",
+        "needsRerunOnly": "A relancer uniquement",
+        "allApps": "Toutes les apps",
+        "allStatuses": "Tous les statuts",
+        "allFreshness": "Toutes les fraicheurs",
+        "fresh24h": "Dernieres 24h",
+        "fresh7d": "7 derniers jours",
+        "fresh30d": "30 derniers jours",
+        "stale30d": "Plus de 30 jours",
+        "never": "Jamais execute"
+      },
+      "columns": {
+        "testId": "ID test",
+        "app": "App",
+        "feature": "Feature",
+        "status": "Statut",
+        "lastRun": "Derniere execution",
+        "agent": "Agent",
+        "actions": "Actions"
+      },
+      "status": {
+        "pass": "Reussi",
+        "fail": "Echec",
+        "blocked": "Bloque",
+        "skip": "Ignore",
+        "never": "Jamais"
+      },
+      "lastRun": {
+        "never": "Jamais",
+        "minutesAgo": "il y a {count}m",
+        "hoursAgo": "il y a {count}h",
+        "daysAgo": "il y a {count}j"
+      },
+      "actions": {
+        "viewHistory": "Voir l'historique",
+        "rerun": "Relancer"
+      },
+      "needsRerun": {
+        "badge": "Obsolete",
+        "tooltip": "Des fichiers couverts par ce test ont ete modifies depuis la derniere execution"
+      },
+      "history": {
+        "title": "Historique des executions",
+        "noRuns": "Aucune execution enregistree",
+        "passRate": "Taux de reussite",
+        "avgDuration": "Duree moyenne",
+        "exercises": "Fichiers couverts",
+        "runs": "Executions recentes",
+        "agent": "Agent",
+        "failedToLoad": "Echec du chargement de l'historique"
+      },
+      "table": {
+        "rows": "{count} test(s)",
+        "previous": "Precedent",
+        "next": "Suivant",
+        "pageOf": "Page {current} sur {total}",
+        "empty": "Aucun test ne correspond aux filtres."
+      }
     },
     "ezpay": {
       "stats": {
