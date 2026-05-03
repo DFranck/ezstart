@@ -47,7 +47,9 @@
     "prepare": "husky",
     "setup:env": "node scripts/tools/setup-env.js",
     "registry:update": "pnpm --filter @ezstart/ui generate:registry",
-    "stripe": "stripe listen --forward-to localhost:6130/api/webhooks/stripe"
+    "stripe": "stripe listen --forward-to localhost:6130/api/webhooks/stripe",
+    "e2e:record": "tsx scripts/e2e/record-test-run.ts",
+    "e2e:seed": "pnpm --filter api-ezstart seed:e2e-tests"
   },
   "lint-staged": {
     "package.json": [
