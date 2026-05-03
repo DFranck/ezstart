@@ -20,7 +20,7 @@ export async function resolveApplicationByKey(
     throw new Error('publishableKey is required to resolve application config')
   }
 
-  const url = `${client.config.apiUrl}/keys/config?key=${encodeURIComponent(publishableKey)}`
+  const url = `${client.config.apiUrl}/api/keys/config?key=${encodeURIComponent(publishableKey)}`
   const response = await fetch(url, { headers: { Accept: 'application/json' } })
 
   const result = await response.json()
