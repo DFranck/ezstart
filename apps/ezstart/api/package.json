@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed:e2e-tests": "tsx src/scripts/seed-e2e-test-definitions.ts",
+    "seed:e2e-runs": "tsx src/scripts/seed-e2e-test-runs-from-markdown.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "clean": "rm -rf dist"
