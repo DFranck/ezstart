@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmActionDialog,
   Div,
   Input,
   P,
@@ -21,7 +22,6 @@ import {
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
-import { ConfirmActionDialog } from '@ezstart/pay-sdk'
 
 // ========================================
 // Types

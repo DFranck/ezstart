@@ -1,4 +1,4 @@
-import { PaymentSuccessPage } from '@ezstart/pay-sdk'
+import { PaymentSuccessTemplate } from '@ezstart/ui/components'
 import { getTranslations } from 'next-intl/server'
 
 export default async function DonateSuccessPage({
@@ -9,7 +9,7 @@ export default async function DonateSuccessPage({
   const { locale } = await params
   const t = await getTranslations('donate.success')
   return (
-    <PaymentSuccessPage
+    <PaymentSuccessTemplate
       redirectTo={`/${locale}`}
       fallbackHref={`/${locale}`}
       successMessage={t('message')}
