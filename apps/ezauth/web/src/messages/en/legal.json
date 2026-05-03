@@ -62,5 +62,35 @@
     "emailCta": "Send us an email",
     "githubLabel": "GitHub",
     "githubCta": "Open an issue"
+  },
+  "refundPolicy": {
+    "title": "Refund Policy",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "May 3, 2026",
+    "lead": "We want you to be happy with EZAuth. This page summarizes how refunds work and what to expect when you request one.",
+    "euRightHeading": "EU 14-day right of withdrawal",
+    "euRightBody": "Customers in the European Union benefit from a 14-day right of withdrawal under Directive 2011/83/EU. You can request a full refund within 14 days of your initial paid subscription, no questions asked, unless you have explicitly waived this right by starting to consume the service.",
+    "eligibilityHeading": "Eligibility",
+    "eligibilityBody": "Refunds are issued for unused subscription time on a pro-rata basis after the 14-day window. Usage-based charges (API calls, additional seats) are non-refundable once consumed. Free trials never produce a charge and therefore do not require a refund.",
+    "processHeading": "How refunds are processed",
+    "processBody": "Approved refunds are issued back to the original payment method through Stripe within 5 to 10 business days, depending on your card issuer. You will receive an email confirmation once the refund is initiated. Currency conversion fees applied by your bank are not reimbursed.",
+    "contactHeading": "Request a refund",
+    "contactBody": "Contact us with your account email and the invoice number you would like refunded. We aim to reply within one business day.",
+    "contactCta": "Contact us"
+  },
+  "legalNotices": {
+    "title": "Legal Notices",
+    "lastUpdatedLabel": "Last updated",
+    "lastUpdatedValue": "May 3, 2026",
+    "lead": "Information required by French and European Union law for any operator of an online service (loi pour la confiance dans l'économie numérique, Directive 2000/31/EC).",
+    "publisherHeading": "Publisher",
+    "publisherBody": "EZStart LLC, a limited liability company registered in Wyoming (United States). Director of publication: Franck Dufournet. Contact: support@ezstart.xyz.",
+    "hostingHeading": "Hosting",
+    "hostingBody": "The EZAuth web application is hosted by Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, United States. The EZAuth API is hosted by Railway Corp., 2261 Market Street #4382, San Francisco, CA 94114, United States.",
+    "ipHeading": "Intellectual property",
+    "ipBody": "The EZAuth source code is published under the MIT license in the @ezstart monorepo on GitHub. Trademarks, logos, and brand assets remain the property of EZStart LLC. Any reproduction without prior written authorization is forbidden.",
+    "contactHeading": "Contact",
+    "contactBody": "For any question regarding these legal notices, our terms of service, or your personal data, reach out via the contact form below.",
+    "contactCta": "Contact us"
   }
 }

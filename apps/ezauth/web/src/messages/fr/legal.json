@@ -62,5 +62,35 @@
     "emailCta": "Nous envoyer un e-mail",
     "githubLabel": "GitHub",
     "githubCta": "Ouvrir une issue"
+  },
+  "refundPolicy": {
+    "title": "Politique de remboursement",
+    "lastUpdatedLabel": "Dernière mise à jour",
+    "lastUpdatedValue": "3 mai 2026",
+    "lead": "Nous voulons que vous soyez satisfait d'EZAuth. Cette page résume le fonctionnement des remboursements et ce à quoi vous pouvez vous attendre.",
+    "euRightHeading": "Droit de rétractation européen de 14 jours",
+    "euRightBody": "Les clients résidant dans l'Union européenne bénéficient d'un droit de rétractation de 14 jours en vertu de la directive 2011/83/UE. Vous pouvez demander un remboursement intégral dans les 14 jours suivant votre premier abonnement payant, sans avoir à vous justifier, sauf si vous avez explicitement renoncé à ce droit en commençant à consommer le service.",
+    "eligibilityHeading": "Conditions",
+    "eligibilityBody": "Au-delà des 14 jours, les remboursements sont calculés au prorata du temps d'abonnement non utilisé. Les frais à l'usage (appels d'API, sièges supplémentaires) ne sont pas remboursables une fois consommés. Les périodes d'essai gratuites ne donnent jamais lieu à un débit et ne nécessitent donc pas de remboursement.",
+    "processHeading": "Traitement des remboursements",
+    "processBody": "Les remboursements approuvés sont reversés sur le moyen de paiement initial via Stripe sous 5 à 10 jours ouvrés, selon votre établissement bancaire. Vous recevrez une confirmation par e-mail dès l'initiation du remboursement. Les frais de conversion de devises éventuellement appliqués par votre banque ne sont pas pris en charge.",
+    "contactHeading": "Demander un remboursement",
+    "contactBody": "Contactez-nous en précisant l'e-mail de votre compte et le numéro de facture concerné. Nous nous engageons à vous répondre sous un jour ouvré.",
+    "contactCta": "Nous contacter"
+  },
+  "legalNotices": {
+    "title": "Mentions légales",
+    "lastUpdatedLabel": "Dernière mise à jour",
+    "lastUpdatedValue": "3 mai 2026",
+    "lead": "Informations requises par la loi française et le droit de l'Union européenne pour tout opérateur d'un service en ligne (loi pour la confiance dans l'économie numérique, directive 2000/31/CE).",
+    "publisherHeading": "Éditeur",
+    "publisherBody": "EZStart LLC, société à responsabilité limitée enregistrée dans le Wyoming (États-Unis). Directeur de la publication : Franck Dufournet. Contact : support@ezstart.xyz.",
+    "hostingHeading": "Hébergement",
+    "hostingBody": "L'application web EZAuth est hébergée par Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis. L'API EZAuth est hébergée par Railway Corp., 2261 Market Street #4382, San Francisco, CA 94114, États-Unis.",
+    "ipHeading": "Propriété intellectuelle",
+    "ipBody": "Le code source d'EZAuth est publié sous licence MIT dans le monorepo @ezstart sur GitHub. Les marques, logos et éléments graphiques restent la propriété d'EZStart LLC. Toute reproduction sans autorisation écrite préalable est interdite.",
+    "contactHeading": "Contact",
+    "contactBody": "Pour toute question relative à ces mentions légales, à nos conditions d'utilisation ou à vos données personnelles, contactez-nous via le formulaire ci-dessous.",
+    "contactCta": "Nous contacter"
   }
 }
