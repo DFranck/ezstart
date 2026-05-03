@@ -19,7 +19,7 @@ import {
 } from '@ezstart/ui/components'
 import type { Application, AuditLogEntry } from '../core/types.js'
 import { useAuth } from '../react/hooks.js'
-import { UserMenu } from './UserMenu.js'
+import { UserMenuV2 } from './user-menu-v2/UserMenuV2.js'
 import { DashboardSkeleton } from './dashboard/sections.js'
 import { SectionRenderer } from './dashboard/section-renderer.js'
 import {
@@ -314,7 +314,7 @@ export function EZAuthDashboard({
               here is off-screen and unreachable. We render an icon-variant
               copy in the topbar (below) for those breakpoints. */}
           <div className="hidden lg:block">
-            <UserMenu variant="extended" side="top" avatarSize="sm" />
+            <UserMenuV2 variant="extended" side="top" avatarSize="sm" />
           </div>
         </SidebarFooter>
       </DashboardSidebar>
@@ -333,7 +333,7 @@ export function EZAuthDashboard({
               compact icon variant to keep the topbar tight. Pushed to the
               far right via ml-auto when no `topBarExtra` was provided. */}
           <div className={`lg:hidden ${topBarExtra ? '' : 'ml-auto'}`}>
-            <UserMenu variant="icon" side="bottom" avatarSize="sm" />
+            <UserMenuV2 variant="icon" side="bottom" avatarSize="sm" />
           </div>
         </DashboardHeader>
 

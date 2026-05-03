@@ -85,6 +85,16 @@ vi.mock('../../react/auth-provider.js', () => ({
 vi.mock('../../components/UserMenu.js', () => ({
   UserMenu: () => <div data-testid="UserMenu" />,
 }))
+vi.mock('../../components/user-menu-v2/UserMenuV2.js', async importOriginal => {
+  // Preserve the pure helpers (e.g. `resolvePlanBadge`) consumed by other
+  // dashboard sections — only stub the React component so we don't mount
+  // the full UserMenuV2 (which pulls AccountModalV2 / useAuthStoreApi).
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return {
+    ...actual,
+    UserMenuV2: () => <div data-testid="UserMenuV2" />,
+  }
+})
 vi.mock('../../components/UserSettings.js', () => ({
   UserSettings: () => <div data-testid="UserSettings" />,
 }))
