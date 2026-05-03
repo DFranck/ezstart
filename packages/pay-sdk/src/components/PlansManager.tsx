@@ -184,7 +184,7 @@ export function PlansManager({
       <CardContent className="space-y-4">
         {isLoading && (
           <Div className="flex items-center justify-center min-h-[30vh]">
-            <Spinner variant="primary" size="md" />
+            <Spinner variant="primary" size="default" />
           </Div>
         )}
 

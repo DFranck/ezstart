@@ -25,11 +25,14 @@ import {
   type ColumnDef,
 } from '@ezstart/ui/components'
 import { E2ETestsHistoryDrawer } from './e2e-tests-history-drawer'
+import { EnvBadge } from './env-badge'
 import {
+  RUN_ENVS,
   STATUS_VARIANT,
   formatRelativeTime,
   freshnessOf,
   getRunStatus,
+  type EnvFilter,
   type FreshnessBucket,
   type NeedsRerunResponse,
   type SummaryStatsResponse,
@@ -39,16 +42,18 @@ import {
 
 // ─── Fetchers ────────────────────────────────────────────────────────────
 
-async function fetchTests(): Promise<TestsListResponse> {
-  return apiCall<TestsListResponse>('/e2e-tests', { appName: 'ezstart' })
+async function fetchTests(env: EnvFilter): Promise<TestsListResponse> {
+  const qs = env === 'all' ? '' : `?env=${encodeURIComponent(env)}`
+  return apiCall<TestsListResponse>(`/e2e-tests${qs}`, { appName: 'ezstart' })
 }
 
 async function fetchSummary(): Promise<SummaryStatsResponse> {
   return apiCall<SummaryStatsResponse>('/e2e-tests/stats/summary', { appName: 'ezstart' })
 }
 
-async function fetchNeedsRerun(): Promise<NeedsRerunResponse> {
-  return apiCall<NeedsRerunResponse>('/e2e-tests/needs-rerun', { appName: 'ezstart' })
+async function fetchNeedsRerun(env: EnvFilter): Promise<NeedsRerunResponse> {
+  const qs = env === 'all' ? '' : `?env=${encodeURIComponent(env)}`
+  return apiCall<NeedsRerunResponse>(`/e2e-tests/needs-rerun${qs}`, { appName: 'ezstart' })
 }
 
 // ─── Component ───────────────────────────────────────────────────────────
@@ -59,20 +64,23 @@ export function E2ETestsTab() {
   // Filters
   const [appFilter, setAppFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [envFilter, setEnvFilter] = useState<EnvFilter>('all')
   const [freshnessFilter, setFreshnessFilter] = useState<FreshnessBucket>('all')
   const [needsRerunOnly, setNeedsRerunOnly] = useState(false)
 
   // Drawer
   const [selectedTestId, setSelectedTestId] = useState<string | null>(null)
 
-  // Queries
+  // Queries — env filter is server-side so the matrix recomputes "latest run"
+  // per env (a test that passes locally but never ran in production should
+  // appear as 'never' when filtering on production).
   const {
     data: testsData,
     isLoading: testsLoading,
     error: testsError,
   } = useQuery({
-    queryKey: ['admin-e2e-tests'],
-    queryFn: fetchTests,
+    queryKey: ['admin-e2e-tests', envFilter],
+    queryFn: () => fetchTests(envFilter),
     staleTime: 30 * 1000,
   })
 
@@ -83,8 +91,8 @@ export function E2ETestsTab() {
   })
 
   const { data: needsRerunData } = useQuery({
-    queryKey: ['admin-e2e-tests-needs-rerun'],
-    queryFn: fetchNeedsRerun,
+    queryKey: ['admin-e2e-tests-needs-rerun', envFilter],
+    queryFn: () => fetchNeedsRerun(envFilter),
     staleTime: 30 * 1000,
   })
 
@@ -172,6 +180,20 @@ export function E2ETestsTab() {
       },
     },
     {
+      id: 'env',
+      header: ({ header }) => <DataTableColumnHeader header={header} title={t('columns.env')} />,
+      cell: ({ row }) => (
+        <EnvBadge
+          env={row.original.lastRun?.env}
+          tooltip={
+            row.original.lastRun?.env
+              ? t(`env.${row.original.lastRun.env}`)
+              : t('env.envBadge.tooltip')
+          }
+        />
+      ),
+    },
+    {
       id: 'lastRun',
       header: ({ header }) => (
         <DataTableColumnHeader header={header} title={t('columns.lastRun')} />
@@ -200,11 +222,14 @@ export function E2ETestsTab() {
     },
   ]
 
-  // Stats display values
-  const total = summaryData?.total ?? 0
-  const passCount = summaryData?.pass ?? 0
-  const failCount = summaryData?.fail ?? 0
-  const passRate = total > 0 ? Math.round((passCount / total) * 100) : 0
+  // Stats display values — the API returns the canonical
+  // `{ totalDefinitions, latestRunBreakdown: { pass, fail, ... }, passRate }`
+  // shape (FIX-EZSTART-ADMIN-UI-PASS-001). The previous flat reads
+  // (`summaryData.total`, `summaryData.pass`) silently produced 0 because the
+  // TS contract was wrong.
+  const total = summaryData?.totalDefinitions ?? 0
+  const failCount = summaryData?.latestRunBreakdown?.fail ?? 0
+  const passRate = summaryData?.passRate ?? 0
   const needsRerunCount = needsRerunData?.tests.length ?? 0
 
   return (
@@ -232,7 +257,9 @@ export function E2ETestsTab() {
             </Card>
             <Card className="p-4">
               <P className="text-xs text-muted-foreground">{t('stats.passRateLabel')}</P>
-              <P className="text-2xl font-semibold mt-1 tabular-nums text-success">{passRate}%</P>
+              <P className="text-2xl font-semibold mt-1 tabular-nums text-success">
+                {passRate.toFixed(1)}%
+              </P>
             </Card>
             <Card className="p-4">
               <P className="text-xs text-muted-foreground">{t('stats.failingLabel')}</P>
@@ -249,6 +276,35 @@ export function E2ETestsTab() {
           </>
         )}
       </Div>
+
+      {/* Per-env breakdown — surfaces the new dimension at a glance */}
+      {summaryData?.byEnv && (
+        <Div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {RUN_ENVS.map(env => {
+            const bucket = summaryData.byEnv?.[env]
+            const passes = bucket?.pass ?? 0
+            return (
+              <Card key={env} className="p-4">
+                <Div className="flex items-center gap-2">
+                  <EnvBadge env={env} tooltip={t(`env.${env}`)} size="sm" />
+                  <P className="text-xs text-muted-foreground">{t('stats.envPassLabel')}</P>
+                </Div>
+                <P className="text-2xl font-semibold mt-2 tabular-nums">
+                  {passes}
+                  <Span className="ml-1 text-sm font-normal text-muted-foreground">/ {total}</Span>
+                </P>
+                <P className="text-xs text-muted-foreground mt-1">
+                  {t('stats.envBreakdown', {
+                    fail: bucket?.fail ?? 0,
+                    blocked: bucket?.blocked ?? 0,
+                    never: bucket?.never ?? 0,
+                  })}
+                </P>
+              </Card>
+            )
+          })}
+        </Div>
+      )}
 
       {/* Filters */}
       <Card variant="floating">
@@ -283,6 +339,23 @@ export function E2ETestsTab() {
                 <SelectItem value="blocked">{t('status.blocked')}</SelectItem>
                 <SelectItem value="skip">{t('status.skip')}</SelectItem>
                 <SelectItem value="never">{t('status.never')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Div>
+
+          <Div className="space-y-1.5">
+            <P className="text-xs font-medium text-muted-foreground">{t('filters.env')}</P>
+            <Select value={envFilter} onValueChange={v => setEnvFilter(v as EnvFilter)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('env.all')}</SelectItem>
+                {RUN_ENVS.map(env => (
+                  <SelectItem key={env} value={env}>
+                    {t(`env.${env}`)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Div>

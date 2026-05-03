@@ -7,6 +7,7 @@ import {
   type AuthAdminDashboardTexts,
   LoginButton,
   RequireAuth,
+  RequireTwoFactor,
 } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/auth-sdk'
 import { PayAdminDashboard, type PayAdminDashboardTexts } from '@ezstart/pay-sdk'
@@ -305,7 +306,17 @@ export default function AdminPage() {
           </Section>
         }
       >
-        <AdminPanelContent />
+        {/*
+          2FA gate — every `/api/admin/*` route on every Tier 1 SaaS rejects
+          un-enrolled admins with `403 + code: TWO_FACTOR_REQUIRED` (cf.
+          `apps/ezauth/api/src/middleware/require-two-factor.ts`). Without
+          this gate the user lands on a dashboard whose every analytics call
+          fails silently with "Failed to load analytics" (FIX-EZSTART-ADMIN-UI-PASS-001).
+          With it, the user gets an actionable "Enable 2FA now" CTA.
+        */}
+        <RequireTwoFactor fallbackPath="/en/dashboard?tab=security">
+          <AdminPanelContent />
+        </RequireTwoFactor>
       </RequireRole>
     </RequireAuth>
   )

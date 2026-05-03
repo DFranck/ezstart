@@ -311,6 +311,20 @@ export { UserMenu } from './components/UserMenu.js'
 export type { UserMenuProps, UserMenuItem, UserMenuTexts } from './components/UserMenu.js'
 export { AccountModal } from './components/AccountModal.js'
 export type { AccountModalProps, AccountModalTexts } from './components/AccountModal.js'
+// V2 user components — pro identity card + sidebar Account modal. Drop-in
+// replacement for V1 (`UserMenu` + `AccountModal`) which now emit deprecation
+// warnings on mount.
+export { UserMenuV2 } from './components/user-menu-v2/UserMenuV2.js'
+export type {
+  UserMenuV2Props,
+  UserMenuV2Item,
+  UserMenuV2Texts,
+} from './components/user-menu-v2/types.js'
+export { AccountModalV2 } from './components/user-menu-v2/AccountModalV2.js'
+export type {
+  AccountModalV2Props,
+  AccountModalV2Texts,
+} from './components/user-menu-v2/AccountModalV2.js'
 export { UserAvatar } from './components/UserAvatar.js'
 export type { UserAvatarProps } from './components/UserAvatar.js'
 export { UserSettings } from './components/UserSettings.js'
@@ -412,6 +426,15 @@ export { RequireRole } from './rbac/components/require-role.js'
 export type { RequireRoleProps } from './rbac/components/require-role.js'
 export { InsufficientPermissions } from './rbac/components/insufficient-permissions.js'
 export type { InsufficientPermissionsProps } from './rbac/components/insufficient-permissions.js'
+
+// 2FA enforcement guard — render-blocks elevated-role users (admin /
+// superadmin) that have not enrolled 2FA. Companion to the backend
+// `requireTwoFactor()` middleware which is the security source of truth.
+export {
+  RequireTwoFactor,
+  DEFAULT_REQUIRE_TWO_FACTOR_TEXTS,
+} from './components/RequireTwoFactor.js'
+export type { RequireTwoFactorProps, RequireTwoFactorTexts } from './components/RequireTwoFactor.js'
 
 // ── i18n ─────────────────────────────────────────────────────────────────────
 

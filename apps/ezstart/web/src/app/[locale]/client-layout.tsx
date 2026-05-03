@@ -1,7 +1,7 @@
 'use client'
 
 import { useNavLinks } from '@/hooks/useNavLinks'
-import { LoginButton, SignedIn, SignedOut, UserMenu } from '@ezstart/auth-sdk'
+import { LoginButton, SignedIn, SignedOut, UserMenuV2 } from '@ezstart/auth-sdk'
 import { getApiUrl } from '@ezstart/config'
 import { ThemeSwitcher } from '@ezstart/ui/theme/components'
 import { useTheme } from 'next-themes'
@@ -95,7 +95,15 @@ const ClientLayout = ({ children }: ClientLayoutProps): React.JSX.Element => {
               <ThemeSwitcher />
             </SignedOut>
             <SignedIn>
-              <UserMenu
+              {/*
+                V2 UserMenu (FIX-EZSTART-ADMIN-UI-PASS-001) — drop-in
+                replacement for the V1 `<UserMenu>` + `<AccountModal>` which
+                emitted deprecation warnings on mount. Embeds `<AccountModalV2>`
+                with sidebar nav. Texts shape extends V1 with optional pro-level
+                labels — undefined keys fall back to localized SDK defaults
+                (en/fr/vi via the auth-sdk dictionary).
+              */}
+              <UserMenuV2
                 avatarSize="sm"
                 theme={{ theme, setTheme }}
                 googleOAuthUrl={`${getApiUrl('ezauth')}/api/auth/google?app=ezstart`}

@@ -271,7 +271,7 @@ function SignupTrendChart({ loading, data, t }: SignupTrendChartProps) {
   if (loading || !data) {
     return (
       <Div className="flex items-center justify-center h-[260px]">
-        <Spinner size="md" />
+        <Spinner size="default" />
       </Div>
     )
   }

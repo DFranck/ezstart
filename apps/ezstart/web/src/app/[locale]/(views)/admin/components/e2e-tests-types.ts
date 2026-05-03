@@ -1,11 +1,24 @@
-// Types mirror api-ezstart E2E-MATRIX-001 DTOs.
+// Types mirror api-ezstart E2E-MATRIX-001 + E2E-MATRIX-ENV-DIMENSION-001 DTOs.
 
 import type { BadgeProps } from '@ezstart/ui/components'
 
 export type TestStatus = 'pass' | 'fail' | 'blocked' | 'skip' | 'never'
 
+/**
+ * Environment in which a test run was executed.
+ *
+ * Mirrors `E2E_RUN_ENVS` from api-ezstart. `'all'` is a UI-only sentinel used
+ * by the env filter dropdown — never sent to the server as a stored value.
+ */
+export type RunEnv = 'local' | 'staging' | 'production'
+export type EnvFilter = RunEnv | 'all'
+
+export const RUN_ENVS: readonly RunEnv[] = ['local', 'staging', 'production'] as const
+
 export interface TestRun {
   status: Exclude<TestStatus, 'never'>
+  /** Optional for backwards-compat — pre-migration runs may lack env client-side. */
+  env?: RunEnv
   runAt: string
   agent: string
   durationMs?: number
@@ -25,33 +38,72 @@ export interface TestDefinition {
 export interface TestsListResponse {
   tests: TestDefinition[]
   total: number
+  env?: EnvFilter
+}
+
+export interface EnvStatsBucket {
+  total: number
+  pass: number
+  fail: number
+  blocked: number
+  skip: number
+  passRate: number | null
+  avgDurationMs?: number | null
+  lastRunAt?: string | null
 }
 
 export interface TestHistoryResponse {
   definition: TestDefinition
   runs: TestRun[]
-  stats: { passRate: number; avgDurationMs: number }
+  stats: {
+    passRate: number
+    avgDurationMs: number
+    /** Per-env breakdown — undefined on legacy responses, drives drawer tabs. */
+    byEnv?: Record<RunEnv, EnvStatsBucket>
+  }
 }
 
 export interface NeedsRerunResponse {
   tests: TestDefinition[]
+  env?: EnvFilter
 }
 
 export interface AppStatsBucket {
-  total: number
+  app: string
+  totalDefinitions: number
   pass: number
   fail: number
   blocked: number
   skip: number
+  never: number
 }
 
-export interface SummaryStatsResponse {
-  total: number
+export interface EnvSummaryBucket {
   pass: number
   fail: number
   blocked: number
   skip: number
-  byApp: Record<string, AppStatsBucket>
+  never: number
+}
+
+/**
+ * Latest-run breakdown shape returned by `GET /api/e2e-tests/stats/summary`.
+ *
+ * Mirrors the api-ezstart `E2E-MATRIX-001` controller output. The previous TS
+ * contract declared a flat `{ total, pass, fail, ... }` shape that the API
+ * never returned, which caused the admin Stats cards to display 0/0%/0
+ * (FIX-EZSTART-ADMIN-UI-PASS-001).
+ */
+export interface SummaryStatsResponse {
+  totalDefinitions: number
+  latestRunBreakdown: EnvSummaryBucket
+  /** Pre-computed pass rate as a percentage (0–100, 1 decimal). */
+  passRate: number
+  byApp: AppStatsBucket[]
+  /** Per-env latest-run breakdown. Optional for backwards-compat. */
+  byEnv?: Record<RunEnv, EnvSummaryBucket>
+  lastRunAt?: string
+  evaluatedAt?: string
 }
 
 export type FreshnessBucket = 'all' | 'fresh-24h' | 'fresh-7d' | 'fresh-30d' | 'stale-30d' | 'never'
@@ -62,6 +114,16 @@ export const STATUS_VARIANT: Record<TestStatus, BadgeProps['variant']> = {
   blocked: 'warning',
   skip: 'secondary',
   never: 'outline',
+}
+
+/**
+ * Badge color per env. Mission spec: local=blue, staging=yellow, production=green.
+ * (Maps to existing variants — no new variant added to packages/ui.)
+ */
+export const ENV_VARIANT: Record<RunEnv, BadgeProps['variant']> = {
+  local: 'info',
+  staging: 'warning',
+  production: 'success',
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────

@@ -72,7 +72,7 @@ export function UsageDetailsModal({
     >
       {isLoading && (
         <Div className="flex justify-center py-8">
-          <Spinner variant="primary" size="md" />
+          <Spinner variant="primary" size="default" />
         </Div>
       )}
 

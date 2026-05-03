@@ -265,7 +265,7 @@ function RevenueTrendChart({ loading, data, t }: SubProps) {
   if (loading || !data) {
     return (
       <Div className="flex items-center justify-center h-[260px]">
-        <Spinner size="md" />
+        <Spinner size="default" />
       </Div>
     )
   }

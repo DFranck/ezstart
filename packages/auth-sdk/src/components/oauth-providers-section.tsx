@@ -293,7 +293,7 @@ export function OAuthProvidersSection({
       <CardContent>
         {isLoading ? (
           <Div className="flex items-center justify-center py-6">
-            <Spinner variant="primary" size="md" />
+            <Spinner variant="primary" size="default" />
             <Span className="ml-2 text-sm text-muted-foreground">{texts.loading}</Span>
           </Div>
         ) : isError ? (

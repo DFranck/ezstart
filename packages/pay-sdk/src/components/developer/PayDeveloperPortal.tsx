@@ -231,7 +231,7 @@ export function PayDeveloperPortal({
 
         {applicationId && isLoading && (
           <Div className="flex items-center justify-center min-h-[40vh]">
-            <Spinner variant="primary" size="md" />
+            <Spinner variant="primary" size="default" />
           </Div>
         )}
 
