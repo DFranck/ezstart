@@ -49,8 +49,9 @@ import { spawn, spawnSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import * as dotenv from 'dotenv'
+import { extractEnvFlag, isProtectedEnvKey, parseEnvArg, type TargetEnv } from './shared-flags.js'
 
-type TargetEnv = 'local' | 'staging' | 'production'
+export type { TargetEnv }
 
 function findMonorepoRoot(start: string = process.cwd()): string {
   let dir = path.resolve(start)
@@ -245,10 +246,17 @@ interface ParsedFlags {
   from?: TargetEnv
   overrides: Record<string, string>
   dryRun: boolean
+  /**
+   * When true, after pushing the merged cascade vars, the script also
+   * inventories what's currently set on Vercel and DELETES anything that
+   * does not appear in the local cascade (except platform-protected keys
+   * — see `isProtectedEnvKey()`). Off by default — opt-in only.
+   */
+  prune: boolean
 }
 
 export function parseFlags(flags: string[]): ParsedFlags {
-  const result: ParsedFlags = { overrides: {}, dryRun: false }
+  const result: ParsedFlags = { overrides: {}, dryRun: false, prune: false }
   for (let i = 0; i < flags.length; i++) {
     const flag = flags[i]
     if (flag === '--from') {
@@ -273,11 +281,110 @@ export function parseFlags(flags: string[]): ParsedFlags {
       }
     } else if (flag === '--dry-run') {
       result.dryRun = true
+    } else if (flag === '--prune') {
+      result.prune = true
     } else {
       fail(`Unknown flag "${flag}"`)
     }
   }
   return result
+}
+
+// ────────────────────────────────────────────────────────────
+// Prune logic — list remote keys & diff against local cascade
+// ────────────────────────────────────────────────────────────
+
+/**
+ * Inventory env vars currently set on Vercel for a given target environment.
+ *
+ * Strategy : `vercel env ls <target> [<gitBranch>]` returns a human-readable
+ * table on stdout. Vercel CLI does NOT have a `--json` flag for `env ls` as
+ * of CLI v32, so we parse the table line-by-line. The table format is :
+ *
+ *   Environment Variables found in Project "x"
+ *
+ *     name              value             environments      created
+ *     NEXT_PUBLIC_FOO   Encrypted         Production        ...
+ *     ...
+ *
+ * Heuristic : skip blank lines + the header row + lines that don't start with
+ * a JS-identifier-like prefix. Robust enough for our use (we only care about
+ * the keys, not the values).
+ */
+export function parseVercelEnvLs(stdout: string): string[] {
+  const keys = new Set<string>()
+  for (const rawLine of stdout.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line) continue
+    // Header / footer lines start with capital words like "Environment" or
+    // contain "Vercel CLI" — they don't match our key regex.
+    const m = line.match(/^([A-Z_][A-Z0-9_]*)\s/)
+    if (m) keys.add(m[1])
+  }
+  return Array.from(keys).sort()
+}
+
+export interface ListVercelEnvOptions {
+  cwd: string
+  vercelTarget: 'development' | 'preview' | 'production'
+  gitBranch: string | null
+  /** Test seam : swap the underlying spawn for a mock. */
+  exec?: (args: string[], cwd: string) => { status: number; stdout: string; stderr: string }
+}
+
+/**
+ * Run `vercel env ls` in the project directory and return the list of var
+ * names currently configured for the target env (+ optional git branch).
+ *
+ * Throws when the CLI exits non-zero — caller should catch and present a
+ * clear error.
+ */
+export function listVercelEnvKeys(opts: ListVercelEnvOptions): string[] {
+  const args = ['env', 'ls', opts.vercelTarget]
+  if (opts.gitBranch) args.push(opts.gitBranch)
+  const exec = opts.exec ?? defaultVercelExec
+  const result = exec(args, opts.cwd)
+  if (result.status !== 0) {
+    throw new Error(
+      `vercel env ls exited with status ${result.status} : ${result.stderr.trim() || '(empty)'}`
+    )
+  }
+  return parseVercelEnvLs(result.stdout)
+}
+
+function defaultVercelExec(
+  args: string[],
+  cwd: string
+): { status: number; stdout: string; stderr: string } {
+  const result = spawnSync('vercel', args, { cwd, encoding: 'utf-8', shell: true })
+  return {
+    status: result.status ?? 1,
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
+  }
+}
+
+export interface ComputePruneInput {
+  /** Keys discovered on the remote (Vercel project for the target env). */
+  remoteKeys: readonly string[]
+  /** Keys present in the merged local cascade (will be pushed). */
+  localKeys: readonly string[]
+}
+
+/**
+ * Compute the list of keys that would be pruned : present on remote, not in
+ * the local cascade, AND not platform-protected. Pure function — easy to
+ * test exhaustively without a live Vercel project.
+ */
+export function computePruneList(input: ComputePruneInput): string[] {
+  const local = new Set(input.localKeys)
+  const result: string[] = []
+  for (const key of input.remoteKeys) {
+    if (local.has(key)) continue
+    if (isProtectedEnvKey(key)) continue
+    result.push(key)
+  }
+  return result.sort()
 }
 
 // ── CLI entry ───────────────────────────────────────────────
@@ -293,22 +400,44 @@ const isDirectRun = (() => {
 })()
 
 async function main(): Promise<void> {
-  const [, , app, env, ...rest] = process.argv
-  if (!app || !env) {
+  const [, , app, ...restRaw] = process.argv
+  if (!app) {
     fail(
-      'Usage: pnpm env:push:vercel <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run]\n' +
+      'Usage: pnpm env:push:vercel <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run] [--prune]\n' +
+        '         pnpm env:push:vercel <app> --env=<env> ...   (anti-typo alias)\n' +
         '  Example: pnpm env:push:vercel ezpay production\n' +
+        '  Example: pnpm env:push:vercel ezpay --env=staging --prune --dry-run\n' +
         '  Example: pnpm env:push:vercel ezpay staging --from local --override DEPLOY_ENV=staging'
     )
   }
-  if (!['local', 'staging', 'production'].includes(env)) {
-    fail(`Invalid env "${env}" — must be one of: local | staging | production`)
+
+  // Extract --env=<x> BEFORE pulling the positional <env>, so a caller using
+  // --env= without the legacy positional doesn't get the flag mis-parsed as
+  // the positional. Then take the leftover first non-flag token as positional.
+  const rest = [...restRaw]
+  const envFlagValue = extractEnvFlag(rest)
+  // Positional <env> = first leftover arg that does NOT start with '--'.
+  let positionalEnv: string | undefined
+  if (rest.length > 0 && !rest[0].startsWith('--')) {
+    positionalEnv = rest.shift()
   }
+
+  let targetEnv: TargetEnv | null
+  try {
+    targetEnv = parseEnvArg(positionalEnv, envFlagValue)
+  } catch (err) {
+    fail(err instanceof Error ? err.message : String(err))
+  }
+  if (!targetEnv) {
+    fail(
+      'Missing <env> — pass it as positional or --env=<value>. Valid values: local | staging | production.'
+    )
+  }
+  const env = targetEnv
 
   const flags = parseFlags(rest)
 
   const ROOT = findMonorepoRoot()
-  const targetEnv = env as TargetEnv
 
   const { merged, sources } = loadMergedEnv({
     root: ROOT,
@@ -359,6 +488,36 @@ async function main(): Promise<void> {
     for (const [k, v] of Object.entries(merged)) {
       const marker = flags.overrides[k] !== undefined ? ' [override]' : ''
       console.info(`  ${k}=${mask(v)}${marker}`)
+    }
+    if (flags.prune) {
+      // In dry-run we still need to inventory the remote to compute the prune
+      // diff. The CLI is read-only here so it is safe to call without staging
+      // a real change.
+      try {
+        const remoteKeys = listVercelEnvKeys({
+          cwd: webDir,
+          vercelTarget,
+          gitBranch: vercelGitBranch(env),
+        })
+        const toPrune = computePruneList({
+          remoteKeys,
+          localKeys: Object.keys(merged),
+        })
+        if (toPrune.length === 0) {
+          console.info(
+            `\n🧹 [prune dry-run] No remote vars would be pruned (cascade matches remote inventory).`
+          )
+        } else {
+          console.info(
+            `\n🧹 [prune dry-run] ${toPrune.length} remote var${toPrune.length === 1 ? '' : 's'} would be DELETED from Vercel:`
+          )
+          for (const k of toPrune) console.info(`  - ${k}`)
+        }
+      } catch (err) {
+        console.warn(
+          `\n⚠️  [prune dry-run] Could not inventory remote vars: ${err instanceof Error ? err.message : String(err)}`
+        )
+      }
     }
     console.info(
       `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to "${app}" (${vercelTarget})`
@@ -427,6 +586,56 @@ async function main(): Promise<void> {
   console.info(
     `\n${failed === 0 ? '✅' : '⚠️ '} Pushed ${pushed}/${entries.length} vars to Vercel project "${app}" (parallel concurrency=${VERCEL_CONCURRENCY})`
   )
+
+  // ── Prune (opt-in via --prune) ─────────────────────────────
+  // Inventory remote vars after the push, diff against local cascade, delete
+  // anything missing locally that is NOT platform-protected. Done AFTER the
+  // push so the diff includes the just-pushed keys (no false-positive deletes).
+  if (flags.prune) {
+    let remoteKeys: string[]
+    try {
+      remoteKeys = listVercelEnvKeys({
+        cwd: webDir,
+        vercelTarget,
+        gitBranch: vercelGitBranch(env),
+      })
+    } catch (err) {
+      console.error(
+        `\n❌ [prune] Could not inventory remote vars: ${err instanceof Error ? err.message : String(err)}`
+      )
+      console.error(`   Skipping prune. Push itself succeeded.`)
+      process.exit(failed > 0 ? 1 : 0)
+    }
+
+    const toPrune = computePruneList({
+      remoteKeys,
+      localKeys: Object.keys(merged),
+    })
+
+    if (toPrune.length === 0) {
+      console.info(`\n🧹 [prune] No remote vars to delete — cascade matches remote inventory.`)
+    } else {
+      console.info(
+        `\n🧹 [prune] Deleting ${toPrune.length} remote var${toPrune.length === 1 ? '' : 's'} not in local cascade:`
+      )
+      for (const k of toPrune) console.info(`  - ${k}`)
+
+      // Sequential deletes (concurrency unnecessary — typically 1-5 keys).
+      const pruneTasks = toPrune.map(k => async () => {
+        const rmArgs = ['env', 'rm', k, vercelTarget]
+        if (vercelGitBranch(env)) rmArgs.push(vercelGitBranch(env)!)
+        rmArgs.push('--yes')
+        return await vercelSpawn(rmArgs, webDir)
+      })
+      const pruneResults = await runWithConcurrency(pruneTasks, 4)
+      const prunedOk = pruneResults.filter(r => r.status === 0).length
+      const prunedFail = pruneResults.length - prunedOk
+      console.info(
+        `${prunedFail === 0 ? '✅' : '⚠️ '} [prune] Deleted ${prunedOk}/${pruneResults.length} remote vars`
+      )
+    }
+  }
+
   if (failed > 0) process.exit(1)
 }
 

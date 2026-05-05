@@ -51,8 +51,9 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import * as dotenv from 'dotenv'
 import { getRailwayAppConfig, type RailwayAppConfig } from './railway-projects.js'
+import { extractEnvFlag, isProtectedEnvKey, parseEnvArg, type TargetEnv } from './shared-flags.js'
 
-type TargetEnv = 'local' | 'staging' | 'production'
+export type { TargetEnv }
 
 function findMonorepoRoot(start: string = process.cwd()): string {
   let dir = path.resolve(start)
@@ -200,6 +201,13 @@ interface ParsedFlags {
   overrides: Record<string, string>
   includeBlocked: Set<string>
   dryRun: boolean
+  /**
+   * When true, after pushing the merged cascade vars, the script also
+   * inventories what's currently set on Railway and DELETES anything that
+   * does not appear in the local cascade (except platform-protected keys
+   * — see `isProtectedEnvKey()`). Off by default — opt-in only.
+   */
+  prune: boolean
 }
 
 const PRODUCTION_BLOCKLIST = [/^TEST_/, /^DEBUG_/, /^_LOCAL_/, /^DEV_/]
@@ -284,7 +292,12 @@ export function loadMergedEnv(input: LoadMergedEnvInput): LoadMergedEnvResult {
 }
 
 export function parseFlags(flags: string[]): ParsedFlags {
-  const result: ParsedFlags = { overrides: {}, includeBlocked: new Set(), dryRun: false }
+  const result: ParsedFlags = {
+    overrides: {},
+    includeBlocked: new Set(),
+    dryRun: false,
+    prune: false,
+  }
   for (let i = 0; i < flags.length; i++) {
     const flag = flags[i]
     if (flag === '--from') {
@@ -318,11 +331,118 @@ export function parseFlags(flags: string[]): ParsedFlags {
       }
     } else if (flag === '--dry-run') {
       result.dryRun = true
+    } else if (flag === '--prune') {
+      result.prune = true
     } else {
       fail(`Unknown flag "${flag}"`)
     }
   }
   return result
+}
+
+// ────────────────────────────────────────────────────────────
+// Prune logic — list remote keys & diff against local cascade
+// ────────────────────────────────────────────────────────────
+
+/**
+ * Inventory env vars currently set on Railway for a given service+env.
+ *
+ * Strategy : Railway CLI 4.x supports `railway variables --service <s>
+ * --environment <e> --json` which returns an object whose keys are env var
+ * names. Older CLIs return a human-readable table — we fallback to parsing
+ * KEY=VALUE lines. Both shapes are handled.
+ *
+ * The VALUE side is intentionally ignored — for prune we only care about
+ * the keys (we are about to delete, not re-add).
+ */
+export function parseRailwayVariables(stdout: string): string[] {
+  const trimmed = stdout.trim()
+  if (!trimmed) return []
+  // Try JSON first (CLI 4.x with --json).
+  if (trimmed.startsWith('{')) {
+    try {
+      const obj = JSON.parse(trimmed) as Record<string, unknown>
+      return Object.keys(obj).sort()
+    } catch {
+      // fall through to table parser
+    }
+  }
+  // Table / KEY=VALUE fallback. Each line either has `KEY=VALUE` or a table
+  // row starting with a JS-identifier key. Skip blank lines + table headers.
+  const keys = new Set<string>()
+  for (const rawLine of trimmed.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line) continue
+    const eq = line.indexOf('=')
+    if (eq > 0) {
+      const k = line.slice(0, eq).trim()
+      if (/^[A-Z_][A-Z0-9_]*$/i.test(k)) keys.add(k)
+      continue
+    }
+    const m = line.match(/^([A-Z_][A-Z0-9_]*)\s/)
+    if (m) keys.add(m[1])
+  }
+  return Array.from(keys).sort()
+}
+
+export interface ListRailwayEnvOptions {
+  service: string
+  env: TargetEnv
+  /** Test seam : swap the underlying spawn for a mock. */
+  exec?: (args: string[]) => { status: number; stdout: string; stderr: string }
+}
+
+/**
+ * Run `railway variables` and parse the inventory of var names. Throws on
+ * non-zero exit so caller can present a clear error.
+ */
+export function listRailwayEnvKeys(opts: ListRailwayEnvOptions): string[] {
+  const args = ['variables', '--service', opts.service, '--environment', opts.env, '--json']
+  const exec = opts.exec ?? defaultRailwayExec
+  const result = exec(args)
+  if (result.status !== 0) {
+    // Some CLI versions don't support --json — retry without it.
+    const fallback = exec(['variables', '--service', opts.service, '--environment', opts.env])
+    if (fallback.status !== 0) {
+      throw new Error(
+        `railway variables exited with status ${fallback.status} : ${fallback.stderr.trim() || '(empty)'}`
+      )
+    }
+    return parseRailwayVariables(fallback.stdout)
+  }
+  return parseRailwayVariables(result.stdout)
+}
+
+function defaultRailwayExec(args: string[]): { status: number; stdout: string; stderr: string } {
+  const result = railwaySpawnSync(args, { stdio: 'pipe' })
+  return {
+    status: result.status ?? 1,
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
+  }
+}
+
+export interface ComputePruneInput {
+  /** Keys discovered on the remote (Railway service for the target env). */
+  remoteKeys: readonly string[]
+  /** Keys present in the merged local cascade (will be pushed). */
+  localKeys: readonly string[]
+}
+
+/**
+ * Compute the list of keys that would be pruned : present on remote, not in
+ * local cascade, AND not platform-protected. Pure function — easy to test
+ * exhaustively without a live Railway service.
+ */
+export function computePruneList(input: ComputePruneInput): string[] {
+  const local = new Set(input.localKeys)
+  const result: string[] = []
+  for (const key of input.remoteKeys) {
+    if (local.has(key)) continue
+    if (isProtectedEnvKey(key)) continue
+    result.push(key)
+  }
+  return result.sort()
 }
 
 // ── CLI entry ───────────────────────────────────────────────
@@ -338,22 +458,42 @@ const isDirectRun = (() => {
 })()
 
 if (isDirectRun) {
-  const [, , app, env, ...rest] = process.argv
-  if (!app || !env) {
+  const [, , app, ...restRaw] = process.argv
+  if (!app) {
     fail(
-      'Usage: pnpm env:push:railway <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run]\n' +
+      'Usage: pnpm env:push:railway <app> <env> [--from <sourceEnv>] [--override KEY=val,KEY2=val2] [--dry-run] [--prune]\n' +
+        '         pnpm env:push:railway <app> --env=<env> ...   (anti-typo alias)\n' +
         '  Example: pnpm env:push:railway ezauth staging\n' +
+        '  Example: pnpm env:push:railway ezpay --env=staging --prune --dry-run\n' +
         '  Example: pnpm env:push:railway ezpay staging --from local --override DEPLOY_ENV=staging'
     )
   }
-  if (!['local', 'staging', 'production'].includes(env)) {
-    fail(`Invalid env "${env}" — must be one of: local | staging | production`)
+
+  // Same parsing strategy as push-vercel.ts — extract --env=<x> first, then
+  // take the leftover non-flag head as the positional <env> if any.
+  const rest = [...restRaw]
+  const envFlagValue = extractEnvFlag(rest)
+  let positionalEnv: string | undefined
+  if (rest.length > 0 && !rest[0].startsWith('--')) {
+    positionalEnv = rest.shift()
   }
+
+  let targetEnv: TargetEnv | null
+  try {
+    targetEnv = parseEnvArg(positionalEnv, envFlagValue)
+  } catch (err) {
+    fail(err instanceof Error ? err.message : String(err))
+  }
+  if (!targetEnv) {
+    fail(
+      'Missing <env> — pass it as positional or --env=<value>. Valid values: local | staging | production.'
+    )
+  }
+  const env = targetEnv
 
   const flags = parseFlags(rest)
 
   const ROOT = findMonorepoRoot()
-  const targetEnv = env as TargetEnv
 
   const { merged, sources } = loadMergedEnv({
     root: ROOT,
@@ -446,6 +586,33 @@ if (isDirectRun) {
   }
 
   if (flags.dryRun) {
+    if (flags.prune) {
+      // Inventory remote (read-only) and compute would-be-pruned list.
+      try {
+        // Need to link first to make the variables call target the right project.
+        // Linking is read-only metadata change; safe in dry-run.
+        linkRailwayProject(railwayConfig, targetEnv)
+        const remoteKeys = listRailwayEnvKeys({ service, env: targetEnv })
+        const toPrune = computePruneList({
+          remoteKeys,
+          localKeys: Object.keys(merged),
+        })
+        if (toPrune.length === 0) {
+          console.info(
+            `\n🧹 [prune dry-run] No remote vars would be pruned (cascade matches remote inventory).`
+          )
+        } else {
+          console.info(
+            `\n🧹 [prune dry-run] ${toPrune.length} remote var${toPrune.length === 1 ? '' : 's'} would be DELETED from Railway:`
+          )
+          for (const k of toPrune) console.info(`  - ${k}`)
+        }
+      } catch (err) {
+        console.warn(
+          `\n⚠️  [prune dry-run] Could not inventory remote vars: ${err instanceof Error ? err.message : String(err)}`
+        )
+      }
+    }
     console.info(
       `\n✅ Dry-run complete — ${Object.keys(merged).length} vars would be pushed to ` +
         `project="${railwayConfig.project}" service="${service}" env="${env}"`
@@ -516,4 +683,54 @@ if (isDirectRun) {
   console.info(
     `\n✅ Pushed ${entries.length} vars to Railway project="${railwayConfig.project}" service="${service}" env="${env}" in 1 batch call`
   )
+
+  // ── Prune (opt-in via --prune) ─────────────────────────────
+  // Inventory remote vars after the push, diff against local cascade, delete
+  // anything missing locally that is NOT platform-protected.
+  if (flags.prune) {
+    let remoteKeys: string[]
+    try {
+      remoteKeys = listRailwayEnvKeys({ service, env: targetEnv })
+    } catch (err) {
+      console.error(
+        `\n❌ [prune] Could not inventory remote vars: ${err instanceof Error ? err.message : String(err)}`
+      )
+      console.error(`   Skipping prune. Push itself succeeded.`)
+      process.exit(0)
+    }
+
+    const toPrune = computePruneList({
+      remoteKeys,
+      localKeys: Object.keys(merged),
+    })
+
+    if (toPrune.length === 0) {
+      console.info(`\n🧹 [prune] No remote vars to delete — cascade matches remote inventory.`)
+    } else {
+      console.info(
+        `\n🧹 [prune] Deleting ${toPrune.length} remote var${toPrune.length === 1 ? '' : 's'} not in local cascade:`
+      )
+      for (const k of toPrune) console.info(`  - ${k}`)
+
+      // Railway CLI : `variables --remove KEY1 KEY2 ...` removes vars in one call.
+      const removeArgs = [
+        'variables',
+        '--remove',
+        ...toPrune,
+        '--service',
+        service,
+        '--environment',
+        env,
+        '--skip-deploys',
+      ]
+      const removeResult = railwaySpawnSync(removeArgs, { stdio: 'pipe' })
+      if (removeResult.status !== 0) {
+        console.error(
+          `\n❌ [prune] railway variables --remove failed (status ${removeResult.status}): ${(removeResult.stderr ?? '').trim().slice(0, 200)}`
+        )
+      } else {
+        console.info(`✅ [prune] Removed ${toPrune.length} remote vars`)
+      }
+    }
+  }
 }

@@ -159,26 +159,43 @@ for production targets) and push the flattened result. Railway uses
 
 Flags common to both:
 
-| Flag                 | Effect                                                |
-| -------------------- | ----------------------------------------------------- |
-| `--dry-run`          | Print the merged vars without calling the remote CLI. |
-| `--from <env>`       | Bypass the cascade and load a SINGLE source file.     |
-| `--override K=V,...` | Apply a final override (wins over every file layer).  |
+| Flag                 | Effect                                                                                                                                                                                                                             |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------- |
+| `--dry-run`          | Print the merged vars without calling the remote CLI.                                                                                                                                                                              |
+| `--from <env>`       | Bypass the cascade and load a SINGLE source file.                                                                                                                                                                                  |
+| `--override K=V,...` | Apply a final override (wins over every file layer).                                                                                                                                                                               |
+| `--env=<env>`        | Anti-typo alias for the positional `<env>`. Accepts `local                                                                                                                                                                         | staging | production`. Conflicts with positional → fails. |
+| `--prune`            | After pushing, inventory the remote and DELETE any var that is not in the local cascade (except platform-managed VERCEL*\*/RAILWAY*_/NODE*ENV/PORT/CI/*_). Off by default — opt-in. Combine with `--dry-run` to preview deletions. |
 
 Railway-only: `--include-blocked` to force-push `TEST_*` / `DEBUG_*` /
 `_LOCAL_*` / `DEV_*` vars that are otherwise filtered out of production pushes.
+
+```bash
+# Anti-typo: this fails fast instead of pushing to the wrong env
+pnpm env:push:vercel ezpay --env=stagging      # ❌ Invalid env "stagging"
+pnpm env:push:vercel ezpay staging --env=production   # ❌ Conflicting
+
+# Prune dry-run — preview what would be deleted from Vercel
+pnpm env:push:vercel ezpay production --dry-run --prune
+
+# Prune for real — push then delete stale remote vars (PROTECTED keys never touched)
+pnpm env:push:vercel ezpay production --prune
+```
 
 ### All apps at once — `env:push:all`
 
 ```bash
 pnpm env:push:all <env> [--dry-run] [--only-api] [--only-web]
-                        [--apps <csv>] [--continue-on-error]
+                        [--apps <csv>] [--continue-on-error] [--prune]
+pnpm env:push:all --env=<env> ...   # anti-typo alias for the positional
 
 # Examples
 pnpm env:push:all staging --dry-run
 pnpm env:push:all production --apps ezauth,ezpay
 pnpm env:push:all staging --only-web
 pnpm env:push:all production --continue-on-error
+pnpm env:push:all production --prune --dry-run     # preview prune across every app
+pnpm env:push:all --env=staging --prune            # forward --prune to each child push
 ```
 
 Loops over the 8 monorepo apps and, for each, calls `env:push:railway` (if the

@@ -28,8 +28,8 @@
 import { spawn } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
+import { extractEnvFlag, parseEnvArg, type TargetEnv } from './shared-flags.js'
 
-type TargetEnv = 'local' | 'staging' | 'production'
 type Platform = 'railway' | 'vercel'
 
 const ALL_APPS = [
@@ -50,6 +50,8 @@ interface ParsedArgs {
   onlyWeb: boolean
   apps: readonly string[]
   continueOnError: boolean
+  /** Forward to each child push script — opt-in destructive cleanup. */
+  prune: boolean
 }
 
 interface StepResult {
@@ -80,23 +82,36 @@ function fail(msg: string): never {
 }
 
 function parseArgs(argv: readonly string[]): ParsedArgs {
-  const [env, ...rest] = argv
-
-  if (!env) {
-    fail(
-      'Usage: pnpm env:push:all <env> [--dry-run] [--only-api] [--only-web] [--apps <csv>] [--continue-on-error]\n' +
-        '  Example: pnpm env:push:all staging --dry-run\n' +
-        '  Example: pnpm env:push:all production --apps ezauth,ezpay'
-    )
+  // Same parsing strategy as push-vercel/push-railway — pull --env=<x> out
+  // first, then take the leftover non-flag head as the positional <env>.
+  const working = [...argv]
+  const envFlagValue = extractEnvFlag(working)
+  let positionalEnv: string | undefined
+  if (working.length > 0 && !working[0].startsWith('--')) {
+    positionalEnv = working.shift()
   }
-  if (!['local', 'staging', 'production'].includes(env)) {
-    fail(`Invalid env "${env}" — must be one of: local | staging | production`)
+  const rest = working
+
+  let resolvedEnv: TargetEnv | null
+  try {
+    resolvedEnv = parseEnvArg(positionalEnv, envFlagValue)
+  } catch (err) {
+    fail(err instanceof Error ? err.message : String(err))
+  }
+  if (!resolvedEnv) {
+    fail(
+      'Usage: pnpm env:push:all <env> [--dry-run] [--only-api] [--only-web] [--apps <csv>] [--continue-on-error] [--prune]\n' +
+        '         pnpm env:push:all --env=<env> ...   (anti-typo alias)\n' +
+        '  Example: pnpm env:push:all staging --dry-run\n' +
+        '  Example: pnpm env:push:all --env=production --apps ezauth,ezpay --prune'
+    )
   }
 
   let dryRun = false
   let onlyApi = false
   let onlyWeb = false
   let continueOnError = false
+  let prune = false
   let apps: readonly string[] = ALL_APPS
 
   for (let i = 0; i < rest.length; i++) {
@@ -109,6 +124,8 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
       onlyWeb = true
     } else if (flag === '--continue-on-error') {
       continueOnError = true
+    } else if (flag === '--prune') {
+      prune = true
     } else if (flag === '--apps') {
       const value = rest[++i]
       if (!value) fail('--apps requires a comma-separated list (e.g. --apps ezauth,ezpay)')
@@ -132,12 +149,13 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
   }
 
   return {
-    env: env as TargetEnv,
+    env: resolvedEnv,
     dryRun,
     onlyApi,
     onlyWeb,
     apps,
     continueOnError,
+    prune,
   }
 }
 
@@ -161,11 +179,13 @@ function runPush(
   platform: Platform,
   app: string,
   env: TargetEnv,
-  dryRun: boolean
+  dryRun: boolean,
+  prune: boolean
 ): Promise<StepResult> {
   const script = platform === 'railway' ? 'env:push:railway' : 'env:push:vercel'
   const args = ['run', script, app, env]
   if (dryRun) args.push('--dry-run')
+  if (prune) args.push('--prune')
 
   const prefix = platform === 'railway' ? '🚂' : '▲'
 
@@ -243,7 +263,8 @@ async function main(): Promise<void> {
       `${args.dryRun ? ' (dry-run)' : ''}` +
       `${args.onlyApi ? ' [api only]' : ''}` +
       `${args.onlyWeb ? ' [web only]' : ''}` +
-      `${args.continueOnError ? ' [continue-on-error]' : ''}`
+      `${args.continueOnError ? ' [continue-on-error]' : ''}` +
+      `${args.prune ? ' [prune]' : ''}`
   )
   console.info(`   apps: ${args.apps.join(', ')}`)
 
@@ -285,7 +306,7 @@ async function main(): Promise<void> {
     // API push
     if (!args.onlyWeb) {
       if (hasPackage(ROOT, app, 'api')) {
-        const result = await runPush(ROOT, 'railway', app, args.env, args.dryRun)
+        const result = await runPush(ROOT, 'railway', app, args.env, args.dryRun, args.prune)
         steps.push(result)
         if (result.status === 'failed' && !args.continueOnError) {
           stopRequested = true
@@ -306,7 +327,7 @@ async function main(): Promise<void> {
     // Web push
     if (!args.onlyApi) {
       if (hasPackage(ROOT, app, 'web')) {
-        const result = await runPush(ROOT, 'vercel', app, args.env, args.dryRun)
+        const result = await runPush(ROOT, 'vercel', app, args.env, args.dryRun, args.prune)
         steps.push(result)
         if (result.status === 'failed' && !args.continueOnError) {
           stopRequested = true
