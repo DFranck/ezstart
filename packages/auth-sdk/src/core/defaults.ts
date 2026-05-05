@@ -75,7 +75,10 @@ export const EZAUTH_URLS_BY_ENV: Record<AuthEnvironment, { api: string; web: str
  *     doesn't trip the localhost trap.
  */
 export function detectAuthEnvironment(): AuthEnvironment {
-  // Server-side signals (Node / Edge / build).
+  // Server-side signals (Node / Edge / build) — these are the AUTHORITATIVE
+  // signals when present. Any consumer running our `pnpm env:push:*` toolchain
+  // has DEPLOY_ENV set in every environment, so this branch wins in the
+  // canonical EZStart deployment.
   if (typeof process !== 'undefined' && process.env) {
     const deployEnv = process.env.DEPLOY_ENV
     if (deployEnv === 'staging') return 'staging'
@@ -86,15 +89,27 @@ export function detectAuthEnvironment(): AuthEnvironment {
       return 'staging'
     }
 
-    // NODE_ENV is read only when no `window` (server) — Next.js client bundles
-    // always set NODE_ENV='production' even on staging, which would bypass the
-    // hostname check below.
-    if (typeof window === 'undefined') {
-      if (process.env.NODE_ENV === 'production') return 'production'
+    // CRITICAL : Next.js build prerender phase. When `NEXT_PHASE` is
+    // `'phase-production-build'`, we're inside a Vercel build worker.
+    // Some Next.js workers ship a JSDOM-like `window` polyfill with
+    // `hostname === 'localhost'`, which would trip the client-side
+    // localhost detection below and break the build with a misleading
+    // "webUrl resolves to localhost" CONFIG_ERROR. Short-circuit to
+    // 'production' so prerender uses safe canonical URLs.
+    if (process.env.NEXT_PHASE === 'phase-production-build') return 'production'
+
+    // Server-side production runtime (Railway prod, Node serverless, etc.)
+    // — `NODE_ENV === 'production'` AND no browser `window` means we're in
+    // a real Node.js server context, never localhost. Browsers running a
+    // real prod build still set `NODE_ENV='production'` but `typeof window`
+    // is defined → we then fall through to the hostname check.
+    if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+      return 'production'
     }
   }
 
-  // Client-side : hostname pattern match.
+  // Client-side : hostname pattern match. Reached only when running in a
+  // real browser context with `NODE_ENV !== 'production'` (typically dev).
   if (typeof window !== 'undefined' && window.location?.hostname) {
     const host = window.location.hostname
 
@@ -112,7 +127,7 @@ export function detectAuthEnvironment(): AuthEnvironment {
     }
   }
 
-  // Safe fallback — external customers + static prerender land here.
+  // Safe fallback — external customers + ambiguous contexts land here.
   return 'production'
 }
 

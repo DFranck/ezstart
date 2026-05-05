@@ -29,7 +29,12 @@ export interface DemoSandboxProps {
   componentName: string
 }
 
-const DEMO_API_URL = process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'
+// SDK auto-resolves apiUrl via env-aware defaults (Phase D ENV-DIET 2026-05-05).
+// We intentionally pass `undefined` when NEXT_PUBLIC_EZAUTH_API_URL is unset
+// so the SDK lookup picks the right URL per env (production / staging / local).
+// Hardcoding `http://localhost:6110` here would force localhost on Vercel and
+// trip the auth-sdk webUrl-localhost trap during static prerender.
+const DEMO_API_URL = process.env.NEXT_PUBLIC_EZAUTH_API_URL
 const DEMO_KEY = process.env.NEXT_PUBLIC_EZAUTH_DOCS_DEMO_KEY
 
 export function DemoSandbox({ children, componentName }: DemoSandboxProps) {

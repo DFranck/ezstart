@@ -10,9 +10,7 @@ export default function Demo() {
   // below tells visitors what they're looking at.
   return (
     <Div className="w-full max-w-xl space-y-4">
-      <MaintenanceBanner
-        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
-      />
+      <MaintenanceBanner apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL} />
       <Card variant="default">
         <CardContent className="py-4 px-6">
           <P className="text-sm text-muted-foreground text-center">
