@@ -714,3 +714,17 @@ export interface UpdateMaintenanceModeRequest {
   /** ISO datetime or `null` to clear the scheduled end. */
   scheduledEnd?: string | null
 }
+
+/**
+ * EZStart deployment environments recognized by the SDK's env-aware default
+ * URL resolution (`detectAuthEnvironment` / `EZAUTH_URLS_BY_ENV`).
+ *
+ * - `'production'` — canonical *.ezstart.xyz domains
+ * - `'staging'`    — Vercel preview of the staging branch + Railway staging APIs
+ * - `'local'`      — localhost dev (port 6110/6111)
+ *
+ * External customers self-hosting against a different cloud / domain still
+ * override via the `apiUrl` / `webUrl` props or the `NEXT_PUBLIC_EZAUTH_*_URL`
+ * env vars — those win over the env-aware defaults.
+ */
+export type AuthEnvironment = 'production' | 'staging' | 'local'

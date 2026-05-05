@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resolveSDKConfig } from '../../core/auth-client.js'
 
 describe('resolveSDKConfig', () => {
@@ -81,7 +81,20 @@ describe('resolveSDKConfig', () => {
   describe('off-localhost fail-fast', () => {
     const originalLocation = window.location
 
+    beforeEach(() => {
+      // Phase D : the SDK ships env-aware default URLs. Force tests into
+      // 'production' so `getEzauthDefaultUrls()` returns canonical prod
+      // hosts, regardless of the developer machine's DEPLOY_ENV (which
+      // would otherwise leak into assertions when this test runs from a
+      // staging working tree).
+      vi.stubEnv('DEPLOY_ENV', '')
+      vi.stubEnv('VERCEL_ENV', '')
+      vi.stubEnv('VERCEL_GIT_COMMIT_REF', '')
+      vi.stubEnv('NODE_ENV', 'production')
+    })
+
     afterEach(() => {
+      vi.unstubAllEnvs()
       // Restore the original jsdom location object
       Object.defineProperty(window, 'location', {
         configurable: true,
@@ -95,8 +108,13 @@ describe('resolveSDKConfig', () => {
      * a plain object whose hostname is non-local. jsdom's native Location
      * property is non-configurable on the descriptor, so we swap the whole
      * object.
+     *
+     * The default hostname intentionally avoids the `'staging'` prefix and the
+     * `'-git-staging-*.vercel.app'` pattern so `detectAuthEnvironment()` falls
+     * through to the production default. Tests that need staging detection
+     * should pass `'something-git-staging-x.vercel.app'` explicitly.
      */
-    function stubNonLocalhost(hostname = 'staging.example.com'): void {
+    function stubNonLocalhost(hostname = 'app.example.com'): void {
       Object.defineProperty(window, 'location', {
         configurable: true,
         writable: true,
@@ -112,14 +130,22 @@ describe('resolveSDKConfig', () => {
       })
     }
 
-    it('throws when called off-localhost with empty config (no key, no apiUrl, no firstParty)', () => {
+    it('falls back to env-aware default API URL off-localhost with empty config (no key, no apiUrl, no firstParty)', () => {
+      // Phase D (2026-05-05) — the SDK ships env-aware default URLs for the
+      // canonical EZStart deployment, so a bare `resolveSDKConfig({})` no
+      // longer throws : it picks the production default URL. Self-hosted
+      // callers still override via the `apiUrl` prop or env var.
       stubNonLocalhost()
-      expect(() => resolveSDKConfig({})).toThrow(/cannot resolve apiUrl/i)
+      const result = resolveSDKConfig({})
+      expect(result.clientConfig.apiUrl).toBe('https://ezauth-api.ezstart.xyz/api/auth')
+      expect(result.webUrl).toBe('https://ezauth.ezstart.xyz')
     })
 
-    it('throws when called off-localhost with only appName (no URL signals)', () => {
+    it('falls back to env-aware default with only appName (no URL signals)', () => {
       stubNonLocalhost()
-      expect(() => resolveSDKConfig({ appName: 'myapp' })).toThrow(/cannot resolve apiUrl/i)
+      const result = resolveSDKConfig({ appName: 'myapp' })
+      expect(result.clientConfig.apiUrl).toBe('https://ezauth-api.ezstart.xyz/api/auth')
+      expect(result.clientConfig.appName).toBe('myapp')
     })
 
     it('accepts firstParty with explicit apiUrl off-localhost', () => {
@@ -147,13 +173,15 @@ describe('resolveSDKConfig', () => {
       expect(result.keyFetch?.apiBaseUrl).toBe('https://auth.example.com')
     })
 
-    it('throws when publishableKey provided off-localhost without apiUrl', () => {
+    it('uses env-aware default API URL when publishableKey provided off-localhost without apiUrl', () => {
+      // Phase D — auto-resolve the canonical EZStart API URL so consumers
+      // pointing at the official cloud need ZERO env vars (just the key).
       stubNonLocalhost()
-      expect(() =>
-        resolveSDKConfig({
-          publishableKey: 'ez_pk_live_abc123',
-        })
-      ).toThrow(/cannot resolve apiUrl/i)
+      const result = resolveSDKConfig({
+        publishableKey: 'ez_pk_live_abc123',
+      })
+      expect(result.keyFetch?.apiBaseUrl).toBe('https://ezauth-api.ezstart.xyz')
+      expect(result.clientConfig.apiKey).toBe('ez_pk_live_abc123')
     })
 
     it('accepts explicit apiUrl off-localhost without a key', () => {
@@ -344,12 +372,15 @@ describe('resolveSDKConfig', () => {
         })
       }
 
-      it('throws CONFIG_ERROR at SSR when no apiUrl/key/firstParty is provided', () => {
+      it('falls back to env-aware default at SSR when no apiUrl/key/firstParty provided', () => {
+        // Phase D (2026-05-05) — SSR with no window + no env signal +
+        // empty config → SDK uses the canonical EZStart production URL
+        // as the env-aware default (NODE_ENV=production stub above
+        // narrows detectAuthEnvironment to 'production').
         removeWindow()
-        // No window → isLocalhost() returns false → off-localhost fail-fast
-        // triggers. This is the documented SSR contract: consumers must pass
-        // apiUrl explicitly OR load the provider behind `'use client'`.
-        expect(() => resolveSDKConfig({})).toThrow(/cannot resolve apiUrl/i)
+        const result = resolveSDKConfig({})
+        expect(result.clientConfig.apiUrl).toBe('https://ezauth-api.ezstart.xyz/api/auth')
+        expect(result.webUrl).toBe('https://ezauth.ezstart.xyz')
       })
 
       it('resolves at SSR when apiUrl and webUrl are provided explicitly', () => {

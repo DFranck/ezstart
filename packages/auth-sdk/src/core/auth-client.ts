@@ -13,7 +13,7 @@
  * ```
  */
 
-import { DEFAULT_AUTH_WEB_URL } from './defaults.js'
+import { getEzauthDefaultUrls } from './defaults.js'
 import { AuthError } from './errors.js'
 import type {
   AdminAnalyticsOverview,
@@ -621,13 +621,6 @@ const DEFAULT_LOCAL_WEB = 'http://localhost:6111'
  *
  * Fail-fast, no silent fallback to a vendor-specific production URL.
  */
-const MISSING_API_URL_MESSAGE =
-  'auth-sdk: cannot resolve apiUrl. Provide one of: ' +
-  '`publishableKey` (auto-resolves via /api/keys/config), ' +
-  '`apiUrl` (explicit override), ' +
-  'or `firstParty: true` with `apiUrl`. ' +
-  'Running on localhost falls back to http://localhost:6110 automatically.'
-
 /**
  * Thrown when `firstParty: true` is used off-localhost without an explicit
  * `appName`. Defaulting to `'ezauth'` silently on a non-ezauth app would
@@ -792,24 +785,16 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   // `/api/auth/api/keys/config` suffixes.
   const consumerBaseUrl = sdkConfig.apiUrl ? normalizeApiBaseUrl(sdkConfig.apiUrl) : undefined
 
-  // Fail-fast in non-localhost environments when the consumer hasn't provided
-  // any of the signals required to resolve a URL. Silent hardcoded fallbacks
-  // to vendor-specific production hosts are forbidden by the agnostic
-  // packaging rules — the consumer must always opt-in explicitly.
-  if (!local && !sdkConfig.firstParty && !key && !consumerBaseUrl) {
-    throw new AuthError(MISSING_API_URL_MESSAGE, 0, 'CONFIG_ERROR')
-  }
-
-  // Localhost-only default. Non-local callers never reach the API default
-  // here: they must have supplied `consumerBaseUrl`, `firstParty`, or a `key`
-  // above. The web fallback chain differs — when `sdkConfig.webUrl` is
-  // missing AND we're off-localhost, we use the canonical
-  // `DEFAULT_AUTH_WEB_URL` (Stripe-style hardcoded prod default) so a
-  // static Vercel build with no `NEXT_PUBLIC_EZAUTH_WEB_URL` env override
-  // doesn't trip the localhost trap at prerender time. Self-hosted callers
-  // override via the `webUrl` prop or the env var.
-  const localDefaultApiUrl = `${DEFAULT_LOCAL_API}/api/auth`
-  const defaultWebUrl = local ? DEFAULT_LOCAL_WEB : DEFAULT_AUTH_WEB_URL
+  // Env-aware default URLs for the canonical EZAuth deployment. Picks
+  // production / staging / local based on `DEPLOY_ENV` / `VERCEL_GIT_*` /
+  // hostname (cf. `core/defaults.ts` `detectAuthEnvironment`). External
+  // customers self-hosting against a different cloud override via the
+  // `apiUrl` / `webUrl` props or the `NEXT_PUBLIC_EZAUTH_*_URL` env vars
+  // — those win over these defaults. The defaults exist so the canonical
+  // EZStart deployment needs ZERO env vars in any of its environments.
+  const envDefaults = getEzauthDefaultUrls()
+  const defaultApiBaseUrl = envDefaults.api
+  const defaultWebUrl = sdkConfig.webUrl ?? envDefaults.web
 
   if (sdkConfig.firstParty) {
     // First-party mode: direct access, no key needed.
@@ -821,8 +806,12 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
       throw new AuthError(MISSING_FIRST_PARTY_APP_NAME_MESSAGE, 0, 'CONFIG_ERROR')
     }
 
-    const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : localDefaultApiUrl
-    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+    // First-party callers without an explicit `apiUrl` get the env-aware
+    // default API base. Eliminates the need for `NEXT_PUBLIC_EZAUTH_API_URL`
+    // when the consumer is the canonical EZStart auth provider.
+    const apiBaseUrl = consumerBaseUrl ?? defaultApiBaseUrl
+    const apiUrl = `${apiBaseUrl}/api/auth`
+    const webUrl = defaultWebUrl
     const appName = sdkConfig.appName ?? 'ezauth'
 
     assertWebUrlNotLocalhostOffLocal(webUrl, local)
@@ -840,15 +829,12 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
 
   if (key) {
     // Publishable key mode: create client with defaults, then async-update
-    // from key config. In non-localhost envs without a consumer-provided
-    // `apiUrl`, we can't know where to send the `/api/keys/config` request,
-    // so we require explicit `apiUrl` alongside the key off localhost.
-    if (!local && !consumerBaseUrl) {
-      throw new AuthError(MISSING_API_URL_MESSAGE, 0, 'CONFIG_ERROR')
-    }
-    const apiBaseUrl = consumerBaseUrl ?? DEFAULT_LOCAL_API
+    // from key config. Consumer-provided `apiUrl` wins; otherwise we use the
+    // env-aware default so a consumer pointing at the canonical EZStart
+    // cloud needs no env var to discover where `/keys/config` lives.
+    const apiBaseUrl = consumerBaseUrl ?? defaultApiBaseUrl
     const apiUrl = `${apiBaseUrl}/api/auth`
-    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+    const webUrl = defaultWebUrl
 
     assertWebUrlNotLocalhostOffLocal(webUrl, local)
 
@@ -873,10 +859,13 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
     }
   }
 
-  // Dev mode: no key, no first-party → permissive localhost defaults.
-  // Non-localhost callers already threw above.
-  const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : localDefaultApiUrl
-  const webUrl = sdkConfig.webUrl ?? defaultWebUrl
+  // Dev mode: no key, no first-party → permissive defaults. Off-localhost
+  // we still resolve a sensible default API URL via the env-aware lookup
+  // (no more fail-fast on bare `<AuthProvider>` mounts during static
+  // prerender — the env-aware default covers the canonical deployment).
+  const apiBaseUrl = consumerBaseUrl ?? (local ? DEFAULT_LOCAL_API : defaultApiBaseUrl)
+  const apiUrl = `${apiBaseUrl}/api/auth`
+  const webUrl = defaultWebUrl
   const appName = sdkConfig.appName ?? 'dev'
 
   assertWebUrlNotLocalhostOffLocal(webUrl, local)
