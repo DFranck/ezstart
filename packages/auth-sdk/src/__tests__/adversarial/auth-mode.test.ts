@@ -253,28 +253,38 @@ describe('resolveSDKConfig', () => {
         expect(result.webUrl).toBe('https://ezauth.ezstart.xyz')
       })
 
-      it('throws off-localhost when webUrl is explicitly set to a localhost URL', () => {
+      it('warns (no throw) off-localhost when webUrl is explicitly set to a localhost URL', () => {
+        // Phase D follow-up (2026-05-05) — converted from throw to warn so a
+        // false-positive doesn't kill the entire app render. The console.warn
+        // surfaces the issue (visible to operators + Sentry) without breaking
+        // the page.
         stubNonLocalhost()
-        expect(() =>
-          resolveSDKConfig({
-            firstParty: true,
-            apiUrl: 'https://auth.example.com',
-            appName: 'ezauth',
-            webUrl: 'http://localhost:6111',
-          })
-        ).toThrow(/webUrl resolves to localhost/i)
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const result = resolveSDKConfig({
+          firstParty: true,
+          apiUrl: 'https://auth.example.com',
+          appName: 'ezauth',
+          webUrl: 'http://localhost:6111',
+        })
+        expect(result.webUrl).toBe('http://localhost:6111')
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining('webUrl resolves to localhost')
+        )
+        warnSpy.mockRestore()
       })
 
-      it('throws off-localhost for 127.0.0.1 / [::1] variants', () => {
+      it('warns (no throw) off-localhost for 127.0.0.1 / [::1] variants', () => {
         stubNonLocalhost()
-        expect(() =>
-          resolveSDKConfig({
-            firstParty: true,
-            apiUrl: 'https://auth.example.com',
-            appName: 'ezauth',
-            webUrl: 'http://127.0.0.1:6111',
-          })
-        ).toThrow(/webUrl resolves to localhost/i)
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const result = resolveSDKConfig({
+          firstParty: true,
+          apiUrl: 'https://auth.example.com',
+          appName: 'ezauth',
+          webUrl: 'http://127.0.0.1:6111',
+        })
+        expect(result.webUrl).toBe('http://127.0.0.1:6111')
+        expect(warnSpy).toHaveBeenCalled()
+        warnSpy.mockRestore()
       })
 
       it('accepts off-localhost when webUrl is a real domain', () => {
@@ -297,18 +307,19 @@ describe('resolveSDKConfig', () => {
         expect(result.webUrl).toContain('localhost')
       })
 
-      it('fires the guard for dev-mode config with stale webUrl off-localhost', () => {
+      it('warns (no throw) for dev-mode config with stale webUrl off-localhost', () => {
         stubNonLocalhost()
-        // Dev mode (no firstParty, no key) normally throws before reaching the
-        // webUrl guard because apiUrl is missing. Providing apiUrl explicitly
-        // should still trip the webUrl guard when webUrl itself is localhost.
-        expect(() =>
-          resolveSDKConfig({
-            apiUrl: 'https://auth.example.com',
-            appName: 'myapp',
-            webUrl: 'http://localhost:6111',
-          })
-        ).toThrow(/webUrl resolves to localhost/i)
+        // Dev mode (no firstParty, no key) — webUrl localhost surfaces a
+        // console.warn instead of throwing (cf. Phase D follow-up).
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const result = resolveSDKConfig({
+          apiUrl: 'https://auth.example.com',
+          appName: 'myapp',
+          webUrl: 'http://localhost:6111',
+        })
+        expect(result.webUrl).toBe('http://localhost:6111')
+        expect(warnSpy).toHaveBeenCalled()
+        warnSpy.mockRestore()
       })
     })
 

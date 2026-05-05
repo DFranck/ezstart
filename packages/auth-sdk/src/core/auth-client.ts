@@ -659,33 +659,37 @@ const WEB_URL_LOCALHOST_TRAP_MESSAGE =
 function assertWebUrlNotLocalhostOffLocal(webUrl: string, isLocal: boolean): void {
   if (isLocal) return
 
-  // Phase D follow-up (2026-05-05) — never throw during SSR / static
-  // prerender. The assertion's purpose is to catch CLIENT misconfig at
-  // runtime (consumer ships with the wrong webUrl baked in). Throwing at
-  // build time kills static page generation entirely (worse UX than the
-  // login button being slightly broken on click). Browsers always have
-  // `window` defined ; SSR / Node prerender / Edge / build workers do not.
-  if (typeof window === 'undefined') return
-
+  // Phase D follow-up (2026-05-05) — converted from `throw` to `console.warn`.
+  //
+  // Original intent : catch consumers shipping production builds with a
+  // localhost webUrl baked in (login click would dead-end on localhost).
+  //
+  // Why warn instead of throw : in a Stripe-pattern SDK with env-aware
+  // defaults, the assertion fires false-positive when the bundler dead-
+  // code-eliminates the env detection in client builds, leaving stale
+  // localhost defaults visible to the trap. Throwing at provider mount
+  // time kills the entire app (white screen) — much worse UX than a
+  // potentially mis-configured login button. The warn surfaces the
+  // problem in console (visible to operators + Sentry-style trackers)
+  // without breaking the page render.
+  let isLocalhostUrl = false
   try {
     const parsed = new URL(webUrl)
     const host = parsed.hostname
-    if (
+    isLocalhostUrl =
       host === 'localhost' ||
       host.endsWith('.localhost') ||
       host === '127.0.0.1' ||
       host === '0.0.0.0' ||
       host === '[::1]' ||
       host === '::1'
-    ) {
-      throw new AuthError(WEB_URL_LOCALHOST_TRAP_MESSAGE, 0, 'CONFIG_ERROR')
-    }
-  } catch (err) {
-    if (err instanceof AuthError) throw err
+  } catch {
     // Malformed URL: fall back to string contains to avoid false negatives.
-    if (webUrl.includes('localhost') || webUrl.includes('127.0.0.1')) {
-      throw new AuthError(WEB_URL_LOCALHOST_TRAP_MESSAGE, 0, 'CONFIG_ERROR')
-    }
+    isLocalhostUrl = webUrl.includes('localhost') || webUrl.includes('127.0.0.1')
+  }
+
+  if (isLocalhostUrl && typeof console !== 'undefined' && console.warn) {
+    console.warn(`[auth-sdk] ${WEB_URL_LOCALHOST_TRAP_MESSAGE}`)
   }
 }
 
