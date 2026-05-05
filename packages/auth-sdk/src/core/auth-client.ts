@@ -658,6 +658,15 @@ const WEB_URL_LOCALHOST_TRAP_MESSAGE =
  */
 function assertWebUrlNotLocalhostOffLocal(webUrl: string, isLocal: boolean): void {
   if (isLocal) return
+
+  // Phase D follow-up (2026-05-05) — never throw during SSR / static
+  // prerender. The assertion's purpose is to catch CLIENT misconfig at
+  // runtime (consumer ships with the wrong webUrl baked in). Throwing at
+  // build time kills static page generation entirely (worse UX than the
+  // login button being slightly broken on click). Browsers always have
+  // `window` defined ; SSR / Node prerender / Edge / build workers do not.
+  if (typeof window === 'undefined') return
+
   try {
     const parsed = new URL(webUrl)
     const host = parsed.hostname
