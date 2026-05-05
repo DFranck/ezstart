@@ -11,6 +11,7 @@ import React, {
 } from 'react'
 import type { Logger } from '@ezstart/logger'
 import { createPayClient, type PayClient } from '../core/pay-client.js'
+import { DEFAULT_PAY_API_URL } from '../core/defaults.js'
 import type { PayClientConfig } from '../core/types.js'
 import { usePayStore, type ApplicationResolutionStatus } from './store.js'
 
@@ -231,19 +232,34 @@ export function PayProvider({
       ? publishableKey
       : undefined
 
+  // Stripe-style apiUrl resolution (Phase A1 ENV-DIET 2026-05-05):
+  //   1. explicit `config.apiUrl`           (caller knows best)
+  //   2. NEXT_PUBLIC_EZPAY_API_URL          (dev / staging / self-hosted override)
+  //   3. DEFAULT_PAY_API_URL                (shipped prod default for *.ezstart.xyz)
+  //
+  // The default kicks in only when neither prop nor env var is provided so
+  // pre-existing consumers keep working unchanged. Production callers pointing
+  // at the canonical EZPay cloud can drop `NEXT_PUBLIC_EZPAY_API_URL` from
+  // their env entirely.
+  const resolvedConfigApiUrl =
+    config?.apiUrl ?? process.env.NEXT_PUBLIC_EZPAY_API_URL ?? DEFAULT_PAY_API_URL
+
   const client = useMemo(() => {
     return createPayClient({
       appName,
       applicationId: applicationIdProp ?? config?.applicationId,
-      apiUrl: config?.apiUrl ?? '',
       apiKey: derivedApiKey,
       ...config,
+      // `apiUrl` is set AFTER the spread so an undefined `config.apiUrl`
+      // doesn't fall back to the empty-string default and clobber the
+      // Stripe-style resolution above (Phase A1 ENV-DIET 2026-05-05).
+      apiUrl: resolvedConfigApiUrl,
       getToken: () => getTokenRef.current?.() ?? null,
       onTokenRefresh: () => onTokenRefreshRef.current?.() ?? Promise.resolve(null),
       onAuthFailure: () => onAuthFailureRef.current?.(),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- callbacks are handled via refs
-  }, [appName, applicationIdProp, config, derivedApiKey])
+  }, [appName, applicationIdProp, config, derivedApiKey, resolvedConfigApiUrl])
 
   // Determine initial state based on which props are provided.
   const explicitApplicationId = applicationIdProp ?? config?.applicationId ?? null
@@ -407,8 +423,8 @@ export function PayProvider({
   //   4. `null`                              — production without explicit
   //                                            wiring or key resolve fails
   const resolvedPayWebUrl = useMemo(
-    () => resolvePayWebUrl(payWebUrl ?? resolvedWebUrlFromKey ?? undefined, config?.apiUrl),
-    [payWebUrl, resolvedWebUrlFromKey, config?.apiUrl]
+    () => resolvePayWebUrl(payWebUrl ?? resolvedWebUrlFromKey ?? undefined, resolvedConfigApiUrl),
+    [payWebUrl, resolvedWebUrlFromKey, resolvedConfigApiUrl]
   )
 
   const resolvedLocale = locale && locale.length > 0 ? locale : 'en'

@@ -437,13 +437,14 @@ describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
     expect(plansUrl.startsWith('http://api.example.com/api/plans')).toBe(true)
   })
 
-  it('when `config.apiUrl` is missing, falls back to relative URL (regression guard)', async () => {
-    // Without config.apiUrl, PayClient defaults apiUrl to ''. The resulting
-    // `/plans` URL will be resolved against the current origin — which in a
-    // browser context is exactly the REG-2 bug: green-pulse web origin
-    // instead of ezpay API. This test documents the required behaviour
-    // when `apiUrl` IS provided (absolute URL) vs when it's missing
-    // (relative fallback) so future refactors don't silently regress.
+  it('when `config.apiUrl` is missing, falls back to DEFAULT_PAY_API_URL (Phase A1)', async () => {
+    // Phase A1 ENV-DIET (2026-05-05) — Stripe-style: when neither
+    // `config.apiUrl` prop nor `NEXT_PUBLIC_EZPAY_API_URL` env var is
+    // provided, the SDK ships a hardcoded prod default
+    // (`https://ezpay-api.ezstart.xyz`) so the canonical EZPay cloud
+    // works zero-config. This kills the legacy REG-2 bug structurally —
+    // the relative `/api/plans` request that previously hit the consumer
+    // app's origin can no longer happen.
     const fetchMock = vi.fn(
       async () =>
         new Response(JSON.stringify({ success: true, data: [] }), {
@@ -473,10 +474,9 @@ describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
     })
     expect(plansCall).toBeDefined()
     const plansUrl = plansCall?.[0] as string
-    // Without apiUrl, the call starts with `/api/plans` — a relative URL that
-    // would hit the hosting origin (the REG-2 bug). The fix is at the
-    // consumer side: pass `config.apiUrl` explicitly.
-    expect(plansUrl.startsWith('/api/plans')).toBe(true)
+    // Now defaults to the canonical prod host. Self-hosted callers must
+    // override via `config.apiUrl` or `NEXT_PUBLIC_EZPAY_API_URL`.
+    expect(plansUrl.startsWith('https://ezpay-api.ezstart.xyz/api/plans')).toBe(true)
   })
 })
 

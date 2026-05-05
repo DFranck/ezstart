@@ -75,6 +75,9 @@ export {
 // Utils
 export { formatCurrency, getCurrencySymbol } from './format-currency.js'
 
+// Hardcoded prod defaults (Stripe-pattern)
+export { DEFAULT_PAY_API_URL } from './defaults.js'
+
 // Providers
 export { PaymentProviderRegistry } from './providers/registry.js'
 export { StripeProvider } from './providers/stripe.js'

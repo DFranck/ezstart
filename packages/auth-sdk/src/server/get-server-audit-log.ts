@@ -14,6 +14,7 @@
 
 import './_internal/server-only.js'
 
+import { resolveAuthApiUrl } from './_internal/resolve-api-url.js'
 import type { AuditLogAction, AuditLogEntry } from '../core/types.js'
 
 /** Minimal logger surface — opt-in, avoids hard dep on `@ezstart/logger`. */
@@ -39,8 +40,13 @@ export interface GetServerAuditLogOptions {
    *
    * The `/api/auth/me/audit-log` path is appended automatically. Trailing
    * slashes are tolerated.
+   *
+   * **Optional since Phase A1 (2026-05-05).** When omitted, the helper
+   * falls back to `process.env.NEXT_PUBLIC_EZAUTH_API_URL`, then to the
+   * shipped production default (`https://ezauth-api.ezstart.xyz`). Pass
+   * an explicit URL to override (self-hosted EZAuth, custom cloud, etc.).
    */
-  apiUrl: string
+  apiUrl?: string
   /**
    * Raw `Cookie` header from the incoming request. Pass `undefined` (or an
    * empty string) for unauthenticated requests — the helper short-circuits
@@ -98,7 +104,8 @@ export async function getServerAuditLog(
   }
 
   const fetchFn = fetchImpl ?? fetch
-  const baseUrl = apiUrl.replace(/\/+$/, '')
+  const resolvedApiUrl = resolveAuthApiUrl(apiUrl)
+  const baseUrl = resolvedApiUrl.replace(/\/+$/, '')
 
   const params = new URLSearchParams()
   if (filters?.limit !== undefined) params.set('limit', String(filters.limit))

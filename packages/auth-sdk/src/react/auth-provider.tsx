@@ -11,6 +11,7 @@ import {
 import { useStore } from 'zustand'
 import { CoreAuthClient, fetchKeyConfig, resolveSDKConfig } from '../core/auth-client.js'
 import { resolveEffectiveAuthMode } from '../core/cross-origin.js'
+import { DEFAULT_AUTH_API_URL } from '../core/defaults.js'
 import type {
   AuthMode,
   AuthScope,
@@ -333,6 +334,16 @@ export function AuthProvider({
     // and `process.env?` optional chaining disables the substitution.
     const key = publishableKey ?? process.env.NEXT_PUBLIC_EZAUTH_KEY
 
+    // Stripe-style apiUrl resolution (Phase A1 ENV-DIET 2026-05-05):
+    //   1. explicit `apiUrl` prop          (caller knows best)
+    //   2. NEXT_PUBLIC_EZAUTH_API_URL      (dev / staging / self-hosted override)
+    //   3. DEFAULT_AUTH_API_URL            (shipped prod default for *.ezstart.xyz)
+    //
+    // The default kicks in only when neither prop nor env var is provided, so
+    // any pre-existing consumer wiring keeps working unchanged. Consumers
+    // running against the canonical EZAuth cloud can drop the env var entirely.
+    const resolvedApiUrl = apiUrl ?? process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? DEFAULT_AUTH_API_URL
+
     // Defensive fallback (dev-only): if webUrl wasn't provided AND apiUrl
     // looks like the canonical localhost dev pattern (port 6110), derive the
     // web URL by swapping to port 6111. This unblocks consumer apps that forgot
@@ -343,15 +354,15 @@ export function AuthProvider({
     // `api.<host>` → `app.<host>` mapping we can safely guess.
     const resolvedWebUrl =
       webUrl ??
-      (apiUrl?.match(/^https?:\/\/localhost:6110(\/|$)/)
-        ? apiUrl.replace(/:6110(\/|$)/, ':6111$1')
+      (resolvedApiUrl?.match(/^https?:\/\/localhost:6110(\/|$)/)
+        ? resolvedApiUrl.replace(/:6110(\/|$)/, ':6111$1')
         : undefined)
 
     return {
       publishableKey: mode === 'first-party' ? undefined : (key ?? undefined),
       firstParty: mode === 'first-party',
       appName,
-      apiUrl,
+      apiUrl: resolvedApiUrl,
       webUrl: resolvedWebUrl,
     }
   }, [publishableKey, mode, appName, apiUrl, webUrl])

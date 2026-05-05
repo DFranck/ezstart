@@ -1,3 +1,4 @@
+import { getServerKeyConfig } from '@ezstart/auth-sdk/server'
 import {
   Button,
   Card,
@@ -11,11 +12,14 @@ import {
   Section,
 } from '@ezstart/ui/components'
 import type { Metadata } from 'next'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 
-const EZAUTH_WEB_URL = process.env.NEXT_PUBLIC_EZAUTH_WEB_URL ?? 'https://ezauth.ezstart.xyz'
-const EZPAY_WEB_URL = process.env.NEXT_PUBLIC_EZPAY_WEB_URL ?? 'https://ezpay.ezstart.xyz'
 const GITHUB_URL = 'https://github.com/DFranck/ezstart'
+// Canonical production fallbacks used when neither `/keys/config` nor a
+// publishable key is configured. Keeps the landing renderable on a fresh
+// `pnpm dev ezstart` without requiring any env wiring.
+const EZAUTH_WEB_FALLBACK = 'https://ezauth.ezstart.xyz'
+const EZPAY_WEB_FALLBACK = 'https://ezpay.ezstart.xyz'
 
 export const metadata: Metadata = {
   title: 'Platform pricing',
@@ -24,8 +28,26 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-export default function PricingPage() {
-  const t = useTranslations('pricing')
+/**
+ * Phase A1 ENV-DIET (2026-05-05) — `EZAUTH_WEB_URL` is resolved server-side
+ * via the new {@link getServerKeyConfig} helper. The publishable key
+ * (`NEXT_PUBLIC_EZAUTH_KEY`) becomes the single source of truth for the
+ * EZAuth dashboard URL — same Stripe / Clerk pattern as the client SDK.
+ * Falls back to the canonical prod host when no key is configured.
+ *
+ * `EZPAY_WEB_URL` is NOT resolvable from `/keys/config` (that endpoint
+ * lives on the EZPay API and would require its own publishable key); we
+ * still rely on the canonical production fallback for now. A future Phase
+ * A2 can introduce `getServerPayKeyConfig` from `@ezstart/pay-sdk/server`.
+ */
+export default async function PricingPage() {
+  const t = await getTranslations('pricing')
+
+  const ezauthKeyConfig = await getServerKeyConfig({
+    publishableKey: process.env.NEXT_PUBLIC_EZAUTH_KEY,
+  })
+  const ezauthWebUrl = ezauthKeyConfig?.webUrl ?? EZAUTH_WEB_FALLBACK
+  const ezpayWebUrl = EZPAY_WEB_FALLBACK
 
   return (
     <Main withHeaderOffset>
@@ -44,7 +66,7 @@ export default function PricingPage() {
               <P className="text-muted-foreground">{t('ezauthBody')}</P>
               <Button asChild variant="default">
                 {/* eslint-disable-next-line @ezstart/ezstart/no-raw-html -- external app URL */}
-                <a href={`${EZAUTH_WEB_URL}/pricing`} target="_blank" rel="noopener noreferrer">
+                <a href={`${ezauthWebUrl}/pricing`} target="_blank" rel="noopener noreferrer">
                   {t('ezauthCta')}
                 </a>
               </Button>
@@ -58,7 +80,7 @@ export default function PricingPage() {
               <P className="text-muted-foreground">{t('ezpayBody')}</P>
               <Button asChild variant="default">
                 {/* eslint-disable-next-line @ezstart/ezstart/no-raw-html -- external app URL */}
-                <a href={`${EZPAY_WEB_URL}/pricing`} target="_blank" rel="noopener noreferrer">
+                <a href={`${ezpayWebUrl}/pricing`} target="_blank" rel="noopener noreferrer">
                   {t('ezpayCta')}
                 </a>
               </Button>

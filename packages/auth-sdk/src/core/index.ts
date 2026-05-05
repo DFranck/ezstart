@@ -18,6 +18,9 @@ export { TokenManager, createMemoryStorage, createLocalStorage } from './token-m
 // Errors
 export { AuthError } from './errors.js'
 
+// Hardcoded prod defaults (Stripe-pattern)
+export { DEFAULT_AUTH_API_URL } from './defaults.js'
+
 // Cross-origin detection (used by AuthProvider to auto-fallback authMode)
 export {
   isSameRegistrableDomain,

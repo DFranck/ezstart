@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation'
 import { RegisterButton, useAuth } from '@ezstart/auth-sdk'
 import type { Plan } from '@ezstart/pay-sdk'
 import { PricingPage } from '@ezstart/pay-sdk/components'
+import { useApplicationContext } from '@ezstart/pay-sdk'
 import type { KnownIconName } from '@ezstart/ui/components'
 import {
   AuroraEffect,
@@ -21,8 +22,6 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
-
-const EZAUTH_APP_ID = process.env.NEXT_PUBLIC_EZAUTH_APP_ID
 
 // ---------------------------------------------------------------------------
 // Static data (icons, code snippets) — keys come from i18n
@@ -72,6 +71,11 @@ function Dashboard() {
 export default function HomePage() {
   const t = useTranslations('home')
   const { isAuthenticated } = useAuth()
+  // Phase A1 ENV-DIET (2026-05-05) — `applicationId` is auto-resolved by the
+  // pay-sdk PayProvider from `NEXT_PUBLIC_EZPAY_KEY` via ezpay's
+  // `/keys/config.applicationId`. No more `NEXT_PUBLIC_EZAUTH_APP_ID` env
+  // var needed in the consumer's `.env.local`.
+  const { applicationId } = useApplicationContext()
 
   // Synthetic Free tier rendered alongside the DB-fetched paid plans. EZPay
   // doesn't store a Free plan (no Stripe price needed for $0/month) but the
@@ -183,9 +187,9 @@ export default function HomePage() {
       </LandingSection>
 
       <LandingSection id="pricing" align="center">
-        {EZAUTH_APP_ID ? (
+        {applicationId ? (
           <PricingPage
-            applicationId={EZAUTH_APP_ID}
+            applicationId={applicationId}
             additionalPlans={[freeTierPlan]}
             texts={{
               title: t('pricingSectionTitle'),

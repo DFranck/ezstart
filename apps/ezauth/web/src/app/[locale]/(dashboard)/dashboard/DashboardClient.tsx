@@ -13,6 +13,7 @@ import {
   type EZAuthDashboardExtraSection,
   type EZAuthDashboardTexts,
 } from '@ezstart/auth-sdk/components'
+import { useApplicationContext } from '@ezstart/pay-sdk'
 import {
   BillingDashboard,
   InvoiceHistorySection,
@@ -97,6 +98,12 @@ export function DashboardClient({
     router.replace(`/${locale}/login`)
   }, [router, locale])
   const { user, isAuthenticated, isAuthReady } = useAuthGate({ onRedirect: handleRedirect })
+  // Phase A1 ENV-DIET (2026-05-05) — `applicationId` is auto-resolved by the
+  // pay-sdk PayProvider from `NEXT_PUBLIC_EZPAY_KEY` via ezpay's
+  // `/keys/config.applicationId`. No more `NEXT_PUBLIC_EZAUTH_APP_ID` env
+  // var needed in the consumer's `.env.local`. The PayProvider for ezauth's
+  // own dashboard sits in `components/providers.tsx` (PayBridge).
+  const { applicationId: ezauthApplicationId } = useApplicationContext()
 
   const { data: myApps } = useMyApplications(isAuthenticated)
 
@@ -493,9 +500,11 @@ export function DashboardClient({
   // Slot: Billing — shows the user's own EZAuth subscription (via pay-sdk) +
   // Manage button that opens the Stripe Customer Portal.
   //
-  // The EZAuth PayProvider is intentionally mounted without a `publishableKey`
-  // (ezauth keys can't resolve ezpay's `/api/keys/config`), so we pass the
-  // Application id explicitly here to scope the dashboard to EZAuth plans.
+  // Phase A1 ENV-DIET (2026-05-05) — `applicationId` now comes from
+  // `useApplicationContext()`. The EZAuth PayBridge mounts pay-sdk with
+  // `NEXT_PUBLIC_EZPAY_KEY`, which auto-resolves the Application id via
+  // ezpay's `/api/keys/config`. The previous `process.env.NEXT_PUBLIC_EZAUTH_APP_ID`
+  // env var is no longer required.
   const invoicesTexts: Partial<InvoiceHistorySectionTexts> = {
     title: tInvoices('title'),
     description: tInvoices('description'),
@@ -590,7 +599,7 @@ export function DashboardClient({
   const billingSlot = (
     <Div className="space-y-6">
       <BillingDashboard
-        applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID}
+        applicationId={ezauthApplicationId ?? undefined}
         userId={user._id}
         locale={locale}
         texts={billingDashboardTexts}
@@ -604,7 +613,7 @@ export function DashboardClient({
         }}
       />
       <InvoiceHistorySection
-        applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID}
+        applicationId={ezauthApplicationId ?? undefined}
         userId={user._id}
         texts={invoicesTexts}
       />

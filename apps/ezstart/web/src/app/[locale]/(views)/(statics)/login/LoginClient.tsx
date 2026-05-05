@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuthContext } from '@ezstart/auth-sdk'
 import {
   Card,
   CardContent,
@@ -14,7 +15,6 @@ import {
 import { useTranslations } from 'next-intl'
 import { useEffect } from 'react'
 
-const EZAUTH_WEB_URL = process.env.NEXT_PUBLIC_EZAUTH_WEB_URL ?? 'http://localhost:6111'
 const EZAUTH_KEY = process.env.NEXT_PUBLIC_EZAUTH_KEY
 
 interface LoginClientProps {
@@ -26,18 +26,24 @@ interface LoginClientProps {
  * confirmed the user is anonymous. Bounces the browser to the EZAuth hosted
  * `/login` with `key` + `redirect_uri` so the SDK can exchange the code on
  * the way back via `/auth/callback`.
+ *
+ * Phase A1 ENV-DIET (2026-05-05) — `webUrl` is read from `useAuthContext()`
+ * which auto-resolves it from `/keys/config.webUrl`. The legacy
+ * `NEXT_PUBLIC_EZAUTH_WEB_URL` env var is no longer required.
  */
 export default function LoginClient({ locale }: LoginClientProps) {
   const t = useTranslations('login')
+  const { webUrl } = useAuthContext()
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    if (!webUrl) return
 
     const callbackUrl = `${window.location.origin}/${locale}/auth/callback`
     const params = new URLSearchParams({ redirect_uri: callbackUrl })
     if (EZAUTH_KEY) params.set('key', EZAUTH_KEY)
-    window.location.assign(`${EZAUTH_WEB_URL}/${locale}/login?${params.toString()}`)
-  }, [locale])
+    window.location.assign(`${webUrl}/${locale}/login?${params.toString()}`)
+  }, [locale, webUrl])
 
   return (
     <Main withHeaderOffset>

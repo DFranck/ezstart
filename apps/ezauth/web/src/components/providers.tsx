@@ -65,9 +65,11 @@ function PayBridge({ children, locale }: { children: React.ReactNode; locale: st
       // `/keys/config.applicationId`. Make sure the EZPay publishable key is
       // seeded against the ezauth-tenant Application in EZPay's DB so the
       // resolved `applicationId` correctly scopes payments to ezauth.
+      // Phase A1 ENV-DIET (2026-05-05) — `apiUrl` is OPTIONAL: SDK ships
+      // `https://ezpay-api.ezstart.xyz` as a hardcoded default for prod.
       appName="ezauth"
       publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
-      config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
+      config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL }}
       locale={locale}
       getToken={() => getSnapshot().accessToken}
       onAuthFailure={onAuthFailure}
@@ -114,10 +116,12 @@ export function Providers({
         authMode="httpOnly"
         mode="first-party"
         publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
-        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
-        // `webUrl` is auto-resolved from the publishable key via
-        // `/keys/config.webUrl` (Phase 3 ENV-DIET 2026-05-05). The legacy
-        // `NEXT_PUBLIC_EZAUTH_WEB_URL` env var is no longer required.
+        // Phase A1 ENV-DIET (2026-05-05) — `apiUrl` is OPTIONAL in production
+        // (SDK ships `https://ezauth-api.ezstart.xyz` as a hardcoded default).
+        // The prop is still threaded so dev / staging consumers can override
+        // via `NEXT_PUBLIC_EZAUTH_API_URL` in their `.env.local`. `webUrl` is
+        // auto-resolved from `/keys/config.webUrl` (Phase 3 ENV-DIET 2026-05-05).
+        apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL}
         initialUser={initialUser}
       >
         <QueryProvider>

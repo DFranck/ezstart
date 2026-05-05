@@ -14,6 +14,7 @@
 
 import './_internal/server-only.js'
 
+import { resolveAuthApiUrl } from './_internal/resolve-api-url.js'
 import type { Application } from '../core/types.js'
 
 /** Minimal logger surface — opt-in, avoids hard dep on `@ezstart/logger`. */
@@ -29,8 +30,13 @@ export interface GetServerApplicationOptions {
    *
    * The `/api/applications/:id` path is appended automatically. Trailing
    * slashes are tolerated.
+   *
+   * **Optional since Phase A1 (2026-05-05).** When omitted, the helper
+   * falls back to `process.env.NEXT_PUBLIC_EZAUTH_API_URL`, then to the
+   * shipped production default (`https://ezauth-api.ezstart.xyz`). Pass
+   * an explicit URL to override (self-hosted EZAuth, custom cloud, etc.).
    */
-  apiUrl: string
+  apiUrl?: string
   /**
    * Raw `Cookie` header from the incoming request. Pass `undefined` (or an
    * empty string) for unauthenticated requests — the helper short-circuits
@@ -100,7 +106,8 @@ export async function getServerApplication(
   }
 
   const fetchFn = fetchImpl ?? fetch
-  const baseUrl = apiUrl.replace(/\/+$/, '')
+  const resolvedApiUrl = resolveAuthApiUrl(apiUrl)
+  const baseUrl = resolvedApiUrl.replace(/\/+$/, '')
   const url = `${baseUrl}/api/applications/${encodeURIComponent(id)}`
 
   try {

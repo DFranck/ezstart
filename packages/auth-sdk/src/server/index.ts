@@ -52,6 +52,12 @@ export type {
   GetServerApplicationLogger,
 } from './get-server-application.js'
 
+export { getServerKeyConfig } from './get-server-key-config.js'
+export type {
+  GetServerKeyConfigOptions,
+  GetServerKeyConfigLogger,
+} from './get-server-key-config.js'
+
 // ---------------------------------------------------------------------------
 // Feature gate (server-only — app+user context aware)
 // ---------------------------------------------------------------------------
@@ -71,6 +77,11 @@ export {
   createCoreAuthClient as createAuthClient,
 } from '../core/auth-client.js'
 export type { AuthClientConfig } from '../core/types.js'
+
+// Hardcoded prod default — same value used by the client `<AuthProvider>`
+// when no `apiUrl` prop / env var is provided. Re-exported so server
+// callers can opt into the same fallback explicitly when composing URLs.
+export { DEFAULT_AUTH_API_URL } from '../core/defaults.js'
 
 // ---------------------------------------------------------------------------
 // Types — shared between API + server-side helpers
