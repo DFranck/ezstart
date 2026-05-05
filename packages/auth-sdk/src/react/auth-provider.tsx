@@ -308,6 +308,11 @@ export function AuthProvider({
 
   const storeState = useStore(store)
   const keyConfigRef = useRef<PublishableKeyConfig | null>(null)
+  // Mirror the latest key config on a state slot so context consumers can read
+  // it (Provider, useAuthContext) rather than only reading the (snapshot-stale)
+  // ref. Necessary for the auto-resolved `webUrl` exposure documented in
+  // `standard-sdk-dx.md` §0bis (consumer drops `NEXT_PUBLIC_EZAUTH_WEB_URL`).
+  const [keyConfigState, setKeyConfigState] = useState<PublishableKeyConfig | null>(null)
 
   // Determine initial scope from mode prop
   const initialScope: AuthScope = mode === 'first-party' ? 'first-party' : 'live'
@@ -424,6 +429,10 @@ export function AuthProvider({
       .then(config => {
         if (cancelled) return
         keyConfigRef.current = config
+        // Surface the resolved config on a state slot so the context picks up
+        // the auto-resolved `webUrl` (and any other fields consumers might
+        // start to depend on) without forcing the caller to wire it via env.
+        setKeyConfigState(config)
         // Update client app name ONLY if the consumer did NOT provide one OR
         // the provided name is the placeholder `'pending'`. When the consumer
         // passes an explicit `appName` (e.g. `<AuthProvider appName="ezpay">`),
@@ -450,6 +459,7 @@ export function AuthProvider({
           plan: config.plan,
           scope: config.scope,
           consumerAppName,
+          webUrl: config.webUrl,
         })
       })
       .catch(err => {
@@ -651,12 +661,21 @@ export function AuthProvider({
     [redirectAfterLogout, onLogout, resolvedStorageKey, resolvedLogoutTexts]
   )
 
+  // Auto-resolve `webUrl` from the publishable key config when the consumer
+  // didn't pass an explicit `webUrl` prop. The `/keys/config` endpoint returns
+  // the canonical EZAuth web URL for the resolved environment (dev/staging/
+  // prod), which means consumers can drop `NEXT_PUBLIC_EZAUTH_WEB_URL` from
+  // their env and rely entirely on the publishable key as the source of truth.
+  // The explicit `webUrl` prop still wins when provided — same precedence as
+  // every other Provider prop in the SDK.
+  const effectiveWebUrl = webUrl ?? keyConfigState?.webUrl ?? resolvedWebUrl
+
   const contextValue = useMemo(
     () => ({
       client,
       appName: resolvedAppName,
-      webUrl: resolvedWebUrl,
-      keyConfig: keyConfigRef.current,
+      webUrl: effectiveWebUrl,
+      keyConfig: keyConfigState,
       scope: resolvedScope,
       publishableKey: sdkConfig.publishableKey,
       logoutDefaults,
@@ -664,7 +683,8 @@ export function AuthProvider({
     [
       client,
       resolvedAppName,
-      resolvedWebUrl,
+      effectiveWebUrl,
+      keyConfigState,
       resolvedScope,
       sdkConfig.publishableKey,
       logoutDefaults,

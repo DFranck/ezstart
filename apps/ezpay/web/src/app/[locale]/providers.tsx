@@ -65,7 +65,9 @@ export function Providers({
         <AuthProvider
           appName="ezpay"
           apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
-          webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+          // `webUrl` is auto-resolved from the publishable key via
+          // `/keys/config.webUrl` (Phase 3 ENV-DIET 2026-05-05). The legacy
+          // `NEXT_PUBLIC_EZAUTH_WEB_URL` env var is no longer required.
           publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
           initialUser={initialUser}
         >

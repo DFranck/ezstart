@@ -261,6 +261,12 @@ export function PayProvider({
   // Pending AND failed both keep `isReady=false` to prevent fail-open cross-app queries.
   const [resolutionStatus, setResolutionStatus] =
     useState<ApplicationResolutionStatus>(initialStatus)
+  // Auto-resolved EZPay web URL (from `/keys/config.webUrl`). When the consumer
+  // didn't pass `payWebUrl` explicitly AND the publishable key resolve returns
+  // a `webUrl`, we surface it via the React context so fallback CTAs ("Get
+  // your key") render with the right host even in production. Without this,
+  // consumers must set `NEXT_PUBLIC_EZPAY_WEB_URL` manually for every app.
+  const [resolvedWebUrlFromKey, setResolvedWebUrlFromKey] = useState<string | null>(null)
 
   const setApplicationContext = usePayStore(state => state.setApplicationContext)
 
@@ -350,6 +356,12 @@ export function PayProvider({
         if (cancelled) return
         setApplicationId(cfg.applicationId)
         setAppSlug(cfg.appSlug)
+        // Capture the API-returned EZPay web URL so the context can surface it
+        // when the consumer didn't pass `payWebUrl`. Skipped when the value is
+        // empty — falls back to localhost auto-detect / null.
+        if (cfg.webUrl && cfg.webUrl.length > 0) {
+          setResolvedWebUrlFromKey(cfg.webUrl)
+        }
         setResolutionStatus('ready')
         setApplicationContext({
           applicationId: cfg.applicationId,
@@ -388,9 +400,15 @@ export function PayProvider({
 
   const isReady = resolutionStatus === 'ready' || resolutionStatus === 'idle'
 
+  // Precedence for the EZPay web URL (highest → lowest):
+  //   1. Explicit `payWebUrl` prop           — caller knows best
+  //   2. `webUrl` from `/keys/config` resolve — Stripe-style auto-config
+  //   3. localhost dev auto-detect           — keeps zero-config DX in dev
+  //   4. `null`                              — production without explicit
+  //                                            wiring or key resolve fails
   const resolvedPayWebUrl = useMemo(
-    () => resolvePayWebUrl(payWebUrl, config?.apiUrl),
-    [payWebUrl, config?.apiUrl]
+    () => resolvePayWebUrl(payWebUrl ?? resolvedWebUrlFromKey ?? undefined, config?.apiUrl),
+    [payWebUrl, resolvedWebUrlFromKey, config?.apiUrl]
   )
 
   const resolvedLocale = locale && locale.length > 0 ? locale : 'en'

@@ -50,7 +50,9 @@ export function Providers({
         appName="ezstart"
         authMode="httpOnly"
         apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
-        webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+        // `webUrl` is auto-resolved from the publishable key via
+        // `/keys/config.webUrl` (Phase 3 ENV-DIET 2026-05-05). The legacy
+        // `NEXT_PUBLIC_EZAUTH_WEB_URL` env var is no longer required.
         publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
         initialUser={initialUser}
       >
@@ -78,11 +80,13 @@ export function Providers({
  * helper to avoid stale closures and forwards a Context-bound `onAuthFailure`
  * callback.
  *
- * NOTE — `applicationId` is the ezauth Application id for ezstart. We use
- * `applicationId` over `publishableKey` here because ezstart is the hub: it
- * talks to the ezpay API on behalf of the ezstart app (no separate ezpay
- * publishable key needed). The ezauth JWT carries the user identity and
- * `applicationId` scopes the ezpay queries to the ezstart tenant.
+ * Phase 3 ENV-DIET (2026-05-05) — `applicationId` and `payWebUrl` are now
+ * auto-resolved by pay-sdk from `NEXT_PUBLIC_EZPAY_KEY` via ezpay's
+ * `/keys/config.applicationId` + `/keys/config.webUrl`. The legacy
+ * `NEXT_PUBLIC_EZAUTH_APP_ID` and `NEXT_PUBLIC_EZPAY_WEB_URL` env vars are
+ * no longer required. Make sure `NEXT_PUBLIC_EZPAY_KEY` is seeded against
+ * the ezstart-tenant Application in EZPay's DB so the resolved
+ * `applicationId` correctly scopes payments / subscriptions to ezstart.
  */
 function PayProviderWrapper({ children, locale }: { children: React.ReactNode; locale: Locale }) {
   const getSnapshot = useAuthStoreGetSnapshot()
@@ -93,10 +97,9 @@ function PayProviderWrapper({ children, locale }: { children: React.ReactNode; l
 
   return (
     <PayProvider
-      applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID ?? ''}
       appName="ezstart"
+      publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
       config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
-      payWebUrl={process.env.NEXT_PUBLIC_EZPAY_WEB_URL ?? 'http://localhost:6131'}
       locale={locale}
       getToken={() => getSnapshot().accessToken}
       onAuthFailure={onAuthFailure}

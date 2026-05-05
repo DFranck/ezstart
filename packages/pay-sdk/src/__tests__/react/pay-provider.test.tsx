@@ -480,6 +480,100 @@ describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
   })
 })
 
+describe('PayProvider — Phase 3 auto-resolve payWebUrl from /keys/config', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    usePayStore.setState({
+      applicationId: null,
+      appSlug: null,
+      isReady: false,
+      applicationResolutionStatus: 'idle',
+    })
+  })
+
+  it('auto-resolves `payWebUrl` from /keys/config.webUrl when prop is omitted', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+      if (url.includes('/keys/config')) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              applicationId: 'app_autoweb',
+              appSlug: 'ezbill',
+              apiUrl: 'http://api.example.com',
+              webUrl: 'https://ezpay.example.com',
+              type: 'publishable',
+              env: 'live',
+              scope: 'user',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      return new Response(JSON.stringify({ error: 'Not found' }), { status: 404 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }) => (
+        <PayProvider
+          publishableKey="ez_pk_live_autoweb"
+          config={{ apiUrl: 'http://api.example.com' }}
+        >
+          {children}
+        </PayProvider>
+      ),
+    })
+
+    // Wait for the resolve to populate the context with the API-returned URL.
+    await waitFor(() => expect(result.current.applicationId).toBe('app_autoweb'))
+    await waitFor(() => expect(result.current.payWebUrl).toBe('https://ezpay.example.com'))
+  })
+
+  it('explicit `payWebUrl` prop wins over /keys/config.webUrl', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+      if (url.includes('/keys/config')) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              applicationId: 'app_override',
+              appSlug: 'ezbill',
+              webUrl: 'https://ezpay.api-resolved.example.com',
+              type: 'publishable',
+              env: 'live',
+              scope: 'user',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      return new Response(JSON.stringify({ error: 'Not found' }), { status: 404 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { result } = renderHook(() => useApplicationContext(), {
+      wrapper: ({ children }) => (
+        <PayProvider
+          publishableKey="ez_pk_live_override"
+          payWebUrl="https://prop-wins.example.com"
+          config={{ apiUrl: 'http://api.example.com' }}
+        >
+          {children}
+        </PayProvider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current.applicationId).toBe('app_override'))
+    // Even after the API resolves, the explicit prop is still authoritative.
+    expect(result.current.payWebUrl).toBe('https://prop-wins.example.com')
+  })
+})
+
 describe('PayProvider — payWebUrl propagation', () => {
   afterEach(() => {
     vi.restoreAllMocks()

@@ -60,8 +60,13 @@ function PayBridge({ children, locale }: { children: React.ReactNode; locale: st
   }, [storeApi])
   return (
     <PayProvider
-      applicationId={process.env.NEXT_PUBLIC_EZAUTH_APP_ID ?? ''}
+      // Phase 3 ENV-DIET (2026-05-05) — `applicationId` is auto-resolved by
+      // pay-sdk from `NEXT_PUBLIC_EZPAY_KEY` via ezpay's
+      // `/keys/config.applicationId`. Make sure the EZPay publishable key is
+      // seeded against the ezauth-tenant Application in EZPay's DB so the
+      // resolved `applicationId` correctly scopes payments to ezauth.
       appName="ezauth"
+      publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
       config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL ?? 'http://localhost:6130' }}
       locale={locale}
       getToken={() => getSnapshot().accessToken}
@@ -110,16 +115,18 @@ export function Providers({
         mode="first-party"
         publishableKey={process.env.NEXT_PUBLIC_EZAUTH_KEY}
         apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110'}
-        webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
+        // `webUrl` is auto-resolved from the publishable key via
+        // `/keys/config.webUrl` (Phase 3 ENV-DIET 2026-05-05). The legacy
+        // `NEXT_PUBLIC_EZAUTH_WEB_URL` env var is no longer required.
         initialUser={initialUser}
       >
         <QueryProvider>
           {/*
-            PayProvider is scoped via `applicationId` (not `publishableKey`):
-            NEXT_PUBLIC_EZAUTH_KEY is an EZAUTH publishable key; passing it
-            here would make PayProvider call ezpay `/api/keys/config` with an
-            ezauth key and 404. Using `applicationId` bypasses the key-config
-            resolve and scopes ezpay queries directly to the ezauth tenant.
+            PayProvider is scoped via `NEXT_PUBLIC_EZPAY_KEY` (the EZPay
+            publishable key) — pay-sdk auto-resolves `applicationId` from
+            ezpay's `/keys/config.applicationId`. NOTE: `NEXT_PUBLIC_EZAUTH_KEY`
+            is an EZAUTH key and would 404 against ezpay's endpoint, so the
+            two publishable keys MUST stay distinct.
           */}
           <PayBridge locale={locale}>{children}</PayBridge>
         </QueryProvider>
