@@ -1,6 +1,7 @@
 'use client'
 
-import { useAuth, useMyApplications } from '@ezstart/auth-sdk'
+import { useMyApplications } from '@ezstart/auth-sdk'
+import { useAuthGate } from '@/hooks/useAuthGate'
 import {
   ApplicationsList,
   DeleteAccountSection,
@@ -22,7 +23,7 @@ import { Button, Card, CardContent, Div, H3, Icon, P, Span, Spinner } from '@ezs
 import type { ApiKeyItem, Application, AuditLogEntry } from '@ezstart/auth-sdk'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useCallback } from 'react'
 import { Link } from '@/i18n/navigation'
 import { EzauthScopeIndicator } from '@/components/ezauth-scope-indicator'
 
@@ -83,21 +84,23 @@ export function DashboardClient({
   const locale = useLocale()
   const router = useRouter()
 
-  const { user, isAuthenticated } = useAuth()
-
   // SSR initialUser bootstrap: useAuth() returns the correct user on the very
   // first paint when the user is signed in (no mount guard needed). When the
   // user is anonymous, redirect client-side; the spinner below covers the
   // brief render before navigation completes.
+  //
+  // Gate redirect on `isAuthReady` so the cross-origin staging race condition
+  // (SSR returns null cookie → client persist hydrates from localStorage
+  // async) does NOT bounce an authenticated user to /login before hydration
+  // completes. Cf. .claude/rules/nextjs.md §1.1 + standard-saas.md §2.1.
+  const handleRedirect = useCallback(() => {
+    router.replace(`/${locale}/login`)
+  }, [router, locale])
+  const { user, isAuthenticated, isAuthReady } = useAuthGate({ onRedirect: handleRedirect })
+
   const { data: myApps } = useMyApplications(isAuthenticated)
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace(`/${locale}/login`)
-    }
-  }, [isAuthenticated, router, locale])
-
-  if (!isAuthenticated || !user) {
+  if (!isAuthReady || !isAuthenticated || !user) {
     return (
       <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />

@@ -1,13 +1,13 @@
 'use client'
 
-import { useAuth } from '@ezstart/auth-sdk'
 import { ApplicationDetailView } from '@ezstart/auth-sdk/components'
 import type { ApplicationDetailViewTexts, DeveloperPortalTexts } from '@ezstart/auth-sdk/components'
 import type { ApiKeyItem, Application } from '@ezstart/auth-sdk'
 import { Div, Spinner } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useCallback } from 'react'
+import { useAuthGate } from '@/hooks/useAuthGate'
 
 export interface DeveloperDetailClientProps {
   /** Application id from the dynamic route segment. */
@@ -41,18 +41,21 @@ export function DeveloperDetailClient({
   const tOAuth = useTranslations('dashboard.oauthProviders')
   const locale = useLocale()
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
 
   // SSR initialUser bootstrap: useAuth() is correct on first paint when signed
   // in. When anonymous, redirect client-side; the spinner below covers the
   // brief render before navigation completes.
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace(`/${locale}/login`)
-    }
-  }, [isAuthenticated, router, locale])
+  //
+  // Gate redirect on `isAuthReady` so the cross-origin staging race condition
+  // (SSR returns null cookie → client persist hydrates from localStorage
+  // async) does NOT bounce an authenticated user to /login before hydration
+  // completes. Cf. .claude/rules/nextjs.md §1.1 + standard-saas.md §2.1.
+  const handleRedirect = useCallback(() => {
+    router.replace(`/${locale}/login`)
+  }, [router, locale])
+  const { user, isAuthenticated, isAuthReady } = useAuthGate({ onRedirect: handleRedirect })
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthReady || !isAuthenticated || !user) {
     return (
       <Div className="flex flex-1 items-center justify-center min-h-[50vh]">
         <Spinner variant="primary" size="lg" />
