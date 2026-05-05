@@ -82,8 +82,8 @@ const loginCookieController = async (req: Request, res: Response) => {
     })
 
     // Set httpOnly cookies — access (15m, path=/) + refresh (30d, path=/api/auth/refresh)
-    res.cookie(ACCESS_COOKIE_NAME, authResult.access_token, buildAuthCookieOptions())
-    res.cookie(REFRESH_COOKIE_NAME, authResult.refreshToken, buildRefreshCookieOptions())
+    res.cookie(ACCESS_COOKIE_NAME, authResult.access_token, buildAuthCookieOptions(req))
+    res.cookie(REFRESH_COOKIE_NAME, authResult.refreshToken, buildRefreshCookieOptions(req))
 
     // Return user info + refresh token (refresh token duplicated in body for
     // backwards-compat with the localStorage mode; httpOnly consumers ignore it)

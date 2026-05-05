@@ -64,8 +64,8 @@ const refreshController = async (req: Request, res: Response) => {
     })
 
     // Rotate both cookies in parallel with the body response (dual-mode).
-    res.cookie(ACCESS_COOKIE_NAME, result.access_token, buildAuthCookieOptions())
-    res.cookie(REFRESH_COOKIE_NAME, result.refreshToken, buildRefreshCookieOptions())
+    res.cookie(ACCESS_COOKIE_NAME, result.access_token, buildAuthCookieOptions(req))
+    res.cookie(REFRESH_COOKIE_NAME, result.refreshToken, buildRefreshCookieOptions(req))
 
     sendSuccess(res, {
       accessToken: result.access_token,

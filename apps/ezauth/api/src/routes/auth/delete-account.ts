@@ -81,9 +81,9 @@ const deleteAccountResponseSchema = z.object({
  * no longer ride a stale cookie) and on the idempotent "already-deleted"
  * branch (in case the user retries from a tab that still has the cookie).
  */
-function clearAuthCookies(res: Response): void {
-  res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions())
-  res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions())
+function clearAuthCookies(req: Request, res: Response): void {
+  res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions(req))
+  res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions(req))
 }
 
 /**
@@ -125,7 +125,7 @@ const deleteAccountController = async (req: Request, res: Response) => {
     // Still clear cookies in case the caller retried from a tab that kept the
     // pre-deletion session alive.
     if (user.deletedAt && user.scheduledHardDeleteAt) {
-      clearAuthCookies(res)
+      clearAuthCookies(req, res)
       return sendSuccess(res, {
         message: 'Account already scheduled for deletion',
         scheduledDeletionAt: user.scheduledHardDeleteAt.toISOString(),
@@ -189,7 +189,7 @@ const deleteAccountController = async (req: Request, res: Response) => {
     // 6. Clear access + refresh httpOnly cookies on this response so the
     //    browser drops the still-unexpired JWT (15 min TTL would otherwise
     //    keep `/api/auth/verify` returning 200 until natural expiry).
-    clearAuthCookies(res)
+    clearAuthCookies(req, res)
 
     // 7. Audit log — record the session-revocation event with both the
     //    refresh-token revocation count and the cookie-clear flag so an

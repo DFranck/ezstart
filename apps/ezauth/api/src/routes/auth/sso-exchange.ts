@@ -121,8 +121,8 @@ const ssoExchangeController = async (req: Request, res: Response) => {
     })
 
     // Cookie options mirror login-cookie.ts EXACTLY — centralized in config/cookie.ts.
-    res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions())
-    res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions())
+    res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions(req))
+    res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions(req))
 
     // Tokens returned in body for localStorage-mode consumers (e.g. localhost
     // where httpOnly cookies can't cross ports); httpOnly consumers ignore them.

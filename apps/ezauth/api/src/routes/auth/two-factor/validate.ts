@@ -128,8 +128,8 @@ const validateController = async (req: Request, res: Response) => {
         ip: req.ip,
       })
 
-      res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions())
-      res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions())
+      res.cookie(ACCESS_COOKIE_NAME, session.access_token, buildAuthCookieOptions(req))
+      res.cookie(REFRESH_COOKIE_NAME, session.refreshToken, buildRefreshCookieOptions(req))
 
       return sendSuccess(res, {
         user: session.user,

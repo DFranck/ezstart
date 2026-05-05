@@ -73,8 +73,8 @@ function extractUserIdFromRequest(req: Request): string | null {
 // Logout: clear httpOnly cookies + revoke refresh tokens
 const logoutController = async (req: Request, res: Response) => {
   const clearCookies = () => {
-    res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions())
-    res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions())
+    res.clearCookie(ACCESS_COOKIE_NAME, buildAuthCookieClearOptions(req))
+    res.clearCookie(REFRESH_COOKIE_NAME, buildRefreshCookieClearOptions(req))
   }
 
   try {

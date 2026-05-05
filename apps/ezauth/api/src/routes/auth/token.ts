@@ -48,8 +48,8 @@ const tokenController = async (req: Request, res: Response) => {
     })
 
     // DUAL-MODE: Set httpOnly cookies (apps using cookie mode) + return tokens in body
-    res.cookie(ACCESS_COOKIE_NAME, token.access_token, buildAuthCookieOptions())
-    res.cookie(REFRESH_COOKIE_NAME, token.refreshToken, buildRefreshCookieOptions())
+    res.cookie(ACCESS_COOKIE_NAME, token.access_token, buildAuthCookieOptions(req))
+    res.cookie(REFRESH_COOKIE_NAME, token.refreshToken, buildRefreshCookieOptions(req))
 
     sendSuccess(res, {
       access_token: token.access_token,
