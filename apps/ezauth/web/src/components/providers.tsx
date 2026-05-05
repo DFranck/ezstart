@@ -119,9 +119,15 @@ export function Providers({
         // Phase A1 ENV-DIET (2026-05-05) — `apiUrl` is OPTIONAL in production
         // (SDK ships `https://ezauth-api.ezstart.xyz` as a hardcoded default).
         // The prop is still threaded so dev / staging consumers can override
-        // via `NEXT_PUBLIC_EZAUTH_API_URL` in their `.env.local`. `webUrl` is
-        // auto-resolved from `/keys/config.webUrl` (Phase 3 ENV-DIET 2026-05-05).
+        // via `NEXT_PUBLIC_EZAUTH_API_URL` in their `.env.local`.
+        // `webUrl` is REQUIRED in firstParty mode (no key fetch → no auto-resolve
+        // from /keys/config). On staging the Vercel preview URL differs from the
+        // hardcoded prod default `https://ezauth.ezstart.xyz`, so we MUST thread
+        // the env var through here. Without this, ezauth-web on staging would
+        // redirect login flows to the prod auth host (cross-env code mismatch).
+        // STAGING-FIRSTPARTY-WEBURL-CROSS-ENV-LEAK-001 postmortem in BACKLOG.md.
         apiUrl={process.env.NEXT_PUBLIC_EZAUTH_API_URL}
+        webUrl={process.env.NEXT_PUBLIC_EZAUTH_WEB_URL}
         initialUser={initialUser}
       >
         <QueryProvider>
