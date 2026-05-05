@@ -210,17 +210,19 @@ describe('resolveSDKConfig', () => {
     // -----------------------------------------------------------------------
 
     describe('webUrl localhost trap guard', () => {
-      it('throws off-localhost when webUrl defaults to localhost (env var missing)', () => {
+      it('falls back to DEFAULT_AUTH_WEB_URL off-localhost when no env var is wired', () => {
         stubNonLocalhost()
         // firstParty + apiUrl satisfies the api guard; webUrl falls back to
-        // DEFAULT_LOCAL_WEB because no NEXT_PUBLIC_EZAUTH_WEB_URL was wired.
-        expect(() =>
-          resolveSDKConfig({
-            firstParty: true,
-            apiUrl: 'https://auth.example.com',
-            appName: 'ezauth',
-          })
-        ).toThrow(/webUrl resolves to localhost/i)
+        // DEFAULT_AUTH_WEB_URL (Stripe-style hardcoded prod default) so a
+        // static Vercel build with no `NEXT_PUBLIC_EZAUTH_WEB_URL` env override
+        // doesn't trip the localhost trap at prerender time. The guard still
+        // catches EXPLICIT localhost values (covered in the next two tests).
+        const result = resolveSDKConfig({
+          firstParty: true,
+          apiUrl: 'https://auth.example.com',
+          appName: 'ezauth',
+        })
+        expect(result.webUrl).toBe('https://ezauth.ezstart.xyz')
       })
 
       it('throws off-localhost when webUrl is explicitly set to a localhost URL', () => {

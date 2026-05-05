@@ -21,3 +21,18 @@
  * production host", not a smart-detect.
  */
 export const DEFAULT_AUTH_API_URL = 'https://ezauth-api.ezstart.xyz'
+
+/**
+ * Hardcoded production default WEB URL — where consumers redirect users for
+ * login / register / SSO callback. Mirrors `DEFAULT_AUTH_API_URL` precedence:
+ *
+ *   1. explicit `webUrl` prop (caller knows best)
+ *   2. `/api/keys/config.webUrl` response (per-tenant override)
+ *   3. `process.env.NEXT_PUBLIC_EZAUTH_WEB_URL`  (dev / staging / custom)
+ *   4. `DEFAULT_AUTH_WEB_URL`                    (shipped prod default)
+ *
+ * Off-localhost fallback is the canonical EZAuth web host so a static
+ * Vercel build with no env override doesn't trip the
+ * `WEB_URL_LOCALHOST_TRAP_MESSAGE` guard at prerender time.
+ */
+export const DEFAULT_AUTH_WEB_URL = 'https://ezauth.ezstart.xyz'

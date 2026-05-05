@@ -13,6 +13,7 @@
  * ```
  */
 
+import { DEFAULT_AUTH_WEB_URL } from './defaults.js'
 import { AuthError } from './errors.js'
 import type {
   AdminAnalyticsOverview,
@@ -799,10 +800,16 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
     throw new AuthError(MISSING_API_URL_MESSAGE, 0, 'CONFIG_ERROR')
   }
 
-  // Localhost-only default. Non-local callers never reach a default: they
-  // must have supplied `consumerBaseUrl`, `firstParty`, or a `key` above.
+  // Localhost-only default. Non-local callers never reach the API default
+  // here: they must have supplied `consumerBaseUrl`, `firstParty`, or a `key`
+  // above. The web fallback chain differs — when `sdkConfig.webUrl` is
+  // missing AND we're off-localhost, we use the canonical
+  // `DEFAULT_AUTH_WEB_URL` (Stripe-style hardcoded prod default) so a
+  // static Vercel build with no `NEXT_PUBLIC_EZAUTH_WEB_URL` env override
+  // doesn't trip the localhost trap at prerender time. Self-hosted callers
+  // override via the `webUrl` prop or the env var.
   const localDefaultApiUrl = `${DEFAULT_LOCAL_API}/api/auth`
-  const localDefaultWebUrl = DEFAULT_LOCAL_WEB
+  const defaultWebUrl = local ? DEFAULT_LOCAL_WEB : DEFAULT_AUTH_WEB_URL
 
   if (sdkConfig.firstParty) {
     // First-party mode: direct access, no key needed.
@@ -815,7 +822,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
     }
 
     const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : localDefaultApiUrl
-    const webUrl = sdkConfig.webUrl ?? localDefaultWebUrl
+    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
     const appName = sdkConfig.appName ?? 'ezauth'
 
     assertWebUrlNotLocalhostOffLocal(webUrl, local)
@@ -841,7 +848,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
     }
     const apiBaseUrl = consumerBaseUrl ?? DEFAULT_LOCAL_API
     const apiUrl = `${apiBaseUrl}/api/auth`
-    const webUrl = sdkConfig.webUrl ?? localDefaultWebUrl
+    const webUrl = sdkConfig.webUrl ?? defaultWebUrl
 
     assertWebUrlNotLocalhostOffLocal(webUrl, local)
 
@@ -869,7 +876,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   // Dev mode: no key, no first-party → permissive localhost defaults.
   // Non-localhost callers already threw above.
   const apiUrl = consumerBaseUrl ? `${consumerBaseUrl}/api/auth` : localDefaultApiUrl
-  const webUrl = sdkConfig.webUrl ?? localDefaultWebUrl
+  const webUrl = sdkConfig.webUrl ?? defaultWebUrl
   const appName = sdkConfig.appName ?? 'dev'
 
   assertWebUrlNotLocalhostOffLocal(webUrl, local)
