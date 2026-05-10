@@ -683,11 +683,19 @@ export function AuthProvider({
   // every other Provider prop in the SDK.
   const effectiveWebUrl = webUrl ?? keyConfigState?.webUrl ?? resolvedWebUrl
 
+  // `clientConfig.apiUrl` includes the `/api/auth` suffix that CoreAuthClient
+  // needs internally. Strip it so `useAuthApiUrl()` returns the bare base URL
+  // that downstream consumers (useMaintenanceStatus, etc.) can concatenate
+  // their own paths against without getting `/api/auth/api/<path>` doubles.
+  const apiBaseUrl = resolved.clientConfig.apiUrl.endsWith('/api/auth')
+    ? resolved.clientConfig.apiUrl.slice(0, -'/api/auth'.length)
+    : resolved.clientConfig.apiUrl
+
   const contextValue = useMemo(
     () => ({
       client,
       appName: resolvedAppName,
-      apiUrl: resolved.clientConfig.apiUrl,
+      apiUrl: apiBaseUrl,
       webUrl: effectiveWebUrl,
       keyConfig: keyConfigState,
       scope: resolvedScope,
@@ -697,7 +705,7 @@ export function AuthProvider({
     [
       client,
       resolvedAppName,
-      resolved.clientConfig.apiUrl,
+      apiBaseUrl,
       effectiveWebUrl,
       keyConfigState,
       resolvedScope,
