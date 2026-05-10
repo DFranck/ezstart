@@ -75,8 +75,14 @@ export {
 // Utils
 export { formatCurrency, getCurrencySymbol } from './format-currency.js'
 
-// Hardcoded prod defaults (Stripe-pattern)
-export { DEFAULT_PAY_API_URL } from './defaults.js'
+// Env-aware URL defaults (Phase A2 2026-05-10)
+export {
+  DEFAULT_PAY_API_URL,
+  EZPAY_URLS_BY_ENV,
+  detectPayEnvironment,
+  getEzpayDefaultUrls,
+} from './defaults.js'
+export type { PayEnvironment } from './defaults.js'
 
 // Providers
 export { PaymentProviderRegistry } from './providers/registry.js'

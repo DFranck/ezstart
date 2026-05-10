@@ -1,13 +1,13 @@
 /**
- * Phase A1 ENV-DIET (2026-05-05) — hardcoded production default for `apiUrl`.
+ * Env-aware apiUrl resolution (Phase A2 2026-05-10) — pays-sdk derives the
+ * correct API URL from the environment when neither `config.apiUrl` nor
+ * `NEXT_PUBLIC_EZPAY_API_URL` is provided.
  *
- * Stripe-style pattern: when neither `config.apiUrl` nor
- * `NEXT_PUBLIC_EZPAY_API_URL` is provided, the SDK ships a canonical
- * production default (`DEFAULT_PAY_API_URL`) so consumers deployed on
- * `*.ezstart.xyz` need ZERO env wiring in production.
+ * The env-aware default (via `getEzpayDefaultUrls()`) replaces the previous
+ * hardcoded `DEFAULT_PAY_API_URL`. `DEFAULT_PAY_API_URL` is preserved as a
+ * backwards-compat constant but is now an alias for the production URL.
  *
- * Public API stability: the explicit prop and the env var still win over
- * the default — any pre-existing wiring keeps working unchanged.
+ * Public API stability: explicit prop and env var still win over the default.
  */
 import React from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
@@ -15,9 +15,10 @@ import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 
 import { PayProvider, useApplicationContext } from '../../react/pay-provider.js'
 import { usePayStore } from '../../react/store.js'
-import { DEFAULT_PAY_API_URL } from '../../core/defaults.js'
+import { DEFAULT_PAY_API_URL, EZPAY_URLS_BY_ENV } from '../../core/defaults.js'
 
 const originalEnvUrl = process.env.NEXT_PUBLIC_EZPAY_API_URL
+const originalDeployEnv = process.env.DEPLOY_ENV
 
 function resetStore() {
   usePayStore.setState({
@@ -28,10 +29,13 @@ function resetStore() {
   })
 }
 
-describe('PayProvider — Phase A1 hardcoded prod apiUrl default', () => {
+describe('PayProvider — env-aware apiUrl resolution', () => {
   beforeEach(() => {
     resetStore()
     delete process.env.NEXT_PUBLIC_EZPAY_API_URL
+    // Pin DEPLOY_ENV=production so detectPayEnvironment() returns a
+    // deterministic result regardless of the jsdom hostname.
+    process.env.DEPLOY_ENV = 'production'
   })
 
   afterEach(() => {
@@ -42,9 +46,14 @@ describe('PayProvider — Phase A1 hardcoded prod apiUrl default', () => {
     } else {
       process.env.NEXT_PUBLIC_EZPAY_API_URL = originalEnvUrl
     }
+    if (originalDeployEnv === undefined) {
+      delete process.env.DEPLOY_ENV
+    } else {
+      process.env.DEPLOY_ENV = originalDeployEnv
+    }
   })
 
-  it('falls back to DEFAULT_PAY_API_URL on outbound requests when no apiUrl is configured', async () => {
+  it('falls back to the production default when no apiUrl is configured', async () => {
     const fetchMock = vi.fn(
       async () =>
         new Response(JSON.stringify({ success: true, data: [] }), {
@@ -72,10 +81,43 @@ describe('PayProvider — Phase A1 hardcoded prod apiUrl default', () => {
     })
     expect(plansCall).toBeDefined()
     const plansUrl = plansCall?.[0] as string
-    expect(plansUrl.startsWith(`${DEFAULT_PAY_API_URL}/api/plans`)).toBe(true)
+    expect(plansUrl.startsWith(`${EZPAY_URLS_BY_ENV.production.api}/api/plans`)).toBe(true)
   })
 
-  it('explicit `config.apiUrl` wins over the default', async () => {
+  it('falls back to the staging default when DEPLOY_ENV=staging', async () => {
+    process.env.DEPLOY_ENV = 'staging'
+
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ success: true, data: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { usePlans } = await import('../../react/hooks/usePlans.js')
+
+    const { result } = renderHook(() => usePlans({ active: true }), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <PayProvider applicationId="app_staging">{children}</PayProvider>
+      ),
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    const plansCall = fetchMock.mock.calls.find(call => {
+      const url = typeof call[0] === 'string' ? call[0] : ''
+      return url.includes('/plans')
+    })
+    expect(plansCall).toBeDefined()
+    const plansUrl = plansCall?.[0] as string
+    expect(plansUrl.startsWith(`${EZPAY_URLS_BY_ENV.staging.api}/api/plans`)).toBe(true)
+  })
+
+  it('explicit `config.apiUrl` wins over the env-aware default', async () => {
     const fetchMock = vi.fn(
       async () =>
         new Response(JSON.stringify({ success: true, data: [] }), {
@@ -111,7 +153,7 @@ describe('PayProvider — Phase A1 hardcoded prod apiUrl default', () => {
     expect(plansUrl.startsWith('https://custom-pay.example.com/api/plans')).toBe(true)
   })
 
-  it('NEXT_PUBLIC_EZPAY_API_URL env var wins over the default', async () => {
+  it('NEXT_PUBLIC_EZPAY_API_URL env var wins over the env-aware default', async () => {
     process.env.NEXT_PUBLIC_EZPAY_API_URL = 'http://localhost:6130'
 
     const fetchMock = vi.fn(
@@ -142,6 +184,43 @@ describe('PayProvider — Phase A1 hardcoded prod apiUrl default', () => {
     expect(plansCall).toBeDefined()
     const plansUrl = plansCall?.[0] as string
     expect(plansUrl.startsWith('http://localhost:6130/api/plans')).toBe(true)
+  })
+
+  it('trailing \\n in env var is trimmed — falls through to env-aware default', async () => {
+    // Reproduce the Vercel staging bug: NEXT_PUBLIC_EZPAY_API_URL had a
+    // trailing newline that made the URL invalid. With trim(), the empty/whitespace
+    // value is treated as "not set" and the env-aware default kicks in.
+    process.env.NEXT_PUBLIC_EZPAY_API_URL = '   \n  '
+
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ success: true, data: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { usePlans } = await import('../../react/hooks/usePlans.js')
+
+    const { result } = renderHook(() => usePlans({ active: true }), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <PayProvider applicationId="app_trim">{children}</PayProvider>
+      ),
+    })
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    const plansCall = fetchMock.mock.calls.find(call => {
+      const url = typeof call[0] === 'string' ? call[0] : ''
+      return url.includes('/plans')
+    })
+    expect(plansCall).toBeDefined()
+    const plansUrl = plansCall?.[0] as string
+    // Should use the production default (DEPLOY_ENV=production pinned in beforeEach)
+    expect(plansUrl.startsWith(`${EZPAY_URLS_BY_ENV.production.api}/api/plans`)).toBe(true)
   })
 
   it('explicit `config.apiUrl` wins over both the env var and the default', async () => {
@@ -193,8 +272,8 @@ describe('PayProvider — Phase A1 hardcoded prod apiUrl default', () => {
     expect(result.current.applicationId).toBe('app_default')
   })
 
-  it('DEFAULT_PAY_API_URL is the canonical EZPay cloud host', () => {
-    // Locks the shipped value so accidental edits surface in CI.
+  it('DEFAULT_PAY_API_URL is the canonical EZPay production host', () => {
     expect(DEFAULT_PAY_API_URL).toBe('https://ezpay-api.ezstart.xyz')
+    expect(DEFAULT_PAY_API_URL).toBe(EZPAY_URLS_BY_ENV.production.api)
   })
 })

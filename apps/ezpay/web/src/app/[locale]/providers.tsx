@@ -33,9 +33,9 @@ function PayBridge({ locale, children }: { locale: string; children: ReactNode }
   return (
     <PayProvider
       appName="ezpay"
-      // Phase A1 ENV-DIET (2026-05-05) — `apiUrl` is OPTIONAL: SDK ships
-      // `https://ezpay-api.ezstart.xyz` as a hardcoded default for prod.
-      config={{ apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL }}
+      // Phase A2 ENV-DIET (2026-05-10) — no `apiUrl` prop needed. The SDK
+      // derives the correct URL from DEPLOY_ENV / hostname via getEzpayDefaultUrls().
+      // Self-hosted callers override via NEXT_PUBLIC_EZPAY_API_URL or config.apiUrl.
       publishableKey={process.env.NEXT_PUBLIC_EZPAY_KEY}
       locale={locale}
       getToken={() => getSnapshot().accessToken}

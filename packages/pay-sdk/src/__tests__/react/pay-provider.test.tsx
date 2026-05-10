@@ -7,7 +7,7 @@
  */
 import React from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { PayProvider, useApplicationContext } from '../../react/pay-provider.js'
 import { usePayStore } from '../../react/store.js'
 
@@ -395,8 +395,21 @@ describe('PayProvider — REG-1 infinite loop guard on /keys/config', () => {
 })
 
 describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
+  const originalDeployEnv = process.env.DEPLOY_ENV
+
+  beforeEach(() => {
+    // Pin to production so detectPayEnvironment() returns a deterministic
+    // result regardless of jsdom hostname (window.location.hostname = 'localhost').
+    process.env.DEPLOY_ENV = 'production'
+  })
+
   afterEach(() => {
     vi.restoreAllMocks()
+    if (originalDeployEnv === undefined) {
+      delete process.env.DEPLOY_ENV
+    } else {
+      process.env.DEPLOY_ENV = originalDeployEnv
+    }
     usePayStore.setState({
       applicationId: null,
       appSlug: null,
@@ -575,8 +588,22 @@ describe('PayProvider — Phase 3 auto-resolve payWebUrl from /keys/config', () 
 })
 
 describe('PayProvider — payWebUrl propagation', () => {
+  const originalDeployEnv = process.env.DEPLOY_ENV
+
+  beforeEach(() => {
+    // Pin to production so detectPayEnvironment() returns 'production'
+    // regardless of jsdom hostname — ensures env-aware default URL is
+    // the production host (non-localhost → payWebUrl resolves to null).
+    process.env.DEPLOY_ENV = 'production'
+  })
+
   afterEach(() => {
     vi.restoreAllMocks()
+    if (originalDeployEnv === undefined) {
+      delete process.env.DEPLOY_ENV
+    } else {
+      process.env.DEPLOY_ENV = originalDeployEnv
+    }
     usePayStore.setState({
       applicationId: null,
       appSlug: null,

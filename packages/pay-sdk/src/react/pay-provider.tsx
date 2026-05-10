@@ -11,7 +11,7 @@ import React, {
 } from 'react'
 import type { Logger } from '@ezstart/logger'
 import { createPayClient, type PayClient } from '../core/pay-client.js'
-import { DEFAULT_PAY_API_URL } from '../core/defaults.js'
+import { getEzpayDefaultUrls } from '../core/defaults.js'
 import type { PayClientConfig } from '../core/types.js'
 import { usePayStore, type ApplicationResolutionStatus } from './store.js'
 
@@ -232,17 +232,19 @@ export function PayProvider({
       ? publishableKey
       : undefined
 
-  // Stripe-style apiUrl resolution (Phase A1 ENV-DIET 2026-05-05):
-  //   1. explicit `config.apiUrl`           (caller knows best)
-  //   2. NEXT_PUBLIC_EZPAY_API_URL          (dev / staging / self-hosted override)
-  //   3. DEFAULT_PAY_API_URL                (shipped prod default for *.ezstart.xyz)
+  // Env-aware apiUrl resolution (Phase A2 2026-05-10):
+  //   1. explicit `config.apiUrl` (trimmed)            (caller knows best)
+  //   2. NEXT_PUBLIC_EZPAY_API_URL (trimmed)           (dev / staging / self-hosted override)
+  //   3. getEzpayDefaultUrls().api                     (env-aware: staging → staging URL, prod → prod)
   //
-  // The default kicks in only when neither prop nor env var is provided so
-  // pre-existing consumers keep working unchanged. Production callers pointing
-  // at the canonical EZPay cloud can drop `NEXT_PUBLIC_EZPAY_API_URL` from
-  // their env entirely.
+  // `.trim()` prevents a trailing `\n` in any env source from producing an
+  // invalid URL (e.g. Vercel env var manually set with a newline appended).
+  // Empty-string after trim is treated as "not set" so the env-aware default
+  // kicks in — consumers pointing at the canonical EZPay cloud need zero env
+  // wiring in any environment when DEPLOY_ENV is correctly configured.
   const resolvedConfigApiUrl =
-    config?.apiUrl ?? process.env.NEXT_PUBLIC_EZPAY_API_URL ?? DEFAULT_PAY_API_URL
+    (config?.apiUrl?.trim() ?? process.env.NEXT_PUBLIC_EZPAY_API_URL?.trim() ?? '') ||
+    getEzpayDefaultUrls().api
 
   const client = useMemo(() => {
     return createPayClient({
