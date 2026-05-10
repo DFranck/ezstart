@@ -11,7 +11,7 @@ import {
 import { useStore } from 'zustand'
 import { CoreAuthClient, fetchKeyConfig, resolveSDKConfig } from '../core/auth-client.js'
 import { resolveEffectiveAuthMode } from '../core/cross-origin.js'
-import { DEFAULT_AUTH_API_URL } from '../core/defaults.js'
+import { getEzauthDefaultUrls } from '../core/defaults.js'
 import type {
   AuthMode,
   AuthScope,
@@ -337,12 +337,14 @@ export function AuthProvider({
     // Stripe-style apiUrl resolution (Phase A1 ENV-DIET 2026-05-05):
     //   1. explicit `apiUrl` prop          (caller knows best)
     //   2. NEXT_PUBLIC_EZAUTH_API_URL      (dev / staging / self-hosted override)
-    //   3. DEFAULT_AUTH_API_URL            (shipped prod default for *.ezstart.xyz)
+    //   3. getEzauthDefaultUrls().api      (env-aware: staging hostname → staging
+    //                                       API, localhost → local, else prod)
     //
-    // The default kicks in only when neither prop nor env var is provided, so
-    // any pre-existing consumer wiring keeps working unchanged. Consumers
-    // running against the canonical EZAuth cloud can drop the env var entirely.
-    const resolvedApiUrl = apiUrl ?? process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? DEFAULT_AUTH_API_URL
+    // getEzauthDefaultUrls() is called at render time inside useMemo so it can
+    // read window.location.hostname — unlike the module-level DEFAULT_AUTH_API_URL
+    // constant which always resolved to production at import time.
+    const resolvedApiUrl =
+      apiUrl ?? process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? getEzauthDefaultUrls().api
 
     // Defensive fallback (dev-only): if webUrl wasn't provided AND apiUrl
     // looks like the canonical localhost dev pattern (port 6110), derive the
@@ -685,6 +687,7 @@ export function AuthProvider({
     () => ({
       client,
       appName: resolvedAppName,
+      apiUrl: resolved.clientConfig.apiUrl,
       webUrl: effectiveWebUrl,
       keyConfig: keyConfigState,
       scope: resolvedScope,
@@ -694,6 +697,7 @@ export function AuthProvider({
     [
       client,
       resolvedAppName,
+      resolved.clientConfig.apiUrl,
       effectiveWebUrl,
       keyConfigState,
       resolvedScope,
@@ -749,6 +753,21 @@ export function useAuthContext() {
     throw new Error('useAuthContext must be used within AuthProvider')
   }
   return context
+}
+
+/**
+ * Returns the env-aware API URL resolved by the nearest `<AuthProvider>`.
+ * Use this inside components that already live below `<AuthProvider>` to
+ * avoid duplicating URL resolution logic.
+ *
+ * @example
+ * ```tsx
+ * const apiUrl = useAuthApiUrl()
+ * const { data } = useMaintenanceStatus({ apiUrl })
+ * ```
+ */
+export function useAuthApiUrl(): string {
+  return useAuthContext().apiUrl
 }
 
 /**

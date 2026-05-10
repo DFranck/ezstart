@@ -14,22 +14,24 @@
  * @internal
  */
 
-import { DEFAULT_AUTH_API_URL } from '../../core/defaults.js'
+import { getEzauthDefaultUrls } from '../../core/defaults.js'
 
 /**
- * Resolve the final auth API URL applying the Stripe-style precedence.
+ * Resolve the final auth API URL applying the Stripe-style precedence:
  *
- * Returns the resolved string. Never throws — when no signal is available
- * the hardcoded production default kicks in.
+ *   1. explicit `apiUrl` argument (caller knows best)
+ *   2. `NEXT_PUBLIC_EZAUTH_API_URL` (self-hosted / legacy override)
+ *   3. `getEzauthDefaultUrls().api` — env-aware:
+ *        - server-side: reads `DEPLOY_ENV` (staging → staging API, etc.)
+ *        - client-side: reads `window.location.hostname` pattern
+ *        - fallback: production (safe for external consumers)
+ *
+ * Returns the resolved string. Never throws.
  */
 export function resolveAuthApiUrl(explicit?: string | null): string {
   if (explicit && explicit.length > 0) return explicit
-  // Next.js statically replaces `process.env.NEXT_PUBLIC_*` at build time —
-  // safe to read directly here even though this module is server-only,
-  // because consumer apps that pre-build their server bundles will inline
-  // the value at build time. Server-rendered Next.js apps also have
-  // `process.env` available at runtime.
+  // Next.js statically replaces `process.env.NEXT_PUBLIC_*` at build time.
   const fromEnv = process.env.NEXT_PUBLIC_EZAUTH_API_URL
   if (fromEnv && fromEnv.length > 0) return fromEnv
-  return DEFAULT_AUTH_API_URL
+  return getEzauthDefaultUrls().api
 }

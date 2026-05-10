@@ -34,6 +34,8 @@ export interface AuthLogoutTexts {
 export interface AuthContextValue {
   client: CoreAuthClient
   appName: string
+  /** Resolved API URL (env-aware: staging/prod/local). */
+  apiUrl: string
   /** Web URL for login/register redirects. */
   webUrl: string
   /** Resolved key config (null until async fetch completes, or if no key). */

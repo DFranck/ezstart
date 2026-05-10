@@ -32,6 +32,7 @@ export {
 export {
   AuthProvider,
   useAuthContext,
+  useAuthApiUrl,
   useAuthStore,
   useAuthStoreSelector,
   useAuthStoreApi,

@@ -2,6 +2,7 @@
 
 import {
   AuthProvider,
+  useAuthApiUrl,
   useAuthStoreGetSnapshot,
   useAuthStoreApi,
   type AuthUser,
@@ -26,9 +27,8 @@ import { QueryProvider } from './providers/QueryProvider'
  */
 function PlatformShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('admin.maintenanceMode.banner')
-  const { data } = useMaintenanceStatus({
-    apiUrl: process.env.NEXT_PUBLIC_EZAUTH_API_URL ?? 'http://localhost:6110',
-  })
+  const apiUrl = useAuthApiUrl()
+  const { data } = useMaintenanceStatus({ apiUrl })
   return (
     <>
       <MaintenanceBanner
