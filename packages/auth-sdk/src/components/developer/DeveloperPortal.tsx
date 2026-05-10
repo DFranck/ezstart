@@ -123,17 +123,14 @@ export function DeveloperPortal({
   const [usageKeyId, setUsageKeyId] = useState<string | null>(null)
 
   const {
-    data: allApiKeys = [] as ApiKeyItem[],
+    data: apiKeys = [] as ApiKeyItem[],
     isLoading,
     isError,
     refetch,
-  } = useApiKeys(enabled, initialKeys ? { initialData: initialKeys } : undefined)
-
-  // When an Application is selected, scope the displayed keys to it. Pre-P6
-  // keys without `applicationId` are excluded from that view.
-  const apiKeys = applicationId
-    ? allApiKeys.filter((k: ApiKeyItem) => k.applicationId === applicationId)
-    : allApiKeys
+  } = useApiKeys(enabled, {
+    ...(initialKeys ? { initialData: initialKeys } : {}),
+    applicationId,
+  })
 
   const createMutation = useCreateApiKey({
     onSuccess: data => {

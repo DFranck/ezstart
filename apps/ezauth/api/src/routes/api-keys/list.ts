@@ -8,9 +8,12 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApiKeyUsageModel } from '../../models/api-key-usage.js'
+import { getApplicationModel } from '../../models/application.js'
+import { getAuthUserModel } from '../../models/auth-user.js'
 import { logger } from '@ezstart/logger/server'
 
 export const listApiKeysRegistry = new OpenAPIRegistry()
@@ -33,6 +36,9 @@ const apiKeyItemSchema = z.object({
   revokedAt: z.string().nullable(),
   quotaMonthly: z.number().nullable(),
   usageThisMonth: z.number(),
+  applicationId: z.string().nullable(),
+  type: z.enum(['publishable', 'secret']).nullable(),
+  env: z.enum(['live', 'test']).nullable(),
 })
 
 const listApiKeysResponseSchema = z.object({
@@ -48,17 +54,57 @@ const errorResponseSchema = z.object({
 const listApiKeysController = async (req: Request, res: Response) => {
   try {
     const userId = req.userId!
+    const appIdParam =
+      typeof req.query.applicationId === 'string' ? req.query.applicationId : undefined
+
     const ApiKey = await getApiKeyModel()
     const ApiKeyUsage = await getApiKeyUsageModel()
 
-    // Multi-tenancy: when authenticated via an API key restricted to a single
-    // Application (`appName !== '*'`), narrow the listing so an admin key for
-    // 'acme' cannot enumerate keys belonging to the same user but bound to
-    // other Applications. JWT auth leaves `req.apiKeyAppName` undefined so
-    // the dashboard view is unaffected.
-    const baseQuery: Record<string, unknown> = { userId }
-    if (req.apiKeyAppName && req.apiKeyAppName !== '*') {
-      baseQuery.appName = req.apiKeyAppName
+    let baseQuery: Record<string, unknown>
+
+    if (appIdParam) {
+      // --- applicationId-scoped listing ---
+      if (!Types.ObjectId.isValid(appIdParam)) {
+        return sendError(res, 'Invalid applicationId', 400)
+      }
+
+      const Application = await getApplicationModel()
+      const app = await Application.findById(appIdParam).lean()
+      if (!app) {
+        return sendError(res, 'Application not found', 404)
+      }
+
+      // Access check: owner, superadmin, or app admin
+      const AuthUser = await getAuthUserModel()
+      const user = await AuthUser.findById(userId).lean()
+
+      const isOwner = app.ownerId?.toString() === userId
+      const isSuperadmin = user?.globalRoles?.includes('superadmin') ?? false
+      const isAppAdmin = user?.appRoles?.[app.slug]?.includes('admin') ?? false
+
+      if (!isOwner && !isSuperadmin && !isAppAdmin) {
+        return sendError(res, 'Access denied', 403)
+      }
+
+      // Include both keyed-by-applicationId and legacy appName-only keys
+      // that predate the P6 multi-tenancy migration.
+      baseQuery = {
+        $or: [
+          { applicationId: new Types.ObjectId(appIdParam) },
+          { appName: app.slug, applicationId: { $exists: false } },
+        ],
+      }
+    } else {
+      // --- legacy user-scoped listing (unchanged behaviour) ---
+      // Multi-tenancy: when authenticated via an API key restricted to a single
+      // Application (`appName !== '*'`), narrow the listing so an admin key for
+      // 'acme' cannot enumerate keys belonging to the same user but bound to
+      // other Applications. JWT auth leaves `req.apiKeyAppName` undefined so
+      // the dashboard view is unaffected.
+      baseQuery = { userId }
+      if (req.apiKeyAppName && req.apiKeyAppName !== '*') {
+        baseQuery.appName = req.apiKeyAppName
+      }
     }
 
     const keys = await ApiKey.find(baseQuery).select('-key').sort({ createdAt: -1 }).lean()
@@ -96,6 +142,9 @@ const listApiKeysController = async (req: Request, res: Response) => {
       revokedAt: k.revokedAt ? k.revokedAt.toISOString() : null,
       quotaMonthly: k.quotaMonthly ?? null,
       usageThisMonth: usageMap.get(k._id.toString()) ?? 0,
+      applicationId: k.applicationId?.toString() ?? null,
+      type: k.type ?? null,
+      env: k.env ?? null,
     }))
 
     sendSuccess(res, data)
@@ -111,6 +160,8 @@ docRouter.get('/keys', authJwtOrKey({ requireKeyScope: 'admin' }), listApiKeysCo
   responseSchema: listApiKeysResponseSchema,
   extraResponses: {
     401: { description: 'Authentication required', schema: errorResponseSchema },
+    403: { description: 'Access denied', schema: errorResponseSchema },
+    404: { description: 'Application not found', schema: errorResponseSchema },
   },
 })
 

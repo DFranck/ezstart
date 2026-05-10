@@ -33,10 +33,17 @@ export interface UseApiKeysOptions {
    * the data fresh.
    */
   initialData?: ApiKeyItem[]
+  /**
+   * When provided, fetch all keys for this Application (owner/superadmin
+   * only). Sends `?applicationId=<id>` to the server so filtering happens
+   * server-side, not client-side.
+   */
+  applicationId?: string
 }
 
 /**
- * Fetch the current user's API keys.
+ * Fetch API keys — scoped to the current user, or to a specific Application
+ * when `options.applicationId` is provided.
  *
  * @example
  * ```tsx
@@ -50,15 +57,22 @@ export interface UseApiKeysOptions {
  * ```tsx
  * const { data } = useApiKeys(true, { initialData: serverKeys })
  * ```
+ *
+ * Application-scoped (owner / superadmin):
+ *
+ * @example
+ * ```tsx
+ * const { data } = useApiKeys(true, { applicationId: 'app-abc' })
+ * ```
  */
 export function useApiKeys(enabled = true, options?: UseApiKeysOptions) {
+  const applicationId = options?.applicationId
   return useQuery({
-    queryKey: API_KEYS_KEY,
-    queryFn: () =>
-      apiCall<ApiKeyItem[]>('/keys', {
-        appName: 'ezauth',
-        method: 'GET',
-      }),
+    queryKey: applicationId ? [...API_KEYS_KEY, 'app', applicationId] : API_KEYS_KEY,
+    queryFn: () => {
+      const url = applicationId ? `/keys?applicationId=${applicationId}` : '/keys'
+      return apiCall<ApiKeyItem[]>(url, { appName: 'ezauth', method: 'GET' })
+    },
     enabled,
     initialData: options?.initialData,
   })
