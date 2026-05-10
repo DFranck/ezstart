@@ -14,7 +14,6 @@ export default function TestDonatePage() {
     <Div className="w-full space-y-8">
       {/* Donation Card */}
       <DonationCard
-        appName="ezpay"
         projectId="ezpay"
         projectName="EZPay Development"
         presetAmounts={[5, 10]}

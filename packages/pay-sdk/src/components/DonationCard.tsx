@@ -133,7 +133,12 @@ export function DonationCard({
         '`appName` was never wired into the donation request — `projectId` carries the routing.'
     )
   }
-  const { applicationResolutionStatus, payWebUrl, locale: contextLocale } = useApplicationContext()
+  const {
+    applicationResolutionStatus,
+    payWebUrl,
+    locale: contextLocale,
+    applicationId: contextApplicationId,
+  } = useApplicationContext()
   const resolvedLocale = locale ?? contextLocale
   const dashboardUrl = payWebUrl ? `${payWebUrl}/${resolvedLocale}/developer` : undefined
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
@@ -160,9 +165,10 @@ export function DonationCard({
     if (amount === 0 && !message.trim()) return // testimonial needs a message
 
     try {
+      const resolvedApplicationId = applicationId ?? contextApplicationId ?? undefined
       const result = await createDonation({
         projectId,
-        ...(applicationId ? { applicationId } : {}),
+        ...(resolvedApplicationId ? { applicationId: resolvedApplicationId } : {}),
         amount,
         currency,
         isPublic: true,
