@@ -1,3 +1,4 @@
+import { parseApiError } from '@ezstart/api-sdk'
 import type {
   ApplicationConfigResponse,
   BillingPortalRequest,
@@ -26,7 +27,7 @@ export async function resolveApplicationByKey(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(result?.error || `Failed to resolve application (${response.status})`)
+    throw new Error(parseApiError(result) ?? `Failed to resolve application (${response.status})`)
   }
 
   // Endpoint always wraps as `{ success: true, data: {...} }` — unwrap.
@@ -58,7 +59,7 @@ export async function createBillingPortalSession(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(result.error || 'Failed to create billing portal session')
+    throw new Error(parseApiError(result) ?? 'Failed to create billing portal session')
   }
 
   return result.data ?? result

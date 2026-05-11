@@ -11,6 +11,7 @@
  * Keeping these helpers in a single module avoids duplicating the auth/401
  * logic across every domain file while staying strictly agnostic.
  */
+import { parseApiError } from '@ezstart/api-sdk'
 import type { PayClientConfig, Payment, PaymentsListResponse } from '../types/index.js'
 
 /**
@@ -123,7 +124,7 @@ export async function fetchList(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(result.error || `Failed to fetch ${path}`)
+    throw new Error(parseApiError(result) ?? `Failed to fetch ${path}`)
   }
 
   // Normalize: API returns { success, data, meta } → { payments, total }

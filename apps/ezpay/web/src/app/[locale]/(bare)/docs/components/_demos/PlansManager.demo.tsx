@@ -15,7 +15,7 @@ export default function Demo() {
     <DemoSandbox componentName="PlansManager">
       <Div className="flex flex-col items-center gap-3 w-full">
         <Div className="w-full max-w-3xl">
-          <PlansManager applicationId="_pay-docs-demo" />
+          <PlansManager />
         </Div>
         <P className="text-xs text-muted-foreground text-center max-w-md">
           Drives `PlanEditorDialog` for create + edit, and `PlanArchiveDialog` for safe archival.

@@ -30,7 +30,7 @@ import {
 import { toast } from '@ezstart/ui/utils'
 import { useCallback, useEffect, useState } from 'react'
 import type { Plan } from '../core/types.js'
-import { usePayContext, usePayLocale } from '../react/pay-provider.js'
+import { useApplicationContext, usePayContext, usePayLocale } from '../react/pay-provider.js'
 import { PlanEditorDialog } from './PlanEditorDialog.js'
 import { PlanArchiveDialog } from './plans-manager/PlanArchiveDialog.js'
 import {
@@ -46,7 +46,7 @@ export {
 } from './plans-manager/plans-manager-types.js'
 
 export interface PlansManagerProps {
-  applicationId: string
+  applicationId?: string
   texts?: Partial<PlansManagerTexts>
   /**
    * BCP-47 locale passed to `formatCurrency`. When omitted, inherits from
@@ -81,13 +81,15 @@ async function fetchAllPlans(
 }
 
 export function PlansManager({
-  applicationId,
+  applicationId: applicationIdProp,
   texts: partialTexts,
   locale,
   className,
 }: PlansManagerProps) {
   const texts = mergePlansManagerTexts(partialTexts)
   const { client } = usePayContext()
+  const { applicationId: ctxApplicationId } = useApplicationContext()
+  const applicationId = applicationIdProp ?? ctxApplicationId ?? ''
   const contextLocale = usePayLocale()
   const resolvedLocale = locale ?? contextLocale
 
