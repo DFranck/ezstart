@@ -16,7 +16,7 @@ export default function Demo() {
     <DemoSandbox componentName="BillingDashboard">
       <Div className="flex flex-col items-center gap-3 w-full">
         <Div className="w-full max-w-3xl">
-          <BillingDashboard applicationId="_pay-docs-demo" recentPaymentsCount={3} />
+          <BillingDashboard recentPaymentsCount={3} />
         </Div>
         <P className="text-xs text-muted-foreground text-center max-w-md">
           Wire `onUpgrade` to push to your pricing page, `onViewAllPayments` to your full history
