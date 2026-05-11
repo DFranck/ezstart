@@ -198,6 +198,19 @@ paymentSchema.index({ projectId: 1, createdAt: -1 })
 paymentSchema.index({ userId: 1, createdAt: -1 })
 paymentSchema.index({ type: 1, status: 1 })
 
+// TTL auto-purge for test data — documents with isTestMode:true are deleted
+// after 24h. Keeps sandbox/playground flows from polluting the database
+// across dev, staging, and prod. Live payments (isTestMode:false) are never
+// touched by this index (partial filter expression).
+paymentSchema.index(
+  { createdAt: 1 },
+  {
+    name: 'test_mode_ttl_24h',
+    expireAfterSeconds: 86400,
+    partialFilterExpression: { isTestMode: true },
+  }
+)
+
 // Stripe-pattern test/live partition (`standard-saas-data.md` §4) — auto-scope
 // every read by `req.derivedMode` propagated via AsyncLocalStorage.
 paymentSchema.plugin(testModeScopePlugin)
