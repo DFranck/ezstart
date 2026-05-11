@@ -137,6 +137,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
         customerEmail: donorEmail || undefined,
         isAnonymous: isAnonymous || false,
         liveMode: isLiveMode,
+        isTestMode: !isLiveMode,
         metadata: {
           message: message || undefined,
           isPublic: isPublic !== false,
@@ -231,6 +232,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       paymentId: session.sessionId,
       status: 'pending',
       liveMode: isLiveMode,
+      isTestMode: !isLiveMode,
       metadata: {
         message,
         isPublic,

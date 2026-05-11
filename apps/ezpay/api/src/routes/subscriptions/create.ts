@@ -211,6 +211,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       paymentId: session.sessionId,
       status: 'pending',
       liveMode: isLiveMode,
+      isTestMode: !isLiveMode,
       metadata: {
         planId,
         planName,

@@ -93,6 +93,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           completedAt: new Date(),
           paymentMethod: data.paymentMethod,
           liveMode: eventLiveMode,
+          isTestMode: !eventLiveMode,
         }
 
         // Store payment intent ID for refund lookups
@@ -484,6 +485,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           customerEmail: data.customerEmail || subPayment.customerEmail,
           isAnonymous: false,
           liveMode: subPayment.liveMode,
+          isTestMode: !subPayment.liveMode,
           metadata: {
             subscriptionId: data.subscriptionId,
             billingReason: data.billingReason,
