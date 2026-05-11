@@ -34,6 +34,11 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): React.JSX
         { href: '/', label: t('nav.home'), icon: 'lucide:Home' as const },
         { href: `/${game}/scan`, label: t('nav.scan'), icon: 'lucide:ScanLine' as const },
         { href: `/${game}/bench`, label: t('nav.bench'), icon: 'lucide:FlaskConical' as const },
+        {
+          href: `/${game}/calculate`,
+          label: t('nav.calculate'),
+          icon: 'lucide:Calculator' as const,
+        },
         { href: `/${game}/history`, label: t('nav.history'), icon: 'lucide:Clock' as const },
         { href: `/${game}/data`, label: t('nav.data'), icon: 'lucide:Database' as const },
         { href: `/${game}/sources`, label: t('nav.sources'), icon: 'lucide:BookOpen' as const },

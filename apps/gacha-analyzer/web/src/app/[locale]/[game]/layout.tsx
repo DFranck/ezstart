@@ -17,6 +17,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   data: 'nav.data',
   history: 'history.title',
   sources: 'nav.sources',
+  calculate: 'calculate.title',
 }
 
 export default function GameLayout({ children }: { children: React.ReactNode }) {
