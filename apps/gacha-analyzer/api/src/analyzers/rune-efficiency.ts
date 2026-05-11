@@ -5,7 +5,7 @@
  * with accurate 6★ roll ranges, grind potential, and detailed substat analysis.
  */
 
-import type { StatType, RuneQuality, RuneStat, RuneData } from '@gacha-analyzer/types'
+import type { StatType, RuneQuality, RuneStat, RuneData, RuneMarker } from '@gacha-analyzer/types'
 import {
   EFFICIENCY_THRESHOLDS,
   LEVEL_STRICTNESS,
@@ -28,6 +28,8 @@ import {
   SET_ARCHETYPE_AFFINITY,
   GRINDABLE_STATS,
   GEM_RANGES,
+  MAX_STAT_BY_RARITY,
+  GEM_PRIORITY_BY_SLOT,
 } from '@gacha-analyzer/types'
 
 // Re-export types for consumers
@@ -95,6 +97,19 @@ export interface ProgressiveAdvice {
   reasonParams?: Record<string, string>
   nextCheckAt: number
   sellProbability: number
+}
+
+export interface RarityComparison {
+  stat: StatType
+  value: number
+  rareMax: number
+  heroMax: number
+  legendMax: number
+  isAboveHeroMax: boolean
+  isAboveRareMax: boolean
+  ratioVsHeroMax: number
+  ratioVsLegendMax: number
+  rollEstimate: number
 }
 
 export type BuildArchetype =
@@ -204,6 +219,12 @@ export interface RuneAnalysis {
   profile?: PlayerProfile
   /** Whether the rune is ancient */
   isAncient?: boolean
+  /** RuneMarker classification (TRUE_LEG_MIN, TRUE_HERO_MIN, etc.) */
+  runeMarker: RuneMarker
+  /** Human-readable reasoning for the runeMarker classification */
+  runeMarkerReasoning: string[]
+  /** Per-substat comparison against rarity max values */
+  rarityComparisons: RarityComparison[]
 }
 
 // Keep legacy exports for backward compat with index.ts
@@ -1474,6 +1495,227 @@ function calculateArchetypeOptimizations(
   return optimizations
 }
 
+/** Premium rune sets — slot 2/4/6 from these are REAPP candidates if stats are weak */
+const PREMIUM_SETS: string[] = ['violent', 'swift', 'rage', 'despair', 'will']
+
+/**
+ * Order of RuneMarker from weakest to strongest (for isMarkerBetter comparison).
+ */
+const MARKER_RANK: Record<RuneMarker, number> = {
+  SELL: 0,
+  REAPP: 1,
+  GEM: 2,
+  GRIND: 3,
+  TEST: 4,
+  TRUE_RARE_MIN: 5,
+  TRUE_HERO_MIN: 6,
+  TRUE_LEG_MIN: 7,
+}
+
+function isMarkerBetter(a: RuneMarker, b: RuneMarker): boolean {
+  return MARKER_RANK[a] > MARKER_RANK[b]
+}
+
+/**
+ * Compare each substat to the rarity max thresholds (rare / hero / legend).
+ * The innate stat is NOT included.
+ */
+export function compareToRarityMax(runeData: RuneData): RarityComparison[] {
+  return runeData.subStats.map(sub => {
+    const heroMax = MAX_STAT_BY_RARITY['hero'][sub.type]
+    const rareMax = MAX_STAT_BY_RARITY['rare'][sub.type]
+    const legendMax = MAX_STAT_BY_RARITY['legend'][sub.type]
+    const isAboveHeroMax = sub.value > heroMax
+    const isAboveRareMax = sub.value > rareMax
+    const ratioVsHeroMax = heroMax > 0 ? sub.value / heroMax : 0
+    const ratioVsLegendMax = legendMax > 0 ? sub.value / legendMax : 0
+    const rollEstimate = estimateRolls(sub.type, sub.value, runeData.isAncient).count
+    return {
+      stat: sub.type,
+      value: sub.value,
+      rareMax,
+      heroMax,
+      legendMax,
+      isAboveHeroMax,
+      isAboveRareMax,
+      ratioVsHeroMax: Math.round(ratioVsHeroMax * 1000) / 1000,
+      ratioVsLegendMax: Math.round(ratioVsLegendMax * 1000) / 1000,
+      rollEstimate,
+    }
+  })
+}
+
+/**
+ * Return a deep copy of runeData with one substat swapped to a gem replacement.
+ */
+export function simulateGem(
+  runeData: RuneData,
+  removeStat: StatType,
+  replaceStat: StatType,
+  gemValue?: number
+): RuneData {
+  const copy: RuneData = JSON.parse(JSON.stringify(runeData)) as RuneData
+  const idx = copy.subStats.findIndex(s => s.type === removeStat)
+  if (idx === -1) return copy
+  const value =
+    gemValue ?? GEM_RANGES.legend[replaceStat]?.max ?? MAX_STAT_BY_RARITY['legend'][replaceStat]
+  copy.subStats[idx] = { type: replaceStat, value }
+  return copy
+}
+
+/**
+ * Determine the best gem operation for a rune:
+ * find the worst non-grindable substat (by ratio vs legend max)
+ * and the best priority replacement for the slot that isn't already present.
+ */
+export function getBestGemTarget(runeData: RuneData): {
+  removeStat: StatType | null
+  replaceStat: StatType
+  reason: string
+} {
+  const nonGrindable = runeData.subStats.filter(s => !GRINDABLE_STATS.includes(s.type))
+
+  if (nonGrindable.length === 0) {
+    return {
+      removeStat: null,
+      replaceStat: 'spd',
+      reason: 'All substats are grindable — no gem needed',
+    }
+  }
+
+  // Pick non-grindable with lowest ratio vs legend max
+  const sorted = [...nonGrindable].sort((a, b) => {
+    const ratioA =
+      MAX_STAT_BY_RARITY['legend'][a.type] > 0 ? a.value / MAX_STAT_BY_RARITY['legend'][a.type] : 0
+    const ratioB =
+      MAX_STAT_BY_RARITY['legend'][b.type] > 0 ? b.value / MAX_STAT_BY_RARITY['legend'][b.type] : 0
+    return ratioA - ratioB
+  })
+  const worstStat = sorted[0]!
+
+  const existingTypes = new Set(runeData.subStats.map(s => s.type))
+  const slotPriority = GEM_PRIORITY_BY_SLOT[runeData.slot] ?? []
+  const replaceStat = slotPriority.find(s => !existingTypes.has(s))
+
+  if (!replaceStat) {
+    return {
+      removeStat: null,
+      replaceStat: 'spd',
+      reason: 'No useful gem target available — all priority stats already present',
+    }
+  }
+
+  return {
+    removeStat: worstStat.type,
+    replaceStat,
+    reason: `Remove weak non-grindable ${worstStat.type}, replace with ${replaceStat}`,
+  }
+}
+
+/**
+ * Internal marker classification without gem recursion.
+ * Shared logic used by classifyRuneMarker and gem simulation.
+ */
+function classifyRuneMarkerInternal(
+  runeData: RuneData,
+  comparisons: RarityComparison[]
+): { marker: RuneMarker; reasoning: string[] } {
+  const reasoning: string[] = []
+
+  const grindableCount = runeData.subStats.filter(s => GRINDABLE_STATS.includes(s.type)).length
+  const aboveHeroCount = comparisons.filter(c => c.isAboveHeroMax).length
+  const aboveRareCount = comparisons.filter(c => c.isAboveRareMax).length
+
+  reasoning.push(`Grindable stats: ${grindableCount}/4`)
+  reasoning.push(`Stats above Hero max: ${aboveHeroCount}`)
+  reasoning.push(`Stats above Rare max: ${aboveRareCount}`)
+
+  let marker: RuneMarker = 'SELL'
+
+  if (grindableCount >= 4) {
+    if (aboveHeroCount >= 1) marker = 'TRUE_LEG_MIN'
+    else if (aboveRareCount >= 2) marker = 'TRUE_HERO_MIN'
+    else marker = 'TRUE_RARE_MIN'
+  } else if (grindableCount === 3) {
+    if (aboveHeroCount >= 2) marker = 'TRUE_LEG_MIN'
+    else if (aboveHeroCount >= 1 && aboveRareCount >= 1) marker = 'TRUE_HERO_MIN'
+    else if (aboveRareCount >= 2) marker = 'TRUE_HERO_MIN'
+    else if (aboveRareCount >= 1) marker = 'TRUE_RARE_MIN'
+    else marker = 'SELL'
+  } else if (grindableCount === 2) {
+    if (aboveHeroCount >= 2) marker = 'TRUE_LEG_MIN'
+    else if (aboveHeroCount >= 1) marker = 'TRUE_HERO_MIN'
+    else marker = 'SELL'
+  } else {
+    marker = 'SELL'
+  }
+
+  // REAPP override: premium set + even slot + SELL
+  if (
+    marker === 'SELL' &&
+    PREMIUM_SETS.includes(runeData.set) &&
+    [2, 4, 6].includes(runeData.slot)
+  ) {
+    marker = 'REAPP'
+    reasoning.push('Set premium + slot pair → REAPP candidate despite weak stats')
+  }
+
+  return { marker, reasoning }
+}
+
+/**
+ * Classify a rune with a RuneMarker, including gem simulation if applicable.
+ */
+export function classifyRuneMarker(runeData: RuneData): {
+  marker: RuneMarker
+  reasoning: string[]
+  comparisons: RarityComparison[]
+  gemSimulation?: {
+    removeStat: StatType
+    replaceStat: StatType
+    markerPostGem: RuneMarker
+    reasoningPostGem: string[]
+  }
+} {
+  const comparisons = compareToRarityMax(runeData)
+  const { marker: baseMarker, reasoning } = classifyRuneMarkerInternal(runeData, comparisons)
+
+  const gemTarget = getBestGemTarget(runeData)
+
+  let marker = baseMarker
+  let gemSimulation:
+    | {
+        removeStat: StatType
+        replaceStat: StatType
+        markerPostGem: RuneMarker
+        reasoningPostGem: string[]
+      }
+    | undefined
+
+  if (gemTarget.removeStat !== null) {
+    const simulatedRune = simulateGem(runeData, gemTarget.removeStat, gemTarget.replaceStat)
+    const simComparisons = compareToRarityMax(simulatedRune)
+    const simResult = classifyRuneMarkerInternal(simulatedRune, simComparisons)
+
+    gemSimulation = {
+      removeStat: gemTarget.removeStat,
+      replaceStat: gemTarget.replaceStat,
+      markerPostGem: simResult.marker,
+      reasoningPostGem: simResult.reasoning,
+    }
+
+    // GEM override: if gem improves marker AND current marker is SELL or GRIND
+    if (isMarkerBetter(simResult.marker, marker) && (marker === 'SELL' || marker === 'GRIND')) {
+      marker = 'GEM'
+      reasoning.push(
+        `Gem ${gemTarget.removeStat} → ${gemTarget.replaceStat} would improve to ${simResult.marker}`
+      )
+    }
+  }
+
+  return { marker, reasoning, comparisons, gemSimulation }
+}
+
 /**
  * Legacy function name — kept for backward compatibility.
  * Delegates to analyzeRune.
@@ -1618,6 +1860,9 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   // Per-archetype gem/grind optimization recommendations
   const archetypeOptimizations = calculateArchetypeOptimizations(rune, synergy, quality, isAncient)
 
+  // RuneMarker classification (TRUE_LEG_MIN, GEM, REAPP, SELL, ...)
+  const markerResult = classifyRuneMarker(rune)
+
   return {
     currentEfficiency: roundedCurrent,
     efficiency: roundedCurrent,
@@ -1660,5 +1905,8 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     setWeightRatio: Math.round(setWeightRatio * 1000) / 1000,
     profile,
     ...(isAncient ? { isAncient } : {}),
+    runeMarker: markerResult.marker,
+    runeMarkerReasoning: markerResult.reasoning,
+    rarityComparisons: markerResult.comparisons,
   }
 }

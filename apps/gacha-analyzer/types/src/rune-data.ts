@@ -1205,3 +1205,93 @@ export const SET_STRENGTH_THRESHOLD_BONUS: Record<string, number> = {
   C: 10, // seuils +10%
   D: 13, // seuils +13% — sets artéfact doivent être godlike
 }
+
+// ============================================
+// MAX SUBSTAT VALUE BY RARITY
+// ============================================
+// Formula: MAX_STAT_BY_RARITY[rarity][stat] = (1 + UPGRADES_BY_QUALITY[rarity]) × SUBSTAT_ROLL_RANGES[stat].max
+// Verification:
+//   normal:  (1+0)=1 roll  × max(spd:6) = 6  ✓
+//   magic:   (1+1)=2 rolls × max(spd:6) = 12 ✓
+//   hero:    (1+3)=4 rolls × max(spd:6) = 24 ✓
+//   legend:  (1+4)=5 rolls × max(spd:6) = 30 ✓
+export const MAX_STAT_BY_RARITY: Record<RuneQuality, Record<StatType, number>> = {
+  normal: {
+    hp: 375,
+    'hp%': 8,
+    atk: 20,
+    'atk%': 8,
+    def: 20,
+    'def%': 8,
+    spd: 6,
+    cr: 6,
+    cd: 7,
+    res: 8,
+    acc: 8,
+  },
+  magic: {
+    hp: 750,
+    'hp%': 16,
+    atk: 40,
+    'atk%': 16,
+    def: 40,
+    'def%': 16,
+    spd: 12,
+    cr: 12,
+    cd: 14,
+    res: 16,
+    acc: 16,
+  },
+  rare: {
+    hp: 1125,
+    'hp%': 24,
+    atk: 60,
+    'atk%': 24,
+    def: 60,
+    'def%': 24,
+    spd: 18,
+    cr: 18,
+    cd: 21,
+    res: 24,
+    acc: 24,
+  },
+  hero: {
+    hp: 1500,
+    'hp%': 32,
+    atk: 80,
+    'atk%': 32,
+    def: 80,
+    'def%': 32,
+    spd: 24,
+    cr: 24,
+    cd: 28,
+    res: 32,
+    acc: 32,
+  },
+  legend: {
+    hp: 1875,
+    'hp%': 40,
+    atk: 100,
+    'atk%': 40,
+    def: 100,
+    'def%': 40,
+    spd: 30,
+    cr: 30,
+    cd: 35,
+    res: 40,
+    acc: 40,
+  },
+}
+
+// ============================================
+// GEM PRIORITY BY SLOT
+// ============================================
+// Priority order of stats to gem into, per slot
+export const GEM_PRIORITY_BY_SLOT: Record<number, StatType[]> = {
+  1: ['spd', 'atk%', 'cr', 'cd'],
+  2: ['spd', 'atk%', 'def%', 'hp%'],
+  3: ['spd', 'def%', 'hp%', 'atk%'],
+  4: ['cr', 'cd', 'atk%', 'spd'],
+  5: ['spd', 'hp%', 'def%', 'atk%'],
+  6: ['spd', 'hp%', 'def%', 'acc'],
+}
