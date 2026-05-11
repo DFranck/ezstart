@@ -106,7 +106,13 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           updateData['metadata.subscriptionId'] = data.subscriptionId
         }
 
-        const result = await Payment.updateOne({ paymentId: data.sessionId }, updateData)
+        // isTestMode in the filter overrides testModeScopePlugin: webhook
+        // requests carry no API key so derivedMode defaults to 'live', which
+        // would otherwise exclude test payments from the query.
+        const result = await Payment.updateOne(
+          { paymentId: data.sessionId, isTestMode: !eventLiveMode },
+          updateData
+        )
 
         if (result.matchedCount === 0) {
           logger.error(`Payment not found in DB: ${data.sessionId}`)
@@ -133,7 +139,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         // the Payment row is the source of truth; grants are a side-effect.
         if (data.mode === 'subscription' && data.subscriptionId) {
           try {
-            const payment = await Payment.findOne({ paymentId: data.sessionId }).lean()
+            const payment = await Payment.findOne({
+              paymentId: data.sessionId,
+              isTestMode: !eventLiveMode,
+            }).lean()
             const planId = payment?.metadata?.planId
             const userId = payment?.userId
 
@@ -175,7 +184,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
       case 'checkout.expired': {
         const data = event.data as WebhookCheckoutData
-        await Payment.updateOne({ paymentId: data.sessionId }, { status: 'cancelled' })
+        await Payment.updateOne(
+          { paymentId: data.sessionId, isTestMode: !eventLiveMode },
+          { status: 'cancelled' }
+        )
         logger.info(`Payment expired: ${data.sessionId}`)
         break
       }
@@ -183,7 +195,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
       case 'payment.refunded': {
         const data = event.data as WebhookRefundData
         await Payment.updateOne(
-          { stripePaymentIntentId: data.paymentIntentId },
+          { stripePaymentIntentId: data.paymentIntentId, isTestMode: !eventLiveMode },
           { status: 'refunded' }
         )
         logger.info(`Payment refunded: ${data.paymentIntentId}`)
@@ -212,6 +224,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         // ezauth for every heartbeat webhook).
         const existingPayment = await Payment.findOne({
           'metadata.subscriptionId': data.subscriptionId,
+          isTestMode: !eventLiveMode,
         }).lean()
 
         const updateFields: Record<string, unknown> = {
@@ -231,7 +244,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           updateFields.currentPeriodEnd = new Date(data.currentPeriodEnd * 1000)
         }
 
-        await Payment.updateOne({ 'metadata.subscriptionId': data.subscriptionId }, updateFields)
+        await Payment.updateOne(
+          { 'metadata.subscriptionId': data.subscriptionId, isTestMode: !eventLiveMode },
+          updateFields
+        )
         logger.info(
           `Subscription updated: ${data.subscriptionId} -> ${mappedStatus}${data.cancelAtPeriodEnd ? ' (canceling at period end)' : ''}`
         )
@@ -315,10 +331,11 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         const existingPayment = await Payment.findOne({
           'metadata.subscriptionId': data.subscriptionId,
+          isTestMode: !eventLiveMode,
         }).lean()
 
         await Payment.updateOne(
-          { 'metadata.subscriptionId': data.subscriptionId },
+          { 'metadata.subscriptionId': data.subscriptionId, isTestMode: !eventLiveMode },
           { status: 'cancelled' }
         )
         logger.info(`Subscription cancelled: ${data.subscriptionId}`)
@@ -397,7 +414,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         if (data.subscriptionId) {
           await Payment.updateOne(
-            { 'metadata.subscriptionId': data.subscriptionId },
+            { 'metadata.subscriptionId': data.subscriptionId, isTestMode: !eventLiveMode },
             { status: 'failed' }
           )
           logger.info(`Invoice payment failed for subscription: ${data.subscriptionId}`)
@@ -419,6 +436,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         const subPayment = await Payment.findOne({
           'metadata.subscriptionId': data.subscriptionId,
           type: 'subscription',
+          isTestMode: !eventLiveMode,
         }).sort({ createdAt: -1 })
 
         if (!subPayment) {
@@ -455,7 +473,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         // Update the subscription's period end
         await Payment.updateOne(
-          { _id: subPayment._id },
+          { _id: subPayment._id, isTestMode: !eventLiveMode },
           {
             $set: {
               status: 'completed',
