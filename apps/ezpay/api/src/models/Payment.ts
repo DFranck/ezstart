@@ -1,6 +1,5 @@
-import { connectToMongo } from '@ezstart/api-core'
+import { connectToMongo, testModeScopePlugin, ttlPlugin } from '@ezstart/api-core'
 import { Schema, Model, Document } from 'mongoose'
-import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 export interface DonationMetadata {
   message?: string
@@ -198,22 +197,11 @@ paymentSchema.index({ projectId: 1, createdAt: -1 })
 paymentSchema.index({ userId: 1, createdAt: -1 })
 paymentSchema.index({ type: 1, status: 1 })
 
-// TTL auto-purge for test data — documents with isTestMode:true are deleted
-// after 24h. Keeps sandbox/playground flows from polluting the database
-// across dev, staging, and prod. Live payments (isTestMode:false) are never
-// touched by this index (partial filter expression).
-paymentSchema.index(
-  { createdAt: 1 },
-  {
-    name: 'test_mode_ttl_24h',
-    expireAfterSeconds: 86400,
-    partialFilterExpression: { isTestMode: true },
-  }
-)
-
-// Stripe-pattern test/live partition (`standard-saas-data.md` §4) — auto-scope
-// every read by `req.derivedMode` propagated via AsyncLocalStorage.
+// Stripe-pattern test/live partition (`standard-saas-data.md` §4):
+// - auto-scope every read by `req.derivedMode` via AsyncLocalStorage
+// - auto-purge test documents after 24h (partial TTL index on isTestMode:true)
 paymentSchema.plugin(testModeScopePlugin)
+paymentSchema.plugin(ttlPlugin, { ttlSeconds: 86400, partialFilter: { isTestMode: true } })
 
 /**
  * Factory function to get Payment model attached to shared connection

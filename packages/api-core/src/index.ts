@@ -101,6 +101,7 @@ export {
   testModeScopePlugin,
   type TestModeScopeOptions,
 } from './core/middleware/test-mode-scope.js'
+export { ttlPlugin, type TTLPluginOptions } from './core/middleware/ttl.js'
 export {
   createErrorHandler,
   type ErrorHandlerConfig,

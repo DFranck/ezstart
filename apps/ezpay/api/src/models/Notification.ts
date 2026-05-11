@@ -15,9 +15,8 @@
  * notification type.
  */
 
-import { connectToMongo } from '@ezstart/api-core'
+import { connectToMongo, testModeScopePlugin, ttlPlugin } from '@ezstart/api-core'
 import { Schema, Document, Model } from 'mongoose'
-import { testModeScopePlugin } from '../middleware/test-mode-scope.js'
 
 export type NotificationType =
   | 'past_due'
@@ -85,6 +84,7 @@ const notificationSchema = new Schema<NotificationDocument>(
 )
 
 notificationSchema.plugin(testModeScopePlugin)
+notificationSchema.plugin(ttlPlugin, { ttlSeconds: 86400, partialFilter: { isTestMode: true } })
 
 // Compound indexes for the common queries: "fetch open notifs for a user"
 notificationSchema.index({ userId: 1, readAt: 1, createdAt: -1 })
