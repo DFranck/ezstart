@@ -5,6 +5,7 @@ import { noDialogOutsideUi } from './rules/no-dialog-outside-ui.js'
 import { noExpressCore } from './rules/no-express-core.js'
 import { noFetchClient } from './rules/no-fetch-client.js'
 import { noHardcodedTailwindColors } from './rules/no-hardcoded-tailwind-colors.js'
+import { noInlinePaginationSchema } from './rules/no-inline-pagination-schema.js'
 import { noLocalUiComponents } from './rules/no-local-ui-components.js'
 import { noNextLinkInLocaleApps } from './rules/no-next-link-in-locale-apps.js'
 import { noRawFetch } from './rules/no-raw-fetch.js'
@@ -24,6 +25,7 @@ const rules = {
   'no-alert-confirm': noAlertConfirm,
   'no-console-log': noConsoleLog,
   'no-hardcoded-tailwind-colors': noHardcodedTailwindColors,
+  'no-inline-pagination-schema': noInlinePaginationSchema,
   'no-dialog-outside-ui': noDialogOutsideUi,
   'require-i18n-string': requireI18nString,
   'no-local-ui-components': noLocalUiComponents,
@@ -47,6 +49,7 @@ const recommendedRules = {
   [`${PLUGIN_NAME}/no-alert-confirm`]: 'error',
   [`${PLUGIN_NAME}/no-console-log`]: 'warn',
   [`${PLUGIN_NAME}/no-hardcoded-tailwind-colors`]: 'warn',
+  [`${PLUGIN_NAME}/no-inline-pagination-schema`]: 'error',
   [`${PLUGIN_NAME}/no-dialog-outside-ui`]: 'warn',
   [`${PLUGIN_NAME}/require-i18n-string`]: 'warn',
   [`${PLUGIN_NAME}/no-local-ui-components`]: 'warn',

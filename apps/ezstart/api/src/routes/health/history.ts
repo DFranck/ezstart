@@ -11,6 +11,7 @@ import {
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -29,12 +30,9 @@ const serviceIdParamSchema = z.object({
   serviceId: z.string().openapi({ description: 'Unique identifier of the service' }),
 })
 
-const historyQuerySchema = z.object({
-  limit: z.coerce
-    .number()
-    .default(50)
-    .openapi({ description: 'Number of history entries to return' }),
-})
+// Uses canonical PaginationQuerySchema (limit 1-100, default 50) — `offset`
+// is part of the schema but not used by this handler (in-memory ring buffer).
+const historyQuerySchema = PaginationQuerySchema
 
 const historyResponseSchema = z.object({
   id: z.string().describe('Unique identifier of the service'),
@@ -66,7 +64,8 @@ const historyResponseSchema = z.object({
 const getServiceHistoryHandler = (req: Request, res: Response) => {
   try {
     const { serviceId } = req.params
-    const { limit = '50' } = req.query
+    const parsed = historyQuerySchema.safeParse(req.query)
+    const limit = parsed.success ? parsed.data.limit : 50
 
     const config = MONITORED_SERVICES[serviceId as keyof typeof MONITORED_SERVICES]
 
@@ -74,7 +73,7 @@ const getServiceHistoryHandler = (req: Request, res: Response) => {
       return sendError(res, 'Service not found', 404)
     }
 
-    const history = healthChecker.getHistory(config.name, Number(limit))
+    const history = healthChecker.getHistory(config.name, limit)
     const uptime24h = healthChecker.calculateUptime(config.name, 24)
     const uptime7d = healthChecker.calculateUptime(config.name, 24 * 7)
     const uptime30d = healthChecker.calculateUptime(config.name, 24 * 30)

@@ -7,6 +7,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -20,19 +21,8 @@ const docRouter = createRouterWithDoc(listDonationsRegistry, router)
 // Zod Schemas
 // ========================================
 
-const donationsQuerySchema = z.object({
+const donationsQuerySchema = PaginationQuerySchema.extend({
   projectId: z.string().optional().openapi({ description: 'Filter by project ID' }),
-  limit: z.coerce
-    .number()
-    .min(1)
-    .max(100)
-    .default(20)
-    .openapi({ description: 'Number of donations to return' }),
-  offset: z.coerce
-    .number()
-    .min(0)
-    .default(0)
-    .openapi({ description: 'Number of donations to skip' }),
 })
 
 const donationsListResponseSchema = z.object({

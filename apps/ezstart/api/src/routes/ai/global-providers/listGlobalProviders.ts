@@ -12,10 +12,11 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { z } from 'zod'
 import { GlobalProviderAccess } from '../../../models/GlobalProviderAccess.js'
 
-const listQuerySchema = z.object({
+const listQuerySchema = PaginationQuerySchema.extend({
   isGloballyEnabled: z
     .enum(['true', 'false'])
     .optional()
@@ -24,8 +25,6 @@ const listQuerySchema = z.object({
     .enum(['gemini', 'openai', 'anthropic'])
     .optional()
     .describe('Filter by provider type'),
-  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
 
 export const listGlobalProvidersRegistry = new OpenAPIRegistry()

@@ -182,6 +182,9 @@ importers:
 
   apps/ezauth/api:
     dependencies:
+      '@ezstart/api-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/api-contracts
       '@ezstart/api-core':
         specifier: workspace:*
         version: link:../../../packages/api-core
@@ -391,6 +394,9 @@ importers:
       '@ezstart/ai-sdk':
         specifier: workspace:*
         version: link:../../../packages/ai-sdk
+      '@ezstart/api-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/api-contracts
       '@ezstart/api-core':
         specifier: workspace:*
         version: link:../../../packages/api-core
@@ -615,6 +621,9 @@ importers:
 
   apps/ezpay/api:
     dependencies:
+      '@ezstart/api-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/api-contracts
       '@ezstart/api-core':
         specifier: workspace:*
         version: link:../../../packages/api-core
@@ -767,6 +776,9 @@ importers:
       '@ezstart/ai-sdk':
         specifier: workspace:*
         version: link:../../../packages/ai-sdk
+      '@ezstart/api-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/api-contracts
       '@ezstart/api-core':
         specifier: workspace:*
         version: link:../../../packages/api-core
@@ -1091,6 +1103,9 @@ importers:
 
   apps/gacha-analyzer/api:
     dependencies:
+      '@ezstart/api-contracts':
+        specifier: workspace:*
+        version: link:../../../packages/api-contracts
       '@ezstart/api-core':
         specifier: workspace:*
         version: link:../../../packages/api-core

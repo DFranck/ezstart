@@ -19,6 +19,7 @@ import {
   sendSuccess,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { logger } from '@ezstart/logger/server'
@@ -74,22 +75,8 @@ const getErrorLogResponseSchema = z.object({
   data: errorLogDetailSchema,
 })
 
-const listErrorLogsQuerySchema = z.object({
-  limit: z.coerce
-    .number()
-    .int()
-    .positive()
-    .max(200)
-    .optional()
-    .default(50)
-    .openapi({ description: 'Page size (1-200, default 50)' }),
-  offset: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .default(0)
-    .openapi({ description: 'Pagination offset (0-based)' }),
+// Note: limit max lowered from 200 → 100 (canonical standard).
+const listErrorLogsQuerySchema = PaginationQuerySchema.extend({
   level: z
     .enum(ERROR_LOG_LEVELS as unknown as [string, ...string[]])
     .optional()

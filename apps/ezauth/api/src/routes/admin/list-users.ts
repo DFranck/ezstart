@@ -8,6 +8,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getApplicationModel } from '../../models/application.js'
@@ -33,24 +34,10 @@ const listUsersResponseSchema = z.object({
   meta: paginationMetaSchema.describe('Pagination metadata'),
 })
 
-// Query validation schema — limit/offset aligned with every other paginated
-// list in the monorepo (green-pulse, ezbill, …).
-const listUsersQuerySchema = z.object({
-  limit: z.coerce
-    .number()
-    .int()
-    .positive()
-    .max(200)
-    .optional()
-    .default(20)
-    .openapi({ description: 'Page size (1-200, default 20)' }),
-  offset: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .default(0)
-    .openapi({ description: 'Pagination offset (0-based, default 0)' }),
+// Query validation schema — uses canonical PaginationQuerySchema from
+// @ezstart/api-contracts (limit max=100, default=50; offset max=10K).
+// Previously had max=200 — lowered to 100 per standard-saas-data.md §3.
+const listUsersQuerySchema = PaginationQuerySchema.extend({
   search: z.string().optional().openapi({ description: 'Free-text search on email/username/name' }),
   role: z
     .string()

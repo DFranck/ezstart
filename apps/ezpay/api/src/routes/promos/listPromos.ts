@@ -7,6 +7,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPromoModel } from '../../models/Promo.js'
 import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
@@ -21,22 +22,9 @@ const docRouter = createRouterWithDoc(listPromosRegistry, router)
 // Zod Schemas
 // ========================================
 
-const listPromosQuerySchema = z.object({
+const listPromosQuerySchema = PaginationQuerySchema.extend({
   appName: z.string().optional().openapi({ description: 'Filter by app name' }),
   active: z.enum(['true', 'false']).optional().openapi({ description: 'Filter by active status' }),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20)
-    .openapi({ description: 'Max results' }),
-  offset: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .default(0)
-    .openapi({ description: 'Offset for pagination' }),
 })
 
 const promosListResponseSchema = z.object({

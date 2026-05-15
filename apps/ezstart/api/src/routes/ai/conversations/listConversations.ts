@@ -12,10 +12,11 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { z } from 'zod'
 import { AIConversation } from '../../../models/AIConversation.js'
 
-const listConversationsQuerySchema = z.object({
+const listConversationsQuerySchema = PaginationQuerySchema.extend({
   appName: z.string().min(1).optional().describe('Application name (optional, omit for all apps)'),
   userId: z.string().optional().describe('Filter by user ID (superadmin only)'),
   all: z.enum(['true', 'false']).optional().describe('List across all users (superadmin only)'),
@@ -23,8 +24,6 @@ const listConversationsQuerySchema = z.object({
     .enum(['true', 'false'])
     .optional()
     .describe('Include soft-deleted conversations'),
-  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
 
 export const listConversationsRegistry = new OpenAPIRegistry()

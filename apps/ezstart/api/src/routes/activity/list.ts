@@ -18,19 +18,18 @@
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 import type { ActivityLog } from '../../types/activity-log.js'
 
-const activityQuerySchema = z.object({
+const activityQuerySchema = PaginationQuerySchema.extend({
   type: z.string().optional().describe('Filter by activity type'),
   severity: z
     .enum(['critical', 'error', 'warning', 'info', 'success'])
     .optional()
     .describe('Filter by severity'),
   project: z.string().optional().describe('Filter by project slug'),
-  limit: z.coerce.number().default(50).describe('Max number of logs'),
-  offset: z.coerce.number().default(0).describe('Number of items to skip'),
   since: z.string().default('7d').describe('Relative time or ISO timestamp'),
 })
 

@@ -7,6 +7,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { getPlanModel } from '../../models/Plan.js'
@@ -22,7 +23,7 @@ const docRouter = createRouterWithDoc(listPlansRegistry, router)
 // Zod Schemas
 // ========================================
 
-const listPlansQuerySchema = z.object({
+const listPlansQuerySchema = PaginationQuerySchema.extend({
   applicationId: z
     .string()
     .optional()
@@ -39,19 +40,6 @@ const listPlansQuerySchema = z.object({
     .enum(['true', 'false'])
     .optional()
     .openapi({ description: 'Explicit active filter (overrides defaults)' }),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20)
-    .openapi({ description: 'Max results' }),
-  offset: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .default(0)
-    .openapi({ description: 'Offset for pagination' }),
 })
 
 const plansListResponseSchema = z.object({

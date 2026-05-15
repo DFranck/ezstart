@@ -19,10 +19,11 @@ import {
 import { enrichedAppProviderSchema } from '@ezstart/ai-sdk'
 import { providerRegistry } from '@ezstart/ai-sdk/server'
 import type { AIProviderInfo, ProviderCapabilities } from '@ezstart/ai-sdk/server'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { z } from 'zod'
 import { AppProvider, normalizeLegacyAppProvider } from '../../../models/AppProvider.js'
 
-const listQuerySchema = z.object({
+const listQuerySchema = PaginationQuerySchema.extend({
   app: z.string().min(1).optional().openapi({
     description: 'Filter by app name — matches providers scoped to this app or "*" (omit for all)',
   }),
@@ -32,13 +33,6 @@ const listQuerySchema = z.object({
     .enum(['true', 'false'])
     .optional()
     .openapi({ description: 'Filter by enabled status' }),
-  limit: z.coerce
-    .number()
-    .min(1)
-    .max(100)
-    .default(20)
-    .openapi({ description: 'Maximum items per page' }),
-  offset: z.coerce.number().min(0).default(0).openapi({ description: 'Number of items to skip' }),
 })
 
 // Response envelope matches the monorepo-wide `{ success, data, meta }` shape.

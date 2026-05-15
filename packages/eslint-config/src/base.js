@@ -48,6 +48,7 @@ export const config = [
       '@ezstart/ezstart/no-alert-confirm': 'warn',
       '@ezstart/ezstart/no-console-log': 'warn',
       '@ezstart/ezstart/no-hardcoded-tailwind-colors': 'warn',
+      '@ezstart/ezstart/no-inline-pagination-schema': 'error',
       '@ezstart/ezstart/no-dialog-outside-ui': 'warn',
     },
   },

@@ -11,6 +11,7 @@ import {
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -29,12 +30,11 @@ const projectIdParamSchema = z.object({
   projectId: z.string().openapi({ description: 'Project identifier (e.g. ezauth, ezbill)' }),
 })
 
-const projectHistoryQuerySchema = z.object({
+// Note: previous schema accepted unbounded limit (default 100). Now uses
+// canonical PaginationQuerySchema (limit 1-100, default 50). `offset` is
+// extended in but unused by this handler (in-memory ring buffer).
+const projectHistoryQuerySchema = PaginationQuerySchema.extend({
   hours: z.coerce.number().default(24).openapi({ description: 'Time range in hours' }),
-  limit: z.coerce
-    .number()
-    .default(100)
-    .openapi({ description: 'Number of history entries per service' }),
 })
 
 const projectHistoryResponseSchema = z.object({
@@ -72,8 +72,9 @@ const projectHistoryResponseSchema = z.object({
 const getProjectHistoryHandler = (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-    const hours = Number(req.query.hours) || 24
-    const limit = Number(req.query.limit) || 100
+    const parsed = projectHistoryQuerySchema.safeParse(req.query)
+    const hours = parsed.success ? parsed.data.hours : 24
+    const limit = parsed.success ? parsed.data.limit : 50
 
     // Find all services for this project (e.g. ezauth-api, ezauth-web)
     const serviceIds = Object.keys(MONITORED_SERVICES).filter(id => id.startsWith(`${projectId}-`))

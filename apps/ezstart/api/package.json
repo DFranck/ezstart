@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@ezstart/ai-sdk": "workspace:*",
+    "@ezstart/api-contracts": "workspace:*",
     "@ezstart/api-core": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",

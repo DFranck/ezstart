@@ -14,6 +14,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { z } from 'zod'
 import {
   AISystemPrompt,
@@ -23,7 +24,7 @@ import {
   type IAISystemPrompt,
 } from '../../../models/AISystemPrompt.js'
 
-const listPromptsQuerySchema = z.object({
+const listPromptsQuerySchema = PaginationQuerySchema.extend({
   app: z
     .string()
     .min(1)
@@ -39,8 +40,6 @@ const listPromptsQuerySchema = z.object({
     .optional()
     .describe('Filter by provider (matches providers[] or "all").'),
   active: z.enum(['true', 'false']).optional().describe('Filter by active status'),
-  limit: z.coerce.number().min(1).max(100).default(20).describe('Maximum items per page'),
-  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip'),
 })
 
 export const listPromptsRegistry = new OpenAPIRegistry()

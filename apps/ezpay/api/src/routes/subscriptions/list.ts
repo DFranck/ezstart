@@ -8,6 +8,7 @@ import {
   sendError,
   sendValidationError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { listApplicationsByOwner } from '../../services/ezauth-client.js'
@@ -22,7 +23,7 @@ const docRouter = createRouterWithDoc(listSubscriptionsRegistry, router)
 // Zod Schemas
 // ========================================
 
-const subscriptionsQuerySchema = z.object({
+const subscriptionsQuerySchema = PaginationQuerySchema.extend({
   scope: z.enum(['mine', 'myApps', 'all']).optional().openapi({
     description:
       'Optional debugging override (superadmin only). The scope is auto-derived from the JWT roles by `attachDerivedScope`.',
@@ -33,17 +34,6 @@ const subscriptionsQuerySchema = z.object({
     .enum(['true', 'false'])
     .optional()
     .openapi({ description: 'Filter by live mode (true=production, false=test)' }),
-  limit: z.coerce
-    .number()
-    .min(1)
-    .max(100)
-    .default(20)
-    .openapi({ description: 'Number of subscriptions to return' }),
-  offset: z.coerce
-    .number()
-    .min(0)
-    .default(0)
-    .openapi({ description: 'Number of subscriptions to skip' }),
 })
 
 const subscriptionsListResponseSchema = z.object({

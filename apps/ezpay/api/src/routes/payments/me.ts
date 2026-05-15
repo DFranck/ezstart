@@ -6,6 +6,7 @@ import {
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -19,7 +20,7 @@ const docRouter = createRouterWithDoc(myPaymentsRegistry, router)
 // Zod Schemas
 // ========================================
 
-const myPaymentsQuerySchema = z.object({
+const myPaymentsQuerySchema = PaginationQuerySchema.extend({
   type: z
     .enum(['donation', 'purchase', 'subscription', 'invoice'])
     .optional()
@@ -32,17 +33,6 @@ const myPaymentsQuerySchema = z.object({
     .enum(['true', 'false'])
     .optional()
     .openapi({ description: 'Filter by live mode (true=production, false=test)' }),
-  limit: z.coerce
-    .number()
-    .min(1)
-    .max(100)
-    .default(20)
-    .openapi({ description: 'Number of payments to return' }),
-  offset: z.coerce
-    .number()
-    .min(0)
-    .default(0)
-    .openapi({ description: 'Number of payments to skip' }),
 })
 
 const myPaymentsResponseSchema = z.object({
@@ -65,7 +55,7 @@ const myPaymentsHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
     if (!req.userId) {
-      return sendSuccess(res, [], { total: 0, limit: 20, offset: 0 })
+      return sendSuccess(res, [], { total: 0, limit: 50, offset: 0 })
     }
 
     const parsed = myPaymentsQuerySchema.safeParse(req.query)

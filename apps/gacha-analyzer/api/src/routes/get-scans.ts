@@ -4,6 +4,7 @@
 
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/api-core'
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { findMany } from '../utils/mongoose-query.js'
 import type { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -11,11 +12,9 @@ import { getScanModel } from '../models/scan.js'
 
 const router: ExpressRouter = Router()
 
-const querySchema = z.object({
+const querySchema = PaginationQuerySchema.extend({
   gameType: z.enum(['summoners-war', 'nikke']).optional(),
   status: z.enum(['pending', 'processing', 'completed', 'failed']).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0),
 })
 
 // GET /scans — Get all scans (most recent first)

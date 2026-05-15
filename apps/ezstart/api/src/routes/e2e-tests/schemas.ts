@@ -5,6 +5,7 @@
  * and so the seeder + CLI helper can reuse the same input validators.
  */
 
+import { PaginationQuerySchema } from '@ezstart/api-contracts'
 import { z } from 'zod'
 import {
   E2E_APPS,
@@ -96,7 +97,8 @@ export const TierFilterSchema = z
   .default('all')
   .describe('Filter runs by tier — pass "all" (default) to include every tier')
 
-export const ListDefinitionsQuerySchema = z.object({
+// Note: limit max lowered from 200 → 100 (canonical standard).
+export const ListDefinitionsQuerySchema = PaginationQuerySchema.extend({
   app: E2EAppEnum.optional(),
   category: E2ECategoryEnum.optional(),
   feature: z.string().max(100).optional(),
@@ -104,8 +106,6 @@ export const ListDefinitionsQuerySchema = z.object({
   status: E2ERunStatusEnum.optional().describe('Filter by latest run status'),
   env: EnvFilterSchema,
   tier: TierFilterSchema,
-  limit: z.coerce.number().int().min(1).max(200).default(50),
-  offset: z.coerce.number().int().min(0).default(0),
 })
 
 export type ListDefinitionsQuery = z.infer<typeof ListDefinitionsQuerySchema>
