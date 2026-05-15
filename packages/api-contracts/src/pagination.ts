@@ -17,7 +17,7 @@ import { z } from 'zod'
  *
  * @example
  * ```ts
- * const meta: ApiMeta = { total: 42, limit: 20, offset: 0, cursor: 'abc' }
+ * const meta: ApiMeta = { total: 42, limit: 50, offset: 0, cursor: 'abc' }
  * ```
  */
 export type ApiMeta = {
@@ -35,7 +35,7 @@ export type ApiMeta = {
  *
  * @example
  * ```ts
- * const meta: PaginationMeta = { total: 42, limit: 20, offset: 0 }
+ * const meta: PaginationMeta = { total: 42, limit: 50, offset: 0 }
  * const hasMore = meta.offset + meta.limit < meta.total
  * ```
  */
@@ -51,7 +51,7 @@ export type PaginationMeta = {
  * Typically wrapped inside a {@link SuccessResponse} on the wire:
  *
  * ```json
- * { "success": true, "data": [...], "meta": { "total": 42, "limit": 20, "offset": 0 } }
+ * { "success": true, "data": [...], "meta": { "total": 42, "limit": 50, "offset": 0 } }
  * ```
  *
  * When consuming via `@ezstart/api-sdk`, the envelope is unwrapped and you
@@ -72,12 +72,67 @@ export type PaginatedResponse<T> = {
 }
 
 /**
+ * Strict positive-integer parser used by pagination params.
+ *
+ * Hardened against the permissive behavior of `z.coerce.number()`, which
+ * accepts hex strings (`'0x10'` → 16), scientific notation (`'1e2'` → 100),
+ * booleans (`true` → 1), single-element arrays (`[50]` → 50), and objects
+ * with a `valueOf()` method. The contract is the SHARED validator between
+ * client and server — every consumer agrees on the same parsing rules.
+ *
+ * Accepted inputs:
+ * - Already-a-number: `z.number().int().positive().finite()`
+ * - Decimal-only string: `/^\d+$/` then `parseInt(s, 10)`
+ *
+ * Rejected inputs (verified): hex (`'0x10'`), scientific (`'1e2'`, `'1.5e2'`),
+ * arrays (`[50]`, `[]`), booleans (`true`, `false`), null, NaN, Infinity,
+ * negatives, zero, floats, whitespace-padded strings, objects with valueOf.
+ *
+ * @internal
+ */
+const StrictPositiveInt = z.union([
+  z.number().int().positive().finite(),
+  z
+    .string()
+    .regex(/^\d+$/, 'Must be a positive decimal integer (no hex, no scientific notation)')
+    .transform(s => Number.parseInt(s, 10))
+    .refine(n => Number.isInteger(n) && n > 0 && Number.isFinite(n), 'Must be a positive integer'),
+])
+
+/**
+ * Strict non-negative-integer parser (offset variant). Accepts 0.
+ *
+ * Same hardening rules as {@link StrictPositiveInt} but allows zero.
+ *
+ * @internal
+ */
+const StrictNonNegativeInt = z.union([
+  z.number().int().nonnegative().finite(),
+  z
+    .string()
+    .regex(/^\d+$/, 'Must be a non-negative decimal integer (no hex, no scientific notation)')
+    .transform(s => Number.parseInt(s, 10))
+    .refine(
+      n => Number.isInteger(n) && n >= 0 && Number.isFinite(n),
+      'Must be a non-negative integer'
+    ),
+])
+
+/**
  * Zod schema for the standard pagination query string.
  *
- * - `limit`  : integer 1..100 (default 20)
- * - `offset` : integer >= 0 (default 0)
+ * - `limit`  : integer 1..100 (default 50, per `standard-saas-data.md` §3)
+ * - `offset` : integer 0..10_000 (default 0)
  *
- * Uses `z.coerce.number()` so it parses query strings (`?limit=50`) directly.
+ * Parses query strings (`?limit=50`) using a strict positive-integer parser
+ * that rejects hex (`0x10`), scientific notation (`1e2`), booleans, arrays,
+ * objects, and whitespace-padded values. See {@link StrictPositiveInt}.
+ *
+ * The `offset` upper bound of 10_000 mirrors industry-standard soft caps
+ * (Stripe, GitHub). Higher offsets force a linear-cost Mongo `skip()` on
+ * every request, which is a DoS amplification primitive — switch to cursor
+ * pagination for deep lists.
+ *
  * Servers should call `PaginationQuerySchema.parse(req.query)` on any GET
  * list endpoint to enforce this contract.
  *
@@ -89,20 +144,12 @@ export type PaginatedResponse<T> = {
  * ```
  */
 export const PaginationQuerySchema = z.object({
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20)
-    .describe('Page size (1-100, default 20)'),
-  offset: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .max(1_000_000)
+  limit: StrictPositiveInt.refine(n => n <= 100, 'Must be at most 100')
+    .default(50)
+    .describe('Page size (1-100, default 50)'),
+  offset: StrictNonNegativeInt.refine(n => n <= 10_000, 'Must be at most 10000')
     .default(0)
-    .describe('Pagination offset (0-based, max 1M, default 0)'),
+    .describe('Pagination offset (0-based, max 10_000, default 0)'),
 })
 
 /**
