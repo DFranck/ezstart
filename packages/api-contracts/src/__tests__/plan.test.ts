@@ -177,6 +177,85 @@ describe('PlanSchema', () => {
     expect(() => PlanSchema.parse({ ...baseValid, intervalCount: 0 })).toThrow()
     expect(() => PlanSchema.parse({ ...baseValid, intervalCount: -1 })).toThrow()
   })
+
+  describe('stripeProductId (Stripe Connect/Pay setup)', () => {
+    it('accepts a valid stripeProductId string', () => {
+      const parsed = PlanSchema.safeParse({ ...baseValid, stripeProductId: 'prod_abc123' })
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.stripeProductId).toBe('prod_abc123')
+    })
+
+    it('treats missing stripeProductId as undefined (optional)', () => {
+      const parsed = PlanSchema.safeParse(baseValid)
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.stripeProductId).toBeUndefined()
+    })
+
+    it('rejects empty stripeProductId (.min(1))', () => {
+      const parsed = PlanSchema.safeParse({ ...baseValid, stripeProductId: '' })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('rejects non-string stripeProductId', () => {
+      const parsed = PlanSchema.safeParse({
+        ...baseValid,
+        stripeProductId: 12345 as unknown as string,
+      })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('rejects stripeProductId exceeding 255 chars', () => {
+      const parsed = PlanSchema.safeParse({
+        ...baseValid,
+        stripeProductId: 'prod_' + 'x'.repeat(260),
+      })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('exports stripeProductId as string | undefined on the type', () => {
+      expectTypeOf<Plan>().toHaveProperty('stripeProductId').toEqualTypeOf<string | undefined>()
+    })
+  })
+
+  describe('isTestMode (Stripe-pattern test/live partition)', () => {
+    it('accepts isTestMode=true', () => {
+      const parsed = PlanSchema.safeParse({ ...baseValid, isTestMode: true })
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.isTestMode).toBe(true)
+    })
+
+    it('accepts isTestMode=false', () => {
+      const parsed = PlanSchema.safeParse({ ...baseValid, isTestMode: false })
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.isTestMode).toBe(false)
+    })
+
+    it('treats missing isTestMode as undefined (optional, legacy backcompat)', () => {
+      const parsed = PlanSchema.safeParse(baseValid)
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.isTestMode).toBeUndefined()
+    })
+
+    it('rejects non-boolean isTestMode (no string coercion)', () => {
+      const parsed = PlanSchema.safeParse({
+        ...baseValid,
+        isTestMode: 'true' as unknown as boolean,
+      })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('rejects numeric isTestMode (no truthy coercion)', () => {
+      const parsed = PlanSchema.safeParse({
+        ...baseValid,
+        isTestMode: 1 as unknown as boolean,
+      })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('exports isTestMode as boolean | undefined on the type', () => {
+      expectTypeOf<Plan>().toHaveProperty('isTestMode').toEqualTypeOf<boolean | undefined>()
+    })
+  })
 })
 
 describe('CreatePlanRequestSchema', () => {

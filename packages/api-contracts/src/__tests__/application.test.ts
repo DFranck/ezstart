@@ -129,6 +129,38 @@ describe('ApplicationSchema', () => {
       .toHaveProperty('requireEmailVerification')
       .toEqualTypeOf<boolean | undefined>()
   })
+
+  describe('isTestMode (Stripe-pattern test/live partition)', () => {
+    it('accepts isTestMode=true', () => {
+      const parsed = ApplicationSchema.safeParse({ ...baseValid, isTestMode: true })
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.isTestMode).toBe(true)
+    })
+
+    it('accepts isTestMode=false', () => {
+      const parsed = ApplicationSchema.safeParse({ ...baseValid, isTestMode: false })
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.isTestMode).toBe(false)
+    })
+
+    it('treats missing isTestMode as undefined (optional, legacy backcompat)', () => {
+      const parsed = ApplicationSchema.safeParse(baseValid)
+      expect(parsed.success).toBe(true)
+      if (parsed.success) expect(parsed.data.isTestMode).toBeUndefined()
+    })
+
+    it('rejects non-boolean isTestMode (no string coercion)', () => {
+      const parsed = ApplicationSchema.safeParse({
+        ...baseValid,
+        isTestMode: 'true' as unknown as boolean,
+      })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('exports isTestMode as boolean | undefined on the type', () => {
+      expectTypeOf<Application>().toHaveProperty('isTestMode').toEqualTypeOf<boolean | undefined>()
+    })
+  })
 })
 
 describe('CreateApplicationRequestSchema', () => {

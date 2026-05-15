@@ -121,6 +121,21 @@ export const ApplicationSchema = z
      */
     webhookEndpointUrl: z.string().nullable().optional(),
     /**
+     * Set to true for applications in test/sandbox mode. Pay-sdk uses this
+     * to dispatch to test Stripe keys; auth-sdk uses it to scope test-data
+     * isolation.
+     *
+     * Stripe-pattern test/live partition (cf. `standard-saas-data.md` §4).
+     * Mirrors the server-side `ApplicationDocument.isTestMode` field — when
+     * a request is authenticated with a test key, the API auto-injects this
+     * filter so test applications never leak into live listings.
+     *
+     * Optional on the wire: legacy applications created before the
+     * test/live partition rollout do not have the field; consumers should
+     * treat `undefined` as "live" (the default partition).
+     */
+    isTestMode: z.boolean().optional(),
+    /**
      * Per-Application HMAC-SHA256 webhook secret in Stripe `whsec_<hex>`
      * format. **Treat as a credential** — only emitted by the API right
      * after `regenerate-webhook-secret` and via S2S admin lookup.

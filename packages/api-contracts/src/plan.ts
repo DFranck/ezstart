@@ -173,6 +173,12 @@ export const PlanSchema = z
     features: z.array(z.string()).optional(),
     active: z.boolean(),
     sortOrder: z.number().int(),
+    /**
+     * Stripe Product ID this plan is linked to. Set by Stripe Connect/Pay
+     * setup (`stripe-plan-sync.syncPlanToStripe`). Used by pay-sdk to lookup
+     * the canonical Stripe price for checkout.
+     */
+    stripeProductId: z.string().min(1).max(255).optional(),
     stripePriceId: z.string().optional(),
     /**
      * Free-trial duration in days (0-90). `0` or `undefined` disables the
@@ -182,6 +188,20 @@ export const PlanSchema = z
     trialDays: z.number().int().min(0).max(90).optional(),
     /** Structured extras: grants, fee %, billing group, yearly discount. */
     metadata: PlanMetadataSchema.optional(),
+    /**
+     * Set to true for plans in test/sandbox mode. Routes filter live vs
+     * test plans based on the request's API key mode.
+     *
+     * Stripe-pattern test/live partition (cf. `standard-saas-data.md` §4).
+     * Mirrors the server-side `PlanDocument.isTestMode` field — plans
+     * created via test publishable keys MUST set this `true` so they don't
+     * pollute the live pricing page.
+     *
+     * Optional on the wire: legacy plans created before the test/live
+     * partition rollout do not have the field; consumers should treat
+     * `undefined` as "live" (the default partition).
+     */
+    isTestMode: z.boolean().optional(),
     createdAt: z.string(),
     updatedAt: z.string(),
   })
