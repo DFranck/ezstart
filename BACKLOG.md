@@ -22,15 +22,25 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 - [x] **WAVE-A-LOT-1-001** 🔴 P0 (DONE 2026-05-15) — Harden existing schemas (auth.ts + pagination.ts). 8 findings closed end-to-end via dev → auditor → hacker pipeline. Commits `31763117` (auth.ts: C-1 discriminatedUnion 2FA, C-2 AuthUser passthrough + 12+ aligned fields, C-3 RefreshResponse bounds, H1 password 12+/Login min(1) legacy, H2 EmailOverride CRLF+script+50KB, H3 username/app/token/code regex, H4 safeRedirectUri stricter+IDN reject) + `f8b73e8a` (pagination.ts: H5 strict coerce union, default 50, offset.max 10K). +112 vitest assertions, 269/269 tests pass, monorepo typecheck 40/40 clean, zero cross-consumer regression. Hacker ran 134 adversarial probes → all 8 findings genuinely closed.
 
-- [ ] **WAVE-A-LOT-1-RESIDUAL-001** 🟠 P1 (~30min) — Hacker found `EmailOverride.bodyHtml` regex `/javascript\s*:/i` bypassable via `java\tscript:` / `java\nscript:` (whitespace in scheme — WHATWG URL parser strips ASCII whitespace, browsers execute the resulting JS). Same applies to HTML entities `&#x6A;avascript:`. JSDoc already disclaims completeness ("server MUST run a proper HTML sanitizer") but the regex creates false-safety. Fix: tighten to `j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:` + reject `&#x?[0-9a-f]+;` entities, OR remove regex entirely + reinforce JSDoc. Lot 2 candidate.
+- [x] **WAVE-A-LOT-1-RESIDUAL-001** 🟠 P1 (DONE 2026-05-15) — `EmailOverride.bodyHtml` regex now catches `java\tscript:` whitespace bypasses + `<[^>]*\s+on\w+\s*=` scoped inline events. Entity-encoded `&#x6A;avascript:` delegated to server-side sanitizer (DOMPurify) — JSDoc explicit. Commit `2f523e58` + patch within same.
 
-- [ ] **WAVE-A-LOT-1-RESIDUAL-002** 🟡 P2 (~20min) — `AuthUserSchema.passthrough()` preserves any field including `password` / `passwordHash` if server bugs and returns them. Add `redactAuthUser(user)` helper that strips sensitive keys (whitelist of allowed fields). Export from api-contracts.
+- [x] **WAVE-A-LOT-1-RESIDUAL-002** 🟡 P2 (DONE 2026-05-15) — `redactAuthUser()` helper + `SENSITIVE_AUTH_USER_KEYS` exported (21 keys harvested from real ezauth Mongoose models). Exact-match guarantee (no substring — `secretQuestion` preserved). Commit `2f523e58`.
 
-- [ ] **WAVE-A-LOT-1-RESIDUAL-003** 🟡 P2 (~10min) — `LoginRequestSchema.email` accepts CRLF (`'a@b.com\r\n'`) because login allows username-or-email. Add `NO_CONTROL_CHARS` filter pre-parse (defuses log injection).
+- [x] **WAVE-A-LOT-1-RESIDUAL-003** 🟡 P2 (DONE 2026-05-15) — `LoginRequestSchema.email` NO_CONTROL_CHARS filter rejects `\r\n\t\0`. Commit `2f523e58`.
 
-- [ ] **WAVE-A-LOT-2-001** 🔴 P0 (~2 jours) — Common DTOs unification: déplacer `Application`/`ApiKey`/`Plan` shapes de `auth-sdk/core/types.ts` + `pay-sdk/core/types/*` vers `api-contracts`. Re-export avec @deprecated dans les SDK pour migration 1 minor release. + Split `auth.ts` (730 lignes > 400) en `auth-shared.ts` / `auth-requests.ts` / `auth-responses.ts` (auditor soft issue Lot 1).
+- [x] **WAVE-A-LOT-2-001** 🔴 P0 (DONE 2026-05-15) — Split `auth.ts` 730 → 62-line barrel + 4 submodules (`auth-shared.ts` 411 / `auth-requests.ts` 264 / `auth-responses.ts` 168 / `redact-auth-user.ts` 79). Zero breaking change. Commit `2f523e58`.
 
-- [ ] **WAVE-A-LOT-2-002** 🔴 P0 (~1 jour) — Nouveaux schemas obligatoires : `Money/Currency` (`AmountCents = z.number().int().positive().max(999_999_999)`, `CurrencyCode = z.enum(['EUR','USD','GBP',...])`), `IdempotencyKey = z.string().uuid()` + header constant, `API versioning` header name + schema. Move `ApiError` class from api-sdk → api-contracts (re-export @deprecated from api-sdk). Adresse les findings auditor : pagination cursor (manquant), error codes pay/webhook/idempotency.
+- [x] **WAVE-A-LOT-2-002** 🔴 P0 (DONE 2026-05-15) — Money/Currency (`AmountCentsSchema`, `CurrencyCodeSchema` ISO 4217, `formatMoney()`) + Idempotency (`IdempotencyKeySchema` UUID, header constants, 24h TTL) + API versioning (`API_VERSION_HEADER`, `ApiVersionSchema`, `CURRENT_API_VERSION`, `SUPPORTED_API_VERSIONS`) + Cursor pagination (`CursorPaginationQuerySchema` append-only) + 15 new error codes. Commit `cb8d8278`. **405/405 tests, monorepo typecheck 40/40.**
+
+- [ ] **WAVE-A-LOT-2-003** 🔴 P0 (~2 jours) — Common DTOs unification: déplacer `Application`/`ApiKey`/`Plan` shapes de `auth-sdk/core/types.ts` + `pay-sdk/core/types/*` vers `api-contracts`. Re-export `@deprecated` dans les SDK pour migration 1 minor release. + Move `ApiError` class from api-sdk → api-contracts (re-export `@deprecated` from api-sdk). HIGH RISK: cross-package refactor, séquentiel (pas parallèle).
+
+- [ ] **WAVE-A-LOT-2-RESIDUAL-001** 🟡 P2 (~30min) — 4 medium residuals trouvés par hacker Lot 2.1, à traiter en Lot 2.3 ou 3:
+  - **B.1** `IdempotencyKeySchema` JSDoc dit "UUID v4" mais accepte v1/v3/v5/nil/v6/v7/v8. Update JSDoc OU tighten regex.
+  - **D.3** `CursorPaginationQuerySchema.cursor` accepte raw `\x00\r\n\t`. Apply `NO_CONTROL_CHARS`.
+  - **A.4** `formatMoney(money, 'invalid-locale')` throws `RangeError`. Wrap try/catch fallback `'en'`.
+  - **I.6** `package.json` exports declares only `'.'`. External consumers can't `import from '@ezstart/api-contracts/auth'`. Either add `./auth` export OR document barrel-only.
+
+- [ ] **WAVE-A-LOT-2-RESIDUAL-002** 🟡 P2 (~30min) — `auth-shared.ts` 411 LOC, 11 over standard.md §3 400-line soft cap. Extract `safeRedirectUri` + ses 6+ refinements à `auth/redirect-uri.ts` (~80 LOC) → `auth-shared.ts` sous 350.
 
 - [ ] **WAVE-A-LOT-3-001** 🟠 P1 (~1 jour) — Migration des 13 callsites inline `z.coerce.number().int().min(1).max(100)` dans `apps/` vers `PaginationQuerySchema` import. ESLint rule `no-inline-pagination-schema` ajoutée dans `@ezstart/eslint-plugin-ezstart`.
 
