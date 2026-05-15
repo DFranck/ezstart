@@ -28,7 +28,7 @@ interface PreviewFrameProps {
  * a spinner while the demo is dynamically importing, and a friendly
  * fallback when the demo doesn't exist.
  *
- * The "DEMO MODE" callout uses the `<Card intent="warning">` semantic-color
+ * The "SANDBOX" callout uses the `<Card intent="warning">` semantic-color
  * pattern (no absolute-overlay hack). The header is structurally part of
  * the preview card — `CardHeader` for the banner + `CardContent` for the
  * sandbox visual.

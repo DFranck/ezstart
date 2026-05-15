@@ -50,7 +50,7 @@
     "previewMissing": "Chưa có demo trực tiếp cho thành phần này — xem liên kết nguồn hoặc tab Mã.",
     "previewMissingTitle": "Demo không khả dụng",
     "demoModeBanner": {
-      "title": "CHẾ ĐỘ DEMO",
+      "title": "SANDBOX",
       "description": "Các hành động trong bản xem trước này là thực nhưng được cô lập trong một Application sandbox. Dữ liệu được đặt lại mỗi 24h."
     },
     "codeFallbackTitle": "Bắt đầu nhanh",

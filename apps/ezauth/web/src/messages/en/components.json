@@ -50,7 +50,7 @@
     "previewMissing": "No live demo for this component yet — see the source link or the Code tab for a snippet.",
     "previewMissingTitle": "Demo unavailable",
     "demoModeBanner": {
-      "title": "DEMO MODE",
+      "title": "SANDBOX",
       "description": "Actions in this preview are real but isolated to a sandbox Application. Data resets every 24h."
     },
     "codeFallbackTitle": "Quick start",

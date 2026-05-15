@@ -50,7 +50,7 @@
     "previewMissing": "Pas encore de démo live pour ce composant — voir le lien source ou l'onglet Code.",
     "previewMissingTitle": "Démo indisponible",
     "demoModeBanner": {
-      "title": "MODE DÉMO",
+      "title": "SANDBOX",
       "description": "Les actions dans cet aperçu sont réelles mais isolées dans une Application sandbox. Les données sont réinitialisées toutes les 24h."
     },
     "codeFallbackTitle": "Démarrage rapide",
