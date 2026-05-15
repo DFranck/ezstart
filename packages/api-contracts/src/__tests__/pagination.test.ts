@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { PaginationQuerySchema, type PaginationQuery } from '../pagination.js'
+import {
+  CursorPaginationMetaSchema,
+  CursorPaginationQuerySchema,
+  PaginationQuerySchema,
+  type CursorPaginationMeta,
+  type CursorPaginationQuery,
+  type PaginationQuery,
+} from '../pagination.js'
 
 describe('PaginationQuerySchema', () => {
   it('applies defaults when query is empty (limit=50 per standard-saas-data.md §3)', () => {
@@ -174,5 +181,104 @@ describe('PaginationQuerySchema — offset bounds (DoS reduction)', () => {
 
   it('rejects offset hex string "0x100" (consistent with limit)', () => {
     expect(PaginationQuerySchema.safeParse({ offset: '0x100' }).success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Cursor pagination
+// ---------------------------------------------------------------------------
+
+describe('CursorPaginationQuerySchema', () => {
+  it('applies default limit when query is empty', () => {
+    const parsed: CursorPaginationQuery = CursorPaginationQuerySchema.parse({})
+    expect(parsed).toEqual({ limit: 50 })
+    expect(parsed.cursor).toBeUndefined()
+  })
+
+  it('accepts a cursor + limit pair', () => {
+    const parsed = CursorPaginationQuerySchema.parse({ cursor: 'eyJpZCI6ImFiYyJ9', limit: 10 })
+    expect(parsed).toEqual({ cursor: 'eyJpZCI6ImFiYyJ9', limit: 10 })
+  })
+
+  it('accepts a numeric limit string (typical req.query shape)', () => {
+    const parsed = CursorPaginationQuerySchema.parse({ limit: '25' })
+    expect(parsed.limit).toBe(25)
+    expect(typeof parsed.limit).toBe('number')
+  })
+
+  it('rejects empty cursor string (cursor must be non-empty when present)', () => {
+    expect(CursorPaginationQuerySchema.safeParse({ cursor: '' }).success).toBe(false)
+  })
+
+  it('rejects cursor longer than 2048 characters', () => {
+    const tooLong = 'a'.repeat(2049)
+    expect(CursorPaginationQuerySchema.safeParse({ cursor: tooLong }).success).toBe(false)
+  })
+
+  it('accepts cursor at the 2048-char boundary', () => {
+    const boundary = 'a'.repeat(2048)
+    const result = CursorPaginationQuerySchema.safeParse({ cursor: boundary })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects non-string cursor', () => {
+    expect(CursorPaginationQuerySchema.safeParse({ cursor: 123 }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ cursor: ['a', 'b'] }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ cursor: { id: 'a' } }).success).toBe(false)
+  })
+
+  it('applies the same strict positive-int rules to limit as offset variant', () => {
+    expect(CursorPaginationQuerySchema.safeParse({ limit: 0 }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ limit: 101 }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ limit: 1.5 }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ limit: '0x10' }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ limit: '1e2' }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ limit: [50] }).success).toBe(false)
+    expect(CursorPaginationQuerySchema.safeParse({ limit: true }).success).toBe(false)
+  })
+})
+
+describe('CursorPaginationMetaSchema', () => {
+  it('accepts a typical "more results" meta', () => {
+    const parsed: CursorPaginationMeta = CursorPaginationMetaSchema.parse({
+      nextCursor: 'eyJpZCI6ImFiYyJ9',
+      hasMore: true,
+    })
+    expect(parsed).toEqual({ nextCursor: 'eyJpZCI6ImFiYyJ9', hasMore: true })
+  })
+
+  it('accepts the terminal "no more results" meta (nextCursor null)', () => {
+    const parsed = CursorPaginationMetaSchema.parse({ nextCursor: null, hasMore: false })
+    expect(parsed).toEqual({ nextCursor: null, hasMore: false })
+  })
+
+  it('rejects missing hasMore', () => {
+    expect(CursorPaginationMetaSchema.safeParse({ nextCursor: 'abc' }).success).toBe(false)
+  })
+
+  it('rejects missing nextCursor (must be either string or null, not omitted)', () => {
+    expect(CursorPaginationMetaSchema.safeParse({ hasMore: false }).success).toBe(false)
+  })
+
+  it('rejects non-boolean hasMore', () => {
+    expect(
+      CursorPaginationMetaSchema.safeParse({ nextCursor: null, hasMore: 'true' }).success
+    ).toBe(false)
+    expect(CursorPaginationMetaSchema.safeParse({ nextCursor: null, hasMore: 1 }).success).toBe(
+      false
+    )
+  })
+
+  it('rejects empty cursor string', () => {
+    expect(CursorPaginationMetaSchema.safeParse({ nextCursor: '', hasMore: false }).success).toBe(
+      false
+    )
+  })
+
+  it('rejects nextCursor longer than 2048 characters', () => {
+    const tooLong = 'a'.repeat(2049)
+    expect(
+      CursorPaginationMetaSchema.safeParse({ nextCursor: tooLong, hasMore: true }).success
+    ).toBe(false)
   })
 })

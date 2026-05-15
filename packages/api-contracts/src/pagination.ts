@@ -163,3 +163,121 @@ export const PaginationQuerySchema = z.object({
  * ```
  */
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>
+
+// ---------------------------------------------------------------------------
+// Cursor pagination (for large or write-heavy collections)
+// ---------------------------------------------------------------------------
+
+/**
+ * Zod schema for cursor-based pagination query parameters.
+ *
+ * Use cursor pagination instead of offset/limit when:
+ * - the collection is large (offset > 10_000 hurts on Mongo `skip()`),
+ * - the collection is write-heavy (inserts shift offsets and produce
+ *   duplicates / skips between pages),
+ * - the API wants stable resumability across long-lived iterators.
+ *
+ * Shape:
+ * - `cursor` : opaque server-issued string from the previous page's
+ *   `nextCursor` meta. Omit on the first page.
+ * - `limit`  : page size, 1..100 (default 50). Same strict parser as
+ *   {@link PaginationQuerySchema} — hex / scientific / arrays / booleans
+ *   rejected.
+ *
+ * The cursor format is intentionally opaque on the wire (clients MUST NOT
+ * parse it). Servers typically encode `{ field, value, id }` as base64url
+ * or sign it with HMAC to prevent tampering.
+ *
+ * @example
+ * ```ts
+ * // server
+ * const { cursor, limit } = CursorPaginationQuerySchema.parse(req.query)
+ * const where = cursor ? { _id: { $gt: decodeCursor(cursor) } } : {}
+ * const rows = await User.find(where).sort({ _id: 1 }).limit(limit + 1)
+ * const hasMore = rows.length > limit
+ * const page = rows.slice(0, limit)
+ * const nextCursor = hasMore ? encodeCursor(page[page.length - 1]._id) : null
+ * ```
+ */
+export const CursorPaginationQuerySchema = z.object({
+  cursor: z
+    .string()
+    .min(1, 'Cursor must be a non-empty string')
+    .max(2048, 'Cursor must be at most 2048 characters')
+    .optional()
+    .describe('Opaque server-issued cursor from the previous page (omit on first page)'),
+  limit: StrictPositiveInt.refine(n => n <= 100, 'Must be at most 100')
+    .default(50)
+    .describe('Page size (1-100, default 50)'),
+})
+
+/**
+ * Inferred TypeScript type for a parsed cursor-pagination query.
+ *
+ * @example
+ * ```ts
+ * function listEvents(query: CursorPaginationQuery) {
+ *   // query.cursor is `string | undefined`, query.limit is `number`
+ * }
+ * ```
+ */
+export type CursorPaginationQuery = z.infer<typeof CursorPaginationQuerySchema>
+
+/**
+ * Zod schema for the meta block returned alongside a cursor-paginated payload.
+ *
+ * Mandatory:
+ * - `nextCursor` : opaque string for the next page, or `null` when no more
+ *   results.
+ * - `hasMore`    : `true` when more results exist beyond this page.
+ *
+ * Intentionally omits `totalCount` — cursor pagination's whole point is that
+ * the server does not need to count the full collection to answer a page
+ * request. Clients that need a count must call a dedicated `/count` endpoint
+ * (and accept it may be approximate).
+ *
+ * @example
+ * ```ts
+ * const meta = CursorPaginationMetaSchema.parse({
+ *   nextCursor: 'eyJpZCI6IjY1OWFmIn0',
+ *   hasMore: true,
+ * })
+ * ```
+ */
+export const CursorPaginationMetaSchema = z.object({
+  nextCursor: z
+    .string()
+    .min(1)
+    .max(2048)
+    .nullable()
+    .describe('Cursor to fetch the next page, or null when no more results'),
+  hasMore: z.boolean().describe('Whether more results exist beyond this page'),
+})
+
+/**
+ * Inferred TypeScript type for a cursor-pagination meta block.
+ */
+export type CursorPaginationMeta = z.infer<typeof CursorPaginationMetaSchema>
+
+/**
+ * Canonical shape of a cursor-paginated list response's *payload*.
+ *
+ * Typically wrapped inside a {@link SuccessResponse} on the wire:
+ *
+ * ```json
+ * { "success": true, "data": [...], "meta": { "nextCursor": "abc", "hasMore": true } }
+ * ```
+ *
+ * @example
+ * ```ts
+ * const page: CursorPaginatedResponse<Event> = await apiCall('/events', {
+ *   appName: 'myapp',
+ *   preserveEnvelope: true,
+ * })
+ * page.data // → Event[]    page.meta.nextCursor // → string | null
+ * ```
+ */
+export type CursorPaginatedResponse<T> = {
+  data: T[]
+  meta: CursorPaginationMeta
+}

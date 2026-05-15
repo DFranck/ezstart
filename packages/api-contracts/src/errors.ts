@@ -53,6 +53,8 @@ export const ErrorCode = {
   // --- Rate limiting --------------------------------------------------------
   /** Request rejected by a rate limiter — check `retryAfter`. */
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+  /** Generic rate-limit rejection (alias for resource-level limits). */
+  RATE_LIMITED: 'RATE_LIMITED',
 
   // --- Network / Server -----------------------------------------------------
   /** Client-side network failure (fetch threw). */
@@ -61,6 +63,47 @@ export const ErrorCode = {
   INTERNAL_ERROR: 'INTERNAL_ERROR',
   /** Upstream dependency unavailable / health check failing. */
   SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  /** Service is in maintenance mode — retry later (read-only or full block). */
+  MAINTENANCE_MODE: 'MAINTENANCE_MODE',
+
+  // --- Application (per-tenant scoping) -------------------------------------
+  /** The targeted Application (tenant) does not exist. */
+  APPLICATION_NOT_FOUND: 'APPLICATION_NOT_FOUND',
+  /** Caller is not allowed to access this Application's data. */
+  APPLICATION_ACCESS_DENIED: 'APPLICATION_ACCESS_DENIED',
+
+  // --- API versioning -------------------------------------------------------
+  /** `EZStart-API-Version` header value is malformed (not `YYYY-MM-DD`). */
+  API_VERSION_INVALID: 'API_VERSION_INVALID',
+  /** `EZStart-API-Version` header value is no longer supported (past sunset). */
+  API_VERSION_UNSUPPORTED: 'API_VERSION_UNSUPPORTED',
+
+  // --- Idempotency ----------------------------------------------------------
+  /** `Idempotency-Key` header value is not a valid UUID. */
+  IDEMPOTENCY_KEY_INVALID: 'IDEMPOTENCY_KEY_INVALID',
+  /**
+   * Same `Idempotency-Key` was already used with a different request body —
+   * server rejects the conflicting reuse instead of silently replaying.
+   */
+  IDEMPOTENCY_KEY_REUSED: 'IDEMPOTENCY_KEY_REUSED',
+
+  // --- Payments / billing ---------------------------------------------------
+  /** The card was declined by the issuer (generic — see `details` for code). */
+  PAY_CARD_DECLINED: 'PAY_CARD_DECLINED',
+  /** Card declined specifically for insufficient funds. */
+  PAY_INSUFFICIENT_FUNDS: 'PAY_INSUFFICIENT_FUNDS',
+  /** Payment requires 3-D Secure / Strong Customer Authentication. */
+  PAY_3DS_REQUIRED: 'PAY_3DS_REQUIRED',
+  /** Promo / coupon code is invalid, expired, or not applicable. */
+  PAY_INVALID_PROMO: 'PAY_INVALID_PROMO',
+  /** Promo / coupon code has reached its global redemption cap. */
+  PAY_PROMO_EXHAUSTED: 'PAY_PROMO_EXHAUSTED',
+
+  // --- Webhooks -------------------------------------------------------------
+  /** Webhook HMAC signature did not match — request is unauthenticated. */
+  WEBHOOK_INVALID_SIGNATURE: 'WEBHOOK_INVALID_SIGNATURE',
+  /** Webhook timestamp is outside the freshness window (replay attack guard). */
+  WEBHOOK_REPLAY_DETECTED: 'WEBHOOK_REPLAY_DETECTED',
 } as const
 
 /**

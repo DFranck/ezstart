@@ -25,6 +25,37 @@ describe('ErrorCode', () => {
     expect(ErrorCode.SERVICE_UNAVAILABLE).toBe('SERVICE_UNAVAILABLE')
   })
 
+  it('exposes Wave-A2 codes (pay / webhook / idempotency / rate / maintenance / version / application)', () => {
+    // Rate limiting (alias)
+    expect(ErrorCode.RATE_LIMITED).toBe('RATE_LIMITED')
+
+    // Maintenance
+    expect(ErrorCode.MAINTENANCE_MODE).toBe('MAINTENANCE_MODE')
+
+    // Application scoping
+    expect(ErrorCode.APPLICATION_NOT_FOUND).toBe('APPLICATION_NOT_FOUND')
+    expect(ErrorCode.APPLICATION_ACCESS_DENIED).toBe('APPLICATION_ACCESS_DENIED')
+
+    // API versioning
+    expect(ErrorCode.API_VERSION_INVALID).toBe('API_VERSION_INVALID')
+    expect(ErrorCode.API_VERSION_UNSUPPORTED).toBe('API_VERSION_UNSUPPORTED')
+
+    // Idempotency
+    expect(ErrorCode.IDEMPOTENCY_KEY_INVALID).toBe('IDEMPOTENCY_KEY_INVALID')
+    expect(ErrorCode.IDEMPOTENCY_KEY_REUSED).toBe('IDEMPOTENCY_KEY_REUSED')
+
+    // Payments
+    expect(ErrorCode.PAY_CARD_DECLINED).toBe('PAY_CARD_DECLINED')
+    expect(ErrorCode.PAY_INSUFFICIENT_FUNDS).toBe('PAY_INSUFFICIENT_FUNDS')
+    expect(ErrorCode.PAY_3DS_REQUIRED).toBe('PAY_3DS_REQUIRED')
+    expect(ErrorCode.PAY_INVALID_PROMO).toBe('PAY_INVALID_PROMO')
+    expect(ErrorCode.PAY_PROMO_EXHAUSTED).toBe('PAY_PROMO_EXHAUSTED')
+
+    // Webhooks
+    expect(ErrorCode.WEBHOOK_INVALID_SIGNATURE).toBe('WEBHOOK_INVALID_SIGNATURE')
+    expect(ErrorCode.WEBHOOK_REPLAY_DETECTED).toBe('WEBHOOK_REPLAY_DETECTED')
+  })
+
   it('has no value collisions across codes', () => {
     const values = Object.values(ErrorCode)
     const unique = new Set(values)
@@ -46,9 +77,24 @@ describe('ErrorCode', () => {
       | 'ALREADY_EXISTS'
       | 'CONFLICT'
       | 'RATE_LIMIT_EXCEEDED'
+      | 'RATE_LIMITED'
       | 'NETWORK_ERROR'
       | 'INTERNAL_ERROR'
       | 'SERVICE_UNAVAILABLE'
+      | 'MAINTENANCE_MODE'
+      | 'APPLICATION_NOT_FOUND'
+      | 'APPLICATION_ACCESS_DENIED'
+      | 'API_VERSION_INVALID'
+      | 'API_VERSION_UNSUPPORTED'
+      | 'IDEMPOTENCY_KEY_INVALID'
+      | 'IDEMPOTENCY_KEY_REUSED'
+      | 'PAY_CARD_DECLINED'
+      | 'PAY_INSUFFICIENT_FUNDS'
+      | 'PAY_3DS_REQUIRED'
+      | 'PAY_INVALID_PROMO'
+      | 'PAY_PROMO_EXHAUSTED'
+      | 'WEBHOOK_INVALID_SIGNATURE'
+      | 'WEBHOOK_REPLAY_DETECTED'
     >()
   })
 

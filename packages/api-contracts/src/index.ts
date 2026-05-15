@@ -36,7 +36,21 @@
 
 export type { ApiResponse, ErrorPayload, ErrorResponse, SuccessResponse } from './envelope.js'
 
-export type { ApiMeta, PaginatedResponse, PaginationMeta, PaginationQuery } from './pagination.js'
+export type {
+  ApiMeta,
+  CursorPaginatedResponse,
+  CursorPaginationMeta,
+  CursorPaginationQuery,
+  PaginatedResponse,
+  PaginationMeta,
+  PaginationQuery,
+} from './pagination.js'
+
+export type { AmountCents, CurrencyCode, Money } from './money.js'
+
+export type { IdempotencyKey } from './idempotency.js'
+
+export type { ApiVersion } from './versioning.js'
 
 export type {
   AuthUser,
@@ -53,6 +67,7 @@ export type {
   RegisterResponse,
   ResetPasswordRequest,
   SendVerificationRequest,
+  SensitiveAuthUserKey,
   SupportedLocale,
   TokenRequest,
   TokenResponse,
@@ -77,7 +92,27 @@ export { ErrorCode } from './errors.js'
 // Runtime — Zod schemas
 // ---------------------------------------------------------------------------
 
-export { PaginationQuerySchema } from './pagination.js'
+export {
+  CursorPaginationMetaSchema,
+  CursorPaginationQuerySchema,
+  PaginationQuerySchema,
+} from './pagination.js'
+
+export { AmountCentsSchema, CurrencyCodeSchema, MoneySchema, formatMoney } from './money.js'
+
+export {
+  IDEMPOTENCY_CACHE_TTL_SECONDS,
+  IDEMPOTENCY_KEY_HEADER,
+  IdempotencyKeySchema,
+} from './idempotency.js'
+
+export {
+  API_VERSION_FORMAT,
+  API_VERSION_HEADER,
+  ApiVersionSchema,
+  CURRENT_API_VERSION,
+  SUPPORTED_API_VERSIONS,
+} from './versioning.js'
 
 export {
   AuthUserSchema,
@@ -93,11 +128,14 @@ export {
   RegisterRequestSchema,
   RegisterResponseSchema,
   ResetPasswordRequestSchema,
+  SENSITIVE_AUTH_USER_KEYS,
   SendVerificationRequestSchema,
+  SHORT_CODE_REGEX_SOURCE,
   SupportedLocaleSchema,
   TokenRequestSchema,
   TokenResponseSchema,
   VerifyEmailRequestSchema,
   VerifyRequestSchema,
   VerifyResponseSchema,
+  redactAuthUser,
 } from './auth.js'
