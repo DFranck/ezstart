@@ -53,6 +53,37 @@ export type { IdempotencyKey } from './idempotency.js'
 export type { ApiVersion } from './versioning.js'
 
 export type {
+  Application,
+  ApplicationResolveResponse,
+  ApplicationStatus,
+  ApplicationTheme,
+  CreateApplicationRequest,
+  UpdateApplicationRequest,
+  UpdateApplicationThemeRequest,
+} from './application.js'
+
+export type {
+  ApiKeyEnv,
+  ApiKeyItem,
+  ApiKeyScope,
+  ApiKeyType,
+  ApiKeyUsageResponse,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+} from './api-key.js'
+
+export type {
+  CreatePlanRequest,
+  Plan,
+  PlanAmountCents,
+  PlanInterval,
+  PlanMetadata,
+  PlanResponse,
+  PlansListResponse,
+  UpdatePlanRequest,
+} from './plan.js'
+
+export type {
   AuthUser,
   EmailOverride,
   ForgotPasswordRequest,
@@ -89,6 +120,12 @@ export { isErrorResponse, isSuccessResponse } from './envelope.js'
 export { ErrorCode } from './errors.js'
 
 // ---------------------------------------------------------------------------
+// Runtime — error class
+// ---------------------------------------------------------------------------
+
+export { ApiError } from './api-error.js'
+
+// ---------------------------------------------------------------------------
 // Runtime — Zod schemas
 // ---------------------------------------------------------------------------
 
@@ -113,6 +150,37 @@ export {
   CURRENT_API_VERSION,
   SUPPORTED_API_VERSIONS,
 } from './versioning.js'
+
+export {
+  ApplicationResolveResponseSchema,
+  ApplicationSchema,
+  ApplicationStatusSchema,
+  ApplicationThemeSchema,
+  CreateApplicationRequestSchema,
+  UpdateApplicationRequestSchema,
+  UpdateApplicationThemeRequestSchema,
+} from './application.js'
+
+export {
+  ApiKeyEnvSchema,
+  ApiKeyItemSchema,
+  ApiKeyScopeSchema,
+  ApiKeyTypeSchema,
+  ApiKeyUsageResponseSchema,
+  CreateApiKeyRequestSchema,
+  CreateApiKeyResponseSchema,
+} from './api-key.js'
+
+export {
+  CreatePlanRequestSchema,
+  PlanAmountCentsSchema,
+  PlanIntervalSchema,
+  PlanMetadataSchema,
+  PlanResponseSchema,
+  PlanSchema,
+  PlansListResponseSchema,
+  UpdatePlanRequestSchema,
+} from './plan.js'
 
 export {
   AuthUserSchema,

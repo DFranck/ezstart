@@ -1990,6 +1990,9 @@ importers:
 
   packages/pay-sdk:
     dependencies:
+      '@ezstart/api-contracts':
+        specifier: workspace:*
+        version: link:../api-contracts
       '@ezstart/api-core':
         specifier: workspace:*
         version: link:../api-core

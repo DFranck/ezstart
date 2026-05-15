@@ -9,21 +9,20 @@
 
 import { randomBytes, createHash } from 'node:crypto'
 
+import type { ApiKeyEnv, ApiKeyScope, ApiKeyType } from '@ezstart/api-contracts'
+
 /** Length (in bytes) of the random payload before hex-encoding. */
 const RAW_KEY_LENGTH = 32
 
 /**
- * API key type — determines whether the key is safe to expose client-side.
- * - `publishable` → safe in frontend/browser (prefix `ez_pk_*`)
- * - `secret` → server-only, never exposed (prefix `ez_sk_*`)
+ * Re-exports of the wire-level key discriminators. The canonical home for
+ * these types is `@ezstart/api-contracts` — re-exporting here preserves the
+ * original import path (`@ezstart/auth-sdk` → `ApiKeyType` etc.) so existing
+ * call sites keep working.
+ *
+ * @deprecated Import from `@ezstart/api-contracts` instead.
  */
-export type ApiKeyType = 'publishable' | 'secret'
-
-/** API key environment — separates production keys from sandbox/test keys. */
-export type ApiKeyEnv = 'live' | 'test'
-
-/** API key permission scope — metadata only, NEVER embedded in the prefix. */
-export type ApiKeyScope = 'admin' | 'user' | 'readonly'
+export type { ApiKeyEnv, ApiKeyScope, ApiKeyType }
 
 /** Modern prefix map keyed by `${type}.${env}`. */
 export const KEY_PREFIX: Record<`${ApiKeyType}.${ApiKeyEnv}`, string> = {

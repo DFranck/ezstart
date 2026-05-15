@@ -1,44 +1,16 @@
 /**
- * Typed API error thrown by the SDK.
+ * Re-export of {@link ApiError} from `@ezstart/api-contracts`.
  *
- * Always carries an HTTP-like `status` (0 for network errors) and a
- * human-readable `message` already parsed via `parseApiError`.
+ * The class moved to api-contracts in v1.1.0 so that both clients
+ * (`@ezstart/api-sdk`, `@ezstart/auth-sdk`, `@ezstart/pay-sdk`) and the
+ * server framework (`@ezstart/api-core`) can throw and catch the exact same
+ * class without creating a backward dependency.
  *
- * Optional fields:
- * - `code` : machine-readable error code (e.g. `RATE_LIMIT_EXCEEDED`).
- * - `retryAfter` : seconds before retry is allowed (typically for 429).
- * - `data` : raw error body (as parsed from the response).
+ * This re-export preserves the original import path
+ * (`@ezstart/api-sdk/core` → `ApiError`) so existing call sites keep working.
+ * It will be kept indefinitely for back-compat; new code should prefer
+ * `import { ApiError } from '@ezstart/api-contracts'`.
+ *
+ * @see {@link https://github.com/DFranck/ezstart/blob/master/packages/api-contracts/src/api-error.ts}
  */
-export class ApiError extends Error {
-  public readonly status: number
-  public readonly code?: string
-  public readonly data?: unknown
-  public readonly retryAfter?: number
-
-  constructor(
-    message: string,
-    opts: {
-      status: number
-      code?: string
-      data?: unknown
-      retryAfter?: number
-    }
-  ) {
-    super(message)
-    this.name = 'ApiError'
-    this.status = opts.status
-    this.code = opts.code
-    this.data = opts.data
-    this.retryAfter = opts.retryAfter
-
-    // Preserve prototype chain for `instanceof` checks
-    Object.setPrototypeOf(this, ApiError.prototype)
-  }
-
-  /**
-   * Type guard to narrow `unknown` values to `ApiError`.
-   */
-  static isApiError(value: unknown): value is ApiError {
-    return value instanceof ApiError
-  }
-}
+export { ApiError } from '@ezstart/api-contracts'

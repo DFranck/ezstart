@@ -10,6 +10,7 @@
  *
  * @internal
  */
+import type { CurrencyCode } from '@ezstart/api-contracts'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Badge,
@@ -339,7 +340,7 @@ function CreatePlanDialog({
   const [planAppName, setPlanAppName] = useState(appSlug || '')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
-  const [currency, setCurrency] = useState('EUR')
+  const [currency, setCurrency] = useState<CurrencyCode>('EUR')
   const [interval, setInterval] = useState<'month' | 'year'>('month')
   const [intervalCount, setIntervalCount] = useState('1')
   const [features, setFeatures] = useState('')
@@ -470,7 +471,7 @@ function CreatePlanDialog({
 
             <Div className="space-y-2">
               <Label>{t.planCurrency}</Label>
-              <Select value={currency} onValueChange={setCurrency}>
+              <Select value={currency} onValueChange={v => setCurrency(v as CurrencyCode)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

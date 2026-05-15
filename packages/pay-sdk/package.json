@@ -66,6 +66,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@ezstart/api-contracts": "workspace:*",
     "@ezstart/api-core": "workspace:*",
     "@ezstart/api-sdk": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",

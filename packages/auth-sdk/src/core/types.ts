@@ -304,205 +304,45 @@ export interface JWTPayload {
 // ---------------------------------------------------------------------------
 // API Keys (Developer Portal)
 // ---------------------------------------------------------------------------
+//
+// These wire shapes moved to `@ezstart/api-contracts` in v1.1.0 so any server
+// that issues / verifies keys (EZAuth, EZPay, future) and any client agree
+// on the same shape without taking a backward dep on auth-sdk. The crypto
+// runtime (`generateRawApiKey`, `hashApiKey`, `detectKeyFormat`) stays in
+// `./api-keys-crypto.ts` because it depends on Node's `crypto` module.
 
-/** An API key as returned by the list endpoint. */
-export interface ApiKeyItem {
-  id: string
-  keyPrefix: string
-  name: string
-  appName: string
-  /** Application this key is scoped to (P6+). Optional for pre-P6 keys. */
-  applicationId?: string
-  /** Legacy scope value from DB. New keys use scope='admin'|'user'|'readonly' metadata. */
-  scope: 'test' | 'live' | 'admin'
-  permissions: string[]
-  status: 'active' | 'revoked'
-  lastUsedAt: string | null
-  expiresAt: string | null
-  createdAt: string
-  revokedAt: string | null
-  quotaMonthly: number | null
-  usageThisMonth: number
-}
-
-/** Usage stats for a single API key. */
-export interface ApiKeyUsageResponse {
-  currentMonth: {
-    requestCount: number
-    topEndpoints: { endpoint: string; count: number }[]
-  }
-  daily: { date: string; requestCount: number }[]
-  quota: {
-    limit: number | null
-    used: number
-    remaining: number | null
-  }
-}
-
-/** Response from create / rotate key endpoints. */
-export interface CreateApiKeyResponse {
-  id: string
-  key: string
-  keyPrefix: string
-  name: string
-  /** Application this key was scoped to (P6+). */
-  applicationId?: string
-  /** Key type (optional, present on new keys created after P2a). */
-  type?: 'publishable' | 'secret'
-  /** Key environment (optional, present on new keys created after P2a). */
-  env?: 'live' | 'test'
-  /** Permission scope (optional, present on new keys created after P2a). */
-  scope?: 'admin' | 'user' | 'readonly'
-}
-
-/** Body for the create-key mutation. */
-export interface CreateApiKeyRequest {
-  name: string
-  /**
-   * App scope (legacy — pre-P6). New callers should pass `applicationId`
-   * instead; `appName` is kept for backwards compatibility and will be
-   * removed in a future major.
-   * @deprecated Use `applicationId`.
-   */
-  appName?: string
-  /** Application this key will belong to (P6+). Preferred over `appName`. */
-  applicationId?: string
-  /** Key type: publishable (client-side safe) or secret (server-only). */
-  type?: 'publishable' | 'secret'
-  /** Environment: live (production) or test (sandbox). */
-  env?: 'live' | 'test'
-  /** Permission scope for the new key. */
-  scope?: 'admin' | 'user' | 'readonly'
-  expiresAt: string | null
-}
+/**
+ * @deprecated Import from `@ezstart/api-contracts` instead.
+ */
+export type {
+  ApiKeyItem,
+  ApiKeyUsageResponse,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+} from '@ezstart/api-contracts'
 
 // ---------------------------------------------------------------------------
 // Applications (P6 — multi-tenant entity shared across services)
 // ---------------------------------------------------------------------------
+//
+// These types moved to `@ezstart/api-contracts` in v1.1.0 so that any service
+// (EZAuth API, EZPay API, future) and any client can agree on the exact wire
+// shape without taking a backward dep on auth-sdk. The re-exports below
+// preserve the original import path (`@ezstart/auth-sdk/core` → `Application`,
+// etc.) so existing consumer call sites keep working unchanged.
 
 /**
- * White-label theme tokens persisted on an Application.
- *
- * All fields are optional — an Application can override as few or as many
- * design tokens as it wants. Unset tokens inherit the default EZAuth theme
- * (or the CSS preset keyed on `data-app="<slug>"`).
- *
- * Values are CSS color strings (hex, `oklch()`, `hsl()`, or `rgb()`). `logo`
- * is a full `https:` URL to the tenant's logo asset (not rendered yet by
- * the first iteration of the auth pages — reserved for THEME-LOGO-UPLOAD).
+ * @deprecated Import from `@ezstart/api-contracts` instead.
  */
-export interface ApplicationTheme {
-  primary?: string
-  background?: string
-  foreground?: string
-  accent?: string
-  logo?: string
-}
-
-/**
- * Application tenant — source of truth lives in EZAuth DB; other services
- * (EZPay, etc.) reference it by `id`.
- *
- * `theme` + `themeEnabled` back the EZAuth Pro white-label feature.
- * `themeEnabled` is shown as a toggle in the dashboard and gated on plan
- * activation — when `false`, SSR falls back to the default preset.
- */
-export interface Application {
-  id: string
-  slug: string
-  name: string
-  description?: string
-  ownerId: string
-  metadata?: Record<string, unknown>
-  status: 'active' | 'archived'
-  theme?: ApplicationTheme | null
-  themeEnabled?: boolean
-  /**
-   * Platform-owned flag (dogfood). `true` for the apps owned by the
-   * platform operator — grants free access to paid features via the
-   * server-side `hasFeature()` helper (see `@ezstart/auth-sdk/server`).
-   *
-   * Not exposed to the self-service dashboard — flipped via a superadmin
-   * seed script or a future superadmin-only API route.
-   */
-  isPlatformOwned?: boolean
-  /**
-   * Composable email-verification gate (Clerk / Vercel pattern). When `true`,
-   * the consumer signals that downstream features should require a verified
-   * email. Login itself is never blocked.
-   *
-   * Use the matching `<RequireEmailVerified>` guard component or the
-   * `requireEmailVerified` Express middleware to enforce the gate at the
-   * point of use.
-   *
-   * @default false
-   */
-  requireEmailVerification?: boolean
-  /**
-   * Optional override for the URL where outbound webhooks (currently
-   * EZPay → EZAuth subscription notifications) are delivered. `null` means
-   * "use the service-specific default" (canonical ezauth subscriptions
-   * webhook endpoint). Reserved for future external consumers — most
-   * Applications leave this `null`.
-   */
-  webhookEndpointUrl?: string | null
-  /**
-   * Per-Application HMAC-SHA256 webhook secret in Stripe `whsec_<hex>`
-   * format. **Treat as a credential** — only emitted by the API immediately
-   * after `regenerate-webhook-secret` and via the S2S admin
-   * `?include=webhookSecret` lookup. All other endpoints omit the field
-   * entirely.
-   *
-   * Consumer code should never persist this value beyond the single render
-   * that displays it once to the user.
-   */
-  webhookSecret?: string
-  createdAt: string
-  updatedAt: string
-}
-
-/** Body for `POST /applications`. */
-export interface CreateApplicationRequest {
-  slug: string
-  name: string
-  description?: string
-  metadata?: Record<string, unknown>
-}
-
-/** Body for `PATCH /applications/:id`. */
-export interface UpdateApplicationRequest {
-  name?: string
-  description?: string
-  metadata?: Record<string, unknown>
-  /**
-   * Toggle the composable email-verification gate (Clerk / Vercel pattern).
-   * When `true`, the consumer signals that downstream features should
-   * require a verified email. Login itself is never blocked.
-   */
-  requireEmailVerification?: boolean
-}
-
-/**
- * Body for `PATCH /applications/:id/theme`.
- *
- * Either field may be sent on its own — callers can toggle `themeEnabled`
- * without touching the tokens, or update the tokens while leaving the
- * enable flag alone. Passing `theme: null` clears the saved tokens.
- */
-export interface UpdateApplicationThemeRequest {
-  theme?: ApplicationTheme | null
-  themeEnabled?: boolean
-}
-
-/** Response from `GET /applications/resolve?key=ez_pk_live_*`. */
-export interface ApplicationResolveResponse {
-  applicationId: string
-  slug: string
-  name: string
-  type?: 'publishable' | 'secret'
-  env?: 'live' | 'test'
-  scope?: 'admin' | 'user' | 'readonly'
-}
+export type {
+  Application,
+  ApplicationResolveResponse,
+  ApplicationStatus,
+  ApplicationTheme,
+  CreateApplicationRequest,
+  UpdateApplicationRequest,
+  UpdateApplicationThemeRequest,
+} from '@ezstart/api-contracts'
 
 // ---------------------------------------------------------------------------
 // Audit log (user activity)
