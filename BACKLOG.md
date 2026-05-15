@@ -12,6 +12,52 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 ---
 
+## SaaS Pro Publishability — 6-Wave plan (started 2026-05-15)
+
+**Goal**: 5 SDK (`api-contracts`, `api-core`, `api-sdk`, `auth-sdk`, `pay-sdk`) publishable npm + zéro exploit exploitable. Plan validé par user 2026-05-15. ~4-5 semaines. Foundation-first: api-contracts → api-core → api-sdk → consumer SDKs.
+
+**Audit baseline** : 10 agents (5 auditor + 5 hacker) ont identifié 23 critical + 30 high + 28 medium findings cumulés. Reports dans `tmp/audit-{sdk}-{role}.md`.
+
+### Wave A — api-contracts foundation
+
+- [x] **WAVE-A-LOT-1-001** 🔴 P0 (DONE 2026-05-15) — Harden existing schemas (auth.ts + pagination.ts). 8 findings closed end-to-end via dev → auditor → hacker pipeline. Commits `31763117` (auth.ts: C-1 discriminatedUnion 2FA, C-2 AuthUser passthrough + 12+ aligned fields, C-3 RefreshResponse bounds, H1 password 12+/Login min(1) legacy, H2 EmailOverride CRLF+script+50KB, H3 username/app/token/code regex, H4 safeRedirectUri stricter+IDN reject) + `f8b73e8a` (pagination.ts: H5 strict coerce union, default 50, offset.max 10K). +112 vitest assertions, 269/269 tests pass, monorepo typecheck 40/40 clean, zero cross-consumer regression. Hacker ran 134 adversarial probes → all 8 findings genuinely closed.
+
+- [ ] **WAVE-A-LOT-1-RESIDUAL-001** 🟠 P1 (~30min) — Hacker found `EmailOverride.bodyHtml` regex `/javascript\s*:/i` bypassable via `java\tscript:` / `java\nscript:` (whitespace in scheme — WHATWG URL parser strips ASCII whitespace, browsers execute the resulting JS). Same applies to HTML entities `&#x6A;avascript:`. JSDoc already disclaims completeness ("server MUST run a proper HTML sanitizer") but the regex creates false-safety. Fix: tighten to `j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:` + reject `&#x?[0-9a-f]+;` entities, OR remove regex entirely + reinforce JSDoc. Lot 2 candidate.
+
+- [ ] **WAVE-A-LOT-1-RESIDUAL-002** 🟡 P2 (~20min) — `AuthUserSchema.passthrough()` preserves any field including `password` / `passwordHash` if server bugs and returns them. Add `redactAuthUser(user)` helper that strips sensitive keys (whitelist of allowed fields). Export from api-contracts.
+
+- [ ] **WAVE-A-LOT-1-RESIDUAL-003** 🟡 P2 (~10min) — `LoginRequestSchema.email` accepts CRLF (`'a@b.com\r\n'`) because login allows username-or-email. Add `NO_CONTROL_CHARS` filter pre-parse (defuses log injection).
+
+- [ ] **WAVE-A-LOT-2-001** 🔴 P0 (~2 jours) — Common DTOs unification: déplacer `Application`/`ApiKey`/`Plan` shapes de `auth-sdk/core/types.ts` + `pay-sdk/core/types/*` vers `api-contracts`. Re-export avec @deprecated dans les SDK pour migration 1 minor release. + Split `auth.ts` (730 lignes > 400) en `auth-shared.ts` / `auth-requests.ts` / `auth-responses.ts` (auditor soft issue Lot 1).
+
+- [ ] **WAVE-A-LOT-2-002** 🔴 P0 (~1 jour) — Nouveaux schemas obligatoires : `Money/Currency` (`AmountCents = z.number().int().positive().max(999_999_999)`, `CurrencyCode = z.enum(['EUR','USD','GBP',...])`), `IdempotencyKey = z.string().uuid()` + header constant, `API versioning` header name + schema. Move `ApiError` class from api-sdk → api-contracts (re-export @deprecated from api-sdk). Adresse les findings auditor : pagination cursor (manquant), error codes pay/webhook/idempotency.
+
+- [ ] **WAVE-A-LOT-3-001** 🟠 P1 (~1 jour) — Migration des 13 callsites inline `z.coerce.number().int().min(1).max(100)` dans `apps/` vers `PaginationQuerySchema` import. ESLint rule `no-inline-pagination-schema` ajoutée dans `@ezstart/eslint-plugin-ezstart`.
+
+- [ ] **WAVE-A-LOT-4-001** 🟠 P1 (~30min) — `CHANGELOG.md` v1.0.0 entry rédigée + bumped semver. Audit final agnosticité grep.
+
+### Wave B — api-core foundation (pending Wave A)
+
+8 fixes auditor + 12 fixes hacker à exécuter quand Wave A done. Notable : CORS case-fold H1 (CSRF login bypass), CSRF `crypto.timingSafeEqual`, MongoDB Atlas localhost fallback supprimé, rate limiter LRU, **`tenantScope()` middleware nouveau** (foundation pour Wave E pay-sdk cross-tenant fix), idempotency middleware HA-ready, ttlPlugin tests, JSDoc createApiAuth corrigée. Cf. `tmp/audit-api-core-{auditor,hacker}.md`.
+
+### Wave C — api-sdk hardening (pending Wave B)
+
+4 critical + 5 high. Refresh `credentials` + `AbortSignal` propagation, logout/refresh race, refresh circuit breaker, `url.ts` fragment bug, workspace deps cleanup pour publishability, `Idempotency-Key` first-class. Cf. `tmp/audit-api-sdk-{auditor,hacker}.md`.
+
+### Wave D — auth-sdk security + agnosticity (pending Wave C)
+
+5 critical + 7 high. BroadcastChannel LOGIN validation (account takeover same-origin), OAuth open redirect allowlist + PKCE, UserAvatar URL validation, hasRole cross-tenant default safe, password 12+/zxcvbn/HIBP, account enumeration, JWT public key per-service, sso.ts agnosticity (drop `@ezstart/config`), middleware/createAuthMiddleware.ts agnosticity, test failing fix `auth-provider-default-api-url.test.tsx`. Cf. `tmp/audit-auth-sdk-{auditor,hacker}.md`.
+
+### Wave E — pay-sdk security + structure + SSR (pending Wave D)
+
+**4 critiques money loss exploitables maintenant** : C-1 price tampering (Pro $99 → 0.01 EUR exploit chain en 3 HTTP calls), C-2 Customer Portal hijack, C-3 cross-tenant applicationId injection (consume `tenantScope()` middleware Wave B), C-4 promo atomic `findOneAndUpdate` + `$lt: maxUses`. + Module-level Zustand → factory + Context, `core/methods/\*`dep`@ezstart/api-sdk` cleanup, SSR companions (`getServerPlans`, `getServerKeyConfig`, `getServerSubscriptionStatus`), `initial<X>`props, Idempotency-Key, webhook event idempotency table, Stripe Connect state nonce tracking, rate limit strict sur`/donate|subscribe|purchase`, REG-1 régression revert (mon commit `869c0d80`reset le ref à chaque cleanup → reactiv DoS) avec proper StrictMode fix via TanStack Query cache. Cf.`tmp/audit-pay-sdk-{auditor,hacker}.md`.
+
+### Wave F — Publishability finale
+
+Pre-publish dry-run × 5, npm provenance workflows, bundle size badges, examples directories, cross-SDK integration test (signup → checkout → portal → logout).
+
+---
+
 ## Auth standalone V1 — Path to Clerk-level Pro (post-MVP)
 
 **Status MVP** : ezauth standalone est production-ready à **~99.95%** (Day 2026-05-01 : massive Wave 1+2+3 + P0 SSR/UX session — ~38 commits, ezauth/ezpay/ezstart now consume `auth-sdk/server`, `pay-sdk/server`, `ai-sdk/server`, `api-core/crypto`, `api-core/audit-log`. Tier 1 SaaS service pattern aligned with `standard-architecture.md`). Tu peux vendre ezauth aujourd'hui à un client B2B externe — secret keys S2S server-to-server fonctionnent end-to-end avec multi-tenancy enforced.
