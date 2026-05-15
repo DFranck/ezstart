@@ -182,4 +182,50 @@ describe('formatMoney', () => {
     const out = formatMoney({ amount: 1, currency: 'USD' }, 'en-US')
     expect(out).toBe('$0.01')
   })
+
+  // -------------------------------------------------------------------------
+  // A.4 — invalid locale must NOT throw (Lot 2.1.1 fix)
+  //
+  // Source: tmp/hacker-wave-a-lot2-1.md §A.4
+  //
+  // Previously, `Intl.NumberFormat(invalidLocale, ...)` surfaced a
+  // `RangeError("Incorrect locale information provided")` to the caller. Any
+  // consumer forwarding an unvalidated `Accept-Language` header straight into
+  // `formatMoney` would crash at display time. We now fall back to 'en'
+  // silently — defense in depth, never a crash on display.
+  // -------------------------------------------------------------------------
+
+  describe('formatMoney — invalid locale fallback (A.4)', () => {
+    it('does NOT throw on a garbage locale tag', () => {
+      expect(() => formatMoney({ amount: 100, currency: 'EUR' }, 'invalid-XYZ')).not.toThrow()
+    })
+
+    it('falls back to en formatting when locale is garbage', () => {
+      const out = formatMoney({ amount: 100, currency: 'EUR' }, 'invalid-XYZ')
+      // en formatting for €1.00 — exact symbol depends on ICU but the digits
+      // and decimal are stable
+      expect(out).toContain('1.00')
+      expect(out).toMatch(/€|EUR/)
+    })
+
+    it('does NOT throw on a script-injection-shaped locale (defense in depth)', () => {
+      expect(() =>
+        formatMoney({ amount: 100, currency: 'EUR' }, '<script>alert(1)</script>')
+      ).not.toThrow()
+    })
+
+    it('regression: legitimate fr-FR still works (does not hit fallback)', () => {
+      const out = formatMoney({ amount: 100, currency: 'EUR' }, 'fr-FR')
+      // fr-FR formats 1.00 EUR as "1,00 €" — comma separator confirms the
+      // fallback was NOT used (en would emit a period).
+      expect(out).toContain('1,00')
+      expect(out).toMatch(/€|EUR/)
+    })
+
+    it('regression: default locale (en) still works', () => {
+      const out = formatMoney({ amount: 100, currency: 'EUR' })
+      expect(out).toContain('1.00')
+      expect(out).toMatch(/€|EUR/)
+    })
+  })
 })

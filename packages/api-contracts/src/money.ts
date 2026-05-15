@@ -174,23 +174,41 @@ const MINOR_UNIT_EXPONENT: Readonly<Record<CurrencyCode, number>> = Object.freez
  * - Delegates the actual formatting to `Intl.NumberFormat` so the output
  *   respects the locale's grouping, decimal separator, currency placement,
  *   and symbol.
+ * - **A.4 fix (Lot 2.1.1, 2026-05-16)** — if `locale` is not a valid BCP 47
+ *   tag, `Intl.NumberFormat` would throw `RangeError("Incorrect locale
+ *   information provided")`. To defuse that footgun for callers that forward
+ *   an unvalidated `Accept-Language` header straight in, the function
+ *   transparently falls back to `'en'` instead of throwing. The caller still
+ *   gets a usable string; the cost is a silent locale downgrade rather than
+ *   a runtime crash.
  *
  * @param money - parsed {@link Money} object
  * @param locale - BCP 47 locale tag (default `'en'`)
  *
  * @example
  * ```ts
- * formatMoney({ amount: 1234, currency: 'EUR' }, 'fr-FR') // '12,34 €'
- * formatMoney({ amount: 1234, currency: 'EUR' }, 'en')    // '€12.34'
- * formatMoney({ amount: 1234, currency: 'USD' }, 'en-US') // '$12.34'
- * formatMoney({ amount: 1234, currency: 'JPY' }, 'ja-JP') // '￥1,234'  (no decimal)
+ * formatMoney({ amount: 1234, currency: 'EUR' }, 'fr-FR')        // '12,34 €'
+ * formatMoney({ amount: 1234, currency: 'EUR' }, 'en')           // '€12.34'
+ * formatMoney({ amount: 1234, currency: 'USD' }, 'en-US')        // '$12.34'
+ * formatMoney({ amount: 1234, currency: 'JPY' }, 'ja-JP')        // '￥1,234'  (no decimal)
+ * formatMoney({ amount: 100,  currency: 'EUR' }, 'invalid-XYZ')  // '€1.00'   (en fallback)
  * ```
  */
 export function formatMoney(money: Money, locale: string = 'en'): string {
   const exponent = MINOR_UNIT_EXPONENT[money.currency]
   const major = money.amount / 10 ** exponent
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: money.currency,
-  }).format(major)
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: money.currency,
+    }).format(major)
+  } catch {
+    // Invalid locale (e.g. caller forwarded an unvalidated Accept-Language
+    // header). Fall back to 'en' rather than surfacing the RangeError —
+    // defense in depth, never a crash on display formatting.
+    return new Intl.NumberFormat('en', {
+      style: 'currency',
+      currency: money.currency,
+    }).format(major)
+  }
 }

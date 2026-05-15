@@ -44,6 +44,32 @@ describe('IdempotencyKeySchema', () => {
     }
   })
 
+  it('accepts any UUID variant (RFC 4122) — JSDoc parity (Lot 2.1.1 B.1 fix)', () => {
+    // The JSDoc explicitly documents "any UUID variant" — verify v1/v3/v5/v6/v7/v8
+    // all parse so the documentation does not drift from runtime behavior.
+    const variants = [
+      // v1 (timestamp-based)
+      '550e8400-e29b-11d4-a716-446655440000',
+      // v3 (MD5 namespace)
+      '6fa459ea-ee8a-3ca4-894e-db77e160355e',
+      // v4 (random — historic default)
+      '550e8400-e29b-41d4-a716-446655440000',
+      // v5 (SHA-1 namespace)
+      '886313e1-3b8a-5372-9b90-0c9aee199e5d',
+      // v6 (reordered timestamp)
+      '1ec9414c-232a-6b00-b3c8-9f6bdeced846',
+      // v7 (Unix-ms timestamp + random — increasingly used by modern libs)
+      '018f7c5e-1234-7000-8000-000000000000',
+      // v8 (custom)
+      '550e8400-e29b-81d4-a716-446655440000',
+      // nil UUID (special case — P3 posture note per hacker report)
+      '00000000-0000-0000-0000-000000000000',
+    ]
+    for (const u of variants) {
+      expect(IdempotencyKeySchema.parse(u)).toBe(u)
+    }
+  })
+
   it('rejects non-UUID strings', () => {
     expect(() => IdempotencyKeySchema.parse('1')).toThrow()
     expect(() => IdempotencyKeySchema.parse('test')).toThrow()

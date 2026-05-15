@@ -119,6 +119,25 @@ const StrictNonNegativeInt = z.union([
 ])
 
 /**
+ * Rejects strings containing any ASCII control character (`\x00`-`\x1F`,
+ * `\x7F`) — i.e. NUL, BEL, BS, TAB, LF, VT, FF, CR, ESC, DEL, etc.
+ *
+ * Applied to opaque pagination cursors so a raw `\r\n` cannot:
+ * - Smuggle into a `Link: <…?cursor=…>` response header (RFC 5988 sibling
+ *   of HTTP response splitting).
+ * - Break unstructured log formatters (`console.log`, text-mode pino) that
+ *   would print a literal newline mid-line.
+ * - Decode to a control char inside a server-side base64 cursor blob.
+ *
+ * No legitimate cursor encoding (base64url, hex, JWT, signed token) emits
+ * raw ASCII control bytes, so this filter is pure defense-in-depth with no
+ * legitimate-traffic impact.
+ *
+ * @internal
+ */
+const NO_CONTROL_CHARS = /^[^\x00-\x1F\x7F]*$/
+
+/**
  * Zod schema for the standard pagination query string.
  *
  * - `limit`  : integer 1..100 (default 50, per `standard-saas-data.md` §3)
@@ -204,6 +223,7 @@ export const CursorPaginationQuerySchema = z.object({
     .string()
     .min(1, 'Cursor must be a non-empty string')
     .max(2048, 'Cursor must be at most 2048 characters')
+    .regex(NO_CONTROL_CHARS, 'cursor must not contain control characters')
     .optional()
     .describe('Opaque server-issued cursor from the previous page (omit on first page)'),
   limit: StrictPositiveInt.refine(n => n <= 100, 'Must be at most 100')

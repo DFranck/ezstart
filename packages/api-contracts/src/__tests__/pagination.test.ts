@@ -236,6 +236,62 @@ describe('CursorPaginationQuerySchema', () => {
     expect(CursorPaginationQuerySchema.safeParse({ limit: [50] }).success).toBe(false)
     expect(CursorPaginationQuerySchema.safeParse({ limit: true }).success).toBe(false)
   })
+
+  // -------------------------------------------------------------------------
+  // D.3 — cursor must not contain ASCII control chars (Lot 2.1.1 fix)
+  //
+  // Source: tmp/hacker-wave-a-lot2-1.md §D.3
+  //
+  // A raw `\r\n` in an echoed cursor could smuggle into a `Link:` response
+  // header or pollute a text-formatter log line. No legitimate cursor encoding
+  // (base64url, hex, JWT, signed token) contains raw ASCII control bytes, so
+  // this is pure defense-in-depth with zero legitimate-traffic impact.
+  // -------------------------------------------------------------------------
+
+  describe('cursor — control-char filter (D.3)', () => {
+    it('accepts a typical base64url cursor', () => {
+      const result = CursorPaginationQuerySchema.safeParse({ cursor: 'eyJpZCI6IjY1OWFmIn0' })
+      expect(result.success).toBe(true)
+    })
+
+    it('accepts plain alphanumerics + hex + URL-safe chars', () => {
+      const cursor = 'abc123-_ABC.~='
+      const result = CursorPaginationQuerySchema.safeParse({ cursor })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects cursor with embedded NUL byte \\x00', () => {
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\x00null' }).success).toBe(false)
+    })
+
+    it('rejects cursor with embedded LF \\n', () => {
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\nLF' }).success).toBe(false)
+    })
+
+    it('rejects cursor with embedded CR \\r', () => {
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\rCR' }).success).toBe(false)
+    })
+
+    it('rejects cursor with embedded TAB \\t', () => {
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\ttab' }).success).toBe(false)
+    })
+
+    it('rejects cursor with CRLF (response-splitting primitive)', () => {
+      expect(
+        CursorPaginationQuerySchema.safeParse({ cursor: 'split\r\nSet-Cookie: x=1' }).success
+      ).toBe(false)
+    })
+
+    it('rejects cursor with DEL \\x7F (high control char)', () => {
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\x7Fdel' }).success).toBe(false)
+    })
+
+    it('rejects cursor with bell \\x07 / VT \\x0B / FF \\x0C', () => {
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\x07bell' }).success).toBe(false)
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\x0Bvt' }).success).toBe(false)
+      expect(CursorPaginationQuerySchema.safeParse({ cursor: 'evil\x0Cff' }).success).toBe(false)
+    })
+  })
 })
 
 describe('CursorPaginationMetaSchema', () => {
