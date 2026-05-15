@@ -412,6 +412,10 @@ export function PayProvider({
 
     return () => {
       cancelled = true
+      // Reset so React StrictMode double-invocation can retry the fetch.
+      // Without this the second effect sees the ref already set (REG-1) and
+      // skips the fetch entirely → resolutionStatus stays 'pending' forever.
+      resolvedKeyRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we intentionally resolve once per (client, publishableKey) pair
   }, [client, publishableKey, applicationIdProp, config?.applicationId])
