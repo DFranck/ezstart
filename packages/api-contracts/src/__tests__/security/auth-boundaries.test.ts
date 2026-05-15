@@ -86,27 +86,29 @@ describe('password max length (bcrypt DoS)', () => {
 // ---------------------------------------------------------------------------
 
 describe('username constraints', () => {
-  it('RegisterRequestSchema rejects username > 50 chars', () => {
+  // 2026-05-15 (H3) — username now strict regex (3-32 alphanumerics + _ - .).
+  // Bound dropped from 50 to 32.
+  it('RegisterRequestSchema rejects username > 32 chars', () => {
     expect(() =>
       RegisterRequestSchema.parse({
         email: 'a@b.com',
-        username: 'a'.repeat(51),
-        password: 'validpass1',
+        username: 'a'.repeat(33),
+        password: 'long-password',
         app: 'myapp',
       })
     ).toThrow()
   })
 
-  it('RegisterRequestSchema accepts username at 50 chars', () => {
-    const name50 = 'a'.repeat(50)
+  it('RegisterRequestSchema accepts username at 32 chars', () => {
+    const name32 = 'a'.repeat(32)
     expect(
       RegisterRequestSchema.parse({
         email: 'a@b.com',
-        username: name50,
-        password: 'validpass1',
+        username: name32,
+        password: 'long-password',
         app: 'myapp',
       }).username
-    ).toBe(name50)
+    ).toBe(name32)
   })
 })
 
@@ -123,7 +125,7 @@ describe('email max length', () => {
       RegisterRequestSchema.parse({
         email: hugeEmail,
         username: 'user',
-        password: 'validpass1',
+        password: 'long-password',
         app: 'myapp',
       })
     ).toThrow()
@@ -153,8 +155,9 @@ describe('email max length', () => {
 // ---------------------------------------------------------------------------
 
 describe('EmailOverrideSchema field limits', () => {
-  it('rejects subject > 500 chars', () => {
-    expect(() => EmailOverrideSchema.parse({ subject: 'a'.repeat(501) })).toThrow()
+  // 2026-05-15 (H2) — subject max raised to RFC 5322 line length (998).
+  it('rejects subject > 998 chars (RFC 5322 line length)', () => {
+    expect(() => EmailOverrideSchema.parse({ subject: 'a'.repeat(999) })).toThrow()
   })
 
   it('rejects bodyHtml > 50_000 chars', () => {
@@ -179,14 +182,14 @@ describe('EmailOverrideSchema field limits', () => {
 
   it('accepts fields within limits', () => {
     const result = EmailOverrideSchema.parse({
-      subject: 'a'.repeat(500),
+      subject: 'a'.repeat(998),
       heading: 'a'.repeat(500),
       intro: 'a'.repeat(2000),
       outro: 'a'.repeat(2000),
       ctaLabel: 'a'.repeat(200),
       bodyHtml: 'a'.repeat(50_000),
     })
-    expect(result.subject).toHaveLength(500)
+    expect(result.subject).toHaveLength(998)
   })
 })
 
