@@ -32,7 +32,15 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 - [x] **WAVE-A-LOT-2-002** 🔴 P0 (DONE 2026-05-15) — Money/Currency (`AmountCentsSchema`, `CurrencyCodeSchema` ISO 4217, `formatMoney()`) + Idempotency (`IdempotencyKeySchema` UUID, header constants, 24h TTL) + API versioning (`API_VERSION_HEADER`, `ApiVersionSchema`, `CURRENT_API_VERSION`, `SUPPORTED_API_VERSIONS`) + Cursor pagination (`CursorPaginationQuerySchema` append-only) + 15 new error codes. Commit `cb8d8278`. **405/405 tests, monorepo typecheck 40/40.**
 
-- [ ] **WAVE-A-LOT-2-003** 🔴 P0 (~2 jours) — Common DTOs unification: déplacer `Application`/`ApiKey`/`Plan` shapes de `auth-sdk/core/types.ts` + `pay-sdk/core/types/*` vers `api-contracts`. Re-export `@deprecated` dans les SDK pour migration 1 minor release. + Move `ApiError` class from api-sdk → api-contracts (re-export `@deprecated` from api-sdk). HIGH RISK: cross-package refactor, séquentiel (pas parallèle).
+- [x] **WAVE-A-LOT-2-003** 🔴 P0 (DONE 2026-05-16) — DTO unification + ApiError move (highest-risk Wave A item). Commit `ee79e8d8` (Lot 2.3 + 2.3.1 squashed). 4 wire shapes moved to `@ezstart/api-contracts`:
+  - **ApiError** class (api-sdk → api-contracts) + isApiError guard. api-core can now `throw ApiError` without depending on api-sdk.
+  - **Application** + ApplicationSchema (Zod, NEW) + ApplicationStatus + ApplicationTheme (auth-sdk → api-contracts).
+  - **ApiKey shapes** (4 interfaces + 3 enums) (auth-sdk → api-contracts). Lot 2.3.1 patch fixed 3 drifts vs runtime: scope enum 3→5 values (add `user`/`readonly`), `applicationId.nullable().optional()` (route emits null), `type` + `env` declared (were stripped on parse).
+  - **Plan** + PlanMetadata + PlanInterval (pay-sdk → api-contracts) **avec Money/Currency wire enforcement** : `Plan.amount` via `PlanAmountCentsSchema` (reject floats `19.99`, accept `0` free tier), `Plan.currency` via `CurrencyCodeSchema` ISO 4217.
+
+  All origin packages keep `@deprecated` re-exports → zero breaking change. pay-sdk gains direct dep on api-contracts. **512/512 api-contracts tests** (+112 new), **monorepo typecheck 40/40**, baselines match: auth-sdk 586/587, pay-sdk 372/383, api-ezauth 649/649, api-ezpay 672/672.
+
+- [ ] **WAVE-A-LOT-2-RESIDUAL-003** 🟡 P2 (~30min, Wave B polish) — 2 optional fields the auditor flagged but didn't block: (a) `ApplicationSchema` could expose `isTestMode`; (b) `PlanSchema` could expose `stripeProductId` + `isTestMode`. Add in Wave B when polishing schemas.
 
 - [ ] **WAVE-A-LOT-2-RESIDUAL-001** 🟡 P2 (~30min) — 4 medium residuals trouvés par hacker Lot 2.1, à traiter en Lot 2.3 ou 3:
   - **B.1** `IdempotencyKeySchema` JSDoc dit "UUID v4" mais accepte v1/v3/v5/nil/v6/v7/v8. Update JSDoc OU tighten regex.
