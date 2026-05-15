@@ -40,19 +40,21 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
   All origin packages keep `@deprecated` re-exports → zero breaking change. pay-sdk gains direct dep on api-contracts. **512/512 api-contracts tests** (+112 new), **monorepo typecheck 40/40**, baselines match: auth-sdk 586/587, pay-sdk 372/383, api-ezauth 649/649, api-ezpay 672/672.
 
-- [ ] **WAVE-A-LOT-2-RESIDUAL-003** 🟡 P2 (~30min, Wave B polish) — 2 optional fields the auditor flagged but didn't block: (a) `ApplicationSchema` could expose `isTestMode`; (b) `PlanSchema` could expose `stripeProductId` + `isTestMode`. Add in Wave B when polishing schemas.
+- [x] **WAVE-A-LOT-2-RESIDUAL-003** 🟡 P2 (DONE 2026-05-16) — 3 optional fields added: `Application.isTestMode`, `Plan.stripeProductId`, `Plan.isTestMode`. Cross-checked vs Mongoose models: all 3 exist server-side as REAL fields. Commit `94a7ea8c`.
 
-- [ ] **WAVE-A-LOT-2-RESIDUAL-001** 🟡 P2 (~30min) — 4 medium residuals trouvés par hacker Lot 2.1, à traiter en Lot 2.3 ou 3:
-  - **B.1** `IdempotencyKeySchema` JSDoc dit "UUID v4" mais accepte v1/v3/v5/nil/v6/v7/v8. Update JSDoc OU tighten regex.
-  - **D.3** `CursorPaginationQuerySchema.cursor` accepte raw `\x00\r\n\t`. Apply `NO_CONTROL_CHARS`.
-  - **A.4** `formatMoney(money, 'invalid-locale')` throws `RangeError`. Wrap try/catch fallback `'en'`.
-  - **I.6** `package.json` exports declares only `'.'`. External consumers can't `import from '@ezstart/api-contracts/auth'`. Either add `./auth` export OR document barrel-only.
+- [x] **WAVE-A-LOT-2-RESIDUAL-001** 🟡 P2 (DONE 2026-05-16) — 4 medium residuals fixed (commit `2ea292e0`):
+  - **B.1** IdempotencyKey JSDoc rewritten to "any RFC 4122 variant" — runtime was correct, doc lied (UUID v7 modern accepted).
+  - **D.3** `CursorPaginationQuerySchema.cursor` gets strict `NO_CONTROL_CHARS = /^[^\x00-\x1F\x7F]*$/` filter.
+  - **A.4** `formatMoney` wraps `Intl.NumberFormat` in try/catch with silent `'en'` fallback.
+  - **I.6** Added `./auth` subpath export + new `src/auth/index.ts` barrel. Idiomatic SDK pattern (Stripe/Clerk).
 
-- [ ] **WAVE-A-LOT-2-RESIDUAL-002** 🟡 P2 (~30min) — `auth-shared.ts` 411 LOC, 11 over standard.md §3 400-line soft cap. Extract `safeRedirectUri` + ses 6+ refinements à `auth/redirect-uri.ts` (~80 LOC) → `auth-shared.ts` sous 350.
+- [x] **WAVE-A-LOT-2-RESIDUAL-002** 🟡 P2 (DONE 2026-05-16) — `auth-shared.ts` 411 → 322 LOC. `safeRedirectUri` extracted to `auth/redirect-uri.ts` (114 LOC) + 25 new direct unit tests. Pure file split, zero behavior change, backward-compat via re-export. Commit `b24370b1`.
 
-- [ ] **WAVE-A-LOT-3-001** 🟠 P1 (~1 jour) — Migration des 13 callsites inline `z.coerce.number().int().min(1).max(100)` dans `apps/` vers `PaginationQuerySchema` import. ESLint rule `no-inline-pagination-schema` ajoutée dans `@ezstart/eslint-plugin-ezstart`.
+- [x] **WAVE-A-LOT-3-001** 🟠 P1 (DONE 2026-05-16) — 23 inline pagination callsites migrated to `PaginationQuerySchema` import (auditor estimated 13, real count 23 — multi-line `z.coerce` chains). ESLint rule `no-inline-pagination-schema` activated at `error` level in `@ezstart/eslint-config/base`. Side-effect security wins: 3 unbounded-`limit` routes now capped at 100 (DoS surface eliminated). Commit `93dba1b3`.
 
-- [ ] **WAVE-A-LOT-4-001** 🟠 P1 (~30min) — `CHANGELOG.md` v1.0.0 entry rédigée + bumped semver. Audit final agnosticité grep.
+- [x] **WAVE-A-LOT-4-001** 🟠 P1 (DONE 2026-05-16) — `CHANGELOG.md` v1.0.0 entry comprehensive (this commit). Package version already at 1.0.0 (no bump needed). api-contracts is **publishable npm** + agnostic + tested + documented + SaaS-pro ready.
+
+**🎉 Wave A complete — `@ezstart/api-contracts` v1.0.0 is ready to publish.** 23 hacker findings closed end-to-end, 569 tests, zero cross-consumer regression. 11 commits over 2 days via the strict `dev → auditor → hacker → fix loop` pipeline. Reports in `tmp/{dev,auditor,hacker}-wave-a-*.md`.
 
 ### Wave B — api-core foundation (pending Wave A)
 
