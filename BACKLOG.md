@@ -56,9 +56,27 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 **🎉 Wave A complete — `@ezstart/api-contracts` v1.0.0 is ready to publish.** 23 hacker findings closed end-to-end, 569 tests, zero cross-consumer regression. 11 commits over 2 days via the strict `dev → auditor → hacker → fix loop` pipeline. Reports in `tmp/{dev,auditor,hacker}-wave-a-*.md`.
 
-### Wave B — api-core foundation (pending Wave A)
+### Wave B — api-core foundation ✅ COMPLETE (2026-05-16)
 
-8 fixes auditor + 12 fixes hacker à exécuter quand Wave A done. Notable : CORS case-fold H1 (CSRF login bypass), CSRF `crypto.timingSafeEqual`, MongoDB Atlas localhost fallback supprimé, rate limiter LRU, **`tenantScope()` middleware nouveau** (foundation pour Wave E pay-sdk cross-tenant fix), idempotency middleware HA-ready, ttlPlugin tests, JSDoc createApiAuth corrigée. Cf. `tmp/audit-api-core-{auditor,hacker}.md`.
+**`@ezstart/api-core` v0.2.0 ready to publish.** 20 hacker findings closed (3 critical + 6 high + 6 medium + 5 low) + new `createTenantScopeMiddleware` foundation primitive. 13 commits, ~3 days of strict `dev → auditor → hacker → fix loop` pipeline.
+
+- [x] **WAVE-B-LOT-1-CORS** 🔴 P0 (DONE — commit `5d189509`) — CORS case-fold bypass closed (H1). Defense in depth : `app.set('case sensitive routing', true)` + lowercase `isCookiePath` compare. Closes CSRF login attack via `/api/auth/Login` (capital L). +7 adversarial tests, 8/8 probes pass.
+- [x] **WAVE-B-LOT-1-CSRF** 🔴 P0 (DONE — commit `2de415f7`) — `crypto.timingSafeEqual` for CSRF token compare + length-check first to avoid TypeError throw. +7 tests, 9/9 probes pass.
+- [x] **WAVE-B-LOT-1-MONGO** 🔴 P0 (DONE — commit `ce2fe25c`) — MongoDB Atlas fail-close in production (H2). 3-branch behavior (prod throw, test throw, dev LOUD warn fallback). Credentials never logged. +6 tests, no other silent fallbacks in api-core.
+- [x] **WAVE-B-LOT-2-TENANT-SCOPE** 🔴 P0 (DONE — commit `cdf1a467`) — New `createTenantScopeMiddleware` foundation primitive. Resolves `req.applicationId` from 3 sources (apiKey/body/param), optional ownership verify + superadmin bypass. **Unblocks Wave E pay-sdk C-3 "free Pro tier" exploit fix** — direct G-probe confirmed `403 APPLICATION_ACCESS_DENIED` on the exact attack chain. +30 tests across 8 describe blocks, 34/34 adversarial probes pass.
+- [x] **WAVE-B-LOT-3-RATE-LIMIT** 🟠 P1 (DONE — commit `21fb7fd5`) — Rate-limit LRU eviction (H3) + explicit `disabled` opt-in (H4 — NODE_ENV=test bypass removed). Bonus: H6+H7 idempotency fixes bundled here by lint-staged.
+- [x] **WAVE-B-LOT-3-SERVER-CONFIG** 🟠 P1 (DONE — commit `6272d1bb`) — `TRUST_PROXY_HOPS` env var 3-level precedence (H5) + CSP missing warning in prod (H8). +14 tests.
+- [x] **WAVE-B-LOT-3-IDEMPOTENCY** 🟠 P1 (DONE — bundled in commit `21fb7fd5` + fixup `f311b2e1`) — Don't cache 5xx/408/425/429 (H6) + preserve all headers incl. Set-Cookie array (H7). Hop-by-hop header strip per RFC 7230 §6.1.
+- [x] **WAVE-B-LOT-3-TTL** 🟠 P1 (DONE — commit `d4ef1525`) — `ttlPlugin` 22 tests added (6 describe blocks). Source untouched. Auditor P0 publish blocker closed.
+- [x] **WAVE-B-LOT-3-JSDOC** 🟢 P3 (DONE — commit `3c4da1bb`) — `createApiAuth` JSDoc lie fixed (removed ghost X-User-Id mention).
+- [x] **WAVE-B-LOT-4-HEALTH-ROUTER** 🟡 P2 (DONE — commit `34f817c2`) — M1 versioned-router `/v1/v1/` 404 + M4 `/health` bare in prod + M5 `/health/deep` cache 1s + inFlight coalescing + strict rate-limit + H9 CORP back to `same-origin`. +19 tests.
+- [x] **WAVE-B-LOT-4-AUTH** 🟡 P2 (DONE — commit `89b8f8d7`) — M3 `isValidObjectId` (reject 24 zeros) + L1 JWT `iss`/`aud` opt-in + L2 `extractRawApiKey` trims. +23 tests.
+- [x] **WAVE-B-LOT-4-PII-LOGGING** 🟡 P2 (DONE — commit `fee16e92`) — M2 `extractIp` uses `req.ip` (proxy-aware) + L5 `sanitizeErrorForLog` strips Mongoose ValidationError values + MongoServerError keyValue. +14 tests.
+- [x] **WAVE-B-LOT-4-MIDDLEWARE-SEMANTICS** 🟡 P2 (DONE — commit `eaffe50b`) — M6 skip OPTIONS in rate-limit + L7 idempotency in-memory prod warning + L3/L4 testModeScopePlugin JSDoc auto-scope notes. +8 tests.
+- [x] **WAVE-B-LOT-4-CSRF-SAMESITE** 🟠 P1 (DONE — commit `009d9e9c` — BREAKING intentional) — `createCsrfMiddleware` default `sameSite` changed `'strict'` → `'lax'` (L6). Unblocks email/SSO link-click flow. Options surface added (cookieName, domain, sameSite, secure). +9 tests.
+- [x] **WAVE-B-LOT-5-CHANGELOG** 🟠 P1 (DONE 2026-05-16) — `CHANGELOG.md` v0.2.0 entry comprehensive + semver bump 0.1.5 → 0.2.0. api-core publishable npm + agnostic + hardened.
+
+**🎉 Wave B metrics**: 410 → 581 tests (+171), zero cross-consumer regression (api-ezauth 649/649, api-ezpay 672/672, api-ezstart 119/119, api-gacha-analyzer 161/161, api-ezbill 67/67), monorepo typecheck 40/40 on every commit. 2 internal regressions caught by pipeline before commit (B3-C lint-staged revert chain + B3-A downstream ezauth tests fixed with unique XFF).
 
 ### Wave C — api-sdk hardening (pending Wave B)
 
