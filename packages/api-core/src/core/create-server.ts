@@ -75,6 +75,22 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
 
   const app: Express = express()
 
+  // Defense in depth (Wave B Lot 1 — H1 CORS case-fold bypass fix):
+  // Express defaults `case sensitive routing` to `false`, which would route
+  // `POST /api/auth/Login` (capital L) to the lower-cased `/api/auth/login`
+  // handler. Combined with the case-sensitive `isCookiePath()` check below,
+  // an attacker could land in the auth handler (cookie issued) while the
+  // permissive CORS middleware also ran (origin reflected) — a full CSRF
+  // login bypass on every cookie-auth route.
+  //
+  // Forcing case-sensitive routing makes mismatched-case URLs return 404,
+  // so even if a future caller forgets the lowercase normalization in
+  // `isCookiePath`, the auth handler never executes for the spoofed path.
+  //
+  // REST URLs in this monorepo are lowercase by convention — no consumer
+  // route relies on mixed-case path matching.
+  app.set('case sensitive routing', true)
+
   // Trust 2 proxy hops: Railway edge → Fastly CDN. With this Express picks the
   // real client IP from X-Forwarded-For (last 2 IPs are stripped as trusted),
   // not the LB IP. CRITICAL for accurate per-IP rate limiting on anonymous routes.
@@ -135,9 +151,19 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
 
     // Permissive fallback — only runs when no strict middleware already
     // handled the response (i.e. the path is not under `cookieAuthRoutes`).
+    //
+    // Defense in depth (Wave B Lot 1 — H1): the prefix match is done on a
+    // lower-cased copy of both the URL and the configured prefixes. Even
+    // though `app.set('case sensitive routing', true)` above turns the
+    // mismatched-case attack into a 404, this lowercase compare prevents
+    // any future Express-routing-setting drift from re-opening the bypass.
+    // Both layers must hold for the bypass to be possible.
     const permissive = createPermissiveCorsMiddleware()
-    const isCookiePath = (url: string): boolean =>
-      cookieRoutes.some(prefix => url === prefix || url.startsWith(`${prefix}/`))
+    const lowerCookieRoutes = cookieRoutes.map(p => p.toLowerCase())
+    const isCookiePath = (url: string): boolean => {
+      const lower = url.toLowerCase()
+      return lowerCookieRoutes.some(prefix => lower === prefix || lower.startsWith(`${prefix}/`))
+    }
     app.use((req, res, next) => {
       if (cookieRoutes.length > 0 && isCookiePath(req.path)) return next()
       permissive(req, res, next)
