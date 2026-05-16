@@ -188,8 +188,9 @@ function buildUserFromDecoded(decoded: Record<string, unknown>): AuthenticatedUs
  * Monorepo convenience that mirrors the old `express-core` behaviour:
  *
  * 1. Reads `JWT_SECRET` from the environment (or accepts an explicit override).
- * 2. Verifies tokens with `jsonwebtoken` (HS256, Bearer header + cookie + dev
- *    `X-User-Id` fallback).
+ * 2. Verifies tokens with `jsonwebtoken` (HS256). The token is read from
+ *    either the `Authorization: Bearer <token>` header (checked first) OR
+ *    the `ezauth_token` httpOnly cookie (set by ezauth login) as fallback.
  * 3. Returns `{ authMiddleware, optionalAuthMiddleware }` — the legacy names
  *    expected by all monorepo apps.
  *
