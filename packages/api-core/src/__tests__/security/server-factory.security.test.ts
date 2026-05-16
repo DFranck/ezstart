@@ -265,6 +265,84 @@ describe('Server factory — security', () => {
     })
   })
 
+  // ─── Wave B Lot 4 (H9) — CORP same-origin ───
+  describe('H9 — Helmet Cross-Origin-Resource-Policy', () => {
+    it('sets Cross-Origin-Resource-Policy: same-origin by default', async () => {
+      const { app } = createBaseApiServer({ port: 0 })
+      const res = await request(app).get('/health')
+      expect(res.headers['cross-origin-resource-policy']).toBe('same-origin')
+    })
+
+    it('still emits CORP same-origin when serviceName is custom', async () => {
+      const { app } = createBaseApiServer({ port: 0, serviceName: 'svc-x' })
+      const res = await request(app).get('/health')
+      expect(res.headers['cross-origin-resource-policy']).toBe('same-origin')
+    })
+
+    it('omits CORP header entirely when security: false (caller owns helmet)', async () => {
+      const { app } = createBaseApiServer({ port: 0, security: false })
+      const res = await request(app).get('/health')
+      expect(res.headers['cross-origin-resource-policy']).toBeUndefined()
+    })
+  })
+
+  // ─── Wave B Lot 4 (M4) — /health prod fingerprinting ───
+  describe('M4 — /health hides service identity in production', () => {
+    const originalNodeEnv = process.env.NODE_ENV
+
+    afterEach(() => {
+      if (originalNodeEnv === undefined) {
+        delete process.env.NODE_ENV
+      } else {
+        process.env.NODE_ENV = originalNodeEnv
+      }
+    })
+
+    it('returns { status: "ok" } only when NODE_ENV=production (no service, no timestamp)', async () => {
+      process.env.NODE_ENV = 'production'
+      const { app } = createBaseApiServer({
+        port: 0,
+        serviceName: 'ezauth',
+        disableCspWarning: true,
+      })
+      const res = await request(app).get('/health')
+      expect(res.status).toBe(200)
+      expect(res.body).toEqual({ status: 'ok' })
+      expect(res.body).not.toHaveProperty('service')
+      expect(res.body).not.toHaveProperty('timestamp')
+    })
+
+    it('legacy /api/health is also hardened in production', async () => {
+      process.env.NODE_ENV = 'production'
+      const { app } = createBaseApiServer({
+        port: 0,
+        serviceName: 'ezauth',
+        disableCspWarning: true,
+      })
+      const res = await request(app).get('/api/health')
+      expect(res.status).toBe(200)
+      expect(res.body).toEqual({ status: 'ok' })
+    })
+
+    it('keeps the rich payload (service + timestamp) outside production', async () => {
+      // vitest forces NODE_ENV=test — explicit assignment for clarity.
+      process.env.NODE_ENV = 'test'
+      const { app } = createBaseApiServer({ port: 0, serviceName: 'ezauth' })
+      const res = await request(app).get('/health')
+      expect(res.status).toBe(200)
+      expect(res.body).toMatchObject({ status: 'ok', service: 'ezauth' })
+      expect(res.body.timestamp).toEqual(expect.any(String))
+    })
+
+    it('keeps the rich payload in development', async () => {
+      process.env.NODE_ENV = 'development'
+      const { app } = createBaseApiServer({ port: 0, serviceName: 'ezpay' })
+      const res = await request(app).get('/health')
+      expect(res.status).toBe(200)
+      expect(res.body.service).toBe('ezpay')
+    })
+  })
+
   // ─── H8: CSP missing warning in production ───
   describe('H8 — CSP missing warning', () => {
     const originalNodeEnv = process.env.NODE_ENV

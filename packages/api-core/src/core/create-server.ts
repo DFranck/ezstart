@@ -125,13 +125,28 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
   app.set('trust proxy', trustProxy)
 
   // Security headers (Helmet). Opt-out via `config.security: false` for
-  // services that need to set their own helmet config (rare). Defaults are
-  // SaaS-friendly: cross-origin resource sharing enabled, CSP disabled
-  // (Next.js consumers manage their own).
+  // services that need to set their own helmet config (rare).
+  //
+  // Wave B Lot 4 (H9, 2026-05-16): `crossOriginResourcePolicy` reverted to
+  // helmet's default `same-origin` per
+  // `.claude/rules/standard-saas-security.md` §1. The previous `cross-origin`
+  // setting weakened browser isolation — combined with the (now-fixed) H1 CORS
+  // case-fold bypass, a hostile origin could fetch the API JSON response body
+  // and read session-establishment payloads or error-message-based
+  // password-enumeration oracles. With `same-origin`, the browser blocks the
+  // body read regardless of CORS, restoring defense-in-depth.
+  //
+  // Callers that genuinely need to embed API JSON cross-origin (rare — most
+  // public reads should sit on a CDN with its own CORP policy) can opt out by
+  // passing `security: false` and mounting their own helmet config.
+  //
+  // CSP stays disabled — Next.js consumers ship per-route CSPs via
+  // `vercel.json` / middleware. The boot-time warning below (H8) catches the
+  // operator footgun if a new service forgets to layer one on top.
   if (config.security !== false) {
     app.use(
       helmet({
-        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        crossOriginResourcePolicy: { policy: 'same-origin' },
         contentSecurityPolicy: false,
       })
     )
@@ -230,7 +245,20 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
   const healthPath = config.healthPath ?? HEALTH_PATH_DEFAULT
   const rootPath = config.rootPath ?? ROOT_PATH_DEFAULT
 
+  // Wave B Lot 4 (M4, 2026-05-16): `/health` is unauthenticated by design
+  // (Railway/Vercel liveness probes hit it without credentials). Surfacing
+  // `service` + `timestamp` in production gives attackers a free recon
+  // signal — curl /health on every Railway subdomain to map the entire
+  // deployment ('ezauth' / 'ezpay' / etc.). In production we now respond
+  // with the bare `{ status: 'ok' }` k8s/Railway need and nothing more.
+  // Dev/staging keep the richer payload so operators can sanity-check which
+  // service answered.
+  const isProductionEnv = process.env.NODE_ENV === 'production'
   const healthHandler: express.RequestHandler = (_req, res) => {
+    if (isProductionEnv) {
+      res.status(200).json({ status: 'ok' })
+      return
+    }
     res.status(200).json({
       status: 'ok',
       service: serviceName,
@@ -252,13 +280,24 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
   // Mounted unconditionally: when no DB and no checks are configured, the
   // endpoint just returns the uptime / version snapshot — still useful for
   // status-page polling. See `.claude/rules/standard-saas-observability.md` §4.
+  //
+  // Wave B Lot 4 (M5, 2026-05-16): the deep handler is fronted by a strict
+  // rate-limiter (5 req/min) AND a 1-second response cache to neutralise the
+  // DoS vector reported in the hacker audit — `ab -n 1000 -c 100 /health/deep`
+  // previously opened 100 concurrent Mongoose pool slots, starving real
+  // requests. The cache means status pages polling every few seconds still
+  // get fresh data, while a flood of concurrent pings collapses to a single
+  // backing check per second. Each rate-limit token is independent of the
+  // global limiter so legitimate user traffic isn't affected.
   const deepHealthPath = config.deepHealthPath ?? HEALTH_DEEP_PATH_DEFAULT
   app.get(
     deepHealthPath,
+    createStrictRateLimiter({ skipPaths: [] }),
     createDeepHealthHandler({
       serviceName,
       db: config.db,
       checks: config.deepHealthChecks,
+      cacheMs: 1_000,
     })
   )
 

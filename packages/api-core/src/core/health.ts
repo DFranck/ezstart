@@ -181,6 +181,21 @@ export type DeepHealthHandlerConfig = {
   version?: string
   /** Sanitize error messages for production. Default: `NODE_ENV === 'production'`. */
   isProd?: boolean
+  /**
+   * In-memory response cache TTL in milliseconds. When > 0 the most recent
+   * snapshot is replayed for subsequent calls within the window, collapsing a
+   * burst of `/health/deep` pings into a single backing check.
+   *
+   * Status-page pollers (Better Stack, Pingdom, UptimeRobot) typically ping
+   * every 30-60s so a 1s cache is invisible to them while neutralising the
+   * DoS vector documented in the Wave B Lot 4 hacker report (M5): 100
+   * concurrent pings previously opened 100 Mongoose pool slots, starving
+   * real requests.
+   *
+   * Default `0` (caching disabled) — opt-in by the consumer via
+   * `createBaseApiServer` (which sets `cacheMs: 1_000` by default).
+   */
+  cacheMs?: number
 }
 
 /**
@@ -205,8 +220,17 @@ export type DeepHealthHandlerConfig = {
  */
 export function createDeepHealthHandler(config: DeepHealthHandlerConfig): RequestHandler {
   const isProd = config.isProd ?? process.env.NODE_ENV === 'production'
+  const cacheMs = Math.max(0, config.cacheMs ?? 0)
 
-  return async function deepHealthHandler(_req, res): Promise<void> {
+  // Wave B Lot 4 (M5): per-handler cache. Closure-scoped so each mount of
+  // the factory has its own snapshot — multiple deep-health routes (e.g.
+  // `/health/deep` + `/healthz/ready`) don't share state and can't cross-
+  // pollute readiness signals. `inFlight` deduplicates concurrent first
+  // requests so 100 parallel pings only trigger one backing run.
+  let cached: { snapshot: DeepHealthSnapshot; expires: number } | null = null
+  let inFlight: Promise<DeepHealthSnapshot> | null = null
+
+  async function buildSnapshot(): Promise<DeepHealthSnapshot> {
     const checks: HealthCheck[] = []
     if (config.db) checks.push(createDbHealthCheck(config.db))
     if (config.checks) checks.push(...config.checks)
@@ -225,7 +249,35 @@ export function createDeepHealthHandler(config: DeepHealthHandlerConfig): Reques
       checks: checksMap,
     }
     if (config.version !== undefined) snapshot.version = config.version
+    return snapshot
+  }
 
-    res.status(overall === 'down' ? 503 : 200).json(snapshot)
+  return async function deepHealthHandler(_req, res): Promise<void> {
+    const now = Date.now()
+
+    if (cacheMs > 0 && cached !== null && cached.expires > now) {
+      const cachedSnapshot = cached.snapshot
+      res.status(cachedSnapshot.status === 'down' ? 503 : 200).json(cachedSnapshot)
+      return
+    }
+
+    let snapshot: DeepHealthSnapshot
+    if (cacheMs > 0) {
+      // Coalesce concurrent first calls onto a single backing run — without
+      // this, a burst of N pings during a cold cache would still fan out to
+      // N parallel checks, defeating the cache's DoS-protection purpose.
+      const pending = inFlight ?? buildSnapshot()
+      inFlight = pending
+      try {
+        snapshot = await pending
+      } finally {
+        if (inFlight === pending) inFlight = null
+      }
+      cached = { snapshot, expires: Date.now() + cacheMs }
+    } else {
+      snapshot = await buildSnapshot()
+    }
+
+    res.status(snapshot.status === 'down' ? 503 : 200).json(snapshot)
   }
 }

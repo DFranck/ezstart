@@ -297,3 +297,188 @@ describe('createDbHealthCheck', () => {
     expect(result).toMatchObject({ status: 'down' })
   })
 })
+
+// ─── Wave B Lot 4 (M5) — cache + rate-limit on /health/deep ───
+describe('M5 — createDeepHealthHandler cache', () => {
+  it('caches the snapshot for the configured TTL (no second invocation within window)', async () => {
+    let invocations = 0
+    const checks: HealthCheck[] = [
+      {
+        name: 'counter',
+        check: () => {
+          invocations += 1
+          return { status: 'ok', details: { invocations } }
+        },
+      },
+    ]
+
+    const app = express()
+    app.get('/health/deep', createDeepHealthHandler({ serviceName: 'myapp', checks, cacheMs: 200 }))
+
+    const first = await request(app).get('/health/deep')
+    expect(first.status).toBe(200)
+    expect(first.body.checks.counter.details.invocations).toBe(1)
+
+    const second = await request(app).get('/health/deep')
+    expect(second.status).toBe(200)
+    expect(second.body.checks.counter.details.invocations).toBe(1)
+
+    const third = await request(app).get('/health/deep')
+    expect(third.body.checks.counter.details.invocations).toBe(1)
+    expect(invocations).toBe(1)
+  })
+
+  it('serves a fresh snapshot after the cache expires', async () => {
+    let invocations = 0
+    const checks: HealthCheck[] = [
+      {
+        name: 'counter',
+        check: () => {
+          invocations += 1
+          return { status: 'ok', details: { invocations } }
+        },
+      },
+    ]
+
+    const app = express()
+    app.get('/health/deep', createDeepHealthHandler({ serviceName: 'myapp', checks, cacheMs: 50 }))
+
+    const first = await request(app).get('/health/deep')
+    expect(first.body.checks.counter.details.invocations).toBe(1)
+
+    await new Promise(resolve => setTimeout(resolve, 80))
+
+    const second = await request(app).get('/health/deep')
+    expect(second.body.checks.counter.details.invocations).toBe(2)
+    expect(invocations).toBe(2)
+  })
+
+  it('coalesces concurrent first calls onto a single backing run (DoS protection)', async () => {
+    let invocations = 0
+    const checks: HealthCheck[] = [
+      {
+        name: 'slow',
+        check: async () => {
+          invocations += 1
+          await new Promise(resolve => setTimeout(resolve, 50))
+          return { status: 'ok', details: { invocations } }
+        },
+      },
+    ]
+
+    const app = express()
+    app.get(
+      '/health/deep',
+      createDeepHealthHandler({ serviceName: 'myapp', checks, cacheMs: 1_000 })
+    )
+
+    // 10 parallel pings against a cold cache — without coalescing each would
+    // trigger its own backing check (10 invocations, 10 DB pool slots).
+    const results = await Promise.all(
+      Array.from({ length: 10 }, () => request(app).get('/health/deep'))
+    )
+
+    for (const res of results) {
+      expect(res.status).toBe(200)
+      expect(res.body.checks.slow.details.invocations).toBe(1)
+    }
+    expect(invocations).toBe(1)
+  })
+
+  it('does NOT cache when cacheMs is 0 (default opt-in)', async () => {
+    let invocations = 0
+    const checks: HealthCheck[] = [
+      {
+        name: 'counter',
+        check: () => {
+          invocations += 1
+          return { status: 'ok' }
+        },
+      },
+    ]
+
+    const app = express()
+    app.get('/health/deep', createDeepHealthHandler({ serviceName: 'myapp', checks }))
+
+    await request(app).get('/health/deep')
+    await request(app).get('/health/deep')
+    await request(app).get('/health/deep')
+    expect(invocations).toBe(3)
+  })
+
+  it('caches 503 (down) responses with the right status code on replay', async () => {
+    let invocations = 0
+    const checks: HealthCheck[] = [
+      {
+        name: 'failing',
+        check: () => {
+          invocations += 1
+          return { status: 'down', message: 'unreachable' }
+        },
+      },
+    ]
+
+    const app = express()
+    app.get('/health/deep', createDeepHealthHandler({ serviceName: 'myapp', checks, cacheMs: 500 }))
+
+    const first = await request(app).get('/health/deep')
+    expect(first.status).toBe(503)
+    expect(first.body.status).toBe('down')
+
+    const second = await request(app).get('/health/deep')
+    expect(second.status).toBe(503)
+    expect(second.body.status).toBe('down')
+    expect(invocations).toBe(1)
+  })
+})
+
+describe('M5 — createBaseApiServer rate-limits /health/deep', () => {
+  it('returns 429 after the strict preset quota (5 req/min) on the same bucket', async () => {
+    const { app } = createBaseApiServer({ port: 0, serviceName: 'myapp' })
+
+    // Burst 6 requests from the same source — the strict preset (5/min)
+    // should let the first 5 through and 429 the 6th.
+    const responses = []
+    for (let i = 0; i < 6; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      responses.push(await request(app).get('/health/deep'))
+    }
+
+    const successful = responses.filter(r => r.status === 200 || r.status === 503)
+    const throttled = responses.filter(r => r.status === 429)
+
+    expect(successful.length).toBe(5)
+    expect(throttled.length).toBe(1)
+    expect(throttled[0]?.body).toMatchObject({
+      success: false,
+      error: { code: 'RATE_LIMIT_EXCEEDED' },
+    })
+  })
+
+  it('cache serves the same snapshot to all 5 allowed requests within 1s', async () => {
+    let invocations = 0
+    const { app } = createBaseApiServer({
+      port: 0,
+      serviceName: 'myapp',
+      deepHealthChecks: [
+        {
+          name: 'counter',
+          check: () => {
+            invocations += 1
+            return { status: 'ok', details: { invocations } }
+          },
+        },
+      ],
+    })
+
+    // Five parallel requests within the cache window — exactly 1 backing run.
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () => request(app).get('/health/deep'))
+    )
+    for (const res of results) {
+      expect(res.status).toBe(200)
+      expect(res.body.checks.counter.details.invocations).toBe(1)
+    }
+    expect(invocations).toBe(1)
+  })
+})
