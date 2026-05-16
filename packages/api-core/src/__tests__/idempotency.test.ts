@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest'
 import {
   createIdempotencyMiddleware,
   createInMemoryIdempotencyStore,
+  type IdempotencyRecord,
   type IdempotencyStore,
 } from '../core/middleware/idempotency.js'
 import { sendError, sendSuccess } from '../core/responses.js'
