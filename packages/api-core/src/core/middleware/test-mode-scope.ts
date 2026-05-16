@@ -41,14 +41,48 @@
  * The schema MUST have an `isTestMode` path. The plugin checks `schema.path
  * ('isTestMode')` and is a no-op when absent — safe to apply globally.
  *
- * ## Aggregations
+ * ## Methods NOT auto-scoped (caller responsibility — L3 / L4 hardening 2026-05-16)
  *
- * Aggregation pipelines are NOT auto-scoped — they have many shapes and a
- * blanket `$match` injection at the top of the pipeline can subtly change
- * grouping semantics. Callers that aggregate across `isTestMode`-scoped
- * collections MUST add their own `{ $match: { isTestMode: ... } }` stage as
- * the FIRST pipeline element (or use the explicit opt-out for cross-mode
- * analytics).
+ * The following Mongoose operations are INTENTIONALLY left unscoped — their
+ * shapes are too varied (aggregation pipelines) or too destructive
+ * (`deleteOne`/`deleteMany`/`bulkWrite`) for a blanket auto-injection to be
+ * safe. Callers MUST add an explicit `isTestMode` filter when test/live
+ * isolation matters:
+ *
+ *   - **`aggregate(pipeline)`** — pipelines have many shapes, and a `$match`
+ *     injection at the top of a pipeline can subtly change grouping /
+ *     `$facet` / `$lookup` semantics. Add `{ $match: { isTestMode: ... } }`
+ *     as the FIRST pipeline element (or use a cross-mode opt-out for
+ *     analytics that legitimately span both partitions).
+ *
+ *   - **`deleteOne(filter)` / `deleteMany(filter)`** — destructive operations
+ *     where a missing scope can wipe live data from a test-key request (or
+ *     vice versa). The plugin refuses to silently inject a filter here
+ *     because a wrong scope inferred from request context could be worse
+ *     than no filter at all (e.g. cron deletes that run outside any request
+ *     frame). Add `{ isTestMode: getRequestMode() === 'test' }` to the
+ *     filter explicitly when the operation runs under a request context.
+ *
+ *   - **`bulkWrite(ops)`** — heterogeneous operations array; each entry
+ *     needs its own filter. Apply per-op scoping.
+ *
+ * **Misuse example**:
+ * ```ts
+ * // ❌ DANGEROUS — a live-key request that hits this path with an attacker-
+ * // controlled `userId` could wipe that user's TEST data (or vice versa)
+ * // because no mode filter is auto-injected.
+ * await Model.deleteMany({ userId: req.params.userId })
+ *
+ * // ✅ SAFE — explicit mode filter matches the auto-scoping the plugin
+ * // would have applied on `findOne`/`updateMany`/etc.
+ * import { getRequestContext } from '@ezstart/api-core'
+ * const mode = getRequestContext()?.derivedMode
+ * await Model.deleteMany({ userId: req.params.userId, isTestMode: mode === 'test' })
+ * ```
+ *
+ * See `.claude/rules/standard-saas-data.md` §4 for the test/live isolation
+ * contract this plugin enforces (and where it deliberately defers to the
+ * caller).
  *
  * ## Generic by design
  *
@@ -133,6 +167,19 @@ function injectTestModeFilter(this: Query<unknown, unknown>, next: (err?: Error)
  * No-op for schemas that do not declare an `isTestMode` path — safe to apply
  * unconditionally if you ever want to wire a global plugin (we currently
  * apply per-model for explicitness).
+ *
+ * ## Auto-scoped operations
+ *
+ * Hooked: `find`, `findOne`, `findOneAndUpdate`, `findOneAndDelete`,
+ * `findOneAndReplace`, `countDocuments`, `distinct`, `updateOne`, `updateMany`.
+ *
+ * ## NOT auto-scoped (caller responsibility)
+ *
+ * `aggregate()`, `deleteOne()`, `deleteMany()`, `bulkWrite()` — see the
+ * module docstring for the rationale and the safe usage pattern. Misuse can
+ * cause cross-mode data destruction (live key wiping test data, or vice
+ * versa). Always pair these with an explicit `isTestMode` filter when the
+ * operation runs under a request context.
  */
 export function testModeScopePlugin(schema: Schema): void {
   if (!schema.path('isTestMode')) return
@@ -146,6 +193,11 @@ export function testModeScopePlugin(schema: Schema): void {
   schema.pre('distinct', injectTestModeFilter)
   schema.pre('updateOne', injectTestModeFilter)
   schema.pre('updateMany', injectTestModeFilter)
-  // NOTE: `deleteOne` / `deleteMany` / `aggregate` are intentionally NOT
-  // auto-scoped — see module docstring.
+  // L3 / L4 (2026-05-16): `deleteOne` / `deleteMany` / `aggregate` /
+  // `bulkWrite` are intentionally NOT auto-scoped. Pipelines are too varied
+  // for a blanket `$match` injection (changes grouping / `$facet` /
+  // `$lookup` semantics), and destructive deletes refuse to inherit a
+  // request-derived mode silently because a wrong scope could be worse than
+  // none (e.g. cron-driven cleanup runs outside any request frame).
+  // See the module docstring for the safe-usage pattern.
 }

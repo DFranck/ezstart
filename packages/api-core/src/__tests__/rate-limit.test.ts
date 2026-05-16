@@ -378,3 +378,78 @@ describe('H4 — explicit disable opt-in', () => {
     }
   })
 })
+
+// ─── M6 hardening: OPTIONS preflight bypass ───
+describe('M6 — OPTIONS bypass in rate-limit', () => {
+  it('100 OPTIONS requests do not consume the rate budget (max=5)', async () => {
+    const app = express()
+    app.use(createRateLimiter({ max: 5, windowMs: 60_000, skipPaths: [] }))
+    // Mount an OPTIONS handler so Express doesn't 404 before the middleware
+    // has a chance to be exercised (express-rate-limit's `skip` runs before
+    // route resolution, so a 404 still hits the limiter — but the test asserts
+    // a 204 response, which requires the route to exist).
+    app.options('/x', (_req, res) => {
+      res.status(204).end()
+    })
+
+    for (let i = 0; i < 100; i += 1) {
+      const r = await request(app).options('/x')
+      expect(r.status).toBe(204)
+    }
+  })
+
+  it('GET still hits the budget normally (max=2)', async () => {
+    const app = express()
+    app.use(createRateLimiter({ max: 2, windowMs: 60_000, skipPaths: [] }))
+    app.get('/x', (_req, res) => res.json({ ok: true }))
+
+    const ok1 = await request(app).get('/x')
+    const ok2 = await request(app).get('/x')
+    const blocked = await request(app).get('/x')
+    expect(ok1.status).toBe(200)
+    expect(ok2.status).toBe(200)
+    expect(blocked.status).toBe(429)
+  })
+
+  it('OPTIONS preflights do not consume budget that GET later relies on', async () => {
+    // Realistic attack scenario: attacker spams OPTIONS to lock out a user.
+    // Post-M6, the user's GET budget is untouched after 100 OPTIONS.
+    const app = express()
+    app.use(createRateLimiter({ max: 2, windowMs: 60_000, skipPaths: [] }))
+    app.get('/x', (_req, res) => res.json({ ok: true }))
+    app.options('/x', (_req, res) => res.status(204).end())
+
+    // Attacker burns 100 OPTIONS
+    for (let i = 0; i < 100; i += 1) {
+      await request(app).options('/x')
+    }
+
+    // Victim still has the full GET budget
+    const ok1 = await request(app).get('/x')
+    const ok2 = await request(app).get('/x')
+    const blocked = await request(app).get('/x')
+    expect(ok1.status).toBe(200)
+    expect(ok2.status).toBe(200)
+    expect(blocked.status).toBe(429)
+  })
+
+  it('OPTIONS bypass also applies to strict preset', async () => {
+    const app = express()
+    app.use('/login', createStrictRateLimiter())
+    app.options('/login', (_req, res) => res.status(204).end())
+    app.post('/login', (_req, res) => res.json({ ok: true }))
+
+    // 50 OPTIONS preflights (limiter is 5/min) — all should pass.
+    for (let i = 0; i < 50; i += 1) {
+      const r = await request(app).options('/login')
+      expect(r.status).toBe(204)
+    }
+    // The POST budget (5/min) is still intact.
+    for (let i = 0; i < 5; i += 1) {
+      const r = await request(app).post('/login')
+      expect(r.status).toBe(200)
+    }
+    const blocked = await request(app).post('/login')
+    expect(blocked.status).toBe(429)
+  })
+})

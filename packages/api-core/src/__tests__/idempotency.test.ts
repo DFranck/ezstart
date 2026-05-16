@@ -4,7 +4,7 @@
 
 import express from 'express'
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   createIdempotencyMiddleware,
   createInMemoryIdempotencyStore,
@@ -530,5 +530,85 @@ describe('H7 — replay full response headers (Set-Cookie, Location, custom)', (
     expect(second.headers['content-type']).toBe('application/xml; charset=utf-8')
     expect(second.headers['content-type']).toBe(first.headers['content-type'])
     expect(second.text).toBe(first.text)
+  })
+})
+
+/**
+ * L7 — In-memory idempotency store warns at boot when paired with
+ * `NODE_ENV=production`. Multi-replica deploys silently break the Stripe
+ * exactly-once contract because each Node process has its own Map; the
+ * factory surfaces this footgun via a one-shot logger.warn that hits the
+ * configured error tracker the moment one is wired up.
+ *
+ * See `tmp/audit-api-core-hacker.md` §L7.
+ */
+describe('L7 — In-memory idempotency prod warning', () => {
+  const originalNodeEnv = process.env.NODE_ENV
+
+  afterEach(() => {
+    // Always restore NODE_ENV so accidental leaks don't poison neighboring
+    // suites (other tests assume `test` and would suddenly hit the warning).
+    if (originalNodeEnv === undefined) {
+      delete process.env.NODE_ENV
+    } else {
+      process.env.NODE_ENV = originalNodeEnv
+    }
+  })
+
+  it('warns when using the default in-memory store in NODE_ENV=production', () => {
+    const logger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    }
+    process.env.NODE_ENV = 'production'
+    createIdempotencyMiddleware({ logger })
+
+    expect(logger.warn).toHaveBeenCalledTimes(1)
+    const [msg] = logger.warn.mock.calls[0] as [string, unknown?]
+    expect(msg).toContain('horizontal scaling')
+    expect(msg).toContain('IdempotencyStore')
+  })
+
+  it('silent when a custom store is injected (even in production)', () => {
+    const logger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    }
+    const customStore: IdempotencyStore = {
+      get: () => null,
+      set: () => undefined,
+    }
+    process.env.NODE_ENV = 'production'
+    createIdempotencyMiddleware({ store: customStore, logger })
+
+    expect(logger.warn).not.toHaveBeenCalled()
+  })
+
+  it('silent in non-production env (development, test, staging)', () => {
+    const logger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    }
+    for (const env of ['development', 'test', 'staging', undefined] as const) {
+      logger.warn.mockClear()
+      if (env === undefined) delete process.env.NODE_ENV
+      else process.env.NODE_ENV = env
+      createIdempotencyMiddleware({ logger })
+      expect(logger.warn).not.toHaveBeenCalled()
+    }
+  })
+
+  it('silent when no logger is injected (default silentLogger never emits)', () => {
+    // Even in production the factory must NOT throw if the caller didn't wire
+    // a logger — the silent default just swallows the warning. The L7 contract
+    // is "warn if both production + default store + logger provided".
+    process.env.NODE_ENV = 'production'
+    expect(() => createIdempotencyMiddleware()).not.toThrow()
   })
 })

@@ -20,6 +20,17 @@
  * out explicitly via the new `disabled: true` option. There is no env-var
  * escape hatch — disabling is always intentional and visible at the call
  * site.
+ *
+ * ### CORS preflight bypass (M6 fix — 2026-05-16)
+ *
+ * `OPTIONS` requests are ALWAYS skipped — they are CORS preflights, not real
+ * user traffic. Counting them against the quota lets an attacker burn a
+ * victim's budget by triggering preflight floods (a browser making a single
+ * cross-origin POST emits 1 OPTIONS + 1 POST = 2 requests against the limit).
+ * Worse, an attacker who controls a page the victim visits can spam OPTIONS
+ * via `fetch()` and lock out the victim from auth endpoints. Skipping OPTIONS
+ * removes that vector with zero security cost — preflights are non-mutating
+ * by HTTP semantics and don't reach business handlers.
  */
 
 import type { Request } from 'express'
@@ -159,8 +170,16 @@ export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequ
     // protection, billing abuse: all wide open with no boot signal. Callers
     // that need to disable the limiter (typically test suites whose supertest
     // fixtures all share the loopback IP) must opt in via `disabled: true`.
+    //
+    // M6 hardening (2026-05-16): CORS preflight `OPTIONS` requests bypass the
+    // limiter unconditionally. They are not real user traffic and counting
+    // them lets an attacker burn through a victim's quota by spamming
+    // preflights (a single cross-origin POST = 1 OPTIONS + 1 POST = 2 against
+    // the budget). Skipping OPTIONS has no security cost — preflights are
+    // non-mutating by HTTP semantics and never reach business handlers.
     skip: req => {
       if (disabled) return true
+      if (req.method === 'OPTIONS') return true
       return skipPaths.some(path => req.path === path)
     },
     handler: (_req, res) => {

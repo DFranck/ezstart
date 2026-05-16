@@ -38,6 +38,14 @@
  * env-var escape hatch — disabling is always intentional and visible at the
  * call site.
  *
+ * ### CORS preflight bypass (M6 fix — 2026-05-16)
+ *
+ * `OPTIONS` requests are ALWAYS skipped — they are CORS preflights, not real
+ * user traffic. Counting them lets an attacker burn through a victim's quota
+ * by spamming preflights (a cross-origin POST emits 1 OPTIONS + 1 POST = 2
+ * against the budget). Skipping OPTIONS has no security cost — preflights
+ * are non-mutating by HTTP semantics and never reach business handlers.
+ *
  * @example
  * ```ts
  * import { createKeyHashRateLimiter } from '@ezstart/api-core'
@@ -188,6 +196,14 @@ export function createKeyHashRateLimiter(opts: KeyHashRateLimiterOptions): KeyHa
 
   const middleware: RequestHandler = (req, res, next) => {
     if (disabled) {
+      next()
+      return
+    }
+
+    // M6 (2026-05-16): CORS preflights bypass the limiter unconditionally.
+    // Counting them lets an attacker burn the victim's quota via preflight
+    // floods. OPTIONS is non-mutating by HTTP semantics.
+    if (req.method === 'OPTIONS') {
       next()
       return
     }

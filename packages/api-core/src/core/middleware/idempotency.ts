@@ -22,6 +22,8 @@
  */
 
 import type { NextFunction, Request, RequestHandler, Response } from 'express'
+import { silentLogger } from '../internal/logger.js'
+import type { ServerLogger } from '../types.js'
 import { sendError } from '../responses.js'
 
 /**
@@ -77,6 +79,12 @@ export type IdempotencyMiddlewareConfig = {
    * Persistent store. Defaults to {@link createInMemoryIdempotencyStore}
    * with a 10k-entry LRU and 24h TTL — fine for single-instance dev /
    * staging. Multi-replica production MUST inject Redis / Mongo.
+   *
+   * **L7 warning (2026-05-16)**: when the default in-memory store is used
+   * with `NODE_ENV === 'production'`, the factory emits a one-shot
+   * `logger.warn` at boot time to surface the multi-pod inconsistency
+   * footgun. Inject a shared `store` to silence the warning and get
+   * cross-replica idempotency.
    */
   store?: IdempotencyStore
   /**
@@ -103,6 +111,19 @@ export type IdempotencyMiddlewareConfig = {
    * the middleware so legacy clients keep working.
    */
   required?: boolean
+  /**
+   * Optional structured logger. Defaults to a silent no-op (api-core
+   * convention — callers opt-in to observability by injecting their own).
+   * Used exclusively to emit the L7 production warning when the default
+   * in-memory store is paired with `NODE_ENV === 'production'`.
+   *
+   * @example
+   * ```ts
+   * import { logger } from '@ezstart/logger/server'
+   * createIdempotencyMiddleware({ logger })
+   * ```
+   */
+  logger?: ServerLogger
 }
 
 /**
@@ -118,10 +139,20 @@ export type InMemoryStoreConfig = {
 /**
  * In-memory LRU store with TTL eviction.
  *
- * Single-process only — if you scale beyond one replica, swap this out
- * for a shared Redis or Mongo implementation. The LRU is implemented
- * with a `Map` (which preserves insertion order in V8) — every `get`
- * hit refreshes the entry by deleting + re-inserting it.
+ * **DO NOT use in production with > 1 replica.** Each Node process has its
+ * own Map — the same `Idempotency-Key` sent to different replicas hits a
+ * fresh handler in each, re-executing the side effects N times (cf. Stripe
+ * idempotency contract: exactly-once across the cluster). Multi-replica
+ * production deployments MUST inject a shared store backed by Redis,
+ * Mongo, or any other cross-replica primitive.
+ *
+ * {@link createIdempotencyMiddleware} surfaces this footgun via a one-shot
+ * `logger.warn` at boot when `NODE_ENV === 'production'` and the default
+ * store is used — see the L7 hardening notes there.
+ *
+ * Single-process dev / staging / low-volume self-hosted use cases are fine.
+ * The LRU is implemented with a `Map` (V8 preserves insertion order) —
+ * every `get` hit refreshes the entry by deleting + re-inserting it.
  *
  * @example
  * ```ts
@@ -323,12 +354,34 @@ function instrumentResponse(
 export function createIdempotencyMiddleware(
   config: IdempotencyMiddlewareConfig = {}
 ): RequestHandler {
+  const usingDefaultStore = config.store === undefined
   const store = config.store ?? createInMemoryIdempotencyStore()
   const methods = (config.methods ?? DEFAULT_METHODS).map(m => m.toUpperCase())
   const headerName = config.headerName ?? DEFAULT_HEADER
   const headerLower = headerName.toLowerCase()
   const required = config.required ?? false
   const hashRequest = config.hashRequest
+  const logger = config.logger ?? silentLogger
+
+  // L7 hardening (2026-05-16): emit a one-shot warning at construction time
+  // when the in-memory default store is paired with `NODE_ENV=production`.
+  // The in-memory Map is per-process, so multi-replica deploys (Railway HA,
+  // Vercel Edge with N instances, k8s ReplicaSets) silently re-execute side
+  // effects when the same Idempotency-Key lands on different pods. Stripe's
+  // exactly-once contract requires a shared store — Redis / Mongo / etc.
+  //
+  // The warning is fire-and-forget: it surfaces in Sentry / Better Stack / log
+  // sinks the moment an operator activates them, without forcing a runtime
+  // failure. Callers who knowingly run a single-replica prod can suppress by
+  // injecting any store (even a thin wrapper around the in-memory one).
+  if (usingDefaultStore && process.env.NODE_ENV === 'production') {
+    logger.warn(
+      '[api-core] createIdempotencyMiddleware is using the default in-memory ' +
+        'store in production. This store does NOT share state across replicas — ' +
+        'horizontal scaling will break idempotency guarantees. Inject a Redis or ' +
+        'Mongo-backed IdempotencyStore for multi-pod safety.'
+    )
+  }
 
   return async function idempotencyMiddleware(
     req: Request,
