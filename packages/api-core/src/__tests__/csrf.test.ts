@@ -208,3 +208,143 @@ describe('createCsrfMiddleware — timing-safe compare (Wave B Lot 1)', () => {
     expect(res.status).toBe(403)
   })
 })
+
+/**
+ * Wave B Lot 4 B4-E — sameSite/secure/domain configurable.
+ *
+ * Standard reference: .claude/rules/standard-saas-security.md §2
+ * ("Session cookies httpOnly + Secure + SameSite=Lax") and L6 in the
+ * api-core hacker audit (sameSite='strict' broke cross-origin SSO links).
+ *
+ * Backward-compat note: the default sameSite changed from 'strict' to 'lax'
+ * to match industry norms (Chromium/Firefox/Safari since 2020). Apps that
+ * never receive users via cross-origin links can opt back into 'strict'.
+ */
+describe('createCsrfMiddleware — sameSite/secure/domain (Wave B Lot 4 B4-E)', () => {
+  function buildWith(options?: Parameters<typeof createCsrfMiddleware>[0]) {
+    const app = express()
+    app.use(parseCookies)
+    const csrf = createCsrfMiddleware(options)
+    app.use(csrf.generateToken)
+    app.use(csrf.verifyToken)
+    app.get('/api/data', (_req, res) => res.json({ ok: true }))
+    return app
+  }
+
+  it("defaults to sameSite='lax'", async () => {
+    const app = buildWith()
+    const res = await request(app).get('/api/data')
+    const cookie = extractSetCookie(res, 'csrf-token')
+    expect(cookie).toBeDefined()
+    expect(cookie).toContain('SameSite=Lax')
+    expect(cookie).not.toContain('SameSite=Strict')
+  })
+
+  it("respects sameSite='strict' when configured", async () => {
+    const app = buildWith({ sameSite: 'strict' })
+    const res = await request(app).get('/api/data')
+    const cookie = extractSetCookie(res, 'csrf-token')
+    expect(cookie).toBeDefined()
+    expect(cookie).toContain('SameSite=Strict')
+  })
+
+  it("respects sameSite='none' + secure=true", async () => {
+    const app = buildWith({ sameSite: 'none', secure: true })
+    const res = await request(app).get('/api/data')
+    const cookie = extractSetCookie(res, 'csrf-token')
+    expect(cookie).toBeDefined()
+    expect(cookie).toContain('SameSite=None')
+    expect(cookie).toContain('Secure')
+  })
+
+  it("throws when sameSite='none' is paired with secure=false", () => {
+    expect(() => createCsrfMiddleware({ sameSite: 'none', secure: false })).toThrow(
+      /requires secure=true/i
+    )
+  })
+
+  it("throws when sameSite='none' is paired with NODE_ENV !== 'production' (default secure=false)", () => {
+    const originalEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'development'
+    try {
+      expect(() => createCsrfMiddleware({ sameSite: 'none' })).toThrow(/requires secure=true/i)
+    } finally {
+      process.env.NODE_ENV = originalEnv
+    }
+  })
+
+  it('Secure flag defaults to true when NODE_ENV=production', async () => {
+    const originalEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    try {
+      const app = buildWith()
+      const res = await request(app).get('/api/data')
+      const cookie = extractSetCookie(res, 'csrf-token')
+      expect(cookie).toBeDefined()
+      expect(cookie).toContain('Secure')
+    } finally {
+      process.env.NODE_ENV = originalEnv
+    }
+  })
+
+  it('Secure flag defaults to false outside production', async () => {
+    const originalEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'development'
+    try {
+      const app = buildWith()
+      const res = await request(app).get('/api/data')
+      const cookie = extractSetCookie(res, 'csrf-token')
+      expect(cookie).toBeDefined()
+      expect(cookie).not.toContain('Secure')
+    } finally {
+      process.env.NODE_ENV = originalEnv
+    }
+  })
+
+  it('explicit secure=true overrides NODE_ENV default', async () => {
+    const originalEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'development'
+    try {
+      const app = buildWith({ secure: true })
+      const res = await request(app).get('/api/data')
+      const cookie = extractSetCookie(res, 'csrf-token')
+      expect(cookie).toBeDefined()
+      expect(cookie).toContain('Secure')
+    } finally {
+      process.env.NODE_ENV = originalEnv
+    }
+  })
+
+  it('domain option emits the Domain= attribute', async () => {
+    const app = buildWith({ domain: 'localhost' })
+    const res = await request(app).get('/api/data')
+    const cookie = extractSetCookie(res, 'csrf-token')
+    expect(cookie).toBeDefined()
+    expect(cookie).toContain('Domain=localhost')
+  })
+
+  it('custom cookieName changes both Set-Cookie and verify lookup', async () => {
+    const app = express()
+    app.use(parseCookies)
+    const csrf = createCsrfMiddleware({ cookieName: 'my-xsrf' })
+    app.use(csrf.generateToken)
+    app.use(csrf.verifyToken)
+    app.get('/data', (_req, res) => res.json({ ok: true }))
+    app.post('/data', (_req, res) => res.json({ ok: true }))
+
+    const getRes = await request(app).get('/data')
+    const cookie = extractSetCookie(getRes, 'my-xsrf')
+    expect(cookie).toBeDefined()
+    expect(getRes.headers['x-csrf-token']).toBeDefined()
+
+    // POST roundtrip with the custom-named cookie + matching header succeeds
+    const token = getRes.headers['x-csrf-token'] as string
+    const cookies = getRes.headers['set-cookie']
+    const cookieStr = Array.isArray(cookies) ? cookies.join('; ') : String(cookies)
+    const postRes = await request(app)
+      .post('/data')
+      .set('Cookie', cookieStr)
+      .set('X-CSRF-Token', token)
+    expect(postRes.status).toBe(200)
+  })
+})

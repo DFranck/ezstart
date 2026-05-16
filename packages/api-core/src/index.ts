@@ -97,7 +97,7 @@ export {
   type TenantScopeLogger,
   type TenantScopeOptions,
 } from './core/middleware/tenant-scope.js'
-export { createCsrfMiddleware } from './core/middleware/csrf.js'
+export { createCsrfMiddleware, type CreateCsrfMiddlewareOptions } from './core/middleware/csrf.js'
 export {
   attachDerivedMode,
   resolveDerivedMode,
@@ -111,6 +111,7 @@ export {
 export { ttlPlugin, type TTLPluginOptions } from './core/middleware/ttl.js'
 export {
   createErrorHandler,
+  sanitizeErrorForLog,
   type ErrorHandlerConfig,
   type ErrorPersistCallback,
 } from './core/middleware/error-handler.js'
@@ -209,7 +210,9 @@ export {
   createApiServer,
   createEzstartAuth,
   createEzstartServer,
+  isValidObjectId,
   type ApiServerOptions,
+  type CreateApiAuthOptions,
   type EzstartServerOptions,
 } from './create-api-server.js'
 export { connectToMongo } from './connect-to-mongo.js'

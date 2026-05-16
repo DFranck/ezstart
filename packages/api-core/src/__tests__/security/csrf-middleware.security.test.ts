@@ -65,9 +65,26 @@ describe('CSRF middleware — security', () => {
       expect(csrfCookie).not.toContain('HttpOnly')
     })
 
-    it('csrf-token cookie has SameSite=Strict', async () => {
+    it('csrf-token cookie defaults to SameSite=Lax (Wave B Lot 4 B4-E)', async () => {
+      // Default changed strict → lax to support cross-origin SSO link clicks
+      // (industry default; matches Chromium/Firefox/Safari since 2020).
       const app = buildApp()
       const res = await request(app).get('/api/data')
+      const csrfCookie = extractSetCookie(res, 'csrf-token')
+      expect(csrfCookie).toBeDefined()
+      expect(csrfCookie).toContain('SameSite=Lax')
+      expect(csrfCookie).not.toContain('SameSite=Strict')
+    })
+
+    it('csrf-token cookie respects SameSite=Strict when explicitly configured', async () => {
+      const app = express()
+      app.use(parseCookies)
+      const csrf = createCsrfMiddleware({ sameSite: 'strict' })
+      app.use(csrf.generateToken)
+      app.use(csrf.verifyToken)
+      app.get('/test', (_req, res) => res.json({ ok: true }))
+
+      const res = await request(app).get('/test')
       const csrfCookie = extractSetCookie(res, 'csrf-token')
       expect(csrfCookie).toBeDefined()
       expect(csrfCookie).toContain('SameSite=Strict')
@@ -116,10 +133,8 @@ describe('CSRF middleware — security', () => {
       const cookies = getRes.headers['set-cookie']
       const cookieStr = Array.isArray(cookies) ? cookies.join('; ') : String(cookies)
 
-      const res = await request(app)
-        .post('/api/data')
-        .set('Cookie', cookieStr)
-        // No X-CSRF-Token header
+      const res = await request(app).post('/api/data').set('Cookie', cookieStr)
+      // No X-CSRF-Token header
       expect(res.status).toBe(403)
     })
 
@@ -128,10 +143,8 @@ describe('CSRF middleware — security', () => {
       const getRes = await request(app).get('/api/data')
       const token = getRes.headers['x-csrf-token'] as string
 
-      const res = await request(app)
-        .post('/api/data')
-        .set('X-CSRF-Token', token)
-        // No Cookie header
+      const res = await request(app).post('/api/data').set('X-CSRF-Token', token)
+      // No Cookie header
       expect(res.status).toBe(403)
     })
   })
