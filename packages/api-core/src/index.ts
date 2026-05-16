@@ -90,6 +90,13 @@ export {
   type UnifiedAuthScope,
   type UnifiedJwtResult,
 } from './core/middleware/unified-auth.js'
+export {
+  createTenantScopeMiddleware,
+  type TenantApplicationLoader,
+  type TenantApplicationShape,
+  type TenantScopeLogger,
+  type TenantScopeOptions,
+} from './core/middleware/tenant-scope.js'
 export { createCsrfMiddleware } from './core/middleware/csrf.js'
 export {
   attachDerivedMode,

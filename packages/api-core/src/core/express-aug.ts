@@ -34,6 +34,23 @@ declare global {
        * Defaults to `'live'` for cookie-auth dashboard requests.
        */
       derivedMode?: DerivedMode
+      /**
+       * Populated by the consumer's API-key middleware when the request is
+       * authenticated via `X-API-Key` / `Authorization: ApiKey ...`.
+       *
+       * Holds the Application id referenced by the API key (always the key
+       * owner's Application — already validated upstream). Consumed by
+       * `createTenantScopeMiddleware({ source: 'apiKey' })` as a pre-trusted
+       * tenant id (no further ownership check needed).
+       */
+      apiKeyApplicationId?: string
+      /**
+       * Populated by `createTenantScopeMiddleware` after the source field
+       * has been resolved AND (when applicable) ownership has been verified
+       * against `req.userId`. Always a tenant id the authenticated caller
+       * is allowed to act on.
+       */
+      applicationId?: string
     }
   }
 }
