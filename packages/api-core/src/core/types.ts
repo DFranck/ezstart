@@ -202,6 +202,40 @@ export type ServerConfig = {
    * caller mounts its own helmet config — most consumers should leave it on.
    */
   security?: boolean
+  /**
+   * Number of proxy hops to trust when resolving `req.ip` from
+   * `X-Forwarded-For`. Passed straight to Express `app.set('trust proxy', ...)`.
+   *
+   * Precedence (highest → lowest):
+   * 1. `config.trustProxyHops` (this field)
+   * 2. `process.env.TRUST_PROXY_HOPS` (numeric or literal `'true'`)
+   * 3. Default `2` — matches the current Railway edge → Fastly CDN topology
+   *
+   * Set `true` to trust ALL hops (dangerous — only for tests behind a known
+   * LB). Set `0` to disable proxy trust entirely (`req.ip` becomes the direct
+   * socket address). When the env var fails to parse as a finite non-negative
+   * number, the core logs an error and falls back to `2`.
+   *
+   * @example
+   * ```ts
+   * createBaseApiServer({ port: 3000, trustProxyHops: 3 }) // Cloudflare + Fastly + Railway
+   * ```
+   */
+  trustProxyHops?: number | boolean
+  /**
+   * Suppresses the production-mode warning emitted when Helmet's
+   * `Content-Security-Policy` is disabled (the api-core default — Next.js
+   * consumers ship their own CSP via `vercel.json` or middleware).
+   *
+   * Set to `true` ONLY when the caller is intentionally running without a
+   * CSP (e.g. an internal-only API behind a strict allowlist). Leaving the
+   * warning enabled is the safer default — it surfaces an operator footgun
+   * when a new service forgets to layer a CSP on top.
+   *
+   * Skipped automatically when `NODE_ENV !== 'production'` to keep vitest /
+   * dev output quiet.
+   */
+  disableCspWarning?: boolean
 }
 
 /**

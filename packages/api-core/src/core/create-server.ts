@@ -91,11 +91,38 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
   // route relies on mixed-case path matching.
   app.set('case sensitive routing', true)
 
-  // Trust 2 proxy hops: Railway edge → Fastly CDN. With this Express picks the
-  // real client IP from X-Forwarded-For (last 2 IPs are stripped as trusted),
-  // not the LB IP. CRITICAL for accurate per-IP rate limiting on anonymous routes.
-  // Setting `true` would trust ALL hops including potentially-forged headers.
-  app.set('trust proxy', 2)
+  // Trust proxy hops — defaults to 2 (Railway edge → Fastly CDN). Express picks
+  // the real client IP from X-Forwarded-For (last N IPs are stripped as
+  // trusted), not the LB IP. CRITICAL for accurate per-IP rate limiting on
+  // anonymous routes.
+  //
+  // Wave B Lot 3 (H5): hop count is now env-configurable to survive infra
+  // changes (adding Cloudflare → 3 hops, removing Fastly → 1 hop). A bad
+  // hardcoded value silently lets attackers spoof `req.ip` via crafted XFF.
+  //
+  // Precedence: `config.trustProxyHops` > `TRUST_PROXY_HOPS` env > 2.
+  // - Numeric (`'2'`, `'3'`, `'0'`) → trust that many rightmost hops.
+  // - `'true'` → trust ALL hops (dangerous, only for tests behind known LBs).
+  // - `0` → disable trust entirely (`req.ip` = direct socket address).
+  // - Unparseable / negative → log error, fall back to 2.
+  const trustProxyEnv = process.env.TRUST_PROXY_HOPS
+  let trustProxy: number | boolean = 2
+  if (config.trustProxyHops !== undefined) {
+    trustProxy = config.trustProxyHops
+  } else if (trustProxyEnv !== undefined) {
+    if (trustProxyEnv === 'true') {
+      trustProxy = true
+    } else {
+      const parsed = Number.parseInt(trustProxyEnv, 10)
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        trustProxy = parsed
+      } else {
+        logger.error(`[api-core] Invalid TRUST_PROXY_HOPS=${trustProxyEnv}, falling back to 2`)
+        trustProxy = 2
+      }
+    }
+  }
+  app.set('trust proxy', trustProxy)
 
   // Security headers (Helmet). Opt-out via `config.security: false` for
   // services that need to set their own helmet config (rare). Defaults are
@@ -108,6 +135,23 @@ export function createBaseApiServer(config: ServerConfig): ApiServer {
         contentSecurityPolicy: false,
       })
     )
+
+    // Wave B Lot 3 (H8): Helmet's CSP is intentionally disabled — Next.js
+    // consumers ship per-route CSPs via `vercel.json` / middleware, and API
+    // services typically need none. BUT if a new service forgets to layer
+    // one on top, defense-in-depth against XSS (Swagger UI schema injection,
+    // adjacent static content, etc.) is silently lost.
+    //
+    // Emit a single warn at boot when running in production unless the
+    // caller explicitly acknowledges via `disableCspWarning: true`. Skipped
+    // in non-prod to keep dev / vitest output quiet.
+    if (process.env.NODE_ENV === 'production' && config.disableCspWarning !== true) {
+      logger.warn(
+        '[api-core] Content-Security-Policy disabled and no override detected. ' +
+          'XSS mitigation reduced. Mount a CSP middleware in the consumer app ' +
+          '(helmet.contentSecurityPolicy) or set `disableCspWarning: true` if intentional.'
+      )
+    }
   }
 
   // CORS — 3-tier policy (see .claude/rules/standard-saas-cors.md).

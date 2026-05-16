@@ -9,7 +9,7 @@
 
 import express from 'express'
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBaseApiServer } from '../../core/create-server.js'
 
 describe('Server factory — security', () => {
@@ -175,6 +175,188 @@ describe('Server factory — security', () => {
       expect(res.status).toBe(200)
       // The body should be a raw Buffer, not parsed JSON
       expect(Buffer.isBuffer(rawBody)).toBe(true)
+    })
+  })
+
+  // ─── H5: TRUST_PROXY_HOPS env var + config.trustProxyHops override ───
+  describe('H5 — TRUST_PROXY_HOPS env var + config override', () => {
+    const originalEnv = process.env.TRUST_PROXY_HOPS
+
+    beforeEach(() => {
+      delete process.env.TRUST_PROXY_HOPS
+    })
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.TRUST_PROXY_HOPS
+      } else {
+        process.env.TRUST_PROXY_HOPS = originalEnv
+      }
+    })
+
+    it('defaults to 2 hops when neither env nor config is set', () => {
+      const { app } = createBaseApiServer({ port: 0 })
+      expect(app.get('trust proxy')).toBe(2)
+    })
+
+    it('respects TRUST_PROXY_HOPS=4 (Cloudflare + Fastly + Railway edge + extra hop)', () => {
+      process.env.TRUST_PROXY_HOPS = '4'
+      const { app } = createBaseApiServer({ port: 0 })
+      expect(app.get('trust proxy')).toBe(4)
+    })
+
+    it('respects TRUST_PROXY_HOPS=true (trust ALL hops — test/LB only)', () => {
+      process.env.TRUST_PROXY_HOPS = 'true'
+      const { app } = createBaseApiServer({ port: 0 })
+      expect(app.get('trust proxy')).toBe(true)
+    })
+
+    it('respects TRUST_PROXY_HOPS=0 (disable proxy trust entirely)', () => {
+      process.env.TRUST_PROXY_HOPS = '0'
+      const { app } = createBaseApiServer({ port: 0 })
+      expect(app.get('trust proxy')).toBe(0)
+    })
+
+    it('logs error and falls back to 2 when env var is unparseable', () => {
+      process.env.TRUST_PROXY_HOPS = 'banana'
+      const logger = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+      }
+      const { app } = createBaseApiServer({ port: 0, logger })
+      expect(app.get('trust proxy')).toBe(2)
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid TRUST_PROXY_HOPS=banana')
+      )
+    })
+
+    it('logs error and falls back to 2 when env var is negative', () => {
+      process.env.TRUST_PROXY_HOPS = '-1'
+      const logger = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+      }
+      const { app } = createBaseApiServer({ port: 0, logger })
+      expect(app.get('trust proxy')).toBe(2)
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid TRUST_PROXY_HOPS=-1')
+      )
+    })
+
+    it('config.trustProxyHops overrides TRUST_PROXY_HOPS env', () => {
+      process.env.TRUST_PROXY_HOPS = '5'
+      const { app } = createBaseApiServer({ port: 0, trustProxyHops: 1 })
+      expect(app.get('trust proxy')).toBe(1)
+    })
+
+    it('config.trustProxyHops=true wins over env=2', () => {
+      process.env.TRUST_PROXY_HOPS = '2'
+      const { app } = createBaseApiServer({ port: 0, trustProxyHops: true })
+      expect(app.get('trust proxy')).toBe(true)
+    })
+
+    it('config.trustProxyHops=0 wins over default (disable trust)', () => {
+      const { app } = createBaseApiServer({ port: 0, trustProxyHops: 0 })
+      expect(app.get('trust proxy')).toBe(0)
+    })
+  })
+
+  // ─── H8: CSP missing warning in production ───
+  describe('H8 — CSP missing warning', () => {
+    const originalNodeEnv = process.env.NODE_ENV
+
+    afterEach(() => {
+      if (originalNodeEnv === undefined) {
+        delete process.env.NODE_ENV
+      } else {
+        process.env.NODE_ENV = originalNodeEnv
+      }
+    })
+
+    it('warns when NODE_ENV=production and no disableCspWarning override', () => {
+      process.env.NODE_ENV = 'production'
+      const logger = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+      }
+      createBaseApiServer({ port: 0, serviceName: 'svc', logger })
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Content-Security-Policy'))
+    })
+
+    it('silent when disableCspWarning: true (caller acknowledged)', () => {
+      process.env.NODE_ENV = 'production'
+      const logger = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+      }
+      createBaseApiServer({
+        port: 0,
+        serviceName: 'svc',
+        logger,
+        disableCspWarning: true,
+      })
+      const cspWarnCalls = logger.warn.mock.calls.filter(call =>
+        String(call[0]).includes('Content-Security-Policy')
+      )
+      expect(cspWarnCalls).toHaveLength(0)
+    })
+
+    it('silent in non-production env (dev noise prevention)', () => {
+      process.env.NODE_ENV = 'development'
+      const logger = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+      }
+      createBaseApiServer({ port: 0, serviceName: 'svc', logger })
+      const cspWarnCalls = logger.warn.mock.calls.filter(call =>
+        String(call[0]).includes('Content-Security-Policy')
+      )
+      expect(cspWarnCalls).toHaveLength(0)
+    })
+
+    it('silent in test env (vitest quiet)', () => {
+      process.env.NODE_ENV = 'test'
+      const logger = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+      }
+      createBaseApiServer({ port: 0, serviceName: 'svc', logger })
+      const cspWarnCalls = logger.warn.mock.calls.filter(call =>
+        String(call[0]).includes('Content-Security-Policy')
+      )
+      expect(cspWarnCalls).toHaveLength(0)
+    })
+
+    it('silent when security: false (caller owns helmet entirely)', () => {
+      process.env.NODE_ENV = 'production'
+      const logger = {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+      }
+      createBaseApiServer({
+        port: 0,
+        serviceName: 'svc',
+        logger,
+        security: false,
+      })
+      const cspWarnCalls = logger.warn.mock.calls.filter(call =>
+        String(call[0]).includes('Content-Security-Policy')
+      )
+      expect(cspWarnCalls).toHaveLength(0)
     })
   })
 })
