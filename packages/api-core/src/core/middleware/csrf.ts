@@ -41,9 +41,20 @@ export function createCsrfMiddleware() {
       if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next()
       const cookieToken = req.cookies?.['csrf-token'] as string | undefined
       const headerToken = req.headers['x-csrf-token'] as string | undefined
-      if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+      if (!cookieToken || !headerToken) {
         return sendError(res, 'CSRF token mismatch', 403)
       }
+
+      // Timing-safe compare per .claude/rules/standard-saas-security.md §6.
+      // crypto.timingSafeEqual throws if the buffers have different lengths,
+      // so length-check first (different lengths = always mismatch, no info
+      // leak because length is observable on the wire anyway via Content-Length).
+      const cookieBuf = Buffer.from(cookieToken)
+      const headerBuf = Buffer.from(headerToken)
+      if (cookieBuf.length !== headerBuf.length || !crypto.timingSafeEqual(cookieBuf, headerBuf)) {
+        return sendError(res, 'CSRF token mismatch', 403)
+      }
+
       next()
     },
   }

@@ -119,3 +119,92 @@ describe('createCsrfMiddleware', () => {
     expect(headRes.status).toBe(200)
   })
 })
+
+/**
+ * Wave B Lot 1 — Timing-safe compare regression suite.
+ *
+ * Standard reference: .claude/rules/standard-saas-security.md §6
+ * ("Timing-safe comparison ... JAMAIS `===` sur signatures").
+ *
+ * Builds a minimal app where the middleware-chain runs verifyToken DIRECTLY
+ * (without generateToken in front), so we control both cookie and header
+ * tokens explicitly and can assert behavior on length-mismatch and same-length
+ * mismatch cases.
+ */
+describe('createCsrfMiddleware — timing-safe compare (Wave B Lot 1)', () => {
+  function buildVerifyOnlyApp() {
+    const app = express()
+    app.use(parseCookies)
+    const csrf = createCsrfMiddleware()
+    // verifyToken ONLY — no generateToken overwriting incoming state.
+    app.use(csrf.verifyToken)
+    app.get('/x', (_req, res) => res.json({ ok: true }))
+    app.post('/x', (_req, res) => res.json({ ok: true }))
+    return app
+  }
+
+  it('accepts matching cookie + header tokens (same value, same length)', async () => {
+    const app = buildVerifyOnlyApp()
+    const token = 'a'.repeat(64)
+    const res = await request(app)
+      .post('/x')
+      .set('Cookie', `csrf-token=${token}`)
+      .set('X-CSRF-Token', token)
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({ ok: true })
+  })
+
+  it('rejects mismatched tokens with the SAME length (timing-safe path)', async () => {
+    const app = buildVerifyOnlyApp()
+    const a = 'a'.repeat(64)
+    const b = 'b'.repeat(64)
+    const res = await request(app)
+      .post('/x')
+      .set('Cookie', `csrf-token=${a}`)
+      .set('X-CSRF-Token', b)
+    expect(res.status).toBe(403)
+    expect(res.body.error.message).toBe('CSRF token mismatch')
+  })
+
+  it('rejects mismatched tokens with DIFFERENT lengths (no TypeError leak)', async () => {
+    // Regression: crypto.timingSafeEqual throws TypeError when buffer lengths
+    // differ. The middleware MUST length-check first and return 403 cleanly.
+    const app = buildVerifyOnlyApp()
+    const a = 'short'
+    const b = 'definitely-much-longer-token-string'
+    const res = await request(app)
+      .post('/x')
+      .set('Cookie', `csrf-token=${a}`)
+      .set('X-CSRF-Token', b)
+    expect(res.status).toBe(403)
+    expect(res.body.error.message).toBe('CSRF token mismatch')
+  })
+
+  it('rejects when cookie token is missing', async () => {
+    const app = buildVerifyOnlyApp()
+    const res = await request(app).post('/x').set('X-CSRF-Token', 'x')
+    expect(res.status).toBe(403)
+  })
+
+  it('rejects when header token is missing', async () => {
+    const app = buildVerifyOnlyApp()
+    const res = await request(app).post('/x').set('Cookie', 'csrf-token=x')
+    expect(res.status).toBe(403)
+  })
+
+  it('skips GET/HEAD/OPTIONS (safe methods are never compared)', async () => {
+    const app = buildVerifyOnlyApp()
+    // No cookie, no header — would 403 on POST, but GET must bypass.
+    const res = await request(app).get('/x')
+    expect(res.status).toBe(200)
+  })
+
+  it('rejects when both cookie and header are empty strings (falsy guard)', async () => {
+    // Defense-in-depth: empty string is falsy, must hit the missing-token
+    // branch BEFORE the timing-safe compare (which would otherwise pass on
+    // two zero-length buffers).
+    const app = buildVerifyOnlyApp()
+    const res = await request(app).post('/x').set('Cookie', 'csrf-token=').set('X-CSRF-Token', '')
+    expect(res.status).toBe(403)
+  })
+})
