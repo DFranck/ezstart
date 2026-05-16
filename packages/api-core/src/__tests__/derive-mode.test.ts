@@ -126,6 +126,71 @@ describe('attachDerivedMode', () => {
     const res = await request(app).get('/mode').set('X-API-Key', 'ez_pk_test_async')
     expect(res.body.ctxMode).toBe('test')
   })
+
+  // ─── L2 — extractRawApiKey trims whitespace (audit 2026-05-15) ───
+  describe('L2 — X-API-Key whitespace handling', () => {
+    it('trims leading whitespace from X-API-Key header', async () => {
+      const app = buildApp()
+      const res = await request(app).get('/mode').set('X-API-Key', '   ez_pk_test_abc123')
+      expect(res.status).toBe(200)
+      // If trim worked, the prefix detection picks up "test"
+      expect(res.body.derivedMode).toBe('test')
+    })
+
+    it('trims trailing whitespace from X-API-Key header', async () => {
+      const app = buildApp()
+      const res = await request(app).get('/mode').set('X-API-Key', 'ez_pk_test_abc123   ')
+      expect(res.status).toBe(200)
+      expect(res.body.derivedMode).toBe('test')
+    })
+
+    it('trims trailing tabs from X-API-Key header', async () => {
+      const app = buildApp()
+      // Tab character (\t) trailing — Node http accepts horizontal tab in header
+      const res = await request(app).get('/mode').set('X-API-Key', 'ez_pk_test_abc123\t')
+      expect(res.status).toBe(200)
+      expect(res.body.derivedMode).toBe('test')
+    })
+
+    it('trims both leading and trailing whitespace from X-API-Key', async () => {
+      const app = buildApp()
+      const res = await request(app).get('/mode').set('X-API-Key', '  ez_pk_live_xyz789  ')
+      expect(res.status).toBe(200)
+      expect(res.body.derivedMode).toBe('live')
+    })
+
+    it('treats whitespace-only X-API-Key header as absent (default to live)', async () => {
+      const app = buildApp()
+      const res = await request(app).get('/mode').set('X-API-Key', '   ')
+      expect(res.status).toBe(200)
+      expect(res.body.derivedMode).toBe('live')
+    })
+
+    it('preserves an X-API-Key with no whitespace exactly', async () => {
+      const app = buildApp()
+      const res = await request(app).get('/mode').set('X-API-Key', 'ez_pk_test_xyz')
+      expect(res.status).toBe(200)
+      expect(res.body.derivedMode).toBe('test')
+    })
+
+    it('trims whitespace inside Authorization: ApiKey <key> header', async () => {
+      const app = buildApp()
+      // 'ApiKey ' prefix + " ez_sk_test_secret " trailing
+      const res = await request(app)
+        .get('/mode')
+        .set('Authorization', 'ApiKey ez_sk_test_secret   ')
+      expect(res.status).toBe(200)
+      expect(res.body.derivedMode).toBe('test')
+    })
+
+    it('treats whitespace-only Authorization: ApiKey value as absent', async () => {
+      const app = buildApp()
+      const res = await request(app).get('/mode').set('Authorization', 'ApiKey    ')
+      expect(res.status).toBe(200)
+      // Falls through to default
+      expect(res.body.derivedMode).toBe('live')
+    })
+  })
 })
 
 describe('withRequestContextMiddleware', () => {

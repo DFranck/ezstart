@@ -66,14 +66,30 @@ function detectModeFromKey(rawKey: string): DerivedMode | undefined {
   return undefined
 }
 
-/** Pull the raw API key from headers (X-API-Key or `Authorization: ApiKey`). */
+/**
+ * Pull the raw API key from headers (`X-API-Key` or `Authorization: ApiKey`).
+ *
+ * The header value is **trimmed** (leading/trailing whitespace, CR, LF
+ * removed) before being returned. This prevents silent auth failure / mode
+ * mis-detection when a key has accidental whitespace from copy-paste — the
+ * downstream hash compare would otherwise miss the DB row and emit a
+ * confusing "key not found" error that fingerprints the system (L2 —
+ * adversarial audit 2026-05-15).
+ *
+ * Returns `undefined` when no header is set or when the header is
+ * whitespace-only.
+ */
 function extractRawApiKey(req: Request): string | undefined {
   const xApiKey = req.headers['x-api-key']
-  if (typeof xApiKey === 'string' && xApiKey.length > 0) return xApiKey
+  if (typeof xApiKey === 'string') {
+    const trimmed = xApiKey.trim()
+    if (trimmed.length > 0) return trimmed
+  }
 
   const authHeader = req.headers.authorization
-  if (authHeader && authHeader.startsWith('ApiKey ')) {
-    return authHeader.substring(7)
+  if (typeof authHeader === 'string' && authHeader.startsWith('ApiKey ')) {
+    const trimmed = authHeader.substring(7).trim()
+    if (trimmed.length > 0) return trimmed
   }
   return undefined
 }

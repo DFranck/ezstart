@@ -174,3 +174,225 @@ describe('createApiAuth — JWT security', () => {
     expect(res.status).toBe(401)
   })
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+// M3 — Reject all-zero ObjectId (audit 2026-05-15)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('M3 — Reject all-zero ObjectId in JWT userId', () => {
+  beforeEach(() => {
+    process.env.JWT_SECRET = TEST_SECRET
+  })
+  afterEach(() => {
+    delete process.env.JWT_SECRET
+  })
+
+  it('isValidObjectId() rejects the canonical 24-zero ObjectId', async () => {
+    const { isValidObjectId } = await import('../../create-api-server.js')
+    expect(isValidObjectId('000000000000000000000000')).toBe(false)
+  })
+
+  it('isValidObjectId() accepts a real ObjectId', async () => {
+    const { isValidObjectId } = await import('../../create-api-server.js')
+    expect(isValidObjectId('507f1f77bcf86cd799439011')).toBe(true)
+  })
+
+  it('isValidObjectId() rejects non-hex / wrong length', async () => {
+    const { isValidObjectId } = await import('../../create-api-server.js')
+    expect(isValidObjectId('not-an-objectid')).toBe(false)
+    expect(isValidObjectId('507f1f77bcf86cd79943901')).toBe(false) // 23 chars
+    expect(isValidObjectId('507f1f77bcf86cd7994390111')).toBe(false) // 25 chars
+    expect(isValidObjectId('507f1f77bcf86cd79943901z')).toBe(false) // non-hex char
+  })
+
+  it('isValidObjectId() accepts uppercase hex (Mongo serializes lowercase but be forgiving on read)', async () => {
+    const { isValidObjectId } = await import('../../create-api-server.js')
+    expect(isValidObjectId('507F1F77BCF86CD799439011')).toBe(true)
+  })
+
+  it('rejects JWT with all-zero userId via authMiddleware', async () => {
+    const token = jwt.sign({ userId: '000000000000000000000000' }, TEST_SECRET, {
+      algorithm: 'HS256',
+    })
+    const { createApiAuth } = await import('../../create-api-server.js')
+    const { authMiddleware } = createApiAuth(TEST_SECRET)
+    const app = express()
+    app.get('/protected', authMiddleware, (req: Request, res: Response) => {
+      res.json({ userId: req.userId })
+    })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(401)
+  })
+
+  it('rejects JWT with all-zero `sub` claim', async () => {
+    const token = jwt.sign({ sub: '000000000000000000000000' }, TEST_SECRET, {
+      algorithm: 'HS256',
+    })
+    const { createApiAuth } = await import('../../create-api-server.js')
+    const { authMiddleware } = createApiAuth(TEST_SECRET)
+    const app = express()
+    app.get('/protected', authMiddleware, (req: Request, res: Response) => {
+      res.json({ userId: req.userId })
+    })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(401)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L1 — JWT iss/aud verification (audit 2026-05-15)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('L1 — JWT iss/aud verification in createApiAuth', () => {
+  beforeEach(() => {
+    process.env.JWT_SECRET = TEST_SECRET
+  })
+  afterEach(() => {
+    delete process.env.JWT_SECRET
+  })
+
+  async function buildAppWithAuth(authOptions?: {
+    issuer?: string | string[]
+    audience?: string | string[]
+  }) {
+    const { createApiAuth } = await import('../../create-api-server.js')
+    const { authMiddleware } = createApiAuth({ jwtSecret: TEST_SECRET, ...authOptions })
+    const app = express()
+    app.get('/protected', authMiddleware, (req: Request, res: Response) => {
+      res.json({ userId: req.userId })
+    })
+    return app
+  }
+
+  it('accepts JWT without iss/aud claims when options unset (backward compat)', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+    })
+    const app = await buildAppWithAuth()
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(200)
+  })
+
+  it('accepts JWT with matching issuer when configured', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'https://ezauth.ezstart.xyz',
+    })
+    const app = await buildAppWithAuth({ issuer: 'https://ezauth.ezstart.xyz' })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(200)
+  })
+
+  it('rejects JWT with wrong issuer when configured', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'https://evil-issuer.com',
+    })
+    const app = await buildAppWithAuth({ issuer: 'https://ezauth.ezstart.xyz' })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(401)
+  })
+
+  it('rejects JWT with no issuer claim when issuer is configured', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      // no issuer
+    })
+    const app = await buildAppWithAuth({ issuer: 'https://ezauth.ezstart.xyz' })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(401)
+  })
+
+  it('accepts JWT matching one of multiple allowed issuers', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'https://ezpay.ezstart.xyz',
+    })
+    const app = await buildAppWithAuth({
+      issuer: ['https://ezauth.ezstart.xyz', 'https://ezpay.ezstart.xyz'],
+    })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(200)
+  })
+
+  it('accepts JWT with matching audience when configured', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      audience: 'ezpay',
+    })
+    const app = await buildAppWithAuth({ audience: 'ezpay' })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(200)
+  })
+
+  it('rejects JWT with wrong audience when configured', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      audience: 'evil-app',
+    })
+    const app = await buildAppWithAuth({ audience: 'ezpay' })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(401)
+  })
+
+  it('accepts JWT with one of multiple allowed audiences', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      audience: 'ezbill',
+    })
+    const app = await buildAppWithAuth({ audience: ['ezpay', 'ezbill'] })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(200)
+  })
+
+  it('enforces BOTH iss and aud when both configured', async () => {
+    const goodToken = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'https://ezauth.ezstart.xyz',
+      audience: 'ezpay',
+    })
+    // Wrong issuer, right audience → reject
+    const wrongIssuerToken = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'https://evil.com',
+      audience: 'ezpay',
+    })
+    // Right issuer, wrong audience → reject
+    const wrongAudToken = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'https://ezauth.ezstart.xyz',
+      audience: 'evil-app',
+    })
+
+    const app = await buildAppWithAuth({
+      issuer: 'https://ezauth.ezstart.xyz',
+      audience: 'ezpay',
+    })
+
+    expect(
+      (await request(app).get('/protected').set('Authorization', `Bearer ${goodToken}`)).status
+    ).toBe(200)
+    expect(
+      (await request(app).get('/protected').set('Authorization', `Bearer ${wrongIssuerToken}`))
+        .status
+    ).toBe(401)
+    expect(
+      (await request(app).get('/protected').set('Authorization', `Bearer ${wrongAudToken}`)).status
+    ).toBe(401)
+  })
+
+  it('legacy string-only signature still works (backward compat)', async () => {
+    const token = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_SECRET, {
+      algorithm: 'HS256',
+    })
+    const { createApiAuth } = await import('../../create-api-server.js')
+    // Legacy: createApiAuth(jwtSecret) as bare string
+    const { authMiddleware } = createApiAuth(TEST_SECRET)
+    const app = express()
+    app.get('/protected', authMiddleware, (req: Request, res: Response) => {
+      res.json({ userId: req.userId })
+    })
+    const res = await request(app).get('/protected').set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(200)
+  })
+})
