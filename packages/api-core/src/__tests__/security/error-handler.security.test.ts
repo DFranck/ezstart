@@ -14,7 +14,7 @@
 import express from 'express'
 import request from 'supertest'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createErrorHandler } from '../../core/middleware/error-handler.js'
+import { createErrorHandler, sanitizeErrorForLog } from '../../core/middleware/error-handler.js'
 import { createPermissiveCorsMiddleware } from '../../core/middleware/cors.js'
 
 describe('createErrorHandler — CORS preservation', () => {
@@ -287,5 +287,219 @@ describe('createErrorHandler — already-sent responses', () => {
 
     expect(status).not.toHaveBeenCalled()
     expect(json).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * L5 (2026-05-15) — sanitizeErrorForLog must strip PII from Mongoose
+ * ValidationError and MongoDB duplicate-key errors before the error reaches
+ * Pino / Sentry. The leak vector: `err.errors[field].value` carries the
+ * raw user-supplied value that failed validation (often an email or password
+ * for a signup flow).
+ */
+describe('sanitizeErrorForLog', () => {
+  it('keeps name + message + stack for a plain Error', () => {
+    const err = new Error('something broke')
+    const safe = sanitizeErrorForLog(err)
+    expect(safe.name).toBe('Error')
+    expect(safe.message).toBe('something broke')
+    expect(typeof safe.stack).toBe('string')
+    expect((safe.stack as string).length).toBeGreaterThan(0)
+    expect(Object.keys(safe).sort()).toEqual(['message', 'name', 'stack'])
+  })
+
+  it('handles non-Error throwable (string)', () => {
+    expect(sanitizeErrorForLog('boom')).toEqual({ error: 'boom' })
+  })
+
+  it('handles non-Error throwable (number, undefined, object)', () => {
+    expect(sanitizeErrorForLog(42)).toEqual({ error: '42' })
+    expect(sanitizeErrorForLog(undefined)).toEqual({ error: 'undefined' })
+    expect(sanitizeErrorForLog({ msg: 'plain object' })).toEqual({
+      error: '[object Object]',
+    })
+  })
+
+  it('strips Mongoose ValidationError.errors[*].value, keeps field name + kind', () => {
+    const err = new Error('Validation failed')
+    err.name = 'ValidationError'
+    ;(
+      err as unknown as {
+        errors: Record<string, { kind: string; path: string; value: string }>
+      }
+    ).errors = {
+      email: { kind: 'unique', path: 'email', value: 'leak-pii@example.com' },
+      password: { kind: 'minlength', path: 'password', value: 'plaintextLeakHash' },
+    }
+
+    const safe = sanitizeErrorForLog(err)
+    const serialized = JSON.stringify(safe)
+
+    // PII values MUST NOT appear anywhere in the sanitized output.
+    expect(serialized).not.toContain('leak-pii@example.com')
+    expect(serialized).not.toContain('plaintextLeakHash')
+
+    // Field-name metadata IS preserved so operators can still triage.
+    expect(safe.name).toBe('ValidationError')
+    expect(safe.message).toBe('Validation failed')
+    expect(safe.validationFields).toEqual([
+      { field: 'email', kind: 'unique' },
+      { field: 'password', kind: 'minlength' },
+    ])
+
+    // Raw errors bag is dropped.
+    expect(safe).not.toHaveProperty('errors')
+  })
+
+  it('handles ValidationError with errors[*].kind missing', () => {
+    const err = new Error('partial validation')
+    err.name = 'ValidationError'
+    ;(err as unknown as { errors: Record<string, { value: string }> }).errors = {
+      anyfield: { value: 'secret-value' },
+    }
+
+    const safe = sanitizeErrorForLog(err)
+    expect(JSON.stringify(safe)).not.toContain('secret-value')
+    expect(safe.validationFields).toEqual([{ field: 'anyfield', kind: 'unknown' }])
+  })
+
+  it('strips MongoServerError keyValue (E11000 duplicate key) values', () => {
+    const err = new Error('E11000 duplicate key error')
+    err.name = 'MongoServerError'
+    ;(err as unknown as { code: number }).code = 11000
+    ;(
+      err as unknown as { keyValue: Record<string, unknown>; keyPattern: Record<string, unknown> }
+    ).keyValue = {
+      email: 'duplicate-leak@example.com',
+    }
+    ;(err as unknown as { keyPattern: Record<string, unknown> }).keyPattern = { email: 1 }
+
+    const safe = sanitizeErrorForLog(err)
+    const serialized = JSON.stringify(safe)
+
+    expect(serialized).not.toContain('duplicate-leak@example.com')
+    expect(safe.duplicateFields).toEqual(['email'])
+    expect(safe).not.toHaveProperty('keyValue')
+    expect(safe).not.toHaveProperty('keyPattern')
+  })
+
+  it('falls back to keyPattern when keyValue is absent (some Mongo driver versions)', () => {
+    const err = new Error('E11000')
+    err.name = 'MongoServerError'
+    ;(err as unknown as { code: number }).code = 11000
+    ;(err as unknown as { keyPattern: Record<string, unknown> }).keyPattern = {
+      username: 1,
+      tenantId: 1,
+    }
+
+    const safe = sanitizeErrorForLog(err)
+    expect(safe.duplicateFields).toEqual(['username', 'tenantId'])
+  })
+
+  it('does not add duplicateFields on a non-11000 MongoServerError', () => {
+    const err = new Error('other mongo error')
+    err.name = 'MongoServerError'
+    ;(err as unknown as { code: number }).code = 121 // DocumentValidationFailure
+    ;(err as unknown as { keyValue: Record<string, unknown> }).keyValue = {
+      secret: 'should-not-leak',
+    }
+
+    const safe = sanitizeErrorForLog(err)
+    expect(safe).not.toHaveProperty('duplicateFields')
+    // But the keyValue is still NOT copied to the output (we never spread err).
+    expect(JSON.stringify(safe)).not.toContain('should-not-leak')
+  })
+
+  it('handles a custom Error subclass without crashing', () => {
+    class MyAppError extends Error {
+      constructor(
+        message: string,
+        public readonly code: string
+      ) {
+        super(message)
+        this.name = 'MyAppError'
+      }
+    }
+    const err = new MyAppError('app boom', 'APP_BOOM')
+    const safe = sanitizeErrorForLog(err)
+    expect(safe.name).toBe('MyAppError')
+    expect(safe.message).toBe('app boom')
+    // Custom .code on the error is NOT copied (sanitizer only keeps name + message + stack).
+    expect(safe).not.toHaveProperty('code')
+  })
+})
+
+/**
+ * L5 integration: the error-handler middleware must use the sanitizer when
+ * calling logger.error — even on a raw Mongoose-shaped ValidationError, the
+ * PII value must never reach the logger payload.
+ */
+describe('createErrorHandler — sanitizes Mongoose ValidationError before log (L5)', () => {
+  it('logger.error receives sanitized err (no PII value)', async () => {
+    const errorSpy = vi.fn()
+    const logger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: errorSpy,
+      debug: vi.fn(),
+    }
+
+    const app = express()
+    app.get('/boom', (_req, _res, next) => {
+      const err = new Error('User validation failed')
+      err.name = 'ValidationError'
+      ;(err as unknown as { errors: Record<string, { kind: string; value: string }> }).errors = {
+        email: { kind: 'unique', value: 'leak@example.com' },
+        password: { kind: 'minlength', value: 'hunter2plaintext' },
+      }
+      next(err)
+    })
+    app.use(createErrorHandler({ logger, isProd: true }))
+
+    await request(app).get('/boom')
+
+    expect(errorSpy).toHaveBeenCalledTimes(1)
+    const [, payload] = errorSpy.mock.calls[0] ?? []
+    const serialized = JSON.stringify(payload)
+    expect(serialized).not.toContain('leak@example.com')
+    expect(serialized).not.toContain('hunter2plaintext')
+
+    // Sanity check: the sanitized err is still useful for triage.
+    const pl = payload as { err: { name: string; validationFields: unknown } }
+    expect(pl.err.name).toBe('ValidationError')
+    expect(pl.err.validationFields).toEqual([
+      { field: 'email', kind: 'unique' },
+      { field: 'password', kind: 'minlength' },
+    ])
+  })
+
+  it('logger.error receives sanitized err for MongoServerError E11000', async () => {
+    const errorSpy = vi.fn()
+    const logger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: errorSpy,
+      debug: vi.fn(),
+    }
+
+    const app = express()
+    app.get('/boom', (_req, _res, next) => {
+      const err = new Error('E11000 duplicate key')
+      err.name = 'MongoServerError'
+      ;(err as unknown as { code: number }).code = 11000
+      ;(err as unknown as { keyValue: Record<string, unknown> }).keyValue = {
+        email: 'already-registered-pii@example.com',
+      }
+      next(err)
+    })
+    app.use(createErrorHandler({ logger, isProd: true }))
+
+    await request(app).get('/boom')
+
+    const [, payload] = errorSpy.mock.calls[0] ?? []
+    const serialized = JSON.stringify(payload)
+    expect(serialized).not.toContain('already-registered-pii@example.com')
+    const pl = payload as { err: { duplicateFields: string[] } }
+    expect(pl.err.duplicateFields).toEqual(['email'])
   })
 })

@@ -130,7 +130,17 @@ describe('AuditLogService', () => {
   })
 
   describe('createFromRequest()', () => {
-    it('extracts ip + user-agent from forwarded headers', async () => {
+    /**
+     * M2 (2026-05-15): extractIp uses Express's proxy-aware `req.ip` instead
+     * of raw `X-Forwarded-For` parsing. With trust proxy configured, `req.ip`
+     * is the canonical resolved client IP — the raw XFF leftmost value is
+     * forgeable by clients and was a forensics-poisoning vector.
+     *
+     * In tests, the fakeRequest sets req.ip='127.0.0.1' (the proxy-resolved
+     * value Express would expose). XFF is left in the headers to confirm the
+     * raw spoofable value is NOT picked up.
+     */
+    it('uses req.ip (proxy-aware) instead of raw X-Forwarded-For', async () => {
       const req = fakeRequest()
       await AuditLogService.createFromRequest(req, {
         userId: 'user-4',
@@ -140,12 +150,14 @@ describe('AuditLogService', () => {
       const AuditLog = await getAuditLogModel()
       const doc = await AuditLog.findOne({ userId: 'user-4' }).lean()
       expect(doc?.metadata).toMatchObject({
-        ip: '203.0.113.42',
+        ip: '127.0.0.1',
         userAgent: 'AcmeAgent/1.0 (Test)',
       })
+      // Critical: the spoofable leftmost XFF value MUST NOT be persisted.
+      expect(doc?.metadata?.ip).not.toBe('203.0.113.42')
     })
 
-    it('falls back to req.ip when no proxy header is present', async () => {
+    it('uses req.ip when no proxy header is present', async () => {
       const req = fakeRequest({
         headers: { 'user-agent': 'Mozilla/5.0' },
       })

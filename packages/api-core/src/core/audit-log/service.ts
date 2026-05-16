@@ -110,22 +110,25 @@ export interface AuditLogService<TAction extends string = string> {
 }
 
 /**
- * Extract the best-effort source IP from a request. Honours the most common
- * proxy header conventions (`x-forwarded-for`, `x-real-ip`) before falling
- * back to the raw socket address Express exposes via `req.ip`.
+ * Extract the best-effort source IP from a request.
+ *
+ * Uses Express's proxy-aware `req.ip`, which respects the `trust proxy` setting
+ * configured by `createBaseApiServer` (via the `TRUST_PROXY_HOPS` env var,
+ * default 2 = Railway+Fastly). With trust proxy set correctly, `req.ip` is the
+ * leftmost untrusted IP in the `X-Forwarded-For` chain — i.e. the real client.
+ *
+ * Falls back to `req.socket.remoteAddress` (the direct TCP peer) when no
+ * proxy header is trusted by Express. Returns `null` only if no source can be
+ * resolved at all.
+ *
+ * Prior implementations read `X-Forwarded-For` directly, which is forgeable by
+ * clients (XFF is appended at each proxy hop — the leftmost value is the one
+ * the attacker controls). This was hacker finding M2 (2026-05-15).
  *
  * @internal
  */
 function extractIp(req: Request): string | null {
-  const forwarded = req.headers['x-forwarded-for']
-  if (typeof forwarded === 'string' && forwarded.length > 0) {
-    return forwarded.split(',')[0]?.trim() ?? null
-  }
-  const real = req.headers['x-real-ip']
-  if (typeof real === 'string' && real.length > 0) {
-    return real
-  }
-  return req.ip ?? null
+  return req.ip ?? req.socket?.remoteAddress ?? null
 }
 
 /**

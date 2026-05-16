@@ -283,37 +283,81 @@ describe('createAuditLogService — create()', () => {
 /* -------------------------------------------------------------------------- */
 
 describe('createAuditLogService — createFromRequest()', () => {
-  it('extracts ip + user-agent from forwarded headers', async () => {
+  /**
+   * M2 (2026-05-15): extractIp now uses Express's proxy-aware `req.ip`
+   * (which respects `app.set('trust proxy', N)` configured via
+   * `TRUST_PROXY_HOPS`) instead of raw `X-Forwarded-For` parsing. The raw
+   * leftmost-XFF value is forgeable by clients; `req.ip` is the canonical
+   * resolved upstream IP.
+   */
+  it('uses req.ip (proxy-aware) instead of raw X-Forwarded-For', async () => {
     const svc = createAuditLogService<TestAction>({
       getModel: async () => AuditLogModel,
       defaultAppName: 'svc',
     })
 
-    await svc.createFromRequest(fakeRequest(), {
+    // Express would expose req.ip = the trusted upstream IP after parsing
+    // XFF with the configured hop count. We simulate that here: req.ip is
+    // the canonical value, XFF in headers is the raw chain (forgeable).
+    const req = fakeRequest({
+      ip: '198.51.100.7',
+      headers: {
+        'user-agent': 'TestAgent/1.0',
+        'x-forwarded-for': 'spoofed-client, 10.0.0.1',
+      },
+    })
+    await svc.createFromRequest(req, {
       userId: 'user-8',
       action: 'login',
     })
     const doc = await AuditLogModel.findOne({ userId: 'user-8' }).lean()
     expect(doc?.metadata).toMatchObject({
-      ip: '203.0.113.42',
+      ip: '198.51.100.7',
       userAgent: 'TestAgent/1.0',
     })
+    // Critical: the spoofed XFF value must NOT appear in the persisted log.
+    expect(doc?.metadata).not.toMatchObject({ ip: 'spoofed-client' })
   })
 
-  it('falls back to req.ip when no proxy header is present', async () => {
+  it('falls back to socket.remoteAddress when req.ip is undefined', async () => {
     const svc = createAuditLogService<TestAction>({
       getModel: async () => AuditLogModel,
       defaultAppName: 'svc',
     })
 
-    const req = fakeRequest({ headers: { 'user-agent': 'Mozilla/5.0' } })
+    const req = {
+      headers: { 'user-agent': 'Mozilla/5.0' },
+      socket: { remoteAddress: '203.0.113.99' },
+      // ip intentionally omitted to exercise the fallback
+    } as unknown as Request
     await svc.createFromRequest(req, {
       userId: 'user-9',
       action: 'logout',
     })
     const doc = await AuditLogModel.findOne({ userId: 'user-9' }).lean()
     expect(doc?.metadata).toMatchObject({
-      ip: '127.0.0.1',
+      ip: '203.0.113.99',
+      userAgent: 'Mozilla/5.0',
+    })
+  })
+
+  it('returns null ip when neither req.ip nor socket.remoteAddress is set', async () => {
+    const svc = createAuditLogService<TestAction>({
+      getModel: async () => AuditLogModel,
+      defaultAppName: 'svc',
+    })
+
+    const req = {
+      headers: { 'user-agent': 'Mozilla/5.0' },
+      socket: {},
+    } as unknown as Request
+    await svc.createFromRequest(req, {
+      userId: 'user-9b',
+      action: 'logout',
+    })
+    const doc = await AuditLogModel.findOne({ userId: 'user-9b' }).lean()
+    expect(doc?.metadata).toMatchObject({
+      ip: null,
       userAgent: 'Mozilla/5.0',
     })
   })

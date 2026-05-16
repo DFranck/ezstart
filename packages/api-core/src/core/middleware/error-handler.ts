@@ -23,6 +23,68 @@ import { captureException } from '../../observability/index.js'
 import type { ServerLogger } from '../types.js'
 
 /**
+ * Strip PII / huge payloads from an error before logging.
+ *
+ * Mongoose `ValidationError.errors[field].value` contains the raw user-supplied
+ * value that failed validation (e.g. invalid email, plaintext password from a
+ * bad signup, credit-card form). Pino serializes the whole error object —
+ * dumping that surface to logs leaks PII into log storage.
+ *
+ * MongoDB `MongoServerError` with `code === 11000` (duplicate key) carries
+ * `keyValue` / `keyPattern` which include the offending document values (e.g.
+ * the email a registration collided with).
+ *
+ * This sanitizer keeps `name + message + stack` for forensic debugging but
+ * strips the value-bearing fields, replacing them with field-name metadata
+ * (`validationFields`, `duplicateFields`) so operators still know which fields
+ * failed without seeing the values.
+ *
+ * @example
+ * ```ts
+ * try { await UserModel.create(req.body) } catch (err) {
+ *   logger.error('User create failed', sanitizeErrorForLog(err))
+ * }
+ * ```
+ *
+ * @param err - Anything thrown — Error subclass, string, number, undefined.
+ * @returns A plain object safe to pass to `logger.error()` / Sentry.
+ */
+export function sanitizeErrorForLog(err: unknown): Record<string, unknown> {
+  if (!(err instanceof Error)) {
+    return { error: String(err) }
+  }
+  const base: Record<string, unknown> = {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+  }
+  // Mongoose ValidationError → keep field names + validator kind, drop values.
+  if (err.name === 'ValidationError' && 'errors' in err) {
+    const errs = (err as unknown as { errors: Record<string, { kind?: string; path?: string }> })
+      .errors
+    if (errs && typeof errs === 'object') {
+      base.validationFields = Object.keys(errs).map(field => ({
+        field,
+        kind: errs[field]?.kind ?? 'unknown',
+      }))
+    }
+  }
+  // MongoDB duplicate-key (E11000) → keep field names, drop values.
+  if (
+    err.name === 'MongoServerError' &&
+    'code' in err &&
+    (err as unknown as { code: number }).code === 11000
+  ) {
+    const e = err as unknown as {
+      keyValue?: Record<string, unknown>
+      keyPattern?: Record<string, unknown>
+    }
+    base.duplicateFields = Object.keys(e.keyValue ?? e.keyPattern ?? {})
+  }
+  return base
+}
+
+/**
  * Optional callback invoked on every unhandled error BEFORE the response is
  * sent. Designed for app-level persistence (e.g. write the error to a local
  * `ErrorLog` Mongo collection so the admin dashboard can browse them
@@ -116,10 +178,12 @@ export function createErrorHandler(config: ErrorHandlerConfig = {}): ErrorReques
 
     // Log via the injected logger — never console.*. The error payload is
     // intentionally rich (path, method) so observability tooling can group
-    // errors by route.
+    // errors by route. The `err` is sanitized via `sanitizeErrorForLog` to
+    // strip PII from Mongoose ValidationError / MongoDB duplicate-key errors
+    // (hacker finding L5, 2026-05-15).
     if (logger?.error) {
       logger.error('Unhandled error in request', {
-        err,
+        err: sanitizeErrorForLog(err),
         path: req.path,
         method: req.method,
       })
