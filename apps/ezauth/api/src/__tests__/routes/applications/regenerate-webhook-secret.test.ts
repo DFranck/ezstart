@@ -22,8 +22,26 @@ import {
 
 function createTestApp() {
   const app = express()
+  // Trust the X-Forwarded-For chain so each test can synthesise a unique source
+  // IP via the per-request helper below. Without this, supertest funnels every
+  // request through the loopback IP and saturates the `createStrictRateLimiter`
+  // bucket (5/min) — the implicit `NODE_ENV=test` bypass was removed for H4
+  // (audit 2026-05-16). We bucket per-IP rather than wiring `disabled: true`
+  // on the production route because we still want the limiter to run
+  // end-to-end in tests; we just need each spec to have its own quota.
+  app.set('trust proxy', true)
   app.use(express.json())
   app.use(cookieParser())
+  // Stamp a unique X-Forwarded-For per request so the rate-limit bucket key
+  // (req.ip for anonymous traffic) is distinct per spec.
+  let reqCounter = 0
+  app.use((req, _res, next) => {
+    if (!req.headers['x-forwarded-for']) {
+      reqCounter += 1
+      req.headers['x-forwarded-for'] = `203.0.113.${reqCounter % 254}, 10.0.0.1`
+    }
+    next()
+  })
   applicationRouters.forEach(r => app.use('/api', r))
   return app
 }

@@ -24,14 +24,25 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import { sendError } from '../responses.js'
 
-/** Cached snapshot of a previously-served idempotent response. */
+/**
+ * Cached snapshot of a previously-served idempotent response.
+ *
+ * Header values can be `string | string[] | number` to faithfully round-trip
+ * what Node's `OutgoingHttpHeaders` reports — notably `Set-Cookie` which is an
+ * array of strings (one entry per cookie). Replay uses `res.setHeader(name, value)`
+ * which handles all three shapes natively.
+ */
 export type IdempotencyRecord = {
   /** HTTP status code returned the first time. */
   status: number
   /** Response body (parsed JSON when available, raw string otherwise). */
   body: unknown
-  /** Subset of response headers worth replaying (Content-Type by default). */
-  headers: Record<string, string>
+  /**
+   * Response headers worth replaying — `Set-Cookie`, `Location`, `Content-Type`,
+   * `ETag`, custom `X-*`, etc. Hop-by-hop headers (RFC 7230 §6.1) are stripped
+   * at capture time so replay is safe across HTTP/1.1 connections.
+   */
+  headers: Record<string, string | string[] | number>
   /** Wall-clock time the original response was produced. */
   storedAt: number
   /**
@@ -163,6 +174,75 @@ const DEFAULT_HEADER = 'Idempotency-Key'
 const REPLAYED_HEADER = 'X-Idempotent-Replayed'
 
 /**
+ * Hop-by-hop headers (RFC 7230 §6.1) — these are connection-scoped and MUST
+ * NOT be forwarded by proxies / replayed across requests. Stripping them at
+ * capture time keeps replayed responses safe regardless of the underlying
+ * HTTP version negotiated for the replay request.
+ */
+const HOP_BY_HOP_HEADERS = new Set([
+  'connection',
+  'keep-alive',
+  'transfer-encoding',
+  'upgrade',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailers',
+])
+
+/**
+ * HTTP status codes that indicate a transient failure for which the caller
+ * SHOULD retry. Caching these would lock the caller out of retrying for the
+ * full TTL window (24h by default) — exactly the opposite of what idempotency
+ * keys exist to enable.
+ *
+ * - `5xx` (500-599): server errors — DB timeout, downstream Stripe blip,
+ *   upstream gateway failure. Stripe's own
+ *   [idempotency docs](https://stripe.com/docs/api/idempotent_requests)
+ *   explicitly skip caching 5xx for this reason.
+ * - `408` Request Timeout — server told the client to retry.
+ * - `425` Too Early — replay-safety mechanism, client should retry without
+ *   early-data.
+ * - `429` Too Many Requests — rate-limited, client retries after backoff.
+ *
+ * 2xx and 3xx (success / redirect) and 4xx other than the above (client
+ * errors that are deterministic for the same input — `400 Bad Request`,
+ * `402 Payment Required`, `409 Conflict`, `422 Unprocessable Entity`) ARE
+ * cached so retries observe the same deterministic outcome.
+ *
+ * @internal
+ */
+function isTransientStatus(status: number): boolean {
+  if (status >= 500 && status <= 599) return true
+  return status === 408 || status === 425 || status === 429
+}
+
+/**
+ * Snapshot every response header that's safe to replay on cache hit. Drops
+ * hop-by-hop headers (connection-scoped per RFC 7230) and skips undefined
+ * entries. Preserves `Set-Cookie` arrays so multi-cookie responses replay
+ * faithfully — critical for auth flows where one response can set both the
+ * session cookie and a CSRF token cookie.
+ *
+ * @internal
+ */
+function snapshotHeaders(res: Response): Record<string, string | string[] | number> {
+  const all = res.getHeaders()
+  const out: Record<string, string | string[] | number> = {}
+  for (const [name, value] of Object.entries(all)) {
+    if (value === undefined) continue
+    if (HOP_BY_HOP_HEADERS.has(name.toLowerCase())) continue
+    out[name] = value as string | string[] | number
+  }
+  // Always guarantee a Content-Type so JSON consumers parse the replayed body
+  // correctly even if the original handler relied on Express's default.
+  if (!('content-type' in out) && !('Content-Type' in out)) {
+    out['Content-Type'] = 'application/json; charset=utf-8'
+  }
+  return out
+}
+
+/**
  * Capture the response status + headers + body via a small proxy so the
  * middleware can persist them for subsequent replays. We only intercept
  * `res.json` / `res.send` because those are the canonical exit points used
@@ -170,11 +250,18 @@ const REPLAYED_HEADER = 'X-Idempotent-Replayed'
  * `res.json`). Streaming responses are NOT cached — the middleware skips
  * them silently.
  *
+ * Transient failures (5xx, 408, 425, 429) are NOT captured — caching them
+ * would block retries of recoverable downstream blips for the full TTL.
+ *
  * @internal
  */
 function instrumentResponse(
   res: Response,
-  onCapture: (snapshot: { status: number; body: unknown; contentType: string | undefined }) => void
+  onCapture: (snapshot: {
+    status: number
+    body: unknown
+    headers: Record<string, string | string[] | number>
+  }) => void
 ): void {
   let captured = false
   const originalJson = res.json.bind(res)
@@ -183,10 +270,11 @@ function instrumentResponse(
   function capture(body: unknown): void {
     if (captured) return
     captured = true
-    const contentType =
-      (res.getHeader('Content-Type') as string | undefined) ?? 'application/json; charset=utf-8'
+    const status = res.statusCode
+    // H6: never cache transient failures — clients MUST be allowed to retry.
+    if (isTransientStatus(status)) return
     try {
-      onCapture({ status: res.statusCode, body, contentType })
+      onCapture({ status, body, headers: snapshotHeaders(res) })
     } catch {
       // Never let a capture/store failure poison the response — the body
       // has already been computed and is about to be flushed to the
@@ -290,7 +378,9 @@ export function createIdempotencyMiddleware(
         )
         return
       }
-      // Replay — restore Content-Type so JSON consumers parse correctly.
+      // Replay every captured header — `Set-Cookie`, `Location`, `Content-Type`,
+      // `ETag`, custom `X-*`. `res.setHeader` accepts `string | string[] | number`
+      // and re-emits `Set-Cookie` arrays as multiple header lines.
       for (const [name, value] of Object.entries(cached.headers)) {
         res.setHeader(name, value)
       }
@@ -303,7 +393,7 @@ export function createIdempotencyMiddleware(
       const record: IdempotencyRecord = {
         status: snapshot.status,
         body: snapshot.body,
-        headers: snapshot.contentType ? { 'Content-Type': snapshot.contentType } : {},
+        headers: snapshot.headers,
         storedAt: Date.now(),
       }
       if (requestHash !== undefined) record.requestHash = requestHash

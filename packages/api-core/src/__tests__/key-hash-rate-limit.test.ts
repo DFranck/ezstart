@@ -161,4 +161,155 @@ describe('createKeyHashRateLimiter', () => {
     const rebound = await request(app).get('/x?key=alice')
     expect(rebound.status).toBe(200)
   })
+
+  // ─── H3 hardening: bounded Map (LRU eviction) ───
+  describe('H3 — bounded Map (LRU)', () => {
+    it('evicts the least-recently-used entry when maxEntries is exceeded', async () => {
+      // maxEntries=3, max=1 per key: 4 distinct keys → 1st is evicted by 4th.
+      const limiter = createKeyHashRateLimiter({
+        max: 1,
+        maxEntries: 3,
+        extractKey: req => String(req.query.key ?? ''),
+      })
+      const app = buildApp(limiter)
+
+      // Seed 3 keys — each hits its quota (1/1).
+      await request(app).get('/x?key=k1')
+      await request(app).get('/x?key=k2')
+      await request(app).get('/x?key=k3')
+
+      // Confirm k1 is still tracked (would 429 if requested again).
+      const k1Blocked = await request(app).get('/x?key=k1')
+      expect(k1Blocked.status).toBe(429)
+
+      // The k1 access above re-touched it, moving it to the tail.
+      // Now insert k4 + k5 → k2 then k3 should be evicted (oldest in touch order).
+      // After k1 was touched, order is [k2, k3, k1]. Inserting k4 evicts k2.
+      await request(app).get('/x?key=k4')
+      await request(app).get('/x?key=k5') // evicts k3
+
+      // k2 was evicted → treated as new, gets a fresh quota (200, not 429).
+      const k2Allowed = await request(app).get('/x?key=k2')
+      expect(k2Allowed.status).toBe(200)
+
+      // k3 was also evicted → fresh quota.
+      const k3Allowed = await request(app).get('/x?key=k3')
+      expect(k3Allowed.status).toBe(200)
+    })
+
+    it('LRU touch on get keeps frequently-used keys alive', async () => {
+      const limiter = createKeyHashRateLimiter({
+        max: 1,
+        maxEntries: 2,
+        extractKey: req => String(req.query.key ?? ''),
+      })
+      const app = buildApp(limiter)
+
+      // Insert k1, k2 (both at quota).
+      await request(app).get('/x?key=k1')
+      await request(app).get('/x?key=k2')
+
+      // Touch k1 again — Map order becomes [k2, k1].
+      const k1Blocked = await request(app).get('/x?key=k1')
+      expect(k1Blocked.status).toBe(429)
+
+      // Insert k3 → evicts k2 (oldest), keeps k1 (recently touched).
+      await request(app).get('/x?key=k3')
+
+      // k1 should still be rate-limited (not evicted).
+      const k1StillBlocked = await request(app).get('/x?key=k1')
+      expect(k1StillBlocked.status).toBe(429)
+
+      // k2 was evicted → fresh quota.
+      const k2Allowed = await request(app).get('/x?key=k2')
+      expect(k2Allowed.status).toBe(200)
+    })
+
+    it('does not evict anything when below maxEntries', async () => {
+      const limiter = createKeyHashRateLimiter({
+        max: 1,
+        maxEntries: 100,
+        extractKey: req => String(req.query.key ?? ''),
+      })
+      const app = buildApp(limiter)
+
+      // Burn quota on 5 distinct keys.
+      for (const k of ['a', 'b', 'c', 'd', 'e']) {
+        await request(app).get(`/x?key=${k}`)
+      }
+
+      // All 5 should still be rate-limited.
+      for (const k of ['a', 'b', 'c', 'd', 'e']) {
+        const blocked = await request(app).get(`/x?key=${k}`)
+        expect(blocked.status).toBe(429)
+      }
+    })
+
+    it('uses 10_000 as the default maxEntries cap', async () => {
+      // Smoke test the default — insert one entry, confirm normal limiter
+      // behavior. We can't realistically populate 10K entries in a unit
+      // test, but the LRU eviction path is exercised by the dedicated
+      // bounded-cap tests above.
+      const limiter = createKeyHashRateLimiter({
+        max: 1,
+        extractKey: req => String(req.query.key ?? ''),
+      })
+      const app = buildApp(limiter)
+      await request(app).get('/x?key=onlyone')
+      const blocked = await request(app).get('/x?key=onlyone')
+      expect(blocked.status).toBe(429)
+    })
+  })
+
+  // ─── H4 hardening: explicit opt-in disable (no NODE_ENV auto-bypass) ───
+  describe('H4 — explicit disable opt-in', () => {
+    it('rate-limits in NODE_ENV=test by default (no implicit bypass)', async () => {
+      const prev = process.env.NODE_ENV
+      process.env.NODE_ENV = 'test'
+      try {
+        const limiter = createKeyHashRateLimiter({
+          max: 2,
+          extractKey: req => String(req.query.key ?? ''),
+        })
+        const app = buildApp(limiter)
+
+        await request(app).get('/x?key=alice')
+        await request(app).get('/x?key=alice')
+        const blocked = await request(app).get('/x?key=alice')
+        // Without explicit `disabled: true`, the limiter MUST fire even when
+        // NODE_ENV=test. This is the core of the H4 fix.
+        expect(blocked.status).toBe(429)
+      } finally {
+        process.env.NODE_ENV = prev
+      }
+    })
+
+    it('disabled: true bypasses the limiter entirely', async () => {
+      const limiter = createKeyHashRateLimiter({
+        max: 1,
+        disabled: true,
+        extractKey: req => String(req.query.key ?? ''),
+      })
+      const app = buildApp(limiter)
+
+      // 5 requests against a max=1 limiter must all succeed when disabled.
+      for (let i = 0; i < 5; i += 1) {
+        const res = await request(app).get('/x?key=alice')
+        expect(res.status).toBe(200)
+      }
+    })
+
+    it('disabled: false (default) enforces the limiter normally', async () => {
+      const limiter = createKeyHashRateLimiter({
+        max: 1,
+        disabled: false,
+        extractKey: req => String(req.query.key ?? ''),
+      })
+      const app = buildApp(limiter)
+
+      await request(app).get('/x?key=alice')
+      const blocked = await request(app).get('/x?key=alice')
+      expect(blocked.status).toBe(429)
+    })
+  })
 })

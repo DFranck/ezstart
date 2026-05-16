@@ -247,3 +247,287 @@ describe('createInMemoryIdempotencyStore', () => {
     expect(await store.get('a')).toBeNull()
   })
 })
+
+/**
+ * Regression tests for hacker findings B3-C / H6 + H7
+ * (see `tmp/audit-api-core-hacker.md` §H6 §H7).
+ *
+ * H6 — Caching 5xx blocks retries of transient downstream failures.
+ * H7 — Replay loses `Set-Cookie` / `Location` / custom headers.
+ */
+describe('H6 — never cache transient failures (5xx, 408, 425, 429)', () => {
+  function buildFlakyApp(
+    statuses: number[],
+    handler?: (status: number, req: express.Request, res: express.Response) => void
+  ) {
+    const app = express()
+    app.use(express.json())
+    let callIndex = 0
+    app.post('/api/charges', createIdempotencyMiddleware(), (req, res) => {
+      const status = statuses[Math.min(callIndex, statuses.length - 1)]
+      callIndex += 1
+      if (handler) {
+        handler(status, req, res)
+      } else {
+        // Distinct body per call so we can prove a non-cached retry actually re-ran.
+        res.status(status).json({ status, callIndex, body: req.body })
+      }
+    })
+    return { app, getCallCount: () => callIndex }
+  }
+
+  it('skips cache on 500 — second request with same key actually re-runs the handler', async () => {
+    const { app, getCallCount } = buildFlakyApp([500, 200])
+
+    const first = await request(app)
+      .post('/api/charges')
+      .set('Idempotency-Key', 'idem_5xx')
+      .send({})
+    const second = await request(app)
+      .post('/api/charges')
+      .set('Idempotency-Key', 'idem_5xx')
+      .send({})
+
+    expect(first.status).toBe(500)
+    expect(second.status).toBe(200) // retry actually executed the handler — got the recovered 200
+    expect(second.headers['x-idempotent-replayed']).toBeUndefined()
+    expect(getCallCount()).toBe(2) // proves the handler was invoked twice (no replay)
+  })
+
+  it('skips cache on 503', async () => {
+    const { app } = buildFlakyApp([503, 200])
+    const first = await request(app).post('/api/charges').set('Idempotency-Key', 'k').send({})
+    const second = await request(app).post('/api/charges').set('Idempotency-Key', 'k').send({})
+    expect(first.status).toBe(503)
+    expect(second.status).toBe(200)
+    expect(second.headers['x-idempotent-replayed']).toBeUndefined()
+  })
+
+  it('skips cache on 408 / 425 / 429 (transient client conditions)', async () => {
+    for (const transientCode of [408, 425, 429]) {
+      const { app } = buildFlakyApp([transientCode, 200])
+      const first = await request(app)
+        .post('/api/charges')
+        .set('Idempotency-Key', `k_${transientCode}`)
+        .send({})
+      const second = await request(app)
+        .post('/api/charges')
+        .set('Idempotency-Key', `k_${transientCode}`)
+        .send({})
+      expect(first.status).toBe(transientCode)
+      expect(second.status).toBe(200)
+      expect(second.headers['x-idempotent-replayed']).toBeUndefined()
+    }
+  })
+
+  it('CACHES 4xx (deterministic client errors are safe to replay)', async () => {
+    // 400 / 402 / 409 / 422 are deterministic for the same input — replaying them
+    // is the correct behavior (idempotent: same input → same error).
+    for (const deterministicCode of [400, 402, 409, 422]) {
+      const { app, getCallCount } = buildFlakyApp([deterministicCode, deterministicCode])
+      const first = await request(app)
+        .post('/api/charges')
+        .set('Idempotency-Key', `k4xx_${deterministicCode}`)
+        .send({})
+      const second = await request(app)
+        .post('/api/charges')
+        .set('Idempotency-Key', `k4xx_${deterministicCode}`)
+        .send({})
+
+      expect(first.status).toBe(deterministicCode)
+      expect(second.status).toBe(deterministicCode)
+      expect(second.body).toEqual(first.body) // proves replay (same callIndex baked in)
+      expect(second.headers['x-idempotent-replayed']).toBe('true')
+      expect(getCallCount()).toBe(1) // handler only ran once — second hit was replay
+    }
+  })
+
+  it('caches 2xx normally (the success path is unchanged)', async () => {
+    const { app, getCallCount } = buildFlakyApp([200, 200])
+    const first = await request(app).post('/api/charges').set('Idempotency-Key', 'k2xx').send({})
+    const second = await request(app).post('/api/charges').set('Idempotency-Key', 'k2xx').send({})
+
+    expect(first.status).toBe(200)
+    expect(second.status).toBe(200)
+    expect(second.body).toEqual(first.body)
+    expect(second.headers['x-idempotent-replayed']).toBe('true')
+    expect(getCallCount()).toBe(1)
+  })
+
+  it('caches 3xx redirects (also deterministic)', async () => {
+    const { app, getCallCount } = buildFlakyApp([302, 302], (status, _req, res) => {
+      // Set Content-Type explicitly so supertest's auto-JSON parsing doesn't choke
+      // on the plain-text body. The point of the test is the Location header + status.
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      res.setHeader('Location', '/success')
+      res.status(status).send('Found')
+    })
+    const first = await request(app).post('/api/charges').set('Idempotency-Key', 'k3xx').send({})
+    const second = await request(app).post('/api/charges').set('Idempotency-Key', 'k3xx').send({})
+
+    expect(first.status).toBe(302)
+    expect(second.status).toBe(302)
+    expect(second.headers['location']).toBe('/success')
+    expect(second.headers['x-idempotent-replayed']).toBe('true')
+    expect(getCallCount()).toBe(1)
+  })
+})
+
+describe('H7 — replay full response headers (Set-Cookie, Location, custom)', () => {
+  it('replays Set-Cookie on cache hit (single cookie)', async () => {
+    const app = express()
+    app.use(express.json())
+    app.post('/api/login', createIdempotencyMiddleware(), (_req, res) => {
+      res.setHeader('Set-Cookie', 'session=eyJUSER=abc; Path=/; HttpOnly')
+      sendSuccess(res, { user: { id: 'u_1' } })
+    })
+
+    const first = await request(app).post('/api/login').set('Idempotency-Key', 'k_cookie').send({})
+    const second = await request(app).post('/api/login').set('Idempotency-Key', 'k_cookie').send({})
+
+    expect(first.status).toBe(200)
+    expect(second.status).toBe(200)
+    // supertest exposes Set-Cookie as a string array
+    expect(second.headers['set-cookie']).toBeDefined()
+    expect(second.headers['set-cookie']).toEqual(first.headers['set-cookie'])
+    expect(second.headers['set-cookie']?.[0]).toContain('session=eyJUSER=abc')
+    expect(second.headers['x-idempotent-replayed']).toBe('true')
+  })
+
+  it('replays multiple Set-Cookie values (auth + CSRF)', async () => {
+    const app = express()
+    app.use(express.json())
+    app.post('/api/login', createIdempotencyMiddleware(), (_req, res) => {
+      res.setHeader('Set-Cookie', [
+        'session=eyJUSER=abc; HttpOnly; Secure',
+        'csrf=token123; Path=/',
+      ])
+      sendSuccess(res, { ok: true })
+    })
+
+    const first = await request(app)
+      .post('/api/login')
+      .set('Idempotency-Key', 'k_multicookie')
+      .send({})
+    const second = await request(app)
+      .post('/api/login')
+      .set('Idempotency-Key', 'k_multicookie')
+      .send({})
+
+    const firstCookies = first.headers['set-cookie'] ?? []
+    const secondCookies = second.headers['set-cookie'] ?? []
+    expect(secondCookies).toHaveLength(2)
+    expect(secondCookies).toEqual(firstCookies)
+    expect(secondCookies.some(c => c.includes('session='))).toBe(true)
+    expect(secondCookies.some(c => c.includes('csrf=token123'))).toBe(true)
+  })
+
+  it('replays Location on 302', async () => {
+    const app = express()
+    app.use(express.json())
+    app.post('/api/redirect', createIdempotencyMiddleware(), (_req, res) => {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      res.setHeader('Location', '/dashboard')
+      res.status(302).send('Found')
+    })
+
+    const first = await request(app).post('/api/redirect').set('Idempotency-Key', 'k_loc').send({})
+    const second = await request(app).post('/api/redirect').set('Idempotency-Key', 'k_loc').send({})
+
+    expect(first.status).toBe(302)
+    expect(second.status).toBe(302)
+    expect(second.headers['location']).toBe('/dashboard')
+    expect(second.headers['location']).toBe(first.headers['location'])
+    expect(second.headers['x-idempotent-replayed']).toBe('true')
+  })
+
+  it('replays custom X-* headers (ETag, X-Request-Id, X-Trace-Id)', async () => {
+    const app = express()
+    app.use(express.json())
+    app.post('/api/create', createIdempotencyMiddleware(), (_req, res) => {
+      res.setHeader('ETag', 'W/"abc123"')
+      res.setHeader('X-Request-Id', 'req_xyz')
+      res.setHeader('X-Trace-Id', 'trace_42')
+      sendSuccess(res, { id: 'created_1' })
+    })
+
+    const first = await request(app).post('/api/create').set('Idempotency-Key', 'k_custom').send({})
+    const second = await request(app)
+      .post('/api/create')
+      .set('Idempotency-Key', 'k_custom')
+      .send({})
+
+    expect(second.headers['etag']).toBe('W/"abc123"')
+    expect(second.headers['x-request-id']).toBe('req_xyz')
+    expect(second.headers['x-trace-id']).toBe('trace_42')
+    expect(second.headers['x-idempotent-replayed']).toBe('true')
+    // Sanity — replay matches original
+    expect(second.headers['etag']).toBe(first.headers['etag'])
+  })
+
+  it('strips hop-by-hop headers (Connection, Keep-Alive, etc.) at capture time', async () => {
+    // Inspect the persisted record directly — Node's HTTP layer refuses to emit
+    // some hop-by-hop combinations (e.g. Transfer-Encoding + Content-Length) so
+    // we can't reliably observe them on the wire via supertest. The contract we
+    // care about is: whatever the handler sets, the cache must NOT replay
+    // hop-by-hop headers on a subsequent request.
+    const captured: Record<string, IdempotencyRecord> = {}
+    const inspectStore: IdempotencyStore = {
+      get(key) {
+        return captured[key] ?? null
+      },
+      set(key, record) {
+        captured[key] = record
+      },
+    }
+
+    const app = express()
+    app.use(express.json())
+    app.post('/api/items', createIdempotencyMiddleware({ store: inspectStore }), (_req, res) => {
+      // Set hop-by-hop headers that ARE safe to assign at the handler level
+      // (Keep-Alive, Proxy-Authenticate, TE, Upgrade). Connection /
+      // Transfer-Encoding are managed by Node itself so we don't set them here
+      // — the strip logic still handles them if they ever leak through.
+      res.setHeader('Keep-Alive', 'timeout=5')
+      res.setHeader('Proxy-Authenticate', 'Basic')
+      res.setHeader('TE', 'trailers')
+      res.setHeader('Upgrade', 'websocket')
+      res.setHeader('X-Safe-Header', 'kept')
+      res.setHeader('Set-Cookie', 'session=abc')
+      sendSuccess(res, { ok: true })
+    })
+
+    await request(app).post('/api/items').set('Idempotency-Key', 'k_hop').send({})
+
+    const record = captured['k_hop']
+    expect(record).toBeDefined()
+    const headerNames = Object.keys(record.headers).map(h => h.toLowerCase())
+    // Hop-by-hop headers stripped at capture time
+    expect(headerNames).not.toContain('keep-alive')
+    expect(headerNames).not.toContain('proxy-authenticate')
+    expect(headerNames).not.toContain('te')
+    expect(headerNames).not.toContain('upgrade')
+    expect(headerNames).not.toContain('connection')
+    expect(headerNames).not.toContain('transfer-encoding')
+    // Safe headers preserved
+    expect(headerNames).toContain('x-safe-header')
+    expect(headerNames).toContain('set-cookie')
+    expect(headerNames).toContain('content-type')
+  })
+
+  it('preserves Content-Type when handler explicitly sets a non-JSON type', async () => {
+    const app = express()
+    app.use(express.json())
+    app.post('/api/xml', createIdempotencyMiddleware(), (_req, res) => {
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+      res.status(200).send('<root><id>1</id></root>')
+    })
+
+    const first = await request(app).post('/api/xml').set('Idempotency-Key', 'k_xml').send({})
+    const second = await request(app).post('/api/xml').set('Idempotency-Key', 'k_xml').send({})
+
+    expect(second.headers['content-type']).toBe('application/xml; charset=utf-8')
+    expect(second.headers['content-type']).toBe(first.headers['content-type'])
+    expect(second.text).toBe(first.text)
+  })
+})

@@ -286,3 +286,95 @@ describe('Per-bucket isolation (keyGenerator priority)', () => {
     expect(blocked.status).toBe(429)
   })
 })
+
+// ─── H4 hardening: explicit opt-in disable (no NODE_ENV auto-bypass) ───
+describe('H4 — explicit disable opt-in', () => {
+  // These tests must NOT have RATE_LIMIT_FORCE set in their inner closure —
+  // they verify the post-H4 behavior where the limiter is always on unless
+  // the caller passes `disabled: true`. The suite-level beforeAll above does
+  // set RATE_LIMIT_FORCE=1 for backward-compat with the old skip logic, but
+  // since that env var is now ignored entirely, leaving it set here is a
+  // no-op (kept to document the transition).
+
+  it('rate-limits in NODE_ENV=test by default (no implicit bypass)', async () => {
+    const prevNodeEnv = process.env.NODE_ENV
+    const prevForce = process.env.RATE_LIMIT_FORCE
+    process.env.NODE_ENV = 'test'
+    delete process.env.RATE_LIMIT_FORCE
+    try {
+      const app = express()
+      app.use(createRateLimiter({ max: 2, windowMs: 60_000, skipPaths: [] }))
+      app.get('/x', (_req, res) => res.json({ ok: true }))
+
+      await request(app).get('/x')
+      await request(app).get('/x')
+      const blocked = await request(app).get('/x')
+      // Without explicit `disabled: true`, the limiter MUST fire even when
+      // NODE_ENV=test and RATE_LIMIT_FORCE is unset. This is the core of H4.
+      expect(blocked.status).toBe(429)
+      expect(blocked.body.error.code).toBe('RATE_LIMIT_EXCEEDED')
+    } finally {
+      process.env.NODE_ENV = prevNodeEnv
+      if (prevForce === undefined) delete process.env.RATE_LIMIT_FORCE
+      else process.env.RATE_LIMIT_FORCE = prevForce
+    }
+  })
+
+  it('disabled: true bypasses the limiter entirely', async () => {
+    const app = express()
+    app.use(createRateLimiter({ max: 1, windowMs: 60_000, skipPaths: [], disabled: true }))
+    app.get('/x', (_req, res) => res.json({ ok: true }))
+
+    // 5 requests against a max=1 limiter all succeed when disabled is true.
+    for (let i = 0; i < 5; i += 1) {
+      const res = await request(app).get('/x')
+      expect(res.status).toBe(200)
+    }
+  })
+
+  it('disabled: false (default) enforces the limiter normally', async () => {
+    const app = express()
+    app.use(createRateLimiter({ max: 1, windowMs: 60_000, skipPaths: [], disabled: false }))
+    app.get('/x', (_req, res) => res.json({ ok: true }))
+
+    await request(app).get('/x')
+    const blocked = await request(app).get('/x')
+    expect(blocked.status).toBe(429)
+  })
+
+  it('disabled flag also forwards through preset limiters', async () => {
+    // createStrictRateLimiter spreads ...options, so disabled must pass through.
+    const app = express()
+    app.post('/login', createStrictRateLimiter({ disabled: true }), (_req, res) =>
+      res.json({ ok: true })
+    )
+
+    // Strict limiter is normally 5/min — 10 requests must all pass when disabled.
+    for (let i = 0; i < 10; i += 1) {
+      const res = await request(app).post('/login')
+      expect(res.status).toBe(200)
+    }
+  })
+
+  it('RATE_LIMIT_FORCE env var is now ignored (was the old escape hatch)', async () => {
+    // Pre-H4: setting RATE_LIMIT_FORCE=1 was required to bypass the implicit
+    // NODE_ENV=test skip. Post-H4: the limiter is always on, so this var is
+    // a no-op. The kept-around setting in suite beforeAll is harmless legacy.
+    const prevNodeEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'test'
+    process.env.RATE_LIMIT_FORCE = '0' // explicitly OFF — still doesn't matter
+    try {
+      const app = express()
+      app.use(createRateLimiter({ max: 1, windowMs: 60_000, skipPaths: [] }))
+      app.get('/x', (_req, res) => res.json({ ok: true }))
+
+      await request(app).get('/x')
+      const blocked = await request(app).get('/x')
+      // Limiter fires regardless of RATE_LIMIT_FORCE value.
+      expect(blocked.status).toBe(429)
+    } finally {
+      process.env.NODE_ENV = prevNodeEnv
+      process.env.RATE_LIMIT_FORCE = '1' // restore suite default
+    }
+  })
+})

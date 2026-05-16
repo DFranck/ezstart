@@ -9,6 +9,17 @@
  *
  * Per-IP bucketing alone is broken behind a CDN/LB: every authenticated user
  * sharing the same egress IP would share a single quota and self-DOS.
+ *
+ * ### Test bypass (H4 fix — 2026-05-16)
+ *
+ * The limiter does NOT auto-disable when `NODE_ENV === 'test'`. A misconfigured
+ * production deploy with `NODE_ENV=test` would have silently unmetered every
+ * limiter — brute-force protection, account lockout, billing abuse: all wide
+ * open with no boot signal. Callers that need to skip the limiter (typically
+ * test suites whose supertest fixtures all share the loopback IP) must opt
+ * out explicitly via the new `disabled: true` option. There is no env-var
+ * escape hatch — disabling is always intentional and visible at the call
+ * site.
  */
 
 import type { Request } from 'express'
@@ -36,6 +47,24 @@ export interface RateLimitOptions {
    * what you're doing — IP-only bucketing is broken behind a CDN/LB.
    */
   keyGenerator?: (req: Request) => string
+  /**
+   * When `true`, every request bypasses the limiter and calls `next()`
+   * immediately. Intended for test suites that share a single source IP
+   * across many specs and would otherwise self-throttle.
+   *
+   * **Defaults to `false`** — there is no implicit `NODE_ENV=test` bypass
+   * (H4 fix, 2026-05-16). A misconfigured production deploy with
+   * `NODE_ENV=test` previously silently unmetered every limiter. Disabling
+   * must now be opt-in and visible at the call site.
+   *
+   * @example
+   * ```ts
+   * // Test suite — opt out explicitly so the shared loopback IP doesn't
+   * // throttle other tests sharing this Express instance.
+   * app.use(createRateLimiter({ disabled: process.env.NODE_ENV === 'test' }))
+   * ```
+   */
+  disabled?: boolean
 }
 
 type RateLimitHandlerBody = {
@@ -107,6 +136,7 @@ export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequ
     message = 'Too many requests, please try again later.',
     skipPaths = ['/health', '/api/health'],
     keyGenerator = defaultKeyGenerator,
+    disabled = false,
   } = options
 
   const retryAfterSeconds = Math.ceil(windowMs / 1000)
@@ -123,13 +153,14 @@ export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequ
     // the over-permissive `trust proxy: true` setting — now fixed in
     // `createBaseApiServer` to `2` matching real Fastly→Railway hop count.)
     //
-    // In `test` env every supertest request comes from the same loopback IP,
-    // so a 5-req/min limiter would throttle suites after the 5th request and
-    // poison subsequent assertions. We skip enforcement in test by default.
-    // Tests that DELIBERATELY exercise the limiter (`auth/rate-limit.test.ts`)
-    // override this via the `RATE_LIMIT_FORCE=1` env escape hatch.
+    // H4 hardening (2026-05-16): the previous `NODE_ENV === 'test'` implicit
+    // bypass was removed. A misconfigured production deploy with `NODE_ENV=test`
+    // would have silently unmetered every limiter — auth lockout, brute-force
+    // protection, billing abuse: all wide open with no boot signal. Callers
+    // that need to disable the limiter (typically test suites whose supertest
+    // fixtures all share the loopback IP) must opt in via `disabled: true`.
     skip: req => {
-      if (process.env.NODE_ENV === 'test' && process.env.RATE_LIMIT_FORCE !== '1') return true
+      if (disabled) return true
       return skipPaths.some(path => req.path === path)
     },
     handler: (_req, res) => {
