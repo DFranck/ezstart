@@ -47,7 +47,10 @@ export type ApiClient = {
  */
 export function createApiClient(config: ApiClientConfig = {}): ApiClient {
   const resolved = resolveConfig(config)
-  const refreshHelper: RefreshHelper = createRefreshHelper(resolved.refresh, resolved.tokenStore)
+  const refreshHelper: RefreshHelper = createRefreshHelper(resolved.refresh, resolved.tokenStore, {
+    credentials: resolved.credentials,
+    logger: resolved.logger,
+  })
 
   const apiCall = createApiCall(resolved, refreshHelper)
   const apiStream = createApiStream(resolved, refreshHelper)
