@@ -66,17 +66,26 @@ describe('Header injection attacks', () => {
     expect(Object.keys(headers).some(k => k.includes('\r\n'))).toBe(true)
   })
 
-  // VULN-2c: Authorization header can be overwritten by caller headers
-  it('caller-supplied Authorization header is overwritten by token', () => {
-    const headers = buildHeaders(
-      { Authorization: 'Bearer attacker-token' },
-      'real-token',
-      {}
-    )
-    // buildHeaders does NOT check if Authorization already exists — it overwrites
-    // FINDING: Token always wins over caller header — this is CORRECT behavior
-    // (defense in depth: prevents caller from injecting different auth)
-    expect(headers['Authorization']).toBe('Bearer real-token')
+  // VULN-2c (post-MED-5): caller-supplied Authorization is preserved.
+  //
+  // Prior policy: token-from-store always overwrote a caller-supplied
+  // Authorization header (defense-in-depth against accidental auth
+  // injection). New policy (Wave C MED-5): the explicit caller header
+  // wins, case-insensitively, so a consumer can intentionally override
+  // the auth scheme (e.g. swap to `Basic`, or proxy a delegated token)
+  // without the token store silently shadowing it. Bearer leaks via a
+  // lowercase `authorization` header are also now prevented.
+  it('caller-supplied Authorization header is preserved over the token store (MED-5)', () => {
+    const headers = buildHeaders({ Authorization: 'Bearer caller-token' }, 'token-from-store', {})
+    expect(headers['Authorization']).toBe('Bearer caller-token')
+  })
+
+  it('caller-supplied lowercase authorization header is preserved (MED-5 case-insensitive)', () => {
+    const headers = buildHeaders({ authorization: 'Bearer caller-token' }, 'token-from-store', {})
+    // The caller's exact-case header is kept, and no duplicate canonical
+    // `Authorization` is injected.
+    expect(headers['authorization']).toBe('Bearer caller-token')
+    expect(headers['Authorization']).toBeUndefined()
   })
 
   // VULN-2d: Token is null — Authorization header is not set

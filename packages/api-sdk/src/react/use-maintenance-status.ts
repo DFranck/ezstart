@@ -98,12 +98,16 @@ export function useMaintenanceStatus(
 
   return useQuery<MaintenanceStatus, ApiError>({
     queryKey: [...QUERY_KEY, url],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       try {
+        // MED-1: propagate the React Query–provided AbortSignal so the
+        // fetch is cancelled when the query is invalidated, the component
+        // unmounts, or a refetch supersedes the in-flight call.
         const res = await fetch(url, {
           method: 'GET',
           headers: { Accept: 'application/json' },
           credentials: 'include',
+          signal,
         })
         if (!res.ok) {
           return defaultDisabled()
@@ -117,9 +121,15 @@ export function useMaintenanceStatus(
           return defaultDisabled()
         }
         return normalizeStatus(parsed)
-      } catch {
+      } catch (err) {
+        // CRITICAL: do NOT swallow AbortError as "no maintenance" — let
+        // React Query observe the cancellation so the query is properly
+        // marked as aborted (otherwise a unmount/remount flashes a
+        // "banner hidden" state from the synthetic defaultDisabled() result
+        // before the real fetch resolves).
+        if (err instanceof Error && err.name === 'AbortError') throw err
         // Public banner must never break the consumer app — silently
-        // degrade to "no maintenance" on any network/parse failure.
+        // degrade to "no maintenance" on any other network/parse failure.
         return defaultDisabled()
       }
     },
