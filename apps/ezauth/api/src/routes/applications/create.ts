@@ -20,6 +20,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApplicationModel, APPLICATION_SLUG_REGEX } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { serializeApplication } from './serialize.js'
@@ -175,20 +176,31 @@ const createApplicationController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/applications', verifyTokenMiddleware, createApplicationController, {
-  summary: 'Create a new Application',
-  tags: ['Applications'],
-  bodySchema: createApplicationBodySchema,
-  responseSchema: applicationResponseSchema,
-  extraResponses: {
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    403: {
-      description: 'Reserved slug prefix (only superadmins may create _-prefixed slugs)',
-      schema: errorResponseSchema,
+docRouter.post(
+  '/applications',
+  verifyTokenMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — creating an Application provisions billable
+  // multi-tenant resources (DB scope, webhook secret, theme tokens). An
+  // unverified account must not be able to spawn tenants.
+  // Cf. `standard-saas-security.md` §2 + `standard-saas-architecture.md`.
+  requireEmailVerified,
+  createApplicationController,
+  {
+    summary: 'Create a new Application',
+    tags: ['Applications'],
+    bodySchema: createApplicationBodySchema,
+    responseSchema: applicationResponseSchema,
+    extraResponses: {
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description:
+          'Reserved slug prefix (superadmin-only) or email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
+      409: { description: 'Slug already in use', schema: errorResponseSchema },
+      422: { description: 'Validation error', schema: errorResponseSchema },
     },
-    409: { description: 'Slug already in use', schema: errorResponseSchema },
-    422: { description: 'Validation error', schema: errorResponseSchema },
-  },
-})
+  }
+)
 
 export default router

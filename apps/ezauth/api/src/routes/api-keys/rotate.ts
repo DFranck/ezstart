@@ -9,6 +9,7 @@ import {
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApiKeyModel, type ApiKeyScope } from '../../models/api-key.js'
 import {
   generateRawApiKey,
@@ -104,15 +105,27 @@ const rotateApiKeyController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/keys/:id/rotate', verifyTokenMiddleware, rotateApiKeyController, {
-  summary: 'Rotate an API key (revoke old + create new)',
-  tags: ['API Keys'],
-  responseSchema: rotateApiKeyResponseSchema,
-  extraResponses: {
-    400: { description: 'Key already revoked', schema: errorResponseSchema },
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    404: { description: 'API key not found', schema: errorResponseSchema },
-  },
-})
+docRouter.post(
+  '/keys/:id/rotate',
+  verifyTokenMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — rotation issues a brand-new key; gate it
+  // behind email verification. Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
+  rotateApiKeyController,
+  {
+    summary: 'Rotate an API key (revoke old + create new)',
+    tags: ['API Keys'],
+    responseSchema: rotateApiKeyResponseSchema,
+    extraResponses: {
+      400: { description: 'Key already revoked', schema: errorResponseSchema },
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
+      404: { description: 'API key not found', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

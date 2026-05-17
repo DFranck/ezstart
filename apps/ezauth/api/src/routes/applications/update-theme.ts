@@ -43,6 +43,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { applicationThemeSchema } from '../../utils/theme.js'
@@ -161,6 +162,9 @@ const updateApplicationThemeController = async (req: Request, res: Response) => 
 docRouter.patch(
   '/applications/:id/theme',
   verifyTokenMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — theme tokens are surfaced cross-tenant
+  // (consumer SDKs SSR the values). Only verified owners may mutate.
+  requireEmailVerified,
   updateApplicationThemeController,
   {
     summary: 'Update Application white-label theme tokens + enable flag',
@@ -169,6 +173,10 @@ docRouter.patch(
     responseSchema: applicationResponseSchema,
     extraResponses: {
       401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
       404: { description: 'Application not found', schema: errorResponseSchema },
       422: { description: 'Validation error', schema: errorResponseSchema },
     },

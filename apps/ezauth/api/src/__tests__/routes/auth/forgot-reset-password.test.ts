@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
+import express from 'express'
+import request from 'supertest'
 import {
   createUser,
   createQuickSignupUser,
@@ -8,7 +10,15 @@ import {
 } from '../../helpers/setup.js'
 import { getAuthUserModel } from '../../../models/auth-user.js'
 import { getAuthCodeModel } from '../../../models/auth-code.js'
+import resetPasswordRouter from '../../../routes/auth/reset-password.js'
 import crypto from 'crypto'
+
+function buildResetApp() {
+  const app = express()
+  app.use(express.json())
+  app.use('/api', resetPasswordRouter)
+  return app
+}
 
 describe('Forgot / Reset Password Logic', () => {
   beforeAll(async () => {
@@ -183,6 +193,66 @@ describe('Forgot / Reset Password Logic', () => {
       })
 
       expect(found).toBeNull()
+    })
+  })
+
+  /**
+   * Wave D Lot 2.5 / HAC-NEW-5 (2026-05-17) — HTTP-level coverage for the
+   * `newPassword` floor on `POST /api/reset-password`.
+   *
+   * Previously this route inlined `newPassword: min(8)`, while
+   * `RegisterRequestSchema` and `changePasswordSchema` both enforce `min(12)`.
+   * An attacker could chain forgot-password → reset-password to downgrade
+   * any account's password to 8 chars and bypass the registration floor.
+   *
+   * The route now imports the canonical `ResetPasswordRequestSchema` from
+   * `@ezstart/api-contracts` (single source of truth) which enforces
+   * `min(12).max(128)` + `OPAQUE_TOKEN_REGEX`. Cf. `standard-saas-security.md` §2.
+   */
+  describe('POST /api/reset-password — newPassword min(12) policy (HAC-NEW-5)', () => {
+    it('rejects newPassword shorter than 12 characters', async () => {
+      const user = await createUser({
+        email: 'short-reset@example.com',
+        username: 'shortresetpw',
+        password: 'OldPassword123!',
+      })
+      const resetCode = await createPasswordResetCode(user._id!.toString())
+
+      const res = await request(buildResetApp())
+        .post('/api/reset-password')
+        .send({ token: resetCode.code, newPassword: 'Short8!1' }) // 8 chars — below floor
+
+      // api-core `sendValidationError` uses HTTP 422 (Unprocessable Entity).
+      expect(res.status).toBe(422)
+      const flat = JSON.stringify(res.body)
+      expect(flat).toMatch(/at least 12|too_small|12 characters/i)
+
+      // Password must NOT have been changed.
+      const AuthUser = await getAuthUserModel()
+      const refreshed = await AuthUser.findById(user._id)
+      const stillOld = await refreshed!.comparePassword('OldPassword123!')
+      expect(stillOld).toBe(true)
+    })
+
+    it('accepts newPassword of 12+ characters and resets the password', async () => {
+      const user = await createUser({
+        email: 'ok-reset@example.com',
+        username: 'okresetpw',
+        password: 'OldPassword123!',
+      })
+      const resetCode = await createPasswordResetCode(user._id!.toString())
+
+      const res = await request(buildResetApp())
+        .post('/api/reset-password')
+        .send({ token: resetCode.code, newPassword: 'NewLongerPwd123!' }) // 16 chars
+
+      expect(res.status).toBe(200)
+
+      // Password was actually rotated.
+      const AuthUser = await getAuthUserModel()
+      const refreshed = await AuthUser.findById(user._id)
+      const matchesNew = await refreshed!.comparePassword('NewLongerPwd123!')
+      expect(matchesNew).toBe(true)
     })
   })
 })

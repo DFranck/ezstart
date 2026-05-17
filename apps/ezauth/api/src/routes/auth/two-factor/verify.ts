@@ -13,6 +13,7 @@ import { AuditLogService } from '../../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
+import { requireEmailVerified } from '../../../middleware/require-email-verified.js'
 
 export const twoFactorVerifyRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -52,10 +53,21 @@ const verifyController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/2fa/verify', verifyRateLimiter, authMiddleware, verifyController, {
-  summary: 'Verify TOTP code to complete 2FA setup',
-  tags: ['Two-Factor Authentication'],
-  bodySchema: verifyCodeSchema,
-})
+docRouter.post(
+  '/2fa/verify',
+  verifyRateLimiter,
+  authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — completing 2FA setup (which generates backup
+  // codes) on an unverified account would let an attacker holding only
+  // the signup credential lock the real owner out permanently. Gate the
+  // enable step behind email verification (paired with /2fa/setup).
+  requireEmailVerified,
+  verifyController,
+  {
+    summary: 'Verify TOTP code to complete 2FA setup',
+    tags: ['Two-Factor Authentication'],
+    bodySchema: verifyCodeSchema,
+  }
+)
 
 export default router

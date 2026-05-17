@@ -13,6 +13,7 @@ import { AuditLogService } from '../../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
+import { requireEmailVerified } from '../../../middleware/require-email-verified.js'
 
 export const twoFactorDisableRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -62,10 +63,20 @@ const disableController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/2fa/disable', disableRateLimiter, authMiddleware, disableController, {
-  summary: 'Disable 2FA (requires current TOTP code or backup code)',
-  tags: ['Two-Factor Authentication'],
-  bodySchema: disableSchema,
-})
+docRouter.post(
+  '/2fa/disable',
+  disableRateLimiter,
+  authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — disabling 2FA is a sensitive op; an
+  // unverified account must not be able to weaken security on a stolen
+  // signup credential. Pairs with /2fa/setup + /2fa/verify gates.
+  requireEmailVerified,
+  disableController,
+  {
+    summary: 'Disable 2FA (requires current TOTP code or backup code)',
+    tags: ['Two-Factor Authentication'],
+    bodySchema: disableSchema,
+  }
+)
 
 export default router

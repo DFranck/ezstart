@@ -17,6 +17,7 @@ import { getRefreshTokenModel } from '../../models/refresh-token.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { emailService } from '../../services/email.service.js'
 import { accountDeletionTemplate } from '@ezstart/email-service'
 import type { EmailContext } from '@ezstart/email-service'
@@ -261,6 +262,13 @@ docRouter.delete(
   createStrictRateLimiter(),
   verifyCookieCsrf,
   authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — anti vandalism: an unverified account (the
+  // signup victim never even consented) must not be able to wipe out
+  // associated data through this endpoint. The legitimate "abandon
+  // unverified signup" path is the cron purge or a deliberate admin
+  // action, not a self-service delete from a stolen credential.
+  // Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
   deleteAccountController,
   {
     summary:
@@ -275,6 +283,10 @@ docRouter.delete(
       },
       401: {
         description: 'Authentication required or invalid password',
+        schema: errorResponseSchema,
+      },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
         schema: errorResponseSchema,
       },
       404: { description: 'User not found', schema: errorResponseSchema },

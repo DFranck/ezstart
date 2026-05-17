@@ -10,6 +10,7 @@ import {
 } from '@ezstart/api-core'
 import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+import { ResetPasswordRequestSchema } from '@ezstart/api-contracts'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { logger } from '@ezstart/logger/server'
@@ -20,14 +21,13 @@ const docRouter = createRouterWithDoc(resetPasswordRegistry, router)
 
 const resetPasswordRateLimiter = createStrictRateLimiter()
 
-const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token is required').describe('Password reset token'),
-  newPassword: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be at most 128 characters')
-    .describe('New password (min 8, max 128 characters)'),
-})
+// HAC-HIGH-5 / Wave D Lot 2.5 (2026-05-17) — import canonical
+// `ResetPasswordRequestSchema` from `@ezstart/api-contracts` (single source
+// of truth). Previously this route inlined `newPassword: min(8)`, which let
+// forgot-password → reset-password bypass the 12-char floor enforced by
+// `RegisterRequestSchema` / `changePasswordSchema`. See
+// `standard-saas-security.md` §2 ("password strength enforcement").
+const resetPasswordSchema = ResetPasswordRequestSchema
 
 const resetPasswordResponseSchema = z.object({
   message: z.string().describe('Response message'),

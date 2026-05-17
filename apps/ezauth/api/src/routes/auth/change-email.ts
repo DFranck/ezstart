@@ -20,6 +20,7 @@ import { emailService } from '../../services/email.service.js'
 import { AuditLogService } from '../../services/audit-log.service.js'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { resolveUserLocale } from '../../utils/locale.js'
 import { getAppDisplayName } from '../../utils/app-display.js'
 import { getWebUrl } from '@ezstart/config/urls'
@@ -280,6 +281,11 @@ docRouter.post(
   createStrictRateLimiter(),
   verifyCookieCsrf,
   authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — gate email-change behind verification of the
+  // CURRENT email. Without this an attacker who grabbed an unverified
+  // signup could re-point the account to their own inbox and then trigger
+  // a "verify" on the new address. Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
   changeEmailController,
   {
     summary: 'Request an email change (sends verification link to the new address)',
@@ -290,6 +296,10 @@ docRouter.post(
       400: { description: 'Invalid request or password missing', schema: errorResponseSchema },
       401: {
         description: 'Authentication required or invalid password',
+        schema: errorResponseSchema,
+      },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
         schema: errorResponseSchema,
       },
       404: { description: 'User not found', schema: errorResponseSchema },

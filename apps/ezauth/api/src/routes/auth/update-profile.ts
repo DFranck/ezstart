@@ -15,6 +15,7 @@ import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/serve
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { isValidAvatarUrl, MAX_AVATAR_URL_LENGTH } from '../../utils/avatar.js'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 
 export const updateProfileRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -66,16 +67,31 @@ const updateProfileController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.put('/profile', verifyCookieCsrf, authMiddleware, updateProfileController, {
-  summary: 'Update own profile (firstName, lastName, avatar)',
-  tags: ['User'],
-  bodySchema: updateProfileSchema,
-  responseSchema: userResponseSchema,
-  extraResponses: {
-    400: { description: 'No fields to update', schema: errorResponseSchema },
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    404: { description: 'User not found', schema: errorResponseSchema },
-  },
-})
+docRouter.put(
+  '/profile',
+  verifyCookieCsrf,
+  authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — anti identity-squatting: an unverified
+  // account must not be able to set firstName/lastName/avatar (the
+  // squatter would otherwise build a "real-looking" profile on top of a
+  // stolen email address). Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
+  updateProfileController,
+  {
+    summary: 'Update own profile (firstName, lastName, avatar)',
+    tags: ['User'],
+    bodySchema: updateProfileSchema,
+    responseSchema: userResponseSchema,
+    extraResponses: {
+      400: { description: 'No fields to update', schema: errorResponseSchema },
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
+      404: { description: 'User not found', schema: errorResponseSchema },
+    },
+  }
+)
 
 export default router

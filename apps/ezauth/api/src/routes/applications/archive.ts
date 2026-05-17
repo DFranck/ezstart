@@ -21,6 +21,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApplicationModel } from '../../models/application.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
@@ -111,19 +112,32 @@ const archiveApplicationController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.delete('/applications/:id', verifyTokenMiddleware, archiveApplicationController, {
-  summary: 'Archive an Application (soft delete, optional cascade revokes keys)',
-  tags: ['Applications'],
-  responseSchema: archiveResponseSchema,
-  extraResponses: {
-    400: { description: 'Application already archived', schema: errorResponseSchema },
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    404: { description: 'Application not found', schema: errorResponseSchema },
-    409: {
-      description: 'Active API keys exist — pass `?cascade=true` to revoke them',
-      schema: errorResponseSchema,
+docRouter.delete(
+  '/applications/:id',
+  verifyTokenMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — archiving an Application optionally revokes
+  // every key tied to it (`?cascade=true`); only verified owners may
+  // perform this destructive op.
+  requireEmailVerified,
+  archiveApplicationController,
+  {
+    summary: 'Archive an Application (soft delete, optional cascade revokes keys)',
+    tags: ['Applications'],
+    responseSchema: archiveResponseSchema,
+    extraResponses: {
+      400: { description: 'Application already archived', schema: errorResponseSchema },
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
+      404: { description: 'Application not found', schema: errorResponseSchema },
+      409: {
+        description: 'Active API keys exist — pass `?cascade=true` to revoke them',
+        schema: errorResponseSchema,
+      },
     },
-  },
-})
+  }
+)
 
 export default router

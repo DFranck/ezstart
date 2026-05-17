@@ -17,6 +17,7 @@ import { z } from 'zod'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 
 export const changePasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -27,7 +28,16 @@ const changePasswordSchema = z.object({
     .string()
     .optional()
     .describe('Current password (not required for OAuth-only users)'),
-  newPassword: z.string().min(8).max(128).describe('New password (min 8, max 128 chars)'),
+  // HAC-HIGH-5 (2026-05-17) — bumped from min(8) → min(12) to align with
+  // `RegisterRequestSchema` / `ResetPasswordRequestSchema`. Previously a
+  // user could downgrade their password floor from 12 chars (set at
+  // registration) to 8 chars via this route — see `standard-saas-security.md`
+  // §2. Server SHOULD also enforce zxcvbn + HIBP at runtime.
+  newPassword: z
+    .string()
+    .min(12, 'newPassword must be at least 12 characters')
+    .max(128)
+    .describe('New password (12-128 characters; server must also enforce zxcvbn + HIBP check)'),
 })
 
 const changePasswordController = async (req: Request, res: Response) => {
@@ -91,6 +101,11 @@ docRouter.put(
   createStrictRateLimiter(),
   verifyCookieCsrf,
   authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — anti account-takeover: an unverified account
+  // (potentially controlled only because the attacker grabbed a victim's
+  // email at signup but never proved control) must not be able to change
+  // its password. Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
   changePasswordController,
   {
     summary: 'Change own password (or create password for OAuth users)',
@@ -99,6 +114,10 @@ docRouter.put(
     extraResponses: {
       400: { description: 'Current password required', schema: errorResponseSchema },
       401: { description: 'Current password incorrect', schema: errorResponseSchema },
+      403: {
+        description: 'Email not verified — `code: EMAIL_VERIFICATION_REQUIRED`',
+        schema: errorResponseSchema,
+      },
       404: { description: 'User not found', schema: errorResponseSchema },
     },
   }

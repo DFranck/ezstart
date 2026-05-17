@@ -13,6 +13,7 @@ import { AuthService } from '../../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import QRCode from 'qrcode'
 import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
+import { requireEmailVerified } from '../../../middleware/require-email-verified.js'
 
 export const twoFactorSetupRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -45,9 +46,20 @@ const setupController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/2fa/setup', setupRateLimiter, authMiddleware, setupController, {
-  summary: 'Generate TOTP secret for 2FA setup',
-  tags: ['Two-Factor Authentication'],
-})
+docRouter.post(
+  '/2fa/setup',
+  setupRateLimiter,
+  authMiddleware,
+  // HAC-HIGH-2 (2026-05-17) — 2FA enrollment is meaningless on an account
+  // whose email is not yet verified (the attacker who grabbed the email
+  // could enroll their own TOTP and lock out the real owner forever).
+  // Cf. `standard-saas-security.md` §2.
+  requireEmailVerified,
+  setupController,
+  {
+    summary: 'Generate TOTP secret for 2FA setup',
+    tags: ['Two-Factor Authentication'],
+  }
+)
 
 export default router

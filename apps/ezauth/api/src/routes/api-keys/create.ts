@@ -11,6 +11,7 @@ import { Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 import { Types } from 'mongoose'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { requireEmailVerified } from '../../middleware/require-email-verified.js'
 import { getApiKeyModel } from '../../models/api-key.js'
 import { getApplicationModel, APPLICATION_SLUG_REGEX } from '../../models/application.js'
 import { generateRawApiKey, hashApiKey, extractKeyPrefix } from '../../utils/api-key.js'
@@ -250,20 +251,30 @@ const createApiKeyController = async (req: Request, res: Response) => {
   }
 }
 
-docRouter.post('/keys', authJwtOrKey({ requireKeyScope: 'admin' }), createApiKeyController, {
-  summary: 'Create a new API key',
-  tags: ['API Keys'],
-  bodySchema: createApiKeyBodySchema,
-  responseSchema: createApiKeyResponseSchema,
-  extraResponses: {
-    400: { description: 'Validation error or limit reached', schema: errorResponseSchema },
-    401: { description: 'Authentication required', schema: errorResponseSchema },
-    403: {
-      description: 'Forbidden (platform-wide or non-owned Application)',
-      schema: errorResponseSchema,
+docRouter.post(
+  '/keys',
+  authJwtOrKey({ requireKeyScope: 'admin' }),
+  // HAC-HIGH-2 (2026-05-17) — gate API key creation behind email verification.
+  // An unverified account must not be able to mint keys that grant access to
+  // paid features (cf. `standard-saas-security.md` §2 "email verification gate").
+  requireEmailVerified,
+  createApiKeyController,
+  {
+    summary: 'Create a new API key',
+    tags: ['API Keys'],
+    bodySchema: createApiKeyBodySchema,
+    responseSchema: createApiKeyResponseSchema,
+    extraResponses: {
+      400: { description: 'Validation error or limit reached', schema: errorResponseSchema },
+      401: { description: 'Authentication required', schema: errorResponseSchema },
+      403: {
+        description:
+          'Forbidden (platform-wide, non-owned Application, or email not verified — `code: EMAIL_VERIFICATION_REQUIRED`)',
+        schema: errorResponseSchema,
+      },
+      404: { description: 'Application not found', schema: errorResponseSchema },
     },
-    404: { description: 'Application not found', schema: errorResponseSchema },
-  },
-})
+  }
+)
 
 export default router
