@@ -16,8 +16,43 @@
 import { getApiUrl, type AppName } from '@ezstart/config/urls'
 import { logger } from '@ezstart/logger'
 import { createApiClient } from './core/create-client.js'
+import type { ApiCallOptions, StreamCallbacks } from './core/types.js'
 
 const STORAGE_KEY = 'ezauth-storage'
+
+// ---------------------------------------------------------------------------
+// Deprecation runtime warnings (cf. standard-ui.md §10 + standard-sdk-dx §10)
+// ---------------------------------------------------------------------------
+// The monorepo wrapper (`apiCall` / `apiQuery` / `apiStream`) is deprecated in
+// favour of the agnostic `createApiClient` factory from `@ezstart/api-sdk/core`.
+// It is preserved for backwards-compat with the 75+ monorepo files that still
+// import it; deletion + Provider-DI migration is tracked as Wave D. Until then,
+// every consumer call surfaces a one-time-per-session warn so we measure usage
+// before pulling the trigger.
+
+// Module-level dedup set — each deprecated export warns ONE TIME per session.
+const _warnedDeprecations = new Set<string>()
+
+/**
+ * Emit a deprecation warning for a wrapper export, once per session.
+ * Goes through `@ezstart/logger` (the wrapper's existing dep) so the
+ * warning is consistent with the SDK's logging surface.
+ *
+ * @internal
+ */
+function _warnWrapperDeprecation(exportName: string, replacement: string): void {
+  if (_warnedDeprecations.has(exportName)) return
+  _warnedDeprecations.add(exportName)
+  try {
+    logger.warn(
+      `[api-sdk] '${exportName}' from '@ezstart/api-sdk' is deprecated. ` +
+        `Use ${replacement} instead. The legacy wrapper will be removed in a future major. ` +
+        `See https://github.com/DFranck/ezstart/tree/master/packages/api-sdk#migration`
+    )
+  } catch {
+    // logger.warn must never throw — defensive (cf. standard-sdk-dx §11bis.2)
+  }
+}
 
 type StoredState = {
   accessToken?: string
@@ -93,12 +128,48 @@ export const ezstartClient = createApiClient({
 
 /**
  * Bound `apiCall` that routes through the @ezstart configuration.
+ *
+ * @deprecated Use `createApiClient({ baseUrl, ... }).apiCall` from
+ * `@ezstart/api-sdk/core` (or the root entry) instead. This wrapper requires
+ * the monorepo-only `@ezstart/config` + `@ezstart/logger` peer dependencies
+ * and will be removed once the Provider-DI refactor lands. Consumer code
+ * outside the monorepo should never reach this export — install
+ * `@ezstart/api-sdk` + `@ezstart/api-contracts` only and build your own
+ * client.
  */
-export const apiCall = ezstartClient.apiCall
-/** Bound `apiStream` that routes through the @ezstart configuration. */
-export const apiStream = ezstartClient.apiStream
-/** Bound `apiQuery(appName)` that routes through the @ezstart configuration. */
-export const apiQuery = ezstartClient.apiQuery
+export function apiCall<T = unknown>(endpoint: string, options?: ApiCallOptions): Promise<T> {
+  _warnWrapperDeprecation('apiCall', 'createApiClient(...).apiCall')
+  return ezstartClient.apiCall<T>(endpoint, options)
+}
+
+/**
+ * Bound `apiStream` that routes through the @ezstart configuration.
+ *
+ * @deprecated Use `createApiClient({ baseUrl, ... }).apiStream` from
+ * `@ezstart/api-sdk/core` (or the root entry) instead. Same removal plan as
+ * {@link apiCall}.
+ */
+export function apiStream(
+  endpoint: string,
+  options: ApiCallOptions & StreamCallbacks
+): Promise<void> {
+  _warnWrapperDeprecation('apiStream', 'createApiClient(...).apiStream')
+  return ezstartClient.apiStream(endpoint, options)
+}
+
+/**
+ * Bound `apiQuery(appName)` that routes through the @ezstart configuration.
+ *
+ * @deprecated Use `createApiClient({ baseUrl, ... }).apiQuery` from
+ * `@ezstart/api-sdk/core` (or the root entry) instead. Same removal plan as
+ * {@link apiCall}.
+ */
+export function apiQuery(
+  appName: Parameters<typeof ezstartClient.apiQuery>[0]
+): ReturnType<typeof ezstartClient.apiQuery> {
+  _warnWrapperDeprecation('apiQuery', 'createApiClient(...).apiQuery')
+  return ezstartClient.apiQuery(appName)
+}
 
 /**
  * Reset the module-level refresh inflight promise (test-only).
