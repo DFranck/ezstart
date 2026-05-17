@@ -39,6 +39,24 @@ export function normalizeEndpoint(endpoint: string, prefix: string): string {
  * @internal
  *
  * Append query params to a URL (skips `undefined`/`null`).
+ *
+ * Preserves a trailing `#fragment` if present: the query string is inserted
+ * BEFORE the fragment, never after. A naive `${url}?${qs}` concatenation
+ * would attach the query string inside the fragment, which the browser and
+ * most HTTP servers interpret as part of the fragment identifier (the
+ * fragment is not even sent to the server), silently dropping the params.
+ *
+ * @example
+ * appendQuery('https://api.example.com/users', { page: 2 })
+ * // → 'https://api.example.com/users?page=2'
+ *
+ * @example
+ * appendQuery('https://api.example.com/users#section', { page: 2 })
+ * // → 'https://api.example.com/users?page=2#section'
+ *
+ * @example
+ * appendQuery('https://api.example.com/users?sort=name#top', { page: 2 })
+ * // → 'https://api.example.com/users?sort=name&page=2#top'
  */
 export function appendQuery(url: string, query?: QueryParams): string {
   if (!query || Object.keys(query).length === 0) return url
@@ -50,7 +68,14 @@ export function appendQuery(url: string, query?: QueryParams): string {
   }
   const qs = params.toString()
   if (qs.length === 0) return url
-  return url.includes('?') ? `${url}&${qs}` : `${url}?${qs}`
+
+  // Split BEFORE the fragment so the query lands on the path, not inside `#…`.
+  // Use `indexOf` + `slice` (zero regex, zero extra allocation vs split).
+  const hashIndex = url.indexOf('#')
+  const base = hashIndex === -1 ? url : url.slice(0, hashIndex)
+  const fragment = hashIndex === -1 ? '' : url.slice(hashIndex)
+  const separator = base.includes('?') ? '&' : '?'
+  return `${base}${separator}${qs}${fragment}`
 }
 
 /**
