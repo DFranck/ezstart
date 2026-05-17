@@ -1,5 +1,6 @@
 import createIntlMiddleware from 'next-intl/middleware'
 import { createAuthMiddleware } from '@ezstart/auth-sdk'
+import { getWebUrl } from '@ezstart/config'
 import { routing } from './i18n/routing'
 
 const intlMiddleware = createIntlMiddleware(routing)
@@ -7,6 +8,7 @@ const intlMiddleware = createIntlMiddleware(routing)
 export default createAuthMiddleware({
   appName: 'gacha-analyzer',
   authMode: 'httpOnly',
+  ezauthUrl: getWebUrl('ezauth'),
   protectedPaths: [],
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,

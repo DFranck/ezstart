@@ -12,10 +12,11 @@
  * is strictly an improvement (read-only addition, no data shape change).
  *
  * **Server-only.** Do NOT import from client code — Mongoose is a server-only
- * dependency. We intentionally do NOT add `import 'server-only'` here because
- * Express APIs (the primary consumer) run under vitest's node env where the
- * `server-only` shim throws regardless of context. The `mongoose` peer dep
- * already prevents accidental client bundling.
+ * dependency. We rely on the project's own `_internal/server-only.js` guard
+ * (a Node-safe runtime check on `process.versions.node`) rather than the
+ * `server-only` npm package, which throws at module load outside Next.js'
+ * `react-server` condition and would crash raw-Node API services at boot.
+ * The `mongoose` peer dep additionally prevents accidental client bundling.
  *
  * @example
  * ```ts
@@ -32,6 +33,8 @@
  *
  * @module @ezstart/auth-sdk/server/api-key-usage-schema
  */
+
+import './_internal/server-only.js'
 
 import { Schema } from 'mongoose'
 

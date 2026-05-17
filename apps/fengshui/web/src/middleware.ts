@@ -1,5 +1,6 @@
 // apps/fengshui/web/middleware.ts
 import { createAuthMiddleware } from '@ezstart/auth-sdk'
+import { getWebUrl } from '@ezstart/config'
 import createIntlMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
 
@@ -12,6 +13,7 @@ const intlMiddleware = createIntlMiddleware(routing)
 export default createAuthMiddleware({
   appName: 'fengshui',
   authMode: 'httpOnly',
+  ezauthUrl: getWebUrl('ezauth'),
   protectedPaths: ['/dashboard'],
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,

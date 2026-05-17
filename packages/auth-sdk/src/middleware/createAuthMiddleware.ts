@@ -4,8 +4,13 @@
  * Provides centralized authentication middleware that works with:
  * - next-intl for i18n routing
  * - 3 authentication modes (httpOnly, jwt, localStorage)
- * - Auto-detection based on environment
+ * - Hostname-based auto-detection (localhost → localStorage)
  * - Dynamic redirects to EZAuth login
+ *
+ * Agnostic — accepts `ezauthUrl` (where to send unauthenticated users) and an
+ * optional `logger` (`{ debug, warn }`) via config. No coupling to
+ * `@ezstart/config` or `@ezstart/logger` — consumers resolve URLs and wire
+ * loggers explicitly.
  *
  * @example
  * ```ts
@@ -15,6 +20,7 @@
  * export default createAuthMiddleware({
  *   appName: 'ezbill',
  *   authMode: 'httpOnly',  // Auto-switches to localStorage in localhost
+ *   ezauthUrl: 'https://ezauth.example.com',
  *   protectedPaths: ['/dashboard', '/clients', '/invoices'],
  *   locales: ['en', 'fr'],
  *   defaultLocale: 'en'
@@ -23,16 +29,30 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { getWebUrl, getCurrentEnvironment, isEzstartDomain } from '@ezstart/config/urls'
-import { logger } from '@ezstart/logger'
+import type { ClientLogger } from '@ezstart/api-sdk/core'
 
 export type AuthMode = 'localStorage' | 'httpOnly' | 'jwt'
+
+/**
+ * Logger contract consumed by the middleware. Compatible with `ClientLogger`
+ * from `@ezstart/api-sdk/core` (defaults to silent no-op when absent).
+ */
+export type AuthMiddlewareLogger = ClientLogger
 
 export interface AuthMiddlewareConfig {
   /**
    * App name (e.g., 'ezbill', 'ezpay', 'green-pulse')
    */
   appName: string
+
+  /**
+   * Fully qualified EZAuth web URL used to build the login redirect when
+   * an unauthenticated user hits a protected path (e.g.
+   * `'https://ezauth.ezstart.xyz'`). Required for `httpOnly` mode — callers
+   * resolve this from their own env (e.g. `getWebUrl('ezauth')` in monorepo
+   * consumers, or `process.env.NEXT_PUBLIC_EZAUTH_WEB_URL` elsewhere).
+   */
+  ezauthUrl?: string
 
   /**
    * Authentication mode
@@ -87,6 +107,12 @@ export interface AuthMiddlewareConfig {
   intlMiddleware?: (request: NextRequest) => NextResponse | Response
 
   /**
+   * Optional logger. Defaults to a silent no-op when absent — callers opt in
+   * by passing their own (e.g. `@ezstart/logger`'s client logger or Pino).
+   */
+  logger?: AuthMiddlewareLogger
+
+  /**
    * Debug mode - logs all auth decisions without redirecting
    * Useful for troubleshooting auth issues in production
    *
@@ -102,22 +128,41 @@ export interface AuthMiddlewareConfig {
 }
 
 /**
- * Determine the actual auth mode to use based on environment and configuration
- * Same logic as AuthProvider for consistency
+ * Silent default logger — keeps the middleware agnostic. Callers opt in by
+ * passing `logger: <yourLogger>` in the config.
  */
-function resolveAuthMode(configuredMode: AuthMode, hostname: string, env: string): AuthMode {
+const noopLogger: AuthMiddlewareLogger = {
+  debug: () => {},
+  warn: () => {},
+}
+
+/**
+ * Detect whether a hostname runs inside the conventional `*.ezstart.xyz`
+ * deployment so we can keep the httpOnly cookie path enabled for first-party
+ * apps. External domains fall back to localStorage. Hostname matching is
+ * intentionally inlined here to keep this file agnostic of `@ezstart/config`.
+ */
+function isEzstartHostname(hostname: string): boolean {
+  return hostname === 'ezstart.xyz' || hostname.endsWith('.ezstart.xyz')
+}
+
+/**
+ * Determine the actual auth mode to use based on hostname and configuration.
+ * Same logic as AuthProvider for consistency.
+ */
+function resolveAuthMode(configuredMode: AuthMode, hostname: string, isLocal: boolean): AuthMode {
   // Rule 1: Force localStorage in localhost (skip auth checks entirely)
-  if (env === 'local') {
+  if (isLocal) {
     return 'localStorage'
   }
 
   // Rule 2: httpOnly on ezstart domain (OK)
-  if (configuredMode === 'httpOnly' && isEzstartDomain(hostname)) {
+  if (configuredMode === 'httpOnly' && isEzstartHostname(hostname)) {
     return 'httpOnly'
   }
 
   // Rule 3: httpOnly on external domain (fallback)
-  if (configuredMode === 'httpOnly' && !isEzstartDomain(hostname)) {
+  if (configuredMode === 'httpOnly' && !isEzstartHostname(hostname)) {
     return 'localStorage'
   }
 
@@ -148,12 +193,14 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
     authMode = 'localStorage',
     // jwtPublicKey is reserved for future signature verification on external domains
     jwtPublicKey: _jwtPublicKey,
+    ezauthUrl,
     protectedPaths,
     locales = ['en', 'fr'],
     // defaultLocale is reserved for future locale-aware redirects when intlMiddleware is omitted
     defaultLocale: _defaultLocale = 'en',
     cookieName = 'ezauth_session',
     intlMiddleware,
+    logger = noopLogger,
     debug = false,
   } = config
 
@@ -171,14 +218,13 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
 
     // Detect environment
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
-    const env = isLocalhost ? 'local' : getCurrentEnvironment()
 
     // Resolve actual auth mode
-    const resolvedMode = resolveAuthMode(authMode, hostname, env)
+    const resolvedMode = resolveAuthMode(authMode, hostname, isLocalhost)
 
     logger.debug(`[AuthMiddleware] ${pathname}`, {
       resolvedMode,
-      env,
+      isLocalhost,
       hostname,
     })
 
@@ -229,9 +275,23 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
         })
 
         if (!authCookie) {
-          // User not authenticated - redirect to EZAuth login
+          // User not authenticated - redirect to EZAuth login. Require an
+          // explicit `ezauthUrl` from config — callers resolve this from
+          // their own env (e.g. `getWebUrl('ezauth')` in the monorepo). If
+          // it's missing we fall through to `next()` and let the client-side
+          // guard handle redirection, rather than 500-ing on every request.
+          if (!ezauthUrl) {
+            logger.warn(
+              '[AuthMiddleware] httpOnly mode requires `ezauthUrl` in config — skipping redirect. ' +
+                'Pass `ezauthUrl: getWebUrl("ezauth")` (or equivalent) when calling createAuthMiddleware().'
+            )
+            if (intlMiddleware) {
+              return intlMiddleware(request)
+            }
+            return NextResponse.next()
+          }
+
           const appOrigin = currentUrl.origin
-          const ezauthUrl = getWebUrl('ezauth', env)
 
           // Build redirect URL with locale preserved (critical for i18n apps)
           // Without locale prefix, callback fails and creates redirect loop
