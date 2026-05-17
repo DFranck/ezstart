@@ -16,6 +16,7 @@ import { logger } from '@ezstart/logger/server'
 import { z } from 'zod'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../../../config/env.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../../config/jwt.js'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import {
   ACCESS_COOKIE_NAME,
@@ -58,11 +59,16 @@ const validateController = async (req: Request, res: Response) => {
 
     const { tempToken, code } = parsed.data
 
-    // Verify the temp token
+    // Verify the temp token — HAC-CRIT-2 enforces iss/aud so a
+    // cross-API access token cannot be replayed here as a `2fa_pending`
+    // temp token (the type check below is a second layer, this rejects
+    // earlier).
     let payload: TwoFactorPendingPayload
     try {
       payload = jwt.verify(tempToken, JWT_SECRET, {
         algorithms: ['HS256'],
+        issuer: JWT_ISSUER,
+        audience: JWT_VERIFIER_AUDIENCE,
       }) as TwoFactorPendingPayload
     } catch {
       return sendError(res, 'Invalid or expired temporary token', 401)

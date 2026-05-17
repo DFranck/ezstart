@@ -22,6 +22,7 @@ import {
 } from '@ezstart/auth-sdk/server'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../../config/env.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
 
 export const loginRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -71,7 +72,9 @@ const loginController = async (req: Request, res: Response) => {
     const has2FA = await TotpService.isEnabled(userId)
 
     if (has2FA) {
-      // Return a temporary token that must be exchanged with a 2FA code
+      // Return a temporary token that must be exchanged with a 2FA code.
+      // HAC-CRIT-2 — temp tokens are consumed by ezauth's /auth/2fa/validate
+      // endpoint only, so we stamp + verify against `aud: 'ezauth'`.
       const tempToken = jwt.sign(
         {
           userId,
@@ -80,7 +83,12 @@ const loginController = async (req: Request, res: Response) => {
           type: '2fa_pending',
         },
         JWT_SECRET,
-        { expiresIn: '5m', algorithm: 'HS256' }
+        {
+          expiresIn: '5m',
+          algorithm: 'HS256',
+          issuer: JWT_ISSUER,
+          audience: JWT_VERIFIER_AUDIENCE,
+        }
       )
 
       return sendSuccess(res, {

@@ -224,6 +224,7 @@ describe('AuthService', () => {
   describe('verifyToken', () => {
     it('should verify a valid JWT', async () => {
       const user = await createUser({ email: 'jwt@example.com', username: 'jwtuser' })
+      // HAC-CRIT-2 — verifier enforces iss='ezauth' + aud='ezauth'.
       const token = jwt.sign(
         {
           userId: user._id!.toString(),
@@ -232,7 +233,12 @@ describe('AuthService', () => {
           apps: user.apps,
         },
         JWT_SECRET,
-        { expiresIn: '15m', algorithm: 'HS256' }
+        {
+          expiresIn: '15m',
+          algorithm: 'HS256',
+          issuer: 'ezauth',
+          audience: 'ezauth',
+        }
       )
 
       const payload = await AuthService.verifyToken(token)
@@ -248,10 +254,75 @@ describe('AuthService', () => {
       const token = jwt.sign(
         { userId: 'abc', email: 'e@e.com', username: 'u', apps: [] },
         JWT_SECRET,
-        { expiresIn: '0s', algorithm: 'HS256' }
+        {
+          expiresIn: '0s',
+          algorithm: 'HS256',
+          issuer: 'ezauth',
+          audience: 'ezauth',
+        }
       )
 
       await expect(AuthService.verifyToken(token)).rejects.toThrow('Invalid token')
+    })
+
+    // HAC-CRIT-2 — additional regression tests proving cross-API isolation.
+    it('should reject a token signed for a different audience (cross-API replay)', async () => {
+      const user = await createUser({ email: 'cross@example.com', username: 'crossuser' })
+      // Token minted for ezpay only — ezauth verifier must reject.
+      const ezpayOnlyToken = jwt.sign(
+        {
+          userId: user._id!.toString(),
+          email: user.email,
+          username: user.username,
+          apps: user.apps,
+        },
+        JWT_SECRET,
+        {
+          expiresIn: '15m',
+          algorithm: 'HS256',
+          issuer: 'ezauth',
+          audience: 'ezpay',
+        }
+      )
+
+      await expect(AuthService.verifyToken(ezpayOnlyToken)).rejects.toThrow('Invalid token')
+    })
+
+    it('should reject a token with no iss/aud claims (legacy pre-fix token)', async () => {
+      const user = await createUser({ email: 'legacy@example.com', username: 'legacyuser' })
+      const legacyToken = jwt.sign(
+        {
+          userId: user._id!.toString(),
+          email: user.email,
+          username: user.username,
+          apps: user.apps,
+        },
+        JWT_SECRET,
+        { expiresIn: '15m', algorithm: 'HS256' } // no iss, no aud
+      )
+
+      await expect(AuthService.verifyToken(legacyToken)).rejects.toThrow('Invalid token')
+    })
+
+    it('should reject a token with wrong issuer', async () => {
+      const user = await createUser({ email: 'wrong-iss@example.com', username: 'wrongissuser' })
+      const wrongIssuerToken = jwt.sign(
+        {
+          userId: user._id!.toString(),
+          email: user.email,
+          username: user.username,
+          apps: user.apps,
+        },
+        JWT_SECRET,
+        {
+          expiresIn: '15m',
+          algorithm: 'HS256',
+          issuer: 'evil-issuer',
+          audience: 'ezauth',
+        }
+      )
+
+      await expect(AuthService.verifyToken(wrongIssuerToken)).rejects.toThrow('Invalid token')
     })
   })
 
@@ -371,7 +442,13 @@ describe('AuthService', () => {
       })
 
       const session = await issueSession(user)
-      const decoded = jwt.verify(session.access_token, JWT_SECRET) as Record<string, unknown>
+      // HAC-CRIT-2 — issueSession stamps iss='ezauth' + aud=[...platform];
+      // verify against any one of those audiences proves the token is
+      // routable across the @ezstart suite.
+      const decoded = jwt.verify(session.access_token, JWT_SECRET, {
+        issuer: 'ezauth',
+        audience: 'ezauth',
+      }) as Record<string, unknown>
       expect(decoded.isVerified).toBe(true)
     })
 
@@ -386,7 +463,10 @@ describe('AuthService', () => {
       })
 
       const session = await issueSession(user)
-      const decoded = jwt.verify(session.access_token, JWT_SECRET) as Record<string, unknown>
+      const decoded = jwt.verify(session.access_token, JWT_SECRET, {
+        issuer: 'ezauth',
+        audience: 'ezauth',
+      }) as Record<string, unknown>
       expect(decoded.isVerified).toBe(false)
     })
   })

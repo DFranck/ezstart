@@ -156,6 +156,39 @@ export interface AuthMiddlewareConfig {
   jwtSecret: string
   /** Cookie name carrying the access JWT. Defaults to `'ez_access'`. */
   cookieName?: string
+  /**
+   * Expected JWT audience (RFC 7519 §4.1.3) for this consumer API. The
+   * middleware rejects any token whose `aud` claim does NOT contain this
+   * value with HTTP 401 + `code: 'INVALID_TOKEN'`.
+   *
+   * Set this to the slug of the consumer app (e.g. `'ezpay'`, `'ezbill'`,
+   * `'green-pulse'`) to prevent **cross-API token reuse**: when `JWT_SECRET`
+   * is shared across all @ezstart APIs (current production deployment), an
+   * ezauth-issued token without `aud` enforcement would be bit-for-bit
+   * valid at every other API too. Stamping `aud` on the sign side and
+   * enforcing it here is the second factor that blocks privilege
+   * escalation when one API's secret leaks.
+   *
+   * `jsonwebtoken` accepts either a string or an array on verify; passing
+   * a string is the typical (and strictest) usage — the token MUST list
+   * that exact string in its `aud` array.
+   *
+   * Defaults to `undefined` (no enforcement) for backwards compatibility
+   * with services that haven't migrated yet. **Strongly recommended** for
+   * any service that trusts a shared `JWT_SECRET`.
+   *
+   * @example { audience: 'ezpay' }
+   */
+  audience?: string | string[]
+  /**
+   * Expected JWT issuer (RFC 7519 §4.1.1). Defaults to `undefined` (no
+   * enforcement). Set to `'ezauth'` to require that the token was minted
+   * by the @ezstart identity provider — pairs naturally with `audience`
+   * above to form the full HAC-CRIT-2 defence.
+   *
+   * @example { issuer: 'ezauth' }
+   */
+  issuer?: string | string[]
   /** Factory returning the ApiKey Mongoose model (must be ready). */
   getApiKeyModel: () => Promise<AuthMiddlewareModel<ApiKeyDoc>>
   /** Factory returning the ApiKeyUsage Mongoose model (must be ready). */
@@ -327,6 +360,28 @@ export function createAuthMiddleware(
   const log = config.logger ?? noopLogger
   const cacheTtlMs = config.usageCacheTtlMs ?? 5 * 60 * 1000
 
+  // HAC-CRIT-2 — normalise the iss/aud options into the tuple shape
+  // `jsonwebtoken` expects. Bare `string[]` is rejected at the type level
+  // because the lib insists on `[string, ...string[]]`. Empty arrays
+  // degrade to "no enforcement" (undefined) to keep the back-compat path.
+  const verifyAudience: jwt.VerifyOptions['audience'] | undefined =
+    config.audience === undefined
+      ? undefined
+      : Array.isArray(config.audience)
+        ? config.audience.length === 0
+          ? undefined
+          : ([config.audience[0], ...config.audience.slice(1)] as [string, ...string[]])
+        : config.audience
+
+  const verifyIssuer: jwt.VerifyOptions['issuer'] | undefined =
+    config.issuer === undefined
+      ? undefined
+      : Array.isArray(config.issuer)
+        ? config.issuer.length === 0
+          ? undefined
+          : ([config.issuer[0], ...config.issuer.slice(1)] as [string, ...string[]])
+        : config.issuer
+
   // Per-factory monthly quota cache. Each instance has its own cache so
   // multiple factories (rare) don't share state. Tests can pass
   // `usageCacheTtlMs: 0` to disable caching entirely.
@@ -394,8 +449,15 @@ export function createAuthMiddleware(
     if (!token) return null
 
     try {
+      // HAC-CRIT-2 — enforce iss/aud when configured so a cross-API token
+      // (or one forged outside the legitimate sign path) is rejected by
+      // `jwt.verify` itself with `JsonWebTokenError`. Both options omitted
+      // when undefined to keep back-compat behaviour for consumers that
+      // haven't migrated.
       const payload = jwt.verify(token, config.jwtSecret, {
         algorithms: ['HS256'],
+        ...(verifyIssuer !== undefined ? { issuer: verifyIssuer } : {}),
+        ...(verifyAudience !== undefined ? { audience: verifyAudience } : {}),
       }) as unknown as JWTPayload
 
       const attached = await attachUserToRequest(req, payload.userId)

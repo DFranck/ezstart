@@ -330,6 +330,140 @@ describe('createAuthMiddleware — JWT path', () => {
   })
 })
 
+// HAC-CRIT-2 — iss/aud enforcement regression suite for the SDK middleware.
+describe('createAuthMiddleware — JWT iss/aud enforcement (HAC-CRIT-2)', () => {
+  it('accepts a token with matching audience when `audience` is configured', async () => {
+    const user = makeUser()
+    const cfg = buildConfig({
+      audience: 'ezpay',
+      issuer: 'ezauth',
+      getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
+    })
+    const middleware = createAuthMiddleware(cfg)()
+    const token = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'ezauth',
+      audience: ['ezauth', 'ezpay'],
+    })
+    const req = { headers: {}, cookies: { [COOKIE_NAME]: token }, path: '/' } as never
+    const res = makeRes()
+    await new Promise<void>(resolve => {
+      middleware(req, res as never, () => resolve())
+    })
+    expect(res.json).not.toHaveBeenCalled()
+    expect((req as { userId?: string }).userId).toBe('user-123')
+  })
+
+  it('rejects a token whose audience excludes the configured audience (cross-API replay)', async () => {
+    const user = makeUser()
+    const cfg = buildConfig({
+      audience: 'ezpay',
+      issuer: 'ezauth',
+      getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
+    })
+    const middleware = createAuthMiddleware(cfg)()
+    // Token minted for ezbill only — must not authenticate ezpay.
+    const ezbillOnly = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'ezauth',
+      audience: 'ezbill',
+    })
+    const req = { headers: {}, cookies: { [COOKIE_NAME]: ezbillOnly }, path: '/' } as never
+    const res = makeRes()
+    await new Promise<void>(resolve => {
+      middleware(req, res as never, () => resolve())
+      setTimeout(resolve, 50)
+    })
+    expect(res.status).toHaveBeenCalledWith(401)
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.objectContaining({ code: 'INVALID_TOKEN' }),
+      })
+    )
+  })
+
+  it('rejects a token with no iss/aud claims (legacy pre-fix token)', async () => {
+    const user = makeUser()
+    const cfg = buildConfig({
+      audience: 'ezpay',
+      issuer: 'ezauth',
+      getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
+    })
+    const middleware = createAuthMiddleware(cfg)()
+    const legacy = jwt.sign({ userId: 'user-123' }, JWT_SECRET, { algorithm: 'HS256' })
+    const req = { headers: {}, cookies: { [COOKIE_NAME]: legacy }, path: '/' } as never
+    const res = makeRes()
+    await new Promise<void>(resolve => {
+      middleware(req, res as never, () => resolve())
+      setTimeout(resolve, 50)
+    })
+    expect(res.status).toHaveBeenCalledWith(401)
+  })
+
+  it('rejects a token with wrong issuer', async () => {
+    const user = makeUser()
+    const cfg = buildConfig({
+      audience: 'ezpay',
+      issuer: 'ezauth',
+      getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
+    })
+    const middleware = createAuthMiddleware(cfg)()
+    const forged = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'evil-issuer',
+      audience: 'ezpay',
+    })
+    const req = { headers: {}, cookies: { [COOKIE_NAME]: forged }, path: '/' } as never
+    const res = makeRes()
+    await new Promise<void>(resolve => {
+      middleware(req, res as never, () => resolve())
+      setTimeout(resolve, 50)
+    })
+    expect(res.status).toHaveBeenCalledWith(401)
+  })
+
+  it('backward-compat — accepts any-audience token when `audience` is unset', async () => {
+    const user = makeUser()
+    const cfg = buildConfig({
+      // no audience / issuer set — legacy behaviour
+      getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
+    })
+    const middleware = createAuthMiddleware(cfg)()
+    const anyAud = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+      algorithm: 'HS256',
+      audience: 'literally-anything',
+    })
+    const req = { headers: {}, cookies: { [COOKIE_NAME]: anyAud }, path: '/' } as never
+    const res = makeRes()
+    await new Promise<void>(resolve => {
+      middleware(req, res as never, () => resolve())
+    })
+    expect(res.json).not.toHaveBeenCalled()
+    expect((req as { userId?: string }).userId).toBe('user-123')
+  })
+
+  it('audience array — accepts a token whose audience matches any entry', async () => {
+    const user = makeUser()
+    const cfg = buildConfig({
+      audience: ['ezpay', 'ezbill'],
+      issuer: 'ezauth',
+      getAuthUserModel: vi.fn(async () => buildAuthUserModel(user)),
+    })
+    const middleware = createAuthMiddleware(cfg)()
+    const token = jwt.sign({ userId: 'user-123' }, JWT_SECRET, {
+      algorithm: 'HS256',
+      issuer: 'ezauth',
+      audience: 'ezbill',
+    })
+    const req = { headers: {}, cookies: { [COOKIE_NAME]: token }, path: '/' } as never
+    const res = makeRes()
+    await new Promise<void>(resolve => {
+      middleware(req, res as never, () => resolve())
+    })
+    expect(res.json).not.toHaveBeenCalled()
+  })
+})
+
 describe('createAuthMiddleware — API key path', () => {
   it('accepts a valid X-API-Key, attaches user and stamps legacy req fields', async () => {
     const user = makeUser()

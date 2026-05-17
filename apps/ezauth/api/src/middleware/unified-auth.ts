@@ -32,6 +32,7 @@ import {
 } from '@ezstart/auth-sdk/server'
 import { logger } from '@ezstart/logger/server'
 import { JWT_SECRET } from '../config/env.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../config/jwt.js'
 import { ACCESS_COOKIE_NAME } from '../config/cookie.js'
 import { getApiKeyModel } from '../models/api-key.js'
 import { getApiKeyUsageModel } from '../models/api-key-usage.js'
@@ -40,10 +41,18 @@ import { updatePresenceByUserId } from '../services/presence.service.js'
 
 // Bound, app-scoped factory. One instance per process — safe because every
 // dependency (env, models, presence) is process-singleton.
+//
+// HAC-CRIT-2 — enforce iss/aud on every JWT verify so a token minted for
+// another @ezstart API (or by an attacker bypassing the sign path) is
+// rejected here. Mirrors the constants used in the standalone
+// `middleware/auth.ts` verifier (which guards routes not going through
+// the SDK-based unified middleware).
 const authJwtOrKeyFactory = createAuthMiddleware({
   appName: 'ezauth',
   jwtSecret: JWT_SECRET,
   cookieName: ACCESS_COOKIE_NAME,
+  issuer: JWT_ISSUER,
+  audience: JWT_VERIFIER_AUDIENCE,
   getApiKeyModel: getApiKeyModel as never,
   getApiKeyUsageModel: getApiKeyUsageModel as never,
   getAuthUserModel: getAuthUserModel as never,

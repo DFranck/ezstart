@@ -16,6 +16,7 @@ import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
 import { hashRefreshToken, getRefreshTokenModel } from '../../models/refresh-token.js'
 import { JWT_SECRET } from '../../config/env.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
 import {
   ACCESS_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
@@ -60,8 +61,13 @@ function extractUserIdFromRequest(req: Request): string | null {
 
     if (!token) return null
 
+    // HAC-CRIT-2 — enforce iss/aud so a cross-API or forged token cannot
+    // resolve a userId via this best-effort helper. Catch below degrades
+    // to anonymous logout (cookie clear still happens).
     const payload = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_VERIFIER_AUDIENCE,
     }) as unknown as JWTPayload
     return payload.userId ?? null
   } catch {

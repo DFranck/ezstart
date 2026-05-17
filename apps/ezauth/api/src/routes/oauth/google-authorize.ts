@@ -14,6 +14,7 @@ import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import { logger } from '@ezstart/logger/server'
 import passport, { OAUTH_STATE_COOKIE, signOAuthStateToken } from '../../config/passport.js'
 import { JWT_SECRET } from '../../config/env.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
 import { ACCESS_COOKIE_NAME } from '../../config/cookie.js'
 
 export const googleAuthorizeRegistry = new OpenAPIRegistry()
@@ -54,8 +55,12 @@ function extractCurrentUserId(req: Request): string | undefined {
   }
   if (!token) return undefined
   try {
+    // HAC-CRIT-2 — enforce iss/aud so a cross-API token cannot resolve
+    // a userId via this best-effort helper.
     const payload = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_VERIFIER_AUDIENCE,
     }) as unknown as JWTPayload
     return payload.userId
   } catch {

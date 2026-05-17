@@ -2,7 +2,16 @@ import { createApiAuth, type RequestHandler } from '@ezstart/api-core'
 import { hasAnyRole } from '@ezstart/auth-sdk/rbac/client'
 import type { Request, Response, NextFunction } from 'express'
 
-const auth = createApiAuth()
+// HAC-CRIT-2 — enforce iss/aud on every JWT verify so an ezauth-issued
+// token for `aud: ['ezauth', 'ezbill', ...]` (without 'ezpay' in the
+// audience list) is rejected here as 401. Even though every @ezstart API
+// trusts the same shared `JWT_SECRET`, the audience acts as a second
+// factor that ties the token to the consumer it was minted for. See
+// apps/ezauth/api/src/config/jwt.ts for the sign-side mirror.
+const auth = createApiAuth({
+  issuer: 'ezauth',
+  audience: 'ezpay',
+})
 export const authMiddleware: RequestHandler = auth.authMiddleware
 export const optionalAuthMiddleware: RequestHandler = auth.optionalAuthMiddleware
 

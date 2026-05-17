@@ -19,6 +19,7 @@ import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
 import { JWT_SECRET, env } from '../config/env.js'
 import { ACCESS_TOKEN_EXPIRES_SECONDS } from '../config/cookie.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE, defaultSignAudience } from '../config/jwt.js'
 import {
   LOCKOUT_DURATION_MS,
   MAX_FAILED_LOGIN_ATTEMPTS,
@@ -108,9 +109,14 @@ export async function issueSession(
   meta?: { userAgent?: string; ip?: string }
 ): Promise<AuthToken & { refreshToken: string }> {
   const payload = await buildJwtPayload(user)
+  // HAC-CRIT-2 — stamp `iss` + `aud` so cross-API token replay is rejected
+  // by every consumer's `jwt.verify({ issuer, audience })`. See
+  // ../config/jwt.ts for the rationale.
   const accessToken = jwt.sign({ ...payload }, JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     algorithm: 'HS256',
+    issuer: JWT_ISSUER,
+    audience: defaultSignAudience(),
   })
 
   const refreshToken = await AuthService.generateRefreshToken(
@@ -374,7 +380,13 @@ export class AuthService {
   // Verify JWT token
   static async verifyToken(token: string): Promise<JWTPayload> {
     try {
-      const payload = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as JWTPayload
+      // HAC-CRIT-2 — enforce iss/aud so tokens minted for another @ezstart
+      // app (or by an attacker bypassing the sign path) are rejected here.
+      const payload = jwt.verify(token, JWT_SECRET, {
+        algorithms: ['HS256'],
+        issuer: JWT_ISSUER,
+        audience: JWT_VERIFIER_AUDIENCE,
+      }) as JWTPayload
       return payload
     } catch {
       throw new Error('Invalid token')

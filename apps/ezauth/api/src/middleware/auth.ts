@@ -13,6 +13,7 @@ import { logger } from '@ezstart/logger/server'
 import { mapToRecord } from '../utils/map-to-record.js'
 import { JWT_SECRET } from '../config/env.js'
 import { ACCESS_COOKIE_NAME } from '../config/cookie.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../config/jwt.js'
 
 /** Extract a Bearer/cookie token from the request, or return undefined. */
 function extractToken(req: Request): string | undefined {
@@ -77,8 +78,12 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       return sendError(res, 'Authentication required', 401)
     }
 
+    // HAC-CRIT-2 — enforce iss/aud so a token minted for another app (or
+    // by an attacker bypassing the sign path) is rejected with 401 here.
     const payload = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_VERIFIER_AUDIENCE,
     }) as unknown as JWTPayload
 
     const attached = await attachUserToRequest(req, payload.userId)
@@ -110,8 +115,13 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
       return next()
     }
 
+    // HAC-CRIT-2 — same iss/aud enforcement as the required path; an
+    // invalid/cross-API token degrades to anonymous (no rejection here
+    // because this middleware is opt-in).
     const payload = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_VERIFIER_AUDIENCE,
     }) as unknown as JWTPayload
     await attachUserToRequest(req, payload.userId)
     next()

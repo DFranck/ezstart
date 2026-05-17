@@ -24,6 +24,13 @@ import type { ApiKeyScope } from '../../models/api-key.js'
 // JWT_SECRET mirrors config/env.ts test fallback
 const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-do-not-use-in-prod'
 
+// HAC-CRIT-2 — fixtures must mint tokens with the same iss/aud claims
+// production code emits, otherwise `jwt.verify` on the routes side would
+// reject them as 401 (audience invalid / invalid issuer). Kept as plain
+// string literals here so the helper has zero import on app source.
+const TEST_JWT_ISSUER = 'ezauth'
+const TEST_JWT_AUDIENCE = ['ezauth', 'ezpay', 'ezbill', 'green-pulse']
+
 export interface CreateUserOptions {
   email?: string
   username?: string
@@ -187,7 +194,12 @@ export function generateAccessToken(
       twoFactorEnabled: opts.twoFactorEnabled === true,
     },
     JWT_SECRET,
-    { expiresIn, algorithm: 'HS256' }
+    {
+      expiresIn,
+      algorithm: 'HS256',
+      issuer: TEST_JWT_ISSUER,
+      audience: TEST_JWT_AUDIENCE,
+    }
   )
 }
 
@@ -209,7 +221,12 @@ export function generateExpiredToken(user: AuthUserDocument): string {
       twoFactorEnabled: false,
     },
     JWT_SECRET,
-    { expiresIn: 0, algorithm: 'HS256' }
+    {
+      expiresIn: 0,
+      algorithm: 'HS256',
+      issuer: TEST_JWT_ISSUER,
+      audience: TEST_JWT_AUDIENCE,
+    }
   )
 }
 

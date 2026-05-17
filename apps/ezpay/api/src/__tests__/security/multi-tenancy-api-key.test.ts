@@ -497,7 +497,14 @@ describe('P0 multi-tenancy — admin API key cannot leak other slugs', () => {
           appRoles: { 'slug-acme': ['admin'] },
         },
         TEST_JWT_SECRET,
-        { algorithm: 'HS256', expiresIn: '5m' }
+        {
+          algorithm: 'HS256',
+          expiresIn: '5m',
+          // HAC-CRIT-2 — ezpay's verifier now enforces iss/aud; mint a
+          // token shaped like a production ezauth-issued one.
+          issuer: 'ezauth',
+          audience: ['ezauth', 'ezpay', 'ezbill', 'green-pulse'],
+        }
       )
 
       const res = await call<Array<{ projectId: string }>>(app, '/api/payments', {

@@ -81,10 +81,18 @@ async function seedKey(
   return { rawKey, doc }
 }
 
-function signJwt(payload: Record<string, unknown>, overrides: { secret?: string } = {}): string {
+function signJwt(
+  payload: Record<string, unknown>,
+  overrides: { secret?: string; audience?: string | string[]; issuer?: string } = {}
+): string {
+  // HAC-CRIT-2 — default to a token shape that ezpay's `createApiAuth`
+  // accepts (issuer='ezauth', audience contains 'ezpay'). Overrides let
+  // individual tests assert wrong-audience / wrong-issuer rejection.
   return jwt.sign(payload, overrides.secret ?? TEST_JWT_SECRET, {
     algorithm: 'HS256',
     expiresIn: '5m',
+    issuer: overrides.issuer ?? 'ezauth',
+    audience: overrides.audience ?? ['ezauth', 'ezpay', 'ezbill', 'green-pulse'],
   })
 }
 
@@ -268,9 +276,16 @@ describe('EZPay authJwtOrKey — unified JWT + API key middleware', () => {
     })
 
     it('expired JWT returns 401 (does NOT fall back to API-key path)', async () => {
+      // HAC-CRIT-2 — even an "expired" token must carry valid iss/aud
+      // claims to reach the expiry check; otherwise the audience/issuer
+      // mismatch fires first (also a 401). Either way the 401 contract is
+      // preserved; we keep the audience valid so the assertion exercises
+      // the TTL path specifically.
       const expired = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_JWT_SECRET, {
         algorithm: 'HS256',
         expiresIn: -1,
+        issuer: 'ezauth',
+        audience: ['ezauth', 'ezpay', 'ezbill', 'green-pulse'],
       })
       const res = await call(app, '/user-route', { authorization: `Bearer ${expired}` })
       expect(res.status).toBe(401)
@@ -280,6 +295,46 @@ describe('EZPay authJwtOrKey — unified JWT + API key middleware', () => {
       const bad = signJwt({ userId: '507f1f77bcf86cd799439011' }, { secret: 'wrong-secret' })
       const res = await call(app, '/user-route', { authorization: `Bearer ${bad}` })
       expect(res.status).toBe(401)
+    })
+
+    // HAC-CRIT-2 — cross-API replay protection regression suite.
+    it('JWT with audience that excludes ezpay returns 401 (cross-API replay)', async () => {
+      // Token minted for ezbill only — even though JWT_SECRET is shared,
+      // ezpay's verifier must reject it because `aud` lacks `'ezpay'`.
+      const ezbillOnly = signJwt({ userId: '507f1f77bcf86cd799439011' }, { audience: 'ezbill' })
+      const res = await call(app, '/user-route', { authorization: `Bearer ${ezbillOnly}` })
+      expect(res.status).toBe(401)
+    })
+
+    it('JWT with no audience claim returns 401 (legacy pre-fix token)', async () => {
+      // Bypass the helper to emit a claim-less token (mirrors a token
+      // issued before HAC-CRIT-2 was deployed).
+      const legacy = jwt.sign({ userId: '507f1f77bcf86cd799439011' }, TEST_JWT_SECRET, {
+        algorithm: 'HS256',
+        expiresIn: '5m',
+        // no iss, no aud
+      })
+      const res = await call(app, '/user-route', { authorization: `Bearer ${legacy}` })
+      expect(res.status).toBe(401)
+    })
+
+    it('JWT with wrong issuer returns 401 (forged outside ezauth)', async () => {
+      const forged = signJwt({ userId: '507f1f77bcf86cd799439011' }, { issuer: 'evil-issuer' })
+      const res = await call(app, '/user-route', { authorization: `Bearer ${forged}` })
+      expect(res.status).toBe(401)
+    })
+
+    it('JWT with audience array containing ezpay is accepted', async () => {
+      // Production tokens carry the full platform list; verify ezpay
+      // accepts a token whose `aud` lists multiple consumers as long as
+      // `'ezpay'` is among them.
+      const platformToken = signJwt(
+        { userId: '507f1f77bcf86cd799439011', globalRoles: [] },
+        { audience: ['ezauth', 'ezpay', 'ezbill'] }
+      )
+      const res = await call(app, '/user-route', { authorization: `Bearer ${platformToken}` })
+      // 200 (route handler echoes); does NOT 401 on audience grounds.
+      expect(res.status).toBe(200)
     })
   })
 

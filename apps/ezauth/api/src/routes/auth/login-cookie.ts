@@ -21,6 +21,7 @@ import {
 } from '@ezstart/auth-sdk/server'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../../config/env.js'
+import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
 import {
   ACCESS_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
@@ -56,6 +57,8 @@ const loginCookieController = async (req: Request, res: Response) => {
     const has2FA = await TotpService.isEnabled(userId)
 
     if (has2FA) {
+      // HAC-CRIT-2 — temp tokens are consumed by ezauth's /auth/2fa/validate
+      // endpoint only, so we stamp + verify against `aud: 'ezauth'`.
       const tempToken = jwt.sign(
         {
           userId,
@@ -65,7 +68,12 @@ const loginCookieController = async (req: Request, res: Response) => {
           mode: 'cookie',
         },
         JWT_SECRET,
-        { expiresIn: '5m', algorithm: 'HS256' }
+        {
+          expiresIn: '5m',
+          algorithm: 'HS256',
+          issuer: JWT_ISSUER,
+          audience: JWT_VERIFIER_AUDIENCE,
+        }
       )
 
       return sendSuccess(res, {
