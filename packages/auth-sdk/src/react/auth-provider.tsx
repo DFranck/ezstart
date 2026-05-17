@@ -269,10 +269,32 @@ export function AuthProvider({
   // would silently leak the previous session's `user` blob across reloads.
   const resolvedStorageKey = storageKey ?? getLegacyStorageKey() ?? 'ezauth-storage'
 
+  // Live reference to the active CoreAuthClient — wired by the
+  // `useMemo(() => new CoreAuthClient(...))` below. Hoisted here so the
+  // store factory closure can call `clientRef.current?.getCurrentUser()`
+  // when a cross-tab broadcast arrives (cf. HAC-HIGH-1 hardening in
+  // `store.ts`: the store NEVER trusts the broadcast payload — it
+  // re-fetches the authoritative user from the server). The closure is
+  // captured ONCE on first render and stays stable for the store's
+  // lifetime; the ref pointer is what we mutate when the client is
+  // re-created after a publishableKey / apiUrl change.
+  const clientRef = useRef<CoreAuthClient | null>(null)
+
   const [store] = useState(() =>
     createAuthStore({
       initialUser,
       storageKey: resolvedStorageKey,
+      fetchMe: async () => {
+        const c = clientRef.current
+        if (!c) return null
+        try {
+          return await c.getCurrentUser()
+        } catch {
+          // Surface as "no server confirmation" → store keeps current
+          // local state (debounce already guarded the call frequency).
+          return null
+        }
+      },
     })
   )
 
@@ -376,6 +398,11 @@ export function AuthProvider({
     () => new CoreAuthClient(resolved.clientConfig),
     [resolved.clientConfig.apiUrl, resolved.clientConfig.appName]
   )
+
+  // Publish the live client to the ref so the store's `fetchMe` closure
+  // (created once at mount) always resolves against the current client
+  // instance — handles publishableKey / apiUrl rotations transparently.
+  clientRef.current = client
 
   const resolvedWebUrl = resolved.webUrl
   const resolvedAppName = resolved.clientConfig.appName
