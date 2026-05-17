@@ -18,6 +18,26 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import React from 'react'
 import { toast } from 'sonner'
+
+// Spy on api-sdk's `bumpLogoutEpoch` BEFORE importing the auth-sdk hook so
+// the mock is in place when the module captures the binding. This proves
+// the Wave C CRIT-2 fix is actually wired end-to-end: `logout()` MUST
+// signal the api-sdk refresh helper before clearing the store, otherwise
+// a refresh in-flight at logout time silently re-hydrates fresh tokens.
+//
+// `vi.hoisted` is required: `vi.mock` is itself hoisted ABOVE top-level
+// const declarations, so a plain `const spy = vi.fn()` would still be
+// `undefined` when the mock factory runs. Hoisting the spy alongside the
+// mock keeps the binding ready in time.
+const { bumpLogoutEpochSpy } = vi.hoisted(() => ({
+  bumpLogoutEpochSpy: vi.fn(),
+}))
+vi.mock('@ezstart/api-sdk/core', async () => {
+  const actual =
+    await vi.importActual<typeof import('@ezstart/api-sdk/core')>('@ezstart/api-sdk/core')
+  return { ...actual, bumpLogoutEpoch: bumpLogoutEpochSpy }
+})
+
 import { useAuth } from '../../react/hooks.js'
 import { createAuthStore, type AuthStoreApi } from '../../react/store.js'
 import { AuthContext, AuthStoreContext } from '../../react/__contexts.js'
@@ -99,6 +119,7 @@ describe('useAuth().logout() — 8-step orchestrator', () => {
   beforeEach(() => {
     localStorage.clear()
     vi.clearAllMocks()
+    bumpLogoutEpochSpy.mockClear()
     // Force a unique storage key per test so persist rehydration from a
     // previous test does not pollute the new store.
     const key = `ezauth-test-${Math.random().toString(36).slice(2)}`
@@ -302,6 +323,51 @@ describe('useAuth().logout() — 8-step orchestrator', () => {
 
     expect(assignSpy).not.toHaveBeenCalled()
     // Local cleanup still ran.
+    expect(store.getState().isAuthenticated).toBe(false)
+  })
+
+  it('wires bumpLogoutEpoch BEFORE any other logout side-effect (CRIT-2)', async () => {
+    // Track call order across (a) bumpLogoutEpoch (api-sdk signal),
+    // (b) the server-side logout POST, and (c) the local store reset.
+    // The contract: bump MUST land first so any refresh in-flight at this
+    // very moment discards its resulting tokens instead of re-hydrating
+    // the store post-logout.
+    const callOrder: string[] = []
+    bumpLogoutEpochSpy.mockImplementation(() => {
+      callOrder.push('bump')
+    })
+    client.logout.mockImplementation(async () => {
+      callOrder.push('server')
+    })
+
+    // Patch the store's `logout` action to record when the reset runs.
+    const originalStoreLogout = store.getState().logout
+    store.setState({
+      logout: () => {
+        callOrder.push('storeReset')
+        originalStoreLogout()
+      },
+    })
+
+    const Wrapper = makeWrapper({ store, client, redirectAfterLogout: false })
+    const { result } = renderHook(() => useAuth(), { wrapper: Wrapper })
+
+    await act(async () => {
+      await result.current.logout()
+    })
+
+    // Exactly one bump per logout call.
+    expect(bumpLogoutEpochSpy).toHaveBeenCalledTimes(1)
+
+    // Order matters: bump → server POST → store reset. The bump being
+    // first is the security invariant we are testing; anything later
+    // would leave a window where an in-flight refresh can re-hydrate the
+    // store after the server already revoked the refresh token.
+    expect(callOrder[0]).toBe('bump')
+    expect(callOrder.indexOf('bump')).toBeLessThan(callOrder.indexOf('storeReset'))
+    expect(callOrder.indexOf('bump')).toBeLessThan(callOrder.indexOf('server'))
+
+    // Final state sanity — full flow still ran end-to-end.
     expect(store.getState().isAuthenticated).toBe(false)
   })
 })

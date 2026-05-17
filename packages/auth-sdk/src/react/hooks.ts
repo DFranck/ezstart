@@ -1,5 +1,6 @@
 'use client'
 
+import { bumpLogoutEpoch } from '@ezstart/api-sdk/core'
 import { toast } from 'sonner'
 import type { AuthLogger } from './auth-provider.js'
 import { useAuthContext, useAuthStore, useAuthStoreApi } from './auth-provider.js'
@@ -212,6 +213,19 @@ export function useAuth(logger?: AuthLogger) {
    * ```
    */
   const logout = async (options: LogoutOptions = {}) => {
+    // CRIT-2 wiring (Wave C) — MUST run BEFORE any other logout side-effect.
+    // Snapshots the module-level logout epoch in `@ezstart/api-sdk` so any
+    // refresh in-flight (started before this call) will discard its
+    // resulting tokens instead of silently re-hydrating the store
+    // post-logout. Without this call, the race is:
+    //   T+0   apiCall() -> 401 -> refresh() starts
+    //   T+50  user clicks Logout -> store cleared
+    //   T+100 refresh resolves with fresh tokens -> store re-hydrated
+    //   T+101 user is "re-logged-in" without ever knowing.
+    // Bumping the epoch here lets the refresh helper detect the change
+    // at completion and drop the fresh tokens on the floor.
+    bumpLogoutEpoch()
+
     // Resolve the effective config — per-call override > provider default > English default.
     const redirectTarget =
       options.redirectAfterLogout !== undefined
