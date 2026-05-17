@@ -2,7 +2,7 @@ import { ApiError } from './api-error.js'
 import { resolveBaseUrl, type ResolvedConfig } from './internal/config.js'
 import { fetchWithRetry } from './internal/fetch-with-retry.js'
 import type { RefreshHelper } from './internal/refresh.js'
-import { buildBody, buildHeaders } from './internal/request.js'
+import { buildBody, buildHeaders, hasHeaderCI, resolveIdempotencyKey } from './internal/request.js'
 import { buildUrl } from './internal/url.js'
 import { parseApiError, parseApiErrorCode, parseRetryAfter } from './parse-api-error.js'
 import type { ApiCallOptions, ResponseType } from './types.js'
@@ -155,6 +155,7 @@ export function createApiCall(resolved: ResolvedConfig, refreshHelper: RefreshHe
       baseUrl: baseUrlOverride,
       preserveEnvelope = false,
       responseType = 'json',
+      idempotencyKey,
     } = options
 
     const baseUrl = baseUrlOverride ?? resolveBaseUrl(resolved.baseUrl, appName)
@@ -162,7 +163,19 @@ export function createApiCall(resolved: ResolvedConfig, refreshHelper: RefreshHe
 
     const tokenResult = resolveToken(resolved, options)
     const token = tokenResult instanceof Promise ? await tokenResult : tokenResult
-    const initFactory = buildInit(method, body, headers, credentials, signal)
+
+    // Resolve the `Idempotency-Key` option BEFORE merging into headers so
+    // that 'auto' generates a UUID lazily (per-call, not per-retry) and so
+    // any thrown error from the resolver surfaces before fetch is invoked.
+    // Caller-supplied `headers['Idempotency-Key']` wins case-insensitively,
+    // mirroring the Authorization / Content-Type / Accept policy.
+    const resolvedIdempotencyKey = resolveIdempotencyKey(idempotencyKey)
+    const headersWithIdempotency: Record<string, string> =
+      resolvedIdempotencyKey !== undefined && !hasHeaderCI(headers, 'Idempotency-Key')
+        ? { ...headers, 'Idempotency-Key': resolvedIdempotencyKey }
+        : headers
+
+    const initFactory = buildInit(method, body, headersWithIdempotency, credentials, signal)
 
     const res = await fetchWithRetry({
       url,

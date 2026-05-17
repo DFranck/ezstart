@@ -75,13 +75,45 @@ export type BuildHeadersOptions = {
  * must shadow a default `Accept` injection — otherwise the request ends up
  * with two header entries that differ only by case, and behavior is
  * browser/runtime-dependent.
+ *
+ * Exported so other request-building helpers (e.g. the `Idempotency-Key`
+ * resolution in `api-call.ts`) can apply the same RFC-compliant dedup rule.
  */
-function hasHeaderCI(headers: Record<string, string>, name: string): boolean {
+export function hasHeaderCI(headers: Record<string, string>, name: string): boolean {
   const lower = name.toLowerCase()
   for (const key of Object.keys(headers)) {
     if (key.toLowerCase() === lower) return true
   }
   return false
+}
+
+/**
+ * @internal
+ *
+ * Resolve the `Idempotency-Key` header value from the per-call
+ * `idempotencyKey` option:
+ *
+ * - `undefined` → no key (no header injected).
+ * - `'auto'`    → generate an RFC 4122 v4 UUID via `crypto.randomUUID()`.
+ *                  Throws when the runtime lacks `crypto.randomUUID` (very
+ *                  old environments — Node < 19 without polyfill, legacy
+ *                  browsers without secure context). The error is explicit
+ *                  so callers can swap in an explicit UUID instead.
+ * - `string`    → returned as-is. The SDK does NOT validate the format —
+ *                  `@ezstart/api-core` rejects non-v4 UUIDs with HTTP 400.
+ */
+export function resolveIdempotencyKey(opt: string | 'auto' | undefined): string | undefined {
+  if (opt === undefined) return undefined
+  if (opt === 'auto') {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID()
+    }
+    throw new Error(
+      "[api-sdk] idempotencyKey: 'auto' requires `crypto.randomUUID()` which is unavailable in this runtime. " +
+        'Provide an explicit UUID v4 string instead.'
+    )
+  }
+  return opt
 }
 
 /**

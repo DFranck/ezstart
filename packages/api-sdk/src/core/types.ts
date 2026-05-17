@@ -173,6 +173,49 @@ export type ApiCallOptions = {
    * For non-JSON response types, envelope unwrap is skipped on success.
    */
   responseType?: ResponseType
+  /**
+   * Idempotency key for safe retry of mutating requests.
+   *
+   * - `'auto'`   : SDK generates an RFC 4122 v4 UUID via `crypto.randomUUID()`
+   * - `string`   : caller-provided key (must match RFC 4122 v4 format —
+   *                `@ezstart/api-core` rejects anything else with HTTP 400)
+   * - omitted    : no `Idempotency-Key` header sent (backward compatible)
+   *
+   * Sent as the `Idempotency-Key` request header. Pairs with the
+   * `createIdempotencyMiddleware` from `@ezstart/api-core` which dedups
+   * for 24 h.
+   *
+   * Only meaningful on mutating methods (POST/PUT/PATCH/DELETE). The header
+   * is sent regardless of method — the server ignores it on GET. The SDK
+   * does NOT auto-restrict to mutating methods so a consumer can opt-in
+   * for a custom GET-with-side-effects pattern if needed.
+   *
+   * If the caller also passes an `Idempotency-Key` (any case) inside
+   * `headers`, that explicit header wins — `idempotencyKey` is ignored
+   * for the duplicate (caller-supplied headers always take precedence,
+   * mirroring the `Authorization` / `Content-Type` / `Accept` policy).
+   *
+   * @example
+   * ```ts
+   * // Auto-generated UUID (most common case)
+   * await client.apiCall('/donations', {
+   *   method: 'POST',
+   *   body,
+   *   idempotencyKey: 'auto',
+   * })
+   * ```
+   *
+   * @example
+   * ```ts
+   * // Caller-supplied (deterministic key tied to a business ID)
+   * await client.apiCall('/refunds', {
+   *   method: 'POST',
+   *   body: { chargeId: 'ch_123' },
+   *   idempotencyKey: `refund-ch_123-${Date.now()}`,
+   * })
+   * ```
+   */
+  idempotencyKey?: string | 'auto'
 }
 
 /**
