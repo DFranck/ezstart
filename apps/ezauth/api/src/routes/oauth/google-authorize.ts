@@ -16,6 +16,7 @@ import passport, { OAUTH_STATE_COOKIE, signOAuthStateToken } from '../../config/
 import { JWT_SECRET } from '../../config/env.js'
 import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
 import { ACCESS_COOKIE_NAME } from '../../config/cookie.js'
+import { validateRedirectUriForApp } from '../../services/oauth-redirect-uri.service.js'
 
 export const googleAuthorizeRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -80,13 +81,30 @@ function extractCurrentUserId(req: Request): string | undefined {
  */
 docRouter.get(
   '/google',
-  (req, res, next) => {
+  async (req, res, next) => {
     const parsed = googleAuthorizeQuerySchema.safeParse(req.query)
     if (!parsed.success) {
       return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
     }
 
     const { app, redirect_uri, intent } = parsed.data
+
+    // HAC-HIGH-3 (RFC 6749 §3.1.2) — when the caller supplied a
+    // `redirect_uri`, it MUST match one of the registered URIs on this
+    // Application EXACTLY. We validate before kicking off the Google flow
+    // so attacker-controlled URIs never reach Google's consent screen with
+    // a victim's `state`. An absent `redirect_uri` is allowed (falls back
+    // to the EZAuth canonical `/auth/callback`); a present one is enforced.
+    if (redirect_uri !== undefined) {
+      const allowed = await validateRedirectUriForApp(app, redirect_uri)
+      if (!allowed) {
+        return sendError(
+          res,
+          'invalid_redirect_uri — does not match any registered URI for this Application',
+          400
+        )
+      }
+    }
 
     let linkUserId: string | undefined
     if (intent === 'link') {

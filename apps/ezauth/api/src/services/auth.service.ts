@@ -364,6 +364,38 @@ export class AuthService {
       throw new Error('Invalid or expired authorization code')
     }
 
+    // HAC-HIGH-4 (RFC 6749 §4.1.3) — "if the `redirect_uri` parameter was
+    // included in the initial authorization request […] and if included
+    // ensure that their values are identical." When the auth code was issued
+    // with a `redirectUri`, the /token request MUST present the SAME value.
+    // Exact-match — no normalization, same rationale as
+    // `validateRedirectUri()`. Stops authcode-injection attacks where an
+    // attacker intercepts a legitimate code and tries to redeem it on a
+    // different `redirect_uri` they control.
+    if (authCode.redirectUri) {
+      if (data.redirect_uri !== authCode.redirectUri) {
+        logger.warn(
+          {
+            app: data.app,
+            issuedRedirectUri: authCode.redirectUri,
+            presentedRedirectUri: data.redirect_uri ?? null,
+          },
+          '[OAuth] /token redirect_uri mismatch — possible authcode injection attempt'
+        )
+        throw new Error('Invalid or expired authorization code')
+      }
+    } else if (data.redirect_uri) {
+      // Inverse case: the code was minted WITHOUT a redirect_uri (legacy /login
+      // or magic-link flow), but the client sends one anyway. RFC 6749 §4.1.3
+      // forbids this asymmetry. Reject so attackers cannot turn a no-redirect
+      // code into a redirect-bearing one.
+      logger.warn(
+        { app: data.app, presentedRedirectUri: data.redirect_uri },
+        '[OAuth] /token presented redirect_uri but auth code was issued without one'
+      )
+      throw new Error('Invalid or expired authorization code')
+    }
+
     // Mark code as used
     authCode.isUsed = true
     await authCode.save()

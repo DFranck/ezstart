@@ -177,6 +177,32 @@ export interface ApplicationDocument extends Document {
     /** Hard cap on audit log entries scoped to this app over a 24h window. */
     maxEventsPerDay?: number
   } | null
+  /**
+   * Registered OAuth `redirect_uri` allowlist for this Application
+   * (RFC 6749 §3.1.2 — exact-match).
+   *
+   * Every `redirect_uri` parameter on `/auth/google` (authorize) and
+   * `/auth/token` (code exchange) MUST match one of these URIs EXACTLY —
+   * no trailing-slash normalization, no querystring drift, no scheme
+   * downgrade, no wildcards. Any normalization would open IDN / homoglyph /
+   * `//` bypass classes; keep the policy explicit so each tenant declares
+   * every callback URL they actually use.
+   *
+   * `[]` (default) → OAuth flows are **disabled** for this Application
+   * (fail-closed). This is the secure default for existing Applications
+   * created before this field existed: their owner MUST register every
+   * callback URL via the dashboard before OAuth begins working again.
+   *
+   * Closes HAC-HIGH-3 (per-Application allowlist instead of platform-wide
+   * `getAllowedOrigins('ezauth')`) and is read by
+   * `validateRedirectUri()` in `services/oauth-redirect-uri.service.ts`.
+   *
+   * Backfill: the field defaults to `[]` via Mongoose schema, so existing
+   * documents transparently gain the field on the next read. Operators
+   * must populate it manually for each tenant that uses OAuth — see the
+   * Wave D Lot 5 changelog for the migration note.
+   */
+  redirectUris: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -345,6 +371,27 @@ const applicationSchema = new Schema<ApplicationDocument>(
       ),
       required: false,
       default: null,
+    },
+    redirectUris: {
+      type: [String],
+      required: true,
+      default: [],
+      validate: {
+        // HAC-HIGH-3 — every entry MUST be a parseable http(s) URL. We do not
+        // normalize (no lowercase, no trailing-slash strip) so the runtime
+        // exact-match in `validateRedirectUri()` stays unambiguous.
+        validator: (uris: string[]): boolean =>
+          uris.every(uri => {
+            if (typeof uri !== 'string' || uri.length === 0 || uri.length > 2048) return false
+            try {
+              const u = new URL(uri)
+              return u.protocol === 'http:' || u.protocol === 'https:'
+            } catch {
+              return false
+            }
+          }),
+        message: 'redirectUris must each be a valid http(s) URL (max 2048 chars, no wildcards)',
+      },
     },
   },
   {

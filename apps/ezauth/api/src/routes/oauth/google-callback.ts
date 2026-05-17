@@ -1,9 +1,9 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/api-core'
 import type { Router as ExpressRouter, Request, Response, NextFunction } from 'express'
 import { getWebUrl } from '@ezstart/config/urls'
-import { getAllowedOrigins } from '@ezstart/config/cors'
 import { logger } from '@ezstart/logger/server'
 import passport, { OAUTH_STATE_COOKIE, verifyOAuthStateToken } from '../../config/passport.js'
+import { validateRedirectUriForApp } from '../../services/oauth-redirect-uri.service.js'
 
 export const googleCallbackRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -21,23 +21,6 @@ function loginErrorUrl(errorCode: string, message?: string): string {
   const params = new URLSearchParams({ error: errorCode })
   if (message) params.set('message', message)
   return `${base}/login?${params.toString()}`
-}
-
-/** Check if a redirect URI's origin is in the allowed CORS origins or is localhost */
-function isAllowedRedirectUri(uri: string): boolean {
-  try {
-    const parsed = new URL(uri)
-    const origin = parsed.origin
-
-    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
-      return true
-    }
-
-    const allowedOrigins = getAllowedOrigins('ezauth')
-    return allowedOrigins.includes(origin)
-  } catch {
-    return false
-  }
 }
 
 /**
@@ -114,7 +97,7 @@ docRouter.get(
   '/google/callback',
   validateOAuthState,
   authenticateGoogle,
-  (req, res) => {
+  async (req, res) => {
     const user = req.user as unknown as { authCode: string; redirect_uri?: string }
 
     if (!user || !user.authCode) {
@@ -122,8 +105,29 @@ docRouter.get(
     }
 
     if (user.redirect_uri) {
-      if (!isAllowedRedirectUri(user.redirect_uri)) {
-        logger.warn(`OAuth callback blocked invalid redirect_uri: ${user.redirect_uri}`)
+      // HAC-HIGH-3 (RFC 6749 §3.1.2) — re-validate against the per-Application
+      // allowlist at callback time. The same check ran in /google (authorize)
+      // before kicking off the flow, but Google round-trips the original
+      // redirect_uri verbatim inside our signed state, so a re-check here
+      // closes the gap if the allowlist has been mutated between authorize
+      // and callback (or if a future code path forwards a state we did not
+      // pre-validate). The `app` is the slug we signed into the state JWT.
+      const stateToken = typeof req.query.state === 'string' ? req.query.state : ''
+      let appSlug = ''
+      try {
+        appSlug = verifyOAuthStateToken(stateToken).app
+      } catch {
+        // verifyOAuthStateToken was already gated by validateOAuthState — if
+        // we reach this catch the token raced an expiry between the two
+        // calls, which is exceptional but treated as a hard reject.
+        return res.redirect(loginErrorUrl('oauth_state_invalid'))
+      }
+      const allowed = await validateRedirectUriForApp(appSlug, user.redirect_uri)
+      if (!allowed) {
+        logger.warn(
+          { appSlug, redirectUri: user.redirect_uri },
+          '[OAuth] callback blocked — redirect_uri not in Application.redirectUris'
+        )
         return res.redirect(loginErrorUrl('oauth_invalid_redirect'))
       }
 
