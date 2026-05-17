@@ -101,7 +101,14 @@ export const apiStream = ezstartClient.apiStream
 export const apiQuery = ezstartClient.apiQuery
 
 /**
- * Reset the in-flight refresh promise. Exposed for tests only.
+ * Reset the module-level refresh inflight promise (test-only).
+ *
+ * @deprecated Use the new factory pattern: `const client = createApiClient(...)`
+ * then `client.refreshHelper.reset()` (or whatever the public surface
+ * exposes — see {@link RefreshHelper.reset} in `core/internal/refresh.ts`).
+ * This legacy helper exists only for backwards-compatibility with tests
+ * that still target the deprecated `ezstart-client.ts` wrapper, which
+ * is scheduled for removal in Wave C Lot 3.
  *
  * @internal
  */

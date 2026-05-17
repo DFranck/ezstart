@@ -36,6 +36,38 @@ describe('parseApiError', () => {
     expect(parseApiError(payload)).toBe('Password must be at least 8 characters')
   })
 
+  it('extracts first Zod validation detail nested inside error envelope (HIGH-3)', () => {
+    const payload = {
+      success: false,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid input',
+        details: [{ path: ['email'], message: 'Field X required', code: 'invalid_string' }],
+      },
+    }
+    expect(parseApiError(payload)).toBe('Field X required')
+  })
+
+  it('prefers nested error.details[0].message over nested error.message (HIGH-3)', () => {
+    const payload = {
+      error: {
+        message: 'Generic',
+        details: [{ message: 'Specific' }],
+      },
+    }
+    expect(parseApiError(payload)).toBe('Specific')
+  })
+
+  it('falls through to nested error.message when nested error.details is empty (HIGH-3)', () => {
+    const payload = {
+      error: {
+        message: 'Generic fallback',
+        details: [],
+      },
+    }
+    expect(parseApiError(payload)).toBe('Generic fallback')
+  })
+
   it('extracts flat error string', () => {
     expect(parseApiError({ error: 'Invalid credentials' })).toBe('Invalid credentials')
   })

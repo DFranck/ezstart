@@ -4,11 +4,12 @@ import type { ApiErrorPayload } from './types.js'
  * Parse an API error payload into a human-readable message (English).
  *
  * Handles formats (priority order):
- * 1. Zod validation: `{ details: [{ message, path, code }] }` → first detail's `message`
- * 2. Nested object : `{ error: { message, code } }` → `error.message`
- * 3. Flat string   : `{ error: 'Invalid credentials' }` → the string
- * 4. Direct message: `{ message: 'User not found' }` → the message
- * 5. Fallback      : generic "An error occurred."
+ * 1. Zod validation (root)   : `{ details: [{ message, path, code }] }` → first detail's `message`
+ * 2. Zod validation (nested) : `{ error: { details: [{ message, path }] } }` → first detail's `message`
+ * 3. Nested object           : `{ error: { message, code } }` → `error.message`
+ * 4. Flat string             : `{ error: 'Invalid credentials' }` → the string
+ * 5. Direct message          : `{ message: 'User not found' }` → the message
+ * 6. Fallback                : generic "An error occurred."
  *
  * Returns `null` ONLY when the input is nullish/empty — callers may use this
  * to detect "no error payload" cases. All other cases produce a string.
@@ -30,7 +31,7 @@ export function parseApiError(errorData: unknown): string | null {
   // Empty object guard
   if (Object.keys(payload).length === 0) return null
 
-  // 1. Zod validation details (most specific)
+  // 1. Zod validation details at root (most specific)
   if (Array.isArray(payload.details) && payload.details.length > 0) {
     const first = payload.details[0] as { message?: unknown } | null | undefined
     if (first && typeof first.message === 'string' && first.message.length > 0) {
@@ -38,7 +39,21 @@ export function parseApiError(errorData: unknown): string | null {
     }
   }
 
-  // 2. Nested error object
+  // 2. Zod validation details nested inside error envelope
+  //    (e.g. `{ success: false, error: { code, message, details: [...] } }`)
+  //    The nested detail's message is more specific than the generic
+  //    `error.message`, so it MUST be checked before path 3.
+  if (typeof payload.error === 'object' && payload.error !== null) {
+    const nested = payload.error as { details?: unknown }
+    if (Array.isArray(nested.details) && nested.details.length > 0) {
+      const first = nested.details[0] as { message?: unknown } | null | undefined
+      if (first && typeof first.message === 'string' && first.message.length > 0) {
+        return first.message
+      }
+    }
+  }
+
+  // 3. Nested error object message
   if (typeof payload.error === 'object' && payload.error !== null) {
     const nested = payload.error as { message?: unknown }
     if (typeof nested.message === 'string' && nested.message.length > 0) {
@@ -46,12 +61,12 @@ export function parseApiError(errorData: unknown): string | null {
     }
   }
 
-  // 3. Flat error string
+  // 4. Flat error string
   if (typeof payload.error === 'string' && payload.error.length > 0) {
     return payload.error
   }
 
-  // 4. Direct message
+  // 5. Direct message
   if (typeof payload.message === 'string' && payload.message.length > 0) {
     return payload.message
   }
