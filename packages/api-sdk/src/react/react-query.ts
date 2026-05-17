@@ -70,11 +70,44 @@ export type UseApiInfiniteQueryOptions<T> = Omit<
 > & {
   /** Page size. Default `20`. */
   limit?: number
-  /** Extra query params merged on each call. */
+  /**
+   * Extra query params merged on each call. MUST NOT include `limit` or
+   * `offset` — those are reserved (page size via the top-level `limit`
+   * option, offset via React Query's `pageParam`). Passing them throws
+   * an `Error` at call-time to surface the bug instead of silently
+   * breaking pagination (the spread `{ ...query, limit, offset: pageParam }`
+   * would always override them, so they had no effect anyway).
+   */
   query?: QueryParams
   headers?: Record<string, string>
   /** Override call options (e.g. `skipAuth`). `preserveEnvelope` is forced to `true`. */
   callOptions?: Partial<Omit<ApiCallOptions, 'appName' | 'query' | 'headers' | 'preserveEnvelope'>>
+}
+
+/**
+ * @internal
+ *
+ * Guard against silent pagination breakage in `useInfiniteQuery`. The
+ * top-level `limit` option controls page size, and `offset` is managed
+ * automatically via React Query's `pageParam` — so passing either inside
+ * `query` is always a bug (the spread `{ ...query, limit, offset }` in
+ * the call builder overrides them anyway). Throw early with a clear
+ * migration path instead of silently ignoring the developer's intent.
+ *
+ * Exported for direct unit testing without a React Testing Library setup.
+ */
+export function assertInfiniteQueryParamsValid(query: QueryParams | undefined): void {
+  if (!query) return
+  const reserved: string[] = []
+  if ('limit' in query) reserved.push('limit')
+  if ('offset' in query) reserved.push('offset')
+  if (reserved.length === 0) return
+  throw new Error(
+    '[api-sdk] useInfiniteQuery: do NOT pass `limit` or `offset` via the `query` option. ' +
+      'Use the top-level `limit` option for page size; `offset` is managed automatically ' +
+      "via React Query's pageParam. Got reserved keys: " +
+      reserved.join(', ')
+  )
 }
 
 /**
@@ -164,6 +197,7 @@ export function createApiQuery(apiCall: BoundApiCall) {
         options: UseApiInfiniteQueryOptions<T> = {}
       ): UseInfiniteQueryResult<InfiniteData<PaginatedResponse<T>>, ApiError> {
         const { limit = 20, query, headers, callOptions, ...rqOptions } = options
+        assertInfiniteQueryParamsValid(query)
         return useInfiniteQuery<
           PaginatedResponse<T>,
           ApiError,

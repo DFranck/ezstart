@@ -1,10 +1,11 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { apiQuery } from '../ezstart-client.js'
-import type {
-  PaginatedResponse,
-  UseApiInfiniteQueryOptions,
-  UseApiMutationOptions,
-  UseApiQueryOptions,
+import {
+  assertInfiniteQueryParamsValid,
+  type PaginatedResponse,
+  type UseApiInfiniteQueryOptions,
+  type UseApiMutationOptions,
+  type UseApiQueryOptions,
 } from '../react/react-query.js'
 
 /**
@@ -73,6 +74,32 @@ describe('apiQuery', () => {
         limit: number
         offset: number
       }>()
+    })
+  })
+
+  describe('assertInfiniteQueryParamsValid (useInfiniteQuery guard)', () => {
+    it('throws when query.limit is passed (would silently break pagination)', () => {
+      expect(() => assertInfiniteQueryParamsValid({ limit: 50 })).toThrow(/limit/)
+      expect(() => assertInfiniteQueryParamsValid({ limit: 50 })).toThrow(/useInfiniteQuery/)
+    })
+
+    it('throws when query.offset is passed (managed by pageParam)', () => {
+      expect(() => assertInfiniteQueryParamsValid({ offset: 100 })).toThrow(/offset/)
+    })
+
+    it('throws listing every reserved key found when both are passed', () => {
+      expect(() => assertInfiniteQueryParamsValid({ limit: 10, offset: 5 })).toThrow(
+        /limit, offset/
+      )
+    })
+
+    it('does not throw on safe extra params (sort, filter, etc.)', () => {
+      expect(() => assertInfiniteQueryParamsValid({ sort: 'name', q: 'foo' })).not.toThrow()
+    })
+
+    it('does not throw when query is undefined or empty', () => {
+      expect(() => assertInfiniteQueryParamsValid(undefined)).not.toThrow()
+      expect(() => assertInfiniteQueryParamsValid({})).not.toThrow()
     })
   })
 })
