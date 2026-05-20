@@ -1,4 +1,4 @@
-import { parseApiError } from '@ezstart/api-sdk'
+import { payErrorFromResponse } from '../errors.js'
 import type {
   ConnectDashboardLinkResponse,
   ConnectOnboardRequest,
@@ -26,7 +26,7 @@ export async function getConnectStatus(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to fetch connect status')
+    throw payErrorFromResponse(result, response.status, 'Failed to fetch connect status')
   }
 
   return result.data ?? result
@@ -45,7 +45,7 @@ export async function connectOnboard(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to start onboarding')
+    throw payErrorFromResponse(result, response.status, 'Failed to start onboarding')
   }
 
   return result.data ?? result
@@ -64,7 +64,7 @@ export async function getConnectDashboardLink(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to get dashboard link')
+    throw payErrorFromResponse(result, response.status, 'Failed to get dashboard link')
   }
 
   return result.data ?? result
@@ -93,7 +93,7 @@ export async function connectResume(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to resume onboarding')
+    throw payErrorFromResponse(result, response.status, 'Failed to resume onboarding')
   }
 
   return result.data ?? result
@@ -129,7 +129,7 @@ export async function disconnectAccount(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to disconnect account')
+    throw payErrorFromResponse(result, response.status, 'Failed to disconnect account')
   }
 
   return result

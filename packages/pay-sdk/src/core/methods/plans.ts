@@ -1,4 +1,4 @@
-import { parseApiError } from '@ezstart/api-sdk'
+import { payErrorFromResponse } from '../errors.js'
 import type {
   CreatePlanRequest,
   PlanResponse,
@@ -20,7 +20,7 @@ export async function createPlan(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to create plan')
+    throw payErrorFromResponse(result, response.status, 'Failed to create plan')
   }
 
   return result.data ?? result
@@ -53,7 +53,7 @@ export async function listPlans(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to list plans')
+    throw payErrorFromResponse(result, response.status, 'Failed to list plans')
   }
 
   // Map MongoDB _id to id for SDK type compatibility
@@ -80,7 +80,7 @@ export async function updatePlan(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to update plan')
+    throw payErrorFromResponse(result, response.status, 'Failed to update plan')
   }
 
   return result.data ?? result
@@ -98,7 +98,7 @@ export async function deletePlan(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to delete plan')
+    throw payErrorFromResponse(result, response.status, 'Failed to delete plan')
   }
 
   return result

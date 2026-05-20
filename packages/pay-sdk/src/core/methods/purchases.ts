@@ -1,4 +1,4 @@
-import { parseApiError } from '@ezstart/api-sdk'
+import { payErrorFromResponse } from '../errors.js'
 import type {
   CreatePurchaseRequest,
   PaymentResponse,
@@ -21,7 +21,7 @@ export async function createPurchase(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to create purchase')
+    throw payErrorFromResponse(result, response.status, 'Failed to create purchase')
   }
 
   // Unwrap standard { success, data } response

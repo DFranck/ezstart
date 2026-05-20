@@ -5,6 +5,10 @@ export { createPayClient } from './core/pay-client.js'
 export type { PayClient } from './core/pay-client.js'
 export type { PayClientConfig } from './core/types.js'
 
+// Typed error class + parsers (agnostic — replaces api-sdk's parseApiError)
+export { PayError, parsePayError, parsePayErrorCode, payErrorFromResponse } from './core/errors.js'
+export type { PayErrorDetail } from './core/errors.js'
+
 // Re-export types
 export type {
   Payment,

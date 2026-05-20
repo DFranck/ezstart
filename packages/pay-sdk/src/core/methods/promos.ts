@@ -1,4 +1,4 @@
-import { parseApiError } from '@ezstart/api-sdk'
+import { payErrorFromResponse } from '../errors.js'
 import type {
   CreatePromoRequest,
   PromoResponse,
@@ -21,7 +21,7 @@ export async function createPromo(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to create promo')
+    throw payErrorFromResponse(result, response.status, 'Failed to create promo')
   }
 
   return result.data ?? result
@@ -55,7 +55,7 @@ export async function listPromos(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to list promos')
+    throw payErrorFromResponse(result, response.status, 'Failed to list promos')
   }
 
   // Map MongoDB _id to id for SDK type compatibility
@@ -84,7 +84,7 @@ export async function validatePromo(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to validate promo')
+    throw payErrorFromResponse(result, response.status, 'Failed to validate promo')
   }
 
   return result
@@ -104,7 +104,7 @@ export async function updatePromo(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to update promo')
+    throw payErrorFromResponse(result, response.status, 'Failed to update promo')
   }
 
   return result.data ?? result
@@ -122,7 +122,7 @@ export async function deletePromo(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to delete promo')
+    throw payErrorFromResponse(result, response.status, 'Failed to delete promo')
   }
 
   return result

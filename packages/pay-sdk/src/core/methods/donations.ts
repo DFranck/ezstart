@@ -1,4 +1,4 @@
-import { parseApiError } from '@ezstart/api-sdk'
+import { payErrorFromResponse } from '../errors.js'
 import type {
   CreateDonationRequest,
   PaymentResponse,
@@ -22,7 +22,7 @@ export async function createDonation(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to create donation')
+    throw payErrorFromResponse(result, response.status, 'Failed to create donation')
   }
 
   // Unwrap standard { success, data } response
@@ -51,7 +51,7 @@ export async function getDonationStats(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to fetch donation stats')
+    throw payErrorFromResponse(result, response.status, 'Failed to fetch donation stats')
   }
 
   return result

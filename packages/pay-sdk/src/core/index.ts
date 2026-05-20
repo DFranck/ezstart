@@ -72,6 +72,10 @@ export {
   planResponseSchema,
 } from './schemas.js'
 
+// Errors — typed PayError + parsers (agnostic, replaces @ezstart/api-sdk's parseApiError)
+export { PayError, parsePayError, parsePayErrorCode, payErrorFromResponse } from './errors.js'
+export type { PayErrorDetail } from './errors.js'
+
 // Utils
 export { formatCurrency, getCurrencySymbol } from './format-currency.js'
 

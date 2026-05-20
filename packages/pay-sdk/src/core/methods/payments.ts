@@ -1,4 +1,4 @@
-import { parseApiError } from '@ezstart/api-sdk'
+import { payErrorFromResponse } from '../errors.js'
 import type { GetPaymentsParams, Payment, PaymentsListResponse } from '../types/index.js'
 import type { PayClientInternal } from './http.js'
 
@@ -50,7 +50,7 @@ export async function getPayment(client: PayClientInternal, paymentId: string): 
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to fetch payment')
+    throw payErrorFromResponse(result, response.status, 'Failed to fetch payment')
   }
 
   return result.payment
@@ -71,7 +71,7 @@ export async function refundPayment(
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(parseApiError(result) ?? 'Failed to refund payment')
+    throw payErrorFromResponse(result, response.status, 'Failed to refund payment')
   }
 
   return result
@@ -94,6 +94,6 @@ export async function cleanupPayments(
     headers: client.getHeaders(),
   })
   const result = await response.json()
-  if (!response.ok) throw new Error(parseApiError(result) ?? 'Failed to cleanup')
+  if (!response.ok) throw payErrorFromResponse(result, response.status, 'Failed to cleanup')
   return result.data ?? result
 }
