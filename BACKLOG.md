@@ -97,6 +97,18 @@ Source unique de vérité pour les items **en cours / à faire**. Les items term
 
 **4 critiques money loss exploitables maintenant** : C-1 price tampering (Pro $99 → 0.01 EUR exploit chain en 3 HTTP calls), C-2 Customer Portal hijack, C-3 cross-tenant applicationId injection (consume `tenantScope()` middleware Wave B), C-4 promo atomic `findOneAndUpdate` + `$lt: maxUses`. + Module-level Zustand → factory + Context, `core/methods/\*`dep`@ezstart/api-sdk` cleanup, SSR companions (`getServerPlans`, `getServerKeyConfig`, `getServerSubscriptionStatus`), `initial<X>`props, Idempotency-Key, webhook event idempotency table, Stripe Connect state nonce tracking, rate limit strict sur`/donate|subscribe|purchase`, REG-1 régression revert (mon commit `869c0d80`reset le ref à chaque cleanup → reactiv DoS) avec proper StrictMode fix via TanStack Query cache. Cf.`tmp/audit-pay-sdk-{auditor,hacker}.md`.
 
+#### Wave E — Lot 1 DONE (2026-05-20) — sécu billing committée
+
+- [x] **Lot 1+1.5** — C-1 price authority (prix server-side DB/catalogue, amount client ignoré subscribe/purchase, donate borné) + C-2 portal ownership + C-3 cross-tenant (refund/cancel/change-plan via `resolveTenantAccess`) + C-4 promo atomique + C-5 webhook idempotency (`WebhookEvent` ledger + index eager au boot) + HIGH-1 plan↔tenant binding + LOW-a admin gate + verify-payment IDOR + rate limit strict. Commits `~f1279d68` et 2 précédents. Re-hack CLEAN.
+
+#### Wave E — follow-ups tracked (post Lot 1, 2026-05-20)
+
+- [ ] **EZP-MODE-WRITE-ISOLATION-001** 🔴 (E1.5 planifié — HAC MED-2) — test/live write desync : `isTestMode` dérivé de `STRIPE_SECRET_KEY` du process au lieu de la KEY du caller (`req.mode`/prefix `ez_pk_test/live`). Sur un process prod `sk_live_`, une test key déclenche de **vraies charges LIVE** + écrit des rows LIVE invisibles au reader test. Fix : Stripe client par mode (`STRIPE_TEST_SECRET_KEY` quand `req.mode==='test'`) + `isTestMode` écrit depuis `req.mode` sur TOUS les writes. + colonne mode sur le ledger `WebhookEvent`. C'est le prochain lot Wave E (E1.5).
+- [ ] **EZP-CHANGEPLAN-BIND-APPID-001** 🟢 LOW (re-hack Lot 1.5 — fix en E4) — `change-plan` binde sur le slug déprécié/mutable `Plan.appName === payment.projectId` alors que `subscribe` binde sur `applicationId` immuable. Exploit prouvé inatteignable aujourd'hui (slugs uniques+immuables, createPlan stampe le slug du créateur). Fix trivial : binder sur `applicationId` via le vieux plan (`Plan.findById(payment.metadata.planId)`) → symétrie + supprime la dépendance au champ déprécié.
+- [ ] **EZP-OWNERSHIP-DRY-001** 🟡 (audit Lot 1) — `extractBearerToken` copié-collé dans 10 fichiers (8 routes pré-existantes + les 2 nouveaux helpers `checkout-authority`/`tenant-ownership`) byte-identique. Consolider en un util partagé. Les 2 helpers ownership ne sont pas des doublons purs (id vs slug) — OK séparés.
+- [ ] **EZP-WEBHOOK-SPLIT-001** 🟢 P3 (audit Lot 1) — `routes/webhooks.ts` 607 lignes (>400). Splitter par handler d'event.
+- [ ] **EZP-LOW-RESIDUALS-001** 🟢 LOW (re-hack Lot 1) — (a) €0 testimonial donation bypass ownership/existence (spam anon, mitigé par rate-limit) ; (b) flake d'isolation `dunning.service.test.ts` (passe isolé, fail en parallèle ; diff Lot 1.5 = comment-only) à investiguer.
+
 ### Wave F — Publishability finale
 
 Pre-publish dry-run × 5, npm provenance workflows, bundle size badges, examples directories, cross-SDK integration test (signup → checkout → portal → logout).
