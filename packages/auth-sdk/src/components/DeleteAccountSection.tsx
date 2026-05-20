@@ -22,25 +22,9 @@ import {
 } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { safeRemoveLocalStorage } from '../core/safe-storage.js'
 import { useAuth } from '../react/hooks.js'
 import { useAuthContext, useAuthStoreApi } from '../react/auth-provider.js'
-
-/**
- * Safe localStorage key removal — Safari private mode + SSR + agent harness
- * environments all fail differently when localStorage is unavailable. Wrap
- * the call so a missing storage layer never throws past the logout flow.
- *
- * @internal
- */
-function safeRemoveLocalStorage(key: string): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.removeItem(key)
-  } catch {
-    // Storage disabled / quota exceeded / private mode — non-fatal, the store
-    // reset above is the source of truth.
-  }
-}
 
 /**
  * User-facing strings for {@link DeleteAccountSection}. All keys are required

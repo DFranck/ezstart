@@ -1,5 +1,6 @@
 'use client'
 import { parseApiError } from '@ezstart/api-sdk'
+import { safeGetLocalStorage, safeRemoveLocalStorage } from '../core/safe-storage.js'
 import { Button, Div, P, Spinner } from '@ezstart/ui/components'
 import { logger } from './internal-logger.js'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -202,16 +203,19 @@ function CallbackContent({
         await handleCallback(code)
         setStatus('success')
 
-        // Get saved redirect URL from localStorage (set by redirectToLogin)
-        const savedRedirect =
-          typeof window !== 'undefined' ? localStorage.getItem('ezauth_redirect_after_login') : null
+        // The session is now established. Everything below is best-effort
+        // redirect bookkeeping — a `localStorage` failure (Safari private
+        // mode, disabled storage) must NEVER surface "Authentication failed"
+        // when the user is, in fact, authenticated. `safeGetLocalStorage`
+        // returns `null` on failure → we fall back to the prop default.
+        const savedRedirect = safeGetLocalStorage('ezauth_redirect_after_login')
 
         // Use saved redirect if available, otherwise use prop default
         const finalRedirect = savedRedirect || redirectTo
 
-        // Clear saved redirect
-        if (typeof window !== 'undefined' && savedRedirect) {
-          localStorage.removeItem('ezauth_redirect_after_login')
+        // Clear saved redirect (no-op + non-throwing when storage unavailable)
+        if (savedRedirect) {
+          safeRemoveLocalStorage('ezauth_redirect_after_login')
         }
 
         // Redirect after successful auth

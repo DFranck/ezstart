@@ -13,6 +13,7 @@
  * ```
  */
 
+import type { CrossOriginLogger } from './cross-origin.js'
 import { getEzauthDefaultUrls } from './defaults.js'
 import { AuthError } from './errors.js'
 import type {
@@ -67,6 +68,33 @@ function parseError(body: Record<string, unknown>, fallback: string): string {
   // Handle top-level message
   if (typeof body.message === 'string') return body.message
   return fallback
+}
+
+/**
+ * Extract the machine-readable error `code` from a response body, when the
+ * API returns the structured envelope `{ error: { message, code } }` (the
+ * `@ezstart/api-core` `sendError()` shape, also used by the SDK's own
+ * `requireEmailVerified` server gate). Falls back to a top-level `code`.
+ *
+ * Returns `undefined` when no code is present so callers can pass it straight
+ * to `new AuthError(message, status, parseErrorCode(...))` — a code-less
+ * `AuthError` keeps its existing behaviour.
+ *
+ * Surfacing the code lets consumers `switch` on it (e.g.
+ * `isEmailVerificationRequiredError(err)`) instead of brittle message
+ * string-matching. cf. standard-sdk-dx.md §4 (error codes standardized).
+ *
+ * @internal
+ */
+function parseErrorCode(body: Record<string, unknown>): string | undefined {
+  // Structured envelope: { error: { message, code } }
+  if (body.error && typeof body.error === 'object') {
+    const errObj = body.error as Record<string, unknown>
+    if (typeof errObj.code === 'string') return errObj.code
+  }
+  // Top-level code: { success: false, code: "..." }
+  if (typeof body.code === 'string') return body.code
+  return undefined
 }
 
 // ---------------------------------------------------------------------------
@@ -141,7 +169,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Token exchange failed'), response.status)
+      throw new AuthError(
+        parseError(result, 'Token exchange failed'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const data = unwrapEnvelope<AuthToken>(result)
@@ -170,7 +202,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Login failed'), response.status)
+      throw new AuthError(
+        parseError(result, 'Login failed'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const data = unwrapEnvelope<{ user: AuthUser }>(result)
@@ -189,7 +225,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Failed to get user info'), response.status)
+      throw new AuthError(
+        parseError(result, 'Failed to get user info'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const data = unwrapEnvelope<{ user: AuthUser }>(result)
@@ -249,7 +289,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Failed to update profile'), response.status)
+      throw new AuthError(
+        parseError(result, 'Failed to update profile'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const profileData = unwrapEnvelope<{ user: AuthUser }>(result)
@@ -274,7 +318,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Failed to change password'), response.status)
+      throw new AuthError(
+        parseError(result, 'Failed to change password'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
   }
 
@@ -313,7 +361,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Failed to delete account'), response.status)
+      throw new AuthError(
+        parseError(result, 'Failed to delete account'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const payload = unwrapEnvelope<{
@@ -340,7 +392,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Quick signup failed'), response.status)
+      throw new AuthError(
+        parseError(result, 'Quick signup failed'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const payload = unwrapEnvelope<QuickSignUpResult>(result)
@@ -371,7 +427,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Failed to load OAuth providers'), response.status)
+      throw new AuthError(
+        parseError(result, 'Failed to load OAuth providers'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const data = unwrapEnvelope<{ providers: ConnectedOAuthProvider[] }>(result)
@@ -443,7 +503,11 @@ export class CoreAuthClient {
 
     const result = await response.json()
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Failed to list audit log'), response.status)
+      throw new AuthError(
+        parseError(result, 'Failed to list audit log'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
     return unwrapEnvelope<AuditLogListResponse>(result)
   }
@@ -480,7 +544,11 @@ export class CoreAuthClient {
 
     const result = await response.json()
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Failed to fetch analytics overview'), response.status)
+      throw new AuthError(
+        parseError(result, 'Failed to fetch analytics overview'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
     return unwrapEnvelope<AdminAnalyticsOverview>(result)
   }
@@ -497,7 +565,11 @@ export class CoreAuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      throw new AuthError(parseError(result, 'Token refresh failed'), response.status)
+      throw new AuthError(
+        parseError(result, 'Token refresh failed'),
+        response.status,
+        parseErrorCode(result)
+      )
     }
 
     const data = unwrapEnvelope<RefreshResult>(result)
@@ -647,7 +719,7 @@ const WEB_URL_LOCALHOST_TRAP_MESSAGE =
   'or pass `webUrl` explicitly to your provider.'
 
 /**
- * Assert that a `webUrl` is safe for the current environment. Throws when
+ * Assert that a `webUrl` is safe for the current environment. Warns when
  * the app runs off-localhost but `webUrl` still resolves to a localhost
  * host. Localhost apps may point anywhere (including other localhost
  * ports), so no check is applied when `isLocal` is true.
@@ -655,11 +727,21 @@ const WEB_URL_LOCALHOST_TRAP_MESSAGE =
  * Matches `http://localhost`, `https://localhost`, and the `.localhost`
  * TLD variants so multi-tenant dev URLs (e.g. `https://app.localhost`)
  * also trip the guard when used unintentionally in prod.
+ *
+ * @param logger - Optional logger; only `warn` is called. Defaults to a
+ *   silent no-op so the agnostic core never writes to `console` directly
+ *   (cf. standard.md §1/§2 — logging is injected, not hard-coded). The
+ *   consuming provider wires its own logger (which may route to console,
+ *   toast, Sentry, etc.) through `resolveSDKConfig`.
  */
-function assertWebUrlNotLocalhostOffLocal(webUrl: string, isLocal: boolean): void {
+function assertWebUrlNotLocalhostOffLocal(
+  webUrl: string,
+  isLocal: boolean,
+  logger?: CrossOriginLogger
+): void {
   if (isLocal) return
 
-  // Phase D follow-up (2026-05-05) — converted from `throw` to `console.warn`.
+  // Phase D follow-up (2026-05-05) — converted from `throw` to a warning.
   //
   // Original intent : catch consumers shipping production builds with a
   // localhost webUrl baked in (login click would dead-end on localhost).
@@ -670,8 +752,11 @@ function assertWebUrlNotLocalhostOffLocal(webUrl: string, isLocal: boolean): voi
   // localhost defaults visible to the trap. Throwing at provider mount
   // time kills the entire app (white screen) — much worse UX than a
   // potentially mis-configured login button. The warn surfaces the
-  // problem in console (visible to operators + Sentry-style trackers)
-  // without breaking the page render.
+  // problem (visible to operators + Sentry-style trackers via the
+  // injected logger) without breaking the page render.
+  //
+  // Lot 3B (2026-05-20) — routed through the injected logger instead of a
+  // direct `console.warn` so the agnostic core stays console-free.
   let isLocalhostUrl = false
   try {
     const parsed = new URL(webUrl)
@@ -688,8 +773,8 @@ function assertWebUrlNotLocalhostOffLocal(webUrl: string, isLocal: boolean): voi
     isLocalhostUrl = webUrl.includes('localhost') || webUrl.includes('127.0.0.1')
   }
 
-  if (isLocalhostUrl && typeof console !== 'undefined' && console.warn) {
-    console.warn(`[auth-sdk] ${WEB_URL_LOCALHOST_TRAP_MESSAGE}`)
+  if (isLocalhostUrl) {
+    logger?.warn?.(`[auth-sdk] ${WEB_URL_LOCALHOST_TRAP_MESSAGE}`)
   }
 }
 
@@ -777,10 +862,19 @@ export interface PendingKeyFetch {
  * **Pure function** — no side effects, safe to call from `useMemo`. The actual
  * network request is deferred to the caller's effect.
  *
+ * @param sdkConfig - The consumer-supplied SDK configuration.
+ * @param logger - Optional logger; only `warn` is called, surfaced when the
+ *   resolved `webUrl` is a stale localhost value off-localhost (the
+ *   localhost-trap guard). Defaults to a silent no-op so the agnostic core
+ *   never touches `console` directly — the consuming `<AuthProvider>` wires
+ *   its own `logger` (console / toast / Sentry) and forwards it here.
  * @returns Resolved config with apiUrl, appName, webUrl, and an optional
  *          `keyFetch` descriptor the caller resolves asynchronously.
  */
-export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
+export function resolveSDKConfig(
+  sdkConfig: AuthSDKConfig,
+  logger?: CrossOriginLogger
+): {
   clientConfig: AuthClientConfig
   webUrl: string
   /**
@@ -827,7 +921,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
     const webUrl = defaultWebUrl
     const appName = sdkConfig.appName ?? 'ezauth'
 
-    assertWebUrlNotLocalhostOffLocal(webUrl, local)
+    assertWebUrlNotLocalhostOffLocal(webUrl, local, logger)
 
     return {
       clientConfig: {
@@ -849,7 +943,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
     const apiUrl = `${apiBaseUrl}/api/auth`
     const webUrl = defaultWebUrl
 
-    assertWebUrlNotLocalhostOffLocal(webUrl, local)
+    assertWebUrlNotLocalhostOffLocal(webUrl, local, logger)
 
     // We create the client with placeholder appName; it will be updated after config fetch
     const clientConfig: AuthClientConfig = {
@@ -881,7 +975,7 @@ export function resolveSDKConfig(sdkConfig: AuthSDKConfig): {
   const webUrl = defaultWebUrl
   const appName = sdkConfig.appName ?? 'dev'
 
-  assertWebUrlNotLocalhostOffLocal(webUrl, local)
+  assertWebUrlNotLocalhostOffLocal(webUrl, local, logger)
 
   return {
     clientConfig: {

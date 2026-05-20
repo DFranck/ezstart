@@ -255,11 +255,35 @@ describe('resolveSDKConfig', () => {
 
       it('warns (no throw) off-localhost when webUrl is explicitly set to a localhost URL', () => {
         // Phase D follow-up (2026-05-05) — converted from throw to warn so a
-        // false-positive doesn't kill the entire app render. The console.warn
-        // surfaces the issue (visible to operators + Sentry) without breaking
-        // the page.
+        // false-positive doesn't kill the entire app render.
+        //
+        // Lot 3B (2026-05-20) — the warning now routes through the INJECTED
+        // logger (silent no-op by default) instead of a direct console.warn,
+        // so the agnostic core never touches `console`. We assert the logger
+        // shim receives the message AND that `console.warn` is never called.
         stubNonLocalhost()
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const warn = vi.fn()
+        const result = resolveSDKConfig(
+          {
+            firstParty: true,
+            apiUrl: 'https://auth.example.com',
+            appName: 'ezauth',
+            webUrl: 'http://localhost:6111',
+          },
+          { warn }
+        )
+        expect(result.webUrl).toBe('http://localhost:6111')
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('webUrl resolves to localhost'))
+        expect(consoleSpy).not.toHaveBeenCalled()
+        consoleSpy.mockRestore()
+      })
+
+      it('stays silent (no console write) off-localhost when no logger is injected', () => {
+        // Agnostic-core guarantee: with no logger, the localhost-trap guard is
+        // a silent no-op — it must NEVER fall back to console.warn.
+        stubNonLocalhost()
+        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
         const result = resolveSDKConfig({
           firstParty: true,
           apiUrl: 'https://auth.example.com',
@@ -267,24 +291,24 @@ describe('resolveSDKConfig', () => {
           webUrl: 'http://localhost:6111',
         })
         expect(result.webUrl).toBe('http://localhost:6111')
-        expect(warnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('webUrl resolves to localhost')
-        )
-        warnSpy.mockRestore()
+        expect(consoleSpy).not.toHaveBeenCalled()
+        consoleSpy.mockRestore()
       })
 
       it('warns (no throw) off-localhost for 127.0.0.1 / [::1] variants', () => {
         stubNonLocalhost()
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-        const result = resolveSDKConfig({
-          firstParty: true,
-          apiUrl: 'https://auth.example.com',
-          appName: 'ezauth',
-          webUrl: 'http://127.0.0.1:6111',
-        })
+        const warn = vi.fn()
+        const result = resolveSDKConfig(
+          {
+            firstParty: true,
+            apiUrl: 'https://auth.example.com',
+            appName: 'ezauth',
+            webUrl: 'http://127.0.0.1:6111',
+          },
+          { warn }
+        )
         expect(result.webUrl).toBe('http://127.0.0.1:6111')
-        expect(warnSpy).toHaveBeenCalled()
-        warnSpy.mockRestore()
+        expect(warn).toHaveBeenCalled()
       })
 
       it('accepts off-localhost when webUrl is a real domain', () => {
@@ -309,17 +333,20 @@ describe('resolveSDKConfig', () => {
 
       it('warns (no throw) for dev-mode config with stale webUrl off-localhost', () => {
         stubNonLocalhost()
-        // Dev mode (no firstParty, no key) — webUrl localhost surfaces a
-        // console.warn instead of throwing (cf. Phase D follow-up).
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-        const result = resolveSDKConfig({
-          apiUrl: 'https://auth.example.com',
-          appName: 'myapp',
-          webUrl: 'http://localhost:6111',
-        })
+        // Dev mode (no firstParty, no key) — webUrl localhost surfaces a warn
+        // via the injected logger instead of throwing (cf. Phase D follow-up
+        // + Lot 3B logger routing).
+        const warn = vi.fn()
+        const result = resolveSDKConfig(
+          {
+            apiUrl: 'https://auth.example.com',
+            appName: 'myapp',
+            webUrl: 'http://localhost:6111',
+          },
+          { warn }
+        )
         expect(result.webUrl).toBe('http://localhost:6111')
-        expect(warnSpy).toHaveBeenCalled()
-        warnSpy.mockRestore()
+        expect(warn).toHaveBeenCalled()
       })
     })
 

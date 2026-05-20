@@ -35,6 +35,12 @@ export interface AccountModalTexts {
   changePassword: string
   createPassword: string
   passwordChanged: string
+  /**
+   * Shown when a privileged action (e.g. change password) is rejected by
+   * the server with code `EMAIL_VERIFICATION_REQUIRED` — the user must
+   * verify their email before continuing.
+   */
+  emailVerificationRequired: string
   // Advanced security (link to ezauth settings)
   securitySection: string
   manageSecurity: string
@@ -76,6 +82,7 @@ export const DEFAULT_ACCOUNT_TEXTS: AccountModalTexts = {
   changePassword: 'Change password',
   createPassword: 'Create password',
   passwordChanged: 'Password changed successfully',
+  emailVerificationRequired: 'Please verify your email address before changing your password.',
   securitySection: 'Advanced security',
   manageSecurity: 'Manage 2FA & sessions',
   emailVerified: 'Verified',

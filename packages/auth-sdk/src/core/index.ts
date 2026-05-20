@@ -15,8 +15,16 @@ export {
 // Token storage
 export { TokenManager, createMemoryStorage, createLocalStorage } from './token-manager.js'
 
+// Defensive localStorage helpers (Safari private mode / SSR / disabled storage)
+export { safeGetLocalStorage, safeSetLocalStorage, safeRemoveLocalStorage } from './safe-storage.js'
+export type { SafeStorageLogger } from './safe-storage.js'
+
 // Errors
-export { AuthError } from './errors.js'
+export {
+  AuthError,
+  EMAIL_VERIFICATION_REQUIRED,
+  isEmailVerificationRequiredError,
+} from './errors.js'
 
 // Hardcoded prod defaults (Stripe-pattern)
 export { DEFAULT_AUTH_API_URL } from './defaults.js'

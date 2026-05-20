@@ -1,6 +1,7 @@
 'use client'
 
 import { bumpLogoutEpoch } from '@ezstart/api-sdk/core'
+import { safeRemoveLocalStorage, safeSetLocalStorage } from '../core/safe-storage.js'
 import { toast } from 'sonner'
 import type { AuthLogger } from './auth-provider.js'
 import { useAuthContext, useAuthStore, useAuthStoreApi } from './auth-provider.js'
@@ -45,23 +46,6 @@ export interface LogoutOptions {
 }
 
 /**
- * Safe localStorage key removal — Safari private mode + SSR + agent harness
- * environments all fail differently when localStorage is unavailable. Wrap
- * the call so a missing storage layer never throws past the logout flow.
- *
- * @internal
- */
-function safeRemoveLocalStorage(key: string): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.removeItem(key)
-  } catch {
-    // Storage disabled / quota exceeded / private mode — non-fatal, the store
-    // reset above is the source of truth.
-  }
-}
-
-/**
  * Main auth hook providing state + actions.
  *
  * Must be used within an `<AuthProvider>`.
@@ -90,10 +74,12 @@ export function useAuth(logger?: AuthLogger) {
    * whitelist.
    */
   const login = (additionalParams?: Record<string, string>): Promise<never> => {
-    // Save current URL for post-login redirect
+    // Save current URL for post-login redirect. `setItem` can throw (Safari
+    // private mode, quota exceeded, storage disabled) — wrap it so a storage
+    // failure never blocks the login redirect (the hint is best-effort).
     if (typeof window !== 'undefined') {
       const currentUrl = window.location.pathname + window.location.search + window.location.hash
-      localStorage.setItem('ezauth_redirect_after_login', currentUrl)
+      safeSetLocalStorage('ezauth_redirect_after_login', currentUrl, log)
     }
 
     // Build redirect URI from current origin + locale

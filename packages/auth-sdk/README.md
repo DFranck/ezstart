@@ -131,7 +131,8 @@ See [`examples/vanilla-standalone`](./examples/vanilla-standalone) for a complet
 ### Core (`@ezstart/auth-sdk/core`)
 
 - `createCoreAuthClient(config)` — Factory for the framework-agnostic client. Returns `login`, `logout`, `refresh`, `getCurrentUser`, `updateProfile`, etc.
-- `AuthError` — Typed error class with `code` and `statusCode`.
+- `AuthError` — Typed error class with `code` and `status`. The client now threads the server's `error.code` into `AuthError.code` so consumers can `switch` on it instead of matching error strings.
+- `EMAIL_VERIFICATION_REQUIRED` / `isEmailVerificationRequiredError(err)` — Constant + type guard for the `403` returned by the `requireEmailVerified` server gate on privileged routes. Use the guard to surface a "verify your email" prompt (`<EmailVerificationBanner>` / resend CTA) instead of a generic error.
 - `TokenManager` — Pluggable token persistence interface.
 - `createLocalStorage()` / `createMemoryStorage()` — Built-in storage backends.
 
@@ -229,7 +230,6 @@ The components layer is **agnostic of any i18n library**. All user-facing string
 
 ```tsx
 import { SignInForm } from '@ezstart/auth-sdk/components'
-
 ;<SignInForm
   appName="myapp"
   texts={{

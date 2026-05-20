@@ -13,7 +13,11 @@ export {
   fetchKeyConfig,
   resolveSDKConfig,
 } from './core/auth-client.js'
-export { AuthError } from './core/errors.js'
+export {
+  AuthError,
+  EMAIL_VERIFICATION_REQUIRED,
+  isEmailVerificationRequiredError,
+} from './core/errors.js'
 export { TokenManager, createMemoryStorage, createLocalStorage } from './core/token-manager.js'
 
 // Core schemas (response validation)

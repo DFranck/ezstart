@@ -4,6 +4,7 @@ import { Button, Div, H3, Icon, Input, Label, P, Span } from '@ezstart/ui/compon
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { CoreAuthClient } from '../../core/auth-client.js'
+import { isEmailVerificationRequiredError } from '../../core/errors.js'
 import { createSsoHandoff } from './sso-handoff.js'
 import type { AccountModalTexts } from './types.js'
 
@@ -68,7 +69,14 @@ export function AccountSettingsSection({
       setNewPasswordValue('')
       setEditingPassword(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to change password')
+      // Privileged action gated behind email verification — surface the
+      // dedicated, actionable message instead of the generic server text so
+      // the user knows exactly what to do next (verify their email).
+      if (isEmailVerificationRequiredError(error)) {
+        toast.error(texts.emailVerificationRequired)
+      } else {
+        toast.error(error instanceof Error ? error.message : 'Failed to change password')
+      }
     } finally {
       setSavingPassword(false)
     }

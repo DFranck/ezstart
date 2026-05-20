@@ -391,7 +391,17 @@ export function AuthProvider({
     }
   }, [publishableKey, mode, appName, apiUrl, webUrl])
 
-  const resolved = useMemo(() => resolveSDKConfig(sdkConfig), [sdkConfig])
+  // Forward the injected logger so the localhost-trap guard inside
+  // `resolveSDKConfig` (cf. `assertWebUrlNotLocalhostOffLocal`) routes its
+  // warning through the consumer's logger instead of a direct console.warn.
+  // Defaults to the silent no-op when the consumer wires no logger.
+  const resolved = useMemo(
+    () =>
+      resolveSDKConfig(sdkConfig, {
+        warn: (message: string, ...args: unknown[]) => logger.warn(message, ...args),
+      }),
+    [sdkConfig, logger]
+  )
 
   // Create the client (stable reference)
   const client = useMemo(
@@ -414,7 +424,8 @@ export function AuthProvider({
   //   - same eTLD+1 (api ↔ web)        → respects the configured authMode
   //                                      (defaults to 'httpOnly' when unset)
   //   - cross-origin + 'httpOnly' set  → falls back to 'localStorage' with
-  //                                      a one-time console.warn (see helper)
+  //                                      a one-time warn via the injected
+  //                                      logger (see helper)
   const effectiveMode = useMemo<AuthMode>(() => {
     if (isLocalhostBrowser()) return 'localStorage'
     const configured: AuthMode = authMode ?? 'httpOnly'
