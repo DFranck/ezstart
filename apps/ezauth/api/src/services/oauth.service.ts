@@ -1,7 +1,7 @@
 import { getAuthUserModel } from '../models/auth-user.js'
 import { getOAuthAccountModel } from '../models/oauth-account.js'
 import { AuthCodeResponse } from '@ezstart/auth-sdk/server'
-import { AuthService } from './auth.service.js'
+import { AuthService, type AuthCodePkce } from './auth.service.js'
 import { AuditLogService } from './audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
 import { isValidAvatarUrl } from '../utils/avatar.js'
@@ -19,6 +19,15 @@ export interface OAuthFlowContext {
    * state JWT, so by the time we read it here it is already trusted.
    */
   linkUserId?: string
+  /**
+   * PKCE (RFC 7636) binding the SDK committed to BEFORE redirecting to Google.
+   * Extracted from the signed OAuth state in the Passport strategy, so it is
+   * tamper-proof by the time we read it here. When set, the minted auth code
+   * carries `code_challenge` and the /token exchange REQUIRES a matching
+   * `code_verifier`. Absent ⇒ legacy (no-PKCE) auth code — backward compatible
+   * with SDKs that never sent a challenge.
+   */
+  pkce?: AuthCodePkce
 }
 
 /**
@@ -106,7 +115,12 @@ export class OAuthService {
           )
         }
         // Already linked to the same user — idempotent success.
-        return AuthService.generateAuthCodePublic(linkedUser._id!.toString(), app, redirectUri)
+        return AuthService.generateAuthCodePublic(
+          linkedUser._id!.toString(),
+          app,
+          redirectUri,
+          flow.pkce
+        )
       }
 
       // Same safety as auto-link path: provider MUST have verified the email.
@@ -132,7 +146,12 @@ export class OAuthService {
         appName: app,
         metadata: { provider: profile.provider, providerEmail: profile.email },
       })
-      return AuthService.generateAuthCodePublic(linkedUser._id!.toString(), app, redirectUri)
+      return AuthService.generateAuthCodePublic(
+        linkedUser._id!.toString(),
+        app,
+        redirectUri,
+        flow.pkce
+      )
     }
 
     // 1. Existing OAuth link → login
@@ -163,7 +182,7 @@ export class OAuthService {
         metadata: { provider: profile.provider, method: 'oauth' },
       })
 
-      return AuthService.generateAuthCodePublic(user._id!.toString(), app, redirectUri)
+      return AuthService.generateAuthCodePublic(user._id!.toString(), app, redirectUri, flow.pkce)
     }
 
     // 2. Local user exists with this email → only auto-link if BOTH verified
@@ -210,7 +229,12 @@ export class OAuthService {
             { provider: profile.provider, providerId: profile.providerId },
             '[OAuth] Auto-link race lost — falling back to login'
           )
-          return AuthService.generateAuthCodePublic(existingUser._id!.toString(), app, redirectUri)
+          return AuthService.generateAuthCodePublic(
+            existingUser._id!.toString(),
+            app,
+            redirectUri,
+            flow.pkce
+          )
         }
         throw err
       }
@@ -225,7 +249,12 @@ export class OAuthService {
         },
       })
 
-      return AuthService.generateAuthCodePublic(existingUser._id!.toString(), app, redirectUri)
+      return AuthService.generateAuthCodePublic(
+        existingUser._id!.toString(),
+        app,
+        redirectUri,
+        flow.pkce
+      )
     }
 
     // 3. Brand-new user — still require the provider to have verified the email
@@ -294,7 +323,7 @@ export class OAuthService {
       }
     }
 
-    return AuthService.generateAuthCodePublic(newUser._id!.toString(), app, redirectUri)
+    return AuthService.generateAuthCodePublic(newUser._id!.toString(), app, redirectUri, flow.pkce)
   }
 
   /**

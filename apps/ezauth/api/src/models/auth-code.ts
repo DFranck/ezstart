@@ -8,6 +8,15 @@ export interface AuthCodeDocument extends Document {
   app: string
   type: 'auth' | 'password-reset' | 'email-verification' | 'sso-handoff'
   redirectUri?: string
+  /**
+   * PKCE (RFC 7636 / OAuth 2.1) — when the client committed to a PKCE flow,
+   * this stores `BASE64URL(SHA256(code_verifier))`. The /token exchange then
+   * REQUIRES a matching `code_verifier`. Absent ⇒ legacy (no-PKCE) code that
+   * exchanges without a verifier (magic-link, sso-handoff, 2FA, legacy login).
+   */
+  codeChallenge?: string
+  /** PKCE method — only `'S256'` is ever stored (plain is rejected upstream). */
+  codeChallengeMethod?: 'S256'
   expiresAt: Date
   isUsed: boolean
   consumedAt?: Date
@@ -55,6 +64,16 @@ const authCodeSchema = new Schema<AuthCodeDocument>(
     },
     redirectUri: {
       type: String,
+    },
+    // PKCE (RFC 7636) — stored only when the client opted into PKCE. The
+    // exchange binds `BASE64URL(SHA256(code_verifier))` against this value
+    // with a timing-safe compare. See `auth.service.ts` exchangeCodeForToken.
+    codeChallenge: {
+      type: String,
+    },
+    codeChallengeMethod: {
+      type: String,
+      enum: ['S256'],
     },
     expiresAt: {
       type: Date,

@@ -81,6 +81,15 @@ const loginController = async (req: Request, res: Response) => {
           userId,
           app: parsed.data.app,
           redirect_uri: parsed.data.redirect_uri,
+          // PKCE (RFC 7636) — carry the challenge across the 2FA detour so the
+          // code minted by /2fa/validate stays bound to the verifier the
+          // client committed to here. Omitted when no PKCE was requested.
+          ...(parsed.data.code_challenge
+            ? {
+                code_challenge: parsed.data.code_challenge,
+                code_challenge_method: parsed.data.code_challenge_method ?? 'S256',
+              }
+            : {}),
           type: '2fa_pending',
         },
         JWT_SECRET,

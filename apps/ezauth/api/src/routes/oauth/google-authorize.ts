@@ -10,7 +10,11 @@ import { z } from 'zod'
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
-import { errorResponseSchema } from '@ezstart/auth-sdk/server'
+import {
+  errorResponseSchema,
+  PkceCodeChallengeSchema,
+  PkceCodeChallengeMethodSchema,
+} from '@ezstart/auth-sdk/server'
 import { logger } from '@ezstart/logger/server'
 import passport, { OAUTH_STATE_COOKIE, signOAuthStateToken } from '../../config/passport.js'
 import { JWT_SECRET } from '../../config/env.js'
@@ -36,6 +40,20 @@ const googleAuthorizeQuerySchema = z.object({
     description:
       'Flow intent — `link` requires the caller to already be signed in (cookie session) and links the OAuth provider to the current user instead of refusing on email collision.',
   }),
+  // PKCE (RFC 7636 / OAuth 2.1) — OPTIONAL + strictly additive. When the SDK
+  // commits to a `code_verifier` (stashed in sessionStorage before the
+  // redirect to Google), it sends the derived `code_challenge` + S256 method
+  // here. We sign BOTH into the state JWT so they round-trip through Google
+  // tamper-proof; the callback then mints an auth code bound to the challenge.
+  // Omitting both keeps the legacy (no-PKCE) OAuth behaviour. The shared
+  // schemas reject `plain` (S256-only) and bound the charset/length.
+  //
+  // No `.openapi()` here: these schemas come from `@ezstart/api-contracts`
+  // (a different zod instance) so re-decorating them locally breaks type
+  // inference. The OpenAPI doc still describes the two params via the
+  // `description` field on the schemas themselves.
+  code_challenge: PkceCodeChallengeSchema.optional(),
+  code_challenge_method: PkceCodeChallengeMethodSchema.optional(),
 })
 
 /**
@@ -87,7 +105,7 @@ docRouter.get(
       return sendValidationError(res, 'Invalid query parameters', parsed.error.errors)
     }
 
-    const { app, redirect_uri, intent } = parsed.data
+    const { app, redirect_uri, intent, code_challenge, code_challenge_method } = parsed.data
 
     // HAC-HIGH-3 (RFC 6749 §3.1.2) — when the caller supplied a
     // `redirect_uri`, it MUST match one of the registered URIs on this
@@ -125,6 +143,13 @@ docRouter.get(
       redirectUri: redirect_uri,
       intent: intent ?? 'signin',
       linkUserId,
+      // PKCE (RFC 7636) — sign the challenge INTO the state so it round-trips
+      // through Google tamper-proof. Only when the SDK supplied one; the
+      // method defaults to S256 (the schema rejects any other value, so this
+      // only normalizes an absent method when a challenge IS present).
+      ...(code_challenge
+        ? { codeChallenge: code_challenge, codeChallengeMethod: code_challenge_method ?? 'S256' }
+        : {}),
     })
 
     res.cookie(OAUTH_STATE_COOKIE, nonce, {

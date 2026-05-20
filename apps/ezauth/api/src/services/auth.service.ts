@@ -29,6 +29,18 @@ import {
 import { AuditLogService } from './audit-log.service.js'
 import { TotpService } from './totp.service.js'
 import { assertPasswordStrength } from './password-policy.service.js'
+import { verifyPkceChallenge } from '../utils/pkce.js'
+
+/**
+ * PKCE (RFC 7636) parameters carried from the authorization request (/login,
+ * /register) onto the minted auth code. When `codeChallenge` is set, the
+ * /token exchange requires a matching `code_verifier`. Both fields are
+ * optional end-to-end so the legacy (no-PKCE) flow keeps working.
+ */
+export interface AuthCodePkce {
+  codeChallenge?: string
+  codeChallengeMethod?: 'S256'
+}
 
 const ACCESS_TOKEN_EXPIRES_IN = env.ACCESS_TOKEN_EXPIRES_IN as `${number}m`
 const REFRESH_TOKEN_DAYS = 30
@@ -208,8 +220,13 @@ export class AuthService {
       throw saveError
     }
 
-    // Generate auth code
-    return this.generateAuthCode(user._id!.toString(), data.app, data.redirect_uri)
+    // Generate auth code — propagate PKCE challenge when the client opted in.
+    return this.generateAuthCode(
+      user._id!.toString(),
+      data.app,
+      data.redirect_uri,
+      pkceFromRequest(data)
+    )
   }
 
   /**
@@ -351,7 +368,9 @@ export class AuthService {
   // Login user
   static async login(data: LoginRequest): Promise<AuthCodeResponse> {
     const userId = await this.validateCredentials(data)
-    return this.generateAuthCode(userId, data.app, data.redirect_uri)
+    // Propagate the PKCE challenge (RFC 7636) onto the minted code when the
+    // client opted in. Absent ⇒ legacy no-PKCE code.
+    return this.generateAuthCode(userId, data.app, data.redirect_uri, pkceFromRequest(data))
   }
 
   // ✅ NEW: Login with direct token (httpOnly cookie mode)
@@ -443,6 +462,28 @@ export class AuthService {
       throw new Error('Invalid or expired authorization code')
     }
 
+    // PKCE (RFC 7636 §4.6 / OAuth 2.1) — when the code was minted WITH a
+    // `code_challenge`, the /token request MUST present a `code_verifier`
+    // whose `BASE64URL(SHA256(verifier))` matches (timing-safe). This defeats
+    // authorization-code interception: an attacker who steals the code never
+    // knew the verifier. Placed BEFORE `isUsed=true` (mirrors the HAC-HIGH-4
+    // redirect_uri cross-check) so a failed PKCE check does NOT burn the code.
+    //
+    // When NO challenge was stored (legacy flows: magic-link, sso-handoff,
+    // 2FA-without-pkce, pre-PKCE login), the verifier is not required and is
+    // ignored — backward compatible. The generic error message matches the
+    // other authcode rejections (MED-3 safe-error) so PKCE failure cannot be
+    // distinguished from an invalid/expired code.
+    if (authCode.codeChallenge) {
+      if (!data.code_verifier || !verifyPkceChallenge(data.code_verifier, authCode.codeChallenge)) {
+        logger.warn(
+          { app: data.app, hasVerifier: Boolean(data.code_verifier) },
+          '[OAuth] /token PKCE verification failed — missing or mismatched code_verifier'
+        )
+        throw new Error('Invalid or expired authorization code')
+      }
+    }
+
     // Mark code as used
     authCode.isUsed = true
     await authCode.save()
@@ -497,21 +538,27 @@ export class AuthService {
   }
 
   /**
-   * Public wrapper for generating auth codes (used by 2FA validate route)
+   * Public wrapper for generating auth codes (used by 2FA validate route).
+   *
+   * Accepts the optional PKCE challenge so a code minted AFTER the 2FA detour
+   * carries the same binding the user committed to at /login — otherwise a
+   * 2FA-enabled user would silently downgrade out of PKCE.
    */
   static async generateAuthCodePublic(
     userId: string,
     app: string,
-    redirectUri?: string
+    redirectUri?: string,
+    pkce?: AuthCodePkce
   ): Promise<AuthCodeResponse> {
-    return this.generateAuthCode(userId, app, redirectUri)
+    return this.generateAuthCode(userId, app, redirectUri, pkce)
   }
 
   // Private: Generate auth code
   private static async generateAuthCode(
     userId: string,
     app: string,
-    redirectUri?: string
+    redirectUri?: string,
+    pkce?: AuthCodePkce
   ): Promise<AuthCodeResponse> {
     const AuthCodeModel = await getAuthCodeModel()
     const code = crypto.randomBytes(32).toString('hex')
@@ -521,6 +568,14 @@ export class AuthService {
       userId,
       app,
       redirectUri,
+      // PKCE — store only when the client committed to a challenge. Omitted
+      // ⇒ the field stays undefined and the exchange runs the legacy path.
+      ...(pkce?.codeChallenge
+        ? {
+            codeChallenge: pkce.codeChallenge,
+            codeChallengeMethod: pkce.codeChallengeMethod ?? 'S256',
+          }
+        : {}),
     })
 
     await authCode.save()
@@ -665,5 +720,22 @@ export class AuthService {
       expiresAt: s.expiresAt.toISOString(),
       isCurrent: currentTokenHash ? s.tokenHash === currentTokenHash : false,
     }))
+  }
+}
+
+/**
+ * Extract the PKCE challenge (RFC 7636) from a parsed login/register request.
+ *
+ * Returns `undefined` when no challenge was supplied so the caller mints a
+ * legacy (no-PKCE) code. The `code_challenge_method` defaults to `'S256'` —
+ * the contract (`PkceCodeChallengeMethodSchema = z.literal('S256')`) already
+ * rejects any other value, so the only possibilities here are `'S256'` or
+ * absent.
+ */
+function pkceFromRequest(data: LoginRequest | RegisterRequest): AuthCodePkce | undefined {
+  if (!data.code_challenge) return undefined
+  return {
+    codeChallenge: data.code_challenge,
+    codeChallengeMethod: data.code_challenge_method ?? 'S256',
   }
 }

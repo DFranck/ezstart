@@ -43,6 +43,9 @@ interface TwoFactorPendingPayload {
   userId: string
   app: string
   redirect_uri?: string
+  /** PKCE (RFC 7636) challenge carried across the 2FA detour, when present. */
+  code_challenge?: string
+  code_challenge_method?: 'S256'
   type: string
   mode?: string
 }
@@ -144,11 +147,19 @@ const validateController = async (req: Request, res: Response) => {
       })
     }
 
-    // Auth-code mode — return the same shape /login does
+    // Auth-code mode — return the same shape /login does. Re-bind the PKCE
+    // challenge (RFC 7636) the client committed to at /login so the post-2FA
+    // code still requires the verifier on exchange.
     const authCode = await AuthService.generateAuthCodePublic(
       payload.userId,
       payload.app,
-      payload.redirect_uri
+      payload.redirect_uri,
+      payload.code_challenge
+        ? {
+            codeChallenge: payload.code_challenge,
+            codeChallengeMethod: payload.code_challenge_method ?? 'S256',
+          }
+        : undefined
     )
 
     sendSuccess(res, {
