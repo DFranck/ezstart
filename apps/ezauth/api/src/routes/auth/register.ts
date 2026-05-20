@@ -27,6 +27,7 @@ import {
   authCodeResponseSchema,
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
+import { WeakPasswordError, PwnedPasswordError } from '../../services/password-policy.service.js'
 
 export const registerRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -111,8 +112,19 @@ const registerController = async (req: Request, res: Response) => {
       message: 'User registered successfully. Please check your email to verify your account.',
     })
   } catch (error) {
+    // MED-1 — password-policy rejection → 422 with a stable, non-leaking code.
+    if (error instanceof WeakPasswordError || error instanceof PwnedPasswordError) {
+      return sendError(res, error.message, error.statusCode, { code: error.code })
+    }
+    // MED-3 — only the "user already exists" message is an intentional,
+    // client-safe signal; everything else returns a generic message so
+    // unexpected internal detail never leaks. The thrown error is logged.
     logger.error('Register error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Registration failed', 400)
+    const safeMessage =
+      error instanceof Error && error.message === 'User already exists with this email or username'
+        ? error.message
+        : 'Registration failed'
+    sendError(res, safeMessage, 400)
   }
 }
 
@@ -134,6 +146,10 @@ docRouter.post(
     status: 201,
     extraResponses: {
       400: { description: 'Registration failed', schema: errorResponseSchema },
+      422: {
+        description: 'Password too weak (`WEAK_PASSWORD`) or breached (`PWNED_PASSWORD`)',
+        schema: errorResponseSchema,
+      },
       429: { description: 'Too many registration attempts', schema: errorResponseSchema },
     },
   }

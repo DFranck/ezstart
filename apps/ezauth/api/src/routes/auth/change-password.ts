@@ -18,6 +18,11 @@ import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 import { verifyCookieCsrf } from '../../middleware/csrf.js'
 import { verifyTokenMiddleware as authMiddleware } from '../../middleware/auth.js'
 import { requireEmailVerified } from '../../middleware/require-email-verified.js'
+import {
+  assertPasswordStrength,
+  WeakPasswordError,
+  PwnedPasswordError,
+} from '../../services/password-policy.service.js'
 
 export const changePasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -68,6 +73,11 @@ const changePasswordController = async (req: Request, res: Response) => {
     }
     // If user has no password (OAuth-only), allow setting one without currentPassword
 
+    // MED-1 — enforce password strength (zxcvbn + HIBP) BEFORE hashing/saving.
+    // Penalize passwords derived from the account identity. A failure here
+    // returns 422 with a stable code and the password is left unchanged.
+    await assertPasswordStrength(newPassword, [user.email, user.username])
+
     // Set new password — pre-save hook will hash it automatically
     user.passwordHash = newPassword
     user.hasSetOwnPassword = true
@@ -91,8 +101,16 @@ const changePasswordController = async (req: Request, res: Response) => {
     })
     sendSuccess(res, { message: 'Password changed successfully' })
   } catch (error) {
+    // MED-1 — surface password-policy rejections with a stable, non-leaking
+    // code (422 Unprocessable Entity).
+    if (error instanceof WeakPasswordError || error instanceof PwnedPasswordError) {
+      return sendError(res, error.message, error.statusCode, { code: error.code })
+    }
+    // MED-3 — never echo a raw `error.message` to the client for unexpected
+    // failures (could leak DB/internal structure). Log the detail server-side
+    // and return a stable generic message.
     logger.error('Change password error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to change password', 500)
+    sendError(res, 'Unable to change password', 500)
   }
 }
 
@@ -119,6 +137,10 @@ docRouter.put(
         schema: errorResponseSchema,
       },
       404: { description: 'User not found', schema: errorResponseSchema },
+      422: {
+        description: 'Password too weak (`WEAK_PASSWORD`) or breached (`PWNED_PASSWORD`)',
+        schema: errorResponseSchema,
+      },
     },
   }
 )

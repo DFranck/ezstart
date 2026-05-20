@@ -14,6 +14,11 @@ import { ResetPasswordRequestSchema } from '@ezstart/api-contracts'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { getAuthCodeModel } from '../../models/auth-code.js'
 import { logger } from '@ezstart/logger/server'
+import {
+  assertPasswordStrength,
+  WeakPasswordError,
+  PwnedPasswordError,
+} from '../../services/password-policy.service.js'
 
 export const resetPasswordRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -71,6 +76,12 @@ const resetPasswordController = async (req: Request, res: Response) => {
       })
     }
 
+    // MED-1 — enforce password strength (zxcvbn + HIBP) BEFORE hashing/saving.
+    // Penalize passwords derived from the account identity. A failure here
+    // returns 422 with a stable code and does NOT consume the reset token, so
+    // the user can retry with a stronger password using the same link.
+    await assertPasswordStrength(newPassword, [user.email, user.username])
+
     // Update password (pre-save hook will hash it)
     user.passwordHash = newPassword
     user.hasSetOwnPassword = true
@@ -87,6 +98,12 @@ const resetPasswordController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { message: 'Password reset successfully' })
   } catch (error) {
+    // MED-1 / MED-3 — surface the password-policy rejection with a stable,
+    // non-leaking code (422). Everything else returns a generic 500 message
+    // (no `error.message` leak).
+    if (error instanceof WeakPasswordError || error instanceof PwnedPasswordError) {
+      return sendError(res, error.message, error.statusCode, { code: error.code })
+    }
     logger.error('Reset password error:', error)
     sendError(res, 'Failed to reset password', 500)
   }
@@ -99,6 +116,10 @@ docRouter.post('/reset-password', resetPasswordRateLimiter, resetPasswordControl
   responseSchema: resetPasswordResponseSchema,
   extraResponses: {
     400: { description: 'Invalid or expired token', schema: errorSchema },
+    422: {
+      description: 'Password too weak (`WEAK_PASSWORD`) or breached (`PWNED_PASSWORD`)',
+      schema: errorSchema,
+    },
     429: { description: 'Too many attempts', schema: errorSchema },
     500: { description: 'Server error', schema: errorSchema },
   },

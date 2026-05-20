@@ -27,6 +27,7 @@
   "dependencies": {
     "@ezstart/api-contracts": "workspace:*",
     "@ezstart/api-core": "workspace:*",
+    "@ezstart/api-sdk": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/email-service": "workspace:*",
@@ -36,6 +37,8 @@
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/qrcode": "^1.5.6",
+    "@zxcvbn-ts/core": "^3.0.4",
+    "@zxcvbn-ts/language-common": "^3.0.4",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
