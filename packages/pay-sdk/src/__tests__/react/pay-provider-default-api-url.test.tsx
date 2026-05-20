@@ -14,24 +14,16 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 
 import { PayProvider, useApplicationContext } from '../../react/pay-provider.js'
-import { usePayStore } from '../../react/store.js'
 import { DEFAULT_PAY_API_URL, EZPAY_URLS_BY_ENV } from '../../core/defaults.js'
 
 const originalEnvUrl = process.env.NEXT_PUBLIC_EZPAY_API_URL
 const originalDeployEnv = process.env.DEPLOY_ENV
 
-function resetStore() {
-  usePayStore.setState({
-    applicationId: null,
-    appSlug: null,
-    isReady: false,
-    applicationResolutionStatus: 'idle',
-  })
-}
+// No store reset helper needed — each test renders a fresh <PayProvider> with
+// its own isolated per-tree store (standard.md §0bis: factory + Context).
 
 describe('PayProvider — env-aware apiUrl resolution', () => {
   beforeEach(() => {
-    resetStore()
     delete process.env.NEXT_PUBLIC_EZPAY_API_URL
     // Pin DEPLOY_ENV=production so detectPayEnvironment() returns a
     // deterministic result regardless of the jsdom hostname.
@@ -40,7 +32,6 @@ describe('PayProvider — env-aware apiUrl resolution', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
-    resetStore()
     if (originalEnvUrl === undefined) {
       delete process.env.NEXT_PUBLIC_EZPAY_API_URL
     } else {

@@ -73,12 +73,25 @@ vi.mock('../../react/pay-provider.js', async () => {
   )
   return {
     ...actual,
+    // PlansManager consumes `usePayContext` (client), `useApplicationContext`
+    // (ctx applicationId fallback) and `usePayLocale` (locale). Mock all three
+    // — the real hooks throw "must be used within a PayProvider" since no
+    // <PayProvider> wraps these isolated render() calls.
     usePayContext: () => ({
       client: mockClient,
       applicationId: 'app_1',
       appSlug: 'acme',
       isReady: true,
     }),
+    useApplicationContext: () => ({
+      applicationId: 'app_1',
+      appSlug: 'acme',
+      isReady: true,
+      applicationResolutionStatus: 'ready' as const,
+      payWebUrl: null,
+      locale: 'en',
+    }),
+    usePayLocale: () => 'en',
   }
 })
 

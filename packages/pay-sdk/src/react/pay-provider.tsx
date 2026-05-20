@@ -13,7 +13,22 @@ import type { Logger } from '@ezstart/logger'
 import { createPayClient, type PayClient } from '../core/pay-client.js'
 import { getEzpayDefaultUrls } from '../core/defaults.js'
 import type { PayClientConfig } from '../core/types.js'
-import { usePayStore, type ApplicationResolutionStatus } from './store.js'
+import { PayStoreContext } from './__contexts.js'
+import { usePayStore as usePayStoreBound } from './pay-provider/public-hooks.js'
+import { createPayStore, type ApplicationResolutionStatus } from './store.js'
+
+// ---------------------------------------------------------------------------
+// Public re-exports — the Context-bound store hooks live in
+// `./pay-provider/public-hooks.ts`. Re-exporting them here keeps the public
+// import path (`@ezstart/pay-sdk` → `./pay-provider.js`) byte-for-byte
+// unchanged for any consumer that imported them from the provider module.
+// ---------------------------------------------------------------------------
+export {
+  usePayStore,
+  usePayStoreApi,
+  usePayStoreGetSnapshot,
+  usePayStoreSSR,
+} from './pay-provider/public-hooks.js'
 
 /**
  * Default logger that mirrors the previous hard-coded `console.error`
@@ -270,13 +285,39 @@ export function PayProvider({
     : publishableKey
       ? 'pending'
       : 'idle'
-
-  const [applicationId, setApplicationId] = useState<string | null>(explicitApplicationId)
-  const [appSlug, setAppSlug] = useState<string | null>(
-    explicitApplicationId ? (appName ?? null) : null
-  )
   // `isReady` tracks "safe to render downstream queries" — true only for `ready` / `idle`.
   // Pending AND failed both keep `isReady=false` to prevent fail-open cross-app queries.
+  const initialIsReady = initialStatus === 'ready' || initialStatus === 'idle'
+  // Match the legacy initial `appSlug` exactly: only known synchronously when
+  // an explicit applicationId is provided. The legacy `appName`-only (idle)
+  // path leaves it null until the resolution effect patches it (parity with
+  // the pre-refactor behaviour — no first-render slug drift).
+  const initialAppSlug = explicitApplicationId ? (appName ?? null) : null
+
+  // ── Per-Provider Zustand store (Clerk-style SSR setup) ──────────────────
+  //
+  // Creating the store inside `useState` guarantees one store per Provider
+  // instance AND that the resolved application context (computed synchronously
+  // from the props above) is available on the very first render. Subscribers
+  // therefore never observe a transient `{ isReady: false, status: 'idle' }`
+  // flash between mount and the post-mount resolution effect. This is the
+  // canonical Next.js + Zustand setup (standard.md §0bis). The factory is
+  // referenced once on first render — the `useState` initializer is not
+  // re-invoked on subsequent renders, so changing props mutate the live store
+  // through the resolution effect below, never re-create it.
+  const [store] = useState(() =>
+    createPayStore({
+      initial: {
+        applicationId: explicitApplicationId,
+        appSlug: initialAppSlug,
+        isReady: initialIsReady,
+        applicationResolutionStatus: initialStatus,
+      },
+    })
+  )
+
+  const [applicationId, setApplicationId] = useState<string | null>(explicitApplicationId)
+  const [appSlug, setAppSlug] = useState<string | null>(initialAppSlug)
   const [resolutionStatus, setResolutionStatus] =
     useState<ApplicationResolutionStatus>(initialStatus)
   // Auto-resolved EZPay web URL (from `/keys/config.webUrl`). When the consumer
@@ -286,18 +327,48 @@ export function PayProvider({
   // consumers must set `NEXT_PUBLIC_EZPAY_WEB_URL` manually for every app.
   const [resolvedWebUrlFromKey, setResolvedWebUrlFromKey] = useState<string | null>(null)
 
-  const setApplicationContext = usePayStore(state => state.setApplicationContext)
+  // Read the action off the per-Provider store instance directly — the
+  // component cannot consume `PayStoreContext` via `usePayStore()` because it
+  // provides that very context in its own return. `getState()` is stable for
+  // the store's lifetime, so this needs no memoization.
+  const setApplicationContext = store.getState().setApplicationContext
 
   /**
    * REG-1 guard — tracks which `publishableKey` has already been resolved (or
    * attempted) by this provider instance. Ensures a single `/keys/config` call
    * per mounted provider + key pair, even if a stale effect fires because
    * React / dev tools / Strict Mode re-run it, or an ancestor re-renders with
-   * a new closure. Without this ref, a transient 429 (or any fetch error)
-   * combined with a re-render loop could hammer the auth API at > 30 req/min
-   * and lock the user out via rate limit.
+   * a new closure (e.g. an inline `config` object recreating the memoized
+   * `client` on every render).
+   *
+   * The ref is **never reset in the effect cleanup**: doing so re-arms the
+   * fetch on the very next re-render (StrictMode mount→cleanup→mount, or a
+   * parent re-render with a fresh `client`), which is exactly the infinite
+   * re-fetch loop REG-1 prevents. A transient 429 (or any fetch error)
+   * combined with such a loop would hammer the auth API at > 30 req/min and
+   * lock the user out via rate limit. The key is only re-fetched when the
+   * `publishableKey` value itself changes (a different key → a different ref
+   * value → a legitimate new fetch).
    */
   const resolvedKeyRef = useRef<string | null>(null)
+
+  /**
+   * Tracks whether the provider is still mounted so the async `/keys/config`
+   * resolve can avoid a "setState after unmount" warning. Unlike the
+   * `resolvedKeyRef` dedup guard, this is reset by the cleanup of a dedicated
+   * mount/unmount effect (empty deps) — so a StrictMode mount→cleanup→mount
+   * cycle does NOT keep the fetch from applying its result on the live mount
+   * (the second mount re-arms `isMountedRef = true` before the in-flight fetch
+   * settles). The result is applied as long as the key still matches, never
+   * discarded by a transient effect re-run.
+   */
+  const isMountedRef = useRef(true)
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // VULN-3: dev-time warning for legacy `appName`-only path.
   useEffect(() => {
@@ -357,6 +428,7 @@ export function PayProvider({
       return
     }
     resolvedKeyRef.current = publishableKey
+    const resolvingKey = publishableKey
 
     // publishableKey provided → mark pending and fetch.
     setResolutionStatus('pending')
@@ -367,11 +439,17 @@ export function PayProvider({
       applicationResolutionStatus: 'pending',
     })
 
-    let cancelled = false
+    // The result is applied iff the provider is still mounted AND the key we
+    // resolved is still the active one. We deliberately do NOT use a per-effect
+    // `cancelled` closure: a StrictMode mount→cleanup→mount cycle would cancel
+    // the only in-flight fetch (the second mount is blocked by `resolvedKeyRef`
+    // and starts none of its own), leaving the status stuck at `pending`.
+    const stillActive = () => isMountedRef.current && resolvedKeyRef.current === resolvingKey
+
     client
       .resolveApplicationByKey(publishableKey)
       .then(cfg => {
-        if (cancelled) return
+        if (!stillActive()) return
         setApplicationId(cfg.applicationId)
         setAppSlug(cfg.appSlug)
         // Capture the API-returned EZPay web URL so the context can surface it
@@ -389,7 +467,7 @@ export function PayProvider({
         })
       })
       .catch((err: unknown) => {
-        if (cancelled) return
+        if (!stillActive()) return
         const message = err instanceof Error ? err.message : String(err)
         // VULN-1: NO fail-open. Keep applicationId=null AND isReady=false so
         // downstream hooks (usePaymentHistory, etc.) can detect the failure
@@ -410,13 +488,11 @@ export function PayProvider({
         })
       })
 
-    return () => {
-      cancelled = true
-      // Reset so React StrictMode double-invocation can retry the fetch.
-      // Without this the second effect sees the ref already set (REG-1) and
-      // skips the fetch entirely → resolutionStatus stays 'pending' forever.
-      resolvedKeyRef.current = null
-    }
+    // No cleanup that resets `resolvedKeyRef` — see the ref's doc comment.
+    // Resetting it would re-arm the fetch on the next re-render (StrictMode
+    // double-mount or a parent re-render that recreates `client`), producing
+    // the REG-1 infinite re-fetch loop. The in-flight result is gated by
+    // `stillActive()` (mount + key match) instead of a per-effect flag.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we intentionally resolve once per (client, publishableKey) pair
   }, [client, publishableKey, applicationIdProp, config?.applicationId])
 
@@ -458,7 +534,11 @@ export function PayProvider({
     ]
   )
 
-  return <PayContext.Provider value={contextValue}>{children}</PayContext.Provider>
+  return (
+    <PayStoreContext.Provider value={store}>
+      <PayContext.Provider value={contextValue}>{children}</PayContext.Provider>
+    </PayStoreContext.Provider>
+  )
 }
 
 export function usePayContext() {
@@ -558,7 +638,7 @@ export type { Logger } from '@ezstart/logger'
 export function usePay() {
   const { client } = usePayContext()
   const { payments, isLoading, error, setPayments, setLoading, setError, addPayment } =
-    usePayStore()
+    usePayStoreBound()
 
   return {
     client,

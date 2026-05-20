@@ -1,80 +1,58 @@
-import { create } from 'zustand'
-import type { Payment } from '../core/types.js'
+'use client'
+
+import type { StoreApi, UseBoundStore } from 'zustand'
+import { createBasePayStore, type PayState, type PayStoreInitialState } from './store/state.js'
+
+// Re-export the state shape + lifecycle type so existing import paths keep
+// working unchanged (consumers + tests rely on these exact paths).
+export type { PayState, PayStoreInitialState } from './store/state.js'
+export type { ApplicationResolutionStatus } from './store/state.js'
+
+// Re-export the bound store hooks. They live in `pay-provider/public-hooks.ts`
+// (Context-bound) but are surfaced from here so the public barrels
+// (`src/index.ts`, `react/index.ts`) can keep importing `usePayStore` /
+// `usePayStoreSSR` from `./store.js` — the public import path is unchanged.
+export {
+  usePayStore,
+  usePayStoreApi,
+  usePayStoreGetSnapshot,
+  usePayStoreSSR,
+} from './pay-provider/public-hooks.js'
 
 /**
- * Application context resolution lifecycle:
- * - `idle`: provider mounted without publishableKey and without applicationId
- *   (legacy `appName`-only path — cross-app queries possible, discouraged).
- * - `pending`: publishableKey provided, resolution in flight.
- * - `ready`: applicationId available (explicit prop or successful resolve).
- * - `failed`: publishableKey was provided but resolution threw (network/auth/etc.).
- *   Consumers MUST treat `failed` as "no scope available" and refuse to make
- *   scoped queries (to avoid cross-app leaks via silent downgrade).
+ * Pay store bound hook returned by {@link createPayStore}. Standard zustand
+ * vanilla store API (`getState`, `setState`, `subscribe`) plus the bound-hook
+ * call signature.
  */
-export type ApplicationResolutionStatus = 'idle' | 'pending' | 'ready' | 'failed'
+export type PayStoreApi = UseBoundStore<StoreApi<PayState>>
 
-export interface PayState {
-  payments: Payment[]
-  isLoading: boolean
-  error: string | null
-  /** Application id resolved from the publishable key (null until resolved). */
-  applicationId: string | null
-  /** Human-friendly application slug (null until resolved). */
-  appSlug: string | null
+/**
+ * Options accepted by {@link createPayStore}. Currently just the SSR-bootstrap
+ * initial application context (resolved synchronously by `<PayProvider>` from
+ * its props). Kept as an object so future per-store config (storage key,
+ * etc.) can be added without a breaking signature change.
+ */
+export interface CreatePayStoreOptions {
   /**
-   * `true` ONLY when `applicationResolutionStatus === 'ready'` or `'idle'`.
-   * `false` while pending AND on resolution failure (prevents fail-open).
+   * Initial application context — resolved synchronously by `<PayProvider>`
+   * from its `applicationId` / `publishableKey` / legacy `appName` props so
+   * subscribers see the SSR-correct value on the first render.
    */
-  isReady: boolean
-  /** Explicit resolution lifecycle — safer than `isReady` alone for RBAC gating. */
-  applicationResolutionStatus: ApplicationResolutionStatus
-  setPayments: (payments: Payment[]) => void
-  setLoading: (isLoading: boolean) => void
-  setError: (error: string | null) => void
-  addPayment: (payment: Payment) => void
-  clearError: () => void
-  setApplicationContext: (ctx: {
-    applicationId: string | null
-    appSlug: string | null
-    isReady: boolean
-    applicationResolutionStatus: ApplicationResolutionStatus
-  }) => void
+  initial?: PayStoreInitialState
 }
 
-export const usePayStore = create<PayState>(set => ({
-  payments: [],
-  isLoading: false,
-  error: null,
-  applicationId: null,
-  appSlug: null,
-  isReady: false,
-  applicationResolutionStatus: 'idle',
-  setPayments: payments => set({ payments }),
-  setLoading: isLoading => set({ isLoading }),
-  setError: error => set({ error }),
-  addPayment: payment => set(state => ({ payments: [payment, ...state.payments] })),
-  clearError: () => set({ error: null }),
-  setApplicationContext: ctx => set(ctx),
-}))
-
-// SSR-safe store hook
-export function usePayStoreSSR() {
-  if (typeof window === 'undefined') {
-    return {
-      payments: [],
-      isLoading: false,
-      error: null,
-      applicationId: null,
-      appSlug: null,
-      isReady: false,
-      applicationResolutionStatus: 'idle' as ApplicationResolutionStatus,
-      setPayments: () => {},
-      setLoading: () => {},
-      setError: () => {},
-      addPayment: () => {},
-      clearError: () => {},
-      setApplicationContext: () => {},
-    }
-  }
-  return usePayStore()
+/**
+ * Factory that returns a fresh pay store. **Always** call this through
+ * `<PayProvider>` (which wraps the call in `useState(() => createPayStore(...))`
+ * to guarantee a single store per React tree). Direct module-level usage is
+ * forbidden — it breaks Next.js SSR (the server and client end up with
+ * different stores and React throws an hydration mismatch).
+ *
+ * @example
+ * ```tsx
+ * const [store] = useState(() => createPayStore({ initial: { applicationId } }))
+ * ```
+ */
+export function createPayStore(options: CreatePayStoreOptions = {}): PayStoreApi {
+  return createBasePayStore(options.initial)
 }

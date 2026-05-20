@@ -9,9 +9,21 @@ export {
 } from './pay-provider.js'
 export type { Logger } from './pay-provider.js'
 
-// Store
-export { usePayStore, usePayStoreSSR } from './store.js'
-export type { PayState } from './store.js'
+// Store — factory + Context-bound hooks (SSR-safe per standard.md §0bis)
+export {
+  createPayStore,
+  usePayStore,
+  usePayStoreApi,
+  usePayStoreGetSnapshot,
+  usePayStoreSSR,
+} from './store.js'
+export type {
+  PayState,
+  PayStoreApi,
+  PayStoreInitialState,
+  CreatePayStoreOptions,
+  ApplicationResolutionStatus,
+} from './store.js'
 
 // Hooks
 export { useDonations } from './hooks/useDonations.js'

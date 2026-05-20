@@ -10,6 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { PayProvider, useApplicationContext } from '../../react/pay-provider.js'
 import { usePayStore } from '../../react/store.js'
+import type { PayState } from '../../react/store.js'
 
 const ORIGINAL_NODE_ENV = process.env.NODE_ENV
 
@@ -40,13 +41,8 @@ describe('PayProvider — applicationId resolution', () => {
   afterEach(() => {
     vi.restoreAllMocks()
     process.env.NODE_ENV = ORIGINAL_NODE_ENV
-    // Reset zustand store between tests
-    usePayStore.setState({
-      applicationId: null,
-      appSlug: null,
-      isReady: false,
-      applicationResolutionStatus: 'idle',
-    })
+    // No store reset needed — each test renders a fresh <PayProvider> which
+    // creates its own isolated per-tree store (standard.md §0bis).
   })
 
   it('fetches /keys/config when publishableKey is provided and resolves applicationId', async () => {
@@ -294,31 +290,66 @@ describe('PayProvider — applicationId resolution', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const { result } = renderHook(() => useApplicationContext(), {
-      wrapper: ({ children }) => <Wrapper publishableKey="ez_pk_test_store">{children}</Wrapper>,
-    })
+    // Read the per-Provider store via the Context-bound hook (the legacy
+    // module-level `usePayStore.getState()` is gone — the store now lives on
+    // the Provider tree, so we must read it from inside the tree).
+    const { result } = renderHook(
+      () => ({
+        ctx: useApplicationContext(),
+        store: usePayStore(),
+      }),
+      {
+        wrapper: ({ children }) => <Wrapper publishableKey="ez_pk_test_store">{children}</Wrapper>,
+      }
+    )
 
     await waitFor(() => {
-      expect(result.current.isReady).toBe(true)
+      expect(result.current.ctx.isReady).toBe(true)
     })
 
     // Store should now reflect the resolved context
-    const store = usePayStore.getState()
-    expect(store.applicationId).toBe('app_store_789')
-    expect(store.appSlug).toBe('ezstart')
-    expect(store.isReady).toBe(true)
+    expect(result.current.store.applicationId).toBe('app_store_789')
+    expect(result.current.store.appSlug).toBe('ezstart')
+    expect(result.current.store.isReady).toBe(true)
+  })
+
+  it('SSR bootstrap: a subscriber sees the resolved context on the FIRST render snapshot', () => {
+    // Non-regression guard (standard.md §0bis): with an explicit applicationId
+    // the store MUST boot in `ready`/isReady=true on the very first render —
+    // NOT after an `await act(...)`. A module-level store (or a post-mount
+    // `setState`) would surface a transient `{ isReady: false, status: 'idle' }`
+    // here and fail the assertion.
+    const snapshots: PayState[] = []
+    function Probe() {
+      const state = usePayStore()
+      snapshots.push(state)
+      return null
+    }
+
+    renderHook(() => null, {
+      wrapper: ({ children }) => (
+        <PayProvider applicationId="app_ssr_first" appName="ezbill">
+          <Probe />
+          {children}
+        </PayProvider>
+      ),
+    })
+
+    // The very first snapshot the subscriber recorded must already be ready.
+    const first = snapshots[0]
+    expect(first).toBeDefined()
+    expect(first?.applicationId).toBe('app_ssr_first')
+    expect(first?.appSlug).toBe('ezbill')
+    expect(first?.isReady).toBe(true)
+    expect(first?.applicationResolutionStatus).toBe('ready')
   })
 })
 
 describe('PayProvider — REG-1 infinite loop guard on /keys/config', () => {
   afterEach(() => {
     vi.restoreAllMocks()
-    usePayStore.setState({
-      applicationId: null,
-      appSlug: null,
-      isReady: false,
-      applicationResolutionStatus: 'idle',
-    })
+    // No store reset needed — each test renders a fresh <PayProvider> with its
+    // own isolated per-tree store (standard.md §0bis).
   })
 
   it('does NOT re-fetch /keys/config when the provider re-renders with the same publishableKey', async () => {
@@ -410,12 +441,8 @@ describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
     } else {
       process.env.DEPLOY_ENV = originalDeployEnv
     }
-    usePayStore.setState({
-      applicationId: null,
-      appSlug: null,
-      isReady: false,
-      applicationResolutionStatus: 'idle',
-    })
+    // No store reset needed — each test renders a fresh <PayProvider> with its
+    // own isolated per-tree store (standard.md §0bis).
   })
 
   it('forwards `config.apiUrl` to PayClient so `/plans` hits the ezpay API (absolute URL)', async () => {
@@ -496,12 +523,8 @@ describe('PayProvider — REG-2 apiUrl propagation to pay-sdk fetches', () => {
 describe('PayProvider — Phase 3 auto-resolve payWebUrl from /keys/config', () => {
   afterEach(() => {
     vi.restoreAllMocks()
-    usePayStore.setState({
-      applicationId: null,
-      appSlug: null,
-      isReady: false,
-      applicationResolutionStatus: 'idle',
-    })
+    // No store reset needed — each test renders a fresh <PayProvider> with its
+    // own isolated per-tree store (standard.md §0bis).
   })
 
   it('auto-resolves `payWebUrl` from /keys/config.webUrl when prop is omitted', async () => {
@@ -604,12 +627,8 @@ describe('PayProvider — payWebUrl propagation', () => {
     } else {
       process.env.DEPLOY_ENV = originalDeployEnv
     }
-    usePayStore.setState({
-      applicationId: null,
-      appSlug: null,
-      isReady: false,
-      applicationResolutionStatus: 'idle',
-    })
+    // No store reset needed — each test renders a fresh <PayProvider> with its
+    // own isolated per-tree store (standard.md §0bis).
   })
 
   it('exposes the explicit payWebUrl prop through useApplicationContext', async () => {
@@ -763,12 +782,8 @@ describe('PayClient.resolveApplicationByKey', () => {
 describe('PayProvider — publishableKey → X-API-Key auto-injection', () => {
   afterEach(() => {
     vi.restoreAllMocks()
-    usePayStore.setState({
-      applicationId: null,
-      appSlug: null,
-      isReady: false,
-      applicationResolutionStatus: 'idle',
-    })
+    // No store reset needed — each test renders a fresh <PayProvider> with its
+    // own isolated per-tree store (standard.md §0bis).
   })
 
   it('injects publishableKey as X-API-Key header on subsequent client requests', async () => {
