@@ -7,6 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-05-20
+
+Inaugural `1.0.0` of `@ezstart/pay-sdk` (not yet published to npm). This release
+finalizes the SSR-first, agnostic-core architecture (mirroring `@ezstart/auth-sdk`).
+
+### Changed (BREAKING)
+
+- **`core/` is now agnostic of `@ezstart/api-sdk` at runtime.** The core methods
+  (`donations`, `purchases`, `subscriptions`, `payments`, `plans`, `promos`,
+  `billing`, `connect`, `http`) no longer import `@ezstart/api-sdk`. They now
+  throw a dedicated **`PayError`** (new `core/errors.ts`) instead of `api-sdk`'s
+  `ApiError`.
+  - `PayError extends Error` with the same shape (`code`, `statusCode`,
+    `details`, `message`). It is **drop-in for most consumers**: `instanceof
+Error`, `.message`, and the message-extraction logic are byte-for-byte
+    preserved (`parsePayError` replicates `api-sdk`'s 6-priority extraction).
+  - **Migration:** a consumer that caught `api-sdk`'s `ApiError` _specifically_
+    (e.g. `catch (e) { if (e instanceof ApiError) … }`) must now catch
+    `PayError` instead — import it from `@ezstart/pay-sdk` or
+    `@ezstart/pay-sdk/core`. Consumers that only inspect `e.message` /
+    `e.code` / `e.statusCode` or use `instanceof Error` need no change.
+  - Note: `@ezstart/api-sdk` remains a runtime dependency for now because the
+    `react/` layer (pay-keys hooks) still uses `apiCall` — tracked
+    `EZP-REACT-APISDK-001`.
+
+- **`usePayStore` requires a `<PayProvider>` ancestor.** The Zustand store is no
+  longer a module-level singleton. It is now created per React tree via a
+  factory + Context (`createPayStore` + `PayStoreContext`, instantiated in
+  `useState(() => createPayStore(…))` inside `PayProvider`) — making it
+  SSR-safe (no server/client hydration mismatch, one instance per tree).
+  - The public `usePayStore(selector)` signature is **unchanged**.
+  - **Migration:** any code that used `usePayStore` (or the imperative
+    `getState`/`setState` accessors) _outside_ a `<PayProvider>` must now be
+    wrapped in `<PayProvider>`. Imperative access is exposed via the
+    Context-bound `usePayStoreApi` hook (no module-level store export remains).
+
+### Added
+
+- **SSR companions** for SSR-first hydration (`standard-sdk-dx` §11sexies),
+  exposed from the `./server` entry point: `getServerPlans`,
+  `getServerKeyConfig`, `getServerSubscriptionStatus`. Each fetches via the
+  agnostic core and **returns `null` on any error** (never throws → SSR
+  survives an API outage). Each underlying file is guarded server-only so a
+  browser bundle cannot import it (the guard is a runtime `window` check, not
+  the `server-only` npm package, which crashes raw-Node API services at boot).
+- **`initial<X>` props** to bootstrap from the server companions and kill the
+  loading-skeleton flash: `initialPlans` + `initialSubscription` on
+  `PricingPage`; `initialSubscription` + `initialPayments` on
+  `BillingDashboard`; `initialPlans` / `initialStatus` / `initialPayments` on
+  the `usePlans` / `useSubscriptionStatus` / `usePaymentHistory` hooks. When
+  initial data is provided, hydration happens synchronously in the `useState`
+  initializer (never via post-mount `useEffect`); `isLoading` starts `false`
+  and the first network fetch runs as a **silent revalidation** (no skeleton,
+  no `mounted` guard).
+- **`PayError` + `parsePayError`** (plus `parsePayErrorCode`,
+  `payErrorFromResponse`) exported from the root barrel and `./core`.
+- New agnostic `core/derive-subscription-status.ts`
+  (`SubscriptionStatusSnapshot`, ISO `periodEnd` for the RSC boundary) so the
+  client hook and the server companion produce a byte-identical snapshot.
+- `README.md` gains a **Quickstart — Next.js SSR** section (explicit `apiUrl`,
+  zero monorepo magic).
+
+### Fixed
+
+- **REG-1: `/keys/config` re-fetch loop (reactivation DoS).** The
+  publishable-key config is now fetched **exactly once per `publishableKey`**
+  for the provider lifetime. Removed the cleanup ref reset that re-armed the
+  fetch on every re-render / React StrictMode remount; replaced the per-effect
+  cancelled closure with a `stillActive()` mount+key gate. No retry loop on
+  `429`. Legitimate auto-resolution + `payWebUrl` capture are preserved.
+
+### Changed (internal, non-breaking)
+
+- Replaced all `z.any()` schemas with real Zod schemas: plan `z.any()` →
+  `PlanSchema` (reused from `@ezstart/api-contracts`); promo `z.any()` → a
+  precise `promoSchema` mirroring the `Promo` interface (typed enums). Zero
+  `z.any()` remain in `pay-sdk` `src/`.
+- Split `react/pay-provider.tsx` (714 → 310 lines) into co-located files
+  (`use-key-config-resolution`, `use-pay`, `types`, `loggers`). Pure move —
+  the public surface is unchanged (`usePay` re-exported at the same path);
+  REG-1, the factory store + Context, SSR-first `initial<X>`, and config
+  auto-resolution are all preserved.
+
 ### Deprecated
 
 - **PAY_SDK_PHASE_1_MIGRATE-001 (#179)** — 10 generic components moved to
