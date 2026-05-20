@@ -1,99 +1,25 @@
 'use client'
 
-import { Button, Div, Input, P, Spinner } from '@ezstart/ui/components'
+import { Button, Div, P, Spinner } from '@ezstart/ui/components'
 import { apiCall } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
-import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
+import {
+  resolveTwoFactorSettingsTexts,
+  type TwoFactorSettingsPhase,
+  type TwoFactorSettingsProps,
+} from './_internal/two-factor-settings/types.js'
+import {
+  TwoFactorBackupPhase,
+  TwoFactorDisablePhase,
+  TwoFactorQrPhase,
+} from './_internal/two-factor-settings/phases.js'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-export interface TwoFactorSettingsTexts {
-  // Status
-  enabled: string
-  disabled: string
-  enableDescription: string
-  disableDescription: string
-  enableButton: string
-  disableButton: string
-  // Setup flow
-  setupTitle: string
-  setupDescription: string
-  scanQR: string
-  manualEntry: string
-  enterCode: string
-  codePlaceholder: string
-  verify: string
-  verifying: string
-  cancel: string
-  // Backup codes
-  backupTitle: string
-  backupDescription: string
-  copyBackup: string
-  downloadBackup: string
-  confirmBackup: string
-  done: string
-  // Disable flow
-  disableTitle: string
-  disableConfirm: string
-  disablePasswordLabel: string
-  disablePasswordPlaceholder: string
-  disablePasswordHint: string
-  // Errors
-  fallbackError: string
-  invalidCode: string
-}
-
-export interface TwoFactorSettingsProps {
-  /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
-   * locale detected from the URL pathname (e.g. `/fr/settings` → `'fr'`).
-   * Any keys provided in `texts` take precedence over the localized defaults.
-   */
-  locale?: AuthLocale | string
-  /** Override texts (merged on top of the localized defaults). */
-  texts?: Partial<TwoFactorSettingsTexts>
-  /** Called when 2FA is enabled or disabled */
-  onStatusChange?: (enabled: boolean) => void
-}
-
-type Phase = 'idle' | 'qr' | 'backup' | 'disable'
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const DEFAULT_TEXTS: TwoFactorSettingsTexts = {
-  enabled: 'Enabled',
-  disabled: 'Disabled',
-  enableDescription: 'Protect your account with two-factor authentication.',
-  disableDescription: 'Two-factor authentication is currently active.',
-  enableButton: 'Enable 2FA',
-  disableButton: 'Disable 2FA',
-  setupTitle: 'Set up two-factor authentication',
-  setupDescription: 'Scan the QR code with your authenticator app.',
-  scanQR: 'Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)',
-  manualEntry: 'Or enter this code manually:',
-  enterCode: 'Enter the 6-digit code from your authenticator app',
-  codePlaceholder: '000000',
-  verify: 'Verify & Enable',
-  verifying: 'Verifying...',
-  cancel: 'Cancel',
-  backupTitle: 'Backup Codes',
-  backupDescription: 'Save these backup codes in a safe place. Each code can only be used once.',
-  copyBackup: 'Copy codes',
-  downloadBackup: 'Download codes',
-  confirmBackup: "I've saved my backup codes",
-  done: 'Done',
-  disableTitle: 'Disable two-factor authentication',
-  disableConfirm: 'Enter your current 2FA code to disable two-factor authentication',
-  disablePasswordLabel: 'Password',
-  disablePasswordPlaceholder: 'Enter your password',
-  disablePasswordHint: 'Confirm with your account password (defense in depth)',
-  fallbackError: 'An error occurred. Please try again.',
-  invalidCode: 'Invalid code. Please try again.',
-}
-
-// ─── Component ──────────────────────────────────────────────────────────────
+export type {
+  TwoFactorSettingsProps,
+  TwoFactorSettingsTexts,
+} from './_internal/two-factor-settings/types.js'
 
 /**
  * Settings panel for enrolling in 2FA, viewing recovery codes, and
@@ -111,46 +37,10 @@ export function TwoFactorSettings({
 }: TwoFactorSettingsProps) {
   const navigation = useAuthNavigation()
   const locale = propLocale ?? navigation.locale
-  // The shared `twoFactor` namespace covers both prompt + settings keys.
-  // For `<TwoFactorSettings>` the canonical "Verify & Enable" copy lives
-  // under `settingsVerify` (the bare `verify` key is the shorter "Verify"
-  // label rendered by `<TwoFactorPrompt>`). Map back into the local shape.
-  const dict = getAuthTexts(locale, 'twoFactor') as Record<string, string>
-  const t: TwoFactorSettingsTexts = {
-    enabled: dict.enabled ?? DEFAULT_TEXTS.enabled,
-    disabled: dict.disabled ?? DEFAULT_TEXTS.disabled,
-    enableDescription: dict.enableDescription ?? DEFAULT_TEXTS.enableDescription,
-    disableDescription: dict.disableDescription ?? DEFAULT_TEXTS.disableDescription,
-    enableButton: dict.enableButton ?? DEFAULT_TEXTS.enableButton,
-    disableButton: dict.disableButton ?? DEFAULT_TEXTS.disableButton,
-    setupTitle: dict.setupTitle ?? DEFAULT_TEXTS.setupTitle,
-    setupDescription: dict.setupDescription ?? DEFAULT_TEXTS.setupDescription,
-    scanQR: dict.scanQR ?? DEFAULT_TEXTS.scanQR,
-    manualEntry: dict.manualEntry ?? DEFAULT_TEXTS.manualEntry,
-    enterCode: dict.enterCode ?? DEFAULT_TEXTS.enterCode,
-    codePlaceholder: dict.codePlaceholder ?? DEFAULT_TEXTS.codePlaceholder,
-    verify: dict.settingsVerify ?? DEFAULT_TEXTS.verify,
-    verifying: dict.verifying ?? DEFAULT_TEXTS.verifying,
-    cancel: dict.cancel ?? DEFAULT_TEXTS.cancel,
-    backupTitle: dict.backupTitle ?? DEFAULT_TEXTS.backupTitle,
-    backupDescription: dict.backupDescription ?? DEFAULT_TEXTS.backupDescription,
-    copyBackup: dict.copyBackup ?? DEFAULT_TEXTS.copyBackup,
-    downloadBackup: dict.downloadBackup ?? DEFAULT_TEXTS.downloadBackup,
-    confirmBackup: dict.confirmBackup ?? DEFAULT_TEXTS.confirmBackup,
-    done: dict.done ?? DEFAULT_TEXTS.done,
-    disableTitle: dict.disableTitle ?? DEFAULT_TEXTS.disableTitle,
-    disableConfirm: dict.disableConfirm ?? DEFAULT_TEXTS.disableConfirm,
-    disablePasswordLabel: dict.disablePasswordLabel ?? DEFAULT_TEXTS.disablePasswordLabel,
-    disablePasswordPlaceholder:
-      dict.disablePasswordPlaceholder ?? DEFAULT_TEXTS.disablePasswordPlaceholder,
-    disablePasswordHint: dict.disablePasswordHint ?? DEFAULT_TEXTS.disablePasswordHint,
-    fallbackError: dict.fallbackError ?? DEFAULT_TEXTS.fallbackError,
-    invalidCode: dict.invalidCode ?? DEFAULT_TEXTS.invalidCode,
-    ...texts,
-  }
+  const t = resolveTwoFactorSettingsTexts(locale, texts)
 
   const [is2FAEnabled, setIs2FAEnabled] = useState<boolean | null>(null)
-  const [phase, setPhase] = useState<Phase>('idle')
+  const [phase, setPhase] = useState<TwoFactorSettingsPhase>('idle')
   const [qrCode, setQrCode] = useState('')
   const [secret, setSecret] = useState('')
   const [code, setCode] = useState('')
@@ -315,170 +205,52 @@ export function TwoFactorSettings({
       )}
 
       {phase === 'qr' && (
-        <Div className="space-y-4">
-          <P size="sm" className="text-muted-foreground">
-            {t.scanQR}
-          </P>
-
-          {qrCode && (
-            <Div className="flex justify-center">
-              <img src={qrCode} alt="2FA QR Code" className="w-48 h-48 rounded-lg" />
-            </Div>
-          )}
-
-          <Div className="space-y-1">
-            <P size="xs" className="text-muted-foreground">
-              {t.manualEntry}
-            </P>
-            <P size="sm" className="font-mono bg-muted px-3 py-2 rounded break-all select-all">
-              {secret}
-            </P>
-          </Div>
-
-          <Div className="space-y-2">
-            <P size="sm" className="text-muted-foreground">
-              {t.enterCode}
-            </P>
-            <Input
-              type="text"
-              required
-              aria-required="true"
-              aria-label={t.enterCode}
-              autoComplete="one-time-code"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              placeholder={t.codePlaceholder}
-              value={code}
-              onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
-              className="text-center text-lg tracking-widest"
-              autoFocus
-            />
-            <Button
-              onClick={handleVerify}
-              disabled={loading || code.length !== 6}
-              className="w-full"
-              variant="default"
-            >
-              {loading ? t.verifying : t.verify}
-            </Button>
-            <Button
-              onClick={() => {
-                setPhase('idle')
-                setCode('')
-                setError('')
-              }}
-              variant="ghost"
-              className="w-full"
-            >
-              {t.cancel}
-            </Button>
-          </Div>
-        </Div>
+        <TwoFactorQrPhase
+          texts={t}
+          qrCode={qrCode}
+          secret={secret}
+          code={code}
+          loading={loading}
+          onCodeChange={setCode}
+          onVerify={handleVerify}
+          onCancel={() => {
+            setPhase('idle')
+            setCode('')
+            setError('')
+          }}
+        />
       )}
 
       {phase === 'backup' && (
-        <Div className="space-y-4">
-          <P size="sm" className="font-medium">
-            {t.backupTitle}
-          </P>
-          <P size="xs" className="text-muted-foreground">
-            {t.backupDescription}
-          </P>
-          <Div className="grid grid-cols-2 gap-2">
-            {backupCodes.map((bc, i) => (
-              <P
-                key={i}
-                size="sm"
-                className="font-mono bg-muted px-3 py-2 rounded text-center select-all"
-              >
-                {bc}
-              </P>
-            ))}
-          </Div>
-          <Div className="flex gap-2">
-            <Button onClick={handleCopyBackup} variant="outline" className="flex-1" type="button">
-              {t.copyBackup}
-            </Button>
-            <Button
-              onClick={handleDownloadBackup}
-              variant="outline"
-              className="flex-1"
-              type="button"
-            >
-              {t.downloadBackup}
-            </Button>
-          </Div>
-          <Button
-            onClick={() => {
-              setPhase('idle')
-              setCode('')
-              setBackupCodes([])
-            }}
-            className="w-full"
-            variant="default"
-          >
-            {t.confirmBackup}
-          </Button>
-        </Div>
+        <TwoFactorBackupPhase
+          texts={t}
+          backupCodes={backupCodes}
+          onCopy={handleCopyBackup}
+          onDownload={handleDownloadBackup}
+          onConfirm={() => {
+            setPhase('idle')
+            setCode('')
+            setBackupCodes([])
+          }}
+        />
       )}
 
       {phase === 'disable' && (
-        <Div className="space-y-4">
-          <P size="sm" className="text-muted-foreground">
-            {t.disableConfirm}
-          </P>
-          <Input
-            type="text"
-            required
-            aria-required="true"
-            aria-label={t.disableConfirm}
-            autoComplete="one-time-code"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={6}
-            placeholder={t.codePlaceholder}
-            value={code}
-            onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
-            className="text-center text-lg tracking-widest"
-            autoFocus
-          />
-          <Div className="space-y-1">
-            <P size="xs" className="text-muted-foreground">
-              {t.disablePasswordHint}
-            </P>
-            <Input
-              type="password"
-              required
-              aria-required="true"
-              aria-label={t.disablePasswordHint}
-              autoComplete="current-password"
-              placeholder={t.disablePasswordPlaceholder}
-              value={disablePassword}
-              onChange={e => setDisablePassword(e.target.value)}
-            />
-          </Div>
-          <Button
-            onClick={handleDisable}
-            disabled={loading || code.length !== 6}
-            className="w-full"
-            variant="destructive"
-          >
-            {loading ? t.verifying : t.disableButton}
-          </Button>
-          <Button
-            onClick={() => {
-              setPhase('idle')
-              setCode('')
-              setDisablePassword('')
-              setError('')
-            }}
-            variant="ghost"
-            className="w-full"
-          >
-            {t.cancel}
-          </Button>
-        </Div>
+        <TwoFactorDisablePhase
+          texts={t}
+          code={code}
+          disablePassword={disablePassword}
+          loading={loading}
+          onCodeChange={setCode}
+          onPasswordChange={setDisablePassword}
+          onDisable={handleDisable}
+          onCancel={() => {
+            setPhase('idle')
+            setCode('')
+            setDisablePassword('')
+            setError('')
+          }}
+        />
       )}
     </Div>
   )

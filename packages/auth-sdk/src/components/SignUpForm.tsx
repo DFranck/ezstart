@@ -1,181 +1,29 @@
 'use client'
 
-import {
-  Badge,
-  Button,
-  Div,
-  P,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  PasswordInput,
-  PasswordStrength,
-  Span,
-} from '@ezstart/ui/components'
+import { Button, Div, Form } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
-import Link from 'next/link'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
+import { OAuthButtons } from './OAuthButtons.js'
 import { usePromoCode } from './usePromoCode.js'
 import { readUtmSource } from './utmSource.js'
 import { DevModeBanner } from './DevModeBanner.js'
 import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
 import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
-import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
+import { getAuthTexts } from '../i18n/index.js'
+import {
+  SIGN_UP_DEFAULT_FORM_ID,
+  type SignUpFormData,
+  type SignUpFormProps,
+  type SignUpFormTexts,
+} from './_internal/sign-up-form/types.js'
+import { useAvailabilityCheck } from './_internal/sign-up-form/use-availability-check.js'
+import { SignUpFormFields } from './_internal/sign-up-form/SignUpFormFields.js'
+import { SignUpSuccess } from './_internal/sign-up-form/SignUpSuccess.js'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-export interface SignUpFormTexts {
-  email: string
-  emailPlaceholder: string
-  emailTaken: string
-  username: string
-  usernamePlaceholder: string
-  usernameTaken: string
-  firstName: string
-  firstNamePlaceholder: string
-  lastName: string
-  lastNamePlaceholder: string
-  password: string
-  passwordPlaceholder: string
-  passwordHint: string
-  confirmPassword: string
-  confirmPasswordPlaceholder: string
-  passwordMismatch: string
-  submit: string
-  submitting: string
-  fallbackError: string
-  /**
-   * Shown when `apiCall` throws an `ApiError` with `code === 'NETWORK_UNAVAILABLE'`
-   * (server unreachable: offline, DNS down, server crashed). Replaces the
-   * raw browser `"Failed to fetch"` message which is non-actionable.
-   */
-  networkError: string
-  // Success state
-  checkEmail: string
-  checkEmailDescription: string
-  backToLogin: string
-  // Password strength
-  passwordWeak: string
-  passwordFair: string
-  passwordGood: string
-  passwordStrong: string
-  // Promo code
-  promoCodeLabel: string
-  promoCodePlaceholder: string
-  promoCodeApplied: string
-  promoCodeToggle: string
-  promoCodeInvalid: string
-  promoCodeRateLimited: string
-  promoCodeChecking: string
-  // OAuth texts (optional — only needed if showOAuth is true)
-  continueWithGoogle?: string
-  orContinueWith?: string
-  // PasswordInput visibility toggle (sr-only)
-  showPassword?: string
-  hidePassword?: string
-}
-
-export interface SignUpFormProps {
-  /** App name for the register request */
-  appName: string
-  /** Pre-filled promo code (auto-detected from URL ?promo= or localStorage if not provided) */
-  promoCode?: string
-  /** Redirect URI after registration (OAuth code flow) */
-  redirectUri?: string
-  /** Called after successful registration */
-  onSuccess?: () => void
-  /** Called when user clicks "Back to login" after registration */
-  onBackToLogin?: () => void
-  /** Href for back to login link */
-  backToLoginHref?: string
-  /** Show OAuth buttons above the form */
-  showOAuth?: boolean
-  /** OAuth providers to display */
-  oauthProviders?: OAuthProvider[]
-  /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
-   * locale detected from the URL pathname (e.g. `/fr/register` → `'fr'`).
-   * Any keys provided in `texts` take precedence over the localized defaults.
-   */
-  locale?: AuthLocale | string
-  /** Override texts (merged on top of the localized defaults). */
-  texts?: Partial<SignUpFormTexts>
-  /**
-   * When true, the form is rendered in preview mode: all inputs and submit
-   * button are disabled with reduced opacity. Useful when the publishable
-   * key is invalid — the form is visible but not usable.
-   */
-  disabled?: boolean
-  /**
-   * Key validation status for the DevModeBanner.
-   * - `'valid'` — key was validated successfully
-   * - `'invalid'` — key is invalid, revoked, or expired
-   * - `'missing'` — no key provided
-   */
-  keyStatus?: 'valid' | 'invalid' | 'missing'
-  /** Raw publishable key from URL (for DevModeBanner display). */
-  urlKey?: string
-  /**
-   * EZPay-compatible API base URL used to validate promo codes
-   * (`?promo=` URL param or manually entered). When omitted, promo
-   * validation is disabled entirely. Pass the same value the consumer
-   * already uses for `<PayProvider apiUrl=...>`.
-   *
-   * @example 'https://pay.example.com'
-   */
-  promoApiUrl?: string
-  /**
-   * DOM `id` of the underlying `<form>` element. Used by `<SignUpModal>` to
-   * render its primary submit button OUTSIDE the form (in the Modal footer
-   * slot) via the standard HTML `<button form="...">` association.
-   */
-  formId?: string
-  /**
-   * Hide the in-form primary submit button. Used by `<SignUpModal>` so the
-   * submit button can be rendered in the Modal footer instead. Secondary
-   * controls (OAuth buttons, promo-code toggle) STAY visible.
-   */
-  hideSubmitButton?: boolean
-  /**
-   * Notified whenever the form's internal `loading` state flips. Lets a
-   * parent (e.g. `<SignUpModal>`) wire its external submit button's spinner
-   * + disabled state without owning the submission logic.
-   */
-  onSubmittingChange?: (isSubmitting: boolean) => void
-  /**
-   * Cloudflare Turnstile site key — when provided, renders a captcha widget
-   * above the submit button and blocks submission until a token is obtained.
-   * The token is sent as `body.turnstileToken` to the backend. When omitted
-   * the widget is not rendered (no-op) and submission is unrestricted.
-   */
-  turnstileSiteKey?: string
-}
-
-const DEFAULT_FORM_ID = 'ezstart-signup-form'
-
-// ─── Defaults ───────────────────────────────────────────────────────────────
-
-const MIN_PASSWORD_LENGTH = 8
-
-// ─── Component ──────────────────────────────────────────────────────────────
-
-interface FormData {
-  email: string
-  username: string
-  password: string
-  confirmPassword: string
-  firstName: string
-  lastName: string
-  promoCode: string
-}
+export type { SignUpFormProps, SignUpFormTexts } from './_internal/sign-up-form/types.js'
 
 /**
  * Account creation form with email + password, optional first/last name,
@@ -201,7 +49,7 @@ export function SignUpForm({
   keyStatus,
   urlKey,
   promoApiUrl,
-  formId = DEFAULT_FORM_ID,
+  formId = SIGN_UP_DEFAULT_FORM_ID,
   hideSubmitButton = false,
   onSubmittingChange,
   turnstileSiteKey,
@@ -235,11 +83,7 @@ export function SignUpForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [registered, setRegistered] = useState(false)
-  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null)
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
-  const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const {
     promoCode: resolvedPromo,
     setPromoCode: setResolvedPromo,
@@ -250,7 +94,7 @@ export function SignUpForm({
     setIsOpen: setPromoOpen,
   } = usePromoCode(appName, promoCode, promoApiUrl)
 
-  const form = useForm<FormData>({
+  const form = useForm<SignUpFormData>({
     defaultValues: {
       email: '',
       username: '',
@@ -264,6 +108,9 @@ export function SignUpForm({
   })
 
   const watchPassword = form.watch('password')
+  const watchEmail = form.watch('email')
+  const watchUsername = form.watch('username')
+  const { emailAvailable, usernameAvailable } = useAvailabilityCheck(watchEmail, watchUsername)
 
   // Lift `loading` out so a parent (e.g. `<SignUpModal>` rendering an
   // external submit button in the Modal footer) can mirror the spinner /
@@ -272,52 +119,7 @@ export function SignUpForm({
     onSubmittingChange?.(loading)
   }, [loading, onSubmittingChange])
 
-  // Debounced availability check
-  const checkAvailability = useCallback(async (field: 'email' | 'username', value: string) => {
-    if (!value || value.length < 3) {
-      if (field === 'email') setEmailAvailable(null)
-      else setUsernameAvailable(null)
-      return
-    }
-
-    try {
-      const params = new URLSearchParams({ [field]: value })
-      const data = await apiCall<{
-        emailAvailable?: boolean
-        usernameAvailable?: boolean
-      }>(`/auth/check-availability?${params.toString()}`, {
-        appName: 'ezauth',
-        method: 'GET',
-      })
-      if (field === 'email') setEmailAvailable(data.emailAvailable ?? null)
-      else setUsernameAvailable(data.usernameAvailable ?? null)
-    } catch {
-      // Silently fail — availability check is non-critical
-    }
-  }, [])
-
-  const watchEmail = form.watch('email')
-  const watchUsername = form.watch('username')
-
-  useEffect(() => {
-    if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
-    setEmailAvailable(null)
-    emailTimerRef.current = setTimeout(() => checkAvailability('email', watchEmail), 500)
-    return () => {
-      if (emailTimerRef.current) clearTimeout(emailTimerRef.current)
-    }
-  }, [watchEmail, checkAvailability])
-
-  useEffect(() => {
-    if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
-    setUsernameAvailable(null)
-    usernameTimerRef.current = setTimeout(() => checkAvailability('username', watchUsername), 500)
-    return () => {
-      if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
-    }
-  }, [watchUsername, checkAvailability])
-
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: SignUpFormData) => {
     // Block submission when the captcha widget is showing but the user
     // hasn't completed the challenge yet. Defensive guard for cases where
     // the submit button lives outside the form (e.g. `<SignUpModal>` footer)
@@ -368,27 +170,11 @@ export function SignUpForm({
 
   if (registered) {
     return (
-      <Div className="space-y-4 text-center py-4">
-        <Div className="text-4xl">&#9993;</Div>
-        <P className="font-semibold text-lg">{t.checkEmail}</P>
-        <P className="text-sm text-muted-foreground">{t.checkEmailDescription}</P>
-        <Div className="pt-2">
-          {onBackToLogin ? (
-            <Button
-              type="button"
-              variant="link"
-              className="text-sm text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
-              onClick={onBackToLogin}
-            >
-              {t.backToLogin}
-            </Button>
-          ) : (
-            <Button asChild variant="link" className="text-sm text-muted-foreground">
-              <Link href={resolvedBackToLoginHref}>{t.backToLogin}</Link>
-            </Button>
-          )}
-        </Div>
-      </Div>
+      <SignUpSuccess
+        texts={t}
+        backToLoginHref={resolvedBackToLoginHref}
+        onBackToLogin={onBackToLogin}
+      />
     )
   }
 
@@ -417,235 +203,19 @@ export function SignUpForm({
             </Div>
           )}
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t.email}
-                  <Span aria-hidden="true" className="text-destructive ml-0.5">
-                    *
-                  </Span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    required
-                    aria-required="true"
-                    autoComplete="email"
-                    placeholder={t.emailPlaceholder}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-                {emailAvailable === false && (
-                  <P size="xs" className="text-destructive">
-                    {t.emailTaken}
-                  </P>
-                )}
-              </FormItem>
-            )}
+          <SignUpFormFields
+            form={form}
+            texts={t}
+            watchPassword={watchPassword}
+            emailAvailable={emailAvailable}
+            usernameAvailable={usernameAvailable}
+            promoOpen={promoOpen}
+            setPromoOpen={setPromoOpen}
+            setResolvedPromo={setResolvedPromo}
+            promoIsValid={promoIsValid}
+            promoIsRateLimited={promoIsRateLimited}
+            promoIsValidating={promoIsValidating}
           />
-
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t.username}
-                  <Span aria-hidden="true" className="text-destructive ml-0.5">
-                    *
-                  </Span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    required
-                    aria-required="true"
-                    autoComplete="username"
-                    placeholder={t.usernamePlaceholder}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-                {usernameAvailable === false && (
-                  <P size="xs" className="text-destructive">
-                    {t.usernameTaken}
-                  </P>
-                )}
-              </FormItem>
-            )}
-          />
-
-          <Div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs md:text-sm">{t.firstName}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      autoComplete="given-name"
-                      placeholder={t.firstNamePlaceholder}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs md:text-sm">{t.lastName}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      autoComplete="family-name"
-                      placeholder={t.lastNamePlaceholder}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </Div>
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t.password}
-                  <Span aria-hidden="true" className="text-destructive ml-0.5">
-                    *
-                  </Span>
-                </FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    required
-                    aria-required="true"
-                    minLength={MIN_PASSWORD_LENGTH}
-                    autoComplete="new-password"
-                    placeholder={t.passwordPlaceholder}
-                    texts={{
-                      showPassword: t.showPassword,
-                      hidePassword: t.hidePassword,
-                    }}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-                <PasswordStrength
-                  password={watchPassword}
-                  texts={{
-                    weak: t.passwordWeak,
-                    fair: t.passwordFair,
-                    good: t.passwordGood,
-                    strong: t.passwordStrong,
-                  }}
-                />
-                <P className="mt-1 text-xs text-muted-foreground">{t.passwordHint}</P>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            rules={{
-              validate: (value: string) =>
-                value === form.getValues('password') || t.passwordMismatch,
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t.confirmPassword}
-                  <Span aria-hidden="true" className="text-destructive ml-0.5">
-                    *
-                  </Span>
-                </FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    required
-                    aria-required="true"
-                    minLength={MIN_PASSWORD_LENGTH}
-                    autoComplete="new-password"
-                    placeholder={t.confirmPasswordPlaceholder}
-                    texts={{
-                      showPassword: t.showPassword,
-                      hidePassword: t.hidePassword,
-                    }}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {!promoOpen ? (
-            <Button
-              type="button"
-              variant="link"
-              className="text-xs text-muted-foreground p-0 h-auto cursor-pointer"
-              onClick={() => setPromoOpen(true)}
-            >
-              {t.promoCodeToggle}
-            </Button>
-          ) : (
-            <FormField
-              control={form.control}
-              name="promoCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs text-muted-foreground">
-                    {t.promoCodeLabel}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder={t.promoCodePlaceholder}
-                      className="h-8 text-sm"
-                      {...field}
-                      onChange={e => {
-                        field.onChange(e)
-                        setResolvedPromo(e.target.value)
-                      }}
-                    />
-                  </FormControl>
-                  {promoIsValidating && (
-                    <P size="xs" className="text-muted-foreground">
-                      {t.promoCodeChecking}
-                    </P>
-                  )}
-                  {promoIsValid === true && (
-                    <Badge variant="success" className="text-xs">
-                      {t.promoCodeApplied}
-                    </Badge>
-                  )}
-                  {promoIsValid === false && !promoIsRateLimited && (
-                    <P size="xs" className="text-destructive">
-                      {t.promoCodeInvalid}
-                    </P>
-                  )}
-                  {promoIsRateLimited && (
-                    <P size="xs" className="text-warning">
-                      {t.promoCodeRateLimited}
-                    </P>
-                  )}
-                </FormItem>
-              )}
-            />
-          )}
 
           {turnstileSiteKey && (
             <TurnstileWidget

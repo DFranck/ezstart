@@ -1,150 +1,28 @@
 'use client'
 
-import {
-  Button,
-  Div,
-  P,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  PasswordInput,
-  Span,
-} from '@ezstart/ui/components'
+import { Button, Div, Form } from '@ezstart/ui/components'
 import { apiCall, ApiError } from '@ezstart/api-sdk'
 import { logger } from './internal-logger.js'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { OAuthButtons, type OAuthProvider } from './OAuthButtons.js'
+import { OAuthButtons } from './OAuthButtons.js'
 import { TwoFactorPrompt, type TwoFactorPromptTexts } from './TwoFactorPrompt.js'
 import { DevModeBanner } from './DevModeBanner.js'
 import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
 import { useAuth } from '../react/hooks.js'
 import { useAuthNavigation } from '../react/useAuthNavigation.js'
-import { getAuthTexts, type AuthLocale } from '../i18n/index.js'
-import { detectCurrentThemePreference } from './themePreference.js'
-import { buildPostLoginRedirect } from './postLoginRedirect.js'
+import { getAuthTexts } from '../i18n/index.js'
+import {
+  SIGN_IN_DEFAULT_FORM_ID,
+  type SignInFormData,
+  type SignInFormProps,
+  type SignInFormTexts,
+} from './_internal/sign-in-form/types.js'
+import { useAuthedRedirect } from './_internal/sign-in-form/use-authed-redirect.js'
+import { completeLoginRedirect } from './_internal/sign-in-form/complete-login-redirect.js'
+import { SignInFormFields } from './_internal/sign-in-form/SignInFormFields.js'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-export interface SignInFormTexts {
-  emailOrUsername: string
-  emailOrUsernamePlaceholder: string
-  password: string
-  passwordPlaceholder: string
-  forgotPassword: string
-  submit: string
-  submitting: string
-  required: string
-  minLength: string
-  noRedirectUri: string
-  fallbackError: string
-  /**
-   * Shown when `apiCall` throws an `ApiError` with `code === 'NETWORK_UNAVAILABLE'`
-   * (server unreachable: offline, DNS down, server crashed). Replaces the
-   * raw browser `"Failed to fetch"` message which is non-actionable.
-   */
-  networkError: string
-  // PasswordInput visibility toggle (sr-only)
-  showPassword?: string
-  hidePassword?: string
-  // 2FA texts (optional — only needed if 2FA is enabled)
-  twoFactorPrompt?: string
-  twoFactorCodePlaceholder?: string
-  twoFactorVerify?: string
-  twoFactorVerifying?: string
-  twoFactorBack?: string
-  // OAuth texts (optional — only needed if showOAuth is true)
-  continueWithGoogle?: string
-  orContinueWith?: string
-}
-
-export interface SignInFormProps {
-  /** App name for the login request */
-  appName: string
-  /** Redirect URI after login (OAuth code flow) */
-  redirectUri?: string
-  /** Called after successful login (if not using redirect) */
-  onSuccess?: () => void
-  /** Called when user clicks "Forgot password" */
-  onForgotPassword?: () => void
-  /** Href for forgot password link (used if onForgotPassword is not provided) */
-  forgotPasswordHref?: string
-  /** Show OAuth buttons above the form */
-  showOAuth?: boolean
-  /** OAuth providers to display */
-  oauthProviders?: OAuthProvider[]
-  /**
-   * Locale for embedded dictionaries (en | fr | vi). Defaults to the active
-   * locale detected from the URL pathname (e.g. `/fr/login` → `'fr'`).
-   * Any keys provided in `texts` take precedence over the localized defaults.
-   */
-  locale?: AuthLocale | string
-  /** Override texts (merged on top of the localized defaults). */
-  texts?: Partial<SignInFormTexts>
-  /**
-   * When true, the form is rendered in preview mode: all inputs and submit
-   * button are disabled with reduced opacity. Useful when the publishable
-   * key is invalid — the form is visible but not usable.
-   */
-  disabled?: boolean
-  /**
-   * Key validation status for the DevModeBanner.
-   * - `'valid'` — key was validated successfully
-   * - `'invalid'` — key is invalid, revoked, or expired
-   * - `'missing'` — no key provided
-   */
-  keyStatus?: 'valid' | 'invalid' | 'missing'
-  /** Raw publishable key from URL (for DevModeBanner display). */
-  urlKey?: string
-  /**
-   * DOM `id` of the underlying `<form>` element. Used by `<SignInModal>` to
-   * render its primary submit button OUTSIDE the form (in the Modal footer
-   * slot) via the standard HTML `<button form="...">` association. Defaults
-   * to a stable internal id; pass an explicit value only when wiring an
-   * external submit button yourself.
-   */
-  formId?: string
-  /**
-   * Hide the in-form primary submit button. Used by `<SignInModal>` so the
-   * submit button can be rendered in the Modal footer instead. Secondary
-   * controls (OAuth buttons, "Forgot password?" link) STAY visible.
-   */
-  hideSubmitButton?: boolean
-  /**
-   * Notified whenever the form's internal `loading` state flips. Lets a
-   * parent (e.g. `<SignInModal>`) wire its external submit button's spinner
-   * + disabled state without owning the submission logic.
-   */
-  onSubmittingChange?: (isSubmitting: boolean) => void
-  /**
-   * Cloudflare Turnstile site key — when provided, the form starts tracking
-   * failed login attempts and renders a captcha widget once the user has
-   * failed `turnstileShowAfterFails` times in a row (default 3). The token
-   * is sent as `body.turnstileToken` to the backend on subsequent attempts.
-   * When the key is empty, the widget is never shown (no-op).
-   */
-  turnstileSiteKey?: string
-  /**
-   * Number of consecutive failed login attempts before the captcha widget
-   * is rendered. Only meaningful when `turnstileSiteKey` is provided.
-   * Defaults to `3` — kept low to balance bot deterrence with user
-   * friction on legitimate typos.
-   */
-  turnstileShowAfterFails?: number
-}
-
-const DEFAULT_FORM_ID = 'ezstart-signin-form'
-
-// ─── Component ──────────────────────────────────────────────────────────────
-
-type FormData = {
-  email: string
-  password: string
-}
+export type { SignInFormProps, SignInFormTexts } from './_internal/sign-in-form/types.js'
 
 /**
  * Email + password sign-in form with optional 2FA prompt and OAuth
@@ -168,7 +46,7 @@ export function SignInForm({
   disabled = false,
   keyStatus,
   urlKey,
-  formId = DEFAULT_FORM_ID,
+  formId = SIGN_IN_DEFAULT_FORM_ID,
   hideSubmitButton = false,
   onSubmittingChange,
   turnstileSiteKey,
@@ -196,74 +74,7 @@ export function SignInForm({
       ? `${window.location.origin}${locale ? `/${locale}` : ''}/dashboard`
       : undefined)
 
-  // ── Auto-redirect when already authenticated ─────────────────────────────
-  //
-  // P1 UX bug (LOGIN-PAGE-NO-REDIRECT-IF-AUTHED): in cross-origin scenarios
-  // (e.g. `ezauth-git-staging-ezstart.vercel.app`) the user can land on
-  // `/login` while their httpOnly cookie was not visible to SSR
-  // (`getServerAuth()` returned null) but their localStorage carries a valid
-  // user state from a previous session on the same domain. The store
-  // rehydrates client-side with `isAuthenticated: true`, but without this
-  // guard the form sat there waiting for the user to type credentials they
-  // already have. Redirect them straight to the dashboard.
-  //
-  // - Wait for `isAuthReady` so we don't race the persist rehydration on
-  //   the very first render (would briefly think the user is signed out).
-  // - `window.location.replace()` (not `router.push`) so:
-  //     · the SDK stays free of a `next/router` peer dep
-  //     · `/login` does not stay in browser history (back-button safe)
-  //     · the destination boots with a fresh React tree (no stale state)
-  useEffect(() => {
-    if (!isAuthReady) return
-    if (!isAuthenticated) return
-    if (typeof window === 'undefined') return
-    if (!resolvedRedirectUri) return
-
-    // Same-origin → direct redirect (consumer's own /dashboard route, store
-    // already populated via persist). Cross-origin → MUST do an SSO handoff
-    // first : POST /auth/sso/authorize to generate a one-shot auth code, then
-    // redirect with `?code=...` so the consumer's `/auth/callback` can exchange
-    // it. Without this step the consumer lands on its callback empty-handed and
-    // shows "No authorization code found" (cf. FIX-EZSTART-SSO-LOGIN-FLOW).
-    let cancelled = false
-    const targetUrl = (() => {
-      try {
-        return new URL(resolvedRedirectUri, window.location.origin)
-      } catch {
-        return null
-      }
-    })()
-    if (!targetUrl) return
-
-    const isSameOrigin = targetUrl.origin === window.location.origin
-    if (isSameOrigin) {
-      window.location.replace(resolvedRedirectUri)
-      return
-    }
-
-    void (async () => {
-      try {
-        const result = await apiCall<{ code: string; expiresIn: number }>('/auth/sso/authorize', {
-          appName: 'ezauth',
-          method: 'POST',
-          body: { app: appName, redirectUri: targetUrl.toString() },
-        })
-        if (cancelled) return
-        const target = new URL(targetUrl.toString())
-        target.searchParams.set('code', result.code)
-        window.location.replace(target.toString())
-      } catch (err) {
-        // Fall through to render the form so the user has a recovery path.
-        logger.warn(
-          'SSO auto-handoff failed, falling back to manual sign-in:',
-          err instanceof Error ? err.message : String(err)
-        )
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [isAuthReady, isAuthenticated, resolvedRedirectUri, appName])
+  useAuthedRedirect({ isAuthReady, isAuthenticated, resolvedRedirectUri, appName })
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -281,14 +92,14 @@ export function SignInForm({
     onSubmittingChange?.(loading)
   }, [loading, onSubmittingChange])
 
-  const form = useForm<FormData>({
+  const form = useForm<SignInFormData>({
     defaultValues: {
       email: '',
       password: '',
     },
   })
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: SignInFormData) => {
     if (loading) return
     // Block submission when the captcha widget is showing but the user
     // hasn't completed the challenge yet. Defensive guard for cases where
@@ -328,55 +139,17 @@ export function SignInForm({
         return
       }
 
-      // Redirect with authorization code.
-      //
-      // `buildPostLoginRedirect` distinguishes two flows:
-      //
-      // 1. **Cross-origin SSO** (foreign consumer app) — append `?code=`
-      //    so the consumer's `/auth/callback` can exchange it, plus
-      //    `?theme=` so the consumer adopts the user's last-chosen
-      //    scheme. `detectCurrentThemePreference` returns `undefined`
-      //    when no signal is available — the param is omitted in that
-      //    case.
-      //
-      // 2. **Same-origin first-party** (e.g. ezauth dogfood hitting
-      //    `/admin` on its own origin) — there is no `/auth/callback`
-      //    handler on the destination, so the SDK MUST exchange the
-      //    code itself BEFORE navigating. Otherwise the destination
-      //    page renders with no tokens in the store, `RequireAuth`
-      //    flips to unauthenticated, and we redirect right back to
-      //    `/login` — an infinite loop. We reuse `handleCallback`
-      //    (the same primitive `<AuthCallbackPage>` calls in the SSO
-      //    flow) so both paths share one code-exchange code path.
+      // Redirect with the authorization code. `completeLoginRedirect`
+      // distinguishes same-origin first-party (exchange the code itself via
+      // `handleCallback` before navigating) from cross-origin SSO (forward
+      // `?code=`/`?theme=` so the consumer's `/auth/callback` exchanges it).
       if (resolvedRedirectUri && result.code) {
-        logger.info('Redirecting to:', resolvedRedirectUri)
-        const url = new URL(resolvedRedirectUri)
-        const isSameOrigin = url.origin === window.location.origin
-
-        if (isSameOrigin) {
-          try {
-            await handleCallback(result.code)
-          } catch (exchangeError) {
-            logger.error(
-              'Same-origin code exchange failed:',
-              exchangeError instanceof Error ? exchangeError.message : String(exchangeError)
-            )
-            throw exchangeError instanceof Error ? exchangeError : new Error(t.fallbackError)
-          }
-          window.location.href = url.toString()
-          return
-        }
-
-        // Cross-origin: forward the code (and theme) so the consumer's
-        // `/auth/callback` can perform the exchange itself.
-        const themePref = detectCurrentThemePreference()
-        const target = buildPostLoginRedirect(
+        await completeLoginRedirect({
           resolvedRedirectUri,
-          result.code,
-          themePref,
-          window.location.origin
-        )
-        window.location.href = target
+          code: result.code,
+          handleCallback,
+          fallbackError: t.fallbackError,
+        })
         return
       }
 
@@ -455,93 +228,13 @@ export function SignInForm({
             </Div>
           )}
 
-          <FormField
-            control={form.control}
-            name="email"
-            rules={{
-              required: t.required,
-              minLength: { value: 3, message: t.minLength.replace('{min}', '3') },
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t.emailOrUsername}
-                  <Span aria-hidden="true" className="text-destructive ml-0.5">
-                    *
-                  </Span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    required
-                    aria-required="true"
-                    placeholder={t.emailOrUsernamePlaceholder}
-                    autoComplete="username"
-                    disabled={disabled}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <SignInFormFields
+            form={form}
+            texts={t}
+            disabled={disabled}
+            forgotPasswordHref={resolvedForgotPasswordHref}
+            onForgotPassword={onForgotPassword}
           />
-
-          <FormField
-            control={form.control}
-            name="password"
-            rules={{
-              required: t.required,
-              minLength: { value: 6, message: t.minLength.replace('{min}', '6') },
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t.password}
-                  <Span aria-hidden="true" className="text-destructive ml-0.5">
-                    *
-                  </Span>
-                </FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    required
-                    aria-required="true"
-                    placeholder={t.passwordPlaceholder}
-                    autoComplete="current-password"
-                    disabled={disabled}
-                    texts={{
-                      showPassword: t.showPassword,
-                      hidePassword: t.hidePassword,
-                    }}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Div className="text-right">
-            <P size="xs">
-              {onForgotPassword ? (
-                <Button
-                  type="button"
-                  variant="link"
-                  className="p-0 h-auto text-xs text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
-                  onClick={onForgotPassword}
-                  disabled={disabled}
-                >
-                  {t.forgotPassword}
-                </Button>
-              ) : (
-                <a
-                  href={resolvedForgotPasswordHref}
-                  className="text-muted-foreground hover:text-foreground font-medium underline-offset-4 hover:underline cursor-pointer"
-                >
-                  {t.forgotPassword}
-                </a>
-              )}
-            </P>
-          </Div>
 
           {showTurnstile && (
             <TurnstileWidget
