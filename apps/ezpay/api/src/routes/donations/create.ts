@@ -3,6 +3,7 @@ import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
+  createStrictRateLimiter,
   sendSuccess,
   sendError,
   sendValidationError,
@@ -14,8 +15,19 @@ import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
 import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 import { checkPayDemoQuotas } from '../../middleware/check-pay-demo-quotas.js'
+import {
+  assertApplicationAuthority,
+  validateDonationAmount,
+} from '../_shared/checkout-authority.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+
+// Strict per-bucket rate limit (anti card-testing / abuse). Donations accept
+// anonymous callers, so the bucket falls back to per-IP for them. See
+// `createStrictRateLimiter` (5 req / min). Disabled under NODE_ENV=test.
+const donateRateLimiter = createStrictRateLimiter({
+  disabled: process.env.NODE_ENV === 'test',
+})
 
 /**
  * Resolve the base URL for Stripe Checkout success / cancel redirects.
@@ -66,7 +78,11 @@ const createDonationSchema = z.object({
       'ezauth Application id receiving the donation (required when not authenticated via API key)'
     ),
   projectName: z.string().optional().describe('Project display name'),
-  amount: z.number().nonnegative().describe('Donation amount in currency units (0 = testimonial)'),
+  amount: z
+    .number()
+    .finite('amount must be a finite number')
+    .nonnegative()
+    .describe('Donation amount in currency units (0 = testimonial). Bounded server-side.'),
   currency: z
     .string()
     .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
@@ -152,6 +168,24 @@ const createDonationHandler = async (req: Request, res: Response) => {
       })
     }
 
+    // Amount authority (C-1, donation variant) — a donation amount is
+    // donor-chosen (legitimate), but we bound + validate it server-side:
+    // reject negative / zero / NaN / overflow and clamp the currency to a
+    // server allowlist. The donor still picks the amount, but never an
+    // out-of-range one or an exotic currency forwarded to Stripe verbatim.
+    const amountCheck = validateDonationAmount(amount, currency)
+    if (!amountCheck.ok) {
+      return sendValidationError(res, amountCheck.message, [
+        {
+          code: 'custom',
+          path: ['amount'],
+          message: amountCheck.message,
+        },
+      ])
+    }
+    const validatedAmount = amountCheck.amount
+    const validatedCurrency = amountCheck.currency
+
     // Use custom returnUrl, fallback to project's web URL based on projectId,
     // then to the request `Origin` header (sandbox / docs demo / external
     // consumers whose `projectId` is not a known platform AppName).
@@ -167,24 +201,19 @@ const createDonationHandler = async (req: Request, res: Response) => {
       ])
     }
 
-    // Resolve the target Application id:
-    //   1. API-key auth → middleware populates `req.apiKeyApplicationId`
-    //   2. Public/JWT auth → caller passes `applicationId` in body
-    //   3. Neither → 422 (cannot route Connect fee without the owner)
-    const applicationId = req.apiKeyApplicationId ?? bodyApplicationId
-    if (!applicationId) {
-      return sendValidationError(res, 'applicationId required', [
-        {
-          code: 'custom',
-          path: ['applicationId'],
-          message:
-            'applicationId is required when not authenticated via API key (body field or X-API-Key)',
-        },
-      ])
+    // Tenant gate (C-3, donation variant) — resolve + authorise the target
+    // Application. API-key auth is trusted (bound at mint time); an
+    // authenticated Bearer caller must own the Application or be superadmin;
+    // an anonymous donor may donate *to* an existing + active Application
+    // (no ownership required — they pay to the app, not as it).
+    const authz = await assertApplicationAuthority(req, bodyApplicationId, { allowAnonymous: true })
+    if (!authz.ok) {
+      return sendError(res, authz.message, authz.status)
     }
+    const applicationId = authz.applicationId
 
     // Resolve Connect fee for the target Application
-    const connectFee = await resolveConnectFee(applicationId, Math.round(amount * 100))
+    const connectFee = await resolveConnectFee(applicationId, Math.round(validatedAmount * 100))
 
     // Stripe automatic tax — opt-out via env var. See subscribe route for details.
     const automaticTax = process.env.STRIPE_AUTOMATIC_TAX !== 'false'
@@ -192,8 +221,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
     // Create checkout session via provider
     const provider = getProvider()
     const session = await provider.createCheckoutSession({
-      amount,
-      currency,
+      amount: validatedAmount,
+      currency: validatedCurrency,
       description: `Donation to ${projectName || projectId}`,
       metadata: {
         type: 'donation',
@@ -222,8 +251,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
       projectId,
       projectName: projectName || projectId,
       type: 'donation',
-      amount,
-      currency,
+      amount: validatedAmount,
+      currency: validatedCurrency,
       userId,
       customerName: isAnonymous ? 'Anonymous' : donorName,
       customerEmail: donorEmail,
@@ -260,13 +289,20 @@ const createDonationHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.post('/donate', authOptionalJwtOrKey(), checkPayDemoQuotas, createDonationHandler, {
-  summary: 'Create a donation checkout session',
-  tags: ['Donations'],
-  bodySchema: createDonationSchema,
-  responseSchema: paymentResponseSchema,
-  status: 201,
-})
+docRouter.post(
+  '/donate',
+  donateRateLimiter,
+  authOptionalJwtOrKey(),
+  checkPayDemoQuotas,
+  createDonationHandler,
+  {
+    summary: 'Create a donation checkout session',
+    tags: ['Donations'],
+    bodySchema: createDonationSchema,
+    responseSchema: paymentResponseSchema,
+    status: 201,
+  }
+)
 
 export { createDonationRegistry as registry, router }
 export default router

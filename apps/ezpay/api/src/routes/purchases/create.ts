@@ -3,6 +3,7 @@ import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
+  createStrictRateLimiter,
   sendSuccess,
   sendError,
   sendValidationError,
@@ -15,8 +16,15 @@ import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
 import { authMiddleware, populateUserFromToken } from '../../middleware/auth.js'
 import { checkPayDemoQuotas } from '../../middleware/check-pay-demo-quotas.js'
+import { assertApplicationAuthority, resolvePurchasePrice } from '../_shared/checkout-authority.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
+
+// Strict per-bucket rate limit (anti card-testing / checkout abuse). See
+// `createStrictRateLimiter` (5 req / min). Disabled under NODE_ENV=test.
+const purchaseRateLimiter = createStrictRateLimiter({
+  disabled: process.env.NODE_ENV === 'test',
+})
 
 export const createPurchaseRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -34,14 +42,23 @@ const createPurchaseSchema = z.object({
     .describe(
       'ezauth Application id owning the checkout (required when not authenticated via API key)'
     ),
-  productId: z.string().describe('Product identifier'),
-  productName: z.string().describe('Product display name'),
-  amount: z.number().positive().describe('Purchase amount in currency units'),
+  productId: z.string().describe('Product identifier (price resolved server-side from catalogue)'),
+  productName: z
+    .string()
+    .optional()
+    .describe('Ignored — resolved server-side from the product catalogue'),
+  amount: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      'Ignored — the purchase price is resolved server-side from the product catalogue, never the client'
+    ),
   currency: z
     .string()
     .regex(/^[a-z]{3}$/i, 'Must be a valid ISO 4217 currency code')
-    .default('EUR')
-    .describe('Currency code (EUR, USD, GBP, etc.)'),
+    .optional()
+    .describe('Ignored — currency is resolved server-side from the product catalogue'),
   customerEmail: z.string().email().optional().describe('Customer email'),
   returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
   promoCode: z.string().optional().describe('Optional promo code for discount'),
@@ -70,9 +87,6 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       projectId,
       applicationId: bodyApplicationId,
       productId,
-      productName,
-      amount,
-      currency = 'EUR',
       customerEmail,
       returnUrl,
       promoCode,
@@ -81,23 +95,29 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
     // Always use the authenticated user ID from JWT, never from the request body
     const userId = req.userId
 
-    // Resolve the target Application id:
-    //   1. API-key auth → middleware populates `req.apiKeyApplicationId`
-    //   2. Bearer/JWT auth → caller passes `applicationId` in body
-    //   3. Neither → 422 (cannot route Connect fee without the owner)
-    const applicationId = req.apiKeyApplicationId ?? bodyApplicationId
-    if (!applicationId) {
-      return sendValidationError(res, 'applicationId required', [
-        {
-          code: 'custom',
-          path: ['applicationId'],
-          message:
-            'applicationId is required when not authenticated via API key (body field or X-API-Key)',
-        },
-      ])
+    // Tenant ownership gate (C-3) — resolve + authorise the Application from
+    // the ezauth source-of-truth. API-key auth is trusted (bound at mint
+    // time); Bearer auth must own the Application or be superadmin.
+    const authz = await assertApplicationAuthority(req, bodyApplicationId)
+    if (!authz.ok) {
+      return sendError(res, authz.message, authz.status)
     }
+    const applicationId = authz.applicationId
 
-    // Promo code validation and discount calculation
+    // Price authority (C-1) — the purchase price + currency + name are
+    // resolved SERVER-SIDE from the product catalogue keyed by `productId`.
+    // The client `amount` / `currency` / `productName` are deliberately
+    // ignored. An unknown `productId` is a 400.
+    const product = resolvePurchasePrice(productId)
+    if (!product) {
+      return sendError(res, 'Unknown productId', 400)
+    }
+    const amount = product.amount
+    const currency = product.currency
+    const productName = product.productName
+
+    // Promo code validation and discount calculation — applied to the
+    // server-resolved price, never a client-supplied amount.
     let finalAmount = amount
     let promoMetadata: { promoCode?: string; originalAmount?: number; discountApplied?: number } =
       {}
@@ -213,6 +233,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 
 docRouter.post(
   '/purchase',
+  purchaseRateLimiter,
   authMiddleware,
   populateUserFromToken,
   checkPayDemoQuotas,
