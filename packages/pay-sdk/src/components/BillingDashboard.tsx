@@ -21,6 +21,7 @@ import { formatCurrency } from '../core/format-currency.js'
 import { PaymentHistory } from './PaymentHistory.js'
 import { ManageSubscriptionButton } from './ManageSubscriptionButton.js'
 import { PayNotConfiguredCard, type PayNotConfiguredTexts } from './common/PayNotConfiguredCard.js'
+import type { Payment, SubscriptionStatusSnapshot } from '../core/types.js'
 
 export interface BillingDashboardTexts {
   title: string
@@ -114,6 +115,26 @@ export interface BillingDashboardProps {
    * (default `'en'`).
    */
   locale?: string
+  /**
+   * SSR-resolved subscription snapshot used to render the current-plan card on
+   * the very first paint (no skeleton flash). Pass the result of
+   * `getServerSubscriptionStatus()` from `@ezstart/pay-sdk/server`. The client
+   * `useSubscriptionStatus` hook hydrates from it and revalidates silently.
+   *
+   * @example
+   * ```tsx
+   * // Server Component
+   * const initialSubscription = await getServerSubscriptionStatus({ cookieHeader })
+   * return <BillingDashboard initialSubscription={initialSubscription ?? undefined} />
+   * ```
+   */
+  initialSubscription?: SubscriptionStatusSnapshot
+  /**
+   * SSR-resolved recent payments used to bootstrap the "Recent payments" card
+   * on the first paint (no skeleton flash). Fetch a server-side page scoped to
+   * the same `userId` / `applicationId`.
+   */
+  initialPayments?: Payment[]
   className?: string
 }
 
@@ -129,6 +150,8 @@ export function BillingDashboard({
   paymentHistoryTexts,
   notConfiguredTexts,
   locale,
+  initialSubscription,
+  initialPayments,
   className,
 }: BillingDashboardProps) {
   const t = { ...DEFAULT_TEXTS, ...textsProp }
@@ -159,11 +182,13 @@ export function BillingDashboard({
     userId: userId || '',
     applicationId: effectiveApplicationId,
     appName,
+    initialStatus: initialSubscription,
   })
   const { payments, isLoading: paymentsLoading } = usePaymentHistory({
     userId,
     applicationId: effectiveApplicationId,
     limit: recentPaymentsCount,
+    initialPayments,
   })
 
   // VULN-1: when the publishableKey resolution failed, render an explicit

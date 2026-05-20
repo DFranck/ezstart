@@ -24,6 +24,15 @@ interface UsePaymentHistoryParams {
   offset?: number
   filters?: PaymentFilters
   autoLoad?: boolean
+  /**
+   * SSR-resolved payments used to hydrate the list synchronously at mount
+   * (no skeleton flash). Pass a server-fetched page so `<BillingDashboard>`
+   * renders the recent payments on the first paint — the `useEffect` fetch
+   * then revalidates silently. When provided, `isLoading` starts `false`.
+   */
+  initialPayments?: Payment[]
+  /** SSR-resolved total count companion to `initialPayments`. */
+  initialTotal?: number
 }
 
 /**
@@ -56,12 +65,26 @@ interface UsePaymentHistoryParams {
  */
 export function usePaymentHistory(params: UsePaymentHistoryParams = {}) {
   const { client, applicationId: ctxApplicationId, applicationResolutionStatus } = usePayContext()
-  const [payments, setPayments] = useState<Payment[]>([])
-  const [total, setTotal] = useState(0)
+
+  const {
+    userId,
+    applicationId,
+    limit = 20,
+    offset = 0,
+    filters,
+    autoLoad = true,
+    initialPayments,
+    initialTotal,
+  } = params
+
+  const hasInitialPayments = initialPayments !== undefined
+  const [payments, setPayments] = useState<Payment[]>(initialPayments ?? [])
+  const [total, setTotal] = useState(initialTotal ?? initialPayments?.length ?? 0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { userId, applicationId, limit = 20, offset = 0, filters, autoLoad = true } = params
+  // First revalidation after an SSR hydrate runs silently (no skeleton flash).
+  const revalidatedRef = useRef(false)
 
   // Resolve effective applicationId:
   // - Explicit prop wins (including empty string opt-out)
@@ -77,74 +100,78 @@ export function usePaymentHistory(params: UsePaymentHistoryParams = {}) {
   // AbortController for the in-flight request — reset on each new call.
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  const loadPayments = useCallback(async () => {
-    // VULN-1: refuse to fetch when the publishableKey resolve failed.
-    if (applicationResolutionStatus === 'failed' && applicationId === undefined) {
-      setPayments([])
-      setTotal(0)
-      setIsLoading(false)
-      setError(
-        'Billing context unavailable: the application could not be resolved. ' +
-          'Refresh the page or verify the publishable key.'
-      )
-      return
-    }
-
-    // Abort any previous in-flight request before starting a new one.
-    abortControllerRef.current?.abort()
-    const controller = new AbortController()
-    abortControllerRef.current = controller
-
-    const myRequestId = ++requestIdRef.current
-    const myApplicationId = effectiveApplicationId
-
-    setIsLoading(true)
-    setError(null)
-    try {
-      const result = await client.getPayments({
-        userId,
-        applicationId: myApplicationId,
-        limit,
-        offset,
-        type: filters?.type,
-        status: filters?.status,
-        dateFrom: filters?.dateFrom,
-        dateTo: filters?.dateTo,
-        signal: controller.signal,
-      })
-      // VULN-2: ignore stale responses (slow app A returning after app B switch).
-      if (
-        controller.signal.aborted ||
-        myRequestId !== requestIdRef.current ||
-        myApplicationId !== effectiveApplicationId
-      ) {
-        return
-      }
-      setPayments(result.payments)
-      setTotal(result.total)
-    } catch (err) {
-      if (controller.signal.aborted || myRequestId !== requestIdRef.current) {
-        return
-      }
-      setError(err instanceof Error ? err.message : 'Failed to load payment history')
-    } finally {
-      if (myRequestId === requestIdRef.current) {
+  const loadPayments = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const silent = opts?.silent ?? false
+      // VULN-1: refuse to fetch when the publishableKey resolve failed.
+      if (applicationResolutionStatus === 'failed' && applicationId === undefined) {
+        setPayments([])
+        setTotal(0)
         setIsLoading(false)
+        setError(
+          'Billing context unavailable: the application could not be resolved. ' +
+            'Refresh the page or verify the publishable key.'
+        )
+        return
       }
-    }
-  }, [
-    client,
-    userId,
-    effectiveApplicationId,
-    applicationResolutionStatus,
-    applicationId,
-    limit,
-    offset,
-    filters?.type,
-    filters?.status,
-    filters?.dateFrom,
-    filters?.dateTo,
-  ])
+
+      // Abort any previous in-flight request before starting a new one.
+      abortControllerRef.current?.abort()
+      const controller = new AbortController()
+      abortControllerRef.current = controller
+
+      const myRequestId = ++requestIdRef.current
+      const myApplicationId = effectiveApplicationId
+
+      if (!silent) setIsLoading(true)
+      setError(null)
+      try {
+        const result = await client.getPayments({
+          userId,
+          applicationId: myApplicationId,
+          limit,
+          offset,
+          type: filters?.type,
+          status: filters?.status,
+          dateFrom: filters?.dateFrom,
+          dateTo: filters?.dateTo,
+          signal: controller.signal,
+        })
+        // VULN-2: ignore stale responses (slow app A returning after app B switch).
+        if (
+          controller.signal.aborted ||
+          myRequestId !== requestIdRef.current ||
+          myApplicationId !== effectiveApplicationId
+        ) {
+          return
+        }
+        setPayments(result.payments)
+        setTotal(result.total)
+      } catch (err) {
+        if (controller.signal.aborted || myRequestId !== requestIdRef.current) {
+          return
+        }
+        setError(err instanceof Error ? err.message : 'Failed to load payment history')
+      } finally {
+        if (myRequestId === requestIdRef.current && !silent) {
+          setIsLoading(false)
+        }
+      }
+    },
+    [
+      client,
+      userId,
+      effectiveApplicationId,
+      applicationResolutionStatus,
+      applicationId,
+      limit,
+      offset,
+      filters?.type,
+      filters?.status,
+      filters?.dateFrom,
+      filters?.dateTo,
+    ]
+  )
 
   useEffect(() => {
     if (!autoLoad) return
@@ -154,19 +181,27 @@ export function usePaymentHistory(params: UsePaymentHistoryParams = {}) {
       return
     }
 
-    loadPayments()
+    // SSR hydrate present + first revalidation → run silently (no skeleton).
+    const silent = hasInitialPayments && !revalidatedRef.current
+    revalidatedRef.current = true
+    void loadPayments({ silent })
 
     return () => {
       // Cancel the in-flight request when deps change or the component unmounts.
       abortControllerRef.current?.abort()
     }
-  }, [autoLoad, loadPayments, applicationResolutionStatus])
+  }, [autoLoad, loadPayments, applicationResolutionStatus, hasInitialPayments])
+
+  // Stable no-arg reload — discards any event/args a caller forwards.
+  const reload = useCallback(() => {
+    void loadPayments()
+  }, [loadPayments])
 
   return {
     payments,
     total,
     isLoading,
     error,
-    reload: loadPayments,
+    reload,
   }
 }

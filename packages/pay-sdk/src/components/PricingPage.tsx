@@ -18,7 +18,7 @@ import { usePlans } from '../react/hooks/usePlans.js'
 import { useSubscriptionStatus } from '../react/hooks/useSubscriptionStatus.js'
 import { useApplicationContext, usePayLogger } from '../react/pay-provider.js'
 import { formatCurrency } from '../core/format-currency.js'
-import type { Plan } from '../core/types.js'
+import type { Plan, SubscriptionStatusSnapshot } from '../core/types.js'
 import {
   PayNotConfiguredCard,
   classifyPayError,
@@ -107,6 +107,26 @@ export interface PricingPageProps {
    * ```
    */
   additionalPlans?: Plan[]
+  /**
+   * SSR-resolved plans used to bootstrap the pricing grid on the very first
+   * paint (no skeleton flash). Pass the result of `getServerPlans()` from
+   * `@ezstart/pay-sdk/server`. The client `usePlans` hook hydrates from this
+   * snapshot and revalidates against the server silently post-hydration.
+   *
+   * @example
+   * ```tsx
+   * // Server Component
+   * const initialPlans = await getServerPlans({ applicationId })
+   * return <PricingPage initialPlans={initialPlans ?? undefined} />
+   * ```
+   */
+  initialPlans?: Plan[]
+  /**
+   * SSR-resolved subscription snapshot used to highlight the user's current
+   * plan on the first paint (no "current plan" flash). Pass the result of
+   * `getServerSubscriptionStatus()` from `@ezstart/pay-sdk/server`.
+   */
+  initialSubscription?: SubscriptionStatusSnapshot
   /** Additional CSS class */
   className?: string
 }
@@ -124,6 +144,8 @@ export function PricingPage({
   notConfiguredTexts,
   locale,
   additionalPlans,
+  initialPlans,
+  initialSubscription,
   className,
 }: PricingPageProps) {
   const t = { ...DEFAULT_PRICING_TEXTS, ...textsProp }
@@ -156,11 +178,13 @@ export function PricingPage({
     applicationId,
     appName,
     active: true,
+    initialPlans,
   })
   const subStatus = useSubscriptionStatus({
     userId: userId || '',
     applicationId,
     appName,
+    initialStatus: initialSubscription,
   })
 
   const currentPlanName = subStatus.plan

@@ -81,6 +81,77 @@ const plans = await client.listPlans({ appName: 'myapp' })
 const donation = await client.createDonation({ projectId: 'proj_123', amount: 500 })
 ```
 
+## Quickstart — Next.js SSR (kill the loading-skeleton flash)
+
+The data-fetching components (`<PricingPage>`, `<BillingDashboard>`) fetch
+their data client-side via `useEffect`. Without bootstrapping, the first
+server-rendered paint shows the loading skeleton, then swaps to the real
+content after hydration — a visible flash.
+
+Bootstrap the data server-side with the `getServer<X>()` companions from
+`@ezstart/pay-sdk/server` and pass it as an `initial<X>` prop. The component
+hydrates synchronously (correct first paint) and the client `useEffect`
+becomes a silent revalidation.
+
+```tsx
+// app/[locale]/pricing/page.tsx — Server Component
+import { getServerPlans, getServerSubscriptionStatus } from '@ezstart/pay-sdk/server'
+import { PricingPage } from '@ezstart/pay-sdk/components'
+import { headers } from 'next/headers'
+
+export default async function Pricing() {
+  const cookieHeader = (await headers()).get('cookie')
+
+  const [initialPlans, initialSubscription] = await Promise.all([
+    getServerPlans({
+      apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL!,
+      applicationId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+    }),
+    getServerSubscriptionStatus({
+      apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL!,
+      cookieHeader,
+      applicationId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+    }),
+  ])
+
+  return (
+    <PricingPage
+      initialPlans={initialPlans ?? undefined}
+      initialSubscription={initialSubscription ?? undefined}
+    />
+  )
+}
+```
+
+```tsx
+// app/[locale]/(dashboard)/billing/page.tsx — Server Component
+import { getServerSubscriptionStatus } from '@ezstart/pay-sdk/server'
+import { BillingDashboard } from '@ezstart/pay-sdk/components'
+import { headers } from 'next/headers'
+
+export default async function Billing() {
+  const cookieHeader = (await headers()).get('cookie')
+  const initialSubscription = await getServerSubscriptionStatus({
+    apiUrl: process.env.NEXT_PUBLIC_EZPAY_API_URL!,
+    cookieHeader,
+    applicationId: process.env.NEXT_PUBLIC_APPLICATION_ID,
+  })
+
+  return <BillingDashboard initialSubscription={initialSubscription ?? undefined} />
+}
+```
+
+The companions never throw — they return `null` on any error (network,
+non-2xx, parse) so a Server Component renders safely even when the API is
+down. The components fall back to their client fetch when `initial<X>` is
+omitted.
+
+| Companion                     | Returns                              | Bootstraps                                                                     |
+| ----------------------------- | ------------------------------------ | ------------------------------------------------------------------------------ |
+| `getServerPlans`              | `Plan[] \| null`                     | `<PricingPage initialPlans>`                                                   |
+| `getServerKeyConfig`          | `ApplicationConfigResponse \| null`  | resolved `applicationId` / `webUrl`                                            |
+| `getServerSubscriptionStatus` | `SubscriptionStatusSnapshot \| null` | `<BillingDashboard initialSubscription>` / `<PricingPage initialSubscription>` |
+
 ## Choosing your payment UX
 
 EZPay wraps **Stripe Checkout (hosted)** by default — that's the recommended pattern for 99% of use cases. Stripe Elements (embedded) is supported via direct Stripe SDK integration, but EZPay focuses on the hosted flow.
@@ -392,6 +463,13 @@ All user-facing strings are driven by the `texts` prop (English defaults provide
 - Types + Zod schemas (no React deps)
 - `StripeProvider`, `ConsoleProvider`, `PaymentProviderRegistry`
 - `verifyWebhookSignature({ provider, stripe, payload, signature, secret })` — provider-agnostic helper that wraps `stripe.webhooks.constructEvent` (today) and returns a normalised `WebhookEvent`. Throws on invalid signatures so handlers can return `400` directly.
+
+**SSR bootstrap companions** (Clerk / Stripe-style — see [Quickstart — Next.js SSR](#quickstart--nextjs-ssr-kill-the-loading-skeleton-flash)). All are `server-only`, take `{ apiUrl, ... }`, and return `null` on any error (never throw):
+
+- `getServerPlans({ apiUrl?, applicationId?, appName?, publishableKey?, active?, limit?, offset?, cookieHeader? })` — fetch active plans via `GET /api/plans`, sorted by `sortOrder`. Returns `Plan[] | null`. Bootstraps `<PricingPage initialPlans>`.
+- `getServerKeyConfig({ apiUrl?, publishableKey })` — resolve a publishable key via `GET /api/keys/config`. Returns `ApplicationConfigResponse | null` (`applicationId`, `appSlug`, `webUrl`, ...).
+- `getServerSubscriptionStatus({ apiUrl?, cookieHeader? | bearerToken?, userId?, applicationId?, skipPlanFeatures? })` — fetch the user's most recent subscription via `GET /api/subscriptions` (+ best-effort plan features) and derive a serializable `SubscriptionStatusSnapshot | null`. Bootstraps `<BillingDashboard initialSubscription>` / `<PricingPage initialSubscription>`.
+- `deriveSubscriptionStatus(payments, plans?)` / `EMPTY_SUBSCRIPTION_SNAPSHOT` — the pure derivation shared with the client `useSubscriptionStatus` hook.
 
 ```ts
 import Stripe from 'stripe'
