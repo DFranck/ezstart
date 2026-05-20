@@ -6,9 +6,15 @@
  *
  *   - {@link MAX_FAILED_LOGIN_ATTEMPTS} consecutive failures lock the account
  *     for {@link LOCKOUT_DURATION_MS}.
- *   - The next attempt while locked throws {@link AccountLockedError}, which
- *     the route layer maps to HTTP 423 with `code: 'ACCOUNT_LOCKED'`.
- *   - A successful login resets the counter and clears the lock.
+ *   - HIGH-2 (Wave D Lot 3.5A — COMPARE-FIRST): a WRONG-password attempt
+ *     ALWAYS returns the generic `'Invalid credentials'` (401) — even the Nth
+ *     attempt that trips the lock. {@link AccountLockedError} (mapped to HTTP
+ *     423) is thrown ONLY when the CORRECT password is presented on an account
+ *     that is currently locked. This closes the account-enumeration oracle:
+ *     reaching 423 requires valid credentials, so it can no longer be used to
+ *     distinguish a real account from a non-existent one.
+ *   - A successful login (within an unlocked window) resets the counter and
+ *     clears the lock.
  *   - The lockout window expires (next attempt after `lockedUntil` succeeds
  *     with the right password).
  *   - The sliding window {@link SLIDING_WINDOW_MS} resets the counter when
@@ -63,9 +69,11 @@ describe('Login — account-level brute force lockout', () => {
     await createUser({ email: EMAIL, username: USERNAME, password: PASSWORD })
   })
 
-  it('locks the account after MAX_FAILED_LOGIN_ATTEMPTS wrong-password attempts', async () => {
-    // Burn N-1 attempts — they all return generic 'Invalid credentials'.
-    for (let i = 0; i < MAX_FAILED_LOGIN_ATTEMPTS - 1; i++) {
+  it('locks the account after MAX_FAILED_LOGIN_ATTEMPTS wrong-password attempts (wrong pwd always 401, never 423)', async () => {
+    // HIGH-2 — EVERY wrong-password attempt (including the Nth that trips the
+    // lock) returns the generic 'Invalid credentials'. The lock is set in the
+    // DB but is NOT surfaced on a wrong-password attempt.
+    for (let i = 0; i < MAX_FAILED_LOGIN_ATTEMPTS; i++) {
       const res = await attemptLogin(WRONG_PASSWORD)
       expect(res.ok).toBe(false)
       if (!res.ok) {
@@ -74,32 +82,24 @@ describe('Login — account-level brute force lockout', () => {
       }
     }
 
-    // The Nth attempt triggers the lock — the throw is the AccountLockedError
-    // itself (the route returns 423 from this).
-    const locking = await attemptLogin(WRONG_PASSWORD)
-    expect(locking.ok).toBe(false)
-    if (!locking.ok) {
-      expect(locking.error).toBeInstanceOf(AccountLockedError)
-      expect((locking.error as AccountLockedError).code).toBe('ACCOUNT_LOCKED')
-      expect((locking.error as AccountLockedError).lockedUntil).toBeInstanceOf(Date)
-      expect((locking.error as AccountLockedError).retryAfterSeconds).toBeGreaterThan(0)
-    }
-
-    // Subsequent attempts (even with the RIGHT password) keep returning 423
-    // until the lockout expires.
-    const next = await attemptLogin(PASSWORD)
-    expect(next.ok).toBe(false)
-    if (!next.ok) {
-      expect(next.error).toBeInstanceOf(AccountLockedError)
-    }
-
-    // DB state: lockedUntil is in the future, counter has been reset to 0
-    // so the next window starts fresh after unlock.
+    // DB state: the Nth wrong attempt set `lockedUntil` in the future and reset
+    // the counter to 0 so the next window starts fresh after unlock.
     const AuthUser = await getAuthUserModel()
     const persisted = await AuthUser.findOne({ email: EMAIL })
     expect(persisted?.lockedUntil).toBeInstanceOf(Date)
     expect(persisted!.lockedUntil!.getTime()).toBeGreaterThan(Date.now())
     expect(persisted?.failedLoginAttempts).toBe(0)
+
+    // The lock is revealed ONLY when the CORRECT password is presented — this
+    // is the single place 423 can occur, and it requires valid credentials.
+    const withRightPassword = await attemptLogin(PASSWORD)
+    expect(withRightPassword.ok).toBe(false)
+    if (!withRightPassword.ok) {
+      expect(withRightPassword.error).toBeInstanceOf(AccountLockedError)
+      expect((withRightPassword.error as AccountLockedError).code).toBe('ACCOUNT_LOCKED')
+      expect((withRightPassword.error as AccountLockedError).lockedUntil).toBeInstanceOf(Date)
+      expect((withRightPassword.error as AccountLockedError).retryAfterSeconds).toBeGreaterThan(0)
+    }
   })
 
   it('writes an audit log entry when the account locks', async () => {
@@ -245,6 +245,52 @@ describe('Login — account-level brute force lockout', () => {
     const user = await AuthUser.findOne({ email: EMAIL })
     expect(user?.failedLoginAttempts ?? 0).toBe(0)
     expect(user?.lockedUntil).toBeFalsy()
+  })
+
+  it('HIGH-2: N wrong attempts on an EXISTING vs NON-EXISTENT account are indistinguishable (no enumeration oracle)', async () => {
+    // Existing account: every wrong attempt — including the Nth that locks —
+    // returns the generic 401 'Invalid credentials' (never 423).
+    const existingResults: string[] = []
+    for (let i = 0; i < MAX_FAILED_LOGIN_ATTEMPTS + 1; i++) {
+      const res = await attemptLogin(WRONG_PASSWORD)
+      expect(res.ok).toBe(false)
+      if (!res.ok) {
+        expect(res.error).not.toBeInstanceOf(AccountLockedError)
+        existingResults.push(res.error.message)
+      }
+    }
+
+    // Non-existent identifier: same number of attempts, same generic message.
+    const ghostResults: string[] = []
+    for (let i = 0; i < MAX_FAILED_LOGIN_ATTEMPTS + 1; i++) {
+      let caught: Error | null = null
+      try {
+        await AuthService.validateCredentials({
+          email: 'does-not-exist@example.com',
+          password: WRONG_PASSWORD,
+          app: 'ezstart',
+        })
+      } catch (error) {
+        caught = error as Error
+      }
+      expect(caught).not.toBeNull()
+      expect(caught).not.toBeInstanceOf(AccountLockedError)
+      ghostResults.push(caught!.message)
+    }
+
+    // The observable error surface is byte-for-byte identical between the two
+    // — no 423 leaks for the existing account, so an attacker cannot tell
+    // "real but locked" from "does not exist".
+    expect(existingResults.every(m => m === 'Invalid credentials')).toBe(true)
+    expect(ghostResults.every(m => m === 'Invalid credentials')).toBe(true)
+    expect(existingResults).toEqual(ghostResults)
+
+    // The 423 lock signal is reachable ONLY with the correct password.
+    const locked = await attemptLogin(PASSWORD)
+    expect(locked.ok).toBe(false)
+    if (!locked.ok) {
+      expect(locked.error).toBeInstanceOf(AccountLockedError)
+    }
   })
 
   it('AccountLockedError carries an actionable message + retryAfterSeconds', async () => {

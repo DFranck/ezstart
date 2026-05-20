@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 import { getAuthUserModel, AuthUserDocument } from '../models/auth-user.js'
 import { getAuthCodeModel } from '../models/auth-code.js'
 import {
@@ -27,9 +28,27 @@ import {
 } from '../config/lockout.js'
 import { AuditLogService } from './audit-log.service.js'
 import { TotpService } from './totp.service.js'
+import { assertPasswordStrength } from './password-policy.service.js'
 
 const ACCESS_TOKEN_EXPIRES_IN = env.ACCESS_TOKEN_EXPIRES_IN as `${number}m`
 const REFRESH_TOKEN_DAYS = 30
+
+/**
+ * MED-2 (Wave D Lot 3A) — constant dummy bcrypt hash used to equalize the
+ * response time of credential checks when the identifier does NOT exist.
+ *
+ * Without this, a non-existent account returns immediately (no bcrypt work)
+ * while an existing account incurs the ~hundreds-of-ms bcrypt compare. An
+ * attacker measuring that timing delta can enumerate which emails/usernames
+ * are registered. By running a throwaway `bcrypt.compare` against this hash
+ * we burn the same CPU on the miss path as on the hit path.
+ *
+ * The hash is of a random throwaway password generated at authoring time — it
+ * matches no real account and is never used to grant access. Cost factor 12
+ * mirrors the `bcrypt.genSalt(12)` used by the AuthUser pre-save hook so the
+ * compare takes the same wall-clock time as a real one.
+ */
+const DUMMY_BCRYPT_HASH = '$2a$12$pCBbNeZtb//laRE6gKE0muioZJWbgAnaZgPzeeh7hFhlPlxbCgKnG'
 
 /**
  * Thrown when an account is currently locked due to too many failed login
@@ -155,6 +174,13 @@ export class AuthService {
       throw new Error('User already exists with this email or username')
     }
 
+    // MED-1 — server-side password strength gate (zxcvbn score >= 3 + HIBP
+    // breach check). Runs AFTER the uniqueness check so we don't reveal
+    // timing about existing accounts via the (heavier) strength check, and
+    // BEFORE persisting so a weak/breached password is never hashed/stored.
+    // Penalize passwords derived from the user's own identity.
+    await assertPasswordStrength(data.password, [normalizedEmail, normalizedUsername])
+
     // Create new user
     const user = new AuthUserModel({
       email: normalizedEmail,
@@ -213,22 +239,35 @@ export class AuthService {
       $or: [{ email: identifier }, { username: identifier }],
     })
     if (!user) {
+      // MED-2 — run a throwaway bcrypt compare so the miss path costs the same
+      // wall-clock time as the hit path. Without this, a non-existent account
+      // returns instantly (no bcrypt) while a real account pays the bcrypt
+      // cost → timing side-channel that lets attackers enumerate accounts.
+      // Result is intentionally discarded.
+      await bcrypt.compare(data.password, DUMMY_BCRYPT_HASH)
       // Do NOT count toward any account counter — would leak existence.
       throw new Error('Invalid credentials')
     }
 
     const now = new Date()
 
-    // Already locked? Reject before doing the bcrypt compare so we don't
-    // burn CPU on a known-locked account.
-    if (user.lockedUntil && user.lockedUntil.getTime() > now.getTime()) {
-      throw new AccountLockedError(user.lockedUntil)
-    }
-
+    // HIGH-2 (Wave D Lot 3.5A) — COMPARE-FIRST to kill the account-enumeration
+    // oracle. The previous code checked `lockedUntil` BEFORE the bcrypt compare,
+    // so a locked (hence existing) account returned 423 in ~0ms while a
+    // non-existent identifier returned 401 after a full bcrypt — a reliable
+    // binary existence oracle (lock 6 attempts, then read 423 vs 401).
+    //
+    // Now we ALWAYS run exactly one real bcrypt compare first (uniform timing,
+    // single compare per attempt). The 423 "locked" signal is revealed ONLY
+    // when the password is CORRECT — which an attacker cannot reach without the
+    // credentials, so it can no longer be used to enumerate accounts.
     const isValidPassword = await user.comparePassword(data.password)
+
     if (!isValidPassword) {
-      // Sliding window: a stale failure (older than the window) resets the
-      // counter to 1 instead of stacking forever.
+      // Wrong password. Apply the lockout bookkeeping but ALWAYS return a
+      // generic 401 — NEVER 423 here, even if THIS attempt just tripped the
+      // lock. Surfacing 423 on a wrong-password attempt would re-open the
+      // enumeration oracle (only existing accounts can lock).
       const last = user.lastFailedLoginAt
       const withinWindow =
         last instanceof Date && now.getTime() - last.getTime() < SLIDING_WINDOW_MS
@@ -247,7 +286,9 @@ export class AuthService {
         await user.save()
 
         // Fire-and-forget audit log entry. Failure must NEVER block the
-        // response (the user already gets 423 from the throw below).
+        // response. NOTE: we DON'T throw AccountLockedError here — a wrong
+        // password always returns the generic 401 below. The lock takes effect
+        // for the NEXT attempt that presents the correct password.
         void AuditLogService.create({
           userId: user._id!.toString(),
           action: 'account_locked_brute_force',
@@ -259,20 +300,28 @@ export class AuthService {
             failedAttempts: MAX_FAILED_LOGIN_ATTEMPTS,
           },
         })
-
-        throw new AccountLockedError(lockedUntil)
+      } else {
+        user.failedLoginAttempts = newAttempts
+        await user.save()
       }
 
-      user.failedLoginAttempts = newAttempts
-      await user.save()
-
-      // Provide a more helpful message for quick-signup users who never set a password
+      // Generic 401 for every wrong-password path. The "no password set" hint
+      // is intentionally only given on a wrong-password attempt for a
+      // quick-signup account that exists; this matches the prior UX and does
+      // not create a stronger oracle than already exists (a 401 either way) —
+      // it merely helps a legitimate user who forgot they used Google sign-in.
       if (!user.hasSetOwnPassword) {
         throw new Error(
           "You haven't set a password yet. Use Google sign-in or click Forgot Password."
         )
       }
       throw new Error('Invalid credentials')
+    }
+
+    // Password is CORRECT. NOW — and only now — is it safe to reveal a lock,
+    // because reaching this branch requires valid credentials.
+    if (user.lockedUntil && user.lockedUntil.getTime() > now.getTime()) {
+      throw new AccountLockedError(user.lockedUntil)
     }
 
     // Successful login — reset the lockout counter and clear any expired
@@ -310,30 +359,28 @@ export class AuthService {
     data: LoginRequest,
     meta?: { userAgent?: string; ip?: string }
   ): Promise<AuthToken & { refreshToken: string }> {
-    const AuthUserModel = await getAuthUserModel()
-
-    // Find user by email OR username (`email` field accepts either)
-    const identifier = data.email.trim().toLowerCase()
-    const user = await AuthUserModel.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
+    // HIGH-2 (Wave D Lot 3.5A) — delegate to `validateCredentials` so the
+    // cookie-login path shares the EXACT hardened logic: one constant-time
+    // bcrypt compare (compare-first), the same brute-force lockout bookkeeping,
+    // and the same enumeration-safe error surface (generic 401 on wrong
+    // password, `AccountLockedError`/423 ONLY when the correct password is
+    // presented on a locked account). Previously this method ran its own
+    // unguarded compare with no lockout and no compare-first ordering — a
+    // second, weaker code path that re-opened the timing/lock oracle.
+    const userId = await this.validateCredentials(data, {
+      ip: meta?.ip ?? null,
+      userAgent: meta?.userAgent ?? null,
     })
 
+    const AuthUserModel = await getAuthUserModel()
+    const user = await AuthUserModel.findById(userId)
     if (!user) {
+      // Should be unreachable — validateCredentials just resolved this id.
       throw new Error('Invalid credentials')
     }
 
-    // Check password
-    const isValidPassword = await user.comparePassword(data.password)
-    if (!isValidPassword) {
-      throw new Error('Invalid credentials')
-    }
-
-    // Check if user has access to the app
-    if (!user.apps.includes(data.app)) {
-      user.apps.push(data.app)
-      await user.save()
-    }
-
+    // `validateCredentials` already grants app access + persists on success,
+    // so the app membership is guaranteed here; no extra save needed.
     return issueSession(user, meta)
   }
 

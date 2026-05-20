@@ -22,11 +22,17 @@ describe('AuthService', () => {
   })
 
   describe('register', () => {
+    // MED-1 (Wave D Lot 3A) — `AuthService.register` now runs the server-side
+    // password-strength gate (zxcvbn score >= 3). HIBP is skipped under
+    // NODE_ENV=test. Use a high-entropy, non-identity-derived password so the
+    // gate passes and we exercise the registration logic, not the gate.
+    const STRONG_PASSWORD = 'qZ7!vBn3kLp2xWm'
+
     it('should register a new user and return auth code', async () => {
       const result = await AuthService.register({
         email: 'newuser@example.com',
         username: 'newuser',
-        password: 'Password123!',
+        password: STRONG_PASSWORD,
         app: 'ezstart',
       })
 
@@ -42,7 +48,7 @@ describe('AuthService', () => {
         AuthService.register({
           email: 'taken@example.com',
           username: 'user2',
-          password: 'Password123!',
+          password: STRONG_PASSWORD,
           app: 'ezstart',
         })
       ).rejects.toThrow('User already exists')
@@ -55,10 +61,24 @@ describe('AuthService', () => {
         AuthService.register({
           email: 'user2@example.com',
           username: 'takenname',
-          password: 'Password123!',
+          password: STRONG_PASSWORD,
           app: 'ezstart',
         })
       ).rejects.toThrow('User already exists')
+    })
+
+    // MED-1 — explicit coverage that the strength gate rejects a weak
+    // password at registration with a WeakPasswordError (zxcvbn score < 3).
+    it('should reject a weak password with WeakPasswordError', async () => {
+      const { WeakPasswordError } = await import('../../services/password-policy.service.js')
+      await expect(
+        AuthService.register({
+          email: 'weakpw@example.com',
+          username: 'weakpwuser',
+          password: 'Password123!', // zxcvbn score 1 — below the floor of 3
+          app: 'ezstart',
+        })
+      ).rejects.toBeInstanceOf(WeakPasswordError)
     })
   })
 
