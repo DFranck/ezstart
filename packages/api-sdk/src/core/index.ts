@@ -11,6 +11,7 @@ export { createApiCall } from './api-call.js'
 export { ApiError } from './api-error.js'
 export { createApiClient } from './create-client.js'
 export type { ApiClient } from './create-client.js'
+export { fetchExternal } from './fetch-external.js'
 export { parseApiError, parseApiErrorCode, parseRetryAfter } from './parse-api-error.js'
 export { createApiStream } from './stream.js'
 

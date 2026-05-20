@@ -32,9 +32,6 @@
  * - `fetchExternal` provides an explicit escape hatch for 3rd-party APIs.
  */
 
-import { ApiError } from './core/api-error.js'
-import { parseApiError, parseApiErrorCode } from './core/parse-api-error.js'
-
 // ---------------------------------------------------------------------------
 // Core — framework-agnostic primitives
 // ---------------------------------------------------------------------------
@@ -42,6 +39,10 @@ export { createApiCall } from './core/api-call.js'
 export { ApiError } from './core/api-error.js'
 export { createApiClient } from './core/create-client.js'
 export type { ApiClient } from './core/create-client.js'
+// `fetchExternal` lives in `core/` (server-safe, zero React) and is re-exported
+// here for the root entry point. Server-side consumers SHOULD import it from
+// `@ezstart/api-sdk/core` to avoid pulling the React Query re-exports below.
+export { fetchExternal } from './core/fetch-external.js'
 export { parseApiError, parseApiErrorCode, parseRetryAfter } from './core/parse-api-error.js'
 export { createApiStream } from './core/stream.js'
 export type {
@@ -112,52 +113,3 @@ export {
   isSuccessResponse,
   PaginationQuerySchema,
 } from '@ezstart/api-contracts'
-
-/**
- * Explicit helper for calling third-party HTTP APIs (GitHub, npm, etc.).
- *
- * Unlike `apiCall`:
- * - does NOT inject auth tokens,
- * - does NOT resolve URLs via `@ezstart/config`,
- * - does NOT unwrap `{ success, data }` envelopes.
- *
- * It is the supported alternative to raw `fetch()` — a future lint rule
- * will forbid raw `fetch` outside `packages/api-sdk` to prevent bypass.
- *
- * @throws {ApiError} on non-2xx responses or network failures.
- *
- * @example
- * ```ts
- * const repo = await fetchExternal<GitHubRepo>('https://api.github.com/repos/vercel/next.js')
- * ```
- */
-export async function fetchExternal<T = unknown>(url: string, init?: RequestInit): Promise<T> {
-  let res: Response
-  try {
-    res = await fetch(url, init)
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Network request failed'
-    throw new ApiError(message, { status: 0, code: 'NETWORK_ERROR' })
-  }
-
-  const text = await res.text()
-  let parsed: unknown = null
-  if (text.length > 0) {
-    try {
-      parsed = JSON.parse(text)
-    } catch {
-      parsed = text
-    }
-  }
-
-  if (!res.ok) {
-    const message = parseApiError(parsed) ?? `External request failed with status ${res.status}`
-    throw new ApiError(message, {
-      status: res.status,
-      code: parseApiErrorCode(parsed),
-      data: parsed,
-    })
-  }
-
-  return parsed as T
-}

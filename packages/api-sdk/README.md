@@ -100,7 +100,6 @@ Drop-in third-party service wrappers from `@ezstart/api-sdk/integrations`.
 ```tsx
 'use client'
 import { TurnstileWidget } from '@ezstart/api-sdk/integrations'
-
 ;<TurnstileWidget
   siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''}
   onVerify={token => console.log('verified', token)}
@@ -154,7 +153,14 @@ api.queryKey('/items', { page: 1 }) // for invalidation
 
 Explicit escape hatch for 3rd-party APIs. No auth injection, no URL resolution, no envelope unwrap — just `fetch` + JSON parse + `ApiError` on non-2xx.
 
+Exported from both the root and the `./core` entry point. In a server context
+(no React peer deps installed), import from `./core` to avoid pulling the
+root's static React Query re-exports:
+
 ```ts
+// Server-side (Node API, no React): import from /core
+import { fetchExternal } from '@ezstart/api-sdk/core'
+
 const repo = await fetchExternal<Repo>('https://api.github.com/repos/vercel/next.js')
 ```
 

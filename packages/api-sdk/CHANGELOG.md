@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `fetchExternal` is now also exported from the `./core` entry point
+  (`@ezstart/api-sdk/core`). Server-side consumers SHOULD import it from
+  `/core` rather than the root: the root entry statically re-exports React
+  Query (a `react` / `@tanstack/react-query` peer dep), which can trigger
+  `ERR_MODULE_NOT_FOUND` on a `--frozen-lockfile` install that omits the
+  React peers (e.g. an API service deployed on Railway). The root export is
+  retained unchanged for backward compatibility — this is strictly additive.
+
 ## [1.0.0] - 2026-05-17
 
 Inaugural public release. First version published to npm.
