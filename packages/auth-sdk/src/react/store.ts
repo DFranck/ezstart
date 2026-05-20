@@ -1,71 +1,21 @@
 'use client'
 
-import { create, type StoreApi, type UseBoundStore } from 'zustand'
-import { persist } from 'zustand/middleware'
-import type { AuthMode, AuthUser } from '../core/types.js'
+import type { StoreApi, UseBoundStore } from 'zustand'
+import type { AuthUser } from '../core/types.js'
+import { attachCrossTabSync, REFETCH_DEBOUNCE_MS } from './store/broadcast.js'
+import { createBaseAuthStore, type AuthState } from './store/state.js'
 
-export interface AuthState {
-  user: AuthUser | null
-  accessToken: string | null
-  refreshToken: string | null
-  isAuthenticated: boolean
-  mode: AuthMode
-  isLoggingIn: boolean
-  isLoggingOut: boolean
-  isAuthReady: boolean
+// Re-export the state shape so `import { AuthState } from './store.js'` keeps
+// working unchanged (consumers + tests rely on this exact path).
+export type { AuthState }
 
-  // Actions
-  setAuth: (user: AuthUser, accessToken?: string, mode?: AuthMode, refreshToken?: string) => void
-  setTokens: (accessToken: string, refreshToken: string) => void
-  logout: () => void
-  updateUser: (user: AuthUser) => void
-  getMode: () => AuthMode
-  setLoggingIn: (isLoggingIn: boolean) => void
-  setLoggingOut: (isLoggingOut: boolean) => void
-}
+// Re-export the broadcast signal envelope + type guard. Tests import
+// `isBroadcastMessage` / `BroadcastMessage` directly from `./store.js`.
+export { isBroadcastMessage } from './store/broadcast.js'
+export type { BroadcastMessage } from './store/broadcast.js'
 
 const DEFAULT_STORAGE_KEY = 'ezauth-storage'
 const DEFAULT_BROADCAST_CHANNEL = 'ezauth-sync'
-
-/** Minimum interval (ms) between two server re-fetches triggered by a broadcast. */
-const REFETCH_DEBOUNCE_MS = 1000
-
-/**
- * Cross-tab broadcast message envelope. **Signal-only** by design — no
- * user/token payload is ever trusted from the wire (threat-model
- * HAC-HIGH-1, audited 2026-05-17): a malicious extension, an XSS payload
- * on a sibling app sharing the same root origin, or any other process
- * that can call `postMessage` on the BroadcastChannel must NOT be able
- * to inject `{ type: 'LOGIN', user: { roles: ['superadmin'] } }` and
- * elevate the privileges of every open tab.
- *
- * The receive-side treats `LOGIN` / `TOKEN_REFRESH` / `USER_UPDATED` as
- * a "hey, something changed — go check with the server" hint, then
- * re-fetches the authoritative user via the provided `fetchMe` callback
- * (typically `() => client.getCurrentUser()` which hits `/api/auth/me`).
- * The server remains the single source of truth — an attacker who can
- * spoof a broadcast still can't make the server lie.
- */
-export type BroadcastMessage =
-  | { type: 'LOGIN' }
-  | { type: 'LOGOUT' }
-  | { type: 'TOKEN_REFRESH' }
-  | { type: 'USER_UPDATED' }
-
-/**
- * Type guard — accept only the known signal envelopes. Anything else
- * (unknown `type`, non-object payload, `null`, strings, arrays…) is
- * dropped silently. Forward-compatibility: a newer SDK version emitting
- * a future message type will be ignored by an older receiver instead of
- * crashing.
- */
-export function isBroadcastMessage(data: unknown): data is BroadcastMessage {
-  if (!data || typeof data !== 'object') return false
-  const type = (data as { type?: unknown }).type
-  return (
-    type === 'LOGIN' || type === 'LOGOUT' || type === 'TOKEN_REFRESH' || type === 'USER_UPDATED'
-  )
-}
 
 export interface CreateAuthStoreOptions {
   /**
@@ -144,111 +94,7 @@ export function createAuthStore(options: CreateAuthStoreOptions = {}): AuthStore
     refetchDebounceMs = REFETCH_DEBOUNCE_MS,
   } = options
 
-  const baseStore = create<AuthState>()(
-    persist(
-      (set, get) => ({
-        user: initialUser,
-        accessToken: null,
-        refreshToken: null,
-        isAuthenticated: !!initialUser,
-        mode: 'localStorage', // Will be auto-detected on first use
-        isLoggingIn: false,
-        isLoggingOut: false,
-        isAuthReady: !!initialUser,
-
-        setAuth: (
-          user: AuthUser,
-          accessToken?: string,
-          mode: AuthMode = 'localStorage',
-          refreshToken?: string
-        ) => {
-          set({
-            user,
-            accessToken: mode === 'localStorage' ? (accessToken ?? null) : null,
-            // In httpOnly mode the refresh token lives in a server-side cookie;
-            // never hold it in JS memory or localStorage.
-            refreshToken: mode === 'localStorage' ? (refreshToken ?? null) : null,
-            isAuthenticated: true,
-            mode,
-            isLoggingIn: false,
-          })
-        },
-
-        setTokens: (accessToken: string, refreshToken: string) => {
-          set(state => ({
-            ...state,
-            accessToken: state.mode === 'localStorage' ? accessToken : null,
-            refreshToken: state.mode === 'localStorage' ? refreshToken : null,
-          }))
-        },
-
-        logout: () => {
-          set({
-            user: null,
-            accessToken: null,
-            refreshToken: null,
-            isAuthenticated: false,
-            isLoggingOut: false,
-            mode: 'localStorage', // Reset to default
-          })
-        },
-
-        updateUser: (user: AuthUser) => {
-          set(state => ({
-            ...state,
-            user,
-          }))
-        },
-
-        getMode: () => get().mode,
-
-        setLoggingIn: (isLoggingIn: boolean) => {
-          set({ isLoggingIn })
-        },
-
-        setLoggingOut: (isLoggingOut: boolean) => {
-          set({ isLoggingOut })
-        },
-      }),
-      {
-        name: storageKey,
-        partialize: state => ({
-          user: state.user,
-          // Only persist accessToken in localStorage mode.
-          accessToken: state.mode === 'localStorage' ? state.accessToken : null,
-          // httpOnly mode stores the refresh token in a server-side cookie — NEVER
-          // mirror it to localStorage (XSS would otherwise hand an attacker a
-          // long-lived credential).
-          refreshToken: state.mode === 'localStorage' ? state.refreshToken : null,
-          isAuthenticated: state.isAuthenticated,
-          mode: state.mode,
-        }),
-        onRehydrateStorage: () => rehydratedState => {
-          // Mark auth as ready after zustand rehydrates from localStorage.
-          // Also ensure isAuthenticated is true if the user was already authenticated
-          // (covers edge cases where the callback fires late or not at all).
-          //
-          // Important: if `initialUser` was provided to the factory, the store
-          // already booted with `isAuthReady: true` and a user. The persist
-          // middleware will overwrite that with whatever is in localStorage —
-          // which in httpOnly mode is empty and would clobber the SSR user.
-          // Restore from initialUser when the rehydrated payload is empty.
-          baseStore.setState(prev => ({
-            ...prev,
-            isAuthReady: true,
-            ...(rehydratedState?.isAuthenticated && rehydratedState?.user
-              ? { isAuthenticated: true }
-              : initialUser && !rehydratedState?.user
-                ? {
-                    user: initialUser,
-                    isAuthenticated: true,
-                  }
-                : {}),
-          }))
-        },
-      }
-    )
-  )
+  const baseStore = createBaseAuthStore({ initialUser, storageKey })
 
   // ── Cross-tab/cross-app synchronization ───────────────────────────────
   //
@@ -266,129 +112,11 @@ export function createAuthStore(options: CreateAuthStoreOptions = {}): AuthStore
   // forge `{ type: 'LOGIN', user: { roles: ['superadmin'] } }` and
   // elevate every open tab's privileges, because the server is the
   // single source of truth. See {@link BroadcastMessage}.
-  let cleanupChannel: (() => void) | null = null
-  if (
-    typeof window !== 'undefined' &&
-    broadcastChannel !== false &&
-    typeof BroadcastChannel !== 'undefined'
-  ) {
-    const authChannel = new BroadcastChannel(broadcastChannel)
-
-    // Capture the unwrapped actions BEFORE the wrappers replace them.
-    // The broadcast handler MUST use these unwrapped versions when it
-    // applies the server-fetched user — calling the wrapped `setAuth`
-    // from the receive-side would re-emit a LOGIN broadcast and create
-    // an infinite ping-pong between every connected tab.
-    const originalSetAuth = baseStore.getState().setAuth
-    const originalLogout = baseStore.getState().logout
-
-    // Debounce re-fetches so an attacker spamming broadcast messages
-    // cannot DoS the auth API. A single timer is enough — we only ever
-    // need to know "the server state may have changed, sync again".
-    let lastRefetchAt = 0
-    let refetchInFlight = false
-
-    const refetchAndApply = async () => {
-      if (!fetchMe) return
-      const now = Date.now()
-      if (now - lastRefetchAt < refetchDebounceMs) return
-      if (refetchInFlight) return
-      lastRefetchAt = now
-      refetchInFlight = true
-      try {
-        const user = await fetchMe()
-        if (user) {
-          // Re-use the store's current mode + tokens — the broadcast does
-          // not (and must not) carry credentials. In httpOnly mode the
-          // refresh flow happens server-side via the cookie; in
-          // localStorage mode the access/refresh tokens already live in
-          // this tab's state (a true cross-tab login requires the user
-          // to re-login here too — broadcast is a hint, not a token
-          // transport).
-          //
-          // Use the UNWRAPPED `originalSetAuth` — calling the wrapped
-          // version would re-broadcast LOGIN to every peer tab and
-          // trigger an infinite ping-pong.
-          const current = baseStore.getState()
-          originalSetAuth(
-            user,
-            current.accessToken ?? undefined,
-            current.mode,
-            current.refreshToken ?? undefined
-          )
-        } else {
-          // Server says "no session" → reset state. Use the unwrapped
-          // logout for the same reason — we don't want to bounce a
-          // LOGOUT signal back to the peer that triggered the re-fetch.
-          originalLogout()
-        }
-      } catch {
-        // Best-effort: a transient network blip must never log the user
-        // out. Keep the current local state; the next broadcast (or the
-        // provider's periodic `verifyToken` tick) will retry.
-      } finally {
-        refetchInFlight = false
-      }
-    }
-
-    authChannel.onmessage = (event: MessageEvent<unknown>) => {
-      const data = event.data
-      if (!isBroadcastMessage(data)) {
-        // Unknown / spoofed / malformed payloads are silently dropped.
-        return
-      }
-      if (data.type === 'LOGOUT') {
-        // LOGOUT is the only signal safe to act on without a server
-        // round-trip: a malicious LOGOUT broadcast can only DENY service
-        // (the worst it does is log the user out of the current tab),
-        // never escalate privileges. The peer tab that emitted LOGOUT
-        // has already called POST /api/auth/logout server-side, so any
-        // subsequent fetch would 401 anyway.
-        //
-        // Use the UNWRAPPED `originalLogout` to avoid re-broadcasting
-        // LOGOUT to peers (the originator already sent it).
-        originalLogout()
-        return
-      }
-      // LOGIN / TOKEN_REFRESH / USER_UPDATED → re-fetch authoritative state.
-      void refetchAndApply()
-    }
-
-    // Wrap setAuth/logout to broadcast SIGNAL-ONLY envelopes to other
-    // tabs/apps. The user/token payload is deliberately omitted from
-    // the wire — peer tabs re-fetch from the server (see onmessage
-    // above). The postMessage calls are guarded with try/catch because
-    // the channel can close out from under us (HMR rebuild, React
-    // StrictMode double-mount cleanup, browser navigation tearing down
-    // the previous tree). The local store mutation has already happened;
-    // failing to broadcast is non-fatal.
-    let channelOpen = true
-
-    const safePost = (message: BroadcastMessage) => {
-      if (!channelOpen) return
-      try {
-        authChannel.postMessage(message)
-      } catch {
-        channelOpen = false
-      }
-    }
-
-    baseStore.setState({
-      setAuth: (user, accessToken, mode, refreshToken) => {
-        originalSetAuth(user, accessToken, mode, refreshToken)
-        safePost({ type: 'LOGIN' })
-      },
-      logout: () => {
-        originalLogout()
-        safePost({ type: 'LOGOUT' })
-      },
-    })
-
-    cleanupChannel = () => {
-      channelOpen = false
-      authChannel.close()
-    }
-  }
+  const cleanupChannel = attachCrossTabSync(baseStore, {
+    broadcastChannel,
+    fetchMe,
+    refetchDebounceMs,
+  })
 
   // Wrap the bound hook with the `__cleanup` augmentation. The persist
   // middleware extends the store type at the value level, but for the
