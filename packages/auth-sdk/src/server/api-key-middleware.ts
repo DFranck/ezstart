@@ -57,11 +57,12 @@
 
 import './_internal/server-only.js'
 
-import type { NextFunction, Request, RequestHandler, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import {
   hashApiKey as defaultHashApiKey,
   detectKeyFormat as defaultDetectKeyFormat,
 } from '../core/api-keys-crypto.js'
+import { createApiKeyHandler } from './_internal/api-key-handler.js'
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -188,61 +189,12 @@ export interface ApiKeyMiddleware {
 }
 
 // ---------------------------------------------------------------------------
-// Internal — envelope (mirrors `@ezstart/api-core` `sendError` shape)
+// Internal helpers extracted to `./_internal/` (Wave D Lot 4):
+//   - error-envelope.ts   → sendErrorEnvelope + ErrorOptions (shared)
+//   - usage-window.ts     → month/day/seconds helpers (shared)
+//   - api-key-handler.ts  → createApiKeyHandler(ctx) — the request handler
+// All behaviour unchanged.
 // ---------------------------------------------------------------------------
-
-interface ErrorOptions {
-  code?: string
-  details?: unknown
-  retryAfter?: number
-}
-
-function sendErrorEnvelope(
-  res: Response,
-  message: string,
-  status: number,
-  opts: ErrorOptions = {}
-): void {
-  const error: { message: string; code?: string; details?: unknown; retryAfter?: number } = {
-    message,
-  }
-  if (opts.code !== undefined) error.code = opts.code
-  if (opts.details !== undefined) error.details = opts.details
-  if (opts.retryAfter !== undefined) error.retryAfter = opts.retryAfter
-  if (!res.headersSent) {
-    res.status(status).json({ success: false, error })
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Pure helpers
-// ---------------------------------------------------------------------------
-
-function getCurrentMonthPrefix(): string {
-  return new Date().toISOString().slice(0, 7)
-}
-
-function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function getSecondsUntilNextMonth(): number {
-  const now = new Date()
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-  return Math.ceil((nextMonth.getTime() - now.getTime()) / 1000)
-}
-
-function extractApiKeyHeader(req: Request): string | undefined {
-  const xApiKey = req.headers['x-api-key']
-  if (typeof xApiKey === 'string' && xApiKey.length > 0) {
-    return xApiKey
-  }
-  const authHeader = req.headers.authorization
-  if (authHeader && authHeader.startsWith('ApiKey ')) {
-    return authHeader.substring(7)
-  }
-  return undefined
-}
 
 // ---------------------------------------------------------------------------
 // Factory
@@ -287,127 +239,19 @@ export function createApiKeyMiddleware<TKey extends ApiKeyShape = ApiKeyShape>(
 
   // Per-factory monthly quota cache. Each instance has its own cache so
   // multiple factories (rare) don't share state. Tests can pass
-  // `cacheTtlMs: 0` to disable caching entirely.
+  // `cacheTtlMs: 0` to disable caching entirely. The handler closes over
+  // this exact Map instance (see `./_internal/api-key-handler.ts`), so the
+  // `.reset()` augmentation below clears the same state the handler reads.
   const usageCache = new Map<string, { total: number; expiry: number }>()
 
-  async function getMonthlyUsage(apiKeyId: string): Promise<number> {
-    const monthPrefix = getCurrentMonthPrefix()
-    const cacheKey = `${apiKeyId}:${monthPrefix}`
-    if (cacheTtlMs > 0) {
-      const cached = usageCache.get(cacheKey)
-      if (cached && cached.expiry > Date.now()) return cached.total
-    }
-    const ApiKeyUsage = await config.getUsageModel()
-    const result = await ApiKeyUsage.aggregate<{ total: number }>([
-      { $match: { apiKeyId, date: { $regex: `^${monthPrefix}` } } },
-      { $group: { _id: null, total: { $sum: '$requestCount' } } },
-    ])
-    const total = result[0]?.total ?? 0
-    if (cacheTtlMs > 0) {
-      usageCache.set(cacheKey, { total, expiry: Date.now() + cacheTtlMs })
-    }
-    return total
-  }
-
-  function incrementCachedUsage(apiKeyId: string): void {
-    if (cacheTtlMs <= 0) return
-    const monthPrefix = getCurrentMonthPrefix()
-    const cached = usageCache.get(`${apiKeyId}:${monthPrefix}`)
-    if (cached) cached.total += 1
-  }
-
-  const handler = async function validateApiKeyMiddleware(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const rawKey = extractApiKeyHeader(req)
-      if (!rawKey) {
-        sendErrorEnvelope(res, 'API key required', 401)
-        return
-      }
-
-      // Warn on legacy ezk_* keys still in the wild — keep the deadline
-      // aligned with standard-saas-keys.md (2026-07-21).
-      const format = detectFormat(rawKey)
-      if (format?.isLegacy) {
-        log.warn('Legacy ezk_* key detected, please rotate to ez_pk_/ez_sk_ by 2026-07-21', {
-          keyPrefix: rawKey.substring(0, 15),
-        })
-      }
-
-      const hashedKey = hash(rawKey)
-      const ApiKey = await config.getKeyModel()
-      const apiKey = await ApiKey.findOne({ key: hashedKey }).lean()
-
-      if (!apiKey) {
-        sendErrorEnvelope(res, 'Invalid API key', 401)
-        return
-      }
-      if (apiKey.status !== 'active') {
-        sendErrorEnvelope(res, 'API key has been revoked', 401)
-        return
-      }
-      if (apiKey.expiresAt && new Date(apiKey.expiresAt) < new Date()) {
-        sendErrorEnvelope(res, 'API key has expired', 401)
-        return
-      }
-
-      const keyId = typeof apiKey._id === 'string' ? apiKey._id : apiKey._id.toString()
-      const quota = apiKey.quotaMonthly
-      if (quota !== null && quota !== undefined) {
-        const used = await getMonthlyUsage(keyId)
-        if (used >= quota) {
-          sendErrorEnvelope(res, 'Monthly quota exceeded', 429, {
-            code: 'QUOTA_EXCEEDED',
-            details: { quota, used },
-            retryAfter: getSecondsUntilNextMonth(),
-          })
-          return
-        }
-      }
-
-      // Hand off to the per-app populator BEFORE firing bookkeeping so
-      // any synchronous validation it performs can short-circuit cleanly
-      // (the try/catch around the body will surface a 500 if it throws).
-      config.populateRequest(req, apiKey)
-
-      // Fire-and-forget: bump lastUsedAt on the key.
-      ApiKey.updateOne({ _id: apiKey._id }, { $set: { lastUsedAt: new Date() } }).catch(
-        (err: unknown) => {
-          log.warn('Failed to update API key lastUsedAt:', err)
-        }
-      )
-
-      // Fire-and-forget: increment per-day usage bucket.
-      const today = getTodayDate()
-      const sanitizedPath = req.path.replace(/[.$]/g, '_')
-      void config
-        .getUsageModel()
-        .then(ApiKeyUsage =>
-          ApiKeyUsage.updateOne(
-            { apiKeyId: keyId, date: today },
-            {
-              $inc: { requestCount: 1, [`endpoints.${sanitizedPath}`]: 1 },
-              $setOnInsert: { userId: apiKey.userId },
-            },
-            { upsert: true }
-          )
-        )
-        .then(() => {
-          incrementCachedUsage(keyId)
-        })
-        .catch(() => {
-          // Silent fail — usage tracking is best-effort.
-        })
-
-      next()
-    } catch (error: unknown) {
-      log.error('API key middleware error:', error)
-      sendErrorEnvelope(res, 'API key authentication failed', 500)
-    }
-  }
+  const handler = createApiKeyHandler<TKey>({
+    config,
+    hash,
+    detectFormat,
+    cacheTtlMs,
+    usageCache,
+    log,
+  })
 
   const middleware = handler as ApiKeyMiddleware
 
