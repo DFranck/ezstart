@@ -101,9 +101,12 @@ function buildResubscribeUrl(projectId: string): string {
  * Send the past-due dunning email AND drop a persistent banner notification
  * the SDK `<PastDueBanner>` will surface until `payment_recovery` resolves.
  *
- * Idempotency at the webhook layer (Stripe `event.id` dedup) is sufficient
- * — the underlying side-effects here (email send, notification insert,
- * audit log) are safe to repeat in the rare race-condition scenario.
+ * Idempotency is enforced at the webhook layer: `routes/webhooks.ts` claims
+ * each Stripe `event.id` in the `WebhookEvent` ledger (atomic insert, unique
+ * index) BEFORE dispatching here, so a redelivered event short-circuits to a
+ * 200 no-op and never reaches this function twice. The underlying side-effects
+ * (email send, notification insert, audit log) are additionally safe to repeat
+ * in the rare cross-process race that slips past the gate.
  */
 export async function handlePastDue(args: PastDueArgs): Promise<void> {
   const ctx = buildEmailContext()

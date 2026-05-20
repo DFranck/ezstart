@@ -1,8 +1,10 @@
+import { randomUUID } from 'node:crypto'
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError } from '@ezstart/api-core'
 import { getProvider } from '../services/stripe.js'
 import { getPaymentModel } from '../models/Payment.js'
 import { getPlanModel } from '../models/Plan.js'
+import { claimWebhookEvent } from '../models/WebhookEvent.js'
 import { incrementUsage } from '../services/promo.js'
 import {
   notifyEzauthSubscription,
@@ -49,7 +51,12 @@ function mapStripeStatusToEzauth(
  * Extract Stripe event id from the provider-wrapped `WebhookEvent`. The
  * pay-sdk Stripe provider exposes the raw Stripe event under `event.raw`,
  * from which we pull the `id` field. Returns `null` if the shape is
- * unexpected so callers can skip idempotent side-effects cleanly.
+ * unexpected.
+ *
+ * Used for (1) the idempotency claim — the `event.id` is the dedup key that
+ * guarantees each delivery is processed exactly once — and (2) the
+ * cross-service ezauth notification, which forwards `stripeEventId` so the
+ * receiver can dedup its own grant side-effects.
  */
 function extractStripeEventId(raw: unknown): string | null {
   if (typeof raw !== 'object' || raw === null) return null
@@ -72,6 +79,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
   let event
 
   try {
+    // Signature verification is timing-safe: the Stripe SDK
+    // (`stripe.webhooks.constructEvent`, see pay-sdk StripeProvider) computes
+    // the HMAC and compares it with a constant-time `crypto.timingSafeEqual`.
+    // We NEVER compare signatures with `===` ourselves.
     event = provider.verifyWebhookSignature(req.body, sig)
   } catch (err) {
     logger.error('Webhook signature verification failed:', err instanceof Error ? err : String(err))
@@ -80,6 +91,41 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
   // Extract livemode from webhook event
   const eventLiveMode = event.livemode ?? false
+
+  // Idempotency gate — claim the Stripe event id BEFORE running any
+  // side-effect. Stripe delivers at-least-once (retries on non-2xx + manual
+  // "Resend" in the dashboard), so the same `event.id` can arrive multiple
+  // times. The first claim wins; every subsequent delivery short-circuits to
+  // a 200 no-op, preventing double promo burns and duplicate renewal Payments.
+  const idempotencyKey = extractStripeEventId(event.raw)
+  if (idempotencyKey) {
+    let firstSeen: boolean
+    try {
+      firstSeen = await claimWebhookEvent(idempotencyKey, {
+        provider: 'stripe',
+        eventType: event.type,
+      })
+    } catch (claimErr) {
+      // The idempotency store is unreachable. Do NOT process blindly (would
+      // re-run side-effects on the next retry) and do NOT ack — let Stripe
+      // retry once the store recovers.
+      logger.error(
+        'Webhook idempotency claim failed (store unreachable) — asking Stripe to retry:',
+        claimErr instanceof Error ? claimErr : String(claimErr)
+      )
+      return sendError(res, 'Idempotency store unavailable', 503)
+    }
+
+    if (!firstSeen) {
+      logger.info(`Duplicate webhook event ignored (already processed): ${idempotencyKey}`)
+      return sendSuccess(res, { received: true, duplicate: true })
+    }
+  } else {
+    // No event id on the payload (shape unexpected). We can't dedup — process
+    // once and rely on the per-resource unique constraints (paymentId) as a
+    // secondary guard. Logged so the gap is visible in observability.
+    logger.warn('Webhook event has no extractable id — idempotency dedup skipped')
+  }
 
   try {
     switch (event.type) {
@@ -120,12 +166,23 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           logger.info(`Payment completed: ${data.sessionId}`)
         }
 
-        // Increment promo usage now that payment is confirmed
+        // Increment promo usage now that payment is confirmed. The increment
+        // is atomic (check-and-$inc in one op) so it cannot exceed maxUses even
+        // under concurrent webhook deliveries — and the per-event idempotency
+        // gate above already prevents this exact event from burning twice.
         const promoId = data.metadata?.promoId
         if (promoId) {
           try {
-            await incrementUsage(promoId)
-            logger.info(`Promo usage incremented: ${promoId}`)
+            const claimed = await incrementUsage(promoId)
+            if (claimed) {
+              logger.info(`Promo usage incremented: ${promoId}`)
+            } else {
+              // Promo already at its usage limit. The payment still completes
+              // (the user paid); we only log the over-redemption attempt.
+              logger.warn(
+                `Promo usage NOT incremented — already at limit: ${promoId} (payment ${data.sessionId})`
+              )
+            }
           } catch (promoErr) {
             logger.error(
               'Failed to increment promo usage:',
@@ -254,9 +311,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         // Dunning: if THIS update is the transition into past_due (i.e. the
         // previous metadata.subscriptionStatus was NOT past_due), fire the
-        // dunning email + persistent banner. Idempotent — re-firing the same
-        // Stripe event re-creates the notification but we always upsert the
-        // banner via the SDK component anyway.
+        // dunning email + persistent banner. A redelivery of the SAME Stripe
+        // event never reaches here (the event.id idempotency gate at the top
+        // short-circuits it); the transition guard below additionally prevents
+        // a distinct event re-firing when the status hasn't actually changed.
         try {
           const prevStatus = existingPayment?.metadata?.subscriptionStatus
           if (data.status === 'past_due' && prevStatus !== 'past_due' && existingPayment) {
@@ -487,15 +545,32 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           }
         )
 
-        // Create a new payment record for this renewal
+        // Amount reconciliation: trust the amount Stripe reports on the
+        // invoice, NOT a server-side pre-computed figure. If the renewal
+        // amount diverges from the original subscription's amount (price
+        // change, proration, tax shift), persist the real Stripe value and
+        // surface the divergence for observability.
+        const renewalAmount = (data.amount ?? 0) / 100
+        if (renewalAmount > 0 && Math.abs(renewalAmount - subPayment.amount) > 0.01) {
+          logger.warn(
+            `Subscription renewal amount diverges from original for ${data.subscriptionId}: ` +
+              `original=${subPayment.amount} renewal=${renewalAmount} (persisting Stripe value)`
+          )
+        }
+
+        // Create a new payment record for this renewal. The paymentId uses a
+        // random UUID (not Date.now(), which collides within the same ms and
+        // would let the unique index pass a duplicate renewal through). The
+        // unique `paymentId` index is now a real second line of defence
+        // against duplicate renewals on top of the per-event idempotency gate.
         await Payment.create({
           projectId: subPayment.projectId,
           projectName: subPayment.projectName,
           type: 'subscription',
-          amount: (data.amount || 0) / 100,
+          amount: renewalAmount,
           currency: data.currency || subPayment.currency,
           provider: 'stripe',
-          paymentId: `renewal-${data.subscriptionId}-${Date.now()}`,
+          paymentId: `renewal-${data.subscriptionId}-${randomUUID()}`,
           status: 'completed',
           completedAt: new Date(),
           userId: subPayment.userId,

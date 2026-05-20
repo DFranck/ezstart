@@ -3,6 +3,7 @@
 import './instrument.mjs'
 import { logger } from '@ezstart/logger/server'
 import { bootApi, createVersionedRouter } from '@ezstart/api-core'
+import { ensureWebhookEventIndexes } from './models/WebhookEvent.js'
 import routes, { registries } from './routes/index.js'
 import { startConnectCleanupScheduler } from './services/connect-cleanup.js'
 import { startPayDocsDemoResetScheduler } from './services/pay-docs-demo-reset.service.js'
@@ -34,7 +35,15 @@ try {
     rawBodyRoutes: ['/api/webhooks/stripe', '/api/webhooks/stripe-connect'],
     cookieAuthRoutes: [],
     useDerivedMode: true,
-    onReady: ({ app }) => {
+    onReady: async ({ app }) => {
+      // 🔒 Build the WebhookEvent unique `eventId` index BEFORE accepting
+      // traffic. `bootApi` runs `onReady` after `connectToMongo` resolves and
+      // before `startServer` binds the listener, so this guarantees the index
+      // exists before the first webhook can be claimed. Without it, Mongoose's
+      // lazy/async index build races the first deliveries → two inserts of the
+      // same `event.id` both succeed → double-credit (hacker MED-1).
+      await ensureWebhookEventIndexes()
+
       // Routes available at /api/* and /api/v1/*
       app.use(createVersionedRouter('/api', routes))
     },

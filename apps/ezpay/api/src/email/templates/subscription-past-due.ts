@@ -5,8 +5,10 @@
  * Pairs with Stripe Smart Retries (configured in Dashboard, see
  * `apps/ezpay/STRIPE_DUNNING_SETUP.md`). Stripe will retry payments
  * automatically for ~22 days; the operator owns the messaging cadence
- * here. Idempotency at the webhook layer (per `event.id`) prevents
- * double-sending on Stripe redelivery.
+ * here. Idempotency at the webhook layer prevents double-sending on Stripe
+ * redelivery: `routes/webhooks.ts` claims each `event.id` in the
+ * `WebhookEvent` ledger (atomic, unique index) before this template is
+ * ever rendered, so a redelivered event is a 200 no-op.
  */
 
 import {

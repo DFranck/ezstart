@@ -279,5 +279,111 @@ describe('Promo Service', () => {
       const updated = await PromoModel.findById(promo._id)
       expect(updated?.usedCount).toBe(7)
     })
+
+    it('should return true when a redemption is claimed', async () => {
+      const promo = await PromoModel.create({
+        code: 'CLAIMTRUE',
+        appName: 'ezbill',
+        discountType: 'percent',
+        discountValue: 10,
+        duration: 'once',
+        active: true,
+        maxUses: 3,
+        usedCount: 0,
+      })
+
+      const claimed = await incrementUsage(String(promo._id))
+      expect(claimed).toBe(true)
+    })
+
+    it('should return false (and NOT increment) when already at maxUses', async () => {
+      const promo = await PromoModel.create({
+        code: 'CLAIMFALSE',
+        appName: 'ezbill',
+        discountType: 'percent',
+        discountValue: 10,
+        duration: 'once',
+        active: true,
+        maxUses: 2,
+        usedCount: 2,
+      })
+
+      const claimed = await incrementUsage(String(promo._id))
+      expect(claimed).toBe(false)
+
+      const reloaded = await PromoModel.findById(promo._id)
+      expect(reloaded?.usedCount).toBe(2) // unchanged — over-redemption blocked
+    })
+
+    it('should return true for unlimited promos (no maxUses) regardless of usedCount', async () => {
+      const promo = await PromoModel.create({
+        code: 'UNBOUND',
+        appName: 'ezbill',
+        discountType: 'percent',
+        discountValue: 10,
+        duration: 'forever',
+        active: true,
+        usedCount: 999,
+      })
+
+      const claimed = await incrementUsage(String(promo._id))
+      expect(claimed).toBe(true)
+
+      const reloaded = await PromoModel.findById(promo._id)
+      expect(reloaded?.usedCount).toBe(1000)
+    })
+  })
+
+  // =========================================================================
+  // C-4 — Over-redemption TOCTOU: the atomic check-and-increment must NEVER
+  // let usedCount exceed maxUses, even under heavy concurrency.
+  // =========================================================================
+  describe('incrementUsage atomicity (C-4 TOCTOU)', () => {
+    it('caps usedCount at maxUses:1 under 20 concurrent redemptions', async () => {
+      const promo = await PromoModel.create({
+        code: 'SINGLEUSE',
+        appName: 'myapp',
+        discountType: 'percent',
+        discountValue: 50,
+        duration: 'once',
+        active: true,
+        maxUses: 1,
+        usedCount: 0,
+      })
+
+      // 20 concurrent redemption attempts of a single-use promo.
+      const results = await Promise.all(
+        Array.from({ length: 20 }, () => incrementUsage(String(promo._id)))
+      )
+
+      const successes = results.filter(Boolean).length
+      expect(successes).toBe(1) // exactly ONE claim succeeded
+
+      const reloaded = await PromoModel.findById(promo._id)
+      expect(reloaded?.usedCount).toBe(1) // never over-redeemed (was 20 before fix)
+    })
+
+    it('caps usedCount at maxUses:3 under 50 concurrent redemptions', async () => {
+      const promo = await PromoModel.create({
+        code: 'TRIPLEUSE',
+        appName: 'myapp',
+        discountType: 'fixed',
+        discountValue: 500,
+        duration: 'once',
+        active: true,
+        maxUses: 3,
+        usedCount: 0,
+      })
+
+      const results = await Promise.all(
+        Array.from({ length: 50 }, () => incrementUsage(String(promo._id)))
+      )
+
+      const successes = results.filter(Boolean).length
+      expect(successes).toBe(3)
+
+      const reloaded = await PromoModel.findById(promo._id)
+      expect(reloaded?.usedCount).toBe(3)
+    })
   })
 })
