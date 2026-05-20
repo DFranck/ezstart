@@ -5,6 +5,26 @@ All notable changes to `@ezstart/api-contracts` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-05-20
+
+PKCE (RFC 7636 / OAuth 2.1) authorization-code interception protection. Strictly **additive** (all new fields optional) — every existing payload keeps validating unchanged, so this is a minor bump.
+
+### Added
+
+- **PKCE primitives** in `auth/auth-shared.ts`:
+  - `PKCE_CHARS_REGEX` — RFC 7636 §4.1 unreserved URL-safe charset (`A-Z a-z 0-9 - . _ ~`).
+  - `PkceCodeChallengeSchema` — 43–128 char base64url challenge.
+  - `PkceCodeChallengeMethodSchema` — `z.literal('S256')` (the `plain` method is rejected per OAuth 2.1).
+  - `PkceCodeVerifierSchema` — 43–128 char base64url verifier.
+- **`LoginRequestSchema`** + **`RegisterRequestSchema`** — optional `code_challenge` + `code_challenge_method`. When the client commits to a challenge, the server stores it on the auth code.
+- **`TokenRequestSchema`** — optional `code_verifier`. Required at runtime ONLY when the code was minted with a challenge (the server enforces the binding via a timing-safe `BASE64URL(SHA256(verifier)) === challenge` compare); the contract cannot express that conditional, so it stays optional here.
+- The 3 PKCE schemas are exported from the package barrel (`@ezstart/api-contracts`) and via `@ezstart/api-contracts/auth`.
+
+### Notes
+
+- `plain` is intentionally unsupported — a `code_challenge_method` other than `'S256'` fails validation.
+- Backward compat: omitting all PKCE fields preserves the exact pre-1.1 (no-PKCE) behaviour.
+
 ## [1.0.0] - 2026-05-16
 
 First production release. Wire single-source-of-truth for the @ezstart SaaS platform — envelope, error codes, pagination, auth flows, money primitives, idempotency contract, API versioning, common DTOs (Application/ApiKey/Plan), and a typed ApiError class.

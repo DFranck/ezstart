@@ -99,6 +99,80 @@ describe('LoginRequestSchema', () => {
       'someUser-123.foo'
     )
   })
+
+  // PKCE (RFC 7636 / OAuth 2.1) — optional + strictly additive.
+  describe('PKCE', () => {
+    // 43-char base64url SHA-256 digest (the canonical S256 challenge length).
+    const challenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM'
+
+    it('parses WITHOUT PKCE fields (backward compat)', () => {
+      const parsed = LoginRequestSchema.parse(valid)
+      expect(parsed.code_challenge).toBeUndefined()
+      expect(parsed.code_challenge_method).toBeUndefined()
+    })
+
+    it('accepts a valid S256 code_challenge + method', () => {
+      const parsed = LoginRequestSchema.parse({
+        ...valid,
+        code_challenge: challenge,
+        code_challenge_method: 'S256',
+      })
+      expect(parsed.code_challenge).toBe(challenge)
+      expect(parsed.code_challenge_method).toBe('S256')
+    })
+
+    it("rejects code_challenge_method='plain' (OAuth 2.1 S256-only)", () => {
+      expect(() =>
+        LoginRequestSchema.parse({
+          ...valid,
+          code_challenge: challenge,
+          code_challenge_method: 'plain',
+        })
+      ).toThrow()
+    })
+
+    it('rejects an unknown code_challenge_method', () => {
+      expect(() =>
+        LoginRequestSchema.parse({
+          ...valid,
+          code_challenge: challenge,
+          code_challenge_method: 'S512',
+        })
+      ).toThrow()
+    })
+
+    it('rejects a code_challenge shorter than 43 chars', () => {
+      expect(() => LoginRequestSchema.parse({ ...valid, code_challenge: 'too-short' })).toThrow()
+    })
+
+    it('rejects a code_challenge longer than 128 chars', () => {
+      expect(() =>
+        LoginRequestSchema.parse({ ...valid, code_challenge: 'a'.repeat(129) })
+      ).toThrow()
+    })
+
+    it('rejects a code_challenge with non-base64url chars (+ / =)', () => {
+      expect(() =>
+        LoginRequestSchema.parse({ ...valid, code_challenge: `${challenge.slice(0, -1)}+` })
+      ).toThrow()
+      expect(() =>
+        LoginRequestSchema.parse({ ...valid, code_challenge: `${challenge.slice(0, -1)}/` })
+      ).toThrow()
+    })
+
+    it('rejects a code_challenge with a NUL byte (log injection)', () => {
+      expect(() =>
+        LoginRequestSchema.parse({ ...valid, code_challenge: `${challenge.slice(0, -1)}\0` })
+      ).toThrow()
+    })
+
+    it('accepts the unreserved ~ char (RFC 7636 §4.1)', () => {
+      const withTilde = `${challenge.slice(0, -1)}~`
+      expect(LoginRequestSchema.parse({ ...valid, code_challenge: withTilde }).code_challenge).toBe(
+        withTilde
+      )
+    })
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -150,6 +224,35 @@ describe('RegisterRequestSchema', () => {
 
   it('rejects empty username', () => {
     expect(() => RegisterRequestSchema.parse({ ...valid, username: '' })).toThrow()
+  })
+
+  // PKCE (RFC 7636) — same optional fields as LoginRequest.
+  describe('PKCE', () => {
+    const challenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM'
+
+    it('accepts a valid S256 challenge', () => {
+      const parsed = RegisterRequestSchema.parse({
+        ...valid,
+        code_challenge: challenge,
+        code_challenge_method: 'S256',
+      })
+      expect(parsed.code_challenge).toBe(challenge)
+      expect(parsed.code_challenge_method).toBe('S256')
+    })
+
+    it("rejects code_challenge_method='plain'", () => {
+      expect(() =>
+        RegisterRequestSchema.parse({
+          ...valid,
+          code_challenge: challenge,
+          code_challenge_method: 'plain',
+        })
+      ).toThrow()
+    })
+
+    it('parses without PKCE (backward compat)', () => {
+      expect(RegisterRequestSchema.parse(valid).code_challenge).toBeUndefined()
+    })
   })
 })
 
@@ -337,6 +440,41 @@ describe('TokenRequestSchema', () => {
 
   it('H3: rejects code with whitespace', () => {
     expect(() => TokenRequestSchema.parse({ ...valid, code: 'auth code' })).toThrow()
+  })
+
+  // PKCE (RFC 7636) — optional code_verifier on the exchange.
+  describe('PKCE code_verifier', () => {
+    const verifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXkdBjftJeZ4CVP'
+
+    it('parses WITHOUT code_verifier (legacy / no-PKCE)', () => {
+      expect(TokenRequestSchema.parse(valid).code_verifier).toBeUndefined()
+    })
+
+    it('accepts a valid code_verifier', () => {
+      expect(TokenRequestSchema.parse({ ...valid, code_verifier: verifier }).code_verifier).toBe(
+        verifier
+      )
+    })
+
+    it('rejects a code_verifier shorter than 43 chars', () => {
+      expect(() => TokenRequestSchema.parse({ ...valid, code_verifier: 'short' })).toThrow()
+    })
+
+    it('rejects a code_verifier longer than 128 chars', () => {
+      expect(() => TokenRequestSchema.parse({ ...valid, code_verifier: 'a'.repeat(129) })).toThrow()
+    })
+
+    it('rejects a code_verifier with non-base64url chars', () => {
+      expect(() =>
+        TokenRequestSchema.parse({ ...valid, code_verifier: `${verifier.slice(0, -1)}+` })
+      ).toThrow()
+    })
+
+    it('rejects a code_verifier with a newline (log injection)', () => {
+      expect(() =>
+        TokenRequestSchema.parse({ ...valid, code_verifier: `${verifier.slice(0, -1)}\n` })
+      ).toThrow()
+    })
   })
 })
 

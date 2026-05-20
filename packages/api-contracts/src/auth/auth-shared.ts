@@ -53,6 +53,62 @@ export const OPAQUE_TOKEN_REGEX = /^[A-Za-z0-9_\-.]{1,2048}$/
  */
 export const SHORT_CODE_REGEX = /^[a-zA-Z0-9]{6,12}$/
 
+// ---------------------------------------------------------------------------
+// PKCE (RFC 7636 — OAuth 2.1 authorization-code interception protection)
+// ---------------------------------------------------------------------------
+
+/**
+ * PKCE `code_verifier` / `code_challenge` charset — the unreserved URL-safe
+ * characters defined by RFC 7636 §4.1: `A-Z a-z 0-9 - . _ ~`.
+ *
+ * The `code_verifier` is a high-entropy random string (43–128 chars). The
+ * `code_challenge` for the S256 method is `BASE64URL(SHA256(verifier))`, which
+ * yields a 43-char string (32 bytes → 43 base64url chars, no padding). Both
+ * share the same allowed alphabet, so a single regex bounds both fields and
+ * blocks log-injection / NUL-byte smuggling at the contract layer.
+ */
+export const PKCE_CHARS_REGEX = /^[A-Za-z0-9\-._~]+$/
+
+/**
+ * Zod schema for a PKCE `code_challenge` (S256 method).
+ *
+ * RFC 7636 §4.1 bounds the verifier to 43–128 chars; the S256 challenge is a
+ * fixed 43-char base64url SHA-256 digest. We accept the full 43–128 window
+ * (rather than pinning 43) so a forward-compatible server / future challenge
+ * shape isn't rejected, while still rejecting trivially short or oversized
+ * values. URL-safe charset only.
+ */
+export const PkceCodeChallengeSchema = z
+  .string()
+  .min(43, 'code_challenge must be at least 43 characters (RFC 7636 §4.1)')
+  .max(128, 'code_challenge must be at most 128 characters (RFC 7636 §4.1)')
+  .regex(PKCE_CHARS_REGEX, 'code_challenge must be URL-safe base64 (A-Z, a-z, 0-9, -, ., _, ~)')
+
+/**
+ * Zod schema for the PKCE `code_challenge_method`.
+ *
+ * **S256 ONLY.** The `plain` method (RFC 7636 §4.2) offers no protection
+ * against an attacker who can read the authorization request, so OAuth 2.1
+ * (and `@ezstart`) reject it outright. A request that passes a `code_challenge`
+ * with `method: 'plain'` (or any value other than `'S256'`) fails validation.
+ */
+export const PkceCodeChallengeMethodSchema = z
+  .literal('S256')
+  .describe('PKCE code challenge method — S256 only (plain is rejected per OAuth 2.1)')
+
+/**
+ * Zod schema for a PKCE `code_verifier` (sent on the /token exchange).
+ *
+ * RFC 7636 §4.1: 43–128 chars, unreserved URL-safe charset. The server hashes
+ * it with SHA-256 and compares (timing-safe) against the stored
+ * `code_challenge`.
+ */
+export const PkceCodeVerifierSchema = z
+  .string()
+  .min(43, 'code_verifier must be at least 43 characters (RFC 7636 §4.1)')
+  .max(128, 'code_verifier must be at most 128 characters (RFC 7636 §4.1)')
+  .regex(PKCE_CHARS_REGEX, 'code_verifier must be URL-safe base64 (A-Z, a-z, 0-9, -, ., _, ~)')
+
 /**
  * Re-exported short-code regex (alphanumeric, 6-12 chars) for downstream
  * use in 2FA TOTP / email verification code schemas (kept here so the

@@ -15,6 +15,9 @@ import {
   EmailOverrideSchema,
   NO_CONTROL_CHARS,
   OPAQUE_TOKEN_REGEX,
+  PkceCodeChallengeMethodSchema,
+  PkceCodeChallengeSchema,
+  PkceCodeVerifierSchema,
   SupportedLocaleSchema,
   USERNAME_REGEX,
   safeRedirectUri,
@@ -71,6 +74,17 @@ export const LoginRequestSchema = z.object({
     .regex(APP_SLUG_REGEX, 'app must match /^[a-z0-9-]{2,32}$/')
     .describe('Target app identifier (ezauth, ezbill, etc.)'),
   redirect_uri: safeRedirectUri.optional().describe('OAuth redirect URI after authentication'),
+  // PKCE (RFC 7636 / OAuth 2.1) — OPTIONAL + strictly additive. When present,
+  // the client commits to a `code_verifier` it will echo on the /token
+  // exchange. The server stores `code_challenge` on the auth code and rejects
+  // an exchange whose `BASE64URL(SHA256(verifier))` doesn't match. Omitting
+  // both keeps the legacy (no-PKCE) behaviour for backward compatibility.
+  code_challenge: PkceCodeChallengeSchema.optional().describe(
+    'PKCE code challenge — BASE64URL(SHA256(code_verifier)) (RFC 7636)'
+  ),
+  code_challenge_method: PkceCodeChallengeMethodSchema.optional().describe(
+    'PKCE method — S256 only (plain rejected)'
+  ),
 })
 export type LoginRequest = z.infer<typeof LoginRequestSchema>
 
@@ -106,6 +120,15 @@ export const RegisterRequestSchema = z.object({
     .regex(APP_SLUG_REGEX, 'app must match /^[a-z0-9-]{2,32}$/')
     .describe('Target app identifier (ezauth, ezbill, etc.)'),
   redirect_uri: safeRedirectUri.optional().describe('OAuth redirect URI after registration'),
+  // PKCE (RFC 7636 / OAuth 2.1) — OPTIONAL + strictly additive, same contract
+  // as LoginRequest. The register endpoint mints an auth code too, so a client
+  // that wants PKCE on the post-signup exchange commits its challenge here.
+  code_challenge: PkceCodeChallengeSchema.optional().describe(
+    'PKCE code challenge — BASE64URL(SHA256(code_verifier)) (RFC 7636)'
+  ),
+  code_challenge_method: PkceCodeChallengeMethodSchema.optional().describe(
+    'PKCE method — S256 only (plain rejected)'
+  ),
   promoCode: z.string().max(50).optional().describe('Optional promo code to apply at signup'),
   utmSource: z
     .string()
@@ -243,6 +266,16 @@ export const TokenRequestSchema = z.object({
   redirect_uri: safeRedirectUri
     .optional()
     .describe('OAuth redirect URI (must match the one used at login)'),
+  // PKCE (RFC 7636 / OAuth 2.1) — OPTIONAL + strictly additive. REQUIRED at
+  // runtime only when the auth code was minted WITH a `code_challenge`: the
+  // server then verifies `BASE64URL(SHA256(code_verifier))` matches (timing-
+  // safe). A code minted without a challenge ignores the verifier (legacy
+  // backward-compat). The contract cannot express "required iff the code had
+  // a challenge" (it has no view of server state), so it stays optional here
+  // and the binding is enforced server-side.
+  code_verifier: PkceCodeVerifierSchema.optional().describe(
+    'PKCE code verifier — required when the auth code was issued with a code_challenge (RFC 7636)'
+  ),
 })
 export type TokenRequest = z.infer<typeof TokenRequestSchema>
 
