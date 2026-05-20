@@ -11,9 +11,21 @@ import { Router as ExpressRouter } from 'express'
 import { TotpService } from '../../../services/totp.service.js'
 import { AuditLogService } from '../../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
+import { toSafeErrorMessage } from '../../../utils/safe-error.js'
 import { z } from 'zod'
 import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
 import { requireEmailVerified } from '../../../middleware/require-email-verified.js'
+
+/**
+ * MED-1 — intentional, client-safe 2FA-verify messages thrown by
+ * {@link TotpService.verifyAndEnable}. Anything else collapses to a generic
+ * message.
+ */
+const SAFE_VERIFY_MESSAGES = [
+  'No 2FA setup in progress. Call /auth/2fa/setup first.',
+  '2FA is already enabled.',
+  'Invalid verification code. Please try again.',
+] as const
 
 export const twoFactorVerifyRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -49,7 +61,14 @@ const verifyController = async (req: Request, res: Response) => {
     })
   } catch (error) {
     logger.error('2FA verify error:', error)
-    sendError(res, error instanceof Error ? error.message : '2FA verification failed', 400)
+    sendError(
+      res,
+      toSafeErrorMessage(error, {
+        allow: SAFE_VERIFY_MESSAGES,
+        fallback: '2FA verification failed',
+      }),
+      400
+    )
   }
 }
 

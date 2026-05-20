@@ -45,8 +45,9 @@ const checkAvailabilityController = async (req: Request, res: Response) => {
 
     sendSuccess(res, result)
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('Check availability error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Availability check failed', 500)
+    sendError(res, 'Availability check failed', 500)
   }
 }
 

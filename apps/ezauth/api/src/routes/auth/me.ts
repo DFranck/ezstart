@@ -23,8 +23,10 @@ const meController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { user })
   } catch (error) {
+    // MED-1 — never echo a raw `error.message` (Mongoose/DB internals leak).
+    // Any error reaching here is unexpected; return a stable generic message.
     logger.error('Get user error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to fetch user', 500)
+    sendError(res, 'Failed to fetch user', 500)
   }
 }
 

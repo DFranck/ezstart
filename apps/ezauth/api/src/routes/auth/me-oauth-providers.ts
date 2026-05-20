@@ -64,8 +64,9 @@ const listProvidersController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { providers })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('List OAuth providers error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to list OAuth providers', 500)
+    sendError(res, 'Failed to list OAuth providers', 500)
   }
 }
 
@@ -116,12 +117,10 @@ const disconnectProviderController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { message: `${provider} account disconnected` })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
+    // All intentional client messages above are returned inline before this.
     logger.error('Disconnect OAuth provider error:', error)
-    sendError(
-      res,
-      error instanceof Error ? error.message : 'Failed to disconnect OAuth provider',
-      500
-    )
+    sendError(res, 'Failed to disconnect OAuth provider', 500)
   }
 }
 

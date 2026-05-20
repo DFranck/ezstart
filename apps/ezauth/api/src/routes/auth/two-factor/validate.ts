@@ -169,8 +169,10 @@ const validateController = async (req: Request, res: Response) => {
         },
       })
     }
+    // MED-1 — generic message; raw error.message would leak DB internals.
+    // All intentional client messages above are returned inline before this.
     logger.error('2FA validate error:', error)
-    sendError(res, error instanceof Error ? error.message : '2FA validation failed', 401)
+    sendError(res, '2FA validation failed', 401)
   }
 }
 

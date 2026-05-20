@@ -168,8 +168,11 @@ const quickSignupController = async (req: Request, res: Response) => {
       refreshToken: session.refreshToken,
     })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals
+    // (e.g. Mongoose E11000 dup-key with collection/index names). The
+    // intentional 'User already exists' 409 is returned inline above.
     logger.error('Quick-signup error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Quick signup failed', 400)
+    sendError(res, 'Quick signup failed', 400)
   }
 }
 

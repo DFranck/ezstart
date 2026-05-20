@@ -95,8 +95,9 @@ const auditLogController = async (req: Request, res: Response) => {
       offset,
     })
   } catch (err) {
+    // MED-1 — generic message; raw err.message would leak DB internals.
     logger.error('List audit log error:', err)
-    sendError(res, err instanceof Error ? err.message : 'Failed to list audit log', 500)
+    sendError(res, 'Failed to list audit log', 500)
   }
 }
 

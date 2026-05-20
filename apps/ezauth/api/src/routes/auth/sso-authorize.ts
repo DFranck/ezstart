@@ -87,7 +87,7 @@ const ssoAuthorizeController = async (req: Request, res: Response) => {
     const message = error instanceof Error ? error.message : 'SSO authorize failed'
     logger.warn({ err: message }, 'SSO authorize error')
 
-    // Redirect-allowlist / validation errors are 400
+    // Redirect-allowlist / validation errors are intentional, client-safe 400s.
     if (
       message.startsWith('Disallowed redirectUri') ||
       message.startsWith('Invalid redirectUri') ||
@@ -95,7 +95,9 @@ const ssoAuthorizeController = async (req: Request, res: Response) => {
     ) {
       return sendError(res, message, 400)
     }
-    return sendError(res, message, 500)
+    // MED-1 — anything else is an unexpected error; return a stable generic
+    // message so internal detail (DB/Mongoose, etc.) never leaks to the client.
+    return sendError(res, 'SSO authorize failed', 500)
   }
 }
 

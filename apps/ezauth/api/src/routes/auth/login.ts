@@ -15,6 +15,7 @@ import { checkDemoQuotas } from '../../middleware/check-demo-quotas.js'
 import { TotpService } from '../../services/totp.service.js'
 import { verifyTurnstileToken } from '../../services/turnstile.service.js'
 import { logger } from '@ezstart/logger/server'
+import { toSafeErrorMessage } from '../../utils/safe-error.js'
 import {
   loginRequestSchema,
   authCodeResponseSchema,
@@ -126,10 +127,29 @@ const loginController = async (req: Request, res: Response) => {
         },
       })
     }
+    // MED-3 — only the credential-check service's intentional, UX-safe
+    // messages are echoed verbatim. Everything else (unexpected DB/Mongoose
+    // errors, etc.) returns a stable generic message so internal detail never
+    // leaks to the client. The thrown `error.message` is still logged below.
     logger.error('Login error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Login failed', 401)
+    sendError(
+      res,
+      toSafeErrorMessage(error, { allow: SAFE_LOGIN_MESSAGES, fallback: 'Login failed' }),
+      401
+    )
   }
 }
+
+/**
+ * MED-3 — allowlist of intentional, client-safe login error messages thrown
+ * by `validateCredentials`. Any message not on this list is replaced with a
+ * generic `'Login failed'` so unexpected errors (DB structure, Mongoose
+ * validation, etc.) never leak to the client.
+ */
+const SAFE_LOGIN_MESSAGES = new Set<string>([
+  'Invalid credentials',
+  "You haven't set a password yet. Use Google sign-in or click Forgot Password.",
+])
 
 // `checkDemoQuotas` is a strict no-op for non-`_docs-demo` traffic. For
 // docs-demo requests it gates the daily audit-event quota (login + signup

@@ -14,11 +14,22 @@ import { AuthService, AccountLockedError } from '../../services/auth.service.js'
 import { TotpService } from '../../services/totp.service.js'
 import { checkDemoQuotas } from '../../middleware/check-demo-quotas.js'
 import { logger } from '@ezstart/logger/server'
+import { toSafeErrorMessage } from '../../utils/safe-error.js'
 import {
   loginRequestSchema,
   userResponseSchema,
   errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
+
+/**
+ * MED-1 — intentional, client-safe credential-check messages thrown by
+ * {@link AuthService.validateCredentials} (via `loginWithToken`). Mirrors the
+ * allowlist in `login.ts`. Anything else collapses to a generic 'Login failed'.
+ */
+const SAFE_LOGIN_COOKIE_MESSAGES = [
+  'Invalid credentials',
+  "You haven't set a password yet. Use Google sign-in or click Forgot Password.",
+] as const
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../../config/env.js'
 import { JWT_ISSUER, JWT_VERIFIER_AUDIENCE } from '../../config/jwt.js'
@@ -113,7 +124,11 @@ const loginCookieController = async (req: Request, res: Response) => {
       })
     }
     logger.error('Login cookie error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Login failed', 401)
+    sendError(
+      res,
+      toSafeErrorMessage(error, { allow: SAFE_LOGIN_COOKIE_MESSAGES, fallback: 'Login failed' }),
+      401
+    )
   }
 }
 

@@ -180,8 +180,10 @@ const changeEmailController = async (req: Request, res: Response) => {
       expiresAt: expiresAt.toISOString(),
     })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
+    // All intentional client messages above are returned inline before this.
     logger.error('Change email error:', error)
-    return sendError(res, error instanceof Error ? error.message : 'Failed to change email', 500)
+    return sendError(res, 'Failed to change email', 500)
   }
 }
 

@@ -62,8 +62,9 @@ const updateProfileController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { user: user.toAuthUser() })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('Update profile error:', error)
-    sendError(res, error instanceof Error ? error.message : 'Failed to update profile', 500)
+    sendError(res, 'Failed to update profile', 500)
   }
 }
 

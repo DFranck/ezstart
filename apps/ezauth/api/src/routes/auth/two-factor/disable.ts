@@ -11,9 +11,22 @@ import { Router as ExpressRouter } from 'express'
 import { TotpService } from '../../../services/totp.service.js'
 import { AuditLogService } from '../../../services/audit-log.service.js'
 import { logger } from '@ezstart/logger/server'
+import { toSafeErrorMessage } from '../../../utils/safe-error.js'
 import { z } from 'zod'
 import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
 import { requireEmailVerified } from '../../../middleware/require-email-verified.js'
+
+/**
+ * MED-1 — intentional, client-safe 2FA-disable messages thrown by
+ * {@link TotpService.disable}. Anything else collapses to a generic message
+ * so unexpected internal detail never leaks.
+ */
+const SAFE_DISABLE_MESSAGES = [
+  '2FA is not enabled.',
+  'User not found.',
+  'Invalid password.',
+  'Invalid verification code.',
+] as const
 
 export const twoFactorDisableRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -59,7 +72,11 @@ const disableController = async (req: Request, res: Response) => {
     sendSuccess(res, { message: '2FA disabled successfully' })
   } catch (error) {
     logger.error('2FA disable error:', error)
-    sendError(res, error instanceof Error ? error.message : '2FA disable failed', 400)
+    sendError(
+      res,
+      toSafeErrorMessage(error, { allow: SAFE_DISABLE_MESSAGES, fallback: '2FA disable failed' }),
+      400
+    )
   }
 }
 

@@ -81,8 +81,11 @@ const verifyController = async (req: Request, res: Response) => {
         exp: payload.exp,
       },
     })
-  } catch (error) {
-    sendError(res, error instanceof Error ? error.message : 'Invalid token', 401)
+  } catch {
+    // MED-1 — never echo a raw error.message. `verifyToken` already throws the
+    // intentional 'Invalid token' message and any other (unexpected) error must
+    // collapse to the same stable 401 so internal detail never leaks.
+    sendError(res, 'Invalid token', 401)
   }
 }
 

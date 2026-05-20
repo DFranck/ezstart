@@ -252,8 +252,10 @@ const deleteAccountController = async (req: Request, res: Response) => {
       gracePeriodDays: DELETION_GRACE_PERIOD_DAYS,
     })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
+    // All intentional client messages above are returned inline before this.
     logger.error('Delete account error:', error)
-    return sendError(res, error instanceof Error ? error.message : 'Failed to delete account', 500)
+    return sendError(res, 'Failed to delete account', 500)
   }
 }
 

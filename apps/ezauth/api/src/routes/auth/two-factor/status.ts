@@ -23,8 +23,9 @@ const statusController = async (req: Request, res: Response) => {
 
     sendSuccess(res, { isEnabled })
   } catch (error) {
+    // MED-1 — generic message; raw error.message would leak DB internals.
     logger.error('2FA status error:', error)
-    sendError(res, error instanceof Error ? error.message : '2FA status check failed', 500)
+    sendError(res, '2FA status check failed', 500)
   }
 }
 

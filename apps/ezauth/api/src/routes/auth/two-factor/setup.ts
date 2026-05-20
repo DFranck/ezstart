@@ -11,9 +11,20 @@ import { Router as ExpressRouter } from 'express'
 import { TotpService } from '../../../services/totp.service.js'
 import { AuthService } from '../../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
+import { toSafeErrorMessage } from '../../../utils/safe-error.js'
 import QRCode from 'qrcode'
 import { verifyTokenMiddleware as authMiddleware } from '../../../middleware/auth.js'
 import { requireEmailVerified } from '../../../middleware/require-email-verified.js'
+
+/**
+ * MED-1 — intentional, client-safe 2FA-setup messages thrown by
+ * {@link TotpService.generateSecret} / {@link AuthService.getUserById}.
+ * Anything else collapses to a generic message.
+ */
+const SAFE_SETUP_MESSAGES = [
+  '2FA is already enabled. Disable it first to reconfigure.',
+  'User not found',
+] as const
 
 export const twoFactorSetupRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -42,7 +53,11 @@ const setupController = async (req: Request, res: Response) => {
     })
   } catch (error) {
     logger.error('2FA setup error:', error)
-    sendError(res, error instanceof Error ? error.message : '2FA setup failed', 400)
+    sendError(
+      res,
+      toSafeErrorMessage(error, { allow: SAFE_SETUP_MESSAGES, fallback: '2FA setup failed' }),
+      400
+    )
   }
 }
 
