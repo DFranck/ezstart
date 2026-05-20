@@ -27,6 +27,7 @@ vi.mock('../../../services/stripe-connect.js', () => ({
 
 let currentUserId: string | undefined = 'user-1'
 let currentGlobalRoles: string[] = []
+let currentAppRoles: Record<string, string[]> = {}
 
 vi.mock('../../../middleware/auth.js', () => ({
   authMiddleware: (req: express.Request, _res: express.Response, next: express.NextFunction) => {
@@ -42,12 +43,22 @@ vi.mock('../../../middleware/auth.js', () => ({
       ;(req as unknown as { user: Record<string, unknown> }).user = {
         userId: req.userId,
         globalRoles: currentGlobalRoles,
+        appRoles: currentAppRoles,
       }
     }
     next()
   },
-  isAdminUser: (req: express.Request): boolean =>
-    (req.user?.globalRoles as string[] | undefined)?.includes('superadmin') ?? false,
+  isAdminUser: (req: express.Request): boolean => {
+    const user = req.user as { globalRoles?: string[]; appRoles?: Record<string, string[]> }
+    if (user?.globalRoles?.some(r => r === 'superadmin' || r === 'admin')) return true
+    return Object.values(user?.appRoles ?? {}).some(roles => roles.includes('admin'))
+  },
+}))
+
+// Tenant-ownership resolution forwards to ezauth's owner-scoped app list.
+let ownedSlugs: string[] = []
+vi.mock('../../../services/ezauth-client.js', () => ({
+  listApplicationsByOwner: () => Promise.resolve(ownedSlugs.map(slug => ({ slug }))),
 }))
 
 const routeMod = await import('../../../routes/subscriptions/change-plan.js')
@@ -126,6 +137,8 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
     subscriptionsUpdateMock.mockReset()
     currentUserId = 'user-1'
     currentGlobalRoles = []
+    currentAppRoles = {}
+    ownedSlugs = []
   })
 
   async function seedSubscriptionAndPlans(): Promise<{
@@ -278,6 +291,95 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
 
     const res = await postChangePlan(app, subscriptionId, { newPlanId: String(newPlanId) })
     expect(res.status).toBe(200)
+  })
+
+  it('refuses (403) an app admin changing ANOTHER tenant’s subscription — cross-tenant', async () => {
+    // Subscription belongs to the `ezauth` tenant (see seedSubscriptionAndPlans).
+    const { subscriptionId, newPlanId } = await seedSubscriptionAndPlans()
+    currentUserId = 'admin-other'
+    currentAppRoles = { 'other-app': ['admin'] }
+    ownedSlugs = ['other-app'] // owns a DIFFERENT tenant
+
+    const res = await postChangePlan(app, subscriptionId, { newPlanId: String(newPlanId) })
+
+    expect(res.status).toBe(403)
+    expect(subscriptionsUpdateMock).not.toHaveBeenCalled()
+  })
+
+  it('allows an app admin to change a subscription of an Application they own', async () => {
+    const { subscriptionId, newPlanId, newPriceId } = await seedSubscriptionAndPlans()
+    currentUserId = 'admin-ezauth'
+    currentAppRoles = { ezauth: ['admin'] }
+    ownedSlugs = ['ezauth'] // owns the matching tenant
+    subscriptionsRetrieveMock.mockResolvedValue({
+      id: subscriptionId,
+      items: { data: [{ id: 'si_1' }] },
+    })
+    subscriptionsUpdateMock.mockResolvedValue({
+      id: subscriptionId,
+      status: 'active',
+      items: { data: [{ id: 'si_1', current_period_end: 1999999999 }] },
+    })
+
+    const res = await postChangePlan(app, subscriptionId, { newPlanId: String(newPlanId) })
+
+    expect(res.status).toBe(200)
+    expect(subscriptionsUpdateMock).toHaveBeenCalledWith(subscriptionId, {
+      items: [{ id: 'si_1', price: newPriceId }],
+      proration_behavior: 'create_prorations',
+    })
+  })
+
+  it('returns 404 (generic) when the target plan belongs to ANOTHER tenant — arbitrage closed (HIGH-1)', async () => {
+    // Subscription belongs to the `ezauth` tenant. The caller owns it, but
+    // tries to re-price onto a cheaper Plan from a DIFFERENT tenant.
+    const { subscriptionId } = await seedSubscriptionAndPlans()
+    const foreignPlan = await Plan.create({
+      name: 'Cheap Foreign Plan',
+      applicationId: 'app-other',
+      appName: 'otherapp', // slug of a DIFFERENT tenant
+      amount: 100, // €1.00 — much cheaper than the ezauth plan
+      currency: 'usd',
+      interval: 'month',
+      intervalCount: 1,
+      active: true,
+      stripeProductId: 'prod_foreign',
+      stripePriceId: 'price_foreign',
+    })
+
+    const res = await postChangePlan(app, subscriptionId, {
+      newPlanId: String(foreignPlan._id),
+    })
+
+    // Generic 404 — never reveals the foreign plan exists. No Stripe call.
+    expect(res.status).toBe(404)
+    expect(subscriptionsRetrieveMock).not.toHaveBeenCalled()
+    expect(subscriptionsUpdateMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 404 (fail-closed) when the target plan has no tenant slug snapshot (HIGH-1)', async () => {
+    const { subscriptionId } = await seedSubscriptionAndPlans()
+    // A plan WITHOUT `appName` cannot be bound to the subscription's tenant —
+    // fail-closed rather than allow an unattributable plan.
+    const orphanPlan = await Plan.create({
+      name: 'Orphan Plan',
+      applicationId: 'app-ezauth',
+      // no appName
+      amount: 9999,
+      currency: 'EUR',
+      interval: 'year',
+      intervalCount: 1,
+      active: true,
+      stripeProductId: 'prod_orphan',
+      stripePriceId: 'price_orphan',
+    })
+
+    const res = await postChangePlan(app, subscriptionId, {
+      newPlanId: String(orphanPlan._id),
+    })
+
+    expect(res.status).toBe(404)
+    expect(subscriptionsUpdateMock).not.toHaveBeenCalled()
   })
 
   it('returns 400 when the target plan is inactive', async () => {

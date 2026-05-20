@@ -1,9 +1,14 @@
 /**
  * POST /api/billing/portal — create a Stripe Customer Portal session.
  *
- * Auth: Bearer JWT. The caller may pass an explicit `customerId`; otherwise
- * the route resolves it from the user's most recent subscription `Payment`
- * by looking up the Stripe subscription and extracting its `customer`.
+ * Auth: Bearer JWT. The portal session is ALWAYS scoped to the authenticated
+ * user: the Stripe customer is resolved server-side from the user's own
+ * subscription `Payment` records (looking up the Stripe subscription and
+ * extracting its `customer`). A caller MAY pass an explicit `customerId`, but
+ * it is accepted ONLY when it matches one of the user's own customers —
+ * otherwise the request is rejected (403). This prevents a portal-hijack where
+ * an attacker passes the victim's `customerId` to open the victim's billing
+ * portal (Wave E finding C-2).
  *
  * Subscriptions created via Connect `transfer_data.destination` live on the
  * platform account — the portal session is created platform-side (no
@@ -44,7 +49,7 @@ const billingPortalBodySchema = z.object({
     .openapi({ description: 'URL the customer is redirected to after leaving the portal' }),
   customerId: z.string().min(1).optional().openapi({
     description:
-      'Stripe customer id. When omitted, the route resolves the customer from the latest subscription payment of the authenticated user.',
+      'Stripe customer id. Accepted ONLY when it belongs to the authenticated user (verified server-side). When omitted, the route resolves the customer from the latest subscription payment of the authenticated user.',
   }),
 })
 
@@ -64,6 +69,14 @@ const errorResponseSchema = z.object({
 // Helpers
 // ----------------------------------------------------------------------------
 
+/**
+ * Upper bound on the number of subscription → Stripe customer lookups we
+ * perform when resolving the authenticated user's owned customer ids. Keeps
+ * the ownership check bounded even for users with many historical
+ * subscriptions; the most recent ones are checked first.
+ */
+const MAX_SUBSCRIPTION_LOOKUPS = 10
+
 /** Default return URL when none is provided by the caller. */
 function resolveDefaultReturnUrl(req: Request): string {
   const origin = req.headers.origin
@@ -82,6 +95,48 @@ function extractCustomerId(subscription: Stripe.Subscription): string | null {
   if (typeof customer === 'string') return customer
   if (customer && typeof customer === 'object' && 'id' in customer) return customer.id
   return null
+}
+
+/**
+ * Resolve the Stripe customer ids that belong to the authenticated user, in
+ * recency order (latest subscription first). The set is derived ONLY from the
+ * user's own subscription `Payment` records — never from the request body —
+ * so it is the authoritative ownership boundary for the portal.
+ *
+ * At most {@link MAX_SUBSCRIPTION_LOOKUPS} Stripe lookups are performed to
+ * bound the cost; the first resolved id is the user's primary customer.
+ *
+ * @internal
+ */
+async function resolveOwnedCustomerIds(stripe: Stripe, userId: string): Promise<string[]> {
+  const Payment = await getPaymentModel()
+  const subscriptions = await Payment.find({
+    userId,
+    type: 'subscription',
+    'metadata.subscriptionId': { $exists: true, $ne: null },
+  })
+    .sort({ createdAt: -1 })
+    .limit(MAX_SUBSCRIPTION_LOOKUPS)
+    .lean()
+
+  const customerIds: string[] = []
+  for (const payment of subscriptions) {
+    const subscriptionId = payment.metadata?.subscriptionId
+    if (!subscriptionId) continue
+    try {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      const resolved = extractCustomerId(subscription)
+      if (resolved && !customerIds.includes(resolved)) {
+        customerIds.push(resolved)
+      }
+    } catch (err) {
+      logger.warn('Failed to retrieve Stripe subscription while resolving owned customers', {
+        subscriptionId,
+        error: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }
+  return customerIds
 }
 
 // ----------------------------------------------------------------------------
@@ -104,34 +159,26 @@ const billingPortalController = async (req: Request, res: Response) => {
 
     const stripe = getStripeInstance()
 
-    let customerId = explicitCustomerId
+    // The customer is ALWAYS resolved from the authenticated user's own
+    // subscriptions — never trusted from the request body. This is the
+    // ownership boundary that prevents a portal hijack.
+    const ownedCustomerIds = await resolveOwnedCustomerIds(stripe, userId)
+    if (ownedCustomerIds.length === 0) {
+      return sendError(res, 'No subscription found for this user', 404)
+    }
 
-    if (!customerId) {
-      const Payment = await getPaymentModel()
-      const latest = await Payment.findOne({
-        userId,
-        type: 'subscription',
-        'metadata.subscriptionId': { $exists: true, $ne: null },
-      })
-        .sort({ createdAt: -1 })
-        .lean()
-
-      const subscriptionId = latest?.metadata?.subscriptionId
-      if (!subscriptionId) {
-        return sendError(res, 'No subscription found for this user', 404)
+    let customerId: string
+    if (explicitCustomerId) {
+      // An explicit customerId is honoured ONLY when it belongs to the
+      // authenticated user. Otherwise the caller is attempting to open
+      // someone else's portal — reject.
+      if (!ownedCustomerIds.includes(explicitCustomerId)) {
+        return sendError(res, 'Customer does not belong to the authenticated user', 403)
       }
-
-      try {
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        const resolved = extractCustomerId(subscription)
-        if (!resolved) {
-          return sendError(res, 'No subscription found for this user', 404)
-        }
-        customerId = resolved
-      } catch (err) {
-        logger.error('Failed to retrieve Stripe subscription for portal session:', err)
-        return sendError(res, 'No subscription found for this user', 404)
-      }
+      customerId = explicitCustomerId
+    } else {
+      // Default: the user's most recent subscription customer.
+      customerId = ownedCustomerIds[0] as string
     }
 
     const session = await stripe.billingPortal.sessions.create({
@@ -154,6 +201,10 @@ docRouter.post('/portal', authJwtOrKey(), billingPortalController, {
   extraResponses: {
     400: { description: 'Validation error', schema: errorResponseSchema },
     401: { description: 'Authentication required', schema: errorResponseSchema },
+    403: {
+      description: 'Customer does not belong to the authenticated user',
+      schema: errorResponseSchema,
+    },
     404: { description: 'No subscription found for this user', schema: errorResponseSchema },
     500: { description: 'Failed to create billing portal session', schema: errorResponseSchema },
   },

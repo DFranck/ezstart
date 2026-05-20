@@ -8,8 +8,8 @@ import {
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
-import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
+import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -44,9 +44,16 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Subscription not found', 404)
     }
 
-    // Ownership check: non-admin users can only cancel their own subscriptions
-    if (!isAdminUser(req) && payment.userId !== req.userId) {
-      return sendError(res, 'You can only cancel your own subscriptions', 403)
+    // Ownership check. A subscriber may always cancel their own subscription
+    // (`payment.userId === req.userId`). Otherwise the caller must be a
+    // superadmin OR an admin of the Application the subscription belongs to —
+    // a binary admin gate would let an app admin cancel another tenant's
+    // subscription (cross-tenant escalation).
+    if (payment.userId !== req.userId) {
+      const access = await resolveTenantAccess(req, payment.projectId)
+      if (!access.allowed) {
+        return sendError(res, 'You can only cancel your own subscriptions', 403)
+      }
     }
 
     await getProvider().cancelSubscription(subscriptionId)

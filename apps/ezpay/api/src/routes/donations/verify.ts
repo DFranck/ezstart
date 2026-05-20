@@ -6,8 +6,9 @@ import {
   sendSuccess,
   sendError,
 } from '@ezstart/api-core'
-import { getPaymentModel } from '../../models/Payment.js'
+import { getPaymentModel, type PaymentDocument } from '../../models/Payment.js'
 import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
+import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -25,10 +26,59 @@ const verifyPaymentParamsSchema = z.object({
 
 const paymentResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
-  payment: z.record(z.unknown()).optional().describe('Payment object with details'),
+  payment: z
+    .record(z.unknown())
+    .optional()
+    .describe(
+      'Payment details. Anonymous / unrelated callers receive a minimal, non-PII projection (status only); the owner / app admin / superadmin receives the full document.'
+    ),
   checkoutUrl: z.string().optional().describe('Stripe checkout URL to redirect user'),
   error: z.string().optional().describe('Error message if operation failed'),
 })
+
+// ========================================
+// Helpers
+// ========================================
+
+/**
+ * Minimal, non-PII projection of a payment. Returned to callers that are NOT
+ * entitled to the full record (anonymous post-checkout redirect, unrelated
+ * authenticated user). Carries ONLY what a success page needs to confirm the
+ * outcome — never `customerEmail`, `customerName`, donor `metadata.message`,
+ * amount, etc.
+ */
+interface PublicPaymentView {
+  paymentId: string
+  type: PaymentDocument['type']
+  status: PaymentDocument['status']
+  completed: boolean
+}
+
+function toPublicPaymentView(payment: PaymentDocument): PublicPaymentView {
+  return {
+    paymentId: payment.paymentId,
+    type: payment.type,
+    status: payment.status,
+    completed: payment.status === 'completed',
+  }
+}
+
+/**
+ * Decide whether the caller may see the full payment document. The session id
+ * is a Stripe-issued opaque token that comes back on an anonymous browser
+ * redirect, so we cannot rely on it as an ownership proof. Full access is
+ * granted only to:
+ *   - the user who made the payment (`payment.userId === req.userId`); or
+ *   - a superadmin / an admin of the Application the payment belongs to.
+ * Everyone else (anonymous donor, unrelated user) gets the public projection.
+ */
+async function callerMayViewFullPayment(req: Request, payment: PaymentDocument): Promise<boolean> {
+  if (payment.userId && req.userId && payment.userId === req.userId) {
+    return true
+  }
+  const access = await resolveTenantAccess(req, payment.projectId)
+  return access.allowed
+}
 
 // ========================================
 // Route Handler
@@ -46,9 +96,15 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Payment not found', 404)
     }
 
+    // Scope the response to the caller's entitlement — never leak PII to an
+    // anonymous / unrelated caller who merely holds the session id (IDOR).
+    const mayViewFull = await callerMayViewFullPayment(req, payment)
+    const respond = (): Response =>
+      sendSuccess(res, mayViewFull ? payment : toPublicPaymentView(payment))
+
     // If already completed, return success
     if (payment.status === 'completed') {
-      return sendSuccess(res, payment)
+      return respond()
     }
 
     // Verify with payment provider to prevent fraud
@@ -67,7 +123,7 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
 
       logger.info(`✅ Payment verified and completed: ${sessionId}`)
 
-      sendSuccess(res, payment)
+      respond()
     } else {
       // Payment not confirmed by provider
       logger.warn(`⚠️ Payment not confirmed: ${sessionId} (status: ${verification.status})`)

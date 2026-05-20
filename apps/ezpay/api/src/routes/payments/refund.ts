@@ -9,9 +9,9 @@ import {
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getProvider } from '../../services/stripe.js'
-import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { auditLogService } from '../../services/audit-log.service.js'
+import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -47,19 +47,25 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
 
     const { paymentId } = validation.data
 
-    // Admin check
-    const isAdmin = isAdminUser(req)
-
-    if (!isAdmin) {
-      return sendError(res, 'Admin access required', 403)
-    }
-
     const payment = await Payment.findOne({
       $or: [{ _id: paymentId }, { paymentId }],
     })
 
     if (!payment) {
       return sendError(res, 'Payment not found', 404)
+    }
+
+    // Authorisation (LOW-a) — `resolveTenantAccess` is the sole authority. A
+    // binary `isAdminUser` gate placed BEFORE this check rejected app-admins
+    // outright, so an app-admin could not refund payments for their OWN
+    // tenant. `resolveTenantAccess` already encodes the correct rule:
+    //   - superadmin → platform-wide access,
+    //   - app-admin / owner → only Applications they own,
+    //   - anyone else (plain user, foreign app-admin) → denied (cross-tenant
+    //     escalation stays a 403, finding C-3).
+    const access = await resolveTenantAccess(req, payment.projectId)
+    if (!access.allowed) {
+      return sendError(res, 'You can only refund payments for your own applications', 403)
     }
 
     if (payment.status === 'refunded') {

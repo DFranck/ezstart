@@ -29,11 +29,11 @@ import {
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
-import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getPlanModel } from '../../models/Plan.js'
 import { getStripeInstance } from '../../services/stripe-connect.js'
+import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 
 export const changePlanRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -105,15 +105,33 @@ const changePlanHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Subscription not found', 404)
     }
 
-    // Ownership — non-admins can only change their own subscription.
-    if (!isAdminUser(req) && payment.userId !== userId) {
-      return sendError(res, 'You can only change your own subscriptions', 403)
+    // Ownership — the subscriber may always change their own subscription.
+    // Otherwise the caller must be a superadmin OR an admin of the Application
+    // the subscription belongs to. A binary admin gate would let an app admin
+    // re-price another tenant's subscription (cross-tenant escalation).
+    if (payment.userId !== userId) {
+      const access = await resolveTenantAccess(req, payment.projectId)
+      if (!access.allowed) {
+        return sendError(res, 'You can only change your own subscriptions', 403)
+      }
     }
 
     // 2. Resolve the new Plan — must be active and mirrored to Stripe.
     const Plan = await getPlanModel()
     const newPlan = await Plan.findById(newPlanId)
     if (!newPlan) {
+      return sendError(res, 'Target plan not found', 404)
+    }
+    // Tenant binding (HIGH-1) — the target Plan MUST belong to the same
+    // Application as the subscription being changed. Without this, a caller
+    // authorised for the subscription's tenant could re-price it onto a
+    // cheaper Plan from ANOTHER tenant (`€1/usd` instead of `€49/eur`) — a
+    // cross-tenant price-arbitrage. The subscription's tenant identity is its
+    // `Payment.projectId` (the ezauth Application slug); `Plan.appName` is the
+    // slug snapshot, so we bind slug-to-slug. Fail-closed when `appName` is
+    // unset or mismatched, and return a generic 404 (NOT 403) so we never
+    // reveal another tenant's catalogue.
+    if (!newPlan.appName || newPlan.appName !== payment.projectId) {
       return sendError(res, 'Target plan not found', 404)
     }
     if (!newPlan.active || newPlan.deletedAt) {
@@ -188,7 +206,7 @@ docRouter.post('/subscriptions/:subscriptionId/change-plan', authJwtOrKey(), cha
   extraResponses: {
     400: { description: 'Validation error', schema: errorResponseSchema },
     401: { description: 'Authentication required', schema: errorResponseSchema },
-    403: { description: 'Not the subscription owner', schema: errorResponseSchema },
+    403: { description: 'Not the subscription owner or app admin', schema: errorResponseSchema },
     404: { description: 'Subscription or plan not found', schema: errorResponseSchema },
   },
 })
