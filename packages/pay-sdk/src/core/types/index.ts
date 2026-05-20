@@ -56,7 +56,11 @@ export type {
   ConnectResumeResponse,
 } from './connect.js'
 
-export type { BillingPortalResponse, BillingPortalRequest } from './billing.js'
+export type {
+  BillingPortalResponse,
+  BillingPortalRequest,
+  SubscriptionStatusSnapshot,
+} from './billing.js'
 
 export type {
   PayApiKeyItem,

@@ -53,6 +53,7 @@ export type {
   // billing portal
   BillingPortalResponse,
   BillingPortalRequest,
+  SubscriptionStatusSnapshot,
   // api keys
   PayApiKeyItem,
   CreatePayApiKeyRequest,

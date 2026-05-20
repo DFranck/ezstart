@@ -45,7 +45,16 @@ export type {
   CreatePayApiKeyRequest,
   CreatePayApiKeyResponse,
   PayApiKeyUsageResponse,
+  BillingPortalResponse,
+  BillingPortalRequest,
+  SubscriptionStatusSnapshot,
 } from './types.js'
+
+// Subscription status derivation (shared between client hook + server companion)
+export {
+  deriveSubscriptionStatus,
+  EMPTY_SUBSCRIPTION_SNAPSHOT,
+} from './derive-subscription-status.js'
 
 // Schemas
 export {

@@ -40,6 +40,31 @@ export { signWebhook } from './webhook-signer.js'
 export type { SignWebhookOptions } from './webhook-signer.js'
 
 // ---------------------------------------------------------------------------
+// SSR bootstrap companions (Clerk / Stripe-style) — kill the loading-skeleton
+// flash by resolving data server-side and passing `initial<X>` props.
+// ---------------------------------------------------------------------------
+
+export { getServerPlans } from './get-server-plans.js'
+export type { GetServerPlansOptions, GetServerPlansLogger } from './get-server-plans.js'
+
+export { getServerKeyConfig } from './get-server-key-config.js'
+export type {
+  GetServerKeyConfigOptions,
+  GetServerKeyConfigLogger,
+} from './get-server-key-config.js'
+
+export { getServerSubscriptionStatus } from './get-server-subscription-status.js'
+export type {
+  GetServerSubscriptionStatusOptions,
+  GetServerSubscriptionStatusLogger,
+} from './get-server-subscription-status.js'
+
+// Re-export the shared snapshot type + derivation helper so server callers
+// can construct / inspect snapshots without reaching into core directly.
+export { deriveSubscriptionStatus, EMPTY_SUBSCRIPTION_SNAPSHOT } from '../core/index.js'
+export type { SubscriptionStatusSnapshot } from '../core/index.js'
+
+// ---------------------------------------------------------------------------
 // Types — payment domain (re-exported from core for server-side consumers)
 // ---------------------------------------------------------------------------
 

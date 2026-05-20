@@ -50,7 +50,14 @@ export type {
   CreatePayApiKeyRequest,
   CreatePayApiKeyResponse,
   PayApiKeyUsageResponse,
+  SubscriptionStatusSnapshot,
 } from './core/types.js'
+
+// Subscription status derivation (shared with the server SSR companion)
+export {
+  deriveSubscriptionStatus,
+  EMPTY_SUBSCRIPTION_SNAPSHOT,
+} from './core/derive-subscription-status.js'
 
 // Schemas
 export {
