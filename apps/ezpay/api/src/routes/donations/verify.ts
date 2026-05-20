@@ -7,6 +7,7 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getPaymentModel, type PaymentDocument } from '../../models/Payment.js'
+import { getProviderForRequest, isStripeModeUnavailableError } from '../../services/stripe.js'
 import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
 import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -107,12 +108,12 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
       return respond()
     }
 
-    // Verify with payment provider to prevent fraud
-    const { getProvider } = await import('../../services/stripe.js')
+    // Verify with the payment provider for the caller's derived mode to
+    // prevent fraud. Fail-closed (503) when the mode's key is missing.
     if (!sessionId) {
       return sendError(res, 'Missing sessionId', 400)
     }
-    const verification = await getProvider().verifyPayment(sessionId)
+    const verification = await getProviderForRequest(req).verifyPayment(sessionId)
 
     // Only mark as completed if provider confirms payment
     if (verification.paid) {
@@ -130,6 +131,10 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
       sendError(res, 'Payment not confirmed', 400)
     }
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Verify payment refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Verify payment error:', error instanceof Error ? error : String(error))
     sendError(res, 'Failed to verify payment')
   }

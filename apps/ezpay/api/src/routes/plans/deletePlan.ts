@@ -96,9 +96,10 @@ const deletePlanHandler = async (req: Request, res: Response) => {
 
     // Fire-and-forget Stripe archival. The helper already swallows its own
     // errors, but wrap in try/catch defensively so any unexpected throw
-    // doesn't break the 200 response.
+    // doesn't break the 200 response. The Plan's Stripe entities live in the
+    // account matching its own partition — archive in that mode.
     try {
-      await archivePlanInStripe(plan)
+      await archivePlanInStripe(plan, plan.isTestMode ? 'test' : 'live')
     } catch (err) {
       logger.warn('deletePlan: archivePlanInStripe unexpected failure', {
         planId: String(plan._id),

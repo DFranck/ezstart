@@ -60,7 +60,7 @@ vi.mock('../../../middleware/auth.js', () => ({
 // the URL was minted with the existing stripeAccountId.
 const accountLinksCreateMock = vi.fn()
 vi.mock('../../../services/stripe-connect.js', () => ({
-  getStripeInstance: () => ({
+  getStripeInstanceForMode: () => ({
     accountLinks: {
       create: accountLinksCreateMock,
     },

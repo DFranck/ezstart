@@ -13,8 +13,9 @@ import { getPlanModel } from '../../models/Plan.js'
 import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplication } from '../../services/ezauth-client.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForMode } from '../../services/stripe-connect.js'
 import { repriceStripePlan, type PlanPriceSnapshot } from '../../services/stripe-plan-sync.js'
+import { isStripeModeUnavailableError } from '../../services/stripe.js'
 import { auditLogService } from '../../services/audit-log.service.js'
 
 export const updatePlanRegistry = new OpenAPIRegistry()
@@ -164,11 +165,20 @@ const updatePlanHandler = async (req: Request, res: Response) => {
 
     const productMetaChanged = updates.name !== undefined || updates.description !== undefined
 
+    // The Stripe Product/Price for this Plan lives in the account matching the
+    // Plan's own partition (`isTestMode`) — derive the mode from the existing
+    // row, NOT the request, so a reprice always hits the account that holds it.
+    const planMode = plan.isTestMode ? 'test' : 'live'
+
     if (priceChanged) {
       try {
-        const newPriceId = await repriceStripePlan(plan, prevSnapshot)
+        const newPriceId = await repriceStripePlan(plan, prevSnapshot, planMode)
         plan.stripePriceId = newPriceId
       } catch (err) {
+        if (isStripeModeUnavailableError(err)) {
+          logger.error(`updatePlan reprice refused — ${err.message}`)
+          return sendError(res, `Payments are not available in ${err.mode} mode`, err.statusCode)
+        }
         logger.error('updatePlan: Stripe reprice failed', err instanceof Error ? err : String(err))
         return sendError(res, 'Stripe sync failed, please retry', 502)
       }
@@ -176,7 +186,7 @@ const updatePlanHandler = async (req: Request, res: Response) => {
 
     if (productMetaChanged && plan.stripeProductId) {
       try {
-        const stripe = getStripeInstance()
+        const stripe = getStripeInstanceForMode(planMode)
         await stripe.products.update(plan.stripeProductId, {
           name: plan.name,
           description: plan.description,

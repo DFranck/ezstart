@@ -23,7 +23,7 @@ const stubStripe = {
 }
 
 vi.mock('../../services/stripe-connect.js', () => ({
-  getStripeInstance: () => stubStripe,
+  getStripeInstanceForMode: () => stubStripe,
 }))
 
 const { syncPlanToStripe, repriceStripePlan, archivePlanInStripe } =

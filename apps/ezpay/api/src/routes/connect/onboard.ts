@@ -9,7 +9,8 @@ import {
 } from '@ezstart/api-core'
 import { getApiUrl } from '@ezstart/config'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForRequest } from '../../services/stripe-connect.js'
+import { resolveRequestMode, isStripeModeUnavailableError } from '../../services/stripe.js'
 import { getApplication } from '../../services/ezauth-client.js'
 import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
@@ -109,7 +110,13 @@ const onboardHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Application already has a connected account', 409)
     }
 
-    const stripe = getStripeInstance()
+    // Connect account is created in the Stripe account matching the caller's
+    // derived mode (test/live). Fail-closed (503) when the mode's key is
+    // missing — a test onboard must never create an account on the live
+    // platform (Wave E MED-2).
+    const mode = resolveRequestMode(req)
+    const isTestMode = mode === 'test'
+    const stripe = getStripeInstanceForRequest(req)
 
     // Create Stripe Connect account (standard or express)
     const accountParams: Stripe.AccountCreateParams =
@@ -146,6 +153,7 @@ const onboardHandler = async (req: Request, res: Response) => {
       chargesEnabled: false,
       payoutsEnabled: false,
       defaultFeePercent: 3,
+      isTestMode,
     })
 
     // Create account link for onboarding. Both `refresh_url` and `return_url`
@@ -178,6 +186,10 @@ const onboardHandler = async (req: Request, res: Response) => {
       connectedAccount,
     })
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Connect onboard refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Connect onboard error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to create connected account')
   }

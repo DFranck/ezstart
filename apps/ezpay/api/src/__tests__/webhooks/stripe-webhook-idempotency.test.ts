@@ -27,11 +27,10 @@ import type { WebhookEvent } from '@ezstart/pay-sdk/providers'
 // the "cannot access before initialization" hoisting trap.
 // ========================================
 vi.mock('../../services/stripe.js', () => {
-  const verify = vi.fn<(payload: unknown, sig: string) => WebhookEvent>()
-  const mockProvider = { verifyWebhookSignature: verify }
+  const verify =
+    vi.fn<(payload: unknown, sig: string) => { event: WebhookEvent; mode: 'test' | 'live' }>()
   return {
-    getProvider: () => mockProvider,
-    registry: { getDefault: () => mockProvider },
+    verifyStripeWebhook: verify,
   }
 })
 
@@ -41,7 +40,7 @@ vi.mock('../../services/ezauth-subscription-webhook.js', () => ({
 }))
 
 import webhookRouter from '../../routes/webhooks.js'
-import { getProvider } from '../../services/stripe.js'
+import { verifyStripeWebhook } from '../../services/stripe.js'
 import { getPaymentModel, type PaymentDocument } from '../../models/Payment.js'
 import { getPromoModel, type PromoDocument } from '../../models/Promo.js'
 import {
@@ -50,8 +49,8 @@ import {
   type WebhookEventDocument,
 } from '../../models/WebhookEvent.js'
 
-// Typed handle on the mocked verifyWebhookSignature.
-const verifyWebhookSignature = vi.mocked(getProvider().verifyWebhookSignature)
+// Typed handle on the mocked verifyStripeWebhook.
+const verifyWebhookSignature = vi.mocked(verifyStripeWebhook)
 
 // ========================================
 // Express handler harness — pull the POST /webhooks/stripe handler off the
@@ -117,7 +116,12 @@ async function invokeWebhook(opts: {
   event: WebhookEvent
   signature?: string
 }): Promise<FakeResponse> {
-  verifyWebhookSignature.mockReturnValueOnce(opts.event)
+  // verifyStripeWebhook now returns { event, mode } — the mode is the verified
+  // secret's mode. For these tests we derive it from the event's livemode so
+  // the existing scenarios (which set livemode to drive isTestMode) keep their
+  // semantics: a livemode:true event is a live delivery, livemode:false a test.
+  const mode = opts.event.livemode ? 'live' : 'test'
+  verifyWebhookSignature.mockReturnValueOnce({ event: opts.event, mode })
   const handler = getWebhookHandler()
   const res = makeRes()
   await handler(makeReq('raw', opts.signature ?? 'sig_valid'), res.res)

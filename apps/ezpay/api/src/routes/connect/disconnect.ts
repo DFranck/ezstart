@@ -40,7 +40,8 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForMode } from '../../services/stripe-connect.js'
+import { isStripeModeUnavailableError } from '../../services/stripe.js'
 import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { auditLogService } from '../../services/audit-log.service.js'
@@ -140,24 +141,31 @@ const disconnectHandler = async (req: Request, res: Response) => {
       accountType,
       isPlatformAccount,
       applicationId: accountApplicationId,
+      isTestMode,
     } = account
 
     // Attempt Stripe deletion for external accounts only. We never delete the
     // shared platform account (would nuke every platform-owned app). For
     // external accounts we proceed even if Stripe refuses — the user's intent
-    // is to disconnect from EZPay's side.
+    // is to disconnect from EZPay's side. The Stripe account is selected by the
+    // ConnectedAccount's own partition (test/live); if that mode's key is
+    // unavailable we log + continue with local cleanup rather than touch the
+    // wrong account.
     let stripeDeleted: boolean | null = null
     if (!isPlatformAccount) {
       try {
-        const stripe = getStripeInstance()
+        const stripe = getStripeInstanceForMode(isTestMode ? 'test' : 'live')
         await stripe.accounts.del(stripeAccountId)
         stripeDeleted = true
       } catch (err) {
         stripeDeleted = false
+        const reason = isStripeModeUnavailableError(err)
+          ? `${err.mode}-mode Stripe key unavailable`
+          : err instanceof Error
+            ? err.message
+            : String(err)
         logger.warn(
-          `Stripe accounts.del failed for ${stripeAccountId} (continuing with local cleanup): ${
-            err instanceof Error ? err.message : String(err)
-          }`
+          `Stripe accounts.del failed for ${stripeAccountId} (continuing with local cleanup): ${reason}`
         )
       }
     }

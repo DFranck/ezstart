@@ -32,7 +32,8 @@ import { z } from 'zod'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getPlanModel } from '../../models/Plan.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForMode } from '../../services/stripe-connect.js'
+import { isStripeModeUnavailableError } from '../../services/stripe.js'
 import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 
 export const changePlanRegistry = new OpenAPIRegistry()
@@ -141,8 +142,11 @@ const changePlanHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Target plan is not linked to a Stripe price', 400)
     }
 
-    // 3. Retrieve the existing Stripe subscription + item.
-    const stripe = getStripeInstance()
+    // 3. Retrieve the existing Stripe subscription + item. The subscription
+    //    lives in the Stripe account matching the original Payment's partition
+    //    (test/live) — derive the mode from the row, NOT the request, so the
+    //    re-price hits the account that owns the subscription.
+    const stripe = getStripeInstanceForMode(payment.isTestMode ? 'test' : 'live')
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
     const firstItem = subscription.items?.data?.[0]
     if (!firstItem) {
@@ -190,6 +194,10 @@ const changePlanHandler = async (req: Request, res: Response) => {
       newStripePriceId: newPlan.stripePriceId,
     })
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Change plan refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Change plan error:', error instanceof Error ? error : String(error))
     return sendError(
       res,

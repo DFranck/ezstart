@@ -11,7 +11,11 @@ import {
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { getPlanModel } from '../../models/Plan.js'
-import { getProvider } from '../../services/stripe.js'
+import {
+  getProviderForRequest,
+  resolveRequestMode,
+  isStripeModeUnavailableError,
+} from '../../services/stripe.js'
 import { validatePromo, calculateDiscount } from '../../services/promo.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
@@ -190,7 +194,11 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
     // externally.
     const automaticTax = process.env.STRIPE_AUTOMATIC_TAX !== 'false'
 
-    const provider = getProvider()
+    // Select the Stripe provider for the caller's derived mode. A test key
+    // (`ez_pk_test_*`) routes through the test Stripe account; a live key
+    // through the live account. Fail-closed (503) when the mode's key is
+    // missing — never silently downgrade a test request to the live account.
+    const provider = getProviderForRequest(req)
     const session = await provider.createSubscriptionCheckout({
       amount, // FULL server-resolved price — provider handles discount via native mechanism (coupon)
       currency,
@@ -229,8 +237,11 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
           : undefined,
     })
 
-    // Detect live vs test mode from Stripe key
-    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
+    // Test/live partition is driven by the CALLER's key (`req.derivedMode`),
+    // never by the process env prefix — otherwise a test key on a live process
+    // would write live-tagged rows (Wave E MED-2).
+    const mode = resolveRequestMode(req)
+    const isTestMode = mode === 'test'
 
     const payment = await Payment.create({
       projectId,
@@ -244,8 +255,8 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       provider: 'stripe',
       paymentId: session.sessionId,
       status: 'pending',
-      liveMode: isLiveMode,
-      isTestMode: !isLiveMode,
+      liveMode: !isTestMode,
+      isTestMode,
       metadata: {
         planId,
         planName,
@@ -263,6 +274,12 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
+    // Fail-closed: the caller's mode (test/live) has no Stripe key configured.
+    // Surface a 503 — NEVER fall back to the other mode's account.
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Subscription checkout refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     const stripeMapped = mapStripeError(error)
     if (stripeMapped) {
       logger.warn(

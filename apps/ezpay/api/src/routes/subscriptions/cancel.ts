@@ -7,7 +7,7 @@ import {
   sendError,
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { getProvider } from '../../services/stripe.js'
+import { getProviderForRequest, isStripeModeUnavailableError } from '../../services/stripe.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { resolveTenantAccess } from '../../services/tenant-ownership.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -56,7 +56,10 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
       }
     }
 
-    await getProvider().cancelSubscription(subscriptionId)
+    // Use the provider for the caller's derived mode so the Stripe cancel hits
+    // the same account that created the subscription. Fail-closed (503) when
+    // the mode's key is missing — never downgrade across the test/live boundary.
+    await getProviderForRequest(req).cancelSubscription(subscriptionId)
 
     // Mark as canceling at period end — actual cancellation happens via webhook
     // when Stripe fires customer.subscription.deleted at end of billing period
@@ -66,6 +69,10 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { cancelled: true })
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Cancel subscription refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Cancel subscription error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to cancel subscription')
   }

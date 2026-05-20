@@ -48,15 +48,27 @@ describe('WebhookEvent — boot-time index build (MED-1)', () => {
     }
   })
 
-  it('builds the unique eventId index so the boot mechanism is idempotent', async () => {
+  it('builds the unique {eventId,isTestMode} compound index so the boot mechanism is idempotent', async () => {
     // Boot step (mirrors index.ts onReady).
     await ensureWebhookEventIndexes()
 
     const indexes = await WebhookEvent.collection.indexes()
-    const eventIdIndex = indexes.find(idx => idx.key?.eventId === 1)
+    // Dedup is mode-scoped (Wave E MED-2): the uniqueness key is the COMPOUND
+    // { eventId, isTestMode } so test + live event ids are independent.
+    const compoundIndex = indexes.find(idx => idx.key?.eventId === 1 && idx.key?.isTestMode === 1)
 
-    expect(eventIdIndex, 'unique eventId index must exist after boot').toBeDefined()
-    expect(eventIdIndex?.unique).toBe(true)
+    expect(
+      compoundIndex,
+      'unique {eventId,isTestMode} compound index must exist after boot'
+    ).toBeDefined()
+    expect(compoundIndex?.unique).toBe(true)
+
+    // No legacy single-field unique `eventId_1` index should remain.
+    const legacyIndex = indexes.find(
+      idx =>
+        idx.name === 'eventId_1' || (idx.key?.eventId === 1 && idx.key?.isTestMode === undefined)
+    )
+    expect(legacyIndex, 'legacy single-field eventId index must NOT exist').toBeUndefined()
   })
 
   it('is idempotent — re-running at boot does not throw', async () => {

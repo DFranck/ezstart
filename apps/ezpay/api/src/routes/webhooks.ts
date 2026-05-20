@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { logger } from '@ezstart/logger/server'
 import { Router, sendSuccess, sendError } from '@ezstart/api-core'
-import { getProvider } from '../services/stripe.js'
+import { verifyStripeWebhook } from '../services/stripe.js'
 import { getPaymentModel } from '../models/Payment.js'
 import { getPlanModel } from '../models/Plan.js'
 import { claimWebhookEvent } from '../models/WebhookEvent.js'
@@ -75,22 +75,33 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
     return sendError(res, 'Missing webhook signature', 400)
   }
 
-  const provider = getProvider()
   let event
+  let mode
 
   try {
     // Signature verification is timing-safe: the Stripe SDK
     // (`stripe.webhooks.constructEvent`, see pay-sdk StripeProvider) computes
     // the HMAC and compares it with a constant-time `crypto.timingSafeEqual`.
     // We NEVER compare signatures with `===` ourselves.
-    event = provider.verifyWebhookSignature(req.body, sig)
+    //
+    // Mode-aware (Wave E MED-2 / HACK E1.5): Stripe signs test events with the
+    // test secret and live events with the live secret. `verifyStripeWebhook`
+    // tries both configured secrets and returns the event PLUS the `mode` of
+    // the secret that actually verified the signature. The dataset to write is
+    // derived from that VERIFIED mode — never from the payload's self-declared
+    // `livemode` (which an attacker holding the test secret could forge to
+    // `true` and mutate LIVE data).
+    ;({ event, mode } = verifyStripeWebhook(req.body, sig))
   } catch (err) {
     logger.error('Webhook signature verification failed:', err instanceof Error ? err : String(err))
     return sendError(res, 'Invalid signature', 400)
   }
 
-  // Extract livemode from webhook event
-  const eventLiveMode = event.livemode ?? false
+  // The mode dataset is bound to the VERIFYING secret (`mode`), not the
+  // payload's `livemode` field — a test-secret-signed event can only ever
+  // write test-tagged rows, a live-secret-signed event live rows.
+  const eventLiveMode = mode === 'live'
+  const eventIsTestMode = !eventLiveMode
 
   // Idempotency gate — claim the Stripe event id BEFORE running any
   // side-effect. Stripe delivers at-least-once (retries on non-2xx + manual
@@ -101,9 +112,14 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
   if (idempotencyKey) {
     let firstSeen: boolean
     try {
+      // Dedup is scoped by mode — Stripe issues test and live event ids from
+      // independent namespaces, so the ledger uniqueness is on
+      // `{ eventId, isTestMode }`. This keeps a (theoretical) test/live id
+      // collision from one mode short-circuiting the other mode's delivery.
       firstSeen = await claimWebhookEvent(idempotencyKey, {
         provider: 'stripe',
         eventType: event.type,
+        isTestMode: eventIsTestMode,
       })
     } catch (claimErr) {
       // The idempotency store is unreachable. Do NOT process blindly (would

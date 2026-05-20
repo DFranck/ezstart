@@ -27,7 +27,10 @@ import { getPaymentModel, type PaymentDocument } from '../../../models/Payment.j
 const refundPaymentMock = vi.fn()
 
 vi.mock('../../../services/stripe.js', () => ({
-  getProvider: () => ({ refundPayment: refundPaymentMock }),
+  getProviderForRequest: () => ({ refundPayment: refundPaymentMock }),
+  resolveRequestMode: (req: { derivedMode?: string }) =>
+    req.derivedMode === 'test' ? 'test' : 'live',
+  isStripeModeUnavailableError: () => false,
 }))
 
 let currentUserId: string | undefined = 'owner-1'

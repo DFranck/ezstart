@@ -15,15 +15,9 @@ import type { Model } from 'mongoose'
 // ========================================
 
 // Mock the stripe service before importing the webhook route
-vi.mock('../../services/stripe.js', () => {
-  const mockProvider = {
-    verifyWebhookSignature: vi.fn(),
-  }
-  return {
-    getProvider: () => mockProvider,
-    registry: { getDefault: () => mockProvider },
-  }
-})
+vi.mock('../../services/stripe.js', () => ({
+  verifyStripeWebhook: vi.fn(),
+}))
 
 describe('Stripe Webhook Handler', () => {
   let PaymentModel: Model<PaymentDocument>
@@ -125,10 +119,7 @@ describe('Stripe Webhook Handler', () => {
         provider: 'stripe',
       })
 
-      await PaymentModel.updateOne(
-        { paymentId: 'cs_test_expired' },
-        { status: 'cancelled' }
-      )
+      await PaymentModel.updateOne({ paymentId: 'cs_test_expired' }, { status: 'cancelled' })
 
       const payment = await PaymentModel.findOne({ paymentId: 'cs_test_expired' })
       expect(payment?.status).toBe('cancelled')

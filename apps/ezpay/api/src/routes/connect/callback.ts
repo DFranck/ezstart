@@ -2,7 +2,8 @@ import { logger } from '@ezstart/logger/server'
 import { Router, sendError } from '@ezstart/api-core'
 import { getWebUrl } from '@ezstart/config'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForMode } from '../../services/stripe-connect.js'
+import { isStripeModeUnavailableError } from '../../services/stripe.js'
 import { verifyConnectState, ConnectStateError } from '../../utils/connect-state.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 
@@ -66,10 +67,21 @@ router.get('/connect/callback', async (req: Request, res: Response) => {
       throw err
     }
 
-    const stripe = getStripeInstance()
-    const account = await stripe.accounts.retrieve(accountId)
-
     const ConnectedAccount = await getConnectedAccountModel()
+
+    // Resolve the ConnectedAccount's own partition mode FIRST — this callback
+    // is a Stripe redirect with no API key, so we cannot derive the mode from
+    // the request. Retrieve the account from the Stripe account (test vs live)
+    // that actually owns it; fail-closed when that mode's key is unavailable.
+    const ownerRow = await ConnectedAccount.findOne({
+      stripeAccountId: accountId,
+      applicationId: trustedApplicationId,
+    }).lean()
+    if (!ownerRow) {
+      return sendError(res, 'Invalid or missing state', 400)
+    }
+    const stripe = getStripeInstanceForMode(ownerRow.isTestMode ? 'test' : 'live')
+    const account = await stripe.accounts.retrieve(accountId)
 
     const status = resolveAccountStatus(
       account.charges_enabled ?? false,
@@ -119,6 +131,10 @@ router.get('/connect/callback', async (req: Request, res: Response) => {
 
     return res.redirect(302, target)
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Connect callback refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Connect callback error:', error instanceof Error ? error : String(error))
     return sendError(res, error instanceof Error ? error.message : 'Failed to process callback')
   }

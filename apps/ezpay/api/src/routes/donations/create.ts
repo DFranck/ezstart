@@ -10,7 +10,11 @@ import {
 } from '@ezstart/api-core'
 import { URLS, getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
-import { getProvider } from '../../services/stripe.js'
+import {
+  getProviderForRequest,
+  resolveRequestMode,
+  isStripeModeUnavailableError,
+} from '../../services/stripe.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
 import { authOptionalJwtOrKey } from '../../middleware/unified-auth.js'
@@ -132,9 +136,12 @@ const createDonationHandler = async (req: Request, res: Response) => {
     // Use the authenticated user ID from JWT if available, never from the request body
     const userId = req.userId
 
-    // Detect live vs test mode from Stripe key
-    const livePrefix = 'sk_' + 'live_'
-    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith(livePrefix)
+    // Test/live partition is driven by the CALLER's key (`req.derivedMode`),
+    // never by the process env prefix (Wave E MED-2). Applies to BOTH the
+    // testimonial (€0, no Stripe) and the Stripe-backed donation path so a
+    // test key never writes a live-tagged donation row.
+    const mode = resolveRequestMode(req)
+    const isTestMode = mode === 'test'
 
     // Testimonial: bypass Stripe for €0 donations, save directly to DB
     if (amount === 0) {
@@ -152,8 +159,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
         customerName: donorName || undefined,
         customerEmail: donorEmail || undefined,
         isAnonymous: isAnonymous || false,
-        liveMode: isLiveMode,
-        isTestMode: !isLiveMode,
+        liveMode: !isTestMode,
+        isTestMode,
         metadata: {
           message: message || undefined,
           isPublic: isPublic !== false,
@@ -218,8 +225,9 @@ const createDonationHandler = async (req: Request, res: Response) => {
     // Stripe automatic tax — opt-out via env var. See subscribe route for details.
     const automaticTax = process.env.STRIPE_AUTOMATIC_TAX !== 'false'
 
-    // Create checkout session via provider
-    const provider = getProvider()
+    // Create checkout session via the provider for the caller's derived mode.
+    // Fail-closed when the mode's key is missing — see services/stripe.ts.
+    const provider = getProviderForRequest(req)
     const session = await provider.createCheckoutSession({
       amount: validatedAmount,
       currency: validatedCurrency,
@@ -260,8 +268,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
       provider: 'stripe',
       paymentId: session.sessionId,
       status: 'pending',
-      liveMode: isLiveMode,
-      isTestMode: !isLiveMode,
+      liveMode: !isTestMode,
+      isTestMode,
       metadata: {
         message,
         isPublic,
@@ -273,6 +281,11 @@ const createDonationHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
+    // Fail-closed: the caller's mode has no Stripe key — 503, never downgrade.
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Donation checkout refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     const stripeMapped = mapStripeError(error)
     if (stripeMapped) {
       logger.warn(

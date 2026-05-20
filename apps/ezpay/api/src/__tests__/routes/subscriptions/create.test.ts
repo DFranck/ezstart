@@ -23,9 +23,12 @@ import type { EzauthApplication } from '../../../services/ezauth-client.js'
 // --- Provider mock -----------------------------------------------------------
 const createSubscriptionCheckoutMock = vi.fn()
 vi.mock('../../../services/stripe.js', () => ({
-  getProvider: () => ({
+  getProviderForRequest: () => ({
     createSubscriptionCheckout: createSubscriptionCheckoutMock,
   }),
+  resolveRequestMode: (req: { derivedMode?: string }) =>
+    req.derivedMode === 'test' ? 'test' : 'live',
+  isStripeModeUnavailableError: () => false,
 }))
 
 // --- ezauth-client mock (ownership source-of-truth) --------------------------

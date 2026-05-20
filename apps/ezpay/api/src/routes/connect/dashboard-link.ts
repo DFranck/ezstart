@@ -8,7 +8,8 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForMode } from '../../services/stripe-connect.js'
+import { isStripeModeUnavailableError } from '../../services/stripe.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -60,7 +61,8 @@ const dashboardLinkHandler = async (req: Request, res: Response) => {
       return sendError(res, 'Connected account is not active. Complete onboarding first.', 400)
     }
 
-    const stripe = getStripeInstance()
+    // Use the Stripe account matching the ConnectedAccount's own partition.
+    const stripe = getStripeInstanceForMode(account.isTestMode ? 'test' : 'live')
 
     // Express accounts use createLoginLink; Standard accounts manage their own Stripe dashboard
     if (account.accountType === 'express') {
@@ -73,6 +75,10 @@ const dashboardLinkHandler = async (req: Request, res: Response) => {
       })
     }
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Dashboard link refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Dashboard link error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to create dashboard link')
   }

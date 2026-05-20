@@ -29,7 +29,7 @@ vi.mock('../../../services/stripe-plan-sync.js', () => ({
 const productUpdateMock = vi.fn()
 
 vi.mock('../../../services/stripe-connect.js', () => ({
-  getStripeInstance: () => ({
+  getStripeInstanceForMode: () => ({
     products: { update: productUpdateMock },
     prices: { update: vi.fn(), create: vi.fn() },
   }),

@@ -31,7 +31,8 @@ import Stripe from 'stripe'
 
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getPaymentModel } from '../../models/Payment.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForRequest } from '../../services/stripe-connect.js'
+import { isStripeModeUnavailableError } from '../../services/stripe.js'
 
 export const billingPortalRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -157,7 +158,9 @@ const billingPortalController = async (req: Request, res: Response) => {
 
     const { returnUrl, customerId: explicitCustomerId } = parsed.data
 
-    const stripe = getStripeInstance()
+    // Resolve the Stripe account for the caller's derived mode — the portal
+    // for a test subscription opens on the test account, never the live one.
+    const stripe = getStripeInstanceForRequest(req)
 
     // The customer is ALWAYS resolved from the authenticated user's own
     // subscriptions — never trusted from the request body. This is the
@@ -188,6 +191,10 @@ const billingPortalController = async (req: Request, res: Response) => {
 
     return sendSuccess(res, { url: session.url })
   } catch (error: unknown) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Billing portal refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Billing portal session error:', error)
     return sendError(res, 'Failed to create billing portal session', 500)
   }

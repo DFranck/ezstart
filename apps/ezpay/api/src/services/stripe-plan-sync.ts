@@ -15,7 +15,8 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { getStripeInstance } from './stripe-connect.js'
+import { getStripeInstanceForMode } from './stripe-connect.js'
+import type { StripeMode } from './stripe.js'
 import type { PlanDocument } from '../models/Plan.js'
 
 export interface StripeSyncResult {
@@ -47,15 +48,24 @@ function toStripeInterval(interval: string | undefined): PlanInterval {
  * mirror a Plan. Safe to call multiple times with the same Plan id thanks to
  * the deterministic idempotency keys.
  *
+ * The `mode` selects the Stripe account the Plan is mirrored to — a test-mode
+ * plan is published to the test Stripe account, a live plan to the live
+ * account. Defaults to `'live'` for callers that manage the catalogue from the
+ * cookie-auth dashboard (whose `req.derivedMode` defaults to `'live'`) and for
+ * background seed scripts.
+ *
  * @example
  * const plan = await Plan.create({...})
- * const { stripeProductId, stripePriceId } = await syncPlanToStripe(plan)
+ * const { stripeProductId, stripePriceId } = await syncPlanToStripe(plan, 'live')
  * plan.stripeProductId = stripeProductId
  * plan.stripePriceId = stripePriceId
  * await plan.save()
  */
-export async function syncPlanToStripe(plan: PlanDocument): Promise<StripeSyncResult> {
-  const stripe = getStripeInstance()
+export async function syncPlanToStripe(
+  plan: PlanDocument,
+  mode: StripeMode = 'live'
+): Promise<StripeSyncResult> {
+  const stripe = getStripeInstanceForMode(mode)
   const planId = String(plan._id)
 
   const product = await stripe.products.create(
@@ -98,8 +108,11 @@ export async function syncPlanToStripe(plan: PlanDocument): Promise<StripeSyncRe
  * caller already committed the DB-side soft delete and we don't want a
  * downstream Stripe outage to block the delete response.
  */
-export async function archivePlanInStripe(plan: PlanDocument): Promise<void> {
-  const stripe = getStripeInstance()
+export async function archivePlanInStripe(
+  plan: PlanDocument,
+  mode: StripeMode = 'live'
+): Promise<void> {
+  const stripe = getStripeInstanceForMode(mode)
 
   if (plan.stripePriceId) {
     try {
@@ -142,9 +155,10 @@ export async function archivePlanInStripe(plan: PlanDocument): Promise<void> {
  */
 export async function repriceStripePlan(
   plan: PlanDocument,
-  prev: PlanPriceSnapshot
+  prev: PlanPriceSnapshot,
+  mode: StripeMode = 'live'
 ): Promise<string> {
-  const stripe = getStripeInstance()
+  const stripe = getStripeInstanceForMode(mode)
   const planId = String(plan._id)
 
   if (!plan.stripeProductId) {

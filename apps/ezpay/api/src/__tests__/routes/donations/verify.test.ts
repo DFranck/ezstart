@@ -20,7 +20,10 @@ import { getPaymentModel, type PaymentDocument } from '../../../models/Payment.j
 const verifyPaymentMock = vi.fn()
 
 vi.mock('../../../services/stripe.js', () => ({
-  getProvider: () => ({ verifyPayment: verifyPaymentMock }),
+  getProviderForRequest: () => ({ verifyPayment: verifyPaymentMock }),
+  resolveRequestMode: (req: { derivedMode?: string }) =>
+    req.derivedMode === 'test' ? 'test' : 'live',
+  isStripeModeUnavailableError: () => false,
 }))
 
 // Auth state — undefined userId simulates an anonymous post-checkout redirect.

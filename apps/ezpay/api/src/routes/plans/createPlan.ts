@@ -14,6 +14,7 @@ import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { getApplication } from '../../services/ezauth-client.js'
 import { syncPlanToStripe } from '../../services/stripe-plan-sync.js'
+import { resolveRequestMode, isStripeModeUnavailableError } from '../../services/stripe.js'
 import { auditLogService } from '../../services/audit-log.service.js'
 
 export const createPlanRegistry = new OpenAPIRegistry()
@@ -117,17 +118,30 @@ const createPlanHandler = async (req: Request, res: Response) => {
 
     const Plan = await getPlanModel()
 
+    // Test/live partition driven by the caller's key (`req.derivedMode`).
+    // A test-mode admin creates test-tagged Plans mirrored to the test Stripe
+    // account; a live-mode admin (cookie-auth default) creates live Plans.
+    const mode = resolveRequestMode(req)
+    const isTestMode = mode === 'test'
+
     // Create the Plan row first so we have a stable `_id` for Stripe
     // idempotency keys. If the Stripe sync fails, we roll back the DB row.
     const plan = await Plan.create({
       ...data,
       appName: application.slug,
+      isTestMode,
     })
 
     let stripeIds: { stripeProductId: string; stripePriceId: string }
     try {
-      stripeIds = await syncPlanToStripe(plan)
+      stripeIds = await syncPlanToStripe(plan, mode)
     } catch (err) {
+      // Fail-closed: the caller's mode has no Stripe key — 503, never downgrade.
+      if (isStripeModeUnavailableError(err)) {
+        await plan.deleteOne()
+        logger.error(`createPlan refused — ${err.message}`)
+        return sendError(res, `Payments are not available in ${err.mode} mode`, err.statusCode)
+      }
       logger.error(
         'createPlan: Stripe sync failed, rolling back',
         err instanceof Error ? err : String(err)

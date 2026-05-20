@@ -8,7 +8,7 @@ import {
   sendValidationError,
 } from '@ezstart/api-core'
 import { getPaymentModel } from '../../models/Payment.js'
-import { getProvider } from '../../services/stripe.js'
+import { getProviderForRequest, isStripeModeUnavailableError } from '../../services/stripe.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { auditLogService } from '../../services/audit-log.service.js'
 import { resolveTenantAccess } from '../../services/tenant-ownership.js'
@@ -76,7 +76,10 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
       return sendError(res, 'No payment intent found — cannot refund', 400)
     }
 
-    await getProvider().refundPayment(payment.stripePaymentIntentId)
+    // Refund through the provider for the caller's derived mode — a test-mode
+    // refund hits the test Stripe account, a live refund the live account.
+    // Fail-closed (503) when the mode's key is missing.
+    await getProviderForRequest(req).refundPayment(payment.stripePaymentIntentId)
 
     payment.status = 'refunded'
     await payment.save()
@@ -100,6 +103,10 @@ const refundPaymentHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, payment)
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Refund refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Refund payment error:', error instanceof Error ? error : String(error))
     sendError(res, error instanceof Error ? error.message : 'Failed to refund payment')
   }

@@ -27,7 +27,7 @@ process.env.JWT_SECRET = TEST_SECRET
 // `retrieveMock` so tests can assert Stripe was (or wasn't) hit.
 const retrieveMock = vi.fn()
 vi.mock('../../../services/stripe-connect.js', () => ({
-  getStripeInstance: () => ({
+  getStripeInstanceForMode: () => ({
     accounts: {
       retrieve: retrieveMock,
     },

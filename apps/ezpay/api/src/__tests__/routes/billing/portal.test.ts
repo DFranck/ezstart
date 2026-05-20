@@ -18,17 +18,19 @@ import type { Model } from 'mongoose'
 const billingPortalCreateMock = vi.fn()
 const subscriptionsRetrieveMock = vi.fn()
 
+const stripeStub = {
+  billingPortal: {
+    sessions: {
+      create: billingPortalCreateMock,
+    },
+  },
+  subscriptions: {
+    retrieve: subscriptionsRetrieveMock,
+  },
+}
 vi.mock('../../../services/stripe-connect.js', () => ({
-  getStripeInstance: () => ({
-    billingPortal: {
-      sessions: {
-        create: billingPortalCreateMock,
-      },
-    },
-    subscriptions: {
-      retrieve: subscriptionsRetrieveMock,
-    },
-  }),
+  getStripeInstanceForRequest: () => stripeStub,
+  getStripeInstanceForMode: () => stripeStub,
 }))
 
 let currentUserId: string | undefined = 'user-1'

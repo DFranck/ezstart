@@ -30,7 +30,8 @@ import {
 } from '@ezstart/api-core'
 import { getApiUrl } from '@ezstart/config'
 import { getConnectedAccountModel } from '../../models/ConnectedAccount.js'
-import { getStripeInstance } from '../../services/stripe-connect.js'
+import { getStripeInstanceForMode } from '../../services/stripe-connect.js'
+import { isStripeModeUnavailableError } from '../../services/stripe.js'
 import { isAdminUser } from '../../middleware/auth.js'
 import { authJwtOrKey } from '../../middleware/unified-auth.js'
 import { generateConnectState } from '../../utils/connect-state.js'
@@ -132,8 +133,9 @@ const resumeHandler = async (req: Request, res: Response) => {
     // Generate a fresh Stripe account link. We re-use the existing
     // stripeAccountId so the user lands back in their half-filled Stripe
     // form — Stripe's account_onboarding link continues exactly where they
-    // left off.
-    const stripe = getStripeInstance()
+    // left off. Use the Stripe account matching the ConnectedAccount's own
+    // partition (test/live) so the link resolves on the right account.
+    const stripe = getStripeInstanceForMode(account.isTestMode ? 'test' : 'live')
     const baseUrl = getApiUrl('ezpay')
     const localeQuery = locale ? `&locale=${encodeURIComponent(locale)}` : ''
     // Signed state — see `routes/connect/onboard.ts` for rationale.
@@ -181,6 +183,10 @@ const resumeHandler = async (req: Request, res: Response) => {
       expiresInMs: Math.max(0, RESUME_EXPIRY_MS - ageMs),
     })
   } catch (error) {
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Connect resume refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     logger.error('Connect resume error:', error instanceof Error ? error : String(error))
     return sendError(res, error instanceof Error ? error.message : 'Failed to resume onboarding')
   }

@@ -17,7 +17,7 @@ const subscriptionsRetrieveMock = vi.fn()
 const subscriptionsUpdateMock = vi.fn()
 
 vi.mock('../../../services/stripe-connect.js', () => ({
-  getStripeInstance: () => ({
+  getStripeInstanceForMode: () => ({
     subscriptions: {
       retrieve: subscriptionsRetrieveMock,
       update: subscriptionsUpdateMock,

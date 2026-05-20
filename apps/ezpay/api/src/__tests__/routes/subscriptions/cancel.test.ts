@@ -19,7 +19,10 @@ import { getPaymentModel, type PaymentDocument } from '../../../models/Payment.j
 const cancelSubscriptionMock = vi.fn()
 
 vi.mock('../../../services/stripe.js', () => ({
-  getProvider: () => ({ cancelSubscription: cancelSubscriptionMock }),
+  getProviderForRequest: () => ({ cancelSubscription: cancelSubscriptionMock }),
+  resolveRequestMode: (req: { derivedMode?: string }) =>
+    req.derivedMode === 'test' ? 'test' : 'live',
+  isStripeModeUnavailableError: () => false,
 }))
 
 let currentUserId: string | undefined = 'owner-1'

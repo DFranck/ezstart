@@ -10,7 +10,11 @@ import {
 } from '@ezstart/api-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
-import { getProvider } from '../../services/stripe.js'
+import {
+  getProviderForRequest,
+  resolveRequestMode,
+  isStripeModeUnavailableError,
+} from '../../services/stripe.js'
 import { validatePromo, calculateDiscount } from '../../services/promo.js'
 import { resolveConnectFee } from '../../services/connect-fee.js'
 import { mapStripeError } from '../../utils/stripe-error.js'
@@ -149,7 +153,9 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
     // Stripe automatic tax — opt-out via env var. See subscribe route for details.
     const automaticTax = process.env.STRIPE_AUTOMATIC_TAX !== 'false'
 
-    const provider = getProvider()
+    // Select the Stripe provider for the caller's derived mode (test/live).
+    // Fail-closed when the mode's key is missing — see services/stripe.ts.
+    const provider = getProviderForRequest(req)
     const session = await provider.createCheckoutSession({
       amount: finalAmount, // Discounted amount OK for one-time purchases
       currency,
@@ -184,8 +190,10 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
           : undefined,
     })
 
-    // Detect live vs test mode from Stripe key
-    const isLiveMode = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_')
+    // Test/live partition is driven by the CALLER's key (`req.derivedMode`),
+    // never by the process env prefix (Wave E MED-2).
+    const mode = resolveRequestMode(req)
+    const isTestMode = mode === 'test'
 
     const payment = await Payment.create({
       projectId,
@@ -199,8 +207,8 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       provider: 'stripe',
       paymentId: session.sessionId,
       status: 'pending',
-      liveMode: isLiveMode,
-      isTestMode: !isLiveMode,
+      liveMode: !isTestMode,
+      isTestMode,
       metadata: {
         productId,
         productName,
@@ -215,6 +223,11 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 
     sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
+    // Fail-closed: the caller's mode has no Stripe key — 503, never downgrade.
+    if (isStripeModeUnavailableError(error)) {
+      logger.error(`Purchase checkout refused — ${error.message}`)
+      return sendError(res, `Payments are not available in ${error.mode} mode`, error.statusCode)
+    }
     const stripeMapped = mapStripeError(error)
     if (stripeMapped) {
       logger.warn(
