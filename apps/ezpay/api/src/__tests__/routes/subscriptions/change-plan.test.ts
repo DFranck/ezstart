@@ -145,7 +145,23 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
     subscriptionId: string
     newPlanId: Types.ObjectId
     newPriceId: string
+    oldPlanId: Types.ObjectId
   }> {
+    // The subscription's CURRENT plan — a real Plan row whose immutable
+    // `applicationId` anchors the tenant identity (id↔id binding).
+    const oldPlan = await Plan.create({
+      name: 'Pro Monthly',
+      applicationId: 'app-ezauth',
+      appName: 'ezauth',
+      amount: 999,
+      currency: 'EUR',
+      interval: 'month',
+      intervalCount: 1,
+      active: true,
+      stripeProductId: 'prod_old',
+      stripePriceId: 'price_old',
+    })
+
     await Payment.create({
       projectId: 'ezauth',
       projectName: 'EZAuth',
@@ -160,11 +176,12 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
       liveMode: false,
       metadata: {
         subscriptionId: 'sub_123',
-        planId: 'plan-old',
+        planId: String(oldPlan._id),
         planName: 'Pro Monthly',
       },
     })
 
+    // The target plan — SAME Application (`app-ezauth`) as the current plan.
     const newPlan = await Plan.create({
       name: 'Pro Yearly',
       applicationId: 'app-ezauth',
@@ -182,6 +199,7 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
       subscriptionId: 'sub_123',
       newPlanId: newPlan._id as Types.ObjectId,
       newPriceId: 'price_new',
+      oldPlanId: oldPlan._id as Types.ObjectId,
     }
   }
 
@@ -330,14 +348,15 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
     })
   })
 
-  it('returns 404 (generic) when the target plan belongs to ANOTHER tenant — arbitrage closed (HIGH-1)', async () => {
-    // Subscription belongs to the `ezauth` tenant. The caller owns it, but
-    // tries to re-price onto a cheaper Plan from a DIFFERENT tenant.
+  it('returns 404 (generic) when the target plan belongs to ANOTHER tenant — arbitrage closed (HIGH-1 / LOW-1)', async () => {
+    // Subscription's current plan belongs to the `app-ezauth` tenant (id↔id
+    // binding). The caller owns the subscription, but tries to re-price onto a
+    // cheaper Plan whose immutable `applicationId` is a DIFFERENT tenant.
     const { subscriptionId } = await seedSubscriptionAndPlans()
     const foreignPlan = await Plan.create({
       name: 'Cheap Foreign Plan',
-      applicationId: 'app-other',
-      appName: 'otherapp', // slug of a DIFFERENT tenant
+      applicationId: 'app-other', // id of a DIFFERENT tenant
+      appName: 'otherapp',
       amount: 100, // €1.00 — much cheaper than the ezauth plan
       currency: 'usd',
       interval: 'month',
@@ -357,36 +376,88 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
     expect(subscriptionsUpdateMock).not.toHaveBeenCalled()
   })
 
-  it('returns 404 (fail-closed) when the target plan has no tenant slug snapshot (HIGH-1)', async () => {
+  it('still binds id↔id even when the foreign plan shares the OLD slug (appName ignored — LOW-1)', async () => {
+    // Defends the symmetry fix: a foreign plan that mutated/forged its
+    // deprecated `appName` to match the subscription's slug (`ezauth`) MUST
+    // still be rejected — the binding is on the immutable `applicationId`, not
+    // the slug snapshot.
     const { subscriptionId } = await seedSubscriptionAndPlans()
-    // A plan WITHOUT `appName` cannot be bound to the subscription's tenant —
-    // fail-closed rather than allow an unattributable plan.
-    const orphanPlan = await Plan.create({
-      name: 'Orphan Plan',
+    const forgedSlugPlan = await Plan.create({
+      name: 'Forged Slug Plan',
+      applicationId: 'app-other', // DIFFERENT tenant id
+      appName: 'ezauth', // same slug as the subscription — must be ignored
+      amount: 100,
+      currency: 'usd',
+      interval: 'month',
+      intervalCount: 1,
+      active: true,
+      stripeProductId: 'prod_forged',
+      stripePriceId: 'price_forged',
+    })
+
+    const res = await postChangePlan(app, subscriptionId, {
+      newPlanId: String(forgedSlugPlan._id),
+    })
+
+    expect(res.status).toBe(404)
+    expect(subscriptionsRetrieveMock).not.toHaveBeenCalled()
+    expect(subscriptionsUpdateMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 404 (fail-closed) when the subscription has no resolvable current plan (LOW-1)', async () => {
+    // The subscription's `metadata.planId` does not resolve to any Plan row —
+    // the tenant identity cannot be anchored, so we MUST fail-closed rather
+    // than fall back to the deprecated `Payment.projectId` slug.
+    await Payment.create({
+      projectId: 'ezauth',
+      projectName: 'EZAuth',
+      type: 'subscription',
+      amount: 9.99,
+      currency: 'EUR',
+      userId: 'user-1',
+      isAnonymous: false,
+      provider: 'stripe',
+      paymentId: 'cs_sub_orphan',
+      status: 'completed',
+      liveMode: false,
+      metadata: {
+        subscriptionId: 'sub_orphan',
+        planId: '5f9f1b9b1c9d440000000000', // valid ObjectId, no matching Plan
+        planName: 'Pro Monthly',
+      },
+    })
+
+    // A perfectly valid same-tenant target plan exists — irrelevant, the
+    // current plan cannot be resolved.
+    const newPlan = await Plan.create({
+      name: 'Pro Yearly',
       applicationId: 'app-ezauth',
-      // no appName
+      appName: 'ezauth',
       amount: 9999,
       currency: 'EUR',
       interval: 'year',
       intervalCount: 1,
       active: true,
-      stripeProductId: 'prod_orphan',
-      stripePriceId: 'price_orphan',
+      stripeProductId: 'prod_new',
+      stripePriceId: 'price_new',
     })
 
-    const res = await postChangePlan(app, subscriptionId, {
-      newPlanId: String(orphanPlan._id),
+    const res = await postChangePlan(app, 'sub_orphan', {
+      newPlanId: String(newPlan._id),
     })
 
     expect(res.status).toBe(404)
+    expect(subscriptionsRetrieveMock).not.toHaveBeenCalled()
     expect(subscriptionsUpdateMock).not.toHaveBeenCalled()
   })
 
   it('returns 400 when the target plan is inactive', async () => {
     const { subscriptionId } = await seedSubscriptionAndPlans()
+    // Same tenant (`app-ezauth`) so the binding passes and we reach the
+    // active check.
     const inactive = await Plan.create({
       name: 'Old',
-      applicationId: 'app-1',
+      applicationId: 'app-ezauth',
       appName: 'ezauth',
       amount: 9999,
       currency: 'EUR',
@@ -406,9 +477,11 @@ describe('POST /subscriptions/:subscriptionId/change-plan', () => {
 
   it('returns 400 when the target plan has no stripePriceId', async () => {
     const { subscriptionId } = await seedSubscriptionAndPlans()
+    // Same tenant (`app-ezauth`) so the binding passes and we reach the
+    // stripePriceId check.
     const unlinkedPlan = await Plan.create({
       name: 'Unlinked',
-      applicationId: 'app-1',
+      applicationId: 'app-ezauth',
       appName: 'ezauth',
       amount: 9999,
       currency: 'EUR',
